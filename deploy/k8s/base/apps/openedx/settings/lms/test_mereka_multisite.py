@@ -281,7 +281,7 @@ class TestCookieDomainMiddleware(unittest.TestCase):
 
 
 class TestLoginRedirectMiddleware(unittest.TestCase):
-    """Test MerekaLoginRedirectMiddleware — per-tenant /login redirect."""
+    """Test MerekaLoginRedirectMiddleware — per-tenant auth entrypoint redirect."""
 
     class _FakeJsonResponse:
         def __init__(self, payload, status=200):
@@ -332,8 +332,28 @@ class TestLoginRedirectMiddleware(unittest.TestCase):
 
     @patch.object(ms, 'patch_sites_framework')
     @patch.object(ms, '_mfe_base_url_for_host')
+    def test_rewrites_register_to_tenant_mfe(self, mock_mfe, mock_patch):
+        """biji-biji /register should redirect to biji-biji MFE register, not mereka MFE."""
+        mock_mfe.return_value = "https://apps.staging.academy.biji-biji.com"
+
+        original_location = "https://staging.apps.academyv2.mereka.io/authn/register"
+
+        def get_response(request):
+            return self._make_redirect_response(original_location)
+
+        mw = ms.MerekaLoginRedirectMiddleware(get_response)
+        req = self._make_request("staging.academy.biji-biji.com", path="/register")
+        resp = mw(req)
+
+        resp.__setitem__.assert_called_with(
+            "Location",
+            "https://apps.staging.academy.biji-biji.com/authn/register"
+        )
+
+    @patch.object(ms, 'patch_sites_framework')
+    @patch.object(ms, '_mfe_base_url_for_host')
     def test_no_rewrite_on_non_login_path(self, mock_mfe, mock_patch):
-        """Only /login triggers redirect rewriting."""
+        """Only auth entrypoints trigger redirect rewriting."""
         mock_mfe.return_value = "https://apps.staging.academy.biji-biji.com"
 
         def get_response(request):

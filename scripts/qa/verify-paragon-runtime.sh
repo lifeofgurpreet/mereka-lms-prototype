@@ -179,7 +179,6 @@ fi
 # AC-TKN-018 / AC-TKN-019 runtime validation is environment-dependent.
 if [[ -n "${RUNTIME_URL:-}" ]]; then
   runtime_url="${RUNTIME_URL%/}/theme/mereka-brand.min.css"
-  authn_shell_url="${RUNTIME_URL%/}/authn/login"
   runtime_status="$(curl "${CURL_FLAGS[@]}" -sSIL -o /tmp/paragon-theme-head.$$ -w "%{http_code}" "$runtime_url" || true)"
   if [[ "$runtime_status" =~ ^[0-9]+$ ]] && [[ "$runtime_status" -ge 200 ]] && [[ "$runtime_status" -lt 400 ]]; then
     content_type_ok=0
@@ -230,76 +229,75 @@ if [[ -n "${RUNTIME_URL:-}" ]]; then
     fail "AC-TKN-018/019 runtime URL check failed: ${runtime_url} (HTTP ${runtime_status:-unknown}); likely runtime-theme rollout drift (rebuild/push MFE image and update GitOps tags/ref)"
   fi
 
-  authn_shell_status="$(curl "${CURL_FLAGS[@]}" -sSL -o /tmp/paragon-authn-shell.$$ -w "%{http_code}" "$authn_shell_url" || true)"
-  if [[ "$authn_shell_status" =~ ^[0-9]+$ ]] && [[ "$authn_shell_status" -ge 200 ]] && [[ "$authn_shell_status" -lt 400 ]]; then
-    has_runtime_theme_urls=0
-    has_embedded_theme_files=0
+  for authn_shell_url in "${RUNTIME_URL%/}/authn/login" "${RUNTIME_URL%/}/authn/register"; do
+    authn_shell_status="$(curl "${CURL_FLAGS[@]}" -sSL -o /tmp/paragon-authn-shell.$$ -w "%{http_code}" "$authn_shell_url" || true)"
+    if [[ "$authn_shell_status" =~ ^[0-9]+$ ]] && [[ "$authn_shell_status" -ge 200 ]] && [[ "$authn_shell_status" -lt 400 ]]; then
+      has_runtime_theme_urls=0
+      has_embedded_theme_files=0
 
-    if grep -q '/theme/core.min.css' /tmp/paragon-authn-shell.$$ \
-      && grep -q '/theme/mereka-brand.min.css' /tmp/paragon-authn-shell.$$; then
-      has_runtime_theme_urls=1
-    fi
+      if grep -q '/theme/core.min.css' /tmp/paragon-authn-shell.$$ \
+        && grep -q '/theme/mereka-brand.min.css' /tmp/paragon-authn-shell.$$; then
+        has_runtime_theme_urls=1
+      fi
 
-    if grep -Eq 'paragon-theme-core\.[A-Za-z0-9]+\.css' /tmp/paragon-authn-shell.$$ \
-      && grep -Eq 'brand-theme-core\.[A-Za-z0-9]+\.css' /tmp/paragon-authn-shell.$$; then
-      has_embedded_theme_files=1
-    fi
+      if grep -Eq 'paragon-theme-core\.[A-Za-z0-9]+\.css' /tmp/paragon-authn-shell.$$ \
+        && grep -Eq 'brand-theme-core\.[A-Za-z0-9]+\.css' /tmp/paragon-authn-shell.$$; then
+        has_embedded_theme_files=1
+      fi
 
-    if [[ "$has_runtime_theme_urls" -eq 1 ]]; then
-      pass "Runtime authn shell references /theme/core.min.css + /theme/mereka-brand.min.css"
-    elif [[ "$has_embedded_theme_files" -eq 1 ]]; then
-      if [[ "$REQUIRE_RUNTIME" -eq 1 ]]; then
-        fail "Runtime authn shell still uses embedded paragon/brand hash files (runtime theme URLs required)"
+      if [[ "$has_runtime_theme_urls" -eq 1 ]]; then
+        pass "Runtime authn shell references /theme/core.min.css + /theme/mereka-brand.min.css (${authn_shell_url})"
+      elif [[ "$has_embedded_theme_files" -eq 1 ]]; then
+        if [[ "$REQUIRE_RUNTIME" -eq 1 ]]; then
+          fail "Runtime authn shell still uses embedded paragon/brand hash files (${authn_shell_url})"
+        else
+          warn "Runtime authn shell currently uses embedded paragon/brand hash files (${authn_shell_url})"
+        fi
       else
-        warn "Runtime authn shell currently uses embedded paragon/brand hash files"
+        if [[ "$REQUIRE_RUNTIME" -eq 1 ]]; then
+          fail "Runtime authn shell theme markers are inconclusive (${authn_shell_url})"
+        else
+          warn "Runtime authn shell theme markers are inconclusive (${authn_shell_url})"
+        fi
+      fi
+
+      bundle_marker_hits=""
+      while IFS= read -r bundle_path; do
+        [[ -z "$bundle_path" ]] && continue
+        bundle_url="${RUNTIME_URL%/}${bundle_path}"
+        bundle_tmp="$(mktemp -t paragon-authn-bundle.XXXXXX)"
+        if curl "${CURL_FLAGS[@]}" -fsSL "$bundle_url" -o "$bundle_tmp" 2>/dev/null; then
+          for marker in \
+            "mereka-authn-login-branding" \
+            "mereka-header-logo" \
+            "mereka-footer" \
+            "MerekaAuthnLoginBranding"; do
+            if grep -q "$marker" "$bundle_tmp"; then
+              bundle_marker_hits+="${marker}@${bundle_path}"$'\n'
+            fi
+          done
+        fi
+        rm -f "$bundle_tmp"
+      done < <(grep -Eo 'src="/authn/[^"]+\.js"' /tmp/paragon-authn-shell.$$ | sed -E 's/src="([^"]+)"/\1/' | sort -u)
+
+      if [[ -n "$bundle_marker_hits" ]]; then
+        hit_count="$(printf '%s' "$bundle_marker_hits" | sed '/^$/d' | wc -l | tr -d ' ')"
+        pass "Runtime authn bundles expose branded slot markers (${hit_count} hit(s)) for ${authn_shell_url}"
+      else
+        if [[ "$SLOT_MARKERS_REQUIRED" -eq 1 ]]; then
+          fail "Runtime authn bundles do not expose branded slot markers (${authn_shell_url})"
+        else
+          warn "Runtime authn bundles do not expose branded slot markers (${authn_shell_url})"
+        fi
       fi
     else
       if [[ "$REQUIRE_RUNTIME" -eq 1 ]]; then
-        fail "Runtime authn shell theme markers are inconclusive (${authn_shell_url})"
+        fail "Runtime authn shell check failed: ${authn_shell_url} (HTTP ${authn_shell_status:-unknown})"
       else
-        warn "Runtime authn shell theme markers are inconclusive (${authn_shell_url})"
+        warn "Runtime authn shell check unavailable: ${authn_shell_url} (HTTP ${authn_shell_status:-unknown})"
       fi
     fi
-
-    # Branded-slot runtime signal:
-    # Authn bundles should contain at least one mereka marker string when slot
-    # definitions are actually present in the deployed MFE artifact.
-    bundle_marker_hits=""
-    while IFS= read -r bundle_path; do
-      [[ -z "$bundle_path" ]] && continue
-      bundle_url="${RUNTIME_URL%/}${bundle_path}"
-      bundle_tmp="$(mktemp -t paragon-authn-bundle.XXXXXX)"
-      if curl "${CURL_FLAGS[@]}" -fsSL "$bundle_url" -o "$bundle_tmp" 2>/dev/null; then
-        for marker in \
-          "mereka-authn-login-branding" \
-          "mereka-header-logo" \
-          "mereka-footer" \
-          "MerekaAuthnLoginBranding"; do
-          if grep -q "$marker" "$bundle_tmp"; then
-            bundle_marker_hits+="${marker}@${bundle_path}"$'\n'
-          fi
-        done
-      fi
-      rm -f "$bundle_tmp"
-    done < <(grep -Eo 'src="/authn/[^"]+\.js"' /tmp/paragon-authn-shell.$$ | sed -E 's/src="([^"]+)"/\1/' | sort -u)
-
-    if [[ -n "$bundle_marker_hits" ]]; then
-      hit_count="$(printf '%s' "$bundle_marker_hits" | sed '/^$/d' | wc -l | tr -d ' ')"
-      pass "Runtime authn bundles expose branded slot markers (${hit_count} hit(s))"
-    else
-      if [[ "$SLOT_MARKERS_REQUIRED" -eq 1 ]]; then
-        fail "Runtime authn bundles do not expose branded slot markers (likely stale/unbranded MFE rollout)"
-      else
-        warn "Runtime authn bundles do not expose branded slot markers"
-      fi
-    fi
-  else
-    if [[ "$REQUIRE_RUNTIME" -eq 1 ]]; then
-      fail "Runtime authn shell check failed: ${authn_shell_url} (HTTP ${authn_shell_status:-unknown})"
-    else
-      warn "Runtime authn shell check unavailable: ${authn_shell_url} (HTTP ${authn_shell_status:-unknown})"
-    fi
-  fi
+  done
 
   rm -f /tmp/paragon-theme-head.$$
   rm -f /tmp/paragon-theme-body.$$

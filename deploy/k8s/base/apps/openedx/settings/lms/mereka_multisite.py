@@ -8,7 +8,7 @@ Goals:
   the tenant's LMS domain).
 - Ensure cookies never set an invalid Domain attribute when serving multiple
   root domains (academyv2.mereka.io vs biji-biji.com).
-- Rewrite /login redirects to the tenant's MFE authn surface (not the global one).
+- Rewrite /login and /register redirects to the tenant's MFE authn surface (not the global one).
 
 This module is imported via middleware in production settings.
 """
@@ -47,6 +47,10 @@ _FALLBACK_MFE_PATH_PREFIXES = (
 _LOGIN_SESSION_PATHS = (
     "/api/user/v1/account/login_session/",
     "/api/user/v2/account/login_session/",
+)
+_AUTHN_ENTRYPOINT_PATHS = (
+    "/login",
+    "/register",
 )
 _MFE_CONFIG_PATHS = (
     "/api/mfe_config/v1",
@@ -415,7 +419,7 @@ class MerekaLoginRedirectMiddleware:
         if path in _MFE_CONFIG_PATHS:
             return self._rewrite_mfe_config_response(request, host, response)
 
-        if path != "/login":
+        if path not in _AUTHN_ENTRYPOINT_PATHS:
             return response
 
         if getattr(response, "status_code", 0) not in (301, 302, 303, 307, 308):

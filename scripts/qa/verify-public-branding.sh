@@ -146,50 +146,52 @@ check_contains_any() {
 
 check_mfe_authn_surface() {
   local mfe_host=$1
-  local authn_url="https://${mfe_host}/authn/login"
   local config_url="https://${mfe_host}/api/mfe_config/v1"
-  local html config authn_css_path authn_css
+  local html config authn_css_path authn_css authn_url route_label
   local ts
 
-  check_http "$authn_url" "MFE login reachable"
+  for route_label in "login" "register"; do
+    authn_url="https://${mfe_host}/authn/${route_label}"
+    check_http "$authn_url" "MFE ${route_label} reachable"
 
-  ts="$(date +%s)"
-  html="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "${authn_url}?nocache=${ts}" 2>/dev/null || true)"
-  if rg -F -q '<div id="root"></div>' <<<"$html" \
-    && rg -q '/authn/app\.[^"]+\.js' <<<"$html" \
-    && rg -q '/authn/app\.[^"]+\.css' <<<"$html"; then
-    printf "✓ MFE auth page serves authn bundle shell\n"
-  else
-    printf "✗ MFE auth page missing expected authn bundle shell\n" >&2
-    failures=$((failures + 1))
-  fi
-
-  authn_css_path="$(printf '%s' "$html" | rg -o '/authn/app\.[^"]+\.css' | head -n 1 || true)"
-  if [[ -z "$authn_css_path" ]]; then
-    printf "✗ MFE auth page missing app CSS link\n" >&2
-    failures=$((failures + 1))
-  else
-    local actual_mfe_rev
-    authn_css="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "https://${mfe_host}${authn_css_path}?nocache=${ts}" 2>/dev/null || true)"
-    actual_mfe_rev="$(printf '%s' "$authn_css" | sed -nE 's/.*--mereka-mfe-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' | head -n 1 || true)"
-    if grep -Eq -- '--mereka-mfe-gradient|--mereka-gradient-primary|--mereka-font-body|font-family:Poppins' <<<"$authn_css"; then
-      if [[ -n "$EXPECTED_MFE_BRANDING_REV" ]] && ! grep -F -q "$EXPECTED_MFE_BRANDING_REV" <<<"$authn_css"; then
-        if [[ "${STRICT_MFE_BRANDING_REV:-0}" == "1" ]]; then
-          printf "✗ MFE auth CSS missing expected branding revision (%s)\n" "$EXPECTED_MFE_BRANDING_REV" >&2
-          printf "  debug: actual_mfe_branding_rev=%s\n" "${actual_mfe_rev:-<missing>}" >&2
-          failures=$((failures + 1))
-        else
-          printf "✓ MFE auth CSS includes Mereka branding markers (revision differs from local source: expected=%s actual=%s)\n" \
-            "$EXPECTED_MFE_BRANDING_REV" "${actual_mfe_rev:-<missing>}"
-        fi
-      else
-        printf "✓ MFE auth CSS includes Mereka branding markers\n"
-      fi
+    ts="$(date +%s)"
+    html="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "${authn_url}?nocache=${ts}" 2>/dev/null || true)"
+    if rg -F -q '<div id="root"></div>' <<<"$html" \
+      && rg -q '/authn/app\.[^"]+\.js' <<<"$html" \
+      && rg -q '/authn/app\.[^"]+\.css' <<<"$html"; then
+      printf "✓ MFE %s page serves authn bundle shell\n" "$route_label"
     else
-      printf "✗ MFE auth CSS missing Mereka gradient marker\n" >&2
+      printf "✗ MFE %s page missing expected authn bundle shell\n" "$route_label" >&2
       failures=$((failures + 1))
     fi
-  fi
+
+    authn_css_path="$(printf '%s' "$html" | rg -o '/authn/app\.[^"]+\.css' | head -n 1 || true)"
+    if [[ -z "$authn_css_path" ]]; then
+      printf "✗ MFE %s page missing app CSS link\n" "$route_label" >&2
+      failures=$((failures + 1))
+    else
+      local actual_mfe_rev
+      authn_css="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "https://${mfe_host}${authn_css_path}?nocache=${ts}" 2>/dev/null || true)"
+      actual_mfe_rev="$(printf '%s' "$authn_css" | sed -nE 's/.*--mereka-mfe-branding-rev:[[:space:]]*\"([^\"]+)\".*/\1/p' | head -n 1 || true)"
+      if grep -Eq -- '--mereka-mfe-gradient|--mereka-gradient-primary|--mereka-font-body|font-family:Poppins' <<<"$authn_css"; then
+        if [[ -n "$EXPECTED_MFE_BRANDING_REV" ]] && ! grep -F -q "$EXPECTED_MFE_BRANDING_REV" <<<"$authn_css"; then
+          if [[ "${STRICT_MFE_BRANDING_REV:-0}" == "1" ]]; then
+            printf "✗ MFE %s CSS missing expected branding revision (%s)\n" "$route_label" "$EXPECTED_MFE_BRANDING_REV" >&2
+            printf "  debug: actual_mfe_branding_rev=%s\n" "${actual_mfe_rev:-<missing>}" >&2
+            failures=$((failures + 1))
+          else
+            printf "✓ MFE %s CSS includes Mereka branding markers (revision differs from local source: expected=%s actual=%s)\n" \
+              "$route_label" "$EXPECTED_MFE_BRANDING_REV" "${actual_mfe_rev:-<missing>}"
+          fi
+        else
+          printf "✓ MFE %s CSS includes Mereka branding markers\n" "$route_label"
+        fi
+      else
+        printf "✗ MFE %s CSS missing Mereka gradient marker\n" "$route_label" >&2
+        failures=$((failures + 1))
+      fi
+    fi
+  done
 
   config="$(curl -sS --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "$config_url" 2>/dev/null || true)"
   if rg -F -q '"SITE_NAME": "Mereka Academy"' <<<"$config" \

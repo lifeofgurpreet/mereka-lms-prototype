@@ -7,6 +7,8 @@ type RouteConfig = {
 
 const BASE_MFE_ROUTES: RouteConfig[] = [
   { label: 'authn-login', path: '/authn/login' },
+  { label: 'authn-register', path: '/authn/register' },
+  { label: 'authn-reset', path: '/authn/reset' },
   { label: 'learner-dashboard', path: '/learner-dashboard/' },
   { label: 'account-settings', path: '/account/settings' },
   { label: 'profile-home', path: '/profile/u/' },
@@ -31,11 +33,11 @@ const OPTIONAL_MARKER_ROUTES = new Set([
 ]);
 let cachedThemeMode: ThemeContractMode | null = null;
 
-function isAuthnLoginUrl(urlValue: string): boolean {
+function isAuthnRouteUrl(urlValue: string): boolean {
   try {
-    return new URL(urlValue).pathname.startsWith('/authn/login');
+    return new URL(urlValue).pathname.startsWith('/authn/');
   } catch {
-    return urlValue.includes('/authn/login');
+    return urlValue.includes('/authn/');
   }
 }
 
@@ -357,18 +359,19 @@ test.describe('Branding smoke', () => {
       await expectTenantPaletteBridge(page, mfeBaseUrl);
 
       let markerCounts = await getBrandingMarkerCounts(page);
+      const isAuthnRoute = route.label.startsWith('authn-');
       const currentUrl = page.url();
-      let redirectedToAuthn = route.label !== 'authn-login' && isAuthnLoginUrl(currentUrl);
+      let redirectedToAuthn = !isAuthnRoute && isAuthnRouteUrl(currentUrl);
       if (REQUIRE_BRANDING_MARKERS && !OPTIONAL_MARKER_ROUTES.has(route.label) && !redirectedToAuthn) {
         const maxAttempts = 8;
         for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-          redirectedToAuthn = route.label !== 'authn-login' && isAuthnLoginUrl(page.url());
+          redirectedToAuthn = !isAuthnRoute && isAuthnRouteUrl(page.url());
           if (redirectedToAuthn) {
             break;
           }
           const authnMarkerReady = markerCounts.authnBranding > 0;
           const anyMarkerReady = getBrandingMarkerHitCount(markerCounts) > 0;
-          const markerReady = route.label === 'authn-login' ? authnMarkerReady : anyMarkerReady;
+          const markerReady = isAuthnRoute ? authnMarkerReady : anyMarkerReady;
           if (markerReady) {
             break;
           }
@@ -379,12 +382,12 @@ test.describe('Branding smoke', () => {
         if (redirectedToAuthn) {
           const title = await page.title();
           const hasAuthnMarker = markerCounts.authnBranding > 0;
-          const hasLoginTitle = /(login|auth)/i.test(title);
+          const hasLoginTitle = /(login|sign in|register|reset|password|auth)/i.test(title);
           expect(
             hasAuthnMarker || hasLoginTitle,
             `Expected branded authn shell signal after redirect from ${targetUrl}; current URL=${page.url()} title=${title} counts=${JSON.stringify(markerCounts)}`,
           ).toBeTruthy();
-        } else if (route.label === 'authn-login') {
+        } else if (isAuthnRoute) {
           expect(
             markerCounts.authnBranding,
             `Expected authn branding marker (${BRANDING_MARKER_SELECTORS.authnBranding}) on ${targetUrl}; current URL=${page.url()} counts=${JSON.stringify(markerCounts)}`,

@@ -92,6 +92,7 @@ test.describe('Unauthenticated smoke — MFE apps', () => {
   const MFE_APPS = [
     { name: 'authn', path: '/authn/login' },
     { name: 'authn-register', path: '/authn/register' },
+    { name: 'authn-reset', path: '/authn/reset' },
     { name: 'learner-dashboard', path: '/learner-dashboard/' },
     { name: 'account', path: '/account/' },
     { name: 'profile', path: '/profile/' },
@@ -111,21 +112,22 @@ test.describe('Unauthenticated smoke — MFE apps', () => {
     });
   }
 
-  test('authn login page contains Paragon theme reference', async ({ page, baseURL }) => {
-    const mfeBase = getMfeBaseUrl(baseURL!);
-    const response = await page.goto(`${mfeBase}/authn/login`, {
-      waitUntil: 'domcontentloaded',
-    });
+  for (const authnPath of ['/authn/login', '/authn/register', '/authn/reset']) {
+    test(`${authnPath} contains Paragon theme reference`, async ({ page, baseURL }) => {
+      const mfeBase = getMfeBaseUrl(baseURL!);
+      const response = await page.goto(`${mfeBase}${authnPath}`, {
+        waitUntil: 'domcontentloaded',
+      });
 
-    const html = await response?.text() ?? '';
-    // Must reference Paragon theme CSS (either runtime URLs or embedded)
-    const hasRuntimeTheme = html.includes('/theme/core.min.css');
-    const hasEmbeddedTheme = /paragon-theme-core\.[a-z0-9]+\.css/i.test(html);
-    expect(
-      hasRuntimeTheme || hasEmbeddedTheme,
-      'authn/login should reference Paragon theme CSS (runtime or embedded)',
-    ).toBe(true);
-  });
+      const html = await response?.text() ?? '';
+      const hasRuntimeTheme = html.includes('/theme/core.min.css');
+      const hasEmbeddedTheme = /paragon-theme-core\.[a-z0-9]+\.css/i.test(html);
+      expect(
+        hasRuntimeTheme || hasEmbeddedTheme,
+        `${authnPath} should reference Paragon theme CSS (runtime or embedded)`,
+      ).toBe(true);
+    });
+  }
 
   test('password reset page loads', async ({ page, baseURL }) => {
     const mfeBase = getMfeBaseUrl(baseURL!);
@@ -145,6 +147,9 @@ test.describe('Unauthenticated smoke — MFE apps', () => {
     if (hasEmailInput) {
       await expect(emailInput).toBeVisible();
     }
+
+    await expect(page.locator('.mereka-authn-login-branding--reset')).toHaveCount(1);
+    await expect(page.locator('.mereka-authn-login-branding__route-links')).toHaveCount(1);
   });
 });
 

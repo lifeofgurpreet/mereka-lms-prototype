@@ -96,6 +96,8 @@ _INSERT_SLOTS: list[tuple[str, str, str]] = [
         "MerekaAuthoringVideoTranscriptTranslationsHint",
     ),
     # ── Authentication ────────────────────────────────────────────────────
+    # login_component is the canonical auth shell owner for login/register/reset
+    # inside the Authn MFE. Keep route-aware auth branding here, not in LMS templates.
     (
         "org.openedx.frontend.authn.login_component.v1",
         "mereka_authn_login_component",

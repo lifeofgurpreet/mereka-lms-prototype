@@ -91,6 +91,12 @@ else
   else
     fail "Verifier missing selector file support"
   fi
+  if rg -n 'canonical auth/account context-card markers present' "$VERIFY_SCRIPT" >/dev/null \
+    && rg -n 'mereka-additional-profile-fields mereka-progress-certificate-status mereka-shell-panel mb-3' "$VERIFY_SCRIPT" >/dev/null; then
+    pass "Verifier guards canonical auth/account context-card source markers"
+  else
+    fail "Verifier missing canonical auth/account context-card source-marker guard"
+  fi
   if rg -n -- '--authenticated|--context|--namespace' "$VERIFY_SCRIPT" >/dev/null \
     && rg -n 'SafeCookieData\.create' "$VERIFY_SCRIPT" >/dev/null; then
     pass "Verifier supports authenticated learner-mode storage state minting"

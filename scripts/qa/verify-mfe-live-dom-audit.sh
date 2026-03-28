@@ -183,7 +183,7 @@ case "$AUDIT_PROFILE" in
     ;;
   phase7_strict)
     if [[ -z "$SELECTOR_AUDIT_ROUTES" ]]; then
-      SELECTOR_AUDIT_ROUTES="/authn/login,/authn/register"
+      SELECTOR_AUDIT_ROUTES="/authn/login,/authn/register,/authn/reset"
     fi
     if [[ -z "$SELECTOR_AUDIT_SELECTORS_FILE" ]]; then
       SELECTOR_AUDIT_SELECTORS_FILE="$REPO_ROOT/scripts/qa/mfe-live-dom-phase7-selectors.txt"
@@ -197,7 +197,7 @@ case "$AUDIT_PROFILE" in
     ;;
   phase7_full)
     if [[ -z "$SELECTOR_AUDIT_ROUTES" ]]; then
-      SELECTOR_AUDIT_ROUTES="/authn/login,/authn/register,/learner-dashboard/,/learning/,/account/settings"
+      SELECTOR_AUDIT_ROUTES="/authn/login,/authn/register,/authn/reset,/learner-dashboard/,/learning/,/account/settings"
     fi
     if [[ -z "$SELECTOR_AUDIT_SELECTORS_FILE" ]]; then
       SELECTOR_AUDIT_SELECTORS_FILE="$REPO_ROOT/scripts/qa/mfe-live-dom-phase7-full-selectors.txt"
@@ -410,6 +410,22 @@ fi
 timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
 artifact="$ARTIFACT_DIR/mfe-live-dom-audit-${ENVIRONMENT}-${timestamp}.log"
 : > "$artifact"
+
+PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js"
+if [[ ! -f "$PLUGIN_FILE" ]]; then
+  echo "ERROR: missing plugin runtime definitions: ${PLUGIN_FILE#$REPO_ROOT/}" | tee -a "$artifact" >&2
+  exit 1
+fi
+
+if ! rg -qF "const MerekaAuthnContextCard = ({" "$PLUGIN_FILE" \
+  || ! rg -qF "const MerekaAuthnContextMetaItem = ({ label, value }) => (" "$PLUGIN_FILE" \
+  || ! rg -qF "className=\"mereka-progress-certificate-status mereka-shell-panel my-3\"" "$PLUGIN_FILE" \
+  || ! rg -qF "className=\"mereka-account-id-verification-hint mereka-progress-certificate-status mereka-shell-panel mb-2\"" "$PLUGIN_FILE" \
+  || ! rg -qF "className=\"mereka-additional-profile-fields mereka-progress-certificate-status mereka-shell-panel mb-3\"" "$PLUGIN_FILE"; then
+  echo "ERROR: source contract missing canonical auth/account context-card markers." | tee -a "$artifact" >&2
+  exit 1
+fi
+echo "Source contract: canonical auth/account context-card markers present" | tee -a "$artifact"
 
 preflight_path="${SELECTOR_AUDIT_ROUTES%%,*}"
 if [[ -z "$preflight_path" ]]; then

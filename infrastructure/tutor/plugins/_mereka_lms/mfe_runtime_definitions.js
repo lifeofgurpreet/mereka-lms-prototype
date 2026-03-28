@@ -195,11 +195,54 @@ const getMerekaShellCopy = (variant) => {
   const brand = variant && variant.brand ? variant.brand : 'Mereka Academy';
   return {
     authn: {
-      eyebrow: 'Learning workspace',
-      title: 'Welcome back',
-      subtitle: `Sign in to continue with ${brand}.`,
-      supportCtaLabel: 'Support',
-      trustNote: 'Secure access for your active learning environment.',
+      login: {
+        eyebrow: 'Learning workspace',
+        title: 'Welcome back',
+        subtitle: `Sign in to continue with ${brand}.`,
+        supportCtaLabel: 'Support',
+        trustNote: 'Secure access for your active learning environment.',
+        signals: [
+          'Resume active programs',
+          'Keep progress and certificates in view',
+          'Get support without losing context',
+        ],
+        utilityLinks: [
+          { mode: 'register', label: 'Create account' },
+          { mode: 'reset', label: 'Reset password' },
+        ],
+      },
+      register: {
+        eyebrow: 'New learner setup',
+        title: `Create your ${brand} account`,
+        subtitle: `Join ${brand} to start guided learning, track milestones, and keep your progress in one place.`,
+        supportCtaLabel: 'See support options',
+        trustNote: 'One account unlocks courses, support, and proof of learning across your pathway.',
+        signals: [
+          'Start with a clear path',
+          'Track progress and certificates',
+          'Move from curiosity to applied work faster',
+        ],
+        utilityLinks: [
+          { mode: 'login', label: 'Already have an account?' },
+          { mode: 'reset', label: 'Need to reset instead?' },
+        ],
+      },
+      reset: {
+        eyebrow: 'Access recovery',
+        title: `Recover your ${brand} access`,
+        subtitle: `Reset your password and get back into ${brand} without losing your learning history, milestones, or support context.`,
+        supportCtaLabel: 'Support',
+        trustNote: 'We keep your courses, certificates, and active support lane attached to one secure identity.',
+        signals: [
+          'Reset securely with your email',
+          'Return to active programs faster',
+          'Keep progress and certificates intact',
+        ],
+        utilityLinks: [
+          { mode: 'login', label: 'Back to sign in' },
+          { mode: 'register', label: 'Create account' },
+        ],
+      },
     },
     dashboard: {
       eyebrow: 'Learning cockpit',
@@ -215,6 +258,26 @@ const getMerekaShellCopy = (variant) => {
       supportCtaLabel: 'Get help',
     },
   };
+};
+
+const getMerekaAuthnPath = (mode) => {
+  const pathByMode = {
+    login: '/authn/login',
+    register: '/authn/register',
+    reset: '/authn/reset',
+  };
+  return pathByMode[mode] || pathByMode.login;
+};
+
+const getMerekaAuthnMode = () => {
+  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+  if (pathname.startsWith('/authn/register')) {
+    return 'register';
+  }
+  if (pathname.startsWith('/authn/reset')) {
+    return 'reset';
+  }
+  return 'login';
 };
 
 const getLogoHref = () => getLearnerHomeHref();
@@ -510,31 +573,54 @@ const MerekaAuthnLoginBranding = () => {
   const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
   const variant = getMerekaVariant(hostname, config);
   const shellCopy = getMerekaShellCopy(variant);
+  const authnMode = getMerekaAuthnMode();
+  const authnCopy = shellCopy.authn[authnMode] || shellCopy.authn.login;
+  const helpUrl = (typeof variant?.helpUrl === 'string' && variant.helpUrl) ? variant.helpUrl : 'https://help.mereka.io/';
 
   return (
-    <div className="mereka-authn-login-branding mereka-shell-panel mereka-shell-panel--authn">
-      <p className="mereka-shell-kicker mereka-authn-login-branding__eyebrow">{shellCopy.authn.eyebrow}</p>
-      <a href="/" className="mereka-authn-login-branding__logo">
+    <div
+      className={`mereka-authn-login-branding mereka-authn-login-branding--${authnMode} mereka-shell-panel mereka-shell-panel--authn`}
+    >
+      <p className="mereka-shell-kicker mereka-authn-login-branding__eyebrow">{authnCopy.eyebrow}</p>
+      <a href={getLogoHref()} className="mereka-authn-login-branding__logo">
         <img
           src={getMerekaThemeAssetUrl(config, variant.logoUrl)}
           alt={`${variant.brand} logo`}
           className="mereka-authn-login-branding__logo-img"
         />
       </a>
-      <h2 className="mereka-authn-login-branding__title">{shellCopy.authn.title}</h2>
+      <h2 className="mereka-authn-login-branding__title">{authnCopy.title}</h2>
       <p className="mereka-authn-login-branding__subtitle">
-        {shellCopy.authn.subtitle}
+        {authnCopy.subtitle}
       </p>
+      <div className="mereka-authn-login-branding__route-links">
+        {(authnCopy.utilityLinks || []).map(({ mode, label }) => (
+          <a
+            key={mode}
+            href={getMerekaAuthnPath(mode)}
+            className="mereka-authn-login-branding__route-link"
+          >
+            {label}
+          </a>
+        ))}
+      </div>
+      <ul className="mereka-authn-login-branding__signals list-unstyled">
+        {authnCopy.signals.map(signal => (
+          <li key={signal} className="mereka-authn-login-branding__signal">
+            {signal}
+          </li>
+        ))}
+      </ul>
       <div className="mereka-authn-login-branding__actions">
         <a
-          href={variant.helpUrl}
+          href={helpUrl}
           className="mereka-shell-link mereka-shell-link--quiet"
           target="_blank"
           rel="noopener noreferrer"
         >
-          {shellCopy.authn.supportCtaLabel}
+          {authnCopy.supportCtaLabel}
         </a>
-        <span className="mereka-authn-login-branding__trust-note">{shellCopy.authn.trustNote}</span>
+        <span className="mereka-authn-login-branding__trust-note">{authnCopy.trustNote}</span>
       </div>
     </div>
   );
@@ -1222,6 +1308,24 @@ const MerekaLearningCourseExitDashboardFootnoteLinkHint = () => {
   );
 };
 
+const MerekaAuthnContextMetaItem = ({ label, value }) => (
+  <li className="mereka-additional-profile-fields__item">
+    <span className="mereka-additional-profile-fields__label">{label}</span>
+    <strong className="mereka-additional-profile-fields__value">{value}</strong>
+  </li>
+);
+
+const MerekaAuthnContextCard = ({ className, eyebrow, title, body, meta }) => (
+  <section className={className}>
+    <div className="mereka-shell-panel__content">
+      <p className="mereka-shell-kicker mb-2">{eyebrow}</p>
+      <p className="mereka-progress-certificate-status__title mb-1">{title}</p>
+      {body ? <p className="mereka-progress-certificate-status__body mb-0">{body}</p> : null}
+      {meta}
+    </div>
+  </section>
+);
+
 // Learning progress certificate status branding and context card.
 // Wired into org.openedx.frontend.learning.progress_certificate_status.v1.
 const MerekaProgressCertificateStatus = ({ courseId }) => {
@@ -1230,15 +1334,12 @@ const MerekaProgressCertificateStatus = ({ courseId }) => {
   const safeCourseId = typeof courseId === 'string' ? courseId : '';
 
   return (
-    <div className="mereka-progress-certificate-status mereka-shell-panel my-3">
-      <div className="mereka-shell-panel__content">
-        <p className="mereka-shell-kicker">Progress snapshot</p>
-        <p className="mereka-progress-certificate-status__title mb-1">Keep your learning streak active</p>
-        <p className="mereka-progress-certificate-status__body mb-0">
-          {variant.brand} Learning{safeCourseId ? ` course ${safeCourseId}` : ''} is active. Keep completing units to unlock your certificate with confidence.
-        </p>
-      </div>
-    </div>
+    <MerekaAuthnContextCard
+      className="mereka-progress-certificate-status mereka-shell-panel my-3"
+      eyebrow="Progress snapshot"
+      title="Keep your learning streak active"
+      body={`${variant.brand} Learning${safeCourseId ? ` course ${safeCourseId}` : ''} is active. Keep completing units to unlock your certificate with confidence.`}
+    />
   );
 };
 
@@ -1246,9 +1347,12 @@ const MerekaProgressCertificateStatus = ({ courseId }) => {
 // Wired into org.openedx.frontend.account.id_verification_page.v1.
 const MerekaAccountIdVerificationHint = () => {
   return (
-    <p className="mereka-account-id-verification-hint mb-2">
-      ID verification details are reviewed by your learning administrator for secure certificate issuance.
-    </p>
+    <MerekaAuthnContextCard
+      className="mereka-account-id-verification-hint mereka-progress-certificate-status mereka-shell-panel mb-2"
+      eyebrow="Identity check"
+      title="Verification supports certificate release"
+      body="ID verification details are reviewed by your learning administrator for secure certificate issuance."
+    />
   );
 };
 
@@ -1258,17 +1362,22 @@ const MerekaAccountIdVerificationHint = () => {
 const MerekaAdditionalProfileFields = () => {
   const config = getConfig();
   const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
+  const profileMeta = (
+    <ul className="mereka-additional-profile-fields__list list-unstyled mb-0 mt-3">
+      <MerekaAuthnContextMetaItem label="Organization" value={variant.brand} />
+      <MerekaAuthnContextMetaItem label="Job title" value="Pending admin sync" />
+      <MerekaAuthnContextMetaItem label="Department" value="Pending admin sync" />
+    </ul>
+  );
 
   return (
-    <section className="mereka-additional-profile-fields mb-3">
-      <h2 className="h5 mb-2">Enterprise profile details</h2>
-      <p className="small mb-3">For {variant.brand} workplace setups, these fields are preconfigured by your admin team.</p>
-      <ul className="mereka-additional-profile-fields__list list-unstyled mb-0">
-        <li className="mb-2">Organization: <strong>{variant.brand}</strong></li>
-        <li className="mb-2">Job title: <strong>—</strong></li>
-        <li className="mb-2">Department: <strong>—</strong></li>
-      </ul>
-    </section>
+    <MerekaAuthnContextCard
+      className="mereka-additional-profile-fields mereka-progress-certificate-status mereka-shell-panel mb-3"
+      eyebrow="Profile setup"
+      title="Enterprise profile details"
+      body={`For ${variant.brand} workplace setups, these fields are preconfigured by your admin team.`}
+      meta={profileMeta}
+    />
   );
 };
 

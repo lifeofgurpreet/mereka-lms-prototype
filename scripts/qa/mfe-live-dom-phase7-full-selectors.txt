@@ -11,8 +11,14 @@
 .mereka-authn-login-branding__eyebrow
 .mereka-authn-login-branding__title
 .mereka-authn-login-branding__subtitle
+.mereka-authn-login-branding__signals
+.mereka-authn-login-branding__signal
 .mereka-authn-login-branding__actions
 .mereka-authn-login-branding__trust-note
+.mereka-authn-login-branding__route-links
+.mereka-authn-login-branding__route-link
+.mereka-authn-login-branding--register
+.mereka-authn-login-branding--reset
 .mereka-header-logo
 .mereka-header-logo__lockup
 .mereka-header-logo__brand
@@ -63,6 +69,11 @@
 .mereka-course-outline-sidebar__title
 .mereka-course-outline-sidebar__body
 .mereka-account-id-verification-hint
+.mereka-additional-profile-fields
+.mereka-additional-profile-fields__list
+.mereka-additional-profile-fields__item
+.mereka-additional-profile-fields__label
+.mereka-additional-profile-fields__value
 .mereka-studio-footer__inner
 .mereka-studio-footer__logo
 .mereka-studio-footer__logo-link

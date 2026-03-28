@@ -82,10 +82,10 @@ else
 fi
 
 if rg -qF "Enterprise profile details" "$PLUGIN_FILE" \
-  && rg -qF "Organization:" "$PLUGIN_FILE" \
-  && rg -qF "Job title:" "$PLUGIN_FILE" \
-  && rg -qF "Department:" "$PLUGIN_FILE"; then
-  pass "Additional profile field UI markers present (Organization/Job title/Department)"
+  && rg -qF "<MerekaAuthnContextMetaItem label=\"Organization\" value={variant.brand} />" "$PLUGIN_FILE" \
+  && rg -qF "<MerekaAuthnContextMetaItem label=\"Job title\" value=\"Pending admin sync\" />" "$PLUGIN_FILE" \
+  && rg -qF "<MerekaAuthnContextMetaItem label=\"Department\" value=\"Pending admin sync\" />" "$PLUGIN_FILE"; then
+  pass "Additional profile field UI markers present via canonical context-card meta rows"
 else
   fail "Additional profile field UI markers missing"
 fi
