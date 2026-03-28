@@ -177,10 +177,19 @@ section "3. Catalog CSS Surface Coverage"
 # The authored discovery surface is LMS-only SCSS, not runtime override CSS.
 check_contains "$LMS_DISCOVERY_SCSS" ".find-courses" "LMS discovery partial styles .find-courses"
 check_contains "$LMS_DISCOVERY_SCSS" "#discovery-form.wrapper-search-context" "LMS discovery partial styles the search shell"
+check_contains "$LMS_DISCOVERY_SCSS" ".find-courses .course-search form" "LMS discovery partial bridges the legacy course-search shell"
 check_contains "$LMS_DISCOVERY_SCSS" ".discovery-input" "LMS discovery partial styles search input"
+check_contains "$LMS_DISCOVERY_SCSS" ".find-courses .search-input" "LMS discovery partial styles the legacy search input"
 check_contains "$LMS_DISCOVERY_SCSS" ".discovery-submit.button" "LMS discovery partial styles submit button"
+check_contains "$LMS_DISCOVERY_SCSS" ".find-courses .search-button" "LMS discovery partial styles the legacy search button"
 check_contains "$LMS_DISCOVERY_SCSS" ".search-facets" "LMS discovery partial styles search facets panel"
+check_contains "$LMS_DISCOVERY_SCSS" ".find-courses .courses-container > .search-facets" "LMS discovery partial gives the facets rail an explicit courses-container owner"
+check_contains "$LMS_DISCOVERY_SCSS" ".find-courses .search-facets .search-facets-lists" "LMS discovery partial styles the upstream facet lists wrapper"
+check_contains "$LMS_DISCOVERY_SCSS" ".find-courses .courses-container > #filter-bar.filters" "LMS discovery partial gives the active filter rail an explicit courses-container owner"
 check_contains "$LMS_DISCOVERY_SCSS" ".courses-listing" "LMS discovery partial styles catalog grid"
+check_contains "$LMS_DISCOVERY_SCSS" ".find-courses .pagination" "LMS discovery partial styles catalog pagination"
+check_contains "$LMS_DISCOVERY_SCSS" ".find-courses .empty-results" "LMS discovery partial styles empty catalog recovery states"
+check_contains "$LMS_DISCOVERY_SCSS" "grid-template-areas:" "LMS discovery partial lays out search, facets, filters, and results as one canonical shell"
 
 # Course-about page styling
 check_contains "$LMS_DISCOVERY_SCSS" ".course-about" "LMS discovery partial styles .course-about"
@@ -204,11 +213,14 @@ check_contains "$LMS_DISCOVERY_SCSS" ".find-courses .course .course-signal" "LMS
 check_contains "$LMS_DISCOVERY_SCSS" ".find-courses .course .course-footer" "LMS discovery partial styles the course footer action row"
 check_contains "$LMS_DISCOVERY_SCSS" ".find-courses .course .course-footer-copy" "LMS discovery partial styles the decision-support copy"
 check_contains "$LMS_DISCOVERY_SCSS" ".find-courses #discovery-message.search-status-label" "LMS discovery count is treated as an eyebrow, not a hero"
+check_contains "$LMS_DISCOVERY_SCSS" ".find-courses #discovery-message.search-status-label:empty" "LMS discovery hides an empty search-status pill instead of leaving dead chrome"
 check_contains_re "$LMS_DISCOVERY_SCSS" "text-transform:[[:space:]]*capitalize" "LMS discovery filters normalize raw facet labels"
 check_contains "$LMS_DISCOVERY_SCSS" "grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))" "LMS discovery grid gives the premium cards more breathing room"
 check_contains "$LMS_DISCOVERY_SCSS" ".find-courses .course .course-name" "LMS discovery groups course metadata as a vertical stack"
 check_contains "$LMS_DISCOVERY_SCSS" ".find-courses .course .course-title" "LMS discovery keeps course title primary"
 check_contains "$LMS_DISCOVERY_SCSS" ".find-courses .learn-more" "LMS discovery styles the catalog CTA as the primary action"
+check_contains "$LMS_DISCOVERY_SCSS" "content-visibility: auto" "LMS discovery uses offscreen render skipping for course cards"
+check_contains "$LMS_DISCOVERY_SCSS" "contain-intrinsic-size: 38rem" "LMS discovery reserves stable intrinsic size for deferred cards"
 check_contains "$LMS_DISCOVERY_SCSS" "@media (max-width: 640px)" "LMS discovery partial carries the mobile fallback"
 check_contains "$COURSE_TEMPLATE_LMS" "View Course" "LMS template CTA says View Course"
 check_contains "$COURSE_TEMPLATE_LMS" "class=\"course-badge course-badge--org\"" "LMS course card template exposes an organization badge"
@@ -216,6 +228,8 @@ check_contains "$COURSE_TEMPLATE_LMS" "class=\"course-visual-copy\"" "LMS course
 check_contains "$COURSE_TEMPLATE_LMS" "class=\"course-guidance\"" "LMS course card template includes guidance copy"
 check_contains "$COURSE_TEMPLATE_LMS" "class=\"course-decision-grid\"" "LMS course card template includes structured decision signals"
 check_contains "$COURSE_TEMPLATE_LMS" "class=\"course-footer-copy\"" "LMS course card template includes footer decision-support copy"
+check_contains "$COURSE_TEMPLATE_LMS" "loading=\"lazy\"" "LMS course card template lazy-loads listing images"
+check_contains "$COURSE_TEMPLATE_LMS" "decoding=\"async\"" "LMS course card template async-decodes listing images"
 check_contains "$COURSE_CARD_TEMPLATE_LMS" "class=\"course course-card-premium\"" "Discovery template marks the premium catalog card shell"
 check_contains "$COURSE_CARD_TEMPLATE_LMS" "Explore Course" "Discovery template CTA says Explore Course"
 check_contains "$COURSE_CARD_TEMPLATE_LMS" "class=\"course-badge course-badge--org\"" "Discovery template exposes an organization badge"
@@ -223,6 +237,8 @@ check_contains "$COURSE_CARD_TEMPLATE_LMS" "class=\"course-visual-copy\"" "Disco
 check_contains "$COURSE_CARD_TEMPLATE_LMS" "class=\"course-guidance\"" "Discovery template includes guidance copy for the decision moment"
 check_contains "$COURSE_CARD_TEMPLATE_LMS" "class=\"course-decision-grid\"" "Discovery template includes structured decision signals"
 check_contains "$COURSE_CARD_TEMPLATE_LMS" "class=\"course-footer-copy\"" "Discovery template includes footer decision-support copy"
+check_contains "$COURSE_CARD_TEMPLATE_LMS" "loading=\"lazy\"" "Discovery template lazy-loads listing images"
+check_contains "$COURSE_CARD_TEMPLATE_LMS" "decoding=\"async\"" "Discovery template async-decodes listing images"
 check_not_contains "$COURSE_CARD_TEMPLATE_LMS" "aria-label=\"\"" "Discovery template does not ship an empty CTA aria-label"
 
 # Token usage in catalog CSS (not hard-coded hex for brand values)
@@ -233,6 +249,7 @@ check_contains "$LMS_DISCOVERY_SCSS" "var(--mereka-color-surface-primary)" "Cata
 
 # Common overrides should stay out of authored discovery ownership.
 check_not_contains "$MEREKA_OVERRIDES_COMMON" ".find-courses #discovery-form.wrapper-search-context" "Common overrides do not own discovery shell"
+check_not_contains "$MEREKA_OVERRIDES_COMMON" ".find-courses .pagination > li > a" "Common overrides do not own discovery pagination"
 check_not_contains "$MEREKA_OVERRIDES_COMMON" ".course-about .intro-inner-wrapper" "Common overrides do not own course-about hero"
 
 # ─── 4. Head-Extra CSS Injection ────────────────────────────────────────────

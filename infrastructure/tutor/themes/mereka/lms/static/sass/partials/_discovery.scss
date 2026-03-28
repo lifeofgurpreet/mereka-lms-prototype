@@ -17,6 +17,65 @@
   background: transparent;
   box-shadow: none;
   padding-inline: 0;
+  display: grid;
+  gap: 1.25rem 1.5rem;
+  align-items: start;
+  grid-template-columns: minmax(16rem, 19rem) minmax(0, 1fr);
+  grid-template-areas:
+    "search search"
+    "facets filters"
+    "facets results";
+}
+
+.find-courses .courses-container > .course-search,
+.find-courses .courses-container > #discovery-form.wrapper-search-context {
+  grid-area: search;
+}
+
+.find-courses .courses-container > .courses,
+.find-courses .courses-container > .highlighted-courses {
+  grid-area: results;
+  min-width: 0;
+}
+
+.find-courses .courses-container > .courses.no-course-discovery {
+  grid-column: 1 / -1;
+}
+
+.find-courses .courses-container > .search-facets {
+  grid-area: facets;
+  position: sticky;
+  top: clamp(1rem, 2vw, 1.5rem);
+  align-self: start;
+}
+
+.find-courses .courses-container > #filter-bar.filters {
+  grid-area: filters;
+  margin: 0;
+  align-self: start;
+}
+
+.find-courses .course-search {
+  margin-bottom: 1.25rem;
+}
+
+.find-courses .course-search form {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: stretch;
+  padding: 1.05rem 1.15rem 0.95rem;
+  backdrop-filter: blur(16px);
+}
+
+.find-courses .course-search label {
+  display: block;
+  min-width: 0;
+  margin: 0;
 }
 
 .find-courses #discovery-form.wrapper-search-context {
@@ -32,13 +91,25 @@
 }
 
 .find-courses #discovery-message.search-status-label {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 0.45rem;
   align-self: start;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(45, 137, 139, 0.16);
+  background: rgba(45, 137, 139, 0.08);
   color: var(--mereka-color-ink-700);
   font-size: 0.9rem !important;
   font-weight: 700;
   letter-spacing: 0.08em;
   line-height: 1.2;
   text-transform: uppercase;
+}
+
+.find-courses #discovery-message.search-status-label:empty {
+  display: none;
 }
 
 .find-courses #discovery-form .wrapper-search-input {
@@ -57,6 +128,16 @@
   font-size: 0.97rem;
 }
 
+.find-courses .search-input {
+  width: 100%;
+  min-height: 100%;
+  border-radius: 999px;
+  border: 1px solid rgba(26, 22, 35, 0.14);
+  background: rgba(251, 250, 251, 0.92);
+  padding: 0.8rem 1rem;
+  font-size: 0.97rem;
+}
+
 .find-courses #discovery-input.discovery-input:focus {
   outline: none;
   border-color: rgba(45, 137, 139, 0.65);
@@ -64,8 +145,16 @@
   background: #fff;
 }
 
+.find-courses .search-input:focus {
+  outline: none;
+  border-color: rgba(45, 137, 139, 0.65);
+  box-shadow: 0 0 0 4px rgba(45, 137, 139, 0.15);
+  background: #fff;
+}
+
 .find-courses button.discovery-submit,
-.find-courses .discovery-submit.button {
+.find-courses .discovery-submit.button,
+.find-courses .search-button {
   border-radius: 999px;
   border: 0;
   color: #fff;
@@ -80,9 +169,15 @@
 .find-courses button.discovery-submit:hover,
 .find-courses button.discovery-submit:focus,
 .find-courses .discovery-submit.button:hover,
-.find-courses .discovery-submit.button:focus {
+.find-courses .discovery-submit.button:focus,
+.find-courses .search-button:hover,
+.find-courses .search-button:focus {
   transform: translateY(-1px);
   box-shadow: 0 18px 32px rgba(45, 137, 139, 0.25);
+}
+
+.find-courses .search-button .icon {
+  color: currentColor;
 }
 
 .find-courses .search-facets {
@@ -99,6 +194,11 @@
   font-family: var(--mereka-font-heading);
   font-weight: 700;
   margin-bottom: 0.5rem;
+}
+
+.find-courses .search-facets .search-facets-lists {
+  display: grid;
+  gap: 1rem;
 }
 
 .find-courses .search-facets a,
@@ -266,6 +366,154 @@
 .find-courses .courses-listing-item {
   display: flex;
   min-width: 0;
+  content-visibility: auto;
+  contain-intrinsic-size: 38rem;
+}
+
+.find-courses .pagination {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1.8rem 0 0;
+  padding: 0;
+}
+
+.find-courses .pagination > li {
+  list-style: none;
+}
+
+.find-courses .pagination > li > a,
+.find-courses .pagination > li > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(26, 22, 35, 0.12);
+  background: rgba(251, 250, 251, 0.92);
+  color: var(--mereka-color-ink-900);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.1;
+  box-shadow: 0 14px 28px rgba(26, 22, 35, 0.08);
+  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+}
+
+.find-courses .pagination > li > a:hover,
+.find-courses .pagination > li > a:focus,
+.find-courses .pagination > li > span:hover,
+.find-courses .pagination > li > span:focus {
+  border-color: rgba(45, 137, 139, 0.35);
+  box-shadow: 0 0 0 4px rgba(45, 137, 139, 0.12);
+}
+
+.find-courses .pagination > .active > a,
+.find-courses .pagination > .active > span,
+.find-courses .pagination > .active > a:hover,
+.find-courses .pagination > .active > span:hover,
+.find-courses .pagination > .active > a:focus,
+.find-courses .pagination > .active > span:focus {
+  background: var(--mereka-gradient-primary);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 16px 30px rgba(45, 137, 139, 0.22);
+}
+
+.find-courses .pagination > .disabled > a,
+.find-courses .pagination > .disabled > span {
+  opacity: 0.55;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.find-courses .empty-results,
+.find-courses .no-results,
+.find-courses .courses-listing-empty,
+.find-courses .courses-empty {
+  display: grid;
+  gap: 0.7rem;
+  justify-items: start;
+  padding: 1.4rem 1.5rem;
+  margin-top: 1.3rem;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(45, 137, 139, 0.14), transparent 14rem),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 247, 252, 0.95));
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+}
+
+.find-courses .empty-results::before,
+.find-courses .no-results::before,
+.find-courses .courses-listing-empty::before,
+.find-courses .courses-empty::before {
+  content: "";
+  width: 3.4rem;
+  height: 3.4rem;
+  border-radius: 1.15rem;
+  background:
+    linear-gradient(135deg, rgba(45, 137, 139, 0.18), rgba(171, 59, 120, 0.16));
+  box-shadow: 0 18px 36px rgba(26, 22, 35, 0.12);
+}
+
+.find-courses .empty-results > *,
+.find-courses .no-results > *,
+.find-courses .courses-listing-empty > *,
+.find-courses .courses-empty > * {
+  position: relative;
+  z-index: 1;
+}
+
+.find-courses .empty-results h2,
+.find-courses .no-results h2,
+.find-courses .courses-listing-empty h2,
+.find-courses .courses-empty h2 {
+  margin: 0;
+  color: var(--mereka-color-ink-900);
+  font-family: var(--mereka-font-heading);
+  font-size: clamp(1.35rem, 2vw, 1.8rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+.find-courses .empty-results p,
+.find-courses .no-results p,
+.find-courses .courses-listing-empty p,
+.find-courses .courses-empty p {
+  margin: 0;
+  color: var(--mereka-color-ink-700);
+  font-size: 0.98rem;
+  line-height: 1.65;
+  max-width: 40rem;
+}
+
+.find-courses .empty-results a,
+.find-courses .empty-results button,
+.find-courses .no-results a,
+.find-courses .no-results button,
+.find-courses .courses-listing-empty a,
+.find-courses .courses-listing-empty button,
+.find-courses .courses-empty a,
+.find-courses .courses-empty button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.9rem;
+  padding: 0.78rem 1.1rem;
+  border-radius: 999px;
+  border: 0;
+  background: var(--mereka-gradient-primary);
+  color: #fff;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 14px 28px rgba(45, 137, 139, 0.2);
 }
 
 .find-courses .course {
@@ -912,6 +1160,20 @@
 }
 
 @media (max-width: 960px) {
+  .find-courses .courses-container {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "search"
+      "filters"
+      "facets"
+      "results";
+  }
+
+  .find-courses .courses-container > .search-facets,
+  .find-courses .courses-container > #filter-bar.filters {
+    position: static;
+  }
+
   .course-info .container,
   .course-about .container {
     grid-template-columns: minmax(0, 1fr);
@@ -937,6 +1199,7 @@
 }
 
 @media (max-width: 640px) {
+  .find-courses .course-search form,
   .find-courses #discovery-form.wrapper-search-context,
   .find-courses .search-facets,
   .find-courses #filter-bar.filters {
@@ -944,8 +1207,20 @@
     padding-inline: 0.95rem;
   }
 
+  .find-courses .course-search form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .find-courses .search-button {
+    justify-content: center;
+  }
+
   .find-courses .courses-listing {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .find-courses .pagination {
+    justify-content: flex-start;
   }
 
   .find-courses .course .course-image,

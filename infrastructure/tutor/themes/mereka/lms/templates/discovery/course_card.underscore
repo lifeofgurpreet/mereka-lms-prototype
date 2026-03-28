@@ -1,7 +1,7 @@
 <article class="course course-card-premium" role="region" aria-label="<%- content.display_name %>">
         <header class="course-image">
             <div class="cover-image">
-                <img src="<%- image_url %>" onerror="this.src='/theming/asset/images/no_course_image.png';" alt="" />
+                <img src="<%- image_url %>" onerror="this.src='/theming/asset/images/no_course_image.png';" alt="" loading="lazy" decoding="async" fetchpriority="low" />
                 <div class="course-badge-row" aria-hidden="true">
                     <span class="course-badge course-badge--org"><%- org %></span>
                     <span class="course-badge course-badge--code"><%- content.number %></span>

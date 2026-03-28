@@ -46,8 +46,21 @@ test.describe('Unauthenticated smoke — LMS', () => {
     expect(response?.status()).toBe(200);
 
     await page.waitForLoadState('networkidle').catch(() => {});
-    await expect(page.locator('#discovery-form')).toHaveCount(1);
-    await expect(page.locator('.search-facets')).toHaveCount(1);
+    const modernSearchShell = page.locator('#discovery-form');
+    const legacySearchShell = page.locator('.course-search form');
+    const searchShellCount = (await modernSearchShell.count()) + (await legacySearchShell.count());
+    expect(searchShellCount).toBeGreaterThan(0);
+
+    const modernFacetShellCount = await page.locator('.search-facets').count();
+    if (modernFacetShellCount > 0) {
+      await expect(page.locator('.search-facets')).toHaveCount(1);
+      await expect(page.locator('.search-facets .search-facets-lists')).toHaveCount(1);
+      await expect(page.locator('#filter-bar.filters')).toHaveCount(1);
+      await expect(page.locator('#discovery-message.search-status-label')).toHaveCount(1);
+    } else {
+      await expect(page.locator('.course-search .search-input')).toHaveCount(1);
+      await expect(page.locator('.course-search .search-button')).toHaveCount(1);
+    }
 
     const firstCard = page.locator('.courses-listing .course-card-premium').first();
     await expect(firstCard).toBeVisible({ timeout: 20_000 });
