@@ -9,14 +9,15 @@ Start by reading:
 3. `docs/status/active/UI_RUNTIME_TRUTH_TRACKER_2026-03-25.md`
 4. `docs/status/active/DEV_STAGING_TRUTH_TRACKER_2026-03-25.md`
 5. `scripts/qa/verify-mfe-config-contract.sh`
-6. `scripts/qa/verify-multisite-config.sh`
+6. `scripts/qa/verify-post-deploy-gate.sh`
 
-If you are checking the just-merged enterprise proof lane, also read:
+If you need the closed proof lanes for context, also read:
 
 7. `https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1148`
-8. `https://github.com/Biji-Biji-Initiative/mereka-lms/issues/842`
-9. `https://github.com/Biji-Biji-Initiative/mereka-lms/issues/843`
-10. `https://github.com/Biji-Biji-Initiative/mereka-lms/issues/834`
+8. `https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1153`
+9. `https://github.com/Biji-Biji-Initiative/mereka-lms/issues/842`
+10. `https://github.com/Biji-Biji-Initiative/mereka-lms/issues/843`
+11. `https://github.com/Biji-Biji-Initiative/mereka-lms/issues/834`
 
 ## Mission
 
@@ -34,29 +35,30 @@ The queue is no longer the problem.
 
 The system is currently concentrated around:
 
-1. restoring `mereka-lms` `main` to green after `#1149`
-2. following through the merged `bbi-infrastructure#2160` proof result without pretending the failed cluster audit is closed
-3. merging `mereka-lms#1150` so the partially repaired MFE config lane stays contract-honest
-4. cleaning the remaining frontend source-of-truth drift after runtime truth is repaired
+1. merging `mereka-lms#1155` so the docs catch up to reality
+2. opening the next real implementation lane: shared footer content source across LMS and MFE surfaces
+3. opening the MFE-config contract truth lane so the live parity repair is backed by an explicit contract and verifier
+4. leaving the closed enterprise/frontend ownership lanes retired unless fresh evidence reopens them
 
 ## Immediate first task
 
-Start with `T-01b` from the tracker unless fresh evidence proves another lane is now more urgent.
+Start with `T-01` from the tracker unless fresh evidence proves another lane is now more urgent.
 
 Current verified first move:
 
-1. work from `/tmp/mereka-two-week-tracker` and regenerate `verification/catalogs/verification_catalog.json`
-2. get the app-repo follow-up green so `mereka-lms` `main` returns to green
-3. then classify the `#2160` merge result correctly from the merge commit evidence instead of treating it as operationally closed
+1. refresh and merge `#1155`
+2. then open the shared footer payload lane rather than reopening closed ownership work
+3. after that, open the MFE-config contract lane and keep the runtime parity repair explicit
 
 ## Non-negotiable rules
 
 - Do not collapse repo truth, infra truth, and runtime truth into one sentence.
 - Do not close an issue because the source looks right if runtime proof is part of the acceptance boundary.
 - Do not rediscover already-closed queue debt unless new evidence shows regression.
-- Do not describe the MFE config lane as fully repaired; the three original null keys are fixed, but account/profile/login parity is still open.
-- Do not ignore a red `main` branch in the app repo while claiming the tracker is current.
-- Do not widen the now-merged `#1148` lane into general enterprise cleanup.
+- Do not describe the MFE-config lane as open runtime breakage if fresh live probes show parity is repaired.
+- Do not misclassify the `Post-Deploy E2E Gate` failure as an app-runtime defect; the proven root cause is workflow checkout ordering and the fix is already merged in `#1154`.
+- Do not widen the now-merged `#1148` or `#1153` lanes into general cleanup.
+- Do not jump straight to tenant CSS runtime injection before the clearer shared-footer single-source lane.
 - Do not leave the tracker ahead of reality.
 
 ## Required proof discipline
@@ -77,18 +79,17 @@ Every handoff note must include:
 
 ## Working order for the next agent
 
-1. `T-01b` restore app main to green after the tracker merge
-2. `T-03` treat `#2160` as merged-but-not-operationally-closed and carry the failed cluster-audit truth forward honestly
-3. `T-02` merge `#1150` so the partially repaired nonprod MFE config contract stays guarded
-4. `T-04` work `#843` through `#1153` after the red-main and active infra PR lanes are drained
-5. `T-05` refresh trackers/handoffs after truth advances, not before
+1. `T-01` merge `#1155`
+2. `T-02` open the shared footer content source lane
+3. `T-03` open the MFE-config contract truth lane
+4. `T-04` keep the closed enterprise/frontend ownership lanes retired unless fresh evidence reopens them
 
 ## Minimum acceptable success for this program handoff
 
-- `#1148` is merged cleanly
-- dev and staging LMS-host/apps-host MFE config surfaces stay non-null for learner/account/discussions URLs
-- the remaining account/profile/login parity gap is either fixed or explicitly still the active runtime defect
-- `mereka-lms` `main` is green again after the tracker/docs follow-up
-- `bbi-infrastructure#2160` is merged and its merge commit has an explicit post-merge proof result that is classified truthfully
-- the next promotion proof bundle explicitly covers build digest -> overlay -> Argo -> live runtime
+- `#1154` is merged and its post-merge `main` runs are clean
+- dev and staging LMS-host/apps-host MFE-config surfaces stay aligned for the governed learner/account/profile/login keys
+- the `#2161` false-negative is closed by `#2162` and its merge-commit follow-through
+- the shared footer content source lane is opened as the next implementation lane with one canonical payload for LMS and MFE public footer content
+- the MFE-config contract lane is opened as the next truth lane after the shared footer source
+- the next promotion proof bundle still covers build digest -> overlay -> Argo -> live runtime
 - the active tracker still matches the real state without narrative drift

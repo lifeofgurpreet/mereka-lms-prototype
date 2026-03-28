@@ -1,5 +1,5 @@
 # Two-Week Platform Truth Tracker
-_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-28T02:18:30Z • Status: active_
+_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-28T03:45:19Z • Status: active_
 
 This is the execution board for the next 14 days. It is intentionally cross-repo and cross-surface: app CI truth, infra promotion truth, live runtime truth, and frontend source-of-truth cleanup all belong here when they are still active and verifiable.
 
@@ -16,55 +16,54 @@ The goal is not to keep a long wish list. The goal is to keep the next two weeks
 ## Current verified state
 
 - Recently merged in `mereka-lms`:
-  - `#1144` `fix(ci): restore CodeQL to ARC heavy runners` merged `2026-03-27T16:49:37Z`
-  - `#1145` `fix(multisite): seed learner-home MFE gate` merged `2026-03-27T18:02:05Z`
-  - `#1147` `[codex] add authenticated learner DOM audit mode` merged `2026-03-27T19:45:13Z`
   - `#1148` `test(runtime): add enterprise deep-route browser proof` merged `2026-03-28T01:03:07Z`
   - `#1149` `docs(status): add two-week platform truth tracker` merged `2026-03-28T01:13:14Z`
+  - `#1150` `test(runtime): verify LMS and MFE config surfaces stay aligned` merged `2026-03-28T03:13:32Z`
+  - `#1151` `fix(ci): repair setup-playwright action manifest` merged `2026-03-28T02:56:30Z`
+  - `#1152` `docs(status): refresh platform truth control point` merged `2026-03-28T02:29:33Z`
+  - `#1153` `docs(branding): clarify runtime shim ownership` merged `2026-03-28T02:45:35Z`
+  - `#1154` `fix(ci): checkout post-deploy gate policy` merged `2026-03-28T03:30:07Z`
 - Recently merged in `bbi-infrastructure`:
   - `#2155` `feat(promotion): infra-owned dev image promotion for mereka-lms` merged `2026-03-27T13:08:26Z`
   - `#2157` `fix(ci): route dev promotion through pull requests` merged `2026-03-27T13:36:43Z`
-  - `#2158` `fix(mereka-lms): backfill MFE config URLs in env overlays` merged `2026-03-28T01:09:58Z`
-  - `#2159` `fix(ci): refresh impacted apps before post-merge audit` merged `2026-03-28T01:42:26Z`
-  - `#2160` `fix(ci): self-validate post-merge proof workflows` merged `2026-03-28T01:55:55Z`
-  - merge commit: `a4382673979a236b5e8b9660d78d6befe9a5eadd`
-  - proof status on the merge commit:
-    - `Post-Merge Release Proof`: success
-    - `Post-Merge Cluster Validation`: failure
-  - lane classification: `repo_complete`, not `runtime_validated`
-- The app PR queue is no longer blocked on enterprise browser proof:
-  - `#1148` merged at commit `9a1d9cc5e274239627bc294c634b47d037cefe99`
-  - the last known blocking diff was catalog drift in `verification/catalogs/verification_catalog.json`
-  - that drift was fixed on PR head `5de82adcfc10cd7074a8af348ababb655a85da14` before merge
-- The active issue stack is now concentrated:
-  - `#834` parent epic: audit remediation, frontend parity, docs truth, migration proof hardening
-  - `#842` is now closed by `#1148`
-  - `#843` is the next frontend debt lane after the runtime contract lane
-- Active app PR lanes relevant to the board:
-  - `#1150` `test(runtime): verify LMS and MFE config surfaces stay aligned`
-  - `#1152` `docs(status): refresh platform truth control point`
-  - `#1153` `docs(branding): clarify runtime shim ownership`
+  - `#2161` `feat(ci): prove impacted mereka-lms runtime realization` merged `2026-03-28T02:56:10Z`
+  - `#2162` `fix(ci): harden settings ownership verifier` merged `2026-03-28T03:14:05Z`
+- Active issue stack:
+  - `#834` remains the parent epic for audit remediation and proof hardening
+  - `#842` is closed by `#1148`
+  - `#843` is closed by `#1153`
+- Active app PR lanes:
+  - none on the platform-truth board
+- Active docs PR lane:
+  - `#1155` `docs(status): refresh platform truth control point`
+  - only open PR in `mereka-lms`
+- Active infra PR lanes:
+  - none on the platform-truth board; `#2162` is already merged
 - Live dev runtime is on the current promoted image set:
   - `openedx` deployments use `4aba20f30871938d59594fbf70e2ca99e389da5a@sha256:299bd93755f7e4e93da9f0ef38a725343508a33a862bc97d8dd02f23f1320b8f`
   - `mfe` uses `4aba20f30871938d59594fbf70e2ca99e389da5a@sha256:ddd93e8603d96d3a639f89c281a00785fa822537f1feb3eadd45d69fcfc7449d`
-- The broad LMS-host/apps-host MFE config null-key defect is repaired on nonprod, but parity is not fully closed:
-  - live dev LMS-host and apps-host endpoints both return non-null values for:
-    - `LEARNER_HOME_MICROFRONTEND_URL`
-    - `ACCOUNT_MICROFRONTEND_URL`
-    - `DISCUSSIONS_MICROFRONTEND_URL`
-  - live staging LMS-host and apps-host endpoints return the same key family non-null
-  - remaining live parity gaps still reproduced on `2026-03-28T02:18:30Z`:
-    - dev LMS-host omits `ACCOUNT_SETTINGS_URL`, `PROFILE_MICROFRONTEND_URL`, and `LOGIN_REDIRECT_URL`
-    - dev `ACCOUNT_PROFILE_URL` differs across surfaces (`/profile` on LMS-host vs `/u/` on apps-host)
-    - staging LMS-host and apps-host both omit `ACCOUNT_SETTINGS_URL`, `PROFILE_MICROFRONTEND_URL`, and `LOGIN_REDIRECT_URL`
+- The LMS-host/apps-host MFE-config parity gap is repaired live on nonprod:
+  - `bash scripts/qa/verify-mfe-config-contract.sh --env dev` passes
+  - `bash scripts/qa/verify-mfe-config-contract.sh --env staging` passes
+  - live dev and staging LMS-host/apps-host public surfaces now return non-null values for the governed learner/account/profile/login key family
 - The promotion boundary is materially stronger than it was 24 hours ago:
   - `bbi-infrastructure/.github/workflows/promote-dev-image.yml` is merged
   - `bbi-infrastructure/.github/workflows/promote-image.yml` already exists as the broader governed promotion surface
   - app-repo CI no longer needs to mutate infra git state directly
-- Current app-repo regression:
-  - `mereka-lms` `main` head `d1b633b4bccf6f1b63a325f729e24d1763cff15b` has a failed `CI` run
-  - failure boundary: `Static Validation Precheck` -> `Verify verification catalog is generated and current`
-  - immediate fix path: regenerate `verification/catalogs/verification_catalog.json` in a follow-up app PR
+- Current post-merge follow-through boundaries:
+  - `mereka-lms` `main` carries the `#1154` merge commit `2f3eba2b3b13afbe13e3b4d9b0ef77f856ec0c56`
+  - `#1154` post-merge `main` is already clean:
+    - `CI` success
+    - `CodeQL` success
+    - `WIF Readiness Check` success
+    - `IaC Security Scan` success
+  - `#1150` post-merge `main` is already clean:
+    - `CI` success
+    - `CodeQL` success
+    - `IaC Security Scan` success
+  - `bbi-infrastructure` main is already clean for `#2162`:
+    - `Auth Verification` success
+    - `Policy Guards` success
 
 ## What we achieved already
 
@@ -72,254 +71,145 @@ The goal is not to keep a long wish list. The goal is to keep the next two weeks
 - Restored CodeQL on ARC heavy and closed the runner/image truth gap that was blocking `#1016`.
 - Fixed learner-home handoff truth for `/dashboard` and moved it into canonical seed/reconcile paths.
 - Added authenticated DOM/browser proof for learner dashboard surfaces and merged it into `main`.
+- Repaired live dev/staging public MFE-config parity and merged the verifier lane that now guards it.
 - Landed the infra-owned dev-promotion path and fixed its protected-branch behavior so it opens PRs instead of pushing to `main`.
-- Verified live dev runtime on the promoted image set instead of stopping at GHCR or repo-level overlay claims.
+- Proved app-scoped post-merge runtime realization and merged the shell-hardening follow-up for its first verifier false negative.
 
 ## Current control point
 
 The system is no longer blocked by stale queue debt or unclear runner ownership. The remaining risk is concentrated in four places:
 
-1. restore `mereka-lms` `main` to green after `#1149` by merging a catalog-refreshing follow-up PR
-2. classify and follow through the `#2160` post-merge proof result instead of treating the lane as operationally closed
-3. merge `mereka-lms#1150` so the partially repaired MFE-config lane stays contract-honest across both LMS-host and apps-host surfaces
-4. merge `mereka-lms#1153` to advance `#843` with explicit runtime-shim ownership and verifier guardrails
+1. merge `mereka-lms#1155` so the active-status docs stop lagging behind reality
+2. open the next real implementation lane: shared footer content source across LMS and MFE surfaces
+3. open the MFE-config contract truth lane so the live parity repair is backed by an explicit contract and verifier
+4. leave the already-closed enterprise/frontend ownership lanes retired unless fresh evidence reopens them
 
 ## Two-week execution board
 
-### T-01 — Confirm enterprise deep-route proof stayed merged and close the lane cleanly
+### T-01 — Merge `#1155` and refresh the control-plane docs to current reality
 
 Priority: `P0`
 Owner surfaces: `mereka-lms`
 
 Current truth:
 
-- `#1148` is merged at `9a1d9cc5e274239627bc294c634b47d037cefe99`.
-- `#842` is closed.
-- Post-merge `CI` on that merge commit succeeded; the later cancellation on `CodeQL` happened only because `main` advanced to `#1149`.
-- The remaining work on this lane is post-merge truth, not PR repair.
+- `#1154` is merged and the post-merge `main` runs are clean.
+- `#1155` is the remaining open docs lane in `mereka-lms`.
+- the tracker is one control point behind unless it absorbs the latest queue state.
 
 Done when:
 
-- post-merge `main` runs are green for the affected checks
-- no regression reopens the enterprise/browser proof surface
-- the tracker no longer describes this as an open PR lane
+- `#1155` is rebased onto current `main`
+- the tracker names `#1154` as merged, not open
+- the tracker points at the next actual implementation lanes rather than stale queue repair
 
 Verification commands:
 
 ```bash
-gh pr view 1148 --json state,mergedAt,mergeCommit,url
-gh issue view 842 --json state,closedAt,url
-gh run list --repo Biji-Biji-Initiative/mereka-lms --branch main --limit 10
+gh pr list --repo Biji-Biji-Initiative/mereka-lms --state open --limit 10
+gh pr view 1155 --repo Biji-Biji-Initiative/mereka-lms --json headRefOid,mergeStateStatus,statusCheckRollup,url
+git diff --check
 ```
 
 Notes:
 
-- This lane is no longer the active implementation bottleneck.
-- Do not reopen it unless fresh evidence shows regression.
+- Docs stay downstream of reality.
+- The tracker should now reflect a drained app queue, not a still-open repair queue.
 
-### T-01b — Restore app main to green after the tracker merge
+### T-02 — Open the shared footer content source lane
 
 Priority: `P0`
 Owner surfaces: `mereka-lms`
 
 Current truth:
 
-- `#1149` merged documentation updates but did not regenerate `verification/catalogs/verification_catalog.json`
-- current `main` head `d1b633b4bccf6f1b63a325f729e24d1763cff15b` is failing `CI`
-- failure boundary is narrow and reproducible:
-  - `Static Validation Precheck`
-  - `Verify verification catalog is generated and current`
-- follow-up app PRs now carry the minimal governed fix path:
-  - `#1152` tracker refresh plus catalog update
-  - `#1153` runtime-shim ownership docs plus catalog update
+- there is still real duplicate footer content ownership between LMS Mako and the MFE footer implementation
+- current public MFE footer content lives in `infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js`
+- current LMS footer content lives independently in `infrastructure/tutor/themes/mereka/lms/templates/footer.html`
+- both surfaces render correctly today, but future copy/legal/nav changes still require multiple edits
+- the smallest credible repair is a shared footer payload exposed on the existing Django↔MFE config bridge while keeping the current DOM/class names stable
 
 Done when:
 
-- a follow-up app PR with the regenerated catalog merges
-- `mereka-lms` `main` returns to green
-- the tracker no longer treats this as an active regression
+- one canonical public-footer payload exists for both LMS and MFE surfaces
+- the current LMS footer and `MerekaFooter` render from the same content source
+- current footer DOM/classnames remain compatible with existing CSS/verifiers
 
 Verification commands:
 
 ```bash
-python3 scripts/qa/generate-verification-catalog.py
-bash scripts/qa/verify-verification-catalog.sh
-gh run view 23674117290 --repo Biji-Biji-Initiative/mereka-lms --log-failed
-git diff -- verification/catalogs/verification_catalog.json
+bash scripts/qa/verify-footer-parity.sh --source-only
+bash scripts/qa/verify-footer-variant-matrix.sh
+bash scripts/qa/verify-footer-slot-only.sh
+pytest -q tests/test_mfe_slot_ownership_patch.py
+git diff --check
 ```
 
 Notes:
 
-- This is a regression repair, not a new product lane.
-- Keep the fix minimal unless reality changed elsewhere in the same truth surface.
+- Keep CMS/Studio and enterprise footer surfaces out of the first repair unless they can consume the same payload with no extra routing/build work.
+- This is now the clearest remaining implementation lane after the queue repair work.
 
-### T-02 — Keep the repaired MFE config contract lane honest
-
-Priority: `P0`
-Owner surfaces: `mereka-lms`, then `bbi-infrastructure` only if the evidence proves the owner boundary lives there
-
-Current truth:
-
-- `bbi-infrastructure#2158` is merged at `efb84a0d72a045e03f11a5f2ea1adf32643f7a6f`
-- that merged fix repaired the old null-key defect for the main learner/account/discussions URL family
-- live dev LMS-host and apps-host endpoints both return non-null values for:
-  - `LEARNER_HOME_MICROFRONTEND_URL`
-  - `ACCOUNT_MICROFRONTEND_URL`
-  - `DISCUSSIONS_MICROFRONTEND_URL`
-- live staging LMS-host and apps-host endpoints return the same key family non-null
-- the runtime contract is still incomplete on the public surfaces:
-  - `ACCOUNT_SETTINGS_URL` is missing on dev LMS-host, staging LMS-host, and staging apps-host
-  - `PROFILE_MICROFRONTEND_URL` is missing on dev LMS-host, staging LMS-host, and staging apps-host
-  - `LOGIN_REDIRECT_URL` is missing on dev LMS-host, staging LMS-host, and staging apps-host
-  - `ACCOUNT_PROFILE_URL` still mismatches across dev LMS-host/apps-host
-- `#1150` is the governed verifier lane that turns this from anecdotal runtime evidence into an explicit contract failure
-
-Done when:
-
-- `#1150` merges on a truthful head
-- the strengthened verifier passes on both dev and staging
-- LMS-host and apps-host public surfaces agree on the governed account/profile/login keys, not just the three earlier URL keys
-- any future regression reopens from runtime truth, not from stale assumptions
-
-Verification commands:
-
-```bash
-python3 - <<'PY'
-import json, urllib.request
-for url in [
-    'https://academyv2.mereka.dev/api/mfe_config/v1',
-    'https://apps.academyv2.mereka.dev/api/mfe_config/v1?mfe=authn',
-    'https://staging.academyv2.mereka.io/api/mfe_config/v1',
-    'https://staging.apps.academyv2.mereka.io/api/mfe_config/v1?mfe=authn',
-]:
-    payload = json.load(urllib.request.urlopen(url))
-    print(url)
-    for key in [
-        'LEARNER_HOME_MICROFRONTEND_URL',
-        'ACCOUNT_MICROFRONTEND_URL',
-        'DISCUSSIONS_MICROFRONTEND_URL',
-        'ACCOUNT_SETTINGS_URL',
-        'ACCOUNT_PROFILE_URL',
-        'PROFILE_MICROFRONTEND_URL',
-        'LEARNING_BASE_URL',
-        'LOGIN_REDIRECT_URL',
-    ]:
-        print(f"  {key}={payload.get(key)!r}")
-PY
-
-bash scripts/qa/verify-mfe-config-contract.sh --env dev
-bash scripts/qa/verify-multisite-config.sh dev --context rke2-nonprod --namespace mereka-lms-dev
-kubectl exec -n mereka-lms-dev deploy/lms -- sh -lc "grep -n 'LEARNER_HOME_MICROFRONTEND_URL\\|ACCOUNT_MICROFRONTEND_URL\\|DISCUSSIONS_MICROFRONTEND_URL\\|FEATURES\\['\\''MFE_CONFIG'\\''\\] = MFE_CONFIG' /openedx/edx-platform/lms/envs/tutor/production.py"
-```
-
-Notes:
-
-- Ownership for the original null-key repair was proven by the realized infra settings copies in the live LMS pod.
-- The remaining parity gap is narrower and may be split between env defaults and per-site `SiteConfiguration.MFE_CONFIG` state; do not guess the owner from one surface alone.
-- Do not call this lane closed from repo truth alone; close it only when the governed runtime verifier passes.
-
-### T-03 — Turn the merged post-merge proof lane into an honest operational verdict
-
-Priority: `P0`
-Owner surfaces: `bbi-infrastructure` consuming `mereka-lms` build truth
-
-Current truth:
-
-- dev promotion is now infra-owned
-- protected-branch behavior is corrected
-- broader governed promotion already exists via `promote-image.yml`
-- `bbi-infrastructure#2159` is merged and improved impacted-app realization discipline
-- `bbi-infrastructure#2160` is merged and did prove the targeted behavior:
-  - `Post-Merge Release Proof` self-triggered and passed on the merge commit
-  - `Post-Merge Cluster Validation` self-triggered and failed on real dev-board findings
-- the remaining gap is no longer workflow pathing; it is honest operational follow-through on the failed cluster audit
-
-Done when:
-
-- `#2160` merges on a truthful head
-- the `#2160` merge commit triggers `Post-Merge Cluster Validation` and `Post-Merge Release Proof`
-- those post-merge workflows complete and leave an explicit success or failure boundary tied to the merge commit
-- the promotion path continues to show an explicit proof chain:
-  - built digest
-  - overlay change
-  - Argo desired state move
-  - live deployment image move
-  - runtime verifier pass
-- no app-repo workflow reaches into infra git directly
-
-Verification commands:
-
-```bash
-gh pr view 2155 --repo Biji-Biji-Initiative/bbi-infrastructure --json state,mergedAt,url
-gh pr view 2157 --repo Biji-Biji-Initiative/bbi-infrastructure --json state,mergedAt,url
-gh pr view 2159 --repo Biji-Biji-Initiative/bbi-infrastructure --json state,headRefOid,statusCheckRollup,url
-gh workflow view promote-dev-image.yml --repo Biji-Biji-Initiative/bbi-infrastructure
-gh workflow view promote-image.yml --repo Biji-Biji-Initiative/bbi-infrastructure
-kubectl get deploy -n mereka-lms-dev lms cms lms-worker cms-worker mfe -o jsonpath='{range .items[*]}{.metadata.name}{"="}{.spec.template.spec.containers[0].image}{"\n"}{end}'
-```
-
-Notes:
-
-- The main architectural boundary is established.
-- `#2159` is a realization-discipline step, not another promotion redesign.
-
-### T-04 — Close the frontend ownership/drift debt in `#843`
+### T-03 — Open the MFE-config contract truth lane
 
 Priority: `P1`
 Owner surfaces: `mereka-lms`
 
 Current truth:
 
-- the high-value runtime and CI truth lanes were repaired first
-- the remaining frontend debt is now the canonical-source question:
-  - what `head-extra.html` still owns
-  - what token generation owns
-  - what runtime override CSS owns
-- `#1153` is the first narrow slice on this lane
-- `#1153` currently required a governed catalog refresh, not a redesign of the theming stack
+- live dev/staging parity for the governed learner/account/profile/login key family is repaired
+- the remaining work is to make the contract explicit, stable, and verifier-backed
+- `scripts/qa/verify-mfe-config-contract.sh` is the right lane boundary for this work
+- the public API should not regress back to implicit or half-populated key exposure
 
 Done when:
 
-- `head-extra.html` is no longer an unbounded hotfix layer
-- token vs override ownership is explicit in docs/comments/verifiers
-- future contributors can answer "which file is canonical for what?" without guesswork
-- `#1153` merges cleanly and post-merge `main` stays green
+- the canonical contract for learner/account/discussions-facing MFE config keys is explicit
+- the verifier hard-fails if the governed keys regress
+- the live API stays truthful on dev and staging for the approved key family
+
+Verification commands:
+
+```bash
+bash scripts/qa/verify-mfe-config-contract.sh --env dev
+bash scripts/qa/verify-mfe-config-contract.sh --env staging
+bash scripts/qa/verify-multisite-config.sh dev --context rke2-nonprod --namespace mereka-lms-dev
+git diff --check
+```
+
+Notes:
+
+- Treat this as a runtime contract lane, not a docs lane.
+- Do not assume ownership until the diff proves where the missing values belong.
+
+### T-04 — Keep the closed enterprise/frontend ownership lanes retired unless they regress
+
+Priority: `P1`
+Owner surfaces: `mereka-lms`
+
+Current truth:
+
+- `#1148` is merged and `#842` is closed.
+- `#1153` is merged and `#843` is closed.
+- no active implementation PR is currently needed on either lane.
+
+Done when:
+
+- the tracker stops treating these as active queue items
+- they reopen only if fresh runtime or source-of-truth evidence appears
 
 Verification commands:
 
 ```bash
 bash scripts/qa/verify-token-drift.sh
 bash scripts/qa/verify-branding-css.sh
-git diff --check
+gh issue view 842 --repo Biji-Biji-Initiative/mereka-lms --json state,url
+gh issue view 843 --repo Biji-Biji-Initiative/mereka-lms --json state,url
 ```
 
 Notes:
 
-- This lane matters, but it follows T-02.
-- Do not treat style cleanup as higher priority than runtime contract truth.
-
-### T-05 — Keep trackers and evidence downstream of reality
-
-Priority: `P1`
-Owner surfaces: mixed, but primarily `mereka-lms` status/evidence maintainers
-
-Current truth:
-
-- most of the dangerous stale queue debt is gone
-- the remaining risk is narrative drift: docs claiming closure before runtime or infra proof exists
-
-Done when:
-
-- active trackers point only at current lanes
-- each tracker names its truth boundary explicitly
-- takeover prompts tell the next agent what to verify first, not what to believe
-
-Verification commands:
-
-```bash
-rg -n "Last verified|Status: active|Do not claim|Current truth|Done when" docs/status/active -S
-git diff --check
-```
+- Do not pull closed lanes back into the control point without new evidence.
 
 ## Longer-horizon workstreams after the two-week window
 
@@ -327,10 +217,9 @@ These are real, but they should not displace the two-week critical path above.
 
 | Workstream | Why it matters | Why it is not first |
 |---|---|---|
-| Shared footer content source | Django and React footer content still risks future drift | both surfaces currently render; runtime contract truth is higher priority |
-| Tenant CSS runtime injection | multi-tenant palette/runtime token layering is still incomplete | the current tenant/runtime path works well enough for one active tenant family |
-| Full retirement of `head-extra.html` | removes an emergency override surface entirely | requires the token/override ownership lane to land first |
-| More aggressive generated-artifact automation | reduces future catalog/inventory drift friction | useful, but the current blocker is one concrete catalog diff, not system-wide generation failure |
+| Tenant CSS runtime injection | multi-tenant palette/runtime token layering is still incomplete | the current tenant/runtime path works well enough for one active tenant family, and footer duplication is the clearer immediate ownership repair |
+| Full retirement of `head-extra.html` | removes an emergency override surface entirely | requires a separate bounded cleanup lane after the already-closed ownership/docs work |
+| More aggressive generated-artifact automation | reduces future catalog/inventory drift friction | useful, but the current blocker is one concrete workflow repair and two post-merge proof tails |
 | Staging/prod post-promotion runtime packs | makes release proof even more machine-checkable | dev/runtime truth and the next governed promotion path should be stabilized first |
 
 ## Ownership boundary
@@ -342,7 +231,9 @@ These are real, but they should not displace the two-week critical path above.
 ## Do not claim this program closed unless all of these are true
 
 - `#1148` is merged and `#842` is no longer open debt
-- live dev LMS-host `api/mfe_config/v1` returns complete learner/account/discussions MFE URLs or the team explicitly narrows the supported contract surface and updates the verifiers/docs to match
-- the next promotion path is proven from built digest to live runtime without app-repo git mutation
-- `#843` leaves behind explicit canonical ownership for token/override/hotfix layers
+- live dev and staging LMS-host/apps-host public MFE-config surfaces stay aligned for the governed learner/account/profile/login keys, and `#1150` keeps that parity durable in repo truth
+- `#1154` is merged and its post-merge `main` runs close cleanly
+- the `#2161` false-negative is closed by `#2162` and its merge-commit follow-through is clean
+- the shared footer content source lane is opened and described as a single-source repair rather than a vague drift warning
+- `#843` remains closed unless new frontend ownership drift appears
 - the active trackers still match the actual repo, infra, and runtime state
