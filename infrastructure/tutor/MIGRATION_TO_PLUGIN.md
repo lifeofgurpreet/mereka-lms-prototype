@@ -1,6 +1,23 @@
-# Migration from apply-patches.sh to Tutor Plugin
+# Migration from direct apply-patches.sh usage to the Tutor plugin workflow
 
-This guide explains how to migrate from the manual `apply-patches.sh` script to the native Tutor plugin system.
+This guide explains how to move away from the old operator habit of calling
+`apply-patches.sh` directly and toward the plugin-led Tutor workflow.
+
+## Canonical Local Operator Path
+
+For local iteration, the canonical path is:
+
+```bash
+source infrastructure/tutor/tutor-env.sh
+tutor plugins enable mereka_lms
+./scripts/infra/tutor-config-save.sh [tutor config save args]
+```
+
+Authority split:
+
+- `infrastructure/tutor/plugins/mereka_lms.py` is the source of truth for Tutor configuration and MFE/runtime customization that belongs in hooks.
+- `scripts/infra/tutor-config-save.sh` is the operator front door for regenerating local Tutor output safely.
+- `infrastructure/tutor/apply-patches.sh` remains an implementation detail invoked by the wrapper for residual file-sync and generated-file patch debt. It is not the day-to-day operator command.
 
 ## Why Migrate?
 
@@ -37,11 +54,11 @@ This guide explains how to migrate from the manual `apply-patches.sh` script to 
 These require additional file operations that plugins cannot handle directly:
 
 1. **Theme file copying** (logos, fonts, SCSS)
-   - **Workaround**: Use `tutor config save --set ...` or Tutor's theme mounting system
+   - **Workaround**: Use `./scripts/infra/tutor-config-save.sh --set ...` or Tutor's theme mounting system
    - **Status**: May require a separate script or Tutor's `PLUGIN_FILES` hook
 
 2. **MFE theme assets** (indigo/mereka directory)
-   - **Workaround**: Copy manually or use build script
+   - **Workaround**: Regenerate through `./scripts/infra/tutor-config-save.sh`, which invokes the residual asset-sync layer
    - **Status**: Tutor's `mounts` feature can handle this
 
 ### ❌ Not in Plugin (Intentional)
@@ -65,9 +82,9 @@ These are handled by Tutor's native features:
    tutor plugins list  # Verify it's listed
    ```
 
-2. **Regenerate config:**
+2. **Regenerate config through the canonical wrapper:**
    ```bash
-   tutor config save
+   ./scripts/infra/tutor-config-save.sh
    ```
 
 3. **Check generated files:**
@@ -100,9 +117,9 @@ Run this comparison to ensure the plugin produces the same output as `apply-patc
 mkdir -p /tmp/mereka-lms-migration
 cp -r tutor_env/env /tmp/mereka-lms-migration/env-with-apply-patches
 
-# Disable manual patches, enable plugin
+# Regenerate through the canonical plugin-led wrapper
 tutor plugins enable mereka_lms
-tutor config save
+./scripts/infra/tutor-config-save.sh
 
 # Compare key files
 diff -u \
@@ -118,22 +135,24 @@ diff -u \
 
 1. **Update CI/CD:**
    ```bash
-   # In deploy scripts, replace:
-   ./infrastructure/tutor/apply-patches.sh
+   # In local/operator-facing docs or helper scripts, replace:
+   #   tutor config save
+   #   ./infrastructure/tutor/apply-patches.sh
 
    # With:
    tutor plugins enable mereka_lms
-   tutor config save
+   ./scripts/infra/tutor-config-save.sh
    ```
 
 2. **Update documentation:**
    ```bash
    # Update README, CLAUDE.md, docs/onboarding/
-   # Remove references to apply-patches.sh
+   # Remove apply-patches.sh as an operator instruction
    ```
 
 3. **Archive old script:**
    ```bash
+   # Only after theme/build-context sync no longer depends on it.
    git mv infrastructure/tutor/apply-patches.sh \
           infrastructure/tutor/apply-patches.sh.deprecated
    git commit -m "refactor: migrate from apply-patches.sh to Tutor plugin"
@@ -172,7 +191,7 @@ tutor plugins enable mereka_lms
 
 ```bash
 # Regenerate config after enabling plugin
-tutor config save
+./scripts/infra/tutor-config-save.sh
 
 # Check generated settings
 cat tutor_env/env/apps/openedx/settings/lms/production.py | grep MEREKA
@@ -211,6 +230,9 @@ If the plugin causes issues:
    ./infrastructure/tutor/apply-patches.sh
    ```
 
+This direct script path is an exceptional fallback only. The canonical local
+operator path remains `./scripts/infra/tutor-config-save.sh`.
+
 3. **Rebuild images:**
    ```bash
    tutor images build openedx mfe
@@ -219,8 +241,8 @@ If the plugin causes issues:
 ## Known Limitations
 
 1. **Theme file copying:** The plugin does not handle file copying. You must still:
-   - Copy theme assets to build directory
-   - Run branding sync scripts
+   - Keep theme assets synced into the repo via branding sync scripts
+   - Regenerate Tutor output through `./scripts/infra/tutor-config-save.sh`, which still calls `apply-patches.sh`
 
 2. **Docker build context:** Custom apps must be in `./infrastructure/tutor/custom-apps/` relative to `TUTOR_ROOT`.
 

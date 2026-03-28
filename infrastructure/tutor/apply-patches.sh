@@ -2,6 +2,10 @@
 # Apply local adjustments to Tutor templates until upstream catches up.
 # This script sources modular patch functions from infrastructure/tutor/patches/
 # and calls them in order. Each patch is idempotent (safe to run multiple times).
+# Operator note: for normal local iteration, use
+# `./scripts/infra/tutor-config-save.sh` as the front door. This script remains
+# the implementation detail behind that wrapper until the remaining file-sync
+# and generated-file patch debt is retired.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"

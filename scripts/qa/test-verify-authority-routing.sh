@@ -9,7 +9,9 @@ tmpdir="$(mktemp -d -t verify-authority-routing.XXXXXX)"
 trap 'rm -rf "$tmpdir"' EXIT
 
 mkdir -p "$tmpdir/bin" "$tmpdir/scripts/lib" "$tmpdir/scripts/governance" "$tmpdir/.github/workflows" \
-  "$tmpdir/docs/stabilization" "$tmpdir/docs/policies/operations"
+  "$tmpdir/docs/stabilization" "$tmpdir/docs/policies/operations" \
+  "$tmpdir/docs/guides/onboarding" "$tmpdir/docs/guides/branding" \
+  "$tmpdir/infrastructure/tutor"
 
 write_lms_ops_fixture() {
   cat >"$tmpdir/bin/lms-ops" <<'EOF'
@@ -101,6 +103,35 @@ EOF
 The generated derivative is .github/ci-scripts-static.txt.
 The authority lives in scripts/governance/script-registry.yaml under ci_static_inventory.
 EOF
+
+  cat >"$tmpdir/docs/guides/onboarding/QUICK_START_LOCAL.md" <<'EOF'
+# Quick Start
+
+tutor plugins enable mereka_lms
+./scripts/infra/tutor-config-save.sh --set LMS_HOST=localhost
+EOF
+
+  cat >"$tmpdir/docs/guides/branding/BRANDING.md" <<'EOF'
+# Branding
+
+Use ./scripts/infra/tutor-config-save.sh for local Tutor regeneration.
+This flows through the internal `apply-patches.sh` call.
+EOF
+
+  cat >"$tmpdir/docs/guides/branding/BRANDING_GUARDRAILS.md" <<'EOF'
+# Branding Guardrails
+
+For local repair guidance, rerun ./scripts/infra/tutor-config-save.sh.
+EOF
+
+  cat >"$tmpdir/infrastructure/tutor/MIGRATION_TO_PLUGIN.md" <<'EOF'
+# Migration
+
+## Canonical Local Operator Path
+
+Use ./scripts/infra/tutor-config-save.sh after enabling the Tutor plugin.
+apply-patches.sh is now an implementation detail.
+EOF
 }
 
 run_expect_pass() {
@@ -128,6 +159,14 @@ write_canonical_entrypoints_fixture
 write_pass_workflows_fixture
 write_authority_docs_fixture
 run_expect_pass "allowlisted transitional callers pass without app-owned bypasses"
+
+cat >"$tmpdir/docs/guides/onboarding/QUICK_START_LOCAL.md" <<'EOF'
+# Quick Start
+
+./infrastructure/tutor/apply-patches.sh
+EOF
+run_expect_fail "quick start must not present apply-patches.sh as the operator command"
+write_authority_docs_fixture
 
 cat >"$tmpdir/.github/workflows/drift.yml" <<'EOF'
 name: drift

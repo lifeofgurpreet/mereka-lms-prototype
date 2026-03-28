@@ -88,9 +88,9 @@ To preview locally:
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
 source infrastructure/tutor/tutor-env.sh
+tutor plugins enable mereka_lms
 ./scripts/branding/sync-brand-assets.sh
-tutor config save --set THEME_DIR="$(pwd)/infrastructure/tutor/themes" --set THEME_NAME=mereka
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/tutor-config-save.sh --set THEME_DIR="$(pwd)/infrastructure/tutor/themes" --set THEME_NAME=mereka
 tutor local start -d
 tutor local run lms ./manage.py lms collectstatic --noinput
 ```
@@ -98,9 +98,9 @@ tutor local run lms ./manage.py lms collectstatic --noinput
 ## Branding Health Gate
 
 Run `./scripts/branding/verify-branding-health.sh` before building or deploying images. It enforces
-the presence of required logos, fonts, SCSS imports, and favicon assets. `./infrastructure/tutor/apply-patches.sh`
-and `./scripts/branding/deploy-branded-image.sh` now execute this check automatically and fail fast if any
-asset is missing.
+the presence of required logos, fonts, SCSS imports, and favicon assets. `./scripts/infra/tutor-config-save.sh`
+(via its internal `apply-patches.sh` call) and `./scripts/branding/deploy-branded-image.sh` now execute this
+check automatically and fail fast if any asset is missing.
 
 To ensure the runtime CSS carries the full branded experience (course cards, courseware chrome), run:
 
@@ -261,14 +261,14 @@ See `docs/programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md` § "Plugin-First
 
 - For local reproduction / parity checks: `export TUTOR_ROOT="$(pwd)/tutor_env" && source infrastructure/tutor/tutor-env.sh && tutor images build mfe`.
 - For production: publish the updated MFE image through `.github/workflows/build-tutor-images.yml`, then promote it with `./scripts/infra/release-openedx-gitops.sh --require-digests`.
-- Always run `./infrastructure/tutor/apply-patches.sh` immediately before `tutor images build mfe` (ensures idempotent theming copy and npm retry/timeouts).
+- For local Tutor regeneration before `tutor images build mfe`, use `./scripts/infra/tutor-config-save.sh`; it invokes `apply-patches.sh` internally and is the canonical operator front door.
 - Never run parallel `tutor images build mfe` commands; a single active build is the supported path.
 
 ## Favicons & Meta
 
 - Primary favicon: `infrastructure/tutor/themes/mereka/common/static/images/favicon.ico` (synced from `assets/branding/favicon.ico`).
 - Optional SVG: `infrastructure/tutor/themes/mereka/common/static/images/favicon.svg` if you want crisp scaling.
-- Set `INDIGO_FAVICON_URL=https://<lms-host>/static/mereka/images/favicon.ico` via `tutor config save` so Django advertises the correct icon and MFEs reuse it from their config.
+- Set `INDIGO_FAVICON_URL=https://<lms-host>/static/mereka/images/favicon.ico` via `./scripts/infra/tutor-config-save.sh --set ...` so Django advertises the correct icon and MFEs reuse it from their config.
 
 ---
 
@@ -340,8 +340,7 @@ cp new-font.woff2 assets/branding/fonts/
 
 2. **Theme not configured**:
    ```bash
-   tutor config save --set THEME_NAME=mereka --set THEME_DIR="$(pwd)/infrastructure/tutor/themes"
-   ./infrastructure/tutor/apply-patches.sh
+   ./scripts/infra/tutor-config-save.sh --set THEME_NAME=mereka --set THEME_DIR="$(pwd)/infrastructure/tutor/themes"
    tutor local restart
    ```
 
@@ -366,8 +365,8 @@ ls -lh infrastructure/tutor/themes/mereka/common/static/fonts/
 grep -r "google" infrastructure/tutor/themes/mereka/scss/
 # Should return nothing
 
-# Rebuild with patches
-./infrastructure/tutor/apply-patches.sh
+# Rebuild through the canonical Tutor wrapper
+./scripts/infra/tutor-config-save.sh
 tutor images build openedx
 ```
 
@@ -386,7 +385,7 @@ tutor images build openedx
 2. **Production MFE image not rebuilt**:
    - Local reproduction:
      ```bash
-     ./infrastructure/tutor/apply-patches.sh
+     ./scripts/infra/tutor-config-save.sh
      tutor images build mfe
      ```
    - Production repair:

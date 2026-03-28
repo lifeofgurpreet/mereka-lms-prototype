@@ -20,9 +20,10 @@ pip install -r requirements-tutor.txt
 # 4. Set up Tutor
 source infrastructure/tutor/tutor-env.sh
 export TUTOR_ROOT="$(pwd)/tutor_env"
+tutor plugins enable mereka_lms
 
-# 5. Configure local services (IMPORTANT: use local Docker names)
-tutor config save \
+# 5. Render local Tutor config through the canonical wrapper
+./scripts/infra/tutor-config-save.sh \
   --set LMS_HOST=localhost \
   --set CMS_HOST=studio.localhost \
   --set MFE_HOST=apps.localhost \
@@ -33,24 +34,19 @@ tutor config save \
   --set MYSQL_PORT=3306 \
   --set REDIS_PORT=6379
 
-# 6. Apply patches (fixes MySQL, MFE configs)
-./infrastructure/tutor/apply-patches.sh
-
-# 7. Build images (first time only, takes 30-45 min total)
+# 6. Build images (first time only, takes 30-45 min total)
 tutor images build openedx
 tutor images build mfe
 
-# 8. Launch services
+# 7. Launch services
 tutor local launch -I --skip-build
-./infrastructure/tutor/apply-patches.sh
-tutor local restart
 
-# 9. Create local admin user
+# 8. Create local admin user
 export LOCAL_ADMIN_PASSWORD='<choose-a-local-only-password>'
 docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms manage_user --superuser --staff admin admin@mereka.academy
 docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "import os; from django.contrib.auth import get_user_model; User = get_user_model(); u = User.objects.get(username='admin'); u.set_password(os.environ['LOCAL_ADMIN_PASSWORD']); u.is_staff = True; u.is_superuser = True; u.save(); print('✅ Local admin updated')"
 
-# 10. Verify
+# 9. Verify
 curl -I http://localhost
 curl -I http://apps.localhost/authn/login
 ```
@@ -86,8 +82,7 @@ tutor local start -d
 tutor local stop
 
 # After config changes
-tutor config save --set KEY=value
-./infrastructure/tutor/apply-patches.sh  # CRITICAL!
+./scripts/infra/tutor-config-save.sh --set KEY=value
 tutor local restart
 ```
 
@@ -110,8 +105,7 @@ tutor local restart mfe
 
 **Config shows cloud IPs**
 ```bash
-tutor config save --set MYSQL_HOST=mysql --set MONGODB_HOST=mongodb
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/tutor-config-save.sh --set MYSQL_HOST=mysql --set MONGODB_HOST=mongodb
 tutor local restart
 ```
 
@@ -132,4 +126,4 @@ tutor local restart
 
 ---
 
-**Remember:** Always verify config uses local Docker services (`mysql`, `mongodb`, `redis`) not cloud IPs, and never commit local passwords or copied secrets.
+**Remember:** For local Tutor regeneration, use `./scripts/infra/tutor-config-save.sh` rather than calling `apply-patches.sh` directly. Always verify config uses local Docker services (`mysql`, `mongodb`, `redis`) not cloud IPs, and never commit local passwords or copied secrets.

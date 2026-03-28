@@ -145,6 +145,10 @@ fi
 # 7. Canonical docs must describe generated inventory authority honestly.
 STATIC_CONTRACT_DOC="$REPO_ROOT/docs/stabilization/STATIC_VALIDATION_CONTRACT.md"
 RUNNER_POLICY_DOC="$REPO_ROOT/docs/policies/operations/CI_RUNNER_POLICY.md"
+QUICK_START_DOC="$REPO_ROOT/docs/guides/onboarding/QUICK_START_LOCAL.md"
+BRANDING_DOC="$REPO_ROOT/docs/guides/branding/BRANDING.md"
+BRANDING_GUARDRAILS_DOC="$REPO_ROOT/docs/guides/branding/BRANDING_GUARDRAILS.md"
+MIGRATION_DOC="$REPO_ROOT/infrastructure/tutor/MIGRATION_TO_PLUGIN.md"
 
 if [[ -f "$STATIC_CONTRACT_DOC" ]]; then
   require_doc_pattern "$STATIC_CONTRACT_DOC" "ci_static_inventory" \
@@ -168,6 +172,44 @@ if [[ -f "$RUNNER_POLICY_DOC" ]]; then
     "CI_RUNNER_POLICY.md does not present ci-scripts-static.txt as the authoritative registration surface"
 else
   fail "missing canonical doc: docs/policies/operations/CI_RUNNER_POLICY.md"
+fi
+
+if [[ -f "$QUICK_START_DOC" ]]; then
+  require_doc_pattern "$QUICK_START_DOC" "./scripts/infra/tutor-config-save.sh" \
+    "QUICK_START_LOCAL.md uses tutor-config-save.sh as the local Tutor front door"
+  require_doc_pattern "$QUICK_START_DOC" "tutor plugins enable mereka_lms" \
+    "QUICK_START_LOCAL.md enables mereka_lms during local bootstrap"
+  forbid_doc_pattern "$QUICK_START_DOC" "./infrastructure/tutor/apply-patches.sh" \
+    "QUICK_START_LOCAL.md does not present apply-patches.sh as the operator command"
+else
+  fail "missing canonical doc: docs/guides/onboarding/QUICK_START_LOCAL.md"
+fi
+
+if [[ -f "$BRANDING_DOC" ]]; then
+  require_doc_pattern "$BRANDING_DOC" "./scripts/infra/tutor-config-save.sh" \
+    "BRANDING.md routes local Tutor regeneration through tutor-config-save.sh"
+  require_doc_pattern "$BRANDING_DOC" 'internal `apply-patches.sh` call' \
+    "BRANDING.md treats apply-patches.sh as an internal wrapper detail"
+else
+  fail "missing canonical doc: docs/guides/branding/BRANDING.md"
+fi
+
+if [[ -f "$BRANDING_GUARDRAILS_DOC" ]]; then
+  require_doc_pattern "$BRANDING_GUARDRAILS_DOC" "./scripts/infra/tutor-config-save.sh" \
+    "BRANDING_GUARDRAILS.md uses tutor-config-save.sh for local repair guidance"
+else
+  fail "missing canonical doc: docs/guides/branding/BRANDING_GUARDRAILS.md"
+fi
+
+if [[ -f "$MIGRATION_DOC" ]]; then
+  require_doc_pattern "$MIGRATION_DOC" "Canonical Local Operator Path" \
+    "MIGRATION_TO_PLUGIN.md declares a canonical local operator path"
+  require_doc_pattern "$MIGRATION_DOC" "./scripts/infra/tutor-config-save.sh" \
+    "MIGRATION_TO_PLUGIN.md routes local regeneration through tutor-config-save.sh"
+  require_doc_pattern "$MIGRATION_DOC" "implementation detail" \
+    "MIGRATION_TO_PLUGIN.md demotes apply-patches.sh to an implementation detail"
+else
+  fail "missing canonical doc: infrastructure/tutor/MIGRATION_TO_PLUGIN.md"
 fi
 
 # 8. CI workflows must not bypass lms-ops for app-owned concerns.
