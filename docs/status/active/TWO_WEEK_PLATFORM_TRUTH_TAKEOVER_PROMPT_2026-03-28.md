@@ -43,30 +43,38 @@ Use only:
 
 The active work is now:
 
-1. treat post-promotion dev runtime availability as the immediate blocker
-2. keep `#1164` open until tenant-host runtime proof exists
+1. keep `#1164` open until tenant runtime branding data becomes tenant-specific and the browser proof passes on the runtime plane that actually serves the public tenant hosts
+2. identify and verify the runtime plane that actually serves those public tenant hosts
 3. keep nonprod MFE-config parity represented as closed
 4. keep the prod `502` behavior classified as availability/outage work, not as a reopened MFE-config contract bug
 
 ## Immediate first tasks
 
-### First lane: dev runtime availability after merged promotion
+### First lane: close `#1164` only with tenant-host proof on the correct plane
 
 Work in `/tmp/mereka-tenant-palette-bridge` unless the evidence forces an infra/runtime handoff.
 
 Run:
 
-1. `gh pr view 2168 --repo Biji-Biji-Initiative/bbi-infrastructure --json state,mergedAt,mergeCommit,url`
-2. probe the live dev hosts directly:
-   - `https://academyv2.mereka.dev`
-   - `https://biji-biji.academyv2.mereka.dev`
-   - `https://skillourfuture.academyv2.mereka.dev`
-3. if they are still `502`, treat runtime availability as the blocker and report it explicitly
-4. do not pretend tenant-palette proof moved just because promotion merged
+1. prove which runtime plane actually serves `biji-biji.academyv2.mereka.dev`, `skillourfuture.academyv2.mereka.dev`, and their `apps.*` hosts
+2. probe tenant LMS-host and apps-host config payloads directly on that plane
+3. run the targeted Playwright proof against that same plane
+4. treat default/null tenant branding data as the current blocker until the proof passes
+5. do not let merged GKE source/promotion work become a false closure claim for this issue
 
-### Second lane: close `#1164` only with tenant-host proof
+### Second lane: runtime-plane ownership for public tenant hosts
 
-Only after dev public-host availability is back, rerun the tenant-host probes and browser proof:
+Current verified truth:
+
+- public tenant hosts resolve to RKE2/nonprod worker IPs, not to the GKE ingress address
+- GKE `mereka-lms-dev` has no ingress rules or live endpoints for the non-default tenant hosts
+- desired GKE source now includes those tenant hosts, but the live GKE app has not realized that ingress/Caddy state yet
+- a manual sync is not a truthful closure shortcut while `lms` and `cms` remain replica-zero and their HPAs are `ScalingDisabled`
+- therefore the public proof surface for `#1164` is not currently the same thing as the GKE namespace/build chain being monitored
+
+Do not move forward until that ownership boundary is explicit.
+
+### Third lane: tenant-host proof commands
 
 ```bash
 python3 - <<'PY'
@@ -88,7 +96,7 @@ BASE_URL=https://skillourfuture.academyv2.mereka.dev EXPECTED_SITE_NAME='Skill O
   npx playwright test tests/tenant-palette-bridge.spec.ts --project chromium
 ```
 
-### Third lane: prod anomaly
+### Fourth lane: prod anomaly
 
 Treat prod as a separate availability lane.
 
@@ -106,9 +114,11 @@ Do not reopen the old nonprod MFE-config parity bug because of this.
 ## Non-negotiable rules
 
 - Do not collapse repo truth, infra truth, and runtime truth into one sentence.
-- Do not close `#1164` because `#1166` and `#2168` are merged.
+- Do not close `#1164` because `#1166`, `#1172`, `#2168`, or `#2171` are merged.
 - Do not rediscover already-closed queue debt unless fresh evidence proves regression.
 - Do not reopen `#1169`; it is merged.
+- Do not claim the GKE `mereka-lms-dev` app is the public tenant-host runtime plane unless the routing proof says so.
+- Do not treat manual Argo sync as a runtime proof substitute while `lms` and `cms` remain intentionally zero-scaled.
 - Do not describe the prod outage as an `/api/mfe_config/v1` bug unless the broad `502` surface disappears and a narrower boundary remains.
 - Do not widen `#1169` into general CI cleanup.
 - Do not widen merged `#1166` into a new source-implementation lane unless runtime proof shows the merge was insufficient.
