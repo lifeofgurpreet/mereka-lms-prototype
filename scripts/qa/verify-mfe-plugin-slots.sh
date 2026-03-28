@@ -275,6 +275,69 @@ else
   fail "Source contract: dashboard micro-shell canonical reuse markers missing"
 fi
 
+if rg -qF "const MerekaLearningContextCard = ({" "$PLUGIN_FILE" \
+  && rg -qF "const MerekaLearningContextMetaItem = ({ label, value }) => {" "$PLUGIN_FILE" \
+  && rg -qF "className=\"mereka-learning-course-tabs-hint mb-2\"" "$PLUGIN_FILE" \
+  && rg -qF "className=\"mereka-learning-notifications-discussions-sidebar-hint mb-2\"" "$PLUGIN_FILE" \
+  && rg -qF "className=\"mereka-learning-course-exit-dashboard-footnote-link-hint mb-2\"" "$PLUGIN_FILE"; then
+  pass "Source contract: learning and discussions helper slots share canonical context-card shell"
+else
+  fail "Source contract: learning/discussions canonical context-card shell markers missing"
+fi
+
+if rg -qF "className=\"mereka-learning-course-header mb-3\"" "$PLUGIN_FILE" \
+  && rg -qF "className=\"mereka-course-outline-sidebar mb-3\"" "$PLUGIN_FILE" \
+  && rg -qF "className=\"mereka-progress-certificate-status my-3\"" "$PLUGIN_FILE" \
+  && rg -qF "const MerekaLearningContextCard = ({" "$PLUGIN_FILE"; then
+  pass "Source contract: learning header, outline sidebar, and progress shell reuse canonical context-card"
+else
+  fail "Source contract: learning shell canonical reuse markers missing"
+fi
+
+if rg -qF "className=\"mereka-progress-course-grade-hint mb-2\"" "$PLUGIN_FILE" \
+  && rg -qF "className=\"mereka-progress-related-links-hint mb-2\"" "$PLUGIN_FILE" \
+  && rg -qF "className=\"mereka-progress-grade-breakdown-hint mb-2\"" "$PLUGIN_FILE" \
+  && rg -qF "className=\"mereka-learning-course-home-section-outline-hint mb-2\"" "$PLUGIN_FILE" \
+  && rg -qF "className=\"mereka-learning-course-recommendations-hint mb-2\"" "$PLUGIN_FILE" \
+  && rg -qF "const MerekaLearningContextCard = ({" "$PLUGIN_FILE"; then
+  pass "Source contract: progress and course-home helper slots reuse canonical context-card"
+else
+  fail "Source contract: progress/course-home canonical context-card markers missing"
+fi
+
+if rg -qF "className=\"mereka-learning-unit-title-hint mb-2\"" "$PLUGIN_FILE" \
+  && rg -qF "className=\"mereka-learning-sequence-navigation-hint mb-2\"" "$PLUGIN_FILE" \
+  && rg -qF "className=\"mereka-learning-content-iframe-loader-hint mb-2\"" "$PLUGIN_FILE" \
+  && rg -qF "className=\"mereka-learning-content-iframe-error-hint mb-2\"" "$PLUGIN_FILE" \
+  && rg -qF "className=\"mereka-learning-sequence-container-hint mb-2\"" "$PLUGIN_FILE" \
+  && rg -qF "className=\"mereka-learning-gated-unit-content-message-hint mb-2\"" "$PLUGIN_FILE" \
+  && rg -qF "const MerekaLearningContextCard = ({" "$PLUGIN_FILE"; then
+  pass "Source contract: unit and content recovery helper slots reuse canonical context-card"
+else
+  fail "Source contract: unit/content recovery canonical context-card markers missing"
+fi
+
+if rg -qF "compact = false" "$PLUGIN_FILE" \
+  && rg -qF "className=\"mereka-learning-outline-sidebar-trigger-hint d-none d-xl-inline-flex\"" "$PLUGIN_FILE" \
+  && rg -qF "className=\"mereka-learning-outline-mobile-sidebar-trigger-hint d-inline-flex d-xl-none\"" "$PLUGIN_FILE" \
+  && rg -qF "className=\"mereka-learning-next-unit-top-nav-trigger-hint d-none d-lg-inline-flex\"" "$PLUGIN_FILE" \
+  && rg -qF "className=\"mereka-learning-notifications-discussions-sidebar-trigger-hint d-inline-flex\"" "$PLUGIN_FILE" \
+  && rg -qF ".mereka-learning-context-card--compact" "$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"; then
+  pass "Source contract: learner trigger slots reuse compact context-card shell"
+else
+  fail "Source contract: learner trigger canonical compact-shell markers missing"
+fi
+
+if rg -qF "org.openedx.frontend.account.id_verification_page.v1" "$PLUGIN_FILE" \
+  && rg -qF "mereka_account_id_verification_hint" "$PLUGIN_FILE" \
+  && rg -qF "className=\"mereka-account-id-verification-hint mb-2\"" "$PLUGIN_FILE" \
+  && rg -qF "title=\"Verification supports secure certificate release\"" "$PLUGIN_FILE" \
+  && rg -qF "const MerekaLearningContextCard = ({" "$PLUGIN_FILE"; then
+  pass "Source contract: account verification slot reuses canonical context-card shell"
+else
+  fail "Source contract: account verification canonical context-card markers missing"
+fi
+
 if rg -qF "org.openedx.frontend.account.additional_profile_fields.v1" "$PLUGIN_FILE" \
   && rg -qF "mereka_additional_profile_fields" "$PLUGIN_FILE"; then
   pass "Source contract: account additional profile fields slot markers present"
@@ -287,6 +350,17 @@ if rg -qF "org.openedx.frontend.profile.additional_profile_fields.v1" "$PLUGIN_F
   pass "Source contract: profile additional profile fields slot markers present"
 else
   fail "Source contract: profile additional profile fields slot markers missing"
+fi
+
+if rg -qF "className=\"mereka-additional-profile-fields mb-3\"" "$PLUGIN_FILE" \
+  && rg -qF "title=\"Enterprise profile details\"" "$PLUGIN_FILE" \
+  && rg -qF "<MerekaLearningContextMetaItem label=\"Organization\" value={variant.brand} />" "$PLUGIN_FILE" \
+  && rg -qF "<MerekaLearningContextMetaItem label=\"Job title\" value=\"Pending admin sync\" />" "$PLUGIN_FILE" \
+  && rg -qF "<MerekaLearningContextMetaItem label=\"Department\" value=\"Pending admin sync\" />" "$PLUGIN_FILE" \
+  && rg -qF "const MerekaLearningContextCard = ({" "$PLUGIN_FILE"; then
+  pass "Source contract: account and profile additional fields reuse canonical context-card meta shell"
+else
+  fail "Source contract: account/profile additional fields canonical context-card markers missing"
 fi
 
 # Build/verification diagnostics contract for rapid slot debugging.
