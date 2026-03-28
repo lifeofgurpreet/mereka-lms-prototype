@@ -4,10 +4,10 @@
 # Verify SLSA-style build provenance and attestation for OCI images.
 #
 # Offline checks (default):
-#   1. Workflow references cosign-installer action
+#   1. Workflow uses the canonical cosign install script
 #   2. Workflow contains 'cosign attest' step
 #   3. Provenance artifact upload step exists
-#   4. cosign-installer is pinned to a commit SHA
+#   4. Canonical cosign installer script exists and pins version + checksum
 #   5. Provenance job has id-token: write permission
 #
 # Online checks (--online):
@@ -54,12 +54,12 @@ if [[ ! -f "$BUILD_WORKFLOW" ]]; then
   exit 1
 fi
 
-# 1. cosign-installer action referenced
+# 1. Canonical cosign installer script referenced
 WORKFLOW_CONTENT="$(< "$BUILD_WORKFLOW")"
-if grep -q 'sigstore/cosign-installer@' <<< "$WORKFLOW_CONTENT"; then
-  pass "Workflow references sigstore/cosign-installer"
+if grep -q './scripts/infra/install-cosign.sh' <<< "$WORKFLOW_CONTENT"; then
+  pass "Workflow uses canonical scripts/infra/install-cosign.sh"
 else
-  fail "Workflow does not reference sigstore/cosign-installer"
+  fail "Workflow does not use canonical scripts/infra/install-cosign.sh"
 fi
 
 # 2. cosign attest step
@@ -76,11 +76,15 @@ else
   fail "No provenance artifact upload step found"
 fi
 
-# 4. cosign-installer pinned to SHA (not floating tag)
-if grep -E 'sigstore/cosign-installer@[0-9a-f]{40}' <<< "$WORKFLOW_CONTENT" >/dev/null; then
-  pass "cosign-installer is pinned to commit SHA"
+COSIGN_INSTALLER="scripts/infra/install-cosign.sh"
+if [[ ! -f "$COSIGN_INSTALLER" ]]; then
+  fail "Missing canonical cosign installer: $COSIGN_INSTALLER"
+elif grep -q 'COSIGN_VERSION=' "$COSIGN_INSTALLER" \
+  && grep -q 'COSIGN_SHA256=' "$COSIGN_INSTALLER" \
+  && grep -q 'sha256sum -c -' "$COSIGN_INSTALLER"; then
+  pass "Canonical cosign installer pins version + checksum"
 else
-  fail "cosign-installer is NOT pinned to commit SHA"
+  fail "Canonical cosign installer does not pin version + checksum"
 fi
 
 # 5. id-token: write permission for provenance job

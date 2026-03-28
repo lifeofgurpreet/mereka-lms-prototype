@@ -836,6 +836,29 @@ scripts:
     proof_command: "bash scripts/infra/resolve-image-digest.sh --help"
     criticality: release-blocking
 
+  - path: scripts/infra/install-cosign.sh
+    owner: platform-team
+    purpose: >
+      Canonical cosign bootstrap for CI and release workflows. Installs the
+      pinned cosign binary with checksum verification so workflows do not
+      duplicate ad hoc installer logic.
+    inputs:
+      - COSIGN_VERSION (optional; defaults to pinned release)
+      - COSIGN_SHA256 (optional; defaults to pinned checksum)
+      - INSTALL_DIR PATH (optional)
+      - DOWNLOAD_TIMEOUT SECONDS (optional)
+    outputs:
+      - installed cosign binary in the resolved writable install directory
+      - stdout (resolved version output)
+    side_effects:
+      - downloads the pinned cosign release artifact
+      - writes a cosign binary into the resolved install directory
+      - appends the install directory to GITHUB_PATH when available
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash -n scripts/infra/install-cosign.sh"
+    criticality: release-blocking
+
   - path: scripts/infra/sync-gitops-prod-image-tags.sh
     owner: platform-team
     purpose: >

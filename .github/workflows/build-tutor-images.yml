@@ -1022,7 +1022,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
-      - name: Install envsubst (required by cosign-installer)
+      - name: Install envsubst (required by install-cosign.sh)
         run: |
           if ! command -v envsubst &>/dev/null; then
             # Static binary — works on all runner types.
@@ -1041,7 +1041,7 @@ jobs:
           fi
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@ba7bc0a3fef59531c69a25acd34668d6d3fe6f22  # v4.1.0
+        run: ./scripts/infra/install-cosign.sh
 
       - name: Log in to GHCR
         env:
@@ -1194,7 +1194,7 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
-      - name: Install envsubst (required by cosign-installer)
+      - name: Install envsubst (required by install-cosign.sh)
         run: |
           if ! command -v envsubst &>/dev/null; then
             # Static binary — works on all runner types.
@@ -1213,7 +1213,7 @@ jobs:
           fi
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@ba7bc0a3fef59531c69a25acd34668d6d3fe6f22  # v4.1.0
+        run: ./scripts/infra/install-cosign.sh
 
       - name: Generate release bundle
         id: bundle
@@ -1322,7 +1322,7 @@ jobs:
           name: release-bundle
           path: var/ci
 
-      - name: Install envsubst (required by cosign-installer)
+      - name: Install envsubst (required by install-cosign.sh)
         run: |
           if ! command -v envsubst &>/dev/null; then
             # Static binary — works on all runner types.
@@ -1341,7 +1341,7 @@ jobs:
           fi
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@ba7bc0a3fef59531c69a25acd34668d6d3fe6f22  # v4.1.0
+        run: ./scripts/infra/install-cosign.sh
 
       - name: Verify release bundle signature
         if: ${{ needs.release-bundle.result == 'success' }}

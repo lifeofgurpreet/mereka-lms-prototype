@@ -9,6 +9,16 @@ tmpdir="$(mktemp -d -t verify-slsa-provenance.XXXXXX)"
 trap 'rm -rf "$tmpdir"' EXIT
 
 mkdir -p "$tmpdir/.github/workflows"
+mkdir -p "$tmpdir/scripts/infra"
+
+write_installer_fixture() {
+  cat >"$tmpdir/scripts/infra/install-cosign.sh" <<'EOF'
+#!/usr/bin/env bash
+COSIGN_VERSION="v3.0.5"
+COSIGN_SHA256="deadbeef"
+echo "${COSIGN_SHA256}  /tmp/cosign" | sha256sum -c -
+EOF
+}
 
 write_pass_fixture() {
   cat >"$tmpdir/.github/workflows/build-tutor-images.yml" <<'EOF'
@@ -19,7 +29,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: sigstore/cosign-installer@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+      - run: ./scripts/infra/install-cosign.sh
       - run: cosign attest --type slsaprovenance image
       - run: echo "slsa-provenance"
       - run: |
@@ -50,6 +60,7 @@ run_expect_fail() {
 }
 
 write_pass_fixture
+write_installer_fixture
 run_expect_pass "workflow with pinned cosign + id-token + slsa fields passes"
 
 cat >"$tmpdir/.github/workflows/build-tutor-images.yml" <<'EOF'
@@ -59,7 +70,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: sigstore/cosign-installer@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+      - run: ./scripts/infra/install-cosign.sh
       - run: cosign attest --type slsaprovenance image
       - run: echo "slsa-provenance"
       - run: |
