@@ -1,5 +1,5 @@
 # Two-Week Platform Truth Tracker
-_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-28T05:02:01Z • Status: active_
+_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-28T05:14:07Z • Status: active_
 
 This is the execution board for the next 14 days. It is intentionally cross-repo and cross-surface: app CI truth, infra promotion truth, live runtime truth, and frontend source-of-truth cleanup all belong here when they are still active and verifiable.
 
@@ -16,6 +16,7 @@ The goal is not to keep a long wish list. The goal is to keep the next two weeks
 ## Current verified state
 
 - Recently merged in `mereka-lms`:
+  - `#1162` `docs(status): refresh platform truth control point` merged `2026-03-28T05:09:15Z`
   - `#1157` `feat(footer): share public footer content source` merged `2026-03-28T04:48:23Z`
   - `#1161` `docs(status): refresh platform truth tracker` merged `2026-03-28T04:51:25Z`
   - `#1148` `test(runtime): add enterprise deep-route browser proof` merged `2026-03-28T01:03:07Z`
@@ -27,6 +28,7 @@ The goal is not to keep a long wish list. The goal is to keep the next two weeks
   - `#1154` `fix(ci): checkout post-deploy gate policy` merged `2026-03-28T03:30:07Z`
   - `#1155` `docs(status): refresh platform truth control point` merged `2026-03-28T03:48:07Z`
 - Recently merged in `bbi-infrastructure`:
+  - `#2164` `feat(ci): emit dev promotion proof artifact` merged `2026-03-28T05:10:13Z`
   - `#2163` `feat(proof): emit mereka-lms runtime realization json` merged `2026-03-28T04:54:00Z`
   - `#2155` `feat(promotion): infra-owned dev image promotion for mereka-lms` merged `2026-03-27T13:08:26Z`
   - `#2157` `fix(ci): route dev promotion through pull requests` merged `2026-03-27T13:36:43Z`
@@ -38,19 +40,15 @@ The goal is not to keep a long wish list. The goal is to keep the next two weeks
   - `#843` is closed by `#1153`
 - Active app PR lanes:
   - `#1158` `docs(branding): align tenant runtime contract`
-  - head: `6c26fccb6b5b2508e1d94afaec60f12be4e103cd`
-  - current state: refreshed on top of current `main`; queued/in-progress CI, no live failing job
+  - head: `ff25713d06bffad29f9f4ecee04f1091cfb2d58e`
+  - current state: branch refreshed on top of current `main`; fresh CI wave is queued/in progress, no failing job
   - `#1160` `test(smoke): require both public mfe config surfaces`
-  - head: `d60f37cffafed997ecefa896625441093f8d4c39`
-  - current state: refreshed on top of current `main`; only CI/CodeQL tail remains
+  - head: `80f727f156bf3edd04ccbbf8973cda69ed7cdb09`
+  - current state: branch refreshed on top of current `main`; fresh CI wave is queued/in progress after superseding a stuck Python CodeQL initializer
 - Closed non-merge app lane:
   - `#1159` `docs(tenant-branding): align palette truth`
   - closed `2026-03-28T04:55:58Z`
   - current state: retired as a separate lane; any still-useful palette-truth deltas must be absorbed deliberately, not merged blindly
-- Active infra PR lanes:
-  - `#2164` `feat(ci): emit dev promotion proof artifact`
-  - head: `cd5242e2df6cdbf0d9f7604fbadd563480e7a1f9`
-  - current state: auto-merge armed; waiting on `policy-guards`
 - Non-board open PRs:
   - `#1156` Dependabot bump; not part of the platform-truth program
 - Live dev runtime is on the current promoted image set:
@@ -91,13 +89,13 @@ The goal is not to keep a long wish list. The goal is to keep the next two weeks
 
 ## Current control point
 
-The system is no longer blocked by stale queue debt or unclear runner ownership. `#1157` is merged, `#1161` is merged, live LMS/apps MFE-config parity is repaired, `#842` and `#843` are closed, and the active queue is down to `#1158`, `#1160`, and infra `#2164`.
+The system is no longer blocked by stale queue debt or unclear runner ownership. `#1157`, `#1161`, `#1162`, `#2163`, and `#2164` are merged, live LMS/apps MFE-config parity is repaired, `#842` and `#843` are closed, and the active queue is down to two app-repo rerun lanes: `#1158` and `#1160`.
 
 The remaining risk is concentrated in four places:
 
 1. land `#1158` so the tenant-branding docs/schema/verifier stop over-claiming current runtime behavior
 2. land `#1160` so the browser smoke lane hard-requires both public MFE-config surfaces
-3. finish `#2164` so dev promotion emits its own proof artifact and extends the build -> infra -> runtime chain
+3. keep the now-merged `#2164` dev-promotion artifact lane represented truthfully in the control-plane docs
 4. leave the already-closed MFE-config and enterprise/frontend ownership lanes retired unless fresh evidence reopens them
 
 ## Two-week execution board
@@ -168,7 +166,7 @@ Notes:
 - This lane does not implement the runtime injector yet.
 - Its purpose is to stop lying about what current runtime tenant theming does.
 
-### T-03 — Finish the remaining proof lanes before opening any new runtime injector
+### T-03 — Finish the remaining app proof lanes before opening any new runtime injector
 
 Priority: `P0`
 Owner surfaces: `mereka-lms`
@@ -177,12 +175,12 @@ Current truth:
 
 - `#1158` is still the contract-truth first move.
 - `#1160` is still open to harden the browser smoke lane on both public MFE-config surfaces.
-- `#2164` is still open to harden dev promotion evidence.
+- `#2164` is merged and already hardens dev promotion evidence.
 - current governed runtime still does not prove live per-tenant `palette.*` -> `--mereka-color-*` injection.
 
 Done when:
 
-- `#1158`, `#1160`, and `#2164` are all merged
+- `#1158` and `#1160` are both merged
 - the tracker reflects that narrower queue truth
 - only then is a new runtime injector lane worth opening
 
@@ -210,7 +208,7 @@ Current truth:
 - current `main` already checks both public surfaces in `scripts/qa/verify-mfe-config-contract.sh`
 - `#1160` is now open to tighten the residual Playwright smoke gap from `apps || LMS` to `apps && LMS`
 - `#2163` is merged and emits machine-readable runtime realization JSON
-- `#2164` is the remaining dev-promotion artifact lane
+- `#2164` is merged and emits the dev-promotion proof artifact
 - the broader promotion boundary is materially stronger after `#2155`, `#2157`, `#2161`, `#2162`, and `#2163`
 - the remaining value is not another redesign; it is keeping the proof chain explicit on the next real promotion
 
@@ -218,7 +216,7 @@ Done when:
 
 - the repaired MFE-config lane stays guarded without being misclassified as still broken
 - `#1160` merges or its exact scope is absorbed elsewhere without losing the `both public surfaces must pass` guarantee
-- `#2164` merges so dev promotion emits its own machine-readable proof artifact
+- the tracker and follow-on proof notes treat `#2164` as merged reality rather than an open lane
 - the next promotion proof bundle names each step explicitly:
   - built digest
   - infra PR / overlay mutation
@@ -252,8 +250,10 @@ Current truth:
 - `#1148` is merged and `#842` is closed.
 - `#843` is closed.
 - `#1157` is merged.
+- `#1162` is merged.
+- `#2164` is merged.
 - the MFE-config parity lane is repaired and verifier-backed on current `main`.
-- the tracker in `main` was already stale again after `#1161`, which is why this follow-up exists.
+- the tracker in `main` drifts quickly because the queue is now small and merges are happening faster than doc-only refresh cadence.
 
 Done when:
 
