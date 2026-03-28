@@ -108,6 +108,21 @@ const getMerekaVariant = (hostname, config) => {
   };
 };
 
+const getMerekaPublicFooter = (config) => {
+  const footer = config && typeof config.MEREKA_PUBLIC_FOOTER === 'object' && config.MEREKA_PUBLIC_FOOTER !== null
+    ? config.MEREKA_PUBLIC_FOOTER
+    : {};
+
+  return {
+    brand: footer.brand || {},
+    socialLinks: Array.isArray(footer.socialLinks) ? footer.socialLinks : [],
+    navLinks: Array.isArray(footer.navLinks) ? footer.navLinks : [],
+    support: footer.support || {},
+    sections: footer.sections || {},
+    legal: footer.legal || {},
+  };
+};
+
 const getLearnerHomeHref = () => '/learner-dashboard/';
 
 const getCatalogHref = (baseUrl) => {
@@ -1063,62 +1078,24 @@ const MerekaFooter = () => {
   const currentYear = new Date().getFullYear();
   const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
   const variant = getMerekaVariant(hostname, config);
+  const footerContent = getMerekaPublicFooter(config);
+  const footerSupport = footerContent.support || {};
+  const footerSections = footerContent.sections || {};
+  const footerMarketplace = footerSections.marketplace || {};
+  const footerLegal = footerContent.legal || {};
   const logoPath = variant.logoUrl || '/theme/logo-horizontal.svg';
   const logoUrl = baseUrl ? `${baseUrl}${logoPath}` : logoPath;
-
-  const socialLinks = [
-    { name: 'TikTok', url: 'https://www.tiktok.com/@mereka.io', icon: 'M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z' },
-    { name: 'Instagram', url: 'https://www.instagram.com/mereka.io/', icon: 'M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z' },
-    { name: 'Facebook', url: 'https://www.facebook.com/mereka.io', icon: 'M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z' },
-    { name: 'LinkedIn', url: 'https://www.linkedin.com/company/mereka/', icon: 'M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z' },
-    { name: 'YouTube', url: 'https://www.youtube.com/channel/UCCyMH5KIZeCMchjMKl7RWxg', icon: 'M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z' },
-  ];
-
-  // navLinks: corporate-global links are the same for all tenants.
-  // Help Centre and Support email are resolved from the tenant data contract (variant).
+  const socialLinks = footerContent.socialLinks;
   const navLinks = [
-    { label: 'About', url: 'https://corporate.mereka.io/about-us' },
-    { label: 'Andragogy', url: 'https://corporate.mereka.io/andragogy' },
-    { label: 'Portfolio', url: 'https://corporate.mereka.io/portfolio' },
-    { label: 'Team', url: 'https://corporate.mereka.io/our-team' },
-    { label: 'Careers', url: 'https://corporate.mereka.io/work-with-us' },
-    { label: 'Ecosystem', url: 'https://corporate.mereka.io/ecosystem' },
-    { label: 'Blog', url: 'https://corporate.mereka.io/blog' },
-    { label: 'Help Centre', url: variant.helpUrl },
-    { label: 'Contact Support', url: 'mailto:' + variant.supportEmail },
+    ...footerContent.navLinks,
+    { label: footerSupport.helpLabel || 'Help Centre', url: variant.helpUrl },
+    { label: footerSupport.contactSupportLabel || 'Contact Support', url: 'mailto:' + variant.supportEmail },
   ];
-
-  const corporateLinks = [
-    { label: 'Accelerate Talent', url: 'https://corporate.mereka.io/academy/funders' },
-    { label: 'Create Online Course', url: 'https://corporate.mereka.io/academy/create-online-courses' },
-    { label: 'Build a Makerspace', url: 'https://corporate.mereka.io/academy/makerspace' },
-  ];
-
-  const marketplaceUserLinks = [
-    { label: 'Experiences', url: 'https://mereka.io/experiences' },
-    { label: 'Experts', url: 'https://mereka.io/experts' },
-    { label: 'Expertise', url: 'https://mereka.io/expertise' },
-    { label: 'Hubs', url: 'https://mereka.io/hubs' },
-    { label: 'Spaces', url: 'https://corporate.mereka.io/space' },
-  ];
-
-  const marketplaceBusinessLinks = [
-    { label: 'Pricing', url: 'https://hubs.mereka.io/pricing' },
-    { label: 'Solutions', url: 'https://hubs.mereka.io/howitworks' },
-  ];
-
-  const academyLinks = [
-    { label: 'Future of Work', url: 'https://corporate.mereka.io/academy/future-of-work' },
-    { label: 'Digital Entrepreneur', url: 'https://corporate.mereka.io/academy/digital-entrepreneur' },
-    { label: 'All Courses', url: 'https://corporate.mereka.io/academy/all-courses' },
-  ];
-
-  const spaceLinks = [
-    { label: 'Mereka @ Publika', url: 'https://corporate.mereka.io/publika' },
-    { label: 'Our Labs', url: 'https://corporate.mereka.io/space#labs' },
-    { label: 'Bespoke Design', url: 'https://corporate.mereka.io/space/innovate#products' },
-    { label: 'Host Events', url: 'https://corporate.mereka.io/space#event-cta' },
-  ];
+  const corporateLinks = (footerSections.corporate && footerSections.corporate.links) || [];
+  const marketplaceUserLinks = footerMarketplace.userLinks || [];
+  const marketplaceBusinessLinks = footerMarketplace.businessLinks || [];
+  const academyLinks = (footerSections.academy && footerSections.academy.links) || [];
+  const spaceLinks = (footerSections.space && footerSections.space.links) || [];
 
   const SocialIcon = ({ d }) => (
     <svg
@@ -1160,12 +1137,12 @@ const MerekaFooter = () => {
         <div className="footer-container">
           <a href={baseUrl || '/'} className="footer-logo-link">
             {logoUrl ? <img src={logoUrl} alt={variant.brand + ' logo'} className="footer-logo-img" /> : null}
-            <span className="footer-brand-name">mereka</span>
+            <span className="footer-brand-name">{(footerContent.brand && footerContent.brand.logoText) || 'mereka'}</span>
           </a>
           <div className="footer-social-icons">
             {socialLinks.map(s => (
               <a key={s.name} href={s.url} target="_blank" rel="noopener noreferrer" aria-label={s.name} className="footer-social-link">
-                <SocialIcon d={s.icon} />
+                <SocialIcon d={s.iconPath} />
               </a>
             ))}
           </div>
@@ -1180,8 +1157,8 @@ const MerekaFooter = () => {
               <a key={l.label} href={l.url} target="_blank" rel="noopener noreferrer">{l.label}</a>
             ))}
           </nav>
-          <a href={'https://wa.me/' + variant.whatsapp} target="_blank" rel="noopener noreferrer" className="footer-whatsapp-btn">
-            <WhatsAppIcon /> Contact Us
+          <a href={'https://wa.me/' + (variant.whatsapp || footerSupport.whatsapp || '601135271981')} target="_blank" rel="noopener noreferrer" className="footer-whatsapp-btn">
+            <WhatsAppIcon /> {footerSupport.contactCtaLabel || 'Contact Us'}
           </a>
         </div>
       </div>
@@ -1190,34 +1167,35 @@ const MerekaFooter = () => {
       <div className="footer-body">
         <div className="footer-container footer-columns">
           <div className="footer-column">
-            <h4 className="footer-column-title">Corporate</h4>
+            <h4 className="footer-column-title">{(footerSections.corporate && footerSections.corporate.title) || 'Corporate'}</h4>
             <ul>{corporateLinks.map(l => <li key={l.label}><a href={l.url} target="_blank" rel="noopener noreferrer">{l.label}</a></li>)}</ul>
           </div>
           <div className="footer-column footer-column--wide">
-            <h4 className="footer-column-title">Marketplace</h4>
+            <h4 className="footer-column-title">{footerMarketplace.title || 'Marketplace'}</h4>
             <div className="footer-marketplace-grid">
               <div>
-                <p className="footer-sub-heading">USERS</p>
+                <p className="footer-sub-heading">{footerMarketplace.usersHeading || 'USERS'}</p>
                 <ul>{marketplaceUserLinks.map(l => <li key={l.label}><a href={l.url} target="_blank" rel="noopener noreferrer">{l.label}</a></li>)}</ul>
               </div>
               <div>
-                <p className="footer-sub-heading">BUSINESS</p>
+                <p className="footer-sub-heading">{footerMarketplace.businessHeading || 'BUSINESS'}</p>
                 <ul>{marketplaceBusinessLinks.map(l => <li key={l.label}><a href={l.url} target="_blank" rel="noopener noreferrer">{l.label}</a></li>)}</ul>
-                <p className="footer-app-label">Manage your bookings</p>
+                <p className="footer-app-label">{footerMarketplace.appLabel || 'Manage your bookings'}</p>
                 <div className="footer-app-badges">
-                  <a href="https://apps.apple.com/id/app/mereka-hubs/id6473277964" target="_blank" rel="noopener noreferrer" className="footer-badge">App Store</a>
-                  <a href="https://play.google.com/store/apps/details?id=io.mereka.hubs" target="_blank" rel="noopener noreferrer" className="footer-badge">Google Play</a>
+                  {(footerMarketplace.appBadges || []).map(badge => (
+                    <a key={badge.label} href={badge.url} target="_blank" rel="noopener noreferrer" className="footer-badge">{badge.label}</a>
+                  ))}
                 </div>
-                <a href="https://mereka.io/welcome/hub" target="_blank" rel="noopener noreferrer" className="footer-cta-btn">Become a Hub</a>
+                <a href={(footerMarketplace.cta && footerMarketplace.cta.url) || 'https://mereka.io/welcome/hub'} target="_blank" rel="noopener noreferrer" className="footer-cta-btn">{(footerMarketplace.cta && footerMarketplace.cta.label) || 'Become a Hub'}</a>
               </div>
             </div>
           </div>
           <div className="footer-column">
-            <h4 className="footer-column-title">Academy</h4>
+            <h4 className="footer-column-title">{(footerSections.academy && footerSections.academy.title) || 'Academy'}</h4>
             <ul>{academyLinks.map(l => <li key={l.label}><a href={l.url} target="_blank" rel="noopener noreferrer">{l.label}</a></li>)}</ul>
           </div>
           <div className="footer-column">
-            <h4 className="footer-column-title">Space</h4>
+            <h4 className="footer-column-title">{(footerSections.space && footerSections.space.title) || 'Space'}</h4>
             <ul>{spaceLinks.map(l => <li key={l.label}><a href={l.url} target="_blank" rel="noopener noreferrer">{l.label}</a></li>)}</ul>
           </div>
         </div>
@@ -1227,9 +1205,9 @@ const MerekaFooter = () => {
       <div className="footer-legal">
         <div className="footer-container footer-legal-row">
           <span className="footer-copyright">&copy; {currentYear} {variant.copyrightHolder}</span>
-          <a href={variant.termsUrl} target="_blank" rel="noopener noreferrer">TERMS OF USE</a>
-          <a href={variant.privacyUrl} target="_blank" rel="noopener noreferrer">PRIVACY POLICY</a>
-          <a href={variant.cookiesUrl} target="_blank" rel="noopener noreferrer">COOKIES POLICY</a>
+          <a href={variant.termsUrl} target="_blank" rel="noopener noreferrer">{footerLegal.termsLabel || 'TERMS OF USE'}</a>
+          <a href={variant.privacyUrl} target="_blank" rel="noopener noreferrer">{footerLegal.privacyLabel || 'PRIVACY POLICY'}</a>
+          <a href={variant.cookiesUrl} target="_blank" rel="noopener noreferrer">{footerLegal.cookiesLabel || 'COOKIES POLICY'}</a>
         </div>
       </div>
     </footer>

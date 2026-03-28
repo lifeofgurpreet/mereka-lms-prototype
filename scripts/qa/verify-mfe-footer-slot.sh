@@ -13,6 +13,7 @@ PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 PLUGIN_BUNDLE=""
 PLUGIN="$PLUGIN_MAIN"
 PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
+FOOTER_PAYLOAD="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/mereka_footer.py"
 
 PASS=0
 FAIL=0
@@ -51,6 +52,10 @@ else
   echo "=== Results: $PASS PASS / $FAIL FAIL / $WARN WARN ==="
   exit 1
 fi
+
+uses_shared_footer_payload() {
+  grep -q 'MEREKA_PUBLIC_FOOTER' "$PLUGIN" && [ -f "$FOOTER_PAYLOAD" ]
+}
 
 # 2. MerekaFooter component defined in mfe-env-config patch
 if grep -q 'const MerekaFooter' "$PLUGIN"; then
@@ -119,6 +124,8 @@ fi
 # Critical links
 if grep -q 'corporate.mereka.io' "$PLUGIN"; then
   do_pass "Corporate links present"
+elif uses_shared_footer_payload && grep -q 'corporate.mereka.io' "$FOOTER_PAYLOAD"; then
+  do_pass "Corporate links present via shared footer payload"
 else
   do_fail "Corporate links missing"
 fi

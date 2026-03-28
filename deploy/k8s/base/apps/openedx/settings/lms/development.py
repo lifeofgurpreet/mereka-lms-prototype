@@ -7,6 +7,7 @@ import json
 import os
 
 from xmodule.modulestore.modulestore_settings import update_module_store_settings
+from .mereka_footer import build_mereka_public_footer
 
 # Mongodb connection parameters: simply modify `mongodb_parameters` to affect all connections to MongoDb.
 mongodb_parameters = {
@@ -533,6 +534,9 @@ ECOMMERCE_API_URL = ECOMMERCE_PUBLIC_URL_ROOT + "/api/v2"
 ORDER_HISTORY_MICROFRONTEND_URL = "http://apps.localhost:7296/orders/orders"
 MFE_CONFIG["ECOMMERCE_BASE_URL"] = ECOMMERCE_PUBLIC_URL_ROOT
 MFE_CONFIG["ORDER_HISTORY_URL"] = ORDER_HISTORY_MICROFRONTEND_URL
+
+MEREKA_PUBLIC_FOOTER = build_mereka_public_footer()
+MFE_CONFIG["MEREKA_PUBLIC_FOOTER"] = MEREKA_PUBLIC_FOOTER
 
 
 

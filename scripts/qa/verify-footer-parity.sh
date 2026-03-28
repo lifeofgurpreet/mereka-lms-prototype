@@ -72,6 +72,9 @@ CMS_FOOTER="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates/footer.h
 CMS_FOOTER_WIDGET="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates/widgets/footer.html"
 ENTERPRISE_ENV="$REPO_ROOT/deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js"
 ENTERPRISE_KUSTOMIZE="$REPO_ROOT/deploy/k8s/base/apps/enterprise/mfe/kustomization.yaml"
+FOOTER_HELPER="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/mereka_footer.py"
+LMS_PRODUCTION_SETTINGS="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/production.py"
+LMS_DEVELOPMENT_SETTINGS="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/development.py"
 
 if mereka_plugin_has_any "$REPO_ROOT"; then
   PLUGIN_BUNDLE="$(mktemp -t mereka-plugin-contract.XXXXXX)"
@@ -271,6 +274,12 @@ else
     fail "getMerekaVariant runtime resolver missing"
   fi
 
+  if grep -q "getMerekaPublicFooter" "$PLUGIN" && grep -q "config.MEREKA_PUBLIC_FOOTER" "$PLUGIN"; then
+    pass "MFE footer consumes shared MEREKA_PUBLIC_FOOTER content"
+  else
+    fail "MFE footer missing shared MEREKA_PUBLIC_FOOTER content consumption"
+  fi
+
   # Minimum 2 production domain entries (we expect 3)
   DOMAIN_COUNT=$(grep -c "'academyv2.mereka.io'\|'academy.biji-biji.com'\|'skillourfuture.academy.mereka.io'" "$PLUGIN" || true)
   if [[ "$DOMAIN_COUNT" -ge 2 ]]; then
@@ -311,6 +320,12 @@ else
     pass "LMS footer template references Mereka logo or footer CSS class"
   else
     warn "LMS footer template may be missing Mereka logo or mereka-footer CSS class"
+  fi
+
+  if grep -q "MEREKA_PUBLIC_FOOTER" "$LMS_FOOTER"; then
+    pass "LMS footer template renders shared MEREKA_PUBLIC_FOOTER content"
+  else
+    fail "LMS footer template missing shared MEREKA_PUBLIC_FOOTER content wiring"
   fi
 fi
 
@@ -639,6 +654,20 @@ if [[ -f "$LMS_FOOTER_TPL" ]]; then
     fail "LMS footer missing SiteConfiguration keys for support email / help URL"
   fi
 fi
+
+if [[ -f "$FOOTER_HELPER" ]]; then
+  pass "Shared footer helper exists: deploy/k8s/base/apps/openedx/settings/lms/mereka_footer.py"
+else
+  fail "Shared footer helper missing: deploy/k8s/base/apps/openedx/settings/lms/mereka_footer.py"
+fi
+
+for settings_file in "$LMS_PRODUCTION_SETTINGS" "$LMS_DEVELOPMENT_SETTINGS"; do
+  if [[ -f "$settings_file" ]] && grep -q "MFE_CONFIG\\[\"MEREKA_PUBLIC_FOOTER\"\\]" "$settings_file"; then
+    pass "${settings_file#$REPO_ROOT/} exports MEREKA_PUBLIC_FOOTER into MFE_CONFIG"
+  else
+    fail "${settings_file#$REPO_ROOT/} missing MEREKA_PUBLIC_FOOTER export into MFE_CONFIG"
+  fi
+done
 
 echo ""
 

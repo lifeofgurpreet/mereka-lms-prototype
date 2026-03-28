@@ -4,6 +4,7 @@ import os
 import sys
 import importlib
 from lms.envs.production import *
+from .mereka_footer import build_mereka_public_footer
 
 
 def _parse_sentry_rate(env_key, default=0.0):
@@ -962,6 +963,9 @@ MFE_CONFIG_API_URLS = {
     'orders': f"{MEREKA_MFE_BASE_URL}/orders",
     'payment': f"{MEREKA_MFE_BASE_URL}/payment",
 }
+
+MEREKA_PUBLIC_FOOTER = build_mereka_public_footer()
+MFE_CONFIG["MEREKA_PUBLIC_FOOTER"] = MEREKA_PUBLIC_FOOTER
 
 EDXNOTES_PUBLIC_API = f"{MEREKA_NOTES_BASE_URL}/api/v1"
 EDXNOTES_INTERNAL_API = "http://notes:8000/api/v1"
