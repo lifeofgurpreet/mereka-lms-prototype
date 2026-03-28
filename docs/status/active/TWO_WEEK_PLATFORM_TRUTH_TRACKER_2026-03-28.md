@@ -1,5 +1,5 @@
 # Two-Week Platform Truth Tracker
-_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-28T05:14:07Z • Status: active_
+_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-28T06:02:48Z • Status: active_
 
 This is the execution board for the next 14 days. It is intentionally cross-repo and cross-surface: app CI truth, infra promotion truth, live runtime truth, and frontend source-of-truth cleanup all belong here when they are still active and verifiable.
 
@@ -19,6 +19,7 @@ The goal is not to keep a long wish list. The goal is to keep the next two weeks
   - `#1162` `docs(status): refresh platform truth control point` merged `2026-03-28T05:09:15Z`
   - `#1157` `feat(footer): share public footer content source` merged `2026-03-28T04:48:23Z`
   - `#1161` `docs(status): refresh platform truth tracker` merged `2026-03-28T04:51:25Z`
+  - `#1160` `test(smoke): require both public MFE config surfaces` merged `2026-03-28T05:27:42Z`
   - `#1148` `test(runtime): add enterprise deep-route browser proof` merged `2026-03-28T01:03:07Z`
   - `#1149` `docs(status): add two-week platform truth tracker` merged `2026-03-28T01:13:14Z`
   - `#1150` `test(runtime): verify LMS and MFE config surfaces stay aligned` merged `2026-03-28T03:13:32Z`
@@ -35,16 +36,14 @@ The goal is not to keep a long wish list. The goal is to keep the next two weeks
   - `#2161` `feat(ci): prove impacted mereka-lms runtime realization` merged `2026-03-28T02:56:10Z`
   - `#2162` `fix(ci): harden settings ownership verifier` merged `2026-03-28T03:14:05Z`
 - Active issue stack:
-  - `#834` remains the parent epic for audit remediation and proof hardening
+  - `#834` is closed as the audit-remediation parent epic; the runtime palette follow-on moved to `#1164`
   - `#842` is closed by `#1148`
   - `#843` is closed by `#1153`
+  - `#1164` is the open successor issue for tenant runtime palette injection in the public MFE shell
 - Active app PR lanes:
   - `#1158` `docs(branding): align tenant runtime contract`
   - head: `ff25713d06bffad29f9f4ecee04f1091cfb2d58e`
   - current state: branch refreshed on top of current `main`; fresh CI wave is queued/in progress, no failing job
-  - `#1160` `test(smoke): require both public mfe config surfaces`
-  - head: `80f727f156bf3edd04ccbbf8973cda69ed7cdb09`
-  - current state: branch refreshed on top of current `main`; fresh CI wave is queued/in progress after superseding a stuck Python CodeQL initializer
 - Closed non-merge app lane:
   - `#1159` `docs(tenant-branding): align palette truth`
   - closed `2026-03-28T04:55:58Z`
@@ -89,14 +88,14 @@ The goal is not to keep a long wish list. The goal is to keep the next two weeks
 
 ## Current control point
 
-The system is no longer blocked by stale queue debt or unclear runner ownership. `#1157`, `#1161`, `#1162`, `#2163`, and `#2164` are merged, live LMS/apps MFE-config parity is repaired, `#842` and `#843` are closed, and the active queue is down to two app-repo rerun lanes: `#1158` and `#1160`.
+The system is no longer blocked by stale queue debt or unclear runner ownership. `#1157`, `#1160`, `#1161`, `#1162`, `#2163`, and `#2164` are merged, live LMS/apps MFE-config parity is repaired, `#834`, `#842`, and `#843` are closed, and the active queue is down to one app-repo rerun lane: `#1158`.
 
 The remaining risk is concentrated in four places:
 
 1. land `#1158` so the tenant-branding docs/schema/verifier stop over-claiming current runtime behavior
-2. land `#1160` so the browser smoke lane hard-requires both public MFE-config surfaces
+2. keep the now-merged `#1160` browser smoke lane represented truthfully in the control-plane docs
 3. keep the now-merged `#2164` dev-promotion artifact lane represented truthfully in the control-plane docs
-4. leave the already-closed MFE-config and enterprise/frontend ownership lanes retired unless fresh evidence reopens them
+4. keep `#834` closed as the audit-remediation parent epic and leave `#1164` as the explicit successor for runtime palette injection
 
 ## Two-week execution board
 
@@ -166,7 +165,7 @@ Notes:
 - This lane does not implement the runtime injector yet.
 - Its purpose is to stop lying about what current runtime tenant theming does.
 
-### T-03 — Finish the remaining app proof lanes before opening any new runtime injector
+### T-03 — Keep the repaired MFE-config parity explicit and verifier-backed
 
 Priority: `P0`
 Owner surfaces: `mereka-lms`
@@ -174,15 +173,15 @@ Owner surfaces: `mereka-lms`
 Current truth:
 
 - `#1158` is still the contract-truth first move.
-- `#1160` is still open to harden the browser smoke lane on both public MFE-config surfaces.
+- `#1160` is merged and now part of the maintained proof baseline.
 - `#2164` is merged and already hardens dev promotion evidence.
-- current governed runtime still does not prove live per-tenant `palette.*` -> `--mereka-color-*` injection.
+- current governed runtime still does not prove live per-tenant `palette.*` -> `--mereka-color-*` injection; that future implementation is tracked in `#1164`.
 
 Done when:
 
-- `#1158` and `#1160` are both merged
-- the tracker reflects that narrower queue truth
-- only then is a new runtime injector lane worth opening
+- `#1158` is merged
+- the tracker reflects the repaired MFE-config parity baseline truth
+- the successor runtime injector lane stays explicit in `#1164`
 
 Verification commands:
 
@@ -197,7 +196,7 @@ Notes:
 
 - Do not claim the runtime contract is real until the runtime path exists.
 
-### T-04 — Keep the repaired MFE-config parity and promotion proof explicit
+### T-04 — Keep the successor runtime palette lane explicit
 
 Priority: `P1`
 Owner surfaces: split between `mereka-lms` and `bbi-infrastructure`
@@ -206,16 +205,14 @@ Current truth:
 
 - live dev and staging LMS/apps MFE-config parity is repaired
 - current `main` already checks both public surfaces in `scripts/qa/verify-mfe-config-contract.sh`
-- `#1160` is now open to tighten the residual Playwright smoke gap from `apps || LMS` to `apps && LMS`
 - `#2163` is merged and emits machine-readable runtime realization JSON
 - `#2164` is merged and emits the dev-promotion proof artifact
 - the broader promotion boundary is materially stronger after `#2155`, `#2157`, `#2161`, `#2162`, and `#2163`
-- the remaining value is not another redesign; it is keeping the proof chain explicit on the next real promotion
+- the remaining value is not another redesign; it is keeping the proof chain explicit on the next real promotion and using `#1164` for the runtime palette follow-on
 
 Done when:
 
 - the repaired MFE-config lane stays guarded without being misclassified as still broken
-- `#1160` merges or its exact scope is absorbed elsewhere without losing the `both public surfaces must pass` guarantee
 - the tracker and follow-on proof notes treat `#2164` as merged reality rather than an open lane
 - the next promotion proof bundle names each step explicitly:
   - built digest
@@ -250,8 +247,10 @@ Current truth:
 - `#1148` is merged and `#842` is closed.
 - `#843` is closed.
 - `#1157` is merged.
+- `#1160` is merged.
 - `#1162` is merged.
 - `#2164` is merged.
+- `#834` is closed as the audit-remediation parent epic, with runtime palette follow-on tracked in `#1164`.
 - the MFE-config parity lane is repaired and verifier-backed on current `main`.
 - the tracker in `main` drifts quickly because the queue is now small and merges are happening faster than doc-only refresh cadence.
 
@@ -280,7 +279,7 @@ These are real, but they should not displace the two-week critical path above.
 
 | Workstream | Why it matters | Why it is not first |
 |---|---|---|
-| Tenant CSS runtime injection | multi-tenant palette/runtime token layering is still incomplete | the current tenant/runtime path works well enough for one active tenant family, and footer duplication is the clearer immediate ownership repair |
+| Tenant runtime palette injection `#1164` | multi-tenant palette/runtime token layering is still incomplete | the current tenant/runtime path works well enough for one active tenant family, and the implementation now has a focused follow-on lane instead of a vague umbrella |
 | Full retirement of `head-extra.html` | removes an emergency override surface entirely | requires a separate bounded cleanup lane after the already-closed ownership/docs work |
 | More aggressive generated-artifact automation | reduces future catalog/inventory drift friction | useful, but the current blocker is one concrete workflow repair and two post-merge proof tails |
 | Staging/prod post-promotion runtime packs | makes release proof even more machine-checkable | dev/runtime truth and the next governed promotion path should be stabilized first |
@@ -299,6 +298,7 @@ These are real, but they should not displace the two-week critical path above.
 - the `#2161` false-negative is closed by `#2162` and its merge-commit follow-through is clean
 - `#1157` is the active footer-source lane and is described as a single-source repair rather than a vague drift warning
 - `#1158` is explicitly tracked as the contract-truth first move for tenant runtime theming
-- the next tenant palette/runtime lane is described from implementation evidence, not aspiration
+- `#1164` is the explicit successor for tenant runtime palette implementation
+- `#834` is closed as the audit-remediation parent epic or explicitly re-scoped to exclude the runtime palette follow-on
 - `#843` remains closed unless new frontend ownership drift appears
 - the active trackers still match the actual repo, infra, and runtime state

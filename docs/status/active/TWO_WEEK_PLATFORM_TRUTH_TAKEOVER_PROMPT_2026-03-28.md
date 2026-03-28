@@ -19,6 +19,10 @@ If you need the closed proof lanes for context, also read:
 10. `https://github.com/Biji-Biji-Initiative/mereka-lms/issues/843`
 11. `https://github.com/Biji-Biji-Initiative/mereka-lms/issues/834`
 
+If you need the successor implementation lane context, also read:
+
+12. `https://github.com/Biji-Biji-Initiative/mereka-lms/issues/1164`
+
 ## Mission
 
 Keep the next two weeks of platform work truthful across all three planes:
@@ -31,12 +35,12 @@ The objective is not "keep the queue busy." The objective is "finish the remaini
 
 ## Current control point
 
-The queue is no longer the problem. `#1157`, `#1161`, `#1162`, and infra `#2164` are merged, live LMS/apps MFE-config parity is repaired, and `#842` / `#843` are closed.
+The queue is no longer the problem. `#1157`, `#1158`, `#1160`, `#1161`, `#1162`, and infra `#2164` are merged, live LMS/apps MFE-config parity is repaired, `#842` / `#843` are closed, and `#834` is closed with successor work in `#1164`.
 
 The system is currently concentrated around:
 
 1. landing `#1158` as the tenant-branding contract-truth cleanup
-2. landing `#1160` so the browser smoke lane hard-requires both public MFE-config surfaces
+2. keep `#834` documented as closed truthfully instead of keeping the audit epic open as a catch-all
 3. keeping merged infra `#2164` represented truthfully as part of the promotion-proof chain
 4. keeping the repaired MFE-config parity explicit and verifier-backed
 5. leaving the closed enterprise/frontend ownership lanes retired unless fresh evidence reopens them
@@ -44,9 +48,7 @@ The system is currently concentrated around:
 Use the clean clones only:
 
 - `/tmp/mereka-tenant-runtime-contract` for the tenant-branding runtime-contract lane on `#1158`
-- `/tmp/mereka-mfe-config-smoke` for the smaller dual-surface smoke-proof lane on `#1160`
-- `/tmp/bbi-promotion-proof-bundle` for infra proof lane `#2164`
-- `/tmp/mereka-two-week-tracker` for tracker/takeover doc follow-ups
+- `/tmp/mereka-two-week-tracker` for tracker/closeout doc follow-ups
 
 ## Immediate first task
 
@@ -55,8 +57,8 @@ Start with `T-01` from the tracker unless fresh evidence proves another lane is 
 Current verified first move:
 
 1. pick up `#1158` in `/tmp/mereka-tenant-runtime-contract` so the tenant-branding docs/schema/verifier stop over-claiming runtime CSS token injection
-2. land `#1160` in `/tmp/mereka-mfe-config-smoke` so the browser smoke lane requires both public MFE-config surfaces
-3. keep the tracker aligned in `/tmp/mereka-two-week-tracker` with the current control point
+2. keep `/tmp/mereka-two-week-tracker` aligned with the current control point and document `#834` as closed truthfully
+3. treat `#1160` as merged proof-chain reality, not an active queue item
 4. treat `#2164` as merged proof-chain reality, not an active queue item
 5. treat `#1159` as closed unless a narrow, deliberate follow-on is still needed after `#1158`
 
@@ -69,7 +71,7 @@ Current verified first move:
 - Do not misclassify the `Post-Deploy E2E Gate` failure as an app-runtime defect; the proven root cause is workflow checkout ordering and the fix is already merged in `#1154`.
 - Do not widen the now-merged `#1148` or `#1153` lanes into general cleanup.
 - Do not reopen `#1157` or `#1159` casually; both are no longer active merge lanes.
-- Do not jump straight to a runtime injector before `#1158` and `#1160` are settled.
+- Do not jump straight to the runtime palette successor before `#1158` is settled and `#834` is closed.
 - Do not leave the tracker ahead of reality.
 
 ## Required proof discipline
@@ -91,7 +93,7 @@ Every handoff note must include:
 ## Working order for the next agent
 
 1. `T-01` land `#1158`
-2. `T-02` land `#1160`
+2. `T-02` keep `#834` documented as closed and keep `#1164` explicit as the successor lane
 3. `T-03` keep merged infra `#2164` explicit in the promotion proof chain
 4. `T-04` keep the repaired MFE-config parity explicit and verifier-backed
 5. `T-05` keep the tracker and retired lanes truthful
@@ -99,7 +101,7 @@ Every handoff note must include:
 ## Minimum acceptable success for this program handoff
 
 - `#1158` is merged and removes contradictory tenant-branding runtime claims before injector work starts
-- `#1160` preserves the repaired LMS/apps MFE-config parity in the browser smoke lane, not only the dedicated contract verifier
+- the `#1160` merge preserves the repaired LMS/apps MFE-config parity in the browser smoke lane, not only the dedicated contract verifier
 - infra `#2164` remains represented as merged proof-chain truth
 - dev and staging LMS/apps MFE-config surfaces stay aligned for the governed learner/account/profile/login keys
 - the `#2161` false-negative is closed by `#2162`, and `#2163` / `#2164` extend the proof chain cleanly
