@@ -160,6 +160,11 @@ for domain in "${DOMAINS[@]}"; do
   if [[ -n "$CONFIG_JSON" ]]; then
     SITE_NAME="$(echo "$CONFIG_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin).get('SITE_NAME','MISSING'))" 2>/dev/null || echo "PARSE_ERROR")"
     LOGO_URL="$(echo "$CONFIG_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin).get('LOGO_URL','MISSING'))" 2>/dev/null || echo "PARSE_ERROR")"
+    PRIMARY_COLOR="$(echo "$CONFIG_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin).get('PRIMARY_COLOR','MISSING'))" 2>/dev/null || echo "PARSE_ERROR")"
+    SECONDARY_COLOR="$(echo "$CONFIG_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin).get('SECONDARY_COLOR','MISSING'))" 2>/dev/null || echo "PARSE_ERROR")"
+    ACCENT_COLOR="$(echo "$CONFIG_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin).get('ACCENT_COLOR','MISSING'))" 2>/dev/null || echo "PARSE_ERROR")"
+    TEXT_ON_PRIMARY="$(echo "$CONFIG_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin).get('TEXT_ON_PRIMARY','MISSING'))" 2>/dev/null || echo "PARSE_ERROR")"
+    palette_missing=()
 
     if [[ "$SITE_NAME" != "MISSING" && "$SITE_NAME" != "PARSE_ERROR" ]]; then
       pass "$domain MFE config SITE_NAME='$SITE_NAME'"
@@ -173,6 +178,19 @@ for domain in "${DOMAINS[@]}"; do
       # This is expected — MFE loads logos via authenticated API calls
     else
       warn "$domain MFE config LOGO_URL missing or null"
+    fi
+
+    for palette_key in PRIMARY_COLOR SECONDARY_COLOR ACCENT_COLOR TEXT_ON_PRIMARY; do
+      palette_value="${!palette_key}"
+      if [[ "$palette_value" == "MISSING" || "$palette_value" == "PARSE_ERROR" || "$palette_value" == "None" || -z "$palette_value" ]]; then
+        palette_missing+=("$palette_key")
+      fi
+    done
+
+    if [[ "${#palette_missing[@]}" -eq 0 ]]; then
+      pass "$domain MFE config palette keys present (PRIMARY_COLOR, SECONDARY_COLOR, ACCENT_COLOR, TEXT_ON_PRIMARY)"
+    else
+      fail "$domain MFE config palette keys missing: ${palette_missing[*]}"
     fi
   else
     fail "$domain MFE config API unreachable"

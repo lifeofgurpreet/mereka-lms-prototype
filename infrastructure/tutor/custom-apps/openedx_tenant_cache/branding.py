@@ -58,6 +58,8 @@ def _load_branding_from_db(enterprise_uuid):
         'SITE_NAME': getattr(settings, 'DEFAULT_ORG_DISPLAY_NAME', 'Mereka Academy'),
         'PRIMARY_COLOR': getattr(settings, 'DEFAULT_ORG_PRIMARY_COLOR', '#1a73e8'),
         'SECONDARY_COLOR': getattr(settings, 'DEFAULT_ORG_ACCENT_COLOR', '#4285f4'),
+        'ACCENT_COLOR': getattr(settings, 'DEFAULT_ORG_ACCENT_COLOR', '#295cad'),
+        'TEXT_ON_PRIMARY': '#ffffff',
         'FOOTER_TEXT': '',
     }
 
@@ -81,6 +83,8 @@ def _load_branding_from_db(enterprise_uuid):
                 defaults['SITE_NAME'] = mfe.get('SITE_NAME', mapping.name) or defaults['SITE_NAME']
                 defaults['PRIMARY_COLOR'] = merged.get('primary_color', '') or defaults['PRIMARY_COLOR']
                 defaults['SECONDARY_COLOR'] = merged.get('secondary_color', '') or defaults['SECONDARY_COLOR']
+                defaults['ACCENT_COLOR'] = mfe.get('ACCENT_COLOR', merged.get('accent_color', '')) or defaults['ACCENT_COLOR']
+                defaults['TEXT_ON_PRIMARY'] = mfe.get('TEXT_ON_PRIMARY', merged.get('text_on_primary_color', '')) or defaults['TEXT_ON_PRIMARY']
                 defaults['FOOTER_TEXT'] = merged.get('footer_text', '') or defaults['FOOTER_TEXT']
 
                 # Include any additional MFE config

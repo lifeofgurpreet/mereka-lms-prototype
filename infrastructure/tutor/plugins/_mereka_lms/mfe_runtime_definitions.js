@@ -123,6 +123,52 @@ const getMerekaPublicFooter = (config) => {
   };
 };
 
+const normalizeTenantPaletteValue = (value) => {
+  return typeof value === 'string' ? value.trim() : '';
+};
+
+const applyMerekaTenantPaletteBridge = () => {
+  if (typeof document === 'undefined' || typeof getConfig !== 'function') {
+    return;
+  }
+
+  const rootStyle = document.documentElement && document.documentElement.style;
+  if (!rootStyle || typeof rootStyle.setProperty !== 'function') {
+    return;
+  }
+
+  const config = getConfig() || {};
+  const primary = normalizeTenantPaletteValue(config.PRIMARY_COLOR);
+  const secondary = normalizeTenantPaletteValue(config.SECONDARY_COLOR);
+  const accent = normalizeTenantPaletteValue(config.ACCENT_COLOR);
+  const textOnPrimary = normalizeTenantPaletteValue(config.TEXT_ON_PRIMARY);
+
+  const paletteBridge = {
+    '--tenant-color-primary': primary,
+    '--tenant-color-secondary': secondary,
+    '--tenant-color-accent': accent,
+    '--tenant-color-text-on-primary': textOnPrimary,
+    '--mereka-color-magenta': primary,
+    '--mereka-color-teal': secondary,
+    '--mereka-color-blue': accent,
+    '--mereka-color-info': accent,
+    '--pgn-color-primary-base': primary,
+    '--pgn-color-secondary-base': secondary,
+    '--pgn-color-info-base': accent,
+    '--pgn-color-brand-base': primary,
+    '--pgn-link-color': primary,
+    '--pgn-link-hover-color': secondary,
+  };
+
+  for (const [propertyName, value] of Object.entries(paletteBridge)) {
+    if (value) {
+      rootStyle.setProperty(propertyName, value);
+    }
+  }
+};
+
+applyMerekaTenantPaletteBridge();
+
 const getLearnerHomeHref = () => '/learner-dashboard/';
 
 const getCatalogHref = (baseUrl) => {

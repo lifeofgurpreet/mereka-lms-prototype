@@ -106,7 +106,65 @@ function getExpectedThemeCss(mfeBaseUrl: string): { brandCore: string; brandLigh
   };
 }
 
+function getRuntimeThemeReferences(cssPath: string): string[] {
+  const normalizedPath = cssPath.startsWith('/') ? cssPath : `/${cssPath}`;
+  const references = new Set([normalizedPath]);
+  if (normalizedPath.startsWith('/theme/')) {
+    references.add(normalizedPath.replace(/^\/theme\//, '../theme/'));
+  }
+  return [...references];
+}
+
+function htmlContainsAnyThemeReference(html: string, cssPath: string): boolean {
+  return getRuntimeThemeReferences(cssPath).some((reference) => html.includes(reference));
+}
+
 type ThemeContractMode = 'runtime-theme-urls' | 'embedded-theme-files';
+
+type TenantPalette = {
+  primary: string;
+  secondary: string;
+  accent: string;
+  textOnPrimary: string;
+};
+
+type TenantPaletteAliasMap = {
+  [K in keyof typeof TENANT_PALETTE_CSS_VARIABLES]: keyof TenantPalette;
+};
+
+const TENANT_PALETTE_CSS_VARIABLES = {
+  primary: '--tenant-color-primary',
+  secondary: '--tenant-color-secondary',
+  accent: '--tenant-color-accent',
+  textOnPrimary: '--tenant-color-text-on-primary',
+  merekaMagenta: '--mereka-color-magenta',
+  merekaTeal: '--mereka-color-teal',
+  merekaBlue: '--mereka-color-blue',
+  merekaInfo: '--mereka-color-info',
+  pgnPrimaryBase: '--pgn-color-primary-base',
+  pgnSecondaryBase: '--pgn-color-secondary-base',
+  pgnInfoBase: '--pgn-color-info-base',
+  pgnBrandBase: '--pgn-color-brand-base',
+  pgnLinkColor: '--pgn-link-color',
+  pgnLinkHoverColor: '--pgn-link-hover-color',
+} as const;
+
+const TENANT_PALETTE_ALIAS_SOURCE: TenantPaletteAliasMap = {
+  primary: 'primary',
+  secondary: 'secondary',
+  accent: 'accent',
+  textOnPrimary: 'textOnPrimary',
+  merekaMagenta: 'primary',
+  merekaTeal: 'secondary',
+  merekaBlue: 'accent',
+  merekaInfo: 'accent',
+  pgnPrimaryBase: 'primary',
+  pgnSecondaryBase: 'secondary',
+  pgnInfoBase: 'accent',
+  pgnBrandBase: 'primary',
+  pgnLinkColor: 'primary',
+  pgnLinkHoverColor: 'secondary',
+};
 
 const BRANDING_MARKER_SELECTORS = {
   authnBranding: '.mereka-authn-login-branding',
@@ -164,9 +222,9 @@ async function detectThemeContractMode(page: Page, mfeBaseUrl: string): Promise<
   const authnShellStatus = authnShellResponse.status();
   if (authnShellStatus >= 200 && authnShellStatus < 500) {
     const authnShellHtml = await authnShellResponse.text();
-    const runtimeThemeFromHtml = authnShellHtml.includes('/theme/core.min.css')
-      && authnShellHtml.includes(expectedThemeCss.brandCore)
-      && authnShellHtml.includes(expectedThemeCss.brandLight);
+    const runtimeThemeFromHtml = htmlContainsAnyThemeReference(authnShellHtml, '/theme/core.min.css')
+      && htmlContainsAnyThemeReference(authnShellHtml, expectedThemeCss.brandCore)
+      && htmlContainsAnyThemeReference(authnShellHtml, expectedThemeCss.brandLight);
     if (runtimeThemeFromHtml) {
       for (const cssPath of ['/theme/core.min.css', expectedThemeCss.brandCore, expectedThemeCss.brandLight]) {
         const cssResponse = await page.request.get(`${mfeBaseUrl}${cssPath}`);
@@ -229,6 +287,45 @@ async function detectThemeContractMode(page: Page, mfeBaseUrl: string): Promise<
   return cachedThemeMode;
 }
 
+function normalizePaletteValue(value: unknown): string {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+async function expectTenantPaletteBridge(page: Page, mfeBaseUrl: string): Promise<void> {
+  const configResponse = await page.request.get(`${mfeBaseUrl}/api/mfe_config/v1`, { timeout: 15000 });
+  expect(configResponse.status()).toBeGreaterThanOrEqual(200);
+  expect(configResponse.status()).toBeLessThan(500);
+
+  const configPayload = await configResponse.json().catch(() => ({} as Record<string, unknown>));
+  const expectedPalette: TenantPalette = {
+    primary: normalizePaletteValue(configPayload.PRIMARY_COLOR),
+    secondary: normalizePaletteValue(configPayload.SECONDARY_COLOR),
+    accent: normalizePaletteValue(configPayload.ACCENT_COLOR),
+    textOnPrimary: normalizePaletteValue(configPayload.TEXT_ON_PRIMARY),
+  };
+
+  for (const [key, value] of Object.entries(expectedPalette)) {
+    expect(value, `Expected ${key} palette value in ${mfeBaseUrl}/api/mfe_config/v1`).toBeTruthy();
+  }
+
+  const actualPalette = await page.evaluate((cssVariables) => {
+    const rootStyle = getComputedStyle(document.documentElement);
+    return Object.fromEntries(
+      Object.entries(cssVariables).map(([key, cssVariable]) => [key, rootStyle.getPropertyValue(cssVariable).trim()]),
+    );
+  }, TENANT_PALETTE_CSS_VARIABLES);
+
+  for (const [key, cssVariable] of Object.entries(TENANT_PALETTE_CSS_VARIABLES) as Array<
+    [keyof typeof TENANT_PALETTE_CSS_VARIABLES, string]
+  >) {
+    const expectedValue = expectedPalette[TENANT_PALETTE_ALIAS_SOURCE[key]];
+    expect(
+      actualPalette[key],
+      `Expected ${key} (${cssVariable}) on ${mfeBaseUrl} to equal ${expectedValue}; got ${actualPalette[key]}`,
+    ).toBe(expectedValue);
+  }
+}
+
 test.describe('Branding smoke', () => {
   for (const route of MFE_ROUTES) {
     test(`theme assets + token bridge present on ${route.label}`, async ({ page, baseURL }, testInfo) => {
@@ -251,11 +348,13 @@ test.describe('Branding smoke', () => {
         expect(html).toMatch(/paragon-theme-core\.[a-z0-9]+\.css/i);
         expect(html).toMatch(/brand-theme-core\.[a-z0-9]+\.css/i);
       } else {
-        const expectedThemeCss = getExpectedThemeCss(mfeBaseUrl);
-        expect(html).toContain('/theme/core.min.css');
-        expect(html).toContain(expectedThemeCss.brandCore);
-        expect(html).toContain(expectedThemeCss.brandLight);
-      }
+      const expectedThemeCss = getExpectedThemeCss(mfeBaseUrl);
+      expect(htmlContainsAnyThemeReference(html, '/theme/core.min.css')).toBeTruthy();
+      expect(htmlContainsAnyThemeReference(html, expectedThemeCss.brandCore)).toBeTruthy();
+      expect(htmlContainsAnyThemeReference(html, expectedThemeCss.brandLight)).toBeTruthy();
+    }
+
+      await expectTenantPaletteBridge(page, mfeBaseUrl);
 
       let markerCounts = await getBrandingMarkerCounts(page);
       const currentUrl = page.url();
