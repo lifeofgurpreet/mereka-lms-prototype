@@ -22,6 +22,7 @@ scripts/infra/normalize-mysql-secrets.sh
 scripts/infra/provision-admin-api-key.sh
 scripts/infra/provision-mysql-app-dbs.sh
 scripts/infra/fix-mfe-refresh-endpoint-site-config.sh
+scripts/infra/prepare-tutor-build-context-ci.sh
 scripts/infra/prune-gcp-snapshots.sh
 scripts/infra/purge-frontend-theme-cache.sh
 scripts/infra/release-openedx-gitops.sh

@@ -89,14 +89,19 @@ classify_path() {
     infrastructure/tutor/plugins/mfe_oauth_fix.py|\
     infrastructure/tutor/plugins/_mereka_lms/openedx_dockerfile.py|\
     infrastructure/tutor/plugins/_mereka_lms/lms_settings.py|\
-    infrastructure/tutor/plugins/_mereka_lms/cms_settings.py)
+    infrastructure/tutor/plugins/_mereka_lms/cms_settings.py|\
+    scripts/infra/build-openedx-image.sh|\
+    scripts/qa/verify-openedx-image-branding.sh)
       mark_openedx "$path"
       ;;
     infrastructure/tutor/themes/mereka/mfe/*|\
     infrastructure/tutor/plugins/mereka_lms_mfe_slots.py|\
     infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py|\
     infrastructure/tutor/plugins/_mereka_lms/mfe_runtime.py|\
-    infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js)
+    infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js|\
+    scripts/infra/build-mfe-image.sh|\
+    scripts/qa/verify-mfe-image-branding.sh|\
+    scripts/qa/verify-mfe-runtime-contract.sh)
       mark_mfe "$path"
       ;;
     *)

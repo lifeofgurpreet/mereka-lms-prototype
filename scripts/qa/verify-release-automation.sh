@@ -279,7 +279,9 @@ if [[ -f "${RELEASE_SCRIPT}" ]]; then
     fail "release-openedx-gitops.sh missing CI explicit --target-env guard"
   fi
 
-  if grep -q 'CI production apply requires both --openedx-digest and --mfe-digest' "${RELEASE_SCRIPT}" 2>/dev/null; then
+  if grep -q -- '--require-digests requires digests for every targeted image\.' "${RELEASE_SCRIPT}" 2>/dev/null \
+    || grep -q 'CI production apply requires both --openedx-digest and --mfe-digest' "${RELEASE_SCRIPT}" 2>/dev/null \
+    || grep -q 'CI production apply requires digests for every targeted image\.' "${RELEASE_SCRIPT}" 2>/dev/null; then
     pass "release-openedx-gitops.sh guards CI production digest"
   else
     fail "release-openedx-gitops.sh missing CI production digest safety gate"

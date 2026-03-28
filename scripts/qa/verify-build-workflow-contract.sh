@@ -15,6 +15,7 @@ RELEASE_BUNDLE_BLOCK="$(sed -n '/^  release-bundle:/,/^  update-gitops:/p' "$BUI
 UPDATE_GITOPS_BLOCK="$(sed -n '/^  update-gitops:/,$p' "$BUILD_WF")"
 OPENEDX_CACHE_HEALTH_BLOCK="$(sed -n '/Verify OpenEdX build cache health/,/Generate image metadata/p' "$BUILD_WF")"
 RESOLVE_SCOPE_BLOCK="$(sed -n '/^  resolve-build-scope:/,/^  lint:/p' "$BUILD_WF")"
+PREP_BLOCK="$(sed -n '/^  prepare-build-context:/,/^  build-openedx:/p' "$BUILD_WF")"
 BUILD_OPENEDX_BLOCK="$(sed -n '/^  build-openedx:/,/^  build-mfe:/p' "$BUILD_WF")"
 BUILD_MFE_BLOCK="$(sed -n '/^  build-mfe:/,/^  scan-openedx-image:/p' "$BUILD_WF")"
 SCAN_OPENEDX_BLOCK="$(sed -n '/^  scan-openedx-image:/,/^  scan-mfe-image:/p' "$BUILD_WF")"
@@ -119,6 +120,9 @@ required_trigger_paths=(
   "infrastructure/tutor/brand-*/**"
   "assets/branding/**"
   "scripts/infra/prepare-tutor-build-context.sh"
+  "scripts/infra/prepare-tutor-build-context-ci.sh"
+  "infrastructure/tutor/apply-patches.sh"
+  "infrastructure/tutor/patches/**"
   "scripts/infra/resolve-build-scope.sh"
   "scripts/infra/install-cosign.sh"
   "scripts/infra/generate-build-provenance.sh"
@@ -160,16 +164,22 @@ else
   fail "build-mfe-image helper missing or not executable"
 fi
 
+if [[ -x "$REPO_ROOT/scripts/infra/prepare-tutor-build-context.sh" ]]; then
+  pass "prepare-tutor-build-context helper exists"
+else
+  fail "prepare-tutor-build-context helper missing or not executable"
+fi
+
+if [[ -x "$REPO_ROOT/scripts/infra/prepare-tutor-build-context-ci.sh" ]]; then
+  pass "prepare-tutor-build-context-ci helper exists"
+else
+  fail "prepare-tutor-build-context-ci helper missing or not executable"
+fi
+
 if [[ -x "$REPO_ROOT/scripts/qa/verify-openedx-image-branding.sh" ]]; then
   pass "verify-openedx-image-branding helper exists"
 else
   fail "verify-openedx-image-branding helper missing or not executable"
-fi
-
-if [[ -f "$REPO_ROOT/scripts/infra/prepare-tutor-build-context.sh" ]]; then
-  pass "prepare-tutor-build-context helper exists"
-else
-  fail "prepare-tutor-build-context helper missing"
 fi
 
 if [[ "$RESOLVE_SCOPE_BLOCK" == *"./scripts/infra/resolve-build-scope.sh"* ]]; then
@@ -184,34 +194,76 @@ else
   fail "build-scope resolver missing fetch-depth: 0"
 fi
 
-if grep -q "needs.resolve-build-scope.outputs.build_openedx == 'true'" "$BUILD_WF"; then
+if [[ "$BUILD_OPENEDX_BLOCK" == *"needs.resolve-build-scope.outputs.build_openedx == 'true'"* ]]; then
   pass "build-openedx job is gated by resolved build scope"
 else
   fail "build-openedx job missing resolved build-scope gate"
 fi
 
-if grep -q "needs.resolve-build-scope.outputs.build_mfe == 'true'" "$BUILD_WF"; then
+if [[ "$BUILD_MFE_BLOCK" == *"needs.resolve-build-scope.outputs.build_mfe == 'true'"* ]]; then
   pass "build-mfe job is gated by resolved build scope"
 else
   fail "build-mfe job missing resolved build-scope gate"
 fi
 
-if grep -q './scripts/infra/prepare-tutor-build-context.sh --target openedx' "$BUILD_WF"; then
-  pass "build-openedx job uses canonical target-aware build-context prep"
+if [[ "$PREP_BLOCK" == *'runs-on: mereka-k8s-runners'* && "$PREP_BLOCK" == *'./scripts/infra/prepare-tutor-build-context-ci.sh --target "${{ steps.prep-target.outputs.target }}"'* ]]; then
+  pass "prepare-build-context job runs canonical prep on standard runners"
 else
-  fail "build-openedx job missing canonical target-aware build-context prep"
+  fail "prepare-build-context job missing canonical prep contract"
 fi
 
-if grep -q './scripts/infra/prepare-tutor-build-context.sh --target mfe' "$BUILD_WF"; then
-  pass "build-mfe job uses canonical target-aware build-context prep"
+if [[ "$PREP_BLOCK" == *'target=all'* && "$PREP_BLOCK" == *'target=openedx'* && "$PREP_BLOCK" == *'target=mfe'* ]]; then
+  pass "prepare-build-context job resolves all/openedx/mfe prep targets"
 else
-  fail "build-mfe job missing canonical target-aware build-context prep"
+  fail "prepare-build-context job missing target-resolution contract"
 fi
 
-if grep -q '\./infrastructure/tutor/apply-patches.sh' "$BUILD_WF"; then
-  fail "workflow still calls apply-patches.sh directly in build jobs"
+if [[ "$PREP_BLOCK" == *'openedx-build-context.tgz'* && "$PREP_BLOCK" == *'mfe-build-context.tgz'* && "$PREP_BLOCK" == *'tutor-build-contexts'* ]]; then
+  pass "prepare-build-context job packages target-specific artifacts into one shared bundle"
 else
-  pass "workflow no longer calls apply-patches.sh directly in build jobs"
+  fail "prepare-build-context job missing shared build-context bundle contract"
+fi
+
+if [[ "$BUILD_OPENEDX_BLOCK" == *'prepare-build-context'* ]]; then
+  pass "build-openedx job depends on prepared build context"
+else
+  fail "build-openedx job missing prepared build-context dependency"
+fi
+
+if [[ "$BUILD_MFE_BLOCK" == *'prepare-build-context'* ]]; then
+  pass "build-mfe job depends on prepared build context"
+else
+  fail "build-mfe job missing prepared build-context dependency"
+fi
+
+if [[ "$BUILD_OPENEDX_BLOCK" == *'actions/download-artifact'* && "$BUILD_OPENEDX_BLOCK" == *'tutor-build-contexts'* && "$BUILD_OPENEDX_BLOCK" == *'openedx-build-context.tgz'* ]]; then
+  pass "build-openedx job downloads shared prepared build-context artifact"
+else
+  fail "build-openedx job missing shared prepared build-context artifact download"
+fi
+
+if [[ "$BUILD_MFE_BLOCK" == *'actions/download-artifact'* && "$BUILD_MFE_BLOCK" == *'tutor-build-contexts'* && "$BUILD_MFE_BLOCK" == *'mfe-build-context.tgz'* ]]; then
+  pass "build-mfe job downloads shared prepared build-context artifact"
+else
+  fail "build-mfe job missing shared prepared build-context artifact download"
+fi
+
+if [[ "$BUILD_OPENEDX_BLOCK" == *'Set up Python environment'* || "$BUILD_OPENEDX_BLOCK" == *'Set up Tutor environment'* ]]; then
+  fail "build-openedx job still performs Tutor prep on heavy builders"
+else
+  pass "build-openedx heavy builder no longer performs Tutor prep"
+fi
+
+if [[ "$BUILD_MFE_BLOCK" == *'Set up Python environment'* || "$BUILD_MFE_BLOCK" == *'Set up Tutor environment'* ]]; then
+  fail "build-mfe job still performs Tutor prep on heavy builders"
+else
+  pass "build-mfe heavy builder no longer performs Tutor prep"
+fi
+
+if [[ "$BUILD_OPENEDX_BLOCK" == *'./infrastructure/tutor/apply-patches.sh'* || "$BUILD_MFE_BLOCK" == *'./infrastructure/tutor/apply-patches.sh'* ]]; then
+  fail "heavy build jobs still call apply-patches.sh directly"
+else
+  pass "heavy build jobs no longer call apply-patches.sh directly"
 fi
 
 required_trigger_exclusions=(

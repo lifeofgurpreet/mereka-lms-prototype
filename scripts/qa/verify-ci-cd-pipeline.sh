@@ -153,29 +153,25 @@ check_build_pipeline() {
     fail "[AC-011] Branding verification log artifacts missing"
   fi
 
-  # AC-009: Tutor versions are pinned in the canonical requirements file and
-  # the workflow consumes that file instead of baking microversions into YAML.
+  # AC-009: Tutor versions must stay pinned in the shared requirements file
   if [[ -f "requirements-tutor.txt" ]] \
-    && grep -Eq '^tutor\[full\]==[0-9]+\.[0-9]+\.[0-9]+' requirements-tutor.txt \
-    && grep -Eq '^tutor-mfe==[0-9]+\.[0-9]+\.[0-9]+' requirements-tutor.txt \
+    && grep -Eq '^tutor\[full\]==[0-9]+\.[0-9]+\.[0-9]+$' requirements-tutor.txt \
+    && grep -Eq '^tutor-mfe==[0-9]+\.[0-9]+\.[0-9]+$' requirements-tutor.txt \
     && grep -q "requirements-file: 'requirements-tutor.txt'" "$BUILD_WF"; then
     pass "[AC-009] Tutor version pinned via requirements-tutor.txt and wired into build workflow"
   else
     fail "[AC-009] Tutor version pinning contract missing (requirements-tutor.txt + workflow wiring)"
   fi
 
-  # AC-009: Canonical target-aware build-context prep is used in both build jobs.
-  if grep -q 'prepare-tutor-build-context.sh --target openedx' "$BUILD_WF" && \
-     grep -q 'prepare-tutor-build-context.sh --target mfe' "$BUILD_WF"; then
-    pass "[AC-009] target-aware build-context prep called in both openedx and mfe build jobs"
+  # AC-009: Tutor build-context prep happens on standard runners before the heavy build jobs.
+  if grep -q '^  prepare-build-context:' "$BUILD_WF" \
+    && grep -q './scripts/infra/prepare-tutor-build-context-ci.sh --target "${{ steps.prep-target.outputs.target }}"' "$BUILD_WF" \
+    && grep -q 'target=all' "$BUILD_WF" \
+    && grep -q 'target=openedx' "$BUILD_WF" \
+    && grep -q 'target=mfe' "$BUILD_WF"; then
+    pass "[AC-009] Tutor build-context prep is routed through the canonical CI prep helper"
   else
-    fail "[AC-009] target-aware build-context prep missing from one or both build jobs"
-  fi
-
-  if grep -q '\./infrastructure/tutor/apply-patches.sh' "$BUILD_WF"; then
-    fail "[AC-009] build workflow still calls apply-patches.sh directly"
-  else
-    pass "[AC-009] build workflow no longer calls apply-patches.sh directly"
+    fail "[AC-009] Tutor build-context prep is not routed through the canonical CI prep helper"
   fi
 
   if grep -q 'scripts/infra/build-openedx-image.sh' "$BUILD_WF"; then

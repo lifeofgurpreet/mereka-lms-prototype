@@ -20,6 +20,9 @@ on:
       - 'infrastructure/tutor/brand-*/**'
       - 'assets/branding/**'
       - 'scripts/infra/prepare-tutor-build-context.sh'
+      - 'scripts/infra/prepare-tutor-build-context-ci.sh'
+      - 'infrastructure/tutor/apply-patches.sh'
+      - 'infrastructure/tutor/patches/**'
       - 'scripts/infra/resolve-build-scope.sh'
       - 'scripts/infra/install-cosign.sh'
       - 'scripts/infra/generate-build-provenance.sh'
@@ -247,6 +250,61 @@ jobs:
           scandir: './infrastructure/tutor'
           severity: warning
 
+  prepare-build-context:
+    name: Prepare Tutor Build Context
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 20
+    needs: [resolve-build-scope, lint]
+    if: ${{ needs.resolve-build-scope.outputs.build_openedx == 'true' || needs.resolve-build-scope.outputs.build_mfe == 'true' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-python-env
+        with:
+          python-version: '3.12'
+          requirements-file: 'requirements-tutor.txt'
+
+      - name: Resolve build-context prep target
+        id: prep-target
+        env:
+          BUILD_OPENEDX: ${{ needs.resolve-build-scope.outputs.build_openedx }}
+          BUILD_MFE: ${{ needs.resolve-build-scope.outputs.build_mfe }}
+        run: |
+          if [[ "$BUILD_OPENEDX" == 'true' && "$BUILD_MFE" == 'true' ]]; then
+            echo "target=all" >> "$GITHUB_OUTPUT"
+          elif [[ "$BUILD_OPENEDX" == 'true' ]]; then
+            echo "target=openedx" >> "$GITHUB_OUTPUT"
+          elif [[ "$BUILD_MFE" == 'true' ]]; then
+            echo "target=mfe" >> "$GITHUB_OUTPUT"
+          else
+            echo "No Tutor build context requested." >&2
+            exit 1
+          fi
+
+      - name: Prepare Tutor build context
+        env:
+          BUILD_OPENEDX: ${{ needs.resolve-build-scope.outputs.build_openedx }}
+          BUILD_MFE: ${{ needs.resolve-build-scope.outputs.build_mfe }}
+        run: |
+          ./scripts/infra/prepare-tutor-build-context-ci.sh --target "${{ steps.prep-target.outputs.target }}"
+          mkdir -p var/ci
+          if [[ "$BUILD_OPENEDX" == 'true' ]]; then
+            tar -C tutor_env/env/build -czf var/ci/openedx-build-context.tgz openedx
+          fi
+          if [[ "$BUILD_MFE" == 'true' ]]; then
+            tar -C tutor_env/env/plugins/mfe/build -czf var/ci/mfe-build-context.tgz mfe
+          fi
+
+      - name: Upload Tutor build-context artifacts
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        with:
+          name: tutor-build-contexts
+          path: var/ci/
+          retention-days: 3
+
   build-openedx:
     name: Build OpenEdX Image
     runs-on: mereka-k8s-heavy-builders
@@ -258,7 +316,7 @@ jobs:
     # Keep outer timeout comfortably above inner image-build timeout (170m)
     # so pre/post-build checks and artifact upload have recovery headroom.
     timeout-minutes: 200
-    needs: [resolve-build-scope, lint]
+    needs: [resolve-build-scope, lint, prepare-build-context]
     if: ${{ needs.resolve-build-scope.outputs.build_openedx == 'true' }}
     permissions:
       contents: read
@@ -306,40 +364,17 @@ jobs:
           fi
           free -h || true
 
-      - name: Set up Python environment
-        uses: ./.github/actions/setup-python-env
+      - name: Download OpenEdX build context artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
         with:
-          python-version: '3.12'
-          requirements-file: 'requirements-tutor.txt'
+          name: tutor-build-contexts
+          path: var/ci
 
-      - name: Verify Tutor version
-        run: tutor --version
-
-      - name: Set up Tutor environment
+      - name: Extract OpenEdX build context artifact
         run: |
-          export TUTOR_ROOT=$(pwd)/tutor_env
-          mkdir -p $TUTOR_ROOT
-
-          # Sync plugin package to Tutor plugins directory.
-          # Cannot source tutor-env.sh directly (requires .venv which CI lacks).
-          PLUGIN_SRC_DIR="$(pwd)/infrastructure/tutor/plugins"
-          PLUGIN_DIR="${TUTOR_PLUGINS_DIR:-$HOME/.local/share/tutor-plugins}"
-          mkdir -p "$PLUGIN_DIR"
-          cp "$PLUGIN_SRC_DIR/mereka_lms.py" "$PLUGIN_DIR/mereka_lms.py"
-          cp "$PLUGIN_SRC_DIR/mereka_lms_mfe_slots.py" "$PLUGIN_DIR/mereka_lms_mfe_slots.py"
-          cp -R "$PLUGIN_SRC_DIR/_mereka_lms" "$PLUGIN_DIR/_mereka_lms"
-
-          # Enable the Mereka LMS plugin so hooks fire during image build
-          tutor plugins enable mereka_lms
-
-          # Initialize Tutor config
-          tutor config save \
-            --set LMS_HOST=academyv2.mereka.io \
-            --set CMS_HOST=studio.academyv2.mereka.io \
-            --set ENABLE_HTTPS=true
-
-          # Prepare Open edX-specific build context without touching MFE-only paths.
-          ./scripts/infra/prepare-tutor-build-context.sh --target openedx
+          mkdir -p tutor_env/env/build
+          tar -C tutor_env/env/build -xzf var/ci/openedx-build-context.tgz
+          test -f tutor_env/env/build/openedx/Dockerfile
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd  # v4.0.0
@@ -542,7 +577,7 @@ jobs:
       group: build-mfe-${{ github.ref == 'refs/heads/main' && github.ref || github.run_id }}
       cancel-in-progress: false
     timeout-minutes: 120
-    needs: [resolve-build-scope, lint]
+    needs: [resolve-build-scope, lint, prepare-build-context]
     if: ${{ needs.resolve-build-scope.outputs.build_mfe == 'true' }}
     permissions:
       contents: read
@@ -574,39 +609,17 @@ jobs:
           fi
           free -h || true
 
-      - name: Set up Python environment
-        uses: ./.github/actions/setup-python-env
+      - name: Download MFE build context artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
         with:
-          python-version: '3.12'
-          requirements-file: 'requirements-tutor.txt'
+          name: tutor-build-contexts
+          path: var/ci
 
-      - name: Verify Tutor version
-        run: tutor --version
-
-      - name: Set up Tutor environment
+      - name: Extract MFE build context artifact
         run: |
-          export TUTOR_ROOT=$(pwd)/tutor_env
-          mkdir -p $TUTOR_ROOT
-
-          # Sync plugin package to Tutor plugins directory.
-          PLUGIN_SRC_DIR="$(pwd)/infrastructure/tutor/plugins"
-          PLUGIN_DIR="${TUTOR_PLUGINS_DIR:-$HOME/.local/share/tutor-plugins}"
-          mkdir -p "$PLUGIN_DIR"
-          cp "$PLUGIN_SRC_DIR/mereka_lms.py" "$PLUGIN_DIR/mereka_lms.py"
-          cp "$PLUGIN_SRC_DIR/mereka_lms_mfe_slots.py" "$PLUGIN_DIR/mereka_lms_mfe_slots.py"
-          cp -R "$PLUGIN_SRC_DIR/_mereka_lms" "$PLUGIN_DIR/_mereka_lms"
-
-          # Enable the Mereka LMS plugin so hooks fire during image build
-          tutor plugins enable mereka_lms
-
-          # Initialize Tutor config
-          tutor config save \
-            --set LMS_HOST=academyv2.mereka.io \
-            --set MFE_HOST=apps.academyv2.mereka.io \
-            --set ENABLE_HTTPS=true
-
-          # Prepare MFE-specific build context without touching Open edX-only paths.
-          ./scripts/infra/prepare-tutor-build-context.sh --target mfe
+          mkdir -p tutor_env/env/plugins/mfe/build
+          tar -C tutor_env/env/plugins/mfe/build -xzf var/ci/mfe-build-context.tgz
+          test -f tutor_env/env/plugins/mfe/build/mfe/Dockerfile
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd  # v4.0.0

@@ -1338,43 +1338,60 @@ scripts:
     proof_command: "printf 'infrastructure/tutor/themes/mereka/mfe/mereka.scss\n' | bash scripts/infra/resolve-build-scope.sh | head -5"
     criticality: release-blocking
 
-  # ── Tutor Configuration ──────────────────────────────────────────────────────
-
   - path: scripts/infra/prepare-tutor-build-context.sh
     owner: platform-team
     purpose: >
-      Canonical front door for mutating rendered Tutor build context. Delegates
-      to infrastructure/tutor/apply-patches.sh with an explicit target so CI
-      and local workflows can prepare only the required build surfaces.
+      Canonical front door for mutating rendered Tutor build context by target.
+      Routes to apply-patches.sh with explicit openedx, mfe, or all scope so
+      CI and local workflows prepare only the contexts they actually need.
     inputs:
-      - --target all|openedx|mfe (optional; defaults to all)
-      - MEREKA_BUILD_TARGET (optional env override)
+      - --target all|openedx|mfe
+      - TUTOR_ROOT (optional env override)
     outputs:
-      - rendered Tutor build context for the selected target
-      - stdout (target-scoped preparation summary)
+      - rendered Tutor build context under tutor_env/
+      - stdout (patch application summary)
     side_effects:
-      - Mutates rendered Tutor environment/build files through the canonical
-        apply-patches implementation
+      - Mutates rendered Tutor build context under tutor_env/
     dry_run: false
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/infra/prepare-tutor-build-context.sh --help 2>&1 | head -5"
     criticality: release-supporting
 
+  - path: scripts/infra/prepare-tutor-build-context-ci.sh
+    owner: platform-team
+    purpose: >
+      Renders Tutor config on standard CI runners, enables the Mereka LMS plugin,
+      applies target-scoped Tutor build-context mutations, and leaves packaged
+      Open edX or MFE build context ready for heavy image jobs to consume.
+    inputs:
+      - --target all|openedx|mfe
+      - TUTOR_ROOT (optional env override)
+    outputs:
+      - rendered Tutor build context under tutor_env/
+      - stdout (prepared target summary)
+    side_effects:
+      - Regenerates tutor_env/ and mutates target-specific build context
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/prepare-tutor-build-context-ci.sh --help 2>&1 | head -5"
+    criticality: release-supporting
+
+  # ── Tutor Configuration ──────────────────────────────────────────────────────
+
   - path: scripts/infra/tutor-config-save.sh
     owner: platform-team
     purpose: >
-      Safe wrapper for 'tutor config save'. Automatically prepares the Tutor
-      build context via the canonical target-scoped front door and verifies the
-      rendered configuration. Use this instead of bare 'tutor config save'.
+      Safe wrapper for 'tutor config save'. Automatically applies patches and
+      verifies configuration. Use this instead of bare 'tutor config save'.
     inputs:
       - TUTOR_ROOT (required env var)
       - tutor config save args (passed through)
     outputs:
       - tutor_env/ directory (regenerated)
-      - stdout (build-context preparation summary)
+      - stdout (patch application summary)
     side_effects:
       - Regenerates tutor_env/ from scratch (overwrites rendered files)
-      - Re-prepares rendered Tutor build context for all targets
+      - Applies all infrastructure patches
     dry_run: false
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/infra/tutor-config-save.sh --help 2>&1 | head -5"

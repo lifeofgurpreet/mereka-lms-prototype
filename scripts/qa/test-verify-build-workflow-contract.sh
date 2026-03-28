@@ -28,20 +28,24 @@ set -euo pipefail
 echo "ok"
 EOF
 chmod +x "$tmpdir/scripts/infra/build-mfe-image.sh"
+cat >"$tmpdir/scripts/infra/prepare-tutor-build-context.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+echo "ok"
+EOF
+chmod +x "$tmpdir/scripts/infra/prepare-tutor-build-context.sh"
+cat >"$tmpdir/scripts/infra/prepare-tutor-build-context-ci.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+echo "ok"
+EOF
+chmod +x "$tmpdir/scripts/infra/prepare-tutor-build-context-ci.sh"
 cat >"$tmpdir/scripts/qa/verify-openedx-image-branding.sh" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 echo "ok"
 EOF
 chmod +x "$tmpdir/scripts/qa/verify-openedx-image-branding.sh"
-
-cat >"$tmpdir/scripts/infra/prepare-tutor-build-context.sh" <<'EOF'
-#!/usr/bin/env bash
-set -euo pipefail
-test "${1:-}" = "--target"
-test -n "${2:-}"
-EOF
-chmod +x "$tmpdir/scripts/infra/prepare-tutor-build-context.sh"
 
 write_pass_fixture() {
   cat >"$tmpdir/.github/workflows/build-tutor-images.yml" <<'EOF'
@@ -61,6 +65,7 @@ on:
       - 'infrastructure/tutor/brand-*/**'
       - 'assets/branding/**'
       - 'scripts/infra/prepare-tutor-build-context.sh'
+      - 'scripts/infra/prepare-tutor-build-context-ci.sh'
       - 'scripts/infra/resolve-build-scope.sh'
       - 'scripts/infra/install-cosign.sh'
       - 'scripts/infra/generate-build-provenance.sh'
@@ -104,14 +109,51 @@ jobs:
   lint:
     steps:
       - run: echo lint
-  build-openedx:
+  prepare-build-context:
+    runs-on: mereka-k8s-runners
     needs: [resolve-build-scope, lint]
+    if: ${{ needs.resolve-build-scope.outputs.build_openedx == 'true' || needs.resolve-build-scope.outputs.build_mfe == 'true' }}
+    steps:
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-python-env
+      - id: prep-target
+        env:
+          BUILD_OPENEDX: ${{ needs.resolve-build-scope.outputs.build_openedx }}
+          BUILD_MFE: ${{ needs.resolve-build-scope.outputs.build_mfe }}
+        run: |
+          if [[ "$BUILD_OPENEDX" == 'true' && "$BUILD_MFE" == 'true' ]]; then
+            echo "target=all" >> "$GITHUB_OUTPUT"
+          elif [[ "$BUILD_OPENEDX" == 'true' ]]; then
+            echo "target=openedx" >> "$GITHUB_OUTPUT"
+          elif [[ "$BUILD_MFE" == 'true' ]]; then
+            echo "target=mfe" >> "$GITHUB_OUTPUT"
+          else
+            echo "No Tutor build context requested." >&2
+            exit 1
+          fi
+      - run: |
+          ./scripts/infra/prepare-tutor-build-context-ci.sh --target "${{ steps.prep-target.outputs.target }}"
+          tar -C tutor_env/env/build -czf var/ci/openedx-build-context.tgz openedx
+          tar -C tutor_env/env/plugins/mfe/build -czf var/ci/mfe-build-context.tgz mfe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tutor-build-contexts
+          path: var/ci/
+
+  build-openedx:
+    needs: [resolve-build-scope, lint, prepare-build-context]
     if: ${{ needs.resolve-build-scope.outputs.build_openedx == 'true' }}
     runs-on: mereka-k8s-heavy-builders
     outputs:
       image_digest: ${{ steps.digest.outputs.digest }}
     steps:
-      - run: ./scripts/infra/prepare-tutor-build-context.sh --target openedx
+      - uses: actions/download-artifact@v4
+        with:
+          name: tutor-build-contexts
+          path: var/ci
+      - run: |
+          mkdir -p tutor_env/env/build
+          tar -C tutor_env/env/build -xzf var/ci/openedx-build-context.tgz
       - name: Verify OpenEdX build cache health
         run: |
           SUMMARY="${SUMMARY}\n✅ GHA cache read/write is enabled for OpenEdX build"
@@ -130,13 +172,19 @@ jobs:
         run: echo "digest=sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" >> "$GITHUB_OUTPUT"
 
   build-mfe:
-    needs: [resolve-build-scope, lint]
+    needs: [resolve-build-scope, lint, prepare-build-context]
     if: ${{ needs.resolve-build-scope.outputs.build_mfe == 'true' }}
     runs-on: mereka-k8s-heavy-builders
     outputs:
       image_digest: ${{ steps.digest.outputs.digest }}
     steps:
-      - run: ./scripts/infra/prepare-tutor-build-context.sh --target mfe
+      - uses: actions/download-artifact@v4
+        with:
+          name: tutor-build-contexts
+          path: var/ci
+      - run: |
+          mkdir -p tutor_env/env/plugins/mfe/build
+          tar -C tutor_env/env/plugins/mfe/build -xzf var/ci/mfe-build-context.tgz
       - name: Verify MFE build cache health
         run: echo ok
       - name: Build MFE image
@@ -280,17 +328,6 @@ text = text.replace(
 p.write_text(text)
 PY
 run_expect_fail "missing canonical target_environment normalization is rejected"
-
-write_pass_fixture
-python3 - "$tmpdir" <<'PY'
-from pathlib import Path
-import sys
-p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
-text = p.read_text()
-text = text.replace("./scripts/infra/prepare-tutor-build-context.sh --target openedx", "./infrastructure/tutor/apply-patches.sh")
-p.write_text(text)
-PY
-run_expect_fail "direct apply-patches build call is rejected"
 
 write_pass_fixture
 python3 - "$tmpdir" <<'PY'
@@ -664,6 +701,18 @@ scope_output="$(printf 'deploy/k8s/base/apps/openedx/settings/lms/production.py\
 [[ "$scope_output" == *'Build OpenEdX: `true`'* ]] || { echo "FAIL classifier should keep OpenEdX enabled for OpenEdX-only changes" >&2; exit 1; }
 [[ "$scope_output" == *'Build MFE: `false`'* ]] || { echo "FAIL classifier should skip MFE for OpenEdX-only changes" >&2; exit 1; }
 echo "PASS classifier routes obvious OpenEdX-only changes correctly"
+
+scope_output="$(printf 'scripts/infra/build-openedx-image.sh\nscripts/qa/verify-openedx-image-branding.sh\n' | bash "$ROOT_DIR/scripts/infra/resolve-build-scope.sh")"
+[[ "$scope_output" == *'Scope label: `openedx-only`'* ]] || { echo "FAIL classifier should treat OpenEdX build helper and verifier changes as openedx-only" >&2; exit 1; }
+[[ "$scope_output" == *'Build OpenEdX: `true`'* ]] || { echo "FAIL classifier should keep OpenEdX enabled for OpenEdX build helper and verifier changes" >&2; exit 1; }
+[[ "$scope_output" == *'Build MFE: `false`'* ]] || { echo "FAIL classifier should skip MFE for OpenEdX build helper and verifier changes" >&2; exit 1; }
+echo "PASS classifier routes OpenEdX helper and verifier changes correctly"
+
+scope_output="$(printf 'scripts/infra/build-mfe-image.sh\nscripts/qa/verify-mfe-image-branding.sh\nscripts/qa/verify-mfe-runtime-contract.sh\n' | bash "$ROOT_DIR/scripts/infra/resolve-build-scope.sh")"
+[[ "$scope_output" == *'Scope label: `mfe-only`'* ]] || { echo "FAIL classifier should treat MFE build helper and verifier changes as mfe-only" >&2; exit 1; }
+[[ "$scope_output" == *'Build OpenEdX: `false`'* ]] || { echo "FAIL classifier should skip OpenEdX for MFE build helper and verifier changes" >&2; exit 1; }
+[[ "$scope_output" == *'Build MFE: `true`'* ]] || { echo "FAIL classifier should keep MFE enabled for MFE build helper and verifier changes" >&2; exit 1; }
+echo "PASS classifier routes MFE helper and verifier changes correctly"
 
 scope_output="$(printf 'assets/branding/logo.svg\n' | bash "$ROOT_DIR/scripts/infra/resolve-build-scope.sh")"
 [[ "$scope_output" == *'Scope label: `both`'* ]] || { echo "FAIL classifier should treat shared branding assets as both" >&2; exit 1; }
