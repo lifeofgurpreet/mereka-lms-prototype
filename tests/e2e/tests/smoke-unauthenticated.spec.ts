@@ -151,8 +151,12 @@ test.describe('Unauthenticated smoke — API contracts', () => {
     const hasLmsSurface = lmsResponse.status() === 200;
 
     expect(
-      hasMfeSurface || hasLmsSurface,
-      'at least one public MFE config surface should return 200',
+      hasMfeSurface,
+      `apps-host MFE config surface should return 200 (got ${mfeResponse.status()})`,
+    ).toBe(true);
+    expect(
+      hasLmsSurface,
+      `LMS-host MFE config surface should return 200 (got ${lmsResponse.status()})`,
     ).toBe(true);
 
     const criticalKeys = [
