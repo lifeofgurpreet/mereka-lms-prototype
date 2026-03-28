@@ -102,13 +102,17 @@ the same ownership role.
    - LMS templates under `lms/templates/` adapt that shell for legacy surfaces and should not invent a second shell language
 6. Public LMS discovery ownership is route-specific:
    - `lms/static/sass/partials/_discovery.scss` owns `/courses` and `/courses/<id>/about`
-   - `lms/templates/courseware/course_about.html` owns the course-about markup, SEO metadata, and schema contract
    - `lms/templates/discovery/course_card.underscore` owns the course-card markup contract
    - `common/static/css/mereka-overrides.css` must not carry discovery/course-about presentation
+<<<<<<< HEAD
 7. Learner LMS dashboard ownership is route-specific:
    - `lms/static/sass/partials/_custom.scss` owns learner dashboard card/list/CTA presentation
    - `scss/theme.scss` must not carry learner dashboard card/list selectors
    - `common/static/css/mereka-overrides.css` keeps only shared dashboard utilities and must not carry learner dashboard card shell/layout rules
+8. Certificate ownership is split by runtime surface, not by keyword:
+   - `lms/templates/certificates/accomplishment-base.html` owns the printable LMS certificate presentation
+   - `infrastructure/tutor/themes/mereka/mfe/mereka.scss` owns authored styling for MFE progress/profile certificate surfaces
+   - `scss/theme.scss` only owns the Studio `.view-certificates` empty-state CTA and must not become a second printable-certificate authority
 
 For the logged-out LMS landing experience, ownership is intentionally split by
 surface rather than by convenience:

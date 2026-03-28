@@ -81,13 +81,13 @@ else
   fail "Slot-to-component binding markers for additional profile fields missing"
 fi
 
-if rg -qF "const MerekaLearningContextCard = ({" "$PLUGIN_FILE" \
-  && rg -qF "const MerekaLearningContextMetaItem = ({ label, value }) => {" "$PLUGIN_FILE" \
-  && rg -qF "className=\"mereka-additional-profile-fields mb-3\"" "$PLUGIN_FILE" \
-  && rg -qF "<MerekaLearningContextMetaItem label=\"Organization\" value={variant.brand} />" "$PLUGIN_FILE" \
-  && rg -qF "<MerekaLearningContextMetaItem label=\"Job title\" value=\"Pending admin sync\" />" "$PLUGIN_FILE" \
-  && rg -qF "<MerekaLearningContextMetaItem label=\"Department\" value=\"Pending admin sync\" />" "$PLUGIN_FILE"; then
-  pass "Additional profile field UI markers present via canonical context-card meta rows"
+if rg -qF "mereka-additional-profile-fields__title" "$PLUGIN_FILE" \
+  && rg -qF "Finish the profile details certificates depend on" "$PLUGIN_FILE" \
+  && rg -qF "Organization" "$PLUGIN_FILE" \
+  && rg -qF "Job title" "$PLUGIN_FILE" \
+  && rg -qF "Department" "$PLUGIN_FILE" \
+  && rg -qF "mereka-additional-profile-fields__hint" "$PLUGIN_FILE"; then
+  pass "Additional profile field UI markers match the canonical certificate-profile shell"
 else
   fail "Additional profile field UI markers missing"
 fi

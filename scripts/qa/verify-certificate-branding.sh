@@ -25,6 +25,17 @@ assert_contains() {
   fi
 }
 
+assert_not_contains() {
+  local file="$1"
+  local needle="$2"
+  local label="$3"
+  if grep -Fq -- "$needle" "$file"; then
+    fail "$label (unexpected '$needle' in ${file#$REPO_ROOT/})"
+  else
+    pass "$label"
+  fi
+}
+
 echo "=== Certificate Branding Verification ==="
 
 CSS_FILES=(
@@ -52,7 +63,10 @@ else
 fi
 
 MFE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
+THEME_README="$REPO_ROOT/infrastructure/tutor/themes/mereka/README.md"
+SHARED_THEME_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/scss/theme.scss"
 PROFILE_CERT_CARD_COMPONENT="$REPO_ROOT/tutor_env/dev/frontend-app-profile/src/profile/CertificateCard.jsx"
+PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js"
 
 if mereka_plugin_has_any "$REPO_ROOT"; then
   if mereka_plugin_has_fixed "$REPO_ROOT" "org.openedx.frontend.learning.progress_certificate_status.v1"; then
@@ -72,10 +86,33 @@ fi
 
 if [[ -f "$MFE_SCSS" ]]; then
   assert_contains "$MFE_SCSS" ".mereka-progress-certificate-status" "MFE certificate slot class styling exists"
+  assert_contains "$MFE_SCSS" ".mereka-progress-certificate-status__header" "MFE certificate slot includes a structured readiness header"
+  assert_contains "$MFE_SCSS" ".mereka-certificate-readiness__steps" "MFE certificate slot includes a canonical readiness checklist"
+  assert_contains "$MFE_SCSS" ".mereka-progress-certificate-status__hint" "MFE progress certificate helper hint styling exists"
+  assert_contains "$MFE_SCSS" ".mereka-account-id-verification-hint__title" "Account verification hint has an explicit title style"
+  assert_contains "$MFE_SCSS" ".mereka-additional-profile-fields__item" "Additional profile fields render as structured readiness items"
   assert_contains "$MFE_SCSS" ".profile-page .certificate" "Profile certificate cards use Mereka tokenized card styling"
   assert_contains "$MFE_SCSS" ".profile-page .certificate-type-illustration" "Profile certificate illustration shell is themed"
 else
   fail "MFE stylesheet missing: infrastructure/tutor/themes/mereka/mfe/mereka.scss"
+fi
+
+if [[ -f "$PLUGIN_FILE" ]]; then
+  assert_contains "$PLUGIN_FILE" "const MerekaCertificateContextShell = ({" "Certificate surfaces share one canonical context shell"
+  assert_contains "$PLUGIN_FILE" "const MerekaCertificateContextMetaItem = ({ label, value }) => (" "Certificate surfaces share a canonical readiness meta row"
+  assert_contains "$PLUGIN_FILE" "className=\"mereka-progress-certificate-status mereka-shell-panel my-3\"" "Progress certificate status uses the canonical context shell"
+  assert_contains "$PLUGIN_FILE" "className=\"mereka-account-id-verification-hint mereka-shell-panel mb-3\"" "Account verification uses the canonical certificate context shell"
+  assert_contains "$PLUGIN_FILE" "className=\"mereka-additional-profile-fields mereka-shell-panel mb-3\"" "Additional profile fields use the canonical certificate context shell"
+else
+  fail "MFE runtime definitions missing: infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js"
+fi
+
+if [[ -f "$SHARED_THEME_SCSS" ]]; then
+  assert_contains "$SHARED_THEME_SCSS" ".view-certificates .content-primary .no-content .button" "Shared theme keeps only the Studio certificates CTA"
+  assert_not_contains "$SHARED_THEME_SCSS" "body.certificate" "Shared theme does not own printable LMS certificate presentation"
+  assert_not_contains "$SHARED_THEME_SCSS" ".profile-page .certificate" "Shared theme does not own MFE certificate card presentation"
+else
+  fail "Shared theme stylesheet missing: infrastructure/tutor/themes/mereka/scss/theme.scss"
 fi
 
 if [[ -f "$PROFILE_CERT_CARD_COMPONENT" ]]; then
@@ -107,10 +144,19 @@ fi
 THEMED_CERT_BASE="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/certificates/accomplishment-base.html"
 if [[ -f "$THEMED_CERT_BASE" ]]; then
   pass "Themed LMS certificate base template override exists"
-  assert_contains "$THEMED_CERT_BASE" "Mereka certificate branding override" "Certificate template includes Mereka branding marker"
+  assert_contains "$THEMED_CERT_BASE" "canonical owner for printable LMS certificate presentation" "Certificate template states printable ownership explicitly"
   assert_contains "$THEMED_CERT_BASE" "--mereka-cert-primary" "Certificate template defines Mereka certificate design tokens"
+  assert_contains "$THEMED_CERT_BASE" "--mereka-cert-shadow" "Certificate template defines elevated certificate shell styling"
 else
   fail "Missing themed LMS certificate base template override: ${THEMED_CERT_BASE#$REPO_ROOT/}"
+fi
+
+if [[ -f "$THEME_README" ]]; then
+  assert_contains "$THEME_README" "Certificate ownership is split by runtime surface" "Theme README documents certificate ownership split"
+  assert_contains "$THEME_README" "lms/templates/certificates/accomplishment-base.html" "Theme README names the printable LMS certificate owner"
+  assert_contains "$THEME_README" "only owns the Studio \`.view-certificates\` empty-state CTA" "Theme README keeps shared theme certificate scope narrow"
+else
+  fail "Theme README missing: infrastructure/tutor/themes/mereka/README.md"
 fi
 
 echo ""

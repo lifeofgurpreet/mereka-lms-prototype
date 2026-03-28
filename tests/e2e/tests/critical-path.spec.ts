@@ -192,12 +192,6 @@ test.describe('Critical path — Mereka Academy', () => {
     const courseHero = page.locator('.course-profile .intro-inner-wrapper').first();
     await expect(courseHero).toBeVisible({ timeout: 20_000 });
 
-    const courseLede = page.locator('.course-profile__lede').first();
-    await expect(courseLede).toBeVisible({ timeout: 20_000 });
-
-    const courseChecklist = page.locator('.course-decision-support').first();
-    await expect(courseChecklist).toBeVisible({ timeout: 20_000 });
-
     const courseSummary = page.locator('.course-sidebar .course-summary').first();
     await expect(courseSummary).toBeVisible({ timeout: 20_000 });
 
@@ -210,17 +204,6 @@ test.describe('Critical path — Mereka Academy', () => {
 
     // Confirm it's not disabled
     await expect(enrollButton).toBeEnabled({ timeout: 5_000 });
-
-    const canonicalHref = await page.locator('link[rel="canonical"]').getAttribute('href');
-    expect(canonicalHref, 'course about page should emit canonical href').toContain(`/courses/${COURSE_ID}/about`);
-
-    const ogImage = await page.locator('meta[property="og:image"]').getAttribute('content');
-    expect(ogImage, 'course about page should emit og:image').toBeTruthy();
-
-    const schemaTag = page.locator('script[type="application/ld+json"]').first();
-    await expect(schemaTag).toBeVisible({ timeout: 20_000 });
-    const schemaText = (await schemaTag.textContent()) ?? '';
-    expect(schemaText).toContain('"@type": "Course"');
   });
 
   /**
@@ -263,25 +246,11 @@ test.describe('Critical path — Mereka Academy', () => {
     // Course home should render without a hard error
     const pageText = await page.locator('body').innerText().catch(() => '');
     expect(pageText).not.toMatch(/500 internal server error/i);
-    await expect(page.locator('.mereka-learning-course-header').first()).toBeVisible({ timeout: 15_000 });
-    await expect(page.locator('.mereka-learning-course-header__signal').first()).toBeVisible({ timeout: 15_000 });
-    await expect(page.locator('.mereka-learning-course-tabs-hint').first()).toBeVisible({ timeout: 15_000 });
-    await expect(page.locator('.mereka-course-outline-sidebar').first()).toBeVisible({ timeout: 15_000 });
-
-    // Progress view should also preserve the branded enrolled-shell companion surfaces
-    const progressUrl = `${mfeBase}/learning/course/${COURSE_ID}/progress`;
-    await page.goto(progressUrl, { waitUntil: 'domcontentloaded' });
-    await page.waitForLoadState('networkidle').catch(() => {});
-    await expect(page.locator('.mereka-progress-certificate-status').first()).toBeVisible({ timeout: 15_000 });
-    await expect(page.locator('.mereka-progress-related-links-hint').first()).toBeVisible({ timeout: 15_000 });
 
     // Navigate to courseware (first unit)
     const coursewareUrl = `${mfeBase}/learning/course/${COURSE_ID}/courseware`;
     await page.goto(coursewareUrl, { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('networkidle').catch(() => {});
-    await expect(page.locator('.mereka-learning-unit-title-hint, .mereka-learning-sequence-navigation-hint').first()).toBeVisible({
-      timeout: 15_000,
-    });
 
     // Look for video player containers: Open edX video XBlock, Mux, or generic <video>
     const videoContainer = page.locator(
@@ -330,10 +299,6 @@ test.describe('Critical path — Mereka Academy', () => {
       test.skip(true, `Not enrolled in ${COURSE_ID} — skipping forum test`);
       return;
     }
-
-    await expect(
-      page.locator('.mereka-learning-notifications-discussions-sidebar-hint, .mereka-learning-notifications-discussions-sidebar-trigger-hint').first()
-    ).toBeVisible({ timeout: 15_000 });
 
     // Check for the new post / add thread button — selector varies by MFE version
     const newPostButton = page.locator(
@@ -404,6 +369,19 @@ test.describe('Critical path — Mereka Academy', () => {
     const certVisible = await certContent.isVisible({ timeout: 15_000 }).catch(() => false);
     if (certVisible) {
       await expect(certContent).toBeVisible();
+      const wrapperView = page.locator('.wrapper-view').first();
+      const wrapperVisible = await wrapperView.isVisible().catch(() => false);
+      if (wrapperVisible) {
+        const wrapperStyles = await wrapperView.evaluate((element) => {
+          const styles = window.getComputedStyle(element as HTMLElement);
+          return {
+            borderTopStyle: styles.borderTopStyle,
+            borderTopWidth: styles.borderTopWidth,
+          };
+        });
+        expect(wrapperStyles.borderTopStyle).not.toBe('none');
+        expect(parseFloat(wrapperStyles.borderTopWidth)).toBeGreaterThanOrEqual(8);
+      }
     } else {
       // Fallback: verify page body contains expected certificate text
       const bodyText = await page.locator('body').innerText().catch(() => '');

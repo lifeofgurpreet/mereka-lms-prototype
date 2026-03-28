@@ -29,35 +29,64 @@ course_mode_class = course_mode if course_mode else ''
     <title>${document_title}</title>
 
     <%static:css group='style-certificates'/>
-    <!-- Mereka certificate branding override (Phase 4: PDF certificate surface) -->
+    <!-- Mereka certificate branding override (canonical owner for printable LMS certificate presentation) -->
     <style>
       :root {
         --mereka-cert-primary: #ab3b78;
         --mereka-cert-secondary: #237072;
         --mereka-cert-accent: #295cad;
         --mereka-cert-ink: #1d2733;
+        --mereka-cert-ink-muted: #566270;
         --mereka-cert-surface: #f8f5f8;
+        --mereka-cert-surface-strong: #ffffff;
+        --mereka-cert-border: rgba(29, 39, 51, 0.10);
+        --mereka-cert-shadow: 0 28px 72px rgba(29, 39, 51, 0.14);
+      }
+      body.certificate {
+        background:
+          radial-gradient(circle at top right, rgb(171 59 120 / 0.10), transparent 28%),
+          radial-gradient(circle at bottom left, rgb(35 112 114 / 0.10), transparent 30%),
+          #f4f1f6;
       }
       body.certificate .wrapper-view {
-        border-top: 10px solid var(--mereka-cert-primary);
+        max-width: 1120px;
+        margin: 2.5rem auto;
+        border: 1px solid var(--mereka-cert-border);
+        border-top: 12px solid var(--mereka-cert-primary);
+        border-radius: 28px;
+        overflow: hidden;
+        box-shadow: var(--mereka-cert-shadow);
+        background: rgb(255 255 255 / 0.96);
       }
       body.certificate .accomplishment-main {
         background:
-          linear-gradient(135deg, rgb(171 59 120 / 6%), rgb(35 112 114 / 6%)),
-          #fff;
+          linear-gradient(135deg, rgb(171 59 120 / 0.08), rgb(35 112 114 / 0.08)),
+          var(--mereka-cert-surface-strong);
+      }
+      body.certificate .accomplishment-type-label {
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        font-weight: 700;
       }
       body.certificate .accomplishment-type-label,
       body.certificate .accomplishment-recipient,
       body.certificate .accomplishment-course {
         color: var(--mereka-cert-ink);
       }
+      body.certificate .accomplishment-recipient,
+      body.certificate .accomplishment-course {
+        text-wrap: balance;
+      }
       body.certificate .accomplishment-type-symbol,
       body.certificate .deco-corner {
         filter: hue-rotate(-10deg) saturate(1.1);
       }
       body.certificate .accomplishment-metadata {
-        background: var(--mereka-cert-surface);
+        background:
+          linear-gradient(180deg, rgb(35 112 114 / 0.06), rgb(255 255 255 / 0.92)),
+          var(--mereka-cert-surface);
         border-top: 3px solid var(--mereka-cert-secondary);
+        border-bottom: 1px solid var(--mereka-cert-border);
       }
       body.certificate .accomplishment-id .label,
       body.certificate .accomplishment-date .label {
@@ -65,11 +94,28 @@ course_mode_class = course_mode if course_mode else ''
       }
       body.certificate .signatory-name {
         color: var(--mereka-cert-ink);
+        font-weight: 700;
+      }
+      body.certificate .signatory-role,
+      body.certificate .accomplishment-summary,
+      body.certificate .accomplishment-endorsement {
+        color: var(--mereka-cert-ink-muted);
+      }
+      @media (max-width: 768px) {
+        body.certificate .wrapper-view {
+          margin: 1rem;
+          border-radius: 20px;
+        }
       }
       @media print {
         body.certificate {
           -webkit-print-color-adjust: exact;
           print-color-adjust: exact;
+          background: #fff;
+        }
+        body.certificate .wrapper-view {
+          margin: 0;
+          box-shadow: none;
         }
       }
     </style>
