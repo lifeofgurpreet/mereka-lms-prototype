@@ -102,6 +102,7 @@ the same ownership role.
    - LMS templates under `lms/templates/` adapt that shell for legacy surfaces and should not invent a second shell language
 6. Public LMS discovery ownership is route-specific:
    - `lms/static/sass/partials/_discovery.scss` owns `/courses` and `/courses/<id>/about`
+   - `lms/templates/courseware/course_about.html` owns the course-about markup, SEO metadata, and schema contract
    - `lms/templates/discovery/course_card.underscore` owns the course-card markup contract
    - `common/static/css/mereka-overrides.css` must not carry discovery/course-about presentation
 7. Learner LMS dashboard ownership is route-specific:

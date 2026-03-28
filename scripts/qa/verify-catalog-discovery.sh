@@ -199,6 +199,8 @@ check_contains "$LMS_DISCOVERY_SCSS" ".course-about .intro-inner-wrapper" "LMS d
 check_contains "$LMS_DISCOVERY_SCSS" "grid-template-columns: minmax(0, 1.7fr) minmax(18rem, 24rem)" "LMS discovery partial gives course-about a two-column conversion layout"
 check_contains "$LMS_DISCOVERY_SCSS" ".course-about .social-sharing" "LMS discovery partial styles course-about social sharing cluster"
 check_contains "$LMS_DISCOVERY_SCSS" ".course-about .important-dates-item" "LMS discovery partial styles course-about metadata cards"
+check_contains "$LMS_DISCOVERY_SCSS" ".course-about .course-decision-support" "LMS discovery partial styles the course-about enrollment checklist shell"
+check_contains "$LMS_DISCOVERY_SCSS" ".course-about .course-decision-support__item" "LMS discovery partial styles the course-about enrollment checklist items"
 check_contains "$LMS_DISCOVERY_SCSS" "position: sticky" "LMS discovery partial keeps the course-about sidebar sticky on desktop"
 
 # Course card styling
@@ -347,13 +349,18 @@ else
   skip "Indigo course_about.html not present (venv not installed — run make bootstrap)"
 fi
 
-# Mereka theme does NOT override course_about — verify no conflicting override
+# Mereka theme should now own course-about markup + SEO contract directly.
 MEREKA_ABOUT_OVERRIDE="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/courseware/course_about.html"
-if [[ -f "$MEREKA_ABOUT_OVERRIDE" ]]; then
-  pass "Mereka theme has custom course_about.html override (SEO additions present)"
-else
-  skip "Mereka theme has no course_about.html override yet (SEO gaps pending — tracked in audit doc)"
-fi
+check_file_exists "$MEREKA_ABOUT_OVERRIDE" "Mereka theme has custom course_about.html override"
+check_contains "$MEREKA_ABOUT_OVERRIDE" "meta name=\"description\"" "Mereka course-about override adds meta description"
+check_contains "$MEREKA_ABOUT_OVERRIDE" "property=\"og:image\"" "Mereka course-about override adds og:image"
+check_contains "$MEREKA_ABOUT_OVERRIDE" "property=\"og:url\"" "Mereka course-about override adds og:url"
+check_contains "$MEREKA_ABOUT_OVERRIDE" "rel=\"canonical\"" "Mereka course-about override adds canonical link"
+check_contains "$MEREKA_ABOUT_OVERRIDE" "application/ld+json" "Mereka course-about override adds Course schema"
+check_contains "$MEREKA_ABOUT_OVERRIDE" "strip_tags" "Mereka course-about override strips HTML from SEO description"
+check_contains "$MEREKA_ABOUT_OVERRIDE" "course-profile__lede" "Mereka course-about override exposes premium hero lede"
+check_contains "$MEREKA_ABOUT_OVERRIDE" "course-decision-support" "Mereka course-about override exposes the enrollment checklist shell"
+check_contains "$MEREKA_ABOUT_OVERRIDE" "Before you enroll" "Mereka course-about override frames the enrollment checklist in the hero"
 
 # ─── 11. MFE Brand Token Config ─────────────────────────────────────────────
 

@@ -91,7 +91,7 @@ if [[ -f "$AUTH_SCRIPT" && -x "$AUTH_SCRIPT" ]]; then
     fail "No args → exited $missing_rc (expected 2)"
   fi
 
-  if echo "$missing_output" | grep -qi "required\|usage\|error"; then
+  if [[ "$missing_output" =~ [Rr]equired|[Uu]sage|[Ee]rror ]]; then
     pass "No args → error message emitted"
   else
     fail "No args → no error message in output"
@@ -109,11 +109,11 @@ if [[ -f "$AUTH_SCRIPT" && -x "$AUTH_SCRIPT" ]]; then
     fail "Missing --password → exited $partial_rc (expected 2)"
   fi
 
-  if echo "$partial_output" | grep -qi "password.*required\|required.*password"; then
+  if [[ "$partial_output" =~ [Pp]assword.*[Rr]equired|[Rr]equired.*[Pp]assword ]]; then
     pass "Missing --password → descriptive error emitted"
   else
     # Still acceptable if generic "required" message shown
-    if echo "$partial_output" | grep -qi "required\|usage"; then
+    if [[ "$partial_output" =~ [Rr]equired|[Uu]sage ]]; then
       pass "Missing --password → usage/error message emitted"
     else
       fail "Missing --password → no descriptive error in output"

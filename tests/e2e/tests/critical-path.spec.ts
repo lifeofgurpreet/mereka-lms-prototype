@@ -192,6 +192,12 @@ test.describe('Critical path — Mereka Academy', () => {
     const courseHero = page.locator('.course-profile .intro-inner-wrapper').first();
     await expect(courseHero).toBeVisible({ timeout: 20_000 });
 
+    const courseLede = page.locator('.course-profile__lede').first();
+    await expect(courseLede).toBeVisible({ timeout: 20_000 });
+
+    const courseChecklist = page.locator('.course-decision-support').first();
+    await expect(courseChecklist).toBeVisible({ timeout: 20_000 });
+
     const courseSummary = page.locator('.course-sidebar .course-summary').first();
     await expect(courseSummary).toBeVisible({ timeout: 20_000 });
 
@@ -204,6 +210,17 @@ test.describe('Critical path — Mereka Academy', () => {
 
     // Confirm it's not disabled
     await expect(enrollButton).toBeEnabled({ timeout: 5_000 });
+
+    const canonicalHref = await page.locator('link[rel="canonical"]').getAttribute('href');
+    expect(canonicalHref, 'course about page should emit canonical href').toContain(`/courses/${COURSE_ID}/about`);
+
+    const ogImage = await page.locator('meta[property="og:image"]').getAttribute('content');
+    expect(ogImage, 'course about page should emit og:image').toBeTruthy();
+
+    const schemaTag = page.locator('script[type="application/ld+json"]').first();
+    await expect(schemaTag).toBeVisible({ timeout: 20_000 });
+    const schemaText = (await schemaTag.textContent()) ?? '';
+    expect(schemaText).toContain('"@type": "Course"');
   });
 
   /**

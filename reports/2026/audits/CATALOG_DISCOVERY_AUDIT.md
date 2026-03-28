@@ -145,33 +145,33 @@ Ulmo officially deprecates the legacy server-rendered course listing (`/courses`
 |------|-----------|-----------------|---------|--------------------------|--------------|---------|
 | LMS homepage (`/`) | `Mereka Academy` (from platform name) | None | None | None | Default edX | None |
 | Course listing (`/courses`) | `Courses` (upstream default) | None | None | None | Default edX | None |
-| Course-about (`/courses/<key>/about`) | `{course.display_name}` | None | `og:title`, `og:description` (Indigo) | None | Default edX | None |
+| Course-about (`/courses/<key>/about`) | `{course.display_name}` | Mereka override | `og:title`, `og:description`, `og:image`, `og:url`, canonical | `Course` JSON-LD | Default edX | None |
 | Learner Dashboard MFE | `Mereka Academy` (from SITE_NAME) | None | None | None | n/a (MFE) | n/a |
 
-**OG tags on course-about**: Provided by the Indigo `course_about.html` template (`<%block name="headextra">`). This block outputs `og:title` from `course.display_name_with_default` and `og:description` from `get_course_about_section(request, course, 'short_description')`. These are correct but minimal.
+**Course-about metadata status (updated 2026-03-28)**: Mereka now owns `lms/templates/courseware/course_about.html` directly. The override keeps Indigo's functional behavior but adds a cleaned meta description, `og:image`, `og:url`, canonical URL, and `Course` JSON-LD.
 
 **Gaps**:
 
-1. **No JSON-LD / Schema.org structured data** on any page. Course-about pages lack `Course` schema markup (name, description, provider, startDate, image, url). This is a significant SEO gap — Google's rich results for courses require `Course` + `CourseInstance` schema.
+1. **Homepage and catalog listing still lack JSON-LD / Schema.org structured data**. Course-about pages now emit `Course` schema, but the broader discovery journey still has no structured data or rich-result hints.
 
-2. **No `og:image`** on course-about pages. The Indigo template provides `og:title` and `og:description` but not `og:image`. Sharing a course link on social media will show no preview image.
+2. **Homepage and catalog listing still lack social preview metadata**. Course-about now ships rich metadata, but the browse surfaces still have no `og:image`, `og:url`, or meaningful social preview treatment.
 
-3. **No `og:url`** or `og:type` on any page.
+3. **Homepage and catalog listing still lack canonical metadata**. Course-about now emits canonical URLs, but the listing and homepage do not.
 
 4. **No meta description** on homepage or course listing.
 
 5. **No structured sitemap** (`/sitemap.xml`). Open edX ships a basic sitemap at `/sitemap.xml` via `django.contrib.sitemaps`, but it is not configured or verified for this deployment.
 
-6. **No canonical URL tags** (`<link rel="canonical">`) on course-about pages, creating duplicate content risk (e.g. `/courses/<key>/about` accessed with and without trailing slash, or via preview domain).
+6. **No canonical URL tags** (`<link rel="canonical">`) on homepage or catalog listing pages, creating duplicate content risk once alternate domains and preview hosts are involved.
 
-7. **Course description truncation**: `get_course_about_section(request, course, 'short_description')` returns raw HTML from the Studio rich-text editor. This is injected into `og:description` without stripping tags, which can produce garbage in social share previews.
+7. **Course description sanitization on non-course-about surfaces** remains ad hoc. Course-about now strips HTML before emitting metadata, but the rest of the discovery journey still lacks a clean SEO description contract.
 
 ### 5.2 Priority Ranking
 
 | Gap | SEO Impact | Implementation Complexity | Priority |
 |-----|-----------|--------------------------|----------|
-| JSON-LD `Course` schema on course-about | High (Google rich results) | Medium (Mako template patch) | P1 |
-| `og:image` on course-about | High (social sharing) | Low (add `course_image_url` to headextra block) | P1 |
+| JSON-LD and canonical metadata on homepage/listing | High | Medium | P1 |
+| `og:image` and meta description on homepage/listing | High | Low | P1 |
 | Meta description on homepage/listing | Medium | Low | P2 |
 | Canonical URL tags | Medium | Low | P2 |
 | HTML-stripped `og:description` | Medium | Low | P2 |
@@ -188,15 +188,15 @@ The T117 tracker task says "Legacy catalog surface deprecated." In Ulmo context 
 | Surface | Deprecation Action | When |
 |---------|-------------------|------|
 | Legacy course listing (`/courses` with Elasticsearch-backed `#discovery-form`) | Redirect to learner-dashboard MFE or future catalog MFE | When catalog MFE is available |
-| Legacy course-about page (`/courses/<key>/about`) | Replace with Ulmo's new course-about MFE (`frontend-app-course-about`) or keep Indigo template | Decision needed — see Section 6.2 |
+| Legacy course-about page (`/courses/<key>/about`) | Keep LMS template ownership explicit until a dedicated course-about MFE exists | Current plan |
 
 ### 6.2 Architecture Decision Required
 
-**Option A — Keep Indigo template, apply Mereka overrides (current state)**
+**Option A — Keep LMS template ownership in the Mereka theme (current state)**
 - No new MFE to build or deploy
-- Tokens already applied via CSS
-- SEO gaps remain (no JSON-LD, no og:image)
-- Responsive to Ulmo upstream course-about improvements
+- Tokens and hero semantics live in canonical LMS theme files
+- Course-about SEO contract is now locally owned
+- Responsive to Ulmo upstream behavior because the override is still a server-rendered LMS surface
 
 **Option B — Build and serve `frontend-app-course-about` MFE**
 - Full Paragon/token control
@@ -204,7 +204,7 @@ The T117 tracker task says "Legacy catalog surface deprecated." In Ulmo context 
 - Requires MFE build, Caddy routing, env config wiring
 - Not yet in `MFE_CONFIG_API_URLS` or `deploy/k8s/base/apps/mfe/`
 
-**Recommendation**: Option A in the short term (add JSON-LD and og:image to the Indigo template via a Mereka theme override of `courseware/course_about.html`). Defer Option B to a dedicated MFE track.
+**Recommendation**: Stay on Option A until a real course-about MFE track exists. The immediate gap is no longer course-about ownership; it is homepage/listing SEO and broader browse-to-enroll polish.
 
 ---
 
@@ -222,14 +222,9 @@ To fully apply Design Tokens to catalog surfaces, the following work is needed:
 
 ### 7.2 Medium Term (SEO on catalog pages)
 
-1. Create `infrastructure/tutor/themes/mereka/lms/templates/courseware/course_about.html`
-2. Override the `headextra` block to add:
-   - `og:image` from `course_image_url`
-   - `og:url` (canonical)
-   - `og:type = "website"`
-   - `<link rel="canonical">` tag
-   - JSON-LD `Course` schema block
-3. Strip HTML from `og:description` (use `re.sub(r'<[^>]+>', '', ...)` or Django's `strip_tags`)
+1. Add meaningful homepage/listing meta descriptions and social images
+2. Decide whether `/courses` gets collection-level JSON-LD or stays a pure browse surface
+3. Verify sitemap and canonical behavior across primary and tenant domains
 
 ### 7.3 Long Term
 
