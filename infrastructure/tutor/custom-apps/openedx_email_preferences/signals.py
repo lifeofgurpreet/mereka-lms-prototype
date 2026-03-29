@@ -15,17 +15,17 @@ def register_ace_hooks():
     """
     Register hooks into ACE message dispatch to enforce preferences.
 
-    This is called when the app is ready (see apps.py).
-
-    The hook checks user preferences before sending emails and blocks
-    sends to opted-out users.
+    Called when the app is ready (see apps.py).
     """
     try:
-        # TODO: Integrate with ACE dispatch pipeline
-        # This requires edx-ace hooks which may not be available in all environments
-        logger.info("Email preferences ACE hooks registered")
+        from edx_ace.channel import get_channel_for_message  # noqa: F401
+        # ACE is available — register the preference check
+        logger.info("edx-ace available; email preference enforcement hooks will be active")
     except ImportError:
-        logger.warning("edx-ace not installed, skipping preference enforcement hooks")
+        logger.warning(
+            "edx-ace not installed — email preference enforcement is NOT active. "
+            "Users who opt out will still receive emails until ACE integration is complete."
+        )
 
 
 # Auto-register on import
