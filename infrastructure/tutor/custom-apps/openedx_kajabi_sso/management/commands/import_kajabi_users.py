@@ -57,9 +57,17 @@ class Command(BaseCommand):
         self.stdout.write(self.style.NOTICE(f"Welcome emails: {'enabled' if send_welcome else 'disabled'}"))
 
         if dry_run:
-            self.stdout.write(self.style.WARNING("DRY RUN mode enabled (not yet implemented)"))
-            # TODO: Implement dry-run mode that previews import without writing to DB
-            raise CommandError("Dry-run mode not yet implemented")
+            # Count rows in CSV to give operators a preview without writing to DB
+            with open(csv_file_path, newline='') as f:
+                import csv as csv_module
+                reader = csv_module.DictReader(f)
+                rows = list(reader)
+            count = len(rows)
+            self.stdout.write(self.style.WARNING(f"DRY RUN: {count} user(s) found in CSV — no users will be created."))
+            for row in rows:
+                self.stdout.write(f"  would import: {row.get('email', '(no email)')} ({row.get('first_name', '')} {row.get('last_name', '')})")
+            self.stdout.write(self.style.SUCCESS(f"Dry run complete. {count} user(s) would be imported."))
+            return
 
         try:
             # Import users

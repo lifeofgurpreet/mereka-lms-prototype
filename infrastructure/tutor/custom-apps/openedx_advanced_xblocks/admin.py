@@ -409,7 +409,8 @@ class XBlockGradebookEntryAdmin(admin.ModelAdmin):
 
         self.message_user(
             request,
-            f"Queued {count} grade(s) for gradebook sync retry"
+            f"Gradebook sync retry is not yet implemented. {count} grade(s) selected but no action taken.",
+            level='warning'
         )
 
     retry_gradebook_sync.short_description = 'Retry gradebook sync'
