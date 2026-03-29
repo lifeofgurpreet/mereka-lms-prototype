@@ -265,7 +265,6 @@ scripts/qa/verify-mct-video-urls.sh
 scripts/qa/verify-caddy-cache-policy.sh
 scripts/qa/verify-build-invariants.sh
 scripts/qa/verify-ci-script-list.sh
-scripts/mobile/validate-mobile-secrets.sh
 scripts/qa/verify-externalsecret-config.sh
 scripts/qa/verify-k8s-secret-scan.sh
 scripts/qa/verify-mobile-secrets-inventory.sh

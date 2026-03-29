@@ -631,3 +631,44 @@ class TaskTests(unittest.TestCase):
         sig = inspect.signature(purge_expired_notifications)
         default = sig.parameters['retention_days'].default
         self.assertEqual(default, 90)
+
+
+class TestOrgSlugNotSpoofable:
+    """Verify the tenant isolation fix: org_slug must NOT come from query params."""
+
+    def test_get_user_org_slug_ignores_query_params(self):
+        """_get_user_org_slug must derive org from site config, not from request.query_params."""
+        import sys
+        import types
+
+        # Stub the openedx site_configuration module
+        helpers_mod = types.ModuleType("helpers")
+        helpers_mod.get_value = lambda key, default=None: "mereka" if key == "course_org_filter" else default
+
+        site_config_mod = types.ModuleType("site_configuration")
+        site_config_mod.helpers = helpers_mod
+
+        djangoapps_mod = sys.modules.get("openedx.core.djangoapps", types.ModuleType("djangoapps"))
+        djangoapps_mod.site_configuration = site_config_mod
+        sys.modules["openedx.core.djangoapps"] = djangoapps_mod
+        sys.modules["openedx.core.djangoapps.site_configuration"] = site_config_mod
+        sys.modules["openedx.core.djangoapps.site_configuration.helpers"] = helpers_mod
+
+        from openedx_notifications.views import NotificationViewSet
+
+        view = NotificationViewSet()
+        # Mock a request with a spoofed org_slug query param
+        mock_request = type("Request", (), {
+            "query_params": {"org_slug": "attacker-org"},
+            "user": type("User", (), {"id": 1, "is_authenticated": True})(),
+        })()
+        view.request = mock_request
+
+        result = view._get_user_org_slug()
+        # Must NOT return the attacker's spoofed value
+        assert result != "attacker-org", (
+            f"SECURITY: _get_user_org_slug returned spoofed value '{result}'. "
+            "Tenant isolation is broken — org_slug is still read from query params."
+        )
+        # Should return the site-config derived value
+        assert result == "mereka", f"Expected 'mereka' from site config, got '{result}'"

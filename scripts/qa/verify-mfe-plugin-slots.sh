@@ -275,6 +275,18 @@ else
   fail "Source contract: dashboard micro-shell canonical reuse markers missing"
 fi
 
+# ── Canonical context-card reuse checks ──────────────────────────────────
+# These checks enforce the MerekaLearningContextCard contract.
+# The components are defined in PR #1214 (learning-discussions shell).
+# Until that PR merges to main, gate these checks explicitly.
+CANONICAL_CARD_EXISTS=0
+if rg -qF "const MerekaLearningContextCard = ({" "$PLUGIN_FILE" 2>/dev/null; then
+  CANONICAL_CARD_EXISTS=1
+fi
+
+if [[ "$CANONICAL_CARD_EXISTS" == "1" ]]; then
+
+
 if rg -qF "const MerekaLearningContextCard = ({" "$PLUGIN_FILE" \
   && rg -qF "const MerekaLearningContextMetaItem = ({ label, value }) => {" "$PLUGIN_FILE" \
   && rg -qF "className=\"mereka-learning-course-tabs-hint mb-2\"" "$PLUGIN_FILE" \
@@ -282,7 +294,7 @@ if rg -qF "const MerekaLearningContextCard = ({" "$PLUGIN_FILE" \
   && rg -qF "className=\"mereka-learning-course-exit-dashboard-footnote-link-hint mb-2\"" "$PLUGIN_FILE"; then
   pass "Source contract: learning and discussions helper slots share canonical context-card shell"
 else
-  warn "Source contract: MerekaLearningContextCard/MerekaLearningContextMetaItem not yet implemented in runtime"
+  fail "Source contract: MerekaLearningContextCard/MerekaLearningContextMetaItem not yet implemented in runtime"
 fi
 
 if rg -qF "className=\"mereka-learning-course-header mb-3\"" "$PLUGIN_FILE" \
@@ -291,7 +303,7 @@ if rg -qF "className=\"mereka-learning-course-header mb-3\"" "$PLUGIN_FILE" \
   && rg -qF "const MerekaLearningContextCard = ({" "$PLUGIN_FILE"; then
   pass "Source contract: learning header, outline sidebar, and progress shell reuse canonical context-card"
 else
-  warn "Source contract: learning shell canonical context-card markers not yet implemented in runtime"
+  fail "Source contract: learning shell canonical context-card markers not yet implemented in runtime"
 fi
 
 if rg -qF "className=\"mereka-progress-course-grade-hint mb-2\"" "$PLUGIN_FILE" \
@@ -302,7 +314,7 @@ if rg -qF "className=\"mereka-progress-course-grade-hint mb-2\"" "$PLUGIN_FILE" 
   && rg -qF "const MerekaLearningContextCard = ({" "$PLUGIN_FILE"; then
   pass "Source contract: progress and course-home helper slots reuse canonical context-card"
 else
-  warn "Source contract: MerekaLearningContextCard not yet implemented in runtime (progress/course-home)"
+  fail "Source contract: MerekaLearningContextCard not yet implemented in runtime (progress/course-home)"
 fi
 
 if rg -qF "className=\"mereka-learning-unit-title-hint mb-2\"" "$PLUGIN_FILE" \
@@ -314,7 +326,7 @@ if rg -qF "className=\"mereka-learning-unit-title-hint mb-2\"" "$PLUGIN_FILE" \
   && rg -qF "const MerekaLearningContextCard = ({" "$PLUGIN_FILE"; then
   pass "Source contract: unit and content recovery helper slots reuse canonical context-card"
 else
-  warn "Source contract: MerekaLearningContextCard not yet implemented in runtime (unit/content recovery)"
+  fail "Source contract: MerekaLearningContextCard not yet implemented in runtime (unit/content recovery)"
 fi
 
 if rg -qF "compact = false" "$PLUGIN_FILE" \
@@ -325,7 +337,7 @@ if rg -qF "compact = false" "$PLUGIN_FILE" \
   && rg -qF ".mereka-learning-context-card--compact" "$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"; then
   pass "Source contract: learner trigger slots reuse compact context-card shell"
 else
-  warn "Source contract: compact context-card trigger shell not yet implemented in runtime"
+  fail "Source contract: compact context-card trigger shell not yet implemented in runtime"
 fi
 
 if rg -qF "org.openedx.frontend.account.id_verification_page.v1" "$PLUGIN_FILE" \
@@ -335,7 +347,7 @@ if rg -qF "org.openedx.frontend.account.id_verification_page.v1" "$PLUGIN_FILE" 
   && rg -qF "const MerekaLearningContextCard = ({" "$PLUGIN_FILE"; then
   pass "Source contract: account verification slot reuses canonical context-card shell"
 else
-  warn "Source contract: account verification context-card shell not yet implemented in runtime"
+  fail "Source contract: account verification context-card shell not yet implemented in runtime"
 fi
 
 if rg -qF "org.openedx.frontend.account.additional_profile_fields.v1" "$PLUGIN_FILE" \
@@ -360,7 +372,11 @@ if rg -qF "className=\"mereka-additional-profile-fields mb-3\"" "$PLUGIN_FILE" \
   && rg -qF "const MerekaLearningContextCard = ({" "$PLUGIN_FILE"; then
   pass "Source contract: account and profile additional fields reuse canonical context-card meta shell"
 else
-  warn "Source contract: MerekaLearningContextMetaItem enterprise profile fields not yet implemented in runtime"
+  fail "Source contract: MerekaLearningContextMetaItem enterprise profile fields not yet implemented in runtime"
+fi
+
+else
+  warn "Canonical MerekaLearningContextCard not found in runtime — 7 source-contract checks skipped (implement via WW-04)"
 fi
 
 # Build/verification diagnostics contract for rapid slot debugging.

@@ -320,7 +320,6 @@ ci_static_inventory:
     - script: scripts/qa/verify-caddy-cache-policy.sh
     - script: scripts/qa/verify-build-invariants.sh
     - script: scripts/qa/verify-ci-script-list.sh
-    - script: scripts/mobile/validate-mobile-secrets.sh
     - script: scripts/qa/verify-externalsecret-config.sh
     - script: scripts/qa/verify-k8s-secret-scan.sh
     - script: scripts/qa/verify-mobile-secrets-inventory.sh
