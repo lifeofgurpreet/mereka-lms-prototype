@@ -70,13 +70,18 @@ class NotificationViewSet(viewsets.ModelViewSet):
 
     def _get_user_org_slug(self):
         """
-        Get the user's current organization slug.
+        Get the organization slug for the current request's site.
 
-        In production, this would derive from user profile or session.
-        For now, use a default or request parameter.
+        Derives the org from the SiteConfiguration ``course_org_filter`` value,
+        which is set per-tenant and is not caller-controllable.
         """
-        # TODO: Integrate with multi-tenancy spec to get org_slug from user profile
-        return self.request.query_params.get('org_slug', 'default')
+        from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
+        org_filter = configuration_helpers.get_value('course_org_filter', None)
+        if isinstance(org_filter, list) and org_filter:
+            return org_filter[0].lower()
+        if isinstance(org_filter, str) and org_filter:
+            return org_filter.lower()
+        return 'default'
 
     def destroy(self, request, *args, **kwargs):
         """
