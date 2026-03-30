@@ -144,6 +144,11 @@ RUN pip install django-ratelimit==4.1.0
 
 # Install pymongo SRV extras for MongoDB Atlas
 RUN pip install "pymongo[srv]"
+
+# Aspects analytics: xAPI event routing + ClickHouse event sinks
+# Pinned to Python 3.11 compatible versions (v10.0.0+ and v1.1.3+ require 3.12)
+RUN pip install "edx-event-routing-backends>=9.3.5,<9.4"
+RUN pip install "platform-plugin-aspects==1.1.2"
 """,
 )
 

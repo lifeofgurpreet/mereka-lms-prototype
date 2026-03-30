@@ -1757,6 +1757,31 @@ ENABLE_VIDEO_XAPI_EVENTS = os.environ.get(
     "ENABLE_VIDEO_XAPI_EVENTS", "false"
 ).lower() in ("true", "1", "yes")
 
+# ============================================
+# Aspects Analytics — Event Routing Backends
+# ============================================
+# event-routing-backends: batched xAPI event delivery
+EVENT_ROUTING_BACKEND_BATCHING_ENABLED = os.environ.get(
+    "EVENT_ROUTING_BACKEND_BATCHING_ENABLED", "true"
+).lower() in ("true", "1", "yes")
+EVENT_ROUTING_BACKEND_BATCH_SIZE = int(os.environ.get("EVENT_ROUTING_BACKEND_BATCH_SIZE", "100"))
+EVENT_ROUTING_BACKEND_BATCH_INTERVAL = int(os.environ.get("EVENT_ROUTING_BACKEND_BATCH_INTERVAL", "5"))
+
+# platform-plugin-aspects: ClickHouse event sinks for course data
+EVENT_SINK_CLICKHOUSE_BACKEND_CONFIG = {
+    "url": "http://" + os.environ.get("ASPECTS_CLICKHOUSE_HOST", "clickhouse") + ":" + os.environ.get("ASPECTS_CLICKHOUSE_PORT", "8123"),
+    "username": os.environ.get("ASPECTS_CLICKHOUSE_USER", "openedx"),
+    "password": os.environ.get("ASPECTS_CLICKHOUSE_PASSWORD", ""),
+    "database": os.environ.get("ASPECTS_CLICKHOUSE_DATABASE", "openedx"),
+    "timeout_secs": int(os.environ.get("ASPECTS_CLICKHOUSE_TIMEOUT", "30")),
+}
+EVENT_SINK_CLICKHOUSE_COURSE_OVERVIEWS_ENABLED = os.environ.get(
+    "EVENT_SINK_CLICKHOUSE_COURSE_OVERVIEWS_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+EVENT_SINK_CLICKHOUSE_COURSE_ENROLLMENT_ENABLED = os.environ.get(
+    "EVENT_SINK_CLICKHOUSE_COURSE_ENROLLMENT_ENABLED", "false"
+).lower() in ("true", "1", "yes")
+
 # Video analytics event recording
 ENABLE_VIDEO_ANALYTICS = os.environ.get(
     "ENABLE_VIDEO_ANALYTICS", "false"
