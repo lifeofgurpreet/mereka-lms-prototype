@@ -25,7 +25,8 @@ fail() { FAIL=$((FAIL + 1)); echo "  FAIL: $1"; }
 
 MFE_FOOTER="${REPO_ROOT}/infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js"
 DJANGO_FOOTER="${REPO_ROOT}/infrastructure/tutor/themes/mereka/lms/templates/footer.html"
-DATA_CONTRACT="${REPO_ROOT}/deploy/k8s/base/apps/openedx/settings/lms/mereka_footer.py"
+# Footer content is now hardcoded in the Django Mako template (no separate data-contract file).
+# Social links, app badge URLs, etc. are checked directly in the Django footer.
 
 echo "=== Footer Content Parity Verifier ==="
 echo ""
@@ -99,12 +100,6 @@ else
   fail "Django footer source missing: ${DJANGO_FOOTER}"
 fi
 
-if [[ -f "$DATA_CONTRACT" ]]; then
-  pass "Footer data contract exists"
-else
-  fail "Footer data contract missing: ${DATA_CONTRACT}"
-fi
-
 # -------------------------------------------------------------------
 # CSS class structure: both use mereka-footer--v2
 # -------------------------------------------------------------------
@@ -124,17 +119,17 @@ check_both "footer-columns grid" "footer-columns"
 echo ""
 echo "--- App store badges ---"
 
-# Badge URLs live in the data contract; both renderers read from appBadges
-if grep -qF "play.google.com/store/apps" "$DATA_CONTRACT" 2>/dev/null; then
-  pass "Google Play badge URL in data contract"
+# Badge URLs are hardcoded in the Django footer; MFE reads from runtime config.
+if grep -qF "play.google.com/store/apps" "$DJANGO_FOOTER" 2>/dev/null; then
+  pass "Google Play badge URL in Django footer"
 else
-  fail "Google Play badge URL MISSING from data contract"
+  fail "Google Play badge URL MISSING from Django footer"
 fi
 
-if grep -qF "apps.apple.com" "$DATA_CONTRACT" 2>/dev/null; then
-  pass "App Store badge URL in data contract"
+if grep -qF "apps.apple.com" "$DJANGO_FOOTER" 2>/dev/null; then
+  pass "App Store badge URL in Django footer"
 else
-  fail "App Store badge URL MISSING from data contract"
+  fail "App Store badge URL MISSING from Django footer"
 fi
 
 check_regex_both "App badge rendering (appBadges loop)" "(appBadges|footer-badge)"
@@ -156,16 +151,16 @@ check_both "WhatsApp SVG icon path" "M.057 24l1.687-6.163"
 echo ""
 echo "--- Social icons ---"
 
-# Check data contract has all 5 social links
+# Django footer has all 5 social links hardcoded; MFE reads from config at runtime.
 for platform in TikTok Instagram Facebook LinkedIn YouTube; do
-  if grep -qF "\"name\": \"${platform}\"" "$DATA_CONTRACT" 2>/dev/null; then
-    pass "${platform} in data contract"
+  if grep -qF "\"name\": \"${platform}\"" "$DJANGO_FOOTER" 2>/dev/null; then
+    pass "${platform} social link in Django footer"
   else
-    fail "${platform} MISSING from data contract"
+    fail "${platform} social link MISSING from Django footer"
   fi
 done
 
-# Both footers render social icons from the data contract
+# Both footers render social icons with SVG
 check_both "Social icon SVG rendering" "viewBox=\"0 0 24 24\""
 check_regex_both "Social link loop (MFE .map / Mako for)" "(socialLinks\\.map|for social_link in)"
 
