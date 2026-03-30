@@ -142,16 +142,16 @@ scripts/qa/verify-aspects-compat.sh
 scripts/qa/verify-email-templates.sh
 scripts/qa/verify-content-libraries-advanced.sh
 scripts/qa/verify-correlation-header-propagation.sh
-scripts/qa/verify-certificate-branding.sh
-scripts/qa/verify-e2e-framework.sh
-scripts/qa/verify-credentials-issuance.sh
-scripts/qa/verify-credentials-ops.sh
-scripts/qa/verify-purchase-gateway-scaffold.sh
-scripts/qa/no_runtime_release_side_effects.sh
-scripts/governance/validate-registry.sh
-scripts/qa/test-verify-script-registry-completeness.sh
-scripts/qa/verify-tenant-specs.sh
-scripts/qa/verify-redis-db-allocation.sh
-scripts/qa/verify-agent-context-lock.sh --allow-main
-scripts/qa/verify-runtime-proof-fixture-pack.sh
-scripts/qa/verify-env-auth-parity.sh
+scripts/qa/verify-brand-parity.sh
+scripts/qa/verify-mfe-slot-profile-persistence.sh
+scripts/qa/verify-admin-console.sh
+scripts/qa/verify-credentials-verification.sh
+scripts/qa/verify-advanced-xblocks.sh
+scripts/qa/verify-dr-drill-schedule.sh
+scripts/release/release-gate.sh --skip-cluster
+scripts/qa/verify-script-registry-completeness.sh
+scripts/qa/test-verify-canonical-entrypoints.sh
+scripts/qa/verify-enterprise-auth-contract.sh
+scripts/qa/verify-enterprise-mfe-build-contract.sh
+scripts/qa/verify-ci-execution-contract.sh
+scripts/qa/verify-vendored-settings-drift.sh

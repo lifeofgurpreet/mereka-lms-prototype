@@ -421,6 +421,7 @@ scripts/qa/verify-enterprise-sso.sh
 scripts/qa/verify-logging-pipeline.sh
 scripts/qa/verify-correlation-header-propagation.sh
 scripts/qa/verify-branding-health.sh
+scripts/qa/verify-mako-template-syntax.sh
 scripts/qa/verify-brand-parity.sh
 scripts/qa/verify-certificate-branding.sh
 scripts/qa/verify-mfe-plugin-slots.sh

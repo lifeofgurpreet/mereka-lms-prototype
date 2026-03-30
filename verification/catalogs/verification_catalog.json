@@ -7859,6 +7859,34 @@
         "ci_static"
       ],
       "env_scope": [
+        "dev"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-mako-template-syntax.sh",
+      "reference_count": 4,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "high",
+      "spec_ids": [
+        "AC-FRONT-090"
+      ],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
+      "env_scope": [
         "global"
       ],
       "kind": "verify",
@@ -17377,26 +17405,26 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
-    "ci_static_bound": 357,
+    "ci_static_bound": 358,
     "kinds": {
-      "verify": 577
+      "verify": 578
     },
     "mutability": {
       "destructive": 9,
       "mutating": 18,
-      "read-only": 550
+      "read-only": 551
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 400,
+      "active": 401,
       "manual_only": 177
     },
     "tiers": {
       "exploratory_manual": 180,
       "periodic_runtime": 16,
-      "release_blocking": 381
+      "release_blocking": 382
     },
-    "total_verify_scripts": 577,
+    "total_verify_scripts": 578,
     "workflow_direct_bound": 54
   },
   "version": "1"

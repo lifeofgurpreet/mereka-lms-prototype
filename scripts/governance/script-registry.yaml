@@ -476,6 +476,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-logging-pipeline.sh
     - script: scripts/qa/verify-correlation-header-propagation.sh
     - script: scripts/qa/verify-branding-health.sh
+    - script: scripts/qa/verify-mako-template-syntax.sh
     - script: scripts/qa/verify-brand-parity.sh
     - script: scripts/qa/verify-certificate-branding.sh
     - script: scripts/qa/verify-mfe-plugin-slots.sh
@@ -2401,6 +2402,17 @@ scripts:
     owner: platform-team
     purpose: Validate Multisite Config
     criticality: release-supporting
+
+  - path: scripts/qa/verify-mako-template-syntax.sh
+    owner: platform-team
+    purpose: Static syntax check for Mako templates — catches undefined _() and missing imports
+    inputs: []
+    outputs: [exit code]
+    side_effects: none
+    dry_run: n/a
+    lanes: [dev, staging, prod]
+    proof_command: bash scripts/qa/verify-mako-template-syntax.sh
+    criticality: release-blocking
 
   - path: scripts/qa/verify-a11y-regression-lane.sh
     owner: platform-team
