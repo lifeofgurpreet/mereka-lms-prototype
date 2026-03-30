@@ -44,9 +44,9 @@ main() {
     exit 0
   fi
 
-  local tmp_bin
+  local tmp_bin=""
+  trap 'rm -f "${tmp_bin:-}"' EXIT
   tmp_bin="$(mktemp -t cosign-linux-amd64.XXXXXX)"
-  trap 'rm -f "${tmp_bin}"' EXIT
 
   timeout "${DOWNLOAD_TIMEOUT}" curl -fsSL --retry 3 --retry-delay 2 --retry-connrefused \
     -o "${tmp_bin}" \
