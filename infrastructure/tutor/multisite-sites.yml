@@ -25,7 +25,7 @@ sites:
       ENABLE_COMPREHENSIVE_THEMING: true
       course_org_filter:
         - MEREKA
-      logo_image: https://academyv2.mereka.io/static/mereka/images/logo-horizontal.png
+      logo_image: https://academyv2.mereka.io/static/mereka/images/logo-horizontal.svg
       logo_url: /
       favicon_path: mereka/images/favicon.ico
       homepage_banner_enabled: false
@@ -45,7 +45,7 @@ sites:
       ENABLE_COMPREHENSIVE_THEMING: true
       course_org_filter:
         - BIJIBIJI
-      logo_image: https://academyv2.mereka.io/static/mereka/images/logo-horizontal.png
+      logo_image: https://academyv2.mereka.io/static/mereka/images/logo-horizontal.svg
       logo_url: /
       favicon_path: mereka/images/favicon.ico
       homepage_banner_enabled: false
@@ -65,6 +65,6 @@ sites:
       ENABLE_COMPREHENSIVE_THEMING: true
       course_org_filter:
         - SKILLOURFUTURE
-      logo_image: https://academyv2.mereka.io/static/mereka/images/logo-horizontal.png
+      logo_image: https://academyv2.mereka.io/static/mereka/images/logo-horizontal.svg
       logo_url: /
       favicon_path: mereka/images/favicon.ico

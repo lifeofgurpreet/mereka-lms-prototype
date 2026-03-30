@@ -11,13 +11,13 @@ organizations:
 
 sites:
   - domain: staging.academyv2.mereka.io
-    name: Mereka Academy (Staging)
+    name: Mereka Academy
     orgs:
       - MEREKA
     site_values:
       domain: staging.academyv2.mereka.io
-      site_name: Mereka Academy (Staging)
-      platform_name: Mereka Academy (Staging)
+      site_name: Mereka Academy
+      platform_name: Mereka Academy
       LMS_ROOT_URL: https://staging.academyv2.mereka.io
       CMS_ROOT_URL: https://staging.studio.academyv2.mereka.io
       MFE_BASE_URL: https://staging.apps.academyv2.mereka.io
@@ -25,19 +25,19 @@ sites:
       ENABLE_COMPREHENSIVE_THEMING: true
       course_org_filter:
         - MEREKA
-      logo_image: https://staging.academyv2.mereka.io/static/mereka/images/logo-horizontal.png
+      logo_image: https://staging.academyv2.mereka.io/static/mereka/images/logo-horizontal.svg
       logo_url: /
       favicon_path: mereka/images/favicon.ico
       homepage_banner_enabled: false
 
   - domain: staging.preview.academyv2.mereka.io
-    name: Mereka Academy Preview (Staging)
+    name: Mereka Academy Preview
     orgs:
       - MEREKA
     site_values:
       domain: staging.preview.academyv2.mereka.io
-      site_name: Mereka Academy Preview (Staging)
-      platform_name: Mereka Academy (Staging)
+      site_name: Mereka Academy Preview
+      platform_name: Mereka Academy
       LMS_ROOT_URL: https://staging.preview.academyv2.mereka.io
       CMS_ROOT_URL: https://staging.studio.academyv2.mereka.io
       MFE_BASE_URL: https://staging.apps.academyv2.mereka.io
@@ -45,7 +45,7 @@ sites:
       ENABLE_COMPREHENSIVE_THEMING: true
       course_org_filter:
         - MEREKA
-      logo_image: https://staging.preview.academyv2.mereka.io/static/mereka/images/logo-horizontal.png
+      logo_image: https://staging.preview.academyv2.mereka.io/static/mereka/images/logo-horizontal.svg
       logo_url: /
       favicon_path: mereka/images/favicon.ico
       homepage_banner_enabled: false
