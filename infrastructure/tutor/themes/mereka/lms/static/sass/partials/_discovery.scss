@@ -1430,3 +1430,13 @@
     justify-items: start;
   }
 }
+
+// Override upstream float/width at >=980px — must match specificity of
+// .find-courses .courses-container .courses:not(.no-course-discovery) .courses-listing .courses-listing-item
+@media screen and (min-width: 980px) {
+  .find-courses .courses-container .courses:not(.no-course-discovery) .courses-listing .courses-listing-item {
+    float: none;
+    width: 100%;
+    display: flex;
+  }
+}

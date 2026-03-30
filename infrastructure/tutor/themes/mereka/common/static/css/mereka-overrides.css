@@ -932,3 +932,4 @@ table thead th {
 }
 /* Lane B fix: override upstream float/width on course cards */
 .find-courses .courses-listing li,.find-courses .courses-listing-item{float:none;width:100%;display:flex;min-width:0}
+@media screen and (min-width:980px){.find-courses .courses-container .courses:not(.no-course-discovery) .courses-listing .courses-listing-item{float:none;width:100%;display:flex;min-width:0}}
