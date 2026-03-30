@@ -949,7 +949,8 @@
 
 .course-info .course-quickfacts__item,
 .course-about .course-quickfacts__item {
-  min-width: min(100%, 10.5rem);
+  min-width: 10.5rem; // CSS min(100%,10.5rem) not supported by Ruby SASS
+  max-width: 100%;
   padding: 0.8rem 1rem;
   border-radius: 20px;
   border: 1px solid rgba(26, 22, 35, 0.08);
@@ -1098,7 +1099,8 @@
 .course-info .media,
 .course-about .media {
   justify-self: end;
-  width: min(100%, 24rem);
+  width: 24rem; // CSS min(100%,24rem) not supported by Ruby SASS
+  max-width: 100%;
 }
 
 .course-info .hero,
