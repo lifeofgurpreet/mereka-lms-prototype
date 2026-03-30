@@ -18,7 +18,7 @@
 # Env:
 #   NAMESPACE=mereka-lms
 #   CONTEXTS="ctx1 ctx2"
-#   OIDC_PROVIDER_DISPLAY_NAME="Sign in with Mereka"
+#   OIDC_PROVIDER_DISPLAY_NAME="Mereka"
 #   VERIFY_OIDC_DISPLAY_NAME=1
 #
 set -euo pipefail
@@ -43,7 +43,7 @@ ENVIRONMENT="auto" # auto | prod | dev | staging
 
 # If true, allow an empty domain list (not recommended).
 ALLOW_EMPTY_DOMAINS="${ALLOW_EMPTY_DOMAINS:-0}"
-OIDC_PROVIDER_DISPLAY_NAME="${OIDC_PROVIDER_DISPLAY_NAME:-Sign in with Mereka}"
+OIDC_PROVIDER_DISPLAY_NAME="${OIDC_PROVIDER_DISPLAY_NAME:-Mereka}"
 VERIFY_OIDC_DISPLAY_NAME="${VERIFY_OIDC_DISPLAY_NAME:-1}"
 
 require_bool_01() {

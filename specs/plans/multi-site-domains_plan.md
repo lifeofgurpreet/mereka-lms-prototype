@@ -92,7 +92,7 @@ Before implementing, review what already exists:
   - **Files**: `scripts/shared/config.sh`
 
 - [ ] **[M]** Verify OIDC provider configuration per domain matches spec contract (`scripts/qa/verify-oidc-provider-configs.sh`) | AC: #9 | Depends: None
-  - **Done**: Script already validates OAuth2ProviderConfig for backend_name=oidc per site. Verify it checks: enabled+visible, non-empty effective secret, display name "Sign in with Mereka".
+  - **Done**: Script already validates OAuth2ProviderConfig for backend_name=oidc per site. Verify it checks: enabled+visible, non-empty effective secret, display name "Mereka".
   - **Files**: `scripts/qa/verify-oidc-provider-configs.sh`
 
 ### Test

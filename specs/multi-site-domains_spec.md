@@ -122,7 +122,7 @@ The system MUST support the following domains:
 
 - The latest `OAuth2ProviderConfig` for `backend_name=oidc` MUST be enabled and visible.
 - The latest provider config MUST resolve a non-empty effective secret (`get_setting("SECRET")`).
-- The default provider display label MUST remain `Sign in with Mereka`.
+- The default provider display label MUST be `Mereka` (the authn MFE prepends "Sign in with").
 
 ### Reverse Proxy
 

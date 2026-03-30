@@ -946,7 +946,7 @@ kubectl -n authentik logs deploy/authentik-server --since=2h \
 - Redeploy LMS settings and confirm OIDC authorize redirect includes PKCE params on all served hosts.
 - Ensure latest `OAuth2ProviderConfig` for each LMS site resolves a non-empty secret:
   - Either set DB `secret` on latest row, or ensure runtime `SOCIAL_AUTH_OAUTH_SECRETS["oidc"]` is populated.
-  - If needed for emergency recovery, set latest row name back to `Sign in with Mereka` and secret from runtime env.
+  - If needed for emergency recovery, set latest row name back to `Mereka` and secret from runtime env.
  - If the Authentik flow requires MFA, ensure:
    - platform admins have at least one active MFA device enrolled, or
    - the flow/policy excludes the canary user (so CI can validate callbacks deterministically).

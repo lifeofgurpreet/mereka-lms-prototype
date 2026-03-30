@@ -50,9 +50,9 @@ _mfe_static_base = _mfe_url.rstrip("/")
 # This avoids broken themed-asset redirects on LMS hosts for logo-horizontal*.png
 # and keeps Authn/Account/Profile logos consistent across environments.
 MFE_CONFIG["FAVICON_URL"] = f"{_mfe_static_base}/theme/favicon.ico"
-MFE_CONFIG["LOGO_URL"] = f"{_mfe_static_base}/theme/logo-horizontal.png"
-MFE_CONFIG["LOGO_WHITE_URL"] = f"{_mfe_static_base}/theme/logo-horizontal-white.png"
-MFE_CONFIG["LOGO_TRADEMARK_URL"] = f"{_mfe_static_base}/theme/logo.png"
+MFE_CONFIG["LOGO_URL"] = f"{_mfe_static_base}/theme/logo-horizontal.svg"
+MFE_CONFIG["LOGO_WHITE_URL"] = f"{_mfe_static_base}/theme/logo-horizontal-white.svg"
+MFE_CONFIG["LOGO_TRADEMARK_URL"] = f"{_mfe_static_base}/theme/logo.svg"
 
 # ── Content Security Policy ────────────────────────────────────────────────
 # Migration plan: docs/adr/025-csp-nonce-migration.md

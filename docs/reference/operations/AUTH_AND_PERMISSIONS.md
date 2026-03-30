@@ -248,7 +248,7 @@ Verify (kubectl required, no secrets):
 Notes:
 - The script verifies the domains configured in `scripts/shared/config.sh` (prod vs dev).
 - The script fails if the latest provider config resolves an empty secret (`get_setting("SECRET")`), which protects against Authentik token exchange failures (`Invalid client secret`).
-- The script also enforces the provider display-name contract (`Sign in with Mereka`) by default.
+- The script also enforces the provider display-name contract (`Mereka`) by default.
 - `OAuth2ProviderConfig` is a versioned ConfigurationModel. If you need to "fix" it,
   the safest approach is to **create a new enabled row** (do not try to edit old rows to
   disable them, that can create new versions and accidentally make a disabled version "current").

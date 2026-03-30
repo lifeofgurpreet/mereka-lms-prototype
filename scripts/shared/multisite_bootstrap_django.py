@@ -86,7 +86,7 @@ def hero_html(*, eyebrow: str, heading: str, body: str, primary_label: str, prim
 
 
 ORGANIZATIONS, SITE_DEFINITIONS = load_definitions()
-OIDC_PROVIDER_DISPLAY_NAME = os.environ.get("OIDC_PROVIDER_DISPLAY_NAME", "Sign in with Mereka")
+OIDC_PROVIDER_DISPLAY_NAME = os.environ.get("OIDC_PROVIDER_DISPLAY_NAME", "Mereka")
 
 
 def _extract_host(url_or_host: object) -> str:
@@ -318,10 +318,10 @@ def build_site_mfe_config_overrides(
         mfe_scheme = parsed.scheme or "https"
         mfe_origin = f"{mfe_scheme}://{mfe_host}" if mfe_host else mfe_base
 
-        overrides["FAVICON_URL"] = f"{mfe_origin}/static/images/favicon.ico"
-        overrides["LOGO_URL"] = f"{mfe_origin}/static/images/logo-horizontal.png"
-        overrides["LOGO_WHITE_URL"] = f"{mfe_origin}/static/images/logo-horizontal-white.png"
-        overrides["LOGO_TRADEMARK_URL"] = f"{mfe_origin}/static/images/logo.png"
+        overrides["FAVICON_URL"] = f"{mfe_origin}/theme/favicon.ico"
+        overrides["LOGO_URL"] = f"{mfe_origin}/theme/logo-horizontal.svg"
+        overrides["LOGO_WHITE_URL"] = f"{mfe_origin}/theme/logo-horizontal-white.svg"
+        overrides["LOGO_TRADEMARK_URL"] = f"{mfe_origin}/theme/logo.svg"
 
         if mfe_host:
             overrides["BASE_URL"] = mfe_host
@@ -349,11 +349,11 @@ def build_site_mfe_config_overrides(
             overrides[key] = f"{mfe_origin}{suffix}"
     else:
         overrides["FAVICON_URL"] = f"{lms_root}/theming/asset/{theme_name}/images/favicon.ico"
-        overrides["LOGO_URL"] = f"{lms_root}/theming/asset/{theme_name}/images/logo-horizontal.png"
+        overrides["LOGO_URL"] = f"{lms_root}/theming/asset/{theme_name}/images/logo-horizontal.svg"
         overrides["LOGO_WHITE_URL"] = (
-            f"{lms_root}/theming/asset/{theme_name}/images/logo-horizontal-white.png"
+            f"{lms_root}/theming/asset/{theme_name}/images/logo-horizontal-white.svg"
         )
-        overrides["LOGO_TRADEMARK_URL"] = f"{lms_root}/theming/asset/{theme_name}/images/logo.png"
+        overrides["LOGO_TRADEMARK_URL"] = f"{lms_root}/theming/asset/{theme_name}/images/logo.svg"
         authn_url = default_cfg.get("AUTHN_MICROFRONTEND_URL")
         authn_domain = default_cfg.get("AUTHN_MICROFRONTEND_DOMAIN")
         if authn_url:

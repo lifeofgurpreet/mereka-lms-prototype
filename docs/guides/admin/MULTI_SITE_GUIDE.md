@@ -123,7 +123,7 @@ kubectl rollout restart deployment/caddy -n mereka-lms
 **Contract** (per spec):
 - Latest `OAuth2ProviderConfig` with `backend_name=oidc` must be enabled and visible
 - Must resolve non-empty effective secret (`get_setting("SECRET")`)
-- Provider label: `Sign in with Mereka`
+- Provider label: `Mereka` (authn MFE prepends "Sign in with")
 
 **Verify**:
 ```bash
@@ -423,7 +423,7 @@ Checks each domain:
 Must pass all 3 checks:
 - ✅ Enabled and visible
 - ✅ Non-empty effective secret
-- ✅ Provider label = "Sign in with Mereka"
+- ✅ Provider label = "Mereka"
 
 ---
 

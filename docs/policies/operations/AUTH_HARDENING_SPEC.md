@@ -133,7 +133,7 @@ It aggregates:
 - `scripts/qa/verify-oidc-provider-configs.sh`
   - Verifies the **latest** `OAuth2ProviderConfig` for `backend_name=oidc` is enabled/visible for the configured sites.
   - Verifies the latest config resolves a **non-empty effective secret** (`get_setting("SECRET")`).
-  - Verifies provider display name contract (default: `Sign in with Mereka`).
+  - Verifies provider display name contract (default: `Mereka`).
   - This directly prevents `/auth/login/oidc/` from 500ing with "Can't fetch setting of a disabled backend/provider."
   - This also prevents callback regressions where token exchange fails with `Invalid client secret`.
   - Domain coverage is derived from `scripts/shared/config.sh`:

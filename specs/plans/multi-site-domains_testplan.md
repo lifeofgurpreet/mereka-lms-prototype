@@ -47,7 +47,7 @@ Test types used:
 | AC-008 | Favicon is served from /theming/asset/images/favicon.ico (rewrite active) | smoke_test | `scripts/qa/verify-favicon-multisite.sh` (new) | curl -L follow redirect | Verify Caddy rewrite rule works |
 | AC-009 | OIDC provider configs enabled+visible for all domains | shell_verification | `scripts/qa/verify-oidc-provider-configs.sh` | kubectl exec into LMS pod | Already exists |
 | AC-009 | OIDC provider resolves non-empty effective secret| shell_verification | `scripts/qa/verify-oidc-provider-configs.sh` | kubectl exec into LMS pod | Already exists |
-| AC-009 | OIDC provider display label is "Sign in with Mereka" | shell_verification | `scripts/qa/verify-oidc-provider-configs.sh` | kubectl exec into LMS pod | Already exists (VERIFY_OIDC_DISPLAY_NAME=1) |
+| AC-009 | OIDC provider display label is "Mereka" | shell_verification | `scripts/qa/verify-oidc-provider-configs.sh` | kubectl exec into LMS pod | Already exists (VERIFY_OIDC_DISPLAY_NAME=1) |
 
 ---
 
