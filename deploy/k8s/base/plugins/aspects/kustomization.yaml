@@ -9,6 +9,7 @@ resources:
   - services.yml
   - deployments.yml
   - jobs.yml
+  - sync-job.yml
   - ingress.yml
   - prometheusrule.yml
   - network-policy.yaml
