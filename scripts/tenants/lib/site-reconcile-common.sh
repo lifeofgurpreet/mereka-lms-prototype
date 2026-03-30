@@ -7,7 +7,8 @@
 #
 #   Required (from env file):
 #     NAMESPACE        — K8s namespace to query
-#     TENANT_DEFS      — array of "SLUG|DOMAIN|NAME|LMS_ROOT_URL|MFE_BASE_URL|COURSE_ORG_FILTER_JSON|THEME_NAME"
+#     TENANT_DEFS      — array of
+#                        "SLUG|DOMAIN|NAME|LMS_ROOT_URL|MFE_BASE_URL|COURSE_ORG_FILTER_JSON|THEME_NAME|PRIMARY_COLOR|SECONDARY_COLOR|ACCENT_COLOR"
 #   Required (from env file, function):
 #     _cms_url_for_slug — function returning CMS URL for a given slug
 #
@@ -27,7 +28,7 @@ run_seed() {
   local FAIL=0
 
   for TENANT_LINE in "${TENANT_DEFS[@]}"; do
-    IFS='|' read -r SLUG DOMAIN NAME LMS_ROOT_URL MFE_BASE_URL COURSE_ORG_FILTER_JSON THEME_NAME <<< "$TENANT_LINE"
+    IFS='|' read -r SLUG DOMAIN NAME LMS_ROOT_URL MFE_BASE_URL COURSE_ORG_FILTER_JSON THEME_NAME PRIMARY_COLOR SECONDARY_COLOR ACCENT_COLOR <<< "$TENANT_LINE"
 
     local CMS_ROOT_URL
     CMS_ROOT_URL="$(_cms_url_for_slug "$SLUG")"
@@ -47,6 +48,9 @@ run_seed() {
     echo "  AUTHN_MFE_URL  : $AUTHN_MFE_URL"
     echo "  course_org_filter: $COURSE_ORG_FILTER_JSON"
     echo "  THEME_NAME     : ${THEME_NAME:-(empty)}"
+    echo "  PRIMARY_COLOR  : ${PRIMARY_COLOR:-(empty)}"
+    echo "  SECONDARY_COLOR: ${SECONDARY_COLOR:-(empty)}"
+    echo "  ACCENT_COLOR   : ${ACCENT_COLOR:-(empty)}"
 
     if [[ "$DRY_RUN" == "true" ]]; then
       echo "  [DRY RUN] would create/update Site + SiteConfiguration"
@@ -72,6 +76,9 @@ mfe_url         = "${MFE_BASE_URL}"
 authn_mfe_url   = "${AUTHN_MFE_URL}"
 course_org_filter = json.loads('${COURSE_ORG_FILTER_JSON}')
 theme_name      = "${THEME_NAME}"
+primary_color   = "${PRIMARY_COLOR}"
+secondary_color = "${SECONDARY_COLOR}"
+accent_color    = "${ACCENT_COLOR}"
 
 # ── Site row ──────────────────────────────────────────────────────────────────
 site, site_created = Site.objects.get_or_create(
@@ -95,12 +102,14 @@ site_values = {
     "domain": domain,
     "site_name": name,
     "platform_name": name,
+    "PRIMARY_COLOR": primary_color,
+    "SECONDARY_COLOR": secondary_color,
+    "ACCENT_COLOR": accent_color,
     "LMS_ROOT_URL": lms_url,
     "CMS_ROOT_URL": cms_url,
     "MFE_BASE_URL": mfe_url,
     "AUTHN_MICROFRONTEND_URL": authn_mfe_url,
     "THEME_NAME": theme_name,
-    "ENABLE_LEARNER_HOME_MFE": True,
     "ENABLE_COMPREHENSIVE_THEMING": True,
     "course_org_filter": course_org_filter,
     "logo_image": logo_img,
@@ -126,6 +135,18 @@ site_values = {
         "BASE_URL": mfe_url.replace("https://", "").replace("http://", ""),
         "AUTHN_MICROFRONTEND_URL": authn_mfe_url,
         "AUTHN_MICROFRONTEND_DOMAIN": mfe_url.replace("https://", "").replace("http://", ""),
+        "ACCOUNT_MICROFRONTEND_URL": f"{mfe_url}/account/",
+        "ACCOUNT_PROFILE_URL": f"{mfe_url}/profile",
+        "COMMUNICATIONS_MICROFRONTEND_URL": f"{mfe_url}/communications",
+        "COURSE_AUTHORING_MICROFRONTEND_URL": f"{mfe_url}/authoring",
+        "COURSE_HOME_URL": f"{mfe_url}/learning/",
+        "DISCUSSIONS_MICROFRONTEND_URL": f"{mfe_url}/discussions",
+        "LEARNER_DASHBOARD_URL": f"{mfe_url}/learner-dashboard/",
+        "LEARNER_HOME_MICROFRONTEND_URL": f"{mfe_url}/learner-dashboard/",
+        "LEARNING_BASE_URL": f"{mfe_url}/learning",
+        "PRIMARY_COLOR": primary_color,
+        "SECONDARY_COLOR": secondary_color,
+        "ACCENT_COLOR": accent_color,
     },
 }
 
