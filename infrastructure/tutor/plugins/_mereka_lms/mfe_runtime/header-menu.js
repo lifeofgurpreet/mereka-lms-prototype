@@ -291,33 +291,17 @@ const MerekaAuthnLoginBranding = () => {
   const config = getConfig();
   const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
   const variant = getMerekaVariant(hostname, config);
-  const shellCopy = getMerekaShellCopy(variant);
 
   return (
-    <div className="mereka-authn-login-branding mereka-shell-panel mereka-shell-panel--authn">
-      <p className="mereka-shell-kicker mereka-authn-login-branding__eyebrow">{shellCopy.authn.eyebrow}</p>
+    <div className="mereka-authn-login-branding">
       <a href="/" className="mereka-authn-login-branding__logo">
         <img
           src={getMerekaThemeAssetUrl(config, variant.logoUrl)}
           alt={`${variant.brand} logo`}
           className="mereka-authn-login-branding__logo-img"
         />
+        <span className="mereka-authn-login-branding__brand">{variant.brand}</span>
       </a>
-      <h2 className="mereka-authn-login-branding__title">{shellCopy.authn.title}</h2>
-      <p className="mereka-authn-login-branding__subtitle">
-        {shellCopy.authn.subtitle}
-      </p>
-      <div className="mereka-authn-login-branding__actions">
-        <a
-          href={variant.helpUrl}
-          className="mereka-shell-link mereka-shell-link--quiet"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {shellCopy.authn.supportCtaLabel}
-        </a>
-        <span className="mereka-authn-login-branding__trust-note">{shellCopy.authn.trustNote}</span>
-      </div>
     </div>
   );
 };
