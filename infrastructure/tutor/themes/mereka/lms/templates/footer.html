@@ -2,6 +2,7 @@
 <%page expression_filter="h"/>
 <%!
   from datetime import datetime
+  from django.conf import settings as django_settings
   from django.utils.translation import gettext as _
   from openedx.core.djangoapps.lang_pref.api import footer_language_selector_is_enabled
   from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
@@ -10,10 +11,9 @@
 <%namespace name='static' file='static_content.html'/>
 
 <%
-  support_email = configuration_helpers.get_value('SUPPORT_EMAIL', 'support@mereka.io')
-  help_url = configuration_helpers.get_value('HELP_CENTER_URL', 'https://help.mereka.io/')
-  privacy_url = configuration_helpers.get_value('PRIVACY_POLICY_URL', 'https://legal.mereka.io/privacy-policy/')
-  lms_root = getattr(settings, 'LMS_ROOT_URL', 'https://academyv2.mereka.io')
+  ## Data-contract: canonical shared footer content from MEREKA_PUBLIC_FOOTER.
+  ## All hardcoded defaults below mirror MEREKA_BASE_VARIANT / mereka_footer.py
+  ## so the footer renders correctly even when the setting is absent.
   footer_content = getattr(settings, 'MEREKA_PUBLIC_FOOTER', {}) or {}
   footer_brand = footer_content.get('brand', {}) or {}
   footer_social_links = footer_content.get('socialLinks', []) or []
@@ -25,7 +25,17 @@
   footer_academy = footer_sections.get('academy', {}) or {}
   footer_space = footer_sections.get('space', {}) or {}
   footer_legal = footer_content.get('legal', {}) or {}
+
+  ## Tenant-variant fields — prefer SiteConfiguration, fall back to settings / hardcoded.
+  lms_root = getattr(settings, 'LMS_ROOT_URL', 'https://academyv2.mereka.io')
+  support_email = configuration_helpers.get_value('SUPPORT_EMAIL', 'support@mereka.io')
+  help_url = configuration_helpers.get_value('HELP_CENTER_URL', 'https://help.mereka.io/')
+  privacy_url = configuration_helpers.get_value('PRIVACY_POLICY_URL', 'https://legal.mereka.io/privacy-policy/')
+  terms_url = configuration_helpers.get_value('TERMS_OF_SERVICE_URL', 'https://legal.mereka.io/')
+  cookies_url = configuration_helpers.get_value('COOKIES_POLICY_URL', 'https://legal.mereka.io/#cookie-policy')
+  copyright_holder = configuration_helpers.get_value('PLATFORM_NAME', getattr(settings, 'PLATFORM_NAME', 'MEREKA'))
   whatsapp_number = footer_support.get('whatsapp', '601135271981')
+  logo_text = footer_brand.get('logoText', 'mereka')
 %>
 
 <footer class="mereka-footer mereka-footer--v2" role="contentinfo"
@@ -38,8 +48,8 @@
   <div class="footer-social">
     <div class="footer-container">
       <a href="${lms_root}" class="footer-logo-link">
-        <img src="${static.url('images/logo.png')}" alt="${static.get_platform_name()} logo" class="footer-logo-img" />
-        <span class="footer-brand-name">${footer_brand.get('logoText', 'mereka')}</span>
+        <img src="${static.url('images/logo.png')}" alt="${copyright_holder} logo" class="footer-logo-img" />
+        <span class="footer-brand-name">${logo_text}</span>
       </a>
       <div class="footer-social-icons">
         % for social_link in footer_social_links:
@@ -58,9 +68,9 @@
     <div class="footer-container">
       <nav class="footer-nav-links" aria-label="${_('Site navigation')}">
         % for nav_link in footer_nav_links:
-          <a href="${nav_link.get('url')}" target="_blank" rel="noopener">${_(nav_link.get('label'))}</a>
+          <a href="${nav_link.get('url')}" target="_blank" rel="noopener noreferrer">${_(nav_link.get('label'))}</a>
         % endfor
-        <a href="${help_url}" target="_blank" rel="noopener">${_(footer_support.get('helpLabel', 'Help Centre'))}</a>
+        <a href="${help_url}" target="_blank" rel="noopener noreferrer">${_(footer_support.get('helpLabel', 'Help Centre'))}</a>
         <a href="mailto:${support_email}">${_(footer_support.get('contactSupportLabel', 'Contact Support'))}</a>
       </nav>
       <a href="https://wa.me/${whatsapp_number}" target="_blank" rel="noopener noreferrer" class="footer-whatsapp-btn">
@@ -80,7 +90,7 @@
         <h4 class="footer-column-title">${_(footer_corporate.get('title', 'Corporate'))}</h4>
         <ul>
           % for link in footer_corporate.get('links', []):
-            <li><a href="${link.get('url')}" target="_blank" rel="noopener">${_(link.get('label'))}</a></li>
+            <li><a href="${link.get('url')}" target="_blank" rel="noopener noreferrer">${_(link.get('label'))}</a></li>
           % endfor
         </ul>
       </div>
@@ -92,7 +102,7 @@
             <p class="footer-sub-heading">${footer_marketplace.get('usersHeading', 'USERS')}</p>
             <ul>
               % for link in footer_marketplace.get('userLinks', []):
-                <li><a href="${link.get('url')}" target="_blank" rel="noopener">${_(link.get('label'))}</a></li>
+                <li><a href="${link.get('url')}" target="_blank" rel="noopener noreferrer">${_(link.get('label'))}</a></li>
               % endfor
             </ul>
           </div>
@@ -100,7 +110,7 @@
             <p class="footer-sub-heading">${footer_marketplace.get('businessHeading', 'BUSINESS')}</p>
             <ul>
               % for link in footer_marketplace.get('businessLinks', []):
-                <li><a href="${link.get('url')}" target="_blank" rel="noopener">${_(link.get('label'))}</a></li>
+                <li><a href="${link.get('url')}" target="_blank" rel="noopener noreferrer">${_(link.get('label'))}</a></li>
               % endfor
             </ul>
             <p class="footer-app-label">${_(footer_marketplace.get('appLabel', 'Manage your bookings'))}</p>
@@ -118,7 +128,7 @@
         <h4 class="footer-column-title">${_(footer_academy.get('title', 'Academy'))}</h4>
         <ul>
           % for link in footer_academy.get('links', []):
-            <li><a href="${link.get('url')}" target="_blank" rel="noopener">${_(link.get('label'))}</a></li>
+            <li><a href="${link.get('url')}" target="_blank" rel="noopener noreferrer">${_(link.get('label'))}</a></li>
           % endfor
         </ul>
       </div>
@@ -127,7 +137,7 @@
         <h4 class="footer-column-title">${_(footer_space.get('title', 'Space'))}</h4>
         <ul>
           % for link in footer_space.get('links', []):
-            <li><a href="${link.get('url')}" target="_blank" rel="noopener">${_(link.get('label'))}</a></li>
+            <li><a href="${link.get('url')}" target="_blank" rel="noopener noreferrer">${_(link.get('label'))}</a></li>
           % endfor
         </ul>
       </div>
@@ -138,13 +148,10 @@
   ## Zone 4: Legal bottom row
   <div class="footer-legal">
     <div class="footer-container footer-legal-row">
-      ## Copyright holder: use platform name from SiteConfiguration / settings.PLATFORM_NAME.
-      ## When full multi-tenancy is live (bead 2rcf), replace with per-tenant copyrightHolder
-      ## from TenantConfig, matching the SITE_VARIANTS map in the MFE footer plugin.
-      <span class="footer-copyright">&copy; ${datetime.now().year} ${static.get_platform_name()}</span>
-      <a href="https://legal.mereka.io/" target="_blank" rel="noopener">${_(footer_legal.get('termsLabel', 'TERMS OF USE'))}</a>
-      <a href="${privacy_url}" target="_blank" rel="noopener">${_(footer_legal.get('privacyLabel', 'PRIVACY POLICY'))}</a>
-      <a href="https://legal.mereka.io/#cookie-policy" target="_blank" rel="noopener">${_(footer_legal.get('cookiesLabel', 'COOKIES POLICY'))}</a>
+      <span class="footer-copyright">&copy; ${datetime.now().year} ${copyright_holder}</span>
+      <a href="${terms_url}" target="_blank" rel="noopener noreferrer">${_(footer_legal.get('termsLabel', 'TERMS OF USE'))}</a>
+      <a href="${privacy_url}" target="_blank" rel="noopener noreferrer">${_(footer_legal.get('privacyLabel', 'PRIVACY POLICY'))}</a>
+      <a href="${cookies_url}" target="_blank" rel="noopener noreferrer">${_(footer_legal.get('cookiesLabel', 'COOKIES POLICY'))}</a>
       % if icp_license_info.get('icp_license'):
         <span class="icp">
           ${u"{text} ".format(text=icp_license_info.get('text'))}
