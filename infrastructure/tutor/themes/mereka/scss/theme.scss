@@ -449,11 +449,11 @@
   grid-template-columns: 1fr 2fr 1fr 1fr;
   gap: 2rem 3rem;
 }
-.footer-column-title {
+.mereka-footer--v2 .footer-column-title {
   font-size: 1rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
-  color: rgba(255, 255, 255, 0.95);
+  color: rgba(255, 255, 255, 0.95) !important;
 }
 .footer-column ul {
   list-style: none;
