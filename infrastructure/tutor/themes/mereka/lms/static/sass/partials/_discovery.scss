@@ -367,10 +367,13 @@
 
 .find-courses .courses-listing li,
 .find-courses .courses-listing-item {
+  // Override upstream float/width that conflicts with our grid layout.
+  // Open edX sets `float: left; width: 31.7616%` at min-width:980px which
+  // resolves against the grid column width, not the container — collapsing cards.
+  float: none;
+  width: 100%;
   display: flex;
   min-width: 0;
-  content-visibility: auto;
-  contain-intrinsic-size: 38rem;
 }
 
 .find-courses .pagination {
