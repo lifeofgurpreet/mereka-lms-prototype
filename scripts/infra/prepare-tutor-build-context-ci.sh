@@ -43,10 +43,11 @@ export TUTOR_ROOT="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
 PLUGIN_SRC_DIR="$REPO_ROOT/infrastructure/tutor/plugins"
 PLUGIN_DIR="${TUTOR_PLUGINS_DIR:-$HOME/.local/share/tutor-plugins}"
 
-# Clean any stale rendered config from previous builds on PVC-backed runners.
-# tutor config save renders env.config.jsx from plugin hooks — if the rendered
-# output persists from a prior build, the MFE gets stale plugin components.
-rm -rf "$TUTOR_ROOT/env"
+# Clean ALL stale Tutor state from previous builds on PVC-backed runners.
+# Without this, Python's module cache and Tutor's config cache serve stale
+# plugin JS content even though the source files were freshly copied.
+rm -rf "$TUTOR_ROOT"
+rm -rf "$PLUGIN_DIR/__pycache__" "$PLUGIN_DIR/_mereka_lms/__pycache__"
 mkdir -p "$TUTOR_ROOT" "$PLUGIN_DIR"
 
 install -m 0644 "$PLUGIN_SRC_DIR/mereka_lms.py" "$PLUGIN_DIR/mereka_lms.py"
