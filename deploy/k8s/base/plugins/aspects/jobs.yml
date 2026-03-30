@@ -122,9 +122,21 @@ spec:
             - -c
             - |
               set -e
-              echo "=== Initializing ClickHouse database ==="
+              echo "=== Initializing ClickHouse databases ==="
               clickhouse-client --host clickhouse --user openedx --password "${CLICKHOUSE_PASSWORD}" --query "
               CREATE DATABASE IF NOT EXISTS openedx;
+              "
+              clickhouse-client --host clickhouse --user openedx --password "${CLICKHOUSE_PASSWORD}" --query "
+              CREATE DATABASE IF NOT EXISTS xapi;
+              "
+              echo "=== Creating xapi_events_all table (Ralph target) ==="
+              clickhouse-client --host clickhouse --user openedx --password "${CLICKHOUSE_PASSWORD}" --query "
+              CREATE TABLE IF NOT EXISTS xapi.xapi_events_all (
+                event_id UUID DEFAULT generateUUIDv4(),
+                emission_time DateTime64(6) DEFAULT now64(6),
+                event String
+              ) ENGINE = MergeTree()
+              ORDER BY (emission_time, event_id);
               "
               echo "=== Creating xAPI events table ==="
               clickhouse-client --host clickhouse --user openedx --password "${CLICKHOUSE_PASSWORD}" --query "

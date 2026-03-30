@@ -1,4 +1,77 @@
 ---
+# Ralph auth configuration
+# The auth.json defines users that can submit xAPI statements to Ralph.
+# event-routing-backends in the LMS authenticates as the "lms" user.
+# The password hash is a bcrypt hash — generate with: python3 -c "import bcrypt; print(bcrypt.hashpw(b'password', bcrypt.gensalt()).decode())"
+# The overlay must patch this ConfigMap to set the real hash.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ralph-auth
+  labels:
+    app.kubernetes.io/name: ralph
+    app.kubernetes.io/part-of: aspects
+data:
+  auth.json: |
+    [
+      {
+        "username": "lms",
+        "scopes": ["ralph_scope"],
+        "hash": "$2b$12$placeholder_hash_must_be_set_by_overlay",
+        "agent": {
+          "account": {
+            "name": "__server_lms",
+            "homePage": "https://academyv2.mereka.dev"
+          }
+        }
+      }
+    ]
+---
+# Ralph logging configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ralph-logging
+  labels:
+    app.kubernetes.io/name: ralph
+    app.kubernetes.io/part-of: aspects
+data:
+  logging.yaml: |
+    version: 1
+    disable_existing_loggers: false
+    formatters:
+      default:
+        "()": uvicorn.logging.DefaultFormatter
+        fmt: "%(asctime)s %(levelprefix)s %(message)s"
+        use_colors:
+      access:
+        "()": uvicorn.logging.AccessFormatter
+        fmt: '%(asctime)s %(levelprefix)s %(client_addr)s - "%(request_line)s" %(status_code)s'
+    handlers:
+      default:
+        formatter: default
+        class: logging.StreamHandler
+        stream: ext://sys.stderr
+      access:
+        formatter: access
+        class: logging.StreamHandler
+        stream: ext://sys.stdout
+    loggers:
+      uvicorn:
+        handlers: [default]
+        level: INFO
+        propagate: false
+      uvicorn.error:
+        level: INFO
+      uvicorn.access:
+        handlers: [access]
+        level: INFO
+        propagate: false
+      ralph:
+        handlers: [default]
+        level: INFO
+        propagate: false
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
