@@ -55,6 +55,16 @@ install -m 0644 "$PLUGIN_SRC_DIR/mereka_lms_mfe_slots.py" "$PLUGIN_DIR/mereka_lm
 rm -rf "$PLUGIN_DIR/_mereka_lms"
 cp -R "$PLUGIN_SRC_DIR/_mereka_lms" "$PLUGIN_DIR/_mereka_lms"
 
+# Diagnostic: verify the plugin JS has the expected content
+echo "=== Plugin JS diagnostic ==="
+echo "Source MerekaAuthnLoginBranding:"
+grep -c 'mereka-authn-login-branding__brand' "$PLUGIN_SRC_DIR/_mereka_lms/mfe_runtime_definitions.js" || echo "0 (old)"
+echo "Copied MerekaAuthnLoginBranding:"
+grep -c 'mereka-authn-login-branding__brand' "$PLUGIN_DIR/_mereka_lms/mfe_runtime_definitions.js" || echo "0 (old)"
+echo "Old shell-panel marker in source:"
+grep -c 'mereka-shell-panel--authn' "$PLUGIN_SRC_DIR/_mereka_lms/mfe_runtime_definitions.js" || echo "0 (trimmed)"
+echo "==========================="
+
 tutor plugins enable mereka_lms
 
 case "$TARGET" in
@@ -80,6 +90,14 @@ case "$TARGET" in
 esac
 
 "$REPO_ROOT/scripts/infra/prepare-tutor-build-context.sh" --target "$TARGET"
+
+# Diagnostic: verify the rendered env.config.jsx has the expected component
+if [[ -f "$TUTOR_ROOT/env/plugins/mfe/build/mfe/env.config.jsx" ]]; then
+  echo "=== Rendered env.config.jsx diagnostic ==="
+  grep -c 'mereka-authn-login-branding__brand' "$TUTOR_ROOT/env/plugins/mfe/build/mfe/env.config.jsx" || echo "0 (old component in rendered config!)"
+  grep -c 'mereka-shell-panel--authn' "$TUTOR_ROOT/env/plugins/mfe/build/mfe/env.config.jsx" || echo "0 (trimmed, good)"
+  echo "==========================="
+fi
 
 case "$TARGET" in
   openedx)
