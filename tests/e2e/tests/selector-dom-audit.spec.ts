@@ -11,8 +11,8 @@ const ROUTE_SPECIFIC_BRANDING_SELECTORS: Array<{ pattern: RegExp; selectors: str
   {
     pattern: /\/authn\//,
     selectors: [
-      '.mereka-authn-login-branding__eyebrow',
-      '.mereka-authn-login-branding__actions',
+      '.mereka-authn-login-branding__logo',
+      '.mereka-authn-login-branding__logo-img',
     ],
   },
   {

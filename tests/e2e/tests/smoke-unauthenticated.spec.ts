@@ -148,8 +148,8 @@ test.describe('Unauthenticated smoke — MFE apps', () => {
       await expect(emailInput).toBeVisible();
     }
 
-    await expect(page.locator('.mereka-authn-login-branding--reset')).toHaveCount(1);
-    await expect(page.locator('.mereka-authn-login-branding__route-links')).toHaveCount(1);
+    await expect(page.locator('.mereka-authn-login-branding__logo')).toHaveCount(1);
+    await expect(page.locator('.mereka-authn-login-branding__logo-img')).toHaveCount(1);
   });
 });
 

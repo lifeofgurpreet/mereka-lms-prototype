@@ -2,8 +2,8 @@
 # One selector per line; lines beginning with # are ignored.
 
 .mereka-authn-login-branding
-.mereka-authn-login-branding__route-links
-.mereka-authn-login-branding--reset
+.mereka-authn-login-branding__logo
+.mereka-authn-login-branding__logo-img
 .mereka-footer
 .btn-primary
 .form-control
