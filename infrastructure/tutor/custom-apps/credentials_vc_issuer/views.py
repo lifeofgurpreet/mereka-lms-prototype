@@ -42,6 +42,7 @@ def _get_public_key_from_private(private_key_b64: str) -> str:
             # This requires the cryptography library
             try:
                 from cryptography.hazmat.primitives.asymmetric import ed25519
+                from cryptography.hazmat.primitives import serialization
                 private_key_obj = ed25519.Ed25519PrivateKey.from_private_bytes(private_key_bytes)
                 public_key_obj = private_key_obj.public_key()
                 public_key_bytes = public_key_obj.public_bytes(
