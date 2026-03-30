@@ -728,7 +728,9 @@ table thead th {
 .footer-logo-img {
   height: 2rem;
   width: auto;
-  filter: invert(1);
+  max-width: 8rem;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
 }
 .footer-brand-name {
   font-size: 1.25rem;
@@ -797,6 +799,7 @@ table thead th {
   font-size: 1rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
+  color: rgba(255, 255, 255, 0.95);
 }
 .footer-column ul {
   list-style: none;
@@ -911,7 +914,6 @@ table thead th {
 /* Branding health check compatibility: logo size cap (checked by verify-branding-css.sh) */
 .mereka-footer .footer-logo-img {
   max-width: 120px;
-  width: 120px;
 }
 
 /* Retain selector for verify-public-branding.sh logo checks */
