@@ -21,20 +21,20 @@ mereka_plugin_contract_files() {
   main_file="$(mereka_plugin_main_file "$repo_root")"
 
   if [[ -f "$main_file" ]]; then
-    printf "%s\n" "$main_file"
+    printf "%s\n" "$main_file" 2>/dev/null || true
   fi
 
   # Sibling modules (mereka_lms_*.py)
   if [[ -d "$plugins_dir" ]]; then
     while IFS= read -r -d '' file; do
-      printf "%s\n" "$file"
+      printf "%s\n" "$file" 2>/dev/null || true
     done < <(find "$plugins_dir" -maxdepth 1 -type f -name "mereka_lms_*.py" -print0 | sort -z)
   fi
 
   # Subpackage modules (_mereka_lms/*.py, _mereka_lms/*.js)
   if [[ -d "$plugins_dir/_mereka_lms" ]]; then
     while IFS= read -r -d '' file; do
-      printf "%s\n" "$file"
+      printf "%s\n" "$file" 2>/dev/null || true
     done < <(find "$plugins_dir/_mereka_lms" -type f \( -name "*.py" -o -name "*.js" \) -print0 | sort -z)
   fi
 }

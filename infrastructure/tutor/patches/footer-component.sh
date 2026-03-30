@@ -33,6 +33,11 @@ apply_footer_component_patch() {
     mkdir -p "$MFE_INDIGO_DIR/mereka"
     rm -rf "$MFE_INDIGO_DIR/mereka/scss"
     cp -R "$THEME_SCSS_SOURCE" "$MFE_INDIGO_DIR/mereka/scss"
+    # Merge MFE surface partials (WW-05 split) into the same scss/ slot so that
+    # mereka.scss's @import "./scss/X" resolves them at build time.
+    if [ -d "$THEME_MFE_SOURCE/scss" ]; then
+      cp "$THEME_MFE_SOURCE/scss/"*.scss "$MFE_INDIGO_DIR/mereka/scss/"
+    fi
     rm -rf "$MFE_INDIGO_DIR/mereka/fonts"
     cp -R "$THEME_MFE_SOURCE/fonts" "$MFE_INDIGO_DIR/mereka/fonts"
     cp "$THEME_MFE_SOURCE/mereka.scss" "$MFE_INDIGO_DIR/mereka/mereka.scss"

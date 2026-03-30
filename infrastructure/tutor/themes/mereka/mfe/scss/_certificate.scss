@@ -1,0 +1,105 @@
+// Certificate surface — progress status widget and readiness checklist steps.
+// RISK: LOW — slot-owned class used by progress certificate widget.
+
+.mereka-progress-certificate-status {
+  position: relative;
+  overflow: hidden;
+  padding: 1.15rem 1.2rem;
+  border: 1px solid rgba(35, 112, 114, 0.12);
+  background:
+    radial-gradient(circle at top right, rgba(171, 59, 120, 0.14), transparent 34%),
+    linear-gradient(180deg, rgba(35, 112, 114, 0.08) 0%, rgba(255, 255, 255, 0.96) 42%);
+  box-shadow: 0 18px 40px rgba(29, 39, 51, 0.10);
+}
+
+.mereka-progress-certificate-status__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+.mereka-progress-certificate-status__status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid rgba(35, 112, 114, 0.14);
+  background: rgba(35, 112, 114, 0.08);
+  color: var(--mereka-color-ink-700);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mereka-progress-certificate-status__title {
+  color: var(--mereka-color-ink-900);
+  font-weight: 700;
+}
+
+.mereka-progress-certificate-status__body {
+  color: var(--mereka-color-ink-700);
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+.mereka-certificate-readiness__steps {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.mereka-certificate-readiness__step {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.8rem;
+  align-items: start;
+  padding: 0.85rem 0.95rem;
+  border-radius: 20px;
+  border: 1px solid rgba(35, 112, 114, 0.12);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.mereka-certificate-readiness__step-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  padding: 0.25rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(35, 112, 114, 0.16), rgba(171, 59, 120, 0.16));
+  color: var(--mereka-color-ink-900);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.mereka-certificate-readiness__step-copy {
+  min-width: 0;
+}
+
+.mereka-certificate-readiness__step-title {
+  color: var(--mereka-color-ink-900);
+  font-size: 0.94rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.mereka-certificate-readiness__step-body {
+  color: var(--mereka-color-ink-700);
+  font-size: 0.84rem;
+  line-height: 1.6;
+}
+
+.mereka-progress-certificate-status__hint {
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px dashed rgba(35, 112, 114, 0.22);
+  color: var(--mereka-color-ink-700);
+  font-size: 0.84rem;
+  line-height: 1.6;
+}

@@ -3,11 +3,19 @@
 import re
 import sys
 
+import pathlib
+
 tokens_css = open("assets/branding/tokens.css").read()
 overrides = open(
     "infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css"
 ).read()
-mfe_scss = open("infrastructure/tutor/themes/mereka/mfe/mereka.scss").read()
+# Read the MFE manifest + all partials (WW-05 SCSS split)
+mfe_scss_parts = [open("infrastructure/tutor/themes/mereka/mfe/mereka.scss").read()]
+partials_dir = pathlib.Path("infrastructure/tutor/themes/mereka/mfe/scss")
+if partials_dir.is_dir():
+    for f in sorted(partials_dir.glob("*.scss")):
+        mfe_scss_parts.append(f.read_text())
+mfe_scss = "\n".join(mfe_scss_parts)
 
 colors = dict(
     re.findall(r"(--color-(?:teal|magenta|blue|sky))\s*:\s*(#[0-9a-fA-F]{6})", tokens_css)

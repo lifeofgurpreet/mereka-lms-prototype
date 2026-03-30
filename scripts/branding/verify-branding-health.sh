@@ -84,6 +84,70 @@ check_mfe_token_stack_imports() {
   failures=1
 }
 
+# check_contains_mfe_scss: grep the MFE manifest AND all mfe/scss/ partials.
+# Use this instead of check_contains/check_contains_any for MFE surface checks
+# so that content split into partials (WW-05) is still found.
+check_contains_mfe_scss() {
+  local label="$1"
+  local manifest="$2"
+  local needle="$3"
+  local partials_dir
+  partials_dir="$(dirname "$manifest")/scss"
+
+  # Collect candidate files: manifest + any *.scss in the partials dir.
+  local found=0
+  local files=("$manifest")
+  if [[ -d "$partials_dir" ]]; then
+    while IFS= read -r -d '' f; do
+      files+=("$f")
+    done < <(find "$partials_dir" -maxdepth 1 -name "*.scss" -print0 | sort -z)
+  fi
+
+  for f in "${files[@]}"; do
+    [[ -f "$f" ]] || continue
+    if grep -q -- "$needle" "$f"; then
+      found=1
+      break
+    fi
+  done
+
+  if [[ $found -eq 1 ]]; then
+    echo "  ✓ $label"
+  else
+    echo "  ✗ $label (missing: $needle)"
+    failures=1
+  fi
+}
+
+# check_contains_any_mfe_scss: like check_contains_mfe_scss but accepts multiple needles.
+check_contains_any_mfe_scss() {
+  local label="$1"
+  local manifest="$2"
+  shift 2
+  local partials_dir
+  partials_dir="$(dirname "$manifest")/scss"
+
+  local files=("$manifest")
+  if [[ -d "$partials_dir" ]]; then
+    while IFS= read -r -d '' f; do
+      files+=("$f")
+    done < <(find "$partials_dir" -maxdepth 1 -name "*.scss" -print0 | sort -z)
+  fi
+
+  for needle in "$@"; do
+    for f in "${files[@]}"; do
+      [[ -f "$f" ]] || continue
+      if grep -q -- "$needle" "$f"; then
+        echo "  ✓ $label"
+        return
+      fi
+    done
+  done
+
+  echo "  ✗ $label (missing all candidates: $*)"
+  failures=1
+}
+
 check_selector_absent_noncomment() {
   local label="$1"
   local path="$2"
@@ -202,13 +266,14 @@ check_file "CMS runtime overrides CSS" "$CMS_OVERRIDE_CSS"
 check_contains "CMS head-extra links runtime overrides" "$CMS_HEAD_EXTRA_TEMPLATE" "mereka/css/mereka-overrides.css"
 check_contains "MFE theme sets font path" "$MFE_SCSS" '$mereka-font-path'
 check_mfe_token_stack_imports "MFE theme imports shared token stack" "$MFE_SCSS"
-check_contains "MFE theme exports branding revision marker" "$MFE_SCSS" '--mereka-mfe-branding-rev'
-check_contains "MFE theme styles Paragon card" "$MFE_SCSS" '.pgn__card'
-check_contains_any "MFE theme styles alert surface" "$MFE_SCSS" '.pgn__alert' '.alert'
-check_contains_any "MFE theme styles modal surface" "$MFE_SCSS" '.pgn__modal-content' '.modal-content'
-check_contains "MFE theme styles authn slot component" "$MFE_SCSS" '.mereka-authn-login-branding'
+# Surface checks scan the manifest AND all mfe/scss/ partials (WW-05 split).
+check_contains_mfe_scss "MFE theme exports branding revision marker" "$MFE_SCSS" '--mereka-mfe-branding-rev'
+check_contains_mfe_scss "MFE theme styles Paragon card" "$MFE_SCSS" '.pgn__card'
+check_contains_any_mfe_scss "MFE theme styles alert surface" "$MFE_SCSS" '.pgn__alert' '.alert'
+check_contains_any_mfe_scss "MFE theme styles modal surface" "$MFE_SCSS" '.pgn__modal-content' '.modal-content'
+check_contains_mfe_scss "MFE theme styles authn slot component" "$MFE_SCSS" '.mereka-authn-login-branding'
 check_selector_absent_noncomment "MFE authn wildcard selectors removed" "$MFE_SCSS" '[class*="authn"]'
-check_contains "MFE theme targets account/settings surfaces" "$MFE_SCSS" 'account-settings'
+check_contains_mfe_scss "MFE theme targets account/settings surfaces" "$MFE_SCSS" 'account-settings'
 check_selector_absent_noncomment "MFE learner-dashboard wildcard selectors removed" "$MFE_SCSS" '[class*="learner-dashboard"]'
 check_selector_absent_noncomment "MFE learning wildcard selectors removed" "$MFE_SCSS" '[class*="learning"]'
 check_selector_absent_noncomment "MFE discussions wildcard selectors removed" "$MFE_SCSS" '[class*="discussions"]'

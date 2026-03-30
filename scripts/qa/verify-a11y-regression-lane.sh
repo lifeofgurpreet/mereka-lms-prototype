@@ -20,7 +20,48 @@ PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 
 PARENT_SCRIPT="$REPO_ROOT/scripts/qa/verify-authenticated-smoke-a11y.sh"
 MFE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
+MFE_SCSS_PARTIALS_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/scss"
 A11Y_RUNBOOK="$REPO_ROOT/docs/ops/runbooks/A11Y_REGRESSION_LANE.md"
+
+# grep_mfe_scss: search the MFE manifest AND all mfe/scss/ partials for a pattern.
+# Returns 0 (found) or 1 (not found). Handles the WW-05 SCSS split.
+grep_mfe_scss() {
+  local pattern="$1"
+  local grep_flags="${2:--q}"
+  # Search manifest first
+  if [[ -f "$MFE_SCSS" ]] && grep $grep_flags "$pattern" "$MFE_SCSS" 2>/dev/null; then
+    return 0
+  fi
+  # Then search partials
+  if [[ -d "$MFE_SCSS_PARTIALS_DIR" ]]; then
+    local f
+    for f in "$MFE_SCSS_PARTIALS_DIR"/*.scss; do
+      [[ -f "$f" ]] || continue
+      if grep $grep_flags "$pattern" "$f" 2>/dev/null; then
+        return 0
+      fi
+    done
+  fi
+  return 1
+}
+
+# grep_mfe_scss_output: like grep_mfe_scss but outputs the first matching line.
+grep_mfe_scss_output() {
+  local pattern="$1"
+  if [[ -f "$MFE_SCSS" ]]; then
+    local match
+    match=$(grep "$pattern" "$MFE_SCSS" 2>/dev/null | head -1) && { echo "$match"; return 0; }
+  fi
+  if [[ -d "$MFE_SCSS_PARTIALS_DIR" ]]; then
+    local f
+    for f in "$MFE_SCSS_PARTIALS_DIR"/*.scss; do
+      [[ -f "$f" ]] || continue
+      local match
+      match=$(grep "$pattern" "$f" 2>/dev/null | head -1) && { echo "$match"; return 0; }
+    done
+  fi
+  return 1
+}
 EVIDENCE_REPORT="$REPO_ROOT/docs/evidence/operations/a11y-regression-lane-report.md"
 
 RED='\033[0;31m'
@@ -135,33 +176,34 @@ echo ""
 echo "  -- /dashboard: focus-visible styling checks --"
 
 if [[ -f "$MFE_SCSS" ]]; then
-  # Check that :focus is defined (may use :focus for older browser compat alongside :focus-visible)
-  if grep -q ':focus' "$MFE_SCSS"; then
-    pass_check "AC-FRONT-073: mereka.scss defines :focus styling rules for dashboard route"
+  # Check that :focus is defined (searches manifest + partials)
+  if grep_mfe_scss ':focus'; then
+    pass_check "AC-FRONT-073: MFE SCSS defines :focus styling rules for dashboard route"
   else
-    fail_check "AC-FRONT-073: mereka.scss missing :focus styling rules"
+    fail_check "AC-FRONT-073: MFE SCSS missing :focus styling rules"
   fi
 
   # Check for focus ring via box-shadow (Paragon pattern)
-  if grep -q 'box-shadow' "$MFE_SCSS"; then
-    pass_check "AC-FRONT-073: mereka.scss uses box-shadow for focus ring (Paragon pattern)"
+  if grep_mfe_scss 'box-shadow'; then
+    pass_check "AC-FRONT-073: MFE SCSS uses box-shadow for focus ring (Paragon pattern)"
   else
-    fail_check "AC-FRONT-073: mereka.scss missing box-shadow focus ring pattern"
+    fail_check "AC-FRONT-073: MFE SCSS missing box-shadow focus ring pattern"
   fi
 
   # Confirm focus ring color token is defined (--mereka-mfe-focus)
-  if grep -q '\-\-mereka-mfe-focus' "$MFE_SCSS"; then
-    pass_check "AC-FRONT-073: mereka.scss defines --mereka-mfe-focus token for focus ring color"
+  if grep_mfe_scss '\-\-mereka-mfe-focus'; then
+    pass_check "AC-FRONT-073: MFE SCSS defines --mereka-mfe-focus token for focus ring color"
   else
-    fail_check "AC-FRONT-073: mereka.scss missing --mereka-mfe-focus focus ring token"
+    fail_check "AC-FRONT-073: MFE SCSS missing --mereka-mfe-focus focus ring token"
   fi
 
   # Confirm focus ring is NOT suppressed to transparent or none
   FOCUS_NONE_COUNT=0
-  if grep -E ':focus\s*\{' "$MFE_SCSS" | grep -q 'outline:\s*none\|outline:\s*0'; then
+  FOCUS_RULES=$(grep_mfe_scss_output ':focus' || true)
+  if echo "$FOCUS_RULES" | grep -q 'outline:\s*none\|outline:\s*0'; then
     FOCUS_NONE_COUNT=$((FOCUS_NONE_COUNT + 1))
   fi
-  if grep -E ':focus\s*\{' "$MFE_SCSS" | grep -q 'box-shadow:\s*none'; then
+  if echo "$FOCUS_RULES" | grep -q 'box-shadow:\s*none'; then
     FOCUS_NONE_COUNT=$((FOCUS_NONE_COUNT + 1))
   fi
   if [[ $FOCUS_NONE_COUNT -eq 0 ]]; then
@@ -178,15 +220,15 @@ echo ""
 echo "  -- /account/settings: Paragon focus token checks --"
 
 if [[ -f "$MFE_SCSS" ]]; then
-  # Confirm pgn form controls have focus styling (profile uses form inputs)
-  if grep -q 'pgn__form-control:focus\|form-control:focus' "$MFE_SCSS"; then
-    pass_check "AC-FRONT-073: mereka.scss has focus styling for Paragon form controls (profile route)"
+  # Confirm pgn form controls have focus styling (searches manifest + partials)
+  if grep_mfe_scss 'pgn__form-control:focus\|form-control:focus'; then
+    pass_check "AC-FRONT-073: MFE SCSS has focus styling for Paragon form controls (profile route)"
   else
-    fail_check "AC-FRONT-073: mereka.scss missing Paragon form control focus styling"
+    fail_check "AC-FRONT-073: MFE SCSS missing Paragon form control focus styling"
   fi
 
   # Confirm the focus token variable is not overridden to 'transparent'
-  FOCUS_TOKEN_VALUE=$(grep '\-\-mereka-mfe-focus' "$MFE_SCSS" | head -1 || true)
+  FOCUS_TOKEN_VALUE=$(grep_mfe_scss_output '\-\-mereka-mfe-focus' || true)
   if echo "$FOCUS_TOKEN_VALUE" | grep -q 'transparent'; then
     fail_check "AC-FRONT-073: --mereka-mfe-focus is set to transparent — focus ring is invisible"
   else

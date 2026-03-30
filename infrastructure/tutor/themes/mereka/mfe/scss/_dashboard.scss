@@ -1,0 +1,194 @@
+// Learner dashboard surface — header slot, course card accent, micro-shell widgets,
+// sidebar, no-courses view, and studio footer slot.
+
+/* RISK: LOW — studio footer class names are slot-owned by this repo */
+.mereka-studio-footer__inner {
+  padding: 1.25rem 1rem;
+  text-align: center;
+}
+
+.mereka-studio-footer__logo-link {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+}
+
+.mereka-studio-footer__logo {
+  max-width: 220px;
+  width: 100%;
+}
+
+.mereka-studio-footer__tagline {
+  margin: 0;
+  color: var(--mereka-color-ink-700);
+}
+
+/* RISK: LOW — slot-owned learner-dashboard header surface */
+.mereka-dashboard-header-slot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.mereka-dashboard-header-slot__actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+/* RISK: LOW — slot-owned learner-dashboard course-card accent */
+.mereka-course-card-accent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.mereka-course-card-accent__meta {
+  font-size: var(--pgn-typography-font-size-sm);
+  color: var(--mereka-color-ink-700);
+}
+
+.mereka-dashboard-micro-shell {
+  padding: 0.85rem 0.95rem;
+  content-visibility: auto;
+  contain-intrinsic-size: 104px;
+}
+
+.mereka-dashboard-micro-shell__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.mereka-dashboard-micro-shell__copy {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.mereka-dashboard-micro-shell__title {
+  color: var(--mereka-color-ink-900);
+  font-family: var(--mereka-font-heading, "Lato", sans-serif);
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.mereka-dashboard-micro-shell__body {
+  color: var(--mereka-color-ink-700);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.mereka-dashboard-micro-shell__badge {
+  flex-shrink: 0;
+}
+
+.mereka-dashboard-micro-shell--inline {
+  margin-top: 0.25rem;
+  padding-top: 0.7rem;
+  border-top: 1px dashed var(--mereka-mfe-border);
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.mereka-dashboard-modal-hint {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(245, 248, 255, 0.94));
+}
+
+.mereka-learner-sidebar-widget {
+  padding: clamp(1.15rem, 2vw, 1.5rem);
+}
+
+.mereka-learner-sidebar-widget__title {
+  color: var(--mereka-color-ink-900);
+}
+
+.mereka-learner-sidebar-widget__links {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.mereka-learner-sidebar-widget__link {
+  display: grid;
+  gap: 0.18rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  color: var(--mereka-color-ink-900);
+  text-decoration: none;
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.mereka-learner-sidebar-widget__link:hover,
+.mereka-learner-sidebar-widget__link:focus {
+  color: var(--mereka-color-ink-900);
+  text-decoration: none;
+  border-color: rgba(35, 112, 114, 0.22);
+  box-shadow: 0 16px 28px rgba(26, 22, 35, 0.08);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mereka-learner-sidebar-widget__link:hover,
+  .mereka-learner-sidebar-widget__link:focus {
+    transform: translateY(-1px);
+  }
+}
+
+.mereka-learner-sidebar-widget__label {
+  font-weight: 700;
+}
+
+.mereka-learner-sidebar-widget__meta {
+  color: var(--mereka-color-ink-700);
+  font-size: 0.82rem;
+}
+
+.mereka-no-courses-view {
+  padding: clamp(1.4rem, 3vw, 2.3rem);
+  text-align: left;
+}
+
+.mereka-no-courses-view__message {
+  max-width: 40rem;
+  color: var(--mereka-color-ink-700);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.mereka-no-courses-view__signals {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.mereka-no-courses-view__signal {
+  position: relative;
+  padding: 0.9rem 1rem 0.9rem 1.2rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  color: var(--mereka-color-ink-900);
+}
+
+.mereka-no-courses-view__signal::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  border-radius: 999px;
+  background-image: var(--mereka-mfe-gradient);
+}
+
+.mereka-no-courses-view__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}

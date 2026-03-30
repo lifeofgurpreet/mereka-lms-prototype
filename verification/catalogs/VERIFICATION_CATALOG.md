@@ -8,32 +8,34 @@ Machine-readable source: `verification/catalogs/verification_catalog.json`.
 - `scripts/qa/run-multisite-governance-gates.sh` — **Multisite runtime gates**: Tenant/multisite runtime governance checks
 
 ## Summary
-- Total `verify-*.sh` scripts: **578**
+- Total `verify-*.sh` scripts: **579**
 - Archived deprecated scripts: **21**
 - CI static-bound scripts: **358**
 - Workflow-direct bound scripts: **54**
 - Status overrides applied: **8**
 
 ### Tier Distribution
-- `exploratory_manual`: 180
+- `exploratory_manual`: 181
 - `periodic_runtime`: 16
 - `release_blocking`: 382
 
 ### Status Distribution
 - `active`: 401
+- `deprecated_candidate`: 1
 - `manual_only`: 177
 
 ### Kind Distribution
-- `verify`: 578
+- `verify`: 579
 
 ### Mutability Distribution
 - `destructive`: 9
 - `mutating`: 18
-- `read-only`: 551
+- `read-only`: 552
 
 ## Deprecated Candidates
 
-- None
+Scripts currently not CI-bound and with near-zero references:
+- `scripts/qa/verify-footer-content-parity.sh` (owner: `platform-core`, refs: 1)
 
 ## Archived Deprecated Scripts
 
