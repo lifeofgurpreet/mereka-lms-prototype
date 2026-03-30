@@ -19,33 +19,45 @@ const MEREKA_BASE_VARIANT = {
   cookiesUrl: 'https://legal.mereka.io/#cookie-policy',
 };
 
+// Shared tenant configs — reused for prod and dev hostname entries.
+const _MEREKA_ACADEMY = {
+  ...MEREKA_BASE_VARIANT,
+  brand: 'Mereka Academy',
+  copyrightHolder: 'MEREKA',
+  supportEmail: 'support@mereka.io',
+};
+
+const _BIJI_BIJI = {
+  ...MEREKA_BASE_VARIANT,
+  logoUrl: '/theme/biji-biji/logo-horizontal.svg',
+  mobileLogoUrl: '/theme/biji-biji/logo.svg',
+  themeBrandUrl: '../theme/biji-biji-brand.min.css',
+  themeBrandLightUrl: '../theme/biji-biji-brand-light.min.css',
+  brand: 'Biji-Biji Academy',
+  copyrightHolder: 'Biji-Biji Initiative',
+  supportEmail: 'techadmin@biji-biji.com',
+};
+
+const _SKILL_OUR_FUTURE = {
+  ...MEREKA_BASE_VARIANT,
+  logoUrl: '/theme/skillourfuture/logo-horizontal.svg',
+  mobileLogoUrl: '/theme/skillourfuture/logo.svg',
+  themeBrandUrl: '../theme/sof-brand.min.css',
+  themeBrandLightUrl: '../theme/sof-brand-light.min.css',
+  brand: 'Skill Our Future Academy',
+  copyrightHolder: 'MEREKA',
+  supportEmail: 'support@mereka.io',
+};
+
 const MEREKA_SITE_VARIANTS = {
-  'academyv2.mereka.io': {
-    ...MEREKA_BASE_VARIANT,
-    brand: 'Mereka Academy',
-    copyrightHolder: 'MEREKA',
-    supportEmail: 'support@mereka.io',
-  },
-  'academy.biji-biji.com': {
-    ...MEREKA_BASE_VARIANT,
-    logoUrl: '/theme/biji-biji/logo-horizontal.svg',
-    mobileLogoUrl: '/theme/biji-biji/logo.svg',
-    themeBrandUrl: '../theme/biji-biji-brand.min.css',
-    themeBrandLightUrl: '../theme/biji-biji-brand-light.min.css',
-    brand: 'Biji-Biji Academy',
-    copyrightHolder: 'Biji-Biji Initiative',
-    supportEmail: 'techadmin@biji-biji.com',
-  },
-  'skillourfuture.academy.mereka.io': {
-    ...MEREKA_BASE_VARIANT,
-    logoUrl: '/theme/skillourfuture/logo-horizontal.svg',
-    mobileLogoUrl: '/theme/skillourfuture/logo.svg',
-    themeBrandUrl: '../theme/sof-brand.min.css',
-    themeBrandLightUrl: '../theme/sof-brand-light.min.css',
-    brand: 'Skill Our Future Academy',
-    copyrightHolder: 'MEREKA',
-    supportEmail: 'support@mereka.io',
-  },
+  // Production hostnames
+  'academyv2.mereka.io': _MEREKA_ACADEMY,
+  'academy.biji-biji.com': _BIJI_BIJI,
+  'skillourfuture.academy.mereka.io': _SKILL_OUR_FUTURE,
+  // Dev hostnames (academyv2.mereka.dev zone)
+  'academyv2.mereka.dev': _MEREKA_ACADEMY,
+  'biji-biji.academyv2.mereka.dev': _BIJI_BIJI,
+  'skillourfuture.academyv2.mereka.dev': _SKILL_OUR_FUTURE,
 };
 
 const deriveVariantCandidates = (hostname) => {
