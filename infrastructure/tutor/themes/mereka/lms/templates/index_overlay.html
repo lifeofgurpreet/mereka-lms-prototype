@@ -1,6 +1,17 @@
+<%!
+from django.conf import settings
+%>
+<%
+platform_name = getattr(settings, 'PLATFORM_NAME', 'Mereka Academy')
+try:
+    from openedx.core.djangoapps.site_configuration import helpers as config_helpers
+    platform_name = config_helpers.get_value('platform_name', platform_name)
+except Exception:
+    pass
+%>
 <section class="mereka-hero">
   <div class="mereka-hero__copy">
-    <p class="eyebrow">Mereka Academy</p>
+    <p class="eyebrow">${platform_name}</p>
     <h1>Train teams that can ship what Southeast Asia needs next.</h1>
     <p class="lede">
       Strategy-grade learning journeys for builders, operators, and emerging leaders. Every path

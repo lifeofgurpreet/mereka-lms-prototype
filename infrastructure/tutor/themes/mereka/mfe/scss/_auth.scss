@@ -2,21 +2,34 @@
 // RISK: LOW — plugin-slot class names owned by this repo; not coupled to upstream DOM internals.
 // Minimal brand mark: logo + brand name above the login form (inside login_component.v1 slot).
 
-// ── Upstream authn layout: brand color alignment (P2-10) ────────────────────
-// The upstream BaseContainer renders a bg-primary-400 banner with LOGO_WHITE_URL.
-// Ensure the banner uses Mereka brand colors instead of stock Open edX blue.
+// ── Upstream authn layout: brand color + logo alignment ─────────────────────
 .bg-primary-400 {
-  background-color: var(--mereka-color-magenta, #AB3B78) !important;
+  background-color: var(--pgn-color-primary-400, var(--mereka-color-magenta, #AB3B78)) !important;
 }
 
-// Upstream layout "Start learning with {SITE_NAME}" text colors
 .text-accent-a {
   color: rgba(255, 255, 255, 0.85) !important;
 }
 
-// Upstream SVG decorative element: match brand color
 .large-screen-svg-primary rect {
-  fill: var(--mereka-color-magenta, #AB3B78);
+  fill: var(--pgn-color-primary-400, var(--mereka-color-magenta, #AB3B78));
+}
+
+// Fix top-left logo clipping — upstream uses position:absolute with no top offset
+.logo.position-absolute {
+  top: 1.5rem !important;
+  left: 1.5rem !important;
+  max-height: 3rem;
+  width: auto;
+  object-fit: contain;
+}
+
+// Small-screen logo also needs spacing
+.logo-small {
+  margin: 1rem auto;
+  max-height: 2.5rem;
+  width: auto;
+  object-fit: contain;
 }
 
 .mereka-authn-login-branding {
