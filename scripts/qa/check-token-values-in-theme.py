@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Validate that canonical token color values appear in theme CSS/SCSS files."""
+import pathlib
 import re
 import sys
-
-import pathlib
 
 tokens_css = open("assets/branding/tokens.css").read()
 overrides = open(

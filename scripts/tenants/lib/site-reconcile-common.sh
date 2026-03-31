@@ -95,8 +95,37 @@ else:
     site_action = "UNCHANGED"
 
 # ── SiteConfiguration row ─────────────────────────────────────────────────────
-logo_img = f"{lms_url}/static/{theme_name}/images/logo-horizontal.png" if theme_name else ""
+logo_img = f"{lms_url}/static/{theme_name}/images/logo-horizontal.svg" if theme_name else ""
 favicon  = f"{theme_name}/images/favicon.ico" if theme_name else ""
+
+# Derive tenant brand asset subpath from slug.
+# Known tenants with their own brand asset subdirectories under /theme/:
+_TENANT_BRAND_SUBPATHS = {"biji-biji": "biji-biji/", "skillourfuture": "skillourfuture/"}
+brand_subpath = _TENANT_BRAND_SUBPATHS.get(slug, "")
+
+# Derive canonical brand colors from the brand token CSS files.
+# The brand CSS (e.g. sof-brand.min.css) is the canonical source of
+# tenant colors. The env-file palette values are fallbacks only.
+import re as _re, pathlib as _pathlib
+_BRAND_CSS_MAP = {"biji-biji": "biji-biji-brand.min.css", "skillourfuture": "sof-brand.min.css"}
+_brand_css_name = _BRAND_CSS_MAP.get(slug)
+if _brand_css_name:
+    _brand_css_candidates = [
+        _pathlib.Path("/openedx/themes/mereka/mfe/theme") / _brand_css_name,
+        _pathlib.Path("/openedx/dist/theme") / _brand_css_name,
+    ]
+    for _bcp in _brand_css_candidates:
+        if _bcp.is_file():
+            _css_text = _bcp.read_text()
+            _m = _re.search(r"--mereka-color-magenta:\s*(#[0-9a-fA-F]{3,8})", _css_text)
+            if _m: primary_color = _m.group(1)
+            _m = _re.search(r"--mereka-color-teal:\s*(#[0-9a-fA-F]{3,8})", _css_text)
+            if _m: secondary_color = _m.group(1)
+            _m = _re.search(r"--mereka-color-blue:\s*(#[0-9a-fA-F]{3,8})", _css_text)
+            if _m: accent_color = _m.group(1)
+            break
+
+mfe_origin = mfe_url.replace("https://", "").replace("http://", "")
 
 site_values = {
     "domain": domain,
@@ -127,10 +156,10 @@ site_values = {
         "SESSION_COOKIE_SAMESITE": "None",
         "CSRF_COOKIE_SAMESITE": "None",
         "SITE_NAME": name,
-        "FAVICON_URL": f"https://{mfe_url.replace('https://', '').replace('http://', '')}/theme/favicon.ico" if theme_name else "",
-        "LOGO_URL": f"https://{mfe_url.replace('https://', '').replace('http://', '')}/theme/logo-horizontal.png" if theme_name else "",
-        "LOGO_WHITE_URL": f"https://{mfe_url.replace('https://', '').replace('http://', '')}/theme/logo-horizontal-white.png" if theme_name else "",
-        "LOGO_TRADEMARK_URL": f"https://{mfe_url.replace('https://', '').replace('http://', '')}/theme/logo.png" if theme_name else "",
+        "FAVICON_URL": f"https://{mfe_origin}/theme/favicon.ico" if theme_name else "",
+        "LOGO_URL": f"https://{mfe_origin}/theme/{brand_subpath}logo-horizontal.svg" if theme_name else "",
+        "LOGO_WHITE_URL": f"https://{mfe_origin}/theme/{brand_subpath}logo-horizontal-white.svg" if theme_name else "",
+        "LOGO_TRADEMARK_URL": f"https://{mfe_origin}/theme/{brand_subpath}logo.svg" if theme_name else "",
         "STUDIO_BASE_URL": cms_url,
         "BASE_URL": mfe_url.replace("https://", "").replace("http://", ""),
         "AUTHN_MICROFRONTEND_URL": authn_mfe_url,

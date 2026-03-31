@@ -122,7 +122,12 @@ lms_url = "${LMS_URL}"
 cms_url = "${CMS_URL}"
 mfe_url = "${MFE_URL}"
 theme = "${THEME}"
+slug = "${SLUG}"
 org_filter = json.loads('${ORG_JSON}')
+
+# Derive tenant brand asset subpath from slug.
+_TENANT_BRAND_SUBPATHS = {"biji-biji": "biji-biji/", "skillourfuture": "skillourfuture/"}
+brand_subpath = _TENANT_BRAND_SUBPATHS.get(slug, "")
 
 site, created = Site.objects.get_or_create(
     domain=domain,
@@ -152,7 +157,7 @@ site_values = {
     "ENABLE_LEARNER_HOME_MFE": True,
     "ENABLE_COMPREHENSIVE_THEMING": True,
     "course_org_filter": org_filter,
-    "logo_image": f"{lms_url}/static/{theme}/images/logo-horizontal.png",
+    "logo_image": f"{lms_url}/static/{theme}/images/logo-horizontal.svg",
     "logo_url": "/",
     "favicon_path": f"{theme}/images/favicon.ico",
     "MFE_CONFIG": {
@@ -167,9 +172,9 @@ site_values = {
         "SESSION_COOKIE_SAMESITE": "None",
         "CSRF_COOKIE_SAMESITE": "None",
         "FAVICON_URL": f"{mfe_url}/theme/favicon.ico",
-        "LOGO_URL": f"{mfe_url}/theme/logo-horizontal.png",
-        "LOGO_WHITE_URL": f"{mfe_url}/theme/logo-horizontal-white.png",
-        "LOGO_TRADEMARK_URL": f"{mfe_url}/theme/logo.png",
+        "LOGO_URL": f"{mfe_url}/theme/{brand_subpath}logo-horizontal.svg",
+        "LOGO_WHITE_URL": f"{mfe_url}/theme/{brand_subpath}logo-horizontal-white.svg",
+        "LOGO_TRADEMARK_URL": f"{mfe_url}/theme/{brand_subpath}logo.svg",
         "STUDIO_BASE_URL": cms_url,
         "BASE_URL": mfe_url.replace("https://", "").replace("http://", ""),
         "AUTHN_MICROFRONTEND_URL": f"{mfe_url}/authn",
