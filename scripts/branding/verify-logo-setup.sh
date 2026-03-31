@@ -60,17 +60,17 @@ echo ""
 echo "3. Checking MFE_CONFIG logo URLs in LMS settings..."
 SETTINGS_FILE="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/production.py"
 if [[ -f "$SETTINGS_FILE" ]]; then
-  if grep -q 'LOGO_URL.*logo-horizontal.png' "$SETTINGS_FILE"; then
-    echo "  ✓ LOGO_URL points to logo-horizontal.png"
+  if grep -q 'LOGO_URL.*logo-horizontal\.\(png\|svg\)' "$SETTINGS_FILE"; then
+    echo "  ✓ LOGO_URL points to logo-horizontal asset"
   else
-    echo "  ✗ LOGO_URL does not reference logo-horizontal.png"
+    echo "  ✗ LOGO_URL does not reference logo-horizontal.{png,svg}"
     MISSING_THEME=1
   fi
 
-  if grep -q 'LOGO_WHITE_URL.*logo-horizontal-white.png' "$SETTINGS_FILE"; then
-    echo "  ✓ LOGO_WHITE_URL points to logo-horizontal-white.png"
+  if grep -q 'LOGO_WHITE_URL.*logo-horizontal-white\.\(png\|svg\)' "$SETTINGS_FILE"; then
+    echo "  ✓ LOGO_WHITE_URL points to logo-horizontal-white asset"
   else
-    echo "  ✗ LOGO_WHITE_URL does not reference logo-horizontal-white.png"
+    echo "  ✗ LOGO_WHITE_URL does not reference logo-horizontal-white.{png,svg}"
     MISSING_THEME=1
   fi
 else
