@@ -45,3 +45,39 @@ surface-specific preload differences should diverge.
   type="text/css"
   media="all"
 />
+
+## Tenant palette injection — override CSS custom properties per SiteConfiguration.
+## SOF uses purple; Biji-Biji uses black; default Mereka uses magenta.
+<%
+from openedx.core.djangoapps.site_configuration import helpers as config_helpers
+
+tenant_primary   = config_helpers.get_value("PRIMARY_COLOR", "")
+tenant_secondary = config_helpers.get_value("SECONDARY_COLOR", "")
+tenant_accent    = config_helpers.get_value("ACCENT_COLOR", "")
+%>
+% if tenant_primary or tenant_secondary or tenant_accent:
+<style>
+:root {
+  % if tenant_primary:
+  --mereka-color-magenta: ${tenant_primary};
+  --pgn-color-primary-base: ${tenant_primary};
+  --pgn-color-primary-400: ${tenant_primary};
+  --pgn-color-primary-500: ${tenant_primary};
+  --pgn-color-brand-base: ${tenant_primary};
+  --color-magenta: ${tenant_primary};
+  % endif
+  % if tenant_secondary:
+  --mereka-color-teal: ${tenant_secondary};
+  --pgn-color-secondary-base: ${tenant_secondary};
+  --color-teal: ${tenant_secondary};
+  % endif
+  % if tenant_accent:
+  --mereka-color-blue: ${tenant_accent};
+  --pgn-color-info-base: ${tenant_accent};
+  --pgn-color-info-500: ${tenant_accent};
+  --pgn-color-info-700: ${tenant_accent};
+  --color-blue: ${tenant_accent};
+  % endif
+}
+</style>
+% endif

@@ -973,7 +973,7 @@ table thead th {
   min-height: 100% !important;
   border-radius: 20px !important;
   border: 1px solid rgba(26, 22, 35, 0.06) !important;
-  box-shadow: 0 4px 24px rgba(26, 22, 35, 0.08), 0 1px 4px rgba(26, 22, 35, 0.04) !important;
+  box-shadow: 0 4px 24px rgba(26, 22, 35, 0.10), 0 1px 4px rgba(26, 22, 35, 0.05) !important;
   overflow: hidden !important;
   background: #fff !important;
   transition: transform 220ms ease, box-shadow 220ms ease !important;
@@ -1146,5 +1146,47 @@ table thead th {
   .dashboard .my-courses .course-item .wrapper-course-image img,
   .dashboard .listing-courses .course-item .wrapper-course-image img {
     height: 200px !important;
+  }
+}
+
+/* ── Fix 2a: Broken image fallback ────────────────────────────────── */
+/* Hide the browser's broken-image icon so the gradient background shows */
+.course .course-image img[src=""],
+.course .course-image img:not([src]) {
+  visibility: hidden !important;
+}
+.course .course-image img {
+  background: transparent !important;
+}
+
+/* ── Fix 2c: Ensure .courses-listing does not clip card shadows ──── */
+.courses-listing {
+  overflow: visible !important;
+}
+
+/* ── Fix 2d: Hide duplicate title overlay in course image area ───── */
+.course .course-image .cover-image .course-title-text,
+.course .course-image .cover-image > span,
+.course .course-image .cover-image > .course-name {
+  display: none !important;
+}
+
+/* ── Fix 2e: Card body spacing — no forced min-height, clamp desc ── */
+.course .course-info {
+  min-height: 0 !important;
+}
+.course .course-info .course-description,
+.course .course-info .course-about p {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 3 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+}
+
+/* ── Fix 6: Mobile responsive — single-column on small screens ───── */
+@media (max-width: 640px) {
+  .courses-listing {
+    grid-template-columns: 1fr !important;
   }
 }
