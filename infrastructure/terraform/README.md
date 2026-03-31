@@ -1,6 +1,16 @@
 # Terraform Infrastructure
 
-This directory contains Infrastructure-as-Code for the Mereka LMS platform on GCP.
+> **STATUS: FROZEN** — 2026-03-31
+>
+> This directory is **no longer the canonical source of truth** for GCP infrastructure.
+> All external control-plane resources (GCP project config, IAM, DNS, Cloudflare, Infisical)
+> are now managed by the [`platform-control-plane`](https://github.com/Biji-Biji-Initiative/platform-control-plane) repository.
+>
+> **Do not run `terraform apply` from this directory.**
+>
+> See: [FROZEN.md](FROZEN.md) | [SPEC-PLATFORM-001](https://github.com/Biji-Biji-Initiative/vps-infrastructure/blob/main/specs/platform/SPEC-PLATFORM-001-source-of-truth-boundaries.md)
+
+This directory contains **legacy** Infrastructure-as-Code for the Mereka LMS platform on GCP.
 
 ## Architecture
 
