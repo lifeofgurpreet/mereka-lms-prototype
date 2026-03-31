@@ -195,13 +195,21 @@ const getMerekaBaseUrl = (config) => {
 
 const getMerekaThemeAssetUrl = (config, assetPath) => {
   const normalizedPath = typeof assetPath === 'string' ? assetPath.trim() : '';
-  const baseUrl = getMerekaBaseUrl(config);
   if (!normalizedPath) {
     return '';
   }
   if (!normalizedPath.startsWith('/')) {
     return normalizedPath;
   }
+  // Theme assets (/theme/*) live in the MFE image, not LMS. Use the current
+  // page origin (always the MFE domain) so the browser resolves to the MFE
+  // pod directly, without relying on the Caddy /theme/* proxy on the LMS host.
+  // This aligns with lms_settings.py which sets MFE_CONFIG logo URLs to the
+  // MFE static base, not the LMS base.
+  if (normalizedPath.startsWith('/theme/') && typeof window !== 'undefined') {
+    return `${window.location.origin}${normalizedPath}`;
+  }
+  const baseUrl = getMerekaBaseUrl(config);
   return baseUrl ? `${baseUrl}${normalizedPath}` : normalizedPath;
 };
 

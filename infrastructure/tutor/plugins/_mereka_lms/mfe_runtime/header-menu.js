@@ -262,10 +262,16 @@ const MerekaHeaderLogo = () => {
   const isMobileViewport = typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px)').matches : false;
   const selectedLogo = isMobileViewport && variant.mobileLogoUrl ? variant.mobileLogoUrl : variant.logoUrl;
   const shellCopy = getMerekaShellCopy(variant);
+  const svgUrl = getMerekaThemeAssetUrl(config, selectedLogo);
+  const pngFallback = svgUrl.replace(/\.svg$/, '.png');
 
   return (
     <a href={getLogoHref()} aria-label={`${variant.brand} learning home`} className="mereka-header-logo">
-      <img src={getMerekaThemeAssetUrl(config, selectedLogo)} alt={`${variant.brand} logo`} />
+      <img
+        src={svgUrl}
+        alt={`${variant.brand} logo`}
+        onError={(e) => { if (e.target.src !== pngFallback) { e.target.src = pngFallback; } }}
+      />
       <span className="mereka-header-logo__lockup">
         <span className="mereka-header-logo__brand">{variant.brand}</span>
         <span className="mereka-header-logo__meta">{shellCopy.learning.eyebrow}</span>
@@ -291,14 +297,20 @@ const MerekaAuthnLoginBranding = () => {
   const config = getConfig();
   const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
   const variant = getMerekaVariant(hostname, config);
+  const svgUrl = getMerekaThemeAssetUrl(config, variant.logoUrl);
+  // Fallback: if SVG fails (e.g. raster-in-SVG blocked by browser sandbox),
+  // try the PNG equivalent. This is a narrow workaround for defective SVG
+  // source assets — the SVG should be replaced with a proper vector file.
+  const pngFallback = svgUrl.replace(/\.svg$/, '.png');
 
   return (
     <div className="mereka-authn-login-branding">
       <a href="/" className="mereka-authn-login-branding__logo">
         <img
-          src={getMerekaThemeAssetUrl(config, variant.logoUrl)}
+          src={svgUrl}
           alt={`${variant.brand} logo`}
           className="mereka-authn-login-branding__logo-img"
+          onError={(e) => { if (e.target.src !== pngFallback) { e.target.src = pngFallback; } }}
         />
         <span className="mereka-authn-login-branding__brand">{variant.brand}</span>
       </a>
