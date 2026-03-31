@@ -20,8 +20,16 @@ RUN apt-get update && apt-get install -y \\
 # Install local OEP-48 brand package for MFEs.
 # We ship the package in tutor_env/plugins/mfe/build/mfe/indigo/brand-mereka and
 # alias it as @edx/brand for all frontend app builds.
+#
+# IMPORTANT: This MUST be post-npm-install, not pre-npm-install.
+# Pre-npm-install fires BEFORE the main `npm clean-install` layer. Since
+# brand-mereka changes on every branding PR, placing it before npm install
+# invalidates the entire dependency install cache for ALL MFE apps (~10 apps
+# × 3-5 min each = 30-50 min wasted). By moving it to post-npm-install,
+# the main dependency layer stays cached and only the brand overlay + webpack
+# rebuild are invalidated.
 _register_env_patch(
-    "mfe-dockerfile-pre-npm-install",
+    "mfe-dockerfile-post-npm-install",
     """
 COPY indigo/brand-mereka /openedx/app/brand-mereka
 RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
