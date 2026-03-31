@@ -17,7 +17,7 @@ warn() { WARN=$((WARN + 1)); echo "  WARN: $1"; }
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
-RUNTIME_DEFS="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js"
+RUNTIME_DEFS="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/mfe_runtime/tenant-resolution.js"
 PLUGIN_BUNDLE=""
 PLUGIN="$PLUGIN_MAIN"
 MATRIX_DOC="$REPO_ROOT/docs/reference/operations/TENANT_BRANDING_MATRIX.md"

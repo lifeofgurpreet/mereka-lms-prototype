@@ -55,14 +55,14 @@ install -m 0644 "$PLUGIN_SRC_DIR/mereka_lms_mfe_slots.py" "$PLUGIN_DIR/mereka_lm
 rm -rf "$PLUGIN_DIR/_mereka_lms"
 cp -R "$PLUGIN_SRC_DIR/_mereka_lms" "$PLUGIN_DIR/_mereka_lms"
 
-# Diagnostic: verify the plugin JS has the expected content
-echo "=== Plugin JS diagnostic ==="
-echo "Source MerekaAuthnLoginBranding:"
-grep -c 'mereka-authn-login-branding__brand' "$PLUGIN_SRC_DIR/_mereka_lms/mfe_runtime_definitions.js" || echo "0 (old)"
-echo "Copied MerekaAuthnLoginBranding:"
-grep -c 'mereka-authn-login-branding__brand' "$PLUGIN_DIR/_mereka_lms/mfe_runtime_definitions.js" || echo "0 (old)"
-echo "Old shell-panel marker in source:"
-grep -c 'mereka-shell-panel--authn' "$PLUGIN_SRC_DIR/_mereka_lms/mfe_runtime_definitions.js" || echo "0 (trimmed)"
+# Diagnostic: verify the shipped split-module runtime has the expected content.
+# NOTE: mfe_runtime_definitions.js is DEPRECATED — do not debug against it.
+# The shipped source is mfe_runtime/*.js, loaded by mfe_runtime.py.
+echo "=== Plugin JS diagnostic (split modules) ==="
+echo "Source MerekaAuthnLoginBranding (header-menu.js):"
+grep -c 'mereka-authn-login-branding__brand' "$PLUGIN_SRC_DIR/_mereka_lms/mfe_runtime/header-menu.js" || echo "0 (missing)"
+echo "Source MEREKA_SITE_VARIANTS (tenant-resolution.js):"
+grep -c 'MEREKA_SITE_VARIANTS' "$PLUGIN_SRC_DIR/_mereka_lms/mfe_runtime/tenant-resolution.js" || echo "0 (missing)"
 echo "==========================="
 
 tutor plugins enable mereka_lms

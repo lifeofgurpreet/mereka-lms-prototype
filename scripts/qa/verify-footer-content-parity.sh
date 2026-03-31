@@ -23,7 +23,10 @@ FAIL=0
 pass() { PASS=$((PASS + 1)); echo "  PASS: $1"; }
 fail() { FAIL=$((FAIL + 1)); echo "  FAIL: $1"; }
 
-MFE_FOOTER="${REPO_ROOT}/infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js"
+# NOTE: The shipped MFE runtime is assembled from split modules in mfe_runtime/.
+# The monolith (mfe_runtime_definitions.js) is deprecated and may diverge.
+# Footer component lives in the split module:
+MFE_FOOTER="${REPO_ROOT}/infrastructure/tutor/plugins/_mereka_lms/mfe_runtime/footer.js"
 DJANGO_FOOTER="${REPO_ROOT}/infrastructure/tutor/themes/mereka/lms/templates/footer.html"
 # Footer content is now hardcoded in the Django Mako template (no separate data-contract file).
 # Social links, app badge URLs, etc. are checked directly in the Django footer.

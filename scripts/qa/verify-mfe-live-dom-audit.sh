@@ -411,7 +411,8 @@ timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
 artifact="$ARTIFACT_DIR/mfe-live-dom-audit-${ENVIRONMENT}-${timestamp}.log"
 : > "$artifact"
 
-PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js"
+# Shipped runtime is split modules — use tenant-resolution for variant/component definitions.
+PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/mfe_runtime/tenant-resolution.js"
 if [[ ! -f "$PLUGIN_FILE" ]]; then
   echo "ERROR: missing plugin runtime definitions: ${PLUGIN_FILE#$REPO_ROOT/}" | tee -a "$artifact" >&2
   exit 1

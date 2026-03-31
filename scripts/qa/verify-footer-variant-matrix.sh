@@ -12,7 +12,10 @@ fail() { FAIL=$((FAIL + 1)); echo "  FAIL: $1"; }
 warn() { WARN=$((WARN + 1)); echo "  WARN: $1"; }
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-RUNTIME_DEFS="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js"
+# The shipped runtime is assembled from split modules in mfe_runtime/.
+# Use tenant-resolution.js for MEREKA_SITE_VARIANTS, footer.js for footer components.
+RUNTIME_DEFS="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/mfe_runtime/tenant-resolution.js"
+RUNTIME_DEFS_FOOTER="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/mfe_runtime/footer.js"
 MATRIX_DOC="$REPO_ROOT/docs/reference/operations/FOOTER_VARIANT_MATRIX.md"
 
 echo "========================================"

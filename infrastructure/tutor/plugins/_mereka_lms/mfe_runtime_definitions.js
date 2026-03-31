@@ -1,3 +1,16 @@
+// ╔═══════════════════════════════════════════════════════════════════════╗
+// ║ DEPRECATED — NOT THE SHIPPED MFE RUNTIME SOURCE                     ║
+// ║                                                                     ║
+// ║ The actual runtime is assembled from the split modules in:          ║
+// ║   infrastructure/tutor/plugins/_mereka_lms/mfe_runtime/             ║
+// ║     tenant-resolution.js  header-menu.js  dashboard.js              ║
+// ║     learning.js  certificate-profile.js  authoring.js  footer.js   ║
+// ║                                                                     ║
+// ║ Loaded by: infrastructure/tutor/plugins/_mereka_lms/mfe_runtime.py  ║
+// ║                                                                     ║
+// ║ This file is kept for QA script compatibility only. It WILL diverge ║
+// ║ from the shipped runtime. Do NOT debug against this file.           ║
+// ╚═══════════════════════════════════════════════════════════════════════╝
 {% raw %}
 const normalizeHostname = (hostname) => {
   return (typeof hostname === 'string' ? hostname.toLowerCase() : '').replace(/^www\\./, '');

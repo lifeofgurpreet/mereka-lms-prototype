@@ -66,7 +66,7 @@ MFE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 THEME_README="$REPO_ROOT/infrastructure/tutor/themes/mereka/README.md"
 SHARED_THEME_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/scss/theme.scss"
 PROFILE_CERT_CARD_COMPONENT="$REPO_ROOT/tutor_env/dev/frontend-app-profile/src/profile/CertificateCard.jsx"
-PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js"
+PLUGIN_FILE="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/mfe_runtime/certificate-profile.js"
 
 if mereka_plugin_has_any "$REPO_ROOT"; then
   if mereka_plugin_has_fixed "$REPO_ROOT" "org.openedx.frontend.learning.progress_certificate_status.v1"; then
