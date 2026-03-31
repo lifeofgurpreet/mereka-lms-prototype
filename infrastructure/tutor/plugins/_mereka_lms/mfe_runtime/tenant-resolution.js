@@ -191,7 +191,27 @@ const applyMerekaTenantPaletteBridge = () => {
   }
 };
 
-applyMerekaTenantPaletteBridge();
+// The palette bridge must run AFTER the MFE config API response is merged
+// into getConfig(). At module evaluation time, getConfig() returns build-time
+// defaults only — PRIMARY_COLOR etc. are not yet populated. Defer execution
+// and retry until the config contains tenant-specific values.
+(function _deferPaletteBridge() {
+  const _tryApply = () => {
+    if (typeof getConfig !== 'function') return false;
+    const cfg = getConfig() || {};
+    // PRIMARY_COLOR is only present after the config API response is merged.
+    if (!cfg.PRIMARY_COLOR) return false;
+    applyMerekaTenantPaletteBridge();
+    return true;
+  };
+  // Try immediately (covers SSR / pre-loaded config).
+  if (_tryApply()) return;
+  // Retry on short intervals until config is loaded (max ~10s).
+  let attempts = 0;
+  const _interval = setInterval(() => {
+    if (_tryApply() || ++attempts > 50) clearInterval(_interval);
+  }, 200);
+})();
 
 const getLearnerHomeHref = () => '/learner-dashboard/';
 
