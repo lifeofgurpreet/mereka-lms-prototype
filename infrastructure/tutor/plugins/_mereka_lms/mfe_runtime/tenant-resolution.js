@@ -163,15 +163,25 @@ const applyMerekaTenantPaletteBridge = () => {
     '--tenant-color-accent': accent,
     '--tenant-color-text-on-primary': textOnPrimary,
     '--mereka-color-magenta': primary,
+    '--mereka-color-magenta-dark': primary,
     '--mereka-color-teal': secondary,
     '--mereka-color-blue': accent,
     '--mereka-color-info': accent,
     '--pgn-color-primary-base': primary,
+    // Paragon utility classes (bg-primary-400, bg-primary-500, etc.) use
+    // these shade variables, not primary-base. Without setting them, the
+    // authn left panel and buttons stay on the default Mereka magenta.
+    '--pgn-color-primary-400': primary,
+    '--pgn-color-primary-500': primary,
+    '--pgn-color-primary-700': primary,
+    '--pgn-color-brand-base': primary,
+    '--pgn-color-brand-700': primary,
     '--pgn-color-secondary-base': secondary,
     '--pgn-color-info-base': accent,
-    '--pgn-color-brand-base': primary,
     '--pgn-link-color': primary,
     '--pgn-link-hover-color': secondary,
+    '--pgn-btn-color': primary,
+    '--pgn-btn-hover-color': primary,
   };
 
   for (const [propertyName, value] of Object.entries(paletteBridge)) {

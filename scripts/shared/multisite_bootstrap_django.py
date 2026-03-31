@@ -318,10 +318,21 @@ def build_site_mfe_config_overrides(
         mfe_scheme = parsed.scheme or "https"
         mfe_origin = f"{mfe_scheme}://{mfe_host}" if mfe_host else mfe_base
 
+        # Derive tenant brand asset subpath from domain. The MFE theme directory
+        # uses /theme/{tenant}/ for non-default tenants, /theme/ for default.
+        # Known tenant prefixes that have brand asset subdirectories:
+        _TENANT_BRAND_SUBPATHS = {"biji-biji": "biji-biji", "skillourfuture": "skillourfuture"}
+        lms_domain = (rendered_values.get("domain") or "").lower()
+        brand_subpath = ""
+        for prefix, subpath in _TENANT_BRAND_SUBPATHS.items():
+            if lms_domain.startswith(f"{prefix}."):
+                brand_subpath = f"{subpath}/"
+                break
+
         overrides["FAVICON_URL"] = f"{mfe_origin}/theme/favicon.ico"
-        overrides["LOGO_URL"] = f"{mfe_origin}/theme/logo-horizontal.svg"
-        overrides["LOGO_WHITE_URL"] = f"{mfe_origin}/theme/logo-horizontal-white.svg"
-        overrides["LOGO_TRADEMARK_URL"] = f"{mfe_origin}/theme/logo.svg"
+        overrides["LOGO_URL"] = f"{mfe_origin}/theme/{brand_subpath}logo-horizontal.svg"
+        overrides["LOGO_WHITE_URL"] = f"{mfe_origin}/theme/{brand_subpath}logo-horizontal-white.svg"
+        overrides["LOGO_TRADEMARK_URL"] = f"{mfe_origin}/theme/{brand_subpath}logo.svg"
 
         if mfe_host:
             overrides["BASE_URL"] = mfe_host
