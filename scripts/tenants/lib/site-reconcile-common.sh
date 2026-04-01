@@ -147,12 +147,12 @@ else:
     site_action = "UNCHANGED"
 
 # ── SiteConfiguration row ─────────────────────────────────────────────────────
-logo_img = f"{lms_url}/static/{theme_name}/images/logo-horizontal.svg" if theme_name else ""
-favicon  = f"{theme_name}/images/favicon.ico" if theme_name else ""
-
 # Derive tenant brand asset subpath from slug.
-# Known tenants with their own brand asset subdirectories under /theme/:
+# Known tenants with their own brand asset subdirectories under /theme/ and /static/images/:
 _TENANT_BRAND_SUBPATHS = {"biji-biji": "biji-biji/", "skillourfuture": "skillourfuture/"}
+_logo_subpath = _TENANT_BRAND_SUBPATHS.get(slug, "")
+logo_img = f"{lms_url}/static/{theme_name}/images/{_logo_subpath}logo-horizontal.svg" if theme_name else ""
+favicon  = f"{theme_name}/images/favicon.ico" if theme_name else ""
 brand_subpath = _TENANT_BRAND_SUBPATHS.get(slug, "")
 
 # Derive canonical brand colors from the brand token CSS files.
