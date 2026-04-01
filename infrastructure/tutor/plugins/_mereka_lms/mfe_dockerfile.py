@@ -127,7 +127,19 @@ variant_theme_map = {
         "core": "../theme/biji-biji-brand.min.css",
         "light": "../theme/biji-biji-brand-light.min.css",
     },
+    "biji-biji.academyv2.mereka.dev": {
+        "core": "../theme/biji-biji-brand.min.css",
+        "light": "../theme/biji-biji-brand-light.min.css",
+    },
     "skillourfuture.academy.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.dev": {
         "core": "../theme/sof-brand.min.css",
         "light": "../theme/sof-brand-light.min.css",
     },
