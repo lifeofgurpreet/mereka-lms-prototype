@@ -397,3 +397,20 @@ validate-deploy-contract: ## Validate deploy package contract (checks 4+5 are WA
 validate-deploy-contract-strict: ## Validate deploy package contract (all checks blocking)
 	@scripts/qa/validate-deploy-contract.sh --strict
 	@scripts/qa/verify-runtime-authority-map.sh
+
+.PHONY: domains-generate domains-check domains-audit
+domains-generate: ## Regenerate all domain artifacts from tenant-registry.yaml
+	python3 scripts/domains/generate_domain_authority_matrix.py
+	python3 scripts/domains/generate_config_domains.py
+	python3 scripts/domains/generate_domain_env.py
+	@echo "All domain artifacts regenerated"
+
+domains-check: ## CI gate: verify all domain generated files are current
+	python3 scripts/domains/generate_domain_authority_matrix.py --check
+	python3 scripts/domains/generate_config_domains.py --check
+	python3 scripts/domains/generate_domain_env.py --check
+	@echo "All domain generated files are current"
+
+domains-audit: ## Run full domain runtime audit (requires network)
+	python3 scripts/domains/generate_domain_runtime_audit.py
+	@echo "Domain runtime audit complete"

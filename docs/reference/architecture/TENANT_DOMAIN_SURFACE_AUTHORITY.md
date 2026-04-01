@@ -38,9 +38,7 @@
 
 ### Slug inconsistency (action required)
 
-The tenant registry uses `biji-biji` while `tenant-contracts.yml` uses `bijibiji`. The management command `provision_tenant.py` stores whichever slug it receives in `EnterpriseCustomer.slug`. This must be reconciled before bootstrap.
-
-**Recommendation**: Use `bijibiji` everywhere (valid slug, no hyphens that could confuse URL parsing).
+The canonical tenant registry uses `biji-biji` while `tenant-contracts.yml` uses `bijibiji`. This must be reconciled before bootstrap. The registry slug `biji-biji` is canonical.
 
 ## Domain Matrix — Production
 
@@ -58,12 +56,28 @@ The tenant registry uses `biji-biji` while `tenant-contracts.yml` uses `bijibiji
 | | Enterprise Learner | `learner.academyv2.mereka.io` | caddy→enterprise-learner-portal:8002 | active | P2 |
 | | Ecommerce (legacy) | `ecommerce.academyv2.mereka.io` | caddy→ecommerce:8000 | deprecated | P2 |
 | | Auth (external) | `auth0.mereka.io` | Authentik (external) | active | P0 |
+| | Analytics | `analytics.academyv2.mereka.io` | caddy→superset:8088 | active | P1 |
 | **biji-biji** | LMS | `academy.biji-biji.com` | caddy→lms:8000 | active | P0 |
 | | Studio | `studio.academy.biji-biji.com` | caddy→cms:8000 | active | P0 |
 | | MFE | `apps.academy.biji-biji.com` | caddy→mfe:8002 | active | P0 |
-| **skillourfuture** | LMS | `skillourfuture.academy.mereka.io` | caddy→lms:8000 | active | P0 |
-| | Studio | `studio.skillourfuture.academy.mereka.io` | caddy→cms:8000 | planned | P2 |
-| | MFE | `apps.skillourfuture.academy.mereka.io` | caddy→mfe:8002 | planned | P2 |
+| | Preview | `preview.academy.biji-biji.com` | caddy→lms:8000 | planned | P2 |
+| | Enterprise Admin | `admin.academy.biji-biji.com` | caddy→enterprise-admin-portal:8002 | planned | P2 |
+| | Enterprise Learner | `learner.academy.biji-biji.com` | caddy→enterprise-learner-portal:8002 | planned | P2 |
+| | Credentials | `credentials.academy.biji-biji.com` | caddy→credentials:8000 | planned | P2 |
+| | Analytics | `analytics.academy.biji-biji.com` | caddy→superset:8088 | planned | P2 |
+| **skillourfuture** | LMS (legacy root) | `skillourfuture.academy.mereka.io` | caddy→lms:8000 | active | P0 |
+| | LMS (target root) | `skillourfuture.academyv2.mereka.io` | caddy→lms:8000 | planned | P1 |
+| | Studio | `studio.skillourfuture.academyv2.mereka.io` | caddy→cms:8000 | planned | P2 |
+| | MFE | `apps.skillourfuture.academyv2.mereka.io` | caddy→mfe:8002 | planned | P2 |
+| | Preview | `preview.skillourfuture.academyv2.mereka.io` | caddy→lms:8000 | planned | P2 |
+| | Enterprise Admin | `admin.skillourfuture.academyv2.mereka.io` | caddy→enterprise-admin-portal:8002 | planned | P2 |
+| | Enterprise Learner | `learner.skillourfuture.academyv2.mereka.io` | caddy→enterprise-learner-portal:8002 | planned | P2 |
+| | Credentials | `credentials.skillourfuture.academyv2.mereka.io` | caddy→credentials:8000 | planned | P2 |
+| | Analytics | `analytics.skillourfuture.academyv2.mereka.io` | caddy→superset:8088 | planned | P2 |
+
+> BB/SOF planned entries: target-state intent ratified by domain truth convergence tranche.
+> Current runtime is shared for enterprise-admin/learner/credentials/analytics.
+> SOF target root: `*.skillourfuture.academyv2.mereka.io` (migration from legacy `*.skillourfuture.academy.mereka.io`).
 
 ## Domain Matrix — Dev
 
@@ -72,11 +86,34 @@ The tenant registry uses `biji-biji` while `tenant-contracts.yml` uses `bijibiji
 | mereka | LMS | `academyv2.mereka.dev` | active | P1 |
 | mereka | Studio | `studio.academyv2.mereka.dev` | active | P1 |
 | mereka | MFE | `apps.academyv2.mereka.dev` | active | P1 |
+| mereka | Preview | `preview.academyv2.mereka.dev` | active | P2 |
+| mereka | Discovery | `discovery.academyv2.mereka.dev` | active | P1 |
+| mereka | Notes | `notes.academyv2.mereka.dev` | active | P2 |
+| mereka | Credentials | `credentials.academyv2.mereka.dev` | active | P2 |
+| mereka | Forum | `forum.academyv2.mereka.dev` | active | P2 |
 | mereka | Enterprise Admin | `admin.academyv2.mereka.dev` | active | P2 |
 | mereka | Enterprise Learner | `learner.academyv2.mereka.dev` | active | P2 |
+| mereka | Analytics | `analytics.academyv2.mereka.dev` | active | P2 |
 | mereka | Auth | `auth0.mereka.dev` | active | P1 |
+| biji-biji | LMS | `biji-biji.academyv2.mereka.dev` | active | P1 |
+| biji-biji | Studio | `studio.biji-biji.academyv2.mereka.dev` | active | P1 |
+| biji-biji | MFE | `apps.biji-biji.academyv2.mereka.dev` | active | P1 |
+| biji-biji | Preview | `preview.biji-biji.academyv2.mereka.dev` | planned | P2 |
+| biji-biji | Enterprise Admin | `admin.biji-biji.academyv2.mereka.dev` | planned | P2 |
+| biji-biji | Enterprise Learner | `learner.biji-biji.academyv2.mereka.dev` | planned | P2 |
+| biji-biji | Credentials | `credentials.biji-biji.academyv2.mereka.dev` | planned | P2 |
+| biji-biji | Analytics | `analytics.biji-biji.academyv2.mereka.dev` | planned | P2 |
+| skillourfuture | LMS | `skillourfuture.academyv2.mereka.dev` | active | P1 |
+| skillourfuture | Studio | `studio.skillourfuture.academyv2.mereka.dev` | active | P1 |
+| skillourfuture | MFE | `apps.skillourfuture.academyv2.mereka.dev` | active | P1 |
+| skillourfuture | Preview | `preview.skillourfuture.academyv2.mereka.dev` | planned | P2 |
+| skillourfuture | Enterprise Admin | `admin.skillourfuture.academyv2.mereka.dev` | planned | P2 |
+| skillourfuture | Enterprise Learner | `learner.skillourfuture.academyv2.mereka.dev` | planned | P2 |
+| skillourfuture | Credentials | `credentials.skillourfuture.academyv2.mereka.dev` | planned | P2 |
+| skillourfuture | Analytics | `analytics.skillourfuture.academyv2.mereka.dev` | planned | P2 |
 
-> Dev currently only provisions the mereka tenant. Biji-Biji and SkillOurFuture do not have dev domains deployed.
+> All three tenants provisioned on rke2-nonprod (dev). BB/SOF LMS/Studio/MFE verified on live ingress 2026-03-20.
+> Planned entries: target-state intent. Current runtime shared for enterprise/credentials/analytics.
 
 ## Surface Map
 

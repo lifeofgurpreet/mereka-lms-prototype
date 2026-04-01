@@ -1,3 +1,5 @@
+# GENERATED — do not hand-edit. Source: deploy/k8s/tenancy/tenant-registry.yaml
+# Regenerate: python scripts/domains/generate_domain_env.py --env local
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -204,6 +206,6 @@ spec:
             - name: AUTH_HOST
               value: auth0.mereka.dev
             - name: TENANT_BIJIBIJI_HOST
-              value: academy.biji-biji.com
+              value: biji-biji.academyv2.mereka.dev
             - name: TENANT_SOF_HOST
-              value: skillourfuture.academy.mereka.dev
+              value: skillourfuture.academyv2.mereka.dev

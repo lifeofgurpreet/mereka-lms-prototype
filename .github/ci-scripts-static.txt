@@ -460,3 +460,5 @@ scripts/qa/verify-runtime-proof-fixture-pack.sh
 scripts/qa/verify-course-catalog-durability.sh
 scripts/qa/verify-vendored-settings-drift.sh
 scripts/qa/verify-env-auth-parity.sh
+scripts/qa/verify-domain-authority-chain.sh
+scripts/qa/verify-domain-generated-surfaces.sh

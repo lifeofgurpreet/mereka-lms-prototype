@@ -139,6 +139,10 @@ hubspot-webhook-mct/.env
 .agent-mail-project-id
 .agent-mail.yaml
 
+# Domain runtime audit outputs (runtime-dependent, not deterministic)
+generated/domain/domain-runtime-audit.json
+docs/reference/generated/domain-runtime-audit.md
+
 # Stray CLI artifacts
 --url
 .docs-world-class-sync-state

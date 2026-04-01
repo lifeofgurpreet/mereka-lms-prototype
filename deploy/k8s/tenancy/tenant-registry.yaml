@@ -10,7 +10,7 @@
 #   - scripts/tenants/lib/runtime-proof-common.sh
 #   - scripts/qa/verify-rke2-tenant-routes.sh
 #   - scripts/qa/verify-mfe-config-api.sh
-#   - deploy/k8s/contract.json (domain_registry section)
+#   - deploy/k8s/contract.json (domain_registry summary projection)
 #
 # Rules:
 #   1. Every domain that appears in Ingress, Caddyfile, ALLOWED_HOSTS,
@@ -22,7 +22,7 @@
 #
 # Maintainer: app repo (mereka-lms). GitOps consumes, never modifies.
 ---
-version: "1.2.0"
+version: "1.5.0"
 
 # ============================================================================
 # TENANTS
@@ -45,39 +45,90 @@ tenants:
   - slug: skillourfuture
     name: Skill Our Future
     org_filter: [SKILLOURFUTURE]
-    site_domain: skillourfuture.academy.mereka.io  # django_site.domain (prod)
+    site_domain: skillourfuture.academy.mereka.io  # django_site.domain (prod) — CURRENT
+    target_site_domain: skillourfuture.academyv2.mereka.io  # migration target
     theme: mereka
     is_primary: false
 
 # ============================================================================
 # ENVIRONMENTS
 # ============================================================================
+#
+# Placement metadata fields (added v1.3.0):
+#   cluster_ref:          Name of the K8s cluster hosting this environment
+#                         (matches cluster-topology-catalog.yaml keys)
+#   cluster_class:        Cluster classification: gke-prod | shared-nonprod | local
+#   gitops_repo:          GitHub org/repo that owns the GitOps overlay
+#                         (empty for local — overlay is app-repo owned)
+#   gitops_overlay_path:  Path within gitops_repo (or app repo for local) to
+#                         the Kustomize overlay rendered by ArgoCD
+#   argocd_app:           ArgoCD Application (or ApplicationSet-generated app)
+#                         name that deploys this environment (empty for local)
+#   runtime_proof_script: Repo-relative path to the runtime proof verification
+#                         script, or empty string if none exists yet
+#   dns_zone:             Cloudflare DNS zone managing the root_domain
+#
 environments:
   production:
     scheme: https
     root_domain: mereka.io
     auth_host: auth0.mereka.io
     namespace: mereka-lms
+    cluster_ref: prod-gke
+    cluster_class: gke-prod
+    gitops_repo: Biji-Biji-Initiative/bbi-infrastructure
+    gitops_overlay_path: apps/mereka-lms/overlays/prod
+    argocd_app: mereka-lms-prod
+    runtime_proof_script: ""
+    dns_zone: mereka.io
   dev:
     scheme: https
     root_domain: mereka.dev
     auth_host: auth0.mereka.dev
     namespace: mereka-lms-dev
+    cluster_ref: nonprod-rke2
+    cluster_class: shared-nonprod
+    gitops_repo: Biji-Biji-Initiative/bbi-infrastructure
+    gitops_overlay_path: apps/mereka-lms/overlays/profiles/dev
+    argocd_app: mereka-lms-dev
+    runtime_proof_script: scripts/tenants/verify-dev-runtime-proof.sh
+    dns_zone: mereka.dev
   profiles-dev:
     scheme: https
     root_domain: mereka.dev
     auth_host: auth0.mereka.dev
     namespace: mereka-lms-dev
+    cluster_ref: nonprod-rke2
+    cluster_class: shared-nonprod
+    gitops_repo: Biji-Biji-Initiative/bbi-infrastructure
+    gitops_overlay_path: apps/mereka-lms/overlays/profiles/dev
+    argocd_app: mereka-lms-dev
+    runtime_proof_script: scripts/tenants/verify-dev-runtime-proof.sh
+    dns_zone: mereka.dev
   staging:
     scheme: https
     root_domain: mereka.io
     auth_host: staging.auth0.mereka.io
     namespace: stg-mereka-lms
+    cluster_ref: nonprod-rke2
+    cluster_class: shared-nonprod
+    gitops_repo: Biji-Biji-Initiative/bbi-infrastructure
+    gitops_overlay_path: apps/mereka-lms/overlays/staging
+    argocd_app: mereka-lms-staging
+    runtime_proof_script: scripts/tenants/verify-staging-runtime-proof.sh
+    dns_zone: mereka.io
   local:
     scheme: http
     root_domain: localhost
     auth_host: ""
     namespace: mereka-lms
+    cluster_ref: kind-local
+    cluster_class: local
+    gitops_repo: ""
+    gitops_overlay_path: deploy/k8s/overlays/local
+    argocd_app: ""
+    runtime_proof_script: ""
+    dns_zone: ""
 
 # ============================================================================
 # DOMAIN REGISTRY
@@ -91,7 +142,7 @@ environments:
 #   status:           active | alias | redirect-only | deprecated | parked | planned
 #   role:             primary | studio | mfe | preview | discovery | notes |
 #                     credentials | forum | enterprise-admin | enterprise-learner |
-#                     ecommerce | payments | auth
+#                     analytics | ecommerce | payments | auth
 #   service:          K8s service name that handles traffic
 #   caddy_backend:    backend in Caddyfile (e.g. lms:8000)
 #   auth_class:       DIRECT_AUTH_PARTICIPANT | REDIRECT_TARGET | CORS_ORIGIN |
@@ -322,6 +373,24 @@ domains:
     proof_priority: P0
     notes: "Authentik OIDC provider. External to this deployment."
 
+  - domain: analytics.academyv2.mereka.io
+    environment: production
+    tenant: mereka
+    status: active
+    role: analytics
+    service: caddy
+    caddy_backend: "superset:8088"
+    auth_class: DIRECT_AUTH_PARTICIPANT
+    in_allowed_hosts: false
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: null
+    ingress_tls: true
+    release_critical: false
+    proof_priority: P1
+    notes: "Aspects/Superset analytics dashboard. Shared by all tenants via row-level security. Prod dormant (ADR-017)."
+
   # ==========================================================================
   # PRODUCTION — Biji-Biji Academy (tenant)
   # ==========================================================================
@@ -376,6 +445,96 @@ domains:
     release_critical: true
     proof_priority: P0
 
+  - domain: preview.academy.biji-biji.com
+    environment: production
+    tenant: biji-biji
+    status: active
+    role: preview
+    service: caddy
+    caddy_backend: "lms:8000"
+    auth_class: AUTH_TRANSPARENT
+    in_allowed_hosts: true
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: ".biji-biji.com"
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Needed for Studio View Live button. Cookie domain continuity with BB LMS/Studio. No DNS or TLS yet."
+
+  - domain: admin.academy.biji-biji.com
+    environment: production
+    tenant: biji-biji
+    status: active
+    role: enterprise-admin
+    service: caddy
+    caddy_backend: "enterprise-admin-portal:8002"
+    auth_class: CORS_ORIGIN
+    in_allowed_hosts: true
+    in_cors: true
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: ".biji-biji.com"
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Realized 2026-04-01. DNS + TLS + Caddy + Ingress live."
+
+  - domain: learner.academy.biji-biji.com
+    environment: production
+    tenant: biji-biji
+    status: active
+    role: enterprise-learner
+    service: caddy
+    caddy_backend: "enterprise-learner-portal:8002"
+    auth_class: AUTH_TRANSPARENT
+    in_allowed_hosts: false
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: ".biji-biji.com"
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Realized 2026-04-01. DNS + TLS + Caddy + Ingress live."
+
+  - domain: credentials.academy.biji-biji.com
+    environment: production
+    tenant: biji-biji
+    status: active
+    role: credentials
+    service: caddy
+    caddy_backend: "credentials:8000"
+    auth_class: DIRECT_AUTH_PARTICIPANT
+    in_allowed_hosts: false
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: null
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Realized 2026-04-01. DNS + TLS + Caddy + Ingress live."
+
+  - domain: analytics.academy.biji-biji.com
+    environment: production
+    tenant: biji-biji
+    status: active
+    role: analytics
+    service: caddy
+    caddy_backend: "superset:8088"
+    auth_class: DIRECT_AUTH_PARTICIPANT
+    in_allowed_hosts: false
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: null
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Realized 2026-04-01. DNS + TLS + Caddy + Ingress live."
+
   # ==========================================================================
   # PRODUCTION — Skill Our Future (tenant)
   # ==========================================================================
@@ -399,7 +558,7 @@ domains:
   - domain: studio.skillourfuture.academy.mereka.io
     environment: production
     tenant: skillourfuture
-    status: planned
+    status: deprecated
     role: studio
     service: caddy
     caddy_backend: "cms:8000"
@@ -412,12 +571,30 @@ domains:
     ingress_tls: false
     release_critical: false
     proof_priority: P2
-    notes: "In ALLOWED_HOSTS and multisite-sites.yml but NOT in prod Ingress TLS. No cert, not routable."
+    notes: "Legacy root. In ALLOWED_HOSTS and multisite-sites.yml but NOT in prod Ingress TLS. Migration target: studio.skillourfuture.academyv2.mereka.io"
+
+  - domain: studio.skillourfuture.academyv2.mereka.io
+    environment: production
+    tenant: skillourfuture
+    status: active
+    role: studio
+    service: caddy
+    caddy_backend: "cms:8000"
+    auth_class: DIRECT_AUTH_PARTICIPANT
+    in_allowed_hosts: true
+    in_cors: false
+    in_csrf: true
+    in_redirect_list: false
+    cookie_domain: ".skillourfuture.academyv2.mereka.io"
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Target root. Not in prod Ingress TLS. No cert, not routable."
 
   - domain: apps.skillourfuture.academy.mereka.io
     environment: production
     tenant: skillourfuture
-    status: planned
+    status: deprecated
     role: mfe
     service: caddy
     caddy_backend: "mfe:8002"
@@ -430,7 +607,133 @@ domains:
     ingress_tls: false
     release_critical: false
     proof_priority: P2
-    notes: "In ALLOWED_HOSTS and CORS but NOT in prod Ingress TLS. No cert, not routable."
+    notes: "Legacy root. In ALLOWED_HOSTS and CORS but NOT in prod Ingress TLS. Migration target: apps.skillourfuture.academyv2.mereka.io"
+
+  - domain: apps.skillourfuture.academyv2.mereka.io
+    environment: production
+    tenant: skillourfuture
+    status: active
+    role: mfe
+    service: caddy
+    caddy_backend: "mfe:8002"
+    auth_class: REDIRECT_TARGET
+    in_allowed_hosts: true
+    in_cors: true
+    in_csrf: true
+    in_redirect_list: false
+    cookie_domain: ".skillourfuture.academyv2.mereka.io"
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Target root. Not in prod Ingress TLS. No cert, not routable."
+
+  - domain: preview.skillourfuture.academyv2.mereka.io
+    environment: production
+    tenant: skillourfuture
+    status: active
+    role: preview
+    service: caddy
+    caddy_backend: "lms:8000"
+    auth_class: AUTH_TRANSPARENT
+    in_allowed_hosts: true
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: ".skillourfuture.academyv2.mereka.io"
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Needed for Studio View Live button. Cookie domain continuity with SOF LMS/Studio. No DNS or TLS yet."
+
+  - domain: skillourfuture.academyv2.mereka.io
+    environment: production
+    tenant: skillourfuture
+    status: active
+    role: primary
+    service: caddy
+    caddy_backend: "lms:8000"
+    auth_class: DIRECT_AUTH_PARTICIPANT
+    in_allowed_hosts: true
+    in_cors: true
+    in_csrf: true
+    in_redirect_list: false
+    cookie_domain: ".skillourfuture.academyv2.mereka.io"
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P1
+    notes: "Migration target from skillourfuture.academy.mereka.io. No DNS yet."
+
+  - domain: admin.skillourfuture.academyv2.mereka.io
+    environment: production
+    tenant: skillourfuture
+    status: active
+    role: enterprise-admin
+    service: caddy
+    caddy_backend: "enterprise-admin-portal:8002"
+    auth_class: CORS_ORIGIN
+    in_allowed_hosts: true
+    in_cors: true
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: ".skillourfuture.academyv2.mereka.io"
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Realized 2026-04-01. DNS + TLS + Caddy + Ingress live."
+
+  - domain: learner.skillourfuture.academyv2.mereka.io
+    environment: production
+    tenant: skillourfuture
+    status: active
+    role: enterprise-learner
+    service: caddy
+    caddy_backend: "enterprise-learner-portal:8002"
+    auth_class: AUTH_TRANSPARENT
+    in_allowed_hosts: false
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: ".skillourfuture.academyv2.mereka.io"
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Realized 2026-04-01. DNS + TLS + Caddy + Ingress live."
+
+  - domain: credentials.skillourfuture.academyv2.mereka.io
+    environment: production
+    tenant: skillourfuture
+    status: active
+    role: credentials
+    service: caddy
+    caddy_backend: "credentials:8000"
+    auth_class: DIRECT_AUTH_PARTICIPANT
+    in_allowed_hosts: false
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: null
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Realized 2026-04-01. DNS + TLS + Caddy + Ingress live."
+
+  - domain: analytics.skillourfuture.academyv2.mereka.io
+    environment: production
+    tenant: skillourfuture
+    status: active
+    role: analytics
+    service: caddy
+    caddy_backend: "superset:8088"
+    auth_class: DIRECT_AUTH_PARTICIPANT
+    in_allowed_hosts: false
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: null
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Realized 2026-04-01. DNS + TLS + Caddy + Ingress live."
 
   # ==========================================================================
   # DEV — Mereka Academy (rke2-nonprod, academyv2.mereka.dev)
@@ -623,6 +926,24 @@ domains:
     proof_priority: P1
     notes: "Dev Authentik OIDC provider"
 
+  - domain: analytics.academyv2.mereka.dev
+    environment: dev
+    tenant: mereka
+    status: active
+    role: analytics
+    service: caddy
+    caddy_backend: "superset:8088"
+    auth_class: DIRECT_AUTH_PARTICIPANT
+    in_allowed_hosts: false
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: null
+    ingress_tls: true
+    release_critical: false
+    proof_priority: P2
+    notes: "Aspects/Superset analytics dashboard (dev). Shared by all tenants via RLS."
+
   # ==========================================================================
   # DEV — Biji-Biji Academy (tenant-pattern)
   # ==========================================================================
@@ -678,6 +999,96 @@ domains:
     release_critical: false
     proof_priority: P1
 
+  - domain: preview.biji-biji.academyv2.mereka.dev
+    environment: dev
+    tenant: biji-biji
+    status: active
+    role: preview
+    service: caddy
+    caddy_backend: "lms:8000"
+    auth_class: AUTH_TRANSPARENT
+    in_allowed_hosts: true
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: ".biji-biji.academyv2.mereka.dev"
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Dev preview for BB tenant. No DNS yet."
+
+  - domain: admin.biji-biji.academyv2.mereka.dev
+    environment: dev
+    tenant: biji-biji
+    status: active
+    role: enterprise-admin
+    service: caddy
+    caddy_backend: "enterprise-admin-portal:8002"
+    auth_class: CORS_ORIGIN
+    in_allowed_hosts: true
+    in_cors: true
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: ".biji-biji.academyv2.mereka.dev"
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Realized 2026-04-01. DNS + TLS + Caddy + Ingress live."
+
+  - domain: learner.biji-biji.academyv2.mereka.dev
+    environment: dev
+    tenant: biji-biji
+    status: active
+    role: enterprise-learner
+    service: caddy
+    caddy_backend: "enterprise-learner-portal:8002"
+    auth_class: AUTH_TRANSPARENT
+    in_allowed_hosts: false
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: ".biji-biji.academyv2.mereka.dev"
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Realized 2026-04-01. DNS + TLS + Caddy + Ingress live."
+
+  - domain: credentials.biji-biji.academyv2.mereka.dev
+    environment: dev
+    tenant: biji-biji
+    status: active
+    role: credentials
+    service: caddy
+    caddy_backend: "credentials:8000"
+    auth_class: DIRECT_AUTH_PARTICIPANT
+    in_allowed_hosts: false
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: null
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Realized 2026-04-01. DNS + TLS + Caddy + Ingress live."
+
+  - domain: analytics.biji-biji.academyv2.mereka.dev
+    environment: dev
+    tenant: biji-biji
+    status: active
+    role: analytics
+    service: caddy
+    caddy_backend: "superset:8088"
+    auth_class: DIRECT_AUTH_PARTICIPANT
+    in_allowed_hosts: false
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: null
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Realized 2026-04-01. DNS + TLS + Caddy + Ingress live."
+
   # ==========================================================================
   # DEV — Skill Our Future (tenant-pattern)
   # ==========================================================================
@@ -732,6 +1143,96 @@ domains:
     ingress_tls: true
     release_critical: false
     proof_priority: P1
+
+  - domain: preview.skillourfuture.academyv2.mereka.dev
+    environment: dev
+    tenant: skillourfuture
+    status: active
+    role: preview
+    service: caddy
+    caddy_backend: "lms:8000"
+    auth_class: AUTH_TRANSPARENT
+    in_allowed_hosts: true
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: ".skillourfuture.academyv2.mereka.dev"
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Dev preview for SOF tenant. No DNS yet."
+
+  - domain: admin.skillourfuture.academyv2.mereka.dev
+    environment: dev
+    tenant: skillourfuture
+    status: active
+    role: enterprise-admin
+    service: caddy
+    caddy_backend: "enterprise-admin-portal:8002"
+    auth_class: CORS_ORIGIN
+    in_allowed_hosts: true
+    in_cors: true
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: ".skillourfuture.academyv2.mereka.dev"
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Realized 2026-04-01. DNS + TLS + Caddy + Ingress live."
+
+  - domain: learner.skillourfuture.academyv2.mereka.dev
+    environment: dev
+    tenant: skillourfuture
+    status: active
+    role: enterprise-learner
+    service: caddy
+    caddy_backend: "enterprise-learner-portal:8002"
+    auth_class: AUTH_TRANSPARENT
+    in_allowed_hosts: false
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: ".skillourfuture.academyv2.mereka.dev"
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Realized 2026-04-01. DNS + TLS + Caddy + Ingress live."
+
+  - domain: credentials.skillourfuture.academyv2.mereka.dev
+    environment: dev
+    tenant: skillourfuture
+    status: active
+    role: credentials
+    service: caddy
+    caddy_backend: "credentials:8000"
+    auth_class: DIRECT_AUTH_PARTICIPANT
+    in_allowed_hosts: false
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: null
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Realized 2026-04-01. DNS + TLS + Caddy + Ingress live."
+
+  - domain: analytics.skillourfuture.academyv2.mereka.dev
+    environment: dev
+    tenant: skillourfuture
+    status: active
+    role: analytics
+    service: caddy
+    caddy_backend: "superset:8088"
+    auth_class: DIRECT_AUTH_PARTICIPANT
+    in_allowed_hosts: false
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: null
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Realized 2026-04-01. DNS + TLS + Caddy + Ingress live."
 
   # ==========================================================================
   # PROFILES/DEV — alternate naming (*-dev.mereka.dev)
@@ -1053,6 +1554,24 @@ domains:
     proof_priority: P2
     notes: "Enterprise learner portal MFE"
 
+  - domain: staging.forum.academyv2.mereka.io
+    environment: staging
+    tenant: mereka
+    status: active
+    role: forum
+    service: caddy
+    caddy_backend: "lms:8000"
+    auth_class: AUTH_TRANSPARENT
+    in_allowed_hosts: true
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: ".academyv2.mereka.io"
+    ingress_tls: true
+    release_critical: false
+    proof_priority: P2
+    notes: "Forum v2 runs in LMS process (staging)"
+
   - domain: staging.auth0.mereka.io
     environment: staging
     tenant: mereka
@@ -1070,6 +1589,24 @@ domains:
     release_critical: true
     proof_priority: P0
     notes: "Staging Authentik OIDC provider. External to this deployment."
+
+  - domain: analytics.staging.academyv2.mereka.io
+    environment: staging
+    tenant: mereka
+    status: active
+    role: analytics
+    service: caddy
+    caddy_backend: "superset:8088"
+    auth_class: DIRECT_AUTH_PARTICIPANT
+    in_allowed_hosts: false
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: null
+    ingress_tls: true
+    release_critical: false
+    proof_priority: P2
+    notes: "Aspects/Superset analytics dashboard (staging). Shared by all tenants via RLS."
 
   # ==========================================================================
   # STAGING — Biji-Biji Academy (tenant)
@@ -1126,6 +1663,96 @@ domains:
     release_critical: true
     proof_priority: P0
 
+  - domain: preview.staging.academy.biji-biji.com
+    environment: staging
+    tenant: biji-biji
+    status: active
+    role: preview
+    service: caddy
+    caddy_backend: "lms:8000"
+    auth_class: AUTH_TRANSPARENT
+    in_allowed_hosts: true
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: ".academy.biji-biji.com"
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Staging preview for BB tenant. No DNS yet."
+
+  - domain: admin.staging.academy.biji-biji.com
+    environment: staging
+    tenant: biji-biji
+    status: active
+    role: enterprise-admin
+    service: caddy
+    caddy_backend: "enterprise-admin-portal:8002"
+    auth_class: CORS_ORIGIN
+    in_allowed_hosts: true
+    in_cors: true
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: ".academy.biji-biji.com"
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Realized 2026-04-01. DNS + TLS + Caddy + Ingress live."
+
+  - domain: learner.staging.academy.biji-biji.com
+    environment: staging
+    tenant: biji-biji
+    status: active
+    role: enterprise-learner
+    service: caddy
+    caddy_backend: "enterprise-learner-portal:8002"
+    auth_class: AUTH_TRANSPARENT
+    in_allowed_hosts: false
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: ".academy.biji-biji.com"
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Realized 2026-04-01. DNS + TLS + Caddy + Ingress live."
+
+  - domain: credentials.staging.academy.biji-biji.com
+    environment: staging
+    tenant: biji-biji
+    status: active
+    role: credentials
+    service: caddy
+    caddy_backend: "credentials:8000"
+    auth_class: DIRECT_AUTH_PARTICIPANT
+    in_allowed_hosts: false
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: null
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Realized 2026-04-01. DNS + TLS + Caddy + Ingress live."
+
+  - domain: analytics.staging.academy.biji-biji.com
+    environment: staging
+    tenant: biji-biji
+    status: active
+    role: analytics
+    service: caddy
+    caddy_backend: "superset:8088"
+    auth_class: DIRECT_AUTH_PARTICIPANT
+    in_allowed_hosts: false
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: null
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Realized 2026-04-01. DNS + TLS + Caddy + Ingress live."
+
   # ==========================================================================
   # STAGING — Skill Our Future (tenant)
   # ==========================================================================
@@ -1180,3 +1807,147 @@ domains:
     ingress_tls: true
     release_critical: true
     proof_priority: P0
+
+  - domain: preview.staging.skillourfuture.academyv2.mereka.io
+    environment: staging
+    tenant: skillourfuture
+    status: active
+    role: preview
+    service: caddy
+    caddy_backend: "lms:8000"
+    auth_class: AUTH_TRANSPARENT
+    in_allowed_hosts: true
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: ".skillourfuture.academyv2.mereka.io"
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Staging preview for SOF tenant at target root. No DNS yet."
+
+  - domain: staging.skillourfuture.academyv2.mereka.io
+    environment: staging
+    tenant: skillourfuture
+    status: active
+    role: primary
+    service: caddy
+    caddy_backend: "lms:8000"
+    auth_class: DIRECT_AUTH_PARTICIPANT
+    in_allowed_hosts: true
+    in_cors: true
+    in_csrf: true
+    in_redirect_list: false
+    cookie_domain: ".skillourfuture.academyv2.mereka.io"
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P1
+    notes: "Realized 2026-04-01. Migration target — DNS + TLS + Ingress live."
+
+  - domain: studio.staging.skillourfuture.academyv2.mereka.io
+    environment: staging
+    tenant: skillourfuture
+    status: active
+    role: studio
+    service: caddy
+    caddy_backend: "cms:8000"
+    auth_class: DIRECT_AUTH_PARTICIPANT
+    in_allowed_hosts: true
+    in_cors: false
+    in_csrf: true
+    in_redirect_list: false
+    cookie_domain: ".skillourfuture.academyv2.mereka.io"
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P1
+    notes: "Realized 2026-04-01. Migration target — DNS + TLS + Ingress live."
+
+  - domain: apps.staging.skillourfuture.academyv2.mereka.io
+    environment: staging
+    tenant: skillourfuture
+    status: active
+    role: mfe
+    service: caddy
+    caddy_backend: "mfe:8002"
+    auth_class: REDIRECT_TARGET
+    in_allowed_hosts: true
+    in_cors: true
+    in_csrf: true
+    in_redirect_list: true
+    cookie_domain: ".skillourfuture.academyv2.mereka.io"
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P1
+    notes: "Realized 2026-04-01. Migration target — DNS + TLS + Ingress live."
+
+  - domain: admin.staging.skillourfuture.academyv2.mereka.io
+    environment: staging
+    tenant: skillourfuture
+    status: active
+    role: enterprise-admin
+    service: caddy
+    caddy_backend: "enterprise-admin-portal:8002"
+    auth_class: CORS_ORIGIN
+    in_allowed_hosts: true
+    in_cors: true
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: ".skillourfuture.academyv2.mereka.io"
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Realized 2026-04-01. DNS + TLS + Caddy + Ingress live."
+
+  - domain: learner.staging.skillourfuture.academyv2.mereka.io
+    environment: staging
+    tenant: skillourfuture
+    status: active
+    role: enterprise-learner
+    service: caddy
+    caddy_backend: "enterprise-learner-portal:8002"
+    auth_class: AUTH_TRANSPARENT
+    in_allowed_hosts: false
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: ".skillourfuture.academyv2.mereka.io"
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Realized 2026-04-01. DNS + TLS + Caddy + Ingress live."
+
+  - domain: credentials.staging.skillourfuture.academyv2.mereka.io
+    environment: staging
+    tenant: skillourfuture
+    status: active
+    role: credentials
+    service: caddy
+    caddy_backend: "credentials:8000"
+    auth_class: DIRECT_AUTH_PARTICIPANT
+    in_allowed_hosts: false
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: null
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Realized 2026-04-01. DNS + TLS + Caddy + Ingress live."
+
+  - domain: analytics.staging.skillourfuture.academyv2.mereka.io
+    environment: staging
+    tenant: skillourfuture
+    status: active
+    role: analytics
+    service: caddy
+    caddy_backend: "superset:8088"
+    auth_class: DIRECT_AUTH_PARTICIPANT
+    in_allowed_hosts: false
+    in_cors: false
+    in_csrf: false
+    in_redirect_list: false
+    cookie_domain: null
+    ingress_tls: false
+    release_critical: false
+    proof_priority: P2
+    notes: "Realized 2026-04-01. DNS + TLS + Caddy + Ingress live."

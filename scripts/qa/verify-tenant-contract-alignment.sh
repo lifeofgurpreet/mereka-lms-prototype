@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 # @covers AC-MTA-001, AC-MTA-002, AC-MTA-003, AC-MTA-022
 # @spec: multi-tenancy-architecture_spec.md
+#
+# Verify alignment between:
+#   - infrastructure/tenants/tenant-contracts.yml (tenant metadata + convenience domains)
+#   - deploy/k8s/base/apps/multi-tenancy/configmap-tenants.yaml (K8s ConfigMap)
+#   - infrastructure/tutor/multisite-sites.yml (multisite config)
+#   - deploy/k8s/base/apps/caddy/Caddyfile (routing)
+#
+# Canonical domain truth: deploy/k8s/tenancy/tenant-registry.yaml
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"

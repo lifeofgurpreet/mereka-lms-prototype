@@ -53,14 +53,14 @@ links:
 > **Deployment boundary (ADR-025)**: For the authoritative classification of which files in
 > `deploy/k8s/` stay in this repo vs migrate to `bbi-infrastructure`, see
 > `docs/reference/architecture/DEPLOYMENT_CONTRACT.md` and `docs/reference/architecture/RESOURCE_OWNERSHIP_MATRIX.md`.
-> The active development environment is now `rke2-nonprod` (not GKE). The production GKE overlay
-> is frozen at zero replicas pending the infrastructure repo migration.
+> Active environments: rke2-nonprod (dev + staging) and rke2-prod (production).
+> The legacy GKE production overlay is frozen at zero replicas (decommissioning).
 
 # Human Summary
 
 ## What we're building
 
-A production-grade Kubernetes deployment of the Open edX learning platform (Tutor 21.0.0, Ulmo). The deployment consists of 17+ workloads spanning the LMS, Studio (CMS), micro-frontends, supporting services (Forum, Discovery, Credentials, Notes, XQueue, Purchase Gateway), infrastructure databases (MySQL, Redis, Meilisearch), an SMTP relay, a Caddy reverse proxy, and an analytics stack (ClickHouse, Superset). All resources live in the `mereka-lms` namespace, managed through Kustomize overlays. Active environments: local (Kind) and rke2-nonprod (dev); production (GKE) is frozen.
+A production-grade Kubernetes deployment of the Open edX learning platform (Tutor 21.0.0, Ulmo). The deployment consists of 17+ workloads spanning the LMS, Studio (CMS), micro-frontends, supporting services (Forum, Discovery, Credentials, Notes, XQueue, Purchase Gateway), infrastructure databases (MySQL, Redis, Meilisearch), an SMTP relay, a Caddy reverse proxy, and an analytics stack (ClickHouse, Superset). All resources live in the `mereka-lms` namespace, managed through Kustomize overlays. Active environments: local (Kind), rke2-nonprod (dev + staging), and rke2-prod (production). Legacy GKE overlay is frozen/decommissioning.
 
 ## Why it matters
 

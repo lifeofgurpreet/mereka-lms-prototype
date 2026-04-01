@@ -176,6 +176,54 @@
       "ci_binding": [],
       "ci_entrypoints": [],
       "env_scope": [
+        "dev",
+        "prod",
+        "staging"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "identity-access",
+      "path": "scripts/aspects/verify-aspects-auth-flow.sh",
+      "reference_count": 3,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "cluster"
+      ],
+      "severity": "low",
+      "spec_ids": [],
+      "status": "manual_only",
+      "tier": "exploratory_manual"
+    },
+    {
+      "cadence": "on_demand",
+      "canonical": true,
+      "ci_binding": [],
+      "ci_entrypoints": [],
+      "env_scope": [
+        "dev",
+        "prod",
+        "staging"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "platform-core",
+      "path": "scripts/aspects/verify-aspects-data-pipeline.sh",
+      "reference_count": 3,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "cluster"
+      ],
+      "severity": "low",
+      "spec_ids": [],
+      "status": "manual_only",
+      "tier": "exploratory_manual"
+    },
+    {
+      "cadence": "on_demand",
+      "canonical": true,
+      "ci_binding": [],
+      "ci_entrypoints": [],
+      "env_scope": [
         "global"
       ],
       "kind": "verify",
@@ -1221,7 +1269,7 @@
       "mutability": "destructive",
       "owner": "platform-core",
       "path": "scripts/qa/verify-aspects-wiring.sh",
-      "reference_count": 6,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster",
@@ -4571,6 +4619,60 @@
         "ci_static"
       ],
       "env_scope": [
+        "dev"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "identity-access",
+      "path": "scripts/qa/verify-domain-authority-chain.sh",
+      "reference_count": 4,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "high",
+      "spec_ids": [],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
+      "env_scope": [
+        "dev",
+        "nonprod",
+        "staging"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-domain-generated-surfaces.sh",
+      "reference_count": 5,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "high",
+      "spec_ids": [],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
+      "env_scope": [
         "dev",
         "nonprod",
         "preview",
@@ -4580,7 +4682,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-domain-url-invariants.sh",
-      "reference_count": 9,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -8200,7 +8302,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-config-api.sh",
-      "reference_count": 9,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -13178,7 +13280,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-rke2-tenant-routes.sh",
-      "reference_count": 6,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster",
@@ -15071,7 +15173,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-tenant-contract-alignment.sh",
-      "reference_count": 7,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -15102,7 +15204,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-tenant-dns-inventory.sh",
-      "reference_count": 6,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -17372,7 +17474,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/tenants/verify-dev-runtime-proof.sh",
-      "reference_count": 3,
+      "reference_count": 4,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -17395,7 +17497,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/tenants/verify-staging-runtime-proof.sh",
-      "reference_count": 4,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -17418,7 +17520,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/tenants/verify-staging-tenant-proof.sh",
-      "reference_count": 4,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -17431,27 +17533,27 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
-    "ci_static_bound": 358,
+    "ci_static_bound": 360,
     "kinds": {
-      "verify": 579
+      "verify": 583
     },
     "mutability": {
       "destructive": 9,
       "mutating": 18,
-      "read-only": 552
+      "read-only": 556
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 401,
+      "active": 403,
       "deprecated_candidate": 1,
-      "manual_only": 177
+      "manual_only": 179
     },
     "tiers": {
-      "exploratory_manual": 181,
+      "exploratory_manual": 183,
       "periodic_runtime": 16,
-      "release_blocking": 382
+      "release_blocking": 384
     },
-    "total_verify_scripts": 579,
+    "total_verify_scripts": 583,
     "workflow_direct_bound": 54
   },
   "version": "1"

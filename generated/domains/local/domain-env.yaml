@@ -1,0 +1,209 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lms
+  labels:
+    app.kubernetes.io/name: lms
+spec:
+  template:
+    spec:
+      containers:
+        - name: lms
+          env:
+            - name: MEREKA_LMS_DOMAIN
+              value: academyv2.mereka.dev
+            - name: MEREKA_SCHEME
+              value: https
+            - name: MEREKA_COOKIE_DOMAIN
+              value: .academyv2.mereka.dev
+            - name: LMS_BASE_URL
+              value: https://academyv2.mereka.dev
+            - name: MFE_BASE_URL
+              value: https://apps.academyv2.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cms
+  labels:
+    app.kubernetes.io/name: cms
+spec:
+  template:
+    spec:
+      containers:
+        - name: cms
+          env:
+            - name: MEREKA_LMS_DOMAIN
+              value: academyv2.mereka.dev
+            - name: MEREKA_SCHEME
+              value: https
+            - name: MEREKA_COOKIE_DOMAIN
+              value: .academyv2.mereka.dev
+            - name: LMS_BASE_URL
+              value: https://academyv2.mereka.dev
+            - name: MFE_BASE_URL
+              value: https://apps.academyv2.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lms-worker
+  labels:
+    app.kubernetes.io/name: lms-worker
+spec:
+  template:
+    spec:
+      containers:
+        - name: lms-worker
+          env:
+            - name: MEREKA_LMS_DOMAIN
+              value: academyv2.mereka.dev
+            - name: MEREKA_SCHEME
+              value: https
+            - name: MEREKA_COOKIE_DOMAIN
+              value: .academyv2.mereka.dev
+            - name: LMS_BASE_URL
+              value: https://academyv2.mereka.dev
+            - name: MFE_BASE_URL
+              value: https://apps.academyv2.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cms-worker
+  labels:
+    app.kubernetes.io/name: cms-worker
+spec:
+  template:
+    spec:
+      containers:
+        - name: cms-worker
+          env:
+            - name: MEREKA_LMS_DOMAIN
+              value: academyv2.mereka.dev
+            - name: MEREKA_SCHEME
+              value: https
+            - name: MEREKA_COOKIE_DOMAIN
+              value: .academyv2.mereka.dev
+            - name: LMS_BASE_URL
+              value: https://academyv2.mereka.dev
+            - name: MFE_BASE_URL
+              value: https://apps.academyv2.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discovery
+  labels:
+    app.kubernetes.io/name: discovery
+spec:
+  template:
+    spec:
+      containers:
+        - name: discovery
+          env:
+            - name: MEREKA_LMS_DOMAIN
+              value: academyv2.mereka.dev
+            - name: MEREKA_SCHEME
+              value: https
+            - name: LMS_BASE_URL
+              value: https://academyv2.mereka.dev
+            - name: MFE_BASE_URL
+              value: https://apps.academyv2.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notes
+  labels:
+    app.kubernetes.io/name: notes
+spec:
+  template:
+    spec:
+      containers:
+        - name: notes
+          env:
+            - name: MEREKA_LMS_DOMAIN
+              value: academyv2.mereka.dev
+            - name: NOTES_DOMAIN
+              value: notes.academyv2.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: credentials
+  labels:
+    app.kubernetes.io/name: credentials
+spec:
+  template:
+    spec:
+      containers:
+        - name: credentials
+          env:
+            - name: MEREKA_LMS_DOMAIN
+              value: academyv2.mereka.dev
+            - name: MEREKA_MFE_DOMAIN
+              value: apps.academyv2.mereka.dev
+            - name: MEREKA_CREDENTIALS_DOMAIN
+              value: credentials.academyv2.mereka.dev
+            - name: MEREKA_SCHEME
+              value: https
+            - name: LMS_BASE_URL
+              value: https://academyv2.mereka.dev
+            - name: MFE_BASE_URL
+              value: https://apps.academyv2.mereka.dev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: caddy
+  labels:
+    app.kubernetes.io/name: caddy
+spec:
+  template:
+    spec:
+      containers:
+        - name: caddy
+          env:
+            - name: LMS_HOST
+              value: academyv2.mereka.dev
+            - name: LMS_HOST_PREVIEW
+              value: preview.academyv2.mereka.dev
+            - name: STUDIO_HOST
+              value: studio.academyv2.mereka.dev
+            - name: DISCOVERY_HOST
+              value: discovery.academyv2.mereka.dev
+            - name: MFE_HOST
+              value: apps.academyv2.mereka.dev
+            - name: NOTES_HOST
+              value: notes.academyv2.mereka.dev
+            - name: CREDENTIALS_HOST
+              value: credentials.academyv2.mereka.dev
+            - name: ENTERPRISE_ADMIN_HOST
+              value: admin.academyv2.mereka.dev
+            - name: ENTERPRISE_LEARNER_HOST
+              value: learner.academyv2.mereka.dev
+---
+# MFE Caddy domain env vars for CSP header template interpolation.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mfe
+  labels:
+    app.kubernetes.io/name: mfe
+spec:
+  template:
+    spec:
+      containers:
+        - name: mfe
+          env:
+            - name: LMS_HOST
+              value: academyv2.mereka.dev
+            - name: CMS_HOST
+              value: studio.academyv2.mereka.dev
+            - name: AUTH_HOST
+              value: auth0.mereka.dev
+            - name: TENANT_BIJIBIJI_HOST
+              value: biji-biji.academyv2.mereka.dev
+            - name: TENANT_SOF_HOST
+              value: skillourfuture.academyv2.mereka.dev

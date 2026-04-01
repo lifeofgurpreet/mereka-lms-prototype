@@ -31,92 +31,22 @@ export K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
 export K8S_CLUSTER="${K8S_CLUSTER:-mereka-lms}"
 
 # =============================================================================
-# Domain Settings
+# Domain Settings — generated from tenant-registry.yaml
+# Regenerate: python scripts/domains/generate_config_domains.py
 # =============================================================================
-# Canonical app-owned tenant/domain source lives in
-# deploy/k8s/tenancy/tenant-registry.yaml.
-# This file provides derived shell defaults for scripts and must stay aligned
-# with the tenant registry rather than becoming a second authority plane.
-# Production
-export LMS_DOMAIN="${LMS_DOMAIN:-academyv2.mereka.io}"
-export STUDIO_DOMAIN="${STUDIO_DOMAIN:-studio.${LMS_DOMAIN}}"
-export MFE_DOMAIN="${MFE_DOMAIN:-apps.${LMS_DOMAIN}}"
-export AUTHENTIK_DOMAIN="${AUTHENTIK_DOMAIN:-auth0.mereka.io}"
-export PREVIEW_DOMAIN="${PREVIEW_DOMAIN:-preview.${LMS_DOMAIN}}"
-export DISCOVERY_DOMAIN="${DISCOVERY_DOMAIN:-discovery.${LMS_DOMAIN}}"
-
-# Legacy Oscar ecommerce (deprecated — being replaced by purchase-gateway)
-# Kept during dual-stack transition period; will be removed after AC-027/AC-028 close
-export ECOMMERCE_DOMAIN="${ECOMMERCE_DOMAIN:-ecommerce.${LMS_DOMAIN}}"
-
-export NOTES_DOMAIN="${NOTES_DOMAIN:-notes.${LMS_DOMAIN}}"
-export CREDENTIALS_DOMAIN="${CREDENTIALS_DOMAIN:-credentials.${LMS_DOMAIN}}"
-export FORUM_DOMAIN="${FORUM_DOMAIN:-forum.${LMS_DOMAIN}}"
-
-# Enterprise MFE domains
-export ENTERPRISE_ADMIN_DOMAIN="${ENTERPRISE_ADMIN_DOMAIN:-admin.${LMS_DOMAIN}}"
-export ENTERPRISE_PORTAL_DOMAIN="${ENTERPRISE_PORTAL_DOMAIN:-learner.${LMS_DOMAIN}}"
-
-# Alternative domains (multisite)
-export BIJI_DOMAIN="${BIJI_DOMAIN:-academy.biji-biji.com}"
-export SKILLOURFUTURE_DOMAIN="${SKILLOURFUTURE_DOMAIN:-skillourfuture.academy.mereka.io}"
-export SKILLOURFUTURE_STUDIO_DOMAIN="${SKILLOURFUTURE_STUDIO_DOMAIN:-studio.${SKILLOURFUTURE_DOMAIN}}"
-export SKILLOURFUTURE_MFE_DOMAIN="${SKILLOURFUTURE_MFE_DOMAIN:-apps.${SKILLOURFUTURE_DOMAIN}}"
-
-# Biji-Biji dedicated subdomains (public DNS)
-export BIJI_STUDIO_DOMAIN="${BIJI_STUDIO_DOMAIN:-studio.academy.biji-biji.com}"
-export BIJI_MFE_DOMAIN="${BIJI_MFE_DOMAIN:-apps.academy.biji-biji.com}"
-
-# Development
-export DEV_LMS_DOMAIN="${DEV_LMS_DOMAIN:-academyv2.mereka.dev}"
-export DEV_STUDIO_DOMAIN="${DEV_STUDIO_DOMAIN:-studio.${DEV_LMS_DOMAIN}}"
-export DEV_MFE_DOMAIN="${DEV_MFE_DOMAIN:-apps.${DEV_LMS_DOMAIN}}"
-export DEV_AUTHENTIK_DOMAIN="${DEV_AUTHENTIK_DOMAIN:-auth0.mereka.dev}"
-export DEV_PREVIEW_DOMAIN="${DEV_PREVIEW_DOMAIN:-preview.${DEV_LMS_DOMAIN}}"
-export DEV_DISCOVERY_DOMAIN="${DEV_DISCOVERY_DOMAIN:-discovery.${DEV_LMS_DOMAIN}}"
-
-# Legacy Oscar ecommerce (deprecated — being replaced by purchase-gateway)
-# Kept during dual-stack transition period; will be removed after AC-027/AC-028 close
-export DEV_ECOMMERCE_DOMAIN="${DEV_ECOMMERCE_DOMAIN:-ecommerce.${DEV_LMS_DOMAIN}}"
-
-export DEV_NOTES_DOMAIN="${DEV_NOTES_DOMAIN:-notes.${DEV_LMS_DOMAIN}}"
-export DEV_CREDENTIALS_DOMAIN="${DEV_CREDENTIALS_DOMAIN:-credentials.${DEV_LMS_DOMAIN}}"
-export DEV_FORUM_DOMAIN="${DEV_FORUM_DOMAIN:-forum.${DEV_LMS_DOMAIN}}"
-
-# Enterprise MFE domains (dev)
-export DEV_ENTERPRISE_ADMIN_DOMAIN="${DEV_ENTERPRISE_ADMIN_DOMAIN:-admin.${DEV_LMS_DOMAIN}}"
-export DEV_ENTERPRISE_PORTAL_DOMAIN="${DEV_ENTERPRISE_PORTAL_DOMAIN:-learner.${DEV_LMS_DOMAIN}}"
-
-# DEV tenant-pattern domains
-export DEV_BIJI_DOMAIN="${DEV_BIJI_DOMAIN:-biji-biji.academyv2.mereka.dev}"
-export DEV_BIJI_STUDIO_DOMAIN="${DEV_BIJI_STUDIO_DOMAIN:-studio.${DEV_BIJI_DOMAIN}}"
-export DEV_BIJI_MFE_DOMAIN="${DEV_BIJI_MFE_DOMAIN:-apps.${DEV_BIJI_DOMAIN}}"
-export DEV_SKILLOURFUTURE_DOMAIN="${DEV_SKILLOURFUTURE_DOMAIN:-skillourfuture.academyv2.mereka.dev}"
-export DEV_SKILLOURFUTURE_STUDIO_DOMAIN="${DEV_SKILLOURFUTURE_STUDIO_DOMAIN:-studio.${DEV_SKILLOURFUTURE_DOMAIN}}"
-export DEV_SKILLOURFUTURE_MFE_DOMAIN="${DEV_SKILLOURFUTURE_MFE_DOMAIN:-apps.${DEV_SKILLOURFUTURE_DOMAIN}}"
+_REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+_GENERATED_DOMAINS="${_REPO_ROOT}/generated/domains/config-domains.sh"
+if [[ -f "$_GENERATED_DOMAINS" ]]; then
+    # shellcheck source=../../generated/domains/config-domains.sh
+    source "$_GENERATED_DOMAINS"
+else
+    echo "WARN: generated domain config not found at $_GENERATED_DOMAINS" >&2
+    echo "WARN: run: python scripts/domains/generate_config_domains.py" >&2
+fi
+unset _REPO_ROOT _GENERATED_DOMAINS
 
 # Purchase Gateway is path-routed under the LMS host via /payments/*.
 # There is no standalone payments.<domain> hostname in the active platform contract.
-
-# Staging (active non-prod lane on shared rke2-nonprod today)
-export STAGING_LMS_DOMAIN="${STAGING_LMS_DOMAIN:-staging.academyv2.mereka.io}"
-export STAGING_STUDIO_DOMAIN="${STAGING_STUDIO_DOMAIN:-staging.studio.academyv2.mereka.io}"
-export STAGING_MFE_DOMAIN="${STAGING_MFE_DOMAIN:-staging.apps.academyv2.mereka.io}"
-export STAGING_AUTHENTIK_DOMAIN="${STAGING_AUTHENTIK_DOMAIN:-staging.auth0.mereka.io}"
-export STAGING_PREVIEW_DOMAIN="${STAGING_PREVIEW_DOMAIN:-staging.preview.academyv2.mereka.io}"
-export STAGING_DISCOVERY_DOMAIN="${STAGING_DISCOVERY_DOMAIN:-staging.discovery.academyv2.mereka.io}"
-# Legacy Oscar ecommerce (deprecated — being replaced by purchase-gateway)
-# Kept during dual-stack transition period; will be removed after AC-027/AC-028 close
-export STAGING_ECOMMERCE_DOMAIN="${STAGING_ECOMMERCE_DOMAIN:-staging.ecommerce.academyv2.mereka.io}"
-export STAGING_NOTES_DOMAIN="${STAGING_NOTES_DOMAIN:-staging.notes.academyv2.mereka.io}"
-export STAGING_CREDENTIALS_DOMAIN="${STAGING_CREDENTIALS_DOMAIN:-staging.credentials.academyv2.mereka.io}"
-export STAGING_FORUM_DOMAIN="${STAGING_FORUM_DOMAIN:-staging.forum.academyv2.mereka.io}"
-
-# Enterprise MFE domains (staging)
-export STAGING_ENTERPRISE_ADMIN_DOMAIN="${STAGING_ENTERPRISE_ADMIN_DOMAIN:-staging.admin.academyv2.mereka.io}"
-export STAGING_ENTERPRISE_PORTAL_DOMAIN="${STAGING_ENTERPRISE_PORTAL_DOMAIN:-staging.learner.academyv2.mereka.io}"
-
-# Purchase Gateway (staging)
 
 # =============================================================================
 # Container Registry

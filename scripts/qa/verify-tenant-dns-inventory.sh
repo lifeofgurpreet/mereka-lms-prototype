@@ -3,9 +3,14 @@
 # @spec: multi-tenancy-architecture_spec.md
 #
 # Guardrail: keep tenant contract domains visible in the repo's Cloudflare
-# inventory snapshots. This is an inventory-visibility check only; canonical
-# domain/routing proof lives in deploy/k8s/tenancy/tenant-registry.yaml plus
-# the runtime-proof entrypoints that consume it.
+# inventory snapshots. This is an inventory-visibility check only.
+#
+# Canonical domain truth: deploy/k8s/tenancy/tenant-registry.yaml
+# Tenant metadata source: infrastructure/tenants/tenant-contracts.yml
+#
+# This script reads domains.lms from tenant-contracts.yml as a convenience
+# reference for DNS inventory checks. The canonical domain/routing proof
+# lives in tenant-registry.yaml plus the runtime-proof entrypoints.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"

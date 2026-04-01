@@ -155,3 +155,4 @@ scripts/qa/verify-enterprise-auth-contract.sh
 scripts/qa/verify-enterprise-mfe-build-contract.sh
 scripts/qa/verify-ci-execution-contract.sh
 scripts/qa/verify-vendored-settings-drift.sh
+scripts/qa/verify-domain-generated-surfaces.sh

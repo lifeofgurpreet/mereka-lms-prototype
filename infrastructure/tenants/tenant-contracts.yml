@@ -1,3 +1,24 @@
+# Tenant Contracts — tenant metadata and identity
+#
+# OWNERSHIP BOUNDARY:
+#   This file owns: tenant identity (slug, name, org_code), contact info,
+#   country, registry_slug, MFE env file paths, and aliases.
+#
+#   This file does NOT own: canonical hostnames. The source of truth for all
+#   live domains (FQDNs, TLS, auth classification, proof priority) is:
+#     deploy/k8s/tenancy/tenant-registry.yaml
+#
+#   The "domains" section is a DERIVED REFERENCE verified by CI alignment
+#   checks. Operational scripts (sync, provision) read domains from the
+#   canonical registry, not from this file. If domains here drift from
+#   the registry, the alignment gate fails.
+#
+# Consumers:
+#   - scripts/tenants/sync-tenant-registry-configmap.sh (metadata only — domains from registry)
+#   - scripts/tenants/provision-all-tenants.sh (metadata only — domains from registry)
+#   - scripts/qa/verify-tenant-contract-alignment.sh (alignment check — reads both)
+#   - scripts/qa/verify-tenant-dns-inventory.sh (inventory visibility — reads both)
+#   - scripts/shared/config.sh mereka_lms_canonical_domain_map_json() (slug mapping only)
 version: 1
 
 tenants:

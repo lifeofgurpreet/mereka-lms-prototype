@@ -21,7 +21,7 @@ check() {
 TOKENS="$REPO_ROOT/assets/branding/tokens.css"
 PROVENANCE="$REPO_ROOT/assets/branding/tokens.provenance.json"
 OVERRIDES="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css"
-MFE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
+MFE_SCSS_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe"
 CI_WORKFLOW="$REPO_ROOT/.github/workflows/ci.yml"
 
 # --- AC-004: Token file structure ---
@@ -74,10 +74,10 @@ check "--mereka-font-heading in mereka-overrides.css" grep -q "\-\-mereka-font-h
 check "--mereka-font-body in mereka-overrides.css" grep -q "\-\-mereka-font-body" "$OVERRIDES"
 
 # --- AC-012: Token values in MFE SCSS ---
-check "mfe/mereka.scss exists" test -f "$MFE_SCSS"
-check "--mereka-color-teal referenced in mfe/mereka.scss" grep -q "mereka-color-teal" "$MFE_SCSS"
-check "--mereka-color-blue referenced in mfe/mereka.scss" grep -q "mereka-color-blue" "$MFE_SCSS"
-check "--mereka-font-heading referenced in mfe/mereka.scss" grep -q "mereka-font-heading" "$MFE_SCSS"
+check "mfe/mereka.scss exists" test -f "$MFE_SCSS_DIR/mereka.scss"
+check "--mereka-color-teal referenced in mfe scss tree" grep -rq "mereka-color-teal" "$MFE_SCSS_DIR"
+check "--mereka-color-blue referenced in mfe scss tree" grep -rq "mereka-color-blue" "$MFE_SCSS_DIR"
+check "--mereka-font-heading referenced in mfe scss tree" grep -rq "mereka-font-heading" "$MFE_SCSS_DIR"
 
 echo ""
 echo "Results: $PASS passed, $FAIL failed"

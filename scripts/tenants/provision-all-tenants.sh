@@ -16,7 +16,10 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PROVISION_SCRIPT="${REPO_ROOT}/scripts/tenants/provision-tenant.sh"
+# Tenant metadata (slug, name, contact, aliases):
 TENANT_CONTRACT="${REPO_ROOT}/infrastructure/tenants/tenant-contracts.yml"
+# Canonical domain truth (production primary domains):
+TENANT_REGISTRY="${REPO_ROOT}/deploy/k8s/tenancy/tenant-registry.yaml"
 
 # Colors
 GREEN='\033[0;32m'
@@ -46,14 +49,32 @@ if [[ ! -f "$TENANT_CONTRACT" ]]; then
   echo -e "${RED}✗${NC} tenant contract not found: $TENANT_CONTRACT"
   exit 1
 fi
+if [[ ! -f "$TENANT_REGISTRY" ]]; then
+  echo -e "${RED}✗${NC} tenant registry not found: $TENANT_REGISTRY"
+  exit 1
+fi
 
-mapfile -t TENANT_ROWS < <(python3 - "$TENANT_CONTRACT" <<'PY'
+mapfile -t TENANT_ROWS < <(python3 - "$TENANT_CONTRACT" "$TENANT_REGISTRY" <<'PY'
 import sys
 from pathlib import Path
 
 import yaml
 
 contract = yaml.safe_load(Path(sys.argv[1]).read_text(encoding="utf-8"))
+registry = yaml.safe_load(Path(sys.argv[2]).read_text(encoding="utf-8"))
+
+# Build production primary domain lookup from canonical registry.
+domain_by_tenant: dict[str, str] = {}
+for entry in registry.get("domains", []):
+    if (
+        entry.get("environment") == "production"
+        and entry.get("role") == "primary"
+        and entry.get("status") == "active"
+        and entry.get("tenant")
+        and entry.get("domain")
+    ):
+        domain_by_tenant[entry["tenant"]] = entry["domain"]
+
 tenants = contract.get("tenants", [])
 if not tenants:
     raise SystemExit("No tenants found in tenant contract")
@@ -62,8 +83,12 @@ for tenant in tenants:
     if not tenant.get("active", True):
         continue
     slug = tenant["slug"]
+    registry_slug = tenant.get("registry_slug") or slug
     name = tenant["name"]
-    lms = tenant["domains"]["lms"]
+    # Domain from canonical registry, not from tenant-contracts.yml
+    lms = domain_by_tenant.get(registry_slug, domain_by_tenant.get(slug, ""))
+    if not lms:
+        raise SystemExit(f"No production primary domain for tenant '{slug}' in tenant-registry.yaml")
     email = tenant.get("contact_email", "")
     country = tenant.get("country", "")
     print(f"{slug}|{name}|{lms}|{email}|{country}")

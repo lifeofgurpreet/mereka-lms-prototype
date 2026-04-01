@@ -113,6 +113,46 @@
     "proxied": false
   },
   {
+    "description": "SOF tenant preview (target root, DNS-only)",
+    "type": "CNAME",
+    "name": "preview.skillourfuture.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "SOF tenant enterprise admin (target root, DNS-only)",
+    "type": "CNAME",
+    "name": "admin.skillourfuture.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "SOF tenant enterprise learner (target root, DNS-only)",
+    "type": "CNAME",
+    "name": "learner.skillourfuture.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "SOF tenant credentials (target root, DNS-only)",
+    "type": "CNAME",
+    "name": "credentials.skillourfuture.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "SOF tenant analytics (target root, DNS-only)",
+    "type": "CNAME",
+    "name": "analytics.skillourfuture.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
     "description": "CAA: allow Let's Encrypt to issue for academyv2.mereka.io",
     "type": "CAA",
     "name": "academyv2.mereka.io",

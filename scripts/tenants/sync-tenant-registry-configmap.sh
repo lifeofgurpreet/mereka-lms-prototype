@@ -2,10 +2,16 @@
 # @covers AC-MTA-001, AC-MTA-014, AC-MTA-021
 # @spec: multi-tenancy-architecture_spec.md
 #
-# Keep tenant-registry ConfigMap aligned with the canonical tenant contract.
+# Keep tenant-registry ConfigMap aligned with canonical sources.
 #
-# Canonical input:
-#   infrastructure/tenants/tenant-contracts.yml
+# Inputs:
+#   Tenant metadata (slug, name, aliases, org_code):
+#     infrastructure/tenants/tenant-contracts.yml
+#   Canonical domain truth (FQDNs, production primary domains):
+#     deploy/k8s/tenancy/tenant-registry.yaml
+#
+# Domain lookup: production primary domains come from tenant-registry.yaml
+# (the canonical host-intent source), NOT from tenant-contracts.yml.
 #
 # Target:
 #   deploy/k8s/base/apps/multi-tenancy/configmap-tenants.yaml (data.tenants.yaml)
@@ -17,6 +23,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 CONTRACT_PATH="${REPO_ROOT}/infrastructure/tenants/tenant-contracts.yml"
+TENANT_REGISTRY_PATH="${REPO_ROOT}/deploy/k8s/tenancy/tenant-registry.yaml"
 REGISTRY_CONFIGMAP_PATH="${REPO_ROOT}/deploy/k8s/base/apps/multi-tenancy/configmap-tenants.yaml"
 
 MODE="check"
@@ -59,12 +66,16 @@ if [[ ! -f "$CONTRACT_PATH" ]]; then
   exit 1
 fi
 
+if [[ ! -f "$TENANT_REGISTRY_PATH" ]]; then
+  echo "FAIL tenant-registry.yaml missing: $TENANT_REGISTRY_PATH" >&2
+  exit 1
+fi
 if [[ ! -f "$REGISTRY_CONFIGMAP_PATH" ]]; then
   echo "FAIL tenant registry ConfigMap missing: $REGISTRY_CONFIGMAP_PATH" >&2
   exit 1
 fi
 
-python3 - "$MODE" "$CONTRACT_PATH" "$REGISTRY_CONFIGMAP_PATH" <<'PY'
+python3 - "$MODE" "$CONTRACT_PATH" "$TENANT_REGISTRY_PATH" "$REGISTRY_CONFIGMAP_PATH" <<'PY'
 from __future__ import annotations
 
 import difflib
@@ -76,7 +87,8 @@ import yaml
 
 mode = sys.argv[1]
 contract_path = Path(sys.argv[2])
-configmap_path = Path(sys.argv[3])
+registry_path = Path(sys.argv[3])
+configmap_path = Path(sys.argv[4])
 
 
 def fail(message: str) -> None:
@@ -106,6 +118,20 @@ contract_payload = yaml.safe_load(contract_path.read_text(encoding="utf-8")) or 
 tenants = contract_payload.get("tenants")
 if not isinstance(tenants, list) or not tenants:
     fail("tenant contract has no tenants")
+
+# Build production primary domain lookup from the canonical host registry.
+# This replaces the previous pattern of reading domains.lms from tenant-contracts.yml.
+registry_payload = yaml.safe_load(registry_path.read_text(encoding="utf-8")) or {}
+registry_domain_by_tenant: dict[str, str] = {}
+for entry in registry_payload.get("domains", []):
+    if (
+        entry.get("environment") == "production"
+        and entry.get("role") == "primary"
+        and entry.get("status") == "active"
+        and entry.get("tenant")
+        and entry.get("domain")
+    ):
+        registry_domain_by_tenant[entry["tenant"]] = entry["domain"]
 
 raw_cm_text = configmap_path.read_text(encoding="utf-8")
 cm_docs = list(yaml.safe_load_all(raw_cm_text))
@@ -143,8 +169,11 @@ for tenant in tenants:
     slug = str(tenant.get("slug", "")).strip()
     registry_slug = str(tenant.get("registry_slug") or slug).strip()
     name = str(tenant.get("name", "")).strip()
-    domains = tenant.get("domains") if isinstance(tenant.get("domains"), dict) else {}
-    domain = str(domains.get("lms", "")).strip()
+    # Domain comes from the canonical tenant-registry.yaml, NOT from
+    # the convenience domains map in tenant-contracts.yml.
+    domain = registry_domain_by_tenant.get(registry_slug, "")
+    if not domain:
+        domain = registry_domain_by_tenant.get(slug, "")
     aliases = normalize_aliases(tenant.get("aliases"))
     org_code = tenant.get("org_code")
     existing_entry = existing_by_slug.get(registry_slug, {})
@@ -162,7 +191,7 @@ for tenant in tenants:
     if not name:
         fail(f"{slug}: missing tenant name")
     if not domain:
-        fail(f"{slug}: missing domains.lms")
+        fail(f"{slug}: no production primary domain in tenant-registry.yaml")
 
     enterprise_uuid = existing_uuid or placeholder_uuid(
         str(org_code) if isinstance(org_code, str) else None,

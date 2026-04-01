@@ -155,3 +155,4 @@ scripts/qa/verify-configmap-hash-suffixes.sh
 scripts/qa/verify-mfe-env-config-url-guard.sh
 scripts/qa/verify-arc-runner-contract.sh
 scripts/qa/verify-course-catalog-durability.sh
+scripts/qa/verify-domain-authority-chain.sh

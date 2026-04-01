@@ -1,0 +1,32 @@
+# GENERATED — do not hand-edit. Source: deploy/k8s/tenancy/tenant-registry.yaml
+# Regenerate: python scripts/domains/generate_domain_env.py
+# Patch Caddy Deployment env vars for staging.academyv2.mereka.io domain.
+# The Caddyfile uses {$VAR} placeholders; these env vars set the actual hostnames.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: caddy
+spec:
+  template:
+    spec:
+      containers:
+        - name: caddy
+          env:
+            - name: LMS_HOST
+              value: "staging.academyv2.mereka.io"
+            - name: LMS_HOST_PREVIEW
+              value: "staging.preview.academyv2.mereka.io"
+            - name: STUDIO_HOST
+              value: "staging.studio.academyv2.mereka.io"
+            - name: MFE_HOST
+              value: "staging.apps.academyv2.mereka.io"
+            - name: DISCOVERY_HOST
+              value: "staging.discovery.academyv2.mereka.io"
+            - name: NOTES_HOST
+              value: "staging.notes.academyv2.mereka.io"
+            - name: CREDENTIALS_HOST
+              value: "staging.credentials.academyv2.mereka.io"
+            - name: ENTERPRISE_ADMIN_HOST
+              value: "staging.admin.academyv2.mereka.io"
+            - name: ENTERPRISE_LEARNER_HOST
+              value: "staging.learner.academyv2.mereka.io"

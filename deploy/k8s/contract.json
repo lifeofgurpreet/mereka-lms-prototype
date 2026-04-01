@@ -1,5 +1,5 @@
 {
-  "version": "1.3.0",
+  "version": "1.5.0",
   "contract_schema_version": "1",
   "base_path": "deploy/k8s/base",
   "local_overlay": "deploy/k8s/overlays/local",
@@ -533,6 +533,25 @@
       "fix": "Middleware config belongs in app repo production.py"
     }
   ],
+
+  "domain_registry": {
+    "canonical_source": "deploy/k8s/tenancy/tenant-registry.yaml",
+    "version": "1.5.0",
+    "summary": {
+      "total_domains": 100,
+      "active_domains": 97,
+      "deprecated_domains": 3,
+      "environments": ["production", "dev", "profiles-dev", "staging"],
+      "tenants": ["mereka", "biji-biji", "skillourfuture"],
+      "roles": [
+        "primary", "studio", "mfe", "preview", "discovery", "notes",
+        "credentials", "forum", "enterprise-admin", "enterprise-learner",
+        "analytics", "ecommerce", "auth"
+      ],
+      "statuses": ["active", "deprecated", "planned"]
+    },
+    "_note": "Domain counts are a summary projection. Do NOT duplicate the full domain list here — read tenant-registry.yaml directly. Update counts when domains are added/removed."
+  },
 
   "stableResourceNames": {
     "configMaps": [

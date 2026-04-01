@@ -23,5 +23,45 @@
     "content": "academy.biji-biji.com",
     "ttl": 1,
     "proxied": false
+  },
+  {
+    "description": "BB tenant preview (DNS-only)",
+    "type": "CNAME",
+    "name": "preview.academy.biji-biji.com",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "BB tenant enterprise admin (DNS-only)",
+    "type": "CNAME",
+    "name": "admin.academy.biji-biji.com",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "BB tenant enterprise learner (DNS-only)",
+    "type": "CNAME",
+    "name": "learner.academy.biji-biji.com",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "BB tenant credentials (DNS-only)",
+    "type": "CNAME",
+    "name": "credentials.academy.biji-biji.com",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "BB tenant analytics (DNS-only)",
+    "type": "CNAME",
+    "name": "analytics.academy.biji-biji.com",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
   }
 ]
