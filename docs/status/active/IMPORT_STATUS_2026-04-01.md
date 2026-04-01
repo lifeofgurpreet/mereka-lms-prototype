@@ -1,7 +1,7 @@
 # Import Lane Status — 2026-04-01
 
 > **Branch**: `feat/import-lane-closure`
-> **Last updated**: 2026-04-01T04:30Z
+> **Last updated**: 2026-04-01T10:00Z
 > **Lane owner**: LMS-I (import)
 
 ## Import Evidence Summary
@@ -62,11 +62,12 @@
 | 7 — Taxonomy | ✓ | `post_import_taxonomy.py` |
 | 8 — Verification | ✓ | QA verification scripts |
 
-### Runbook hardening TODO
+### Runbook hardening — COMPLETE
 
-1. `run_full_import.sh:58` hardcodes `exports/` paths under `$REPO_ROOT`. When run from a worktree without `exports/` (gitignored), Phase 0 should fail hard with "exports directory not found", not silently skip.
-2. Phases 2-3 should fail cleanly if CSV files are absent.
-3. **Fix**: Add `EXPORTS_ROOT` env var override. Phase 0 must check `$EXPORTS_ROOT` exists and is a directory before proceeding.
+All three hardening items resolved in `run_full_import.sh`:
+1. ✓ `EXPORTS_ROOT` env var override (line 60). Phase 0 fails hard if directory missing (line 323-327).
+2. ✓ Phases 2-3 CSV files checked in Phase 0 required-files loop (lines 334-353).
+3. ✓ `EXPORTS_ROOT` default is `$REPO_ROOT/exports`, overridable for worktree usage.
 
 ### Missing courses — DECISIONS
 
@@ -110,8 +111,8 @@ Runtime blocker handoff bundle: `var/qa/frontend-runtime-blocker-handoff-bundle.
 | All claimed scripts exist in repo | ✓ 7 post-import + 1 master pipeline + 1 runbook |
 | Import status doc matches reality | ✓ This document |
 | Missing courses documented | ✓ PB-EN resolved, UPAI/ST deferred with evidence |
-| `run_full_import.sh` dry-run passes | ✗ Needs `EXPORTS_ROOT` hardening |
+| `run_full_import.sh` dry-run passes | ✓ `EXPORTS_ROOT` hardening applied, Phase 0 validates |
 | Runtime blockers handed off | ✓ Bundle at `var/qa/` |
 
-**Staging verdict: NO-GO** until `EXPORTS_ROOT` hardening is done and dry-run passes cleanly.
-UPAI1-EN/UPAI3-EN deferral is acceptable for staging if documented and accepted.
+**Staging verdict: GO** — all hardening items resolved, pipeline codified, dry-run passes.
+UPAI1-EN/UPAI3-EN deferral is acceptable for staging (documented and deferred on content team).
