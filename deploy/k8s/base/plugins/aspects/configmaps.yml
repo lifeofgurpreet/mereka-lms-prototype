@@ -203,7 +203,7 @@ data:
                 "access_token_url": os.environ.get("OAUTH_ISSUER_URL", "http://localhost") + "/application/o/token/",
                 "authorize_url": os.environ.get("OAUTH_ISSUER_URL", "http://localhost") + "/application/o/authorize/",
                 "client_kwargs": {
-                    "scope": "openid email profile",
+                    "scope": "openid email profile groups",
                 },
                 "jwks_uri": os.environ.get("OAUTH_ISSUER_URL", "http://localhost") + "/application/o/superset-analytics/jwks/",
             },
@@ -213,6 +213,17 @@ data:
     # Map Authentik user info to Superset
     AUTH_USER_REGISTRATION = True
     AUTH_USER_REGISTRATION_ROLE = "Gamma"  # Default role for new users
+
+    # Map Authentik groups to Superset roles.
+    # Users in these Authentik groups get the corresponding Superset role on login.
+    # Groups not listed here are ignored — user keeps AUTH_USER_REGISTRATION_ROLE.
+    AUTH_ROLES_MAPPING = {
+        "authentik Admins": ["Admin"],
+        "superusers": ["Admin"],
+        "Platform Admins": ["Admin"],
+        "Course Creators": ["Alpha"],
+    }
+    AUTH_ROLES_SYNC_AT_LOGIN = True
 
     # Custom user info mapping from Authentik
     from superset.security import SupersetSecurityManager
@@ -230,6 +241,7 @@ data:
                     "email": data.get("email"),
                     "first_name": data.get("given_name", ""),
                     "last_name": data.get("family_name", ""),
+                    "role_keys": data.get("groups", []),
                 }
             return super().oauth_user_info(provider, response)
 

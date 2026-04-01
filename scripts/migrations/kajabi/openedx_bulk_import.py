@@ -81,7 +81,7 @@ def import_users(csv_path: str, settings_module: str, start: int, limit: int | N
         try:
             email = (row.get("email") or "").strip().lower()
             username = (row.get("username") or "").strip()
-            full_name = sanitize_text(row.get("full_name"))
+            full_name = sanitize_text(row.get("name") or row.get("full_name"))
             country = (row.get("country") or "").strip().upper()
             is_active = str(row.get("is_active", "true")).lower() not in ("false", "0")
             if not email or not username:
