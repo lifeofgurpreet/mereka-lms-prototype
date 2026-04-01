@@ -142,3 +142,4 @@ hubspot-webhook-mct/.env
 # Stray CLI artifacts
 --url
 .docs-world-class-sync-state
+.aspects-tutor-workspace/
