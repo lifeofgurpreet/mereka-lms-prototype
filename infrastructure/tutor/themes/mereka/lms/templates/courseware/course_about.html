@@ -216,7 +216,7 @@ if not course.start_date_is_still_default:
       % else:
       <div class="media">
         <div class="hero">
-          <img src="${course_image_urls['large']}" onerror="this.src='/theming/asset/images/no_course_image.png';" alt="" aria-hidden="true" />
+          <img src="${course_image_urls['large']}" onerror="this.onerror=null;this.dataset.broken='1';this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 400 225%22%3E%3Crect width=%22400%22 height=%22225%22 fill=%22%23237072%22 rx=%2212%22/%3E%3Ctext x=%22200%22 y=%22120%22 text-anchor=%22middle%22 fill=%22rgba(255,255,255,0.7)%22 font-family=%22Poppins,sans-serif%22 font-size=%2218%22%3ECourse Image%3C/text%3E%3C/svg%3E';" alt="" aria-hidden="true" />
         </div>
       </div>
       % endif

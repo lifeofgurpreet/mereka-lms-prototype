@@ -1158,6 +1158,13 @@ table thead th {
 .course .course-image img {
   background: transparent !important;
 }
+/* SVG data-URI fallback: when onerror fires, the handler sets
+   data-broken="1" and replaces src with an inline SVG placeholder.
+   Ensure the SVG fills the container cleanly. */
+.course .course-image img[data-broken="1"] {
+  object-fit: contain !important;
+  background: linear-gradient(145deg, #eef9fb 0%, #f3eef8 50%, #fdf2f8 100%) !important;
+}
 
 /* ── Fix 2c: Ensure .courses-listing does not clip card shadows ──── */
 .courses-listing {
