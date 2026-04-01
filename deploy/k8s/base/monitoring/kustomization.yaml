@@ -43,7 +43,6 @@ resources:
   - servicemonitor-mux.yaml
   - prometheusrule-video.yaml
   - prometheusrule-externalsecrets.yaml
-  - prometheusrule-aspects.yaml
   - hpa-enterprise.yaml
   # ── QUARANTINED PrometheusRules (not rendered) ───────────────────────────
   # prometheusrule-email.yaml          — References SES exporter metrics

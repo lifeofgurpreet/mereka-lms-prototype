@@ -10,82 +10,103 @@ metadata:
     role: alert-rules
 spec:
   groups:
-    - name: aspects.rules
+    - name: aspects.availability
+      interval: 30s
       rules:
-        # ClickHouse disk usage warning
-        - alert: ClickHouseDiskPressure
+        - alert: ClickHousePodDown
           expr: |
-            (kubelet_volume_stats_used_bytes{namespace="mereka-lms", persistentvolumeclaim="clickhouse-data"}
-            / kubelet_volume_stats_capacity_bytes{namespace="mereka-lms", persistentvolumeclaim="clickhouse-data"})
-            > 0.75
+            kube_deployment_status_available_replicas{namespace=~"mereka-lms.*|stg-mereka-lms", deployment="clickhouse"} == 0
+            and kube_deployment_spec_replicas{namespace=~"mereka-lms.*|stg-mereka-lms", deployment="clickhouse"} > 0
           for: 5m
-          labels:
-            severity: warning
-            service: aspects
-          annotations:
-            summary: "ClickHouse disk usage above 75%"
-            description: "ClickHouse PVC clickhouse-data is {{ $value | humanizePercentage }} full. Consider running TTL cleanup or expanding storage."
-
-        # ClickHouse disk usage critical
-        - alert: ClickHouseDiskCritical
-          expr: |
-            (kubelet_volume_stats_used_bytes{namespace="mereka-lms", persistentvolumeclaim="clickhouse-data"}
-            / kubelet_volume_stats_capacity_bytes{namespace="mereka-lms", persistentvolumeclaim="clickhouse-data"})
-            > 0.85
-          for: 2m
           labels:
             severity: critical
             service: aspects
           annotations:
-            summary: "ClickHouse disk usage above 85% - CRITICAL"
-            description: "ClickHouse PVC clickhouse-data is {{ $value | humanizePercentage }} full. Immediate action required: run TTL cleanup or expand storage."
+            summary: "ClickHouse pod is down"
+            description: "ClickHouse in {{ $labels.namespace }} has 0 available replicas for 5+ minutes."
 
-        # Superset pod unavailable
-        - alert: SupersetUnavailable
+        - alert: SupersetPodDown
           expr: |
-            kube_deployment_status_replicas_available{namespace="mereka-lms", deployment="superset"} == 0
+            kube_deployment_status_available_replicas{namespace=~"mereka-lms.*|stg-mereka-lms", deployment="superset"} == 0
+            and kube_deployment_spec_replicas{namespace=~"mereka-lms.*|stg-mereka-lms", deployment="superset"} > 0
           for: 5m
-          labels:
-            severity: warning
-            service: aspects
-          annotations:
-            summary: "Superset analytics dashboard is unavailable"
-            description: "Superset deployment has 0 available replicas for more than 5 minutes."
-
-        # ClickHouse pod unavailable
-        - alert: ClickHouseUnavailable
-          expr: |
-            kube_deployment_status_replicas_available{namespace="mereka-lms", deployment="clickhouse"} == 0
-          for: 2m
           labels:
             severity: critical
             service: aspects
           annotations:
-            summary: "ClickHouse analytics data warehouse is unavailable"
-            description: "ClickHouse deployment has 0 available replicas for more than 2 minutes. Analytics data ingestion is halted."
+            summary: "Superset is down"
+            description: "Superset in {{ $labels.namespace }} has 0 available replicas for 5+ minutes."
 
-        # Superset worker unavailable
-        - alert: SupersetWorkerUnavailable
+        - alert: RalphPodDown
           expr: |
-            kube_deployment_status_replicas_available{namespace="mereka-lms", deployment="superset-worker"} == 0
+            kube_deployment_status_available_replicas{namespace=~"mereka-lms.*|stg-mereka-lms", deployment="ralph"} == 0
+            and kube_deployment_spec_replicas{namespace=~"mereka-lms.*|stg-mereka-lms", deployment="ralph"} > 0
+          for: 5m
+          labels:
+            severity: critical
+            service: aspects
+          annotations:
+            summary: "Ralph xAPI LRS is down"
+            description: "Ralph in {{ $labels.namespace }} has 0 available replicas for 5+ minutes. xAPI events are being lost."
+
+        - alert: SupersetWorkerDown
+          expr: |
+            kube_deployment_status_available_replicas{namespace=~"mereka-lms.*|stg-mereka-lms", deployment="superset-worker"} == 0
+            and kube_deployment_spec_replicas{namespace=~"mereka-lms.*|stg-mereka-lms", deployment="superset-worker"} > 0
           for: 10m
           labels:
             severity: warning
             service: aspects
           annotations:
-            summary: "Superset background worker is unavailable"
-            description: "Superset worker deployment has 0 available replicas for more than 10 minutes. Scheduled reports and async queries will not run."
+            summary: "Superset worker is down"
+            description: "Superset worker in {{ $labels.namespace }} has 0 available replicas for 10+ minutes."
 
-        # ClickHouse high memory usage
-        - alert: ClickHouseHighMemory
+        - alert: AspectsPodRestarting
           expr: |
-            container_memory_working_set_bytes{namespace="mereka-lms", container="clickhouse"}
-            / container_spec_memory_limit_bytes{namespace="mereka-lms", container="clickhouse"}
-            > 0.85
+            rate(kube_pod_container_status_restarts_total{namespace=~"mereka-lms.*|stg-mereka-lms", pod=~"(clickhouse|superset|ralph).*"}[15m]) > 0
           for: 5m
           labels:
             severity: warning
             service: aspects
           annotations:
-            summary: "ClickHouse memory usage above 85%"
-            description: "ClickHouse container is using {{ $value | humanizePercentage }} of its memory limit."
+            summary: "Aspects pod restarting"
+            description: "Pod {{ $labels.pod }} in {{ $labels.namespace }} has restarted {{ $value | humanize }} times in 15 minutes."
+
+    - name: aspects.resources
+      interval: 60s
+      rules:
+        - alert: ClickHouseStorageHigh
+          expr: |
+            (kubelet_volume_stats_used_bytes{namespace=~"mereka-lms.*|stg-mereka-lms", persistentvolumeclaim=~".*clickhouse.*"}
+            / kubelet_volume_stats_capacity_bytes{namespace=~"mereka-lms.*|stg-mereka-lms", persistentvolumeclaim=~".*clickhouse.*"}) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+            service: aspects
+          annotations:
+            summary: "ClickHouse storage > 85%"
+            description: "PVC {{ $labels.persistentvolumeclaim }} in {{ $labels.namespace }} is {{ $value | humanizePercentage }} full."
+
+        - alert: ClickHouseStorageCritical
+          expr: |
+            (kubelet_volume_stats_used_bytes{namespace=~"mereka-lms.*|stg-mereka-lms", persistentvolumeclaim=~".*clickhouse.*"}
+            / kubelet_volume_stats_capacity_bytes{namespace=~"mereka-lms.*|stg-mereka-lms", persistentvolumeclaim=~".*clickhouse.*"}) > 0.95
+          for: 5m
+          labels:
+            severity: critical
+            service: aspects
+          annotations:
+            summary: "ClickHouse storage > 95%"
+            description: "PVC {{ $labels.persistentvolumeclaim }} in {{ $labels.namespace }} is {{ $value | humanizePercentage }} full. Immediate action required."
+
+        - alert: ClickHouseHighMemory
+          expr: |
+            container_memory_working_set_bytes{namespace=~"mereka-lms.*|stg-mereka-lms", container="clickhouse"}
+            / on(pod, namespace) kube_pod_container_resource_limits{resource="memory", namespace=~"mereka-lms.*|stg-mereka-lms", container="clickhouse"} > 0.85
+          for: 5m
+          labels:
+            severity: warning
+            service: aspects
+          annotations:
+            summary: "ClickHouse memory usage > 85%"
+            description: "ClickHouse container in {{ $labels.namespace }} is using {{ $value | humanizePercentage }} of its memory limit."
