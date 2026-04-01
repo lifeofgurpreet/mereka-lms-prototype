@@ -55,13 +55,17 @@ NC='\033[0m'
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-MCT_OLX_DIR="$REPO_ROOT/exports/mct/olx_packages"
-DRIVE_OLX_DIR="$REPO_ROOT/exports/drive/olx_packages"
-MCT_USERS_CSV="$REPO_ROOT/exports/mct/openedx_import/users_import.csv"
-MCT_ENROLLMENTS_CSV="$REPO_ROOT/exports/mct/openedx_import/enrollments_import.csv"
-KAJABI_USERS_CSV="$REPO_ROOT/exports/kajabi/openedx_import/users_import.csv"
-KAJABI_ENROLLMENTS_CSV="$REPO_ROOT/exports/kajabi/openedx_import/enrollments_import.csv"
-KAJABI_COMPLETIONS_CSV="$REPO_ROOT/exports/kajabi/openedx_import/completions_import.csv"
+# EXPORTS_ROOT can be overridden for worktree usage where exports/ is gitignored.
+# Default: $REPO_ROOT/exports (the main checkout's export artifacts).
+EXPORTS_ROOT="${EXPORTS_ROOT:-$REPO_ROOT/exports}"
+
+MCT_OLX_DIR="$EXPORTS_ROOT/mct/olx_packages"
+DRIVE_OLX_DIR="$EXPORTS_ROOT/drive/olx_packages"
+MCT_USERS_CSV="$EXPORTS_ROOT/mct/openedx_import/users_import.csv"
+MCT_ENROLLMENTS_CSV="$EXPORTS_ROOT/mct/openedx_import/enrollments_import.csv"
+KAJABI_USERS_CSV="$EXPORTS_ROOT/kajabi/openedx_import/users_import.csv"
+KAJABI_ENROLLMENTS_CSV="$EXPORTS_ROOT/kajabi/openedx_import/enrollments_import.csv"
+KAJABI_COMPLETIONS_CSV="$EXPORTS_ROOT/kajabi/openedx_import/completions_import.csv"
 
 MCT_BULK_IMPORT="$SCRIPT_DIR/mct/openedx_bulk_import_mct.py"
 KAJABI_BULK_IMPORT="$SCRIPT_DIR/kajabi/openedx_bulk_import.py"
@@ -314,7 +318,18 @@ phase_0_verify() {
     errors=$((errors + 1))
   fi
 
-  # 6. Required export files
+  # 6. Exports root directory
+  step "Checking exports root: $EXPORTS_ROOT"
+  if [[ ! -d "$EXPORTS_ROOT" ]]; then
+    fail "EXPORTS_ROOT directory not found: $EXPORTS_ROOT"
+    fail "If running from a worktree, set EXPORTS_ROOT to the main checkout's exports dir:"
+    fail "  EXPORTS_ROOT=/home/gurpreet/projects/k8s/mereka-lms/exports $0 --env $ENV ..."
+    errors=$((errors + 1))
+  else
+    ok "Exports root exists: $EXPORTS_ROOT"
+  fi
+
+  # 7. Required export files
   step "Checking required export artifacts..."
   local required_files=(
     "$MCT_USERS_CSV"

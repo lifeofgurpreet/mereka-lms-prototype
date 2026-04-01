@@ -62,7 +62,7 @@ OUTPUT_DIR = EXPORTS_KAJABI / "openedx_import"
 # "TIYJ" in completions data maps to "TYJ-EN" (different abbreviation)
 # ---------------------------------------------------------------------------
 PREFIX_TO_COURSE_KEY: dict[str, str] = {
-    "PB":   "course-v1:MEREKA+PB-EN+course",
+    "PB":   "course-v1:MEREKA+MCT32-EN+course",  # remapped from PB-EN (same content),
     "F101": "course-v1:MEREKA+F101-MS+course",
     "PF":   "course-v1:MEREKA+PF-ID+course",
     "PW":   "course-v1:MEREKA+PW-EN+course",
@@ -80,7 +80,7 @@ PREFIX_TO_COURSE_KEY: dict[str, str] = {
 # Kajabi product id → Open edX course key
 # Derived from products.ndjson titles; updated manually if new products appear.
 PRODUCT_ID_TO_COURSE_KEY: dict[str, str] = {
-    "2147807941": "course-v1:MEREKA+PB-EN+course",           # Personal Branding
+    "2147807941": "course-v1:MEREKA+MCT32-EN+course",           # Personal Branding
     "2147807951": "course-v1:MEREKA+MYFC-MS+course",         # Managing Your First Client
     "2147933335": "course-v1:MEREKA+PF-ID+course",           # Personal Finance
     "2147934068": "course-v1:MEREKA+TYJ-EN+course",          # Thriving In Your Job
@@ -93,7 +93,7 @@ PRODUCT_ID_TO_COURSE_KEY: dict[str, str] = {
     "2148348806": "course-v1:MEREKA+UPAI1-EN+course",        # Getting Started with ChatGPT
     # Malay variants mapped to same course keys
     "2148256173": "course-v1:MEREKA+SP-MS+course",           # Profil Keterampilan (ID)
-    "2148257968": "course-v1:MEREKA+PB-EN+course",           # Penjenamaan Diri (MY)
+    "2148257968": "course-v1:MEREKA+MCT33-ID+course",           # Penjenamaan Diri (MY)
     "2148257973": "course-v1:MEREKA+SYFC-MS+course",         # Pikat Hati Klien (MY)
     "2148257982": "course-v1:MEREKA+SYFJ-ID+course",         # Dapatkan Pekerjaan (MY)
     "2148258205": "course-v1:MEREKA+MYFC-MS+course",         # Pengurusan Klien (MY)
