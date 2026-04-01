@@ -336,11 +336,14 @@ for store in MODULESTORE["default"]["OPTIONS"]["stores"]:
 # Behave like memcache when it comes to connection errors
 DJANGO_REDIS_IGNORE_EXCEPTIONS = True
 
-# Elasticsearch connection parameters
+# Search connection parameters.
+# SEARCH_ENGINE is set to MeilisearchEngine above (line ~150).
+# ELASTIC_SEARCH_CONFIG is retained for any edx-search code paths that
+# still reference it, but pointed at Meilisearch so connections don't
+# hang against a dead Elasticsearch service.
 ELASTIC_SEARCH_CONFIG = [{
-  
-  "host": "elasticsearch",
-  "port": 9200,
+  "host": "meilisearch",
+  "port": 7700,
 }]
 
 # Common cache config

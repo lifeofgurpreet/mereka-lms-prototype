@@ -11,12 +11,18 @@ from openedx.core.djangoapps.site_configuration import helpers as configuration_
 from lms.djangoapps.branding import api as branding_api
 %>
 
+<%
+  ## Tenant-aware logo and tagline — reads from SiteConfiguration, falls back to theme defaults.
+  _logo_url = configuration_helpers.get_value('logo_image', static.url('images/logo.png'))
+  _platform_name = configuration_helpers.get_value('platform_name', static.get_platform_name())
+  _tagline = configuration_helpers.get_value('PLATFORM_TAGLINE', 'Learning experiences crafted for Southeast Asia.')
+%>
 <h1 class="hd logo-header navbar-brand mereka-navbar-brand">
   <div class="logo">
     <a class="navbar-brand" href="${branding_api.get_home_url()}" itemprop="url">
-      <img class="logo-image" src="${static.url('images/logo.png')}" alt="${_('{platform_name} home').format(platform_name=static.get_platform_name())}" itemprop="logo" />
+      <img class="logo-image" src="${_logo_url}" alt="${_('{platform_name} home').format(platform_name=_platform_name)}" itemprop="logo" />
     </a>
-    <span class="logo-tagline">Learning experiences crafted for Southeast Asia.</span>
+    <span class="logo-tagline">${_tagline}</span>
   </div>
   % if course and not disable_courseware_header:
     <div class="course-header">

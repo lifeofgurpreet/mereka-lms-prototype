@@ -21,9 +21,61 @@
 # This file does NOT call set -euo pipefail; the caller owns that.
 
 # ─────────────────────────────────────────────────────────────────────────────
+# seed_waffle_flags — create global waffle flags required for MFE redirects
+# ─────────────────────────────────────────────────────────────────────────────
+seed_waffle_flags() {
+  echo "--- seeding waffle flags ---"
+
+  if [[ "$DRY_RUN" == "true" ]]; then
+    echo "  [DRY RUN] would create/update waffle flags"
+    echo ""
+    return 0
+  fi
+
+  local PY_WAFFLE
+  PY_WAFFLE=$(cat <<'PYEOF'
+from waffle.models import Flag
+import json
+
+flags = [
+    # Dashboard MFE redirect — learner_home_mfe_enabled() checks this flag.
+    # Without it, /dashboard stays on the legacy Django page even when
+    # LEARNER_HOME_MFE_REDIRECT_PERCENTAGE = 100 is set.
+    ("learner_home.redirect_to_microfrontend", True),
+]
+
+results = []
+for flag_name, everyone_val in flags:
+    obj, created = Flag.objects.update_or_create(
+        name=flag_name,
+        defaults={"everyone": everyone_val},
+    )
+    results.append({
+        "flag": flag_name,
+        "action": "CREATED" if created else "UPDATED",
+        "everyone": obj.everyone,
+    })
+print(json.dumps(results))
+PYEOF
+)
+
+  local RESULT
+  RESULT=$(kubectl exec -n "$NAMESPACE" "$LMS_POD" -- \
+    python manage.py lms shell -c "$PY_WAFFLE" 2>/dev/null \
+    | grep '^\[' | tail -1 \
+    || echo "[]")
+
+  echo "  result: $RESULT"
+  echo ""
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
 # run_seed — iterate TENANT_DEFS and upsert Site + SiteConfiguration
 # ─────────────────────────────────────────────────────────────────────────────
 run_seed() {
+  # Seed global waffle flags before tenant-specific config.
+  seed_waffle_flags
+
   local PASS=0
   local FAIL=0
 

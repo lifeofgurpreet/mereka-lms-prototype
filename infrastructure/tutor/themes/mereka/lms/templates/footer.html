@@ -92,7 +92,9 @@
   cookies_url = configuration_helpers.get_value('COOKIES_POLICY_URL', 'https://legal.mereka.io/#cookie-policy')
   copyright_holder = configuration_helpers.get_value('PLATFORM_NAME', getattr(settings, 'PLATFORM_NAME', 'MEREKA'))
   whatsapp_number = '601135271981'
-  logo_text = 'mereka'
+  ## Tenant-aware footer logo — reads from SiteConfiguration, falls back to defaults.
+  logo_text = configuration_helpers.get_value('platform_name', 'mereka')
+  logo_image_url = configuration_helpers.get_value('logo_image', '')
 %>
 
 <footer class="mereka-footer mereka-footer--v2" role="contentinfo"
@@ -105,7 +107,7 @@
   <div class="footer-social">
     <div class="footer-container">
       <a href="${lms_root}" class="footer-logo-link">
-        <img src="${static.url('images/logo.png')}" alt="${copyright_holder} logo" class="footer-logo-img" />
+        <img src="${logo_image_url if logo_image_url else static.url('images/logo.png')}" alt="${copyright_holder} logo" class="footer-logo-img" />
         <span class="footer-brand-name">${logo_text}</span>
       </a>
       <div class="footer-social-icons">
