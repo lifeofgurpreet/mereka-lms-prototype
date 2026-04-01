@@ -153,9 +153,24 @@ Superset authenticates via Authentik OAuth2:
 - Historical learner activity before pipeline activation
 - Tracking logs are ephemeral (not persisted to PVC) so historical backfill is impossible for past periods
 
-### Tracking log persistence (future)
-To enable historical backfill, add a PVC mount for `/openedx/data/logs/` in the LMS deployment.
-Then use `transform_tracking_logs` management command to replay historical events.
+### Tracking log persistence
+PVC `lms-tracking-logs` (5Gi, ReadWriteMany) defined in `deploy/k8s/base/plugins/aspects/volumes.yml`.
+Must be mounted to LMS + LMS-worker deployments at `/openedx/data/logs/` via overlay patch.
+
+**Backfill procedure** (replay tracking logs into xAPI pipeline):
+```bash
+kubectl exec -n <ns> <lms-pod> -- python manage.py lms transform_tracking_logs \
+  --source_provider LOCAL \
+  --source_config '{"key":"/openedx/data/logs","container":".","prefix":"tracking"}' \
+  --transformer_type xapi \
+  --destination_provider LRS \
+  --batch_size 1000 \
+  --sleep_between_batches_secs 0.1
+```
+
+**Log rotation**: LMS writes to `/openedx/data/logs/tracking.log`. Python logging
+rotates via `RotatingFileHandler`. Ensure PVC has enough headroom for accumulated logs
+between rotations.
 
 ## Environments
 

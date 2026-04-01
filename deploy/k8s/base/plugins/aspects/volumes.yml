@@ -13,3 +13,26 @@ spec:
     requests:
       storage: 10Gi
   storageClassName: standard-rwo
+---
+# Tracking log persistence for xAPI backfill
+# Mount on LMS deployment at /openedx/data/logs via overlay patch.
+# Enables historical replay via:
+#   python manage.py lms transform_tracking_logs \
+#     --source_provider LOCAL \
+#     --source_config '{"key":"/openedx/data/logs","container":".","prefix":"tracking"}' \
+#     --transformer_type xapi --destination_provider LRS --batch_size 1000
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: lms-tracking-logs
+  labels:
+    app.kubernetes.io/name: lms
+    app.kubernetes.io/part-of: aspects
+    app.kubernetes.io/component: tracking-logs
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard-rwo
