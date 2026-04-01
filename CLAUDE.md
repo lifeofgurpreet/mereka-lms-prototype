@@ -34,7 +34,8 @@ This is the **Mereka Academy Open edX** deployment repository. It tracks infrast
   - Redis (caching, Celery)
 - **Infrastructure**:
   - Local: Docker Compose
-  - Production: Google Kubernetes Engine (GKE), Cloud SQL, Artifact Registry
+  - Dev/Staging/Production: RKE2 on Contabo VPS (rke2-nonprod cluster)
+  - GKE: **DECOMMISSIONED** — all workloads migrated to RKE2. GKE namespace frozen at 0 replicas.
 - **Frontend**: Micro-frontends (MFEs) built on React, served via Caddy reverse proxy
 - **Services**:
   - Discovery (course catalog)
@@ -67,7 +68,7 @@ deploy/k8s/               # Kubernetes manifests
       ├── local/          # Local Kind/Minikube (stays in app repo)
       ├── rke2-nonprod/   # Dev RKE2 cluster (active dev target — will move to bbi-infrastructure)
       ├── staging/        # Staging overlay — shares rke2-nonprod cluster, consolidation pending
-      └── production/     # Production GKE — frozen at 0 replicas, will move to bbi-infrastructure
+      └── production/     # Production overlay — GKE DECOMMISSIONED, production is on RKE2
 
 .github/
   ├── actions/            # Composite actions (DRY building blocks)
@@ -87,7 +88,7 @@ infrastructure/           # Infrastructure-as-code
 
 scripts/                  # Automation organized by domain
   ├── shared/             # Common utilities (config.sh, setup-local.sh)
-  ├── infra/              # GCP, GKE, MongoDB, backups
+  ├── infra/              # GCP (legacy), MongoDB Atlas, backups
   ├── migrations/         # Kajabi/MCT data migration
   ├── branding/           # Theme sync scripts
   ├── analytics/          # Analytics exports
@@ -245,12 +246,16 @@ curl -I http://studio.localhost            # Studio
 curl -I http://apps.localhost/authn/login  # MFE login
 ```
 
-### Diagnostics (Kubernetes/Production)
+### Diagnostics (Kubernetes — RKE2)
 ```bash
+# Context: kubectl config use-context rke2-nonprod
+# Namespaces: mereka-lms-dev (dev), stg-mereka-lms (staging)
+# GKE mereka-lms namespace is DECOMMISSIONED (frozen at 0 replicas)
+
 # Quick site-down diagnostic (run in order)
-kubectl get pods -n mereka-lms                          # 1. Are pods running?
-kubectl get endpoints -n mereka-lms                     # 2. CRITICAL: Empty = no traffic
-kubectl get svc caddy -n mereka-lms                     # 3. LoadBalancer status
+kubectl get pods -n mereka-lms-dev                      # 1. Are pods running?
+kubectl get endpoints -n mereka-lms-dev                 # 2. CRITICAL: Empty = no traffic
+kubectl get svc caddy -n mereka-lms-dev                 # 3. Service status
 
 # Fix service selector mismatches (most common issue)
 ./scripts/infra/fix-service-selectors.sh
