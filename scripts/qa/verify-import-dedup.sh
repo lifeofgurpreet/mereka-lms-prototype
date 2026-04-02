@@ -61,7 +61,7 @@ run_query() {
   local query="$2"
   kubectl $CONTEXT exec -n "$NAMESPACE" "$LMS_POD" -c lms -- \
     bash -c "cd /openedx/edx-platform && python manage.py lms shell -c \"$query\"" 2>&1 \
-    | grep -v "^$\|WARNING\|DeprecationWarning\|ImportWarning\|RemovedInDjango\|RuntimeError\|casbin\|BLOCK_STRUCTURES\|imghdr\|SwaggerJSON\|drf_yasg\|openedx_tenant\|frozen import\|SixMeta\|embargo"
+    | grep -v "^$\|WARNING\|DeprecationWarning\|ImportWarning\|RemovedInDjango\|RuntimeError\|casbin\|BLOCK_STRUCTURES\|imghdr\|SwaggerJSON\|drf_yasg\|openedx_tenant\|frozen import\|SixMeta\|embargo\|objects imported\|objects could\|form_class\|Historical\|openassessment\|common\.djangoapps\|lms\.djangoapps\|openedx\.\|return form"
 }
 
 # --- 1. Duplicate emails ---

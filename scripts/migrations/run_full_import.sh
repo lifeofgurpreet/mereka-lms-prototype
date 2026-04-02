@@ -142,8 +142,8 @@ case "$ENV" in
     : "${KUBE_CONTEXT:=rke2-nonprod}"
     ;;
   prod)
-    NAMESPACE="mereka-lms"
-    : "${KUBE_CONTEXT:=gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
+    NAMESPACE="mereka-lms-prod"
+    : "${KUBE_CONTEXT:=rke2-nonprod}"
     ;;
   *)
     echo -e "${RED}ERROR: Unknown environment '$ENV'. Must be: dev, staging, prod${NC}" >&2
@@ -407,7 +407,7 @@ phase_0_verify() {
   log "  MCT users CSV:             $((mct_user_rows - 1)) data rows (expected ~71,260)"
   log "  Kajabi users CSV:          $((kajabi_user_rows - 1)) data rows (expected ~94,872)"
   log "  MCT enrollments CSV:       $((mct_enr_rows - 1)) data rows (expected ~2,305,395)"
-  log "  Kajabi enrollments CSV:    $((kajabi_enr_rows - 1)) data rows (expected ~107,051)"
+  log "  Kajabi enrollments CSV:    $((kajabi_enr_rows - 1)) data rows (expected ~85,355)"
   log "  Kajabi completions CSV:    $((kajabi_comp_rows - 1)) data rows (expected ~11,178)"
 
   # 10. Disk space on pods (informational)
