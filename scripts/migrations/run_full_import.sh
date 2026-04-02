@@ -281,11 +281,8 @@ phase_0_verify() {
     errors=$((errors + 1))
   fi
 
-  # 2. Switch context
-  step "Switching to context $KUBE_CONTEXT..."
-  if [[ $DRY_RUN -eq 0 ]]; then
-    kubectl config use-context "$KUBE_CONTEXT" 2>&1 | tee -a "$LOG_FILE"
-  fi
+  # 2. Verify context exists (all kubectl calls use --context flag, no global switch)
+  step "Verifying context $KUBE_CONTEXT..."
 
   # 3. Namespace exists
   step "Checking namespace $NAMESPACE..."
@@ -902,10 +899,7 @@ main() {
   log "Dry-run:  $DRY_RUN"
   log "Started:  $(date '+%Y-%m-%d %H:%M:%S')"
 
-  # Switch context upfront
-  if [[ $DRY_RUN -eq 0 ]]; then
-    kubectl config use-context "$KUBE_CONTEXT" 2>&1 | tee -a "$LOG_FILE"
-  fi
+  # All kubectl calls use --context flag; no global context switch needed
 
   local all_phases=(
     phase-0-verify
