@@ -16,10 +16,18 @@ from lms.djangoapps.courseware.courses import get_course_about_section
 %>
 <%
 LANGUAGE_CODE = get_language() or settings.LANGUAGE_CODE or 'en'
-course_path = reverse('about_course', args=[str(course.id)])
-course_url = request.build_absolute_uri(course_path)
-raw_short_description = get_course_about_section(request, course, "short_description") or ""
-raw_overview = get_course_about_section(request, course, "overview") or ""
+try:
+    course_path = reverse('about_course', args=[str(course.id)])
+    course_url = request.build_absolute_uri(course_path)
+except Exception:
+    course_path = ''
+    course_url = ''
+try:
+    raw_short_description = get_course_about_section(request, course, "short_description") or ""
+    raw_overview = get_course_about_section(request, course, "overview") or ""
+except Exception:
+    raw_short_description = ""
+    raw_overview = ""
 description_source = raw_short_description or raw_overview
 seo_description = re.sub(r"\s+", " ", strip_tags(description_source)).strip()
 if len(seo_description) > 220:
@@ -82,20 +90,42 @@ if not course.start_date_is_still_default:
 
 <%inherit file="../main.html" />
 <%block name="headextra">
-  <meta name="description" content="${seo_description}" />
-  <link rel="canonical" href="${course_url}" />
-  <meta property="og:url" content="${course_url}" />
+<%
+  ## Compute SEO variables here because headextra runs before the body <% %> block.
+  try:
+      _seo_path = reverse('about_course', args=[str(course.id)])
+      _seo_url = request.build_absolute_uri(_seo_path)
+  except Exception:
+      _seo_url = ''
+  try:
+      _seo_raw = get_course_about_section(request, course, "short_description") or get_course_about_section(request, course, "overview") or ""
+      _seo_desc = re.sub(r"\s+", " ", strip_tags(_seo_raw)).strip()
+      if len(_seo_desc) > 220:
+          _seo_desc = _seo_desc[:217].rstrip() + "..."
+      if not _seo_desc:
+          _seo_desc = _("Explore this course on {platform}.").format(platform=settings.PLATFORM_NAME)
+  except Exception:
+      _seo_desc = ''
+  try:
+      _seo_img = request.build_absolute_uri(course_image_urls.get('large', '')) if course_image_urls.get('large') else ''
+  except Exception:
+      _seo_img = ''
+%>
+  <meta name="description" content="${_seo_desc}" />
+  % if _seo_url:
+  <link rel="canonical" href="${_seo_url}" />
+  <meta property="og:url" content="${_seo_url}" />
+  % endif
   <meta property="og:title" content="${course.display_name_with_default}" />
-  <meta property="og:description" content="${seo_description}" />
+  <meta property="og:description" content="${_seo_desc}" />
   <meta property="og:type" content="website" />
-  % if full_course_image_url:
-  <meta property="og:image" content="${full_course_image_url}" />
+  % if _seo_img:
+  <meta property="og:image" content="${_seo_img}" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:image" content="${full_course_image_url}" />
+  <meta name="twitter:image" content="${_seo_img}" />
   % else:
   <meta name="twitter:card" content="summary" />
   % endif
-  <script type="application/ld+json">${json.dumps(course_schema) | n}</script>
 </%block>
 
 <%block name="js_extra">
