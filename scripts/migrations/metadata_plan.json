@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-04-01T00:42:43.006049+00:00",
+  "generated_at": "2026-04-02T01:08:54.547901+00:00",
   "statistics": {
-    "total": 39,
-    "with_description": 20,
+    "total": 41,
+    "with_description": 23,
     "with_thumbnail": 9
   },
   "courses": [
@@ -311,12 +311,28 @@
       "thumbnail_url": "https://image.mux.com/FHMOAgs02VbyjBFpdamcPkVl02TxIjpi024uTt4mB3YJzg/thumbnail.jpg?time=5"
     },
     {
+      "course_key": "course-v1:MEREKA+UPAI1-EN+course",
+      "course_number": "UPAI1-EN",
+      "title": "Getting Started to Unlocking the Power of ChatGPT: Beginner Edition",
+      "short_description": "Ready to future-proof your career with Artificial Intelligence (AI)? ChatGPT is a powerful AI generative tool that can help you revolutionize the way you work. In this course, you will learn the importance of generative and possible implications AI, the capabilities of ChatGPT, as well as the importance and ethical implications of AI, so that you can use ChatGPT efficiently and responsibly, and ultimately, can be future-ready.",
+      "overview": "Ready to future-proof your career with Artificial Intelligence (AI)? ChatGPT is a powerful AI generative tool that can help you revolutionize the way you work. In this course, you will learn the importance of generative and possible implications AI, the capabilities of ChatGPT, as well as the importance and ethical implications of AI, so that you can use ChatGPT efficiently and responsibly, and ultimately, can be future-ready.",
+      "thumbnail_url": ""
+    },
+    {
       "course_key": "course-v1:MEREKA+UPAI2-EN+course",
       "course_number": "UPAI2-EN",
       "title": "Boosting Sales and Productivity with ChatGPT",
-      "short_description": "",
-      "overview": "",
+      "short_description": "Unlock the full potential of Chat GPT and skyrocket your sales and productivity in this dynamic course! Discover powerful techniques to leverage Chat GPT and seize sales opportunities like never before. Dive deep into the art of idea generation, thought organisation, database modelling, market research, and crafting compelling business proposals using the unmatched capabilities of Chat GPT. Gain the edge you need to excel in the fast-paced world of business. Join us and revolutionise the way you",
+      "overview": "Unlock the full potential of Chat GPT and skyrocket your sales and productivity in this dynamic course! Discover powerful techniques to leverage Chat GPT and seize sales opportunities like never before. Dive deep into the art of idea generation, thought organisation, database modelling, market research, and crafting compelling business proposals using the unmatched capabilities of Chat GPT. Gain the edge you need to excel in the fast-paced world of business. Join us and revolutionise the way you create sales opportunities, boost productivity, and take your success to new heights!",
       "thumbnail_url": "https://image.mux.com/00mR8TSlLyMdYh3pHoePjXCPjDGdLmOru527vhv7j7Lg/thumbnail.jpg?time=5"
+    },
+    {
+      "course_key": "course-v1:MEREKA+UPAI3-EN+course",
+      "course_number": "UPAI3-EN",
+      "title": "ChatGPT for Job Search and Career Development",
+      "short_description": "Learn how to use Chat GPT to your advantage in your job search and beyond with the help of this course. You will learn how to network successfully, produce compelling cover letters, resumes, and LinkedIn profiles, and negotiate a higher salary using Chat GPT.",
+      "overview": "Learn how to use Chat GPT to your advantage in your job search and beyond with the help of this course. You will learn how to network successfully, produce compelling cover letters, resumes, and LinkedIn profiles, and negotiate a higher salary using Chat GPT.",
+      "thumbnail_url": ""
     }
   ]
 }

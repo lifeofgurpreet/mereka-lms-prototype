@@ -1,7 +1,7 @@
 # Import Lane Status — 2026-04-01
 
 > **Branch**: `feat/import-lane-closure`
-> **Last updated**: 2026-04-01T10:00Z
+> **Last updated**: 2026-04-02T01:10Z
 > **Lane owner**: LMS-I (import)
 
 ## Import Evidence Summary
@@ -14,24 +14,24 @@
 | MCT users (export file) | 69,419 | `verify-user-import-counts.sh --source mct` PASS |
 | Kajabi users (export file) | 73,107 | `verify-user-import-counts.sh --source kajabi` PASS |
 | MCT enrollments (unique pairs) | 441,578 | `verify-enrollment-import-counts.sh --source mct` PASS |
-| Kajabi enrollments (unique pairs) | 147,971 | `verify-enrollment-import-counts.sh --source kajabi` PASS |
+| Kajabi enrollments (unique pairs) | 85,355 | `verify-enrollment-import-counts.sh --source kajabi` PASS (UPAI4/5 orphans removed) |
 | Mux video assets | 503 MCT + 72 Drive = 575 | `verify-mux-upload-completeness.sh` PASS |
 | Kajabi completions (export) | 11,179 | `verify-kajabi-completions-export.sh` PASS |
 | OLX packages (MCT) | 29 tarballs (28 + MCT32-EN) | Built via `build_course_packages.py` |
-| OLX packages (FOW/UPAI) | 9 tarballs | Built via `build_course_packages.py` |
+| OLX packages (FOW/UPAI) | 11 tarballs (9 + UPAI1-EN + UPAI3-EN shells) | Built via `build_course_packages.py` + manual OLX |
 
 ### In dev database (runtime state — `mereka-lms-dev` on rke2-nonprod)
 
 | What | Count | Notes |
 |------|-------|-------|
-| Courses (modulestore) | 37 | All `org=MEREKA`, `run=course`. Includes MCT32-EN (PB-EN remap). |
+| Courses (modulestore) | 39 | All `org=MEREKA`, `run=course`. Includes MCT32-EN (PB-EN remap) + UPAI1-EN/UPAI3-EN shells. |
 | Users | 99,928 | Mix of MCT import + pre-existing from old Kajabi migration |
 | Enrollments | 176,320 | MCT (68K new) + Kajabi (106K new) + pre-existing |
 | Certificates | 4,489 | Kajabi completions (3,648 original + 841 PB→MCT32-EN remap) |
 | Enterprise customers | 3 | Mereka Academy, Skill Our Future, Biji-Biji Academy |
 | Organizations | 3 | MEREKA, BIJIBIJI, SKILLOURFUTURE |
-| Enterprise catalogs | 3 | Mereka (all), SOF (35 MCT+FOW), BijiBiji (1 UPAI) |
-| Taxonomy tags | 108 | 36 courses × (Subject + Level + Credential Type) |
+| Enterprise catalogs | 3 | Mereka (all), SOF (35 MCT+FOW), BijiBiji (3 UPAI) |
+| Taxonomy tags | 117 | 39 courses × (Subject + Level + Credential Type) |
 | Course descriptions | 30/37 | 7 have no source description |
 | Course images | 31/37 | 6 have no video content (no Mux thumbnail) |
 | Block structures | 14/37 | Platform/runtime limitation — see below |
@@ -76,9 +76,9 @@ See `docs/status/active/IMPORT_MISSING_COURSES.md` for full evidence.
 | Course | Decision | Status | Impact |
 |--------|----------|--------|--------|
 | PB-EN | **RESOLVED** — remapped to MCT32-EN | MCT32-EN imported, CSVs remapped | 2,958 completions + 855 enrollments fixed |
-| UPAI1-EN | **DEFERRED** — video URLs not in pipeline input | Blocked on content team | 55,109 Kajabi enrollments affected |
-| UPAI3-EN | **DEFERRED** — video URLs not in pipeline input | Blocked on content team | 10,911 Kajabi enrollments affected |
-| UPAI4-EN/5-EN | **DEFERRED** — same gap as UPAI1/3 | Out of sprint | ~21K enrollments affected |
+| UPAI1-EN | **IMPORTED** — course shell (no videos), enrollments importing | Course live, content team adds videos | 55,109 Kajabi enrollments being imported |
+| UPAI3-EN | **IMPORTED** — course shell (no videos), enrollments importing | Course live, content team adds videos | 10,911 Kajabi enrollments being imported |
+| UPAI4-EN/5-EN | **DROPPED** — orphan enrollments, no course identity | Removed 21,696 orphan rows from CSV | No course exists; no product mapping found |
 | PP-EN | **DEFERRED** — 2 Mux videos exist but OLX not built | Low priority (0 enrollments) | None |
 | Skills Test (7×ST-*) | **DEFERRED** — zero content, zero enrollments | No staging impact | None |
 

@@ -175,8 +175,11 @@ def _build_kajabi_product_to_course() -> dict[str, str]:
         "Managing Your First Client": "course-v1:MEREKA+MYFC-MS+course",
         "Skills Profiling": "course-v1:MEREKA+SP-MS+course",
         "Boosting Sales and Productivity with ChatGPT": "course-v1:MEREKA+UPAI2-EN+course",
+        "Boosting Sales and Productivity with ChatGPT Insights": "course-v1:MEREKA+UPAI2-EN+course",
         "Getting Started with ChatGPT": "course-v1:MEREKA+UPAI1-EN+course",
+        "Getting Started to Unlocking the Power of ChatGPT: Beginner edition": "course-v1:MEREKA+UPAI1-EN+course",
         "ChatGPT for Job Search": "course-v1:MEREKA+UPAI3-EN+course",
+        "ChatGPT for Job Search and Career Development": "course-v1:MEREKA+UPAI3-EN+course",
     }
     path = EXPORTS_KAJABI / "products.ndjson"
     if not path.exists():

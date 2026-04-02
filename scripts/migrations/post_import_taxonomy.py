@@ -2,7 +2,7 @@
 """
 post_import_taxonomy.py
 -----------------------
-Creates Mereka content taxonomies and tags all 36 imported courses.
+Creates Mereka content taxonomies and tags all imported courses (39 as of 2026-04-02).
 
 Usage (run via kubectl exec into the LMS pod):
 
@@ -31,7 +31,7 @@ Taxonomies created:
   Level          — beginner, intermediate, advanced, assessment
   Credential Type — completion, professional, assessment, none
 
-All 36 courses receive tags from all three taxonomies.
+All courses receive tags from all three taxonomies.
 The built-in Languages taxonomy is left to auto-populate from course settings.
 """
 
@@ -111,8 +111,12 @@ COURSE_TAGS = {
     "course-v1:MEREKA+MYFC-MS+course":   ("Entrepreneurship",     "beginner",     "completion"),
     "course-v1:MEREKA+SP-MS+course":     ("Career Development",   "beginner",     "completion"),
     "course-v1:MEREKA+SYFC-MS+course":   ("Entrepreneurship",     "beginner",     "completion"),
-    # UPAI
+    # UPAI (ChatGPT / AI courses — Biji-Biji Academy)
+    "course-v1:MEREKA+UPAI1-EN+course":  ("AI & Technology",      "beginner",     "completion"),
     "course-v1:MEREKA+UPAI2-EN+course":  ("AI & Technology",      "beginner",     "completion"),
+    "course-v1:MEREKA+UPAI3-EN+course":  ("AI & Technology",      "beginner",     "completion"),
+    # MCT32-EN (Personal Branding — PB-EN remapped here)
+    "course-v1:MEREKA+MCT32-EN+course":  ("Soft Skills",          "beginner",     "completion"),
 }
 
 # Map taxonomy name → index into the (subject, level, credential_type) tuple

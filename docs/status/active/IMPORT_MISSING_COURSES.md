@@ -15,11 +15,12 @@ package during the main import pipeline.
 
 | Course(s) | Count | Decision |
 |-----------|-------|----------|
-| PB-EN | 1 | Map to MCT32-EN content; remap Kajabi completions |
-| UPAI1-EN | 1 | OLX package not built; videos need Drive→OLX build step |
-| UPAI3-EN | 1 | OLX package not built; videos need Drive→OLX build step |
-| PP-EN | 1 | OLX package built; 2 videos uploaded to Mux |
-| ST-AC, ST-CW, ST-DM, ST-OM, ST-SMM, ST-WD, ST-PP, ST-ACS | 8 | Deferred — no video content available |
+| PB-EN | 1 | RESOLVED — mapped to MCT32-EN content; Kajabi completions remapped |
+| UPAI1-EN | 1 | IMPORTED — course shell (no videos), 55K enrollments importing |
+| UPAI3-EN | 1 | IMPORTED — course shell (no videos), 11K enrollments importing |
+| UPAI4-EN/5-EN | 2 | DROPPED — orphan enrollments with no course identity (21,696 rows removed from CSV) |
+| PP-EN | 1 | DEFERRED — 2 Mux videos exist but OLX not built (0 enrollments) |
+| ST-AC, ST-CW, ST-DM, ST-OM, ST-SMM, ST-WD, ST-PP, ST-ACS | 8 | DEFERRED — no video content available |
 
 ---
 
@@ -91,20 +92,17 @@ Kajabi has:
   Beginner edition"
 - Completion tag prefix: `elevate-ai-1` → mapped to `course-v1:MEREKA+UPAI1-EN+course`
 - 1 completion record exists in `completions_import.csv`.
+- 55,109 Kajabi enrollments.
 
-Airtable had this course listed with 5 videos scheduled for Drive upload.
-However, `exports/drive/videos_for_mux.json` contains **no entries** for
-`UPAI1-EN` or `UPAIC1-ENG`.  The Drive upload batch (`mux_upload_results.json`)
-has no successful uploads for this course number.
+### Status (updated 2026-04-02)
 
-### Status
-
-- OLX package: **not built**
-- Drive videos in `videos_for_mux.json`: **0**
-- Mux uploads: **0**
+- OLX package: **built** — course shell (placeholder content, no videos)
+- Course imported to dev: **YES** (2026-04-02)
+- Enrollments: **importing** (55,109 rows)
+- Drive videos: **0** (content team to add later)
 - Kajabi completions: **1** (test account `ailab@mereka.io`)
 
-### Decision: Pending — content sourcing required
+### Decision: IMPORTED as shell — content team adds videos later
 
 **Action required:**
 
@@ -134,28 +132,17 @@ Kajabi has:
 - Product `2148185632`: "ChatGPT for Job Search and Career Development"
 - No completion tag prefix defined in `completions.ndjson` for this product.
 - 0 completion records.
+- 10,911 Kajabi enrollments.
 
-Airtable had this course listed with 7 videos scheduled for Drive upload.
-`exports/drive/videos_for_mux.json` contains **no entries** for `UPAI3-EN`
-or `UPAIC3-ENG`.  The Drive upload batch has no successful uploads for this
-course.
+### Status (updated 2026-04-02)
 
-`exports/drive/mux_playback_lookup.json` has no keys matching UPAI3 or
-ChatGPT job search.
-
-### Status
-
-- OLX package: **not built**
-- Drive videos in `videos_for_mux.json`: **0**
-- Mux uploads: **0**
+- OLX package: **built** — course shell (placeholder content, no videos)
+- Course imported to dev: **YES** (2026-04-02)
+- Enrollments: **importing** (10,911 rows)
+- Drive videos: **0** (content team to add later)
 - Kajabi completions: **0**
 
-### Decision: Pending — content sourcing required
-
-**Action required:** Same as UPAI1-EN above.  Check with content team whether
-the 7 videos are available in Google Drive.
-
-**No completions exist for this course.  It does not block staging.**
+### Decision: IMPORTED as shell — content team adds videos later
 
 ---
 

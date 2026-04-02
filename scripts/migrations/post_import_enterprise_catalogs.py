@@ -7,7 +7,7 @@ EnterpriseCustomerCatalog records so each tenant sees the right courses.
 
 Catalog assignments:
   - SOF (Skill Our Future): All MCT courses + FOW courses (35 total)
-  - BijiBiji (Biji-Biji Academy): UPAI courses (1 total)
+  - BijiBiji (Biji-Biji Academy): UPAI courses (3 total: UPAI1-EN, UPAI2-EN, UPAI3-EN)
   - Mereka Academy: All courses via org key MEREKA (platform-wide visibility)
 
 FOW course key prefixes: PB, PW, PF, SYFJ, F101, MYFC, SP, SYFC, TYJ, LLP, PP
