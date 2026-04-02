@@ -115,4 +115,25 @@ Runtime blocker handoff bundle: `var/qa/frontend-runtime-blocker-handoff-bundle.
 | Runtime blockers handed off | ✓ Bundle at `var/qa/` |
 
 **Staging verdict: GO** — all hardening items resolved, pipeline codified, dry-run passes.
-UPAI1-EN/UPAI3-EN deferral is acceptable for staging (documented and deferred on content team).
+UPAI1-EN and UPAI3-EN now imported as course shells (2026-04-02). Enrollments importing.
+
+### Staging parity issue — MEKA-* course IDs (2026-04-02)
+
+Staging has ~147K enrollments under auto-generated `MEKA-*` course IDs from an old Kajabi
+import run (e.g. `course-v1:MEREKA+MEKA-2148875088+course`). Canonical courses exist but
+show 0 enrollments because enrollments are keyed to the wrong course IDs.
+
+**Impact**: Staging learner data is present but not linked to canonical courses.
+**Production is unaffected** — `run_full_import.sh` uses canonical IDs from day one.
+**Recommendation**: Wipe staging enrollments and re-import with `run_full_import.sh --env staging`
+for clean parity with dev. Or accept the divergence since production will be clean.
+
+### Production readiness (2026-04-02)
+
+| Gate | Status |
+|------|--------|
+| Pipeline dry-run passes (files, scripts, CSVs) | ✓ All 11 OLX + all CSVs validated |
+| Prod context = rke2-nonprod (not GKE) | ✓ Fixed 2026-04-02 |
+| Context-switching bug fixed | ✓ No longer mutates global kubectl context |
+| `mereka-lms-prod` namespace exists | ✗ Infra must provision |
+| LMS/CMS pods running in prod | ✗ Blocked on namespace |
