@@ -32,8 +32,19 @@ spec:
                 name: caddy
                 port:
                   number: 80
+    - host: apps.skillourfuture.academyv2.mereka.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: caddy
+                port:
+                  number: 80
   tls:
     - hosts:
         - apps.academyv2.mereka.io
         - apps.academy.biji-biji.com
+        - apps.skillourfuture.academyv2.mereka.io
       secretName: openedx-mfe-tls

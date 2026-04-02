@@ -622,10 +622,10 @@ domains:
     in_csrf: true
     in_redirect_list: false
     cookie_domain: ".skillourfuture.academyv2.mereka.io"
-    ingress_tls: false
+    ingress_tls: true
     release_critical: false
     proof_priority: P2
-    notes: "Target root. Not in prod Ingress TLS. No cert, not routable."
+    notes: "Target root. Routed via prod MFE ingress/TLS."
 
   - domain: preview.skillourfuture.academyv2.mereka.io
     environment: production

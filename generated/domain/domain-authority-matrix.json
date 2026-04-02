@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-01T03:39:50.159520+00:00",
+  "generated_at": "2026-04-02T16:51:22.502948+00:00",
   "source": "deploy/k8s/tenancy/tenant-registry.yaml",
   "source_version": "1.5.0",
   "domains": [
@@ -460,7 +460,7 @@
       "cookie_domain": ".skillourfuture.academyv2.mereka.io",
       "auth_class": "REDIRECT_TARGET",
       "proof_priority": "P2",
-      "ingress_tls": false
+      "ingress_tls": true
     },
     {
       "tenant": "skillourfuture",

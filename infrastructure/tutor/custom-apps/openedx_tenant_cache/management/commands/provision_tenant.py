@@ -9,6 +9,7 @@ import logging
 from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
+from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db import transaction
 from django.core.management import call_command
@@ -192,6 +193,11 @@ class Command(BaseCommand):
     def _ensure_site_configuration(self, mapping, name):
         """Step 4: Create or get TenantSiteConfiguration."""
         from openedx_tenant_cache.models import TenantSiteConfiguration
+        public_footer = (
+            (getattr(settings, "MFE_CONFIG", {}) or {}).get("MEREKA_PUBLIC_FOOTER")
+            or getattr(settings, "MEREKA_PUBLIC_FOOTER", {})
+            or {}
+        )
 
         try:
             config = TenantSiteConfiguration.objects.get(tenant=mapping)
@@ -209,6 +215,7 @@ class Command(BaseCommand):
                 'favicon_url': '',
                 'primary_color': '#1a73e8',
                 'secondary_color': '#4285f4',
+                'accent_color': '#295cad',
                 'footer_text': f'© {name}',
                 'sender_alias': name,
             },
@@ -218,6 +225,13 @@ class Command(BaseCommand):
                 'LOGO_TRADEMARK_URL': '',
                 'LOGO_WHITE_URL': '',
                 'FAVICON_URL': '',
+                'PRIMARY_COLOR': '#1a73e8',
+                'SECONDARY_COLOR': '#4285f4',
+                'ACCENT_COLOR': '#295cad',
+                'BRAND_PRIMARY': '#1a73e8',
+                'BRAND_SECONDARY': '#4285f4',
+                'BRAND_ACCENT': '#295cad',
+                'MEREKA_PUBLIC_FOOTER': public_footer,
             },
             is_active=True,
         )

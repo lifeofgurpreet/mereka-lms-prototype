@@ -2,6 +2,8 @@
 # Each entry acknowledges the risk and confirms the script is intentional.
 scripts/analytics/delete-user-events.sh
 scripts/analytics/export-openedx-data-standalone.py
+scripts/aspects/bootstrap-aspects-env.sh
+scripts/aspects/init-aspects-env.sh
 scripts/branding/build-tokens.sh
 scripts/branding/deploy-logo-fix.sh
 scripts/branding/fix-logo-static-files.sh
@@ -39,6 +41,7 @@ scripts/infra/sync-production-config.sh
 scripts/migrate-to-bbi-k8.sh
 scripts/migrations/import-production-courses.sh
 scripts/migrations/mct/import_2_courses.sh
+scripts/migrations/run_full_import.sh
 scripts/migrations/mct/verify_video_mapping.sh
 scripts/migrations/rollback-openedx-imports.py
 scripts/mobile/setup-ios-app.sh

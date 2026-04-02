@@ -1720,6 +1720,11 @@ scripts:
     purpose: Execute migration dry-run for validation
     criticality: release-supporting
 
+  - path: scripts/migrations/run_full_import.sh
+    owner: platform-team
+    purpose: Execute the full staged migration pipeline across verify, courses, users, and enrollments
+    criticality: release-supporting
+
   - path: scripts/infra/additional-cost-optimizations.sh
     owner: platform-team
     purpose: Additional Cost Optimizations

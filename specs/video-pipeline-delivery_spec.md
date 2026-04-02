@@ -801,13 +801,16 @@ playback with no token
 - When `true`: all courses with `CourseMode` other than "honor" or "audit" use
 signed playback
    - When `false`: all videos use public playback (backward compatible)
-9. **Domain restriction** (optional hardening):
-- Configure Mux playback policy to allow only `academyv2.mereka.io` and
-`academy.biji-biji.com` domains
-- Prevents video hotlinking from external sites (reduces unauthorized delivery
-costs)
-10. **Monitor signed URL performance**: Track
-`signed_url_generation_duration_ms` and alert if p95 exceeds 500ms
+
+1. **Domain restriction** (optional hardening):
+
+   - Configure Mux playback policy to allow only `academyv2.mereka.io` and
+     `academy.biji-biji.com` domains
+   - Prevents video hotlinking from external sites (reduces unauthorized delivery
+     costs)
+
+1. **Monitor signed URL performance**: Track
+   `signed_url_generation_duration_ms` and alert if p95 exceeds 500ms
 
 ### Feature flags
 
@@ -845,6 +848,7 @@ before.
 ### Rollback steps
 
 **Phase 1 Rollback (Video content)**:
+
 ```bash
 # 1. Revert to pre-Mux course packages (Azure CDN URLs)
 cd /home/gurpreet/projects/k8s/mereka-lms
@@ -860,6 +864,7 @@ make qa-smoke
 ```
 
 **Phase 3 Rollback (Studio uploads)**:
+
 ```bash
 # 1. Disable feature flag
 tutor config save --set ENABLE_MUX_STUDIO_UPLOAD=false
@@ -870,6 +875,7 @@ tutor k8s restart lms cms
 ```
 
 **Phase 5 Rollback (Signed playback)**:
+
 ```bash
 # 1. Disable signed playback feature flag
 tutor config save --set ENABLE_MUX_SIGNED_PLAYBACK=false
@@ -886,6 +892,7 @@ curl -I "https://stream.mux.com/{PLAYBACK_ID}.m3u8" # Should return 200 OK, not
 ```
 
 **Signed URL key rotation rollback** (if rotation causes issues):
+
 ```bash
 # 1. Identify which key is failing
 kubectl logs -n mereka-lms -l app.kubernetes.io/name=lms | grep
@@ -908,6 +915,7 @@ print(generate_signed_playback_url('PLAYBACK_ID'))"
 ```
 
 **Cost emergency rollback** (if Mux costs spike unexpectedly):
+
 ```bash
 # 1. Identify high-traffic videos
 curl -H "Authorization: Bearer $MUX_TOKEN" \

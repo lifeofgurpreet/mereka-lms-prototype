@@ -299,6 +299,7 @@ class TestLoginRedirectMiddleware(unittest.TestCase):
         req = MagicMock()
         req.get_host.return_value = host
         req.path = path
+        req.GET = {}
         return req
 
     def _make_redirect_response(self, location, status=302):
@@ -353,17 +354,17 @@ class TestLoginRedirectMiddleware(unittest.TestCase):
     @patch.object(ms, 'patch_sites_framework')
     @patch.object(ms, '_mfe_base_url_for_host')
     def test_no_rewrite_on_non_login_path(self, mock_mfe, mock_patch):
-        """Only auth entrypoints trigger redirect rewriting."""
+        """Non-dashboard, non-auth paths should not trigger rewriting."""
         mock_mfe.return_value = "https://apps.staging.academy.biji-biji.com"
 
         def get_response(request):
             return self._make_redirect_response("https://somewhere.com/dashboard")
 
         mw = ms.MerekaLoginRedirectMiddleware(get_response)
-        req = self._make_request("staging.academy.biji-biji.com", path="/dashboard")
+        req = self._make_request("staging.academy.biji-biji.com", path="/courses")
         resp = mw(req)
 
-        # Should NOT rewrite — path is /dashboard not /login
+        # Should NOT rewrite — unrelated path
         resp.__setitem__.assert_not_called()
 
     @patch.object(ms, 'patch_sites_framework')
@@ -441,6 +442,29 @@ class TestLoginRedirectMiddleware(unittest.TestCase):
         )
 
     @patch.object(ms, 'patch_sites_framework')
+    @patch.object(ms, '_oidc_service_login_url')
+    def test_login_bypasses_authn_for_oauth2_authorize(self, mock_oidc_service_login, mock_patch):
+        mock_oidc_service_login.return_value = (
+            "https://biji-biji.academyv2.mereka.dev/auth/login/oidc/"
+            "?next=%2Foauth2%2Fauthorize%3Fclient_id%3Dcms-sso"
+        )
+
+        def get_response(request):
+            return self._make_redirect_response(
+                "https://apps.biji-biji.academyv2.mereka.dev/authn/login?next=%2Foauth2%2Fauthorize%3Fclient_id%3Dcms-sso"
+            )
+
+        mw = ms.MerekaLoginRedirectMiddleware(get_response)
+        req = self._make_request("biji-biji.academyv2.mereka.dev")
+        req.GET = {"next": "/oauth2/authorize?client_id=cms-sso"}
+        resp = mw(req)
+
+        resp.__setitem__.assert_called_with(
+            "Location",
+            "https://biji-biji.academyv2.mereka.dev/auth/login/oidc/?next=%2Foauth2%2Fauthorize%3Fclient_id%3Dcms-sso"
+        )
+
+    @patch.object(ms, 'patch_sites_framework')
     @patch.object(ms, '_mfe_base_url_for_host')
     def test_no_rewrite_when_redirect_not_to_authn(self, mock_mfe, mock_patch):
         """Redirects from /login that don't go to /authn should not be rewritten."""
@@ -455,6 +479,60 @@ class TestLoginRedirectMiddleware(unittest.TestCase):
         resp = mw(req)
 
         resp.__setitem__.assert_not_called()
+
+    @patch.object(ms, 'patch_sites_framework')
+    @patch.object(ms, '_dashboard_auth_redirect_url')
+    def test_dashboard_redirects_legacy_login_to_tenant_authn(self, mock_dashboard_auth, mock_patch):
+        """LMS /dashboard should stop sending users through the legacy LMS login page."""
+        mock_dashboard_auth.return_value = "https://apps.staging.academy.biji-biji.com/authn/login?next=%2Fdashboard"
+
+        def get_response(request):
+            return self._make_redirect_response("/login?next=/dashboard")
+
+        mw = ms.MerekaLoginRedirectMiddleware(get_response)
+        req = self._make_request("staging.academy.biji-biji.com", path="/dashboard")
+        resp = mw(req)
+
+        resp.__setitem__.assert_called_with(
+            "Location",
+            "https://apps.staging.academy.biji-biji.com/authn/login?next=%2Fdashboard"
+        )
+
+    @patch.object(ms, 'patch_sites_framework')
+    @patch.object(ms, '_dashboard_auth_redirect_url')
+    def test_dashboard_keeps_unrelated_redirects(self, mock_dashboard_auth, mock_patch):
+        mock_dashboard_auth.return_value = "https://apps.staging.academy.biji-biji.com/authn/login?next=%2Fdashboard"
+
+        def get_response(request):
+            return self._make_redirect_response("/courses")
+
+        mw = ms.MerekaLoginRedirectMiddleware(get_response)
+        req = self._make_request("staging.academy.biji-biji.com", path="/dashboard")
+        resp = mw(req)
+
+        resp.__setitem__.assert_not_called()
+
+    @patch.object(ms, 'patch_sites_framework')
+    @patch.object(ms, '_dashboard_mfe_url')
+    def test_dashboard_html_redirects_to_apps_host(self, mock_dashboard_mfe, mock_patch):
+        mock_dashboard_mfe.return_value = "https://apps.staging.academy.biji-biji.com/dashboard"
+
+        def get_response(request):
+            resp = MagicMock()
+            resp.status_code = 200
+            resp.get.side_effect = lambda key, default=None: "text/html; charset=utf-8" if key == "Content-Type" else default
+            resp.__setitem__ = MagicMock()
+            return resp
+
+        mw = ms.MerekaLoginRedirectMiddleware(get_response)
+        req = self._make_request("staging.academy.biji-biji.com", path="/dashboard")
+        resp = mw(req)
+
+        self.assertEqual(resp.status_code, 302)
+        resp.__setitem__.assert_called_with(
+            "Location",
+            "https://apps.staging.academy.biji-biji.com/dashboard"
+        )
 
     @patch.object(ms, 'patch_sites_framework')
     @patch.object(ms, '_mfe_base_url_for_host')

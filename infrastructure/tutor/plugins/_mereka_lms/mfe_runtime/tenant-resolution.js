@@ -22,6 +22,7 @@ const MEREKA_BASE_VARIANT = {
 // Shared tenant configs — reused for prod and dev hostname entries.
 const _MEREKA_ACADEMY = {
   ...MEREKA_BASE_VARIANT,
+  slug: 'mereka',
   brand: 'Mereka Academy',
   copyrightHolder: 'MEREKA',
   supportEmail: 'support@mereka.io',
@@ -29,6 +30,7 @@ const _MEREKA_ACADEMY = {
 
 const _BIJI_BIJI = {
   ...MEREKA_BASE_VARIANT,
+  slug: 'biji-biji',
   logoUrl: '/theme/biji-biji/logo-horizontal.svg',
   mobileLogoUrl: '/theme/biji-biji/logo.svg',
   themeBrandUrl: '../theme/biji-biji-brand.min.css',
@@ -40,6 +42,7 @@ const _BIJI_BIJI = {
 
 const _SKILL_OUR_FUTURE = {
   ...MEREKA_BASE_VARIANT,
+  slug: 'skillourfuture',
   logoUrl: '/theme/skillourfuture/logo-horizontal.svg',
   mobileLogoUrl: '/theme/skillourfuture/logo.svg',
   themeBrandUrl: '../theme/sof-brand.min.css',
@@ -141,6 +144,27 @@ const normalizeTenantPaletteValue = (value) => {
   return typeof value === 'string' ? value.trim() : '';
 };
 
+const applyMerekaTenantIdentity = () => {
+  if (typeof document === 'undefined' || typeof getConfig !== 'function') {
+    return;
+  }
+
+  const config = getConfig() || {};
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  const variant = getMerekaVariant(hostname, config);
+  const tenantSlug = variant && variant.slug ? variant.slug : 'mereka';
+  const root = document.documentElement;
+  const body = document.body;
+
+  if (root && typeof root.setAttribute === 'function') {
+    root.setAttribute('data-mereka-tenant', tenantSlug);
+  }
+  if (body && body.classList && typeof body.classList.add === 'function') {
+    body.classList.remove('mereka-tenant--mereka', 'mereka-tenant--biji-biji', 'mereka-tenant--skillourfuture');
+    body.classList.add(`mereka-tenant--${tenantSlug}`);
+  }
+};
+
 const applyMerekaTenantPaletteBridge = () => {
   if (typeof document === 'undefined' || typeof getConfig !== 'function') {
     return;
@@ -152,16 +176,19 @@ const applyMerekaTenantPaletteBridge = () => {
   }
 
   const config = getConfig() || {};
+  const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
   const primary = normalizeTenantPaletteValue(config.PRIMARY_COLOR);
   const secondary = normalizeTenantPaletteValue(config.SECONDARY_COLOR);
   const accent = normalizeTenantPaletteValue(config.ACCENT_COLOR);
   const textOnPrimary = normalizeTenantPaletteValue(config.TEXT_ON_PRIMARY);
+  const tenantSlug = variant && variant.slug ? variant.slug : 'mereka';
 
   const paletteBridge = {
     '--tenant-color-primary': primary,
     '--tenant-color-secondary': secondary,
     '--tenant-color-accent': accent,
     '--tenant-color-text-on-primary': textOnPrimary,
+    '--tenant-shell-identity': tenantSlug,
     '--mereka-color-magenta': primary,
     '--mereka-color-magenta-dark': primary,
     '--mereka-color-teal': secondary,
@@ -201,6 +228,7 @@ const applyMerekaTenantPaletteBridge = () => {
     const cfg = getConfig() || {};
     // PRIMARY_COLOR is only present after the config API response is merged.
     if (!cfg.PRIMARY_COLOR) return false;
+    applyMerekaTenantIdentity();
     applyMerekaTenantPaletteBridge();
     return true;
   };
@@ -245,6 +273,58 @@ const getMerekaThemeAssetUrl = (config, assetPath) => {
 
 const getMerekaShellCopy = (variant) => {
   const brand = variant && variant.brand ? variant.brand : 'Mereka Academy';
+  const slug = variant && variant.slug ? variant.slug : 'mereka';
+
+  if (slug === 'biji-biji') {
+    return {
+      authn: {
+        eyebrow: 'Community-powered learning',
+        title: 'Step back into the makerspace',
+        subtitle: `Sign in to continue with ${brand} pathways, cohorts, and practical studio work.`,
+        supportCtaLabel: 'Talk to support',
+        trustNote: 'Built for creative communities, practical making, and shared learning momentum.',
+      },
+      dashboard: {
+        eyebrow: 'Maker dashboard',
+        title: `Your ${brand} makerspace is live`,
+        subtitle: 'Pick up cohort work, studio sessions, and project-based pathways without losing context.',
+        primaryCtaLabel: 'Browse pathways',
+        secondaryCtaLabel: 'Community support',
+      },
+      learning: {
+        eyebrow: 'Studio session',
+        title: `${brand} learning flow`,
+        subtitle: 'Keep the session tactile, collaborative, and grounded in the work you are building.',
+        supportCtaLabel: 'Get help',
+      },
+    };
+  }
+
+  if (slug === 'skillourfuture') {
+    return {
+      authn: {
+        eyebrow: 'Career acceleration workspace',
+        title: 'Return to your next breakthrough',
+        subtitle: `Sign in to continue with ${brand} career pathways, coaching, and employability tracks.`,
+        supportCtaLabel: 'Career support',
+        trustNote: 'Designed for confident career moves, employer-aligned learning, and verified progress.',
+      },
+      dashboard: {
+        eyebrow: 'Career dashboard',
+        title: `Your ${brand} growth plan is ready`,
+        subtitle: 'See your next milestone, keep progress visible, and move quickly between coaching and coursework.',
+        primaryCtaLabel: 'Explore programs',
+        secondaryCtaLabel: 'Career support',
+      },
+      learning: {
+        eyebrow: 'Career session',
+        title: `${brand} learning flow`,
+        subtitle: 'Stay focused on the next capability, credential, or career move without losing momentum.',
+        supportCtaLabel: 'Get help',
+      },
+    };
+  }
+
   return {
     authn: {
       eyebrow: 'Learning workspace',

@@ -71,6 +71,7 @@ PYEOF
 
 # ─────────────────────────────────────────────────────────────────────────────
 # run_seed — iterate TENANT_DEFS and upsert Site + SiteConfiguration
+#            plus openedx_tenant_cache tenant rows
 # ─────────────────────────────────────────────────────────────────────────────
 run_seed() {
   # Seed global waffle flags before tenant-specific config.
@@ -117,6 +118,7 @@ run_seed() {
     cat > "$PY_SCRIPT" <<PYEOF
 from django.contrib.sites.models import Site
 from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
+from django.conf import settings
 import json, sys
 
 slug            = "${SLUG}"
@@ -131,6 +133,7 @@ theme_name      = "${THEME_NAME}"
 primary_color   = "${PRIMARY_COLOR}"
 secondary_color = "${SECONDARY_COLOR}"
 accent_color    = "${ACCENT_COLOR}"
+default_footer  = (getattr(settings, "MFE_CONFIG", {}) or {}).get("MEREKA_PUBLIC_FOOTER") or {}
 
 # ── Site row ──────────────────────────────────────────────────────────────────
 site, site_created = Site.objects.get_or_create(
@@ -146,7 +149,7 @@ elif site_created:
 else:
     site_action = "UNCHANGED"
 
-# ── SiteConfiguration row ─────────────────────────────────────────────────────
+# ── SiteConfiguration / tenant-cache row ─────────────────────────────────────
 # Derive tenant brand asset subpath from slug.
 # Known tenants with their own brand asset subdirectories under /theme/ and /static/images/:
 _TENANT_BRAND_SUBPATHS = {"biji-biji": "biji-biji/", "skillourfuture": "skillourfuture/"}
@@ -154,28 +157,6 @@ _logo_subpath = _TENANT_BRAND_SUBPATHS.get(slug, "")
 logo_img = f"{lms_url}/static/{theme_name}/images/{_logo_subpath}logo-horizontal.svg" if theme_name else ""
 favicon  = f"{theme_name}/images/favicon.ico" if theme_name else ""
 brand_subpath = _TENANT_BRAND_SUBPATHS.get(slug, "")
-
-# Derive canonical brand colors from the brand token CSS files.
-# The brand CSS (e.g. sof-brand.min.css) is the canonical source of
-# tenant colors. The env-file palette values are fallbacks only.
-import re as _re, pathlib as _pathlib
-_BRAND_CSS_MAP = {"biji-biji": "biji-biji-brand.min.css", "skillourfuture": "sof-brand.min.css"}
-_brand_css_name = _BRAND_CSS_MAP.get(slug)
-if _brand_css_name:
-    _brand_css_candidates = [
-        _pathlib.Path("/openedx/themes/mereka/mfe/theme") / _brand_css_name,
-        _pathlib.Path("/openedx/dist/theme") / _brand_css_name,
-    ]
-    for _bcp in _brand_css_candidates:
-        if _bcp.is_file():
-            _css_text = _bcp.read_text()
-            _m = _re.search(r"--mereka-color-magenta:\s*(#[0-9a-fA-F]{3,8})", _css_text)
-            if _m: primary_color = _m.group(1)
-            _m = _re.search(r"--mereka-color-teal:\s*(#[0-9a-fA-F]{3,8})", _css_text)
-            if _m: secondary_color = _m.group(1)
-            _m = _re.search(r"--mereka-color-blue:\s*(#[0-9a-fA-F]{3,8})", _css_text)
-            if _m: accent_color = _m.group(1)
-            break
 
 mfe_origin = mfe_url.replace("https://", "").replace("http://", "")
 
@@ -225,6 +206,10 @@ site_values = {
         "LEARNER_DASHBOARD_URL": f"{mfe_url}/learner-dashboard/",
         "LEARNER_HOME_MICROFRONTEND_URL": f"{mfe_url}/learner-dashboard/",
         "LEARNING_BASE_URL": f"{mfe_url}/learning",
+        "MEREKA_PUBLIC_FOOTER": default_footer,
+        "BRAND_PRIMARY": primary_color,
+        "BRAND_SECONDARY": secondary_color,
+        "BRAND_ACCENT": accent_color,
         "PRIMARY_COLOR": primary_color,
         "SECONDARY_COLOR": secondary_color,
         "ACCENT_COLOR": accent_color,
@@ -244,12 +229,140 @@ sc_action = "CREATED" if sc_created else "UPDATED"
 if not sc_created and sc.site_values.get("LMS_ROOT_URL") == lms_url and site_action == "UNCHANGED":
     sc_action = "UNCHANGED"
 
+tenant_mapping_action = "SKIPPED"
+tenant_config_action = "SKIPPED"
+enterprise_uuid = ""
+
+try:
+    from enterprise.models import EnterpriseCustomer
+    enterprise_customer = (
+        EnterpriseCustomer.objects.filter(site=site).order_by("created").first()
+        or EnterpriseCustomer.objects.filter(slug=slug).order_by("created").first()
+    )
+except Exception:
+    enterprise_customer = None
+
+if enterprise_customer is not None:
+    enterprise_uuid = str(enterprise_customer.uuid)
+    from openedx_tenant_cache.models import TenantSiteConfiguration, TenantSiteMapping
+
+    branding_config = {
+        "logo_url": site_values.get("logo_image", ""),
+        "favicon_url": favicon,
+        "primary_color": primary_color,
+        "secondary_color": secondary_color,
+        "accent_color": accent_color,
+        "footer_text": default_footer.get("support", {}).get("contactSupportLabel", ""),
+        "sender_alias": name,
+    }
+    tenant_values = {
+        "PLATFORM_NAME": name,
+        "SITE_NAME": name,
+        "logo_url": site_values.get("logo_image", ""),
+        "favicon_url": favicon,
+        "primary_color": primary_color,
+        "secondary_color": secondary_color,
+        "accent_color": accent_color,
+        "text_on_primary_color": "#ffffff",
+        "footer_text": default_footer.get("support", {}).get("contactSupportLabel", ""),
+        "sender_alias": name,
+    }
+    tenant_mfe_config = {
+        "SITE_NAME": name,
+        "LOGO_URL": f"https://{mfe_origin}/theme/{brand_subpath}logo-horizontal.svg" if theme_name else "",
+        "LOGO_TRADEMARK_URL": f"https://{mfe_origin}/theme/{brand_subpath}logo.svg" if theme_name else "",
+        "LOGO_WHITE_URL": f"https://{mfe_origin}/theme/{brand_subpath}logo-horizontal-white.svg" if theme_name else "",
+        "FAVICON_URL": f"https://{mfe_origin}/theme/favicon.ico" if theme_name else "",
+        "PRIMARY_COLOR": primary_color,
+        "SECONDARY_COLOR": secondary_color,
+        "ACCENT_COLOR": accent_color,
+        "TEXT_ON_PRIMARY": "#ffffff",
+        "BRAND_PRIMARY": primary_color,
+        "BRAND_SECONDARY": secondary_color,
+        "BRAND_ACCENT": accent_color,
+        "MEREKA_PUBLIC_FOOTER": default_footer,
+    }
+
+    mapping = TenantSiteMapping.objects.filter(slug=slug).first()
+    if mapping is None:
+        mapping = TenantSiteMapping.objects.filter(
+            enterprise_customer_uuid=enterprise_customer.uuid
+        ).first()
+
+    if mapping is None:
+        mapping = TenantSiteMapping.objects.create(
+            enterprise_customer_uuid=enterprise_customer.uuid,
+            site=site,
+            slug=slug,
+            name=name,
+            is_active=True,
+            branding_config=branding_config,
+        )
+        tenant_mapping_action = "CREATED"
+    else:
+        mapping_action_changed = False
+        if mapping.enterprise_customer_uuid != enterprise_customer.uuid:
+            mapping.enterprise_customer_uuid = enterprise_customer.uuid
+            mapping_action_changed = True
+        if mapping.site_id != site.id:
+            mapping.site = site
+            mapping_action_changed = True
+        if mapping.slug != slug:
+            mapping.slug = slug
+            mapping_action_changed = True
+        if mapping.name != name:
+            mapping.name = name
+            mapping_action_changed = True
+        if not mapping.is_active:
+            mapping.is_active = True
+            mapping_action_changed = True
+        if mapping.branding_config != branding_config:
+            mapping.branding_config = branding_config
+            mapping_action_changed = True
+        if mapping_action_changed:
+            mapping.save()
+            tenant_mapping_action = "UPDATED"
+        else:
+            tenant_mapping_action = "UNCHANGED"
+
+    tenant_config, tenant_config_created = TenantSiteConfiguration.objects.get_or_create(
+        tenant=mapping,
+        defaults={
+            "values": tenant_values,
+            "mfe_config": tenant_mfe_config,
+            "is_active": True,
+        },
+    )
+    if tenant_config_created:
+        tenant_config_action = "CREATED"
+    else:
+        merged_values = dict(tenant_config.values or {})
+        merged_values.update(tenant_values)
+        merged_mfe = dict(tenant_config.mfe_config or {})
+        merged_mfe.update(tenant_mfe_config)
+        tenant_config_changed = (
+            merged_values != (tenant_config.values or {})
+            or merged_mfe != (tenant_config.mfe_config or {})
+            or not tenant_config.is_active
+        )
+        if tenant_config_changed:
+            tenant_config.values = merged_values
+            tenant_config.mfe_config = merged_mfe
+            tenant_config.is_active = True
+            tenant_config.save()
+            tenant_config_action = "UPDATED"
+        else:
+            tenant_config_action = "UNCHANGED"
+
 result = {
     "tenant": slug,
     "domain": domain,
     "site_id": site.id,
+    "enterprise_uuid": enterprise_uuid,
     "site_action": site_action,
     "sc_action": sc_action,
+    "tenant_mapping_action": tenant_mapping_action,
+    "tenant_config_action": tenant_config_action,
     "status": "OK",
 }
 print(json.dumps(result))

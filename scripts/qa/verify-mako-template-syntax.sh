@@ -102,16 +102,22 @@ echo ""
 for tmpl in "${TEMPLATES[@]}"; do
   rel="${tmpl#$REPO_ROOT/}"
 
-  # Check for unclosed <%def> blocks
-  opens=$(grep -c '<%def ' "$tmpl" 2>/dev/null || true)
+  # Count only non-self-closing <%def> blocks. Mako commonly uses
+  # one-line declarations like `<%def name="pagetitle()" />`.
+  opens=$(grep -cE '<%def [^>]*[^/]>$|<%def [^>]*/?>([^/].*)?$' "$tmpl" 2>/dev/null || true)
+  self_closing=$(grep -cE '<%def [^>]*/>' "$tmpl" 2>/dev/null || true)
   closes=$(grep -c '</%def>' "$tmpl" 2>/dev/null || true)
+  opens=$((opens - self_closing))
   if [[ "$opens" != "$closes" ]]; then
     do_fail "$rel: <%def> open/close mismatch ($opens opens, $closes closes)"
   fi
 
-  # Check for unclosed <%block> blocks
-  opens=$(grep -c '<%block ' "$tmpl" 2>/dev/null || true)
+  # Count only non-self-closing <%block> blocks. Many Open edX templates use
+  # `<%block name="foo"/>` as an intentional single-line declaration.
+  opens=$(grep -cE '<%block [^>]*[^/]>$|<%block [^>]*/?>([^/].*)?$' "$tmpl" 2>/dev/null || true)
+  self_closing=$(grep -cE '<%block [^>]*/>' "$tmpl" 2>/dev/null || true)
   closes=$(grep -c '</%block>' "$tmpl" 2>/dev/null || true)
+  opens=$((opens - self_closing))
   if [[ "$opens" != "$closes" ]]; then
     do_fail "$rel: <%block> open/close mismatch ($opens opens, $closes closes)"
   fi

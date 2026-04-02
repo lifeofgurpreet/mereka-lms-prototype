@@ -353,8 +353,6 @@ def run(completions_only: bool = False, dry_run: bool = False) -> None:
         print(f"  Built {len(user_rows)} user records")
 
         print("Building enrollment records from purchases...")
-        # Build contact email set for quick lookup
-        all_emails = {info["email"] for info in contacts.values()}
         cust_enrollments: list[dict] = []
         seen_enrollments: set[tuple[str, str]] = set()
 

@@ -23,7 +23,7 @@ import json
 import logging
 import os
 from typing import Any, Optional
-from urllib.parse import urlsplit
+from urllib.parse import parse_qsl, quote, urlencode, urlsplit
 
 _log = logging.getLogger(__name__)
 
@@ -51,6 +51,10 @@ _LOGIN_SESSION_PATHS = (
 _AUTHN_ENTRYPOINT_PATHS = (
     "/login",
     "/register",
+)
+_DASHBOARD_PATHS = (
+    "/dashboard",
+    "/dashboard/",
 )
 _MFE_CONFIG_PATHS = (
     "/api/mfe_config/v1",
@@ -282,6 +286,44 @@ def _mfe_base_url_for_host(host: str) -> Optional[str]:
     return None
 
 
+def _tenant_mfe_url(host: str, path: str, query: Optional[dict[str, str]] = None) -> Optional[str]:
+    """
+    Build a tenant-local MFE URL for the given path.
+    """
+    mfe_base = _mfe_base_url_for_host(host)
+    if not mfe_base:
+        return None
+
+    normalized_path = path if path.startswith("/") else f"/{path}"
+    url = f"{mfe_base.rstrip('/')}{normalized_path}"
+    if query:
+        url = f"{url}?{urlencode(query)}"
+    return url
+
+
+def _dashboard_auth_redirect_url(host: str) -> Optional[str]:
+    """
+    Return the tenant apps-host authn entrypoint for learner home access.
+    """
+    return _tenant_mfe_url(host, "/authn/login", {"next": "/dashboard"})
+
+
+def _dashboard_mfe_url(host: str) -> Optional[str]:
+    """
+    Return the tenant apps-host learner-home alias.
+    """
+    return _tenant_mfe_url(host, "/dashboard")
+
+
+def _oidc_service_login_url(host: str, next_target: str) -> str:
+    """
+    Build a tenant-local OIDC login URL for LMS service-to-service OAuth flows.
+    """
+    normalized_host = _strip_port(host)
+    encoded_next = quote(next_target, safe="")
+    return f"https://{normalized_host}/auth/login/oidc/?next={encoded_next}"
+
+
 def _mfe_path_prefixes() -> tuple[str, ...]:
     """
     Return the known MFE path prefixes for this deployment.
@@ -413,6 +455,9 @@ class MerekaLoginRedirectMiddleware:
         path = getattr(request, "path", "") or ""
         host = getattr(request, "get_host", lambda: "")()
 
+        if path in _DASHBOARD_PATHS:
+            return self._rewrite_dashboard_response(host, response)
+
         if path in _LOGIN_SESSION_PATHS:
             return self._rewrite_login_session_response(host, response)
 
@@ -429,6 +474,17 @@ class MerekaLoginRedirectMiddleware:
         if not location:
             return response
 
+        request_next = ""
+        request_get = getattr(request, "GET", None)
+        if request_get is not None and hasattr(request_get, "get"):
+            request_next = request_get.get("next", "") or ""
+
+        # Preserve Studio / service OAuth state by bypassing the authn MFE when
+        # the next target is LMS /oauth2/authorize.
+        if path == "/login" and request_next.startswith("/oauth2/authorize"):
+            response["Location"] = _oidc_service_login_url(host, request_next)
+            return response
+
         # Only rewrite redirects that point to an MFE authn path.
         parts = urlsplit(location)
         if "/authn" not in parts.path:
@@ -439,6 +495,34 @@ class MerekaLoginRedirectMiddleware:
         if new_location != location:
             _log.info("MerekaLoginRedirect: %s -> %s (host=%s)", location, new_location, host)
             response["Location"] = new_location
+        return response
+
+    def _rewrite_dashboard_response(self, host: str, response):
+        dashboard_mfe_url = _dashboard_mfe_url(host)
+        dashboard_auth_url = _dashboard_auth_redirect_url(host)
+        if not dashboard_mfe_url or not dashboard_auth_url:
+            return response
+
+        status_code = getattr(response, "status_code", 0)
+        if status_code in (301, 302, 303, 307, 308):
+            location = response.get("Location") if hasattr(response, "get") else None
+            if not location:
+                return response
+            parts = urlsplit(location)
+            query_pairs = dict(parse_qsl(parts.query, keep_blank_values=True))
+            next_target = query_pairs.get("next", "")
+            normalized_login_path = (parts.path or "").rstrip("/")
+            if normalized_login_path == "/login" and next_target in ("/dashboard", "/dashboard/"):
+                response["Location"] = dashboard_auth_url
+                return response
+            return response
+
+        content_type = ""
+        if hasattr(response, "get"):
+            content_type = response.get("Content-Type", "") or ""
+        if status_code == 200 and "text/html" in content_type:
+            response.status_code = 302
+            response["Location"] = dashboard_mfe_url
         return response
 
     def _rewrite_login_session_response(self, host: str, response):

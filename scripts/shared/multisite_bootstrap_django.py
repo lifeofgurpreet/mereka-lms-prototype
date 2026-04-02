@@ -300,6 +300,9 @@ def build_site_mfe_config_overrides(
     overrides["MARKETING_SITE_BASE_URL"] = lms_root
     overrides["REFRESH_ACCESS_TOKEN_ENDPOINT"] = "/login_refresh"
     overrides["DISABLE_ENTERPRISE_LOGIN"] = default_cfg.get("DISABLE_ENTERPRISE_LOGIN", True)
+    footer_payload = default_cfg.get("MEREKA_PUBLIC_FOOTER")
+    if footer_payload:
+        overrides["MEREKA_PUBLIC_FOOTER"] = footer_payload
     overrides["ACCESS_TOKEN_COOKIE_NAME"] = (
         default_cfg.get("ACCESS_TOKEN_COOKIE_NAME")
         or "edx-jwt-cookie-header-payload"

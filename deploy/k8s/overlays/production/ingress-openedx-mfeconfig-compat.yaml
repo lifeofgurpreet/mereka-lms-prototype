@@ -23,7 +23,29 @@ spec:
                 name: lms
                 port:
                   number: 8000
+    - host: apps.academy.biji-biji.com
+      http:
+        paths:
+          - path: /api/mfe_config/v1/
+            pathType: Exact
+            backend:
+              service:
+                name: lms
+                port:
+                  number: 8000
+    - host: apps.skillourfuture.academyv2.mereka.io
+      http:
+        paths:
+          - path: /api/mfe_config/v1/
+            pathType: Exact
+            backend:
+              service:
+                name: lms
+                port:
+                  number: 8000
   tls:
     - hosts:
         - apps.academyv2.mereka.io
+        - apps.academy.biji-biji.com
+        - apps.skillourfuture.academyv2.mereka.io
       secretName: openedx-mfe-mfeconfig-compat-tls

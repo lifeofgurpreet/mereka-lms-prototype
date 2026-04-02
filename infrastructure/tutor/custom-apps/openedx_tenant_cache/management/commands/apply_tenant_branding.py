@@ -8,6 +8,7 @@ import json
 import logging
 import re
 
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
 logger = logging.getLogger(__name__)
@@ -73,6 +74,11 @@ class Command(BaseCommand):
         logo_square_url = logos.get("logo_square_url", "") or logo_url
         logo_white_url = logos.get("logo_white_url", "") or logo_url
         favicon_url = logos.get("favicon_url", "")
+        public_footer = (
+            (getattr(settings, "MFE_CONFIG", {}) or {}).get("MEREKA_PUBLIC_FOOTER")
+            or getattr(settings, "MEREKA_PUBLIC_FOOTER", {})
+            or {}
+        )
 
         site_config = {
             "PLATFORM_NAME": tenant_name,
@@ -96,7 +102,11 @@ class Command(BaseCommand):
             "PRIMARY_COLOR": primary_color,
             "SECONDARY_COLOR": secondary_color,
             "ACCENT_COLOR": accent_color,
+            "BRAND_PRIMARY": primary_color,
+            "BRAND_SECONDARY": secondary_color,
+            "BRAND_ACCENT": accent_color,
             "TEXT_ON_PRIMARY": text_on_primary,
+            "MEREKA_PUBLIC_FOOTER": public_footer,
         }
 
         return site_config, mfe_config
@@ -169,6 +179,7 @@ class Command(BaseCommand):
             'favicon_url': site_config.get('favicon_url', ''),
             'primary_color': site_config.get('primary_color', ''),
             'secondary_color': site_config.get('secondary_color', ''),
+            'accent_color': site_config.get('accent_color', ''),
             'footer_text': site_config.get('footer_text', ''),
             'sender_alias': site_config.get('sender_alias', ''),
         }

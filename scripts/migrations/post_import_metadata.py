@@ -38,7 +38,6 @@ import json
 import os
 import re
 import sys
-import time
 import urllib.request
 from pathlib import Path
 from typing import Any
@@ -153,7 +152,6 @@ def _extract_kajabi_descriptions() -> dict[str, str]:
     for rec in _iter_ndjson(path):
         pid = str(rec.get("id", ""))
         desc = (rec.get("attributes", {}).get("description") or "").strip()
-        title = (rec.get("attributes", {}).get("title") or "").strip()
         if pid:
             result[pid] = desc
     return result
@@ -363,11 +361,9 @@ def _apply_plan_in_cms() -> None:
         print(f"apply_plan: filtered to {len(courses)} course(s)")
 
     # Django / Open edX imports
-    from django.core.files.base import ContentFile  # noqa: E402
     from opaque_keys.edx.keys import CourseKey  # noqa: E402
-    from xmodule.modulestore.django import modulestore  # noqa: E402
     from xmodule.contentstore.django import contentstore as get_contentstore  # noqa: E402
-    from xmodule.contentstore.content import StaticContent  # noqa: E402
+    from xmodule.modulestore.django import modulestore  # noqa: E402
 
     store = modulestore()
     cstore = get_contentstore()
@@ -431,6 +427,8 @@ def _apply_plan_in_cms() -> None:
 
 def _set_course_image(store, cstore, course, course_key, thumbnail_url: str, dry_run: bool = False) -> None:
     """Download thumbnail and store as course image in contentstore."""
+    from xmodule.contentstore.content import StaticContent
+
     req = urllib.request.Request(
         thumbnail_url,
         headers={"User-Agent": "mereka-lms-metadata-importer/1.0"},

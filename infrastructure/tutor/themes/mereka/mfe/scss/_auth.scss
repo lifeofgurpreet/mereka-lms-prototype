@@ -41,7 +41,7 @@
 .mereka-authn-login-branding__logo {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.85rem;
   text-decoration: none;
   color: var(--mereka-color-ink-900);
 }
@@ -58,10 +58,54 @@
   object-fit: contain;
 }
 
+.mereka-authn-login-branding__copy {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.mereka-authn-login-branding__eyebrow {
+  color: var(--mereka-color-ink-500);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
 .mereka-authn-login-branding__brand {
   font-size: 1.05rem;
   font-weight: 600;
   letter-spacing: 0.01em;
+}
+
+.mereka-authn-login-branding__subtitle {
+  color: var(--mereka-color-ink-700);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  max-width: 26rem;
+}
+
+:root[data-mereka-tenant="biji-biji"] .mereka-authn-login-branding__logo {
+  align-items: flex-start;
+}
+
+:root[data-mereka-tenant="biji-biji"] .mereka-authn-login-branding__brand {
+  color: #1f4f39;
+}
+
+:root[data-mereka-tenant="biji-biji"] .mereka-authn-login-branding__subtitle {
+  color: #2f6b4f;
+}
+
+:root[data-mereka-tenant="skillourfuture"] .mereka-authn-login-branding__brand {
+  color: #450b7f;
+}
+
+:root[data-mereka-tenant="skillourfuture"] .mereka-authn-login-branding__eyebrow {
+  color: #7b2a5a;
+}
+
+:root[data-mereka-tenant="skillourfuture"] .mereka-authn-login-branding__subtitle {
+  color: #4f3a68;
 }
 
 // Account / settings surfaces.

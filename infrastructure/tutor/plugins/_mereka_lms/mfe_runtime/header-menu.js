@@ -297,6 +297,7 @@ const MerekaAuthnLoginBranding = () => {
   const config = getConfig();
   const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
   const variant = getMerekaVariant(hostname, config);
+  const shellCopy = getMerekaShellCopy(variant);
   const svgUrl = getMerekaThemeAssetUrl(config, variant.logoUrl);
   // Fallback: if SVG fails (e.g. raster-in-SVG blocked by browser sandbox),
   // try the PNG equivalent. This is a narrow workaround for defective SVG
@@ -312,7 +313,11 @@ const MerekaAuthnLoginBranding = () => {
           className="mereka-authn-login-branding__logo-img"
           onError={(e) => { if (e.target.src !== pngFallback) { e.target.src = pngFallback; } }}
         />
-        <span className="mereka-authn-login-branding__brand">{variant.brand}</span>
+        <span className="mereka-authn-login-branding__copy">
+          <span className="mereka-authn-login-branding__eyebrow">{shellCopy.authn.eyebrow}</span>
+          <span className="mereka-authn-login-branding__brand">{variant.brand}</span>
+          <span className="mereka-authn-login-branding__subtitle">{shellCopy.authn.trustNote}</span>
+        </span>
       </a>
     </div>
   );

@@ -99,5 +99,5 @@ def test_build_site_mfe_config_overrides_falls_back_to_lms_assets_without_mfe_ba
     assert payload["AUTHN_MICROFRONTEND_URL"] == "https://apps.default.example/authn"
     assert payload["AUTHN_MICROFRONTEND_DOMAIN"] == "apps.default.example"
     assert payload["LOGO_URL"] == (
-        "https://academy.biji-biji.com/theming/asset/mereka/images/logo-horizontal.png"
+        "https://academy.biji-biji.com/theming/asset/mereka/images/logo-horizontal.svg"
     )

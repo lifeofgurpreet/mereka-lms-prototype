@@ -45,9 +45,22 @@ const MerekaNoCoursesView = () => {
   const baseUrl = (config.LMS_BASE_URL || '').replace(/\/$/, '');
   const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
   const shellCopy = getMerekaShellCopy(variant);
+  const emptyStateSignals = {
+    'biji-biji': [
+      'Start with hands-on pathways built around community making and creative practice.',
+      'Return here to keep cohort work, events, and projects in one visible workspace.',
+      'Reach support quickly if you need help joining the right makerspace track.',
+    ],
+    skillourfuture: [
+      'Start with career pathways aligned to employability, confidence, and verified progress.',
+      'Return here to keep coaching, coursework, and milestones in one clear runway.',
+      'Reach support quickly if you need help choosing the next program or pathway.',
+    ],
+  };
+  const variantSlug = variant && variant.slug ? variant.slug : 'mereka';
   const discoverPath = getCatalogHref(baseUrl);
   const helpPath = variant.helpUrl || '/help/';
-  const noCourseSignals = [
+  const noCourseSignals = emptyStateSignals[variantSlug] || [
     'Start with curated pathways tailored to your goals.',
     'Return here anytime to keep momentum visible.',
     'Reach support fast if you need enrollment help.',
@@ -133,9 +146,16 @@ const MerekaDashboardMicroShell = ({
 // Wired into org.openedx.frontend.learner_dashboard.course_card_banner.v1.
 const MerekaCourseCardAccent = ({ cardId }) => {
   const safeCardId = typeof cardId === 'string' ? cardId : '';
+  const config = getConfig();
+  const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
+  const badgeLabelMap = {
+    'biji-biji': 'Biji-Biji Pick',
+    skillourfuture: 'SOF Track',
+  };
+  const badgeLabel = badgeLabelMap[variant && variant.slug ? variant.slug : 'mereka'] || 'Mereka Curated';
   return (
     <div className="mereka-course-card-accent">
-      <span className="mereka-badge">Mereka Curated</span>
+      <span className="mereka-badge">{badgeLabel}</span>
       {safeCardId ? <span className="mereka-course-card-accent__meta">{safeCardId}</span> : null}
     </div>
   );

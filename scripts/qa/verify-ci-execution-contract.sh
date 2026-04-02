@@ -8,8 +8,9 @@
 #   4. setup-python-env composite action exists
 #   5. ci.yml exists
 #   6. kubeconform exclusion patterns cover expected data paths
-#   7. Python lzma fallback is present in the shellcheck install step
-#   8. lsb_release stub step is present in setup-python-env
+#   7. kubeconform schema cache + retry hardening is present
+#   8. Python lzma fallback is present in the shellcheck install step
+#   9. lsb_release stub step is present in setup-python-env
 #
 # Usage:
 #   scripts/qa/verify-ci-execution-contract.sh
@@ -119,6 +120,15 @@ fi
 
 # ── Check 8: Python lzma fallback in shellcheck install step ─────────────────
 if [[ -f "${CI_YML}" ]]; then
+  if grep -q "kubeconform-schemas" "${CI_YML}" && grep -q "error while downloading schema" "${CI_YML}"; then
+    pass "kubeconform schema cache + transient download retry present in ci.yml"
+  else
+    fail "kubeconform schema cache/retry hardening missing in ci.yml"
+  fi
+fi
+
+# ── Check 9: Python lzma fallback in shellcheck install step ─────────────────
+if [[ -f "${CI_YML}" ]]; then
   if grep -q "import lzma" "${CI_YML}"; then
     pass "Python lzma fallback present in ci.yml (shellcheck install)"
   else
@@ -126,7 +136,7 @@ if [[ -f "${CI_YML}" ]]; then
   fi
 fi
 
-# ── Check 9: lsb_release stub in setup-python-env ────────────────────────────
+# ── Check 10: lsb_release stub in setup-python-env ───────────────────────────
 if [[ -f "${SETUP_ACTION}" ]]; then
   if grep -q "lsb_release" "${SETUP_ACTION}"; then
     pass "lsb_release stub step present in setup-python-env action.yml"

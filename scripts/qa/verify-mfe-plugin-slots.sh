@@ -268,8 +268,8 @@ fi
 if rg -qF "const MerekaDashboardMicroShell = ({" "$PLUGIN_FILE" \
   && rg -qF "className=\"mereka-course-card-action-hint mereka-dashboard-micro-shell--inline\"" "$PLUGIN_FILE" \
   && rg -qF "className=\"mereka-dashboard-modal-hint\"" "$PLUGIN_FILE" \
-  && rg -qF ".mereka-dashboard-micro-shell" "$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss" \
-  && rg -qF ".mereka-dashboard-micro-shell--inline" "$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"; then
+  && rg -qF ".mereka-dashboard-micro-shell" "$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/scss/_dashboard.scss" \
+  && rg -qF ".mereka-dashboard-micro-shell--inline" "$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/scss/_dashboard.scss"; then
   pass "Source contract: dashboard action and modal slots reuse canonical micro-shell"
 else
   fail "Source contract: dashboard micro-shell canonical reuse markers missing"

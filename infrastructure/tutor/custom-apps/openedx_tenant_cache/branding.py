@@ -20,6 +20,11 @@ logger = logging.getLogger(__name__)
 BRANDING_CACHE_TTL = 300
 
 
+def _default_public_footer():
+    mfe_config = getattr(settings, 'MFE_CONFIG', {}) or {}
+    return mfe_config.get('MEREKA_PUBLIC_FOOTER') or getattr(settings, 'MEREKA_PUBLIC_FOOTER', {}) or {}
+
+
 def get_tenant_branding(enterprise_uuid):
     """
     Get branding configuration for a tenant.
@@ -59,8 +64,12 @@ def _load_branding_from_db(enterprise_uuid):
         'PRIMARY_COLOR': getattr(settings, 'DEFAULT_ORG_PRIMARY_COLOR', '#1a73e8'),
         'SECONDARY_COLOR': getattr(settings, 'DEFAULT_ORG_ACCENT_COLOR', '#4285f4'),
         'ACCENT_COLOR': getattr(settings, 'DEFAULT_ORG_ACCENT_COLOR', '#295cad'),
+        'BRAND_PRIMARY': getattr(settings, 'DEFAULT_ORG_PRIMARY_COLOR', '#1a73e8'),
+        'BRAND_SECONDARY': getattr(settings, 'DEFAULT_ORG_ACCENT_COLOR', '#4285f4'),
+        'BRAND_ACCENT': getattr(settings, 'DEFAULT_ORG_ACCENT_COLOR', '#295cad'),
         'TEXT_ON_PRIMARY': '#ffffff',
         'FOOTER_TEXT': '',
+        'MEREKA_PUBLIC_FOOTER': _default_public_footer(),
     }
 
     try:
@@ -84,8 +93,15 @@ def _load_branding_from_db(enterprise_uuid):
                 defaults['PRIMARY_COLOR'] = merged.get('primary_color', '') or defaults['PRIMARY_COLOR']
                 defaults['SECONDARY_COLOR'] = merged.get('secondary_color', '') or defaults['SECONDARY_COLOR']
                 defaults['ACCENT_COLOR'] = mfe.get('ACCENT_COLOR', merged.get('accent_color', '')) or defaults['ACCENT_COLOR']
+                defaults['BRAND_PRIMARY'] = mfe.get('BRAND_PRIMARY', defaults['PRIMARY_COLOR']) or defaults['BRAND_PRIMARY']
+                defaults['BRAND_SECONDARY'] = mfe.get('BRAND_SECONDARY', defaults['SECONDARY_COLOR']) or defaults['BRAND_SECONDARY']
+                defaults['BRAND_ACCENT'] = mfe.get('BRAND_ACCENT', defaults['ACCENT_COLOR']) or defaults['BRAND_ACCENT']
                 defaults['TEXT_ON_PRIMARY'] = mfe.get('TEXT_ON_PRIMARY', merged.get('text_on_primary_color', '')) or defaults['TEXT_ON_PRIMARY']
                 defaults['FOOTER_TEXT'] = merged.get('footer_text', '') or defaults['FOOTER_TEXT']
+                defaults['MEREKA_PUBLIC_FOOTER'] = mfe.get(
+                    'MEREKA_PUBLIC_FOOTER',
+                    defaults['MEREKA_PUBLIC_FOOTER'],
+                ) or defaults['MEREKA_PUBLIC_FOOTER']
 
                 # Include any additional MFE config
                 for k, v in mfe.items():
@@ -103,6 +119,12 @@ def _load_branding_from_db(enterprise_uuid):
                 defaults['FAVICON_URL'] = bc['favicon_url']
             if not defaults['SITE_NAME']:
                 defaults['SITE_NAME'] = mapping.name
+            if bc.get('primary_color') and defaults['BRAND_PRIMARY'] == getattr(settings, 'DEFAULT_ORG_PRIMARY_COLOR', '#1a73e8'):
+                defaults['BRAND_PRIMARY'] = bc['primary_color']
+            if bc.get('secondary_color') and defaults['BRAND_SECONDARY'] == getattr(settings, 'DEFAULT_ORG_ACCENT_COLOR', '#4285f4'):
+                defaults['BRAND_SECONDARY'] = bc['secondary_color']
+            if bc.get('accent_color') and defaults['BRAND_ACCENT'] == getattr(settings, 'DEFAULT_ORG_ACCENT_COLOR', '#4285f4'):
+                defaults['BRAND_ACCENT'] = bc['accent_color']
 
     except Exception:
         logger.exception("Failed to load branding for tenant %s", enterprise_uuid)

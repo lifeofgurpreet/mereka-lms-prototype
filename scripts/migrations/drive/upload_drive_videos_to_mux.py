@@ -174,7 +174,7 @@ def _get_mux_creds() -> tuple[str, str]:
 
 
 def _submit_to_mux(
-    session: "requests.Session",
+    session: requests.Session,
     video: dict,
     download_url: str,
     dry_run: bool = False,
@@ -286,14 +286,14 @@ def run(
         print(f"[{idx}/{len(videos)}] {course_number} — {title}")
 
         if not drive_url:
-            print(f"  SKIP: missing drive_url")
+            print("  SKIP: missing drive_url")
             skipped_count += 1
             continue
 
         # Resume: skip if already processed
         resume_key = airtable_id or drive_url
         if skip_existing and resume_key in already_uploaded:
-            print(f"  SKIP: already uploaded")
+            print("  SKIP: already uploaded")
             skipped_count += 1
             continue
 
@@ -309,7 +309,7 @@ def run(
         print(f"  Download URL: {download_url}")
 
         if dry_run:
-            print(f"  [DRY RUN] Would submit to Mux")
+            print("  [DRY RUN] Would submit to Mux")
             result = _submit_to_mux(session, video, download_url, dry_run=True)
             successful.append(result)
             continue

@@ -1,6 +1,6 @@
 # Domain Authority Matrix
 
-_Generated from `deploy/k8s/tenancy/tenant-registry.yaml` v1.5.0 on 2026-04-01._
+_Generated from `deploy/k8s/tenancy/tenant-registry.yaml` v1.5.0 on 2026-04-02._
 _Do not hand-edit. Regenerate with: `python scripts/domains/generate_domain_authority_matrix.py`_
 
 ## production

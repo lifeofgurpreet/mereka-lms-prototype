@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import os
 from typing import Optional
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit, urlunsplit
 
 
 _PATCHED = False
@@ -212,7 +212,7 @@ class MerekaStudioSigninRedirectMiddleware:
 
         # Only needed for Studio's legacy redirect endpoints.
         path = getattr(request, "path", "") or ""
-        if path not in ("/signin", "/signin_redirect_to_lms"):
+        if path not in ("/signin", "/signin_redirect_to_lms", "/login/edx-oauth2", "/login/edx-oauth2/"):
             return response
 
         if getattr(response, "status_code", 0) not in (301, 302, 303, 307, 308):
@@ -227,9 +227,20 @@ class MerekaStudioSigninRedirectMiddleware:
             return response
 
         parts = urlsplit(location)
-        # Only rewrite redirects to /login or /register endpoints.
-        if parts.path not in ("/login", "/register"):
+        # /signin paths should land on the tenant LMS login/register endpoints.
+        if parts.path in ("/login", "/register"):
+            response["Location"] = f"{lms_root}{parts.path}" + (f"?{parts.query}" if parts.query else "")
             return response
 
-        response["Location"] = f"{lms_root}{parts.path}" + (f"?{parts.query}" if parts.query else "")
+        # Studio's edx-oauth2 bootstrap must not jump to the shared Mereka LMS host
+        # for tenant Studio domains. Keep the OAuth2 roundtrip on the tenant LMS root.
+        if path in ("/login/edx-oauth2", "/login/edx-oauth2/") and parts.path == "/oauth2/authorize":
+            lms_parts = urlsplit(lms_root)
+            response["Location"] = urlunsplit((
+                lms_parts.scheme or parts.scheme,
+                lms_parts.netloc,
+                parts.path,
+                parts.query,
+                parts.fragment,
+            ))
         return response

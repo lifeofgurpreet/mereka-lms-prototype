@@ -138,6 +138,7 @@ jobs:
       - name: Prepare local tool cache
         run: |
           mkdir -p "$GITHUB_WORKSPACE/.cache/bin"
+          mkdir -p "$GITHUB_WORKSPACE/.cache/kubeconform-schemas"
           echo "$GITHUB_WORKSPACE/.cache/bin" >> "$GITHUB_PATH"
 
       - name: Cache kubeconform
@@ -146,6 +147,14 @@ jobs:
         with:
           path: .cache/bin/kubeconform
           key: kubeconform-v0.6.4-linux-amd64
+
+      - name: Cache kubeconform schemas
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7  # v5.0.4
+        with:
+          path: .cache/kubeconform-schemas
+          key: kubeconform-schemas-v1-${{ hashFiles('deploy/k8s/**/*.yml', 'deploy/k8s/**/*.yaml') }}
+          restore-keys: |
+            kubeconform-schemas-v1-
 
       - name: Install kubeconform
         if: steps.cache-kubeconform.outputs.cache-hit != 'true'
@@ -228,14 +237,55 @@ jobs:
 
       - name: Validate Kubernetes manifests
         run: |
-          find deploy/k8s -name '*.yml' -o -name '*.yaml' | \
-            grep -v '/patches/' | \
-            grep -v '/config/' | \
-            grep -v '/settings/' | \
-            grep -v 'helm-values' | \
-            grep -v 'registry\.yaml' | \
-            grep -v 'SECRET_CLASSIFICATION' | \
-            xargs kubeconform -strict -ignore-missing-schemas
+          set -euo pipefail
+
+          mapfile -t manifests < <(
+            find deploy/k8s \( -name '*.yml' -o -name '*.yaml' \) | \
+              grep -v '/patches/' | \
+              grep -v '/config/' | \
+              grep -v '/settings/' | \
+              grep -v 'helm-values' | \
+              grep -v 'registry\.yaml' | \
+              grep -v 'SECRET_CLASSIFICATION'
+          )
+
+          if [[ ${#manifests[@]} -eq 0 ]]; then
+            echo "No Kubernetes manifests found for kubeconform validation"
+            exit 0
+          fi
+
+          validate_manifests() {
+            local log_file="$1"
+            kubeconform \
+              -strict \
+              -ignore-missing-schemas \
+              -cache "$GITHUB_WORKSPACE/.cache/kubeconform-schemas" \
+              "${manifests[@]}" 2>&1 | tee "$log_file"
+            return "${PIPESTATUS[0]}"
+          }
+
+          log_file="$(mktemp)"
+          attempt=1
+          max_attempts=3
+
+          until validate_manifests "$log_file"; do
+            exit_code=$?
+            if ! grep -q "error while downloading schema" "$log_file"; then
+              exit "$exit_code"
+            fi
+
+            if (( attempt >= max_attempts )); then
+              echo "kubeconform schema download kept failing after ${attempt} attempts"
+              exit "$exit_code"
+            fi
+
+            sleep_seconds=$(( attempt * 15 ))
+            echo "Transient kubeconform schema download failure detected; retrying in ${sleep_seconds}s (attempt $(( attempt + 1 ))/${max_attempts})"
+            rm -f "$log_file"
+            log_file="$(mktemp)"
+            sleep "$sleep_seconds"
+            ((attempt++))
+          done
 
       - name: Run spec integrity gates
         run: bash scripts/qa/run-spec-integrity-gates.sh

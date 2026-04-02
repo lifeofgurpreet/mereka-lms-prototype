@@ -14,8 +14,8 @@ _Audience: Operations & Developers • Owner: Infra Team • Last updated: 2026-
 | Domain | Purpose | Session Scope | MFE Subdomain |
 |--------|---------|---------------|---------------|
 | `academyv2.mereka.io` | Primary LMS | `.academyv2.mereka.io` (shared with MFE) | `apps.academyv2.mereka.io` |
-| `academy.biji-biji.com` | Biji-Biji Initiative partner branding | Independent (no subdomain sharing) | Uses primary MFE |
-| `skillourfuture.academy.mereka.io` | SkillOurFuture program | Independent | Uses primary MFE |
+| `academy.biji-biji.com` | Biji-Biji Initiative partner branding | Independent (no subdomain sharing) | `apps.academy.biji-biji.com` |
+| `skillourfuture.academy.mereka.io` | SkillOurFuture program | Independent | `apps.skillourfuture.academyv2.mereka.io` |
 
 ### Studio Domain
 

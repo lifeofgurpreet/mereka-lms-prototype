@@ -27,7 +27,6 @@ Requirements:
 from __future__ import annotations
 
 import argparse
-import json
 import subprocess
 import sys
 import textwrap
@@ -118,9 +117,6 @@ def build_django_snippet(dry_run: bool) -> str:
     Returns a single string that can be passed to `manage.py lms shell -c`.
     """
     fow_prefixes_repr = repr(FOW_PREFIXES)
-    customers_repr = repr(
-        {k: {"uuid": v["uuid"], "catalog_title": v["catalog_title"]} for k, v in ENTERPRISE_CUSTOMERS.items()}
-    )
     dry_run_repr = repr(dry_run)
 
     # We build the SOF content_filter dynamically inside the snippet

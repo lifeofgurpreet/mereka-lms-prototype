@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""
+r"""
 post_import_taxonomy.py
 -----------------------
 Creates Mereka content taxonomies and tags all imported courses (39 as of 2026-04-02).
@@ -130,14 +130,13 @@ TAXONOMY_INDEX = {
 # Implementation
 # ---------------------------------------------------------------------------
 
-import sys
 import logging
 
 logging.disable(logging.CRITICAL)  # suppress Django noise during interactive use
 
-from openedx.core.djangoapps.content_tagging import api as tagging_api
-from openedx_tagging.core.tagging.models import Taxonomy, Tag
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
+from openedx.core.djangoapps.content_tagging import api as tagging_api
+from openedx_tagging.core.tagging.models import Tag, Taxonomy
 
 SEPARATOR = "=" * 70
 

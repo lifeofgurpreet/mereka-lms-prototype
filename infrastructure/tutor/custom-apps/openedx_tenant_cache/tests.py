@@ -102,6 +102,12 @@ _settings.DEFAULT_ORG_LOGO_URL = 'https://example.com/logo.png'
 _settings.DEFAULT_ORG_DISPLAY_NAME = 'Test Academy'
 _settings.DEFAULT_ORG_PRIMARY_COLOR = '#111111'
 _settings.DEFAULT_ORG_ACCENT_COLOR = '#222222'
+_settings.MEREKA_PUBLIC_FOOTER = {
+    'navLinks': [{'label': 'About', 'url': 'https://example.com/about'}],
+}
+_settings.MFE_CONFIG = {
+    'MEREKA_PUBLIC_FOOTER': _settings.MEREKA_PUBLIC_FOOTER,
+}
 
 sys.modules['openedx_tenant_cache._test_settings'] = _settings
 
@@ -602,6 +608,48 @@ class TestBrandingModule(TestCase):
         self.assertIn('LOGO_URL', branding)
         self.assertIn('SITE_NAME', branding)
         self.assertEqual(branding['SITE_NAME'], 'Test Academy')
+        self.assertEqual(
+            branding['MEREKA_PUBLIC_FOOTER'],
+            _settings.MEREKA_PUBLIC_FOOTER,
+        )
+
+    def test_get_tenant_branding_uses_footer_and_brand_keys_from_site_config(self):
+        from openedx_tenant_cache.branding import get_tenant_branding
+
+        site = Site.objects.get_or_create(
+            domain='branding.example.com', defaults={'name': 'Branding'}
+        )[0]
+        tenant_uuid = uuid.uuid4()
+        mapping = TenantSiteMapping.objects.create(
+            enterprise_customer_uuid=tenant_uuid,
+            site=site,
+            slug='branding-tenant',
+            name='Branding Tenant',
+            branding_config={'primary_color': '#101010'},
+        )
+        TenantSiteConfiguration.objects.create(
+            tenant=mapping,
+            values={'primary_color': '#123456', 'secondary_color': '#654321'},
+            mfe_config={
+                'ACCENT_COLOR': '#abcdef',
+                'BRAND_PRIMARY': '#123456',
+                'BRAND_SECONDARY': '#654321',
+                'BRAND_ACCENT': '#abcdef',
+                'MEREKA_PUBLIC_FOOTER': {'navLinks': [{'label': 'Docs', 'url': 'https://example.com/docs'}]},
+            },
+        )
+
+        branding = get_tenant_branding(str(tenant_uuid))
+        self.assertEqual(branding['PRIMARY_COLOR'], '#123456')
+        self.assertEqual(branding['SECONDARY_COLOR'], '#654321')
+        self.assertEqual(branding['ACCENT_COLOR'], '#abcdef')
+        self.assertEqual(branding['BRAND_PRIMARY'], '#123456')
+        self.assertEqual(branding['BRAND_SECONDARY'], '#654321')
+        self.assertEqual(branding['BRAND_ACCENT'], '#abcdef')
+        self.assertEqual(
+            branding['MEREKA_PUBLIC_FOOTER']['navLinks'][0]['label'],
+            'Docs',
+        )
 
     def test_inject_mfe_branding_disabled_by_flag(self):
         from openedx_tenant_cache.branding import inject_mfe_branding

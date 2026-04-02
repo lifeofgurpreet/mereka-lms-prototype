@@ -320,7 +320,7 @@ phase_0_verify() {
   if [[ ! -d "$EXPORTS_ROOT" ]]; then
     fail "EXPORTS_ROOT directory not found: $EXPORTS_ROOT"
     fail "If running from a worktree, set EXPORTS_ROOT to the main checkout's exports dir:"
-    fail "  EXPORTS_ROOT=/home/gurpreet/projects/k8s/mereka-lms/exports $0 --env $ENV ..."
+    fail "  EXPORTS_ROOT=\$REPO_ROOT/exports $0 --env $ENV ..."
     errors=$((errors + 1))
   else
     ok "Exports root exists: $EXPORTS_ROOT"

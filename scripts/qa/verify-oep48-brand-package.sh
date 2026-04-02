@@ -304,8 +304,9 @@ if [[ -f "${MFE_SCSS}" ]]; then
   else
     warn "mfe: mereka.scss missing --mereka-mfe-branding-rev revision marker"
   fi
-  if grep -q "\-\-mereka-mfe-gradient:" "${MFE_SCSS}"; then
-    pass "mfe: mereka.scss defines --mereka-mfe-gradient token"
+  if grep -q "\-\-mereka-mfe-gradient:" "${MFE_SCSS}" \
+    || grep -q "\-\-mereka-mfe-gradient:" "${THEME_ROOT}/mfe/scss/_mfe-tokens.scss"; then
+    pass "mfe: theme stack defines --mereka-mfe-gradient token"
   else
     fail "mfe: mereka.scss missing --mereka-mfe-gradient"
   fi
