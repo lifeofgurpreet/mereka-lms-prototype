@@ -98,6 +98,24 @@ FORUM_SEARCH_BACKEND = "forum.search.meilisearch.MeilisearchBackend"
 FEATURES["ENABLE_DISCUSSION_SERVICE"] = True
 COMMENTS_SERVICE_URL = "http://localhost:8000/forum"
 
+# Shared MongoDB defaults for modulestore and forum Atlas fallback.
+#
+# The forum config below intentionally falls back to modulestore Atlas
+# credentials when dedicated FORUM_MONGODB_* secrets are absent, so derive the
+# modulestore values before the forum block uses them.
+MONGODB_HOST = os.environ.get("MONGODB_HOST", "mongodb")
+MONGODB_DB = os.environ.get("MONGODB_DB", "openedx")
+_mongodb_host_lower = (MONGODB_HOST or "").lower()
+_mongodb_is_atlas = _mongodb_host_lower.startswith("mongodb+srv://") or ".mongodb.net" in _mongodb_host_lower
+
+_mongodb_username = None
+_mongodb_password = None
+_mongodb_authsource = "admin"
+if _mongodb_is_atlas:
+    _mongodb_username = os.environ.get("MONGODB_USERNAME") or "cs_comments_user"
+    _mongodb_password = os.environ.get("MONGODB_PASSWORD", "")
+    _mongodb_authsource = os.environ.get("MONGODB_AUTHSOURCE", "admin")
+
 # Forum MongoDB configuration.
 # Reuses the same Atlas-detection logic as DOC_STORE_CONFIG above.
 # For Atlas hosts (mongodb+srv:// or *.mongodb.net), auto-enables SSL and auth.
@@ -292,18 +310,6 @@ CREDENTIALS_SERVICE_USERNAME = os.environ.get("CREDENTIALS_SERVICE_USERNAME", "c
 # environments where Atlas connectivity is not yet available.
 #
 # Atlas cluster: cluster-mereka-lms.2pjex4s.mongodb.net
-MONGODB_HOST = os.environ.get("MONGODB_HOST", "mongodb")
-MONGODB_DB = os.environ.get("MONGODB_DB", "openedx")
-_mongodb_host_lower = (MONGODB_HOST or "").lower()
-_mongodb_is_atlas = _mongodb_host_lower.startswith("mongodb+srv://") or ".mongodb.net" in _mongodb_host_lower
-
-_mongodb_username = None
-_mongodb_password = None
-_mongodb_authsource = "admin"
-if _mongodb_is_atlas:
-    _mongodb_username = os.environ.get("MONGODB_USERNAME") or "cs_comments_user"
-    _mongodb_password = os.environ.get("MONGODB_PASSWORD", "")
-    _mongodb_authsource = os.environ.get("MONGODB_AUTHSOURCE", "admin")
 
 mongodb_parameters = {
     "db": MONGODB_DB,
