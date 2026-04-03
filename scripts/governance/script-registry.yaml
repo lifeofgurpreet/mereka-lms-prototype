@@ -1500,9 +1500,10 @@ scripts:
       - --repo <owner/repo> (optional; autodetects origin remote)
       - --branch-run-id / --branch-log-dir
       - --baseline-run-id / --baseline-log-dir
+      - --policy-file <path> (optional; defaults to verification/manifests/ci_failure_severity_policy.json)
       - GITHUB_TOKEN (required for run-id mode)
     outputs:
-      - stdout JSON or --output file containing ci-failure-baseline/v1 payload
+      - stdout JSON or --output file containing ci-failure-baseline/v2 payload
     side_effects:
       - Downloads GitHub Actions log archives in run-id mode
     dry_run: true

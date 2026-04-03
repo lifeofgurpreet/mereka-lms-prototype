@@ -1,0 +1,33 @@
+{
+  "schema_version": "ci-failure-severity-policy/v1",
+  "defaults": {
+    "severity": "medium",
+    "merge_policy": "review_required_if_baseline"
+  },
+  "rules": [
+    {
+      "match_type": "exact",
+      "pattern": "verify-secret-classification",
+      "severity": "high",
+      "merge_policy": "must_block_even_if_baseline"
+    },
+    {
+      "match_type": "exact",
+      "pattern": "verify-tutor-version-pin",
+      "severity": "high",
+      "merge_policy": "must_block_even_if_baseline"
+    },
+    {
+      "match_type": "exact",
+      "pattern": "verify-certificate-branding",
+      "severity": "low",
+      "merge_policy": "allow_if_baseline_only"
+    },
+    {
+      "match_type": "prefix",
+      "pattern": "job::",
+      "severity": "medium",
+      "merge_policy": "review_required_if_baseline"
+    }
+  ]
+}

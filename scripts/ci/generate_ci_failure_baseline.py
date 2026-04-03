@@ -17,7 +17,8 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FAILURE_RE = re.compile(r"FAIL ((?:verify|test-verify|test-build|test-generate|audit)-[A-Za-z0-9._/-]+)")
-SCHEMA_VERSION = "ci-failure-baseline/v1"
+SCHEMA_VERSION = "ci-failure-baseline/v2"
+DEFAULT_POLICY_PATH = REPO_ROOT / "verification" / "manifests" / "ci_failure_severity_policy.json"
 
 
 def git_remote_repo() -> str:
@@ -108,6 +109,43 @@ def parse_failure_details(log_dir: Path, failed_jobs: list[str] | None = None) -
     return failure_ids, details
 
 
+def load_policy(path: Path) -> dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    defaults = payload["defaults"]
+    rules = payload["rules"]
+    return {
+        "path": str(path),
+        "schema_version": payload["schema_version"],
+        "defaults": defaults,
+        "rules": rules,
+    }
+
+
+def classify_failure(failure_id: str, policy: dict[str, Any]) -> dict[str, str]:
+    for rule in policy["rules"]:
+        match_type = rule["match_type"]
+        pattern = rule["pattern"]
+        if match_type == "exact" and failure_id == pattern:
+            return {
+                "severity": rule["severity"],
+                "merge_policy": rule["merge_policy"],
+                "source": pattern,
+            }
+        if match_type == "prefix" and failure_id.startswith(pattern):
+            return {
+                "severity": rule["severity"],
+                "merge_policy": rule["merge_policy"],
+                "source": pattern,
+            }
+
+    defaults = policy["defaults"]
+    return {
+        "severity": defaults["severity"],
+        "merge_policy": defaults["merge_policy"],
+        "source": "defaults",
+    }
+
+
 def load_run_from_logs(
     *,
     run_id: int | None,
@@ -125,17 +163,44 @@ def load_run_from_logs(
     }
 
 
-def compute_decision(branch_run: dict[str, Any], baseline_run: dict[str, Any]) -> dict[str, Any]:
+def annotate_failure_details(run: dict[str, Any], policy: dict[str, Any]) -> list[dict[str, Any]]:
+    annotated: list[dict[str, Any]] = []
+    for detail in run["failure_details"]:
+        classification = classify_failure(detail["id"], policy)
+        annotated.append(
+            {
+                **detail,
+                "severity": classification["severity"],
+                "merge_policy": classification["merge_policy"],
+                "policy_source": classification["source"],
+            }
+        )
+    return annotated
+
+
+def compute_decision(branch_run: dict[str, Any], baseline_run: dict[str, Any], policy: dict[str, Any]) -> dict[str, Any]:
     branch_set = set(branch_run["failure_ids"])
     baseline_set = set(baseline_run["failure_ids"])
     new_failures = sorted(branch_set - baseline_set)
     resolved_failures = sorted(baseline_set - branch_set)
     shared_failures = sorted(branch_set & baseline_set)
+    branch_details = {item["id"]: item for item in annotate_failure_details(branch_run, policy)}
+    baseline_details = {item["id"]: item for item in annotate_failure_details(baseline_run, policy)}
+    new_failure_details = [branch_details[failure_id] for failure_id in new_failures]
+    resolved_failure_details = [baseline_details[failure_id] for failure_id in resolved_failures]
+    shared_failure_details = [branch_details[failure_id] for failure_id in shared_failures]
+    blocking_shared_failures = sorted(
+        detail["id"]
+        for detail in shared_failure_details
+        if detail["merge_policy"] == "must_block_even_if_baseline"
+    )
 
     if not branch_set:
         decision = "clean"
     elif new_failures:
         decision = "blocked_on_branch_failures"
+    elif blocking_shared_failures:
+        decision = "blocked_on_baseline_policy"
     else:
         decision = "mergeable_with_baseline_debt"
 
@@ -143,6 +208,10 @@ def compute_decision(branch_run: dict[str, Any], baseline_run: dict[str, Any]) -
         "new_failures": new_failures,
         "resolved_failures": resolved_failures,
         "shared_failures": shared_failures,
+        "new_failure_details": new_failure_details,
+        "resolved_failure_details": resolved_failure_details,
+        "shared_failure_details": shared_failure_details,
+        "blocking_shared_failures": blocking_shared_failures,
         "decision": decision,
     }
 
@@ -153,12 +222,18 @@ def build_payload(
     workflow: str,
     branch_run: dict[str, Any],
     baseline_run: dict[str, Any],
+    policy: dict[str, Any],
 ) -> dict[str, Any]:
-    comparison = compute_decision(branch_run, baseline_run)
+    comparison = compute_decision(branch_run, baseline_run, policy)
     return {
         "schema_version": SCHEMA_VERSION,
         "repo": repo,
         "workflow": workflow,
+        "policy": {
+            "path": policy["path"],
+            "schema_version": policy["schema_version"],
+            "defaults": policy["defaults"],
+        },
         "branch_run": branch_run,
         "baseline_run": baseline_run,
         **comparison,
@@ -175,6 +250,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--baseline-run-id", type=int)
     parser.add_argument("--baseline-head-sha")
     parser.add_argument("--baseline-log-dir", type=Path)
+    parser.add_argument("--policy-file", type=Path, default=DEFAULT_POLICY_PATH)
     parser.add_argument("--output", type=Path)
     parser.add_argument("--github-token-env", default="GITHUB_TOKEN")
     args = parser.parse_args()
@@ -229,11 +305,13 @@ def main() -> int:
         log_dir=args.baseline_log_dir,
         token=token,
     )
+    policy = load_policy(args.policy_file)
     payload = build_payload(
         repo=args.repo,
         workflow=args.workflow,
         branch_run=branch_run,
         baseline_run=baseline_run,
+        policy=policy,
     )
 
     rendered = json.dumps(payload, indent=2) + "\n"

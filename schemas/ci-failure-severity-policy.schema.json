@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "defaults",
+    "rules"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "ci-failure-severity-policy/v1"
+    },
+    "defaults": {
+      "$ref": "#/$defs/classification"
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "match_type",
+          "pattern",
+          "severity",
+          "merge_policy"
+        ],
+        "properties": {
+          "match_type": {
+            "type": "string",
+            "enum": ["exact", "prefix"]
+          },
+          "pattern": {
+            "type": "string",
+            "minLength": 1
+          },
+          "severity": {
+            "$ref": "#/$defs/severity"
+          },
+          "merge_policy": {
+            "$ref": "#/$defs/merge_policy"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "severity": {
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    },
+    "merge_policy": {
+      "type": "string",
+      "enum": [
+        "allow_if_baseline_only",
+        "review_required_if_baseline",
+        "must_block_even_if_baseline"
+      ]
+    },
+    "classification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["severity", "merge_policy"],
+      "properties": {
+        "severity": { "$ref": "#/$defs/severity" },
+        "merge_policy": { "$ref": "#/$defs/merge_policy" }
+      }
+    }
+  }
+}

@@ -6,16 +6,31 @@
     "schema_version",
     "repo",
     "workflow",
+    "policy",
     "branch_run",
     "baseline_run",
     "new_failures",
     "resolved_failures",
-    "decision"
+    "decision",
+    "blocking_shared_failures"
   ],
   "properties": {
-    "schema_version": { "type": "string", "const": "ci-failure-baseline/v1" },
+    "schema_version": { "type": "string", "const": "ci-failure-baseline/v2" },
     "repo": { "type": "string", "minLength": 1 },
     "workflow": { "type": "string", "minLength": 1 },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "schema_version", "defaults"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "schema_version": {
+          "type": "string",
+          "const": "ci-failure-severity-policy/v1"
+        },
+        "defaults": { "$ref": "#/$defs/classification" }
+      }
+    },
     "branch_run": { "$ref": "#/$defs/run" },
     "baseline_run": { "$ref": "#/$defs/run" },
     "new_failures": {
@@ -33,16 +48,55 @@
       "items": { "type": "string", "minLength": 1 },
       "uniqueItems": true
     },
+    "new_failure_details": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/failure_detail" }
+    },
+    "resolved_failure_details": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/failure_detail" }
+    },
+    "shared_failure_details": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/failure_detail" }
+    },
+    "blocking_shared_failures": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
     "decision": {
       "type": "string",
       "enum": [
         "clean",
         "mergeable_with_baseline_debt",
-        "blocked_on_branch_failures"
+        "blocked_on_branch_failures",
+        "blocked_on_baseline_policy"
       ]
     }
   },
   "$defs": {
+    "severity": {
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    },
+    "merge_policy": {
+      "type": "string",
+      "enum": [
+        "allow_if_baseline_only",
+        "review_required_if_baseline",
+        "must_block_even_if_baseline"
+      ]
+    },
+    "classification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["severity", "merge_policy"],
+      "properties": {
+        "severity": { "$ref": "#/$defs/severity" },
+        "merge_policy": { "$ref": "#/$defs/merge_policy" }
+      }
+    },
     "run": {
       "type": "object",
       "additionalProperties": false,
@@ -67,20 +121,24 @@
         },
         "failure_details": {
           "type": "array",
-          "items": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["id", "jobs"],
-            "properties": {
-              "id": { "type": "string", "minLength": 1 },
-              "jobs": {
-                "type": "array",
-                "items": { "type": "string", "minLength": 1 },
-                "uniqueItems": true
-              }
-            }
-          }
+          "items": { "$ref": "#/$defs/failure_detail" }
         }
+      }
+    },
+    "failure_detail": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "jobs"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "jobs": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "severity": { "$ref": "#/$defs/severity" },
+        "merge_policy": { "$ref": "#/$defs/merge_policy" },
+        "policy_source": { "type": "string", "minLength": 1 }
       }
     }
   }
