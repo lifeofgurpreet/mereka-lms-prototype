@@ -83,11 +83,12 @@ required_runtime_acs:
       - scripts/infra/validate-telemetry-connectivity.sh
 
   auth-sso-enterprise_spec:
-    acs: [AC-016, AC-043]
-    reason: "Authentik admin MFA enforcement and enterprise tenant SSO flows require live authentication services with tenant credentials"
+    acs: [AC-016, AC-043, AC-044]
+    reason: "Authentik admin MFA enforcement, enterprise tenant SSO flows, and Authentik policy-exception log audits require live authentication services with tenant credentials"
     verification_methods:
       - scripts/infra/ensure-authentik-admin-mfa.sh --verify
       - scripts/qa/verify-enterprise-sso.sh --tenant=acme-corp --env=prod
+      - scripts/qa/audit-authentik-policy-exceptions.sh --since 6h
       - curl -I https://authentik.mereka.io/if/admin/
       - curl -I https://academyv2.mereka.io/enterprise/login/<tenant-slug>
 

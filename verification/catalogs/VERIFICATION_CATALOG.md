@@ -10,19 +10,19 @@ Machine-readable source: `verification/catalogs/verification_catalog.json`.
 ## Summary
 - Total `verify-*.sh` scripts: **589**
 - Archived deprecated scripts: **21**
-- CI static-bound scripts: **362**
+- CI static-bound scripts: **361**
 - Workflow-direct bound scripts: **56**
 - Status overrides applied: **8**
 
 ### Tier Distribution
-- `exploratory_manual`: 185
+- `exploratory_manual`: 186
 - `periodic_runtime`: 17
-- `release_blocking`: 387
+- `release_blocking`: 386
 
 ### Status Distribution
-- `active`: 407
-- `deprecated_candidate`: 2
-- `manual_only`: 180
+- `active`: 406
+- `deprecated_candidate`: 1
+- `manual_only`: 182
 
 ### Kind Distribution
 - `verify`: 589
@@ -35,8 +35,7 @@ Machine-readable source: `verification/catalogs/verification_catalog.json`.
 ## Deprecated Candidates
 
 Scripts currently not CI-bound and with near-zero references:
-- `scripts/qa/verify-footer-content-parity.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-phase7-selector-list-coverage.sh` (owner: `platform-core`, refs: 0)
+- `scripts/qa/verify-phase7-selector-list-coverage.sh` (owner: `platform-core`, refs: 1)
 
 ## Archived Deprecated Scripts
 

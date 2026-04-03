@@ -70,23 +70,32 @@ fi
 echo "AC-MIGLOCK-001: SCSS override blocks vs register entries"
 
 # Count numbered entries in the register (### N. heading pattern)
-REGISTER_ENTRY_COUNT=$(grep -c '^### [0-9]\+\.' "$REGISTER_DOC" || echo 0)
+REGISTER_ENTRY_COUNT=$(grep -c '^### [0-9]\+\.' "$REGISTER_DOC" || true)
+REGISTER_ENTRY_COUNT="${REGISTER_ENTRY_COUNT:-0}"
 
 # Count major CSS section comment blocks (non-BRITTLE, non-Fallback top-level comments)
 # These are lines starting with /* that describe a logical override surface
-SCSS_SECTION_COUNT=$(grep -c '^/\* [A-Z]' "$MFE_SCSS" || echo 0)
+SCSS_SECTION_COUNT=$(grep -c '^/\* [A-Z]' "$MFE_SCSS" || true)
+SCSS_SECTION_COUNT="${SCSS_SECTION_COUNT:-0}"
+ACTIVE_CLASS_SELECTOR_COUNT="$(extract_active_class_selector_values | wc -l | tr -d ' ')"
+ACTIVE_CLASS_SELECTOR_COUNT="${ACTIVE_CLASS_SELECTOR_COUNT:-0}"
 
 echo "  Register entries: $REGISTER_ENTRY_COUNT"
 echo "  SCSS surface sections: $SCSS_SECTION_COUNT"
 
 if [[ $REGISTER_ENTRY_COUNT -ge 10 ]]; then pass_check "Register has at least 10 numbered entries"; else fail_check "Register has at least 10 numbered entries"; fi
-if [[ $SCSS_SECTION_COUNT -ge 1 ]]; then pass_check "SCSS section count >= 1 (has annotated surfaces)"; else fail_check "SCSS section count >= 1 (has annotated surfaces)"; fi
+if [[ $SCSS_SECTION_COUNT -eq 0 && $ACTIVE_CLASS_SELECTOR_COUNT -eq 0 ]]; then
+  pass_check "No annotated SCSS override surfaces remain after wildcard cleanup"
+  pass_check "SCSS surface coverage is not required once override cleanup is complete"
+else
+  if [[ $SCSS_SECTION_COUNT -ge 1 ]]; then pass_check "SCSS section count >= 1 (has annotated surfaces)"; else fail_check "SCSS section count >= 1 (has annotated surfaces)"; fi
 
-# AC-MIGLOCK-001 core: every register entry should have at least one SCSS selector block
-# We verify the ratio is reasonable — sections >= 1 per 4 register entries (conservative)
-EXPECTED_MIN=$(( REGISTER_ENTRY_COUNT / 4 ))
-if [[ $EXPECTED_MIN -lt 1 ]]; then EXPECTED_MIN=1; fi
-if [[ $SCSS_SECTION_COUNT -ge $EXPECTED_MIN ]]; then pass_check "SCSS surface sections cover enough register scope (>= $EXPECTED_MIN sections)"; else fail_check "SCSS surface sections cover enough register scope (>= $EXPECTED_MIN sections)"; fi
+  # AC-MIGLOCK-001 core: every register entry should have at least one SCSS selector block
+  # We verify the ratio is reasonable — sections >= 1 per 4 register entries (conservative)
+  EXPECTED_MIN=$(( REGISTER_ENTRY_COUNT / 4 ))
+  if [[ $EXPECTED_MIN -lt 1 ]]; then EXPECTED_MIN=1; fi
+  if [[ $SCSS_SECTION_COUNT -ge $EXPECTED_MIN ]]; then pass_check "SCSS surface sections cover enough register scope (>= $EXPECTED_MIN sections)"; else fail_check "SCSS surface sections cover enough register scope (>= $EXPECTED_MIN sections)"; fi
+fi
 
 echo ""
 

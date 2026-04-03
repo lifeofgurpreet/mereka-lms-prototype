@@ -8,6 +8,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 MFE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
+MFE_SCSS_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/scss"
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -22,6 +23,13 @@ pass() { echo -e "${GREEN}[PASS]${NC} $1"; PASS=$((PASS + 1)); }
 fail() { echo -e "${RED}[FAIL]${NC} $1"; FAIL=$((FAIL + 1)); }
 warn() { echo -e "${YELLOW}[WARN]${NC} $1"; WARN=$((WARN + 1)); }
 
+find_mfe_scss_files() {
+  find "$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe" \
+    -type f \
+    -name '*.scss' \
+    | sort
+}
+
 echo "=== MFE Reduced-Motion Guard Verification ==="
 echo ""
 
@@ -33,7 +41,7 @@ if [[ ! -f "$MFE_SCSS" ]]; then
 fi
 
 echo "--- Check 1: Guard block exists ---"
-if grep -q '@media (prefers-reduced-motion: no-preference)' "$MFE_SCSS"; then
+if find_mfe_scss_files | xargs -r grep -q '@media (prefers-reduced-motion: no-preference)'; then
   pass "Found prefers-reduced-motion guard block"
 else
   fail "Missing @media (prefers-reduced-motion: no-preference) guard block"
@@ -45,42 +53,43 @@ import json, sys
 import re
 from pathlib import Path
 
-path = Path(sys.argv[1]) / "infrastructure/tutor/themes/mereka/mfe/mereka.scss"
-lines = path.read_text(encoding="utf-8").splitlines()
-
-stack = []
 violations = []
 transform_count = 0
 guard_depth_hits = 0
 
-for i, raw in enumerate(lines, start=1):
-    s = raw.strip()
-    if s.startswith("//") or s.startswith("/*") or s.startswith("*"):
-        continue
+root = Path(sys.argv[1]) / "infrastructure/tutor/themes/mereka/mfe"
+for path in sorted(root.rglob("*.scss")):
+    lines = path.read_text(encoding="utf-8").splitlines()
+    stack = []
 
-    opens = raw.count("{")
-    if opens:
-        header = raw.split("{", 1)[0].strip()
-        block = "other"
-        if "@media" in header and "prefers-reduced-motion" in header:
-            if "no-preference" in header:
-                block = "motion_ok"
+    for i, raw in enumerate(lines, start=1):
+        s = raw.strip()
+        if s.startswith("//") or s.startswith("/*") or s.startswith("*"):
+            continue
+
+        opens = raw.count("{")
+        if opens:
+            header = raw.split("{", 1)[0].strip()
+            block = "other"
+            if "@media" in header and "prefers-reduced-motion" in header:
+                if "no-preference" in header:
+                    block = "motion_ok"
+                else:
+                    block = "motion_other"
+            for _ in range(opens):
+                stack.append(block)
+
+        if re.search(r"(?<![-\w])transform\s*:", s):
+            transform_count += 1
+            if "motion_ok" in stack:
+                guard_depth_hits += 1
             else:
-                block = "motion_other"
-        for _ in range(opens):
-            stack.append(block)
+                violations.append({"file": str(path), "line": i, "text": s})
 
-    if re.search(r"(?<![-\w])transform\s*:", s):
-        transform_count += 1
-        if "motion_ok" in stack:
-            guard_depth_hits += 1
-        else:
-            violations.append({"line": i, "text": s})
-
-    closes = raw.count("}")
-    for _ in range(closes):
-        if stack:
-            stack.pop()
+        closes = raw.count("}")
+        for _ in range(closes):
+            if stack:
+                stack.pop()
 
 print(json.dumps({
     "transform_count": transform_count,
@@ -114,7 +123,7 @@ import os
 
 data = json.loads(os.environ["PY_OUT"])
 for item in data["violations"]:
-    print(f"  - line {item['line']}: {item['text']}")
+    print(f"  - {item['file']}:{item['line']}: {item['text']}")
 PY
 fi
 

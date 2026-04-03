@@ -113,8 +113,8 @@ fi
 
 # Superset image version
 if [[ -f "$ASPECTS_DIR/deployments.yml" ]]; then
-  if grep -q "apache/superset" "$ASPECTS_DIR/deployments.yml"; then
-    ss_image=$(grep "apache/superset" "$ASPECTS_DIR/deployments.yml" | head -1 | tr -d ' ')
+  if grep -Eq "apache/superset|edunext/aspects-superset" "$ASPECTS_DIR/deployments.yml"; then
+    ss_image=$(grep -E "apache/superset|edunext/aspects-superset" "$ASPECTS_DIR/deployments.yml" | head -1 | tr -d ' ')
     do_pass "Superset image pinned: $ss_image"
   else
     do_fail "Superset image not found in deployments.yml"
@@ -239,7 +239,7 @@ if [[ -f "$ASPECTS_DIR/kustomization.yaml" ]]; then
 
   # Check all referenced files exist in the kustomization
   while IFS= read -r resource; do
-    resource=$(echo "$resource" | tr -d ' -')
+    resource=$(echo "$resource" | sed 's/^ *- *//')
     if [[ -n "$resource" ]] && [[ "$resource" != "#"* ]]; then
       if [[ -f "$ASPECTS_DIR/$resource" ]]; then
         do_pass "  kustomization resource exists: $resource"

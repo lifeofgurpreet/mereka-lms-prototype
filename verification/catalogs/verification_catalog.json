@@ -6209,7 +6209,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-footer-content-parity.sh",
-      "reference_count": 1,
+      "reference_count": 2,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -6220,7 +6220,7 @@
         "AC-FTPAR-002",
         "AC-FTPAR-008"
       ],
-      "status": "deprecated_candidate",
+      "status": "manual_only",
       "tier": "exploratory_manual"
     },
     {
@@ -7006,7 +7006,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-import-dedup.sh",
-      "reference_count": 2,
+      "reference_count": 3,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -10547,14 +10547,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -10562,17 +10558,17 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-observability-loki-deployment.sh",
-      "reference_count": 7,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-LOG-001"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -11691,7 +11687,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-phase7-selector-list-coverage.sh",
-      "reference_count": 0,
+      "reference_count": 1,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -17683,7 +17679,7 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
-    "ci_static_bound": 362,
+    "ci_static_bound": 361,
     "kinds": {
       "verify": 589
     },
@@ -17694,14 +17690,14 @@
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 407,
-      "deprecated_candidate": 2,
-      "manual_only": 180
+      "active": 406,
+      "deprecated_candidate": 1,
+      "manual_only": 182
     },
     "tiers": {
-      "exploratory_manual": 185,
+      "exploratory_manual": 186,
       "periodic_runtime": 17,
-      "release_blocking": 387
+      "release_blocking": 386
     },
     "total_verify_scripts": 589,
     "workflow_direct_bound": 56

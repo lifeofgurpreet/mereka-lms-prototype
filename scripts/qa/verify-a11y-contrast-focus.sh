@@ -51,6 +51,36 @@ find_focus_audit_files() {
     -not -name '*.min.css'
 }
 
+find_mfe_source_files() {
+  find "$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe" \
+    -type f \
+    -name '*.scss' \
+    | sort
+}
+
+mfe_source_has_regex() {
+  local pattern="$1"
+  find_mfe_source_files | xargs -r grep -qE "$pattern"
+}
+
+mfe_source_has_literal() {
+  local needle="$1"
+  find_mfe_source_files | xargs -r grep -qF -- "$needle"
+}
+
+mfe_source_count_literal() {
+  local needle="$1"
+  local total=0
+  local file count
+
+  while IFS= read -r file; do
+    count=$(grep -cF -- "$needle" "$file" 2>/dev/null || true)
+    total=$((total + count))
+  done < <(find_mfe_source_files)
+
+  printf '%s\n' "$total"
+}
+
 echo -e "${BLUE}=== A11y Contrast + Focus-Visible Gate ===${NC}"
 echo "  Token source: assets/branding/tokens.css"
 echo "  Theme bridge: infrastructure/tutor/themes/mereka/scss/_tokens.scss"
@@ -268,14 +298,14 @@ else
   fi
 
   # ── Check 3: focus token is defined in MFE SCSS ─────────────────────
-  if grep -qF -- '--mereka-mfe-focus' "$MFE_SCSS"; then
+  if mfe_source_has_literal '--mereka-mfe-focus'; then
     do_pass "AC-A11Y-002: --mereka-mfe-focus focus ring token defined in MFE SCSS"
   else
     do_fail "AC-A11Y-002: --mereka-mfe-focus token missing from MFE SCSS"
   fi
 
   # ── Check 4: focus token is actually used on a :focus rule ──────────
-  FOCUS_TOKEN_USED=$(grep -cF 'var(--mereka-mfe-focus)' "$MFE_SCSS" 2>/dev/null || echo "0")
+  FOCUS_TOKEN_USED=$(mfe_source_count_literal 'var(--mereka-mfe-focus)')
   if [[ "$FOCUS_TOKEN_USED" -gt 0 ]]; then
     do_pass "AC-A11Y-002: --mereka-mfe-focus token used $FOCUS_TOKEN_USED time(s) (focus ring applied)"
   else
@@ -288,13 +318,13 @@ else
   FORMS_HAVE_FOCUS=0
 
   # .btn-primary:focus appears in the MFE SCSS (combined selector)
-  if grep -qE '\.btn-primary.*:focus|:focus.*\.btn-primary' "$MFE_SCSS"; then
+  if mfe_source_has_regex '\.btn-primary.*:focus|:focus.*\.btn-primary'; then
     BTNS_HAVE_FOCUS=1
   fi
-  if grep -qE '\.pgn__btn--primary.*:focus|:focus.*\.pgn__btn--primary' "$MFE_SCSS"; then
+  if mfe_source_has_regex '\.pgn__btn--primary.*:focus|:focus.*\.pgn__btn--primary'; then
     BTNS_HAVE_FOCUS=1
   fi
-  if grep -qE '\.form-control.*:focus|:focus.*\.form-control|\.pgn__form-control.*:focus' "$MFE_SCSS"; then
+  if mfe_source_has_regex '\.form-control.*:focus|:focus.*\.form-control|\.pgn__form-control.*:focus'; then
     FORMS_HAVE_FOCUS=1
   fi
 

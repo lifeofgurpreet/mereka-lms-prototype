@@ -42,6 +42,7 @@ scripts/release/generate_release_object.py  # WORKTREE_CONTEXT (derives the cano
 
 # ── Live infrastructure required ─────────────────────────────────────────────────────
 scripts/qa/verify-enterprise-sso-readiness.sh --mode repo  # LIVE_CLUSTER
+scripts/qa/audit-authentik-policy-exceptions.sh  # LIVE_CLUSTER (reads live Authentik deployment logs for policy_exception events during OIDC authorize flows; not a repo-only static contract)
 scripts/qa/audit-db-exporter-telemetry.sh  # LIVE_CLUSTER
 scripts/qa/audit-velero-alert-pipeline.sh  # LIVE_CLUSTER
 scripts/infra/check-atlas-allowlist.sh  # LIVE_CLUSTER
@@ -53,6 +54,7 @@ scripts/infra/ensure-atlas-allowlist-vps.sh  # LIVE_CLUSTER (mutates Atlas allow
 scripts/infra/ensure-atlas-allowlist-gke-nodes.sh  # LIVE_CLUSTER (mutates Atlas allowlist for current GKE node external IPs; supports --dry-run for planned changes)
 scripts/infra/validate-telemetry-connectivity.sh  # LIVE_CLUSTER
 scripts/qa/verify-grafana-runtime-readiness.sh  # LIVE_CLUSTER
+scripts/qa/verify-observability-loki-deployment.sh  # LIVE_CLUSTER (verifies live Promtail DaemonSet health and scrape posture from the active cluster; not a repo-only static contract)
 scripts/qa/verify-enterprise-service-deployment.sh  # LIVE_CLUSTER
 scripts/qa/verify-enterprise-frontend-live-contract.sh  # LIVE_CLUSTER
 scripts/qa/verify-org-role-ownership.sh  # LIVE_CLUSTER

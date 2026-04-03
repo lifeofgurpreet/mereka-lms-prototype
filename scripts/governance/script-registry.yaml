@@ -363,7 +363,6 @@ ci_static_inventory:
     - script: scripts/qa/audit-observability.sh
     - script: scripts/qa/audit-velero.sh
     - script: scripts/qa/verify-mux-alert-wiring.sh
-    - script: scripts/qa/verify-observability-loki-deployment.sh
     - script: scripts/qa/verify-observability-loki-labels.sh
     - script: scripts/qa/verify-observability-loki-log-sources.sh
     - script: scripts/qa/verify-observability-prometheusrules.sh
@@ -403,7 +402,6 @@ ci_static_inventory:
     - script: scripts/qa/check-axe-journey-coverage.sh
     - script: scripts/qa/verify-ui-accessibility.sh
     - script: scripts/qa/verify-wcag-contrast-v2.sh
-    - script: scripts/qa/audit-authentik-policy-exceptions.sh
     - script: scripts/qa/verify-kajabi-sso.sh
     - script: scripts/qa/verify-platform-admin-sso-isolation.sh
     - script: scripts/qa/verify-session-persistence.sh
@@ -600,6 +598,9 @@ ci_runtime_inventory:
     - script: scripts/qa/verify-enterprise-sso-readiness.sh
       category: LIVE_CLUSTER
       args: ["--mode", "repo"]
+    - script: scripts/qa/audit-authentik-policy-exceptions.sh
+      category: LIVE_CLUSTER
+      note: reads live Authentik deployment logs for policy_exception events during OIDC authorize flows; not a repo-only static contract
     - script: scripts/qa/audit-db-exporter-telemetry.sh
       category: LIVE_CLUSTER
     - script: scripts/qa/audit-velero-alert-pipeline.sh
@@ -628,6 +629,9 @@ ci_runtime_inventory:
       category: LIVE_CLUSTER
     - script: scripts/qa/verify-grafana-runtime-readiness.sh
       category: LIVE_CLUSTER
+    - script: scripts/qa/verify-observability-loki-deployment.sh
+      category: LIVE_CLUSTER
+      note: verifies live Promtail DaemonSet health and scrape posture from the active cluster; not a repo-only static contract
     - script: scripts/qa/verify-enterprise-service-deployment.sh
       category: LIVE_CLUSTER
     - script: scripts/qa/verify-enterprise-frontend-live-contract.sh

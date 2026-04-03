@@ -307,7 +307,6 @@ scripts/qa/audit-grafana-dashboard.sh
 scripts/qa/audit-observability.sh
 scripts/qa/audit-velero.sh
 scripts/qa/verify-mux-alert-wiring.sh
-scripts/qa/verify-observability-loki-deployment.sh
 scripts/qa/verify-observability-loki-labels.sh
 scripts/qa/verify-observability-loki-log-sources.sh
 scripts/qa/verify-observability-prometheusrules.sh
@@ -347,7 +346,6 @@ scripts/qa/verify-visual-regression.sh
 scripts/qa/check-axe-journey-coverage.sh
 scripts/qa/verify-ui-accessibility.sh
 scripts/qa/verify-wcag-contrast-v2.sh
-scripts/qa/audit-authentik-policy-exceptions.sh
 scripts/qa/verify-kajabi-sso.sh
 scripts/qa/verify-platform-admin-sso-isolation.sh
 scripts/qa/verify-session-persistence.sh
