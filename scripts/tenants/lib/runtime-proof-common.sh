@@ -748,6 +748,8 @@ for line in lines.strip().splitlines():
 print(json.dumps(meta))
 " 2>/dev/null || echo "[]")
 
+  RELEASE_OBJECT_JSON_ENV="${RELEASE_OBJECT_JSON:-}" \
+  RELEASE_OBJECT_ID_ENV="${RELEASE_OBJECT_ID:-}" \
   python3 -c "
 import json, os
 
@@ -776,6 +778,8 @@ sc_data     = load_json(os.path.join(artifact_dir, proof_prefix + '-siteconfig-p
 mfe_data    = load_json(os.path.join(artifact_dir, proof_prefix + '-mfe-config-proof.json'))  or []
 cookie_data = load_json(os.path.join(artifact_dir, proof_prefix + '-cookie-proof.json'))      or []
 auth_data   = load_json(os.path.join(artifact_dir, proof_prefix + '-auth-redirect-proof.json')) or []
+release_object_json = os.environ.get('RELEASE_OBJECT_JSON_ENV') or None
+release_object_id = os.environ.get('RELEASE_OBJECT_ID_ENV') or None
 
 def classify_tenant(slug, lms, mfe):
     host_entry = next((h for h in host_data if h.get('host') == lms), None)
@@ -817,6 +821,10 @@ proof = {
     'namespace': ns,
     'lms_pod': lms_pod,
     'banned_commit': 'e5c0c508',
+    'release_truth': {
+        'release_object_id': release_object_id,
+        'release_object_json': release_object_json,
+    },
     'summary': {
         'overall': overall,
         'pass': pass_count,

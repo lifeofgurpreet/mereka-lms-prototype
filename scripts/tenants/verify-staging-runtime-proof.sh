@@ -6,7 +6,7 @@
 # MFE config isolation, cookie domain scoping, and auth redirect routing.
 #
 # Usage:
-#   scripts/tenants/verify-staging-runtime-proof.sh [--namespace NS] [--dry-run] [--output-dir DIR]
+#   scripts/tenants/verify-staging-runtime-proof.sh [--namespace NS] [--dry-run] [--output-dir DIR] [--release-object-json PATH]
 #
 # Writes:
 #   var/proof/staging-runtime-proof.json   (machine-readable consolidated proof)
@@ -23,6 +23,8 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 OUTPUT_DIR="${REPO_ROOT}/var/proof"
 DRY_RUN=false
 CURL_TIMEOUT=15
+RELEASE_OBJECT_JSON=""
+RELEASE_OBJECT_ID=""
 
 # ── Arg parsing ───────────────────────────────────────────────────────────────
 # Note: --namespace may override the env file default; parse before sourcing.
@@ -31,9 +33,10 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --namespace)  _NS_OVERRIDE="${2:?--namespace requires a value}"; shift 2 ;;
     --output-dir) OUTPUT_DIR="${2:?--output-dir requires a value}"; shift 2 ;;
+    --release-object-json) RELEASE_OBJECT_JSON="${2:?--release-object-json requires a value}"; shift 2 ;;
     --dry-run)    DRY_RUN=true; shift ;;
     -h|--help)
-      echo "Usage: $0 [--namespace NS] [--dry-run] [--output-dir DIR]"
+      echo "Usage: $0 [--namespace NS] [--dry-run] [--output-dir DIR] [--release-object-json PATH]"
       exit 0
       ;;
     *) echo "Unknown argument: $1" >&2; exit 1 ;;
@@ -47,6 +50,26 @@ source "${SCRIPT_DIR}/env/staging.env"
 # Allow --namespace override after env file sets its default
 [[ -n "$_NS_OVERRIDE" ]] && NAMESPACE="$_NS_OVERRIDE"
 
+if [[ -n "$RELEASE_OBJECT_JSON" ]]; then
+  if [[ ! -f "$RELEASE_OBJECT_JSON" ]]; then
+    echo "ERROR: release object not found: $RELEASE_OBJECT_JSON" >&2
+    exit 1
+  fi
+  RELEASE_OBJECT_JSON="$(python3 -c 'from pathlib import Path; import sys; print(Path(sys.argv[1]).resolve())' "$RELEASE_OBJECT_JSON")"
+  RELEASE_OBJECT_ID="$(
+    python3 - "$RELEASE_OBJECT_JSON" <<'PY'
+import json
+import sys
+
+payload = json.load(open(sys.argv[1], encoding="utf-8"))
+release_id = str(payload.get("release_id", "")).strip()
+if not release_id:
+    raise SystemExit("release object missing release_id")
+print(release_id)
+PY
+  )"
+fi
+
 mkdir -p "$OUTPUT_DIR"
 
 # ── Dry-run stub ──────────────────────────────────────────────────────────────
@@ -54,6 +77,7 @@ if $DRY_RUN; then
   echo "=== DRY RUN MODE — no live cluster calls will be made ==="
   echo "Namespace : $NAMESPACE"
   echo "Output dir: $OUTPUT_DIR"
+  [[ -n "$RELEASE_OBJECT_ID" ]] && echo "Release ID: $RELEASE_OBJECT_ID"
   echo "Tenants   : ${#TENANTS[@]}"
   for t in "${TENANTS[@]}"; do
     IFS=: read -r slug lms _dr_studio mfe _dr_cd <<< "$t"

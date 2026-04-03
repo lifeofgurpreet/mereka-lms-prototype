@@ -54,6 +54,53 @@ def test_runtime_routing_matrix_is_deterministic_for_noop_regen() -> None:
 
 def test_accept_runtime_routing_dry_run_emits_summary(tmp_path: Path) -> None:
     output_dir = tmp_path / "accept-runtime-routing"
+    release_object_path = tmp_path / "release-object.json"
+    release_object_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "release-object/v1",
+                "release_id": "ro-rb-abcdef1234567-20260403T120000Z",
+                "created_at_utc": "2026-04-03T12:00:00Z",
+                "service_id": "mereka-lms",
+                "repository": "Biji-Biji-Initiative/mereka-lms",
+                "app_commit_sha": "55c932f75d4144cba8d5a6789aa7ab0fa8dd426a",
+                "target_environment": "dev",
+                "tenant_contract": {
+                    "path": str(REPO_ROOT / "deploy/k8s/tenancy/tenant-registry.yaml"),
+                    "sha256": "b" * 64,
+                    "control_plane_ref": "Biji-Biji-Initiative/platform-control-plane@5fffde1a",
+                },
+                "build": {
+                    "workflow": ".github/workflows/build-tutor-images.yml",
+                    "run_id": "1",
+                    "run_attempt": "1",
+                    "release_bundle_id": "rb-abcdef1234567-20260403T120000Z",
+                },
+                "images": {
+                    "openedx": {
+                        "name": "ghcr.io/biji-biji-initiative/mereka-lms/openedx",
+                        "digest": "sha256:" + "1" * 64,
+                    },
+                    "mfe": {
+                        "name": "ghcr.io/biji-biji-initiative/mereka-lms/mfe",
+                        "digest": "sha256:" + "2" * 64,
+                    },
+                },
+                "source_artifacts": {
+                    "release_bundle_json": "/tmp/release-bundle.json",
+                    "build_provenance_json": None,
+                },
+                "proof_refs": ["var/acceptance/runtime-routing/dev/example/summary.json"],
+                "promotion": {
+                    "status": "build-only",
+                    "gitops_repository": None,
+                    "gitops_commit_sha": None,
+                },
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     result = subprocess.run(
         [
             "bash",
@@ -64,6 +111,8 @@ def test_accept_runtime_routing_dry_run_emits_summary(tmp_path: Path) -> None:
             "--tenant",
             "biji-biji",
             "--dry-run",
+            "--release-object-json",
+            str(release_object_path),
             "--output-dir",
             str(output_dir),
         ],
@@ -86,7 +135,11 @@ def test_accept_runtime_routing_dry_run_emits_summary(tmp_path: Path) -> None:
     assert summary["verdict"]["status"] == "pass"
     assert summary["verdict"]["failed_checks"] == 0
     assert summary["contract"]["schema_version"] == "runtime-routing-contract/v1"
+    assert summary["release_truth"]["release_object_id"] == "ro-rb-abcdef1234567-20260403T120000Z"
+    assert summary["artifacts"]["release_object_json"] == str(release_object_path.resolve())
     assert Path(summary["artifacts"]["truth_ledger_json"]).exists()
     assert Path(summary["artifacts"]["canonical_truth_ledger_json"]).exists()
+    truth_ledger = json.loads(Path(summary["artifacts"]["truth_ledger_json"]).read_text(encoding="utf-8"))
+    assert truth_ledger["release_truth"]["release_object_id"] == "ro-rb-abcdef1234567-20260403T120000Z"
     assert any(check["name"].startswith("playwright:biji-biji") for check in summary["checks"])
     jsonschema.validate(summary, load_proof_schema())

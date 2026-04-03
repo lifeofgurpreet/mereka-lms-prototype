@@ -19,6 +19,8 @@ SKIP_RUNTIME_PROOF=0
 SKIP_PLAYWRIGHT=0
 SKIP_STUDIO_SSO=0
 SKIP_FOOTER=0
+RELEASE_OBJECT_JSON=""
+RELEASE_OBJECT_ID=""
 
 usage() {
   cat <<'EOF'
@@ -33,6 +35,7 @@ Options:
   --skip-playwright                                  Skip Playwright browser checks
   --skip-studio-sso                                  Skip Studio SSO redirect check
   --skip-footer                                      Skip footer parity live check
+  --release-object-json <path>                       Bind release-object/v1 evidence into proof + ledger
   -h, --help                                         Show help
 EOF
 }
@@ -47,6 +50,7 @@ while [[ $# -gt 0 ]]; do
     --skip-playwright) SKIP_PLAYWRIGHT=1; shift ;;
     --skip-studio-sso) SKIP_STUDIO_SSO=1; shift ;;
     --skip-footer) SKIP_FOOTER=1; shift ;;
+    --release-object-json) RELEASE_OBJECT_JSON="${2:?--release-object-json requires a value}"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown argument: $1" >&2; usage >&2; exit 2 ;;
   esac
@@ -61,6 +65,26 @@ case "$ENVIRONMENT" in
     exit 2
     ;;
 esac
+
+if [[ -n "$RELEASE_OBJECT_JSON" ]]; then
+  if [[ ! -f "$RELEASE_OBJECT_JSON" ]]; then
+    echo "release object not found: $RELEASE_OBJECT_JSON" >&2
+    exit 2
+  fi
+  RELEASE_OBJECT_JSON="$(python3 -c 'from pathlib import Path; import sys; print(Path(sys.argv[1]).resolve())' "$RELEASE_OBJECT_JSON")"
+  RELEASE_OBJECT_ID="$(
+    python3 - "$RELEASE_OBJECT_JSON" <<'PY'
+import json
+import sys
+
+payload = json.load(open(sys.argv[1], encoding="utf-8"))
+release_id = str(payload.get("release_id", "")).strip()
+if not release_id:
+    raise SystemExit("release object missing release_id")
+print(release_id)
+PY
+  )"
+fi
 
 if [[ -z "$OUTPUT_DIR" ]]; then
   OUTPUT_DIR="$REPO_ROOT/var/acceptance/runtime-routing/${ENVIRONMENT}/$(date -u +%Y%m%dT%H%M%SZ)"
@@ -118,7 +142,9 @@ if [[ "$SKIP_RUNTIME_PROOF" == "0" && -n "$RUNTIME_PROOF_SCRIPT" ]]; then
   run_check \
     "runtime-proof:${ENVIRONMENT}" \
     "$OUTPUT_DIR/runtime-proof.log" \
-    bash "$REPO_ROOT/$RUNTIME_PROOF_SCRIPT" --output-dir "$OUTPUT_DIR/runtime-proof" || FAILURES=$((FAILURES + 1))
+    bash "$REPO_ROOT/$RUNTIME_PROOF_SCRIPT" \
+      --output-dir "$OUTPUT_DIR/runtime-proof" \
+      ${RELEASE_OBJECT_JSON:+--release-object-json "$RELEASE_OBJECT_JSON"} || FAILURES=$((FAILURES + 1))
 fi
 
 if python3 - "$MATRIX_PATH" "$OUTPUT_DIR" "$SKIP_PLAYWRIGHT" "$SKIP_STUDIO_SSO" "$SKIP_FOOTER" "$DRY_RUN" "$SUMMARY_TSV" "$REPO_ROOT" <<'PY'
@@ -373,7 +399,7 @@ if [[ "$PYTHON_RC" -ne 0 ]]; then
   FAILURES=$((FAILURES + PYTHON_RC))
 fi
 
-python3 - "$MATRIX_PATH" "$SUMMARY_TSV" "$SUMMARY_JSON" "$ENVIRONMENT" "$TENANT_FILTER" "$DRY_RUN" "$FAILURES" "$GENERATED_AT_UTC" "$OUTPUT_DIR" "$CANONICAL_TRUTH_LEDGER_JSON" <<'PY'
+python3 - "$MATRIX_PATH" "$SUMMARY_TSV" "$SUMMARY_JSON" "$ENVIRONMENT" "$TENANT_FILTER" "$DRY_RUN" "$FAILURES" "$GENERATED_AT_UTC" "$OUTPUT_DIR" "$CANONICAL_TRUTH_LEDGER_JSON" "$RELEASE_OBJECT_JSON" "$RELEASE_OBJECT_ID" <<'PY'
 import json
 import sys
 from pathlib import Path
@@ -388,6 +414,8 @@ failures = int(sys.argv[7])
 generated_at_utc = sys.argv[8]
 output_dir = Path(sys.argv[9])
 canonical_truth_ledger_json = Path(sys.argv[10])
+release_object_json = sys.argv[11] or None
+release_object_id = sys.argv[12] or None
 matrix = json.loads(matrix_path.read_text(encoding="utf-8"))
 
 checks = []
@@ -428,6 +456,11 @@ payload = {
         "summary_json": str(summary_json),
         "truth_ledger_json": str(output_dir / "truth-ledger.json"),
         "canonical_truth_ledger_json": str(canonical_truth_ledger_json),
+        "release_object_json": release_object_json,
+    },
+    "release_truth": {
+        "release_object_id": release_object_id,
+        "release_object_json": release_object_json,
     },
     "matrix": matrix,
     "checks": checks,
@@ -462,6 +495,7 @@ fi
 [[ -n "${TRUTH_LEDGER_INFRA_COMMIT_SHA:-}" ]] && LEDGER_ARGS+=(--infra-commit-sha "$TRUTH_LEDGER_INFRA_COMMIT_SHA")
 [[ -n "${TRUTH_LEDGER_RELEASE_OPENEDX_IMAGE:-}" ]] && LEDGER_ARGS+=(--release-openedx-image "$TRUTH_LEDGER_RELEASE_OPENEDX_IMAGE")
 [[ -n "${TRUTH_LEDGER_RELEASE_MFE_IMAGE:-}" ]] && LEDGER_ARGS+=(--release-mfe-image "$TRUTH_LEDGER_RELEASE_MFE_IMAGE")
+[[ -n "$RELEASE_OBJECT_JSON" ]] && LEDGER_ARGS+=(--release-object-json "$RELEASE_OBJECT_JSON")
 [[ -n "$ARGO_APP" ]] && LEDGER_ARGS+=(--argo-app "$ARGO_APP")
 [[ -n "$TARGET_NAMESPACE" ]] && LEDGER_ARGS+=(--namespace "$TARGET_NAMESPACE")
 python3 "$REPO_ROOT/scripts/release/generate_truth_ledger.py" "${LEDGER_ARGS[@]}" >/dev/null

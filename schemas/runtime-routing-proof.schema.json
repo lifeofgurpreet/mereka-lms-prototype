@@ -11,6 +11,7 @@
     "mode",
     "verdict",
     "contract",
+    "release_truth",
     "artifacts",
     "matrix",
     "checks"
@@ -42,6 +43,15 @@
         "schema_version": { "type": ["string", "null"] }
       }
     },
+    "release_truth": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["release_object_id", "release_object_json"],
+      "properties": {
+        "release_object_id": { "type": ["string", "null"] },
+        "release_object_json": { "type": ["string", "null"] }
+      }
+    },
     "artifacts": {
       "type": "object",
       "additionalProperties": false,
@@ -51,7 +61,8 @@
         "checks_tsv",
         "summary_json",
         "truth_ledger_json",
-        "canonical_truth_ledger_json"
+        "canonical_truth_ledger_json",
+        "release_object_json"
       ],
       "properties": {
         "output_dir": { "type": "string", "minLength": 1 },
@@ -59,7 +70,8 @@
         "checks_tsv": { "type": "string", "minLength": 1 },
         "summary_json": { "type": "string", "minLength": 1 },
         "truth_ledger_json": { "type": "string", "minLength": 1 },
-        "canonical_truth_ledger_json": { "type": "string", "minLength": 1 }
+        "canonical_truth_ledger_json": { "type": "string", "minLength": 1 },
+        "release_object_json": { "type": ["string", "null"] }
       }
     },
     "matrix": { "type": "object" },
