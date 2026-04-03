@@ -35,6 +35,7 @@ scripts/infra/cleanup-stale-branches.sh  # WORKTREE_CONTEXT (local branch/worktr
 scripts/infra/recover-stale-build-tutor-images.sh  # WORKTREE_CONTEXT (manual GitHub Actions recovery for stale build-tutor workflow_dispatch runs)
 scripts/qa/ops-preflight.sh  # WORKTREE_CONTEXT (operator preflight for br+tutor+gitops before combined manual ops)
 scripts/acceptance/generate_runtime_routing_matrix.py  # WORKTREE_CONTEXT (generates the runtime-routing contract from tenant-registry.yaml)
+scripts/release/generate_truth_ledger.py  # WORKTREE_CONTEXT (joins runtime-routing proof with repo, release, infra, Argo, and runtime truths)
 
 # ── Live infrastructure required ─────────────────────────────────────────────────────
 scripts/qa/verify-enterprise-sso-readiness.sh --mode repo  # LIVE_CLUSTER

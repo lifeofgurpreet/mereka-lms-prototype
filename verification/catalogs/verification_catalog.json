@@ -14995,7 +14995,7 @@
       "mutability": "read-only",
       "owner": "identity-access",
       "path": "scripts/qa/verify-tenant-auth-runtime.sh",
-      "reference_count": 0,
+      "reference_count": 1,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

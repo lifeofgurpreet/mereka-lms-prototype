@@ -70,6 +70,8 @@ mkdir -p "$OUTPUT_DIR"
 MATRIX_PATH="$OUTPUT_DIR/browser-matrix.json"
 SUMMARY_TSV="$OUTPUT_DIR/checks.tsv"
 SUMMARY_JSON="$OUTPUT_DIR/summary.json"
+TRUTH_LEDGER_JSON="$OUTPUT_DIR/truth-ledger.json"
+CANONICAL_TRUTH_LEDGER_JSON="$REPO_ROOT/generated/truth-ledger/runtime-routing/${ENVIRONMENT}/${TENANT_FILTER:-all}.json"
 GENERATED_AT_UTC="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 FAILURES=0
 : >"$SUMMARY_TSV"
@@ -371,7 +373,7 @@ if [[ "$PYTHON_RC" -ne 0 ]]; then
   FAILURES=$((FAILURES + PYTHON_RC))
 fi
 
-python3 - "$MATRIX_PATH" "$SUMMARY_TSV" "$SUMMARY_JSON" "$ENVIRONMENT" "$TENANT_FILTER" "$DRY_RUN" "$FAILURES" "$GENERATED_AT_UTC" "$OUTPUT_DIR" <<'PY'
+python3 - "$MATRIX_PATH" "$SUMMARY_TSV" "$SUMMARY_JSON" "$ENVIRONMENT" "$TENANT_FILTER" "$DRY_RUN" "$FAILURES" "$GENERATED_AT_UTC" "$OUTPUT_DIR" "$CANONICAL_TRUTH_LEDGER_JSON" <<'PY'
 import json
 import sys
 from pathlib import Path
@@ -385,6 +387,7 @@ dry_run = sys.argv[6] == "1"
 failures = int(sys.argv[7])
 generated_at_utc = sys.argv[8]
 output_dir = Path(sys.argv[9])
+canonical_truth_ledger_json = Path(sys.argv[10])
 matrix = json.loads(matrix_path.read_text(encoding="utf-8"))
 
 checks = []
@@ -423,12 +426,46 @@ payload = {
         "matrix": str(matrix_path),
         "checks_tsv": str(summary_tsv),
         "summary_json": str(summary_json),
+        "truth_ledger_json": str(output_dir / "truth-ledger.json"),
+        "canonical_truth_ledger_json": str(canonical_truth_ledger_json),
     },
     "matrix": matrix,
     "checks": checks,
 }
 summary_json.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 PY
+
+ARGO_APP=""
+TARGET_NAMESPACE=""
+case "$ENVIRONMENT" in
+  dev|profiles-dev)
+    ARGO_APP="mereka-lms-dev"
+    TARGET_NAMESPACE="mereka-lms-dev"
+    ;;
+  staging)
+    ARGO_APP="mereka-lms-staging"
+    TARGET_NAMESPACE="mereka-lms-staging"
+    ;;
+  production)
+    ARGO_APP="mereka-lms"
+    TARGET_NAMESPACE="mereka-lms"
+    ;;
+esac
+
+LEDGER_ARGS=(
+  --summary-json "$SUMMARY_JSON"
+  --output "$CANONICAL_TRUTH_LEDGER_JSON"
+)
+if APP_SHA="$(git -C "$REPO_ROOT" rev-parse HEAD 2>/dev/null)"; then
+  LEDGER_ARGS+=(--app-sha "$APP_SHA")
+fi
+[[ -n "${TRUTH_LEDGER_INFRA_COMMIT_SHA:-}" ]] && LEDGER_ARGS+=(--infra-commit-sha "$TRUTH_LEDGER_INFRA_COMMIT_SHA")
+[[ -n "${TRUTH_LEDGER_RELEASE_OPENEDX_IMAGE:-}" ]] && LEDGER_ARGS+=(--release-openedx-image "$TRUTH_LEDGER_RELEASE_OPENEDX_IMAGE")
+[[ -n "${TRUTH_LEDGER_RELEASE_MFE_IMAGE:-}" ]] && LEDGER_ARGS+=(--release-mfe-image "$TRUTH_LEDGER_RELEASE_MFE_IMAGE")
+[[ -n "$ARGO_APP" ]] && LEDGER_ARGS+=(--argo-app "$ARGO_APP")
+[[ -n "$TARGET_NAMESPACE" ]] && LEDGER_ARGS+=(--namespace "$TARGET_NAMESPACE")
+python3 "$REPO_ROOT/scripts/release/generate_truth_ledger.py" "${LEDGER_ARGS[@]}" >/dev/null
+cp "$CANONICAL_TRUTH_LEDGER_JSON" "$TRUTH_LEDGER_JSON"
 
 echo "$SUMMARY_JSON"
 if [[ "$FAILURES" -ne 0 ]]; then

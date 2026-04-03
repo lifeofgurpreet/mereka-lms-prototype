@@ -8,7 +8,18 @@ cleanup() {
 }
 trap cleanup EXIT
 
-git clone -q "$REPO_ROOT" "$tmpdir/repo"
+mkdir -p "$tmpdir/repo"
+if command -v rsync >/dev/null 2>&1; then
+  rsync -a --delete --exclude '.git/' "$REPO_ROOT/" "$tmpdir/repo/"
+else
+  (
+    cd "$REPO_ROOT"
+    tar --exclude='.git' -cf - .
+  ) | (
+    cd "$tmpdir/repo"
+    tar -xf -
+  )
+fi
 cd "$tmpdir/repo"
 
 python3 scripts/qa/generate-verification-catalog.py >/tmp/test-verify-catalog-generate.log 2>&1
@@ -34,6 +45,18 @@ fi
 if ! rg -qi "drift|up to date|catalog" /tmp/test-verify-catalog-fail.log; then
   echo "Expected failure log to mention catalog drift."
   cat /tmp/test-verify-catalog-fail.log
+  exit 1
+fi
+
+if ! rg -q "verification/catalogs/verification_catalog.json" /tmp/test-verify-catalog-fail.log; then
+  echo "Expected failure log to list the changed catalog JSON file."
+  cat /tmp/test-verify-catalog-fail.log
+  exit 1
+fi
+
+if [[ "$(cat verification/catalogs/verification_catalog.json)" != "{}" ]]; then
+  echo "Expected --check mode to remain read-only."
+  cat verification/catalogs/verification_catalog.json
   exit 1
 fi
 

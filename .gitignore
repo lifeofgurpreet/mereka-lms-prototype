@@ -141,6 +141,7 @@ hubspot-webhook-mct/.env
 
 # Domain runtime audit outputs (runtime-dependent, not deterministic)
 generated/domain/domain-runtime-audit.json
+generated/truth-ledger/
 docs/reference/generated/domain-runtime-audit.md
 
 # Stray CLI artifacts

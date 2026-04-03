@@ -548,12 +548,12 @@ review_cadence: weekly
 | Package / Area | Status | Priority | Issue | Action |
 |---|---|---|---|---|
 | **pip-audit CI scan scope** | 🔴 BROKEN | P1 | CI scans only pip-audit's own deps (no `-r` flag) — `requirements-tutor.txt` and `kajabi-webhook/requirements.txt` are **never audited** | Add `-r requirements-tutor.txt` to `pip-audit` invocation in `ci.yml:862` |
-| `.devcontainer/Dockerfile` | 🔴 STALE | P1 | Tutor `18.2.2` (Quince) vs project's `21.0.2` (Ulmo) — any dev using devcontainer has incompatible CLI | Update to `tutor[full]==21.0.2` |
+| `.devcontainer/Dockerfile` | 🔴 STALE | P1 | Tutor `18.2.2` (Quince) vs project's `21.0.0` (Ulmo) — any dev using devcontainer has incompatible CLI | Update to `tutor[full]==21.0.0` |
 | `tutor-contrib-aspects` | 🟡 UNPINNED | P2 | Installed in `.venv` (`3.0.3`) but absent from `requirements-tutor.txt` — CI won't install it | Add `tutor-contrib-aspects==3.0.3` to `requirements-tutor.txt` |
 | `requirements-ci.txt` | 🟡 UNPINNED | P2 | `pyyaml`, `ruff`, `yamllint`, `jinja2` all unpinned — CI tools can break silently on new releases | Add version bounds (`ruff>=0.9,<1`, etc.) |
 | `uvicorn` in kajabi-webhook | 🟡 OUTDATED | P2 | `0.30.6` vs current `0.34.x` — `0.32+` includes security and HTTP/2 fixes | Bump to `>=0.32.0` |
 | `moment.js` in hubspot-webhook | 🟡 DEPRECATED | P2 | Officially deprecated library; `^` semver = silent major upgrades | Replace with `dayjs`; run `npm audit` |
-| Tutor venv drift (21.0.0 vs 21.0.2) | 🟡 STALE | P2 | Local `.venv` two patch versions behind CI pin | `pip install -r requirements-tutor.txt` |
+| Tutor venv drift (18.2.2 vs 21.0.0) | 🟡 STALE | P2 | Local devcontainer and stale Tutor installs lag the repo pin | `pip install -r requirements-tutor.txt` |
 | `django-prometheus==2.3.1` | 🟡 OUTDATED | P3 | ~2022 release; current is 2.5.0 (adds Django 5.x support) | Update to `>=2.3.1,<3` |
 | `brand-mereka` Paragon loose pin | 🟡 AT_RISK | P3 | `^23.19.1` = any 23.x pulled at build time; no lockfile | Add `package-lock.json` |
 | `Pygments` CVE-2026-4539 | 🟡 SUPPRESSED | P3 | ReDoS in AdlLexer; local-only; no upstream fix; correctly suppressed in CI | Monitor for ≥2.19.3 release |

@@ -22,7 +22,7 @@
 #   ci_static_inventory.precheck_files[] - Repo-relative static scripts that must run serially before shard fan-out
 #   ci_runtime_inventory.entries[].script - Repo-relative manual/runtime inventory entry
 
-version: "1.2.3"
+version: "1.2.4"
 
 canonical_entrypoints:
   # Top-level release automation
@@ -734,6 +734,9 @@ ci_runtime_inventory:
     - script: scripts/acceptance/generate_runtime_routing_matrix.py
       category: WORKTREE_CONTEXT
       note: generates the runtime-routing contract from tenant-registry.yaml
+    - script: scripts/release/generate_truth_ledger.py
+      category: WORKTREE_CONTEXT
+      note: joins runtime-routing proof with repo, release, infra, Argo, and runtime truths
 
 scripts:
 
@@ -826,6 +829,7 @@ scripts:
       - --skip-footer (optional)
     outputs:
       - var/acceptance/runtime-routing/<env>/<timestamp>/summary.json
+      - var/acceptance/runtime-routing/<env>/<timestamp>/truth-ledger.json
       - var/acceptance/runtime-routing/<env>/<timestamp>/browser-matrix.json
       - per-tenant log files under the same proof bundle
     side_effects:
@@ -856,6 +860,32 @@ scripts:
     lanes: [dev, staging, prod]
     proof_command: "python3 scripts/acceptance/generate_runtime_routing_matrix.py --env dev --check"
     criticality: informational
+
+  - path: scripts/release/generate_truth_ledger.py
+    owner: platform-team
+    purpose: >
+      Joins the runtime-routing proof bundle with app, release, infra, Argo,
+      and live runtime facts into one machine-readable truth ledger.
+    inputs:
+      - --summary-json PATH
+      - --output PATH (optional)
+      - --app-sha SHA (optional)
+      - --infra-commit-sha SHA (optional)
+      - --argo-app NAME (optional)
+      - --namespace NAME (optional)
+      - --release-openedx-image IMAGE@DIGEST (optional)
+      - --release-mfe-image IMAGE@DIGEST (optional)
+      - --image-repo REPOSITORY (optional, repeatable)
+    outputs:
+      - var/acceptance/runtime-routing/<env>/<timestamp>/truth-ledger.json
+      - generated/truth-ledger/<lane>/<env>/<tenant-or-all>.json
+      - stdout path to the emitted ledger
+    side_effects:
+      - reads kubectl/Argo live state when the relevant options are provided or inferred
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "python3 scripts/release/generate_truth_ledger.py --summary-json /tmp/runtime-routing-summary.json --output /tmp/runtime-truth-ledger.json"
+    criticality: release-supporting
 
   # ── Image Tag Management ─────────────────────────────────────────────────────
 

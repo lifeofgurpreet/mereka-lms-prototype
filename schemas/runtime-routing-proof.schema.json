@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at_utc",
+    "lane",
+    "environment",
+    "tenant_filter",
+    "mode",
+    "verdict",
+    "contract",
+    "artifacts",
+    "matrix",
+    "checks"
+  ],
+  "properties": {
+    "schema_version": { "type": "string", "const": "runtime-routing-proof/v1" },
+    "generated_at_utc": { "type": "string", "minLength": 1 },
+    "lane": { "type": "string", "const": "runtime-routing" },
+    "environment": { "type": "string", "minLength": 1 },
+    "tenant_filter": { "type": ["string", "null"] },
+    "mode": { "type": "string", "enum": ["dry-run", "execute"] },
+    "verdict": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "failed_checks"],
+      "properties": {
+        "status": { "type": "string", "enum": ["pass", "fail"] },
+        "failed_checks": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["matrix_path", "source", "source_version", "schema_version"],
+      "properties": {
+        "matrix_path": { "type": "string", "minLength": 1 },
+        "source": { "type": ["string", "null"] },
+        "source_version": { "type": ["string", "null"] },
+        "schema_version": { "type": ["string", "null"] }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "output_dir",
+        "matrix",
+        "checks_tsv",
+        "summary_json",
+        "truth_ledger_json",
+        "canonical_truth_ledger_json"
+      ],
+      "properties": {
+        "output_dir": { "type": "string", "minLength": 1 },
+        "matrix": { "type": "string", "minLength": 1 },
+        "checks_tsv": { "type": "string", "minLength": 1 },
+        "summary_json": { "type": "string", "minLength": 1 },
+        "truth_ledger_json": { "type": "string", "minLength": 1 },
+        "canonical_truth_ledger_json": { "type": "string", "minLength": 1 }
+      }
+    },
+    "matrix": { "type": "object" },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "status", "exit_code", "log"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "status": { "type": "string", "minLength": 1 },
+          "exit_code": { "type": "integer", "minimum": 0 },
+          "log": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

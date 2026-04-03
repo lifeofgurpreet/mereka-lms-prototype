@@ -6,9 +6,12 @@ import subprocess
 import sys
 from pathlib import Path
 
+import jsonschema
+
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 GENERATOR_PATH = REPO_ROOT / "scripts" / "acceptance" / "generate_runtime_routing_matrix.py"
+PROOF_SCHEMA_PATH = REPO_ROOT / "schemas" / "runtime-routing-proof.schema.json"
 
 
 def load_generator_module():
@@ -17,6 +20,10 @@ def load_generator_module():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)  # type: ignore[union-attr]
     return module
+
+
+def load_proof_schema() -> dict:
+    return json.loads(PROOF_SCHEMA_PATH.read_text(encoding="utf-8"))
 
 
 def test_runtime_routing_matrix_builds_dev_payload() -> None:
@@ -79,4 +86,7 @@ def test_accept_runtime_routing_dry_run_emits_summary(tmp_path: Path) -> None:
     assert summary["verdict"]["status"] == "pass"
     assert summary["verdict"]["failed_checks"] == 0
     assert summary["contract"]["schema_version"] == "runtime-routing-contract/v1"
+    assert Path(summary["artifacts"]["truth_ledger_json"]).exists()
+    assert Path(summary["artifacts"]["canonical_truth_ledger_json"]).exists()
     assert any(check["name"].startswith("playwright:biji-biji") for check in summary["checks"])
+    jsonschema.validate(summary, load_proof_schema())

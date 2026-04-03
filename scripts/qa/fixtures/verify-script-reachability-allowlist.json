@@ -143,6 +143,7 @@
     "scripts/qa/verify-studio-isolation.sh",
     "scripts/qa/verify-studio-sso-flow.sh",
     "scripts/qa/verify-superset-runbook.sh",
+    "scripts/qa/verify-tenant-auth-runtime.sh",
     "scripts/qa/verify-tenant-contract-alignment.sh",
     "scripts/qa/verify-tenant-first-consolidation.sh",
     "scripts/qa/verify-tenant-isolation.sh",

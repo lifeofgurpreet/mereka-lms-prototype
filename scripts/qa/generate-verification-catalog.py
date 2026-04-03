@@ -532,16 +532,27 @@ def main() -> int:
     json_payload = json.dumps(catalog, indent=2, sort_keys=True) + "\n"
     md_payload = render_markdown(catalog)
 
-    changed_json = write_if_changed(json_path, json_payload)
-    changed_md = write_if_changed(md_path, md_payload)
+    changed_outputs: list[str] = []
+    current_json = json_path.read_text(encoding="utf-8") if json_path.exists() else ""
+    current_md = md_path.read_text(encoding="utf-8") if md_path.exists() else ""
+    if current_json != json_payload:
+        changed_outputs.append(str(json_path.relative_to(repo_root)))
+    if current_md != md_payload:
+        changed_outputs.append(str(md_path.relative_to(repo_root)))
 
     if args.check:
-      if changed_json or changed_md:
+      if changed_outputs:
         print("Verification catalog drift detected.")
+        print("Changed files:")
+        for item in changed_outputs:
+            print(f"- {item}")
         print("Run: python3 scripts/qa/generate-verification-catalog.py")
         return 1
       print("Verification catalog is up to date.")
       return 0
+
+    changed_json = write_if_changed(json_path, json_payload)
+    changed_md = write_if_changed(md_path, md_payload)
 
     updated = []
     if changed_json:
