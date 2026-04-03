@@ -27,6 +27,7 @@ on:
       - 'scripts/infra/install-cosign.sh'
       - 'scripts/infra/generate-build-provenance.sh'
       - 'scripts/infra/generate-release-bundle.sh'
+      - 'scripts/release/generate_release_object.py'
       - 'scripts/infra/build-openedx-image.sh'
       - 'scripts/infra/build-mfe-image.sh'
       - 'scripts/infra/release-openedx-gitops.sh'
@@ -35,6 +36,7 @@ on:
       - 'scripts/qa/verify-build-provenance.sh'
       - 'scripts/qa/verify-openedx-image-branding.sh'
       - 'scripts/qa/verify-release-bundle.sh'
+      - 'scripts/qa/verify-release-object.sh'
       - 'scripts/qa/verify-mfe-image-branding.sh'
       - 'scripts/qa/verify-mfe-runtime-contract.sh'
       - '.github/workflows/build-tutor-images.yml'
@@ -1318,9 +1320,16 @@ jobs:
             --certificate var/ci/release-bundle.pem \
             --certificate-identity "${CERT_IDENTITY}" \
             --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
+          python3 ./scripts/release/generate_release_object.py \
+            --release-bundle-json var/ci/release-bundle.json \
+            --output var/ci/release-object.json
+          ./scripts/qa/verify-release-object.sh var/ci/release-object.json
           BUNDLE_ID="$(python3 -c 'import json;print(json.load(open("var/ci/release-bundle.json"))["bundle_id"])')"
+          RELEASE_OBJECT_ID="$(python3 -c 'import json;print(json.load(open("var/ci/release-object.json"))["release_id"])')"
           echo "bundle_id=${BUNDLE_ID}" >> "$GITHUB_OUTPUT"
+          echo "release_object_id=${RELEASE_OBJECT_ID}" >> "$GITHUB_OUTPUT"
           echo "**Release bundle:** \`${BUNDLE_ID}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Release object:** \`${RELEASE_OBJECT_ID}\`" >> $GITHUB_STEP_SUMMARY
           echo "**Bundle signature:** \`var/ci/release-bundle.sig\`" >> $GITHUB_STEP_SUMMARY
           echo "**Bundle certificate:** \`var/ci/release-bundle.pem\`" >> $GITHUB_STEP_SUMMARY
 
@@ -1330,6 +1339,7 @@ jobs:
           name: release-bundle
           path: |
             var/ci/release-bundle.json
+            var/ci/release-object.json
             var/ci/release-bundle.sig
             var/ci/release-bundle.pem
           retention-days: 90

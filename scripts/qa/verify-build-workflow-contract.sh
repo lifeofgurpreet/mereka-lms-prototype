@@ -127,6 +127,7 @@ required_trigger_paths=(
   "scripts/infra/install-cosign.sh"
   "scripts/infra/generate-build-provenance.sh"
   "scripts/infra/generate-release-bundle.sh"
+  "scripts/release/generate_release_object.py"
   "scripts/infra/build-openedx-image.sh"
   "scripts/infra/build-mfe-image.sh"
   "scripts/infra/release-openedx-gitops.sh"
@@ -135,6 +136,7 @@ required_trigger_paths=(
   "scripts/qa/verify-build-provenance.sh"
   "scripts/qa/verify-openedx-image-branding.sh"
   "scripts/qa/verify-release-bundle.sh"
+  "scripts/qa/verify-release-object.sh"
   "scripts/qa/verify-mfe-image-branding.sh"
   "scripts/qa/verify-mfe-runtime-contract.sh"
 )
@@ -414,6 +416,24 @@ if [[ "$RELEASE_BUNDLE_BLOCK" == *"scan-openedx-image"* && "$RELEASE_BUNDLE_BLOC
   pass "release bundle waits for post-push scan artifact jobs"
 else
   fail "release bundle missing post-push scan dependencies"
+fi
+
+if [[ "$RELEASE_BUNDLE_BLOCK" == *'scripts/release/generate_release_object.py'* ]]; then
+  pass "release bundle job emits the canonical release object"
+else
+  fail "release bundle job missing release object generation"
+fi
+
+if [[ "$RELEASE_BUNDLE_BLOCK" == *'scripts/qa/verify-release-object.sh'* ]]; then
+  pass "release bundle job verifies the canonical release object"
+else
+  fail "release bundle job missing release object verification"
+fi
+
+if [[ "$RELEASE_BUNDLE_BLOCK" == *'var/ci/release-object.json'* ]]; then
+  pass "release bundle artifact upload includes release-object.json"
+else
+  fail "release bundle artifact upload missing release-object.json"
 fi
 
 # OpenEdX cache-health reporting must match the canonical push-first strategy:

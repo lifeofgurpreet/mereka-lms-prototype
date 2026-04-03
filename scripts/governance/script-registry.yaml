@@ -569,6 +569,10 @@ ci_runtime_inventory:
       category: CI_ARTIFACT
     - script: scripts/qa/test-verify-release-bundle.sh
       category: CI_ARTIFACT
+    - script: scripts/qa/verify-release-object.sh
+      category: CI_ARTIFACT
+    - script: scripts/qa/test-verify-release-object.sh
+      category: CI_ARTIFACT
     - script: scripts/qa/verify-release-readiness.sh
       category: CI_ARTIFACT
       args: ["--dry-run"]
@@ -742,6 +746,9 @@ ci_runtime_inventory:
     - script: scripts/release/generate_truth_ledger.py
       category: WORKTREE_CONTEXT
       note: joins runtime-routing proof with repo, release, infra, Argo, and runtime truths
+    - script: scripts/release/generate_release_object.py
+      category: WORKTREE_CONTEXT
+      note: derives the canonical release object from the signed release bundle
 
 scripts:
 
@@ -878,6 +885,7 @@ scripts:
       - --infra-commit-sha SHA (optional)
       - --argo-app NAME (optional)
       - --namespace NAME (optional)
+      - --release-object-json PATH (optional)
       - --release-openedx-image IMAGE@DIGEST (optional)
       - --release-mfe-image IMAGE@DIGEST (optional)
       - --image-repo REPOSITORY (optional, repeatable)
@@ -890,6 +898,28 @@ scripts:
     dry_run: true
     lanes: [dev, staging, prod]
     proof_command: "python3 scripts/release/generate_truth_ledger.py --summary-json /tmp/runtime-routing-summary.json --output /tmp/runtime-truth-ledger.json"
+    criticality: release-supporting
+
+  - path: scripts/release/generate_release_object.py
+    owner: platform-team
+    purpose: >
+      Derives the canonical release object from the signed release bundle and optional
+      build-provenance linkage. This is the app-repo promotion unit that later proof
+      and GitOps consumers should reference instead of hand-joining SHA, digest, and
+      contract facts.
+    inputs:
+      - --release-bundle-json PATH
+      - --output PATH
+      - --tenant-contract-path PATH (optional)
+      - --build-provenance-json PATH (optional)
+      - --proof-ref PATH (optional, repeatable)
+      - --release-id ID (optional)
+    outputs:
+      - JSON file at --output path
+    side_effects: none
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "python3 scripts/release/generate_release_object.py --release-bundle-json /tmp/release-bundle.json --output /tmp/release-object.json"
     criticality: release-supporting
 
   # ── Image Tag Management ─────────────────────────────────────────────────────

@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/schemas/release-object.schema.json",
+  "title": "Mereka LMS Release Object",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "release_id",
+    "created_at_utc",
+    "service_id",
+    "repository",
+    "app_commit_sha",
+    "target_environment",
+    "tenant_contract",
+    "build",
+    "images",
+    "source_artifacts",
+    "proof_refs",
+    "promotion"
+  ],
+  "properties": {
+    "schema_version": { "type": "string", "const": "release-object/v1" },
+    "release_id": {
+      "type": "string",
+      "pattern": "^ro-rb-[0-9a-f]{7,40}-[0-9]{8}T[0-9]{6}Z$"
+    },
+    "created_at_utc": { "type": "string", "format": "date-time" },
+    "service_id": { "type": "string", "const": "mereka-lms" },
+    "repository": { "type": "string", "minLength": 3 },
+    "app_commit_sha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "target_environment": {
+      "type": "string",
+      "enum": ["dev", "nonprod", "staging", "production", "prod", "rke2-nonprod"]
+    },
+    "tenant_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "control_plane_ref": { "type": ["string", "null"] }
+      }
+    },
+    "build": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workflow", "run_id", "run_attempt", "release_bundle_id"],
+      "properties": {
+        "workflow": { "type": "string", "minLength": 1 },
+        "run_id": { "type": "string", "pattern": "^[0-9]+$" },
+        "run_attempt": { "type": "string", "pattern": "^[0-9]+$" },
+        "release_bundle_id": {
+          "type": "string",
+          "pattern": "^rb-[0-9a-f]{7,40}-[0-9]{8}T[0-9]{6}Z$"
+        }
+      }
+    },
+    "images": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["openedx", "mfe"],
+      "properties": {
+        "openedx": { "$ref": "#/$defs/imageRef" },
+        "mfe": { "$ref": "#/$defs/imageRef" }
+      }
+    },
+    "source_artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["release_bundle_json", "build_provenance_json"],
+      "properties": {
+        "release_bundle_json": { "type": "string", "minLength": 1 },
+        "build_provenance_json": { "type": ["string", "null"] }
+      }
+    },
+    "proof_refs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "promotion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "gitops_repository", "gitops_commit_sha"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["build-only", "gitops-linked"]
+        },
+        "gitops_repository": { "type": ["string", "null"] },
+        "gitops_commit_sha": { "type": ["string", "null"] }
+      }
+    }
+  },
+  "$defs": {
+    "imageRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "digest"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+      }
+    }
+  }
+}

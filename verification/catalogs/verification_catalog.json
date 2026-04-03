@@ -423,7 +423,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/infra/verify-release-preflight.sh",
-      "reference_count": 8,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -2638,7 +2638,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-ci-cache-policy.sh",
-      "reference_count": 4,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -6655,7 +6655,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-generated-surfaces.sh",
-      "reference_count": 4,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -8381,7 +8381,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-config-api.sh",
-      "reference_count": 11,
+      "reference_count": 12,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -13075,6 +13075,35 @@
       "cadence": "per_pr_and_push",
       "canonical": true,
       "ci_binding": [
+        "workflow_direct"
+      ],
+      "ci_entrypoints": [
+        "workflow_direct"
+      ],
+      "env_scope": [
+        "dev",
+        "nonprod",
+        "prod",
+        "staging"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-release-object.sh",
+      "reference_count": 8,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "high",
+      "spec_ids": [],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
         "ci_static"
       ],
       "ci_entrypoints": [
@@ -13381,7 +13410,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-rke2-tenant-routes.sh",
-      "reference_count": 7,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster",
@@ -17595,7 +17624,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/tenants/verify-dev-runtime-proof.sh",
-      "reference_count": 7,
+      "reference_count": 9,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -17618,7 +17647,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/tenants/verify-staging-runtime-proof.sh",
-      "reference_count": 6,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -17656,26 +17685,26 @@
     "archived_deprecated_scripts": 21,
     "ci_static_bound": 362,
     "kinds": {
-      "verify": 588
+      "verify": 589
     },
     "mutability": {
       "destructive": 9,
       "mutating": 18,
-      "read-only": 561
+      "read-only": 562
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 406,
+      "active": 407,
       "deprecated_candidate": 2,
       "manual_only": 180
     },
     "tiers": {
       "exploratory_manual": 185,
       "periodic_runtime": 17,
-      "release_blocking": 386
+      "release_blocking": 387
     },
-    "total_verify_scripts": 588,
-    "workflow_direct_bound": 55
+    "total_verify_scripts": 589,
+    "workflow_direct_bound": 56
   },
   "version": "1"
 }

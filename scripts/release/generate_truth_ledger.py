@@ -25,6 +25,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--infra-commit-sha")
     parser.add_argument("--argo-app")
     parser.add_argument("--namespace")
+    parser.add_argument("--release-object-json", type=Path)
     parser.add_argument("--release-openedx-image")
     parser.add_argument("--release-mfe-image")
     parser.add_argument(
@@ -58,6 +59,27 @@ def parse_image_reference(image_ref: str | None) -> dict[str, Any] | None:
         "repository": repository,
         "tag": tag or None,
         "digest": digest or None,
+    }
+
+
+def load_release_object(path: Path) -> dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    return {
+        "release_object_id": payload.get("release_id"),
+        "release_object_json": str(path.resolve()),
+        "openedx_image": {
+            "reference": f"{payload['images']['openedx']['name']}@{payload['images']['openedx']['digest']}",
+            "repository": payload["images"]["openedx"]["name"],
+            "tag": None,
+            "digest": payload["images"]["openedx"]["digest"],
+        },
+        "mfe_image": {
+            "reference": f"{payload['images']['mfe']['name']}@{payload['images']['mfe']['digest']}",
+            "repository": payload["images"]["mfe"]["name"],
+            "tag": None,
+            "digest": payload["images"]["mfe"]["digest"],
+        },
+        "proof_refs": payload.get("proof_refs", []),
     }
 
 
@@ -282,6 +304,7 @@ def build_payload(
             "truth_ledger_json": str(output_path),
             "acceptance_bundle": summary.get("artifacts", {}).get("output_dir"),
             "acceptance_summary_json": str(summary_path),
+            "release_object_json": release_truth.get("release_object_json"),
         },
     }
 
@@ -308,15 +331,28 @@ def main() -> int:
 
     tracked_repositories = tuple(args.image_repo) if args.image_repo else DEFAULT_IMAGE_REPOS
     release_truth = {
+        "release_object_id": None,
+        "release_object_json": None,
         "openedx_image": parse_image_reference(args.release_openedx_image),
         "mfe_image": parse_image_reference(args.release_mfe_image),
+        "proof_refs": [],
     }
+    inferred_app_sha = args.app_sha
+    inferred_infra_sha = args.infra_commit_sha
+    if args.release_object_json:
+        release_object_payload = json.loads(args.release_object_json.resolve().read_text(encoding="utf-8"))
+        release_object_truth = load_release_object(args.release_object_json.resolve())
+        release_truth.update(release_object_truth)
+        if not inferred_app_sha:
+            inferred_app_sha = release_object_payload.get("app_commit_sha")
+        if not inferred_infra_sha:
+            inferred_infra_sha = release_object_payload.get("promotion", {}).get("gitops_commit_sha")
     argo_truth = discover_argo_truth(args.argo_app)
     runtime_truth = discover_runtime_truth(args.namespace, tracked_repositories)
     payload = build_payload(
         summary,
-        app_sha=args.app_sha or git_head_sha(),
-        infra_commit_sha=args.infra_commit_sha,
+        app_sha=inferred_app_sha or git_head_sha(),
+        infra_commit_sha=inferred_infra_sha,
         argo_truth=argo_truth,
         runtime_truth=runtime_truth,
         release_truth=release_truth,

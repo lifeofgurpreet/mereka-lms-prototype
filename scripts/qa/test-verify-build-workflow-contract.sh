@@ -70,6 +70,7 @@ on:
       - 'scripts/infra/install-cosign.sh'
       - 'scripts/infra/generate-build-provenance.sh'
       - 'scripts/infra/generate-release-bundle.sh'
+      - 'scripts/release/generate_release_object.py'
       - 'scripts/infra/build-openedx-image.sh'
       - 'scripts/infra/build-mfe-image.sh'
       - 'scripts/infra/release-openedx-gitops.sh'
@@ -78,6 +79,7 @@ on:
       - 'scripts/qa/verify-build-provenance.sh'
       - 'scripts/qa/verify-openedx-image-branding.sh'
       - 'scripts/qa/verify-release-bundle.sh'
+      - 'scripts/qa/verify-release-object.sh'
       - 'scripts/qa/verify-mfe-image-branding.sh'
       - 'scripts/qa/verify-mfe-runtime-contract.sh'
       - '.github/workflows/build-tutor-images.yml'
@@ -268,6 +270,19 @@ jobs:
   release-bundle:
     needs: [build-openedx, build-mfe, scan-openedx-image, scan-mfe-image, slsa-provenance]
     if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.target_environment != 'select-environment') }}
+    steps:
+      - run: ./scripts/infra/generate-release-bundle.sh --output var/ci/release-bundle.json --repo Biji-Biji-Initiative/mereka-lms --commit-sha aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa --workflow .github/workflows/build-tutor-images.yml --run-id 1 --run-attempt 1 --target-environment dev --openedx-image ghcr.io/biji-biji-initiative/mereka-lms/openedx --openedx-digest sha256:1111111111111111111111111111111111111111111111111111111111111111 --mfe-image ghcr.io/biji-biji-initiative/mereka-lms/mfe --mfe-digest sha256:2222222222222222222222222222222222222222222222222222222222222222
+      - run: ./scripts/qa/verify-release-bundle.sh var/ci/release-bundle.json
+      - run: python3 ./scripts/release/generate_release_object.py --release-bundle-json var/ci/release-bundle.json --output var/ci/release-object.json
+      - run: ./scripts/qa/verify-release-object.sh var/ci/release-object.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-bundle
+          path: |
+            var/ci/release-bundle.json
+            var/ci/release-object.json
+            var/ci/release-bundle.sig
+            var/ci/release-bundle.pem
 
   update-gitops:
     runs-on: ubuntu-latest

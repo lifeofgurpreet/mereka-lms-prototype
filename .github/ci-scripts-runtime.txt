@@ -21,6 +21,8 @@ scripts/qa/verify-build-provenance.sh  # CI_ARTIFACT
 scripts/qa/test-verify-build-provenance.sh  # CI_ARTIFACT
 scripts/qa/verify-release-bundle.sh  # CI_ARTIFACT
 scripts/qa/test-verify-release-bundle.sh  # CI_ARTIFACT
+scripts/qa/verify-release-object.sh  # CI_ARTIFACT
+scripts/qa/test-verify-release-object.sh  # CI_ARTIFACT
 scripts/qa/verify-release-readiness.sh --dry-run  # CI_ARTIFACT
 scripts/infra/verify-release-preflight.sh  # CI_ARTIFACT
 scripts/qa/verify-release-dry-run-contract.sh  # CI_ARTIFACT
@@ -36,6 +38,7 @@ scripts/infra/recover-stale-build-tutor-images.sh  # WORKTREE_CONTEXT (manual Gi
 scripts/qa/ops-preflight.sh  # WORKTREE_CONTEXT (operator preflight for br+tutor+gitops before combined manual ops)
 scripts/acceptance/generate_runtime_routing_matrix.py  # WORKTREE_CONTEXT (generates the runtime-routing contract from tenant-registry.yaml)
 scripts/release/generate_truth_ledger.py  # WORKTREE_CONTEXT (joins runtime-routing proof with repo, release, infra, Argo, and runtime truths)
+scripts/release/generate_release_object.py  # WORKTREE_CONTEXT (derives the canonical release object from the signed release bundle)
 
 # ── Live infrastructure required ─────────────────────────────────────────────────────
 scripts/qa/verify-enterprise-sso-readiness.sh --mode repo  # LIVE_CLUSTER
