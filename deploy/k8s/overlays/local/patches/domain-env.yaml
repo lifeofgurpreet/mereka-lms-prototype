@@ -1,5 +1,3 @@
-# GENERATED — do not hand-edit. Source: deploy/k8s/tenancy/tenant-registry.yaml
-# Regenerate: python scripts/domains/generate_domain_env.py --env local
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -173,10 +171,10 @@ spec:
               value: preview.academyv2.mereka.dev
             - name: STUDIO_HOST
               value: studio.academyv2.mereka.dev
-            - name: DISCOVERY_HOST
-              value: discovery.academyv2.mereka.dev
             - name: MFE_HOST
               value: apps.academyv2.mereka.dev
+            - name: DISCOVERY_HOST
+              value: discovery.academyv2.mereka.dev
             - name: NOTES_HOST
               value: notes.academyv2.mereka.dev
             - name: CREDENTIALS_HOST
@@ -185,6 +183,14 @@ spec:
               value: admin.academyv2.mereka.dev
             - name: ENTERPRISE_LEARNER_HOST
               value: learner.academyv2.mereka.dev
+            - name: TENANT_BIJIBIJI_LMS_HOST
+              value: biji-biji.academyv2.mereka.dev
+            - name: TENANT_SOF_LMS_HOST
+              value: skillourfuture.academyv2.mereka.dev
+            - name: TENANT_BIJIBIJI_MFE_HOST
+              value: apps.biji-biji.academyv2.mereka.dev
+            - name: TENANT_SOF_MFE_HOST
+              value: apps.skillourfuture.academyv2.mereka.dev
 ---
 # MFE Caddy domain env vars for CSP header template interpolation.
 apiVersion: apps/v1

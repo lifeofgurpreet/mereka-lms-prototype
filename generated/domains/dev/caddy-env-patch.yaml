@@ -30,3 +30,11 @@ spec:
               value: "admin.academyv2.mereka.dev"
             - name: ENTERPRISE_LEARNER_HOST
               value: "learner.academyv2.mereka.dev"
+            - name: TENANT_BIJIBIJI_LMS_HOST
+              value: "biji-biji.academyv2.mereka.dev"
+            - name: TENANT_SOF_LMS_HOST
+              value: "skillourfuture.academyv2.mereka.dev"
+            - name: TENANT_BIJIBIJI_MFE_HOST
+              value: "apps.biji-biji.academyv2.mereka.dev"
+            - name: TENANT_SOF_MFE_HOST
+              value: "apps.skillourfuture.academyv2.mereka.dev"

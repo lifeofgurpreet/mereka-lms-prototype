@@ -84,8 +84,8 @@ localhost{$default_site_port}, preview.localhost{$default_site_port} {
 # Domains are injected via environment variables; overlays must set:
 #   LMS_HOST        — primary LMS hostname (e.g. academyv2.mereka.io)
 #   LMS_HOST_PREVIEW — preview hostname    (e.g. preview.academyv2.mereka.io)
-# Additional microsite domains are added by overlay-supplied Caddyfile overrides.
-http://{$LMS_HOST}, http://{$LMS_HOST_PREVIEW} {
+#   TENANT_*_LMS_HOST — non-primary LMS tenant roots (when this base Caddyfile is authoritative)
+http://{$LMS_HOST}, http://{$LMS_HOST_PREVIEW}, http://{$TENANT_BIJIBIJI_LMS_HOST:bijibiji.invalid}, http://{$TENANT_SOF_LMS_HOST:sof.invalid} {
     @favicon_matcher {
         path_regexp ^/favicon.ico$
     }

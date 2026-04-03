@@ -70,6 +70,29 @@ def _core_lms_env_with_auth() -> list[tuple[str, Any]]:
     ]
 
 
+def _caddy_env_specs(overlay_env: str) -> list[tuple[str, Any]]:
+    """Caddy host env vars for an overlay environment."""
+    specs: list[tuple[str, Any]] = [
+        ("LMS_HOST", ("mereka", "primary")),
+        ("LMS_HOST_PREVIEW", ("mereka", "preview")),
+        ("STUDIO_HOST", ("mereka", "studio")),
+        ("MFE_HOST", ("mereka", "mfe")),
+        ("DISCOVERY_HOST", ("mereka", "discovery")),
+        ("NOTES_HOST", ("mereka", "notes")),
+        ("CREDENTIALS_HOST", ("mereka", "credentials")),
+        ("ENTERPRISE_ADMIN_HOST", ("mereka", "enterprise-admin")),
+        ("ENTERPRISE_LEARNER_HOST", ("mereka", "enterprise-learner")),
+    ]
+    if overlay_env in {"local", "dev"}:
+        specs.extend([
+            ("TENANT_BIJIBIJI_LMS_HOST", ("biji-biji", "primary")),
+            ("TENANT_SOF_LMS_HOST", ("skillourfuture", "primary")),
+            ("TENANT_BIJIBIJI_MFE_HOST", ("biji-biji", "mfe")),
+            ("TENANT_SOF_MFE_HOST", ("skillourfuture", "mfe")),
+        ])
+    return specs
+
+
 # The deployment map differs per overlay environment because the overlays
 # evolved independently.  We define per-env maps.
 
@@ -116,17 +139,7 @@ def _get_deployment_map_local() -> list[dict[str, Any]]:
         }),
         _labeled("caddy", {
             "kind": "Deployment", "name": "caddy", "container": "caddy",
-            "env": [
-                ("LMS_HOST", ("mereka", "primary")),
-                ("LMS_HOST_PREVIEW", ("mereka", "preview")),
-                ("STUDIO_HOST", ("mereka", "studio")),
-                ("DISCOVERY_HOST", ("mereka", "discovery")),
-                ("MFE_HOST", ("mereka", "mfe")),
-                ("NOTES_HOST", ("mereka", "notes")),
-                ("CREDENTIALS_HOST", ("mereka", "credentials")),
-                ("ENTERPRISE_ADMIN_HOST", ("mereka", "enterprise-admin")),
-                ("ENTERPRISE_LEARNER_HOST", ("mereka", "enterprise-learner")),
-            ],
+            "env": _caddy_env_specs("local"),
         }),
         {
             "kind": "Deployment", "name": "mfe", "container": "mfe",
@@ -548,20 +561,6 @@ def _render_cronjob(
 # YAML generation — caddy-env-patch.yaml
 # ---------------------------------------------------------------------------
 
-# Caddy env vars: 9 vars, same for all environments, derived from mereka tenant
-CADDY_ENV_ROLES: list[tuple[str, str]] = [
-    ("LMS_HOST", "primary"),
-    ("LMS_HOST_PREVIEW", "preview"),
-    ("STUDIO_HOST", "studio"),
-    ("MFE_HOST", "mfe"),
-    ("DISCOVERY_HOST", "discovery"),
-    ("NOTES_HOST", "notes"),
-    ("CREDENTIALS_HOST", "credentials"),
-    ("ENTERPRISE_ADMIN_HOST", "enterprise-admin"),
-    ("ENTERPRISE_LEARNER_HOST", "enterprise-learner"),
-]
-
-
 def generate_caddy_env_patch(overlay_env: str, registry: dict) -> str:
     """Generate caddy-env-patch.yaml for a given overlay environment."""
     reg_env = ENV_TO_REGISTRY[overlay_env]
@@ -591,8 +590,8 @@ def generate_caddy_env_patch(overlay_env: str, registry: dict) -> str:
     lines.append("      containers:")
     lines.append("        - name: caddy")
     lines.append("          env:")
-    for env_name, role in CADDY_ENV_ROLES:
-        value = domains.get((reg_env, "mereka", role), "")
+    for env_name, spec in _caddy_env_specs(overlay_env):
+        value = resolve_value(spec, reg_env, domains, {}, "https")
         lines.append(f"            - name: {env_name}")
         lines.append(f'              value: "{value}"')
     lines.append("")

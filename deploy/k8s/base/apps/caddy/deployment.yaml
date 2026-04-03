@@ -41,6 +41,10 @@ spec:
             value: "localhost"
           - name: LMS_HOST_PREVIEW
             value: "preview.localhost"
+          - name: TENANT_BIJIBIJI_LMS_HOST
+            value: "bijibiji.invalid"
+          - name: TENANT_SOF_LMS_HOST
+            value: "sof.invalid"
           - name: STUDIO_HOST
             value: "studio.localhost"
           - name: DISCOVERY_HOST

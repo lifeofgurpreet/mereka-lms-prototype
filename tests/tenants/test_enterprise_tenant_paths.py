@@ -22,6 +22,8 @@ SKILLOURFUTURE_BRANDING = REPO_ROOT / "scripts" / "tenants" / "skillourfuture-br
 DEV_MULTISITE_DEFINITIONS = REPO_ROOT / "infrastructure" / "tutor" / "multisite-sites.dev.yml"
 CADDYFILE = REPO_ROOT / "deploy" / "k8s" / "base" / "apps" / "caddy" / "Caddyfile"
 CADDY_DEPLOYMENT = REPO_ROOT / "deploy" / "k8s" / "base" / "apps" / "caddy" / "deployment.yaml"
+GENERATED_DEV_CADDY_ENV = REPO_ROOT / "generated" / "domains" / "dev" / "caddy-env-patch.yaml"
+LOCAL_DOMAIN_ENV = REPO_ROOT / "deploy" / "k8s" / "overlays" / "local" / "patches" / "domain-env.yaml"
 
 
 def bash_eval(command: str) -> str:
@@ -33,6 +35,19 @@ def bash_eval(command: str) -> str:
         text=True,
     )
     return result.stdout.strip()
+
+
+def yaml_caddy_env_map(path: Path) -> dict[str, str]:
+    for document in yaml.safe_load_all(path.read_text(encoding="utf-8")):
+        if not isinstance(document, dict):
+            continue
+        if document.get("kind") != "Deployment":
+            continue
+        if document.get("metadata", {}).get("name") != "caddy":
+            continue
+        env = document["spec"]["template"]["spec"]["containers"][0]["env"]
+        return {item["name"]: item["value"] for item in env}
+    raise AssertionError(f"Could not find caddy deployment in {path}")
 
 
 def test_shared_config_resolves_active_nonprod_defaults() -> None:
@@ -181,3 +196,28 @@ def test_outer_caddy_binds_non_primary_tenant_apps_hosts_explicitly() -> None:
     assert env_map["MFE_HOST"] == "apps.localhost"
     assert env_map["TENANT_BIJIBIJI_MFE_HOST"] == "apps-bijibiji.invalid"
     assert env_map["TENANT_SOF_MFE_HOST"] == "apps-sof.invalid"
+
+
+def test_outer_caddy_binds_non_primary_tenant_lms_hosts_explicitly() -> None:
+    caddy_text = CADDYFILE.read_text(encoding="utf-8")
+    deployment = yaml.safe_load(CADDY_DEPLOYMENT.read_text(encoding="utf-8"))
+    env = deployment["spec"]["template"]["spec"]["containers"][0]["env"]
+    env_map = {item["name"]: item["value"] for item in env}
+
+    assert "http://{$TENANT_BIJIBIJI_LMS_HOST:bijibiji.invalid}" in caddy_text
+    assert "http://{$TENANT_SOF_LMS_HOST:sof.invalid}" in caddy_text
+    assert env_map["TENANT_BIJIBIJI_LMS_HOST"] == "bijibiji.invalid"
+    assert env_map["TENANT_SOF_LMS_HOST"] == "sof.invalid"
+
+
+def test_dev_domain_projections_include_non_primary_lms_hosts_for_caddy() -> None:
+    generated_dev_map = yaml_caddy_env_map(GENERATED_DEV_CADDY_ENV)
+    local_overlay_map = yaml_caddy_env_map(LOCAL_DOMAIN_ENV)
+
+    assert generated_dev_map["TENANT_BIJIBIJI_LMS_HOST"] == "biji-biji.academyv2.mereka.dev"
+    assert generated_dev_map["TENANT_SOF_LMS_HOST"] == "skillourfuture.academyv2.mereka.dev"
+    assert generated_dev_map["TENANT_BIJIBIJI_MFE_HOST"] == "apps.biji-biji.academyv2.mereka.dev"
+    assert generated_dev_map["TENANT_SOF_MFE_HOST"] == "apps.skillourfuture.academyv2.mereka.dev"
+
+    assert local_overlay_map["TENANT_BIJIBIJI_LMS_HOST"] == "biji-biji.academyv2.mereka.dev"
+    assert local_overlay_map["TENANT_SOF_LMS_HOST"] == "skillourfuture.academyv2.mereka.dev"
