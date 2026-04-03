@@ -334,6 +334,18 @@ else
   fail "MFE post-push scan job missing canonical runner or dependency"
 fi
 
+if [[ "$SCAN_OPENEDX_BLOCK" == *'uses: docker/setup-buildx-action'* && "$SCAN_OPENEDX_BLOCK" == *'Fix DinD network MTU'* ]]; then
+  pass "OpenEdX post-push scan establishes canonical Docker runtime"
+else
+  fail "OpenEdX post-push scan missing canonical Docker/MTU setup"
+fi
+
+if [[ "$SCAN_MFE_BLOCK" == *'uses: docker/setup-buildx-action'* && "$SCAN_MFE_BLOCK" == *'Fix DinD network MTU'* ]]; then
+  pass "MFE post-push scan establishes canonical Docker runtime"
+else
+  fail "MFE post-push scan missing canonical Docker/MTU setup"
+fi
+
 if grep -q 'timeout 20m "\$HOME/\.local/bin/syft" scan "registry:\${OPENEDX_IMAGE_REF}"' "$BUILD_WF"; then
   pass "OpenEdX post-push SBOM generation has a timeout guard"
 else

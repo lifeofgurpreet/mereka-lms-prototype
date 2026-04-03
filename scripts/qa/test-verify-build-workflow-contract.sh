@@ -208,6 +208,10 @@ jobs:
     needs: [build-openedx]
     if: ${{ needs.build-openedx.result == 'success' }}
     steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Fix DinD network MTU
+        run: echo fix mtu
       - name: Verify OpenEdX image branding contract
         run: scripts/qa/verify-openedx-image-branding.sh "${OPENEDX_IMAGE_REF}" | tee var/ci/verify-openedx-image-branding.log
         env:
@@ -233,6 +237,10 @@ jobs:
     needs: [build-mfe]
     if: ${{ needs.build-mfe.result == 'success' }}
     steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      - name: Fix DinD network MTU
+        run: echo fix mtu
       - name: Verify MFE image branding contract
         run: scripts/qa/verify-mfe-image-branding.sh "${MFE_IMAGE_REF}" | tee var/ci/verify-mfe-image-branding.log
         env:
@@ -404,6 +412,22 @@ import sys
 p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
 text = p.read_text()
 text = text.replace(
+    '      - name: Set up Docker Buildx\n'
+    '        uses: docker/setup-buildx-action@v4\n',
+    '',
+    1,
+)
+p.write_text(text)
+PY
+run_expect_fail "OpenEdX post-push scan must establish Docker runtime"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
     '      - name: Build OpenEdX image\n'
     '        run: |\n'
     '          ./scripts/infra/build-openedx-image.sh \\\n'
@@ -477,6 +501,23 @@ text = text.replace(
 p.write_text(text)
 PY
 run_expect_fail "missing canonical MFE post-push branding verification is rejected"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+marker = (
+    '      - name: Set up Docker Buildx\n'
+    '        uses: docker/setup-buildx-action@v4\n'
+    '      - name: Fix DinD network MTU\n'
+    '        run: echo fix mtu\n'
+)
+text = text.replace(marker, '', 1)
+p.write_text(text)
+PY
+run_expect_fail "MFE post-push scan must establish Docker runtime"
 
 write_pass_fixture
 python3 - "$tmpdir" <<'PY'
