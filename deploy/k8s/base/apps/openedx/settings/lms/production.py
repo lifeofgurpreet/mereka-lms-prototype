@@ -3,6 +3,7 @@ import logging
 import os
 import sys
 import importlib
+from urllib.parse import urlparse
 from lms.envs.production import *
 from .mereka_footer import build_mereka_public_footer
 
@@ -57,6 +58,23 @@ def _module_available(module_name):
         return False
 
 
+def _is_mongodb_atlas_host(raw_value):
+    value = (raw_value or "").strip().lower()
+    if not value:
+        return False
+
+    if "://" in value:
+        parsed = urlparse(value)
+        host = (parsed.hostname or "").strip().lower()
+    else:
+        host = value.rsplit("@", 1)[-1]
+        host = host.split("/", 1)[0].split("?", 1)[0].split("#", 1)[0]
+        host = host.split(":", 1)[0].strip().lower()
+
+    host = host.rstrip(".")
+    return host == "mongodb.net" or host.endswith(".mongodb.net")
+
+
 # Override SECRET_KEY from environment variable (required for K8s deployment).
 # Nonprod fallback chain prevents hard crashes when legacy secret keys drift to
 # empty while JWT keys remain populated.
@@ -106,7 +124,7 @@ COMMENTS_SERVICE_URL = "http://localhost:8000/forum"
 MONGODB_HOST = os.environ.get("MONGODB_HOST", "mongodb")
 MONGODB_DB = os.environ.get("MONGODB_DB", "openedx")
 _mongodb_host_lower = (MONGODB_HOST or "").lower()
-_mongodb_is_atlas = _mongodb_host_lower.startswith("mongodb+srv://") or ".mongodb.net" in _mongodb_host_lower
+_mongodb_is_atlas = _is_mongodb_atlas_host(MONGODB_HOST)
 
 _mongodb_username = None
 _mongodb_password = None
@@ -123,10 +141,7 @@ if _mongodb_is_atlas:
 FORUM_MONGODB_DATABASE = "cs_comments_service"
 _forum_mongo_host = os.environ.get("FORUM_MONGODB_HOST") or MONGODB_HOST or "mongodb"
 _forum_mongo_host_lower = (_forum_mongo_host or "").lower()
-_forum_mongo_is_atlas = (
-    _forum_mongo_host_lower.startswith("mongodb+srv://")
-    or ".mongodb.net" in _forum_mongo_host_lower
-)
+_forum_mongo_is_atlas = _is_mongodb_atlas_host(_forum_mongo_host)
 FORUM_MONGODB_CLIENT_PARAMETERS = {
     "host": _forum_mongo_host,
 }
