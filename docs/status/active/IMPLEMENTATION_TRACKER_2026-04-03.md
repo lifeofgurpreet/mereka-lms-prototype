@@ -80,6 +80,7 @@ review_cadence: weekly
 | enterprise-catalog-worker (prod) | **0 restarts**, 21h uptime | 🟢 HEALTHY | — | No action |
 | enterprise-subsidy-worker (prod) | **Does not exist** (by design — subsidy has no Celery) | 🟢 HEALTHY | — | Architecture correct |
 | ecommerce-worker CrashLoop (nonprod) | **DOES NOT EXIST** — Oscar stack absent from `mereka-lms-dev` entirely | 🟢 NOT APPLICABLE | — | Bead `mereka-lms-1jsy` may be stale — verify |
+| **LMS Celery Beat (scheduler)** | **NOT DEPLOYED** | 🔴 MISSING | P1 | `CELERYBEAT_SCHEDULE` is defined (4h integrated channel syncs) but no Beat deployment exists in any overlay. Degreed/Canvas/Cornerstone syncs are silently not running. Either deploy `lms-beat` Deployment or convert to CronJobs. |
 
 > **Root cause for ALL historical Celery crashes (batch4j)**: Redis `rdb_last_bgsave_status: err` on 2026-03-31 21:29 UTC. `stop-writes-on-bgsave-error` was `yes` → Redis rejected all writes → 100 Celery reconnect retries exhausted → workers crashed. Now mitigated (`stop-writes-on-bgsave-error: no`) but **483K uncommitted changes** remain unsynced — Redis has not successfully persisted to disk. This is a latent data-loss risk if Redis restarts.
 
@@ -152,9 +153,12 @@ review_cadence: weekly
 |------|--------|----------|----------|-------------|
 | PR #1278 (BB/SOF tenant logos) — logos IN REPO, image rebuild needed | 🟡 IN PROGRESS | P1 | repo_truth (batch2) | `infrastructure/tutor/themes/mereka/lms/static/images/biji-biji/` + `skillourfuture/` exist. Trigger `build-tutor-images.yml` with `build_openedx=true`. |
 | MFE Dockerfile Ulmo migration (bead `mereka-lms-2s47`) | 🟢 DONE | — | repo_truth (batch2) | All `ADD` lines in `mfe-build/Dockerfile` correctly pinned to `#release/ulmo.1`. Minor: README.md still shows redwood in example — cosmetic doc fix only. |
-| `apply-dev-tenant-state.sh` not on main (`fix/libsass-css4-rgb-compat`) | 🔴 BLOCKED | P1 | repo_truth (batch2) | 32 commits ahead of main, no PR. Branch mixes CSS, tenancy, governance work — needs triage/break-apart before merge. |
-| `feat/import-lane-closure` follow-on (5 commits past merged PR #1275) | 🔴 BLOCKED | P1 | repo_truth (batch2) | 5 commits (runbook hardening, PB→MCT32-EN remap, conflict resolution) not on a PR. Needs new PR. |
-| `worktree-feat+first-class-domains` — 23 commits, no PR | 🔴 BLOCKED | P1 | repo_truth (batch2) | First-class domain realization complete on branch but not merged. PR urgently needed. |
+| `fix/libsass-css4-rgb-compat` — 32 commits, 15 days old, no PR | 🔴 BLOCKED | P1 | repo_truth (b5-branches) | MUST SPLIT: 17 theme CSS commits + 3 tenancy commits + 3 QA commits + 9 other. Open 4-5 separate PRs by domain; CSS theming first (fast-track). 22 files changed. |
+| `feat/import-lane-closure` follow-on (5 commits post-merge PR #1275) | 🔴 BLOCKED | P1 | repo_truth (b5-branches) | 5 post-merge commits (runbook hardening, PB→MCT32-EN remap). Needs new PR. |
+| `worktree-feat+first-class-domains` — 23 post-merge commits, no PR | 🔴 BLOCKED | P1 | repo_truth (b5-branches) | **CLARIFICATION**: Original PR #1262 was merged 2026-03-31. These 23 commits are NEW work pushed AFTER the merge (last: 2026-04-02). 11 merge conflicts with main. Needs a new follow-on PR. |
+| PRs #1297, #1298, #1299, #1300 | 🟢 MERGED | — | repo_truth (b5-branches) | 4 PRs merged in last 2 days — good velocity |
+| PRs #1288, #1280, #1301, #1245 | 🟢 READY | P1 | repo_truth (b5-branches) | All passing CI, zero risk — merge now |
+| PRs #1296, #1294, #1283 | 🔴 CI_FAIL | P1 | repo_truth (b5-branches) | Static Validation Scripts + Postchecks failures — likely need inventory regeneration. Rebase from main. |
 
 **Bead**: `mereka-lms-2s47`
 **Skill**: `image-tag-audit`, `mfe-branding-proof`, `gitops-contract-consumer`
@@ -491,7 +495,9 @@ review_cadence: weekly
 | JWT key drift (public/private mismatch) | 🟢 DONE | — | runtime_validated | Fixed — derive public JWK from private at startup |
 | CH user passwords (ESO coverage) | 🟢 DONE | — | repo_truth (batch3) | ExternalSecret maps all 4 CH passwords; base Secret uses empty-string placeholders |
 | CH user passwords (runtime `ALTER USER`) | ⚪ NOT STARTED | P2 | unverified | Must run `ALTER USER` to apply passwords from ESO secret at runtime |
-| `protect-gitops-managed-resources` Kyverno policy | 🔴 MISSING | P1 | runtime (batch3) | **Policy documented in CLAUDE.md but NOT deployed**. 13 other Kyverno policies active but none protect ArgoCD-managed resources. Implement in `bbi-infrastructure`. |
+| `protect-gitops-managed-resources` Kyverno policy | 🔴 MISSING | P1 | runtime (b5-kyverno) | NOT deployed, NOT in repo. Security runbook at `docs/ops/runbooks/SECURITY_INCIDENT_SUPPLY_CHAIN.md:61` assumes it blocks mutations — creates false confidence. Implement in `bbi-infrastructure`. |
+| All 13 Kyverno policies in **AUDIT mode** (none enforced) | 🟡 AUDIT_ONLY | P2 | runtime (b5-kyverno) | 408 violations across 22 namespaces — none blocked. stg-mereka-lms: 98, mereka-lms-dev: 96. Phase to Enforce after fixing violations. |
+| 4 app-repo policy files should move to `bbi-infrastructure` | 🟡 OWNERSHIP_GAP | P3 | repo_truth (b5-kyverno) | `deploy/k8s/base/policies/*.yaml` — DEPLOYMENT_CONTRACT.md says these belong in GitOps infra repo. Migrate when other moves proceed. |
 | CSP nonce migration (ADR-025) | ⚪ NOT STARTED | P3 | unverified | `docs/adr/025-csp-nonce-migration.md` |
 | GDPR / Data Privacy compliance | ❄️ PARKED | P4 | unverified | `data-privacy-gdpr-compliance_spec.md` (30 ACs) — Tier 9 |
 | Pre-commit secret scanning hook | 🟢 DONE | — | repo_truth | `.githooks/pre-commit` |
@@ -507,7 +513,7 @@ review_cadence: weekly
 | Video: Full Mux + XBlock + Analytics pipeline | `mereka-lms-1bdm` | ~25 | 🟡 IN PROGRESS | P1 | TBD |
 | Mobile: Enterprise iOS + Android | `mereka-lms-mci9` | 37 | ❄️ PARKED | P2 | 2027 |
 | Proctoring: Enterprise proctoring | `mereka-lms-i8lo` | 38 | ❄️ PARKED | P4 | 2027 |
-| Email & Notifications pipeline | — | 45 | ⚪ NOT STARTED | P3 | TBD |
+| Email & Notifications pipeline | — | 45 | 🟢 DONE (all 6 phases) | — | CLOSED |
 | Content Libraries v2 | — | 33 | ❄️ PARKED | P3 | TBD |
 | Verifiable Credentials / OBv3 | — | ~40 | ⚪ NOT STARTED | P4 | TBD |
 | HubSpot Registration (K8s-native) | — | 26 | ❄️ PARKED | P3 | After MCT live |
@@ -613,6 +619,59 @@ review_cadence: weekly
 
 ---
 
+## Section 17: Email / SMTP Pipeline (b5-smtp)
+
+> **Correction to Section 12**: Email & Notifications pipeline is **FULLY COMPLETE** (all 6 phases merged). Was incorrectly listed as NOT STARTED.
+
+| Item | Status | Priority | Evidence | Next Action |
+|------|--------|----------|----------|-------------|
+| SMTP service (exim-relay) | 🟢 RUNNING | — | repo_truth (b5-smtp) | `devture/exim-relay:4.96-r1-0`; relays to AWS SES `email-smtp.ap-southeast-1.amazonaws.com:587` via STARTTLS |
+| LMS email delivery path | 🟢 WORKING | — | repo_truth (b5-smtp) | LMS → `smtp:8025` (exim) → AWS SES. SES credentials from ExternalSecrets. |
+| Email Phase 1–6 (45 ACs) | 🟢 COMPLETE | — | repo_truth (b5-smtp) | All 6 phases merged to main: SES infra, bounce handling, ACE channels, in-app tray, push (FCM), multi-lang templates, bulk campaigns, digests, analytics. |
+| `prometheusrule-email.yaml` quarantined | 🔴 QUARANTINED | P1 | repo_truth (b5-smtp) | 7/8 rules non-functional (depend on SES exporter). `SMTPRelayPodDown` alert CAN fire but is quarantined. Un-quarantine at minimum to get pod-down alerting. |
+| SES exporter NOT deployed | 🔴 MISSING | P1 | repo_truth (b5-smtp) | No SES CloudWatch metrics exporter → no visibility into bounce/complaint rates, quota, delivery latency. Build or source SES → Prometheus exporter. |
+| `DEFAULT_FROM_EMAIL` — base config is `contact@localhost` | 🟡 VERIFY | P2 | repo_truth (b5-smtp) | Likely overridden by overlay `MEREKA_CONTACT_EMAIL`. Confirm production uses `contact@academyv2.mereka.io` or similar. |
+| SES account sandbox vs production mode | ⚪ UNVERIFIED | P2 | unverified | If still in sandbox mode, delivery only goes to verified recipients. Verify DKIM/SPF/DMARC for `academyv2.mereka.io` and `academy.biji-biji.com`. |
+| Phase 6 analytics → ClickHouse | 🟡 UNVERIFIED | P2 | unverified | Phase 6 engagement analytics needs ClickHouse for durable storage. Verify xAPI flow from email events. |
+
+---
+
+## Section 18: MySQL Health (b5-mysql)
+
+| Item | Status | Priority | Evidence | Next Action |
+|------|--------|----------|----------|-------------|
+| MySQL 8.4.0, PVC 5Gi | 🟢 HEALTHY | — | repo_truth (b5-mysql) | `mysql_native_password=ON` enforced via deployment arg. `mysqld_exporter` sidecar on port 9104. |
+| ServiceMonitor + 5 PrometheusRules | 🟢 ACTIVE | — | repo_truth (b5-mysql) | Rules: MySQLPodDown, MySQLExporterDown, MySQLHighConnectionUtilization, MySQLSlowQueriesSpike, HighPVCUtilization. Plus GCP Cloud Monitoring alerts. |
+| Production CPU request reduced to 10m | 🟡 WATCH | P2 | repo_truth (b5-mysql) | Prod overlay sets MySQL CPU request to `10m` (from base `500m`). Same aggressive reduction as Redis. Risk: throttling under peak. |
+| 5Gi PVC with 99K users + 176K enrollments | 🟡 WATCH | P2 | repo_truth (b5-mysql) | Alert at 80% (4Gi used). With import data growing, may need expansion. Add 90% CRITICAL alert. |
+| InnoDB buffer pool hit rate — no alert | ⚪ MISSING | P3 | repo_truth (b5-mysql) | Add to `prometheusrule-lms.yaml` — target >99% hit rate |
+| Slow query log | ⚪ NOT CONFIGURED | P3 | repo_truth (b5-mysql) | Enable `--slow-query-log=ON --long-query-time=1.0` in deployment args |
+| Single MySQL pod — SPOF | 🟡 ARCH_RISK | P4 | repo_truth (b5-mysql) | No read replica. Read replica strategy needed for HA. |
+
+---
+
+## Section 19: Celery Workers (b5-celery)
+
+| Worker | Replicas | Concurrency | Status | Restarts |
+|--------|----------|-------------|--------|----------|
+| lms-worker (prod) | 2 | 2 | 🟢 HEALTHY | 0 |
+| cms-worker (prod) | 1 | 2 | 🟢 HEALTHY | 0 |
+| enterprise-catalog-worker | 1 | 2 | 🟢 HEALTHY | 0 |
+| enterprise-access-worker | 1 | 2 | 🟢 HEALTHY | 0 |
+| **lms-beat (scheduler)** | **0** | — | 🔴 NOT DEPLOYED | — |
+
+> Total capacity: 4 pods, 10 maximum concurrent tasks.
+
+| Item | Status | Priority | Evidence | Next Action |
+|------|--------|----------|----------|-------------|
+| **Celery Beat NOT deployed** | 🔴 MISSING | P1 | repo_truth (b5-celery) | `CELERYBEAT_SCHEDULE` defines 4h syncs (`integrated_channels_content_metadata_sync`, `integrated_channels_learner_data_sync`) but no Beat Deployment in any overlay. Channel syncs silently not running. Deploy `lms-beat` or convert to CronJobs. |
+| Production worker CPU request: 10m | 🟡 WATCH | P2 | repo_truth (b5-celery) | Prod overlay sets worker CPU request to `10m` (same aggressive reduction pattern as MySQL + Redis). Risk: task starvation at high cluster load. |
+| Redis DB allocation (8/16 used) | 🟢 ADEQUATE | — | repo_truth (b5-celery) | DBs 0,8,9,10,11,12,13,14 allocated. 8 free for future services. Document in runbook to prevent collisions. |
+| Queue depth monitoring | ⚪ NOT STARTED | P2 | unverified | No alert for queue depth >1000 pending tasks for >5min. Add to PrometheusRules. |
+| Task fan-out for integrated channels | ⚪ UNVERIFIED | P2 | unverified | Verify if Degreed/Canvas/Cornerstone channel integrations are configured — if yes, they're not syncing. |
+
+---
+
 ## Section 15: MongoDB Atlas (b5-mongodb)
 
 | Item | Status | Priority | Evidence | Next Action |
@@ -684,3 +743,4 @@ review_cadence: weekly
 | 2026-04-03 | Batch 2 | frontend/branding/gitops (MFE Dockerfile, branch states, tenant logos, footer, open PRs, OIDC script, first-class-domains, CI inventory) | **COMPLETE** — MFE Ulmo done; logos in repo; head-extra 83L; footer wired; import #1275 merged + 5 follow-on unPRed; first-class-domains 23 commits no PR; OIDC uncommitted local changes; CI inventory PASS |
 | 2026-04-03 | Batch 3 | security/infra/debt (secrets, ESO completeness, worker limits, Velero manifest, ARC dry-run, Kyverno, script registry, tech debt, Aspects prod, head-extra) | **COMPLETE** — Secrets CLEAN; CH user ESO mappings DONE; Kyverno `protect-gitops-managed-resources` NOT DEPLOYED (critical gap); Aspects prod NOT dormant (replicas=1); `openedx_assessment_bulk` has 5 unimplemented TODOs; Velero Schedule not in GitOps |
 | 2026-04-03 | Batch 4 (10 agents) | PRs, testing, CronJobs, observability, deps, enterprise-nonprod, migrations, tenancy, video, spec-gaps | **COMPLETE (10/10)** — CI has 8 systemic failures on main; 1,318 custom-app tests never run in CI; `openedx_tenant_cache` unapplied (P0 blocked); SOF staging SiteConfig MISSING + `tenant-resolution.js` SOF entry MISSING; Mux creds LIVE but INSTALLED_APPS patch absent (critical path); delivery monitor at 0 replicas; spec coverage tool inflated (real ~40-55% Tier 4-6); 3 specs filed-only with no CI; enterprise IdP = business blocker for 27/45 auth ACs |
+| 2026-04-03 | Batch 5 (10 agents) | Redis, Purchase Gateway, Discovery, Meilisearch, MongoDB, Credentials/Notes, SMTP, Branches, Kyverno, MySQL, Celery | **COMPLETE (10/10)** — Redis P0: maxmemory 4gb vs 128Mi prod limit + 1Gi PVC (OOM guaranteed); Discovery CI failures = stale checks for deleted course_about.html; Email pipeline ALL 6 PHASES DONE (was wrongly NOT STARTED); Celery Beat NOT deployed (channel syncs silently broken); all 13 Kyverno policies AUDIT mode + 408 violations; purchase-gateway test step missing; `notes-migrate.yaml` also missing; mongodb-exporter vestigial; Meilisearch /metrics unconfigured; 60 commits backlogged in 3 stale branches |
