@@ -88,9 +88,14 @@ review_cadence: weekly
 | `rdb_last_bgsave_status: err` | 🟡 LATENT RISK | P1 | Investigate why bgsave is failing; ensure Redis disk has space; run `BGSAVE` manually to verify |
 | 483K uncommitted changes | 🟡 LATENT RISK | P1 | If Redis pod restarts, all in-memory state lost |
 | `stop-writes-on-bgsave-error: no` | 🟢 MITIGATED | — | Crash loop stopped; workers now restart cleanly |
+| **CRITICAL: `maxmemory 4gb` in redis.conf vs 128Mi prod memory limit** | 🔴 CRITICAL | P0 | `deploy/k8s/overlays/production/patches/resource-limits.yaml` sets Redis limit to **128Mi** but `redis.conf` configures `maxmemory 4gb`. OOM kill guaranteed. Fix: raise prod limit to 512Mi minimum. | 
+| **PVC 1Gi too small** for 4GB maxmemory + AOF growth | 🔴 CRITICAL | P0 | `deploy/k8s/base/volumes.yml` Redis PVC is 1Gi. Expand to 5Gi minimum. |
+| AOF persistence: `appendonly yes`, `appendfsync everysec` | 🟢 CONFIGURED | — | Hybrid RDB+AOF enabled — better durability than RDB-only |
+| No PodDisruptionBudget for Redis | 🟡 RISK | P2 | Pod can be evicted mid-bgsave. Add PDB at `deploy/k8s/base/apps/redis/pdb.yaml` |
+| No Redis persistence Prometheus alerts | 🔴 UNMONITORED | P1 | No alert for `rdb_last_bgsave_status`, memory fragmentation, or AOF rewrite. Add to `prometheusrule-lms.yaml` |
 
 **Bead**: `mereka-lms-1jsy`
-**Skill**: `enterprise-services`, `k8s-diagnostics`
+**Skill**: `enterprise-services`, `k8s-diagnostics`, `system-performance-remediation`
 
 ---
 
@@ -128,6 +133,7 @@ review_cadence: weekly
 | `verify-secret-classification` | Missing Aspects ClickHouse passwords in classification coverage | Add CH passwords to secret classification map |
 | `verify-catalog-discovery` | 13 sub-checks failing | Investigate discovery service health checks |
 | `verify-theming-generated-artifacts` | `favicon.ico` missing for mereka theme | Add `favicon.ico` to theme static (file exists in git status as untracked!) |
+| `verify-catalog-discovery` (13 sub-checks) | **ROOT CAUSE: checks for `course_about.html` which was intentionally deleted** (commit `b4ae5333a`, 2026-04-02) to fix Mako scope bug causing 500 errors. Script enforces a file that no longer exists by design. | Update `scripts/qa/verify-catalog-discovery.sh` — remove 10 stale `course_about.html` checks; document the SEO gap (no JSON-LD schema on course-about pages) |
 | `verify-brand-asset-drift` | Asset drift detected | Re-run brand asset generation |
 | `verify-mfe-reduced-motion` | Missing `@media (prefers-reduced-motion: no-preference)` guard | Add motion guard to MFE SCSS |
 | `verify-migration-lock` | 2 locked items open | Investigate migration lock file |
@@ -242,7 +248,9 @@ review_cadence: weekly
 | `openedx_tenant_cache 0001_initial` — UNAPPLIED (LMS + CMS) | 🔴 BLOCKED | P0 | runtime (batch4b) | App signals registered at startup; any write → `ProgrammingError: relation does not exist`. Run `lms-migrate` + `cms-migrate` Jobs immediately. |
 | `lms-migrate` Job manifest | 🟢 EXISTS | — | repo_truth (batch4b) | `deploy/k8s/base/jobs/lms-migrate.yaml` — apply before next LMS rollout |
 | `cms-migrate` Job manifest | 🟢 EXISTS | — | repo_truth (batch4b) | `deploy/k8s/base/jobs/cms-migrate.yaml` — apply before next CMS rollout |
-| `credentials-migrate.yaml` manifest | 🔴 MISSING | P2 | repo_truth (batch4b) | No manifest exists — gap in release tooling for future credentials schema changes |
+| `credentials-migrate.yaml` manifest | 🔴 MISSING | P1 | repo_truth (b5-credentials-notes confirmed) | No manifest exists. Copy pattern from `lms-migrate.yaml`; image `overhangio/openedx-credentials:21.0.0`, settings `credentials.settings.tutor.production`. |
+| `notes-migrate.yaml` manifest | 🔴 MISSING | P2 | repo_truth (b5-credentials-notes) | No manifest exists. Copy pattern from `lms-migrate.yaml`; image `overhangio/openedx-notes:21.0.0`, settings `notesserver.settings.tutor`. |
+| Credentials VC issuer key rotation registry (AC-CRED-013/014) | 🔴 STUB | P2 | repo_truth (b5-credentials-notes) | `credentials_vc_issuer/views.py:101` — TODO unimplemented. Only single key served. No rotation mechanism. |
 | Enterprise catalog/access/subsidy migrations | 🟢 CLEAN | — | runtime (batch4b) | All applied 14h ago via migrate Jobs |
 | Nonprod smoke test matrix | 🟡 IN PROGRESS | P1 | unverified | Bead `mereka-lms-288f` |
 | Tenant route matrix validation | 🟡 IN PROGRESS | P1 | unverified | All 3 tenants: Mereka / BB / SOF |
@@ -302,7 +310,13 @@ review_cadence: weekly
 | enterprise-admin-portal (dev) | 🟡 NO INGRESS | P2 | runtime (batch4j) | Pod running but no ingress rule for `admin.academyv2.mereka.dev` — not browser-accessible |
 | enterprise-learner-portal (dev) | 🟡 NO INGRESS | P2 | runtime (batch4j) | Pod running but no ingress rule — not browser-accessible |
 | ecommerce (Oscar) in dev | 🟢 INTENTIONALLY ABSENT | — | runtime (batch4j) | Oscar stack not deployed in `mereka-lms-dev` at all |
-| payments-gateway (dev + staging) | 🟡 RUNNING (9 restarts) | P2 | runtime (batch4j) | Deployed in both dev and staging. 9 restarts since 2026-03-31 — same Redis bgsave root cause. |
+| payments-gateway (dev + staging) | 🟡 RUNNING (9 restarts) | P2 | runtime (batch4j) | Dev: 9 restarts (Redis bgsave root cause). Staging: 35d uptime. |
+| payments-gateway (prod) | 🟡 REPLICA COUNT UNCLEAR | P1 | repo_truth (b5-purchase-gateway) | Prod overlay shows `count: 1` with "dark launch" comment — but 0/0 was expected. Clarify intent and set explicitly. File: `overlays/production/kustomization.yaml` |
+| Stripe keys: staging uses dev test key | 🟡 CONFIG GAP | P2 | repo_truth (b5-purchase-gateway) | Staging references `STRIPE_SECRET_KEY_DEV` (same as dev). Create dedicated `STRIPE_SECRET_KEY_STAGING` in Infisical. |
+| Purchase Gateway CI test step | 🔴 MISSING | P1 | repo_truth (b5-purchase-gateway) | 229 async tests in 38 test files — **never run in CI**. `build-purchase-gateway.yml` has no pytest step. |
+| PostgreSQL-payments ServiceMonitor | 🔴 MISSING | P2 | repo_truth (b5-purchase-gateway) | No SM for the payments PostgreSQL. Create `servicemonitor-postgresql-payments.yaml`. |
+| Purchase Gateway Alembic migrations | 🟢 DONE | — | repo_truth (b5-purchase-gateway) | 2 migrations (`001_initial_schema`, `002_fulfillment_outbox_jobs`). Init container runs `alembic upgrade head` at pod start. |
+| Purchase Gateway health endpoints | 🟢 DONE | — | repo_truth (b5-purchase-gateway) | `/health/` (DB+Redis+Stripe check), `/ready/` (lightweight), `/metrics` (Prometheus) all implemented. |
 | MEREKA EC catalogs on prod | ❄️ PARKED | P3 | runtime_validated | User deferred — create via Django admin when ready |
 | SOF EC catalogs | ❄️ PARKED | P3 | runtime_validated | User deferred |
 | Biji-Biji duplicate catalogs | ❄️ PARKED | P4 | runtime_validated | Low priority cleanup |
@@ -424,8 +438,10 @@ review_cadence: weekly
 |------|--------|----------|----------|-------------|
 | 11 SMs active (caddy, LMS, CMS, credentials, discovery, mysql, redis, enterprise, notes, mux-monitor, mongodb-exporter) | 🟢 ACTIVE | — | repo_truth (batch4g) | |
 | `servicemonitor-purchase-gateway.yaml` namespace mismatch | 🔴 BROKEN | P1 | repo_truth (batch4g) | Targets `namespaceSelector: mereka-lms` but deploy is in `mereka-lms-dev`. Add kustomize patch per env. |
-| `meilisearch` — no ServiceMonitor | 🔴 MISSING | P2 | runtime (batch4g) | Add SM or at minimum PrometheusRule for pod-up |
-| `postgresql-payments` — no SM | ⚪ NOT STARTED | P3 | repo_truth | Purchase gateway DB unmonitored |
+| `meilisearch` — no ServiceMonitor | 🔴 MISSING | P2 | repo_truth (b5-meilisearch) | Meilisearch v1.8.4 exposes `/metrics` on port 7700 but port has no `metrics` annotation. Create `servicemonitor-meilisearch.yaml`. |
+| `meilisearch` — `servicemonitor-forum.yaml` QUARANTINED | ℹ️ BY DESIGN | — | repo_truth (b5-meilisearch) | Forum v2 runs in-process in LMS pod — would duplicate LMS time-series. Correct to keep quarantined. |
+| `mongodb-exporter` — no ServiceMonitor | 🔴 MISSING | P2 | repo_truth (b5-mongodb) | `mongodb-exporter` deployment IS running (1/1, 43h) but has no SM. Either add SM or remove the deployment if vestigial. |
+| `postgresql-payments` — no SM | 🔴 MISSING | P2 | repo_truth (b5-purchase-gateway) | Purchase gateway DB unmonitored. Create `servicemonitor-postgresql-payments.yaml`. |
 | Worker pods (cms-worker, lms-worker, enterprise-*-worker) — no /metrics | ⚪ DEFERRED | P3 | repo_truth | Workers have no HTTP endpoint — kube-state coverage only |
 
 ### 10.3 SLO Coverage
@@ -594,6 +610,34 @@ review_cadence: weekly
 **Skill**: `codebase-audit`, `techdebt`, `critical-script-governance`
 
 ---
+
+---
+
+## Section 15: MongoDB Atlas (b5-mongodb)
+
+| Item | Status | Priority | Evidence | Next Action |
+|------|--------|----------|----------|-------------|
+| Atlas connectivity configuration | 🟢 DONE | — | repo_truth (b5-mongodb) | SRV protocol, SSL auto-detect, `pymongo[srv]` installed. ExternalSecrets map all 4 Atlas keys. |
+| `mongodb-exporter` deployment (43h uptime) | 🟡 VESTIGIAL RISK | P2 | runtime (b5-mongodb) | Running 1/1 but no ServiceMonitor. Is this legacy from pre-Atlas? If not used: `kubectl delete deployment mongodb-exporter -n mereka-lms`. |
+| `verify-mongodb-atlas-integration.sh` — 3 failing checks | 🟡 FALSE POSITIVES | P2 | repo_truth (b5-mongodb) | 2 checks incorrectly flag env injection as missing (env IS injected). 1 check fails because mongodb-exporter deployment exists. Fix script assertions. |
+| `dnspython` not explicitly pinned | 🟡 RISK | P2 | repo_truth (b5-mongodb) | SRV resolution requires `dnspython>=2.0`. Not in `OPENEDX_EXTRA_PIP_REQUIREMENTS`. Add it explicitly; verify with `python -c "import dns"` in LMS pod. |
+| Forum + modulestore share same MongoDB password | 🟡 ISOLATION GAP | P3 | repo_truth (b5-mongodb) | `MEREKA_LMS_MONGODB_PASSWORD` used for both. Create separate Atlas users: `modulestore-user` (openedx DB) + `forum-user` (cs_comments_service). |
+| No Atlas metrics in Prometheus | 🔴 UNMONITORED | P2 | repo_truth (b5-mongodb) | Cannot alert on connection pool exhaustion, replication lag, or query latency. Integrate Atlas API metrics or Atlas Prometheus integration. |
+| Atlas backups | ⚪ NOT STARTED | P3 | unverified | Verify point-in-time recovery enabled in Atlas console; set 7d retention |
+
+---
+
+## Section 16: Meilisearch Operations (b5-meilisearch)
+
+| Item | Status | Priority | Evidence | Next Action |
+|------|--------|----------|----------|-------------|
+| Meilisearch v1.8.4 — running | 🟢 DEPLOYED | — | repo_truth (b5-meilisearch) | Image pinned; 2Gi PVC; health probe on `/health` port 7700. |
+| Forum search configured | 🟢 DONE | — | repo_truth (b5-meilisearch) | `MEILISEARCH_ENABLED=True`, `SEARCH_ENGINE=search.meilisearch.MeilisearchEngine`, index prefix `tutor_`. |
+| Content Libraries v2 search | 🟢 DONE | — | repo_truth (b5-meilisearch) | `content_libraries` + `library_components` indexes used. |
+| No ServiceMonitor | 🔴 MISSING | P1 | repo_truth (b5-meilisearch) | Meilisearch v1.8.4 exposes `/metrics` on port 7700. Create `servicemonitor-meilisearch.yaml` + add `metrics` port annotation to Service. |
+| No PrometheusRule | 🔴 MISSING | P1 | repo_truth (b5-meilisearch) | No alert for MeilisearchDown, search latency, or PVC usage. Create `prometheusrule-meilisearch.yaml`. |
+| No forum reindex CronJob | 🟡 MISSING | P2 | repo_truth (b5-meilisearch) | `cronjob-course-reindex.yaml` covers ES course_info but no equivalent for forum discussion indexes. Add weekly forum reindex job. |
+| PVC only 2Gi | 🟡 WATCH | P3 | repo_truth (b5-meilisearch) | With forum + content-libraries indexes growing, 2Gi may need expansion. Alert when >85% full. |
 
 ---
 
