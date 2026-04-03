@@ -66,3 +66,16 @@ def test_autodetect_falls_back_to_default_infra_repo(tmp_path: Path) -> None:
     assert result.returncode == 1, result.stdout + result.stderr
     assert f"Infra repo: {autodetect_infra}" in result.stdout
     assert "FAIL production.py: diverged" in result.stdout
+
+
+def test_explicit_invalid_infra_repo_fails_loudly(tmp_path: Path) -> None:
+    app_repo = tmp_path / "app"
+    invalid_infra = tmp_path / "missing-infra"
+    tracked_rel = f"deploy/k8s/base/{TRACKED_FILE}"
+
+    write_tracked_file(app_repo, tracked_rel, "APP=canonical\n")
+
+    result = run_verify(app_repo, infra_repo=invalid_infra, home_dir=tmp_path / "home")
+
+    assert result.returncode == 2
+    assert f"ERROR: explicit INFRA_REPO is invalid: {invalid_infra}" in result.stderr
