@@ -410,11 +410,10 @@ else:
       "https://${mfe}/api/mfe_config/v1" 2>/dev/null || echo "")
 
     if [[ -z "$CONFIG_RAW" ]]; then
-      # Staging: unreachable MFE config is critical (cross-contamination undetectable)
-      # Dev: non-critical (single-tenant, infra proxy may not be wired yet)
-      local mfe_unreachable_critical="true"
-      [[ "$ENV_LABEL" == "dev" ]] && mfe_unreachable_critical="false"
-      fail_ "MFEConfig[$slug]: /api/mfe_config/v1 unreachable on $mfe" "$mfe_unreachable_critical"
+      # Multi-tenant proof cannot sign off if the public apps host cannot return
+      # runtime config for this tenant. That blocks tenant auth/runtime truth even
+      # when LMS internals look correct, so keep it critical across envs.
+      fail_ "MFEConfig[$slug]: /api/mfe_config/v1 unreachable on $mfe" "true"
       MFE_CONFIG_JSON="$(printf '%s' "$MFE_CONFIG_JSON" | python3 -c "
 import json,sys
 d=json.load(sys.stdin)

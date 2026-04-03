@@ -217,6 +217,7 @@ http://{$MFE_HOST} {
     # can reach LMS via K8s service DNS.
     handle /api/* {
         reverse_proxy lms:8000 {
+            header_up Host {http.request.host}
             header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
             header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
             header_up X-Forwarded-Host {http.request.host}
@@ -224,6 +225,7 @@ http://{$MFE_HOST} {
     }
     handle /login_refresh* {
         reverse_proxy lms:8000 {
+            header_up Host {http.request.host}
             header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
             header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
             header_up X-Forwarded-Host {http.request.host}
@@ -231,6 +233,7 @@ http://{$MFE_HOST} {
     }
     handle /csrf/* {
         reverse_proxy lms:8000 {
+            header_up Host {http.request.host}
             header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
             header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
             header_up X-Forwarded-Host {http.request.host}
@@ -238,6 +241,7 @@ http://{$MFE_HOST} {
     }
     handle /oauth2/* {
         reverse_proxy lms:8000 {
+            header_up Host {http.request.host}
             header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
             header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
             header_up X-Forwarded-Host {http.request.host}
@@ -245,6 +249,7 @@ http://{$MFE_HOST} {
     }
     handle /login {
         reverse_proxy lms:8000 {
+            header_up Host {http.request.host}
             header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
             header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
             header_up X-Forwarded-Host {http.request.host}

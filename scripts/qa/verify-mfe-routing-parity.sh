@@ -293,6 +293,21 @@ else
   do_fail "AC-ROUTE-001: /login_refresh proxy target is not lms:8000"
 fi
 
+# The outer apps-host Caddyfile must preserve Host when proxying LMS-owned paths.
+# Without this, non-primary tenant apps hosts can collapse back to empty or primary
+# mfe_config responses because LMS resolves SiteConfiguration off request host.
+if grep -A4 "handle /api/\\*" "$OUTER_CADDYFILE" | grep -qF "header_up Host {http.request.host}"; then
+  do_pass "AC-ROUTE-001: outer apps-host /api/* proxy preserves Host header"
+else
+  do_fail "AC-ROUTE-001: outer apps-host /api/* proxy missing Host header preservation"
+fi
+
+if grep -A4 "handle /login_refresh\\*" "$OUTER_CADDYFILE" | grep -qF "header_up Host {http.request.host}"; then
+  do_pass "AC-ROUTE-001: outer apps-host /login_refresh* proxy preserves Host header"
+else
+  do_fail "AC-ROUTE-001: outer apps-host /login_refresh* proxy missing Host header preservation"
+fi
+
 echo ""
 
 # =============================================================================
