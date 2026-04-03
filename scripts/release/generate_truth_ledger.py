@@ -67,6 +67,8 @@ def load_release_object(path: Path) -> dict[str, Any]:
     return {
         "release_object_id": payload.get("release_id"),
         "release_object_json": str(path.resolve()),
+        "build_origin_environment": payload.get("build_origin_environment"),
+        "promotion_target_environment": payload.get("promotion_target_environment"),
         "openedx_image": {
             "reference": f"{payload['images']['openedx']['name']}@{payload['images']['openedx']['digest']}",
             "repository": payload["images"]["openedx"]["name"],
@@ -266,6 +268,7 @@ def build_payload(
         "bundle_path": summary.get("artifacts", {}).get("output_dir"),
         "summary_json": str(summary_path),
         "verdict": summary.get("verdict", {}),
+        "verdict_planes": summary.get("verdict_planes", {}),
         "check_statuses": summary.get("checks", []),
     }
     comparisons = compare_release_to_runtime(release_truth, runtime_truth)
@@ -333,6 +336,8 @@ def main() -> int:
     release_truth = {
         "release_object_id": None,
         "release_object_json": None,
+        "build_origin_environment": None,
+        "promotion_target_environment": None,
         "openedx_image": parse_image_reference(args.release_openedx_image),
         "mfe_image": parse_image_reference(args.release_mfe_image),
         "proof_refs": [],

@@ -116,6 +116,9 @@ gh run download "${RUN_ID}" --name build-provenance --dir "var/release-artifacts
 ```
 
 Treat the workflow-emitted immutable tags/digests plus the `release-bundle` and `build-provenance` artifacts as the authoritative release inputs.
+The release object distinguishes:
+- `build_origin_environment` — where the build-side artifact was produced from
+- `promotion_target_environment` — where GitOps has actually linked it, when known
 
 ### 6. Apply the canonical release
 

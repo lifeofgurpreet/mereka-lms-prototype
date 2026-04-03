@@ -108,6 +108,12 @@ Options:
 - `deploy_to_staging` - **Legacy input name** retained for backwards compatibility
 - `image_tag` - Custom tag (default: git SHA)
 
+Release-object semantics:
+- workflow input `target_environment` is the build-side selection used when producing the release bundle
+- the emitted release object makes this explicit as `build_origin_environment`
+- once promotion exists, `promotion_target_environment` becomes the consumer-side truth
+- do not read the build artifact as proof that promotion already happened
+
 Staging safety gate:
 - Manual `target_environment=staging` dispatch is blocked unless repository variable `ENABLE_STAGING_ENV=true`.
 - Current operating model is `local/dev -> prod`, so leave `ENABLE_STAGING_ENV` unset until staging is actually provisioned.

@@ -82,6 +82,9 @@ def test_release_object_builds_from_release_bundle_only(tmp_path: Path) -> None:
 
     assert payload["schema_version"] == "release-object/v1"
     assert payload["release_id"] == "ro-rb-abcdef1234567-20260403T120000Z"
+    assert payload["build_origin_environment"] == "dev"
+    assert payload["promotion_target_environment"] is None
+    assert payload["target_environment"] == "dev"
     assert payload["promotion"]["status"] == "build-only"
     assert payload["promotion"]["gitops_commit_sha"] is None
     assert payload["tenant_contract"]["sha256"]
@@ -129,6 +132,8 @@ def test_release_object_links_build_provenance_when_present(tmp_path: Path) -> N
     assert payload["promotion"]["status"] == "gitops-linked"
     assert payload["promotion"]["gitops_repository"] == "Biji-Biji-Initiative/bbi-infrastructure"
     assert payload["promotion"]["gitops_commit_sha"] == "b" * 40
+    assert payload["build_origin_environment"] == "dev"
+    assert payload["promotion_target_environment"] == "dev"
     assert payload["proof_refs"] == ["var/acceptance/runtime-routing/dev/20260403T120000Z/summary.json"]
     jsonschema.validate(payload, load_schema())
 
@@ -162,5 +167,7 @@ def test_release_object_cli_emits_schema_valid_payload(tmp_path: Path) -> None:
 
     payload = json.loads(output_path.read_text(encoding="utf-8"))
     assert payload["release_id"] == "ro-rb-abcdef1234567-20260403T120000Z"
+    assert payload["build_origin_environment"] == "dev"
+    assert payload["promotion_target_environment"] is None
     assert payload["proof_refs"] == ["var/acceptance/runtime-routing/dev/20260403T120000Z/summary.json"]
     jsonschema.validate(payload, load_schema())

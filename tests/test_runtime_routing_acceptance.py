@@ -64,6 +64,8 @@ def test_accept_runtime_routing_dry_run_emits_summary(tmp_path: Path) -> None:
                 "service_id": "mereka-lms",
                 "repository": "Biji-Biji-Initiative/mereka-lms",
                 "app_commit_sha": "55c932f75d4144cba8d5a6789aa7ab0fa8dd426a",
+                "build_origin_environment": "dev",
+                "promotion_target_environment": None,
                 "target_environment": "dev",
                 "tenant_contract": {
                     "path": str(REPO_ROOT / "deploy/k8s/tenancy/tenant-registry.yaml"),
@@ -134,8 +136,12 @@ def test_accept_runtime_routing_dry_run_emits_summary(tmp_path: Path) -> None:
     assert summary["tenant_filter"] == "biji-biji"
     assert summary["verdict"]["status"] == "pass"
     assert summary["verdict"]["failed_checks"] == 0
+    assert summary["verdict_planes"]["routing_core"]["status"] == "pass"
+    assert summary["verdict_planes"]["adjacent_surface"]["status"] == "pass"
     assert summary["contract"]["schema_version"] == "runtime-routing-contract/v1"
     assert summary["release_truth"]["release_object_id"] == "ro-rb-abcdef1234567-20260403T120000Z"
+    assert summary["release_truth"]["build_origin_environment"] == "dev"
+    assert summary["release_truth"]["promotion_target_environment"] is None
     assert summary["artifacts"]["release_object_json"] == str(release_object_path.resolve())
     assert Path(summary["artifacts"]["truth_ledger_json"]).exists()
     assert Path(summary["artifacts"]["canonical_truth_ledger_json"]).exists()

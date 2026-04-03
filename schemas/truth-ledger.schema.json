@@ -55,6 +55,8 @@
       "properties": {
         "release_object_id": { "type": ["string", "null"] },
         "release_object_json": { "type": ["string", "null"] },
+        "build_origin_environment": { "type": ["string", "null"] },
+        "promotion_target_environment": { "type": ["string", "null"] },
         "openedx_image": { "$ref": "#/$defs/imageRefOrNull" },
         "mfe_image": { "$ref": "#/$defs/imageRefOrNull" },
         "proof_refs": {
@@ -118,7 +120,7 @@
     "acceptance_truth": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["bundle_path", "summary_json", "verdict", "check_statuses"],
+      "required": ["bundle_path", "summary_json", "verdict", "verdict_planes", "check_statuses"],
       "properties": {
         "bundle_path": { "type": ["string", "null"] },
         "summary_json": { "type": "string", "minLength": 1 },
@@ -129,6 +131,15 @@
           "properties": {
             "status": { "type": "string", "enum": ["pass", "fail"] },
             "failed_checks": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "verdict_planes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["routing_core", "adjacent_surface"],
+          "properties": {
+            "routing_core": { "$ref": "#/$defs/verdictPlane" },
+            "adjacent_surface": { "$ref": "#/$defs/verdictPlane" }
           }
         },
         "check_statuses": {
@@ -201,6 +212,16 @@
         "repository": { "type": "string", "minLength": 1 },
         "tag": { "type": ["string", "null"] },
         "digest": { "type": ["string", "null"] }
+      }
+    },
+    "verdictPlane": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "failed_checks", "check_count"],
+      "properties": {
+        "status": { "type": "string", "enum": ["pass", "fail", "not-applicable"] },
+        "failed_checks": { "type": "integer", "minimum": 0 },
+        "check_count": { "type": "integer", "minimum": 0 }
       }
     }
   }

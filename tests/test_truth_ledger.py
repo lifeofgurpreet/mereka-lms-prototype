@@ -33,6 +33,10 @@ def test_truth_ledger_builds_partial_payload_from_acceptance_summary(tmp_path: P
         "tenant_filter": "biji-biji",
         "mode": "execute",
         "verdict": {"status": "pass", "failed_checks": 0},
+        "verdict_planes": {
+            "routing_core": {"status": "pass", "failed_checks": 0, "check_count": 1},
+            "adjacent_surface": {"status": "not-applicable", "failed_checks": 0, "check_count": 0},
+        },
         "contract": {
             "source": "deploy/k8s/tenancy/tenant-registry.yaml",
             "source_version": "2026-04-03",
@@ -55,6 +59,8 @@ def test_truth_ledger_builds_partial_payload_from_acceptance_summary(tmp_path: P
         release_truth={
             "release_object_id": None,
             "release_object_json": None,
+            "build_origin_environment": None,
+            "promotion_target_environment": None,
             "openedx_image": None,
             "mfe_image": None,
             "proof_refs": [],
@@ -67,6 +73,7 @@ def test_truth_ledger_builds_partial_payload_from_acceptance_summary(tmp_path: P
     assert payload["record_id"] == "runtime-routing:dev:biji-biji"
     assert payload["repo_truth"]["app_commit_sha"] == "55c932f75d4144cba8d5a6789aa7ab0fa8dd426a"
     assert payload["acceptance_truth"]["verdict"]["status"] == "pass"
+    assert payload["acceptance_truth"]["verdict_planes"]["routing_core"]["status"] == "pass"
     assert payload["contract_truth"]["matrix_sha256"]
     assert payload["final_verdict"]["status"] == "partial"
     jsonschema.validate(payload, load_ledger_schema())
@@ -80,6 +87,10 @@ def test_truth_ledger_marks_release_runtime_digest_mismatch_as_fail(tmp_path: Pa
         "tenant_filter": "biji-biji",
         "mode": "execute",
         "verdict": {"status": "pass", "failed_checks": 0},
+        "verdict_planes": {
+            "routing_core": {"status": "pass", "failed_checks": 0, "check_count": 0},
+            "adjacent_surface": {"status": "not-applicable", "failed_checks": 0, "check_count": 0},
+        },
         "contract": {"source": "deploy/k8s/tenancy/tenant-registry.yaml", "source_version": "2026-04-03", "schema_version": "runtime-routing-contract/v1"},
         "artifacts": {"output_dir": str(tmp_path / "bundle")},
         "matrix": {"tenant": "biji-biji"},
@@ -92,6 +103,8 @@ def test_truth_ledger_marks_release_runtime_digest_mismatch_as_fail(tmp_path: Pa
     release_truth = {
         "release_object_id": "ro-rb-abcdef1234567-20260403T120000Z",
         "release_object_json": str(tmp_path / "release-object.json"),
+        "build_origin_environment": "dev",
+        "promotion_target_environment": "staging",
         "openedx_image": module.parse_image_reference("ghcr.io/biji-biji-initiative/mereka-lms/openedx:abc@sha256:111"),
         "mfe_image": module.parse_image_reference("ghcr.io/biji-biji-initiative/mereka-lms/mfe:abc@sha256:222"),
         "proof_refs": [],
@@ -201,6 +214,8 @@ def test_truth_ledger_uses_release_object_when_provided(tmp_path: Path) -> None:
                 "service_id": "mereka-lms",
                 "repository": "Biji-Biji-Initiative/mereka-lms",
                 "app_commit_sha": "55c932f75d4144cba8d5a6789aa7ab0fa8dd426a",
+                "build_origin_environment": "dev",
+                "promotion_target_environment": None,
                 "target_environment": "dev",
                 "tenant_contract": {
                     "path": str(REPO_ROOT / "deploy/k8s/tenancy/tenant-registry.yaml"),
@@ -259,5 +274,7 @@ def test_truth_ledger_uses_release_object_when_provided(tmp_path: Path) -> None:
 
     payload = json.loads((output_dir / "truth-ledger.json").read_text(encoding="utf-8"))
     assert payload["release_truth"]["release_object_id"] == "ro-rb-abcdef1234567-20260403T120000Z"
+    assert payload["release_truth"]["build_origin_environment"] == "dev"
+    assert payload["release_truth"]["promotion_target_environment"] is None
     assert payload["artifacts"]["release_object_json"] == str(release_object_path.resolve())
     jsonschema.validate(payload, load_ledger_schema())

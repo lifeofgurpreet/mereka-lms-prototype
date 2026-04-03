@@ -18,6 +18,8 @@ cat >"${tmpdir}/var/ci/release-object.json" <<'EOF'
   "service_id": "mereka-lms",
   "repository": "Biji-Biji-Initiative/mereka-lms",
   "app_commit_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "build_origin_environment": "dev",
+  "promotion_target_environment": null,
   "target_environment": "dev",
   "tenant_contract": {
     "path": "/tmp/tenant-registry.yaml",

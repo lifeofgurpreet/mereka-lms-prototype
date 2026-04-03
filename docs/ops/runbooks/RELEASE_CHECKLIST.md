@@ -62,6 +62,10 @@ Staging note:
 - `target_environment=staging` is intentionally blocked unless repository variable `ENABLE_STAGING_ENV=true`.
 - With current infrastructure constraints, use `production` for real rollouts and use dev/local for pre-prod validation.
 
+Interpretation rule:
+- workflow `target_environment` selects the build-side release artifact context
+- release-object `promotion_target_environment` stays empty until promotion evidence links the build to a real environment
+
 ## 5. GitOps Rollout (Canonical)
 
 ```bash

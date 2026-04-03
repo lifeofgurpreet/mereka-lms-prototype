@@ -43,8 +43,16 @@ if payload.get("schema_version") != "release-object/v1":
 
 check_rx(payload.get("release_id"), r"ro-rb-[0-9a-f]{7,40}-[0-9]{8}T[0-9]{6}Z", "release_id")
 check_rx(payload.get("app_commit_sha"), r"[0-9a-f]{40}", "app_commit_sha")
-if payload.get("target_environment") not in {"dev", "nonprod", "staging", "production", "prod", "rke2-nonprod"}:
-    errors.append(f"target_environment invalid: {payload.get('target_environment')}")
+valid_envs = {"dev", "nonprod", "staging", "production", "prod", "rke2-nonprod"}
+if payload.get("build_origin_environment") not in valid_envs:
+    errors.append(f"build_origin_environment invalid: {payload.get('build_origin_environment')}")
+promotion_target = payload.get("promotion_target_environment")
+if promotion_target is not None and promotion_target not in valid_envs:
+    errors.append(f"promotion_target_environment invalid: {promotion_target}")
+
+legacy_target = payload.get("target_environment")
+if legacy_target is not None and legacy_target != payload.get("build_origin_environment"):
+    errors.append("target_environment must match build_origin_environment when present")
 
 tenant_contract = payload.get("tenant_contract", {})
 if not str(tenant_contract.get("path", "")).strip():

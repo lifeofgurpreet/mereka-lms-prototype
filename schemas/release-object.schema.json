@@ -11,7 +11,8 @@
     "service_id",
     "repository",
     "app_commit_sha",
-    "target_environment",
+    "build_origin_environment",
+    "promotion_target_environment",
     "tenant_contract",
     "build",
     "images",
@@ -29,8 +30,24 @@
     "service_id": { "type": "string", "const": "mereka-lms" },
     "repository": { "type": "string", "minLength": 3 },
     "app_commit_sha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "build_origin_environment": {
+      "type": "string",
+      "description": "Environment context used when the build-side release artifact was produced.",
+      "enum": ["dev", "nonprod", "staging", "production", "prod", "rke2-nonprod"]
+    },
+    "promotion_target_environment": {
+      "description": "Environment this release object has actually been linked to through promotion, when known.",
+      "anyOf": [
+        { "type": "null" },
+        {
+          "type": "string",
+          "enum": ["dev", "nonprod", "staging", "production", "prod", "rke2-nonprod"]
+        }
+      ]
+    },
     "target_environment": {
       "type": "string",
+      "description": "Deprecated transitional alias. Use build_origin_environment and promotion_target_environment instead.",
       "enum": ["dev", "nonprod", "staging", "production", "prod", "rke2-nonprod"]
     },
     "tenant_contract": {

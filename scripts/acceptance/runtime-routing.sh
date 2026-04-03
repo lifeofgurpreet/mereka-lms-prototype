@@ -432,6 +432,32 @@ for line in summary_tsv.read_text(encoding="utf-8").splitlines():
         }
     )
 
+def is_check_failure(check):
+    status = check["status"].strip().lower()
+    return check["exit_code"] != 0 or status == "fail"
+
+def classify_plane(check):
+    name = check["name"].strip().lower()
+    adjacent_markers = ("playwright:", "browser", "branding", "footer")
+    if any(marker in name for marker in adjacent_markers):
+        return "adjacent_surface"
+    return "routing_core"
+
+def build_plane_verdict(plane_name):
+    plane_checks = [check for check in checks if classify_plane(check) == plane_name]
+    if not plane_checks:
+        return {"status": "not-applicable", "failed_checks": 0, "check_count": 0}
+    failed = sum(1 for check in plane_checks if is_check_failure(check))
+    return {
+        "status": "pass" if failed == 0 else "fail",
+        "failed_checks": failed,
+        "check_count": len(plane_checks),
+    }
+
+release_object_payload = None
+if release_object_json:
+    release_object_payload = json.loads(Path(release_object_json).read_text(encoding="utf-8"))
+
 payload = {
     "schema_version": "runtime-routing-proof/v1",
     "generated_at_utc": generated_at_utc,
@@ -442,6 +468,10 @@ payload = {
     "verdict": {
         "status": "pass" if failures == 0 else "fail",
         "failed_checks": failures,
+    },
+    "verdict_planes": {
+        "routing_core": build_plane_verdict("routing_core"),
+        "adjacent_surface": build_plane_verdict("adjacent_surface"),
     },
     "contract": {
         "matrix_path": str(matrix_path),
@@ -461,6 +491,12 @@ payload = {
     "release_truth": {
         "release_object_id": release_object_id,
         "release_object_json": release_object_json,
+        "build_origin_environment": (
+            release_object_payload.get("build_origin_environment") if release_object_payload else None
+        ),
+        "promotion_target_environment": (
+            release_object_payload.get("promotion_target_environment") if release_object_payload else None
+        ),
     },
     "matrix": matrix,
     "checks": checks,

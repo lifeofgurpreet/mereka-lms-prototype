@@ -832,6 +832,16 @@ proof = {
         'skip': skip_count,
         'critical_fail': critical_fail,
     },
+    'verdict_planes': {
+        'routing_core': {
+            'status': 'pass' if critical_fail == 0 else 'fail',
+            'failed_checks': critical_fail,
+        },
+        'adjacent_surface': {
+            'status': 'not-applicable',
+            'failed_checks': 0,
+        },
+    },
     'tenants': tenants_meta,
     'tenant_classification': tenant_classification,
     'artifacts': {

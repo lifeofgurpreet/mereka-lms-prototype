@@ -54,6 +54,10 @@ def build_payload(
     promotion_status = "gitops-linked" if build_provenance else "build-only"
     promotion_repo = build_provenance.get("gitops", {}).get("repository") if build_provenance else None
     promotion_commit = build_provenance.get("gitops", {}).get("commit_sha") if build_provenance else None
+    build_origin_environment = release_bundle["target_environment"]
+    promotion_target_environment = (
+        build_provenance.get("target_environment") if build_provenance else None
+    )
 
     return {
         "schema_version": "release-object/v1",
@@ -62,7 +66,10 @@ def build_payload(
         "service_id": release_bundle["service_id"],
         "repository": release_bundle["repository"],
         "app_commit_sha": release_bundle["commit_sha"],
-        "target_environment": release_bundle["target_environment"],
+        "build_origin_environment": build_origin_environment,
+        "promotion_target_environment": promotion_target_environment,
+        # Transitional alias for existing consumers; new readers should use the explicit fields above.
+        "target_environment": build_origin_environment,
         "tenant_contract": {
             "path": str(tenant_contract_path.resolve()),
             "sha256": file_sha256(tenant_contract_path),
