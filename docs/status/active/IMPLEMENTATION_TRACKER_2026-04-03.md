@@ -72,34 +72,40 @@ review_cadence: weekly
 
 ---
 
-### 1.3 Enterprise Worker Stability — PROD CLEAN
+### 1.3 Enterprise Worker Stability — ROOT CAUSE FOUND (batch4j)
 
 | Service | Restart Count (prod) | Status | Priority | Next Action |
 |---------|---------------------|--------|----------|-------------|
 | enterprise-access-worker (prod) | **0 restarts**, 21h uptime | 🟢 HEALTHY | — | No action |
 | enterprise-catalog-worker (prod) | **0 restarts**, 21h uptime | 🟢 HEALTHY | — | No action |
 | enterprise-subsidy-worker (prod) | **Does not exist** (by design — subsidy has no Celery) | 🟢 HEALTHY | — | Architecture correct |
-| ecommerce-worker CrashLoop (nonprod) | unknown — staging DEGRADED | 🔴 BLOCKED | P1 | Bead `mereka-lms-1jsy` — diagnose in dev/staging, not prod |
+| ecommerce-worker CrashLoop (nonprod) | **DOES NOT EXIST** — Oscar stack absent from `mereka-lms-dev` entirely | 🟢 NOT APPLICABLE | — | Bead `mereka-lms-1jsy` may be stale — verify |
 
-> High restart counts previously documented were for dev/staging, not prod. Prod workers are fresh (21h).
+> **Root cause for ALL historical Celery crashes (batch4j)**: Redis `rdb_last_bgsave_status: err` on 2026-03-31 21:29 UTC. `stop-writes-on-bgsave-error` was `yes` → Redis rejected all writes → 100 Celery reconnect retries exhausted → workers crashed. Now mitigated (`stop-writes-on-bgsave-error: no`) but **483K uncommitted changes** remain unsynced — Redis has not successfully persisted to disk. This is a latent data-loss risk if Redis restarts.
+
+| Redis Health Risk | Status | Priority | Next Action |
+|---|---|---|---|
+| `rdb_last_bgsave_status: err` | 🟡 LATENT RISK | P1 | Investigate why bgsave is failing; ensure Redis disk has space; run `BGSAVE` manually to verify |
+| 483K uncommitted changes | 🟡 LATENT RISK | P1 | If Redis pod restarts, all in-memory state lost |
+| `stop-writes-on-bgsave-error: no` | 🟢 MITIGATED | — | Crash loop stopped; workers now restart cleanly |
 
 **Bead**: `mereka-lms-1jsy`
 **Skill**: `enterprise-services`, `k8s-diagnostics`
 
 ---
 
-### 1.4 CronJob Failures (prod) — 6 Distinct Root Causes
+### 1.4 CronJob Failures (prod) — Root Causes + Fixes (batch4c)
 
-| Job | Frequency | Status | Root Cause | Fix |
-|-----|-----------|--------|------------|-----|
-| `auth-verify-prod` | every 15m | 🔴 FAILING | `default-deny-all` NetworkPolicy blocks egress — **platform IS healthy, this is a false negative** | Add egress NetworkPolicy for auth-verify CronJob pods |
-| `cert-verify-prod` | every 6h | 🔴 FAILING | Same NetworkPolicy blocks `apk add` in Alpine container | Use pre-installed image (e.g. `alpine/openssl`) or add egress rule |
-| `course-reindex` | every 6h | 🔴 FAILING | JSON decode error at step 2/3 — Elasticsearch doc-count query returns empty body | Fix reindex script ES query |
-| `library-export` | nightly | 🔴 FAILING | Silent failure — no pod logs | Investigate script; add error trapping |
-| `tenant-isolation-nightly` | nightly | 🔴 FAILING | Logs GC'd — failure reason unknown | Re-run manually, capture logs |
-| `superset-init` | one-shot | 🔴 STUCK | Terminating for **2d2h** — finalizer stuck | `kubectl delete job superset-init -n mereka-lms --force --grace-period=0` |
+| Job | Status | Root Cause (confirmed) | Fix | Effort | PR needed? |
+|-----|--------|----------------------|-----|--------|------------|
+| `auth-verify-prod` | 🔴 FALSE NEGATIVE | `default-deny-all` blocks port 443 egress. Platform IS healthy. | Add `allow-monitoring-jobs-external-egress` NetworkPolicy for `auth-verify`+`cert-verify` pods | 5 min | Yes — `deploy/k8s/base/network-policies/` |
+| `cert-verify-prod` | 🔴 FALSE NEGATIVE | Same NetworkPolicy blocks `apk add` on Alpine container | Same NP fix above covers both | 5 min | Yes — same PR |
+| `course-reindex` | 🔴 BROKEN | `curl -sf \| python3` — empty body on ES down/cold → `JSONDecodeError`. Step 1 (reindex) succeeds; step 2 (count verify) crashes. | Guard with: `ES_BODY=$(curl ... \|\| echo '{"count":0}')` in `cronjob-course-reindex.yaml:57-58` | 5 min | Yes — this repo |
+| `library-export` | 🔴 BROKEN | Zero `envFrom` secretRefs + zero volume mounts → Django can't init, silent exit 1 | Add `envFrom: openedx-secrets, database-secrets, mereka-lms-runtime-secrets` + volume mounts (settings ConfigMaps) to `cronjob-library-export.yaml` | 30 min | Yes — this repo |
+| `tenant-isolation-nightly` | 🔴 BROKEN | `lms` SA lacks `pods/exec` RBAC → `kubectl exec` returns 403 → empty `LMS_POD` var → job exits "No LMS pod found" | Create `Role/RoleBinding` granting `pods` list + `pods/exec` create for monitoring jobs | 30 min | Yes — `deploy/k8s/base/monitoring/rbac.yaml` |
+| `superset-init` | 🔴 STUCK 2d+ | `argocd.argoproj.io/hook-delete-policy: HookSucceeded` — ArgoCD only deletes on success; failed job lingers + stuck `Terminating` pod prevents TTL cleanup | **Now**: `kubectl delete pod -n mereka-lms -l app.kubernetes.io/name=superset-init --force --grace-period=0 && kubectl delete job superset-init -n mereka-lms` **Then**: change hook policy to `HookSucceeded,HookFailed` + add `activeDeadlineSeconds: 600` in `deploy/k8s/base/plugins/aspects/jobs.yml:13` | 5 min kubectl + 5 min PR | kubectl now; PR for manifest |
 
-> ⚠️ `auth-verify` and `cert-verify` failures are **monitoring false negatives** — platform is healthy (HTTP 200 confirmed externally).
+> All 5 PR changes are in **this repo** (`mereka-lms`), not `bbi-infrastructure`.
 
 **Skill**: `k8s-diagnostics`, `k8s-operations`
 
@@ -110,6 +116,25 @@ review_cadence: weekly
 | Item | Status | Priority | Evidence | Next Action |
 |------|--------|----------|----------|-------------|
 | 54 non-running pods (`stg-mereka-lms`) | 🟡 DEGRADED | P2 | runtime (batch1) | Evicted/Error/ContainerStatusUnknown pods not GC'd. Run: `kubectl delete pods --field-selector=status.phase=Failed -n stg-mereka-lms && kubectl delete pods --field-selector=status.phase=Succeeded -n stg-mereka-lms` |
+
+---
+
+### 1.6 Main Branch CI — Systemic Failures (batch4a)
+
+> ⚠️ Main branch CI has been failing across Static Validation shards for 24+ hours. All open PRs inherit these failures — not PR-caused.
+
+| Failing Check | Root Cause | Fix Needed |
+|---|---|---|
+| `verify-secret-classification` | Missing Aspects ClickHouse passwords in classification coverage | Add CH passwords to secret classification map |
+| `verify-catalog-discovery` | 13 sub-checks failing | Investigate discovery service health checks |
+| `verify-theming-generated-artifacts` | `favicon.ico` missing for mereka theme | Add `favicon.ico` to theme static (file exists in git status as untracked!) |
+| `verify-brand-asset-drift` | Asset drift detected | Re-run brand asset generation |
+| `verify-mfe-reduced-motion` | Missing `@media (prefers-reduced-motion: no-preference)` guard | Add motion guard to MFE SCSS |
+| `verify-migration-lock` | 2 locked items open | Investigate migration lock file |
+| `verify-aspects-analytics` | 2 checks failing | Check aspects pipeline state |
+| `verify-phase7-selector-list-coverage` | Phase 7 selectors incomplete | Update selector coverage |
+
+**Priority**: Fix these on `main` before merging any PR — they block clean CI assessment.
 
 ---
 
@@ -154,6 +179,21 @@ review_cadence: weekly
 
 **Beads**: `mereka-lms-1kwf`, `mereka-lms-1kwf.1`
 **Skill**: `mfe-branding-proof`, `openedx-architecture`, `tutor-commands`
+
+### 2.5 Open PR Action Queue (batch4a)
+
+| PR | Title | Merge State | Recommendation | Action |
+|----|-------|-------------|----------------|--------|
+| #1288 | docs(import): truthful status doc | ✅ Mergeable, CI PASS | **MERGE NOW** | Zero risk, docs-only |
+| #1280 | docs: complete dev closure tracker | ✅ Mergeable, CI PASS | **MERGE NOW** | Zero risk, docs-only |
+| #1301 | bump lodash 4.18.1 | ✅ Mergeable | **MERGE NOW** | Systemic CI failures not caused by this PR |
+| #1245 | bump actions/cache 5.0.4 | ✅ Mergeable | **MERGE NOW** | 1-line CI dependency update |
+| #1296 | fix(auth): OIDC verifier domain canonicalization | ❌ CONFLICTING | NEEDS_REBASE | Supersedes #1294; rebase then review |
+| #1283 | fix(aspects): closure phase 1 | ❌ CONFLICTING | NEEDS_REBASE | Migration script conflicts; rebase needed |
+| #1247 | fix(theme): sync CMS overrides | ❌ CONFLICTING | NEEDS_REBASE | 3 days stale; trivial rebase |
+| #1294 | fix(auth): verify OIDC provider surface | ✅ Mergeable | CLOSE (superseded by #1296) | Narrower scope, #1296 covers it all |
+| #1302 | feat(acceptance): runtime-routing control plane | DRAFT | HOLD | CI still running; opened today |
+| bbi-infra #2245 | docs(domains): D-05 domain-registry boundary | Unknown | NEEDS_REVIEW | 3 days inactive; ping author |
 
 ---
 
@@ -246,15 +286,24 @@ review_cadence: weekly
 
 ## Section 6: Enterprise Services
 
-### 6.1 Catalog / Subsidy / Access
+### 6.1 Catalog / Subsidy / Access (dev state — batch4j)
 
 | Item | Status | Priority | Evidence | Next Action |
 |------|--------|----------|----------|-------------|
-| MEREKA EC catalogs (0) | ❄️ PARKED | P3 | runtime_validated | User deferred — create via Django admin when ready |
-| SOF EC catalogs (0) | ❄️ PARKED | P3 | runtime_validated | User deferred |
-| Biji-Biji duplicate catalogs (3 LMS, 1 catalog service) | ❄️ PARKED | P4 | runtime_validated | Low priority cleanup |
-| Enterprise admin portal thin menu | 🟡 IN PROGRESS | P2 | runtime | Expected until catalogs created |
-| License manager / learner portal `/mereka` slug | ⚪ NOT STARTED | P2 | unverified | Needs browser login test |
+| enterprise-catalog (dev) | 🟢 HEALTHY | — | runtime (batch4j) | 6 catalogs, 4 queries, 109 content objects |
+| enterprise-access (dev) | 🟢 HEALTHY | — | runtime (batch4j) | 0 LicenseRequests (expected for dev) |
+| enterprise-subsidy (dev) | 🟢 HEALTHY | — | runtime (batch4j) | 0 Subsidies (expected for dev) |
+| license-manager (dev) | 🟢 HEALTHY | — | runtime (batch4j) | 0 SubscriptionPlans; 0 restarts |
+| enterprise-admin-portal (dev) | 🟡 NO INGRESS | P2 | runtime (batch4j) | Pod running but no ingress rule for `admin.academyv2.mereka.dev` — not browser-accessible |
+| enterprise-learner-portal (dev) | 🟡 NO INGRESS | P2 | runtime (batch4j) | Pod running but no ingress rule — not browser-accessible |
+| ecommerce (Oscar) in dev | 🟢 INTENTIONALLY ABSENT | — | runtime (batch4j) | Oscar stack not deployed in `mereka-lms-dev` at all |
+| payments-gateway (dev + staging) | 🟡 RUNNING (9 restarts) | P2 | runtime (batch4j) | Deployed in both dev and staging. 9 restarts since 2026-03-31 — same Redis bgsave root cause. |
+| MEREKA EC catalogs on prod | ❄️ PARKED | P3 | runtime_validated | User deferred — create via Django admin when ready |
+| SOF EC catalogs | ❄️ PARKED | P3 | runtime_validated | User deferred |
+| Biji-Biji duplicate catalogs | ❄️ PARKED | P4 | runtime_validated | Low priority cleanup |
+| License manager `/mereka` slug | ⚪ NOT STARTED | P2 | unverified | Needs browser login test |
+
+> Enterprise service ports: catalog:8160, access:18270, subsidy:18280, license-manager:18170 — NOT 8000. Health probes must use these ports.
 
 **Skill**: `enterprise-services`, `k8s-diagnostics`
 
@@ -332,18 +381,62 @@ review_cadence: weekly
 
 ---
 
-## Section 10: Observability & Monitoring
+## Section 10: Observability & Monitoring (batch4g — full audit)
+
+### 10.1 PrometheusRules
 
 | Item | Status | Priority | Evidence | Next Action |
 |------|--------|----------|----------|-------------|
-| Prometheus stack (dev + staging) | 🟢 DONE | — | runtime_validated | Metrics flowing |
-| Loki + Promtail log aggregation | 🟢 DONE | — | runtime_validated | Deployed |
-| Tempo distributed tracing | 🟢 DONE | — | runtime_validated | Deployed |
-| Superset dashboards (18, Aspects) | 🟢 DONE | — | runtime_validated | OAuth login works |
-| SLO dashboards defined | ⚪ NOT STARTED | P2 | unverified | `slo-sla-service-level-management_spec.md` |
-| PagerDuty / Slack alerting wired | ⚪ NOT STARTED | P2 | unverified | Need Prometheus alert rules → routing |
-| Synthetic checks for MFE/account/login | ⚪ NOT STARTED | P2 | unverified | Blackbox exporter config |
-| `daily-infrastructure-audit.yml` | 🟢 DONE | — | repo_truth | Merged observability + alert routing + parity |
+| 12 active rules (auth, caddy, credentials, enterprise, ESO, libraries, LMS, services, velero, video, SLO×2) | 🟢 ACTIVE | — | repo_truth (batch4g) | Deployed via kustomization |
+| `prometheusrule-email.yaml` | ❄️ QUARANTINED | P3 | repo_truth | SES exporter not deployed — `ses_bounce_total` metric missing. Deploy SES exporter to un-quarantine. |
+| `prometheusrule-ora2.yaml` | ❄️ QUARANTINED | P4 | repo_truth | ORA2 custom instrumentation not emitted by stock Open edX |
+| `prometheusrule-tenant-isolation.yaml` | ❄️ QUARANTINED | P3 | repo_truth | Depends on Pushgateway (not deployed) |
+| SMTP pod — no active alert | 🔴 UNMONITORED | P2 | runtime (batch4g) | `smtp` deploy running but email rule quarantined; no alert if SMTP dies |
+| Meilisearch — no PrometheusRule | 🔴 UNMONITORED | P2 | runtime (batch4g) | Forum search degradation completely invisible |
+
+### 10.2 ServiceMonitors
+
+| Item | Status | Priority | Evidence | Next Action |
+|------|--------|----------|----------|-------------|
+| 11 SMs active (caddy, LMS, CMS, credentials, discovery, mysql, redis, enterprise, notes, mux-monitor, mongodb-exporter) | 🟢 ACTIVE | — | repo_truth (batch4g) | |
+| `servicemonitor-purchase-gateway.yaml` namespace mismatch | 🔴 BROKEN | P1 | repo_truth (batch4g) | Targets `namespaceSelector: mereka-lms` but deploy is in `mereka-lms-dev`. Add kustomize patch per env. |
+| `meilisearch` — no ServiceMonitor | 🔴 MISSING | P2 | runtime (batch4g) | Add SM or at minimum PrometheusRule for pod-up |
+| `postgresql-payments` — no SM | ⚪ NOT STARTED | P3 | repo_truth | Purchase gateway DB unmonitored |
+| Worker pods (cms-worker, lms-worker, enterprise-*-worker) — no /metrics | ⚪ DEFERRED | P3 | repo_truth | Workers have no HTTP endpoint — kube-state coverage only |
+
+### 10.3 SLO Coverage
+
+| Item | Status | Priority | Evidence |
+|------|--------|----------|----------|
+| SLO recording rules (7 journeys: LMS login/course, CMS authoring, checkout, webhook, forum, MFE) | 🟢 COMPLETE | — | repo_truth (batch4g) |
+| SLO burn-rate rules | 🟢 COMPLETE | — | repo_truth (batch4g) |
+| SLO overview Grafana dashboard (`slo-overview.json`, 22 panels) | 🔴 NOT DEPLOYED | P1 | runtime (batch4g) | File exists in repo but NOT loaded as Grafana configmap. Add to monitoring namespace with `grafana_dashboard=1` label. |
+
+### 10.4 Alert Routing
+
+| Item | Status | Priority | Evidence | Next Action |
+|------|--------|----------|----------|-------------|
+| Slack webhook wired (`#nonprod-alerts`) | 🟢 DONE | — | runtime (batch4g) | ESO-managed `alertmanager-slack-webhook` |
+| Critical + warning both → same Slack channel | 🟡 PARTIAL | P2 | runtime (batch4g) | No severity-based routing; critical alerts don't page anyone |
+| No production-specific receiver | 🔴 MISSING | P1 | runtime (batch4g) | All envs go to `#nonprod-alerts` — prod alerts mixed with dev noise |
+| No PagerDuty / OpsGenie escalation | 🔴 MISSING | P2 | runtime (batch4g) | Critical alerts can be missed if Slack is not actively watched |
+| No dead-man's switch (heartbeat) | ⚪ NOT STARTED | P3 | unverified | No probe verifying alertmanager pipeline end-to-end |
+
+### 10.5 Synthetic / Blackbox Checks
+
+| Item | Status | Priority | Evidence | Next Action |
+|------|--------|----------|----------|-------------|
+| Blackbox exporter deployed | 🔴 NOT DEPLOYED | P1 | runtime (batch4g) | Zero `Probe` CRD objects in cluster. No blackbox exporter deployment. |
+| Synthetic probe for `academyv2.mereka.io` | 🔴 MISSING | P1 | runtime (batch4g) | No external HTTP/HTTPS probe hitting production URL |
+| Certificate validity synthetic check | 🔴 MISSING | P2 | runtime (batch4g) | `cert-verify-prod` CronJob fails (see §1.4) — no replacement |
+
+### 10.6 Grafana
+
+| Item | Status | Priority | Evidence | Next Action |
+|------|--------|----------|----------|-------------|
+| 36 infrastructure dashboards loaded (kube, ARC, ArgoCD, cert-manager, Velero) | 🟢 LOADED | — | runtime (batch4g) | |
+| `slo-overview.json` (22-panel LMS SLO dashboard) | 🔴 NOT LOADED | P1 | runtime (batch4g) | Must add as ConfigMap with `grafana_dashboard=1` label |
+| `daily-infrastructure-audit.yml` | 🟢 DONE | — | repo_truth | Merged observability + parity workflows |
 
 **Skill**: `k8s-diagnostics`, `cost-management`
 
@@ -384,6 +477,25 @@ review_cadence: weekly
 
 ---
 
+## Section 11b: Dependency Security (batch4e)
+
+| Package / Area | Status | Priority | Issue | Action |
+|---|---|---|---|---|
+| **pip-audit CI scan scope** | 🔴 BROKEN | P1 | CI scans only pip-audit's own deps (no `-r` flag) — `requirements-tutor.txt` and `kajabi-webhook/requirements.txt` are **never audited** | Add `-r requirements-tutor.txt` to `pip-audit` invocation in `ci.yml:862` |
+| `.devcontainer/Dockerfile` | 🔴 STALE | P1 | Tutor `18.2.2` (Quince) vs project's `21.0.2` (Ulmo) — any dev using devcontainer has incompatible CLI | Update to `tutor[full]==21.0.2` |
+| `tutor-contrib-aspects` | 🟡 UNPINNED | P2 | Installed in `.venv` (`3.0.3`) but absent from `requirements-tutor.txt` — CI won't install it | Add `tutor-contrib-aspects==3.0.3` to `requirements-tutor.txt` |
+| `requirements-ci.txt` | 🟡 UNPINNED | P2 | `pyyaml`, `ruff`, `yamllint`, `jinja2` all unpinned — CI tools can break silently on new releases | Add version bounds (`ruff>=0.9,<1`, etc.) |
+| `uvicorn` in kajabi-webhook | 🟡 OUTDATED | P2 | `0.30.6` vs current `0.34.x` — `0.32+` includes security and HTTP/2 fixes | Bump to `>=0.32.0` |
+| `moment.js` in hubspot-webhook | 🟡 DEPRECATED | P2 | Officially deprecated library; `^` semver = silent major upgrades | Replace with `dayjs`; run `npm audit` |
+| Tutor venv drift (21.0.0 vs 21.0.2) | 🟡 STALE | P2 | Local `.venv` two patch versions behind CI pin | `pip install -r requirements-tutor.txt` |
+| `django-prometheus==2.3.1` | 🟡 OUTDATED | P3 | ~2022 release; current is 2.5.0 (adds Django 5.x support) | Update to `>=2.3.1,<3` |
+| `brand-mereka` Paragon loose pin | 🟡 AT_RISK | P3 | `^23.19.1` = any 23.x pulled at build time; no lockfile | Add `package-lock.json` |
+| `Pygments` CVE-2026-4539 | 🟡 SUPPRESSED | P3 | ReDoS in AdlLexer; local-only; no upstream fix; correctly suppressed in CI | Monitor for ≥2.19.3 release |
+| `platform-plugin-aspects<1.1.3` | ℹ️ INTENTIONAL | — | Python 3.12 requirement in 1.1.3+; cap is intentional | Unblock when platform → Python 3.12 |
+| `edx-event-routing-backends>=9.3.5,<9.4` | ℹ️ RANGE PIN | — | Non-hermetic; could resolve to different patch in CI vs prod | Consider exact `==9.3.5` pin |
+
+---
+
 ## Section 12b: Technical Debt in Custom Apps
 
 | App | Debt Type | Status | Priority | Next Action |
@@ -394,6 +506,28 @@ review_cadence: weekly
 | Plugin files (`infrastructure/tutor/plugins/`) | 0 TODOs | 🟢 CLEAN | — | No action |
 
 > batch3 found 14 TODOs across 8 files in `infrastructure/tutor/custom-apps/` (not plugins — plugins are clean).
+
+---
+
+## Section 13b: Test Coverage (batch4-testing)
+
+| Area | Tests | CI-Enforced | Blocking | Status | Gap |
+|------|-------|------------|---------|--------|-----|
+| `tests/` (core) | 185 across 15 files | Yes (pytest) | **No** — `continue-on-error: true` | 🟡 | `.coverage` artifact missing from last CI run — gate is invisible |
+| `custom-apps/` (21 apps) | **1,318 tests** | **No** | — | 🔴 | Tests exist and NEVER run in CI |
+| K8s multisite (LMS settings) | 52 tests | Partial (path-gated) | Yes | 🟢 | No CMS equivalent |
+| purchase-gateway | 229 tests (unit + integration) | **No** | — | 🔴 | `build-purchase-gateway.yml` skips test step entirely |
+| E2E Playwright | 5 spec files | **No** (manual dispatch only) | — | 🔴 | Daily schedule cron commented out |
+| QA shell scripts | 775 scripts (~177K lines) | Partial (static shard) | Yes | 🟡 | Runtime scripts never run in CI |
+| Tutor shell tests | 6 scripts | Yes | Yes | 🟢 | Requires real Tutor — can't mock |
+| Spec coverage gate | 80% threshold | Yes | **Yes** | 🟢 | Measures AC linkage, not code coverage |
+
+**Top 3 CI test gaps to close (batch4-testing):**
+1. 🔴 **Wire `custom-apps/` to CI** — 1,318 tests in 21 apps, zero CI execution, regressions completely invisible
+2. 🔴 **Wire `purchase-gateway` tests** — 229 async tests, `build-purchase-gateway.yml` has no test job
+3. 🟡 **Remove `continue-on-error: true` from `test-coverage` job** — currently swallows failures silently; `.coverage` artifact missing from latest run means actual % unknown
+
+**Skill**: `test-coverage-enhancer`, `gh-actions`
 
 ---
 
