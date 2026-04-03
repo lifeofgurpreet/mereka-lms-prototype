@@ -11,7 +11,7 @@ SELECTOR_FILE="$REPO_ROOT/scripts/qa/mfe-live-dom-phase7-selectors.txt"
 FULL_SELECTOR_FILE="$REPO_ROOT/scripts/qa/mfe-live-dom-phase7-full-selectors.txt"
 WRAPPER="$REPO_ROOT/scripts/qa/run-phase7-dom-audit.sh"
 FULL_WRAPPER="$REPO_ROOT/scripts/qa/run-phase7-dom-audit-full.sh"
-SELECTOR_COVERAGE_SCRIPT="$REPO_ROOT/scripts/qa/verify-phase7-selector-list-coverage.sh"
+SELECTOR_COVERAGE_SCRIPT="$REPO_ROOT/scripts/qa/verify-mfe-selector-coverage.sh"
 VERIFY_SCRIPT="$REPO_ROOT/scripts/qa/verify-mfe-live-dom-audit.sh"
 LIVE_DOM_WORKFLOW="$REPO_ROOT/.github/workflows/mfe-live-dom-audit.yml"
 CLOSURE_WORKFLOW="$REPO_ROOT/.github/workflows/frontend-branding-closure.yml"
@@ -72,7 +72,7 @@ else
 fi
 
 if [[ ! -x "$SELECTOR_COVERAGE_SCRIPT" ]]; then
-  fail "Missing executable coverage checker: scripts/qa/verify-phase7-selector-list-coverage.sh"
+  fail "Missing executable coverage checker: scripts/qa/verify-mfe-selector-coverage.sh"
 else
   pass "Selector coverage checker exists"
 fi
@@ -164,11 +164,11 @@ else
     fail "Makefile missing authenticated dev DOM audit target wiring"
   fi
 
-  if rg -n '^qa-phase7-selector-coverage:' "$MAKEFILE" >/dev/null \
-    && rg -n 'verify-phase7-selector-list-coverage\.sh' "$MAKEFILE" >/dev/null; then
-    pass "Makefile exposes qa-phase7-selector-coverage target"
+  if rg -n '^qa-mfe-selector-coverage:' "$MAKEFILE" >/dev/null \
+    && rg -n 'verify-mfe-selector-coverage\.sh' "$MAKEFILE" >/dev/null; then
+    pass "Makefile exposes qa-mfe-selector-coverage target"
   else
-    fail "Makefile missing qa-phase7-selector-coverage target wiring"
+    fail "Makefile missing qa-mfe-selector-coverage target wiring"
   fi
 fi
 

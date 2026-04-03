@@ -40,14 +40,15 @@ skip() { SKIP=$((SKIP + 1)); echo "  SKIP: $1"; }
 LIVE_MODE=0
 LMS_URL="https://${LMS_DOMAIN:-academyv2.mereka.io}"
 MFE_URL="https://${MFE_DOMAIN:-apps.academyv2.mereka.io}"
+EXPLICIT_LIVE_URLS=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --live|--online) LIVE_MODE=1; shift ;;
     --offline|--source-only)
                      shift ;;  # default, no-op
-    --lms-url)       LMS_URL="$2"; shift 2 ;;
-    --mfe-url)       MFE_URL="$2"; shift 2 ;;
+    --lms-url)       LMS_URL="$2"; EXPLICIT_LIVE_URLS=1; shift 2 ;;
+    --mfe-url)       MFE_URL="$2"; EXPLICIT_LIVE_URLS=1; shift 2 ;;
     -h|--help)
       sed -n '3,20p' "$0" | sed 's/^# \?//'
       exit 0
@@ -683,55 +684,68 @@ if [[ "$LIVE_MODE" -eq 1 ]]; then
   echo "  MFE URL: $MFE_URL"
   echo ""
   # @covers AC-FTPAR-007: live footer class + section markers present on all domains
-  LIVE_DOMAINS=(
-    "academyv2.mereka.io"
-    "academy.biji-biji.com"
-    "skillourfuture.academy.mereka.io"
-  )
+  if [[ "$EXPLICIT_LIVE_URLS" -eq 1 ]]; then
+    LIVE_TARGETS=(
+      "lms|${LMS_URL}"
+      "mfe|${MFE_URL}"
+    )
+  else
+    LIVE_TARGETS=(
+      "lms-primary|https://academyv2.mereka.io"
+      "lms-biji|https://academy.biji-biji.com"
+      "lms-sof|https://skillourfuture.academy.mereka.io"
+    )
+  fi
 
-  for domain in "${LIVE_DOMAINS[@]}"; do
-    echo "  [domain: $domain]"
-    HTML=$(curl -sf --max-time 15 "https://${domain}" 2>/dev/null || true)
+  for target in "${LIVE_TARGETS[@]}"; do
+    name="${target%%|*}"
+    url="${target#*|}"
+    echo "  [target: $name]"
+    HTML=$(curl -sSLf --max-time 15 "$url" 2>/dev/null || true)
     if [[ -z "$HTML" ]]; then
-      fail "${domain}: failed to fetch (curl error, timeout, or 5xx)"
+      fail "${name}: failed to fetch ${url} (curl error, timeout, or 5xx)"
       continue
     fi
 
     # mereka-footer class must be present
     if grep -q "mereka-footer" <<<"$HTML"; then
-      pass "${domain}: mereka-footer class present"
+      pass "${name}: mereka-footer class present"
     else
-      fail "${domain}: mereka-footer class NOT present (may be deployment gap — image rebuild required)"
+      fail "${name}: mereka-footer class NOT present (may be deployment gap — image rebuild required)"
     fi
 
     # No unbranded "Powered by Open edX"
     if grep -qi "powered by open edx" <<<"$HTML"; then
-      fail "${domain}: contains 'Powered by Open edX'"
+      fail "${name}: contains 'Powered by Open edX'"
     else
-      pass "${domain}: no unbranded 'Powered by Open edX'"
+      pass "${name}: no unbranded 'Powered by Open edX'"
     fi
 
     # Copyright line present
     if grep -qE "©|&copy;|copyright|MEREKA|Biji-Biji" <<<"$HTML"; then
-      pass "${domain}: copyright/brand line present"
+      pass "${name}: copyright/brand line present"
     else
-      fail "${domain}: copyright/brand line NOT present"
+      fail "${name}: copyright/brand line NOT present"
     fi
   done
 
-  # LMS structural section checks (single LMS pod serves all three domains)
-  echo "  [LMS structural sections: academyv2.mereka.io]"
-  LMS_HTML=$(curl -sf --max-time 15 "https://academyv2.mereka.io" 2>/dev/null || true)
-  if [[ -n "$LMS_HTML" ]]; then
-    for section in "Future of Work" "Creative Tech" "Explore" "Support" "Partners"; do
-      if grep -q "$section" <<<"$LMS_HTML"; then
-        pass "LMS footer section '${section}' present"
-      else
-        fail "LMS footer section '${section}' NOT present (may be image deployment gap)"
-      fi
-    done
+  # The broad section inventory belongs to branding acceptance, not runtime-routing.
+  if [[ "$EXPLICIT_LIVE_URLS" -eq 1 ]]; then
+    skip "Explicit live URLs provided — skipping broad LMS section inventory (tenant-branding concern)"
   else
-    warn "Could not fetch academyv2.mereka.io for section checks"
+    echo "  [LMS structural sections: academyv2.mereka.io]"
+    LMS_HTML=$(curl -sf --max-time 15 "https://academyv2.mereka.io" 2>/dev/null || true)
+    if [[ -n "$LMS_HTML" ]]; then
+      for section in "Future of Work" "Creative Tech" "Explore" "Support" "Partners"; do
+        if grep -q "$section" <<<"$LMS_HTML"; then
+          pass "LMS footer section '${section}' present"
+        else
+          fail "LMS footer section '${section}' NOT present (may be image deployment gap)"
+        fi
+      done
+    else
+      warn "Could not fetch academyv2.mereka.io for section checks"
+    fi
   fi
 else
   skip "AC-FTPAR-007 skipped — pass --live to run live footer content checks"

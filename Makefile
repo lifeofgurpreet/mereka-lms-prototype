@@ -104,8 +104,11 @@ qa-phase7-dom-audit-full-dev-auth: ## Run expanded Phase 7 authenticated learner
 qa-phase7-dom-audit-full-strict: ## Run expanded Phase 7 runtime DOM selector audit (prod, runtime theme required)
 	./scripts/qa/run-phase7-dom-audit-full.sh --env prod --project chromium --require-runtime-theme
 
-qa-phase7-selector-coverage: ## Verify Phase 7 selector-list coverage stays aligned with mereka.scss classes
-	./scripts/qa/verify-phase7-selector-list-coverage.sh
+qa-mfe-selector-coverage: ## Verify the canonical MFE selector inventory stays aligned with runtime classes
+	./scripts/qa/verify-mfe-selector-coverage.sh
+
+qa-phase7-selector-coverage: ## Deprecated alias for qa-mfe-selector-coverage
+	$(MAKE) qa-mfe-selector-coverage
 
 qa-phase2-smoke-evidence-prod: ## Run Phase 2 MFE smoke + screenshot evidence capture (prod, runtime theme required)
 	./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.io --require-runtime --require-slot-markers

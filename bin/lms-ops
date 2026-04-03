@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# lms-ops — Unified operator surface for Mereka LMS app-owned concerns.
+# lms-ops — App-owned control-plane surface for Mereka LMS concerns.
 #
-# This is the single canonical front door for LMS operations.
-# It mirrors the pattern of bbi-infrastructure's bin/gitops-ops
-# but is scoped strictly to app-owned concerns.
+# Public lane entrypoints live under bin/accept. bin/lms-ops remains the
+# backend control-plane surface for app-owned operational concerns and
+# compatibility routing.
 #
 # Usage:
 #   bin/lms-ops <concern> [options]
@@ -12,6 +12,7 @@
 #   migrate plan     Show pending migrations per service (read-only)
 #   migrate apply    Run migration Jobs via kubectl apply (requires --lane)
 #   migrate verify   Verify zero pending migrations post-apply
+#   accept runtime-routing  Run the canonical tenant runtime-routing acceptance lane
 #   inventory ci-static   Show authoritative CI static-validation inventory
 #   inventory ci-runtime  Show authoritative CI runtime-validation inventory
 #   proof            Emit GitOps-conformant evidence envelopes
@@ -408,9 +409,29 @@ do_topology() {
   exec "$REPO_ROOT/scripts/qa/verify-topology-selectors.sh" "${args[@]}"
 }
 
+# ── Concern: accept ────────────────────────────────────────────────────────
+do_accept() {
+  local sub="${SUBCONCERN:-runtime-routing}"
+  case "$sub" in
+    runtime-routing)
+      local env_scope="$LANE"
+      [[ "$env_scope" == "prod" ]] && env_scope="production"
+      local args=("--env" "$env_scope")
+      [[ "$DRY_RUN" == "true" ]] && args+=("--dry-run")
+      args+=("${PASSTHROUGH_ARGS[@]}")
+      exec "$REPO_ROOT/scripts/acceptance/runtime-routing.sh" "${args[@]}"
+      ;;
+    *)
+      echo "Unknown accept subconcern: $sub (expected: runtime-routing)" >&2
+      exit 1
+      ;;
+  esac
+}
+
 # ── Dispatch ──────────────────────────────────────────────────────────────
 case "$CONCERN" in
   migrate)      do_migrate ;;
+  accept)       do_accept ;;
   inventory)    do_inventory ;;
   proof)        do_proof ;;
   release-gate) do_release_gate ;;
@@ -419,6 +440,6 @@ case "$CONCERN" in
   topology)     do_topology ;;
   *)
     echo "Unknown concern: $CONCERN" >&2
-    echo "Valid concerns: migrate, inventory, proof, release-gate, smoke, preflight, topology" >&2
+    echo "Valid concerns: migrate, accept, inventory, proof, release-gate, smoke, preflight, topology" >&2
     exit 1 ;;
 esac

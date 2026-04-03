@@ -34,6 +34,7 @@ scripts/infra/check-pr-handoff-discipline.sh  # WORKTREE_CONTEXT (local pre-hand
 scripts/infra/cleanup-stale-branches.sh  # WORKTREE_CONTEXT (local branch/worktree cleanup; start with --dry-run before using --remote)
 scripts/infra/recover-stale-build-tutor-images.sh  # WORKTREE_CONTEXT (manual GitHub Actions recovery for stale build-tutor workflow_dispatch runs)
 scripts/qa/ops-preflight.sh  # WORKTREE_CONTEXT (operator preflight for br+tutor+gitops before combined manual ops)
+scripts/acceptance/generate_runtime_routing_matrix.py  # WORKTREE_CONTEXT (generates the runtime-routing contract from tenant-registry.yaml)
 
 # ── Live infrastructure required ─────────────────────────────────────────────────────
 scripts/qa/verify-enterprise-sso-readiness.sh --mode repo  # LIVE_CLUSTER
@@ -79,6 +80,7 @@ scripts/qa/public-health-check.sh  # LIVE_APP (public endpoint smoke; optional k
 scripts/qa/run-mfe-slot-gates.sh  # LIVE_APP
 scripts/qa/run-tenant-branding-qa.sh  # LIVE_APP
 scripts/qa/verify-paragon-runtime.sh  # LIVE_APP (visual-regression prereqs)
+scripts/acceptance/runtime-routing.sh  # LIVE_APP (canonical lane wrapper for tenant LMS/apps/studio/footer runtime acceptance)
 
 # ── Data file dependent ─────────────────────────────────────────────────────
 scripts/qa/verify-certificate-issuance.sh  # DATA_FILE

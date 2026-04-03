@@ -328,7 +328,7 @@ scripts/qa/verify-mfe-selectors.sh
 scripts/qa/verify-mfe-slot-nfr.sh
 scripts/qa/verify-mfe-ulmo-migration.sh
 scripts/qa/verify-phase7-dom-audit-contract.sh
-scripts/qa/verify-phase7-selector-list-coverage.sh
+scripts/qa/verify-mfe-selector-coverage.sh
 scripts/qa/verify-slot-migration-readiness.sh
 scripts/branding/verify-logo-setup.sh
 scripts/qa/audit-branding-surfaces.sh

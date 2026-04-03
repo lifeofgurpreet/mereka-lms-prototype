@@ -25,6 +25,7 @@ version: "2.0.0"
 front_door:
   canonical: bin/lms-ops
   concerns:
+    - accept      # canonical lane acceptance wrapper
     - inventory   # harness inventory / generated CI static+runtime reports
     - migrate     # plan/apply/verify
     - proof       # evidence envelope emission
@@ -228,6 +229,34 @@ entrypoints:
           and boundary audit. A structural integrity gate, not a live-cluster
           runtime verification gate. Run with --skip-cluster for CI static
           checks; use run-release-verification-gates.sh for the full suite.
+    status: canonical
+
+  # ── 7. Runtime-routing-acceptance ───────────────────────────────────────
+  - workflow_id: runtime-routing-acceptance
+    label: "Tenant runtime-routing acceptance lane"
+    canonical_script: scripts/acceptance/runtime-routing.sh
+    owner: platform-team
+    invocation: |
+      # Preferred operator front door:
+      bin/accept runtime-routing --env dev
+
+      # Control-plane compatibility path:
+      bin/lms-ops accept runtime-routing --lane dev
+    proof_output: |
+      - var/acceptance/runtime-routing/<env>/<timestamp>/browser-matrix.json
+      - var/acceptance/runtime-routing/<env>/<timestamp>/summary.json
+      - per-tenant logs for playwright, studio-sso, and footer parity
+    alternatives:
+      - path: tests/e2e/tests/smoke-unauthenticated.spec.ts
+        reason: >
+          High-signal browser oracle, but not the acceptance front door by itself.
+          Run through runtime-routing.sh so the proof bundle stays coherent.
+      - path: scripts/qa/verify-studio-sso-flow.sh
+        reason: >
+          Useful focused redirect check, but only one slice of the lane contract.
+      - path: scripts/qa/verify-footer-parity.sh
+        reason: >
+          Useful footer/runtime probe, but not a complete tenant-routing acceptance lane.
     status: canonical
 
   # ── 7. Proof-envelope ──────────────────────────────────────────────────

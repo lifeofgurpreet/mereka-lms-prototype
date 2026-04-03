@@ -111,7 +111,7 @@ scripts/qa/verify-slo-dashboards.sh
 scripts/qa/verify-mfe-customizations.sh
 scripts/qa/verify-mfe-route-smoke.sh
 scripts/qa/verify-mfe-slot-nfr.sh
-scripts/qa/verify-phase7-selector-list-coverage.sh
+scripts/qa/verify-mfe-selector-coverage.sh
 scripts/qa/audit-branding-surfaces.sh
 scripts/qa/verify-rtl-theme-assets.sh
 scripts/qa/verify-token-drift.sh

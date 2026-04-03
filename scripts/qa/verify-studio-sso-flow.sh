@@ -41,11 +41,11 @@ echo "Domain: $DOMAIN"
 echo ""
 
 # @covers AC-SSO-BYPASS-001
-# Test 1: /login?next=/oauth2/authorize... should bypass MFE authn
-# and redirect to /auth/login/oidc/ (the OIDC provider login)
-check "OAuth login bypasses MFE authn" \
+# Test 1: /login?next=/oauth2/authorize... should preserve the OAuth intent
+# through the tenant MFE authn entrypoint rather than leaking cross-tenant.
+check "OAuth login preserves tenant MFE authn path" \
   "https://${DOMAIN}/login?next=/oauth2/authorize%3Fclient_id%3Dcms-sso%26response_type%3Dcode" \
-  "/auth/login/oidc/"
+  "apps\.${DOMAIN}/authn/login\\?next=%2Foauth2%2Fauthorize"
 
 # @covers AC-SSO-BYPASS-002
 # Test 2: /login (no next param) should redirect to MFE authn as usual

@@ -22,7 +22,7 @@
 #   ci_static_inventory.precheck_files[] - Repo-relative static scripts that must run serially before shard fan-out
 #   ci_runtime_inventory.entries[].script - Repo-relative manual/runtime inventory entry
 
-version: "1.2.2"
+version: "1.2.3"
 
 canonical_entrypoints:
   # Top-level release automation
@@ -383,7 +383,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-mfe-slot-nfr.sh
     - script: scripts/qa/verify-mfe-ulmo-migration.sh
     - script: scripts/qa/verify-phase7-dom-audit-contract.sh
-    - script: scripts/qa/verify-phase7-selector-list-coverage.sh
+    - script: scripts/qa/verify-mfe-selector-coverage.sh
     - script: scripts/qa/verify-slot-migration-readiness.sh
     - script: scripts/branding/verify-logo-setup.sh
     - script: scripts/qa/audit-branding-surfaces.sh
@@ -728,6 +728,12 @@ ci_runtime_inventory:
     - script: scripts/qa/verify-paragon-token-coverage.sh
       category: DOC_GAP
       note: TSV audit files
+    - script: scripts/acceptance/runtime-routing.sh
+      category: LIVE_APP
+      note: canonical lane wrapper for tenant LMS/apps/studio/footer runtime acceptance
+    - script: scripts/acceptance/generate_runtime_routing_matrix.py
+      category: WORKTREE_CONTEXT
+      note: generates the runtime-routing contract from tenant-registry.yaml
 
 scripts:
 
@@ -800,6 +806,56 @@ scripts:
     lanes: [prod]
     proof_command: "bash scripts/infra/create-release.sh --help 2>&1 | head -3 || true"
     criticality: release-blocking
+
+  # ── Lane Acceptance ────────────────────────────────────────────────────────
+
+  - path: scripts/acceptance/runtime-routing.sh
+    owner: platform-team
+    purpose: >
+      Canonical runtime-routing lane wrapper. Generates the tenant browser matrix,
+      runs the env runtime-proof script, and wraps the existing browser/runtime
+      oracles into one proof bundle.
+    inputs:
+      - --env production|staging|dev|profiles-dev|local
+      - --tenant slug (optional)
+      - --output-dir PATH (optional)
+      - --dry-run (optional)
+      - --skip-runtime-proof (optional)
+      - --skip-playwright (optional)
+      - --skip-studio-sso (optional)
+      - --skip-footer (optional)
+    outputs:
+      - var/acceptance/runtime-routing/<env>/<timestamp>/summary.json
+      - var/acceptance/runtime-routing/<env>/<timestamp>/browser-matrix.json
+      - per-tenant log files under the same proof bundle
+    side_effects:
+      - none in --dry-run
+      - reads live app endpoints and may read live cluster state via delegated runtime-proof scripts
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bin/accept runtime-routing --env dev --tenant biji-biji --dry-run"
+    criticality: release-supporting
+
+  - path: scripts/acceptance/generate_runtime_routing_matrix.py
+    owner: platform-team
+    purpose: >
+      Generates the canonical runtime-routing browser contract from
+      deploy/k8s/tenancy/tenant-registry.yaml for one environment at a time.
+    inputs:
+      - --env production|staging|dev|profiles-dev|local
+      - --tenant slug (optional)
+      - --output PATH (optional)
+      - --stdout (optional)
+      - --check (optional)
+    outputs:
+      - generated/tenant-runtime/browser-matrix-<env>.json
+      - stdout path or JSON when requested
+    side_effects:
+      - writes generated tenant-runtime contract files in the repo
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "python3 scripts/acceptance/generate_runtime_routing_matrix.py --env dev --check"
+    criticality: informational
 
   # ── Image Tag Management ─────────────────────────────────────────────────────
 

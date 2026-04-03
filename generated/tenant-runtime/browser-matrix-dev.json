@@ -1,0 +1,259 @@
+{
+  "schema_version": "runtime-routing-contract/v1",
+  "source": "deploy/k8s/tenancy/tenant-registry.yaml",
+  "source_version": "1.5.0",
+  "lane": "runtime-routing",
+  "environment": "dev",
+  "environment_contract": {
+    "lane_contract_version": "1",
+    "root_domain": "mereka.dev",
+    "auth_host": "auth0.mereka.dev",
+    "namespace": "mereka-lms-dev",
+    "argocd_app": "mereka-lms-dev",
+    "gitops_overlay_path": "apps/mereka-lms/overlays/profiles/dev",
+    "runtime_proof_script": "scripts/tenants/verify-dev-runtime-proof.sh",
+    "acceptance_profile": {
+      "dashboard_redirect": {
+        "path": "/dashboard",
+        "expect_final_role": "mfe"
+      },
+      "apps_host_stability_paths": [
+        "/",
+        "/dashboard"
+      ],
+      "studio_sso": {
+        "entry_role": "primary",
+        "entry_path": "/login",
+        "expect_apps_role": "mfe"
+      },
+      "forbidden_hosts": {
+        "source_tenant": "mereka",
+        "apply_to_non_primary_tenants_only": true,
+        "roles": [
+          "primary",
+          "studio",
+          "mfe"
+        ]
+      },
+      "footer_probe": {
+        "lms_role": "primary",
+        "mfe_role": "mfe"
+      },
+      "playwright": {
+        "base_url_role": "primary",
+        "selector_audit_routes": [
+          "/authn/login",
+          "/learner-dashboard/",
+          "/profile/"
+        ]
+      }
+    }
+  },
+  "tenants": [
+    {
+      "tenant": "mereka",
+      "display_name": "Mereka Academy",
+      "is_primary": true,
+      "theme": "mereka",
+      "playwright_base_url": "https://academyv2.mereka.dev",
+      "playwright_selector_audit_routes": [
+        "/authn/login",
+        "/learner-dashboard/",
+        "/profile/"
+      ],
+      "studio_sso_entry_domain": "academyv2.mereka.dev",
+      "footer_probe": {
+        "lms_url": "https://academyv2.mereka.dev",
+        "mfe_url": "https://apps.academyv2.mereka.dev"
+      },
+      "hosts": {
+        "primary": "academyv2.mereka.dev",
+        "studio": "studio.academyv2.mereka.dev",
+        "mfe": "apps.academyv2.mereka.dev"
+      },
+      "forbidden_hosts": [],
+      "contract_ready": true,
+      "missing_roles": [],
+      "assertions": [
+        {
+          "id": "dashboard-route",
+          "kind": "redirect-contract",
+          "url": "https://academyv2.mereka.dev/dashboard",
+          "expect_final_host": "apps.academyv2.mereka.dev",
+          "forbid_hosts": []
+        },
+        {
+          "id": "apps-root",
+          "kind": "host-stability",
+          "url": "https://apps.academyv2.mereka.dev/",
+          "expect_host": "apps.academyv2.mereka.dev",
+          "forbid_redirect_hosts": []
+        },
+        {
+          "id": "apps-dashboard",
+          "kind": "host-stability",
+          "url": "https://apps.academyv2.mereka.dev/dashboard",
+          "expect_host": "apps.academyv2.mereka.dev",
+          "forbid_redirect_hosts": []
+        },
+        {
+          "id": "studio-sso-login",
+          "kind": "sso-contract",
+          "url": "https://academyv2.mereka.dev/login",
+          "expect_apps_host": "apps.academyv2.mereka.dev",
+          "forbid_hosts": []
+        }
+      ]
+    },
+    {
+      "tenant": "biji-biji",
+      "display_name": "Biji-Biji Academy",
+      "is_primary": false,
+      "theme": "mereka",
+      "playwright_base_url": "https://biji-biji.academyv2.mereka.dev",
+      "playwright_selector_audit_routes": [
+        "/authn/login",
+        "/learner-dashboard/",
+        "/profile/"
+      ],
+      "studio_sso_entry_domain": "biji-biji.academyv2.mereka.dev",
+      "footer_probe": {
+        "lms_url": "https://biji-biji.academyv2.mereka.dev",
+        "mfe_url": "https://apps.biji-biji.academyv2.mereka.dev"
+      },
+      "hosts": {
+        "primary": "biji-biji.academyv2.mereka.dev",
+        "studio": "studio.biji-biji.academyv2.mereka.dev",
+        "mfe": "apps.biji-biji.academyv2.mereka.dev"
+      },
+      "forbidden_hosts": [
+        "academyv2.mereka.dev",
+        "studio.academyv2.mereka.dev",
+        "apps.academyv2.mereka.dev"
+      ],
+      "contract_ready": true,
+      "missing_roles": [],
+      "assertions": [
+        {
+          "id": "dashboard-route",
+          "kind": "redirect-contract",
+          "url": "https://biji-biji.academyv2.mereka.dev/dashboard",
+          "expect_final_host": "apps.biji-biji.academyv2.mereka.dev",
+          "forbid_hosts": [
+            "academyv2.mereka.dev",
+            "studio.academyv2.mereka.dev",
+            "apps.academyv2.mereka.dev"
+          ]
+        },
+        {
+          "id": "apps-root",
+          "kind": "host-stability",
+          "url": "https://apps.biji-biji.academyv2.mereka.dev/",
+          "expect_host": "apps.biji-biji.academyv2.mereka.dev",
+          "forbid_redirect_hosts": [
+            "academyv2.mereka.dev",
+            "studio.academyv2.mereka.dev",
+            "apps.academyv2.mereka.dev"
+          ]
+        },
+        {
+          "id": "apps-dashboard",
+          "kind": "host-stability",
+          "url": "https://apps.biji-biji.academyv2.mereka.dev/dashboard",
+          "expect_host": "apps.biji-biji.academyv2.mereka.dev",
+          "forbid_redirect_hosts": [
+            "academyv2.mereka.dev",
+            "studio.academyv2.mereka.dev",
+            "apps.academyv2.mereka.dev"
+          ]
+        },
+        {
+          "id": "studio-sso-login",
+          "kind": "sso-contract",
+          "url": "https://biji-biji.academyv2.mereka.dev/login",
+          "expect_apps_host": "apps.biji-biji.academyv2.mereka.dev",
+          "forbid_hosts": [
+            "academyv2.mereka.dev",
+            "studio.academyv2.mereka.dev",
+            "apps.academyv2.mereka.dev"
+          ]
+        }
+      ]
+    },
+    {
+      "tenant": "skillourfuture",
+      "display_name": "Skill Our Future",
+      "is_primary": false,
+      "theme": "mereka",
+      "playwright_base_url": "https://skillourfuture.academyv2.mereka.dev",
+      "playwright_selector_audit_routes": [
+        "/authn/login",
+        "/learner-dashboard/",
+        "/profile/"
+      ],
+      "studio_sso_entry_domain": "skillourfuture.academyv2.mereka.dev",
+      "footer_probe": {
+        "lms_url": "https://skillourfuture.academyv2.mereka.dev",
+        "mfe_url": "https://apps.skillourfuture.academyv2.mereka.dev"
+      },
+      "hosts": {
+        "primary": "skillourfuture.academyv2.mereka.dev",
+        "studio": "studio.skillourfuture.academyv2.mereka.dev",
+        "mfe": "apps.skillourfuture.academyv2.mereka.dev"
+      },
+      "forbidden_hosts": [
+        "academyv2.mereka.dev",
+        "studio.academyv2.mereka.dev",
+        "apps.academyv2.mereka.dev"
+      ],
+      "contract_ready": true,
+      "missing_roles": [],
+      "assertions": [
+        {
+          "id": "dashboard-route",
+          "kind": "redirect-contract",
+          "url": "https://skillourfuture.academyv2.mereka.dev/dashboard",
+          "expect_final_host": "apps.skillourfuture.academyv2.mereka.dev",
+          "forbid_hosts": [
+            "academyv2.mereka.dev",
+            "studio.academyv2.mereka.dev",
+            "apps.academyv2.mereka.dev"
+          ]
+        },
+        {
+          "id": "apps-root",
+          "kind": "host-stability",
+          "url": "https://apps.skillourfuture.academyv2.mereka.dev/",
+          "expect_host": "apps.skillourfuture.academyv2.mereka.dev",
+          "forbid_redirect_hosts": [
+            "academyv2.mereka.dev",
+            "studio.academyv2.mereka.dev",
+            "apps.academyv2.mereka.dev"
+          ]
+        },
+        {
+          "id": "apps-dashboard",
+          "kind": "host-stability",
+          "url": "https://apps.skillourfuture.academyv2.mereka.dev/dashboard",
+          "expect_host": "apps.skillourfuture.academyv2.mereka.dev",
+          "forbid_redirect_hosts": [
+            "academyv2.mereka.dev",
+            "studio.academyv2.mereka.dev",
+            "apps.academyv2.mereka.dev"
+          ]
+        },
+        {
+          "id": "studio-sso-login",
+          "kind": "sso-contract",
+          "url": "https://skillourfuture.academyv2.mereka.dev/login",
+          "expect_apps_host": "apps.skillourfuture.academyv2.mereka.dev",
+          "forbid_hosts": [
+            "academyv2.mereka.dev",
+            "studio.academyv2.mereka.dev",
+            "apps.academyv2.mereka.dev"
+          ]
+        }
+      ]
+    }
+  ]
+}

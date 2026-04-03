@@ -1,6 +1,8 @@
 {
   "version": 1,
   "staging_reference_allowlist": [
+    "scripts/acceptance/generate_runtime_routing_matrix.py",
+    "scripts/acceptance/runtime-routing.sh",
     "scripts/aspects/bootstrap-aspects-env.sh",
     "scripts/aspects/init-aspects-env.sh",
     "scripts/aspects/verify-aspects-auth-flow.sh",

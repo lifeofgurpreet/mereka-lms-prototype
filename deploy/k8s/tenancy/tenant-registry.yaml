@@ -131,6 +131,45 @@ environments:
     dns_zone: ""
 
 # ============================================================================
+# LANE CONTRACTS
+# ============================================================================
+# Explicit lane-level product rules. Generators may derive concrete URLs and
+# hostnames from these rules plus the domain registry, but they may not invent
+# new routing behavior outside this section.
+lane_contracts:
+  runtime-routing:
+    schema_version: "1"
+    environments:
+      production: &runtime_routing_defaults
+        dashboard_redirect:
+          path: /dashboard
+          expect_final_role: mfe
+        apps_host_stability_paths:
+          - /
+          - /dashboard
+        studio_sso:
+          entry_role: primary
+          entry_path: /login
+          expect_apps_role: mfe
+        forbidden_hosts:
+          source_tenant: mereka
+          apply_to_non_primary_tenants_only: true
+          roles: [primary, studio, mfe]
+        footer_probe:
+          lms_role: primary
+          mfe_role: mfe
+        playwright:
+          base_url_role: primary
+          selector_audit_routes:
+            - /authn/login
+            - /learner-dashboard/
+            - /profile/
+      dev: *runtime_routing_defaults
+      profiles-dev: *runtime_routing_defaults
+      staging: *runtime_routing_defaults
+      local: *runtime_routing_defaults
+
+# ============================================================================
 # DOMAIN REGISTRY
 # ============================================================================
 # Every live domain across all environments and tenants.

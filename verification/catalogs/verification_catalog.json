@@ -2527,7 +2527,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-catalog-discovery.sh",
-      "reference_count": 5,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -6211,7 +6211,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-footer-parity.sh",
-      "reference_count": 19,
+      "reference_count": 21,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -8933,6 +8933,32 @@
       "cadence": "per_pr_and_push",
       "canonical": true,
       "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
+      "env_scope": [
+        "global"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "frontend-platform",
+      "path": "scripts/qa/verify-mfe-selector-coverage.sh",
+      "reference_count": 6,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "high",
+      "spec_ids": [],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
         "ci_static",
         "workflow_direct"
       ],
@@ -11598,14 +11624,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "global"
       ],
@@ -11613,15 +11635,15 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-phase7-selector-list-coverage.sh",
-      "reference_count": 5,
+      "reference_count": 0,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "deprecated_candidate",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "on_demand",
@@ -14886,7 +14908,7 @@
       "mutability": "read-only",
       "owner": "identity-access",
       "path": "scripts/qa/verify-studio-sso-flow.sh",
-      "reference_count": 8,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -17519,7 +17541,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/tenants/verify-dev-runtime-proof.sh",
-      "reference_count": 4,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -17542,7 +17564,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/tenants/verify-staging-runtime-proof.sh",
-      "reference_count": 5,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -17580,25 +17602,25 @@
     "archived_deprecated_scripts": 21,
     "ci_static_bound": 360,
     "kinds": {
-      "verify": 585
+      "verify": 586
     },
     "mutability": {
       "destructive": 9,
       "mutating": 18,
-      "read-only": 558
+      "read-only": 559
     },
     "status_overrides_applied": 8,
     "statuses": {
       "active": 404,
-      "deprecated_candidate": 1,
+      "deprecated_candidate": 2,
       "manual_only": 180
     },
     "tiers": {
-      "exploratory_manual": 184,
+      "exploratory_manual": 185,
       "periodic_runtime": 17,
       "release_blocking": 384
     },
-    "total_verify_scripts": 585,
+    "total_verify_scripts": 586,
     "workflow_direct_bound": 54
   },
   "version": "1"

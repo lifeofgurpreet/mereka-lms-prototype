@@ -58,13 +58,13 @@ commonAnnotations:
 # labels (and label selectors) added to all Resources
 # https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/labels/
 labels:
-  - pairs:
-      app.kubernetes.io/instance: mereka-lms
-      app.kubernetes.io/part-of: mereka-lms
-      app.kubernetes.io/managed-by: tutor
-    # Do not mutate selectors automatically. It causes drift/immutability issues
-    # and breaks Services when workloads don't carry the injected instance labels.
-    includeSelectors: false
+- pairs:
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/managed-by: tutor
+  # Do not mutate selectors automatically. It causes drift/immutability issues
+  # and breaks Services when workloads don't carry the injected instance labels.
+  includeSelectors: false
 
 
 patches:
@@ -85,7 +85,7 @@ configMapGenerator:
   - apps/caddy/Caddyfile
   options:
     labels:
-        app.kubernetes.io/name: caddy
+      app.kubernetes.io/name: caddy
 - name: openedx-settings-lms
   files:
   - apps/openedx/settings/lms/__init__.py
@@ -98,7 +98,7 @@ configMapGenerator:
   - apps/openedx/settings/lms/mereka_enterprise_channels.py
   options:
     labels:
-        app.kubernetes.io/name: openedx
+      app.kubernetes.io/name: openedx
 - name: openedx-settings-cms
   files:
   - apps/openedx/settings/cms/__init__.py
@@ -110,32 +110,32 @@ configMapGenerator:
   - apps/openedx/settings/cms/mereka_multisite.py
   options:
     labels:
-        app.kubernetes.io/name: openedx
+      app.kubernetes.io/name: openedx
 - name: openedx-config
   files:
   - apps/openedx/config/cms.env.yml
   - apps/openedx/config/lms.env.yml
   options:
     labels:
-        app.kubernetes.io/name: openedx
+      app.kubernetes.io/name: openedx
 - name: openedx-uwsgi-config
   files:
   - apps/openedx/uwsgi.ini
   options:
     labels:
-        app.kubernetes.io/name: openedx
+      app.kubernetes.io/name: openedx
 - name: openedx-theme-head-extra
   files:
   - apps/openedx/theme/head-extra.html
   options:
     labels:
-        app.kubernetes.io/name: openedx
+      app.kubernetes.io/name: openedx
 - name: redis-config
   files:
   - apps/redis/redis.conf
   options:
     labels:
-        app.kubernetes.io/name: redis
+      app.kubernetes.io/name: redis
 - name: discovery-settings
   files:
     - plugins/discovery/apps/settings/tutor/production.py

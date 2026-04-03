@@ -185,7 +185,27 @@ apps.localhost{$default_site_port} {
 
 # MFE (TLS via NGINX Ingress)
 http://{$MFE_HOST} {
-    redir / https://{$LMS_HOST}
+    # Root apps host contract: stay on the tenant apps host and land on the authn shell.
+    # Without this, requests to apps.<tenant>/ fall through and leak to the shared LMS host.
+    @mfe_root_entry {
+        path /
+    }
+    redir @mfe_root_entry /authn/login?next=%2Fdashboard 302
+
+    # Learner-home alias: human entry traffic expects /dashboard on the apps host,
+    # but the shipped learner-home MFE lives at /learner-dashboard/.
+    @mfe_dashboard_alias {
+        path /dashboard /dashboard/
+    }
+    redir @mfe_dashboard_alias /learner-dashboard/ 302
+
+    # Account MFE requires trailing slash: React Router basename=/account/ won't
+    # match /account (no slash), rendering a blank page. Redirect silently.
+    @account_no_slash {
+        path /account
+    }
+    redir @account_no_slash /account/ 302
+
     request_body {
         max_size 2MB
     }

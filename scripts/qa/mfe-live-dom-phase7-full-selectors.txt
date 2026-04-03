@@ -9,6 +9,9 @@
 .mereka-authn-login-branding__logo
 .mereka-authn-login-branding__logo-img
 .mereka-authn-login-branding__brand
+.mereka-authn-login-branding__copy
+.mereka-authn-login-branding__eyebrow
+.mereka-authn-login-branding__subtitle
 .mereka-header-logo
 .mereka-header-logo__lockup
 .mereka-header-logo__brand
