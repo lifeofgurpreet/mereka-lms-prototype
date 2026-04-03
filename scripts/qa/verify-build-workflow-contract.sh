@@ -322,14 +322,14 @@ else
   pass "MFE heavy build job no longer performs SBOM/Trivy scanning"
 fi
 
-if [[ "$SCAN_OPENEDX_BLOCK" == *"runs-on: mereka-k8s-runners"* && "$SCAN_OPENEDX_BLOCK" == *"needs: [build-openedx]"* ]]; then
-  pass "OpenEdX post-push scan runs on standard runners after build-openedx"
+if [[ "$SCAN_OPENEDX_BLOCK" == *"runs-on: mereka-k8s-heavy-builders"* && "$SCAN_OPENEDX_BLOCK" == *"needs: [build-openedx]"* ]]; then
+  pass "OpenEdX post-push scan runs on heavy builders after build-openedx"
 else
   fail "OpenEdX post-push scan job missing canonical runner or dependency"
 fi
 
-if [[ "$SCAN_MFE_BLOCK" == *"runs-on: mereka-k8s-runners"* && "$SCAN_MFE_BLOCK" == *"needs: [build-mfe]"* ]]; then
-  pass "MFE post-push scan runs on standard runners after build-mfe"
+if [[ "$SCAN_MFE_BLOCK" == *"runs-on: mereka-k8s-heavy-builders"* && "$SCAN_MFE_BLOCK" == *"needs: [build-mfe]"* ]]; then
+  pass "MFE post-push scan runs on heavy builders after build-mfe"
 else
   fail "MFE post-push scan job missing canonical runner or dependency"
 fi

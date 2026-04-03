@@ -819,7 +819,7 @@ jobs:
 
   scan-openedx-image:
     name: Post-push OpenEdX Scan
-    runs-on: mereka-k8s-runners
+    runs-on: mereka-k8s-heavy-builders
     timeout-minutes: 45
     needs: [build-openedx]
     if: ${{ needs.build-openedx.result == 'success' }}
@@ -964,7 +964,7 @@ jobs:
 
   scan-mfe-image:
     name: Post-push MFE Scan
-    runs-on: mereka-k8s-runners
+    runs-on: mereka-k8s-heavy-builders
     timeout-minutes: 45
     needs: [build-mfe]
     if: ${{ needs.build-mfe.result == 'success' }}

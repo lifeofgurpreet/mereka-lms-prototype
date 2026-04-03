@@ -204,7 +204,7 @@ jobs:
         run: echo "digest=sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" >> "$GITHUB_OUTPUT"
 
   scan-openedx-image:
-    runs-on: mereka-k8s-runners
+    runs-on: mereka-k8s-heavy-builders
     needs: [build-openedx]
     if: ${{ needs.build-openedx.result == 'success' }}
     steps:
@@ -233,7 +233,7 @@ jobs:
           OPENEDX_IMAGE_REF: ${{ env.REGISTRY }}/openedx@${{ needs.build-openedx.outputs.image_digest }}
 
   scan-mfe-image:
-    runs-on: mereka-k8s-runners
+    runs-on: mereka-k8s-heavy-builders
     needs: [build-mfe]
     if: ${{ needs.build-mfe.result == 'success' }}
     steps:
