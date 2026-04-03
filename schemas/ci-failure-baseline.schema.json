@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "repo",
+    "workflow",
+    "branch_run",
+    "baseline_run",
+    "new_failures",
+    "resolved_failures",
+    "decision"
+  ],
+  "properties": {
+    "schema_version": { "type": "string", "const": "ci-failure-baseline/v1" },
+    "repo": { "type": "string", "minLength": 1 },
+    "workflow": { "type": "string", "minLength": 1 },
+    "branch_run": { "$ref": "#/$defs/run" },
+    "baseline_run": { "$ref": "#/$defs/run" },
+    "new_failures": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "resolved_failures": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "shared_failures": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "clean",
+        "mergeable_with_baseline_debt",
+        "blocked_on_branch_failures"
+      ]
+    }
+  },
+  "$defs": {
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "run_id",
+        "head_sha",
+        "failure_ids",
+        "failure_details"
+      ],
+      "properties": {
+        "run_id": { "type": ["integer", "null"] },
+        "head_sha": { "type": ["string", "null"] },
+        "failure_ids": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "failed_jobs": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "failure_details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "jobs"],
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "jobs": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 },
+                "uniqueItems": true
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

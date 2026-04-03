@@ -59,17 +59,13 @@ jobs:
         run: |
           ./scripts/qa/verify-auth-surfaces.sh "$INPUT_ENV_SCOPE"
 
-      - name: Set up Python environment (SSO canary)
+      - name: Set up Python Playwright (SSO canary)
         if: ${{ (github.event.inputs.run_authenticated_sso_canary == 'true') || (vars.RUN_AUTHENTICATED_SSO_CANARY == 'true') }}
-        uses: ./.github/actions/setup-python-env
+        uses: ./.github/actions/setup-python-playwright
         with:
-          python-version: "3.11"
-          install-base-deps: 'false'
-          extra-deps: '"playwright==1.50.0"'
-
-      - name: Install Playwright browsers (SSO canary)
-        if: ${{ (github.event.inputs.run_authenticated_sso_canary == 'true') || (vars.RUN_AUTHENTICATED_SSO_CANARY == 'true') }}
-        run: python -m playwright install --with-deps chromium
+          python-version: '3.11'
+          playwright-version: '1.50.0'
+          install-system-deps: 'true'
 
       - name: Optional credentialed SSO canary (no cluster access) - run
         if: ${{ (github.event.inputs.run_authenticated_sso_canary == 'true') || (vars.RUN_AUTHENTICATED_SSO_CANARY == 'true') }}

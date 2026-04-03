@@ -18,12 +18,27 @@ except ImportError as exc:  # pragma: no cover - surfaced as a hard failure
     raise SystemExit("PyYAML is required: pip install pyyaml") from exc
 
 
-def git_repo_root() -> Path:
-    output = subprocess.check_output(
-        ["git", "rev-parse", "--show-toplevel"],
-        text=True,
-    ).strip()
-    return Path(output)
+def repo_root_from_path() -> Path:
+    return Path(__file__).resolve().parents[2]
+
+
+def discover_repo_root() -> Path:
+    override = os.environ.get("REPO_ROOT_OVERRIDE")
+    if override:
+        return Path(override).resolve()
+    fallback = repo_root_from_path()
+    try:
+        output = subprocess.check_output(
+            ["git", "rev-parse", "--show-toplevel"],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except (OSError, subprocess.CalledProcessError):
+        return fallback
+    candidate = Path(output).resolve()
+    if (candidate / "scripts/governance/script-registry.yaml").is_file():
+        return candidate
+    return fallback
 
 
 def load_registry(path: Path) -> dict:
@@ -264,7 +279,7 @@ def check_current(expected: str, output_path: Path) -> int:
 
 
 def main() -> int:
-    repo_root = git_repo_root()
+    repo_root = discover_repo_root()
     default_registry = repo_root / "scripts/governance/script-registry.yaml"
     default_generator = repo_root / "scripts/governance/generate-ci-runtime-inventory.py"
 

@@ -1,0 +1,77 @@
+name: 'Set up Python Playwright'
+description: 'Install Python Playwright, cache Chromium, and repair the browser only when needed'
+
+inputs:
+  python-version:
+    description: 'Python version'
+    required: false
+    default: '3.11'
+  playwright-version:
+    description: 'Playwright Python package version'
+    required: false
+    default: '1.50.0'
+  install-system-deps:
+    description: 'Whether to install Playwright system dependencies on cache miss/repair'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python environment
+      uses: ./.github/actions/setup-python-env
+      with:
+        python-version: ${{ inputs.python-version }}
+        install-base-deps: 'false'
+        extra-deps: '"playwright==${{ inputs.playwright-version }}"'
+
+    - name: Cache Playwright browsers
+      id: playwright-cache
+      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-py-${{ inputs.playwright-version }}-${{ runner.os }}
+
+    - name: Install or repair Playwright Chromium
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        executable_path="$(python - <<'PY'
+        from playwright.sync_api import sync_playwright
+
+        with sync_playwright() as playwright:
+            print(playwright.chromium.executable_path)
+        PY
+        )"
+
+        if [[ "${{ steps.playwright-cache.outputs.cache-hit }}" == "true" && -x "$executable_path" ]]; then
+          echo "Using cached Playwright Chromium at $executable_path"
+          exit 0
+        fi
+
+        args=(chromium)
+        if [[ "${{ inputs.install-system-deps }}" == "true" ]]; then
+          args=(--with-deps chromium)
+        fi
+
+        if [[ "${{ steps.playwright-cache.outputs.cache-hit }}" == "true" ]]; then
+          echo "Cached Playwright browser bundle is stale or incomplete; reinstalling Chromium."
+        else
+          echo "No Playwright browser cache found; installing Chromium."
+        fi
+
+        python -m playwright install "${args[@]}"
+
+        repaired_executable_path="$(python - <<'PY'
+        from playwright.sync_api import sync_playwright
+
+        with sync_playwright() as playwright:
+            print(playwright.chromium.executable_path)
+        PY
+        )"
+
+        if [[ ! -x "$repaired_executable_path" ]]; then
+          echo "ERROR: Playwright Chromium executable not found after install: $repaired_executable_path" >&2
+          exit 1
+        fi

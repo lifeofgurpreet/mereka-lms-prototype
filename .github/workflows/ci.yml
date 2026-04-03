@@ -330,14 +330,11 @@ jobs:
           npm install markdownlint-cli
           npx markdownlint docs/ specs/ --ignore docs/archive/ || true
 
-      - name: Verify CI static inventory is generated and current
-        run: python3 scripts/governance/generate-ci-static-inventory.py --check
+      - name: Verify generated surfaces are current
+        run: bash scripts/qa/verify-generated-surfaces.sh
 
-      - name: Verify verification catalog is generated and current
-        run: bash scripts/qa/verify-verification-catalog.sh
-
-      - name: Verify CI runtime inventory is generated and current
-        run: python3 scripts/governance/generate-ci-runtime-inventory.py --check
+      - name: Verify CI cache policy
+        run: bash scripts/qa/verify-ci-cache-policy.sh
 
   static-validation-shards:
     name: Static Validation Scripts (${{ matrix.shard.key }})

@@ -55,6 +55,7 @@ scripts/qa/verify-ci-runner-policy.sh
 scripts/qa/verify-stabilization-control-board.sh
 scripts/qa/verify-mysql-user-repair-guardrails.sh
 scripts/qa/verify-purge-frontend-cache-guardrails.sh
+scripts/qa/test-verify-generated-surfaces.sh
 scripts/qa/test-verify-verification-catalog.sh
 scripts/qa/verify-deprecated-verification-hygiene.sh
 scripts/qa/verify-release-gitops-guardrails.sh

@@ -56,6 +56,7 @@ scripts/qa/verify-execution-invariants-pack.sh
 scripts/qa/verify-provision-mysql-app-dbs-guardrails.sh
 scripts/qa/verify-data-retention-jobs-guardrails.sh
 scripts/qa/verify-studio-sso-canary-guardrails.sh
+scripts/qa/verify-verification-catalog.sh
 scripts/qa/verify-verify-script-reachability.sh
 scripts/qa/verify-release-automation.sh
 scripts/qa/verify-release-invocation-guardrail-wiring.sh

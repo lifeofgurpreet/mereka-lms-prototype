@@ -48,7 +48,8 @@ ci_static_inventory:
     - .github/ci-scripts-static-shard-02.txt
     - .github/ci-scripts-static-shard-03.txt
   precheck_files:
-    - scripts/qa/verify-verification-catalog.sh
+    - scripts/qa/verify-generated-surfaces.sh
+    - scripts/qa/verify-ci-cache-policy.sh
     - scripts/qa/verify-new-ci-static-entries.sh
   generator: scripts/governance/generate-ci-static-inventory.py
   owner: platform-team
@@ -214,6 +215,10 @@ ci_static_inventory:
     - script: scripts/qa/verify-authentik-apply-guardrails.sh
     - script: scripts/qa/verify-studio-sso-canary-guardrails.sh
     - script: scripts/qa/verify-new-ci-static-entries.sh
+    - script: scripts/qa/verify-generated-surfaces.sh
+    - script: scripts/qa/test-verify-generated-surfaces.sh
+    - script: scripts/qa/verify-ci-cache-policy.sh
+    - script: scripts/qa/test-verify-ci-cache-policy.sh
     - script: scripts/qa/verify-verification-catalog.sh
     - script: scripts/qa/test-verify-verification-catalog.sh
     - script: scripts/qa/verify-verification-sprawl-budget.sh
@@ -1387,6 +1392,86 @@ scripts:
     proof_command: "bash scripts/qa/verify-no-hardcoded-secrets.sh 2>&1 | tail -5"
     criticality: release-blocking
 
+  - path: scripts/qa/verify-generated-surfaces.sh
+    owner: platform-team
+    purpose: >
+      Canonical front door for deterministic generated-surface drift checks used by
+      CI precheck. Verifies static inventory, verification catalog, runtime inventory,
+      and tracked runtime-routing matrices in one read-only pass.
+    inputs: []
+    outputs:
+      - stdout (PASS/FAIL summary)
+      - exit code
+    side_effects: none
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/verify-generated-surfaces.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/verify-verification-catalog.sh
+    owner: platform-team
+    purpose: >
+      Validates that the generated verification catalog matches the authoritative
+      registry and remains current without mutating tracked outputs.
+    inputs: []
+    outputs:
+      - stdout (PASS/FAIL summary)
+      - exit code
+    side_effects: none
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/verify-verification-catalog.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/test-verify-generated-surfaces.sh
+    owner: platform-team
+    purpose: >
+      Regression harness for verify-generated-surfaces.sh. Seeds generated-surface
+      drift in a temporary repo copy and proves the gate remains read-only.
+    inputs: []
+    outputs:
+      - stdout (PASS/FAIL summary)
+      - exit code
+    side_effects:
+      - Creates a temporary repo copy under /tmp
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/test-verify-generated-surfaces.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/verify-ci-cache-policy.sh
+    owner: platform-team
+    purpose: >
+      Verifies that CI workflows route Playwright browser setup through the
+      shared cached setup actions and that image builds retain the required
+      BuildKit cache restore/write-back policy.
+    inputs: []
+    outputs:
+      - stdout (PASS/FAIL summary)
+      - exit code
+    side_effects: none
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/verify-ci-cache-policy.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/test-verify-ci-cache-policy.sh
+    owner: platform-team
+    purpose: >
+      Regression harness for verify-ci-cache-policy.sh. Seeds workflow and build
+      cache drift in a temporary repo copy and proves the verifier remains
+      read-only while pinpointing the missing cache contracts.
+    inputs: []
+    outputs:
+      - stdout (PASS/FAIL summary)
+      - exit code
+    side_effects:
+      - Creates a temporary repo copy under /tmp
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/test-verify-ci-cache-policy.sh"
+    criticality: release-blocking
+
   # ── CI Preflight & Build ─────────────────────────────────────────────────────
 
   - path: scripts/ci/preflight-check.sh
@@ -1405,6 +1490,25 @@ scripts:
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/ci/preflight-check.sh 2>&1 | head -20"
     criticality: release-blocking
+
+  - path: scripts/ci/generate_ci_failure_baseline.py
+    owner: platform-team
+    purpose: >
+      Generates a machine-readable branch-vs-main CI failure diff so operators can
+      distinguish branch regressions from inherited baseline debt.
+    inputs:
+      - --repo <owner/repo> (optional; autodetects origin remote)
+      - --branch-run-id / --branch-log-dir
+      - --baseline-run-id / --baseline-log-dir
+      - GITHUB_TOKEN (required for run-id mode)
+    outputs:
+      - stdout JSON or --output file containing ci-failure-baseline/v1 payload
+    side_effects:
+      - Downloads GitHub Actions log archives in run-id mode
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "python3 scripts/ci/generate_ci_failure_baseline.py --help | head -20"
+    criticality: release-supporting
 
   - path: scripts/infra/resolve-build-scope.sh
     owner: platform-team

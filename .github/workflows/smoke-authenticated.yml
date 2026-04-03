@@ -216,22 +216,11 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
-      - name: Set up Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+      - name: Set up Python Playwright
+        uses: ./.github/actions/setup-python-playwright
         with:
           python-version: '3.11'
-
-      - name: Cache Playwright browsers
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-py-1.50.0-${{ runner.os }}
-
-      - name: Install Playwright (Chromium)
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install "playwright==1.50.0"
-          python -m playwright install chromium
+          playwright-version: '1.50.0'
 
       - name: Run SSO canary
         env:

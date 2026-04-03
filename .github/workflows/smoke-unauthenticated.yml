@@ -27,16 +27,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
-      - name: Setup Node
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f  # v6.3.0
+      - name: Set up Playwright
+        uses: ./.github/actions/setup-playwright
         with:
-          node-version: "20"
+          node-version: '20'
+          npm-cache-dependency-path: tests/e2e/package-lock.json
 
-      - name: Install Playwright
+      - name: Install npm dependencies
         working-directory: tests/e2e
-        run: |
-          npm ci
-          npx playwright install --with-deps chromium
+        run: npm ci
 
       - name: Resolve base URL
         id: resolve

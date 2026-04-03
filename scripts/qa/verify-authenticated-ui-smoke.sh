@@ -201,11 +201,12 @@ if [[ -f "$CI_WORKFLOW" ]]; then
     fail "CI workflow does not propagate the resolved env scope into visual regression"
   fi
 
-  # Check for Playwright installation
-  if grep -q "playwright install" "$CI_WORKFLOW"; then
-    pass "CI workflow installs Playwright browsers"
+  # Check for Playwright browser setup through either the shared cache action
+  # or an explicit install command.
+  if grep -q "setup-python-playwright" "$CI_WORKFLOW" || grep -q "playwright install" "$CI_WORKFLOW"; then
+    pass "CI workflow provisions Playwright browsers"
   else
-    fail "CI workflow missing Playwright browser installation"
+    fail "CI workflow missing Playwright browser provisioning"
   fi
 
   # Check for artifact upload

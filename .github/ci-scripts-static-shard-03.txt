@@ -55,6 +55,7 @@ scripts/qa/test-verify-ci-runner-policy.sh
 scripts/qa/verify-convergence-evidence-bundle.sh
 scripts/qa/verify-prune-gcp-snapshots-guardrails.sh
 scripts/qa/verify-authentik-apply-guardrails.sh
+scripts/qa/test-verify-ci-cache-policy.sh
 scripts/qa/verify-verification-sprawl-budget.sh
 scripts/qa/verify-post-deploy-health-gate-wiring.sh
 scripts/qa/verify-release-deployment-choreography.sh

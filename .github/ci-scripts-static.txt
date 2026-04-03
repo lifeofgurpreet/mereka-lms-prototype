@@ -160,6 +160,10 @@ scripts/qa/verify-purge-frontend-cache-guardrails.sh
 scripts/qa/verify-authentik-apply-guardrails.sh
 scripts/qa/verify-studio-sso-canary-guardrails.sh
 scripts/qa/verify-new-ci-static-entries.sh
+scripts/qa/verify-generated-surfaces.sh
+scripts/qa/test-verify-generated-surfaces.sh
+scripts/qa/verify-ci-cache-policy.sh
+scripts/qa/test-verify-ci-cache-policy.sh
 scripts/qa/verify-verification-catalog.sh
 scripts/qa/test-verify-verification-catalog.sh
 scripts/qa/verify-verification-sprawl-budget.sh
