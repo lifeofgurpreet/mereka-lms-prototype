@@ -47,6 +47,10 @@ spec:
             value: "discovery.localhost"
           - name: MFE_HOST
             value: "apps.localhost"
+          - name: TENANT_BIJIBIJI_MFE_HOST
+            value: "apps-bijibiji.invalid"
+          - name: TENANT_SOF_MFE_HOST
+            value: "apps-sof.invalid"
           - name: NOTES_HOST
             value: "notes.localhost"
           - name: CREDENTIALS_HOST

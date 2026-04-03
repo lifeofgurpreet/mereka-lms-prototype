@@ -110,6 +110,7 @@ for SLUG in "${SLUGS[@]}"; do
 import json
 from django.contrib.sites.models import Site
 from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
+from urllib.parse import urlparse
 
 try:
     from enterprise.models import EnterpriseCustomer
@@ -192,8 +193,38 @@ sc, sc_created = SiteConfiguration.objects.update_or_create(
     }
 )
 
+mfe_site_action = "SKIPPED"
+mfe_sc_action = "SKIPPED"
+mfe_host = urlparse(mfe_url).netloc or ""
+if mfe_host and mfe_host != domain:
+    mfe_site, mfe_site_created = Site.objects.update_or_create(
+        domain=mfe_host,
+        defaults={"name": f"{name} Apps"},
+    )
+    mfe_site_action = "CREATED" if mfe_site_created else "UPDATED"
+
+    mfe_site_values = dict(site_values)
+    mfe_site_values["domain"] = mfe_host
+    mfe_site_values["MFE_CONFIG"] = dict(site_values.get("MFE_CONFIG", {}))
+
+    _, mfe_sc_created = SiteConfiguration.objects.update_or_create(
+        site=mfe_site,
+        defaults={
+            "enabled": True,
+            "site_values": mfe_site_values,
+        }
+    )
+    mfe_sc_action = "CREATED" if mfe_sc_created else "UPDATED"
+
 action = "CREATED" if sc_created else "UPDATED"
-print(json.dumps({"tenant": "${SLUG}", "site_id": site.id, "action": action, "status": "OK"}))
+print(json.dumps({
+    "tenant": "${SLUG}",
+    "site_id": site.id,
+    "action": action,
+    "mfe_site_action": mfe_site_action,
+    "mfe_sc_action": mfe_sc_action,
+    "status": "OK",
+}))
 PYEOF
 
   PY_CONTENT=$(cat "$PY_SCRIPT")

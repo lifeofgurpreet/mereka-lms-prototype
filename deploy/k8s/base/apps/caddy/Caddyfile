@@ -176,15 +176,9 @@ http://{$DISCOVERY_HOST} {
 # MFE (Micro-Frontends) - localhost and production/dev
 # - apps.localhost: local development
 # MFE_HOST is injected by the overlay (e.g. apps.academyv2.mereka.io).
-apps.localhost{$default_site_port} {
-    request_body {
-        max_size 2MB
-    }
-    import proxy "mfe:8002"
-}
-
-# MFE (TLS via NGINX Ingress)
-http://{$MFE_HOST} {
+# Non-primary tenant apps hosts must be bound explicitly; a comma-joined host
+# list in one env var is not a trustworthy Caddy authority surface.
+(mfe_apps_proxy) {
     # Root apps host contract: stay on the tenant apps host and land on the authn shell.
     # Without this, requests to apps.<tenant>/ fall through and leak to the shared LMS host.
     @mfe_root_entry {
@@ -257,6 +251,28 @@ http://{$MFE_HOST} {
     }
 
     import proxy "mfe:8002"
+}
+
+apps.localhost{$default_site_port} {
+    request_body {
+        max_size 2MB
+    }
+    import proxy "mfe:8002"
+}
+
+# MFE (TLS via NGINX Ingress)
+http://{$MFE_HOST} {
+    import mfe_apps_proxy
+}
+
+# Non-primary tenant apps hosts must bind through the same authoritative edge
+# block as the primary apps host. Do not rely on a comma-joined MFE_HOST env.
+http://{$TENANT_BIJIBIJI_MFE_HOST:apps-bijibiji.invalid} {
+    import mfe_apps_proxy
+}
+
+http://{$TENANT_SOF_MFE_HOST:apps-sof.invalid} {
+    import mfe_apps_proxy
 }
 # Notes API
 notes.localhost{$default_site_port} {

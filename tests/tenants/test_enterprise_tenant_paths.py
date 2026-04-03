@@ -4,6 +4,8 @@ import json
 import subprocess
 from pathlib import Path
 
+import yaml
+
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SHARED_CONFIG = REPO_ROOT / "scripts" / "shared" / "config.sh"
@@ -17,6 +19,9 @@ MULTISITE_BOOTSTRAP_DJANGO = REPO_ROOT / "scripts" / "shared" / "multisite_boots
 VERIFY_MULTISITE_CONFIG = REPO_ROOT / "scripts" / "qa" / "verify-multisite-config.sh"
 BIJI_BRANDING = REPO_ROOT / "scripts" / "tenants" / "biji-biji-branding.json"
 SKILLOURFUTURE_BRANDING = REPO_ROOT / "scripts" / "tenants" / "skillourfuture-branding.json"
+DEV_MULTISITE_DEFINITIONS = REPO_ROOT / "infrastructure" / "tutor" / "multisite-sites.dev.yml"
+CADDYFILE = REPO_ROOT / "deploy" / "k8s" / "base" / "apps" / "caddy" / "Caddyfile"
+CADDY_DEPLOYMENT = REPO_ROOT / "deploy" / "k8s" / "base" / "apps" / "caddy" / "deployment.yaml"
 
 
 def bash_eval(command: str) -> str:
@@ -88,6 +93,24 @@ def test_siteconfig_seed_paths_enable_learner_home_mfe() -> None:
     assert 'rendered_values["ENABLE_LEARNER_HOME_MFE"] = True' in bootstrap_text
 
 
+def test_seed_paths_upsert_non_primary_mfe_hosts_like_bootstrap() -> None:
+    seed_text = SEED_SCRIPT.read_text(encoding="utf-8")
+    reconcile_text = SITE_RECONCILE_COMMON.read_text(encoding="utf-8")
+    bootstrap_text = MULTISITE_BOOTSTRAP_DJANGO.read_text(encoding="utf-8")
+
+    assert 'mfe_host = urlparse(mfe_url).netloc or ""' in seed_text
+    assert 'defaults={"name": f"{name} Apps"}' in seed_text
+    assert 'mfe_site_values["domain"] = mfe_host' in seed_text
+    assert 'mfe_site_values["MFE_CONFIG"] = dict(site_values.get("MFE_CONFIG", {}))' in seed_text
+
+    assert 'mfe_host = urlparse(mfe_url).netloc or ""' in reconcile_text
+    assert 'defaults={"name": f"{name} Apps"}' in reconcile_text
+    assert 'mfe_site_values["domain"] = mfe_host' in reconcile_text
+    assert 'mfe_site_values["MFE_CONFIG"] = dict(site_values.get("MFE_CONFIG", {}))' in reconcile_text
+
+    assert "Ensure MFE host itself resolves through SiteConfiguration overrides." in bootstrap_text
+
+
 def test_multisite_verifier_checks_authenticated_dashboard_handoff() -> None:
     text = VERIFY_MULTISITE_CONFIG.read_text(encoding="utf-8")
     assert "SafeCookieData.create" in text
@@ -134,3 +157,27 @@ def test_canonical_branding_payloads_exist_for_active_dev_tenants() -> None:
     assert skill["colors"]["text_on_primary"] == "#ffffff"
     assert skill["logos"]["logo_url"] == "/theme/logo-horizontal.png"
     assert skill["footer"]["contact_email"] == "admin@mereka.io"
+
+
+def test_dev_multisite_definitions_cover_active_non_primary_tenants() -> None:
+    payload = yaml.safe_load(DEV_MULTISITE_DEFINITIONS.read_text(encoding="utf-8"))
+    domains = {site["domain"] for site in payload["sites"]}
+
+    assert "biji-biji.academyv2.mereka.dev" in domains
+    assert "skillourfuture.academyv2.mereka.dev" in domains
+
+
+def test_outer_caddy_binds_non_primary_tenant_apps_hosts_explicitly() -> None:
+    caddy_text = CADDYFILE.read_text(encoding="utf-8")
+    deployment = yaml.safe_load(CADDY_DEPLOYMENT.read_text(encoding="utf-8"))
+    env = deployment["spec"]["template"]["spec"]["containers"][0]["env"]
+    env_map = {item["name"]: item["value"] for item in env}
+
+    assert "http://{$TENANT_BIJIBIJI_MFE_HOST:apps-bijibiji.invalid}" in caddy_text
+    assert "http://{$TENANT_SOF_MFE_HOST:apps-sof.invalid}" in caddy_text
+    assert "http://{$MFE_HOST} {" in caddy_text
+    assert 'value: "apps.localhost"' not in caddy_text
+
+    assert env_map["MFE_HOST"] == "apps.localhost"
+    assert env_map["TENANT_BIJIBIJI_MFE_HOST"] == "apps-bijibiji.invalid"
+    assert env_map["TENANT_SOF_MFE_HOST"] == "apps-sof.invalid"
