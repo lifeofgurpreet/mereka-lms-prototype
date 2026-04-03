@@ -239,9 +239,14 @@ review_cadence: weekly
 
 | Item | Status | Priority | Evidence | Next Action |
 |------|--------|----------|----------|-------------|
+| `openedx_tenant_cache 0001_initial` — UNAPPLIED (LMS + CMS) | 🔴 BLOCKED | P0 | runtime (batch4b) | App signals registered at startup; any write → `ProgrammingError: relation does not exist`. Run `lms-migrate` + `cms-migrate` Jobs immediately. |
+| `lms-migrate` Job manifest | 🟢 EXISTS | — | repo_truth (batch4b) | `deploy/k8s/base/jobs/lms-migrate.yaml` — apply before next LMS rollout |
+| `cms-migrate` Job manifest | 🟢 EXISTS | — | repo_truth (batch4b) | `deploy/k8s/base/jobs/cms-migrate.yaml` — apply before next CMS rollout |
+| `credentials-migrate.yaml` manifest | 🔴 MISSING | P2 | repo_truth (batch4b) | No manifest exists — gap in release tooling for future credentials schema changes |
+| Enterprise catalog/access/subsidy migrations | 🟢 CLEAN | — | runtime (batch4b) | All applied 14h ago via migrate Jobs |
 | Nonprod smoke test matrix | 🟡 IN PROGRESS | P1 | unverified | Bead `mereka-lms-288f` |
 | Tenant route matrix validation | 🟡 IN PROGRESS | P1 | unverified | All 3 tenants: Mereka / BB / SOF |
-| payments-gateway parity (nonprod) | 🟡 IN PROGRESS | P1 | unverified | Bead `mereka-lms-1jsy` |
+| payments-gateway parity (nonprod) | 🟢 DEPLOYED | — | runtime (batch4j) | Running in both dev (9 restarts/bgsave) and staging (35d uptime) |
 | Final hardening + handoff | 🟡 IN PROGRESS | P1 | unverified | Bead `mereka-lms-3st7` |
 | RKE2 LMS migration completion | 🟡 IN PROGRESS | P1 | unverified | Bead `mereka-lms-5ngf` |
 
@@ -347,6 +352,25 @@ review_cadence: weekly
 | `course_org_filter` for dev tenants | 🟡 IN PROGRESS | P2 | runtime | TEMP_RUNTIME — needs script merge |
 
 **Skill**: `domain-truth-convergence`, `gitops-contract-consumer`
+
+---
+
+### 8.2 Tenant Runtime Gaps (batch4h — runtime verified)
+
+| Item | Status | Priority | Evidence | Next Action |
+|------|--------|----------|----------|-------------|
+| **Staging SOF SiteConfig MISSING** — `staging.skillourfuture.academyv2.mereka.io` | 🔴 BLOCKED | P1 | runtime (batch4h) | DB query confirmed: `SiteConfiguration` row does NOT exist for SOF in staging DB. SOF courses would bleed through Mereka `course_org_filter`. Create via Django admin or migration on `stg-mereka-lms`. |
+| **`MEREKA_SITE_VARIANTS` SOF entry MISSING** in `tenant-resolution.js` | 🔴 BLOCKED | P1 | repo_truth (batch4h) | `infrastructure/tutor/plugins/_mereka_lms/mfe_runtime/tenant-resolution.js` has `'biji-biji.academyv2.mereka.io': _BIJI_BIJI` but NO `'skillourfuture.academyv2.mereka.io': _SKILL_OUR_FUTURE`. SOF MFE returns incorrect tenant config. |
+| Dev Mereka org filter | 🟢 COMPLETE | — | runtime (batch4h) | `MEREKA` org filter verified in dev DB |
+| Dev Biji-Biji org filter | 🟢 COMPLETE | — | runtime (batch4h) | `BIJI_BIJI` org filter verified in dev DB |
+| Dev SOF org filter | 🟢 COMPLETE | — | runtime (batch4h) | `SOF` org filter verified in dev DB |
+| Multi-tenancy spec (`multi-tenancy-architecture_spec.md`, 33 ACs) | 🟡 PARTIAL | P2 | repo_truth (b4-spec-gap) | ~8 ACs runtime proven (3-tenant routing). 17 ACs skipped (enterprise isolation). Full runtime proof incomplete. |
+
+> **Fix for `tenant-resolution.js`** (1-line change):
+> Add to `MEREKA_SITE_VARIANTS` in `infrastructure/tutor/plugins/_mereka_lms/mfe_runtime/tenant-resolution.js`:
+> ```js
+> 'skillourfuture.academyv2.mereka.io': _SKILL_OUR_FUTURE,
+> ```
 
 ---
 
@@ -477,6 +501,26 @@ review_cadence: weekly
 
 ---
 
+### 12.1 Video Pipeline Phase Status (batch4f — runtime verified)
+
+> **Mux API credentials are LIVE and verified working** (`MUX_TOKEN_ID`/`MUX_TOKEN_SECRET` from ESO).
+
+| Phase | Description | Status | Priority | Blocker |
+|-------|-------------|--------|----------|---------|
+| Phase 1 | Mux API integration + upload infrastructure | 🟢 DONE | — | — |
+| Phase 2 | MCT video mapping (503 videos) | 🟢 DONE | — | `exports/mct/video_mapping_openedx.json` complete |
+| Phase 3 | Mux delivery monitor deployment | 🟡 AT_ZERO_REPLICAS | P1 | `kubectl scale deploy mux-delivery-monitor -n mereka-lms --replicas=1` — pod manifest exists, 0/0 replicas |
+| Phase 4 | Custom video apps in `INSTALLED_APPS` | 🔴 BLOCKED | P0 | Apps (`mux_upload`, `video_analytics`, `video_protection`, `video_pipeline`) **installed in Docker image** but NOT in `INSTALLED_APPS` in running pod's `production.py`. Tutor `lms_settings` patch is MISSING from the deployed config. Must add via `apply-patches.sh`. |
+| Phase 5 | Mux signing keys (signed playback URLs) | ⚪ NOT STARTED | P2 | Blocked on Phase 4 + key provisioning in Infisical |
+| Phase 6 | XBlock integration (in-course video) | ⚪ NOT STARTED | P3 | Blocked on Phase 4–5 |
+| Phase 7 | Analytics (xAPI events → ClickHouse) | ⚪ NOT STARTED | P3 | Blocked on Phase 4 + Aspects tracking-log PVC |
+
+> **Video mapping**: 503 MCT videos fully mapped at `exports/mct/video_mapping_openedx.json`. ServiceMonitor `servicemonitor-mux-monitor.yaml` exists in repo.
+>
+> **Critical path**: Phase 4 (INSTALLED_APPS patch) unblocks all remaining phases. Fix is 1 line in `apply-patches.sh` / `mereka_lms.py` plugin.
+
+---
+
 ## Section 11b: Dependency Security (batch4e)
 
 | Package / Area | Status | Priority | Issue | Action |
@@ -551,6 +595,42 @@ review_cadence: weekly
 
 ---
 
+---
+
+## Section 14: Spec-to-Reality Gap Analysis — Tier 4–6 (b4-spec-gap)
+
+> **Coverage tool inflation warning**: `spec_coverage_report.py` reports 100% mapped / 85.7% automated.
+> "Automated" = `@covers` annotation exists in a script on disk. It does NOT mean the check passes,
+> runs in CI, or has browser proof. True implementation rate for Tier 4–6 is **~40–55%** of ACs.
+
+| Spec | Tier | ACs | @covers | Runtime Proven | Deferred | Real Status |
+|------|------|-----|---------|----------------|----------|-------------|
+| `design-tokens-system` | 4 | 12 | 12 (100%) | ~12 (repo-truth only) | 0 | CI-complete; no browser proof |
+| `multi-tenancy-architecture` | 4 | 33 | 33 (100%) | ~8 (3-tenant routing) | 17 | Partial runtime; enterprise isolation unfiled |
+| `oep48-brand-package` | 4 | 37 | 28 (76%) | ~20 (MFE login) | 9 | Partial; Studio branding stalled |
+| `mfe-plugin-slots` | 4 | 29 | 29 (100%) | ~1 (footer only) | 28 (manual) | Source verified; browser proof absent |
+| `slo-sla-service-level-management` | 4 | 53 | 53 (100%) | rules deployed; dashboard NOT | 10 | Rules live; Grafana dashboard P1 missing |
+| `frontend-accessibility` | 4 | 27 | 5 (19%) | 0 | 23 | **FILED-ONLY** — 23 ACs have zero scripts |
+| `studio-customization` | 4 | 28 | 8 (29%) | 0 | 20 | **FILED-ONLY** — SSO loop blocks all proof |
+| `frontend-performance-budgets` | 4 | 30 | 7 (23%) | 0 | 18 | **FILED-ONLY** — no CI enforcement |
+| `auth-sso-enterprise` | 5 | 45 | 45 (100%) | 18 (static config) | 27 | Config foundations only; enterprise IdP = business blocker |
+| `enterprise-microservices` | 6 | 37 | 37 (100%) | ~25 (prod deployments) | 3 | Best coverage; SSO federation + channels gaps |
+| `paragon-design-tokens-migration` | 5 | 41 | 0 (0%) | 0 | 41 | **NOT STARTED** — blocked on OEP-48 |
+
+### Critical Spec Gaps (b4-spec-gap)
+
+| Finding | Status | Priority | Action |
+|---------|--------|----------|--------|
+| **Three specs filed-only** (`accessibility`, `studio-customization`, `perf-budgets`) | 🔴 PAPER_SPEC | P2 | Either build scripts + CI coverage, or formally defer with rationale |
+| **Auth/SSO Tier 5 — 27/45 ACs need enterprise IdP** | 🔴 BUSINESS_BLOCKER | P2 | Cannot implement SAML federation, SCIM, MFA enforcement without real enterprise customer IdP. Not a technical blocker. |
+| **SLO Grafana dashboard not deployed** (`slo-overview.json`) | 🔴 P1 UNDEPLOYED | P1 | Already in §10.3. File exists, not loaded as Grafana ConfigMap. Blocks AC-008, AC-009. |
+| **Testmaps have NO `status` field on any AC** | 🟡 FORMAT_DEBT | P3 | All 29 testmap YAMLs in `specs/plans/` adopted format but never populated `status:` field. Every AC shows `NO_STATUS`. |
+| **Coverage inflation**: `@covers` ≠ CI-bound ≠ passing | 🟡 MISLEADING | P2 | Document in spec governance: coverage tool measures annotation density, not behavioral proof. |
+| Enterprise microservices SSO (AC-026..029) | 🔴 BLOCKED | P2 | SAML/OIDC federation ACs share the enterprise IdP blocker with auth-sso spec |
+| Enterprise integrated channels (AC-030..032: Degreed, Canvas) | ⚪ NOT STARTED | P3 | Not in current deployment manifest; no connector exists |
+
+---
+
 ## Tracker Update Log
 
 | Date | Batch | Skills Used | Key Findings |
@@ -559,3 +639,4 @@ review_cadence: weekly
 | 2026-04-03 | Batch 1 | live cluster diagnostics (ArgoCD, pods, images, workers, CronJobs, ARC, ESO, Velero, dev image drift) | **COMPLETE** — ArgoCD both envs Healthy; prod 31/31; staging 54 failed pods; Velero FailedValidation (VolumeSnapshotLocation missing); 6 CronJob failures with distinct root causes; ARC healthy; ESO all synced; dev image `00ad100e` (same as prod, docs were stale) |
 | 2026-04-03 | Batch 2 | frontend/branding/gitops (MFE Dockerfile, branch states, tenant logos, footer, open PRs, OIDC script, first-class-domains, CI inventory) | **COMPLETE** — MFE Ulmo done; logos in repo; head-extra 83L; footer wired; import #1275 merged + 5 follow-on unPRed; first-class-domains 23 commits no PR; OIDC uncommitted local changes; CI inventory PASS |
 | 2026-04-03 | Batch 3 | security/infra/debt (secrets, ESO completeness, worker limits, Velero manifest, ARC dry-run, Kyverno, script registry, tech debt, Aspects prod, head-extra) | **COMPLETE** — Secrets CLEAN; CH user ESO mappings DONE; Kyverno `protect-gitops-managed-resources` NOT DEPLOYED (critical gap); Aspects prod NOT dormant (replicas=1); `openedx_assessment_bulk` has 5 unimplemented TODOs; Velero Schedule not in GitOps |
+| 2026-04-03 | Batch 4 (10 agents) | PRs, testing, CronJobs, observability, deps, enterprise-nonprod, migrations, tenancy, video, spec-gaps | **COMPLETE (10/10)** — CI has 8 systemic failures on main; 1,318 custom-app tests never run in CI; `openedx_tenant_cache` unapplied (P0 blocked); SOF staging SiteConfig MISSING + `tenant-resolution.js` SOF entry MISSING; Mux creds LIVE but INSTALLED_APPS patch absent (critical path); delivery monitor at 0 replicas; spec coverage tool inflated (real ~40-55% Tier 4-6); 3 specs filed-only with no CI; enterprise IdP = business blocker for 27/45 auth ACs |
