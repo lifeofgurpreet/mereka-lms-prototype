@@ -131,6 +131,47 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
+      - name: Live-asset gate (INV-013 — must pass before canary)
+        if: ${{ steps.resolve-smoke.outputs.run_smoke == '1' }}
+        env:
+          LMS_DOMAIN: ${{ steps.resolve-smoke.outputs.lms_domain }}
+          MFE_DOMAIN: ${{ steps.resolve-smoke.outputs.mfe_domain }}
+        run: |
+          set -euo pipefail
+          echo "=== Live-Asset Gate (INV-013) ==="
+          echo "Rule: Never run browser canary while live asset gate is red."
+          echo ""
+
+          gate_ok=true
+
+          # Check LMS responds with 200
+          lms_status=$(curl -sI -o /dev/null -w '%{http_code}' "https://${LMS_DOMAIN}/" --max-time 15 || echo "000")
+          if [[ "$lms_status" =~ ^(200|301|302)$ ]]; then
+            echo "PASS: LMS https://${LMS_DOMAIN}/ returned $lms_status"
+          else
+            echo "FAIL: LMS https://${LMS_DOMAIN}/ returned $lms_status — asset gate RED"
+            gate_ok=false
+          fi
+
+          # Check MFE serves actual content (not error page)
+          mfe_status=$(curl -sI -o /dev/null -w '%{http_code}' "https://${MFE_DOMAIN}/authn/login" --max-time 15 || echo "000")
+          if [[ "$mfe_status" =~ ^(200|301|302)$ ]]; then
+            echo "PASS: MFE https://${MFE_DOMAIN}/authn/login returned $mfe_status"
+          else
+            echo "FAIL: MFE https://${MFE_DOMAIN}/authn/login returned $mfe_status — asset gate RED"
+            gate_ok=false
+          fi
+
+          if [[ "$gate_ok" != "true" ]]; then
+            echo ""
+            echo "BLOCKED: Live-asset gate is RED. Browser canary will not proceed."
+            echo "Fix the asset/route issue first, then rerun this workflow."
+            exit 1
+          fi
+
+          echo ""
+          echo "Live-asset gate is GREEN. Proceeding to browser canary."
+
       - name: Run authenticated smoke tests
         if: ${{ steps.resolve-smoke.outputs.run_smoke == '1' }}
         env:
