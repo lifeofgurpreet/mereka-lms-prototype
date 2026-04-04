@@ -48,8 +48,8 @@ tutor local restart
 ```
 === Tutor Configuration Manager ===
 
-Repository:  /home/gurpreet/projects/k8s/mereka-lms
-Tutor Root:  /home/gurpreet/projects/k8s/mereka-lms/tutor_env
+Repository:  <repo-root>
+Tutor Root:  <repo-root>/tutor_env
 
 Backing up existing config...
   → tutor_env/config.yml.backup.20260210_125000

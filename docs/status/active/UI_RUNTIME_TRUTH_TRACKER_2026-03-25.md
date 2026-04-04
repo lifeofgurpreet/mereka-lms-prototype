@@ -6,7 +6,7 @@ This tracker records the truthful operator path for the authenticated browser-pr
 ## Current verified signal
 
 - The clean worktree used for the browser-proof lane is isolated from the dirty local checkout:
-  - path: `/home/gurpreet/projects/_worktrees/mereka-lms-docs-refresh`
+  - path: worktree `mereka-lms-docs-refresh`
   - branch: `docs/staging-truth-refresh`
   - base commit: `813b94f4034ade621faea5962836b749161a4c20`
 - Canonical tracked proof runs are green:

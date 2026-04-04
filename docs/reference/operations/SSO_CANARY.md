@@ -3,6 +3,10 @@
 Authenticated canary checks that validate the full OIDC/Authentik SSO roundtrip against
 LMS and Studio. These run in CI on a schedule and can be triggered manually.
 
+> Credential authority is defined in
+> [AUTHENTICATED_SMOKE_CREDENTIALS.md](AUTHENTICATED_SMOKE_CREDENTIALS.md).
+> This document is canary execution detail, not secret authority.
+
 ## Overview
 
 The SSO canary performs a real browser login using Python Playwright (Chromium headless)
@@ -11,7 +15,7 @@ and verifies:
 1. **Primary OIDC canary** — a learner account logs in via Authentik, lands on LMS dashboard
    and MFE learner-dashboard. Validates `/api/user/v1/me` returns a session.
 2. **Studio staff canary** — a staff account logs in via Authentik, then navigates to
-   `https://studio.<domain>/home/` and verifies it loads without an error page.
+   the Studio home route and verifies it loads without an error page.
 3. **Local login canary** (optional) — same as primary but through the Authn MFE native form
    instead of Authentik. Disabled by default (`RUN_LOCAL_LOGIN_CANARY=0`).
 
@@ -48,7 +52,8 @@ Why:
 
 ## Secrets
 
-All secrets are GitHub repository secrets. Never hardcode credentials.
+Credential authority is Infisical. GitHub Actions secrets are consumer mirrors
+for CI execution. Never hardcode credentials.
 
 ### Primary OIDC canary (learner account)
 
@@ -102,7 +107,7 @@ print('Created:', u.username)
 ```
 
 The account must:
-- Have `is_staff=True` (needed to access Studio `/home/`)
+- Have `is_staff=True` (needed to access Studio home route)
 - Be enrolled via Authentik SSO (the canary logs in via OIDC, not native password)
 - NOT have MFA enabled (or the canary flow will stall)
 - Use an email address that exists in Authentik with a known password
@@ -115,7 +120,7 @@ In the Authentik admin UI (`https://auth0.mereka.io`):
 3. Assign the user to the Open edX application / provider group
 4. Verify the user can log in to Studio manually before adding the secret to CI
 
-### 3. Add secrets to GitHub
+### 3. Store in Infisical, then mirror to GitHub (consumer)
 
 ```
 Repository → Settings → Secrets and variables → Actions → New repository secret
@@ -162,7 +167,7 @@ per the setup steps above.
 
 ### `studio_access_required_but_not_authenticated`
 
-The canary account reached Studio `/home/` but was redirected to `/signin`. Causes:
+The canary account reached Studio home route but was redirected to sign-in. Causes:
 - Authentik user not in the Open edX application group
 - Open edX account does not have `is_staff=True`
 - Session cookie mismatch (check `studio_session_id` vs `sessionid` in MEMORY.md)
@@ -191,9 +196,10 @@ log shows the full redirect chain (cookies redacted).
 Rotate Studio canary credentials every 90 days or immediately after any credential
 exposure. Procedure:
 1. Reset the Authentik user password
-2. Update `SSO_CANARY_STUDIO_EMAIL_PROD` / `SSO_CANARY_STUDIO_PASSWORD_PROD` in GitHub secrets
-3. Trigger the canary manually to confirm it still passes
-4. Update the rotation date below
+2. Update canonical Infisical entries first
+3. Mirror updated values to GitHub consumer secrets
+4. Trigger the canary manually to confirm it still passes
+5. Update the rotation date below
 
 **Last rotated**: (not yet set — initial setup pending)
 **Next rotation**: 90 days after initial rotation
@@ -205,4 +211,5 @@ exposure. Procedure:
 - Workflow: `.github/workflows/smoke-authenticated.yml` (sso-canary job)
 - Operations gate: `.github/workflows/operations-gates-runtime.yml`
 - Credential handling: `docs/reference/operations/AUTHENTICATED_SMOKE_CREDENTIALS.md`
+- Registry: `docs/status/active/SMOKE_ACCOUNT_REGISTRY_2026-04-04.md`
 - Studio SSO patterns: `MEMORY.md` (Studio SSO section)

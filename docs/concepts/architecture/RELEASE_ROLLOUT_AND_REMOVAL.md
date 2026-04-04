@@ -1,5 +1,12 @@
 # Release Rollout And Removal
-_Audience: Engineering Team • Owner: Platform Team • Last verified: 2026-03-09 • Status: canonical_
+_Audience: Engineering Team • Owner: Platform Team • Last verified: 2026-04-04 • Status: detailed-reference_
+
+> **Classification**: policy/reference detail.
+>
+> Canonical build→promotion→realization→proof workflow is owned by:
+> [../../architecture/PROMOTION_REALIZATION_AND_INCIDENT_FLOW.md](../../architecture/PROMOTION_REALIZATION_AND_INCIDENT_FLOW.md)
+>
+> This file remains useful for rollout/removal policy standards and fitness checks.
 
 ## Governs
 

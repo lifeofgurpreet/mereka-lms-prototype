@@ -34,7 +34,7 @@ Staging deployment is gated behind `ENABLE_STAGING_ENV=true` (default: false). N
 |---|---|---|
 | Open edX app code, Tutor themes, build scripts, QA scripts | `mereka-lms` | Source for what gets built and validated |
 | Base K8s manifests for Open edX (`deploy/k8s/base`) | `mereka-lms` | App-level runtime contract owned with app code |
-| ArgoCD Applications/ApplicationSets, env overlays, pinned refs, image tag overrides | `BBI-K8` (`/home/gurpreet/projects/k8s/infrastructure`) | GitOps desired state for clusters |
+| ArgoCD Applications/ApplicationSets, env overlays, pinned refs, image tag overrides | `BBI-K8` (bbi-infrastructure repo) | GitOps desired state for clusters |
 | Cross-app platform services (Authentik, Grafana, n8n, listmonk, etc.) | `BBI-K8` | Platform scope beyond Open edX |
 | Secrets values | Infisical | Single source of truth (not Git) |
 

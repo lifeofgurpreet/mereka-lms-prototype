@@ -1,0 +1,226 @@
+# Process Invariants — machine-readable never-again rules
+#
+# Hard-won lessons codified as machine-checkable invariants.
+# Each rule exists because violating it caused a real incident,
+# CI break, or multi-session recovery effort.
+#
+# These invariants complement (not replace) the human-readable docs:
+#   - docs/stabilization/EXECUTION_INVARIANTS.md
+#   - docs/policies/operations/AGENT_EXECUTION_INVARIANTS.md
+#   - docs/reference/operations/execution-invariants-pack.v1.yaml
+#   - docs/architecture/PLATFORM_AUTHORITY_MAP.md
+#   - docs/architecture/PROMOTION_REALIZATION_AND_INCIDENT_FLOW.md
+#
+# Consumers:
+#   - CI verification scripts (scripts/qa/verify-*.sh)
+#   - Agent execution workflows
+#   - Release gate checks
+---
+schema_version: "1.0"
+
+# ============================================================================
+# LAYER MODEL
+# ============================================================================
+# The platform uses a 6-layer authority model. Each invariant is tagged
+# with the layer(s) it primarily guards.
+layers:
+  - id: source
+    name: Source authority
+    question: "What should exist?"
+  - id: build-render
+    name: Build/render authority
+    question: "What actually gets built?"
+  - id: promotion
+    name: Promotion authority
+    question: "What should move to environments?"
+  - id: realization
+    name: Realization authority
+    question: "What is actually applied live?"
+  - id: runtime
+    name: Runtime truth
+    question: "What do users see?"
+  - id: proof
+    name: Proof truth
+    question: "Are checks trustworthy?"
+
+# ============================================================================
+# INVARIANTS
+# ============================================================================
+invariants:
+  - id: INV-001
+    rule: "Never patch a generated artifact without fixing the generator/build path"
+    description: >
+      If a rendered artifact (e.g., Tutor-generated settings, Kustomize output)
+      is wrong, patch the source template or generator — not the output. The output
+      will be overwritten on next render, silently reverting your fix.
+    incident_class: "#1327 build-path"
+    layer: build-render
+    enforcement: "CI check: verify-docs-authority-invariants.sh"
+    severity: critical
+
+  - id: INV-002
+    rule: "Never rerun browser canary while live asset gate is red"
+    description: >
+      If the live asset gate (image hash, config hash, Argo sync) is red,
+      browser proof is meaningless — you are proving the old bundle. Fix the
+      asset gate first, then rerun browser proof.
+    incident_class: proof-asset-ordering
+    layer: proof
+    enforcement: "release gate ordering in CI"
+    severity: critical
+
+  - id: INV-003
+    rule: "Never promote from a dirty worktree"
+    description: >
+      A dirty working tree means uncommitted changes exist. Promoting from this
+      state risks shipping unreviewed or partial changes. Always verify
+      `git status --short` is clean before promotion.
+    incident_class: dirty-tree-mutation
+    layer: promotion
+    enforcement: "pre-commit hook + context lock check"
+    severity: critical
+
+  - id: INV-004
+    rule: "Use release-object-driven promotion — never manually join SHA/digest/env"
+    description: >
+      Release identity (branch SHA, image digest, env patch) must flow through
+      a single release object. Manual joining of these values across systems
+      causes identity split — the wrong image ships to the wrong environment.
+    incident_class: release-identity-split
+    layer: promotion
+    enforcement: "release process contract (RELEASE_PROCESS.md)"
+    severity: critical
+
+  - id: INV-005
+    rule: "Every incident leaves a stronger regression guard"
+    description: >
+      After fixing any incident, add a verification script, CI check, or
+      invariant that prevents the same class of failure from recurring.
+      A fix without a guard is incomplete.
+    incident_class: guard-gap
+    layer: proof
+    enforcement: "PR review checklist"
+    severity: high
+
+  - id: INV-006
+    rule: "Never debug on main — one hypothesis per PR on a feature branch"
+    description: >
+      Experimental fixes go on feature branches. Each PR addresses exactly one
+      failure hypothesis. Bundled PRs make bisection impossible. Direct pushes
+      to main bypass CI and review.
+    incident_class: main-pollution
+    layer: source
+    enforcement: "branch protection rules + CI gate"
+    severity: critical
+
+  - id: INV-007
+    rule: "Always run apply-patches.sh after tutor config save"
+    description: >
+      `tutor config save` regenerates templates from scratch, losing all patches.
+      Forgetting apply-patches.sh causes MySQL auth failure, MFE build breaks,
+      missing CSRF origins, and other cascading failures.
+    incident_class: patch-loss
+    layer: build-render
+    enforcement: "verify-tutor-config.sh + pre-commit hook"
+    severity: critical
+
+  - id: INV-008
+    rule: "Never use real operator identities for browser proof"
+    description: >
+      Browser proof must use synthetic smoke accounts, never real operator or
+      user credentials. Real credential use in proof creates security exposure
+      and violates the real-account boundary.
+    incident_class: credential-boundary-violation
+    layer: proof
+    enforcement: "REAL_ACCOUNT_AND_CREDENTIAL_BOUNDARY.md contract"
+    severity: critical
+
+  - id: INV-009
+    rule: "Never mix proof and repair in one claim"
+    description: >
+      Proof answers what is true. Repair changes what is true. An agent must not
+      ship a repair and call it proof, or claim proved truth from repo-only evidence.
+      Proof lanes may conclude observed truth only; repair lanes may claim durable
+      repo change only.
+    incident_class: proof-repair-mixing
+    layer: proof
+    enforcement: "PROOF_REPAIR_SEPARATION_PROTOCOL.md"
+    severity: high
+
+  - id: INV-010
+    rule: "Infisical is secret authority — never hardcode secrets in repo"
+    description: >
+      All secrets flow through Infisical → GCP Secret Manager → ExternalSecrets → K8s.
+      Hardcoded secrets in code, config, or docs are a security violation. Identity
+      systems own identities; Infisical owns secret material.
+    incident_class: secret-leak
+    layer: source
+    enforcement: "pre-commit secret scanning hook + CI TruffleHog"
+    severity: critical
+
+  - id: INV-011
+    rule: "Layer first, tool second — choose owner layer before choosing fix tool"
+    description: >
+      When a symptom appears, first identify which of the 6 layers owns the
+      broken behavior. Only then choose the tool/file to patch. Patching the
+      wrong layer creates fixes that are overwritten or cause cascading failures.
+    incident_class: layer-mismatch
+    layer: source
+    enforcement: "PLATFORM_AUTHORITY_MAP.md triage workflow"
+    severity: high
+
+  - id: INV-012
+    rule: "CI must pass on main before any PR evaluation is meaningful"
+    description: >
+      If main is red, feature PR evaluation is meaningless — cascade failures
+      obscure real problems. Stabilize main first with a minimal targeted fix,
+      then resume feature work.
+    incident_class: red-main-cascade
+    layer: proof
+    enforcement: "branch protection + required status checks"
+    severity: high
+
+  - id: INV-013
+    rule: "Never trust build success as proof of served asset"
+    description: >
+      A built image is not a deployed image. A deployed image is not a served
+      asset. The real gating proof is the live served asset (JS/CSS bundle,
+      rendered page, API response), not the build log or image digest.
+    incident_class: "#1329 stale-bundle"
+    layer: runtime
+    enforcement: "asset verification step in runtime-proof playbook"
+    severity: critical
+
+  - id: INV-014
+    rule: "Admin merge to main must be logged as an exception"
+    description: >
+      Any merge that bypasses normal CI gates or review requirements must be
+      explicitly logged with justification. Admin merges that skip checks are
+      not ordinary — they create unverified truth on main.
+    incident_class: admin-merge-exception
+    layer: source
+    enforcement: "PR review checklist + audit log"
+    severity: high
+
+  - id: INV-015
+    rule: "Infra render-guard and app build-path guard are separate lanes"
+    description: >
+      The infrastructure repo's rendered-artifact checks (Kustomize, overlay)
+      are not the same as the app repo's build-path checks (Tutor, plugin,
+      image). Both must pass independently. A green infra guard does not
+      prove the app build is correct, and vice versa.
+    incident_class: "#1330 guard-order"
+    layer: build-render
+    enforcement: "separate CI jobs per lane"
+    severity: high
+
+  - id: INV-016
+    rule: "Release bundle must be verifiable — cosign or equivalent signing required"
+    description: >
+      A release object without cryptographic verification is an unsigned claim.
+      If cosign or equivalent signing fails, the release is not promotable.
+      Fix signing before promoting.
+    incident_class: "#1332 cosign-failure"
+    layer: promotion
+    enforcement: "verify-release-bundle.sh + verify-build-provenance.sh"
+    severity: critical

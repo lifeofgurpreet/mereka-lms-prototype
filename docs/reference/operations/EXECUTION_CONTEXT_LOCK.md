@@ -61,8 +61,8 @@ When invalidated, the lock MUST be re-captured before any further mutation.
 
 ```text
 repo_name: mereka-lms
-repo_path: /home/gurpreet/projects/k8s/mereka-lms-wt-lane-e-invariants
-worktree_path: /home/gurpreet/projects/k8s/mereka-lms-wt-lane-e-invariants
+repo_path: <repo-root or worktree path>
+worktree_path: <repo-root or worktree path>
 branch: lane-e/execution-invariants-pack
 baseline_ref: origin/main
 lane: Lane E
@@ -80,7 +80,7 @@ real_account_access: prohibited
 Incorrect because the branch is omitted:
 
 ```text
-repo_path: /home/gurpreet/projects/k8s/mereka-lms
+repo_path: <repo-root>
 lane: Lane E
 mutation_class: repo-only
 ```

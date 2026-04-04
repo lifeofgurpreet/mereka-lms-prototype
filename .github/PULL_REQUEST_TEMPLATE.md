@@ -2,10 +2,13 @@
 
 - What changed:
 - Why:
+- Owner layer: <!-- source | build/render | promotion | realization | runtime | proof -->
 
 ## Authority routing
 
 - Governed scope tokens:
+- Source of truth file(s) changed:
+- Generated artifact(s) that must be checked:
 - Canonical roots touched:
 - Transitional roots touched:
 - Archive roots touched:
@@ -26,10 +29,19 @@
 - Generated testmaps regenerated:
 - Manual verification metadata touched:
 
+## Change safety
+
+- [ ] I patched the generator/source, not just the generated artifact
+- [ ] Rendered/build artifact reflects my change (verified, not assumed)
+- [ ] If runtime change: proof plan defined (route proof → asset verify → browser canary)
+- [ ] If promotion: release object used (no manual SHA join)
+- [ ] Rollback plan: <!-- how to revert if this breaks -->
+
 ## Validation
 
 - [ ] `tools/docs/verify/verify-docs-policy.sh`
 - [ ] `python3 scripts/qa/spec-tools/spec_verify.py specs/ --scan-dirs tests/ scripts/ --repo-root .`
+- [ ] `scripts/qa/verify-docs-authority-invariants.sh`
 - [ ] other relevant checks:
 
 ## Compatibility / migration notes

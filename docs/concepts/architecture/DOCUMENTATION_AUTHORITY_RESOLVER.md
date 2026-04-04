@@ -1,5 +1,11 @@
 # Documentation Authority Resolver
-_Audience: Contributors • Owner: Platform Team • Last verified: 2026-03-08 • Status: canonical_
+_Audience: Contributors • Owner: Platform Team • Last verified: 2026-04-04 • Status: detailed-reference_
+
+> **Classification**: detailed resolver/reference.
+>
+> Canonical platform authority flow now lives in:
+> - [../../architecture/PLATFORM_AUTHORITY_MAP.md](../../architecture/PLATFORM_AUTHORITY_MAP.md)
+> - [../../architecture/PROMOTION_REALIZATION_AND_INCIDENT_FLOW.md](../../architecture/PROMOTION_REALIZATION_AND_INCIDENT_FLOW.md)
 
 This document resolves documentation split-brain. If two paths appear to answer the same question, use this resolver to determine the winner.
 
@@ -10,7 +16,8 @@ Use this table before reading or writing:
 | If your question is about... | Start here |
 | --- | --- |
 | Intended behavior or acceptance criteria | `specs/**` |
-| Current architecture rules or standards | `docs/concepts/architecture/**` |
+| Stable platform authority model and incident ownership | `docs/architecture/**` |
+| Detailed architecture standards and concept overviews | `docs/concepts/architecture/**` |
 | How to operate or recover the platform | `docs/ops/**` |
 | Why a technical decision was made | `docs/adr/**` |
 | How contributors or users should do something | `docs/guides/**` |
@@ -25,16 +32,17 @@ Use this table before reading or writing:
 Apply these rules in order:
 
 1. If the question is about intended behavior, `specs/**` wins.
-2. If the question is about living architecture policy or standards, `docs/concepts/architecture/**` wins.
-3. If the question is about operator procedure, `docs/ops/**` wins.
-4. If the question is about accepted or superseded technical decisions, `docs/adr/**` wins.
-5. If the question is about user or contributor guidance, `docs/guides/**` wins.
-6. If the question is about supporting reference, `docs/reference/**` wins.
-7. If the question is about durable repo or operational rules, `docs/policies/**` wins.
-8. If the question is about docs-program internals, templates, or transition ledgers, `docs/meta/**` wins.
-9. If the question is about proof, `docs/evidence/**` wins.
-10. If the question is about current reporting or open status, `docs/status/**` wins.
-11. If the path is under `docs/archive/**`, it is historical context only and MUST NOT override active roots.
+2. If the question is about stable platform authority model and flow ownership, `docs/architecture/**` wins.
+3. If the question is about detailed architecture standards or concept overviews, `docs/concepts/architecture/**` wins.
+4. If the question is about operator procedure, `docs/ops/**` wins.
+5. If the question is about accepted or superseded technical decisions, `docs/adr/**` wins.
+6. If the question is about user or contributor guidance, `docs/guides/**` wins.
+7. If the question is about supporting reference, `docs/reference/**` wins.
+8. If the question is about durable repo or operational rules, `docs/policies/**` wins.
+9. If the question is about docs-program internals, templates, or transition ledgers, `docs/meta/**` wins.
+10. If the question is about proof, `docs/evidence/**` wins.
+11. If the question is about current reporting or open status, `docs/status/**` wins.
+12. If the path is under `docs/archive/**`, it is historical context only and MUST NOT override active roots.
 
 ## What to do when two docs disagree
 
@@ -49,7 +57,7 @@ If a transitional or archive path contradicts a winning root, the winning root g
 
 | Artifact kind | Canonical root | Transitional roots | Cold / historical root |
 | --- | --- | --- | --- |
-| Living architecture / standards | `docs/concepts/architecture/**` | `docs/architecture/README.md` | `docs/archive/**` |
+| Stable platform architecture model | `docs/architecture/**` | `docs/concepts/architecture/**` | `docs/archive/**` |
 | Operator procedures | `docs/ops/**` | `docs/operations/README.md`, `docs/runbooks/README.md` | `docs/archive/**` |
 | Human guidance / onboarding | `docs/guides/**` | `docs/onboarding/README.md`, `docs/branding/README.md` | `docs/archive/**` |
 | Stable lookup / reference | `docs/reference/**` | none | `docs/archive/**` |
@@ -127,7 +135,7 @@ Examples:
 
 - `docs/ops/**` SHOULD link to `docs/reference/**`, `docs/policies/**`, `docs/evidence/**`, and `docs/status/**`
 - `docs/ops/**` MUST NOT use `docs/operations/**` as live procedure authority
-- `docs/concepts/architecture/**` MUST NOT depend on `docs/architecture/**` as current law
+- `docs/concepts/architecture/**` SHOULD point to `docs/architecture/**` for stable authority model ownership
 
 ## Review rule
 
@@ -142,8 +150,8 @@ These are locked for this wave:
 - `docs/operations/README.md` is the only retained tombstone path under the retired operations root
 - `docs/evidence/**` is the single active evidence root
 - `docs/status/**` is the single active status root
-- `docs/concepts/architecture/**` is the canonical architecture narrative and living standards root
-- `docs/architecture/README.md` is the only retained tombstone path under the retired root
+- `docs/architecture/**` is the canonical stable system-model root for platform authority and flow ownership
+- `docs/concepts/architecture/**` is detailed standards/reference context
 - proposed `ADR-034` to `ADR-041` must leave the accepted ADR hot path and live in `docs/adr/rfc/`
 
 ## Local validation entrypoints

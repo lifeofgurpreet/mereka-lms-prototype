@@ -157,7 +157,7 @@ If the key is absent or malformed:
 **Verify**:
 
 ```bash
-cd /home/gurpreet/projects/k8s/reka-slackbot
+cd ../reka-slackbot  # or wherever reka-slackbot is checked out
 infisical secrets get MEREKA_LMS_VC_SIGNING_PRIVATE_KEY \
   --domain https://secrets.mereka.io/api \
   --env prod --path / --plain 2>/dev/null | wc -c

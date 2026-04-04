@@ -1,7 +1,7 @@
 # Settings Ownership Consolidation
+_Status: detailed-reference_
 
 Date: 2026-03-16
-Status: OWNERSHIP_MODEL_CHOSEN_AND_MIGRATION_STARTED
 
 ## Prior Guardrails and Why They Failed
 

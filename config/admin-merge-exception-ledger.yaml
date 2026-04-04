@@ -1,0 +1,37 @@
+# Admin Merge Exception Ledger
+#
+# Every merge that bypasses normal CI gates or review requirements
+# MUST be logged here with justification.
+#
+# Admin merges that skip checks are not ordinary. They create
+# unverified truth on main.
+#
+# Rule: if you use admin merge, you MUST add an entry here in
+# the same PR or a follow-up within 24 hours.
+#
+# Consumers:
+#   - PR review checklist
+#   - Audit processes
+#   - Incident post-mortems
+---
+schema_version: "1.0"
+
+policy:
+  rule: "Admin merges must be logged as exceptions"
+  enforcement: "PR template checklist + this ledger"
+  escalation: "Unlogged admin merges are treated as incidents"
+
+exceptions:
+  # Template entry (copy this for new exceptions):
+  # - date: "YYYY-MM-DD"
+  #   pr: "https://github.com/Biji-Biji-Initiative/mereka-lms/pull/NNNN"
+  #   commit: "SHA"
+  #   bypassed_checks:
+  #     - "check name 1"
+  #     - "check name 2"
+  #   justification: "Why this bypass was necessary"
+  #   follow_up: "What was done to prevent recurrence"
+  #   logged_by: "agent or human name"
+
+  # No exceptions logged yet. Keep it that way.
+  []

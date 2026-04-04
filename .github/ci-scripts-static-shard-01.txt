@@ -23,6 +23,7 @@ scripts/qa/verify-custom-apps-hygiene.sh
 scripts/qa/verify-authn-submodule-path-contract.sh
 scripts/qa/verify-evidence-sprawl-budget.sh
 scripts/qa/verify-deprecation-discipline.sh
+scripts/qa/verify-machine-truth-freshness.sh
 scripts/qa/test-build-validator-drift-evidence-bundle.sh
 scripts/qa/test-verify-no-mux-asset-ids.sh
 scripts/qa/test-verify-script-portability.sh

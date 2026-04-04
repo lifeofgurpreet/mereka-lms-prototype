@@ -150,7 +150,7 @@ tutor images build openedx -a PIP_COMMAND=pip && tutor images push openedx
 
 When multiple agents work in parallel:
 
-1. **Single canonical worktree**: All agents use `/home/gurpreet/projects/k8s/mereka-lms` on `main`
+1. **Single canonical worktree**: All agents use the `mereka-lms` repo root on `main`
 2. **Feature branches**: Create short-lived branches (`feat/<bead-id>-<slug>`)
 3. **File reservations**: Use Agent Mail `file_reservation_paths` before editing shared files
 4. **Sequential merges**: Only one PR merged at a time to avoid conflicts

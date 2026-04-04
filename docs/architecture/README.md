@@ -1,19 +1,23 @@
-# Architecture Root Retired
-_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-10 • Status: superseded_
+# Architecture
+_Audience: Contributors and operators • Owner: Platform Team • Status: canonical_
 
-superseded_by: docs/concepts/architecture/README.md
+This is the canonical root for **stable system model** documentation.
 
-`docs/architecture/**` is retired and is no longer a living documentation root.
+## Canonical architecture docs
 
-## Use these roots instead
+1. [PLATFORM_AUTHORITY_MAP.md](PLATFORM_AUTHORITY_MAP.md)
+2. [PROMOTION_REALIZATION_AND_INCIDENT_FLOW.md](PROMOTION_REALIZATION_AND_INCIDENT_FLOW.md)
 
-- [docs/concepts/architecture/README.md](../concepts/architecture/README.md) for living architecture material
-- [docs/adr/README.md](../adr/README.md) for accepted ADRs and RFCs
-- [`docs/guides/standards/`](../guides/standards/) for standards and writing/process guidance
-- [`docs/meta/docs-program/`](../meta/docs-program/) for docs-program governance and closeout records
+## Boundary
 
-## Rules
+- Use this root for stable control-plane model, authority boundaries, and incident ownership flow.
+- Use `docs/status/active/` for current operational state.
+- Use `docs/reference/contracts/` for verifier/identity/deprecation contracts.
+- Use `docs/reference/operations/` and `docs/ops/runbooks/` for procedures and execution detail.
 
-- Do not add new canonical content under `docs/architecture/**`.
-- Do not recreate wrapper trees under this root.
-- If a path under this root is still referenced, rewrite the reference to a canonical root instead of adding another compatibility file.
+## Detailed architecture reference
+
+Concept deep-dives and standards that are still useful but not canonical for
+platform authority live under:
+
+- [docs/concepts/architecture/README.md](../concepts/architecture/README.md)

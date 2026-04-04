@@ -1,12 +1,12 @@
 ---
 title: Architecture Documentation
 owner: Platform Team
-status: canonical
-last_reviewed: 2026-03-10
-last_verified: 2026-03-10
-canonical_root: docs/concepts/architecture
-doc_class: architecture-standard
-summary: Canonical front door for living architecture standards and real architecture overviews.
+status: detailed-reference
+last_reviewed: 2026-04-04
+last_verified: 2026-04-04
+canonical_root: docs/architecture
+doc_class: architecture-reference
+summary: Detailed architecture standards and concept overviews that support canonical architecture docs.
 tags:
   - architecture
   - standards
@@ -16,15 +16,19 @@ governs:
   - docs.policy
 ---
 
-# Architecture Documentation
+# Architecture Concepts and Standards
 
-This directory is the canonical living architecture root for Mereka LMS.
+> **Classification**: detailed reference (not canonical owner of platform authority flow).
+>
+> Canonical stable architecture lives in:
+> - [docs/architecture/PLATFORM_AUTHORITY_MAP.md](../../architecture/PLATFORM_AUTHORITY_MAP.md)
+> - [docs/architecture/PROMOTION_REALIZATION_AND_INCIDENT_FLOW.md](../../architecture/PROMOTION_REALIZATION_AND_INCIDENT_FLOW.md)
 
 ## Use this root for
 
 Come here when you need:
-- current architecture law,
-- the architecture hot path,
+- detailed standards and concept context,
+- deep architecture overviews,
 - or real architecture overviews that still belong in a concepts root.
 
 ## Authority boundary
@@ -37,7 +41,7 @@ Come here when you need:
 - Proof lives in `docs/evidence/**`.
 - Active status lives in `docs/status/**`.
 
-## Hot path
+## Supporting standards path
 
 1. [ARCHITECTURE_CHARTER.md](ARCHITECTURE_CHARTER.md)
 2. [DOCUMENTATION_AUTHORITY_RESOLVER.md](DOCUMENTATION_AUTHORITY_RESOLVER.md)

@@ -485,7 +485,7 @@ ARGO_APPS="mereka-lms-local" ./scripts/infra/argocd-refresh.sh
 ARGO_NAMESPACE=argocd ARGO_REFRESH_TYPE=hard ./scripts/infra/argocd-refresh.sh mereka-lms-local
 ```
 
-For detailed secrets management architecture, see `/home/gurpreet/projects/secrets-management/specs/`.
+For detailed secrets management architecture, see the `secrets-management` repo specs.
 
 ### Bump Production GitOps Base Ref (Required After App Repo Changes)
 
@@ -496,7 +496,7 @@ When you change anything under `deploy/k8s/base/` in this repo, you must bump th
 
 1. In `mereka-lms`, get the full commit SHA:
    ```bash
-   cd /home/gurpreet/projects/k8s/mereka-lms
+   cd "$(git rev-parse --show-toplevel)"
    git rev-parse HEAD
    ```
 2. In the active GitOps repo (`BBI-K8`), update:

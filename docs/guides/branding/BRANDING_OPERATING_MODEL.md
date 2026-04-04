@@ -172,7 +172,7 @@ Local Tutor builds remain valid for debug/dev parity:
 
    - Cause: incorrect pinned SHA in active GitOps repo (`BBI-K8`/`infrastructure`) (`?ref=<sha>` typo or stale SHA).
    - Fix:
-     1) get exact SHA from source repo: `git -C /home/gurpreet/projects/k8s/mereka-lms rev-parse HEAD`
+     1) get exact SHA from source repo: `git rev-parse HEAD` (from mereka-lms root)
      2) update `apps/mereka-lms/base/kustomization.yaml` with that exact SHA
      3) push and wait for `mereka-lms-local` app to return `Synced/Healthy`.
 

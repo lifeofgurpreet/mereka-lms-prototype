@@ -1,6 +1,13 @@
 # Authority Matrix — Mereka LMS Architecture Convergence Program
 
-> **Status**: WS-0 Baseline (Phase A)
+> **Status**: reference-only (superseded for canonical ownership mapping)
+>
+> Superseded by:
+> [PLATFORM_AUTHORITY_MAP.md](./PLATFORM_AUTHORITY_MAP.md)
+>
+> This file remains useful for detailed route/settings ownership entries.
+>
+> **Original status**: WS-0 Baseline (Phase A)
 > **Owner**: Principal Debt-Eradication Lead
 > **Last updated**: 2026-03-11
 

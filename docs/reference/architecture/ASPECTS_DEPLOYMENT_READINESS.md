@@ -118,7 +118,7 @@ Execute these steps in order when prerequisites are satisfied:
 
 1. **Activate Tutor environment**:
    ```bash
-   cd /home/gurpreet/projects/k8s/mereka-lms
+   cd "$(git rev-parse --show-toplevel)"
    source .venv/bin/activate
    export TUTOR_ROOT="$(pwd)/tutor_env"
    ```

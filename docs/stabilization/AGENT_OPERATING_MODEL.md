@@ -119,7 +119,7 @@ git remote -v
 
 # 2. Confirm worktree root
 git rev-parse --show-toplevel
-# Expected: /home/gurpreet/projects/k8s/mereka-lms (or worktree equivalent)
+# Expected: the mereka-lms repo root (or worktree equivalent)
 
 # 3. Confirm branch
 git branch --show-current

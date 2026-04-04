@@ -221,7 +221,7 @@ curl -sI https://studio.academyv2.mereka.io | head -1
 
 | Gate | Failure Symptom | Recovery Steps | Time |
 |------|----------------|----------------|------|
-| `--check-only` | Wrong path/branch/worktree | `cd /home/gurpreet/projects/k8s/mereka-lms && git checkout main` | <1 min |
+| `--check-only` | Wrong path/branch/worktree | `cd $REPO_ROOT && git checkout main` | <1 min |
 | `--check-only` | Uncommitted changes | `git stash` or commit pending work | <2 min |
 | `--check-only` | Remote divergence | `git pull --rebase origin main` | <2 min |
 | Build fails (OOM) | Docker OOM during webpack | Free RAM (close apps), retry with `--max-old-space-size=6144` | 5-10 min |
@@ -236,8 +236,8 @@ curl -sI https://studio.academyv2.mereka.io | head -1
 
 ```bash
 # Revert mereka-lms and infrastructure in one go
-REPO_ROOT="/home/gurpreet/projects/k8s/mereka-lms"
-INFRA_REPO="/home/gurpreet/projects/k8s/infrastructure"
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+INFRA_REPO="${INFRA_REPO:-../bbi-infrastructure}"
 
 # Revert latest commit in both repos
 git -C $REPO_ROOT revert HEAD --no-edit && git -C $REPO_ROOT push

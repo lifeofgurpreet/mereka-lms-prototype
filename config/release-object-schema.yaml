@@ -1,0 +1,125 @@
+# Release Object Schema — machine-readable release identity
+#
+# A release object binds together: build identity, image digests,
+# evidence bundle, and promotion target. It is the single source
+# of truth for "what is being promoted."
+#
+# Without a release object, promotion is a manual SHA join across
+# systems — the root cause of release-identity-split incidents.
+#
+# Consumers:
+#   - promote-image workflow
+#   - release gate scripts
+#   - truth ledger entries
+---
+schema_version: "1.0"
+
+# Schema definition
+fields:
+  release_id:
+    type: string
+    description: "Unique release identifier (e.g., v1.2.3 or SHA-based)"
+    required: true
+
+  source_commit:
+    type: string
+    description: "Full git commit SHA from mereka-lms repo"
+    required: true
+
+  source_branch:
+    type: string
+    description: "Branch the commit was built from (must be main for promotions)"
+    required: true
+
+  images:
+    type: list
+    description: "Built image references with digests"
+    required: true
+    items:
+      name:
+        type: string
+        description: "Image name (e.g., openedx, mfe, caddy)"
+      registry:
+        type: string
+        description: "Registry URL (e.g., ghcr.io/biji-biji-initiative/mereka-lms)"
+      tag:
+        type: string
+        description: "Image tag"
+      digest:
+        type: string
+        description: "Image digest (sha256:...)"
+
+  evidence_bundle:
+    type: object
+    description: "CI evidence from the build"
+    fields:
+      ci_run_id:
+        type: string
+        description: "GitHub Actions run ID"
+      ci_run_url:
+        type: string
+        description: "URL to the CI run"
+      static_validation:
+        type: string
+        enum: [pass, fail, skip]
+      security_scan:
+        type: string
+        enum: [pass, fail, skip]
+      build_provenance:
+        type: string
+        description: "Cosign attestation reference or 'unsigned'"
+
+  promotion_target:
+    type: string
+    description: "Target environment (dev, staging, production)"
+    required: true
+
+  promoted_at:
+    type: string
+    format: iso8601
+    description: "Timestamp of promotion"
+
+  runtime_proof:
+    type: object
+    description: "Post-promotion runtime verification"
+    fields:
+      route_proof:
+        type: string
+        enum: [pass, fail, pending]
+      asset_proof:
+        type: string
+        enum: [pass, fail, pending]
+      browser_canary:
+        type: string
+        enum: [pass, fail, pending]
+      verified_at:
+        type: string
+        format: iso8601
+
+# Example release object
+example:
+  release_id: "v2026.04.04-1e9393d"
+  source_commit: "1e9393ddd..."
+  source_branch: "main"
+  images:
+    - name: openedx
+      registry: "ghcr.io/biji-biji-initiative/mereka-lms"
+      tag: "v2026.04.04-1e9393d"
+      digest: "sha256:abc123..."
+    - name: mfe
+      registry: "ghcr.io/biji-biji-initiative/mereka-lms"
+      tag: "v2026.04.04-1e9393d-mfe"
+      digest: "sha256:def456..."
+  evidence_bundle:
+    ci_run_id: "12345678"
+    ci_run_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/actions/runs/12345678"
+    static_validation: pass
+    security_scan: pass
+    build_provenance: "cosign:sha256:..."
+  promotion_target: "dev"
+  promoted_at: "2026-04-04T12:00:00Z"
+  runtime_proof:
+    route_proof: pass
+    asset_proof: pass
+    browser_canary: pass
+    verified_at: "2026-04-04T12:30:00Z"

@@ -8,7 +8,7 @@ This document defines who owns each observability layer and how changes are sync
 - `mereka-lms` repository owns observability contracts, templates, audits, and gates for LMS application-level monitoring posture.
 - `infrastructure` repository is the GitOps source of truth for deployed monitoring stack/runtime overlays in Kubernetes.
 - `vps/infrastructure` owns VPS-specific observability runtime assets.
-- `/home/gurpreet/projects/observability` is deprecated and must not be treated as active source of truth.
+- The legacy `observability` workspace (previously a sibling project) is deprecated and must not be treated as active source of truth.
 
 ## Source of Truth
 
@@ -28,7 +28,7 @@ This document defines who owns each observability layer and how changes are sync
 | Platform monitoring stack (Prometheus/Grafana/Alertmanager/Loki/Tempo) | `infrastructure/monitoring/` | Platform observability team |
 | Mereka LMS runtime overlays (ServiceMonitors/PrometheusRules/image pins) | `https://github.com/Biji-Biji-Initiative/BBI-K8/blob/main/apps/mereka-lms/overlays/prod/` (+ nonprod overlays) | Platform observability + LMS platform team |
 | VPS-only observability runtime | `vps/infrastructure/observability/` | VPS infrastructure team |
-| Legacy observability workspace | `/home/gurpreet/projects/observability` (deprecated; historical reference only) | n/a |
+| Legacy observability workspace | deprecated sibling `observability` project (historical reference only) | n/a |
 
 ## Change Process
 

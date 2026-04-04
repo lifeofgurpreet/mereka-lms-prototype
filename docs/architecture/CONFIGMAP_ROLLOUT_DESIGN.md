@@ -1,6 +1,6 @@
 # ConfigMap Rollout Semantics — Design Decision
 
-> **Status**: PROPOSED
+> Status: detailed-reference (proposed design)
 > **Owner**: Lane C (Principal Orchestration)
 > **Related**: AUTHORITY_MATRIX.md (debt inventory item)
 

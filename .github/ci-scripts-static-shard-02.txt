@@ -22,6 +22,7 @@ scripts/qa/test-verify-secrets-inventory.sh
 scripts/qa/verify-custom-app-install-contract.sh
 scripts/qa/verify-qa-readonly-contract.sh
 scripts/qa/test-verify-evidence-sprawl-budget.sh
+scripts/qa/verify-docs-authority-invariants.sh
 scripts/qa/verify-openedx-audit-tracker-sync.sh
 scripts/qa/test-build-validator-drift-review-packet.sh
 scripts/qa/test-verify-kustomize-no-deprecated-keys.sh

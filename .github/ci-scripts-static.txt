@@ -60,6 +60,9 @@ scripts/qa/verify-evidence-sprawl-budget.sh
 scripts/qa/test-verify-evidence-sprawl-budget.sh
 scripts/qa/verify-architecture-doc-path-drift.sh
 scripts/qa/verify-deprecation-discipline.sh
+scripts/qa/verify-docs-authority-invariants.sh
+scripts/qa/verify-process-invariants.sh
+scripts/qa/verify-machine-truth-freshness.sh
 scripts/qa/verify-openedx-audit-tracker-sync.sh
 scripts/qa/verify-tutor-config-path-contract.sh
 scripts/qa/test-build-validator-drift-evidence-bundle.sh

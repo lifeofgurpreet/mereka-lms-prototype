@@ -20,6 +20,8 @@ Use this root when the question is factual rather than procedural:
 
 - [`architecture/**`](architecture/README.md) for contracts, inventories, and architecture-facing reference
 - [`operations/**`](operations/README.md) for runtime matrices, hostnames, access posture, and deploy reference
+- [`contracts/**`](contracts/) for canonical verifier/identity/deprecation contracts
+- [`governance/**`](governance/) for canonical deprecation and authority-cleanup ledgers
 - [`analytics/**`](analytics/README.md) for analytics-related factual and migration reference
 - [`migrations/**`](migrations/README.md) for source-system and migration reference
 

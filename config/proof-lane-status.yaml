@@ -1,0 +1,126 @@
+# Proof Lane Status — machine-readable proof state per lane
+#
+# Each proof lane has a contract (what it proves), a set of
+# verifiers (scripts that run), and a current status.
+#
+# This file is updated after each proof run. Manual edits
+# must be backed by actual proof artifacts.
+#
+# Consumers:
+#   - Release gate scripts
+#   - Operational dashboards
+#   - docs/status/active/ companion docs
+---
+schema_version: "1.0"
+last_updated: "2026-04-04"
+
+lanes:
+  - id: runtime-routing
+    name: "Runtime Routing"
+    contract: "Route reachability and response class for active surfaces"
+    verifiers:
+      - scripts/qa/verify-rke2-tenant-routes.sh
+      - scripts/qa/verify-service-endpoints.sh
+      - scripts/qa/verify-mfe-route-smoke.sh
+    environments:
+      dev:
+        status: partial
+        last_run: null
+        notes: "11 surfaces proved, 16 unproved, 1 broken (forum alias)"
+      staging:
+        status: partial
+        last_run: null
+        notes: "6 surfaces proved, 23 unproved, 2 broken"
+      production:
+        status: unproved
+        last_run: null
+        notes: "1 proved, 28 unproved"
+
+  - id: authenticated-learner-canary
+    name: "Authenticated Learner Canary"
+    contract: "Login/session/dashboard journey for smoke learner"
+    verifiers:
+      - scripts/qa/verify-authenticated-sso-canary.sh
+    environments:
+      dev:
+        status: partial
+        notes: "SSO flow works, some post-login surfaces unproved"
+      staging:
+        status: broken
+        notes: "Post-login flow broken on staging apps MFE"
+      production:
+        status: unproved
+        notes: "Smoke accounts not yet provisioned"
+
+  - id: studio-canary
+    name: "Studio Staff Canary"
+    contract: "Staff Studio login and home page"
+    verifiers:
+      - scripts/qa/verify-authenticated-sso-canary.sh
+      - scripts/qa/verify-studio-sso-flow.sh
+    environments:
+      dev:
+        status: partial
+      staging:
+        status: unproved
+      production:
+        status: unproved
+
+  - id: forum-smoke
+    name: "Forum Smoke"
+    contract: "Forum endpoint health semantics"
+    verifiers:
+      - scripts/qa/verify-forum-smoke.sh
+    environments:
+      dev:
+        status: broken
+        notes: "Alias returns empty 200, in-process endpoint returns 401"
+      staging:
+        status: broken
+        notes: "Forum alias resolution break"
+      production:
+        status: unproved
+
+  - id: generated-surfaces
+    name: "Generated Surface Integrity"
+    contract: "Generated outputs match source contracts"
+    verifiers:
+      - scripts/qa/verify-domain-generated-surfaces.sh
+      - scripts/qa/verify-domain-authority-chain.sh
+    environments:
+      dev:
+        status: partial
+      staging:
+        status: unproved
+      production:
+        status: unproved
+
+  - id: release-chain
+    name: "Release Chain Integrity"
+    contract: "Release object + evidence bundle + truth ledger"
+    verifiers:
+      - scripts/qa/verify-release-bundle.sh
+      - scripts/qa/verify-build-provenance.sh
+    environments:
+      dev:
+        status: partial
+        notes: "Release workflow exists, evidence bundle generation needs hardening"
+      staging:
+        status: unproved
+      production:
+        status: unproved
+
+  - id: tenant-isolation
+    name: "Tenant Isolation"
+    contract: "Cross-tenant separation proof"
+    verifiers:
+      - scripts/qa/verify-tenant-isolation.sh
+      - scripts/qa/verify-tenant-isolation-gates.sh
+    environments:
+      dev:
+        status: unproved
+        notes: "Pushgateway not deployed, PrometheusRule quarantined"
+      staging:
+        status: unproved
+      production:
+        status: unproved
