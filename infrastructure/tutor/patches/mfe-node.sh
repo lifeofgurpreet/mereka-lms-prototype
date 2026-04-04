@@ -368,8 +368,6 @@ for target in targets:
     def ensure_mfe_account_social_links_guard(text):
         if "FROM base AS account-common" not in text:
             return text
-        if 'service_path = Path("/openedx/app/src/account-settings/data/service.js")' in text:
-            return text
 
         patch_block = """RUN python3 - <<'PY'
 from pathlib import Path
@@ -399,6 +397,7 @@ service_path.write_text(updated, encoding="utf-8")
 if patched not in service_path.read_text(encoding="utf-8"):
     raise SystemExit(f"{guard_revision}: frontend-app-account social_links guard missing after patch write")
 PY"""
+        patch_lines = patch_block.splitlines()
 
         lines = text.splitlines()
         start = None
@@ -416,6 +415,16 @@ PY"""
                 end = idx
                 break
 
+        # Remove any existing injected guard in this stage so the effective patch can be
+        # reinserted after the account source copy, which is the last write to service.js.
+        search_idx = start
+        while search_idx <= end - len(patch_lines):
+            if lines[search_idx : search_idx + len(patch_lines)] == patch_lines:
+                del lines[search_idx : search_idx + len(patch_lines)]
+                end -= len(patch_lines)
+                continue
+            search_idx += 1
+
         insert_at = None
         for idx in range(start, end):
             if lines[idx].strip() == "COPY --from=account-src / /openedx/app":
@@ -424,7 +433,7 @@ PY"""
         if insert_at is None:
             return text
 
-        lines = lines[:insert_at] + [patch_block] + lines[insert_at:]
+        lines = lines[:insert_at] + patch_lines + lines[insert_at:]
         rebuilt = "\n".join(lines)
         if text.endswith("\n"):
             rebuilt += "\n"

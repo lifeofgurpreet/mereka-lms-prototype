@@ -66,42 +66,6 @@ RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 """,
 )
 
-# Guard account MFE bootstrap against LMS payloads that serialize social_links as null.
-# Without this, authenticated learners can land on a blank /account shell after OIDC handoff.
-_register_env_patch(
-    "mfe-dockerfile-post-npm-install-account",
-    """
-RUN python3 - <<'PY'
-from pathlib import Path
-
-guard_revision = "account-social-links-guard-2026-04-04-cacheproof-v1"
-service_path = Path("/openedx/app/src/account-settings/data/service.js")
-if not service_path.exists():
-    raise SystemExit(0)
-
-original = "const platformData = data.social_links.find(({ platform }) => platform === id);"
-patched = (
-    "const socialLinks = Array.isArray(data.social_links) ? data.social_links : [];\\n"
-    "      const platformData = socialLinks.find(({ platform }) => platform === id);"
-)
-
-content = service_path.read_text(encoding="utf-8")
-if patched in content:
-    raise SystemExit(0)
-if original not in content:
-    raise SystemExit(f"{guard_revision}: frontend-app-account social_links lookup anchor missing")
-
-updated = content.replace(original, patched)
-if updated == content:
-    raise SystemExit(f"{guard_revision}: frontend-app-account social_links patch was a no-op")
-
-service_path.write_text(updated, encoding="utf-8")
-if patched not in service_path.read_text(encoding="utf-8"):
-    raise SystemExit(f"{guard_revision}: frontend-app-account social_links guard missing after patch write")
-PY
-""",
-)
-
 # Fail the account build if a stale compiled bundle or source map still contains the
 # unguarded social_links lookup after webpack finishes.
 _register_env_patch(
