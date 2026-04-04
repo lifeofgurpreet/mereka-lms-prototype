@@ -47,3 +47,20 @@ exceptions:
       New process-invariants.yml workflow now runs these checks as dedicated
       visible CI statuses on all future PRs. This was the bootstrap merge.
     logged_by: "agent-2 (factory-droid)"
+
+  - date: "2026-04-04"
+    pr: "https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1336"
+    commit: "see squash merge"
+    bypassed_checks:
+      - "static-validation (CI not yet run)"
+      - "process-invariants workflow (newly added in this PR)"
+      - "branch protection merge requirements"
+    justification: >
+      Enforcement hardening tranche — change-surface contracts, dedicated CI
+      workflow, admin-merge enforcement. All 5 invariant checks pass locally.
+      Approved by repo owner. This is the second and final bootstrap merge.
+    follow_up: >
+      process-invariants.yml workflow is now active on main. All future PRs
+      will have 4 dedicated visible status checks. No more admin merges
+      needed for this tranche.
+    logged_by: "agent-2 (factory-droid)"
