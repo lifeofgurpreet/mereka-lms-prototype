@@ -1,0 +1,252 @@
+schema_version: "1.0"
+# Adapted from anthropics/skills skill-creator eval framework.
+# Trigger evals test activation accuracy.
+# Quality evals test behavioral correctness.
+
+skills:
+  - skill_name: layer-triage
+    trigger_evals:
+      - id: 1
+        prompt: "The login page on academyv2.mereka.io is showing a 502 error for the last 10 minutes"
+        should_trigger: true
+        reason: "Runtime break requiring layer identification"
+      - id: 2
+        prompt: "I want to add a new feature to the course catalog"
+        should_trigger: false
+        reason: "Feature work, not incident triage"
+      - id: 3
+        prompt: "Our CI pipeline is failing with an unrelated shellcheck error"
+        should_trigger: true
+        reason: "CI failure needing classification before fix"
+      - id: 4
+        prompt: "Can you update the README with the new deployment instructions?"
+        should_trigger: false
+        reason: "Documentation task, no broken surface"
+      - id: 5
+        prompt: "The MFE apps page returns 200 but shows a blank white screen after last deploy"
+        should_trigger: true
+        reason: "Runtime/asset mismatch requiring layer diagnosis"
+    quality_evals:
+      - id: 1
+        prompt: "Users report that https://academy.biji-biji.com/dashboard shows a 404 after we merged PR #1200"
+        expected_behavior: |
+          1. Names the broken surface (production, biji-biji, academy.biji-biji.com, /dashboard)
+          2. Identifies potential owner layers (realization or runtime)
+          3. Produces an incident table before suggesting any fix
+          4. Does NOT immediately suggest editing code
+        assertions:
+          - "Output contains an incident table with 'Broken surface' field"
+          - "Output identifies at least one candidate owner layer"
+          - "Output does NOT suggest code changes before completing the incident table"
+
+  - skill_name: cross-repo-authority
+    trigger_evals:
+      - id: 1
+        prompt: "I need to change the image tag for mereka-lms in production"
+        should_trigger: true
+        reason: "Image tag pinning is bbi-infrastructure's job"
+      - id: 2
+        prompt: "Should I edit deploy/k8s/overlays/production/kustomization.yaml in this repo?"
+        should_trigger: true
+        reason: "Transitional overlay ownership question"
+      - id: 3
+        prompt: "I want to add a new Python dependency to requirements.txt"
+        should_trigger: false
+        reason: "App-internal change, no cross-repo boundary"
+      - id: 4
+        prompt: "ArgoCD isn't syncing the mereka-lms-dev app"
+        should_trigger: true
+        reason: "Argo is bbi-infrastructure's domain"
+    quality_evals:
+      - id: 1
+        prompt: "I want to fix a wrong Caddyfile route. Should I edit it in mereka-lms or bbi-infrastructure?"
+        expected_behavior: |
+          1. Identifies Caddyfile is in deploy/k8s/base/apps/caddy/ (mereka-lms)
+          2. Notes that realization happens via bbi-infrastructure
+          3. Recommends editing in mereka-lms (base manifest) and letting Argo consume it
+        assertions:
+          - "Output mentions deploy/k8s/base/apps/caddy/"
+          - "Output recommends editing in mereka-lms"
+          - "Output mentions Argo or bbi-infrastructure for realization"
+
+  - skill_name: frontend-mfe-change
+    trigger_evals:
+      - id: 1
+        prompt: "I need to change the login page branding colors"
+        should_trigger: true
+        reason: "MFE branding change"
+      - id: 2
+        prompt: "The MFE authn page webpack build is failing with OOM"
+        should_trigger: true
+        reason: "MFE build issue"
+      - id: 3
+        prompt: "I need to add a new API endpoint to the LMS"
+        should_trigger: false
+        reason: "Backend change, not frontend"
+      - id: 4
+        prompt: "How do I configure plugin slots for the footer component?"
+        should_trigger: true
+        reason: "Plugin slot configuration is MFE domain"
+    quality_evals:
+      - id: 1
+        prompt: "I want to change the brand color from blue to green across all MFEs"
+        expected_behavior: |
+          1. Points to assets/brand/ as the correct source location
+          2. Mentions mereka_lms.py plugin as the build path
+          3. Says to run apply-patches.sh after changes
+          4. Warns against editing tutor_env/ directly
+        assertions:
+          - "Output mentions assets/brand/ or @edx/brand"
+          - "Output mentions apply-patches.sh"
+          - "Output warns against editing tutor_env/"
+
+  - skill_name: settings-configmap
+    trigger_evals:
+      - id: 1
+        prompt: "I need to add CSRF_TRUSTED_ORIGINS for a new domain"
+        should_trigger: true
+        reason: "Django settings change"
+      - id: 2
+        prompt: "The LMS settings show MYSQL_HOST as 10.97.0.2 but it should be mysql"
+        should_trigger: true
+        reason: "ConfigMap drift / settings mismatch"
+      - id: 3
+        prompt: "I want to write a new smoke test script"
+        should_trigger: false
+        reason: "QA script creation, not settings change"
+    quality_evals:
+      - id: 1
+        prompt: "I need to add a new ALLOWED_HOSTS entry for skillourfuture.org"
+        expected_behavior: |
+          1. Points to infrastructure/tutor/plugins/mereka_lms.py as source
+          2. Describes the render path (tutor config save + apply-patches.sh)
+          3. Mentions verifying the rendered output
+        assertions:
+          - "Output mentions mereka_lms.py"
+          - "Output mentions tutor config save or apply-patches.sh"
+
+  - skill_name: gitops-promotion
+    trigger_evals:
+      - id: 1
+        prompt: "How do I deploy the latest build to dev environment?"
+        should_trigger: true
+        reason: "Promotion workflow"
+      - id: 2
+        prompt: "Argo shows the mereka-lms app as OutOfSync after my PR merged"
+        should_trigger: true
+        reason: "Promotion/realization gap"
+      - id: 3
+        prompt: "I need to refactor the course migration scripts"
+        should_trigger: false
+        reason: "Code refactor, not deployment"
+    quality_evals:
+      - id: 1
+        prompt: "My fix is merged to main. Is it live?"
+        expected_behavior: |
+          1. Distinguishes merged truth from proved truth
+          2. Lists the four truths (branch, merged, realized, proved)
+          3. Says to verify via runtime proof, not just merge status
+        assertions:
+          - "Output mentions 'proved truth' or 'runtime proof'"
+          - "Output does NOT say the fix is live just because it's merged"
+
+  - skill_name: runtime-proof
+    trigger_evals:
+      - id: 1
+        prompt: "I just deployed to dev, how do I verify it's working?"
+        should_trigger: true
+        reason: "Post-deployment verification"
+      - id: 2
+        prompt: "The browser canary is green but users say login is broken"
+        should_trigger: true
+        reason: "False green trap investigation"
+      - id: 3
+        prompt: "I need to write documentation for the new API"
+        should_trigger: false
+        reason: "Documentation task"
+    quality_evals:
+      - id: 1
+        prompt: "I want to run the full verification suite after deployment"
+        expected_behavior: |
+          1. Specifies mandatory order: route proof first, then asset, then browser canary
+          2. Lists the actual script names
+          3. Warns against running browser canary before route proof passes
+        assertions:
+          - "Output specifies route proof before browser canary"
+          - "Output mentions verify-rke2-tenant-routes.sh or route proof script"
+
+  - skill_name: smoke-identity
+    trigger_evals:
+      - id: 1
+        prompt: "I need to create a new smoke test account for the biji-biji tenant"
+        should_trigger: true
+        reason: "Smoke identity provisioning"
+      - id: 2
+        prompt: "Where are the SSO_CANARY_EMAIL credentials stored?"
+        should_trigger: true
+        reason: "Credential authority chain question"
+      - id: 3
+        prompt: "I want to optimize the CI pipeline timing"
+        should_trigger: false
+        reason: "CI optimization, not identity management"
+    quality_evals:
+      - id: 1
+        prompt: "The GitHub Actions smoke test is failing because SSO_CANARY_PASSWORD is wrong"
+        expected_behavior: |
+          1. Identifies GitHub secrets as consumers, not authority
+          2. Points to Infisical as secret authority
+          3. Points to Authentik + Open edX as identity authority
+        assertions:
+          - "Output identifies Infisical as secret authority"
+          - "Output says GitHub secrets are consumers/mirrors, not authority"
+
+  - skill_name: docs-governance
+    trigger_evals:
+      - id: 1
+        prompt: "I'm creating a new architecture doc, where should it go?"
+        should_trigger: true
+        reason: "Doc placement decision"
+      - id: 2
+        prompt: "There are two docs that describe the same thing, which is canonical?"
+        should_trigger: true
+        reason: "Authority overlap resolution"
+      - id: 3
+        prompt: "I need to fix a bug in the LMS settings"
+        should_trigger: false
+        reason: "Code fix, not documentation"
+    quality_evals:
+      - id: 1
+        prompt: "I wrote a new doc about the deployment pipeline at docs/concepts/architecture/DEPLOY_PIPELINE.md"
+        expected_behavior: |
+          1. Notes docs/architecture/ is for canonical content
+          2. Notes docs/concepts/ is for detailed-reference only
+          3. Recommends checking DEPRECATION_LEDGER for overlaps
+        assertions:
+          - "Output distinguishes canonical from detailed-reference locations"
+          - "Output mentions DEPRECATION_LEDGER"
+
+  - skill_name: ci-scope-and-timing
+    trigger_evals:
+      - id: 1
+        prompt: "CI is taking 20 minutes for a docs-only PR, can we skip some jobs?"
+        should_trigger: true
+        reason: "CI scope question"
+      - id: 2
+        prompt: "I want to add a new verification script to CI"
+        should_trigger: true
+        reason: "CI registration workflow"
+      - id: 3
+        prompt: "The login page theme needs updating"
+        should_trigger: false
+        reason: "Frontend task, not CI"
+    quality_evals:
+      - id: 1
+        prompt: "I wrote scripts/qa/verify-new-thing.sh. How do I get it into CI?"
+        expected_behavior: |
+          1. Points to script-registry.yaml as the registry
+          2. Says to add to ci_static_inventory.entries
+          3. Says to regenerate ci-scripts-static.txt
+          4. Mentions committing all three files together
+        assertions:
+          - "Output mentions script-registry.yaml"
+          - "Output mentions generate-ci-static-inventory.py or regeneration step"

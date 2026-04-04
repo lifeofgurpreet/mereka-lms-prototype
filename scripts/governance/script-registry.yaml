@@ -123,6 +123,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-proof-gate-contract.sh
     - script: scripts/qa/verify-ci-scope-contract.sh
     - script: scripts/qa/verify-blind-agent-acceptance.sh
+    - script: scripts/qa/verify-skill-evals-schema.sh
     - script: scripts/qa/verify-openedx-audit-tracker-sync.sh
     - script: scripts/qa/verify-tutor-config-path-contract.sh
     - script: scripts/qa/test-build-validator-drift-evidence-bundle.sh
