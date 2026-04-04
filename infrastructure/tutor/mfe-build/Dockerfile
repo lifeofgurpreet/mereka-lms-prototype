@@ -267,6 +267,7 @@ COPY --from=account-src / /openedx/app
 RUN python3 - <<'PY'
 from pathlib import Path
 
+guard_revision = "account-social-links-guard-2026-04-04-cacheproof-v1"
 service_path = Path("/openedx/app/src/account-settings/data/service.js")
 if not service_path.exists():
     raise SystemExit(0)
@@ -281,9 +282,15 @@ content = service_path.read_text(encoding="utf-8")
 if patched in content:
     raise SystemExit(0)
 if original not in content:
-    raise SystemExit("frontend-app-account social_links lookup anchor missing")
+    raise SystemExit(f"{guard_revision}: frontend-app-account social_links lookup anchor missing")
 
-service_path.write_text(content.replace(original, patched), encoding="utf-8")
+updated = content.replace(original, patched)
+if updated == content:
+    raise SystemExit(f"{guard_revision}: frontend-app-account social_links patch was a no-op")
+
+service_path.write_text(updated, encoding="utf-8")
+if patched not in service_path.read_text(encoding="utf-8"):
+    raise SystemExit(f"{guard_revision}: frontend-app-account social_links guard missing after patch write")
 PY
 
 RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations
@@ -848,6 +855,38 @@ RUN npm run build
 FROM account-common AS account-prod
 ENV NODE_ENV=production
 RUN npm run build
+RUN python3 - <<'PY'
+from pathlib import Path
+
+guard_revision = "account-social-links-guard-2026-04-04-cacheproof-v1"
+dist_dir = Path("/openedx/app/dist")
+if not dist_dir.exists():
+    raise SystemExit(f"{guard_revision}: frontend-app-account dist missing after build")
+
+forbidden = "const platformData = data.social_links.find(({ platform }) => platform === id);"
+required = "const socialLinks = Array.isArray(data.social_links) ? data.social_links : [];"
+offenders = []
+required_found = False
+
+for asset in sorted(dist_dir.rglob("*")):
+    if asset.suffix not in {".js", ".map"}:
+        continue
+    try:
+        content = asset.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        continue
+    if forbidden in content:
+        offenders.append(str(asset))
+    if required in content:
+        required_found = True
+
+if offenders:
+    raise SystemExit(
+        f"{guard_revision}: unguarded social_links lookup survived account build in {', '.join(offenders)}"
+    )
+if not required_found:
+    raise SystemExit(f"{guard_revision}: guarded social_links source missing from compiled account assets")
+PY
 
 
 

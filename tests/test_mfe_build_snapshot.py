@@ -16,14 +16,25 @@ def test_account_mfe_hook_guards_null_social_links() -> None:
     assert 'service_path = Path("/openedx/app/src/account-settings/data/service.js")' in content
     assert "const socialLinks = Array.isArray(data.social_links) ? data.social_links : [];" in content
     assert "frontend-app-account social_links lookup anchor missing" in content
+    assert "frontend-app-account social_links patch was a no-op" in content
+    assert "frontend-app-account social_links guard missing after patch write" in content
+    assert '"mfe-dockerfile-post-npm-build"' in content
+    assert "unguarded social_links lookup survived account build" in content
+    assert "guarded social_links source missing from compiled account assets" in content
 
 
 def test_rendered_account_mfe_dockerfile_carries_null_guard_when_available() -> None:
     snapshot = SNAPSHOT_DOCKERFILE.read_text(encoding="utf-8")
     assert 'service_path = Path("/openedx/app/src/account-settings/data/service.js")' in snapshot
+    assert "frontend-app-account social_links patch was a no-op" in snapshot
+    assert "frontend-app-account social_links guard missing after patch write" in snapshot
+    assert "unguarded social_links lookup survived account build" in snapshot
+    assert "guarded social_links source missing from compiled account assets" in snapshot
 
     if not RENDERED_DOCKERFILE.exists():
         return
 
     content = RENDERED_DOCKERFILE.read_text(encoding="utf-8")
     assert 'service_path = Path("/openedx/app/src/account-settings/data/service.js")' in content
+    assert "frontend-app-account social_links patch was a no-op" in content
+    assert "frontend-app-account social_links guard missing after patch write" in content
