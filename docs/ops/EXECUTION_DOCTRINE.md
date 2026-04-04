@@ -91,6 +91,19 @@ We are moving from many helpful scripts to a few canonical control surfaces.
    `bin/lms-ops accept ...` exist for control-plane composition, not for
    day-to-day operator discoverability.
 
+6. **Canonical lane taxonomy is fixed.**
+   Only these lane names are public and operator-facing:
+   - `runtime-routing`
+   - `identity-session`
+   - `tenant-branding`
+   - `infra-realization`
+   - `seed-bootstrap`
+
+7. **One human-facing acceptance front door.**
+   Human operators use `bin/accept <lane> ...`. Lower-level scripts and
+   `bin/lms-ops accept ...` exist for control-plane composition, not for
+   day-to-day operator discoverability.
+
 ## Three-Repo Contract
 
 - **mereka-lms** (app)

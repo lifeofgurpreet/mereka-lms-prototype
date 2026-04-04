@@ -842,7 +842,8 @@ scripts:
       - --skip-runtime-proof (optional)
       - --skip-playwright (optional)
       - --skip-studio-sso (optional)
-      - --skip-footer (optional)
+      - --with-footer (optional)
+      - --skip-footer (legacy compatibility alias; optional)
     outputs:
       - var/acceptance/runtime-routing/<env>/<timestamp>/summary.json
       - var/acceptance/runtime-routing/<env>/<timestamp>/truth-ledger.json

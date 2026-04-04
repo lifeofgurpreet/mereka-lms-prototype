@@ -26,6 +26,17 @@
     "environment": { "type": "string", "minLength": 1 },
     "tenant_filter": { "type": ["string", "null"] },
     "record_id": { "type": "string", "minLength": 1 },
+    "release_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["release_id", "release_bundle_id", "app_commit_sha", "release_object_json"],
+      "properties": {
+        "release_id": { "type": ["string", "null"] },
+        "release_bundle_id": { "type": ["string", "null"] },
+        "app_commit_sha": { "type": ["string", "null"] },
+        "release_object_json": { "type": "string", "minLength": 1 }
+      }
+    },
     "contract_truth": {
       "type": "object",
       "additionalProperties": false,
@@ -51,9 +62,11 @@
     "release_truth": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["release_object_id", "openedx_image", "mfe_image"],
+      "required": ["release_id", "release_bundle_id", "release_object_json", "openedx_image", "mfe_image"],
       "properties": {
         "release_object_id": { "type": ["string", "null"] },
+        "release_id": { "type": ["string", "null"] },
+        "release_bundle_id": { "type": ["string", "null"] },
         "release_object_json": { "type": ["string", "null"] },
         "build_origin_environment": { "type": ["string", "null"] },
         "promotion_target_environment": { "type": ["string", "null"] },
@@ -120,7 +133,7 @@
     "acceptance_truth": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["bundle_path", "summary_json", "verdict", "verdict_planes", "check_statuses"],
+      "required": ["bundle_path", "summary_json", "verdict", "check_statuses"],
       "properties": {
         "bundle_path": { "type": ["string", "null"] },
         "summary_json": { "type": "string", "minLength": 1 },
@@ -131,15 +144,6 @@
           "properties": {
             "status": { "type": "string", "enum": ["pass", "fail"] },
             "failed_checks": { "type": "integer", "minimum": 0 }
-          }
-        },
-        "verdict_planes": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["routing_core", "adjacent_surface"],
-          "properties": {
-            "routing_core": { "$ref": "#/$defs/verdictPlane" },
-            "adjacent_surface": { "$ref": "#/$defs/verdictPlane" }
           }
         },
         "check_statuses": {
@@ -190,7 +194,6 @@
       "required": ["truth_ledger_json", "acceptance_bundle", "acceptance_summary_json"],
       "properties": {
         "truth_ledger_json": { "type": "string", "minLength": 1 },
-        "release_object_json": { "type": ["string", "null"] },
         "acceptance_bundle": { "type": ["string", "null"] },
         "acceptance_summary_json": { "type": "string", "minLength": 1 }
       }
@@ -212,16 +215,6 @@
         "repository": { "type": "string", "minLength": 1 },
         "tag": { "type": ["string", "null"] },
         "digest": { "type": ["string", "null"] }
-      }
-    },
-    "verdictPlane": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["status", "failed_checks", "check_count"],
-      "properties": {
-        "status": { "type": "string", "enum": ["pass", "fail", "not-applicable"] },
-        "failed_checks": { "type": "integer", "minimum": 0 },
-        "check_count": { "type": "integer", "minimum": 0 }
       }
     }
   }

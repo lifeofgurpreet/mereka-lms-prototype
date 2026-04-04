@@ -92,6 +92,8 @@ configMapGenerator:
   - apps/openedx/settings/lms/development.py
   - apps/openedx/settings/lms/production.py
   - apps/openedx/settings/lms/test.py
+  - apps/openedx/settings/lms/mereka_footer.py
+  - apps/openedx/settings/lms/mereka_jwt_session.py
   - apps/openedx/settings/lms/mereka_platform_admin.py
   - apps/openedx/settings/lms/mereka_forwarded_headers.py
   - apps/openedx/settings/lms/mereka_multisite.py

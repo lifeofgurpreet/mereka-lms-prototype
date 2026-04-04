@@ -66,6 +66,35 @@ RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 """,
 )
 
+# Guard account MFE bootstrap against LMS payloads that serialize social_links as null.
+# Without this, authenticated learners can land on a blank /account shell after OIDC handoff.
+_register_env_patch(
+    "mfe-dockerfile-post-npm-install-account",
+    """
+RUN python3 - <<'PY'
+from pathlib import Path
+
+service_path = Path("/openedx/app/src/account-settings/data/service.js")
+if not service_path.exists():
+    raise SystemExit(0)
+
+original = "const platformData = data.social_links.find(({ platform }) => platform === id);"
+patched = (
+    "const socialLinks = Array.isArray(data.social_links) ? data.social_links : [];\\n"
+    "      const platformData = socialLinks.find(({ platform }) => platform === id);"
+)
+
+content = service_path.read_text(encoding="utf-8")
+if patched in content:
+    raise SystemExit(0)
+if original not in content:
+    raise SystemExit("frontend-app-account social_links lookup anchor missing")
+
+service_path.write_text(content.replace(original, patched), encoding="utf-8")
+PY
+""",
+)
+
 # NPM install resilience (retry on failure)
 # NOTE: Using 'npm install' instead of 'npm ci' to handle lockfile drift gracefully
 # while still respecting the lockfile when possible. This is the SOTA approach for

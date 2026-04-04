@@ -38,11 +38,36 @@ def _active_domain_rows(registry: dict[str, Any], env: str) -> list[dict[str, An
     ]
 
 
+def _proof_priority_value(row: dict[str, Any]) -> int:
+    priority = str(row.get("proof_priority", "P9"))
+    if priority.startswith("P") and priority[1:].isdigit():
+        return int(priority[1:])
+    return 9
+
+
 def _host_map_for_env(registry: dict[str, Any], env: str) -> dict[str, dict[str, str]]:
     host_map: dict[str, dict[str, str]] = {}
+    chosen_rows: dict[tuple[str, str], dict[str, Any]] = {}
     for row in _active_domain_rows(registry, env):
-        tenant = row["tenant"]
-        role = row["role"]
+        key = (row["tenant"], row["role"])
+        current = chosen_rows.get(key)
+        if current is None:
+            chosen_rows[key] = row
+            continue
+        current_rank = (
+            0 if bool(current.get("release_critical", False)) else 1,
+            _proof_priority_value(current),
+            current.get("domain", ""),
+        )
+        candidate_rank = (
+            0 if bool(row.get("release_critical", False)) else 1,
+            _proof_priority_value(row),
+            row.get("domain", ""),
+        )
+        if candidate_rank < current_rank:
+            chosen_rows[key] = row
+
+    for (tenant, role), row in chosen_rows.items():
         host_map.setdefault(tenant, {})[role] = row["domain"]
     return host_map
 
@@ -97,15 +122,21 @@ def _build_assertions(
         if not apps_host:
             continue
         assertion_id = "apps-root" if path == "/" else f"apps-{path.strip('/').replace('/', '-')}"
-        assertions.append(
-            {
-                "id": assertion_id,
-                "kind": "host-stability",
-                "url": f"https://{apps_host}{path}",
-                "expect_host": apps_host,
-                "forbid_redirect_hosts": forbidden_hosts,
-            }
-        )
+        assertion = {
+            "id": assertion_id,
+            "kind": "host-stability",
+            "url": f"https://{apps_host}{path}",
+            "expect_host": apps_host,
+            "forbid_redirect_hosts": forbidden_hosts,
+        }
+        if path in {"/", "/dashboard"}:
+            assertion.update(
+                {
+                    "expect_content_type_prefix": "text/html",
+                    "expect_min_body_bytes": 1,
+                }
+            )
+        assertions.append(assertion)
 
     studio_cfg = lane_contract.get("studio_sso", {})
     studio_entry_host = hosts.get(studio_cfg.get("entry_role", ""))

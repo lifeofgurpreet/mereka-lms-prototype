@@ -5,7 +5,7 @@
 # - env-specific runtime proof script from tenant-registry.yaml
 # - Playwright unauthenticated/branding/selector checks
 # - Studio SSO redirect verification
-# - Footer parity live verification
+# - Optional footer parity live verification (branding concern, not routing-core)
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -18,8 +18,8 @@ DRY_RUN=0
 SKIP_RUNTIME_PROOF=0
 SKIP_PLAYWRIGHT=0
 SKIP_STUDIO_SSO=0
-SKIP_FOOTER=0
-RELEASE_OBJECT_JSON=""
+SKIP_FOOTER=1
+RELEASE_OBJECT_JSON="${TRUTH_LEDGER_RELEASE_OBJECT_JSON:-}"
 RELEASE_OBJECT_ID=""
 
 usage() {
@@ -34,8 +34,9 @@ Options:
   --skip-runtime-proof                               Skip env runtime-proof script
   --skip-playwright                                  Skip Playwright browser checks
   --skip-studio-sso                                  Skip Studio SSO redirect check
-  --skip-footer                                      Skip footer parity live check
   --release-object-json <path>                       Bind release-object/v1 evidence into proof + ledger
+  --with-footer                                     Include footer parity live check
+  --skip-footer                                     Deprecated compatibility alias (footer is skipped by default)
   -h, --help                                         Show help
 EOF
 }
@@ -49,8 +50,9 @@ while [[ $# -gt 0 ]]; do
     --skip-runtime-proof) SKIP_RUNTIME_PROOF=1; shift ;;
     --skip-playwright) SKIP_PLAYWRIGHT=1; shift ;;
     --skip-studio-sso) SKIP_STUDIO_SSO=1; shift ;;
-    --skip-footer) SKIP_FOOTER=1; shift ;;
     --release-object-json) RELEASE_OBJECT_JSON="${2:?--release-object-json requires a value}"; shift 2 ;;
+    --with-footer) SKIP_FOOTER=0; shift ;;
+    --skip-footer) SKIP_FOOTER=1; shift ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown argument: $1" >&2; usage >&2; exit 2 ;;
   esac
@@ -198,6 +200,25 @@ def final_host_for(url: str) -> str:
     )
     return urlparse(response.url).hostname or ""
 
+def fetch_response_details(url: str) -> dict[str, object]:
+    import requests
+
+    session = requests.Session()
+    response = session.get(
+        url,
+        allow_redirects=True,
+        timeout=20,
+        headers={"User-Agent": "runtime-routing-accept/1.0"},
+    )
+    final_url = response.url or url
+    return {
+        "final_url": final_url,
+        "final_host": urlparse(final_url).hostname or "",
+        "status_code": response.status_code,
+        "content_type": response.headers.get("content-type", ""),
+        "body_bytes": len(response.content or b""),
+    }
+
 def redirect_hosts_for(url: str) -> list[str]:
     import requests
 
@@ -245,7 +266,8 @@ def run_contract_assertions(tenant: dict, log_path: pathlib.Path) -> None:
         kind = assertion["kind"]
         try:
             hosts = redirect_hosts_for(url)
-            final_host = final_host_for(url)
+            details = fetch_response_details(url)
+            final_host = str(details["final_host"])
         except Exception as exc:
             tenant_failures += 1
             lines.append(f"FAIL {assertion_id}: request error for {url}: {exc}")
@@ -266,12 +288,29 @@ def run_contract_assertions(tenant: dict, log_path: pathlib.Path) -> None:
             expected = assertion["expect_host"]
             forbidden = set(assertion.get("forbid_redirect_hosts", []))
             bad_hosts = [host for host in hosts if host in forbidden]
-            if final_host == expected and not bad_hosts:
-                lines.append(f"PASS {assertion_id}: final_host={final_host} chain={hosts}")
+            expected_content_type = assertion.get("expect_content_type_prefix")
+            expected_min_body_bytes = int(assertion.get("expect_min_body_bytes", 0))
+            content_type = str(details.get("content_type", ""))
+            body_bytes = int(details.get("body_bytes", 0))
+            status_code = int(details.get("status_code", 0))
+            final_url = str(details.get("final_url", url))
+            content_type_ok = (
+                not expected_content_type
+                or content_type.lower().startswith(str(expected_content_type).lower())
+            )
+            body_ok = body_bytes >= expected_min_body_bytes
+            if final_host == expected and not bad_hosts and content_type_ok and body_ok:
+                lines.append(
+                    f"PASS {assertion_id}: final_host={final_host} status={status_code} "
+                    f"content_type={content_type!r} body_bytes={body_bytes} final_url={final_url} chain={hosts}"
+                )
             else:
                 tenant_failures += 1
                 lines.append(
-                    f"FAIL {assertion_id}: expected final_host={expected}, got {final_host}; forbidden_seen={bad_hosts}; chain={hosts}"
+                    f"FAIL {assertion_id}: expected final_host={expected}, got {final_host}; "
+                    f"forbidden_seen={bad_hosts}; status={status_code}; content_type={content_type!r}; "
+                    f"body_bytes={body_bytes}; expected_content_type_prefix={expected_content_type!r}; "
+                    f"expected_min_body_bytes={expected_min_body_bytes}; final_url={final_url}; chain={hosts}"
                 )
         elif kind == "sso-contract":
             expected = assertion["expect_apps_host"]
@@ -373,9 +412,10 @@ for tenant in payload["tenants"]:
                 failures += 1
 
     if not skip_studio_sso and lms_host:
+        expected_apps_host = tenant.get("hosts", {}).get("mfe")
         execute(
             f"studio-sso:{slug}",
-            ["bash", "scripts/qa/verify-studio-sso-flow.sh", lms_host],
+            ["bash", "scripts/qa/verify-studio-sso-flow.sh", lms_host, expected_apps_host or ""],
             tenant_dir / "studio-sso.log",
         )
 
@@ -414,9 +454,18 @@ failures = int(sys.argv[7])
 generated_at_utc = sys.argv[8]
 output_dir = Path(sys.argv[9])
 canonical_truth_ledger_json = Path(sys.argv[10])
-release_object_json = sys.argv[11] or None
+release_object_json = Path(sys.argv[11]) if sys.argv[11] else None
 release_object_id = sys.argv[12] or None
 matrix = json.loads(matrix_path.read_text(encoding="utf-8"))
+release_identity = None
+if release_object_json and release_object_json.exists():
+    release_object = json.loads(release_object_json.read_text(encoding="utf-8"))
+    release_identity = {
+        "release_id": release_object.get("release_id"),
+        "release_bundle_id": release_object.get("build", {}).get("release_bundle_id"),
+        "app_commit_sha": release_object.get("app_commit_sha"),
+        "release_object_json": str(release_object_json),
+    }
 
 checks = []
 for line in summary_tsv.read_text(encoding="utf-8").splitlines():
@@ -431,6 +480,7 @@ for line in summary_tsv.read_text(encoding="utf-8").splitlines():
             "log": log_path,
         }
     )
+failed_check_count = sum(1 for check in checks if check["status"] == "fail")
 
 def is_check_failure(check):
     status = check["status"].strip().lower()
@@ -454,10 +504,6 @@ def build_plane_verdict(plane_name):
         "check_count": len(plane_checks),
     }
 
-release_object_payload = None
-if release_object_json:
-    release_object_payload = json.loads(Path(release_object_json).read_text(encoding="utf-8"))
-
 payload = {
     "schema_version": "runtime-routing-proof/v1",
     "generated_at_utc": generated_at_utc,
@@ -467,7 +513,7 @@ payload = {
     "mode": "dry-run" if dry_run else "execute",
     "verdict": {
         "status": "pass" if failures == 0 else "fail",
-        "failed_checks": failures,
+        "failed_checks": failed_check_count,
     },
     "verdict_planes": {
         "routing_core": build_plane_verdict("routing_core"),
@@ -486,21 +532,23 @@ payload = {
         "summary_json": str(summary_json),
         "truth_ledger_json": str(output_dir / "truth-ledger.json"),
         "canonical_truth_ledger_json": str(canonical_truth_ledger_json),
-        "release_object_json": release_object_json,
+        "release_object_json": str(release_object_json) if release_object_json else None,
     },
     "release_truth": {
         "release_object_id": release_object_id,
-        "release_object_json": release_object_json,
+        "release_object_json": str(release_object_json) if release_object_json else None,
         "build_origin_environment": (
-            release_object_payload.get("build_origin_environment") if release_object_payload else None
+            release_object.get("build_origin_environment") if release_identity else None
         ),
         "promotion_target_environment": (
-            release_object_payload.get("promotion_target_environment") if release_object_payload else None
+            release_object.get("promotion_target_environment") if release_identity else None
         ),
     },
     "matrix": matrix,
     "checks": checks,
 }
+if release_identity:
+    payload["release_identity"] = release_identity
 summary_json.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 PY
 
@@ -513,7 +561,7 @@ case "$ENVIRONMENT" in
     ;;
   staging)
     ARGO_APP="mereka-lms-staging"
-    TARGET_NAMESPACE="mereka-lms-staging"
+    TARGET_NAMESPACE="stg-mereka-lms"
     ;;
   production)
     ARGO_APP="mereka-lms"
@@ -526,12 +574,14 @@ LEDGER_ARGS=(
   --output "$CANONICAL_TRUTH_LEDGER_JSON"
 )
 if APP_SHA="$(git -C "$REPO_ROOT" rev-parse HEAD 2>/dev/null)"; then
-  LEDGER_ARGS+=(--app-sha "$APP_SHA")
+  if [[ -z "${TRUTH_LEDGER_RELEASE_OBJECT_JSON:-}" ]]; then
+    LEDGER_ARGS+=(--app-sha "$APP_SHA")
+  fi
 fi
 [[ -n "${TRUTH_LEDGER_INFRA_COMMIT_SHA:-}" ]] && LEDGER_ARGS+=(--infra-commit-sha "$TRUTH_LEDGER_INFRA_COMMIT_SHA")
+[[ -n "${TRUTH_LEDGER_RELEASE_OBJECT_JSON:-}" ]] && LEDGER_ARGS+=(--release-object-json "$TRUTH_LEDGER_RELEASE_OBJECT_JSON")
 [[ -n "${TRUTH_LEDGER_RELEASE_OPENEDX_IMAGE:-}" ]] && LEDGER_ARGS+=(--release-openedx-image "$TRUTH_LEDGER_RELEASE_OPENEDX_IMAGE")
 [[ -n "${TRUTH_LEDGER_RELEASE_MFE_IMAGE:-}" ]] && LEDGER_ARGS+=(--release-mfe-image "$TRUTH_LEDGER_RELEASE_MFE_IMAGE")
-[[ -n "$RELEASE_OBJECT_JSON" ]] && LEDGER_ARGS+=(--release-object-json "$RELEASE_OBJECT_JSON")
 [[ -n "$ARGO_APP" ]] && LEDGER_ARGS+=(--argo-app "$ARGO_APP")
 [[ -n "$TARGET_NAMESPACE" ]] && LEDGER_ARGS+=(--namespace "$TARGET_NAMESPACE")
 python3 "$REPO_ROOT/scripts/release/generate_truth_ledger.py" "${LEDGER_ARGS[@]}" >/dev/null

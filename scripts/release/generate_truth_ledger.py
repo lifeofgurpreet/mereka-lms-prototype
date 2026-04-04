@@ -62,27 +62,13 @@ def parse_image_reference(image_ref: str | None) -> dict[str, Any] | None:
     }
 
 
-def load_release_object(path: Path) -> dict[str, Any]:
-    payload = json.loads(path.read_text(encoding="utf-8"))
-    return {
-        "release_object_id": payload.get("release_id"),
-        "release_object_json": str(path.resolve()),
-        "build_origin_environment": payload.get("build_origin_environment"),
-        "promotion_target_environment": payload.get("promotion_target_environment"),
-        "openedx_image": {
-            "reference": f"{payload['images']['openedx']['name']}@{payload['images']['openedx']['digest']}",
-            "repository": payload["images"]["openedx"]["name"],
-            "tag": None,
-            "digest": payload["images"]["openedx"]["digest"],
-        },
-        "mfe_image": {
-            "reference": f"{payload['images']['mfe']['name']}@{payload['images']['mfe']['digest']}",
-            "repository": payload["images"]["mfe"]["name"],
-            "tag": None,
-            "digest": payload["images"]["mfe"]["digest"],
-        },
-        "proof_refs": payload.get("proof_refs", []),
-    }
+def load_release_object(path: Path | None) -> dict[str, Any] | None:
+    if not path:
+        return None
+    try:
+        return json.loads(path.resolve().read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
 
 
 def git_head_sha() -> str | None:
@@ -260,6 +246,7 @@ def build_payload(
     argo_truth: dict[str, Any],
     runtime_truth: dict[str, Any],
     release_truth: dict[str, Any],
+    release_identity: dict[str, Any] | None,
     summary_path: Path,
     output_path: Path,
 ) -> dict[str, Any]:
@@ -268,13 +255,12 @@ def build_payload(
         "bundle_path": summary.get("artifacts", {}).get("output_dir"),
         "summary_json": str(summary_path),
         "verdict": summary.get("verdict", {}),
-        "verdict_planes": summary.get("verdict_planes", {}),
         "check_statuses": summary.get("checks", []),
     }
     comparisons = compare_release_to_runtime(release_truth, runtime_truth)
     final_verdict = compute_final_verdict(acceptance_truth, argo_truth, comparisons)
 
-    return {
+    payload = {
         "schema_version": "runtime-truth-ledger/v1",
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "lane": summary.get("lane"),
@@ -307,9 +293,11 @@ def build_payload(
             "truth_ledger_json": str(output_path),
             "acceptance_bundle": summary.get("artifacts", {}).get("output_dir"),
             "acceptance_summary_json": str(summary_path),
-            "release_object_json": release_truth.get("release_object_json"),
         },
     }
+    if release_identity:
+        payload["release_identity"] = release_identity
+    return payload
 
 
 def main() -> int:
@@ -333,34 +321,53 @@ def main() -> int:
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     tracked_repositories = tuple(args.image_repo) if args.image_repo else DEFAULT_IMAGE_REPOS
+    release_object = load_release_object(args.release_object_json)
+    summary_release_identity = summary.get("release_identity") if isinstance(summary.get("release_identity"), dict) else None
+    release_identity = summary_release_identity or (
+        {
+            "release_id": release_object.get("release_id"),
+            "release_bundle_id": release_object.get("build", {}).get("release_bundle_id"),
+            "app_commit_sha": release_object.get("app_commit_sha"),
+            "release_object_json": str(args.release_object_json.resolve()),
+        }
+        if release_object and args.release_object_json
+        else None
+    )
     release_truth = {
-        "release_object_id": None,
-        "release_object_json": None,
-        "build_origin_environment": None,
-        "promotion_target_environment": None,
-        "openedx_image": parse_image_reference(args.release_openedx_image),
-        "mfe_image": parse_image_reference(args.release_mfe_image),
-        "proof_refs": [],
+        "release_object_id": (release_identity or {}).get("release_id"),
+        "release_id": (release_identity or {}).get("release_id"),
+        "release_bundle_id": (release_identity or {}).get("release_bundle_id"),
+        "release_object_json": str(args.release_object_json.resolve()) if args.release_object_json else None,
+        "build_origin_environment": release_object.get("build_origin_environment") if release_object else None,
+        "promotion_target_environment": release_object.get("promotion_target_environment") if release_object else None,
+        "openedx_image": parse_image_reference(args.release_openedx_image)
+        or parse_image_reference(
+            f"{release_object['images']['openedx']['name']}@{release_object['images']['openedx']['digest']}"
+            if release_object
+            and release_object.get("images", {}).get("openedx", {}).get("name")
+            and release_object.get("images", {}).get("openedx", {}).get("digest")
+            else None
+        ),
+        "mfe_image": parse_image_reference(args.release_mfe_image)
+        or parse_image_reference(
+            f"{release_object['images']['mfe']['name']}@{release_object['images']['mfe']['digest']}"
+            if release_object
+            and release_object.get("images", {}).get("mfe", {}).get("name")
+            and release_object.get("images", {}).get("mfe", {}).get("digest")
+            else None
+        ),
+        "proof_refs": release_object.get("proof_refs", []) if release_object else [],
     }
-    inferred_app_sha = args.app_sha
-    inferred_infra_sha = args.infra_commit_sha
-    if args.release_object_json:
-        release_object_payload = json.loads(args.release_object_json.resolve().read_text(encoding="utf-8"))
-        release_object_truth = load_release_object(args.release_object_json.resolve())
-        release_truth.update(release_object_truth)
-        if not inferred_app_sha:
-            inferred_app_sha = release_object_payload.get("app_commit_sha")
-        if not inferred_infra_sha:
-            inferred_infra_sha = release_object_payload.get("promotion", {}).get("gitops_commit_sha")
     argo_truth = discover_argo_truth(args.argo_app)
     runtime_truth = discover_runtime_truth(args.namespace, tracked_repositories)
     payload = build_payload(
         summary,
-        app_sha=inferred_app_sha or git_head_sha(),
-        infra_commit_sha=inferred_infra_sha,
+        app_sha=args.app_sha or (release_identity or {}).get("app_commit_sha") or git_head_sha(),
+        infra_commit_sha=args.infra_commit_sha,
         argo_truth=argo_truth,
         runtime_truth=runtime_truth,
         release_truth=release_truth,
+        release_identity=release_identity,
         summary_path=summary_path,
         output_path=output_path,
     )

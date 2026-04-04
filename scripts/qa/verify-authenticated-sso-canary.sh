@@ -642,13 +642,35 @@ with sync_playwright() as p:
         assert_not_auth_error_page(page, "login_entrypoint")
 
         if login_flow == "oidc":
-            page.get_by_placeholder("Email or Username").fill(email, timeout=30000)
-            page.get_by_role("button", name=re.compile(r"Log in", re.I)).click(timeout=20000)
-            page.wait_for_load_state("domcontentloaded", timeout=60000)
-            assert_not_auth_error_page(page, "authentik_username_submitted")
+            username_input = page.get_by_placeholder("Email or Username")
+            password_input = page.get_by_placeholder("Password")
 
-            page.get_by_placeholder("Password").fill(password, timeout=30000)
-            page.get_by_role("button", name=re.compile(r"Continue", re.I)).click(timeout=20000)
+            def click_password_submit() -> None:
+                # Prefer credential-submit controls and avoid social-login buttons
+                # like "Continue with Google" on the combined login screen.
+                for pattern in (r"^Log in$", r"^Continue$"):
+                    try:
+                        page.get_by_role("button", name=re.compile(pattern, re.I)).click(timeout=10000)
+                        return
+                    except Exception:
+                        continue
+                password_input.press("Enter")
+
+            username_input.fill(email, timeout=30000)
+            password_ready = True
+            try:
+                password_input.wait_for(state="visible", timeout=3000)
+            except Exception:
+                password_ready = False
+
+            if not password_ready:
+                page.get_by_role("button", name=re.compile(r"^Log in$|^Continue$", re.I)).click(timeout=20000)
+                page.wait_for_load_state("domcontentloaded", timeout=60000)
+                assert_not_auth_error_page(page, "authentik_username_submitted")
+                password_input.wait_for(state="visible", timeout=30000)
+
+            password_input.fill(password, timeout=30000)
+            click_password_submit()
             page.wait_for_load_state("domcontentloaded", timeout=60000)
             assert_not_auth_error_page(page, "authentik_password_submitted")
 

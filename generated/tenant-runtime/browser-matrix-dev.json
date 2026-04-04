@@ -87,14 +87,18 @@
           "kind": "host-stability",
           "url": "https://apps.academyv2.mereka.dev/",
           "expect_host": "apps.academyv2.mereka.dev",
-          "forbid_redirect_hosts": []
+          "forbid_redirect_hosts": [],
+          "expect_content_type_prefix": "text/html",
+          "expect_min_body_bytes": 1
         },
         {
           "id": "apps-dashboard",
           "kind": "host-stability",
           "url": "https://apps.academyv2.mereka.dev/dashboard",
           "expect_host": "apps.academyv2.mereka.dev",
-          "forbid_redirect_hosts": []
+          "forbid_redirect_hosts": [],
+          "expect_content_type_prefix": "text/html",
+          "expect_min_body_bytes": 1
         },
         {
           "id": "studio-sso-login",
@@ -154,7 +158,9 @@
             "academyv2.mereka.dev",
             "studio.academyv2.mereka.dev",
             "apps.academyv2.mereka.dev"
-          ]
+          ],
+          "expect_content_type_prefix": "text/html",
+          "expect_min_body_bytes": 1
         },
         {
           "id": "apps-dashboard",
@@ -165,7 +171,9 @@
             "academyv2.mereka.dev",
             "studio.academyv2.mereka.dev",
             "apps.academyv2.mereka.dev"
-          ]
+          ],
+          "expect_content_type_prefix": "text/html",
+          "expect_min_body_bytes": 1
         },
         {
           "id": "studio-sso-login",
@@ -229,7 +237,9 @@
             "academyv2.mereka.dev",
             "studio.academyv2.mereka.dev",
             "apps.academyv2.mereka.dev"
-          ]
+          ],
+          "expect_content_type_prefix": "text/html",
+          "expect_min_body_bytes": 1
         },
         {
           "id": "apps-dashboard",
@@ -240,7 +250,9 @@
             "academyv2.mereka.dev",
             "studio.academyv2.mereka.dev",
             "apps.academyv2.mereka.dev"
-          ]
+          ],
+          "expect_content_type_prefix": "text/html",
+          "expect_min_body_bytes": 1
         },
         {
           "id": "studio-sso-login",

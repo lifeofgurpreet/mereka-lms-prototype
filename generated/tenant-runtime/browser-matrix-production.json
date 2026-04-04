@@ -87,14 +87,18 @@
           "kind": "host-stability",
           "url": "https://apps.academyv2.mereka.io/",
           "expect_host": "apps.academyv2.mereka.io",
-          "forbid_redirect_hosts": []
+          "forbid_redirect_hosts": [],
+          "expect_content_type_prefix": "text/html",
+          "expect_min_body_bytes": 1
         },
         {
           "id": "apps-dashboard",
           "kind": "host-stability",
           "url": "https://apps.academyv2.mereka.io/dashboard",
           "expect_host": "apps.academyv2.mereka.io",
-          "forbid_redirect_hosts": []
+          "forbid_redirect_hosts": [],
+          "expect_content_type_prefix": "text/html",
+          "expect_min_body_bytes": 1
         },
         {
           "id": "studio-sso-login",
@@ -154,7 +158,9 @@
             "academyv2.mereka.io",
             "studio.academyv2.mereka.io",
             "apps.academyv2.mereka.io"
-          ]
+          ],
+          "expect_content_type_prefix": "text/html",
+          "expect_min_body_bytes": 1
         },
         {
           "id": "apps-dashboard",
@@ -165,7 +171,9 @@
             "academyv2.mereka.io",
             "studio.academyv2.mereka.io",
             "apps.academyv2.mereka.io"
-          ]
+          ],
+          "expect_content_type_prefix": "text/html",
+          "expect_min_body_bytes": 1
         },
         {
           "id": "studio-sso-login",
@@ -185,19 +193,19 @@
       "display_name": "Skill Our Future",
       "is_primary": false,
       "theme": "mereka",
-      "playwright_base_url": "https://skillourfuture.academyv2.mereka.io",
+      "playwright_base_url": "https://skillourfuture.academy.mereka.io",
       "playwright_selector_audit_routes": [
         "/authn/login",
         "/learner-dashboard/",
         "/profile/"
       ],
-      "studio_sso_entry_domain": "skillourfuture.academyv2.mereka.io",
+      "studio_sso_entry_domain": "skillourfuture.academy.mereka.io",
       "footer_probe": {
-        "lms_url": "https://skillourfuture.academyv2.mereka.io",
+        "lms_url": "https://skillourfuture.academy.mereka.io",
         "mfe_url": "https://apps.skillourfuture.academyv2.mereka.io"
       },
       "hosts": {
-        "primary": "skillourfuture.academyv2.mereka.io",
+        "primary": "skillourfuture.academy.mereka.io",
         "studio": "studio.skillourfuture.academyv2.mereka.io",
         "mfe": "apps.skillourfuture.academyv2.mereka.io"
       },
@@ -212,7 +220,7 @@
         {
           "id": "dashboard-route",
           "kind": "redirect-contract",
-          "url": "https://skillourfuture.academyv2.mereka.io/dashboard",
+          "url": "https://skillourfuture.academy.mereka.io/dashboard",
           "expect_final_host": "apps.skillourfuture.academyv2.mereka.io",
           "forbid_hosts": [
             "academyv2.mereka.io",
@@ -229,7 +237,9 @@
             "academyv2.mereka.io",
             "studio.academyv2.mereka.io",
             "apps.academyv2.mereka.io"
-          ]
+          ],
+          "expect_content_type_prefix": "text/html",
+          "expect_min_body_bytes": 1
         },
         {
           "id": "apps-dashboard",
@@ -240,12 +250,14 @@
             "academyv2.mereka.io",
             "studio.academyv2.mereka.io",
             "apps.academyv2.mereka.io"
-          ]
+          ],
+          "expect_content_type_prefix": "text/html",
+          "expect_min_body_bytes": 1
         },
         {
           "id": "studio-sso-login",
           "kind": "sso-contract",
-          "url": "https://skillourfuture.academyv2.mereka.io/login",
+          "url": "https://skillourfuture.academy.mereka.io/login",
           "expect_apps_host": "apps.skillourfuture.academyv2.mereka.io",
           "forbid_hosts": [
             "academyv2.mereka.io",

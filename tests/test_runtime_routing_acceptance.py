@@ -52,6 +52,23 @@ def test_runtime_routing_matrix_is_deterministic_for_noop_regen() -> None:
     assert module.build_payload(registry, "dev") == module.build_payload(registry, "dev")
 
 
+def test_runtime_routing_matrix_prefers_release_critical_staging_hosts() -> None:
+    module = load_generator_module()
+    payload = module.build_payload(module.load_registry(), "staging")
+
+    sof = next(tenant for tenant in payload["tenants"] if tenant["tenant"] == "skillourfuture")
+    assert sof["hosts"]["primary"] == "staging.skillourfuture.academy.mereka.io"
+    assert sof["hosts"]["studio"] == "studio.staging.skillourfuture.academy.mereka.io"
+    assert sof["hosts"]["mfe"] == "apps.staging.skillourfuture.academy.mereka.io"
+    apps_root = next(assertion for assertion in sof["assertions"] if assertion["id"] == "apps-root")
+    assert apps_root["expect_host"] == "apps.staging.skillourfuture.academy.mereka.io"
+    assert apps_root["expect_content_type_prefix"] == "text/html"
+    assert apps_root["expect_min_body_bytes"] == 1
+    apps_dashboard = next(assertion for assertion in sof["assertions"] if assertion["id"] == "apps-dashboard")
+    assert apps_dashboard["expect_content_type_prefix"] == "text/html"
+    assert apps_dashboard["expect_min_body_bytes"] == 1
+
+
 def test_accept_runtime_routing_dry_run_emits_summary(tmp_path: Path) -> None:
     output_dir = tmp_path / "accept-runtime-routing"
     release_object_path = tmp_path / "release-object.json"
@@ -148,4 +165,33 @@ def test_accept_runtime_routing_dry_run_emits_summary(tmp_path: Path) -> None:
     truth_ledger = json.loads(Path(summary["artifacts"]["truth_ledger_json"]).read_text(encoding="utf-8"))
     assert truth_ledger["release_truth"]["release_object_id"] == "ro-rb-abcdef1234567-20260403T120000Z"
     assert any(check["name"].startswith("playwright:biji-biji") for check in summary["checks"])
+    assert not any(check["name"].startswith("footer:") for check in summary["checks"])
     jsonschema.validate(summary, load_proof_schema())
+
+
+def test_accept_runtime_routing_with_footer_emits_footer_check_in_dry_run(tmp_path: Path) -> None:
+    output_dir = tmp_path / "accept-runtime-routing-with-footer"
+    result = subprocess.run(
+        [
+            "bash",
+            "bin/accept",
+            "runtime-routing",
+            "--env",
+            "dev",
+            "--tenant",
+            "biji-biji",
+            "--dry-run",
+            "--with-footer",
+            "--output-dir",
+            str(output_dir),
+        ],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    summary_path = Path(result.stdout.strip())
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    assert any(check["name"].startswith("footer:biji-biji") for check in summary["checks"])

@@ -69,6 +69,17 @@
         "promotion_target_environment": { "type": ["string", "null"] }
       }
     },
+    "release_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["release_id", "release_bundle_id", "app_commit_sha", "release_object_json"],
+      "properties": {
+        "release_id": { "type": ["string", "null"] },
+        "release_bundle_id": { "type": ["string", "null"] },
+        "app_commit_sha": { "type": ["string", "null"] },
+        "release_object_json": { "type": ["string", "null"] }
+      }
+    },
     "artifacts": {
       "type": "object",
       "additionalProperties": false,

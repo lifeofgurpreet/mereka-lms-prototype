@@ -6,6 +6,7 @@
 set -euo pipefail
 
 DOMAIN="${1:-academyv2.mereka.io}"
+EXPECTED_APPS_HOST="${2:-}"
 if [[ "$DOMAIN" == *.mereka.dev ]]; then
   AUTHENTIK_DOMAIN="auth0.mereka.dev"
 elif [[ "$DOMAIN" == staging.*.mereka.io || "$DOMAIN" == *.staging.academyv2.mereka.io ]]; then
@@ -15,6 +16,14 @@ else
 fi
 PASS=0
 FAIL=0
+
+if [[ -z "$EXPECTED_APPS_HOST" ]]; then
+  if [[ "$DOMAIN" == staging.* ]]; then
+    EXPECTED_APPS_HOST="staging.apps.${DOMAIN#staging.}"
+  else
+    EXPECTED_APPS_HOST="apps.${DOMAIN}"
+  fi
+fi
 
 check() {
   local label="$1"
@@ -45,19 +54,19 @@ echo ""
 # through the tenant MFE authn entrypoint rather than leaking cross-tenant.
 check "OAuth login preserves tenant MFE authn path" \
   "https://${DOMAIN}/login?next=/oauth2/authorize%3Fclient_id%3Dcms-sso%26response_type%3Dcode" \
-  "apps\.${DOMAIN}/authn/login\\?next=%2Foauth2%2Fauthorize"
+  "${EXPECTED_APPS_HOST//./\\.}/authn/login\\?next=%2Foauth2%2Fauthorize"
 
 # @covers AC-SSO-BYPASS-002
 # Test 2: /login (no next param) should redirect to MFE authn as usual
 check "Plain login goes to MFE authn" \
   "https://${DOMAIN}/login" \
-  "apps\.${DOMAIN}/authn"
+  "${EXPECTED_APPS_HOST//./\\.}/authn"
 
 # @covers AC-SSO-BYPASS-003
 # Test 3: /login?next=/dashboard should redirect to MFE authn (not bypassed)
 check "Non-OAuth next goes to MFE authn" \
   "https://${DOMAIN}/login?next=/dashboard" \
-  "apps\.${DOMAIN}/authn"
+  "${EXPECTED_APPS_HOST//./\\.}/authn"
 
 # @covers AC-SSO-BYPASS-004
 # Test 4: Full chain trace - Studio login initiates OAuth flow
