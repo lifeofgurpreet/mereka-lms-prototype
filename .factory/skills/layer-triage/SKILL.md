@@ -55,6 +55,14 @@ Regression guard to add:
 - Do NOT treat branch/merge truth as proved truth
 - Do NOT promote from a dirty worktree
 
+## Required Companions
+
+> Source: `config/skills-graph.yaml`
+
+- **Requires**: none (this is the universal root skill)
+- **Recommended**: none
+- **Required by**: all other skills
+
 ## References
 
 - [PLATFORM_AUTHORITY_MAP.md](docs/architecture/PLATFORM_AUTHORITY_MAP.md)

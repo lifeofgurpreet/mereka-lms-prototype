@@ -64,6 +64,13 @@ git revert HEAD --no-edit && git push
 # Then promote the reverted build
 ```
 
+## Required Companions
+
+> Source: `config/skills-graph.yaml`
+
+- **Requires**: `layer-triage`, `runtime-proof`
+- **Recommended**: `gitops-promotion`, `cross-repo-authority`
+
 ## References
 
 - [FRONTEND_MFE_CHANGE.md](docs/ops/playbooks/FRONTEND_MFE_CHANGE.md)

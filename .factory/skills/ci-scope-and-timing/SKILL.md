@@ -77,6 +77,13 @@ speculative fixes to main.
 
 Lightweight checks run on `mereka-k8s-runners` (2CPU/4GB).
 
+## Required Companions
+
+> Source: `config/skills-graph.yaml`
+
+- **Requires**: `layer-triage`
+- **Recommended**: none
+
 ## References
 
 - [CI_CD_RUNNERS.md](docs/ops/ci-cd/CI_CD_RUNNERS.md)

@@ -67,6 +67,13 @@ If `MYSQL_HOST: "10.97.0.2"` appears in local config:
 ./scripts/infra/tutor-config-save.sh --set MYSQL_HOST=mysql --set MONGODB_HOST=mongodb --set REDIS_HOST=redis
 ```
 
+## Required Companions
+
+> Source: `config/skills-graph.yaml`
+
+- **Requires**: `layer-triage`, `cross-repo-authority`
+- **Recommended**: `runtime-proof`
+
 ## References
 
 - [DJANGO_SETTINGS_CHANGE.md](docs/ops/playbooks/DJANGO_SETTINGS_CHANGE.md)

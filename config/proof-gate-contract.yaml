@@ -1,0 +1,69 @@
+# Proof Gate Contract — machine-readable proof ordering
+#
+# Defines the strict ordering of proof gates. Each gate specifies
+# a predecessor that must be green before the successor can run.
+# Violating gate ordering produces meaningless proof (INV-002, INV-013).
+#
+# Consumers:
+#   - CI workflows (gate step ordering)
+#   - Agent execution workflows (proof sequencing)
+#   - config/process-invariants.yaml (invariant enforcement)
+---
+schema_version: "1.0"
+
+gates:
+  - id: live-asset-before-canary
+    description: "LMS + MFE must return 2xx before browser canary runs"
+    predecessor: route-proof
+    successor: browser-canary
+    required_state: "LMS 200 + MFE 200"
+    enforcement: ".github/workflows/smoke-authenticated.yml live-asset gate step"
+    invariant: INV-013
+
+  - id: release-object-before-promotion
+    description: "Release object with valid schema must exist before promotion begins"
+    predecessor: build-complete
+    successor: promotion
+    required_state: "release object exists with valid schema"
+    enforcement: ".github/workflows/release.yml schema validation step"
+    invariant: INV-004
+
+  - id: realization-before-runtime-proof
+    description: "Live image hash must match release object before runtime proof is meaningful"
+    predecessor: argo-sync
+    successor: runtime-proof
+    required_state: "live image hash matches release object"
+    enforcement: "runtime-proof playbook image-hash check"
+    invariant: INV-002
+
+  - id: runtime-proof-before-truth-ledger
+    description: "All proof lanes must be green before truth ledger records proved truth"
+    predecessor: runtime-proof
+    successor: truth-ledger-update
+    required_state: "all proof lanes green for target surface"
+    enforcement: "truth ledger update gating"
+    invariant: INV-009
+
+  - id: route-proof-before-asset-verification
+    description: "HTTP reachability must be confirmed before checking served asset content"
+    predecessor: route-proof
+    successor: asset-verification
+    required_state: "HTTP 200 from all target tenant routes"
+    enforcement: "runtime-proof skill mandatory order"
+    invariant: INV-013
+
+  - id: asset-verification-before-browser-canary
+    description: "Served JS/CSS bundle must match build before browser login journey runs"
+    predecessor: asset-verification
+    successor: browser-canary
+    required_state: "served asset hash matches build artifact"
+    enforcement: ".github/workflows/smoke-authenticated.yml asset gate step"
+    invariant: INV-013
+
+  - id: patches-before-render
+    description: "apply-patches.sh must run after tutor config save before any rendered artifact is trusted"
+    predecessor: tutor-config-save
+    successor: rendered-artifact-verification
+    required_state: "all patches applied and verified"
+    enforcement: "scripts/infra/verify-tutor-config.sh + pre-commit hook"
+    invariant: INV-007

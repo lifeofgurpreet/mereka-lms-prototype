@@ -24,6 +24,8 @@ scripts/qa/verify-qa-readonly-contract.sh
 scripts/qa/test-verify-evidence-sprawl-budget.sh
 scripts/qa/verify-docs-authority-invariants.sh
 scripts/qa/verify-change-surface-contract.sh
+scripts/qa/verify-generated-surface-lineage.sh
+scripts/qa/verify-ci-scope-contract.sh
 scripts/qa/verify-tutor-config-path-contract.sh
 scripts/qa/test-authn-deep-route-handoff-patch.sh
 scripts/qa/test-verify-secret-inventory.sh

@@ -67,6 +67,13 @@ curl -sI https://apps.academyv2.mereka.io/authn/login | grep -E 'HTTP|content-ty
 - Accept branch truth or merge truth as proved truth
 - Run proof against a known-unpatched live bundle
 
+## Required Companions
+
+> Source: `config/skills-graph.yaml`
+
+- **Requires**: `layer-triage`
+- **Recommended**: `smoke-identity`
+
 ## References
 
 - [RUNTIME_PROOF_VERIFICATION.md](docs/ops/playbooks/RUNTIME_PROOF_VERIFICATION.md)

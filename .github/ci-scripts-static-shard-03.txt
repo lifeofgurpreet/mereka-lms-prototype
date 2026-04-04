@@ -24,6 +24,8 @@ scripts/qa/verify-evidence-tracking-policy.sh
 scripts/qa/verify-architecture-doc-path-drift.sh
 scripts/qa/verify-process-invariants.sh
 scripts/qa/verify-admin-merge-exceptions.sh
+scripts/qa/verify-cross-repo-boundaries.sh
+scripts/qa/verify-blind-agent-acceptance.sh
 scripts/qa/test-build-validator-drift-evidence-bundle.sh
 scripts/qa/test-verify-no-mux-asset-ids.sh
 scripts/qa/test-verify-script-portability.sh

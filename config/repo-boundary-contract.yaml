@@ -1,0 +1,94 @@
+# Repo Boundary Contract — machine-readable cross-repo authority map
+#
+# Defines what each repo owns, does not own, and which paths are
+# transitional (migrating to another repo). Also declares forbidden
+# cross-edits that would violate the producer/consumer boundary.
+#
+# Consumers:
+#   - cross-repo-authority skill
+#   - Agent execution workflows (boundary enforcement)
+#   - PR review checklists
+---
+schema_version: "1.0"
+
+repos:
+  - id: mereka-lms
+    owns:
+      - "App source, Tutor plugins, build scripts"
+      - "deploy/k8s/base/** (app base manifests)"
+      - "deploy/k8s/overlays/local/** (local dev)"
+      - "scripts/qa/** (verification)"
+      - "specs/** (machine-checkable intent)"
+      - "config/** (machine-readable contracts)"
+      - "infrastructure/tutor/** (Tutor config + patches)"
+      - "assets/brand/** (MFE branding)"
+      - ".github/workflows/** (CI definitions)"
+    does_not_own:
+      - "Environment overlays (prod/staging) — bbi-infrastructure"
+      - "ArgoCD applications — bbi-infrastructure"
+      - "Image tag pinning — bbi-infrastructure"
+      - "Platform services (Authentik, Grafana, etc.) — bbi-infrastructure"
+      - "Cluster topology + namespace management — bbi-infrastructure"
+    transitional:
+      - "deploy/k8s/overlays/rke2-nonprod/** — migrating to bbi-infrastructure"
+      - "deploy/k8s/overlays/production/** — migrating to bbi-infrastructure"
+      - "deploy/k8s/overlays/staging/** — migrating to bbi-infrastructure"
+      - "deploy/k8s/base/arc/** — platform-shared, migrating to bbi-infrastructure"
+      - "deploy/k8s/base/logging/** — platform-shared, migrating to bbi-infrastructure"
+      - "deploy/k8s/base/policies/** — platform-shared, migrating to bbi-infrastructure"
+
+  - id: bbi-infrastructure
+    owns:
+      - "ArgoCD Applications/ApplicationSets"
+      - "Environment overlays + image tag pinning"
+      - "Platform services (Authentik, Grafana, Prometheus, etc.)"
+      - "Cluster topology + namespace management"
+      - "Helm chart values for platform stack"
+      - "ARC runner infrastructure (post-migration)"
+    does_not_own:
+      - "App source code"
+      - "Tutor configuration"
+      - "QA/verification scripts"
+      - "Build logic and image construction"
+      - "Machine-checkable specs"
+
+  - id: platform-control-plane
+    owns:
+      - "Release contracts"
+      - "Service identity contracts"
+      - "Staging DNS/cert readiness"
+      - "Cross-repo governance rules"
+    does_not_own:
+      - "Runtime code"
+      - "Deployment manifests"
+      - "QA/verification scripts"
+      - "Build logic"
+
+forbidden_cross_edits:
+  - from: mereka-lms
+    to_path: "apps/mereka-lms/overlays/*/kustomization.yaml"
+    reason: "Image tag pinning is bbi-infrastructure's job"
+
+  - from: mereka-lms
+    to_path: "apps/mereka-lms/overlays/*/image-tag-patch.yaml"
+    reason: "Image tag overrides are bbi-infrastructure's job"
+
+  - from: bbi-infrastructure
+    to_path: "infrastructure/tutor/**"
+    reason: "Build config is mereka-lms's job"
+
+  - from: bbi-infrastructure
+    to_path: "scripts/qa/**"
+    reason: "QA verification scripts are mereka-lms's job"
+
+  - from: bbi-infrastructure
+    to_path: "specs/**"
+    reason: "Machine-checkable intent is mereka-lms's job"
+
+  - from: mereka-lms
+    to_path: "platform-services/**"
+    reason: "Platform services are bbi-infrastructure's job"
+
+  - from: mereka-lms
+    to_path: "cluster-config/**"
+    reason: "Cluster topology is bbi-infrastructure's job"

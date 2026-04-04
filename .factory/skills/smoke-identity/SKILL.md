@@ -55,6 +55,13 @@ These must be mapped FROM canonical Infisical-backed identities.
 - Store passwords in repo docs
 - Hardcode credentials in scripts
 
+## Required Companions
+
+> Source: `config/skills-graph.yaml`
+
+- **Requires**: `layer-triage`
+- **Recommended**: `runtime-proof`
+
 ## References
 
 - [SMOKE_ACCOUNT_REGISTRY](docs/status/active/SMOKE_ACCOUNT_REGISTRY_2026-04-04.md)

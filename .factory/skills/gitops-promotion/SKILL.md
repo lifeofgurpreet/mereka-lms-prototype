@@ -68,6 +68,13 @@ If Argo shows "stale operation" or sync seems stuck:
 2. If stale: `argocd app terminate-op <app>` then re-sync
 3. Never assume "synced" means "correct" without checking live pod state
 
+## Required Companions
+
+> Source: `config/skills-graph.yaml`
+
+- **Requires**: `layer-triage`, `cross-repo-authority`
+- **Recommended**: `runtime-proof`
+
 ## References
 
 - [RELEASE_PROMOTION.md](docs/ops/playbooks/RELEASE_PROMOTION.md)

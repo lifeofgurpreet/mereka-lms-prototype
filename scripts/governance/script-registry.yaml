@@ -117,6 +117,12 @@ ci_static_inventory:
     - script: scripts/qa/verify-machine-truth-freshness.sh
     - script: scripts/qa/verify-change-surface-contract.sh
     - script: scripts/qa/verify-admin-merge-exceptions.sh
+    - script: scripts/qa/verify-skill-graph-coverage.sh
+    - script: scripts/qa/verify-generated-surface-lineage.sh
+    - script: scripts/qa/verify-cross-repo-boundaries.sh
+    - script: scripts/qa/verify-proof-gate-contract.sh
+    - script: scripts/qa/verify-ci-scope-contract.sh
+    - script: scripts/qa/verify-blind-agent-acceptance.sh
     - script: scripts/qa/verify-openedx-audit-tracker-sync.sh
     - script: scripts/qa/verify-tutor-config-path-contract.sh
     - script: scripts/qa/test-build-validator-drift-evidence-bundle.sh

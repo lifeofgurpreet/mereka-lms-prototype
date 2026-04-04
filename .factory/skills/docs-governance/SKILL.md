@@ -67,6 +67,13 @@ description: Enforce documentation authority, supersession, and deprecation disc
 - Remove a superseded doc without checking all inbound links
 - Use speculative deprecation dates without source evidence
 
+## Required Companions
+
+> Source: `config/skills-graph.yaml`
+
+- **Requires**: `layer-triage`
+- **Recommended**: none
+
 ## References
 
 - [DEPRECATION_LEDGER.md](docs/reference/governance/DEPRECATION_LEDGER.md)

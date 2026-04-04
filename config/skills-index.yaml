@@ -1,0 +1,149 @@
+# Skills Index — machine-readable catalog of all project skills
+#
+# Each skill has a defined purpose, layer ownership, inputs/outputs,
+# and forbidden shortcuts. This index is the authority for skill metadata.
+#
+# Consumers:
+#   - Agent execution workflows (skill routing)
+#   - config/skills-graph.yaml (dependency resolution)
+#   - config/change-surface-contracts.yaml (required_skills references)
+---
+schema_version: "1.0"
+
+skills:
+  - id: layer-triage
+    description: "Identify owner layer before any fix — forces layer-first diagnosis instead of tool-first guessing"
+    owning_surfaces: [all]
+    owning_layer: all
+    inputs: [broken-surface-description]
+    outputs: [owner-layer-hypothesis, incident-table]
+    required_checks: []
+    forbidden_shortcuts:
+      - "tool-first guessing"
+      - "skipping evidence collection"
+      - "patching without naming the broken surface"
+    repo_scope: [mereka-lms, bbi-infrastructure]
+
+  - id: frontend-mfe-change
+    description: "Change MFE appearance, behavior, or configuration safely — plugin slots, branding, build config"
+    owning_surfaces: [frontend-mfe]
+    owning_layer: build-render
+    inputs: [mfe-change-request, current-plugin-config]
+    outputs: [rendered-config-verified, mfe-build-artifact]
+    required_checks:
+      - tutor-config-tests
+      - verify-tutor-patches
+      - verify-mfe-build-contract
+    forbidden_shortcuts:
+      - "editing tutor_env/ generated directory directly"
+      - "Dockerfile-level env.config.jsx changes"
+      - "inline CSS in MFE source instead of brand tokens"
+    repo_scope: [mereka-lms]
+
+  - id: settings-configmap
+    description: "Verify rendered Django settings, ConfigMaps, and Kustomize output — trace the settings render path"
+    owning_surfaces: [django-settings, k8s-base-manifests]
+    owning_layer: build-render
+    inputs: [settings-change-request, current-rendered-settings]
+    outputs: [rendered-config-verified, kustomize-render-verified]
+    required_checks:
+      - tutor-config-tests
+      - verify-kustomize-render
+    forbidden_shortcuts:
+      - "editing rendered settings in tutor_env/ directly"
+      - "patching ConfigMap without fixing source plugin"
+      - "skipping Kustomize render verification"
+    repo_scope: [mereka-lms]
+
+  - id: gitops-promotion
+    description: "Promote a build through dev, staging, production via release objects and ArgoCD"
+    owning_surfaces: [release-promotion]
+    owning_layer: promotion
+    inputs: [release-bundle, image-digest, build-metadata]
+    outputs: [release-object-valid, argo-sync-verified]
+    required_checks:
+      - verify-release-bundle
+      - verify-build-provenance
+    forbidden_shortcuts:
+      - "manually joining SHA/digest/env without release object"
+      - "promoting from dirty worktree"
+      - "skipping Argo realization verification"
+      - "collapsing branch truth with proved truth"
+    repo_scope: [mereka-lms, bbi-infrastructure]
+
+  - id: runtime-proof
+    description: "Verify that a change is actually live and working — route proof, browser canary, asset verification"
+    owning_surfaces: [all]
+    owning_layer: proof
+    inputs: [deployed-environment, target-tenant, target-surface]
+    outputs: [route-proof-artifact, browser-canary-result, asset-verification]
+    required_checks:
+      - verify-rke2-tenant-routes
+    forbidden_shortcuts:
+      - "running browser canary while live asset gate is red"
+      - "claiming proved truth from repo-only evidence"
+      - "mixing proof and repair in one claim"
+      - "using real operator credentials for browser proof"
+    repo_scope: [mereka-lms]
+
+  - id: smoke-identity
+    description: "Manage smoke test identities, Infisical secrets, and CI consumer mapping"
+    owning_surfaces: [smoke-identity]
+    owning_layer: proof
+    inputs: [smoke-account-request, identity-authority-source]
+    outputs: [smoke-account-registered, secret-consumer-mapped]
+    required_checks:
+      - verify-machine-truth-freshness
+    forbidden_shortcuts:
+      - "treating GitHub secrets as authority (they are consumers)"
+      - "using real operator identities for smoke testing"
+      - "creating accounts without updating smoke-account-registry.yaml"
+    repo_scope: [mereka-lms]
+
+  - id: docs-governance
+    description: "Enforce documentation authority, supersession, and deprecation discipline — prevents doc sprawl"
+    owning_surfaces: [docs-governance, machine-truth]
+    owning_layer: source
+    inputs: [doc-change-request, current-doc-classification]
+    outputs: [doc-classified, deprecation-ledger-updated]
+    required_checks:
+      - verify-docs-authority-invariants
+      - verify-process-invariants
+    forbidden_shortcuts:
+      - "creating docs without classification label"
+      - "moving docs without updating deprecation ledger"
+      - "duplicating authority across multiple docs"
+      - "placing status content in architecture paths"
+    repo_scope: [mereka-lms]
+
+  - id: cross-repo-authority
+    description: "Enforce the boundary between app repo (mereka-lms) and infrastructure repo (bbi-infrastructure)"
+    owning_surfaces: [k8s-base-manifests, caddy-domain-routing, release-promotion]
+    owning_layer: source
+    inputs: [cross-repo-change-request, boundary-classification]
+    outputs: [boundary-verified, correct-repo-identified]
+    required_checks:
+      - verify-kustomize-structure
+    forbidden_shortcuts:
+      - "patching infra overlay from app repo"
+      - "editing image tags in mereka-lms (bbi-infrastructure's job)"
+      - "fixing consumer directly instead of producer"
+      - "including ARC manifests in rke2-nonprod overlay"
+    repo_scope: [mereka-lms, bbi-infrastructure]
+
+  - id: ci-scope-and-timing
+    description: "Understand CI scope boundaries and timing to avoid wasting cycles on unrelated checks"
+    owning_surfaces: [ci-scripts]
+    owning_layer: proof
+    inputs: [ci-change-request, script-inventory]
+    outputs: [ci-inventory-regenerated, scope-classified]
+    required_checks:
+      - verify-script-governance-orphans
+      - verify-ci-script-list
+      - verify-script-registry-completeness
+    forbidden_shortcuts:
+      - "hand-editing ci-scripts-static.txt (it's generated)"
+      - "adding scripts without updating script-registry.yaml"
+      - "duplicating GCP auth / Python setup (use composite actions)"
+      - "running build-tutor-images for docs-only changes"
+    repo_scope: [mereka-lms]

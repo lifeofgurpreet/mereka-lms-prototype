@@ -71,6 +71,13 @@ Steps 1-2 are app-repo. Step 3-4 are infra-repo. Step 5 is app-repo again.
 - Assume `kubectl apply` from mereka-lms is the canonical deploy path (Argo is)
 - Apply ARC manifests through the main overlay namespace transformer
 
+## Required Companions
+
+> Source: `config/skills-graph.yaml`
+
+- **Requires**: `layer-triage`
+- **Recommended**: none
+
 ## References
 
 - [REPO_BOUNDARIES.md](docs/policies/operations/REPO_BOUNDARIES.md)

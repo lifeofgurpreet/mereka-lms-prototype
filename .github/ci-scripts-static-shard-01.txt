@@ -24,6 +24,8 @@ scripts/qa/verify-authn-submodule-path-contract.sh
 scripts/qa/verify-evidence-sprawl-budget.sh
 scripts/qa/verify-deprecation-discipline.sh
 scripts/qa/verify-machine-truth-freshness.sh
+scripts/qa/verify-skill-graph-coverage.sh
+scripts/qa/verify-proof-gate-contract.sh
 scripts/qa/verify-openedx-audit-tracker-sync.sh
 scripts/qa/test-build-validator-drift-review-packet.sh
 scripts/qa/test-verify-kustomize-no-deprecated-keys.sh
