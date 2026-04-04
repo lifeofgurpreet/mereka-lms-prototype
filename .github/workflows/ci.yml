@@ -874,9 +874,20 @@ jobs:
           HADOLINT_BINARY="hadolint-linux-x86_64"
           HADOLINT_URL="https://github.com/hadolint/hadolint/releases/download/v${HADOLINT_VERSION}/${HADOLINT_BINARY}"
           HADOLINT_SHA_URL="${HADOLINT_URL}.sha256"
-          curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+          HADOLINT_DOWNLOAD_TIMEOUT="${HADOLINT_DOWNLOAD_TIMEOUT:-120}"
+          HADOLINT_CONNECT_TIMEOUT="${HADOLINT_CONNECT_TIMEOUT:-15}"
+          HADOLINT_MAX_TIME="${HADOLINT_MAX_TIME:-90}"
+          timeout "${HADOLINT_DOWNLOAD_TIMEOUT}" curl --fail --location \
+            --retry 5 --retry-all-errors --retry-connrefused \
+            --connect-timeout "${HADOLINT_CONNECT_TIMEOUT}" \
+            --max-time "${HADOLINT_MAX_TIME}" \
+            --silent --show-error \
             --output "${HADOLINT_BINARY}" "${HADOLINT_URL}"
-          curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+          timeout "${HADOLINT_DOWNLOAD_TIMEOUT}" curl --fail --location \
+            --retry 5 --retry-all-errors --retry-connrefused \
+            --connect-timeout "${HADOLINT_CONNECT_TIMEOUT}" \
+            --max-time "${HADOLINT_MAX_TIME}" \
+            --silent --show-error \
             --output "${HADOLINT_BINARY}.sha256" "${HADOLINT_SHA_URL}"
           sha256sum -c "${HADOLINT_BINARY}.sha256"
           install -m 0755 "${HADOLINT_BINARY}" "$GITHUB_WORKSPACE/.cache/bin/hadolint"
