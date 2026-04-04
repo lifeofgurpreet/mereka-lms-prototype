@@ -9,7 +9,15 @@ cleanup() {
 trap cleanup EXIT
 
 mkdir -p "$tmpdir/repo"
-if command -v rsync >/dev/null 2>&1; then
+if git -C "$REPO_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  git -C "$REPO_ROOT" ls-files -z | (
+    cd "$REPO_ROOT"
+    tar --null -T - -cf -
+  ) | (
+    cd "$tmpdir/repo"
+    tar -xf -
+  )
+elif command -v rsync >/dev/null 2>&1; then
   rsync -a --delete --exclude '.git' --exclude '.git/' "$REPO_ROOT/" "$tmpdir/repo/"
 else
   (

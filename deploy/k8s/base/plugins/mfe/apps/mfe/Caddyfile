@@ -121,6 +121,18 @@
 		header_up Host {http.request.host}
 	}
 
+	# Some MFEs issue basename-relative LMS/auth requests such as
+	# /learner-dashboard/api/... or /learner-dashboard/login_refresh.
+	# Strip the MFE basename before proxying so these requests hit LMS instead
+	# of falling through to the SPA handlers below.
+	@mfe_prefixed_lms_routes path_regexp mfe_prefixed_lms ^/(authn|account|communications|course-authoring|authoring|discussions|gradebook|learner-dashboard|learning|learner-record|ora-grading|profile)(/(api/mfe_config/v1.*|api/.*|login_refresh.*|csrf/.*|oauth2/.*|login))$
+	handle @mfe_prefixed_lms_routes {
+		rewrite * {http.regexp.mfe_prefixed_lms.2}
+		reverse_proxy lms:8000 {
+			header_up Host {http.request.host}
+		}
+	}
+
 	# Account MFE does not implement /settings as a standalone SPA route.
 	# Redirect it to the canonical account root so users don't hit a "page unavailable" screen.
 	@account_settings_compat {

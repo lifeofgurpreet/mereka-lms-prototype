@@ -15,6 +15,7 @@
     "scripts/qa/verify-copy-terminology.sh",
     "scripts/qa/verify-css-scoping.sh",
     "scripts/qa/verify-design-tokens-migration.sh",
+    "scripts/qa/verify-docs-authority-invariants.sh",
     "scripts/qa/verify-footer-slot-migration.sh",
     "scripts/qa/verify-fpf-slot-coverage.sh",
     "scripts/qa/verify-frontend-version-truth.sh",

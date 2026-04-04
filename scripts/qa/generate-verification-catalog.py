@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -252,15 +253,38 @@ def compute_reference_counts(repo_root: Path, scripts: list[str]) -> dict[str, i
         ".pytest_cache",
         ".mypy_cache",
     }
-    for path in repo_root.rglob("*"):
-        if not path.is_file():
-            continue
+    def should_scan(path: Path) -> bool:
         if path in excluded_generated:
-            continue
+            return False
         if any(part in excluded_dirs for part in path.parts):
-            continue
-        if path.suffix.lower() in TEXT_SUFFIXES or path.name == "Makefile":
-            text_files.append(path)
+            return False
+        if not path.is_file():
+            return False
+        return path.suffix.lower() in TEXT_SUFFIXES or path.name == "Makefile"
+
+    try:
+        tracked_paths = [
+            raw_path
+            for raw_path in subprocess.run(
+            ["git", "-C", str(repo_root), "ls-files", "-z"],
+            check=True,
+            capture_output=True,
+            text=False,
+        ).stdout.split(b"\0")
+            if raw_path
+        ]
+    except (OSError, subprocess.CalledProcessError):
+        tracked_paths = []
+
+    if tracked_paths:
+        for raw_path in tracked_paths:
+            path = repo_root / raw_path.decode("utf-8")
+            if should_scan(path):
+                text_files.append(path)
+    else:
+        for path in repo_root.rglob("*"):
+            if should_scan(path):
+                text_files.append(path)
 
     for file_path in text_files:
         try:

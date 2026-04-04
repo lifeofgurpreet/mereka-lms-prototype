@@ -66,6 +66,14 @@ _register_env_patch(
 {{ MFE_HOST }}{$default_site_port} {
     import security_headers
 
+    @mfe_prefixed_lms_routes path_regexp mfe_prefixed_lms ^/(authn|account|communications|course-authoring|authoring|discussions|gradebook|learner-dashboard|learning|learner-record|ora-grading|profile)(/(api/mfe_config/v1.*|api/.*|login_refresh.*|csrf/.*|oauth2/.*|login))$
+    handle @mfe_prefixed_lms_routes {
+        rewrite * {http.regexp.mfe_prefixed_lms.2}
+        reverse_proxy lms:8000 {
+            header_up Host {http.request.host}
+        }
+    }
+
     reverse_proxy /profile/api/* lms:8000 {
         # Preserve incoming host for tenant-aware SiteConfiguration resolution
         header_up Host {http.request.host}

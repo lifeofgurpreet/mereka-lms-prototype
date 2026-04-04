@@ -204,6 +204,21 @@ http://{$DISCOVERY_HOST} {
         max_size 2MB
     }
 
+    # Some MFEs issue basename-relative LMS/auth requests (for example
+    # /learner-dashboard/api/... or /learner-dashboard/login_refresh).
+    # Strip the MFE basename before proxying so these requests do not fall
+    # through to the SPA shell and return index.html with 200 text/html.
+    @mfe_prefixed_lms_routes path_regexp mfe_prefixed_lms ^/(authn|account|communications|course-authoring|authoring|discussions|gradebook|learner-dashboard|learning|learner-record|ora-grading|profile)(/(api/mfe_config/v1.*|api/.*|login_refresh.*|csrf/.*|oauth2/.*|login))$
+    handle @mfe_prefixed_lms_routes {
+        rewrite * {http.regexp.mfe_prefixed_lms.2}
+        reverse_proxy lms:8000 {
+            header_up Host {http.request.host}
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Forwarded-Host {http.request.host}
+        }
+    }
+
     # Route LMS API calls to LMS. MFE React apps call these as relative URLs
     # (resolved against the apps.* origin). The ingress sends ALL MFE traffic
     # to this Caddy instance because ingress-nginx (hostNetwork) cannot reach

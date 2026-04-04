@@ -1,8 +1,8 @@
 {
-  "max_total_verify_scripts": 600,
+  "max_total_verify_scripts": 605,
   "max_manual_only_scripts": 182,
   "max_deprecated_candidate_scripts": 35,
   "min_ci_static_bound": 323,
-  "budget_reviewed_at": "2026-04-03",
-  "budget_rationale": "Raise manual-only cap from 181→182 for the CI truth-control tranche while generated-surface, cache-policy, and footer parity gates remain manual-only."
+  "budget_reviewed_at": "2026-04-04",
+  "budget_rationale": "Raise total verify-script cap from 600→605 after rebasing onto main added seven release-blocking governance verifiers; keep manual-only and deprecated-candidate ceilings unchanged so further growth still requires review."
 }

@@ -869,6 +869,8 @@ jobs:
           fi
 
       - name: Install hadolint
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           HADOLINT_VERSION="2.14.0"
           HADOLINT_BINARY="hadolint-linux-x86_64"

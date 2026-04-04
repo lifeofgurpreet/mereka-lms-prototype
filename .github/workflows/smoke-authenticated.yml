@@ -186,7 +186,7 @@ jobs:
         run: echo "Skipping smoke-authenticated job because ${{ steps.resolve-smoke.outputs.skip_reason }}"
 
       - name: Run visual regression tests (authenticated)
-        if: ${{ always() && steps.resolve-smoke.outputs.run_smoke == '1' }}
+        if: ${{ !cancelled() && steps.resolve-smoke.outputs.run_smoke == '1' }}
         env:
           SSO_USERNAME: ${{ steps.resolve-smoke.outputs.sso_username }}
           SSO_PASSWORD: ${{ steps.resolve-smoke.outputs.sso_password }}

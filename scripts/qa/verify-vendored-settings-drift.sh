@@ -54,10 +54,48 @@ TRACKED_FILES=(
   "apps/openedx/settings/cms/mereka_platform_admin.py"
 )
 
+should_skip_for_unchanged_ci_surface() {
+  [[ "${VENDORED_SETTINGS_FORCE_FULL_SCAN:-0}" == "1" ]] && return 1
+  [[ -n "${INFRA_REPO:-}" && ! -d "${INFRA_REPO}/apps/mereka-lms" ]] && return 1
+
+  case "${GITHUB_EVENT_NAME:-}" in
+    pull_request|push) ;;
+    *)
+      return 1
+      ;;
+  esac
+
+  local -a changed_paths=()
+  if ! mapfile -t changed_paths < <(git -C "$REPO_ROOT" show --pretty='' --name-only --first-parent HEAD 2>/dev/null | sed '/^$/d'); then
+    return 1
+  fi
+
+  [[ ${#changed_paths[@]} -eq 0 ]] && return 1
+
+  local rel_path=""
+  local app_path=""
+  local changed=""
+  for rel_path in "${TRACKED_FILES[@]}"; do
+    app_path="deploy/k8s/base/${rel_path}"
+    for changed in "${changed_paths[@]}"; do
+      if [[ "$changed" == "$app_path" || "$changed" == "scripts/qa/verify-vendored-settings-drift.sh" ]]; then
+        return 1
+      fi
+    done
+  done
+
+  echo "SKIP: no vendored-settings surfaces changed in current CI diff"
+  return 0
+}
+
 echo "=== Vendored Settings Drift Check ==="
 echo "App repo: $REPO_ROOT"
 echo "Infra repo: $INFRA_REPO"
 echo ""
+
+if should_skip_for_unchanged_ci_surface; then
+  exit 0
+fi
 
 for rel_path in "${TRACKED_FILES[@]}"; do
   APP_FILE="$REPO_ROOT/deploy/k8s/base/$rel_path"

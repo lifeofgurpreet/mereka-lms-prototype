@@ -4,7 +4,7 @@
 # Ensures that:
 # 1. AGENTS.md points to the canonical authority map
 # 2. Non-canonical docs/architecture files carry superseded/reference banners
-# 3. No active docs contain hardcoded user-local paths
+# 3. No active docs contain workstation-specific user-local absolute paths
 # 4. No contract/governance docs contain stale authority claims
 # 5. Required authority documents exist
 set -euo pipefail
@@ -69,10 +69,11 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 3. No active docs contain hardcoded user-local paths (/home/gurpreet/)
+# 3. No active docs contain workstation-specific user-local absolute paths
 # ---------------------------------------------------------------------------
-echo "--- Check 3: No hardcoded user-local paths in active docs ---"
-BLOCKED_PREFIX="/home/gurpreet/"
+echo "--- Check 3: No workstation-specific user-local absolute paths in active docs ---"
+POSIX_USER_PATH_PATTERN='/(home|Users)/[^[:space:]"'"'"'`]+'
+WINDOWS_USER_PATH_PATTERN='[A-Za-z]:\\Users\\[^[:space:]"'"'"'`]+'
 check3_failed=0
 for search_glob in \
   "$REPO_ROOT/docs/architecture/"*.md \
@@ -81,16 +82,16 @@ for search_glob in \
   shopt -s nullglob globstar
   for f in $search_glob; do
     [[ -f "$f" ]] || continue
-    if grep -qF "$BLOCKED_PREFIX" "$f"; then
+    if rg -q --no-heading -e "$POSIX_USER_PATH_PATTERN" -e "$WINDOWS_USER_PATH_PATTERN" "$f"; then
       rel="${f#"$REPO_ROOT"/}"
-      fail "$rel contains hardcoded path $BLOCKED_PREFIX"
+      fail "$rel contains a workstation-specific absolute user path"
       check3_failed=$((check3_failed + 1))
     fi
   done
   shopt -u nullglob globstar
 done
 if [[ "$check3_failed" -eq 0 ]]; then
-  pass "No hardcoded user-local paths found in docs/architecture, docs/reference, or docs/status/active"
+  pass "No workstation-specific user-local absolute paths found in docs/architecture, docs/reference, or docs/status/active"
 fi
 
 # ---------------------------------------------------------------------------
