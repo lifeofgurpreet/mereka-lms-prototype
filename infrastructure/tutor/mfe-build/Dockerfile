@@ -264,6 +264,27 @@ RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 
 RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'
 COPY --from=account-src / /openedx/app
+RUN python3 - <<'PY'
+from pathlib import Path
+
+service_path = Path("/openedx/app/src/account-settings/data/service.js")
+if not service_path.exists():
+    raise SystemExit(0)
+
+original = "const platformData = data.social_links.find(({ platform }) => platform === id);"
+patched = (
+    "const socialLinks = Array.isArray(data.social_links) ? data.social_links : [];\\n"
+    "      const platformData = socialLinks.find(({ platform }) => platform === id);"
+)
+
+content = service_path.read_text(encoding="utf-8")
+if patched in content:
+    raise SystemExit(0)
+if original not in content:
+    raise SystemExit("frontend-app-account social_links lookup anchor missing")
+
+service_path.write_text(content.replace(original, patched), encoding="utf-8")
+PY
 
 RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations
 
