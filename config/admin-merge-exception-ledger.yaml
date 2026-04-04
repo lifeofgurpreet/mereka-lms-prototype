@@ -94,3 +94,17 @@ exceptions:
       CI will validate on next PR via process-invariants.yml which now
       includes all 6 new verifiers in the static inventory.
     logged_by: "factory-droid (session contract-system)"
+
+  - pr: "#1338"
+    sha: "83882c7b9"
+    date: "2026-04-04"
+    author: "factory-droid[bot]"
+    bypassed_checks:
+      - "required status checks (CI not yet run on branch)"
+    justification: >
+      Skill eval framework — evals/evals.yaml (32 trigger + 9 quality evals),
+      schema verifier (120 checks passing). Eval definitions and verifier only,
+      no runtime changes.
+    follow_up: >
+      Eval runner (subagent-based) and benchmark aggregation in separate PRs.
+    logged_by: "factory-droid (session skill-evals)"
