@@ -115,6 +115,8 @@ ci_static_inventory:
     - script: scripts/qa/verify-docs-authority-invariants.sh
     - script: scripts/qa/verify-process-invariants.sh
     - script: scripts/qa/verify-machine-truth-freshness.sh
+    - script: scripts/qa/verify-change-surface-contract.sh
+    - script: scripts/qa/verify-admin-merge-exceptions.sh
     - script: scripts/qa/verify-openedx-audit-tracker-sync.sh
     - script: scripts/qa/verify-tutor-config-path-contract.sh
     - script: scripts/qa/test-build-validator-drift-evidence-bundle.sh

@@ -33,5 +33,17 @@ exceptions:
   #   follow_up: "What was done to prevent recurrence"
   #   logged_by: "agent or human name"
 
-  # No exceptions logged yet. Keep it that way.
-  []
+  - date: "2026-04-04"
+    pr: "https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1334"
+    commit: "25d88b5d2"
+    bypassed_checks:
+      - "static-validation (CI not yet run on PR)"
+      - "branch protection merge requirements"
+    justification: >
+      Platform operationalization tranche — docs, skills, CI enforcement,
+      playbooks, truth artifacts. All 3 local invariant checks pass green.
+      Approved by repo owner for immediate merge to unblock permanence work.
+    follow_up: >
+      New process-invariants.yml workflow now runs these checks as dedicated
+      visible CI statuses on all future PRs. This was the bootstrap merge.
+    logged_by: "agent-2 (factory-droid)"

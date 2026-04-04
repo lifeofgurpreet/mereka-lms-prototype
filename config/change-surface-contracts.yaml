@@ -1,0 +1,175 @@
+# Change-Surface Contracts — machine-readable path-to-law mapping
+#
+# Every file change activates a contract. The contract declares:
+#   - which layer owns the change
+#   - which skills an agent must invoke
+#   - which checks must pass
+#   - which artifacts must be produced
+#   - which shortcuts are forbidden
+#
+# This is the binding layer between "helpful docs" and "hard enforcement."
+#
+# Consumers:
+#   - scripts/qa/verify-change-surface-contract.sh (CI gate)
+#   - Agent skills (auto-routing)
+#   - PR review checklist
+---
+schema_version: "1.0"
+
+surfaces:
+  - id: frontend-mfe
+    name: "Frontend / MFE changes"
+    globs:
+      - "infrastructure/tutor/plugins/**"
+      - "assets/brand/**"
+      - "infrastructure/tutor/patches/mfe-*"
+      - "infrastructure/tutor/patches/brand-*"
+      - "infrastructure/tutor/patches/footer-*"
+    owner_layer: build-render
+    required_skills:
+      - layer-triage
+      - frontend-mfe-change
+    required_checks:
+      - tutor-config-tests
+      - verify-tutor-patches
+      - verify-mfe-build-contract
+    required_artifacts:
+      - rendered-config-verified
+    forbidden:
+      - "tutor_env/**"
+    forbidden_reason: "Generated directory — changes lost on next tutor config save"
+
+  - id: django-settings
+    name: "Django / LMS / CMS settings"
+    globs:
+      - "infrastructure/tutor/plugins/**"
+      - "deploy/k8s/base/apps/lms/**"
+      - "deploy/k8s/base/apps/cms/**"
+    owner_layer: build-render
+    required_skills:
+      - layer-triage
+      - settings-configmap
+    required_checks:
+      - tutor-config-tests
+      - verify-kustomize-render
+    required_artifacts:
+      - rendered-config-verified
+    forbidden:
+      - "tutor_env/**"
+    forbidden_reason: "Generated directory — changes lost on next tutor config save"
+
+  - id: caddy-domain-routing
+    name: "Caddy / domain / routing"
+    globs:
+      - "deploy/k8s/base/apps/caddy/**"
+      - "deploy/k8s/tenancy/tenant-registry.yaml"
+      - "infrastructure/cloudflare/**"
+    owner_layer: source
+    required_skills:
+      - layer-triage
+      - cross-repo-authority
+    required_checks:
+      - verify-rke2-tenant-routes
+      - verify-domain-authority-chain
+    required_artifacts:
+      - tenant-registry-updated
+    forbidden: []
+
+  - id: release-promotion
+    name: "Release / promotion"
+    globs:
+      - "scripts/release/**"
+      - "scripts/infra/canonical-release.sh"
+      - "scripts/infra/release-openedx-gitops.sh"
+      - "scripts/infra/bump-image-tags.sh"
+    owner_layer: promotion
+    required_skills:
+      - layer-triage
+      - gitops-promotion
+      - cross-repo-authority
+    required_checks:
+      - verify-release-bundle
+      - verify-build-provenance
+    required_artifacts:
+      - release-object-valid
+    forbidden: []
+
+  - id: smoke-identity
+    name: "Smoke / test identity"
+    globs:
+      - "deploy/k8s/tenancy/smoke-account-registry.yaml"
+      - "scripts/qa/verify-authenticated-sso-canary.sh"
+      - "scripts/qa/verify-auth-surfaces.sh"
+    owner_layer: proof
+    required_skills:
+      - smoke-identity
+      - runtime-proof
+    required_checks:
+      - verify-machine-truth-freshness
+    required_artifacts: []
+    forbidden: []
+
+  - id: docs-governance
+    name: "Documentation changes"
+    globs:
+      - "docs/architecture/**"
+      - "docs/reference/**"
+      - "docs/status/active/**"
+      - "AGENTS.md"
+    owner_layer: source
+    required_skills:
+      - docs-governance
+    required_checks:
+      - verify-docs-authority-invariants
+      - verify-process-invariants
+    required_artifacts: []
+    forbidden: []
+
+  - id: ci-scripts
+    name: "CI / verification scripts"
+    globs:
+      - "scripts/qa/**"
+      - "scripts/governance/**"
+      - ".github/ci-scripts-*.txt"
+      - ".github/workflows/**"
+    owner_layer: proof
+    required_skills:
+      - ci-scope-and-timing
+    required_checks:
+      - verify-script-governance-orphans
+      - verify-ci-script-list
+      - verify-script-registry-completeness
+    required_artifacts:
+      - ci-inventory-regenerated
+    forbidden: []
+
+  - id: k8s-base-manifests
+    name: "Kubernetes base manifests"
+    globs:
+      - "deploy/k8s/base/**"
+      - "deploy/k8s/overlays/**"
+    owner_layer: source
+    required_skills:
+      - layer-triage
+      - cross-repo-authority
+      - settings-configmap
+    required_checks:
+      - verify-kustomize-structure
+      - verify-kustomize-render
+    required_artifacts: []
+    forbidden:
+      - "deploy/k8s/base/arc/**"
+    forbidden_reason: "ARC manifests are platform-shared — apply separately, not through overlay"
+
+  - id: machine-truth
+    name: "Machine-readable truth files"
+    globs:
+      - "config/*.yaml"
+      - "deploy/k8s/tenancy/smoke-account-registry.yaml"
+    owner_layer: source
+    required_skills:
+      - docs-governance
+    required_checks:
+      - verify-machine-truth-freshness
+    required_artifacts: []
+    forbidden: []
