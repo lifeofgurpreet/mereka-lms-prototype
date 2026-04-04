@@ -928,12 +928,24 @@ jobs:
           OPENEDX_IMAGE_REF: ${{ env.REGISTRY }}/openedx@${{ needs.build-openedx.outputs.image_digest }}
         run: |
           mkdir -p var/ci
-          trivy image \
+          set +e
+          timeout 20m trivy image \
             --format json \
             --output var/ci/trivy-openedx.json \
             --ignorefile .trivyignore \
             --severity CRITICAL,HIGH \
             "${OPENEDX_IMAGE_REF}"
+          trivy_status=$?
+          set -e
+
+          if [[ "$trivy_status" -eq 124 ]]; then
+            echo "OpenEdX Trivy scan timed out after 20m; continuing without vulnerability verdict." >&2
+            exit 124
+          fi
+          if [[ "$trivy_status" -ne 0 ]]; then
+            echo "OpenEdX Trivy scan failed with exit code ${trivy_status}; continuing without vulnerability verdict." >&2
+            exit "$trivy_status"
+          fi
 
           CRITICAL_COUNT=$(jq '[(.Results // [])[] | .Vulnerabilities // [] | .[] | select(.Severity == "CRITICAL")] | length' var/ci/trivy-openedx.json)
           echo "CRITICAL vulnerabilities: ${CRITICAL_COUNT}"
@@ -1088,12 +1100,24 @@ jobs:
           MFE_IMAGE_REF: ${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs.image_digest }}
         run: |
           mkdir -p var/ci
-          trivy image \
+          set +e
+          timeout 20m trivy image \
             --format json \
             --output var/ci/trivy-mfe.json \
             --ignorefile .trivyignore \
             --severity CRITICAL,HIGH \
             "${MFE_IMAGE_REF}"
+          trivy_status=$?
+          set -e
+
+          if [[ "$trivy_status" -eq 124 ]]; then
+            echo "MFE Trivy scan timed out after 20m; continuing without vulnerability verdict." >&2
+            exit 124
+          fi
+          if [[ "$trivy_status" -ne 0 ]]; then
+            echo "MFE Trivy scan failed with exit code ${trivy_status}; continuing without vulnerability verdict." >&2
+            exit "$trivy_status"
+          fi
 
           CRITICAL_COUNT=$(jq '[(.Results // [])[] | .Vulnerabilities // [] | .[] | select(.Severity == "CRITICAL")] | length' var/ci/trivy-mfe.json)
           echo "CRITICAL vulnerabilities: ${CRITICAL_COUNT}"
