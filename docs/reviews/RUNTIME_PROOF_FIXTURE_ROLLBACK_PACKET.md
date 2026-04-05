@@ -1,7 +1,7 @@
 # Runtime Proof Fixture Rollback Packet
 
 > **Lane**: lane-i / lane-j (Runtime Proof Fixture Contract + Execution Bridge)
-> **Environment**: dev
+> **Environment**: dev active; staging/prod fixtures remain declarative until explicitly applied
 > **Applies to**: future apply runs (apply code now exists; live execution has NOT occurred in either lane)
 > **Contract**: `docs/stabilization/SYNTHETIC_RUNTIME_PROOF_FIXTURE_CONTRACT.md`
 

@@ -66,17 +66,28 @@ REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 MANIFEST_DIR = REPO_ROOT / "config" / "runtime-proof"
 
 
+def _manifest_name_candidates(env: str) -> list[str]:
+    normalized = env.strip().lower()
+    aliases = {
+        "prod": ["prod", "production"],
+        "production": ["production", "prod"],
+    }
+    return aliases.get(normalized, [normalized])
+
+
 def find_manifest(env: str) -> Path:
     candidates = []
     manifest_dir_override = os.environ.get("RUNTIME_PROOF_MANIFEST_DIR")
-    if manifest_dir_override:
-        candidates.append(Path(manifest_dir_override) / f"{env}.synthetic-proof-fixtures.yaml")
-    candidates.extend(
-        [
-            MANIFEST_DIR / f"{env}.synthetic-proof-fixtures.yaml",
-            Path(f"/openedx/config/runtime-proof/{env}.synthetic-proof-fixtures.yaml"),
-        ]
-    )
+    env_names = _manifest_name_candidates(env)
+    for env_name in env_names:
+        if manifest_dir_override:
+            candidates.append(Path(manifest_dir_override) / f"{env_name}.synthetic-proof-fixtures.yaml")
+        candidates.extend(
+            [
+                MANIFEST_DIR / f"{env_name}.synthetic-proof-fixtures.yaml",
+                Path(f"/openedx/config/runtime-proof/{env_name}.synthetic-proof-fixtures.yaml"),
+            ]
+        )
     for p in candidates:
         if p.exists():
             return p

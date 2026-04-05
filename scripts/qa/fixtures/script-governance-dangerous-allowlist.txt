@@ -63,6 +63,7 @@ scripts/tenants/bootstrap-enterprise-service-deps.sh
 scripts/tenants/provision-all-tenants.sh
 scripts/tenants/sync-tenant-registry-configmap.sh
 scripts/tenants/bootstrap-enterprise-tenants.py
+scripts/tenants/bootstrap-runtime-proof-fixtures.py
 scripts/tenants/bootstrap-runtime-proof-fixtures-catalog.py
 scripts/tenants/generate-saml-keypair.sh
 scripts/tenants/offboard-tenant.sh

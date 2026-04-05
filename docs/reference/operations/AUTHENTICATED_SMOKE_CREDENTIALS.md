@@ -25,7 +25,8 @@ This document defines credential authority for authenticated smoke lanes.
 
 ## Canonical registry
 
-- [../../status/active/SMOKE_ACCOUNT_REGISTRY_2026-04-04.md](../../status/active/SMOKE_ACCOUNT_REGISTRY_2026-04-04.md)
+- Machine-readable contract: [../contracts/SMOKE_ACCOUNT_REGISTRY_CONTRACT.md](../contracts/SMOKE_ACCOUNT_REGISTRY_CONTRACT.md)
+- Operational status companion: [../../status/active/SMOKE_ACCOUNT_REGISTRY_2026-04-04.md](../../status/active/SMOKE_ACCOUNT_REGISTRY_2026-04-04.md)
 
 ## Rotation rule
 

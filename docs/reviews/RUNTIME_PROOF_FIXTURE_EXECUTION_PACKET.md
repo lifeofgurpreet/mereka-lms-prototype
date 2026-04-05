@@ -1,9 +1,9 @@
 # Runtime Proof Fixture Execution Packet
 
 > **Lane**: lane-i / lane-j (Runtime Proof Fixture Contract + Execution Bridge)
-> **Environment**: dev
+> **Environment**: dev active; staging and production manifests available for non-dev proof planning
 > **Mutation status**: NO live mutation in lane-i or lane-j — these are repo-only tooling lanes.
-> **Canonical manifest**: `config/runtime-proof/dev.synthetic-proof-fixtures.yaml`
+> **Canonical manifests**: `config/runtime-proof/{dev,staging,prod}.synthetic-proof-fixtures.yaml`
 > **Contract**: `docs/stabilization/SYNTHETIC_RUNTIME_PROOF_FIXTURE_CONTRACT.md`
 
 ---
@@ -23,8 +23,8 @@ the commands in this packet.** The bootstrap tool in its current form is a plann
 
 Run the dry-run command:
 
-- Before any browser-based proof flow against `mereka-lms-dev`
-- After any change to `config/runtime-proof/dev.synthetic-proof-fixtures.yaml`
+- Before any browser-based proof flow against the selected environment
+- After any change to `config/runtime-proof/*.synthetic-proof-fixtures.yaml`
 - In CI, as part of the static validation job
 - Before opening a PR that touches enterprise fixture data
 
@@ -42,7 +42,7 @@ Run the validate command:
 - [ ] Python 3.10+ available
 - [ ] PyYAML installed: `pip install pyyaml` (or `pip install -r requirements-tutor.txt`)
 - [ ] Repo checked out at the correct branch
-- [ ] `config/runtime-proof/dev.synthetic-proof-fixtures.yaml` exists
+- [ ] the selected manifest in `config/runtime-proof/*.synthetic-proof-fixtures.yaml` exists
 
 ### For future apply (not yet wired — future runtime lane)
 

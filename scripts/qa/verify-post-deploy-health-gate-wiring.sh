@@ -65,6 +65,25 @@ if [[ -f "$POST_DEPLOY_WORKFLOW" ]]; then
     "post-deploy workflow verifies parked production state"
 fi
 
+if [[ -f "$RUNTIME_PROOF_POLICY" ]]; then
+  require_pattern \
+    "$RUNTIME_PROOF_POLICY" \
+    "PROD_FULL_RUNTIME_PROOF_VERIFIER=scripts/tenants/verify-prod-runtime-proof.sh" \
+    "runtime proof policy keeps successor prod runtime verifier"
+  require_pattern \
+    "$RUNTIME_PROOF_POLICY" \
+    "STAGING_RUNTIME_FIXTURE_MANIFEST=config/runtime-proof/staging.synthetic-proof-fixtures.yaml" \
+    "runtime proof policy tracks staging fixture manifest"
+  require_pattern \
+    "$RUNTIME_PROOF_POLICY" \
+    "PROD_RUNTIME_FIXTURE_MANIFEST=config/runtime-proof/prod.synthetic-proof-fixtures.yaml" \
+    "runtime proof policy tracks production fixture manifest"
+  require_pattern \
+    "$RUNTIME_PROOF_POLICY" \
+    "SMOKE_ACCOUNT_REGISTRY_CONTRACT=config/smoke-account-registry.yaml" \
+    "runtime proof policy tracks canonical smoke account registry contract"
+fi
+
 if [[ -f "$OPERATIONS_GATES_WORKFLOW" ]]; then
   require_pattern \
     "$OPERATIONS_GATES_WORKFLOW" \

@@ -45,11 +45,24 @@ def test_runtime_routing_matrix_builds_dev_payload() -> None:
     assert any(assertion["id"] == "dashboard-route" for assertion in biji["assertions"])
 
 
+def test_runtime_routing_matrix_builds_production_payload() -> None:
+    module = load_generator_module()
+    payload = module.build_payload(module.load_registry(), "production")
+
+    assert payload["environment"] == "production"
+    assert (
+        payload["environment_contract"]["runtime_proof_script"]
+        == "scripts/tenants/verify-prod-runtime-proof.sh"
+    )
+    assert payload["environment_contract"]["namespace"] == "mereka-lms"
+
+
 def test_runtime_routing_matrix_is_deterministic_for_noop_regen() -> None:
     module = load_generator_module()
     registry = module.load_registry()
 
     assert module.build_payload(registry, "dev") == module.build_payload(registry, "dev")
+    assert module.build_payload(registry, "production") == module.build_payload(registry, "production")
 
 
 def test_runtime_routing_matrix_prefers_release_critical_staging_hosts() -> None:

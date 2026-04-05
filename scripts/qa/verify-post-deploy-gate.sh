@@ -117,10 +117,14 @@ if [[ -f "$POLICY_FILE" ]] \
   && grep -q '^POST_DEPLOY_WORKFLOW_RUN_ENV=production$' "$POLICY_FILE" \
   && grep -q '^PROD_RUNTIME_MODE=parked$' "$POLICY_FILE" \
   && grep -q '^PROD_PARKED_STATUS_CONTEXT=post-deploy/production-parked-state$' "$POLICY_FILE" \
-  && grep -q '^PROD_PARKED_VERIFIER=scripts/qa/verify-prod-parked-state.sh$' "$POLICY_FILE"; then
-  pass "Runtime proof policy codifies staging authority and parked production verification"
+  && grep -q '^PROD_PARKED_VERIFIER=scripts/qa/verify-prod-parked-state.sh$' "$POLICY_FILE" \
+  && grep -q '^PROD_FULL_RUNTIME_PROOF_VERIFIER=scripts/tenants/verify-prod-runtime-proof.sh$' "$POLICY_FILE" \
+  && grep -q '^STAGING_RUNTIME_FIXTURE_MANIFEST=config/runtime-proof/staging.synthetic-proof-fixtures.yaml$' "$POLICY_FILE" \
+  && grep -q '^PROD_RUNTIME_FIXTURE_MANIFEST=config/runtime-proof/prod.synthetic-proof-fixtures.yaml$' "$POLICY_FILE" \
+  && grep -q '^SMOKE_ACCOUNT_REGISTRY_CONTRACT=config/smoke-account-registry.yaml$' "$POLICY_FILE"; then
+  pass "Runtime proof policy codifies staging authority, parked prod, and the successor prod/non-dev proof surfaces"
 else
-  fail "Runtime proof policy missing staging/prod parked contract entries"
+  fail "Runtime proof policy missing canonical staging/prod proof contract entries"
 fi
 
 # ── Section 3: Blocking Gate Structure ───────────────────────────────────────
@@ -237,7 +241,25 @@ else
   fail "GitHub Actions are not pinned to specific versions"
 fi
 
-# ── Section 6: Verify Script Exists ──────────────────────────────────────────
+# ── Section 6: Contract Surface Existence ────────────────────────────────────
+
+echo ""
+echo "--- Contract Surface Existence ---"
+
+for rel_path in \
+  "scripts/qa/verify-prod-parked-state.sh" \
+  "scripts/tenants/verify-prod-runtime-proof.sh" \
+  "config/runtime-proof/staging.synthetic-proof-fixtures.yaml" \
+  "config/runtime-proof/prod.synthetic-proof-fixtures.yaml" \
+  "config/smoke-account-registry.yaml"; do
+  if [[ -f "$REPO_ROOT/$rel_path" ]]; then
+    pass "Contract surface exists: $rel_path"
+  else
+    fail "Contract surface missing: $rel_path"
+  fi
+done
+
+# ── Section 7: Verify Script Exists ──────────────────────────────────────────
 
 echo ""
 echo "--- Verification Script ---"
@@ -255,7 +277,7 @@ else
   fail "Verification script is not executable (run: chmod +x scripts/qa/verify-post-deploy-gate.sh)"
 fi
 
-# ── Section 7: Operational Doc ───────────────────────────────────────────────
+# ── Section 8: Operational Doc ───────────────────────────────────────────────
 
 echo ""
 echo "--- Operational Documentation ---"
@@ -267,7 +289,7 @@ else
   fail "Operational doc missing: docs/ops/runbooks/POST_DEPLOY_GATE.md"
 fi
 
-# ── Section 8: Online Mode — GitHub API Check ────────────────────────────────
+# ── Section 9: Online Mode — GitHub API Check ────────────────────────────────
 
 if [[ "$MODE" == "online" ]]; then
   echo ""

@@ -79,7 +79,7 @@ environments:
     gitops_repo: Biji-Biji-Initiative/bbi-infrastructure
     gitops_overlay_path: apps/mereka-lms/overlays/prod
     argocd_app: mereka-lms-prod
-    runtime_proof_script: ""
+    runtime_proof_script: scripts/tenants/verify-prod-runtime-proof.sh
     dns_zone: mereka.io
   dev:
     scheme: https
