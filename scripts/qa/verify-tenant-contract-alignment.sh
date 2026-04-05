@@ -39,6 +39,7 @@ contract_path = repo_root / "infrastructure/tenants/tenant-contracts.yml"
 experience_contract_path = repo_root / "config/tenant-experience-contract.yaml"
 multisite_path = repo_root / "infrastructure/tutor/multisite-sites.yml"
 multisite_dev_path = repo_root / "infrastructure/tutor/multisite-sites.dev.yml"
+multisite_staging_path = repo_root / "infrastructure/tutor/multisite-sites.staging.yml"
 registry_path = repo_root / "deploy/k8s/base/apps/multi-tenancy/configmap-tenants.yaml"
 caddy_path = repo_root / "deploy/k8s/base/apps/caddy/Caddyfile"
 tenant_resolution_path = repo_root / "infrastructure/tutor/plugins/_mereka_lms/mfe_runtime/tenant-resolution.js"
@@ -94,6 +95,7 @@ contract = yaml.safe_load(contract_path.read_text(encoding="utf-8"))
 experience_contract = yaml.safe_load(experience_contract_path.read_text(encoding="utf-8"))
 multisite = yaml.safe_load(multisite_path.read_text(encoding="utf-8"))
 multisite_dev = yaml.safe_load(multisite_dev_path.read_text(encoding="utf-8"))
+multisite_staging = yaml.safe_load(multisite_staging_path.read_text(encoding="utf-8")) if multisite_staging_path.exists() else {"sites": []}
 tenant_registry_contract = yaml.safe_load((repo_root / "deploy/k8s/tenancy/tenant-registry.yaml").read_text(encoding="utf-8")) or {}
 registry_docs = list(yaml.safe_load_all(registry_path.read_text(encoding="utf-8")))
 caddy_text = caddy_path.read_text(encoding="utf-8")
@@ -123,6 +125,8 @@ sites = multisite.get("sites") or []
 site_by_domain = {site.get("domain"): site for site in sites if isinstance(site, dict)}
 sites_dev = multisite_dev.get("sites") or []
 site_by_domain_dev = {site.get("domain"): site for site in sites_dev if isinstance(site, dict)}
+sites_staging = multisite_staging.get("sites") or []
+site_by_domain_staging = {site.get("domain"): site for site in sites_staging if isinstance(site, dict)}
 
 active_tenants = [tenant for tenant in contract.get("tenants", []) if tenant.get("active", True)]
 if not active_tenants:
@@ -335,7 +339,7 @@ for tenant in experience_tenants:
         apps_host = env_entry["apps_host"]
         studio_host = env_entry["studio_host"]
         authn_base_url = env_entry["authn_base_url"]
-        site_map = site_by_domain if env == "production" else site_by_domain_dev if env == "dev" else {}
+        site_map = site_by_domain if env == "production" else site_by_domain_dev if env == "dev" else site_by_domain_staging if env == "staging" else {}
         site = site_map.get(lms_host)
 
         if not site:
