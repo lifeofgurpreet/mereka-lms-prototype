@@ -39,6 +39,9 @@ case "$ENV" in
   dev)
     DOMAINS=("academyv2.mereka.dev" "biji-biji.academyv2.mereka.dev" "skillourfuture.academyv2.mereka.dev")
     ;;
+  staging)
+    DOMAINS=("staging.academyv2.mereka.io" "staging.academy.biji-biji.com" "staging.skillourfuture.academy.mereka.io")
+    ;;
   *) echo "Unknown env: $ENV" >&2; exit 1 ;;
 esac
 
@@ -49,6 +52,9 @@ declare -A DOMAIN_MFE_HOST=(
   ["academyv2.mereka.dev"]="apps.academyv2.mereka.dev"
   ["biji-biji.academyv2.mereka.dev"]="apps.biji-biji.academyv2.mereka.dev"
   ["skillourfuture.academyv2.mereka.dev"]="apps.skillourfuture.academyv2.mereka.dev"
+  ["staging.academyv2.mereka.io"]="staging.apps.academyv2.mereka.io"
+  ["staging.academy.biji-biji.com"]="apps.staging.academy.biji-biji.com"
+  ["staging.skillourfuture.academy.mereka.io"]="apps.staging.skillourfuture.academy.mereka.io"
 )
 
 declare -A DOMAIN_THEME_CSS=(
@@ -58,6 +64,9 @@ declare -A DOMAIN_THEME_CSS=(
   ["academyv2.mereka.dev"]="/theme/mereka-brand.min.css"
   ["biji-biji.academyv2.mereka.dev"]="/theme/biji-biji-brand.min.css"
   ["skillourfuture.academyv2.mereka.dev"]="/theme/sof-brand.min.css"
+  ["staging.academyv2.mereka.io"]="/theme/mereka-brand.min.css"
+  ["staging.academy.biji-biji.com"]="/theme/biji-biji-brand.min.css"
+  ["staging.skillourfuture.academy.mereka.io"]="/theme/sof-brand.min.css"
 )
 
 PASS=0
@@ -298,6 +307,9 @@ declare -A DOMAIN_EXPECTED_BRAND=(
   ["academyv2.mereka.dev"]="Mereka Academy"
   ["biji-biji.academyv2.mereka.dev"]="Biji-Biji Academy"
   ["skillourfuture.academyv2.mereka.dev"]="Skill Our Future Academy"
+  ["staging.academyv2.mereka.io"]="Mereka Academy"
+  ["staging.academy.biji-biji.com"]="Biji-Biji Academy"
+  ["staging.skillourfuture.academy.mereka.io"]="Skill Our Future Academy"
 )
 
 declare -A DOMAIN_EXPECTED_EYEBROW=(
@@ -307,6 +319,9 @@ declare -A DOMAIN_EXPECTED_EYEBROW=(
   ["academyv2.mereka.dev"]="Learning workspace"
   ["biji-biji.academyv2.mereka.dev"]="Community-powered learning"
   ["skillourfuture.academyv2.mereka.dev"]="Career acceleration workspace"
+  ["staging.academyv2.mereka.io"]="Learning workspace"
+  ["staging.academy.biji-biji.com"]="Community-powered learning"
+  ["staging.skillourfuture.academy.mereka.io"]="Career acceleration workspace"
 )
 
 playwright_available() {
@@ -331,6 +346,8 @@ const { chromium } = require('playwright');
   const page = await browser.newPage({ ignoreHTTPSErrors: true });
   try {
     await page.goto('https://' + process.env.APPS_HOST + '/authn/login?next=%2F', { waitUntil: 'networkidle', timeout: 45000 });
+    // Wait for React plugin slot to hydrate — branding renders async after networkidle
+    await page.waitForSelector('.mereka-authn-login-branding', { timeout: 10000 }).catch(() => {});
     const data = await page.evaluate(() => {
       const root = document.querySelector('.mereka-authn-login-branding');
       const css = getComputedStyle(document.documentElement);
