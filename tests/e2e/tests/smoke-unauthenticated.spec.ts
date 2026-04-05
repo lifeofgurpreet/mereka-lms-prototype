@@ -25,6 +25,91 @@ function getMfeBaseUrl(lmsBaseUrl: string): string {
   return `${parsed.protocol}//${host}${port}`;
 }
 
+function normalizeHostname(hostname: string): string {
+  return hostname.toLowerCase().replace(/^www\./, '');
+}
+
+function deriveVariantCandidates(hostname: string): string[] {
+  const normalizedHostname = normalizeHostname(hostname);
+  if (!normalizedHostname) {
+    return [];
+  }
+
+  const candidates: string[] = [];
+  const queue = [normalizedHostname];
+  const enqueue = (candidate: string) => {
+    if (candidate && !candidates.includes(candidate)) {
+      candidates.push(candidate);
+      queue.push(candidate);
+    }
+  };
+
+  while (queue.length > 0) {
+    const candidate = queue.shift();
+    if (!candidate) {
+      continue;
+    }
+
+    enqueue(candidate.replace(/^(?:staging\.)?apps\./, ''));
+    enqueue(candidate.replace(/^apps\./, ''));
+    enqueue(candidate.replace(/^staging\./, ''));
+    enqueue(candidate.replace(/\.mereka\.dev$/, '.mereka.io'));
+  }
+
+  return candidates;
+}
+
+type AuthnBrandingExpectation = {
+  eyebrow: string;
+  brand: string;
+  subtitle: string;
+  logoPathFragment: string;
+};
+
+function getExpectedAuthnBranding(lmsBaseUrl: string): AuthnBrandingExpectation {
+  const hostname = new URL(lmsBaseUrl).hostname;
+  const variantCopyMap: Record<string, AuthnBrandingExpectation> = {
+    'academy.biji-biji.com': {
+      eyebrow: 'Community-powered learning',
+      brand: 'Biji-Biji Academy',
+      subtitle: 'Built for creative communities, practical making, and shared learning momentum.',
+      logoPathFragment: '/theme/biji-biji/logo-horizontal.svg',
+    },
+    'biji-biji.academyv2.mereka.dev': {
+      eyebrow: 'Community-powered learning',
+      brand: 'Biji-Biji Academy',
+      subtitle: 'Built for creative communities, practical making, and shared learning momentum.',
+      logoPathFragment: '/theme/biji-biji/logo-horizontal.svg',
+    },
+    'skillourfuture.academy.mereka.io': {
+      eyebrow: 'Career acceleration workspace',
+      brand: 'Skill Our Future Academy',
+      subtitle: 'Designed for confident career moves, employer-aligned learning, and verified progress.',
+      logoPathFragment: '/theme/skillourfuture/logo-horizontal.svg',
+    },
+    'skillourfuture.academyv2.mereka.dev': {
+      eyebrow: 'Career acceleration workspace',
+      brand: 'Skill Our Future Academy',
+      subtitle: 'Designed for confident career moves, employer-aligned learning, and verified progress.',
+      logoPathFragment: '/theme/skillourfuture/logo-horizontal.svg',
+    },
+  };
+
+  for (const candidate of deriveVariantCandidates(hostname)) {
+    const expectation = variantCopyMap[candidate];
+    if (expectation) {
+      return expectation;
+    }
+  }
+
+  return {
+    eyebrow: 'Learning workspace',
+    brand: 'Mereka Academy',
+    subtitle: 'Secure access for your active learning environment.',
+    logoPathFragment: '/theme/logo-horizontal.svg',
+  };
+}
+
 test.describe('Unauthenticated smoke — LMS', () => {
   test('LMS homepage responds 200 with branded hero shell', async ({ page, baseURL }) => {
     const response = await page.goto(baseURL!, { waitUntil: 'domcontentloaded' });
@@ -45,7 +130,7 @@ test.describe('Unauthenticated smoke — LMS', () => {
     const response = await page.goto(`${baseURL}/courses`, { waitUntil: 'domcontentloaded' });
     expect(response?.status()).toBe(200);
 
-    await page.waitForLoadState('networkidle').catch(() => {});
+    await page.waitForLoadState('networkidle', { timeout: 5_000 }).catch(() => {});
     const modernSearchShell = page.locator('#discovery-form');
     const legacySearchShell = page.locator('.course-search form');
     const searchShellCount = (await modernSearchShell.count()) + (await legacySearchShell.count());
@@ -128,6 +213,29 @@ test.describe('Unauthenticated smoke — MFE apps', () => {
       ).toBe(true);
     });
   }
+
+  test('authn/login exposes tenant-specific authn branding copy', async ({ page, baseURL }) => {
+    const mfeBase = getMfeBaseUrl(baseURL!);
+    const expectedBranding = getExpectedAuthnBranding(baseURL!);
+    const response = await page.goto(`${mfeBase}/authn/login`, {
+      waitUntil: 'domcontentloaded',
+    });
+
+    const status = response?.status() ?? 0;
+    expect(status).toBeGreaterThan(0);
+    expect(status).toBeLessThan(500);
+
+    await page.waitForLoadState('networkidle').catch(() => {});
+
+    await expect(page.locator('.mereka-authn-login-branding__logo')).toHaveCount(1);
+    await expect(page.locator('.mereka-authn-login-branding__eyebrow')).toContainText(expectedBranding.eyebrow);
+    await expect(page.locator('.mereka-authn-login-branding__brand')).toContainText(expectedBranding.brand);
+    await expect(page.locator('.mereka-authn-login-branding__subtitle')).toContainText(expectedBranding.subtitle);
+    await expect(page.locator('.mereka-authn-login-branding__logo-img')).toHaveAttribute(
+      'src',
+      new RegExp(`${expectedBranding.logoPathFragment.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`),
+    );
+  });
 
   test('password reset page loads', async ({ page, baseURL }) => {
     const mfeBase = getMfeBaseUrl(baseURL!);

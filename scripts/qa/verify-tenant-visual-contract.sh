@@ -35,14 +35,30 @@ done
 case "$ENV" in
   prod)
     DOMAINS=("academyv2.mereka.io" "academy.biji-biji.com" "skillourfuture.academy.mereka.io")
-    MFE_DOMAIN="apps.academyv2.mereka.io"
     ;;
   dev)
-    DOMAINS=("${LMS_DOMAIN:-localhost}")
-    MFE_DOMAIN="${MFE_DOMAIN:-apps.localhost}"
+    DOMAINS=("academyv2.mereka.dev" "biji-biji.academyv2.mereka.dev" "skillourfuture.academyv2.mereka.dev")
     ;;
   *) echo "Unknown env: $ENV" >&2; exit 1 ;;
 esac
+
+declare -A DOMAIN_MFE_HOST=(
+  ["academyv2.mereka.io"]="apps.academyv2.mereka.io"
+  ["academy.biji-biji.com"]="apps.academy.biji-biji.com"
+  ["skillourfuture.academy.mereka.io"]="apps.skillourfuture.academy.mereka.io"
+  ["academyv2.mereka.dev"]="apps.academyv2.mereka.dev"
+  ["biji-biji.academyv2.mereka.dev"]="apps.biji-biji.academyv2.mereka.dev"
+  ["skillourfuture.academyv2.mereka.dev"]="apps.skillourfuture.academyv2.mereka.dev"
+)
+
+declare -A DOMAIN_THEME_CSS=(
+  ["academyv2.mereka.io"]="/theme/mereka-brand.min.css"
+  ["academy.biji-biji.com"]="/theme/biji-biji-brand.min.css"
+  ["skillourfuture.academy.mereka.io"]="/theme/sof-brand.min.css"
+  ["academyv2.mereka.dev"]="/theme/mereka-brand.min.css"
+  ["biji-biji.academyv2.mereka.dev"]="/theme/biji-biji-brand.min.css"
+  ["skillourfuture.academyv2.mereka.dev"]="/theme/sof-brand.min.css"
+)
 
 PASS=0
 FAIL=0
@@ -132,7 +148,6 @@ echo "║       Tenant Visual Contract Verification                  ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo "Environment: $ENV"
 echo "Domains: ${DOMAINS[*]}"
-echo "MFE domain: $MFE_DOMAIN"
 echo ""
 
 if [[ -n "$EVIDENCE_DIR" ]]; then
@@ -208,21 +223,28 @@ echo "── AC-VU-002: Authn smoke per tenant ──"
 for domain in "${DOMAINS[@]}"; do
   echo ""
   echo "  Domain: $domain"
+  mfe_domain="${DOMAIN_MFE_HOST[$domain]:-}"
+  expected_theme_css="${DOMAIN_THEME_CSS[$domain]:-}"
+
+  if [[ -z "$mfe_domain" ]]; then
+    fail "$domain authn host mapping missing"
+    continue
+  fi
 
   # Authn login page: HTTP 200 + HTML marker
   http_with_chain \
     "$domain authn/login" \
-    "https://$MFE_DOMAIN/authn/login" \
+    "https://$mfe_domain/authn/login" \
     "authn\|login\|sign.in\|<div id=\"root\""
 
   # Authn register page: HTTP 200 + HTML marker
   http_with_chain \
     "$domain authn/register" \
-    "https://$MFE_DOMAIN/authn/register" \
+    "https://$mfe_domain/authn/register" \
     "authn\|register\|sign.up\|<div id=\"root\""
 
   # Check CSS bundle loads (look for main CSS link in authn HTML)
-  AUTHN_HTML="$(curl -sL --max-time "$CURL_TIMEOUT" "https://$MFE_DOMAIN/authn/login" 2>/dev/null || echo "")"
+  AUTHN_HTML="$(curl -sL --max-time "$CURL_TIMEOUT" "https://$mfe_domain/authn/login" 2>/dev/null || echo "")"
   if [[ -n "$AUTHN_HTML" ]]; then
     # Extract CSS href
     CSS_HREF="$(echo "$AUTHN_HTML" | grep -oP 'href="([^"]*\.css)"' | head -1 | grep -oP '"[^"]*"' | tr -d '"' || true)"
@@ -230,12 +252,33 @@ for domain in "${DOMAINS[@]}"; do
       if [[ "$CSS_HREF" == http* ]]; then
         check_asset "$domain authn CSS bundle" "$CSS_HREF"
       elif [[ "$CSS_HREF" == /* ]]; then
-        check_asset "$domain authn CSS bundle" "https://$MFE_DOMAIN$CSS_HREF"
+        check_asset "$domain authn CSS bundle" "https://$mfe_domain$CSS_HREF"
       else
-        check_asset "$domain authn CSS bundle" "https://$MFE_DOMAIN/authn/$CSS_HREF"
+        check_asset "$domain authn CSS bundle" "https://$mfe_domain/authn/$CSS_HREF"
       fi
     else
       warn "$domain authn CSS link not found in HTML"
+    fi
+
+    if [[ -n "$expected_theme_css" ]]; then
+      if grep -qF "$expected_theme_css" <<<"$AUTHN_HTML"; then
+        pass "$domain authn shell references expected tenant theme ${expected_theme_css}"
+      else
+        fail "$domain authn shell missing expected tenant theme ${expected_theme_css}"
+      fi
+    fi
+
+    brand_bundle_count=0
+    for brand_css in \
+      "/theme/mereka-brand.min.css" \
+      "/theme/biji-biji-brand.min.css" \
+      "/theme/sof-brand.min.css"; do
+      if grep -qF "$brand_css" <<<"$AUTHN_HTML"; then
+        brand_bundle_count=$((brand_bundle_count + 1))
+      fi
+    done
+    if [[ "$brand_bundle_count" -gt 1 ]]; then
+      warn "$domain authn shell exposes multiple tenant brand bundles in HTML (current count=${brand_bundle_count}); distinct hero/theme proof remains incomplete"
     fi
   fi
 done
@@ -253,15 +296,16 @@ MFE_ROUTES=("learner-dashboard" "profile/u/" "account")
 for domain in "${DOMAINS[@]}"; do
   echo ""
   echo "  Domain: $domain"
+  mfe_domain="${DOMAIN_MFE_HOST[$domain]:-}"
 
   for route in "${MFE_ROUTES[@]}"; do
     # These routes may redirect to login, which is acceptable
     code="$(curl -sL -o /dev/null -w "%{http_code}" \
       --max-time "$CURL_TIMEOUT" --max-redirs 10 \
-      "https://$MFE_DOMAIN/$route" 2>/dev/null || echo "000")"
+      "https://$mfe_domain/$route" 2>/dev/null || echo "000")"
     redirect_count="$(curl -sL -o /dev/null -w "%{num_redirects}" \
       --max-time "$CURL_TIMEOUT" --max-redirs 10 \
-      "https://$MFE_DOMAIN/$route" 2>/dev/null || echo "0")"
+      "https://$mfe_domain/$route" 2>/dev/null || echo "0")"
 
     if [[ "$code" == "200" ]]; then
       pass "$domain $route → HTTP 200 (${redirect_count} redirects)"
@@ -287,9 +331,9 @@ SUMMARY_MD=""
 
 for domain in "${DOMAINS[@]}"; do
   # Build per-domain status
-  DOMAIN_PASS=$(printf '%s\n' "${RESULTS[@]}" | grep -c "$domain.*PASS" || true)
-  DOMAIN_FAIL=$(printf '%s\n' "${RESULTS[@]}" | grep -c "$domain.*FAIL" || true)
-  DOMAIN_WARN=$(printf '%s\n' "${RESULTS[@]}" | grep -c "$domain.*WARN" || true)
+  DOMAIN_PASS=$(printf '%s\n' "${RESULTS[@]}" | grep -c "^PASS: ${domain}" || true)
+  DOMAIN_FAIL=$(printf '%s\n' "${RESULTS[@]}" | grep -c "^FAIL: ${domain}" || true)
+  DOMAIN_WARN=$(printf '%s\n' "${RESULTS[@]}" | grep -c "^WARN: ${domain}" || true)
 
   if [[ "${DOMAIN_FAIL:-0}" -gt 0 ]]; then
     STATUS="FIX"
