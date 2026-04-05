@@ -1,0 +1,88 @@
+# Source-of-Truth Matrix — explicit winning roots for high-risk surfaces
+---
+schema_version: "1.0"
+
+surfaces:
+  - id: agent-skills
+    canonical_locations:
+      - repo: mereka-lms
+        path: ".factory/skills/**"
+    mirror_locations:
+      - repo: local-home
+        path: "~/.factory/skills/**"
+        class: convenience-only
+      - repo: local-home
+        path: "~/.claude/skills/**"
+        class: convenience-only
+    consumer_guards:
+      - "scripts/qa/verify-ghost-truth-surfaces.sh"
+      - "scripts/qa/verify-skill-frontmatter-integrity.sh"
+  - id: tutor-plugin-settings
+    canonical_locations:
+      - repo: mereka-lms
+        path: "infrastructure/tutor/plugins/mereka_lms.py"
+    derived_locations:
+      - repo: mereka-lms
+        path: "deploy/k8s/base/apps/openedx/settings/lms/*.py"
+    consumer_guards:
+      - "scripts/qa/verify-siteconfig-authority.sh"
+      - "scripts/qa/verify-generated-surface-lineage.sh"
+  - id: mfe-routing
+    canonical_locations:
+      - repo: mereka-lms
+        path: "deploy/k8s/tenancy/tenant-registry.yaml"
+      - repo: mereka-lms
+        path: "deploy/k8s/base/apps/caddy/**"
+    derived_locations:
+      - repo: mereka-lms
+        path: "generated/tenant-runtime/browser-matrix-*.json"
+    consumer_guards:
+      - "scripts/qa/verify-domain-proof-matrix.sh"
+      - "scripts/qa/verify-proof-gate-contract.sh"
+  - id: release-object
+    canonical_locations:
+      - repo: mereka-lms
+        path: "config/release-object-schema.yaml"
+      - repo: mereka-lms
+        path: "scripts/release/generate_release_object.py"
+    derived_locations:
+      - repo: ci-artifact
+        path: "var/ci/release-object.json"
+    consumer_guards:
+      - "scripts/qa/verify-release-object.sh"
+      - "scripts/qa/verify-workflow-contract-map.sh"
+  - id: smoke-identities
+    canonical_locations:
+      - repo: mereka-lms
+        path: "deploy/k8s/tenancy/smoke-account-registry.yaml"
+    mirror_locations:
+      - repo: github-actions
+        path: ".github/workflows/smoke-authenticated.yml"
+        class: consumer-only
+    consumer_guards:
+      - "scripts/qa/verify-domain-proof-matrix.sh"
+      - "scripts/qa/verify-machine-truth-freshness.sh"
+  - id: gitops-overlays
+    canonical_locations:
+      - repo: bbi-infrastructure
+        path: "apps/mereka-lms/overlays/**"
+        local_checkout: "../bbi-infrastructure/apps/mereka-lms/overlays"
+    mirror_locations:
+      - repo: mereka-lms
+        path: "deploy/k8s/overlays/production/**"
+        class: transitional-ghost
+      - repo: mereka-lms
+        path: "deploy/k8s/overlays/staging/**"
+        class: transitional-ghost
+      - repo: mereka-lms
+        path: "deploy/k8s/overlays/rke2-nonprod/**"
+        class: transitional-ghost
+    consumer_guards:
+      - "scripts/qa/verify-ghost-truth-surfaces.sh"
+      - "scripts/qa/verify-cross-repo-boundaries.sh"
+  - id: branch-protection
+    canonical_locations:
+      - repo: github-control-plane
+        path: "repos/*/branches/main/protection"
+    consumer_guards:
+      - "scripts/qa/verify-branch-protection-contract.sh"

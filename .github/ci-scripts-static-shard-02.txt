@@ -26,6 +26,8 @@ scripts/qa/verify-docs-authority-invariants.sh
 scripts/qa/verify-change-surface-contract.sh
 scripts/qa/verify-generated-surface-lineage.sh
 scripts/qa/verify-ci-scope-contract.sh
+scripts/qa/verify-domain-proof-matrix.sh
+scripts/qa/verify-source-of-truth-matrix.sh
 scripts/qa/verify-openedx-audit-tracker-sync.sh
 scripts/qa/test-build-validator-drift-review-packet.sh
 scripts/qa/test-verify-kustomize-no-deprecated-keys.sh

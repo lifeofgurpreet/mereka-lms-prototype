@@ -2,7 +2,7 @@
 # verify-process-invariants.sh — Enforce process and template invariants
 #
 # Ensures that:
-# 1. PR template mentions owner layer
+# 1. PR template mentions owner layer and future-agent mistake prevention
 # 2. Issue templates include at least one incident template
 # 3. Runbooks directory contains playbooks or troubleshooting docs
 # 4. Status docs do not claim "canonical" in their header status field
@@ -25,17 +25,17 @@ echo "Repo root: ${REPO_ROOT}"
 echo
 
 # ---------------------------------------------------------------------------
-# 1. PR template must mention "owner layer" (case-insensitive)
+# 1. PR template must mention owner layer and future-agent mistake prevented
 # ---------------------------------------------------------------------------
-echo "--- Check 1: PR template contains owner-layer reference ---"
+echo "--- Check 1: PR template contains owner-layer and future-agent-mistake references ---"
 PR_TEMPLATE="$REPO_ROOT/.github/PULL_REQUEST_TEMPLATE.md"
 if [[ ! -f "$PR_TEMPLATE" ]]; then
   fail "PR template (.github/PULL_REQUEST_TEMPLATE.md) does not exist"
 else
-  if grep -qi 'owner layer' "$PR_TEMPLATE"; then
-    pass "PR template references owner layer"
+  if grep -qi 'owner layer' "$PR_TEMPLATE" && grep -qi 'future-agent mistake prevented' "$PR_TEMPLATE"; then
+    pass "PR template references owner layer and future-agent mistake prevented"
   else
-    fail "PR template (.github/PULL_REQUEST_TEMPLATE.md) does not contain 'owner layer' (case-insensitive)"
+    fail "PR template (.github/PULL_REQUEST_TEMPLATE.md) must contain both 'owner layer' and 'future-agent mistake prevented' (case-insensitive)"
   fi
 fi
 

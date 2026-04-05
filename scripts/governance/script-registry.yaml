@@ -124,6 +124,12 @@ ci_static_inventory:
     - script: scripts/qa/verify-ci-scope-contract.sh
     - script: scripts/qa/verify-blind-agent-acceptance.sh
     - script: scripts/qa/verify-skill-evals-schema.sh
+    - script: scripts/qa/verify-domain-proof-matrix.sh
+    - script: scripts/qa/verify-workflow-contract-map.sh
+    - script: scripts/qa/verify-ghost-truth-surfaces.sh
+    - script: scripts/qa/verify-source-of-truth-matrix.sh
+    - script: scripts/qa/verify-structural-debt-register.sh
+    - script: scripts/qa/verify-skill-eval-runner.sh
     - script: scripts/qa/verify-openedx-audit-tracker-sync.sh
     - script: scripts/qa/verify-tutor-config-path-contract.sh
     - script: scripts/qa/test-build-validator-drift-evidence-bundle.sh
@@ -570,6 +576,12 @@ ci_runtime_inventory:
     - key: CONFIG_DRIFT
       title: Runtime or tenant config drift
       description: detects runtime-versus-source tenant or config drift
+    - key: LIVE_GITHUB
+      title: Live GitHub settings required
+      description: needs GitHub API access to branch protection or other repo settings outside the worktree
+    - key: EXTERNAL_REPO
+      title: External repo checkout required
+      description: needs a sibling checkout or temporary clone of a shared repo outside this worktree
   entries:
     - script: scripts/qa/verify-build-provenance.sh
       category: CI_ARTIFACT
@@ -607,6 +619,14 @@ ci_runtime_inventory:
     - script: scripts/qa/ops-preflight.sh
       category: WORKTREE_CONTEXT
       note: operator preflight for br+tutor+gitops before combined manual ops
+    - script: scripts/qa/verify-branch-protection-contract.sh
+      category: LIVE_GITHUB
+      args: ["--live"]
+      note: audits live GitHub main-branch protection across mereka-lms, bbi-infrastructure, and platform-control-plane
+    - script: scripts/qa/verify-skill-frontmatter-integrity.sh
+      category: EXTERNAL_REPO
+      args: ["--profile", "shared"]
+      note: audits shared team-skills roots in addition to repo-local .factory/skills
     - script: scripts/qa/verify-enterprise-sso-readiness.sh
       category: LIVE_CLUSTER
       args: ["--mode", "repo"]

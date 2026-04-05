@@ -15,6 +15,8 @@
 #   TUTOR_ENV        — needs a populated Tutor environment
 #   DOC_GAP          — depends on incomplete runbook or audit-document coverage
 #   CONFIG_DRIFT     — detects runtime-versus-source tenant or config drift
+#   LIVE_GITHUB      — needs GitHub API access to branch protection or other repo settings outside the worktree
+#   EXTERNAL_REPO    — needs a sibling checkout or temporary clone of a shared repo outside this worktree
 
 # ── CI artifact required ─────────────────────────────────────────────────────
 scripts/qa/verify-build-provenance.sh  # CI_ARTIFACT
@@ -117,3 +119,9 @@ scripts/qa/verify-paragon-token-coverage.sh  # DOC_GAP (TSV audit files)
 # ── Runtime or tenant config drift ─────────────────────────────────────────────────────
 scripts/qa/verify-tenant-contract-alignment.sh  # CONFIG_DRIFT
 scripts/qa/verify-tenant-override-schema.sh  # CONFIG_DRIFT
+
+# ── Live GitHub settings required ─────────────────────────────────────────────────────
+scripts/qa/verify-branch-protection-contract.sh --live  # LIVE_GITHUB (audits live GitHub main-branch protection across mereka-lms, bbi-infrastructure, and platform-control-plane)
+
+# ── External repo checkout required ─────────────────────────────────────────────────────
+scripts/qa/verify-skill-frontmatter-integrity.sh --profile shared  # EXTERNAL_REPO (audits shared team-skills roots in addition to repo-local .factory/skills)

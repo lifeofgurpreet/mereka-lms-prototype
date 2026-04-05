@@ -1,0 +1,225 @@
+# Structural Debt Register — machine-readable, severity-ranked
+#
+# Every entry represents a known deviation from the contract system's
+# declared invariants. Each must have an owner, severity, and a
+# kill/migrate/tolerate decision.
+#
+# Consumers:
+#   - scripts/qa/verify-structural-debt-register.sh (freshness + schema)
+#   - Agent execution workflows (debt-aware routing)
+#   - Operational convergence sessions
+#
+# Classification:
+#   severity: critical | high | medium | low
+#   decision: kill | migrate | tolerate
+#   status: open | in-progress | resolved
+---
+schema_version: "1.0"
+
+entries:
+  # ── CI gate failures (classified from full static inventory run) ──────────
+
+  - id: DEBT-001
+    title: "Untracked root markdown LAUNCH_ROADMAP.md fails verify-repo-structure"
+    severity: low
+    class: local-workspace-artifact
+    owner_repo: mereka-lms
+    owner_layer: source
+    failing_gate: scripts/qa/verify-repo-structure.sh
+    evidence: "LAUNCH_ROADMAP.md is untracked (git status --porcelain shows ??)"
+    current_risk: "CI fails on machines where untracked files exist in worktree"
+    decision: kill
+    action: "Deleted local LAUNCH_ROADMAP.md from the worktree; keep root markdown allowlist clean"
+    review_date: "2026-04-05"
+    status: resolved
+
+  - id: DEBT-002
+    title: "Python __pycache__/.pyc artifacts in deploy/k8s/ fail validate-deploy-contract"
+    severity: medium
+    class: local-workspace-artifact
+    owner_repo: mereka-lms
+    owner_layer: build
+    failing_gate: scripts/qa/validate-deploy-contract.sh
+    evidence: "7 .pyc files under deploy/k8s/base/apps/openedx/settings/"
+    current_risk: "Compiled artifacts in deploy tree; CI fails on machines where python imported these"
+    decision: kill
+    action: "Removed deploy/k8s/base/apps/openedx/settings/lms/__pycache__ and keep __pycache__/ ignored"
+    review_date: "2026-04-05"
+    status: resolved
+
+  - id: DEBT-003
+    title: "verify-branding-evidence-a11y-contract regex parse error"
+    severity: medium
+    class: script-bug
+    owner_repo: mereka-lms
+    owner_layer: proof
+    failing_gate: scripts/qa/verify-branding-evidence-a11y-contract.sh
+    evidence: "ripgrep fails on escaped quotes in regex pattern"
+    current_risk: "A11y contract verification is broken; false negative"
+    decision: kill
+    action: "Fix the regex pattern in the script (unescaped quotes)"
+    review_date: "2026-04-04"
+    status: open
+
+  - id: DEBT-004
+    title: "verify-vendored-settings-drift shows 4 diverged files"
+    severity: high
+    class: cross-repo-drift
+    owner_repo: mereka-lms + bbi-infrastructure
+    owner_layer: build
+    failing_gate: scripts/qa/verify-vendored-settings-drift.sh
+    evidence: "production.py (176+54 diff lines), mereka_multisite.py (188+31 diff lines)"
+    current_risk: "App repo settings diverge from infra vendored copy; live behavior may not match source"
+    decision: migrate
+    action: "Run vendor-sync to update bbi-infrastructure vendored copies from app repo"
+    review_date: "2026-04-04"
+    status: open
+
+  - id: DEBT-005
+    title: "verify-oscar-deprecation printf error on reference count"
+    severity: low
+    class: script-bug
+    owner_repo: mereka-lms
+    owner_layer: proof
+    failing_gate: scripts/qa/verify-oscar-deprecation.sh
+    evidence: "printf format error on line 411 with 1192 reference count"
+    current_risk: "Oscar deprecation audit produces incorrect output"
+    decision: kill
+    action: "Fix printf format string in verify-oscar-deprecation.sh"
+    review_date: "2026-04-04"
+    status: open
+
+  - id: DEBT-006
+    title: "audit-velero reports stale backups (115+ hours) and pending PVCs"
+    severity: high
+    class: infrastructure-drift
+    owner_repo: bbi-infrastructure
+    owner_layer: realization
+    failing_gate: scripts/qa/audit-velero.sh
+    evidence: "8 daily backup schedules stale >113h; clickhouse-data PVC pending"
+    current_risk: "Backup coverage gap; data loss risk if cluster event occurs"
+    decision: migrate
+    action: "Investigate Velero schedule health in bbi-infrastructure; fix or reclassify"
+    review_date: "2026-04-04"
+    status: open
+
+  - id: DEBT-007
+    title: "test-verify-ci-cache-policy and test-verify-verification-catalog timeout (rsync)"
+    severity: medium
+    class: test-environment-dependency
+    owner_repo: mereka-lms
+    owner_layer: proof
+    failing_gate: "scripts/qa/test-verify-ci-cache-policy.sh, scripts/qa/test-verify-verification-catalog.sh"
+    evidence: "Both scripts use rsync to create temp worktrees; timeout at 80-115s"
+    current_risk: "These tests cannot run in resource-constrained environments"
+    decision: tolerate
+    action: "Mark as CI-only (requires full worktree rsync); add timeout tolerance or skip marker"
+    review_date: "2026-04-04"
+    status: open
+
+  - id: DEBT-008
+    title: "verify-release-automation fails due to branding a11y sub-check"
+    severity: medium
+    class: cascading-failure
+    owner_repo: mereka-lms
+    owner_layer: proof
+    failing_gate: scripts/qa/verify-release-automation.sh
+    evidence: "Cascades from DEBT-003 (a11y regex bug)"
+    current_risk: "Release automation gate is red due to unrelated branding script bug"
+    decision: kill
+    action: "Fix DEBT-003 first; this resolves automatically"
+    review_date: "2026-04-04"
+    status: open
+
+  # ── Gemini-class structural debt ──────────────────────────────────────────
+
+  - id: DEBT-009
+    title: "Split-brain GitOps: app-repo overlays vs bbi-infrastructure overlays"
+    severity: high
+    class: ghost-truth-surface
+    owner_repo: mereka-lms
+    owner_layer: realization
+    evidence: "deploy/k8s/overlays/production/ and overlays/rke2-nonprod/ exist in mereka-lms but bbi-infrastructure is the live GitOps truth"
+    current_risk: "Agents edit the wrong overlay; changes never reach production"
+    decision: migrate
+    action: "Complete migration to bbi-infrastructure per ADR-025; freeze app-repo overlays"
+    review_date: "2026-04-04"
+    status: open
+
+  - id: DEBT-010
+    title: "Bashified release joins (manual SHA+digest+env join)"
+    severity: high
+    class: manual-critical-path
+    owner_repo: mereka-lms
+    owner_layer: promotion
+    evidence: "Release scripts still allow manual image tag joining without release-object validation"
+    current_risk: "Wrong image can be promoted; release-object gate can be bypassed via direct script invocation"
+    decision: kill
+    action: "Enforce release-object schema validation in all promotion paths"
+    review_date: "2026-04-04"
+    status: open
+
+  - id: DEBT-011
+    title: "Local-only ~/.factory/skills copies treated as evidence"
+    severity: medium
+    class: local-only-truth
+    owner_repo: mereka-lms
+    owner_layer: source
+    evidence: "Previous agent work propagated skills to ~/.factory/skills/ and mentioned this as deliverable"
+    current_risk: "Skills drift between repo canonical and local copies; agents on other machines have no skills"
+    decision: kill
+    action: "Repo .factory/skills/ is canonical; local copies are convenience only, never evidence"
+    review_date: "2026-04-04"
+    status: open
+
+  - id: DEBT-012
+    title: "Frozen Terraform directory still in repo"
+    severity: low
+    class: ghost-truth-surface
+    owner_repo: mereka-lms
+    owner_layer: source
+    evidence: "infrastructure/terraform/ exists but is frozen; DEPRECATION_LEDGER classifies as deprecated"
+    current_risk: "Agents may attempt to use Terraform for infrastructure changes"
+    decision: tolerate
+    action: "Already classified in DEPRECATION_LEDGER; remove when no inbound references remain"
+    review_date: "2026-04-04"
+    status: open
+
+  - id: DEBT-013
+    title: "Hand-maintained contracts without freshness checks"
+    severity: medium
+    class: contract-drift-risk
+    owner_repo: mereka-lms
+    owner_layer: proof
+    evidence: "config/change-surface-contracts.yaml, config/proof-gate-contract.yaml are hand-maintained"
+    current_risk: "Contracts can drift from reality without detection"
+    decision: migrate
+    action: "Added freshness verifiers for workflow map, ghost truth, source-of-truth, structural debt, domain proof, and eval runner contracts"
+    review_date: "2026-04-05"
+    status: resolved
+
+  - id: DEBT-014
+    title: "Main-branch protection does not yet match required governance contract"
+    severity: high
+    class: live-governance-gap
+    owner_repo: mereka-lms + bbi-infrastructure + platform-control-plane
+    owner_layer: proof
+    evidence: "mereka-lms and bbi-infrastructure still have enforce_admins=false; bbi-infrastructure/platform-control-plane have 0 required approvals; platform-control-plane has zero required status checks"
+    current_risk: "Direct pushes, missing reviews, or missing required checks can bypass contract enforcement on main"
+    decision: kill
+    action: "Applied config/branch-protection-contract.yaml to mereka-lms, bbi-infrastructure, and platform-control-plane; keep scripts/qa/verify-branch-protection-contract.sh --live green"
+    review_date: "2026-04-05"
+    status: resolved
+
+  - id: DEBT-015
+    title: "Shared team-skills roots can silently break loader integrity"
+    severity: high
+    class: shared-skill-loader
+    owner_repo: team-skills
+    owner_layer: source
+    evidence: "plugins/infra/skills/cost-management/SKILL.md has malformed frontmatter and shared roots contain alias-shadowed skill files"
+    current_risk: "Agents outside this repo can miss, shadow, or mis-load shared skills without any repo-local signal"
+    decision: kill
+    action: "Keep config/skill-roots.yaml plus scripts/qa/verify-skill-frontmatter-integrity.sh --profile shared green and fix shared-root frontmatter drift immediately"
+    review_date: "2026-04-05"
+    status: open

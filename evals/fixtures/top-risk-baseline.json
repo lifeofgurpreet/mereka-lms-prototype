@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "agent": {
+    "name": "baseline-fixture",
+    "mode": "golden"
+  },
+  "predictions": [
+    {"skill_name": "layer-triage", "eval_type": "trigger", "eval_id": 1, "predicted_skills": ["layer-triage"]},
+    {"skill_name": "layer-triage", "eval_type": "trigger", "eval_id": 2, "predicted_skills": []},
+    {"skill_name": "layer-triage", "eval_type": "trigger", "eval_id": 3, "predicted_skills": ["layer-triage"]},
+    {"skill_name": "layer-triage", "eval_type": "trigger", "eval_id": 4, "predicted_skills": []},
+    {"skill_name": "layer-triage", "eval_type": "trigger", "eval_id": 5, "predicted_skills": ["layer-triage"]},
+    {"skill_name": "layer-triage", "eval_type": "quality", "eval_id": 1, "selected_skills": ["layer-triage"], "response_text": "Broken surface: production / biji-biji / academy.biji-biji.com /dashboard\nOwner layer: realization or runtime\nSource authority file: deploy/k8s/tenancy/tenant-registry.yaml\nRendered/build artifact: generated/tenant-runtime/browser-matrix-production.json\nRealized/live artifact: Argo-applied routes for academy.biji-biji.com\nCurrent proof artifact: smoke-authenticated lane\nRegression guard to add: verify route proof before changing code."},
+
+    {"skill_name": "frontend-mfe-change", "eval_type": "trigger", "eval_id": 1, "predicted_skills": ["frontend-mfe-change"]},
+    {"skill_name": "frontend-mfe-change", "eval_type": "trigger", "eval_id": 2, "predicted_skills": ["frontend-mfe-change"]},
+    {"skill_name": "frontend-mfe-change", "eval_type": "trigger", "eval_id": 3, "predicted_skills": []},
+    {"skill_name": "frontend-mfe-change", "eval_type": "trigger", "eval_id": 4, "predicted_skills": ["frontend-mfe-change"]},
+    {"skill_name": "frontend-mfe-change", "eval_type": "quality", "eval_id": 1, "selected_skills": ["frontend-mfe-change"], "response_text": "Update assets/brand and the MFE brand package, then flow the change through infrastructure/tutor/plugins/mereka_lms.py. Run apply-patches.sh after updating the brand assets, and do not hand-edit tutor_env/ because it is generated."},
+
+    {"skill_name": "settings-configmap", "eval_type": "trigger", "eval_id": 1, "predicted_skills": ["settings-configmap"]},
+    {"skill_name": "settings-configmap", "eval_type": "trigger", "eval_id": 2, "predicted_skills": ["settings-configmap"]},
+    {"skill_name": "settings-configmap", "eval_type": "trigger", "eval_id": 3, "predicted_skills": []},
+    {"skill_name": "settings-configmap", "eval_type": "quality", "eval_id": 1, "selected_skills": ["settings-configmap"], "response_text": "Add the new host in infrastructure/tutor/plugins/mereka_lms.py, then run tutor config save and apply-patches.sh so the rendered settings stay authoritative."},
+
+    {"skill_name": "gitops-promotion", "eval_type": "trigger", "eval_id": 1, "predicted_skills": ["gitops-promotion"]},
+    {"skill_name": "gitops-promotion", "eval_type": "trigger", "eval_id": 2, "predicted_skills": ["gitops-promotion"]},
+    {"skill_name": "gitops-promotion", "eval_type": "trigger", "eval_id": 3, "predicted_skills": []},
+    {"skill_name": "gitops-promotion", "eval_type": "quality", "eval_id": 1, "selected_skills": ["gitops-promotion"], "response_text": "Merged truth is not proved truth. Check realized truth in GitOps and then run runtime proof before claiming the fix is live; runtime proof is the final gate."},
+
+    {"skill_name": "runtime-proof", "eval_type": "trigger", "eval_id": 1, "predicted_skills": ["runtime-proof"]},
+    {"skill_name": "runtime-proof", "eval_type": "trigger", "eval_id": 2, "predicted_skills": ["runtime-proof"]},
+    {"skill_name": "runtime-proof", "eval_type": "trigger", "eval_id": 3, "predicted_skills": []},
+    {"skill_name": "runtime-proof", "eval_type": "quality", "eval_id": 1, "selected_skills": ["runtime-proof"], "response_text": "Run route proof first, then the live-asset check, and only then the browser canary. Start with verify-rke2-tenant-routes.sh or the environment runtime proof script before any browser canary."}
+  ]
+}
