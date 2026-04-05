@@ -15828,7 +15828,8 @@
       "ci_binding": [],
       "ci_entrypoints": [],
       "env_scope": [
-        "dev"
+        "dev",
+        "staging"
       ],
       "kind": "verify",
       "mutability": "read-only",
