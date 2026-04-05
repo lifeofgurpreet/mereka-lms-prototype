@@ -745,5 +745,35 @@ class TestDomainFromEnvValue(unittest.TestCase):
         self.assertEqual(ms._domain_from_env_value(None), "")
 
 
+class TestTenantAuthnMicrofrontendUrlForHost(unittest.TestCase):
+    @patch.object(ms, "_mfe_base_url_for_host")
+    def test_uses_tenant_apps_host_when_available(self, mock_mfe_base):
+        mock_mfe_base.return_value = "https://apps.biji-biji.academyv2.mereka.dev"
+
+        resolved = ms.tenant_authn_microfrontend_url_for_host(
+            "biji-biji.academyv2.mereka.dev",
+            "https://apps.academyv2.mereka.dev/authn",
+        )
+
+        self.assertEqual(
+            resolved,
+            "https://apps.biji-biji.academyv2.mereka.dev/authn",
+        )
+
+    @patch.object(ms, "_mfe_base_url_for_host")
+    def test_falls_back_to_default_authn_url(self, mock_mfe_base):
+        mock_mfe_base.return_value = None
+
+        resolved = ms.tenant_authn_microfrontend_url_for_host(
+            "biji-biji.academyv2.mereka.dev",
+            "https://apps.academyv2.mereka.dev/authn/",
+        )
+
+        self.assertEqual(
+            resolved,
+            "https://apps.academyv2.mereka.dev/authn",
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

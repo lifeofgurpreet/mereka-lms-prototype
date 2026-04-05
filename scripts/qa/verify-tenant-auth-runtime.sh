@@ -113,7 +113,52 @@ except:
 done
 echo
 
-echo "--- Section 4: /dashboard unauthenticated redirect chain ---"
+echo "--- Section 4: homepage auth links ---"
+for tenant in bb sof; do
+  check
+  lms="${TENANT_LMS[$tenant]}"
+  expected_host="${TENANT_MFE[$tenant]}"
+
+  homepage_link_status=$(curl -sSk --max-time 10 "${lms}/" 2>/dev/null \
+    | python3 - "$expected_host" <<'PY'
+import re
+import sys
+
+expected_host = sys.argv[1]
+html = sys.stdin.read()
+
+sign_in = re.search(r'<a[^>]*class="[^"]*sign-in-btn[^"]*"[^>]*href="([^"]+)"', html)
+register = re.search(r'<a[^>]*class="[^"]*register-btn[^"]*"[^>]*href="([^"]+)"', html)
+
+issues = []
+for label, match, expected_path in (
+    ("sign-in", sign_in, "/authn/login"),
+    ("register", register, "/authn/register"),
+):
+    if not match:
+        issues.append(f"{label}=missing")
+        continue
+    href = match.group(1)
+    expected = f"https://{expected_host}{expected_path}"
+    if not href.startswith(expected):
+        issues.append(f"{label}={href}")
+
+if issues:
+    print("FAIL " + " ".join(issues))
+else:
+    print("PASS")
+PY
+)
+
+  if [[ "$homepage_link_status" == PASS* ]]; then
+    log_pass "[${tenant}] homepage auth links point to ${expected_host}"
+  else
+    log_fail "[${tenant}] homepage auth links should point to ${expected_host}, got: ${homepage_link_status#FAIL }"
+  fi
+done
+echo
+
+echo "--- Section 5: /dashboard unauthenticated redirect chain ---"
 for tenant in main bb sof; do
   check
   lms="${TENANT_LMS[$tenant]}"
