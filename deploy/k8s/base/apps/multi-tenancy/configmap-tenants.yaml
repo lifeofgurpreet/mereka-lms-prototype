@@ -43,7 +43,7 @@ data:
       alias_domains: []
     - slug: skillourfuture
       name: Skill Our Future
-      domain: skillourfuture.academy.mereka.io
+      domain: skillourfuture.academyv2.mereka.io
       enterprise_customer_uuid: PLACEHOLDER-SKILLOURFUTURE-UUID
       active: true
       alias_domains: []

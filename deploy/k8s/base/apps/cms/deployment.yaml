@@ -30,49 +30,49 @@ spec:
         - name: cms
           image: docker.io/overhangio/openedx:21.0.0-indigo
           env:
-          - name: SERVICE_VARIANT
-            value: cms
-          - name: DJANGO_SETTINGS_MODULE
-            value: cms.envs.tutor.production
-          - name: OTEL_SERVICE_NAME
-            value: cms
-          - name: OTEL_EXPORTER_OTLP_ENDPOINT
-            value: http://tempo.monitoring.svc.cluster.local:4318
-          - name: OTEL_EXPORTER_OTLP_PROTOCOL
-            value: http/protobuf
-          - name: OTEL_PROPAGATORS
-            value: tracecontext,baggage
-          - name: OTEL_TRACES_SAMPLER
-            value: parentbased_traceidratio
-          - name: OTEL_TRACES_SAMPLER_ARG
-            value: "0.1"
-          - name: MEREKA_PLATFORM_ADMIN_EMAILS
-            value: ""
-          - name: UWSGI_WORKERS
-            value: "2"
-          - name: MONGODB_HOST
-            valueFrom:
-              secretKeyRef:
-                name: openedx-secrets
-                key: FORUM_MONGODB_HOST
-          # Open edX Tutor settings expect JWT_SECRET_KEY (not JWT_SECRET_KEY_LMS).
-          - name: JWT_SECRET_KEY
-            valueFrom:
-              secretKeyRef:
-                name: openedx-secrets
-                key: JWT_SECRET_KEY_CMS
-          # Open edX Tutor settings expect XQUEUE_PASSWORD (not XQUEUE_LMS_PASSWORD).
-          - name: XQUEUE_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: openedx-secrets
-                key: XQUEUE_LMS_PASSWORD
-          # Open edX Tutor settings expect SOCIAL_AUTH_OIDC_SECRET (not OIDC_CLIENT_SECRET).
-          - name: SOCIAL_AUTH_OIDC_SECRET
-            valueFrom:
-              secretKeyRef:
-                name: openedx-secrets
-                key: OIDC_CLIENT_SECRET
+            - name: SERVICE_VARIANT
+              value: cms
+            - name: DJANGO_SETTINGS_MODULE
+              value: cms.envs.tutor.production
+            - name: OTEL_SERVICE_NAME
+              value: cms
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://tempo.monitoring.svc.cluster.local:4318
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: http/protobuf
+            - name: OTEL_PROPAGATORS
+              value: tracecontext,baggage
+            - name: OTEL_TRACES_SAMPLER
+              value: parentbased_traceidratio
+            - name: OTEL_TRACES_SAMPLER_ARG
+              value: "0.1"
+            - name: MEREKA_PLATFORM_ADMIN_EMAILS
+              value: ""
+            - name: UWSGI_WORKERS
+              value: "2"
+            - name: MONGODB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: openedx-secrets
+                  key: FORUM_MONGODB_HOST
+            # Open edX Tutor settings expect JWT_SECRET_KEY (not JWT_SECRET_KEY_LMS).
+            - name: JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openedx-secrets
+                  key: JWT_SECRET_KEY_CMS
+            # Open edX Tutor settings expect XQUEUE_PASSWORD (not XQUEUE_LMS_PASSWORD).
+            - name: XQUEUE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openedx-secrets
+                  key: XQUEUE_LMS_PASSWORD
+            # Open edX Tutor settings expect SOCIAL_AUTH_OIDC_SECRET (not OIDC_CLIENT_SECRET).
+            - name: SOCIAL_AUTH_OIDC_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: openedx-secrets
+                  key: OIDC_CLIENT_SECRET
           envFrom:
             - secretRef:
                 name: openedx-secrets
@@ -152,5 +152,5 @@ spec:
           configMap:
             name: openedx-theme-head-extra
             items:
-            - key: head-extra.html
-              path: head-extra.html
+              - key: head-extra.html
+                path: head-extra.html

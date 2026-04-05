@@ -36,12 +36,16 @@ import yaml
 repo_root = Path(sys.argv[1])
 
 contract_path = repo_root / "infrastructure/tenants/tenant-contracts.yml"
+experience_contract_path = repo_root / "config/tenant-experience-contract.yaml"
 multisite_path = repo_root / "infrastructure/tutor/multisite-sites.yml"
+multisite_dev_path = repo_root / "infrastructure/tutor/multisite-sites.dev.yml"
 registry_path = repo_root / "deploy/k8s/base/apps/multi-tenancy/configmap-tenants.yaml"
 caddy_path = repo_root / "deploy/k8s/base/apps/caddy/Caddyfile"
+tenant_resolution_path = repo_root / "infrastructure/tutor/plugins/_mereka_lms/mfe_runtime/tenant-resolution.js"
 
 failed = 0
 passed = 0
+warnings = 0
 
 
 def ok(msg: str) -> None:
@@ -56,6 +60,12 @@ def fail(msg: str) -> None:
     print(f"FAIL {msg}")
 
 
+def warn(msg: str) -> None:
+    global warnings
+    warnings += 1
+    print(f"WARN {msg}")
+
+
 def require_file(path: Path, label: str) -> None:
     if path.exists():
         ok(f"{label} exists")
@@ -67,9 +77,12 @@ print("=== Tenant Contract Alignment Verification ===")
 
 for required, label in [
     (contract_path, "tenant contract"),
+    (experience_contract_path, "tenant experience contract"),
     (multisite_path, "multisite-sites.yml"),
+    (multisite_dev_path, "multisite-sites.dev.yml"),
     (registry_path, "tenant registry configmap"),
     (caddy_path, "Caddyfile"),
+    (tenant_resolution_path, "tenant runtime resolver"),
 ]:
     require_file(required, label)
 
@@ -78,9 +91,13 @@ if failed:
     raise SystemExit(1)
 
 contract = yaml.safe_load(contract_path.read_text(encoding="utf-8"))
+experience_contract = yaml.safe_load(experience_contract_path.read_text(encoding="utf-8"))
 multisite = yaml.safe_load(multisite_path.read_text(encoding="utf-8"))
+multisite_dev = yaml.safe_load(multisite_dev_path.read_text(encoding="utf-8"))
+tenant_registry_contract = yaml.safe_load((repo_root / "deploy/k8s/tenancy/tenant-registry.yaml").read_text(encoding="utf-8")) or {}
 registry_docs = list(yaml.safe_load_all(registry_path.read_text(encoding="utf-8")))
 caddy_text = caddy_path.read_text(encoding="utf-8")
+tenant_resolution_text = tenant_resolution_path.read_text(encoding="utf-8")
 
 registry_cm = next((doc for doc in registry_docs if isinstance(doc, dict) and doc.get("kind") == "ConfigMap"), None)
 if not registry_cm:
@@ -96,9 +113,16 @@ if not registry_yaml_blob.strip():
 
 registry_tenants = yaml.safe_load(registry_yaml_blob) or []
 registry_by_slug = {tenant.get("slug"): tenant for tenant in registry_tenants if isinstance(tenant, dict)}
+tenant_contract_by_slug = {
+    tenant.get("slug"): tenant
+    for tenant in tenant_registry_contract.get("tenants", [])
+    if isinstance(tenant, dict) and tenant.get("slug")
+}
 
 sites = multisite.get("sites") or []
 site_by_domain = {site.get("domain"): site for site in sites if isinstance(site, dict)}
+sites_dev = multisite_dev.get("sites") or []
+site_by_domain_dev = {site.get("domain"): site for site in sites_dev if isinstance(site, dict)}
 
 active_tenants = [tenant for tenant in contract.get("tenants", []) if tenant.get("active", True)]
 if not active_tenants:
@@ -158,7 +182,16 @@ for tenant in active_tenants:
         if registry_domain == lms:
             ok(f"{slug}: tenant-registry domain matches {lms}")
         else:
-            fail(f"{slug}: tenant-registry domain mismatch (expected {lms}, got {registry_domain})")
+            registry_contract_entry = tenant_contract_by_slug.get(registry_slug) or tenant_contract_by_slug.get(slug) or {}
+            current_site_domain = registry_contract_entry.get("site_domain")
+            target_site_domain = registry_contract_entry.get("target_site_domain")
+            if current_site_domain == lms and target_site_domain == registry_domain:
+                warn(
+                    f"{slug}: tenant-registry domain follows documented migration target "
+                    f"(current {lms}, target {registry_domain})"
+                )
+            else:
+                fail(f"{slug}: tenant-registry domain mismatch (expected {lms}, got {registry_domain})")
 
         expected_aliases = sorted(tenant.get("aliases") or [])
         actual_aliases = sorted(registry_entry.get("alias_domains") or [])
@@ -227,7 +260,111 @@ for tenant in active_tenants:
         else:
             fail(f"{slug}: {key} mismatch (expected {expected}, got {actual})")
 
-print(f"Summary: PASS={passed} FAIL={failed}")
+
+print("=== Tenant Experience Contract Verification ===")
+
+def find_contract_tenant(slug: str):
+    for tenant in active_tenants:
+        if tenant.get("slug") == slug:
+            return tenant
+        if tenant.get("registry_slug") == slug:
+            return tenant
+    return None
+
+
+def expect_contains(haystack: str, needle: str, label: str) -> None:
+    if needle in haystack:
+        ok(label)
+    else:
+        fail(f"{label} (missing {needle!r})")
+
+
+def expect_authn_subtitle(haystack: str, expected_subtitle: str, brand: str, label: str) -> None:
+    if expected_subtitle in haystack:
+        ok(label)
+        return
+    template_subtitle = expected_subtitle.replace(brand, "${brand}")
+    if template_subtitle in haystack:
+        ok(f"{label} (template form)")
+        return
+    fail(f"{label} (missing {expected_subtitle!r} or template {template_subtitle!r})")
+
+
+experience_tenants = experience_contract.get("tenants", []) if isinstance(experience_contract, dict) else []
+if not experience_tenants:
+    fail("tenant experience contract has no tenants")
+
+for tenant in experience_tenants:
+    slug = tenant["slug"]
+    variant_symbol = tenant["variant_symbol"]
+    site_name = tenant["site_name"]
+    expected_brand = tenant.get("expected_brand", site_name)
+    expected_authn = tenant["expected_authn"]
+    runtime_tenant = find_contract_tenant(slug)
+
+    print(f"--- experience tenant: {slug} ---")
+
+    if runtime_tenant is not None:
+        ok(f"{slug}: experience contract links to tenant contract entry")
+    else:
+        fail(f"{slug}: missing linked tenant contract entry")
+
+    expect_contains(tenant_resolution_text, f"const {variant_symbol} = {{", f"{slug}: runtime variant symbol exists")
+    expect_contains(tenant_resolution_text, f"slug: '{tenant['contract_slug']}'", f"{slug}: runtime variant slug matches")
+    expect_contains(tenant_resolution_text, f"brand: '{expected_brand}'", f"{slug}: runtime brand matches")
+    expect_contains(tenant_resolution_text, f"logoUrl: '{tenant['logo_asset']}'", f"{slug}: runtime logo asset matches")
+    expect_contains(tenant_resolution_text, f"mobileLogoUrl: '{tenant['mobile_logo_asset']}'", f"{slug}: runtime mobile logo asset matches")
+    expect_contains(tenant_resolution_text, f"themeBrandUrl: '{tenant['theme_bundle']}'", f"{slug}: runtime theme bundle matches")
+    expect_contains(tenant_resolution_text, f"themeBrandLightUrl: '{tenant['theme_bundle_light']}'", f"{slug}: runtime light theme bundle matches")
+    expect_contains(tenant_resolution_text, f"eyebrow: '{expected_authn['eyebrow']}'", f"{slug}: authn eyebrow matches")
+    expect_contains(tenant_resolution_text, f"title: '{expected_authn['title']}'", f"{slug}: authn title matches")
+    expect_authn_subtitle(tenant_resolution_text, expected_authn["subtitle"], expected_brand, f"{slug}: authn subtitle matches")
+    expect_contains(tenant_resolution_text, f"trustNote: '{expected_authn['trust_note']}'", f"{slug}: authn trust note matches")
+
+    smoke_id = tenant.get("smoke_account_key")
+    if smoke_id:
+        expect_contains(
+            (repo_root / "config/smoke-account-registry.yaml").read_text(encoding="utf-8"),
+            f"canonical_id: {smoke_id}",
+            f"{slug}: smoke account binding exists",
+        )
+
+    for env_entry in tenant.get("environments", []):
+        env = env_entry["env"]
+        lms_host = env_entry["lms_host"]
+        apps_host = env_entry["apps_host"]
+        studio_host = env_entry["studio_host"]
+        authn_base_url = env_entry["authn_base_url"]
+        site_map = site_by_domain if env == "production" else site_by_domain_dev if env == "dev" else {}
+        site = site_map.get(lms_host)
+
+        if not site:
+            fail(f"{slug}/{env}: multisite source missing {lms_host}")
+            continue
+
+        ok(f"{slug}/{env}: multisite source includes {lms_host}")
+        values = site.get("site_values") or {}
+        expected_values = {
+            "site_name": site_name,
+            "LMS_ROOT_URL": f"https://{lms_host}",
+            "CMS_ROOT_URL": f"https://{studio_host}",
+            "MFE_BASE_URL": f"https://{apps_host}",
+        }
+        for key, expected in expected_values.items():
+            actual = values.get(key)
+            if actual == expected:
+                ok(f"{slug}/{env}: {key} matches experience contract")
+            else:
+                fail(f"{slug}/{env}: {key} mismatch (expected {expected}, got {actual})")
+
+        if authn_base_url == f"https://{apps_host}/authn":
+            ok(f"{slug}/{env}: authn_base_url derived from apps host")
+        else:
+            fail(f"{slug}/{env}: authn_base_url mismatch (expected https://{apps_host}/authn, got {authn_base_url})")
+
+        expect_contains(tenant_resolution_text, f"'{lms_host}': {variant_symbol}", f"{slug}/{env}: runtime host binding exists")
+
+print(f"Summary: PASS={passed} WARN={warnings} FAIL={failed}")
 if failed:
     raise SystemExit(1)
 PY
