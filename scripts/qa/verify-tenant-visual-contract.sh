@@ -30,44 +30,70 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# ── Domain configuration ──────────────────────────────────────────────────
+# ── Domain configuration (generated from canonical tenant experience contract) ─
 
+CONTRACT_FILE="$REPO_ROOT/config/tenant-experience-contract.yaml"
+
+# Map env name to contract env key
 case "$ENV" in
-  prod)
-    DOMAINS=("academyv2.mereka.io" "academy.biji-biji.com" "skillourfuture.academy.mereka.io")
-    ;;
-  dev)
-    DOMAINS=("academyv2.mereka.dev" "biji-biji.academyv2.mereka.dev" "skillourfuture.academyv2.mereka.dev")
-    ;;
-  staging)
-    DOMAINS=("staging.academyv2.mereka.io" "staging.academy.biji-biji.com" "staging.skillourfuture.academy.mereka.io")
-    ;;
+  prod) CONTRACT_ENV="production" ;;
+  dev|staging) CONTRACT_ENV="$ENV" ;;
   *) echo "Unknown env: $ENV" >&2; exit 1 ;;
 esac
 
-declare -A DOMAIN_MFE_HOST=(
-  ["academyv2.mereka.io"]="apps.academyv2.mereka.io"
-  ["academy.biji-biji.com"]="apps.academy.biji-biji.com"
-  ["skillourfuture.academy.mereka.io"]="apps.skillourfuture.academy.mereka.io"
-  ["academyv2.mereka.dev"]="apps.academyv2.mereka.dev"
-  ["biji-biji.academyv2.mereka.dev"]="apps.biji-biji.academyv2.mereka.dev"
-  ["skillourfuture.academyv2.mereka.dev"]="apps.skillourfuture.academyv2.mereka.dev"
-  ["staging.academyv2.mereka.io"]="staging.apps.academyv2.mereka.io"
-  ["staging.academy.biji-biji.com"]="apps.staging.academy.biji-biji.com"
-  ["staging.skillourfuture.academy.mereka.io"]="apps.staging.skillourfuture.academy.mereka.io"
-)
+# Generate all domain maps from the canonical contract
+eval "$(python3 - "$CONTRACT_FILE" "$CONTRACT_ENV" <<'PY'
+import sys
+import yaml
+from pathlib import Path
 
-declare -A DOMAIN_THEME_CSS=(
-  ["academyv2.mereka.io"]="/theme/mereka-brand.min.css"
-  ["academy.biji-biji.com"]="/theme/biji-biji-brand.min.css"
-  ["skillourfuture.academy.mereka.io"]="/theme/sof-brand.min.css"
-  ["academyv2.mereka.dev"]="/theme/mereka-brand.min.css"
-  ["biji-biji.academyv2.mereka.dev"]="/theme/biji-biji-brand.min.css"
-  ["skillourfuture.academyv2.mereka.dev"]="/theme/sof-brand.min.css"
-  ["staging.academyv2.mereka.io"]="/theme/mereka-brand.min.css"
-  ["staging.academy.biji-biji.com"]="/theme/biji-biji-brand.min.css"
-  ["staging.skillourfuture.academy.mereka.io"]="/theme/sof-brand.min.css"
-)
+contract_path = Path(sys.argv[1])
+target_env = sys.argv[2]
+
+contract = yaml.safe_load(contract_path.read_text(encoding="utf-8"))
+tenants = contract.get("tenants", [])
+
+domains = []
+mfe_map = []
+theme_map = []
+brand_map = []
+eyebrow_map = []
+
+for tenant in tenants:
+    slug = tenant.get("slug", "")
+    expected_brand = tenant.get("expected_brand", tenant.get("site_name", ""))
+    theme_bundle = tenant.get("theme_bundle", "")
+    expected_authn = tenant.get("expected_authn", {})
+    eyebrow = expected_authn.get("eyebrow", "")
+
+    for env_entry in tenant.get("environments", []):
+        if env_entry.get("env") != target_env:
+            continue
+        lms_host = env_entry.get("lms_host", "")
+        apps_host = env_entry.get("apps_host", "")
+        if not lms_host or not apps_host:
+            continue
+        domains.append(lms_host)
+        mfe_map.append(f'  ["{lms_host}"]="{apps_host}"')
+        theme_map.append(f'  ["{lms_host}"]="{theme_bundle}"')
+        brand_map.append(f'  ["{lms_host}"]="{expected_brand}"')
+        eyebrow_map.append(f'  ["{lms_host}"]="{eyebrow}"')
+
+print(f"DOMAINS=({' '.join(repr(d) for d in domains)})")
+print(f"declare -A DOMAIN_MFE_HOST=(")
+print("\n".join(mfe_map))
+print(")")
+print(f"declare -A DOMAIN_THEME_CSS=(")
+print("\n".join(theme_map))
+print(")")
+print(f"declare -A DOMAIN_EXPECTED_BRAND=(")
+print("\n".join(brand_map))
+print(")")
+print(f"declare -A DOMAIN_EXPECTED_EYEBROW=(")
+print("\n".join(eyebrow_map))
+print(")")
+PY
+)"
 
 PASS=0
 FAIL=0
@@ -300,29 +326,8 @@ echo ""
 
 echo "── AC-VU-002b: Browser DOM authn contract ──"
 
-declare -A DOMAIN_EXPECTED_BRAND=(
-  ["academyv2.mereka.io"]="Mereka Academy"
-  ["academy.biji-biji.com"]="Biji-Biji Academy"
-  ["skillourfuture.academy.mereka.io"]="Skill Our Future Academy"
-  ["academyv2.mereka.dev"]="Mereka Academy"
-  ["biji-biji.academyv2.mereka.dev"]="Biji-Biji Academy"
-  ["skillourfuture.academyv2.mereka.dev"]="Skill Our Future Academy"
-  ["staging.academyv2.mereka.io"]="Mereka Academy"
-  ["staging.academy.biji-biji.com"]="Biji-Biji Academy"
-  ["staging.skillourfuture.academy.mereka.io"]="Skill Our Future Academy"
-)
-
-declare -A DOMAIN_EXPECTED_EYEBROW=(
-  ["academyv2.mereka.io"]="Learning workspace"
-  ["academy.biji-biji.com"]="Community-powered learning"
-  ["skillourfuture.academy.mereka.io"]="Career acceleration workspace"
-  ["academyv2.mereka.dev"]="Learning workspace"
-  ["biji-biji.academyv2.mereka.dev"]="Community-powered learning"
-  ["skillourfuture.academyv2.mereka.dev"]="Career acceleration workspace"
-  ["staging.academyv2.mereka.io"]="Learning workspace"
-  ["staging.academy.biji-biji.com"]="Community-powered learning"
-  ["staging.skillourfuture.academy.mereka.io"]="Career acceleration workspace"
-)
+# DOMAIN_EXPECTED_BRAND and DOMAIN_EXPECTED_EYEBROW are now generated
+# from the canonical tenant experience contract at the top of this script.
 
 playwright_available() {
   ( cd "$REPO_ROOT/tests/e2e" && node -e "require.resolve('playwright')" ) >/dev/null 2>&1

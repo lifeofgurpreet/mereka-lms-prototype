@@ -271,7 +271,11 @@ except Exception:
 
 if enterprise_customer is not None:
     enterprise_uuid = str(enterprise_customer.uuid)
-    from openedx_tenant_cache.models import TenantSiteConfiguration, TenantSiteMapping
+    try:
+        from openedx_tenant_cache.models import TenantSiteConfiguration, TenantSiteMapping
+    except (ImportError, RuntimeError):
+        TenantSiteConfiguration = None
+        TenantSiteMapping = None
 
     branding_config = {
         "logo_url": site_values.get("logo_image", ""),
@@ -310,76 +314,80 @@ if enterprise_customer is not None:
         "MEREKA_PUBLIC_FOOTER": default_footer,
     }
 
-    mapping = TenantSiteMapping.objects.filter(slug=slug).first()
-    if mapping is None:
-        mapping = TenantSiteMapping.objects.filter(
-            enterprise_customer_uuid=enterprise_customer.uuid
-        ).first()
-
-    if mapping is None:
-        mapping = TenantSiteMapping.objects.create(
-            enterprise_customer_uuid=enterprise_customer.uuid,
-            site=site,
-            slug=slug,
-            name=name,
-            is_active=True,
-            branding_config=branding_config,
-        )
-        tenant_mapping_action = "CREATED"
+    if TenantSiteMapping is None:
+        tenant_mapping_action = "SKIPPED (openedx_tenant_cache not installed)"
+        tenant_config_action = "SKIPPED"
     else:
-        mapping_action_changed = False
-        if mapping.enterprise_customer_uuid != enterprise_customer.uuid:
-            mapping.enterprise_customer_uuid = enterprise_customer.uuid
-            mapping_action_changed = True
-        if mapping.site_id != site.id:
-            mapping.site = site
-            mapping_action_changed = True
-        if mapping.slug != slug:
-            mapping.slug = slug
-            mapping_action_changed = True
-        if mapping.name != name:
-            mapping.name = name
-            mapping_action_changed = True
-        if not mapping.is_active:
-            mapping.is_active = True
-            mapping_action_changed = True
-        if mapping.branding_config != branding_config:
-            mapping.branding_config = branding_config
-            mapping_action_changed = True
-        if mapping_action_changed:
-            mapping.save()
-            tenant_mapping_action = "UPDATED"
-        else:
-            tenant_mapping_action = "UNCHANGED"
+        mapping = TenantSiteMapping.objects.filter(slug=slug).first()
+        if mapping is None:
+            mapping = TenantSiteMapping.objects.filter(
+                enterprise_customer_uuid=enterprise_customer.uuid
+            ).first()
 
-    tenant_config, tenant_config_created = TenantSiteConfiguration.objects.get_or_create(
-        tenant=mapping,
-        defaults={
-            "values": tenant_values,
-            "mfe_config": tenant_mfe_config,
-            "is_active": True,
-        },
-    )
-    if tenant_config_created:
-        tenant_config_action = "CREATED"
-    else:
-        merged_values = dict(tenant_config.values or {})
-        merged_values.update(tenant_values)
-        merged_mfe = dict(tenant_config.mfe_config or {})
-        merged_mfe.update(tenant_mfe_config)
-        tenant_config_changed = (
-            merged_values != (tenant_config.values or {})
-            or merged_mfe != (tenant_config.mfe_config or {})
-            or not tenant_config.is_active
-        )
-        if tenant_config_changed:
-            tenant_config.values = merged_values
-            tenant_config.mfe_config = merged_mfe
-            tenant_config.is_active = True
-            tenant_config.save()
-            tenant_config_action = "UPDATED"
+        if mapping is None:
+            mapping = TenantSiteMapping.objects.create(
+                enterprise_customer_uuid=enterprise_customer.uuid,
+                site=site,
+                slug=slug,
+                name=name,
+                is_active=True,
+                branding_config=branding_config,
+            )
+            tenant_mapping_action = "CREATED"
         else:
-            tenant_config_action = "UNCHANGED"
+            mapping_action_changed = False
+            if mapping.enterprise_customer_uuid != enterprise_customer.uuid:
+                mapping.enterprise_customer_uuid = enterprise_customer.uuid
+                mapping_action_changed = True
+            if mapping.site_id != site.id:
+                mapping.site = site
+                mapping_action_changed = True
+            if mapping.slug != slug:
+                mapping.slug = slug
+                mapping_action_changed = True
+            if mapping.name != name:
+                mapping.name = name
+                mapping_action_changed = True
+            if not mapping.is_active:
+                mapping.is_active = True
+                mapping_action_changed = True
+            if mapping.branding_config != branding_config:
+                mapping.branding_config = branding_config
+                mapping_action_changed = True
+            if mapping_action_changed:
+                mapping.save()
+                tenant_mapping_action = "UPDATED"
+            else:
+                tenant_mapping_action = "UNCHANGED"
+
+        tenant_config, tenant_config_created = TenantSiteConfiguration.objects.get_or_create(
+            tenant=mapping,
+            defaults={
+                "values": tenant_values,
+                "mfe_config": tenant_mfe_config,
+                "is_active": True,
+            },
+        )
+        if tenant_config_created:
+            tenant_config_action = "CREATED"
+        else:
+            merged_values = dict(tenant_config.values or {})
+            merged_values.update(tenant_values)
+            merged_mfe = dict(tenant_config.mfe_config or {})
+            merged_mfe.update(tenant_mfe_config)
+            tenant_config_changed = (
+                merged_values != (tenant_config.values or {})
+                or merged_mfe != (tenant_config.mfe_config or {})
+                or not tenant_config.is_active
+            )
+            if tenant_config_changed:
+                tenant_config.values = merged_values
+                tenant_config.mfe_config = merged_mfe
+                tenant_config.is_active = True
+                tenant_config.save()
+                tenant_config_action = "UPDATED"
+            else:
+                tenant_config_action = "UNCHANGED"
 
 result = {
     "tenant": slug,
@@ -397,15 +405,12 @@ result = {
 print(json.dumps(result))
 PYEOF
 
-    local PY_CONTENT
-    PY_CONTENT=$(cat "$PY_SCRIPT")
-    rm -f "$PY_SCRIPT"
-
     local RESULT
-    RESULT=$(kubectl exec -n "$NAMESPACE" "$LMS_POD" -- \
-      python manage.py lms shell -c "$PY_CONTENT" 2>/dev/null \
+    RESULT=$(kubectl exec -i -n "$NAMESPACE" "$LMS_POD" -- \
+      python manage.py lms shell 2>/dev/null < "$PY_SCRIPT" \
       | grep '^{' | tail -1 \
       || echo "{\"tenant\":\"${SLUG}\",\"status\":\"FAIL\",\"error\":\"exec_failed\"}")
+    rm -f "$PY_SCRIPT"
 
     echo "  result: $RESULT"
     echo ""
