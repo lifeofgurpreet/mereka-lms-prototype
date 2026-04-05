@@ -9,6 +9,7 @@
 from django.conf import settings
 from django.utils.translation import gettext as _
 
+from lms.envs.tutor.mereka_multisite import tenant_authn_microfrontend_url_for_host
 from openedx.core.djangoapps.site_configuration import helpers as config_helpers
 from openedx.core.djangoapps.user_authn.toggles import should_redirect_to_authn_microfrontend
 %>
@@ -20,7 +21,15 @@ from openedx.core.djangoapps.user_authn.toggles import should_redirect_to_authn_
   can_discover_courses = settings.FEATURES.get('ENABLE_COURSE_DISCOVERY')
   allow_public_account_creation = static.get_value('ALLOW_PUBLIC_ACCOUNT_CREATION', settings.FEATURES.get('ALLOW_PUBLIC_ACCOUNT_CREATION')) and settings.FEATURES.get('SHOW_REGISTRATION_LINKS', True)
   should_redirect_to_authn_mfe = should_redirect_to_authn_microfrontend()
-  tenant_authn_url = (config_helpers.get_value('AUTHN_MICROFRONTEND_URL', settings.AUTHN_MICROFRONTEND_URL) or settings.AUTHN_MICROFRONTEND_URL).rstrip('/')
+  request_host = ""
+  try:
+    request_host = request.get_host() or ""
+  except Exception:
+    request_host = ""
+  tenant_authn_url = tenant_authn_microfrontend_url_for_host(
+    request_host,
+    config_helpers.get_value('AUTHN_MICROFRONTEND_URL', settings.AUTHN_MICROFRONTEND_URL) or settings.AUTHN_MICROFRONTEND_URL,
+  )
 %>
 <nav class="nav-links" aria-label=${_("Supplemental Links")}>
   <div class="main">

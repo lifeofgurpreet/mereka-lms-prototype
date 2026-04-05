@@ -301,6 +301,26 @@ def _tenant_mfe_url(host: str, path: str, query: Optional[dict[str, str]] = None
     return url
 
 
+def tenant_authn_microfrontend_url_for_host(host: str, default_url: str) -> str:
+    """
+    Resolve the authn MFE base URL for the request host.
+
+    Anonymous LMS shell pages render outside the /api/mfe_config/v1 contract and
+    can fall back to the global settings.AUTHN_MICROFRONTEND_URL even when the
+    tenant's SiteConfiguration still has the correct MFE_BASE_URL. Prefer the
+    host-derived tenant apps origin when available, and only then fall back to
+    the caller-provided default URL.
+    """
+    try:
+        tenant_authn_url = _tenant_mfe_url(host, "/authn")
+    except Exception:
+        _log.exception("Failed to resolve tenant authn MFE URL for host %s", host)
+        tenant_authn_url = None
+    if tenant_authn_url:
+        return tenant_authn_url.rstrip("/")
+    return (default_url or "").strip().rstrip("/")
+
+
 def _dashboard_auth_redirect_url(host: str) -> Optional[str]:
     """
     Return the tenant apps-host authn entrypoint for learner home access.
