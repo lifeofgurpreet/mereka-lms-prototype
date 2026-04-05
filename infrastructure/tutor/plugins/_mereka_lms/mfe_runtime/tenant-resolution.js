@@ -57,6 +57,10 @@ const MEREKA_SITE_VARIANTS = {
   'academyv2.mereka.io': _MEREKA_ACADEMY,
   'academy.biji-biji.com': _BIJI_BIJI,
   'skillourfuture.academy.mereka.io': _SKILL_OUR_FUTURE,
+  // Staging hostnames
+  'staging.academyv2.mereka.io': _MEREKA_ACADEMY,
+  'staging.academy.biji-biji.com': _BIJI_BIJI,
+  'staging.skillourfuture.academy.mereka.io': _SKILL_OUR_FUTURE,
   // Dev hostnames (academyv2.mereka.dev zone)
   'academyv2.mereka.dev': _MEREKA_ACADEMY,
   'biji-biji.academyv2.mereka.dev': _BIJI_BIJI,

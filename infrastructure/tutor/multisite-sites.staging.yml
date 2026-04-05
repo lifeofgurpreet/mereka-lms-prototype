@@ -30,6 +30,46 @@ sites:
       favicon_path: mereka/images/favicon.ico
       homepage_banner_enabled: false
 
+  - domain: staging.academy.biji-biji.com
+    name: Biji-Biji Academy
+    orgs:
+      - BIJIBIJI
+    site_values:
+      domain: staging.academy.biji-biji.com
+      site_name: Biji-Biji Academy
+      platform_name: Biji-Biji Academy
+      LMS_ROOT_URL: https://staging.academy.biji-biji.com
+      CMS_ROOT_URL: https://studio.staging.academy.biji-biji.com
+      MFE_BASE_URL: https://apps.staging.academy.biji-biji.com
+      THEME_NAME: mereka
+      ENABLE_COMPREHENSIVE_THEMING: true
+      course_org_filter:
+        - BIJIBIJI
+      logo_image: https://staging.academy.biji-biji.com/static/mereka/images/biji-biji/logo-horizontal.svg
+      logo_url: /
+      favicon_path: mereka/images/favicon.ico
+      homepage_banner_enabled: false
+
+  - domain: staging.skillourfuture.academy.mereka.io
+    name: Skill Our Future
+    orgs:
+      - SKILLOURFUTURE
+    site_values:
+      domain: staging.skillourfuture.academy.mereka.io
+      site_name: Skill Our Future
+      platform_name: Skill Our Future
+      LMS_ROOT_URL: https://staging.skillourfuture.academy.mereka.io
+      CMS_ROOT_URL: https://studio.staging.skillourfuture.academy.mereka.io
+      MFE_BASE_URL: https://apps.staging.skillourfuture.academy.mereka.io
+      THEME_NAME: mereka
+      ENABLE_COMPREHENSIVE_THEMING: true
+      course_org_filter:
+        - SKILLOURFUTURE
+      logo_image: https://staging.skillourfuture.academy.mereka.io/static/mereka/images/skillourfuture/logo-horizontal.svg
+      logo_url: /
+      favicon_path: mereka/images/favicon.ico
+      homepage_banner_enabled: false
+
   - domain: staging.preview.academyv2.mereka.io
     name: Mereka Academy Preview
     orgs:

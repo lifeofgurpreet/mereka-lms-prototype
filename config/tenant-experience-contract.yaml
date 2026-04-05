@@ -7,11 +7,11 @@ scope:
     - authn-mfe-shell
   environments:
     - dev
+    - staging
     - production
   note: >
     Phase 1 covers the currently implemented tenant homepage/authn experience
-    contract. Staging tenant-specific source realization is tracked separately
-    and is intentionally not claimed here yet.
+    contract across dev, staging, and production environments.
 
 proof_defaults:
   proof_selectors:
@@ -52,6 +52,11 @@ tenants:
         apps_host: apps.academyv2.mereka.dev
         studio_host: studio.academyv2.mereka.dev
         authn_base_url: https://apps.academyv2.mereka.dev/authn
+      - env: staging
+        lms_host: staging.academyv2.mereka.io
+        apps_host: staging.apps.academyv2.mereka.io
+        studio_host: staging.studio.academyv2.mereka.io
+        authn_base_url: https://staging.apps.academyv2.mereka.io/authn
 
   - slug: biji-biji
     contract_slug: biji-biji
@@ -83,6 +88,11 @@ tenants:
         apps_host: apps.biji-biji.academyv2.mereka.dev
         studio_host: studio.biji-biji.academyv2.mereka.dev
         authn_base_url: https://apps.biji-biji.academyv2.mereka.dev/authn
+      - env: staging
+        lms_host: staging.academy.biji-biji.com
+        apps_host: apps.staging.academy.biji-biji.com
+        studio_host: studio.staging.academy.biji-biji.com
+        authn_base_url: https://apps.staging.academy.biji-biji.com/authn
 
   - slug: skillourfuture
     contract_slug: skillourfuture
@@ -114,3 +124,8 @@ tenants:
         apps_host: apps.skillourfuture.academyv2.mereka.dev
         studio_host: studio.skillourfuture.academyv2.mereka.dev
         authn_base_url: https://apps.skillourfuture.academyv2.mereka.dev/authn
+      - env: staging
+        lms_host: staging.skillourfuture.academy.mereka.io
+        apps_host: apps.staging.skillourfuture.academy.mereka.io
+        studio_host: studio.staging.skillourfuture.academy.mereka.io
+        authn_base_url: https://apps.staging.skillourfuture.academy.mereka.io/authn
