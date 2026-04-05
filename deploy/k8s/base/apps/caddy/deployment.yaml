@@ -47,6 +47,10 @@ spec:
             value: "sof.invalid"
           - name: STUDIO_HOST
             value: "studio.localhost"
+          - name: TENANT_BIJIBIJI_STUDIO_HOST
+            value: "studio-bijibiji.invalid"
+          - name: TENANT_SOF_STUDIO_HOST
+            value: "studio-sof.invalid"
           - name: DISCOVERY_HOST
             value: "discovery.localhost"
           - name: MFE_HOST

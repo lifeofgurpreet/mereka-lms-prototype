@@ -138,9 +138,10 @@ studio.localhost{$default_site_port} {
     }
 }
 
-# Studio/CMS - environment-specific domain (TLS via NGINX Ingress)
+# Studio/CMS - environment-specific domains (TLS via NGINX Ingress)
 # STUDIO_HOST is injected by the overlay (e.g. studio.academyv2.mereka.io).
-http://{$STUDIO_HOST} {
+# TENANT_*_STUDIO_HOST carry tenant-pattern Studio roots when active.
+http://{$STUDIO_HOST}, http://{$TENANT_BIJIBIJI_STUDIO_HOST:studio-bijibiji.invalid}, http://{$TENANT_SOF_STUDIO_HOST:studio-sof.invalid} {
     @favicon_matcher {
         path_regexp ^/favicon.ico$
     }

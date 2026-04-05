@@ -63,6 +63,11 @@ if [[ -z "$SINCE" ]]; then
   exit 1
 fi
 
+if [[ "${GITHUB_ACTIONS:-}" == "true" && "${STRICT_RUNTIME:-0}" != "1" && "${AUDIT_AUTHENTIK_POLICY_LIVE:-0}" != "1" ]]; then
+  echo "[SKIP] GitHub Actions static lane — set STRICT_RUNTIME=1 or AUDIT_AUTHENTIK_POLICY_LIVE=1 to run live Authentik policy audit"
+  exit 0
+fi
+
 if ! command -v kubectl >/dev/null 2>&1; then
   echo "[SKIP] kubectl not available — skipping cluster checks"
   exit 0

@@ -36,7 +36,7 @@ assert_not_contains() {
   fi
 }
 
-assert_contains_in_any() {
+assert_contains_any() {
   local needle="$1"
   local label="$2"
   shift 2
@@ -47,9 +47,9 @@ assert_contains_in_any() {
       return 0
     fi
   done
-  local first_file="$1"
-  fail "$label (missing '$needle' across canonical MFE source files; checked ${first_file#$REPO_ROOT/} and sibling partials)"
+  fail "$label (missing '$needle' in searched files)"
 }
+
 echo "=== Certificate Branding Verification ==="
 
 CSS_FILES=(
@@ -100,15 +100,21 @@ else
 fi
 
 if [[ -f "$MFE_SCSS" ]]; then
-  MFE_STYLE_FILES=("$MFE_SCSS" "$MFE_SCSS_DIR"/*.scss)
-  assert_contains_in_any ".mereka-progress-certificate-status" "MFE certificate slot class styling exists" "${MFE_STYLE_FILES[@]}"
-  assert_contains_in_any ".mereka-progress-certificate-status__header" "MFE certificate slot includes a structured readiness header" "${MFE_STYLE_FILES[@]}"
-  assert_contains_in_any ".mereka-certificate-readiness__steps" "MFE certificate slot includes a canonical readiness checklist" "${MFE_STYLE_FILES[@]}"
-  assert_contains_in_any ".mereka-progress-certificate-status__hint" "MFE progress certificate helper hint styling exists" "${MFE_STYLE_FILES[@]}"
-  assert_contains_in_any ".mereka-account-id-verification-hint__title" "Account verification hint has an explicit title style" "${MFE_STYLE_FILES[@]}"
-  assert_contains_in_any ".mereka-additional-profile-fields__item" "Additional profile fields render as structured readiness items" "${MFE_STYLE_FILES[@]}"
-  assert_contains_in_any ".profile-page .certificate" "Profile certificate cards use Mereka tokenized card styling" "${MFE_STYLE_FILES[@]}"
-  assert_contains_in_any ".profile-page .certificate-type-illustration" "Profile certificate illustration shell is themed" "${MFE_STYLE_FILES[@]}"
+  MFE_THEME_SOURCES=("$MFE_SCSS")
+  if [[ -d "$MFE_SCSS_DIR" ]]; then
+    while IFS= read -r partial; do
+      MFE_THEME_SOURCES+=("$partial")
+    done < <(find "$MFE_SCSS_DIR" -type f -name '*.scss' | sort)
+  fi
+
+  assert_contains_any ".mereka-progress-certificate-status" "MFE certificate slot class styling exists" "${MFE_THEME_SOURCES[@]}"
+  assert_contains_any ".mereka-progress-certificate-status__header" "MFE certificate slot includes a structured readiness header" "${MFE_THEME_SOURCES[@]}"
+  assert_contains_any ".mereka-certificate-readiness__steps" "MFE certificate slot includes a canonical readiness checklist" "${MFE_THEME_SOURCES[@]}"
+  assert_contains_any ".mereka-progress-certificate-status__hint" "MFE progress certificate helper hint styling exists" "${MFE_THEME_SOURCES[@]}"
+  assert_contains_any ".mereka-account-id-verification-hint__title" "Account verification hint has an explicit title style" "${MFE_THEME_SOURCES[@]}"
+  assert_contains_any ".mereka-additional-profile-fields__item" "Additional profile fields render as structured readiness items" "${MFE_THEME_SOURCES[@]}"
+  assert_contains_any ".profile-page .certificate" "Profile certificate cards use Mereka tokenized card styling" "${MFE_THEME_SOURCES[@]}"
+  assert_contains_any ".profile-page .certificate-type-illustration" "Profile certificate illustration shell is themed" "${MFE_THEME_SOURCES[@]}"
 else
   fail "MFE stylesheet missing: infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 fi

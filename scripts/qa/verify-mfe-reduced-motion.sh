@@ -8,7 +8,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 MFE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
-MFE_SCSS_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/scss"
+MFE_SCSS_ROOT="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe"
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -23,13 +23,6 @@ pass() { echo -e "${GREEN}[PASS]${NC} $1"; PASS=$((PASS + 1)); }
 fail() { echo -e "${RED}[FAIL]${NC} $1"; FAIL=$((FAIL + 1)); }
 warn() { echo -e "${YELLOW}[WARN]${NC} $1"; WARN=$((WARN + 1)); }
 
-find_mfe_scss_files() {
-  find "$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe" \
-    -type f \
-    -name '*.scss' \
-    | sort
-}
-
 echo "=== MFE Reduced-Motion Guard Verification ==="
 echo ""
 
@@ -40,11 +33,23 @@ if [[ ! -f "$MFE_SCSS" ]]; then
   exit 1
 fi
 
+if [[ ! -d "$MFE_SCSS_ROOT/scss" ]]; then
+  fail "MFE partial source directory missing: $MFE_SCSS_ROOT/scss"
+  echo ""
+  echo "PASS: $PASS | FAIL: $FAIL | WARN: $WARN"
+  exit 1
+fi
+
+collect_mfe_scss() {
+  printf '%s\n' "$MFE_SCSS"
+  find "$MFE_SCSS_ROOT/scss" -type f -name '*.scss' | sort
+}
+
 echo "--- Check 1: Guard block exists ---"
-if find_mfe_scss_files | xargs -r grep -q '@media (prefers-reduced-motion: no-preference)'; then
+if collect_mfe_scss | xargs grep -q '@media (prefers-reduced-motion: no-preference)'; then
   pass "Found prefers-reduced-motion guard block"
 else
-  fail "Missing @media (prefers-reduced-motion: no-preference) guard block"
+  fail "Missing @media (prefers-reduced-motion: no-preference) guard block across MFE stylesheet sources"
 fi
 
 echo "--- Check 2: transform rules are guarded ---"
@@ -53,15 +58,17 @@ import json, sys
 import re
 from pathlib import Path
 
+theme_root = Path(sys.argv[1]) / "infrastructure/tutor/themes/mereka/mfe"
+paths = [theme_root / "mereka.scss", *sorted((theme_root / "scss").glob("*.scss"))]
+
+stack = []
 violations = []
 transform_count = 0
 guard_depth_hits = 0
 
-root = Path(sys.argv[1]) / "infrastructure/tutor/themes/mereka/mfe"
-for path in sorted(root.rglob("*.scss")):
+for path in paths:
     lines = path.read_text(encoding="utf-8").splitlines()
     stack = []
-
     for i, raw in enumerate(lines, start=1):
         s = raw.strip()
         if s.startswith("//") or s.startswith("/*") or s.startswith("*"):
@@ -84,7 +91,7 @@ for path in sorted(root.rglob("*.scss")):
             if "motion_ok" in stack:
                 guard_depth_hits += 1
             else:
-                violations.append({"file": str(path), "line": i, "text": s})
+                violations.append({"file": str(path.relative_to(theme_root.parent.parent.parent.parent)), "line": i, "text": s})
 
         closes = raw.count("}")
         for _ in range(closes):

@@ -78,15 +78,17 @@ _check_host() {
   # $2 is a label hint (unused in logic but kept for call-site readability)
   local critical="${3:-true}"
 
-  local http_code
+  local http_code body_file body_bytes
+  body_file="$(mktemp)"
   # curl -w "%{http_code}" always prints a 3-digit code (000 on failure) to stdout,
   # even when it exits non-zero. Capture stdout directly; do not append a fallback
   # via || echo because that would double the output on connection errors.
-  http_code=$(curl -s -o /dev/null -w "%{http_code}" \
+  http_code=$(curl -s -o "$body_file" -w "%{http_code}" \
     --max-time "$CURL_TIMEOUT" \
     "https://${host}/" 2>/dev/null; true)
   # Normalise: keep only the last 3 characters in case of any capture noise
   http_code="${http_code: -3}"
+  body_bytes=$(wc -c < "$body_file" 2>/dev/null || echo 0)
 
   local accepted="false"
   local verdict
@@ -104,8 +106,12 @@ _check_host() {
       verdict="OK_AUTH_WALL"
       ;;
     2[0-9][0-9]|3[0-9][0-9])
-      accepted="true"
-      verdict="OK"
+      if [[ "$http_code" == "200" && "$body_bytes" -eq 0 ]]; then
+        verdict="EMPTY_200"
+      else
+        accepted="true"
+        verdict="OK"
+      fi
       ;;
     *)
       verdict="UNEXPECTED_${http_code}"
@@ -115,15 +121,17 @@ _check_host() {
   HOST_ACCEPT_JSON="$(printf '%s' "$HOST_ACCEPT_JSON" | python3 -c "
 import json,sys
 d=json.load(sys.stdin)
-d.append({'host':'$host','http_code':'$http_code','accepted':$accepted,'verdict':'$verdict'})
+d.append({'host':'$host','http_code':'$http_code','body_bytes':$body_bytes,'accepted':$accepted,'verdict':'$verdict'})
 print(json.dumps(d))
 " 2>/dev/null || echo "$HOST_ACCEPT_JSON")"
 
   if [[ "$accepted" == "true" ]]; then
-    pass_ "Host: https://$host/ → $http_code ($verdict)"
+    pass_ "Host: https://$host/ → $http_code ($verdict, ${body_bytes} bytes)"
   else
-    fail_ "Host: https://$host/ → $http_code ($verdict)" "$critical"
+    fail_ "Host: https://$host/ → $http_code ($verdict, ${body_bytes} bytes)" "$critical"
   fi
+
+  rm -f "$body_file"
 }
 
 # ─────────────────────────────────────────────────────────────────────────────

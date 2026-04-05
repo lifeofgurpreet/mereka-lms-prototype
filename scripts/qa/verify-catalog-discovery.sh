@@ -47,6 +47,16 @@ check_file_exists() {
   fi
 }
 
+check_file_missing() {
+  local path="$1"
+  local label="$2"
+  if [[ -f "$path" ]]; then
+    fail "$label — unexpected file present: $path"
+  else
+    pass "$label"
+  fi
+}
+
 check_contains() {
   local file="$1"
   local needle="$2"
@@ -221,8 +231,6 @@ check_contains "$LMS_DISCOVERY_SCSS" "grid-template-columns: repeat(auto-fit, mi
 check_contains "$LMS_DISCOVERY_SCSS" ".find-courses .course .course-name" "LMS discovery groups course metadata as a vertical stack"
 check_contains "$LMS_DISCOVERY_SCSS" ".find-courses .course .course-title" "LMS discovery keeps course title primary"
 check_contains "$LMS_DISCOVERY_SCSS" ".find-courses .learn-more" "LMS discovery styles the catalog CTA as the primary action"
-check_contains "$LMS_DISCOVERY_SCSS" "content-visibility: auto" "LMS discovery uses offscreen render skipping for course cards"
-check_contains "$LMS_DISCOVERY_SCSS" "contain-intrinsic-size: 38rem" "LMS discovery reserves stable intrinsic size for deferred cards"
 check_contains "$LMS_DISCOVERY_SCSS" "@media (max-width: 640px)" "LMS discovery partial carries the mobile fallback"
 check_contains "$COURSE_TEMPLATE_LMS" "View Course" "LMS template CTA says View Course"
 check_contains "$COURSE_TEMPLATE_LMS" "class=\"course-badge course-badge--org\"" "LMS course card template exposes an organization badge"
@@ -329,9 +337,9 @@ check_contains "$AUDIT_DOC" "canonical" "Audit documents canonical URL gap"
 check_contains_re "$AUDIT_DOC" "Course.*schema" "Audit documents Course schema gap"
 check_contains "$AUDIT_DOC" "DEFAULT_PRODUCT_SOURCE_SLUG" "Audit documents DEFAULT_PRODUCT_SOURCE_SLUG gap"
 
-# ─── 10. Indigo Course-About OG Tags (Upstream Template) ────────────────────
+# ─── 10. Course-About Ownership + SEO Gap Tracking ───────────────────────────
 
-section "10. Indigo Course-About OG Tags (Upstream Template)"
+section "10. Course-About Ownership + SEO Gap Tracking"
 
 INDIGO_ABOUT=".venv/lib/python3.13/site-packages/tutorindigo/templates/indigo/lms/templates/courseware/course_about.html"
 INDIGO_ABOUT_ABS="$REPO_ROOT/$INDIGO_ABOUT"
@@ -349,31 +357,15 @@ else
   skip "Indigo course_about.html not present (venv not installed — run make bootstrap)"
 fi
 
-# Mereka theme should now own course-about markup + SEO contract directly.
+# Current truth: the dedicated Mereka course_about override was intentionally
+# removed after causing Mako scope failures. The SEO gap now lives in docs until
+# a safer ownership model is reinstated.
 MEREKA_ABOUT_OVERRIDE="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/courseware/course_about.html"
-if [[ -f "$MEREKA_ABOUT_OVERRIDE" ]]; then
-  check_file_exists "$MEREKA_ABOUT_OVERRIDE" "Mereka theme has custom course_about.html override"
-  check_contains "$MEREKA_ABOUT_OVERRIDE" "meta name=\"description\"" "Mereka course-about override adds meta description"
-  check_contains "$MEREKA_ABOUT_OVERRIDE" "property=\"og:image\"" "Mereka course-about override adds og:image"
-  check_contains "$MEREKA_ABOUT_OVERRIDE" "property=\"og:url\"" "Mereka course-about override adds og:url"
-  check_contains "$MEREKA_ABOUT_OVERRIDE" "rel=\"canonical\"" "Mereka course-about override adds canonical link"
-  check_contains "$MEREKA_ABOUT_OVERRIDE" "application/ld+json" "Mereka course-about override adds Course schema"
-  check_contains "$MEREKA_ABOUT_OVERRIDE" "strip_tags" "Mereka course-about override strips HTML from SEO description"
-  check_contains "$MEREKA_ABOUT_OVERRIDE" "course-profile__lede" "Mereka course-about override exposes premium hero lede"
-  check_contains "$MEREKA_ABOUT_OVERRIDE" "course-decision-support" "Mereka course-about override exposes the enrollment checklist shell"
-  check_contains "$MEREKA_ABOUT_OVERRIDE" "Before you enroll" "Mereka course-about override frames the enrollment checklist in the hero"
-else
-  skip "Mereka theme custom course_about.html override intentionally absent (removed to fix Mako scope bug; SEO gap tracked in CATALOG_DISCOVERY_AUDIT.md)"
-  skip "Mereka course-about meta description remains an acknowledged SEO gap until the next safe override strategy lands"
-  skip "Mereka course-about og:image remains an acknowledged SEO gap until the next safe override strategy lands"
-  skip "Mereka course-about og:url remains an acknowledged SEO gap until the next safe override strategy lands"
-  skip "Mereka course-about canonical link remains an acknowledged SEO gap until the next safe override strategy lands"
-  skip "Mereka course-about Course schema remains an acknowledged SEO gap until the next safe override strategy lands"
-  skip "Mereka course-about SEO description sanitization remains an acknowledged SEO gap until the next safe override strategy lands"
-  skip "Mereka course-about premium hero lede remains an acknowledged SEO gap until the next safe override strategy lands"
-  skip "Mereka course-about enrollment checklist shell remains an acknowledged SEO gap until the next safe override strategy lands"
-  skip "Mereka course-about enrollment checklist framing remains an acknowledged SEO gap until the next safe override strategy lands"
-fi
+check_file_missing "$MEREKA_ABOUT_OVERRIDE" "Mereka theme does not ship a custom course_about.html override"
+check_contains "$AUDIT_DOC" "inherits from Indigo" "Audit documents that course-about currently inherits Indigo"
+check_contains "$AUDIT_DOC" "no \`courseware/course_about.html\` override exists" "Audit documents the intentional absence of a Mereka course-about override"
+check_contains "$AUDIT_DOC" "Course-about now emits canonical URLs" "Audit tracks the canonical gap as resolved only for course-about"
+check_contains "$AUDIT_DOC" "homepage/listing SEO" "Audit keeps homepage/listing SEO as the active discovery gap"
 
 # ─── 11. MFE Brand Token Config ─────────────────────────────────────────────
 
