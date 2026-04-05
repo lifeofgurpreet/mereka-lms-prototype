@@ -118,14 +118,15 @@ for tenant in bb sof; do
   check
   lms="${TENANT_LMS[$tenant]}"
   expected_host="${TENANT_MFE[$tenant]}"
+  homepage_html="$(curl -sSk --max-time 10 "${lms}/" 2>/dev/null || true)"
 
-  homepage_link_status=$(curl -sSk --max-time 10 "${lms}/" 2>/dev/null \
-    | python3 - "$expected_host" <<'PY'
+  homepage_link_status=$(HOMEPAGE_HTML="$homepage_html" python3 - "$expected_host" <<'PY'
 import re
+import os
 import sys
 
 expected_host = sys.argv[1]
-html = sys.stdin.read()
+html = os.environ.get("HOMEPAGE_HTML", "")
 
 sign_in = re.search(r'<a[^>]*class="[^"]*sign-in-btn[^"]*"[^>]*href="([^"]+)"', html)
 register = re.search(r'<a[^>]*class="[^"]*register-btn[^"]*"[^>]*href="([^"]+)"', html)
