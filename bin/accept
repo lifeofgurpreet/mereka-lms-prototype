@@ -9,6 +9,7 @@ Usage: bin/accept <lane> [options]
 
 Lanes:
   runtime-routing   Tenant LMS/apps/studio/footer runtime acceptance
+  identity-session  Tenant cookie/session/SSO/auth-redirect acceptance
 EOF
 }
 
@@ -23,6 +24,9 @@ shift
 case "$LANE" in
   runtime-routing)
     exec "$REPO_ROOT/scripts/acceptance/runtime-routing.sh" "$@"
+    ;;
+  identity-session)
+    exec "$REPO_ROOT/scripts/acceptance/identity-session.sh" "$@"
     ;;
   -h|--help)
     usage
