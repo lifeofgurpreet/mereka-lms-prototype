@@ -1,0 +1,80 @@
+# Ghost Truth Surfaces — paths that look live but are not canonical truth
+---
+schema_version: "1.0"
+
+surfaces:
+  - id: app-repo-production-overlays
+    repo: mereka-lms
+    path: "deploy/k8s/overlays/production/**"
+    path_hint: "deploy/k8s/overlays/production"
+    class: ghost
+    must_exist: true
+    canonical_source:
+      repo: bbi-infrastructure
+      path: "apps/mereka-lms/overlays/prod/**"
+  - id: app-repo-staging-overlays
+    repo: mereka-lms
+    path: "deploy/k8s/overlays/staging/**"
+    path_hint: "deploy/k8s/overlays/staging"
+    class: ghost
+    must_exist: true
+    canonical_source:
+      repo: bbi-infrastructure
+      path: "apps/mereka-lms/overlays/staging/**"
+  - id: app-repo-rke2-overlays
+    repo: mereka-lms
+    path: "deploy/k8s/overlays/rke2-nonprod/**"
+    path_hint: "deploy/k8s/overlays/rke2-nonprod"
+    class: ghost
+    must_exist: true
+    canonical_source:
+      repo: bbi-infrastructure
+      path: "apps/mereka-lms/overlays/profiles/**"
+  - id: frozen-terraform
+    repo: mereka-lms
+    path: "infrastructure/terraform/**"
+    path_hint: "infrastructure/terraform"
+    class: frozen
+    must_exist: true
+    canonical_source:
+      repo: bbi-infrastructure
+      path: "platform/terraform/**"
+  - id: local-factory-skills
+    repo: local-home
+    path: "~/.factory/skills/**"
+    path_hint: "~/.factory/skills"
+    class: mirror-only
+    must_exist: false
+    reject_canonical_mentions: true
+    canonical_source:
+      repo: mereka-lms
+      path: ".factory/skills/**"
+  - id: local-claude-skills
+    repo: local-home
+    path: "~/.claude/skills/**"
+    path_hint: "~/.claude/skills"
+    class: mirror-only
+    must_exist: false
+    reject_canonical_mentions: true
+    canonical_source:
+      repo: mereka-lms
+      path: ".factory/skills/**"
+
+scan_paths:
+  - "config"
+  - "scripts/qa"
+  - ".github/PULL_REQUEST_TEMPLATE.md"
+
+forbidden_canonical_terms:
+  - canonical
+  - authoritative
+  - source of truth
+  - proof
+
+allowed_noncanonical_terms:
+  - mirror
+  - convenience
+  - local-only
+  - never evidence
+  - not evidence
+  - shadow

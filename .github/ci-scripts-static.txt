@@ -72,6 +72,12 @@ scripts/qa/verify-proof-gate-contract.sh
 scripts/qa/verify-ci-scope-contract.sh
 scripts/qa/verify-blind-agent-acceptance.sh
 scripts/qa/verify-skill-evals-schema.sh
+scripts/qa/verify-domain-proof-matrix.sh
+scripts/qa/verify-workflow-contract-map.sh
+scripts/qa/verify-ghost-truth-surfaces.sh
+scripts/qa/verify-source-of-truth-matrix.sh
+scripts/qa/verify-structural-debt-register.sh
+scripts/qa/verify-skill-eval-runner.sh
 scripts/qa/verify-openedx-audit-tracker-sync.sh
 scripts/qa/verify-tutor-config-path-contract.sh
 scripts/qa/test-build-validator-drift-evidence-bundle.sh

@@ -3,6 +3,7 @@
 - What changed:
 - Why:
 - Owner layer: <!-- source | build/render | promotion | realization | runtime | proof -->
+- Future-agent mistake prevented:
 
 ## Authority routing
 

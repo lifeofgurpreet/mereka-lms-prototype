@@ -1,0 +1,96 @@
+# Domain Proof Matrix — machine-readable surface scoring contract
+#
+# Builds a scoreboard of active tenant/domain proof units and classifies them
+# by blocker class: secrets, ci, promotion, runtime.
+---
+schema_version: "1.0"
+
+inputs:
+  tenant_registry: "deploy/k8s/tenancy/tenant-registry.yaml"
+  smoke_registry: "deploy/k8s/tenancy/smoke-account-registry.yaml"
+  dns_records:
+    - environment: production
+      file: "infrastructure/cloudflare/records.json"
+    - environment: staging
+      file: "infrastructure/cloudflare/records.json"
+    - environment: dev
+      file: "infrastructure/cloudflare/records.mereka-dev.json"
+    - environment: profiles-dev
+      file: "infrastructure/cloudflare/records.mereka-dev.json"
+  browser_matrices:
+    - environment: production
+      file: "generated/tenant-runtime/browser-matrix-production.json"
+    - environment: staging
+      file: "generated/tenant-runtime/browser-matrix-staging.json"
+    - environment: dev
+      file: "generated/tenant-runtime/browser-matrix-dev.json"
+    - environment: profiles-dev
+      file: "generated/tenant-runtime/browser-matrix-profiles-dev.json"
+
+environments:
+  production:
+    count_in_scoreboard: true
+    required_workflows:
+      - ".github/workflows/build-tutor-images.yml"
+      - ".github/workflows/release.yml"
+      - ".github/workflows/smoke-authenticated.yml"
+  staging:
+    count_in_scoreboard: true
+    required_workflows:
+      - ".github/workflows/smoke-authenticated.yml"
+  dev:
+    count_in_scoreboard: true
+    required_workflows:
+      - ".github/workflows/build-tutor-images.yml"
+      - ".github/workflows/smoke-authenticated.yml"
+  profiles-dev:
+    count_in_scoreboard: true
+    required_workflows:
+      - ".github/workflows/build-tutor-images.yml"
+      - ".github/workflows/smoke-authenticated.yml"
+  local:
+    count_in_scoreboard: false
+    required_workflows: []
+
+scoring:
+  count_statuses: [active]
+  blocker_priority: [secrets, ci, promotion, runtime]
+  success_statuses: [green, unknown, red]
+
+default_surface_rule:
+  proof_mode: metadata_only
+  smoke_account_role: none
+  smoke_account_required: false
+
+surface_rules:
+  - role: primary
+    proof_mode: browser_matrix
+    smoke_account_role: learner
+    smoke_account_required: true
+  - role: studio
+    proof_mode: browser_matrix
+    smoke_account_role: operator
+    smoke_account_required: true
+  - role: mfe
+    proof_mode: browser_matrix
+    smoke_account_role: learner
+    smoke_account_required: true
+  - role: enterprise-learner
+    proof_mode: metadata_only
+    smoke_account_role: learner
+    smoke_account_required: true
+  - role: enterprise-admin
+    proof_mode: metadata_only
+    smoke_account_id: smoke-enterprise-admin
+    smoke_account_required: true
+  - role: analytics
+    proof_mode: metadata_only
+    smoke_account_id: smoke-analytics-support
+    smoke_account_required: true
+  - role: auth
+    proof_mode: metadata_only
+    smoke_account_role: none
+    smoke_account_required: false
+
+outputs:
+  summary_json: "var/qa/domain-proof-summary.json"

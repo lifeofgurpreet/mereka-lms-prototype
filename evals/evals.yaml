@@ -5,6 +5,7 @@ schema_version: "1.0"
 
 skills:
   - skill_name: layer-triage
+    risk_tier: high
     trigger_evals:
       - id: 1
         prompt: "The login page on academyv2.mereka.io is showing a 502 error for the last 10 minutes"
@@ -34,6 +35,16 @@ skills:
           2. Identifies potential owner layers (realization or runtime)
           3. Produces an incident table before suggesting any fix
           4. Does NOT immediately suggest editing code
+        quality_contract:
+          required_substrings:
+            - "Broken surface"
+            - "Owner layer"
+            - "Regression guard to add"
+          required_any:
+            - ["realization", "runtime"]
+          forbidden_substrings:
+            - "edit the code immediately"
+            - "change the code right away"
         assertions:
           - "Output contains an incident table with 'Broken surface' field"
           - "Output identifies at least one candidate owner layer"
@@ -70,6 +81,7 @@ skills:
           - "Output mentions Argo or bbi-infrastructure for realization"
 
   - skill_name: frontend-mfe-change
+    risk_tier: high
     trigger_evals:
       - id: 1
         prompt: "I need to change the login page branding colors"
@@ -95,12 +107,21 @@ skills:
           2. Mentions mereka_lms.py plugin as the build path
           3. Says to run apply-patches.sh after changes
           4. Warns against editing tutor_env/ directly
+        quality_contract:
+          required_substrings:
+            - "assets/brand"
+            - "mereka_lms.py"
+            - "apply-patches.sh"
+            - "tutor_env/"
+          required_any: []
+          forbidden_substrings: []
         assertions:
           - "Output mentions assets/brand/ or @edx/brand"
           - "Output mentions apply-patches.sh"
           - "Output warns against editing tutor_env/"
 
   - skill_name: settings-configmap
+    risk_tier: high
     trigger_evals:
       - id: 1
         prompt: "I need to add CSRF_TRUSTED_ORIGINS for a new domain"
@@ -121,11 +142,18 @@ skills:
           1. Points to infrastructure/tutor/plugins/mereka_lms.py as source
           2. Describes the render path (tutor config save + apply-patches.sh)
           3. Mentions verifying the rendered output
+        quality_contract:
+          required_substrings:
+            - "mereka_lms.py"
+          required_any:
+            - ["tutor config save", "apply-patches.sh"]
+          forbidden_substrings: []
         assertions:
           - "Output mentions mereka_lms.py"
           - "Output mentions tutor config save or apply-patches.sh"
 
   - skill_name: gitops-promotion
+    risk_tier: high
     trigger_evals:
       - id: 1
         prompt: "How do I deploy the latest build to dev environment?"
@@ -146,11 +174,22 @@ skills:
           1. Distinguishes merged truth from proved truth
           2. Lists the four truths (branch, merged, realized, proved)
           3. Says to verify via runtime proof, not just merge status
+        quality_contract:
+          required_substrings:
+            - "merged"
+            - "proved truth"
+            - "runtime proof"
+          required_any: []
+          forbidden_substrings:
+            - "it is already live"
+            - "it's live now"
+            - "live because it's merged"
         assertions:
           - "Output mentions 'proved truth' or 'runtime proof'"
           - "Output does NOT say the fix is live just because it's merged"
 
   - skill_name: runtime-proof
+    risk_tier: high
     trigger_evals:
       - id: 1
         prompt: "I just deployed to dev, how do I verify it's working?"
@@ -171,6 +210,13 @@ skills:
           1. Specifies mandatory order: route proof first, then asset, then browser canary
           2. Lists the actual script names
           3. Warns against running browser canary before route proof passes
+        quality_contract:
+          required_substrings:
+            - "route proof"
+            - "browser canary"
+          required_any:
+            - ["verify-rke2-tenant-routes.sh", "verify-dev-runtime-proof.sh", "verify-staging-runtime-proof.sh"]
+          forbidden_substrings: []
         assertions:
           - "Output specifies route proof before browser canary"
           - "Output mentions verify-rke2-tenant-routes.sh or route proof script"
