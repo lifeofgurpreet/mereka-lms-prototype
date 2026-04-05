@@ -10,6 +10,7 @@ Usage: bin/accept <lane> [options]
 Lanes:
   runtime-routing   Tenant LMS/apps/studio/footer runtime acceptance
   identity-session  Tenant cookie/session/SSO/auth-redirect acceptance
+  tenant-branding   Tenant visual/branding/theme/authn-shell acceptance
 EOF
 }
 
@@ -27,6 +28,9 @@ case "$LANE" in
     ;;
   identity-session)
     exec "$REPO_ROOT/scripts/acceptance/identity-session.sh" "$@"
+    ;;
+  tenant-branding)
+    exec "$REPO_ROOT/scripts/acceptance/tenant-branding.sh" "$@"
     ;;
   -h|--help)
     usage

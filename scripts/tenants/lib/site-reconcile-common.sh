@@ -168,6 +168,7 @@ site_values = {
     "PRIMARY_COLOR": primary_color,
     "SECONDARY_COLOR": secondary_color,
     "ACCENT_COLOR": accent_color,
+    "TEXT_ON_PRIMARY": "#ffffff",
     "LMS_ROOT_URL": lms_url,
     "CMS_ROOT_URL": cms_url,
     "MFE_BASE_URL": mfe_url,
@@ -215,6 +216,7 @@ site_values = {
         "PRIMARY_COLOR": primary_color,
         "SECONDARY_COLOR": secondary_color,
         "ACCENT_COLOR": accent_color,
+        "TEXT_ON_PRIMARY": "#ffffff",
     },
 }
 
