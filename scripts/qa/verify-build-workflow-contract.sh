@@ -29,6 +29,15 @@ path_filter_has_entry() {
   local entry="$1"
   grep -qF -- "      - '$entry'" "$BUILD_WF"
 }
+extract_step_block() {
+  local block="$1"
+  local needle="$2"
+  awk -v needle="$needle" '
+    capture && $0 ~ /^      - / && index($0, needle) == 0 { exit }
+    index($0, needle) { capture=1 }
+    capture { print }
+  ' <<<"$block"
+}
 
 echo "=== Build Workflow Contract ==="
 
@@ -337,13 +346,15 @@ else
   fail "update-gitops job missing release object consumer validation gate"
 fi
 
-if grep -Eq '\./scripts/infra/release-openedx-gitops\.sh .*--release-object-json var/ci/release-object\.json' <<<"$UPDATE_GITOPS_BLOCK"; then
+PROMOTION_STEP_BLOCK="$(extract_step_block "$UPDATE_GITOPS_BLOCK" './scripts/infra/release-openedx-gitops.sh')"
+if [[ "$PROMOTION_STEP_BLOCK" == *'./scripts/infra/release-openedx-gitops.sh'* && "$PROMOTION_STEP_BLOCK" == *'--release-object-json var/ci/release-object.json'* ]]; then
   pass "update-gitops job binds release object into promotion step"
 else
   fail "update-gitops job missing release-object binding on promotion step"
 fi
 
-if grep -Eq '\./bin/lms-ops[[:space:]]+proof .*--release-object-json var/ci/release-object\.json' <<<"$UPDATE_GITOPS_BLOCK"; then
+PROOF_STEP_BLOCK="$(extract_step_block "$UPDATE_GITOPS_BLOCK" './bin/lms-ops proof')"
+if [[ "$PROOF_STEP_BLOCK" == *'./bin/lms-ops proof'* && "$PROOF_STEP_BLOCK" == *'--release-object-json var/ci/release-object.json'* ]]; then
   pass "update-gitops job binds release object into proof step"
 else
   fail "update-gitops job missing release-object binding on proof step"

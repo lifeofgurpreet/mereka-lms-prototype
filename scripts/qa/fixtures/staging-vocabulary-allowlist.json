@@ -107,6 +107,7 @@
     "scripts/qa/verify-video-pipeline.sh",
     "scripts/qa/visual-regression-test.sh",
     "scripts/release/emit-proof-envelope.sh",
+    "scripts/release/release_object_bindings.py",
     "scripts/release/smoke-by-service-wave.sh",
     "scripts/shared/config.sh",
     "scripts/shared/merge_tenant_branding.py",

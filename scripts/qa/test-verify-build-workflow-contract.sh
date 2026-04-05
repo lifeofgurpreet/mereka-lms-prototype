@@ -328,9 +328,29 @@ jobs:
             --mfe-digest sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb \
             --app-sha aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa >/dev/null
       - run: echo "push ghcr.io/biji-biji-initiative/mereka-lms/openedx:sha"
-      - run: ./scripts/infra/release-openedx-gitops.sh --target-env production --openedx-tag sha --mfe-tag sha --openedx-digest sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa --mfe-digest sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb --release-object-json var/ci/release-object.json --require-digests --app-repo "$GITHUB_WORKSPACE" --infra-repo "$GITHUB_WORKSPACE/bbi-infrastructure" --apply --commit --push
-      - run: ./bin/lms-ops proof --concern release-gate --lane prod --release-object-json var/ci/release-object.json --skip-cluster
-      - run: python3 ./scripts/release/release_object_bindings.py verify-proof-envelope --envelope-json var/proof/release-gate.json --release-object-json var/ci/release-object.json
+      - run: |
+          ./scripts/infra/release-openedx-gitops.sh \
+            --target-env production \
+            --openedx-tag sha \
+            --mfe-tag sha \
+            --openedx-digest sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \
+            --mfe-digest sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb \
+            --release-object-json var/ci/release-object.json \
+            --require-digests \
+            --app-repo "$GITHUB_WORKSPACE" \
+            --infra-repo "$GITHUB_WORKSPACE/bbi-infrastructure" \
+            --apply --commit --push
+      - run: |
+          ./bin/lms-ops proof \
+            --concern release-gate \
+            --lane prod \
+            --release-object-json var/ci/release-object.json \
+            --skip-cluster
+      - run: |
+          python3 ./scripts/release/release_object_bindings.py \
+            verify-proof-envelope \
+            --envelope-json var/proof/release-gate.json \
+            --release-object-json var/ci/release-object.json
       - uses: actions/upload-artifact@v4
         with:
           name: build-provenance
@@ -709,8 +729,29 @@ import sys
 p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
 text = p.read_text()
 text = text.replace(
-    '      - run: ./scripts/infra/release-openedx-gitops.sh --target-env production --openedx-tag sha --mfe-tag sha --openedx-digest sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa --mfe-digest sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb --release-object-json var/ci/release-object.json --require-digests --app-repo "$GITHUB_WORKSPACE" --infra-repo "$GITHUB_WORKSPACE/bbi-infrastructure" --apply --commit --push\n',
-    '      - run: ./scripts/infra/release-openedx-gitops.sh --target-env production --openedx-tag sha --mfe-tag sha --openedx-digest sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa --mfe-digest sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb --require-digests --app-repo "$GITHUB_WORKSPACE" --infra-repo "$GITHUB_WORKSPACE/bbi-infrastructure" --apply --commit --push\n',
+    '      - run: |\n'
+    '          ./scripts/infra/release-openedx-gitops.sh \\\n'
+    '            --target-env production \\\n'
+    '            --openedx-tag sha \\\n'
+    '            --mfe-tag sha \\\n'
+    '            --openedx-digest sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \\\n'
+    '            --mfe-digest sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb \\\n'
+    '            --release-object-json var/ci/release-object.json \\\n'
+    '            --require-digests \\\n'
+    '            --app-repo "$GITHUB_WORKSPACE" \\\n'
+    '            --infra-repo "$GITHUB_WORKSPACE/bbi-infrastructure" \\\n'
+    '            --apply --commit --push\n',
+    '      - run: |\n'
+    '          ./scripts/infra/release-openedx-gitops.sh \\\n'
+    '            --target-env production \\\n'
+    '            --openedx-tag sha \\\n'
+    '            --mfe-tag sha \\\n'
+    '            --openedx-digest sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \\\n'
+    '            --mfe-digest sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb \\\n'
+    '            --require-digests \\\n'
+    '            --app-repo "$GITHUB_WORKSPACE" \\\n'
+    '            --infra-repo "$GITHUB_WORKSPACE/bbi-infrastructure" \\\n'
+    '            --apply --commit --push\n',
 )
 p.write_text(text)
 PY
@@ -723,8 +764,17 @@ import sys
 p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
 text = p.read_text()
 text = text.replace(
-    '      - run: ./bin/lms-ops proof --concern release-gate --lane prod --release-object-json var/ci/release-object.json --skip-cluster\n',
-    '      - run: ./bin/lms-ops proof --concern release-gate --lane prod --skip-cluster\n',
+    '      - run: |\n'
+    '          ./bin/lms-ops proof \\\n'
+    '            --concern release-gate \\\n'
+    '            --lane prod \\\n'
+    '            --release-object-json var/ci/release-object.json \\\n'
+    '            --skip-cluster\n',
+    '      - run: |\n'
+    '          ./bin/lms-ops proof \\\n'
+    '            --concern release-gate \\\n'
+    '            --lane prod \\\n'
+    '            --skip-cluster\n',
 )
 p.write_text(text)
 PY
@@ -736,7 +786,15 @@ from pathlib import Path
 import sys
 p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
 text = p.read_text()
-text = text.replace('      - run: ./bin/lms-ops proof --concern release-gate --lane prod --release-object-json var/ci/release-object.json --skip-cluster\n', '')
+text = text.replace(
+    '      - run: |\n'
+    '          ./bin/lms-ops proof \\\n'
+    '            --concern release-gate \\\n'
+    '            --lane prod \\\n'
+    '            --release-object-json var/ci/release-object.json \\\n'
+    '            --skip-cluster\n',
+    '',
+)
 p.write_text(text)
 PY
 run_expect_fail "missing lms-ops proof emission is rejected"
@@ -747,7 +805,14 @@ from pathlib import Path
 import sys
 p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
 text = p.read_text()
-text = text.replace('      - run: python3 ./scripts/release/release_object_bindings.py verify-proof-envelope --envelope-json var/proof/release-gate.json --release-object-json var/ci/release-object.json\n', '')
+text = text.replace(
+    '      - run: |\n'
+    '          python3 ./scripts/release/release_object_bindings.py \\\n'
+    '            verify-proof-envelope \\\n'
+    '            --envelope-json var/proof/release-gate.json \\\n'
+    '            --release-object-json var/ci/release-object.json\n',
+    '',
+)
 p.write_text(text)
 PY
 run_expect_fail "missing proof-envelope release binding verification is rejected"
