@@ -46,7 +46,7 @@ links:
     - "specs/repository-structure_spec.md"
 ---
 
-# Human Summary
+## Human Summary
 
 ## What we're building
 
@@ -89,7 +89,7 @@ quality down to 240p on 1 Mbps connections
 - Subtitle tracks are available in at least English and Vietnamese for all
 courses with localized content
 
-# Agent Contract
+## Agent Contract
 
 ## Scope
 
@@ -106,7 +106,8 @@ courses with localized content
   - Video storage lifecycle (cold storage discounts, retention policies)
   - Mobile video optimization (low-bandwidth renditions, poster images)
   - Mux API secret management via Infisical/ExternalSecrets
-  - Provider abstraction layer for future migration to GCS+CDN if cost thresholds are exceeded
+  - Provider abstraction layer for future migration to GCS+CDN if cost
+    thresholds are exceeded
 
 - Out of scope:
   - DRM (Widevine/FairPlay) -- not justified at current scale ($100/month add-on)
@@ -406,7 +407,7 @@ instead of a broken player
 - [ ] AC-VPD-025: Given Mux API is unreachable, when the LMS page loads, then
 the page renders fully with video placeholder -- no 500 errors or blank pages
 
-### Observability
+### Operational Monitoring
 
 - [ ] AC-VPD-026: Given the Video Operations Dashboard in Grafana, when
 accessed, then it displays upload counts, processing queue depth, transcode
@@ -421,8 +422,8 @@ where learners pause or stop watching
 `video_delivery_minutes_monthly` is queried, then the value updates at least
 every 6 hours
 - [ ] AC-VPD-030: Given an alert rule for `video_transcode_success_rate`, when
-the rate drops below 95% for 6 hours, then a warning alert is sent to
-#ops-warnings Slack channel
+  the rate drops below 95% for 6 hours, then a warning alert is sent to the
+  `#ops-warnings` Slack channel
 
 ### Content Protection & Signed URLs
 
@@ -590,6 +591,7 @@ status transitions at `INFO` level
 ### Metrics
 
 **Upload & Transcoding Metrics**:
+
 - `video_upload_total` (counter): Total videos uploaded to Mux, labeled by
 `status` (success, failed, duplicate)
 - `video_upload_duration_seconds` (histogram): Time from upload initiation to
@@ -602,6 +604,7 @@ status, checked every 5 minutes
 (rate_limit, invalid_format, quota_exceeded, network_error)
 
 **Delivery & Playback Metrics**:
+
 - `video_delivery_minutes_monthly` (gauge): Current month's delivery minutes
 consumed (from Mux API or webhook), updated every 6 hours
 - `video_playback_start_count` (counter): Number of video play initiations,
@@ -619,12 +622,14 @@ bucketed at 0.5s, 1s, 2s, 3s, 5s
 `error_code` (403_forbidden, 404_not_found, network_timeout, codec_error)
 
 **CDN & Cache Metrics**:
+
 - `video_cdn_cache_hit_ratio` (gauge): CDN cache hit rate for HLS segments, per
 region, updated hourly
 - `video_manifest_request_latency_seconds` (histogram): Latency for `.m3u8`
 manifest requests, bucketed at 0.05s, 0.1s, 0.2s, 0.5s, 1s
 
 **Storage & Cost Metrics**:
+
 - `mux_storage_minutes` (gauge): Total video-minutes stored in Mux, refreshed
 daily via Mux API
 - `mux_storage_cost_usd_monthly` (gauge): Estimated monthly storage cost based
@@ -633,6 +638,7 @@ on cold storage discounts (40% at 30d, 60% at 90d)
 on minutes consumed (should remain $0 under 100K free tier)
 
 **API & Infrastructure Metrics**:
+
 - `mux_api_errors` (counter): Mux API error responses, labeled by `status_code`
 (429, 500, 503) and `endpoint` (/assets, /uploads, /playback-ids)
 - `mux_api_request_duration_seconds` (histogram): Mux API response time,
@@ -645,6 +651,7 @@ succeed, per 24h window
 ### Alerts
 
 **Cost & Quota Alerts** (severity: critical, route to #ops-alerts):
+
 - MUST alert when `video_delivery_minutes_monthly` exceeds 80,000 (80% of free
 tier, 3-month trailing average)
 - MUST alert when `video_delivery_minutes_monthly` exceeds 95,000 (approaching
@@ -655,6 +662,7 @@ free tier limit, immediate)
 minutes (upload backlog)
 
 **Playback Quality Alerts** (severity: warning, route to #ops-warnings):
+
 - SHOULD alert when `video_ttff_seconds` p95 exceeds 5 seconds for more than 15
 minutes (poor user experience)
 - SHOULD alert when `video_rebuffer_ratio` p95 exceeds 2% for more than 30
@@ -665,6 +673,7 @@ starts for >10 minutes (widespread issue)
 edge misconfiguration)
 
 **Upload & Transcoding Alerts** (severity: warning):
+
 - MUST alert when any Mux asset transitions to "errored" status (individual
 video failure)
 - MUST alert when `video_transcode_success_rate` drops below 95% over a 6-hour
@@ -673,6 +682,7 @@ window (systemic issue)
 minutes) for >1 hour (Mux API slowness)
 
 **API & Infrastructure Alerts** (severity: critical):
+
 - SHOULD alert when `mux_api_errors` rate exceeds 10 errors/hour (API
 instability)
 - MUST alert when `mux_api_errors` rate exceeds 50 errors/hour for >5 minutes
@@ -686,6 +696,7 @@ minutes (authentication slowdown)
 
 **Video Operations Dashboard** (Grafana,
 `infrastructure/monitoring/dashboards/video-operations.json`):
+
 - **Upload Health Panel**: `video_upload_total` by status
 (success/failed/duplicate), upload duration histogram, transcode success rate
 trend
@@ -700,6 +711,7 @@ for last 7 days
 
 **Video Engagement Dashboard** (Superset, integrated with Aspects analytics
 pipeline):
+
 - **Play Rate Panel**: Video play starts per course, per video, per
 day/week/month
 - **Completion Funnel Panel**: Play → 25% → 50% → 75% → 90% completion rates by
@@ -713,6 +725,7 @@ device type (from Video XBlock user agent)
 
 **Video Cost Dashboard** (Grafana,
 `infrastructure/monitoring/dashboards/video-cost.json`):
+
 - **Delivery Usage Panel**: `video_delivery_minutes_monthly` trend, free tier
 usage percentage (80K/95K thresholds marked), projected overage cost if
 threshold exceeded
@@ -724,6 +737,7 @@ GCS+CDN alternative at current usage levels
 minutes exceeds 80K (migration trigger per cost analysis)
 
 **Video Quality Dashboard** (Grafana, populated by Mux Data integration):
+
 - **Playback Performance Panel**: `video_ttff_seconds` p50/p95/p99,
 `video_startup_time_seconds` p95, rebuffer ratio trend
 - **CDN Performance Panel**: `video_cdn_cache_hit_ratio` by region, manifest
@@ -776,40 +790,51 @@ XBlock renders
 3. **Sync to K8s** via ExternalSecrets (verify `kubectl get secret
 mereka-lms-runtime-secrets -n mereka-lms -o json | jq .data`)
 4. **Implement server-side signed URL generation**:
-- Add Django view `/api/video/playback-token/<playback_id>/` that generates
-signed tokens
-   - Token expiry: 12 hours (configurable via `MUX_SIGNED_URL_EXPIRY_HOURS`)
-- Enforce enrollment check: `CourseEnrollment.objects.filter(user=request.user,
-course_id=course_key).exists()`
-5. **Update Video XBlock rendering** to:
-- Check if course is restricted (via `CourseMode` or
-`EnterpriseCustomer.enable_video_drm`)
-- If restricted: fetch signed playback token from `/api/video/playback-token/`
-via AJAX before initializing player
-   - If public: use public playback URL directly
-6. **Set Mux playback policies per asset**:
-   - For free courses: `playback_policy: "public"` (default, no token required)
-- For paid/restricted courses: `playback_policy: "signed"` (token required,
-enforced by Mux CDN)
-7. **Test enrollment-gated access**:
-- Verify unenrolled users receive 403 Forbidden from Mux when attempting
-playback with no token
-   - Verify enrolled users can play videos after token generation
-   - Verify tokens expire after 12 hours (test with manually backdated tokens)
-8. **Deploy behind feature flag**: `ENABLE_MUX_SIGNED_PLAYBACK` (default:
-`false`)
-- When `true`: all courses with `CourseMode` other than "honor" or "audit" use
-signed playback
-   - When `false`: all videos use public playback (backward compatible)
 
-1. **Domain restriction** (optional hardening):
+   - Add Django view `/api/video/playback-token/<playback_id>/` that generates
+     signed tokens
+   - Token expiry: 12 hours (configurable via
+     `MUX_SIGNED_URL_EXPIRY_HOURS`)
+   - Enforce enrollment check:
+     `CourseEnrollment.objects.filter(user=request.user, course_id=course_key).exists()`
+5. **Update Video XBlock rendering**:
+
+   - Check if course is restricted (via `CourseMode` or
+     `EnterpriseCustomer.enable_video_drm`)
+   - If restricted, fetch a signed playback token from
+     `/api/video/playback-token/` via AJAX before initializing the player
+   - If public, use the public playback URL directly
+
+6. **Set Mux playback policies per asset**:
+
+   - For free courses, use `playback_policy: "public"` (default, no token
+     required)
+   - For paid or restricted courses, use `playback_policy: "signed"` (token
+     required, enforced by Mux CDN)
+
+7. **Test enrollment-gated access**:
+
+   - Verify unenrolled users receive 403 Forbidden from Mux when attempting
+     playback with no token
+   - Verify enrolled users can play videos after token generation
+   - Verify tokens expire after 12 hours (test with manually backdated
+     tokens)
+
+8. **Deploy behind feature flag**: `ENABLE_MUX_SIGNED_PLAYBACK`
+   (default: `false`)
+
+   - When `true`, all courses with `CourseMode` other than `honor` or
+     `audit` use signed playback
+   - When `false`, all videos use public playback (backward compatible)
+
+9. **Domain restriction** (optional hardening):
 
    - Configure Mux playback policy to allow only `academyv2.mereka.io` and
      `academy.biji-biji.com` domains
    - Prevents video hotlinking from external sites (reduces unauthorized delivery
      costs)
 
-1. **Monitor signed URL performance**: Track
+10. **Monitor signed URL performance**: Track
    `signed_url_generation_duration_ms` and alert if p95 exceeds 500ms
 
 ### Feature flags
