@@ -139,15 +139,32 @@ if (
     )
 
 for name, content in (("lms", lms_settings), ("cms", cms_settings)):
-    required_tokens = [
-        "_mongodb_is_atlas = _mongodb_host_lower.startswith(\"mongodb+srv://\") or \".mongodb.net\" in _mongodb_host_lower",
-        "if _mongodb_is_atlas:",
-        "\"host\": MONGODB_HOST",
-        "\"ssl\": bool(_mongodb_is_atlas)",
-    ]
-    for token in required_tokens:
-        if token not in content:
-            errors.append(f"{name} settings missing token: {token}")
+    if "if _mongodb_is_atlas:" not in content:
+        errors.append(f"{name} settings missing token: if _mongodb_is_atlas:")
+    if "\"host\": MONGODB_HOST" not in content:
+        errors.append(f"{name} settings missing token: \"host\": MONGODB_HOST")
+    if "\"ssl\": bool(_mongodb_is_atlas)" not in content:
+        errors.append(f"{name} settings missing token: \"ssl\": bool(_mongodb_is_atlas)")
+
+    if name == "lms":
+        detection_variants = [
+            (
+                "def _is_mongodb_atlas_host(raw_value):",
+                "_mongodb_is_atlas = _is_mongodb_atlas_host(MONGODB_HOST)",
+            ),
+            (
+                "_mongodb_is_atlas = _mongodb_host_lower.startswith(\"mongodb+srv://\") or \".mongodb.net\" in _mongodb_host_lower",
+            ),
+        ]
+    else:
+        detection_variants = [
+            (
+                "_mongodb_is_atlas = _mongodb_host_lower.startswith(\"mongodb+srv://\") or \".mongodb.net\" in _mongodb_host_lower",
+            ),
+        ]
+
+    if not any(all(token in content for token in variant) for variant in detection_variants):
+        errors.append(f"{name} settings missing Atlas detection contract")
 
 if (
     "- patches/remove-legacy-mongodb-service.yaml" not in prod_overlay

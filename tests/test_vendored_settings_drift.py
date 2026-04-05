@@ -1,0 +1,81 @@
+from __future__ import annotations
+
+import os
+import subprocess
+from pathlib import Path
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SCRIPT = REPO_ROOT / "scripts" / "qa" / "verify-vendored-settings-drift.sh"
+TRACKED_FILE = "apps/openedx/settings/lms/production.py"
+
+
+def write_tracked_file(root: Path, relative_path: str, content: str) -> None:
+    path = root / relative_path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content, encoding="utf-8")
+
+
+def run_verify(repo_root: Path, *, infra_repo: Path | None, home_dir: Path) -> subprocess.CompletedProcess[str]:
+    env = os.environ.copy()
+    env["REPO_ROOT_OVERRIDE"] = str(repo_root)
+    env["HOME"] = str(home_dir)
+    if infra_repo is None:
+        env.pop("INFRA_REPO", None)
+    else:
+        env["INFRA_REPO"] = str(infra_repo)
+    return subprocess.run(
+        ["bash", str(SCRIPT)],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+        env=env,
+    )
+
+
+def test_explicit_infra_repo_is_not_overridden_by_autodetect(tmp_path: Path) -> None:
+    app_repo = tmp_path / "app"
+    explicit_infra = tmp_path / "explicit-infra"
+    autodetect_infra = tmp_path / "home" / "projects" / "k8s" / "bbi-infrastructure"
+    tracked_rel = f"deploy/k8s/base/{TRACKED_FILE}"
+    vendored_rel = f"apps/mereka-lms/base/deploy/k8s/base/{TRACKED_FILE}"
+
+    write_tracked_file(app_repo, tracked_rel, "APP=canonical\n")
+    write_tracked_file(explicit_infra, vendored_rel, "APP=canonical\n")
+    write_tracked_file(autodetect_infra, vendored_rel, "APP=stale\n")
+
+    result = run_verify(app_repo, infra_repo=explicit_infra, home_dir=tmp_path / "home")
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert f"Infra repo: {explicit_infra}" in result.stdout
+    assert "OK   production.py: in sync" in result.stdout
+
+
+def test_autodetect_falls_back_to_default_infra_repo(tmp_path: Path) -> None:
+    app_repo = tmp_path / "app"
+    autodetect_infra = tmp_path / "home" / "projects" / "k8s" / "bbi-infrastructure"
+    tracked_rel = f"deploy/k8s/base/{TRACKED_FILE}"
+    vendored_rel = f"apps/mereka-lms/base/deploy/k8s/base/{TRACKED_FILE}"
+
+    write_tracked_file(app_repo, tracked_rel, "APP=canonical\n")
+    write_tracked_file(autodetect_infra, vendored_rel, "APP=stale\n")
+
+    result = run_verify(app_repo, infra_repo=None, home_dir=tmp_path / "home")
+
+    assert result.returncode == 1, result.stdout + result.stderr
+    assert f"Infra repo: {autodetect_infra}" in result.stdout
+    assert "FAIL production.py: diverged" in result.stdout
+
+
+def test_explicit_invalid_infra_repo_fails_loudly(tmp_path: Path) -> None:
+    app_repo = tmp_path / "app"
+    invalid_infra = tmp_path / "missing-infra"
+    tracked_rel = f"deploy/k8s/base/{TRACKED_FILE}"
+
+    write_tracked_file(app_repo, tracked_rel, "APP=canonical\n")
+
+    result = run_verify(app_repo, infra_repo=invalid_infra, home_dir=tmp_path / "home")
+
+    assert result.returncode == 2
+    assert f"ERROR: explicit INFRA_REPO is invalid: {invalid_infra}" in result.stderr

@@ -17,9 +17,13 @@
 #   INFRA_REPO=/path/to/bbi-infrastructure ./scripts/qa/verify-vendored-settings-drift.sh
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 
-# Auto-detect infra repo location
+# Auto-detect infra repo location only when the caller did not pin a target.
+INFRA_REPO_EXPLICIT=0
+if [[ -n "${INFRA_REPO+x}" ]]; then
+  INFRA_REPO_EXPLICIT=1
+fi
 INFRA_REPO="${INFRA_REPO:-}"
 if [[ -z "$INFRA_REPO" ]] && [[ "${GITHUB_ACTIONS:-false}" != "true" ]]; then
   for candidate in \
@@ -31,6 +35,13 @@ if [[ -z "$INFRA_REPO" ]] && [[ "${GITHUB_ACTIONS:-false}" != "true" ]]; then
       break
     fi
   done
+fi
+
+if [[ -n "$INFRA_REPO" ]] && [[ ! -d "$INFRA_REPO/apps/mereka-lms" ]]; then
+  if [[ "$INFRA_REPO_EXPLICIT" -eq 1 ]]; then
+    echo "ERROR: explicit INFRA_REPO is invalid: $INFRA_REPO" >&2
+    exit 2
+  fi
 fi
 
 if [[ -z "$INFRA_REPO" ]] || [[ ! -d "$INFRA_REPO/apps/mereka-lms" ]]; then
@@ -130,7 +141,8 @@ echo "=== Summary: PASS=$PASS FAIL=$FAIL SKIP=$SKIP ==="
 if [[ $FAIL -gt 0 ]]; then
   echo ""
   echo "FAIL: $FAIL file(s) diverged between app repo and infra vendored copy."
-  echo "The app repo is the canonical source. Run vendor-sync to update infra."
+  echo "The app repo is the canonical source. Run:"
+  echo "  scripts/infra/sync-vendored-openedx-settings.sh --infra-repo \"$INFRA_REPO\" --apply"
   exit 1
 fi
 

@@ -2286,6 +2286,11 @@ scripts:
     purpose: Sync Production Config
     criticality: release-supporting
 
+  - path: scripts/infra/sync-vendored-openedx-settings.sh
+    owner: platform-team
+    purpose: Sync Vendored Openedx Settings
+    criticality: release-supporting
+
   - path: scripts/infra/sync-translations.sh
     owner: platform-team
     purpose: Sync Translations
