@@ -123,7 +123,6 @@ COMMENTS_SERVICE_URL = "http://localhost:8000/forum"
 # modulestore values before the forum block uses them.
 MONGODB_HOST = os.environ.get("MONGODB_HOST", "mongodb")
 MONGODB_DB = os.environ.get("MONGODB_DB", "openedx")
-_mongodb_host_lower = (MONGODB_HOST or "").lower()
 _mongodb_is_atlas = _is_mongodb_atlas_host(MONGODB_HOST)
 
 _mongodb_username = None
