@@ -43,9 +43,25 @@ chmod +x "$tmpdir/scripts/infra/prepare-tutor-build-context-ci.sh"
 cat >"$tmpdir/scripts/qa/verify-openedx-image-branding.sh" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
+DOCKER_PULL_TIMEOUT_SECS="${DOCKER_PULL_TIMEOUT_SECS:-600}"
+DOCKER_RUN_TIMEOUT_SECS="${DOCKER_RUN_TIMEOUT_SECS:-180}"
+run_with_timeout() { timeout "$1" "${@:2}"; }
+run_with_timeout "${DOCKER_PULL_TIMEOUT_SECS}" docker pull example >/dev/null || true
+run_with_timeout "${DOCKER_RUN_TIMEOUT_SECS}" docker run example true || true
 echo "ok"
 EOF
 chmod +x "$tmpdir/scripts/qa/verify-openedx-image-branding.sh"
+cat >"$tmpdir/scripts/qa/verify-mfe-image-branding.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+DOCKER_PULL_TIMEOUT_SECS="${DOCKER_PULL_TIMEOUT_SECS:-600}"
+DOCKER_RUN_TIMEOUT_SECS="${DOCKER_RUN_TIMEOUT_SECS:-180}"
+run_with_timeout() { timeout "$1" "${@:2}"; }
+run_with_timeout "${DOCKER_PULL_TIMEOUT_SECS}" docker pull example >/dev/null || true
+run_with_timeout "${DOCKER_RUN_TIMEOUT_SECS}" docker run example true || true
+echo "ok"
+EOF
+chmod +x "$tmpdir/scripts/qa/verify-mfe-image-branding.sh"
 
 write_pass_fixture() {
   cat >"$tmpdir/.github/workflows/build-tutor-images.yml" <<'EOF'

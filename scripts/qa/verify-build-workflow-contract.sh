@@ -184,6 +184,28 @@ else
   fail "verify-openedx-image-branding helper missing or not executable"
 fi
 
+if grep -q 'DOCKER_PULL_TIMEOUT_SECS=' "$REPO_ROOT/scripts/qa/verify-openedx-image-branding.sh" \
+  && grep -q 'run_with_timeout "${DOCKER_PULL_TIMEOUT_SECS}" docker pull' "$REPO_ROOT/scripts/qa/verify-openedx-image-branding.sh" \
+  && grep -q 'run_with_timeout "${DOCKER_RUN_TIMEOUT_SECS}" docker run' "$REPO_ROOT/scripts/qa/verify-openedx-image-branding.sh"; then
+  pass "verify-openedx-image-branding helper bounds docker pull/run with timeouts"
+else
+  fail "verify-openedx-image-branding helper missing docker timeout guards"
+fi
+
+if [[ -x "$REPO_ROOT/scripts/qa/verify-mfe-image-branding.sh" ]]; then
+  pass "verify-mfe-image-branding helper exists"
+else
+  fail "verify-mfe-image-branding helper missing or not executable"
+fi
+
+if grep -q 'DOCKER_PULL_TIMEOUT_SECS=' "$REPO_ROOT/scripts/qa/verify-mfe-image-branding.sh" \
+  && grep -q 'run_with_timeout "${DOCKER_PULL_TIMEOUT_SECS}" docker pull' "$REPO_ROOT/scripts/qa/verify-mfe-image-branding.sh" \
+  && grep -q 'run_with_timeout "${DOCKER_RUN_TIMEOUT_SECS}" docker run' "$REPO_ROOT/scripts/qa/verify-mfe-image-branding.sh"; then
+  pass "verify-mfe-image-branding helper bounds docker pull/run with timeouts"
+else
+  fail "verify-mfe-image-branding helper missing docker timeout guards"
+fi
+
 if [[ "$RESOLVE_SCOPE_BLOCK" == *"./scripts/infra/resolve-build-scope.sh"* ]]; then
   pass "workflow resolves push build scope via canonical helper"
 else
