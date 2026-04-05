@@ -286,6 +286,102 @@ done
 echo ""
 
 # ══════════════════════════════════════════════════════════════════════════
+# AC-VU-002b: Browser DOM contract for tenant authn (optional — requires Playwright)
+# ══════════════════════════════════════════════════════════════════════════
+
+echo "── AC-VU-002b: Browser DOM authn contract ──"
+
+declare -A DOMAIN_EXPECTED_BRAND=(
+  ["academyv2.mereka.io"]="Mereka Academy"
+  ["academy.biji-biji.com"]="Biji-Biji Academy"
+  ["skillourfuture.academy.mereka.io"]="Skill Our Future Academy"
+  ["academyv2.mereka.dev"]="Mereka Academy"
+  ["biji-biji.academyv2.mereka.dev"]="Biji-Biji Academy"
+  ["skillourfuture.academyv2.mereka.dev"]="Skill Our Future Academy"
+)
+
+declare -A DOMAIN_EXPECTED_EYEBROW=(
+  ["academyv2.mereka.io"]="Learning workspace"
+  ["academy.biji-biji.com"]="Community-powered learning"
+  ["skillourfuture.academy.mereka.io"]="Career acceleration workspace"
+  ["academyv2.mereka.dev"]="Learning workspace"
+  ["biji-biji.academyv2.mereka.dev"]="Community-powered learning"
+  ["skillourfuture.academyv2.mereka.dev"]="Career acceleration workspace"
+)
+
+playwright_available() {
+  ( cd "$REPO_ROOT/tests/e2e" && node -e "require.resolve('playwright')" ) >/dev/null 2>&1
+}
+
+browser_authn_contract_check() {
+  local label="$1" apps_host="$2" expected_brand="$3" expected_eyebrow="$4"
+
+  if ! playwright_available; then
+    warn "$label → browser DOM audit skipped (Playwright deps not installed)"
+    return
+  fi
+
+  local browser_json
+  if ! browser_json="$(
+    ( cd "$REPO_ROOT/tests/e2e" &&
+      APPS_HOST="$apps_host" node <<'JS'
+const { chromium } = require('playwright');
+(async () => {
+  const browser = await chromium.launch({ headless: true });
+  const page = await browser.newPage({ ignoreHTTPSErrors: true });
+  try {
+    await page.goto('https://' + process.env.APPS_HOST + '/authn/login?next=%2F', { waitUntil: 'networkidle', timeout: 45000 });
+    const data = await page.evaluate(() => {
+      const root = document.querySelector('.mereka-authn-login-branding');
+      const css = getComputedStyle(document.documentElement);
+      return {
+        status: root ? 'ok' : 'missing-branding-root',
+        tenant: document.documentElement.getAttribute('data-mereka-tenant') || '',
+        primary: css.getPropertyValue('--tenant-color-primary').trim(),
+        paragonPrimary: css.getPropertyValue('--pgn-color-primary-base').trim(),
+        eyebrow: root ? (root.querySelector('.mereka-authn-login-branding__eyebrow')?.textContent?.trim() || '') : '',
+        brand: root ? (root.querySelector('.mereka-authn-login-branding__brand')?.textContent?.trim() || '') : '',
+      };
+    });
+    process.stdout.write(JSON.stringify(data));
+  } finally { await browser.close(); }
+})().catch(e => { process.stderr.write(String(e.stack || e)); process.exit(1); });
+JS
+    ) 2>/dev/null
+  )"; then
+    fail "$label → browser DOM audit failed to execute"
+    return
+  fi
+
+  local browser_status browser_brand browser_eyebrow browser_primary browser_paragon
+  browser_status="$(python3 -c 'import json,sys; print(json.load(sys.stdin).get("status",""))' <<< "$browser_json" 2>/dev/null || echo "parse-error")"
+  browser_brand="$(python3 -c 'import json,sys; print(json.load(sys.stdin).get("brand",""))' <<< "$browser_json" 2>/dev/null || echo "")"
+  browser_eyebrow="$(python3 -c 'import json,sys; print(json.load(sys.stdin).get("eyebrow",""))' <<< "$browser_json" 2>/dev/null || echo "")"
+  browser_primary="$(python3 -c 'import json,sys; print(json.load(sys.stdin).get("primary",""))' <<< "$browser_json" 2>/dev/null || echo "")"
+  browser_paragon="$(python3 -c 'import json,sys; print(json.load(sys.stdin).get("paragonPrimary",""))' <<< "$browser_json" 2>/dev/null || echo "")"
+
+  [[ "$browser_status" == "ok" ]] && pass "$label → branding root rendered" || fail "$label → branding root missing"
+  [[ "$browser_brand" == "$expected_brand" ]] && pass "$label → brand '$browser_brand'" || fail "$label → brand '$browser_brand' (expected '$expected_brand')"
+  [[ "$browser_eyebrow" == "$expected_eyebrow" ]] && pass "$label → eyebrow '$browser_eyebrow'" || fail "$label → eyebrow '$browser_eyebrow' (expected '$expected_eyebrow')"
+  [[ -n "$browser_primary" && -n "$browser_paragon" ]] && pass "$label → palette bridge present" || fail "$label → palette bridge missing"
+}
+
+for domain in "${DOMAINS[@]}"; do
+  mfe_domain="${DOMAIN_MFE_HOST[$domain]:-}"
+  expected_brand="${DOMAIN_EXPECTED_BRAND[$domain]:-}"
+  expected_eyebrow="${DOMAIN_EXPECTED_EYEBROW[$domain]:-}"
+
+  if [[ -z "$mfe_domain" || -z "$expected_brand" ]]; then
+    skip "$domain browser DOM authn → missing host or brand mapping"
+    continue
+  fi
+
+  browser_authn_contract_check "$domain authn DOM" "$mfe_domain" "$expected_brand" "$expected_eyebrow"
+done
+
+echo ""
+
+# ══════════════════════════════════════════════════════════════════════════
 # AC-VU-003: Screenshot route baselines for learner-dashboard + profile
 # ══════════════════════════════════════════════════════════════════════════
 
