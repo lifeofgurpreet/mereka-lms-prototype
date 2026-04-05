@@ -214,11 +214,11 @@ else
   do_fail "AC-ROUTE-002: Could not extract dist dir for /authoring ($AUTHORING_DIST) or /course-authoring ($COURSE_AUTHORING_DIST)"
 fi
 
-# Verify canonical dist dir is 'course-authoring' (not 'authoring')
-if [ "${AUTHORING_DIST:-}" = "course-authoring" ]; then
-  do_pass "AC-ROUTE-002: /authoring alias correctly maps to dist/course-authoring (canonical dir)"
+# Verify canonical dist dir is 'authoring'
+if [ "${AUTHORING_DIST:-}" = "authoring" ]; then
+  do_pass "AC-ROUTE-002: /authoring alias correctly maps to dist/authoring (canonical dir)"
 else
-  do_warn "AC-ROUTE-002: /authoring dist dir is '${AUTHORING_DIST:-unknown}', expected 'course-authoring'"
+  do_warn "AC-ROUTE-002: /authoring dist dir is '${AUTHORING_DIST:-unknown}', expected 'authoring'"
 fi
 
 # Both routes must have strip_prefix directives (so /authoring/... strips /authoring)
@@ -293,19 +293,26 @@ else
   do_fail "AC-ROUTE-001: /login_refresh proxy target is not lms:8000"
 fi
 
-# The outer apps-host Caddyfile must preserve Host when proxying LMS-owned paths.
-# Without this, non-primary tenant apps hosts can collapse back to empty or primary
-# mfe_config responses because LMS resolves SiteConfiguration off request host.
-if grep -A4 "handle /api/\\*" "$OUTER_CADDYFILE" | grep -qF "header_up Host {http.request.host}"; then
-  do_pass "AC-ROUTE-001: outer apps-host /api/* proxy preserves Host header"
+# The outer apps-host Caddyfile should delegate through the shared mfe_apps_proxy
+# macro, while the inner MFE Caddyfile owns LMS-facing API/auth passthroughs.
+if grep -A2 'http://{$MFE_HOST}' "$OUTER_CADDYFILE" | grep -qF 'import mfe_apps_proxy' && \
+   grep -A2 'http://{$TENANT_BIJIBIJI_MFE_HOST' "$OUTER_CADDYFILE" | grep -qF 'import mfe_apps_proxy' && \
+   grep -A2 'http://{$TENANT_SOF_MFE_HOST' "$OUTER_CADDYFILE" | grep -qF 'import mfe_apps_proxy'; then
+  do_pass "AC-ROUTE-001: outer apps hosts consistently delegate through mfe_apps_proxy"
 else
-  do_fail "AC-ROUTE-001: outer apps-host /api/* proxy missing Host header preservation"
+  do_fail "AC-ROUTE-001: outer apps hosts do not consistently delegate through mfe_apps_proxy"
 fi
 
-if grep -A4 "handle /login_refresh\\*" "$OUTER_CADDYFILE" | grep -qF "header_up Host {http.request.host}"; then
-  do_pass "AC-ROUTE-001: outer apps-host /login_refresh* proxy preserves Host header"
+if grep -A3 "reverse_proxy /api/\\*" "$MFE_CADDYFILE" | grep -qF "header_up Host {http.request.host}"; then
+  do_pass "AC-ROUTE-001: inner /api/* proxy preserves Host header"
 else
-  do_fail "AC-ROUTE-001: outer apps-host /login_refresh* proxy missing Host header preservation"
+  do_fail "AC-ROUTE-001: inner /api/* proxy missing Host header preservation"
+fi
+
+if grep -A3 "reverse_proxy /login_refresh\\*" "$MFE_CADDYFILE" | grep -qF "header_up Host {http.request.host}"; then
+  do_pass "AC-ROUTE-001: inner /login_refresh* proxy preserves Host header"
+else
+  do_fail "AC-ROUTE-001: inner /login_refresh* proxy missing Host header preservation"
 fi
 
 echo ""
@@ -434,7 +441,7 @@ if [ "$FAIL" -gt 0 ]; then
   echo "Common fixes:"
   echo "  1. New MFE route added? Add handler block to:"
   echo "       deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"
-  echo "  2. /authoring and /course-authoring must both serve dist/course-authoring"
+  echo "  2. /authoring and /course-authoring must both serve dist/authoring"
   echo "  3. All routes must use file_server (not reverse_proxy) except API passthroughs"
   echo "  4. See docs/ops/runbooks/architecture/MFE_ROUTING_PARITY.md for the full runbook"
   echo ""

@@ -365,6 +365,10 @@ if [[ -n "$MFE_BASE_URL" ]]; then
     curl -sSI --max-time 15 "$url" 2>/dev/null | grep -i "^content-type:" | head -1 | tr -d '\r' || true
   }
 
+  body_is_json() {
+    python3 -c 'import json, sys; json.load(sys.stdin)' >/dev/null 2>&1
+  }
+
   # 2.1 Public env.config.jsx is diagnostic only
   env_config_url="${MFE_BASE_URL}/env.config.jsx"
   env_status=$(http_status "$env_config_url")
@@ -414,7 +418,28 @@ if [[ -n "$MFE_BASE_URL" ]]; then
     fi
   fi
 
-  # 2.2 Mereka logo (default tenant)
+  # 2.2 Apps-host authoring config must remain a JSON API response, not an HTML shell.
+  authoring_config_url="${MFE_BASE_URL}/api/mfe_config/v1?mfe=authoring"
+  authoring_config_status=$(http_status "$authoring_config_url")
+  authoring_config_ct=$(content_type "$authoring_config_url")
+  if [[ "$authoring_config_status" == "200" ]]; then
+    pass "authoring config endpoint returns HTTP 200: ${authoring_config_url}"
+  else
+    fail "authoring config endpoint returns HTTP ${authoring_config_status}: ${authoring_config_url}"
+  fi
+  if echo "$authoring_config_ct" | grep -qi "application/json"; then
+    pass "authoring config endpoint Content-Type is application/json"
+  else
+    fail "authoring config endpoint Content-Type is not application/json (got: ${authoring_config_ct:-<none>})"
+  fi
+  authoring_config_body=$(http_body "$authoring_config_url")
+  if printf '%s' "$authoring_config_body" | body_is_json; then
+    pass "authoring config endpoint body parses as JSON"
+  else
+    fail "authoring config endpoint body does not parse as JSON"
+  fi
+
+  # 2.3 Mereka logo (default tenant)
   logo_url="${MFE_BASE_URL}/theme/logo-horizontal.svg"
   logo_status=$(http_status "$logo_url")
   logo_ct=$(content_type "$logo_url")
@@ -429,7 +454,7 @@ if [[ -n "$MFE_BASE_URL" ]]; then
     fail "Default logo Content-Type is not image/svg+xml (got: ${logo_ct:-<none>})"
   fi
 
-  # 2.3 core.min.css
+  # 2.4 core.min.css
   core_css_url="${MFE_BASE_URL}/theme/core.min.css"
   core_status=$(http_status "$core_css_url")
   core_ct=$(content_type "$core_css_url")
@@ -444,7 +469,7 @@ if [[ -n "$MFE_BASE_URL" ]]; then
     fail "core.min.css Content-Type is not text/css (got: ${core_ct:-<none>})"
   fi
 
-  # 2.4 Tenant brand CSS bundles
+  # 2.5 Tenant brand CSS bundles
   for brand_css in \
     "biji-biji-brand.min.css" \
     "sof-brand.min.css"
@@ -458,7 +483,7 @@ if [[ -n "$MFE_BASE_URL" ]]; then
     fi
   done
 
-  # 2.5 Tenant logos
+  # 2.6 Tenant logos
   for tenant_logo in \
     "biji-biji/logo-horizontal.svg" \
     "skillourfuture/logo-horizontal.svg"
@@ -472,7 +497,7 @@ if [[ -n "$MFE_BASE_URL" ]]; then
     fi
   done
 
-  # 2.6 Learner dashboard MFE serves
+  # 2.7 Learner dashboard MFE serves
   dashboard_url="${MFE_BASE_URL}/learner-dashboard/"
   dashboard_status=$(http_status "$dashboard_url")
   if [[ "$dashboard_status" == "200" ]]; then
@@ -481,7 +506,7 @@ if [[ -n "$MFE_BASE_URL" ]]; then
     fail "learner-dashboard returns HTTP ${dashboard_status}: ${dashboard_url} (MFE may not be running)"
   fi
 
-  # 2.7 PARAGON_THEME present in learner-dashboard HTML (theme switching wired)
+  # 2.8 PARAGON_THEME present in learner-dashboard HTML (theme switching wired)
   if [[ "$dashboard_status" == "200" ]]; then
     dashboard_body=$(http_body "$dashboard_url")
     if grep -q "PARAGON_THEME" <<< "$dashboard_body"; then
