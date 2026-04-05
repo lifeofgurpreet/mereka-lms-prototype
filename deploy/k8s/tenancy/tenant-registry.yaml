@@ -57,7 +57,7 @@ tenants:
 # Placement metadata fields (added v1.3.0):
 #   cluster_ref:          Name of the K8s cluster hosting this environment
 #                         (matches cluster-topology-catalog.yaml keys)
-#   cluster_class:        Cluster classification: gke-prod | shared-nonprod | local
+#   cluster_class:        Cluster classification: rke2-prod | shared-nonprod | local
 #   gitops_repo:          GitHub org/repo that owns the GitOps overlay
 #                         (empty for local — overlay is app-repo owned)
 #   gitops_overlay_path:  Path within gitops_repo (or app repo for local) to
@@ -74,8 +74,8 @@ environments:
     root_domain: mereka.io
     auth_host: auth0.mereka.io
     namespace: mereka-lms
-    cluster_ref: prod-gke
-    cluster_class: gke-prod
+    cluster_ref: rke2-prod
+    cluster_class: rke2-prod
     gitops_repo: Biji-Biji-Initiative/bbi-infrastructure
     gitops_overlay_path: apps/mereka-lms/overlays/prod
     argocd_app: mereka-lms-prod
