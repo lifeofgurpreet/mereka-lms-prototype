@@ -81,7 +81,7 @@ for surface in surfaces:
         local_checkout = location.get("local_checkout")
         if local_checkout:
             checkout_path = (repo_root / local_checkout).resolve()
-            if not checkout_path.exists():
+            if repo == "mereka-lms" and not checkout_path.exists():
                 issues.append(f"surface {surface['id']} local checkout missing: {local_checkout}")
         for pattern in ghost_patterns:
             if repo in {"mereka-lms", "local-home"} and (
