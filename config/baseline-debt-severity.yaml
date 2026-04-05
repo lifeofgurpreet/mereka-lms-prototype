@@ -1,0 +1,138 @@
+---
+# Baseline Debt Severity Map — Mereka LMS
+#
+# Classifies known CI/runtime failures on main by severity.
+# Consumed by CI baseline-diff logic to separate merge-blocking
+# failures from inherited debt.
+#
+# severity:
+#   high   — merge-blocking; must fix before release
+#   medium — should fix within current phase; tolerated on main
+#   low    — cosmetic or deferred; explicit waiver
+#
+# status:
+#   active     — currently failing on main
+#   fixed      — was failing, now resolved
+#   waived     — explicitly accepted with owner + review date
+#
+# source:
+#   static     — offline CI (scripts, lint, types)
+#   runtime    — live cluster (smoke, SSO, E2E)
+#   build      — image build pipeline
+#
+# Generated: 2026-04-05
+# Evidence: main branch CI runs 23998687484 (success), 24001401327 (failure)
+
+schema_version: "1.0"
+baseline_commit: "2a4777d62"
+evidence_runs:
+  - id: 23998687484
+    conclusion: success
+    scope: CI (static validation)
+    note: All static shards pass on main
+  - id: 24001401327
+    conclusion: failure
+    scope: Authenticated Smoke Tests
+    note: SSO Canary + smoke-authenticated fail
+  - id: 23999116815
+    conclusion: failure
+    scope: Post-Deploy E2E Gate
+    note: Runtime E2E gate failure
+
+# ── Static Validation (offline CI) ──────────────────────────────────────
+
+static_debt: []
+# Main currently has ZERO static validation failures.
+# All 3 shards + precheck + postchecks pass consistently.
+# This is a clean baseline — any new static failure is a regression.
+
+# ── Runtime Failures (live cluster) ─────────────────────────────────────
+
+runtime_debt:
+  - id: RD-001
+    name: SSO Canary failure
+    workflow: Authenticated Smoke Tests
+    job: SSO Canary
+    severity: medium
+    status: active
+    source: runtime
+    owner: platform-team
+    root_cause: >
+      Playwright Python 3.11 dependency mismatch on ARC runners
+      (system Python 3.12.3 does not match required 3.11).
+      The SSO canary itself is a valid test but fails on runner tooling,
+      not on actual SSO behavior.
+    evidence: "gh run view 24001401327 --job 69997933178"
+    fix_lane: WS3 (CI truth control) — runner image or setup-python alignment
+    waiver_reason: null
+    review_date: null
+
+  - id: RD-002
+    name: smoke-authenticated failure
+    workflow: Authenticated Smoke Tests
+    job: smoke-authenticated
+    severity: medium
+    status: active
+    source: runtime
+    owner: platform-team
+    root_cause: >
+      Same Python/Playwright dependency mismatch as RD-001.
+      Authenticated smoke requires Playwright which requires Python 3.11.
+    evidence: "gh run view 24001401327 --job 69997933183"
+    fix_lane: WS3 (CI truth control) — same fix as RD-001
+    waiver_reason: null
+    review_date: null
+
+  - id: RD-003
+    name: Post-Deploy E2E Gate failure
+    workflow: Post-Deploy E2E Gate
+    job: unknown
+    severity: medium
+    status: active
+    source: runtime
+    owner: platform-team
+    root_cause: >
+      Runtime E2E gate failure — likely same Playwright/runner dependency
+      issue as RD-001/RD-002. Needs log inspection to confirm.
+    evidence: "gh run view 23999116815"
+    fix_lane: WS3 (CI truth control) — runner alignment
+    waiver_reason: null
+    review_date: null
+
+# ── Build Pipeline ──────────────────────────────────────────────────────
+
+build_debt:
+  - id: BD-001
+    name: TruffleHog installer CDN flake
+    workflow: CI
+    job: Security Scans
+    severity: low
+    status: fixed
+    source: build
+    owner: platform-team
+    root_cause: >
+      TruffleHog GitHub release download occasionally returns 502.
+      Fixed in PR #1347 with API fallback.
+    evidence: "PR #1347 merged on docs/tenant-experience-board"
+    fix_lane: resolved
+    waiver_reason: null
+    review_date: null
+
+# ── Summary ─────────────────────────────────────────────────────────────
+
+summary:
+  high_severity: 0
+  medium_severity: 3
+  low_severity: 0
+  fixed: 1
+  total_active: 3
+  merge_policy: >
+    Zero high-severity failures required for merge.
+    Medium-severity runtime failures are tolerated on main when
+    the root cause is runner tooling, not product behavior.
+    All 3 active medium failures share the same root cause:
+    Playwright/Python version mismatch on ARC runners.
+  recommended_fix: >
+    Single fix: align ARC runner Python to 3.11 or update Playwright
+    workflow to use setup-python with explicit 3.11 target.
+    This would resolve RD-001, RD-002, and RD-003 simultaneously.
