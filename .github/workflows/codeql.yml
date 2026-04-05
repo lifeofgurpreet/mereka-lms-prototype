@@ -40,11 +40,68 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  change-scope:
+    name: Detect CodeQL language scope
+    runs-on: mereka-k8s-runners
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      python_changed: ${{ steps.scope.outputs.python_changed }}
+      javascript_changed: ${{ steps.scope.outputs.javascript_changed }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Detect language-bearing diff
+        id: scope
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${GITHUB_EVENT_NAME}" != "pull_request" ]]; then
+            echo "python_changed=true" >> "$GITHUB_OUTPUT"
+            echo "javascript_changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          mapfile -t CHANGED < <(git diff --name-only "${BASE_SHA}...${HEAD_SHA}")
+
+          python_changed=false
+          javascript_changed=false
+
+          for path in "${CHANGED[@]}"; do
+            case "$path" in
+              *.py|requirements*.txt|pyproject.toml|setup.py|setup.cfg)
+                python_changed=true
+                ;;
+            esac
+
+            case "$path" in
+              *.js|*.jsx|*.ts|*.tsx|package.json|package-lock.json|pnpm-lock.yaml|yarn.lock)
+                javascript_changed=true
+                ;;
+            esac
+          done
+
+          echo "python_changed=${python_changed}" >> "$GITHUB_OUTPUT"
+          echo "javascript_changed=${javascript_changed}" >> "$GITHUB_OUTPUT"
+
   analyze:
     name: Analyze (${{ matrix.language }})
     # ARC heavy runners now ship the pre-bundled CodeQL archive at
     # /opt/codeql/codeql-bundle-linux64.tar.zst, so restore the job to the
     # self-hosted runner class that carries that runtime contract.
+    needs: change-scope
+    if: >-
+      ${{
+        github.event_name != 'pull_request' ||
+        (matrix.language == 'python' && needs.change-scope.outputs.python_changed == 'true') ||
+        (matrix.language == 'javascript-typescript' && needs.change-scope.outputs.javascript_changed == 'true')
+      }}
     runs-on: mereka-k8s-heavy-builders
     timeout-minutes: 45
     permissions:

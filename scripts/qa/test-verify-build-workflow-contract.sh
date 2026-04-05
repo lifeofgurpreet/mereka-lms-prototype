@@ -244,7 +244,19 @@ jobs:
       - name: Install Trivy CLI
         run: echo install trivy
       - name: Scan OpenEdX image for vulnerabilities
-        run: trivy image "${OPENEDX_IMAGE_REF}"
+        run: |
+          set +e
+          timeout 20m trivy image "${OPENEDX_IMAGE_REF}"
+          trivy_status=$?
+          set -e
+          if [[ "$trivy_status" -eq 124 ]]; then
+            echo "OpenEdX Trivy scan timed out after 20m; continuing without vulnerability verdict." >&2
+            exit 124
+          fi
+          if [[ "$trivy_status" -ne 0 ]]; then
+            echo "OpenEdX Trivy scan failed with exit code ${trivy_status}; continuing without vulnerability verdict." >&2
+            exit "$trivy_status"
+          fi
         env:
           OPENEDX_IMAGE_REF: ${{ env.REGISTRY }}/openedx@${{ needs.build-openedx.outputs.image_digest }}
 
@@ -282,7 +294,19 @@ jobs:
       - name: Install Trivy CLI
         run: echo install trivy
       - name: Scan MFE image for vulnerabilities
-        run: trivy image "${MFE_IMAGE_REF}"
+        run: |
+          set +e
+          timeout 20m trivy image "${MFE_IMAGE_REF}"
+          trivy_status=$?
+          set -e
+          if [[ "$trivy_status" -eq 124 ]]; then
+            echo "MFE Trivy scan timed out after 20m; continuing without vulnerability verdict." >&2
+            exit 124
+          fi
+          if [[ "$trivy_status" -ne 0 ]]; then
+            echo "MFE Trivy scan failed with exit code ${trivy_status}; continuing without vulnerability verdict." >&2
+            exit "$trivy_status"
+          fi
         env:
           MFE_IMAGE_REF: ${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs.image_digest }}
 
@@ -731,7 +755,19 @@ text = text.replace(
     '      - name: Install Trivy CLI\n'
     '        run: echo install trivy\n'
     '      - name: Scan OpenEdX image for vulnerabilities\n'
-    '        run: trivy image "${OPENEDX_IMAGE_REF}"\n'
+    '        run: |\n'
+    '          set +e\n'
+    '          timeout 20m trivy image "${OPENEDX_IMAGE_REF}"\n'
+    '          trivy_status=$?\n'
+    '          set -e\n'
+    '          if [[ "$trivy_status" -eq 124 ]]; then\n'
+    '            echo "OpenEdX Trivy scan timed out after 20m; continuing without vulnerability verdict." >&2\n'
+    '            exit 124\n'
+    '          fi\n'
+    '          if [[ "$trivy_status" -ne 0 ]]; then\n'
+    '            echo "OpenEdX Trivy scan failed with exit code ${trivy_status}; continuing without vulnerability verdict." >&2\n'
+    '            exit "$trivy_status"\n'
+    '          fi\n'
     '        env:\n'
     '          OPENEDX_IMAGE_REF: ${{ env.REGISTRY }}/openedx@${{ needs.build-openedx.outputs.image_digest }}\n',
     '',

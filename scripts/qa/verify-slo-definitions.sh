@@ -138,7 +138,7 @@ if [[ "$MODE" == "local" ]]; then
 
     if [[ -n "$slo_file" ]]; then
       fast_expr=$(grep -A6 "alert: ${alert_name}" "$slo_file" 2>/dev/null || true)
-      if echo "$fast_expr" | grep -q "burn_rate_1h" && echo "$fast_expr" | grep -q "burn_rate_5m"; then
+      if [[ "$fast_expr" == *"burn_rate_1h"* && "$fast_expr" == *"burn_rate_5m"* ]]; then
         pass "Alert $alert_name uses multi-window (1h + 5m)"
       else
         fail "Alert $alert_name missing multi-window pattern (expected burn_rate_1h AND burn_rate_5m)"
@@ -159,7 +159,7 @@ if [[ "$MODE" == "local" ]]; then
 
     if [[ -n "$slo_file" ]]; then
       slow_expr=$(grep -A6 "alert: ${alert_name}" "$slo_file" 2>/dev/null || true)
-      if echo "$slow_expr" | grep -q "burn_rate_6h" && echo "$slow_expr" | grep -q "burn_rate_30m"; then
+      if [[ "$slow_expr" == *"burn_rate_6h"* && "$slow_expr" == *"burn_rate_30m"* ]]; then
         pass "Alert $alert_name uses multi-window (6h + 30m)"
       else
         fail "Alert $alert_name missing multi-window pattern (expected burn_rate_6h AND burn_rate_30m)"
@@ -253,7 +253,7 @@ else
       "mereka:http_requests:availability_ratio_5m" \
       "mereka:slo:burn_rate_1h" \
       "mereka:slo:error_budget_remaining_ratio"; do
-      if echo "$RULES_JSON" | grep -q "$rule"; then
+      if [[ "$RULES_JSON" == *"$rule"* ]]; then
         pass "Recording rule active in Prometheus: $rule"
       else
         fail "Recording rule not found in Prometheus: $rule"
@@ -262,7 +262,7 @@ else
 
     # Check burn-rate alerts for extended services
     for alert in SLOBudgetFastBurnExtended SLOBudgetSlowBurnExtended SLOBudgetExhaustedExtended; do
-      if echo "$RULES_JSON" | grep -q "$alert"; then
+      if [[ "$RULES_JSON" == *"$alert"* ]]; then
         pass "Alert rule active in Prometheus: $alert"
       else
         fail "Alert rule not found in Prometheus: $alert"
