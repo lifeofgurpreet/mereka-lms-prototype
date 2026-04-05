@@ -107,7 +107,23 @@ _check_host() {
       ;;
     2[0-9][0-9]|3[0-9][0-9])
       if [[ "$http_code" == "200" && "$body_bytes" -eq 0 ]]; then
-        verdict="EMPTY_200"
+        # MFE containers serve nothing at /; retry with /authn/login as fallback
+        local fb_code fb_file fb_bytes
+        fb_file="$(mktemp)"
+        fb_code=$(curl -s -o "$fb_file" -w "%{http_code}" \
+          --max-time "$CURL_TIMEOUT" \
+          "https://${host}/authn/login" 2>/dev/null; true)
+        fb_code="${fb_code: -3}"
+        fb_bytes=$(wc -c < "$fb_file" 2>/dev/null || echo 0)
+        rm -f "$fb_file"
+        if [[ "$fb_code" =~ ^[23][0-9][0-9]$ && "$fb_bytes" -gt 0 ]]; then
+          accepted="true"
+          verdict="OK_MFE_FALLBACK"
+          http_code="$fb_code"
+          body_bytes="$fb_bytes"
+        else
+          verdict="EMPTY_200"
+        fi
       else
         accepted="true"
         verdict="OK"
