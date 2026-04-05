@@ -29,6 +29,15 @@ path_filter_has_entry() {
   local entry="$1"
   grep -qF -- "      - '$entry'" "$BUILD_WF"
 }
+extract_step_block() {
+  local block="$1"
+  local needle="$2"
+  awk -v needle="$needle" '
+    capture && $0 ~ /^      - / && index($0, needle) == 0 { exit }
+    index($0, needle) { capture=1 }
+    capture { print }
+  ' <<<"$block"
+}
 
 echo "=== Build Workflow Contract ==="
 
@@ -128,6 +137,7 @@ required_trigger_paths=(
   "scripts/infra/generate-build-provenance.sh"
   "scripts/infra/generate-release-bundle.sh"
   "scripts/release/generate_release_object.py"
+  "scripts/release/release_object_bindings.py"
   "scripts/infra/build-openedx-image.sh"
   "scripts/infra/build-mfe-image.sh"
   "scripts/infra/release-openedx-gitops.sh"
@@ -328,6 +338,32 @@ if grep -q "var/ci/release-gate-envelope.json" "$BUILD_WF"; then
   pass "build workflow uploads release-gate envelope artifact"
 else
   fail "build workflow missing release-gate envelope artifact upload"
+fi
+
+if [[ "$UPDATE_GITOPS_BLOCK" == *'./scripts/qa/verify-release-object.sh var/ci/release-object.json'* && "$UPDATE_GITOPS_BLOCK" == *'scripts/release/release_object_bindings.py'* && "$UPDATE_GITOPS_BLOCK" == *'promotion-inputs'* ]]; then
+  pass "update-gitops job re-validates the downloaded release object before promotion"
+else
+  fail "update-gitops job missing release object consumer validation gate"
+fi
+
+PROMOTION_STEP_BLOCK="$(extract_step_block "$UPDATE_GITOPS_BLOCK" './scripts/infra/release-openedx-gitops.sh')"
+if [[ "$PROMOTION_STEP_BLOCK" == *'./scripts/infra/release-openedx-gitops.sh'* && "$PROMOTION_STEP_BLOCK" == *'--release-object-json var/ci/release-object.json'* ]]; then
+  pass "update-gitops job binds release object into promotion step"
+else
+  fail "update-gitops job missing release-object binding on promotion step"
+fi
+
+PROOF_STEP_BLOCK="$(extract_step_block "$UPDATE_GITOPS_BLOCK" './bin/lms-ops proof')"
+if [[ "$PROOF_STEP_BLOCK" == *'./bin/lms-ops proof'* && "$PROOF_STEP_BLOCK" == *'--release-object-json var/ci/release-object.json'* ]]; then
+  pass "update-gitops job binds release object into proof step"
+else
+  fail "update-gitops job missing release-object binding on proof step"
+fi
+
+if [[ "$UPDATE_GITOPS_BLOCK" == *'verify-proof-envelope'* && "$UPDATE_GITOPS_BLOCK" == *'--envelope-json var/proof/release-gate.json'* ]]; then
+  pass "update-gitops job verifies release-gate envelope binding against release object"
+else
+  fail "update-gitops job missing proof-envelope release binding verification"
 fi
 
 # Informational SBOM generation must be bounded so it cannot occupy the main

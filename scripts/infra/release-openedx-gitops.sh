@@ -22,6 +22,7 @@ OPENEDX_DIGEST=""
 MFE_DIGEST=""
 REQUIRE_DIGESTS=0
 APP_SHA_OVERRIDE=""
+RELEASE_OBJECT_JSON=""
 TARGET_ENV="production"
 TARGET_ENV_SET=0
 UPDATE_BASE_REF_MODE="auto" # auto|1|0
@@ -80,6 +81,9 @@ Options:
   --app-repo PATH       Override app repo path (default: current repo root).
   --infra-repo PATH     Override GitOps repo path.
   --app-sha SHA         Override app SHA to pin in GitOps base ref.
+  --release-object-json PATH
+                       Consume canonical release-object identity for digests,
+                       app SHA, and proof/promotion binding.
   --update-base-ref     Force update GitOps base ref to app SHA.
   --skip-base-ref       Skip GitOps base ref update.
                        Default: update for production, skip for staging.
@@ -212,6 +216,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --app-sha)
       APP_SHA_OVERRIDE="${2:-}"
+      shift 2
+      ;;
+    --release-object-json)
+      RELEASE_OBJECT_JSON="${2:-}"
       shift 2
       ;;
     --update-base-ref)
@@ -352,14 +360,6 @@ validate_digest() {
     exit 1
   fi
 }
-
-validate_digest "$OPENEDX_DIGEST" "openedx"
-validate_digest "$MFE_DIGEST" "openedx-mfe"
-
-if [[ "$REQUIRE_DIGESTS" -eq 1 && ( -z "$OPENEDX_DIGEST" || -z "$MFE_DIGEST" ) ]]; then
-  echo "--require-digests requires both --openedx-digest and --mfe-digest." >&2
-  exit 1
-fi
 
 if [[ "$COMMIT" -eq 1 && "$APPLY" -ne 1 ]]; then
   echo "--commit requires --apply." >&2
@@ -742,6 +742,40 @@ require_git_repo "$APP_REPO"
 require_git_repo "$INFRA_REPO"
 
 TARGET_ENV="$(normalize_target_env "$TARGET_ENV")"
+RELEASE_OBJECT_ID=""
+if [[ -n "$RELEASE_OBJECT_JSON" ]]; then
+  if [[ ! -f "$RELEASE_OBJECT_JSON" ]]; then
+    echo "release object not found: $RELEASE_OBJECT_JSON" >&2
+    exit 1
+  fi
+  release_object_args=(
+    promotion-inputs
+    --release-object-json "$RELEASE_OBJECT_JSON"
+    --target-env "$TARGET_ENV"
+    --format env
+  )
+  [[ -n "$OPENEDX_DIGEST" ]] && release_object_args+=(--openedx-digest "$OPENEDX_DIGEST")
+  [[ -n "$MFE_DIGEST" ]] && release_object_args+=(--mfe-digest "$MFE_DIGEST")
+  [[ -n "$APP_SHA_OVERRIDE" ]] && release_object_args+=(--app-sha "$APP_SHA_OVERRIDE")
+
+  while IFS='=' read -r key value; do
+    case "$key" in
+      release_id) RELEASE_OBJECT_ID="$value" ;;
+      app_commit_sha) APP_SHA_OVERRIDE="$value" ;;
+      openedx_digest) OPENEDX_DIGEST="$value" ;;
+      mfe_digest) MFE_DIGEST="$value" ;;
+    esac
+  done < <(python3 "$REPO_ROOT/scripts/release/release_object_bindings.py" "${release_object_args[@]}")
+fi
+
+validate_digest "$OPENEDX_DIGEST" "openedx"
+validate_digest "$MFE_DIGEST" "openedx-mfe"
+
+if [[ "$REQUIRE_DIGESTS" -eq 1 && ( -z "$OPENEDX_DIGEST" || -z "$MFE_DIGEST" ) ]]; then
+  echo "--require-digests requires both --openedx-digest and --mfe-digest." >&2
+  exit 1
+fi
+
 require_bool_01 "ALLOW_PROD_APPLY" "$ALLOW_PROD_APPLY"
 
 if [[ "$APPLY" -eq 1 && "$CONFIRM_RELEASE_OPENEDX_GITOPS" != "$CONFIRM_APPLY_TOKEN" ]]; then
@@ -859,6 +893,7 @@ INFRA_OVERLAY_FILE="$INFRA_REPO/$INFRA_OVERLAY_REL"
 echo "App repo:   $APP_REPO"
 echo "Infra repo: $INFRA_REPO"
 echo "Target env: $TARGET_ENV"
+echo "Release object: ${RELEASE_OBJECT_ID:-<none>}"
 echo "OpenedX tag: $OPENEDX_TAG"
 echo "MFE tag:     $MFE_TAG"
 echo "OpenedX digest: ${OPENEDX_DIGEST:-<unchanged>}"

@@ -28,6 +28,7 @@ on:
       - 'scripts/infra/generate-build-provenance.sh'
       - 'scripts/infra/generate-release-bundle.sh'
       - 'scripts/release/generate_release_object.py'
+      - 'scripts/release/release_object_bindings.py'
       - 'scripts/infra/build-openedx-image.sh'
       - 'scripts/infra/build-mfe-image.sh'
       - 'scripts/infra/release-openedx-gitops.sh'
@@ -1560,6 +1561,22 @@ jobs:
           print("PASS: release-bundle artifact matches workflow commit/canonical-environment/digest context")
           PY
 
+      - name: Validate release object consumer gate
+        if: ${{ needs.release-bundle.result == 'success' }}
+        run: |
+          set -euo pipefail
+          TARGET_ENV="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
+          OPENEDX_DIGEST="${{ needs.build-openedx.outputs.image_digest }}"
+          MFE_DIGEST="${{ needs.build-mfe.outputs.image_digest }}"
+          ./scripts/qa/verify-release-object.sh var/ci/release-object.json
+          python3 ./scripts/release/release_object_bindings.py \
+            promotion-inputs \
+            --release-object-json var/ci/release-object.json \
+            --target-env "${TARGET_ENV}" \
+            --openedx-digest "${OPENEDX_DIGEST}" \
+            --mfe-digest "${MFE_DIGEST}" \
+            --app-sha "${GITHUB_SHA}" >/dev/null
+
       - name: Configure git identity
         run: |
           git config --global user.name "github-actions[bot]"
@@ -1598,6 +1615,7 @@ jobs:
             --mfe-tag "${TAG}" \
             --openedx-digest "${OPENEDX_DIGEST}" \
             --mfe-digest "${MFE_DIGEST}" \
+            --release-object-json var/ci/release-object.json \
             --require-digests \
             --app-repo "$GITHUB_WORKSPACE" \
             --infra-repo "$GITHUB_WORKSPACE/bbi-infrastructure" \
@@ -1652,7 +1670,12 @@ jobs:
           ./bin/lms-ops proof \
             --concern release-gate \
             --lane "$LANE" \
+            --release-object-json var/ci/release-object.json \
             --skip-cluster
+          python3 ./scripts/release/release_object_bindings.py \
+            verify-proof-envelope \
+            --envelope-json var/proof/release-gate.json \
+            --release-object-json var/ci/release-object.json
           cp var/proof/release-gate.json var/ci/release-gate-envelope.json
 
       - name: Upload build provenance

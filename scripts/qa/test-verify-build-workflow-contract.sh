@@ -87,6 +87,7 @@ on:
       - 'scripts/infra/generate-build-provenance.sh'
       - 'scripts/infra/generate-release-bundle.sh'
       - 'scripts/release/generate_release_object.py'
+      - 'scripts/release/release_object_bindings.py'
       - 'scripts/infra/build-openedx-image.sh'
       - 'scripts/infra/build-mfe-image.sh'
       - 'scripts/infra/release-openedx-gitops.sh'
@@ -341,8 +342,39 @@ jobs:
           TARGET_ENV_RAW="${{ inputs.target_environment }}"
           TARGET_ENV="$(normalize_lane_to_canonical "${TARGET_ENV_RAW}")"
           test -n "$TARGET_ENV"
+      - run: ./scripts/qa/verify-release-object.sh var/ci/release-object.json
+      - run: |
+          python3 ./scripts/release/release_object_bindings.py \
+            promotion-inputs \
+            --release-object-json var/ci/release-object.json \
+            --target-env production \
+            --openedx-digest sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \
+            --mfe-digest sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb \
+            --app-sha aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa >/dev/null
       - run: echo "push ghcr.io/biji-biji-initiative/mereka-lms/openedx:sha"
-      - run: ./bin/lms-ops proof --concern release-gate --lane prod --skip-cluster
+      - run: |
+          ./scripts/infra/release-openedx-gitops.sh \
+            --target-env production \
+            --openedx-tag sha \
+            --mfe-tag sha \
+            --openedx-digest sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \
+            --mfe-digest sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb \
+            --release-object-json var/ci/release-object.json \
+            --require-digests \
+            --app-repo "$GITHUB_WORKSPACE" \
+            --infra-repo "$GITHUB_WORKSPACE/bbi-infrastructure" \
+            --apply --commit --push
+      - run: |
+          ./bin/lms-ops proof \
+            --concern release-gate \
+            --lane prod \
+            --release-object-json var/ci/release-object.json \
+            --skip-cluster
+      - run: |
+          python3 ./scripts/release/release_object_bindings.py \
+            verify-proof-envelope \
+            --envelope-json var/proof/release-gate.json \
+            --release-object-json var/ci/release-object.json
       - uses: actions/upload-artifact@v4
         with:
           name: build-provenance
@@ -688,10 +720,126 @@ from pathlib import Path
 import sys
 p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
 text = p.read_text()
-text = text.replace('      - run: ./bin/lms-ops proof --concern release-gate --lane prod --skip-cluster\n', '')
+text = text.replace('      - run: ./scripts/qa/verify-release-object.sh var/ci/release-object.json\n', '')
+p.write_text(text)
+PY
+run_expect_fail "missing release object consumer verification gate is rejected"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    '      - run: |\n'
+    '          python3 ./scripts/release/release_object_bindings.py \\\n'
+    '            promotion-inputs \\\n'
+    '            --release-object-json var/ci/release-object.json \\\n'
+    '            --target-env production \\\n'
+    '            --openedx-digest sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \\\n'
+    '            --mfe-digest sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb \\\n'
+    '            --app-sha aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa >/dev/null\n',
+    '',
+)
+p.write_text(text)
+PY
+run_expect_fail "missing promotion-inputs release object consumer gate is rejected"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    '      - run: |\n'
+    '          ./scripts/infra/release-openedx-gitops.sh \\\n'
+    '            --target-env production \\\n'
+    '            --openedx-tag sha \\\n'
+    '            --mfe-tag sha \\\n'
+    '            --openedx-digest sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \\\n'
+    '            --mfe-digest sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb \\\n'
+    '            --release-object-json var/ci/release-object.json \\\n'
+    '            --require-digests \\\n'
+    '            --app-repo "$GITHUB_WORKSPACE" \\\n'
+    '            --infra-repo "$GITHUB_WORKSPACE/bbi-infrastructure" \\\n'
+    '            --apply --commit --push\n',
+    '      - run: |\n'
+    '          ./scripts/infra/release-openedx-gitops.sh \\\n'
+    '            --target-env production \\\n'
+    '            --openedx-tag sha \\\n'
+    '            --mfe-tag sha \\\n'
+    '            --openedx-digest sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \\\n'
+    '            --mfe-digest sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb \\\n'
+    '            --require-digests \\\n'
+    '            --app-repo "$GITHUB_WORKSPACE" \\\n'
+    '            --infra-repo "$GITHUB_WORKSPACE/bbi-infrastructure" \\\n'
+    '            --apply --commit --push\n',
+)
+p.write_text(text)
+PY
+run_expect_fail "missing release-object binding on promotion step is rejected"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    '      - run: |\n'
+    '          ./bin/lms-ops proof \\\n'
+    '            --concern release-gate \\\n'
+    '            --lane prod \\\n'
+    '            --release-object-json var/ci/release-object.json \\\n'
+    '            --skip-cluster\n',
+    '      - run: |\n'
+    '          ./bin/lms-ops proof \\\n'
+    '            --concern release-gate \\\n'
+    '            --lane prod \\\n'
+    '            --skip-cluster\n',
+)
+p.write_text(text)
+PY
+run_expect_fail "missing release-object binding on proof step is rejected"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    '      - run: |\n'
+    '          ./bin/lms-ops proof \\\n'
+    '            --concern release-gate \\\n'
+    '            --lane prod \\\n'
+    '            --release-object-json var/ci/release-object.json \\\n'
+    '            --skip-cluster\n',
+    '',
+)
 p.write_text(text)
 PY
 run_expect_fail "missing lms-ops proof emission is rejected"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    '      - run: |\n'
+    '          python3 ./scripts/release/release_object_bindings.py \\\n'
+    '            verify-proof-envelope \\\n'
+    '            --envelope-json var/proof/release-gate.json \\\n'
+    '            --release-object-json var/ci/release-object.json\n',
+    '',
+)
+p.write_text(text)
+PY
+run_expect_fail "missing proof-envelope release binding verification is rejected"
 
 write_pass_fixture
 python3 - "$tmpdir" <<'PY'
