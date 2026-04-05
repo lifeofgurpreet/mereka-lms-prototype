@@ -1,0 +1,116 @@
+---
+schema_version: "0.1"
+status: phase-1
+scope:
+  surfaces:
+    - lms-homepage-auth-links
+    - authn-mfe-shell
+  environments:
+    - dev
+    - production
+  note: >
+    Phase 1 covers the currently implemented tenant homepage/authn experience
+    contract. Staging tenant-specific source realization is tracked separately
+    and is intentionally not claimed here yet.
+
+proof_defaults:
+  proof_selectors:
+    eyebrow: ".mereka-authn-login-branding__eyebrow"
+    brand: ".mereka-authn-login-branding__brand"
+    subtitle: ".mereka-authn-login-branding__subtitle"
+    logo: ".mereka-authn-login-branding__logo img"
+  plugin_set_id: mereka-core
+
+tenants:
+  - slug: mereka
+    contract_slug: mereka
+    variant_symbol: _MEREKA_ACADEMY
+    site_name: Mereka Academy
+    expected_brand: Mereka Academy
+    theme_id: mereka
+    theme_bundle: ../theme/mereka-brand.min.css
+    theme_bundle_light: ../theme/mereka-brand-light.min.css
+    header_variant: mereka-default
+    logo_asset: /theme/logo-horizontal.svg
+    mobile_logo_asset: /theme/logo.svg
+    hero_variant: mereka-authn-default
+    hero_copy_id: mereka-authn-default-v1
+    smoke_account_key: smoke-learner-mereka
+    expected_authn:
+      eyebrow: Learning workspace
+      title: Welcome back
+      subtitle: Sign in to continue with Mereka Academy.
+      trust_note: Secure access for your active learning environment.
+    environments:
+      - env: production
+        lms_host: academyv2.mereka.io
+        apps_host: apps.academyv2.mereka.io
+        studio_host: studio.academyv2.mereka.io
+        authn_base_url: https://apps.academyv2.mereka.io/authn
+      - env: dev
+        lms_host: academyv2.mereka.dev
+        apps_host: apps.academyv2.mereka.dev
+        studio_host: studio.academyv2.mereka.dev
+        authn_base_url: https://apps.academyv2.mereka.dev/authn
+
+  - slug: biji-biji
+    contract_slug: biji-biji
+    variant_symbol: _BIJI_BIJI
+    site_name: Biji-Biji Academy
+    expected_brand: Biji-Biji Academy
+    theme_id: mereka
+    theme_bundle: ../theme/biji-biji-brand.min.css
+    theme_bundle_light: ../theme/biji-biji-brand-light.min.css
+    header_variant: biji-biji
+    logo_asset: /theme/biji-biji/logo-horizontal.svg
+    mobile_logo_asset: /theme/biji-biji/logo.svg
+    hero_variant: biji-biji-authn
+    hero_copy_id: biji-biji-authn-v1
+    smoke_account_key: smoke-learner-biji-biji
+    expected_authn:
+      eyebrow: Community-powered learning
+      title: Step back into the makerspace
+      subtitle: Sign in to continue with Biji-Biji Academy pathways, cohorts, and practical studio work.
+      trust_note: Built for creative communities, practical making, and shared learning momentum.
+    environments:
+      - env: production
+        lms_host: academy.biji-biji.com
+        apps_host: apps.academy.biji-biji.com
+        studio_host: studio.academy.biji-biji.com
+        authn_base_url: https://apps.academy.biji-biji.com/authn
+      - env: dev
+        lms_host: biji-biji.academyv2.mereka.dev
+        apps_host: apps.biji-biji.academyv2.mereka.dev
+        studio_host: studio.biji-biji.academyv2.mereka.dev
+        authn_base_url: https://apps.biji-biji.academyv2.mereka.dev/authn
+
+  - slug: skillourfuture
+    contract_slug: skillourfuture
+    variant_symbol: _SKILL_OUR_FUTURE
+    site_name: Skill Our Future
+    expected_brand: Skill Our Future Academy
+    theme_id: mereka
+    theme_bundle: ../theme/sof-brand.min.css
+    theme_bundle_light: ../theme/sof-brand-light.min.css
+    header_variant: skillourfuture
+    logo_asset: /theme/skillourfuture/logo-horizontal.svg
+    mobile_logo_asset: /theme/skillourfuture/logo.svg
+    hero_variant: skillourfuture-authn
+    hero_copy_id: skillourfuture-authn-v1
+    smoke_account_key: smoke-learner-skillourfuture
+    expected_authn:
+      eyebrow: Career acceleration workspace
+      title: Return to your next breakthrough
+      subtitle: Sign in to continue with Skill Our Future Academy career pathways, coaching, and employability tracks.
+      trust_note: Designed for confident career moves, employer-aligned learning, and verified progress.
+    environments:
+      - env: production
+        lms_host: skillourfuture.academy.mereka.io
+        apps_host: apps.skillourfuture.academy.mereka.io
+        studio_host: studio.skillourfuture.academy.mereka.io
+        authn_base_url: https://apps.skillourfuture.academy.mereka.io/authn
+      - env: dev
+        lms_host: skillourfuture.academyv2.mereka.dev
+        apps_host: apps.skillourfuture.academyv2.mereka.dev
+        studio_host: studio.skillourfuture.academyv2.mereka.dev
+        authn_base_url: https://apps.skillourfuture.academyv2.mereka.dev/authn
