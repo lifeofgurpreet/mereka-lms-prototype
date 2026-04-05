@@ -384,6 +384,36 @@ if [[ -n "$MFE_BASE_URL" ]]; then
     fi
   fi
 
+  # 2.1b Basename-routed MFEs may request runtime config relative to their own
+  # prefix. This must resolve to JavaScript, not the SPA shell HTML.
+  prefixed_env_config_url="${MFE_BASE_URL}/learner-dashboard/env.config.js"
+  prefixed_env_status=$(http_status "$prefixed_env_config_url")
+  prefixed_env_ct=$(content_type "$prefixed_env_config_url")
+  if [[ "$prefixed_env_status" == "200" ]]; then
+    pass "prefixed learner-dashboard env.config.js returns HTTP 200: ${prefixed_env_config_url}"
+  else
+    fail "prefixed learner-dashboard env.config.js returns HTTP ${prefixed_env_status}: ${prefixed_env_config_url}"
+  fi
+  if echo "$prefixed_env_ct" | grep -qi "html"; then
+    fail "prefixed learner-dashboard env.config.js returned HTML Content-Type (got: ${prefixed_env_ct:-<none>})"
+  else
+    pass "prefixed learner-dashboard env.config.js does not advertise HTML Content-Type"
+  fi
+  if [[ "$prefixed_env_status" == "200" ]]; then
+    prefixed_env_body=$(http_body "$prefixed_env_config_url")
+    prefixed_env_size=${#prefixed_env_body}
+    if [[ "$prefixed_env_size" -gt 100 ]]; then
+      pass "prefixed learner-dashboard env.config.js body is non-trivial (${prefixed_env_size} bytes > 100)"
+    else
+      fail "prefixed learner-dashboard env.config.js body is too small (${prefixed_env_size} bytes <= 100)"
+    fi
+    if grep -qiE '<!doctype html|<html' <<< "$prefixed_env_body"; then
+      fail "prefixed learner-dashboard env.config.js body contains HTML shell content"
+    else
+      pass "prefixed learner-dashboard env.config.js body is not HTML shell content"
+    fi
+  fi
+
   # 2.2 Mereka logo (default tenant)
   logo_url="${MFE_BASE_URL}/theme/logo-horizontal.svg"
   logo_status=$(http_status "$logo_url")

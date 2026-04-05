@@ -9136,7 +9136,8 @@
         "AC-ROUTE-001",
         "AC-ROUTE-002",
         "AC-ROUTE-003",
-        "AC-ROUTE-004"
+        "AC-ROUTE-004",
+        "AC-ROUTE-005"
       ],
       "status": "active",
       "tier": "release_blocking"
@@ -9183,7 +9184,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-runtime-contract.sh",
-      "reference_count": 7,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

@@ -11,11 +11,14 @@
 #   3. All MFE route handlers proxy exclusively to mfe:8002 from the outer Caddyfile
 #      (deploy/k8s/base/apps/caddy/Caddyfile)
 #   4. Cross-reference with branding verifier MFE_ROUTES map for drift detection
+#   5. Prefixed runtime env.config.js requests are rewritten to the shared
+#      /openedx/dist/env.config.js instead of falling through to SPA index.html
 #
 # AC-ROUTE-001: Routes mapped from runtime Caddyfile expectations
 # AC-ROUTE-002: Both /authoring and /course-authoring tested
 # AC-ROUTE-003: Intended to gate CI (syntax-checked in monitoring-guardrails)
 # AC-ROUTE-004: Evidence and log commands documented in docs/ops/runbooks/architecture/MFE_ROUTING_PARITY.md
+# AC-ROUTE-005: Prefixed env.config.js requests resolve to the shared runtime config artifact
 #
 # Usage: ./scripts/qa/verify-mfe-routing-parity.sh
 
@@ -39,7 +42,7 @@ do_warn() { WARN=$((WARN + 1)); echo "  WARN  $1"; }
 
 echo "=== MFE Routing Parity Verification ==="
 echo "Spec: bead-115d17"
-echo "Coverage: AC-ROUTE-001, AC-ROUTE-002, AC-ROUTE-003, AC-ROUTE-004"
+echo "Coverage: AC-ROUTE-001, AC-ROUTE-002, AC-ROUTE-003, AC-ROUTE-004, AC-ROUTE-005"
 echo ""
 
 # =============================================================================
@@ -130,9 +133,6 @@ declare -A EXPECTED_ROUTES=(
 # Verify each expected route has a handler block and correct dist directory
 for route in "${!EXPECTED_ROUTES[@]}"; do
   dist_dir="${EXPECTED_ROUTES[$route]}"
-
-  # Check the named matcher exists: @mfe_<name>
-  matcher_name="mfe_${dist_dir}"
 
   # Look for: path <route> <route>/*
   route_escaped="${route//\//\\/}"
@@ -346,7 +346,44 @@ fi
 echo ""
 
 # =============================================================================
-# Section 10: Branding verifier cross-reference (AC-ROUTE-001)
+# Section 10: Prefixed env.config.js routing (AC-ROUTE-005)
+# =============================================================================
+echo "--- Prefixed env.config.js Routing (AC-ROUTE-005) ---"
+
+ENV_CONFIG_BLOCK=$(awk '
+  /@mfe_prefixed_env_config/ { flag=1 }
+  flag { print }
+  flag && /file_server/ { exit }
+' "$MFE_CADDYFILE")
+
+if [ -n "$ENV_CONFIG_BLOCK" ]; then
+  do_pass "AC-ROUTE-005: prefixed env.config.js handler exists in MFE Caddyfile"
+else
+  do_fail "AC-ROUTE-005: prefixed env.config.js handler missing from MFE Caddyfile"
+fi
+
+if printf '%s\n' "$ENV_CONFIG_BLOCK" | grep -q 'learner-dashboard'; then
+  do_pass "AC-ROUTE-005: learner-dashboard prefix is covered by prefixed env.config.js matcher"
+else
+  do_fail "AC-ROUTE-005: learner-dashboard prefix missing from prefixed env.config.js matcher"
+fi
+
+if printf '%s\n' "$ENV_CONFIG_BLOCK" | grep -q 'rewrite \* /env.config.js'; then
+  do_pass "AC-ROUTE-005: prefixed env.config.js requests rewrite to /env.config.js"
+else
+  do_fail "AC-ROUTE-005: prefixed env.config.js rewrite to /env.config.js missing"
+fi
+
+if printf '%s\n' "$ENV_CONFIG_BLOCK" | grep -q 'root \* /openedx/dist'; then
+  do_pass "AC-ROUTE-005: prefixed env.config.js is served from /openedx/dist"
+else
+  do_fail "AC-ROUTE-005: prefixed env.config.js root is not /openedx/dist"
+fi
+
+echo ""
+
+# =============================================================================
+# Section 11: Branding verifier cross-reference (AC-ROUTE-001)
 # =============================================================================
 echo "--- Branding Verifier Cross-Reference (AC-ROUTE-001) ---"
 
@@ -366,7 +403,7 @@ fi
 echo ""
 
 # =============================================================================
-# Section 11: Runbook content checks (AC-ROUTE-004)
+# Section 12: Runbook content checks (AC-ROUTE-004)
 # =============================================================================
 echo "--- Runbook Content Checks (AC-ROUTE-004) ---"
 
