@@ -180,24 +180,19 @@ jobs:
           if [[ "$INPUT_RUN_AUTHENTICATED_SSO_CANARY" == "true" ]]; then
             export RUN_AUTHENTICATED_SSO_CANARY=1
             export AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1
-            # Optional: only require Studio staff canary when secrets are present.
-            require_studio=1
-            if [[ "$INPUT_ENV_SCOPE" == "prod" || "$INPUT_ENV_SCOPE" == "both" || "$INPUT_ENV_SCOPE" == "all" ]]; then
-              if [[ -z "${SSO_CANARY_STUDIO_EMAIL_PROD:-}" || -z "${SSO_CANARY_STUDIO_PASSWORD_PROD:-}" ]]; then
-                require_studio=0
-              fi
+            export REQUIRE_STUDIO_CANARY=0
+            export REQUIRE_STUDIO_CANARY_PROD=0
+            export REQUIRE_STUDIO_CANARY_DEV=0
+            export REQUIRE_STUDIO_CANARY_STAGING=0
+            if [[ -n "${SSO_CANARY_STUDIO_EMAIL_PROD:-}" && -n "${SSO_CANARY_STUDIO_PASSWORD_PROD:-}" ]]; then
+              export REQUIRE_STUDIO_CANARY_PROD=1
             fi
-            if [[ "$INPUT_ENV_SCOPE" == "dev" || "$INPUT_ENV_SCOPE" == "both" || "$INPUT_ENV_SCOPE" == "all" ]]; then
-              if [[ -z "${SSO_CANARY_STUDIO_EMAIL_DEV:-}" || -z "${SSO_CANARY_STUDIO_PASSWORD_DEV:-}" ]]; then
-                require_studio=0
-              fi
+            if [[ -n "${SSO_CANARY_STUDIO_EMAIL_DEV:-}" && -n "${SSO_CANARY_STUDIO_PASSWORD_DEV:-}" ]]; then
+              export REQUIRE_STUDIO_CANARY_DEV=1
             fi
-            if [[ "$INPUT_ENV_SCOPE" == "staging" || "$INPUT_ENV_SCOPE" == "all" ]]; then
-              if [[ -z "${SSO_CANARY_STUDIO_EMAIL_STAGING:-}" || -z "${SSO_CANARY_STUDIO_PASSWORD_STAGING:-}" ]]; then
-                require_studio=0
-              fi
+            if [[ -n "${SSO_CANARY_STUDIO_EMAIL_STAGING:-}" && -n "${SSO_CANARY_STUDIO_PASSWORD_STAGING:-}" ]]; then
+              export REQUIRE_STUDIO_CANARY_STAGING=1
             fi
-            export REQUIRE_STUDIO_CANARY="$require_studio"
           else
             export RUN_AUTHENTICATED_SSO_CANARY=0
           fi

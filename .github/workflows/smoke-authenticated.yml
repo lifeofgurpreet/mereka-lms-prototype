@@ -263,6 +263,37 @@ jobs:
           python-version: '3.11'
           playwright-version: '1.50.0'
 
+      - name: Resolve Studio canary requirements
+        id: resolve-studio-canary
+        env:
+          INPUT_ENV_SCOPE: ${{ github.event.inputs.env_scope || 'staging' }}
+          SSO_CANARY_STUDIO_EMAIL_PROD: ${{ secrets.SSO_CANARY_STUDIO_EMAIL_PROD }}
+          SSO_CANARY_STUDIO_PASSWORD_PROD: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_PROD }}
+          SSO_CANARY_STUDIO_EMAIL_DEV: ${{ secrets.SSO_CANARY_STUDIO_EMAIL_DEV }}
+          SSO_CANARY_STUDIO_PASSWORD_DEV: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_DEV }}
+          SSO_CANARY_STUDIO_EMAIL_STAGING: ${{ secrets.SSO_CANARY_STUDIO_EMAIL_STAGING }}
+          SSO_CANARY_STUDIO_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_STAGING }}
+        run: |
+          set -euo pipefail
+
+          require_prod=0
+          require_dev=0
+          require_staging=0
+
+          if [[ -n "${SSO_CANARY_STUDIO_EMAIL_PROD:-}" && -n "${SSO_CANARY_STUDIO_PASSWORD_PROD:-}" ]]; then
+            require_prod=1
+          fi
+          if [[ -n "${SSO_CANARY_STUDIO_EMAIL_DEV:-}" && -n "${SSO_CANARY_STUDIO_PASSWORD_DEV:-}" ]]; then
+            require_dev=1
+          fi
+          if [[ -n "${SSO_CANARY_STUDIO_EMAIL_STAGING:-}" && -n "${SSO_CANARY_STUDIO_PASSWORD_STAGING:-}" ]]; then
+            require_staging=1
+          fi
+
+          echo "require_prod=$require_prod" >> "$GITHUB_OUTPUT"
+          echo "require_dev=$require_dev" >> "$GITHUB_OUTPUT"
+          echo "require_staging=$require_staging" >> "$GITHUB_OUTPUT"
+
       - name: Run SSO canary
         env:
           INPUT_ENV_SCOPE: ${{ github.event.inputs.env_scope || 'staging' }}
@@ -282,6 +313,9 @@ jobs:
           SSO_CANARY_PASSWORD: ${{ secrets.SSO_CANARY_PASSWORD }}
           REQUIRE_SECRETS: '1'
           REQUIRE_STUDIO_CANARY: '0'
+          REQUIRE_STUDIO_CANARY_PROD: ${{ steps.resolve-studio-canary.outputs.require_prod }}
+          REQUIRE_STUDIO_CANARY_DEV: ${{ steps.resolve-studio-canary.outputs.require_dev }}
+          REQUIRE_STUDIO_CANARY_STAGING: ${{ steps.resolve-studio-canary.outputs.require_staging }}
           SSO_CANARY_TIMEOUT_SECONDS: '180'
         run: ./scripts/qa/verify-authenticated-sso-canary.sh --env "$INPUT_ENV_SCOPE"
 

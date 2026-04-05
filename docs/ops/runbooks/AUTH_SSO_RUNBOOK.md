@@ -36,6 +36,10 @@ Notes:
 - Secrets: `SSO_CANARY_*`
 - Gate variable: `RUN_AUTHENTICATED_SSO_CANARY=true`
 
+Studio staff canary policy:
+- prod and staging Studio canaries are required when their dedicated `SSO_CANARY_STUDIO_*` secrets are present
+- dev Studio coverage remains optional until dedicated dev staff credentials are provisioned
+
 Audit wiring (workflows + GitHub secret/variable presence):
 
 ```bash
@@ -92,4 +96,3 @@ Remediate (sets strong random passwords; does not print them):
 ```bash
 ./scripts/qa/verify-oidc-user-password-state.sh --env prod --fix
 ```
-
