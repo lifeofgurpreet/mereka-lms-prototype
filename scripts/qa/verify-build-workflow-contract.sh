@@ -128,6 +128,7 @@ required_trigger_paths=(
   "scripts/infra/generate-build-provenance.sh"
   "scripts/infra/generate-release-bundle.sh"
   "scripts/release/generate_release_object.py"
+  "scripts/release/release_object_bindings.py"
   "scripts/infra/build-openedx-image.sh"
   "scripts/infra/build-mfe-image.sh"
   "scripts/infra/release-openedx-gitops.sh"
@@ -328,6 +329,30 @@ if grep -q "var/ci/release-gate-envelope.json" "$BUILD_WF"; then
   pass "build workflow uploads release-gate envelope artifact"
 else
   fail "build workflow missing release-gate envelope artifact upload"
+fi
+
+if [[ "$UPDATE_GITOPS_BLOCK" == *'./scripts/qa/verify-release-object.sh var/ci/release-object.json'* && "$UPDATE_GITOPS_BLOCK" == *'scripts/release/release_object_bindings.py'* && "$UPDATE_GITOPS_BLOCK" == *'promotion-inputs'* ]]; then
+  pass "update-gitops job re-validates the downloaded release object before promotion"
+else
+  fail "update-gitops job missing release object consumer validation gate"
+fi
+
+if grep -Eq '\./scripts/infra/release-openedx-gitops\.sh .*--release-object-json var/ci/release-object\.json' <<<"$UPDATE_GITOPS_BLOCK"; then
+  pass "update-gitops job binds release object into promotion step"
+else
+  fail "update-gitops job missing release-object binding on promotion step"
+fi
+
+if grep -Eq '\./bin/lms-ops[[:space:]]+proof .*--release-object-json var/ci/release-object\.json' <<<"$UPDATE_GITOPS_BLOCK"; then
+  pass "update-gitops job binds release object into proof step"
+else
+  fail "update-gitops job missing release-object binding on proof step"
+fi
+
+if [[ "$UPDATE_GITOPS_BLOCK" == *'verify-proof-envelope'* && "$UPDATE_GITOPS_BLOCK" == *'--envelope-json var/proof/release-gate.json'* ]]; then
+  pass "update-gitops job verifies release-gate envelope binding against release object"
+else
+  fail "update-gitops job missing proof-envelope release binding verification"
 fi
 
 # Informational SBOM generation must be bounded so it cannot occupy the main

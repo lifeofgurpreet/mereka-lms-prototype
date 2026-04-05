@@ -18,6 +18,8 @@
 #   --lane <lane>      Canonical lane: dev|staging|prod (default: dev)
 #   --dry-run          Mark envelope as dry-run
 #   --ci-run-id <id>   GitHub Actions run ID (default: "local")
+#   --release-object-json <path>
+#                      Bind release-object identity into emitted envelope(s)
 #   --output-dir <dir> Write envelopes here (default: var/proof)
 #   --format json      JSON output only (no human-readable text)
 #   --skip-cluster     Pass to release-gate.sh (skip live cluster checks)
@@ -36,6 +38,7 @@ CONCERN=""
 LANE="dev"
 DRY_RUN=false
 CI_RUN_ID="${GITHUB_RUN_ID:-local}"
+RELEASE_OBJECT_JSON=""
 OUTPUT_DIR="$REPO_ROOT/var/proof"
 FORMAT="text"
 SKIP_CLUSTER=false
@@ -48,6 +51,7 @@ while [[ $# -gt 0 ]]; do
     --lane)         LANE="$(normalize_lane_to_canonical "${2:?--lane requires a value}")"; shift 2 ;;
     --dry-run)      DRY_RUN=true; shift ;;
     --ci-run-id)    CI_RUN_ID="${2:?--ci-run-id requires a value}"; shift 2 ;;
+    --release-object-json) RELEASE_OBJECT_JSON="${2:?--release-object-json requires a value}"; shift 2 ;;
     --output-dir)   OUTPUT_DIR="${2:?--output-dir requires a value}"; shift 2 ;;
     --format)       FORMAT="${2:?--format requires a value}"; shift 2 ;;
     --skip-cluster) SKIP_CLUSTER=true; shift ;;
@@ -63,6 +67,15 @@ done
 if [[ -z "$CONCERN" ]]; then
   echo "Error: --concern is required (release-gate|migration-proof|runtime-smoke|aggregate)" >&2
   exit 1
+fi
+
+RELEASE_IDENTITY_JSON=""
+if [[ -n "$RELEASE_OBJECT_JSON" ]]; then
+  RELEASE_IDENTITY_JSON="$(
+    python3 "$REPO_ROOT/scripts/release/release_object_bindings.py" \
+      identity \
+      --release-object-json "$RELEASE_OBJECT_JSON"
+  )"
 fi
 
 # Resolve namespace from lane if not explicitly set
@@ -89,30 +102,55 @@ emit_envelope() {
   local output_file="$OUTPUT_DIR/${concern}.json"
 
   local error_field=""
-  if [[ -n "$error" ]]; then
-    error_field="\"error\": $(python3 -c "import json; print(json.dumps('$error'))"),"
-  fi
+  OUTPUT_FILE="$output_file" \
+  ENVELOPE_CONCERN="$concern" \
+  ENVELOPE_RESULT="$result" \
+  ENVELOPE_TIMESTAMP="$TIMESTAMP" \
+  ENVELOPE_COMMIT_SHA="$COMMIT_SHA" \
+  ENVELOPE_CI_RUN_ID="$CI_RUN_ID" \
+  ENVELOPE_LANE="$LANE" \
+  ENVELOPE_DRY_RUN="$DRY_RUN" \
+  ENVELOPE_DETAILS="$details" \
+  ENVELOPE_WARNINGS="$warnings" \
+  ENVELOPE_DURATION_MS="$duration_ms" \
+  ENVELOPE_ERROR="$error" \
+  ENVELOPE_CONTRACT_REF="${CONTRACT_REF:-Biji-Biji-Initiative/platform-control-plane@5fffde1a}" \
+  ENVELOPE_RELEASE_IDENTITY="$RELEASE_IDENTITY_JSON" \
+  python3 - <<'PY'
+from __future__ import annotations
 
-  cat > "$output_file" <<ENVELOPE
-{
-  "schema_version": "1",
-  "concern": "$concern",
-  "timestamp": "$TIMESTAMP",
-  "commit_sha": "$COMMIT_SHA",
-  "ci_run_id": "$CI_RUN_ID",
-  "lane": "$LANE",
-  "service_id": "mereka-lms",
-  "contract_family": "proof-envelope",
-  "contract_version": "1.0",
-  "contract_ref": "${CONTRACT_REF:-Biji-Biji-Initiative/platform-control-plane@5fffde1a}",
-  "dry_run": $DRY_RUN,
-  "result": "$result",
-  "details": $details,
-  ${error_field}
-  "warnings": $warnings,
-  "duration_ms": $duration_ms
+import json
+import os
+from pathlib import Path
+
+payload = {
+    "schema_version": "1",
+    "concern": os.environ["ENVELOPE_CONCERN"],
+    "timestamp": os.environ["ENVELOPE_TIMESTAMP"],
+    "commit_sha": os.environ["ENVELOPE_COMMIT_SHA"],
+    "ci_run_id": os.environ["ENVELOPE_CI_RUN_ID"],
+    "lane": os.environ["ENVELOPE_LANE"],
+    "service_id": "mereka-lms",
+    "contract_family": "proof-envelope",
+    "contract_version": "1.0",
+    "contract_ref": os.environ["ENVELOPE_CONTRACT_REF"],
+    "dry_run": os.environ["ENVELOPE_DRY_RUN"].lower() == "true",
+    "result": os.environ["ENVELOPE_RESULT"],
+    "details": json.loads(os.environ["ENVELOPE_DETAILS"]),
+    "warnings": json.loads(os.environ["ENVELOPE_WARNINGS"]),
+    "duration_ms": int(os.environ["ENVELOPE_DURATION_MS"]),
 }
-ENVELOPE
+
+error = os.environ.get("ENVELOPE_ERROR", "")
+if error:
+    payload["error"] = error
+
+release_identity = os.environ.get("ENVELOPE_RELEASE_IDENTITY", "").strip()
+if release_identity:
+    payload["release_identity"] = json.loads(release_identity)
+
+Path(os.environ["OUTPUT_FILE"]).write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+PY
 
   if [[ "$FORMAT" == "json" ]]; then
     cat "$output_file"
@@ -142,6 +180,7 @@ run_and_capture() {
 run_release_gate() {
   local args=("--overlay" "$OVERLAY")
   [[ "$SKIP_CLUSTER" == "true" ]] && args+=("--skip-cluster")
+  [[ -n "$RELEASE_OBJECT_JSON" ]] && args+=("--release-object-json" "$RELEASE_OBJECT_JSON")
 
   [[ "$FORMAT" != "json" ]] && echo "Running release-gate (overlay: $OVERLAY)..."
 

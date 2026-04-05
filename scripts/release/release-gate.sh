@@ -3,11 +3,13 @@
 # Canonical release verification entrypoint for Phase 2 deployment contract.
 #
 # Usage:
-#   scripts/release/release-gate.sh [--overlay <path>] [--skip-cluster]
+#   scripts/release/release-gate.sh [--overlay <path>] [--skip-cluster] [--release-object-json <path>]
 #
 # Flags:
 #   --overlay <path>   Path to Kustomize overlay to check (default: deploy/k8s/base)
 #   --skip-cluster     Skip checks that require a live Kubernetes cluster
+#   --release-object-json <path>
+#                      Bind canonical release-object identity into the proof artifact
 #
 # Exit codes:
 #   0  All gates PASS
@@ -28,6 +30,7 @@ NC='\033[0m'
 # ── Arg parsing ───────────────────────────────────────────────────────────
 OVERLAY="deploy/k8s/base"
 SKIP_CLUSTER=false
+RELEASE_OBJECT_JSON=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -39,13 +42,26 @@ while [[ $# -gt 0 ]]; do
       SKIP_CLUSTER=true
       shift
       ;;
+    --release-object-json)
+      RELEASE_OBJECT_JSON="${2:?--release-object-json requires a path}"
+      shift 2
+      ;;
     *)
       echo "Unknown flag: $1" >&2
-      echo "Usage: $0 [--overlay <path>] [--skip-cluster]" >&2
+      echo "Usage: $0 [--overlay <path>] [--skip-cluster] [--release-object-json <path>]" >&2
       exit 1
       ;;
   esac
 done
+
+RELEASE_IDENTITY_JSON=""
+if [[ -n "$RELEASE_OBJECT_JSON" ]]; then
+  RELEASE_IDENTITY_JSON="$(
+    python3 "$REPO_ROOT/scripts/release/release_object_bindings.py" \
+      identity \
+      --release-object-json "$RELEASE_OBJECT_JSON"
+  )"
+fi
 
 # ── Counters ──────────────────────────────────────────────────────────────
 PASS=0
@@ -293,20 +309,46 @@ VERDICT="pass"
 # A "pass" with closure_level=static is NOT canonical runtime proof.
 CLOSURE_LEVEL="runtime"
 [[ "$SKIP_CLUSTER" == "true" ]] && CLOSURE_LEVEL="static"
-cat > "$PROOF_DIR/release-gate.json" <<PROOF
-{
-  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-  "sha": "$(git -C "$REPO_ROOT" rev-parse HEAD 2>/dev/null || echo "unknown")",
-  "overlay": "$OVERLAY",
-  "skip_cluster": $SKIP_CLUSTER,
-  "closure_level": "$CLOSURE_LEVEL",
-  "gates_pass": $PASS,
-  "gates_fail": $FAIL,
-  "gates_warn": $WARN,
-  "gates_skip": $SKIP,
-  "verdict": "$VERDICT"
+PROOF_PATH="$PROOF_DIR/release-gate.json"
+PROOF_PATH="$PROOF_PATH" \
+TIMESTAMP_UTC="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+HEAD_SHA="$(git -C "$REPO_ROOT" rev-parse HEAD 2>/dev/null || echo "unknown")" \
+OVERLAY_VALUE="$OVERLAY" \
+SKIP_CLUSTER_VALUE="$SKIP_CLUSTER" \
+CLOSURE_LEVEL_VALUE="$CLOSURE_LEVEL" \
+PASS_COUNT="$PASS" \
+FAIL_COUNT="$FAIL" \
+WARN_COUNT="$WARN" \
+SKIP_COUNT="$SKIP" \
+VERDICT_VALUE="$VERDICT" \
+RELEASE_IDENTITY_JSON="$RELEASE_IDENTITY_JSON" \
+python3 - <<'PY'
+from __future__ import annotations
+
+import json
+import os
+from pathlib import Path
+
+payload = {
+    "timestamp": os.environ["TIMESTAMP_UTC"],
+    "sha": os.environ["HEAD_SHA"],
+    "overlay": os.environ["OVERLAY_VALUE"],
+    "skip_cluster": os.environ["SKIP_CLUSTER_VALUE"].lower() == "true",
+    "closure_level": os.environ["CLOSURE_LEVEL_VALUE"],
+    "gates_pass": int(os.environ["PASS_COUNT"]),
+    "gates_fail": int(os.environ["FAIL_COUNT"]),
+    "gates_warn": int(os.environ["WARN_COUNT"]),
+    "gates_skip": int(os.environ["SKIP_COUNT"]),
+    "verdict": os.environ["VERDICT_VALUE"],
 }
-PROOF
+
+release_identity_json = os.environ.get("RELEASE_IDENTITY_JSON", "").strip()
+if release_identity_json:
+    payload["release_identity"] = json.loads(release_identity_json)
+
+proof_path = Path(os.environ["PROOF_PATH"])
+proof_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+PY
 info "Proof artifact written: $PROOF_DIR/release-gate.json"
 
 # ── Summary ───────────────────────────────────────────────────────────────
