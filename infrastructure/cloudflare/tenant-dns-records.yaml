@@ -22,9 +22,9 @@ records:
     proxied: false  # DNS-only — multi-level subdomain needs Let's Encrypt
     comment: "Acme Corp pilot tenant — DNS-only + Let's Encrypt"
 
-  # Studio for Acme (optional, if per-tenant studio needed)
-  # - name: studio.acme.academyv2.mereka.io
-  #   type: A
-  #   content: "${GKE_LOAD_BALANCER_IP}"
-  #   proxied: false
-  #   comment: "Acme Corp Studio — DNS-only + Let's Encrypt"
+# Studio for Acme (optional, if per-tenant studio needed)
+# - name: studio.acme.academyv2.mereka.io
+#   type: A
+#   content: "${GKE_LOAD_BALANCER_IP}"
+#   proxied: false
+#   comment: "Acme Corp Studio — DNS-only + Let's Encrypt"

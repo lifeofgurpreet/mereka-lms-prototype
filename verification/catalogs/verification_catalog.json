@@ -15640,7 +15640,7 @@
       "ci_binding": [],
       "ci_entrypoints": [],
       "env_scope": [
-        "global"
+        "dev"
       ],
       "kind": "verify",
       "mutability": "read-only",

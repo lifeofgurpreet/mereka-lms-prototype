@@ -45,6 +45,7 @@ tenant_resolution_path = repo_root / "infrastructure/tutor/plugins/_mereka_lms/m
 
 failed = 0
 passed = 0
+warnings = 0
 
 
 def ok(msg: str) -> None:
@@ -57,6 +58,12 @@ def fail(msg: str) -> None:
     global failed
     failed += 1
     print(f"FAIL {msg}")
+
+
+def warn(msg: str) -> None:
+    global warnings
+    warnings += 1
+    print(f"WARN {msg}")
 
 
 def require_file(path: Path, label: str) -> None:
@@ -87,6 +94,7 @@ contract = yaml.safe_load(contract_path.read_text(encoding="utf-8"))
 experience_contract = yaml.safe_load(experience_contract_path.read_text(encoding="utf-8"))
 multisite = yaml.safe_load(multisite_path.read_text(encoding="utf-8"))
 multisite_dev = yaml.safe_load(multisite_dev_path.read_text(encoding="utf-8"))
+tenant_registry_contract = yaml.safe_load((repo_root / "deploy/k8s/tenancy/tenant-registry.yaml").read_text(encoding="utf-8")) or {}
 registry_docs = list(yaml.safe_load_all(registry_path.read_text(encoding="utf-8")))
 caddy_text = caddy_path.read_text(encoding="utf-8")
 tenant_resolution_text = tenant_resolution_path.read_text(encoding="utf-8")
@@ -105,6 +113,11 @@ if not registry_yaml_blob.strip():
 
 registry_tenants = yaml.safe_load(registry_yaml_blob) or []
 registry_by_slug = {tenant.get("slug"): tenant for tenant in registry_tenants if isinstance(tenant, dict)}
+tenant_contract_by_slug = {
+    tenant.get("slug"): tenant
+    for tenant in tenant_registry_contract.get("tenants", [])
+    if isinstance(tenant, dict) and tenant.get("slug")
+}
 
 sites = multisite.get("sites") or []
 site_by_domain = {site.get("domain"): site for site in sites if isinstance(site, dict)}
@@ -169,7 +182,16 @@ for tenant in active_tenants:
         if registry_domain == lms:
             ok(f"{slug}: tenant-registry domain matches {lms}")
         else:
-            fail(f"{slug}: tenant-registry domain mismatch (expected {lms}, got {registry_domain})")
+            registry_contract_entry = tenant_contract_by_slug.get(registry_slug) or tenant_contract_by_slug.get(slug) or {}
+            current_site_domain = registry_contract_entry.get("site_domain")
+            target_site_domain = registry_contract_entry.get("target_site_domain")
+            if current_site_domain == lms and target_site_domain == registry_domain:
+                warn(
+                    f"{slug}: tenant-registry domain follows documented migration target "
+                    f"(current {lms}, target {registry_domain})"
+                )
+            else:
+                fail(f"{slug}: tenant-registry domain mismatch (expected {lms}, got {registry_domain})")
 
         expected_aliases = sorted(tenant.get("aliases") or [])
         actual_aliases = sorted(registry_entry.get("alias_domains") or [])
@@ -342,7 +364,7 @@ for tenant in experience_tenants:
 
         expect_contains(tenant_resolution_text, f"'{lms_host}': {variant_symbol}", f"{slug}/{env}: runtime host binding exists")
 
-print(f"Summary: PASS={passed} FAIL={failed}")
+print(f"Summary: PASS={passed} WARN={warnings} FAIL={failed}")
 if failed:
     raise SystemExit(1)
 PY
