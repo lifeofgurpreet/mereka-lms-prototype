@@ -706,6 +706,9 @@ ci_runtime_inventory:
       category: LIVE_CLUSTER
     - script: scripts/qa/verify-content-libraries-v2-enterprise.sh
       category: LIVE_CLUSTER
+    - script: scripts/tenants/verify-prod-runtime-proof.sh
+      category: LIVE_CLUSTER
+      note: active-production runtime proof; successor verifier for the parked-state prod gate
     - script: scripts/tenants/bootstrap-enterprise-service-deps.sh
       category: LIVE_CLUSTER
       note: idempotent manual bootstrap; use --dry-run first
@@ -1959,6 +1962,11 @@ scripts:
   - path: scripts/tenants/sync-tenant-registry-configmap.sh
     owner: platform-team
     purpose: Sync tenant registry to Kubernetes ConfigMap
+    criticality: release-supporting
+
+  - path: scripts/tenants/verify-prod-runtime-proof.sh
+    owner: platform-team
+    purpose: Verify post-deploy runtime proof for active production tenants
     criticality: release-supporting
 
   # ── Migrations ──────────────────────────────────────────────────────────────

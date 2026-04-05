@@ -1,0 +1,136 @@
+---
+schema_version: "1.0"
+owner: Platform Team
+status: canonical
+identity_authority_rule: real identity systems first
+secret_authority_rule: Infisical is canonical for secret material and metadata
+consumer_rule: GitHub/runtime consumers mirror from Infisical only
+
+consumer_surfaces:
+  github_actions:
+    secret_families:
+      - E2E_TEST_USERNAME
+      - E2E_TEST_PASSWORD
+      - E2E_TEST_COURSE_ID
+      - SSO_CANARY_EMAIL_DEV
+      - SSO_CANARY_PASSWORD_DEV
+      - SSO_CANARY_EMAIL_STAGING
+      - SSO_CANARY_PASSWORD_STAGING
+      - SSO_CANARY_EMAIL_PROD
+      - SSO_CANARY_PASSWORD_PROD
+      - SSO_CANARY_STUDIO_EMAIL_DEV
+      - SSO_CANARY_STUDIO_PASSWORD_DEV
+      - SSO_CANARY_STUDIO_EMAIL_STAGING
+      - SSO_CANARY_STUDIO_PASSWORD_STAGING
+      - SSO_CANARY_STUDIO_EMAIL_PROD
+      - SSO_CANARY_STUDIO_PASSWORD_PROD
+  runtime_canaries:
+    verifiers:
+      - scripts/qa/verify-authenticated-sso-canary.sh
+      - .github/workflows/post-deploy-e2e.yml
+
+registrations:
+  - canonical_id: smoke-learner-mereka
+    tenant: mereka
+    role: learner
+    identity_authority: Authentik + Open edX learner record
+    secret_authority: Infisical
+    target_envs: [dev, staging, production]
+    infisical_refs:
+      - SMOKE_LEARNER_MEREKA_{ENV}_EMAIL
+      - SMOKE_LEARNER_MEREKA_{ENV}_PASSWORD
+    consumer_mirrors:
+      dev: [SSO_CANARY_EMAIL_DEV, SSO_CANARY_PASSWORD_DEV]
+      staging: [SSO_CANARY_EMAIL_STAGING, SSO_CANARY_PASSWORD_STAGING]
+      production: [SSO_CANARY_EMAIL_PROD, SSO_CANARY_PASSWORD_PROD]
+
+  - canonical_id: smoke-operator-mereka
+    tenant: mereka
+    role: operator
+    identity_authority: Authentik + Open edX staff record
+    secret_authority: Infisical
+    target_envs: [dev, staging, production]
+    infisical_refs:
+      - SMOKE_OPERATOR_MEREKA_{ENV}_EMAIL
+      - SMOKE_OPERATOR_MEREKA_{ENV}_PASSWORD
+    consumer_mirrors:
+      dev: [SSO_CANARY_STUDIO_EMAIL_DEV, SSO_CANARY_STUDIO_PASSWORD_DEV]
+      staging: [SSO_CANARY_STUDIO_EMAIL_STAGING, SSO_CANARY_STUDIO_PASSWORD_STAGING]
+      production: [SSO_CANARY_STUDIO_EMAIL_PROD, SSO_CANARY_STUDIO_PASSWORD_PROD]
+
+  - canonical_id: smoke-learner-biji-biji
+    tenant: biji-biji
+    role: learner
+    identity_authority: Authentik + Open edX learner record
+    secret_authority: Infisical
+    target_envs: [dev, staging, production]
+    infisical_refs:
+      - SMOKE_LEARNER_BIJI_BIJI_{ENV}_EMAIL
+      - SMOKE_LEARNER_BIJI_BIJI_{ENV}_PASSWORD
+    consumer_mirrors: {}
+
+  - canonical_id: smoke-operator-biji-biji
+    tenant: biji-biji
+    role: operator
+    identity_authority: Authentik + Open edX staff record
+    secret_authority: Infisical
+    target_envs: [dev, staging, production]
+    infisical_refs:
+      - SMOKE_OPERATOR_BIJI_BIJI_{ENV}_EMAIL
+      - SMOKE_OPERATOR_BIJI_BIJI_{ENV}_PASSWORD
+    consumer_mirrors: {}
+
+  - canonical_id: smoke-learner-skillourfuture
+    tenant: skillourfuture
+    role: learner
+    identity_authority: Authentik + Open edX learner record
+    secret_authority: Infisical
+    target_envs: [dev, staging, production]
+    infisical_refs:
+      - SMOKE_LEARNER_SOF_{ENV}_EMAIL
+      - SMOKE_LEARNER_SOF_{ENV}_PASSWORD
+    consumer_mirrors: {}
+
+  - canonical_id: smoke-operator-skillourfuture
+    tenant: skillourfuture
+    role: operator
+    identity_authority: Authentik + Open edX staff record
+    secret_authority: Infisical
+    target_envs: [dev, staging, production]
+    infisical_refs:
+      - SMOKE_OPERATOR_SOF_{ENV}_EMAIL
+      - SMOKE_OPERATOR_SOF_{ENV}_PASSWORD
+    consumer_mirrors: {}
+
+  - canonical_id: smoke-platform-superuser
+    tenant: platform
+    role: superuser
+    identity_authority: Open edX admin authority
+    secret_authority: Infisical
+    target_envs: [dev, staging, production]
+    infisical_refs:
+      - SMOKE_PLATFORM_SUPERUSER_{ENV}_EMAIL
+      - SMOKE_PLATFORM_SUPERUSER_{ENV}_PASSWORD
+    consumer_mirrors: {}
+
+  - canonical_id: smoke-enterprise-admin
+    tenant: shared
+    role: enterprise-admin
+    identity_authority: enterprise identity authority
+    secret_authority: Infisical
+    target_envs: [dev, staging, production]
+    infisical_refs:
+      - SMOKE_ENTERPRISE_ADMIN_{ENV}_EMAIL
+      - SMOKE_ENTERPRISE_ADMIN_{ENV}_PASSWORD
+    consumer_mirrors: {}
+
+  - canonical_id: smoke-analytics-support
+    tenant: shared
+    role: analytics-support
+    identity_authority: analytics identity authority
+    secret_authority: Infisical
+    target_envs: [dev, staging, production]
+    infisical_refs:
+      - SMOKE_ANALYTICS_SUPPORT_{ENV}_EMAIL
+      - SMOKE_ANALYTICS_SUPPORT_{ENV}_PASSWORD
+    consumer_mirrors: {}

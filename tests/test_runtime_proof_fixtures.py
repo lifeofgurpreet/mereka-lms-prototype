@@ -28,7 +28,12 @@ from typing import Any
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-MANIFEST_PATH = REPO_ROOT / "config" / "runtime-proof" / "dev.synthetic-proof-fixtures.yaml"
+MANIFEST_PATHS = {
+    "dev": REPO_ROOT / "config" / "runtime-proof" / "dev.synthetic-proof-fixtures.yaml",
+    "staging": REPO_ROOT / "config" / "runtime-proof" / "staging.synthetic-proof-fixtures.yaml",
+    "production": REPO_ROOT / "config" / "runtime-proof" / "prod.synthetic-proof-fixtures.yaml",
+}
+DEV_MANIFEST_PATH = MANIFEST_PATHS["dev"]
 BOOTSTRAP_TOOL = REPO_ROOT / "scripts" / "tenants" / "bootstrap-runtime-proof-fixtures.py"
 VALIDATE_TOOL = REPO_ROOT / "scripts" / "tenants" / "validate-runtime-proof-fixtures.py"
 CATALOG_TOOL = REPO_ROOT / "scripts" / "tenants" / "bootstrap-runtime-proof-fixtures-catalog.py"
@@ -47,11 +52,11 @@ REQUIRED_FIXTURE_CLASSES = [
 def dev_manifest() -> dict[str, Any]:
     """Load and return the dev synthetic proof fixture manifest."""
     yaml = pytest.importorskip("yaml", reason="PyYAML required")
-    assert MANIFEST_PATH.exists(), (
-        f"Manifest not found: {MANIFEST_PATH}. "
+    assert DEV_MANIFEST_PATH.exists(), (
+        f"Manifest not found: {DEV_MANIFEST_PATH}. "
         "Run from repo root or ensure the manifest has been created."
     )
-    content = yaml.safe_load(MANIFEST_PATH.read_text(encoding="utf-8"))
+    content = yaml.safe_load(DEV_MANIFEST_PATH.read_text(encoding="utf-8"))
     assert isinstance(content, dict), "Manifest must parse as a dict"
     return content
 
@@ -88,15 +93,29 @@ def validate_module():
 
 
 class TestManifestParsing:
-    def test_manifest_file_exists(self):
-        assert MANIFEST_PATH.exists(), f"Manifest not found: {MANIFEST_PATH}"
+    @pytest.mark.parametrize(
+        ("env_name", "manifest_path"),
+        MANIFEST_PATHS.items(),
+    )
+    def test_manifest_file_exists(self, env_name: str, manifest_path: Path):
+        assert manifest_path.exists(), f"Manifest not found for {env_name}: {manifest_path}"
 
     def test_manifest_is_valid_yaml(self):
         yaml_mod = pytest.importorskip("yaml")
-        content = MANIFEST_PATH.read_text(encoding="utf-8")
+        content = DEV_MANIFEST_PATH.read_text(encoding="utf-8")
         parsed = yaml_mod.safe_load(content)
         assert parsed is not None, "Manifest parsed as None — file may be empty"
         assert isinstance(parsed, dict), "Manifest must be a YAML mapping at the top level"
+
+    @pytest.mark.parametrize(
+        ("env_name", "manifest_path"),
+        MANIFEST_PATHS.items(),
+    )
+    def test_manifest_environment_matches_contract(self, env_name: str, manifest_path: Path):
+        yaml_mod = pytest.importorskip("yaml")
+        parsed = yaml_mod.safe_load(manifest_path.read_text(encoding="utf-8"))
+        expected = "production" if env_name == "production" else env_name
+        assert parsed["environment"] == expected
 
     def test_manifest_version_present(self, dev_manifest):
         assert "version" in dev_manifest, "Manifest must have a 'version' field"
@@ -227,6 +246,21 @@ class TestBootstrapDryRun:
         assert output.get("real_account_mutation_forbidden") is True
         assert isinstance(output.get("actions"), list)
         assert len(output["actions"]) > 0, "Dry-run must produce at least one action"
+
+    @pytest.mark.parametrize("env_name", ["staging", "production"])
+    def test_non_dev_dry_run_json_is_parseable(self, env_name: str):
+        result = subprocess.run(
+            [sys.executable, str(BOOTSTRAP_TOOL), "--env", env_name, "--json"],
+            capture_output=True,
+            text=True,
+            cwd=str(REPO_ROOT),
+        )
+        assert result.returncode == 0, (
+            f"Bootstrap dry-run --json exited {result.returncode} for {env_name}.\n{result.stderr}"
+        )
+        output = json.loads(result.stdout)
+        assert output.get("environment") == env_name
+        assert isinstance(output.get("actions"), list)
 
     def test_dry_run_produces_expected_action_categories(self):
         result = subprocess.run(
@@ -750,6 +784,14 @@ class TestSharedLibrary:
         with pytest.raises(lib.SyntheticSafetyViolation):
             lib.validate_environment("staging")
 
+    def test_find_manifest_accepts_production_alias(self, lib):
+        prod_path = lib.find_manifest("production")
+        assert prod_path.name == "prod.synthetic-proof-fixtures.yaml"
+
+    def test_find_manifest_accepts_prod_alias(self, lib):
+        prod_path = lib.find_manifest("prod")
+        assert prod_path.name == "prod.synthetic-proof-fixtures.yaml"
+
     def test_validate_safety_flag_accepts_true(self, lib):
         lib.validate_safety_flag({"real_account_mutation_forbidden": True})  # Should not raise.
 
@@ -884,6 +926,18 @@ class TestCatalogCompanion:
         assert output.get("mode") == "dry_run"
         assert output.get("scope") == "enterprise_catalog_service_data"
         assert isinstance(output.get("actions"), list)
+
+    @pytest.mark.parametrize("env_name", ["staging", "production"])
+    def test_catalog_dry_run_json_supports_non_dev_manifests(self, env_name: str):
+        result = subprocess.run(
+            [sys.executable, str(CATALOG_TOOL), "--env", env_name, "--json"],
+            capture_output=True,
+            text=True,
+            cwd=str(REPO_ROOT),
+        )
+        assert result.returncode == 0
+        output = json.loads(result.stdout)
+        assert output.get("environment") == env_name
 
     def test_catalog_dry_run_produces_catalog_actions(self):
         """Catalog tool dry-run must produce catalog-related actions."""

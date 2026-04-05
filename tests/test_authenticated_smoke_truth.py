@@ -40,6 +40,11 @@ def test_authenticated_sso_canary_wiring_audit_checks_staging_first_defaults() -
     assert "github.event.inputs.env_scope || 'staging'" in workflow
     assert 'scope="${INPUT_ENV_SCOPE:-staging}"' in workflow
     assert "steps.resolve-smoke.outputs.resolved_scope" in workflow
+    assert "Resolve Studio canary requirements" in workflow
+    assert "REQUIRE_STUDIO_CANARY_PROD" in workflow
+    assert "REQUIRE_STUDIO_CANARY_STAGING" in workflow
+    assert "REQUIRE_STUDIO_CANARY_DEV" in workflow
+    assert "studio_canary_required_for_env()" in canary_script
 
 
 def test_authenticated_sso_canary_includes_enterprise_browser_proof_contract() -> None:
@@ -57,3 +62,12 @@ def test_authenticated_sso_canary_includes_enterprise_browser_proof_contract() -
     assert "ENTERPRISE_ADMIN_DOMAIN" in canary_script
     assert "ENTERPRISE_PORTAL_DOMAIN" in canary_script
     assert "enterprise/proxy-login/" in canary_script
+
+
+def test_authenticated_sso_canary_audit_keeps_dev_coverage_optional() -> None:
+    audit_script = (REPO_ROOT / "scripts/qa/audit-authenticated-sso-canary-wiring.sh").read_text(encoding="utf-8")
+
+    assert "dev coverage remains optional" in audit_script
+    assert "runtime workflow prod studio requirement export" in audit_script
+    assert "runtime workflow staging studio requirement export" in audit_script
+    assert "canary workflow resolves studio requirements per env" in audit_script

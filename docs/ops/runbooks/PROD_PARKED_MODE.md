@@ -74,3 +74,16 @@ parked state is intentional and not degraded.
 The current post-build runtime workflow uses this verifier instead of browser
 E2E while production remains parked. See `config/runtime-proof-policy.env` and
 `docs/ops/runbooks/POST_DEPLOY_GATE.md`.
+
+## Reactivation Hand-off
+
+When production is intentionally reactivated, the browser/runtime proof lane
+switches from the parked-state verifier to:
+
+- `scripts/tenants/verify-prod-runtime-proof.sh`
+- `config/runtime-proof/prod.synthetic-proof-fixtures.yaml`
+- `config/smoke-account-registry.yaml`
+
+Do not reactivate production by copying the dev fixture story. The production
+runtime-proof verifier and the production fixture manifest are the canonical
+non-dev proof surfaces.

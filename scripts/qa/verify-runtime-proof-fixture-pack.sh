@@ -100,7 +100,11 @@ echo "Repo root: ${REPO_ROOT}"
 echo "========================================================================"
 echo ""
 
-MANIFEST_REL="config/runtime-proof/dev.synthetic-proof-fixtures.yaml"
+declare -A MANIFESTS=(
+  [dev]="config/runtime-proof/dev.synthetic-proof-fixtures.yaml"
+  [staging]="config/runtime-proof/staging.synthetic-proof-fixtures.yaml"
+  [production]="config/runtime-proof/prod.synthetic-proof-fixtures.yaml"
+)
 
 # ── Section 1: Core documents ─────────────────────────────────────────────────
 echo "--- Section 1: Core documents ---"
@@ -109,8 +113,14 @@ _check_file_exists \
   "docs/stabilization/SYNTHETIC_RUNTIME_PROOF_FIXTURE_CONTRACT.md"
 
 _check_file_exists \
-  "manifest" \
-  "${MANIFEST_REL}"
+  "smoke_account_registry_contract" \
+  "config/smoke-account-registry.yaml"
+
+for env in dev staging production; do
+  _check_file_exists \
+    "manifest:${env}" \
+    "${MANIFESTS[$env]}"
+done
 
 _check_file_exists \
   "execution_packet" \
@@ -164,129 +174,138 @@ echo ""
 
 # ── Section 3: Manifest YAML validity ─────────────────────────────────────────
 echo "--- Section 3: Manifest YAML validity ---"
-_yaml_valid "manifest_yaml" "${MANIFEST_REL}"
+for env in dev staging production; do
+  _yaml_valid "manifest_yaml:${env}" "${MANIFESTS[$env]}"
+done
 
 echo ""
 
 # ── Section 4: Required fixture classes in manifest ───────────────────────────
 echo "--- Section 4: Required fixture classes ---"
-_manifest_contains \
-  "fixture_class:synthetic_identities" \
-  "${MANIFEST_REL}" \
-  "'synthetic_identities' in m.get('fixture_classes', {})"
+for env in dev staging production; do
+  _manifest_contains \
+    "fixture_class:${env}:synthetic_identities" \
+    "${MANIFESTS[$env]}" \
+    "'synthetic_identities' in m.get('fixture_classes', {})"
 
-_manifest_contains \
-  "fixture_class:lms_enterprise_data" \
-  "${MANIFEST_REL}" \
-  "'lms_enterprise_data' in m.get('fixture_classes', {})"
+  _manifest_contains \
+    "fixture_class:${env}:lms_enterprise_data" \
+    "${MANIFESTS[$env]}" \
+    "'lms_enterprise_data' in m.get('fixture_classes', {})"
 
-_manifest_contains \
-  "fixture_class:enterprise_catalog_service_data" \
-  "${MANIFEST_REL}" \
-  "'enterprise_catalog_service_data' in m.get('fixture_classes', {})"
+  _manifest_contains \
+    "fixture_class:${env}:enterprise_catalog_service_data" \
+    "${MANIFESTS[$env]}" \
+    "'enterprise_catalog_service_data' in m.get('fixture_classes', {})"
 
-_manifest_contains \
-  "fixture_class:waffle_flags" \
-  "${MANIFEST_REL}" \
-  "'waffle_flags' in m.get('fixture_classes', {})"
+  _manifest_contains \
+    "fixture_class:${env}:waffle_flags" \
+    "${MANIFESTS[$env]}" \
+    "'waffle_flags' in m.get('fixture_classes', {})"
+done
 
 echo ""
 
 # ── Section 5: Safety invariant ───────────────────────────────────────────────
 echo "--- Section 5: Safety invariant ---"
-_manifest_contains \
-  "real_account_mutation_forbidden:true" \
-  "${MANIFEST_REL}" \
-  "m.get('real_account_mutation_forbidden') is True"
+for env in dev staging production; do
+  _manifest_contains \
+    "real_account_mutation_forbidden:${env}:true" \
+    "${MANIFESTS[$env]}" \
+    "m.get('real_account_mutation_forbidden') is True"
+done
 
 echo ""
 
 # ── Section 6: LMS + enterprise-catalog split ─────────────────────────────────
 echo "--- Section 6: LMS + enterprise-catalog catalog split ---"
+for env in dev staging production; do
+  _manifest_contains \
+    "lms_enterprise_data:${env}:has_catalogs" \
+    "${MANIFESTS[$env]}" \
+    "any(
+      ec.get('catalogs')
+      for ec in m.get('fixture_classes', {})
+                 .get('lms_enterprise_data', {})
+                 .get('enterprise_customers', [])
+    )"
 
-# LMS side: lms_enterprise_data must have enterprise_customers with catalogs.
-_manifest_contains \
-  "lms_enterprise_data:has_catalogs" \
-  "${MANIFEST_REL}" \
-  "any(
-    ec.get('catalogs')
-    for ec in m.get('fixture_classes', {})
-               .get('lms_enterprise_data', {})
-               .get('enterprise_customers', [])
-  )"
-
-# Enterprise-catalog service side: enterprise_catalog_service_data must have catalogs.
-_manifest_contains \
-  "enterprise_catalog_service_data:has_catalogs" \
-  "${MANIFEST_REL}" \
-  "bool(
-    m.get('fixture_classes', {})
-     .get('enterprise_catalog_service_data', {})
-     .get('catalogs')
-  )"
+  _manifest_contains \
+    "enterprise_catalog_service_data:${env}:has_catalogs" \
+    "${MANIFESTS[$env]}" \
+    "bool(
+      m.get('fixture_classes', {})
+       .get('enterprise_catalog_service_data', {})
+       .get('catalogs')
+    )"
+done
 
 echo ""
 
 # ── Section 7: Python validate tool exit code ─────────────────────────────────
 echo "--- Section 7: validate tool runs clean ---"
-if python3 "${REPO_ROOT}/scripts/tenants/validate-runtime-proof-fixtures.py" \
-    --env dev --json > /dev/null 2>&1; then
-  _pass "validate_tool:exit_code_0 (manifest passes static validation)"
-else
-  _fail "validate_tool:non_zero_exit (manifest has validation errors — run validate tool for details)"
-fi
+for env in dev staging production; do
+  if python3 "${REPO_ROOT}/scripts/tenants/validate-runtime-proof-fixtures.py" \
+      --env "$env" --json > /dev/null 2>&1; then
+    _pass "validate_tool:${env}:exit_code_0"
+  else
+    _fail "validate_tool:${env}:non_zero_exit"
+  fi
+done
 
 echo ""
 
 # ── Section 8: Bootstrap dry-run exit code ────────────────────────────────────
 echo "--- Section 8: bootstrap dry-run runs clean ---"
-if python3 "${REPO_ROOT}/scripts/tenants/bootstrap-runtime-proof-fixtures.py" \
-    --env dev --json > /dev/null 2>&1; then
-  _pass "bootstrap_tool:dry_run_exit_code_0"
-else
-  _fail "bootstrap_tool:dry_run_non_zero_exit"
-fi
+for env in dev staging production; do
+  if python3 "${REPO_ROOT}/scripts/tenants/bootstrap-runtime-proof-fixtures.py" \
+      --env "$env" --json > /dev/null 2>&1; then
+    _pass "bootstrap_tool:${env}:dry_run_exit_code_0"
+  else
+    _fail "bootstrap_tool:${env}:dry_run_non_zero_exit"
+  fi
+done
 
 echo ""
 
 # ── Section 9: Catalog companion dry-run ──────────────────────────────────────
 echo "--- Section 9: catalog companion dry-run runs clean ---"
-if python3 "${REPO_ROOT}/scripts/tenants/bootstrap-runtime-proof-fixtures-catalog.py" \
-    --env dev --json > /dev/null 2>&1; then
-  _pass "catalog_companion_tool:dry_run_exit_code_0"
-else
-  _fail "catalog_companion_tool:dry_run_non_zero_exit"
-fi
+for env in dev staging production; do
+  if python3 "${REPO_ROOT}/scripts/tenants/bootstrap-runtime-proof-fixtures-catalog.py" \
+      --env "$env" --json > /dev/null 2>&1; then
+    _pass "catalog_companion_tool:${env}:dry_run_exit_code_0"
+  else
+    _fail "catalog_companion_tool:${env}:dry_run_non_zero_exit"
+  fi
+done
 
 echo ""
 
 # ── Section 10: Enterprise link authoritative source ──────────────────────────
 echo "--- Section 10: enterprise_link is the single authoritative source ---"
+for env in dev staging production; do
+  _manifest_contains \
+    "enterprise_link:${env}:no_user_links_key" \
+    "${MANIFESTS[$env]}" \
+    "not any(
+      'user_links' in (user if isinstance(user, dict) else {})
+      for user in
+        m.get('fixture_classes', {})
+         .get('synthetic_identities', {})
+         .get('users', [])
+    )"
 
-# The manifest must NOT use 'user_links' as a top-level data key.
-# enterprise_link in synthetic_identities[].users is authoritative.
-_manifest_contains \
-  "enterprise_link:no_user_links_key" \
-  "${MANIFEST_REL}" \
-  "not any(
-    'user_links' in (user if isinstance(user, dict) else {})
-    for user in
-      m.get('fixture_classes', {})
-       .get('synthetic_identities', {})
-       .get('users', [])
-  )"
-
-# Verify enterprise_link is used in at least one user record.
-_manifest_contains \
-  "enterprise_link:present_in_at_least_one_user" \
-  "${MANIFEST_REL}" \
-  "any(
-    'enterprise_link' in (user if isinstance(user, dict) else {})
-    for user in
-      m.get('fixture_classes', {})
-       .get('synthetic_identities', {})
-       .get('users', [])
-  )"
+  _manifest_contains \
+    "enterprise_link:${env}:present_in_at_least_one_user" \
+    "${MANIFESTS[$env]}" \
+    "any(
+      'enterprise_link' in (user if isinstance(user, dict) else {})
+      for user in
+        m.get('fixture_classes', {})
+         .get('synthetic_identities', {})
+         .get('users', [])
+    )"
+done
 
 echo ""
 

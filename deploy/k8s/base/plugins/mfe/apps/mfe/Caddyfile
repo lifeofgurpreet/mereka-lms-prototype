@@ -80,6 +80,19 @@
 		file_server
 	}
 
+	# Some basename-routed MFEs request env.config.js relative to their own prefix
+	# (for example /learner-dashboard/env.config.js). Serve the shared runtime
+	# config file from /openedx/dist/env.config.js before SPA try_files falls back
+	# to index.html with a misleading 200 text/html response.
+	@mfe_prefixed_env_config {
+		path_regexp prefixed_env_config ^/(authn|account|communications|course-authoring|authoring|discussions|gradebook|learner-dashboard|learning|learner-record|ora-grading|profile)/env\.config\.js$
+	}
+	handle @mfe_prefixed_env_config {
+		rewrite * /env.config.js
+		root * /openedx/dist
+		file_server
+	}
+
 	# Profile API calls from the Profile MFE route through LMS domain routing.
 	# MUST be a handle block placed BEFORE handle @mfe_profile so Caddy's
 	# mutually-exclusive handle evaluation matches /profile/api/* first,

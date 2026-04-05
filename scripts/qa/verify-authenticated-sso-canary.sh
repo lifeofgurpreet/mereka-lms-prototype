@@ -24,6 +24,9 @@
 # Env:
 #   REQUIRE_SECRETS=1                           Fail when primary creds are missing (default: 1)
 #   REQUIRE_STUDIO_CANARY=0                     Fail when Studio staff creds are missing (default: 0)
+#   REQUIRE_STUDIO_CANARY_PROD=0|1              Optional prod-only override for Studio canary requirement
+#   REQUIRE_STUDIO_CANARY_STAGING=0|1           Optional staging-only override for Studio canary requirement
+#   REQUIRE_STUDIO_CANARY_DEV=0|1               Optional dev-only override for Studio canary requirement
 #   RUN_OIDC_CANARY=1                           Run primary OIDC canary flow (default: 1)
 #   RUN_STUDIO_CANARY=1                         Run Studio OIDC canary flow (default: 1)
 #   RUN_LOCAL_LOGIN_CANARY=0                    Also run native /authn/login credential canary (default: 0)
@@ -68,6 +71,9 @@ Usage: ./scripts/qa/verify-authenticated-sso-canary.sh [--env staging|dev|prod|b
 Env:
   REQUIRE_SECRETS=1                            Fail when primary creds are missing (default: 1)
   REQUIRE_STUDIO_CANARY=0                      Fail when Studio staff creds are missing (default: 0)
+  REQUIRE_STUDIO_CANARY_PROD=0|1               Optional prod-only override for Studio canary requirement
+  REQUIRE_STUDIO_CANARY_STAGING=0|1            Optional staging-only override for Studio canary requirement
+  REQUIRE_STUDIO_CANARY_DEV=0|1                Optional dev-only override for Studio canary requirement
   RUN_OIDC_CANARY=1                            Run primary OIDC canary flow (default: 1)
   RUN_STUDIO_CANARY=1                          Run Studio OIDC canary flow (default: 1)
   RUN_LOCAL_LOGIN_CANARY=0                     Also run native /authn/login credential canary (default: 0)
@@ -108,6 +114,38 @@ if [[ "$ENV_SCOPE" != "prod" && "$ENV_SCOPE" != "dev" && "$ENV_SCOPE" != "stagin
 fi
 
 failures=0
+
+studio_canary_required_for_env() {
+  local env_name="$1"
+  local override=""
+
+  case "$env_name" in
+    prod)
+      override="${REQUIRE_STUDIO_CANARY_PROD:-}"
+      ;;
+    staging)
+      override="${REQUIRE_STUDIO_CANARY_STAGING:-}"
+      ;;
+    dev)
+      override="${REQUIRE_STUDIO_CANARY_DEV:-}"
+      ;;
+  esac
+
+  if [[ -z "$override" ]]; then
+    printf '%s\n' "$REQUIRE_STUDIO_CANARY"
+    return
+  fi
+
+  case "$override" in
+    0|1)
+      printf '%s\n' "$override"
+      ;;
+    *)
+      echo "WARN: invalid ${env_name} Studio canary override '$override'; falling back to REQUIRE_STUDIO_CANARY=$REQUIRE_STUDIO_CANARY" >&2
+      printf '%s\n' "$REQUIRE_STUDIO_CANARY"
+      ;;
+  esac
+}
 
 run_playwright_canary() {
   local env_name="$1"
@@ -1011,7 +1049,7 @@ run_primary_env() {
 
 run_studio_env() {
   local env_name="$1"
-  local lms_domain studio_domain mfe_domain email password
+  local lms_domain studio_domain mfe_domain email password require_studio
 
   if [[ "$env_name" == "prod" ]]; then
     lms_domain="$LMS_DOMAIN"
@@ -1033,13 +1071,15 @@ run_studio_env() {
     password="${SSO_CANARY_STUDIO_PASSWORD_DEV:-${SSO_CANARY_STUDIO_PASSWORD:-}}"
   fi
 
+  require_studio="$(studio_canary_required_for_env "$env_name")"
+
   if [[ -z "${email:-}" || -z "${password:-}" ]]; then
-    if [[ "$REQUIRE_STUDIO_CANARY" == "1" ]]; then
+    if [[ "$require_studio" == "1" ]]; then
       echo "FAIL $env_name: missing Studio SSO canary credentials (set SSO_CANARY_STUDIO_EMAIL[_${env_name^^}] and SSO_CANARY_STUDIO_PASSWORD[_${env_name^^}])" >&2
       failures=$((failures + 1))
       return
     fi
-    echo "SKIP $env_name: missing Studio SSO canary credentials (REQUIRE_STUDIO_CANARY=0)"
+    echo "SKIP $env_name: missing Studio SSO canary credentials (Studio canary optional for this env)"
     return
   fi
 

@@ -138,9 +138,10 @@ studio.localhost{$default_site_port} {
     }
 }
 
-# Studio/CMS - environment-specific domain (TLS via NGINX Ingress)
+# Studio/CMS - environment-specific domains (TLS via NGINX Ingress)
 # STUDIO_HOST is injected by the overlay (e.g. studio.academyv2.mereka.io).
-http://{$STUDIO_HOST} {
+# TENANT_*_STUDIO_HOST carry tenant-pattern Studio roots when active.
+http://{$STUDIO_HOST}, http://{$TENANT_BIJIBIJI_STUDIO_HOST:studio-bijibiji.invalid}, http://{$TENANT_SOF_STUDIO_HOST:studio-sof.invalid} {
     @favicon_matcher {
         path_regexp ^/favicon.ico$
     }
@@ -219,51 +220,8 @@ http://{$DISCOVERY_HOST} {
         }
     }
 
-    # Route LMS API calls to LMS. MFE React apps call these as relative URLs
-    # (resolved against the apps.* origin). The ingress sends ALL MFE traffic
-    # to this Caddy instance because ingress-nginx (hostNetwork) cannot reach
-    # LMS pods on the control-plane node via pod CIDR. Caddy (on pod network)
-    # can reach LMS via K8s service DNS.
-    handle /api/* {
-        reverse_proxy lms:8000 {
-            header_up Host {http.request.host}
-            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
-            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
-            header_up X-Forwarded-Host {http.request.host}
-        }
-    }
-    handle /login_refresh* {
-        reverse_proxy lms:8000 {
-            header_up Host {http.request.host}
-            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
-            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
-            header_up X-Forwarded-Host {http.request.host}
-        }
-    }
-    handle /csrf/* {
-        reverse_proxy lms:8000 {
-            header_up Host {http.request.host}
-            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
-            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
-            header_up X-Forwarded-Host {http.request.host}
-        }
-    }
-    handle /oauth2/* {
-        reverse_proxy lms:8000 {
-            header_up Host {http.request.host}
-            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
-            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
-            header_up X-Forwarded-Host {http.request.host}
-        }
-    }
-    handle /login {
-        reverse_proxy lms:8000 {
-            header_up Host {http.request.host}
-            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
-            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
-            header_up X-Forwarded-Host {http.request.host}
-        }
-    }
+    # Route all apps.* traffic through the MFE service. The MFE pod owns the
+    # LMS-facing API/auth proxy logic and has the live network path to LMS.
 
     import proxy "mfe:8002"
 }

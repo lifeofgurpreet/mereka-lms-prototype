@@ -162,7 +162,7 @@ fi
 # ubuntu-24.04 runners are too small for OpenEdX builds (need 12GB+ RAM).
 # Count runs-on lines for build jobs (not lint/provenance)
 BUILD_JOB_RUNNERS=$(awk '/Build Open[Ee]d[Xx] Image|Build MFE Image/{found=1} found && /runs-on:/{print; found=0}' "$BUILD_WF")
-if echo "$BUILD_JOB_RUNNERS" | grep -q 'mereka-k8s-heavy-builders'; then
+if grep -q 'mereka-k8s-heavy-builders' <<<"$BUILD_JOB_RUNNERS"; then
   do_pass "INV-7: Image build jobs use heavy-builder runners"
 else
   do_fail "INV-7: Image build jobs must use mereka-k8s-heavy-builders (not github-hosted)"

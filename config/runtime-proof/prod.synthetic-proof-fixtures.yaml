@@ -1,0 +1,117 @@
+# Synthetic Runtime Proof Fixture Manifest — production environment
+#
+# This manifest is the canonical production proof contract. It exists so
+# production reactivation does not depend on dev-only fixture truth while
+# production remains parked by policy.
+---
+version: "1.0"
+environment: production
+contract_ref: docs/stabilization/SYNTHETIC_RUNTIME_PROOF_FIXTURE_CONTRACT.md
+real_account_mutation_forbidden: true
+
+target:
+  lms_domain: academyv2.mereka.io
+  mfe_domain: apps.academyv2.mereka.io
+  enterprise_catalog_domain: admin.academy.biji-biji.com
+  namespace: mereka-lms
+
+fixture_classes:
+  synthetic_identities:
+    required: true
+    description: >
+      Canonical production smoke identities. While production remains parked,
+      this manifest is declarative truth only; apply only during controlled
+      production reactivation.
+    users:
+      - username: lanea-platform-admin
+        email: lanea-platform-admin@synthetic.test
+        role: platform_admin
+        is_staff: true
+        is_superuser: true
+        password_secret_path: /k8s/mereka-lms/LANEA_PLATFORM_ADMIN_PASSWORD
+      - username: lanea-enterprise-admin
+        email: lanea-enterprise-admin@synthetic.test
+        role: enterprise_admin
+        password_secret_path: /k8s/mereka-lms/LANEA_ENTERPRISE_ADMIN_PASSWORD
+        enterprise_link:
+          customer_slug: biji-biji
+          enterprise_role: admin
+      - username: lanea-enterprise-learner
+        email: lanea-enterprise-learner@synthetic.test
+        role: enterprise_learner
+        password_secret_path: /k8s/mereka-lms/LANEA_ENTERPRISE_LEARNER_PASSWORD
+        enterprise_link:
+          customer_slug: biji-biji
+          enterprise_role: learner
+      - username: lanea-unlinked-user
+        email: lanea-unlinked-user@synthetic.test
+        role: negative_case
+        password_secret_path: /k8s/mereka-lms/LANEA_UNLINKED_USER_PASSWORD
+        enterprise_link: null
+
+  lms_enterprise_data:
+    required: true
+    enterprise_customers:
+      - slug: biji-biji
+        name: Biji Biji Initiative
+        contact_email: lanea-enterprise-admin@synthetic.test
+        country: MY
+        active: true
+        real_account_guard: true
+        enterprise_customer_config:
+          enable_data_sharing_consent: true
+          enforce_data_sharing_consent: at_enrollment
+          enable_audit_enrollment: false
+          enable_learner_portal: true
+          enable_portal_code_management: false
+          enable_analytics_screen: true
+        site:
+          domain: academyv2.mereka.io
+        catalogs:
+          - title: "Biji Biji Default Catalog"
+            catalog_query:
+              content_filter:
+                content_type: course
+              org_filter:
+                - BIJIBIJI
+                - MEREKA
+
+  enterprise_catalog_service_data:
+    required: true
+    catalogs:
+      - enterprise_customer_slug: biji-biji
+        title: "Biji Biji Default Catalog"
+        enterprise_catalog_uuid: 57e324c2-e0d1-4e65-91ea-818f636c91aa
+        catalog_query:
+          content_filter:
+            content_type: course
+          include_exec_ed_2u_course_types: false
+    verification:
+      expected_min_courses: 1
+      api_path_template: "/enterprise-catalog/api/v1/enterprise-catalogs/{catalog_uuid}/"
+
+  waffle_flags:
+    required: true
+    platform_wide_flags:
+      - name: enterprise.learner_bff_enabled
+        active: true
+    tenant_scoped_switches:
+      - base: enterprise.enable_learner_portal
+        enterprise_slug: biji-biji
+        active: true
+      - base: enterprise.enable_integrated_learner_portal_search
+        enterprise_slug: biji-biji
+        active: true
+      - base: enterprise.enable_analytics_screen
+        enterprise_slug: biji-biji
+        active: true
+
+  negative_cases:
+    required: false
+    cases:
+      - id: NC-001
+        name: Non-linked user cannot access learner portal
+        identity: lanea-unlinked-user
+      - id: NC-002
+        name: Non-linked user cannot access enterprise admin
+        identity: lanea-unlinked-user

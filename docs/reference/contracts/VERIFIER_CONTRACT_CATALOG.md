@@ -27,6 +27,16 @@ _Audience: Operators and agents · Owner: Platform Team · Status: canonical_
 | enterprise admin smoke | enterprise identity authority | Infisical | enterprise admin proof |
 | analytics/support smoke | analytics identity authority | Infisical | analytics/operator proof |
 
+## Runtime proof contract surfaces
+
+| Surface | Canonical path | Role |
+|---|---|---|
+| Production full runtime verifier | `scripts/tenants/verify-prod-runtime-proof.sh` | Active-browser/runtime verifier once production is reactivated |
+| Production parked-state verifier | `scripts/qa/verify-prod-parked-state.sh` | Current production runtime contract while production remains parked |
+| Staging fixture manifest | `config/runtime-proof/staging.synthetic-proof-fixtures.yaml` | Canonical non-dev staging synthetic proof contract |
+| Production fixture manifest | `config/runtime-proof/prod.synthetic-proof-fixtures.yaml` | Canonical production synthetic proof contract for controlled reactivation |
+| Smoke account registry | `config/smoke-account-registry.yaml` | Canonical identity-authority / secret-authority / consumer-path registry |
+
 ## Contract rules
 
 1. Verifiers may only prove what is in their contract lane.
@@ -37,5 +47,6 @@ _Audience: Operators and agents · Owner: Platform Team · Status: canonical_
 ## Related
 
 - [AGENT_EXECUTION_WORKFLOW.md](../operations/AGENT_EXECUTION_WORKFLOW.md)
+- [SMOKE_ACCOUNT_REGISTRY_CONTRACT.md](SMOKE_ACCOUNT_REGISTRY_CONTRACT.md)
 - [SMOKE_ACCOUNT_REGISTRY_2026-04-04.md](../../status/active/SMOKE_ACCOUNT_REGISTRY_2026-04-04.md)
 - [AUTHENTICATED_SMOKE_CREDENTIALS.md](../operations/AUTHENTICATED_SMOKE_CREDENTIALS.md)

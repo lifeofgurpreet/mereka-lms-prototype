@@ -29,14 +29,34 @@ fi
 
 IMAGE_REF="$1"
 EXPECTED_REV="${2:-}"
+DOCKER_PULL_TIMEOUT_SECS="${DOCKER_PULL_TIMEOUT_SECS:-600}"
+DOCKER_RUN_TIMEOUT_SECS="${DOCKER_RUN_TIMEOUT_SECS:-180}"
 
 if [[ -z "$EXPECTED_REV" && -f "$MFE_THEME_SCSS" ]]; then
   EXPECTED_REV="$(sed -nE 's/.*--mereka-mfe-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' "$MFE_THEME_SCSS" | head -n 1 || true)"
 fi
 
+run_with_timeout() {
+  local timeout_secs="$1"
+  shift
+  if command -v timeout >/dev/null 2>&1; then
+    timeout "${timeout_secs}" "$@"
+  else
+    "$@"
+  fi
+}
+
 if ! docker image inspect "$IMAGE_REF" >/dev/null 2>&1; then
   echo "Pulling image for branding verification: $IMAGE_REF"
-  docker pull "$IMAGE_REF" >/dev/null
+  if ! run_with_timeout "${DOCKER_PULL_TIMEOUT_SECS}" docker pull "$IMAGE_REF" >/dev/null; then
+    status=$?
+    if [[ "$status" -eq 124 ]]; then
+      echo "ERROR: docker pull timed out after ${DOCKER_PULL_TIMEOUT_SECS}s for $IMAGE_REF" >&2
+    else
+      echo "ERROR: docker pull failed with exit code ${status} for $IMAGE_REF" >&2
+    fi
+    exit "$status"
+  fi
 fi
 
 echo "Verifying MFE image branding: $IMAGE_REF"
@@ -46,7 +66,7 @@ else
   echo "Expected MFE branding revision: <skipped>"
 fi
 
-docker run --rm \
+if ! run_with_timeout "${DOCKER_RUN_TIMEOUT_SECS}" docker run --rm \
   -e EXPECTED_MFE_BRANDING_REV="$EXPECTED_REV" \
   --entrypoint sh \
   "$IMAGE_REF" \
@@ -127,3 +147,12 @@ docker run --rm \
       fi
     fi
   '
+then
+  status=$?
+  if [[ "$status" -eq 124 ]]; then
+    echo "ERROR: docker run timed out after ${DOCKER_RUN_TIMEOUT_SECS}s for $IMAGE_REF" >&2
+  else
+    echo "ERROR: branding verification failed with exit code ${status} for $IMAGE_REF" >&2
+  fi
+  exit "$status"
+fi

@@ -211,5 +211,6 @@ exposure. Procedure:
 - Workflow: `.github/workflows/smoke-authenticated.yml` (sso-canary job)
 - Operations gate: `.github/workflows/operations-gates-runtime.yml`
 - Credential handling: `docs/reference/operations/AUTHENTICATED_SMOKE_CREDENTIALS.md`
-- Registry: `docs/status/active/SMOKE_ACCOUNT_REGISTRY_2026-04-04.md`
+- Registry contract: `docs/reference/contracts/SMOKE_ACCOUNT_REGISTRY_CONTRACT.md`
+- Registry status companion: `docs/status/active/SMOKE_ACCOUNT_REGISTRY_2026-04-04.md`
 - Studio SSO patterns: `MEMORY.md` (Studio SSO section)

@@ -4,6 +4,11 @@ _Audience: Operators/release engineers · Owner: Platform Team · Status: active
 Operational registry for canonical smoke identities.
 Passwords are never stored in repo.
 
+Canonical contract:
+
+- [../../reference/contracts/SMOKE_ACCOUNT_REGISTRY_CONTRACT.md](../../reference/contracts/SMOKE_ACCOUNT_REGISTRY_CONTRACT.md)
+- [../../../config/smoke-account-registry.yaml](../../../config/smoke-account-registry.yaml)
+
 ## Governing rule
 
 1. Create identity in real identity authority first.

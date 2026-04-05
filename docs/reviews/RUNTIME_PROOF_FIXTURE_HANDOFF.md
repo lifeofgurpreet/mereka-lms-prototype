@@ -12,14 +12,14 @@ Lane-i delivered the contract, manifest, dry-run planner, static validator, CI v
 and tests. Lane-j (this lane) delivered the **execution bridge**: the apply code paths,
 shared safety library, catalog companion tool, and live-readonly validation mode.
 
-Nothing was mutated in any live cluster in either lane. All artifacts are static files in the repo.
+Nothing was mutated in any live cluster in either lane. All artifacts are static files in the repo, and non-dev manifests now exist so staging/prod proof planning does not depend on dev-only truth.
 
 ### Delivered artifacts
 
 | Artifact | Path | Purpose |
 |----------|------|---------|
 | Contract document | `docs/stabilization/SYNTHETIC_RUNTIME_PROOF_FIXTURE_CONTRACT.md` | Single source of truth for fixture intent, allowed/forbidden actions, naming conventions |
-| Dev manifest | `config/runtime-proof/dev.synthetic-proof-fixtures.yaml` | Machine-readable fixture spec (identities, enterprise data, catalog split, waffle flags, negative cases) |
+| Fixture manifests | `config/runtime-proof/{dev,staging,prod}.synthetic-proof-fixtures.yaml` | Machine-readable fixture specs for active and non-dev proof planning |
 | Shared safety library | `scripts/tenants/lib/proof_fixtures.py` | Guard functions, dataclasses, manifest loading — shared by all fixture tools |
 | Shared library init | `scripts/tenants/lib/__init__.py` | Package init for shared library |
 | Bootstrap tool (LMS) | `scripts/tenants/bootstrap-runtime-proof-fixtures.py` | Dry-run planner + `--apply` path (Django ORM, guard chain, idempotent creates) |

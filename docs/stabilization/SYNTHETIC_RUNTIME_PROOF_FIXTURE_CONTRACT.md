@@ -1,10 +1,10 @@
 # Synthetic Runtime Proof Fixture Contract
 
 > **Status**: Active
-> **Environment scope**: dev (staging to follow)
+> **Environment scope**: dev active; staging and production manifests canonicalized for non-dev proof
 > **Owner**: Runtime Proof Lane (lane-i)
 > **Canonical path**: `docs/stabilization/SYNTHETIC_RUNTIME_PROOF_FIXTURE_CONTRACT.md`
-> **Manifest**: `config/runtime-proof/dev.synthetic-proof-fixtures.yaml`
+> **Manifests**: `config/runtime-proof/*.synthetic-proof-fixtures.yaml`
 
 ---
 
@@ -34,11 +34,15 @@ sign in with real credentials.
 | Environment | Manifest | Status |
 |-------------|----------|--------|
 | `dev` | `config/runtime-proof/dev.synthetic-proof-fixtures.yaml` | Active |
-| `staging` | `config/runtime-proof/staging.synthetic-proof-fixtures.yaml` | Not yet created |
-| `production` | — | Forbidden — synthetic fixtures must never run in production |
+| `staging` | `config/runtime-proof/staging.synthetic-proof-fixtures.yaml` | Canonical non-dev proof contract |
+| `production` | `config/runtime-proof/prod.synthetic-proof-fixtures.yaml` | Declarative contract only while production remains parked |
 
 The `dev` environment targets the `mereka-lms-dev` namespace / `mereka-lms-dev` ArgoCD app,
 with LMS at `academyv2.mereka.dev` and MFEs at `apps.academyv2.mereka.dev`.
+
+The `staging` and `production` manifests exist so non-dev runtime proof and reactivation do not
+depend on dev-only fixture truth. Their presence does not authorize uncontrolled writes in those
+environments.
 
 ---
 
@@ -134,7 +138,7 @@ baseline. They validate that the platform correctly rejects non-eligible users.
 | Modifying any real operator account (`team@mereka.io`, `admin@biji-biji.com`, etc.) | Real account mutation is explicitly prohibited by this contract |
 | Creating accounts with real email domains | Cannot risk collision with real user accounts |
 | Setting passwords visible in logs or committed to git | Password hygiene |
-| Running this fixture pack in `staging` or `production` without an explicit manifest for that environment | Environment scope isolation |
+| Running this fixture pack in `staging` or `production` without the matching explicit manifest and release approval path | Environment scope isolation |
 | Linking synthetic users to a real enterprise customer that has real learners | Could corrupt real enrollment data |
 | Using `bootstrap-enterprise-tenants.py --apply` to install synthetic fixtures | That tool manages real tenants; synthetic fixtures have their own tool |
 
@@ -176,8 +180,8 @@ attached. Modifying them during proof:
 
 Before running any browser-based proof agent against the dev cluster, confirm:
 
-- [ ] `scripts/tenants/validate-runtime-proof-fixtures.py` exits 0 (static schema check)
-- [ ] `scripts/tenants/bootstrap-runtime-proof-fixtures.py --dry-run` exits 0 with expected plan
+- [ ] `scripts/tenants/validate-runtime-proof-fixtures.py --env <env>` exits 0 for the selected environment
+- [ ] `scripts/tenants/bootstrap-runtime-proof-fixtures.py --env <env> --dry-run` exits 0 with expected plan
 - [ ] LMS pod is ready: `kubectl get pods -n mereka-lms-dev -l app.kubernetes.io/name=lms`
 - [ ] Enterprise-catalog pod is ready: `kubectl get pods -n mereka-lms-dev -l app.kubernetes.io/name=enterprise-catalog`
 - [ ] `/api/mfe_config/v1` returns HTTP 200 from `apps.academyv2.mereka.dev`
@@ -212,6 +216,8 @@ Real tenant bootstrap (existing)          Synthetic proof fixtures (this contrac
 ─────────────────────────────────         ────────────────────────────────────────
 config/enterprise-tenants/                config/runtime-proof/
   dev.enterprise-tenants.yaml               dev.synthetic-proof-fixtures.yaml
+                                           staging.synthetic-proof-fixtures.yaml
+                                           prod.synthetic-proof-fixtures.yaml
 
 scripts/tenants/                          scripts/tenants/
   bootstrap-enterprise-tenants.py           bootstrap-runtime-proof-fixtures.py

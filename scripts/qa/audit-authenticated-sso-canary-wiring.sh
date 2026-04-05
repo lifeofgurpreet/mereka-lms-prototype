@@ -24,7 +24,7 @@ usage() {
 Usage: $0 [--repo owner/repo]
 
 Env:
-  STRICT=1   Fail when GitHub canary secrets/variable are missing
+  STRICT=1   Fail when required GitHub canary secrets/variables are missing (dev coverage remains optional)
 EOF_USAGE
 }
 
@@ -90,6 +90,9 @@ check_workflow_pattern "$WORKFLOW_FILE" "SSO_CANARY_EMAIL_DEV" "dev canary email
 check_workflow_pattern "$WORKFLOW_FILE" "SSO_CANARY_PASSWORD_DEV" "dev canary password secret wiring"
 check_workflow_pattern "$WORKFLOW_FILE" "SSO_CANARY_EMAIL_STAGING" "staging canary email secret wiring"
 check_workflow_pattern "$WORKFLOW_FILE" "SSO_CANARY_PASSWORD_STAGING" "staging canary password secret wiring"
+check_workflow_pattern "$WORKFLOW_FILE" "REQUIRE_STUDIO_CANARY_PROD" "runtime workflow prod studio requirement export"
+check_workflow_pattern "$WORKFLOW_FILE" "REQUIRE_STUDIO_CANARY_DEV" "runtime workflow dev studio requirement export"
+check_workflow_pattern "$WORKFLOW_FILE" "REQUIRE_STUDIO_CANARY_STAGING" "runtime workflow staging studio requirement export"
 check_workflow_pattern "$WORKFLOW_FILE" "SSO_CANARY_STUDIO_EMAIL_STAGING" "staging Studio canary email secret wiring"
 check_workflow_pattern "$WORKFLOW_FILE" "SSO_CANARY_STUDIO_PASSWORD_STAGING" "staging Studio canary password secret wiring"
 
@@ -116,6 +119,10 @@ check_workflow_pattern "$CANARY_WORKFLOW_FILE" "default: 'staging'" "canary work
 check_workflow_pattern "$CANARY_WORKFLOW_FILE" "github.event.inputs.env_scope || 'staging'" "canary workflow fallback env scope is staging"
 check_workflow_pattern "$CANARY_WORKFLOW_FILE" 'scope="${INPUT_ENV_SCOPE:-staging}"' "authenticated smoke resolver defaults to staging"
 check_workflow_pattern "$CANARY_WORKFLOW_FILE" "REQUIRE_STUDIO_CANARY" "canary workflow REQUIRE_STUDIO_CANARY flag present"
+check_workflow_pattern "$CANARY_WORKFLOW_FILE" "Resolve Studio canary requirements" "canary workflow resolves studio requirements per env"
+check_workflow_pattern "$CANARY_WORKFLOW_FILE" "REQUIRE_STUDIO_CANARY_PROD" "canary workflow prod studio requirement wiring"
+check_workflow_pattern "$CANARY_WORKFLOW_FILE" "REQUIRE_STUDIO_CANARY_DEV" "canary workflow dev studio requirement wiring"
+check_workflow_pattern "$CANARY_WORKFLOW_FILE" "REQUIRE_STUDIO_CANARY_STAGING" "canary workflow staging studio requirement wiring"
 check_workflow_pattern "$CANARY_WORKFLOW_FILE" "sso-canary" "canary workflow sso-canary job defined"
 check_workflow_pattern "$CANARY_WORKFLOW_FILE" "verify-authenticated-sso-canary.sh" "canary workflow invokes canary script"
 
@@ -125,6 +132,10 @@ if [[ ! -f "$CANARY_SCRIPT" ]]; then
 else
   check_workflow_pattern "$CANARY_SCRIPT" 'ENV_SCOPE="staging"' "canary script default env scope is staging"
   check_workflow_pattern "$CANARY_SCRIPT" 'RUN_ENTERPRISE_BROWSER_PROOF="${RUN_ENTERPRISE_BROWSER_PROOF:-1}"' "canary script enables enterprise browser proof by default"
+  check_workflow_pattern "$CANARY_SCRIPT" "studio_canary_required_for_env()" "canary script resolves studio requirement per env"
+  check_workflow_pattern "$CANARY_SCRIPT" 'REQUIRE_STUDIO_CANARY_PROD' "canary script supports prod studio requirement override"
+  check_workflow_pattern "$CANARY_SCRIPT" 'REQUIRE_STUDIO_CANARY_STAGING' "canary script supports staging studio requirement override"
+  check_workflow_pattern "$CANARY_SCRIPT" 'REQUIRE_STUDIO_CANARY_DEV' "canary script supports dev studio requirement override"
   check_workflow_pattern "$CANARY_SCRIPT" 'SSO_CANARY_ENTERPRISE_ADMIN_ROUTE="${SSO_CANARY_ENTERPRISE_ADMIN_ROUTE:-/admin/analytics/}"' "canary script default enterprise admin deep route"
   check_workflow_pattern "$CANARY_SCRIPT" 'SSO_CANARY_ENTERPRISE_LEARNER_ROUTE="${SSO_CANARY_ENTERPRISE_LEARNER_ROUTE:-/dashboard}"' "canary script default enterprise learner deep route"
   check_workflow_pattern "$CANARY_SCRIPT" 'ENTERPRISE_ADMIN_DOMAIN' "canary script resolves enterprise admin domains from shared config"
@@ -141,10 +152,6 @@ if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
     SSO_CANARY_PASSWORD_PROD \
     SSO_CANARY_STUDIO_EMAIL_PROD \
     SSO_CANARY_STUDIO_PASSWORD_PROD \
-    SSO_CANARY_EMAIL_DEV \
-    SSO_CANARY_PASSWORD_DEV \
-    SSO_CANARY_STUDIO_EMAIL_DEV \
-    SSO_CANARY_STUDIO_PASSWORD_DEV \
     SSO_CANARY_EMAIL_STAGING \
     SSO_CANARY_PASSWORD_STAGING \
     SSO_CANARY_STUDIO_EMAIL_STAGING \
@@ -159,6 +166,19 @@ if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
         echo "WARN github secret missing: $key (non-strict warning)"
         warnings=$((warnings + 1))
       fi
+    fi
+  done
+
+  for key in \
+    SSO_CANARY_EMAIL_DEV \
+    SSO_CANARY_PASSWORD_DEV \
+    SSO_CANARY_STUDIO_EMAIL_DEV \
+    SSO_CANARY_STUDIO_PASSWORD_DEV; do
+    if grep -qx "$key" <<<"$secret_names"; then
+      echo "OK github secret present: $key"
+    else
+      echo "WARN github secret missing: $key (dev coverage remains optional)"
+      warnings=$((warnings + 1))
     fi
   done
 

@@ -1,7 +1,7 @@
 # Finish-Line Master Tracker
 
 _Audience: Contributors and reviewers • Owner: Platform Team • Last verified:
-2026-04-03T06:58:00Z • Status: active_
+2026-04-03T19:58:00Z • Status: active_
 
 Use this tracker with:
 
@@ -33,9 +33,22 @@ Use this tracker with:
 
 ### runtime_truth
 
-- Fresh dev runtime proof passed after the paired app+infra repair:
-  - command: `bash scripts/tenants/verify-dev-runtime-proof.sh --namespace mereka-lms-dev`
-  - status: pass for primary + `biji-biji` + `skillourfuture`
+- Dev tenant runtime is not closed.
+  - fresh live probes on 2026-04-03 show:
+    - `biji-biji.academyv2.mereka.dev` → `200` with empty body
+    - `skillourfuture.academyv2.mereka.dev` → `200` with empty body
+    - `studio.biji-biji.academyv2.mereka.dev` → `200` with empty body
+    - `studio.skillourfuture.academyv2.mereka.dev` → `200` with empty body
+  - fresh live probes also show:
+    - `apps.biji-biji.academyv2.mereka.dev` is healthy
+    - `apps.skillourfuture.academyv2.mereka.dev` is healthy
+  - realized-root cause:
+    ingress and Django site rows exist, but the live Caddy config only binds
+    tenant `apps.*` host blocks, not tenant LMS/Studio host blocks
+- `bbi-infrastructure#2406` is the live consumer fix for dev tenant LMS/Studio
+  Caddy authority.
+- `mereka-lms#1324` is the source/proof hardening follow-up; it makes runtime
+  proof reject empty `200` responses and aligns source Caddy defaults.
 - Fresh staging runtime proof passed for the active tenant matrix:
   - command: `bash scripts/tenants/verify-staging-runtime-proof.sh --namespace stg-mereka-lms`
   - status: pass for primary + `biji-biji` + `skillourfuture`
@@ -61,7 +74,9 @@ authority convergence:
   - proof command:
     `bash scripts/tenants/verify-dev-runtime-proof.sh --namespace mereka-lms-dev`
   - drift detector: `bash scripts/qa/verify-rke2-tenant-routes.sh --online`
-  - current status: dev and staging verified, prod open
+  - current status:
+    staging verified; dev tenant LMS/Studio roots broken pending `#2406`;
+    prod open
   - duplicate paths to retire: vendored Caddy copies without explicit provenance
 - Multisite runtime data (`Site` / `SiteConfiguration`)
   - canonical owner repo: `mereka-lms`
@@ -125,6 +140,13 @@ authority convergence:
   - proof after merge:
     `bash scripts/tenants/verify-dev-runtime-proof.sh --namespace mereka-lms-dev`
   - status: verified
+- Dev tenant LMS/Studio root repair
+  - app PR: `#1324`
+  - infra PR: `#2406`
+  - target env: dev
+  - proof after merge:
+    `bash scripts/tenants/verify-dev-runtime-proof.sh --namespace mereka-lms-dev`
+  - status: in flight
 - Release-object foundation
   - app PR: `#1310`
   - infra PR: not started

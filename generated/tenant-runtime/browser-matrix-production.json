@@ -11,7 +11,7 @@
     "namespace": "mereka-lms",
     "argocd_app": "mereka-lms-prod",
     "gitops_overlay_path": "apps/mereka-lms/overlays/prod",
-    "runtime_proof_script": "",
+    "runtime_proof_script": "scripts/tenants/verify-prod-runtime-proof.sh",
     "acceptance_profile": {
       "dashboard_redirect": {
         "path": "/dashboard",

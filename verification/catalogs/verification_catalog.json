@@ -1684,7 +1684,7 @@
       "mutability": "read-only",
       "owner": "identity-access",
       "path": "scripts/qa/verify-authenticated-sso-canary.sh",
-      "reference_count": 35,
+      "reference_count": 36,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -9136,7 +9136,8 @@
         "AC-ROUTE-001",
         "AC-ROUTE-002",
         "AC-ROUTE-003",
-        "AC-ROUTE-004"
+        "AC-ROUTE-004",
+        "AC-ROUTE-005"
       ],
       "status": "active",
       "tier": "release_blocking"
@@ -9183,7 +9184,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-runtime-contract.sh",
-      "reference_count": 7,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -12205,13 +12206,14 @@
         "ci_static"
       ],
       "env_scope": [
-        "prod"
+        "prod",
+        "staging"
       ],
       "kind": "verify",
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-post-deploy-health-gate-wiring.sh",
-      "reference_count": 4,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -12548,7 +12550,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-prod-parked-state.sh",
-      "reference_count": 12,
+      "reference_count": 13,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -13785,13 +13787,15 @@
         "ci_static"
       ],
       "env_scope": [
-        "dev"
+        "dev",
+        "prod",
+        "staging"
       ],
       "kind": "verify",
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-runtime-proof-fixture-pack.sh",
-      "reference_count": 8,
+      "reference_count": 9,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -17958,6 +17962,29 @@
       "ci_entrypoints": [],
       "env_scope": [
         "dev",
+        "prod"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "multisite-governance",
+      "path": "scripts/tenants/verify-prod-runtime-proof.sh",
+      "reference_count": 13,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "cluster"
+      ],
+      "severity": "medium",
+      "spec_ids": [],
+      "status": "active",
+      "tier": "periodic_runtime"
+    },
+    {
+      "cadence": "scheduled_or_post_deploy",
+      "canonical": true,
+      "ci_binding": [],
+      "ci_entrypoints": [],
+      "env_scope": [
+        "dev",
         "staging"
       ],
       "kind": "verify",
@@ -18002,25 +18029,25 @@
     "archived_deprecated_scripts": 21,
     "ci_static_bound": 373,
     "kinds": {
-      "verify": 601
+      "verify": 602
     },
     "mutability": {
       "destructive": 9,
       "mutating": 18,
-      "read-only": 574
+      "read-only": 575
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 418,
+      "active": 419,
       "deprecated_candidate": 1,
       "manual_only": 182
     },
     "tiers": {
       "exploratory_manual": 186,
-      "periodic_runtime": 17,
+      "periodic_runtime": 18,
       "release_blocking": 398
     },
-    "total_verify_scripts": 601,
+    "total_verify_scripts": 602,
     "workflow_direct_bound": 60
   },
   "version": "1"

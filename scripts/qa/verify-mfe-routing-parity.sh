@@ -11,11 +11,14 @@
 #   3. All MFE route handlers proxy exclusively to mfe:8002 from the outer Caddyfile
 #      (deploy/k8s/base/apps/caddy/Caddyfile)
 #   4. Cross-reference with branding verifier MFE_ROUTES map for drift detection
+#   5. Prefixed runtime env.config.js requests are rewritten to the shared
+#      /openedx/dist/env.config.js instead of falling through to SPA index.html
 #
 # AC-ROUTE-001: Routes mapped from runtime Caddyfile expectations
 # AC-ROUTE-002: Both /authoring and /course-authoring tested
 # AC-ROUTE-003: Intended to gate CI (syntax-checked in monitoring-guardrails)
 # AC-ROUTE-004: Evidence and log commands documented in docs/ops/runbooks/architecture/MFE_ROUTING_PARITY.md
+# AC-ROUTE-005: Prefixed env.config.js requests resolve to the shared runtime config artifact
 #
 # Usage: ./scripts/qa/verify-mfe-routing-parity.sh
 
@@ -39,7 +42,7 @@ do_warn() { WARN=$((WARN + 1)); echo "  WARN  $1"; }
 
 echo "=== MFE Routing Parity Verification ==="
 echo "Spec: bead-115d17"
-echo "Coverage: AC-ROUTE-001, AC-ROUTE-002, AC-ROUTE-003, AC-ROUTE-004"
+echo "Coverage: AC-ROUTE-001, AC-ROUTE-002, AC-ROUTE-003, AC-ROUTE-004, AC-ROUTE-005"
 echo ""
 
 # =============================================================================
@@ -131,9 +134,6 @@ declare -A EXPECTED_ROUTES=(
 for route in "${!EXPECTED_ROUTES[@]}"; do
   dist_dir="${EXPECTED_ROUTES[$route]}"
 
-  # Check the named matcher exists: @mfe_<name>
-  matcher_name="mfe_${dist_dir}"
-
   # Look for: path <route> <route>/*
   route_escaped="${route//\//\\/}"
   if grep -qP "path ${route_escaped}( |$)" "$MFE_CADDYFILE"; then
@@ -214,11 +214,11 @@ else
   do_fail "AC-ROUTE-002: Could not extract dist dir for /authoring ($AUTHORING_DIST) or /course-authoring ($COURSE_AUTHORING_DIST)"
 fi
 
-# Verify canonical dist dir is 'course-authoring' (not 'authoring')
-if [ "${AUTHORING_DIST:-}" = "course-authoring" ]; then
-  do_pass "AC-ROUTE-002: /authoring alias correctly maps to dist/course-authoring (canonical dir)"
+# Verify canonical dist dir is 'authoring'
+if [ "${AUTHORING_DIST:-}" = "authoring" ]; then
+  do_pass "AC-ROUTE-002: /authoring alias correctly maps to dist/authoring (canonical dir)"
 else
-  do_warn "AC-ROUTE-002: /authoring dist dir is '${AUTHORING_DIST:-unknown}', expected 'course-authoring'"
+  do_warn "AC-ROUTE-002: /authoring dist dir is '${AUTHORING_DIST:-unknown}', expected 'authoring'"
 fi
 
 # Both routes must have strip_prefix directives (so /authoring/... strips /authoring)
@@ -293,19 +293,26 @@ else
   do_fail "AC-ROUTE-001: /login_refresh proxy target is not lms:8000"
 fi
 
-# The outer apps-host Caddyfile must preserve Host when proxying LMS-owned paths.
-# Without this, non-primary tenant apps hosts can collapse back to empty or primary
-# mfe_config responses because LMS resolves SiteConfiguration off request host.
-if grep -A4 "handle /api/\\*" "$OUTER_CADDYFILE" | grep -qF "header_up Host {http.request.host}"; then
-  do_pass "AC-ROUTE-001: outer apps-host /api/* proxy preserves Host header"
+# The outer apps-host Caddyfile should delegate through the shared mfe_apps_proxy
+# macro, while the inner MFE Caddyfile owns LMS-facing API/auth passthroughs.
+if grep -A2 'http://{$MFE_HOST}' "$OUTER_CADDYFILE" | grep -qF 'import mfe_apps_proxy' && \
+   grep -A2 'http://{$TENANT_BIJIBIJI_MFE_HOST' "$OUTER_CADDYFILE" | grep -qF 'import mfe_apps_proxy' && \
+   grep -A2 'http://{$TENANT_SOF_MFE_HOST' "$OUTER_CADDYFILE" | grep -qF 'import mfe_apps_proxy'; then
+  do_pass "AC-ROUTE-001: outer apps hosts consistently delegate through mfe_apps_proxy"
 else
-  do_fail "AC-ROUTE-001: outer apps-host /api/* proxy missing Host header preservation"
+  do_fail "AC-ROUTE-001: outer apps hosts do not consistently delegate through mfe_apps_proxy"
 fi
 
-if grep -A4 "handle /login_refresh\\*" "$OUTER_CADDYFILE" | grep -qF "header_up Host {http.request.host}"; then
-  do_pass "AC-ROUTE-001: outer apps-host /login_refresh* proxy preserves Host header"
+if grep -A3 "reverse_proxy /api/\\*" "$MFE_CADDYFILE" | grep -qF "header_up Host {http.request.host}"; then
+  do_pass "AC-ROUTE-001: inner /api/* proxy preserves Host header"
 else
-  do_fail "AC-ROUTE-001: outer apps-host /login_refresh* proxy missing Host header preservation"
+  do_fail "AC-ROUTE-001: inner /api/* proxy missing Host header preservation"
+fi
+
+if grep -A3 "reverse_proxy /login_refresh\\*" "$MFE_CADDYFILE" | grep -qF "header_up Host {http.request.host}"; then
+  do_pass "AC-ROUTE-001: inner /login_refresh* proxy preserves Host header"
+else
+  do_fail "AC-ROUTE-001: inner /login_refresh* proxy missing Host header preservation"
 fi
 
 echo ""
@@ -346,7 +353,44 @@ fi
 echo ""
 
 # =============================================================================
-# Section 10: Branding verifier cross-reference (AC-ROUTE-001)
+# Section 10: Prefixed env.config.js routing (AC-ROUTE-005)
+# =============================================================================
+echo "--- Prefixed env.config.js Routing (AC-ROUTE-005) ---"
+
+ENV_CONFIG_BLOCK=$(awk '
+  /@mfe_prefixed_env_config/ { flag=1 }
+  flag { print }
+  flag && /file_server/ { exit }
+' "$MFE_CADDYFILE")
+
+if [ -n "$ENV_CONFIG_BLOCK" ]; then
+  do_pass "AC-ROUTE-005: prefixed env.config.js handler exists in MFE Caddyfile"
+else
+  do_fail "AC-ROUTE-005: prefixed env.config.js handler missing from MFE Caddyfile"
+fi
+
+if printf '%s\n' "$ENV_CONFIG_BLOCK" | grep -q 'learner-dashboard'; then
+  do_pass "AC-ROUTE-005: learner-dashboard prefix is covered by prefixed env.config.js matcher"
+else
+  do_fail "AC-ROUTE-005: learner-dashboard prefix missing from prefixed env.config.js matcher"
+fi
+
+if printf '%s\n' "$ENV_CONFIG_BLOCK" | grep -q 'rewrite \* /env.config.js'; then
+  do_pass "AC-ROUTE-005: prefixed env.config.js requests rewrite to /env.config.js"
+else
+  do_fail "AC-ROUTE-005: prefixed env.config.js rewrite to /env.config.js missing"
+fi
+
+if printf '%s\n' "$ENV_CONFIG_BLOCK" | grep -q 'root \* /openedx/dist'; then
+  do_pass "AC-ROUTE-005: prefixed env.config.js is served from /openedx/dist"
+else
+  do_fail "AC-ROUTE-005: prefixed env.config.js root is not /openedx/dist"
+fi
+
+echo ""
+
+# =============================================================================
+# Section 11: Branding verifier cross-reference (AC-ROUTE-001)
 # =============================================================================
 echo "--- Branding Verifier Cross-Reference (AC-ROUTE-001) ---"
 
@@ -366,7 +410,7 @@ fi
 echo ""
 
 # =============================================================================
-# Section 11: Runbook content checks (AC-ROUTE-004)
+# Section 12: Runbook content checks (AC-ROUTE-004)
 # =============================================================================
 echo "--- Runbook Content Checks (AC-ROUTE-004) ---"
 
@@ -397,7 +441,7 @@ if [ "$FAIL" -gt 0 ]; then
   echo "Common fixes:"
   echo "  1. New MFE route added? Add handler block to:"
   echo "       deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"
-  echo "  2. /authoring and /course-authoring must both serve dist/course-authoring"
+  echo "  2. /authoring and /course-authoring must both serve dist/authoring"
   echo "  3. All routes must use file_server (not reverse_proxy) except API passthroughs"
   echo "  4. See docs/ops/runbooks/architecture/MFE_ROUTING_PARITY.md for the full runbook"
   echo ""

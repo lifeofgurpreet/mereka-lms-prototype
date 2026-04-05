@@ -5,6 +5,10 @@ _Audience: Operators and developers • Owner: Platform Team • Last verified: 
 
 The post-deploy runtime gate enforces the current runtime-proof contract. In the present topology, manual browser proof defaults to staging, while automatic post-build runs verify that production remains intentionally parked at zero replicas.
 
+The runtime policy also carries the successor production browser/runtime proof lane, the
+non-dev synthetic fixture manifests, and the canonical smoke-account registry so production
+reactivation does not depend on tribal knowledge.
+
 ---
 
 ## Overview
@@ -15,6 +19,9 @@ The post-deploy runtime gate enforces the current runtime-proof contract. In the
 | **Verification script** | `scripts/qa/verify-post-deploy-gate.sh` |
 | **Trigger** | Automatic after `Build Tutor Images` succeeds; manual dispatch |
 | **Runtime policy** | `config/runtime-proof-policy.env` |
+| **Prod successor runtime verifier** | `scripts/tenants/verify-prod-runtime-proof.sh` |
+| **Non-dev fixture manifests** | `config/runtime-proof/staging.synthetic-proof-fixtures.yaml`, `config/runtime-proof/prod.synthetic-proof-fixtures.yaml` |
+| **Smoke credential contract** | `config/smoke-account-registry.yaml` |
 | **Manual default target** | `https://staging.academyv2.mereka.io` |
 | **Timeout** | 30 minutes |
 | **Artifacts** | 30-day retention in `post-deploy-e2e-<run_id>` |
@@ -187,6 +194,10 @@ The shared `.github/actions/setup-playwright` action resolves the Playwright ver
 
 If the gate fails in `production` parked-state mode, inspect the zero-replica and GitOps parked-state contract instead of trying to run browser E2E against prod.
 
+If production is reactivated, switch the runtime lane to the successor verifier in
+`config/runtime-proof-policy.env` and validate against the production fixture manifest and smoke
+account registry before calling the lane runtime-complete.
+
 ---
 
 ## Marking a Release Complete
@@ -195,8 +206,9 @@ A release may only be marked complete after the relevant runtime lane proof pass
 
 1. staging browser proof shows `success` on the deployment commit when staging is the active runtime lane
 2. production parked-state verification shows `success` when prod remains intentionally parked
-3. `./scripts/qa/verify-post-deploy-gate.sh --mode online` returns `PASS`
-4. No P0 incidents are open in the operations runbook
+3. if production is reactivated, `scripts/tenants/verify-prod-runtime-proof.sh` becomes the authoritative production runtime verifier instead of the parked-state check
+4. `./scripts/qa/verify-post-deploy-gate.sh --mode online` returns `PASS`
+5. No P0 incidents are open in the operations runbook
 
 If the gate fails and the failure is a known flake (not a real regression), document the exception in a PR comment and get sign-off from a second engineer before proceeding.
 

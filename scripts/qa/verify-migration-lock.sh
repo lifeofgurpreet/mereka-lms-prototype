@@ -11,6 +11,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 REGISTER_DOC="$REPO_ROOT/docs/reference/architecture/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md"
 MFE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
+MFE_SCSS_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/scss"
 
 PASS=0
 FAIL=0
@@ -25,17 +26,28 @@ warn() {
 }
 
 extract_active_class_selector_values() {
-  python3 - "$MFE_SCSS" <<'PY'
+  python3 - "$@" <<'PY'
 import re
 import sys
 from pathlib import Path
 
-text = Path(sys.argv[1]).read_text(encoding="utf-8")
-text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
-text = re.sub(r"^\s*//.*$", "", text, flags=re.M)
-for value in re.findall(r'\[class\*="([^"]+)"\]', text):
-    print(value)
+for path_str in sys.argv[1:]:
+    text = Path(path_str).read_text(encoding="utf-8")
+    text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+    text = re.sub(r"^\s*//.*$", "", text, flags=re.M)
+    for value in re.findall(r'\[class\*="([^"]+)"\]', text):
+        print(value)
 PY
+}
+
+find_mfe_source_files() {
+  if [[ -f "$MFE_SCSS" ]]; then
+    printf '%s\n' "$MFE_SCSS"
+  fi
+
+  if [[ -d "$MFE_SCSS_DIR" ]]; then
+    find "$MFE_SCSS_DIR" -maxdepth 1 -type f -name '*.scss' | sort
+  fi
 }
 
 echo "========================================"
@@ -64,38 +76,45 @@ if [[ ! -f "$MFE_SCSS" ]]; then
   exit 1
 fi
 
+MFE_SOURCE_FILES=()
+while IFS= read -r source_file; do
+  MFE_SOURCE_FILES+=("$source_file")
+done < <(find_mfe_source_files 2>/dev/null)
+
+if [[ "${#MFE_SOURCE_FILES[@]}" -eq 0 ]]; then
+  echo "  FAIL: no MFE SCSS source files found under $MFE_SCSS_DIR"
+  FAIL=$((FAIL + 1))
+  echo ""
+  echo "=== SUMMARY ==="
+  echo "PASS: $PASS  FAIL: $FAIL  WARN: $WARN"
+  echo "RESULT: FAIL"
+  exit 1
+fi
+
 # -----------------------------------------------------------------------
 # AC-MIGLOCK-001: Section count in SCSS >= register entry count
 # -----------------------------------------------------------------------
 echo "AC-MIGLOCK-001: SCSS override blocks vs register entries"
 
 # Count numbered entries in the register (### N. heading pattern)
-REGISTER_ENTRY_COUNT=$(grep -c '^### [0-9]\+\.' "$REGISTER_DOC" || true)
+REGISTER_ENTRY_COUNT=$(grep -c '^### [0-9]\+\.' "$REGISTER_DOC" 2>/dev/null | tr -d '[:space:]')
 REGISTER_ENTRY_COUNT="${REGISTER_ENTRY_COUNT:-0}"
 
-# Count major CSS section comment blocks (non-BRITTLE, non-Fallback top-level comments)
-# These are lines starting with /* that describe a logical override surface
-SCSS_SECTION_COUNT=$(grep -c '^/\* [A-Z]' "$MFE_SCSS" || true)
+# Count major SCSS section comment blocks across the actual MFE source files.
+SCSS_SECTION_COUNT=$(grep -hE '^/\* [A-Z]' "${MFE_SOURCE_FILES[@]}" 2>/dev/null | wc -l | tr -d '[:space:]')
 SCSS_SECTION_COUNT="${SCSS_SECTION_COUNT:-0}"
-ACTIVE_CLASS_SELECTOR_COUNT="$(extract_active_class_selector_values | wc -l | tr -d ' ')"
-ACTIVE_CLASS_SELECTOR_COUNT="${ACTIVE_CLASS_SELECTOR_COUNT:-0}"
 
 echo "  Register entries: $REGISTER_ENTRY_COUNT"
 echo "  SCSS surface sections: $SCSS_SECTION_COUNT"
 
 if [[ $REGISTER_ENTRY_COUNT -ge 10 ]]; then pass_check "Register has at least 10 numbered entries"; else fail_check "Register has at least 10 numbered entries"; fi
-if [[ $SCSS_SECTION_COUNT -eq 0 && $ACTIVE_CLASS_SELECTOR_COUNT -eq 0 ]]; then
-  pass_check "No annotated SCSS override surfaces remain after wildcard cleanup"
-  pass_check "SCSS surface coverage is not required once override cleanup is complete"
-else
-  if [[ $SCSS_SECTION_COUNT -ge 1 ]]; then pass_check "SCSS section count >= 1 (has annotated surfaces)"; else fail_check "SCSS section count >= 1 (has annotated surfaces)"; fi
+if [[ $SCSS_SECTION_COUNT -ge 1 ]]; then pass_check "SCSS section count >= 1 (has annotated surfaces)"; else fail_check "SCSS section count >= 1 (has annotated surfaces)"; fi
 
-  # AC-MIGLOCK-001 core: every register entry should have at least one SCSS selector block
-  # We verify the ratio is reasonable — sections >= 1 per 4 register entries (conservative)
-  EXPECTED_MIN=$(( REGISTER_ENTRY_COUNT / 4 ))
-  if [[ $EXPECTED_MIN -lt 1 ]]; then EXPECTED_MIN=1; fi
-  if [[ $SCSS_SECTION_COUNT -ge $EXPECTED_MIN ]]; then pass_check "SCSS surface sections cover enough register scope (>= $EXPECTED_MIN sections)"; else fail_check "SCSS surface sections cover enough register scope (>= $EXPECTED_MIN sections)"; fi
-fi
+# AC-MIGLOCK-001 core: every register entry should have at least one SCSS selector block
+# We verify the ratio is reasonable — sections >= 1 per 4 register entries (conservative)
+EXPECTED_MIN=$(( REGISTER_ENTRY_COUNT / 4 ))
+if [[ $EXPECTED_MIN -lt 1 ]]; then EXPECTED_MIN=1; fi
+if [[ $SCSS_SECTION_COUNT -ge $EXPECTED_MIN ]]; then pass_check "SCSS surface sections cover enough register scope (>= $EXPECTED_MIN sections)"; else fail_check "SCSS surface sections cover enough register scope (>= $EXPECTED_MIN sections)"; fi
 
 echo ""
 
@@ -104,7 +123,7 @@ echo ""
 # -----------------------------------------------------------------------
 echo "AC-MIGLOCK-002: class* override alignment with exception register"
 
-mapfile -t ACTIVE_CLASS_VALUES < <(extract_active_class_selector_values)
+mapfile -t ACTIVE_CLASS_VALUES < <(extract_active_class_selector_values "${MFE_SOURCE_FILES[@]}")
 CLASS_STAR_TOTAL="${#ACTIVE_CLASS_VALUES[@]}"
 if [[ "$CLASS_STAR_TOTAL" -gt 0 ]]; then
   mapfile -t ACTIVE_CLASS_UNIQUE < <(printf '%s\n' "${ACTIVE_CLASS_VALUES[@]}" | sort -u)
@@ -228,15 +247,20 @@ else
   FAIL=$((FAIL + 1))
 fi
 
-ACCOUNT_SCOPE_ACTIVE=$(python3 - "$MFE_SCSS" <<'PY'
+ACCOUNT_SCOPE_ACTIVE=$(python3 - "${MFE_SOURCE_FILES[@]}" <<'PY'
 import re
 import sys
 from pathlib import Path
 
-text = Path(sys.argv[1]).read_text(encoding="utf-8")
-text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
-text = re.sub(r"^\s*//.*$", "", text, flags=re.M)
-print(1 if ".page__account-settings" in text else 0)
+active = 0
+for path_str in sys.argv[1:]:
+    text = Path(path_str).read_text(encoding="utf-8")
+    text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+    text = re.sub(r"^\s*//.*$", "", text, flags=re.M)
+    if ".page__account-settings" in text:
+        active = 1
+        break
+print(active)
 PY
 )
 if [[ "$ACCOUNT_SCOPE_ACTIVE" -eq 1 ]]; then

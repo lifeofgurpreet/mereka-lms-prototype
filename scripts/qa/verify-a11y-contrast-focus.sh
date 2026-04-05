@@ -37,6 +37,7 @@ do_warn() { WARN=$((WARN + 1)); echo -e "${YELLOW}[WARN]${NC} $1"; }
 TOKENS_CSS="$REPO_ROOT/assets/branding/tokens.css"
 TOKENS_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/scss/_tokens.scss"
 MFE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
+MFE_SCSS_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/scss"
 THEME_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka"
 EXCEPTION_DOC="$REPO_ROOT/docs/ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md"
 
@@ -52,39 +53,19 @@ find_focus_audit_files() {
 }
 
 find_mfe_source_files() {
-  find "$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe" \
-    -type f \
-    -name '*.scss' \
-    | sort
-}
+  if [[ -f "$MFE_SCSS" ]]; then
+    printf '%s\n' "$MFE_SCSS"
+  fi
 
-mfe_source_has_regex() {
-  local pattern="$1"
-  find_mfe_source_files | xargs -r grep -qE "$pattern"
-}
-
-mfe_source_has_literal() {
-  local needle="$1"
-  find_mfe_source_files | xargs -r grep -qF -- "$needle"
-}
-
-mfe_source_count_literal() {
-  local needle="$1"
-  local total=0
-  local file count
-
-  while IFS= read -r file; do
-    count=$(grep -cF -- "$needle" "$file" 2>/dev/null || true)
-    total=$((total + count))
-  done < <(find_mfe_source_files)
-
-  printf '%s\n' "$total"
+  if [[ -d "$MFE_SCSS_DIR" ]]; then
+    find "$MFE_SCSS_DIR" -maxdepth 1 -type f -name '*.scss' | sort
+  fi
 }
 
 echo -e "${BLUE}=== A11y Contrast + Focus-Visible Gate ===${NC}"
 echo "  Token source: assets/branding/tokens.css"
 echo "  Theme bridge: infrastructure/tutor/themes/mereka/scss/_tokens.scss"
-echo "  MFE overrides: infrastructure/tutor/themes/mereka/mfe/mereka.scss"
+echo "  MFE overrides: infrastructure/tutor/themes/mereka/mfe/mereka.scss + mfe/scss/*.scss"
 echo ""
 
 # ── Python availability check ─────────────────────────────────────────
@@ -246,10 +227,15 @@ echo ""
 # ── AC-A11Y-002: focus-visible / focus indicator audit ────────────────
 echo -e "${BLUE}## AC-A11Y-002: Focus-Visible / Focus Indicator Audit${NC}"
 
-if [[ ! -f "$MFE_SCSS" ]]; then
-  do_fail "AC-A11Y-002: mereka.scss not found — cannot audit focus overrides"
+MFE_SOURCE_FILES=()
+while IFS= read -r source_file; do
+  MFE_SOURCE_FILES+=("$source_file")
+done < <(find_mfe_source_files 2>/dev/null)
+
+if [[ "${#MFE_SOURCE_FILES[@]}" -eq 0 ]]; then
+  do_fail "AC-A11Y-002: no MFE SCSS source files found — cannot audit focus overrides"
 else
-  do_pass "AC-A11Y-002: mereka.scss found"
+  do_pass "AC-A11Y-002: found ${#MFE_SOURCE_FILES[@]} MFE SCSS source file(s)"
 
   # ── Check 1: outline removal patterns ──────────────────────────────
   # Pattern: outline: none  or  outline: 0  on interactive contexts
@@ -298,14 +284,14 @@ else
   fi
 
   # ── Check 3: focus token is defined in MFE SCSS ─────────────────────
-  if mfe_source_has_literal '--mereka-mfe-focus'; then
-    do_pass "AC-A11Y-002: --mereka-mfe-focus focus ring token defined in MFE SCSS"
+  if grep -qF -- '--mereka-mfe-focus' "${MFE_SOURCE_FILES[@]}"; then
+    do_pass "AC-A11Y-002: --mereka-mfe-focus focus ring token defined in MFE source SCSS"
   else
-    do_fail "AC-A11Y-002: --mereka-mfe-focus token missing from MFE SCSS"
+    do_fail "AC-A11Y-002: --mereka-mfe-focus token missing from MFE source SCSS"
   fi
 
   # ── Check 4: focus token is actually used on a :focus rule ──────────
-  FOCUS_TOKEN_USED=$(mfe_source_count_literal 'var(--mereka-mfe-focus)')
+  FOCUS_TOKEN_USED=$(grep -hFo 'var(--mereka-mfe-focus)' "${MFE_SOURCE_FILES[@]}" 2>/dev/null | wc -l | tr -d '[:space:]')
   if [[ "$FOCUS_TOKEN_USED" -gt 0 ]]; then
     do_pass "AC-A11Y-002: --mereka-mfe-focus token used $FOCUS_TOKEN_USED time(s) (focus ring applied)"
   else
@@ -318,26 +304,26 @@ else
   FORMS_HAVE_FOCUS=0
 
   # .btn-primary:focus appears in the MFE SCSS (combined selector)
-  if mfe_source_has_regex '\.btn-primary.*:focus|:focus.*\.btn-primary'; then
+  if grep -qE '\.btn-primary.*:focus|:focus.*\.btn-primary' "${MFE_SOURCE_FILES[@]}"; then
     BTNS_HAVE_FOCUS=1
   fi
-  if mfe_source_has_regex '\.pgn__btn--primary.*:focus|:focus.*\.pgn__btn--primary'; then
+  if grep -qE '\.pgn__btn--primary.*:focus|:focus.*\.pgn__btn--primary' "${MFE_SOURCE_FILES[@]}"; then
     BTNS_HAVE_FOCUS=1
   fi
-  if mfe_source_has_regex '\.form-control.*:focus|:focus.*\.form-control|\.pgn__form-control.*:focus'; then
+  if grep -qE '\.form-control.*:focus|:focus.*\.form-control|\.pgn__form-control.*:focus' "${MFE_SOURCE_FILES[@]}"; then
     FORMS_HAVE_FOCUS=1
   fi
 
   if [[ "$BTNS_HAVE_FOCUS" -eq 1 ]]; then
-    do_pass "AC-A11Y-002: .btn-primary / .pgn__btn--primary has :focus rule in MFE SCSS"
+    do_pass "AC-A11Y-002: .btn-primary / .pgn__btn--primary has :focus rule in MFE source SCSS"
   else
-    do_warn "AC-A11Y-002: .btn-primary / .pgn__btn--primary :focus rule not found in MFE SCSS"
+    do_warn "AC-A11Y-002: .btn-primary / .pgn__btn--primary :focus rule not found in MFE source SCSS"
   fi
 
   if [[ "$FORMS_HAVE_FOCUS" -eq 1 ]]; then
-    do_pass "AC-A11Y-002: .form-control / .pgn__form-control has :focus rule in MFE SCSS"
+    do_pass "AC-A11Y-002: .form-control / .pgn__form-control has :focus rule in MFE source SCSS"
   else
-    do_warn "AC-A11Y-002: .form-control / .pgn__form-control :focus rule not found in MFE SCSS"
+    do_warn "AC-A11Y-002: .form-control / .pgn__form-control :focus rule not found in MFE source SCSS"
   fi
 
   # ── Check 6: :focus-visible migration progress ──────────────────────

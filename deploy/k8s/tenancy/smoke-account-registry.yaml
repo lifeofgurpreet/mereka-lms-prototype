@@ -1,7 +1,10 @@
-# Smoke Account Registry — machine-readable authority
+# Smoke Account Registry — legacy tenancy mirror
 #
-# This is the canonical, machine-readable registry for all smoke test identities
-# used by release gates, CI, and manual QA across all tenants and environments.
+# Canonical smoke-account contract now lives at:
+#   config/smoke-account-registry.yaml
+#
+# Keep this file only as a compatibility mirror for tenancy-adjacent consumers
+# until they are migrated. Do not treat this path as the authority surface.
 #
 # Identity authority: Authentik + Open edX (NOT GitHub secrets, NOT Infisical)
 # Secret authority: Infisical

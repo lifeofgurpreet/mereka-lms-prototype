@@ -54,7 +54,35 @@ Django-rendered pages (header/footer) already use `configuration_helpers.get_val
 - Requires Transifex translation import (build-time) + DarkLangConfig admin setup (runtime)
 - Not a code issue — admin/content task
 
-### G. ArgoCD Health — CLEAN
+### G. Tenant Root Runtime — BROKEN ON DEV TENANT LMS/STUDIO ROOTS
+
+Fresh live probes on 2026-04-03 corrected the earlier closure claim.
+
+What is actually true right now:
+- `https://biji-biji.academyv2.mereka.dev/` returns `200` with `Content-Length: 0`
+- `https://skillourfuture.academyv2.mereka.dev/` returns `200` with `Content-Length: 0`
+- `https://studio.biji-biji.academyv2.mereka.dev/` returns `200` with `Content-Length: 0`
+- `https://studio.skillourfuture.academyv2.mereka.dev/` returns `200` with `Content-Length: 0`
+- `https://apps.biji-biji.academyv2.mereka.dev/` is healthy and serves the authn shell
+- `https://apps.skillourfuture.academyv2.mereka.dev/` is healthy and serves the authn shell
+
+Root cause isolated:
+- live ingress already carries the tenant LMS/Studio/MFE hosts
+- live Django `Site` and `SiteConfiguration` rows already exist for BB and SOF
+- live Caddy authority only materialized tenant `apps.*` host blocks, not tenant LMS or Studio host blocks
+- tenant LMS and Studio requests therefore fall through to an empty `200 OK` at the proxy layer
+
+Fix path staged:
+- `bbi-infrastructure#2406` binds dev tenant LMS and Studio hosts in the realized Caddy consumer
+- `mereka-lms#1324` hardens source truth and runtime proof so empty `200` host responses fail verification
+
+Retest gate after `#2406` realizes:
+1. `https://biji-biji.academyv2.mereka.dev/`
+2. `https://skillourfuture.academyv2.mereka.dev/`
+3. `https://studio.biji-biji.academyv2.mereka.dev/`
+4. `https://studio.skillourfuture.academyv2.mereka.dev/`
+
+### H. ArgoCD Health — CLEAN
 
 - `mereka-lms-dev`: Synced Healthy (was Degraded earlier, now resolved)
 - Enterprise worker high restart counts (subsidy: 158, access: 128, catalog: 109) are pre-existing and unrelated to frontend lane
@@ -71,8 +99,10 @@ Django-rendered pages (header/footer) already use `configuration_helpers.get_val
 | 6 | Tenant brand logos in theme | MERGED (#1278), build in progress | No |
 | 7 | `/dashboard` authenticated landing | CONFIG CORRECT, needs browser proof | No |
 | 8 | Studio auth callback | OAUTH2 CLIENT CORRECT, needs browser proof | Unproven |
-| 9 | Language selector | DEFERRED (admin task) | No |
-| 10 | Course card images (MCT migration) | DATA ISSUE, gradient fallback works | No |
+| 9 | BB/SOF dev LMS roots | BROKEN — empty `200 OK` from proxy | Yes |
+| 10 | BB/SOF dev Studio roots | BROKEN — empty `200 OK` from proxy | Yes |
+| 11 | Language selector | DEFERRED (admin task) | No |
+| 12 | Course card images (MCT migration) | DATA ISSUE, gradient fallback works | No |
 
 ## What Requires Image Rebuild (in progress)
 
@@ -84,6 +114,8 @@ Django-rendered pages (header/footer) already use `configuration_helpers.get_val
 1. Authenticated `/dashboard` → MFE learner-dashboard redirect
 2. Studio login callback round-trip
 3. `next` parameter survival through auth chain
+4. BB/SOF LMS roots return real HTML after `bbi-infrastructure#2406`
+5. BB/SOF Studio roots return real HTML after `bbi-infrastructure#2406`
 
 These require an actual authenticated session (SSO via Authentik), not just curl.
 

@@ -10703,6 +10703,33 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-04",
+    "owner": "Platform Team",
+    "path": "reference/contracts/SMOKE_ACCOUNT_REGISTRY_CONTRACT.md",
+    "status": "canonical",
+    "type": "contract"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-04",
+    "owner": "Platform Team",
+    "path": "reference/contracts/VERIFIER_CONTRACT_CATALOG.md",
+    "status": "canonical",
+    "type": "contract"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-04",
+    "owner": "Platform Team",
+    "path": "status/active/SMOKE_ACCOUNT_REGISTRY_2026-04-04.md",
+    "status": "canonical",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
     "path": "verification/evidence-packs/.gitkeep",

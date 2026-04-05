@@ -19,6 +19,10 @@ STAGING_RUNTIME_BASE_URL=https://staging.academyv2.mereka.io
 PROD_RUNTIME_MODE=parked
 PROD_PARKED_STATUS_CONTEXT=post-deploy/production-parked-state
 PROD_PARKED_VERIFIER=scripts/qa/verify-prod-parked-state.sh
+PROD_FULL_RUNTIME_PROOF_VERIFIER=scripts/tenants/verify-prod-runtime-proof.sh
+STAGING_RUNTIME_FIXTURE_MANIFEST=config/runtime-proof/staging.synthetic-proof-fixtures.yaml
+PROD_RUNTIME_FIXTURE_MANIFEST=config/runtime-proof/prod.synthetic-proof-fixtures.yaml
+SMOKE_ACCOUNT_REGISTRY_CONTRACT=config/smoke-account-registry.yaml
 EOF
 
   cat >"$tmpdir/.github/workflows/post-deploy-e2e.yml" <<'EOF'
@@ -80,5 +84,20 @@ jobs:
       - run: ./scripts/infra/release-openedx-gitops.sh
 EOF
 run_expect_fail "missing --verify-runtime flag is rejected"
+
+write_pass_fixtures
+cat >"$tmpdir/config/runtime-proof-policy.env" <<'EOF'
+AUTHORITATIVE_RUNTIME_PROOF_ENV=staging
+POST_DEPLOY_WORKFLOW_RUN_ENV=production
+POST_DEPLOY_MANUAL_DEFAULT_ENV=staging
+STAGING_RUNTIME_BASE_URL=https://staging.academyv2.mereka.io
+PROD_RUNTIME_MODE=parked
+PROD_PARKED_STATUS_CONTEXT=post-deploy/production-parked-state
+PROD_PARKED_VERIFIER=scripts/qa/verify-prod-parked-state.sh
+PROD_FULL_RUNTIME_PROOF_VERIFIER=scripts/tenants/verify-prod-runtime-proof.sh
+STAGING_RUNTIME_FIXTURE_MANIFEST=config/runtime-proof/staging.synthetic-proof-fixtures.yaml
+PROD_RUNTIME_FIXTURE_MANIFEST=config/runtime-proof/prod.synthetic-proof-fixtures.yaml
+EOF
+run_expect_fail "missing smoke account registry contract entry is rejected"
 
 echo "OK"

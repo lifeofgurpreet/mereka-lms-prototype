@@ -21,15 +21,17 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 # Auto-detect infra repo location
 INFRA_REPO="${INFRA_REPO:-}"
-for candidate in \
-  "$HOME/projects/k8s/bbi-infrastructure" \
-  "$REPO_ROOT/../bbi-infrastructure" \
-  "$HOME/bbi-infrastructure"; do
-  if [[ -d "$candidate/apps/mereka-lms" ]]; then
-    INFRA_REPO="$candidate"
-    break
-  fi
-done
+if [[ -z "$INFRA_REPO" ]] && [[ "${GITHUB_ACTIONS:-false}" != "true" ]]; then
+  for candidate in \
+    "$HOME/projects/k8s/bbi-infrastructure" \
+    "$REPO_ROOT/../bbi-infrastructure" \
+    "$HOME/bbi-infrastructure"; do
+    if [[ -d "$candidate/apps/mereka-lms" ]]; then
+      INFRA_REPO="$candidate"
+      break
+    fi
+  done
+fi
 
 if [[ -z "$INFRA_REPO" ]] || [[ ! -d "$INFRA_REPO/apps/mereka-lms" ]]; then
   echo "SKIP: bbi-infrastructure repo not found — set INFRA_REPO"
