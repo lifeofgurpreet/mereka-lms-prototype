@@ -774,6 +774,20 @@ class TestTenantAuthnMicrofrontendUrlForHost(unittest.TestCase):
             "https://apps.academyv2.mereka.dev/authn",
         )
 
+    @patch.object(ms, "_tenant_mfe_url")
+    def test_falls_back_to_default_authn_url_when_lookup_raises(self, mock_tenant_mfe_url):
+        mock_tenant_mfe_url.side_effect = RuntimeError("db unavailable")
+
+        resolved = ms.tenant_authn_microfrontend_url_for_host(
+            "biji-biji.academyv2.mereka.dev",
+            "https://apps.academyv2.mereka.dev/authn/",
+        )
+
+        self.assertEqual(
+            resolved,
+            "https://apps.academyv2.mereka.dev/authn",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

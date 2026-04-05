@@ -311,7 +311,11 @@ def tenant_authn_microfrontend_url_for_host(host: str, default_url: str) -> str:
     host-derived tenant apps origin when available, and only then fall back to
     the caller-provided default URL.
     """
-    tenant_authn_url = _tenant_mfe_url(host, "/authn")
+    try:
+        tenant_authn_url = _tenant_mfe_url(host, "/authn")
+    except Exception:
+        _log.exception("Failed to resolve tenant authn MFE URL for host %s", host)
+        tenant_authn_url = None
     if tenant_authn_url:
         return tenant_authn_url.rstrip("/")
     return (default_url or "").strip().rstrip("/")
