@@ -116,9 +116,11 @@ tenants:
     environments:
       - env: production
         lms_host: skillourfuture.academy.mereka.io
-        apps_host: apps.skillourfuture.academy.mereka.io
-        studio_host: studio.skillourfuture.academy.mereka.io
-        authn_base_url: https://apps.skillourfuture.academy.mereka.io/authn
+        apps_host: apps.skillourfuture.academyv2.mereka.io
+        studio_host: studio.skillourfuture.academyv2.mereka.io
+        authn_base_url: https://apps.skillourfuture.academyv2.mereka.io/authn
+        # D-08: LMS is on academy.mereka.io, apps/studio on academyv2.mereka.io.
+        # Cookie domain mismatch may affect SSO. Full migration to one domain pending.
       - env: dev
         lms_host: skillourfuture.academyv2.mereka.dev
         apps_host: apps.skillourfuture.academyv2.mereka.dev

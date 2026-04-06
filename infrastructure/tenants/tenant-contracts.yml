@@ -61,8 +61,8 @@ tenants:
     country: MY
     domains:
       lms: skillourfuture.academy.mereka.io
-      studio: studio.skillourfuture.academy.mereka.io
-      apps: apps.skillourfuture.academy.mereka.io
+      studio: studio.skillourfuture.academyv2.mereka.io
+      apps: apps.skillourfuture.academyv2.mereka.io
       admin: admin.academyv2.mereka.io
     aliases: []
     mfe_env_file: deploy/k8s/base/apps/enterprise/mfe/skillourfuture-mfe-env.js

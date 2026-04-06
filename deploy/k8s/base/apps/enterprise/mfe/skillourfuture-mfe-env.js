@@ -6,7 +6,7 @@
 // same container (COPY'd into /openedx/dist/theme/ at Docker build time).
 window.ENV_CONFIG = {
   LMS_BASE_URL: 'https://skillourfuture.academy.mereka.io',
-  STUDIO_BASE_URL: 'https://studio.skillourfuture.academy.mereka.io',
+  STUDIO_BASE_URL: 'https://studio.skillourfuture.academyv2.mereka.io',
   LOGIN_URL: 'https://skillourfuture.academy.mereka.io/login',
   LOGOUT_URL: 'https://skillourfuture.academy.mereka.io/logout',
   REFRESH_ACCESS_TOKEN_ENDPOINT: 'https://skillourfuture.academy.mereka.io/login_refresh',
