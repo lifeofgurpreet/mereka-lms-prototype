@@ -26,4 +26,5 @@ def test_base_settings_document_overlay_hardening_contract() -> None:
 
     assert overlay_comment in lms_text
     assert overlay_comment in cms_text
-    assert "OAUTH_ENFORCE_SECURE = False" in lms_text
+    # Base must keep OAUTH_ENFORCE_SECURE = True (verify-security-hardening.sh enforces this).
+    assert "OAUTH_ENFORCE_SECURE = True" in lms_text

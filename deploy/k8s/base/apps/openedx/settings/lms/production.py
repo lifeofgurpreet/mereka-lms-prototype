@@ -693,8 +693,8 @@ PROFILE_IMAGE_BACKEND["options"]["location"] = os.path.join(
 COURSE_CATALOG_VISIBILITY_PERMISSION = "see_in_catalog"
 COURSE_ABOUT_VISIBILITY_PERMISSION = "see_about_page"
 
-# Production-mode OAuth redirects must stay HTTPS-only. Local direct-container
-# workflows should use development.py instead of weakening deployed lanes here.
+# Environment-owned overlays must harden this for live lanes.
+# OAUTH_ENFORCE_SECURE = True ensures all OAuth redirects use HTTPS.
 OAUTH_ENFORCE_SECURE = True
 
 # Email settings
@@ -999,6 +999,10 @@ LMS_ROOT_URL = MEREKA_LMS_BASE_URL
 # In K8s, localhost:80 doesn't serve LMS — use the external URL so requests
 # route through the ingress (same as dev does).
 LMS_INTERNAL_ROOT_URL = LMS_ROOT_URL
+# Enterprise OAuth2 provider: defaults to http://127.0.0.1:8000/oauth2 which
+# fails in K8s. Without this, ALL enterprise-linked users get "error loading
+# course" because the consent API can't obtain an OAuth2 token.
+ENTERPRISE_BACKEND_SERVICE_EDX_OAUTH2_PROVIDER_URL = f"{LMS_INTERNAL_ROOT_URL}/oauth2"
 ENTERPRISE_API_URL = f"{LMS_ROOT_URL}/enterprise/api/v1/"
 # Enterprise catalog internal URL: the enterprise Django package defaults to
 # "enterprise.catalog.app:18160" (Tutor hostname), which doesn't resolve in K8s.

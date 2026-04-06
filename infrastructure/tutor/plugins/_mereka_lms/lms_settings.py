@@ -213,6 +213,29 @@ if "DISCUSSIONS_MFE_FEEDBACK_URL" not in globals():
 # Set default theme for all sites
 DEFAULT_SITE_THEME = "mereka"
 
+# Extracted XBlocks — use the new modular blocks from xblocks-contrib (0.6.0)
+# Verified installed: all block types present in xblocks_contrib package
+FEATURES['USE_EXTRACTED_VIDEO_BLOCK'] = True
+FEATURES['USE_EXTRACTED_HTML_BLOCK'] = True
+FEATURES['USE_EXTRACTED_PROBLEM_BLOCK'] = True
+FEATURES['USE_EXTRACTED_DISCUSSION_BLOCK'] = True
+FEATURES['USE_EXTRACTED_LTI_BLOCK'] = True
+FEATURES['USE_EXTRACTED_WORD_CLOUD_BLOCK'] = True
+FEATURES['USE_EXTRACTED_POLL_QUESTION_BLOCK'] = True
+FEATURES['USE_EXTRACTED_ANNOTATABLE_BLOCK'] = True
+
+# Aspects event routing — enable batching for performance
+EVENT_ROUTING_BACKEND_BATCHING_ENABLED = True
+
+# Certificate lifecycle events on the event bus
+SEND_LEARNING_CERTIFICATE_LIFECYCLE_EVENTS_TO_BUS = True
+
+# Programs cache API — needed for program discovery
+FEATURES['EXPOSE_CACHE_PROGRAMS_ENDPOINT'] = True
+
+# Content Libraries v2 (Learning Core)
+FEATURES['ENABLE_CONTENT_LIBRARIES'] = True
+
 # Ensure optional Redwood apps exist
 if "openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig" not in INSTALLED_APPS:
     INSTALLED_APPS += ["openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig"]
