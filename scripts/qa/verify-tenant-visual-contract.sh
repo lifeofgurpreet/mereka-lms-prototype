@@ -7,7 +7,7 @@
 # and CSS/asset assertions for all 3 production tenants.
 #
 # Usage:
-#   ./scripts/qa/verify-tenant-visual-contract.sh [--env prod|dev] [--evidence-dir DIR]
+#   ./scripts/qa/verify-tenant-visual-contract.sh [--env prod|dev] [--tenant SLUG] [--evidence-dir DIR]
 
 set -euo pipefail
 
@@ -15,15 +15,17 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 ENV="prod"
+TENANT_FILTER=""
 EVIDENCE_DIR=""
 CURL_TIMEOUT="${CURL_TIMEOUT:-15}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --env) ENV="${2:-prod}"; shift 2 ;;
+    --tenant) TENANT_FILTER="${2:-}"; shift 2 ;;
     --evidence-dir) EVIDENCE_DIR="${2:-}"; shift 2 ;;
     -h|--help)
-      echo "Usage: $0 [--env prod|dev] [--evidence-dir DIR]"
+      echo "Usage: $0 [--env prod|dev] [--tenant SLUG] [--evidence-dir DIR]"
       exit 0
       ;;
     *) echo "Unknown arg: $1" >&2; exit 1 ;;
@@ -42,13 +44,14 @@ case "$ENV" in
 esac
 
 # Generate all domain maps from the canonical contract
-eval "$(python3 - "$CONTRACT_FILE" "$CONTRACT_ENV" <<'PY'
+eval "$(python3 - "$CONTRACT_FILE" "$CONTRACT_ENV" "$TENANT_FILTER" <<'PY'
 import sys
 import yaml
 from pathlib import Path
 
 contract_path = Path(sys.argv[1])
 target_env = sys.argv[2]
+tenant_filter = sys.argv[3]
 
 contract = yaml.safe_load(contract_path.read_text(encoding="utf-8"))
 tenants = contract.get("tenants", [])
@@ -61,6 +64,8 @@ eyebrow_map = []
 
 for tenant in tenants:
     slug = tenant.get("slug", "")
+    if tenant_filter and slug != tenant_filter:
+        continue
     expected_brand = tenant.get("expected_brand", tenant.get("site_name", ""))
     theme_bundle = tenant.get("theme_bundle", "")
     expected_authn = tenant.get("expected_authn", {})
@@ -94,6 +99,15 @@ print("\n".join(eyebrow_map))
 print(")")
 PY
 )"
+
+if [[ "${#DOMAINS[@]}" -eq 0 ]]; then
+  if [[ -n "$TENANT_FILTER" ]]; then
+    echo "No tenant domains matched tenant '$TENANT_FILTER' in environment '$CONTRACT_ENV'" >&2
+  else
+    echo "No tenant domains found in environment '$CONTRACT_ENV'" >&2
+  fi
+  exit 2
+fi
 
 PASS=0
 FAIL=0
@@ -182,6 +196,9 @@ echo "╔═══════════════════════�
 echo "║       Tenant Visual Contract Verification                  ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo "Environment: $ENV"
+if [[ -n "$TENANT_FILTER" ]]; then
+  echo "Tenant filter: $TENANT_FILTER"
+fi
 echo "Domains: ${DOMAINS[*]}"
 echo ""
 

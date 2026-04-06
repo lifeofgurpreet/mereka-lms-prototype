@@ -23,7 +23,7 @@ Usage: scripts/acceptance/tenant-branding.sh [OPTIONS]
 
 Options:
   --env <production|staging|dev>  Environment to verify
-  --tenant <slug>                 Restrict to one tenant (not yet implemented)
+  --tenant <slug>                 Restrict to one tenant
   --output-dir <path>             Override proof bundle path
   --dry-run                       Emit the plan without executing checks
   -h, --help                      Show help
@@ -64,23 +64,36 @@ GENERATED_AT_UTC="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 VISUAL_LOG="$OUTPUT_DIR/visual-contract.log"
 EVIDENCE_DIR="$OUTPUT_DIR/evidence"
+CHECK_SCOPE="$ENVIRONMENT${TENANT_FILTER:+:$TENANT_FILTER}"
 mkdir -p "$EVIDENCE_DIR"
 
 if [[ "$DRY_RUN" == "1" ]]; then
-  echo "DRY RUN: would execute verify-tenant-visual-contract.sh --env $ENVIRONMENT --evidence-dir $EVIDENCE_DIR" >"$VISUAL_LOG"
-  printf "visual-contract:%s\tplanned\t0\t%s\n" "$ENVIRONMENT" "$VISUAL_LOG" >>"$SUMMARY_TSV"
+  {
+    printf "DRY RUN: would execute verify-tenant-visual-contract.sh --env %s" "$ENVIRONMENT"
+    if [[ -n "$TENANT_FILTER" ]]; then
+      printf " --tenant %s" "$TENANT_FILTER"
+    fi
+    printf " --evidence-dir %s\n" "$EVIDENCE_DIR"
+  } >"$VISUAL_LOG"
+  printf "visual-contract:%s\tplanned\t0\t%s\n" "$CHECK_SCOPE" "$VISUAL_LOG" >>"$SUMMARY_TSV"
   VISUAL_RC=0
 else
+  VISUAL_ARGS=(
+    --env "$ENVIRONMENT"
+    --evidence-dir "$EVIDENCE_DIR"
+  )
+  if [[ -n "$TENANT_FILTER" ]]; then
+    VISUAL_ARGS+=(--tenant "$TENANT_FILTER")
+  fi
   if bash "$REPO_ROOT/scripts/qa/verify-tenant-visual-contract.sh" \
-    --env "$ENVIRONMENT" \
-    --evidence-dir "$EVIDENCE_DIR" \
+    "${VISUAL_ARGS[@]}" \
     >"$VISUAL_LOG" 2>&1; then
     VISUAL_RC=0
   else
     VISUAL_RC=$?
   fi
   printf "visual-contract:%s\t%s\t%s\t%s\n" \
-    "$ENVIRONMENT" \
+    "$CHECK_SCOPE" \
     "$(if [[ "$VISUAL_RC" -eq 0 ]]; then echo pass; else echo fail; fi)" \
     "$VISUAL_RC" \
     "$VISUAL_LOG" \
@@ -134,7 +147,7 @@ TOTAL_FAIL=$(grep -oP 'FAIL=\K\d+' "$VISUAL_LOG" 2>/dev/null | tail -1 || echo 0
 TOTAL_WARN=$(grep -oP 'WARN=\K\d+' "$VISUAL_LOG" 2>/dev/null | tail -1 || echo 0)
 
 python3 - "$SUMMARY_JSON" "$VERDICT" "$FAIL_COUNT" "$PASS_COUNT" "$SKIP_COUNT" \
-  "$ENVIRONMENT" "$MODE" "$GENERATED_AT_UTC" "$OUTPUT_DIR" "$SUMMARY_TSV" \
+  "$ENVIRONMENT" "$MODE" "$GENERATED_AT_UTC" "$OUTPUT_DIR" "$SUMMARY_TSV" "$TENANT_FILTER" \
   "$TOTAL_PASS" "$TOTAL_FAIL" "$TOTAL_WARN" <<'PY'
 import json
 import sys
@@ -150,9 +163,10 @@ mode = sys.argv[7]
 generated_at = sys.argv[8]
 output_dir = sys.argv[9]
 tsv_path = sys.argv[10]
-total_pass = int(sys.argv[11]) if sys.argv[11] else 0
-total_fail = int(sys.argv[12]) if sys.argv[12] else 0
-total_warn = int(sys.argv[13]) if sys.argv[13] else 0
+tenant_filter = sys.argv[11] or None
+total_pass = int(sys.argv[12]) if sys.argv[12] else 0
+total_fail = int(sys.argv[13]) if sys.argv[13] else 0
+total_warn = int(sys.argv[14]) if sys.argv[14] else 0
 
 checks = []
 for line in Path(tsv_path).read_text(encoding="utf-8").strip().splitlines():
@@ -170,6 +184,7 @@ summary = {
     "generated_at_utc": generated_at,
     "lane": "tenant-branding",
     "environment": environment,
+    "tenant_filter": tenant_filter,
     "mode": mode,
     "verdict": {
         "status": verdict,

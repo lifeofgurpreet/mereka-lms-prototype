@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at_utc",
+    "lane",
+    "environment",
+    "tenant_filter",
+    "mode",
+    "verdict",
+    "visual_contract_totals",
+    "artifacts",
+    "checks"
+  ],
+  "properties": {
+    "schema_version": { "type": "string", "const": "tenant-branding-proof/v1" },
+    "generated_at_utc": { "type": "string", "minLength": 1 },
+    "lane": { "type": "string", "const": "tenant-branding" },
+    "environment": { "type": "string", "minLength": 1 },
+    "tenant_filter": { "type": ["string", "null"] },
+    "mode": { "type": "string", "enum": ["dry-run", "execute"] },
+    "verdict": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "failed_checks", "passed_checks", "skipped_checks"],
+      "properties": {
+        "status": { "type": "string", "enum": ["pass", "fail"] },
+        "failed_checks": { "type": "integer", "minimum": 0 },
+        "passed_checks": { "type": "integer", "minimum": 0 },
+        "skipped_checks": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "visual_contract_totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pass", "fail", "warn"],
+      "properties": {
+        "pass": { "type": "integer", "minimum": 0 },
+        "fail": { "type": "integer", "minimum": 0 },
+        "warn": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["output_dir", "checks_tsv", "summary_json", "evidence_dir"],
+      "properties": {
+        "output_dir": { "type": "string", "minLength": 1 },
+        "checks_tsv": { "type": "string", "minLength": 1 },
+        "summary_json": { "type": "string", "minLength": 1 },
+        "evidence_dir": { "type": "string", "minLength": 1 }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "status", "exit_code", "log"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "status": { "type": "string", "minLength": 1 },
+          "exit_code": { "type": "integer", "minimum": 0 },
+          "log": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

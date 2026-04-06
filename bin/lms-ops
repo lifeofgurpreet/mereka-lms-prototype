@@ -12,7 +12,9 @@
 #   migrate plan     Show pending migrations per service (read-only)
 #   migrate apply    Run migration Jobs via kubectl apply (requires --lane)
 #   migrate verify   Verify zero pending migrations post-apply
-#   accept runtime-routing  Run the canonical tenant runtime-routing acceptance lane
+#   accept runtime-routing   Run the canonical tenant runtime-routing acceptance lane
+#   accept identity-session  Run the canonical tenant identity/session acceptance lane
+#   accept tenant-branding   Run the canonical tenant branding acceptance lane
 #   inventory ci-static   Show authoritative CI static-validation inventory
 #   inventory ci-runtime  Show authoritative CI runtime-validation inventory
 #   proof            Emit GitOps-conformant evidence envelopes
@@ -412,20 +414,29 @@ do_topology() {
 # ── Concern: accept ────────────────────────────────────────────────────────
 do_accept() {
   local sub="${SUBCONCERN:-runtime-routing}"
+  local env_scope="$LANE"
+  local script=""
   case "$sub" in
     runtime-routing)
-      local env_scope="$LANE"
       [[ "$env_scope" == "prod" ]] && env_scope="production"
-      local args=("--env" "$env_scope")
-      [[ "$DRY_RUN" == "true" ]] && args+=("--dry-run")
-      args+=("${PASSTHROUGH_ARGS[@]}")
-      exec "$REPO_ROOT/scripts/acceptance/runtime-routing.sh" "${args[@]}"
+      script="$REPO_ROOT/scripts/acceptance/runtime-routing.sh"
+      ;;
+    identity-session)
+      script="$REPO_ROOT/scripts/acceptance/identity-session.sh"
+      ;;
+    tenant-branding)
+      script="$REPO_ROOT/scripts/acceptance/tenant-branding.sh"
       ;;
     *)
-      echo "Unknown accept subconcern: $sub (expected: runtime-routing)" >&2
+      echo "Unknown accept subconcern: $sub (expected: runtime-routing, identity-session, tenant-branding)" >&2
       exit 1
       ;;
   esac
+
+  local args=("--env" "$env_scope")
+  [[ "$DRY_RUN" == "true" ]] && args+=("--dry-run")
+  args+=("${PASSTHROUGH_ARGS[@]}")
+  exec "$script" "${args[@]}"
 }
 
 # ── Dispatch ──────────────────────────────────────────────────────────────
