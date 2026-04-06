@@ -213,6 +213,13 @@ if "DISCUSSIONS_MFE_FEEDBACK_URL" not in globals():
 # Set default theme for all sites
 DEFAULT_SITE_THEME = "mereka"
 
+# Fix JWT_ALGORITHM: the infra overlay sets JWT_AUTH["JWT_ALGORITHM"] = "RS512"
+# but the symmetric JWT path (used by enterprise backend service clients via
+# create_jwt_for_user) creates an 'oct' key incompatible with RS512.
+# JWT_ALGORITHM must be HS256 for symmetric JWTs; JWT_SIGNING_ALGORITHM (RS512)
+# is used separately for asymmetric JWTs.
+JWT_AUTH["JWT_ALGORITHM"] = "HS256"
+
 # Extracted XBlocks — use the new modular blocks from xblocks-contrib (0.6.0)
 # Verified installed: all block types present in xblocks_contrib package
 FEATURES['USE_EXTRACTED_VIDEO_BLOCK'] = True
