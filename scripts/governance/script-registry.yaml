@@ -892,6 +892,36 @@ scripts:
     proof_command: "bin/accept runtime-routing --env dev --tenant biji-biji --dry-run"
     criticality: release-supporting
 
+  - path: scripts/acceptance/identity-session.sh
+    owner: platform-team
+    purpose: Canonical identity-session lane. Cookie domain, auth redirect, Studio SSO per tenant.
+    inputs: [--env, --tenant, --output-dir, --dry-run, --skip-cookie-proof, --skip-auth-redirect, --skip-studio-sso]
+    outputs: [var/acceptance/identity-session/<env>/<timestamp>/summary.json]
+    side_effects: []
+    dry_run: true
+    lanes: [dev, staging, prod]
+    criticality: release-supporting
+
+  - path: scripts/acceptance/tenant-branding.sh
+    owner: platform-team
+    purpose: Canonical tenant-branding lane. Visual contract + browser DOM + evidence artifacts.
+    inputs: [--env, --tenant, --output-dir, --dry-run]
+    outputs: [var/acceptance/tenant-branding/<env>/<timestamp>/summary.json]
+    side_effects: []
+    dry_run: true
+    lanes: [dev, staging, prod]
+    criticality: release-supporting
+
+  - path: scripts/tenants/seed-prod-sites.sh
+    owner: platform-team
+    purpose: Idempotent seed/repair for Django Site + SiteConfiguration rows in production.
+    inputs: [--namespace, --dry-run]
+    outputs: [stdout JSON per tenant]
+    side_effects: [creates/updates Site and SiteConfiguration rows in production Django DB]
+    dry_run: true
+    lanes: [prod]
+    criticality: operational-dangerous
+
   - path: scripts/acceptance/generate_runtime_routing_matrix.py
     owner: platform-team
     purpose: >
