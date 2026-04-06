@@ -135,15 +135,22 @@ else
     pass "AC-TF-001: No null/undefined values in SITE_VARIANTS (all fields deterministic)"
   fi
 
-  # Determinism check: each domain key maps to a non-empty brand value.
-  # The brand: field appears in the per-tenant block (not in MEREKA_BASE_VARIANT spread).
-  # Extract the multi-line block for each domain and check for brand:.
+  # Determinism check: each domain key maps to a variant with a non-empty brand value.
+  # Domain entries use symbolic references (e.g. 'academyv2.mereka.io': _MEREKA_ACADEMY)
+  # so we resolve the reference and check the variant object for brand:.
   for domain in "${PRODUCTION_DOMAINS[@]}"; do
-    DOMAIN_BLOCK=$(awk "/'${domain}':/,/^\s*\},?$/" "$PLUGIN_FILE" | head -20 || true)
-    if grep -q "brand: '" <<<"$DOMAIN_BLOCK"; then
-      pass "AC-TF-001: Domain '${domain}' has deterministic non-empty brand value"
+    # Extract the variant symbol for this domain
+    VARIANT_SYMBOL=$(grep "'${domain}':" "$PLUGIN_FILE" | head -1 | grep -oP ':\s*(\w+)' | sed 's/: //' || true)
+    if [[ -n "$VARIANT_SYMBOL" ]]; then
+      # Find the variant object and check for brand field
+      VARIANT_BLOCK=$(awk "/const ${VARIANT_SYMBOL} = \{/,/^\};/" "$PLUGIN_FILE" | head -30 || true)
+      if grep -q "brand: '" <<<"$VARIANT_BLOCK"; then
+        pass "AC-TF-001: Domain '${domain}' has deterministic non-empty brand value (via ${VARIANT_SYMBOL})"
+      else
+        fail "AC-TF-001: Domain '${domain}' variant ${VARIANT_SYMBOL} missing deterministic brand value"
+      fi
     else
-      fail "AC-TF-001: Domain '${domain}' missing deterministic brand value"
+      fail "AC-TF-001: Domain '${domain}' missing variant reference in SITE_VARIANTS"
     fi
   done
 
