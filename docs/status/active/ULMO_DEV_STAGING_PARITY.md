@@ -1,21 +1,27 @@
 # Ulmo Dev Parity Gap Analysis
 
 **Last updated**: 2026-02-25
-**Status**: Active gap analysis
+**Status**: Superseded — production is now on **rke2-prod**, not GKE
+
+> **CORRECTION (2026-04-06)**: This document was written when production was on GKE.
+> Production has since migrated to **rke2-prod** (Contabo VPS). GKE is decommissioned.
+> References to "production GKE" and "GKE scaled to 0" below are historical context only.
+> The canonical production substrate is `rke2-prod`, namespace `mereka-lms`.
+> See `deploy/k8s/tenancy/tenant-registry.yaml` for current production truth.
 
 ---
 
-## Context
+## Context (historical — see correction above)
 
-Tutor v21 (Open edX Ulmo / Indigo) is the current release on production GKE
-(`academyv2.mereka.io`). The cluster is scaled to 0 replicas to reduce costs but the
-images and config are fully deployed and validated.
+Tutor v21 (Open edX Ulmo / Indigo) is the current release on production ~~GKE~~
+rke2-prod (`academyv2.mereka.io`). ~~The cluster is scaled to 0 replicas to reduce
+costs but the images and config are fully deployed and validated.~~
 
 The rke2-nonprod cluster (`academyv2.mereka.dev`) runs identically structured
 Kubernetes manifests via the `deploy/k8s/overlays/rke2-nonprod` Kustomize overlay.
-The goal of this document is to enumerate every gap that must be closed before
+~~The goal of this document is to enumerate every gap that must be closed before
 rke2-nonprod can serve as a reliable dev environment for production-equivalent
-Ulmo testing. Dev is validated first, then production GKE is scaled back up.
+Ulmo testing. Dev is validated first, then production GKE is scaled back up.~~
 
 **GitOps source of truth**: `bbi-infrastructure`
 (`apps/mereka-lms/overlays/{dev,staging,prod}/`). This document tracks what
