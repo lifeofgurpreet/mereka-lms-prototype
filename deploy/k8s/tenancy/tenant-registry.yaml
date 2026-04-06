@@ -594,7 +594,9 @@ domains:
     release_critical: true
     proof_priority: P0
 
-  - domain: studio.skillourfuture.academy.mereka.io
+  # NOTE (D-08): Studio ingress is on academyv2.mereka.io but cookie domain is
+  # .skillourfuture.academy.mereka.io (from LMS). Cookie sharing may fail.
+  - domain: studio.skillourfuture.academyv2.mereka.io
     environment: production
     tenant: skillourfuture
     status: deprecated
@@ -612,6 +614,8 @@ domains:
     proof_priority: P2
     notes: "Legacy root. In ALLOWED_HOSTS and multisite-sites.yml but NOT in prod Ingress TLS. Migration target: studio.skillourfuture.academyv2.mereka.io"
 
+  # NOTE (D-08): Studio ingress is on academyv2.mereka.io but cookie domain is
+  # .skillourfuture.academy.mereka.io (from LMS). Cookie sharing may fail.
   - domain: studio.skillourfuture.academyv2.mereka.io
     environment: production
     tenant: skillourfuture
@@ -630,7 +634,9 @@ domains:
     proof_priority: P2
     notes: "Target root. Not in prod Ingress TLS. No cert, not routable."
 
-  - domain: apps.skillourfuture.academy.mereka.io
+  # NOTE (D-08): Apps ingress is on academyv2.mereka.io but cookie domain is
+  # .skillourfuture.academy.mereka.io (from LMS). Authn flows may use different domain tree.
+  - domain: apps.skillourfuture.academyv2.mereka.io
     environment: production
     tenant: skillourfuture
     status: deprecated
@@ -648,6 +654,8 @@ domains:
     proof_priority: P2
     notes: "Legacy root. In ALLOWED_HOSTS and CORS but NOT in prod Ingress TLS. Migration target: apps.skillourfuture.academyv2.mereka.io"
 
+  # NOTE (D-08): Apps ingress is on academyv2.mereka.io but cookie domain is
+  # .skillourfuture.academy.mereka.io (from LMS). Authn flows may use different domain tree.
   - domain: apps.skillourfuture.academyv2.mereka.io
     environment: production
     tenant: skillourfuture
