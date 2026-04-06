@@ -3,13 +3,15 @@
 # Canonical release verification entrypoint for Phase 2 deployment contract.
 #
 # Usage:
-#   scripts/release/release-gate.sh [--overlay <path>] [--skip-cluster] [--release-object-json <path>]
+#   scripts/release/release-gate.sh [--overlay <path>] [--skip-cluster] [--release-object-json <path>] [--ci-failure-baseline-json <path>]
 #
 # Flags:
 #   --overlay <path>   Path to Kustomize overlay to check (default: deploy/k8s/base)
 #   --skip-cluster     Skip checks that require a live Kubernetes cluster
 #   --release-object-json <path>
 #                      Bind canonical release-object identity into the proof artifact
+#   --ci-failure-baseline-json <path>
+#                      Evaluate severity-aware CI baseline debt and embed it in the proof artifact
 #
 # Exit codes:
 #   0  All gates PASS
@@ -31,6 +33,7 @@ NC='\033[0m'
 OVERLAY="deploy/k8s/base"
 SKIP_CLUSTER=false
 RELEASE_OBJECT_JSON=""
+CI_FAILURE_BASELINE_JSON=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -46,15 +49,20 @@ while [[ $# -gt 0 ]]; do
       RELEASE_OBJECT_JSON="${2:?--release-object-json requires a path}"
       shift 2
       ;;
+    --ci-failure-baseline-json)
+      CI_FAILURE_BASELINE_JSON="${2:?--ci-failure-baseline-json requires a path}"
+      shift 2
+      ;;
     *)
       echo "Unknown flag: $1" >&2
-      echo "Usage: $0 [--overlay <path>] [--skip-cluster] [--release-object-json <path>]" >&2
+      echo "Usage: $0 [--overlay <path>] [--skip-cluster] [--release-object-json <path>] [--ci-failure-baseline-json <path>]" >&2
       exit 1
       ;;
   esac
 done
 
 RELEASE_IDENTITY_JSON=""
+CI_FAILURE_BASELINE_PROOF_JSON=""
 if [[ -n "$RELEASE_OBJECT_JSON" ]]; then
   RELEASE_IDENTITY_JSON="$(
     python3 "$REPO_ROOT/scripts/release/release_object_bindings.py" \
@@ -299,6 +307,121 @@ if [[ $BOUNDARY_WARNS -eq 0 ]]; then
   pass "No platform-shared resources found in app repo (ADR-025 compliant)"
 fi
 
+# ── Gate 9: CI baseline debt policy (optional) ───────────────────────────
+header "Gate 9: CI Baseline Debt Policy"
+
+if [[ -z "$CI_FAILURE_BASELINE_JSON" ]]; then
+  skip "CI failure baseline artifact not provided"
+else
+  if [[ ! -f "$CI_FAILURE_BASELINE_JSON" ]]; then
+    fail "CI failure baseline artifact not found: $CI_FAILURE_BASELINE_JSON"
+  elif CI_FAILURE_BASELINE_PROOF_JSON="$(
+    python3 - "$CI_FAILURE_BASELINE_JSON" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1]).resolve()
+payload = json.loads(path.read_text(encoding="utf-8"))
+
+required_top = {
+    "schema_version",
+    "decision",
+    "policy",
+    "branch_run",
+    "baseline_run",
+    "new_failures",
+    "shared_failures",
+    "blocking_shared_failures",
+}
+missing = sorted(required_top - payload.keys())
+if missing:
+    raise SystemExit(f"missing required keys: {', '.join(missing)}")
+if payload["schema_version"] != "ci-failure-baseline/v2":
+    raise SystemExit(
+        f"unsupported ci failure baseline schema_version: {payload['schema_version']}"
+    )
+decision = payload["decision"]
+allowed_decisions = {
+    "clean",
+    "mergeable_with_baseline_debt",
+    "blocked_on_branch_failures",
+    "blocked_on_baseline_policy",
+}
+if decision not in allowed_decisions:
+    raise SystemExit(f"unsupported ci failure baseline decision: {decision}")
+for key in ("new_failures", "shared_failures", "blocking_shared_failures"):
+    if not isinstance(payload[key], list):
+        raise SystemExit(f"{key} must be an array")
+policy = payload["policy"]
+if not isinstance(policy, dict):
+    raise SystemExit("policy must be an object")
+if policy.get("schema_version") != "ci-failure-severity-policy/v1":
+    raise SystemExit(
+        f"unsupported policy schema_version: {policy.get('schema_version')}"
+    )
+branch_run = payload["branch_run"]
+baseline_run = payload["baseline_run"]
+if not isinstance(branch_run, dict) or not isinstance(baseline_run, dict):
+    raise SystemExit("branch_run and baseline_run must be objects")
+
+summary = {
+    "artifact_path": str(path),
+    "schema_version": payload["schema_version"],
+    "decision": decision,
+    "new_failures": payload["new_failures"],
+    "shared_failures": payload["shared_failures"],
+    "blocking_shared_failures": payload["blocking_shared_failures"],
+    "new_failure_count": len(payload["new_failures"]),
+    "shared_failure_count": len(payload["shared_failures"]),
+    "blocking_shared_failure_count": len(payload["blocking_shared_failures"]),
+    "policy": {
+        "path": policy.get("path"),
+        "schema_version": policy["schema_version"],
+        "defaults": policy.get("defaults"),
+    },
+    "branch_run": {
+        "run_id": branch_run.get("run_id"),
+        "head_sha": branch_run.get("head_sha"),
+    },
+    "baseline_run": {
+        "run_id": baseline_run.get("run_id"),
+        "head_sha": baseline_run.get("head_sha"),
+    },
+}
+print(json.dumps(summary))
+PY
+  )"; then
+    BASELINE_DECISION="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["decision"])' <<<"$CI_FAILURE_BASELINE_PROOF_JSON")"
+    BASELINE_NEW_COUNT="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["new_failure_count"])' <<<"$CI_FAILURE_BASELINE_PROOF_JSON")"
+    BASELINE_SHARED_COUNT="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["shared_failure_count"])' <<<"$CI_FAILURE_BASELINE_PROOF_JSON")"
+    BASELINE_BLOCKING_COUNT="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["blocking_shared_failure_count"])' <<<"$CI_FAILURE_BASELINE_PROOF_JSON")"
+    BASELINE_NEW_IDS="$(python3 -c 'import json,sys; print(", ".join(json.load(sys.stdin)["new_failures"][:5]))' <<<"$CI_FAILURE_BASELINE_PROOF_JSON")"
+    BASELINE_SHARED_IDS="$(python3 -c 'import json,sys; print(", ".join(json.load(sys.stdin)["shared_failures"][:5]))' <<<"$CI_FAILURE_BASELINE_PROOF_JSON")"
+    BASELINE_BLOCKING_IDS="$(python3 -c 'import json,sys; print(", ".join(json.load(sys.stdin)["blocking_shared_failures"][:5]))' <<<"$CI_FAILURE_BASELINE_PROOF_JSON")"
+    case "$BASELINE_DECISION" in
+      clean)
+        pass "CI failure baseline is clean"
+        ;;
+      mergeable_with_baseline_debt)
+        warn "CI failure baseline is mergeable with inherited debt ($BASELINE_SHARED_COUNT shared failure(s))"
+        [[ -n "$BASELINE_SHARED_IDS" ]] && info "Shared baseline failures: $BASELINE_SHARED_IDS"
+        ;;
+      blocked_on_branch_failures)
+        fail "CI failure baseline found $BASELINE_NEW_COUNT new branch failure(s)"
+        [[ -n "$BASELINE_NEW_IDS" ]] && info "New branch failures: $BASELINE_NEW_IDS"
+        ;;
+      blocked_on_baseline_policy)
+        fail "CI failure baseline has $BASELINE_BLOCKING_COUNT blocking shared failure(s)"
+        [[ -n "$BASELINE_BLOCKING_IDS" ]] && info "Blocking shared failures: $BASELINE_BLOCKING_IDS"
+        ;;
+    esac
+  else
+    fail "CI failure baseline artifact invalid: $CI_FAILURE_BASELINE_JSON"
+    info "Run: python3 scripts/ci/generate_ci_failure_baseline.py --help"
+  fi
+fi
+
 # ── Proof artifact ────────────────────────────────────────────────────────
 PROOF_DIR="$REPO_ROOT/var/proof"
 mkdir -p "$PROOF_DIR"
@@ -322,6 +445,7 @@ WARN_COUNT="$WARN" \
 SKIP_COUNT="$SKIP" \
 VERDICT_VALUE="$VERDICT" \
 RELEASE_IDENTITY_JSON="$RELEASE_IDENTITY_JSON" \
+CI_FAILURE_BASELINE_SUMMARY_JSON="$CI_FAILURE_BASELINE_PROOF_JSON" \
 python3 - <<'PY'
 from __future__ import annotations
 
@@ -345,6 +469,10 @@ payload = {
 release_identity_json = os.environ.get("RELEASE_IDENTITY_JSON", "").strip()
 if release_identity_json:
     payload["release_identity"] = json.loads(release_identity_json)
+
+ci_failure_baseline_json = os.environ.get("CI_FAILURE_BASELINE_SUMMARY_JSON", "").strip()
+if ci_failure_baseline_json:
+    payload["ci_failure_baseline"] = json.loads(ci_failure_baseline_json)
 
 proof_path = Path(os.environ["PROOF_PATH"])
 proof_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
