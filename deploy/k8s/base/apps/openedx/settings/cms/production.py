@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# Environment-owned overlays must harden this for live lanes.
 import logging
 import os
 import sys
