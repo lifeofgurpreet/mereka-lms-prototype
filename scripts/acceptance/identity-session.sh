@@ -109,7 +109,7 @@ record_check() {
 }
 
 # ── Run identity/session proof per tenant ──────────────────────────────
-python3 - "$MATRIX_PATH" "$OUTPUT_DIR" "$SKIP_COOKIE_PROOF" "$SKIP_AUTH_REDIRECT" "$SKIP_STUDIO_SSO" "$DRY_RUN" "$SUMMARY_TSV" "$REPO_ROOT" "$NAMESPACE" "$PRIMARY_COOKIE_DOMAIN" "$TENANT_COOKIE_MAP" <<'PY'
+if python3 - "$MATRIX_PATH" "$OUTPUT_DIR" "$SKIP_COOKIE_PROOF" "$SKIP_AUTH_REDIRECT" "$SKIP_STUDIO_SSO" "$DRY_RUN" "$SUMMARY_TSV" "$REPO_ROOT" "$NAMESPACE" "$PRIMARY_COOKIE_DOMAIN" "$TENANT_COOKIE_MAP" <<'PY'
 import json
 import pathlib
 import subprocess
@@ -312,7 +312,11 @@ for tenant in tenants:
 
 sys.exit(failures)
 PY
-rc=$?
+then
+  rc=0
+else
+  rc=$?
+fi
 FAILURES=$((FAILURES + rc))
 
 # ── Emit summary ───────────────────────────────────────────────────────
@@ -328,7 +332,7 @@ VERDICT="pass"
 [[ "$FAIL_COUNT" -gt 0 ]] && VERDICT="fail"
 
 python3 - "$SUMMARY_JSON" "$VERDICT" "$FAIL_COUNT" "$PASS_COUNT" "$SKIP_COUNT" "$PLAN_COUNT" \
-  "$ENVIRONMENT" "$MODE" "$GENERATED_AT_UTC" "$MATRIX_PATH" "$OUTPUT_DIR" "$SUMMARY_TSV" <<'PY'
+  "$ENVIRONMENT" "$MODE" "$GENERATED_AT_UTC" "$MATRIX_PATH" "$OUTPUT_DIR" "$SUMMARY_TSV" "$TENANT_FILTER" <<'PY'
 import json
 import sys
 from pathlib import Path
@@ -345,6 +349,7 @@ generated_at = sys.argv[9]
 matrix_path = sys.argv[10]
 output_dir = sys.argv[11]
 tsv_path = sys.argv[12]
+tenant_filter = sys.argv[13] or None
 
 checks = []
 for line in Path(tsv_path).read_text(encoding="utf-8").strip().splitlines():
@@ -362,6 +367,7 @@ summary = {
     "generated_at_utc": generated_at,
     "lane": "identity-session",
     "environment": environment,
+    "tenant_filter": tenant_filter,
     "mode": mode,
     "verdict": {
         "status": verdict,
