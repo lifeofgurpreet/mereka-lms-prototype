@@ -89,7 +89,7 @@
           "expect_host": "apps.academyv2.mereka.dev",
           "forbid_redirect_hosts": [],
           "expect_content_type_prefix": "text/html",
-          "expect_min_body_bytes": 0
+          "expect_min_body_bytes": 1
         },
         {
           "id": "apps-dashboard",
@@ -98,7 +98,7 @@
           "expect_host": "apps.academyv2.mereka.dev",
           "forbid_redirect_hosts": [],
           "expect_content_type_prefix": "text/html",
-          "expect_min_body_bytes": 0
+          "expect_min_body_bytes": 1
         },
         {
           "id": "studio-sso-login",
@@ -160,7 +160,7 @@
             "apps.academyv2.mereka.dev"
           ],
           "expect_content_type_prefix": "text/html",
-          "expect_min_body_bytes": 0
+          "expect_min_body_bytes": 1
         },
         {
           "id": "apps-dashboard",
@@ -173,7 +173,7 @@
             "apps.academyv2.mereka.dev"
           ],
           "expect_content_type_prefix": "text/html",
-          "expect_min_body_bytes": 0
+          "expect_min_body_bytes": 1
         },
         {
           "id": "studio-sso-login",
@@ -239,7 +239,7 @@
             "apps.academyv2.mereka.dev"
           ],
           "expect_content_type_prefix": "text/html",
-          "expect_min_body_bytes": 0
+          "expect_min_body_bytes": 1
         },
         {
           "id": "apps-dashboard",
@@ -252,7 +252,7 @@
             "apps.academyv2.mereka.dev"
           ],
           "expect_content_type_prefix": "text/html",
-          "expect_min_body_bytes": 0
+          "expect_min_body_bytes": 1
         },
         {
           "id": "studio-sso-login",
