@@ -22,7 +22,7 @@
       "status": "fixed",
       "fix_evidence": "kubectl exec runtime fix applied 2026-04-05T23:20Z",
       "owner_lane": "WS6",
-      "next_action": "none — fixed at runtime"
+      "next_action": "none \u2014 fixed at runtime"
     },
     {
       "id": "PF-002",
@@ -36,7 +36,7 @@
       "status": "fixed",
       "fix_evidence": "kubectl exec runtime fix applied 2026-04-05T23:20Z",
       "owner_lane": "WS6",
-      "next_action": "none — fixed at runtime"
+      "next_action": "none \u2014 fixed at runtime"
     },
     {
       "id": "PF-003",
@@ -50,7 +50,7 @@
       "status": "fixed",
       "fix_evidence": "kubectl exec runtime fix applied 2026-04-05T23:20Z",
       "owner_lane": "WS6",
-      "next_action": "none — fixed at runtime"
+      "next_action": "none \u2014 fixed at runtime"
     },
     {
       "id": "PF-004",
@@ -92,7 +92,7 @@
       "status": "open",
       "fix_evidence": null,
       "owner_lane": "WS6",
-      "next_action": "Same root cause as PF-004 — prod MFE image lacks plugin slot config"
+      "next_action": "Same root cause as PF-004 \u2014 prod MFE image lacks plugin slot config"
     },
     {
       "id": "PF-007",
@@ -117,8 +117,8 @@
       "description": "apps.skillourfuture.academy.mereka.io unreachable (DNS/ingress not configured)",
       "severity": "high",
       "root_cause_class": "infra-reachability",
-      "status": "open",
-      "fix_evidence": null,
+      "status": "fixed",
+      "fix_evidence": "SOF prod domains corrected in PR #1357 (mereka-lms) \u2014 studio/apps now use academyv2.mereka.io matching ingress",
       "owner_lane": "infra",
       "next_action": "Configure DNS A record and ingress for apps.skillourfuture.academy.mereka.io on rke2-prod"
     },
@@ -131,8 +131,8 @@
       "description": "studio.skillourfuture.academy.mereka.io unreachable",
       "severity": "high",
       "root_cause_class": "infra-reachability",
-      "status": "open",
-      "fix_evidence": null,
+      "status": "fixed",
+      "fix_evidence": "SOF prod domains corrected in PR #1357 (mereka-lms) \u2014 studio/apps now use academyv2.mereka.io matching ingress",
       "owner_lane": "infra",
       "next_action": "Configure DNS and ingress for studio.skillourfuture.academy.mereka.io on rke2-prod"
     },
@@ -145,8 +145,8 @@
       "description": "MFE_BASE_URL in SiteConfig points to apps.skillourfuture.academyv2.mereka.io but proof expects apps.skillourfuture.academy.mereka.io",
       "severity": "medium",
       "root_cause_class": "migration-drift",
-      "status": "open",
-      "fix_evidence": null,
+      "status": "fixed",
+      "fix_evidence": "SiteConfig MFE_BASE_URL updated via PR #1357 to match actual infra domain",
       "owner_lane": "WS6",
       "next_action": "Resolve SOF production domain migration: either move SiteConfig to new domain or accept current as canonical"
     },
@@ -187,24 +187,25 @@
       "description": "/login?next=/oauth2/authorize goes directly to OIDC provider instead of MFE authn first",
       "severity": "low",
       "root_cause_class": "probe-strictness",
-      "status": "known",
-      "fix_evidence": "OAuth authorize flow correctly bypasses MFE authn to go directly to OIDC provider; assertion is too strict",
+      "status": "fixed",
+      "fix_evidence": "Studio SSO assertion relaxed in PR #1355 \u2014 accepts direct OIDC for OAuth authorize",
       "owner_lane": "WS5",
       "next_action": "Fix the Studio SSO verifier to accept direct OIDC redirect for OAuth authorize paths"
     }
   ],
   "summary": {
     "total": 13,
-    "fixed": 3,
-    "open_high": 2,
-    "open_medium": 5,
-    "open_low": 3,
+    "fixed": 7,
+    "open_high": 0,
+    "open_medium": 4,
+    "open_low": 2,
     "by_root_cause": {
       "config-gap": 3,
       "build-image-gap": 4,
       "infra-reachability": 2,
       "migration-drift": 1,
       "probe-strictness": 3
-    }
+    },
+    "note": "Updated 2026-04-06T00:25Z. PF-004 through PF-007 (build-image-gap) pending MFE rollout on rke2-prod (ArgoCD git auth blocker)."
   }
 }

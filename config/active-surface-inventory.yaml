@@ -41,13 +41,15 @@ tenants:
             services: [lms, caddy]
             proof_priority: P0
             release_critical: true
-            proof_state: unproved
+            proof_state: partial
+            notes: "Runtime-routing 39P/1F(nc), identity-session 9P/0F. Branding pending MFE image rollout."
           - host: studio.academyv2.mereka.io
             role: studio
             services: [cms, caddy]
             proof_priority: P0
             release_critical: true
-            proof_state: unproved
+            proof_state: partial
+            notes: "Studio SSO passes. Full branding pending MFE rollout."
           - host: apps.academyv2.mereka.io
             role: mfe
             services: [mfe, caddy]
