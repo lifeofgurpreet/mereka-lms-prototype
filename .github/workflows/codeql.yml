@@ -47,8 +47,8 @@ jobs:
       contents: read
       pull-requests: read
     outputs:
-      python_changed: ${{ steps.scope.outputs.python_changed }}
-      javascript_changed: ${{ steps.scope.outputs.javascript_changed }}
+      should_run: ${{ steps.scope.outputs.should_run }}
+      language_matrix: ${{ steps.scope.outputs.language_matrix }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
@@ -60,35 +60,48 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [[ "${GITHUB_EVENT_NAME}" != "pull_request" ]]; then
-            echo "python_changed=true" >> "$GITHUB_OUTPUT"
-            echo "javascript_changed=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          BASE_SHA="${{ github.event.pull_request.base.sha }}"
-          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
-          mapfile -t CHANGED < <(git diff --name-only "${BASE_SHA}...${HEAD_SHA}")
-
           python_changed=false
           javascript_changed=false
 
-          for path in "${CHANGED[@]}"; do
-            case "$path" in
-              *.py|requirements*.txt|pyproject.toml|setup.py|setup.cfg)
-                python_changed=true
-                ;;
-            esac
+          if [[ "${GITHUB_EVENT_NAME}" != "pull_request" ]]; then
+            python_changed=true
+            javascript_changed=true
+          else
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+            mapfile -t CHANGED < <(git diff --name-only "${BASE_SHA}...${HEAD_SHA}")
 
-            case "$path" in
-              *.js|*.jsx|*.ts|*.tsx|package.json|package-lock.json|pnpm-lock.yaml|yarn.lock)
-                javascript_changed=true
-                ;;
-            esac
-          done
+            for path in "${CHANGED[@]}"; do
+              case "$path" in
+                *.py|requirements*.txt|pyproject.toml|setup.py|setup.cfg)
+                  python_changed=true
+                  ;;
+              esac
 
-          echo "python_changed=${python_changed}" >> "$GITHUB_OUTPUT"
-          echo "javascript_changed=${javascript_changed}" >> "$GITHUB_OUTPUT"
+              case "$path" in
+                *.js|*.jsx|*.ts|*.tsx|package.json|package-lock.json|pnpm-lock.yaml|yarn.lock)
+                  javascript_changed=true
+                  ;;
+              esac
+            done
+          fi
+
+          languages=()
+          if [[ "$python_changed" == true ]]; then
+            languages+=('"python"')
+          fi
+          if [[ "$javascript_changed" == true ]]; then
+            languages+=('"javascript-typescript"')
+          fi
+
+          if [[ "${#languages[@]}" -eq 0 ]]; then
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+            echo 'language_matrix={"language":["python"]}' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "should_run=true" >> "$GITHUB_OUTPUT"
+          printf 'language_matrix={"language":[%s]}\n' "$(IFS=,; echo "${languages[*]}")" >> "$GITHUB_OUTPUT"
 
   analyze:
     name: Analyze (${{ matrix.language }})
@@ -96,12 +109,7 @@ jobs:
     # /opt/codeql/codeql-bundle-linux64.tar.zst, so restore the job to the
     # self-hosted runner class that carries that runtime contract.
     needs: change-scope
-    if: >-
-      ${{
-        github.event_name != 'pull_request' ||
-        (matrix.language == 'python' && needs.change-scope.outputs.python_changed == 'true') ||
-        (matrix.language == 'javascript-typescript' && needs.change-scope.outputs.javascript_changed == 'true')
-      }}
+    if: needs.change-scope.outputs.should_run == 'true'
     runs-on: mereka-k8s-heavy-builders
     timeout-minutes: 45
     permissions:
@@ -110,8 +118,7 @@ jobs:
       actions: read
     strategy:
       fail-fast: false
-      matrix:
-        language: ['python', 'javascript-typescript']
+      matrix: ${{ fromJSON(needs.change-scope.outputs.language_matrix) }}
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
