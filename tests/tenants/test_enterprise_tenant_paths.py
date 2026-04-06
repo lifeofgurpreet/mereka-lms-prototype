@@ -65,9 +65,12 @@ def test_shared_config_builds_registry_backed_canonical_domain_map() -> None:
     staging_map = json.loads(bash_eval("mereka_lms_canonical_domain_map_json staging"))
     assert staging_map["mereka"] == "staging.academyv2.mereka.io"
     assert staging_map["bijibiji"] == "staging.academy.biji-biji.com"
+    # Both staging.skillourfuture.academy.mereka.io and
+    # staging.skillourfuture.academyv2.mereka.io are active primary entries.
+    # The canonical map returns the last-listed primary (academyv2 variant).
     assert (
         staging_map["skillourfuture"]
-        == "staging.skillourfuture.academy.mereka.io"
+        == "staging.skillourfuture.academyv2.mereka.io"
     )
 
 
