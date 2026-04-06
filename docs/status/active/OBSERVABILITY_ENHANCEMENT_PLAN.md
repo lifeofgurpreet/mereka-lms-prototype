@@ -12,10 +12,12 @@
 
 ## Scope
 
-This plan improves **production GKE monitoring** and the **VPS Grafana view**.  
-Dev (kind) health checks remain script-based (`scripts/qa/public-health-check.sh`).
+> **CORRECTION (2026-04-06)**: Production is now on **rke2-prod** (Contabo VPS), not GKE.
+> GKE is decommissioned. There IS a staging environment (`stg-mereka-lms` on rke2-nonprod).
 
-There is **no staging environment**.
+This plan improves **production rke2-prod monitoring** and the **VPS Grafana view**.  
+Dev (rke2-nonprod) and staging (rke2-nonprod, stg-mereka-lms namespace) health checks
+use `bin/accept` acceptance lanes.
 
 Reality-first:
 - Production MySQL/Redis are **in-cluster** and PVC-backed (not Cloud SQL/Memorystore).
