@@ -59,12 +59,40 @@ RUN pip install tzdata>=2024.1
 # a custom urls.py template via ENV_TEMPLATE_TARGETS when the credentials
 # service is deployed.  See: credentials_vc_issuer/apps.py
 
-# CMS production settings patch (metrics + URL exposure in Studio)
+# CMS production settings patch (metrics + URL exposure + modern features in Studio)
 _register_env_patch(
     "openedx-cms-production-settings",
     f"""
 {_CMS_PROMETHEUS_METRICS_SNIPPET}
 # Explicit ROOT_URLCONF_OVERRIDES keeps /metrics stable across plugin API variations.
+
+# Content Libraries v2 (Learning Core) — required for Studio library authoring
+FEATURES['ENABLE_CONTENT_LIBRARIES'] = True
+FEATURES['ENABLE_LIBRARY_AUTHORING_MICROFRONTEND'] = True
+
+# Extracted XBlocks — use the new modular blocks from xblocks-contrib (0.6.0)
+FEATURES['USE_EXTRACTED_VIDEO_BLOCK'] = True
+FEATURES['USE_EXTRACTED_HTML_BLOCK'] = True
+FEATURES['USE_EXTRACTED_PROBLEM_BLOCK'] = True
+FEATURES['USE_EXTRACTED_DISCUSSION_BLOCK'] = True
+FEATURES['USE_EXTRACTED_LTI_BLOCK'] = True
+FEATURES['USE_EXTRACTED_WORD_CLOUD_BLOCK'] = True
+FEATURES['USE_EXTRACTED_POLL_QUESTION_BLOCK'] = True
+FEATURES['USE_EXTRACTED_ANNOTATABLE_BLOCK'] = True
+
+# Aspects event routing — enable batching for performance
+EVENT_ROUTING_BACKEND_BATCHING_ENABLED = True
+
+# Safe app installer for CMS
+def _safe_add_app_cms(app_name):
+    if app_name not in INSTALLED_APPS:
+        try:
+            __import__(app_name.split('.')[0])
+            INSTALLED_APPS.append(app_name)
+        except ImportError:
+            pass
+
+_safe_add_app_cms("openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig")
 """,
 )
 
