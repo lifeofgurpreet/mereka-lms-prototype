@@ -779,6 +779,12 @@ ci_runtime_inventory:
     - script: scripts/acceptance/runtime-routing.sh
       category: LIVE_APP
       note: canonical lane wrapper for tenant LMS/apps/studio/footer runtime acceptance
+    - script: scripts/acceptance/identity-session.sh
+      category: LIVE_APP
+      note: canonical lane wrapper for tenant auth redirect, cookie domain, and Studio SSO acceptance
+    - script: scripts/acceptance/tenant-branding.sh
+      category: LIVE_APP
+      note: canonical lane wrapper for tenant visual identity and branding acceptance
     - script: scripts/acceptance/generate_runtime_routing_matrix.py
       category: WORKTREE_CONTEXT
       note: generates the runtime-routing contract from tenant-registry.yaml
@@ -894,22 +900,49 @@ scripts:
 
   - path: scripts/acceptance/identity-session.sh
     owner: platform-team
-    purpose: Canonical identity-session lane. Cookie domain, auth redirect, Studio SSO per tenant.
-    inputs: [--env, --tenant, --output-dir, --dry-run, --skip-cookie-proof, --skip-auth-redirect, --skip-studio-sso]
-    outputs: [var/acceptance/identity-session/<env>/<timestamp>/summary.json]
-    side_effects: []
+    purpose: >
+      Canonical identity-session lane wrapper. Verifies tenant cookie-domain,
+      LMS to authn redirect, and Studio SSO contract surfaces for one environment.
+    inputs:
+      - --env production|staging|dev
+      - --tenant slug (optional)
+      - --output-dir PATH (optional)
+      - --dry-run (optional)
+      - --skip-cookie-proof (optional)
+      - --skip-auth-redirect (optional)
+      - --skip-studio-sso (optional)
+    outputs:
+      - var/acceptance/identity-session/<env>/<timestamp>/summary.json
+      - var/acceptance/identity-session/<env>/<timestamp>/checks.tsv
+      - per-tenant log files under the same proof bundle
+    side_effects:
+      - none in --dry-run
+      - reads live LMS/authn endpoints and delegated SSO probes in execute mode
     dry_run: true
     lanes: [dev, staging, prod]
+    proof_command: "bin/accept identity-session --env dev --tenant biji-biji --dry-run"
     criticality: release-supporting
 
   - path: scripts/acceptance/tenant-branding.sh
     owner: platform-team
-    purpose: Canonical tenant-branding lane. Visual contract + browser DOM + evidence artifacts.
-    inputs: [--env, --tenant, --output-dir, --dry-run]
-    outputs: [var/acceptance/tenant-branding/<env>/<timestamp>/summary.json]
-    side_effects: []
+    purpose: >
+      Canonical tenant-branding lane wrapper. Verifies the tenant visual contract
+      via verify-tenant-visual-contract.sh and emits a schema-valid proof bundle.
+    inputs:
+      - --env production|staging|dev
+      - --tenant slug (optional)
+      - --output-dir PATH (optional)
+      - --dry-run (optional)
+    outputs:
+      - var/acceptance/tenant-branding/<env>/<timestamp>/summary.json
+      - var/acceptance/tenant-branding/<env>/<timestamp>/checks.tsv
+      - var/acceptance/tenant-branding/<env>/<timestamp>/evidence/
+    side_effects:
+      - none in --dry-run
+      - reads live tenant LMS/authn/MFE surfaces in execute mode
     dry_run: true
     lanes: [dev, staging, prod]
+    proof_command: "bin/accept tenant-branding --env dev --tenant biji-biji --dry-run"
     criticality: release-supporting
 
   - path: scripts/tenants/seed-prod-sites.sh
@@ -921,7 +954,6 @@ scripts:
     dry_run: true
     lanes: [prod]
     criticality: operational-dangerous
-
   - path: scripts/acceptance/generate_runtime_routing_matrix.py
     owner: platform-team
     purpose: >

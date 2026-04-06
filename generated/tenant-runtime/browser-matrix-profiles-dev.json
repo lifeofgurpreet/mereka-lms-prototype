@@ -89,7 +89,7 @@
           "expect_host": "mfe-dev.mereka.dev",
           "forbid_redirect_hosts": [],
           "expect_content_type_prefix": "text/html",
-          "expect_min_body_bytes": 0
+          "expect_min_body_bytes": 1
         },
         {
           "id": "apps-dashboard",
@@ -98,7 +98,7 @@
           "expect_host": "mfe-dev.mereka.dev",
           "forbid_redirect_hosts": [],
           "expect_content_type_prefix": "text/html",
-          "expect_min_body_bytes": 0
+          "expect_min_body_bytes": 1
         },
         {
           "id": "studio-sso-login",

@@ -90,6 +90,8 @@ scripts/qa/run-mfe-slot-gates.sh  # LIVE_APP
 scripts/qa/run-tenant-branding-qa.sh  # LIVE_APP
 scripts/qa/verify-paragon-runtime.sh  # LIVE_APP (visual-regression prereqs)
 scripts/acceptance/runtime-routing.sh  # LIVE_APP (canonical lane wrapper for tenant LMS/apps/studio/footer runtime acceptance)
+scripts/acceptance/identity-session.sh  # LIVE_APP (canonical lane wrapper for tenant auth redirect, cookie domain, and Studio SSO acceptance)
+scripts/acceptance/tenant-branding.sh  # LIVE_APP (canonical lane wrapper for tenant visual identity and branding acceptance)
 
 # ── Data file dependent ─────────────────────────────────────────────────────
 scripts/qa/verify-certificate-issuance.sh  # DATA_FILE

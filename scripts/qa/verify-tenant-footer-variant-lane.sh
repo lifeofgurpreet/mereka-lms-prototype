@@ -80,6 +80,29 @@ declare -a PRODUCTION_DOMAINS=(
   "skillourfuture.academy.mereka.io"
 )
 
+domain_has_deterministic_brand() {
+  local domain="$1"
+  local domain_block=""
+  local alias_name=""
+  local alias_block=""
+
+  domain_block="$(awk "/'${domain}':/,/^[[:space:]]*\\},?$/" "$PLUGIN_FILE" | head -20 || true)"
+  if grep -q "brand: '" <<<"$domain_block"; then
+    return 0
+  fi
+
+  alias_name="$(
+    grep -m1 -E "'${domain}':" "$PLUGIN_FILE" \
+      | sed -nE "s/.*'${domain}':[[:space:]]*([A-Za-z_][A-Za-z0-9_]*)[[:space:]]*,?.*/\1/p"
+  )"
+  if [[ -z "$alias_name" ]]; then
+    return 1
+  fi
+
+  alias_block="$(awk "/const ${alias_name} = \{/,/^[[:space:]]*\\};?$/" "$PLUGIN_FILE" | head -40 || true)"
+  grep -q "brand: '" <<<"$alias_block"
+}
+
 # ---------------------------------------------------------------------------
 # AC-TF-001: Footer variant is fully deterministic for at least 3 domains
 # ---------------------------------------------------------------------------
@@ -118,7 +141,7 @@ else
 
   # Each domain entry must have brand, copyrightHolder, whatsapp (no nulls).
   # Fields may be inherited from MEREKA_BASE_VARIANT via spread — search entire plugin bundle.
-  VARIANTS_BLOCK=$(awk '/const MEREKA_SITE_VARIANTS = \{|const SITE_VARIANTS = \{/,/^\s*\};/' "$PLUGIN_FILE")
+  VARIANTS_BLOCK=$(awk '/const MEREKA_SITE_VARIANTS = \{|const SITE_VARIANTS = \{/,/^[[:space:]]*\};/' "$PLUGIN_FILE")
 
   # brand: is per-entry; whatsapp: and copyrightHolder: may be in MEREKA_BASE_VARIANT (spread)
   for field in "brand:" "copyrightHolder:" "whatsapp:"; do
@@ -135,20 +158,10 @@ else
     pass "AC-TF-001: No null/undefined values in SITE_VARIANTS (all fields deterministic)"
   fi
 
-  # Determinism check: each domain key maps to a variant with a non-empty brand value.
-  # Domain entries use symbolic references (e.g. 'academyv2.mereka.io': _MEREKA_ACADEMY)
-  # so we resolve the reference and check the variant object for brand:.
+  # Determinism check: each domain key maps to a non-empty brand value.
   for domain in "${PRODUCTION_DOMAINS[@]}"; do
-    # Extract the variant symbol for this domain
-    VARIANT_SYMBOL=$(grep "'${domain}':" "$PLUGIN_FILE" | head -1 | grep -oP ':\s*(\w+)' | sed 's/: //' || true)
-    if [[ -n "$VARIANT_SYMBOL" ]]; then
-      # Find the variant object and check for brand field
-      VARIANT_BLOCK=$(awk "/const ${VARIANT_SYMBOL} = \{/,/^\};/" "$PLUGIN_FILE" | head -30 || true)
-      if grep -q "brand: '" <<<"$VARIANT_BLOCK"; then
-        pass "AC-TF-001: Domain '${domain}' has deterministic non-empty brand value (via ${VARIANT_SYMBOL})"
-      else
-        fail "AC-TF-001: Domain '${domain}' variant ${VARIANT_SYMBOL} missing deterministic brand value"
-      fi
+    if domain_has_deterministic_brand "$domain"; then
+      pass "AC-TF-001: Domain '${domain}' has deterministic non-empty brand value"
     else
       fail "AC-TF-001: Domain '${domain}' missing variant reference in SITE_VARIANTS"
     fi
