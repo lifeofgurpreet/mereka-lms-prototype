@@ -64,17 +64,17 @@ _Do not hand-edit. Regenerate with: `python scripts/domains/generate_domain_auth
 | mereka | staging | `staging.preview.academyv2.mereka.io` | preview | active | stg-mereka-lms | nonprod-rke2 | mereka-lms-staging | P1 |
 | mereka | staging | `staging.academyv2.mereka.io` | primary | active | stg-mereka-lms | nonprod-rke2 | mereka-lms-staging | P0 |
 | mereka | staging | `staging.studio.academyv2.mereka.io` | studio | active | stg-mereka-lms | nonprod-rke2 | mereka-lms-staging | P0 |
-| skillourfuture | staging | `analytics.staging.skillourfuture.academyv2.mereka.io` | analytics | active | stg-mereka-lms | nonprod-rke2 | mereka-lms-staging | P2 |
-| skillourfuture | staging | `credentials.staging.skillourfuture.academyv2.mereka.io` | credentials | active | stg-mereka-lms | nonprod-rke2 | mereka-lms-staging | P2 |
-| skillourfuture | staging | `admin.staging.skillourfuture.academyv2.mereka.io` | enterprise-admin | active | stg-mereka-lms | nonprod-rke2 | mereka-lms-staging | P2 |
-| skillourfuture | staging | `learner.staging.skillourfuture.academyv2.mereka.io` | enterprise-learner | active | stg-mereka-lms | nonprod-rke2 | mereka-lms-staging | P2 |
+| skillourfuture | staging | `analytics.staging.skillourfuture.academy.mereka.io` | analytics | active | stg-mereka-lms | nonprod-rke2 | mereka-lms-staging | P2 |
+| skillourfuture | staging | `credentials.staging.skillourfuture.academy.mereka.io` | credentials | active | stg-mereka-lms | nonprod-rke2 | mereka-lms-staging | P2 |
+| skillourfuture | staging | `admin.staging.skillourfuture.academy.mereka.io` | enterprise-admin | active | stg-mereka-lms | nonprod-rke2 | mereka-lms-staging | P2 |
+| skillourfuture | staging | `learner.staging.skillourfuture.academy.mereka.io` | enterprise-learner | active | stg-mereka-lms | nonprod-rke2 | mereka-lms-staging | P2 |
 | skillourfuture | staging | `apps.staging.skillourfuture.academy.mereka.io` | mfe | active | stg-mereka-lms | nonprod-rke2 | mereka-lms-staging | P0 |
-| skillourfuture | staging | `apps.staging.skillourfuture.academyv2.mereka.io` | mfe | active | stg-mereka-lms | nonprod-rke2 | mereka-lms-staging | P1 |
-| skillourfuture | staging | `preview.staging.skillourfuture.academyv2.mereka.io` | preview | active | stg-mereka-lms | nonprod-rke2 | mereka-lms-staging | P2 |
+| skillourfuture | staging | `apps.staging.skillourfuture.academy.mereka.io` | mfe | active | stg-mereka-lms | nonprod-rke2 | mereka-lms-staging | P1 |
+| skillourfuture | staging | `preview.staging.skillourfuture.academy.mereka.io` | preview | active | stg-mereka-lms | nonprod-rke2 | mereka-lms-staging | P2 |
 | skillourfuture | staging | `staging.skillourfuture.academy.mereka.io` | primary | active | stg-mereka-lms | nonprod-rke2 | mereka-lms-staging | P0 |
-| skillourfuture | staging | `staging.skillourfuture.academyv2.mereka.io` | primary | active | stg-mereka-lms | nonprod-rke2 | mereka-lms-staging | P1 |
+| skillourfuture | staging | `staging.skillourfuture.academy.mereka.io` | primary | active | stg-mereka-lms | nonprod-rke2 | mereka-lms-staging | P1 |
 | skillourfuture | staging | `studio.staging.skillourfuture.academy.mereka.io` | studio | active | stg-mereka-lms | nonprod-rke2 | mereka-lms-staging | P0 |
-| skillourfuture | staging | `studio.staging.skillourfuture.academyv2.mereka.io` | studio | active | stg-mereka-lms | nonprod-rke2 | mereka-lms-staging | P1 |
+| skillourfuture | staging | `studio.staging.skillourfuture.academy.mereka.io` | studio | active | stg-mereka-lms | nonprod-rke2 | mereka-lms-staging | P1 |
 
 ## dev
 

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-06T08:22:42.131205+00:00",
+  "generated_at": "2026-04-06T23:15:28.780163+00:00",
   "source": "deploy/k8s/tenancy/tenant-registry.yaml",
   "source_version": "1.5.0",
   "domains": [
@@ -890,7 +890,7 @@
     {
       "tenant": "skillourfuture",
       "environment": "staging",
-      "hostname": "analytics.staging.skillourfuture.academyv2.mereka.io",
+      "hostname": "analytics.staging.skillourfuture.academy.mereka.io",
       "role": "analytics",
       "status": "active",
       "namespace": "stg-mereka-lms",
@@ -907,7 +907,7 @@
     {
       "tenant": "skillourfuture",
       "environment": "staging",
-      "hostname": "credentials.staging.skillourfuture.academyv2.mereka.io",
+      "hostname": "credentials.staging.skillourfuture.academy.mereka.io",
       "role": "credentials",
       "status": "active",
       "namespace": "stg-mereka-lms",
@@ -924,7 +924,7 @@
     {
       "tenant": "skillourfuture",
       "environment": "staging",
-      "hostname": "admin.staging.skillourfuture.academyv2.mereka.io",
+      "hostname": "admin.staging.skillourfuture.academy.mereka.io",
       "role": "enterprise-admin",
       "status": "active",
       "namespace": "stg-mereka-lms",
@@ -933,7 +933,7 @@
       "cluster_class": "shared-nonprod",
       "gitops_overlay_path": "apps/mereka-lms/overlays/staging",
       "dns_zone": "mereka.io",
-      "cookie_domain": ".skillourfuture.academyv2.mereka.io",
+      "cookie_domain": ".skillourfuture.academy.mereka.io",
       "auth_class": "CORS_ORIGIN",
       "proof_priority": "P2",
       "ingress_tls": false
@@ -941,7 +941,7 @@
     {
       "tenant": "skillourfuture",
       "environment": "staging",
-      "hostname": "learner.staging.skillourfuture.academyv2.mereka.io",
+      "hostname": "learner.staging.skillourfuture.academy.mereka.io",
       "role": "enterprise-learner",
       "status": "active",
       "namespace": "stg-mereka-lms",
@@ -950,7 +950,7 @@
       "cluster_class": "shared-nonprod",
       "gitops_overlay_path": "apps/mereka-lms/overlays/staging",
       "dns_zone": "mereka.io",
-      "cookie_domain": ".skillourfuture.academyv2.mereka.io",
+      "cookie_domain": ".skillourfuture.academy.mereka.io",
       "auth_class": "AUTH_TRANSPARENT",
       "proof_priority": "P2",
       "ingress_tls": false
@@ -975,7 +975,7 @@
     {
       "tenant": "skillourfuture",
       "environment": "staging",
-      "hostname": "apps.staging.skillourfuture.academyv2.mereka.io",
+      "hostname": "apps.staging.skillourfuture.academy.mereka.io",
       "role": "mfe",
       "status": "active",
       "namespace": "stg-mereka-lms",
@@ -984,7 +984,7 @@
       "cluster_class": "shared-nonprod",
       "gitops_overlay_path": "apps/mereka-lms/overlays/staging",
       "dns_zone": "mereka.io",
-      "cookie_domain": ".skillourfuture.academyv2.mereka.io",
+      "cookie_domain": ".skillourfuture.academy.mereka.io",
       "auth_class": "REDIRECT_TARGET",
       "proof_priority": "P1",
       "ingress_tls": false
@@ -992,7 +992,7 @@
     {
       "tenant": "skillourfuture",
       "environment": "staging",
-      "hostname": "preview.staging.skillourfuture.academyv2.mereka.io",
+      "hostname": "preview.staging.skillourfuture.academy.mereka.io",
       "role": "preview",
       "status": "active",
       "namespace": "stg-mereka-lms",
@@ -1001,7 +1001,7 @@
       "cluster_class": "shared-nonprod",
       "gitops_overlay_path": "apps/mereka-lms/overlays/staging",
       "dns_zone": "mereka.io",
-      "cookie_domain": ".skillourfuture.academyv2.mereka.io",
+      "cookie_domain": ".skillourfuture.academy.mereka.io",
       "auth_class": "AUTH_TRANSPARENT",
       "proof_priority": "P2",
       "ingress_tls": false
@@ -1026,7 +1026,7 @@
     {
       "tenant": "skillourfuture",
       "environment": "staging",
-      "hostname": "staging.skillourfuture.academyv2.mereka.io",
+      "hostname": "staging.skillourfuture.academy.mereka.io",
       "role": "primary",
       "status": "active",
       "namespace": "stg-mereka-lms",
@@ -1035,7 +1035,7 @@
       "cluster_class": "shared-nonprod",
       "gitops_overlay_path": "apps/mereka-lms/overlays/staging",
       "dns_zone": "mereka.io",
-      "cookie_domain": ".skillourfuture.academyv2.mereka.io",
+      "cookie_domain": ".skillourfuture.academy.mereka.io",
       "auth_class": "DIRECT_AUTH_PARTICIPANT",
       "proof_priority": "P1",
       "ingress_tls": false
@@ -1060,7 +1060,7 @@
     {
       "tenant": "skillourfuture",
       "environment": "staging",
-      "hostname": "studio.staging.skillourfuture.academyv2.mereka.io",
+      "hostname": "studio.staging.skillourfuture.academy.mereka.io",
       "role": "studio",
       "status": "active",
       "namespace": "stg-mereka-lms",
@@ -1069,7 +1069,7 @@
       "cluster_class": "shared-nonprod",
       "gitops_overlay_path": "apps/mereka-lms/overlays/staging",
       "dns_zone": "mereka.io",
-      "cookie_domain": ".skillourfuture.academyv2.mereka.io",
+      "cookie_domain": ".skillourfuture.academy.mereka.io",
       "auth_class": "DIRECT_AUTH_PARTICIPANT",
       "proof_priority": "P1",
       "ingress_tls": false
