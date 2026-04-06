@@ -2479,7 +2479,7 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
-    "path": "archive/reports/deep-research/Review of the \u201cmereka-lms\u201d Repositories Against Open edX 2026 Guidance.pdf",
+    "path": "archive/reports/deep-research/Review of the “mereka-lms” Repositories Against Open edX 2026 Guidance.pdf",
     "status": "archive-candidate",
     "type": "status"
   },
@@ -4001,6 +4001,15 @@
     "last_verified_or_updated": "2026-03-09",
     "owner": "Multisite Platform",
     "path": "concepts/architecture/TENANT_LIFECYCLE.md",
+    "status": "canonical",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-07",
+    "owner": "Platform Team",
+    "path": "concepts/architecture/TENANT_OPERATING_SYSTEM.md",
     "status": "canonical",
     "type": "concept"
   },
@@ -6681,7 +6690,7 @@
     "canonical_conflict_group": null,
     "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-24",
-    "owner": "Engineering Lead \u00b7 Last updated: 2026-02-24",
+    "owner": "Engineering Lead · Last updated: 2026-02-24",
     "path": "ops/runbooks/DR_DRILL_SCHEDULE.md",
     "status": "supporting",
     "type": "runbook"
@@ -6825,7 +6834,7 @@
     "canonical_conflict_group": null,
     "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-24",
-    "owner": "Engineering Lead \u00b7 Last updated: 2026-02-24",
+    "owner": "Engineering Lead · Last updated: 2026-02-24",
     "path": "ops/runbooks/INCIDENT_RESPONSE.md",
     "status": "supporting",
     "type": "runbook"
@@ -8579,6 +8588,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-07",
+    "owner": "Platform Team",
+    "path": "reference/architecture/DOMAIN_AUTHORITY_END_STATE.md",
+    "status": "canonical",
+    "type": "reference"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-11",
     "owner": "Platform Team",
     "path": "reference/architecture/ENTERPRISE_BROWSER_PROOF_PLAN.md",
@@ -8890,6 +8908,24 @@
     "path": "reference/architecture/TUTOR_PATCHES_INVENTORY.md",
     "status": "supporting",
     "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-04",
+    "owner": "Platform Team",
+    "path": "reference/contracts/SMOKE_ACCOUNT_REGISTRY_CONTRACT.md",
+    "status": "canonical",
+    "type": "contract"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-04",
+    "owner": "Platform Team",
+    "path": "reference/contracts/VERIFIER_CONTRACT_CATALOG.md",
+    "status": "canonical",
+    "type": "contract"
   },
   {
     "canonical_conflict_group": null,
@@ -9596,6 +9632,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-07",
+    "owner": "Platform Team",
+    "path": "reference/operations/RUNTIME_TRUTH_MATRIX.md",
+    "status": "canonical",
+    "type": "reference"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-06",
     "owner": "Infra Team",
     "path": "reference/operations/SECRETS_SNAPSHOT.md",
@@ -10163,10 +10208,28 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-07",
+    "owner": "Agent 1 V2",
+    "path": "status/active/AGENT1_V2_OPERATING_CONTRACT_2026-04-07.md",
+    "status": "canonical",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-13",
     "owner": null,
     "path": "status/active/BACKUP_TOOLING_STATUS.md",
     "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-04",
+    "owner": "Platform Team",
+    "path": "status/active/BRANCH_CAPABILITY_CONVERGENCE_2026-04-04.md",
+    "status": "canonical",
     "type": "status"
   },
   {
@@ -10379,9 +10442,45 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-04",
+    "owner": "Platform Team",
+    "path": "status/active/PRODUCTION_READINESS_AUDIT_2026-04-04.md",
+    "status": "canonical",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-26",
     "owner": "Platform Team",
     "path": "status/active/README.md",
+    "status": "canonical",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-04",
+    "owner": "Platform Team",
+    "path": "status/active/SMOKE_ACCOUNT_REGISTRY_2026-04-04.md",
+    "status": "canonical",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-05",
+    "owner": "Platform Team",
+    "path": "status/active/TENANT_EXPERIENCE_CONTRACT_TRACKER_2026-04-05.md",
+    "status": "canonical",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-03",
+    "owner": "Platform Team",
+    "path": "status/active/TENANT_OPERATING_SYSTEM_BLUEPRINT_2026-04-03.md",
     "status": "canonical",
     "type": "status"
   },
@@ -10697,33 +10796,6 @@
     "last_verified_or_updated": "2026-03-09",
     "owner": "Program Mgmt",
     "path": "status/weekly/README.md",
-    "status": "canonical",
-    "type": "status"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-04-04",
-    "owner": "Platform Team",
-    "path": "reference/contracts/SMOKE_ACCOUNT_REGISTRY_CONTRACT.md",
-    "status": "canonical",
-    "type": "contract"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-04-04",
-    "owner": "Platform Team",
-    "path": "reference/contracts/VERIFIER_CONTRACT_CATALOG.md",
-    "status": "canonical",
-    "type": "contract"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-04-04",
-    "owner": "Platform Team",
-    "path": "status/active/SMOKE_ACCOUNT_REGISTRY_2026-04-04.md",
     "status": "canonical",
     "type": "status"
   },

@@ -815,7 +815,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-alert-routing.sh",
-      "reference_count": 30,
+      "reference_count": 31,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster",
@@ -1956,7 +1956,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-branch-protection.sh",
-      "reference_count": 3,
+      "reference_count": 4,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -2465,7 +2465,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-build-workflow-contract.sh",
-      "reference_count": 12,
+      "reference_count": 13,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -2633,7 +2633,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-cert-manager-readiness.sh",
-      "reference_count": 4,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -3003,7 +3003,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-cicd-release-rollback.sh",
-      "reference_count": 6,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -4370,7 +4370,7 @@
       "mutability": "destructive",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-deployment-lanes.sh",
-      "reference_count": 8,
+      "reference_count": 9,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster",
@@ -4711,7 +4711,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-disaster-recovery.sh",
-      "reference_count": 9,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -4838,7 +4838,7 @@
       "mutability": "read-only",
       "owner": "identity-access",
       "path": "scripts/qa/verify-domain-authority-chain.sh",
-      "reference_count": 6,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -4866,7 +4866,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-domain-generated-surfaces.sh",
-      "reference_count": 6,
+      "reference_count": 9,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -4923,7 +4923,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-domain-url-invariants.sh",
-      "reference_count": 12,
+      "reference_count": 14,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -5526,7 +5526,7 @@
       "mutability": "read-only",
       "owner": "identity-access",
       "path": "scripts/qa/verify-enterprise-auth-contract.sh",
-      "reference_count": 5,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -6452,7 +6452,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-footer-parity.sh",
-      "reference_count": 21,
+      "reference_count": 22,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -6894,7 +6894,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-generated-surfaces.sh",
-      "reference_count": 6,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -8676,7 +8676,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-config-api.sh",
-      "reference_count": 14,
+      "reference_count": 16,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -9624,7 +9624,7 @@
       "mutability": "read-only",
       "owner": "migration-platform",
       "path": "scripts/qa/verify-migration-rollback.sh",
-      "reference_count": 11,
+      "reference_count": 12,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -10130,7 +10130,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-multisite-config.sh",
-      "reference_count": 28,
+      "reference_count": 29,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -11184,7 +11184,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-observability-tracing.sh",
-      "reference_count": 8,
+      "reference_count": 9,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -11337,7 +11337,7 @@
       "mutability": "read-only",
       "owner": "identity-access",
       "path": "scripts/qa/verify-oidc-provider-configs.sh",
-      "reference_count": 22,
+      "reference_count": 23,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -12260,7 +12260,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-post-deploy-gate.sh",
-      "reference_count": 11,
+      "reference_count": 12,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -12318,7 +12318,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-post-deploy-smoke.sh",
-      "reference_count": 15,
+      "reference_count": 16,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -13263,7 +13263,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-release-automation.sh",
-      "reference_count": 19,
+      "reference_count": 20,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -13523,7 +13523,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-release-workflow-invocation.sh",
-      "reference_count": 18,
+      "reference_count": 19,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -13619,7 +13619,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-restore-drill.sh",
-      "reference_count": 3,
+      "reference_count": 4,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -13757,7 +13757,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-rke2-tenant-routes.sh",
-      "reference_count": 17,
+      "reference_count": 19,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster",
@@ -13795,7 +13795,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-rollback-dry-run.sh",
-      "reference_count": 9,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -15046,7 +15046,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-slo-synthetic-drills.sh",
-      "reference_count": 4,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -15502,7 +15502,7 @@
       "mutability": "read-only",
       "owner": "identity-access",
       "path": "scripts/qa/verify-studio-sso-flow.sh",
-      "reference_count": 11,
+      "reference_count": 13,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -15589,7 +15589,7 @@
       "mutability": "read-only",
       "owner": "identity-access",
       "path": "scripts/qa/verify-tenant-auth-runtime.sh",
-      "reference_count": 2,
+      "reference_count": 4,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -15866,7 +15866,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-tenant-dns-inventory.sh",
-      "reference_count": 7,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -16147,7 +16147,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-tenant-isolation.sh",
-      "reference_count": 23,
+      "reference_count": 25,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -16463,7 +16463,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-tenant-ui-smoke.sh",
-      "reference_count": 8,
+      "reference_count": 9,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -16493,7 +16493,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-tenant-visual-contract.sh",
-      "reference_count": 7,
+      "reference_count": 9,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -18163,7 +18163,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/tenants/verify-dev-runtime-proof.sh",
-      "reference_count": 11,
+      "reference_count": 13,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -18209,7 +18209,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/tenants/verify-staging-runtime-proof.sh",
-      "reference_count": 10,
+      "reference_count": 12,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
