@@ -294,8 +294,11 @@ def run_contract_assertions(tenant: dict, log_path: pathlib.Path) -> None:
             body_bytes = int(details.get("body_bytes", 0))
             status_code = int(details.get("status_code", 0))
             final_url = str(details.get("final_url", url))
+            # When expected_min_body_bytes=0, an empty response is valid and
+            # may not have a content-type header. Skip content-type check in that case.
             content_type_ok = (
                 not expected_content_type
+                or (expected_min_body_bytes == 0 and body_bytes == 0)
                 or content_type.lower().startswith(str(expected_content_type).lower())
             )
             body_ok = body_bytes >= expected_min_body_bytes
