@@ -1320,10 +1320,12 @@ jobs:
     timeout-minutes: 15
     needs: [build-openedx, build-mfe, scan-openedx-image, scan-mfe-image, slsa-provenance]
     # Run even if SLSA failed — provenance is desirable but must not block releases.
+    # Accept 'skipped' for either image: partial builds (e.g. only OpenEdX changed)
+    # should still generate a release bundle using the existing other image's digest.
     # Manual proof runs may intentionally leave target_environment at the
     # placeholder value. Skip release-bundle generation in that case instead of
     # failing after both images already built and pushed successfully.
-    if: ${{ always() && needs.build-openedx.result == 'success' && needs.build-mfe.result == 'success' && (github.event_name != 'workflow_dispatch' || inputs.target_environment != 'select-environment') }}
+    if: ${{ always() && (needs.build-openedx.result == 'success' || needs.build-openedx.result == 'skipped') && (needs.build-mfe.result == 'success' || needs.build-mfe.result == 'skipped') && !(needs.build-openedx.result == 'skipped' && needs.build-mfe.result == 'skipped') && (github.event_name != 'workflow_dispatch' || inputs.target_environment != 'select-environment') }}
     permissions:
       contents: read
       id-token: write
@@ -1416,7 +1418,8 @@ jobs:
     # Push to main builds images and proof only.
     # Any GitOps mutation here is an explicit/manual bridge. The standard
     # dev/staging/prod promotion path is infra-owned in bbi-infrastructure.
-    if: ${{ always() && needs.build-openedx.result == 'success' && needs.build-mfe.result == 'success' && github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment' }}
+    # Accept 'skipped' for partial builds (same logic as release-bundle).
+    if: ${{ always() && (needs.build-openedx.result == 'success' || needs.build-openedx.result == 'skipped') && (needs.build-mfe.result == 'success' || needs.build-mfe.result == 'skipped') && !(needs.build-openedx.result == 'skipped' && needs.build-mfe.result == 'skipped') && github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment' }}
     environment: ${{ inputs.target_environment }}
     permissions:
       contents: write
