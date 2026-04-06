@@ -20,6 +20,8 @@
 #   --ci-run-id <id>   GitHub Actions run ID (default: "local")
 #   --release-object-json <path>
 #                      Bind release-object identity into emitted envelope(s)
+#   --ci-failure-baseline-json <path>
+#                      Bind severity-aware CI baseline debt into release-gate envelope details
 #   --output-dir <dir> Write envelopes here (default: var/proof)
 #   --format json      JSON output only (no human-readable text)
 #   --skip-cluster     Pass to release-gate.sh (skip live cluster checks)
@@ -39,6 +41,7 @@ LANE="dev"
 DRY_RUN=false
 CI_RUN_ID="${GITHUB_RUN_ID:-local}"
 RELEASE_OBJECT_JSON=""
+CI_FAILURE_BASELINE_JSON=""
 OUTPUT_DIR="$REPO_ROOT/var/proof"
 FORMAT="text"
 SKIP_CLUSTER=false
@@ -52,6 +55,7 @@ while [[ $# -gt 0 ]]; do
     --dry-run)      DRY_RUN=true; shift ;;
     --ci-run-id)    CI_RUN_ID="${2:?--ci-run-id requires a value}"; shift 2 ;;
     --release-object-json) RELEASE_OBJECT_JSON="${2:?--release-object-json requires a value}"; shift 2 ;;
+    --ci-failure-baseline-json) CI_FAILURE_BASELINE_JSON="${2:?--ci-failure-baseline-json requires a value}"; shift 2 ;;
     --output-dir)   OUTPUT_DIR="${2:?--output-dir requires a value}"; shift 2 ;;
     --format)       FORMAT="${2:?--format requires a value}"; shift 2 ;;
     --skip-cluster) SKIP_CLUSTER=true; shift ;;
@@ -181,6 +185,7 @@ run_release_gate() {
   local args=("--overlay" "$OVERLAY")
   [[ "$SKIP_CLUSTER" == "true" ]] && args+=("--skip-cluster")
   [[ -n "$RELEASE_OBJECT_JSON" ]] && args+=("--release-object-json" "$RELEASE_OBJECT_JSON")
+  [[ -n "$CI_FAILURE_BASELINE_JSON" ]] && args+=("--ci-failure-baseline-json" "$CI_FAILURE_BASELINE_JSON")
 
   [[ "$FORMAT" != "json" ]] && echo "Running release-gate (overlay: $OVERLAY)..."
 

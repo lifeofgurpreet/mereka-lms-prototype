@@ -1363,12 +1363,14 @@ scripts:
   - path: scripts/release/release-gate.sh
     owner: platform-team
     purpose: >
-      Canonical release verification entrypoint. Runs 6 gates: Kustomize render,
-      deployment contract validation, migration registry, image pin check,
-      secret key completeness, and cluster connectivity.
+      Canonical release verification entrypoint. Validates release structure,
+      optional release identity binding, and optional severity-aware CI baseline
+      debt alongside the deployment contract gates.
     inputs:
       - --overlay PATH (default: deploy/k8s/base)
       - --skip-cluster (skip live cluster checks)
+      - --release-object-json PATH (optional)
+      - --ci-failure-baseline-json PATH (optional)
     outputs:
       - stdout (PASS/SKIP/FAIL per gate)
     side_effects: none
@@ -1849,10 +1851,13 @@ scripts:
     owner: platform-team
     purpose: >
       Canonical release verification entrypoint. Validates kustomize renders,
-      contract bundle, migration registry, deploy contract, and boundary audit.
+      contract bundle, migration registry, deploy contract, boundary audit,
+      optional release identity binding, and optional CI baseline debt policy.
     inputs:
       - "--overlay PATH (default: deploy/k8s/base)"
       - "--skip-cluster (skip live cluster checks)"
+      - "--release-object-json PATH (optional)"
+      - "--ci-failure-baseline-json PATH (optional)"
     outputs:
       - stdout (gate results)
       - var/proof/release-gate.json (proof artifact)
@@ -1922,7 +1927,17 @@ scripts:
     owner: platform-team
     purpose: >
       Emit a proof envelope artifact for release evidence tracking.
-    inputs: []
+    inputs:
+      - --concern release-gate|migration-proof|runtime-smoke|aggregate
+      - --lane dev|staging|prod (optional)
+      - --dry-run (optional)
+      - --ci-run-id ID (optional)
+      - --release-object-json PATH (optional)
+      - --ci-failure-baseline-json PATH (optional)
+      - --output-dir DIR (optional)
+      - --skip-cluster (optional)
+      - --namespace NS (optional)
+      - --domain HOST (optional)
     outputs:
       - stdout (proof envelope)
     side_effects: []
