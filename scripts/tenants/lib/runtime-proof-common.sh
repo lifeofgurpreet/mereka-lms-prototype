@@ -23,6 +23,11 @@
 #
 # This file does NOT call set -euo pipefail; the caller owns that.
 
+# ── Kubectl wrapper (respects KUBE_CONTEXT from env file) ────────────────────
+_kubectl() {
+  kubectl ${KUBE_CONTEXT:+--context "$KUBE_CONTEXT"} "$@"
+}
+
 # ── Counters & result accumulator ────────────────────────────────────────────
 PASS=0
 FAIL=0
@@ -64,7 +69,7 @@ skip_() {
 # ── Pod discovery ─────────────────────────────────────────────────────────────
 _find_ready_pod() {
   local label="$1"
-  kubectl get pods -n "$NAMESPACE" \
+  _kubectl get pods -n "$NAMESPACE" \
     -l "app.kubernetes.io/name=$label" \
     --field-selector=status.phase=Running \
     -o jsonpath='{range .items[*]}{.metadata.name} {.status.containerStatuses[0].ready}{"\n"}{end}' 2>/dev/null \
@@ -169,7 +174,7 @@ run_proof() {
     local deploy="$1"
 
     local image
-    image=$(kubectl get deployment "$deploy" -n "$NAMESPACE" \
+    image=$(_kubectl get deployment "$deploy" -n "$NAMESPACE" \
       -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null || true)
 
     if [[ -z "$image" ]]; then
@@ -205,7 +210,7 @@ run_proof() {
   echo "--- [2] Module presence ---"
 
   local MODULE_CHECK
-  MODULE_CHECK=$(kubectl exec "$lms_pod" -n "$NAMESPACE" -- \
+  MODULE_CHECK=$(_kubectl exec "$lms_pod" -n "$NAMESPACE" -- \
     python manage.py lms shell -c "
 import sys
 try:
@@ -228,7 +233,7 @@ except ImportError as e:
   fi
 
   local MW_CHECK
-  MW_CHECK=$(kubectl exec "$lms_pod" -n "$NAMESPACE" -- \
+  MW_CHECK=$(_kubectl exec "$lms_pod" -n "$NAMESPACE" -- \
     python manage.py lms shell -c "
 from django.conf import settings
 mw = settings.MIDDLEWARE
@@ -293,7 +298,7 @@ print('PRESENT' if found else 'ABSENT')
   DOMAINS_CSV="${DOMAINS_CSV%,}"
 
   local SC_RAW
-  SC_RAW=$(kubectl exec "$lms_pod" -n "$NAMESPACE" -- python manage.py lms shell -c "
+  SC_RAW=$(_kubectl exec "$lms_pod" -n "$NAMESPACE" -- python manage.py lms shell -c "
 from django.contrib.sites.models import Site
 from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
 import json
