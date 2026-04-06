@@ -130,13 +130,12 @@ def _build_assertions(
             "forbid_redirect_hosts": forbidden_hosts,
         }
         if path in {"/", "/dashboard"}:
-            # MFE containers serve empty body at root/dashboard (client-side routing).
-            # The actual content is delivered via /authn/login, /learner-dashboard/, etc.
-            # Only assert content-type, not body size.
+            # Release-critical staging regressions showed same-host stability alone
+            # is insufficient. Require non-empty HTML for apps root/dashboard too.
             assertion.update(
                 {
                     "expect_content_type_prefix": "text/html",
-                    "expect_min_body_bytes": 0,
+                    "expect_min_body_bytes": 1,
                 }
             )
         assertions.append(assertion)
