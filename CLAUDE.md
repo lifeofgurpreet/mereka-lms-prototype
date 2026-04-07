@@ -470,6 +470,16 @@ gcloud secrets create MEREKA_LMS_NEW_SECRET --data-file=- <<< "value"
 
 See `specs/secrets-management.md` for full specification.
 
+**Test & Operational Credentials (ALL in Infisical)**:
+- **INVARIANT**: Everything you need to test, deploy, or operate is already in Infisical. Do NOT create new tokens or ask for credentials.
+- **Test user password**: `Cr3ativity` (all envs)
+- **Test users**: `testadmin` (staff+super), `lanea-platform-admin` (staff+super), `lanea-enterprise-learner` (enterprise), `synthetic-learner-01` (basic learner)
+- **GitHub App (cross-repo dispatch)**: `BBI_ARC_GITHUB_APP_ID` + `BBI_ARC_GITHUB_APP_PRIVATE_KEY` + `BBI_ARC_GITHUB_APP_INSTALLATION_ID` in Infisical root path
+- **GHCR image push/pull**: `CIE_{DEV,STAGING,PROD}_GHCR_DOCKERCONFIGJSON`
+- **Cloudflare**: `CLOUDFLARE_TOKEN_MEREKA_IO` (with `--recursive`), `CLOUDFLARE_TOKEN_MEREKA_DEV` (NO `--recursive`)
+- **SSO canary**: `SSO_CANARY_EMAIL_*`, `SSO_CANARY_PASSWORD_*`
+- **`ORG_GHCR_TOKEN`**: Currently a GitHub repo secret ONLY (not in Infisical). Used for GHCR image push in CI. Should be mirrored to Infisical at `/shared/github`. For cross-repo dispatch, use the GitHub App instead.
+
 ## Security Notes
 
 - **Never commit secrets**: `tutor_env/config.yml` is gitignored
@@ -606,11 +616,6 @@ GCP_PROJECT=my-test-project source scripts/shared/config.sh
    - **Fix**: Add offline/static gates to `ci_static_inventory`; use `ci_runtime_inventory` only for manual/runtime inventory paths, then regenerate the corresponding `.github/ci-scripts-*.txt` derivative
 10. **Duplicating GCP auth / Python setup in workflows** → Use composite actions in `.github/actions/`
 11. **Including ARC manifests in rke2-nonprod overlay** → The overlay's `namespace: mereka-lms` transformer overrides ARC namespaces. Apply ARC separately: `kubectl apply -k deploy/k8s/base/arc/`
-12. **MFE URL configured but feature not active** → Open edX uses **waffle flags** to gate MFE features independently of URL configuration. A configured `*_MICROFRONTEND_URL` does NOT mean the feature is active. Always check the corresponding waffle flag:
-   - `learner_home_mfe.enabled` gates `/dashboard` → MFE learner-home redirect
-   - Enterprise waffle switches are per-tenant (in enterprise tenant specs)
-   - Check flags: `kubectl exec deploy/lms -- python manage.py lms shell -c "from waffle.models import Flag; print(list(Flag.objects.values('name','everyone')))"`
-   - New flags must be added to `config/enterprise-tenants/*.yaml` under `waffle_flags` section
 
 ## Getting Help
 

@@ -1,10 +1,42 @@
 ---
-schema_version: "1.0"
+schema_version: "1.1"
 owner: Platform Team
 status: canonical
 identity_authority_rule: real identity systems first
 secret_authority_rule: Infisical is canonical for secret material and metadata
 consumer_rule: GitHub/runtime consumers mirror from Infisical only
+
+# ============================================================================
+# CURRENT WORKING TEST ACCOUNTS (verified 2026-04-07)
+#
+# These accounts exist on ALL environments (dev, staging, prod).
+# Password for all: Cr3ativity (stored in Infisical)
+# ============================================================================
+current_accounts:
+  platform_admin:
+    username: lanea-platform-admin
+    password_ref: Infisical (Cr3ativity across all envs)
+    role: staff + superuser
+    envs: [dev, staging, prod]
+    use_for: Studio access, admin operations, staff masquerading
+  enterprise_learner:
+    username: lanea-enterprise-learner
+    password_ref: Infisical (Cr3ativity across all envs)
+    role: enterprise-linked learner
+    envs: [dev, staging, prod]
+    use_for: Enterprise course access, learner portal, consent flows
+  enterprise_admin:
+    username: lanea-enterprise-admin
+    password_ref: Infisical (Cr3ativity across all envs)
+    role: enterprise admin (not staff)
+    envs: [dev, staging, prod]
+    use_for: Enterprise admin portal, catalog management
+  unlinked_user:
+    username: lanea-unlinked-user
+    password_ref: Infisical (Cr3ativity across all envs)
+    role: basic learner (no enterprise link)
+    envs: [dev, staging, prod]
+    use_for: Standard non-enterprise user flows
 
 consumer_surfaces:
   github_actions:

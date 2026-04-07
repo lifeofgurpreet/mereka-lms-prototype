@@ -17,9 +17,13 @@
 # mereka and skillourfuture are spec-only — they will be bootstrapped
 # when their enterprise features are activated on production.
 ---
-version: "1.0"
+version: "1.1"
 environment: production
 lms_domain: academyv2.mereka.io
+
+# Global waffle flags (not per-tenant — apply once per environment)
+waffle_flags:
+  learner_home_mfe.enabled: true  # Redirect /dashboard to MFE learner-home
 
 tenants:
   - slug: mereka

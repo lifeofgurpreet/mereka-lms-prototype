@@ -13,9 +13,13 @@
 # Namespace: stg-mereka-lms
 # Auth host: staging.auth0.mereka.io
 ---
-version: "1.0"
+version: "1.1"
 environment: staging
 lms_domain: staging.academyv2.mereka.io
+
+# Global waffle flags (not per-tenant — apply once per environment)
+waffle_flags:
+  learner_home_mfe.enabled: true  # Redirect /dashboard to MFE learner-home
 
 tenants:
   - slug: mereka

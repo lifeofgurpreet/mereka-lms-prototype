@@ -143,6 +143,7 @@ OAUTH_OIDC_ISSUER = f"{MEREKA_LMS_BASE_URL}/oauth2"
 # into nonprod Studio pages even when MEREKA_* domain env vars are set to .dev.
 LMS_BASE = MEREKA_LMS_DOMAIN
 LMS_ROOT_URL = MEREKA_LMS_BASE_URL
+LMS_INTERNAL_ROOT_URL = LMS_ROOT_URL  # Must match LMS_ROOT_URL, not http://localhost
 CMS_BASE = MEREKA_STUDIO_DOMAIN
 CMS_ROOT_URL = MEREKA_STUDIO_BASE_URL
 

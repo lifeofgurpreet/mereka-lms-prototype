@@ -4025,6 +4025,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-07",
+    "owner": "Platform Team",
+    "path": "concepts/architecture/WS4_PROMOTION_CONTRACT.md",
+    "status": "canonical",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
     "path": "concepts/architecture/bundle-rules.yaml",
