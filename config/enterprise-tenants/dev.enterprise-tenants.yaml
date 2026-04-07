@@ -30,7 +30,7 @@ tenants:
       # If a UUID is provided, the tool uses it for get_or_create.
       # uuid: null  # auto-generated
       enable_data_sharing_consent: true
-      enforce_data_sharing_consent: at_enrollment
+      enforce_data_sharing_consent: externally_managed
       enable_audit_enrollment: false
       enable_learner_portal: true
       enable_portal_code_management: false
@@ -73,7 +73,7 @@ tenants:
 
     enterprise_customer:
       enable_data_sharing_consent: true
-      enforce_data_sharing_consent: at_enrollment
+      enforce_data_sharing_consent: externally_managed
       enable_audit_enrollment: false
       enable_learner_portal: true
       enable_portal_code_management: false
@@ -114,7 +114,7 @@ tenants:
 
     enterprise_customer:
       enable_data_sharing_consent: true
-      enforce_data_sharing_consent: at_enrollment
+      enforce_data_sharing_consent: externally_managed
       enable_audit_enrollment: false
       enable_learner_portal: true
       enable_portal_code_management: false

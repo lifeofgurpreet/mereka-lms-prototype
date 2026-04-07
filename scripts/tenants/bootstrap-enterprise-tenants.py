@@ -103,6 +103,9 @@ def bootstrap_tenant(tenant: dict, dry_run: bool) -> dict:
                 enable_data_sharing_consent=ec_spec.get(
                     "enable_data_sharing_consent", True
                 ),
+                enforce_data_sharing_consent=ec_spec.get(
+                    "enforce_data_sharing_consent", "externally_managed"
+                ),
                 enable_audit_enrollment=ec_spec.get("enable_audit_enrollment", False),
                 enable_learner_portal=ec_spec.get("enable_learner_portal", True),
                 enable_portal_code_management_screen=ec_spec.get(
@@ -117,6 +120,24 @@ def bootstrap_tenant(tenant: dict, dry_run: bool) -> dict:
         result["actions"].append(
             f"EXISTS EnterpriseCustomer slug={tenant['slug']} uuid={ec.uuid}"
         )
+        # Reconcile enforce_data_sharing_consent on existing enterprises
+        desired_enforce = ec_spec.get(
+            "enforce_data_sharing_consent", "externally_managed"
+        )
+        if ec.enforce_data_sharing_consent != desired_enforce:
+            if dry_run:
+                result["actions"].append(
+                    f"UPDATE EnterpriseCustomer slug={tenant['slug']} "
+                    f"enforce_data_sharing_consent: "
+                    f"{ec.enforce_data_sharing_consent!r} -> {desired_enforce!r}"
+                )
+            else:
+                ec.enforce_data_sharing_consent = desired_enforce
+                ec.save(update_fields=["enforce_data_sharing_consent"])
+                result["actions"].append(
+                    f"UPDATED EnterpriseCustomer slug={tenant['slug']} "
+                    f"enforce_data_sharing_consent={desired_enforce!r}"
+                )
 
     # 3. Catalogs
     for cat_spec in tenant.get("catalogs", []):
