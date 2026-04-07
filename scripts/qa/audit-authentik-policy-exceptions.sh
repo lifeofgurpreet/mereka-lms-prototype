@@ -18,7 +18,7 @@
 set -euo pipefail
 
 SINCE="${SINCE:-6h}"
-CONTEXT="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
+CONTEXT="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-rke2-prod}}"
 NAMESPACE="${AUTHENTIK_NAMESPACE:-authentik}"
 DEPLOYMENT="${AUTHENTIK_DEPLOYMENT:-authentik-server}"
 FILTER_OIDC_ONLY="${FILTER_OIDC_ONLY:-1}"
@@ -36,7 +36,7 @@ usage() {
 Usage: ./scripts/qa/audit-authentik-policy-exceptions.sh [--since 6h]
 
 Env:
-  K8S_CONTEXT                kubectl context (default: gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster)
+  K8S_CONTEXT                kubectl context (default: rke2-prod)
   AUTHENTIK_NAMESPACE        namespace (default: authentik)
   AUTHENTIK_DEPLOYMENT       deployment name (default: authentik-server)
   FILTER_OIDC_ONLY=1         only flag exceptions observed during /application/o/authorize flows

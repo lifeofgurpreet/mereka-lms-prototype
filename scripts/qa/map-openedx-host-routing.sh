@@ -14,7 +14,7 @@
 #
 # Env overrides:
 #   NAMESPACE=mereka-lms
-#   CONTEXT_PROD=gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
+#   CONTEXT_PROD=rke2-prod
 #   CONTEXT_DEV=kind-dev
 set -euo pipefail
 
@@ -24,7 +24,7 @@ source "$REPO_ROOT/scripts/shared/config.sh"
 NAMESPACE="${NAMESPACE:-${K8S_NAMESPACE:-mereka-lms}}"
 NAMESPACE_PROD="${NAMESPACE_PROD:-${K8S_NAMESPACE_PROD:-$NAMESPACE}}"
 NAMESPACE_DEV="${NAMESPACE_DEV:-${K8S_NAMESPACE_DEV:-$NAMESPACE}}"
-CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
+CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-rke2-prod}}}"
 CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}}"
 ENV_SCOPE="both"   # prod|dev|both
 FORMAT="table"     # table|json

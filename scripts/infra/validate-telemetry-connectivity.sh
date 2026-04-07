@@ -16,7 +16,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
-K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
+K8S_CONTEXT="${K8S_CONTEXT:-rke2-prod}"
 MONITORING_NS="${MONITORING_NS:-monitoring}"
 APP_NS="${APP_NS:-mereka-lms}"
 VPS_PROM_URL="${VPS_PROM_URL:-https://prometheus.mereka.dev}"

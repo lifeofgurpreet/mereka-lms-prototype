@@ -15,7 +15,7 @@ cd "$REPO_ROOT"
 MODE="local" # local | runtime | all
 JSON_OUT=0
 STRICT_RUNTIME="${STRICT_RUNTIME:-0}"
-K8S_CONTEXT="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
+K8S_CONTEXT="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-rke2-prod}}"
 APP_NS="${APP_NS:-mereka-lms}"
 MON_NS="${MON_NS:-monitoring}"
 PROM_LABEL="${PROM_LABEL:-app.kubernetes.io/name=prometheus}"

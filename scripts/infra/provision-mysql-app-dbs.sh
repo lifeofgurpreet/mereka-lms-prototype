@@ -17,7 +17,7 @@ set -euo pipefail
 # - Live execution requires explicit confirmation token.
 # - Prod-like contexts require explicit ALLOW_PROD_APPLY=1 and default to Velero pre-op backup.
 
-K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
+K8S_CONTEXT="${K8S_CONTEXT:-rke2-prod}"
 K8S_NAMESPACE="${K8S_NAMESPACE:-mereka-lms}"
 MYSQL_DEPLOYMENT="${MYSQL_DEPLOYMENT:-mysql}"
 K8S_SECRET_NAME="${K8S_SECRET_NAME:-database-secrets}"

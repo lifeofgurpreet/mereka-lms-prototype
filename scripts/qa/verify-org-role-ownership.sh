@@ -67,7 +67,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-DEFAULT_PROD_CTX="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
+DEFAULT_PROD_CTX="rke2-prod"
 DEFAULT_DEV_CTX="kind-dev"
 DEFAULT_STAGING_CTX="rke2-nonprod"
 CLUSTER_CHECK_TIMEOUT="${CLUSTER_CHECK_TIMEOUT:-20}"

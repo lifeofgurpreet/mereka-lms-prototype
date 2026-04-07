@@ -14,7 +14,7 @@
 #
 # Dependencies:
 #   - atlas CLI authenticated with mereka-lms profile
-#   - kubectl access to GKE cluster (gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster)
+#   - kubectl access to GKE cluster (rke2-prod)
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -22,7 +22,7 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 ATLAS_PROJECT_ID="${ATLAS_PROJECT_ID:-690e7c787757f4238efc94d1}"
 ATLAS_PROFILE="${ATLAS_PROFILE:-mereka-lms}"
-GKE_CONTEXT="${GKE_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
+GKE_CONTEXT="${GKE_CONTEXT:-rke2-prod}"
 DRY_RUN="${DRY_RUN:-0}"
 
 log() { printf "[%s] %s\n" "$(date '+%Y-%m-%d %H:%M:%S')" "$*"; }

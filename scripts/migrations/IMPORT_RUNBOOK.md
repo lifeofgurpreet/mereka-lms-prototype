@@ -32,7 +32,7 @@ Master runbook for the full Mereka LMS data import pipeline.
 |-----|---------|
 | dev | `rke2-nonprod` |
 | staging | `rke2-nonprod` |
-| prod | `gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster` |
+| prod | `rke2-prod` |
 
 ### Import artifacts (must exist before running)
 
@@ -468,7 +468,7 @@ python3 scripts/migrations/rollback-openedx-imports.py \
 | Property | dev | staging | prod |
 |----------|-----|---------|------|
 | Namespace | `mereka-lms-dev` | `stg-mereka-lms` | `mereka-lms` |
-| Cluster context | `rke2-nonprod` | `rke2-nonprod` | `gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster` |
+| Cluster context | `rke2-nonprod` | `rke2-nonprod` | `rke2-prod` |
 | LMS URL | `https://academyv2.mereka.dev` | `https://staging.academyv2.mereka.dev` | `https://academyv2.mereka.io` |
 
 ### Checking log files

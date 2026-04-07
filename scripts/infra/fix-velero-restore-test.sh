@@ -18,7 +18,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
-K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
+K8S_CONTEXT="${K8S_CONTEXT:-rke2-prod}"
 VELERO_NS="${VELERO_NS:-velero}"
 APP_NAMESPACE="${APP_NAMESPACE:-mereka-lms}"
 RUN_NOW="${RUN_NOW:-1}"

@@ -3,7 +3,7 @@
 # Returns 0 if parked correctly, 1 if degraded.
 set -euo pipefail
 
-CONTEXT="${K8S_CONTEXT_PROD:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
+CONTEXT="${K8S_CONTEXT_PROD:-rke2-prod}"
 NS="${K8S_NAMESPACE_PROD:-mereka-lms}"
 PASS=0
 FAIL=0

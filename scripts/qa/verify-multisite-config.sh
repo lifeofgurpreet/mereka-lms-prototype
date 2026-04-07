@@ -48,7 +48,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Default contexts per environment (avoid accidentally checking dev values in prod DB).
-DEFAULT_PROD_CTX="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
+DEFAULT_PROD_CTX="rke2-prod"
 DEFAULT_DEV_CTX="kind-dev"
 DEFAULT_STAGING_CTX="rke2-nonprod"
 K8S_CONTEXT_EFFECTIVE="${CTX_OVERRIDE:-}"

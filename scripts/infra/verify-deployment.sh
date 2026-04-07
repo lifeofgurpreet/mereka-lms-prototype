@@ -26,7 +26,7 @@ source "$REPO_ROOT/scripts/shared/config.sh"
 
 ENV_NAME="prod" # prod|dev
 NAMESPACE="${NAMESPACE:-${K8S_NAMESPACE:-mereka-lms}}"
-CONTEXT="${CONTEXT:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
+CONTEXT="${CONTEXT:-${K8S_CONTEXT:-rke2-prod}}"
 
 usage() {
   cat <<'USAGE' >&2

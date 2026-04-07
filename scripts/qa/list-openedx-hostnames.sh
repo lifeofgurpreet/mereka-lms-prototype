@@ -13,7 +13,7 @@
 # Optional:
 #   STRICT=1  # exit non-zero if deployed hosts differ from expected
 #   NAMESPACE=mereka-lms
-#   CONTEXT_PROD=gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
+#   CONTEXT_PROD=rke2-prod
 #   CONTEXT_DEV=kind-dev
 #
 set -euo pipefail
@@ -25,7 +25,7 @@ STRICT="${STRICT:-0}"
 NAMESPACE="${NAMESPACE:-${K8S_NAMESPACE:-mereka-lms}}"
 ENV_SCOPE="both" # prod|dev|staging|both|all
 
-CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
+CONTEXT_PROD="${CONTEXT_PROD:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-rke2-prod}}}"
 CONTEXT_DEV="${CONTEXT_DEV:-${K8S_CONTEXT_DEV:-${K8S_CONTEXT:-kind-dev}}}"
 CONTEXT_STAGING="${CONTEXT_STAGING:-${K8S_CONTEXT_STAGING:-rke2-nonprod}}"
 NAMESPACE_STAGING="${NAMESPACE_STAGING:-${K8S_NAMESPACE_STAGING:-stg-mereka-lms}}"

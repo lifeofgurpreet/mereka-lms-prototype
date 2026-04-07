@@ -357,7 +357,7 @@ run_identity_case "invalid-correlation-identity-mismatch" "$FIXTURES_ROOT/malfor
 run_correlation_header_case "verify-correlation-header-propagation" 0
 
 run_lane_contract_case "valid-dev" "dev" "nonprod" "rke2-nonprod" "mereka-lms" 0
-run_lane_contract_case "valid-prod" "prod" "prod" "gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster" "mereka-lms" 0
+run_lane_contract_case "valid-prod" "prod" "prod" "rke2-prod" "mereka-lms" 0
 run_lane_contract_case "invalid-dev-profile" "dev" "prod" "rke2-nonprod" "mereka-lms" 1
 run_lane_contract_case "invalid-missing-context" "nonprod" "nonprod" "" "mereka-lms" 1
 run_lane_contract_case "invalid-missing-gcp" "nonprod" "nonprod" "rke2-nonprod" "" 1

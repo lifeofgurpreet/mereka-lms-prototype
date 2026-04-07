@@ -98,8 +98,8 @@ jobs:
           auth_mode: auto
           gcloud_project: mereka-lms
           gke_project: ${{ vars.GKE_CLUSTER_PROJECT || 'bbi-k8' }}
-          gke_location: ${{ vars.GKE_CLUSTER_LOCATION || 'asia-southeast1-c' }}
-          gke_cluster: ${{ vars.GKE_CLUSTER_NAME || 'bbi-k8-cluster' }}
+          gke_location: ${{ vars.GKE_CLUSTER_LOCATION || '' }}
+          gke_cluster: ${{ vars.GKE_CLUSTER_NAME || '' }}
           strict_runtime: ${{ github.event.inputs.strict_runtime || 'true' }}
 
       - name: Build alert-noise runtime sample

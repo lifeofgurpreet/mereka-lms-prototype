@@ -1,5 +1,5 @@
-name: 'Authenticate to GCP and GKE'
-description: 'Sets up GCP auth, gcloud CLI, and optionally fetches GKE cluster credentials'
+name: 'Authenticate to GCP (and optionally GKE)'
+description: 'Sets up GCP auth + gcloud CLI. GKE credential fetching is skipped by default (GKE decommissioned). Set gke_cluster to re-enable.'
 
 inputs:
   workload_identity_provider:
@@ -25,11 +25,11 @@ inputs:
   gke_location:
     description: 'GKE cluster location (zone or region)'
     required: false
-    default: 'asia-southeast1-c'
+    default: ''  # GKE decommissioned — leave empty unless explicitly needed
   gke_cluster:
-    description: 'GKE cluster name'
+    description: 'GKE cluster name (GKE decommissioned — leave empty for rke2-only workflows)'
     required: false
-    default: 'bbi-k8-cluster'
+    default: ''
   skip_gke:
     description: >
       Skip GKE credential fetching (GCP auth + gcloud only).
@@ -122,9 +122,12 @@ runs:
         SKIP_GCLOUD: ${{ inputs.skip_gcloud }}
         STRICT_RUNTIME: ${{ inputs.strict_runtime }}
       run: |
-        # When GKE fetch is intentionally skipped, surface a defined output immediately.
-        if [[ "$SKIP_GKE" == "true" || "$SKIP_GCLOUD" == "true" ]]; then
+        # Skip GKE credential fetching when:
+        # - Explicitly skipped via skip_gke/skip_gcloud
+        # - GKE cluster name is empty (GKE is decommissioned; most workflows are rke2-only now)
+        if [[ "$SKIP_GKE" == "true" || "$SKIP_GCLOUD" == "true" || -z "$GKE_CLUSTER" ]]; then
           echo "has_cluster=false" >> "$GITHUB_OUTPUT"
+          [[ -z "$GKE_CLUSTER" ]] && echo "INFO: GKE cluster name empty — skipping GKE credential fetch (GKE decommissioned)" >&2
           exit 0
         fi
 

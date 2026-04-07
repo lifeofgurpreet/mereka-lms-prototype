@@ -11,7 +11,7 @@
 # Usage:
 #   ./scripts/qa/audit-observability.sh
 #   ./scripts/qa/audit-observability.sh --json
-#   ./scripts/qa/audit-observability.sh --project mereka-lms --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
+#   ./scripts/qa/audit-observability.sh --project mereka-lms --context rke2-prod
 #   # Canonical runtime/all evidence gate:
 #   OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod \
 #     ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
@@ -26,7 +26,7 @@ cd "$REPO_ROOT"
 
 PROJECT="${GCP_PROJECT:-mereka-lms}"
 COMPUTE_QUOTA_PROJECT="${COMPUTE_QUOTA_PROJECT:-$PROJECT}"
-K8S_CONTEXT="${K8S_CONTEXT:-${K8S_CONTEXT_PROD:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
+K8S_CONTEXT="${K8S_CONTEXT:-${K8S_CONTEXT_PROD:-rke2-prod}}"
 APP_NS="${APP_NS:-mereka-lms}"
 VELERO_NS="${VELERO_NS:-velero}"
 INCLUDE_LEGACY="${INCLUDE_LEGACY_MONITORING:-0}"

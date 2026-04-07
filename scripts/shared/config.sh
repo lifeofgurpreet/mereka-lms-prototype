@@ -27,7 +27,7 @@ export GCP_ZONE="${GCP_ZONE:-asia-southeast1-b}"
 # Kubernetes Settings
 # =============================================================================
 export K8S_NAMESPACE="${K8S_NAMESPACE:-mereka-lms}"
-export K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
+export K8S_CONTEXT="${K8S_CONTEXT:-rke2-prod}"
 export K8S_CLUSTER="${K8S_CLUSTER:-mereka-lms}"
 
 # =============================================================================
@@ -126,7 +126,7 @@ mereka_lms_default_context_for_env() {
     local normalized_env
     normalized_env="$(mereka_lms_normalize_env "${1:-prod}")" || return 1
     case "$normalized_env" in
-        prod) echo "${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}" ;;
+        prod) echo "${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-rke2-prod}}" ;;
         dev|staging) echo "${K8S_CONTEXT_NONPROD:-rke2-nonprod}" ;;
     esac
 }

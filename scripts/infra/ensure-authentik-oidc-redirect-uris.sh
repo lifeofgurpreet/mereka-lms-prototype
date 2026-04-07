@@ -17,7 +17,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/config.sh"
 
-K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
+K8S_CONTEXT="${K8S_CONTEXT:-rke2-prod}"
 NAMESPACE="${NAMESPACE:-authentik}"
 AUTHENTIK_DEPLOY="${AUTHENTIK_DEPLOY:-authentik-server}"
 ALLOW_PROD_APPLY="${ALLOW_PROD_APPLY:-0}"

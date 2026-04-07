@@ -20,7 +20,7 @@ WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/../.." && pwd)}"
 
 APPLY="${APPLY:-0}"
 
-K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
+K8S_CONTEXT="${K8S_CONTEXT:-rke2-prod}"
 K8S_NAMESPACE="${K8S_NAMESPACE:-mereka-lms}"
 K8S_SECRET_NAME="${K8S_SECRET_NAME:-database-secrets}"
 K8S_EXTERNALSECRET_NAME="${K8S_EXTERNALSECRET_NAME:-database-secrets}"

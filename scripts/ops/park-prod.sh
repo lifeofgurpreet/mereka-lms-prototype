@@ -34,7 +34,7 @@ if [[ -z "$BBI_INFRA" ]]; then
 fi
 BBI_INFRA="${BBI_INFRA:-${WORKSPACE_ROOT}/bbi-infrastructure}"
 NAMESPACE="mereka-lms"
-GKE_CONTEXT="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
+GKE_CONTEXT="rke2-prod"
 PARK_PATCH_REL="apps/mereka-lms/overlays/prod/patches/warm-park-mode.yaml"
 KUSTOMIZE_FILE="apps/mereka-lms/overlays/prod/kustomization.yaml"
 DRY_RUN=false

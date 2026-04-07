@@ -10,7 +10,7 @@
 #
 # Usage:
 #   ./scripts/qa/audit-velero.sh
-#   ./scripts/qa/audit-velero.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
+#   ./scripts/qa/audit-velero.sh --context rke2-prod
 #   ./scripts/qa/audit-velero.sh --json
 #
 set -euo pipefail
@@ -18,7 +18,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
-K8S_CONTEXT="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
+K8S_CONTEXT="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-rke2-prod}}"
 VELERO_NS="${VELERO_NS:-velero}"
 APP_NS="${APP_NS:-${K8S_NAMESPACE_PROD:-${K8S_NAMESPACE:-mereka-lms}}}"
 JSON_OUT=0

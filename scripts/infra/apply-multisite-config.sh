@@ -11,7 +11,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/config.sh"
 
-K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
+K8S_CONTEXT="${K8S_CONTEXT:-rke2-prod}"
 NAMESPACE="${NAMESPACE:-mereka-lms}"
 DRY_RUN="${DRY_RUN:-true}"
 ENVIRONMENT="${ENVIRONMENT:-prod}"
@@ -54,10 +54,10 @@ Safety controls for --apply:
 
 EXAMPLES:
   # Preview changes (dry run - default)
-  $0 --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster --env prod --dry-run
+  $0 --context rke2-prod --env prod --dry-run
 
   # Apply changes to production/dev/staging
-  $0 --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster --env prod --apply
+  $0 --context rke2-prod --env prod --apply
   $0 --context kind-dev --env dev --apply
   $0 --context rke2-nonprod --namespace stg-mereka-lms --env staging --apply
 

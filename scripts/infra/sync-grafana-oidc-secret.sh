@@ -4,7 +4,7 @@
 set -euo pipefail
 
 PROJECT_ID="${PROJECT_ID:-bbi-k8}"
-K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
+K8S_CONTEXT="${K8S_CONTEXT:-rke2-prod}"
 NAMESPACE="${NAMESPACE:-monitoring}"
 K8S_SECRET_NAME="${K8S_SECRET_NAME:-grafana-oidc-client-secret}"
 K8S_SECRET_KEY="${K8S_SECRET_KEY:-GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET}"

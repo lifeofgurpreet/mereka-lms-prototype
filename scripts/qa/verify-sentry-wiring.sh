@@ -18,7 +18,7 @@ require_command rg || exit 0
 MODE="local" # local|runtime|all
 JSON_OUT=0
 STRICT_RUNTIME="${STRICT_RUNTIME:-0}"
-K8S_CONTEXT="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
+K8S_CONTEXT="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-rke2-prod}}"
 APP_NS="${APP_NS:-${K8S_NAMESPACE_PROD:-${K8S_NAMESPACE:-mereka-lms}}}"
 REQUIRED_DEPLOYS="${REQUIRED_DEPLOYS:-lms cms lms-worker cms-worker discovery ecommerce credentials}"
 OPTIONAL_DEPLOYS="${OPTIONAL_DEPLOYS:-ecommerce-worker notes notes-worker forum forum-worker}"

@@ -21,7 +21,7 @@ set -euo pipefail
 #   enabled versions in GCP Secret Manager to find a working root password, then
 #   align root to the current K8s secret.
 
-K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
+K8S_CONTEXT="${K8S_CONTEXT:-rke2-prod}"
 K8S_NAMESPACE="${K8S_NAMESPACE:-mereka-lms}"
 GCP_PROJECT_ID="${GCP_PROJECT_ID:-bbi-k8}"
 ALLOW_PROD_APPLY="${ALLOW_PROD_APPLY:-0}"

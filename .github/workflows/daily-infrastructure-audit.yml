@@ -96,8 +96,8 @@ jobs:
           auth_mode: auto
           gcloud_project: mereka-lms
           gke_project: ${{ vars.GKE_CLUSTER_PROJECT || 'bbi-k8' }}
-          gke_location: ${{ vars.GKE_CLUSTER_LOCATION || 'asia-southeast1-c' }}
-          gke_cluster: ${{ vars.GKE_CLUSTER_NAME || 'bbi-k8-cluster' }}
+          gke_location: ${{ vars.GKE_CLUSTER_LOCATION || '' }}
+          gke_cluster: ${{ vars.GKE_CLUSTER_NAME || '' }}
           # Use obs strict_runtime as the auth-level gate (graceful default = false)
           strict_runtime: ${{ github.event.inputs.obs_strict_runtime || 'false' }}
 
@@ -245,8 +245,8 @@ jobs:
       OBS_PARITY_NONPROD_GCP_PROJECT: ${{ vars.OBS_PARITY_NONPROD_GCP_PROJECT }}
       OBS_PARITY_PROD_GCP_PROJECT: ${{ vars.OBS_PARITY_PROD_GCP_PROJECT }}
       GKE_CLUSTER_PROJECT: ${{ vars.GKE_CLUSTER_PROJECT || 'bbi-k8' }}
-      GKE_CLUSTER_LOCATION: ${{ vars.GKE_CLUSTER_LOCATION || 'asia-southeast1-c' }}
-      GKE_CLUSTER_NAME: ${{ vars.GKE_CLUSTER_NAME || 'bbi-k8-cluster' }}
+      GKE_CLUSTER_LOCATION: ${{ vars.GKE_CLUSTER_LOCATION || '' }}  # GKE decommissioned
+      GKE_CLUSTER_NAME: ${{ vars.GKE_CLUSTER_NAME || '' }}  # GKE decommissioned
       OBS_PARITY_REQUIRED_STREAK: "3"
       OBS_PARITY_REQUIRE_PROD_CONTEXT_MATCH: "1"
     permissions:

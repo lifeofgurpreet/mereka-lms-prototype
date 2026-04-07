@@ -10,7 +10,7 @@
 #   ./scripts/ops/unpark-prod.sh [--dry-run] [--skip-velero-check]
 #
 # Requires:
-#   - kubectl pointing at gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
+#   - kubectl pointing at rke2-prod
 #   - write access to bbi-infrastructure repo
 #   - ArgoCD CLI (optional, for status polling)
 
@@ -34,7 +34,7 @@ ARGOCD_APP="mereka-lms-prod"
 PARK_PATCH="apps/mereka-lms/overlays/prod/patches/warm-park-mode.yaml"
 KUSTOMIZE_FILE="apps/mereka-lms/overlays/prod/kustomization.yaml"
 NAMESPACE="mereka-lms"
-GKE_CONTEXT="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
+GKE_CONTEXT="rke2-prod"
 DRY_RUN=false
 SKIP_VELERO=false
 

@@ -12,7 +12,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
 ENV_SCOPE="${ENV_SCOPE:-staging}"
-K8S_CONTEXT="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
+K8S_CONTEXT="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-rke2-prod}}"
 K8S_CONTEXT_DEV="${K8S_CONTEXT_DEV:-rke2-nonprod}"
 K8S_CONTEXT_STAGING="${K8S_CONTEXT_STAGING:-rke2-nonprod}"
 K8S_NAMESPACE="${K8S_NAMESPACE_PROD:-${K8S_NAMESPACE:-mereka-lms}}"

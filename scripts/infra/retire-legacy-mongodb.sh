@@ -16,7 +16,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
-K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
+K8S_CONTEXT="${K8S_CONTEXT:-rke2-prod}"
 APP_NS="${APP_NS:-mereka-lms}"
 LEGACY_DEPLOYMENT_NAME="${LEGACY_DEPLOYMENT_NAME:-mongodb}"
 LEGACY_SERVICE_NAME="${LEGACY_SERVICE_NAME:-mongodb}"

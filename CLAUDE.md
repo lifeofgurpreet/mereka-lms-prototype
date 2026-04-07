@@ -606,6 +606,11 @@ GCP_PROJECT=my-test-project source scripts/shared/config.sh
    - **Fix**: Add offline/static gates to `ci_static_inventory`; use `ci_runtime_inventory` only for manual/runtime inventory paths, then regenerate the corresponding `.github/ci-scripts-*.txt` derivative
 10. **Duplicating GCP auth / Python setup in workflows** → Use composite actions in `.github/actions/`
 11. **Including ARC manifests in rke2-nonprod overlay** → The overlay's `namespace: mereka-lms` transformer overrides ARC namespaces. Apply ARC separately: `kubectl apply -k deploy/k8s/base/arc/`
+12. **MFE URL configured but feature not active** → Open edX uses **waffle flags** to gate MFE features independently of URL configuration. A configured `*_MICROFRONTEND_URL` does NOT mean the feature is active. Always check the corresponding waffle flag:
+   - `learner_home_mfe.enabled` gates `/dashboard` → MFE learner-home redirect
+   - Enterprise waffle switches are per-tenant (in enterprise tenant specs)
+   - Check flags: `kubectl exec deploy/lms -- python manage.py lms shell -c "from waffle.models import Flag; print(list(Flag.objects.values('name','everyone')))"`
+   - New flags must be added to `config/enterprise-tenants/*.yaml` under `waffle_flags` section
 
 ## Getting Help
 

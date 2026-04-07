@@ -16,7 +16,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
 PROJECT="${GCP_PROJECT:-mereka-lms}"
-K8S_CONTEXT="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
+K8S_CONTEXT="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-rke2-prod}}"
 VELERO_NS="${VELERO_NS:-velero}"
 STRICT_RUNTIME="${STRICT_RUNTIME:-0}"
 HOURLY_SCHEDULE_NAME="${HOURLY_SCHEDULE_NAME:-velero-local-hourly-critical-databases}"

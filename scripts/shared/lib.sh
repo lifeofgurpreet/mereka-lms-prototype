@@ -33,7 +33,7 @@ k8s_namespace() {
 }
 
 k8s_context() {
-    echo "${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
+    echo "${K8S_CONTEXT:-rke2-prod}"
 }
 
 k8s_wait_for_rollout() {

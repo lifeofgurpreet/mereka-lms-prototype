@@ -5,13 +5,13 @@
 #
 # Usage:
 #   ./scripts/qa/verify-observability-loki-deployment.sh
-#   ./scripts/qa/verify-observability-loki-deployment.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
+#   ./scripts/qa/verify-observability-loki-deployment.sh --context rke2-prod
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
-DEFAULT_K8S_CONTEXT="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
+DEFAULT_K8S_CONTEXT="rke2-prod"
 K8S_CONTEXT="${K8S_CONTEXT:-${K8S_CONTEXT_PROD:-$DEFAULT_K8S_CONTEXT}}"
 APP_NS="${APP_NS:-${K8S_NAMESPACE:-${K8S_NAMESPACE_PROD:-mereka-lms}}}"
 STRICT="${STRICT:-0}"

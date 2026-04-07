@@ -20,7 +20,7 @@ source "$REPO_ROOT/scripts/shared/config.sh"
 MODE="verify" # verify | apply
 
 # K8s targets
-K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
+K8S_CONTEXT="${K8S_CONTEXT:-rke2-prod}"
 OPENEDX_NAMESPACE="${OPENEDX_NAMESPACE:-mereka-lms}"
 AUTHENTIK_NAMESPACE="${AUTHENTIK_NAMESPACE:-authentik}"
 AUTHENTIK_DEPLOY="${AUTHENTIK_DEPLOY:-authentik-server}"

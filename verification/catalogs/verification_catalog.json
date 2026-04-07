@@ -1457,7 +1457,8 @@
         "workflow_direct"
       ],
       "env_scope": [
-        "dev"
+        "dev",
+        "prod"
       ],
       "kind": "verify",
       "mutability": "read-only",
@@ -7089,7 +7090,8 @@
       "ci_binding": [],
       "ci_entrypoints": [],
       "env_scope": [
-        "dev"
+        "dev",
+        "prod"
       ],
       "kind": "verify",
       "mutability": "read-only",
@@ -7536,7 +7538,8 @@
       "ci_binding": [],
       "ci_entrypoints": [],
       "env_scope": [
-        "dev"
+        "dev",
+        "prod"
       ],
       "kind": "verify",
       "mutability": "read-only",
@@ -8274,7 +8277,7 @@
         "ci_static"
       ],
       "env_scope": [
-        "global"
+        "prod"
       ],
       "kind": "verify",
       "mutability": "read-only",
@@ -10874,7 +10877,8 @@
       "ci_binding": [],
       "ci_entrypoints": [],
       "env_scope": [
-        "dev"
+        "dev",
+        "prod"
       ],
       "kind": "verify",
       "mutability": "read-only",
@@ -10902,7 +10906,8 @@
         "ci_static"
       ],
       "env_scope": [
-        "dev"
+        "dev",
+        "prod"
       ],
       "kind": "verify",
       "mutability": "read-only",
@@ -10930,7 +10935,8 @@
         "ci_static"
       ],
       "env_scope": [
-        "dev"
+        "dev",
+        "prod"
       ],
       "kind": "verify",
       "mutability": "read-only",
@@ -10986,7 +10992,8 @@
         "ci_static"
       ],
       "env_scope": [
-        "dev"
+        "dev",
+        "prod"
       ],
       "kind": "verify",
       "mutability": "read-only",
@@ -11015,7 +11022,8 @@
         "ci_static"
       ],
       "env_scope": [
-        "dev"
+        "dev",
+        "prod"
       ],
       "kind": "verify",
       "mutability": "read-only",
@@ -11043,7 +11051,8 @@
         "ci_static"
       ],
       "env_scope": [
-        "dev"
+        "dev",
+        "prod"
       ],
       "kind": "verify",
       "mutability": "read-only",
@@ -11113,7 +11122,8 @@
         "ci_static"
       ],
       "env_scope": [
-        "dev"
+        "dev",
+        "prod"
       ],
       "kind": "verify",
       "mutability": "read-only",
@@ -11176,7 +11186,8 @@
         "ci_static"
       ],
       "env_scope": [
-        "dev"
+        "dev",
+        "prod"
       ],
       "kind": "verify",
       "mutability": "read-only",
@@ -11204,7 +11215,8 @@
         "ci_static"
       ],
       "env_scope": [
-        "dev"
+        "dev",
+        "prod"
       ],
       "kind": "verify",
       "mutability": "read-only",
@@ -12652,7 +12664,8 @@
       ],
       "env_scope": [
         "dev",
-        "preview"
+        "preview",
+        "prod"
       ],
       "kind": "verify",
       "mutability": "read-only",
@@ -14540,7 +14553,8 @@
         "operations_gate"
       ],
       "env_scope": [
-        "dev"
+        "dev",
+        "prod"
       ],
       "kind": "verify",
       "mutability": "read-only",
@@ -14872,7 +14886,8 @@
         "ci_static"
       ],
       "env_scope": [
-        "dev"
+        "dev",
+        "prod"
       ],
       "kind": "verify",
       "mutability": "read-only",
@@ -14941,7 +14956,8 @@
         "ci_static"
       ],
       "env_scope": [
-        "dev"
+        "dev",
+        "prod"
       ],
       "kind": "verify",
       "mutability": "read-only",
@@ -15037,7 +15053,8 @@
       "ci_binding": [],
       "ci_entrypoints": [],
       "env_scope": [
-        "dev"
+        "dev",
+        "prod"
       ],
       "kind": "verify",
       "mutability": "read-only",
@@ -15072,7 +15089,8 @@
       "ci_binding": [],
       "ci_entrypoints": [],
       "env_scope": [
-        "dev"
+        "dev",
+        "prod"
       ],
       "kind": "verify",
       "mutability": "read-only",

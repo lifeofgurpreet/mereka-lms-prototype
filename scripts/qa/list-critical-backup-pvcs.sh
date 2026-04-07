@@ -9,13 +9,13 @@
 #
 # Usage:
 #   ./scripts/qa/list-critical-backup-pvcs.sh
-#   ./scripts/qa/list-critical-backup-pvcs.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
+#   ./scripts/qa/list-critical-backup-pvcs.sh --context rke2-prod
 #   ./scripts/qa/list-critical-backup-pvcs.sh --schedule velero-local-hourly-critical-databases
 #   ./scripts/qa/list-critical-backup-pvcs.sh --json
 #
 set -euo pipefail
 
-K8S_CONTEXT="${K8S_CONTEXT:-${K8S_CONTEXT_PROD:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
+K8S_CONTEXT="${K8S_CONTEXT:-${K8S_CONTEXT_PROD:-rke2-prod}}"
 VELERO_NS="${VELERO_NS:-velero}"
 SCHEDULE_NAME="${SCHEDULE_NAME:-velero-local-hourly-critical-databases}"
 JSON_OUT=0

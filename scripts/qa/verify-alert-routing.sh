@@ -18,7 +18,7 @@ if [[ "${CI:-}" == "true" ]] || ! command -v kubectl >/dev/null 2>&1 || ! kubect
 fi
 
 PROJECT="${GCP_PROJECT:-mereka-lms}"
-K8S_CONTEXT="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
+K8S_CONTEXT="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-rke2-prod}}"
 STRICT_RUNTIME="${STRICT_RUNTIME:-1}"
 STRICT_WEBHOOK="${STRICT_WEBHOOK:-1}"
 RUN_ATLAS_VPS_AUDIT="${RUN_ATLAS_VPS_AUDIT:-1}"

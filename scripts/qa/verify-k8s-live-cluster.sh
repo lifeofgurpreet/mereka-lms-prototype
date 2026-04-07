@@ -16,7 +16,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-CLUSTER_CONTEXT="${CLUSTER_CONTEXT:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}}"
+CLUSTER_CONTEXT="${CLUSTER_CONTEXT:-${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-rke2-prod}}}"
 NAMESPACE="${NAMESPACE:-${K8S_NAMESPACE_PROD:-${K8S_NAMESPACE:-mereka-lms}}}"
 
 # Counters

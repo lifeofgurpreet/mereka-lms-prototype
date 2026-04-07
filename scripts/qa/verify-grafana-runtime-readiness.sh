@@ -2,7 +2,7 @@
 # Verify Grafana runtime readiness in monitoring namespace and diagnose secret issues.
 set -euo pipefail
 
-K8S_CONTEXT="${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}"
+K8S_CONTEXT="${K8S_CONTEXT:-rke2-prod}"
 NAMESPACE="${NAMESPACE:-monitoring}"
 DEPLOYMENT="${DEPLOYMENT:-monitoring-grafana}"
 

@@ -6,7 +6,7 @@ set -euo pipefail
 
 ENVIRONMENT="${1:-prod}"
 NAMESPACE="${K8S_NAMESPACE_PROD:-${K8S_NAMESPACE:-mereka-lms}}"
-KCTX="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
+KCTX="${K8S_CONTEXT_PROD:-${K8S_CONTEXT:-rke2-prod}}"
 
 if [[ "$ENVIRONMENT" != "prod" ]]; then
   echo "Usage: $0 [prod]" >&2

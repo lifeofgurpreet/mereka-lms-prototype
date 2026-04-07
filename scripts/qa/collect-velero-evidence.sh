@@ -7,7 +7,7 @@
 #
 # Usage:
 #   ./scripts/qa/collect-velero-evidence.sh
-#   ./scripts/qa/collect-velero-evidence.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
+#   ./scripts/qa/collect-velero-evidence.sh --context rke2-prod
 #   OUT_DIR=var/velero-evidence/custom ./scripts/qa/collect-velero-evidence.sh
 #
 set -euo pipefail
@@ -15,7 +15,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
-K8S_CONTEXT="${K8S_CONTEXT:-${K8S_CONTEXT_PROD:-gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster}}"
+K8S_CONTEXT="${K8S_CONTEXT:-${K8S_CONTEXT_PROD:-rke2-prod}}"
 VELERO_NS="${VELERO_NS:-velero}"
 SCHEDULE_NAME="${SCHEDULE_NAME:-velero-local-hourly-critical-databases}"
 
