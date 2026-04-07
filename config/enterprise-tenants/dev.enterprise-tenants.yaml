@@ -9,9 +9,13 @@
 #
 # Idempotent: running twice produces no duplicate records.
 ---
-version: "1.0"
+version: "1.1"
 environment: dev
 lms_domain: academyv2.mereka.dev
+
+# Global waffle flags (not per-tenant — apply once per environment)
+waffle_flags:
+  learner_home_mfe.enabled: true  # Redirect /dashboard to MFE learner-home
 
 tenants:
   - slug: mereka

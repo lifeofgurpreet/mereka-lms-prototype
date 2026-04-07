@@ -437,6 +437,32 @@ def main():
         })
         print()
 
+    # Global waffle flags (not per-tenant)
+    waffle_flags = spec.get("waffle_flags", {})
+    if waffle_flags and not args.tenant:
+        print("--- Global Waffle Flags ---")
+        try:
+            from waffle.models import Flag
+
+            for flag_name, active in waffle_flags.items():
+                flag, created = Flag.objects.get_or_create(
+                    name=flag_name,
+                    defaults={"everyone": active, "superusers": True},
+                )
+                if created:
+                    verb = "[DRY] CREATE" if dry_run else "[OK] CREATED"
+                elif flag.everyone != active:
+                    if not dry_run:
+                        flag.everyone = active
+                        flag.save(update_fields=["everyone"])
+                    verb = "[DRY] UPDATE" if dry_run else "[OK] UPDATED"
+                else:
+                    verb = "[OK] EXISTS"
+                print(f"  {verb} Flag {flag_name} everyone={active}")
+        except ImportError:
+            print("  [ERR] django-waffle not installed")
+        print()
+
     # Summary
     total_actions = sum(len(r["actions"]) for r in all_results)
     total_errors = sum(len(r["errors"]) for r in all_results)
