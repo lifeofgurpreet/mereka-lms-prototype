@@ -553,6 +553,38 @@
       "version": "1.0.0"
     },
     {
+      "acceptance_criteria_count": 7,
+      "created": "2026-04-07",
+      "doc_type": "spec",
+      "domain": "platform",
+      "id": "SPEC-GITOPS-INTEGRITY-SYSTEM",
+      "lane": "normative",
+      "last_reviewed": "2026-04-07",
+      "links": {
+        "generated_testmap": null,
+        "legacy_testmap": null,
+        "plan": null,
+        "source_plan": null,
+        "source_spec": null,
+        "testplan": null
+      },
+      "normativity": "normative",
+      "owner": "engineering",
+      "path": "specs/gitops-integrity-system_spec.md",
+      "review_due": "2026-07-07",
+      "spec_class": "system",
+      "status": "draft",
+      "summary": "Machine-checkable specification enforcing that any fix not deployed through GitOps is temporary state. Covers drift detection, durability proof, truth state tracking, incident-to-guardrail pipeline, and live mutation ledger.",
+      "tags": [
+        "platform.control-plane",
+        "build.gitops-promotion",
+        "ops.drift-detection",
+        "ops.incident-response"
+      ],
+      "title": "GitOps Integrity System",
+      "version": "1.0.0"
+    },
+    {
       "acceptance_criteria_count": 37,
       "created": "2026-02-10",
       "doc_type": "spec",
@@ -2925,7 +2957,7 @@
       "version": "1.0.0"
     }
   ],
-  "entry_count": 103,
+  "entry_count": 104,
   "generated_by": "scripts/qa/spec-tools/build_spec_catalog.py",
   "root": "specs",
   "taxonomy": "specs/standards/spec-taxonomy.yaml"

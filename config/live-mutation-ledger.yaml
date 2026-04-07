@@ -1,0 +1,46 @@
+# Live Mutation Ledger
+#
+# Every manual kubectl exec/patch/delete on production or staging clusters
+# MUST be logged here. This is the single source of truth for "what manual
+# changes currently exist in the cluster."
+#
+# CI gates on: no entry older than 48 hours without a reconciliation_pr.
+# Entries with expired TTL and merged reconciliation PR should be moved to resolved.
+#
+# Schema reference: specs/gitops-integrity-system_spec.md (AC-GIS-005)
+# Verification: scripts/qa/verify-live-mutation-ledger.sh
+---
+schema_version: "1.0"
+
+# Maximum hours a mutation may exist without a reconciliation PR.
+max_ttl_hours: 48
+
+# Active mutations (not yet reconciled into git).
+# Example active entry (uncomment, move under active, and fill for real mutations):
+# - id: "mut-2026-04-02-redis-maxmem"
+#   timestamp: "2026-04-02T08:30:00Z"
+#   operator: "gurpreet"
+#   namespace: "mereka-lms"
+#   command: "kubectl exec -n mereka-lms redis-0 -- redis-cli CONFIG SET maxmemory 512mb"
+#   affected_resources:
+#     - "StatefulSet/redis"
+#   justification: "Redis OOM killing pods; emergency limit increase while PR is prepared"
+#   ttl_hours: 48
+#   reconciliation_pr: "https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1401"
+#   reconciliation_status: pending  # pending | merged | abandoned
+active: []
+
+# Resolved mutations (reconciliation PR merged and ArgoCD synced).
+# Retained for 90 days for audit trail, then pruned.
+resolved:
+  - id: "mut-2026-04-02-redis-maxmem-example"
+    timestamp: "2026-04-02T08:30:00Z"
+    operator: "gurpreet"
+    namespace: "mereka-lms"
+    command: "kubectl exec -n mereka-lms redis-0 -- redis-cli CONFIG SET maxmemory 512mb"
+    affected_resources:
+      - "StatefulSet/redis"
+    justification: "Redis OOM killing pods; emergency limit increase while PR is prepared"
+    reconciliation_pr: "https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1401"
+    resolved_at: "2026-04-03T10:00:00Z"
+    notes: "Example entry from April 2026 Redis OOM incident. Replace with real data."

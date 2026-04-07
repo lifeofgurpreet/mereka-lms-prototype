@@ -18,6 +18,10 @@
   ],
   "allowed_scripts": [
     {
+      "path": "scripts/qa/build-validator-drift-evidence-bundle.sh",
+      "reason": "Evidence builder uses kubectl to collect drift evidence."
+    },
+    {
       "path": "scripts/qa/fix-admin-login.sh",
       "reason": "Remediation helper script intentionally mutates LMS user state."
     },
@@ -38,10 +42,6 @@
       "reason": "Synchronization script intentionally writes PR status back to tracker artifacts."
     },
     {
-      "path": "scripts/qa/build-validator-drift-evidence-bundle.sh",
-      "reason": "Evidence builder uses kubectl to collect drift evidence."
-    },
-    {
       "path": "scripts/qa/verify-aspects-wiring.sh",
       "reason": "Live-cluster verifier uses kubectl to check aspect wiring."
     },
@@ -52,6 +52,10 @@
     {
       "path": "scripts/qa/verify-disaster-recovery.sh",
       "reason": "Live-cluster verifier uses kubectl/velero for DR checks."
+    },
+    {
+      "path": "scripts/qa/verify-durability-proof.sh",
+      "reason": "Durability proof script uses cluster exec to verify live state matches source spec."
     },
     {
       "path": "scripts/qa/verify-ecommerce-worker-health.sh",

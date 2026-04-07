@@ -648,7 +648,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-actions-pinned.sh",
-      "reference_count": 7,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -700,7 +700,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-admin-merge-exceptions.sh",
-      "reference_count": 3,
+      "reference_count": 4,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -760,7 +760,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-agent-context-lock.sh",
-      "reference_count": 4,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -4997,6 +4997,31 @@
       "tier": "release_blocking"
     },
     {
+      "cadence": "on_demand",
+      "canonical": true,
+      "ci_binding": [],
+      "ci_entrypoints": [],
+      "env_scope": [
+        "global"
+      ],
+      "kind": "verify",
+      "mutability": "destructive",
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-durability-proof.sh",
+      "reference_count": 4,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "cluster",
+        "vendor"
+      ],
+      "severity": "low",
+      "spec_ids": [
+        "AC-GIS-002"
+      ],
+      "status": "manual_only",
+      "tier": "exploratory_manual"
+    },
+    {
       "cadence": "per_pr_and_push",
       "canonical": true,
       "ci_binding": [
@@ -6893,7 +6918,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-generated-surface-lineage.sh",
-      "reference_count": 4,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -7080,6 +7105,31 @@
       "severity": "low",
       "spec_ids": [
         "AC-014"
+      ],
+      "status": "manual_only",
+      "tier": "exploratory_manual"
+    },
+    {
+      "cadence": "on_demand",
+      "canonical": true,
+      "ci_binding": [],
+      "ci_entrypoints": [],
+      "env_scope": [
+        "prod"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "platform-infra",
+      "path": "scripts/qa/verify-gitops-sync-drift.sh",
+      "reference_count": 4,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "cluster",
+        "vendor"
+      ],
+      "severity": "low",
+      "spec_ids": [
+        "AC-GIS-001"
       ],
       "status": "manual_only",
       "tier": "exploratory_manual"
@@ -7308,6 +7358,30 @@
       ],
       "severity": "low",
       "spec_ids": [],
+      "status": "manual_only",
+      "tier": "exploratory_manual"
+    },
+    {
+      "cadence": "on_demand",
+      "canonical": true,
+      "ci_binding": [],
+      "ci_entrypoints": [],
+      "env_scope": [
+        "dev"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "sre-security",
+      "path": "scripts/qa/verify-incident-guardrails.sh",
+      "reference_count": 5,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "low",
+      "spec_ids": [
+        "AC-GIS-004"
+      ],
       "status": "manual_only",
       "tier": "exploratory_manual"
     },
@@ -8219,6 +8293,30 @@
       ],
       "status": "active",
       "tier": "release_blocking"
+    },
+    {
+      "cadence": "on_demand",
+      "canonical": true,
+      "ci_binding": [],
+      "ci_entrypoints": [],
+      "env_scope": [
+        "dev"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-live-mutation-ledger.sh",
+      "reference_count": 4,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "low",
+      "spec_ids": [
+        "AC-GIS-005"
+      ],
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "on_demand",
@@ -12723,7 +12821,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-proof-gate-contract.sh",
-      "reference_count": 4,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -13335,7 +13433,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-release-bundle.sh",
-      "reference_count": 12,
+      "reference_count": 13,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -14336,7 +14434,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-secrets-management.sh",
-      "reference_count": 9,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -16888,6 +16986,30 @@
       "tier": "release_blocking"
     },
     {
+      "cadence": "on_demand",
+      "canonical": true,
+      "ci_binding": [],
+      "ci_entrypoints": [],
+      "env_scope": [
+        "dev"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-truth-state-matrix.sh",
+      "reference_count": 4,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "low",
+      "spec_ids": [
+        "AC-GIS-003"
+      ],
+      "status": "manual_only",
+      "tier": "exploratory_manual"
+    },
+    {
       "cadence": "per_pr_and_push",
       "canonical": true,
       "ci_binding": [
@@ -18297,25 +18419,25 @@
     "archived_deprecated_scripts": 21,
     "ci_static_bound": 382,
     "kinds": {
-      "verify": 611
+      "verify": 616
     },
     "mutability": {
-      "destructive": 9,
+      "destructive": 10,
       "mutating": 18,
-      "read-only": 584
+      "read-only": 588
     },
     "status_overrides_applied": 8,
     "statuses": {
       "active": 427,
       "deprecated_candidate": 1,
-      "manual_only": 183
+      "manual_only": 188
     },
     "tiers": {
-      "exploratory_manual": 187,
+      "exploratory_manual": 192,
       "periodic_runtime": 18,
       "release_blocking": 406
     },
-    "total_verify_scripts": 611,
+    "total_verify_scripts": 616,
     "workflow_direct_bound": 60
   },
   "version": "1"

@@ -346,6 +346,7 @@ All specs MUST use prefixed AC identifiers to enable unambiguous cross-spec refe
 | repository-structure | REP | AC-REP-001 |
 | platform-middleware-custom-apps | PMW | AC-PMW-001 |
 | tutor-configuration-resilience | TCR | AC-TCR-001 |
+| gitops-integrity-system | GIS | AC-GIS-001 |
 
 **Cross-spec references** MUST use the full prefixed ID: "see AC-MTA-003 in multi-tenancy-architecture_spec.md".
 

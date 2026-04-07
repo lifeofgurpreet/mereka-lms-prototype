@@ -1169,7 +1169,7 @@
     }
   ],
   "generated_by": "tools/specs/build_spec_graph.py",
-  "node_count": 193,
+  "node_count": 194,
   "nodes": [
     {
       "id": "specs/_generated/testmaps/advanced-assessment-xqueue_spec.testmap.yml",
@@ -1557,6 +1557,17 @@
       "spec_class": "integration",
       "status": "approved",
       "title": "GitHub Actions Cost Monitoring"
+    },
+    {
+      "id": "specs/gitops-integrity-system_spec.md",
+      "lane": "normative",
+      "node_type": "spec",
+      "normativity": "normative",
+      "owner": "engineering",
+      "path": "specs/gitops-integrity-system_spec.md",
+      "spec_class": "system",
+      "status": "draft",
+      "title": "GitOps Integrity System"
     },
     {
       "id": "specs/k8s-deployment_spec.md",

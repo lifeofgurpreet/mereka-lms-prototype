@@ -942,6 +942,8 @@ RUN npm run build
 ######## learner-record (production)
 FROM learner-record-common AS learner-record-prod
 ENV NODE_ENV=production
+# Node 24 requires --openssl-legacy-provider for webpack 4 MFEs
+ENV NODE_OPTIONS="--openssl-legacy-provider --max-old-space-size=4096"
 RUN npm run build
 
 

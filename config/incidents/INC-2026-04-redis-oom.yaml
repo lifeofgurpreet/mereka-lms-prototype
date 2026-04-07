@@ -1,0 +1,42 @@
+# Incident Record: Redis OOM (April 2026)
+#
+# Schema reference: specs/gitops-integrity-system_spec.md (AC-GIS-004)
+# Verification: scripts/qa/verify-incident-guardrails.sh
+---
+id: "INC-2026-04-redis-oom"
+date: "2026-04-02"
+severity: critical
+summary: "Redis pods OOM-killed due to missing memory limits, causing LMS cache failures and elevated error rates"
+root_cause: >
+  Redis StatefulSet had no resource limits set. Under sustained load, Redis memory
+  grew unbounded until the OOM killer terminated the process. ArgoCD-managed
+  resource had been manually patched (kubectl exec) as emergency fix, but the
+  manual patch was reverted on next ArgoCD sync.
+affected_layer: realization
+affected_namespaces:
+  - mereka-lms
+affected_resources:
+  - "StatefulSet/redis"
+
+# Guardrail artifacts (must be populated within 7 days of incident date).
+# Each ref points to the artifact that prevents this incident class from recurring.
+
+# Rule: what must hold going forward
+rule_ref: "config/process-invariants.yaml#INV-001"
+rule_description: "All StatefulSets must have resource requests and limits; no OOM-prone unlimited memory"
+
+# Detector: script or alert that catches this failure class
+detector_ref: "scripts/qa/verify-k8s-manifests.sh"
+detector_description: "Checks all Deployments and StatefulSets for resource requests/limits"
+
+# Policy: admission control or CI gate preventing recurrence
+policy_ref: "deploy/k8s/base/policies/require-resource-limits.yaml"
+policy_description: "Kyverno policy requiring resource limits on all pods in mereka-lms namespace"
+
+# Resolution tracking
+resolution_pr: "https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1401"
+resolution_status: resolved
+resolved_at: "2026-04-03T10:00:00Z"
+notes: >
+  Example incident record. Replace URLs and references with actual values.
+  This serves as a template for future incident records.
