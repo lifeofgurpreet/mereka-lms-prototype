@@ -18,16 +18,31 @@ flowchart LR
   BUILD --> REL --> PROMO --> ARGO --> RUNTIME --> LEDGER
 ```
 
-## Four truths (do not collapse)
+## Five truths (do not collapse)
 
 | Truth type | Meaning | Artifact example |
 |---|---|---|
 | Branch truth | fix exists on branch | PR diff |
 | Merged truth | fix merged to main | merged commit |
-| Realized truth | fix applied live | Argo sync + live image/config hash |
+| Realized truth | fix applied live via ArgoCD | Argo sync status + live image/config hash |
 | Proved truth | user-visible behavior validated | browser/runtime proof artifact |
+| **Durable truth** | fix survives rebuild, resync, and fresh bootstrap | bootstrap script reproduces it; no manual state required |
 
 A fix is live only after **proved truth**, not after branch or merge truth.
+
+A fix is **done** only after **durable truth** — it must be reproducible without manual intervention. State equivalence (live matches git) is necessary but not sufficient; the execution path must also be proven.
+
+### Durability checklist
+
+Before declaring a fix durable, verify:
+- [ ] Fix is in git (source-owned, not just kubectl-patched)
+- [ ] Fix deployed via ArgoCD (not manual kubectl apply)
+- [ ] Fix survives `kubectl delete pod` (pod restart)
+- [ ] Fix survives ArgoCD hard-refresh + sync
+- [ ] Fix reproducible on fresh environment by bootstrap scripts
+- [ ] No manual `kubectl exec` or DB mutation required to reach correct state
+
+See [EXECUTION_INVARIANTS.md](../stabilization/EXECUTION_INVARIANTS.md) Invariant 11 for the operational enforcement of this principle.
 
 ## Incident triage / owner-layer workflow
 

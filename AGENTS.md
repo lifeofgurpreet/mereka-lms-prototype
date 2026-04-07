@@ -21,6 +21,9 @@
 6. Every incident leaves a stronger regression guard.
 7. All active surfaces remain in scope until removed from authority.
 8. Infisical is secret authority; identity systems own identities.
+9. **Any fix not deployed through GitOps is temporary state.** Live `kubectl` mutations are emergency-only and must be source-committed within 5 minutes.
+10. **Report three states separately**: live (cluster), git (source), deployed (ArgoCD). Never collapse them.
+11. **Durable ≠ realized.** A fix must survive pod restart, ArgoCD resync, AND fresh bootstrap to be called done.
 
 ## Quick Reference
 
@@ -32,6 +35,8 @@
 | Where do smoke identities live? | [SMOKE_ACCOUNT_REGISTRY_2026-04-04.md](docs/status/active/SMOKE_ACCOUNT_REGISTRY_2026-04-04.md) |
 | Which docs are canonical vs superseded? | [DEPRECATION_LEDGER.md](docs/reference/governance/DEPRECATION_LEDGER.md) |
 | How should agents execute incidents/fixes? | [AGENT_EXECUTION_WORKFLOW.md](docs/reference/operations/AGENT_EXECUTION_WORKFLOW.md) |
+| What makes a fix durable (not just live)? | [EXECUTION_INVARIANTS.md](docs/stabilization/EXECUTION_INVARIANTS.md) #11–12 |
+| What are the five truth levels? | [PROMOTION_REALIZATION_AND_INCIDENT_FLOW.md](docs/architecture/PROMOTION_REALIZATION_AND_INCIDENT_FLOW.md) |
 
 ## Docs Separation Rule
 

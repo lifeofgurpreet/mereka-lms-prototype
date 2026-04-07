@@ -165,6 +165,58 @@ go on a feature branch. CI validates them there first.
 
 ---
 
+## Invariant 11: Any Fix Not Deployed Through GitOps Is Temporary State
+
+**Rule**: A fix is **not real** unless it is:
+1. Defined in source (git)
+2. Deployed via ArgoCD (not kubectl patch/exec)
+3. Survives pod restart, Argo resync, and fresh environment bootstrap
+
+Live `kubectl` mutations are acceptable **only** to unblock investigation. They must be followed by a source commit within 5 minutes.
+
+**Three states to track for every fix:**
+
+| State | Meaning | How to verify |
+|-------|---------|---------------|
+| **Live** | Running in cluster right now | `kubectl get/exec` |
+| **Git** | Correct state exists in source | `git show main:path/to/file` |
+| **Deployed** | ArgoCD has synced git → cluster | `kubectl get app -n argocd -o jsonpath='{.status.sync.status}'` |
+
+If live ≠ git → you have drift (ArgoCD will revert your fix).
+If git ≠ deployed → you need to sync or wait for auto-sync.
+If live = git = deployed → fix is **realized**.
+
+**But realized ≠ durable.** A fix is durable only if it also survives:
+- Pod restart (not stored in emptyDir/tmp)
+- ArgoCD resync (not a manual kubectl patch)
+- Fresh environment bootstrap (reproducible by scripts)
+
+See [PROMOTION_REALIZATION_AND_INCIDENT_FLOW.md](../architecture/PROMOTION_REALIZATION_AND_INCIDENT_FLOW.md) for the full five-truth model.
+
+**Violation consequence**: Live-only fixes create split-brain between cluster and git. ArgoCD will eventually revert the fix, causing the issue to recur. This was demonstrated in the April 2026 prod CrashLoop incident where kubectl patches were reverted by ArgoCD sync.
+
+---
+
+## Invariant 12: Extract Guardrails From Every Incident
+
+**Rule**: Every production incident must produce at least one of:
+- A rule (documented in this file or a policy doc)
+- A detector (alert, CI check, or verification script)
+- A policy (Kyverno policy, branch protection rule, or hook)
+
+Do not just fix the symptom. Remove the entire class of failure.
+
+**Template**:
+```
+Incident: [what happened]
+Root cause: [why it happened]
+Rule: [what must never happen again]
+Detector: [how we would catch it automatically]
+Policy: [what enforces the rule]
+```
+
+---
+
 ## Quick Reference Card
 
 ```
@@ -182,4 +234,17 @@ Before merging:
   CI green on feature branch
   PR reviewed (if not a repo-only stabilization fix)
   main is green
+
+Before calling a fix "done":
+  Live state matches git state     # kubectl vs git show
+  ArgoCD sync status = Synced      # not OutOfSync
+  Fix survives pod restart          # not in emptyDir/tmp
+  Fix reproducible by bootstrap     # scripts/tenants/bootstrap-*
 ```
+
+## Related
+
+- [PROMOTION_REALIZATION_AND_INCIDENT_FLOW.md](../architecture/PROMOTION_REALIZATION_AND_INCIDENT_FLOW.md) — sanctioned promotion path + five truths
+- [PLATFORM_AUTHORITY_MAP.md](../architecture/PLATFORM_AUTHORITY_MAP.md) — layer ownership
+- [AGENT_EXECUTION_WORKFLOW.md](../reference/operations/AGENT_EXECUTION_WORKFLOW.md) — agent working method
+- [gitops-enforcement rules](../../.claude/rules/gitops-enforcement.md) — global GitOps enforcement for all agents

@@ -1579,6 +1579,24 @@ jobs:
             var/ci/release-bundle.pem
           retention-days: 90
 
+      - name: Dispatch dev promotion to infra repo
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0  # v3.0.0
+        with:
+          token: ${{ secrets.GITOPS_TOKEN_BBI_KUBERNATE }}
+          repository: Biji-Biji-Initiative/bbi-infrastructure
+          event-type: promote-mereka-lms-dev
+          client-payload: >-
+            {
+              "release_id": "${{ steps.bundle.outputs.release_object_id || steps.bundle.outputs.bundle_id }}",
+              "app": "mereka-lms",
+              "source_commit": "${{ github.sha }}",
+              "openedx_digest": "${{ needs.build-openedx.outputs.image_digest }}",
+              "mfe_digest": "${{ needs.build-mfe.outputs.image_digest }}",
+              "target_environment": "dev",
+              "ci_run_url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            }
+
   update-gitops:
     name: Manual GitOps Bridge
     runs-on: mereka-k8s-runners
