@@ -1,0 +1,158 @@
+# Declarative Enterprise Tenant Bootstrap Spec
+#
+# This file defines the desired state for all enterprise tenants
+# in the staging environment. It is consumed by:
+#   - scripts/tenants/bootstrap-enterprise-tenants.py (bootstrap tool)
+#   - scripts/tenants/validate-enterprise-tenants.py (validation tool)
+#
+# Default behavior: DRY RUN. Use --apply to mutate data.
+#
+# Idempotent: running twice produces no duplicate records.
+#
+# Domain authority: deploy/k8s/tenancy/tenant-registry.yaml (staging section)
+# Namespace: stg-mereka-lms
+# Auth host: staging.auth0.mereka.io
+---
+version: "1.0"
+environment: staging
+lms_domain: staging.academyv2.mereka.io
+
+tenants:
+  - slug: mereka
+    name: Mereka Academy
+    org_code: MEREKA
+    active: true
+    contact_email: team@mereka.io
+    country: MY
+    is_platform_operator: true
+
+    site:
+      domain: staging.academyv2.mereka.io
+
+    enterprise_customer:
+      # UUID is generated on first create, then becomes stable.
+      # If a UUID is provided, the tool uses it for get_or_create.
+      # uuid: null  # auto-generated
+      enable_data_sharing_consent: true
+      enforce_data_sharing_consent: externally_managed
+      enable_audit_enrollment: false
+      enable_learner_portal: true
+      enable_portal_code_management: false
+      enable_analytics_screen: true
+
+    catalogs:
+      - title: "Mereka Academy Full Catalog"
+        catalog_query:
+          content_filter:
+            content_type: course
+            aggregation_key: ["courserun:*"]
+          # All MEREKA org courses
+          org_filter:
+            - MEREKA
+
+    user_links:
+      # Link admin users to this enterprise customer.
+      # email is the lookup key. role is "admin" or "learner".
+      - email: team@mereka.io
+        role: admin
+
+    waffle_switches:
+      enterprise.enable_learner_portal: true
+      enterprise.enable_analytics_screen: true
+      enterprise.enable_audit_enrollment: false
+      enterprise.enable_portal_code_management: false
+      enterprise.enable_integrated_learner_portal_search: true
+
+  - slug: biji-biji
+    name: Biji-Biji Academy
+    org_code: BIJIBIJI
+    active: true
+    contact_email: admin@biji-biji.com
+    country: MY
+    is_platform_operator: false
+
+    site:
+      domain: staging.academy.biji-biji.com
+
+    enterprise_customer:
+      enable_data_sharing_consent: true
+      enforce_data_sharing_consent: externally_managed
+      enable_audit_enrollment: false
+      enable_learner_portal: true
+      enable_portal_code_management: false
+      enable_analytics_screen: true
+
+    catalogs:
+      - title: "Biji-Biji Academy Catalog"
+        catalog_query:
+          content_filter:
+            content_type: course
+            aggregation_key: ["courserun:*"]
+          org_filter:
+            - BIJIBIJI
+            # NOTE: If biji-biji should also see MEREKA courses,
+            # add MEREKA to this list. Decision pending.
+
+    user_links:
+      - email: admin@biji-biji.com
+        role: admin
+
+    waffle_switches:
+      enterprise.enable_learner_portal: true
+      enterprise.enable_analytics_screen: true
+      enterprise.enable_audit_enrollment: false
+      enterprise.enable_portal_code_management: false
+      enterprise.enable_integrated_learner_portal_search: true
+
+  - slug: skillourfuture
+    name: Skill Our Future
+    org_code: SKILLOURFUTURE
+    active: true
+    contact_email: admin@mereka.io
+    country: MY
+    is_platform_operator: false
+
+    site:
+      domain: staging.skillourfuture.academy.mereka.io
+
+    enterprise_customer:
+      enable_data_sharing_consent: true
+      enforce_data_sharing_consent: externally_managed
+      enable_audit_enrollment: false
+      enable_learner_portal: true
+      enable_portal_code_management: false
+      enable_analytics_screen: true
+
+    catalogs:
+      - title: "Skill Our Future Catalog"
+        catalog_query:
+          content_filter:
+            content_type: course
+            aggregation_key: ["courserun:*"]
+          org_filter:
+            - SKILLOURFUTURE
+            # NOTE: If SOF should also see MEREKA courses,
+            # add MEREKA to this list. Decision pending.
+
+    user_links:
+      - email: admin@mereka.io
+        role: admin
+
+    waffle_switches:
+      enterprise.enable_learner_portal: true
+      enterprise.enable_analytics_screen: true
+      enterprise.enable_audit_enrollment: false
+      enterprise.enable_portal_code_management: false
+      enterprise.enable_integrated_learner_portal_search: true
+
+# Decisions requiring human input before bootstrap --apply:
+#
+# 1. Should biji-biji and skillourfuture catalogs include MEREKA org courses?
+#    Currently they only include their own org. If those orgs have zero courses,
+#    the catalogs will be empty.
+#
+# 2. UUIDs: ECs are generated fresh on first bootstrap to staging.
+#    bootstrap-enterprise-tenants.py looks up by slug, so existing ECs are reused.
+#
+# 3. Admin users: email addresses below are for bootstrap user_links (ECU records).
+#    Users must already exist in the staging DB before bootstrap runs.

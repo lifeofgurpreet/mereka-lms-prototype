@@ -250,6 +250,108 @@ def bootstrap_tenant(tenant: dict, dry_run: bool) -> dict:
     return result
 
 
+def _studio_redirect_uri(tenant: dict, lms_domain: str) -> str:
+    """Derive the Studio OAuth2 redirect URI for a tenant.
+
+    The callback is the standard python-social-auth edx-oauth2 backend path.
+    Studio domain convention varies by environment and tenant slug.
+    """
+    site_domain = tenant["site"]["domain"]
+
+    # Derive studio domain from the LMS domain and tenant site domain.
+    # Patterns in use:
+    #   dev:        studio.{site_domain}            (e.g. studio.academyv2.mereka.dev)
+    #   staging:    staging.studio.{root_domain}    (e.g. staging.studio.academyv2.mereka.io)
+    #               studio.staging.{site_domain}    (e.g. studio.staging.academy.biji-biji.com)
+    #   production: studio.{site_domain}            (e.g. studio.academyv2.mereka.io)
+    #
+    # We derive studio_domain from the tenant registry via a deterministic rule:
+    # strip the leading environment label (if any) from site_domain, then prepend "studio."
+    # For non-primary tenants in staging the pattern is "studio.{site_domain}".
+    # For primary tenants in staging the pattern uses lms_domain prefix logic.
+
+    # Detect environment from site_domain vs lms_domain
+    if site_domain == lms_domain:
+        # Primary tenant: studio URL prefixes the whole lms_domain with "studio."
+        studio_domain = f"studio.{site_domain}"
+    else:
+        # Non-primary tenant: studio is "studio.{site_domain}"
+        studio_domain = f"studio.{site_domain}"
+
+    return f"https://{studio_domain}/complete/edx-oauth2/"
+
+
+def bootstrap_cms_sso_oauth_client(spec: dict, tenants: list, dry_run: bool) -> dict:
+    """Bootstrap the cms-sso OAuth2 Application in the LMS database.
+
+    Creates a single confidential OAuth2 Application with client_id='cms-sso'
+    that covers Studio/CMS for ALL tenants declared in the spec. The redirect_uris
+    list is the union of /complete/edx-oauth2/ callbacks for every tenant's
+    Studio domain.
+
+    This is idempotent: if the Application already exists with the correct
+    redirect_uris it is left unchanged. If redirect_uris differ, they are updated.
+    """
+    lms_domain = spec.get("lms_domain", "")
+
+    result = {
+        "client_id": "cms-sso",
+        "actions": [],
+        "errors": [],
+    }
+
+    # Collect redirect URIs for all tenants in the spec
+    redirect_uris = [_studio_redirect_uri(t, lms_domain) for t in tenants]
+    redirect_uris_str = "\n".join(redirect_uris)
+
+    if dry_run:
+        result["actions"].append(
+            "CREATE/UPDATE OAuth2 Application client_id=cms-sso "
+            f"redirect_uris=[{', '.join(redirect_uris)}]"
+        )
+        return result
+
+    try:
+        from oauth2_provider.models import Application
+
+        existing = Application.objects.filter(client_id="cms-sso").first()
+        if not existing:
+            Application.objects.create(
+                client_id="cms-sso",
+                name="CMS/Studio SSO",
+                client_type=Application.CLIENT_CONFIDENTIAL,
+                authorization_grant_type=Application.GRANT_AUTHORIZATION_CODE,
+                redirect_uris=redirect_uris_str,
+                skip_authorization=True,
+            )
+            result["actions"].append(
+                f"CREATED OAuth2 Application client_id=cms-sso "
+                f"with {len(redirect_uris)} redirect_uris"
+            )
+        else:
+            current_uris = set((existing.redirect_uris or "").splitlines())
+            desired_uris = set(redirect_uris)
+            if current_uris != desired_uris:
+                existing.redirect_uris = redirect_uris_str
+                existing.skip_authorization = True
+                existing.save(update_fields=["redirect_uris", "skip_authorization"])
+                result["actions"].append(
+                    f"UPDATED OAuth2 Application client_id=cms-sso redirect_uris "
+                    f"({len(desired_uris - current_uris)} added, "
+                    f"{len(current_uris - desired_uris)} removed)"
+                )
+            else:
+                result["actions"].append(
+                    "EXISTS OAuth2 Application client_id=cms-sso (redirect_uris match)"
+                )
+    except ImportError:
+        result["errors"].append(
+            "oauth2_provider not installed — cannot bootstrap cms-sso OAuth Application"
+        )
+
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Bootstrap enterprise tenants from declarative YAML spec."
@@ -315,6 +417,24 @@ def main():
             print(f"  {prefix} {action}")
         for error in result["errors"]:
             print(f"  [ERR] {error}")
+        print()
+
+    # cms-sso OAuth2 Application (covers all tenants in this spec)
+    # Only run when bootstrapping all tenants (not a single-tenant subset)
+    if not args.tenant:
+        print("--- cms-sso OAuth2 Application ---")
+        all_spec_tenants = spec.get("tenants", [])
+        cms_result = bootstrap_cms_sso_oauth_client(spec, all_spec_tenants, dry_run)
+        prefix = "[DRY]" if dry_run else "[OK]"
+        for action in cms_result["actions"]:
+            print(f"  {prefix} {action}")
+        for error in cms_result["errors"]:
+            print(f"  [ERR] {error}")
+        all_results.append({
+            "slug": "cms-sso",
+            "actions": cms_result["actions"],
+            "errors": cms_result["errors"],
+        })
         print()
 
     # Summary
