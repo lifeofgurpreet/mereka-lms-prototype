@@ -961,12 +961,15 @@ for origin in [
 
 
 
-# Ecommerce
+# Ecommerce (legacy Oscar — deprecated, replaced by Purchase Gateway)
+# Keep backend URL for Django internals that reference it.
 ECOMMERCE_PUBLIC_URL_ROOT = MEREKA_ECOMMERCE_BASE_URL
 ECOMMERCE_API_URL = ECOMMERCE_PUBLIC_URL_ROOT + "/api/v2"
-ORDER_HISTORY_MICROFRONTEND_URL = f"{MEREKA_MFE_BASE_URL}/orders/orders"
-MFE_CONFIG["ECOMMERCE_BASE_URL"] = ECOMMERCE_PUBLIC_URL_ROOT
-MFE_CONFIG["ORDER_HISTORY_URL"] = ORDER_HISTORY_MICROFRONTEND_URL
+# Do NOT advertise ecommerce URLs in MFE config — the service has no pods.
+# Caddy routes /orders/* and /payment/* to payments-gateway:8080 which
+# will be the replacement. Re-enable these when Purchase Gateway is live.
+# MFE_CONFIG["ECOMMERCE_BASE_URL"] = ECOMMERCE_PUBLIC_URL_ROOT
+# MFE_CONFIG["ORDER_HISTORY_URL"] = ORDER_HISTORY_MICROFRONTEND_URL
 
 MFE_CONFIG['INDIGO_ENABLE_DARK_TOGGLE'] = True
 
