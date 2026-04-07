@@ -155,10 +155,11 @@ scripts/qa/verify-credentials-issuance.sh
 scripts/qa/verify-credentials-ops.sh
 scripts/qa/verify-purchase-gateway-scaffold.sh
 scripts/qa/no_runtime_release_side_effects.sh
-scripts/governance/validate-registry.sh
-scripts/qa/test-verify-script-registry-completeness.sh
-scripts/qa/verify-tenant-specs.sh
-scripts/qa/verify-redis-db-allocation.sh
-scripts/qa/verify-agent-context-lock.sh --allow-main
-scripts/qa/verify-runtime-proof-fixture-pack.sh
-scripts/qa/verify-env-auth-parity.sh
+scripts/release/release-gate.sh --skip-cluster
+scripts/qa/verify-script-registry-completeness.sh
+scripts/qa/test-verify-canonical-entrypoints.sh
+scripts/qa/verify-enterprise-auth-contract.sh
+scripts/qa/verify-enterprise-mfe-build-contract.sh
+scripts/qa/verify-ci-execution-contract.sh
+scripts/qa/verify-vendored-settings-drift.sh
+scripts/qa/verify-domain-generated-surfaces.sh

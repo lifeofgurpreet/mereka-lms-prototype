@@ -460,6 +460,7 @@ scripts/qa/verify-mobile-backend-api.sh
 scripts/qa/verify-dr-drill-schedule.sh
 scripts/qa/no_runtime_release_side_effects.sh
 scripts/qa/verify-deployment-contract.sh
+scripts/qa/verify-baseline-truth-control.sh
 scripts/release/release-gate.sh --skip-cluster
 scripts/governance/validate-registry.sh
 scripts/qa/scan-secrets-fast.sh
