@@ -153,7 +153,7 @@ summary_md=$(
     printf '\n'
     emit_list "Shared or ambiguous paths" "${shared_hits[@]}"
     if [[ "$scope_label" != "both" ]]; then
-      printf '\n- Release bundle remains dual-image only; partial push builds intentionally skip that lane.\n'
+      printf '\n- Release bundle supports partial builds by inheriting the unchanged component digest.\n'
     fi
   }
 )

@@ -189,6 +189,7 @@ scripts/qa/verify-verify-script-reachability.sh
 scripts/qa/verify-deprecated-verification-hygiene.sh
 scripts/qa/verify-post-deploy-health-gate-wiring.sh
 scripts/qa/verify-release-automation.sh
+scripts/qa/verify-release-dry-run-contract.sh
 scripts/qa/verify-release-gitops-guardrails.sh
 scripts/qa/verify-release-deployment-choreography.sh
 scripts/qa/verify-release-invocation-guardrail-wiring.sh
@@ -224,6 +225,7 @@ scripts/qa/verify-branding-token-integrity.sh
 scripts/qa/verify-branding-evidence-a11y-contract.sh
 scripts/qa/verify-branding-evidence-screenshot-contract.sh
 scripts/qa/verify-paragon-tokens.sh
+scripts/qa/verify-paragon-token-coverage.sh
 scripts/qa/verify-paragon-json-token-hierarchy.sh
 scripts/qa/verify-font-loading.sh
 scripts/qa/verify-branding-asset-sync.sh

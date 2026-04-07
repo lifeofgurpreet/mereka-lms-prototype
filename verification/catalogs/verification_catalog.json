@@ -11797,9 +11797,11 @@
       "cadence": "per_pr_and_push",
       "canonical": true,
       "ci_binding": [
+        "ci_static",
         "workflow_direct"
       ],
       "ci_entrypoints": [
+        "ci_static",
         "workflow_direct"
       ],
       "env_scope": [
@@ -11809,7 +11811,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-paragon-token-coverage.sh",
-      "reference_count": 16,
+      "reference_count": 17,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -13363,10 +13365,14 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
+      "cadence": "per_pr_and_push",
       "canonical": true,
-      "ci_binding": [],
-      "ci_entrypoints": [],
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
       "env_scope": [
         "dev",
         "prod",
@@ -13376,17 +13382,17 @@
       "mutability": "mutating",
       "owner": "sre-security",
       "path": "scripts/qa/verify-release-dry-run-contract.sh",
-      "reference_count": 11,
+      "reference_count": 12,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "low",
+      "severity": "high",
       "spec_ids": [
         "AC-020"
       ],
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -18271,7 +18277,7 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
-    "ci_static_bound": 380,
+    "ci_static_bound": 382,
     "kinds": {
       "verify": 611
     },
@@ -18282,14 +18288,14 @@
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 426,
+      "active": 427,
       "deprecated_candidate": 1,
-      "manual_only": 184
+      "manual_only": 183
     },
     "tiers": {
-      "exploratory_manual": 188,
+      "exploratory_manual": 187,
       "periodic_runtime": 18,
-      "release_blocking": 405
+      "release_blocking": 406
     },
     "total_verify_scripts": 611,
     "workflow_direct_bound": 60

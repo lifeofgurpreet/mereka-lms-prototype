@@ -244,6 +244,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-deprecated-verification-hygiene.sh
     - script: scripts/qa/verify-post-deploy-health-gate-wiring.sh
     - script: scripts/qa/verify-release-automation.sh
+    - script: scripts/qa/verify-release-dry-run-contract.sh
     - script: scripts/qa/verify-release-gitops-guardrails.sh
     - script: scripts/qa/verify-release-deployment-choreography.sh
     - script: scripts/qa/verify-release-invocation-guardrail-wiring.sh
@@ -279,6 +280,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-branding-evidence-a11y-contract.sh
     - script: scripts/qa/verify-branding-evidence-screenshot-contract.sh
     - script: scripts/qa/verify-paragon-tokens.sh
+    - script: scripts/qa/verify-paragon-token-coverage.sh
     - script: scripts/qa/verify-paragon-json-token-hierarchy.sh
     - script: scripts/qa/verify-font-loading.sh
     - script: scripts/qa/verify-branding-asset-sync.sh
@@ -604,8 +606,6 @@ ci_runtime_inventory:
       note: verifies compiled MFE bundles and tenant assets from a built image or deployed MFE base URL
     - script: scripts/infra/verify-release-preflight.sh
       category: CI_ARTIFACT
-    - script: scripts/qa/verify-release-dry-run-contract.sh
-      category: CI_ARTIFACT
     - script: scripts/infra/check-worktree-freshness.sh
       category: WORKTREE_CONTEXT
     - script: scripts/infra/check-pr-handoff-discipline.sh
@@ -774,9 +774,6 @@ ci_runtime_inventory:
     - script: scripts/qa/verify-paragon-theme-urls.sh
       category: DOC_GAP
       note: CSS content-type
-    - script: scripts/qa/verify-paragon-token-coverage.sh
-      category: DOC_GAP
-      note: TSV audit files
     - script: scripts/acceptance/runtime-routing.sh
       category: LIVE_APP
       note: canonical lane wrapper for tenant LMS/apps/studio/footer runtime acceptance
