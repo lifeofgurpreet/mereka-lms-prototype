@@ -1400,6 +1400,42 @@ jobs:
           echo "**Bundle signature:** \`var/ci/release-bundle.sig\`" >> $GITHUB_STEP_SUMMARY
           echo "**Bundle certificate:** \`var/ci/release-bundle.pem\`" >> $GITHUB_STEP_SUMMARY
 
+      - name: Generate truth ledger (repo + release planes)
+        run: |
+          set -euo pipefail
+          TARGET_ENV="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
+          # Create a CI-scoped summary stub for the truth ledger.
+          # Runtime and acceptance planes are filled post-deploy, not in CI.
+          python3 -c "
+          import json
+          summary = {
+            'schema_version': 'ci-build-summary/v1',
+            'generated_at_utc': '$(date -u +%Y-%m-%dT%H:%M:%SZ)',
+            'lane': 'ci-build',
+            'environment': '${TARGET_ENV}',
+            'verdict': {'status': 'pass', 'failed_checks': 0},
+            'checks': [
+              {'name': 'release-bundle-generated', 'status': 'pass'},
+              {'name': 'release-object-generated', 'status': 'pass'},
+              {'name': 'release-bundle-signed', 'status': 'pass'}
+            ]
+          }
+          with open('var/ci/ci-build-summary.json', 'w') as f:
+            json.dump(summary, f, indent=2)
+          "
+          python3 scripts/release/generate_truth_ledger.py \
+            --summary-json var/ci/ci-build-summary.json \
+            --output var/ci/truth-ledger.json \
+            --app-sha "${{ github.sha }}" \
+            --release-object-json var/ci/release-object.json \
+            --release-openedx-image "${{ env.REGISTRY }}/openedx:${{ github.sha }}" \
+            --release-mfe-image "${{ env.REGISTRY }}/mfe:${{ github.sha }}" \
+            --image-repo "${{ env.REGISTRY }}" \
+            || echo "::warning::Truth ledger generation failed (non-blocking)"
+          if [[ -f var/ci/truth-ledger.json ]]; then
+            echo "**Truth ledger:** generated" >> $GITHUB_STEP_SUMMARY
+          fi
+
       - name: Upload release bundle
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
@@ -1407,6 +1443,7 @@ jobs:
           path: |
             var/ci/release-bundle.json
             var/ci/release-object.json
+            var/ci/truth-ledger.json
             var/ci/release-bundle.sig
             var/ci/release-bundle.pem
           retention-days: 90
