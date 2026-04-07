@@ -85,7 +85,7 @@
 	# config file from /openedx/dist/env.config.js before SPA try_files falls back
 	# to index.html with a misleading 200 text/html response.
 	@mfe_prefixed_env_config {
-		path_regexp prefixed_env_config ^/(authn|account|communications|course-authoring|authoring|discussions|gradebook|learner-dashboard|learning|learner-record|ora-grading|profile)/env\.config\.js$
+		path_regexp prefixed_env_config ^/(admin-console|authn|account|communications|course-authoring|authoring|discussions|gradebook|learner-dashboard|learning|learner-record|ora-grading|profile)/env\.config\.js$
 	}
 	handle @mfe_prefixed_env_config {
 		rewrite * /env.config.js
@@ -138,7 +138,7 @@
 	# /learner-dashboard/api/... or /learner-dashboard/login_refresh.
 	# Strip the MFE basename before proxying so these requests hit LMS instead
 	# of falling through to the SPA handlers below.
-	@mfe_prefixed_lms_routes path_regexp mfe_prefixed_lms ^/(authn|account|communications|course-authoring|authoring|discussions|gradebook|learner-dashboard|learning|learner-record|ora-grading|profile)(/(api/mfe_config/v1.*|api/.*|login_refresh.*|csrf/.*|oauth2/.*|login))$
+	@mfe_prefixed_lms_routes path_regexp mfe_prefixed_lms ^/(admin-console|authn|account|communications|course-authoring|authoring|discussions|gradebook|learner-dashboard|learning|learner-record|ora-grading|profile)(/(api/mfe_config/v1.*|api/.*|login_refresh.*|csrf/.*|oauth2/.*|login))$
 	handle @mfe_prefixed_lms_routes {
 		rewrite * {http.regexp.mfe_prefixed_lms.2}
 		reverse_proxy lms:8000 {
@@ -297,6 +297,16 @@
 	handle @mfe_profile_u {
 		root * /openedx/dist/profile
 		try_files /index.html
+		file_server
+	}
+
+	@mfe_admin-console {
+		path /admin-console /admin-console/*
+	}
+	handle @mfe_admin-console {
+		uri strip_prefix /admin-console
+		root * /openedx/dist/admin-console
+		try_files /{path} /index.html
 		file_server
 	}
 

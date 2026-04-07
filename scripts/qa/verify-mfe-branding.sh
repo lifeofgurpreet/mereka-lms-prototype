@@ -90,6 +90,7 @@ echo
 
 # MFE path → directory mappings from Caddyfile
 declare -A MFE_ROUTES=(
+  ["/admin-console"]="admin-console"
   ["/authn"]="authn"
   ["/account"]="account"
   ["/authoring"]="authoring"
