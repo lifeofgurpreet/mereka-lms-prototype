@@ -775,6 +775,8 @@ COPY --from=learner-record-git /openedx/app /
 
 ######## learner-record (common)
 FROM base AS learner-record-common
+# Cache bust at common stage level to force full rebuild (2026-04-08)
+ARG LEARNER_RECORD_REBUILD_V3=true
 COPY --from=learner-record-src /package.json /openedx/app/package.json
 COPY --from=learner-record-src /package-lock.json /openedx/app/package-lock.json
 ARG NPM_REGISTRY=https://registry.npmjs.org/
@@ -942,9 +944,9 @@ RUN npm run build
 ######## learner-record (production)
 FROM learner-record-common AS learner-record-prod
 ENV NODE_ENV=production
-# Cache bust: force rebuild after Node 24 NODE_OPTIONS fix (2026-04-07)
-ARG LEARNER_RECORD_CACHE_BUST=2
-RUN npm run build || { echo "LEARNER_RECORD_BUILD_FAILED"; ls -la /openedx/app/dist/ 2>/dev/null || echo "NO DIST DIR"; exit 1; }
+# Node 24 requires --openssl-legacy-provider for webpack 4 MFEs
+ENV NODE_OPTIONS="--openssl-legacy-provider --max-old-space-size=4096"
+RUN npm run build
 
 
 
