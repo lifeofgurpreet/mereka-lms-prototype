@@ -1799,6 +1799,15 @@ jobs:
             echo "::warning::Release bundle id missing (SLSA/release-bundle may have failed). Generating fallback id."
             RELEASE_BUNDLE_ID="rb-$(echo '${{ github.sha }}' | head -c7)-$(date -u +%Y%m%dT%H%M%SZ)"
           fi
+          # B-019: Sync vendored settings before promotion so infra repo
+          # always has the app repo's canonical Django settings.
+          if [[ -f scripts/infra/sync-vendored-openedx-settings.sh ]]; then
+            echo "Syncing vendored settings to infra repo..."
+            bash scripts/infra/sync-vendored-openedx-settings.sh \
+              --infra-repo "$GITHUB_WORKSPACE/bbi-infrastructure" \
+              --apply || echo "::warning::Vendored settings sync failed (non-blocking)"
+          fi
+
           EXTRA_ARGS=()
           if [[ "${TARGET_ENV}" == "production" ]]; then
             # Production rollouts require runtime convergence verification.
