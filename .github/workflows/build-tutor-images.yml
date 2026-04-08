@@ -1602,7 +1602,9 @@ jobs:
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0  # v3.0.0
         with:
-          token: ${{ secrets.GITOPS_TOKEN_BBI_KUBERNATE }}
+          # Use GitHub App token — has cross-repo permissions on bbi-infrastructure.
+          # GITOPS_TOKEN_BBI_KUBERNATE PAT returns "Bad credentials" (expired/revoked).
+          token: ${{ steps.app-token.outputs.token }}
           repository: Biji-Biji-Initiative/bbi-infrastructure
           event-type: promote-mereka-lms-dev
           client-payload: >-
