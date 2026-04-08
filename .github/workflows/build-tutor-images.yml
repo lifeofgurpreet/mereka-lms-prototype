@@ -1579,11 +1579,21 @@ jobs:
             var/ci/release-bundle.pem
           retention-days: 90
 
+      - name: Generate GitHub App token for cross-repo dispatch
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        id: app-token
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349  # v2
+        with:
+          app-id: ${{ secrets.BBI_ARC_GITHUB_APP_ID }}
+          private-key: ${{ secrets.BBI_ARC_GITHUB_APP_PRIVATE_KEY }}
+          owner: Biji-Biji-Initiative
+          repositories: bbi-infrastructure
+
       - name: Dispatch dev promotion to infra repo
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0  # v3.0.0
         with:
-          token: ${{ secrets.GITOPS_TOKEN_BBI_KUBERNATE }}
+          token: ${{ steps.app-token.outputs.token }}
           repository: Biji-Biji-Initiative/bbi-infrastructure
           event-type: promote-mereka-lms-dev
           client-payload: >-
