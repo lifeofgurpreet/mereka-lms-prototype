@@ -764,8 +764,19 @@ ENV NODE_ENV=development
 CMD ["/bin/bash", "-c", "npm run start --- --config ./webpack.dev-tutor.config.js"]
 
 ####################### learner-record MFE
+# learner-record uses webpack 4 which is fundamentally incompatible with Node 24.
+# Node 18 is the last LTS that supports webpack 4 without OpenSSL/punycode breakage.
+# All other MFEs use webpack 5 (Node 24 compatible).
+FROM docker.io/node:18-bullseye-slim AS learner-record-base
+RUN apt-get update && apt-get install -y git gcc g++ make python3 libgl1 libxi6 \
+    libpng-dev autoconf libtool pkg-config zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /openedx/app /openedx/env
+WORKDIR /openedx/app
+ENV PATH=/openedx/app/node_modules/.bin:${PATH}
+
 ######## learner-record (git)
-FROM base AS learner-record-git
+FROM learner-record-base AS learner-record-git
 ADD --keep-git-dir=true https://github.com/openedx/frontend-app-learner-record.git#release/ulmo.1 .
 
 ######## learner-record (src)
@@ -774,7 +785,7 @@ FROM scratch AS learner-record-src
 COPY --from=learner-record-git /openedx/app /
 
 ######## learner-record (common)
-FROM base AS learner-record-common
+FROM learner-record-base AS learner-record-common
 # Cache bust at common stage level to force full rebuild (2026-04-08)
 ARG LEARNER_RECORD_REBUILD_V3=true
 COPY --from=learner-record-src /package.json /openedx/app/package.json
@@ -944,9 +955,11 @@ RUN npm run build
 ######## learner-record (production)
 FROM learner-record-common AS learner-record-prod
 ENV NODE_ENV=production
-# Node 24 requires --openssl-legacy-provider for webpack 4 MFEs
-ENV NODE_OPTIONS="--openssl-legacy-provider --max-old-space-size=4096"
-RUN npm run build
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+RUN npm run build \
+    || { echo "ERROR: learner-record build failed"; ls -la /openedx/app/dist/ 2>/dev/null || echo "NO DIST DIR"; exit 1; }
+RUN test -f /openedx/app/dist/index.html \
+    || { echo "ERROR: learner-record dist/index.html missing after build"; ls -la /openedx/app/dist/ 2>/dev/null; exit 1; }
 
 
 
