@@ -297,7 +297,6 @@ scripts/qa/verify-externalsecret-config.sh
 scripts/qa/verify-k8s-secret-scan.sh
 scripts/qa/verify-mobile-secrets-inventory.sh
 scripts/qa/verify-mux-secrets.sh
-scripts/qa/verify-observability-pii-filtering.sh
 scripts/qa/verify-pod-security-policies.sh
 scripts/qa/verify-precommit-secret-scan.sh
 scripts/qa/verify-purchase-gateway-resilience.sh

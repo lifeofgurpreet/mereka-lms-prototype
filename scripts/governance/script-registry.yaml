@@ -353,7 +353,6 @@ ci_static_inventory:
     - script: scripts/qa/verify-k8s-secret-scan.sh
     - script: scripts/qa/verify-mobile-secrets-inventory.sh
     - script: scripts/qa/verify-mux-secrets.sh
-    - script: scripts/qa/verify-observability-pii-filtering.sh
     - script: scripts/qa/verify-pod-security-policies.sh
     - script: scripts/qa/verify-precommit-secret-scan.sh
     - script: scripts/qa/verify-purchase-gateway-resilience.sh
@@ -766,6 +765,9 @@ ci_runtime_inventory:
     - script: scripts/qa/verify-secret-inventory.sh
       category: LIVE_CLUSTER
       note: needs gcloud
+    - script: scripts/qa/verify-observability-pii-filtering.sh
+      category: LIVE_CLUSTER
+      note: uses kubectl logs to sample pod output for PII; moved from static inventory
     - script: scripts/qa/verify-tenant-contract-alignment.sh
       category: CONFIG_DRIFT
     - script: scripts/qa/verify-tenant-override-schema.sh
