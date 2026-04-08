@@ -235,10 +235,32 @@ def bootstrap_tenant(tenant: dict, dry_run: bool) -> dict:
         User = get_user_model()
         user = User.objects.filter(email__iexact=email).first()
         if not user:
-            result["actions"].append(
-                f"SKIP user link email={email}: user not found in DB"
-            )
-            continue
+            # Auto-provision synthetic test users (emails ending in @synthetic.test).
+            # Non-synthetic users are real humans — skip them, don't auto-create.
+            if not email.endswith("@synthetic.test"):
+                result["actions"].append(
+                    f"SKIP user link email={email}: user not found (not synthetic)"
+                )
+                continue
+            username = email.split("@")[0]
+            if dry_run:
+                result["actions"].append(
+                    f"CREATE User username={username} email={email}"
+                )
+            else:
+                import os
+                password = os.environ.get("BOOTSTRAP_TEST_PASSWORD", "Cr3ativity")
+                is_staff = role == "admin"
+                user = User.objects.create_user(
+                    username=username,
+                    email=email,
+                    password=password,
+                    is_active=True,
+                    is_staff=is_staff,
+                )
+                result["actions"].append(
+                    f"CREATED User username={username} email={email} staff={is_staff}"
+                )
 
         # Ensure UserProfile and Registration exist (required for MFE login).
         # Users created via manage.py or Django ORM may lack these records.
@@ -539,6 +561,57 @@ def main():
             "actions": cms_result["actions"],
             "errors": cms_result["errors"],
         })
+        print()
+
+    # Standalone users (not linked to any enterprise)
+    standalone_users = spec.get("standalone_users", [])
+    if standalone_users and not args.tenant:
+        print("--- Standalone Users ---")
+        import os
+
+        from django.contrib.auth import get_user_model
+
+        StandaloneUser = get_user_model()
+        password = os.environ.get("BOOTSTRAP_TEST_PASSWORD", "Cr3ativity")
+
+        for su in standalone_users:
+            email = su["email"]
+            username = su["username"]
+            if not email.endswith("@synthetic.test"):
+                print(f"  [SKIP] {username}: not synthetic, skip auto-provisioning")
+                continue
+            user = StandaloneUser.objects.filter(email__iexact=email).first()
+            if not user:
+                if dry_run:
+                    print(f"  [DRY] CREATE User {username} ({email})")
+                else:
+                    user = StandaloneUser.objects.create_user(
+                        username=username,
+                        email=email,
+                        password=password,
+                        is_active=True,
+                        is_staff=su.get("is_staff", False),
+                        is_superuser=su.get("is_superuser", False),
+                    )
+                    print(f"  [OK] CREATED User {username} ({email})")
+            else:
+                # Reconcile staff/superuser flags
+                changed = False
+                if user.is_staff != su.get("is_staff", False):
+                    user.is_staff = su.get("is_staff", False)
+                    changed = True
+                if user.is_superuser != su.get("is_superuser", False):
+                    user.is_superuser = su.get("is_superuser", False)
+                    changed = True
+                if changed and not dry_run:
+                    user.save(update_fields=["is_staff", "is_superuser"])
+                    print(f"  [OK] UPDATED User {username} flags")
+                else:
+                    print(f"  [OK] EXISTS User {username}")
+            if user:
+                _ensure_user_profile_and_registration(
+                    user, {"actions": [], "errors": []}, dry_run
+                )
         print()
 
     # Global waffle flags (not per-tenant)

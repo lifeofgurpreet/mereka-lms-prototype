@@ -21,6 +21,19 @@ version: "1.1"
 environment: production
 lms_domain: academyv2.mereka.io
 
+# Standalone test users — not linked to any enterprise.
+# Created by bootstrap if they don't exist (synthetic emails only).
+# Password from BOOTSTRAP_TEST_PASSWORD env (default: Cr3ativity).
+standalone_users:
+  - username: lanea-platform-admin
+    email: lanea-platform-admin@synthetic.test
+    is_staff: true
+    is_superuser: true
+  - username: lanea-unlinked-user
+    email: lanea-unlinked-user@synthetic.test
+    is_staff: false
+    is_superuser: false
+
 # Global waffle flags (not per-tenant — apply once per environment)
 waffle_flags:
   learner_home_mfe.enabled: true  # Redirect /dashboard to MFE learner-home
