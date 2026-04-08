@@ -64,6 +64,7 @@ source "$PATCHES_DIR/webpack-memory.sh"
 source "$PATCHES_DIR/footer-component.sh"
 source "$PATCHES_DIR/mfe-slot-ownership.sh"
 source "$PATCHES_DIR/build-optimizations.sh"
+source "$PATCHES_DIR/learner-record-node18.sh"
 
 apply_patch() {
   local fn="$1"
@@ -108,6 +109,7 @@ apply_mfe_patches() {
   apply_patch apply_brand_package_patch
   apply_patch apply_footer_component_patch
   apply_patch apply_mfe_slot_ownership_patch
+  apply_patch apply_learner_record_node18_patch
   sync_mfe_patch_helpers
 }
 
