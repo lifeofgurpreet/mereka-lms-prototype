@@ -130,6 +130,10 @@ ci_static_inventory:
     - script: scripts/qa/verify-source-of-truth-matrix.sh
     - script: scripts/qa/verify-structural-debt-register.sh
     - script: scripts/qa/verify-skill-eval-runner.sh
+    - script: scripts/qa/verify-skill-routing-contract.sh
+    - script: scripts/qa/test-hardening-negative.sh
+    - script: scripts/qa/verify-workflow-gate-enforcement.sh
+    - script: scripts/qa/verify-proof-lineage-chain.sh
     - script: scripts/qa/verify-openedx-audit-tracker-sync.sh
     - script: scripts/qa/verify-tutor-config-path-contract.sh
     - script: scripts/qa/test-build-validator-drift-evidence-bundle.sh

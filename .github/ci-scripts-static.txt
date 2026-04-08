@@ -78,6 +78,10 @@ scripts/qa/verify-ghost-truth-surfaces.sh
 scripts/qa/verify-source-of-truth-matrix.sh
 scripts/qa/verify-structural-debt-register.sh
 scripts/qa/verify-skill-eval-runner.sh
+scripts/qa/verify-skill-routing-contract.sh
+scripts/qa/test-hardening-negative.sh
+scripts/qa/verify-workflow-gate-enforcement.sh
+scripts/qa/verify-proof-lineage-chain.sh
 scripts/qa/verify-openedx-audit-tracker-sync.sh
 scripts/qa/verify-tutor-config-path-contract.sh
 scripts/qa/test-build-validator-drift-evidence-bundle.sh

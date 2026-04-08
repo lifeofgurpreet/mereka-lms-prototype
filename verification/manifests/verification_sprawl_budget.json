@@ -1,8 +1,8 @@
 {
-  "max_total_verify_scripts": 616,
+  "max_total_verify_scripts": 620,
   "max_manual_only_scripts": 188,
   "max_deprecated_candidate_scripts": 35,
   "min_ci_static_bound": 323,
-  "budget_reviewed_at": "2026-04-07",
-  "budget_rationale": "Raise from 611/184 to 616/188: spec catalog/index/graph regeneration added new verification entries from WS4 contract + credential invariants docs."
+  "budget_reviewed_at": "2026-04-08",
+  "budget_rationale": "Raise 619→620: added verify-proof-lineage-chain.sh for runtime proof join verification."
 }

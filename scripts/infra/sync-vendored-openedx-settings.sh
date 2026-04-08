@@ -107,7 +107,8 @@ for rel_path in "${TRACKED_FILES[@]}"; do
     exit 1
   fi
 
-  if cmp -s "$src" "$dst"; then
+  # Normalize CRLF before comparing — infra repo may have different line endings
+  if diff -q <(tr -d '\r' < "$src") <(tr -d '\r' < "$dst") >/dev/null 2>&1; then
     echo "OK   $(basename "$rel_path"): in sync"
     PASS=$((PASS + 1))
     continue

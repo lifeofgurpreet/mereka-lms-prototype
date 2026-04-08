@@ -69,11 +69,19 @@ if [[ ! -d "$INFRA_REPO/.git" ]]; then
   exit 1
 fi
 
-echo "Auditing staging references in: $INFRA_REPO"
+# Pin to a stable ref, not the mutable checkout
+INFRA_REF="${INFRA_REF_OVERRIDE:-refs/remotes/origin/main}"
+if ! git -C "$INFRA_REPO" rev-parse --verify "$INFRA_REF" >/dev/null 2>&1; then
+  echo "FAIL: missing infra ref: $INFRA_REF"
+  exit 1
+fi
+INFRA_REF_SHORT=$(git -C "$INFRA_REPO" rev-parse --short "$INFRA_REF")
 
-overlay_file="$INFRA_REPO/apps/mereka-lms/overlays/staging/kustomization.yaml"
+echo "Auditing staging references in: $INFRA_REPO (ref: $INFRA_REF_SHORT)"
+
+# Check overlay existence via git, not filesystem
 overlay_exists=0
-if [[ -f "$overlay_file" ]]; then
+if git -C "$INFRA_REPO" cat-file -e "${INFRA_REF}:apps/mereka-lms/overlays/staging/kustomization.yaml" 2>/dev/null; then
   overlay_exists=1
 fi
 
@@ -83,12 +91,12 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# Find staging refs that are specifically tied to mereka-lms.
-rg -n --no-heading \
+# Search the pinned tree for staging references (via git grep, not rg on working tree)
+git -C "$INFRA_REPO" grep -n \
   -e 'apps/mereka-lms/overlays/staging' \
   -e 'mereka-lms.*staging' \
   -e 'staging.*mereka-lms' \
-  "$INFRA_REPO/apps" "$INFRA_REPO/applicationsets" "$INFRA_REPO/argocd" 2>/dev/null >"$tmp_hits" || true
+  "$INFRA_REF" -- 'apps/' 'applicationsets/' 'argocd/' 2>/dev/null >"$tmp_hits" || true
 
 echo "- staging overlay file present: $([[ "$overlay_exists" -eq 1 ]] && echo yes || echo no)"
 hit_count="$(wc -l <"$tmp_hits" | tr -d '[:space:]')"

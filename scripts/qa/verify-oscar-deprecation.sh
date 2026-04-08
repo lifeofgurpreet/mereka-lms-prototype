@@ -400,13 +400,14 @@ EXCLUDE_DIRS=(
   "--exclude=verify-oscar-deprecation.sh"
 )
 
+# Move || fallback outside $() to avoid capturing both wc output AND "0" with pipefail
 OSCAR_REF_COUNT=$(grep -rli "ecommerce\|oscar\|OSCAR_DEFAULT_CURRENCY" \
   "${EXCLUDE_DIRS[@]}" \
-  . 2>/dev/null | wc -l || echo 0)
+  . 2>/dev/null | wc -l) || OSCAR_REF_COUNT=0
 
 PG_REF_COUNT=$(grep -rli "purchase.gateway\|purchase_gateway\|payments.gateway\|payments_gateway\|ENABLE_GATEWAY_FULFILLMENT" \
   "${EXCLUDE_DIRS[@]}" \
-  . 2>/dev/null | wc -l || echo 0)
+  . 2>/dev/null | wc -l) || PG_REF_COUNT=0
 
 printf "\n  Oscar/ecommerce references: ${YELLOW}%d file(s)${NC}\n" "$OSCAR_REF_COUNT"
 printf "  Purchase Gateway references: ${GREEN}%d file(s)${NC}\n" "$PG_REF_COUNT"

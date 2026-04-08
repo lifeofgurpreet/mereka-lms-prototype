@@ -17,16 +17,28 @@ INFRA_REPO="${INFRA_REPO:-}"
 for candidate in \
   "$HOME/projects/k8s/bbi-infrastructure" \
   "$REPO_ROOT/../bbi-infrastructure"; do
-  if [[ -d "$candidate/apps/mereka-lms" ]]; then
+  if [[ -d "$candidate/.git" ]]; then
     INFRA_REPO="$candidate"
     break
   fi
 done
 
-if [[ -z "$INFRA_REPO" ]] || [[ ! -d "$INFRA_REPO/apps/mereka-lms" ]]; then
+if [[ -z "$INFRA_REPO" ]] || [[ ! -d "$INFRA_REPO/.git" ]]; then
   echo "SKIP: bbi-infrastructure repo not found — set INFRA_REPO"
   exit 0
 fi
+
+# Pin to a stable ref, not the mutable checkout
+INFRA_REF="${INFRA_REF_OVERRIDE:-refs/remotes/origin/main}"
+if ! git -C "$INFRA_REPO" rev-parse --verify "$INFRA_REF" >/dev/null 2>&1; then
+  echo "FAIL: missing infra ref: $INFRA_REF"
+  exit 1
+fi
+
+# Read a file from the pinned ref, not the working tree
+infra_cat() {
+  git -C "$INFRA_REPO" show "${INFRA_REF}:${1}" 2>/dev/null
+}
 
 PASS=0
 FAIL=0
@@ -52,11 +64,11 @@ for setting in "${PARITY_SETTINGS[@]}"; do
   for overlay in "${OVERLAYS[@]}"; do
     env="${overlay%%:*}"
     file="${overlay#*:}"
-    filepath="$INFRA_REPO/$file"
-    if [[ ! -f "$filepath" ]]; then
+    file_content=$(infra_cat "$file" 2>/dev/null) || true
+    if [[ -z "$file_content" ]]; then
       continue
     fi
-    val=$(grep -v '^\s*#' "$filepath" | grep "^${setting}\b" | tail -1 | sed 's/.*= *//' | tr -d ' "'"'" || true)
+    val=$(echo "$file_content" | grep -v '^\s*#' | grep "^${setting}\b" | tail -1 | sed 's/.*= *//' | tr -d ' "'"'" || true)
     if [[ -n "$val" ]]; then
       values+=("$val")
       envs+=("$env=$val")

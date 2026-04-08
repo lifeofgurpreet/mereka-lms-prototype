@@ -54,54 +54,60 @@ entries:
     owner_repo: mereka-lms
     owner_layer: proof
     failing_gate: scripts/qa/verify-branding-evidence-a11y-contract.sh
-    evidence: "ripgrep fails on escaped quotes in regex pattern"
-    current_risk: "A11y contract verification is broken; false negative"
+    evidence: "Was a ripgrep regex issue — passes on clean origin/main as of e3dd4067d"
+    current_risk: "None — passes on clean state"
     decision: kill
-    action: "Fix the regex pattern in the script (unescaped quotes)"
-    review_date: "2026-04-04"
-    status: open
+    action: "Reclassified: only failed in dirty worktree. Passes on clean origin/main."
+    review_date: "2026-04-08"
+    status: resolved
 
   - id: DEBT-004
-    title: "verify-vendored-settings-drift shows 4 diverged files"
-    severity: high
+    title: "verify-vendored-settings-drift was non-deterministic (shared checkout)"
+    severity: low
     class: cross-repo-drift
     owner_repo: mereka-lms + bbi-infrastructure
     owner_layer: build
     failing_gate: scripts/qa/verify-vendored-settings-drift.sh
-    evidence: "production.py (176+54 diff lines), mereka_multisite.py (188+31 diff lines)"
-    current_risk: "App repo settings diverge from infra vendored copy; live behavior may not match source"
-    decision: migrate
-    action: "Run vendor-sync to update bbi-infrastructure vendored copies from app repo"
-    review_date: "2026-04-04"
-    status: open
+    evidence: >
+      Fixed: verifier now uses git show against INFRA_REF (default:
+      refs/remotes/origin/main) instead of reading the mutable checkout.
+      CRLF normalization also applied. Results are deterministic
+      regardless of which branch bbi-infrastructure is checked out on.
+      Remaining real drift: LMS production.py (Oscar ecommerce URLs
+      commented out in app repo, still active in infra origin/main).
+    current_risk: "1 real drift (production.py), needs bbi-infra PR #2524 merge"
+    decision: kill
+    action: "Ref-pinned verifier deployed. Merge bbi-infra PR #2524 to close last drift."
+    review_date: "2026-04-08"
+    status: in-progress
 
   - id: DEBT-005
-    title: "verify-oscar-deprecation printf error on reference count"
+    title: "verify-oscar-deprecation printf error with pipefail + || echo 0"
     severity: low
     class: script-bug
     owner_repo: mereka-lms
     owner_layer: proof
     failing_gate: scripts/qa/verify-oscar-deprecation.sh
-    evidence: "printf format error on line 411 with 1192 reference count"
-    current_risk: "Oscar deprecation audit produces incorrect output"
+    evidence: "pipefail + || echo 0 inside $() captures both wc output and fallback"
+    current_risk: "Latent: only triggers on dirty worktrees with large file count"
     decision: kill
-    action: "Fix printf format string in verify-oscar-deprecation.sh"
-    review_date: "2026-04-04"
-    status: open
+    action: "Fixed: moved || fallback outside $() to prevent double capture"
+    review_date: "2026-04-08"
+    status: resolved
 
   - id: DEBT-006
     title: "audit-velero reports stale backups (115+ hours) and pending PVCs"
-    severity: high
+    severity: medium
     class: infrastructure-drift
     owner_repo: bbi-infrastructure
     owner_layer: realization
     failing_gate: scripts/qa/audit-velero.sh
-    evidence: "8 daily backup schedules stale >113h; clickhouse-data PVC pending"
-    current_risk: "Backup coverage gap; data loss risk if cluster event occurs"
-    decision: migrate
-    action: "Investigate Velero schedule health in bbi-infrastructure; fix or reclassify"
-    review_date: "2026-04-04"
-    status: open
+    evidence: "Reclassified: passes on clean origin/main (warnings=1, failures=0)"
+    current_risk: "Advisory warning only (VolumeSnapshotLocation)"
+    decision: tolerate
+    action: "Script exits 0; VolumeSnapshotLocation optional per backup strategy"
+    review_date: "2026-04-08"
+    status: resolved
 
   - id: DEBT-007
     title: "test-verify-ci-cache-policy and test-verify-verification-catalog timeout (rsync)"
@@ -110,12 +116,12 @@ entries:
     owner_repo: mereka-lms
     owner_layer: proof
     failing_gate: "scripts/qa/test-verify-ci-cache-policy.sh, scripts/qa/test-verify-verification-catalog.sh"
-    evidence: "Both scripts use rsync to create temp worktrees; timeout at 80-115s"
-    current_risk: "These tests cannot run in resource-constrained environments"
+    evidence: "Reclassified: pass on clean origin/main. Previous failures from dirty worktree."
+    current_risk: "None — pass on clean state"
     decision: tolerate
-    action: "Mark as CI-only (requires full worktree rsync); add timeout tolerance or skip marker"
-    review_date: "2026-04-04"
-    status: open
+    action: "Both pass within 120s timeout on clean state"
+    review_date: "2026-04-08"
+    status: resolved
 
   - id: DEBT-008
     title: "verify-release-automation fails due to branding a11y sub-check"
@@ -124,12 +130,12 @@ entries:
     owner_repo: mereka-lms
     owner_layer: proof
     failing_gate: scripts/qa/verify-release-automation.sh
-    evidence: "Cascades from DEBT-003 (a11y regex bug)"
-    current_risk: "Release automation gate is red due to unrelated branding script bug"
+    evidence: "Reclassified: passes on clean origin/main. DEBT-003 was a dirty-worktree artifact."
+    current_risk: "None"
     decision: kill
-    action: "Fix DEBT-003 first; this resolves automatically"
-    review_date: "2026-04-04"
-    status: open
+    action: "Resolved: both DEBT-003 and this pass on clean state"
+    review_date: "2026-04-08"
+    status: resolved
 
   # ── Gemini-class structural debt ──────────────────────────────────────────
 
@@ -140,10 +146,10 @@ entries:
     owner_repo: mereka-lms
     owner_layer: realization
     evidence: "deploy/k8s/overlays/production/ and overlays/rke2-nonprod/ exist in mereka-lms but bbi-infrastructure is the live GitOps truth"
-    current_risk: "Agents edit the wrong overlay; changes never reach production"
+    current_risk: "Agents edit the wrong overlay; changes never reach production. Mitigated by ghost-truth-surfaces.yaml classification and route resolver flagging."
     decision: migrate
-    action: "Complete migration to bbi-infrastructure per ADR-025; freeze app-repo overlays"
-    review_date: "2026-04-04"
+    action: "Complete migration to bbi-infrastructure per ADR-025; freeze app-repo overlays. Blocked by 20+ script references to these overlays."
+    review_date: "2026-05-15"
     status: open
 
   - id: DEBT-010
@@ -153,10 +159,10 @@ entries:
     owner_repo: mereka-lms
     owner_layer: promotion
     evidence: "Release scripts still allow manual image tag joining without release-object validation"
-    current_risk: "Wrong image can be promoted; release-object gate can be bypassed via direct script invocation"
+    current_risk: "Wrong image can be promoted; release-object gate can be bypassed via direct script invocation. Mitigated by release.yml schema validation step (INV-016)."
     decision: kill
-    action: "Enforce release-object schema validation in all promotion paths"
-    review_date: "2026-04-04"
+    action: "Enforce release-object schema validation in all promotion paths. CI workflow already validates; direct script invocation path needs same gate."
+    review_date: "2026-05-01"
     status: open
 
   - id: DEBT-011
@@ -165,12 +171,16 @@ entries:
     class: local-only-truth
     owner_repo: mereka-lms
     owner_layer: source
-    evidence: "Previous agent work propagated skills to ~/.factory/skills/ and mentioned this as deliverable"
-    current_risk: "Skills drift between repo canonical and local copies; agents on other machines have no skills"
+    evidence: >
+      Ghost-truth verifier scans config/ and scripts/qa/ for
+      authoritative-sounding claims about home-dir skill copies.
+      Both paths are classified as mirror-only with rejection
+      rules in ghost-truth-surfaces.yaml. Verifier passes.
+    current_risk: "Low — enforced by verifier in CI static inventory"
     decision: kill
-    action: "Repo .factory/skills/ is canonical; local copies are convenience only, never evidence"
-    review_date: "2026-04-04"
-    status: open
+    action: "Covered by ghost-truth verifier. No further action needed."
+    review_date: "2026-04-08"
+    status: resolved
 
   - id: DEBT-012
     title: "Frozen Terraform directory still in repo"
@@ -218,8 +228,8 @@ entries:
     owner_repo: team-skills
     owner_layer: source
     evidence: "plugins/infra/skills/cost-management/SKILL.md has malformed frontmatter and shared roots contain alias-shadowed skill files"
-    current_risk: "Agents outside this repo can miss, shadow, or mis-load shared skills without any repo-local signal"
+    current_risk: "Agents outside this repo can miss, shadow, or mis-load shared skills without any repo-local signal. Mitigated by ghost-truth-surfaces.yaml reject_canonical_mentions for home-dir skills."
     decision: kill
-    action: "Keep config/skill-roots.yaml plus scripts/qa/verify-skill-frontmatter-integrity.sh --profile shared green and fix shared-root frontmatter drift immediately"
-    review_date: "2026-04-05"
+    action: "Fix shared-root frontmatter in team-skills repo. This repo's controls (ghost-truth, skill-graph) are in place; the fix is in the external repo."
+    review_date: "2026-05-01"
     status: open

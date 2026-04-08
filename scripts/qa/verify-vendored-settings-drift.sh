@@ -15,6 +15,10 @@
 # Usage:
 #   ./scripts/qa/verify-vendored-settings-drift.sh
 #   INFRA_REPO=/path/to/bbi-infrastructure ./scripts/qa/verify-vendored-settings-drift.sh
+#
+# The infra file is read via `git show` against a stable ref (default:
+# refs/remotes/origin/main) so results are deterministic regardless of
+# which branch happens to be checked out in the sibling repo.
 set -euo pipefail
 
 REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
@@ -44,10 +48,21 @@ if [[ -n "$INFRA_REPO" ]] && [[ ! -d "$INFRA_REPO/apps/mereka-lms" ]]; then
   fi
 fi
 
-if [[ -z "$INFRA_REPO" ]] || [[ ! -d "$INFRA_REPO/apps/mereka-lms" ]]; then
+if [[ -z "$INFRA_REPO" ]] || [[ ! -d "$INFRA_REPO/.git" ]]; then
   echo "SKIP: bbi-infrastructure repo not found — set INFRA_REPO"
   exit 0
 fi
+
+# Pin comparison to a stable git ref, not the mutable checkout.
+# Default: origin/main. Override with INFRA_REF for testing.
+INFRA_REF="${INFRA_REF_OVERRIDE:-refs/remotes/origin/main}"
+
+if ! git -C "$INFRA_REPO" rev-parse --verify "$INFRA_REF" >/dev/null 2>&1; then
+  echo "FAIL: missing infra ref: $INFRA_REF (run 'git -C $INFRA_REPO fetch origin main')"
+  exit 1
+fi
+
+INFRA_REF_SHORT=$(git -C "$INFRA_REPO" rev-parse --short "$INFRA_REF")
 
 PASS=0
 FAIL=0
@@ -104,6 +119,7 @@ should_skip_for_unchanged_ci_surface() {
 echo "=== Vendored Settings Drift Check ==="
 echo "App repo: $REPO_ROOT"
 echo "Infra repo: $INFRA_REPO"
+echo "Infra ref: $INFRA_REF ($INFRA_REF_SHORT)"
 echo ""
 
 if should_skip_for_unchanged_ci_surface; then
@@ -112,20 +128,28 @@ fi
 
 for rel_path in "${TRACKED_FILES[@]}"; do
   APP_FILE="$REPO_ROOT/deploy/k8s/base/$rel_path"
-  INFRA_FILE="$INFRA_REPO/$VENDORED_BASE/$rel_path"
+  INFRA_REL_PATH="$VENDORED_BASE/$rel_path"
 
   if [[ ! -f "$APP_FILE" ]]; then
     echo "SKIP $(basename "$rel_path"): not in app repo"
     SKIP=$((SKIP + 1))
     continue
   fi
-  if [[ ! -f "$INFRA_FILE" ]]; then
-    echo "SKIP $(basename "$rel_path"): not in infra repo"
+
+  # Check infra file exists at pinned ref
+  if ! git -C "$INFRA_REPO" cat-file -e "${INFRA_REF}:${INFRA_REL_PATH}" 2>/dev/null; then
+    echo "SKIP $(basename "$rel_path"): not in infra repo at $INFRA_REF"
     SKIP=$((SKIP + 1))
     continue
   fi
 
-  DIFF_LINES=$(diff "$APP_FILE" "$INFRA_FILE" 2>/dev/null | wc -l || true)
+  # Compare directly via process substitution — no variable capture
+  # to avoid bash stripping trailing newlines.
+  # Normalize CRLF before comparing.
+  DIFF_LINES=$(diff \
+    <(tr -d '\r' < "$APP_FILE") \
+    <(git -C "$INFRA_REPO" show "${INFRA_REF}:${INFRA_REL_PATH}" | tr -d '\r') \
+    2>/dev/null | wc -l || true)
   if [[ "$DIFF_LINES" -eq 0 ]]; then
     echo "OK   $(basename "$rel_path"): in sync"
     PASS=$((PASS + 1))

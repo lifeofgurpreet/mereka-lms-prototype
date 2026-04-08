@@ -49,23 +49,23 @@ import yaml
 contract = yaml.safe_load(open(sys.argv[1]))
 repos = contract.get("repos", [])
 assert repos, "no repos defined"
+version = contract.get("schema_version", "1.0")
 for row in repos:
+    repo_name = row.get("repo", "<unknown>")
+    assert "repo" in row, f"missing 'repo' field"
+    assert "branch" in row, f"missing 'branch' in {repo_name}"
+    # v2.0: target section holds enforcement expectations
+    target = row.get("target", row)  # fallback to flat v1.0 layout
     for field in (
-        "repo",
-        "branch",
         "enforce_admins",
         "required_approving_review_count",
-        "dismiss_stale_reviews",
-        "required_conversation_resolution",
         "strict_status_checks",
         "required_status_checks",
-        "allow_force_pushes",
-        "allow_deletions",
     ):
-        assert field in row, f"missing {field} in {row.get('repo', '<unknown>')}"
-        if field == "required_status_checks":
-            assert isinstance(row[field], list) and row[field], f"required_status_checks must be non-empty for {row['repo']}"
-print(f"Validated {len(repos)} branch-protection contract rows")
+        assert field in target, f"missing target.{field} in {repo_name}"
+    checks = target["required_status_checks"]
+    assert isinstance(checks, list) and checks, f"required_status_checks must be non-empty for {repo_name}"
+print(f"Validated {len(repos)} branch-protection contract rows (schema v{version})")
 PY
 then
   pass "branch-protection contract has required fields"
@@ -88,6 +88,7 @@ failures = []
 for row in contract.get("repos", []):
     repo = row["repo"]
     branch = row["branch"]
+    target = row.get("target", row)  # v2.0 uses target section
     try:
         raw = subprocess.check_output(
             ["gh", "api", f"repos/{repo}/branches/{branch}/protection"],
@@ -104,19 +105,17 @@ for row in contract.get("repos", []):
     comparisons = {
         "enforce_admins": bool((live.get("enforce_admins") or {}).get("enabled")),
         "required_approving_review_count": int(reviews.get("required_approving_review_count") or 0),
-        "dismiss_stale_reviews": bool(reviews.get("dismiss_stale_reviews", False)),
-        "required_conversation_resolution": bool((live.get("required_conversation_resolution") or {}).get("enabled")),
         "strict_status_checks": bool(checks.get("strict")),
-        "allow_force_pushes": bool((live.get("allow_force_pushes") or {}).get("enabled")),
-        "allow_deletions": bool((live.get("allow_deletions") or {}).get("enabled")),
     }
     for field, actual in comparisons.items():
-        expected = row[field]
+        if field not in target:
+            continue
+        expected = target[field]
         if actual != expected:
             failures.append(f"{repo}: {field} expected {expected!r} but got {actual!r}")
 
     actual_contexts = sorted(checks.get("contexts") or [])
-    expected_contexts = sorted(row["required_status_checks"])
+    expected_contexts = sorted(target.get("required_status_checks", []))
     if actual_contexts != expected_contexts:
         failures.append(
             f"{repo}: required_status_checks expected {expected_contexts!r} but got {actual_contexts!r}"

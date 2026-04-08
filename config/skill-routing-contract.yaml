@@ -1,0 +1,82 @@
+# Skill Routing Contract — maps incident/task classes to required skill bundles
+#
+# Without this, agents use isolated skills instead of the correct combination.
+# Each route declares what skills MUST be invoked together for a given symptom.
+#
+# Consumed by:
+#   - scripts/qa/verify-skill-routing-contract.sh (schema + coverage)
+#   - Blind-agent acceptance harness (routing accuracy)
+#   - Agent execution workflows (auto-routing)
+---
+schema_version: "1.0"
+
+routes:
+  - id: blank-mfe-page
+    symptom: "MFE page is blank, white screen, or 404"
+    required_skills: [layer-triage, runtime-proof, frontend-mfe-change]
+    recommended_skills: [gitops-promotion]
+    entry_point: layer-triage
+    notes: "Must verify live assets before touching code"
+
+  - id: django-settings-drift
+    symptom: "Django setting wrong, missing, or different between envs"
+    required_skills: [layer-triage, settings-configmap, cross-repo-authority]
+    recommended_skills: [runtime-proof]
+    entry_point: layer-triage
+    notes: "Settings live in app repo but are consumed by infra overlays"
+
+  - id: promotion-question
+    symptom: "How to promote, release, or deploy a change"
+    required_skills: [layer-triage, gitops-promotion, cross-repo-authority]
+    recommended_skills: [runtime-proof]
+    entry_point: layer-triage
+    notes: "Promotion touches both repos — never edit infra from app repo"
+
+  - id: canary-failure
+    symptom: "Smoke test or canary failed after deployment"
+    required_skills: [layer-triage, runtime-proof, smoke-identity]
+    recommended_skills: [frontend-mfe-change]
+    entry_point: layer-triage
+    notes: "Live-asset gate must be green before browser canary"
+
+  - id: auth-sso-issue
+    symptom: "Login fails, SSO redirect loop, session cookie problem"
+    required_skills: [layer-triage, settings-configmap, runtime-proof]
+    recommended_skills: [cross-repo-authority]
+    entry_point: layer-triage
+    notes: "Cookie domain, SESSION_COOKIE_NAME, OAuth2 config are common causes"
+
+  - id: ci-gate-failure
+    symptom: "CI check failed, static validation red, workflow error"
+    required_skills: [layer-triage, ci-scope-and-timing]
+    recommended_skills: []
+    entry_point: layer-triage
+    notes: "Check if failure is deterministic vs environment-dependent"
+
+  - id: doc-authority-conflict
+    symptom: "Two docs say different things, stale reference, wrong canonical"
+    required_skills: [layer-triage, docs-governance]
+    recommended_skills: []
+    entry_point: layer-triage
+    notes: "Check DOCUMENTATION_AUTHORITY_RESOLVER first"
+
+  - id: cross-repo-boundary
+    symptom: "Change needs to span mereka-lms and bbi-infrastructure"
+    required_skills: [layer-triage, cross-repo-authority, gitops-promotion]
+    recommended_skills: [runtime-proof]
+    entry_point: layer-triage
+    notes: "App repo produces base manifests, infra repo consumes via overlays"
+
+  - id: branding-visual-bug
+    symptom: "Logo wrong, colors off, theme not applied, footer mismatch"
+    required_skills: [layer-triage, frontend-mfe-change, runtime-proof]
+    recommended_skills: []
+    entry_point: layer-triage
+    notes: "Check which surface: MFE brand package, Django theme, or Caddy static"
+
+  - id: image-build-failure
+    symptom: "Docker/Tutor image build fails, OOM, webpack error"
+    required_skills: [layer-triage, ci-scope-and-timing]
+    recommended_skills: [settings-configmap]
+    entry_point: layer-triage
+    notes: "Heavy builds need mereka-k8s-heavy-builders ARC runners"

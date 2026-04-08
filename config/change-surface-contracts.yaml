@@ -43,6 +43,7 @@ surfaces:
     name: "Django / LMS / CMS settings"
     globs:
       - "infrastructure/tutor/plugins/**"
+      - "deploy/k8s/base/apps/openedx/**"
       - "deploy/k8s/base/apps/lms/**"
       - "deploy/k8s/base/apps/cms/**"
     owner_layer: build-render

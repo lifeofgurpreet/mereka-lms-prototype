@@ -1959,7 +1959,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-branch-protection-contract.sh",
-      "reference_count": 6,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -6972,7 +6972,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-ghost-truth-surfaces.sh",
-      "reference_count": 5,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -12859,6 +12859,34 @@
         "ci_static"
       ],
       "env_scope": [
+        "global"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-proof-lineage-chain.sh",
+      "reference_count": 3,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "high",
+      "spec_ids": [
+        "AC-RELEASE-001"
+      ],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
+      "env_scope": [
         "prod"
       ],
       "kind": "verify",
@@ -14893,7 +14921,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-skill-frontmatter-integrity.sh",
-      "reference_count": 6,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -14928,6 +14956,34 @@
       ],
       "severity": "high",
       "spec_ids": [],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
+      "env_scope": [
+        "dev"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-skill-routing-contract.sh",
+      "reference_count": 5,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "high",
+      "spec_ids": [
+        "AC-PROCESS-001"
+      ],
       "status": "active",
       "tier": "release_blocking"
     },
@@ -15509,7 +15565,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-structural-debt-register.sh",
-      "reference_count": 5,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -18222,6 +18278,34 @@
         "ci_static"
       ],
       "env_scope": [
+        "dev"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-workflow-gate-enforcement.sh",
+      "reference_count": 3,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "high",
+      "spec_ids": [
+        "AC-CI-017"
+      ],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
+      "env_scope": [
         "global"
       ],
       "kind": "verify",
@@ -18441,27 +18525,27 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
-    "ci_static_bound": 386,
+    "ci_static_bound": 389,
     "kinds": {
-      "verify": 616
+      "verify": 619
     },
     "mutability": {
       "destructive": 10,
       "mutating": 18,
-      "read-only": 588
+      "read-only": 591
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 431,
+      "active": 434,
       "deprecated_candidate": 1,
       "manual_only": 184
     },
     "tiers": {
       "exploratory_manual": 188,
       "periodic_runtime": 18,
-      "release_blocking": 410
+      "release_blocking": 413
     },
-    "total_verify_scripts": 616,
+    "total_verify_scripts": 619,
     "workflow_direct_bound": 64
   },
   "version": "1"

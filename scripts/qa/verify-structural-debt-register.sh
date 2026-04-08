@@ -94,6 +94,32 @@ missing_classes = required_classes - seen_classes
 for klass in sorted(missing_classes):
     issues.append(f"missing required debt class {klass}")
 
+# Strictness: high/critical open debt past review date must be flagged
+from datetime import date
+today = date.today().isoformat()
+warnings = []
+for entry in entries:
+    if entry.get("status") == "resolved":
+        continue
+    severity = entry.get("severity", "")
+    review = str(entry.get("review_date", ""))
+    eid = entry.get("id", "?")
+    # High/critical past review date → fail
+    if severity in ("critical", "high") and review < today:
+        issues.append(f"{eid}: {severity} debt past review_date {review} — must be reviewed or reclassified")
+    # Medium past review date → warning (non-blocking)
+    elif severity == "medium" and review < today:
+        warnings.append(f"{eid}: medium debt past review_date {review}")
+    # No owner → fail
+    if not entry.get("owner_repo"):
+        issues.append(f"{eid}: missing owner_repo")
+    # No risk statement → fail
+    if not entry.get("current_risk"):
+        issues.append(f"{eid}: missing current_risk")
+
+for w in warnings:
+    print(f"  [WARN] {w}")
+
 if issues:
     for issue in issues:
         print(issue)

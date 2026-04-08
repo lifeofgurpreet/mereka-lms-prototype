@@ -161,6 +161,94 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# Q6: "Smoke test user can't log in"
+# Expected: smoke-identity + runtime-proof, smoke-account-registry
+# ---------------------------------------------------------------------------
+echo '--- Q6: "Smoke user login fails" → smoke-identity ---'
+
+if [[ -f "$REPO_ROOT/.factory/skills/smoke-identity/SKILL.md" ]]; then
+  pass "smoke-identity skill exists"
+else
+  fail "smoke-identity skill missing"
+fi
+
+if [[ -f "$REPO_ROOT/config/skill-routing-contract.yaml" ]]; then
+  if grep -A3 'canary-failure' "$REPO_ROOT/config/skill-routing-contract.yaml" | grep -q 'smoke-identity'; then
+    pass "skill-routing-contract routes canary-failure to smoke-identity"
+  else
+    fail "skill-routing-contract missing smoke-identity for canary-failure"
+  fi
+else
+  fail "skill-routing-contract.yaml missing"
+fi
+
+# ---------------------------------------------------------------------------
+# Q7: "Logo is wrong on the MFE learner dashboard"
+# Expected: frontend-mfe-change + runtime-proof, branding route
+# ---------------------------------------------------------------------------
+echo '--- Q7: "Wrong logo on MFE" → frontend-mfe-change ---'
+
+if [[ -f "$REPO_ROOT/config/skill-routing-contract.yaml" ]]; then
+  if grep -A3 'branding-visual-bug' "$REPO_ROOT/config/skill-routing-contract.yaml" | grep -q 'frontend-mfe-change'; then
+    pass "skill-routing-contract routes branding to frontend-mfe-change"
+  else
+    fail "skill-routing-contract missing frontend-mfe-change for branding"
+  fi
+else
+  fail "skill-routing-contract.yaml missing"
+fi
+
+# ---------------------------------------------------------------------------
+# Q8: "Which document is the authority for release process?"
+# Expected: docs-governance skill, DOCUMENTATION_AUTHORITY_RESOLVER
+# ---------------------------------------------------------------------------
+echo '--- Q8: "Release process authority?" → docs-governance ---'
+
+if [[ -f "$REPO_ROOT/.factory/skills/docs-governance/SKILL.md" ]]; then
+  pass "docs-governance skill exists"
+else
+  fail "docs-governance skill missing"
+fi
+
+if [[ -f "$REPO_ROOT/config/source-of-truth-matrix.yaml" ]]; then
+  pass "source-of-truth-matrix.yaml exists for canonical lookups"
+else
+  fail "source-of-truth-matrix.yaml missing"
+fi
+
+# ---------------------------------------------------------------------------
+# Q9: "Tutor image build OOM'd — what do I check?"
+# Expected: ci-scope-and-timing, image-build-failure route
+# ---------------------------------------------------------------------------
+echo '--- Q9: "Image build OOM" → ci-scope-and-timing ---'
+
+if [[ -f "$REPO_ROOT/config/skill-routing-contract.yaml" ]]; then
+  if grep -q 'image-build-failure' "$REPO_ROOT/config/skill-routing-contract.yaml"; then
+    pass "skill-routing-contract has image-build-failure route"
+  else
+    fail "skill-routing-contract missing image-build-failure route"
+  fi
+else
+  fail "skill-routing-contract.yaml missing"
+fi
+
+# ---------------------------------------------------------------------------
+# Q10: "SSO redirect loop on Studio after config change"
+# Expected: settings-configmap + runtime-proof, auth route
+# ---------------------------------------------------------------------------
+echo '--- Q10: "Studio SSO redirect loop" → settings-configmap ---'
+
+if [[ -f "$REPO_ROOT/config/skill-routing-contract.yaml" ]]; then
+  if grep -A3 'auth-sso-issue' "$REPO_ROOT/config/skill-routing-contract.yaml" | grep -q 'settings-configmap'; then
+    pass "skill-routing-contract routes auth-sso to settings-configmap"
+  else
+    fail "skill-routing-contract missing settings-configmap for auth-sso"
+  fi
+else
+  fail "skill-routing-contract.yaml missing"
+fi
+
+# ---------------------------------------------------------------------------
 # Meta: contract system completeness
 # ---------------------------------------------------------------------------
 echo '--- Meta: Contract system completeness ---'
@@ -174,6 +262,8 @@ REQUIRED_CONTRACTS=(
   "config/ci-scope-contract.yaml"
   "config/change-surface-contracts.yaml"
   "config/process-invariants.yaml"
+  "config/skill-routing-contract.yaml"
+  "config/source-of-truth-matrix.yaml"
 )
 
 for contract in "${REQUIRED_CONTRACTS[@]}"; do
