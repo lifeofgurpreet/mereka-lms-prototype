@@ -22,12 +22,11 @@ def _register_env_patch(patch_name: str, patch_body: str) -> None:
 # Uses webpack 4 → requires Node 18 (patched by patches/learner-record-node18.sh).
 from tutormfe.hooks import MFE_APPS  # noqa: E402
 
-MFE_APPS.add_item(
-    (
-        "learner-record",
-        {
-            "repository": "https://github.com/openedx/frontend-app-learner-record.git",
-            "port": 1990,
-        },
-    )
-)
+
+@MFE_APPS.add()
+def _add_learner_record_mfe(apps):
+    apps["learner-record"] = {
+        "repository": "https://github.com/openedx/frontend-app-learner-record.git",
+        "port": 1990,
+    }
+    return apps
