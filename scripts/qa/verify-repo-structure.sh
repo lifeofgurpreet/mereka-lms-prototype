@@ -135,6 +135,7 @@ allowed_root_md=(
   "README.md"
   "CLAUDE.md"
   "AGENTS.md"
+  "CHANGELOG.md"
   "CONTRIBUTING.md"
   "MIGRATION_CHECKLIST.md"
   "LOCAL_SETUP_COMPLETE.md"

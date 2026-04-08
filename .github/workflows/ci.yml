@@ -15,12 +15,14 @@ on:
       - '.github/workflows/docs-compliance.yml'
       - '.github/workflows/docs-policy.yml'
       - '.github/workflows/codeql.yml'
-      - '*.md'
       - 'CLAUDE.md'
       - 'AGENTS.md'
       - 'CONTRIBUTING.md'
       - 'SECURITY.md'
       - 'LICENSE'
+      # NOTE: '*.md' glob removed. CHANGELOG.md and other root .md files
+      # are release artifacts that must trigger CI so required branch-
+      # protection checks report and PRs can merge.
   merge_group:
   push:
     branches: [main]
