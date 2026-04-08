@@ -579,7 +579,7 @@ jobs:
       # active main build after the janitor clears older queued workflow runs.
       group: build-mfe-${{ github.ref == 'refs/heads/main' && github.ref || github.run_id }}
       cancel-in-progress: false
-    timeout-minutes: 120
+    timeout-minutes: 150
     needs: [resolve-build-scope, lint, prepare-build-context]
     if: ${{ needs.resolve-build-scope.outputs.build_mfe == 'true' }}
     permissions:
@@ -677,7 +677,8 @@ jobs:
           ) &
           HEARTBEAT_PID=$!
           trap 'kill $HEARTBEAT_PID 2>/dev/null || true' EXIT
-          if ! timeout 110m ./scripts/infra/build-mfe-image.sh \
+          # 140m: 12 MFEs + learner-record on separate Node 18 base needs extra time
+          if ! timeout 140m ./scripts/infra/build-mfe-image.sh \
             --context-dir "${TUTOR_ROOT}/env/plugins/mfe/build/mfe" \
             --dockerfile "${TUTOR_ROOT}/env/plugins/mfe/build/mfe/Dockerfile" \
             --image-repo "${{ env.REGISTRY }}/mfe" \
