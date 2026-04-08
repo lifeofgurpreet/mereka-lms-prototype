@@ -1356,6 +1356,15 @@ jobs:
       - name: Install cosign
         run: ./scripts/infra/install-cosign.sh
 
+      - name: Generate GitHub App token for artifact access and cross-repo dispatch
+        id: app-token
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349  # v2
+        with:
+          app-id: ${{ secrets.BBI_ARC_GITHUB_APP_ID }}
+          private-key: ${{ secrets.BBI_ARC_GITHUB_APP_PRIVATE_KEY }}
+          owner: Biji-Biji-Initiative
+          repositories: mereka-lms,bbi-infrastructure
+
       - name: Resolve release bundle digests
         id: resolve_digests
         env:
@@ -1363,7 +1372,7 @@ jobs:
           MFE_DIGEST: ${{ needs.build-mfe.outputs.image_digest }}
           BUILD_OPENEDX_RESULT: ${{ needs.build-openedx.result }}
           BUILD_MFE_RESULT: ${{ needs.build-mfe.result }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
           REPO: ${{ github.repository }}
           CURRENT_RUN_ID: ${{ github.run_id }}
         run: |
@@ -1578,16 +1587,6 @@ jobs:
             var/ci/release-bundle.sig
             var/ci/release-bundle.pem
           retention-days: 90
-
-      - name: Generate GitHub App token for cross-repo dispatch
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-        id: app-token
-        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349  # v2
-        with:
-          app-id: ${{ secrets.BBI_ARC_GITHUB_APP_ID }}
-          private-key: ${{ secrets.BBI_ARC_GITHUB_APP_PRIVATE_KEY }}
-          owner: Biji-Biji-Initiative
-          repositories: bbi-infrastructure
 
       - name: Dispatch dev promotion to infra repo
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
