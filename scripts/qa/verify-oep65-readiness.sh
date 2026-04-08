@@ -268,7 +268,7 @@ section "7. Dockerfile surgery maintainability (OEP-65 gap: regex anchors)"
 if [[ ! -f "$APPLY_PATCHES" ]]; then
   skip "apply-patches.sh not found — cannot check Dockerfile surgery"
 else
-  if grep -q "mfe-node.sh\|mfe_node" "$APPLY_PATCHES"; then
+  if grep -q '^[^#]*mfe-node\.sh\|^[^#]*mfe_node' "$APPLY_PATCHES"; then
     fail "mfe-node.sh Dockerfile surgery still active in apply-patches.sh (Gap 3 in OEP65_MODULE_READINESS.md — will break when upstream MFE Dockerfile structure changes)"
   else
     pass "mfe-node.sh Dockerfile surgery not present in apply-patches.sh (Gap 3 mitigated)"

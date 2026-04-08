@@ -8789,6 +8789,7 @@
         "ci_static"
       ],
       "env_scope": [
+        "dev",
         "prod"
       ],
       "kind": "verify",

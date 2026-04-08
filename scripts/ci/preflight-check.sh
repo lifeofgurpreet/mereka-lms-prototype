@@ -56,24 +56,22 @@ echo "Generating Dockerfiles (tutor config save + apply-patches.sh)..."
   >/dev/null 2>&1
 
 # Apply patches to the rendered Dockerfile.
-# We can't use apply-patches.sh directly because it hardcodes paths relative
-# to tutor_env/ and discovers template paths from Python imports. Instead, run
-# the MFE_TEMPLATE-aware patching with MFE_TEMPLATE pointing at our rendered file.
+# NOTE: mfe-node.sh was removed in tracker #32. MFE Dockerfile patches are now
+# handled by Tutor plugin hooks in _mereka_lms/mfe_dockerfile.py, applied at
+# `tutor config save` time. This block now only runs brand-package and footer
+# asset sync patches (file I/O operations that plugins cannot perform).
 export MFE_TEMPLATE="$TUTOR_ROOT/env/plugins/mfe/build/mfe/Dockerfile"
 RENDERED_DF="$TUTOR_ROOT/env/plugins/mfe/build/mfe/Dockerfile"
-if [[ -f "$RENDERED_DF" && -f "$REPO_ROOT/infrastructure/tutor/patches/mfe-node.sh" ]]; then
+if [[ -f "$RENDERED_DF" ]]; then
   (
     export VIRTUAL_ENV="$TUTOR_VENV"
     export PATH="$TUTOR_VENV/bin:$PATH"
     export REPO_ROOT TUTOR_ROOT MFE_TEMPLATE
-    # Symlink so hardcoded tutor_env path in mfe-node.sh also finds the file
     mkdir -p "$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe" 2>/dev/null || true
     ln -sf "$RENDERED_DF" "$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile" 2>/dev/null || true
     cd "$REPO_ROOT"
     source infrastructure/tutor/patches/_common.sh
     _discover_template_paths 2>/dev/null || true
-    source infrastructure/tutor/patches/mfe-node.sh
-    apply_mfe_node_patch
     source infrastructure/tutor/patches/brand-package.sh
     apply_brand_package_patch 2>/dev/null || true
     source infrastructure/tutor/patches/footer-component.sh

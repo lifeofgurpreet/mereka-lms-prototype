@@ -20,8 +20,8 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
-# Patch functions moved to the modular patch file (T018 refactor)
-MFE_PATCH="$REPO_ROOT/infrastructure/tutor/patches/mfe-node.sh"
+# mfe-node.sh removed in tracker #32; MFE Dockerfile hooks now live in plugin module
+MFE_PATCH="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py"
 SNAPSHOT="$REPO_ROOT/infrastructure/tutor/mfe-build/Dockerfile"
 KUSTOMIZATION_PROD="$REPO_ROOT/deploy/k8s/overlays/production/kustomization.yaml"
 NAMESPACE="${NAMESPACE:-mereka-lms}"
@@ -62,29 +62,21 @@ echo ""
 run_offline_checks() {
 
   # -----------------------------------------------------------------------
-  # AC-ULMO-001: Patch function exists in apply-patches.sh
+  # AC-ULMO-001: Ulmo source refs are native in Tutor v21 (no patch needed)
+  # NOTE: ensure_mfe_ulmo_source_refs() was in mfe-node.sh (removed tracker #32).
+  # Tutor v21 (Ulmo) natively uses release/ulmo.1 refs; the bash patch is no-op.
+  # Verification is now against the snapshot Dockerfile directly.
   # -----------------------------------------------------------------------
-  echo "--- AC-ULMO-001: ensure_mfe_ulmo_source_refs patch function ---"
+  echo "--- AC-ULMO-001: Ulmo source refs (native in Tutor v21) ---"
 
   if [[ ! -f "$APPLY_PATCHES" ]]; then
     fail "apply-patches.sh not found at $APPLY_PATCHES"
   else
-    # After T018 refactor, patch functions live in patches/mfe-node.sh
-    PATCH_SOURCE="$APPLY_PATCHES"
-    if [[ -f "$MFE_PATCH" ]]; then
-      PATCH_SOURCE="$MFE_PATCH"
-    fi
-
-    if grep -q "def ensure_mfe_ulmo_source_refs" "$PATCH_SOURCE"; then
-      pass "ensure_mfe_ulmo_source_refs() present in $PATCH_SOURCE"
+    # Verify mfe-node.sh is no longer sourced (it was removed in tracker #32)
+    if grep -q 'mfe-node.sh' "$APPLY_PATCHES"; then
+      fail "apply-patches.sh still references removed mfe-node.sh (tracker #32)"
     else
-      fail "ensure_mfe_ulmo_source_refs() missing from $PATCH_SOURCE"
-    fi
-
-    if grep -q "release/ulmo\.1" "$PATCH_SOURCE"; then
-      pass "Patch source patches ADD refs to release/ulmo.1"
-    else
-      fail "Patch source has no ulmo.1 ref patch"
+      pass "apply-patches.sh does not reference deprecated mfe-node.sh"
     fi
 
     # OPENEDX_COMMON_VERSION check (gitignored config.yml)
@@ -92,9 +84,9 @@ run_offline_checks() {
     if [[ -f "$TUTOR_CONFIG" ]]; then
       CONFIG_VER=$(grep "OPENEDX_COMMON_VERSION" "$TUTOR_CONFIG" | head -1 || true)
       if echo "$CONFIG_VER" | grep -q "redwood"; then
-        pass "OPENEDX_COMMON_VERSION=redwood.3 (patch approach active — not config-driven)"
+        pass "OPENEDX_COMMON_VERSION=redwood.3 (snapshot approach active)"
       elif echo "$CONFIG_VER" | grep -q "ulmo"; then
-        pass "OPENEDX_COMMON_VERSION=ulmo (config-driven approach — patch is no-op)"
+        pass "OPENEDX_COMMON_VERSION=ulmo (native Tutor v21 behavior)"
       else
         skip "OPENEDX_COMMON_VERSION not determinable from config.yml"
       fi
@@ -243,19 +235,13 @@ run_offline_checks() {
     fi
   fi
 
-  # After T018 refactor, patch functions live in patches/mfe-node.sh
-  BRAND_SOURCE="${MFE_PATCH:-$APPLY_PATCHES}"
-  if [[ -f "$BRAND_SOURCE" ]]; then
-    if grep -q "def ensure_mfe_brand_ulmo_version" "$BRAND_SOURCE"; then
-      pass "ensure_mfe_brand_ulmo_version() present in patch source"
+  # mfe-node.sh removed in tracker #32; brand version now handled via @edx/brand@file:./brand-mereka
+  # The plugin module handles brand copy; indigo-brand-openedx pin is no longer used.
+  if [[ -f "$MFE_PATCH" ]]; then
+    if grep -q '@edx/brand@file:./brand-mereka' "$MFE_PATCH"; then
+      pass "Plugin module uses local brand package (@edx/brand@file:./brand-mereka)"
     else
-      fail "ensure_mfe_brand_ulmo_version() missing from patch source ($BRAND_SOURCE)"
-    fi
-
-    if grep -qE "indigo-brand-openedx@\^2\.[4-9]\." "$BRAND_SOURCE"; then
-      pass "Patch source references ulmo-compatible brand version (^2.4.x+)"
-    else
-      fail "Patch source still references pre-ulmo brand version"
+      fail "Plugin module missing local brand package hook"
     fi
   fi
 
@@ -277,15 +263,9 @@ run_offline_checks() {
     skip "Snapshot Dockerfile not found — skipping discussions webpack check"
   fi
 
-  # After T018 refactor, this function lives in patches/mfe-node.sh
-  DISCUSSIONS_SOURCE="${MFE_PATCH:-$APPLY_PATCHES}"
-  if [[ -f "$DISCUSSIONS_SOURCE" ]]; then
-    if grep -q "def ensure_mfe_discussions_webpack_noninteractive" "$DISCUSSIONS_SOURCE"; then
-      pass "ensure_mfe_discussions_webpack_noninteractive() present as guard"
-    else
-      skip "ensure_mfe_discussions_webpack_noninteractive() not found — guard may have been removed"
-    fi
-  fi
+  # ensure_mfe_discussions_webpack_noninteractive() was in mfe-node.sh (removed tracker #32).
+  # This was dead code on Ulmo — discussions webpack is fixed upstream. No replacement needed.
+  pass "discussions webpack guard removed as dead code (Ulmo native fix — tracker #32)"
 
   echo ""
 

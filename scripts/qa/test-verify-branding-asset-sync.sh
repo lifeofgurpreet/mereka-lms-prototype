@@ -16,6 +16,7 @@ mkdir -p \
   "$tmpdir/tutor_env/env/apps/openedx/settings/lms" \
   "$tmpdir/infrastructure/tutor" \
   "$tmpdir/infrastructure/tutor/patches" \
+  "$tmpdir/infrastructure/tutor/plugins/_mereka_lms" \
   "$tmpdir/scripts/branding"
 
 for logo in \
@@ -38,8 +39,14 @@ cat >"$tmpdir/infrastructure/tutor/apply-patches.sh" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 PATCHES_DIR="$(pwd)/infrastructure/tutor/patches"
-source "$PATCHES_DIR/mfe-node.sh"
+# mfe-node.sh removed in tracker #32; MFE hooks are in the Tutor plugin module
 source "$PATCHES_DIR/brand-package.sh"
+EOF
+
+# Minimal plugin module mock to satisfy verify-branding-asset-sync.sh check
+cat >"$tmpdir/infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py" <<'EOF'
+# Mock mfe_dockerfile.py for test fixture
+_register_env_patch("mfe-dockerfile-pre-npm-install", "")
 EOF
 
 cat >"$tmpdir/scripts/branding/sync-brand-package.sh" <<'EOF'

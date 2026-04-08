@@ -486,10 +486,11 @@ PY
 fi
 
 # AC-BRAND-023 Tutor build integration contract
-# Brand COPY + npm alias may be in the plugin OR in patches/mfe-node.sh (current debt).
+# Brand COPY + npm alias are handled by the Tutor plugin module.
+# Search both the main plugin file and the MFE Dockerfile submodule.
+PLUGIN_DIR="$(dirname "$PLUGIN_FILE")"
 BRAND_SEARCH_FILES=("$PLUGIN_FILE")
-MFE_NODE_PATCH="$REPO_ROOT/infrastructure/tutor/patches/mfe-node.sh"
-[[ -f "$MFE_NODE_PATCH" ]] && BRAND_SEARCH_FILES+=("$MFE_NODE_PATCH")
+[[ -f "$PLUGIN_DIR/_mereka_lms/mfe_dockerfile.py" ]] && BRAND_SEARCH_FILES+=("$PLUGIN_DIR/_mereka_lms/mfe_dockerfile.py")
 
 BRAND_COPY_FOUND=0
 BRAND_NPM_FOUND=0

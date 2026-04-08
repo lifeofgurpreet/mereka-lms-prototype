@@ -8,7 +8,8 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
 APPLY_PATCH_SCRIPT="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
-PATCH_MODULE="$REPO_ROOT/infrastructure/tutor/patches/mfe-node.sh"
+# mfe-node.sh removed in tracker #32; MFE Dockerfile hooks now live in the plugin
+PATCH_MODULE="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py"
 SLOT_OWNERSHIP_PATCH="$REPO_ROOT/infrastructure/tutor/patches/mfe-slot-ownership.sh"
 SLOT_OWNERSHIP_HELPER="$REPO_ROOT/infrastructure/tutor/patches/mfe_slot_ownership.py"
 GENERATED_MFE_DOCKERFILE="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
@@ -112,16 +113,23 @@ echo "Verifying MFE build prerequisites..."
 echo ""
 
 echo "1. Patch source contract..."
-check_contains "apply-patches sources MFE patch module" "$APPLY_PATCH_SCRIPT" "source \"\$PATCHES_DIR/mfe-node.sh\""
-check_contains "apply-patches applies MFE node patch" "$APPLY_PATCH_SCRIPT" "apply_mfe_node_patch"
+# mfe-node.sh was removed in tracker #32; verify it is absent from apply-patches.sh
+if grep -q 'mfe-node.sh' "$APPLY_PATCH_SCRIPT" 2>/dev/null; then
+  echo "  ✗ apply-patches.sh still references removed mfe-node.sh (tracker #32)"
+  failures=1
+else
+  echo "  ✓ apply-patches.sh does not reference deprecated mfe-node.sh"
+fi
 check_contains "apply-patches sources MFE slot ownership patch" "$APPLY_PATCH_SCRIPT" "source \"\$PATCHES_DIR/mfe-slot-ownership.sh\""
 check_contains "apply-patches applies MFE slot ownership patch" "$APPLY_PATCH_SCRIPT" "apply_mfe_slot_ownership_patch"
-check_contains "mfe-node patch defines plugin dependency helper" "$PATCH_MODULE" "def ensure_mfe_plugin_framework_dependency(text):"
+# Plugin module now carries all MFE Dockerfile hooks (tracker #32)
+check_contains "plugin module defines pre-npm-install hook" "$PATCH_MODULE" "mfe-dockerfile-pre-npm-install"
+check_contains "plugin module defines post-npm-install hook" "$PATCH_MODULE" "mfe-dockerfile-post-npm-install"
+check_contains "plugin module installs frontend-plugin-framework" "$PATCH_MODULE" "frontend-plugin-framework@^1.8.0"
+check_contains "plugin module installs local brand package" "$PATCH_MODULE" "@edx/brand@file:./brand-mereka"
 check_contains "slot ownership shell delegates to Python helper" "$SLOT_OWNERSHIP_PATCH" "mfe_slot_ownership.py"
 check_contains "slot ownership helper defines strip_slot_ownership" "$SLOT_OWNERSHIP_HELPER" "def strip_slot_ownership("
-check_contains_any_file "mfe-node patch injects legacy-to-legacy-peer line" "$LEGACY_PLUGIN_INSTALL_LINE" "$PATCH_MODULE"
-check_contains_any_file "mfe-node patch injects plugin dependency line" "$PLUGIN_INSTALL_LINE" "$PATCH_MODULE"
-check_contains_any_file "mfe-node patch invokes plugin dependency helper" "updated = ensure_mfe_plugin_framework_dependency(updated)" "$PATCH_MODULE" "$APPLY_PATCH_SCRIPT"
+check_contains_any_file "plugin injects plugin dependency line" "$PLUGIN_INSTALL_LINE" "$PATCH_MODULE"
 
 echo ""
 echo "2. Generated Dockerfile contract..."

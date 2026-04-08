@@ -58,7 +58,8 @@ if [[ -x "$BRANDING_CHECK" ]]; then
 fi
 
 # Source all patch modules
-source "$PATCHES_DIR/mfe-node.sh"
+# NOTE: MFE node patch module removed in tracker #32; all MFE Dockerfile
+# patches are now handled by Tutor plugin hooks in _mereka_lms/mfe_dockerfile.py.
 source "$PATCHES_DIR/brand-package.sh"
 source "$PATCHES_DIR/webpack-memory.sh"
 source "$PATCHES_DIR/footer-component.sh"
@@ -104,7 +105,6 @@ apply_openedx_patches() {
 }
 
 apply_mfe_patches() {
-  apply_patch apply_mfe_node_patch
   apply_patch apply_brand_package_patch
   apply_patch apply_footer_component_patch
   apply_patch apply_mfe_slot_ownership_patch

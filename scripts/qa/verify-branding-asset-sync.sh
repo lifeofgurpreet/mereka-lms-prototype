@@ -191,10 +191,18 @@ if [[ ! -f "$APPLY_PATCHES" ]]; then
   fail "apply-patches.sh not found at $APPLY_PATCHES"
 else
   pass "apply-patches.sh exists"
+  # mfe-node.sh was removed in tracker #32; verify it is no longer sourced
   if grep -q 'source "\$PATCHES_DIR/mfe-node.sh"' "$APPLY_PATCHES"; then
-    pass "apply-patches sources mfe-node patch module"
+    fail "apply-patches.sh still sources removed mfe-node.sh (tracker #32)"
   else
-    fail "apply-patches missing source for mfe-node.sh"
+    pass "apply-patches.sh does not source deprecated mfe-node.sh"
+  fi
+  # Verify MFE Dockerfile hooks are in the plugin instead
+  PLUGIN_MFE="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py"
+  if [[ -f "$PLUGIN_MFE" ]] && grep -q 'mfe-dockerfile-pre-npm-install' "$PLUGIN_MFE"; then
+    pass "MFE Dockerfile hooks present in Tutor plugin (_mereka_lms/mfe_dockerfile.py)"
+  else
+    fail "MFE Dockerfile hooks missing from plugin — MFE build toolchain may be broken"
   fi
   if grep -q 'source "\$PATCHES_DIR/brand-package.sh"' "$APPLY_PATCHES"; then
     pass "apply-patches sources brand-package patch module"

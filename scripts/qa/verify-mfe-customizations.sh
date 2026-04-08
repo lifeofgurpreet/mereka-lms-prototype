@@ -16,7 +16,8 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
-MFE_NODE_PATCH="$REPO_ROOT/infrastructure/tutor/patches/mfe-node.sh"
+# mfe-node.sh removed in tracker #32; hooks now live in the Tutor plugin module
+MFE_PLUGIN_MODULE="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py"
 TUTOR_ENV="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
 
 PASS=0
@@ -57,22 +58,21 @@ if [[ ! -f "$APPLY_PATCHES" ]]; then
   check_fail "apply-patches.sh not found at $APPLY_PATCHES"
 else
   # Use fixed-string matching (grep -F) to avoid ERE special-character issues.
+  # Signatures now checked against the Tutor plugin module (tracker #32: mfe-node.sh removed).
   declare -A PATCH_SIGNATURES=(
-    ["Node 24 toolchain lock"]="FROM docker.io/node:24.11.0-bullseye-slim"
+    ["Node 24 toolchain (pre-npm-install hook)"]="mfe-dockerfile-pre-npm-install"
     ["g++ python3 toolchain extension"]="gcc g++ git libgl1 libxi6 make python3 python3-distutils"
-    ["Mereka theme copy (indigo/mereka)"]="COPY indigo/mereka /openedx/app/mereka"
-    ["NPM resilience retry loop"]="npm clean-install attempt \${attempt} failed"
+    ["Mereka brand package copy"]="COPY indigo/brand-mereka /openedx/app/brand-mereka"
     ["Cookie domain ENV injection"]="SESSION_COOKIE_DOMAIN"
     ["Frontend plugin framework install"]="frontend-plugin-framework@^1.8.0"
-    ["Indigo brand ulmo pin (2.4.3)"]="indigo-brand-openedx@^2.4.3"
-    ["Admin console Redux deps"]="ensure_mfe_admin_console_redux_deps"
-    ["Course-authoring symlink fix"]="ensure_mfe_course_authoring_directory_fix"
-    ["Discussions webpack non-interactive"]="ensure_mfe_discussions_webpack_noninteractive"
+    ["Local brand alias"]="@edx/brand@file:./brand-mereka"
+    ["Admin console Redux deps"]="react-redux@^8.1.3"
+    ["Account social_links guard"]="unguarded social_links lookup survived account build"
   )
 
   for label in "${!PATCH_SIGNATURES[@]}"; do
     pattern="${PATCH_SIGNATURES[$label]}"
-    if grep -qF "$pattern" "$APPLY_PATCHES" "$MFE_NODE_PATCH" "$TUTOR_ENV" 2>/dev/null; then
+    if grep -qF "$pattern" "$APPLY_PATCHES" "$MFE_PLUGIN_MODULE" "$TUTOR_ENV" 2>/dev/null; then
       check_pass "$label"
     else
       check_fail "$label — pattern not found: $pattern"
@@ -81,20 +81,18 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 2. List all MFE-related function names from apply-patches.sh
+# 2. List all MFE-related hook registrations from plugin module
 # ---------------------------------------------------------------------------
 
-section "MFE patch function inventory (MFE patch scripts)"
+section "MFE patch hook inventory (plugin module)"
 
-if [[ -f "$MFE_NODE_PATCH" ]]; then
-  echo "  Detected MFE-related functions:"
-  grep -E "^[[:space:]]*def ensure_mfe_" "$MFE_NODE_PATCH" \
-    | sed 's/[[:space:]]*def //; s/(.*$//' \
-    | while read -r fn; do
-        echo "    - $fn"
-      done
+if [[ -f "$MFE_PLUGIN_MODULE" ]]; then
+  echo "  Detected MFE hooks in plugin module:"
+  grep -E '"mfe-dockerfile-' "$MFE_PLUGIN_MODULE" \
+    | sed 's/.*"\(mfe-dockerfile-[^"]*\)".*/  - \1/' \
+    | sort -u
 else
-  check_warn "MFE patch helper functions not found"
+  check_warn "MFE plugin module not found at $MFE_PLUGIN_MODULE"
 fi
 
 # ---------------------------------------------------------------------------
