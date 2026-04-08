@@ -52,6 +52,41 @@ def load_spec(env: str) -> dict:
     raise FileNotFoundError(f"No spec found for env={env}. Tried: {tried}")
 
 
+def _ensure_user_profile_and_registration(user, result: dict, dry_run: bool) -> None:
+    """Ensure a User has UserProfile and Registration records.
+
+    Open edX MFE login fails with a server error if these are missing.
+    Users created via manage.py or direct ORM may lack them.
+    """
+    import uuid as uuid_lib
+
+    from common.djangoapps.student.models import Registration, UserProfile
+
+    if not UserProfile.objects.filter(user=user).exists():
+        if dry_run:
+            result["actions"].append(
+                f"CREATE UserProfile for {user.username}"
+            )
+        else:
+            UserProfile.objects.create(user=user, name=user.username)
+            result["actions"].append(
+                f"CREATED UserProfile for {user.username}"
+            )
+
+    if not Registration.objects.filter(user=user).exists():
+        if dry_run:
+            result["actions"].append(
+                f"CREATE Registration for {user.username}"
+            )
+        else:
+            Registration.objects.create(
+                user=user, activation_key=uuid_lib.uuid4().hex[:32]
+            )
+            result["actions"].append(
+                f"CREATED Registration for {user.username}"
+            )
+
+
 def bootstrap_tenant(tenant: dict, dry_run: bool) -> dict:
     """Bootstrap a single tenant. Returns a result dict."""
     from django.contrib.sites.models import Site
@@ -205,6 +240,10 @@ def bootstrap_tenant(tenant: dict, dry_run: bool) -> dict:
             )
             continue
 
+        # Ensure UserProfile and Registration exist (required for MFE login).
+        # Users created via manage.py or Django ORM may lack these records.
+        _ensure_user_profile_and_registration(user, result, dry_run)
+
         ecu = EnterpriseCustomerUser.objects.filter(
             enterprise_customer=ec, user_id=user.id
         ).first()
@@ -281,6 +320,42 @@ def _studio_redirect_uri(tenant: dict, lms_domain: str) -> str:
     return f"https://{studio_domain}/complete/edx-oauth2/"
 
 
+def _reconcile_application_access(app, result: dict) -> None:
+    """Ensure the cms-sso OAuth2 Application has an ApplicationAccess record.
+
+    Studio's python-social-auth requests scopes: user_id, profile, email.
+    Without an ApplicationAccess record tied to the Application, Open edX's
+    DOT scope validator rejects these as invalid_scope.
+    """
+    try:
+        from openedx.core.djangoapps.oauth_dispatch.models import ApplicationAccess
+
+        desired_scopes = ["user_id", "profile", "email"]
+        access, created = ApplicationAccess.objects.get_or_create(
+            application=app,
+            defaults={"scopes": desired_scopes},
+        )
+        if created:
+            result["actions"].append(
+                f"CREATED ApplicationAccess for cms-sso scopes={desired_scopes}"
+            )
+        elif set(access.scopes) != set(desired_scopes):
+            access.scopes = desired_scopes
+            access.save(update_fields=["scopes"])
+            result["actions"].append(
+                f"UPDATED ApplicationAccess for cms-sso scopes={desired_scopes}"
+            )
+        else:
+            result["actions"].append(
+                "EXISTS ApplicationAccess for cms-sso (scopes match)"
+            )
+    except ImportError:
+        result["errors"].append(
+            "openedx.core.djangoapps.oauth_dispatch not available — "
+            "cannot reconcile ApplicationAccess"
+        )
+
+
 def bootstrap_cms_sso_oauth_client(spec: dict, tenants: list, dry_run: bool) -> dict:
     """Bootstrap the cms-sso OAuth2 Application in the LMS database.
 
@@ -309,6 +384,9 @@ def bootstrap_cms_sso_oauth_client(spec: dict, tenants: list, dry_run: bool) -> 
             "CREATE/UPDATE OAuth2 Application client_id=cms-sso "
             f"redirect_uris=[{', '.join(redirect_uris)}]"
         )
+        result["actions"].append(
+            "ENSURE ApplicationAccess for cms-sso scopes=[user_id, profile, email]"
+        )
         return result
 
     try:
@@ -329,21 +407,47 @@ def bootstrap_cms_sso_oauth_client(spec: dict, tenants: list, dry_run: bool) -> 
                 f"with {len(redirect_uris)} redirect_uris"
             )
         else:
+            updated_fields = []
             current_uris = set((existing.redirect_uris or "").splitlines())
             desired_uris = set(redirect_uris)
             if current_uris != desired_uris:
                 existing.redirect_uris = redirect_uris_str
-                existing.skip_authorization = True
-                existing.save(update_fields=["redirect_uris", "skip_authorization"])
+                updated_fields.append("redirect_uris")
                 result["actions"].append(
-                    f"UPDATED OAuth2 Application client_id=cms-sso redirect_uris "
+                    f"UPDATED OAuth2 Application cms-sso redirect_uris "
                     f"({len(desired_uris - current_uris)} added, "
                     f"{len(current_uris - desired_uris)} removed)"
                 )
+            if not existing.skip_authorization:
+                existing.skip_authorization = True
+                updated_fields.append("skip_authorization")
+
+            # Reconcile client_secret from CMS_SOCIAL_AUTH_EDX_OAUTH2_SECRET.
+            # The CMS pod reads this from its ConfigMap/secret; the LMS DB
+            # must match for the OAuth2 code exchange to succeed.
+            import os
+            cms_secret = os.environ.get("CMS_SOCIAL_AUTH_EDX_OAUTH2_SECRET", "")
+            if cms_secret and existing.client_secret != cms_secret:
+                existing.client_secret = cms_secret
+                updated_fields.append("client_secret")
+                result["actions"].append(
+                    "UPDATED OAuth2 Application cms-sso client_secret "
+                    "(synced from CMS_SOCIAL_AUTH_EDX_OAUTH2_SECRET)"
+                )
+
+            if updated_fields:
+                existing.save(update_fields=updated_fields)
             else:
                 result["actions"].append(
                     "EXISTS OAuth2 Application client_id=cms-sso (redirect_uris match)"
                 )
+
+        # Reconcile ApplicationAccess for OAuth2 scopes.
+        # Studio requests scopes: user_id, profile, email.
+        # Without ApplicationAccess, DOT rejects these as invalid_scope.
+        app = Application.objects.get(client_id="cms-sso")
+        _reconcile_application_access(app, result)
+
     except ImportError:
         result["errors"].append(
             "oauth2_provider not installed — cannot bootstrap cms-sso OAuth Application"
