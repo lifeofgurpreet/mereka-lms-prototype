@@ -892,6 +892,11 @@ MFE_CONFIG["ENABLE_TAGGING_TAXONOMY_PAGES"] = "true"
 DISCUSSIONS_MICROFRONTEND_URL = f"{MEREKA_MFE_BASE_URL}/discussions"
 MFE_CONFIG["DISCUSSIONS_MFE_BASE_URL"] = DISCUSSIONS_MICROFRONTEND_URL
 DISCUSSIONS_MFE_FEEDBACK_URL = None
+# Required for /api/discussion/v1/courses/ to return data instead of 404.
+# Without this, the Discussions MFE loads but backend API calls fail because
+# the discussion service routes are registered but not activated for MFE context.
+DISCUSSIONS_MFE_ENABLED = True
+FEATURES["ENABLE_DISCUSSION_HOME_PANEL"] = False  # Force all traffic to MFE, not legacy panel
 
 
 

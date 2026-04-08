@@ -3,3 +3,4 @@ kind: Kustomization
 
 resources:
   - auth-verify-prod.yaml
+  - cert-verify-prod.yaml

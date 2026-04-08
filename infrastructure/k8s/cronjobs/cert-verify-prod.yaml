@@ -32,12 +32,23 @@ spec:
                   set -eu
 
                   # Keep the image simple; install only what we need.
-                  apk add --no-cache openssl ca-certificates >/dev/null
+                  apk add --no-cache openssl ca-certificates curl >/dev/null
 
                   fail=0
 
                   ok() { printf "OK  %s\n" "$1"; }
                   bad() { printf "BAD %s\n" "$1" >&2; fail=$((fail+1)); }
+
+                  # Internal LMS liveness check before external TLS verification.
+                  # Use /heartbeat (not /): the root path redirects unauthenticated
+                  # users to the MFE login page (HTTP 302), while /heartbeat returns
+                  # HTTP 200 unconditionally without authentication.
+                  LMS_CODE=$(curl -sS -o /dev/null -w "%{http_code}" "http://lms:8000/heartbeat" || echo "000")
+                  if [ "$LMS_CODE" = "200" ]; then
+                    ok "http://lms:8000/heartbeat ($LMS_CODE)"
+                  else
+                    bad "http://lms:8000/heartbeat (expected 200, got $LMS_CODE)"
+                  fi
 
                   get_cert() {
                     host="$1"
