@@ -67,6 +67,9 @@ tenants:
         role: learner
       - email: lanea-enterprise-admin@synthetic.test
         role: admin
+      # Single-tenant automation user (smoke-account-registry.yaml: mereka_learner)
+      - email: lanea-mereka-learner@synthetic.test
+        role: learner
 
     waffle_switches:
       enterprise.enable_learner_portal: true
@@ -113,6 +116,9 @@ tenants:
         role: learner
       - email: lanea-enterprise-admin@synthetic.test
         role: admin
+      # Single-tenant automation user (smoke-account-registry.yaml: bb_learner)
+      - email: lanea-bb-learner@synthetic.test
+        role: learner
 
     waffle_switches:
       enterprise.enable_learner_portal: true
@@ -160,6 +166,9 @@ tenants:
         role: learner
       - email: lanea-enterprise-admin@synthetic.test
         role: admin
+      # Single-tenant automation user (smoke-account-registry.yaml: sof_learner)
+      - email: lanea-sof-learner@synthetic.test
+        role: learner
 
     waffle_switches:
       enterprise.enable_learner_portal: true

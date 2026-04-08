@@ -38,6 +38,34 @@ current_accounts:
     envs: [dev, staging, prod]
     use_for: Standard non-enterprise user flows
 
+  # Single-tenant learners — each linked to exactly ONE enterprise.
+  # Use these for browser automation to avoid the org-selector interstitial
+  # that appears when a user is linked to multiple enterprises.
+  mereka_learner:
+    username: lanea-mereka-learner
+    email: lanea-mereka-learner@synthetic.test
+    password_ref: Infisical (Cr3ativity across all envs)
+    role: enterprise learner (Mereka only)
+    enterprise: mereka
+    envs: [dev, staging, prod]
+    use_for: Mereka enterprise learner portal, single-tenant automation
+  bb_learner:
+    username: lanea-bb-learner
+    email: lanea-bb-learner@synthetic.test
+    password_ref: Infisical (Cr3ativity across all envs)
+    role: enterprise learner (Biji-Biji only)
+    enterprise: biji-biji
+    envs: [dev, staging, prod]
+    use_for: Biji-Biji enterprise learner portal, single-tenant automation
+  sof_learner:
+    username: lanea-sof-learner
+    email: lanea-sof-learner@synthetic.test
+    password_ref: Infisical (Cr3ativity across all envs)
+    role: enterprise learner (Skill Our Future only)
+    enterprise: skillourfuture
+    envs: [dev, staging, prod]
+    use_for: SOF enterprise learner portal, single-tenant automation
+
 consumer_surfaces:
   github_actions:
     secret_families:
