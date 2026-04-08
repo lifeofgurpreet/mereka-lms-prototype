@@ -776,6 +776,17 @@ if [[ "$REQUIRE_DIGESTS" -eq 1 && ( -z "$OPENEDX_DIGEST" || -z "$MFE_DIGEST" ) ]
   exit 1
 fi
 
+# B-012: Production promotion requires release-object identity.
+# Without it, promotion is a manual SHA join — the root cause of
+# release-identity-split incidents.
+if [[ "$TARGET_ENV" == "production" && "$REQUIRE_DIGESTS" -eq 1 && -z "$RELEASE_OBJECT_JSON" ]]; then
+  echo "ERROR: Production promotion with --require-digests requires --release-object-json." >&2
+  echo "       The release object binds image digests, app SHA, and proof chain into one identity." >&2
+  echo "       Generate it via CI (build-tutor-images.yml) or:" >&2
+  echo "         python3 scripts/release/generate_release_object.py --release-bundle-json <bundle> --output <path>" >&2
+  exit 1
+fi
+
 require_bool_01 "ALLOW_PROD_APPLY" "$ALLOW_PROD_APPLY"
 
 if [[ "$APPLY" -eq 1 && "$CONFIRM_RELEASE_OPENEDX_GITOPS" != "$CONFIRM_APPLY_TOKEN" ]]; then

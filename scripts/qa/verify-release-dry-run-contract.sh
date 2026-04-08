@@ -87,6 +87,29 @@ INFRA_PROD_FILE="$TMP_INFRA/apps/mereka-lms/overlays/prod/kustomization.yaml"
 APP_PROD_BEFORE="$(sha256sum "$APP_PROD_FILE" | awk '{print $1}')"
 INFRA_PROD_BEFORE="$(sha256sum "$INFRA_PROD_FILE" | awk '{print $1}')"
 
+# B-012: Production --require-digests now requires --release-object-json.
+# Generate a mock release object for the dry-run contract test.
+MOCK_RELEASE_OBJECT="$TMP_INFRA/mock-release-object.json"
+MOCK_SHA="$(git -C "$REPO_ROOT" rev-parse HEAD)"
+MOCK_TS="$(date -u +%Y%m%dT%H%M%SZ)"
+python3 - "$MOCK_RELEASE_OBJECT" "$MOCK_SHA" "$MOCK_TS" <<'PYEOF'
+import json, sys
+path, sha, ts = sys.argv[1], sys.argv[2], sys.argv[3]
+json.dump({
+    "schema_version": "release-object/v1",
+    "release_id": f"ro-rb-qa00000-{ts}",
+    "release_bundle_id": f"rb-qa00000-{ts}",
+    "app_commit_sha": sha,
+    "build_origin_environment": "production",
+    "promotion_status": "build-only",
+    "images": {
+        "openedx": {"digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"},
+        "mfe": {"digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"},
+    },
+    "tenant_contract_sha256": "0" * 64,
+}, open(path, "w"), indent=2)
+PYEOF
+
 "$RELEASE_SCRIPT" \
   --target-env production \
   --openedx-tag qa-contract-openedx \
@@ -94,6 +117,7 @@ INFRA_PROD_BEFORE="$(sha256sum "$INFRA_PROD_FILE" | awk '{print $1}')"
   --openedx-digest "sha256:1111111111111111111111111111111111111111111111111111111111111111" \
   --mfe-digest "sha256:2222222222222222222222222222222222222222222222222222222222222222" \
   --require-digests \
+  --release-object-json "$MOCK_RELEASE_OBJECT" \
   --app-repo "$REPO_ROOT" \
   --infra-repo "$TMP_INFRA" \
   --skip-base-ref >/tmp/release-dry-run-contract.log
@@ -125,8 +149,8 @@ if "$RELEASE_SCRIPT" \
   exit 1
 fi
 
-if ! rg -n -- '--require-digests requires digests for every targeted image\.|--require-digests requires both --openedx-digest and --mfe-digest\.' /tmp/release-require-digest-negative.log >/dev/null; then
-  echo "❌ Missing expected error message when --require-digests is used without digests"
+if ! rg -n -- '--require-digests requires digests for every targeted image\.|--require-digests requires both --openedx-digest and --mfe-digest\.|requires --release-object-json' /tmp/release-require-digest-negative.log >/dev/null; then
+  echo "❌ Missing expected error message when --require-digests is used without digests or release-object"
   exit 1
 fi
 
@@ -143,8 +167,8 @@ if "$RELEASE_SCRIPT" \
   exit 1
 fi
 
-if ! rg -n -- '--require-digests requires digests for every targeted image\.|--require-digests requires both --openedx-digest and --mfe-digest\.' /tmp/release-openedx-only-require-digest-negative.log >/dev/null; then
-  echo "❌ Missing expected error message for partial --require-digests"
+if ! rg -n -- '--require-digests requires digests for every targeted image\.|--require-digests requires both --openedx-digest and --mfe-digest\.|requires --release-object-json' /tmp/release-openedx-only-require-digest-negative.log >/dev/null; then
+  echo "❌ Missing expected error message for partial --require-digests or missing release-object"
   exit 1
 fi
 

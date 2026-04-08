@@ -352,6 +352,16 @@ if [[ "$DELEGATE_APPLY" -eq 1 && "$DELEGATE_TARGET_ENV" == "production" && "$ALL
   fail_hard "Refusing delegated production --apply without ALLOW_PROD_APPLY=1"
 fi
 
+# B-012: Warn early if production promotion lacks release-object identity.
+if [[ "$DELEGATE_TARGET_ENV" == "production" ]] && args_contains "--require-digests" && ! args_contains "--release-object-json"; then
+  warn "Production promotion without --release-object-json."
+  warn "The release object binds digests, app SHA, and proof chain into one identity."
+  warn "Without it, promotion is a manual SHA join — generate via CI or:"
+  warn "  python3 scripts/release/generate_release_object.py --release-bundle-json <bundle> --output <path>"
+  warn "Then pass: --release-object-json <path>"
+  # Hard fail is enforced downstream in release-openedx-gitops.sh
+fi
+
 echo ""
 info "Checking image cache..."
 if check_image_cache; then

@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import json
 import subprocess
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -67,7 +68,13 @@ def load_release_object(path: Path | None) -> dict[str, Any] | None:
         return None
     try:
         return json.loads(path.resolve().read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+    except (OSError, json.JSONDecodeError) as exc:
+        # B-016: If a release object was explicitly requested but can't be loaded,
+        # warn loudly instead of silently returning None.
+        print(
+            f"WARNING: --release-object-json provided ({path}) but failed to load: {exc}",
+            file=sys.stderr,
+        )
         return None
 
 
