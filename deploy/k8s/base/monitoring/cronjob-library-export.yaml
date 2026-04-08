@@ -7,6 +7,8 @@ metadata:
     app.kubernetes.io/name: library-export
     app.kubernetes.io/component: backup
 spec:
+  suspend: true  # SUSPENDED: backup_libraries command does not exist in Ulmo.
+  # Available: content_libraries_import (import only). Needs rewrite for v2 Content Libraries API.
   schedule: "0 3 * * *"  # Nightly at 3 AM UTC
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
