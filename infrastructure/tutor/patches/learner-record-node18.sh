@@ -23,30 +23,45 @@ apply_learner_record_node18_patch() {
     return 0
   fi
 
-  # 1. Add Node 18 base image stage near the top (after the first FROM line)
-  # Insert after the first FROM line that defines 'base'
-  sed -i '/^FROM.*AS base$/a\
-\
-# learner-record requires Node 18 (webpack 4 incompatible with Node 24)\
-FROM docker.io/node:18-bullseye-slim AS learner-record-node18-base\
-RUN apt-get update \&\& apt-get install -y git gcc g++ make python3 libgl1 libxi6 \\\
-    libpng-dev autoconf libtool pkg-config zlib1g-dev \\\
-    \&\& rm -rf /var/lib/apt/lists/*\
-RUN mkdir -p /openedx/app /openedx/env\
-WORKDIR /openedx/app\
-ENV PATH=/openedx/app/node_modules/.bin:${PATH}' "$mfe_dockerfile"
+  # Use Python for reliable multi-line Dockerfile patching.
+  # sed multi-line inserts are fragile — the previous version inserted
+  # inside the base stage instead of before the learner-record section,
+  # breaking ALL MFE builds.
+  python3 - "$mfe_dockerfile" <<'PYEOF'
+import sys
+from pathlib import Path
 
-  # 2. Change learner-record-common to inherit from learner-record-node18-base instead of base
-  sed -i 's/^FROM base AS learner-record-common$/FROM learner-record-node18-base AS learner-record-common/' "$mfe_dockerfile"
+dockerfile = Path(sys.argv[1])
+content = dockerfile.read_text()
 
-  # 3. Change learner-record-git to inherit from learner-record-node18-base instead of base
-  sed -i 's/^FROM base AS learner-record-git$/FROM learner-record-node18-base AS learner-record-git/' "$mfe_dockerfile"
+# The Node 18 base stage to insert
+node18_stage = """
+# learner-record requires Node 18 (webpack 4 incompatible with Node 24)
+FROM docker.io/node:18-bullseye-slim AS learner-record-node18-base
+RUN apt-get update && apt-get install -y git gcc g++ make python3 libgl1 libxi6 \
+    libpng-dev autoconf libtool pkg-config zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /openedx/app /openedx/env
+WORKDIR /openedx/app
+ENV PATH=/openedx/app/node_modules/.bin:${PATH}
 
-  # Verify patch was applied
-  if grep -q "learner-record-node18-base" "$mfe_dockerfile"; then
-    echo "    OK: learner-record pinned to Node 18"
-  else
-    echo "    WARN: learner-record Node 18 patch may not have applied correctly"
-    return 1
-  fi
+"""
+
+# Insert BEFORE the learner-record-git stage (not after the base stage!)
+marker = "FROM base AS learner-record-git"
+if marker not in content:
+    print("    SKIP: learner-record-git stage not found (MFE may not be registered yet)")
+    sys.exit(0)
+
+content = content.replace(marker, node18_stage + "FROM learner-record-node18-base AS learner-record-git")
+
+# Also rebase learner-record-common on the Node 18 base
+content = content.replace(
+    "FROM base AS learner-record-common",
+    "FROM learner-record-node18-base AS learner-record-common"
+)
+
+dockerfile.write_text(content)
+print("    OK: learner-record pinned to Node 18")
+PYEOF
 }
