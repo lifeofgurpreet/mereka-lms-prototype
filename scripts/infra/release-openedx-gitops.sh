@@ -804,6 +804,31 @@ if [[ "$TARGET_ENV" == "production" && "$APPLY" -eq 1 && "$ALLOW_PROD_APPLY" != 
   exit 1
 fi
 
+# B-015: Environment progression check.
+# For production promotion, warn if the same digest isn't already on staging.
+# For staging, warn if it isn't on dev. Advisory only — the hard gate lives
+# in bbi-infrastructure's promote-image.yml.
+if [[ -n "$INFRA_REPO" && -d "$INFRA_REPO" && "$APPLY" -eq 1 ]]; then
+  _predecessor_env=""
+  case "$TARGET_ENV" in
+    production) _predecessor_env="staging" ;;
+    staging)    _predecessor_env="dev" ;;
+  esac
+  if [[ -n "$_predecessor_env" && -n "$OPENEDX_DIGEST" ]]; then
+    _pred_overlay=""
+    case "$_predecessor_env" in
+      staging) _pred_overlay="$INFRA_REPO/apps/mereka-lms/overlays/staging/kustomization.yaml" ;;
+      dev)     _pred_overlay="$INFRA_REPO/apps/mereka-lms/overlays/dev/kustomization.yaml" ;;
+    esac
+    if [[ -n "$_pred_overlay" && -f "$_pred_overlay" ]]; then
+      if ! grep -q "${OPENEDX_DIGEST}" "$_pred_overlay" 2>/dev/null; then
+        echo "WARNING: Promoting to $TARGET_ENV but openedx digest not found in $_predecessor_env overlay." >&2
+        echo "         Consider promoting to $_predecessor_env first for environment parity." >&2
+      fi
+    fi
+  fi
+fi
+
 if [[ "${CI:-}" == "true" && "$TARGET_ENV_SET" -ne 1 ]]; then
   echo "Error: CI mode requires explicit --target-env (production|staging)." >&2
   usage
