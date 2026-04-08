@@ -55,7 +55,11 @@ tenants:
       # email is the lookup key. role is "admin" or "learner".
       - email: team@mereka.io
         role: admin
-      # Additional admin/learner links can be added here.
+      # Canonical test users (smoke-account-registry.yaml)
+      - email: lanea-enterprise-learner@synthetic.test
+        role: learner
+      - email: lanea-enterprise-admin@synthetic.test
+        role: admin
 
     waffle_switches:
       enterprise.enable_learner_portal: true
@@ -97,6 +101,10 @@ tenants:
     user_links:
       - email: admin@biji-biji.com
         role: admin
+      - email: lanea-enterprise-learner@synthetic.test
+        role: learner
+      - email: lanea-enterprise-admin@synthetic.test
+        role: admin
 
     waffle_switches:
       enterprise.enable_learner_portal: true
@@ -137,6 +145,10 @@ tenants:
 
     user_links:
       - email: admin@mereka.io
+        role: admin
+      - email: lanea-enterprise-learner@synthetic.test
+        role: learner
+      - email: lanea-enterprise-admin@synthetic.test
         role: admin
 
     waffle_switches:
