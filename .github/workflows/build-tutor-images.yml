@@ -1574,6 +1574,15 @@ jobs:
             || echo "::warning::Truth ledger generation failed (non-blocking)"
           if [[ -f var/ci/truth-ledger.json ]]; then
             echo "**Truth ledger:** generated" >> $GITHUB_STEP_SUMMARY
+            # B-016: Validate truth ledger has release identity when release object was provided
+            if [[ -f var/ci/release-object.json ]]; then
+              RELEASE_ID_IN_LEDGER=$(python3 -c "import json; d=json.load(open('var/ci/truth-ledger.json')); print(d.get('release_truth',{}).get('release_id',''))" 2>/dev/null)
+              if [[ -z "$RELEASE_ID_IN_LEDGER" ]]; then
+                echo "::warning::Truth ledger missing release_id despite release object being available"
+              else
+                echo "**Truth ledger release binding:** \`${RELEASE_ID_IN_LEDGER}\`" >> $GITHUB_STEP_SUMMARY
+              fi
+            fi
           fi
 
       - name: Upload release bundle

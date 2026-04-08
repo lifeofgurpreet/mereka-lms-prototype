@@ -63,6 +63,11 @@ done
 
 RELEASE_IDENTITY_JSON=""
 CI_FAILURE_BASELINE_PROOF_JSON=""
+# B-016: Warn when release gate runs without release object binding.
+if [[ -z "$RELEASE_OBJECT_JSON" ]]; then
+  echo "WARNING: Release gate running without --release-object-json." >&2
+  echo "         Proof artifact will lack release identity binding." >&2
+fi
 if [[ -n "$RELEASE_OBJECT_JSON" ]]; then
   RELEASE_IDENTITY_JSON="$(
     python3 "$REPO_ROOT/scripts/release/release_object_bindings.py" \

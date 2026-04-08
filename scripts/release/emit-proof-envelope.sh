@@ -74,6 +74,11 @@ if [[ -z "$CONCERN" ]]; then
 fi
 
 RELEASE_IDENTITY_JSON=""
+# B-016: Warn when proof envelope emitted without release object binding.
+if [[ -z "$RELEASE_OBJECT_JSON" ]]; then
+  echo "WARNING: Emitting proof envelope without --release-object-json." >&2
+  echo "         Envelope will lack release_identity field." >&2
+fi
 if [[ -n "$RELEASE_OBJECT_JSON" ]]; then
   RELEASE_IDENTITY_JSON="$(
     python3 "$REPO_ROOT/scripts/release/release_object_bindings.py" \

@@ -70,12 +70,12 @@ def load_release_object(path: Path | None) -> dict[str, Any] | None:
         return json.loads(path.resolve().read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         # B-016: If a release object was explicitly requested but can't be loaded,
-        # warn loudly instead of silently returning None.
+        # fail hard. A truth ledger without release identity is incomplete evidence.
         print(
-            f"WARNING: --release-object-json provided ({path}) but failed to load: {exc}",
+            f"ERROR: --release-object-json provided ({path}) but failed to load: {exc}",
             file=sys.stderr,
         )
-        return None
+        raise SystemExit(1) from exc
 
 
 def git_head_sha() -> str | None:
@@ -329,6 +329,21 @@ def main() -> int:
 
     tracked_repositories = tuple(args.image_repo) if args.image_repo else DEFAULT_IMAGE_REPOS
     release_object = load_release_object(args.release_object_json)
+
+    # B-016: Validate release object has required identity fields when provided.
+    if release_object:
+        missing = [
+            f
+            for f in ("release_id", "app_commit_sha")
+            if not release_object.get(f)
+        ]
+        if missing:
+            print(
+                f"ERROR: Release object missing required fields: {', '.join(missing)}",
+                file=sys.stderr,
+            )
+            raise SystemExit(1)
+
     summary_release_identity = summary.get("release_identity") if isinstance(summary.get("release_identity"), dict) else None
     release_identity = summary_release_identity or (
         {
