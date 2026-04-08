@@ -156,10 +156,11 @@ scripts/qa/verify-credentials-verification.sh
 scripts/qa/verify-advanced-xblocks.sh
 scripts/qa/verify-dr-drill-schedule.sh
 scripts/qa/verify-baseline-truth-control.sh
-scripts/qa/scan-secrets-fast.sh
-scripts/qa/verify-canonical-entrypoints.sh
-scripts/qa/verify-configmap-hash-suffixes.sh
-scripts/qa/verify-mfe-env-config-url-guard.sh
-scripts/qa/verify-arc-runner-contract.sh
-scripts/qa/verify-course-catalog-durability.sh
-scripts/qa/verify-domain-authority-chain.sh
+scripts/qa/verify-incident-guardrails.sh
+scripts/governance/validate-registry.sh
+scripts/qa/test-verify-script-registry-completeness.sh
+scripts/qa/verify-tenant-specs.sh
+scripts/qa/verify-redis-db-allocation.sh
+scripts/qa/verify-agent-context-lock.sh --allow-main
+scripts/qa/verify-runtime-proof-fixture-pack.sh
+scripts/qa/verify-env-auth-parity.sh

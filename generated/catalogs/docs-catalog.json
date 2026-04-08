@@ -533,10 +533,28 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "architecture/PLATFORM_AUTHORITY_MAP.md",
+    "status": "supporting",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "architecture/PROMOTION_REALIZATION_AND_INCIDENT_FLOW.md",
+    "status": "supporting",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-10",
     "owner": "Platform Team",
     "path": "architecture/README.md",
-    "status": "superseded",
+    "status": "canonical",
     "type": "concept"
   },
   {
@@ -2479,7 +2497,7 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
-    "path": "archive/reports/deep-research/Review of the “mereka-lms” Repositories Against Open edX 2026 Guidance.pdf",
+    "path": "archive/reports/deep-research/Review of the \u201cmereka-lms\u201d Repositories Against Open edX 2026 Guidance.pdf",
     "status": "archive-candidate",
     "type": "status"
   },
@@ -3962,10 +3980,10 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
+    "last_verified_or_updated": "2026-04-04",
     "owner": "Platform Team",
     "path": "concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "concept"
   },
   {
@@ -3980,19 +3998,19 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-10",
+    "last_verified_or_updated": "2026-04-04",
     "owner": "Platform Team",
     "path": "concepts/architecture/README.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "concept"
   },
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-09",
+    "last_verified_or_updated": "2026-04-04",
     "owner": "Platform Team",
     "path": "concepts/architecture/RELEASE_ROLLOUT_AND_REMOVAL.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "concept"
   },
   {
@@ -4007,7 +4025,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-04-07",
+    "last_verified_or_updated": "2026-04-03",
     "owner": "Platform Team",
     "path": "concepts/architecture/TENANT_OPERATING_SYSTEM.md",
     "status": "canonical",
@@ -4028,7 +4046,7 @@
     "last_verified_or_updated": "2026-04-07",
     "owner": "Platform Team",
     "path": "concepts/architecture/WS4_PROMOTION_CONTRACT.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "concept"
   },
   {
@@ -6329,6 +6347,51 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/playbooks/CADDY_DOMAIN_ROUTING_CHANGE.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/playbooks/DJANGO_SETTINGS_CHANGE.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/playbooks/FRONTEND_MFE_CHANGE.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/playbooks/RELEASE_PROMOTION.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/playbooks/RUNTIME_PROOF_VERIFICATION.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-06",
     "owner": "SRE Team",
     "path": "ops/quickref/README.md",
@@ -6455,7 +6518,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-12",
+    "last_verified_or_updated": "2026-03-27",
     "owner": "Platform Team",
     "path": "ops/runbooks/ARGOCD_DRIFT.md",
     "status": "supporting",
@@ -6467,6 +6530,15 @@
     "last_verified_or_updated": "2026-03-12",
     "owner": "Platform Team",
     "path": "ops/runbooks/ARGOCD_HEALTH_TROUBLESHOOTING.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/ASPECTS_OPERATIONS.md",
     "status": "supporting",
     "type": "runbook"
   },
@@ -6699,7 +6771,7 @@
     "canonical_conflict_group": null,
     "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-24",
-    "owner": "Engineering Lead · Last updated: 2026-02-24",
+    "owner": "Engineering Lead \u00b7 Last updated: 2026-02-24",
     "path": "ops/runbooks/DR_DRILL_SCHEDULE.md",
     "status": "supporting",
     "type": "runbook"
@@ -6843,7 +6915,7 @@
     "canonical_conflict_group": null,
     "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-24",
-    "owner": "Engineering Lead · Last updated: 2026-02-24",
+    "owner": "Engineering Lead \u00b7 Last updated: 2026-02-24",
     "path": "ops/runbooks/INCIDENT_RESPONSE.md",
     "status": "supporting",
     "type": "runbook"
@@ -7040,7 +7112,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-12",
+    "last_verified_or_updated": "2026-03-27",
     "owner": "Platform Team",
     "path": "ops/runbooks/POST_DEPLOY_GATE.md",
     "status": "supporting",
@@ -7202,7 +7274,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-12",
+    "last_verified_or_updated": "2026-03-27",
     "owner": "Platform Team",
     "path": "ops/runbooks/STAGING_ACTIVATION.md",
     "status": "supporting",
@@ -7238,7 +7310,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-12",
+    "last_verified_or_updated": "2026-03-27",
     "owner": "Platform Team",
     "path": "ops/runbooks/TENANT_BRAND_ONBOARDING_GUIDE.md",
     "status": "supporting",
@@ -7256,7 +7328,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-12",
+    "last_verified_or_updated": "2026-03-27",
     "owner": "Platform Team",
     "path": "ops/runbooks/TENANT_FOOTER_VARIANT_LANE.md",
     "status": "supporting",
@@ -8256,6 +8328,24 @@
     "canonical_conflict_group": null,
     "freshness_risk": "low",
     "last_verified_or_updated": null,
+    "owner": null,
+    "path": "proposals/DOMAIN_TRUTH_CONVERGENCE_MEMO.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "proposals/TENANT_SURFACE_ENTITLEMENT_MATRIX.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
     "owner": "** Observability team",
     "path": "qa/OBS-PILOT-TRACING-01.md",
     "status": "supporting",
@@ -8600,7 +8690,7 @@
     "last_verified_or_updated": "2026-04-07",
     "owner": "Platform Team",
     "path": "reference/architecture/DOMAIN_AUTHORITY_END_STATE.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "reference"
   },
   {
@@ -8924,7 +9014,7 @@
     "last_verified_or_updated": "2026-04-04",
     "owner": "Platform Team",
     "path": "reference/contracts/SMOKE_ACCOUNT_REGISTRY_CONTRACT.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "contract"
   },
   {
@@ -8933,8 +9023,35 @@
     "last_verified_or_updated": "2026-04-04",
     "owner": "Platform Team",
     "path": "reference/contracts/VERIFIER_CONTRACT_CATALOG.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "contract"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "reference/generated/domain-authority-classification.yaml",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "reference/generated/domain-authority-matrix.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "reference/governance/DEPRECATION_LEDGER.md",
+    "status": "supporting",
+    "type": "other"
   },
   {
     "canonical_conflict_group": null,
@@ -9184,6 +9301,15 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "reference/operations/AGENT_EXECUTION_WORKFLOW.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "reference/operations/ALERT_NOISE_CLASSIFICATION_FEED.md",
     "status": "supporting",
     "type": "other"
@@ -9212,7 +9338,7 @@
     "last_verified_or_updated": "2026-03-26",
     "owner": "Platform Team",
     "path": "reference/operations/AUTHENTICATED_SMOKE_CREDENTIALS.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "other"
   },
   {
@@ -9542,7 +9668,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-05",
+    "last_verified_or_updated": "2026-03-31",
     "owner": null,
     "path": "reference/operations/OPENEDX_HOSTNAMES.md",
     "status": "supporting",
@@ -9644,7 +9770,7 @@
     "last_verified_or_updated": "2026-04-07",
     "owner": "Platform Team",
     "path": "reference/operations/RUNTIME_TRUTH_MATRIX.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "reference"
   },
   {
@@ -9743,6 +9869,15 @@
     "last_verified_or_updated": "2026-02-12",
     "owner": "Platform Team",
     "path": "reference/operations/USER_FACING_URLS.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "reference/operations/VERIFIER_CONTRACT_CATALOG.md",
     "status": "supporting",
     "type": "other"
   },
@@ -9878,6 +10013,15 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "reviews/EXECUTION_INVARIANTS_PACK_REVIEW_SUMMARY.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "reviews/GITOPS_INTEGRITY_CLOSURE_AUDIT_2026-04-07.md",
     "status": "supporting",
     "type": "other"
   },
@@ -10217,10 +10361,37 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/ACTIVE_SURFACE_RUNTIME_MATRIX_2026-04-04.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/ACTIVE_SURFACE_STATUS_BOARD_2026-04-04.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-04-07",
     "owner": "Agent 1 V2",
     "path": "status/active/AGENT1_V2_OPERATING_CONTRACT_2026-04-07.md",
-    "status": "canonical",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-01",
+    "owner": null,
+    "path": "status/active/ASPECTS_ANALYTICS_ACTIVATION_TRACKER.md",
+    "status": "supporting",
     "type": "status"
   },
   {
@@ -10238,7 +10409,7 @@
     "last_verified_or_updated": "2026-04-04",
     "owner": "Platform Team",
     "path": "status/active/BRANCH_CAPABILITY_CONVERGENCE_2026-04-04.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "status"
   },
   {
@@ -10334,6 +10505,42 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/DOMAIN_TRUTH_CONVERGENCE_TAKEOVER_PROMPT_2026-03-31.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-31",
+    "owner": "Platform Team",
+    "path": "status/active/DOMAIN_TRUTH_CONVERGENCE_TRACKER_2026-03-31.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/FINISH_LINE_MASTER_TRACKER_2026-04-03.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/FINISH_LINE_TAKEOVER_PROMPT_2026-04-03.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-13",
     "owner": null,
     "path": "status/active/FOLLOW_UPS_2026-01-20.md",
@@ -10361,10 +10568,46 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/FRONTEND_RUNTIME_CLOSURE_TRACKER_2026-04-01.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-06",
     "owner": "Platform Team",
     "path": "status/active/FRONTEND_RUNTIME_STABILITY_STATUS_2026-03-02.md",
     "status": "superseded",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-03",
+    "owner": "Platform Team",
+    "path": "status/active/IMPLEMENTATION_TRACKER_2026-04-03.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/IMPORT_MISSING_COURSES.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/IMPORT_STATUS_2026-04-01.md",
+    "status": "supporting",
     "type": "status"
   },
   {
@@ -10382,6 +10625,15 @@
     "last_verified_or_updated": "2026-03-06",
     "owner": "Ops Domain Owner",
     "path": "status/active/LOCAL_ENVIRONMENT_WORK_REMAINING_2026-03-06.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/MASTER_LAUNCH_ROADMAP_2026-04-04.md",
     "status": "supporting",
     "type": "status"
   },
@@ -10454,7 +10706,16 @@
     "last_verified_or_updated": "2026-04-04",
     "owner": "Platform Team",
     "path": "status/active/PRODUCTION_READINESS_AUDIT_2026-04-04.md",
-    "status": "canonical",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/PROD_REALIZATION_PROOF_2026-04-02.md",
+    "status": "supporting",
     "type": "status"
   },
   {
@@ -10463,7 +10724,34 @@
     "last_verified_or_updated": "2026-03-26",
     "owner": "Platform Team",
     "path": "status/active/README.md",
-    "status": "canonical",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/REVIEWER_OPERATOR_BOARD_2026-04-02.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/RUNTIME_TRUTH_LEDGER_TAKEOVER_PROMPT_2026-04-03.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/RUNTIME_TRUTH_LEDGER_TRACKER_2026-04-03.md",
+    "status": "supporting",
     "type": "status"
   },
   {
@@ -10472,16 +10760,16 @@
     "last_verified_or_updated": "2026-04-04",
     "owner": "Platform Team",
     "path": "status/active/SMOKE_ACCOUNT_REGISTRY_2026-04-04.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "status"
   },
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-04-05",
+    "last_verified_or_updated": "2026-04-05T12:15:00Z",
     "owner": "Platform Team",
     "path": "status/active/TENANT_EXPERIENCE_CONTRACT_TRACKER_2026-04-05.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "status"
   },
   {
@@ -10490,7 +10778,7 @@
     "last_verified_or_updated": "2026-04-03",
     "owner": "Platform Team",
     "path": "status/active/TENANT_OPERATING_SYSTEM_BLUEPRINT_2026-04-03.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "status"
   },
   {
@@ -10508,6 +10796,33 @@
     "last_verified_or_updated": "2026-03-26T10:45:00Z",
     "owner": "Platform Team",
     "path": "status/active/TODAY_WORKLOAD_TRACKER_2026-03-26.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/TRUTH_BOARD_2026-03-30.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/TWO_WEEK_PLATFORM_TRUTH_TAKEOVER_PROMPT_2026-03-28.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-28T08:51:31Z",
+    "owner": "Platform Team",
+    "path": "status/active/TWO_WEEK_PLATFORM_TRUTH_TRACKER_2026-03-28.md",
     "status": "supporting",
     "type": "status"
   },

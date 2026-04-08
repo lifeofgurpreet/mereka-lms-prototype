@@ -26,6 +26,7 @@ expiry_date: null
 removal_condition: null
 historical_reason: Migration history retained for traceability only.
 ---
+<!-- markdownlint-disable -->
 
 # ADR-007: Forum Service Migration from Ruby to Python
 

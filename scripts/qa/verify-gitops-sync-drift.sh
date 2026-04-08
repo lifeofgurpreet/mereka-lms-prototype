@@ -191,5 +191,5 @@ if [[ ${FAILURES} -gt 0 ]]; then
   exit 1
 else
   echo -e "${GREEN}All checks passed${RESET}"
-  exit 0
+exit "${FAILURES}"
 fi

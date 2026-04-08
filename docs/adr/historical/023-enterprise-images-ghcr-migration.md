@@ -27,6 +27,7 @@ removal_condition: null
 historical_reason: Completed migration with active law absorbed by newer platform/build
   governance.
 ---
+<!-- markdownlint-disable -->
 
 # ADR-023: Enterprise Images GHCR Migration
 

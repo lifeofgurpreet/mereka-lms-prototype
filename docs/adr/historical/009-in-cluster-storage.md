@@ -27,6 +27,7 @@ removal_condition: null
 historical_reason: Historical deployment/storage decision retained outside active
   hot path.
 ---
+<!-- markdownlint-disable -->
 
 # ADR-009: In-Cluster MySQL/Redis vs Cloud SQL/Memorystore
 

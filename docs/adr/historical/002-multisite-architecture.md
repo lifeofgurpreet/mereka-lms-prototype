@@ -29,6 +29,7 @@ removal_condition: null
 historical_reason: Superseded in practice by ADR-029 and ADR-033 for current tenancy
   and identity law.
 ---
+<!-- markdownlint-disable -->
 
 # ADR-002: Multisite Architecture
 

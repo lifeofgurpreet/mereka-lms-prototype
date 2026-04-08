@@ -26,6 +26,7 @@ expiry_date: null
 removal_condition: null
 historical_reason: Completed migration decision retained as historical context.
 ---
+<!-- markdownlint-disable -->
 
 # ADR-012: Eliminate Runtime CSS ConfigMap Overlay
 

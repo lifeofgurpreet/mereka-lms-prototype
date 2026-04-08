@@ -467,3 +467,48 @@ jobs:
             var/ci/observability-parity-rollup.md
             var/ci/observability-parity-rollup.json
             var/ci/observability-parity-stability.json
+
+  # ============================================================================
+  # Job 5: GitOps integrity checks
+  # Runs the GitOps Integrity System verifiers (AC-GIS-001 through AC-GIS-005).
+  # These validate: drift detection, truth state matrix, incident guardrails,
+  # live mutation ledger, and invariant enforcement coverage.
+  # Spec: specs/gitops-integrity-system_spec.md
+  # ============================================================================
+  gitops-integrity:
+    name: GitOps integrity checks
+    runs-on: mereka-k8s-runners
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Run GitOps integrity verifiers
+        run: |
+          set -euo pipefail
+          FAILURES=0
+
+          echo "=== GitOps Integrity System (daily) ==="
+          echo ""
+
+          for script in \
+            scripts/qa/verify-gitops-sync-drift.sh \
+            scripts/qa/verify-truth-state-matrix.sh \
+            scripts/qa/verify-incident-guardrails.sh \
+            scripts/qa/verify-live-mutation-ledger.sh; do
+            echo "--- $(basename "$script") ---"
+            if bash "$script" --offline 2>&1; then
+              echo "PASS"
+            else
+              echo "FAIL"
+              FAILURES=$((FAILURES + 1))
+            fi
+            echo ""
+          done
+
+          echo "=== GitOps integrity: $((4 - FAILURES))/4 passed ==="
+          if [[ $FAILURES -gt 0 ]]; then
+            echo "::warning::$FAILURES GitOps integrity check(s) failed"
+          fi
+          # Non-blocking for now — becomes blocking after burn-in period
+          # exit "$FAILURES"

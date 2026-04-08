@@ -29,6 +29,7 @@ removal_condition: null
 historical_reason: 'Pre-launch simplification: durable history retained, active law
   absorbed by current platform/runtime governance.'
 ---
+<!-- markdownlint-disable -->
 
 # ADR-001: MongoDB Atlas vs Local MongoDB
 

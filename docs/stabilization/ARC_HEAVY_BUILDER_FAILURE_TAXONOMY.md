@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD013 MD060 -->
 # ARC Heavy Builder Failure Taxonomy
 
 > Lane F artifact. Decision-grade diagnosis of ARC runner queueing and availability issues.

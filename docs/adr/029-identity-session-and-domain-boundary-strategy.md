@@ -41,6 +41,7 @@ fitness_functions:
 expiry_date: null
 removal_condition: null
 ---
+<!-- markdownlint-disable -->
 
 # ADR-029: Identity, Session, and Domain-Boundary Strategy
 

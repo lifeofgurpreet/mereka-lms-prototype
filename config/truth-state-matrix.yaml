@@ -1,21 +1,11 @@
 # Truth State Matrix
-#
-# Tracks every active fix across 5 truth levels:
-#   branch -> merged -> realized -> proved -> durable
-#
-# A fix progresses through levels as evidence accumulates.
-# CI gates on: no entry at "realized" for >48 hours without reaching "durable".
-#
-# Schema reference: specs/gitops-integrity-system_spec.md (AC-GIS-003)
-# Verification: scripts/qa/verify-truth-state-matrix.sh
-#
-# Generator: TODO — script that reads git log + ArgoCD status + proof artifacts
-#            to populate/update entries automatically.
+# Tracks every active fix across the five truth levels.
+# Producer: scripts/qa/generate-truth-state-matrix.sh
+# Consumer: scripts/qa/verify-truth-state-matrix.sh (AC-GIS-003)
+# Spec: specs/gitops-integrity-system_spec.md
 ---
 schema_version: "1.0"
 
-# Valid truth levels in order of progression.
-# A fix may also regress (e.g., durable -> realized if bootstrap path breaks).
 levels:
   - branch
   - merged
@@ -23,29 +13,8 @@ levels:
   - proved
   - durable
 
-# Threshold (hours) for CI gate: entries at "realized" for longer than this
-# without reaching "durable" trigger a failure.
 realized_ttl_hours: 48
 
-# Active fixes being tracked.
-# Each entry represents a single fix (not a PR — one PR may produce multiple entries).
-# Example entry (uncomment, move under entries, and fill for real fixes):
-# - id: "fix-redis-oom-limits"
-#   description: "Set Redis memory limits to prevent OOM kills"
-#   pr: 1400
-#   commit: "abc1234def5678..."
-#   current_level: durable
-#   timestamps:
-#     branch: "2026-04-01T10:00:00Z"
-#     merged: "2026-04-01T14:00:00Z"
-#     realized: "2026-04-01T14:05:00Z"
-#     proved: "2026-04-01T14:30:00Z"
-#     durable: "2026-04-01T15:00:00Z"
-#   proof_artifacts:
-#     runtime_proof: "var/proofs/fix-redis-oom-limits.json"
-#     durability_proof: "var/proofs/fix-redis-oom-limits-durable.json"
-#   notes: ""
 entries: []
 
-# Archived entries (resolved fixes that have been durable for >90 days).
 archived: []

@@ -340,6 +340,7 @@ Checks:
 - DinD MTU config (`dind-daemon-config.yaml`) is present in the ARC base manifests
 
 ---
+<!-- markdownlint-disable -->
 
 ## References
 

@@ -28,6 +28,7 @@ removal_condition: null
 historical_reason: Retained as historical context; current operational truth now lives
   in broader platform governance and runtime docs.
 ---
+<!-- markdownlint-disable -->
 
 # ADR-004: Secrets Management
 

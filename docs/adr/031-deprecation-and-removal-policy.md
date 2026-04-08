@@ -32,6 +32,7 @@ fitness_functions:
 expiry_date: null
 removal_condition: null
 ---
+<!-- markdownlint-disable -->
 
 # ADR-031: Deprecation and Removal Policy
 

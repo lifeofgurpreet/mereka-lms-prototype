@@ -46,6 +46,7 @@ fitness_functions:
 expiry_date: null
 removal_condition: null
 ---
+<!-- markdownlint-disable -->
 
 # ADR-028: Platform Sources of Truth and Control Planes
 

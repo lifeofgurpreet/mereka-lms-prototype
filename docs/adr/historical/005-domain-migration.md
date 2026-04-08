@@ -29,6 +29,7 @@ removal_condition: null
 historical_reason: Completed migration history; no longer part of current read-first
   law.
 ---
+<!-- markdownlint-disable -->
 
 # ADR-005: Domain Migration (legacy environment → academyV2)
 

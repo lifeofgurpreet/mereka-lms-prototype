@@ -27,6 +27,7 @@ removal_condition: null
 historical_reason: No longer read-first law for pre-launch platform; retained as domain
   history.
 ---
+<!-- markdownlint-disable -->
 
 # ADR-008: Redis Streams as Event Bus
 

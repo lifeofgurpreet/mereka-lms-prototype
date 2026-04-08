@@ -155,11 +155,12 @@ scripts/qa/verify-credentials-issuance.sh
 scripts/qa/verify-credentials-ops.sh
 scripts/qa/verify-purchase-gateway-scaffold.sh
 scripts/qa/no_runtime_release_side_effects.sh
-scripts/release/release-gate.sh --skip-cluster
-scripts/qa/verify-script-registry-completeness.sh
-scripts/qa/test-verify-canonical-entrypoints.sh
-scripts/qa/verify-enterprise-auth-contract.sh
-scripts/qa/verify-enterprise-mfe-build-contract.sh
-scripts/qa/verify-ci-execution-contract.sh
-scripts/qa/verify-vendored-settings-drift.sh
-scripts/qa/verify-domain-generated-surfaces.sh
+scripts/qa/verify-gitops-sync-drift.sh
+scripts/qa/verify-live-mutation-ledger.sh
+scripts/qa/scan-secrets-fast.sh
+scripts/qa/verify-canonical-entrypoints.sh
+scripts/qa/verify-configmap-hash-suffixes.sh
+scripts/qa/verify-mfe-env-config-url-guard.sh
+scripts/qa/verify-arc-runner-contract.sh
+scripts/qa/verify-course-catalog-durability.sh
+scripts/qa/verify-domain-authority-chain.sh

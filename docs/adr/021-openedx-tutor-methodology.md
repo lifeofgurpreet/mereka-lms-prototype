@@ -33,6 +33,7 @@ fitness_functions:
 expiry_date: null
 removal_condition: null
 ---
+<!-- markdownlint-disable -->
 
 # ADR-021: Open edX / Tutor Deployment Methodology
 

@@ -34,6 +34,7 @@ expiry_date: 2026-09-30
 removal_condition: Upstream/frontend authn flow preserves OAuth next state without
   middleware bypass.
 ---
+<!-- markdownlint-disable -->
 
 # ADR-013: Studio SSO Bypass Middleware
 

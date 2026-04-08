@@ -519,6 +519,10 @@ ci_static_inventory:
     - script: scripts/qa/no_runtime_release_side_effects.sh
     - script: scripts/qa/verify-deployment-contract.sh
     - script: scripts/qa/verify-baseline-truth-control.sh
+    - script: scripts/qa/verify-gitops-sync-drift.sh
+    - script: scripts/qa/verify-truth-state-matrix.sh
+    - script: scripts/qa/verify-incident-guardrails.sh
+    - script: scripts/qa/verify-live-mutation-ledger.sh
     - script: scripts/release/release-gate.sh
       args: ["--skip-cluster"]
     - script: scripts/governance/validate-registry.sh

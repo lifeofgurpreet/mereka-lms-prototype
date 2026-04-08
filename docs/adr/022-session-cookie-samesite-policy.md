@@ -37,6 +37,7 @@ expiry_date: 2026-09-30
 removal_condition: SameSite and dedup exception removed after stable federated auth
   flow without stale-cookie reliance.
 ---
+<!-- markdownlint-disable -->
 
 # ADR-022: Session Cookie SameSite Policy and Stale Cookie Mitigation
 

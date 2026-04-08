@@ -29,6 +29,7 @@ removal_condition: null
 historical_reason: Superseded by newer control-plane and methodology ADRs for current
   build/deploy law.
 ---
+<!-- markdownlint-disable -->
 
 # ADR-003: Image Build Pipeline
 

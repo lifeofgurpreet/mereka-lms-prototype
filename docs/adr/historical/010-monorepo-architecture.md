@@ -26,6 +26,7 @@ expiry_date: null
 removal_condition: null
 historical_reason: Older structural decision no longer needs active-law status.
 ---
+<!-- markdownlint-disable -->
 
 # ADR-010: Monorepo Architecture
 

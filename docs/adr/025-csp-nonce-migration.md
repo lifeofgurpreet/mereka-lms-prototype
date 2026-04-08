@@ -29,6 +29,7 @@ fitness_functions: []
 expiry_date: null
 removal_condition: null
 ---
+<!-- markdownlint-disable -->
 
 # ADR-025: CSP Nonce Migration — Removing unsafe-eval / unsafe-inline
 

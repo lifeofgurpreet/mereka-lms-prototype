@@ -7110,10 +7110,16 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "on_demand",
+      "cadence": "per_pr_and_push",
       "canonical": true,
-      "ci_binding": [],
-      "ci_entrypoints": [],
+      "ci_binding": [
+        "ci_static",
+        "workflow_direct"
+      ],
+      "ci_entrypoints": [
+        "ci_static",
+        "workflow_direct"
+      ],
       "env_scope": [
         "prod"
       ],
@@ -7121,18 +7127,18 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-gitops-sync-drift.sh",
-      "reference_count": 4,
+      "reference_count": 9,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster",
         "vendor"
       ],
-      "severity": "low",
+      "severity": "high",
       "spec_ids": [
         "AC-GIS-001"
       ],
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "scheduled_or_post_deploy",
@@ -7362,10 +7368,16 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "on_demand",
+      "cadence": "per_pr_and_push",
       "canonical": true,
-      "ci_binding": [],
-      "ci_entrypoints": [],
+      "ci_binding": [
+        "ci_static",
+        "workflow_direct"
+      ],
+      "ci_entrypoints": [
+        "ci_static",
+        "workflow_direct"
+      ],
       "env_scope": [
         "dev"
       ],
@@ -7373,17 +7385,17 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-incident-guardrails.sh",
-      "reference_count": 5,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "low",
+      "severity": "high",
       "spec_ids": [
         "AC-GIS-004"
       ],
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -8295,10 +8307,16 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
+      "cadence": "per_pr_and_push",
       "canonical": true,
-      "ci_binding": [],
-      "ci_entrypoints": [],
+      "ci_binding": [
+        "ci_static",
+        "workflow_direct"
+      ],
+      "ci_entrypoints": [
+        "ci_static",
+        "workflow_direct"
+      ],
       "env_scope": [
         "dev"
       ],
@@ -8306,17 +8324,17 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-live-mutation-ledger.sh",
-      "reference_count": 4,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "low",
+      "severity": "high",
       "spec_ids": [
         "AC-GIS-005"
       ],
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "on_demand",
@@ -16986,10 +17004,16 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
+      "cadence": "per_pr_and_push",
       "canonical": true,
-      "ci_binding": [],
-      "ci_entrypoints": [],
+      "ci_binding": [
+        "ci_static",
+        "workflow_direct"
+      ],
+      "ci_entrypoints": [
+        "ci_static",
+        "workflow_direct"
+      ],
       "env_scope": [
         "dev"
       ],
@@ -16997,17 +17021,17 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-truth-state-matrix.sh",
-      "reference_count": 4,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "low",
+      "severity": "high",
       "spec_ids": [
         "AC-GIS-003"
       ],
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -18417,7 +18441,7 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
-    "ci_static_bound": 382,
+    "ci_static_bound": 386,
     "kinds": {
       "verify": 616
     },
@@ -18428,17 +18452,17 @@
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 427,
+      "active": 431,
       "deprecated_candidate": 1,
-      "manual_only": 188
+      "manual_only": 184
     },
     "tiers": {
-      "exploratory_manual": 192,
+      "exploratory_manual": 188,
       "periodic_runtime": 18,
-      "release_blocking": 406
+      "release_blocking": 410
     },
     "total_verify_scripts": 616,
-    "workflow_direct_bound": 60
+    "workflow_direct_bound": 64
   },
   "version": "1"
 }

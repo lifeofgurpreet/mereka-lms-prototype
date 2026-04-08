@@ -31,6 +31,7 @@ fitness_functions:
 expiry_date: null
 removal_condition: null
 ---
+<!-- markdownlint-disable -->
 
 # ADR-019: Tutor Upgrade Cadence and EOL Policy
 

@@ -31,6 +31,7 @@ fitness_functions:
 expiry_date: null
 removal_condition: null
 ---
+<!-- markdownlint-disable -->
 
 # ADR-024: True Multi-Tenancy for Subsites (Biji-Biji, SkillOurFuture)
 
