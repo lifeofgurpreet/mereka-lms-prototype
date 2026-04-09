@@ -36,6 +36,16 @@ RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
 """,
 )
 
+# Copy Mereka SCSS theme into the MFE container so that
+# `import './mereka/mereka.scss'` in env.config.jsx resolves.
+# The mereka/ directory is populated by footer-component.sh during apply-patches.
+_register_env_patch(
+    "mfe-dockerfile-post-npm-install",
+    """
+COPY indigo/mereka /openedx/app/mereka
+""",
+)
+
 # Copy generated runtime theme assets into the MFE container.
 # PARAGON_THEME_URLS points to /theme/* on the MFE origin.
 _register_env_patch(
