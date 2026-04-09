@@ -208,7 +208,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/aspects/verify-aspects-data-pipeline.sh",
-      "reference_count": 2,
+      "reference_count": 4,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"

@@ -10,6 +10,7 @@ resources:
   - deployments.yml
   - jobs.yml
   - sync-job.yml
+  - cronjob-event-sink-sync.yml
   - ingress.yml
   - prometheusrule.yml
   - network-policy.yaml

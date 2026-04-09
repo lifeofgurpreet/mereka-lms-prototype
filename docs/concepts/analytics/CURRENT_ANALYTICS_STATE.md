@@ -8,29 +8,29 @@ This document records the analytics surfaces that are live now. It is the curren
 - Prometheus and Grafana for infrastructure and runtime monitoring.
 - Open edX instructor reports for course-level exports and grade/enrollment reporting.
 - Scripted reconciliation for migration work, where needed, from the reference analytics surfaces.
+- Aspects analytics on shared nonprod:
+  - dev (`mereka-lms-dev`) has ClickHouse, Ralph, Superset, and imported dashboards.
+  - staging (`stg-mereka-lms`) has ClickHouse, Ralph, Superset, and imported dashboards.
 
 ## What is not running
 
-- Aspects and Superset for learning analytics.
+- Production Aspects/Superset as an active tenant-admin analytics front door.
 - Panorama or any other third-party analytics platform.
-- Public analytics endpoints or dashboards for tenant admins.
+- A fully governed production analytics publish/promotion lane.
 
 ## Current operator guidance
 
 - Use Grafana and Prometheus for service health, request rates, and cluster metrics.
 - Use the LMS instructor dashboard for per-course enrollment, progress, and grade exports.
-- Use migration reference docs under `docs/reference/analytics/**` only for reconciliation or migration analysis, not as the steady-state analytics front door.
-- Do not treat target-state analytics runbooks or setup references as a
-  shared-environment release front door; no governed analytics publish or
-  promotion lane exists today.
+- Treat shared nonprod Aspects as operational, but keep production claims separate until production realization and runtime proof exist.
+- Do not treat target-state analytics runbooks or setup references as a production release front door until the production lane is explicitly governed.
 
 ## Current access rules
 
-- There is no supported production access flow for Superset because Superset is not deployed.
-- Any local-only experimentation with Aspects stays local and does not change production truth.
-- Any direct Tutor or `kubectl` rollout in a shared environment would be a
-  documented legacy/manual bootstrap exception, not the canonical operator
-  path.
+- Shared nonprod Superset access is supported for operational validation and dashboard work.
+- There is no supported production tenant-admin analytics access flow until production activation is realized and proved.
+- Any local-only experimentation with Aspects stays local and does not change shared-environment truth.
+- Any direct Tutor or `kubectl` rollout in a shared environment is still legacy/manual bootstrap unless it is captured in Git and realized through GitOps.
 
 ## Related docs
 

@@ -351,7 +351,7 @@ if [[ "$FAIL" -gt 0 ]]; then
 else
   echo -e "${GREEN}RESULT: PASS — Aspects manifests are present and well-formed${NC}"
   echo ""
-  echo "Deployment status: NOT DEPLOYED (by design)"
-  echo "Next step: T148 will wire Aspects into the dev kustomization overlay"
+  echo "Source status: base manifests are present; base kustomization still does not include Aspects directly."
+  echo "Runtime status must be checked separately via scripts/aspects/verify-aspects-data-pipeline.sh or active status docs."
   exit 0
 fi

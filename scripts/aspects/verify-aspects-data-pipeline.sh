@@ -67,11 +67,45 @@ kctl() {
   kubectl --context "$K8S_CTX" -n "$NS" "$@"
 }
 
+# mysql_query — run a MySQL query in the in-cluster mysql pod when available.
+mysql_query() {
+  local query="$1"
+  local mysql_pod=""
+  mysql_pod="$(kctl get pod -l app.kubernetes.io/name=mysql -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)"
+  if [[ -z "$mysql_pod" ]]; then
+    mysql_pod="$(kctl get pod -l app=mysql -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)"
+  fi
+  if [[ -z "$mysql_pod" ]]; then
+    return 0
+  fi
+
+  kctl exec "$mysql_pod" -- bash -lc \
+    "mysql -N -u root -p\"\$MYSQL_ROOT_PASSWORD\" openedx -e \"$query\"" 2>/dev/null || true
+}
+
 # ch_query — run a ClickHouse query via kubectl exec
 # Returns the raw output or empty string on failure.
 ch_query() {
   local query="$1"
   kctl exec "$CH_POD" -- clickhouse-client --query="$query" 2>/dev/null || true
+}
+
+iso_age_hours() {
+  local ts="$1"
+  python3 - "$ts" <<'PY'
+from datetime import datetime, timezone
+import sys
+
+raw = sys.argv[1].strip()
+if not raw:
+    print("")
+    raise SystemExit(0)
+
+dt = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+now = datetime.now(timezone.utc)
+hours = (now - dt).total_seconds() / 3600
+print(f"{hours:.1f}")
+PY
 }
 
 # ---------------------------------------------------------------------------
@@ -234,6 +268,54 @@ else
   warn "openedx.courses: query failed or table does not exist"
 fi
 
+# event_sink dimensions (Aspects dimensional backfill)
+raw_event_sink_enrollments="$(ch_query "SELECT count() FROM event_sink.course_enrollment" 2>/dev/null || true)"
+raw_event_sink_courses="$(ch_query "SELECT count() FROM event_sink.course_overviews" 2>/dev/null || true)"
+raw_event_sink_profiles="$(ch_query "SELECT count() FROM event_sink.user_profile" 2>/dev/null || true)"
+raw_event_sink_external_ids="$(ch_query "SELECT count() FROM event_sink.external_id" 2>/dev/null || true)"
+raw_event_sink_tags="$(ch_query "SELECT count() FROM event_sink.tag" 2>/dev/null || true)"
+raw_event_sink_taxonomies="$(ch_query "SELECT count() FROM event_sink.taxonomy" 2>/dev/null || true)"
+raw_event_sink_object_tags="$(ch_query "SELECT count() FROM event_sink.object_tag" 2>/dev/null || true)"
+
+event_sink_enrollments=0
+event_sink_courses=0
+event_sink_profiles=0
+event_sink_external_ids=0
+event_sink_tags=0
+event_sink_taxonomies=0
+event_sink_object_tags=0
+
+for pair in \
+  "event_sink_enrollments:$raw_event_sink_enrollments:event_sink.course_enrollment" \
+  "event_sink_courses:$raw_event_sink_courses:event_sink.course_overviews" \
+  "event_sink_profiles:$raw_event_sink_profiles:event_sink.user_profile" \
+  "event_sink_external_ids:$raw_event_sink_external_ids:event_sink.external_id" \
+  "event_sink_tags:$raw_event_sink_tags:event_sink.tag" \
+  "event_sink_taxonomies:$raw_event_sink_taxonomies:event_sink.taxonomy" \
+  "event_sink_object_tags:$raw_event_sink_object_tags:event_sink.object_tag"; do
+  name="${pair%%:*}"
+  rest="${pair#*:}"
+  value="${rest%%:*}"
+  label="${rest#*:}"
+  if [[ -n "$value" && "$value" =~ ^[0-9]+$ ]]; then
+    printf -v "$name" '%s' "$value"
+    if [[ "$value" -gt 0 ]]; then
+      pass "${label}: ${value} rows"
+    else
+      warn "${label}: 0 rows"
+    fi
+  else
+    warn "${label}: query failed or table does not exist"
+  fi
+done
+
+mysql_course_overviews="$(mysql_query "SELECT COUNT(*) FROM course_overviews_courseoverview;" | tail -1 || true)"
+mysql_enrollments="$(mysql_query "SELECT COUNT(*) FROM student_courseenrollment;" | tail -1 || true)"
+mysql_external_ids="$(mysql_query "SELECT COUNT(*) FROM external_user_ids_externalid;" | tail -1 || true)"
+mysql_tags="$(mysql_query "SELECT COUNT(*) FROM oel_tagging_tag;" | tail -1 || true)"
+mysql_taxonomies="$(mysql_query "SELECT COUNT(*) FROM oel_tagging_taxonomy;" | tail -1 || true)"
+mysql_object_tags="$(mysql_query "SELECT COUNT(*) FROM oel_tagging_objecttag;" | tail -1 || true)"
+
 # ---------------------------------------------------------------------------
 # Step 3: CronJob last sync time
 # ---------------------------------------------------------------------------
@@ -251,6 +333,18 @@ else
 
   if [[ -n "$last_success" ]]; then
     pass "CronJob '${CRONJOB_NAME}' last successful run: ${last_success}"
+    last_success_age_hours="$(iso_age_hours "$last_success")"
+    if [[ -n "$last_success_age_hours" ]]; then
+      echo "    Age: ${last_success_age_hours}h"
+      freshness_state="$(python3 - "$last_success_age_hours" <<'PY'
+import sys
+print("stale" if float(sys.argv[1]) > 36 else "fresh")
+PY
+)"
+      if [[ "$freshness_state" == "stale" ]]; then
+        warn "CronJob '${CRONJOB_NAME}' success is older than 36h"
+      fi
+    fi
   elif [[ -n "$last_schedule" ]]; then
     warn "CronJob '${CRONJOB_NAME}' last scheduled: ${last_schedule} (but no recorded success)"
   else
@@ -259,6 +353,19 @@ else
 
   if [[ -n "$schedule" ]]; then
     echo "    Schedule: ${schedule}"
+  fi
+fi
+
+EVENT_SINK_CRONJOB="aspects-event-sink-sync"
+event_sink_cj_exists="$(kctl get cronjob "$EVENT_SINK_CRONJOB" -o name 2>/dev/null || true)"
+if [[ -z "$event_sink_cj_exists" ]]; then
+  warn "CronJob '${EVENT_SINK_CRONJOB}' not found — event_sink dimensions rely on manual backfills"
+else
+  event_sink_last_success="$(kctl get cronjob "$EVENT_SINK_CRONJOB" -o jsonpath='{.status.lastSuccessfulTime}' 2>/dev/null || true)"
+  if [[ -n "$event_sink_last_success" ]]; then
+    pass "CronJob '${EVENT_SINK_CRONJOB}' last successful run: ${event_sink_last_success}"
+  else
+    warn "CronJob '${EVENT_SINK_CRONJOB}' has no recorded successful run yet"
   fi
 fi
 
@@ -289,6 +396,13 @@ echo "    xapi_events_all : ${xapi_count}"
 echo "    enrollments     : ${enrollments_count}"
 echo "    completions     : ${completions_count}"
 echo "    courses         : ${courses_count}"
+echo "    event_sink.course_enrollment : ${event_sink_enrollments}"
+echo "    event_sink.course_overviews  : ${event_sink_courses}"
+echo "    event_sink.user_profile      : ${event_sink_profiles}"
+echo "    event_sink.external_id       : ${event_sink_external_ids}"
+echo "    event_sink.tag               : ${event_sink_tags}"
+echo "    event_sink.taxonomy          : ${event_sink_taxonomies}"
+echo "    event_sink.object_tag        : ${event_sink_object_tags}"
 echo ""
 
 if [[ "$enrollments_count" -gt 0 && "$courses_count" -gt 0 ]]; then
@@ -301,6 +415,26 @@ fi
 
 if [[ "$xapi_count" -eq 0 ]]; then
   warn "xAPI events count is 0 — real-time event pipeline may not be active"
+fi
+
+if [[ "$event_sink_enrollments" -eq 0 || "$event_sink_courses" -eq 0 || "$event_sink_profiles" -eq 0 ]]; then
+  warn "Core event_sink dimensions are incomplete"
+fi
+
+if [[ "$mysql_external_ids" =~ ^[0-9]+$ && "$mysql_external_ids" -gt 0 && "$event_sink_external_ids" -eq 0 ]]; then
+  fail "event_sink.external_id is empty but MySQL source contains ${mysql_external_ids} rows"
+fi
+
+if [[ "$mysql_tags" =~ ^[0-9]+$ && "$mysql_tags" -gt 0 && "$event_sink_tags" -eq 0 ]]; then
+  fail "event_sink.tag is empty but MySQL source contains ${mysql_tags} rows"
+fi
+
+if [[ "$mysql_taxonomies" =~ ^[0-9]+$ && "$mysql_taxonomies" -gt 0 && "$event_sink_taxonomies" -eq 0 ]]; then
+  fail "event_sink.taxonomy is empty but MySQL source contains ${mysql_taxonomies} rows"
+fi
+
+if [[ "$mysql_object_tags" =~ ^[0-9]+$ && "$mysql_object_tags" -gt 0 && "$event_sink_object_tags" -eq 0 ]]; then
+  fail "event_sink.object_tag is empty but MySQL source contains ${mysql_object_tags} rows"
 fi
 
 # ============================================================================
@@ -321,6 +455,7 @@ if [[ "$FAIL_COUNT" -gt 0 ]]; then
   echo "  Jobs:     kubectl --context ${K8S_CTX} -n ${NS} get jobs --sort-by=.metadata.creationTimestamp"
   echo "  Tables:   kubectl --context ${K8S_CTX} -n ${NS} exec ${CH_POD} -- clickhouse-client --query='SHOW TABLES FROM xapi'"
   echo "            kubectl --context ${K8S_CTX} -n ${NS} exec ${CH_POD} -- clickhouse-client --query='SHOW TABLES FROM openedx'"
+  echo "            kubectl --context ${K8S_CTX} -n ${NS} exec ${CH_POD} -- clickhouse-client --query='SHOW TABLES FROM event_sink'"
   echo ""
   exit 1
 fi
