@@ -53,7 +53,9 @@ log_pass "Extracted ${KEY_COUNT} unique remoteRef.key values from YAML"
 
 # ── Step 3: Detect GCP authentication ────────────────────────────────────────
 GCP_AUTHENTICATED=false
-if command -v gcloud &>/dev/null; then
+if [[ "${SKIP_GCP_CHECK:-0}" == "1" ]]; then
+  log_info "SKIP_GCP_CHECK=1 — skipping GCP Secret Manager checks"
+elif command -v gcloud &>/dev/null; then
   ACTIVE_ACCOUNT="$(gcloud auth list --filter="status:ACTIVE" --format="value(account)" 2>/dev/null || true)"
   if [[ -n "${ACTIVE_ACCOUNT}" ]]; then
     GCP_AUTHENTICATED=true
