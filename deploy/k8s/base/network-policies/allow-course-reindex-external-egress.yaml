@@ -1,0 +1,21 @@
+# Allow course-reindex CronJob pods to reach MongoDB Atlas (modulestore)
+# and Meilisearch (external if needed).
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-course-reindex-external-egress
+  labels:
+    app.kubernetes.io/component: network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: course-reindex
+  policyTypes:
+    - Egress
+  egress:
+    - ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 27017

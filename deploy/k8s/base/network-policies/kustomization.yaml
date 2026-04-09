@@ -18,3 +18,5 @@ resources:
   - allow-smtp-external-egress.yaml
   - allow-discovery-external-egress.yaml
   - allow-aspects-external-egress.yaml
+  - allow-course-reindex-external-egress.yaml
+  - allow-tenant-isolation-external-egress.yaml
