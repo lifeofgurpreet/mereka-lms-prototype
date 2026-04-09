@@ -597,6 +597,9 @@ ci_runtime_inventory:
       category: CI_ARTIFACT
     - script: scripts/qa/test-verify-build-provenance.sh
       category: CI_ARTIFACT
+    - script: scripts/qa/verify-ops-reliability-streak.sh
+      category: CI_ARTIFACT
+      note: "B-027: reads latest ops-reliability-streak artifact and reports streak count vs threshold (informational)"
     - script: scripts/qa/verify-release-bundle.sh
       category: CI_ARTIFACT
     - script: scripts/qa/test-verify-release-bundle.sh

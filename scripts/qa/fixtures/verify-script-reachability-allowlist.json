@@ -115,6 +115,7 @@
     "scripts/qa/verify-notifications-inapp.sh",
     "scripts/qa/verify-observability-contracts.sh",
     "scripts/qa/verify-oep65-readiness.sh",
+    "scripts/qa/verify-ops-reliability-streak.sh",
     "scripts/qa/verify-ora2-operations.sh",
     "scripts/qa/verify-paragon-theme-urls.sh",
     "scripts/qa/verify-patch-idempotency.sh",

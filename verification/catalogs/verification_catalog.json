@@ -11678,6 +11678,28 @@
       "tier": "release_blocking"
     },
     {
+      "cadence": "on_demand",
+      "canonical": true,
+      "ci_binding": [],
+      "ci_entrypoints": [],
+      "env_scope": [
+        "dev"
+      ],
+      "kind": "verify",
+      "mutability": "mutating",
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-ops-reliability-streak.sh",
+      "reference_count": 4,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "low",
+      "spec_ids": [],
+      "status": "manual_only",
+      "tier": "exploratory_manual"
+    },
+    {
       "cadence": "scheduled_or_post_deploy",
       "canonical": true,
       "ci_binding": [],
@@ -18549,25 +18571,25 @@
     "archived_deprecated_scripts": 21,
     "ci_static_bound": 388,
     "kinds": {
-      "verify": 620
+      "verify": 621
     },
     "mutability": {
       "destructive": 10,
-      "mutating": 18,
+      "mutating": 19,
       "read-only": 592
     },
     "status_overrides_applied": 8,
     "statuses": {
       "active": 433,
       "deprecated_candidate": 1,
-      "manual_only": 186
+      "manual_only": 187
     },
     "tiers": {
-      "exploratory_manual": 190,
+      "exploratory_manual": 191,
       "periodic_runtime": 18,
       "release_blocking": 412
     },
-    "total_verify_scripts": 620,
+    "total_verify_scripts": 621,
     "workflow_direct_bound": 64
   },
   "version": "1"

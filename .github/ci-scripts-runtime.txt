@@ -21,6 +21,7 @@
 # ── CI artifact required ─────────────────────────────────────────────────────
 scripts/qa/verify-build-provenance.sh  # CI_ARTIFACT
 scripts/qa/test-verify-build-provenance.sh  # CI_ARTIFACT
+scripts/qa/verify-ops-reliability-streak.sh  # CI_ARTIFACT (B-027: reads latest ops-reliability-streak artifact and reports streak count vs threshold (informational))
 scripts/qa/verify-release-bundle.sh  # CI_ARTIFACT
 scripts/qa/test-verify-release-bundle.sh  # CI_ARTIFACT
 scripts/qa/verify-release-object.sh  # CI_ARTIFACT
