@@ -6,7 +6,7 @@ from _mereka_lms import _register_env_patch
 # MFE Dockerfile Patches
 ###############################################################################
 
-# Node 24 build toolchain
+# Node 24 build toolchain + git HTTPS override
 _register_env_patch(
     "mfe-dockerfile-pre-npm-install",
     """
@@ -14,6 +14,11 @@ _register_env_patch(
 RUN apt-get update && apt-get install -y \\
     gcc g++ git libgl1 libxi6 make python3 python3-distutils \\
     && rm -rf /var/lib/apt/lists/*
+# Force git to use HTTPS instead of SSH for github.com — Docker builds
+# have no SSH keys, so github: protocol (which resolves to SSH) fails.
+# This affects tutor-indigo's @edx/brand install from edly-io/brand-openedx.
+RUN git config --global url."https://github.com/".insteadOf "ssh://git@github.com/" \\
+    && git config --global url."https://github.com/".insteadOf "git@github.com:"
 """,
 )
 
