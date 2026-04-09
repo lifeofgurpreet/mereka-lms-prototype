@@ -34,7 +34,7 @@ spec:
                 - backup_libraries
               env:
                 - name: DJANGO_SETTINGS_MODULE
-                  value: lms.envs.production
+                  value: lms.envs.tutor.production
               resources:
                 requests:
                   memory: "512Mi"
