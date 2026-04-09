@@ -733,14 +733,17 @@ if [[ "$LIVE_MODE" -eq 1 ]]; then
   if [[ "$EXPLICIT_LIVE_URLS" -eq 1 ]]; then
     skip "Explicit live URLs provided — skipping broad LMS section inventory (tenant-branding concern)"
   else
-    echo "  [LMS structural sections: academyv2.mereka.io]"
-    LMS_HTML=$(curl -sf --max-time 15 "https://academyv2.mereka.io" 2>/dev/null || true)
-    if [[ -n "$LMS_HTML" ]]; then
-      for section in "Future of Work" "Creative Tech" "Explore" "Support" "Partners"; do
-        if grep -q "$section" <<<"$LMS_HTML"; then
-          pass "LMS footer section '${section}' present"
+    echo "  [MFE footer sections via /api/mfe_config/v1]"
+    MFE_CONFIG=$(curl -sf --max-time 15 "https://academyv2.mereka.io/api/mfe_config/v1" 2>/dev/null || true)
+    if [[ -n "$MFE_CONFIG" ]]; then
+      # Canonical MFE footer sections from MEREKA_PUBLIC_FOOTER in MFE config API.
+      # The LMS homepage now redirects to MFE learner-home — scraping LMS HTML
+      # for footer sections no longer works. Check the API instead.
+      for section in "corporate" "marketplace" "academy" "space"; do
+        if echo "$MFE_CONFIG" | grep -q "\"$section\""; then
+          pass "MFE footer section '${section}' present"
         else
-          fail "LMS footer section '${section}' NOT present (may be image deployment gap)"
+          fail "MFE footer section '${section}' NOT present in MEREKA_PUBLIC_FOOTER"
         fi
       done
     else
