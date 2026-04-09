@@ -5,24 +5,10 @@ name: CI
 on:
   pull_request:
     branches: [main]
-    paths-ignore:
-      - 'docs/**'
-      - 'tools/docs/**'
-      - 'generated/catalogs/**'
-      - 'docs/catalog.json'
-      - 'specs/testmaps/README.md'
-      - 'specs/_generated/testmaps/README.md'
-      - '.github/workflows/docs-compliance.yml'
-      - '.github/workflows/docs-policy.yml'
-      - '.github/workflows/codeql.yml'
-      - 'CLAUDE.md'
-      - 'AGENTS.md'
-      - 'CONTRIBUTING.md'
-      - 'SECURITY.md'
-      - 'LICENSE'
-      # NOTE: '*.md' glob removed. CHANGELOG.md and other root .md files
-      # are release artifacts that must trigger CI so required branch-
-      # protection checks report and PRs can merge.
+    # NOTE: paths-ignore removed entirely. It prevented required branch-
+    # protection checks from reporting on docs-only PRs, blocking merge.
+    # The change-scope job detects docs-only PRs and skips expensive work
+    # while still reporting all required check names.
   merge_group:
   push:
     branches: [main]
@@ -588,15 +574,19 @@ jobs:
       - static-validation-precheck
       - static-validation-shards
       - static-validation-postchecks
-    if: ${{ always() && (github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true') }}
+    if: ${{ always() }}
     runs-on: mereka-k8s-runners
     permissions:
       contents: read
       pull-requests: write
 
     steps:
+      - name: Skip for docs-only PRs
+        if: ${{ github.event_name == 'pull_request' && needs.change-scope.outputs.docs_only == 'true' }}
+        run: echo "Docs-only PR — static validation skipped by scope."
+
       - name: Download PR coverage artifact
-        if: ${{ github.event_name == 'pull_request' && needs.static-validation-precheck.result == 'success' }}
+        if: ${{ needs.change-scope.outputs.docs_only != 'true' && github.event_name == 'pull_request' && needs.static-validation-precheck.result == 'success' }}
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
         with:
           name: spec-coverage-pr
@@ -718,7 +708,7 @@ jobs:
             }
 
       - name: Fail if any static validation dependency failed
-        if: ${{ needs.static-validation-precheck.result != 'success' || needs.static-validation-shards.result != 'success' || needs.static-validation-postchecks.result != 'success' }}
+        if: ${{ needs.change-scope.outputs.docs_only != 'true' && (needs.static-validation-precheck.result != 'success' || needs.static-validation-shards.result != 'success' || needs.static-validation-postchecks.result != 'success') }}
         run: |
           echo "::error::Static validation aggregate failed because one or more lanes failed"
           exit 1
@@ -731,13 +721,18 @@ jobs:
   tutor-config-tests:
     name: Tutor Configuration Tests
     needs: change-scope
-    if: ${{ github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true' }}
+    if: ${{ always() }}
     runs-on: mereka-k8s-runners
     permissions:
       contents: read
 
     steps:
+      - name: Skip for docs-only PRs
+        if: ${{ github.event_name == 'pull_request' && needs.change-scope.outputs.docs_only == 'true' }}
+        run: echo "Docs-only PR — Tutor config tests skipped by scope."
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        if: ${{ needs.change-scope.outputs.docs_only != 'true' }}
 
       - name: Set up Python environment
         uses: ./.github/actions/setup-python-env
@@ -807,13 +802,18 @@ jobs:
   security-scans:
     name: Security Scans
     needs: change-scope
-    if: ${{ github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true' }}
+    if: ${{ always() }}
     runs-on: mereka-k8s-runners
     permissions:
       contents: read
 
     steps:
+      - name: Skip for docs-only PRs
+        if: ${{ github.event_name == 'pull_request' && needs.change-scope.outputs.docs_only == 'true' }}
+        run: echo "Docs-only PR — security scans skipped by scope."
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        if: ${{ needs.change-scope.outputs.docs_only != 'true' }}
         with:
           fetch-depth: 2  # TruffleHog needs parent commit for diff
 
@@ -951,15 +951,21 @@ jobs:
   test-coverage:
     name: Python test coverage
     needs: change-scope
-    if: ${{ github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true' }}
+    if: ${{ always() }}
     runs-on: mereka-k8s-runners
     permissions:
       contents: read
 
     steps:
+      - name: Skip for docs-only PRs
+        if: ${{ github.event_name == 'pull_request' && needs.change-scope.outputs.docs_only == 'true' }}
+        run: echo "Docs-only PR — Python tests skipped by scope."
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        if: ${{ needs.change-scope.outputs.docs_only != 'true' }}
 
       - name: Set up Python environment
+        if: ${{ needs.change-scope.outputs.docs_only != 'true' }}
         uses: ./.github/actions/setup-python-env
         with:
           python-version: '3.12'
