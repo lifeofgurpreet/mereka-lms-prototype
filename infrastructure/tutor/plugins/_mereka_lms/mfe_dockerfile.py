@@ -250,3 +250,16 @@ index_path.write_text(updated, encoding="utf-8")
 PY
 """,
 )
+
+# Fix moment.js "Invalid time value" crash in Course Authoring MFE (#1385).
+# StatusBar.tsx passes endDate (which may be null/empty) directly to moment.utc(),
+# causing a crash when courses have no end date set. Guard with null check.
+_register_env_patch(
+    "mfe-dockerfile-post-npm-install",
+    """
+# Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
+RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx' \
+    -exec sed -i 's/const endDateObj = moment\\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} + \
+    || true
+""",
+)
