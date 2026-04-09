@@ -85,6 +85,23 @@ spec:
               env:
                 - name: DJANGO_SETTINGS_MODULE
                   value: cms.envs.tutor.production
+                - name: SERVICE_VARIANT
+                  value: cms
+                - name: SECRET_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: openedx-secrets
+                      key: OPENEDX_SECRET_KEY
+                - name: JWT_SECRET_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: openedx-secrets
+                      key: JWT_SECRET_KEY_CMS
+                - name: MONGODB_HOST
+                  valueFrom:
+                    secretKeyRef:
+                      name: openedx-secrets
+                      key: FORUM_MONGODB_HOST
               envFrom:
                 - secretRef:
                     name: openedx-secrets
