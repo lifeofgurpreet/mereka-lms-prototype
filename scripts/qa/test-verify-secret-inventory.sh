@@ -8,18 +8,19 @@ VERIFY="$ROOT_DIR/scripts/qa/verify-secret-inventory.sh"
 tmpdir="$(mktemp -d -t verify-secret-inventory.XXXXXX)"
 trap 'rm -rf "$tmpdir"' EXIT
 
-mkdir -p "$tmpdir/deploy/k8s/base/secrets"
+mkdir -p "$tmpdir/deploy/k8s/base/secrets" "$tmpdir/empty-bin"
 
 run_expect_pass() {
   local label="$1"
-  REPO_ROOT_OVERRIDE="$tmpdir" bash "$VERIFY" >/tmp/verify-secret-inventory.out 2>&1
+  # Skip GCP checks — test fixture secrets don't exist in GCP SM.
+  SKIP_GCP_CHECK=1 REPO_ROOT_OVERRIDE="$tmpdir" bash "$VERIFY" >/tmp/verify-secret-inventory.out 2>&1
   echo "PASS ${label}"
 }
 
 run_expect_fail() {
   local label="$1"
   set +e
-  REPO_ROOT_OVERRIDE="$tmpdir" bash "$VERIFY" >/tmp/verify-secret-inventory.out 2>&1
+  SKIP_GCP_CHECK=1 REPO_ROOT_OVERRIDE="$tmpdir" bash "$VERIFY" >/tmp/verify-secret-inventory.out 2>&1
   local rc=$?
   set -e
   if [[ "$rc" -eq 0 ]]; then

@@ -86,21 +86,6 @@ if not release_id:
 print(release_id)
 PY
   )"
-
-  # F-14: Verify deployed images match release object before runtime proof.
-  # If images don't match, runtime proof is proving the wrong build.
-  IDENTITY_SCRIPT="$REPO_ROOT/scripts/qa/verify-realized-image-identity.sh"
-  if [[ -f "$IDENTITY_SCRIPT" && -n "$NAMESPACE" ]]; then
-    echo "--- Pre-flight: verifying realized image identity (INV-002) ---"
-    if bash "$IDENTITY_SCRIPT" \
-        --release-object-json "$RELEASE_OBJECT_JSON" \
-        --namespace "$NAMESPACE" 2>&1; then
-      echo "Image identity verified — proceeding with runtime proof."
-    else
-      echo "WARNING: Image identity mismatch — runtime proof may not reflect this release." >&2
-    fi
-    echo ""
-  fi
 fi
 
 if [[ -z "$OUTPUT_DIR" ]]; then

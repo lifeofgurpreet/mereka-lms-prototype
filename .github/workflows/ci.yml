@@ -5,10 +5,24 @@ name: CI
 on:
   pull_request:
     branches: [main]
-    # NOTE: paths-ignore removed entirely. It prevented required branch-
-    # protection checks from reporting on docs-only PRs, blocking merge.
-    # The change-scope job detects docs-only PRs and skips expensive work
-    # while still reporting all required check names.
+    paths-ignore:
+      - 'docs/**'
+      - 'tools/docs/**'
+      - 'generated/catalogs/**'
+      - 'docs/catalog.json'
+      - 'specs/testmaps/README.md'
+      - 'specs/_generated/testmaps/README.md'
+      - '.github/workflows/docs-compliance.yml'
+      - '.github/workflows/docs-policy.yml'
+      - '.github/workflows/codeql.yml'
+      - 'CLAUDE.md'
+      - 'AGENTS.md'
+      - 'CONTRIBUTING.md'
+      - 'SECURITY.md'
+      - 'LICENSE'
+      # NOTE: '*.md' glob removed. CHANGELOG.md and other root .md files
+      # are release artifacts that must trigger CI so required branch-
+      # protection checks report and PRs can merge.
   merge_group:
   push:
     branches: [main]
@@ -574,19 +588,15 @@ jobs:
       - static-validation-precheck
       - static-validation-shards
       - static-validation-postchecks
-    if: ${{ always() }}
+    if: ${{ always() && (github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true') }}
     runs-on: mereka-k8s-runners
     permissions:
       contents: read
       pull-requests: write
 
     steps:
-      - name: Skip for docs-only PRs
-        if: ${{ github.event_name == 'pull_request' && needs.change-scope.outputs.docs_only == 'true' }}
-        run: echo "Docs-only PR — static validation skipped by scope."
-
       - name: Download PR coverage artifact
-        if: ${{ needs.change-scope.outputs.docs_only != 'true' && github.event_name == 'pull_request' && needs.static-validation-precheck.result == 'success' }}
+        if: ${{ github.event_name == 'pull_request' && needs.static-validation-precheck.result == 'success' }}
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
         with:
           name: spec-coverage-pr
@@ -708,7 +718,7 @@ jobs:
             }
 
       - name: Fail if any static validation dependency failed
-        if: ${{ needs.change-scope.outputs.docs_only != 'true' && (needs.static-validation-precheck.result != 'success' || needs.static-validation-shards.result != 'success' || needs.static-validation-postchecks.result != 'success') }}
+        if: ${{ needs.static-validation-precheck.result != 'success' || needs.static-validation-shards.result != 'success' || needs.static-validation-postchecks.result != 'success' }}
         run: |
           echo "::error::Static validation aggregate failed because one or more lanes failed"
           exit 1
@@ -718,14 +728,6 @@ jobs:
   # Renders a full Tutor environment + applies patches + runs test suite.
   # Replaces: tutor-config-tests, validate-tutor-config from old ci.yml.
   # ============================================================================
-  tutor-config-tests-skip:
-    name: Tutor Configuration Tests
-    needs: change-scope
-    if: ${{ github.event_name == 'pull_request' && needs.change-scope.outputs.docs_only == 'true' }}
-    runs-on: mereka-k8s-runners
-    steps:
-      - run: echo "Docs-only PR — Tutor config tests skipped by scope."
-
   tutor-config-tests:
     name: Tutor Configuration Tests
     needs: change-scope
@@ -802,14 +804,6 @@ jobs:
   # TruffleHog (HEAD only), Hadolint on all Dockerfiles, pip-audit.
   # Replaces: security-scan, pip-audit from old ci.yml.
   # ============================================================================
-  security-scans-skip:
-    name: Security Scans
-    needs: change-scope
-    if: ${{ github.event_name == 'pull_request' && needs.change-scope.outputs.docs_only == 'true' }}
-    runs-on: mereka-k8s-runners
-    steps:
-      - run: echo "Docs-only PR — security scans skipped by scope."
-
   security-scans:
     name: Security Scans
     needs: change-scope
@@ -954,14 +948,6 @@ jobs:
   # Python test suite with coverage enforcement. Non-blocking (continue-on-error).
   # Kept exactly as-is from original ci.yml.
   # ============================================================================
-  test-coverage-skip:
-    name: Python test coverage
-    needs: change-scope
-    if: ${{ github.event_name == 'pull_request' && needs.change-scope.outputs.docs_only == 'true' }}
-    runs-on: mereka-k8s-runners
-    steps:
-      - run: echo "Docs-only PR — Python tests skipped by scope."
-
   test-coverage:
     name: Python test coverage
     needs: change-scope

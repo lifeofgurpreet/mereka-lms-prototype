@@ -768,6 +768,9 @@ ci_runtime_inventory:
     - script: scripts/qa/verify-observability-pii-filtering.sh
       category: LIVE_CLUSTER
       note: uses kubectl logs to sample pod output for PII; moved from static inventory
+    - script: scripts/qa/verify-realized-image-identity.sh
+      category: LIVE_CLUSTER
+      note: compares live pod image digests against release object (INV-002 gate)
     - script: scripts/qa/verify-tenant-contract-alignment.sh
       category: CONFIG_DRIFT
     - script: scripts/qa/verify-tenant-override-schema.sh

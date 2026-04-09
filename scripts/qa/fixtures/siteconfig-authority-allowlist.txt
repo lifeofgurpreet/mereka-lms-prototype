@@ -15,3 +15,6 @@ scripts/tenants/configure-tenant-idp.sh
 scripts/tenants/sync-tenant-enterprise-mapping.sh
 scripts/infra/fix-mfe-refresh-endpoint-site-config.sh
 infrastructure/tutor/plugins/multi-tenancy/management/commands/provision_tenant.py
+
+# Enterprise tenant bootstrap (creates and cleans SiteConfiguration MFE_CONFIG)
+scripts/tenants/bootstrap-enterprise-tenants.py

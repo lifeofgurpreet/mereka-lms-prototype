@@ -640,6 +640,56 @@ def main():
             print("  [ERR] django-waffle not installed")
         print()
 
+    # SiteConfiguration MFE_CONFIG cleanup
+    # SiteConfiguration can override settings.MFE_CONFIG entirely.
+    # Empty or stale keys in the SiteConfig version block Django settings
+    # from reaching the MFE config API. Clean up known problematic keys.
+    if not args.tenant:
+        print("--- SiteConfiguration MFE_CONFIG Cleanup ---")
+        try:
+            from openedx.core.djangoapps.site_configuration.models import (
+                SiteConfiguration,
+            )
+
+            sc_updated = 0
+            for sc in SiteConfiguration.objects.all():
+                values = sc.site_values or {}
+                mfe = values.get("MFE_CONFIG", {})
+                if not isinstance(mfe, dict):
+                    continue
+                changed = False
+
+                # Remove empty MEREKA_PUBLIC_FOOTER — Django settings has the real data
+                if "MEREKA_PUBLIC_FOOTER" in mfe and not mfe["MEREKA_PUBLIC_FOOTER"]:
+                    if dry_run:
+                        print(f"  [DRY] REMOVE empty MEREKA_PUBLIC_FOOTER from {sc.site.domain}")
+                    else:
+                        del mfe["MEREKA_PUBLIC_FOOTER"]
+                        changed = True
+
+                # Fix ACCOUNT_PROFILE_URL: /profile → /u/
+                for key in ("ACCOUNT_PROFILE_URL", "PROFILE_MICROFRONTEND_URL"):
+                    val = mfe.get(key, "")
+                    if val and "/profile" in val and "/u/" not in val:
+                        new_val = val.replace("/profile", "/u/")
+                        if dry_run:
+                            print(f"  [DRY] FIX {sc.site.domain} {key}: {val} → {new_val}")
+                        else:
+                            mfe[key] = new_val
+                            changed = True
+
+                if changed:
+                    sc.site_values["MFE_CONFIG"] = mfe
+                    sc.save()
+                    print(f"  [OK] UPDATED SiteConfiguration {sc.site.domain}")
+                    sc_updated += 1
+
+            if sc_updated == 0 and not dry_run:
+                print("  [OK] All SiteConfigurations clean")
+        except ImportError:
+            print("  [SKIP] site_configuration not available")
+        print()
+
     # Summary
     total_actions = sum(len(r["actions"]) for r in all_results)
     total_errors = sum(len(r["errors"]) for r in all_results)

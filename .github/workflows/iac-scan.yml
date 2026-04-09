@@ -3,7 +3,9 @@ name: IaC Security Scan
 on:
   pull_request:
     branches: [main]
-    # paths-ignore removed: required checks must always report for merge
+    paths-ignore:
+      - 'docs/**'
+      - 'LICENSE'
   merge_group:
   push:
     branches: [main]
