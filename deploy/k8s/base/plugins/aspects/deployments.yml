@@ -361,7 +361,7 @@ spec:
             periodSeconds: 30
           readinessProbe:
             httpGet:
-              path: /__heartbeat__
+              path: /__lbheartbeat__
               port: 8100
             initialDelaySeconds: 15
             periodSeconds: 10
