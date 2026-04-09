@@ -26,6 +26,27 @@ repos:
             scripts/qa/fixtures/script-basename-overlap-allowlist\.json
           )$
 
+      - id: ci-inventory-regen
+        name: Regenerate CI static + runtime inventories
+        entry: bash -c 'python3 scripts/governance/generate-ci-static-inventory.py --write && python3 scripts/governance/generate-ci-runtime-inventory.py --write && git add .github/ci-scripts-static.txt .github/ci-scripts-static-shard-*.txt .github/ci-scripts-runtime.txt'
+        language: system
+        pass_filenames: false
+        files: ^scripts/governance/script-registry\.yaml$
+
+      - id: runtime-routing-regen
+        name: Regenerate runtime-routing matrices
+        entry: bash -c 'for env in dev staging production profiles-dev local; do python3 scripts/acceptance/generate_runtime_routing_matrix.py --env "$env"; done && git add generated/tenant-runtime/browser-matrix-*.json'
+        language: system
+        pass_filenames: false
+        files: ^deploy/k8s/tenancy/tenant-registry\.yaml$
+
+      - id: design-tokens-regen
+        name: Regenerate design tokens from canonical source
+        entry: bash -c 'bash scripts/branding/generate-tokens-from-canonical.sh && git add infrastructure/tutor/themes/mereka/scss/_tokens.scss infrastructure/tutor/themes/mereka/common/static/css/mereka-*.css infrastructure/tutor/themes/mereka/lms/static/css/mereka-*.css infrastructure/tutor/themes/mereka/cms/static/css/mereka-*.css tokens/src/core/global.json 2>/dev/null; true'
+        language: system
+        pass_filenames: false
+        files: ^assets/branding/tokens\.css$
+
   # Python formatting and linting
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.7.0
