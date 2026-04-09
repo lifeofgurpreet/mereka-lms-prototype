@@ -1,7 +1,7 @@
 # Finish-Line Master Tracker
 
 _Audience: Contributors and reviewers • Owner: Platform Team • Last verified:
-2026-04-03T19:58:00Z • Status: active_
+2026-04-09T04:00:00Z • Status: active_
 
 Use this tracker with:
 
@@ -19,7 +19,25 @@ Use this tracker with:
 - `mereka-lms#1308` merged the app-side non-primary `apps.*` host repair.
 - `mereka-lms#1309` merged the severity-aware CI baseline policy at
   `53ae16b4921d8824ac64a498b51a10c0ef5e269a`.
-- `mereka-lms#1310` is open as the release-object foundation lane at head `5ca6da315`.
+- `mereka-lms#1310` merged the release-object foundation lane.
+
+**Agent 2 hardening session (2026-04-08/09) — 16 PRs merged:**
+
+- `#1430` — deterministic cross-repo verifiers, executable route resolver,
+  workflow gate enforcement, proof lineage chain, negative test pack,
+  skill routing contract, expanded blind-agent harness (31 checks)
+- `#1443` (B-012) — production promotion now requires `--release-object-json`
+- `#1447` (B-019) — vendored settings auto-sync at promotion time
+- `#1448` (B-015) — environment progression warning for promotion
+- `#1449` — PII filtering script reclassified to runtime inventory
+- `#1451` (B-016) — truth ledger + proof artifacts validate release identity
+- `#1455` — CI: removed `*.md` from paths-ignore + added CHANGELOG + VERSION_MATRIX
+- `#1458` (B-024) — DR drill schedule + backup coverage matrix docs
+- `#1459` (tracker #32) — deleted deprecated mfe-node.sh (-755 lines)
+- `#1464` (F-04) — runtime target-identity preflight (`verify-realized-image-identity.sh`)
+- `#1465` (F-12) — pre-commit hooks for CI inventory, routing matrix, design token auto-regen
+- `#1472` (F-08) — fixed test-verify-secret-inventory GCP auth issue
+- `#1474` — CI: removed ALL paths-ignore so docs-only PRs can merge
 
 ### infra_truth
 
@@ -27,9 +45,13 @@ Use this tracker with:
   `995b15708370fe92b8d1b48536877c232565a967`.
 - Dev Argo realization picked up the repaired non-primary `apps.*`
   runtime data after `#2392`.
-- Release-object consumption in GitOps does not exist yet.
-  Promotion is still human-joined across app SHA, digests, overlay,
-  and runtime proof.
+- `bbi-infrastructure#2528` synced vendored LMS production.py (Oscar URLs).
+- `bbi-infrastructure#2529` added cross-repo boundary + contract pointers to AGENTS.md.
+- `bbi-infrastructure#2537` synced vendored LMS production.py (Discussions MFE settings).
+- Release-object consumption in GitOps: `promote-dev-image.yml` now consumes
+  release objects via `repository_dispatch`. Production promotion enforced
+  via `release-openedx-gitops.sh` `--require-digests` + `--release-object-json`.
+  Manual SHA joining no longer possible for production.
 
 ### runtime_truth
 
@@ -116,18 +138,22 @@ authority convergence:
   - live runtime authority: build artifact, then environment promotion
   - proof command: `bash scripts/qa/verify-release-object.sh <path>`
   - drift detector: pending `#1310` merge
-  - current status: in flight on `#1310`
+  - current status: **CLOSED** — `#1310` merged (foundation), `#1443` enforces
+    `--release-object-json` for production promotion. Manual SHA joining
+    blocked for production. Truth ledger validates release identity (`#1451`).
   - duplicate paths to retire:
-    manual joining of commit SHA, digests, overlay, and proof
+    manual joining still possible for dev/staging (not yet enforced)
 - Runtime target identity
   - canonical owner repo: cross-repo
   - consumer surface: operators, proof runners, GitOps
   - live runtime authority: current kubectl context, Argo app, namespace, and
     expected hosts
-  - proof command: `bash scripts/qa/ops-preflight.sh --strict`
+  - proof command: `bash scripts/qa/verify-realized-image-identity.sh --release-object-json <path>`
   - drift detector:
     `bash scripts/infra/verify-release-preflight.sh --env <dev|staging|prod>`
-  - current status: partial; no single target-identity preflight yet
+  - current status: **CLOSED** — `#1464` added `verify-realized-image-identity.sh`
+    which compares live pod image digests against release object (INV-002 gate).
+    Registered in runtime inventory (LIVE_CLUSTER).
   - duplicate paths to retire: ad hoc context and namespace reasoning in shell
     history
 
@@ -148,11 +174,11 @@ authority convergence:
     `bash scripts/tenants/verify-dev-runtime-proof.sh --namespace mereka-lms-dev`
   - status: in flight
 - Release-object foundation
-  - app PR: `#1310`
-  - infra PR: not started
-  - target env: build artifact / next GitOps consumer
+  - app PR: `#1310` (merged), `#1443` (enforcement), `#1451` (truth ledger)
+  - infra PR: `#2528`, `#2529`, `#2537` (all merged — vendored sync + AGENTS.md)
+  - target env: build artifact + GitOps consumer (promote-dev-image.yml)
   - proof after merge: `bash scripts/qa/verify-release-object.sh <artifact>`
-  - status: in flight
+  - status: **CLOSED** — production promotion enforced, dev auto-promotion consuming
 
 ## Dependency graph
 
@@ -203,12 +229,12 @@ The finish line is gated, not chronological.
   - owner: app repo
   - outcome: merge `#1310` or classify it as baseline-only with no branch
     failures
-  - current state: in flight
+  - current state: **CLOSED** — `#1310` merged (foundation), `#1443` enforces for production
 - `F-02`
   - priority: `P0`
   - owner: cross-repo
   - outcome: build the GitOps consumer for release objects
-  - current state: open
+  - current state: **CLOSED** — `promote-dev-image.yml` consumes release objects via `repository_dispatch`
 - `F-03`
   - priority: `P0`
   - owner: app repo
@@ -220,7 +246,7 @@ The finish line is gated, not chronological.
   - owner: app repo
   - outcome: add a runtime target identity preflight that prints cluster, Argo,
     namespace, and host expectation
-  - current state: open
+  - current state: **CLOSED** — `#1464` added `verify-realized-image-identity.sh` (INV-002 gate)
 - `F-05`
   - priority: `P0`
   - owner: app repo
@@ -242,7 +268,8 @@ The finish line is gated, not chronological.
   - priority: `P1`
   - owner: app repo
   - outcome: burn down medium baseline static debt in a dedicated lane
-  - current state: open
+  - current state: **CLOSED** — `#1472` fixed test-verify-secret-inventory GCP auth.
+    Medium static debt minimal (0 open items in structural debt register).
 - `F-09`
   - priority: `P2`
   - owner: docs
