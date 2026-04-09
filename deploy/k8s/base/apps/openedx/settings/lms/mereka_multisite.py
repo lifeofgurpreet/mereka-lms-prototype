@@ -535,6 +535,12 @@ class MerekaLoginRedirectMiddleware:
             if normalized_login_path == "/login" and next_target in ("/dashboard", "/dashboard/"):
                 response["Location"] = dashboard_auth_url
                 return response
+            # Also rewrite MFE redirects (e.g. waffle flag redirecting /dashboard
+            # to LEARNER_HOME_MICROFRONTEND_URL on the wrong host).
+            new_location = _rewrite_redirect_url_to_tenant_mfe(host, location)
+            if new_location != location:
+                _log.info("MerekaDashboardRedirect: %s -> %s (host=%s)", location, new_location, host)
+                response["Location"] = new_location
             return response
 
         content_type = ""

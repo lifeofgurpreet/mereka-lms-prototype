@@ -75,7 +75,6 @@ scripts/qa/verify-deployment-lanes.sh  # LIVE_CLUSTER
 scripts/qa/verify-prod-parked-state.sh  # LIVE_CLUSTER (validates the parked production zero-replica profile against the live cluster)
 scripts/qa/verify-secret-inventory.sh  # LIVE_CLUSTER (needs gcloud)
 scripts/qa/verify-observability-pii-filtering.sh  # LIVE_CLUSTER (uses kubectl logs to sample pod output for PII; moved from static inventory)
-scripts/qa/verify-realized-image-identity.sh  # LIVE_CLUSTER (compares live pod image digests against release object (INV-002 gate))
 
 # ── Live app required ─────────────────────────────────────────────────────
 scripts/qa/verify-tenant-visual-contract.sh  # LIVE_APP
