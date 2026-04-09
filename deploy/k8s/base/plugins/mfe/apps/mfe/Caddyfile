@@ -138,7 +138,11 @@
 	# /learner-dashboard/api/... or /learner-dashboard/login_refresh.
 	# Strip the MFE basename before proxying so these requests hit LMS instead
 	# of falling through to the SPA handlers below.
-	@mfe_prefixed_lms_routes path_regexp mfe_prefixed_lms ^/(admin-console|authn|account|communications|course-authoring|authoring|discussions|gradebook|learner-dashboard|learning|learner-record|ora-grading|profile)(/(api/mfe_config/v1.*|api/.*|login_refresh.*|csrf/.*|oauth2/.*|login))$
+	# Proxy API/auth paths under MFE prefixes to LMS.
+	# IMPORTANT: Do NOT include bare "login" here — it matches /authn/login which is
+	# the MFE login page (should be served by Caddy SPA handler, not proxied to LMS).
+	# The standalone /login route handles non-prefixed login.
+	@mfe_prefixed_lms_routes path_regexp mfe_prefixed_lms ^/(admin-console|authn|account|communications|course-authoring|authoring|discussions|gradebook|learner-dashboard|learning|learner-record|ora-grading|profile)(/(api/mfe_config/v1.*|api/.*|login_refresh.*|csrf/.*|oauth2/.*))$
 	handle @mfe_prefixed_lms_routes {
 		rewrite * {http.regexp.mfe_prefixed_lms.2}
 		reverse_proxy lms:8000 {
