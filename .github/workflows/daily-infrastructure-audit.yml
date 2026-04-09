@@ -512,3 +512,72 @@ jobs:
           fi
           # Non-blocking for now — becomes blocking after burn-in period
           # exit "$FAILURES"
+
+  # ============================================================================
+  # Job 6: Ops reliability streak (B-027)
+  # Tracks consecutive successful daily audit runs. When the streak reaches 7,
+  # the ops surface is "proven reliable" per the B-027 acceptance criteria.
+  # ============================================================================
+  ops-reliability-streak:
+    name: Ops reliability streak
+    needs: [observability-audits, image-freshness, parity-rollup, gitops-integrity]
+    if: ${{ always() && github.event_name == 'schedule' }}
+    runs-on: mereka-k8s-runners
+    permissions:
+      contents: read
+    env:
+      OPS_REQUIRED_STREAK: "7"
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Check ops reliability streak
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          echo "=== Ops Reliability Streak (B-027) ==="
+          echo "Required consecutive green runs: ${OPS_REQUIRED_STREAK}"
+          echo ""
+
+          # Query last 20 scheduled runs of this workflow
+          RUNS_JSON=$(gh api "repos/${{ github.repository }}/actions/workflows/daily-infrastructure-audit.yml/runs?event=schedule&per_page=20&status=completed" --jq '.workflow_runs | map({id: .id, conclusion: .conclusion, created_at: .created_at})')
+
+          # Count consecutive successes
+          STREAK=0
+          while read -r conclusion; do
+            if [[ "$conclusion" == "success" ]]; then
+              STREAK=$((STREAK + 1))
+            else
+              break
+            fi
+          done < <(echo "$RUNS_JSON" | python3 -c "import sys,json; [print(r['conclusion']) for r in json.load(sys.stdin)]")
+
+          echo "Current streak: ${STREAK}/${OPS_REQUIRED_STREAK}"
+
+          # Write evidence JSON
+          mkdir -p var/ci
+          python3 -c "
+          import json
+          from datetime import datetime, timezone
+          json.dump({
+              'generated_at': datetime.now(timezone.utc).isoformat(),
+              'status': 'pass' if ${STREAK} >= ${OPS_REQUIRED_STREAK} else 'building',
+              'required_consecutive': ${OPS_REQUIRED_STREAK},
+              'streak': ${STREAK},
+              'workflow': 'daily-infrastructure-audit.yml',
+          }, open('var/ci/ops-reliability-streak.json', 'w'), indent=2)
+          "
+
+          if [[ $STREAK -ge $OPS_REQUIRED_STREAK ]]; then
+            echo "PASS: Ops reliability proven (${STREAK} consecutive green runs)"
+          else
+            echo "BUILDING: ${STREAK}/${OPS_REQUIRED_STREAK} — need $((OPS_REQUIRED_STREAK - STREAK)) more"
+          fi
+
+      - name: Upload streak evidence
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        with:
+          name: ops-reliability-streak
+          retention-days: 30
+          path: var/ci/ops-reliability-streak.json
