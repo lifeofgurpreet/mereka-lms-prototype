@@ -167,7 +167,8 @@
     "scripts/qa/verify-video-upload.sh",
     "scripts/qa/verify-worktree-sanity.sh",
     "scripts/qa/verify-xqueue-deployment.sh",
-    "scripts/qa/verify-xqueue-graders.sh"
+    "scripts/qa/verify-xqueue-graders.sh",
+    "scripts/qa/verify-realized-image-identity.sh"
   ],
   "notes": "Baseline freeze for verify scripts intentionally not wired via CI/workflows/gate runners."
 }
