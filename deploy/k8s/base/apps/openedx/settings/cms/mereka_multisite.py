@@ -195,6 +195,24 @@ def _lms_root_url_for_host(host: str) -> Optional[str]:
     return None
 
 
+def _mfe_base_url_for_host(host: str) -> Optional[str]:
+    """
+    Resolve the tenant's MFE base URL from SiteConfiguration.
+    """
+    from django.contrib.sites.models import Site
+
+    for candidate in _candidate_site_domains(host):
+        site = Site.objects.filter(domain__iexact=candidate).first()
+        if not site:
+            continue
+        cfg = getattr(site, "configuration", None)
+        values = (getattr(cfg, "site_values", None) or {}) if cfg else {}
+        mfe_base = (values.get("MFE_BASE_URL") or "").strip().rstrip("/")
+        if mfe_base:
+            return mfe_base
+    return None
+
+
 class MerekaStudioSigninRedirectMiddleware:
     """
     Rewrite Studio `/signin` redirects to the correct tenant LMS domain.
@@ -207,11 +225,20 @@ class MerekaStudioSigninRedirectMiddleware:
         patch_sites_framework()
         self.get_response = get_response
 
+    _MFE_PATH_PREFIXES = (
+        "/authn", "/authoring", "/learner-dashboard", "/learning",
+    )
+
     def __call__(self, request):
         response = self.get_response(request)
 
-        # Only needed for Studio's legacy redirect endpoints.
         path = getattr(request, "path", "") or ""
+
+        # Studio /home/ → rewrite authoring MFE redirect to tenant apps host
+        if path in ("/home/", "/home"):
+            return self._rewrite_home_redirect(request, response)
+
+        # Only needed for Studio's legacy redirect endpoints.
         if path not in ("/signin", "/signin_redirect_to_lms", "/login/edx-oauth2", "/login/edx-oauth2/"):
             return response
 
@@ -243,4 +270,30 @@ class MerekaStudioSigninRedirectMiddleware:
                 parts.query,
                 parts.fragment,
             ))
+        return response
+
+    def _rewrite_home_redirect(self, request, response):
+        """Rewrite Studio /home/ redirect to the tenant's authoring MFE."""
+        if getattr(response, "status_code", 0) not in (301, 302, 303, 307, 308):
+            return response
+        location = response.get("Location") if hasattr(response, "get") else None
+        if not location:
+            return response
+
+        host = getattr(request, "get_host", lambda: "")()
+        mfe_base = _mfe_base_url_for_host(host)
+        if not mfe_base:
+            return response
+
+        parts = urlsplit(location)
+        path = parts.path or ""
+        if not any(path.startswith(p) for p in self._MFE_PATH_PREFIXES):
+            return response
+
+        new_location = f"{mfe_base}{path}"
+        if parts.query:
+            new_location += f"?{parts.query}"
+        if new_location != location:
+            _log.info("MerekaStudioHomeRedirect: %s -> %s (host=%s)", location, new_location, host)
+            response["Location"] = new_location
         return response
