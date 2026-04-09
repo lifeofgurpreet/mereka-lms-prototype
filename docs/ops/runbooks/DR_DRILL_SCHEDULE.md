@@ -358,6 +358,37 @@ If a drill is blocked due to environment access, an Engineering Lead can approve
 
 ---
 
+## Sign-off Log Template
+
+After each drill, the operator and Engineering Lead must co-sign the evidence record. Append one row to `var/dr-evidence/sign-off-log.tsv`:
+
+```
+<ISO8601 timestamp>	<drill_type>	<backup_name>	<overall_status>	<operator_name>	<lead_sign_off>	<notes>
+```
+
+Example:
+
+```
+2026-04-01T03:45:00Z	velero	daily-all-apps-20260401	PASS	gurpreet	engineering-lead	"Full namespace restore completed in 42 minutes; row counts within 2%"
+2026-04-07T04:12:00Z	mysql	mereka-lms-mysql-backup-20260407	PASS	gurpreet	engineering-lead	"In-cluster MySQL drill completed; restored PVC verified and cleaned up"
+```
+
+**Fields**:
+
+| Field | Description |
+|-------|-------------|
+| `timestamp` | ISO 8601 UTC timestamp when the drill evidence was signed |
+| `drill_type` | `mysql`, `mongodb`, `postgresql`, or `velero` |
+| `backup_name` | Backup ID or snapshot name used for the drill |
+| `overall_status` | `PASS` or `FAIL` |
+| `operator_name` | GitHub handle of the SRE who ran the drill |
+| `lead_sign_off` | GitHub handle of the Engineering Lead who approved |
+| `notes` | Free text — include deviations, rescheduling reasons, waivers |
+
+A missing or incomplete sign-off for the current calendar month blocks production releases (see Release Gate Integration above).
+
+---
+
 ## Verification
 
 Run the DR drill schedule verification script at any time:

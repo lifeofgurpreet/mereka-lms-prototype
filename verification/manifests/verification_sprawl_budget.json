@@ -3,6 +3,6 @@
   "max_manual_only_scripts": 188,
   "max_deprecated_candidate_scripts": 35,
   "min_ci_static_bound": 323,
-  "budget_reviewed_at": "2026-04-08",
-  "budget_rationale": "Raise 619→620: added verify-proof-lineage-chain.sh for runtime proof join verification."
+  "budget_reviewed_at": "2026-04-09",
+  "budget_rationale": "Reviewed 2026-04-09: mfe-node.sh deleted (tracker #32), DR drill docs added (B-024). Budget holds at 620."
 }
