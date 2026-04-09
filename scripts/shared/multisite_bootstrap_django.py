@@ -300,6 +300,29 @@ def build_site_mfe_config_overrides(
     overrides["MARKETING_SITE_BASE_URL"] = lms_root
     overrides["REFRESH_ACCESS_TOKEN_ENDPOINT"] = "/login_refresh"
     overrides["DISABLE_ENTERPRISE_LOGIN"] = default_cfg.get("DISABLE_ENTERPRISE_LOGIN", True)
+
+    # Propagate SITE_NAME from site_values so MFE config API returns the
+    # correct tenant name instead of the platform default.
+    site_name = (
+        rendered_values.get("site_name")
+        or rendered_values.get("platform_name")
+    )
+    if site_name:
+        overrides["SITE_NAME"] = site_name
+
+    # Propagate brand colors from site_values to MFE_CONFIG so Paragon
+    # design tokens render the correct tenant palette.
+    _BRAND_COLOR_MAP = {
+        "primary_color": ("PRIMARY_COLOR", "BRAND_PRIMARY"),
+        "secondary_color": ("SECONDARY_COLOR", "BRAND_SECONDARY"),
+        "accent_color": ("ACCENT_COLOR", "BRAND_ACCENT"),
+    }
+    for src_key, dest_keys in _BRAND_COLOR_MAP.items():
+        color_value = rendered_values.get(src_key)
+        if color_value:
+            for dest_key in dest_keys:
+                overrides[dest_key] = color_value
+
     footer_payload = default_cfg.get("MEREKA_PUBLIC_FOOTER")
     if footer_payload:
         overrides["MEREKA_PUBLIC_FOOTER"] = footer_payload
@@ -323,12 +346,13 @@ def build_site_mfe_config_overrides(
 
         # Derive tenant brand asset subpath from domain. The MFE theme directory
         # uses /theme/{tenant}/ for non-default tenants, /theme/ for default.
-        # Known tenant prefixes that have brand asset subdirectories:
+        # Match by substring since domains vary: biji-biji.academyv2.mereka.dev,
+        # academy.biji-biji.com, skillourfuture.academy.mereka.io, etc.
         _TENANT_BRAND_SUBPATHS = {"biji-biji": "biji-biji", "skillourfuture": "skillourfuture"}
         lms_domain = (rendered_values.get("domain") or "").lower()
         brand_subpath = ""
-        for prefix, subpath in _TENANT_BRAND_SUBPATHS.items():
-            if lms_domain.startswith(f"{prefix}."):
+        for slug, subpath in _TENANT_BRAND_SUBPATHS.items():
+            if slug in lms_domain:
                 brand_subpath = f"{subpath}/"
                 break
 

@@ -32,6 +32,7 @@ base_defaults:
   # ── Colors (optional; null means inherits theme CSS) ─────────────────────
   primary_color: null
   secondary_color: null
+  accent_color: null
 
 keys:
   # ── Required identity keys (every tenant must supply these) ──────────────
@@ -126,6 +127,12 @@ keys:
     type: hex_color
     required: false
     description: "Secondary brand color as a CSS hex value"
+    base_default: null
+
+  accent_color:
+    type: hex_color
+    required: false
+    description: "Accent brand color as a CSS hex value (Paragon accent-a)"
     base_default: null
 
   # ── UI flags ──────────────────────────────────────────────────────────────
