@@ -96,13 +96,13 @@ else
   fail "release.yml missing bbi-infrastructure checkout (GitOps repo required for promotion)"
 fi
 
-# GitOps token secret used for cross-repo write
-if grep -q "GITOPS_TOKEN_BBI_KUBERNATE" "$RELEASE_WF"; then
-  pass "release.yml uses GITOPS_TOKEN_BBI_KUBERNATE secret for cross-repo write"
-elif grep -q "GITOPS_PAT" "$RELEASE_WF"; then
-  pass "release.yml uses GITOPS_PAT secret for cross-repo write (legacy name)"
+# GitOps writer app secret tuple used for cross-repo write
+if grep -q "GITOPS_GITHUB_APP_ID" "$RELEASE_WF" \
+  && grep -q "GITOPS_GITHUB_APP_INSTALLATION_ID" "$RELEASE_WF" \
+  && grep -q "GITOPS_GITHUB_APP_PRIVATE_KEY" "$RELEASE_WF"; then
+  pass "release.yml uses the GitOps writer app secret tuple for cross-repo write"
 else
-  fail "release.yml missing GitOps token secret (required for bbi-infrastructure write access)"
+  fail "release.yml missing the GitOps writer app secret tuple (required for bbi-infrastructure write access)"
 fi
 
 # contents: write permission in promotion job scope

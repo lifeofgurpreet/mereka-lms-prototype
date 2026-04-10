@@ -330,13 +330,13 @@ check_gitops() {
     fail "[AC-014] Missing digest flags in GitOps invocation"
   fi
 
-  # AC-014: GitOps token validation
-  if grep -q 'GITOPS_TOKEN_BBI_KUBERNATE' "$BUILD_WF"; then
-    pass "[AC-014] GITOPS_TOKEN_BBI_KUBERNATE secret referenced in GitOps update"
-  elif grep -q 'GITOPS_PAT' "$BUILD_WF"; then
-    pass "[AC-014] GITOPS_PAT secret referenced in GitOps update (legacy name)"
+  # AC-014: GitOps writer app validation
+  if grep -q 'FASTLANE_GITHUB_APP_ID' "$BUILD_WF" \
+    && grep -q 'FASTLANE_GITHUB_APP_INSTALLATION_ID' "$BUILD_WF" \
+    && grep -q 'FASTLANE_GITHUB_APP_PRIVATE_KEY' "$BUILD_WF"; then
+    pass "[AC-014] GitOps writer app secret tuple referenced in build workflow"
   else
-    fail "[AC-014] GitOps token secret not referenced in build workflow"
+    fail "[AC-014] GitOps writer app secret tuple not referenced in build workflow"
   fi
 
   # AC-014: Git identity configured for bot commits
