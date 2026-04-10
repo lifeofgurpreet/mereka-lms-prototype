@@ -60,7 +60,7 @@ Verification tags:
 | `staging` | Course reindex CronJob | `course-reindex` CronJob | `reindex_course` command | Meilisearch `tutor_course_info` / `tutor_courseware_content` | `MEILISEARCH_API_KEY` for routine writes; `MEILISEARCH_MASTER_KEY` only for admin inspection | `kubectl create job -n stg-mereka-lms --from=cronjob/course-reindex course-reindex-manual` plus job logs and `/indexes/*/stats` | `deploy/k8s/base/monitoring/cronjob-course-reindex.yaml` | `Runtime-verified` | Manual staging run succeeded: `39 of 39 courses reindexed succesfully.` |
 | `staging` | Learner dashboard MFE | MFE + LMS APIs | MFE | LMS enrollment APIs | session auth | verify through apps domain and config API | staging overlay MFE config | `Hypothesis` | Not re-proved in this tranche. |
 | `staging` | Catalog MFE route | none in current runtime | not enabled | n/a | n/a | route inspection pending | upstream feature docs + repo wiring | `Hypothesis` | Strategic candidate, not yet wired. |
-| `production` | Discovery root | `discovery` Deployment | Django Discovery service | MySQL `discovery` DB | none for root | `curl -I https://discovery.academyv2.mereka.io/` | `deploy/k8s/base/plugins/discovery/apps/settings/tutor/production.py` | `Runtime-verified` | Root behavior must be re-proved per lane before assuming anonymous access. |
+| `production` | Discovery root | `caddy` -> `discovery` Deployment | Redirected compatibility landing | none for root redirect | none for root | `curl -I https://discovery.academyv2.mereka.io/` | `deploy/k8s/base/apps/caddy/Caddyfile` + prod overlay Caddy config | `Runtime-verified` | Returns `302 Location: /health/`; the legacy Query Preview UI is no longer a supported public surface. |
 | `production` | Discovery `/health/` | `discovery` Deployment | Django Discovery service | MySQL `discovery` DB | none | `curl https://discovery.academyv2.mereka.io/health/` | `deploy/k8s/base/plugins/discovery/apps/settings/tutor/production.py` | `Runtime-verified` | Returns `{"overall_status":"OK"...}` in prod. |
 | `production` | Discovery `/api/v1/courses/` | `discovery` Deployment | Discovery REST API | Discovery DB + Elasticsearch | JWT required | `curl -i https://discovery.academyv2.mereka.io/api/v1/courses/` | `deploy/k8s/base/plugins/discovery/apps/settings/tutor/production.py` | `Runtime-verified` | Current prod response is `401`, not public `200`. |
 | `production` | LMS `/courses` | `lms` Deployment | Legacy LMS browse UI backed by course API | Meilisearch-fed course catalog path | none for anon page | `curl -I https://academyv2.mereka.io/courses` plus `kubectl exec -n mereka-lms deploy/lms -- python manage.py lms shell ...` | live patched LMS configmap | `Runtime-verified` | Returns `200` after the prod LMS Meilisearch overlay fix is realized. |
@@ -195,6 +195,9 @@ Current conclusion:
 
 - `Runtime-verified`: Discovery is still an Elasticsearch-backed compatibility
   service in this estate.
+- `Runtime-verified`: the public Discovery root contract is now
+  `/ -> /health/`; the old Query Preview UI is no longer a supported public
+  surface.
 - `Runtime-verified`: its production courses API is auth-protected and currently
   empty.
 - `Runtime-verified`: staging learner browse success does not currently depend

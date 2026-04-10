@@ -4,8 +4,7 @@ _Audience: Platform Operators • Owner: Ops Domain Owner • Last verified: 202
 Quick reference for working with the Discovery service as it exists today.
 Discovery is currently compatibility plumbing, not the canonical learner browse
 surface. Production edx-platform course/forum search is now on Meilisearch; do
-not use the Discovery root or its Elasticsearch-oriented UI as evidence for the
-platform search backend.
+not use the Discovery host as evidence for the platform search backend.
 
 ## TL;DR
 
@@ -29,6 +28,7 @@ curl -i https://discovery.academyv2.mereka.io/api/v1/courses/
 ## Current Runtime Contract
 
 - **Discovery URL**: https://discovery.academyv2.mereka.io
+- **Discovery root**: should redirect to `/health/`; the legacy Query Preview UI is not a supported public surface
 - **Health Check**: https://discovery.academyv2.mereka.io/health/
 - **Courses API in production**: do not assume anonymous access; re-prove the current auth contract in the target lane
 - **Discovery data population**: treat live counts as evidence-ledger material, not durable quickref truth

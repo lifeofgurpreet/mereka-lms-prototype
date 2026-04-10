@@ -162,6 +162,11 @@ discovery.localhost{$default_site_port} {
         max_size 10MB
     }
 
+    # Discovery root is legacy operator plumbing; do not expose the old
+    # Query Preview UI as if it were the learner browse surface.
+    @discovery_root path /
+    redir @discovery_root /health/
+
     import proxy "discovery:8000"
 }
 
@@ -171,6 +176,11 @@ http://{$DISCOVERY_HOST} {
     request_body {
         max_size 10MB
     }
+
+    # Keep API and health routes public where required, but make "/" behave
+    # like a health landing page rather than the legacy Query Preview demo.
+    @discovery_root path /
+    redir @discovery_root /health/
 
     import proxy "discovery:8000"
 }

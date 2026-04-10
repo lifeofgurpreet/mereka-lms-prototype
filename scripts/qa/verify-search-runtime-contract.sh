@@ -6,6 +6,7 @@ LMS_PRODUCTION="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/production.
 CMS_PRODUCTION="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/cms/production.py"
 SECRETS_FILE="$REPO_ROOT/deploy/k8s/base/secrets/external-secrets.yaml"
 CRONJOB_FILE="$REPO_ROOT/deploy/k8s/base/monitoring/cronjob-course-reindex.yaml"
+CADDY_FILE="$REPO_ROOT/deploy/k8s/base/apps/caddy/Caddyfile"
 
 PASS_COUNT=0
 FAIL_COUNT=0
@@ -78,6 +79,10 @@ require_literal "$CRONJOB_FILE" 'search.elastic.ElasticSearchEngine)' \
   "Course reindex cronjob handles Elasticsearch verification"
 require_literal "$CRONJOB_FILE" 'search.meilisearch.MeilisearchEngine)' \
   "Course reindex cronjob handles Meilisearch verification"
+require_literal "$CADDY_FILE" 'redir @discovery_root /health/' \
+  "Base Caddyfile redirects Discovery root to /health/"
+require_pattern "$CADDY_FILE" 'Query Preview UI' \
+  "Base Caddyfile documents why Discovery root is redirected"
 
 printf '\nSummary: %d passed, %d failed\n' "$PASS_COUNT" "$FAIL_COUNT"
 
