@@ -3,7 +3,9 @@ _Audience: Platform Operators • Owner: Ops Domain Owner • Last verified: 202
 
 Quick reference for working with the Discovery service as it exists today.
 Discovery is currently compatibility plumbing, not the canonical learner browse
-surface.
+surface. Production edx-platform course/forum search is now on Meilisearch; do
+not use the Discovery root or its Elasticsearch-oriented UI as evidence for the
+platform search backend.
 
 ## TL;DR
 
