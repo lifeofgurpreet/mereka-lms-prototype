@@ -39,7 +39,7 @@ concurrency:
 jobs:
   change-scope:
     name: Detect docs-only control-plane scope
-    runs-on: mereka-k8s-runners
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: read
@@ -84,6 +84,35 @@ jobs:
 
           echo "docs_only=${docs_only}" >> "$GITHUB_OUTPUT"
 
+  select-ci-lane:
+    name: Select CI lane
+    needs: change-scope
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      runner_label: ${{ steps.select.outputs.runner_label }}
+      decision: ${{ steps.select.outputs.decision }}
+      reason: ${{ steps.select.outputs.reason }}
+    steps:
+      - name: Select runner label
+        id: select
+        uses: Biji-Biji-Initiative/bbi-infrastructure/.github/actions/select-runner-lane@main
+        with:
+          enabled: ${{ vars.CI_FASTLANE_CI_ENABLED || 'false' }}
+          lane_mode: auto
+          fastlane_label: ${{ vars.CI_FASTLANE_CI_LABEL || 'mereka-vps-fastlane-ci' }}
+          routing_policy: lms_ci_prefer_fastlane
+          fallback_label: mereka-k8s-runners
+          runner_status_token: ${{ secrets.FASTLANE_RUNNER_STATUS_TOKEN }}
+          github_app_id: ${{ secrets.FASTLANE_GITHUB_APP_ID }}
+          github_app_installation_id: ${{ secrets.FASTLANE_GITHUB_APP_INSTALLATION_ID }}
+          github_app_private_key: ${{ secrets.FASTLANE_GITHUB_APP_PRIVATE_KEY }}
+          allow_push_main: true
+          allow_workflow_dispatch: true
+          allow_pull_request: true
+          allow_merge_group: true
+
   # ============================================================================
   # Job 1a-1d: static-validation split graph
   # Runs on every PR and push. Keeps the same overall contracts as the old
@@ -121,9 +150,11 @@ jobs:
   # ============================================================================
   static-validation-precheck:
     name: Static Validation Precheck
-    needs: change-scope
+    needs:
+      - change-scope
+      - select-ci-lane
     if: ${{ github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true' }}
-    runs-on: mereka-k8s-runners
+    runs-on: ${{ needs.select-ci-lane.outputs.runner_label }}
     permissions:
       contents: read
 
@@ -730,9 +761,11 @@ jobs:
   # ============================================================================
   tutor-config-tests:
     name: Tutor Configuration Tests
-    needs: change-scope
+    needs:
+      - change-scope
+      - select-ci-lane
     if: ${{ github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true' }}
-    runs-on: mereka-k8s-runners
+    runs-on: ${{ needs.select-ci-lane.outputs.runner_label }}
     permissions:
       contents: read
 
