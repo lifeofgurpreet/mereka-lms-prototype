@@ -1234,6 +1234,8 @@ jobs:
           fi
 
       - name: Install cosign
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: ./scripts/infra/install-cosign.sh
 
       - name: Log in to GHCR
@@ -1411,6 +1413,8 @@ jobs:
           fi
 
       - name: Install cosign
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: ./scripts/infra/install-cosign.sh
 
       - name: Generate GitHub App token for artifact access and cross-repo dispatch
@@ -2032,6 +2036,8 @@ jobs:
           fi
 
       - name: Install cosign
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: ./scripts/infra/install-cosign.sh
 
       - name: Verify release bundle signature
