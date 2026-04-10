@@ -204,6 +204,14 @@ Current conclusion:
   on Discovery content being populated.
 - `Runtime-verified`: Discovery sync CronJob is now deployed in prod, but
   Discovery content remains empty and auth-protected there.
+- `Runtime-verified`: production LMS still publishes
+  `DISCOVERY_API_BASE_URL=https://discovery.academyv2.mereka.io` with
+  `ENABLE_COURSE_DISCOVERY=True`, even though learner browse is now served from
+  the Meilisearch-backed LMS course API.
+- `Runtime-verified`: enterprise-catalog and enterprise-catalog-worker still
+  inject `DISCOVERY_SERVICE_URL=http://discovery:8000` and
+  `DISCOVERY_SERVICE_API_URL=http://discovery:8000/api/v1/` through their
+  generated config.
 
 Current strategy:
 
@@ -211,6 +219,28 @@ Current strategy:
 - do not expand product dependence on it
 - prove whether Catalog MFE enablement can replace browse-path dependence before
   investing heavily in more legacy Discovery behavior
+
+### Remaining Discovery Consumers
+
+The remaining proved production consumers are:
+
+1. LMS runtime configuration metadata:
+   - `DISCOVERY_API_BASE_URL=https://discovery.academyv2.mereka.io`
+   - `ENABLE_COURSE_DISCOVERY=True`
+   - This is compatibility config, not proof that learner browse still depends
+     on Discovery data.
+2. Discovery maintenance:
+   - `discovery-sync` CronJob still targets `http://discovery:8000`
+3. Enterprise catalog services:
+   - `enterprise-catalog`
+   - `enterprise-catalog-worker`
+   - `enterprise-catalog-migrate`
+   - all still point at `DISCOVERY_SERVICE_URL` /
+     `DISCOVERY_SERVICE_API_URL`
+
+That means the safe next step is not deleting Discovery outright. The safe next
+step is replacing or retiring these consumers deliberately, then removing the
+service and its Elasticsearch dependency.
 
 ## Forward Path
 
@@ -226,9 +256,18 @@ Current strategy:
    return to normal auto-sync after stabilization.
 4. Contain or retire Discovery:
    - remove or gate the public Discovery root if it is no longer needed
-   - prove any remaining runtime dependency before keeping Elasticsearch alive
+   - inventory and replace remaining runtime dependencies before keeping Elasticsearch alive
    - make Elasticsearch decommission explicitly contingent on Discovery removal
-5. Evaluate Catalog MFE in a dev/canary lane against Ulmo guidance:
+5. Discovery retirement criteria:
+   - LMS no longer publishes `DISCOVERY_API_BASE_URL` as an active contract, or
+     the remaining consumer is proven non-functional dead config
+   - enterprise-catalog no longer requires `DISCOVERY_SERVICE_URL`
+   - `discovery-sync` CronJob is removed or disabled because no authoritative
+     consumer remains
+   - public Discovery host is either removed or reduced to an explicitly owned
+     internal/admin-only contract
+   - only then is Elasticsearch eligible for full removal
+6. Evaluate Catalog MFE in a dev/canary lane against Ulmo guidance:
    - route enablement
    - config API values
    - Design Tokens / plugin-slot readiness

@@ -33,6 +33,7 @@ curl -i https://discovery.academyv2.mereka.io/api/v1/courses/
 - **Courses API in production**: do not assume anonymous access; re-prove the current auth contract in the target lane
 - **Discovery data population**: treat live counts as evidence-ledger material, not durable quickref truth
 - **Discovery sync CronJob**: verify live presence and schedule in the target lane before assuming continuous sync
+- **Known remaining consumers**: enterprise-catalog services and Discovery maintenance jobs still point at `http://discovery:8000`; do not remove the service until those contracts are replaced
 
 ## Known Issues
 
