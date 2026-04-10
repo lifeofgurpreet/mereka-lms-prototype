@@ -1,11 +1,11 @@
 # Search / Catalog / Discovery Runtime Contract
-_Audience: platform operators and agents · Owner: Platform Team · Status: canonical · Last runtime verified: 2026-04-10T10:25Z (staging)_
+_Audience: platform operators and agents · Owner: Platform Team · Status: canonical · Last runtime verified: 2026-04-10T10:49Z (dev)_
 
 This document records the currently proved search/catalog/discovery contract for
 `mereka-lms` and separates repo intent from overlay truth and runtime truth.
-Runtime claims are lane-specific. The strongest current proof is in
-`stg-mereka-lms`; production remains a separate lane and must not be inferred
-from staging success.
+Runtime claims are lane-specific. The strongest current proof is now in the
+non-prod lanes `stg-mereka-lms` and `mereka-lms-dev`; production remains a
+separate lane and must not be inferred from non-prod success.
 
 ## External Direction
 
@@ -47,6 +47,11 @@ Verification tags:
 
 | Lane | Surface | Runtime owner | Backend | Index / store | Secret / auth | Proof | Source of truth | Verification | Notes |
 |---|---|---|---|---|---|---|---|---|---|
+| `dev` | LMS `/courses` | `lms` Deployment | Legacy LMS browse UI backed by course API | Meilisearch-backed course catalog path | none to render shell | `curl -I https://academyv2.mereka.dev/courses` | live dev LMS config + course API | `Runtime-verified` | Returns `200` HTML after the dev CMS Meilisearch realization and successful reindex. |
+| `dev` | LMS `/courses/<key>/about` | `lms` Deployment | Legacy LMS about page | CourseOverview + search-backed browse data | none for anon page | `curl -I https://academyv2.mereka.dev/courses/course-v1:MEREKA+MCT33-ID+course/about` | LMS runtime settings | `Runtime-verified` | Real course key now returns `200`. |
+| `dev` | Course catalog API | `lms` Deployment | LMS REST API | Meilisearch-fed course catalog | none for anon page | `curl -s https://academyv2.mereka.dev/api/courses/v1/courses/?page_size=1` | LMS runtime + Meilisearch | `Runtime-verified` | Returns real course results and `count=41` after successful reindex. |
+| `dev` | Studio content search | `cms` Deployment | Meilisearch backend | `tutor_course_info` / `tutor_courseware_content` | `MEILISEARCH_API_KEY` for routine writes; `MEILISEARCH_MASTER_KEY` only for `/keys` and admin inspection | `kubectl exec -n mereka-lms-dev deploy/cms -- python manage.py cms shell -c "from django.conf import settings; print(settings.SEARCH_ENGINE, settings.MEILISEARCH_URL, settings.ELASTIC_SEARCH_CONFIG)"` plus Meilisearch `/indexes/*/stats` | dev CMS overlay + runtime settings | `Runtime-verified` | Dev CMS now resolves the explicit Meilisearch engine and writes to Meilisearch successfully. |
+| `dev` | Course reindex CronJob | `course-reindex` CronJob | `reindex_course` command | Meilisearch `tutor_course_info` / `tutor_courseware_content` | `MEILISEARCH_API_KEY` for routine writes; `MEILISEARCH_MASTER_KEY` only for admin inspection | `kubectl create job -n mereka-lms-dev --from=cronjob/course-reindex course-reindex-manual` plus job logs and `/indexes/*/stats` | `deploy/k8s/base/monitoring/cronjob-course-reindex.yaml` | `Runtime-verified` | Manual dev run succeeded: `41 of 41 courses reindexed succesfully.` |
 | `staging` | LMS `/courses` | `lms` Deployment | Legacy LMS browse UI backed by course API | Meilisearch-backed course catalog path | none to render shell | `curl -I https://staging.academyv2.mereka.io/courses` | live staged LMS config + course API | `Runtime-verified` | Returns `200` HTML after the staging Meilisearch repair. |
 | `staging` | LMS `/courses/<key>/about` | `lms` Deployment | Legacy LMS about page | CourseOverview + search-backed browse data | none for anon page | `curl -I https://staging.academyv2.mereka.io/courses/course-v1:MEREKA+MCT44-EN+course/about` | LMS runtime settings | `Runtime-verified` | Real course key now returns `200`. |
 | `staging` | Course catalog API | `lms` Deployment | LMS REST API | Meilisearch-fed course catalog | none for anon page | `curl -s https://staging.academyv2.mereka.io/api/courses/v1/courses/` | LMS runtime + Meilisearch | `Runtime-verified` | Returns real course results after successful reindex. |
@@ -84,36 +89,50 @@ Verification tags:
    - `/courses` returns `200`
    - `/courses/course-v1:MEREKA+MCT44-EN+course/about` returns `200`
    - `/api/courses/v1/courses/` returns course JSON
-7. `Runtime-verified`: production LMS mounts `openedx-settings-lms-patched-*`, not
+7. `Runtime-verified`: dev CMS now reports:
+   - `SEARCH_ENGINE = "search.meilisearch.MeilisearchEngine"`
+   - `MEILISEARCH_URL = "http://meilisearch:7700"`
+   - `ELASTIC_SEARCH_CONFIG = [{"host": "meilisearch", "port": 7700}]`
+8. `Runtime-verified`: dev one-off `course-reindex` now succeeds end-to-end:
+   - `41 of 41 courses reindexed succesfully.`
+   - `tutor_course_info = 41`
+   - `tutor_courseware_content = 2827`
+9. `Runtime-verified`: dev learner browse now works with real data:
+   - `/courses` returns `200`
+   - `/courses/course-v1:MEREKA+MCT33-ID+course/about` returns `200`
+   - `/api/courses/v1/courses/?page_size=1` returns course JSON with `count = 41`
+10. `Runtime-verified`: dev Argo required a one-time hard refresh before it
+    realized the merged overlay revision; the source fix alone was not enough.
+11. `Runtime-verified`: production LMS mounts `openedx-settings-lms-patched-*`, not
    the base LMS settings configmap.
-8. `Runtime-verified`: after a manual full sync, production CMS and
+12. `Runtime-verified`: after a manual full sync, production CMS and
    `course-reindex` now also mount `openedx-settings-cms-patched-*`.
-9. `Runtime-verified`: production LMS still reports:
+13. `Runtime-verified`: production LMS still reports:
    - `SEARCH_ENGINE = "search.elastic.ElasticSearchEngine"`
    - `FORUM_SEARCH_BACKEND = "forum.search.es.ElasticsearchBackend"`
    - `COURSE_CATALOG_URL_ROOT = "http://localhost:8008"`
-10. `Runtime-verified`: Discovery is live in production but currently has `0`
+14. `Runtime-verified`: Discovery is live in production but currently has `0`
     `Course`, `0` `CourseRun`, and `0` `Program` rows.
-11. `Repo-verified`: the repo now includes a static contract guard at
+15. `Repo-verified`: the repo now includes a static contract guard at
     `scripts/qa/verify-search-runtime-contract.sh`
     to catch newline-polluted Meilisearch keys, wrong CMS engine drift, missing
     bootstrap repair, SRV-host Mongo misconfiguration, and regression of the
     current non-interactive reindex contract.
-12. `Runtime-verified`: the earlier `invalid_document_id` failure mode was real
+16. `Runtime-verified`: the earlier `invalid_document_id` failure mode was real
     and came from wrong-primary-key Meilisearch indexes; staging is now past
     that blocker after key-authority repair and successful reindex.
-13. `Repo-verified`: prod app auto-sync is disabled in source, so realization
+17. `Repo-verified`: prod app auto-sync is disabled in source, so realization
     currently depends on an explicit manual sync instead of normal Argo
     convergence.
-14. `Runtime-verified`: after the vendored CronJob security-context fix was
+18. `Runtime-verified`: after the vendored CronJob security-context fix was
     merged and a new full sync completed, prod is now `Synced` on infra revision
     `0aebdace...`.
-15. `Runtime-verified`: `discovery-sync` and `clickhouse-data-sync-daily` now
+19. `Runtime-verified`: `discovery-sync` and `clickhouse-data-sync-daily` now
     exist live with Kyverno-compliant security contexts.
-16. `Runtime-verified`: the active production split-brain is now narrower: live LMS still
+20. `Runtime-verified`: the active production split-brain is now narrower: live LMS still
     reports Elasticsearch, while live CMS and the shipped `course-reindex`
     manifest now target Meilisearch.
-17. `Runtime-verified`: running `search.meilisearch.create_indexes()` repairs
+21. `Runtime-verified`: running `search.meilisearch.create_indexes()` repairs
     filterable and sortable attributes but does not repair an already-created
     wrong-primary-key index, so bootstrap order matters.
 
@@ -140,6 +159,8 @@ What is actually proved today:
 
 - `Runtime-verified`: staging is now healthy on Meilisearch and proves the path
   can work end-to-end once key authority and bootstrap order are correct.
+- `Runtime-verified`: dev now matches that repaired path and proves the same
+  end-to-end flow in the shared non-prod cluster.
 - `Runtime-verified`: production LMS is still on
   `search.elastic.ElasticSearchEngine`.
 - `Runtime-verified`: production Elasticsearch `course_info` exists but was
@@ -156,6 +177,9 @@ What is not yet proved:
 
 Current conclusion:
 
+- The current live problem is solved in the non-prod lanes available in this
+  cluster context: staging and dev both now reindex successfully into
+  Meilisearch and serve learner browse data from populated indexes.
 - Keep production LMS `/courses` on Elasticsearch until the staging repair is
   promoted and a production full reindex populates the learner-facing index.
 - The previously sharp blockers have been retired in staging:
@@ -192,7 +216,7 @@ Current strategy:
 
 ## Forward Path
 
-1. Promote the staging-proved Meilisearch repair into production:
+1. Promote the staging- and dev-proved Meilisearch repair into production:
    - keep course reindex non-interactive
    - keep CMS on the explicit Meilisearch engine
    - keep the repaired API-key authority and bootstrap order intact
