@@ -101,6 +101,7 @@ Operational note:
 - Do not schedule periodic `dump_data_to_clickhouse --force` runs against raw `event_sink` tables yet.
 - Current raw sink tables keep `time_last_dumped` in their sorting keys, so repeated dumps append fresh snapshots instead of replacing prior rows.
 - Shared-env `aspects-event-sink-sync` is intentionally suspended until an idempotent sync design lands.
+- Shared-env `aspects-event-sink-course-overviews-sync` is also intentionally suspended; raw `event_sink.course_overviews` is not safe for repeated scheduled `--force` backfills.
 - Use manual, targeted backfills only when a specific dimension is missing and record the action in the incident trail.
 
 ### Batch sync (daily CronJob)

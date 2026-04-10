@@ -387,11 +387,17 @@ if [[ -z "$course_overviews_cj_exists" ]]; then
   warn "CronJob '${COURSE_OVERVIEWS_CRONJOB}' not found — course_overviews refresh remains coupled to manual backfills"
 else
   course_overviews_image="$(kctl get cronjob "$COURSE_OVERVIEWS_CRONJOB" -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].image}' 2>/dev/null || true)"
+  course_overviews_suspend="$(kctl get cronjob "$COURSE_OVERVIEWS_CRONJOB" -o jsonpath='{.spec.suspend}' 2>/dev/null || true)"
   course_overviews_last_success="$(kctl get cronjob "$COURSE_OVERVIEWS_CRONJOB" -o jsonpath='{.status.lastSuccessfulTime}' 2>/dev/null || true)"
   if [[ "$course_overviews_image" == *":pin-required"* ]]; then
     fail "CronJob '${COURSE_OVERVIEWS_CRONJOB}' image is unresolved: ${course_overviews_image}"
   elif [[ -n "$course_overviews_image" ]]; then
     pass "CronJob '${COURSE_OVERVIEWS_CRONJOB}' image resolved: ${course_overviews_image}"
+  fi
+  if [[ "$course_overviews_suspend" == "true" ]]; then
+    pass "CronJob '${COURSE_OVERVIEWS_CRONJOB}' is suspended pending an idempotent course_overviews sync design"
+  else
+    fail "CronJob '${COURSE_OVERVIEWS_CRONJOB}' is enabled; scheduled --force dumps duplicate raw course_overviews rows"
   fi
   if [[ -n "$course_overviews_last_success" ]]; then
     pass "CronJob '${COURSE_OVERVIEWS_CRONJOB}' last successful run: ${course_overviews_last_success}"

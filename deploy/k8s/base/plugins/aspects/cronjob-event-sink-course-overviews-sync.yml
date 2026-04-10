@@ -1,7 +1,10 @@
 ---
-# CronJob to refresh event_sink.course_overviews separately from the core
-# dimension sync. This isolates the modulestore/Mongo-dependent path so it
-# cannot block the higher-frequency core dimensional refresh job.
+# CronJob definition for event_sink.course_overviews refresh.
+#
+# Suspended by default: repeated `dump_data_to_clickhouse --force` runs append
+# fresh snapshots into the raw MergeTree-backed course_overviews sink, so
+# scheduled reruns create duplicate raw rows. Use manual one-off jobs only
+# until an idempotent course_overviews sync design exists.
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -13,6 +16,7 @@ metadata:
     app.kubernetes.io/part-of: aspects
 spec:
   schedule: "30 3 * * *"
+  suspend: true
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
