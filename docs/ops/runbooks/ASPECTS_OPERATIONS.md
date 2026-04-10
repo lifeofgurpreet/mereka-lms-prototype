@@ -97,6 +97,12 @@ kubectl exec -n <ns> deployment/lms -- python manage.py lms dump_data_to_clickho
 
 Available objects: `course_overviews`, `course_enrollment`, `user_profile`, `course_blocks`
 
+Operational note:
+- Do not schedule periodic `dump_data_to_clickhouse --force` runs against raw `event_sink` tables yet.
+- Current raw sink tables keep `time_last_dumped` in their sorting keys, so repeated dumps append fresh snapshots instead of replacing prior rows.
+- Shared-env `aspects-event-sink-sync` is intentionally suspended until an idempotent sync design lands.
+- Use manual, targeted backfills only when a specific dimension is missing and record the action in the incident trail.
+
 ### Batch sync (daily CronJob)
 Runs at 2 AM UTC. Syncs enrollments, completions, courses from MySQL → ClickHouse openedx.
 

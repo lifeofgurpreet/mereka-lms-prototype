@@ -1,6 +1,10 @@
 ---
-# CronJob to refresh Aspects dimensional data in event_sink.*
-# Runs every 6 hours to keep user/course/tag dimensions aligned with MySQL.
+# CronJob definition for event_sink dimensional refresh.
+#
+# Suspended by default: `dump_data_to_clickhouse --force` appends new snapshots
+# into raw event_sink tables, and several downstream tables are not raw-row
+# idempotent under periodic re-dumps. Use manual one-off jobs only until an
+# idempotent sync contract exists for scheduled execution.
 #
 # This job is intentionally explicit:
 # - It uses the same settings/config/secret surface as the LMS deployment.
@@ -17,6 +21,7 @@ metadata:
     app.kubernetes.io/part-of: aspects
 spec:
   schedule: "0 */6 * * *"
+  suspend: true
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
