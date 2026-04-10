@@ -241,7 +241,7 @@ PYEOF
   MISSING_COUNT=0
   while IFS= read -r key; do
     [[ -z "$key" ]] && continue
-    if ! echo "$ES_KEYS" | grep -qxF "$key"; then
+    if ! grep -qxF "$key" <<< "$ES_KEYS"; then
       fail "Secret key '$key' in contract.json has no ExternalSecret entry"
       MISSING_COUNT=$((MISSING_COUNT + 1))
     fi

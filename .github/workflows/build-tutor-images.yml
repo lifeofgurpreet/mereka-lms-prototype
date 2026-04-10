@@ -93,7 +93,7 @@ env:
 jobs:
   cancel-superseded-queued-main-builds:
     name: Cancel Superseded Queued Main Builds
-    runs-on: ubuntu-latest
+    runs-on: mereka-k8s-runners
     timeout-minutes: 10
     permissions:
       actions: write
@@ -165,7 +165,7 @@ jobs:
 
   resolve-build-scope:
     name: Resolve Build Scope
-    runs-on: ubuntu-latest
+    runs-on: mereka-k8s-runners
     timeout-minutes: 10
     needs: cancel-superseded-queued-main-builds
     permissions:
@@ -232,7 +232,7 @@ jobs:
 
   lint:
     name: Lint & Validate
-    runs-on: ubuntu-latest
+    runs-on: mereka-k8s-runners
     timeout-minutes: 10
     needs: cancel-superseded-queued-main-builds
     permissions:
@@ -264,7 +264,7 @@ jobs:
 
   prepare-build-context:
     name: Prepare Tutor Build Context
-    runs-on: ubuntu-latest
+    runs-on: mereka-k8s-runners
     timeout-minutes: 20
     needs: [resolve-build-scope, lint]
     if: ${{ needs.resolve-build-scope.outputs.build_openedx == 'true' || needs.resolve-build-scope.outputs.build_mfe == 'true' }}
@@ -319,7 +319,7 @@ jobs:
 
   select-build-lane:
     name: Select Build Lane
-    runs-on: ubuntu-latest
+    runs-on: mereka-k8s-runners
     needs: [resolve-build-scope]
     if: ${{ needs.resolve-build-scope.outputs.build_openedx == 'true' || needs.resolve-build-scope.outputs.build_mfe == 'true' }}
     permissions:

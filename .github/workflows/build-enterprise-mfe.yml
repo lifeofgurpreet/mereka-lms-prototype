@@ -37,7 +37,7 @@ permissions: {}  # Deny-all at workflow level; each job grants only what it need
 
 jobs:
   resolve-source:
-    runs-on: ubuntu-latest
+    runs-on: mereka-k8s-runners
     permissions:
       packages: read
     outputs:
@@ -89,7 +89,7 @@ jobs:
           echo "Resolved learner source: ${LEARNER_TAG}"
 
   select-build-lane:
-    runs-on: ubuntu-latest
+    runs-on: mereka-k8s-runners
     needs: resolve-source
     permissions:
       contents: read
