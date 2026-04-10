@@ -670,7 +670,13 @@ jobs:
           driver: docker-container
           # Limit BuildKit to 4 parallel build stages — prevents OOM on 12GB heavy-builder
           # runners when 12 MFEs attempt concurrent webpack compilations.
-          buildkitd-flags: '--oci-worker-max-parallelism 4'
+          # Cap parallel build stages to prevent OOM on 12GB heavy-builders.
+          # MUST use equals-separated form: docker/setup-buildx-action passes
+          # this string into `docker buildx create --buildkitd-flags <value>`
+          # without quoting, so `--oci-worker-max-parallelism 4` gets parsed
+          # as TWO shell args and buildkitd never sees the integer value,
+          # crashes on startup, and the builder container restart-loops.
+          buildkitd-flags: '--oci-worker-max-parallelism=4'
 
       - name: Fix DinD network MTU
         run: |
