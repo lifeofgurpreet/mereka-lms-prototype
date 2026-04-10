@@ -1,7 +1,9 @@
 # Discovery Service Quick Start
 _Audience: Platform Operators • Owner: Ops Domain Owner • Last verified: 2026-03-06 • Status: supporting_
 
-Quick reference for working with the Discovery service (course catalog).
+Quick reference for working with the Discovery service as it exists today.
+Discovery is currently compatibility plumbing, not the canonical learner browse
+surface.
 
 ## TL;DR
 
@@ -15,14 +17,20 @@ open https://studio.academyv2.mereka.io
 # Sync to Discovery
 ./scripts/shared/sync-discovery.sh sync
 
-# View courses
-open https://discovery.academyv2.mereka.io/api/v1/courses/
+# Verify health
+curl -sS https://discovery.academyv2.mereka.io/health/
+
+# Verify the current auth contract for the courses API
+curl -i https://discovery.academyv2.mereka.io/api/v1/courses/
 ```
 
-## Core Endpoints
+## Current Runtime Contract
 
 - **Discovery URL**: https://discovery.academyv2.mereka.io
 - **Health Check**: https://discovery.academyv2.mereka.io/health/
+- **Courses API in production**: do not assume anonymous access; re-prove the current auth contract in the target lane
+- **Discovery data population**: treat live counts as evidence-ledger material, not durable quickref truth
+- **Discovery sync CronJob**: verify live presence and schedule in the target lane before assuming continuous sync
 
 ## Known Issues
 
@@ -85,7 +93,8 @@ Total courses in Discovery: 1
 
 ## Automated Sync
 
-Deploy CronJob for automatic syncing every 6 hours:
+Deploy the sync CronJob only if you intend to operate Discovery as a live synced
+catalog source in that environment:
 
 ```bash
 kubectl apply -f deploy/k8s/base/jobs/discovery-sync-cronjob.yaml
@@ -99,11 +108,13 @@ kubectl get jobs -n mereka-lms -l app.kubernetes.io/name=discovery-sync
 
 ## API Access
 
-### Public Catalog (No Auth)
+### Courses API
 
 ```bash
-curl https://discovery.academyv2.mereka.io/api/v1/courses/ | jq .
+curl -i https://discovery.academyv2.mereka.io/api/v1/courses/
 ```
+
+Do not assume this is anonymous. Re-prove the status code in the target lane.
 
 ### Authenticated Access
 
@@ -197,8 +208,7 @@ kubectl exec -n mereka-lms $DISCOVERY_POD -- \
 
 ## Next Steps
 
-1. **Fix MongoDB permissions** - See [MONGODB_PERMISSIONS_ISSUE.md](../../ops/runbooks/MONGODB_PERMISSIONS_ISSUE.md)
-2. **Create demo courses** - Use Studio UI or import after MongoDB fix
-3. **Deploy CronJob** - Automate Discovery syncing
-4. **Test MFE integration** - Verify course catalog displays correctly
-5. **Configure branding** - Apply Mereka branding to course pages
+1. Re-prove whether Discovery is still needed for the learner browse path in the target lane.
+2. If Discovery remains in use, deploy and verify the sync CronJob explicitly.
+3. Do not treat Discovery API `200` or non-empty data as assumed defaults; verify them.
+4. Prefer the Catalog MFE path for future browse-surface work where viable.

@@ -159,6 +159,10 @@ for name, content in (("lms", lms_settings), ("cms", cms_settings)):
     else:
         detection_variants = [
             (
+                "def _is_mongodb_atlas_host(raw_value):",
+                "_mongodb_is_atlas = _is_mongodb_atlas_host(MONGODB_HOST)",
+            ),
+            (
                 "_mongodb_is_atlas = _mongodb_host_lower.startswith(\"mongodb+srv://\") or \".mongodb.net\" in _mongodb_host_lower",
             ),
         ]

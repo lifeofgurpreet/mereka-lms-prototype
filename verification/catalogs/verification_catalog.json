@@ -14356,6 +14356,28 @@
       "tier": "release_blocking"
     },
     {
+      "cadence": "scheduled_or_post_deploy",
+      "canonical": true,
+      "ci_binding": [],
+      "ci_entrypoints": [],
+      "env_scope": [
+        "global"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-search-runtime-contract.sh",
+      "reference_count": 3,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "medium",
+      "spec_ids": [],
+      "status": "active",
+      "tier": "periodic_runtime"
+    },
+    {
       "cadence": "per_pr_and_push",
       "canonical": true,
       "ci_binding": [
@@ -18593,25 +18615,25 @@
     "archived_deprecated_scripts": 21,
     "ci_static_bound": 388,
     "kinds": {
-      "verify": 622
+      "verify": 623
     },
     "mutability": {
       "destructive": 10,
       "mutating": 19,
-      "read-only": 593
+      "read-only": 594
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 434,
+      "active": 435,
       "deprecated_candidate": 1,
       "manual_only": 187
     },
     "tiers": {
       "exploratory_manual": 191,
-      "periodic_runtime": 19,
+      "periodic_runtime": 20,
       "release_blocking": 412
     },
-    "total_verify_scripts": 622,
+    "total_verify_scripts": 623,
     "workflow_direct_bound": 64
   },
   "version": "1"

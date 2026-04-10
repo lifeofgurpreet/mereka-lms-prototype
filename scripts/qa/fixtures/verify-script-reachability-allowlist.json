@@ -128,6 +128,7 @@
     "scripts/qa/verify-pr-handoff-guardrails.sh",
     "scripts/qa/verify-preview-redirect.sh",
     "scripts/qa/verify-proctoring-advanced.sh",
+    "scripts/qa/verify-realized-image-identity.sh",
     "scripts/qa/verify-regression-detection.sh",
     "scripts/qa/verify-release-readiness.sh",
     "scripts/qa/verify-restore-drill.sh",
@@ -136,6 +137,7 @@
     "scripts/qa/verify-rke2-dev-readiness.sh",
     "scripts/qa/verify-rke2-tenant-routes.sh",
     "scripts/qa/verify-runtime-authority-map.sh",
+    "scripts/qa/verify-search-runtime-contract.sh",
     "scripts/qa/verify-secret-inventory.sh",
     "scripts/qa/verify-secrets-infisical.sh",
     "scripts/qa/verify-secrets-precommit.sh",
@@ -169,8 +171,7 @@
     "scripts/qa/verify-video-upload.sh",
     "scripts/qa/verify-worktree-sanity.sh",
     "scripts/qa/verify-xqueue-deployment.sh",
-    "scripts/qa/verify-xqueue-graders.sh",
-    "scripts/qa/verify-realized-image-identity.sh"
+    "scripts/qa/verify-xqueue-graders.sh"
   ],
   "notes": "Baseline freeze for verify scripts intentionally not wired via CI/workflows/gate runners."
 }

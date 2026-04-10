@@ -75,6 +75,11 @@ def _is_mongodb_atlas_host(raw_value):
     return host == "mongodb.net" or host.endswith(".mongodb.net")
 
 
+def _is_mongodb_srv_uri(raw_value):
+    value = (raw_value or "").strip().lower()
+    return value.startswith("mongodb+srv://")
+
+
 # Override SECRET_KEY from environment variable (required for K8s deployment).
 # Nonprod fallback chain prevents hard crashes when legacy secret keys drift to
 # empty while JWT keys remain populated.
@@ -178,7 +183,9 @@ else:
 MEILISEARCH_ENABLED = True
 MEILISEARCH_URL = "http://meilisearch:7700"
 MEILISEARCH_INDEX_PREFIX = "tutor_"
-MEILISEARCH_API_KEY = os.environ.get("MEILISEARCH_API_KEY", "")
+# Secret managers and kubectl tooling sometimes preserve a trailing newline.
+# Strip it so Meilisearch auth does not fail on otherwise-correct keys.
+MEILISEARCH_API_KEY = (os.environ.get("MEILISEARCH_API_KEY", "") or "").rstrip("\r\n")
 SEARCH_ENGINE = "search.meilisearch.MeilisearchEngine"
 
 # Forum moderation and spam controls.
@@ -328,7 +335,6 @@ CREDENTIALS_SERVICE_USERNAME = os.environ.get("CREDENTIALS_SERVICE_USERNAME", "c
 mongodb_parameters = {
     "db": MONGODB_DB,
     "host": MONGODB_HOST,
-    "port": 27017,
     "user": _mongodb_username,
     # IMPORTANT: For non-Atlas hosts (e.g. in-cluster mongodb), ignore any injected
     # MONGODB_USERNAME/MONGODB_PASSWORD to avoid failing auth against unauthenticated
@@ -340,6 +346,8 @@ mongodb_parameters = {
     "authsource": _mongodb_authsource,
     "replicaSet": None,
 }
+if not _is_mongodb_srv_uri(MONGODB_HOST):
+    mongodb_parameters["port"] = int(os.environ.get("MONGODB_PORT", "27017"))
 DOC_STORE_CONFIG = mongodb_parameters
 CONTENTSTORE = {
     "ENGINE": "xmodule.contentstore.mongo.MongoContentStore",

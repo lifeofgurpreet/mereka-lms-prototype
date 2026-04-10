@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # verify-course-catalog-durability.sh — Verify course catalog index durability
-# Checks that the course-reindex CronJob exists and course_info ES index is populated.
+# Checks that the course-reindex CronJob exists and verifies the backend selected
+# by runtime SEARCH_ENGINE.
 # @covers AC-CAT-001
 set -euo pipefail
 
@@ -33,34 +34,58 @@ else
   fail "CronJob does not run reindex_course via CMS"
 fi
 
-# 4. CronJob has post-reindex verification
-if grep -q "course_info" deploy/k8s/base/monitoring/cronjob-course-reindex.yaml 2>/dev/null; then
-  pass "CronJob verifies course_info after reindex"
+# 4. CronJob has backend-aware post-reindex verification
+if grep -q "SEARCH_ENGINE" deploy/k8s/base/monitoring/cronjob-course-reindex.yaml 2>/dev/null \
+  && grep -q "Unsupported SEARCH_ENGINE" deploy/k8s/base/monitoring/cronjob-course-reindex.yaml 2>/dev/null; then
+  pass "CronJob verifies backend by effective SEARCH_ENGINE"
 else
-  fail "CronJob has no post-reindex verification"
+  fail "CronJob is missing backend-aware verification"
 fi
 
-# 5. CronJob is idempotent (uses --setup flag for non-interactive)
-if grep -q "\-\-setup" deploy/k8s/base/monitoring/cronjob-course-reindex.yaml 2>/dev/null; then
-  pass "CronJob uses --setup (non-interactive, idempotent)"
+# 5. CronJob is non-interactive (pipes explicit confirmation to reindex_course)
+if grep -Eq "printf 'y\\\\n'|echo y \|" deploy/k8s/base/monitoring/cronjob-course-reindex.yaml 2>/dev/null; then
+  pass "CronJob is non-interactive via explicit stdin confirmation"
 else
-  fail "CronJob missing --setup flag"
+  fail "CronJob missing explicit non-interactive confirmation"
 fi
 
 # 6. Live cluster checks (optional — skip if no kubectl access)
 if command -v kubectl &>/dev/null && kubectl get ns mereka-lms-dev &>/dev/null 2>&1; then
-  # Check course_info doc count via ES REST API directly (avoids Django shell noise)
-  COUNT=$(kubectl exec -n mereka-lms-dev deployment/lms -- \
-    curl -sf http://elasticsearch:9200/course_info/_count 2>/dev/null \
-    | python3 -c "import sys,json; print(json.load(sys.stdin).get('count',0))" 2>/dev/null \
-    || echo "0")
-  if [ "${COUNT:-0}" -gt 0 ]; then
-    pass "ES course_info has ${COUNT} docs"
-  else
-    fail "ES course_info is empty (${COUNT} docs)"
-  fi
+  ENGINE=$(kubectl exec -n mereka-lms-dev deployment/cms -- \
+    python manage.py cms shell -c "from django.conf import settings; print(settings.SEARCH_ENGINE)" 2>/dev/null \
+    | tail -1 | tr -d '\r' || echo "")
+  case "${ENGINE}" in
+    search.elastic.ElasticSearchEngine)
+      COUNT=$(kubectl exec -n mereka-lms-dev deployment/lms -- \
+        curl -sf http://elasticsearch:9200/course_info/_count 2>/dev/null \
+        | python3 -c "import sys,json; print(json.load(sys.stdin).get('count',0))" 2>/dev/null \
+        || echo "0")
+      if [ "${COUNT:-0}" -gt 0 ]; then
+        pass "Elasticsearch course_info has ${COUNT} docs"
+      else
+        fail "Elasticsearch course_info is empty (${COUNT} docs)"
+      fi
+      ;;
+    search.meilisearch.MeilisearchEngine)
+      COUNT=$(kubectl exec -n mereka-lms-dev deployment/cms -- /bin/sh -lc \
+        "curl -sf -H \"Authorization: Bearer \${MEILISEARCH_API_KEY:-}\" http://meilisearch:7700/indexes/tutor_course_info/stats 2>/dev/null \
+        | python3 -c \"import sys,json; print(json.load(sys.stdin).get('numberOfDocuments',0))\"" \
+        2>/dev/null || echo "0")
+      if [ "${COUNT:-0}" -gt 0 ]; then
+        pass "Meilisearch tutor_course_info has ${COUNT} docs"
+      else
+        fail "Meilisearch tutor_course_info is empty (${COUNT} docs)"
+      fi
+      ;;
+    "")
+      skip "Could not determine dev SEARCH_ENGINE"
+      ;;
+    *)
+      fail "Unsupported dev SEARCH_ENGINE=${ENGINE}"
+      ;;
+  esac
 else
-  skip "No kubectl access — cannot verify live ES state"
+  skip "No kubectl access — cannot verify live catalog backend state"
 fi
 
 echo ""

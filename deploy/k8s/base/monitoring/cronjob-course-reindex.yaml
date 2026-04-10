@@ -1,13 +1,14 @@
 ---
-# CronJob to reindex courses into Meilisearch via edx-search (MeilisearchEngine).
-# The /courses catalog page queries Meilisearch course_info via edx-search.
-# Without this, a Meilisearch restart/reset leaves /courses empty until manual reindex.
+# CronJob to reindex course catalog documents through edx-search.
+# The active backend is determined by the mounted Django settings at runtime.
+# Verification must follow the effective SEARCH_ENGINE instead of assuming a
+# permanent Elasticsearch or Meilisearch contract in source.
 # Runs every 6 hours. Idempotent — safe to rerun at any time.
 #
-# NOTE: This deployment uses Meilisearch (not Elasticsearch).
-# SEARCH_ENGINE = "search.meilisearch.MeilisearchEngine" in LMS/CMS settings.
-# The reindex_course command uses edx-search which routes to Meilisearch.
-# Index name: tutor_course_info (prefix "tutor_" + "course_info").
+# NOTE:
+# - `reindex_course` prompts for confirmation unless stdin provides `y`
+# - `reindex_course` uses SEARCH_ENGINE from the mounted Django settings
+# - verification branches on the effective SEARCH_ENGINE at runtime
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -55,31 +56,59 @@ spec:
 
                   echo "=== Course Catalog Reindex - $(date -u) ==="
 
-                  echo "[1/3] Reindexing all courses into Meilisearch course_info..."
-                  # --setup flag is Elasticsearch-only and not valid with MeilisearchEngine.
-                  # MeilisearchEngine creates/configures the index automatically on first use.
-                  python manage.py cms reindex_course --all 2>&1
+                  echo "[1/4] Resolving effective SEARCH_ENGINE..."
+                  ENGINE=$(python manage.py cms shell -c "
+                  from django.conf import settings
+                  print(settings.SEARCH_ENGINE)
+                  " 2>/dev/null | tail -1 | tr -d '\r')
 
-                  echo "[2/3] Verifying course_info doc count via Meilisearch..."
-                  # Index prefix is "tutor_" (MEILISEARCH_INDEX_PREFIX), so index = tutor_course_info.
-                  # Meilisearch stats endpoint returns {"numberOfDocuments": N, ...}.
-                  COUNT=$(curl -sf \
-                    -H "Authorization: Bearer ${MEILISEARCH_API_KEY:-}" \
-                    "http://meilisearch:7700/indexes/tutor_course_info/stats" \
-                    | python3 -c "import sys,json; print(json.load(sys.stdin).get('numberOfDocuments',0))" \
-                    2>/dev/null || echo "0")
-
-                  echo "tutor_course_info docs: ${COUNT}"
-
-                  if [ "${COUNT:-0}" -eq 0 ]; then
-                    echo "WARN: tutor_course_info is empty after reindex (may be expected if no published courses)"
+                  if [ -z "${ENGINE:-}" ]; then
+                    echo "Could not determine SEARCH_ENGINE"
+                    exit 1
                   fi
 
-                  echo "[3/3] Verifying CourseOverview count..."
-                  python manage.py cms shell -c "
+                  echo "SEARCH_ENGINE=${ENGINE}"
+
+                  echo "[2/4] Reindexing all courses..."
+                  printf 'y\n' | python manage.py cms reindex_course --all 2>&1
+
+                  echo "[3/4] Verifying backend-specific index population..."
+                  case "${ENGINE}" in
+                    search.elastic.ElasticSearchEngine)
+                      STORE="Elasticsearch course_info"
+                      COUNT=$(curl -sf \
+                        "http://elasticsearch:9200/course_info/_count" \
+                        | python3 -c "import sys,json; print(json.load(sys.stdin).get('count',0))" \
+                        2>/dev/null || echo "0")
+                      ;;
+                    search.meilisearch.MeilisearchEngine)
+                      STORE="Meilisearch tutor_course_info"
+                      COUNT=$(curl -sf \
+                        -H "Authorization: Bearer ${MEILISEARCH_API_KEY:-}" \
+                        "http://meilisearch:7700/indexes/tutor_course_info/stats" \
+                        | python3 -c "import sys,json; print(json.load(sys.stdin).get('numberOfDocuments',0))" \
+                        2>/dev/null || echo "0")
+                      ;;
+                    *)
+                      echo "Unsupported SEARCH_ENGINE=${ENGINE}"
+                      exit 1
+                      ;;
+                  esac
+
+                  echo "${STORE} docs: ${COUNT}"
+
+                  echo "[4/4] Verifying CourseOverview count..."
+                  OVERVIEW_COUNT=$(python manage.py cms shell -c "
                   from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
-                  print(f'CourseOverview total: {CourseOverview.objects.count()}')
-                  " 2>&1 | tail -1 || echo "Could not verify CourseOverview count"
+                  print(CourseOverview.objects.count())
+                  " 2>&1 | tail -1 | tr -d '\r' || echo "unknown")
+
+                  echo "CourseOverview total: ${OVERVIEW_COUNT}"
+
+                  if [ "${OVERVIEW_COUNT}" != "unknown" ] && [ "${OVERVIEW_COUNT:-0}" -gt 0 ] && [ "${COUNT:-0}" -eq 0 ]; then
+                    echo "Index verification failed: ${STORE} is empty while CourseOverview has ${OVERVIEW_COUNT} rows"
+                    exit 1
+                  fi
 
                   echo "Reindex complete."
               env:
