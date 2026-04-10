@@ -120,6 +120,18 @@ def bootstrap_tenant(tenant: dict, dry_run: bool) -> dict:
     ec_spec = tenant.get("enterprise_customer", {})
     ec = EnterpriseCustomer.objects.filter(slug=tenant["slug"]).first()
     if not ec:
+        # Slug mismatch recovery: look up by name before creating a duplicate.
+        ec_by_name = EnterpriseCustomer.objects.filter(name=tenant["name"]).first()
+        if ec_by_name and ec_by_name.slug != tenant["slug"]:
+            old_slug = ec_by_name.slug
+            if not dry_run:
+                ec_by_name.slug = tenant["slug"]
+                ec_by_name.save(update_fields=["slug"])
+            result["actions"].append(
+                f"RENAME slug {old_slug} -> {tenant['slug']} for {tenant['name']}"
+            )
+            ec = ec_by_name
+    if not ec:
         if dry_run:
             result["actions"].append(
                 f"CREATE EnterpriseCustomer slug={tenant['slug']} name={tenant['name']}"
