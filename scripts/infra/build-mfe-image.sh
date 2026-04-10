@@ -55,6 +55,14 @@ if [[ ! -f "$DOCKERFILE" ]]; then
   exit 1
 fi
 
+build_failed_due_to_transient_github_fetch() {
+  local log_path="$1"
+  [[ -f "$log_path" ]] || return 1
+  grep -Eq \
+    'Could not resolve host: github\.com|failed to fetch remote https://github\.com/openedx/frontend-app' \
+    "$log_path"
+}
+
 TAGS=(
   "--tag" "${IMAGE_REPO}:${PRIMARY_TAG}"
   "--tag" "${IMAGE_REPO}:${SECONDARY_TAG}"
@@ -66,13 +74,37 @@ fi
 # BUILDKIT_MAX_PARALLELISM — if exported by caller, buildkitd reads it directly.
 # docker buildx build has no --opt flag; the env var is the correct mechanism.
 
-docker buildx build \
-  --file "$DOCKERFILE" \
-  "${TAGS[@]}" \
-  --cache-from "type=gha" \
-  --cache-to "type=gha,mode=max" \
-  --cache-from "type=registry,ref=${CACHE_REF}" \
-  --build-arg BUILDKIT_INLINE_CACHE=1 \
-  --progress plain \
-  --push \
-  "$CONTEXT_DIR"
+max_attempts=2
+attempt=1
+
+while (( attempt <= max_attempts )); do
+  attempt_log="var/ci/build-mfe-attempt-${attempt}.log"
+  mkdir -p "$(dirname "$attempt_log")"
+
+  if docker buildx build \
+    --file "$DOCKERFILE" \
+    "${TAGS[@]}" \
+    --cache-from "type=gha" \
+    --cache-to "type=gha,mode=max" \
+    --cache-from "type=registry,ref=${CACHE_REF}" \
+    --build-arg BUILDKIT_INLINE_CACHE=1 \
+    --progress plain \
+    --push \
+    "$CONTEXT_DIR" \
+    2>&1 | tee "$attempt_log"; then
+    cp "$attempt_log" var/ci/build-mfe.log
+    exit 0
+  fi
+
+  cp "$attempt_log" var/ci/build-mfe.log
+
+  if (( attempt < max_attempts )) && build_failed_due_to_transient_github_fetch "$attempt_log"; then
+    echo "Transient GitHub fetch failure detected during MFE build; retrying once..." >&2
+    attempt=$((attempt + 1))
+    sleep 5
+    continue
+  fi
+
+  echo "MFE image build failed." >&2
+  exit 1
+done
