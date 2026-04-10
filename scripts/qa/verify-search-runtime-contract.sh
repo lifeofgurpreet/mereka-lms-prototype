@@ -46,6 +46,14 @@ require_pattern "$LMS_PRODUCTION" 'MEILISEARCH_API_KEY = \(os\.environ\.get\("ME
   "LMS trims trailing newlines from MEILISEARCH_API_KEY"
 require_pattern "$CMS_PRODUCTION" 'MEILISEARCH_API_KEY = \(os\.environ\.get\("MEILISEARCH_API_KEY", ""\) or ""\)\.rstrip\("\\r\\n"\)' \
   "CMS trims trailing newlines from MEILISEARCH_API_KEY"
+require_pattern "$CMS_PRODUCTION" 'SEARCH_ENGINE = "search\.meilisearch\.MeilisearchEngine"' \
+  "CMS explicitly uses MeilisearchEngine when Meilisearch is enabled"
+require_pattern "$CMS_PRODUCTION" 'def _apply_meilisearch_runtime_contract\(\):' \
+  "CMS defines the Meilisearch runtime contract helper"
+require_pattern "$CMS_PRODUCTION" 'unsupported primary key' \
+  "CMS refuses non-empty Meilisearch indexes with the wrong primary key"
+require_literal "$CMS_PRODUCTION" '_apply_meilisearch_runtime_contract()' \
+  "CMS applies the Meilisearch runtime contract at settings load"
 require_pattern "$LMS_PRODUCTION" 'def _is_mongodb_srv_uri\(raw_value\):' \
   "LMS defines SRV URI detection helper"
 require_pattern "$CMS_PRODUCTION" 'def _is_mongodb_srv_uri\(raw_value\):' \

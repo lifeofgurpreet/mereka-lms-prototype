@@ -29,8 +29,8 @@ Sources:
 | Plane | Repo intent | Overlay/runtime truth | Status |
 |---|---|---|---|
 | Discovery service | Discovery plugin settings point to Elasticsearch via `ELASTICSEARCH_DSL` | Runtime Discovery still uses Elasticsearch and has zero `Course` / `CourseRun` rows | `Runtime-verified` |
-| edx-platform search | Base LMS/CMS settings enable Meilisearch | Production LMS mounts patched config that forces Elasticsearch; production CMS mounts unpatched config and keeps Meilisearch flags | `Runtime-verified` |
-| Learner browse UX | Legacy `/courses` still exists; Catalog MFE not yet wired here | `/courses` returns a 200 HTML shell, but the underlying search index is empty in production | `Runtime-verified` |
+| edx-platform search | Base LMS uses Meilisearch; CMS now explicitly sets Meilisearch plus runtime bootstrap repair | Production LMS still resolves Elasticsearch, while production CMS now resolves Meilisearch and writes into Meilisearch indexes | `Runtime-verified` |
+| Learner browse UX | Legacy `/courses` still exists; Catalog MFE not yet wired here | `/courses` returns a 200 HTML shell, but the learner browse index is still empty because CMS reindex fails on wrong-primary-key Meilisearch indexes | `Runtime-verified` |
 
 ## Current-State Matrix
 
@@ -47,13 +47,13 @@ Verification tags:
 | Discovery root | `discovery` Deployment | Django Discovery service | MySQL `discovery` DB | none for root | `curl -I https://discovery.academyv2.mereka.io/` | `deploy/k8s/base/plugins/discovery/apps/settings/tutor/production.py` | `Runtime-verified` | Root behavior must be re-proved per environment before assuming anonymous access. |
 | Discovery `/health/` | `discovery` Deployment | Django Discovery service | MySQL `discovery` DB | none | `curl https://discovery.academyv2.mereka.io/health/` | `deploy/k8s/base/plugins/discovery/apps/settings/tutor/production.py` | `Runtime-verified` | Returns `{"overall_status":"OK"...}` in prod. |
 | Discovery `/api/v1/courses/` | `discovery` Deployment | Discovery REST API | Discovery DB + Elasticsearch | JWT required in prod | `curl -i https://discovery.academyv2.mereka.io/api/v1/courses/` | `deploy/k8s/base/plugins/discovery/apps/settings/tutor/production.py` | `Runtime-verified` | Current prod response is `401`, not public `200`. |
-| LMS `/courses` | `lms` Deployment | Legacy LMS discovery UI | Elasticsearch `course_info` | none to render shell | `curl -I https://academyv2.mereka.io/courses` plus ES `_cat/indices` | live patched LMS configmap | `Runtime-verified` | Live LMS `SEARCH_ENGINE` is `search.elastic.ElasticSearchEngine`; current ES `course_info` count is `0`. |
+| LMS `/courses` | `lms` Deployment | Legacy LMS discovery UI | Elasticsearch `course_info` | none to render shell | `curl -I https://academyv2.mereka.io/courses` plus ES `_cat/indices` | live patched LMS configmap | `Runtime-verified` | Live LMS still resolves `search.elastic.ElasticSearchEngine`; current ES `course_info` count is `0`. |
 | LMS `/courses/<key>/about` | `lms` Deployment | Legacy LMS course about page | LMS models / CourseOverview | none for anon page | `curl -I https://academyv2.mereka.io/courses/<course-key>/about` | LMS runtime settings | `Runtime-verified` | Sample unknown course key returns `404`; valid-course proof still needed. |
 | Learner dashboard MFE | MFE + LMS APIs | MFE | LMS enrollment APIs | session auth | verify through apps domain and config API | prod overlay MFE config | `Hypothesis` | Not yet re-proved in this pass. |
 | Catalog MFE route | none in current runtime | not enabled | n/a | n/a | route inspection pending | upstream feature docs + repo wiring | `Hypothesis` | Strategic candidate, not currently proved live. |
-| Studio content search | `cms` Deployment | Meilisearch flags enabled in CMS | likely `tutor_studio_content` | `MEILISEARCH_API_KEY` | `kubectl exec deploy/cms -- python manage.py cms shell ...` | CMS configmap + runtime settings | `Runtime-verified` | CMS runtime has `MEILISEARCH_ENABLED=True`, but end-to-end search proof still pending. |
+| Studio content search | `cms` Deployment | Meilisearch backend | `tutor_course_info` / `tutor_courseware_content` plus Studio-owned indexes | `MEILISEARCH_API_KEY` | `kubectl exec deploy/cms -- python manage.py cms shell ...` plus Meilisearch `/tasks` and `/indexes/*` | CMS configmap + runtime settings | `Runtime-verified` | CMS now resolves `search.meilisearch.MeilisearchEngine`; writes fail on wrong-primary-key indexes auto-created without `_pk`. |
 | Forum search | `lms` Deployment | Elasticsearch backend in prod | Elasticsearch | none | `kubectl exec deploy/lms -- python manage.py lms shell ...` | live patched LMS configmap | `Runtime-verified` | Live `FORUM_SEARCH_BACKEND` is `forum.search.es.ElasticsearchBackend`, contradicting base repo intent. |
-| Course reindex CronJob | `course-reindex` CronJob | `reindex_course` command | live manifest targets Meilisearch `tutor_course_info`, but live LMS/CMS settings still resolve `SEARCH_ENGINE` through Elasticsearch | secrets via `envFrom` | `kubectl get cronjob course-reindex -o json` plus one-off job logs | `deploy/k8s/base/monitoring/cronjob-course-reindex.yaml` | `Runtime-verified` | Current live contradiction: patched CMS settings are mounted, but the shipped command is still interactive and assumes Meilisearch while runtime settings still report Elasticsearch. |
+| Course reindex CronJob | `course-reindex` CronJob | `reindex_course` command | Meilisearch `tutor_course_info` / `tutor_courseware_content` | `MEILISEARCH_API_KEY` for routine writes, `MEILISEARCH_MASTER_KEY` only for admin inspection | `kubectl get cronjob course-reindex -o json` plus one-off job logs and Meilisearch `/tasks` | `deploy/k8s/base/monitoring/cronjob-course-reindex.yaml` | `Runtime-verified` | Prompt blocker is gone. Current failure is `invalid_document_id` because indexes were created without `_pk` as primary key before bootstrap repair ran. |
 | Discovery sync CronJob | `discovery-sync` CronJob | Discovery management commands | Discovery DB + search index | secrets via `envFrom` | `kubectl get cronjob discovery-sync -n mereka-lms -o json` | `deploy/k8s/base/jobs/discovery-sync-cronjob.yaml` | `Runtime-verified` | Live prod CronJob now exists after the Kyverno-compliant vendored fix was realized. |
 
 ## Proved Runtime Facts
@@ -66,28 +66,30 @@ Verification tags:
    - `SEARCH_ENGINE = "search.elastic.ElasticSearchEngine"`
    - `FORUM_SEARCH_BACKEND = "forum.search.es.ElasticsearchBackend"`
    - `COURSE_CATALOG_URL_ROOT = "http://localhost:8008"`
-4. `Runtime-verified`: production CMS reports:
-   - `SEARCH_ENGINE = "search.elastic.ElasticSearchEngine"`
+4. `Runtime-verified`: production CMS now reports:
+   - `SEARCH_ENGINE = "search.meilisearch.MeilisearchEngine"`
    - `MEILISEARCH_ENABLED = True`
    - `MEILISEARCH_URL = "http://meilisearch:7700"`
+   - `ELASTIC_SEARCH_CONFIG = [{"host": "meilisearch", "port": 7700}]`
 5. `Runtime-verified`: Elasticsearch is live and currently has `course_info` and
    `courseware_content` indices, both with `0` documents.
 6. `Runtime-verified`: Discovery is live but currently has `0` `Course`,
    `0` `CourseRun`, and `0` `Program` rows.
-7. `Runtime-verified`: the live `openedx-secrets` values for
-   `MEILISEARCH_MASTER_KEY` and `MEILISEARCH_API_KEY` do not match each other.
-8. `Runtime-verified`: the injected Meilisearch master key currently contains a
-   trailing newline byte. That must be treated as a secret-hygiene defect.
-9. `Runtime-verified`: the current shipped `course-reindex` CronJob is still
-   interactive in live prod and fails with `EOFError` when run non-interactively.
+7. `Runtime-verified`: Meilisearch now accepts the corrected master key from
+   `openedx-secrets`, and `/keys` returns the live built-in search/admin keys.
+8. `Runtime-verified`: `MEILISEARCH_MASTER_KEY` no longer carries the trailing
+   newline byte that previously broke auth.
+9. `Runtime-verified`: `MEILISEARCH_API_KEY` in `openedx-secrets` is now aligned
+   to the live Meilisearch Default Admin API Key and is accepted for routine
+   index/settings writes.
 10. `Repo-verified`: the repo now includes a static contract guard at
     `scripts/qa/verify-search-runtime-contract.sh`
-    to catch newline-polluted Meilisearch keys, SRV-host Mongo misconfiguration,
-    and regression of the current non-interactive reindex contract.
-11. `Runtime-verified`: a previous one-off non-interactive reindex job failed
-    before indexing because CMS timed out talking to the Atlas modulestore
-    replica set, so Atlas connectivity remains the next blocker once the prompt
-    is removed from the live CronJob path.
+    to catch newline-polluted Meilisearch keys, wrong CMS engine drift, missing
+    bootstrap repair, SRV-host Mongo misconfiguration, and regression of the
+    current non-interactive reindex contract.
+11. `Runtime-verified`: the non-interactive reindex path now gets through
+    startup, auth, and filterable/sortable attribute setup and fails later on
+    Meilisearch `invalid_document_id` task failures.
 12. `Repo-verified`: prod app auto-sync is disabled in source, so realization
     currently depends on an explicit manual sync instead of normal Argo
     convergence.
@@ -96,16 +98,22 @@ Verification tags:
     `0aebdace...`.
 14. `Runtime-verified`: `discovery-sync` and `clickhouse-data-sync-daily` now
     exist live with Kyverno-compliant security contexts.
-15. `Runtime-verified`: the active split-brain is now sharper: live LMS/CMS
-    settings still report Elasticsearch, while the shipped `course-reindex`
-    manifest verifies Meilisearch `tutor_course_info`.
+15. `Runtime-verified`: the active split-brain is now narrower: live LMS still
+    reports Elasticsearch, while live CMS and the shipped `course-reindex`
+    manifest now target Meilisearch.
+16. `Runtime-verified`: live `tutor_course_info` and
+    `tutor_courseware_content` indexes currently exist with `primaryKey = None`,
+    which causes Meilisearch to reject raw Open edX ids containing `:`.
+17. `Runtime-verified`: running `search.meilisearch.create_indexes()` repairs
+    filterable and sortable attributes but does not repair an already-created
+    wrong-primary-key index, so bootstrap order matters.
 
 ## Key Model
 
 | Purpose | Canonical variable | Current state | Decision |
 |---|---|---|---|
-| Meilisearch server bootstrap | `MEILI_MASTER_KEY` from `MEILISEARCH_MASTER_KEY` | present in Meilisearch Deployment | keep |
-| Backend index/admin operations | `MEILISEARCH_API_KEY` | present in LMS/CMS secrets | keep, but it must be a valid admin-style API key and newline-safe |
+| Meilisearch server bootstrap | `MEILI_MASTER_KEY` from `MEILISEARCH_MASTER_KEY` | present in Meilisearch Deployment and now accepted by `/keys` | keep |
+| Backend index/admin operations | `MEILISEARCH_API_KEY` | present in LMS/CMS secrets and now aligned to the live Default Admin API Key | keep as routine index/admin key; do not fall back to master |
 | Frontend search | separate search-only key | not wired | do not invent until Catalog MFE path is chosen |
 
 Rules:
@@ -122,49 +130,42 @@ Rules:
 What is actually proved today:
 
 - `Runtime-verified`: live LMS is on `search.elastic.ElasticSearchEngine`.
-- `Overlay-verified`: dev overlay explicitly forces `SEARCH_ENGINE` back to
-  Elasticsearch and explains it with an old colon-ID comment.
+- `Runtime-verified`: live CMS is on `search.meilisearch.MeilisearchEngine`.
 - `Runtime-verified`: prod Elasticsearch `course_info` exists but currently has
   `0` docs.
-- `Runtime-verified`: the production course reindex job still fails before
-  indexing because it waits for interactive confirmation.
-- `Runtime-verified`: after bypassing the prompt in an earlier one-off job, the
-  same reindex path failed with `pymongo.errors.ServerSelectionTimeoutError`
-  while enumerating courses from the Atlas modulestore cluster.
-- `Runtime-verified`: the currently deployed CronJob manifest is no longer the
-  Elasticsearch-oriented source tracked on this branch; live prod is running a
-  Meilisearch-oriented command path from current `main`.
+- `Runtime-verified`: the production course reindex job is now non-interactive
+  and reaches document indexing in Meilisearch.
+- `Runtime-verified`: the current Meilisearch failure mode is no longer auth or
+  filter configuration; it is `invalid_document_id` on indexes created without
+  `_pk` as the primary key.
+- `Runtime-verified`: live `tutor_course_info` and `tutor_courseware_content`
+  were auto-created with `primaryKey = None` before bootstrap repair ran.
 
 What is not yet proved:
 
-- whether the upstream Meilisearch failure is really caused by colon-containing
-  course keys
-- whether `reindex_course` bypasses Meilisearch document-key normalization in
-  the exact way claimed in PR #1497
+- whether the new CMS-side bootstrap repair is sufficient by itself once it is
+  realized in every lane and the wrong zero-doc indexes are recreated
+- whether any additional Meilisearch path still bypasses `_pk` normalization
+  after the runtime bootstrap repair is in place
 
 Current conclusion:
 
-- Keep Elasticsearch as the currently proved `/courses` backend until the
-  Meilisearch migration failure mode is re-proved from code path plus runtime
-  evidence.
-- The immediate production indexing blocker is CMS-to-modulestore MongoDB
-  connectivity, not Meilisearch document-ID behavior.
+- Keep LMS `/courses` on Elasticsearch until the CMS-side Meilisearch bootstrap
+  repair is realized and a full reindex populates the learner-facing index.
+- The immediate production indexing blocker is wrong Meilisearch index creation,
+  not Atlas connectivity, interactive prompts, or auth.
 - The repo still carries secret-model debt because `FORUM_MONGODB_HOST` is the
   effective runtime source for modulestore Atlas connectivity in prod.
-- Do not treat the colon-ID story as canonical yet.
+- The old blanket “colon-id bug” story is still too loose. The proved issue is
+  narrower: Meilisearch rejects raw Open edX ids when the index was created
+  without `_pk` and therefore never applies edx-search’s id hashing path.
 - `Repo-verified`: source-side fixes now exist to make the app repo SRV-safe and
   to make the GitOps prod overlay mount a patched CMS settings configmap for
   `cms`, `cms-worker`, and the CMS-based cronjobs.
 - `Runtime-verified`: a full manual sync can realize the patched CMS settings in
   live prod, so the earlier CMS configmap split is no longer the active blocker.
 - `Runtime-verified`: the Kyverno admission blocker is now resolved in live
-  prod; the remaining blocker is the search/backend contradiction itself.
-- `Runtime-verified`: today’s live contradiction is:
-  - LMS and CMS still report `SEARCH_ENGINE = search.elastic.ElasticSearchEngine`
-  - the shipped `course-reindex` CronJob verifies Meilisearch
-    `tutor_course_info`
-  - the job remains interactive and therefore fails before exercising either
-    backend
+  prod; the remaining blocker is the Meilisearch bootstrap contract itself.
 
 ## Discovery Strategy
 
@@ -172,7 +173,8 @@ Current conclusion:
   service in this estate.
 - `Runtime-verified`: its courses API is auth-protected in prod and currently
   empty.
-- `Runtime-verified`: no Discovery sync CronJob is deployed in prod.
+- `Runtime-verified`: Discovery sync CronJob is now deployed in prod, but
+  Discovery content remains empty and auth-protected.
 
 Current strategy:
 
@@ -183,21 +185,18 @@ Current strategy:
 
 ## Forward Path
 
-1. Fix runtime drift first:
+1. Realize and prove the CMS bootstrap repair:
    - keep course reindex non-interactive
-   - prove whether indexing should target Elasticsearch or Meilisearch in each lane
-   - keep proving that live runtime still consumes the corrected CMS/search
-     contract after future syncs and restarts
+   - ensure every Meilisearch-writing CMS lane carries the `_pk` repair hook
+   - recreate any empty wrong-primary-key indexes before the next full reindex
 2. Reconcile backend authority:
-   - stop the live contradiction between Elasticsearch runtime settings and the
-     Meilisearch-oriented reindex manifest
-   - pick one proven backend contract for `/courses` before changing
-     verification targets again
+   - keep LMS `/courses` on Elasticsearch until Meilisearch reindex is proved
+   - keep CMS indexing on Meilisearch with an explicit bootstrap contract
 3. Decide whether `mereka-lms-prod` should remain on explicit manual sync or
    return to normal auto-sync after stabilization.
 4. Clean Meilisearch secret hygiene:
-   - remove newline pollution from stored secrets
-   - verify the API key has the intended admin/search scopes
+   - keep master-key authority in Infisical newline-safe
+   - keep `MEILISEARCH_API_KEY` aligned to a valid routine admin key, not the master key
 5. Re-prove learner browse path:
    - valid `/courses/<key>/about`
    - actual course card population

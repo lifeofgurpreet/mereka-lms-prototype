@@ -80,6 +80,92 @@ def _is_mongodb_srv_uri(raw_value):
     return value.startswith("mongodb+srv://")
 
 
+def _apply_meilisearch_runtime_contract():
+    """
+    Harden Meilisearch index bootstrap for CMS-owned indexing paths.
+
+    The upstream edx-search Meilisearch backend assumes operators ran
+    `search.meilisearch.create_indexes()` before the first write. If that does
+    not happen, Meilisearch auto-creates indexes with no explicit primary key
+    and then rejects Open edX document ids containing `:`. We repair that lazily
+    the first time CMS touches a search index, but only when the broken index is
+    still empty and therefore safe to recreate.
+    """
+    if globals().get("SEARCH_ENGINE") != "search.meilisearch.MeilisearchEngine":
+        return
+
+    try:
+        import meilisearch
+        import search.meilisearch as search_meilisearch
+    except ImportError:
+        logging.getLogger(__name__).warning(
+            "Meilisearch runtime contract patch skipped; search.meilisearch is unavailable",
+        )
+        return
+
+    if getattr(search_meilisearch, "_MEREKA_RUNTIME_CONTRACT_PATCHED", False):
+        return
+
+    original_get_or_create = search_meilisearch.get_or_create_meilisearch_index
+
+    def _index_document_count(index):
+        stats = index.get_stats()
+        return getattr(stats, "number_of_documents", 0)
+
+    def _get_or_repair_meilisearch_index(client, index_name):
+        try:
+            index = client.get_index(index_name)
+        except meilisearch.errors.MeilisearchApiError as exc:
+            if exc.code != "index_not_found":
+                raise
+            return original_get_or_create(client, index_name)
+
+        primary_key = getattr(index, "primary_key", None)
+        if primary_key in {search_meilisearch.PRIMARY_KEY_FIELD_NAME, "_pk"}:
+            return index
+
+        document_count = _index_document_count(index)
+        if document_count:
+            raise RuntimeError(
+                f"Meilisearch index {index_name} has unsupported primary key {primary_key!r} "
+                f"with {document_count} documents; refusing automatic recreation."
+            )
+
+        logging.getLogger(__name__).warning(
+            "Recreating empty Meilisearch index %s with primary key %s",
+            index_name,
+            search_meilisearch.PRIMARY_KEY_FIELD_NAME,
+        )
+        task_info = client.delete_index(index_name)
+        search_meilisearch.wait_for_task_to_succeed(client, task_info)
+        return original_get_or_create(client, index_name)
+
+    def _patched_meilisearch_index(self):
+        if self._meilisearch_index is None:
+            client = search_meilisearch.get_meilisearch_client()
+            index_name = search_meilisearch.get_meilisearch_index_name(self.index_name)
+            index = _get_or_repair_meilisearch_index(client, index_name)
+
+            filterables = search_meilisearch.INDEX_FILTERABLES.get(self.index_name, [])
+            search_meilisearch.update_index_filterables(client, index, filterables)
+
+            sortables = search_meilisearch.INDEX_SORTABLES.get(self.index_name, [])
+            if sortables:
+                existing_sortables = set(index.get_sortable_attributes())
+                if not set(sortables).issubset(existing_sortables):
+                    merged_sortables = sorted(existing_sortables.union(sortables))
+                    task_info = index.update_sortable_attributes(merged_sortables)
+                    search_meilisearch.wait_for_task_to_succeed(client, task_info)
+
+            self._meilisearch_index = index
+
+        return self._meilisearch_index
+
+    search_meilisearch.get_or_create_meilisearch_index = _get_or_repair_meilisearch_index
+    search_meilisearch.MeilisearchEngine.meilisearch_index = property(_patched_meilisearch_index)
+    search_meilisearch._MEREKA_RUNTIME_CONTRACT_PATCHED = True
+
+
 # Override SECRET_KEY from environment variable (required for K8s deployment).
 # Nonprod fallback chain prevents hard crashes when legacy secret keys drift to
 # empty while JWT keys remain populated.
@@ -223,6 +309,7 @@ DJANGO_REDIS_IGNORE_EXCEPTIONS = True
 # SEARCH_ENGINE uses MeilisearchEngine; ELASTIC_SEARCH_CONFIG is retained
 # for any edx-search code paths that still reference it, but pointed at
 # Meilisearch so connections don't hang against a dead Elasticsearch service.
+SEARCH_ENGINE = "search.meilisearch.MeilisearchEngine"
 ELASTIC_SEARCH_CONFIG = [{
   "host": "meilisearch",
   "port": 7700,
@@ -235,6 +322,7 @@ MEILISEARCH_INDEX_PREFIX = "tutor_"
 # Secret managers and kubectl tooling sometimes preserve a trailing newline.
 # Strip it so Meilisearch auth does not fail on otherwise-correct keys.
 MEILISEARCH_API_KEY = (os.environ.get("MEILISEARCH_API_KEY", "") or "").rstrip("\r\n")
+_apply_meilisearch_runtime_contract()
 
 # Common cache config
 CACHES = {
