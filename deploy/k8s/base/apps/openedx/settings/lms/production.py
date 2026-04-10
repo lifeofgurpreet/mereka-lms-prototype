@@ -1874,6 +1874,12 @@ MUX_PLAYBACK_AUDIENCE = os.environ.get(
 _safe_add_app("openedx_video_analytics")
 _safe_add_app("openedx_video_protection")
 
+_video_urlconf = "lms.envs.tutor.mereka_video_urls"
+if _module_available(_video_urlconf):
+    ROOT_URLCONF_OVERRIDES = globals().get("ROOT_URLCONF_OVERRIDES", [])
+    if _video_urlconf not in ROOT_URLCONF_OVERRIDES:
+        ROOT_URLCONF_OVERRIDES.insert(0, _video_urlconf)
+
 # ── Security Hardening (T119) ────────────────────────────────────────────────
 # Session and CSRF cookie flags.
 # SESSION_COOKIE_SECURE / CSRF_COOKIE_SECURE are already set above based on
