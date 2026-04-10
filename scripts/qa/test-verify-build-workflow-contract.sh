@@ -84,6 +84,7 @@ on:
       - 'scripts/infra/prepare-tutor-build-context-ci.sh'
       - 'scripts/infra/resolve-build-scope.sh'
       - 'scripts/infra/install-cosign.sh'
+      - 'scripts/infra/install-trivy.sh'
       - 'scripts/infra/generate-build-provenance.sh'
       - 'scripts/infra/generate-release-bundle.sh'
       - 'scripts/release/generate_release_object.py'

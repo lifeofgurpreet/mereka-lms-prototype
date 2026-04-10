@@ -25,6 +25,7 @@ on:
       - 'infrastructure/tutor/patches/**'
       - 'scripts/infra/resolve-build-scope.sh'
       - 'scripts/infra/install-cosign.sh'
+      - 'scripts/infra/install-trivy.sh'
       - 'scripts/infra/generate-build-provenance.sh'
       - 'scripts/infra/generate-release-bundle.sh'
       - 'scripts/release/render_control_plane_release_bundle_projection.py'
@@ -966,17 +967,9 @@ jobs:
           retention-days: 90
 
       - name: Install Trivy CLI
-        run: |
-          # trivy v0.69.3 — checksum computed 2026-03-05
-          TRIVY_VERSION="v0.69.3"
-          TRIVY_INSTALL_SHA="e00df553be558995b994758bc8995956554a16937f456dc6615b0cc411bfec7a"
-          mkdir -p "$HOME/.local/bin"
-          curl -sSfL "https://raw.githubusercontent.com/aquasecurity/trivy/${TRIVY_VERSION}/contrib/install.sh" \
-            -o /tmp/trivy-install.sh
-          echo "${TRIVY_INSTALL_SHA}  /tmp/trivy-install.sh" | sha256sum -c -
-          sh /tmp/trivy-install.sh -b "$HOME/.local/bin"
-          rm /tmp/trivy-install.sh
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: ./scripts/infra/install-trivy.sh
 
       - name: Scan OpenEdX image for vulnerabilities
         continue-on-error: true  # Non-blocking: upstream CVEs should not block image delivery
@@ -1138,17 +1131,9 @@ jobs:
           retention-days: 90
 
       - name: Install Trivy CLI
-        run: |
-          # trivy v0.69.3 — checksum computed 2026-03-05
-          TRIVY_VERSION="v0.69.3"
-          TRIVY_INSTALL_SHA="e00df553be558995b994758bc8995956554a16937f456dc6615b0cc411bfec7a"
-          mkdir -p "$HOME/.local/bin"
-          curl -sSfL "https://raw.githubusercontent.com/aquasecurity/trivy/${TRIVY_VERSION}/contrib/install.sh" \
-            -o /tmp/trivy-install.sh
-          echo "${TRIVY_INSTALL_SHA}  /tmp/trivy-install.sh" | sha256sum -c -
-          sh /tmp/trivy-install.sh -b "$HOME/.local/bin"
-          rm /tmp/trivy-install.sh
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: ./scripts/infra/install-trivy.sh
 
       - name: Scan MFE image for vulnerabilities
         continue-on-error: true  # Non-blocking: upstream CVEs should not block image delivery

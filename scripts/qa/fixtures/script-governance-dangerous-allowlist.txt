@@ -37,6 +37,7 @@ scripts/infra/retire-legacy-mongodb.sh
 scripts/infra/sync-github-authenticated-sso-canary-from-infisical.sh
 scripts/infra/sync-gitops-prod-image-tags.sh
 scripts/infra/sync-grafana-oidc-secret.sh
+scripts/infra/install-trivy.sh
 scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh
 scripts/infra/sync-mongodb-from-production.sh
 scripts/infra/sync-production-config.sh
