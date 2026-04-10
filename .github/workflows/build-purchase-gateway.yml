@@ -42,6 +42,7 @@ jobs:
           enabled: ${{ vars.CI_FASTLANE_BUILD_ENABLED }}
           lane_mode: ${{ github.event_name == 'workflow_dispatch' && inputs.lane_mode || 'auto' }}
           fastlane_label: ${{ vars.CI_FASTLANE_BUILD_LABEL }}
+          routing_policy: lms_build_prefer_fastlane
           fallback_label: mereka-k8s-heavy-builders
           timezone: ${{ vars.CI_FASTLANE_BUILD_TIMEZONE }}
           office_hours_start: ${{ vars.CI_FASTLANE_BUILD_WINDOW_START }}
@@ -62,7 +63,7 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@2bf8b85183bd0e570bf1b1260c0aaad04bf865d9
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@main
     secrets: inherit
     with:
       app_name: purchase-gateway
@@ -78,7 +79,7 @@ jobs:
     permissions:
       contents: write
       id-token: write
-    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-update-dev-tag.yml@0f7d03bc537617ec7cf8fb8252c3dee2e3b9e4fd
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-update-dev-tag.yml@main
     with:
       app_name: mereka-lms
       image_tag: ${{ needs.build.outputs.image_tag }}
