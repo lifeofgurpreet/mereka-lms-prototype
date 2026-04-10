@@ -97,3 +97,53 @@ SiteConfiguration/DB   → generated runtime material via bootstrap replay, not 
 | authoring | L3 (HTTP 200 claim) | **🔴 BROKEN** ("Unexpected Application Error! 404 Not Found") |
 
 **Previously overclaimed** (per VNext brief): Profile, Learner Dashboard, non-primary Studio, staging parity. Of these, ONLY Learner Dashboard is actually L4 proven. Profile confirmed still broken. Non-primary Studio and staging parity not yet re-proven this session.
+
+---
+
+## 2026-04-11 later session — 2 more RCBs + deep browser matrix
+
+### New root-cause batches
+
+| Batch | Root Cause | Status | Evidence |
+|-------|-----------|--------|----------|
+| **RCB-13** | Biji-Biji prod CSP `connect-src` missing tenant domains, blocks login CSRF fetch | **SOURCE FIX IN PR #1540** | Browser: biji-biji prod login button stays "pending", console shows CSP violation on `https://academy.biji-biji.com/csrf/api/v1/token`. `CSP_CONNECT_SRC` in `lms_settings.py` only lists Mereka primary hosts. Fix extends to loop `MEREKA_LMS_EXTRA_HOSTS`. |
+| **RCB-10 root cause** | Paragon theme CSS files missing from MFE container (`/openedx/dist/theme/` doesn't exist) | **SOURCE FIX IN PR #1543** | `curl /theme/core.min.css` → 404 on apps.* host, `ls /openedx/dist/theme/` → "No such file or directory" in mfe container. `apply-patches.sh` has `sync_openedx_theme` but no `sync_mfe_theme`. PR adds the missing sync function. |
+
+### RCB-11 update
+
+Previously filed as "learner-record MFE not packaged". **RESOLVED** in the current dev mfe image. The dir `/openedx/dist/learner-record/` exists with `index.html`, `app.*.js`, `app.*.css`, theme bundles. URL `/learner-record/` returns HTTP 200. Browser proof: L1 authenticated-route-redirect working.
+
+### Session 3→4 runtime discoveries from browser proof
+
+Multiple assumptions proven wrong this cycle:
+1. **"HTTP 200 means L3"** — Learner-record URL returned 200 while the MFE was missing. Now re-verified as actually built.
+2. **"Dev SOF dashboard broken"** — Was overclaimed as untested. Real browser proof shows **L4 working** with SOF dark theme.
+3. **"SOF prod serves Mereka"** — Initially flagged as regression. Actually I was testing the migration-target URL (`skillourfuture.academyv2.mereka.io`) instead of the current canonical (`skillourfuture.academy.mereka.io`). Registry says academyv2 subdomain is migration target, not active.
+4. **"Staging is down"** — Session 2 said "externally unreachable". Now L3 proven on `staging.academyv2.mereka.io`. Cluster CPU is still overallocated but staging serves.
+5. **"Profile MFE blank = missing MFE_CONFIG keys"** — Fixed keys via SiteConfiguration + PR #1536, but Profile still blank. Real root cause was theme CSS 404, not config API. Missing keys were secondary noise from Studio Footer component.
+
+### Runtime authority status (updated 2026-04-11 later)
+
+| Domain | State |
+|--------|-------|
+| Dev Mereka (full L4) | ✅ |
+| Dev Biji-Biji (L4 dashboard) | ✅ |
+| Dev SOF (L4 dashboard) | ✅ |
+| Prod Mereka (full L4) | ✅ |
+| Prod Biji-Biji (login) | 🔴 blocked on PR #1540 deploy |
+| Prod SOF (login) | not yet tested |
+| Staging Mereka (L3) | ✅ |
+| Profile / Discussions / Communications (all envs) | 🔴 blocked on PR #1543 deploy |
+| Learner-record | ✅ serves (L1 auth redirect confirmed) |
+
+### Tenant URL canonicality (authority)
+
+Per `deploy/k8s/tenancy/tenant-registry.yaml`:
+
+| Tenant | Current prod URL | Migration target |
+|--------|------------------|------------------|
+| Mereka | `academyv2.mereka.io` | (primary) |
+| Biji-Biji | `academy.biji-biji.com` | `biji-biji.academyv2.mereka.io` |
+| SOF | `skillourfuture.academy.mereka.io` | `skillourfuture.academyv2.mereka.io` |
+
+Testing the migration target URLs returns Mereka content (fall-through to primary Site). Migration cutover is not complete and this is expected per the registry.

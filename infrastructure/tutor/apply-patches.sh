@@ -98,6 +98,26 @@ sync_mfe_patch_helpers() {
   echo "Synced authn deep-route patch helper to MFE build context: $tutor_mfe_build_dir"
 }
 
+sync_mfe_theme() {
+  # RCB-10 root cause fix: copy Paragon/brand theme CSS + logo assets into the
+  # MFE build context so the mfe_dockerfile.py `COPY indigo/theme /openedx/dist/theme`
+  # patch finds them. Without this sync, /theme/core.min.css (and sibling files)
+  # return HTTP 404 on the apps.<tenant> host, the Paragon theme init script fails,
+  # and Profile / Discussions / Communications MFEs silently fall into a React
+  # error boundary ("An unexpected error occurred. Try again").
+  local tutor_mfe_indigo_dir="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}/env/plugins/mfe/build/mfe/indigo"
+  local mereka_mfe_theme_src="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme"
+
+  if [[ ! -d "$mereka_mfe_theme_src" ]]; then
+    echo "WARNING: Mereka MFE theme source not found at $mereka_mfe_theme_src" >&2
+    return 0
+  fi
+
+  mkdir -p "$tutor_mfe_indigo_dir/theme"
+  cp -R "$mereka_mfe_theme_src/." "$tutor_mfe_indigo_dir/theme/"
+  echo "Synced Mereka MFE theme assets to MFE build context: $tutor_mfe_indigo_dir/theme"
+}
+
 apply_openedx_patches() {
   apply_patch apply_webpack_memory_patch
   apply_patch apply_build_optimizations_patch
@@ -109,6 +129,7 @@ apply_mfe_patches() {
   apply_patch apply_footer_component_patch
   apply_patch apply_mfe_slot_ownership_patch
   sync_mfe_patch_helpers
+  sync_mfe_theme
 }
 
 case "$TARGET" in

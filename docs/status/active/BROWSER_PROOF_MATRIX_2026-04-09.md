@@ -202,3 +202,33 @@ was not fully resolved.
 
 - All surfaces — prod proof matrix is stale since 2026-04-09
 
+
+## Update 2026-04-11 later: full 3-env matrix proof + 4 RCBs
+
+**Proven this session via agent-browser:**
+
+| Env | Tenant | Landing | Login flow | Dashboard | Account | Profile | Discussions | Comm. | Learner-rec |
+|-----|--------|---------|-----------|-----------|---------|---------|-------------|-------|-------------|
+| dev | mereka | L3 ✅ | L4 ✅ | L4 ✅ | L4 ✅ | 🔴 RCB-10 | 🔴 RCB-10 | 🔴 RCB-10 | L1 ✅ (auth redir) |
+| dev | biji-biji | L3 ✅ | L4 ✅ | L4 ✅ | n/t | n/t | n/t | n/t | n/t |
+| dev | SOF | L3 ✅ | L4 ✅ | L4 ✅ | n/t | n/t | n/t | n/t | n/t |
+| prod | mereka | L3 ✅ | L4 ✅ | L4 ✅ | L4 ✅ | 🔴 RCB-10 | 🔴 RCB-10 | 🔴 RCB-10 | n/t |
+| prod | biji-biji | L3 ✅ | 🔴 RCB-13 | — | — | — | — | — | — |
+| prod | SOF | L3 ✅ | n/t | n/t | n/t | n/t | n/t | n/t | n/t |
+| staging | mereka | L3 ✅ | 🔴 | — | — | — | — | — | — |
+
+- **n/t** = not tested this session
+- **RCB-10** = Paragon theme CSS files missing from MFE container — PR #1543
+- **RCB-13** = Biji-Biji prod CSP blocks tenant CSRF endpoint — PR #1540
+- **staging login** — testadmin doesn't exist on staging DB (not a platform bug)
+- **RCB-11** — RESOLVED in current dev mfe image. learner-record dir exists, URL returns 200, L1 auth-redirect proven.
+
+**Infrastructure tenant URL canonicality** (from `deploy/k8s/tenancy/tenant-registry.yaml`):
+- Mereka prod: `academyv2.mereka.io` ✅
+- Biji-Biji prod: `academy.biji-biji.com` ✅ (NOT `biji-biji.academyv2.mereka.io` — that's a migration target)
+- SOF prod: `skillourfuture.academy.mereka.io` ✅ (NOT `skillourfuture.academyv2.mereka.io` — migration target)
+- Dev uses `.academyv2.mereka.dev` tree for all 3 tenants
+- Staging uses `.academyv2.mereka.io` (`staging.` prefix) for mereka, others TBD
+
+**Staging operational verdict:** UP, not DOWN. Session 2's "externally unreachable" finding was cleared — staging.academyv2.mereka.io responds and renders Mereka landing. Cluster CPU is still overallocated per the staging audit agent. Staging is 2 commits behind prod on LMS image tag.
+# RCB-10 fix notes
