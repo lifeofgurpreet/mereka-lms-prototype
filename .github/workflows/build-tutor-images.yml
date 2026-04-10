@@ -668,15 +668,16 @@ jobs:
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd  # v4.0.0
         with:
           driver: docker-container
-          # Limit BuildKit to 4 parallel build stages — prevents OOM on 12GB heavy-builder
-          # runners when 12 MFEs attempt concurrent webpack compilations.
-          # Cap parallel build stages to prevent OOM on 12GB heavy-builders.
-          # MUST use equals-separated form: docker/setup-buildx-action passes
-          # this string into `docker buildx create --buildkitd-flags <value>`
-          # without quoting, so `--oci-worker-max-parallelism 4` gets parsed
-          # as TWO shell args and buildkitd never sees the integer value,
-          # crashes on startup, and the builder container restart-loops.
-          buildkitd-flags: '--oci-worker-max-parallelism=4'
+          # Note: the previous attempt to cap parallelism via
+          #   buildkitd-flags: --oci-worker-max-parallelism=4
+          # was bogus — that flag does not exist in buildkitd. Baseline builds
+          # (pre-cap) ran webpack to completion without OOM on 12GB heavy
+          # builders, so no cap is required. If concurrent MFE webpack starts
+          # pushing memory later, the correct lever is config-inline:
+          #   config-inline: |
+          #     [worker.oci]
+          #       max-parallelism = 4
+          # which writes a real buildkitd.toml the worker respects.
 
       - name: Fix DinD network MTU
         run: |
@@ -726,9 +727,9 @@ jobs:
           ) &
           HEARTBEAT_PID=$!
           trap 'kill $HEARTBEAT_PID 2>/dev/null || true' EXIT
-          # 140m: 12 MFEs + learner-record on separate Node 18 base needs extra time
-          # Cap BuildKit parallelism to prevent OOM on 12GB heavy-builder runners.
-          export BUILDKIT_MAX_PARALLELISM="${BUILDKIT_MAX_PARALLELISM:-4}"
+          # 140m: 12 MFEs + learner-record on separate Node 18 base needs extra time.
+          # Note: BUILDKIT_MAX_PARALLELISM env var is not read by the
+          # docker-container driver, so exporting it here was a no-op. Removed.
           if ! timeout 140m ./scripts/infra/build-mfe-image.sh \
             --context-dir "${TUTOR_ROOT}/env/plugins/mfe/build/mfe" \
             --dockerfile "${TUTOR_ROOT}/env/plugins/mfe/build/mfe/Dockerfile" \
