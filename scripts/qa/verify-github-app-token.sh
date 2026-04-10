@@ -61,7 +61,6 @@ info() { echo -e "        $*"; }
 # Classic and common PAT secret names used in this repo and similar GitOps setups
 PAT_PATTERNS=(
   'secrets\.GITOPS_PAT'
-  'secrets\.GITOPS_TOKEN_BBI_KUBERNATE'
   'secrets\.GH_PAT'
   'secrets\.GITHUB_PAT'
   'secrets\.GH_TOKEN'

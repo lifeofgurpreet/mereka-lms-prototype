@@ -28,7 +28,9 @@ jobs:
         with:
           repository: Biji-Biji-Initiative/bbi-infrastructure
       - run: |
-          export GITOPS_TOKEN=${{ secrets.GITOPS_TOKEN_BBI_KUBERNATE }}
+          export GITHUB_APP_ID=${{ secrets.GITOPS_GITHUB_APP_ID }}
+          export GITHUB_APP_INSTALLATION_ID=${{ secrets.GITOPS_GITHUB_APP_INSTALLATION_ID }}
+          export GITHUB_APP_PRIVATE_KEY=${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}
           ./scripts/infra/release-openedx-gitops.sh \
             --target-env production \
             --require-digests \
@@ -71,7 +73,9 @@ jobs:
       contents: write
     steps:
       - run: |
-          export GITOPS_TOKEN=${{ secrets.GITOPS_TOKEN_BBI_KUBERNATE }}
+          export GITHUB_APP_ID=${{ secrets.GITOPS_GITHUB_APP_ID }}
+          export GITHUB_APP_INSTALLATION_ID=${{ secrets.GITOPS_GITHUB_APP_INSTALLATION_ID }}
+          export GITHUB_APP_PRIVATE_KEY=${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}
           ./scripts/infra/release-openedx-gitops.sh \
             --target-env production \
             --apply --commit --push
