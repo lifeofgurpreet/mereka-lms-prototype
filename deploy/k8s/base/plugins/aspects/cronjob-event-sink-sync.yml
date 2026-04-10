@@ -44,7 +44,7 @@ spec:
               type: RuntimeDefault
           containers:
             - name: sync
-              image: docker.io/overhangio/openedx:pin-required
+              image: ghcr.io/biji-biji-initiative/mereka-lms/openedx:pin-required
               imagePullPolicy: IfNotPresent
               command:
                 - /bin/bash

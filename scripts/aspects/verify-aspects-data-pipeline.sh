@@ -361,7 +361,13 @@ event_sink_cj_exists="$(kctl get cronjob "$EVENT_SINK_CRONJOB" -o name 2>/dev/nu
 if [[ -z "$event_sink_cj_exists" ]]; then
   warn "CronJob '${EVENT_SINK_CRONJOB}' not found — event_sink dimensions rely on manual backfills"
 else
+  event_sink_image="$(kctl get cronjob "$EVENT_SINK_CRONJOB" -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].image}' 2>/dev/null || true)"
   event_sink_last_success="$(kctl get cronjob "$EVENT_SINK_CRONJOB" -o jsonpath='{.status.lastSuccessfulTime}' 2>/dev/null || true)"
+  if [[ "$event_sink_image" == *":pin-required"* ]]; then
+    fail "CronJob '${EVENT_SINK_CRONJOB}' image is unresolved: ${event_sink_image}"
+  elif [[ -n "$event_sink_image" ]]; then
+    pass "CronJob '${EVENT_SINK_CRONJOB}' image resolved: ${event_sink_image}"
+  fi
   if [[ -n "$event_sink_last_success" ]]; then
     pass "CronJob '${EVENT_SINK_CRONJOB}' last successful run: ${event_sink_last_success}"
   else
