@@ -5,6 +5,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 # shellcheck source=../lib/lane-normalize.sh
 source "${REPO_ROOT}/scripts/lib/lane-normalize.sh"
+# shellcheck source=../lib/control-plane-contract-ref.sh
+source "${REPO_ROOT}/scripts/lib/control-plane-contract-ref.sh"
 
 usage() {
   cat <<'EOF'
@@ -98,7 +100,7 @@ export OPENEDX_IMAGE
 export OPENEDX_DIGEST
 export MFE_IMAGE
 export MFE_DIGEST
-export CONTRACT_REF="${CONTRACT_REF:-Biji-Biji-Initiative/platform-control-plane@194e6001c924902e8bf3dafefdc37fc842c56653}"
+export CONTRACT_REF="$(resolve_control_plane_contract_ref)"
 
 python3 - "$OUTPUT" <<'PY'
 import json
@@ -116,7 +118,7 @@ payload = {
     "service_id": "mereka-lms",
     "contract_family": "release_bundle_schema",
     "contract_version": "1.1",
-    "contract_ref": os.environ.get("CONTRACT_REF", "Biji-Biji-Initiative/platform-control-plane@194e6001c924902e8bf3dafefdc37fc842c56653"),
+    "contract_ref": os.environ["CONTRACT_REF"],
     "build": {
         "workflow": os.environ["WORKFLOW"],
         "run_id": os.environ["RUN_ID"],
