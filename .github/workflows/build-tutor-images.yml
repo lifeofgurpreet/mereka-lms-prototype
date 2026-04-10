@@ -1748,12 +1748,23 @@ jobs:
             exit 1
           fi
 
+      - name: Mint GitHub App token
+        id: gitops-app-token
+        if: ${{ secrets.FASTLANE_GITHUB_APP_ID != '' && secrets.FASTLANE_GITHUB_APP_PRIVATE_KEY != '' }}
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349
+        with:
+          app-id: ${{ secrets.FASTLANE_GITHUB_APP_ID }}
+          private-key: ${{ secrets.FASTLANE_GITHUB_APP_PRIVATE_KEY }}
+          owner: Biji-Biji-Initiative
+          repositories: bbi-infrastructure
+
       - name: Validate GitOps token
         env:
+          APP_TOKEN: ${{ steps.gitops-app-token.outputs.token }}
           GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN_BBI_KUBERNATE }}
         run: |
-          if [[ -z "${GITOPS_TOKEN}" ]]; then
-            echo "GITOPS_TOKEN_BBI_KUBERNATE secret is required to update bbi-infrastructure." >&2
+          if [[ -z "${APP_TOKEN}" && -z "${GITOPS_TOKEN}" ]]; then
+            echo "GitHub App credentials or GITOPS_TOKEN_BBI_KUBERNATE are required to update bbi-infrastructure." >&2
             exit 1
           fi
 
@@ -1762,7 +1773,7 @@ jobs:
         with:
           repository: Biji-Biji-Initiative/bbi-infrastructure
           path: bbi-infrastructure
-          token: ${{ secrets.GITOPS_TOKEN_BBI_KUBERNATE }}
+          token: ${{ steps.gitops-app-token.outputs.token != '' && steps.gitops-app-token.outputs.token || secrets.GITOPS_TOKEN_BBI_KUBERNATE }}
 
       - name: Download release bundle artifact
         continue-on-error: true  # Bundle may not exist if SLSA/release-bundle failed

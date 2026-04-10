@@ -145,7 +145,7 @@ jobs:
     permissions:
       contents: write
       id-token: write
-    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-update-dev-tag.yml@2bf8b85183bd0e570bf1b1260c0aaad04bf865d9
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-update-dev-tag.yml@0f7d03bc537617ec7cf8fb8252c3dee2e3b9e4fd
     with:
       app_name: mereka-lms
       image_tag: ${{ needs.admin-portal.outputs.image_tag }}
@@ -155,6 +155,8 @@ jobs:
       kustomize_image_name: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-admin-portal
     secrets:
       GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN_BBI_KUBERNATE }}
+      GITHUB_APP_ID: ${{ secrets.FASTLANE_GITHUB_APP_ID }}
+      GITHUB_APP_PRIVATE_KEY: ${{ secrets.FASTLANE_GITHUB_APP_PRIVATE_KEY }}
 
   learner-portal:
     needs: [resolve-source, select-build-lane]
@@ -187,7 +189,7 @@ jobs:
     permissions:
       contents: write
       id-token: write
-    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-update-dev-tag.yml@2bf8b85183bd0e570bf1b1260c0aaad04bf865d9
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-update-dev-tag.yml@0f7d03bc537617ec7cf8fb8252c3dee2e3b9e4fd
     with:
       app_name: mereka-lms
       image_tag: ${{ needs.learner-portal.outputs.image_tag }}
@@ -197,3 +199,5 @@ jobs:
       kustomize_image_name: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-learner-portal
     secrets:
       GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN_BBI_KUBERNATE }}
+      GITHUB_APP_ID: ${{ secrets.FASTLANE_GITHUB_APP_ID }}
+      GITHUB_APP_PRIVATE_KEY: ${{ secrets.FASTLANE_GITHUB_APP_PRIVATE_KEY }}
