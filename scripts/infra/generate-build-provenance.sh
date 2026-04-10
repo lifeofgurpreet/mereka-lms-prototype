@@ -74,7 +74,7 @@ mkdir -p "$(dirname "${OUTPUT}")"
 
 export OUTPUT REPOSITORY COMMIT_SHA TARGET_ENV OPENEDX_DIGEST MFE_DIGEST RELEASE_BUNDLE_ID GITOPS_REPO GITOPS_COMMIT
 export CREATED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-export CONTRACT_REF="${CONTRACT_REF:-Biji-Biji-Initiative/platform-control-plane@5fffde1a}"
+export CONTRACT_REF="${CONTRACT_REF:-Biji-Biji-Initiative/platform-control-plane@194e6001c924902e8bf3dafefdc37fc842c56653}"
 
 python3 - <<'PY'
 import json
@@ -89,7 +89,7 @@ payload = {
     "service_id": "mereka-lms",
     "contract_family": "build-provenance",
     "contract_version": "1.0",
-    "contract_ref": os.environ.get("CONTRACT_REF", "Biji-Biji-Initiative/platform-control-plane@5fffde1a"),
+    "contract_ref": os.environ.get("CONTRACT_REF", "Biji-Biji-Initiative/platform-control-plane@194e6001c924902e8bf3dafefdc37fc842c56653"),
     "release_bundle_id": os.environ["RELEASE_BUNDLE_ID"],
     "images": {
         "openedx_digest": os.environ["OPENEDX_DIGEST"],

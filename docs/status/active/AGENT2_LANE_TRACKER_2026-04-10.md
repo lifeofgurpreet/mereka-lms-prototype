@@ -1,125 +1,61 @@
 # Agent 2 Lane Tracker
 
-_Owner: Agent 2 | Last verified: 2026-04-10T00:00:00Z | Status: active_
+_Owner: Agent 2 | Last verified: 2026-04-10T14:08:00Z | Status: active_
 
-## Lane: Promotion Trust, Release Identity, GitOps Realization, CI/Verifier Discipline
+## Fresh Re-anchor
 
-## Session Progress (2026-04-09/10)
+| Repo | Remote truth | Local checkout state | Notes |
+|---|---|---|---|
+| `mereka-lms` | `origin/main` = `4d0df1a32e150d1acfc21706e1e3734f9456f4fa` | clean Agent 2 worktree at same SHA with pending promotion-lane fixes | source truth for this lane |
+| `bbi-infrastructure` | `origin/main` = `8b325d5bf5e7fd465f7656b2b4ec5c3206565f54` | current source truth after verifier realignment `#2675` and control-plane auth follow-up `#2677` | do not use older dirty infra checkout as authority |
+| `platform-control-plane` | `origin/main` = `194e6001c924902e8bf3dafefdc37fc842c56653` | local `main` at same SHA, clean | PCP truth is ahead of the older ref previously hardcoded in app generators |
 
-### PRs Merged (7)
+## Current Promotion-Lane Conclusion
 
-| PR | What | Category |
-|----|------|----------|
-| #1484 | Dispatch payload contract fix + action replacement | WS4 |
-| #1489 | Schema version drift fix (1.0 → release-object/v1) | Duplicate writer |
-| #1493 | Ops-streak consumer (B-027) | Guardrail |
-| #1494 | MFE SCSS COPY fix | Build pipeline |
-| #1499 | Git HTTPS for Docker builds | Build pipeline |
-| #1502 | DinD DNS fallback | Build pipeline |
-| #1462 | Semantic verification (merged by others) | CI/verifier |
+- Automatic `repository_dispatch` reception is already proved by successful infra runs `24218312468`, `24228818979`, and `24230714536`.
+- Organic push-build dispatch is also already proved by app push runs `24226842382` and `24227735786`; both runs generated release bundles and dispatched to infra.
+- Automatic dev promotion and Argo realization are now proved for release `ro-rb-496b8a3b-20260410T065709Z`.
+- What remains unproved is runtime-consumable release-ID proof, not dispatch or GitOps realization.
+- The highest-risk ambiguity is now contract lineage: app and infra still speak a working legacy `release-object/v1` contract, but PCP is not yet the active enforcement authority for that contract.
 
-### WS4 Dispatch Chain Status
+## Relevant Open PRs In This Lane
 
-| Step | Proved? | How |
-|------|---------|-----|
-| Dispatch auth | YES | 2 canary dispatches accepted (HTTP 204) |
-| Payload contract | YES | Canary v2 passed full validation |
-| Infra reception | YES | First `repository_dispatch` ever received |
-| Promotion PR creation | YES | bbi-infrastructure PR #2601 |
-| Organic push-build dispatch | NO | Runner instability blocks MFE builds |
-| Argo realization | NO | Pending PR merge |
-| Runtime consumption | NO | Agent 1's lane |
+| Repo | PR | State | Why it matters now |
+|---|---|---|---|
+| `mereka-lms` | [#1529](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1529) | open | GitOps writer app credential migration on app side; no live cutover yet |
+| `mereka-lms` | [#1461](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1461) | open | historical WS4 test PR; no longer the only proof source |
+| `mereka-lms` | [#1441](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1441) | open | CI/verifier hardening work, but still failing static validation |
+| `bbi-infrastructure` | [#2636](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2636) | open | shared GitOps writer app migration; still blocked by install/secret cutover |
+| `bbi-infrastructure` | [#2640](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2640) | closed | superseded dev promotion PR from app push run `24226842382` |
+| `bbi-infrastructure` | [#2645](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2645) | merged | dev promotion PR from app push run `24227735786`; merge commit `a06fdf33a3ecc619c0558ad31d2c831796ad54f1` |
+| `bbi-infrastructure` | [#2675](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2675) | merged | realigned stale verifier and contract surfaces so current infra `main` can validate the realized promotion path |
 
-### Hardening Claims Verified
+## WS4 Status
 
-| # | Claim | Status |
-|---|-------|--------|
-| 1 | Release object for prod promotion | VERIFIED TRUE |
-| 2 | Truth ledger hardened | VERIFIED TRUE |
-| 3 | Docs-only required checks | VERIFIED TRUE |
-| 4 | Realized image identity script | EXISTS ON MAIN (more complete version) |
-| 5 | Generated-surface regen hooks | VERIFIED TRUE |
-| 6 | Vendored sync automation | VERIFIED TRUE |
-| 7 | No stranded repairs | VERIFIED TRUE |
-| 8 | Ops reliability streak | Was dead telemetry → NOW HAS CONSUMER (#1493) |
-| 9 | Tracker accuracy | VERIFIED TRUE |
-| 10 | CI on main trustworthy | VERIFIED TRUE |
+| Step | Status | Evidence |
+|---|---|---|
+| Dispatch auth | proved | app build job step `Generate GitHub App token...` + successful `repository_dispatch` infra runs |
+| Sender/receiver payload works | proved, not PCP-governed | push runs `24226842382`, `24227735786`; infra run `24230714536` validated release object and created PR |
+| Infra reception | proved | `promote-dev-image.yml` repository_dispatch runs succeed |
+| Dev promotion PR creation | proved | infra PR [#2645](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2645) merged; [#2640](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2640) closed as superseded |
+| Argo realization | proved | `mereka-lms-dev` Argo application is `Synced` + `Healthy`; live `lms/cms` run `openedx:496b8a3...@sha256:0ce0538...` and live `mfe` runs `mfe:496b8a3...@sha256:fd8e06c...`, matching infra promotion PR [#2645](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2645) and app release object `ro-rb-496b8a3b-20260410T065709Z` |
+| Runtime release-ID consumption | unproved | digest continuity is proved through GitOps realization, but Agent 1 runtime proof lane has not yet consumed this release ID in user-path/runtime evidence |
+| Durable chain | unproved | manual bridge still exists; PCP contract authority not yet active |
 
-### Duplicate Writers Identified
+## Current Blockers
 
-| Writer | Canonical | Shadow | Status |
-|--------|-----------|--------|--------|
-| Release-object schema version | `generate_release_object.py` | `config/release-object-schema.yaml` | FIXED (PR #1489) |
-| Dispatch payload contract | `promote-dev-image.yml` receiver | `build-tutor-images.yml` sender | ALIGNED (PR #1484) |
-| Lane normalize | PCP contract | `scripts/lib/lane-normalize.sh` | NOT YET MIGRATED |
-| Image tag writers | Automated dispatch | Manual GitOps bridge | RETIRE MANUAL after chain proved |
-| CI inventory | `script-registry.yaml` | `.github/ci-scripts-static.txt` | CONTROLLED (freshness gate active) |
+| Severity | Blocker | Why it blocks closure |
+|---|---|---|
+| High | Runtime-consumable release-ID proof still missing | Agent 2 has proved build -> dispatch -> GitOps -> live digests, but Agent 1 runtime/user-path evidence has not yet attached to `ro-rb-496b8a3b-20260410T065709Z` |
+| High | Overall failed app push builds can still promote until app PR [#1539](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1539) lands | runs `24226842382` and `24227735786` failed overall at `SLSA Provenance & Attestation -> Install cosign`, yet still emitted bundles and dispatched |
+| High | Release-object authority still split | app YAML schema, app JSON schema, generator, and infra workflow checks are all separate writers |
+| Medium | PCP contract ref governance is still implicit | core generators/proof scripts are fixed locally to `platform-control-plane@194e6001...`, but the repo still lacks a governed policy for which PCP ref promotion evidence should claim |
+| Medium | GitOps writer app migration incomplete | [#1529](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1529) and [#2636](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2636) are not cut over |
 
-### Ulmo Upgrade Gap (Pre-Analysis)
+## Next Moves
 
-- 29 total customizations
-- 23 safe (plugin API / config only)
-- 6 fragile (template patches / shell-script surgery)
-- Worst offender: `webpack-memory.sh` (15+ hardcoded string replacements)
-- ADR-021 compliant overall
-
-## Next Steps (Per Reviewer Guidance)
-
-1. Get one clean organic push build through MFE
-2. Observe organic dispatch from that build
-3. Merge bbi-infrastructure promotion PR → verify Argo realization
-4. Hand release-ID to Agent 1 for runtime consumption proof
-5. Move dispatch contract + release-object schema authority to PCP
-6. Retire manual GitOps bridge once automated chain is proved
-7. Produce closure report
-
-## Session 2 Corrections (2026-04-10)
-
-### Bugs found and fixed in Session 1 work
-
-| Bug | Impact | Fix |
-|-----|--------|-----|
-| `build-mfe-image.sh` added `--opt max-parallelism=N` to `docker buildx build` — flag does not exist | Would cause "unknown flag: --opt" on every MFE build | Removed `BUILDX_EXTRA_ARGS` block entirely (502baf534) |
-| `BUILDKIT_MAX_PARALLELISM` env var is not respected by `docker-container` driver buildx | OOM cap was ineffective | Added `buildkitd-flags: '--oci-worker-max-parallelism 4'` to `setup-buildx-action` step (a38cc718e) |
-
-### Session 3 additions (context continuation)
-
-| Fix | Impact | Commit |
-|-----|--------|--------|
-| Release-bundle schema aligned to PCP v1.1 | Prevents consumer rejection when strict validation added | 64f009dad |
-| Verifier accepts schema_version 1.0.0 or 1.1 | Prevents verifier from rejecting valid v1.1 bundles | d8e08a635 |
-
-### Session 4 additions (guard fix)
-
-| Fix | Impact | Commit |
-|-----|--------|--------|
-| Account MFE guard v1→v2 in plugin | Guard was checking minified dist for variable that webpack renames — always failing | 635e388ff |
-| Account MFE guard v1→v2 in mfe-build/Dockerfile snapshot | Keeps QA reference file consistent with generated Dockerfile | 798e2547a |
-
-**Root cause of build 24219065443 failure** (after 42 min): Guard v1 searched compiled `.js`/`.map` for `const socialLinks = ...`. Webpack production builds minify variable names → `socialLinks` becomes a short identifier → `required_found` was always `False` → `SystemExit` every build. Fixed by checking SOURCE file (pre-minification) for the fix, and dist only for the OLD forbidden pattern.
-
-### PR #1507 additions (cumulative)
-- 5 artifact docs files (tracker, ledger, chain map, registers)
-- `--opt` bug fix in `build-mfe-image.sh`
-- Proper `buildkitd-flags` cap (real OOM fix)
-- Release-bundle schema version/family/contract aligned to PCP v1.1
-- Verifier updated to accept 1.0.0 or 1.1
-- **Account MFE guard fixed v1→v2** (root cause of 42-min build failure)
-
-## Current Status (Session 4 — end)
-
-Push build 24219065443 FAILED at "Build MFE image" after 42 min — account guard v1 always exits 1.
-PR #1507 CI running — Dependency Review: SUCCESS, IaC Security Scan: SUCCESS, CodeQL in progress.
-
-### Session 4 complete fix (3-layer):
-1. `mfe-dockerfile-pre-npm-build-account` plugin hook — patches source BEFORE webpack
-2. Guard v2 — checks source (not minified dist) — passes after patch runs
-3. mfe-build/Dockerfile snapshot + tests aligned to v2
-
-### What happens next (after PR #1507 merges):
-1. Next push build on main runs with v2 guard + patch hook
-2. Account MFE builds successfully → release-bundle generated
-3. Dispatch fires to bbi-infrastructure
-4. promote-dev-image.yml creates PR with fresh MFE+OpenEdX digests
-5. Merge infra PR → ArgoCD realization
-6. WS4 organically proved end-to-end
+1. Merge app PR [#1539](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1539) so future red overall builds cannot dispatch automatic promotions.
+2. Hand realized release `ro-rb-496b8a3b-20260410T065709Z` to Agent 1 for runtime consumption proof.
+3. Decide whether `Post-Merge Cluster Validation` run `24240983325` is a runner-capacity issue or a stale workflow queue artifact; it is no longer needed to establish GitOps realization for this release.
+4. Move dispatch payload and release-object authority to PCP or consume PCP contracts directly instead of hardcoding both sides.
+5. Retire the manual `update-gitops` bridge after the automated path is realized and runtime-bound.

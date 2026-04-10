@@ -22,7 +22,7 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "const": "1.0.0"
+      "const": "1.1"
     },
     "bundle_id": {
       "type": "string",
@@ -50,7 +50,7 @@
     },
     "contract_family": {
       "type": "string",
-      "const": "release-bundle"
+      "const": "release_bundle_schema"
     },
     "contract_version": {
       "type": "string",

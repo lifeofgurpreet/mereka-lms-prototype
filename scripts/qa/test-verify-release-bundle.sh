@@ -27,7 +27,7 @@ EOF
 write_valid_bundle() {
   cat >"$tmpdir/var/ci/release-bundle.json" <<'EOF'
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1",
   "bundle_id": "rb-abcdef1234567-20260307T120000Z",
   "commit_sha": "0123456789abcdef0123456789abcdef01234567",
   "images": {
@@ -44,9 +44,9 @@ write_valid_bundle() {
     "run_attempt": "1"
   },
   "service_id": "mereka-lms",
-  "contract_family": "release-bundle",
+  "contract_family": "release_bundle_schema",
   "contract_version": "1.0",
-  "contract_ref": "Biji-Biji-Initiative/platform-control-plane@5fffde1a"
+  "contract_ref": "Biji-Biji-Initiative/platform-control-plane@194e6001c924902e8bf3dafefdc37fc842c56653"
 }
 EOF
 }
@@ -76,7 +76,7 @@ run_expect_pass "valid release bundle passes schema and digest checks"
 
 cat >"$tmpdir/var/ci/release-bundle.json" <<'EOF'
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1",
   "bundle_id": "rb-abcdef1234567-20260307T120000Z",
   "commit_sha": "0123456789abcdef0123456789abcdef01234567",
   "images": {
@@ -93,9 +93,9 @@ cat >"$tmpdir/var/ci/release-bundle.json" <<'EOF'
     "run_attempt": "1"
   },
   "service_id": "mereka-lms",
-  "contract_family": "release-bundle",
+  "contract_family": "release_bundle_schema",
   "contract_version": "1.0",
-  "contract_ref": "Biji-Biji-Initiative/platform-control-plane@5fffde1a"
+  "contract_ref": "Biji-Biji-Initiative/platform-control-plane@194e6001c924902e8bf3dafefdc37fc842c56653"
 }
 EOF
 run_expect_fail "invalid image digest is rejected"

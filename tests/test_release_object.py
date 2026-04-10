@@ -26,16 +26,16 @@ def load_schema() -> dict:
 
 def release_bundle_payload() -> dict:
     return {
-        "schema_version": "1.0.0",
+        "schema_version": "1.1",
         "bundle_id": "rb-abcdef1234567-20260403T120000Z",
         "created_at": "2026-04-03T12:00:00Z",
         "repository": "Biji-Biji-Initiative/mereka-lms",
         "commit_sha": "a" * 40,
         "target_environment": "dev",
         "service_id": "mereka-lms",
-        "contract_family": "release-bundle",
+        "contract_family": "release_bundle_schema",
         "contract_version": "1.0",
-        "contract_ref": "Biji-Biji-Initiative/platform-control-plane@5fffde1a",
+        "contract_ref": "Biji-Biji-Initiative/platform-control-plane@194e6001c924902e8bf3dafefdc37fc842c56653",
         "build": {
             "workflow": ".github/workflows/build-tutor-images.yml",
             "run_id": "123",

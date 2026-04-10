@@ -24,7 +24,7 @@ cat >"${tmpdir}/var/ci/release-object.json" <<'EOF'
   "tenant_contract": {
     "path": "/tmp/tenant-registry.yaml",
     "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-    "control_plane_ref": "Biji-Biji-Initiative/platform-control-plane@5fffde1a"
+    "control_plane_ref": "Biji-Biji-Initiative/platform-control-plane@194e6001c924902e8bf3dafefdc37fc842c56653"
   },
   "build": {
     "workflow": ".github/workflows/build-tutor-images.yml",

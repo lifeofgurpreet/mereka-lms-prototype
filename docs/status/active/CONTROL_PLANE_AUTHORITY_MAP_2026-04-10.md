@@ -1,65 +1,48 @@
 # Control-Plane Authority / Migration Map
 
-_Owner: Agent 2 | Last verified: 2026-04-10 | Status: active_
+_Owner: Agent 2 | Last verified: 2026-04-10T10:53:23Z | Status: active_
 
-## PCP Already Contains (Do Not Duplicate)
+## PCP Canonical Now
 
-| Artifact | PCP Path | Notes |
-|----------|----------|-------|
-| Release-bundle schema | `contracts/release-bundle-schema.yaml` (v1.1) | Canonical; mereka-lms generator still writes v1.0.0 (see register #8) |
-| Release-object authority | `contracts/release-object-authority-contract.yaml` | Lists mereka-lms as producer, bbi-infra as consumer |
-| Service identity | `contracts/service-identity-contract.yaml` | Canonical service IDs |
-| Lane identity (service) | `contracts/lane-identity-contract.yaml` | Maps canonical SERVICE lanes (mereka-lms, authentik, etc.) |
-| Release contracts | `contracts/release-contracts.yaml` | Lane registry with evidence requirements |
-| Promotion record schema | `contracts/promotion-record-schema.yaml` | Cross-repo promotion record format |
-| Proof artifact policy | `contracts/proof-artifact-policy.yaml` | What proof is required for promotion |
-| Evidence pack schema | `contracts/evidence-pack-schema.yaml` | Evidence pack structure |
-| Secret contracts | `contracts/secrets-contract.yaml` | Secret management authority |
-| Workload identity | `contracts/workload-identity-bindings.yaml` | GCP workload identity bindings |
+| Concern | PCP authority | Current PCP head |
+|---|---|---|
+| release bundle / evidence pack / promotion record | `contracts/release-bundle-schema.yaml`, `contracts/evidence-pack-schema.yaml`, `contracts/promotion-record-schema.yaml` | `194e6001c924902e8bf3dafefdc37fc842c56653` |
+| release object authority map | `contracts/release-object-authority-contract.yaml` | same |
+| lane / service identity | `contracts/lane-identity-contract.yaml`, `contracts/service-identity-contract.yaml` | same |
+| proof gate / domain proof policy | PCP now owns the migrated contracts via PR `#75` on `main` | same |
 
-## In mereka-lms (App-Scoped — Should Stay Here)
+## Still Local Or Split In App / Infra
 
-| Artifact | Path | Notes |
-|----------|------|-------|
-| Lane identity (env) | `config/lane-identity.yaml` | Maps LMS deployment environments (dev/staging/prod), not services — app-owned |
-| Lane normalize script | `scripts/lib/lane-normalize.sh` | Derived from lane-identity.yaml; app runtime utility |
-| Release bundle generator | `scripts/infra/generate-release-bundle.sh` | Produces bundles that PCP schema validates |
-| Release object generator | `scripts/release/generate_release_object.py` | App-scoped proof object |
-| Truth ledger generator | `scripts/release/generate_truth_ledger.py` | App-scoped ledger |
-| CI inventory | `scripts/governance/script-registry.yaml` | App-owned CI gate definitions |
+| Concern | Current local reality | Status |
+|---|---|---|
+| release-object schema | app YAML schema, app JSON schema, generator, and infra receiver all define behavior | split |
+| dispatch contract | sender and receiver code agree by convention only | split |
+| lane semantics in promotion tooling | app `config/lane-identity.yaml` + `scripts/lib/lane-normalize.sh` still mediate env normalization | split |
+| dev promotion evidence | infra dev workflow writes `dev_promotion_record`, not canonical PCP `promotion_record` | split |
+| control-plane ref pin | core generators/proof scripts now pin `platform-control-plane@194e6001...` locally, but ref choice is still repo-local policy | split |
 
-## Should Move to PCP (Candidates for Migration)
+## What Should Move Next
 
-| Item | Current Location | PCP Target | Priority | Blocker |
-|------|-----------------|------------|----------|---------|
-| Dispatch payload contract | Implicit in workflow step code | `contracts/dispatch-contract.yaml` — defines exact fields sender/receiver must agree on | HIGH | Define contract first, then validate in both workflows |
-| Release-bundle schema version | `generate-release-bundle.sh` writes v1.0.0, contract_family "release-bundle" | Align with PCP v1.1 and contract_family "release_bundle_schema" | MEDIUM | Non-breaking; receiver doesn't validate today |
-| Proof gate contract | `config/proof-gate-contract.yaml` | Merge into `contracts/proof-artifact-policy.yaml` | LOW | Requires alignment between two teams |
+| Priority | Move | Why |
+|---|---|---|
+| High | Dispatch payload contract | current sender/receiver agreement is real but implicit |
+| High | Release-object contract authority | biggest remaining duplicate-writer seam in the promotion chain |
+| Medium | Dev promotion evidence into canonical `promotion_record` family | dev lane currently forks the evidence shape from staging/prod |
+| Medium | Contract-ref pin governance | emitted artifacts now point at current PCP `main` locally, but the choice is still hardcoded instead of governed |
+| Medium | Lane-normalize projection generation from PCP | remove bash/config drift risk |
 
-## Already Aligned (No Migration Needed)
+## What Should Not Move Yet
 
-| Item | State |
-|------|-------|
-| Release-object schema_version | `"release-object/v1"` — fixed in PR #1489 |
-| Dispatch payload format | Aligned sender+receiver — fixed in PR #1484 |
-| Service ID (`mereka-lms`) | Matches PCP `lane-identity-contract.yaml` |
-| Contract ref (`5fffde1a`) | Valid PCP commit SHA, verified |
+| Concern | Why it should stay local for now |
+|---|---|
+| `generate_truth_ledger.py` implementation | app-specific joiner over repo/release/runtime proof planes |
+| runtime-routing / acceptance summary details | runtime lane logic belongs to app/runtime proof tooling |
+| build job orchestration | CI mechanics are app-repo behavior, not control-plane law |
+| tenant contract hashing inside release object | app release object still needs app-local source proof |
 
-## PCP Frozen Baseline
+## Current Authority Delta
 
-```
-Biji-Biji-Initiative/platform-control-plane@5fffde1a
-```
-
-Verified: `git cat-file -t 5fffde1a` → `commit` in PCP repo.
-This is referenced in all mereka-lms release bundles as `contract_ref`.
-
-## Next Migration Step
-
-1. Define `contracts/dispatch-contract.yaml` in PCP
-2. Import it in both `build-tutor-images.yml` (sender) and `promote-dev-image.yml` (receiver)
-3. Both workflows validate their payloads against the contract (fail on mismatch)
-4. This eliminates the current "trust-by-convention" between sender and receiver
-
-This is blocked on: no active failing scenario (the current payload IS aligned after #1484).
-Priority: schedule for next control-plane sprint, not urgent.
+- PCP is ahead of the app repo on canonical contract ownership.
+- The app repo has already partially migrated proof-gate/domain-proof contracts out.
+- The promotion lane is not yet control-plane-led because the live handoff still hinges on repo-local `release-object/v1` checks and an implicit dispatch schema.
+- Any claim that `5fffde1a` is the current PCP baseline is stale; current `origin/main` is `194e6001c924902e8bf3dafefdc37fc842c56653`, and the local promotion generators were updated this tranche to stop emitting the old ref.

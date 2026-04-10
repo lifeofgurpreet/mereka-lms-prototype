@@ -1372,7 +1372,9 @@ jobs:
     runs-on: mereka-k8s-runners
     timeout-minutes: 15
     needs: [build-openedx, build-mfe, scan-openedx-image, scan-mfe-image, slsa-provenance]
-    # Run even if SLSA failed — provenance is desirable but must not block releases.
+    # Keep release-bundle generation available for diagnostics even if SLSA failed.
+    # Automatic GitOps mutation is gated separately below so red builds cannot
+    # mutate infra state while still leaving evidence behind for debugging.
     # Accept 'skipped' for either image: partial builds (e.g. only OpenEdX changed)
     # should still generate a release bundle using the existing other image's digest.
     # Manual proof runs may intentionally leave target_environment at the
@@ -1650,8 +1652,15 @@ jobs:
             var/ci/release-bundle.pem
           retention-days: 90
 
+      - name: Enforce successful provenance before automatic dev promotion
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.slsa-provenance.result != 'success' }}
+        run: |
+          echo "Automatic dev promotion is blocked because SLSA provenance did not succeed." >&2
+          echo "slsa-provenance result: ${{ needs.slsa-provenance.result }}" >&2
+          exit 1
+
       - name: Dispatch dev promotion to infra repo
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.slsa-provenance.result == 'success' }}
         env:
           APP_TOKEN: ${{ steps.app-token.outputs.token }}
           GITHUB_SHA_FULL: ${{ github.sha }}

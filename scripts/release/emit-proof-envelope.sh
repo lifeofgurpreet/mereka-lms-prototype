@@ -123,7 +123,7 @@ emit_envelope() {
   ENVELOPE_WARNINGS="$warnings" \
   ENVELOPE_DURATION_MS="$duration_ms" \
   ENVELOPE_ERROR="$error" \
-  ENVELOPE_CONTRACT_REF="${CONTRACT_REF:-Biji-Biji-Initiative/platform-control-plane@5fffde1a}" \
+  ENVELOPE_CONTRACT_REF="${CONTRACT_REF:-Biji-Biji-Initiative/platform-control-plane@194e6001c924902e8bf3dafefdc37fc842c56653}" \
   ENVELOPE_RELEASE_IDENTITY="$RELEASE_IDENTITY_JSON" \
   python3 - <<'PY'
 from __future__ import annotations
