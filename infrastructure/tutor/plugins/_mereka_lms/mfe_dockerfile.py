@@ -17,8 +17,8 @@ RUN apt-get update && apt-get install -y \\
 # Force git to use HTTPS instead of SSH for github.com — Docker builds
 # have no SSH keys, so github: protocol (which resolves to SSH) fails.
 # This affects tutor-indigo's @edx/brand install from edly-io/brand-openedx.
-RUN git config --global url."https://github.com/".insteadOf "ssh://git@github.com/" \\
-    && git config --global url."https://github.com/".insteadOf "git@github.com:"
+RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@github.com/" \\
+    && git config --global --add url."https://github.com/".insteadOf "git@github.com:"
 """,
 )
 

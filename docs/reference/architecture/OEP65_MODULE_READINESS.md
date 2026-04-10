@@ -75,9 +75,9 @@ its own React tree from scratch and includes its own copy of React and all share
 | `SITE_VARIANTS` hostname map | Hardcoded in `env.config.jsx` React component | **Not aligned** — tight coupling to domain list |
 | Hardcoded footer nav/social links | Arrays in `env.config.jsx` component body | **Not aligned** — should be runtime config |
 | `@edx/brand` package version | Pinned in Dockerfile (`@edly-io/indigo-brand-openedx@^2.4.3`) | **Aligned** — brand package pattern |
-| Multi-stage Dockerfile surgery | `mfe-node.sh` + `build-optimizations.sh` regex patches | **Not aligned** — inhibits upstream adoption |
-| Node 18 base image override | `mfe-node.sh` regex on Tutor-generated Dockerfile | **Not aligned** — forks the generated Dockerfile |
-| Branch ref rewrites (ulmo) | `mfe-node.sh` changes `#open-release/redwood` to `#release/ulmo` | **Aligned** — tracks correct release; low risk |
+| MFE Dockerfile customisation | Tutor plugin hooks in `_mereka_lms/mfe_dockerfile.py` plus limited post-render build-context sync | **Partially aligned** — hook-led authority is correct, but build-context sync is still a downstream coupling point |
+| Node/runtime/toolchain policy | Tutor plugin MFE Dockerfile hooks | **Partially aligned** — no regex surgery remains, but downstream still owns non-upstream build choices |
+| Branch/ref alignment (historical) | Previously handled by rendered Dockerfile surgery; removed with `mfe-node.sh` retirement | **No longer active** — keep as historical migration context only |
 | `--legacy-peer-deps` for FPF | Required by FPF ^1.8.0 peer dep conflicts | **Acceptable** — upstream FPF issue, not ours |
 
 ---
@@ -126,32 +126,30 @@ the `mfe_config` API response, where the LMS already serves correct values per
 
 ---
 
-### Gap 3 — Dockerfile Surgery Inhibits Upstream Adoption (Medium Priority)
+### Gap 3 — Build-Context Sync Still Couples Us to the Aggregate MFE Layout (Medium Priority)
 
-**Current state**: `mfe-node.sh` (334 LOC) applies regex surgery to the Tutor-generated MFE
-Dockerfile to: change the base image to `node:24.11.0-bullseye-slim`, inject toolchain packages, add
-cookie ARGs, add brand package installs, and rewrite branch refs. `build-optimizations.sh`
-(686 LOC) further patches the openedx Dockerfile with positional insertions.
+**Current state**: `mfe-node.sh` has been removed post-rebase. The active MFE Dockerfile authority
+now lives in Tutor plugin hooks under `infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py`.
+However, `apply-patches.sh` still performs post-render filesystem sync into
+`tutor_env/env/plugins/mfe/build/mfe/` for brand assets, footer assets, slot ownership helpers,
+and the authn deep-route helper.
 
-**OEP-65 impact**: When the upstream Tutor MFE plugin adopts Module Federation, the generated
-Dockerfile structure will change significantly (new stages for remote builds, different `COPY`
-patterns). Every regex in `mfe-node.sh` is an anchor on the current generated file structure.
-Each structural change upstream breaks one or more regexes.
+**OEP-65 impact**: This is materially better than regex surgery on the rendered Dockerfile, but it
+still couples downstream customisation to the current aggregate MFE build-context layout. When the
+upstream Tutor MFE plugin adopts Module Federation or changes build-context structure, these sync
+paths may still break.
 
-**OEP-65 target**: Customisations live in Tutor `ENV_PATCHES` (additive, append-only hooks),
-not in regex surgery on generated files. The `mfe-dockerfile-pre-npm-install` and
-`mfe-dockerfile-post-npm-install` hooks already exist for this purpose.
+**OEP-65 target**: Dockerfile customisation stays in Tutor hooks, and any remaining filesystem sync
+is minimized to assets or helper files that genuinely cannot be expressed through hooks.
 
-**What is already aligned**: The Tutor plugin (`mereka_lms.py`) already declares
-`mfe-dockerfile-pre-npm-install`, `mfe-dockerfile-post-npm-install`, and
-`mfe-dockerfile-npm-install` ENV_PATCHES covering toolchain, cookie env, and npm resilience.
-The bash patches are belt-and-suspenders on rendered files.
+**What is already aligned**: Toolchain, cookie env, brand package installation, runtime theme copy,
+plugin-framework dependency, and other Dockerfile-level customisations are now hook-owned rather
+than regex-owned.
 
-**Fix path**: When Tutor MFE plugin adds Module Federation support, audit `mfe-node.sh` for
-broken regexes. Migrate remaining bash operations to ENV_PATCHES where possible. The base image
-selection and brand package installs are the most likely to break.
+**Fix path**: Keep validating the post-`mfe-node` authority model. Reduce remaining
+`apply-patches.sh` MFE sync only where a durable hook- or runtime-owned replacement exists.
 
-**Effort**: Medium when triggered by upstream change. No immediate action required.
+**Effort**: Medium. The highest-risk Dockerfile surgery is already gone; remaining work is narrower.
 
 ---
 
@@ -340,7 +338,7 @@ release cycle. The recommended actions below should be prioritised for Palms (ne
 
 | Action | Trigger |
 |--------|---------|
-| Audit `mfe-node.sh` regex anchors | When Tutor MFE plugin releases Module Federation support |
+| Audit remaining MFE build-context sync assumptions | When Tutor MFE plugin releases Module Federation support |
 | Adopt `frontend-base` shell | When `tutormfe` plugin generates Module Federation remotes |
 | Remove `--legacy-peer-deps` for FPF | When FPF releases peer dep fix |
 

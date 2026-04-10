@@ -45,12 +45,10 @@ its relationship to the native Tutor hooks/filters in `infrastructure/tutor/plug
 
 | Field | Value |
 |-------|-------|
-| LOC | 334 |
-| Classification | `FILESYSTEM` |
-| What it does | Applies a large set of transforms to the MFE Dockerfile (template + rendered copy): 1. Sets base image to `node:24.11.0-bullseye-slim` (or Node 24+). 2. Adds g++, python3, python3-distutils to toolchain. 3. Injects `SESSION_COOKIE_DOMAIN` / `CSRF_COOKIE_DOMAIN` ARG+ENV block. 4. Inserts `COPY indigo/mereka /openedx/app/mereka` at the right Dockerfile layers. 5. Wraps `npm clean-install` with a retry + fallback loop. 6. Installs `@openedx/frontend-plugin-framework` with `--legacy-peer-deps`. 7. Adds `react-redux`/`redux` to admin-console stage. 8. Adds symlink for course-authoring directory rename. 9. Propagates `ENABLE_NEW_RELIC` as an ENV var. 10. Rewrites Redwood branch refs to Ulmo. 11. Updates brand package version. |
-| Tutor hook equivalent | Partial: `mfe-dockerfile-pre-npm-install`, `mfe-dockerfile-post-npm-install`, `mfe-dockerfile-npm-install` ENV_PATCHES in `mereka_lms.py` cover items 2–3 and 5–6 for _new_ template renders. Items 1, 4, 7–11 require regex surgery on the existing multi-stage Dockerfile and cannot be expressed as an append-only ENV_PATCH. |
-| Why it must stay bash | The MFE Dockerfile is a 1000-line multi-stage file. Tutor ENV_PATCHES only append to named extension points. Changing the base image tag, rewriting branch refs, and injecting into specific stages require regex substitution on the rendered file. |
-| Risk of conversion | HIGH — any partial conversion risks leaving an inconsistent Dockerfile. |
+| Classification | `REMOVED` (post-2026-04-10 rebase) |
+| What it did | Historically performed regex surgery on the rendered Tutor MFE Dockerfile for toolchain, cookie env, theme and brand copy, npm resilience, dependency additions, source-ref rewrites, and other stage-specific mutations. |
+| Replaced by | Tutor plugin MFE Dockerfile hooks in `infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py` plus remaining post-render MFE build-context sync in `apply-patches.sh`. |
+| Notes | Historical only. This file is no longer part of the active patch chain and must not be treated as current MFE authority. |
 
 ---
 
@@ -94,7 +92,7 @@ its relationship to the native Tutor hooks/filters in `infrastructure/tutor/plug
 | LOC | 25 |
 | Classification | `FILESYSTEM` |
 | What it does | Copies MFE theme SCSS and font assets from `infrastructure/tutor/themes/mereka/` into `tutor_env/env/plugins/mfe/build/mfe/indigo/mereka/`. This is a pure filesystem operation: `mkdir`, `rm -rf`, `cp -R`. |
-| Tutor hook equivalent | None. The MFE `COPY indigo/mereka /openedx/app/mereka` Dockerfile instruction (injected by `mfe-node.sh` and the `mfe-dockerfile-pre-npm-install` hook) requires these files to physically exist in the build context. A Tutor ENV_PATCH cannot create files. |
+| Tutor hook equivalent | None. The active MFE Dockerfile authority expects these assets to physically exist in the build context before image build. A Tutor ENV_PATCH cannot create files. |
 | Why it must stay bash | Filesystem operations (copy files into the build context). Cannot be expressed as a Tutor filter. |
 | Risk of conversion | N/A — inherently a filesystem operation. |
 | Notes | JSX/env.config surgery was removed in T101 (footer migration to PLUGIN_SLOTS). This function now only syncs static assets. |
@@ -162,11 +160,11 @@ its relationship to the native Tutor hooks/filters in `infrastructure/tutor/plug
 | Patch | Classification | Status |
 |-------|----------------|--------|
 | `_common.sh` | N/A (harness) | Active — required by all FILESYSTEM patches |
-| `mfe-node.sh` | FILESYSTEM | Active — MFE Dockerfile surgery |
 | `webpack-memory.sh` | FILESYSTEM | Active — memory limits + dedup |
 | `footer-component.sh` | FILESYSTEM | Active — asset sync to build context |
 | `brand-package.sh` | FILESYSTEM | Active — OEP-48 brand package sync to MFE build context |
 | `build-optimizations.sh` | FILESYSTEM | Active — 25+ transforms on rendered files |
+| `mfe-node.sh` | REMOVED | Removed post-rebase; replaced by Tutor plugin hooks + MFE build-context sync |
 | `mysql-auth.sh` | REMOVED | Deleted 2026-02-27 → `mereka_lms.py` |
 | `domain-names.sh` | REMOVED | Deleted 2026-02-27 → `mereka_lms.py` |
 | `csrf-origins.sh` | REMOVED | Deleted 2026-02-27 → `mereka_lms.py` |
@@ -192,9 +190,9 @@ corresponding bash patches. These survive `tutor config save` without any post-r
 | `openedx-dockerfile-post-python-requirements` | build-optimizations (custom apps, django-prometheus), mongodb-atlas |
 | `openedx-dockerfile-npm-install-cmd` | build-optimizations (npm install cmd) |
 | `webpack-prod-config` | webpack-memory (Terser, requireCompatConfig) |
-| `mfe-dockerfile-pre-npm-install` | mfe-node (toolchain) |
-| `mfe-dockerfile-post-npm-install` | mfe-node (cookie env, frontend-plugin-framework) |
-| `mfe-dockerfile-npm-install` | mfe-node (npm resilience) |
+| `mfe-dockerfile-pre-npm-install` | historical `mfe-node` toolchain / MFE Dockerfile customisation |
+| `mfe-dockerfile-post-npm-install` | historical `mfe-node` cookie env, frontend-plugin-framework, and related MFE Dockerfile customisation |
+| `mfe-dockerfile-npm-install` | historical `mfe-node` npm resilience |
 | `mfe-env-config-buildtime-imports` | footer-component (SCSS import) |
 | `mfe-env-config-runtime-definitions` | footer-component (MerekaFooter JSX — T101) |
 | `mysql-docker-compose` | mysql-auth |

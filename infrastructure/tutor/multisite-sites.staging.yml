@@ -49,6 +49,10 @@ sites:
       logo_url: /
       favicon_path: mereka/images/favicon.ico
       homepage_banner_enabled: false
+      # Brand colors for MFE Paragon design tokens (from biji-biji-brand.min.css)
+      primary_color: "#000000"
+      secondary_color: "#4b5563"
+      accent_color: "#6F7782"
 
   - domain: staging.skillourfuture.academy.mereka.io
     name: Skill Our Future
@@ -69,6 +73,10 @@ sites:
       logo_url: /
       favicon_path: mereka/images/favicon.ico
       homepage_banner_enabled: false
+      # Brand colors for MFE Paragon design tokens (from sof-brand.min.css)
+      primary_color: "#450B7F"
+      secondary_color: "#82C3C7"
+      accent_color: "#9BCFD2"
 
   - domain: staging.preview.academyv2.mereka.io
     name: Mereka Academy Preview

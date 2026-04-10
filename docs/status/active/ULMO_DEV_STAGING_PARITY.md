@@ -140,7 +140,7 @@ The `infrastructure/tutor/` directory manages Tutor configuration locally. Key p
 | Patch | Purpose | Required for Ulmo |
 |-------|---------|-------------------|
 | `mysql-auth.sh` | `mysql_native_password` plugin fix | Yes (MySQL 8) |
-| `mfe-node.sh` | Node 24 toolchain, ulmo.1 MFE source refs, brand pkg `^2.4.x` | Yes |
+| `_mereka_lms/mfe_dockerfile.py` + MFE build-context sync | Node 24 toolchain, ulmo.1 MFE source refs, brand pkg `^2.4.x` | Yes |
 | `domain-names.sh` | Extra hostnames (biji-biji.com, skillourfuture) | Yes |
 | `webpack-memory.sh` | `NODE_OPTIONS=--max-old-space-size=6144` | Yes (build only) |
 | `csrf-origins.sh` | CSRF trusted origins for both mereka.io and mereka.dev | Yes |

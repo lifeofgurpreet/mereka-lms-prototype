@@ -18,6 +18,10 @@ NC='\033[0m' # No Color
 # Get repository root
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TUTOR_ENV="${TUTOR_ROOT:-${REPO_ROOT}/tutor_env}"
+APPLY_PATCH_SCRIPT="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
+MFE_PATCH_MODULE="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py"
+PLUGIN_SRC_DIR="$REPO_ROOT/infrastructure/tutor/plugins"
+PLUGIN_DIR="${TUTOR_PLUGINS_DIR:-$HOME/.local/share/tutor-plugins}"
 
 # Track failures
 FAILURES=()
@@ -96,6 +100,90 @@ regex_in_file() {
   fi
 }
 
+pattern_not_in_file() {
+  local pattern="$1"
+  local file="$2"
+  local description="$3"
+
+  if [[ ! -f "$file" ]]; then
+    check_fail "$description - file not found: $file"
+    return 1
+  fi
+
+  if grep -qF "$pattern" "$file" 2>/dev/null; then
+    check_fail "$description - unexpected pattern found in $file"
+    return 1
+  fi
+
+  check_pass "$description"
+  return 0
+}
+
+files_match() {
+  local src="$1"
+  local dst="$2"
+  local description="$3"
+
+  if [[ ! -f "$src" ]]; then
+    check_fail "$description - source not found: $src"
+    return 1
+  fi
+  if [[ ! -f "$dst" ]]; then
+    check_fail "$description - mirror not found: $dst"
+    return 1
+  fi
+  if cmp -s "$src" "$dst"; then
+    check_pass "$description"
+    return 0
+  fi
+
+  check_fail "$description - mirror is stale"
+  return 1
+}
+
+dirs_match() {
+  local src="$1"
+  local dst="$2"
+  local description="$3"
+
+  if [[ ! -d "$src" ]]; then
+    check_fail "$description - source dir not found: $src"
+    return 1
+  fi
+  if [[ ! -d "$dst" ]]; then
+    check_fail "$description - mirror dir not found: $dst"
+    return 1
+  fi
+
+  if command -v rsync >/dev/null 2>&1; then
+    local drift
+    drift="$(rsync -rcn --delete --exclude='__pycache__/' --exclude='*.pyc' --out-format='%n' "$src/" "$dst/" 2>/dev/null || true)"
+    if [[ -z "$drift" ]]; then
+      check_pass "$description"
+      return 0
+    fi
+  else
+    if diff -qr "$src" "$dst" >/dev/null 2>&1; then
+      check_pass "$description"
+      return 0
+    fi
+  fi
+
+  check_fail "$description - mirror is stale"
+  return 1
+}
+
+dir_has_files() {
+  local pattern="$1"
+  local description="$2"
+
+  if compgen -G "$pattern" >/dev/null 2>&1; then
+    check_pass "$description"
+  else
+    check_warn "$description"
+  fi
+}
+
 print_section "Checking Tutor Environment Structure"
 
 if [[ ! -d "$TUTOR_ENV" ]]; then
@@ -112,6 +200,12 @@ if [[ -d "$TUTOR_ENV/env/apps/nginx" ]]; then
 fi
 file_exists "$TUTOR_ENV/env/apps/openedx/settings/lms/production.py" "LMS production settings"
 file_exists "$TUTOR_ENV/env/build/openedx/Dockerfile" "OpenEdX Dockerfile"
+
+print_section "Checking Tutor Plugin Source of Truth"
+
+files_match "$PLUGIN_SRC_DIR/mereka_lms.py" "$PLUGIN_DIR/mereka_lms.py" "Tutor plugin entrypoint mirror is fresh"
+files_match "$PLUGIN_SRC_DIR/mereka_lms_mfe_slots.py" "$PLUGIN_DIR/mereka_lms_mfe_slots.py" "Tutor MFE slots module mirror is fresh"
+dirs_match "$PLUGIN_SRC_DIR/_mereka_lms" "$PLUGIN_DIR/_mereka_lms" "Tutor _mereka_lms package mirror is fresh"
 
 print_section "Checking Multi-Site Domain Configuration"
 
@@ -152,27 +246,72 @@ else
   check_warn "Docker Compose file not found (ok if using K8s only)"
 fi
 
-print_section "Checking MFE Configuration"
+print_section "Checking MFE Build Authority"
 
 MFE_DOCKERFILE="$TUTOR_ENV/env/plugins/mfe/build/mfe/Dockerfile"
+MFE_ENV_CONFIG="$TUTOR_ENV/env/plugins/mfe/build/mfe/env.config.jsx"
+MFE_INDIGO_ENV_CONFIG="$TUTOR_ENV/env/plugins/mfe/build/mfe/indigo/env.config.jsx"
+MFE_THEME_DIR="$TUTOR_ENV/env/plugins/mfe/build/mfe/indigo/mereka"
+MFE_BRAND_DIR="$TUTOR_ENV/env/plugins/mfe/build/mfe/indigo/brand-mereka"
 if [[ -f "$MFE_DOCKERFILE" ]]; then
-  pattern_in_file "docker.io/node:24.11.0-bullseye-slim" "$MFE_DOCKERFILE" "MFE Node 24 base image"
-  regex_in_file "gcc g\+\+ git" "$MFE_DOCKERFILE" "MFE build toolchain (g++)"
-  pattern_in_file "python3" "$MFE_DOCKERFILE" "MFE Python 3 dependency"
-  pattern_in_file "SESSION_COOKIE_DOMAIN" "$MFE_DOCKERFILE" "MFE cookie domain config"
-  pattern_in_file "CSRF_COOKIE_DOMAIN" "$MFE_DOCKERFILE" "MFE CSRF cookie config"
+  check_pass "Rendered MFE Dockerfile exists: $MFE_DOCKERFILE"
 else
   check_warn "MFE Dockerfile not found (ok if MFE plugin not installed)"
 fi
 
-# Check MFE theme integration
-MFE_ENV_CONFIG="$TUTOR_ENV/env/plugins/mfe/build/mfe/indigo/env.config.jsx"
-if [[ -f "$MFE_ENV_CONFIG" ]]; then
-  pattern_in_file "mereka/mereka.scss" "$MFE_ENV_CONFIG" "MFE custom theme import"
-  pattern_in_file "const MerekaFooter" "$MFE_ENV_CONFIG" "Custom Mereka footer component"
-  pattern_in_file "<MerekaFooter />" "$MFE_ENV_CONFIG" "Mereka footer rendered"
+if [[ -L "$MFE_DOCKERFILE" ]]; then
+  check_fail "Rendered MFE Dockerfile must not be a symlink: $MFE_DOCKERFILE -> $(readlink "$MFE_DOCKERFILE")"
+elif [[ -f "$MFE_DOCKERFILE" ]]; then
+  check_pass "Rendered MFE Dockerfile is a regular file"
+fi
+
+if [[ -f "$APPLY_PATCH_SCRIPT" ]]; then
+  if grep -q 'mfe-node.sh' "$APPLY_PATCH_SCRIPT" 2>/dev/null; then
+    check_fail "apply-patches.sh still references removed mfe-node.sh"
+  else
+    check_pass "apply-patches.sh does not reference removed mfe-node.sh"
+  fi
 else
-  check_warn "MFE env.config.jsx not found (ok if MFE plugin not installed)"
+  check_fail "apply-patches.sh missing: $APPLY_PATCH_SCRIPT"
+fi
+
+if [[ -f "$MFE_PATCH_MODULE" ]]; then
+  pattern_in_file "mfe-dockerfile-pre-npm-install" "$MFE_PATCH_MODULE" "MFE plugin defines pre-npm-install hook"
+  pattern_in_file "mfe-dockerfile-post-npm-install" "$MFE_PATCH_MODULE" "MFE plugin defines post-npm-install hook"
+  pattern_in_file "@edx/brand@file:./brand-mereka" "$MFE_PATCH_MODULE" "MFE plugin installs local brand package"
+  pattern_in_file "frontend-plugin-framework@^1.8.0" "$MFE_PATCH_MODULE" "MFE plugin installs frontend-plugin-framework"
+else
+  check_fail "MFE Dockerfile patch module missing: $MFE_PATCH_MODULE"
+fi
+
+if [[ -f "$MFE_DOCKERFILE" ]]; then
+  regex_in_file "(docker.io/)?node:(18|20|24)[-a-z0-9.]*" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile uses supported Node image"
+  pattern_in_file "frontend-plugin-framework@^1.8.0" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile contains frontend-plugin-framework install"
+  pattern_in_file "@edx/brand@file:./brand-mereka" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile contains local brand package install"
+fi
+
+if [[ -f "$MFE_ENV_CONFIG" ]]; then
+  check_pass "Rendered MFE env.config.jsx exists: $MFE_ENV_CONFIG"
+else
+  check_warn "Rendered MFE env.config.jsx not found: $MFE_ENV_CONFIG"
+fi
+
+if [[ -f "$MFE_INDIGO_ENV_CONFIG" ]]; then
+  check_pass "Rendered Indigo env.config.jsx exists: $MFE_INDIGO_ENV_CONFIG"
+else
+  check_warn "Rendered Indigo env.config.jsx not found: $MFE_INDIGO_ENV_CONFIG"
+fi
+
+if [[ -d "$MFE_THEME_DIR" ]]; then
+  check_pass "Rendered Indigo theme directory exists: $MFE_THEME_DIR"
+else
+  check_warn "Rendered Indigo theme directory not found: $MFE_THEME_DIR"
+fi
+
+if [[ -d "$MFE_BRAND_DIR" ]]; then
+  check_pass "Rendered Indigo brand package exists: $MFE_BRAND_DIR"
+else
+  check_warn "Rendered Indigo brand package not found: $MFE_BRAND_DIR"
 fi
 
 print_section "Checking Forum Configuration (MongoDB Atlas)"
@@ -212,6 +351,37 @@ if [[ -f "$LMS_SETTINGS" ]]; then
   pattern_in_file "django_prometheus" "$LMS_SETTINGS" "django_prometheus in INSTALLED_APPS"
   pattern_in_file "PrometheusBeforeMiddleware" "$LMS_SETTINGS" "Prometheus middleware (before)"
   pattern_in_file "PrometheusAfterMiddleware" "$LMS_SETTINGS" "Prometheus middleware (after)"
+  pattern_not_in_file "INSTALLED_APPS.append('mfe_oauth_fix')" "$LMS_SETTINGS" "No duplicate raw mfe_oauth_fix app injection"
+  pattern_not_in_file "INSTALLED_APPS.append('mereka_tenancy')" "$LMS_SETTINGS" "No duplicate raw mereka_tenancy app injection"
+fi
+
+print_section "Checking Notifications Compatibility Guards"
+
+NOTIFICATIONS_CHANNEL="$REPO_ROOT/infrastructure/tutor/custom-apps/openedx_notifications/ace_channel.py"
+NOTIFICATIONS_MODEL="$REPO_ROOT/infrastructure/tutor/custom-apps/openedx_notifications/models.py"
+NOTIFICATIONS_MIGRATION="$REPO_ROOT/infrastructure/tutor/custom-apps/openedx_notifications/migrations/0001_initial.py"
+RENDERED_NOTIFICATIONS_CHANNEL="$TUTOR_ENV/env/build/openedx/infrastructure/tutor/custom-apps/openedx_notifications/ace_channel.py"
+RENDERED_NOTIFICATIONS_MODEL="$TUTOR_ENV/env/build/openedx/infrastructure/tutor/custom-apps/openedx_notifications/models.py"
+RENDERED_NOTIFICATIONS_MIGRATION="$TUTOR_ENV/env/build/openedx/infrastructure/tutor/custom-apps/openedx_notifications/migrations/0001_initial.py"
+
+pattern_in_file "getattr(ChannelType, \"IN_APP\", \"in_app\")" "$NOTIFICATIONS_CHANNEL" "ACE in-app channel uses runtime-safe ChannelType fallback"
+pattern_not_in_file "channel_type = ChannelType.IN_APP" "$NOTIFICATIONS_CHANNEL" "ACE channel avoids hard dependency on ChannelType.IN_APP"
+pattern_in_file "related_name='openedx_in_app_notifications'" "$NOTIFICATIONS_MODEL" "Notification model uses non-colliding related_name"
+pattern_in_file "related_name='openedx_in_app_notifications'" "$NOTIFICATIONS_MIGRATION" "Notification migration uses non-colliding related_name"
+pattern_not_in_file "related_name='notifications'" "$NOTIFICATIONS_MODEL" "Notification model avoids upstream notifications reverse accessor collision"
+
+if [[ -f "$RENDERED_NOTIFICATIONS_CHANNEL" ]]; then
+  pattern_in_file "getattr(ChannelType, \"IN_APP\", \"in_app\")" "$RENDERED_NOTIFICATIONS_CHANNEL" "Rendered ACE channel keeps runtime-safe ChannelType fallback"
+  pattern_not_in_file "channel_type = ChannelType.IN_APP" "$RENDERED_NOTIFICATIONS_CHANNEL" "Rendered ACE channel avoids hard dependency on ChannelType.IN_APP"
+fi
+
+if [[ -f "$RENDERED_NOTIFICATIONS_MODEL" ]]; then
+  pattern_in_file "related_name='openedx_in_app_notifications'" "$RENDERED_NOTIFICATIONS_MODEL" "Rendered notification model uses non-colliding related_name"
+  pattern_not_in_file "related_name='notifications'" "$RENDERED_NOTIFICATIONS_MODEL" "Rendered notification model avoids upstream notifications reverse accessor collision"
+fi
+
+if [[ -f "$RENDERED_NOTIFICATIONS_MIGRATION" ]]; then
+  pattern_in_file "related_name='openedx_in_app_notifications'" "$RENDERED_NOTIFICATIONS_MIGRATION" "Rendered notification migration uses non-colliding related_name"
 fi
 
 print_section "Checking Build Optimizations"
@@ -299,6 +469,22 @@ THEME_BUILD_DIR="$TUTOR_ENV/env/build/openedx/themes/mereka"
 if [[ -d "$THEME_BUILD_DIR" ]]; then
   check_pass "Theme build directory exists"
 
+  if [[ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates" && -d "$THEME_BUILD_DIR/lms/templates" ]]; then
+    dirs_match "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates" "$THEME_BUILD_DIR/lms/templates" "Rendered LMS theme templates mirror source"
+  fi
+  if [[ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/common/templates" && -d "$THEME_BUILD_DIR/common/templates" ]]; then
+    dirs_match "$REPO_ROOT/infrastructure/tutor/themes/mereka/common/templates" "$THEME_BUILD_DIR/common/templates" "Rendered common theme templates mirror source"
+  fi
+  if [[ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/css" && -d "$THEME_BUILD_DIR/lms/static/css" ]]; then
+    dirs_match "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/css" "$THEME_BUILD_DIR/lms/static/css" "Rendered LMS theme CSS mirrors source"
+  fi
+  if [[ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css" && -d "$THEME_BUILD_DIR/common/static/css" ]]; then
+    dirs_match "$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css" "$THEME_BUILD_DIR/common/static/css" "Rendered common theme CSS mirrors source"
+  fi
+  if [[ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates" && -d "$THEME_BUILD_DIR/cms/templates" ]]; then
+    dirs_match "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates" "$THEME_BUILD_DIR/cms/templates" "Rendered CMS theme templates mirror source"
+  fi
+
   # Check for key logo files
   if [[ -f "$THEME_BUILD_DIR/lms/static/images/logo.png" ]]; then
     check_pass "LMS logo.png"
@@ -313,13 +499,27 @@ if [[ -d "$THEME_BUILD_DIR" ]]; then
   fi
 
   # Check for fonts
-  if compgen -G "$THEME_BUILD_DIR/lms/static/fonts/*.woff2" >/dev/null 2>&1; then
-    check_pass "LMS font files present"
-  else
-    check_warn "LMS font files not found"
-  fi
+  dir_has_files "$THEME_BUILD_DIR/lms/static/fonts/*.woff2" "LMS font files present"
+  dir_has_files "$THEME_BUILD_DIR/cms/static/fonts/*.woff2" "CMS font files present"
 else
   check_warn "Theme build directory not found (run apply-patches.sh)"
+fi
+
+print_section "Checking Rendered Custom App Build Context"
+
+OPENEDX_BUILD_ROOT="$TUTOR_ENV/env/build/openedx"
+if [[ -d "$OPENEDX_BUILD_ROOT" ]]; then
+  if [[ -d "$REPO_ROOT/infrastructure/tutor/custom-apps/mfe_oauth_fix" && -d "$OPENEDX_BUILD_ROOT/infrastructure/tutor/custom-apps/mfe_oauth_fix" ]]; then
+    dirs_match "$REPO_ROOT/infrastructure/tutor/custom-apps/mfe_oauth_fix" "$OPENEDX_BUILD_ROOT/infrastructure/tutor/custom-apps/mfe_oauth_fix" "Rendered mfe_oauth_fix mirrors source"
+  fi
+  if [[ -d "$REPO_ROOT/infrastructure/tutor/custom-apps/openedx_prometheus" && -d "$OPENEDX_BUILD_ROOT/infrastructure/tutor/custom-apps/openedx_prometheus" ]]; then
+    dirs_match "$REPO_ROOT/infrastructure/tutor/custom-apps/openedx_prometheus" "$OPENEDX_BUILD_ROOT/infrastructure/tutor/custom-apps/openedx_prometheus" "Rendered openedx_prometheus mirrors source"
+  fi
+  if [[ -d "$REPO_ROOT/infrastructure/tutor/plugins/multi-tenancy" && -d "$OPENEDX_BUILD_ROOT/infrastructure/tutor/plugins/multi-tenancy" ]]; then
+    dirs_match "$REPO_ROOT/infrastructure/tutor/plugins/multi-tenancy" "$OPENEDX_BUILD_ROOT/infrastructure/tutor/plugins/multi-tenancy" "Rendered multi-tenancy plugin mirrors source"
+  fi
+else
+  check_warn "Rendered Open edX build root not found: $OPENEDX_BUILD_ROOT"
 fi
 
 # Check for MFE theme assets

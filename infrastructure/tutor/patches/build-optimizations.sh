@@ -405,48 +405,54 @@ RUN pip install django-prometheus==2.3.1"""
 
         updated = force_mfe_discussions_only(updated)
 
+        legacy_mfe_oauth_block = textwrap.dedent("""
+
+        # Set default theme for all sites
+        DEFAULT_SITE_THEME = "mereka"
+
+        # MFE OAuth Fix - Custom app to fix OAuth provider visibility
+        import sys
+        sys.path.insert(0, '/openedx')
+        INSTALLED_APPS.append('mfe_oauth_fix')
+
+        # Add middleware to fix /api/mfe_context responses
+        # Insert at the end of middleware stack so it processes responses
+        MIDDLEWARE.append('mfe_oauth_fix.middleware.MFEOAuthFixMiddleware')
+        """)
+        if "_safe_add_app('mfe_oauth_fix')" in updated and "INSTALLED_APPS.append('mfe_oauth_fix')" in updated:
+            updated = updated.replace(legacy_mfe_oauth_block, "\n", 1)
+
+        if "_safe_add_app('mereka_tenancy')" in updated and "INSTALLED_APPS.append('mereka_tenancy')" in updated:
+            updated = re.sub(
+                r"\n# Mereka Multi-Tenancy — tenant model extensions \+ resolution middleware\n"
+                r"# See: specs/multi-tenancy-architecture_spec\.md\n"
+                r"import sys as _mt_sys\n"
+                r"if '/openedx' not in _mt_sys\.path:\n"
+                r"    _mt_sys\.path\.insert\(0, '/openedx'\)\n"
+                r"if 'mereka_tenancy' not in INSTALLED_APPS:\n"
+                r"    INSTALLED_APPS\.append\('mereka_tenancy'\)\n\n"
+                r"# TenantResolutionMiddleware resolves hostname → Site → EnterpriseCustomer\n"
+                r"# Insert after CurrentSiteMiddleware so Site is already resolved\.\n"
+                r"if 'mereka_tenancy\.middleware\.TenantResolutionMiddleware' not in MIDDLEWARE:\n"
+                r"    _site_mw = 'django\.contrib\.sites\.middleware\.CurrentSiteMiddleware'\n"
+                r"    if _site_mw in MIDDLEWARE:\n"
+                r"        _idx = MIDDLEWARE\.index\(_site_mw\) \+ 1\n"
+                r"        MIDDLEWARE\.insert\(_idx, 'mereka_tenancy\.middleware\.TenantResolutionMiddleware'\)\n"
+                r"    else:\n"
+                r"        MIDDLEWARE\.append\('mereka_tenancy\.middleware\.TenantResolutionMiddleware'\)\n",
+                "\n",
+                updated,
+                count=1,
+            )
+            updated = updated.replace(
+                "if 'mereka_tenancy' not in INSTALLED_APPS:\n    INSTALLED_APPS.append('mereka_tenancy')\n",
+                "",
+                1,
+            )
+
         # DEFAULT_SITE_THEME
         if "DEFAULT_SITE_THEME" not in updated:
             updated = updated.rstrip() + '\n\n# Set default theme for all sites\nDEFAULT_SITE_THEME = "mereka"\n'
-
-        # MFE OAuth fix app
-        if "mfe_oauth_fix" not in updated:
-            mfe_oauth_fix_config = textwrap.dedent("""
-
-                # MFE OAuth Fix - Custom app to fix OAuth provider visibility
-                import sys
-                sys.path.insert(0, '/openedx')
-                INSTALLED_APPS.append('mfe_oauth_fix')
-
-                # Add middleware to fix /api/mfe_context responses
-                # Insert at the end of middleware stack so it processes responses
-                MIDDLEWARE.append('mfe_oauth_fix.middleware.MFEOAuthFixMiddleware')
-            """).strip()
-            updated = updated.rstrip() + '\n\n' + mfe_oauth_fix_config + '\n'
-
-        # mereka_tenancy multi-tenancy app
-        if "mereka_tenancy" not in updated:
-            tenancy_config = textwrap.dedent("""
-
-                # Mereka Multi-Tenancy -- tenant model extensions + resolution middleware
-                # See: specs/multi-tenancy-architecture_spec.md
-                import sys as _mt_sys
-                if '/openedx' not in _mt_sys.path:
-                    _mt_sys.path.insert(0, '/openedx')
-                if 'mereka_tenancy' not in INSTALLED_APPS:
-                    INSTALLED_APPS.append('mereka_tenancy')
-
-                # TenantResolutionMiddleware resolves hostname -> Site -> EnterpriseCustomer
-                # Insert after CurrentSiteMiddleware so Site is already resolved.
-                if 'mereka_tenancy.middleware.TenantResolutionMiddleware' not in MIDDLEWARE:
-                    _site_mw = 'django.contrib.sites.middleware.CurrentSiteMiddleware'
-                    if _site_mw in MIDDLEWARE:
-                        _idx = MIDDLEWARE.index(_site_mw) + 1
-                        MIDDLEWARE.insert(_idx, 'mereka_tenancy.middleware.TenantResolutionMiddleware')
-                    else:
-                        MIDDLEWARE.append('mereka_tenancy.middleware.TenantResolutionMiddleware')
-            """).strip()
-            updated = updated.rstrip() + '\n\n' + tenancy_config + '\n'
 
     # ── assets.py patches ───────────────────────────────────────────────
 
@@ -648,8 +654,10 @@ PY
   local TENANCY_PLUGIN_SRC="$REPO_ROOT/infrastructure/tutor/plugins/multi-tenancy"
   local TENANCY_PLUGIN_DEST="$REPO_ROOT/tutor_env/env/build/openedx/infrastructure/tutor/plugins/multi-tenancy"
   if [ -d "$TENANCY_PLUGIN_SRC" ] && [ -d "$REPO_ROOT/tutor_env/env/build/openedx" ]; then
-    mkdir -p "$(dirname "$TENANCY_PLUGIN_DEST")"
-    cp -R "$TENANCY_PLUGIN_SRC" "$TENANCY_PLUGIN_DEST"
+    mkdir -p "$TENANCY_PLUGIN_DEST"
+    rm -rf "$TENANCY_PLUGIN_DEST"
+    mkdir -p "$TENANCY_PLUGIN_DEST"
+    cp -R "$TENANCY_PLUGIN_SRC/." "$TENANCY_PLUGIN_DEST/"
     echo "Multi-tenancy plugin synced to build context."
   else
     echo "Warning: Multi-tenancy plugin sync skipped (missing build context)."

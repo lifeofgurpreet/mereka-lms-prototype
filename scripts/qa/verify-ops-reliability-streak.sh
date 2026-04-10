@@ -50,17 +50,34 @@ if ! command -v gh &>/dev/null; then
   exit 0
 fi
 
-# Find the most recent successful run of the workflow that produced the artifact
-RUN_ID=$(
-  gh api \
-    "repos/${GH_REPO}/actions/workflows/${WORKFLOW_FILE}/runs?event=schedule&per_page=10&status=completed" \
-    --jq '.workflow_runs | map(select(.conclusion == "success")) | first | .id // empty' \
+# Walk the full completed scheduled run history so a long failure streak does not
+# get misreported as "data unavailable" just because the latest success is older
+# than the first page of results.
+RUN_LINES=$(
+  gh api --paginate \
+    "repos/${GH_REPO}/actions/workflows/${WORKFLOW_FILE}/runs?event=schedule&per_page=100&status=completed" \
+    --jq '.workflow_runs[] | [.id, .conclusion] | @tsv' \
     2>/dev/null || true
 )
 
+RUN_ID="$(
+  printf '%s\n' "$RUN_LINES" | awk '$2 == "success" { print $1; exit }'
+)"
+
 if [[ -z "$RUN_ID" ]]; then
-  echo "WARNING: No completed successful runs found for ${WORKFLOW_FILE}."
-  echo "         Streak data unavailable — cannot assess ops reliability."
+  if [[ -n "$RUN_LINES" ]]; then
+    echo "Generated at: unknown"
+    echo "Workflow:     ${WORKFLOW_FILE}"
+    echo "Streak:       0/${REQUIRED_STREAK}"
+    echo "Status:       degraded"
+    echo ""
+    echo "WARNING: No successful completed scheduled runs found for ${WORKFLOW_FILE}."
+    echo "         Ops reliability streak is effectively 0/${REQUIRED_STREAK}."
+    echo "         This is informational — release is not blocked."
+  else
+    echo "WARNING: No completed scheduled runs found for ${WORKFLOW_FILE}."
+    echo "         Streak data unavailable — cannot assess ops reliability."
+  fi
   exit 0
 fi
 

@@ -68,7 +68,8 @@ if [[ -f "$RENDERED_DF" ]]; then
     export PATH="$TUTOR_VENV/bin:$PATH"
     export REPO_ROOT TUTOR_ROOT MFE_TEMPLATE
     mkdir -p "$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe" 2>/dev/null || true
-    ln -sf "$RENDERED_DF" "$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile" 2>/dev/null || true
+    rm -f "$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile" 2>/dev/null || true
+    cp "$RENDERED_DF" "$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile" 2>/dev/null || true
     cd "$REPO_ROOT"
     source infrastructure/tutor/patches/_common.sh
     _discover_template_paths 2>/dev/null || true
