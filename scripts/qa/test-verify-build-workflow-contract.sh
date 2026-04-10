@@ -332,6 +332,56 @@ jobs:
             var/ci/release-object.json
             var/ci/release-bundle.sig
             var/ci/release-bundle.pem
+      - run: |
+          python3 - <<'PY'
+          files = [
+            "contracts/release-contracts.yaml",
+            "contracts/release-bundle-schema.yaml",
+            "contracts/promotion-dispatch-envelope-schema.yaml",
+          ]
+          print(files)
+          PY
+
+  dispatch-dev-promotion:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    steps:
+      - run: |
+          python3 - <<'PY'
+          bundle_id = "rb-aaaaaaaa-20260410T120000Z"
+          contract_family = "promotion_dispatch_envelope_schema"
+          contract_version = "1.0"
+          contract_ref = "Biji-Biji-Initiative/platform-control-plane@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          evidence = {
+              "release_bundle_id": bundle_id,
+              "lane": "mereka-lms",
+              "delivery_lane": "dev",
+              "service_id": "mereka-lms",
+              "dispatch_event_type": "promote-mereka-lms-dev",
+              "created_at": "2026-04-10T12:00:00Z",
+              "validation_evidence": "ci-build-pass:1",
+              "release_object": {
+                  "schema_version": "release-object/v1",
+                  "release_id": "ro-rb-aaaaaaaa-20260410T120000Z",
+                  "service_id": "mereka-lms",
+                  "app_commit_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "build": {"release_bundle_id": bundle_id},
+              },
+              "build_provenance": {
+                  "run_url": "https://github.com/Biji-Biji-Initiative/mereka-lms/actions/runs/1",
+                  "artifact_uri": "actions/artifacts/release-bundle@run-1",
+                  "build_commit_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              },
+              "control_plane_ref": contract_ref,
+              "contract_family": contract_family,
+              "contract_version": contract_version,
+              "contract_ref": contract_ref,
+          }
+          payload = {
+              "event_type": evidence["dispatch_event_type"],
+              "client_payload": evidence,
+          }
+          print(payload)
+          PY
 
   update-gitops:
     runs-on: ubuntu-latest

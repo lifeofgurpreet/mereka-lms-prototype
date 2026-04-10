@@ -75,6 +75,36 @@ else
   pass "release bundle job no longer hard-fails on placeholder manual environment"
 fi
 
+if grep -q 'contracts/promotion-dispatch-envelope-schema.yaml' "$BUILD_WF"; then
+  pass "workflow fetches PCP promotion-dispatch-envelope schema"
+else
+  fail "workflow missing PCP promotion-dispatch-envelope schema fetch"
+fi
+
+if grep -q '"dispatch_event_type": "promote-mereka-lms-dev"' "$BUILD_WF"; then
+  pass "dispatch envelope records canonical dispatch_event_type"
+else
+  fail "dispatch envelope missing canonical dispatch_event_type"
+fi
+
+if grep -q '"delivery_lane": "dev"' "$BUILD_WF" && grep -q '"lane": "mereka-lms"' "$BUILD_WF" && grep -q '"service_id": "mereka-lms"' "$BUILD_WF"; then
+  pass "dispatch envelope records canonical lane/service identity"
+else
+  fail "dispatch envelope missing canonical lane/service identity"
+fi
+
+if grep -q '"control_plane_ref": contract_ref' "$BUILD_WF" && grep -q '"contract_family": contract_family' "$BUILD_WF" && grep -q '"contract_version": contract_version' "$BUILD_WF"; then
+  pass "dispatch envelope carries PCP contract handshake provenance"
+else
+  fail "dispatch envelope missing PCP contract handshake provenance"
+fi
+
+if grep -Fq '"event_type": evidence["dispatch_event_type"]' "$BUILD_WF"; then
+  pass "repository_dispatch event_type is derived from canonical envelope"
+else
+  fail "repository_dispatch event_type must be derived from canonical envelope"
+fi
+
 # Workflow consistency must compare canonical lane names, not raw workflow aliases.
 if grep -q "normalize_lane_to_canonical" "$BUILD_WF" && grep -q "scripts/lib/lane-normalize.sh" "$BUILD_WF"; then
   pass "workflow normalizes target_environment to canonical lane"
