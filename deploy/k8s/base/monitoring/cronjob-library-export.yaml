@@ -22,11 +22,18 @@ spec:
             app.kubernetes.io/name: library-export
         spec:
           restartPolicy: OnFailure
+          # Kyverno require-non-root-security-context compliance
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
           containers:
             - name: library-export
               # Image is overridden by the kustomization images[] transformer.
               # Base uses docker.io/overhangio/openedx (remapped to ghcr.io image).
               image: docker.io/overhangio/openedx
+              securityContext:
+                allowPrivilegeEscalation: false
               command:
                 - python
                 - manage.py

@@ -25,11 +25,18 @@ spec:
             app.kubernetes.io/name: tenant-isolation-test
         spec:
           restartPolicy: Never
+          # Kyverno require-non-root-security-context compliance
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
           containers:
             - name: isolation-test
               # Runs directly inside the LMS image — no kubectl/RBAC needed.
               # Image is overridden by the kustomization images[] transformer.
               image: docker.io/overhangio/openedx
+              securityContext:
+                allowPrivilegeEscalation: false
               command:
                 - python
                 - -c

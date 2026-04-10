@@ -44,12 +44,20 @@ spec:
           # Use Discovery service account if exists
           serviceAccountName: default
 
+          # Kyverno require-non-root-security-context compliance
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+
           containers:
           - name: sync
             # Uses the upstream openedx image name so kustomize images transform
             # replaces this with the overlay-pinned tag automatically.
             image: docker.io/overhangio/openedx:pin-required
             imagePullPolicy: IfNotPresent
+            securityContext:
+              allowPrivilegeEscalation: false
 
             command:
             - /bin/bash
