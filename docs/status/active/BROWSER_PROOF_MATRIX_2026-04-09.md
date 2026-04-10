@@ -90,3 +90,115 @@ Root cause: cluster CPU exhaustion (0/6 nodes available for scheduling).
 3. Enterprise learner portal flow (blocked by `bff.has_read_access` — backlog)
 4. Non-primary tenant login → dashboard → tenant-specific redirect
 5. Profile page render for authenticated user (was blank — #1467)
+
+---
+
+## Update 2026-04-11 — Agent 1 VNext real browser re-prove (dev mereka)
+
+**Method:** agent-browser CLI (headless Chromium, snapshot-and-refs), `testadmin` credentials,
+stable LMS pod `lms-79bfb484f8-pmmkv`, session cookies verified.
+
+**Important correction:** The 2026-04-09 rows above show L3 for most MFE surfaces based on
+HTTP 200 + title tag + JS bundle presence. Per `feedback-http200-ban.md` that is NOT valid
+L3 proof. Real L3 requires a snapshot showing visible content; real L4 requires authenticated
+data visibly rendered.
+
+### Dev Mereka — honest browser matrix (screenshots saved to /tmp/dev-*.png)
+
+| Surface | Honest Level | Evidence |
+|---------|--------------|----------|
+| LMS homepage `/` | **L3 PROVEN** | 28+ "View Course" links rendered, search box, sign-in link, cookie banner |
+| `/authn/login?next=%2F` | **L3 PROVEN** | Full branded "Start learning with Mereka Academy" panel, Register/Sign in tabs, Username/Password fields, Sign in button, Forgot password link, Sign in with Mereka SSO button (screenshot confirmed) |
+| Login flow (`testadmin`) | **L4 PROVEN** | Form submit → redirects to `apps.academyv2.mereka.dev/learner-dashboard/`, `Account menu for testadmin` visible |
+| `/learner-dashboard/` | **L4 PROVEN** | Branded "Mereka Academy IN SESSION" header, Courses/Dashboard/Course Catalog nav, "MEREKA UPDATE" banner, "My Courses" heading, "Your Mereka Academy dashboard is ready" card, Learning Cockpit sidebar |
+| `/account/` | **L4 PROVEN** | "Account Settings" heading, 7 sidebar sections (Account Info, Profile Info, Social Media, Notifications, Site Preferences, Linked Accounts, Delete Account), Mereka footer with social links |
+| `/u/testadmin` (Profile) | **🔴 BROKEN** | Completely blank page. Title set to "Learner Profile" but DOM empty. Shared TypeError with other blank MFEs. Separate bug from missing MFE_CONFIG keys (see below). |
+| `/learner-record/` | **🔴 BROKEN (404)** | Caddy returns HTTP 404. Root cause: learner-record MFE not packaged in the mfe container. 11 MFEs built but not learner-record. Webpack 4/Node 18 build chain broken. |
+| `/discussions/` | **🔴 BROKEN** | "Unexpected error occurred. Try again" error boundary. `TypeError: Cannot read properties of undefined (reading 'path')` in console. |
+| `/communications/` | **🔴 BROKEN** | Blank page, no visible content. |
+| `/learning/` | ⚠️ Partial | MFE shell renders "Mereka Academy learning flow — FOCUS MODE", footer. Body shows "Page not found" — expected: no course context. Needs course-open test for real L3+. |
+| `/gradebook/` | ⚠️ Partial | Header + full Mereka footer render. No body content. Expected: needs course context. |
+| `/authoring/` | 🔴 BROKEN | "Unexpected Application Error! 404 Not Found" — Authoring MFE router crash, likely needs course path. |
+
+### Root cause 1: Missing MFE_CONFIG keys (source fix in PR #1536)
+
+Console warnings across all broken MFEs:
+```
+App configuration error: SUPPORT_EMAIL is required by Studio Footer Help Content
+App configuration error: TERMS_OF_SERVICE_URL is required by Studio Footer
+App configuration error: PRIVACY_POLICY_URL is required by Studio Footer
+App configuration error: ENABLE_ACCESSIBILITY_PAGE is required by Studio Footer
+App configuration error: ORDER_HISTORY_URL is required by Header
+```
+
+All 6 tenant MFE hosts (dev/prod × mereka/biji-biji/SOF) missing all 5 keys.
+
+**Source root cause:** `infrastructure/tutor/plugins/_mereka_lms/lms_settings.py` populates FAVICON/LOGO
+MFE_CONFIG entries but never set footer/header text/link keys.
+
+**Durable fix:** PR #1536 adds the 5 keys to MFE_CONFIG. Mirrors existing Django footer fallbacks
+from `themes/mereka/lms/templates/footer.html`.
+
+**Live patch (dev only):** SiteConfiguration.values["MFE_CONFIG"] patched on 6 rows (3 tenants ×
+LMS host + apps host). MFE config API verified returning all 5 keys post-patch via curl.
+
+**CRITICAL: Live patch is NOT sufficient to render Profile** — this implies Profile has a
+secondary bug independent of missing config keys. See root cause 2.
+
+### Root cause 2: Shared `TypeError: Cannot read properties of undefined (reading 'path')`
+
+**Affected:** Profile, Learner-Record (though 404'd), Discussions, Communications
+
+**Symptom:** TypeError fires during MFE shell bootstrap before React can mount anything. DOM
+stays empty or shows react-error-boundary fallback. Config API returns valid data (verified).
+JS bundles load HTTP 200 (verified).
+
+**Unknown:** Which specific property access throws. Likely candidates:
+- PARAGON_THEME init script (inline in HTML) accesses `location.hostname` variant map
+- frontend-platform shell router init
+- MFE common hooks reading from config object
+
+**Blocker:** Cannot read the minified JS bundle to identify the call site without sourcemaps.
+Next step: enable Sentry in dev to capture the full stack trace, or fetch a sourcemap build.
+
+### Root cause 3: learner-record not packaged
+
+**Evidence:** `/openedx/dist/` in mfe container has 11 MFEs: account, admin-console, authn,
+authoring, communications, discussions, gradebook, learner-dashboard, learning, ora-grading,
+profile. **learner-record is missing from the list.**
+
+**Source state:** `infrastructure/tutor/plugins/_mereka_lms/__init__.py:27` registers
+learner-record via `MFE_APPS.add()`. The registration is there but the build doesn't produce it.
+Recent Tutor build history (Sessions 2/3) shows a "learner-record build broken" chain that
+was not fully resolved.
+
+**Impact:** Any /learner-record/ route returns 404 on all tenants all environments.
+
+### Confirmed working on dev (L4 proven, real browser)
+
+- Landing page L3
+- authn login page L3
+- Login flow → learner-dashboard L4
+- Account Settings L4
+- No cross-tenant contamination (each tenant served from correct Site row)
+
+### Confirmed broken on dev (real browser)
+
+- Profile (blank, shared TypeError)
+- Learner-Record (404, not built)
+- Discussions (error boundary, shared TypeError)
+- Communications (blank, shared TypeError)
+- Authoring (404 / router crash without course context)
+
+### Not yet re-proven on dev
+
+- Biji-Biji tenant (landing + login + learner-dashboard)
+- SOF tenant (landing + login + learner-dashboard)
+- Non-primary Studio (/studio.*)
+- Enterprise learner portal
+- Admin console
+
+### Not yet re-proven on prod (dev was exhausting enough this session)
+
+- All surfaces — prod proof matrix is stale since 2026-04-09
+

@@ -56,3 +56,44 @@ SiteConfiguration/DB   → generated runtime material via bootstrap replay, not 
 | tenant-isolation | PASS | 4/4 tests after settings + ConfigMap fix |
 | discovery-sync | PASS | Completed pods |
 | backup restore drill | PASS | 968/968 resources, Velero OOM fixed |
+
+---
+
+## 2026-04-11 — Phase 7 control-plane migration + new RCBs
+
+### Phase 7 migration delta (Session 3 → Session 4)
+
+| Domain contract | Before 2026-04-10 | After 2026-04-10 |
+|-----------------|-------------------|------------------|
+| `proof-gate-contract.yaml` | Lived in `mereka-lms/config/` | **Moved to `platform-control-plane`**. mereka-lms `config/` has shim pointer (#1512 merged). |
+| `domain-proof-scoring-policy.yaml` | Lived in `mereka-lms/config/` | **Moved to `platform-control-plane`**. Shim pointer in mereka-lms (#1512 merged). |
+| `proof-gate-contract` conformance baseline | 2026-03-xx | Refreshed to 2026-04-10 in CP#75 |
+
+### New root-cause batches (2026-04-11 session)
+
+| Batch | Root Cause | Status | Evidence |
+|-------|-----------|--------|----------|
+| **RCB-09** | MFE_CONFIG missing 5 required footer/header keys (SUPPORT_EMAIL, TERMS_OF_SERVICE_URL, PRIVACY_POLICY_URL, ENABLE_ACCESSIBILITY_PAGE, ORDER_HISTORY_URL) platform-wide | **SOURCE FIX MERGED-PENDING (PR #1536)** | Dev live-patched, API returns all 5 keys on 3 tenants × 2 hosts. Next image rebuild consumes source fix. |
+| **RCB-10** | Shared `TypeError: Cannot read properties of undefined (reading 'path')` blanks Profile, Discussions, Communications | **DIAGNOSED, NOT FIXED** | Fires during MFE shell bootstrap. Bundles load 200, config API returns valid data. Need sourcemaps/Sentry to identify call site. Profile still blank even after RCB-09 live fix. |
+| **RCB-11** | learner-record MFE registered in Tutor plugin but not packaged in mfe container | **DIAGNOSED, NOT FIXED** | `/openedx/dist/` has 11 MFEs: account, admin-console, authn, authoring, communications, discussions, gradebook, learner-dashboard, learning, ora-grading, profile. learner-record absent. Webpack 4/Node 18 build chain broken from Session 2/3. |
+
+### WS8 status unchanged: 7/7 PASS
+
+### Browser proof delta (2026-04-11 Dev Mereka, real browser with testadmin)
+
+| Surface | Old status (2026-04-09) | Honest re-prove (2026-04-11) |
+|---------|------------------------|------------------------------|
+| LMS landing | L1 (curl 200) | **L3 PROVEN** (28+ course cards visually rendered) |
+| authn login | L3 (HTTP 200 claim) | **L3 PROVEN** (branded "Start learning with Mereka Academy" panel screenshot) |
+| Login flow | L4 (HTTP 200 claim) | **L4 PROVEN** (redirects to learner-dashboard, testadmin menu visible) |
+| learner-dashboard | L3 (HTTP 200 claim) | **L4 PROVEN** ("Mereka Academy IN SESSION", My Courses, Learning Cockpit sidebar visually rendered) |
+| account | L3 (HTTP 200 claim) | **L4 PROVEN** (Account Settings heading + 7 sidebar sections + footer) |
+| profile | L3 (title claim) | **🔴 BROKEN** (completely blank, RCB-10 TypeError) |
+| learner-record | not listed | **🔴 BROKEN 404** (RCB-11 not packaged) |
+| discussions | L3 (HTTP 200 claim) | **🔴 BROKEN** (error boundary, RCB-10 TypeError) |
+| communications | not listed | **🔴 BROKEN** (blank, RCB-10 TypeError) |
+| gradebook | L3 (HTTP 200 claim) | **⚠️ partial** (shell+footer render, body needs course context) |
+| learning | L3 (HTTP 200 claim) | **⚠️ partial** (shell+footer render, body needs course context) |
+| authoring | L3 (HTTP 200 claim) | **🔴 BROKEN** ("Unexpected Application Error! 404 Not Found") |
+
+**Previously overclaimed** (per VNext brief): Profile, Learner Dashboard, non-primary Studio, staging parity. Of these, ONLY Learner Dashboard is actually L4 proven. Profile confirmed still broken. Non-primary Studio and staging parity not yet re-proven this session.

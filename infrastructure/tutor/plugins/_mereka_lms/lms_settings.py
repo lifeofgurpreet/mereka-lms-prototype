@@ -54,6 +54,18 @@ MFE_CONFIG["LOGO_URL"] = f"{_mfe_static_base}/theme/logo-horizontal.svg"
 MFE_CONFIG["LOGO_WHITE_URL"] = f"{_mfe_static_base}/theme/logo-horizontal-white.svg"
 MFE_CONFIG["LOGO_TRADEMARK_URL"] = f"{_mfe_static_base}/theme/logo.svg"
 
+# Keys required by Open edX MFE footer/header components (Studio Footer,
+# Help Content, Header). Missing any of these causes the MFE to crash with
+# "App configuration error: X is required by Y component" and a React
+# TypeError, which blanks Profile/Learner-Record/Discussions/Communications.
+# Values mirror the Django footer fallbacks in themes/mereka/lms/templates/footer.html
+# so the LMS-rendered footer and the MFE-rendered footer stay consistent.
+MFE_CONFIG["SUPPORT_EMAIL"] = "support@mereka.io"
+MFE_CONFIG["TERMS_OF_SERVICE_URL"] = "https://legal.mereka.io/"
+MFE_CONFIG["PRIVACY_POLICY_URL"] = "https://legal.mereka.io/privacy-policy/"
+MFE_CONFIG["ENABLE_ACCESSIBILITY_PAGE"] = False
+MFE_CONFIG["ORDER_HISTORY_URL"] = f"{_lms_url}/orders"
+
 # ── Content Security Policy ────────────────────────────────────────────────
 # Migration plan: docs/adr/025-csp-nonce-migration.md
 #
