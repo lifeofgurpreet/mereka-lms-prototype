@@ -1774,11 +1774,13 @@ jobs:
         id: gitops-app-token
         env:
           FASTLANE_GITHUB_APP_ID: ${{ secrets.FASTLANE_GITHUB_APP_ID }}
+          FASTLANE_GITHUB_APP_INSTALLATION_ID: ${{ secrets.FASTLANE_GITHUB_APP_INSTALLATION_ID }}
           FASTLANE_GITHUB_APP_PRIVATE_KEY: ${{ secrets.FASTLANE_GITHUB_APP_PRIVATE_KEY }}
-        if: ${{ env.FASTLANE_GITHUB_APP_ID != '' && env.FASTLANE_GITHUB_APP_PRIVATE_KEY != '' }}
+        if: ${{ env.FASTLANE_GITHUB_APP_ID != '' && env.FASTLANE_GITHUB_APP_INSTALLATION_ID != '' && env.FASTLANE_GITHUB_APP_PRIVATE_KEY != '' }}
         uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349
         with:
           app-id: ${{ env.FASTLANE_GITHUB_APP_ID }}
+          installation-id: ${{ env.FASTLANE_GITHUB_APP_INSTALLATION_ID }}
           private-key: ${{ env.FASTLANE_GITHUB_APP_PRIVATE_KEY }}
           owner: Biji-Biji-Initiative
           repositories: bbi-infrastructure
