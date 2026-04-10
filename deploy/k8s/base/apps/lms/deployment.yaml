@@ -23,6 +23,10 @@ spec:
         app.kubernetes.io/name: lms
         app.kubernetes.io/part-of: mereka-lms
     spec:
+      # Disable Kubernetes service link env var injection to prevent
+      # MONGODB_PORT, REDIS_PORT, etc. from being set to "tcp://IP:PORT" form,
+      # which breaks Django settings that parse these as integers.
+      enableServiceLinks: false
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
