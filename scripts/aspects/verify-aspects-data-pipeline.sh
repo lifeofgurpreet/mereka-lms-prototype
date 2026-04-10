@@ -381,6 +381,25 @@ else
   fi
 fi
 
+COURSE_OVERVIEWS_CRONJOB="aspects-event-sink-course-overviews-sync"
+course_overviews_cj_exists="$(kctl get cronjob "$COURSE_OVERVIEWS_CRONJOB" -o name 2>/dev/null || true)"
+if [[ -z "$course_overviews_cj_exists" ]]; then
+  warn "CronJob '${COURSE_OVERVIEWS_CRONJOB}' not found — course_overviews refresh remains coupled to manual backfills"
+else
+  course_overviews_image="$(kctl get cronjob "$COURSE_OVERVIEWS_CRONJOB" -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].image}' 2>/dev/null || true)"
+  course_overviews_last_success="$(kctl get cronjob "$COURSE_OVERVIEWS_CRONJOB" -o jsonpath='{.status.lastSuccessfulTime}' 2>/dev/null || true)"
+  if [[ "$course_overviews_image" == *":pin-required"* ]]; then
+    fail "CronJob '${COURSE_OVERVIEWS_CRONJOB}' image is unresolved: ${course_overviews_image}"
+  elif [[ -n "$course_overviews_image" ]]; then
+    pass "CronJob '${COURSE_OVERVIEWS_CRONJOB}' image resolved: ${course_overviews_image}"
+  fi
+  if [[ -n "$course_overviews_last_success" ]]; then
+    pass "CronJob '${COURSE_OVERVIEWS_CRONJOB}' last successful run: ${course_overviews_last_success}"
+  else
+    warn "CronJob '${COURSE_OVERVIEWS_CRONJOB}' has no recorded successful run yet"
+  fi
+fi
+
 # Check for active sync jobs
 active_jobs="$(kctl get jobs -l "cronjob-name=${CRONJOB_NAME}" --sort-by=.metadata.creationTimestamp -o jsonpath='{.items[-1].metadata.name}' 2>/dev/null || true)"
 if [[ -n "$active_jobs" ]]; then

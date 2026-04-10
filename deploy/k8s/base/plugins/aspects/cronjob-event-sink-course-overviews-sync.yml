@@ -1,37 +1,25 @@
 ---
-# CronJob definition for event_sink dimensional refresh.
-#
-# Suspended by default: `dump_data_to_clickhouse --force` appends new snapshots
-# into raw event_sink tables, and several downstream tables are not raw-row
-# idempotent under periodic re-dumps. Use manual one-off jobs only until an
-# idempotent sync contract exists for scheduled execution.
-# course_overviews is intentionally split into its own slower job (see
-# cronjob-event-sink-course-overviews-sync.yml) because the modulestore/Mongo
-# path can stall and should not block the higher-value dimensions from refreshing.
-#
-# This job is intentionally explicit:
-# - It uses the same settings/config/secret surface as the LMS deployment.
-# - It passes ClickHouse connection details directly so it does not depend on
-#   optional LMS runtime env wiring that may be disabled in shared environments.
+# CronJob to refresh event_sink.course_overviews separately from the core
+# dimension sync. This isolates the modulestore/Mongo-dependent path so it
+# cannot block the higher-frequency core dimensional refresh job.
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: aspects-event-sink-sync
+  name: aspects-event-sink-course-overviews-sync
   namespace: mereka-lms
   labels:
-    app.kubernetes.io/name: aspects-event-sink-sync
+    app.kubernetes.io/name: aspects-event-sink-course-overviews-sync
     app.kubernetes.io/component: cronjob
     app.kubernetes.io/part-of: aspects
 spec:
-  schedule: "0 */6 * * *"
-  suspend: true
+  schedule: "30 3 * * *"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
   jobTemplate:
     metadata:
       labels:
-        app.kubernetes.io/name: aspects-event-sink-sync
+        app.kubernetes.io/name: aspects-event-sink-course-overviews-sync
         app.kubernetes.io/component: job
     spec:
       backoffLimit: 1
@@ -39,11 +27,12 @@ spec:
       template:
         metadata:
           labels:
-            app.kubernetes.io/name: aspects-event-sink-sync
+            app.kubernetes.io/name: aspects-event-sink-course-overviews-sync
             app.kubernetes.io/component: pod
         spec:
           restartPolicy: Never
           enableServiceLinks: false
+          activeDeadlineSeconds: 1800
           securityContext:
             runAsUser: 1000
             runAsGroup: 1000
@@ -61,29 +50,18 @@ spec:
                   set -euo pipefail
 
                   CLICKHOUSE_URL="http://${ASPECTS_CLICKHOUSE_HOST}:${ASPECTS_CLICKHOUSE_PORT}"
-                  OBJECTS=(
-                    external_id
-                    user_profile
-                    course_enrollment
-                    tag
-                    taxonomy
-                    object_tag
-                  )
 
-                  echo "=== Aspects event_sink sync - $(date -u) ==="
-                  for object_name in "${OBJECTS[@]}"; do
-                    echo "--- syncing ${object_name} ---"
-                    python manage.py lms dump_data_to_clickhouse \
-                      --object "${object_name}" \
-                      --url "${CLICKHOUSE_URL}" \
-                      --username "${ASPECTS_CLICKHOUSE_USER}" \
-                      --password "${ASPECTS_CLICKHOUSE_PASSWORD}" \
-                      --database "${ASPECTS_CLICKHOUSE_DATABASE}" \
-                      --batch_size 1000 \
-                      --sleep_time 0 \
-                      --force
-                  done
-                  echo "=== Aspects event_sink sync complete ==="
+                  echo "=== Aspects course_overviews sync - $(date -u) ==="
+                  timeout 20m python manage.py lms dump_data_to_clickhouse \
+                    --object course_overviews \
+                    --url "${CLICKHOUSE_URL}" \
+                    --username "${ASPECTS_CLICKHOUSE_USER}" \
+                    --password "${ASPECTS_CLICKHOUSE_PASSWORD}" \
+                    --database "${ASPECTS_CLICKHOUSE_DATABASE}" \
+                    --batch_size 1000 \
+                    --sleep_time 0 \
+                    --force
+                  echo "=== Aspects course_overviews sync complete ==="
               env:
                 - name: SERVICE_VARIANT
                   value: lms
