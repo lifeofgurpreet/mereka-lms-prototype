@@ -37,7 +37,7 @@ permissions: {}  # Deny-all at workflow level; each job grants only what it need
 
 jobs:
   resolve-source:
-    runs-on: mereka-k8s-runners
+    runs-on: ubuntu-latest
     permissions:
       packages: read
     outputs:
