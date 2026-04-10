@@ -28,6 +28,9 @@ def sample_release_object() -> dict:
         "app_commit_sha": "a" * 40,
         "build_origin_environment": "dev",
         "promotion_target_environment": None,
+        "contract_family": "release_object_projection_schema",
+        "contract_version": "1.0",
+        "contract_ref": "Biji-Biji-Initiative/platform-control-plane@194e6001c924902e8bf3dafefdc37fc842c56653",
         "tenant_contract": {
             "path": "/tmp/tenant-registry.yaml",
             "sha256": "1" * 64,

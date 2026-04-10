@@ -13709,16 +13709,13 @@
         "workflow_direct"
       ],
       "env_scope": [
-        "dev",
-        "nonprod",
-        "prod",
-        "staging"
+        "global"
       ],
       "kind": "verify",
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-release-object.sh",
-      "reference_count": 10,
+      "reference_count": 12,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

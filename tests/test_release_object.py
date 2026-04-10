@@ -5,11 +5,8 @@ import json
 import subprocess
 from pathlib import Path
 
-import jsonschema
-
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCRIPT_PATH = REPO_ROOT / "scripts" / "release" / "generate_release_object.py"
-SCHEMA_PATH = REPO_ROOT / "schemas" / "release-object.schema.json"
 
 
 def load_module():
@@ -18,11 +15,6 @@ def load_module():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)  # type: ignore[union-attr]
     return module
-
-
-def load_schema() -> dict:
-    return json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
-
 
 def release_bundle_payload() -> dict:
     return {
@@ -85,10 +77,12 @@ def test_release_object_builds_from_release_bundle_only(tmp_path: Path) -> None:
     assert payload["build_origin_environment"] == "dev"
     assert payload["promotion_target_environment"] is None
     assert payload["target_environment"] == "dev"
+    assert payload["contract_family"] == "release_object_projection_schema"
+    assert payload["contract_version"] == "1.0"
+    assert payload["contract_ref"] == release_bundle_payload()["contract_ref"]
     assert payload["promotion"]["status"] == "build-only"
     assert payload["promotion"]["gitops_commit_sha"] is None
     assert payload["tenant_contract"]["sha256"]
-    jsonschema.validate(payload, load_schema())
 
 
 def test_release_object_links_build_provenance_when_present(tmp_path: Path) -> None:
@@ -135,7 +129,9 @@ def test_release_object_links_build_provenance_when_present(tmp_path: Path) -> N
     assert payload["build_origin_environment"] == "dev"
     assert payload["promotion_target_environment"] == "dev"
     assert payload["proof_refs"] == ["var/acceptance/runtime-routing/dev/20260403T120000Z/summary.json"]
-    jsonschema.validate(payload, load_schema())
+    assert payload["contract_family"] == "release_object_projection_schema"
+    assert payload["contract_version"] == "1.0"
+    assert payload["contract_ref"] == release_bundle_payload()["contract_ref"]
 
 
 def test_release_object_cli_emits_schema_valid_payload(tmp_path: Path) -> None:
@@ -170,4 +166,6 @@ def test_release_object_cli_emits_schema_valid_payload(tmp_path: Path) -> None:
     assert payload["build_origin_environment"] == "dev"
     assert payload["promotion_target_environment"] is None
     assert payload["proof_refs"] == ["var/acceptance/runtime-routing/dev/20260403T120000Z/summary.json"]
-    jsonschema.validate(payload, load_schema())
+    assert payload["contract_family"] == "release_object_projection_schema"
+    assert payload["contract_version"] == "1.0"
+    assert payload["contract_ref"] == release_bundle_payload()["contract_ref"]

@@ -6,7 +6,7 @@ set -euo pipefail
 # verify-proof-lineage-chain.sh — Verify the runtime proof chain is unbroken
 #
 # Statically verifies that the chain from build to runtime proof is wired:
-#   release-object-schema projection → generator → bundle generator → workflow → proof gates
+#   release-object projection contract → generator → bundle generator → workflow → proof gates
 #
 # Does NOT require cluster access. Proves the wiring exists, not the state.
 
@@ -21,15 +21,25 @@ fail() { echo "  [FAIL] $*" >&2; failures=$((failures + 1)); }
 echo "=== Proof Lineage Chain Verification ==="
 
 # ── Link 1: Schema → Generator ──────────────────────────────────────
-echo "--- Link 1: Release object schema projection → generator ---"
+echo "--- Link 1: Release object projection contract consumer → generator ---"
 
-SCHEMA="$REPO_ROOT/schemas/release-object.schema.json"
+VERIFY_SCRIPT="$REPO_ROOT/scripts/qa/verify-release-object.sh"
 GENERATOR="$REPO_ROOT/scripts/release/generate_release_object.py"
 
-if [[ -f "$SCHEMA" ]]; then
-  pass "release-object.schema.json exists"
+if [[ -f "$VERIFY_SCRIPT" ]]; then
+  pass "verify-release-object.sh exists"
+  if grep -q 'release-object-projection-schema\.yaml' "$VERIFY_SCRIPT"; then
+    pass "release-object verifier references PCP projection schema"
+  else
+    fail "release-object verifier does not reference PCP projection schema"
+  fi
+  if grep -q 'PLATFORM_CONTROL_PLANE_ROOT\|WAVE10_PCP_ROOT' "$VERIFY_SCRIPT"; then
+    pass "release-object verifier resolves PCP root"
+  else
+    fail "release-object verifier does not resolve PCP root"
+  fi
 else
-  fail "release-object.schema.json missing"
+  fail "verify-release-object.sh missing"
 fi
 
 if [[ -f "$GENERATOR" ]]; then
@@ -40,8 +50,8 @@ if [[ -f "$GENERATOR" ]]; then
   else
     fail "generator does not reference release bundle input"
   fi
-  # Generator must produce standard fields used by the JSON schema projection.
-  for field in release_id app_commit_sha images build_origin_environment promotion; do
+  # Generator must produce standard fields used by the PCP projection contract.
+  for field in release_id app_commit_sha images build_origin_environment promotion contract_family contract_version contract_ref; do
     if grep -q "$field" "$GENERATOR"; then
       pass "generator produces $field"
     else
@@ -96,14 +106,14 @@ else
 fi
 
 # ── Link 4: Release workflow consumes release object ─────────────────
-echo "--- Link 4: Release workflow → release object schema ---"
+echo "--- Link 4: Release workflow → release object projection consumer ---"
 
 RELEASE_WF="$REPO_ROOT/.github/workflows/release.yml"
 if [[ -f "$RELEASE_WF" ]]; then
-  if grep -q 'schemas/release-object\.schema\.json\|release-object schema projection' "$RELEASE_WF"; then
-    pass "release workflow validates release-object schema"
+  if grep -q 'verify-release-object\.sh\|release-object control-plane projection consumer\|release-object projection' "$RELEASE_WF"; then
+    pass "release workflow validates release-object projection consumer"
   else
-    fail "release workflow does not reference release-object schema"
+    fail "release workflow does not reference release-object projection consumer"
   fi
   # Promotion must depend on release job
   if grep -A5 'promote-to-production' "$RELEASE_WF" | grep -q 'needs:.*create-github-release'; then

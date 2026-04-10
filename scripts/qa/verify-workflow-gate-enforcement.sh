@@ -8,7 +8,7 @@ set -euo pipefail
 #
 # Checks:
 #   1. Live-asset gate in smoke workflow uses exit 1 on failure
-#   2. Release-object validation in release workflow uses exit 1
+#   2. Release-object projection consumer validation in release workflow uses exit 1
 #   3. Promotion job requires create-github-release via needs:
 #   4. Release-bundle job requires all build+scan jobs via needs:
 #   5. continue-on-error steps are explicitly classified with comments
@@ -60,13 +60,13 @@ RELEASE="$WORKFLOWS/release.yml"
 if [[ ! -f "$RELEASE" ]]; then
   fail "release.yml not found"
 else
-  if grep -q 'release-object schema' "$RELEASE"; then
+  if grep -q 'Validate release-object control-plane projection consumer' "$RELEASE"; then
     pass "release-object validation step exists"
   else
     fail "release-object validation step missing"
   fi
 
-  if grep -A20 'release-object schema' "$RELEASE" | grep -q 'exit 1'; then
+  if grep -A20 'Validate release-object control-plane projection consumer' "$RELEASE" | grep -q 'SystemExit'; then
     pass "release-object validation exits 1 on failure"
   else
     fail "release-object validation does NOT exit 1"

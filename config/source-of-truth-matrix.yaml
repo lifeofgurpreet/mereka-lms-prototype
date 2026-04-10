@@ -43,8 +43,8 @@ surfaces:
     canonical_locations:
       - repo: platform-control-plane
         path: "contracts/release-object-authority-contract.yaml"
-      - repo: mereka-lms
-        path: "schemas/release-object.schema.json"
+      - repo: platform-control-plane
+        path: "contracts/release-object-projection-schema.yaml"
       - repo: mereka-lms
         path: "scripts/release/generate_release_object.py"
     derived_locations:

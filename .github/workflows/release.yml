@@ -32,38 +32,21 @@ jobs:
           fi
           echo "TAG=${TAG}" >> "$GITHUB_ENV"
 
-      - name: Validate release-object schema projection (INV-016)
+      - name: Validate release-object control-plane projection consumer (INV-016)
         run: |
           set -euo pipefail
-          SCHEMA="schemas/release-object.schema.json"
-          if [[ ! -f "$SCHEMA" ]]; then
-            echo "ERROR: Release-object schema not found: $SCHEMA"
-            exit 1
-          fi
           python3 - <<'PY'
-          import json
           from pathlib import Path
 
-          schema = json.loads(Path("schemas/release-object.schema.json").read_text(encoding="utf-8"))
-          required = set(schema.get("required", []))
-          expected = {
-              "schema_version",
-              "release_id",
-              "app_commit_sha",
-              "tenant_contract",
-              "build",
-              "images",
-              "source_artifacts",
-              "proof_refs",
-              "promotion",
-          }
-          missing = sorted(expected - required)
+          verifier = Path("scripts/qa/verify-release-object.sh").read_text(encoding="utf-8")
+          missing = []
+          if "release-object-projection-schema.yaml" not in verifier:
+              missing.append("verify-release-object.sh must reference release-object-projection-schema.yaml")
+          if "PLATFORM_CONTROL_PLANE_ROOT" not in verifier:
+              missing.append("verify-release-object.sh must resolve PLATFORM_CONTROL_PLANE_ROOT")
           if missing:
-              raise SystemExit(
-                  "Release-object schema projection missing required fields: "
-                  + ", ".join(missing)
-              )
-          print("PASS: Release-object JSON schema projection validated")
+              raise SystemExit("\n".join(missing))
+          print("PASS: Release-object control-plane projection consumer validated")
           PY
 
       - name: Find previous tag

@@ -10,6 +10,8 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_TENANT_CONTRACT_PATH = REPO_ROOT / "deploy" / "k8s" / "tenancy" / "tenant-registry.yaml"
+RELEASE_OBJECT_CONTRACT_FAMILY = "release_object_projection_schema"
+RELEASE_OBJECT_CONTRACT_VERSION = "1.0"
 
 
 def parse_args() -> argparse.Namespace:
@@ -58,6 +60,7 @@ def build_payload(
     promotion_target_environment = (
         build_provenance.get("target_environment") if build_provenance else None
     )
+    contract_ref = release_bundle.get("contract_ref")
 
     return {
         "schema_version": "release-object/v1",
@@ -70,10 +73,13 @@ def build_payload(
         "promotion_target_environment": promotion_target_environment,
         # Transitional alias for existing consumers; new readers should use the explicit fields above.
         "target_environment": build_origin_environment,
+        "contract_family": RELEASE_OBJECT_CONTRACT_FAMILY,
+        "contract_version": RELEASE_OBJECT_CONTRACT_VERSION,
+        "contract_ref": contract_ref,
         "tenant_contract": {
             "path": str(tenant_contract_path.resolve()),
             "sha256": file_sha256(tenant_contract_path),
-            "control_plane_ref": release_bundle.get("contract_ref"),
+            "control_plane_ref": contract_ref,
         },
         "build": {
             "workflow": release_bundle["build"]["workflow"],

@@ -34,7 +34,7 @@ required_files=(
   "config/process-invariants.yaml"
   "config/active-surface-inventory.yaml"
   "config/proof-lane-status.yaml"
-  "schemas/release-object.schema.json"
+  "config/source-of-truth-matrix.yaml"
   "deploy/k8s/tenancy/smoke-account-registry.yaml"
 )
 for f in "${required_files[@]}"; do
@@ -126,37 +126,25 @@ if [[ -f "$inv_file" ]]; then
 fi
 
 # ---------------------------------------------------------------------------
-# 6. Release-object schema projection has required field definitions
+# 6. Release-object consumer points at PCP projection authority
 # ---------------------------------------------------------------------------
-echo "--- Check 6: Release-object schema required fields ---"
-schema_file="schemas/release-object.schema.json"
-if [[ -f "$schema_file" ]]; then
-  while IFS= read -r line; do
-    field="${line%% *}"
-    status="${line#* }"
-    if [[ "$status" == "present" ]]; then
-      pass "release schema has '$field'"
-    else
-      fail "release schema missing '$field'"
-    fi
-  done < <(python3 - <<'PY' "$schema_file"
-import json
-import sys
-from pathlib import Path
+echo "--- Check 6: Release-object control-plane projection consumer ---"
+if rg -q 'release-object-projection-schema\.yaml' "scripts/qa/verify-release-object.sh"; then
+  pass "verify-release-object.sh references PCP release-object projection schema"
+else
+  fail "verify-release-object.sh does not reference PCP release-object projection schema"
+fi
 
-schema = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
-required = set(schema.get("required", []))
-for field in (
-    "release_id",
-    "app_commit_sha",
-    "images",
-    "tenant_contract",
-    "build",
-    "promotion",
-):
-    print(field, "present" if field in required else "missing")
-PY
-  )
+if rg -q 'PLATFORM_CONTROL_PLANE_ROOT|WAVE10_PCP_ROOT' "scripts/qa/verify-release-object.sh"; then
+  pass "verify-release-object.sh resolves PCP root dynamically"
+else
+  fail "verify-release-object.sh missing PCP root resolution"
+fi
+
+if rg -q 'contracts/release-object-projection-schema\.yaml' "config/source-of-truth-matrix.yaml"; then
+  pass "source-of-truth matrix points release-object at PCP projection schema"
+else
+  fail "source-of-truth matrix still points release-object at local schema authority"
 fi
 
 echo ""

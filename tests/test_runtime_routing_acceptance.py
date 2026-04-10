@@ -95,6 +95,9 @@ def test_accept_runtime_routing_dry_run_emits_summary(tmp_path: Path) -> None:
                 "build_origin_environment": "dev",
                 "promotion_target_environment": None,
                 "target_environment": "dev",
+                "contract_family": "release_object_projection_schema",
+                "contract_version": "1.0",
+                "contract_ref": "Biji-Biji-Initiative/platform-control-plane@194e6001c924902e8bf3dafefdc37fc842c56653",
                 "tenant_contract": {
                     "path": str(REPO_ROOT / "deploy/k8s/tenancy/tenant-registry.yaml"),
                     "sha256": "b" * 64,
