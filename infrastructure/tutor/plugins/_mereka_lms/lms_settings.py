@@ -107,6 +107,20 @@ CSP_FONT_SRC = (
     "https://fonts.gstatic.com",
     "data:",
 )
+# Non-primary tenant hosts (academy.biji-biji.com, skillourfuture.academy.mereka.io,
+# admin.academyv2.mereka.io, learner.academyv2.mereka.io, etc.) must be in
+# connect-src / frame-src / img-src so tenant MFEs can fetch CSRF tokens, user
+# APIs, theme assets, and enterprise flows from their OWN tenant hosts. Without
+# these entries, the MFE served from apps.<tenant> loads with a CSP that only
+# allows Mereka primary hosts — every /csrf/api/v1/token and /api/mfe_context
+# call from a tenant MFE gets blocked by CSP and login hangs with a "pending"
+# button (RCB-13 2026-04-11, observed on biji-biji prod first).
+_tenant_extra_hosts = tuple(
+    f"https://{host}" for host in {{ MEREKA_LMS_EXTRA_HOSTS }}
+) + tuple(
+    f"https://apps.{host}" for host in {{ MEREKA_LMS_EXTRA_HOSTS }}
+)
+
 CSP_IMG_SRC = (
     "'self'",
     "data:",
@@ -123,7 +137,8 @@ CSP_IMG_SRC = (
     "https://www.gravatar.com",        # User avatar images
     "https://stream.mux.com",          # Mux video poster / thumbnail frames
     "https://image.mux.com",           # Mux image API (thumbnails, storyboards)
-)
+) + _tenant_extra_hosts
+
 CSP_CONNECT_SRC = (
     "'self'",
     _lms_url,
@@ -132,7 +147,7 @@ CSP_CONNECT_SRC = (
     _auth_url,
     "https://www.google-analytics.com",
     "https://sentry.io",
-)
+) + _tenant_extra_hosts
 CSP_FRAME_SRC = (
     "'self'",
     _lms_url,
@@ -141,7 +156,7 @@ CSP_FRAME_SRC = (
     _auth_url,
     "https://www.youtube.com",
     "https://player.vimeo.com",
-)
+) + _tenant_extra_hosts
 CSP_MEDIA_SRC = ("'self'", "blob:")
 CSP_OBJECT_SRC = ("'none'",)
 CSP_BASE_URI = ("'self'",)
