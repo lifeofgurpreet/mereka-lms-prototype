@@ -108,3 +108,21 @@ exceptions:
     follow_up: >
       Eval runner (subagent-based) and benchmark aggregation in separate PRs.
     logged_by: "factory-droid (session skill-evals)"
+
+  - date: "2026-04-10"
+    pr: "https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1550"
+    commit: "8010306f2a19f5fb85301a4c9d96077517b54c03"
+    bypassed_checks:
+      - "Static Validation Scripts (shard-01)"
+      - "Static Validation Scripts (shard-02)"
+      - "Static Validation Scripts (shard-03)"
+    justification: >
+      Admin merge used after a bounded wait on queued CI shards with no runner
+      assigned on the mereka-k8s-runners pool. Source-side validation for the
+      xblock iframe config sync passed locally, and the queued shard checks all
+      completed green shortly after the merge.
+    follow_up: >
+      Logged the exception in the canonical ledger. Treat this as a runner
+      capacity/control-plane event, not semantic proof by itself; rely on the
+      post-merge green checks plus Argo/runtime verification for closure.
+    logged_by: "codex (session xblock-iframe-config-sync)"
