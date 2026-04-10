@@ -7,6 +7,17 @@ on:
       - "services/purchase-gateway/**"
       - ".github/workflows/build-purchase-gateway.yml"
   workflow_dispatch:
+    inputs:
+      lane_mode:
+        description: "Routing override for build jobs"
+        type: choice
+        required: false
+        options:
+          - auto
+          - fastlane
+          - fastlane-required
+          - fallback
+        default: auto
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -15,7 +26,35 @@ concurrency:
 permissions: {}  # Deny-all at workflow level; each job grants only what it needs
 
 jobs:
+  select-build-lane:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      runner_label: ${{ steps.select.outputs.runner_label }}
+      decision: ${{ steps.select.outputs.decision }}
+      reason: ${{ steps.select.outputs.reason }}
+    steps:
+      - name: Select runner lane
+        id: select
+        uses: Biji-Biji-Initiative/bbi-infrastructure/.github/actions/select-runner-lane@main
+        with:
+          enabled: ${{ vars.CI_FASTLANE_BUILD_ENABLED }}
+          lane_mode: ${{ github.event_name == 'workflow_dispatch' && inputs.lane_mode || 'auto' }}
+          fastlane_label: ${{ vars.CI_FASTLANE_BUILD_LABEL }}
+          fallback_label: mereka-k8s-heavy-builders
+          timezone: ${{ vars.CI_FASTLANE_BUILD_TIMEZONE }}
+          office_hours_start: ${{ vars.CI_FASTLANE_BUILD_WINDOW_START }}
+          office_hours_end: ${{ vars.CI_FASTLANE_BUILD_WINDOW_END }}
+          runner_status_token: ${{ secrets.FASTLANE_RUNNER_STATUS_TOKEN }}
+          github_app_id: ${{ secrets.FASTLANE_GITHUB_APP_ID }}
+          github_app_installation_id: ${{ secrets.FASTLANE_GITHUB_APP_INSTALLATION_ID }}
+          github_app_private_key: ${{ secrets.FASTLANE_GITHUB_APP_PRIVATE_KEY }}
+          allow_push_main: 'true'
+          allow_workflow_dispatch: 'true'
+
   build:
+    needs: select-build-lane
     # contents: read — checkout in reusable workflow
     # packages: write — push image to GHCR
     # id-token: write — OIDC for Workload Identity Federation (GCP auth)
@@ -23,12 +62,13 @@ jobs:
       contents: read
       packages: write
       id-token: write
-    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@a77f05b1ba53665cb507667f83d6f34897e97fa7
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@2bf8b85183bd0e570bf1b1260c0aaad04bf865d9
     secrets: inherit
     with:
       app_name: purchase-gateway
       dockerfile: services/purchase-gateway/Dockerfile
       context: services/purchase-gateway
+      runner_label: ${{ needs.select-build-lane.outputs.runner_label }}
 
   update-dev:
     needs: build
@@ -38,7 +78,7 @@ jobs:
     permissions:
       contents: write
       id-token: write
-    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-update-dev-tag.yml@8c9ec0149a4f1910f6dfc3246b87046f0c0a43c8
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-update-dev-tag.yml@2bf8b85183bd0e570bf1b1260c0aaad04bf865d9
     with:
       app_name: mereka-lms
       image_tag: ${{ needs.build.outputs.image_tag }}
