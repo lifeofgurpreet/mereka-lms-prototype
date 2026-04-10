@@ -53,12 +53,26 @@ COPY indigo/mereka /openedx/app/mereka
 
 # Copy generated runtime theme assets into the MFE container.
 # PARAGON_THEME_URLS points to /theme/* on the MFE origin.
+#
+# NOTE: The post-npm-install hook fires inside each per-MFE "common" stage.
+# Those stages copy /openedx/dist/theme into their own filesystem, but the
+# FINAL production stage (FROM caddy:2.7.4 AS production) only copies
+# /openedx/app/dist from each <mfe>-prod stage via `COPY --from=<mfe>-prod`,
+# which does NOT include /openedx/dist/theme. That's why the built MFE image
+# has every per-MFE dir under /openedx/dist/ EXCEPT theme/.
+#
+# Fix: inject the same COPY into the production stage via the
+# `mfe-dockerfile-production-final` hook that the base tutor-mfe template
+# invokes at the end of the production stage. This guarantees the theme
+# files land in /openedx/dist/theme/ in the final image regardless of what
+# the per-MFE common stages do.
 _register_env_patch(
     "mfe-dockerfile-post-npm-install",
     """
 COPY indigo/theme /openedx/dist/theme
 """,
 )
+
 
 # Cookie domain environment variables
 _register_env_patch(
