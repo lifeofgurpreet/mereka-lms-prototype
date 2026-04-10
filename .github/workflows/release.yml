@@ -280,11 +280,10 @@ jobs:
           GITHUB_APP_ID: ${{ secrets.GITOPS_GITHUB_APP_ID }}
           GITHUB_APP_INSTALLATION_ID: ${{ secrets.GITOPS_GITHUB_APP_INSTALLATION_ID }}
           GITHUB_APP_PRIVATE_KEY: ${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}
-        if: ${{ env.GITHUB_APP_ID != '' && env.GITHUB_APP_INSTALLATION_ID != '' && env.GITHUB_APP_PRIVATE_KEY != '' }}
+        if: ${{ env.GITHUB_APP_ID != '' && env.GITHUB_APP_PRIVATE_KEY != '' }}
         uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349
         with:
           app-id: ${{ env.GITHUB_APP_ID }}
-          installation-id: ${{ env.GITHUB_APP_INSTALLATION_ID }}
           private-key: ${{ env.GITHUB_APP_PRIVATE_KEY }}
           owner: Biji-Biji-Initiative
           repositories: bbi-infrastructure
@@ -292,11 +291,10 @@ jobs:
       - name: Validate GitOps checkout credential
         env:
           APP_TOKEN: ${{ steps.gitops-app-token.outputs.token }}
-          GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN_BBI_KUBERNATE }}
         run: |
           set -euo pipefail
-          if [[ -z "${APP_TOKEN}" && -z "${GITOPS_TOKEN}" ]]; then
-            echo "GitOps writer app credentials or GITOPS_TOKEN_BBI_KUBERNATE are required to update bbi-infrastructure." >&2
+          if [[ -z "${APP_TOKEN}" ]]; then
+            echo "GitOps writer app credentials are required to update bbi-infrastructure." >&2
             exit 1
           fi
 
@@ -305,22 +303,18 @@ jobs:
         with:
           repository: Biji-Biji-Initiative/bbi-infrastructure
           path: bbi-infrastructure
-          token: ${{ steps.gitops-app-token.outputs.token != '' && steps.gitops-app-token.outputs.token || secrets.GITOPS_TOKEN_BBI_KUBERNATE }}
+          token: ${{ steps.gitops-app-token.outputs.token }}
 
       - name: Select GitOps automation token
         env:
           APP_TOKEN: ${{ steps.gitops-app-token.outputs.token }}
-          GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN_BBI_KUBERNATE }}
         run: |
           set -euo pipefail
-          if [[ -n "${APP_TOKEN}" ]]; then
-            echo "GITOPS_PUSH_TOKEN=${APP_TOKEN}" >> "$GITHUB_ENV"
-          elif [[ -n "${GITOPS_TOKEN}" ]]; then
-            echo "GITOPS_PUSH_TOKEN=${GITOPS_TOKEN}" >> "$GITHUB_ENV"
-          else
-            echo "GitOps writer app credentials or GITOPS_TOKEN_BBI_KUBERNATE are required to update bbi-infrastructure." >&2
+          if [[ -z "${APP_TOKEN}" ]]; then
+            echo "GitOps writer app credentials are required to update bbi-infrastructure." >&2
             exit 1
           fi
+          echo "GITOPS_PUSH_TOKEN=${APP_TOKEN}" >> "$GITHUB_ENV"
 
       - name: Configure git identity
         run: |

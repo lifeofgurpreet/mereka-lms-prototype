@@ -88,7 +88,6 @@ jobs:
       kustomization_file: apps/mereka-lms/overlays/profiles/dev/kustomization.yaml
       kustomize_image_name: ghcr.io/biji-biji-initiative/purchase-gateway
     secrets:
-      GITOPS_TOKEN: ${{ secrets.GITOPS_TOKEN_BBI_KUBERNATE }}
       GITHUB_APP_ID: ${{ secrets.FASTLANE_GITHUB_APP_ID }}
       GITHUB_APP_INSTALLATION_ID: ${{ secrets.FASTLANE_GITHUB_APP_INSTALLATION_ID }}
       GITHUB_APP_PRIVATE_KEY: ${{ secrets.FASTLANE_GITHUB_APP_PRIVATE_KEY }}

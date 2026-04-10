@@ -214,22 +214,20 @@ jobs:
           GITHUB_APP_ID: ${{ secrets.GITOPS_GITHUB_APP_ID }}
           GITHUB_APP_INSTALLATION_ID: ${{ secrets.GITOPS_GITHUB_APP_INSTALLATION_ID }}
           GITHUB_APP_PRIVATE_KEY: ${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}
-        if: ${{ env.GITHUB_APP_ID != '' && env.GITHUB_APP_INSTALLATION_ID != '' && env.GITHUB_APP_PRIVATE_KEY != '' }}
+        if: ${{ env.GITHUB_APP_ID != '' && env.GITHUB_APP_PRIVATE_KEY != '' }}
         uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349
         with:
           app-id: ${{ env.GITHUB_APP_ID }}
-          installation-id: ${{ env.GITHUB_APP_INSTALLATION_ID }}
           private-key: ${{ env.GITHUB_APP_PRIVATE_KEY }}
           owner: Biji-Biji-Initiative
           repositories: bbi-infrastructure
 
       - name: Checkout bbi-infrastructure
-        if: ${{ steps.gitops-app-token.outputs.token != '' || secrets.GITOPS_TOKEN_BBI_KUBERNATE != '' }}
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           repository: Biji-Biji-Initiative/bbi-infrastructure
           path: bbi-infrastructure
-          token: ${{ steps.gitops-app-token.outputs.token != '' && steps.gitops-app-token.outputs.token || secrets.GITOPS_TOKEN_BBI_KUBERNATE }}
+          token: ${{ steps.gitops-app-token.outputs.token }}
 
       - name: Check GHCR image freshness
         env:
