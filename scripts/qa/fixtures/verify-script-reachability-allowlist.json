@@ -101,6 +101,7 @@
     "scripts/qa/verify-mfe-config-api.sh",
     "scripts/qa/verify-mfe-first-policy.sh",
     "scripts/qa/verify-mfe-version-pinning.sh",
+    "scripts/qa/verify-middleware-divergence.sh",
     "scripts/qa/verify-migration-completion-plan.sh",
     "scripts/qa/verify-mobile-deployment.sh",
     "scripts/qa/verify-mobile-ios.sh",

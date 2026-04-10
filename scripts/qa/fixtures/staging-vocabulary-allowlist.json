@@ -82,6 +82,7 @@
     "scripts/qa/verify-mfe-config-api.sh",
     "scripts/qa/verify-mfe-config-contract.sh",
     "scripts/qa/verify-mfe-env-config-url-guard.sh",
+    "scripts/qa/verify-middleware-divergence.sh",
     "scripts/qa/verify-migration-completion-plan.sh",
     "scripts/qa/verify-multisite-config.sh",
     "scripts/qa/verify-oidc-provider-configs.sh",
