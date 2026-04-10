@@ -69,8 +69,8 @@ for key in required_top:
     if key not in bundle:
         errors.append(f"missing top-level key: {key}")
 
-if bundle.get("schema_version") != "1.0.0":
-    errors.append("schema_version must be 1.0.0")
+if bundle.get("schema_version") not in ("1.0.0", "1.1"):
+    errors.append("schema_version must be 1.0.0 or 1.1")
 
 if not re.fullmatch(r"rb-[0-9a-f]{7,40}-[0-9]{8}T[0-9]{6}Z", str(bundle.get("bundle_id", ""))):
     errors.append("bundle_id format invalid")

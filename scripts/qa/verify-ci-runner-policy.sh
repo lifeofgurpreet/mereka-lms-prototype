@@ -16,6 +16,27 @@ MACOS_HOSTED_EXCEPTIONS=(
 # Workflows permitted to use GitHub-hosted Linux runners (temporary Class C exceptions)
 LINUX_HOSTED_EXCEPTIONS=()
 
+# Heavy build jobs — the actual image compile/scan work. These MUST run on
+# ARC (mereka-k8s-heavy-builders) or route through the fastlane selector that
+# falls back to heavy-builders. Any other job is allowed to use hosted runners
+# since fastlane (PR #1518, #1524) intentionally moves lightweight orchestration
+# onto ubuntu-latest to save ARC capacity.
+HEAVY_BUILD_JOBS=(
+  "build-openedx"
+  "build-mfe"
+  "scan-openedx-image"
+  "scan-mfe-image"
+)
+
+# Expression-based `runs-on` values that route through a trusted fastlane
+# selector output are allowed. We match against the raw label string.
+# Selectors come from Biji-Biji-Initiative/bbi-infrastructure and fall back to
+# ARC runners when fastlane is disabled, so the ARC-first guarantee holds.
+FASTLANE_RUNNER_EXPRESSIONS=(
+  'needs.select-build-lane.outputs.runner_label'
+  'needs.select-ci-lane.outputs.runner_label'
+)
+
 # Workflows permitted to use mereka-k8s-heavy-builders (Class B)
 HEAVY_BUILDER_ALLOWED=(
   "build-tutor-images.yml"
@@ -63,6 +84,10 @@ validate_runner_label() {
   local label
   label="$(trim "${raw_label//$'\r'/}")"
 
+  # Strip the "[N]" label-index suffix to get the bare job name for allowlist
+  # matching. The caller passes "job_name[1]" when a job has multiple labels.
+  local bare_job_name="${job_name%\[*}"
+
   if [[ -z "$label" || "$label" == "null" ]]; then
     error "$wf_name:$job_name has empty runs-on label"
     return
@@ -73,17 +98,36 @@ validate_runner_label() {
     return
   fi
 
+  local is_heavy_build_job=false
+  if is_in_list "$bare_job_name" "${HEAVY_BUILD_JOBS[@]}"; then
+    is_heavy_build_job=true
+  fi
+
   if [[ "$label" == *'${{'* ]]; then
-    error "$wf_name:$job_name uses expression-based runs-on '$label' (hard-coded ARC label required)"
+    # Allow expression-based runs-on when it routes through a trusted fastlane
+    # selector output (e.g., select-build-lane.outputs.runner_label). The
+    # fastlane selector falls back to mereka-k8s-heavy-builders when disabled,
+    # so the ARC-first guarantee is preserved for heavy build jobs.
+    local expr
+    for expr in "${FASTLANE_RUNNER_EXPRESSIONS[@]}"; do
+      if [[ "$label" == *"$expr"* ]]; then
+        pass
+        return
+      fi
+    done
+    error "$wf_name:$job_name uses expression-based runs-on '$label' (not a recognized fastlane selector)"
     return
   fi
 
   if [[ "$label" == *"ubuntu-"* ]]; then
-    if [[ "$label" == "ubuntu-24.04" ]] && is_in_list "$wf_name" "${LINUX_HOSTED_EXCEPTIONS[@]}"; then
-      pass
-    else
-      error "$wf_name:$job_name uses GitHub-hosted Linux runner '$label' outside allowlist"
+    # Heavy build jobs may NOT run on github-hosted — they need 12GB+ RAM.
+    if [[ "$is_heavy_build_job" == "true" ]]; then
+      error "$wf_name:$job_name is a heavy build job and must not use GitHub-hosted runner '$label' (use mereka-k8s-heavy-builders or fastlane selector)"
+      return
     fi
+    # Fastlane (PR #1518, #1524) intentionally runs all other orchestration,
+    # lint, prep, and selector jobs on ubuntu-latest to save ARC capacity.
+    pass
     return
   fi
 

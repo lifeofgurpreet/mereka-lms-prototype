@@ -320,7 +320,7 @@ if [[ -f "${BUILD_WORKFLOW}" ]]; then
   fi
 
   if grep -q "target_environment must be explicitly selected before generating a release bundle" "${BUILD_WORKFLOW}" \
-    || echo "${RELEASE_BUNDLE_BLOCK}" | grep -q "inputs.target_environment != 'select-environment'"; then
+    || grep -q "inputs.target_environment != 'select-environment'" <<< "${RELEASE_BUNDLE_BLOCK}"; then
     pass "build-tutor-images.yml guards placeholder target_environment before release bundle generation"
   else
     fail "build-tutor-images.yml missing explicit target_environment guard before release bundle generation"

@@ -267,30 +267,25 @@ COPY --from=account-src / /openedx/app
 RUN python3 - <<'PY'
 from pathlib import Path
 
-guard_revision = "account-social-links-guard-2026-04-04-cacheproof-v1"
 service_path = Path("/openedx/app/src/account-settings/data/service.js")
 if not service_path.exists():
     raise SystemExit(0)
 
 original = "const platformData = data.social_links.find(({ platform }) => platform === id);"
 patched = (
-    "const socialLinks = Array.isArray(data.social_links) ? data.social_links : [];\\n"
+    "const socialLinks = Array.isArray(data.social_links) ? data.social_links : [];\n"
     "      const platformData = socialLinks.find(({ platform }) => platform === id);"
 )
 
 content = service_path.read_text(encoding="utf-8")
 if patched in content:
-    raise SystemExit(0)
+    raise SystemExit(0)  # already patched — idempotent
 if original not in content:
-    raise SystemExit(f"{guard_revision}: frontend-app-account social_links lookup anchor missing")
+    raise SystemExit("account social_links patch anchor missing — upstream may have changed")
 
 updated = content.replace(original, patched)
-if updated == content:
-    raise SystemExit(f"{guard_revision}: frontend-app-account social_links patch was a no-op")
-
 service_path.write_text(updated, encoding="utf-8")
-if patched not in service_path.read_text(encoding="utf-8"):
-    raise SystemExit(f"{guard_revision}: frontend-app-account social_links guard missing after patch write")
+print("account social_links null-safety patch applied")
 PY
 
 RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations
@@ -871,15 +866,26 @@ RUN npm run build
 RUN python3 - <<'PY'
 from pathlib import Path
 
-guard_revision = "account-social-links-guard-2026-04-04-cacheproof-v1"
+guard_revision = "account-social-links-guard-2026-04-04-cacheproof-v2"
+source_path = Path("/openedx/app/src/account-settings/data/service.js")
+
+# 1. Confirm the fix is present in the SOURCE file before minification renames variables.
+required_in_source = "const socialLinks = Array.isArray(data.social_links) ? data.social_links : [];"
+if source_path.exists():
+    source_content = source_path.read_text(encoding="utf-8")
+    if required_in_source not in source_content:
+        raise SystemExit(
+            f"{guard_revision}: guarded social_links fix missing from {source_path} — patch not applied"
+        )
+
+# 2. Confirm the OLD buggy pattern is absent from compiled assets and source maps.
+#    The original string is long enough to survive in .map files if the old code was compiled in.
 dist_dir = Path("/openedx/app/dist")
 if not dist_dir.exists():
     raise SystemExit(f"{guard_revision}: frontend-app-account dist missing after build")
 
 forbidden = "const platformData = data.social_links.find(({ platform }) => platform === id);"
-required = "const socialLinks = Array.isArray(data.social_links) ? data.social_links : [];"
 offenders = []
-required_found = False
 
 for asset in sorted(dist_dir.rglob("*")):
     if asset.suffix not in {".js", ".map"}:
@@ -890,15 +896,11 @@ for asset in sorted(dist_dir.rglob("*")):
         continue
     if forbidden in content:
         offenders.append(str(asset))
-    if required in content:
-        required_found = True
 
 if offenders:
     raise SystemExit(
         f"{guard_revision}: unguarded social_links lookup survived account build in {', '.join(offenders)}"
     )
-if not required_found:
-    raise SystemExit(f"{guard_revision}: guarded social_links source missing from compiled account assets")
 PY
 
 

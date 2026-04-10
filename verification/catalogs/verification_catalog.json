@@ -4397,7 +4397,7 @@
       "mutability": "destructive",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-deployment-lanes.sh",
-      "reference_count": 9,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster",

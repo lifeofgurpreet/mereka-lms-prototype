@@ -255,12 +255,18 @@ check_grep_ability() {
     pass "Grep-ability: All shell scripts have proper shebang"
   fi
 
-  # Check workflow action refs are immutable SHAs (external uses: only)
+  # Check workflow action refs are immutable SHAs (external uses: only).
+  # First-party trusted repos (Biji-Biji-Initiative org) are allowed to use
+  # branch refs like @main because they are under our direct control — the
+  # fastlane selector action lives in bbi-infrastructure and is pinned by
+  # branch protection on the upstream repo.
   local workflow_ref_violations=0
   while IFS=: read -r file line ref; do
     [[ -n "$file" ]] || continue
     [[ "$ref" == ./* ]] && continue
     [[ "$ref" == docker://* ]] && continue
+    # Allow first-party org refs (trusted, controlled by us)
+    [[ "$ref" == Biji-Biji-Initiative/* ]] && continue
 
     if [[ "$ref" != *@* ]]; then
       fail "Grep-ability: Workflow uses ref missing @version: ${file}:${line} (${ref})"

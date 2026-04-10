@@ -63,6 +63,9 @@ if [[ -n "$MUTABLE_TAG" ]]; then
   TAGS+=("--tag" "${IMAGE_REPO}:${MUTABLE_TAG}")
 fi
 
+# BUILDKIT_MAX_PARALLELISM — if exported by caller, buildkitd reads it directly.
+# docker buildx build has no --opt flag; the env var is the correct mechanism.
+
 docker buildx build \
   --file "$DOCKERFILE" \
   "${TAGS[@]}" \

@@ -107,15 +107,15 @@ import sys
 
 output = sys.argv[1]
 payload = {
-    "schema_version": "1.0.0",
+    "schema_version": "1.1",
     "bundle_id": os.environ["BUNDLE_ID"],
     "created_at": os.environ["CREATED_AT"],
     "repository": os.environ["REPO"],
     "commit_sha": os.environ["COMMIT_SHA"],
     "target_environment": os.environ["TARGET_ENV"],
     "service_id": "mereka-lms",
-    "contract_family": "release-bundle",
-    "contract_version": "1.0",
+    "contract_family": "release_bundle_schema",
+    "contract_version": "1.1",
     "contract_ref": os.environ.get("CONTRACT_REF", "Biji-Biji-Initiative/platform-control-plane@5fffde1a"),
     "build": {
         "workflow": os.environ["WORKFLOW"],

@@ -81,27 +81,74 @@ RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 """,
 )
 
+# Patch the account MFE source BEFORE webpack builds.
+# The upstream open-release/redwood.3 source has a null-unsafe lookup:
+#   data.social_links.find(...)
+# which crashes when social_links is null/undefined. Apply the defensive
+# check to the source BEFORE npm run build. The hook fires in account-common
+# after COPY --from=account-src but before the account-prod stage builds,
+# so the source change is compiled in.
+_register_env_patch(
+    "mfe-dockerfile-pre-npm-build-account",
+    """
+RUN python3 - <<'PY'
+from pathlib import Path
+
+service_path = Path("/openedx/app/src/account-settings/data/service.js")
+if not service_path.exists():
+    raise SystemExit(0)
+
+original = "const platformData = data.social_links.find(({ platform }) => platform === id);"
+patched = (
+    "const socialLinks = Array.isArray(data.social_links) ? data.social_links : [];\\n"
+    "      const platformData = socialLinks.find(({ platform }) => platform === id);"
+)
+
+content = service_path.read_text(encoding="utf-8")
+if patched in content:
+    raise SystemExit(0)  # already patched — idempotent
+if original not in content:
+    raise SystemExit("account social_links patch anchor missing — upstream may have changed")
+
+updated = content.replace(original, patched)
+service_path.write_text(updated, encoding="utf-8")
+print("account social_links null-safety patch applied")
+PY
+""",
+)
+
 # Fail the account build if a stale compiled bundle or source map still contains the
 # unguarded social_links lookup after webpack finishes.
+# v2: check fix presence in SOURCE (pre-minification) not in compiled dist where
+# webpack renames variables and the exact string is never found.
+# The pre-npm-build-account hook above applies the patch, so source will have the fix.
 _register_env_patch(
     "mfe-dockerfile-post-npm-build",
     """
 RUN python3 - <<'PY'
 from pathlib import Path
 
-guard_revision = "account-social-links-guard-2026-04-04-cacheproof-v1"
+guard_revision = "account-social-links-guard-2026-04-04-cacheproof-v2"
 source_path = Path("/openedx/app/src/account-settings/data/service.js")
 if not source_path.exists():
     raise SystemExit(0)
 
+# 1. Confirm the fix is present in the SOURCE file before minification renames variables.
+required_in_source = "const socialLinks = Array.isArray(data.social_links) ? data.social_links : [];"
+source_content = source_path.read_text(encoding="utf-8")
+if required_in_source not in source_content:
+    raise SystemExit(
+        f"{guard_revision}: guarded social_links fix missing from {source_path} — patch not applied"
+    )
+
+# 2. Confirm the OLD buggy pattern is absent from compiled assets and source maps.
+#    The original string is long enough to survive in .map files if the old code was compiled in.
 dist_dir = Path("/openedx/app/dist")
 if not dist_dir.exists():
     raise SystemExit(f"{guard_revision}: frontend-app-account dist missing after build")
 
 forbidden = "const platformData = data.social_links.find(({ platform }) => platform === id);"
-required = "const socialLinks = Array.isArray(data.social_links) ? data.social_links : [];"
 offenders = []
-required_found = False
 
 for asset in sorted(dist_dir.rglob("*")):
     if asset.suffix not in {".js", ".map"}:
@@ -112,15 +159,11 @@ for asset in sorted(dist_dir.rglob("*")):
         continue
     if forbidden in content:
         offenders.append(str(asset))
-    if required in content:
-        required_found = True
 
 if offenders:
     raise SystemExit(
         f"{guard_revision}: unguarded social_links lookup survived account build in {', '.join(offenders)}"
     )
-if not required_found:
-    raise SystemExit(f"{guard_revision}: guarded social_links source missing from compiled account assets")
 PY
 """,
 )

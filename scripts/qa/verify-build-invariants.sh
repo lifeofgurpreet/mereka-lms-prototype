@@ -160,12 +160,15 @@ fi
 
 # --- Invariant 7: Image builds MUST run on heavy-builder runners ---
 # ubuntu-24.04 runners are too small for OpenEdX builds (need 12GB+ RAM).
-# Count runs-on lines for build jobs (not lint/provenance)
+# Accept either a direct `mereka-k8s-heavy-builders` label, OR the fastlane
+# selector expression `${{ needs.select-build-lane.outputs.runner_label }}`
+# which falls back to heavy-builders when fastlane is disabled.
 BUILD_JOB_RUNNERS=$(awk '/Build Open[Ee]d[Xx] Image|Build MFE Image/{found=1} found && /runs-on:/{print; found=0}' "$BUILD_WF")
-if grep -q 'mereka-k8s-heavy-builders' <<<"$BUILD_JOB_RUNNERS"; then
-  do_pass "INV-7: Image build jobs use heavy-builder runners"
+if grep -q 'mereka-k8s-heavy-builders' <<<"$BUILD_JOB_RUNNERS" \
+  || grep -q 'needs.select-build-lane.outputs.runner_label' <<<"$BUILD_JOB_RUNNERS"; then
+  do_pass "INV-7: Image build jobs use heavy-builder runners (direct or fastlane selector)"
 else
-  do_fail "INV-7: Image build jobs must use mereka-k8s-heavy-builders (not github-hosted)"
+  do_fail "INV-7: Image build jobs must use mereka-k8s-heavy-builders or fastlane select-build-lane output"
 fi
 
 # --- Invariant 8: No dead runner selection input ---

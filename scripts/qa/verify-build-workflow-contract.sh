@@ -240,8 +240,13 @@ else
   fail "build-mfe job missing resolved build-scope gate"
 fi
 
-if [[ "$PREP_BLOCK" == *'runs-on: mereka-k8s-runners'* && "$PREP_BLOCK" == *'./scripts/infra/prepare-tutor-build-context-ci.sh --target "${{ steps.prep-target.outputs.target }}"'* ]]; then
-  pass "prepare-build-context job runs canonical prep on standard runners"
+# Fastlane (PR #1518, #1524) moves lightweight orchestration jobs to
+# GitHub-hosted runners to save ARC capacity for the actual heavy builds.
+# Accept either ARC runners or ubuntu-* hosted runners for prep — the
+# invariant that matters is that the canonical prep script runs.
+if [[ ( "$PREP_BLOCK" == *'runs-on: mereka-k8s-runners'* || "$PREP_BLOCK" == *'runs-on: ubuntu-'* ) \
+   && "$PREP_BLOCK" == *'./scripts/infra/prepare-tutor-build-context-ci.sh --target "${{ steps.prep-target.outputs.target }}"'* ]]; then
+  pass "prepare-build-context job runs canonical prep (ARC or hosted — fastlane-compatible)"
 else
   fail "prepare-build-context job missing canonical prep contract"
 fi
