@@ -187,6 +187,18 @@ LANGUAGE_COOKIE_NAME = "openedx-language-preference"
 # Allow the platform to include itself in an iframe
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
+# Learning MFE unit pages embed LMS /xblock/* content from apps.localhost, so
+# override the global SAMEORIGIN header for XBlock iframe responses only.
+MIDDLEWARE = list(MIDDLEWARE)
+_xblock_iframe_middleware = "lms.envs.tutor.mereka_xblock_iframe.MerekaXBlockIframeMiddleware"
+if _xblock_iframe_middleware not in MIDDLEWARE:
+    try:
+        _xfo_idx = MIDDLEWARE.index("django.middleware.clickjacking.XFrameOptionsMiddleware")
+    except ValueError:
+        MIDDLEWARE.append(_xblock_iframe_middleware)
+    else:
+        MIDDLEWARE.insert(_xfo_idx, _xblock_iframe_middleware)
+
 
 JWT_AUTH["JWT_ISSUER"] = "http://localhost/oauth2"
 JWT_AUTH["JWT_AUDIENCE"] = "openedx"

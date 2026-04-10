@@ -935,6 +935,22 @@ if _module_available("lms.envs.tutor.mereka_jwt_session"):
 else:
     logging.getLogger(__name__).warning("Skipping missing middleware module: %s", _jwt_bridge_middleware)
 
+# Learning MFE unit pages embed LMS /xblock/* content from the tenant LMS host.
+# Insert this middleware immediately before Django's XFrameOptionsMiddleware so
+# it can remove the global SAMEORIGIN header on the response path for XBlock
+# iframe responses only.
+_xblock_iframe_middleware = "lms.envs.tutor.mereka_xblock_iframe.MerekaXBlockIframeMiddleware"
+if _module_available("lms.envs.tutor.mereka_xblock_iframe"):
+    if _xblock_iframe_middleware not in MIDDLEWARE:
+        try:
+            _xfo_idx = MIDDLEWARE.index("django.middleware.clickjacking.XFrameOptionsMiddleware")
+        except ValueError:
+            MIDDLEWARE.append(_xblock_iframe_middleware)
+        else:
+            MIDDLEWARE.insert(_xfo_idx, _xblock_iframe_middleware)
+else:
+    logging.getLogger(__name__).warning("Skipping missing middleware module: %s", _xblock_iframe_middleware)
+
 
 
 LEARNER_HOME_MICROFRONTEND_URL = f"{MEREKA_MFE_BASE_URL}/learner-dashboard/"
