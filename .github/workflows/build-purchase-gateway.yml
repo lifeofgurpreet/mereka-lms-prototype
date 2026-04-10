@@ -27,7 +27,7 @@ permissions: {}  # Deny-all at workflow level; each job grants only what it need
 
 jobs:
   select-build-lane:
-    runs-on: mereka-k8s-runners
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     outputs:

@@ -39,7 +39,7 @@ concurrency:
 jobs:
   change-scope:
     name: Detect docs-only control-plane scope
-    runs-on: mereka-k8s-runners
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: read
@@ -87,7 +87,7 @@ jobs:
   select-ci-lane:
     name: Select CI lane
     needs: change-scope
-    runs-on: mereka-k8s-runners
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     outputs:
