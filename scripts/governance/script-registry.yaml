@@ -604,6 +604,12 @@ ci_runtime_inventory:
       category: CI_ARTIFACT
     - script: scripts/qa/test-verify-release-bundle.sh
       category: CI_ARTIFACT
+    - script: scripts/qa/verify-control-plane-release-bundle-projection.sh
+      category: EXTERNAL_REPO
+      args: ["var/ci/release-bundle.json"]
+      note: checks the truthful PCP projection for the app-local release bundle against a sibling platform-control-plane checkout
+    - script: scripts/qa/test-verify-control-plane-release-bundle-projection.sh
+      category: CI_ARTIFACT
     - script: scripts/qa/verify-release-object.sh
       category: CI_ARTIFACT
     - script: scripts/qa/test-verify-release-object.sh
@@ -1196,6 +1202,25 @@ scripts:
     dry_run: true  # generates a file only; no cluster/registry mutation
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/infra/generate-release-bundle.sh --help"
+    criticality: release-supporting
+
+  - path: scripts/release/render_control_plane_release_bundle_projection.py
+    owner: platform-team
+    purpose: >
+      Renders a truthful, partial PCP-facing projection from the app-local
+      release bundle without claiming full canonical release-bundle contract
+      satisfaction. Used to show which PCP fields are already derivable at build
+      time and which remain unresolved until promotion/realization.
+    inputs:
+      - --release-bundle-json PATH
+      - --output PATH
+      - --platform-control-plane-root PATH (optional; otherwise discovers sibling checkout)
+    outputs:
+      - JSON file at --output path
+    side_effects: none
+    dry_run: true  # generates a file only
+    lanes: [dev, staging, prod]
+    proof_command: "python3 scripts/release/render_control_plane_release_bundle_projection.py --help"
     criticality: release-supporting
 
   - path: scripts/infra/generate-build-provenance.sh

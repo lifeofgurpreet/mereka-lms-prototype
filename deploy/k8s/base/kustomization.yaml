@@ -40,12 +40,12 @@ resources:
 # Every environment overlay MUST override with a real pinned tag (or tag+digest).
 # This prevents accidental deployment of an unpinned base.
 images:
-  - name: docker.io/overhangio/openedx
-    newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx
-    newTag: pin-required
-  - name: docker.io/overhangio/openedx-mfe
-    newName: ghcr.io/biji-biji-initiative/mereka-lms/mfe
-    newTag: pin-required
+- name: docker.io/overhangio/openedx
+  newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx
+  newTag: pin-required
+- name: docker.io/overhangio/openedx-mfe
+  newName: ghcr.io/biji-biji-initiative/mereka-lms/mfe
+  newTag: pin-required
 
 # namespace to deploy all Resources to
 namespace: mereka-lms
@@ -58,113 +58,113 @@ commonAnnotations:
 # labels (and label selectors) added to all Resources
 # https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/labels/
 labels:
-  - pairs:
-      app.kubernetes.io/instance: mereka-lms
-      app.kubernetes.io/part-of: mereka-lms
-      app.kubernetes.io/managed-by: tutor
-    # Do not mutate selectors automatically. It causes drift/immutability issues
-    # and breaks Services when workloads don't carry the injected instance labels.
-    includeSelectors: false
+- pairs:
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/managed-by: tutor
+  # Do not mutate selectors automatically. It causes drift/immutability issues
+  # and breaks Services when workloads don't carry the injected instance labels.
+  includeSelectors: false
 
 
 patches:
   # T087: Enforce non-root, read-only FS, capability drop, and RuntimeDefault
   # seccomp profile for all Deployments. Multi-doc file, matched by kind+name.
-  - path: patches/container-hardening.yaml
+- path: patches/container-hardening.yaml
   # Runtime safety: ensure credentials service can resolve ZoneInfo("UTC")
   # without depending on base image OS timezone package availability.
-  - path: patches/credentials-zoneinfo.yaml
+- path: patches/credentials-zoneinfo.yaml
   # T087 (enterprise): Same hardening for enterprise services, portal MFEs, and
   # ancillary services. readOnlyRootFilesystem omitted — these services write
   # config to emptyDir at runtime and Caddy-based portals need writable paths.
-  - path: patches/container-hardening-enterprise.yaml
+- path: patches/container-hardening-enterprise.yaml
 
 configMapGenerator:
-  - name: caddy-config
-    files:
-      - apps/caddy/Caddyfile
-    options:
-      labels:
-        app.kubernetes.io/name: caddy
-  - name: openedx-settings-lms
-    files:
-      - apps/openedx/settings/lms/__init__.py
-      - apps/openedx/settings/lms/development.py
-      - apps/openedx/settings/lms/production.py
-      - apps/openedx/settings/lms/test.py
-      - apps/openedx/settings/lms/mereka_footer.py
-      - apps/openedx/settings/lms/mereka_xblock_iframe.py
-      - apps/openedx/settings/lms/mereka_jwt_session.py
-      - apps/openedx/settings/lms/mereka_platform_admin.py
-      - apps/openedx/settings/lms/mereka_forwarded_headers.py
-      - apps/openedx/settings/lms/mereka_multisite.py
-      - apps/openedx/settings/lms/mereka_enterprise_channels.py
-    options:
-      labels:
-        app.kubernetes.io/name: openedx
-  - name: openedx-settings-cms
-    files:
-      - apps/openedx/settings/cms/__init__.py
-      - apps/openedx/settings/cms/development.py
-      - apps/openedx/settings/cms/production.py
-      - apps/openedx/settings/cms/test.py
-      - apps/openedx/settings/cms/mereka_platform_admin.py
-      - apps/openedx/settings/cms/mereka_forwarded_headers.py
-      - apps/openedx/settings/cms/mereka_multisite.py
-    options:
-      labels:
-        app.kubernetes.io/name: openedx
-  - name: openedx-config
-    files:
-      - apps/openedx/config/cms.env.yml
-      - apps/openedx/config/lms.env.yml
-    options:
-      labels:
-        app.kubernetes.io/name: openedx
-  - name: openedx-uwsgi-config
-    files:
-      - apps/openedx/uwsgi.ini
-    options:
-      labels:
-        app.kubernetes.io/name: openedx
-  - name: openedx-theme-head-extra
-    files:
-      - apps/openedx/theme/head-extra.html
-    options:
-      labels:
-        app.kubernetes.io/name: openedx
-  - name: redis-config
-    files:
-      - apps/redis/redis.conf
-    options:
-      labels:
-        app.kubernetes.io/name: redis
-  - name: discovery-settings
-    files:
-      - plugins/discovery/apps/settings/tutor/production.py
-      - plugins/discovery/apps/settings/tutor/mereka_platform_admin.py
-  - name: credentials-settings
-    files:
-      - plugins/credentials/apps/credentials/settings/__init__.py
-      - plugins/credentials/apps/credentials/settings/development.py
-      - plugins/credentials/apps/credentials/settings/production.py
-      - plugins/credentials/apps/credentials/settings/mereka_platform_admin.py
-  - name: mfe-caddy-config
-    files:
-      - plugins/mfe/apps/mfe/Caddyfile
-    options:
-      labels:
-        app.kubernetes.io/name: mfe
-  - name: notes-settings
-    files:
-      - plugins/notes/apps/settings/tutor.py
-  - name: xqueue-settings
-    files:
-      - plugins/xqueue/apps/settings/tutor.py
-  - name: enterprise-access-settings
-    files:
-      - apps/enterprise/settings/enterprise-access-settings.py
-    options:
-      labels:
-        app.kubernetes.io/name: enterprise-access
-        app.kubernetes.io/component: enterprise
+- name: caddy-config
+  files:
+    - apps/caddy/Caddyfile
+  options:
+    labels:
+      app.kubernetes.io/name: caddy
+- name: openedx-settings-lms
+  files:
+    - apps/openedx/settings/lms/__init__.py
+    - apps/openedx/settings/lms/development.py
+    - apps/openedx/settings/lms/production.py
+    - apps/openedx/settings/lms/test.py
+    - apps/openedx/settings/lms/mereka_footer.py
+    - apps/openedx/settings/lms/mereka_xblock_iframe.py
+    - apps/openedx/settings/lms/mereka_jwt_session.py
+    - apps/openedx/settings/lms/mereka_platform_admin.py
+    - apps/openedx/settings/lms/mereka_forwarded_headers.py
+    - apps/openedx/settings/lms/mereka_multisite.py
+    - apps/openedx/settings/lms/mereka_enterprise_channels.py
+  options:
+    labels:
+      app.kubernetes.io/name: openedx
+- name: openedx-settings-cms
+  files:
+    - apps/openedx/settings/cms/__init__.py
+    - apps/openedx/settings/cms/development.py
+    - apps/openedx/settings/cms/production.py
+    - apps/openedx/settings/cms/test.py
+    - apps/openedx/settings/cms/mereka_platform_admin.py
+    - apps/openedx/settings/cms/mereka_forwarded_headers.py
+    - apps/openedx/settings/cms/mereka_multisite.py
+  options:
+    labels:
+      app.kubernetes.io/name: openedx
+- name: openedx-config
+  files:
+    - apps/openedx/config/cms.env.yml
+    - apps/openedx/config/lms.env.yml
+  options:
+    labels:
+      app.kubernetes.io/name: openedx
+- name: openedx-uwsgi-config
+  files:
+    - apps/openedx/uwsgi.ini
+  options:
+    labels:
+      app.kubernetes.io/name: openedx
+- name: openedx-theme-head-extra
+  files:
+    - apps/openedx/theme/head-extra.html
+  options:
+    labels:
+      app.kubernetes.io/name: openedx
+- name: redis-config
+  files:
+    - apps/redis/redis.conf
+  options:
+    labels:
+      app.kubernetes.io/name: redis
+- name: discovery-settings
+  files:
+    - plugins/discovery/apps/settings/tutor/production.py
+    - plugins/discovery/apps/settings/tutor/mereka_platform_admin.py
+- name: credentials-settings
+  files:
+    - plugins/credentials/apps/credentials/settings/__init__.py
+    - plugins/credentials/apps/credentials/settings/development.py
+    - plugins/credentials/apps/credentials/settings/production.py
+    - plugins/credentials/apps/credentials/settings/mereka_platform_admin.py
+- name: mfe-caddy-config
+  files:
+    - plugins/mfe/apps/mfe/Caddyfile
+  options:
+    labels:
+      app.kubernetes.io/name: mfe
+- name: notes-settings
+  files:
+    - plugins/notes/apps/settings/tutor.py
+- name: xqueue-settings
+  files:
+    - plugins/xqueue/apps/settings/tutor.py
+- name: enterprise-access-settings
+  files:
+    - apps/enterprise/settings/enterprise-access-settings.py
+  options:
+    labels:
+      app.kubernetes.io/name: enterprise-access
+      app.kubernetes.io/component: enterprise

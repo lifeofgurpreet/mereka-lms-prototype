@@ -14,6 +14,8 @@ The same workflow also emits `build-provenance` (`var/ci/build-provenance.json`)
 - Generator: `scripts/infra/generate-release-bundle.sh`
 - Validator: `scripts/qa/verify-release-bundle.sh`
 - Build provenance validator: `scripts/qa/verify-build-provenance.sh`
+- PCP projection renderer: `scripts/release/render_control_plane_release_bundle_projection.py`
+- PCP projection verifier: `scripts/qa/verify-control-plane-release-bundle-projection.sh`
 
 The bundle captures:
 
@@ -49,3 +51,29 @@ The bundle captures:
   --certificate-identity "https://github.com/Biji-Biji-Initiative/mereka-lms/.github/workflows/build-tutor-images.yml@refs/heads/main" \
   --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
 ```
+
+## Control-plane projection
+
+The app-local release bundle is not yet identical to the canonical
+platform-control-plane release-bundle contract. Instead, this repo can render a
+truthful partial PCP projection:
+
+```bash
+python3 scripts/release/render_control_plane_release_bundle_projection.py \
+  --release-bundle-json var/ci/release-bundle.json \
+  --output var/ci/control-plane-release-bundle-projection.json
+
+bash scripts/qa/verify-control-plane-release-bundle-projection.sh \
+  var/ci/release-bundle.json
+```
+
+That projection derives the canonical fields already knowable at build time and
+records the remaining unresolved PCP-required fields explicitly. As of this
+tranche, those unresolved fields are:
+
+- `config_digest`
+- `evidence_pack_ref`
+- `rollback_target`
+
+They must be bound later during promotion/realization rather than guessed in the
+app build.

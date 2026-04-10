@@ -68,7 +68,9 @@ workflows:
   - file: ".github/workflows/build-tutor-images.yml"
     references:
       - "scripts/infra/generate-release-bundle.sh"
+      - "scripts/release/render_control_plane_release_bundle_projection.py"
       - "scripts/release/generate_release_object.py"
+      - "scripts/qa/verify-control-plane-release-bundle-projection.sh"
       - "scripts/qa/verify-release-bundle.sh"
       - "scripts/qa/verify-release-object.sh"
   - file: ".github/workflows/release.yml"

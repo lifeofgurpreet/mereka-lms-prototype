@@ -3403,6 +3403,32 @@
       "cadence": "per_pr_and_push",
       "canonical": true,
       "ci_binding": [
+        "workflow_direct"
+      ],
+      "ci_entrypoints": [
+        "workflow_direct"
+      ],
+      "env_scope": [
+        "dev"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-control-plane-release-bundle-projection.sh",
+      "reference_count": 6,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "high",
+      "spec_ids": [],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
         "ci_static"
       ],
       "ci_entrypoints": [
@@ -18615,26 +18641,26 @@
     "archived_deprecated_scripts": 21,
     "ci_static_bound": 388,
     "kinds": {
-      "verify": 623
+      "verify": 624
     },
     "mutability": {
       "destructive": 10,
       "mutating": 19,
-      "read-only": 594
+      "read-only": 595
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 435,
+      "active": 436,
       "deprecated_candidate": 1,
       "manual_only": 187
     },
     "tiers": {
       "exploratory_manual": 191,
       "periodic_runtime": 20,
-      "release_blocking": 412
+      "release_blocking": 413
     },
-    "total_verify_scripts": 623,
-    "workflow_direct_bound": 64
+    "total_verify_scripts": 624,
+    "workflow_direct_bound": 65
   },
   "version": "1"
 }

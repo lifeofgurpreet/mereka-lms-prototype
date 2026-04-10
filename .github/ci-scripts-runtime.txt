@@ -24,6 +24,7 @@ scripts/qa/test-verify-build-provenance.sh  # CI_ARTIFACT
 scripts/qa/verify-ops-reliability-streak.sh  # CI_ARTIFACT (B-027: reads latest ops-reliability-streak artifact and reports streak count vs threshold (informational))
 scripts/qa/verify-release-bundle.sh  # CI_ARTIFACT
 scripts/qa/test-verify-release-bundle.sh  # CI_ARTIFACT
+scripts/qa/test-verify-control-plane-release-bundle-projection.sh  # CI_ARTIFACT
 scripts/qa/verify-release-object.sh  # CI_ARTIFACT
 scripts/qa/test-verify-release-object.sh  # CI_ARTIFACT
 scripts/qa/verify-release-readiness.sh --dry-run  # CI_ARTIFACT
@@ -127,4 +128,5 @@ scripts/qa/verify-tenant-override-schema.sh  # CONFIG_DRIFT
 scripts/qa/verify-branch-protection-contract.sh --live  # LIVE_GITHUB (audits live GitHub main-branch protection across mereka-lms, bbi-infrastructure, and platform-control-plane)
 
 # ── External repo checkout required ─────────────────────────────────────────────────────
+scripts/qa/verify-control-plane-release-bundle-projection.sh var/ci/release-bundle.json  # EXTERNAL_REPO (checks the truthful PCP projection for the app-local release bundle against a sibling platform-control-plane checkout)
 scripts/qa/verify-skill-frontmatter-integrity.sh --profile shared  # EXTERNAL_REPO (audits shared team-skills roots in addition to repo-local .factory/skills)
