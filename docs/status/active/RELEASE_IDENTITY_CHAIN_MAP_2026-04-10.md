@@ -48,7 +48,7 @@ build-tutor-images.yml (push to main)
 | Concern | Canonical should be | Current duplicate writers |
 |---|---|---|
 | release bundle schema | PCP release bundle contract | app generator, app JSON schema, local verifier semantics |
-| release object schema | one canonical contract surface | `config/release-object-schema.yaml`, `schemas/release-object.schema.json`, generator, infra workflow validation |
+| release object schema | one canonical contract surface | `schemas/release-object.schema.json`, generator, infra workflow validation |
 | dispatch handoff | PCP dispatch contract | sender workflow code, receiver workflow code |
 | dev promotion record | PCP promotion-record schema | `dev_promotion_record` ad hoc JSON in `promote-dev-image.yml` |
 | control-plane ref | current PCP ref or explicit pinned release ref | core generators/proof scripts now use `194e6001...` locally, but docs/tests still rely on repo-local pinning rather than governed ref selection |
@@ -59,7 +59,7 @@ build-tutor-images.yml (push to main)
 |---|---|
 | build result -> promotion trust | push runs `24226842382` and `24227735786` failed overall, yet still emitted bundle/release object and dispatched |
 | dev promotion evidence -> PCP truth | dev lane does not emit the canonical PCP `promotion_record` shape |
-| release object -> PCP authority | app and infra still validate `release-object/v1` locally instead of consuming PCP schema authority |
+| release object -> PCP authority | app and infra still validate the local `release-object/v1` JSON projection instead of consuming PCP schema authority directly |
 | PCP reference -> emitted artifacts | local source now points emitted artifacts at `194e6001...`, but the promotion lane still lacks an authority rule for how that ref is selected and updated |
 
 ## Realized Example: `ro-rb-496b8a3b-20260410T065709Z`

@@ -6,11 +6,11 @@ set -euo pipefail
 #
 # Checks:
 #   1. Required truth files exist
-#   2. YAML files are parseable
+#   2. Required machine-readable files are parseable
 #   3. Schema version fields are present
 #   4. smoke-account-registry references real tenant names from tenant-registry
 #   5. process-invariants has at least 12 rules
-#   6. release-object-schema has required fields
+#   6. release-object JSON schema projection has required fields
 #
 # No network calls. No destructive operations.
 
@@ -34,7 +34,7 @@ required_files=(
   "config/process-invariants.yaml"
   "config/active-surface-inventory.yaml"
   "config/proof-lane-status.yaml"
-  "config/release-object-schema.yaml"
+  "schemas/release-object.schema.json"
   "deploy/k8s/tenancy/smoke-account-registry.yaml"
 )
 for f in "${required_files[@]}"; do
@@ -46,16 +46,29 @@ for f in "${required_files[@]}"; do
 done
 
 # ---------------------------------------------------------------------------
-# 2. YAML files are parseable (using python3 yaml if available)
+# 2. Machine-readable files are parseable
 # ---------------------------------------------------------------------------
-echo "--- Check 2: YAML files are parseable ---"
+echo "--- Check 2: Machine-readable files are parseable ---"
 if python3 -c "import yaml" 2>/dev/null; then
   for f in "${required_files[@]}"; do
     if [[ -f "$f" ]]; then
-      if python3 -c "import yaml, sys; yaml.safe_load(open(sys.argv[1]))" "$f" 2>/dev/null; then
-        pass "$f is valid YAML"
+      if python3 - <<'PY' "$f" 2>/dev/null
+import json
+import sys
+import yaml
+from pathlib import Path
+
+path = Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+if path.suffix == ".json":
+    json.loads(text)
+else:
+    yaml.safe_load(text)
+PY
+      then
+        pass "$f is parseable"
       else
-        fail "$f is not valid YAML"
+        fail "$f is not parseable"
       fi
     fi
   done
@@ -69,7 +82,7 @@ fi
 echo "--- Check 3: Schema version fields present ---"
 for f in "${required_files[@]}"; do
   if [[ -f "$f" ]]; then
-    if grep -q 'schema_version:' "$f"; then
+    if rg -q 'schema_version("|:)' "$f"; then
       pass "$f has schema_version"
     else
       fail "$f missing schema_version field"
@@ -113,18 +126,37 @@ if [[ -f "$inv_file" ]]; then
 fi
 
 # ---------------------------------------------------------------------------
-# 6. Release-object schema has required field definitions
+# 6. Release-object schema projection has required field definitions
 # ---------------------------------------------------------------------------
 echo "--- Check 6: Release-object schema required fields ---"
-schema_file="config/release-object-schema.yaml"
+schema_file="schemas/release-object.schema.json"
 if [[ -f "$schema_file" ]]; then
-  for field in release_id source_commit images evidence_bundle promotion_target runtime_proof; do
-    if grep -q "$field:" "$schema_file"; then
+  while IFS= read -r line; do
+    field="${line%% *}"
+    status="${line#* }"
+    if [[ "$status" == "present" ]]; then
       pass "release schema has '$field'"
     else
       fail "release schema missing '$field'"
     fi
-  done
+  done < <(python3 - <<'PY' "$schema_file"
+import json
+import sys
+from pathlib import Path
+
+schema = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+required = set(schema.get("required", []))
+for field in (
+    "release_id",
+    "app_commit_sha",
+    "images",
+    "tenant_contract",
+    "build",
+    "promotion",
+):
+    print(field, "present" if field in required else "missing")
+PY
+  )
 fi
 
 echo ""

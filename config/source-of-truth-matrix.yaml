@@ -41,8 +41,10 @@ surfaces:
       - "scripts/qa/verify-proof-gate-contract.sh"
   - id: release-object
     canonical_locations:
+      - repo: platform-control-plane
+        path: "contracts/release-object-authority-contract.yaml"
       - repo: mereka-lms
-        path: "config/release-object-schema.yaml"
+        path: "schemas/release-object.schema.json"
       - repo: mereka-lms
         path: "scripts/release/generate_release_object.py"
     derived_locations:

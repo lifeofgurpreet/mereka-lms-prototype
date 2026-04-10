@@ -32,21 +32,39 @@ jobs:
           fi
           echo "TAG=${TAG}" >> "$GITHUB_ENV"
 
-      - name: Validate release-object schema contract (INV-016)
+      - name: Validate release-object schema projection (INV-016)
         run: |
           set -euo pipefail
-          SCHEMA="config/release-object-schema.yaml"
+          SCHEMA="schemas/release-object.schema.json"
           if [[ ! -f "$SCHEMA" ]]; then
             echo "ERROR: Release-object schema not found: $SCHEMA"
             exit 1
           fi
-          for field in release_id source_commit images evidence_bundle promotion_target runtime_proof; do
-            if ! grep -q "${field}:" "$SCHEMA"; then
-              echo "ERROR: Release-object schema missing required field: $field"
-              exit 1
-            fi
-          done
-          echo "PASS: Release-object schema contract validated"
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          schema = json.loads(Path("schemas/release-object.schema.json").read_text(encoding="utf-8"))
+          required = set(schema.get("required", []))
+          expected = {
+              "schema_version",
+              "release_id",
+              "app_commit_sha",
+              "tenant_contract",
+              "build",
+              "images",
+              "source_artifacts",
+              "proof_refs",
+              "promotion",
+          }
+          missing = sorted(expected - required)
+          if missing:
+              raise SystemExit(
+                  "Release-object schema projection missing required fields: "
+                  + ", ".join(missing)
+              )
+          print("PASS: Release-object JSON schema projection validated")
+          PY
 
       - name: Find previous tag
         id: prev-tag

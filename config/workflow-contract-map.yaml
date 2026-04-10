@@ -73,7 +73,7 @@ workflows:
       - "scripts/qa/verify-release-object.sh"
   - file: ".github/workflows/release.yml"
     references:
-      - "config/release-object-schema.yaml"
+      - "schemas/release-object.schema.json"
       - "scripts/infra/release-openedx-gitops.sh"
   - file: ".github/workflows/smoke-authenticated.yml"
     references:

@@ -6,7 +6,7 @@ set -euo pipefail
 # verify-proof-lineage-chain.sh — Verify the runtime proof chain is unbroken
 #
 # Statically verifies that the chain from build to runtime proof is wired:
-#   release-object-schema → generator → bundle generator → workflow → proof gates
+#   release-object-schema projection → generator → bundle generator → workflow → proof gates
 #
 # Does NOT require cluster access. Proves the wiring exists, not the state.
 
@@ -21,15 +21,15 @@ fail() { echo "  [FAIL] $*" >&2; failures=$((failures + 1)); }
 echo "=== Proof Lineage Chain Verification ==="
 
 # ── Link 1: Schema → Generator ──────────────────────────────────────
-echo "--- Link 1: Release object schema → generator ---"
+echo "--- Link 1: Release object schema projection → generator ---"
 
-SCHEMA="$REPO_ROOT/config/release-object-schema.yaml"
+SCHEMA="$REPO_ROOT/schemas/release-object.schema.json"
 GENERATOR="$REPO_ROOT/scripts/release/generate_release_object.py"
 
 if [[ -f "$SCHEMA" ]]; then
-  pass "release-object-schema.yaml exists"
+  pass "release-object.schema.json exists"
 else
-  fail "release-object-schema.yaml missing"
+  fail "release-object.schema.json missing"
 fi
 
 if [[ -f "$GENERATOR" ]]; then
@@ -40,8 +40,8 @@ if [[ -f "$GENERATOR" ]]; then
   else
     fail "generator does not reference release bundle input"
   fi
-  # Generator must produce standard fields
-  for field in release_id commit_sha images promotion_target; do
+  # Generator must produce standard fields used by the JSON schema projection.
+  for field in release_id app_commit_sha images build_origin_environment promotion; do
     if grep -q "$field" "$GENERATOR"; then
       pass "generator produces $field"
     else
@@ -100,7 +100,7 @@ echo "--- Link 4: Release workflow → release object schema ---"
 
 RELEASE_WF="$REPO_ROOT/.github/workflows/release.yml"
 if [[ -f "$RELEASE_WF" ]]; then
-  if grep -q 'release-object-schema' "$RELEASE_WF"; then
+  if grep -q 'schemas/release-object\.schema\.json\|release-object schema projection' "$RELEASE_WF"; then
     pass "release workflow validates release-object schema"
   else
     fail "release workflow does not reference release-object schema"
@@ -182,4 +182,4 @@ if [[ "$failures" -gt 0 ]]; then
 fi
 
 echo "Proof lineage chain is wired end-to-end."
-echo "  schema → generator → bundle → workflow → release → promotion → smoke → proof gates → incidents"
+echo "  schema projection → generator → bundle → workflow → release → promotion → smoke → proof gates → incidents"
