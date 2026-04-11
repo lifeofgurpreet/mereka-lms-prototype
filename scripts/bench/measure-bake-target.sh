@@ -9,6 +9,7 @@ fi
 ROOT="$(cd "$1" && pwd)"
 TARGET="$2"
 LABEL="${3:-$TARGET}"
+BENCHMARK_CLASS="${BENCHMARK_CLASS:-producer-class}"
 TIMESTAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 BENCH_DIR="$ROOT/.benchmarks/bake"
 LOG="$BENCH_DIR/${TIMESTAMP}-${LABEL}.log"
@@ -34,7 +35,6 @@ default_benchmark_class() {
 }
 
 BENCHMARK_CLASS="${BENCHMARK_CLASS:-$(default_benchmark_class)}"
-
 target_dockerfile() {
   case "$TARGET" in
     openedx-*) printf '%s\n' "$ROOT/tutor_env/env/build/openedx/Dockerfile" ;;
