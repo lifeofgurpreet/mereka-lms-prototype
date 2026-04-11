@@ -64,7 +64,7 @@ from pathlib import Path
 
 build_script = Path("scripts/infra/build-openedx-image.sh")
 text = build_script.read_text(encoding="utf-8")
-text = text.replace('  --set "${BAKE_TARGET}.cache-from=type=gha,scope=${GHA_SCOPE}"\n', '', 1)
+text = text.replace('--cache-from "type=gha,scope=${GHA_SCOPE}" \\\n', '', 1)
 build_script.write_text(text, encoding="utf-8")
 PY
 

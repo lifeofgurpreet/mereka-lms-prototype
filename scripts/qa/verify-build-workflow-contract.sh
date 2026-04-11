@@ -61,12 +61,18 @@ else
   fail "update_gitops input missing"
 fi
 
+if grep -q "build_profile" "$BUILD_WF"; then
+  pass "build_profile input defined"
+else
+  fail "build_profile input missing"
+fi
+
 # Manual build-proof dispatches must skip release-bundle generation when the
 # placeholder environment is still selected.
-if [[ "$RELEASE_BUNDLE_BLOCK" == *"inputs.target_environment != 'select-environment'"* ]]; then
-  pass "release bundle job skips placeholder manual environment"
+if [[ "$RELEASE_BUNDLE_BLOCK" == *"inputs.target_environment != 'select-environment'"* && "$RELEASE_BUNDLE_BLOCK" == *"inputs.build_profile == 'proof'"* ]]; then
+  pass "release bundle job skips placeholder manual environment and non-proof manual profiles"
 else
-  fail "release bundle job missing placeholder-environment skip gate"
+  fail "release bundle job missing placeholder-environment/non-proof skip gate"
 fi
 
 if [[ "$RELEASE_BUNDLE_BLOCK" == *"target_environment must be explicitly selected before generating a release bundle"* ]]; then
@@ -112,10 +118,10 @@ else
   fail "workflow missing canonical target_environment normalization"
 fi
 
-if [[ "$UPDATE_GITOPS_BLOCK" == *"github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment'"* ]]; then
-  pass "update-gitops job is gated on explicit manual dispatch inputs"
+if [[ "$UPDATE_GITOPS_BLOCK" == *"github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment' && inputs.build_profile == 'proof'"* ]]; then
+  pass "update-gitops job is gated on explicit proof-profile manual dispatch inputs"
 else
-  fail "update-gitops job missing explicit manual-dispatch gating"
+  fail "update-gitops job missing explicit proof-profile manual-dispatch gating"
 fi
 
 if [[ "$UPDATE_GITOPS_BLOCK" == *"github.event_name == 'push' && github.ref == 'refs/heads/main'"* ]]; then
@@ -518,6 +524,12 @@ else
   fail "MFE build missing canonical push-first helper"
 fi
 
+if [[ "$BUILD_MFE_BLOCK" == *'--build-profile "${BUILD_PROFILE}"'* ]]; then
+  pass "MFE build passes explicit build profile to the helper"
+else
+  fail "MFE build missing explicit build profile"
+fi
+
 if [[ "$BUILD_MFE_BLOCK" == *'tutor images build mfe'* ]]; then
   fail "MFE build still calls tutor images build mfe directly"
 else
@@ -572,6 +584,12 @@ if [[ "$BUILD_OPENEDX_BLOCK" == *'./scripts/infra/build-openedx-image.sh'* ]]; t
   pass "OpenEdX build uses the canonical push-first helper"
 else
   fail "OpenEdX build missing canonical push-first helper"
+fi
+
+if [[ "$BUILD_OPENEDX_BLOCK" == *'--build-profile "${BUILD_PROFILE}"'* ]]; then
+  pass "OpenEdX build passes explicit build profile to the helper"
+else
+  fail "OpenEdX build missing explicit build profile"
 fi
 
 if [[ "$BUILD_OPENEDX_BLOCK" == *'tutor images build openedx'* ]]; then

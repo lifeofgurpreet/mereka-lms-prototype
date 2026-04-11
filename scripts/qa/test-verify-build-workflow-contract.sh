@@ -114,6 +114,10 @@ on:
       update_gitops:
         type: boolean
         default: false
+      build_profile:
+        type: choice
+        options: [proof, fast]
+        default: proof
       target_environment:
         type: choice
         options: [select-environment, production, staging]
@@ -179,6 +183,7 @@ jobs:
           SUMMARY="${SUMMARY}\n✅ GHA cache read/write is enabled for OpenEdX build"
       - name: Build OpenEdX image
         run: |
+          BUILD_PROFILE="proof"
           ./scripts/infra/build-openedx-image.sh \
             --context-dir tutor_env/env/build/openedx \
             --dockerfile tutor_env/env/build/openedx/Dockerfile \
@@ -186,6 +191,7 @@ jobs:
             --primary-tag sha \
             --secondary-tag shortsha \
             --cache-ref ghcr.io/biji-biji-initiative/mereka-lms/openedx:mereka-brand \
+            --build-profile "${BUILD_PROFILE}" \
             --mutable-tag mereka-brand
       - name: Resolve pushed openedx digest
         id: digest
@@ -209,6 +215,7 @@ jobs:
         run: echo ok
       - name: Build MFE image
         run: |
+          BUILD_PROFILE="proof"
           ./scripts/infra/build-mfe-image.sh \
             --context-dir tutor_env/env/plugins/mfe/build/mfe \
             --dockerfile tutor_env/env/plugins/mfe/build/mfe/Dockerfile \
@@ -216,6 +223,7 @@ jobs:
             --primary-tag sha \
             --secondary-tag shortsha \
             --cache-ref ghcr.io/biji-biji-initiative/mereka-lms/mfe:mereka-brand \
+            --build-profile "${BUILD_PROFILE}" \
             --mutable-tag mereka-brand
       - name: Resolve pushed mfe digest
         id: digest
@@ -319,7 +327,7 @@ jobs:
 
   release-bundle:
     needs: [build-openedx, build-mfe, scan-openedx-image, scan-mfe-image, slsa-provenance]
-    if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.target_environment != 'select-environment') }}
+    if: ${{ always() && (github.event_name != 'workflow_dispatch' || (inputs.target_environment != 'select-environment' && inputs.build_profile == 'proof')) }}
     steps:
       - run: ./scripts/infra/generate-release-bundle.sh --output var/ci/release-bundle.json --repo Biji-Biji-Initiative/mereka-lms --commit-sha aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa --workflow .github/workflows/build-tutor-images.yml --run-id 1 --run-attempt 1 --target-environment dev --openedx-image ghcr.io/biji-biji-initiative/mereka-lms/openedx --openedx-digest sha256:1111111111111111111111111111111111111111111111111111111111111111 --mfe-image ghcr.io/biji-biji-initiative/mereka-lms/mfe --mfe-digest sha256:2222222222222222222222222222222222222222222222222222222222222222
       - run: ./scripts/qa/verify-release-bundle.sh var/ci/release-bundle.json
@@ -386,7 +394,7 @@ jobs:
 
   update-gitops:
     runs-on: ubuntu-latest
-    if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment' }}
+    if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment' && inputs.build_profile == 'proof' }}
     steps:
       - run: |
           source ./scripts/lib/lane-normalize.sh
@@ -437,7 +445,11 @@ EOF
 
 run_expect_pass() {
   local label="$1"
-  REPO_ROOT_OVERRIDE="$tmpdir" bash "$VERIFY" >/tmp/verify-build-workflow-contract.out 2>&1
+  if ! REPO_ROOT_OVERRIDE="$tmpdir" bash "$VERIFY" >/tmp/verify-build-workflow-contract.out 2>&1; then
+    echo "FAIL ${label}: expected pass but command failed" >&2
+    cat /tmp/verify-build-workflow-contract.out >&2 || true
+    exit 1
+  fi
   echo "PASS ${label}"
 }
 
@@ -482,7 +494,7 @@ import sys
 p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
 text = p.read_text()
 text = text.replace(
-    "  release-bundle:\n    needs: [build-openedx, build-mfe, scan-openedx-image, scan-mfe-image, slsa-provenance]\n    if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.target_environment != 'select-environment') }}\n",
+    "  release-bundle:\n    needs: [build-openedx, build-mfe, scan-openedx-image, scan-mfe-image, slsa-provenance]\n    if: ${{ always() && (github.event_name != 'workflow_dispatch' || (inputs.target_environment != 'select-environment' && inputs.build_profile == 'proof')) }}\n",
     "  release-bundle:\n    needs: [build-openedx, build-mfe, scan-openedx-image, scan-mfe-image, slsa-provenance]\n    steps:\n      - run: |\n          if [[ \"${{ github.event_name }}\" == \"workflow_dispatch\" ]]; then\n            TARGET_ENV=\"${{ inputs.target_environment }}\"\n            if [[ \"$TARGET_ENV\" == \"select-environment\" ]]; then\n              echo \"target_environment must be explicitly selected before generating a release bundle.\" >&2\n              exit 1\n            fi\n          fi\n",
 )
 p.write_text(text)
@@ -553,6 +565,7 @@ text = p.read_text()
 text = text.replace(
     '      - name: Build OpenEdX image\n'
     '        run: |\n'
+    '          BUILD_PROFILE="proof"\n'
     '          ./scripts/infra/build-openedx-image.sh \\\n'
     '            --context-dir tutor_env/env/build/openedx \\\n'
     '            --dockerfile tutor_env/env/build/openedx/Dockerfile \\\n'
@@ -560,6 +573,7 @@ text = text.replace(
     '            --primary-tag sha \\\n'
     '            --secondary-tag shortsha \\\n'
     '            --cache-ref ghcr.io/biji-biji-initiative/mereka-lms/openedx:mereka-brand \\\n'
+    '            --build-profile "${BUILD_PROFILE}" \\\n'
     '            --mutable-tag mereka-brand\n',
     '      - name: Build OpenEdX image\n'
     '        run: tutor images build openedx\n',
@@ -588,6 +602,7 @@ text = p.read_text()
 text = text.replace(
     '      - name: Build MFE image\n'
     '        run: |\n'
+    '          BUILD_PROFILE="proof"\n'
     '          ./scripts/infra/build-mfe-image.sh \\\n'
     '            --context-dir tutor_env/env/plugins/mfe/build/mfe \\\n'
     '            --dockerfile tutor_env/env/plugins/mfe/build/mfe/Dockerfile \\\n'
@@ -595,6 +610,7 @@ text = text.replace(
     '            --primary-tag sha \\\n'
     '            --secondary-tag shortsha \\\n'
     '            --cache-ref ghcr.io/biji-biji-initiative/mereka-lms/mfe:mereka-brand \\\n'
+    '            --build-profile "${BUILD_PROFILE}" \\\n'
     '            --mutable-tag mereka-brand\n',
     '      - name: Build MFE image\n'
     '        run: tutor images build mfe\n',
@@ -711,10 +727,10 @@ jobs:
     steps:
       - run: timeout 20m "$HOME/.local/bin/syft" scan "docker:${MFE_LOCAL_IMAGE}" -o cyclonedx-json=var/ci/sbom-mfe.cdx.json
   release-bundle:
-    if: ${{ always() && (github.event_name != 'workflow_dispatch' || inputs.target_environment != 'select-environment') }}
+    if: ${{ always() && (github.event_name != 'workflow_dispatch' || (inputs.target_environment != 'select-environment' && inputs.build_profile == 'proof')) }}
   update-gitops:
     runs-on: ubuntu-latest
-    if: ${{ always() && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment')) }}
+    if: ${{ always() && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment' && inputs.build_profile == 'proof')) }}
     steps:
       - run: |
           source ./scripts/lib/lane-normalize.sh

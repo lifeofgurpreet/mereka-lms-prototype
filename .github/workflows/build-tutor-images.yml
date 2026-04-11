@@ -81,6 +81,13 @@ on:
         description: 'Image tag (default: git SHA)'
         type: string
         required: false
+      build_profile:
+        description: 'Build profile: proof is promotable; fast is cache-oriented and non-promotable'
+        type: choice
+        options:
+          - proof
+          - fast
+        default: proof
 
 concurrency:
   # Main builds share one workflow-level slot so push and workflow_dispatch
@@ -476,11 +483,16 @@ jobs:
           #   --cache-to=type=gha,mode=max    persist cache state between runs
           #   --cache-from=type=registry      secondary warm path from last push
           #   BUILDKIT_INLINE_CACHE=1         preserve registry fallback metadata
-          CACHE_REF="${{ env.REGISTRY }}/openedx:mereka-brand"
+          BUILD_PROFILE="${{ github.event_name == 'workflow_dispatch' && inputs.build_profile || 'proof' }}"
+          if [[ "${BUILD_PROFILE}" == "proof" ]]; then
+            CACHE_REF="${{ env.REGISTRY }}/openedx:mereka-brand"
+          else
+            CACHE_REF="${{ env.REGISTRY }}/openedx:mereka-brand-fast"
+          fi
           TAG="${{ inputs.image_tag || github.sha }}"
           SHORT_SHA="${GITHUB_SHA::8}"
           MUTABLE_ARGS=()
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+          if [[ "${{ github.ref }}" == "refs/heads/main" && "${BUILD_PROFILE}" == "proof" ]]; then
             MUTABLE_ARGS=(--mutable-tag mereka-brand)
           fi
 
@@ -500,6 +512,7 @@ jobs:
             --primary-tag "${TAG}" \
             --secondary-tag "${SHORT_SHA}" \
             --cache-ref "${CACHE_REF}" \
+            --build-profile "${BUILD_PROFILE}" \
             "${MUTABLE_ARGS[@]}" \
             2>&1 | tee var/ci/build-openedx.log; then
             echo "OpenedX image build timed out or failed after timeout guard" >&2
@@ -723,11 +736,16 @@ jobs:
           mkdir -p var/ci
 
           # Cache strategy: same as openedx build (see D4 comments above).
-          CACHE_REF="${{ env.REGISTRY }}/mfe:mereka-brand"
+          BUILD_PROFILE="${{ github.event_name == 'workflow_dispatch' && inputs.build_profile || 'proof' }}"
+          if [[ "${BUILD_PROFILE}" == "proof" ]]; then
+            CACHE_REF="${{ env.REGISTRY }}/mfe:mereka-brand"
+          else
+            CACHE_REF="${{ env.REGISTRY }}/mfe:mereka-brand-fast"
+          fi
           TAG="${{ inputs.image_tag || github.sha }}"
           SHORT_SHA="${GITHUB_SHA::8}"
           MUTABLE_ARGS=()
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+          if [[ "${{ github.ref }}" == "refs/heads/main" && "${BUILD_PROFILE}" == "proof" ]]; then
             MUTABLE_ARGS=(--mutable-tag mereka-brand)
           fi
 
@@ -750,6 +768,7 @@ jobs:
             --primary-tag "${TAG}" \
             --secondary-tag "${SHORT_SHA}" \
             --cache-ref "${CACHE_REF}" \
+            --build-profile "${BUILD_PROFILE}" \
             "${MUTABLE_ARGS[@]}" \
             2>&1 | tee var/ci/build-mfe.log; then
             echo "MFE image build timed out or failed after timeout guard" >&2
@@ -1388,7 +1407,7 @@ jobs:
     # Manual proof runs may intentionally leave target_environment at the
     # placeholder value. Skip release-bundle generation in that case instead of
     # failing after both images already built and pushed successfully.
-    if: ${{ always() && (needs.build-openedx.result == 'success' || needs.build-openedx.result == 'skipped') && (needs.build-mfe.result == 'success' || needs.build-mfe.result == 'skipped') && !(needs.build-openedx.result == 'skipped' && needs.build-mfe.result == 'skipped') && (github.event_name != 'workflow_dispatch' || inputs.target_environment != 'select-environment') }}
+    if: ${{ always() && (needs.build-openedx.result == 'success' || needs.build-openedx.result == 'skipped') && (needs.build-mfe.result == 'success' || needs.build-mfe.result == 'skipped') && !(needs.build-openedx.result == 'skipped' && needs.build-mfe.result == 'skipped') && (github.event_name != 'workflow_dispatch' || (inputs.target_environment != 'select-environment' && inputs.build_profile == 'proof')) }}
     permissions:
       contents: read
       id-token: write
@@ -1940,7 +1959,7 @@ jobs:
     # Any GitOps mutation here is an explicit/manual bridge. The standard
     # dev/staging/prod promotion path is infra-owned in bbi-infrastructure.
     # Accept 'skipped' for partial builds (same logic as release-bundle).
-    if: ${{ always() && (needs.build-openedx.result == 'success' || needs.build-openedx.result == 'skipped') && (needs.build-mfe.result == 'success' || needs.build-mfe.result == 'skipped') && !(needs.build-openedx.result == 'skipped' && needs.build-mfe.result == 'skipped') && github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment' }}
+    if: ${{ always() && (needs.build-openedx.result == 'success' || needs.build-openedx.result == 'skipped') && (needs.build-mfe.result == 'success' || needs.build-mfe.result == 'skipped') && !(needs.build-openedx.result == 'skipped' && needs.build-mfe.result == 'skipped') && github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment' && inputs.build_profile == 'proof' }}
     environment: ${{ inputs.target_environment }}
     permissions:
       contents: write
