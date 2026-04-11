@@ -121,16 +121,6 @@ _register_env_patch(
 # Copy and install stable custom apps first for cache reuse.
 {_stable_copy_lines}
 {_stable_install_lines}
-
-# Copy and install high-churn custom apps last to reduce invalidation blast radius.
-{_high_churn_copy_lines}
-{_high_churn_install_lines}
-
-# Copy and install mereka_tenancy multi-tenancy plugin
-# NOTE: Installed to /openedx/plugins/ instead of /openedx/ to enable proper namespacing
-COPY --chown=app:app ./infrastructure/tutor/plugins/multi-tenancy /openedx/plugins/mereka_tenancy
-RUN pip install -e /openedx/plugins/mereka_tenancy
-
 # Add repository roots to Python path via .pth file for proper module imports.
 # Include /openedx because custom app packages are mounted there and should be importable
 # as top-level Django apps across CMS/LMS and worker processes.
@@ -146,9 +136,22 @@ RUN pip install django-ratelimit==4.1.0
 RUN pip install "pymongo[srv]"
 
 # Aspects analytics: xAPI event routing + ClickHouse event sinks
-# Pinned to Python 3.11 compatible versions (v10.0.0+ and v1.1.3+ require 3.12)
-RUN pip install "edx-event-routing-backends>=9.3.5,<9.4"
-RUN pip install "platform-plugin-aspects==1.1.2"
+# Latest published releases as of 2026-04-11:
+# - edx-event-routing-backends 10.0.0 requires Python >=3.12
+# - platform-plugin-aspects 1.1.3 requires Python >=3.12
+# Keep the image on the newest Python 3.11-compatible pins.
+RUN $PIP_COMMAND install "edx-event-routing-backends==9.3.8"
+RUN $PIP_COMMAND install "platform-plugin-aspects==1.1.2"
+
+# Copy and install high-churn custom apps last to reduce invalidation blast radius.
+{_high_churn_copy_lines}
+{_high_churn_install_lines}
+
+# Copy and install mereka_tenancy multi-tenancy plugin after support deps so
+# tenant/runtime iteration invalidates the smallest possible tail.
+# NOTE: Installed to /openedx/plugins/ instead of /openedx/ to enable proper namespacing
+COPY --chown=app:app ./infrastructure/tutor/plugins/multi-tenancy /openedx/plugins/mereka_tenancy
+RUN $PIP_COMMAND install -e /openedx/plugins/mereka_tenancy
 """,
 )
 
