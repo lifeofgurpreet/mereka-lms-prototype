@@ -136,6 +136,10 @@ echo "2. Generated Dockerfile contract..."
 if [[ -f "$GENERATED_MFE_DOCKERFILE" ]]; then
   check_contains_regex "generated Dockerfile uses supported Node image" "$GENERATED_MFE_DOCKERFILE" "$NODE_IMAGE_REGEX"
   check_contains "generated Dockerfile contains plugin install line" "$GENERATED_MFE_DOCKERFILE" "$PLUGIN_INSTALL_LINE"
+  check_contains "generated Dockerfile hardens base-stage apt retries" "$GENERATED_MFE_DOCKERFILE" 'Acquire::Retries "6"'
+  check_contains "generated Dockerfile hardens base-stage apt https timeout" "$GENERATED_MFE_DOCKERFILE" 'Acquire::https::Timeout "30"'
+  check_contains "generated Dockerfile forces IPv4 for apt" "$GENERATED_MFE_DOCKERFILE" 'Acquire::ForceIPv4 "true"'
+  check_contains "generated Dockerfile uses fix-missing apt install" "$GENERATED_MFE_DOCKERFILE" '--fix-missing git'
 
   plugin_count="$(grep -F -- "$PLUGIN_INSTALL_LINE" "$GENERATED_MFE_DOCKERFILE" | wc -l | tr -d ' ')"
   if [[ "${plugin_count:-0}" -ge 1 ]]; then
@@ -157,6 +161,13 @@ if [[ -f "$GENERATED_MFE_DOCKERFILE" ]]; then
     failures=1
   else
     echo "  ✓ generated Dockerfile has no git-based tutor-indigo brand install"
+  fi
+
+  if grep -Fq -- '--fix-broken git' "$GENERATED_MFE_DOCKERFILE"; then
+    echo "  ✗ generated Dockerfile still contains stale base-stage apt bootstrap"
+    failures=1
+  else
+    echo "  ✓ generated Dockerfile has no stale base-stage apt bootstrap"
   fi
 
   if grep -Fq -- "@edly-io/indigo-brand-openedx@^2.4.3" "$GENERATED_MFE_DOCKERFILE"; then

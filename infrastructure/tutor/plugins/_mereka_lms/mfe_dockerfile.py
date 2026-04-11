@@ -11,7 +11,9 @@ _register_env_patch(
     "mfe-dockerfile-pre-npm-install",
     """
 # Update package list and install build toolchain for Node 24
-RUN apt-get update && apt-get install -y \\
+RUN printf 'Acquire::Retries "6";\\nAcquire::http::Timeout "30";\\nAcquire::https::Timeout "30";\\nAcquire::ForceIPv4 "true";\\n' > /etc/apt/apt.conf.d/80-retries \\
+ && apt-get update \\
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends --fix-missing \\
     gcc g++ git libgl1 libxi6 make python3 python3-distutils \\
     && rm -rf /var/lib/apt/lists/*
 # Force git to use HTTPS instead of SSH for github.com — Docker builds

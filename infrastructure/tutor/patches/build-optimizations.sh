@@ -8,20 +8,22 @@
 #         nginx health/profile endpoints, Caddy profile proxy.
 
 apply_build_optimizations_patch() {
+  local rendered_root="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
   local targets=(
     "$OPENEDX_TEMPLATE"
-    "$REPO_ROOT/tutor_env/env/build/openedx/Dockerfile"
+    "$rendered_root/env/build/openedx/Dockerfile"
     "$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
+    "$rendered_root/env/plugins/mfe/build/mfe/Dockerfile"
     "$LMS_SETTINGS_TEMPLATE"
-    "$REPO_ROOT/tutor_env/env/apps/openedx/settings/lms/production.py"
+    "$rendered_root/env/apps/openedx/settings/lms/production.py"
     "$LMS_ASSETS_TEMPLATE"
-    "$REPO_ROOT/tutor_env/env/build/openedx/settings/lms/assets.py"
+    "$rendered_root/env/build/openedx/settings/lms/assets.py"
     "$CMS_ASSETS_TEMPLATE"
-    "$REPO_ROOT/tutor_env/env/build/openedx/settings/cms/assets.py"
+    "$rendered_root/env/build/openedx/settings/cms/assets.py"
     "$NGINX_LMS_TEMPLATE"
-    "$REPO_ROOT/tutor_env/env/apps/nginx/lms.conf"
+    "$rendered_root/env/apps/nginx/lms.conf"
     "$CADDY_TEMPLATE"
-    "$REPO_ROOT/tutor_env/env/apps/caddy/Caddyfile"
+    "$rendered_root/env/apps/caddy/Caddyfile"
   )
 
   "${PYTHON_BIN}" - "${targets[@]}" <<'PY'
@@ -245,6 +247,28 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
     # ARC DinD containers have broken gnutls (git+HTTPS fails consistently).
     # curl uses OpenSSL, not gnutls, so it works where git doesn't.
     if path.name == "Dockerfile":
+        hardened_mfe_base_apt = """RUN printf 'Acquire::Retries "6";\\nAcquire::http::Timeout "30";\\nAcquire::https::Timeout "30";\\nAcquire::ForceIPv4 "true";\\n' > /etc/apt/apt.conf.d/80-retries && \\
+    apt-get update \\
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends --fix-missing git \\
+    # required for cwebp-bin
+    gcc libgl1 libxi6 make \\
+    # required for gifsicle, mozjpeg, and optipng (on arm)
+    autoconf libtool pkg-config zlib1g-dev \\
+    # required for node-sass (on arm)
+    python3 g++ python3-distutils \\
+    # required for image-webpack-loader (on arm)
+    libpng-dev \\
+    # required for building node-canvas (on arm, for authoring)
+    # https://www.npmjs.com/package/canvas
+    libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev \\
+ && rm -rf /var/lib/apt/lists/*"""
+        updated = re.sub(
+            r"""RUN printf 'Acquire::Retries "5";\\nAcquire::http::Timeout "120";\\n' > /etc/apt/apt\.conf\.d/80-retries && \\\n\s+apt-get update \\\n\s+&& apt-get install -y --fix-broken git \\\n\s+# required for cwebp-bin\n\s+gcc libgl1 libxi6 make \\\n\s+# required for gifsicle, mozjpeg, and optipng \(on arm\)\n\s+autoconf libtool pkg-config zlib1g-dev \\\n\s+# required for node-sass \(on arm\)\n\s+python3 g\+\+ python3-distutils \\\n\s+# required for image-webpack-loader \(on arm\)\n\s+libpng-dev \\\n\s+# required for building node-canvas \(on arm, for authoring\)\n\s+# https://www\.npmjs\.com/package/canvas\n\s+libcairo2-dev libpango1\.0-dev libjpeg-dev libgif-dev librsvg2-dev""",
+            hardened_mfe_base_apt,
+            updated,
+            count=1,
+        )
+
         plain_pyenv = "RUN git clone https://github.com/pyenv/pyenv $PYENV_ROOT --branch v2.3.36 --depth 1"
         curl_pyenv = (
             "RUN mkdir -p $PYENV_ROOT && \\\n"
