@@ -205,7 +205,10 @@ print_section "Checking Tutor Plugin Source of Truth"
 
 files_match "$PLUGIN_SRC_DIR/mereka_lms.py" "$PLUGIN_DIR/mereka_lms.py" "Tutor plugin entrypoint mirror is fresh"
 files_match "$PLUGIN_SRC_DIR/mereka_lms_mfe_slots.py" "$PLUGIN_DIR/mereka_lms_mfe_slots.py" "Tutor MFE slots module mirror is fresh"
+files_match "$PLUGIN_SRC_DIR/mfe_oauth_fix.py" "$PLUGIN_DIR/mfe_oauth_fix.py" "Legacy standalone MFE OAuth shim mirror is fresh"
 dirs_match "$PLUGIN_SRC_DIR/_mereka_lms" "$PLUGIN_DIR/_mereka_lms" "Tutor _mereka_lms package mirror is fresh"
+
+regex_pattern_count_equals "^- mfe_oauth_fix$" "0" "$TUTOR_ENV/config.yml" "Legacy standalone mfe_oauth_fix Tutor plugin is disabled"
 
 print_section "Checking Multi-Site Domain Configuration"
 
@@ -342,6 +345,14 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_in_file "pip install -e /openedx/mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "MFE OAuth fix installed"
   pattern_in_file "pip install -e /openedx/openedx_prometheus" "$OPENEDX_DOCKERFILE" "Prometheus metrics installed"
   pattern_in_file "django-prometheus" "$OPENEDX_DOCKERFILE" "django-prometheus installed"
+  pattern_not_in_file "Align compiled base requirements with the realized Python 3.11 compatibility contract." "$OPENEDX_DOCKERFILE" "rejected code-stage base requirements pin patch is absent"
+  pattern_in_file "django-cors-headers==4.3.1" "$OPENEDX_DOCKERFILE" "django-cors-headers installed"
+  fixed_pattern_count_equals "pkgconfig==1.5.5" "1" "$OPENEDX_DOCKERFILE" "pkgconfig toolchain pin is not duplicated"
+  pattern_in_file "path==16.16.0" "$OPENEDX_DOCKERFILE" "legacy path provider installed"
+  pattern_in_file "defusedxml==0.7.1" "$OPENEDX_DOCKERFILE" "defusedxml installed"
+  pattern_in_file "edx-enterprise==6.6.9" "$OPENEDX_DOCKERFILE" "edx-enterprise installed"
+  pattern_in_file "lazy==1.6" "$OPENEDX_DOCKERFILE" "lazy installed"
+  pattern_in_file "lxml_html_clean==0.4.4" "$OPENEDX_DOCKERFILE" "lxml_html_clean installed"
   regex_in_file 'pymongo\[srv\]|dnspython' "$OPENEDX_DOCKERFILE" "pymongo[srv] installed (for Atlas)"
 fi
 

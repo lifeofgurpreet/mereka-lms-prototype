@@ -56,6 +56,39 @@ for target in targets:
         "ARG OPENEDX_I18N_VERSION={{ OPENEDX_COMMON_VERSION }}",
         "ARG OPENEDX_I18N_VERSION=master",
     )
+    old_code_stage_pin_block = textwrap.dedent(
+        """\
+        # Align compiled base requirements with the realized Python 3.11 compatibility contract.
+        RUN python3 - <<'PY'
+        from pathlib import Path
+
+        base_txt = Path("/openedx/edx-platform/requirements/edx/base.txt")
+        text = base_txt.read_text()
+        replacements = {
+            "django-cors-headers==4.9.0": "django-cors-headers==4.3.1",
+            "edx-enterprise==6.5.1": "edx-enterprise==6.6.9",
+            "lxml-html-clean==0.4.3": "lxml-html-clean==0.4.4",
+            "path==16.11.0": "path==16.16.0",
+        }
+        for old, new in replacements.items():
+            if old in text:
+                text = text.replace(old, new)
+        base_txt.write_text(text)
+        PY"""
+    )
+    rejected_code_stage_pin_block = textwrap.dedent(
+        """\
+        # Align compiled base requirements with the realized Python 3.11 compatibility contract.
+        RUN sed -i \\
+            -e 's/django-cors-headers==4.9.0/django-cors-headers==4.3.1/g' \\
+            -e 's/edx-enterprise==6.5.1/edx-enterprise==6.6.9/g' \\
+            -e 's/lxml-html-clean==0.4.3/lxml-html-clean==0.4.4/g' \\
+            -e 's/path==16.11.0/path==16.16.0/g' \\
+            /openedx/edx-platform/requirements/edx/base.txt"""
+    )
+    updated = updated.replace(old_code_stage_pin_block, "")
+    updated = updated.replace(rejected_code_stage_pin_block, "")
+    updated = updated.replace("\n\n\n# Identify tutor user to apply patches using git", "\n\n# Identify tutor user to apply patches using git")
 
     # uv pip / no-build-isolation fixes
     updated = updated.replace(
