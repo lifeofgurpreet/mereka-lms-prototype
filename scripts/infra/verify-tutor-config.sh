@@ -345,6 +345,11 @@ if [[ -f "$MFE_DOCKERFILE" ]]; then
   else
     check_pass "Rendered MFE Dockerfile is a regular file"
   fi
+  if grep -qE 'for attempt in 1 2 3.*npm clean-install.*npm install --no-audit --no-fund --registry=\$NPM_REGISTRY' "$MFE_DOCKERFILE" 2>/dev/null; then
+    check_pass "Rendered MFE Dockerfile uses clean-install with npm install fallback"
+  else
+    check_fail "Rendered MFE Dockerfile is missing clean-install fallback policy: $MFE_DOCKERFILE"
+  fi
 else
   check_warn "MFE Dockerfile not found (ok if MFE plugin not installed)"
 fi

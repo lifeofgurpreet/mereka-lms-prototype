@@ -206,9 +206,9 @@ PY
 )
 
 # NPM install resilience (retry on failure)
-# NOTE: Using 'npm install' instead of 'npm ci' to handle lockfile drift gracefully
-# while still respecting the lockfile when possible. This is the SOTA approach for
-# environments where upstream package-lock.json may have minor version drift.
+# NOTE: Prefer `npm clean-install` when the lockfile is usable, but fall back to
+# `npm install` if upstream lockfile drift breaks the strict path. This matches
+# the rendered MFE build authority and keeps lockfile tolerance explicit.
 _register_env_patch(
     "mfe-dockerfile-npm-install",
     """
@@ -218,8 +218,8 @@ RUN npm config set fetch-retries 6 \\
  && npm config set fetch-retry-maxtimeout 120000 \\
  && npm config set fetch-timeout 300000
 
-# Install with retries (using npm install for lockfile drift tolerance)
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+# Install with retries (clean-install first, npm install fallback for lockfile drift)
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 """,
 )
 
