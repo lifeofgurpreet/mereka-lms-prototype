@@ -39,6 +39,29 @@ warn() {
   WARN_COUNT=$((WARN_COUNT + 1))
 }
 
+check_legacy_testmap_worktree_freeze() {
+  local verifier="tools/docs/verify/verify-legacy-testmaps-frozen.py"
+  if [[ ! -f "$verifier" ]]; then
+    warn "Glob-ability: legacy testmap freeze verifier missing: $verifier"
+    return
+  fi
+  if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    warn "Glob-ability: skipping legacy testmap freeze worktree check outside git repo"
+    return
+  fi
+
+  local verifier_output
+  if verifier_output="$(python3 "$verifier" --working-tree 2>&1)"; then
+    pass "Glob-ability: frozen legacy specs/testmaps/** has no local edits"
+    return
+  fi
+
+  fail "Glob-ability: frozen legacy specs/testmaps/** was edited; update specs/_generated/testmaps/** instead"
+  while IFS= read -r line; do
+    [[ -n "$line" ]] && echo "  $line"
+  done <<< "$verifier_output"
+}
+
 ################################################################################
 # Category 1: Glob-ability (file placement conventions)
 ################################################################################
@@ -165,6 +188,8 @@ check_glob_ability() {
   if [[ -d specs/testmaps ]]; then
     warn "Glob-ability: specs/testmaps is a legacy compatibility root; generated testmaps belong in specs/_generated/testmaps"
   fi
+
+  check_legacy_testmap_worktree_freeze
 }
 
 ################################################################################

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail if a diff edits frozen legacy testmaps under specs/testmaps/."""
+"""Fail if frozen legacy testmaps under specs/testmaps/ are edited."""
 
 from __future__ import annotations
 
@@ -25,6 +25,21 @@ def _ref_exists(ref: str, repo_root: Path) -> bool:
     ).returncode == 0
 
 
+def _run_name_only(repo_root: Path, args: list[str]) -> list[str]:
+    """Return non-empty paths from a git name-only command."""
+    result = subprocess.run(
+        ["git", *args, "--", "specs/testmaps"],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        joined = " ".join(args)
+        raise RuntimeError(result.stderr.strip() or f"git {joined} failed")
+    return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+
+
 def git_changed_files(repo_root: Path, diff_range: str) -> list[str] | None:
     """Return changed files in range, or None if the range is unresolvable."""
     # Verify refs before running diff — avoids hard failure on shallow clones
@@ -33,32 +48,53 @@ def git_changed_files(repo_root: Path, diff_range: str) -> list[str] | None:
         if ref and not _ref_exists(ref, repo_root):
             return None
 
-    result = subprocess.run(
-        ["git", "diff", "--name-only", diff_range, "--", "specs/testmaps/**", "specs/testmaps/*"],
+    return _run_name_only(repo_root, ["diff", "--name-only", diff_range])
+
+
+def git_working_tree_changed_files(repo_root: Path) -> list[str]:
+    """Return staged, unstaged, or untracked changes under the frozen legacy root."""
+    changed = set()
+    changed.update(_run_name_only(repo_root, ["diff", "--name-only"]))
+    changed.update(_run_name_only(repo_root, ["diff", "--cached", "--name-only"]))
+
+    untracked = subprocess.run(
+        ["git", "ls-files", "--others", "--exclude-standard", "--", "specs/testmaps"],
         cwd=repo_root,
         capture_output=True,
         text=True,
         check=False,
     )
-    if result.returncode != 0:
-        raise RuntimeError(result.stderr.strip() or f"git diff failed for range {diff_range}")
-    return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+    if untracked.returncode != 0:
+        raise RuntimeError(untracked.stderr.strip() or "git ls-files failed")
+    changed.update(line.strip() for line in untracked.stdout.splitlines() if line.strip())
+    return sorted(changed)
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Block edits to frozen legacy specs/testmaps/**")
-    ap.add_argument("--range", required=True, dest="diff_range", help="git diff range to inspect")
+    mode = ap.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--range", dest="diff_range", help="git diff range to inspect")
+    mode.add_argument(
+        "--working-tree",
+        action="store_true",
+        help="inspect staged, unstaged, and untracked local edits under specs/testmaps/**",
+    )
     ap.add_argument("--summary-file", help="optional JSON summary path")
     args = ap.parse_args()
 
     repo_root = Path.cwd()
-    raw = git_changed_files(repo_root, args.diff_range)
+    mode_name = "working-tree" if args.working_tree else "range"
+    if args.working_tree:
+        raw = git_working_tree_changed_files(repo_root)
+    else:
+        raw = git_changed_files(repo_root, args.diff_range)
 
     if raw is None:
         # Refs not available (shallow clone, workflow_dispatch, etc.) — skip gracefully
         print(f"LEGACY_TESTMAP_FREEZE_SKIP range={args.diff_range} reason=unresolvable_ref")
         summary = {
             "status": "skip",
+            "mode": mode_name,
             "range": args.diff_range,
             "reason": "One or more refs in the range are unresolvable (shallow clone?)",
         }
@@ -73,6 +109,7 @@ def main() -> int:
     ]
     summary = {
         "status": "pass" if not changed_files else "fail",
+        "mode": mode_name,
         "range": args.diff_range,
         "frozen_root": "specs/testmaps/**",
         "allowed_paths": sorted(ALLOWED_LEGACY_PATHS),
@@ -85,14 +122,14 @@ def main() -> int:
 
     if changed_files:
         print(
-            f"LEGACY_TESTMAP_FREEZE_FAIL range={args.diff_range} changed_count={len(changed_files)}",
+            f"LEGACY_TESTMAP_FREEZE_FAIL mode={mode_name} range={args.diff_range} changed_count={len(changed_files)}",
             file=sys.stderr,
         )
         for path in changed_files:
             print(path, file=sys.stderr)
         return 1
 
-    print(f"LEGACY_TESTMAP_FREEZE_OK range={args.diff_range} changed_count=0")
+    print(f"LEGACY_TESTMAP_FREEZE_OK mode={mode_name} range={args.diff_range} changed_count=0")
     return 0
 
 
