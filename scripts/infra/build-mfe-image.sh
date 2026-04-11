@@ -58,8 +58,9 @@ fi
 build_failed_due_to_transient_github_fetch() {
   local log_path="$1"
   [[ -f "$log_path" ]] || return 1
-  grep -Eq \
-    'Could not resolve host: github\.com|failed to fetch remote https://github\.com/openedx/frontend-app' \
+  # Buildx logs can contain NUL bytes, so force text-mode matching.
+  grep -aEq \
+    'Could not resolve host: github\.com|DNS server returned answer with no data|failed to fetch remote https://github\.com/' \
     "$log_path"
 }
 
