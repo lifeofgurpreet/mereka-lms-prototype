@@ -416,6 +416,10 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
 
   if grep -qE "for attempt in 1 2 3.*pip install" "$OPENEDX_DOCKERFILE" 2>/dev/null; then
     check_pass "Resilient pip install with retries"
+  elif grep -qE '\$PIP_COMMAND install --no-build-isolation -r /openedx/edx-platform/requirements/edx/base.txt -r /openedx/edx-platform/requirements/edx/assets.txt' "$OPENEDX_DOCKERFILE" 2>/dev/null; then
+    check_pass "uv-compatible requirements install command"
+  elif grep -qE '\$PIP_COMMAND install --no-build-isolation -r /tmp/base-filtered.txt -r /tmp/assets.txt' "$OPENEDX_DOCKERFILE" 2>/dev/null; then
+    check_pass "uv-compatible requirements install command (/tmp filtered requirements)"
   elif grep -qE "pip install --no-build-isolation -r /openedx/edx-platform/requirements/edx/base.txt -r /openedx/edx-platform/requirements/edx/assets.txt" "$OPENEDX_DOCKERFILE" 2>/dev/null; then
     check_pass "Fallback pip install command"
   else

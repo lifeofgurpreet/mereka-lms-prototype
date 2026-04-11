@@ -6,10 +6,13 @@ from _mereka_lms import _register_env_patch
 # Open edX Dockerfile Patches
 ###############################################################################
 
-# Fix editable Git URLs for uv pip compatibility
-# uv pip (Rust-based SOTA tool) doesn't support editable Git URLs (-e git+https://...)
-# We work around this by filtering them out and installing separately with PEP 508 format.
-# This lets us use uv pip for all packages while handling the edge case properly.
+# Fix editable Git URLs for uv pip compatibility.
+# Tutor 21's installed Open edX Dockerfile template already owns the filtered
+# base-requirements block; there is no live pre-python hook point for that seam.
+# The generator-level normalization to `$PIP_COMMAND --no-build-isolation` is
+# therefore enforced in `patches/build-optimizations.sh`.
+# This source module keeps the canonical filtered-requirements contract so the
+# intended uv behavior remains explicit in repo truth.
 _register_env_patch(
     "openedx-dockerfile-pre-python-requirements",
     """
@@ -20,7 +23,8 @@ RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target
 """,
 )
 
-# Override the base requirements install to use filtered requirements
+# Canonical filtered requirements contract for the Tutor template-owned base
+# requirements step. See build-optimizations.sh for the live render owner.
 _register_env_patch(
     "openedx-dockerfile-python-requirements",
     """

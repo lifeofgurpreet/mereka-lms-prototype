@@ -93,7 +93,13 @@ for target in targets:
     # uv pip / no-build-isolation fixes
     updated = updated.replace(
         "$PIP_COMMAND install -r /openedx/edx-platform/requirements/edx/base.txt -r /openedx/edx-platform/requirements/edx/assets.txt",
-        "pip install --no-build-isolation -r /openedx/edx-platform/requirements/edx/base.txt -r /openedx/edx-platform/requirements/edx/assets.txt",
+        "$PIP_COMMAND install --no-build-isolation -r /openedx/edx-platform/requirements/edx/base.txt -r /openedx/edx-platform/requirements/edx/assets.txt",
+    )
+    updated = updated.replace(
+        "([ -s /tmp/base-filtered.txt ] && pip install --no-build-isolation -r /tmp/base-filtered.txt -r /tmp/assets.txt || pip install --no-build-isolation -r /tmp/assets.txt) && \\\n"
+        "    ([ -s /tmp/git-packages.txt ] && xargs -r -a /tmp/git-packages.txt pip install --no-build-isolation || true)",
+        "([ -s /tmp/base-filtered.txt ] && $PIP_COMMAND install --no-build-isolation -r /tmp/base-filtered.txt -r /tmp/assets.txt || $PIP_COMMAND install --no-build-isolation -r /tmp/assets.txt) && \\\n"
+        "    ([ -s /tmp/git-packages.txt ] && xargs -r -a /tmp/git-packages.txt $PIP_COMMAND install --no-build-isolation || true)",
     )
     updated = updated.replace(
         "$PIP_COMMAND install -r requirements/edx/development.txt",
