@@ -100,13 +100,13 @@ for target in targets:
         "RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/openedx/edx-platform/requirements/edx/base.txt \\\n    --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\\n    pip install -r /openedx/edx-platform/requirements/edx/base.txt",
         """RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/openedx/edx-platform/requirements/edx/base.txt \\
     --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\
-    bash -o pipefail -c 'for attempt in 1 2 3; do pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo "pip install attempt ${attempt} failed; retrying in 10s" >&2; sleep 10; done; exit 1'""",
+    bash -o pipefail -c 'for attempt in 1 2 3; do $PIP_COMMAND install --no-build-isolation -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo "$PIP_COMMAND install attempt ${attempt} failed; retrying in 10s" >&2; sleep 10; done; exit 1'""",
     )
     updated = updated.replace(
         "RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/openedx/edx-platform/requirements/edx/base.txt \\\n    --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\\n    bash -o pipefail -c 'for attempt in 1 2 3; do \\n        pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0 \\n        echo \"pip install attempt ${attempt} failed; retrying in 10s\" >&2 \\n        sleep 10 \\n    done; exit 1'",
         """RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/openedx/edx-platform/requirements/edx/base.txt \\
     --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\
-    bash -o pipefail -c 'for attempt in 1 2 3; do pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo "pip install attempt ${attempt} failed; retrying in 10s" >&2; sleep 10; done; exit 1'""",
+    bash -o pipefail -c 'for attempt in 1 2 3; do $PIP_COMMAND install --no-build-isolation -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo "$PIP_COMMAND install attempt ${attempt} failed; retrying in 10s" >&2; sleep 10; done; exit 1'""",
     )
     updated = updated.replace(
         """RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/openedx/edx-platform/requirements/edx/base.txt \\
@@ -118,7 +118,7 @@ for target in targets:
     done; exit 1'""",
         """RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/openedx/edx-platform/requirements/edx/base.txt \\
     --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\
-    bash -o pipefail -c 'for attempt in 1 2 3; do pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo "pip install attempt ${attempt} failed; retrying in 10s" >&2; sleep 10; done; exit 1'""",
+    bash -o pipefail -c 'for attempt in 1 2 3; do $PIP_COMMAND install --no-build-isolation -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo "$PIP_COMMAND install attempt ${attempt} failed; retrying in 10s" >&2; sleep 10; done; exit 1'""",
     )
 
     # Local requirements removal
