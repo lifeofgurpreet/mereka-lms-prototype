@@ -13,6 +13,7 @@ apply_webpack_memory_patch() {
 
   "${PYTHON_BIN}" - "${targets[@]}" <<'PY'
 from pathlib import Path
+import re
 import sys
 
 targets = sys.argv[1:]
@@ -57,6 +58,23 @@ for target in targets:
         'ENV NODE_OPTIONS="--max-old-space-size=6144"\nENV PYTHONPATH="/openedx/edx-platform"\n',
         'ENV NODE_OPTIONS="--max-old-space-size=6144"\nENV PYTHONPATH="/openedx/edx-platform"\nENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\n',
     )
+    env_trio_unquoted = (
+        'ENV PYTHONPATH=/openedx/edx-platform\n'
+        'ENV NODE_OPTIONS="--max-old-space-size=6144"\n'
+        'ENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\n'
+    )
+    env_trio_quoted = (
+        'ENV NODE_OPTIONS="--max-old-space-size=6144"\n'
+        'ENV PYTHONPATH="/openedx/edx-platform"\n'
+        'ENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\n'
+    )
+    updated = re.sub(rf"(?:{re.escape(env_trio_unquoted)})+", env_trio_unquoted, updated)
+    updated = re.sub(rf"(?:{re.escape(env_trio_quoted)})+", env_trio_quoted, updated)
+    while "ENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\nENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\n" in updated:
+        updated = updated.replace(
+            "ENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\nENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\n",
+            "ENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\n",
+        )
 
     # Webpack config patches
     updated = updated.replace(

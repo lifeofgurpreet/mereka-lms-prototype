@@ -39,16 +39,6 @@ RUN --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\
 """,
 )
 
-# Node environment variables for webpack builds
-_register_env_patch(
-    "openedx-dockerfile-pre-assets",
-    """
-# Increase Node memory limit for webpack builds
-ENV NODE_OPTIONS="--max-old-space-size=6144"
-ENV PYTHONPATH="/openedx/edx-platform"
-""",
-)
-
 # NPM install command override for lockfile drift tolerance
 # NOTE: Using 'npm install' instead of 'npm ci' to handle Open edX upstream
 # lockfile drift gracefully while still respecting the lockfile when possible.
@@ -171,13 +161,17 @@ COPY --from=python-requirements --chown=app:app /openedx/plugins/mereka_tenancy 
 """,
 )
 
-# Custom theme SASS compilation (strip Google Fonts imports)
+# Pre-assets normalization for webpack and custom theme SASS compilation
 # NOTE: The Tutor template COPYs ./themes/ AFTER pre-assets hooks and BEFORE collectstatic.
 # But compile-sass needs the theme present. So we COPY the theme early here.
 # The later COPY ./themes/ will overwrite with the same files — safe and idempotent.
 _register_env_patch(
     "openedx-dockerfile-pre-assets",
     """
+# Increase Node memory limit for webpack builds
+ENV NODE_OPTIONS="--max-old-space-size=6144"
+ENV PYTHONPATH="/openedx/edx-platform"
+
 # Early-copy the mereka theme so it exists when compile-sass runs.
 # Tutor's standard COPY ./themes/ happens AFTER pre-assets hooks, but we need
 # the theme present for SASS compilation. The later COPY overwrites with same files.
