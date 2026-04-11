@@ -75,6 +75,11 @@ case "$BUILD_PROFILE" in
     ;;
 esac
 
+if [[ "$BUILD_PROFILE" == "fast" && -n "$MUTABLE_TAG" ]]; then
+  echo "Fast build profile cannot publish mutable tags; use proof for promotable builds." >&2
+  exit 1
+fi
+
 TAGS=(
   "--tag" "${IMAGE_REPO}:${PRIMARY_TAG}"
   "--tag" "${IMAGE_REPO}:${SECONDARY_TAG}"
