@@ -6,6 +6,7 @@ TRIVY_VERSION="${TRIVY_VERSION:-v0.69.3}"
 TRIVY_SHA256="${TRIVY_SHA256:-1816b632dfe529869c740c0913e36bd1629cb7688bd5634f4a858c1d57c88b75}"
 TRIVY_TARBALL="trivy_${TRIVY_VERSION#v}_Linux-64bit.tar.gz"
 TRIVY_GITHUB_REPO="${TRIVY_GITHUB_REPO:-aquasecurity/trivy}"
+TRIVY_CONTAINER_IMAGE="${TRIVY_CONTAINER_IMAGE:-ghcr.io/aquasecurity/trivy:${TRIVY_VERSION#v}}"
 DOWNLOAD_TIMEOUT="${DOWNLOAD_TIMEOUT:-300}"
 DOWNLOAD_ATTEMPT_TIMEOUT="${DOWNLOAD_ATTEMPT_TIMEOUT:-90}"
 CURL_CONNECT_TIMEOUT="${CURL_CONNECT_TIMEOUT:-20}"
@@ -84,6 +85,43 @@ download_with_curl() {
   return 1
 }
 
+install_container_wrapper() {
+  local install_dir="$1"
+  local wrapper_path="${install_dir}/trivy"
+
+  if ! command -v docker >/dev/null 2>&1; then
+    log "Container fallback unavailable because docker is not installed."
+    return 1
+  fi
+
+  log "Falling back to pinned container wrapper ${TRIVY_CONTAINER_IMAGE}."
+  cat >"${wrapper_path}" <<EOF
+#!/usr/bin/env bash
+set -euo pipefail
+
+TRIVY_CONTAINER_IMAGE="\${TRIVY_CONTAINER_IMAGE:-${TRIVY_CONTAINER_IMAGE}}"
+TRIVY_CACHE_DIR="\${TRIVY_CACHE_DIR:-\${HOME}/.cache/trivy}"
+WORKDIR="\${GITHUB_WORKSPACE:-\$(pwd)}"
+
+mkdir -p "\${TRIVY_CACHE_DIR}"
+
+docker_args=(
+  --rm
+  -v /var/run/docker.sock:/var/run/docker.sock
+  -v "\${TRIVY_CACHE_DIR}:/root/.cache"
+  -v "\${WORKDIR}:\${WORKDIR}"
+  -w "\${WORKDIR}"
+)
+
+if [[ -f "\${HOME}/.docker/config.json" ]]; then
+  docker_args+=(-v "\${HOME}/.docker/config.json:/root/.docker/config.json:ro")
+fi
+
+exec docker run "\${docker_args[@]}" "\${TRIVY_CONTAINER_IMAGE}" "\$@"
+EOF
+  chmod 0755 "${wrapper_path}"
+}
+
 main() {
   local install_dir
   install_dir="$(resolve_install_dir)"
@@ -105,7 +143,12 @@ main() {
 
   if ! download_with_gh "${tarball_path}"; then
     log "GitHub release download unavailable or failed; falling back to curl."
-    download_with_curl "${tarball_path}"
+    if ! download_with_curl "${tarball_path}"; then
+      install_container_wrapper "${install_dir}"
+      echo "${install_dir}" >> "${GITHUB_PATH:-/dev/null}"
+      "${install_dir}/trivy" --version
+      exit 0
+    fi
   fi
 
   echo "${TRIVY_SHA256}  ${tarball_path}" | sha256sum -c -

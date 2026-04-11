@@ -480,6 +480,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-tutor-services.sh
     - script: scripts/qa/verify-tutor-version-pin.sh
     - script: scripts/qa/verify-build-workflow-contract.sh
+    - script: scripts/qa/test-install-trivy-fallback.sh
     - script: scripts/qa/verify-cicd-release-rollback.sh
     - script: scripts/qa/verify-deployment-critical-coverage.sh
     - script: scripts/qa/verify-spec-dedupe-normalize.sh
@@ -1163,11 +1164,13 @@ scripts:
     purpose: >
       Canonical Trivy bootstrap for CI scan workflows. Installs the pinned
       Trivy binary with checksum verification, preferring authenticated GitHub
-      release downloads before bounded curl fallback.
+      release downloads before bounded curl fallback and a pinned container
+      wrapper fallback when release assets are unavailable.
     inputs:
       - TRIVY_VERSION (optional; defaults to pinned release)
       - TRIVY_SHA256 (optional; defaults to pinned checksum)
       - TRIVY_GITHUB_REPO owner/repo (optional)
+      - TRIVY_CONTAINER_IMAGE reference (optional)
       - INSTALL_DIR PATH (optional)
       - DOWNLOAD_TIMEOUT SECONDS (optional)
       - DOWNLOAD_ATTEMPT_TIMEOUT SECONDS (optional)
@@ -1176,15 +1179,31 @@ scripts:
       - CURL_RETRIES COUNT (optional)
       - GH_TOKEN or GITHUB_TOKEN (optional; enables authenticated download path)
     outputs:
-      - installed trivy binary in the resolved writable install directory
+      - installed trivy binary or container-backed wrapper in the resolved writable install directory
       - stdout (resolved version output)
     side_effects:
-      - downloads the pinned Trivy release artifact
-      - writes a trivy binary into the resolved install directory
+      - downloads the pinned Trivy release artifact when available
+      - or writes a container-backed trivy wrapper into the resolved install directory
       - appends the install directory to GITHUB_PATH when available
     dry_run: false
     lanes: [dev, staging, prod]
     proof_command: "bash -n scripts/infra/install-trivy.sh"
+    criticality: release-supporting
+
+  - path: scripts/qa/test-install-trivy-fallback.sh
+    owner: platform-team
+    purpose: >
+      Proves install-trivy.sh can fall back to a pinned container-backed wrapper
+      when GitHub release asset downloads are unavailable.
+    inputs:
+      - none; uses isolated temp directories and fake gh/curl/docker stubs
+    outputs:
+      - stdout confirmation that the fallback wrapper installed successfully
+    side_effects:
+      - creates and removes temporary test fixtures under mktemp directories
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/test-install-trivy-fallback.sh"
     criticality: release-supporting
 
   - path: scripts/infra/sync-gitops-prod-image-tags.sh
