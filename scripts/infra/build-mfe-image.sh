@@ -90,9 +90,33 @@ fi
 
 IMAGE_NAME="${IMAGE_REPO##*/}"
 GHA_SCOPE="tutor-${IMAGE_NAME}-${BUILD_PROFILE}"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+BAKE_FILE="$REPO_ROOT/docker-bake.hcl"
+BAKE_TARGET="mfe-${BUILD_PROFILE}"
 
 # BUILDKIT_MAX_PARALLELISM — if exported by caller, buildkitd reads it directly.
-# docker buildx build has no --opt flag; the env var is the correct mechanism.
+# docker buildx bake has no --opt flag; the env var is the correct mechanism.
+
+if [[ ! -f "$BAKE_FILE" ]]; then
+  echo "Bake file not found: $BAKE_FILE" >&2
+  exit 1
+fi
+
+BAKE_ARGS=(
+  --file "$BAKE_FILE"
+  --progress plain
+  --push
+  --set "${BAKE_TARGET}.context=${CONTEXT_DIR}"
+  --set "${BAKE_TARGET}.dockerfile=${DOCKERFILE}"
+  --set "${BAKE_TARGET}.cache-from=type=gha,scope=${GHA_SCOPE}"
+  --set "${BAKE_TARGET}.cache-from=type=registry,ref=${CACHE_REF}"
+  --set "${BAKE_TARGET}.cache-to=type=gha,mode=max,scope=${GHA_SCOPE}"
+  --set "${BAKE_TARGET}.args.BUILDKIT_INLINE_CACHE=1"
+)
+
+for ((i=1; i<${#TAGS[@]}; i+=2)); do
+  BAKE_ARGS+=(--set "${BAKE_TARGET}.tags=${TAGS[i]}")
+done
 
 max_attempts=2
 attempt=1
@@ -101,23 +125,19 @@ while (( attempt <= max_attempts )); do
   attempt_log="var/ci/build-mfe-attempt-${attempt}.log"
   mkdir -p "$(dirname "$attempt_log")"
 
-  if docker buildx build \
-    --file "$DOCKERFILE" \
-    "${TAGS[@]}" \
-    --cache-from "type=gha,scope=${GHA_SCOPE}" \
-    --cache-to "type=gha,mode=max,scope=${GHA_SCOPE}" \
-    --cache-from "type=registry,ref=${CACHE_REF}" \
-    --build-arg BUILDKIT_INLINE_CACHE=1 \
-    --label "io.mereka.build-profile=${BUILD_PROFILE}" \
-    --progress plain \
-    --push \
-    "$CONTEXT_DIR" \
-    2>&1 | tee "$attempt_log"; then
-    cp "$attempt_log" var/ci/build-mfe.log
-    exit 0
-  fi
+  {
+    printf 'docker buildx bake'
+    printf ' %q' "${BAKE_ARGS[@]}"
+    printf ' %q\n' "$BAKE_TARGET"
+    docker buildx bake "${BAKE_ARGS[@]}" "$BAKE_TARGET"
+  } 2>&1 | tee "$attempt_log"
+  build_status=${PIPESTATUS[0]}
 
   cp "$attempt_log" var/ci/build-mfe.log
+
+  if [[ $build_status -eq 0 ]]; then
+    exit 0
+  fi
 
   if (( attempt < max_attempts )) && build_failed_due_to_transient_github_fetch "$attempt_log"; then
     echo "Transient GitHub fetch failure detected during MFE build; retrying once..." >&2
