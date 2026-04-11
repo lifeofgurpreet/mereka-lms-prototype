@@ -436,7 +436,13 @@ jobs:
           # ARC DinD containers inherit docker0 bridge MTU 1500, but the pod
           # network (eth0) uses MTU 1280 on rke2-nonprod.  Large packets
           # (TLS handshakes, apt downloads) get silently dropped.
-          # Fix: write daemon.json with correct MTU and SIGHUP dockerd.
+          #
+          # MTU authority lives in the heavy-runner dockerd startup flags and
+          # ARC daemon config. Do not rewrite "mtu" here; doing so collides
+          # with dockerd's existing --mtu flag during SIGHUP reload.
+          #
+          # This job-time step only injects DNS fallback into daemon.json, then
+          # reloads dockerd so buildx/buildkit can pick up the resolver config.
           #
           # Uses --pid=host + nsenter to access the DinD daemon's mount
           # namespace and modify /etc/docker/daemon.json in-place.
@@ -444,10 +450,10 @@ jobs:
             docker run --privileged --pid=host busybox \
               nsenter -t 1 -m -- sh -c '
                 mkdir -p /etc/docker
-                echo "{\"mtu\":1280,\"dns\":[\"8.8.8.8\",\"1.1.1.1\"]}" > /etc/docker/daemon.json
+                echo "{\"dns\":[\"8.8.8.8\",\"1.1.1.1\"]}" > /etc/docker/daemon.json
                 kill -HUP 1
               '
-            echo "DinD daemon.json written with MTU=1280 + DNS fallback, dockerd reloaded."
+            echo "DinD daemon.json written with DNS fallback, dockerd reloaded."
             sleep 2
             # Verify the MTU took effect
             docker network inspect bridge --format '{{json .Options}}' || true
@@ -687,14 +693,18 @@ jobs:
           # ARC DinD containers inherit docker0 bridge MTU 1500, but the pod
           # network (eth0) uses MTU 1280 on rke2-nonprod.  Large packets
           # (TLS handshakes, apt downloads) get silently dropped.
+          #
+          # MTU authority lives in the heavy-runner dockerd startup flags and
+          # ARC daemon config. Do not rewrite "mtu" here; doing so collides
+          # with dockerd's existing --mtu flag during SIGHUP reload.
           if docker info >/dev/null 2>&1; then
             docker run --privileged --pid=host busybox \
               nsenter -t 1 -m -- sh -c '
                 mkdir -p /etc/docker
-                echo "{\"mtu\":1280,\"dns\":[\"8.8.8.8\",\"1.1.1.1\"]}" > /etc/docker/daemon.json
+                echo "{\"dns\":[\"8.8.8.8\",\"1.1.1.1\"]}" > /etc/docker/daemon.json
                 kill -HUP 1
               '
-            echo "DinD daemon.json written with MTU=1280 + DNS fallback, dockerd reloaded."
+            echo "DinD daemon.json written with DNS fallback, dockerd reloaded."
             sleep 2
             docker network inspect bridge --format '{{json .Options}}' || true
           fi
@@ -894,12 +904,13 @@ jobs:
       - name: Fix DinD network MTU
         run: |
           # Keep post-push image verification aligned with the heavy build
-          # lanes: ARC DinD workers need MTU 1280 on rke2-nonprod.
+          # lanes. MTU authority lives in the heavy-runner dockerd startup
+          # flags and ARC daemon config; this step only injects DNS fallback.
           if docker info >/dev/null 2>&1; then
             docker run --privileged --pid=host busybox \
               nsenter -t 1 -m -- sh -c '
                 mkdir -p /etc/docker
-                echo "{\"mtu\":1280}" > /etc/docker/daemon.json
+                echo "{\"dns\":[\"8.8.8.8\",\"1.1.1.1\"]}" > /etc/docker/daemon.json
                 kill -HUP 1
               '
             sleep 2
@@ -1043,12 +1054,13 @@ jobs:
       - name: Fix DinD network MTU
         run: |
           # Keep post-push image verification aligned with the heavy build
-          # lanes: ARC DinD workers need MTU 1280 on rke2-nonprod.
+          # lanes. MTU authority lives in the heavy-runner dockerd startup
+          # flags and ARC daemon config; this step only injects DNS fallback.
           if docker info >/dev/null 2>&1; then
             docker run --privileged --pid=host busybox \
               nsenter -t 1 -m -- sh -c '
                 mkdir -p /etc/docker
-                echo "{\"mtu\":1280}" > /etc/docker/daemon.json
+                echo "{\"dns\":[\"8.8.8.8\",\"1.1.1.1\"]}" > /etc/docker/daemon.json
                 kill -HUP 1
               '
             sleep 2
