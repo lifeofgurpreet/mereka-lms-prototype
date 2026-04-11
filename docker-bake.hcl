@@ -14,6 +14,10 @@ variable "OPENEDX_FAST_TAG" {
   default = "docker.io/overhangio/openedx:21.0.0-indigo-fast"
 }
 
+variable "OPENEDX_PRODUCER_TAG" {
+  default = "docker.io/overhangio/openedx:21.0.0-indigo-producer"
+}
+
 variable "OPENEDX_CACHE_REF" {
   default = "docker.io/overhangio/openedx:21.0.0-indigo-cache"
 }
@@ -32,6 +36,10 @@ variable "MFE_PROOF_TAG" {
 
 variable "MFE_FAST_TAG" {
   default = "docker.io/overhangio/openedx-mfe:21.0.0-indigo-fast"
+}
+
+variable "MFE_PRODUCER_TAG" {
+  default = "docker.io/overhangio/openedx-mfe:21.0.0-indigo-producer"
 }
 
 variable "MFE_COMPAT_TAG" {
@@ -56,6 +64,10 @@ group "proof" {
 
 group "fast" {
   targets = ["openedx-fast", "mfe-fast"]
+}
+
+group "producer" {
+  targets = ["openedx-producer", "mfe-producer"]
 }
 
 group "compat" {
@@ -97,6 +109,16 @@ target "openedx-fast" {
   }
 }
 
+target "openedx-producer" {
+  inherits = ["_openedx-common"]
+  tags = ["${OPENEDX_PRODUCER_TAG}"]
+  output = ["type=cacheonly"]
+  labels = {
+    "io.mereka.build-profile" = "producer"
+    "io.mereka.build-scope"   = "openedx"
+  }
+}
+
 target "_mfe-common" {
   context = "${MFE_CONTEXT}"
   dockerfile = "${MFE_DOCKERFILE}"
@@ -128,6 +150,16 @@ target "mfe-fast" {
   ]
   labels = {
     "io.mereka.build-profile" = "fast"
+    "io.mereka.build-scope"   = "mfe"
+  }
+}
+
+target "mfe-producer" {
+  inherits = ["_mfe-common"]
+  tags = ["${MFE_PRODUCER_TAG}"]
+  output = ["type=cacheonly"]
+  labels = {
+    "io.mereka.build-profile" = "producer"
     "io.mereka.build-scope"   = "mfe"
   }
 }
