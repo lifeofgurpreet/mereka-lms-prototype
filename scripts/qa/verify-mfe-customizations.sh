@@ -155,12 +155,12 @@ else
   fi
 
   # Check indigo brand ulmo pin
-  if grep -qF 'indigo-brand-openedx@^2.4.3' "$TUTOR_ENV" 2>/dev/null; then
-    check_pass "Indigo brand Ulmo pin (@^2.4.3) present in MFE Dockerfile"
+  if grep -qF 'indigo-brand-openedx@^2.4.2' "$TUTOR_ENV" 2>/dev/null; then
+    check_pass "Indigo brand Ulmo pin (@^2.4.2) present in MFE Dockerfile"
   else
     if grep -qF 'indigo-brand-openedx' "$TUTOR_ENV" 2>/dev/null; then
       BRAND_LINE=$(grep -F 'indigo-brand-openedx' "$TUTOR_ENV" | head -1)
-      check_fail "Indigo brand pin is not @^2.4.3 — found: $BRAND_LINE"
+      check_fail "Indigo brand pin is not @^2.4.2 — found: $BRAND_LINE"
     else
       check_warn "Indigo brand package not referenced in MFE Dockerfile (may use different brand package)"
     fi

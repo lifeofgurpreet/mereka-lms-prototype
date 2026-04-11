@@ -3,7 +3,7 @@
 # @covers AC-ULMO-001: OPENEDX_COMMON_VERSION patch confirmed working (ensure_mfe_ulmo_source_refs)
 # @covers AC-ULMO-002: All MFE app source refs use release/ulmo.1
 # @covers AC-ULMO-003: Atlas translation pulls use release/ulmo
-# @covers AC-ULMO-004: Brand package upgraded to ulmo-compatible version (^2.4.3)
+# @covers AC-ULMO-004: Brand package upgraded to published ulmo-compatible version (^2.4.2)
 # @covers AC-ULMO-006: discussions webpack fix is no-op on ulmo (fixed upstream)
 #
 # Verify MFE Ulmo migration completeness.

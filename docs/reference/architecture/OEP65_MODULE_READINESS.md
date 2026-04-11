@@ -74,7 +74,7 @@ its own React tree from scratch and includes its own copy of React and all share
 | `ENABLE_NEW_RELIC` build ARG | Per-MFE Docker `ARG ENABLE_NEW_RELIC=false` | **Not aligned** — should be runtime |
 | `SITE_VARIANTS` hostname map | Hardcoded in `env.config.jsx` React component | **Not aligned** — tight coupling to domain list |
 | Hardcoded footer nav/social links | Arrays in `env.config.jsx` component body | **Not aligned** — should be runtime config |
-| `@edx/brand` package version | Pinned in Dockerfile (`@edly-io/indigo-brand-openedx@^2.4.3`) | **Aligned** — brand package pattern |
+| `@edx/brand` package version | Pinned in Dockerfile (`@edly-io/indigo-brand-openedx@^2.4.2`) | **Aligned** — brand package pattern |
 | MFE Dockerfile customisation | Tutor plugin hooks in `_mereka_lms/mfe_dockerfile.py` plus limited post-render build-context sync | **Partially aligned** — hook-led authority is correct, but build-context sync is still a downstream coupling point |
 | Node/runtime/toolchain policy | Tutor plugin MFE Dockerfile hooks | **Partially aligned** — no regex surgery remains, but downstream still owns non-upstream build choices |
 | Branch/ref alignment (historical) | Previously handled by rendered Dockerfile surgery; removed with `mfe-node.sh` retirement | **No longer active** — keep as historical migration context only |
@@ -263,7 +263,7 @@ change to the `MerekaFooter` component.
 The Mereka brand is delivered as an npm package alias:
 
 ```dockerfile
-RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'
+RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.2'
 ```
 
 SCSS is imported in `env.config.jsx`:

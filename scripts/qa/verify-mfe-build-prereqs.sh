@@ -170,7 +170,7 @@ if [[ -f "$GENERATED_MFE_DOCKERFILE" ]]; then
     echo "  ✓ generated Dockerfile has no stale base-stage apt bootstrap"
   fi
 
-  if grep -Fq -- "@edly-io/indigo-brand-openedx@^2.4.3" "$GENERATED_MFE_DOCKERFILE"; then
+  if grep -Fq -- "@edly-io/indigo-brand-openedx@^2.4.2" "$GENERATED_MFE_DOCKERFILE"; then
     echo "  ✓ generated Dockerfile rewrites tutor-indigo brand install to npm package"
   else
     echo "  ✗ generated Dockerfile missing npm-published tutor-indigo brand install"

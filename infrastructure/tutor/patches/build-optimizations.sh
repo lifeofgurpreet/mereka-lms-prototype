@@ -301,7 +301,7 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
 
         updated = updated.replace(
             "RUN npm install '@edx/brand@github:@edly-io/brand-openedx#indigo-2.5.0'",
-            "RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'",
+            "RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.2'",
         )
 
     # REMOVED: Tutor v21 node_modules path fix (was lines 277-282)

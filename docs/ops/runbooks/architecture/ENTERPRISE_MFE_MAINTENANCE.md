@@ -57,7 +57,7 @@ theme-copy wiring.
 
 ### 4. Indigo Brand Package Pin (Ulmo)
 
-The `@edx/brand` alias is pinned to `@edly-io/indigo-brand-openedx@^2.4.3`
+The `@edx/brand` alias is pinned to `@edly-io/indigo-brand-openedx@^2.4.2`
 (Ulmo/Paragon v23). Earlier pins at `^2.1.1` misalign CSS design tokens with
 the Paragon version bundled in Ulmo MFEs.
 
