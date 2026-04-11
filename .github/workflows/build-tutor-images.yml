@@ -90,6 +90,14 @@ on:
           - proof
           - fast
         default: proof
+      mfe_build_profile:
+        description: 'MFE build profile override: compat preserves legacy/default-off surfaces for explicit compatibility builds'
+        type: choice
+        options:
+          - proof
+          - fast
+          - compat
+        default: proof
 
 concurrency:
   # Main builds share one workflow-level slot so push and workflow_dispatch
@@ -767,9 +775,11 @@ jobs:
           mkdir -p var/ci
 
           # Cache strategy: same as openedx build (see D4 comments above).
-          BUILD_PROFILE="${{ github.event_name == 'workflow_dispatch' && inputs.build_profile || 'proof' }}"
+          BUILD_PROFILE="${{ github.event_name == 'workflow_dispatch' && inputs.mfe_build_profile || 'proof' }}"
           if [[ "${BUILD_PROFILE}" == "proof" ]]; then
             CACHE_REF="${{ env.REGISTRY }}/mfe:mereka-brand"
+          elif [[ "${BUILD_PROFILE}" == "compat" ]]; then
+            CACHE_REF="${{ env.REGISTRY }}/mfe:mereka-brand-compat"
           else
             CACHE_REF="${{ env.REGISTRY }}/mfe:mereka-brand-fast"
           fi
