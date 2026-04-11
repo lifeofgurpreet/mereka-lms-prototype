@@ -35,6 +35,8 @@ summary: Defines the normative issuance flow for verifiable credentials, includi
   Mereka LMS.
 ---
 
+<!-- markdownlint-disable MD013 MD025 -->
+
 # CRED-030: Issuance Flows (UX + API)
 
 ## What we're building

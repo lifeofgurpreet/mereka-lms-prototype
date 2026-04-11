@@ -35,6 +35,8 @@ summary: Defines the issuer-side contract for verifiable credentials, including 
   metadata, trust posture, key material expectations, and runtime integration boundaries.
 ---
 
+<!-- markdownlint-disable MD013 MD025 -->
+
 # CRED-020: Issuer Identity, Keys, and Rotation
 
 ## What we're building

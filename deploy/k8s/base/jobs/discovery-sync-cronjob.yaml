@@ -71,19 +71,29 @@ spec:
               # Change to Discovery working directory
               cd /openedx/discovery
 
-              echo "[1/4] Refreshing course metadata..."
-              python manage.py refresh_course_metadata 2>&1 | \
-                grep -v "UserWarning: The 'django-fsm'" || true
+              echo "[1/3] Refreshing course and program metadata..."
+              if python manage.py refresh_course_metadata >/tmp/discovery-refresh.log 2>&1; then
+                grep -v "UserWarning: The 'django-fsm'" /tmp/discovery-refresh.log || true
+              else
+                grep -v "UserWarning: The 'django-fsm'" /tmp/discovery-refresh.log || true
+                echo "Discovery metadata refresh failed"
+                exit 1
+              fi
 
-              echo "[2/4] Refreshing program metadata..."
-              python manage.py refresh_program_metadata 2>&1 | \
-                grep -v "UserWarning: The 'django-fsm'" || true
+              echo "[2/3] Updating search index..."
+              if python manage.py update_index --disable-change-limit >/tmp/discovery-update-index.log 2>&1; then
+                grep -v "UserWarning: The 'django-fsm'" /tmp/discovery-update-index.log || true
+              elif rg -q "index_not_found_exception|no such index" /tmp/discovery-update-index.log; then
+                echo "Discovery indexes are missing; rebuilding from scratch..."
+                python manage.py search_index --rebuild -f --disable-change-limit >/tmp/discovery-search-index.log 2>&1
+                grep -v "UserWarning: The 'django-fsm'" /tmp/discovery-search-index.log || true
+              else
+                grep -v "UserWarning: The 'django-fsm'" /tmp/discovery-update-index.log || true
+                echo "Discovery index update failed"
+                exit 1
+              fi
 
-              echo "[3/4] Updating search index..."
-              python manage.py update_index --disable-change-limit 2>&1 | \
-                grep -v "UserWarning: The 'django-fsm'" || true
-
-              echo "[4/4] Verifying catalog counts..."
+              echo "[3/3] Verifying catalog counts..."
               python manage.py shell -c "
               from course_discovery.apps.course_metadata.models import Course, Program
               print(f'Courses: {Course.objects.count()}, Programs: {Program.objects.count()}')
@@ -99,7 +109,7 @@ spec:
 
             # Django settings
             - name: DJANGO_SETTINGS_MODULE
-              value: course_discovery.settings.production
+              value: course_discovery.settings.tutor.production
 
             # Database connection (from database-secrets)
             - name: DB_HOST
@@ -129,6 +139,14 @@ spec:
             - secretRef:
                 name: openedx-secrets
 
+            volumeMounts:
+            - mountPath: /openedx/discovery/course_discovery/settings/tutor/production.py
+              name: settings
+              subPath: production.py
+            - mountPath: /openedx/discovery/course_discovery/settings/tutor/mereka_platform_admin.py
+              name: settings
+              subPath: mereka_platform_admin.py
+
             # Resource limits
             resources:
               requests:
@@ -149,3 +167,8 @@ spec:
               periodSeconds: 30
               timeoutSeconds: 5
               failureThreshold: 3
+
+          volumes:
+          - name: settings
+            configMap:
+              name: discovery-settings

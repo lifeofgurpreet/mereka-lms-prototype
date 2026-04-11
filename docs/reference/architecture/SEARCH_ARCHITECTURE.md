@@ -1,5 +1,5 @@
 # Search / Catalog / Discovery Runtime Contract
-_Audience: platform operators and agents · Owner: Platform Team · Status: canonical · Last runtime verified: 2026-04-10T12:19Z (production)_
+_Audience: platform operators and agents · Owner: Platform Team · Status: canonical · Last runtime verified: 2026-04-11T12:11Z (production)_
 
 This document records the currently proved search/catalog/discovery contract for
 `mereka-lms` and separates repo intent from overlay truth and runtime truth.
@@ -69,7 +69,7 @@ Verification tags:
 | `production` | Studio content search | `cms` Deployment | Meilisearch backend | `tutor_course_info` / `tutor_courseware_content` plus Studio-owned indexes | `MEILISEARCH_API_KEY` | `kubectl exec -n mereka-lms deploy/cms -- python manage.py cms shell ...` plus Meilisearch `/indexes/*/stats` | CMS configmap + runtime settings | `Runtime-verified` | Production CMS reindex now succeeds into Meilisearch with settled counts `39 / 2815`. |
 | `production` | Forum search | `lms` Deployment | Meilisearch backend | `tutor_*` Meilisearch indexes | `MEILISEARCH_API_KEY` | `kubectl exec -n mereka-lms deploy/lms -- python manage.py lms shell ...` | live patched LMS configmap | `Runtime-verified` | Live `FORUM_SEARCH_BACKEND` now resolves `forum.search.meilisearch.MeilisearchBackend`. |
 | `production` | Course reindex CronJob | `course-reindex` CronJob | `reindex_course` command | Meilisearch `tutor_course_info` / `tutor_courseware_content` | `MEILISEARCH_API_KEY` for routine writes; `MEILISEARCH_MASTER_KEY` only for admin inspection | `kubectl create job -n mereka-lms --from=cronjob/course-reindex course-reindex-manual` plus job logs and `/indexes/*/stats` | `deploy/k8s/base/monitoring/cronjob-course-reindex.yaml` | `Runtime-verified` | Manual production run succeeded: `39 of 39 courses reindexed succesfully.` |
-| `production` | Discovery sync CronJob | `discovery-sync` CronJob | Discovery management commands | Discovery DB + search index | secrets via `envFrom` | `kubectl get cronjob discovery-sync -n mereka-lms -o json` | `deploy/k8s/base/jobs/discovery-sync-cronjob.yaml` | `Runtime-verified` | Exists live after the Kyverno-compliant vendored fix was realized. |
+| `production` | Discovery sync CronJob | `discovery-sync` CronJob | Discovery management commands | Discovery DB + Elasticsearch indexes | secrets via `envFrom` | `kubectl get cronjob discovery-sync -n mereka-lms -o json` plus `kubectl logs -n mereka-lms job/discovery-sync-manual-*` | `deploy/k8s/base/jobs/discovery-sync-cronjob.yaml` | `Runtime-verified` | Manual production run completed successfully at `2026-04-11T12:09:01Z` and populated Discovery with `39` courses / `39` course runs. |
 
 ## Proved Runtime Facts
 
@@ -198,12 +198,12 @@ Current conclusion:
 - `Runtime-verified`: the public Discovery root contract is now
   `/ -> /health/`; the old Query Preview UI is no longer a supported public
   surface.
-- `Runtime-verified`: its production courses API is auth-protected and currently
-  empty.
+- `Runtime-verified`: its production courses API is auth-protected.
 - `Runtime-verified`: staging learner browse success does not currently depend
   on Discovery content being populated.
-- `Runtime-verified`: Discovery sync CronJob is now deployed in prod, but
-  Discovery content remains empty and auth-protected there.
+- `Runtime-verified`: production Discovery sync now completes successfully and
+  leaves Discovery with `39` `Course` rows, `39` `CourseRun` rows, `0`
+  `Program` rows, and `0` `Organization` rows.
 - `Runtime-verified`: production LMS still publishes
   `DISCOVERY_API_BASE_URL=https://discovery.academyv2.mereka.io` with
   `ENABLE_COURSE_DISCOVERY=True`, even though learner browse is now served from
@@ -231,6 +231,8 @@ The remaining proved production consumers are:
      on Discovery data.
 2. Discovery maintenance:
    - `discovery-sync` CronJob still targets `http://discovery:8000`
+   - the job now succeeds, so it is no longer a broken consumer, but it still
+     keeps Discovery operationally in scope
 3. Enterprise catalog services:
    - `enterprise-catalog`
    - `enterprise-catalog-worker`

@@ -44,6 +44,8 @@ links:
     - "specs/cross-cutting-requirements_spec.md"
 ---
 
+<!-- markdownlint-disable MD013 MD022 MD024 MD025 MD029 MD031 MD032 MD036 MD060 -->
+
 # Human Summary
 
 ## What we're building

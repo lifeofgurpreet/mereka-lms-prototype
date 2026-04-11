@@ -67,6 +67,7 @@ OAUTH_APPS=(
   "enterprise-access-key|enterprise_access_worker|client-credentials|ENTERPRISE_ACCESS_OAUTH2_SECRET"
   "enterprise-subsidy-key|enterprise_subsidy_worker|client-credentials|ENTERPRISE_SUBSIDY_OAUTH2_SECRET"
   "license-manager-key|license_manager_worker|client-credentials|LICENSE_MANAGER_OAUTH2_SECRET"
+  "discovery|discovery_worker|client-credentials|DISCOVERY_BACKEND_OAUTH2_SECRET"
 )
 
 for entry in "${OAUTH_APPS[@]}"; do
@@ -147,7 +148,10 @@ partner, created = Partner.objects.update_or_create(
         'site': site,
         'courses_api_url': 'http://lms:8000/api/courses/v1/',
         'organizations_api_url': 'http://lms:8000/api/organizations/v0/',
-        'programs_api_url': 'http://lms:8000/api/programs/v1/',
+        # This stack does not expose the legacy LMS programs API that course-discovery
+        # expects at /api/programs/v1/programs/. Leave the URL empty so the partner
+        # bootstrap skips ProgramsApiDataLoader instead of hard-failing refresh.
+        'programs_api_url': '',
         'marketing_site_api_url': '',
         'lms_url': 'http://lms:8000',
         'lms_admin_url': 'http://lms:8000/admin',
@@ -232,7 +236,9 @@ fi
 echo ""
 echo "--- 5. Stale Site Cleanup ---"
 
-if [[ "$DRY_RUN" == "true" ]]; then
+if [[ ! "$NAMESPACE" =~ dev ]]; then
+  echo "  SKIPPED: stale prod-domain cleanup is restricted to dev namespaces"
+elif [[ "$DRY_RUN" == "true" ]]; then
   echo "  [DRY RUN] Would disable stale prod-domain SiteConfigurations"
 else
   kubectl exec -n "$NAMESPACE" "$LMS_POD" -c lms -- \

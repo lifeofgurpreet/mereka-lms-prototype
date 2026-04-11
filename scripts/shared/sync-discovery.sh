@@ -91,11 +91,9 @@ refresh_metadata() {
   info "Refreshing course metadata in Discovery..."
   DISCOVERY_POD=$(get_discovery_pod)
 
-  kubectl exec -n "$NAMESPACE" "$DISCOVERY_POD" -- \
+  if kubectl exec -n "$NAMESPACE" "$DISCOVERY_POD" -- \
     python manage.py refresh_course_metadata "$@" 2>&1 | \
-    grep -v "UserWarning: The 'django-fsm'" || true
-
-  if [ $? -eq 0 ]; then
+    grep -v "UserWarning: The 'django-fsm'"; then
     info "✓ Course metadata refreshed successfully"
   else
     error "✗ Failed to refresh course metadata"
@@ -107,16 +105,33 @@ refresh_metadata() {
 update_index() {
   info "Updating Discovery search index..."
   DISCOVERY_POD=$(get_discovery_pod)
+  local log_file
+  log_file="$(mktemp)"
 
-  kubectl exec -n "$NAMESPACE" "$DISCOVERY_POD" -- \
-    python manage.py update_index --disable-change-limit 2>&1 | \
-    grep -v "UserWarning: The 'django-fsm'" || true
-
-  if [ $? -eq 0 ]; then
+  if kubectl exec -n "$NAMESPACE" "$DISCOVERY_POD" -- \
+    python manage.py update_index --disable-change-limit >"$log_file" 2>&1; then
+    grep -v "UserWarning: The 'django-fsm'" "$log_file" || true
     info "✓ Search index updated successfully"
-  else
-    warn "Search index update failed (may not be configured)"
+    rm -f "$log_file"
+    return 0
   fi
+
+  grep -v "UserWarning: The 'django-fsm'" "$log_file" || true
+  if rg -q "index_not_found_exception|no such index" "$log_file"; then
+    warn "Discovery indexes are missing; rebuilding from scratch"
+    if kubectl exec -n "$NAMESPACE" "$DISCOVERY_POD" -- \
+      python manage.py search_index --rebuild -f --disable-change-limit >"$log_file" 2>&1; then
+      grep -v "UserWarning: The 'django-fsm'" "$log_file" || true
+      info "✓ Search index rebuilt successfully"
+      rm -f "$log_file"
+      return 0
+    fi
+    grep -v "UserWarning: The 'django-fsm'" "$log_file" || true
+  fi
+
+  rm -f "$log_file"
+  error "✗ Search index update failed"
+  exit 1
 }
 
 # Show Discovery course count
