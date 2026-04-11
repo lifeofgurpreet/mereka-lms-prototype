@@ -1213,22 +1213,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       - name: Install envsubst (required by install-cosign.sh)
-        run: |
-          if ! command -v envsubst &>/dev/null; then
-            # Static binary — works on all runner types.
-            # /usr/local/bin may be read-only on ARC runners; fall back to $HOME/bin.
-            INSTALL_DIR="/usr/local/bin"
-            if ! touch "$INSTALL_DIR/.write-test" 2>/dev/null; then
-              INSTALL_DIR="$HOME/bin"
-              mkdir -p "$INSTALL_DIR"
-              echo "$INSTALL_DIR" >> "$GITHUB_PATH"
-            else
-              rm -f "$INSTALL_DIR/.write-test"
-            fi
-            curl -fsSL -o "$INSTALL_DIR/envsubst" \
-              "https://github.com/a8m/envsubst/releases/download/v1.4.2/envsubst-Linux-x86_64" \
-              && chmod +x "$INSTALL_DIR/envsubst"
-          fi
+        run: ./scripts/infra/install-envsubst.sh
 
       - name: Install cosign
         env:
@@ -1293,10 +1278,21 @@ jobs:
           PROVENANCE
 
           # Attest the image (keyless via Sigstore OIDC)
-          cosign attest --yes \
-            --predicate var/ci/provenance-openedx.json \
-            --type slsaprovenance \
-            "${IMAGE_REF}"
+          for attempt in 1 2 3; do
+            if cosign attest --yes \
+              --predicate var/ci/provenance-openedx.json \
+              --type slsaprovenance \
+              "${IMAGE_REF}"; then
+              break
+            fi
+            rc=$?
+            if [[ "$attempt" -eq 3 ]]; then
+              exit "$rc"
+            fi
+            sleep_seconds=$((attempt * 5))
+            echo "cosign attest failed on attempt ${attempt}/3; retrying in ${sleep_seconds}s" >&2
+            sleep "${sleep_seconds}"
+          done
 
           echo "### OpenEdX SLSA Provenance Attached" >> $GITHUB_STEP_SUMMARY
           echo "**Image:** \`${IMAGE_REF}\`" >> $GITHUB_STEP_SUMMARY
@@ -1352,10 +1348,21 @@ jobs:
           }
           PROVENANCE
 
-          cosign attest --yes \
-            --predicate var/ci/provenance-mfe.json \
-            --type slsaprovenance \
-            "${IMAGE_REF}"
+          for attempt in 1 2 3; do
+            if cosign attest --yes \
+              --predicate var/ci/provenance-mfe.json \
+              --type slsaprovenance \
+              "${IMAGE_REF}"; then
+              break
+            fi
+            rc=$?
+            if [[ "$attempt" -eq 3 ]]; then
+              exit "$rc"
+            fi
+            sleep_seconds=$((attempt * 5))
+            echo "cosign attest failed on attempt ${attempt}/3; retrying in ${sleep_seconds}s" >&2
+            sleep "${sleep_seconds}"
+          done
 
           echo "### MFE SLSA Provenance Attached" >> $GITHUB_STEP_SUMMARY
           echo "**Image:** \`${IMAGE_REF}\`" >> $GITHUB_STEP_SUMMARY
@@ -1392,22 +1399,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       - name: Install envsubst (required by install-cosign.sh)
-        run: |
-          if ! command -v envsubst &>/dev/null; then
-            # Static binary — works on all runner types.
-            # /usr/local/bin may be read-only on ARC runners; fall back to $HOME/bin.
-            INSTALL_DIR="/usr/local/bin"
-            if ! touch "$INSTALL_DIR/.write-test" 2>/dev/null; then
-              INSTALL_DIR="$HOME/bin"
-              mkdir -p "$INSTALL_DIR"
-              echo "$INSTALL_DIR" >> "$GITHUB_PATH"
-            else
-              rm -f "$INSTALL_DIR/.write-test"
-            fi
-            curl -fsSL -o "$INSTALL_DIR/envsubst" \
-              "https://github.com/a8m/envsubst/releases/download/v1.4.2/envsubst-Linux-x86_64" \
-              && chmod +x "$INSTALL_DIR/envsubst"
-          fi
+        run: ./scripts/infra/install-envsubst.sh
 
       - name: Install cosign
         env:
@@ -2015,22 +2007,7 @@ jobs:
           path: var/ci
 
       - name: Install envsubst (required by install-cosign.sh)
-        run: |
-          if ! command -v envsubst &>/dev/null; then
-            # Static binary — works on all runner types.
-            # /usr/local/bin may be read-only on ARC runners; fall back to $HOME/bin.
-            INSTALL_DIR="/usr/local/bin"
-            if ! touch "$INSTALL_DIR/.write-test" 2>/dev/null; then
-              INSTALL_DIR="$HOME/bin"
-              mkdir -p "$INSTALL_DIR"
-              echo "$INSTALL_DIR" >> "$GITHUB_PATH"
-            else
-              rm -f "$INSTALL_DIR/.write-test"
-            fi
-            curl -fsSL -o "$INSTALL_DIR/envsubst" \
-              "https://github.com/a8m/envsubst/releases/download/v1.4.2/envsubst-Linux-x86_64" \
-              && chmod +x "$INSTALL_DIR/envsubst"
-          fi
+        run: ./scripts/infra/install-envsubst.sh
 
       - name: Install cosign
         env:
