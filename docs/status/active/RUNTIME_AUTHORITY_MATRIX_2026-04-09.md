@@ -147,3 +147,50 @@ Per `deploy/k8s/tenancy/tenant-registry.yaml`:
 | SOF | `skillourfuture.academy.mereka.io` | `skillourfuture.academyv2.mereka.io` |
 
 Testing the migration target URLs returns Mereka content (fall-through to primary Site). Migration cutover is not complete and this is expected per the registry.
+
+---
+
+## 2026-04-11 07:25Z correction — merged source vs live runtime
+
+Fresh takeover proof against the currently serving runtime shows two important deltas:
+
+| Domain | Git/source state | Live runtime state |
+|--------|------------------|--------------------|
+| **RCB-10 / dev theme path** | `#1543` and `#1562` are merged | `https://apps.academyv2.mereka.dev/theme/core.min.css` still returns `HTTP 404`; dev `Profile`, `Discussions`, and `Communications` remain broken live |
+| **RCB-13 / prod tenant CSP** | `#1540` is merged | live prod CSP headers on Biji-Biji and SOF MFE hosts still omit tenant LMS origins from `connect-src`; non-primary prod login remains stuck at `pending` |
+
+### Fresh live proof
+
+- **Dev Mereka**
+  - login with `lanea-mereka-learner` still reaches `/learner-dashboard/` and renders authenticated dashboard content
+  - `/u/lanea-mereka-learner` remains blank
+  - `/discussions/` and `/communications/` still render the React error boundary
+  - `/theme/core.min.css` on the dev apps host still returns `404`
+- **Prod Biji-Biji**
+  - branded auth shell renders
+  - submit changes to `pending` and never leaves `/authn/login`
+  - live CSP still only lists primary Mereka origins
+- **Prod SOF**
+  - branded auth shell renders on `apps.skillourfuture.academyv2.mereka.io`
+  - submit changes to `pending` and never leaves `/authn/login`
+  - live CSP still only lists primary Mereka origins
+
+### Authority conclusion
+
+The merged fixes are still **git truth**, not **realized runtime truth**. Do not mark Agent 1 closure items done until a realized bundle is promoted and the same browser proofs are re-run successfully against live dev/prod.
+
+### Exact deployed commit proof
+
+The runtime/browser symptoms above are now pinned to the exact MFE revisions serving live traffic:
+
+| Environment | Namespace | Deployed MFE tag | Deployed MFE digest | Relevant fix | Result |
+|-------------|-----------|------------------|---------------------|--------------|--------|
+| dev | `mereka-lms-dev` | `e4764d5834b6e24c26069e7edb2a527d05ae3b1d` | `sha256:9fff8d031b00feed62f1103baf21d2127c5f5721be064c6158aac018b3a15347` | `#1562` merge commit `6fe23d710273d82f73eeac05fa225d989522acc9` | **not deployed** |
+| prod | `mereka-lms` | `dfbe7ef318067917b6e3906da83cf3b98699dc22` | `sha256:4eee831c775f5705f92f5a0a274319d30b43cdfe8b21864cda06ab50ddaead94` | `#1540` merge commit `ff0a57f8627377252e60fc130a9cd0a2b3536210` | **not deployed** |
+
+Ancestry checks run locally:
+
+- `git merge-base --is-ancestor 6fe23d710273d82f73eeac05fa225d989522acc9 e4764d5834b6e24c26069e7edb2a527d05ae3b1d` -> false
+- `git merge-base --is-ancestor ff0a57f8627377252e60fc130a9cd0a2b3536210 dfbe7ef318067917b6e3906da83cf3b98699dc22` -> false
+
+That closes the ambiguity: the live failures are not contradicting source truth, they are proving that the clusters are still serving older MFE revisions.

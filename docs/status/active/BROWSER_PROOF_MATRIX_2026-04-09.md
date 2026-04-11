@@ -238,6 +238,23 @@ was not fully resolved.
 
 **Merged this cycle:**
 - #1536 (RCB-09 MFE_CONFIG footer/header keys) — 11:42Z
+
+## Update 2026-04-11 08:10Z — deployed commit proof for the still-broken live surfaces
+
+The fresh browser failures above are now tied to the exact deployed MFE revisions:
+
+| Environment | Live namespace | Deployed MFE image tag | Deployed MFE digest | Contains fix? | Consequence |
+|-------------|----------------|------------------------|---------------------|---------------|-------------|
+| dev | `mereka-lms-dev` | `e4764d5834b6e24c26069e7edb2a527d05ae3b1d` | `sha256:9fff8d031b00feed62f1103baf21d2127c5f5721be064c6158aac018b3a15347` | **No `#1562`** | `/theme/core.min.css` still `404`; `Profile`, `Discussions`, `Communications` still broken live |
+| prod | `mereka-lms` | `dfbe7ef318067917b6e3906da83cf3b98699dc22` | `sha256:4eee831c775f5705f92f5a0a274319d30b43cdfe8b21864cda06ab50ddaead94` | **No `#1540`** | Biji-Biji and SOF non-primary prod login still blocked live by old CSP |
+
+**Ancestry proof**
+
+- dev deployed commit `e4764d58...` is the merge commit of `#1543`
+- dev deployed commit `e4764d58...` does **not** contain `#1562` merge commit `6fe23d71...`
+- prod deployed commit `dfbe7ef3...` does **not** contain `#1540` merge commit `ff0a57f8...`
+
+This means the remaining browser failures are currently explained by **deployed runtime lag**, not by contradictory browser evidence.
 - #1540 (RCB-13 CSP tenant extra hosts) — 12:16Z
 - #1543 (RCB-10 stage 1 build context sync) — 13:04Z
 - #1562 (RCB-10 stage 2 production stage COPY inject) — 20:55Z
@@ -298,3 +315,38 @@ Staging non-primary L4 login proof is **gated on realization**, not on a missing
 - Cancelled old build, new CI for `fd16b224` (post-#1492 merge) running. Build Tutor Images for fd16b224 will start after CI completes.
 - **Lesson**: promotion chain is gated on successful Post-push scan. Transient network errors in SBOM/Trivy download will block the entire dispatch. Worth adding retry/graceful-degrade on scan failures if they're non-blocking vuln-wise.
 
+---
+
+## Update 2026-04-11 07:25Z — Agent 1 takeover correction
+
+Fresh browser proof with the canonical learner accounts shows the live runtime is still behind the merged source fixes.
+
+### Dev Mereka (live)
+
+| Surface | Level | Current evidence |
+|---------|-------|------------------|
+| `/authn/login` | **L3** | Branded login shell renders. |
+| Login (`lanea-mereka-learner`) | **L4** | Redirect completes to `/learner-dashboard/`; authenticated dashboard nav and account menu render. |
+| `/learner-dashboard/` | **L4** | Visible dashboard content renders for the learner account. |
+| `/u/lanea-mereka-learner` | **🔴 broken** | Title renders as `Learner Profile |`, but body is empty and the DOM never mounts visible content. |
+| `/discussions/` | **🔴 broken** | React error boundary renders `An unexpected error occurred... Try again`. |
+| `/communications/` | **🔴 broken** | Same React error boundary as Discussions. |
+| `https://apps.academyv2.mereka.dev/theme/core.min.css` | **🔴 broken** | Live request still returns `HTTP 404`, zero bytes. |
+
+**Correction:** the dev `RCB-10` family is still live. The merged `#1543` / `#1562` source fixes are not yet realized on the currently serving dev MFE runtime.
+
+### Production non-primary tenants (live)
+
+| Tenant | Surface | Level | Current evidence |
+|--------|---------|-------|------------------|
+| Biji-Biji | `/authn/login` | **L3** | Branded login shell renders. |
+| Biji-Biji | Login (`lanea-bb-learner`) | **🔴 blocked** | Submit button flips to `pending` and never redirects to `/learner-dashboard/`. |
+| SOF | `/authn/login` | **L3** | Branded login shell renders on `apps.skillourfuture.academyv2.mereka.io`. |
+| SOF | Login (`lanea-sof-learner`) | **🔴 blocked** | Same `pending` stuck-login shape as Biji-Biji. |
+
+Live CSP headers on both prod MFE hosts still show only the primary Mereka origins in `connect-src`, `img-src`, and `frame-src`:
+
+- present: `https://academyv2.mereka.io`, `https://studio.academyv2.mereka.io`, `https://auth0.mereka.io`
+- absent: `https://academy.biji-biji.com`, `https://skillourfuture.academy.mereka.io`
+
+**Correction:** `RCB-13` is still live in production runtime. `#1540` is merged in git, but not realized on the current prod deployment.
