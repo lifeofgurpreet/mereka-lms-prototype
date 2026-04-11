@@ -42,22 +42,33 @@ Primary source of truth: `infrastructure/monitoring/`
 Dashboard catalog in this repo:
 - `infrastructure/monitoring/grafana/dashboard-catalog.bbi-mereka-lms.json`
 
-SLO-specific contract in this repo:
+Canonical LMS Grafana dashboards in this repo:
+- `infrastructure/monitoring/grafana/dashboards/public-endpoints.json`
+- `infrastructure/monitoring/grafana/dashboards/slo-overview.json`
+- `infrastructure/monitoring/grafana/dashboards/operations-signals.json`
+- `infrastructure/monitoring/grafana/dashboards/auth.json`
+- `infrastructure/monitoring/grafana/dashboards/logs.json`
+
+Canonical runtime endpoints:
+- Public endpoints: https://grafana.mereka.dev/d/bbi-app-mereka-lms
+- SLO overview: https://grafana.mereka.dev/d/mereka-slo-overview
+- Operations signals: https://grafana.mereka.dev/d/mereka-lms-operations-signals
+- Auth: https://grafana.mereka.dev/d/mereka-lms-auth
+- Logs: https://grafana.mereka.dev/d/mereka-lms-logs
+
+Primary contracts in this repo:
+- `infrastructure/monitoring/grafana/dashboard-contract.bbi-app-mereka-lms.json`
 - `infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json`
+- `infrastructure/monitoring/grafana/dashboard-contract.mereka-lms-operations-signals.json`
+- `infrastructure/monitoring/grafana/dashboard-contract.mereka-lms-auth.json`
+- `infrastructure/monitoring/grafana/dashboard-contract.mereka-lms-logs.json`
 
-Runtime endpoint:
-- URL: https://grafana.mereka.dev/d/mereka-slo-overview
-
-**Panels:**
-- Service Health (LMS, CMS, Caddy, MFE, Workers)
-- Data Services (MySQL, MongoDB, Redis, Elasticsearch, Forum, Discovery, SMTP)
-- Data-store Deep Telemetry (MySQL connection utilization + slow queries, Redis rejected connections + evictions)
-- Resource Usage (CPU, Memory by pod)
-- External Availability (SLO: 99.5%)
-- Response Time tracking
-- SSL Certificate expiry
-- Log volume by level
-- Recent errors
+Surface summary:
+- `Public Endpoints`: public uptime and edge health for LMS domains and MFEs
+- `SLO Overview`: service health, latency, availability, and error-budget views
+- `Operations Signals`: stateful storage, DB/cache pressure, Velero drills, deployment health
+- `Auth`: LMS/Authentik auth failures, OIDC issues, CSRF failures, authorize 4xx drilldowns
+- `Logs`: 5xx, dependency failures, auth failures, and top error streams for nonprod operators
 
 **Alerts:** Added to `alerts/applications.yaml`
 - `MerekaLMSDown` - LMS pods not running (critical)
@@ -207,8 +218,8 @@ STRICT_RUNTIME=1 ./scripts/qa/audit-db-exporter-telemetry.sh --mode runtime
 ```
 
 `--strict` additionally fails when observability dashboard parity data is unavailable
-or invalid (for example, missing `mereka-slo-overview` dashboard source file or
-missing `prometheus` datasource references). Set `REQUIRE_VPS_PROM_DS=1` when you
+or invalid (for example, missing a required dashboard source file from the catalog
+or missing required datasource references). Set `REQUIRE_VPS_PROM_DS=1` when you
 also want strict enforcement that the dashboard actively uses `prometheus-vps`.
 Set `REQUIRE_GRAFANA_RECOMMENDED=1` when you want strict enforcement of recommended
 dashboard coverage (CrashLoop/Pending/critical deployment/Velero synthetic job signals).
@@ -506,7 +517,9 @@ Caddy LoadBalancer and run `./scripts/infra/check-cert-sans.sh`. Caddy manages T
 ## Files Modified
 
 - `infrastructure/monitoring/` in this repo (GCP monitoring templates and alert JSON)
-- `infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json` (dashboard contract)
+- `infrastructure/monitoring/grafana/dashboard-catalog.bbi-mereka-lms.json` (canonical dashboard catalog)
+- `infrastructure/monitoring/grafana/dashboards/` (local canonical Grafana snapshots)
+- `infrastructure/monitoring/grafana/dashboard-contract.*.json` (dashboard contracts)
 - `infrastructure/platform/monitoring/overlays/{dev,prod}/dashboards/` (platform Grafana dashboards)
 - `vps/infrastructure/observability/` (VPS-only runtime observability assets)
 
