@@ -21,6 +21,8 @@ on:
       - 'assets/branding/**'
       - 'scripts/infra/prepare-tutor-build-context.sh'
       - 'scripts/infra/prepare-tutor-build-context-ci.sh'
+      - 'scripts/ci/preflight-check.sh'
+      - 'scripts/infra/sync-tutor-plugin-mirror.sh'
       - 'infrastructure/tutor/apply-patches.sh'
       - 'infrastructure/tutor/patches/**'
       - 'scripts/infra/resolve-build-scope.sh'
@@ -272,11 +274,40 @@ jobs:
           scandir: './infrastructure/tutor'
           severity: warning
 
+  render-preflight:
+    name: Render Preflight Contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [resolve-build-scope, lint]
+    if: ${{ needs.resolve-build-scope.outputs.build_openedx == 'true' || needs.resolve-build-scope.outputs.build_mfe == 'true' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-python-env
+        with:
+          python-version: '3.12'
+          install-base-deps: 'false'
+
+      - name: Install Tutor into CI preflight venv
+        run: |
+          python3 -m venv .ci-venv
+          source .ci-venv/bin/activate
+          pip install -U pip
+          pip install -r requirements-tutor.txt
+
+      - name: Run rendered Dockerfile preflight tripwire
+        env:
+          TUTOR_VENV: ${{ github.workspace }}/.ci-venv
+        run: ./scripts/ci/preflight-check.sh
+
   prepare-build-context:
     name: Prepare Tutor Build Context
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: [resolve-build-scope, lint]
+    needs: [resolve-build-scope, lint, render-preflight]
     if: ${{ needs.resolve-build-scope.outputs.build_openedx == 'true' || needs.resolve-build-scope.outputs.build_mfe == 'true' }}
     permissions:
       contents: read
