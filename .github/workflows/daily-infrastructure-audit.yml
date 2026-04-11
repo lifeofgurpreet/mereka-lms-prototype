@@ -490,7 +490,9 @@ jobs:
   # ============================================================================
   gitops-integrity:
     name: GitOps integrity checks
+    needs: []
     runs-on: mereka-k8s-runners
+    continue-on-error: false
     permissions:
       contents: read
     steps:
@@ -500,28 +502,53 @@ jobs:
         run: |
           set -euo pipefail
           FAILURES=0
+          RESULTS_FILE="var/ci/gitops-integrity-results.txt"
+          mkdir -p var/ci
 
-          echo "=== GitOps Integrity System (daily) ==="
-          echo ""
+          echo "=== GitOps Integrity System (daily) ===" | tee "$RESULTS_FILE"
+          echo "" | tee -a "$RESULTS_FILE"
 
           for script in \
             scripts/qa/verify-gitops-sync-drift.sh \
             scripts/qa/verify-truth-state-matrix.sh \
             scripts/qa/verify-incident-guardrails.sh \
             scripts/qa/verify-live-mutation-ledger.sh; do
-            echo "--- $(basename "$script") ---"
-            if bash "$script" --offline 2>&1; then
-              echo "PASS"
+            echo "--- $(basename "$script") ---" | tee -a "$RESULTS_FILE"
+            if bash "$script" --offline 2>&1 | tee -a "$RESULTS_FILE"; then
+              echo "PASS" | tee -a "$RESULTS_FILE"
             else
-              echo "FAIL"
+              echo "FAIL" | tee -a "$RESULTS_FILE"
               FAILURES=$((FAILURES + 1))
             fi
-            echo ""
+            echo "" | tee -a "$RESULTS_FILE"
           done
 
-          echo "=== GitOps integrity: $((4 - FAILURES))/4 passed ==="
+          SUMMARY="GitOps integrity: $((4 - FAILURES))/4 passed"
+          echo "=== $SUMMARY ===" | tee -a "$RESULTS_FILE"
+
+          {
+            echo "## GitOps Integrity Checks"
+            echo ""
+            if [[ $FAILURES -eq 0 ]]; then
+              echo "**All 4 checks passed.**"
+            else
+              echo "**$FAILURES check(s) failed.**"
+            fi
+            echo ""
+            echo '```'
+            cat "$RESULTS_FILE"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
           if [[ $FAILURES -gt 0 ]]; then
-            echo "::warning::$FAILURES GitOps integrity check(s) failed"
+            echo "::error::$FAILURES GitOps integrity check(s) failed"
           fi
-          # Non-blocking for now — becomes blocking after burn-in period
-          # exit "$FAILURES"
+          exit "$FAILURES"
+
+      - name: Upload GitOps integrity results
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        with:
+          name: gitops-integrity-results
+          path: var/ci/gitops-integrity-results.txt
+          retention-days: 7

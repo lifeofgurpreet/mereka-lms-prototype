@@ -28,9 +28,9 @@ Machine-readable source: `verification/catalogs/verification_catalog.json`.
 - `verify`: 625
 
 ### Mutability Distribution
-- `destructive`: 10
+- `destructive`: 9
 - `mutating`: 19
-- `read-only`: 596
+- `read-only`: 597
 
 ## Deprecated Candidates
 

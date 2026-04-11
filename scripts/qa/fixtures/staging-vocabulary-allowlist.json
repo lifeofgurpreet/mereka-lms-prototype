@@ -64,6 +64,7 @@
     "scripts/qa/verify-dev-visual-correctness.sh",
     "scripts/qa/verify-domain-generated-surfaces.sh",
     "scripts/qa/verify-domain-url-invariants.sh",
+    "scripts/qa/verify-durability-proof.sh",
     "scripts/qa/verify-email-notifications-pipeline.sh",
     "scripts/qa/verify-enterprise-auth-contract.sh",
     "scripts/qa/verify-enterprise-frontend-config-contract.sh",

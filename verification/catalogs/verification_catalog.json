@@ -5028,10 +5028,13 @@
       "ci_binding": [],
       "ci_entrypoints": [],
       "env_scope": [
-        "global"
+        "dev",
+        "nonprod",
+        "prod",
+        "staging"
       ],
       "kind": "verify",
-      "mutability": "destructive",
+      "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-durability-proof.sh",
       "reference_count": 4,
@@ -17214,7 +17217,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-truth-state-matrix.sh",
-      "reference_count": 7,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -18667,9 +18670,9 @@
       "verify": 625
     },
     "mutability": {
-      "destructive": 10,
+      "destructive": 9,
       "mutating": 19,
-      "read-only": 596
+      "read-only": 597
     },
     "status_overrides_applied": 8,
     "statuses": {
