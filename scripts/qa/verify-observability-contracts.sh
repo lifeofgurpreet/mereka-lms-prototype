@@ -225,10 +225,10 @@ done
 # Verify Promtail config targets Loki endpoint
 cm="deploy/k8s/base/logging/promtail-configmap.yaml"
 if [[ -f "$cm" ]]; then
-  if grep -q 'loki.mereka.dev/loki/api/v1/push' "$cm"; then
-    report PASS "Promtail config targets Loki push endpoint"
+  if grep -qE 'url:\s*https?://[^[:space:]]+/loki/api/v1/push' "$cm"; then
+    report PASS "Promtail config declares Loki push endpoint"
   else
-    report FAIL "Promtail config missing Loki push URL"
+    report FAIL "Promtail config missing Loki push client URL"
   fi
 
   # Verify namespace/pod/container labels are set
@@ -278,13 +278,24 @@ else
 fi
 
 # Grafana dashboard coverage contract
+catalog="infrastructure/monitoring/grafana/dashboard-catalog.bbi-mereka-lms.json"
 contract="infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json"
-if [[ -f "$contract" ]]; then
-  report PASS "Grafana dashboard coverage contract exists"
-  if jq -e . "$contract" >/dev/null 2>&1; then
-    report PASS "Dashboard coverage contract is valid JSON"
+if [[ -f "$catalog" ]]; then
+  report PASS "Grafana dashboard catalog exists"
+  if jq -e . "$catalog" >/dev/null 2>&1; then
+    report PASS "Dashboard catalog is valid JSON"
   else
-    report FAIL "Dashboard coverage contract is invalid JSON"
+    report FAIL "Dashboard catalog is invalid JSON"
+  fi
+else
+  report FAIL "Dashboard catalog missing: $catalog"
+fi
+if [[ -f "$contract" ]]; then
+  report PASS "SLO dashboard coverage contract exists"
+  if jq -e . "$contract" >/dev/null 2>&1; then
+    report PASS "SLO dashboard coverage contract is valid JSON"
+  else
+    report FAIL "SLO dashboard coverage contract is invalid JSON"
   fi
 else
   report FAIL "Dashboard coverage contract missing: $contract"

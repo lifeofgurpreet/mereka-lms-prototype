@@ -314,7 +314,6 @@ scripts/qa/verify-service-endpoints.sh
 scripts/qa/verify-slo-deployment-gate.sh
 scripts/qa/verify-libraries-tenant.sh
 scripts/qa/verify-tenant-auth-analytics.sh
-scripts/qa/verify-tenant-branding-runtime.sh
 scripts/qa/verify-tenant-branding.sh
 scripts/qa/verify-tenant-configmap.sh
 scripts/qa/verify-tenant-foundation.sh

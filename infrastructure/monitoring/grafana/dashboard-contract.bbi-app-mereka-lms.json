@@ -1,6 +1,6 @@
 {
-  "name": "Mereka LMS SLO Overview Dashboard Coverage Contract",
-  "dashboard_uid": "mereka-slo-overview",
+  "name": "Mereka LMS Public Endpoints Dashboard Coverage Contract",
+  "dashboard_uid": "bbi-app-mereka-lms",
   "required": {
     "datasources": [
       "prometheus"
@@ -17,8 +17,10 @@
       "Burn Rate Trend",
       "Burn Rate - 1h Window (Tier 1)",
       "Burn Rate - 6h Window (Tier 1)",
+      "Latency Percentiles",
       "LMS Latency (p50 / p95 / p99)",
       "CMS Latency (p50 / p95 / p99)",
+      "Tier-1 Journey SLOs",
       "Journey SLO (Login) 30-day Error Budget",
       "Journey SLO (Course Access) 30-day Error Budget",
       "Journey SLO (CMS Authoring) 30-day Error Budget",
@@ -30,6 +32,7 @@
     "query_fragments": [
       "mereka:http_requests:availability_ratio_5m",
       "mereka:slo:error_budget_remaining_ratio",
+      "mereka:slo:error_budget_remaining_minutes",
       "mereka:slo:burn_rate_1h",
       "mereka:slo:burn_rate_6h",
       "mereka:slo:journey_error_budget_remaining_ratio",
@@ -43,7 +46,7 @@
       "mereka:http_request_duration:p99_5m"
     ],
     "panels": [
-      {"title": "Service Availability (30-day Rolling)","owner": "platform-sre","max_staleness_minutes": 43200},
+      {"title": "Service Availability (30-day Rolling)","owner": "platform-observability"},
       {"title": "LMS Availability","owner": "team-lms","max_staleness_minutes": 10},
       {"title": "CMS Availability","owner": "team-cms","max_staleness_minutes": 10},
       {"title": "Deployment Policy","owner": "platform-sre"},
@@ -68,6 +71,7 @@
   "recommended": {
     "datasources": [],
     "panel_titles": [
+      "Latency Percentiles",
       "Error Budget Status"
     ],
     "query_fragments": [

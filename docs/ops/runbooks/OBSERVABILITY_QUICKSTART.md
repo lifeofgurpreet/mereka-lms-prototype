@@ -1,5 +1,5 @@
 # Observability Quickstart
-_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-04-11 • Status: active_
 _Audience: On-call / Operators • Last updated: 2026-02-07_
 
 Use this when you need a fast answer to: "Is Mereka LMS healthy right now?"
@@ -128,10 +128,17 @@ STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar
 
 ## 2) Core Dashboards
 
+Canonical Grafana dashboards:
+- `Mereka LMS - Public Endpoints`
+- `Mereka LMS - SLO Overview`
+- `Mereka LMS - Operations Signals`
+- `Mereka LMS - Auth`
+- `Mereka LMS - Logs`
+
 GCP Monitoring dashboards (managed from `infrastructure/monitoring/dashboards/`):
 - `Mereka LMS - Public Endpoints`
-- `Mereka LMS - Auth`
 - `Mereka LMS - GKE`
+- `Mereka LMS - Auth`
 - `Mereka LMS - Operations Signals`
 
 Primary signals to watch first:

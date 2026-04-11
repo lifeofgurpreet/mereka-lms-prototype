@@ -370,7 +370,6 @@ ci_static_inventory:
     - script: scripts/qa/verify-slo-deployment-gate.sh
     - script: scripts/qa/verify-libraries-tenant.sh
     - script: scripts/qa/verify-tenant-auth-analytics.sh
-    - script: scripts/qa/verify-tenant-branding-runtime.sh
     - script: scripts/qa/verify-tenant-branding.sh
     - script: scripts/qa/verify-tenant-configmap.sh
     - script: scripts/qa/verify-tenant-foundation.sh
@@ -782,6 +781,9 @@ ci_runtime_inventory:
       note: compares live pod image digests against release object (INV-002 gate)
     - script: scripts/qa/verify-tenant-contract-alignment.sh
       category: CONFIG_DRIFT
+    - script: scripts/qa/verify-tenant-branding-runtime.sh
+      category: CONFIG_DRIFT
+      note: live tenant-domain branding probe; detects runtime-versus-source branding drift on active public LMS surfaces
     - script: scripts/qa/verify-tenant-override-schema.sh
       category: CONFIG_DRIFT
     - script: scripts/qa/verify-a11y-authenticated-routes.sh

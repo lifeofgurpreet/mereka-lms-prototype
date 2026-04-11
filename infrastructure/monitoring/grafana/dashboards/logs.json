@@ -1,0 +1,572 @@
+{
+  "uid": "mereka-lms-logs",
+  "title": "Mereka LMS - Logs",
+  "description": "Cluster-Loki view of nonprod LMS error classes, dependency failures, and drilldown logs.",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "tags": [
+    "mereka-lms",
+    "logs",
+    "applications",
+    "loki",
+    "nonprod"
+  ],
+  "links": [
+    {
+      "icon": "doc",
+      "targetBlank": true,
+      "title": "LMS Monitoring-as-Code",
+      "type": "link",
+      "url": "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/infrastructure/monitoring/README.md"
+    },
+    {
+      "icon": "doc",
+      "targetBlank": true,
+      "title": "Source Logging Metrics",
+      "type": "link",
+      "url": "https://github.com/Biji-Biji-Initiative/mereka-lms/tree/main/infrastructure/monitoring/logging-metrics"
+    }
+  ],
+  "panels": [
+    {
+      "id": 1,
+      "type": "text",
+      "title": "Scope and Signal Model",
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "# Mereka LMS logs\n\nThis board translates app-owned LMS log-metric contracts into canonical Grafana using **cluster Loki**.\n\n| Scope | Selector |\n|---|---|\n| LMS runtime logs | `{namespace=~\"mereka-lms-dev|stg-mereka-lms\"}` |\n| Primary LMS pods | `app.kubernetes.io/name=\"lms\"` |\n| Error classes | `HTTP 5xx`, auth failures, MySQL errors, Redis errors, stateful storage failures |\n\nUse this board for error spikes and dependency regressions. Routine request logs are intentionally not surfaced here."
+      },
+      "transparent": true
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "HTTP 5xx (24h)",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 10
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 5
+      },
+      "targets": [
+        {
+          "expr": "sum(count_over_time({namespace=~\"mereka-lms-dev|stg-mereka-lms\"} |~ \"(HTTP/1\\\\.1 5[0-9]{2}|\\\"status\\\":5[0-9]{2}|\\\"status_code\\\":5[0-9]{2})\" [24h]))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Auth Failures (24h)",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 5
+      },
+      "targets": [
+        {
+          "expr": "sum(count_over_time({namespace=~\"mereka-lms-dev|stg-mereka-lms\"} |~ \"(?i)(login_session|authentication|login_failed)\" |~ \"(HTTP/1\\\\.1 401|HTTP/1\\\\.1 403|HTTP/1\\\\.1 500|\\\"status\\\":4[0-9]{2}|\\\"status_code\\\":4[0-9]{2}|\\\"status\\\":500|\\\"status_code\\\":500)\" [24h]))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "MySQL Errors (24h)",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 5
+      },
+      "targets": [
+        {
+          "expr": "sum(count_over_time({namespace=~\"mereka-lms-dev|stg-mereka-lms\"} |~ \"(Can\\\\'t connect to MySQL|MySQL server has gone away|Lost connection to MySQL server|OperationalError)\" [24h]))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Redis Errors (24h)",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 5
+      },
+      "targets": [
+        {
+          "expr": "sum(count_over_time({namespace=~\"mereka-lms-dev|stg-mereka-lms\"} |~ \"(redis\\\\.exceptions|Error 111 connecting to redis|ConnectionError|Timeout connecting to server|RedisError)\" [24h]))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Storage Errors (24h)",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 5
+      },
+      "targets": [
+        {
+          "expr": "sum(count_over_time({namespace=~\"mereka-lms-dev|stg-mereka-lms\"} |~ \"(no space left on device|Read-only file system|ENOSPC|disk pressure)\" [24h]))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "stat",
+      "title": "Active Error Streams (5m)",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "yellow",
+                "value": 5
+              },
+              {
+                "color": "red",
+                "value": 15
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 5
+      },
+      "targets": [
+        {
+          "expr": "count(count_over_time({namespace=~\"mereka-lms-dev|stg-mereka-lms\"} |~ \"(?i)(error|exception|panic|OperationalError|ConnectionError|RedisError|ENOSPC)\" [5m]))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "HTTP 5xx by Environment",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 9
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum by (namespace) (count_over_time({namespace=~\"mereka-lms-dev|stg-mereka-lms\"} |~ \"(HTTP/1\\\\.1 5[0-9]{2}|\\\"status\\\":5[0-9]{2}|\\\"status_code\\\":5[0-9]{2})\" [$__interval]))",
+          "legendFormat": "{{namespace}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Dependency and Auth Error Classes",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 9
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(count_over_time({namespace=~\"mereka-lms-dev|stg-mereka-lms\"} |~ \"(?i)(login_session|authentication|login_failed)\" |~ \"(HTTP/1\\\\.1 401|HTTP/1\\\\.1 403|HTTP/1\\\\.1 500|\\\"status\\\":4[0-9]{2}|\\\"status_code\\\":4[0-9]{2}|\\\"status\\\":500|\\\"status_code\\\":500)\" [$__interval]))",
+          "legendFormat": "auth",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(count_over_time({namespace=~\"mereka-lms-dev|stg-mereka-lms\"} |~ \"(Can\\\\'t connect to MySQL|MySQL server has gone away|Lost connection to MySQL server|OperationalError)\" [$__interval]))",
+          "legendFormat": "mysql",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(count_over_time({namespace=~\"mereka-lms-dev|stg-mereka-lms\"} |~ \"(redis\\\\.exceptions|Error 111 connecting to redis|ConnectionError|Timeout connecting to server|RedisError)\" [$__interval]))",
+          "legendFormat": "redis",
+          "refId": "C"
+        },
+        {
+          "expr": "sum(count_over_time({namespace=~\"mereka-lms-dev|stg-mereka-lms\"} |~ \"(no space left on device|Read-only file system|ENOSPC|disk pressure)\" [$__interval]))",
+          "legendFormat": "storage",
+          "refId": "D"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Top Pods by Error Volume",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 17
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "topk(8, sum by (namespace, pod) (count_over_time({namespace=~\"mereka-lms-dev|stg-mereka-lms\"} |~ \"(?i)(error|exception|panic|OperationalError|ConnectionError|RedisError|ENOSPC|Read-only file system)\" [$__interval])))",
+          "legendFormat": "{{namespace}} / {{pod}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "type": "logs",
+      "title": "Recent App 5xx Logs",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 25
+      },
+      "options": {
+        "showLabels": false,
+        "showTime": true,
+        "wrapLogMessage": true
+      },
+      "targets": [
+        {
+          "expr": "{namespace=~\"mereka-lms-dev|stg-mereka-lms\"} |~ \"(HTTP/1\\\\.1 5[0-9]{2}|\\\"status\\\":5[0-9]{2}|\\\"status_code\\\":5[0-9]{2})\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "logs",
+      "title": "Recent Dependency Error Logs",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 25
+      },
+      "options": {
+        "showLabels": false,
+        "showTime": true,
+        "wrapLogMessage": true
+      },
+      "targets": [
+        {
+          "expr": "{namespace=~\"mereka-lms-dev|stg-mereka-lms\"} |~ \"(Can\\\\'t connect to MySQL|MySQL server has gone away|Lost connection to MySQL server|OperationalError|redis\\\\.exceptions|Error 111 connecting to redis|ConnectionError|Timeout connecting to server|RedisError|no space left on device|Read-only file system|ENOSPC|disk pressure)\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "type": "logs",
+      "title": "Recent Auth Failure Logs",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 25
+      },
+      "options": {
+        "showLabels": false,
+        "showTime": true,
+        "wrapLogMessage": true
+      },
+      "targets": [
+        {
+          "expr": "{namespace=~\"mereka-lms-dev|stg-mereka-lms\"} |~ \"(?i)(login_session|authentication|login_failed|csrf|OAuth2ProviderConfig|disabled backend/provider)\"",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

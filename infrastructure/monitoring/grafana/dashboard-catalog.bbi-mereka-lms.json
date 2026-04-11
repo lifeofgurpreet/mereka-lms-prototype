@@ -1,0 +1,50 @@
+{
+  "name": "Mereka LMS Canonical Grafana Dashboard Catalog",
+  "dashboards": [
+    {
+      "key": "public-endpoints",
+      "title": "Mereka LMS - Public Endpoints",
+      "uid": "bbi-app-mereka-lms",
+      "environment": "prod",
+      "surface": "public-edge",
+      "dashboard_file": "infrastructure/monitoring/grafana/dashboards/public-endpoints.json",
+      "contract_file": "infrastructure/monitoring/grafana/dashboard-contract.bbi-app-mereka-lms.json"
+    },
+    {
+      "key": "slo-overview",
+      "title": "Mereka LMS - SLO Overview",
+      "uid": "mereka-slo-overview",
+      "environment": "canonical",
+      "surface": "slo",
+      "dashboard_file": "infrastructure/monitoring/grafana/dashboards/slo-overview.json",
+      "contract_file": "infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json"
+    },
+    {
+      "key": "operations-signals",
+      "title": "Mereka LMS - Operations Signals",
+      "uid": "mereka-lms-operations-signals",
+      "environment": "nonprod",
+      "surface": "operator",
+      "dashboard_file": "infrastructure/monitoring/grafana/dashboards/operations-signals.json",
+      "contract_file": "infrastructure/monitoring/grafana/dashboard-contract.mereka-lms-operations-signals.json"
+    },
+    {
+      "key": "auth",
+      "title": "Mereka LMS - Auth",
+      "uid": "mereka-lms-auth",
+      "environment": "nonprod",
+      "surface": "operator",
+      "dashboard_file": "infrastructure/monitoring/grafana/dashboards/auth.json",
+      "contract_file": "infrastructure/monitoring/grafana/dashboard-contract.mereka-lms-auth.json"
+    },
+    {
+      "key": "logs",
+      "title": "Mereka LMS - Logs",
+      "uid": "mereka-lms-logs",
+      "environment": "nonprod",
+      "surface": "operator",
+      "dashboard_file": "infrastructure/monitoring/grafana/dashboards/logs.json",
+      "contract_file": "infrastructure/monitoring/grafana/dashboard-contract.mereka-lms-logs.json"
+    }
+  ]
+}

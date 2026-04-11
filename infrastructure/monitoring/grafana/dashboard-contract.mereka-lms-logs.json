@@ -1,0 +1,60 @@
+{
+  "name": "Mereka LMS Logs Dashboard Coverage Contract",
+  "dashboard_uid": "mereka-lms-logs",
+  "required": {
+    "datasources": [
+      "loki"
+    ],
+    "panel_titles": [
+      "Scope and Signal Model",
+      "HTTP 5xx (24h)",
+      "Auth Failures (24h)",
+      "MySQL Errors (24h)",
+      "Redis Errors (24h)",
+      "Storage Errors (24h)",
+      "Active Error Streams (5m)",
+      "HTTP 5xx by Environment",
+      "Dependency and Auth Error Classes",
+      "Top Pods by Error Volume",
+      "Recent App 5xx Logs",
+      "Recent Dependency Error Logs",
+      "Recent Auth Failure Logs"
+    ],
+    "query_fragments": [
+      "HTTP/1\\\\.1 5",
+      "login_session|authentication|login_failed",
+      "MySQL server has gone away",
+      "redis\\\\.exceptions",
+      "no space left on device",
+      "Read-only file system",
+      "topk(8"
+    ],
+    "panels": [
+      {"title": "Scope and Signal Model","owner": "platform-observability"},
+      {"title": "HTTP 5xx (24h)","owner": "team-lms","max_staleness_minutes": 1440},
+      {"title": "Auth Failures (24h)","owner": "team-lms","max_staleness_minutes": 1440},
+      {"title": "MySQL Errors (24h)","owner": "team-lms","max_staleness_minutes": 1440},
+      {"title": "Redis Errors (24h)","owner": "team-lms","max_staleness_minutes": 1440},
+      {"title": "Storage Errors (24h)","owner": "platform-sre","max_staleness_minutes": 1440},
+      {"title": "Active Error Streams (5m)","owner": "platform-sre","max_staleness_minutes": 60},
+      {"title": "HTTP 5xx by Environment","owner": "team-lms","max_staleness_minutes": 60},
+      {"title": "Dependency and Auth Error Classes","owner": "team-lms","max_staleness_minutes": 60},
+      {"title": "Top Pods by Error Volume","owner": "platform-sre","max_staleness_minutes": 60},
+      {"title": "Recent App 5xx Logs","owner": "team-lms"},
+      {"title": "Recent Dependency Error Logs","owner": "team-lms"},
+      {"title": "Recent Auth Failure Logs","owner": "team-lms"}
+    ]
+  },
+  "recommended": {
+    "datasources": [],
+    "panel_titles": [
+      "Top Pods by Error Volume",
+      "Recent Dependency Error Logs"
+    ],
+    "query_fragments": [
+      "redis\\\\.exceptions",
+      "MySQL server has gone away",
+      "no space left on device"
+    ]
+  }
+}

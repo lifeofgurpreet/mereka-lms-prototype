@@ -1,5 +1,5 @@
 # On-Call Observability Playbook
-_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-04-11 • Status: active_
 _Audience: Incident responders • Last updated: 2026-02-07_
 
 Use this sequence to understand platform health quickly.
@@ -113,9 +113,11 @@ Close criteria:
 
 Open in order:
 1. `Mereka LMS - Public Endpoints`
-2. `Mereka LMS - Operations Signals`
-3. `Mereka LMS - GKE`
+2. `Mereka LMS - SLO Overview`
+3. `Mereka LMS - Operations Signals`
 4. `Mereka LMS - Auth`
+5. `Mereka LMS - Logs`
+6. `Mereka LMS - GKE` in Cloud Monitoring when you need the older pod/node resource lens
 
 ## Step 5: Fast Branching by Signal
 

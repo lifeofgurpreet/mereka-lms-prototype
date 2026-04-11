@@ -1,6 +1,6 @@
 # Operator Dashboard Reference — Mereka Academy
 
-_Audience: Platform Engineers • Owner: Engineering Lead • Last verified: 2026-03-06 • Status: canonical_
+_Audience: Platform Engineers • Owner: Engineering Lead • Last verified: 2026-04-11 • Status: canonical_
 _Related: [site-down.md](../../ops/runbooks/site-down.md) · [ONCALL_OBSERVABILITY_PLAYBOOK.md](../../ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md) · [INCIDENT_RESPONSE.md](../../ops/runbooks/INCIDENT_RESPONSE.md)_
 
 ---
@@ -26,12 +26,13 @@ Primary observability UI. Access at **https://grafana.mereka.io** (prod) or **ht
 | Dashboard Name | UID | URL path | Purpose |
 |---|---|---|---|
 | Mereka LMS — Public Endpoints | `bbi-app-mereka-lms` | `/d/bbi-app-mereka-lms` | LMS + Studio + MFE HTTP availability, SLO burn rate, SSL expiry |
-| Mereka LMS — Operations Signals | `bbi-ops-mereka-lms` | `/d/bbi-ops-mereka-lms` | MySQL connection saturation, Redis evictions, PVC usage |
-| Mereka LMS — GKE | `bbi-gke-mereka-lms` | `/d/bbi-gke-mereka-lms` | Pod CPU/memory by workload, restart counts, node pressure |
-| Mereka LMS — Auth | `bbi-auth-mereka-lms` | `/d/bbi-auth-mereka-lms` | Auth failure rates per service (LMS, credentials, forum) |
+| Mereka LMS — SLO Overview | `mereka-slo-overview` | `/d/mereka-slo-overview` | Error budgets, burn rates, latency percentiles, and alert-delivery drills |
+| Mereka LMS — Operations Signals | `mereka-lms-operations-signals` | `/d/mereka-lms-operations-signals` | MySQL connection saturation, Redis pressure, PVC usage, Velero freshness, pending/crashloop signals |
+| Mereka LMS — Auth | `mereka-lms-auth` | `/d/mereka-lms-auth` | LMS auth failures, CSRF/OIDC regressions, and Authentik authorize 4xx drilldown |
+| Mereka LMS — Logs | `mereka-lms-logs` | `/d/mereka-lms-logs` | LMS 5xx, dependency failures, storage errors, and recent error drilldown |
 | ORA2 Grading | (json in repo) | `deploy/k8s/base/monitoring/grafana-dashboard-ora2.json` | ORA2 submission/grading latency and errors |
 
-**Contract**: The dashboard panel inventory is governed by `infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json`.
+**Contract**: The dashboard estate is governed by `infrastructure/monitoring/grafana/dashboard-catalog.bbi-mereka-lms.json` plus per-dashboard contracts in `infrastructure/monitoring/grafana/dashboard-contract.*.json`.
 **Audit**: `./scripts/qa/audit-grafana-dashboard.sh --strict-required`
 
 Dashboard access requires Grafana login (Authentik SSO). If a panel shows `No data`, check:
@@ -50,6 +51,7 @@ Access: **console.cloud.google.com → Monitoring** (filter by namespace `mereka
 |---|---|---|
 | Uptime check | `infrastructure/monitoring/uptime/prod-*.json` | HTTPS probes for `academyv2.mereka.io`, microsites, and APIs |
 | Dashboard | `infrastructure/monitoring/dashboards/public-endpoints.json` | Uptime SLO view |
+| Dashboard | `infrastructure/monitoring/dashboards/gke.json` | GKE pod CPU/memory, restart counts, node pressure |
 | Dashboard | `infrastructure/monitoring/dashboards/operations-signals.json` | Storage, DB, Velero signals |
 
 **Alert policies** managed in `infrastructure/monitoring/alerts/`:
@@ -363,9 +365,11 @@ Full checklist: [RELEASE_CHECKLIST.md](../../ops/runbooks/RELEASE_CHECKLIST.md) 
 | Dashboard / Tool | Status |
 |---|---|
 | Grafana: LMS Public Endpoints | Live — `bbi-app-mereka-lms` |
-| Grafana: Operations Signals | Live — stateful storage + DB |
-| Grafana: GKE pod resource view | Live |
-| Grafana: Auth failure rates | Live |
+| Grafana: LMS SLO Overview | Live — `mereka-slo-overview` |
+| Grafana: Operations Signals | Live — `mereka-lms-operations-signals` |
+| Grafana: Auth failure rates | Live — `mereka-lms-auth` |
+| Grafana: LMS logs | Live — `mereka-lms-logs` |
+| GCP Monitoring: Mereka LMS - GKE | Live — `infrastructure/monitoring/dashboards/gke.json` |
 | GCP Cloud Monitoring uptime checks | Live — `infrastructure/monitoring/uptime/` |
 | GCP Cloud Monitoring alert policies | Live — `infrastructure/monitoring/alerts/` |
 | PrometheusRules (15 files) | Deployed to `mereka-lms` namespace |

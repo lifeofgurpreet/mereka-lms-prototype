@@ -6,6 +6,7 @@
 #
 # Usage:
 #   ./scripts/qa/audit-grafana-dashboard.sh
+#   ./scripts/qa/audit-grafana-dashboard.sh --all
 #   ./scripts/qa/audit-grafana-dashboard.sh --json
 #   ./scripts/qa/audit-grafana-dashboard.sh --strict-required
 #   ./scripts/qa/audit-grafana-dashboard.sh --strict-required --strict-recommended
@@ -13,23 +14,32 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 DEFAULT_DASHBOARD_FILE="${REPO_ROOT}/infrastructure/monitoring/grafana/dashboards/slo-overview.json"
+DEFAULT_CONTRACT_FILE="${REPO_ROOT}/infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json"
+DEFAULT_CATALOG_FILE="${REPO_ROOT}/infrastructure/monitoring/grafana/dashboard-catalog.bbi-mereka-lms.json"
 LEGACY_DASHBOARD_FILE="${HOME}/projects/observability/dashboards/03-applications/bbi-mereka-lms.json"
-DASHBOARD_FILE="${DASHBOARD_FILE:-$DEFAULT_DASHBOARD_FILE}"
+USER_DASHBOARD_FILE="${DASHBOARD_FILE:-}"
+USER_CONTRACT_FILE="${CONTRACT_FILE:-}"
+DASHBOARD_FILE="${USER_DASHBOARD_FILE:-$DEFAULT_DASHBOARD_FILE}"
 if [[ ! -f "$DASHBOARD_FILE" ]] && [[ -f "$LEGACY_DASHBOARD_FILE" ]]; then
   DASHBOARD_FILE="$LEGACY_DASHBOARD_FILE"
 fi
-CONTRACT_FILE="${CONTRACT_FILE:-${REPO_ROOT}/infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json}"
+CONTRACT_FILE="${USER_CONTRACT_FILE:-$DEFAULT_CONTRACT_FILE}"
+CATALOG_FILE="${CATALOG_FILE:-$DEFAULT_CATALOG_FILE}"
 JSON_OUT=0
 STRICT_REQUIRED=0
 STRICT_RECOMMENDED=0
+AUDIT_ALL=0
+EXPLICIT_SINGLE=0
 
 usage() {
   cat <<EOF
 Usage: ./scripts/qa/audit-grafana-dashboard.sh [options]
 
 Options:
+  --all                      Audit all dashboards from the catalog
   --dashboard-file PATH      Grafana dashboard JSON path
   --contract-file PATH       Coverage contract JSON path
+  --catalog-file PATH        Dashboard catalog JSON path
   --json                     Emit JSON output
   --strict-required          Exit non-zero on required misses
   --strict-recommended       Exit non-zero on recommended misses
@@ -38,8 +48,10 @@ EOF
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --dashboard-file) DASHBOARD_FILE="${2:-}"; shift 2 ;;
-    --contract-file) CONTRACT_FILE="${2:-}"; shift 2 ;;
+    --all) AUDIT_ALL=1; shift ;;
+    --dashboard-file) DASHBOARD_FILE="${2:-}"; EXPLICIT_SINGLE=1; shift 2 ;;
+    --contract-file) CONTRACT_FILE="${2:-}"; EXPLICIT_SINGLE=1; shift 2 ;;
+    --catalog-file) CATALOG_FILE="${2:-}"; shift 2 ;;
     --json) JSON_OUT=1; shift ;;
     --strict-required) STRICT_REQUIRED=1; shift ;;
     --strict-recommended) STRICT_RECOMMENDED=1; shift ;;
@@ -61,6 +73,19 @@ require_cmd() {
     echo "Missing required command: $1" >&2
     exit 2
   }
+}
+
+resolve_repo_path() {
+  local candidate="${1:-}"
+  if [[ -z "$candidate" ]]; then
+    printf '%s' ""
+    return 0
+  fi
+  if [[ "$candidate" = /* ]]; then
+    printf '%s' "$candidate"
+    return 0
+  fi
+  printf '%s' "${REPO_ROOT}/${candidate}"
 }
 
 require_cmd jq
@@ -223,6 +248,124 @@ contains_substring() {
   local haystack_file="$2"
   rg -Fq -- "$needle" "$haystack_file" >/dev/null 2>&1
 }
+
+run_catalog_audit() {
+  local aggregate_required=0
+  local aggregate_recommended=0
+  local first=1
+
+  [[ -f "$CATALOG_FILE" ]] || {
+    echo "Dashboard catalog missing: $CATALOG_FILE" >&2
+    exit 1
+  }
+  jq -e . "$CATALOG_FILE" >/dev/null || {
+    echo "Invalid JSON in dashboard catalog: $CATALOG_FILE" >&2
+    exit 1
+  }
+
+  local tmpdir
+  tmpdir="$(mktemp -d -t audit-grafana-catalog.XXXXXX)"
+  trap 'rm -rf "$tmpdir"' EXIT
+  local results_file="${tmpdir}/results.jsonl"
+  : >"$results_file"
+
+  while IFS= read -r dashboard_spec; do
+    [[ -n "$dashboard_spec" ]] || continue
+    local key title uid dashboard_path contract_path abs_dashboard abs_contract child_json
+    key="$(jq -r '.key // empty' <<<"$dashboard_spec")"
+    title="$(jq -r '.title // empty' <<<"$dashboard_spec")"
+    uid="$(jq -r '.uid // empty' <<<"$dashboard_spec")"
+    dashboard_path="$(jq -r '.dashboard_file // empty' <<<"$dashboard_spec")"
+    contract_path="$(jq -r '.contract_file // empty' <<<"$dashboard_spec")"
+    abs_dashboard="$(resolve_repo_path "$dashboard_path")"
+    abs_contract="$(resolve_repo_path "$contract_path")"
+
+    if [[ -z "$key" || -z "$dashboard_path" || -z "$contract_path" ]]; then
+      echo "Invalid dashboard catalog entry: ${dashboard_spec}" >&2
+      exit 1
+    fi
+
+    child_json="$("$0" --dashboard-file "$abs_dashboard" --contract-file "$abs_contract" --json)"
+    jq -c \
+      --arg key "$key" \
+      --arg title "$title" \
+      --arg uid "$uid" \
+      '. + {key: $key, title: $title, uid: $uid}' <<<"$child_json" >>"$results_file"
+  done < <(jq -c '.dashboards[]?' "$CATALOG_FILE")
+
+  if [[ ! -s "$results_file" ]]; then
+    echo "Dashboard catalog has no dashboard entries: $CATALOG_FILE" >&2
+    exit 1
+  fi
+
+  if jq -e 'select(.required_ok == false)' "$results_file" >/dev/null 2>&1; then
+    aggregate_required=1
+  fi
+  if jq -e 'select(.recommended_ok == false)' "$results_file" >/dev/null 2>&1; then
+    aggregate_recommended=1
+  fi
+
+  if [[ "$JSON_OUT" -eq 1 ]]; then
+    jq -s \
+      --arg catalog_file "$CATALOG_FILE" \
+      '{
+        mode: "catalog",
+        catalog_file: $catalog_file,
+        results: .,
+        required_ok: (all(.[]; .required_ok == true)),
+        recommended_ok: (all(.[]; .recommended_ok == true))
+      }' "$results_file"
+  else
+    echo "=========================================="
+    echo "Grafana Dashboard Coverage Audit"
+    echo "=========================================="
+    echo "catalog: ${CATALOG_FILE}"
+    echo ""
+
+    while IFS= read -r dashboard_result; do
+      local status required_ok recommended_ok
+      key="$(jq -r '.key' <<<"$dashboard_result")"
+      title="$(jq -r '.title' <<<"$dashboard_result")"
+      required_ok="$(jq -r '.required_ok' <<<"$dashboard_result")"
+      recommended_ok="$(jq -r '.recommended_ok' <<<"$dashboard_result")"
+      status="PASS"
+      if [[ "$required_ok" != "true" ]]; then
+        status="FAIL"
+      elif [[ "$recommended_ok" != "true" ]]; then
+        status="WARN"
+      fi
+      echo "[${status}] ${title} (${key})"
+      jq -r '.required_errors[]? | "  - " + .' <<<"$dashboard_result"
+      jq -r '.recommended_warnings[]? | "  - " + .' <<<"$dashboard_result"
+      echo ""
+    done <"$results_file"
+
+    if [[ "$aggregate_required" -eq 0 ]]; then
+      echo "Required checks: PASS"
+    else
+      echo "Required checks: FAIL"
+    fi
+
+    if [[ "$aggregate_recommended" -eq 0 ]]; then
+      echo "Recommended checks: PASS"
+    else
+      echo "Recommended checks: WARN"
+    fi
+  fi
+
+  if [[ "$STRICT_REQUIRED" -eq 1 && "$aggregate_required" -ne 0 ]]; then
+    exit 1
+  fi
+  if [[ "$STRICT_RECOMMENDED" -eq 1 && "$aggregate_recommended" -ne 0 ]]; then
+    exit 1
+  fi
+
+  exit 0
+}
+
+if [[ "$AUDIT_ALL" -eq 1 || ( "$EXPLICIT_SINGLE" -eq 0 && -f "$CATALOG_FILE" ) ]]; then
+  run_catalog_audit
+fi
 
 check_uid() {
   local expected actual

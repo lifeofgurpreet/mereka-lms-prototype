@@ -1,5 +1,5 @@
 # Monitoring-as-Code
-_Last updated: 2026-02-08_
+_Last updated: 2026-04-11_
 
 This directory is the source of truth for GCP Monitoring templates used by Mereka LMS.
 
@@ -11,7 +11,7 @@ This directory is the source of truth for GCP Monitoring templates used by Merek
 - `dashboards/`: GCP Monitoring dashboards and Grafana-only dashboard artifacts used for legacy video signals.
   - GCP dashboards are expected by runtime parity (`OBSERVABILITY_ENV_LABEL=nonprod OBSERVABILITY_DISPATCH_PROFILE=nonprod ./scripts/qa/run-observability-first-class.sh --mode runtime --strict`).
   - Grafana-only files are intentionally excluded from parity parity checks unless explicitly opted in.
-- `grafana/`: Grafana dashboard coverage contracts (for parity/audit automation)
+- `grafana/`: canonical Grafana dashboard snapshots, per-dashboard coverage contracts, and the LMS dashboard catalog used by parity/audit automation
 
 ## Apply Flow
 
@@ -60,6 +60,8 @@ Grafana dashboard coverage check:
 ./scripts/qa/audit-grafana-dashboard.sh --strict-required
 ./scripts/qa/audit-grafana-dashboard.sh --strict-required --strict-recommended
 ```
+
+The default audit path now walks `infrastructure/monitoring/grafana/dashboard-catalog.bbi-mereka-lms.json` so the full canonical LMS Grafana estate is checked together. Explicit `--dashboard-file` and `--contract-file` arguments still work for single-board checks.
 
 Use strict mode when you want runtime freshness checks to fail hard (for CI gates or audits):
 

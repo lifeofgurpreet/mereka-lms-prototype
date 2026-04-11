@@ -1163,20 +1163,21 @@ fi
 
 # AC-OVR-023: Grafana dashboard with required panels
 echo ""
-echo "==> AC-OVR-023: Grafana dashboard bbi-app-mereka-lms exists with required panels"
+GRAFANA_DASHBOARD_UID="${GRAFANA_DASHBOARD_UID:-bbi-app-mereka-lms}"
+echo "==> AC-OVR-023: Grafana dashboard ${GRAFANA_DASHBOARD_UID} exists with required panels"
 GRAFANA_URL="${GRAFANA_URL:-https://grafana.mereka.io}"
 GRAFANA_TOKEN="${GRAFANA_API_TOKEN:-}"
-GRAFANA_DASHBOARD_CONTRACT_PATH="${GRAFANA_DASHBOARD_CONTRACT_PATH:-infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json}"
+GRAFANA_DASHBOARD_CONTRACT_PATH="${GRAFANA_DASHBOARD_CONTRACT_PATH:-infrastructure/monitoring/grafana/dashboard-contract.bbi-app-mereka-lms.json}"
 DASHBOARD_JSON_CLEAN=""
 
 if [[ -n "$GRAFANA_TOKEN" ]]; then
     set +e
     if command -v timeout >/dev/null 2>&1; then
         DASHBOARD_JSON="$(timeout "$VERIFY_CMD_TIMEOUT" curl -s -H "Authorization: Bearer $GRAFANA_TOKEN" \
-            "$GRAFANA_URL/api/dashboards/uid/bbi-app-mereka-lms" 2>/dev/null)"
+            "$GRAFANA_URL/api/dashboards/uid/${GRAFANA_DASHBOARD_UID}" 2>/dev/null)"
     else
         DASHBOARD_JSON="$(curl -s -H "Authorization: Bearer $GRAFANA_TOKEN" \
-            "$GRAFANA_URL/api/dashboards/uid/bbi-app-mereka-lms" 2>/dev/null)"
+            "$GRAFANA_URL/api/dashboards/uid/${GRAFANA_DASHBOARD_UID}" 2>/dev/null)"
     fi
     set -e
 
@@ -1216,10 +1217,10 @@ if [[ -n "$GRAFANA_TOKEN" ]]; then
         done
 
         if [[ $MISSING -eq 0 ]]; then
-            pass "AC-OVR-023: Dashboard bbi-app-mereka-lms has required panels and query fragments"
+            pass "AC-OVR-023: Dashboard ${GRAFANA_DASHBOARD_UID} has required panels and query fragments"
         fi
     else
-        fail "AC-OVR-023: Dashboard bbi-app-mereka-lms not found in Grafana"
+        fail "AC-OVR-023: Dashboard ${GRAFANA_DASHBOARD_UID} not found in Grafana"
     fi
 else
     skip "AC-OVR-023: GRAFANA_API_TOKEN not set (requires Grafana API access)"

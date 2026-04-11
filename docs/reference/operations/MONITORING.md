@@ -1,5 +1,5 @@
 # Monitoring & Alerting Guide
-_Audience: Platform Eng + SRE • Owner: Infra Team • Last verified: 2026-03-10 • Status: canonical_
+_Audience: Platform Eng + SRE • Owner: Infra Team • Last verified: 2026-04-11 • Status: canonical_
 
 This checklist focuses on the production **GKE Autopilot** cluster that runs the `academyv2.mereka.io` stack (dev is `academyv2.mereka.dev` on VPS kind).
 
@@ -46,20 +46,20 @@ Environment label/profile expectations are defined in:
 
 ### BBI Observability Stack (Grafana)
 
-The primary monitoring dashboard is hosted at https://grafana.mereka.io/d/bbi-app-mereka-lms
-
-**Dashboard Sections**:
-1. **Service Health**: LMS, CMS, Caddy, MFE, Workers status
-2. **Data Services**: MySQL, MongoDB Atlas, Redis, Elasticsearch, Forum
-3. **Resource Usage**: CPU and memory by pod
-4. **External Availability (SLO)**: 24h availability, response time, SSL cert expiry
-5. **Authentication & Security**: Auth failures by service
-6. **Logs**: Error volumes and recent errors
-
-Coverage governance:
-- Contract: `infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json`
+The canonical LMS Grafana estate lives in `grafana.mereka.io` / `grafana.mereka.dev` and is governed locally by:
+- Catalog: `infrastructure/monitoring/grafana/dashboard-catalog.bbi-mereka-lms.json`
+- Per-dashboard contracts: `infrastructure/monitoring/grafana/dashboard-contract.*.json`
 - Audit script: `./scripts/qa/audit-grafana-dashboard.sh --strict-required`
-- Strict recommendation gate: `./scripts/qa/audit-grafana-dashboard.sh --strict-required --strict-recommended`
+
+Supported LMS boards:
+
+| Dashboard | UID | Purpose |
+|-------|-------|-------|
+| Mereka LMS - Public Endpoints | `bbi-app-mereka-lms` | Public availability, error-budget posture, latency, and journey SLOs |
+| Mereka LMS - SLO Overview | `mereka-slo-overview` | SLO-specific error budgets, burn rates, latency percentiles, and alert-delivery drills |
+| Mereka LMS - Operations Signals | `mereka-lms-operations-signals` | MySQL/Redis/PVC/Velero/pending/crashloop operator signals |
+| Mereka LMS - Auth | `mereka-lms-auth` | LMS auth failures, CSRF/OIDC regressions, and Authentik authorize failures |
+| Mereka LMS - Logs | `mereka-lms-logs` | LMS 5xx, dependency/storage errors, and log drilldown |
 
 ### MongoDB Atlas Monitoring
 

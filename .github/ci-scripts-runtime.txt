@@ -122,6 +122,7 @@ scripts/qa/verify-paragon-theme-urls.sh  # DOC_GAP (CSS content-type)
 
 # ── Runtime or tenant config drift ─────────────────────────────────────────────────────
 scripts/qa/verify-tenant-contract-alignment.sh  # CONFIG_DRIFT
+scripts/qa/verify-tenant-branding-runtime.sh  # CONFIG_DRIFT (live tenant-domain branding probe; detects runtime-versus-source branding drift on active public LMS surfaces)
 scripts/qa/verify-tenant-override-schema.sh  # CONFIG_DRIFT
 
 # ── Live GitHub settings required ─────────────────────────────────────────────────────

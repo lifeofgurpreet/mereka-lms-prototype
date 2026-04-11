@@ -1,7 +1,7 @@
 # Mereka LMS SLO Dashboards Setup
-_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-04-11 • Status: active_
 
-<!-- Last verified: 2026-02-13 -->
+<!-- Last verified: 2026-04-11 -->
 
 **Date:** 2026-02-06
 **Status:** Updated
@@ -39,11 +39,14 @@ Located in: `infrastructure/monitoring/`
 
 Primary source of truth: `infrastructure/monitoring/`
 
-Dashboard contract in this repo:
+Dashboard catalog in this repo:
+- `infrastructure/monitoring/grafana/dashboard-catalog.bbi-mereka-lms.json`
+
+SLO-specific contract in this repo:
 - `infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json`
 
 Runtime endpoint:
-- URL: https://grafana.mereka.dev/d/bbi-app-mereka-lms
+- URL: https://grafana.mereka.dev/d/mereka-slo-overview
 
 **Panels:**
 - Service Health (LMS, CMS, Caddy, MFE, Workers)
@@ -173,7 +176,7 @@ The Grafana dashboard on the VPS (`grafana.mereka.dev`) connects to two separate
 
 ### Dashboard Metric Sources
 
-The `bbi-app-mereka-lms` dashboard uses the **default GKE Prometheus** (`prometheus` UID) for:
+The `mereka-slo-overview` dashboard uses the **default GKE Prometheus** (`prometheus` UID) for:
 - Pod status (`kube_pod_status_phase`)
 - Resource usage (`container_cpu_usage_seconds_total`, `container_memory_working_set_bytes`)
 - Service availability
@@ -204,7 +207,7 @@ STRICT_RUNTIME=1 ./scripts/qa/audit-db-exporter-telemetry.sh --mode runtime
 ```
 
 `--strict` additionally fails when observability dashboard parity data is unavailable
-or invalid (for example, missing `bbi-app-mereka-lms` dashboard source file or
+or invalid (for example, missing `mereka-slo-overview` dashboard source file or
 missing `prometheus` datasource references). Set `REQUIRE_VPS_PROM_DS=1` when you
 also want strict enforcement that the dashboard actively uses `prometheus-vps`.
 Set `REQUIRE_GRAFANA_RECOMMENDED=1` when you want strict enforcement of recommended

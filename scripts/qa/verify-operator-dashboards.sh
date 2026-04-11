@@ -116,6 +116,10 @@ if [[ -f "$GUIDE" ]]; then
   for keyword in \
     "grafana.mereka.io" \
     "bbi-app-mereka-lms" \
+    "mereka-slo-overview" \
+    "mereka-lms-operations-signals" \
+    "mereka-lms-auth" \
+    "mereka-lms-logs" \
     "Django Admin" \
     "admin-console" \
     "Aspects" \

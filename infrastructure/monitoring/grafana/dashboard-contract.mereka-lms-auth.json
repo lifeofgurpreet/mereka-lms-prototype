@@ -1,0 +1,56 @@
+{
+  "name": "Mereka LMS Auth Dashboard Coverage Contract",
+  "dashboard_uid": "mereka-lms-auth",
+  "required": {
+    "datasources": [
+      "loki"
+    ],
+    "panel_titles": [
+      "Scope and Signal Model",
+      "Dev Auth Failures (24h)",
+      "Staging Auth Failures (24h)",
+      "OIDC Provider Disabled (24h)",
+      "CSRF Failures (24h)",
+      "Authentik Authorize 4xx (24h)",
+      "Auth Failure Rate",
+      "CSRF / OIDC Configuration Failures",
+      "Authentik Authorize 4xx Rate",
+      "LMS Auth Failure Logs",
+      "LMS CSRF / OIDC Failure Logs",
+      "Authentik Authorize Failure Logs"
+    ],
+    "query_fragments": [
+      "login_session|authentication|login_failed",
+      "disabled backend/provider",
+      "CSRF verification failed",
+      "/application/o/authorize",
+      "client_id=mereka-lms"
+    ],
+    "panels": [
+      {"title": "Scope and Signal Model","owner": "platform-observability"},
+      {"title": "Dev Auth Failures (24h)","owner": "team-lms","max_staleness_minutes": 1440},
+      {"title": "Staging Auth Failures (24h)","owner": "team-lms","max_staleness_minutes": 1440},
+      {"title": "OIDC Provider Disabled (24h)","owner": "team-lms","max_staleness_minutes": 1440},
+      {"title": "CSRF Failures (24h)","owner": "team-lms","max_staleness_minutes": 1440},
+      {"title": "Authentik Authorize 4xx (24h)","owner": "platform-auth","max_staleness_minutes": 1440},
+      {"title": "Auth Failure Rate","owner": "team-lms","max_staleness_minutes": 60},
+      {"title": "CSRF / OIDC Configuration Failures","owner": "team-lms","max_staleness_minutes": 60},
+      {"title": "Authentik Authorize 4xx Rate","owner": "platform-auth","max_staleness_minutes": 60},
+      {"title": "LMS Auth Failure Logs","owner": "team-lms"},
+      {"title": "LMS CSRF / OIDC Failure Logs","owner": "team-lms"},
+      {"title": "Authentik Authorize Failure Logs","owner": "platform-auth"}
+    ]
+  },
+  "recommended": {
+    "datasources": [],
+    "panel_titles": [
+      "Auth Failure Rate",
+      "Authentik Authorize 4xx Rate"
+    ],
+    "query_fragments": [
+      "CSRF verification failed",
+      "disabled backend/provider",
+      "/application/o/authorize"
+    ]
+  }
+}
