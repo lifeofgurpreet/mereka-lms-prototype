@@ -14,6 +14,7 @@ TRACKED_FILES=(
   "apps/openedx/settings/lms/development.py"
   "apps/openedx/settings/lms/production.py"
   "apps/openedx/settings/lms/mereka_xblock_iframe.py"
+  "apps/openedx/settings/lms/mereka_video_urls.py"
   "apps/openedx/settings/cms/production.py"
   "apps/openedx/settings/lms/mereka_multisite.py"
   "apps/openedx/settings/cms/mereka_multisite.py"

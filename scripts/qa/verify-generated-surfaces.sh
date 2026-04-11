@@ -18,6 +18,17 @@ fail() {
   printf 'FAIL %s\n' "$1" >&2
 }
 
+require_fixed() {
+  local path="$1"
+  local needle="$2"
+  local label="$3"
+  if grep -Fq -- "$needle" "$path"; then
+    pass "$label"
+  else
+    fail "$label"
+  fi
+}
+
 run_check() {
   local label="$1"
   shift
@@ -36,6 +47,14 @@ run_check "verification catalog is current" \
 
 run_check "ci runtime inventory is current" \
   python3 scripts/governance/generate-ci-runtime-inventory.py --check
+
+require_fixed "deploy/k8s/base/kustomization.yaml" \
+  "apps/openedx/settings/lms/mereka_video_urls.py" \
+  "base openedx settings generator includes video url shim"
+
+require_fixed "scripts/infra/sync-vendored-openedx-settings.sh" \
+  "\"apps/openedx/settings/lms/mereka_video_urls.py\"" \
+  "vendored settings sync tracks the video url shim"
 
 mapfile -t matrix_files < <(find generated/tenant-runtime -maxdepth 1 -name 'browser-matrix-*.json' | sort)
 if [[ "${#matrix_files[@]}" -eq 0 ]]; then
