@@ -184,6 +184,69 @@ print("Injected COPY indigo/theme into production stage of rendered MFE Dockerfi
 PY
 }
 
+wrap_mfe_pull_translations_retry() {
+  # CI reliability fix — DinD/BuildKit DNS to github.com intermittently fails
+  # during the MFE build, causing `make OPENEDX_ATLAS_PULL=true ... pull_translations`
+  # to abort with:
+  #   fatal: unable to access 'https://github.com/openedx/openedx-translations.git/':
+  #   Could not resolve host: github.com
+  #
+  # Complementary to PR #1567 (trivy bootstrap retry), #1568 (MFE git fetch retry
+  # at workflow level), and #1569 (stop rewriting DinD MTU). Those fix the
+  # runner-side surface; this wraps the actual in-container RUN layer with a
+  # bash retry loop so transient DNS blips inside the docker build don't take
+  # down a 45-minute cold build at layer 155.
+  #
+  # Post-render sed-wrap each `RUN make OPENEDX_ATLAS_PULL=true ... pull_translations`
+  # with: RUN for i in 1 2 3; do <cmd> && exit 0; sleep 15; done; exit 1
+  local rendered_dockerfile="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}/env/plugins/mfe/build/mfe/Dockerfile"
+
+  if [[ ! -f "$rendered_dockerfile" ]]; then
+    echo "WARNING: Rendered MFE Dockerfile not found at $rendered_dockerfile — skip retry wrap" >&2
+    return 0
+  fi
+
+  if grep -q "pull_translations_retry_sentinel" "$rendered_dockerfile"; then
+    echo "MFE Dockerfile pull_translations already wrapped with retry — skip"
+    return 0
+  fi
+
+  python3 - <<'PY' "$rendered_dockerfile"
+import re
+import sys
+from pathlib import Path
+
+p = Path(sys.argv[1])
+text = p.read_text(encoding="utf-8")
+
+pattern = re.compile(
+    r'^RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="([^"]*)" pull_translations\s*$',
+    re.MULTILINE,
+)
+
+def wrap(match):
+    atlas_opts = match.group(1)
+    cmd = (
+        f'make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="{atlas_opts}" pull_translations'
+    )
+    return (
+        "# pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry\n"
+        "RUN bash -o pipefail -c 'for attempt in 1 2 3; do "
+        f"{cmd} && exit 0; "
+        "echo \"pull_translations attempt ${attempt} failed; retrying in 15s\" >&2; "
+        "sleep 15; done; exit 1'"
+    )
+
+new_text, count = pattern.subn(wrap, text)
+if count == 0:
+    print("No pull_translations lines matched — nothing to wrap", file=sys.stderr)
+    sys.exit(0)
+
+p.write_text(new_text, encoding="utf-8")
+print(f"Wrapped {count} pull_translations RUN line(s) with retry loop")
+PY
+}
+
 apply_openedx_patches() {
   apply_patch apply_webpack_memory_patch
   apply_patch apply_build_optimizations_patch
@@ -196,6 +259,7 @@ apply_mfe_patches() {
   apply_patch apply_mfe_slot_ownership_patch
   sync_mfe_patch_helpers
   sync_mfe_theme
+  wrap_mfe_pull_translations_retry
 }
 
 case "$TARGET" in
