@@ -87,15 +87,17 @@ check_contains "$E2E_TESTS" "uses: ./.github/actions/setup-playwright" "e2e-test
 echo
 
 echo -e "${BLUE}## Image build cache policy${NC}"
-check_contains "$OPENEDX_BUILD" '--cache-from "type=gha"' "build-openedx-image uses GHA cache restore"
-check_contains "$OPENEDX_BUILD" '--cache-to "type=gha,mode=max"' "build-openedx-image uses GHA cache write-back"
-check_contains "$OPENEDX_BUILD" '--cache-from "type=registry,ref=${CACHE_REF}"' "build-openedx-image uses registry cache fallback"
-check_contains "$OPENEDX_BUILD" "--build-arg BUILDKIT_INLINE_CACHE=1" "build-openedx-image exports inline cache metadata"
+check_contains "$OPENEDX_BUILD" 'docker buildx bake' "build-openedx-image routes execution through buildx bake"
+check_contains "$OPENEDX_BUILD" '--set "${BAKE_TARGET}.cache-from=type=gha,scope=${GHA_SCOPE}"' "build-openedx-image uses profile-scoped GHA cache restore"
+check_contains "$OPENEDX_BUILD" '--set "${BAKE_TARGET}.cache-to=type=gha,mode=max,scope=${GHA_SCOPE}"' "build-openedx-image uses profile-scoped GHA cache write-back"
+check_contains "$OPENEDX_BUILD" '--set "${BAKE_TARGET}.cache-from=type=registry,ref=${CACHE_REF}"' "build-openedx-image uses registry cache fallback"
+check_contains "$OPENEDX_BUILD" '--set "${BAKE_TARGET}.args.BUILDKIT_INLINE_CACHE=1"' "build-openedx-image exports inline cache metadata"
 
-check_contains "$MFE_BUILD" '--cache-from "type=gha"' "build-mfe-image uses GHA cache restore"
-check_contains "$MFE_BUILD" '--cache-to "type=gha,mode=max"' "build-mfe-image uses GHA cache write-back"
-check_contains "$MFE_BUILD" '--cache-from "type=registry,ref=${CACHE_REF}"' "build-mfe-image uses registry cache fallback"
-check_contains "$MFE_BUILD" "--build-arg BUILDKIT_INLINE_CACHE=1" "build-mfe-image exports inline cache metadata"
+check_contains "$MFE_BUILD" 'docker buildx bake' "build-mfe-image routes execution through buildx bake"
+check_contains "$MFE_BUILD" '--set "${BAKE_TARGET}.cache-from=type=gha,scope=${GHA_SCOPE}"' "build-mfe-image uses profile-scoped GHA cache restore"
+check_contains "$MFE_BUILD" '--set "${BAKE_TARGET}.cache-to=type=gha,mode=max,scope=${GHA_SCOPE}"' "build-mfe-image uses profile-scoped GHA cache write-back"
+check_contains "$MFE_BUILD" '--set "${BAKE_TARGET}.cache-from=type=registry,ref=${CACHE_REF}"' "build-mfe-image uses registry cache fallback"
+check_contains "$MFE_BUILD" '--set "${BAKE_TARGET}.args.BUILDKIT_INLINE_CACHE=1"' "build-mfe-image exports inline cache metadata"
 
 check_contains "$BUILD_WORKFLOW" "uses: docker/setup-buildx-action" "build-tutor-images uses buildx"
 check_contains "$BUILD_WORKFLOW" "./scripts/infra/build-openedx-image.sh" "build-tutor-images routes OpenEdX through the cache-aware helper"

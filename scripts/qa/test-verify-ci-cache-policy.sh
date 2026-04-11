@@ -10,11 +10,21 @@ trap cleanup EXIT
 
 mkdir -p "$tmpdir/repo"
 if command -v rsync >/dev/null 2>&1; then
-  rsync -a --delete --exclude '.git/' "$REPO_ROOT/" "$tmpdir/repo/"
+  rsync -a --delete \
+    --exclude '.git/' \
+    --exclude '.benchmarks/' \
+    --exclude '.venv/' \
+    --exclude 'tutor_env/data/' \
+    "$REPO_ROOT/" "$tmpdir/repo/"
 else
   (
     cd "$REPO_ROOT"
-    tar --exclude='.git' -cf - .
+    tar \
+      --exclude='.git' \
+      --exclude='.benchmarks' \
+      --exclude='.venv' \
+      --exclude='tutor_env/data' \
+      -cf - .
   ) | (
     cd "$tmpdir/repo"
     tar -xf -
@@ -54,7 +64,7 @@ from pathlib import Path
 
 build_script = Path("scripts/infra/build-openedx-image.sh")
 text = build_script.read_text(encoding="utf-8")
-text = text.replace('--cache-from "type=gha" \\\n', '', 1)
+text = text.replace('  --set "${BAKE_TARGET}.cache-from=type=gha,scope=${GHA_SCOPE}"\n', '', 1)
 build_script.write_text(text, encoding="utf-8")
 PY
 
@@ -64,7 +74,7 @@ if bash scripts/qa/verify-ci-cache-policy.sh >/tmp/test-verify-ci-cache-policy-b
   exit 1
 fi
 
-if ! rg -q "build-openedx-image uses GHA cache restore" /tmp/test-verify-ci-cache-policy-build.log; then
+if ! rg -q "build-openedx-image uses profile-scoped GHA cache restore" /tmp/test-verify-ci-cache-policy-build.log; then
   echo "Expected build drift log to mention the missing OpenEdX GHA cache restore."
   cat /tmp/test-verify-ci-cache-policy-build.log
   exit 1

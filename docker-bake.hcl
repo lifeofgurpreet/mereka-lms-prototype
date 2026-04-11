@@ -79,8 +79,8 @@ target "openedx-proof" {
   inherits = ["_openedx-common"]
   tags = ["${OPENEDX_PROOF_TAG}"]
   labels = {
-    "com.mereka.build.profile" = "proof"
-    "com.mereka.build.scope"   = "openedx"
+    "io.mereka.build-profile" = "proof"
+    "io.mereka.build-scope"   = "openedx"
   }
 }
 
@@ -92,8 +92,8 @@ target "openedx-fast" {
     "type=registry,ref=${OPENEDX_CACHE_REF},mode=max",
   ]
   labels = {
-    "com.mereka.build.profile" = "fast"
-    "com.mereka.build.scope"   = "openedx"
+    "io.mereka.build-profile" = "fast"
+    "io.mereka.build-scope"   = "openedx"
   }
 }
 
@@ -114,8 +114,8 @@ target "mfe-proof" {
   inherits = ["_mfe-common"]
   tags = ["${MFE_PROOF_TAG}"]
   labels = {
-    "com.mereka.build.profile" = "proof"
-    "com.mereka.build.scope"   = "mfe"
+    "io.mereka.build-profile" = "proof"
+    "io.mereka.build-scope"   = "mfe"
   }
 }
 
@@ -127,8 +127,8 @@ target "mfe-fast" {
     "type=registry,ref=${MFE_CACHE_REF},mode=max",
   ]
   labels = {
-    "com.mereka.build.profile" = "fast"
-    "com.mereka.build.scope"   = "mfe"
+    "io.mereka.build-profile" = "fast"
+    "io.mereka.build-scope"   = "mfe"
   }
 }
 
@@ -136,7 +136,7 @@ target "mfe-compat" {
   inherits = ["mfe-proof"]
   tags = ["${MFE_COMPAT_TAG}"]
   labels = {
-    "com.mereka.build.profile" = "compat"
-    "com.mereka.build.scope"   = "mfe"
+    "io.mereka.build-profile" = "compat"
+    "io.mereka.build-scope"   = "mfe"
   }
 }
