@@ -201,17 +201,17 @@ acceptance_criteria:
     command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
 - id: AC-BRAND-024
   description: Given the Tutor plugin MFE Dockerfile patches, when the MFE image is
-    built, then `npm ls @edx/brand` inside the built container resolves to the brand-mereka
-    package (exit 0, shows `@edx/brand-mereka`).
+    built, then `require.resolve("@edx/brand/package.json")` inside the built container
+    resolves successfully and the resolved package name is `@edx/brand`.
   verify:
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-brand-package-runtime.sh
     command: scripts/qa/verify-brand-package-runtime.sh
 - id: AC-BRAND-025
-  description: Given the brand package is installed via npm alias, when `tutor images
-    build mfe` completes, then the build exits 0 without npm peer dependency errors
-    related to `@edx/brand`.
+  description: Given the local brand package is registered as `@edx/brand`, when `tutor images
+    build mfe` completes, then the build exits 0 and the resolved runtime package exposes
+    `logo.js`, `logo_white.png`, and `favicon.png`.
   verify:
   - type: automated
     test_type: shell_verification
@@ -244,4 +244,3 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
     command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
-

@@ -126,7 +126,7 @@ check_contains "apply-patches applies MFE slot ownership patch" "$APPLY_PATCH_SC
 check_contains "plugin module defines pre-npm-install hook" "$PATCH_MODULE" "mfe-dockerfile-pre-npm-install"
 check_contains "plugin module defines post-npm-install hook" "$PATCH_MODULE" "mfe-dockerfile-post-npm-install"
 check_contains "plugin module installs frontend-plugin-framework" "$PATCH_MODULE" "frontend-plugin-framework@^1.8.0"
-check_contains "plugin module installs local brand package" "$PATCH_MODULE" "@edx/brand@file:./brand-mereka"
+check_contains "plugin module overlays local brand package" "$PATCH_MODULE" "node_modules/@edx/brand"
 check_contains "slot ownership shell delegates to Python helper" "$SLOT_OWNERSHIP_PATCH" "mfe_slot_ownership.py"
 check_contains "slot ownership helper defines strip_slot_ownership" "$SLOT_OWNERSHIP_HELPER" "def strip_slot_ownership("
 check_contains_any_file "plugin injects plugin dependency line" "$PLUGIN_INSTALL_LINE" "$PATCH_MODULE"
@@ -150,6 +150,20 @@ if [[ -f "$GENERATED_MFE_DOCKERFILE" ]]; then
     failures=1
   else
     echo "  ✓ generated Dockerfile has no legacy plugin install line"
+  fi
+
+  if grep -Fq -- "@edx/brand@github:@edly-io/brand-openedx#indigo-2.5.0" "$GENERATED_MFE_DOCKERFILE"; then
+    echo "  ✗ generated Dockerfile still contains git-based tutor-indigo brand install"
+    failures=1
+  else
+    echo "  ✓ generated Dockerfile has no git-based tutor-indigo brand install"
+  fi
+
+  if grep -Fq -- "@edly-io/indigo-brand-openedx@^2.4.3" "$GENERATED_MFE_DOCKERFILE"; then
+    echo "  ✓ generated Dockerfile rewrites tutor-indigo brand install to npm package"
+  else
+    echo "  ✗ generated Dockerfile missing npm-published tutor-indigo brand install"
+    failures=1
   fi
 
   if [[ -d "$GENERATED_MFE_INDIGO_DIR" ]]; then

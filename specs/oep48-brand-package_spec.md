@@ -32,7 +32,7 @@ summary: Normative contract for the OEP-48 brand package used by Mereka Academy 
 
 ## What is changing
 
-We are creating an `@edx/brand` npm package for Mereka Academy following the OEP-48 brand package interface specification. The package will live at `infrastructure/tutor/brand-mereka/` in the monorepo and be installed into MFE builds via npm alias (`@edx/brand@file:./brand-mereka`). This replaces the current state where MFEs use stock Open edX branding because no brand package exists.
+We are creating an `@edx/brand` npm package for Mereka Academy following the OEP-48 brand package interface specification. The package will live at `infrastructure/tutor/brand-mereka/` in the monorepo and be staged into MFE builds by overlaying `node_modules/@edx/brand` from the local package after the main npm dependency layer completes. This replaces the current state where MFEs use stock Open edX branding because no brand package exists.
 
 The package bundles:
 - Logo SVGs and PNGs (`logo.svg`, `logo-white.svg`, `logo.png`, `logo-white.png`)
@@ -73,7 +73,7 @@ The forcing function is Ulmo (Tutor v21 / Open edX Dec 2025 release), which depr
 - `paragon/_variables.scss` with backward-compatible SCSS variable overrides (colors, font families)
 - `paragon/tokens.json` placeholder with minimal required structure
 - Font files: Poppins (Regular, SemiBold, Bold) and Lato (Regular, Bold, Italic, BoldItalic, Black, BlackItalic) in woff2 format
-- Tutor plugin update: npm alias install of the brand package during MFE build
+- Tutor plugin update: local brand package overlay during MFE build
 - Verification script: `scripts/qa/verify-brand-package/verify-brand-package-structure.sh`
 - CI integration: add verification script to `.github/ci-scripts-static.txt`
 
@@ -174,11 +174,10 @@ infrastructure/tutor/brand-mereka/
 
 #### Tutor Plugin Integration
 
-- The Tutor plugin MUST install the brand package via npm alias during the MFE Docker build.
-- The installation MUST use the `mfe-dockerfile-pre-npm-install` hook to ensure the package is available before `npm install` runs.
+- The Tutor plugin MUST register the brand package as `@edx/brand` during the MFE Docker build.
 - The Dockerfile patch MUST copy the `brand-mereka/` directory into the MFE build context.
-- The Dockerfile patch MUST run `npm install @edx/brand@file:./brand-mereka` (or equivalent alias) to register the package.
-- The installation MUST NOT break existing MFE npm dependency resolution.
+- The Dockerfile patch MUST materialize the package at `/openedx/app/node_modules/@edx/brand` after the main npm dependency layer completes.
+- The registration MUST NOT break existing MFE npm dependency resolution.
 - The installation SHOULD use `--legacy-peer-deps` if Paragon peer dependency conflicts arise.
 
 #### Asset Provenance
@@ -245,8 +244,8 @@ Only domain-specific NFRs are listed above.
 ### Tutor Plugin Integration
 
 - [ ] AC-BRAND-023: Given `infrastructure/tutor/plugins/mereka_lms.py`, when inspected, then it contains a `mfe-dockerfile-pre-npm-install` patch that copies the `brand-mereka/` directory into the MFE build context.
-- [ ] AC-BRAND-024: Given the Tutor plugin MFE Dockerfile patches, when the MFE image is built, then `npm ls @edx/brand` inside the built container resolves to the brand-mereka package (exit 0, shows `@edx/brand-mereka`).
-- [ ] AC-BRAND-025: Given the brand package is installed via npm alias, when `tutor images build mfe` completes, then the build exits 0 without npm peer dependency errors related to `@edx/brand`.
+- [ ] AC-BRAND-024: Given the Tutor plugin MFE Dockerfile patches, when the MFE image is built, then `require.resolve("@edx/brand/package.json")` inside the built container resolves successfully and the resolved package name is `@edx/brand`.
+- [ ] AC-BRAND-025: Given the local brand package is registered as `@edx/brand`, when `tutor images build mfe` completes, then the build exits 0 and the resolved runtime package exposes `logo.js`, `logo_white.png`, and `favicon.png`.
 
 ### Verification Gates
 

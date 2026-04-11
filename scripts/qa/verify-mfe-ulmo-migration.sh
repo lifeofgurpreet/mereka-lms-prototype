@@ -235,11 +235,12 @@ run_offline_checks() {
     fi
   fi
 
-  # mfe-node.sh removed in tracker #32; brand version now handled via @edx/brand@file:./brand-mereka
+  # mfe-node.sh removed in tracker #32; the plugin now overlays the staged
+  # local brand package onto node_modules/@edx/brand after npm finishes.
   # The plugin module handles brand copy; indigo-brand-openedx pin is no longer used.
   if [[ -f "$MFE_PATCH" ]]; then
-    if grep -q '@edx/brand@file:./brand-mereka' "$MFE_PATCH"; then
-      pass "Plugin module uses local brand package (@edx/brand@file:./brand-mereka)"
+    if grep -q 'node_modules/@edx/brand' "$MFE_PATCH"; then
+      pass "Plugin module overlays the local brand package onto @edx/brand"
     else
       fail "Plugin module missing local brand package hook"
     fi

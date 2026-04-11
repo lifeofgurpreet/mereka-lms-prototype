@@ -31,6 +31,7 @@ hooks.Filters.CONFIG_DEFAULTS.add_items(
         ),
         ("MEREKA_PARAGON_THEME_ENABLED", True),
         ("MEREKA_PARAGON_THEME_CDN_BASE", "/theme"),
+        ("MEREKA_PREVIEW_LMS_BASE", "preview.academyv2.mereka.dev"),
         ("MEREKA_SESSION_COOKIE_DOMAIN", ".academyv2.mereka.io"),
         ("MEREKA_CSRF_COOKIE_DOMAIN", ".academyv2.mereka.io"),
     ]

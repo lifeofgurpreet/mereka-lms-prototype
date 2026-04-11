@@ -65,7 +65,7 @@ else
     ["Mereka brand package copy"]="COPY indigo/brand-mereka /openedx/app/brand-mereka"
     ["Cookie domain ENV injection"]="SESSION_COOKIE_DOMAIN"
     ["Frontend plugin framework install"]="frontend-plugin-framework@^1.8.0"
-    ["Local brand alias"]="@edx/brand@file:./brand-mereka"
+    ["Local brand overlay"]="node_modules/@edx/brand"
     ["Admin console Redux deps"]="react-redux@^8.1.3"
     ["Account social_links guard"]="unguarded social_links lookup survived account build"
   )

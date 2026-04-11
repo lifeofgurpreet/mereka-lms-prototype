@@ -22,9 +22,9 @@ RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@git
 """,
 )
 
-# Install local OEP-48 brand package for MFEs.
+# Stage the local OEP-48 brand package for MFEs.
 # We ship the package in tutor_env/plugins/mfe/build/mfe/indigo/brand-mereka and
-# alias it as @edx/brand for all frontend app builds.
+# overlay it onto node_modules/@edx/brand after npm has finished mutating deps.
 #
 # IMPORTANT: This MUST be post-npm-install, not pre-npm-install.
 # Pre-npm-install fires BEFORE the main `npm clean-install` layer. Since
@@ -32,12 +32,13 @@ RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@git
 # invalidates the entire dependency install cache for ALL MFE apps (~10 apps
 # × 3-5 min each = 30-50 min wasted). By moving it to post-npm-install,
 # the main dependency layer stays cached and only the brand overlay + webpack
-# rebuild are invalidated.
+# rebuild are invalidated. We avoid a second local `npm install` here because
+# Arborist can hang indefinitely while reifying the file: package inside the
+# heavy-builder DinD environment.
 _register_env_patch(
     "mfe-dockerfile-post-npm-install",
     """
 COPY indigo/brand-mereka /openedx/app/brand-mereka
-RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
 """,
 )
 
@@ -92,6 +93,26 @@ _register_env_patch(
     """
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
+""",
+)
+
+# Overlay the staged local brand package onto the already-installed
+# stock @edx/brand dependency after npm mutations finish.
+_register_env_patch(
+    "mfe-dockerfile-post-npm-install",
+    """
+RUN rm -rf /openedx/app/node_modules/@edx/brand \\
+ && mkdir -p /openedx/app/node_modules/@edx/brand \\
+ && cp -R /openedx/app/brand-mereka/. /openedx/app/node_modules/@edx/brand/ \\
+ && python3 - <<'PY'
+from pathlib import Path
+import json
+
+pkg_path = Path("/openedx/app/node_modules/@edx/brand/package.json")
+pkg = json.loads(pkg_path.read_text(encoding="utf-8"))
+pkg["name"] = "@edx/brand"
+pkg_path.write_text(json.dumps(pkg, indent=2) + "\\n", encoding="utf-8")
+PY
 """,
 )
 
@@ -204,7 +225,19 @@ RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fu
 _register_env_patch(
     "mfe-dockerfile-post-npm-install-admin-console",
     """
-RUN npm install --legacy-peer-deps 'react-redux@^8.1.3' 'redux@^4.2.1'
+RUN npm install --legacy-peer-deps 'react-redux@^8.1.3' 'redux@^4.2.1' \\
+ && rm -rf /openedx/app/node_modules/@edx/brand \\
+ && mkdir -p /openedx/app/node_modules/@edx/brand \\
+ && cp -R /openedx/app/brand-mereka/. /openedx/app/node_modules/@edx/brand/ \\
+ && python3 - <<'PY'
+from pathlib import Path
+import json
+
+pkg_path = Path("/openedx/app/node_modules/@edx/brand/package.json")
+pkg = json.loads(pkg_path.read_text(encoding="utf-8"))
+pkg["name"] = "@edx/brand"
+pkg_path.write_text(json.dumps(pkg, indent=2) + "\\n", encoding="utf-8")
+PY
 """,
 )
 

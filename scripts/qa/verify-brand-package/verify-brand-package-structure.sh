@@ -493,14 +493,14 @@ BRAND_SEARCH_FILES=("$PLUGIN_FILE")
 [[ -f "$PLUGIN_DIR/_mereka_lms/mfe_dockerfile.py" ]] && BRAND_SEARCH_FILES+=("$PLUGIN_DIR/_mereka_lms/mfe_dockerfile.py")
 
 BRAND_COPY_FOUND=0
-BRAND_NPM_FOUND=0
+BRAND_OVERLAY_FOUND=0
 for f in "${BRAND_SEARCH_FILES[@]}"; do
   [[ -f "$f" ]] || continue
   if grep -q 'brand-mereka' "$f" && grep -q 'COPY' "$f"; then
     BRAND_COPY_FOUND=1
   fi
-  if grep -q '@edx/brand@file:.*brand-mereka' "$f"; then
-    BRAND_NPM_FOUND=1
+  if grep -q 'node_modules/@edx/brand' "$f"; then
+    BRAND_OVERLAY_FOUND=1
   fi
 done
 
@@ -510,10 +510,10 @@ else
   fail "AC-BRAND-023 plugin/patches missing brand COPY hook"
 fi
 
-if [[ $BRAND_NPM_FOUND -eq 1 ]]; then
-  pass "AC-BRAND-023 build pipeline wires npm alias install for @edx/brand"
+if [[ $BRAND_OVERLAY_FOUND -eq 1 ]]; then
+  pass "AC-BRAND-023 build pipeline overlays the staged package onto @edx/brand"
 else
-  fail "AC-BRAND-023 plugin/patches missing npm alias install command"
+  fail "AC-BRAND-023 plugin/patches missing @edx/brand overlay command"
 fi
 
 # AC-BRAND-028 CI wiring

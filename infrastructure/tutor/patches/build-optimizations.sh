@@ -11,6 +11,7 @@ apply_build_optimizations_patch() {
   local targets=(
     "$OPENEDX_TEMPLATE"
     "$REPO_ROOT/tutor_env/env/build/openedx/Dockerfile"
+    "$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
     "$LMS_SETTINGS_TEMPLATE"
     "$REPO_ROOT/tutor_env/env/apps/openedx/settings/lms/production.py"
     "$LMS_ASSETS_TEMPLATE"
@@ -274,6 +275,11 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
                 updated,
             )
 
+        updated = updated.replace(
+            "RUN npm install '@edx/brand@github:@edly-io/brand-openedx#indigo-2.5.0'",
+            "RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.3'",
+        )
+
     # REMOVED: Tutor v21 node_modules path fix (was lines 277-282)
     # This `mv` moved node_modules to /openedx/node_modules but the production stage
     # COPY still referenced /openedx/edx-platform/node_modules → build failure.
@@ -405,22 +411,33 @@ RUN pip install django-prometheus==2.3.1"""
 
         updated = force_mfe_discussions_only(updated)
 
-        legacy_mfe_oauth_block = textwrap.dedent("""
-
-        # Set default theme for all sites
-        DEFAULT_SITE_THEME = "mereka"
-
-        # MFE OAuth Fix - Custom app to fix OAuth provider visibility
-        import sys
-        sys.path.insert(0, '/openedx')
-        INSTALLED_APPS.append('mfe_oauth_fix')
-
-        # Add middleware to fix /api/mfe_context responses
-        # Insert at the end of middleware stack so it processes responses
-        MIDDLEWARE.append('mfe_oauth_fix.middleware.MFEOAuthFixMiddleware')
-        """)
         if "_safe_add_app('mfe_oauth_fix')" in updated and "INSTALLED_APPS.append('mfe_oauth_fix')" in updated:
-            updated = updated.replace(legacy_mfe_oauth_block, "\n", 1)
+            updated = re.sub(
+                r"\n# Set default theme for all sites\n"
+                r'DEFAULT_SITE_THEME = "mereka"\n\n'
+                r"# MFE OAuth Fix - Custom app to fix OAuth provider visibility\n"
+                r"import sys\n"
+                r"sys\.path\.insert\(0, '/openedx'\)\n"
+                r"INSTALLED_APPS\.append\('mfe_oauth_fix'\)\n\n"
+                r"# Add middleware to fix /api/mfe_context responses\n"
+                r"# Insert at the end of middleware stack so it processes responses\n"
+                r"MIDDLEWARE\.append\('mfe_oauth_fix\.middleware\.MFEOAuthFixMiddleware'\)\n\n"
+                r"# Prometheus Metrics Integration\n"
+                r"# django_prometheus must be added at the START of INSTALLED_APPS\n"
+                r"if 'django_prometheus' not in INSTALLED_APPS:\n"
+                r"    INSTALLED_APPS\.insert\(0, 'django_prometheus'\)\n\n"
+                r"# Add custom prometheus app for /metrics endpoint\n"
+                r"if 'openedx_prometheus' not in INSTALLED_APPS:\n"
+                r"    INSTALLED_APPS\.append\('openedx_prometheus'\)\n\n"
+                r"# Prometheus middleware must wrap all other middleware\n"
+                r"if 'django_prometheus\.middleware\.PrometheusBeforeMiddleware' not in MIDDLEWARE:\n"
+                r"    MIDDLEWARE\.insert\(0, 'django_prometheus\.middleware\.PrometheusBeforeMiddleware'\)\n"
+                r"if 'django_prometheus\.middleware\.PrometheusAfterMiddleware' not in MIDDLEWARE:\n"
+                r"    MIDDLEWARE\.append\('django_prometheus\.middleware\.PrometheusAfterMiddleware'\)\n",
+                "\n",
+                updated,
+                count=1,
+            )
 
         if "_safe_add_app('mereka_tenancy')" in updated and "INSTALLED_APPS.append('mereka_tenancy')" in updated:
             updated = re.sub(
