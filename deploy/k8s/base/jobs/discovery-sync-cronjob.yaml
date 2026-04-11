@@ -52,9 +52,10 @@ spec:
 
           containers:
           - name: sync
-            # Uses the upstream openedx image name so kustomize images transform
-            # replaces this with the overlay-pinned tag automatically.
-            image: docker.io/overhangio/openedx:pin-required
+            # Discovery management commands must run in the Discovery image, not the
+            # LMS/CMS openedx image. The openedx image does not contain
+            # /openedx/discovery and causes the sync job to fail before Django boots.
+            image: docker.io/overhangio/openedx-discovery:21.0.1
             imagePullPolicy: IfNotPresent
             securityContext:
               allowPrivilegeEscalation: false
