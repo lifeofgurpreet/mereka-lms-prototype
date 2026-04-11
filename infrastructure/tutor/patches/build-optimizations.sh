@@ -56,39 +56,6 @@ for target in targets:
         "ARG OPENEDX_I18N_VERSION={{ OPENEDX_COMMON_VERSION }}",
         "ARG OPENEDX_I18N_VERSION=master",
     )
-    old_code_stage_pin_block = textwrap.dedent(
-        """\
-        # Align compiled base requirements with the realized Python 3.11 compatibility contract.
-        RUN python3 - <<'PY'
-        from pathlib import Path
-
-        base_txt = Path("/openedx/edx-platform/requirements/edx/base.txt")
-        text = base_txt.read_text()
-        replacements = {
-            "django-cors-headers==4.9.0": "django-cors-headers==4.3.1",
-            "edx-enterprise==6.5.1": "edx-enterprise==6.6.9",
-            "lxml-html-clean==0.4.3": "lxml-html-clean==0.4.4",
-            "path==16.11.0": "path==16.16.0",
-        }
-        for old, new in replacements.items():
-            if old in text:
-                text = text.replace(old, new)
-        base_txt.write_text(text)
-        PY"""
-    )
-    rejected_code_stage_pin_block = textwrap.dedent(
-        """\
-        # Align compiled base requirements with the realized Python 3.11 compatibility contract.
-        RUN sed -i \\
-            -e 's/django-cors-headers==4.9.0/django-cors-headers==4.3.1/g' \\
-            -e 's/edx-enterprise==6.5.1/edx-enterprise==6.6.9/g' \\
-            -e 's/lxml-html-clean==0.4.3/lxml-html-clean==0.4.4/g' \\
-            -e 's/path==16.11.0/path==16.16.0/g' \\
-            /openedx/edx-platform/requirements/edx/base.txt"""
-    )
-    updated = updated.replace(old_code_stage_pin_block, "")
-    updated = updated.replace(rejected_code_stage_pin_block, "")
-    updated = updated.replace("\n\n\n# Identify tutor user to apply patches using git", "\n\n# Identify tutor user to apply patches using git")
 
     # uv pip / no-build-isolation fixes
     updated = updated.replace(
@@ -108,6 +75,24 @@ for target in targets:
     updated = updated.replace(
         "RUN pip install setuptools==44.1.0 pip==20.0.2 wheel==0.34.2",
         "RUN pip install --upgrade pip==25.0.1 setuptools==75.3.0 wheel==0.45.1",
+    )
+    updated = updated.replace(
+        "setuptools==69.1.1 setuptools-scm==8.1.0 pip==24.0 wheel==0.43.0",
+        "setuptools==69.1.1 setuptools-scm==8.1.0 pip==24.0 wheel==0.43.0 pkgconfig==1.5.5",
+    )
+    updated = re.sub(
+        r"(setuptools==69\.1\.1 setuptools-scm==8\.1\.0 pip==24\.0 wheel==0\.43\.0)(?: pkgconfig==1\.5\.5)+",
+        r"\1 pkgconfig==1.5.5",
+        updated,
+    )
+    updated = re.sub(
+        r"(?: pkgconfig==1\.5\.5){2,}",
+        " pkgconfig==1.5.5",
+        updated,
+    )
+    updated = updated.replace(
+        '$PIP_COMMAND install --no-cache-dir --compile uwsgi==2.0.24',
+        'pip install --no-cache-dir --no-build-isolation uwsgi==2.0.24',
     )
 
     # pip install retry wrapping
@@ -157,6 +142,30 @@ for target in targets:
         "RUN cd /openedx/locale/user && \\\n    /openedx/venv/bin/django-admin.py compilemessages -v1",
         "RUN cd /openedx/locale/user && \\\n    /openedx/venv/bin/python -m django compilemessages -v1",
     )
+    translation_preflight_block = (
+        "RUN python - <<'PY'\n"
+        "import importlib\n"
+        "import os\n"
+        "\n"
+        "os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lms.envs.tutor.i18n')\n"
+        "importlib.import_module('lms.envs.tutor.i18n')\n"
+        "print('translation settings import preflight ok')\n"
+        "PY\n"
+    )
+    updated = updated.replace(
+        "RUN make clean_translations",
+        f"{translation_preflight_block}RUN make clean_translations",
+    )
+    updated = re.sub(
+        rf"(?:{re.escape(translation_preflight_block)})+RUN make clean_translations",
+        f"{translation_preflight_block}RUN make clean_translations",
+        updated,
+    )
+    updated = re.sub(
+        rf"(?:{re.escape(translation_preflight_block)}){{2,}}",
+        translation_preflight_block,
+        updated,
+    )
 
     # compilejsi18n
     updated = updated.replace(
@@ -175,8 +184,12 @@ for target in targets:
     # Redwood image. Incompatible with Ulmo (different node version, package structure).
     # Tutor 21's standard node install with BuildKit cache is the correct approach.
 
-    # brand compile block (sass + google fonts strip)
-    brand_compile_block = (
+    # Normalize the asset pipeline to the single source-owned brand compile block
+    # defined in openedx_dockerfile.py. Older patch layers appended a second
+    # compile-sass/google-font-strip block after `npm run postinstall`, then
+    # weakened proof by making webpack conditional on prebuilt bundles.
+    duplicate_brand_compile_tail = (
+        "RUN npm run postinstall  # Postinstall artifacts are stuck in nodejs-requirements layer. Create them here too.\n"
         "RUN python - <<'PY'\n"
         "from pathlib import Path\n"
         "import re\n"
@@ -230,31 +243,18 @@ for target in targets:
         "        path.write_text(updated, encoding='utf-8')\n"
         "        changed += 1\n"
         "print(f'Stripped google font imports from {changed} compiled studio css files')\n"
-        "PY"
-    )
-    compile_patch_marker = "Stripped google font imports from {changed} scss files"
-    if compile_patch_marker not in updated:
-        old_conditional_compile = (
-            'RUN if [ ! -f /openedx/edx-platform/lms/static/css/lms-main.css ]; then npm run compile-sass -- --skip-themes; else echo "compile-sass skipped (prebuilt assets)"; fi'
-        )
-        if old_conditional_compile in updated:
-            updated = updated.replace(old_conditional_compile, brand_compile_block, 1)
-        else:
-            current_compile_block = (
-                "RUN npm run compile-sass -- --skip-themes\n"
-                "RUN npm run webpack\n"
-            )
-            if current_compile_block in updated:
-                updated = updated.replace(current_compile_block, f"{brand_compile_block}\nRUN npm run webpack\n", 1)
-    if compile_patch_marker in updated:
-        updated = updated.replace("\nRUN npm run compile-sass -- --skip-default\n", "\n")
-        updated = updated.replace("fonts\\\\.googleapis\\\\.com", "fonts[.]googleapis[.]com")
-
-    # webpack conditional
-    webpack_conditional = (
+        "PY\n"
         'RUN if [ ! -f /openedx/edx-platform/common/static/bundles/commons.js ]; then npm run webpack; else echo "webpack skipped (prebuilt bundles)"; fi'
     )
-    updated = updated.replace("RUN npm run webpack", webpack_conditional)
+    updated = updated.replace(
+        duplicate_brand_compile_tail,
+        "RUN npm run postinstall  # Postinstall artifacts are stuck in nodejs-requirements layer. Create them here too.\nRUN npm run webpack",
+    )
+    updated = updated.replace(
+        'RUN if [ ! -f /openedx/edx-platform/common/static/bundles/commons.js ]; then npm run webpack; else echo "webpack skipped (prebuilt bundles)"; fi',
+        "RUN npm run webpack",
+    )
+    updated = updated.replace("fonts\\\\.googleapis\\\\.com", "fonts[.]googleapis[.]com")
 
     # edx-platform cherry-pick removal
     patch_block = """# Patch edx-platform
@@ -375,28 +375,45 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
         )
         updated = updated.replace(rdfind_marker, css_copy)
 
-    # Custom apps block in Dockerfile
+    # Remove duplicate production-stage custom app reinjection. These apps are
+    # already installed in python-requirements and their source trees are
+    # carried into the final runtime image from that stage.
     if path.name == "Dockerfile" and "/openedx/edx-platform" in updated:
-        production_custom_apps_pattern = re.compile(
-            r"\n# Copy custom apps\n"
-            r"COPY --chown=app:app \./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix\n"
-            r"COPY --chown=app:app \./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus\n"
-            r"COPY --chown=app:app \./infrastructure/tutor/plugins/multi-tenancy /openedx/plugins/mereka_tenancy\n"
-            r"RUN (?:uv pip install|pip install) -e /openedx/mfe_oauth_fix\n"
-            r"RUN (?:uv pip install|pip install) -e /openedx/openedx_prometheus\n"
-            r"RUN (?:uv pip install|pip install) -e /openedx/plugins/mereka_tenancy\n"
-            r"(?:\n#.*)*\n"
-            r"RUN (?:.*mereka-plugins\.pth\"|echo '/openedx/plugins' > /openedx/venv/lib/python3\.11/site-packages/mereka-plugins\.pth)\n",
-            re.MULTILINE,
-        )
-        updated, _ = production_custom_apps_pattern.subn("\n", updated, count=1)
+        custom_apps_block = """# Copy custom apps
+COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix
+COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus
+COPY --chown=app:app ./infrastructure/tutor/plugins/multi-tenancy /openedx/plugins/mereka_tenancy
+RUN uv pip install -e /openedx/mfe_oauth_fix
+RUN uv pip install -e /openedx/openedx_prometheus
+RUN uv pip install -e /openedx/plugins/mereka_tenancy
+
+# Add repository roots to Python path via .pth file for proper module imports.
+# Include /openedx because custom app packages are mounted there as top-level Django apps.
+RUN PTH_DIR=$(python3 -c 'import sysconfig; print(sysconfig.get_path("purelib"))') && printf '/openedx\\n/openedx/plugins\\n' > "$PTH_DIR/mereka-plugins.pth"
+"""
+        if custom_apps_block in updated:
+            updated = updated.replace("\n" + custom_apps_block, "\n", 1)
+
+        legacy_custom_apps_block = """# Copy custom apps
+COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix
+COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus
+COPY --chown=app:app ./infrastructure/tutor/plugins/multi-tenancy /openedx/plugins/mereka_tenancy
+RUN pip install -e /openedx/mfe_oauth_fix
+RUN pip install -e /openedx/openedx_prometheus
+RUN pip install -e /openedx/plugins/mereka_tenancy
+
+# Add /openedx/plugins to Python path via .pth file for proper module imports
+RUN echo '/openedx/plugins' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth
+"""
+        if legacy_custom_apps_block in updated:
+            updated = updated.replace("\n" + legacy_custom_apps_block, "\n", 1)
 
         # django-prometheus pip install in Dockerfile
         base_req_marker = "bash -o pipefail -c 'for attempt in 1 2 3; do pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo \"pip install attempt ${attempt} failed; retrying in 10s\" >&2; sleep 10; done; exit 1'"
         if base_req_marker in updated:
             if "django-prometheus" not in updated:
                 prometheus_install = base_req_marker + """\n\n# Install django-prometheus for metrics
-RUN pip install django-prometheus==2.3.1"""
+RUN uv pip install django-prometheus==2.3.1"""
                 updated = updated.replace(base_req_marker, prometheus_install)
 
     # ── production.py patches ───────────────────────────────────────────
@@ -492,7 +509,6 @@ RUN pip install django-prometheus==2.3.1"""
                 "",
                 1,
             )
-
         # DEFAULT_SITE_THEME
         if "DEFAULT_SITE_THEME" not in updated:
             updated = updated.rstrip() + '\n\n# Set default theme for all sites\nDEFAULT_SITE_THEME = "mereka"\n'
@@ -697,7 +713,6 @@ PY
   local TENANCY_PLUGIN_SRC="$REPO_ROOT/infrastructure/tutor/plugins/multi-tenancy"
   local TENANCY_PLUGIN_DEST="$REPO_ROOT/tutor_env/env/build/openedx/infrastructure/tutor/plugins/multi-tenancy"
   if [ -d "$TENANCY_PLUGIN_SRC" ] && [ -d "$REPO_ROOT/tutor_env/env/build/openedx" ]; then
-    mkdir -p "$TENANCY_PLUGIN_DEST"
     rm -rf "$TENANCY_PLUGIN_DEST"
     mkdir -p "$TENANCY_PLUGIN_DEST"
     cp -R "$TENANCY_PLUGIN_SRC/." "$TENANCY_PLUGIN_DEST/"
