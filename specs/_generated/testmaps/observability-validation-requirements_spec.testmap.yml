@@ -191,18 +191,18 @@ acceptance_criteria:
     file: scripts/qa/verify-observability-runtime.sh
     command: scripts/qa/verify-observability-runtime.sh
 - id: AC-OVR-022
-  description: Given the file `infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json`,
-    when parsed, then it is valid JSON with `required.panel_titles` and `required.query_fragments`
-    arrays
+  description: Given the file `infrastructure/monitoring/grafana/dashboard-catalog.bbi-mereka-lms.json`,
+    when parsed, then it is valid JSON and every dashboard entry contains `uid`,
+    `title`, `dashboard_file`, and `contract_file`
   verify:
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-observability-validation.sh
     command: scripts/qa/verify-observability-validation.sh
 - id: AC-OVR-023
-  description: Given a running Grafana instance, when the dashboard with UID `bbi-app-mereka-lms`
-    is fetched via API, then all `required.panel_titles` from the contract are present
-    as panel titles in the dashboard
+  description: Given a running Grafana instance, when every dashboard UID from `dashboard-catalog.bbi-mereka-lms.json`
+    is fetched via API, then every dashboard exists and satisfies the `required.panel_titles`
+    and `required.query_fragments` defined by its referenced contract file
   verify:
   - type: automated
     test_type: shell_verification
@@ -278,4 +278,3 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-observability-runtime.sh
     command: scripts/qa/verify-observability-runtime.sh
-

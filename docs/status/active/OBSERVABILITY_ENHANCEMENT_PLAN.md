@@ -72,9 +72,20 @@ Reality-first:
   - `scripts/qa/build-dr-evidence-bundle.sh`
 - Added VPS Atlas allowlist monitor posture audit:
   - `scripts/qa/audit-atlas-allowlist-monitor.sh`
-- Added Grafana coverage contract + audit gate:
+- Added canonical Grafana dashboard catalog + audit gate:
+  - `infrastructure/monitoring/grafana/dashboard-catalog.bbi-mereka-lms.json`
+  - `infrastructure/monitoring/grafana/dashboard-contract.bbi-app-mereka-lms.json`
   - `infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json`
+  - `infrastructure/monitoring/grafana/dashboard-contract.mereka-lms-operations-signals.json`
+  - `infrastructure/monitoring/grafana/dashboard-contract.mereka-lms-auth.json`
+  - `infrastructure/monitoring/grafana/dashboard-contract.mereka-lms-logs.json`
   - `scripts/qa/audit-grafana-dashboard.sh`
+- Added local canonical Grafana snapshots for:
+  - `infrastructure/monitoring/grafana/dashboards/public-endpoints.json`
+  - `infrastructure/monitoring/grafana/dashboards/slo-overview.json`
+  - `infrastructure/monitoring/grafana/dashboards/operations-signals.json`
+  - `infrastructure/monitoring/grafana/dashboards/auth.json`
+  - `infrastructure/monitoring/grafana/dashboards/logs.json`
 - Added CI automation:
   - `.github/workflows/daily-infrastructure-audit.yml` (consolidated; previously `observability-audit.yml` — merged in Phase 6.4)
   - PR guardrails in `.github/workflows/ci.yml`
@@ -144,8 +155,13 @@ Defined in `infrastructure/monitoring/uptime/` and applied via
 - GCP dashboard JSON: `infrastructure/monitoring/dashboards/`  
 - Auth-focused: `infrastructure/monitoring/dashboards/auth.json`
 - Ops-focused: `infrastructure/monitoring/dashboards/operations-signals.json`
-- Platform Grafana dashboard source: `infrastructure/monitoring/dashboards/`  
-  Contract UID: `bbi-app-mereka-lms` (enforced via `infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json`)
+- Canonical Grafana dashboard catalog: `infrastructure/monitoring/grafana/dashboard-catalog.bbi-mereka-lms.json`
+- Canonical LMS Grafana dashboards:
+  - `Mereka LMS - Public Endpoints` (`bbi-app-mereka-lms`)
+  - `Mereka LMS - SLO Overview` (`mereka-slo-overview`)
+  - `Mereka LMS - Operations Signals` (`mereka-lms-operations-signals`)
+  - `Mereka LMS - Auth` (`mereka-lms-auth`)
+  - `Mereka LMS - Logs` (`mereka-lms-logs`)
 
 **Public health checks + TLS SAN validation**
 - `scripts/qa/public-health-check.sh` (prod + dev)
@@ -234,7 +250,7 @@ CHECK_CERTS=1 ./scripts/qa/public-health-check.sh prod
 
 Verify in:
 - **GCP Monitoring** (uptime checks + alert policies)
-- **Grafana** dashboard `bbi-app-mereka-lms`
+- **Grafana** catalog `dashboard-catalog.bbi-mereka-lms.json` and its canonical dashboards
 
 ---
 

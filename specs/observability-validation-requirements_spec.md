@@ -323,13 +323,23 @@ The system MUST maintain GCP Cloud Monitoring resources as defined in `infrastru
 
 ### Required Grafana Dashboards
 
-The system MUST maintain Grafana dashboards as defined in the dashboard coverage contract (`infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json`).
+The system MUST maintain Grafana dashboards as defined in the canonical dashboard catalog (`infrastructure/monitoring/grafana/dashboard-catalog.bbi-mereka-lms.json`).
 
-- The dashboard with UID `bbi-app-mereka-lms` MUST exist in Grafana
-- Required panels MUST include: LMS, CMS (Studio), Caddy, MySQL, Redis, LMS Availability (24h), Auth Failures Over Time, Recent Errors
-- Required query fragments MUST include: `kube_pod_status_phase`, `container_cpu_usage_seconds_total`, `container_memory_usage_bytes`
-- Recommended panels SHOULD include: Velero Backup Verification, Velero Restore Drill, CrashLooping Pods, Pending Pods, Critical Deployment Availability, Synthetic Job Failures, MySQL Connection Utilization, MySQL Slow Queries, Redis Rejected Connections, Redis Evictions
-- The SLO dashboard (UID `mereka-slo-overview`) MUST exist with panels for per-service availability, error budget remaining, burn rate trends, and latency percentiles (per `slo-sla-service-level-management_spec.md` AC-008)
+- Every dashboard entry in the catalog MUST define:
+  - a stable `uid`
+  - a `title`
+  - a repo-local `dashboard_file`
+  - a repo-local `contract_file`
+- The following dashboards MUST remain present as the canonical LMS Grafana estate:
+  - `Mereka LMS - Public Endpoints` (`bbi-app-mereka-lms`)
+  - `Mereka LMS - SLO Overview` (`mereka-slo-overview`)
+  - `Mereka LMS - Operations Signals` (`mereka-lms-operations-signals`)
+  - `Mereka LMS - Auth` (`mereka-lms-auth`)
+  - `Mereka LMS - Logs` (`mereka-lms-logs`)
+- Every `contract_file` referenced by the catalog MUST be valid JSON and MUST define the required panel and query expectations for its dashboard.
+- The `Mereka LMS - Public Endpoints` dashboard (`bbi-app-mereka-lms`) MUST continue to cover LMS/CMS availability, burn-rate posture, error budget posture, and public-edge journey health.
+- The `Mereka LMS - SLO Overview` dashboard (`mereka-slo-overview`) MUST exist with panels for per-service availability, error budget remaining, burn-rate trends, and latency percentiles (per `slo-sla-service-level-management_spec.md` AC-008).
+- The operator dashboards (`mereka-lms-operations-signals`, `mereka-lms-auth`, `mereka-lms-logs`) SHOULD continue to cover nonprod operational health, auth failure spikes, and log/error drilldown.
 
 ### Validation Script Requirements
 
@@ -449,8 +459,8 @@ The system MUST produce a compliance report in the following structure when `--j
 
 ### Grafana Dashboard Compliance
 
-- [ ] AC-OVR-022: Given the file `infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json`, when parsed, then it is valid JSON with `required.panel_titles` and `required.query_fragments` arrays
-- [ ] AC-OVR-023: Given a running Grafana instance, when the dashboard with UID `bbi-app-mereka-lms` is fetched via API, then all `required.panel_titles` from the contract are present as panel titles in the dashboard
+- [ ] AC-OVR-022: Given the file `infrastructure/monitoring/grafana/dashboard-catalog.bbi-mereka-lms.json`, when parsed, then it is valid JSON and every dashboard entry contains `uid`, `title`, `dashboard_file`, and `contract_file`
+- [ ] AC-OVR-023: Given a running Grafana instance, when every dashboard UID from `dashboard-catalog.bbi-mereka-lms.json` is fetched via API, then every dashboard exists and satisfies the `required.panel_titles` and `required.query_fragments` defined by its referenced contract file
 
 ### Validation Script
 
@@ -582,6 +592,12 @@ The system MUST produce a compliance report in the following structure when `--j
   - ServiceMonitor coverage (present vs required)
   - Alert rule coverage (present vs required)
   - Recording rule data availability
+- The canonical LMS dashboard catalog SHOULD remain the single inventory of active Grafana surfaces for:
+  - public edge
+  - SLO posture
+  - nonprod operator health
+  - auth failure analysis
+  - log/error drilldown
 
 ## Rollout & Rollback
 
