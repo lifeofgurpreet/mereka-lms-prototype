@@ -54,6 +54,23 @@ echo "Repository:  $REPO_ROOT"
 echo "Tutor Root:  $TUTOR_ROOT"
 echo ""
 
+SYNC_SCRIPT="$REPO_ROOT/scripts/infra/sync-tutor-plugin-mirror.sh"
+if [[ ! -x "$SYNC_SCRIPT" ]]; then
+  echo -e "${RED}ERROR: Tutor plugin sync script not found or not executable${NC}"
+  echo "  Expected: $SYNC_SCRIPT"
+  echo ""
+  exit 1
+fi
+
+echo -e "${BLUE}Step 0: Syncing Tutor plugin mirror${NC}"
+"$SYNC_SCRIPT"
+echo ""
+
+if tutor plugins disable mfe_oauth_fix >/dev/null 2>&1; then
+  echo -e "${YELLOW}Retired standalone Tutor plugin mfe_oauth_fix was enabled and has been disabled${NC}"
+  echo ""
+fi
+
 # Backup config if it exists
 if [[ -f "$TUTOR_ROOT/config.yml" ]]; then
   BACKUP_FILE="$TUTOR_ROOT/config.yml.backup.$(date +%Y%m%d_%H%M%S)"

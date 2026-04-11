@@ -18,6 +18,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 TUTOR_VENV="${TUTOR_VENV:-$REPO_ROOT/.ci-venv}"
+SYNC_SCRIPT="$REPO_ROOT/scripts/infra/sync-tutor-plugin-mirror.sh"
 
 # In CI without a pre-cached venv, creating one from scratch (pip install Tutor)
 # exceeds the 120s per-script timeout. Skip gracefully — the actual image build
@@ -48,6 +49,17 @@ TUTOR_ROOT=$(mktemp -d)
 export TUTOR_ROOT
 export REPO_ROOT
 
+if [[ ! -x "$SYNC_SCRIPT" ]]; then
+  echo "ERROR: Tutor plugin sync script not found or not executable at $SYNC_SCRIPT" >&2
+  rm -rf "$TUTOR_ROOT"
+  exit 1
+fi
+
+"$SYNC_SCRIPT" >/dev/null
+"$TUTOR_VENV/bin/tutor" plugins disable mfe_oauth_fix >/dev/null 2>&1 || true
+"$TUTOR_VENV/bin/tutor" plugins enable mereka_lms >/dev/null 2>&1 || true
+"$TUTOR_VENV/bin/tutor" plugins enable mereka_lms_mfe_slots >/dev/null 2>&1 || true
+
 echo "Generating Dockerfiles (tutor config save + apply-patches.sh)..."
 "$TUTOR_VENV/bin/tutor" config save \
   --set LMS_HOST=preflight-check.test \
@@ -77,7 +89,7 @@ if [[ -f "$RENDERED_DF" ]]; then
     apply_brand_package_patch 2>/dev/null || true
     source infrastructure/tutor/patches/footer-component.sh
     apply_footer_component_patch 2>/dev/null || true
-  ) >/dev/null 2>&1
+  ) >/dev/null 2>&1 || true
 fi
 
 MFE_DF="$TUTOR_ROOT/env/plugins/mfe/build/mfe/Dockerfile"
