@@ -231,4 +231,70 @@ was not fully resolved.
 - Staging uses `.academyv2.mereka.io` (`staging.` prefix) for mereka, others TBD
 
 **Staging operational verdict:** UP, not DOWN. Session 2's "externally unreachable" finding was cleared — staging.academyv2.mereka.io responds and renders Mereka landing. Cluster CPU is still overallocated per the staging audit agent. Staging is 2 commits behind prod on LMS image tag.
-# RCB-10 fix notes
+
+---
+
+## Update 2026-04-11 later-later: PR #1562 merged + full 3-env L4 closure
+
+**Merged this cycle:**
+- #1536 (RCB-09 MFE_CONFIG footer/header keys) — 11:42Z
+- #1540 (RCB-13 CSP tenant extra hosts) — 12:16Z
+- #1543 (RCB-10 stage 1 build context sync) — 13:04Z
+- #1562 (RCB-10 stage 2 production stage COPY inject) — 20:55Z
+
+**New L4 proofs this later cycle (real browser via agent-browser):**
+
+| Env | Surface | Level | Evidence |
+|-----|---------|-------|----------|
+| **staging** mereka | learner-dashboard | **L4** | lanea-platform-admin login → branded "Mereka Academy IN SESSION" + My Courses + Learning Cockpit rendered |
+| **dev** mereka | `/learner-record/` | **L4** | testadmin login → "My Learner Records" heading + testadmin menu + Back to My Profile nav rendered. Program records API errors (no programs assigned) but MFE shell + auth intact. |
+| **dev** biji-biji Studio | direct URL `apps.biji-biji.academyv2.mereka.dev/authoring/home` | **L3** | "Studio Biji-Biji Academy" branding + Biji-Biji logo + "Built for creators. Built for teams." tagline. L4 content fails with "Could not load Studio home" (dev data issue). |
+| **dev** mereka Studio | `studio.academyv2.mereka.dev/` | **L4** | "Studio Mereka Academy" header, 41 courses listed (AI Fluency, MCT24-EN, etc.), New course / New library buttons. |
+| **prod** mereka Studio | `studio.academyv2.mereka.io/home` | **L3 at Authentik** | Full OAuth chain Studio → LMS cms-sso → Authentik OIDC → branded "Welcome to Mereka" login page with Google SSO + email option. |
+
+### Studio cross-tenant OAuth finding (non-blocking — RCB-16 candidate)
+
+When visiting `studio.biji-biji.academyv2.mereka.dev/` with an active mereka session, the redirect chain lands on `apps.academyv2.mereka.dev/authoring/home` (MEREKA primary apps host) instead of `apps.biji-biji.academyv2.mereka.dev/authoring/home`. The displayed Studio header reads "Studio Mereka Academy" with MEREKA org courses.
+
+Direct URL `apps.biji-biji.academyv2.mereka.dev/authoring/home` DOES serve the correct "Studio Biji-Biji Academy" branding. So the bug is in the Studio OAuth `redirect_uri` parameter — it returns users to primary apps host instead of tenant apps host.
+
+Not blocking Phase 3 closure; documented as RCB-16 candidate for future investigation.
+
+### Dev course data issue (RCB-15)
+
+Every course on dev fails BlockStructureNotFound on `/api/course_home/outline` because `/openedx/media/` is mounted as `emptyDir` and the LMS pod restarts wipe block asset files. Not a platform bug — migration/data lane. Blocks Phase 2 L5 course content tests on dev. Escalated.
+
+### Phase 4 staging L4 closure
+
+Staging mereka is fully L4 operational via lanea-platform-admin. Previous Session 2 assessment of "externally unreachable" is firmly obsolete. Cluster CPU is still overallocated but the mereka tenant serves correctly.
+
+### 2026-04-11 even-later: staging non-primary tenants landing-L3 proven, login-blocked by RCB-13
+
+Real agent-browser probes against staging biji-biji + SOF non-primary tenants:
+
+| Env | Tenant | Landing | Login flow | Notes |
+|-----|--------|---------|------------|-------|
+| staging | biji-biji | **L3 PROVEN** | 🔴 RCB-13 | "Biji-Biji Academy" branded header, tenant MFE URLs correct (`apps.staging.academy.biji-biji.com/authn/login`). Login shell loads, CSP blocks CSRF/mfe_context fetches to `staging.academy.biji-biji.com`. Same bug as prod RCB-13. |
+| staging | SOF | **L3 PROVEN** | n/t (same CSP bug expected) | "Skill Our Future" branded header, tenant MFE URLs correct. |
+
+**Current realized image tags (as of 2026-04-11 21:34Z)**:
+- dev openedx: `e4764d583` (= #1543 only — missing #1536/#1540/#1562)
+- staging openedx: `46a8c5913` (= #1393 — far behind)
+- prod openedx: `dfbe7ef31` (= even older)
+
+None of the three environments currently run the full RCB-09/10/13 fix set. All are waiting on an image build for the current main tip (`fd16b224` after #1492 merged at 22:55Z) to complete and propagate via Agent 2's promotion chain. Once realized, the matrix updates to:
+
+- dev/staging/prod × mereka/biji-biji/SOF × login → L4 (RCB-13 cleared)
+- dev/prod × mereka × profile/discussions/comms → L4 (RCB-10 cleared by stage 2 inject)
+- Theme CSS 200 on `/theme/*` across all MFE hosts
+
+Staging non-primary L4 login proof is **gated on realization**, not on a missing fix.
+
+**Important finding 2026-04-11 22:30Z**: prod MFE image `dfbe7ef31806` ALREADY has `/openedx/dist/theme/` populated (16 files including `core.min.css`, `mereka-brand.min.css`, `biji-biji/`, `skillourfuture/`). So RCB-10 is **dev-only** regression that #1543 introduced when rewiring the theme sync pipeline; #1562 is the corrective fix but only affects dev. Prod was never broken on theme; prod login L4 proof from earlier session stands. Prod biji-biji login L4 is gated on #1540 (RCB-13 CSP) propagating to prod, not on theme.
+
+### Build chain state 2026-04-11 22:57Z
+
+- Build for `a3216e591` (#1563): Build MFE Image stuck at 78+ min (cold webpack reference is 44 min). Post-push OpenEdX Scan completed with **failure** (SBOM gen timed out 20m + Trivy install network error). Overall run would fail even if MFE succeeds → no auto-dispatch.
+- Cancelled old build, new CI for `fd16b224` (post-#1492 merge) running. Build Tutor Images for fd16b224 will start after CI completes.
+- **Lesson**: promotion chain is gated on successful Post-push scan. Transient network errors in SBOM/Trivy download will block the entire dispatch. Worth adding retry/graceful-degrade on scan failures if they're non-blocking vuln-wise.
+
