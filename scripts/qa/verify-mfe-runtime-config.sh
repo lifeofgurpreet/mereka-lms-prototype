@@ -113,7 +113,13 @@ fi
 # 5. MFE Dockerfile does not hardcode cookie domain values
 #    (these should come from the mfe_config runtime API, not build args)
 # ---------------------------------------------------------------------------
-MFE_DOCKERFILE="$REPO_ROOT/infrastructure/tutor/mfe-build/Dockerfile"
+RENDERED_MFE_DOCKERFILE="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
+SNAPSHOT_MFE_DOCKERFILE="$REPO_ROOT/infrastructure/tutor/mfe-build/Dockerfile"
+if [[ -f "$RENDERED_MFE_DOCKERFILE" ]]; then
+  MFE_DOCKERFILE="$RENDERED_MFE_DOCKERFILE"
+else
+  MFE_DOCKERFILE="$SNAPSHOT_MFE_DOCKERFILE"
+fi
 if [[ ! -f "$MFE_DOCKERFILE" ]]; then
   _skip "MFE Dockerfile not found: $MFE_DOCKERFILE"
 else

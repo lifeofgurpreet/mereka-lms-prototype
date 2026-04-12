@@ -64,7 +64,13 @@ CMS_IMAGE_DIR="${THEME_ROOT}/cms/static/images"
 CMS_FONT_DIR="${THEME_ROOT}/cms/static/fonts"
 CMS_HEAD_EXTRA="${THEME_ROOT}/cms/templates/head-extra.html"
 CMS_FOOTER_WIDGET="${THEME_ROOT}/cms/templates/widgets/footer.html"
-MFE_DOCKERFILE="${REPO_ROOT}/infrastructure/tutor/mfe-build/Dockerfile"
+MFE_RENDERED_DOCKERFILE="${REPO_ROOT}/tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
+MFE_SNAPSHOT_DOCKERFILE="${REPO_ROOT}/infrastructure/tutor/mfe-build/Dockerfile"
+if [[ -f "${MFE_RENDERED_DOCKERFILE}" ]]; then
+  MFE_DOCKERFILE="${MFE_RENDERED_DOCKERFILE}"
+else
+  MFE_DOCKERFILE="${MFE_SNAPSHOT_DOCKERFILE}"
+fi
 PLUGIN_FILE="${PLUGIN_MAIN}"
 PROVENANCE="${ASSETS_BRANDING}/tokens.provenance.json"
 OEP48_DOC="${REPO_ROOT}/docs/reference/architecture/OEP48_BRAND_PACKAGE.md"
@@ -457,15 +463,24 @@ echo ""
 # -----------------------------------------------------------------------
 # Section 7: MFE brand package wiring (npm / Dockerfile)
 # -----------------------------------------------------------------------
-echo "[SECTION 7] MFE brand package npm wiring"
+echo "[SECTION 7] MFE brand package wiring"
 
 if [[ -f "${MFE_DOCKERFILE}" ]]; then
-  pass "mfe-build/Dockerfile snapshot exists"
-  # Brand package must be installed as @edx/brand
-  if grep -q "@edx/brand\|indigo-brand-openedx\|brand-openedx" "${MFE_DOCKERFILE}"; then
-    pass "Dockerfile installs @edx/brand or a brand-openedx package"
+  if [[ "${MFE_DOCKERFILE}" == "${MFE_RENDERED_DOCKERFILE}" ]]; then
+    pass "rendered MFE Dockerfile exists"
   else
-    fail "Dockerfile has no @edx/brand installation — MFE brand package not wired"
+    warn "rendered MFE Dockerfile missing — falling back to snapshot Dockerfile"
+  fi
+  # Brand package must be installed via the local @edx/brand alias on the active path.
+  if grep -q "@edx/brand@file:./brand-mereka" "${MFE_DOCKERFILE}"; then
+    pass "Dockerfile installs local @edx/brand alias (brand-mereka)"
+  else
+    fail "Dockerfile missing local @edx/brand alias — active MFE brand package not wired"
+  fi
+  if grep -q "indigo-brand-openedx" "${MFE_DOCKERFILE}"; then
+    fail "Dockerfile still references legacy indigo-brand-openedx package"
+  else
+    pass "Dockerfile has no legacy indigo-brand-openedx package reference"
   fi
   # The Mereka SCSS directory must be copied into the container
   if grep -q "COPY.*mereka\|COPY.*indigo/mereka" "${MFE_DOCKERFILE}"; then

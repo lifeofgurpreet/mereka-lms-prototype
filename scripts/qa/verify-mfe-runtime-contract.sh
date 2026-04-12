@@ -27,6 +27,11 @@
 #
 set -euo pipefail
 
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+CANONICAL_MFE_RENDERED_CONTEXT="tutor_env/env/plugins/mfe/build/mfe"
+CANONICAL_MFE_RENDERED_DOCKERFILE="Dockerfile"
+CANONICAL_MFE_RENDERED_DOCKERFILE_PATH="${REPO_ROOT}/${CANONICAL_MFE_RENDERED_CONTEXT}/${CANONICAL_MFE_RENDERED_DOCKERFILE}"
+
 # ---------------------------------------------------------------------------
 # Argument parsing
 # ---------------------------------------------------------------------------
@@ -208,6 +213,39 @@ if [[ -n "$IMAGE_REF" ]]; then
     docker pull "$IMAGE_REF" >/dev/null
   fi
 
+  image_build_scope="$(docker image inspect --format '{{ index .Config.Labels "io.mereka.build-scope" }}' "$IMAGE_REF" 2>/dev/null || true)"
+  if [[ "$image_build_scope" == "mfe" ]]; then
+    pass "Image label io.mereka.build-scope is mfe"
+  else
+    fail "Image label io.mereka.build-scope is not mfe (got: ${image_build_scope:-<missing>})"
+  fi
+
+  image_rendered_context="$(docker image inspect --format '{{ index .Config.Labels "io.mereka.rendered-context" }}' "$IMAGE_REF" 2>/dev/null || true)"
+  if [[ "$image_rendered_context" == "$CANONICAL_MFE_RENDERED_CONTEXT" ]]; then
+    pass "Image label io.mereka.rendered-context matches canonical plugin-rendered MFE context"
+  else
+    fail "Image label io.mereka.rendered-context drifted from canonical plugin-rendered MFE context (got: ${image_rendered_context:-<missing>})"
+  fi
+
+  image_rendered_dockerfile="$(docker image inspect --format '{{ index .Config.Labels "io.mereka.rendered-dockerfile" }}' "$IMAGE_REF" 2>/dev/null || true)"
+  if [[ "$image_rendered_dockerfile" == "$CANONICAL_MFE_RENDERED_DOCKERFILE" ]]; then
+    pass "Image label io.mereka.rendered-dockerfile matches canonical Dockerfile path within the rendered MFE context"
+  else
+    fail "Image label io.mereka.rendered-dockerfile drifted from canonical Dockerfile path (got: ${image_rendered_dockerfile:-<missing>})"
+  fi
+
+  if [[ -f "$CANONICAL_MFE_RENDERED_DOCKERFILE_PATH" ]]; then
+    expected_rendered_dockerfile_sha256="$(sha256sum "$CANONICAL_MFE_RENDERED_DOCKERFILE_PATH" | awk '{print $1}')"
+    image_rendered_dockerfile_sha256="$(docker image inspect --format '{{ index .Config.Labels "io.mereka.rendered-dockerfile-sha256" }}' "$IMAGE_REF" 2>/dev/null || true)"
+    if [[ "$image_rendered_dockerfile_sha256" == "$expected_rendered_dockerfile_sha256" ]]; then
+      pass "Image label io.mereka.rendered-dockerfile-sha256 matches the canonical rendered MFE Dockerfile in this worktree"
+    else
+      fail "Image label io.mereka.rendered-dockerfile-sha256 does not match the canonical rendered MFE Dockerfile in this worktree"
+    fi
+  else
+    skip "Canonical rendered MFE Dockerfile not present locally; image provenance hash comparison skipped"
+  fi
+
 # Run all image checks in a single container invocation to avoid repeated
 # docker run overhead. Each check emits PASS/FAIL/SKIP lines that are captured
 # and replayed in the outer shell so the counters stay accurate.
@@ -320,6 +358,18 @@ do
     fi
   else
     result FAIL "Brand CSS MISSING: $css_path"
+  fi
+done
+
+# ----- Deprecated shells absent from final image -----
+for deprecated_dist in \
+  "/openedx/dist/orders" \
+  "/openedx/dist/payment"
+do
+  if [ -e "$deprecated_dist" ]; then
+    result FAIL "Deprecated MFE dist payload leaked into the final image: $deprecated_dist"
+  else
+    result PASS "Deprecated MFE dist payload absent from the final image: $deprecated_dist"
   fi
 done
 ' 2>&1)
