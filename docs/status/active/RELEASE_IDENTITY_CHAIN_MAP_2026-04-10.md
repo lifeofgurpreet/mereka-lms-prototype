@@ -1,81 +1,69 @@
 # Release Identity Chain Map
 
-_Owner: Agent 2 | Last verified: 2026-04-10T14:08:00Z | Status: active_
+_Owner: Agent 2 | Last verified: 2026-04-12T22:10:52Z | Status: active_
 
 ## Current Chain
 
-```
-build-tutor-images.yml (push to main)
-  -> generate-release-bundle.sh
+```text
+build-tutor-images.yml
+  -> Generate Release Bundle
      bundle_id = rb-<sha8>-<timestamp>
-  -> generate_release_object.py
-     release_id = ro-<bundle_id>
-  -> generate_truth_ledger.py
-     release_truth.release_id = release_id
-  -> upload artifact: release-bundle
-  -> repository_dispatch promote-mereka-lms-dev
-     payload carries release_bundle_id + release_object + build_provenance
-  -> bbi-infrastructure promote-dev-image.yml
-     validates release_object/v1 directly
-     persists release-object sidecar
-     creates dev overlay promotion PR
-     writes dev-promotion-record.json
+     release_id = ro-rb-<sha8>-<timestamp>
+  -> app release-binding path
+     writes production image refs into app repo truth
+  -> infra prod promotion path
+     writes realized image refs into GitOps overlay truth
   -> ArgoCD realization
+     moves desired revision into prod cluster
   -> runtime proof lane
+     proves public surfaces against the same release line
 ```
 
 ## Where Identity Is Born
 
 | Identity | Writer | Current shape |
 |---|---|---|
-| `bundle_id` | `scripts/infra/generate-release-bundle.sh` | `rb-<sha8>-<timestamp>` |
-| `release_id` | `scripts/release/generate_release_object.py` | `ro-rb-<sha8>-<timestamp>` |
+| `bundle_id` | `Generate Release Bundle` in `build-tutor-images.yml` | `rb-<sha8>-<timestamp>` |
+| `release_id` | release-object generator in the same build lane | `ro-rb-<sha8>-<timestamp>` |
 
 ## Where Identity Is Carried
 
 | Hop | Carrier | Current state |
 |---|---|---|
-| build artifact | `var/ci/release-bundle.json` + `var/ci/release-object.json` | proved |
-| build ledger | `var/ci/truth-ledger.json` | proved |
-| cross-repo handoff | `repository_dispatch.client_payload.release_object` | proved |
-| infra promotion evidence | PR body + `var/promotion-evidence/release-object.json` | proved |
-| dev promotion record | `var/promotion-evidence/dev-promotion-record.json` | proved, but not canonical PCP `promotion_record` |
-| realized deployment | live cluster digest | proved for release `ro-rb-496b8a3b-20260410T065709Z` |
-| runtime proof | Agent 1 lane | unproved |
+| build artifact | release-bundle job output | proved |
+| app repo production binding | merged app PR | proved |
+| infra prod promotion | merged infra PR | proved |
+| post-realization cleanup | merged infra cleanup PR | proved |
+| Argo desired revision | `mereka-lms-prod` Application status | proved |
+| live deployment images | prod `Deployment.spec.template.spec.containers[].image` | proved |
+| runtime proof | current smoke verifier on clean app `origin/main` | proved |
 
-## Where Identity Is Duplicated
-
-| Concern | Canonical should be | Current duplicate writers |
-|---|---|---|
-| release bundle schema | PCP release bundle contract | app generator, app JSON schema, local verifier semantics |
-| release object schema | one canonical contract surface | `schemas/release-object.schema.json`, generator, infra workflow validation |
-| dispatch handoff | PCP dispatch contract | sender workflow code, receiver workflow code |
-| dev promotion record | PCP promotion-record schema | `dev_promotion_record` ad hoc JSON in `promote-dev-image.yml` |
-| control-plane ref | current PCP ref or explicit pinned release ref | core generators/proof scripts now use `194e6001...` locally, but docs/tests still rely on repo-local pinning rather than governed ref selection |
-
-## Where Identity Is Lost Or Downgraded
-
-| Edge | Current problem |
-|---|---|
-| build result -> promotion trust | push runs `24226842382` and `24227735786` failed overall, yet still emitted bundle/release object and dispatched |
-| dev promotion evidence -> PCP truth | dev lane does not emit the canonical PCP `promotion_record` shape |
-| release object -> PCP authority | app and infra still validate the local `release-object/v1` JSON projection instead of consuming PCP schema authority directly |
-| PCP reference -> emitted artifacts | local source now points emitted artifacts at `194e6001...`, but the promotion lane still lacks an authority rule for how that ref is selected and updated |
-
-## Realized Example: `ro-rb-496b8a3b-20260410T065709Z`
+## Current Realized Example: `ro-rb-d6e9f14f-20260411T224043Z`
 
 | Link | Evidence |
 |---|---|
-| build bundle | app run `24227735786` emitted `bundle_id = rb-496b8a3b-20260410T065709Z` |
-| release object | same run emitted `release_id = ro-rb-496b8a3b-20260410T065709Z` with `openedx@sha256:0ce0538...` and `mfe@sha256:fd8e06c...` |
-| dispatch evidence | infra run `24230714536` dev-promotion record carries the same `release_bundle_id`, `release_object_id`, commit `496b8a3...`, and digests |
-| gitops mutation | merged infra PR [#2645](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2645) wrote the same digests into `apps/mereka-lms/overlays/profiles/dev/kustomization.yaml` |
-| live realization | `./scripts/kube dev get deploy -n mereka-lms-dev` shows `lms/cms` on `openedx:496b8a3...@sha256:0ce0538...` and `mfe` on `mfe:496b8a3...@sha256:fd8e06c...` |
-| remaining gap | Agent 1 has not yet attached runtime/user-path proof to the same `release_id` |
+| build run | [`24292565290`](https://github.com/Biji-Biji-Initiative/mereka-lms/actions/runs/24292565290) emitted bundle `rb-d6e9f14f-20260411T224043Z` and release object `ro-rb-d6e9f14f-20260411T224043Z` |
+| app binding | merged [#1588](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1588) wrote the same release line into app production binding truth (`e57b9d766dcf6fa0338c201eb16ddf65a9336ddc`) |
+| prod promotion | merged [#2768](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2768) realized the same line into prod GitOps (`aebcf5a2eff13d807f0c65827deaa2f81223f890`) |
+| post-realization cleanup | merged [#2770](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2770) removed one-shot job drift without changing the realized release digests (`e91cba9b8a821c11c29481bb05b4d6e92d5a2ef9`) |
+| deployed revision | Argo now reports `mereka-lms-prod` `sync=Synced`, `phase=Succeeded`, `revision=e91cba9b8a821c11c29481bb05b4d6e92d5a2ef9` |
+| live Open edX digest | `sha256:b08fbb6223faceb4ccc49e89869dcfe3b9752aca4226a9dc153c74f8760b311f` on `lms/cms/lms-worker/cms-worker` |
+| live MFE digest | `sha256:5e68fd69af068e7c36f0945f12cfcbe970dfcbd18a92ff5ea2c61d871fcdef08` on `mfe` |
+| runtime proof | `bash scripts/qa/verify-post-deploy-smoke.sh --env prod` from clean app `origin/main` `8b22aa7a94ef4f01ab490ec42ea147b5f1b4aa9d` returned `PASS=17 FAIL=0 WARN=6 SKIP=0` |
+| residual gap | top-level Argo app health still reports `Degraded` even though child-resource diff and health are clean after hard refresh |
+
+## Where Identity Still Downgrades
+
+| Edge | Current problem |
+|---|---|
+| build result -> realized prod deployment | the build workflow still does not itself complete the full production promotion chain |
+| release object -> PCP authority | release-object truth is still repo-local rather than PCP-owned |
+| runtime smoke -> cluster-scoped readiness/image subchecks | the smoke script's `kubectl` checks still depend on ambient context, so warnings can appear even when explicit `rke2-prod` proof is clean |
+| Argo desired state -> top-level app health | controller rollup can stay stale even when no child resources are unsynced or unhealthy |
 
 ## What Moves Next To PCP
 
-1. Dispatch payload schema and validation rules.
-2. Release-object schema authority, or at minimum a PCP-owned contract consumed by app and infra.
-3. Dev promotion evidence shape so dev promotions produce the same canonical identity family as staging/prod promotions.
-4. Contract-ref pin governance so emitted proof states which PCP truth it actually used.
+1. Release-object contract authority.
+2. Dispatch / promotion payload authority.
+3. Promotion-record schema so release identity stays machine-readable across build, promotion, and runtime proof.
+4. Governance for the exact PCP contract ref used by each emitted artifact.

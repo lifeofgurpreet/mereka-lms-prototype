@@ -1,132 +1,122 @@
 # Prod Domain Realization — Final Proof Bundle
 
-_Captured: 2026-04-02T03:42:23Z | Cluster: rke2-prod | Verdict: **`runtime_validated`**_
+_Captured: 2026-04-12T22:10:52Z | Cluster: `rke2-prod` | Verdict: **`runtime_validated`**_
 
 ## Final Verdict
 
-**`runtime_validated`** — all active deployments healthy, all tenant-facing
-hosts serve correctly, zero red deployments.
+**`runtime_validated`** for release object `ro-rb-d6e9f14f-20260411T224043Z`.
 
-**NOT `operationally_closed`** because:
-- ArgoCD: `sync=OutOfSync health=Progressing operationState.phase=Failed`
-- 3 resources remain non-Synced (2 Jobs with empty status, 1 ExternalSecret OutOfSync)
-- Last sync operation failed (prior PVC prune blocked by Kyverno)
+This lane is **not fully `operationally_closed`** only because Argo still reports
+top-level app health `Degraded` even though:
 
----
+- `sync = Synced`
+- `operationState.phase = Succeeded`
+- `unsynced resources = none`
+- `non-healthy child resources = none`
+- hard refresh did not move `health.lastTransitionTime` from `2026-04-09T15:48:33Z`
 
-## ArgoCD State
+That residual red is currently classified as **stale controller rollup debt**,
+not release drift.
 
-_Updated: 2026-04-02T05:30Z_
+## Repo Truth
+
+| Plane | Current truth |
+|---|---|
+| app repo | `origin/main = 8b22aa7a94ef4f01ab490ec42ea147b5f1b4aa9d` |
+| app binding merge | [#1588](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1588) → `e57b9d766dcf6fa0338c201eb16ddf65a9336ddc` |
+| smoke-verifier fix | [#1589](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1589) → `8b22aa7a94ef4f01ab490ec42ea147b5f1b4aa9d` |
+| infra repo | `origin/main = e91cba9b8a821c11c29481bb05b4d6e92d5a2ef9` |
+| prod promotion merge | [#2768](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2768) → `aebcf5a2eff13d807f0c65827deaa2f81223f890` |
+| prod cleanup merge | [#2770](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2770) → `e91cba9b8a821c11c29481bb05b4d6e92d5a2ef9` |
+
+## Release Truth
 
 | Field | Value |
 |---|---|
+| build run | [`24292565290`](https://github.com/Biji-Biji-Initiative/mereka-lms/actions/runs/24292565290) |
+| build head | `d6e9f14f623d26256ed55c0ef174a3fea19eada5` |
+| release bundle | `rb-d6e9f14f-20260411T224043Z` |
+| release object | `ro-rb-d6e9f14f-20260411T224043Z` |
+
+## Deployed Truth
+
+| Field | Value |
+|---|---|
+| Argo app | `mereka-lms-prod` |
+| revision | `e91cba9b8a821c11c29481bb05b4d6e92d5a2ef9` |
 | sync | `Synced` |
-| health | `Progressing` |
 | operationState.phase | `Succeeded` |
-| conditions | (none) |
+| top-level health | `Degraded` |
+| unsynced resources | `none` |
+| non-healthy child resources | `none` |
 
-Health is `Progressing` (not `Healthy`) because of failed CronJob pods
-(auth-verify, cert-verify, course-reindex) — not deployment health issues.
-All individual resources report Synced + Healthy.
+## Live Image Proof
 
----
-
-## Active Deployments (29/29 non-zero — zero red)
-
-_All deployments with replicas > 0 are Ready._
-
-| Deployment | Ready |
+| Workload | Image |
 |---|---|
-| caddy | 1/1 |
-| clickhouse | 1/1 |
-| cms | 1/1 |
-| cms-worker | 1/1 |
-| credentials | 1/1 |
-| discovery | 1/1 |
-| elasticsearch | 1/1 |
-| enterprise-access | 1/1 |
-| enterprise-access-worker | 1/1 |
-| enterprise-admin-portal | 1/1 |
-| enterprise-catalog | 1/1 |
-| enterprise-catalog-worker | 1/1 |
-| enterprise-learner-portal | 1/1 |
-| enterprise-subsidy | 1/1 |
-| lms | 2/2 |
-| lms-worker | 1/1 |
-| license-manager | 1/1 |
-| meilisearch | 1/1 |
-| mfe | 1/1 |
-| mux-delivery-monitor | 1/1 |
-| mysql | 1/1 |
-| postgresql-payments | 1/1 |
-| preview-redirect | 1/1 |
-| ralph | 1/1 |
-| redis | 1/1 |
-| smtp | 1/1 |
-| superset | 1/1 |
-| superset-worker | 1/1 |
-| xqueue | 1/1 |
+| `lms` | `ghcr.io/biji-biji-initiative/mereka-lms/openedx:d6e9f14f623d26256ed55c0ef174a3fea19eada5@sha256:b08fbb6223faceb4ccc49e89869dcfe3b9752aca4226a9dc153c74f8760b311f` |
+| `cms` | `ghcr.io/biji-biji-initiative/mereka-lms/openedx:d6e9f14f623d26256ed55c0ef174a3fea19eada5@sha256:b08fbb6223faceb4ccc49e89869dcfe3b9752aca4226a9dc153c74f8760b311f` |
+| `lms-worker` | `ghcr.io/biji-biji-initiative/mereka-lms/openedx:d6e9f14f623d26256ed55c0ef174a3fea19eada5@sha256:b08fbb6223faceb4ccc49e89869dcfe3b9752aca4226a9dc153c74f8760b311f` |
+| `cms-worker` | `ghcr.io/biji-biji-initiative/mereka-lms/openedx:d6e9f14f623d26256ed55c0ef174a3fea19eada5@sha256:b08fbb6223faceb4ccc49e89869dcfe3b9752aca4226a9dc153c74f8760b311f` |
+| `mfe` | `ghcr.io/biji-biji-initiative/mereka-lms/mfe:d6e9f14f623d26256ed55c0ef174a3fea19eada5@sha256:5e68fd69af068e7c36f0945f12cfcbe970dfcbd18a92ff5ea2c61d871fcdef08` |
 
-## Parked Deployments (2 at 0/0)
+## Runtime Proof
 
-| Deployment | Rationale | Parked via |
-|---|---|---|
-| notes | Parked in `park-dormant-services.yaml` + `prod-replica-counts.yaml` | PR #2340 |
-| payments-gateway | Parked in `park-dormant-services.yaml` | PR #2342 |
+Fresh smoke proof from clean app `origin/main` (`8b22aa7a94ef4f01ab490ec42ea147b5f1b4aa9d`):
 
-_Note: elasticsearch, meilisearch, clickhouse, superset, ralph, smtp, xqueue
-were previously parked at 0/0 but are now running (1/1). Another agent or
-manual sync unparked them after the earlier proof was written._
+```bash
+bash scripts/qa/verify-post-deploy-smoke.sh --env prod
+```
 
-## Public Host Proof (11 hosts)
+Result:
 
-| Host | Response | Detail |
-|---|---|---|
-| `academyv2.mereka.io` | HTTP/2 200 | Mereka LMS |
-| `academy.biji-biji.com` | HTTP/2 200 | BB LMS |
-| `skillourfuture.academy.mereka.io` | HTTP/2 200 | SOF LMS (legacy root) |
-| `skillourfuture.academyv2.mereka.io` | HTTP/2 200 | SOF LMS (target root) |
-| `preview.academy.biji-biji.com` | HTTP/2 200 | BB Preview |
-| `admin.academy.biji-biji.com` | HTTP/2 200 | BB Enterprise Admin |
-| `admin.skillourfuture.academyv2.mereka.io` | HTTP/2 200 | SOF Enterprise Admin |
-| `learner.academy.biji-biji.com` | HTTP/2 200 | BB Enterprise Learner |
-| `learner.skillourfuture.academyv2.mereka.io` | HTTP/2 200 | SOF Enterprise Learner |
-| `credentials.academy.biji-biji.com` | HTTP/2 302 → `/health/` | BB Credentials |
-| `credentials.skillourfuture.academyv2.mereka.io` | HTTP/2 302 → `/health/` | SOF Credentials |
+- `PASS=17`
+- `FAIL=0`
+- `WARN=6`
+- `SKIP=0`
 
-## Non-Synced Resources (0)
+Key public-surface passes:
 
-All resources are now Synced. The previous 3 non-synced items were resolved:
-- `Job/clickhouse-init` — deleted (completed init job)
-- `Job/superset-init` — deleted (failed init job)
-- `ExternalSecret/ghcr-registry` — fixed in bbi-infrastructure#2360 (added server-defaulted fields)
+- LMS homepage `200`
+- LMS heartbeat `200`
+- Studio homepage `302`
+- Studio heartbeat `200`
+- Authn login `200`
+- Authn register `200`
+- Learner dashboard `200`
+- Account settings `200`
+- Profile `200`
+- Course About `200`
+- Discussions `200`
+- `academy.biji-biji.com` LMS `200`
+- `skillourfuture.academy.mereka.io` LMS `200`
 
-## Path to `operationally_closed`
+`WARN=6` comes only from the script's ambient-context `kubectl` readiness/image
+subchecks. Those warnings do not contradict the explicit `rke2-prod`
+deployment-image reads above.
 
-1. ~~Fix `ghcr-registry` ExternalSecret field drift~~ — **DONE** (bbi-infrastructure#2360)
-2. ~~Clean up completed init Jobs~~ — **DONE** (deleted clickhouse-init + superset-init)
-3. ~~Clear the Failed operationState~~ — **DONE** (re-sync succeeded, sync=Synced)
-4. Resolve `Progressing` health — caused by failed CronJob pods (auth-verify, cert-verify, course-reindex), not deployment issues
+## Why Argo Still Looks Red
 
-ArgoCD is now `sync=Synced phase=Succeeded`. Health is `Progressing` from CronJob pod noise.
+The remaining top-level `Degraded` bit does **not** currently correspond to a
+real child-resource problem:
 
-## PRs (Prod Activation Tranche — all in `bbi-infrastructure` repo)
+- no `status.conditions`
+- no unsynced resources
+- no child resources with `health.status != Healthy`
+- hard refresh (`argocd.argoproj.io/refresh=hard`) re-reconciled the app but did
+  not move the health transition timestamp
 
-| bbi-infrastructure PR | What |
-|---|---|
-| [#2290](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2290) | Fix prod ingress YAML syntax |
-| [#2292](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2292) | Remove gke-hibernation |
-| [#2293](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2293) | Kyverno PolicyException |
-| [#2296](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2296) | Remove enterprise-prelaunch + Caddy non-root |
-| [#2297](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2297) | Explicit replica counts |
-| [#2311](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2311) | LMS/CMS probe Host headers |
-| [#2324](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2324) | Discovery/notes/credentials probe Host headers |
-| [#2326](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2326) | Enterprise migrate init fix |
-| [#2330](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2330) | No-op migrate init for license-manager + enterprise-access |
-| [#2334](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2334) | MFE memory 256Mi → 1Gi |
-| [#2340](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2340) | Park notes |
-| [#2342](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2342) | Park payments-gateway |
-| [#2348](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2348) | Remove redundant caddy PolicyException |
-| [#2354](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2354) | enterprise-catalog-worker probe timeout |
-| [#2356](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2356) | enterprise-access-worker probe timeout |
-| [#2360](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/2360) | Forum ingress conflict + ghcr-registry drift |
+This should be handled as controller-state debt unless a future read shows a
+real child-resource regression.
+
+## Done When
+
+This release lane should be treated as complete unless one of the following
+becomes false:
+
+1. live prod images drift from the digests above
+2. runtime smoke stops passing on current `main`
+3. Argo child resources become unsynced or non-healthy
+
+If only the top-level app health bit remains `Degraded` with clean child
+evidence, do **not** reopen the release lane as a runtime regression.
