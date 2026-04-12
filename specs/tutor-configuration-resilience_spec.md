@@ -178,7 +178,7 @@ The `mereka_lms` plugin implements 15 ENV_PATCHES hooks covering:
 #### Infrastructure Configuration
 - **Hook:** `mysql-docker-compose`
 - **Patches Applied:**
-  - MySQL 8 authentication plugin fix (`--default-authentication-plugin=mysql_native_password`)
+  - MySQL 8 authentication plugin fix (`--mysql-native-password=ON`)
 
 - **Hook:** `caddy-caddyfile`
 - **Patches Applied:**
@@ -345,7 +345,7 @@ grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.
 - The system MUST implement a Tutor plugin (`tutor-plugin-mereka`) that registers hooks to apply patches at template-render time.
 - The plugin MUST use Tutor's `Filters` API to modify templates before they are written to disk (e.g., `ENV_PATCHES`, `OPENEDX_DOCKERFILE_PRE_ASSETS`, `OPENEDX_LMS_PRODUCTION_SETTINGS`).
 - The plugin MUST apply the following patch categories via hooks:
-  - MySQL authentication plugin configuration (`mysql_native_password`)
+  - MySQL authentication plugin configuration (`mysql-native-password=ON`)
   - MFE Node.js version and build toolchain additions
   - Webpack memory limit (`NODE_OPTIONS=--max-old-space-size=6144`)
   - Multi-site domain additions to `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS`
@@ -431,9 +431,9 @@ grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.
   - **Status:** ✅ Implemented (via `openedx-lms-production-settings` ENV_PATCHES hook)
   - **Verification:** CI job `verify-multi-site-domains` checks ALLOWED_HOSTS (note: current job runs after `apply-patches.sh`, needs plugin-only test)
 
-- [ ] AC-TCR-003: Given the Mereka plugin is enabled, when `tutor config save` is run, then the rendered `docker-compose.yml` contains `mysql_native_password` without running `apply-patches.sh`.
+- [ ] AC-TCR-003: Given the Mereka plugin is enabled, when `tutor config save` is run, then the rendered `docker-compose.yml` contains `mysql-native-password=ON` without running `apply-patches.sh`.
   - **Status:** ✅ Implemented (via `mysql-docker-compose` ENV_PATCHES hook)
-  - **Verification:** CI job `verify-patches` checks `mysql_native_password` (note: current job runs after `apply-patches.sh`, needs plugin-only test)
+  - **Verification:** CI job `verify-patches` checks `mysql-native-password=ON` (note: current job runs after `apply-patches.sh`, needs plugin-only test)
 
 - [ ] AC-TCR-004: Given the Mereka plugin is enabled and `apply-patches.sh` is run, when `scripts/infra/verify-tutor-patches.sh` is executed, then all patches in `patch-manifest.yml` report PASS.
   - **Status:** ❌ Not implemented (manifest-driven verification script does not exist; existing `verify-tutor-config.sh` uses inline checks)

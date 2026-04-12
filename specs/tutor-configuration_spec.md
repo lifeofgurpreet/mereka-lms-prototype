@@ -121,7 +121,7 @@ The `apply-patches.sh` script MUST apply the following file-system patches:
 
 ## Acceptance Criteria
 
-- [ ] AC-001: `grep mysql_native_password tutor_env/env/local/docker-compose.yml` returns results
+- [ ] AC-001: `grep mysql-native-password=ON tutor_env/env/local/docker-compose.yml` returns results
 - [ ] AC-002: `grep "NODE_OPTIONS.*6144" tutor_env/env/build/openedx/Dockerfile` returns results
 - [ ] AC-003: `grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.py` returns results
 - [ ] AC-004: `grep "mfe_oauth_fix" tutor_env/env/apps/openedx/settings/lms/production.py` returns results

@@ -92,72 +92,102 @@ def _render_copy_lines(apps: list[str]) -> str:
     )
 
 
-def _render_install_lines(apps: list[str]) -> str:
-    return "\n".join(f"RUN pip install -e /openedx/{app}" for app in apps)
+def _render_install_block(apps: list[str], *, editable_when_requested: bool) -> str:
+    editable_args = " \\\n        ".join(f"-e /openedx/{app}" for app in apps)
+    noneditable_args = " \\\n        ".join(f"/openedx/{app}" for app in apps)
+    if not editable_when_requested:
+        return (
+            "RUN $PIP_COMMAND install \\\n"
+            f"        {noneditable_args}"
+        )
+    return (
+        "RUN if [ \"$MEREKA_CUSTOM_APP_INSTALL_MODE\" = \"editable\" ]; then \\\n"
+        "      $PIP_COMMAND install \\\n"
+        f"        {editable_args}; \\\n"
+        "    else \\\n"
+        "      $PIP_COMMAND install \\\n"
+        f"        {noneditable_args}; \\\n"
+        "    fi"
+    )
 
 
 def _render_runtime_copy_lines(apps: list[str]) -> str:
-    return "\n".join(
-        f"COPY --from=python-requirements --chown=app:app /openedx/{app} /openedx/{app}"
+    return "\n      ".join(
+        f"cp -a /tmp/python-requirements-openedx/{app} /openedx/{app} && \\"
         for app in apps
     )
 
 
 _stable_copy_lines = _render_copy_lines(_STABLE_CUSTOM_APPS)
-_stable_install_lines = _render_install_lines(_STABLE_CUSTOM_APPS)
+_stable_install_block = _render_install_block(
+    _STABLE_CUSTOM_APPS,
+    editable_when_requested=False,
+)
 _high_churn_copy_lines = _render_copy_lines(_HIGH_CHURN_CUSTOM_APPS)
-_high_churn_install_lines = _render_install_lines(_HIGH_CHURN_CUSTOM_APPS)
-_runtime_copy_lines = _render_runtime_copy_lines(_CUSTOM_APPS)
+_high_churn_install_block = _render_install_block(
+    _HIGH_CHURN_CUSTOM_APPS,
+    editable_when_requested=True,
+)
+_runtime_copy_lines = _render_runtime_copy_lines(_HIGH_CHURN_CUSTOM_APPS)
 
 _register_env_patch(
     "openedx-dockerfile-post-python-requirements",
     f"""
-# Copy and install stable custom apps first for cache reuse.
-{_stable_copy_lines}
-{_stable_install_lines}
+ARG MEREKA_BUILD_PROFILE=proof
+ARG MEREKA_CUSTOM_APP_INSTALL_MODE=editable
+
+# Install support dependencies needed for metrics, translation settings, Atlas,
+# enterprise, and Python 3.11-compatible Aspects in one resolver invocation.
+# Keep this above all custom-app COPY layers so app iteration does not invalidate it.
+RUN $PIP_COMMAND install     django-prometheus==2.3.1     django-ratelimit==4.1.0     django-cors-headers==4.3.1     "path==16.16.0"     "pymongo[srv]"     "defusedxml==0.7.1"     "edx-enterprise==6.6.9"     "lazy==1.6"     "lxml_html_clean==0.4.4"     "edx-event-routing-backends==9.3.8"     "platform-plugin-aspects==1.1.2"
+
 # Add repository roots to Python path via .pth file for proper module imports.
 # Include /openedx because custom app packages are mounted there and should be importable
 # as top-level Django apps across CMS/LMS and worker processes.
-RUN python3 -c "import sysconfig; open(sysconfig.get_path('purelib') + '/mereka-plugins.pth', 'w').write('/openedx\\n/openedx/plugins\\n')"
+RUN PTH_DIR=$(python3 -c 'import sysconfig; print(sysconfig.get_path("purelib"))') && \
+    printf '/openedx\\n/openedx/plugins\\n' > "$PTH_DIR/mereka-plugins.pth"
 
-# Install django-prometheus for metrics
-RUN pip install django-prometheus==2.3.1
-
-# Install django-ratelimit for email preferences rate limiting
-RUN pip install django-ratelimit==4.1.0
-
-# Install pymongo SRV extras for MongoDB Atlas
-RUN pip install "pymongo[srv]"
-
-# Aspects analytics: xAPI event routing + ClickHouse event sinks
-# Latest published releases as of 2026-04-11:
-# - edx-event-routing-backends 10.0.0 requires Python >=3.12
-# - platform-plugin-aspects 1.1.3 requires Python >=3.12
-# Keep the image on the newest Python 3.11-compatible pins.
-RUN $PIP_COMMAND install "edx-event-routing-backends==9.3.8"
-RUN $PIP_COMMAND install "platform-plugin-aspects==1.1.2"
+# Copy and install stable custom apps after the support dependency layer so
+# stable-app iteration only invalidates the grouped install tail. Even in fast
+# builds, keep these non-editable so the runtime image does not carry source
+# trees for low-churn packages.
+{_stable_copy_lines}
+{_stable_install_block}
 
 # Copy and install high-churn custom apps last to reduce invalidation blast radius.
 {_high_churn_copy_lines}
-{_high_churn_install_lines}
+{_high_churn_install_block}
 
 # Copy and install mereka_tenancy multi-tenancy plugin after support deps so
 # tenant/runtime iteration invalidates the smallest possible tail.
 # NOTE: Installed to /openedx/plugins/ instead of /openedx/ to enable proper namespacing
 COPY --chown=app:app ./infrastructure/tutor/plugins/multi-tenancy /openedx/plugins/mereka_tenancy
-RUN $PIP_COMMAND install -e /openedx/plugins/mereka_tenancy
+RUN if [ "$MEREKA_CUSTOM_APP_INSTALL_MODE" = "editable" ]; then \\
+      $PIP_COMMAND install -e /openedx/plugins/mereka_tenancy; \\
+    else \\
+      $PIP_COMMAND install /openedx/plugins/mereka_tenancy; \\
+    fi
 """,
 )
 
 _register_env_patch(
     "openedx-dockerfile-final",
     f"""
-# Carry editable-install source trees into the final runtime image.
-# The venv already contains .egg-link/.pth metadata pointing at these paths.
-# Without these COPYs, the runtime image keeps editable-install metadata but
-# drops the source directories those imports resolve against.
-{_runtime_copy_lines}
-COPY --from=python-requirements --chown=app:app /openedx/plugins/mereka_tenancy /openedx/plugins/mereka_tenancy
+ARG MEREKA_CUSTOM_APP_INSTALL_MODE=editable
+
+# Fast builds keep only the high-churn app sources plus the tenant plugin in
+# the final runtime image. Stable apps stay non-editable even in fast builds so
+# the runtime image does not cargo-ship their source trees. Proof and producer
+# builds install everything non-editably in python-requirements and therefore
+# skip this runtime source carry entirely.
+RUN --mount=type=bind,from=python-requirements,source=/openedx,target=/tmp/python-requirements-openedx,ro \\
+    if [ "$MEREKA_CUSTOM_APP_INSTALL_MODE" = "editable" ]; then \\
+      mkdir -p /openedx/plugins && \\
+      {_runtime_copy_lines}
+      cp -a /tmp/python-requirements-openedx/plugins/mereka_tenancy /openedx/plugins/mereka_tenancy; \\
+    else \\
+      echo "Skipping final runtime custom-app source carry (noneditable mode)"; \\
+    fi
 """,
 )
 

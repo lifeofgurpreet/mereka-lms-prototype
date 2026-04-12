@@ -8,22 +8,21 @@
 #         nginx health/profile endpoints, Caddy profile proxy.
 
 apply_build_optimizations_patch() {
-  local rendered_root="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
   local targets=(
     "$OPENEDX_TEMPLATE"
-    "$rendered_root/env/build/openedx/Dockerfile"
-    "$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
-    "$rendered_root/env/plugins/mfe/build/mfe/Dockerfile"
+    "$REPO_ROOT/tutor_env/env/build/openedx/Dockerfile"
+    "$MYSQL_TEMPLATE"
+    "$REPO_ROOT/tutor_env/env/local/docker-compose.yml"
     "$LMS_SETTINGS_TEMPLATE"
-    "$rendered_root/env/apps/openedx/settings/lms/production.py"
+    "$REPO_ROOT/tutor_env/env/apps/openedx/settings/lms/production.py"
     "$LMS_ASSETS_TEMPLATE"
-    "$rendered_root/env/build/openedx/settings/lms/assets.py"
+    "$REPO_ROOT/tutor_env/env/build/openedx/settings/lms/assets.py"
     "$CMS_ASSETS_TEMPLATE"
-    "$rendered_root/env/build/openedx/settings/cms/assets.py"
+    "$REPO_ROOT/tutor_env/env/build/openedx/settings/cms/assets.py"
     "$NGINX_LMS_TEMPLATE"
-    "$rendered_root/env/apps/nginx/lms.conf"
+    "$REPO_ROOT/tutor_env/env/apps/nginx/lms.conf"
     "$CADDY_TEMPLATE"
-    "$rendered_root/env/apps/caddy/Caddyfile"
+    "$REPO_ROOT/tutor_env/env/apps/caddy/Caddyfile"
   )
 
   "${PYTHON_BIN}" - "${targets[@]}" <<'PY'
@@ -34,6 +33,86 @@ import sys
 
 targets = sys.argv[1:]
 
+STATIC_PAYLOAD_TRIM_BLOCK = textwrap.dedent(
+    """\
+    RUN rm -rf /openedx/staticfiles/stylelint-config-edx \\
+               /openedx/staticfiles/frontend-component-cookie-policy-banner/node_modules \\
+               /openedx/staticfiles/frontend-component-cookie-policy-banner/README* \\
+               /openedx/staticfiles/frontend-component-cookie-policy-banner/package* \\
+               /openedx/staticfiles/frontend-component-cookie-policy-banner/openedx*.yaml \\
+               /openedx/staticfiles/frontend-component-cookie-policy-banner/babel.config* \\
+               /openedx/staticfiles/frontend-component-cookie-policy-banner/renovate* \\
+               /openedx/staticfiles/frontend-component-cookie-policy-banner/LICENSE* \\
+               /openedx/staticfiles/frontend-component-cookie-policy-banner/build/*.scss \\
+               /openedx/staticfiles/frontend-component-cookie-policy-banner/build/*/*.stories.* \\
+               /openedx/staticfiles/frontend-component-cookie-policy-banner/build/*/_storybook-styles* \\
+               /openedx/staticfiles/frontend-component-cookie-policy-banner/build/setupTest* \\
+               /openedx/staticfiles/edx-bootstrap/README* \\
+               /openedx/staticfiles/edx-bootstrap/stylelint.config* \\
+               /openedx/staticfiles/edx-bootstrap/postcss.config* \\
+               /openedx/staticfiles/edx-bootstrap/Makefile* \\
+               /openedx/staticfiles/edx-bootstrap/package* \\
+               /openedx/staticfiles/edx-bootstrap/samples \\
+               /openedx/staticfiles/edx-bootstrap/node_modules"""
+)
+
+FINAL_RUNTIME_PRUNE_BLOCK = textwrap.dedent(
+    """\
+    RUN rm -rf /opt/pyenv/.github \\
+               /opt/pyenv/test \\
+               /opt/pyenv/src \\
+               /opt/pyenv/man \\
+               /opt/pyenv/completions \\
+               /opt/pyenv/terminal_output.png \\
+               /opt/pyenv/versions/3.11.8/bin/pip \\
+               /opt/pyenv/versions/3.11.8/bin/pip3 \\
+               /opt/pyenv/versions/3.11.8/bin/pip3.11 \\
+               /opt/pyenv/versions/3.11.8/lib/python3.11/test \\
+               /opt/pyenv/versions/3.11.8/lib/python3.11/__pycache__ \\
+               /opt/pyenv/versions/3.11.8/lib/python3.11/idlelib \\
+               /opt/pyenv/versions/3.11.8/lib/python3.11/tkinter \\
+               /opt/pyenv/versions/3.11.8/lib/python3.11/turtledemo \\
+               /opt/pyenv/versions/3.11.8/lib/python3.11/site-packages/pip \\
+               /opt/pyenv/versions/3.11.8/lib/python3.11/site-packages/pip-24.0.dist-info \\
+               /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/libpython3.11.a \\
+               /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/Makefile \\
+               /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/Setup \\
+               /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/Setup.bootstrap \\
+               /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/Setup.local \\
+               /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/Setup.stdlib \\
+               /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/install-sh \\
+               /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/makesetup \\
+               /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/python.o \\
+               /openedx/venv/bin/pip \\
+               /openedx/venv/bin/pip3 \\
+               /openedx/venv/bin/pip3.11 \\
+               /openedx/venv/lib/python3.11/site-packages/pip \\
+               /openedx/venv/lib/python3.11/site-packages/pip-24.0.dist-info \\
+               /openedx/venv/lib/python3.11/site-packages/wheel \\
+               /openedx/venv/lib/python3.11/site-packages/wheel-0.45.1.dist-info"""
+)
+
+STATIC_PAYLOAD_TRIM_RE = re.compile(
+    r"RUN rm -rf /openedx/staticfiles/stylelint-config-edx \\\n"
+    r"(?:\s+/openedx/staticfiles/[^\n]+(?: \\\n|\n))+",
+    re.MULTILINE,
+)
+
+FINAL_RUNTIME_PRUNE_RE = re.compile(
+    r"RUN rm -rf /opt/pyenv/\.github \\\n"
+    r"(?:\s+/(?:opt/pyenv|openedx/venv)[^\n]+(?: \\\n|\n))+",
+    re.MULTILINE,
+)
+
+
+def normalize_single_block(text: str, marker: str, pattern: re.Pattern[str], canonical_block: str) -> str:
+    if marker not in text:
+        return text
+    normalized = pattern.sub(canonical_block + "\n", text)
+    if normalized == text:
+        return text
+    return normalized
+
 for target in targets:
     path = Path(target)
     if not path.exists():
@@ -42,6 +121,13 @@ for target in targets:
     updated = original
 
     # ── openedx Dockerfile patches ──────────────────────────────────────
+
+    # MySQL 8.4 removed default_authentication_plugin. Keep the local Tutor
+    # compose authority aligned with the repo-owned MySQL contract.
+    updated = updated.replace(
+        "--default-authentication-plugin=mysql_native_password",
+        "--mysql-native-password=ON",
+    )
 
     # i18n archive URL fix
     updated = updated.replace(
@@ -56,6 +142,39 @@ for target in targets:
         "ARG OPENEDX_I18N_VERSION={{ OPENEDX_COMMON_VERSION }}",
         "ARG OPENEDX_I18N_VERSION=master",
     )
+    old_code_stage_pin_block = textwrap.dedent(
+        """\
+        # Align compiled base requirements with the realized Python 3.11 compatibility contract.
+        RUN python3 - <<'PY'
+        from pathlib import Path
+
+        base_txt = Path("/openedx/edx-platform/requirements/edx/base.txt")
+        text = base_txt.read_text()
+        replacements = {
+            "django-cors-headers==4.9.0": "django-cors-headers==4.3.1",
+            "edx-enterprise==6.5.1": "edx-enterprise==6.6.9",
+            "lxml-html-clean==0.4.3": "lxml-html-clean==0.4.4",
+            "path==16.11.0": "path==16.16.0",
+        }
+        for old, new in replacements.items():
+            if old in text:
+                text = text.replace(old, new)
+        base_txt.write_text(text)
+        PY"""
+    )
+    rejected_code_stage_pin_block = textwrap.dedent(
+        """\
+        # Align compiled base requirements with the realized Python 3.11 compatibility contract.
+        RUN sed -i \\
+            -e 's/django-cors-headers==4.9.0/django-cors-headers==4.3.1/g' \\
+            -e 's/edx-enterprise==6.5.1/edx-enterprise==6.6.9/g' \\
+            -e 's/lxml-html-clean==0.4.3/lxml-html-clean==0.4.4/g' \\
+            -e 's/path==16.11.0/path==16.16.0/g' \\
+            /openedx/edx-platform/requirements/edx/base.txt"""
+    )
+    updated = updated.replace(old_code_stage_pin_block, "")
+    updated = updated.replace(rejected_code_stage_pin_block, "")
+    updated = updated.replace("\n\n\n# Identify tutor user to apply patches using git", "\n\n# Identify tutor user to apply patches using git")
 
     # uv pip / no-build-isolation fixes
     updated = updated.replace(
@@ -90,9 +209,17 @@ for target in targets:
         " pkgconfig==1.5.5",
         updated,
     )
+    # Keep uwsgi on plain pip for now: a local uv preflight against uwsgi==2.0.24
+    # still fails in wheel build with C compiler errors around signal handler
+    # signatures. Treat this as an explicit compatibility exception, not a
+    # forgotten uv seam.
     updated = updated.replace(
         '$PIP_COMMAND install --no-cache-dir --compile uwsgi==2.0.24',
         'pip install --no-cache-dir --no-build-isolation uwsgi==2.0.24',
+    )
+    updated = updated.replace(
+        'RUN pip install "ora2==7.0.0"',
+        'RUN $PIP_COMMAND install "ora2==7.0.0"',
     )
 
     # pip install retry wrapping
@@ -142,19 +269,55 @@ for target in targets:
         "RUN cd /openedx/locale/user && \\\n    /openedx/venv/bin/django-admin.py compilemessages -v1",
         "RUN cd /openedx/locale/user && \\\n    /openedx/venv/bin/python -m django compilemessages -v1",
     )
-    translation_preflight_block = (
+    build_profile_arg = "ARG MEREKA_BUILD_PROFILE=proof\n"
+    custom_app_install_mode_arg = "ARG MEREKA_CUSTOM_APP_INSTALL_MODE=editable\n"
+    if build_profile_arg not in updated and custom_app_install_mode_arg in updated:
+        updated = updated.replace(
+            custom_app_install_mode_arg,
+            build_profile_arg + custom_app_install_mode_arg,
+            1,
+        )
+
+    legacy_translation_preflight_block = (
         "RUN python - <<'PY'\n"
         "import importlib\n"
-        "import os\n"
-        "\n"
+        "import os\n\n"
         "os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lms.envs.tutor.i18n')\n"
         "importlib.import_module('lms.envs.tutor.i18n')\n"
         "print('translation settings import preflight ok')\n"
         "PY\n"
     )
+    translation_preflight_block = (
+        'RUN if [ "$MEREKA_BUILD_PROFILE" = "fast" ]; then '
+        'echo "Skipping translation settings import preflight (fast build profile)"; '
+        "else "
+        "python -c 'import importlib, os; "
+        "os.environ.setdefault(\"DJANGO_SETTINGS_MODULE\", \"lms.envs.tutor.i18n\"); "
+        "importlib.import_module(\"lms.envs.tutor.i18n\"); "
+        "print(\"translation settings import preflight ok\")'; "
+        "fi\n"
+    )
+    escaped_translation_preflight_block = (
+        "RUN if [ \\\"$MEREKA_BUILD_PROFILE\\\" = \\\"fast\\\" ]; then "
+        "echo \\\"Skipping translation settings import preflight (fast build profile)\\\"; "
+        "else "
+        "python -c \\\"import importlib, os; "
+        "os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lms.envs.tutor.i18n'); "
+        "importlib.import_module('lms.envs.tutor.i18n'); "
+        "print('translation settings import preflight ok')\\\"; "
+        "fi\n"
+    )
+    updated = updated.replace(legacy_translation_preflight_block, "")
+    updated = updated.replace(escaped_translation_preflight_block, translation_preflight_block)
+    if f"{build_profile_arg}{translation_preflight_block}" not in updated and translation_preflight_block in updated:
+        updated = updated.replace(
+            translation_preflight_block,
+            build_profile_arg + translation_preflight_block,
+            1,
+        )
     updated = updated.replace(
         "RUN make clean_translations",
-        f"{translation_preflight_block}RUN make clean_translations",
+        f"{translation_preflight_block}RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then echo \"Skipping translation refresh (fast build profile)\"; else make clean_translations; fi",
     )
     updated = re.sub(
         rf"(?:{re.escape(translation_preflight_block)})+RUN make clean_translations",
@@ -170,13 +333,39 @@ for target in targets:
     # compilejsi18n
     updated = updated.replace(
         "RUN ./manage.py lms --settings=tutor.i18n compilejsi18n\nRUN ./manage.py cms --settings=tutor.i18n compilejsi18n\n",
-        "RUN ./manage.py lms --settings=tutor.i18n compilejsi18n --output /openedx/staticfiles/js/i18n\n"
-        "RUN ./manage.py cms --settings=tutor.i18n compilejsi18n --output /openedx/staticfiles/studio/js/i18n\n",
+        "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then mkdir -p /openedx/staticfiles/js/i18n /openedx/staticfiles/studio/js/i18n && echo \"Skipping compilejsi18n (fast build profile)\"; else ./manage.py lms --settings=tutor.i18n compilejsi18n --output /openedx/staticfiles/js/i18n && ./manage.py cms --settings=tutor.i18n compilejsi18n --output /openedx/staticfiles/studio/js/i18n; fi\n",
+    )
+    updated = updated.replace(
+        "RUN ./manage.py lms --settings=tutor.i18n compilejsi18n --output /openedx/staticfiles/js/i18n\nRUN ./manage.py cms --settings=tutor.i18n compilejsi18n --output /openedx/staticfiles/studio/js/i18n\n",
+        "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then mkdir -p /openedx/staticfiles/js/i18n /openedx/staticfiles/studio/js/i18n && echo \"Skipping compilejsi18n (fast build profile)\"; else ./manage.py lms --settings=tutor.i18n compilejsi18n --output /openedx/staticfiles/js/i18n && ./manage.py cms --settings=tutor.i18n compilejsi18n --output /openedx/staticfiles/studio/js/i18n; fi\n",
     )
     updated = updated.replace(
         "# Redwood skips manual compilejsi18n while content libraries mature.\n",
-        "RUN ./manage.py lms --settings=tutor.i18n compilejsi18n --output /openedx/staticfiles/js/i18n\n"
-        "RUN ./manage.py cms --settings=tutor.i18n compilejsi18n --output /openedx/staticfiles/studio/js/i18n\n",
+        "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then mkdir -p /openedx/staticfiles/js/i18n /openedx/staticfiles/studio/js/i18n && echo \"Skipping compilejsi18n (fast build profile)\"; else ./manage.py lms --settings=tutor.i18n compilejsi18n --output /openedx/staticfiles/js/i18n && ./manage.py cms --settings=tutor.i18n compilejsi18n --output /openedx/staticfiles/studio/js/i18n; fi\n",
+    )
+    updated = updated.replace(
+        "RUN ./manage.py lms --settings=tutor.i18n pull_plugin_translations --verbose --repository='openedx/openedx-translations' --revision='release/ulmo.1' ",
+        "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then echo \"Skipping plugin translation pull (fast build profile)\"; else ./manage.py lms --settings=tutor.i18n pull_plugin_translations --verbose --repository='openedx/openedx-translations' --revision='release/ulmo.1'; fi",
+    )
+    updated = updated.replace(
+        "RUN ./manage.py lms --settings=tutor.i18n pull_xblock_translations --repository='openedx/openedx-translations' --revision='release/ulmo.1' \n",
+        "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then echo \"Skipping XBlock translation pull (fast build profile)\"; else ./manage.py lms --settings=tutor.i18n pull_xblock_translations --repository='openedx/openedx-translations' --revision='release/ulmo.1'; fi\n",
+    )
+    updated = updated.replace(
+        "RUN atlas pull --repository='openedx/openedx-translations' --revision='release/ulmo.1'  \\\n    translations/edx-platform/conf/locale:conf/locale \\\n    translations/studio-frontend/src/i18n/messages:conf/plugins-locale/studio-frontend\n",
+        "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then echo \"Skipping atlas translation pull (fast build profile)\"; else atlas pull --repository='openedx/openedx-translations' --revision='release/ulmo.1'  \\\n    translations/edx-platform/conf/locale:conf/locale \\\n    translations/studio-frontend/src/i18n/messages:conf/plugins-locale/studio-frontend; fi\n",
+    )
+    updated = updated.replace(
+        "RUN ./manage.py lms --settings=tutor.i18n compile_xblock_translations\nRUN ./manage.py cms --settings=tutor.i18n compile_xblock_translations\n",
+        "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then echo \"Skipping XBlock translation compile (fast build profile)\"; else ./manage.py lms --settings=tutor.i18n compile_xblock_translations && ./manage.py cms --settings=tutor.i18n compile_xblock_translations; fi\n",
+    )
+    updated = updated.replace(
+        "RUN ./manage.py lms --settings=tutor.i18n compile_plugin_translations\n",
+        "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then echo \"Skipping compile_plugin_translations (fast build profile)\"; else ./manage.py lms --settings=tutor.i18n compile_plugin_translations; fi\n",
+    )
+    updated = updated.replace(
+        "RUN ./manage.py lms --settings=tutor.i18n compilemessages -v1\n",
+        "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then echo \"Skipping compilemessages (fast build profile)\"; else ./manage.py lms --settings=tutor.i18n compilemessages -v1; fi\n",
     )
 
     # REMOVED: Redwood-era node_modules COPY path fixes + node cache reuse (FROM overhangio/openedx:18.2.2)
@@ -254,6 +443,13 @@ for target in targets:
         'RUN if [ ! -f /openedx/edx-platform/common/static/bundles/commons.js ]; then npm run webpack; else echo "webpack skipped (prebuilt bundles)"; fi',
         "RUN npm run webpack",
     )
+    updated = re.sub(
+        r"\n# Now that the default theme is built, build any custom themes\n"
+        r"COPY --chown=app:app \./themes/ /openedx/themes\n+",
+        "\n",
+        updated,
+        count=1,
+    )
     updated = updated.replace("fonts\\\\.googleapis\\\\.com", "fonts[.]googleapis[.]com")
 
     # edx-platform cherry-pick removal
@@ -286,28 +482,6 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
     # ARC DinD containers have broken gnutls (git+HTTPS fails consistently).
     # curl uses OpenSSL, not gnutls, so it works where git doesn't.
     if path.name == "Dockerfile":
-        hardened_mfe_base_apt = """RUN printf 'Acquire::Retries "6";\\nAcquire::http::Timeout "30";\\nAcquire::https::Timeout "30";\\nAcquire::ForceIPv4 "true";\\n' > /etc/apt/apt.conf.d/80-retries && \\
-    apt-get update \\
- && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends --fix-missing git \\
-    # required for cwebp-bin
-    gcc libgl1 libxi6 make \\
-    # required for gifsicle, mozjpeg, and optipng (on arm)
-    autoconf libtool pkg-config zlib1g-dev \\
-    # required for node-sass (on arm)
-    python3 g++ python3-distutils \\
-    # required for image-webpack-loader (on arm)
-    libpng-dev \\
-    # required for building node-canvas (on arm, for authoring)
-    # https://www.npmjs.com/package/canvas
-    libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev \\
- && rm -rf /var/lib/apt/lists/*"""
-        updated = re.sub(
-            r"""RUN printf 'Acquire::Retries "5";\\nAcquire::http::Timeout "120";\\n' > /etc/apt/apt\.conf\.d/80-retries && \\\n\s+apt-get update \\\n\s+&& apt-get install -y --fix-broken git \\\n\s+# required for cwebp-bin\n\s+gcc libgl1 libxi6 make \\\n\s+# required for gifsicle, mozjpeg, and optipng \(on arm\)\n\s+autoconf libtool pkg-config zlib1g-dev \\\n\s+# required for node-sass \(on arm\)\n\s+python3 g\+\+ python3-distutils \\\n\s+# required for image-webpack-loader \(on arm\)\n\s+libpng-dev \\\n\s+# required for building node-canvas \(on arm, for authoring\)\n\s+# https://www\.npmjs\.com/package/canvas\n\s+libcairo2-dev libpango1\.0-dev libjpeg-dev libgif-dev librsvg2-dev""",
-            hardened_mfe_base_apt,
-            updated,
-            count=1,
-        )
-
         plain_pyenv = "RUN git clone https://github.com/pyenv/pyenv $PYENV_ROOT --branch v2.3.36 --depth 1"
         curl_pyenv = (
             "RUN mkdir -p $PYENV_ROOT && \\\n"
@@ -337,11 +511,6 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
                 curl_pyenv,
                 updated,
             )
-
-        updated = updated.replace(
-            "RUN npm install '@edx/brand@github:@edly-io/brand-openedx#indigo-2.5.0'",
-            "RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.2'",
-        )
 
     # REMOVED: Tutor v21 node_modules path fix (was lines 277-282)
     # This `mv` moved node_modules to /openedx/node_modules but the production stage
@@ -374,39 +543,271 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
             "    done"
         )
         updated = updated.replace(rdfind_marker, css_copy)
+    if path.name == "Dockerfile" and "RUN rm -rf /openedx/staticfiles/stylelint-config-edx" not in updated:
+        updated = updated.replace(
+            "    for hashed in /openedx/staticfiles/images/logo.*.png; do \\\n"
+            "      [ -f \"$hashed\" ] && cp -f /openedx/themes/mereka/lms/static/images/logo.png \"$hashed\" 2>/dev/null || true; \\\n"
+            "    done",
+            "    for hashed in /openedx/staticfiles/images/logo.*.png; do \\\n"
+            "      [ -f \"$hashed\" ] && cp -f /openedx/themes/mereka/lms/static/images/logo.png \"$hashed\" 2>/dev/null || true; \\\n"
+            f"    done\n{STATIC_PAYLOAD_TRIM_BLOCK}",
+        )
+    if path.name == "Dockerfile":
+        updated = normalize_single_block(
+            updated,
+            "RUN rm -rf /openedx/staticfiles/stylelint-config-edx",
+            STATIC_PAYLOAD_TRIM_RE,
+            STATIC_PAYLOAD_TRIM_BLOCK,
+        )
+
+    if path.name == "Dockerfile":
+        updated = updated.replace(
+            'if [ "$MEREKA_BUILD_PROFILE" = "fast" ]; then echo "Skipping rdfind static dedupe (fast build profile)"; else rdfind -makesymlinks true -followsymlinks true /openedx/staticfiles/; fi',
+            "rdfind -makesymlinks true -followsymlinks true /openedx/staticfiles/",
+        )
+        final_stage_legacy = """###### Final image with production cmd
+FROM production AS final
+
+# Default amount of uWSGI processes
+ENV UWSGI_WORKERS=2
+
+# Copy the default uWSGI configuration
+COPY --chown=app:app settings/uwsgi.ini /openedx
+
+# Run server
+CMD ["uwsgi", "/openedx/uwsgi.ini"]
+"""
+        final_stage_minimal = """###### Final image with production cmd
+FROM minimal AS final
+
+ARG APP_USER_ID=1000
+
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \\
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \\
+    apt update \\
+    && apt install -y gettext gfortran graphviz graphviz-dev libffi-dev libfreetype6-dev libgeos-dev libjpeg8-dev liblapack-dev libmysqlclient-dev libpng-dev libsqlite3-dev libxmlsec1-dev lynx mysql-client ntp pkg-config
+
+RUN if [ "$APP_USER_ID" = 0 ]; then echo "app user may not be root" && false; fi
+RUN useradd --no-log-init --home-dir /openedx --create-home --shell /bin/bash --uid ${APP_USER_ID} app
+USER ${APP_USER_ID}
+
+COPY --link --from=docker.io/powerman/dockerize:0.19.0 /usr/local/bin/dockerize /usr/local/bin/dockerize
+COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/edx-platform /openedx/edx-platform
+COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=python /opt/pyenv /opt/pyenv
+COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=python-requirements /openedx/venv /openedx/venv
+COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /mnt /mnt
+COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/bin /openedx/bin
+COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/config /openedx/config
+COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/themes /openedx/themes
+COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/staticfiles /openedx/staticfiles
+COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/data /openedx/data
+
+RUN rm -rf /opt/pyenv/.github \\
+           /opt/pyenv/test \\
+           /opt/pyenv/src \\
+           /opt/pyenv/man \\
+           /opt/pyenv/completions \\
+           /opt/pyenv/terminal_output.png \\
+           /opt/pyenv/versions/3.11.8/bin/pip \\
+           /opt/pyenv/versions/3.11.8/bin/pip3 \\
+           /opt/pyenv/versions/3.11.8/bin/pip3.11 \\
+           /opt/pyenv/versions/3.11.8/lib/python3.11/test \\
+           /opt/pyenv/versions/3.11.8/lib/python3.11/__pycache__ \\
+           /opt/pyenv/versions/3.11.8/lib/python3.11/idlelib \\
+           /opt/pyenv/versions/3.11.8/lib/python3.11/tkinter \\
+           /opt/pyenv/versions/3.11.8/lib/python3.11/turtledemo \\
+           /opt/pyenv/versions/3.11.8/lib/python3.11/site-packages/pip \\
+           /opt/pyenv/versions/3.11.8/lib/python3.11/site-packages/pip-24.0.dist-info \\
+           /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/libpython3.11.a \\
+           /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/Makefile \\
+           /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/Setup \\
+           /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/Setup.bootstrap \\
+           /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/Setup.local \\
+           /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/Setup.stdlib \\
+           /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/install-sh \\
+           /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/makesetup \\
+           /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/python.o \\
+           /openedx/venv/bin/pip \\
+           /openedx/venv/bin/pip3 \\
+           /openedx/venv/bin/pip3.11 \\
+           /openedx/venv/lib/python3.11/site-packages/pip \\
+           /openedx/venv/lib/python3.11/site-packages/pip-24.0.dist-info \\
+           /openedx/venv/lib/python3.11/site-packages/wheel \\
+           /openedx/venv/lib/python3.11/site-packages/wheel-0.45.1.dist-info
+
+ENV PATH=/openedx/venv/bin:/openedx/bin:${PATH}
+ENV VIRTUAL_ENV=/openedx/venv/
+ENV PYTHONPATH=/openedx/edx-platform
+ENV COMPREHENSIVE_THEME_DIRS=/openedx/themes
+ENV STATIC_ROOT_LMS=/openedx/staticfiles
+ENV STATIC_ROOT_CMS=/openedx/staticfiles/studio
+ENV SERVICE_VARIANT=lms
+ENV DJANGO_SETTINGS_MODULE=lms.envs.tutor.production
+ENV UWSGI_WORKERS=2
+
+# Copy the default uWSGI configuration
+COPY --chown=app:app settings/uwsgi.ini /openedx
+
+# Run server
+CMD ["uwsgi", "/openedx/uwsgi.ini"]
+"""
+        final_stage_runtime = """FROM production AS runtime-edx-platform-pruned
+
+RUN rm -rf /openedx/edx-platform/.git \\
+           /openedx/edx-platform/.github \\
+           /openedx/edx-platform/docs \\
+           /openedx/edx-platform/test_root \\
+           /openedx/edx-platform/results.txt
+
+###### Final image with production cmd
+FROM docker.io/ubuntu:22.04 AS final
+
+ARG APP_USER_ID=1000
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \\
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \\
+    apt update \\
+    && apt install -y --no-install-recommends \\
+        ca-certificates \\
+        curl \\
+        gettext-base \\
+        graphviz \\
+        libffi8 \\
+        libfreetype6 \\
+        libgeos-c1v5 \\
+        libjpeg-turbo8 \\
+        liblapack3 \\
+        default-mysql-client \\
+        libmysqlclient21 \\
+        libpng16-16 \\
+        libsqlite3-0 \\
+        libxml2 \\
+        libxmlsec1 \\
+        libxmlsec1-openssl \\
+        libxslt1.1 \\
+        locales \\
+        xmlsec1 \\
+    && rm -rf /var/lib/apt/lists/*
+
+RUN if [ "$APP_USER_ID" = 0 ]; then echo "app user may not be root" && false; fi
+RUN useradd --no-log-init --home-dir /openedx --create-home --shell /bin/bash --uid ${APP_USER_ID} app
+USER ${APP_USER_ID}
+
+COPY --link --from=docker.io/powerman/dockerize:0.19.0 /usr/local/bin/dockerize /usr/local/bin/dockerize
+COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=runtime-edx-platform-pruned /openedx/edx-platform /openedx/edx-platform
+COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=python /opt/pyenv /opt/pyenv
+COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=python-requirements /openedx/venv /openedx/venv
+COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /mnt /mnt
+COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/bin /openedx/bin
+COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/config /openedx/config
+COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/themes /openedx/themes
+COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/staticfiles /openedx/staticfiles
+COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/data /openedx/data
+
+ENV PATH=/openedx/venv/bin:/openedx/bin:${PATH}
+ENV VIRTUAL_ENV=/openedx/venv/
+ENV PYTHONPATH=/openedx/edx-platform
+ENV COMPREHENSIVE_THEME_DIRS=/openedx/themes
+ENV STATIC_ROOT_LMS=/openedx/staticfiles
+ENV STATIC_ROOT_CMS=/openedx/staticfiles/studio
+ENV SERVICE_VARIANT=lms
+ENV DJANGO_SETTINGS_MODULE=lms.envs.tutor.production
+ENV UWSGI_WORKERS=2
+
+# Copy the default uWSGI configuration
+COPY --chown=app:app settings/uwsgi.ini /openedx
+
+# Run server
+CMD ["uwsgi", "/openedx/uwsgi.ini"]
+"""
+        updated = updated.replace(final_stage_legacy, final_stage_runtime)
+        updated = updated.replace(final_stage_minimal, final_stage_runtime)
+        if "FROM production AS runtime-edx-platform-pruned" not in updated and "###### Final image with production cmd\nFROM docker.io/ubuntu:22.04 AS final\n" in updated:
+            updated = updated.replace(
+                "###### Final image with production cmd\nFROM docker.io/ubuntu:22.04 AS final\n",
+                "FROM production AS runtime-edx-platform-pruned\n\nRUN rm -rf /openedx/edx-platform/.git \\\n"
+                "           /openedx/edx-platform/.github \\\n"
+                "           /openedx/edx-platform/docs \\\n"
+                "           /openedx/edx-platform/test_root \\\n"
+                "           /openedx/edx-platform/results.txt\n\n"
+                "###### Final image with production cmd\nFROM docker.io/ubuntu:22.04 AS final\n",
+                1,
+            )
+        updated = updated.replace(
+            "FROM docker.io/ubuntu:22.04 AS final\n\nARG APP_USER_ID=1000\n\nENV DEBIAN_FRONTEND=noninteractive\nENV LC_ALL=en_US.UTF-8\n",
+            "FROM docker.io/ubuntu:22.04 AS final\n\nARG APP_USER_ID=1000\n\nENV DEBIAN_FRONTEND=noninteractive\nENV LANG=C.UTF-8\nENV LC_ALL=C.UTF-8\n",
+        )
+        updated = updated.replace(
+            "COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/edx-platform /openedx/edx-platform",
+            "COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=runtime-edx-platform-pruned /openedx/edx-platform /openedx/edx-platform",
+        )
+        updated = updated.replace(
+            "COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/data /openedx/data\n\nENV PATH=/openedx/venv/bin:/openedx/bin:${PATH}\n",
+            "COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/data /openedx/data\n\n"
+            f"{FINAL_RUNTIME_PRUNE_BLOCK}\n\n"
+            "ENV PATH=/openedx/venv/bin:/openedx/bin:${PATH}\n",
+        )
+        updated = updated.replace(
+            "           /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/python.o\n\nENV PATH=/openedx/venv/bin:/openedx/bin:${PATH}\n",
+            "           /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/python.o \\\n"
+            "           /opt/pyenv/versions/3.11.8/bin/pip \\\n"
+            "           /opt/pyenv/versions/3.11.8/bin/pip3 \\\n"
+            "           /opt/pyenv/versions/3.11.8/bin/pip3.11 \\\n"
+            "           /opt/pyenv/versions/3.11.8/lib/python3.11/site-packages/pip \\\n"
+            "           /opt/pyenv/versions/3.11.8/lib/python3.11/site-packages/pip-24.0.dist-info \\\n"
+            "           /openedx/venv/bin/pip \\\n"
+            "           /openedx/venv/bin/pip3 \\\n"
+            "           /openedx/venv/bin/pip3.11 \\\n"
+            "           /openedx/venv/lib/python3.11/site-packages/pip \\\n"
+            "           /openedx/venv/lib/python3.11/site-packages/pip-24.0.dist-info \\\n"
+            "           /openedx/venv/lib/python3.11/site-packages/wheel \\\n"
+            "           /openedx/venv/lib/python3.11/site-packages/wheel-0.45.1.dist-info\n\n"
+            "ENV PATH=/openedx/venv/bin:/openedx/bin:${PATH}\n",
+        )
+        updated = normalize_single_block(
+            updated,
+            "RUN rm -rf /opt/pyenv/.github",
+            FINAL_RUNTIME_PRUNE_RE,
+            FINAL_RUNTIME_PRUNE_BLOCK,
+        )
 
     # Remove duplicate production-stage custom app reinjection. These apps are
-    # already installed in python-requirements and their source trees are
-    # carried into the final runtime image from that stage.
+    # already installed in python-requirements, and the final runtime contract
+    # is now gated by MEREKA_CUSTOM_APP_INSTALL_MODE instead of a second
+    # production-stage editable-install fan-out.
     if path.name == "Dockerfile" and "/openedx/edx-platform" in updated:
-        custom_apps_block = """# Copy custom apps
-COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix
-COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus
-COPY --chown=app:app ./infrastructure/tutor/plugins/multi-tenancy /openedx/plugins/mereka_tenancy
-RUN uv pip install -e /openedx/mfe_oauth_fix
-RUN uv pip install -e /openedx/openedx_prometheus
-RUN uv pip install -e /openedx/plugins/mereka_tenancy
+        legacy_code_stage_custom_apps_pattern = re.compile(
+            r"\n# Copy custom apps\n"
+            r"COPY --chown=app:app \./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix\n"
+            r"COPY --chown=app:app \./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus\n"
+            r"COPY --chown=app:app \./infrastructure/tutor/plugins/multi-tenancy /openedx/plugins/mereka_tenancy\n"
+            r"RUN (?:uv pip install|pip install) -e /openedx/mfe_oauth_fix\n"
+            r"RUN (?:uv pip install|pip install) -e /openedx/openedx_prometheus\n"
+            r"RUN (?:uv pip install|pip install) -e /openedx/plugins/mereka_tenancy\n"
+            r"\n# Add repository roots to Python path via \.pth file for proper module imports\.\n"
+            r"# Include /openedx because custom app packages are mounted there as top-level Django apps\.\n"
+            r"RUN python3 -c \"import sysconfig; open\(sysconfig.get_path\('purelib'\) \+ '/mereka-plugins\.pth', 'w'\)\.write\('/openedx\\n/openedx/plugins\\n'\)\"\n",
+            re.MULTILINE,
+        )
+        updated, _ = legacy_code_stage_custom_apps_pattern.subn("\n", updated, count=1)
 
-# Add repository roots to Python path via .pth file for proper module imports.
-# Include /openedx because custom app packages are mounted there as top-level Django apps.
-RUN PTH_DIR=$(python3 -c 'import sysconfig; print(sysconfig.get_path("purelib"))') && printf '/openedx\\n/openedx/plugins\\n' > "$PTH_DIR/mereka-plugins.pth"
-"""
-        if custom_apps_block in updated:
-            updated = updated.replace("\n" + custom_apps_block, "\n", 1)
-
-        legacy_custom_apps_block = """# Copy custom apps
-COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix
-COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus
-COPY --chown=app:app ./infrastructure/tutor/plugins/multi-tenancy /openedx/plugins/mereka_tenancy
-RUN pip install -e /openedx/mfe_oauth_fix
-RUN pip install -e /openedx/openedx_prometheus
-RUN pip install -e /openedx/plugins/mereka_tenancy
-
-# Add /openedx/plugins to Python path via .pth file for proper module imports
-RUN echo '/openedx/plugins' > /openedx/venv/lib/python3.11/site-packages/mereka-plugins.pth
-"""
-        if legacy_custom_apps_block in updated:
-            updated = updated.replace("\n" + legacy_custom_apps_block, "\n", 1)
+        production_custom_apps_pattern = re.compile(
+            r"\n# Copy custom apps\n"
+            r"COPY --chown=app:app \./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix\n"
+            r"COPY --chown=app:app \./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus\n"
+            r"COPY --chown=app:app \./infrastructure/tutor/plugins/multi-tenancy /openedx/plugins/mereka_tenancy\n"
+            r"RUN (?:uv pip install|pip install) -e /openedx/mfe_oauth_fix\n"
+            r"RUN (?:uv pip install|pip install) -e /openedx/openedx_prometheus\n"
+            r"RUN (?:uv pip install|pip install) -e /openedx/plugins/mereka_tenancy\n"
+            r"(?:\n#.*)*\n"
+            r"RUN (?:.*mereka-plugins\.pth\"|echo '/openedx/plugins' > /openedx/venv/lib/python3\.11/site-packages/mereka-plugins\.pth)\n",
+            re.MULTILINE,
+        )
+        updated, _ = production_custom_apps_pattern.subn("\n", updated, count=1)
 
         # django-prometheus pip install in Dockerfile
         base_req_marker = "bash -o pipefail -c 'for attempt in 1 2 3; do pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo \"pip install attempt ${attempt} failed; retrying in 10s\" >&2; sleep 10; done; exit 1'"
@@ -415,6 +816,22 @@ RUN echo '/openedx/plugins' > /openedx/venv/lib/python3.11/site-packages/mereka-
                 prometheus_install = base_req_marker + """\n\n# Install django-prometheus for metrics
 RUN uv pip install django-prometheus==2.3.1"""
                 updated = updated.replace(base_req_marker, prometheus_install)
+
+        advanced_xblocks_marker = "RUN $PIP_COMMAND install -e .\n"
+        advanced_xblocks_copy = (
+            "RUN $PIP_COMMAND install -e .\n\n"
+            "# Carry openedx_advanced_xblocks into production before translation and\n"
+            "# XBlock entry-point discovery. Its install metadata already lives\n"
+            "# in the venv from python-requirements, but the source tree must also exist\n"
+            "# in this stage before pull_plugin_translations / compile_xblock_translations.\n"
+            "COPY --from=python-requirements --chown=app:app /openedx/openedx_advanced_xblocks /openedx/openedx_advanced_xblocks\n"
+        )
+        if (
+            "pull_plugin_translations" in updated
+            and "COPY --from=python-requirements --chown=app:app /openedx/openedx_advanced_xblocks /openedx/openedx_advanced_xblocks" not in updated
+            and advanced_xblocks_marker in updated
+        ):
+            updated = updated.replace(advanced_xblocks_marker, advanced_xblocks_copy, 1)
 
     # ── production.py patches ───────────────────────────────────────────
 
@@ -454,64 +871,22 @@ RUN uv pip install django-prometheus==2.3.1"""
 
         updated = force_mfe_discussions_only(updated)
 
-        if "_safe_add_app('mfe_oauth_fix')" in updated and "INSTALLED_APPS.append('mfe_oauth_fix')" in updated:
-            updated = re.sub(
-                r"\n# Set default theme for all sites\n"
-                r'DEFAULT_SITE_THEME = "mereka"\n\n'
-                r"# MFE OAuth Fix - Custom app to fix OAuth provider visibility\n"
-                r"import sys\n"
-                r"sys\.path\.insert\(0, '/openedx'\)\n"
-                r"INSTALLED_APPS\.append\('mfe_oauth_fix'\)\n\n"
-                r"# Add middleware to fix /api/mfe_context responses\n"
-                r"# Insert at the end of middleware stack so it processes responses\n"
-                r"MIDDLEWARE\.append\('mfe_oauth_fix\.middleware\.MFEOAuthFixMiddleware'\)\n\n"
-                r"# Prometheus Metrics Integration\n"
-                r"# django_prometheus must be added at the START of INSTALLED_APPS\n"
-                r"if 'django_prometheus' not in INSTALLED_APPS:\n"
-                r"    INSTALLED_APPS\.insert\(0, 'django_prometheus'\)\n\n"
-                r"# Add custom prometheus app for /metrics endpoint\n"
-                r"if 'openedx_prometheus' not in INSTALLED_APPS:\n"
-                r"    INSTALLED_APPS\.append\('openedx_prometheus'\)\n\n"
-                r"# Prometheus middleware must wrap all other middleware\n"
-                r"if 'django_prometheus\.middleware\.PrometheusBeforeMiddleware' not in MIDDLEWARE:\n"
-                r"    MIDDLEWARE\.insert\(0, 'django_prometheus\.middleware\.PrometheusBeforeMiddleware'\)\n"
-                r"if 'django_prometheus\.middleware\.PrometheusAfterMiddleware' not in MIDDLEWARE:\n"
-                r"    MIDDLEWARE\.append\('django_prometheus\.middleware\.PrometheusAfterMiddleware'\)\n",
-                "\n",
-                updated,
-                count=1,
-            )
-
-        if "_safe_add_app('mereka_tenancy')" in updated and "INSTALLED_APPS.append('mereka_tenancy')" in updated:
-            updated = re.sub(
-                r"\n# Mereka Multi-Tenancy — tenant model extensions \+ resolution middleware\n"
-                r"# See: specs/multi-tenancy-architecture_spec\.md\n"
-                r"import sys as _mt_sys\n"
-                r"if '/openedx' not in _mt_sys\.path:\n"
-                r"    _mt_sys\.path\.insert\(0, '/openedx'\)\n"
-                r"if 'mereka_tenancy' not in INSTALLED_APPS:\n"
-                r"    INSTALLED_APPS\.append\('mereka_tenancy'\)\n\n"
-                r"# TenantResolutionMiddleware resolves hostname → Site → EnterpriseCustomer\n"
-                r"# Insert after CurrentSiteMiddleware so Site is already resolved\.\n"
-                r"if 'mereka_tenancy\.middleware\.TenantResolutionMiddleware' not in MIDDLEWARE:\n"
-                r"    _site_mw = 'django\.contrib\.sites\.middleware\.CurrentSiteMiddleware'\n"
-                r"    if _site_mw in MIDDLEWARE:\n"
-                r"        _idx = MIDDLEWARE\.index\(_site_mw\) \+ 1\n"
-                r"        MIDDLEWARE\.insert\(_idx, 'mereka_tenancy\.middleware\.TenantResolutionMiddleware'\)\n"
-                r"    else:\n"
-                r"        MIDDLEWARE\.append\('mereka_tenancy\.middleware\.TenantResolutionMiddleware'\)\n",
-                "\n",
-                updated,
-                count=1,
-            )
-            updated = updated.replace(
-                "if 'mereka_tenancy' not in INSTALLED_APPS:\n    INSTALLED_APPS.append('mereka_tenancy')\n",
-                "",
-                1,
-            )
-        # DEFAULT_SITE_THEME
-        if "DEFAULT_SITE_THEME" not in updated:
-            updated = updated.rstrip() + '\n\n# Set default theme for all sites\nDEFAULT_SITE_THEME = "mereka"\n'
+        # Strip the legacy runtime-settings cluster that used to inject default
+        # theme + MFE OAuth + Prometheus + tenancy directly into rendered Tutor
+        # settings. Source authority for this contract now lives in the
+        # consolidated mereka_lms plugin stack.
+        legacy_runtime_cluster = re.compile(
+            r"# MFE OAuth Fix - Custom app to fix OAuth provider visibility\n"
+            r".*?"
+            r"MIDDLEWARE\.append\('mereka_tenancy\.middleware\.TenantResolutionMiddleware'\)",
+            re.MULTILINE | re.DOTALL,
+        )
+        updated, _ = legacy_runtime_cluster.subn("\n", updated, count=1)
+        theme_marker = '\n# Set default theme for all sites\nDEFAULT_SITE_THEME = "mereka"\n'
+        first_theme = updated.find(theme_marker)
+        last_theme = updated.rfind(theme_marker)
+        if first_theme != -1 and last_theme != -1 and first_theme != last_theme:
+            updated = updated[:last_theme] + updated[last_theme + len(theme_marker):]
 
     # ── assets.py patches ───────────────────────────────────────────────
 
