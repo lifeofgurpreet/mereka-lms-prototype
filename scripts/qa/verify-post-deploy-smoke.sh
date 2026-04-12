@@ -69,7 +69,7 @@ smoke_http() {
   local code
   code="$(curl -so /dev/null -w "%{http_code}" --max-time "$CURL_TIMEOUT" "$url" 2>/dev/null || echo "000")"
 
-  if [[ "$code" == "$expected_code" ]]; then
+  if [[ "$code" =~ ^($expected_code)$ ]]; then
     pass "$label → HTTP $code ($url)"
   elif [[ "$code" == "000" ]]; then
     fail "$label → UNREACHABLE ($url)"
@@ -119,7 +119,8 @@ smoke_mfe_config "LMS MFE config" "$LMS_DOMAIN"
 
 echo ""
 echo "--- Studio/CMS ---"
-smoke_http "Studio homepage" "https://$STUDIO_DOMAIN/"
+# Studio root may render directly or redirect through the current auth entry path.
+smoke_http "Studio homepage" "https://$STUDIO_DOMAIN/" "200|302"
 smoke_http "Studio heartbeat" "https://$STUDIO_DOMAIN/heartbeat"
 
 # ── Section 3: Authentication MFE ────────────────────────────────────────────

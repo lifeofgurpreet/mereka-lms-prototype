@@ -482,6 +482,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-build-workflow-contract.sh
     - script: scripts/qa/test-install-envsubst-fallback.sh
     - script: scripts/qa/test-install-trivy-fallback.sh
+    - script: scripts/qa/test-verify-post-deploy-smoke.sh
     - script: scripts/qa/verify-cicd-release-rollback.sh
     - script: scripts/qa/verify-deployment-critical-coverage.sh
     - script: scripts/qa/verify-spec-dedupe-normalize.sh
@@ -1239,6 +1240,23 @@ scripts:
     dry_run: false
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/qa/test-install-trivy-fallback.sh"
+    criticality: release-supporting
+
+  - path: scripts/qa/test-verify-post-deploy-smoke.sh
+    owner: platform-team
+    purpose: >
+      Proves verify-post-deploy-smoke.sh accepts the current anonymous Studio
+      redirect contract while still requiring the rest of the prod smoke matrix
+      to stay green.
+    inputs:
+      - none; uses isolated temp directories and fake curl/kubectl stubs
+    outputs:
+      - stdout confirmation that the prod smoke verifier accepts Studio HTTP 302
+    side_effects:
+      - creates and removes temporary test fixtures under mktemp directories
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/test-verify-post-deploy-smoke.sh"
     criticality: release-supporting
 
   - path: scripts/infra/sync-gitops-prod-image-tags.sh
