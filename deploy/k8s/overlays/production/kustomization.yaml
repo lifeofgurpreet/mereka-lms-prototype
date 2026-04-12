@@ -48,16 +48,16 @@ patches:
 images:
   - name: docker.io/overhangio/openedx
     newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx
-    newTag: e5c0c5081124dbdff0640039e63af2c598ad9479
-    digest: sha256:c08284cac50035feca46f08ced124df106cc3f9e3ae63acfc1a926613edf0e00
+    newTag: d6e9f14f623d26256ed55c0ef174a3fea19eada5
+    digest: sha256:b08fbb6223faceb4ccc49e89869dcfe3b9752aca4226a9dc153c74f8760b311f
   - name: docker.io/overhangio/openedx-mfe
     newName: ghcr.io/biji-biji-initiative/mereka-lms/mfe
-    newTag: e5c0c5081124dbdff0640039e63af2c598ad9479
-    digest: sha256:e3ab451951cbe123981391047d2f55526c742983c8374e77f9f05bbc0ea89669
+    newTag: d6e9f14f623d26256ed55c0ef174a3fea19eada5
+    digest: sha256:5e68fd69af068e7c36f0945f12cfcbe970dfcbd18a92ff5ea2c61d871fcdef08
   - name: ghcr.io/biji-biji-initiative/mereka-lms/mfe
     newName: ghcr.io/biji-biji-initiative/mereka-lms/mfe
-    newTag: e5c0c5081124dbdff0640039e63af2c598ad9479
-    digest: sha256:e3ab451951cbe123981391047d2f55526c742983c8374e77f9f05bbc0ea89669
+    newTag: d6e9f14f623d26256ed55c0ef174a3fea19eada5
+    digest: sha256:5e68fd69af068e7c36f0945f12cfcbe970dfcbd18a92ff5ea2c61d871fcdef08
   # Enterprise MFE: NREUM-clean + env placeholder patching (strip-nreum.sh + patch-missing-env.sh)
   # Rebuilt 2026-02-20 after script hardening (ae7b125): env.config.js wired, MISSING_ENV_VAR patched
   # NOTE: base manifests already use ghcr.io names — images transformer must match those.

@@ -42,10 +42,12 @@ resources:
 images:
 - name: docker.io/overhangio/openedx
   newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx
-  newTag: pin-required
+  newTag: d6e9f14f623d26256ed55c0ef174a3fea19eada5
+  digest: sha256:b08fbb6223faceb4ccc49e89869dcfe3b9752aca4226a9dc153c74f8760b311f
 - name: docker.io/overhangio/openedx-mfe
   newName: ghcr.io/biji-biji-initiative/mereka-lms/mfe
-  newTag: pin-required
+  newTag: d6e9f14f623d26256ed55c0ef174a3fea19eada5
+  digest: sha256:5e68fd69af068e7c36f0945f12cfcbe970dfcbd18a92ff5ea2c61d871fcdef08
 
 # namespace to deploy all Resources to
 namespace: mereka-lms
