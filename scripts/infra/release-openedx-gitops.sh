@@ -895,10 +895,10 @@ UPDATE_BASE_REF_DEFAULT=0
 APP_OVERLAY_REL="$APP_PROD_REL"
 INFRA_OVERLAY_REL="$INFRA_PROD_REL"
 APP_REQUIRED_NAMES="docker.io/overhangio/openedx,docker.io/overhangio/openedx-mfe,ghcr.io/biji-biji-initiative/mereka-lms/mfe"
-# Production infra overlay matches the canonical docker.io image names and rewrites
-# them via newName -> GHCR. It does not carry separate post-transform ghcr.io image
-# entries for Open edX / MFE.
-INFRA_REQUIRED_NAMES="docker.io/overhangio/openedx,docker.io/overhangio/openedx-mfe"
+# Production infra overlay now pins the post-transform GHCR image names directly.
+# App overlay remains the reference surface with canonical docker.io names plus the
+# extra transformed MFE parity entry; GitOps prod consumes the realized GHCR names.
+INFRA_REQUIRED_NAMES="ghcr.io/biji-biji-initiative/mereka-lms/openedx,ghcr.io/biji-biji-initiative/mereka-lms/mfe"
 
 if [[ "$TARGET_ENV" == "production" ]]; then
   UPDATE_APP_BASE=1

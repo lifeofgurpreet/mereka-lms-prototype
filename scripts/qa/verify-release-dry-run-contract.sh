@@ -59,9 +59,8 @@ images:
     newTag: fixture-tag
 YAML
 
-# Match the current GitOps prod overlay truth: prod pins the canonical docker.io
-# names and rewrites them to GHCR via newName. Do not synthesize extra
-# post-transform ghcr.io image name entries in the temp infra fixture.
+# Match the current GitOps prod overlay truth: prod pins the realized GHCR names
+# directly. Do not reuse the deprecated app-repo production reference shape here.
 python3 - "$TMP_INFRA/apps/mereka-lms/overlays/prod/kustomization.yaml" <<'PY'
 import sys
 from pathlib import Path
@@ -71,11 +70,29 @@ import yaml
 path = Path(sys.argv[1])
 doc = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
 images = doc.setdefault("images", [])
-drop_names = {
-    "ghcr.io/biji-biji-initiative/mereka-lms/openedx",
-    "ghcr.io/biji-biji-initiative/mereka-lms/mfe",
-}
-images = [item for item in images if (item or {}).get("name") not in drop_names]
+normalized = []
+for item in images:
+    if not isinstance(item, dict):
+        continue
+    name = item.get("name")
+    if name == "docker.io/overhangio/openedx":
+        item = dict(item)
+        item["name"] = "ghcr.io/biji-biji-initiative/mereka-lms/openedx"
+        item.pop("newName", None)
+        normalized.append(item)
+        continue
+    if name == "docker.io/overhangio/openedx-mfe":
+        item = dict(item)
+        item["name"] = "ghcr.io/biji-biji-initiative/mereka-lms/mfe"
+        item.pop("newName", None)
+        normalized.append(item)
+        continue
+    if name == "ghcr.io/biji-biji-initiative/mereka-lms/mfe":
+        # The app repo carries an extra transformed-name parity entry for MFE; the
+        # infra prod overlay does not.
+        continue
+    normalized.append(item)
+images = normalized
 doc["images"] = images
 path.write_text(yaml.safe_dump(doc, sort_keys=False), encoding="utf-8")
 PY
@@ -98,15 +115,21 @@ path, sha, ts = sys.argv[1], sys.argv[2], sys.argv[3]
 json.dump({
     "schema_version": "release-object/v1",
     "release_id": f"ro-rb-qa00000-{ts}",
-    "release_bundle_id": f"rb-qa00000-{ts}",
     "app_commit_sha": sha,
+    "build": {
+        "release_bundle_id": f"rb-qa00000-{ts}",
+    },
     "build_origin_environment": "production",
-    "promotion_status": "build-only",
+    "promotion": {
+        "status": "build-only",
+        "gitops_repository": None,
+        "gitops_commit_sha": None,
+    },
+    "promotion_target_environment": None,
     "images": {
         "openedx": {"digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"},
         "mfe": {"digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"},
     },
-    "tenant_contract_sha256": "0" * 64,
 }, open(path, "w"), indent=2)
 PYEOF
 

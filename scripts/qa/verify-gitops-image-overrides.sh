@@ -216,11 +216,11 @@ if check_infra == "1":
         errors.append(f"infra check requested but file missing: {INFRA_PROD}")
     else:
         infra_images = parse_images(INFRA_PROD)
-        # Infra prod overlays pin the canonical docker.io image names and rewrite
-        # them via newName -> GHCR. They do not carry the app repo's extra
-        # transformed-name parity entry for openedx-mfe.
-        infra_openedx = ensure_mapping(infra_images, SOURCE_OPENEDX, TARGET_OPENEDX, str(INFRA_PROD), errors)
-        infra_mfe_source = ensure_mapping(infra_images, SOURCE_MFE, TARGET_MFE, str(INFRA_PROD), errors)
+        # Infra prod overlays now pin the realized GHCR image names directly.
+        # They do not carry the app repo's canonical docker.io source names, nor
+        # the app repo's extra transformed-name parity entry for openedx-mfe.
+        infra_openedx = ensure_mapping(infra_images, TARGET_OPENEDX, None, str(INFRA_PROD), errors)
+        infra_mfe_source = ensure_mapping(infra_images, TARGET_MFE, None, str(INFRA_PROD), errors)
         if prod_openedx and infra_openedx and prod_openedx["newTag"] and infra_openedx["newTag"]:
             if prod_openedx["newTag"] != infra_openedx["newTag"]:
                 errors.append(
