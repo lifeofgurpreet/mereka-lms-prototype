@@ -17470,7 +17470,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-tutor-patches.sh",
-      "reference_count": 12,
+      "reference_count": 11,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
