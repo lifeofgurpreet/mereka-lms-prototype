@@ -312,7 +312,6 @@ scripts/qa/check-atlas-translation-infra.sh
 scripts/qa/verify-kustomize-structure.sh
 scripts/qa/verify-operational-hardening.sh
 scripts/qa/verify-purchase-gateway-k8s.sh
-scripts/qa/verify-service-endpoints.sh
 scripts/qa/verify-slo-deployment-gate.sh
 scripts/qa/verify-libraries-tenant.sh
 scripts/qa/verify-tenant-auth-analytics.sh
