@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCOPE_MODE="${VERIFY_LIBRARIES_HARDENING_SCOPE:-}"
+CHANGED_FILES_RAW="${VERIFY_LIBRARIES_HARDENING_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
+
 # Color codes
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -62,6 +65,35 @@ check_content() {
     FAILED=$((FAILED + 1))
   fi
 }
+
+should_skip_scope() {
+  local changed_path
+
+  [[ "$SCOPE_MODE" == "changed" ]] || return 1
+  [[ -n "${CHANGED_FILES_RAW//[[:space:]]/}" ]] || return 1
+
+  while IFS= read -r changed_path; do
+    [[ -n "$changed_path" ]] || continue
+    case "$changed_path" in
+      .github/workflows/ci.yml|\
+      scripts/qa/verify-libraries-hardening.sh|\
+      infrastructure/tutor/custom-apps/openedx_content_libraries/*|\
+      infrastructure/tutor/custom-apps/openedx_content_libraries/**/*|\
+      deploy/k8s/base/apps/openedx/settings/lms/production.py|\
+      deploy/k8s/base/apps/openedx/settings/cms/production.py|\
+      deploy/k8s/base/monitoring/cronjob-library-export.yaml)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
+
+if should_skip_scope; then
+  echo "PASS verify-libraries-hardening (scope skip: no libraries-hardening-relevant changes)"
+  exit 0
+fi
 
 # ── Section 1: Phase 3-4 Module Files ──────────────────────────────────
 echo "1. Phase 3-4 Module Files"
