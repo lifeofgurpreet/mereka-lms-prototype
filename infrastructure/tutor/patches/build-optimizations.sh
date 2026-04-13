@@ -1000,46 +1000,40 @@ PY
   echo "Syncing logo files from theme source to build directory..."
   local THEME_BUILD_DIR="$REPO_ROOT/tutor_env/env/build/openedx/themes/mereka"
   if [ -d "$THEME_BUILD_DIR" ]; then
-    mkdir -p "$THEME_BUILD_DIR/lms/static/images"
-    for logo_file in logo.png logo-horizontal.png logo-horizontal-white.png logo-square.png \
-                     logo-horizontal.svg logo-horizontal-white.svg logo-square.svg \
-                     favicon.ico; do
-      src_file="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/images/$logo_file"
-      if [ -f "$src_file" ]; then
-        cp "$src_file" "$THEME_BUILD_DIR/lms/static/images/$logo_file"
-        echo "  Copied $logo_file to LMS theme"
-      fi
-    done
+    if [ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/images" ]; then
+      rm -rf "$THEME_BUILD_DIR/lms/static/images"
+      mkdir -p "$THEME_BUILD_DIR/lms/static/images"
+      cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/images/." "$THEME_BUILD_DIR/lms/static/images/"
+      echo "  Mirrored LMS theme images"
+    fi
 
     if [ -d "$THEME_BUILD_DIR/cms" ]; then
-      mkdir -p "$THEME_BUILD_DIR/cms/static/images"
-      for logo_file in logo.png logo-horizontal.png logo-horizontal-white.png logo-square.png \
-                       logo-horizontal.svg logo-horizontal-white.svg logo-square.svg \
-                       favicon.ico; do
-        src_file="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/images/$logo_file"
-        if [ -f "$src_file" ]; then
-          cp "$src_file" "$THEME_BUILD_DIR/cms/static/images/$logo_file"
-          echo "  Copied $logo_file to CMS theme"
-        fi
-      done
+      if [ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/images" ]; then
+        rm -rf "$THEME_BUILD_DIR/cms/static/images"
+        mkdir -p "$THEME_BUILD_DIR/cms/static/images"
+        cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/images/." "$THEME_BUILD_DIR/cms/static/images/"
+        echo "  Mirrored CMS theme images"
+      fi
     fi
     echo "Logo files synced successfully."
 
     # Copy font assets
     echo "Syncing font files from theme source to build directory..."
-    mkdir -p "$THEME_BUILD_DIR/lms/static/fonts"
-    if compgen -G "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/fonts/*.woff2" >/dev/null; then
-      cp "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/fonts/"*.woff2 "$THEME_BUILD_DIR/lms/static/fonts/"
-      echo "  Copied fonts to LMS theme"
+    if [ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/fonts" ]; then
+      rm -rf "$THEME_BUILD_DIR/lms/static/fonts"
+      mkdir -p "$THEME_BUILD_DIR/lms/static/fonts"
+      cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/fonts/." "$THEME_BUILD_DIR/lms/static/fonts/"
+      echo "  Mirrored LMS theme fonts"
     else
       echo "  No LMS fonts found to copy"
     fi
 
     if [ -d "$THEME_BUILD_DIR/cms" ]; then
-      mkdir -p "$THEME_BUILD_DIR/cms/static/fonts"
-      if compgen -G "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/fonts/*.woff2" >/dev/null; then
-        cp "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/fonts/"*.woff2 "$THEME_BUILD_DIR/cms/static/fonts/"
-        echo "  Copied fonts to CMS theme"
+      if [ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/fonts" ]; then
+        rm -rf "$THEME_BUILD_DIR/cms/static/fonts"
+        mkdir -p "$THEME_BUILD_DIR/cms/static/fonts"
+        cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/fonts/." "$THEME_BUILD_DIR/cms/static/fonts/"
+        echo "  Mirrored CMS theme fonts"
       else
         echo "  No CMS fonts found to copy"
       fi

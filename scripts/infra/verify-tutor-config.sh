@@ -693,23 +693,18 @@ if [[ -d "$THEME_BUILD_DIR" ]]; then
   if [[ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates" && -d "$THEME_BUILD_DIR/cms/templates" ]]; then
     dirs_match "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates" "$THEME_BUILD_DIR/cms/templates" "Rendered CMS theme templates mirror source"
   fi
-
-  # Check for key logo files
-  if [[ -f "$THEME_BUILD_DIR/lms/static/images/logo.png" ]]; then
-    check_pass "LMS logo.png"
-  else
-    check_warn "LMS logo.png not found"
+  if [[ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/images" && -d "$THEME_BUILD_DIR/lms/static/images" ]]; then
+    dirs_match "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/images" "$THEME_BUILD_DIR/lms/static/images" "Rendered LMS theme images mirror source"
   fi
-
-  if [[ -f "$THEME_BUILD_DIR/lms/static/images/favicon.ico" ]]; then
-    check_pass "LMS favicon.ico"
-  else
-    check_warn "LMS favicon.ico not found"
+  if [[ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/images" && -d "$THEME_BUILD_DIR/cms/static/images" ]]; then
+    dirs_match "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/images" "$THEME_BUILD_DIR/cms/static/images" "Rendered CMS theme images mirror source"
   fi
-
-  # Check for fonts
-  dir_has_files "$THEME_BUILD_DIR/lms/static/fonts/*.woff2" "LMS font files present"
-  dir_has_files "$THEME_BUILD_DIR/cms/static/fonts/*.woff2" "CMS font files present"
+  if [[ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/fonts" && -d "$THEME_BUILD_DIR/lms/static/fonts" ]]; then
+    dirs_match "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/fonts" "$THEME_BUILD_DIR/lms/static/fonts" "Rendered LMS theme fonts mirror source"
+  fi
+  if [[ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/fonts" && -d "$THEME_BUILD_DIR/cms/static/fonts" ]]; then
+    dirs_match "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/fonts" "$THEME_BUILD_DIR/cms/static/fonts" "Rendered CMS theme fonts mirror source"
+  fi
 else
   check_warn "Theme build directory not found (run apply-patches.sh)"
 fi
