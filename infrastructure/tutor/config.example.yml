@@ -13,6 +13,9 @@ OPENEDX_COMMON_VERSION: open-release/ulmo.1
 OPENEDX_LMS_VERSION: open-release/ulmo.1
 OPENEDX_CMS_VERSION: open-release/ulmo.1
 PLUGINS:
+  - indigo
+  - mereka_lms
+  - mereka_lms_mfe_slots
   - discovery
   - mfe
   - notes

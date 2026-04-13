@@ -56,6 +56,39 @@ for target in targets:
         "ARG OPENEDX_I18N_VERSION={{ OPENEDX_COMMON_VERSION }}",
         "ARG OPENEDX_I18N_VERSION=master",
     )
+    old_code_stage_pin_block = textwrap.dedent(
+        """\
+        # Align compiled base requirements with the realized Python 3.11 compatibility contract.
+        RUN python3 - <<'PY'
+        from pathlib import Path
+
+        base_txt = Path("/openedx/edx-platform/requirements/edx/base.txt")
+        text = base_txt.read_text()
+        replacements = {
+            "django-cors-headers==4.9.0": "django-cors-headers==4.3.1",
+            "edx-enterprise==6.5.1": "edx-enterprise==6.6.9",
+            "lxml-html-clean==0.4.3": "lxml-html-clean==0.4.4",
+            "path==16.11.0": "path==16.16.0",
+        }
+        for old, new in replacements.items():
+            if old in text:
+                text = text.replace(old, new)
+        base_txt.write_text(text)
+        PY"""
+    )
+    rejected_code_stage_pin_block = textwrap.dedent(
+        """\
+        # Align compiled base requirements with the realized Python 3.11 compatibility contract.
+        RUN sed -i \\
+            -e 's/django-cors-headers==4.9.0/django-cors-headers==4.3.1/g' \\
+            -e 's/edx-enterprise==6.5.1/edx-enterprise==6.6.9/g' \\
+            -e 's/lxml-html-clean==0.4.3/lxml-html-clean==0.4.4/g' \\
+            -e 's/path==16.11.0/path==16.16.0/g' \\
+            /openedx/edx-platform/requirements/edx/base.txt"""
+    )
+    updated = updated.replace(old_code_stage_pin_block, "")
+    updated = updated.replace(rejected_code_stage_pin_block, "")
+    updated = updated.replace("\n\n\n# Identify tutor user to apply patches using git", "\n\n# Identify tutor user to apply patches using git")
 
     # uv pip / no-build-isolation fixes
     updated = updated.replace(
@@ -338,56 +371,19 @@ RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425
 
     # Custom apps block in Dockerfile
     if path.name == "Dockerfile" and "/openedx/edx-platform" in updated:
-        copy_themes_marker = "COPY --chown=app:app themes/ /openedx/themes/"
-        copy_themes_marker_alt = "COPY --chown=app:app ./themes/ /openedx/themes"
-        custom_apps_block = """# Copy custom apps
-COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix
-COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus
-COPY --chown=app:app ./infrastructure/tutor/plugins/multi-tenancy /openedx/plugins/mereka_tenancy
-RUN pip install -e /openedx/mfe_oauth_fix
-RUN pip install -e /openedx/openedx_prometheus
-RUN pip install -e /openedx/plugins/mereka_tenancy
-
-# Add repository roots to Python path via .pth file for proper module imports.
-# Include /openedx because custom app packages are mounted there as top-level Django apps.
-RUN PTH_DIR=$(python3 -c 'import sysconfig; print(sysconfig.get_path("purelib"))') && printf '/openedx\\n/openedx/plugins\\n' > "$PTH_DIR/mereka-plugins.pth"
-"""
-        if (copy_themes_marker in updated or copy_themes_marker_alt in updated) and "RUN pip install -e /openedx/mfe_oauth_fix" not in updated:
-            marker = copy_themes_marker if copy_themes_marker in updated else copy_themes_marker_alt
-            custom_apps_copy = f"""{marker}
-{custom_apps_block}"""
-            updated = updated.replace(marker, custom_apps_copy)
-        elif "mfe_oauth_fix" in updated and "openedx_prometheus" not in updated:
-            mfe_oauth_marker = "COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix"
-            custom_apps_add = f"""{mfe_oauth_marker}
-COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus
-COPY --chown=app:app ./infrastructure/tutor/plugins/multi-tenancy /openedx/plugins/mereka_tenancy
-RUN pip install -e /openedx/mfe_oauth_fix
-RUN pip install -e /openedx/openedx_prometheus
-RUN pip install -e /openedx/plugins/mereka_tenancy
-
-# Add repository roots to Python path via .pth file for proper module imports.
-# Include /openedx because custom app packages are mounted there as top-level Django apps.
-RUN PTH_DIR=$(python3 -c 'import sysconfig; print(sysconfig.get_path("purelib"))') && printf '/openedx\\n/openedx/plugins\\n' > "$PTH_DIR/mereka-plugins.pth"
-"""
-            updated = updated.replace(mfe_oauth_marker, custom_apps_add)
-        elif "mfe_oauth_fix" not in updated and "openedx_prometheus" not in updated:
-            workdir_marker = "WORKDIR /openedx/edx-platform\n"
-            if workdir_marker in updated:
-                custom_app_insert = f"""# Copy custom apps
-COPY --chown=app:app ./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix
-COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus
-COPY --chown=app:app ./infrastructure/tutor/plugins/multi-tenancy /openedx/plugins/mereka_tenancy
-RUN pip install -e /openedx/mfe_oauth_fix
-RUN pip install -e /openedx/openedx_prometheus
-RUN pip install -e /openedx/plugins/mereka_tenancy
-
-# Add repository roots to Python path via .pth file for proper module imports.
-# Include /openedx because custom app packages are mounted there as top-level Django apps.
-RUN python3 -c "import sysconfig; open(sysconfig.get_path('purelib') + '/mereka-plugins.pth', 'w').write('/openedx\\n/openedx/plugins\\n')"
-
-""" + workdir_marker
-                updated = updated.replace(workdir_marker, custom_app_insert, 1)
+        production_custom_apps_pattern = re.compile(
+            r"\n# Copy custom apps\n"
+            r"COPY --chown=app:app \./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix\n"
+            r"COPY --chown=app:app \./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus\n"
+            r"COPY --chown=app:app \./infrastructure/tutor/plugins/multi-tenancy /openedx/plugins/mereka_tenancy\n"
+            r"RUN (?:uv pip install|pip install) -e /openedx/mfe_oauth_fix\n"
+            r"RUN (?:uv pip install|pip install) -e /openedx/openedx_prometheus\n"
+            r"RUN (?:uv pip install|pip install) -e /openedx/plugins/mereka_tenancy\n"
+            r"(?:\n#.*)*\n"
+            r"RUN (?:.*mereka-plugins\.pth\"|echo '/openedx/plugins' > /openedx/venv/lib/python3\.11/site-packages/mereka-plugins\.pth)\n",
+            re.MULTILINE,
+        )
+        updated, _ = production_custom_apps_pattern.subn("\n", updated, count=1)
 
         # django-prometheus pip install in Dockerfile
         base_req_marker = "bash -o pipefail -c 'for attempt in 1 2 3; do pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo \"pip install attempt ${attempt} failed; retrying in 10s\" >&2; sleep 10; done; exit 1'"

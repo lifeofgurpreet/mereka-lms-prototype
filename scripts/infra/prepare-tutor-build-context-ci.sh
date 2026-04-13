@@ -52,6 +52,7 @@ mkdir -p "$TUTOR_ROOT" "$PLUGIN_DIR"
 
 install -m 0644 "$PLUGIN_SRC_DIR/mereka_lms.py" "$PLUGIN_DIR/mereka_lms.py"
 install -m 0644 "$PLUGIN_SRC_DIR/mereka_lms_mfe_slots.py" "$PLUGIN_DIR/mereka_lms_mfe_slots.py"
+install -m 0644 "$PLUGIN_SRC_DIR/mfe_oauth_fix.py" "$PLUGIN_DIR/mfe_oauth_fix.py"
 rm -rf "$PLUGIN_DIR/_mereka_lms"
 cp -R "$PLUGIN_SRC_DIR/_mereka_lms" "$PLUGIN_DIR/_mereka_lms"
 

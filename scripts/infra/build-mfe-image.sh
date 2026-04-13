@@ -11,6 +11,7 @@ Usage:
     --primary-tag <tag> \
     --secondary-tag <tag> \
     --cache-ref <repo:tag> \
+    [--build-profile <proof|fast>] \
     [--mutable-tag <tag>]
 EOF
 }
@@ -22,6 +23,7 @@ PRIMARY_TAG=""
 SECONDARY_TAG=""
 CACHE_REF=""
 MUTABLE_TAG=""
+BUILD_PROFILE="proof"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -31,6 +33,7 @@ while [[ $# -gt 0 ]]; do
     --primary-tag) PRIMARY_TAG="${2:-}"; shift 2 ;;
     --secondary-tag) SECONDARY_TAG="${2:-}"; shift 2 ;;
     --cache-ref) CACHE_REF="${2:-}"; shift 2 ;;
+    --build-profile) BUILD_PROFILE="${2:-}"; shift 2 ;;
     --mutable-tag) MUTABLE_TAG="${2:-}"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown argument: $1" >&2; usage >&2; exit 1 ;;
@@ -64,6 +67,19 @@ build_failed_due_to_transient_github_fetch() {
     "$log_path"
 }
 
+case "$BUILD_PROFILE" in
+  proof|fast) ;;
+  *)
+    echo "Unsupported build profile: $BUILD_PROFILE (expected proof or fast)" >&2
+    exit 1
+    ;;
+esac
+
+if [[ "$BUILD_PROFILE" == "fast" && -n "$MUTABLE_TAG" ]]; then
+  echo "Fast build profile cannot publish mutable tags; use proof for promotable builds." >&2
+  exit 1
+fi
+
 TAGS=(
   "--tag" "${IMAGE_REPO}:${PRIMARY_TAG}"
   "--tag" "${IMAGE_REPO}:${SECONDARY_TAG}"
@@ -71,6 +87,9 @@ TAGS=(
 if [[ -n "$MUTABLE_TAG" ]]; then
   TAGS+=("--tag" "${IMAGE_REPO}:${MUTABLE_TAG}")
 fi
+
+IMAGE_NAME="${IMAGE_REPO##*/}"
+GHA_SCOPE="tutor-${IMAGE_NAME}-${BUILD_PROFILE}"
 
 # BUILDKIT_MAX_PARALLELISM — if exported by caller, buildkitd reads it directly.
 # docker buildx build has no --opt flag; the env var is the correct mechanism.
@@ -85,10 +104,11 @@ while (( attempt <= max_attempts )); do
   if docker buildx build \
     --file "$DOCKERFILE" \
     "${TAGS[@]}" \
-    --cache-from "type=gha" \
-    --cache-to "type=gha,mode=max" \
+    --cache-from "type=gha,scope=${GHA_SCOPE}" \
+    --cache-to "type=gha,mode=max,scope=${GHA_SCOPE}" \
     --cache-from "type=registry,ref=${CACHE_REF}" \
     --build-arg BUILDKIT_INLINE_CACHE=1 \
+    --label "io.mereka.build-profile=${BUILD_PROFILE}" \
     --progress plain \
     --push \
     "$CONTEXT_DIR" \

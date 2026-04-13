@@ -4,9 +4,9 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 export TUTOR_ROOT="$REPO_ROOT/tutor_env"
 export OPENEDX_RELEASE="nightly"
 
-# Keep the active Tutor plugin in sync with repo source to avoid config-render drift.
-# The plugin entrypoint (mereka_lms.py) imports from _mereka_lms/ package and
-# mereka_lms_mfe_slots.py — all three must be synced together.
+# Keep the active Tutor plugins in sync with repo source to avoid config-render drift.
+# The primary authority is the consolidated mereka_lms plugin stack plus the
+# retired standalone mfe_oauth_fix compatibility shim.
 PLUGIN_SRC_DIR="$REPO_ROOT/infrastructure/tutor/plugins"
 PLUGIN_DIR="${TUTOR_PLUGINS_DIR:-$HOME/.local/share/tutor-plugins}"
 
@@ -24,6 +24,15 @@ if [ -f "$PLUGIN_SRC_DIR/mereka_lms.py" ]; then
     if [ ! -f "$PLUGIN_DIR/mereka_lms_mfe_slots.py" ] || ! cmp -s "$PLUGIN_SRC_DIR/mereka_lms_mfe_slots.py" "$PLUGIN_DIR/mereka_lms_mfe_slots.py"; then
       cp "$PLUGIN_SRC_DIR/mereka_lms_mfe_slots.py" "$PLUGIN_DIR/mereka_lms_mfe_slots.py"
       echo "Synced Tutor plugin: mereka_lms_mfe_slots.py"
+    fi
+  fi
+
+  # Sync legacy standalone compatibility shim so stale mirrored copies cannot
+  # keep emitting retired ENV_PATCHES.
+  if [ -f "$PLUGIN_SRC_DIR/mfe_oauth_fix.py" ]; then
+    if [ ! -f "$PLUGIN_DIR/mfe_oauth_fix.py" ] || ! cmp -s "$PLUGIN_SRC_DIR/mfe_oauth_fix.py" "$PLUGIN_DIR/mfe_oauth_fix.py"; then
+      cp "$PLUGIN_SRC_DIR/mfe_oauth_fix.py" "$PLUGIN_DIR/mfe_oauth_fix.py"
+      echo "Synced Tutor plugin: mfe_oauth_fix.py"
     fi
   fi
 
