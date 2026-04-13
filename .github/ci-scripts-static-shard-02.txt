@@ -3,15 +3,13 @@
 # Regenerate: python3 scripts/governance/generate-ci-static-inventory.py --write
 # Shard: 2/3
 
-scripts/qa/audit-branding-surfaces.sh
+scripts/qa/test-verify-generated-surfaces.sh
 scripts/qa/verify-secrets-isolation.sh
+scripts/qa/test-build-validator-drift-review-packet.sh
 scripts/qa/test-verify-verification-catalog.sh
 scripts/qa/verify-mfe-route-smoke.sh
-scripts/branding/verify-token-drift.sh
-scripts/governance/validate-registry.sh
 scripts/infra/check-cluster-status.sh
-scripts/migrations/mct/verify_video_mapping.sh
-scripts/qa/audit-infra-mereka-lms-staging-references.sh
+scripts/qa/audit-grafana-dashboard.sh
 scripts/qa/audit-tenant-config-safety.sh
 scripts/qa/check-axe-journey-coverage.sh
 scripts/qa/check-visual-regression-page-count.sh

@@ -358,7 +358,6 @@ scripts/qa/verify-phase7-dom-audit-contract.sh
 scripts/qa/verify-mfe-selector-coverage.sh
 scripts/qa/verify-slot-migration-readiness.sh
 scripts/branding/verify-logo-setup.sh
-scripts/qa/audit-branding-surfaces.sh
 scripts/qa/check-visual-regression-page-count.sh
 scripts/qa/verify-oep48-brand-package.sh
 scripts/qa/verify-rtl-theme-assets.sh
