@@ -13,6 +13,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+SCOPE_MODE="${VERIFY_BRANDING_TOKEN_INTEGRITY_SCOPE:-}"
+CHANGED_FILES_RAW="${VERIFY_BRANDING_TOKEN_INTEGRITY_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -30,6 +32,32 @@ warn() { echo -e "${YELLOW}[WARN]${NC} $1"; WARN=$((WARN + 1)); }
 CANONICAL="$REPO_ROOT/assets/branding/tokens.css"
 TOKENS_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/scss/_tokens.scss"
 THEME_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka"
+
+should_skip_scope() {
+  local changed_path
+
+  [[ "$SCOPE_MODE" == "changed" ]] || return 1
+  [[ -n "${CHANGED_FILES_RAW//[[:space:]]/}" ]] || return 1
+
+  while IFS= read -r changed_path; do
+    [[ -n "$changed_path" ]] || continue
+    case "$changed_path" in
+      .github/workflows/ci.yml|\
+      scripts/qa/verify-branding-token-integrity.sh|\
+      assets/branding/tokens.css|\
+      infrastructure/tutor/themes/mereka/*)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
+
+if should_skip_scope; then
+  echo "PASS verify-branding-token-integrity (scope skip: no branding-token-integrity authority changes)"
+  exit 0
+fi
 
 echo "=== Branding Token Integrity Verification ==="
 echo "  Canonical source: assets/branding/tokens.css"
