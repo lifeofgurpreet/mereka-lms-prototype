@@ -19,6 +19,36 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 TUTOR_VENV="${TUTOR_VENV:-$REPO_ROOT/.ci-venv}"
 SYNC_SCRIPT="$REPO_ROOT/scripts/infra/sync-tutor-plugin-mirror.sh"
+SCOPE_MODE="${PREFLIGHT_CHECK_SCOPE:-}"
+CHANGED_FILES_RAW="${PREFLIGHT_CHECK_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
+
+should_skip_scope() {
+  local changed_path
+
+  [[ "$SCOPE_MODE" == "changed" ]] || return 1
+  [[ -n "${CHANGED_FILES_RAW//[[:space:]]/}" ]] || return 1
+
+  while IFS= read -r changed_path; do
+    [[ -n "$changed_path" ]] || continue
+    case "$changed_path" in
+      .github/workflows/ci.yml|\
+      scripts/ci/preflight-check.sh|\
+      requirements-tutor.txt|\
+      scripts/infra/sync-tutor-plugin-mirror.sh|\
+      infrastructure/tutor/*|\
+      assets/branding/*)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
+
+if should_skip_scope; then
+  echo "PASS preflight-check (scope skip: no tutor preflight authority changes)"
+  exit 0
+fi
 
 # In CI without a pre-cached venv, creating one from scratch (pip install Tutor)
 # exceeds the 120s per-script timeout. Skip gracefully — the actual image build
