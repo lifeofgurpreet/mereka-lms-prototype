@@ -22,6 +22,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 OVERLAYS_DIR="${REPO_ROOT}/deploy/k8s/overlays"
 EXPECTED_NAMESPACE="mereka-lms"
+SCOPE_MODE="${VERIFY_KUSTOMIZE_RENDER_SCOPE:-}"
+CHANGED_FILES_RAW="${VERIFY_KUSTOMIZE_RENDER_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
 
 # Color codes
 RED='\033[0;31m'
@@ -75,6 +77,26 @@ Examples:
   $(basename "$0") --overlay local    # Test local only
   $(basename "$0") --overlay production
 EOF
+}
+
+should_skip_scope() {
+    local path
+
+    [[ "$SCOPE_MODE" == "changed" ]] || return 1
+    [[ -n "${CHANGED_FILES_RAW//[[:space:]]/}" ]] || return 1
+
+    while IFS= read -r path; do
+        [[ -n "$path" ]] || continue
+        case "$path" in
+            .github/workflows/ci.yml|\
+            deploy/k8s/*|\
+            scripts/qa/verify-kustomize-render.sh)
+                return 1
+                ;;
+        esac
+    done <<< "$CHANGED_FILES_RAW"
+
+    return 0
 }
 
 # =============================================================================
@@ -216,6 +238,11 @@ main() {
     # If no overlay specified, test both
     if [[ ${#overlays_to_test[@]} -eq 0 ]]; then
         overlays_to_test=("local" "production")
+    fi
+
+    if should_skip_scope; then
+        echo "PASS verify-kustomize-render (scope skip: no kustomize-render-relevant changes)"
+        exit 0
     fi
 
     # Check kubectl is available
