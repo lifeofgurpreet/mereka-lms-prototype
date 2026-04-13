@@ -45,6 +45,40 @@ LMS_OVERRIDES="infrastructure/tutor/themes/mereka/lms/static/css/mereka-override
 CMS_OVERRIDES="infrastructure/tutor/themes/mereka/cms/static/css/mereka-overrides.css"
 MFE_SCSS="infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 GENERATOR="scripts/branding/generate-tokens-from-canonical.sh"
+SCOPE_MODE="${VALIDATE_TOKEN_CONSUMERS_SCOPE:-}"
+CHANGED_FILES_RAW="${VALIDATE_TOKEN_CONSUMERS_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
+
+should_skip_scope() {
+  local changed_path
+
+  [[ "$SCOPE_MODE" == "changed" ]] || return 1
+  [[ -n "${CHANGED_FILES_RAW//[[:space:]]/}" ]] || return 1
+
+  while IFS= read -r changed_path; do
+    [[ -n "$changed_path" ]] || continue
+    case "$changed_path" in
+      .github/workflows/ci.yml|\
+      scripts/branding/validate-token-consumers.sh|\
+      scripts/branding/generate-tokens-from-canonical.sh|\
+      assets/branding/tokens.css|\
+      infrastructure/tutor/themes/mereka/scss/_tokens.scss|\
+      infrastructure/tutor/themes/mereka/common/static/css/mereka-design-tokens.css|\
+      infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css|\
+      infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css|\
+      infrastructure/tutor/themes/mereka/cms/static/css/mereka-overrides.css|\
+      infrastructure/tutor/themes/mereka/mfe/mereka.scss)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
+
+if should_skip_scope; then
+  echo "PASS validate-token-consumers (scope skip: no token-consumer authority changes)"
+  exit 0
+fi
 
 echo "=== Token Consumer Validation ==="
 echo ""
