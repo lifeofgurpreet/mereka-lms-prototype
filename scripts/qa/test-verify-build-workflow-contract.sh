@@ -4,9 +4,62 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 VERIFY="$ROOT_DIR/scripts/qa/verify-build-workflow-contract.sh"
+SCOPE_MODE="${TEST_VERIFY_BUILD_WORKFLOW_CONTRACT_SCOPE:-}"
+CHANGED_FILES_RAW="${TEST_VERIFY_BUILD_WORKFLOW_CONTRACT_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
 
 tmpdir="$(mktemp -d -t verify-build-workflow-contract.XXXXXX)"
 trap 'rm -rf "$tmpdir"' EXIT
+
+should_skip_scope() {
+  local changed_path
+
+  if [[ "$SCOPE_MODE" != "changed" ]]; then
+    return 1
+  fi
+
+  if [[ -z "${CHANGED_FILES_RAW//[[:space:]]/}" ]]; then
+    return 1
+  fi
+
+  while IFS= read -r changed_path; do
+    [[ -z "$changed_path" ]] && continue
+    case "$changed_path" in
+      .github/workflows/build-tutor-images.yml|\
+      .github/actions/select-build-lane/*|\
+      scripts/infra/build-openedx-image.sh|\
+      scripts/infra/build-mfe-image.sh|\
+      scripts/infra/prepare-tutor-build-context.sh|\
+      scripts/infra/prepare-tutor-build-context-ci.sh|\
+      scripts/infra/resolve-build-scope.sh|\
+      scripts/infra/install-cosign.sh|\
+      scripts/infra/install-trivy.sh|\
+      scripts/infra/generate-build-provenance.sh|\
+      scripts/infra/generate-release-bundle.sh|\
+      scripts/infra/release-openedx-gitops.sh|\
+      scripts/infra/resolve-image-digest.sh|\
+      scripts/lib/lane-normalize.sh|\
+      scripts/release/generate_release_object.py|\
+      scripts/release/release_object_bindings.py|\
+      scripts/qa/verify-build-workflow-contract.sh|\
+      scripts/qa/test-verify-build-workflow-contract.sh|\
+      scripts/qa/verify-build-provenance.sh|\
+      scripts/qa/verify-openedx-image-branding.sh|\
+      scripts/qa/verify-mfe-image-branding.sh|\
+      scripts/qa/verify-mfe-runtime-contract.sh|\
+      scripts/qa/verify-release-bundle.sh|\
+      scripts/qa/verify-release-object.sh)
+        return 1
+        ;;
+    esac
+  done <<<"$CHANGED_FILES_RAW"
+
+  return 0
+}
+
+if should_skip_scope; then
+  echo "PASS test-verify-build-workflow-contract (scope skip: no build-workflow-contract-relevant changes)"
+  exit 0
+fi
 
 mkdir -p "$tmpdir/.github/workflows" "$tmpdir/.github/actions/select-build-lane" "$tmpdir/scripts/infra"
 mkdir -p "$tmpdir/scripts/qa"
