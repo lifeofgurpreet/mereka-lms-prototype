@@ -2,11 +2,41 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+SCOPE_MODE="${VERIFY_VERIFICATION_CATALOG_SCOPE:-}"
+CHANGED_FILES_RAW="${VERIFY_VERIFICATION_CATALOG_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
 tmpdir="$(mktemp -d -t verify-verification-catalog.XXXXXX)"
 cleanup() {
   rm -rf "$tmpdir"
 }
 trap cleanup EXIT
+
+should_skip_scope() {
+  local changed_path
+
+  if [[ "$SCOPE_MODE" != "changed" ]]; then
+    return 1
+  fi
+
+  if [[ -z "${CHANGED_FILES_RAW//[[:space:]]/}" ]]; then
+    return 1
+  fi
+
+  while IFS= read -r changed_path; do
+    [[ -z "$changed_path" ]] && continue
+    case "$changed_path" in
+      scripts/qa/*|scripts/governance/*|verification/*|specs/*)
+        return 1
+        ;;
+    esac
+  done <<<"$CHANGED_FILES_RAW"
+
+  return 0
+}
+
+if should_skip_scope; then
+  echo "PASS test-verify-verification-catalog (scope skip: no verification-catalog-relevant changes)"
+  exit 0
+fi
 
 mkdir -p "$tmpdir/repo"
 if command -v rsync >/dev/null 2>&1; then

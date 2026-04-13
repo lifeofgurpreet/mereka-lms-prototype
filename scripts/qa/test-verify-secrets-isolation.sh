@@ -52,14 +52,16 @@ EOF
 
 run_expect_pass() {
   local label="$1"
-  REPO_ROOT_OVERRIDE="$tmpdir" bash "$VERIFY" >/tmp/verify-secrets-isolation.out 2>&1
+  env -u VERIFY_SECRETS_ISOLATION_SCOPE -u VERIFY_SECRETS_ISOLATION_CHANGED_FILES -u CI_CHANGED_FILES \
+    REPO_ROOT_OVERRIDE="$tmpdir" bash "$VERIFY" >/tmp/verify-secrets-isolation.out 2>&1
   echo "PASS ${label}"
 }
 
 run_expect_fail() {
   local label="$1"
   set +e
-  REPO_ROOT_OVERRIDE="$tmpdir" bash "$VERIFY" >/tmp/verify-secrets-isolation.out 2>&1
+  env -u VERIFY_SECRETS_ISOLATION_SCOPE -u VERIFY_SECRETS_ISOLATION_CHANGED_FILES -u CI_CHANGED_FILES \
+    REPO_ROOT_OVERRIDE="$tmpdir" bash "$VERIFY" >/tmp/verify-secrets-isolation.out 2>&1
   local rc=$?
   set -e
   if [[ "$rc" -eq 0 ]]; then
