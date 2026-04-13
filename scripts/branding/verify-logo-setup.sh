@@ -5,6 +5,50 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+SCOPE_MODE="${VERIFY_LOGO_SETUP_SCOPE:-}"
+CHANGED_FILES_RAW="${VERIFY_LOGO_SETUP_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
+
+should_skip_scope() {
+  local changed_path
+
+  [[ "$SCOPE_MODE" == "changed" ]] || return 1
+  [[ -n "${CHANGED_FILES_RAW//[[:space:]]/}" ]] || return 1
+
+  while IFS= read -r changed_path; do
+    [[ -n "$changed_path" ]] || continue
+    case "$changed_path" in
+      .github/workflows/ci.yml|\
+      scripts/branding/verify-logo-setup.sh|\
+      assets/branding/logo-horizontal.png|\
+      assets/branding/logo-horizontal-white.png|\
+      assets/branding/logo-square.png|\
+      infrastructure/tutor/themes/mereka/common/static/images/logo-horizontal.png|\
+      infrastructure/tutor/themes/mereka/common/static/images/logo-horizontal-white.png|\
+      infrastructure/tutor/themes/mereka/common/static/images/logo-square.png|\
+      infrastructure/tutor/themes/mereka/mfe/images/logo-horizontal.png|\
+      infrastructure/tutor/themes/mereka/mfe/images/logo-horizontal-white.png|\
+      infrastructure/tutor/themes/mereka/mfe/images/logo-square.png|\
+      infrastructure/tutor/themes/mereka/lms/static/images/logo-horizontal.png|\
+      infrastructure/tutor/themes/mereka/lms/static/images/logo-horizontal-white.png|\
+      infrastructure/tutor/themes/mereka/lms/static/images/logo-square.png|\
+      infrastructure/tutor/themes/mereka/cms/static/images/logo-horizontal.png|\
+      infrastructure/tutor/themes/mereka/cms/static/images/logo-horizontal-white.png|\
+      infrastructure/tutor/themes/mereka/cms/static/images/logo-square.png|\
+      deploy/k8s/base/apps/openedx/settings/lms/production.py|\
+      infrastructure/tutor/themes/mereka/lms/templates/footer.html|\
+      infrastructure/tutor/themes/mereka/lms/templates/header/brand.html)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
+
+if should_skip_scope; then
+  echo "PASS verify-logo-setup (scope skip: no logo-setup authority changes)"
+  exit 0
+fi
 
 echo "Verifying Mereka Academy logo setup..."
 echo ""
