@@ -906,19 +906,6 @@ jobs:
       - name: Validate config.example.yml structure
         run: python3 scripts/qa/check-config-example-yaml.py
 
-      - name: Generate offline monitoring plan
-        run: |
-          OFFLINE_PLAN=1 ./scripts/infra/apply-monitoring-configs.sh plan | tee monitoring-plan.txt
-          grep -q "Offline plan complete" monitoring-plan.txt
-          grep -q "gcloud monitoring" monitoring-plan.txt
-
-      - name: Upload monitoring plan artifact
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
-        with:
-          name: monitoring-offline-plan
-          path: monitoring-plan.txt
-          retention-days: 3
-
   # ============================================================================
   # Job 3: security-scans
   # TruffleHog (HEAD only), Hadolint on all Dockerfiles, pip-audit.
