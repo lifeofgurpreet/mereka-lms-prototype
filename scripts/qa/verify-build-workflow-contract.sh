@@ -15,6 +15,7 @@ RELEASE_BUNDLE_BLOCK="$(sed -n '/^  release-bundle:/,/^  update-gitops:/p' "$BUI
 UPDATE_GITOPS_BLOCK="$(sed -n '/^  update-gitops:/,$p' "$BUILD_WF")"
 OPENEDX_CACHE_HEALTH_BLOCK="$(sed -n '/Verify OpenEdX build cache health/,/Generate image metadata/p' "$BUILD_WF")"
 RESOLVE_SCOPE_BLOCK="$(sed -n '/^  resolve-build-scope:/,/^  lint:/p' "$BUILD_WF")"
+SELECT_BUILD_LANE_BLOCK="$(sed -n '/^  select-build-lane:/,/^  prepare-build-context:/p' "$BUILD_WF")"
 PREP_BLOCK="$(sed -n '/^  prepare-build-context:/,/^  build-openedx:/p' "$BUILD_WF")"
 BUILD_OPENEDX_BLOCK="$(sed -n '/^  build-openedx:/,/^  build-mfe:/p' "$BUILD_WF")"
 BUILD_MFE_BLOCK="$(sed -n '/^  build-mfe:/,/^  scan-openedx-image:/p' "$BUILD_WF")"
@@ -201,6 +202,12 @@ else
   fail "resolve-build-scope helper missing"
 fi
 
+if [[ -f "$REPO_ROOT/.github/actions/select-build-lane/action.yml" ]]; then
+  pass "select-build-lane action exists"
+else
+  fail "select-build-lane action missing"
+fi
+
 if [[ -x "$REPO_ROOT/scripts/infra/build-openedx-image.sh" ]]; then
   pass "build-openedx-image helper exists"
 else
@@ -233,10 +240,12 @@ fi
 
 if grep -q 'DOCKER_PULL_TIMEOUT_SECS=' "$REPO_ROOT/scripts/qa/verify-openedx-image-branding.sh" \
   && grep -q 'run_with_timeout "${DOCKER_PULL_TIMEOUT_SECS}" docker pull' "$REPO_ROOT/scripts/qa/verify-openedx-image-branding.sh" \
-  && grep -q 'run_with_timeout "${DOCKER_RUN_TIMEOUT_SECS}" docker run' "$REPO_ROOT/scripts/qa/verify-openedx-image-branding.sh"; then
+  && grep -q 'run_with_timeout "${DOCKER_RUN_TIMEOUT_SECS}" docker run' "$REPO_ROOT/scripts/qa/verify-openedx-image-branding.sh" \
+  && ! grep -q 'if ! run_with_timeout "${DOCKER_PULL_TIMEOUT_SECS}" docker pull' "$REPO_ROOT/scripts/qa/verify-openedx-image-branding.sh" \
+  && ! grep -q 'if ! run_with_timeout "${DOCKER_RUN_TIMEOUT_SECS}" docker run' "$REPO_ROOT/scripts/qa/verify-openedx-image-branding.sh"; then
   pass "verify-openedx-image-branding helper bounds docker pull/run with timeouts"
 else
-  fail "verify-openedx-image-branding helper missing docker timeout guards"
+  fail "verify-openedx-image-branding helper missing safe docker timeout guards"
 fi
 
 if [[ -x "$REPO_ROOT/scripts/qa/verify-mfe-image-branding.sh" ]]; then
@@ -247,10 +256,12 @@ fi
 
 if grep -q 'DOCKER_PULL_TIMEOUT_SECS=' "$REPO_ROOT/scripts/qa/verify-mfe-image-branding.sh" \
   && grep -q 'run_with_timeout "${DOCKER_PULL_TIMEOUT_SECS}" docker pull' "$REPO_ROOT/scripts/qa/verify-mfe-image-branding.sh" \
-  && grep -q 'run_with_timeout "${DOCKER_RUN_TIMEOUT_SECS}" docker run' "$REPO_ROOT/scripts/qa/verify-mfe-image-branding.sh"; then
+  && grep -q 'run_with_timeout "${DOCKER_RUN_TIMEOUT_SECS}" docker run' "$REPO_ROOT/scripts/qa/verify-mfe-image-branding.sh" \
+  && ! grep -q 'if ! run_with_timeout "${DOCKER_PULL_TIMEOUT_SECS}" docker pull' "$REPO_ROOT/scripts/qa/verify-mfe-image-branding.sh" \
+  && ! grep -q 'if ! run_with_timeout "${DOCKER_RUN_TIMEOUT_SECS}" docker run' "$REPO_ROOT/scripts/qa/verify-mfe-image-branding.sh"; then
   pass "verify-mfe-image-branding helper bounds docker pull/run with timeouts"
 else
-  fail "verify-mfe-image-branding helper missing docker timeout guards"
+  fail "verify-mfe-image-branding helper missing safe docker timeout guards"
 fi
 
 if [[ "$RESOLVE_SCOPE_BLOCK" == *"./scripts/infra/resolve-build-scope.sh"* ]]; then
@@ -265,16 +276,34 @@ else
   fail "build-scope resolver missing fetch-depth: 0"
 fi
 
+if [[ "$SELECT_BUILD_LANE_BLOCK" == *"uses: ./.github/actions/select-build-lane"* ]]; then
+  pass "workflow selects heavy-build lane via repo-local action"
+else
+  fail "workflow missing repo-local select-build-lane action"
+fi
+
 if [[ "$BUILD_OPENEDX_BLOCK" == *"needs.resolve-build-scope.outputs.build_openedx == 'true'"* ]]; then
   pass "build-openedx job is gated by resolved build scope"
 else
   fail "build-openedx job missing resolved build-scope gate"
 fi
 
+if [[ "$BUILD_OPENEDX_BLOCK" == *"select-build-lane"* && "$BUILD_OPENEDX_BLOCK" == *"runs-on: \${{ needs.select-build-lane.outputs.runner_label }}"* ]]; then
+  pass "build-openedx job consumes select-build-lane runner output"
+else
+  fail "build-openedx job missing select-build-lane runner contract"
+fi
+
 if [[ "$BUILD_MFE_BLOCK" == *"needs.resolve-build-scope.outputs.build_mfe == 'true'"* ]]; then
   pass "build-mfe job is gated by resolved build scope"
 else
   fail "build-mfe job missing resolved build-scope gate"
+fi
+
+if [[ "$BUILD_MFE_BLOCK" == *"select-build-lane"* && "$BUILD_MFE_BLOCK" == *"runs-on: \${{ needs.select-build-lane.outputs.runner_label }}"* ]]; then
+  pass "build-mfe job consumes select-build-lane runner output"
+else
+  fail "build-mfe job missing select-build-lane runner contract"
 fi
 
 # Fastlane (PR #1518, #1524) moves lightweight orchestration jobs to

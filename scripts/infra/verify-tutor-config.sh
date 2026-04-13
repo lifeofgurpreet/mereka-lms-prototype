@@ -290,7 +290,10 @@ print_section "Checking Tutor Plugin Source of Truth"
 
 files_match "$PLUGIN_SRC_DIR/mereka_lms.py" "$PLUGIN_DIR/mereka_lms.py" "Tutor plugin entrypoint mirror is fresh"
 files_match "$PLUGIN_SRC_DIR/mereka_lms_mfe_slots.py" "$PLUGIN_DIR/mereka_lms_mfe_slots.py" "Tutor MFE slots module mirror is fresh"
+files_match "$PLUGIN_SRC_DIR/mfe_oauth_fix.py" "$PLUGIN_DIR/mfe_oauth_fix.py" "Legacy standalone MFE OAuth shim mirror is fresh"
 dirs_match "$PLUGIN_SRC_DIR/_mereka_lms" "$PLUGIN_DIR/_mereka_lms" "Tutor _mereka_lms package mirror is fresh"
+
+regex_pattern_count_equals "^- mfe_oauth_fix$" "0" "$TUTOR_ENV/config.yml" "Legacy standalone mfe_oauth_fix Tutor plugin is disabled"
 
 print_section "Checking Multi-Site Domain Configuration"
 
@@ -325,7 +328,7 @@ print_section "Checking MySQL Authentication Fix"
 
 DOCKER_COMPOSE="$TUTOR_ENV/env/local/docker-compose.yml"
 if [[ -f "$DOCKER_COMPOSE" ]]; then
-  regex_in_file 'default-authentication-plugin=mysql_native_password|--mysql-native-password=ON' "$DOCKER_COMPOSE" "MySQL native password plugin"
+  pattern_in_file "mysql-native-password=ON" "$DOCKER_COMPOSE" "MySQL native password plugin"
   pattern_in_file "MYSQL_ROOT_HOST" "$DOCKER_COMPOSE" "MySQL remote root access"
 else
   check_warn "Docker Compose file not found (ok if using K8s only)"
@@ -441,9 +444,14 @@ OPENEDX_NOTIFICATIONS_MIGRATION="$OPENEDX_NOTIFICATIONS_DIR/migrations/0001_init
 if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_in_file "mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "MFE OAuth fix app copied"
   pattern_in_file "openedx_prometheus" "$OPENEDX_DOCKERFILE" "Prometheus metrics app copied"
-  pattern_in_file 'if [ "$MEREKA_CUSTOM_APP_INSTALL_MODE" = "editable" ]; then' "$OPENEDX_DOCKERFILE" "High-churn custom-app install block is profile-aware"
-  pattern_in_file '-e /openedx/mfe_oauth_fix' "$OPENEDX_DOCKERFILE" "MFE OAuth fix editable install path present"
+  pattern_in_file '-e /openedx/mfe_oauth_fix' "$OPENEDX_DOCKERFILE" "High-churn app mfe_oauth_fix participates in editable install block"
+  pattern_in_file '-e /openedx/openedx_tenant_cache' "$OPENEDX_DOCKERFILE" "High-churn app openedx_tenant_cache participates in editable install block"
+  pattern_not_in_file 'RUN $PIP_COMMAND install -e /openedx/mfe_oauth_fix' "$OPENEDX_DOCKERFILE" "No per-app uv install fan-out remains for mfe_oauth_fix"
+  pattern_not_in_file 'RUN $PIP_COMMAND install -e /openedx/openedx_prometheus' "$OPENEDX_DOCKERFILE" "No per-app uv install fan-out remains for openedx_prometheus"
+  pattern_in_file 'PTH_DIR=$(python3 -c' "$OPENEDX_DOCKERFILE" "Custom app Python path bridge is shell-native"
+  pattern_not_in_file "write('/openedx" "$OPENEDX_DOCKERFILE" "Broken multiline Python .pth writer is absent"
   pattern_in_file "django-prometheus" "$OPENEDX_DOCKERFILE" "django-prometheus installed"
+  pattern_not_in_file "Align compiled base requirements with the realized Python 3.11 compatibility contract." "$OPENEDX_DOCKERFILE" "rejected code-stage base requirements pin patch is absent"
   pattern_in_file "django-cors-headers==4.3.1" "$OPENEDX_DOCKERFILE" "django-cors-headers installed"
   fixed_pattern_count_equals "pkgconfig==1.5.5" "1" "$OPENEDX_DOCKERFILE" "pkgconfig toolchain pin is not duplicated"
   pattern_in_file "path==16.16.0" "$OPENEDX_DOCKERFILE" "legacy path provider installed"
@@ -452,7 +460,8 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_in_file "lazy==1.6" "$OPENEDX_DOCKERFILE" "lazy installed"
   pattern_in_file "lxml_html_clean==0.4.4" "$OPENEDX_DOCKERFILE" "lxml_html_clean installed"
   regex_in_file 'pymongo\[srv\]|dnspython' "$OPENEDX_DOCKERFILE" "pymongo[srv] installed (for Atlas)"
-  fixed_pattern_count_equals "translation settings import preflight ok" "1" "$OPENEDX_DOCKERFILE" "Translation preflight block is not duplicated"
+  fixed_pattern_count_equals "Install support dependencies needed for metrics, translation settings, Atlas," "1" "$OPENEDX_DOCKERFILE" "Support dependency block is consolidated once"
+  fixed_pattern_count_equals 'Skipping translation settings import preflight (fast build profile)' "1" "$OPENEDX_DOCKERFILE" "Translation preflight block is not duplicated"
 fi
 
 if [[ -f "$LMS_SETTINGS" ]]; then
@@ -497,11 +506,29 @@ if [[ -f "$CONFIG_DEFAULTS_FILE" ]]; then
   pattern_in_file "MEREKA_PREVIEW_LMS_BASE" "$CONFIG_DEFAULTS_FILE" "Mereka Tutor config defaults define preview LMS base contract"
 fi
 
+if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
+  fixed_pattern_count_equals 'COPY --from=python-requirements --chown=app:app /openedx/openedx_advanced_xblocks /openedx/openedx_advanced_xblocks' "1" "$OPENEDX_DOCKERFILE" "openedx_advanced_xblocks is carried into production before translation discovery"
+  advanced_xblocks_first_copy_line=$(grep -nF 'COPY --from=python-requirements --chown=app:app /openedx/openedx_advanced_xblocks /openedx/openedx_advanced_xblocks' "$OPENEDX_DOCKERFILE" 2>/dev/null | head -n1 | cut -d: -f1 || true)
+  advanced_xblocks_translation_line=$(grep -nF 'Skipping plugin translation pull (fast build profile)' "$OPENEDX_DOCKERFILE" 2>/dev/null | head -n1 | cut -d: -f1 || true)
+  if [[ -z "${advanced_xblocks_translation_line:-}" ]]; then
+    advanced_xblocks_translation_line=$(grep -nF "RUN ./manage.py lms --settings=tutor.i18n pull_plugin_translations" "$OPENEDX_DOCKERFILE" 2>/dev/null | head -n1 | cut -d: -f1 || true)
+  fi
+  if [[ -n "${advanced_xblocks_first_copy_line:-}" && -n "${advanced_xblocks_translation_line:-}" && "$advanced_xblocks_first_copy_line" -lt "$advanced_xblocks_translation_line" ]]; then
+    check_pass "openedx_advanced_xblocks is present before translation/XBlock discovery"
+  else
+    check_fail "openedx_advanced_xblocks is not copied into production before translation/XBlock discovery in $OPENEDX_DOCKERFILE"
+  fi
+fi
+
 print_section "Checking Build Optimizations"
 
 if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_in_file "ENV NODE_OPTIONS=\"--max-old-space-size=6144\"" "$OPENEDX_DOCKERFILE" "Node memory limit increased"
   pattern_in_file "ENV PYTHONPATH=/openedx/edx-platform" "$OPENEDX_DOCKERFILE" "PYTHONPATH set"
+  fixed_pattern_count_equals 'ENV PYTHONPATH=/openedx/edx-platform' "2" "$OPENEDX_DOCKERFILE" "Runtime PYTHONPATH env appears only in production and final runtime stages"
+  fixed_pattern_count_equals 'ENV PYTHONPATH="/openedx/edx-platform"' "1" "$OPENEDX_DOCKERFILE" "Pre-assets PYTHONPATH env block is unique"
+  fixed_pattern_count_equals 'ENV NODE_OPTIONS="--max-old-space-size=6144"' "2" "$OPENEDX_DOCKERFILE" "Node memory env appears only in production and pre-assets hooks"
+  fixed_pattern_count_equals 'ENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none' "2" "$OPENEDX_DOCKERFILE" "RequireJS optimize env appears only in production and pre-assets hooks"
 
   # Check for npm/pip install resilience strategy.
   # Upstream patches evolved over time from explicit retry loops to
@@ -525,6 +552,29 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   fi
 
   pattern_in_file "translation settings import preflight ok" "$OPENEDX_DOCKERFILE" "Translation settings import preflight"
+  pattern_in_file 'ARG MEREKA_BUILD_PROFILE=proof' "$OPENEDX_DOCKERFILE" "Build profile arg defaults to proof"
+  pattern_in_file 'Skipping translation refresh (fast build profile)' "$OPENEDX_DOCKERFILE" "Fast build profile can skip translation refresh"
+  pattern_in_file 'Skipping plugin translation pull (fast build profile)' "$OPENEDX_DOCKERFILE" "Fast build profile can skip plugin translation pull"
+  pattern_in_file 'Skipping XBlock translation pull (fast build profile)' "$OPENEDX_DOCKERFILE" "Fast build profile can skip XBlock translation pull"
+  pattern_in_file 'Skipping atlas translation pull (fast build profile)' "$OPENEDX_DOCKERFILE" "Fast build profile can skip atlas translation pull"
+  pattern_in_file 'Skipping XBlock translation compile (fast build profile)' "$OPENEDX_DOCKERFILE" "Fast build profile can skip XBlock translation compile"
+  pattern_in_file 'Skipping compile_plugin_translations (fast build profile)' "$OPENEDX_DOCKERFILE" "Fast build profile can skip compile_plugin_translations"
+  pattern_in_file 'Skipping compilemessages (fast build profile)' "$OPENEDX_DOCKERFILE" "Fast build profile can skip compilemessages"
+  pattern_in_file 'Skipping compilejsi18n (fast build profile)' "$OPENEDX_DOCKERFILE" "Fast build profile can skip compilejsi18n"
+  pattern_in_file 'rdfind -makesymlinks true -followsymlinks true /openedx/staticfiles/' "$OPENEDX_DOCKERFILE" "Static dedupe remains in the rendered Open edX Dockerfile"
+  pattern_not_in_file 'Skipping rdfind static dedupe (fast build profile)' "$OPENEDX_DOCKERFILE" "Fast build profile does not bloat staticfiles by skipping rdfind"
+  pattern_in_file 'RUN rm -rf /openedx/staticfiles/stylelint-config-edx' "$OPENEDX_DOCKERFILE" "Static payload trim removes stylelint package cargo from runtime staticfiles"
+  pattern_in_file '/openedx/staticfiles/frontend-component-cookie-policy-banner/node_modules' "$OPENEDX_DOCKERFILE" "Static payload trim removes cookie banner package node_modules from runtime staticfiles"
+  pattern_in_file '/openedx/staticfiles/edx-bootstrap/samples' "$OPENEDX_DOCKERFILE" "Static payload trim removes edx-bootstrap sample scaffolding from runtime staticfiles"
+  pattern_in_file '/openedx/staticfiles/edx-bootstrap/node_modules' "$OPENEDX_DOCKERFILE" "Static payload trim removes edx-bootstrap node_modules cargo from runtime staticfiles"
+  fixed_pattern_count_equals '/openedx/staticfiles/edx-bootstrap/node_modules' "1" "$OPENEDX_DOCKERFILE" "Static payload trim block does not duplicate edx-bootstrap node_modules"
+  pattern_in_file '/opt/pyenv/.github' "$OPENEDX_DOCKERFILE" "Final runtime image prunes pyenv repo scaffolding"
+  pattern_in_file '/opt/pyenv/versions/3.11.8/lib/python3.11/test' "$OPENEDX_DOCKERFILE" "Final runtime image prunes CPython stdlib test payload"
+  pattern_in_file '/opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/libpython3.11.a' "$OPENEDX_DOCKERFILE" "Final runtime image prunes CPython static build archive"
+  pattern_in_file '/opt/pyenv/versions/3.11.8/lib/python3.11/site-packages/pip' "$OPENEDX_DOCKERFILE" "Final runtime image prunes base interpreter pip tooling"
+  pattern_in_file '/openedx/venv/lib/python3.11/site-packages/pip' "$OPENEDX_DOCKERFILE" "Final runtime image prunes venv pip tooling"
+  pattern_in_file '/openedx/venv/lib/python3.11/site-packages/wheel' "$OPENEDX_DOCKERFILE" "Final runtime image prunes venv wheel tooling"
+  fixed_pattern_count_equals 'RUN rm -rf /opt/pyenv/.github' "1" "$OPENEDX_DOCKERFILE" "Final runtime prune block is rendered exactly once"
   fixed_pattern_count_equals "Stripped google font imports from {changed} scss files" "1" "$OPENEDX_DOCKERFILE" "Brand compile block is not duplicated"
   pattern_not_in_file "webpack skipped (prebuilt bundles)" "$OPENEDX_DOCKERFILE" "Proof lane does not use conditional webpack skip"
   pattern_not_in_file "RUN uv pip install -e /openedx/mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "No duplicate production-stage custom app reinstalls remain"
@@ -539,7 +589,6 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_in_file 'Skipping final runtime custom-app source carry (noneditable mode)' "$OPENEDX_DOCKERFILE" "Proof-ready runtime source carry skip path exists"
   pattern_in_file 'cp -a /tmp/python-requirements-openedx/mfe_oauth_fix /openedx/mfe_oauth_fix' "$OPENEDX_DOCKERFILE" "High-churn runtime source carry preserved for mfe_oauth_fix"
   pattern_in_file 'cp -a /tmp/python-requirements-openedx/openedx_tenant_cache /openedx/openedx_tenant_cache' "$OPENEDX_DOCKERFILE" "High-churn runtime source carry preserved for openedx_tenant_cache"
-  pattern_in_file 'cp -a /tmp/python-requirements-openedx/plugins/mereka_tenancy /openedx/plugins/mereka_tenancy' "$OPENEDX_DOCKERFILE" "High-churn runtime source carry preserved for mereka_tenancy"
   pattern_not_in_file "COPY --from=python-requirements --chown=app:app /openedx/mfe_oauth_fix /openedx/mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "Legacy unconditional final runtime source carry removed"
   pattern_not_in_file "COPY --from=python-requirements --chown=app:app /openedx/openedx_prometheus /openedx/openedx_prometheus" "$OPENEDX_DOCKERFILE" "Legacy unconditional final runtime source carry removed for openedx_prometheus"
   pattern_not_in_file "COPY --from=python-requirements --chown=app:app /openedx/plugins/mereka_tenancy /openedx/plugins/mereka_tenancy" "$OPENEDX_DOCKERFILE" "Legacy unconditional final runtime source carry removed for mereka_tenancy"
@@ -550,7 +599,6 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   fixed_pattern_count_equals 'FROM production AS runtime-edx-platform-pruned' "1" "$OPENEDX_DOCKERFILE" "Runtime edx-platform prune stage is rendered exactly once"
   pattern_in_file 'COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=runtime-edx-platform-pruned /openedx/edx-platform /openedx/edx-platform' "$OPENEDX_DOCKERFILE" "Final runtime image copies edx-platform from the prune stage"
   pattern_not_in_file 'COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/edx-platform /openedx/edx-platform' "$OPENEDX_DOCKERFILE" "Final runtime image no longer copies edx-platform straight from production"
-
   OPENEDX_FINAL_STAGE_TEXT=$(awk '/^FROM docker.io\/ubuntu:22.04 AS final/{flag=1} flag{print}' "$OPENEDX_DOCKERFILE")
   if grep -Fq '/openedx/nodeenv' <<<"$OPENEDX_FINAL_STAGE_TEXT"; then
     check_fail "Final runtime image no longer cargo-ships nodeenv"
@@ -592,8 +640,10 @@ fi
 
 # Check for theme asset compilation
 if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
+  pattern_in_file "COPY --chown=app:app ./themes/mereka/ /openedx/themes/mereka/" "$OPENEDX_DOCKERFILE" "Mereka theme staged before asset build"
   pattern_in_file "npm run compile-sass -- --skip-default --theme-dir /openedx/themes --theme mereka" "$OPENEDX_DOCKERFILE" "Theme SASS compilation"
   pattern_in_file "Stripped google font imports from {changed} scss files" "$OPENEDX_DOCKERFILE" "Google fonts stripping"
+  pattern_not_in_file "COPY --chown=app:app ./themes/ /openedx/themes" "$OPENEDX_DOCKERFILE" "Redundant late broad theme copy removed"
 fi
 
 print_section "Checking Enterprise Features"

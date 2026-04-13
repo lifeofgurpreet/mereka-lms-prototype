@@ -43,6 +43,159 @@ check_absent() {
   fi
 }
 
+json_get() {
+  local json="$1"
+  local path="$2"
+  JSON_DOC="$json" python3 - "$path" <<'PY'
+import json
+import os
+import re
+import sys
+
+node = json.loads(os.environ["JSON_DOC"])
+for part in sys.argv[1].split("."):
+    match = re.fullmatch(r"([^.[]+)(?:\[(\d+)\])?", part)
+    if match is None:
+        raise SystemExit(f"unsupported path segment: {part}")
+    key = match.group(1)
+    index = match.group(2)
+    node = node[key]
+    if index is not None:
+        node = node[int(index)]
+if isinstance(node, (dict, list)):
+    print(json.dumps(node, sort_keys=True))
+else:
+    print(node)
+PY
+}
+
+check_bake_scalar() {
+  local json="$1"
+  local path="$2"
+  local expected="$3"
+  local label="$4"
+  local actual
+  actual="$(json_get "$json" "$path")"
+  if [[ "$actual" == "$expected" ]]; then
+    pass "$label"
+  else
+    fail "$label"
+  fi
+}
+
+check_bake_label() {
+  local json="$1"
+  local target="$2"
+  local key="$3"
+  local expected="$4"
+  local label="$5"
+  local actual
+  actual="$(JSON_DOC="$json" TARGET_NAME="$target" LABEL_KEY="$key" python3 - <<'PY'
+import json
+import os
+
+document = json.loads(os.environ["JSON_DOC"])
+print(document["target"][os.environ["TARGET_NAME"]]["labels"][os.environ["LABEL_KEY"]])
+PY
+)"
+  if [[ "$actual" == "$expected" ]]; then
+    pass "$label"
+  else
+    fail "$label"
+  fi
+}
+
+check_bake_list_contains() {
+  local json="$1"
+  local path="$2"
+  local expected="$3"
+  local label="$4"
+  if JSON_DOC="$json" TARGET_PATH="$path" EXPECTED_VALUE="$expected" python3 - <<'PY'
+import json
+import os
+import re
+
+node = json.loads(os.environ["JSON_DOC"])
+for part in os.environ["TARGET_PATH"].split("."):
+    match = re.fullmatch(r"([^.[]+)(?:\[(\d+)\])?", part)
+    if match is None:
+        raise SystemExit(2)
+    key = match.group(1)
+    index = match.group(2)
+    node = node[key]
+    if index is not None:
+        node = node[int(index)]
+if os.environ["EXPECTED_VALUE"] not in node:
+    raise SystemExit(1)
+PY
+  then
+    pass "$label"
+  else
+    fail "$label"
+  fi
+}
+
+check_bake_object_array_contains() {
+  local json="$1"
+  local path="$2"
+  local expected="$3"
+  local label="$4"
+  if JSON_DOC="$json" TARGET_PATH="$path" EXPECTED_SPEC="$expected" python3 - <<'PY'
+import json
+import os
+import re
+import sys
+
+node = json.loads(os.environ["JSON_DOC"])
+for part in os.environ["TARGET_PATH"].split("."):
+    match = re.fullmatch(r"([^.[]+)(?:\[(\d+)\])?", part)
+    if match is None:
+        raise SystemExit(2)
+    key = match.group(1)
+    index = match.group(2)
+    node = node[key]
+    if index is not None:
+        node = node[int(index)]
+
+expected = {}
+for raw_item in os.environ["EXPECTED_SPEC"].split(","):
+    item = raw_item.strip()
+    if not item:
+        continue
+    if "=" not in item:
+        sys.stderr.write(f"unsupported expected spec fragment: {item}\n")
+        raise SystemExit(2)
+    key, value = item.split("=", 1)
+    expected[key] = value
+
+for entry in node:
+    if isinstance(entry, str):
+        normalized_entry = {}
+        for raw_item in entry.split(","):
+            item = raw_item.strip()
+            if not item or "=" not in item:
+                continue
+            key, value = item.split("=", 1)
+            normalized_entry[key] = value
+        entry = normalized_entry
+    if isinstance(entry, dict) and all(str(entry.get(key)) == value for key, value in expected.items()):
+        raise SystemExit(0)
+
+raise SystemExit(1)
+PY
+  then
+    pass "$label"
+  else
+    fail "$label"
+  fi
+}
+
+bake_print() {
+  local target="$1"
+  shift
+  env "$@" docker buildx bake -f "$REPO_ROOT/docker-bake.hcl" --push --print "$target"
+}
+
 NODE_ACTION="$REPO_ROOT/.github/actions/setup-playwright/action.yml"
 PYTHON_ACTION="$REPO_ROOT/.github/actions/setup-python-playwright/action.yml"
 SMOKE_UNAUTHENTICATED="$REPO_ROOT/.github/workflows/smoke-unauthenticated.yml"
@@ -88,16 +241,45 @@ echo
 
 echo -e "${BLUE}## Image build cache policy${NC}"
 check_contains "$OPENEDX_BUILD" 'docker buildx bake' "build-openedx-image routes execution through buildx bake"
-check_contains "$OPENEDX_BUILD" '--set "${BAKE_TARGET}.cache-from=type=gha,scope=${GHA_SCOPE}"' "build-openedx-image uses profile-scoped GHA cache restore"
-check_contains "$OPENEDX_BUILD" '--set "${BAKE_TARGET}.cache-to=type=gha,mode=max,scope=${GHA_SCOPE}"' "build-openedx-image uses profile-scoped GHA cache write-back"
-check_contains "$OPENEDX_BUILD" '--set "${BAKE_TARGET}.cache-from=type=registry,ref=${CACHE_REF}"' "build-openedx-image uses registry cache fallback"
-check_contains "$OPENEDX_BUILD" '--set "${BAKE_TARGET}.args.BUILDKIT_INLINE_CACHE=1"' "build-openedx-image exports inline cache metadata"
-
 check_contains "$MFE_BUILD" 'docker buildx bake' "build-mfe-image routes execution through buildx bake"
-check_contains "$MFE_BUILD" '--set "${BAKE_TARGET}.cache-from=type=gha,scope=${GHA_SCOPE}"' "build-mfe-image uses profile-scoped GHA cache restore"
-check_contains "$MFE_BUILD" '--set "${BAKE_TARGET}.cache-to=type=gha,mode=max,scope=${GHA_SCOPE}"' "build-mfe-image uses profile-scoped GHA cache write-back"
-check_contains "$MFE_BUILD" '--set "${BAKE_TARGET}.cache-from=type=registry,ref=${CACHE_REF}"' "build-mfe-image uses registry cache fallback"
-check_contains "$MFE_BUILD" '--set "${BAKE_TARGET}.args.BUILDKIT_INLINE_CACHE=1"' "build-mfe-image exports inline cache metadata"
+check_contains "$OPENEDX_BUILD" '--local-defaults' "build-openedx-image exposes repo-local front-door defaults"
+check_contains "$MFE_BUILD" '--local-defaults' "build-mfe-image exposes repo-local front-door defaults"
+check_contains "$OPENEDX_BUILD" '--output-mode <push|docker>' "build-openedx-image documents explicit output mode selection"
+check_contains "$MFE_BUILD" '--output-mode <push|docker>' "build-mfe-image documents explicit output mode selection"
+OPENEDX_PROOF_JSON="$(bake_print openedx-proof \
+  "OPENEDX_PROOF_TAGS=example.invalid/openedx:one,example.invalid/openedx:two" \
+  "OPENEDX_CACHE_REF=example.invalid/openedx:cache" \
+  "OPENEDX_PROOF_GHA_SCOPE=verify-openedx-proof")"
+MFE_PROOF_JSON="$(bake_print mfe-proof \
+  "MFE_PROOF_TAGS=example.invalid/mfe:one,example.invalid/mfe:two" \
+  "MFE_CACHE_REF=example.invalid/mfe:cache" \
+  "MFE_PROOF_GHA_SCOPE=verify-mfe-proof")"
+
+check_bake_scalar "$OPENEDX_PROOF_JSON" "target.openedx-proof.context" "tutor_env/env/build/openedx" "openedx-proof resolves expected context"
+check_bake_scalar "$OPENEDX_PROOF_JSON" "target.openedx-proof.dockerfile" "Dockerfile" "openedx-proof resolves expected dockerfile"
+check_bake_label "$OPENEDX_PROOF_JSON" "openedx-proof" "io.mereka.build-profile" "proof" "openedx-proof resolves build-profile label"
+check_bake_label "$OPENEDX_PROOF_JSON" "openedx-proof" "io.mereka.build-scope" "openedx" "openedx-proof resolves build-scope label"
+check_bake_list_contains "$OPENEDX_PROOF_JSON" "target.openedx-proof.tags" "example.invalid/openedx:one" "openedx-proof resolves first image tag"
+check_bake_list_contains "$OPENEDX_PROOF_JSON" "target.openedx-proof.tags" "example.invalid/openedx:two" "openedx-proof resolves second image tag"
+check_bake_object_array_contains "$OPENEDX_PROOF_JSON" "target.openedx-proof.cache-from" "type=gha,scope=verify-openedx-proof" "openedx-proof resolves GHA cache restore"
+check_bake_object_array_contains "$OPENEDX_PROOF_JSON" "target.openedx-proof.cache-from" "type=registry,ref=example.invalid/openedx:cache" "openedx-proof resolves registry cache fallback"
+check_bake_object_array_contains "$OPENEDX_PROOF_JSON" "target.openedx-proof.cache-to" "type=gha,mode=max,scope=verify-openedx-proof" "openedx-proof resolves GHA cache write-back"
+check_bake_object_array_contains "$OPENEDX_PROOF_JSON" "target.openedx-proof.output" "type=docker" "openedx-proof retains docker output"
+check_bake_object_array_contains "$OPENEDX_PROOF_JSON" "target.openedx-proof.output" "type=image,push=true" "openedx-proof resolves push image output"
+
+check_bake_scalar "$MFE_PROOF_JSON" "target.mfe-proof.context" "tutor_env/env/plugins/mfe/build/mfe" "mfe-proof resolves expected context"
+check_bake_scalar "$MFE_PROOF_JSON" "target.mfe-proof.dockerfile" "Dockerfile" "mfe-proof resolves expected dockerfile"
+check_bake_label "$MFE_PROOF_JSON" "mfe-proof" "io.mereka.build-profile" "proof" "mfe-proof resolves build-profile label"
+check_bake_label "$MFE_PROOF_JSON" "mfe-proof" "io.mereka.build-scope" "mfe" "mfe-proof resolves build-scope label"
+check_bake_label "$MFE_PROOF_JSON" "mfe-proof" "io.mereka.rendered-context" "tutor_env/env/plugins/mfe/build/mfe" "mfe-proof resolves rendered-context label"
+check_bake_label "$MFE_PROOF_JSON" "mfe-proof" "io.mereka.rendered-dockerfile" "Dockerfile" "mfe-proof resolves rendered-dockerfile label"
+check_bake_list_contains "$MFE_PROOF_JSON" "target.mfe-proof.tags" "example.invalid/mfe:one" "mfe-proof resolves first image tag"
+check_bake_list_contains "$MFE_PROOF_JSON" "target.mfe-proof.tags" "example.invalid/mfe:two" "mfe-proof resolves second image tag"
+check_bake_object_array_contains "$MFE_PROOF_JSON" "target.mfe-proof.cache-from" "type=gha,scope=verify-mfe-proof" "mfe-proof resolves GHA cache restore"
+check_bake_object_array_contains "$MFE_PROOF_JSON" "target.mfe-proof.cache-from" "type=registry,ref=example.invalid/mfe:cache" "mfe-proof resolves registry cache fallback"
+check_bake_object_array_contains "$MFE_PROOF_JSON" "target.mfe-proof.cache-to" "type=gha,mode=max,scope=verify-mfe-proof" "mfe-proof resolves GHA cache write-back"
+check_bake_object_array_contains "$MFE_PROOF_JSON" "target.mfe-proof.output" "type=docker" "mfe-proof retains docker output"
+check_bake_object_array_contains "$MFE_PROOF_JSON" "target.mfe-proof.output" "type=image,push=true" "mfe-proof resolves push image output"
 
 check_contains "$BUILD_WORKFLOW" "uses: docker/setup-buildx-action" "build-tutor-images uses buildx"
 check_contains "$BUILD_WORKFLOW" "./scripts/infra/build-openedx-image.sh" "build-tutor-images routes OpenEdX through the cache-aware helper"
