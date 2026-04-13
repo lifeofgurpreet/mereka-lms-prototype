@@ -7,7 +7,35 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+SCOPE_MODE="${VERIFY_DESIGN_TOKEN_CI_SCOPE:-}"
+CHANGED_FILES_RAW="${VERIFY_DESIGN_TOKEN_CI_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
 PASS=0; FAIL=0
+
+should_skip_scope() {
+  [[ "$SCOPE_MODE" == "changed" ]] || return 1
+  [[ -n "$CHANGED_FILES_RAW" ]] || return 1
+
+  while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    case "$path" in
+      .github/workflows/ci.yml|\
+      scripts/qa/verify-design-token-ci.sh|\
+      assets/branding/tokens.css|\
+      assets/branding/tokens.provenance.json|\
+      infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css|\
+      infrastructure/tutor/themes/mereka/mfe/*)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
+
+if should_skip_scope; then
+  echo "PASS verify-design-token-ci (scope skip: no design-token-ci authority changes)"
+  exit 0
+fi
 
 check() {
   local desc="$1"; shift
