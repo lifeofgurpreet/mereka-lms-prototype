@@ -11,6 +11,9 @@
 #   ./verify-operational-hardening.sh --offline  # explicit offline
 set -euo pipefail
 
+SCOPE_MODE="${VERIFY_OPERATIONAL_HARDENING_SCOPE:-}"
+CHANGED_FILES_RAW="${VERIFY_OPERATIONAL_HARDENING_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
+
 # ── Colours ─────────────────────────────────────────────────────────────────
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -49,6 +52,26 @@ require_yq() {
     echo -e "${RED}Error: yq not found at $YQ${NC}"
     exit 1
   fi
+}
+
+should_skip_scope() {
+  local path
+
+  [[ "$SCOPE_MODE" == "changed" ]] || return 1
+  [[ -n "${CHANGED_FILES_RAW//[[:space:]]/}" ]] || return 1
+
+  while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    case "$path" in
+      .github/workflows/ci.yml|\
+      scripts/qa/verify-operational-hardening.sh|\
+      deploy/k8s/base/*)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
 }
 
 # ── Offline checks ───────────────────────────────────────────────────────────
@@ -365,6 +388,11 @@ while [[ $# -gt 0 ]]; do
 done
 
 require_yq
+
+if [[ "$MODE" == "offline" ]] && should_skip_scope; then
+  echo "PASS verify-operational-hardening (scope skip: no deploy-base operational changes)"
+  exit 0
+fi
 
 echo "Operational Hardening Verification"
 echo "==================================="
