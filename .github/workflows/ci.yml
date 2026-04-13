@@ -478,28 +478,7 @@ jobs:
             exit 0
           fi
 
-          mapfile -t markdown_files < <(
-            find docs specs -type f -name '*.md' ! -path 'docs/archive/*' | sort
-          )
-
-          if [[ "${#markdown_files[@]}" -eq 0 ]]; then
-            echo "No markdown files found under docs/ or specs/; skipping advisory markdown lint"
-            exit 0
-          fi
-
-          npm install --silent markdownlint-cli
-
-          markdownlint_jobs="$(
-            getconf _NPROCESSORS_ONLN 2>/dev/null \
-              || nproc 2>/dev/null \
-              || echo 4
-          )"
-          [[ "$markdownlint_jobs" =~ ^[0-9]+$ ]] || markdownlint_jobs=4
-          (( markdownlint_jobs > 0 )) || markdownlint_jobs=4
-
-          printf 'Linting %s markdown files with %s parallel workers\n' "${#markdown_files[@]}" "$markdownlint_jobs"
-          printf '%s\0' "${markdown_files[@]}" \
-            | xargs -0 -n 64 -P "$markdownlint_jobs" ./node_modules/.bin/markdownlint || true
+          npx --yes markdownlint-cli docs/ specs/ --ignore docs/archive/ || true
 
   static-validation-shards:
     name: Static Validation Scripts (${{ matrix.shard.key }})
