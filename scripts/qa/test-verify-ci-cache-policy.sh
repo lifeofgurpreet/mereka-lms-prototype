@@ -2,11 +2,54 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+SCOPE_MODE="${TEST_VERIFY_CI_CACHE_POLICY_SCOPE:-}"
+CHANGED_FILES_RAW="${TEST_VERIFY_CI_CACHE_POLICY_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
 tmpdir="$(mktemp -d -t verify-ci-cache-policy.XXXXXX)"
 cleanup() {
   rm -rf "$tmpdir"
 }
 trap cleanup EXIT
+
+should_skip_scope() {
+  local changed_path
+
+  if [[ "$SCOPE_MODE" != "changed" ]]; then
+    return 1
+  fi
+
+  if [[ -z "${CHANGED_FILES_RAW//[[:space:]]/}" ]]; then
+    return 1
+  fi
+
+  while IFS= read -r changed_path; do
+    [[ -z "$changed_path" ]] && continue
+    case "$changed_path" in
+      .github/workflows/build-tutor-images.yml|\
+      .github/workflows/e2e-tests.yml|\
+      .github/workflows/operations-gates-runtime.yml|\
+      .github/workflows/post-deploy-e2e.yml|\
+      .github/workflows/smoke-authenticated.yml|\
+      .github/workflows/smoke-unauthenticated.yml|\
+      .github/workflows/ci.yml|\
+      .github/actions/setup-playwright/*|\
+      .github/actions/setup-python-playwright/*|\
+      docker-bake.hcl|\
+      scripts/infra/build-openedx-image.sh|\
+      scripts/infra/build-mfe-image.sh|\
+      scripts/qa/test-verify-ci-cache-policy.sh|\
+      scripts/qa/verify-ci-cache-policy.sh)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
+
+if should_skip_scope; then
+  echo "PASS test-verify-ci-cache-policy (scope skip: no ci-cache-policy-relevant changes)"
+  exit 0
+fi
 
 mkdir -p "$tmpdir/repo"
 if command -v rsync >/dev/null 2>&1; then
