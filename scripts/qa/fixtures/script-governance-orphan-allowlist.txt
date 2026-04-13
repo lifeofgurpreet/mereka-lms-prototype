@@ -2,6 +2,7 @@ scripts/analytics/certificate-breakdown-by-course.py
 scripts/analytics/export-openedx-data-standalone.py
 scripts/analytics/openedx-export-certificates.py
 scripts/aspects/bootstrap-aspects-env.sh
+scripts/bench/export-build-proof-inventory.py
 scripts/clickup_import.py
 scripts/download-mct-thumbnails.py
 scripts/export-mct-courses-from-prod.py
@@ -17,8 +18,6 @@ scripts/migrations/mct/link_courses_to_programs.py
 scripts/migrations/mct/map_mct_users_to_openedx.py
 scripts/migrations/mct/setup_programs_django.py
 scripts/migrations/post_import_completions.py
-scripts/migrations/post_import_enterprise_catalogs.py
-scripts/migrations/post_import_metadata.py
 scripts/migrations/post_import_taxonomy.py
 scripts/migrations/reimport_missing_blocks.sh
 scripts/mobile/check_apple_setup.py

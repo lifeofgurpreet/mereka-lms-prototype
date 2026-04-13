@@ -23,7 +23,7 @@ concurrency:
 jobs:
   docs-authority:
     name: Docs Authority Invariants
-    runs-on: mereka-k8s-runners
+    runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
@@ -32,7 +32,7 @@ jobs:
 
   process-rules:
     name: Process Rules
-    runs-on: mereka-k8s-runners
+    runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
@@ -41,7 +41,7 @@ jobs:
 
   machine-truth:
     name: Machine Truth Freshness
-    runs-on: mereka-k8s-runners
+    runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
@@ -50,7 +50,7 @@ jobs:
 
   change-surface:
     name: Change Surface Contract
-    runs-on: mereka-k8s-runners
+    runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2

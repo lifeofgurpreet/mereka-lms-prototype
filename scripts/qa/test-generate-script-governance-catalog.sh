@@ -35,6 +35,14 @@ if runtime_entry.get("status") != "inventory_authoritative":
     raise SystemExit("expected verify-dev-visual-correctness.sh to be inventory_authoritative")
 if "ci_runtime_inventory" not in set(runtime_entry.get("caller_types", [])):
     raise SystemExit("expected verify-dev-visual-correctness.sh to be covered by ci_runtime_inventory")
+
+bench_export = scripts.get("scripts/bench/export-build-proof-inventory.py")
+if not bench_export:
+    raise SystemExit("expected export-build-proof-inventory.py to be cataloged")
+if "prod" in set(bench_export.get("env_scope", [])):
+    raise SystemExit("expected export-build-proof-inventory.py not to infer prod scope from producer-class strings")
+if bench_export.get("risk_level") in {"high", "critical"}:
+    raise SystemExit("expected export-build-proof-inventory.py not to be classified as dangerous")
 PY
 
 echo "OK"

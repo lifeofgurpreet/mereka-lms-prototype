@@ -42,7 +42,7 @@ concurrency:
 jobs:
   change-scope:
     name: Detect CodeQL language scope
-    runs-on: mereka-k8s-runners
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: read

@@ -476,7 +476,7 @@
         "prod"
       ],
       "kind": "verify",
-      "mutability": "read-only",
+      "mutability": "mutating",
       "owner": "platform-infra",
       "path": "scripts/infra/verify-tutor-config.sh",
       "reference_count": 41,
@@ -1867,6 +1867,34 @@
       ],
       "severity": "high",
       "spec_ids": [],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
+      "env_scope": [
+        "global"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-benchmark-artifact-contract.sh",
+      "reference_count": 4,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "high",
+      "spec_ids": [
+        "AC-BENCH-001"
+      ],
       "status": "active",
       "tier": "release_blocking"
     },
@@ -18722,27 +18750,27 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
-    "ci_static_bound": 388,
+    "ci_static_bound": 389,
     "kinds": {
-      "verify": 627
+      "verify": 628
     },
     "mutability": {
       "destructive": 9,
-      "mutating": 19,
+      "mutating": 20,
       "read-only": 599
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 439,
+      "active": 440,
       "deprecated_candidate": 1,
       "manual_only": 187
     },
     "tiers": {
       "exploratory_manual": 191,
       "periodic_runtime": 21,
-      "release_blocking": 415
+      "release_blocking": 416
     },
-    "total_verify_scripts": 627,
+    "total_verify_scripts": 628,
     "workflow_direct_bound": 67
   },
   "version": "1"
