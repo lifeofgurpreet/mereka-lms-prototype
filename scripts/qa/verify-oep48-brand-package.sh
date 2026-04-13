@@ -65,11 +65,19 @@ CMS_FONT_DIR="${THEME_ROOT}/cms/static/fonts"
 CMS_HEAD_EXTRA="${THEME_ROOT}/cms/templates/head-extra.html"
 CMS_FOOTER_WIDGET="${THEME_ROOT}/cms/templates/widgets/footer.html"
 MFE_RENDERED_DOCKERFILE="${REPO_ROOT}/tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
+MFE_PLUGIN_DOCKERFILE="${REPO_ROOT}/infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py"
 MFE_SNAPSHOT_DOCKERFILE="${REPO_ROOT}/infrastructure/tutor/mfe-build/Dockerfile"
+MFE_DOCKERFILE=""
+MFE_DOCKERFILE_LABEL=""
 if [[ -f "${MFE_RENDERED_DOCKERFILE}" ]]; then
   MFE_DOCKERFILE="${MFE_RENDERED_DOCKERFILE}"
-else
+  MFE_DOCKERFILE_LABEL="rendered MFE Dockerfile"
+elif [[ -f "${MFE_PLUGIN_DOCKERFILE}" ]]; then
+  MFE_DOCKERFILE="${MFE_PLUGIN_DOCKERFILE}"
+  MFE_DOCKERFILE_LABEL="plugin MFE Dockerfile authority"
+elif [[ -f "${MFE_SNAPSHOT_DOCKERFILE}" ]]; then
   MFE_DOCKERFILE="${MFE_SNAPSHOT_DOCKERFILE}"
+  MFE_DOCKERFILE_LABEL="snapshot MFE Dockerfile"
 fi
 PLUGIN_FILE="${PLUGIN_MAIN}"
 PROVENANCE="${ASSETS_BRANDING}/tokens.provenance.json"
@@ -468,34 +476,36 @@ echo "[SECTION 7] MFE brand package wiring"
 if [[ -f "${MFE_DOCKERFILE}" ]]; then
   if [[ "${MFE_DOCKERFILE}" == "${MFE_RENDERED_DOCKERFILE}" ]]; then
     pass "rendered MFE Dockerfile exists"
+  elif [[ "${MFE_DOCKERFILE}" == "${MFE_PLUGIN_DOCKERFILE}" ]]; then
+    warn "rendered MFE Dockerfile missing — verifying plugin MFE Dockerfile authority instead"
   else
-    warn "rendered MFE Dockerfile missing — falling back to snapshot Dockerfile"
+    warn "rendered and plugin MFE Dockerfile authority missing — falling back to snapshot Dockerfile"
   fi
   # Brand package must be installed via the local @edx/brand alias on the active path.
   if grep -q "@edx/brand@file:./brand-mereka" "${MFE_DOCKERFILE}"; then
-    pass "Dockerfile installs local @edx/brand alias (brand-mereka)"
+    pass "${MFE_DOCKERFILE_LABEL} installs local @edx/brand alias (brand-mereka)"
   else
-    fail "Dockerfile missing local @edx/brand alias — active MFE brand package not wired"
+    fail "${MFE_DOCKERFILE_LABEL} missing local @edx/brand alias — active MFE brand package not wired"
   fi
   if grep -q "indigo-brand-openedx" "${MFE_DOCKERFILE}"; then
-    fail "Dockerfile still references legacy indigo-brand-openedx package"
+    fail "${MFE_DOCKERFILE_LABEL} still references legacy indigo-brand-openedx package"
   else
-    pass "Dockerfile has no legacy indigo-brand-openedx package reference"
+    pass "${MFE_DOCKERFILE_LABEL} has no legacy indigo-brand-openedx package reference"
   fi
   # The Mereka SCSS directory must be copied into the container
   if grep -q "COPY.*mereka\|COPY.*indigo/mereka" "${MFE_DOCKERFILE}"; then
-    pass "Dockerfile copies Mereka SCSS directory into MFE container"
+    pass "${MFE_DOCKERFILE_LABEL} copies Mereka SCSS directory into MFE container"
   else
-    warn "Dockerfile may not copy mereka/ SCSS dir into container — MFE branding may be missing"
+    warn "${MFE_DOCKERFILE_LABEL} may not copy mereka/ SCSS dir into container — MFE branding may be missing"
   fi
   # No Google Fonts in Dockerfile
   if grep -qi "fonts.googleapis.com\|fonts.gstatic.com" "${MFE_DOCKERFILE}"; then
-    fail "Dockerfile references Google Fonts — must use self-hosted fonts"
+    fail "${MFE_DOCKERFILE_LABEL} references Google Fonts — must use self-hosted fonts"
   else
-    pass "Dockerfile has no Google Fonts references"
+    pass "${MFE_DOCKERFILE_LABEL} has no Google Fonts references"
   fi
 else
-  warn "mfe-build/Dockerfile snapshot missing — cannot verify MFE brand wiring"
+  warn "No rendered, plugin, or snapshot MFE Dockerfile surface found — cannot verify MFE brand wiring"
 fi
 
 echo ""
