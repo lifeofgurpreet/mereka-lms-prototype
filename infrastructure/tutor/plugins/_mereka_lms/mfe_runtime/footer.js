@@ -1,6 +1,15 @@
 // Footer component and related helpers.
 // MerekaFooter is wired into org.openedx.frontend.layout.footer.v1 by PLUGIN_SLOTS in mereka_lms.py.
 
+const getMerekaFooterNavLinks = (footerContent, footerSupport, variant) => {
+  const configuredLinks = Array.isArray(footerContent.navLinks) ? footerContent.navLinks : [];
+  return [
+    ...configuredLinks,
+    { label: footerSupport.helpLabel || 'Help Centre', url: variant.helpUrl },
+    { label: footerSupport.contactSupportLabel || 'Contact Support', url: 'mailto:' + variant.supportEmail },
+  ];
+};
+
 // Custom Mereka footer component (Direct plugin — registered via footer_slot)
 // Wired into org.openedx.frontend.layout.footer.v1 by PLUGIN_SLOTS in mereka_lms.py
 const MerekaFooter = () => {
@@ -17,11 +26,7 @@ const MerekaFooter = () => {
   const logoPath = variant.logoUrl || '/theme/logo-horizontal.svg';
   const logoUrl = getMerekaThemeAssetUrl(config, logoPath);
   const socialLinks = footerContent.socialLinks;
-  const navLinks = [
-    ...footerContent.navLinks,
-    { label: footerSupport.helpLabel || 'Help Centre', url: variant.helpUrl },
-    { label: footerSupport.contactSupportLabel || 'Contact Support', url: 'mailto:' + variant.supportEmail },
-  ];
+  const footerNavLinks = getMerekaFooterNavLinks(footerContent, footerSupport, variant);
   const corporateLinks = (footerSections.corporate && footerSections.corporate.links) || [];
   const marketplaceUserLinks = footerMarketplace.userLinks || [];
   const marketplaceBusinessLinks = footerMarketplace.businessLinks || [];
@@ -84,7 +89,7 @@ const MerekaFooter = () => {
       <div className="footer-nav">
         <div className="footer-container">
           <nav className="footer-nav-links">
-            {navLinks.map(l => (
+            {footerNavLinks.map(l => (
               <a key={l.label} href={l.url} target="_blank" rel="noopener noreferrer">{l.label}</a>
             ))}
           </nav>

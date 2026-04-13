@@ -388,7 +388,6 @@ declare -A SETTING_TO_DIR=(
   ["LEARNING_MICROFRONTEND_URL"]="learning"
   ["ORA_GRADING_MICROFRONTEND_URL"]="ora-grading"
   ["PROFILE_MICROFRONTEND_URL"]="profile"
-  ["ORDER_HISTORY_MICROFRONTEND_URL"]="__orders_proxy__"
 )
 
 while IFS= read -r setting; do
@@ -400,13 +399,7 @@ while IFS= read -r setting; do
 
   expected_dir="${SETTING_TO_DIR[$setting]}"
 
-  if [[ "$expected_dir" == "__orders_proxy__" ]]; then
-    if grep -Fq "reverse_proxy /orders* payments-gateway:8080" "$CADDYFILE"; then
-      do_pass "AC-MFERT-002: LMS setting $setting has Caddy proxy /orders* → payments-gateway"
-    else
-      do_fail "AC-MFERT-002: LMS setting $setting missing Caddy proxy /orders* → payments-gateway"
-    fi
-  elif grep -q "/openedx/dist/$expected_dir" "$CADDYFILE"; then
+  if grep -q "/openedx/dist/$expected_dir" "$CADDYFILE"; then
     do_pass "AC-MFERT-002: LMS setting $setting has Caddy route to $expected_dir"
   else
     do_fail "AC-MFERT-002: LMS setting $setting has no Caddy route to $expected_dir"
@@ -501,18 +494,12 @@ echo ""
 # =============================================================================
 # Section 10: Deprecated MFE Proxy Routes (AC-MFERT-002)
 # =============================================================================
-echo "--- Deprecated MFE Proxy Routes (AC-MFERT-002) ---"
+echo "--- Deprecated Route Absence (AC-MFERT-002) ---"
 
-if grep -q "reverse_proxy /orders\* payments-gateway" "$CADDYFILE"; then
-  do_pass "AC-MFERT-002: /orders proxied to payments-gateway"
+if grep -q "reverse_proxy /orders\*" "$CADDYFILE" || grep -q "reverse_proxy /payment\*" "$CADDYFILE"; then
+  do_fail "AC-MFERT-002: stale /orders or /payment proxy still present in MFE Caddyfile"
 else
-  do_fail "AC-MFERT-002: /orders proxy to payments-gateway missing"
-fi
-
-if grep -q "reverse_proxy /payment\* payments-gateway" "$CADDYFILE"; then
-  do_pass "AC-MFERT-002: /payment proxied to payments-gateway"
-else
-  do_fail "AC-MFERT-002: /payment proxy to payments-gateway missing"
+  do_pass "AC-MFERT-002: stale /orders and /payment proxy routes absent from MFE Caddyfile"
 fi
 
 echo ""

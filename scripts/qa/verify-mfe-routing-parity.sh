@@ -320,20 +320,13 @@ echo ""
 # =============================================================================
 # Section 8: Payments proxy routes (AC-ROUTE-001)
 # =============================================================================
-echo "--- Deprecated MFE Payments Proxy (AC-ROUTE-001) ---"
+echo "--- Deprecated Compat Route Absence (AC-ROUTE-001) ---"
 
-if grep -q "reverse_proxy /orders" "$MFE_CADDYFILE" && \
-   grep -A2 "reverse_proxy /orders" "$MFE_CADDYFILE" | grep -q "payments-gateway"; then
-  do_pass "AC-ROUTE-001: /orders* proxied to payments-gateway"
+if grep -q "reverse_proxy /orders" "$MFE_CADDYFILE" || \
+   grep -q "reverse_proxy /payment" "$MFE_CADDYFILE"; then
+  do_fail "AC-ROUTE-001: stale /orders or /payment proxy still present"
 else
-  do_fail "AC-ROUTE-001: /orders* proxy to payments-gateway MISSING"
-fi
-
-if grep -q "reverse_proxy /payment" "$MFE_CADDYFILE" && \
-   grep -A2 "reverse_proxy /payment" "$MFE_CADDYFILE" | grep -q "payments-gateway"; then
-  do_pass "AC-ROUTE-001: /payment* proxied to payments-gateway"
-else
-  do_fail "AC-ROUTE-001: /payment* proxy to payments-gateway MISSING"
+  do_pass "AC-ROUTE-001: stale /orders and /payment proxies absent"
 fi
 
 echo ""

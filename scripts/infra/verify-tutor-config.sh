@@ -345,6 +345,11 @@ if [[ -f "$MFE_DOCKERFILE" ]]; then
   else
     check_pass "Rendered MFE Dockerfile is a regular file"
   fi
+  if grep -qE 'for attempt in 1 2 3.*npm clean-install.*npm install --no-audit --no-fund --registry=\$NPM_REGISTRY' "$MFE_DOCKERFILE" 2>/dev/null; then
+    check_pass "Rendered MFE Dockerfile uses clean-install with npm install fallback"
+  else
+    check_fail "Rendered MFE Dockerfile is missing clean-install fallback policy: $MFE_DOCKERFILE"
+  fi
 else
   check_warn "MFE Dockerfile not found (ok if MFE plugin not installed)"
 fi
@@ -368,7 +373,7 @@ fi
 if [[ -f "$MFE_PATCH_MODULE" ]]; then
   pattern_in_file "mfe-dockerfile-pre-npm-install" "$MFE_PATCH_MODULE" "MFE plugin defines pre-npm-install hook"
   pattern_in_file "mfe-dockerfile-post-npm-install" "$MFE_PATCH_MODULE" "MFE plugin defines post-npm-install hook"
-  pattern_in_file "node_modules/@edx/brand" "$MFE_PATCH_MODULE" "MFE plugin overlays local brand package onto @edx/brand"
+  pattern_in_file "@edx/brand@file:./brand-mereka" "$MFE_PATCH_MODULE" "MFE plugin installs local brand package"
   pattern_in_file "frontend-plugin-framework@^1.8.0" "$MFE_PATCH_MODULE" "MFE plugin installs frontend-plugin-framework"
 else
   check_fail "MFE Dockerfile patch module missing: $MFE_PATCH_MODULE"
@@ -377,7 +382,7 @@ fi
 if [[ -f "$MFE_DOCKERFILE" ]]; then
   regex_in_file "(docker.io/)?node:(18|20|24)[-a-z0-9.]*" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile uses supported Node image"
   pattern_in_file "frontend-plugin-framework@^1.8.0" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile contains frontend-plugin-framework install"
-  pattern_in_file "node_modules/@edx/brand" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile overlays local brand package onto @edx/brand"
+  pattern_in_file "@edx/brand@file:./brand-mereka" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile contains local brand package install"
 fi
 
 if [[ -f "$MFE_ENV_CONFIG" ]]; then

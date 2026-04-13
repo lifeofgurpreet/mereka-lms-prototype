@@ -11,7 +11,7 @@ Usage:
     --primary-tag <tag> \
     --secondary-tag <tag> \
     --cache-ref <repo:tag> \
-    [--build-profile <proof|fast>] \
+    [--build-profile <proof|fast|compat>] \
     [--mutable-tag <tag>]
 EOF
 }
@@ -68,15 +68,15 @@ build_failed_due_to_transient_github_fetch() {
 }
 
 case "$BUILD_PROFILE" in
-  proof|fast) ;;
+  proof|fast|compat) ;;
   *)
-    echo "Unsupported build profile: $BUILD_PROFILE (expected proof or fast)" >&2
+    echo "Unsupported build profile: $BUILD_PROFILE (expected proof, fast, or compat)" >&2
     exit 1
     ;;
 esac
 
-if [[ "$BUILD_PROFILE" == "fast" && -n "$MUTABLE_TAG" ]]; then
-  echo "Fast build profile cannot publish mutable tags; use proof for promotable builds." >&2
+if [[ "$BUILD_PROFILE" != "proof" && -n "$MUTABLE_TAG" ]]; then
+  echo "Only the proof build profile can publish mutable tags." >&2
   exit 1
 fi
 

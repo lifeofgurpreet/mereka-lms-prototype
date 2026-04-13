@@ -63,9 +63,8 @@ else
     ["Node 24 toolchain (pre-npm-install hook)"]="mfe-dockerfile-pre-npm-install"
     ["g++ python3 toolchain extension"]="gcc g++ git libgl1 libxi6 make python3 python3-distutils"
     ["Mereka brand package copy"]="COPY indigo/brand-mereka /openedx/app/brand-mereka"
-    ["Cookie domain ENV injection"]="SESSION_COOKIE_DOMAIN"
     ["Frontend plugin framework install"]="frontend-plugin-framework@^1.8.0"
-    ["Local brand overlay"]="node_modules/@edx/brand"
+    ["Local brand alias"]="@edx/brand@file:./brand-mereka"
     ["Admin console Redux deps"]="react-redux@^8.1.3"
     ["Account social_links guard"]="unguarded social_links lookup survived account build"
   )
@@ -133,11 +132,17 @@ else
     check_fail "Mereka theme copy not found — custom footer branding may be broken"
   fi
 
-  # Check SESSION_COOKIE_DOMAIN
+  # Check cookie domains are not baked into the default rendered MFE Dockerfile.
   if grep -q 'SESSION_COOKIE_DOMAIN' "$TUTOR_ENV" 2>/dev/null; then
-    check_pass "SESSION_COOKIE_DOMAIN env var present in MFE Dockerfile"
+    check_fail "SESSION_COOKIE_DOMAIN still baked into MFE Dockerfile — runtime mfe_config contract regressed"
   else
-    check_fail "SESSION_COOKIE_DOMAIN not found — multi-domain cookie patch missing"
+    check_pass "SESSION_COOKIE_DOMAIN not baked into default MFE Dockerfile"
+  fi
+
+  if grep -q 'CSRF_COOKIE_DOMAIN' "$TUTOR_ENV" 2>/dev/null; then
+    check_fail "CSRF_COOKIE_DOMAIN still baked into MFE Dockerfile — runtime mfe_config contract regressed"
+  else
+    check_pass "CSRF_COOKIE_DOMAIN not baked into default MFE Dockerfile"
   fi
 
   # Check npm resilience block
@@ -154,16 +159,29 @@ else
     check_fail "frontend-plugin-framework not found in MFE Dockerfile"
   fi
 
-  # Check indigo brand ulmo pin
-  if grep -qF 'indigo-brand-openedx@^2.4.2' "$TUTOR_ENV" 2>/dev/null; then
-    check_pass "Indigo brand Ulmo pin (@^2.4.2) present in MFE Dockerfile"
+  if grep -qF '@edx/brand@file:./brand-mereka' "$TUTOR_ENV" 2>/dev/null; then
+    check_pass "Local brand alias (@edx/brand@file:./brand-mereka) present in MFE Dockerfile"
   else
-    if grep -qF 'indigo-brand-openedx' "$TUTOR_ENV" 2>/dev/null; then
-      BRAND_LINE=$(grep -F 'indigo-brand-openedx' "$TUTOR_ENV" | head -1)
-      check_fail "Indigo brand pin is not @^2.4.2 — found: $BRAND_LINE"
-    else
-      check_warn "Indigo brand package not referenced in MFE Dockerfile (may use different brand package)"
-    fi
+    check_fail "Local brand alias missing from MFE Dockerfile"
+  fi
+
+  if grep -qF 'indigo-brand-openedx' "$TUTOR_ENV" 2>/dev/null; then
+    BRAND_LINE=$(grep -F 'indigo-brand-openedx' "$TUTOR_ENV" | head -1)
+    check_fail "Legacy registry brand package still referenced in MFE Dockerfile — found: $BRAND_LINE"
+  else
+    check_pass "Legacy registry brand package absent from default MFE Dockerfile"
+  fi
+
+  if grep -qF "react-intl@^6.4.0" "$TUTOR_ENV" 2>/dev/null; then
+    check_fail "Deprecated payment-shell react-intl compat patch leaked into default MFE Dockerfile"
+  else
+    check_pass "Deprecated payment-shell react-intl compat patch absent from default MFE Dockerfile"
+  fi
+
+  if grep -q 'ENABLE_NEW_RELIC' "$TUTOR_ENV" 2>/dev/null; then
+    check_fail "ENABLE_NEW_RELIC still baked into MFE Dockerfile — runtime mfe_config contract regressed"
+  else
+    check_pass "ENABLE_NEW_RELIC not baked into default MFE Dockerfile"
   fi
 fi
 

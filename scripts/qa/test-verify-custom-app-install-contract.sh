@@ -24,39 +24,56 @@ def _render_copy_lines(apps):
     return "\n".join(["COPY demo" for _ in apps])
 
 
-def _render_install_lines(apps):
-    return "\n".join(["RUN pip install -e /openedx/custom-apps/openedx_demo_app" for _ in apps])
+def _render_install_block(apps, *, editable_when_requested):
+    if editable_when_requested:
+        return (
+            'RUN if [ "$MEREKA_CUSTOM_APP_INSTALL_MODE" = "editable" ]; then \\\n'
+            "      $PIP_COMMAND install \\\n"
+            "        -e /openedx/openedx_demo_app; \\\n"
+            "    else \\\n"
+            "      $PIP_COMMAND install \\\n"
+            "        /openedx/openedx_demo_app; \\\n"
+            "    fi"
+        )
+    return "RUN $PIP_COMMAND install \\\n        /openedx/openedx_demo_app"
 
 
 def _render_runtime_copy_lines(apps):
     return "\n".join(
         [
-            "COPY --from=python-requirements --chown=app:app /openedx/{app} /openedx/{app}"
+            "cp -a /tmp/python-requirements-openedx/{app} /openedx/{app} && \\"
             for _ in apps
         ]
     )
 
 
 _stable_copy_lines = _render_copy_lines(_STABLE_CUSTOM_APPS)
-_stable_install_lines = _render_install_lines(_STABLE_CUSTOM_APPS)
+_stable_install_block = _render_install_block(
+    _STABLE_CUSTOM_APPS,
+    editable_when_requested=False,
+)
 _high_churn_copy_lines = _render_copy_lines(_HIGH_CHURN_CUSTOM_APPS)
-_high_churn_install_lines = _render_install_lines(_HIGH_CHURN_CUSTOM_APPS)
-_runtime_copy_lines = _render_runtime_copy_lines(_CUSTOM_APPS)
+_high_churn_install_block = _render_install_block(
+    _HIGH_CHURN_CUSTOM_APPS,
+    editable_when_requested=True,
+)
+_runtime_copy_lines = _render_runtime_copy_lines(_HIGH_CHURN_CUSTOM_APPS)
 
 PATCH_TEXT = """
-# Copy and install stable custom apps first for cache reuse.
+# Copy and install stable custom apps after the support dependency layer so
+# stable-app iteration only invalidates the grouped install tail.
 {_stable_copy_lines}
-{_stable_install_lines}
+{_stable_install_block}
 
 # Copy and install high-churn custom apps last to reduce invalidation blast radius.
 {_high_churn_copy_lines}
-{_high_churn_install_lines}
+{_high_churn_install_block}
 """
 
 FINAL_PATCH_NAME = "openedx-dockerfile-final"
 FINAL_PATCH = """
 {_runtime_copy_lines}
-COPY --from=python-requirements --chown=app:app /openedx/plugins/mereka_tenancy /openedx/plugins/mereka_tenancy
+cp -a /tmp/python-requirements-openedx/plugins/mereka_tenancy /openedx/plugins/mereka_tenancy; \\
 """
 EOF_PATCH
 
@@ -115,39 +132,56 @@ def _render_copy_lines(apps):
     return "\n".join(["COPY demo" for _ in apps])
 
 
-def _render_install_lines(apps):
-    return "\n".join(["RUN pip install -e /openedx/custom-apps/openedx_demo_app" for _ in apps])
+def _render_install_block(apps, *, editable_when_requested):
+    if editable_when_requested:
+        return (
+            'RUN if [ "$MEREKA_CUSTOM_APP_INSTALL_MODE" = "editable" ]; then \\\n'
+            "      $PIP_COMMAND install \\\n"
+            "        -e /openedx/openedx_demo_app; \\\n"
+            "    else \\\n"
+            "      $PIP_COMMAND install \\\n"
+            "        /openedx/openedx_demo_app; \\\n"
+            "    fi"
+        )
+    return "RUN $PIP_COMMAND install \\\n        /openedx/openedx_demo_app"
 
 
 def _render_runtime_copy_lines(apps):
     return "\n".join(
         [
-            "COPY --from=python-requirements --chown=app:app /openedx/{app} /openedx/{app}"
+            "cp -a /tmp/python-requirements-openedx/{app} /openedx/{app} && \\"
             for _ in apps
         ]
     )
 
 
 _stable_copy_lines = _render_copy_lines(_STABLE_CUSTOM_APPS)
-_stable_install_lines = _render_install_lines(_STABLE_CUSTOM_APPS)
+_stable_install_block = _render_install_block(
+    _STABLE_CUSTOM_APPS,
+    editable_when_requested=False,
+)
 _high_churn_copy_lines = _render_copy_lines(_HIGH_CHURN_CUSTOM_APPS)
-_high_churn_install_lines = _render_install_lines(_HIGH_CHURN_CUSTOM_APPS)
-_runtime_copy_lines = _render_runtime_copy_lines(_CUSTOM_APPS)
+_high_churn_install_block = _render_install_block(
+    _HIGH_CHURN_CUSTOM_APPS,
+    editable_when_requested=True,
+)
+_runtime_copy_lines = _render_runtime_copy_lines(_HIGH_CHURN_CUSTOM_APPS)
 
 PATCH_TEXT = """
-# Copy and install stable custom apps first for cache reuse.
+# Copy and install stable custom apps after the support dependency layer so
+# stable-app iteration only invalidates the grouped install tail.
 {_stable_copy_lines}
-{_stable_install_lines}
+{_stable_install_block}
 
 # Copy and install high-churn custom apps last to reduce invalidation blast radius.
 {_high_churn_copy_lines}
-{_high_churn_install_lines}
+{_high_churn_install_block}
 """
 
 FINAL_PATCH_NAME = "openedx-dockerfile-final"
 FINAL_PATCH = """
 {_runtime_copy_lines}
-COPY --from=python-requirements --chown=app:app /openedx/plugins/mereka_tenancy /openedx/plugins/mereka_tenancy
+cp -a /tmp/python-requirements-openedx/plugins/mereka_tenancy /openedx/plugins/mereka_tenancy; \\
 """
 EOF_PATCH
 

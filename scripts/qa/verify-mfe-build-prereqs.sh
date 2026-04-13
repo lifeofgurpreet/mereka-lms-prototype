@@ -12,14 +12,20 @@ APPLY_PATCH_SCRIPT="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 PATCH_MODULE="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py"
 SLOT_OWNERSHIP_PATCH="$REPO_ROOT/infrastructure/tutor/patches/mfe-slot-ownership.sh"
 SLOT_OWNERSHIP_HELPER="$REPO_ROOT/infrastructure/tutor/patches/mfe_slot_ownership.py"
+PRUNE_DEPRECATED_SHELLS_PATCH="$REPO_ROOT/infrastructure/tutor/patches/mfe-prune-deprecated-shells.sh"
+PRUNE_DEPRECATED_SHELLS_HELPER="$REPO_ROOT/infrastructure/tutor/patches/mfe_prune_deprecated_shells.py"
 GENERATED_MFE_DOCKERFILE="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
 GENERATED_MFE_BUILD_DIR="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe"
+ACTIVE_MFE_DOCKERFILE_PATH="tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
+LEGACY_MFE_DOCKERFILE_PATH="tutor_env/env/build/mfe/Dockerfile"
 GENERATED_MFE_INDIGO_DIR="$GENERATED_MFE_BUILD_DIR/indigo"
 GENERATED_MFE_INDIGO_ENV="$GENERATED_MFE_INDIGO_DIR/env.config.jsx"
 GENERATED_MFE_INDIGO_THEME_DIR="$GENERATED_MFE_INDIGO_DIR/mereka"
 
 PLUGIN_INSTALL_LINE="RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'"
 LEGACY_PLUGIN_INSTALL_LINE="RUN npm install '@openedx/frontend-plugin-framework@^1.8.0'"
+REDUX_INSTALL_LINE="RUN npm install --legacy-peer-deps 'react-redux@^8.1.3' 'redux@^4.2.1'"
+PAYMENT_REACT_INTL_INSTALL_LINE="RUN npm install --legacy-peer-deps 'react-intl@^6.4.0'"
 NODE_IMAGE_REGEX="(docker.io/)?node:(18|24|20)[-a-z0-9.]*"
 
 REQUIRE_GENERATED_DOCKERFILE="${REQUIRE_GENERATED_DOCKERFILE:-0}"
@@ -78,6 +84,18 @@ check_contains_any_file() {
   failures=1
 }
 
+check_no_legacy_mfe_render_path_refs() {
+  local hits
+  hits="$(cd "$REPO_ROOT" && rg -n --fixed-strings "$LEGACY_MFE_DOCKERFILE_PATH" scripts/ci scripts/infra scripts/qa .github/workflows infrastructure/tutor -g '!docs/**' -g '!scripts/qa/verify-mfe-build-prereqs.sh' || true)"
+  if [[ -z "$hits" ]]; then
+    echo "  ✓ active build/QA surfaces do not reference legacy $LEGACY_MFE_DOCKERFILE_PATH"
+  else
+    echo "  ✗ legacy MFE rendered Dockerfile path leaked into active build/QA surfaces:"
+    printf '%s\n' "$hits" | sed 's/^/    /'
+    failures=1
+  fi
+}
+
 check_jsx_parse() {
   local label="$1"
   local path="$2"
@@ -122,17 +140,23 @@ else
 fi
 check_contains "apply-patches sources MFE slot ownership patch" "$APPLY_PATCH_SCRIPT" "source \"\$PATCHES_DIR/mfe-slot-ownership.sh\""
 check_contains "apply-patches applies MFE slot ownership patch" "$APPLY_PATCH_SCRIPT" "apply_mfe_slot_ownership_patch"
+check_contains "apply-patches sources deprecated shell prune patch" "$APPLY_PATCH_SCRIPT" "source \"\$PATCHES_DIR/mfe-prune-deprecated-shells.sh\""
+check_contains "apply-patches applies deprecated shell prune patch" "$APPLY_PATCH_SCRIPT" "apply_mfe_prune_deprecated_shells_patch"
 # Plugin module now carries all MFE Dockerfile hooks (tracker #32)
 check_contains "plugin module defines pre-npm-install hook" "$PATCH_MODULE" "mfe-dockerfile-pre-npm-install"
 check_contains "plugin module defines post-npm-install hook" "$PATCH_MODULE" "mfe-dockerfile-post-npm-install"
 check_contains "plugin module installs frontend-plugin-framework" "$PATCH_MODULE" "frontend-plugin-framework@^1.8.0"
-check_contains "plugin module overlays local brand package" "$PATCH_MODULE" "node_modules/@edx/brand"
+check_contains "plugin module installs local brand package" "$PATCH_MODULE" "@edx/brand@file:./brand-mereka"
 check_contains "slot ownership shell delegates to Python helper" "$SLOT_OWNERSHIP_PATCH" "mfe_slot_ownership.py"
 check_contains "slot ownership helper defines strip_slot_ownership" "$SLOT_OWNERSHIP_HELPER" "def strip_slot_ownership("
+check_contains "deprecated shell prune helper defines orders/payment app set" "$PRUNE_DEPRECATED_SHELLS_HELPER" "APPS = (\"orders\", \"payment\")"
+check_contains "deprecated shell prune helper strips ENABLE_NEW_RELIC build env" "$PRUNE_DEPRECATED_SHELLS_HELPER" "ARG ENABLE_NEW_RELIC=false"
 check_contains_any_file "plugin injects plugin dependency line" "$PLUGIN_INSTALL_LINE" "$PATCH_MODULE"
 
 echo ""
 echo "2. Generated Dockerfile contract..."
+check_no_legacy_mfe_render_path_refs
+echo "  ✓ active rendered MFE Dockerfile authority path: $ACTIVE_MFE_DOCKERFILE_PATH"
 if [[ -f "$GENERATED_MFE_DOCKERFILE" ]]; then
   check_contains_regex "generated Dockerfile uses supported Node image" "$GENERATED_MFE_DOCKERFILE" "$NODE_IMAGE_REGEX"
   check_contains "generated Dockerfile contains plugin install line" "$GENERATED_MFE_DOCKERFILE" "$PLUGIN_INSTALL_LINE"
@@ -140,13 +164,53 @@ if [[ -f "$GENERATED_MFE_DOCKERFILE" ]]; then
   check_contains "generated Dockerfile hardens base-stage apt https timeout" "$GENERATED_MFE_DOCKERFILE" 'Acquire::https::Timeout "30"'
   check_contains "generated Dockerfile forces IPv4 for apt" "$GENERATED_MFE_DOCKERFILE" 'Acquire::ForceIPv4 "true"'
   check_contains "generated Dockerfile uses fix-missing apt install" "$GENERATED_MFE_DOCKERFILE" '--fix-missing git'
+  check_contains "generated Dockerfile installs CA certificates for atlas/git translation pulls" "$GENERATED_MFE_DOCKERFILE" 'ca-certificates'
+  check_contains "generated Dockerfile refreshes CA bundle after install" "$GENERATED_MFE_DOCKERFILE" 'update-ca-certificates'
+  check_contains "generated Dockerfile pins git SSL CA bundle for atlas/git translation pulls" "$GENERATED_MFE_DOCKERFILE" 'http.sslCAInfo /etc/ssl/certs/ca-certificates.crt'
+  if grep -Eq '^Acquire::(http|https|ForceIPv4|Retries)' "$GENERATED_MFE_DOCKERFILE"; then
+    echo "  ✗ generated Dockerfile leaks bare Acquire:: apt policy lines outside a RUN continuation"
+    failures=1
+  else
+    echo "  ✓ generated Dockerfile keeps apt policy lines inside a valid RUN continuation"
+  fi
 
-  plugin_count="$(grep -F -- "$PLUGIN_INSTALL_LINE" "$GENERATED_MFE_DOCKERFILE" | wc -l | tr -d ' ')"
+  plugin_count="$(grep -F -c -- "$PLUGIN_INSTALL_LINE" "$GENERATED_MFE_DOCKERFILE" || true)"
   if [[ "${plugin_count:-0}" -ge 1 ]]; then
     echo "  ✓ generated Dockerfile plugin install occurrences: ${plugin_count}"
   else
     echo "  ✗ generated Dockerfile plugin install occurrences: 0"
     failures=1
+  fi
+
+  redux_count="$(grep -F -c -- "$REDUX_INSTALL_LINE" "$GENERATED_MFE_DOCKERFILE" || true)"
+  if [[ "${redux_count:-0}" -ge 2 ]]; then
+    echo "  ✓ generated Dockerfile redux install occurrences: ${redux_count}"
+  else
+    echo "  ✗ generated Dockerfile redux install occurrences: ${redux_count:-0} (expected >=2 for admin-console and authn)"
+    failures=1
+  fi
+
+  payment_react_intl_count="$(grep -F -c -- "$PAYMENT_REACT_INTL_INSTALL_LINE" "$GENERATED_MFE_DOCKERFILE" || true)"
+  if [[ "${payment_react_intl_count:-0}" -eq 0 ]]; then
+    echo "  ✓ generated Dockerfile payment react-intl compat patch absent from default path"
+  else
+    echo "  ✗ generated Dockerfile payment react-intl compat patch occurrences: ${payment_react_intl_count:-0} (expected 0 on pruned default path)"
+    failures=1
+  fi
+
+  new_relic_count="$(grep -c 'ARG ENABLE_NEW_RELIC\\|ENV ENABLE_NEW_RELIC' "$GENERATED_MFE_DOCKERFILE" || true)"
+  if [[ "${new_relic_count:-0}" -eq 0 ]]; then
+    echo "  ✓ generated Dockerfile ENABLE_NEW_RELIC build env absent from default path"
+  else
+    echo "  ✗ generated Dockerfile ENABLE_NEW_RELIC build env occurrences: ${new_relic_count:-0} (expected 0 on runtime-driven default path)"
+    failures=1
+  fi
+
+  if grep -Eq "orders-common|payment-common" "$GENERATED_MFE_DOCKERFILE"; then
+    echo "  ✗ generated Dockerfile still contains deprecated orders/payment stages"
+    failures=1
+  else
+    echo "  ✓ generated Dockerfile prunes deprecated orders/payment stages"
   fi
 
   if grep -Fq -- "$LEGACY_PLUGIN_INSTALL_LINE" "$GENERATED_MFE_DOCKERFILE"; then
@@ -170,10 +234,10 @@ if [[ -f "$GENERATED_MFE_DOCKERFILE" ]]; then
     echo "  ✓ generated Dockerfile has no stale base-stage apt bootstrap"
   fi
 
-  if grep -Fq -- "@edly-io/indigo-brand-openedx@^2.4.2" "$GENERATED_MFE_DOCKERFILE"; then
-    echo "  ✓ generated Dockerfile rewrites tutor-indigo brand install to npm package"
+  if grep -Fq -- "@edx/brand@file:./brand-mereka" "$GENERATED_MFE_DOCKERFILE"; then
+    echo "  ✓ generated Dockerfile installs local brand package"
   else
-    echo "  ✗ generated Dockerfile missing npm-published tutor-indigo brand install"
+    echo "  ✗ generated Dockerfile missing local brand package install"
     failures=1
   fi
 

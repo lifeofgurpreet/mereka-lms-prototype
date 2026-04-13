@@ -11,22 +11,22 @@ _register_env_patch(
     "mfe-dockerfile-pre-npm-install",
     """
 # Update package list and install build toolchain for Node 24
-RUN printf 'Acquire::Retries "6";\\nAcquire::http::Timeout "30";\\nAcquire::https::Timeout "30";\\nAcquire::ForceIPv4 "true";\\n' > /etc/apt/apt.conf.d/80-retries \\
- && apt-get update \\
- && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends --fix-missing \\
-    gcc g++ git libgl1 libxi6 make python3 python3-distutils \\
+RUN apt-get update && apt-get install -y \\
+    ca-certificates gcc g++ git libgl1 libxi6 make python3 python3-distutils \\
+    && update-ca-certificates \\
     && rm -rf /var/lib/apt/lists/*
 # Force git to use HTTPS instead of SSH for github.com — Docker builds
 # have no SSH keys, so github: protocol (which resolves to SSH) fails.
 # This affects tutor-indigo's @edx/brand install from edly-io/brand-openedx.
 RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@github.com/" \\
-    && git config --global --add url."https://github.com/".insteadOf "git@github.com:"
+    && git config --global --add url."https://github.com/".insteadOf "git@github.com:" \\
+    && git config --global http.sslCAInfo /etc/ssl/certs/ca-certificates.crt
 """,
 )
 
-# Stage the local OEP-48 brand package for MFEs.
+# Install local OEP-48 brand package for MFEs.
 # We ship the package in tutor_env/plugins/mfe/build/mfe/indigo/brand-mereka and
-# overlay it onto node_modules/@edx/brand after npm has finished mutating deps.
+# alias it as @edx/brand for all frontend app builds.
 #
 # IMPORTANT: This MUST be post-npm-install, not pre-npm-install.
 # Pre-npm-install fires BEFORE the main `npm clean-install` layer. Since
@@ -34,13 +34,12 @@ RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@git
 # invalidates the entire dependency install cache for ALL MFE apps (~10 apps
 # × 3-5 min each = 30-50 min wasted). By moving it to post-npm-install,
 # the main dependency layer stays cached and only the brand overlay + webpack
-# rebuild are invalidated. We avoid a second local `npm install` here because
-# Arborist can hang indefinitely while reifying the file: package inside the
-# heavy-builder DinD environment.
+# rebuild are invalidated.
 _register_env_patch(
     "mfe-dockerfile-post-npm-install",
     """
 COPY indigo/brand-mereka /openedx/app/brand-mereka
+RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
 """,
 )
 
@@ -56,36 +55,10 @@ COPY indigo/mereka /openedx/app/mereka
 
 # Copy generated runtime theme assets into the MFE container.
 # PARAGON_THEME_URLS points to /theme/* on the MFE origin.
-#
-# NOTE: The post-npm-install hook fires inside each per-MFE "common" stage.
-# Those stages copy /openedx/dist/theme into their own filesystem, but the
-# FINAL production stage (FROM caddy:2.7.4 AS production) only copies
-# /openedx/app/dist from each <mfe>-prod stage via `COPY --from=<mfe>-prod`,
-# which does NOT include /openedx/dist/theme. That's why the built MFE image
-# has every per-MFE dir under /openedx/dist/ EXCEPT theme/.
-#
-# Fix: inject the same COPY into the production stage via the
-# `mfe-dockerfile-production-final` hook that the base tutor-mfe template
-# invokes at the end of the production stage. This guarantees the theme
-# files land in /openedx/dist/theme/ in the final image regardless of what
-# the per-MFE common stages do.
 _register_env_patch(
     "mfe-dockerfile-post-npm-install",
     """
 COPY indigo/theme /openedx/dist/theme
-""",
-)
-
-
-# Cookie domain environment variables
-_register_env_patch(
-    "mfe-dockerfile-post-npm-install",
-    """
-# Set cookie domains for MFE builds
-ARG SESSION_COOKIE_DOMAIN={{ MEREKA_SESSION_COOKIE_DOMAIN }}
-ARG CSRF_COOKIE_DOMAIN={{ MEREKA_CSRF_COOKIE_DOMAIN }}
-ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
-ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
 """,
 )
 
@@ -95,26 +68,6 @@ _register_env_patch(
     """
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
-""",
-)
-
-# Overlay the staged local brand package onto the already-installed
-# stock @edx/brand dependency after npm mutations finish.
-_register_env_patch(
-    "mfe-dockerfile-post-npm-install",
-    """
-RUN rm -rf /openedx/app/node_modules/@edx/brand \\
- && mkdir -p /openedx/app/node_modules/@edx/brand \\
- && cp -R /openedx/app/brand-mereka/. /openedx/app/node_modules/@edx/brand/ \\
- && python3 - <<'PY'
-from pathlib import Path
-import json
-
-pkg_path = Path("/openedx/app/node_modules/@edx/brand/package.json")
-pkg = json.loads(pkg_path.read_text(encoding="utf-8"))
-pkg["name"] = "@edx/brand"
-pkg_path.write_text(json.dumps(pkg, indent=2) + "\\n", encoding="utf-8")
-PY
 """,
 )
 
@@ -188,7 +141,7 @@ forbidden = "const platformData = data.social_links.find(({ platform }) => platf
 offenders = []
 
 for asset in sorted(dist_dir.rglob("*")):
-    if asset.suffix not in {".js", ".map"}:
+    if asset.suffix != ".js":
         continue
     try:
         content = asset.read_text(encoding="utf-8")
@@ -206,9 +159,9 @@ PY
 )
 
 # NPM install resilience (retry on failure)
-# NOTE: Using 'npm install' instead of 'npm ci' to handle lockfile drift gracefully
-# while still respecting the lockfile when possible. This is the SOTA approach for
-# environments where upstream package-lock.json may have minor version drift.
+# NOTE: Prefer `npm clean-install` when the lockfile is usable, but fall back to
+# `npm install` if upstream lockfile drift breaks the strict path. This matches
+# the rendered MFE build authority and keeps lockfile tolerance explicit.
 _register_env_patch(
     "mfe-dockerfile-npm-install",
     """
@@ -218,8 +171,8 @@ RUN npm config set fetch-retries 6 \\
  && npm config set fetch-retry-maxtimeout 120000 \\
  && npm config set fetch-timeout 300000
 
-# Install with retries (using npm install for lockfile drift tolerance)
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+# Install with retries (clean-install first, npm install fallback for lockfile drift)
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 """,
 )
 
@@ -227,19 +180,21 @@ RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm install --no-audit --no-fu
 _register_env_patch(
     "mfe-dockerfile-post-npm-install-admin-console",
     """
-RUN npm install --legacy-peer-deps 'react-redux@^8.1.3' 'redux@^4.2.1' \\
- && rm -rf /openedx/app/node_modules/@edx/brand \\
- && mkdir -p /openedx/app/node_modules/@edx/brand \\
- && cp -R /openedx/app/brand-mereka/. /openedx/app/node_modules/@edx/brand/ \\
- && python3 - <<'PY'
-from pathlib import Path
-import json
+RUN npm install --legacy-peer-deps 'react-redux@^8.1.3' 'redux@^4.2.1'
+""",
+)
 
-pkg_path = Path("/openedx/app/node_modules/@edx/brand/package.json")
-pkg = json.loads(pkg_path.read_text(encoding="utf-8"))
-pkg["name"] = "@edx/brand"
-pkg_path.write_text(json.dumps(pkg, indent=2) + "\\n", encoding="utf-8")
-PY
+_register_env_patch(
+    "mfe-dockerfile-post-npm-install-authn",
+    """
+RUN npm install --legacy-peer-deps 'react-redux@^8.1.3' 'redux@^4.2.1'
+""",
+)
+
+_register_env_patch(
+    "mfe-dockerfile-post-npm-install-authn",
+    """
+COPY patch-authn-deep-route-handoff.py /openedx/patch-authn-deep-route-handoff.py
 """,
 )
 
@@ -353,5 +308,30 @@ _register_env_patch(
 RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx' \
     -exec sed -i 's/const endDateObj = moment\\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} + \
     || true
+""",
+)
+
+_register_env_patch(
+    "mfe-dockerfile-post-npm-build-authn",
+    """
+RUN python3 /openedx/patch-authn-deep-route-handoff.py /openedx/app/dist \\
+ && python3 - <<'PY'
+from pathlib import Path
+
+dist_dir = Path("/openedx/app/dist")
+offenders = []
+for asset in sorted(dist_dir.rglob("*.js")):
+    try:
+        content = asset.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        continue
+    if 'LMS_BASE_URL}/dashboard' in content or '"/dashboard"' in content:
+        offenders.append(str(asset))
+
+if offenders:
+    raise SystemExit(
+        "authn deep-route handoff guard failed in " + ", ".join(offenders)
+    )
+PY
 """,
 )

@@ -69,7 +69,13 @@ skip() { echo "  SKIP  $1"; SKIP=$((SKIP + 1)); }
 section() { echo ""; echo "── $1 ──"; }
 
 # Paths
-DOCKERFILE="$REPO_ROOT/infrastructure/tutor/mfe-build/Dockerfile"
+RENDERED_DOCKERFILE="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
+SNAPSHOT_DOCKERFILE="$REPO_ROOT/infrastructure/tutor/mfe-build/Dockerfile"
+if [[ -f "$RENDERED_DOCKERFILE" ]]; then
+  DOCKERFILE="$RENDERED_DOCKERFILE"
+else
+  DOCKERFILE="$SNAPSHOT_DOCKERFILE"
+fi
 ENV_CONFIG_JSX="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/indigo/env.config.jsx"
 PLUGIN_PY="${PLUGIN_BUNDLE:-$PLUGIN_MAIN}"
 APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
@@ -192,10 +198,10 @@ section "4. Brand package pattern (OEP-65 endorsed customisation)"
 if [[ ! -f "$DOCKERFILE" ]]; then
   skip "Dockerfile not found — cannot check brand package"
 else
-  if grep -q "@edx/brand@npm:" "$DOCKERFILE"; then
-    pass "Brand package installed via @edx/brand alias override (@edly-io/indigo-brand-openedx)"
+  if grep -q "@edx/brand@file:./brand-mereka" "$DOCKERFILE"; then
+    pass "Brand package installed via local @edx/brand alias override (brand-mereka)"
   else
-    fail "@edx/brand alias not found in Dockerfile — brand package pattern not applied"
+    fail "Local @edx/brand alias override not found in Dockerfile — current brand package pattern not applied"
   fi
 fi
 

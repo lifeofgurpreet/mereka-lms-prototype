@@ -147,19 +147,13 @@ else
   do_fail "/u route does not serve profile directory"
 fi
 
-# 8. Check payments proxy routes (deprecated MFEs)
+# 8. Check deprecated compat routes stay absent from inner MFE Caddyfile
 echo ""
-echo "--- Deprecated route proxy checks ---"
-if grep -q "reverse_proxy /orders\* payments-gateway" "$CADDYFILE"; then
-  do_pass "/orders proxied to payments-gateway"
+echo "--- Deprecated compat route absence checks ---"
+if grep -q "reverse_proxy /orders\*" "$CADDYFILE" || grep -q "reverse_proxy /payment\*" "$CADDYFILE"; then
+  do_fail "stale /orders or /payment proxy route still present"
 else
-  do_fail "/orders proxy to payments-gateway missing"
-fi
-
-if grep -q "reverse_proxy /payment\* payments-gateway" "$CADDYFILE"; then
-  do_pass "/payment proxied to payments-gateway"
-else
-  do_fail "/payment proxy to payments-gateway missing"
+  do_pass "stale /orders and /payment proxy routes absent"
 fi
 
 # Cleanup

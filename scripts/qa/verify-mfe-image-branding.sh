@@ -48,7 +48,9 @@ run_with_timeout() {
 
 if ! docker image inspect "$IMAGE_REF" >/dev/null 2>&1; then
   echo "Pulling image for branding verification: $IMAGE_REF"
-  if ! run_with_timeout "${DOCKER_PULL_TIMEOUT_SECS}" docker pull "$IMAGE_REF" >/dev/null; then
+  if run_with_timeout "${DOCKER_PULL_TIMEOUT_SECS}" docker pull "$IMAGE_REF" >/dev/null; then
+    :
+  else
     status=$?
     if [[ "$status" -eq 124 ]]; then
       echo "ERROR: docker pull timed out after ${DOCKER_PULL_TIMEOUT_SECS}s for $IMAGE_REF" >&2
@@ -66,7 +68,7 @@ else
   echo "Expected MFE branding revision: <skipped>"
 fi
 
-if ! run_with_timeout "${DOCKER_RUN_TIMEOUT_SECS}" docker run --rm \
+if run_with_timeout "${DOCKER_RUN_TIMEOUT_SECS}" docker run --rm \
   -e EXPECTED_MFE_BRANDING_REV="$EXPECTED_REV" \
   --entrypoint sh \
   "$IMAGE_REF" \
@@ -134,11 +136,12 @@ if ! run_with_timeout "${DOCKER_RUN_TIMEOUT_SECS}" docker run --rm \
     # Verify PARAGON_THEME brand URLs are non-empty in index.html.
     # The mereka_lms plugin mfe-dockerfile-post-npm-build hook patches this.
     # If the plugin was not loaded during build, brand URLs are empty objects.
-    paragon_block="$(grep -o "var PARAGON_THEME = {[^;]*}" index.html || true)"
-    if [ -z "$paragon_block" ]; then
+    # The rendered shape may be either a direct object literal or an IIFE.
+    paragon_block="$(tr "\\n" " " < index.html)"
+    if ! printf "%s" "$paragon_block" | grep -q "var PARAGON_THEME = "; then
       echo "WARN: No PARAGON_THEME variable found in authn/index.html"
     else
-      if echo "$paragon_block" | grep -qE "\"brand\".*\"themeUrls\".*\"core\".*\\.css"; then
+      if printf "%s" "$paragon_block" | grep -qE "var PARAGON_THEME = .*\"themeUrls\".*\\.css"; then
         echo "OK: PARAGON_THEME brand URLs contain CSS references"
       else
         echo "ERROR: PARAGON_THEME brand URLs are empty (plugin hook did not fire during build)" >&2
@@ -148,6 +151,8 @@ if ! run_with_timeout "${DOCKER_RUN_TIMEOUT_SECS}" docker run --rm \
     fi
   '
 then
+  :
+else
   status=$?
   if [[ "$status" -eq 124 ]]; then
     echo "ERROR: docker run timed out after ${DOCKER_RUN_TIMEOUT_SECS}s for $IMAGE_REF" >&2
