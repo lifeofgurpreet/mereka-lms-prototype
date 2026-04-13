@@ -21,6 +21,31 @@ K8S_DIR="${REPO_ROOT}/deploy/k8s"
 BASE_DIR="${K8S_DIR}/base"
 LOCAL_DIR="${K8S_DIR}/overlays/local"
 PROD_DIR="${K8S_DIR}/overlays/production"
+SCOPE_MODE="${VERIFY_KUSTOMIZE_STRUCTURE_SCOPE:-}"
+CHANGED_FILES_RAW="${VERIFY_KUSTOMIZE_STRUCTURE_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
+
+should_skip_scope() {
+  [[ "$SCOPE_MODE" == "changed" ]] || return 1
+  [[ -n "${CHANGED_FILES_RAW//[[:space:]]/}" ]] || return 1
+
+  while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    case "$path" in
+      .github/workflows/ci.yml|\
+      deploy/k8s/*|\
+      scripts/qa/verify-kustomize-structure.sh)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
+
+if should_skip_scope; then
+  echo "PASS verify-kustomize-structure (scope skip: no kustomize-structure-relevant changes)"
+  exit 0
+fi
 
 # Counters
 PASS=0
