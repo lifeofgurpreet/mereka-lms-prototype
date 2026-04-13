@@ -16,6 +16,31 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+VERIFY_MFE_ROUTE_SMOKE_SCOPE="${VERIFY_MFE_ROUTE_SMOKE_SCOPE:-all}"
+VERIFY_MFE_ROUTE_SMOKE_CHANGED_FILES="${VERIFY_MFE_ROUTE_SMOKE_CHANGED_FILES:-}"
+
+if [[ "$VERIFY_MFE_ROUTE_SMOKE_SCOPE" == "changed" ]]; then
+  SHOULD_RUN=0
+  while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    case "$path" in
+      .github/workflows/ci.yml|\
+      scripts/qa/verify-mfe-route-smoke.sh|\
+      deploy/k8s/base/plugins/mfe/*|\
+      deploy/k8s/base/plugins/mfe/**/*|\
+      generated/tenant-runtime/*|\
+      generated/tenant-runtime/**/*)
+        SHOULD_RUN=1
+        break
+        ;;
+    esac
+  done <<< "$VERIFY_MFE_ROUTE_SMOKE_CHANGED_FILES"
+
+  if [[ "$SHOULD_RUN" -eq 0 ]]; then
+    echo "Skipping MFE route smoke; no MFE route authority changes in PR diff."
+    exit 0
+  fi
+fi
 
 # Argument parsing
 ENV="prod"
