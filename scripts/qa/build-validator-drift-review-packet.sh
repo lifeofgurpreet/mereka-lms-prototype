@@ -177,13 +177,22 @@ for path in (repo_root / "scripts").rglob("*"):
         continue
     if path.suffix not in {".sh", ".py"}:
         continue
-    all_scripts.append(str(path.relative_to(repo_root)))
+    relative_path = path.relative_to(repo_root)
+    if any(part.startswith("tmp-") or part.startswith(".tmp-") for part in relative_path.parts):
+        continue
+    all_scripts.append(str(relative_path))
 all_scripts.sort()
+script_contents: dict[str, str] = {}
+stable_scripts: list[str] = []
+for script in all_scripts:
+    script_path = repo_root / script
+    try:
+        script_contents[script] = script_path.read_text(encoding="utf-8", errors="ignore")
+    except FileNotFoundError:
+        continue
+    stable_scripts.append(script)
+all_scripts = stable_scripts
 all_script_set = set(all_scripts)
-script_contents: dict[str, str] = {
-    script: (repo_root / script).read_text(encoding="utf-8", errors="ignore")
-    for script in all_scripts
-}
 
 script_call_graph: dict[str, set[str]] = {script: set() for script in all_scripts}
 for script, content in script_contents.items():

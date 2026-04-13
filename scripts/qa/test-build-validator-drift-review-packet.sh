@@ -5,8 +5,12 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 BUILD_SCRIPT="$ROOT_DIR/scripts/qa/build-validator-drift-review-packet.sh"
 TMP_DIR="$(mktemp -d)"
+TMP_FIXTURE_DIR="$ROOT_DIR/scripts/qa/tmp-build-validator-drift-review-packet"
+TMP_FIXTURE_FILE="$TMP_FIXTURE_DIR/verify-repo-structure.sh"
 
 cleanup() {
+  rm -f "$TMP_FIXTURE_FILE"
+  rmdir "$TMP_FIXTURE_DIR" 2>/dev/null || true
   rm -rf "$TMP_DIR"
 }
 trap cleanup EXIT
@@ -61,6 +65,14 @@ missing = sorted(required.difference(sample))
 if missing:
     raise SystemExit(f"FAIL reachability entry missing keys: {', '.join(missing)}")
 PY
+
+mkdir -p "$TMP_FIXTURE_DIR"
+cat >"$TMP_FIXTURE_FILE" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+echo "ephemeral fixture"
+EOF
+chmod +x "$TMP_FIXTURE_FILE"
 
 OUT_DIR_SEEDED="$TMP_DIR/review-seeded"
 "$BUILD_SCRIPT" --out-dir "$OUT_DIR_SEEDED" --run-seeded-defects >/dev/null

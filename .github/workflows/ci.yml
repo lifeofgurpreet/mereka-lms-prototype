@@ -856,6 +856,8 @@ jobs:
           python-version: '3.12'
           requirements-file: 'requirements-tutor.txt'
           isolated-venv: 'true'
+          cache-isolated-venv: 'true'
+          isolated-venv-name: 'tutor-ci-py312'
 
       - name: Render Tutor environment + apply patches
         env:
