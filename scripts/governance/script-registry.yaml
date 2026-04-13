@@ -159,6 +159,7 @@ ci_static_inventory:
     - script: scripts/qa/test-verify-release-promotion-wiring.sh
     - script: scripts/qa/test-verify-release-workflow-invocation.sh
     - script: scripts/qa/test-verify-build-workflow-contract.sh
+    - script: scripts/qa/test-verify-bootstrap-workflow-contract.sh
     - script: scripts/qa/test-verify-rollback-dry-run.sh
     - script: scripts/qa/test-verify-post-deploy-gate.sh
     - script: scripts/qa/test-verify-wif-readiness.sh
@@ -480,6 +481,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-tutor-services.sh
     - script: scripts/qa/verify-tutor-version-pin.sh
     - script: scripts/qa/verify-build-workflow-contract.sh
+    - script: scripts/qa/verify-bootstrap-workflow-contract.sh
     - script: scripts/qa/test-install-envsubst-fallback.sh
     - script: scripts/qa/test-install-trivy-fallback.sh
     - script: scripts/qa/test-verify-post-deploy-smoke.sh
@@ -1925,6 +1927,11 @@ scripts:
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/infra/tutor-config-save.sh --help 2>&1 | head -5"
     criticality: release-supporting
+
+  - path: scripts/infra/verify-local-bootstrap-readiness.sh
+    owner: platform-team
+    purpose: Verify Local Bootstrap Readiness
+    criticality: release-blocking
 
   # ── Database & Migrations ────────────────────────────────────────────────────
 

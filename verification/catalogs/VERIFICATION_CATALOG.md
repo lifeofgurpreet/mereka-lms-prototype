@@ -10,18 +10,18 @@ Machine-readable source: `verification/catalogs/verification_catalog.json`.
 ## Summary
 - Total `verify-*.sh` scripts: **627**
 - Archived deprecated scripts: **21**
-- CI static-bound scripts: **387**
+- CI static-bound scripts: **388**
 - Workflow-direct bound scripts: **67**
 - Status overrides applied: **8**
 
 ### Tier Distribution
-- `exploratory_manual`: 192
+- `exploratory_manual`: 191
 - `periodic_runtime`: 21
-- `release_blocking`: 414
+- `release_blocking`: 415
 
 ### Status Distribution
-- `active`: 438
-- `deprecated_candidate`: 2
+- `active`: 439
+- `deprecated_candidate`: 1
 - `manual_only`: 187
 
 ### Kind Distribution
@@ -35,7 +35,6 @@ Machine-readable source: `verification/catalogs/verification_catalog.json`.
 ## Deprecated Candidates
 
 Scripts currently not CI-bound and with near-zero references:
-- `scripts/qa/verify-bootstrap-workflow-contract.sh` (owner: `platform-core`, refs: 1)
 - `scripts/qa/verify-phase7-selector-list-coverage.sh` (owner: `platform-core`, refs: 1)
 
 ## Archived Deprecated Scripts

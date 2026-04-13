@@ -3,7 +3,7 @@
 # @spec: ci-cd-pipeline_spec.md
 #
 # Verify bootstrap-local-readiness.yml contract:
-#   - workflow exists and is serialized on persistent self-hosted runners
+#   - workflow exists and is serialized on a governed bootstrap runner lane
 #   - canonical Tutor config and bootstrap-readiness front doors are used
 #   - rendered local Compose images are resolved and pulled before launch
 #   - provenance is checked against actual running tutor_local container images
@@ -54,10 +54,13 @@ else
   fail "workflow missing serialized bootstrap concurrency contract"
 fi
 
-if grep -q 'runs-on: mereka-k8s-heavy-builders' "$BOOTSTRAP_WF"; then
-  pass "workflow uses heavy-builders for local bootstrap"
+if grep -q '^  select-bootstrap-lane:' "$BOOTSTRAP_WF" \
+  && grep -q 'uses: Biji-Biji-Initiative/bbi-infrastructure/.github/actions/select-runner-lane@main' "$BOOTSTRAP_WF" \
+  && grep -q 'fallback_label: mereka-k8s-heavy-builders' "$BOOTSTRAP_WF" \
+  && grep -Fq 'runs-on: ${{ needs.select-bootstrap-lane.outputs.runner_label }}' "$BOOTSTRAP_WF"; then
+  pass "workflow routes local bootstrap through governed runner-lane selection with heavy-builder fallback"
 else
-  fail "workflow missing heavy-builder runner contract"
+  fail "workflow missing governed bootstrap runner-lane contract"
 fi
 
 if grep -q './scripts/infra/tutor-config-save.sh' "$BOOTSTRAP_WF"; then

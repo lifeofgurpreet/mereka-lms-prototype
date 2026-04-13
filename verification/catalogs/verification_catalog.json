@@ -401,7 +401,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/infra/verify-local-bootstrap-readiness.sh",
-      "reference_count": 3,
+      "reference_count": 4,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -1979,10 +1979,14 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
+      "cadence": "per_pr_and_push",
       "canonical": true,
-      "ci_binding": [],
-      "ci_entrypoints": [],
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
       "env_scope": [
         "global"
       ],
@@ -1990,17 +1994,17 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-bootstrap-workflow-contract.sh",
-      "reference_count": 1,
+      "reference_count": 4,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "low",
+      "severity": "high",
       "spec_ids": [
         "AC-CI-BOOTSTRAP-001"
       ],
-      "status": "deprecated_candidate",
-      "tier": "exploratory_manual"
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "on_demand",
@@ -18718,7 +18722,7 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
-    "ci_static_bound": 387,
+    "ci_static_bound": 388,
     "kinds": {
       "verify": 627
     },
@@ -18729,14 +18733,14 @@
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 438,
-      "deprecated_candidate": 2,
+      "active": 439,
+      "deprecated_candidate": 1,
       "manual_only": 187
     },
     "tiers": {
-      "exploratory_manual": 192,
+      "exploratory_manual": 191,
       "periodic_runtime": 21,
-      "release_blocking": 414
+      "release_blocking": 415
     },
     "total_verify_scripts": 627,
     "workflow_direct_bound": 67

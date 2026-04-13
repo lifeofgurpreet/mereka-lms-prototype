@@ -137,6 +137,7 @@ Legend:
 | `build-enterprise-mfe.yml` | admin-portal, learner-portal | _(reusable)_ | E | REUSABLE |
 | `build-ios-app.yml` | all | `macos-latest` | D | EXCEPTION |
 | `build-purchase-gateway.yml` | build, update-dev | _(reusable)_ | E | REUSABLE |
+| `bootstrap-local-readiness.yml` | select bootstrap lane / launch local Tutor baseline | trusted selector → heavy fallback | B | CONFORM |
 | `build-tutor-images.yml` | Build OpenEdX/MFE Image | `mereka-k8s-heavy-builders` | B | CONFORM |
 | `build-tutor-images.yml` | Lint, SLSA, Release, GitOps | `mereka-k8s-runners` | A | CONFORM |
 | `certificate-branding.yml` | all | `mereka-k8s-runners` | A | CONFORM |

@@ -28,9 +28,39 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  select-bootstrap-lane:
+    name: Select Bootstrap Lane
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      runner_label: ${{ steps.select.outputs.runner_label }}
+      decision: ${{ steps.select.outputs.decision }}
+      reason: ${{ steps.select.outputs.reason }}
+    steps:
+      - name: Select runner lane
+        id: select
+        uses: Biji-Biji-Initiative/bbi-infrastructure/.github/actions/select-runner-lane@main
+        with:
+          enabled: ${{ vars.CI_FASTLANE_BUILD_ENABLED || 'false' }}
+          lane_mode: auto
+          fastlane_label: ${{ vars.CI_FASTLANE_BUILD_LABEL || 'mereka-vps-fastlane-build' }}
+          routing_policy: lms_build_prefer_fastlane
+          fallback_label: mereka-k8s-heavy-builders
+          timezone: ${{ vars.CI_FASTLANE_BUILD_TIMEZONE || 'Asia/Kuala_Lumpur' }}
+          office_hours_start: ${{ vars.CI_FASTLANE_BUILD_WINDOW_START || '09:00' }}
+          office_hours_end: ${{ vars.CI_FASTLANE_BUILD_WINDOW_END || '18:00' }}
+          runner_status_token: ${{ secrets.FASTLANE_RUNNER_STATUS_TOKEN }}
+          github_app_id: ${{ secrets.FASTLANE_GITHUB_APP_ID }}
+          github_app_installation_id: ${{ secrets.FASTLANE_GITHUB_APP_INSTALLATION_ID }}
+          github_app_private_key: ${{ secrets.FASTLANE_GITHUB_APP_PRIVATE_KEY }}
+          allow_push_main: 'true'
+          allow_workflow_dispatch: 'true'
+
   bootstrap-readiness:
     name: Launch Local Tutor Baseline
-    runs-on: mereka-k8s-heavy-builders
+    needs: [select-bootstrap-lane]
+    runs-on: ${{ needs.select-bootstrap-lane.outputs.runner_label }}
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
@@ -115,40 +145,40 @@ jobs:
             --format '{{.Name}}|{{.Config.Image}}|{{.Image}}' \
             > var/bootstrap-readiness/actual-running-images.txt
           python3 - <<'PY'
-from pathlib import Path
+            from pathlib import Path
 
-expected = {}
-for line in Path("var/bootstrap-readiness/pulled-image-ids.txt").read_text(encoding="utf-8").splitlines():
-    if not line.strip():
-        continue
-    image_ref, image_id = line.split("|", 1)
-    expected[image_ref] = image_id
+            expected = {}
+            for line in Path("var/bootstrap-readiness/pulled-image-ids.txt").read_text(encoding="utf-8").splitlines():
+                if not line.strip():
+                    continue
+                image_ref, image_id = line.split("|", 1)
+                expected[image_ref] = image_id
 
-actual_lines = Path("var/bootstrap-readiness/actual-running-images.txt").read_text(encoding="utf-8").splitlines()
-failures = []
-for line in actual_lines:
-    if not line.strip():
-        continue
-    name, config_image, container_image_id = line.split("|", 2)
-    expected_id = expected.get(config_image)
-    if expected_id is None:
-        failures.append(f"{name} uses unexpected image ref {config_image}")
-        continue
-    if expected_id != container_image_id:
-        failures.append(
-            f"{name} image id mismatch for {config_image}: expected {expected_id}, got {container_image_id}"
-        )
+            actual_lines = Path("var/bootstrap-readiness/actual-running-images.txt").read_text(encoding="utf-8").splitlines()
+            failures = []
+            for line in actual_lines:
+                if not line.strip():
+                    continue
+                name, config_image, container_image_id = line.split("|", 2)
+                expected_id = expected.get(config_image)
+                if expected_id is None:
+                    failures.append(f"{name} uses unexpected image ref {config_image}")
+                    continue
+                if expected_id != container_image_id:
+                    failures.append(
+                        f"{name} image id mismatch for {config_image}: expected {expected_id}, got {container_image_id}"
+                    )
 
-report = Path("var/bootstrap-readiness/bootstrap-image-provenance-check.txt")
-if failures:
-    report.write_text("\n".join(failures) + "\n", encoding="utf-8")
-    raise SystemExit(1)
+            report = Path("var/bootstrap-readiness/bootstrap-image-provenance-check.txt")
+            if failures:
+                report.write_text("\n".join(failures) + "\n", encoding="utf-8")
+                raise SystemExit(1)
 
-report.write_text(
-    "PASS: tutor_local containers use the rendered compose image refs and freshly pulled image IDs\n",
-    encoding="utf-8",
-)
-PY
+            report.write_text(
+                "PASS: tutor_local containers use the rendered compose image refs and freshly pulled image IDs\n",
+                encoding="utf-8",
+            )
+            PY
 
       - name: Verify bootstrap readiness
         env:

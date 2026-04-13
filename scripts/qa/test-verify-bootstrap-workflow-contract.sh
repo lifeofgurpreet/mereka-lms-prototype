@@ -35,8 +35,15 @@ concurrency:
   group: bootstrap-local-readiness
   cancel-in-progress: false
 jobs:
+  select-bootstrap-lane:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Biji-Biji-Initiative/bbi-infrastructure/.github/actions/select-runner-lane@main
+        with:
+          fallback_label: mereka-k8s-heavy-builders
   bootstrap-readiness:
-    runs-on: mereka-k8s-heavy-builders
+    needs: [select-bootstrap-lane]
+    runs-on: ${{ needs.select-bootstrap-lane.outputs.runner_label }}
     steps:
       - uses: actions/checkout@v4
       - run: ./scripts/infra/tutor-config-save.sh
