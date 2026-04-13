@@ -13,6 +13,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+SCOPE_MODE="${AUDIT_GRAFANA_DASHBOARD_SCOPE:-}"
+CHANGED_FILES_RAW="${AUDIT_GRAFANA_DASHBOARD_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
 DEFAULT_DASHBOARD_FILE="${REPO_ROOT}/infrastructure/monitoring/grafana/dashboards/slo-overview.json"
 DEFAULT_CONTRACT_FILE="${REPO_ROOT}/infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json"
 DEFAULT_CATALOG_FILE="${REPO_ROOT}/infrastructure/monitoring/grafana/dashboard-catalog.bbi-mereka-lms.json"
@@ -46,6 +48,24 @@ Options:
 EOF
 }
 
+should_skip_scope() {
+  [[ "$SCOPE_MODE" == "changed" ]] || return 1
+  [[ -n "$CHANGED_FILES_RAW" ]] || return 1
+
+  while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    case "$path" in
+      .github/workflows/ci.yml|\
+      scripts/qa/audit-grafana-dashboard.sh|\
+      infrastructure/monitoring/grafana/*)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --all) AUDIT_ALL=1; shift ;;
@@ -59,6 +79,11 @@ while [[ $# -gt 0 ]]; do
     *) echo "Unknown arg: $1" >&2; usage; exit 1 ;;
   esac
 done
+
+if should_skip_scope; then
+  echo "PASS audit-grafana-dashboard (scope skip: no Grafana dashboard contract changes)"
+  exit 0
+fi
 
 json_escape() {
   local s="${1:-}"
