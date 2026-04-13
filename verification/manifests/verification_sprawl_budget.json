@@ -1,8 +1,8 @@
 {
-  "max_total_verify_scripts": 625,
+  "max_total_verify_scripts": 627,
   "max_manual_only_scripts": 190,
   "max_deprecated_candidate_scripts": 35,
   "min_ci_static_bound": 323,
-  "budget_reviewed_at": "2026-04-11",
-  "budget_rationale": "Reviewed 2026-04-11: +1 script (verify-middleware-divergence.sh) for RCB-06 LMS↔CMS middleware divergence gate. Budget raised 624→625 with no manual-only budget change; manual-only count is 187 ≤ 190."
+  "budget_reviewed_at": "2026-04-13",
+  "budget_rationale": "Reviewed 2026-04-13: +2 scripts (verify-local-bootstrap-readiness.sh, verify-bootstrap-workflow-contract.sh) for the governed local bootstrap readiness and workflow-contract tranche. Budget raised 625→627 with no manual-only budget change; manual-only count remains within budget."
 }

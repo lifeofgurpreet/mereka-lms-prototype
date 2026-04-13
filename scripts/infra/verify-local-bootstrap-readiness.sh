@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+TUTOR_ROOT="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
+MYSQL_CONTAINER="${MYSQL_CONTAINER:-tutor_local-mysql-1}"
+LMS_CONTAINER="${LMS_CONTAINER:-tutor_local-lms-1}"
+CADDY_CONTAINER="${CADDY_CONTAINER:-tutor_local-caddy-1}"
+TARGET_THEME="${TARGET_THEME:-mereka}"
+
+if [ -f "$REPO_ROOT/infrastructure/tutor/tutor-env.sh" ]; then
+  # shellcheck source=/dev/null
+  source "$REPO_ROOT/infrastructure/tutor/tutor-env.sh" >/dev/null 2>&1 || true
+fi
+
+FAILURES=()
+
+pass() {
+  printf 'PASS: %s\n' "$1"
+}
+
+fail() {
+  printf 'FAIL: %s\n' "$1" >&2
+  FAILURES+=("$1")
+}
+
+require_running_container() {
+  local name="$1"
+  local label="$2"
+  local running
+  running="$(docker inspect -f '{{.State.Running}}' "$name" 2>/dev/null || true)"
+  if [ "$running" = "true" ]; then
+    pass "$label container is running ($name)"
+  else
+    fail "$label container is not running ($name)"
+  fi
+}
+
+mysql_scalar() {
+  local sql="$1"
+  local escaped
+  escaped="$(printf '%q' "$sql")"
+  docker exec "$MYSQL_CONTAINER" sh -lc "mysql -uroot -p\"\$MYSQL_ROOT_PASSWORD\" -Nse $escaped"
+}
+
+lms_shell() {
+  local code="$1"
+  local escaped
+  escaped="$(printf '%q' "$code")"
+  docker exec "$LMS_CONTAINER" sh -lc "cd /openedx/edx-platform && python manage.py lms shell -c $escaped"
+}
+
+check_mysql_ready() {
+  local result
+  if result="$(mysql_scalar 'SELECT 1;' 2>/dev/null)" && [ "$result" = "1" ]; then
+    pass "MySQL root access is healthy"
+  else
+    fail "MySQL root access is not healthy"
+  fi
+}
+
+check_openedx_user() {
+  local result
+  if result="$(mysql_scalar "SELECT COUNT(*) FROM mysql.user WHERE user = 'openedx';" 2>/dev/null)" && [ "${result:-0}" -ge 1 ]; then
+    pass "openedx MySQL user exists"
+  else
+    fail "openedx MySQL user is missing"
+  fi
+}
+
+check_schema_tables() {
+  local result
+  if result="$(mysql_scalar "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'openedx' AND table_name IN ('django_migrations','django_site');" 2>/dev/null)" && [ "${result:-0}" -eq 2 ]; then
+    pass "openedx schema contains core Django tables"
+  else
+    fail "openedx schema is missing core Django tables"
+  fi
+}
+
+check_local_site_rows() {
+  local result
+  if result="$(mysql_scalar "SELECT COUNT(*) FROM openedx.django_site WHERE domain IN ('localhost','localhost:8000','studio.localhost','studio.localhost:8001');" 2>/dev/null)" && [ "${result:-0}" -eq 4 ]; then
+    pass "localhost Django site rows exist"
+  else
+    fail "localhost Django site rows are incomplete"
+  fi
+}
+
+check_local_theme_convergence() {
+  local result
+  result="$(mysql_scalar "
+SELECT GROUP_CONCAT(CONCAT(s.domain, ':', t.theme_dir_name) ORDER BY s.domain SEPARATOR '\n')
+FROM openedx.theming_sitetheme t
+JOIN openedx.django_site s ON s.id = t.site_id
+WHERE s.domain IN ('localhost','localhost:8000','studio.localhost','studio.localhost:8001')
+  AND t.theme_dir_name <> '$TARGET_THEME';
+" 2>/dev/null || true)"
+  if [ -z "$result" ] || [ "$result" = "NULL" ]; then
+    pass "localhost SiteTheme rows converge to $TARGET_THEME"
+  else
+    fail "localhost SiteTheme rows are not converged to $TARGET_THEME${result:+ ($result)}"
+  fi
+}
+
+main() {
+  require_running_container "$MYSQL_CONTAINER" "mysql"
+  require_running_container "$LMS_CONTAINER" "lms"
+  require_running_container "$CADDY_CONTAINER" "caddy"
+
+  check_mysql_ready
+  check_openedx_user
+  check_schema_tables
+  check_local_site_rows
+  check_local_theme_convergence
+
+  if [ "${#FAILURES[@]}" -gt 0 ]; then
+    printf '\nBootstrap readiness is not established. These are local initialized-state failures, not source/render/image proof.\n' >&2
+    exit 1
+  fi
+
+  printf '\nPASS: local bootstrap readiness baseline is established under %s\n' "$TUTOR_ROOT"
+}
+
+main "$@"

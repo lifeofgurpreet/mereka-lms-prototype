@@ -107,6 +107,7 @@ scripts/qa/test-verify-release-gitops-guardrails.sh
 scripts/qa/test-verify-release-promotion-wiring.sh
 scripts/qa/test-verify-release-workflow-invocation.sh
 scripts/qa/test-verify-build-workflow-contract.sh
+scripts/qa/test-verify-bootstrap-workflow-contract.sh
 scripts/qa/test-verify-rollback-dry-run.sh
 scripts/qa/test-verify-post-deploy-gate.sh
 scripts/qa/test-verify-wif-readiness.sh
@@ -424,6 +425,7 @@ scripts/qa/verify-tutor-config-safety.sh
 scripts/qa/verify-tutor-services.sh
 scripts/qa/verify-tutor-version-pin.sh
 scripts/qa/verify-build-workflow-contract.sh
+scripts/qa/verify-bootstrap-workflow-contract.sh
 scripts/qa/test-install-envsubst-fallback.sh
 scripts/qa/test-install-trivy-fallback.sh
 scripts/qa/test-verify-post-deploy-smoke.sh
