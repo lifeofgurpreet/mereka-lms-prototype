@@ -7,10 +7,43 @@ set -euo pipefail
 
 REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 CLASSIFICATION_FILE="$REPO_ROOT/deploy/k8s/base/secrets/SECRET_CLASSIFICATION.yaml"
+SCOPE_MODE="${VERIFY_SECRET_CLASSIFICATION_SCOPE:-}"
+CHANGED_FILES_RAW="${VERIFY_SECRET_CLASSIFICATION_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
+
+should_skip_scope() {
+  local changed_path
+
+  if [[ "$SCOPE_MODE" != "changed" ]]; then
+    return 1
+  fi
+
+  if [[ -z "${CHANGED_FILES_RAW//[[:space:]]/}" ]]; then
+    return 1
+  fi
+
+  while IFS= read -r changed_path; do
+    [[ -n "$changed_path" ]] || continue
+    case "$changed_path" in
+      .github/workflows/ci.yml|\
+      deploy/*|\
+      services/*|\
+      scripts/qa/verify-secret-classification.sh)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
 
 if [[ ! -f "$CLASSIFICATION_FILE" ]]; then
   echo "FAIL missing classification file: $CLASSIFICATION_FILE" >&2
   exit 1
+fi
+
+if should_skip_scope; then
+  echo "PASS verify-secret-classification (scope skip: no secret-classification-relevant changes)"
+  exit 0
 fi
 
 python3 - "$REPO_ROOT" "$CLASSIFICATION_FILE" <<'PY'
