@@ -181,6 +181,11 @@ machine contract and exits `0` if all required settings are compliant, `1`
 otherwise. It requires the `gh` CLI authenticated with a token that has at
 least **Administration: read** permission on the repository.
 
+The cross-repo `--live` audit is stricter: it checks every repo declared in the
+contract, not just `mereka-lms`. If it fails, treat that as governance drift to
+record and repair, not as proof that this repo's local branch protection row is
+wrong.
+
 ---
 
 ## Related Documents

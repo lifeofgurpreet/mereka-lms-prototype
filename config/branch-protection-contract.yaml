@@ -46,10 +46,10 @@ repos:
     live:
       enforce_admins: false
       required_approving_review_count: 1
-      strict_status_checks: true
+      strict_status_checks: false
       required_status_checks:
-        - "auth-verify"
         - "policy-guards"
+        - "validate"
     target:
       enforce_admins: false
       required_approving_review_count: 1
@@ -57,7 +57,9 @@ repos:
       required_status_checks:
         - "auth-verify"
         - "policy-guards"
-    gaps: []
+    gaps:
+      - "strict_status_checks"
+      - "required_status_checks"
     tolerated_deviations:
       - field: enforce_admins
         live_value: false
@@ -66,4 +68,6 @@ repos:
           is retained for emergency patches to cluster state. Admin
           merges must be logged in admin-merge-exception-ledger.yaml.
         review_date: "2026-07-01"
-    notes: "2 required checks. Admin bypass is tolerated with ledger logging."
+    notes: >
+      Admin bypass is tolerated with ledger logging. Live GitHub protection
+      still drifts from target on strict status checks and required contexts.
