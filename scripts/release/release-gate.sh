@@ -21,6 +21,9 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
+SCOPE_MODE="${RELEASE_GATE_SCOPE:-}"
+CHANGED_FILES_RAW="${RELEASE_GATE_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
+
 # ── Colours ───────────────────────────────────────────────────────────────
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -88,6 +91,33 @@ skip()  { echo -e "${YELLOW}[SKIP]${NC} $*"; SKIP=$((SKIP + 1)); }
 warn()  { echo -e "${YELLOW}[WARN]${NC} $*"; WARN=$((WARN + 1)); }
 info()  { echo -e "${CYAN}[INFO]${NC} $*"; }
 header(){ echo -e "\n${BOLD}=== $* ===${NC}"; }
+
+should_skip_scope() {
+  local changed_path
+
+  [[ "$SCOPE_MODE" == "changed" ]] || return 1
+  [[ -n "${CHANGED_FILES_RAW//[[:space:]]/}" ]] || return 1
+
+  while IFS= read -r changed_path; do
+    [[ -n "$changed_path" ]] || continue
+    case "$changed_path" in
+      .github/workflows/ci.yml|\
+      scripts/release/*|\
+      scripts/qa/verify-deployment-contract.sh|\
+      deploy/k8s/*|\
+      deploy/k8s/**/*)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
+
+if should_skip_scope; then
+  echo "PASS release-gate (scope skip: no release-or-deploy authority changes)"
+  exit 0
+fi
 
 CONTRACT="deploy/k8s/contract.json"
 REGISTRY="deploy/k8s/migrations/registry.yaml"
