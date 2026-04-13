@@ -20,6 +20,10 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
+is_noninteractive() {
+  [[ "${CI:-}" == "true" || ! -t 0 ]]
+}
+
 # Get repository root
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
@@ -27,12 +31,22 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 # shellcheck source=../shared/config.sh
 source "$REPO_ROOT/scripts/shared/config.sh"
 
+TUTOR_ENV_HELPER="$REPO_ROOT/infrastructure/tutor/tutor-env.sh"
+if [[ -z "${TUTOR_ROOT:-}" || ! $(command -v tutor >/dev/null 2>&1; echo $?) -eq 0 ]]; then
+  if [[ -f "$TUTOR_ENV_HELPER" ]]; then
+    # shellcheck source=../../infrastructure/tutor/tutor-env.sh
+    source "$TUTOR_ENV_HELPER"
+  fi
+fi
+
 # Ensure TUTOR_ROOT is set
 if [[ -z "${TUTOR_ROOT:-}" ]]; then
   echo -e "${RED}ERROR: TUTOR_ROOT not set${NC}"
   echo ""
-  echo "Please set TUTOR_ROOT before running this script:"
-  echo "  export TUTOR_ROOT=\"\$(pwd)/tutor_env\""
+  echo "Expected repo-local Tutor root:"
+  echo "  $REPO_ROOT/tutor_env"
+  echo ""
+  echo "Fallback helper: $TUTOR_ENV_HELPER"
   echo ""
   exit 1
 fi
@@ -41,8 +55,10 @@ fi
 if ! command -v tutor &>/dev/null; then
   echo -e "${RED}ERROR: tutor command not found${NC}"
   echo ""
-  echo "Please ensure Tutor is installed and activated:"
-  echo "  source .venv/bin/activate"
+  echo "Expected repo-local Tutor virtualenv:"
+  echo "  $REPO_ROOT/.venv"
+  echo ""
+  echo "Fallback helper: $TUTOR_ENV_HELPER"
   echo ""
   exit 1
 fi
@@ -71,7 +87,18 @@ if tutor plugins disable mfe_oauth_fix >/dev/null 2>&1; then
   echo ""
 fi
 
+for plugin in mereka_lms mereka_lms_mfe_slots; do
+  if tutor plugins enable "$plugin" >/dev/null 2>&1; then
+    echo -e "${GREEN}Canonical Tutor plugin enabled: ${plugin}${NC}"
+  else
+    echo -e "${RED}ERROR: Failed to enable canonical Tutor plugin: ${plugin}${NC}" >&2
+    exit 1
+  fi
+done
+echo ""
+
 # Backup config if it exists
+BACKUP_FILE=""
 if [[ -f "$TUTOR_ROOT/config.yml" ]]; then
   BACKUP_FILE="$TUTOR_ROOT/config.yml.backup.$(date +%Y%m%d_%H%M%S)"
   echo -e "${YELLOW}Backing up existing config...${NC}"
@@ -100,7 +127,7 @@ else
   echo ""
   echo -e "${RED}✗ Config save failed (exit code: $EXIT_CODE)${NC}"
   echo ""
-  if [[ -f "$BACKUP_FILE" ]]; then
+  if [[ -n "$BACKUP_FILE" && -f "$BACKUP_FILE" ]]; then
     echo "Restoring backup..."
     cp "$BACKUP_FILE" "$TUTOR_ROOT/config.yml"
     echo -e "${GREEN}✓ Backup restored${NC}"
@@ -129,18 +156,24 @@ else
   echo ""
   echo -e "${RED}✗ Tutor build context preparation failed (exit code: $EXIT_CODE)${NC}"
   echo ""
-  if [[ -f "$BACKUP_FILE" ]]; then
-    read -rp "Restore backup? [Y/n] " response
-    case "$response" in
-      [nN][oO]|[nN])
-        echo "Backup not restored"
-        ;;
-      *)
-        echo "Restoring backup..."
-        cp "$BACKUP_FILE" "$TUTOR_ROOT/config.yml"
-        echo -e "${GREEN}✓ Backup restored${NC}"
-        ;;
-    esac
+  if [[ -n "$BACKUP_FILE" && -f "$BACKUP_FILE" ]]; then
+    if is_noninteractive; then
+      echo "Restoring backup automatically (non-interactive mode)..."
+      cp "$BACKUP_FILE" "$TUTOR_ROOT/config.yml"
+      echo -e "${GREEN}✓ Backup restored${NC}"
+    else
+      read -rp "Restore backup? [Y/n] " response
+      case "$response" in
+        [nN][oO]|[nN])
+          echo "Backup not restored"
+          ;;
+        *)
+          echo "Restoring backup..."
+          cp "$BACKUP_FILE" "$TUTOR_ROOT/config.yml"
+          echo -e "${GREEN}✓ Backup restored${NC}"
+          ;;
+      esac
+    fi
   fi
   exit $EXIT_CODE
 fi
@@ -162,16 +195,21 @@ if [[ -x "$VERIFY_SCRIPT" ]]; then
     echo ""
     echo "Some build-context mutations may not have been applied correctly."
     echo ""
-    read -rp "Continue anyway? [y/N] " response
-    case "$response" in
-      [yY][eE][sS]|[yY])
-        echo -e "${YELLOW}Continuing despite verification failure...${NC}"
-        ;;
-      *)
-        echo -e "${RED}Aborted${NC}"
-        exit $EXIT_CODE
-        ;;
-    esac
+    if is_noninteractive; then
+      echo -e "${RED}Aborted in non-interactive mode${NC}"
+      exit $EXIT_CODE
+    else
+      read -rp "Continue anyway? [y/N] " response
+      case "$response" in
+        [yY][eE][sS]|[yY])
+          echo -e "${YELLOW}Continuing despite verification failure...${NC}"
+          ;;
+        *)
+          echo -e "${RED}Aborted${NC}"
+          exit $EXIT_CODE
+          ;;
+      esac
+    fi
   fi
 else
   echo -e "${YELLOW}⚠ Verification script not found, skipping verification${NC}"
@@ -189,12 +227,15 @@ echo ""
 echo "  ${BLUE}Kubernetes:${NC}"
 echo "    tutor k8s restart"
 echo ""
-echo "  ${BLUE}Build new images (if needed):${NC}"
-echo "    tutor images build openedx"
-echo "    tutor images build mfe"
+echo "  ${BLUE}Fast local image refresh:${NC}"
+echo "    ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast"
+echo "    ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast"
+echo ""
+echo "  ${BLUE}Strict Open edX proof rebuild:${NC}"
+echo "    BENCHMARK_CLASS=proof-class ./scripts/bench/measure-openedx-build.sh \"$REPO_ROOT\" openedx-proof-noneditable"
 echo ""
 
-if [[ -f "$BACKUP_FILE" ]]; then
+if [[ -n "$BACKUP_FILE" && -f "$BACKUP_FILE" ]]; then
   echo "Backup preserved at:"
   echo "  $BACKUP_FILE"
   echo ""

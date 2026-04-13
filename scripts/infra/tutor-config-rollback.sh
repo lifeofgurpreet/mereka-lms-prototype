@@ -122,12 +122,17 @@ restore_backup() {
 
   # Re-run tutor config save to regenerate templates from restored config
   echo -e "${BLUE}Step 1: Regenerating templates from restored config...${NC}"
+  local tutor_env_helper="$REPO_ROOT/infrastructure/tutor/tutor-env.sh"
+  if ! command -v tutor &>/dev/null && [[ -f "$tutor_env_helper" ]]; then
+    # shellcheck source=../../infrastructure/tutor/tutor-env.sh
+    source "$tutor_env_helper"
+  fi
   if command -v tutor &>/dev/null; then
     tutor config save
     echo -e "${GREEN}✓ Templates regenerated${NC}"
   else
     echo -e "${YELLOW}⚠ tutor not found — skipping template regeneration${NC}"
-    echo "  Run 'tutor config save' manually after activating your venv"
+    echo "  Expected repo-local Tutor virtualenv: $REPO_ROOT/.venv"
   fi
   echo ""
 

@@ -1,0 +1,199 @@
+name: Bootstrap Local Readiness
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'requirements-tutor.txt'
+      - 'infrastructure/tutor/config.example.yml'
+      - 'infrastructure/tutor/patches/**'
+      - 'infrastructure/tutor/custom-apps/**'
+      - 'infrastructure/tutor/plugins/**'
+      - 'infrastructure/tutor/themes/**'
+      - 'scripts/infra/tutor-config-save.sh'
+      - 'scripts/infra/prepare-tutor-build-context.sh'
+      - 'scripts/infra/sync-tutor-plugin-mirror.sh'
+      - 'scripts/infra/verify-local-bootstrap-readiness.sh'
+      - '.github/workflows/bootstrap-local-readiness.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  # This workflow launches a full Tutor local estate on a persistent self-hosted runner.
+  # Serialize the lane globally and do not cancel in-flight runs mid-bootstrap.
+  group: bootstrap-local-readiness
+  cancel-in-progress: false
+
+jobs:
+  bootstrap-readiness:
+    name: Launch Local Tutor Baseline
+    runs-on: mereka-k8s-heavy-builders
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Set up Python environment
+        # Control-plane only: the workflow uses Python 3.12 to run Tutor tooling,
+        # while the runtime image lane remains on the Python 3.11 contract.
+        uses: ./.github/actions/setup-python-env
+        with:
+          python-version: '3.12'
+          requirements-file: 'requirements-tutor.txt'
+
+      - name: Render repo-scoped Tutor environment
+        env:
+          TUTOR_ROOT: ${{ github.workspace }}/tutor_env
+        run: |
+          set -euo pipefail
+          if [[ -f "$TUTOR_ROOT/env/local/docker-compose.yml" ]]; then
+            timeout 10m tutor local stop >/dev/null 2>&1 || true
+            timeout 10m tutor local down -v >/dev/null 2>&1 || true
+          fi
+          if [[ -d "$TUTOR_ROOT" ]]; then
+            docker run --rm \
+              -v "$TUTOR_ROOT:/target" \
+              alpine:3.20 \
+              sh -c 'rm -rf /target/* /target/.[!.]* /target/..?*'
+          fi
+          rm -rf "$TUTOR_ROOT"
+          mkdir -p "$TUTOR_ROOT"
+          ./scripts/infra/tutor-config-save.sh \
+            --set LMS_HOST=localhost \
+            --set CMS_HOST=studio.localhost \
+            --set MFE_HOST=apps.localhost \
+            --set MEREKA_PREVIEW_LMS_BASE=preview.localhost \
+            --set DISCOVERY_HOST=discovery.localhost \
+            --set ECOMMERCE_HOST=ecommerce.localhost \
+            --set XQUEUE_HOST=xqueue.localhost
+
+      - name: Resolve rendered bootstrap image set
+        env:
+          TUTOR_ROOT: ${{ github.workspace }}/tutor_env
+        run: |
+          set -euo pipefail
+          mkdir -p var/bootstrap-readiness
+          COMPOSE_ARGS=(
+            -f "$TUTOR_ROOT/env/local/docker-compose.yml"
+            -f "$TUTOR_ROOT/env/local/docker-compose.prod.yml"
+          )
+          docker compose "${COMPOSE_ARGS[@]}" config > var/bootstrap-readiness/docker-compose.resolved.yml
+          docker compose "${COMPOSE_ARGS[@]}" config --images | sort -u > var/bootstrap-readiness/expected-compose-images.txt
+
+      - name: Refresh rendered bootstrap images
+        run: |
+          set -euo pipefail
+          : > var/bootstrap-readiness/pulled-image-ids.txt
+          while IFS= read -r image_ref; do
+            [[ -z "$image_ref" ]] && continue
+            timeout 20m docker pull "$image_ref"
+            image_id="$(docker image inspect "$image_ref" --format '{{.Id}}')"
+            printf '%s|%s\n' "$image_ref" "$image_id" >> var/bootstrap-readiness/pulled-image-ids.txt
+          done < var/bootstrap-readiness/expected-compose-images.txt
+
+      - name: Launch full local Tutor bootstrap
+        env:
+          TUTOR_ROOT: ${{ github.workspace }}/tutor_env
+        run: |
+          set -euo pipefail
+          # This lane is a full first-run bootstrap proof, not a fast steady-state smoke.
+          # Let the job timeout define the budget instead of truncating the bootstrap mid-flight.
+          tutor local launch -I --skip-build
+
+      - name: Validate bootstrap image provenance
+        run: |
+          set -euo pipefail
+          mkdir -p var/bootstrap-readiness
+          CONTAINER_IDS="$(docker ps -aq --filter name=tutor_local)"
+          if [[ -z "$CONTAINER_IDS" ]]; then
+            echo "No tutor_local containers found after launch" > var/bootstrap-readiness/bootstrap-image-provenance-check.txt
+            exit 1
+          fi
+          docker inspect $CONTAINER_IDS \
+            --format '{{.Name}}|{{.Config.Image}}|{{.Image}}' \
+            > var/bootstrap-readiness/actual-running-images.txt
+          python3 - <<'PY'
+from pathlib import Path
+
+expected = {}
+for line in Path("var/bootstrap-readiness/pulled-image-ids.txt").read_text(encoding="utf-8").splitlines():
+    if not line.strip():
+        continue
+    image_ref, image_id = line.split("|", 1)
+    expected[image_ref] = image_id
+
+actual_lines = Path("var/bootstrap-readiness/actual-running-images.txt").read_text(encoding="utf-8").splitlines()
+failures = []
+for line in actual_lines:
+    if not line.strip():
+        continue
+    name, config_image, container_image_id = line.split("|", 2)
+    expected_id = expected.get(config_image)
+    if expected_id is None:
+        failures.append(f"{name} uses unexpected image ref {config_image}")
+        continue
+    if expected_id != container_image_id:
+        failures.append(
+            f"{name} image id mismatch for {config_image}: expected {expected_id}, got {container_image_id}"
+        )
+
+report = Path("var/bootstrap-readiness/bootstrap-image-provenance-check.txt")
+if failures:
+    report.write_text("\n".join(failures) + "\n", encoding="utf-8")
+    raise SystemExit(1)
+
+report.write_text(
+    "PASS: tutor_local containers use the rendered compose image refs and freshly pulled image IDs\n",
+    encoding="utf-8",
+)
+PY
+
+      - name: Verify bootstrap readiness
+        env:
+          TUTOR_ROOT: ${{ github.workspace }}/tutor_env
+        run: ./scripts/infra/verify-local-bootstrap-readiness.sh
+
+      - name: Capture bootstrap provenance
+        if: ${{ always() }}
+        env:
+          TUTOR_ROOT: ${{ github.workspace }}/tutor_env
+        run: |
+          set -euo pipefail
+          mkdir -p var/bootstrap-readiness
+          docker ps -a --filter name=tutor_local --format '{{.Names}} {{.Image}} {{.Status}}' > var/bootstrap-readiness/docker-ps.txt || true
+          CONTAINER_IDS="$(docker ps -aq --filter name=tutor_local)"
+          if [[ -n "$CONTAINER_IDS" ]]; then
+            docker inspect $CONTAINER_IDS \
+              --format '{{.Name}}|{{.Config.Image}}|{{.Image}}' \
+              > var/bootstrap-readiness/image-provenance.txt || true
+          fi
+          cp "$TUTOR_ROOT/config.yml" var/bootstrap-readiness/config.yml 2>/dev/null || true
+
+      - name: Capture failure evidence
+        if: ${{ failure() }}
+        env:
+          TUTOR_ROOT: ${{ github.workspace }}/tutor_env
+        run: |
+          set -euo pipefail
+          mkdir -p var/bootstrap-readiness
+          tutor local status > var/bootstrap-readiness/tutor-status.txt 2>&1 || true
+          tutor local logs --tail 200 > var/bootstrap-readiness/tutor-logs.txt 2>&1 || true
+
+      - name: Upload bootstrap readiness artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        with:
+          name: bootstrap-readiness-${{ github.run_id }}-${{ github.run_attempt }}
+          path: var/bootstrap-readiness/
+          retention-days: 3
+
+      - name: Cleanup local Tutor containers
+        if: ${{ always() }}
+        env:
+          TUTOR_ROOT: ${{ github.workspace }}/tutor_env
+        run: |
+          set -euo pipefail
+          timeout 10m tutor local stop >/dev/null 2>&1 || true
+          timeout 10m tutor local down -v >/dev/null 2>&1 || true
