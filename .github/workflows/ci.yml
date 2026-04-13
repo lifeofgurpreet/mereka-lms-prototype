@@ -383,7 +383,34 @@ jobs:
           find scripts/ -name '*.sh' -type f -print0 | xargs -0 shellcheck --severity=error
 
       - name: Markdown linting
+        shell: bash
         run: |
+          set -euo pipefail
+
+          # Markdown lint remains advisory in this lane. For pull requests, lint
+          # only the changed docs/spec markdown files so mixed code PRs do not
+          # pay full-tree docs lint cost. Keep full-tree coverage on mainline
+          # pushes, merge groups, and manual runs.
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+            git fetch --no-tags --depth=1 origin "${BASE_SHA}"
+            mapfile -t markdown_files < <(
+              git diff --name-only "${BASE_SHA}...${HEAD_SHA}" \
+                | awk '/^(docs|specs)\/.*\.md$/ && $0 !~ /^docs\/archive\// { print }'
+            )
+
+            if [[ "${#markdown_files[@]}" -eq 0 ]]; then
+              echo "No docs/spec markdown changes in PR; skipping advisory markdown lint"
+              exit 0
+            fi
+
+            printf 'Linting changed markdown files:\n'
+            printf ' - %s\n' "${markdown_files[@]}"
+            npx --yes markdownlint-cli "${markdown_files[@]}" || true
+            exit 0
+          fi
+
           npx --yes markdownlint-cli docs/ specs/ --ignore docs/archive/ || true
 
   static-validation-shards:
