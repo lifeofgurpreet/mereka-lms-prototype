@@ -306,7 +306,6 @@ scripts/qa/verify-secrets-live-cluster.sh
 scripts/qa/verify-security-exceptions.sh
 scripts/qa/verify-sla-report-security.sh
 scripts/infra/check-cert-sans.sh
-scripts/infra/check-cluster-status.sh
 scripts/qa/check-atlas-translation-infra.sh
 scripts/qa/verify-kustomize-structure.sh
 scripts/qa/verify-operational-hardening.sh

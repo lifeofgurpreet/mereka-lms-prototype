@@ -381,7 +381,6 @@ ci_static_inventory:
     - script: scripts/qa/verify-security-exceptions.sh
     - script: scripts/qa/verify-sla-report-security.sh
     - script: scripts/infra/check-cert-sans.sh
-    - script: scripts/infra/check-cluster-status.sh
     - script: scripts/qa/check-atlas-translation-infra.sh
     - script: scripts/qa/verify-kustomize-structure.sh
     - script: scripts/qa/verify-operational-hardening.sh
@@ -683,6 +682,9 @@ ci_runtime_inventory:
     - script: scripts/infra/check-atlas-allowlist-vps.sh
       category: LIVE_CLUSTER
       note: checks Atlas allowlist against current VPS egress IP; can refresh Atlas profile first
+    - script: scripts/infra/check-cluster-status.sh
+      category: LIVE_CLUSTER
+      note: direct kubectl and local curl cluster probe for current namespace/services; runtime operator check, not offline static proof
     - script: scripts/infra/monitor-atlas-allowlist-vps.sh
       category: LIVE_CLUSTER
       note: cron-friendly drift monitor; writes status file and optionally sends webhook alert
