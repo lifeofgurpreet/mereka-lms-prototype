@@ -406,11 +406,9 @@ ci_static_inventory:
     - script: scripts/qa/audit-velero.sh
     - script: scripts/qa/verify-mux-alert-wiring.sh
     - script: scripts/qa/verify-observability-loki-log-sources.sh
-    - script: scripts/qa/verify-observability-prometheusrules.sh
-    - script: scripts/qa/verify-observability-servicemonitors.sh
-    - script: scripts/qa/verify-observability-structured-logging.sh
     - script: scripts/qa/verify-observability-validation.sh
     - script: scripts/qa/verify-otel-naming.sh
+    - script: scripts/qa/verify-observability-structured-logging.sh
     - script: scripts/infra/check-error-budget-gate.sh
     - script: scripts/qa/check-error-budget-gate.sh
     - script: scripts/qa/verify-slo-contracts.sh
@@ -713,6 +711,12 @@ ci_runtime_inventory:
     - script: scripts/qa/verify-observability-retention.sh
       category: LIVE_CLUSTER
       note: reads live Loki, Tempo, and Prometheus runtime retention settings from the active cluster; not a repo-only static contract
+    - script: scripts/qa/verify-observability-prometheusrules.sh
+      category: LIVE_CLUSTER
+      note: checks PrometheusRule CRDs, deployed rule objects, and live Prometheus rule loading from the active cluster
+    - script: scripts/qa/verify-observability-servicemonitors.sh
+      category: LIVE_CLUSTER
+      note: checks ServiceMonitor CRDs, deployed ServiceMonitor objects, and live Prometheus target discovery from the active cluster
     - script: scripts/qa/verify-observability-tracing.sh
       category: LIVE_CLUSTER
       note: mixes repo tracing manifests with live Tempo and cluster readiness checks; runtime contract, not offline static proof
