@@ -693,6 +693,12 @@ if [[ -d "$THEME_BUILD_DIR" ]]; then
   if [[ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates" && -d "$THEME_BUILD_DIR/cms/templates" ]]; then
     dirs_match "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates" "$THEME_BUILD_DIR/cms/templates" "Rendered CMS theme templates mirror source"
   fi
+  if [[ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/css" && -d "$THEME_BUILD_DIR/cms/static/css" ]]; then
+    dirs_match "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/css" "$THEME_BUILD_DIR/cms/static/css" "Rendered CMS theme CSS mirrors source"
+  fi
+  if [[ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/sass" && -d "$THEME_BUILD_DIR/cms/static/sass" ]]; then
+    dirs_match "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/sass" "$THEME_BUILD_DIR/cms/static/sass" "Rendered CMS theme SASS mirrors source"
+  fi
   if [[ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/images" && -d "$THEME_BUILD_DIR/lms/static/images" ]]; then
     dirs_match "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/images" "$THEME_BUILD_DIR/lms/static/images" "Rendered LMS theme images mirror source"
   fi

@@ -1041,6 +1041,11 @@ PY
 
     # Sync theme templates/static overrides
     echo "Syncing theme templates/static overrides to build directory..."
+    rm -rf \
+      "$THEME_BUILD_DIR/common/templates" \
+      "$THEME_BUILD_DIR/common/static/css" \
+      "$THEME_BUILD_DIR/lms/templates" \
+      "$THEME_BUILD_DIR/lms/static/css"
     mkdir -p "$THEME_BUILD_DIR/common/templates" "$THEME_BUILD_DIR/common/static/css"
     mkdir -p "$THEME_BUILD_DIR/lms/templates" "$THEME_BUILD_DIR/lms/static/css"
     cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/." "$THEME_BUILD_DIR/lms/templates/"
@@ -1054,6 +1059,10 @@ PY
       cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/." "$THEME_BUILD_DIR/common/static/css/"
     fi
     if [ -d "$THEME_BUILD_DIR/cms" ]; then
+      rm -rf \
+        "$THEME_BUILD_DIR/cms/templates" \
+        "$THEME_BUILD_DIR/cms/static/css" \
+        "$THEME_BUILD_DIR/cms/static/sass"
       mkdir -p "$THEME_BUILD_DIR/cms/templates" "$THEME_BUILD_DIR/cms/static/css" "$THEME_BUILD_DIR/cms/static/sass"
       cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates/." "$THEME_BUILD_DIR/cms/templates/" 2>/dev/null || true
       if [ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/css" ]; then
