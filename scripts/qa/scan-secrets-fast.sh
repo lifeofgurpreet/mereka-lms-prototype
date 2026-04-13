@@ -131,6 +131,7 @@ run_scan() {
     --glob '!tutor_env/**' \
     --glob '!var/**' \
     --glob '!tmp/**' \
+    --glob '!scripts/**/tmp-*/**' \
     --glob '!tests/qa/fixtures/**' \
     --glob '!tests/qa/test_qa_gates_strict.sh' \
     "${extra_excludes[@]}" \
