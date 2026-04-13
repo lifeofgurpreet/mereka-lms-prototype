@@ -23,6 +23,31 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 # Allow env var overrides for testing; fall back to canonical paths
 PROD_KUSTOMIZATION="${PROD_KUSTOMIZATION:-${REPO_ROOT}/deploy/k8s/overlays/production/kustomization.yaml}"
 BASE_KUSTOMIZATION="${BASE_KUSTOMIZATION:-${REPO_ROOT}/deploy/k8s/base/kustomization.yaml}"
+SCOPE_MODE="${VERIFY_K8S_IMAGES_SCOPE:-}"
+CHANGED_FILES_RAW="${VERIFY_K8S_IMAGES_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
+
+should_skip_scope() {
+  [[ "$SCOPE_MODE" == "changed" ]] || return 1
+  [[ -n "${CHANGED_FILES_RAW//[[:space:]]/}" ]] || return 1
+
+  while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    case "$path" in
+      .github/workflows/ci.yml|\
+      deploy/k8s/*|\
+      scripts/qa/verify-k8s-images.sh)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
+
+if should_skip_scope; then
+  echo "PASS verify-k8s-images (scope skip: no k8s-image-policy-relevant changes)"
+  exit 0
+fi
 
 # RELAXED_MODE=1 disables strict immutable-tag enforcement for the production overlay.
 # This is a temporary escape hatch — never set in CI.
