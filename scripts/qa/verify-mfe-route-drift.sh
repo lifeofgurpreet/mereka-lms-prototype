@@ -11,6 +11,32 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 CADDYFILE="$REPO_ROOT/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"
 BRANDING_VERIFIER="$REPO_ROOT/scripts/qa/verify-mfe-branding.sh"
+SCOPE_MODE="${VERIFY_MFE_ROUTE_DRIFT_SCOPE:-}"
+CHANGED_FILES_RAW="${VERIFY_MFE_ROUTE_DRIFT_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
+
+should_skip_scope() {
+  [[ "$SCOPE_MODE" == "changed" ]] || return 1
+  [[ -n "$CHANGED_FILES_RAW" ]] || return 1
+
+  while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    case "$path" in
+      .github/workflows/ci.yml|\
+      scripts/qa/verify-mfe-route-drift.sh|\
+      scripts/qa/verify-mfe-branding.sh|\
+      deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
+
+if should_skip_scope; then
+  echo "PASS verify-mfe-route-drift (scope skip: no MFE route authority changes)"
+  exit 0
+fi
 
 PASS=0
 FAIL=0
