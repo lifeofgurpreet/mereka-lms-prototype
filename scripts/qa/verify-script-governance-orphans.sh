@@ -4,6 +4,7 @@ set -euo pipefail
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 GENERATOR="${REPO_ROOT}/scripts/qa/generate-script-governance-catalog.py"
 ALLOWLIST_FILE="${ALLOWLIST_FILE_OVERRIDE:-${REPO_ROOT}/scripts/qa/fixtures/script-governance-orphan-allowlist.txt}"
+CATALOG_JSON_OVERRIDE="${SCRIPT_GOVERNANCE_CATALOG_JSON_OVERRIDE:-}"
 
 if [[ ! -f "$ALLOWLIST_FILE" ]]; then
   echo "FAIL: orphan allowlist file missing: $ALLOWLIST_FILE" >&2
@@ -22,12 +23,20 @@ contains_path() {
   return 1
 }
 
-TMP_DIR="$(mktemp -d)"
-trap 'rm -rf "$TMP_DIR"' EXIT
+if [[ -n "$CATALOG_JSON_OVERRIDE" ]]; then
+  if [[ ! -f "$CATALOG_JSON_OVERRIDE" ]]; then
+    echo "FAIL: orphan catalog override missing: $CATALOG_JSON_OVERRIDE" >&2
+    exit 1
+  fi
+  OUT_JSON="$CATALOG_JSON_OVERRIDE"
+else
+  TMP_DIR="$(mktemp -d)"
+  trap 'rm -rf "$TMP_DIR"' EXIT
 
-OUT_JSON="${TMP_DIR}/catalog.json"
-OUT_MD="${TMP_DIR}/summary.md"
-python3 "$GENERATOR" --repo-root "$REPO_ROOT" --out "$OUT_JSON" --summary-out "$OUT_MD" >/dev/null
+  OUT_JSON="${TMP_DIR}/catalog.json"
+  OUT_MD="${TMP_DIR}/summary.md"
+  python3 "$GENERATOR" --repo-root "$REPO_ROOT" --out "$OUT_JSON" --summary-out "$OUT_MD" >/dev/null
+fi
 
 mapfile -t current_orphans < <(
   python3 - <<'PY' "$OUT_JSON"
