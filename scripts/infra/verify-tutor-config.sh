@@ -325,7 +325,7 @@ print_section "Checking MySQL Authentication Fix"
 
 DOCKER_COMPOSE="$TUTOR_ENV/env/local/docker-compose.yml"
 if [[ -f "$DOCKER_COMPOSE" ]]; then
-  pattern_in_file "default-authentication-plugin=mysql_native_password" "$DOCKER_COMPOSE" "MySQL native password plugin"
+  regex_in_file 'default-authentication-plugin=mysql_native_password|--mysql-native-password=ON' "$DOCKER_COMPOSE" "MySQL native password plugin"
   pattern_in_file "MYSQL_ROOT_HOST" "$DOCKER_COMPOSE" "MySQL remote root access"
 else
   check_warn "Docker Compose file not found (ok if using K8s only)"
