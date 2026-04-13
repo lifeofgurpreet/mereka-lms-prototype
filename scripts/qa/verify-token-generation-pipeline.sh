@@ -13,6 +13,8 @@ TOKENS_CSS="$REPO_ROOT/assets/branding/tokens.css"
 TOKENS_PROVENANCE="$REPO_ROOT/assets/branding/tokens.provenance.json"
 SCSS_BRIDGE="$REPO_ROOT/infrastructure/tutor/themes/mereka/scss/_tokens.scss"
 RUNTIME_OVERRIDES="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css"
+SCOPE_MODE="${VERIFY_TOKEN_GENERATION_PIPELINE_SCOPE:-}"
+CHANGED_FILES_RAW="${VERIFY_TOKEN_GENERATION_PIPELINE_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
 
 PASS=0
 FAIL=0
@@ -32,6 +34,36 @@ do_warn() {
   WARN=$((WARN + 1))
   echo "  WARN: $1"
 }
+
+should_skip_scope() {
+  local changed_path
+
+  [[ "$SCOPE_MODE" == "changed" ]] || return 1
+  [[ -n "${CHANGED_FILES_RAW//[[:space:]]/}" ]] || return 1
+
+  while IFS= read -r changed_path; do
+    [[ -n "$changed_path" ]] || continue
+    case "$changed_path" in
+      .github/workflows/ci.yml|\
+      scripts/qa/verify-token-generation-pipeline.sh|\
+      docs/reference/architecture/TOKEN_GENERATION_PIPELINE.md|\
+      assets/branding/tokens.css|\
+      assets/branding/tokens.provenance.json|\
+      infrastructure/tutor/themes/mereka/scss/_tokens.scss|\
+      infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css|\
+      scripts/branding/verify-token-drift.sh)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
+
+if should_skip_scope; then
+  echo "PASS verify-token-generation-pipeline (scope skip: no token-generation-pipeline authority changes)"
+  exit 0
+fi
 
 echo "=== Token Generation Pipeline Verification ==="
 echo ""
