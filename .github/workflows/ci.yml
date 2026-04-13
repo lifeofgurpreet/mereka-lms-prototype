@@ -902,9 +902,9 @@ jobs:
           fi
 
           CHANGED_FILES="$(cat <<'EOF_CHANGED'
-${{ needs.change-scope.outputs.changed_files }}
-EOF_CHANGED
-)"
+          ${{ needs.change-scope.outputs.changed_files }}
+          EOF_CHANGED
+          )"
 
           if [[ -z "$CHANGED_FILES" ]]; then
             echo "No PR changed-file list available; keeping Tutor lane enabled."
@@ -946,7 +946,8 @@ EOF_CHANGED
 
       - name: Skip tutor lane for unrelated PR diff
         if: steps.tutor_scope.outputs.run_tests != 'true'
-        run: echo "Tutor Configuration Tests skipped: no tutor-authority changes in this PR."
+        run: |
+          echo "Tutor Configuration Tests skipped: no tutor-authority changes in this PR."
 
       - name: Render Tutor environment + apply patches
         if: steps.tutor_scope.outputs.run_tests == 'true'
