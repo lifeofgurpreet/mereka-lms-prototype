@@ -17455,10 +17455,14 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "on_demand",
+      "cadence": "per_pr_and_push",
       "canonical": false,
-      "ci_binding": [],
-      "ci_entrypoints": [],
+      "ci_binding": [
+        "workflow_direct"
+      ],
+      "ci_entrypoints": [
+        "workflow_direct"
+      ],
       "env_scope": [
         "dev"
       ],
@@ -17466,12 +17470,12 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-tutor-patches.sh",
-      "reference_count": 11,
+      "reference_count": 12,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "low",
+      "severity": "high",
       "spec_ids": [
         "AC-001",
         "AC-002",
@@ -17479,8 +17483,8 @@
         "AC-004",
         "AC-005"
       ],
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "on_demand",
@@ -18761,17 +18765,17 @@
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 440,
+      "active": 441,
       "deprecated_candidate": 1,
-      "manual_only": 187
+      "manual_only": 186
     },
     "tiers": {
-      "exploratory_manual": 191,
+      "exploratory_manual": 190,
       "periodic_runtime": 21,
-      "release_blocking": 416
+      "release_blocking": 417
     },
     "total_verify_scripts": 628,
-    "workflow_direct_bound": 67
+    "workflow_direct_bound": 68
   },
   "version": "1"
 }
