@@ -31,6 +31,7 @@ jobs:
       pull-requests: read
     outputs:
       docs_only: ${{ steps.scope.outputs.docs_only }}
+      tutor_required: ${{ steps.scope.outputs.tutor_required }}
       changed_files: ${{ steps.scope.outputs.changed_files }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
@@ -45,6 +46,7 @@ jobs:
 
           if [[ "${GITHUB_EVENT_NAME}" != "pull_request" ]]; then
             echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            echo "tutor_required=true" >> "$GITHUB_OUTPUT"
             {
               echo "changed_files<<EOF"
               echo "EOF"
@@ -58,6 +60,7 @@ jobs:
 
           if [[ "${#CHANGED[@]}" -eq 0 ]]; then
             echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            echo "tutor_required=true" >> "$GITHUB_OUTPUT"
             {
               echo "changed_files<<EOF"
               echo "EOF"
@@ -72,18 +75,31 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
           docs_only=true
+          tutor_required=false
           for path in "${CHANGED[@]}"; do
             case "$path" in
               docs/*|tools/docs/*|generated/catalogs/*|generated/adr-bundles/*|generated/decision-maps/*|generated/graphs/*|specs/testmaps/README.md|specs/_generated/testmaps/README.md|scripts/qa/build_decision_graph.py|scripts/qa/generate_adr_readme.py|scripts/qa/sync-openedx-audit-pr-status.sh|.github/workflows/docs-compliance.yml|.github/workflows/docs-policy.yml|.github/workflows/codeql.yml|*.md|CLAUDE.md|AGENTS.md|CONTRIBUTING.md|SECURITY.md|LICENSE)
                 ;;
               *)
                 docs_only=false
-                break
+                ;;
+            esac
+
+            case "$path" in
+              .github/actions/setup-python-env/*|\
+              .githooks/pre-commit|\
+              requirements-tutor.txt|\
+              infrastructure/tutor/*|\
+              tests/tutor/*|\
+              scripts/qa/check-config-example-yaml.py|\
+              scripts/qa/verify-tutor-patches.sh)
+                tutor_required=true
                 ;;
             esac
           done
 
           echo "docs_only=${docs_only}" >> "$GITHUB_OUTPUT"
+          echo "tutor_required=${tutor_required}" >> "$GITHUB_OUTPUT"
 
   select-ci-lane:
     name: Select CI lane
@@ -154,7 +170,6 @@ jobs:
     name: Static Validation Precheck
     needs:
       - change-scope
-    if: ${{ github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -355,7 +370,6 @@ jobs:
     name: Static Validation Lint
     needs:
       - change-scope
-    if: ${{ github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -470,7 +484,6 @@ jobs:
     name: Static Validation Scripts (${{ matrix.shard.key }})
     needs:
       - change-scope
-    if: ${{ github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -636,7 +649,6 @@ jobs:
     name: Static Validation Postchecks
     needs:
       - change-scope
-    if: ${{ github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -807,7 +819,7 @@ jobs:
       - static-validation-lint
       - static-validation-shards
       - static-validation-postchecks
-    if: ${{ always() && (github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true') }}
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -955,59 +967,15 @@ jobs:
     needs:
       - change-scope
       - select-ci-lane
-    if: ${{ github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true' }}
-    runs-on: ${{ needs.select-ci-lane.outputs.runner_label }}
+    runs-on: ${{ github.event_name == 'pull_request' && needs.change-scope.outputs.tutor_required != 'true' && 'ubuntu-latest' || needs.select-ci-lane.outputs.runner_label }}
     permissions:
       contents: read
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
-      - name: Scope tutor lane for PR diffs
-        id: tutor_scope
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          if [[ "${GITHUB_EVENT_NAME}" != "pull_request" ]]; then
-            echo "run_tests=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          CHANGED_FILES="$(cat <<'EOF_CHANGED'
-          ${{ needs.change-scope.outputs.changed_files }}
-          EOF_CHANGED
-          )"
-
-          if [[ -z "$CHANGED_FILES" ]]; then
-            echo "No PR changed-file list available; keeping Tutor lane enabled."
-            echo "run_tests=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          while IFS= read -r path; do
-            [[ -n "$path" ]] || continue
-            case "$path" in
-              .github/workflows/ci.yml|\
-              .github/actions/setup-python-env/*|\
-              .githooks/pre-commit|\
-              requirements-tutor.txt|\
-              infrastructure/tutor/*|\
-              tests/tutor/*|\
-              scripts/qa/check-config-example-yaml.py|\
-              scripts/qa/verify-tutor-patches.sh)
-                echo "Tutor lane required due to change: $path"
-                echo "run_tests=true" >> "$GITHUB_OUTPUT"
-                exit 0
-                ;;
-            esac
-          done <<< "$CHANGED_FILES"
-
-          echo "No tutor-authority changes in PR diff; skipping Tutor lane."
-          echo "run_tests=false" >> "$GITHUB_OUTPUT"
-
       - name: Set up Python environment
-        if: steps.tutor_scope.outputs.run_tests == 'true'
+        if: needs.change-scope.outputs.tutor_required == 'true'
         uses: ./.github/actions/setup-python-env
         with:
           python-version: '3.12'
@@ -1017,12 +985,14 @@ jobs:
           isolated-venv-name: 'tutor-ci-py312'
 
       - name: Skip tutor lane for unrelated PR diff
-        if: steps.tutor_scope.outputs.run_tests != 'true'
+        if: needs.change-scope.outputs.tutor_required != 'true'
         run: |
           echo "Tutor Configuration Tests skipped: no tutor-authority changes in this PR."
+          echo "Workflow-only CI control-plane changes are enforced by the"
+          echo "workflow contract verifiers, not by a full Tutor render."
 
       - name: Render Tutor environment + apply patches
-        if: steps.tutor_scope.outputs.run_tests == 'true'
+        if: needs.change-scope.outputs.tutor_required == 'true'
         env:
           TUTOR_ROOT: ${{ github.workspace }}/tutor_env
         run: |
@@ -1031,11 +1001,11 @@ jobs:
           ./infrastructure/tutor/apply-patches.sh
 
       - name: Run tutor apply patches test
-        if: steps.tutor_scope.outputs.run_tests == 'true'
+        if: needs.change-scope.outputs.tutor_required == 'true'
         run: bash tests/tutor/test_tutor_apply.sh
 
       - name: Run tutor verify patches test
-        if: steps.tutor_scope.outputs.run_tests == 'true'
+        if: needs.change-scope.outputs.tutor_required == 'true'
         run: bash tests/tutor/test_verify_patches.sh
 
       - name: Run tutor pre-commit hook test
@@ -1066,7 +1036,6 @@ jobs:
   security-scans:
     name: Security Scans
     needs: change-scope
-    if: ${{ github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -1221,7 +1190,6 @@ jobs:
   test-coverage:
     name: Python test coverage
     needs: change-scope
-    if: ${{ github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
