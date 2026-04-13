@@ -11,6 +11,8 @@
 set -euo pipefail
 
 REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+SCOPE_MODE="${VERIFY_SPEC_DEDUPE_NORMALIZE_SCOPE:-}"
+CHANGED_FILES_RAW="${VERIFY_SPEC_DEDUPE_NORMALIZE_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -24,6 +26,32 @@ WARN=0
 pass_check() { echo -e "${GREEN}[PASS]${NC} $1"; PASS=$((PASS + 1)); }
 fail_check() { echo -e "${RED}[FAIL]${NC} $1"; FAIL=$((FAIL + 1)); }
 warn_check() { echo -e "${YELLOW}[WARN]${NC} $1"; WARN=$((WARN + 1)); }
+
+should_skip_scope() {
+  local changed_path
+
+  [[ "$SCOPE_MODE" == "changed" ]] || return 1
+  [[ -n "${CHANGED_FILES_RAW//[[:space:]]/}" ]] || return 1
+
+  while IFS= read -r changed_path; do
+    [[ -n "$changed_path" ]] || continue
+    case "$changed_path" in
+      .github/workflows/ci.yml|\
+      specs/*|\
+      scripts/qa/verify-spec-dedupe-normalize.sh|\
+      scripts/qa/spec-tools/*)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
+
+if should_skip_scope; then
+  echo "PASS verify-spec-dedupe-normalize (scope skip: no spec-dedupe-relevant changes)"
+  exit 0
+fi
 
 SPECS_DIR="$REPO_ROOT/specs"
 TESTMAPS_DIR="$REPO_ROOT/specs/testmaps"
