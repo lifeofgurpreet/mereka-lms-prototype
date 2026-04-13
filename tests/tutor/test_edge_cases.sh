@@ -32,24 +32,50 @@ test_fail() {
   echo -e "${RED}  ✗ FAIL: $1${NC}"
 }
 
+HAS_TUTOR_ENV=0
+VERIFY_HUMAN_STATUS="skip"
+VERIFY_JSON_VALID=0
+VERIFY_JSON=""
+DOUBLE_APPLY_SUCCESS=0
+
 echo "=== Test Suite: Edge Cases ==="
 echo ""
 
 # Check prerequisites
 if [[ ! -d "$REPO_ROOT/tutor_env" ]]; then
   echo -e "${YELLOW}SKIP: tutor_env not found. Most tests require tutor_env.${NC}"
+else
+  HAS_TUTOR_ENV=1
+
+  # Gather shared verification evidence once so we do not keep paying the same
+  # apply/verify cost across multiple edge-case assertions in CI.
+  if "$VERIFY_SCRIPT" >/dev/null 2>&1; then
+    VERIFY_HUMAN_STATUS="success"
+  else
+    VERIFY_HUMAN_STATUS="failure"
+  fi
+
+  # Shared double-apply evidence used by the rerun/sequential/idempotency tests.
+  "$APPLY_PATCHES_SCRIPT" >/dev/null 2>&1 || true
+  if "$APPLY_PATCHES_SCRIPT" >/dev/null 2>&1; then
+    DOUBLE_APPLY_SUCCESS=1
+  fi
+
+  VERIFY_JSON=$("$VERIFY_SCRIPT" --json 2>/dev/null || true)
+  if echo "$VERIFY_JSON" | jq '.summary.total' >/dev/null 2>&1; then
+    VERIFY_JSON_VALID=1
+  fi
 fi
 
 # EC-TCR-001: Plugin hook not firing (verification catches missing patches)
 test_start "Verification tool catches missing patches from disabled plugin"
-if [[ -d "$REPO_ROOT/tutor_env" ]]; then
-  # Run verification - if it fails, it means patches are missing (good)
-  # If it passes, patches are present (also good for this test environment)
-  if "$VERIFY_SCRIPT" >/dev/null 2>&1; then
+if (( HAS_TUTOR_ENV )); then
+  # If verification fails, it means missing patches were detected (good).
+  # If it passes, patches are present (also good for this test environment).
+  if [[ "$VERIFY_HUMAN_STATUS" == "success" ]]; then
     test_pass
     echo -e "  ${YELLOW}  Note: All patches present (plugin working or patches applied)${NC}"
   else
-    # Verification failed - patches missing
     test_pass
     echo -e "  ${YELLOW}  Note: Verification correctly detected missing patches${NC}"
   fi
@@ -59,12 +85,8 @@ fi
 
 # EC-TCR-002: Interrupted apply-patches.sh - re-run completes remaining patches
 test_start "Re-running apply-patches.sh after interruption completes successfully"
-if [[ -d "$REPO_ROOT/tutor_env" ]]; then
-  # Simulate interruption by running script twice
-  "$APPLY_PATCHES_SCRIPT" >/dev/null 2>&1 || true
-
-  # Second run should complete successfully
-  if "$APPLY_PATCHES_SCRIPT" >/dev/null 2>&1; then
+if (( HAS_TUTOR_ENV )); then
+  if (( DOUBLE_APPLY_SUCCESS )); then
     test_pass
   else
     test_fail "Second run failed"
@@ -75,9 +97,8 @@ fi
 
 # EC-TCR-003: Concurrent config saves (not fully testable without race conditions)
 test_start "apply-patches.sh can be run sequentially without conflicts"
-if [[ -d "$REPO_ROOT/tutor_env" ]]; then
-  # Run twice in sequence
-  if "$APPLY_PATCHES_SCRIPT" >/dev/null 2>&1 && "$APPLY_PATCHES_SCRIPT" >/dev/null 2>&1; then
+if (( HAS_TUTOR_ENV )); then
+  if (( DOUBLE_APPLY_SUCCESS )); then
     test_pass
   else
     test_fail "Sequential runs failed"
@@ -88,27 +109,17 @@ fi
 
 # EC-TCR-004: Template conflict after Tutor upgrade (verification catches it)
 test_start "Verification tool reports missing patches on template changes"
-if [[ -d "$REPO_ROOT/tutor_env" ]]; then
-  # If verify passes, templates are correct
-  # If verify fails, it correctly detected issues
-  "$VERIFY_SCRIPT" >/dev/null 2>&1 || true
+if (( HAS_TUTOR_ENV )); then
   test_pass
-  echo -e "  ${YELLOW}  Note: This test assumes verification works correctly${NC}"
+  echo -e "  ${YELLOW}  Note: Reused shared verification run for template-conflict detection${NC}"
 else
   echo -e "  ${YELLOW}SKIP${NC}"
 fi
 
 # EC-TCR-005: Plugin conflicts (idempotent hooks)
 test_start "apply-patches.sh is idempotent (handles double-application)"
-if [[ -d "$REPO_ROOT/tutor_env" ]]; then
-  # Apply patches twice
-  "$APPLY_PATCHES_SCRIPT" >/dev/null 2>&1 || true
-  "$APPLY_PATCHES_SCRIPT" >/dev/null 2>&1 || true
-
-  # Verify produces structured output (may have failures for patches that
-  # require Tutor plugins not installed in CI)
-  VERIFY_OUT=$("$VERIFY_SCRIPT" --json 2>/dev/null || true)
-  if echo "$VERIFY_OUT" | jq '.summary.total' >/dev/null 2>&1; then
+if (( HAS_TUTOR_ENV )); then
+  if (( DOUBLE_APPLY_SUCCESS )) && (( VERIFY_JSON_VALID )); then
     test_pass
   else
     test_fail "Verification did not produce valid JSON after double-apply"
@@ -119,15 +130,10 @@ fi
 
 # EC-TCR-006: Partial plugin migration (script handles rest)
 test_start "Verification runs after apply-patches.sh"
-if [[ -d "$REPO_ROOT/tutor_env" ]]; then
-  # Run apply-patches to ensure all patches are applied
-  "$APPLY_PATCHES_SCRIPT" >/dev/null 2>&1 || true
-
-  # Verification should produce structured output
-  VERIFY_OUT=$("$VERIFY_SCRIPT" --json 2>/dev/null || true)
-  if echo "$VERIFY_OUT" | jq '.summary.total' >/dev/null 2>&1; then
-    PASSED=$(echo "$VERIFY_OUT" | jq '.summary.passed')
-    TOTAL=$(echo "$VERIFY_OUT" | jq '.summary.total')
+if (( HAS_TUTOR_ENV )); then
+  if (( VERIFY_JSON_VALID )); then
+    PASSED=$(echo "$VERIFY_JSON" | jq '.summary.passed')
+    TOTAL=$(echo "$VERIFY_JSON" | jq '.summary.total')
     echo -e "  ${GREEN}  Verification: $PASSED/$TOTAL patches verified${NC}"
     test_pass
   else
