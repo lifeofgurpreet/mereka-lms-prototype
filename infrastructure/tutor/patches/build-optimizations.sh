@@ -433,15 +433,11 @@ for target in targets:
         "        changed += 1\n"
         "print(f'Stripped google font imports from {changed} compiled studio css files')\n"
         "PY\n"
-        'RUN if [ ! -f /openedx/edx-platform/common/static/bundles/commons.js ]; then npm run webpack; else echo "webpack skipped (prebuilt bundles)"; fi'
+        "RUN npm run webpack"
     )
     updated = updated.replace(
         duplicate_brand_compile_tail,
         "RUN npm run postinstall  # Postinstall artifacts are stuck in nodejs-requirements layer. Create them here too.\nRUN npm run webpack",
-    )
-    updated = updated.replace(
-        'RUN if [ ! -f /openedx/edx-platform/common/static/bundles/commons.js ]; then npm run webpack; else echo "webpack skipped (prebuilt bundles)"; fi',
-        "RUN npm run webpack",
     )
     updated = re.sub(
         r"\n# Now that the default theme is built, build any custom themes\n"
