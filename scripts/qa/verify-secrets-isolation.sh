@@ -57,6 +57,42 @@ PROD_STORE="gcp-secret-manager"
 # On rke2-nonprod, the ClusterSecretStore must point to the dev Infisical environment.
 RKE2_DEV_STORE="infisical-secret-store-dev"
 RKE2_PROD_STORE="gcp-secret-manager"  # GKE-only store; should NOT appear in rke2-nonprod
+SCOPE_MODE="${VERIFY_SECRETS_ISOLATION_SCOPE:-}"
+CHANGED_FILES_RAW="${VERIFY_SECRETS_ISOLATION_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
+declare -a CHANGED_FILES=()
+
+init_scope() {
+  local changed_path
+  local has_relevant_change=0
+
+  if [[ "$SCOPE_MODE" != "changed" ]]; then
+    return 0
+  fi
+
+  if [[ -z "${CHANGED_FILES_RAW//[[:space:]]/}" ]]; then
+    warn "Scope: no changed files provided; running full secrets isolation verification"
+    return 0
+  fi
+
+  mapfile -t CHANGED_FILES < <(printf '%s\n' "$CHANGED_FILES_RAW" | sed '/^$/d')
+  for changed_path in "${CHANGED_FILES[@]}"; do
+    case "$changed_path" in
+      deploy/k8s/base/secrets/*|deploy/k8s/overlays/*|scripts/qa/verify-secrets-isolation.sh|scripts/qa/test-verify-secrets-isolation.sh)
+        has_relevant_change=1
+        break
+        ;;
+    esac
+  done
+
+  if [[ "$has_relevant_change" -eq 1 ]]; then
+    pass "Scope: secrets isolation verification enabled for PR-relevant changes"
+    return 0
+  fi
+
+  skip "Scope: no secrets-isolation-relevant changes in PR diff"
+  printf '=== Secrets isolation: %s PASS / %s FAIL / %s SKIP / %s WARN ===\n' "$PASS" "$FAIL" "$SKIP" "$WARN"
+  exit 0
+}
 
 # ── Python helper written to a temp file so stdin is not consumed ─────────────
 PYHELPER=$(mktemp /tmp/verify-secrets-isolation-XXXXXX.py)
@@ -100,6 +136,8 @@ stores_in_file() {
   local yaml_file="$1"
   python3 "$PYHELPER" "$yaml_file" 2>/dev/null | sort -u
 }
+
+init_scope
 
 # ── Section 1: Base manifest uses gcp-secret-manager ─────────────────────────
 section "1. Base ExternalSecrets store reference"
