@@ -358,7 +358,9 @@ jobs:
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Lint shell scripts (shellcheck)
+        shell: bash
         run: |
+          set -euo pipefail
           export PATH="$HOME/.local/bin:$PATH"
           if ! command -v shellcheck &>/dev/null; then
             SC_VERSION="v0.10.0"
@@ -380,6 +382,31 @@ jobs:
             install -m 0755 "shellcheck-${SC_VERSION}/shellcheck" "$HOME/.local/bin/shellcheck"
             rm -rf "${SC_TARBALL}" "shellcheck-${SC_VERSION}"
           fi
+
+          # On pull requests, lint only the changed shell scripts under
+          # scripts/. Keep full-tree shellcheck on mainline pushes, merge groups,
+          # and manual runs so the authoritative rails still cover the entire
+          # shell surface.
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+            git fetch --no-tags --depth=1 origin "${BASE_SHA}"
+            mapfile -t shell_files < <(
+              git diff --name-only "${BASE_SHA}...${HEAD_SHA}" \
+                | awk '/^scripts\/.*\.sh$/ { print }'
+            )
+
+            if [[ "${#shell_files[@]}" -eq 0 ]]; then
+              echo "No shell script changes under scripts/ in PR; skipping shellcheck"
+              exit 0
+            fi
+
+            printf 'Linting changed shell scripts:\n'
+            printf ' - %s\n' "${shell_files[@]}"
+            shellcheck --severity=error "${shell_files[@]}"
+            exit 0
+          fi
+
           find scripts/ -name '*.sh' -type f -print0 | xargs -0 shellcheck --severity=error
 
       - name: Markdown linting
