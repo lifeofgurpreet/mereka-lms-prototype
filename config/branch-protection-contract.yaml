@@ -8,7 +8,7 @@
 # Gaps between live and target are enforcement debt.
 ---
 schema_version: "2.0"
-audited_at: "2026-04-08"
+audited_at: "2026-04-13"
 
 repos:
   - repo: "Biji-Biji-Initiative/mereka-lms"

@@ -25,6 +25,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+CONTRACT_FILE="${REPO_ROOT}/config/branch-protection-contract.yaml"
 
 # Attempt to infer owner/repo from git remote
 _default_remote() {
@@ -74,6 +75,7 @@ echo -e "${BOLD}=== verify-branch-protection ===${RESET}"
 echo -e "      Repo  : ${OWNER}/${REPO}"
 echo -e "      Branch: ${BRANCH}"
 echo -e "      Policy: docs/policies/operations/BRANCH_PROTECTION.md"
+echo -e "      Contract: config/branch-protection-contract.yaml"
 echo
 
 if ! command -v gh &>/dev/null; then
@@ -91,11 +93,41 @@ if [[ -z "${OWNER}" || -z "${REPO}" ]]; then
   exit 1
 fi
 
+if [[ ! -f "${CONTRACT_FILE}" ]]; then
+  echo -e "${RED}ERROR${RESET}: branch protection contract missing at ${CONTRACT_FILE}"
+  exit 1
+fi
+
 # Verify gh is authenticated
 if ! gh auth status &>/dev/null; then
   echo -e "${RED}ERROR${RESET}: gh CLI is not authenticated. Run: gh auth login"
   exit 1
 fi
+
+CONTRACT_JSON="$(python3 - "${CONTRACT_FILE}" "${OWNER}/${REPO}" "${BRANCH}" <<'PY'
+import json
+import sys
+import yaml
+
+contract = yaml.safe_load(open(sys.argv[1], encoding="utf-8"))
+repo_name = sys.argv[2]
+branch = sys.argv[3]
+
+for row in contract.get("repos", []):
+    if row.get("repo") == repo_name and row.get("branch") == branch:
+        print(json.dumps(row.get("target", row)))
+        raise SystemExit(0)
+
+raise SystemExit(1)
+PY
+)" || {
+  echo -e "${RED}ERROR${RESET}: no branch protection target found for ${OWNER}/${REPO}@${BRANCH} in ${CONTRACT_FILE}"
+  exit 1
+}
+
+EXPECTED_REQUIRED_COUNT="$(echo "${CONTRACT_JSON}" | jq -r '.required_approving_review_count')"
+EXPECTED_STRICT="$(echo "${CONTRACT_JSON}" | jq -r '.strict_status_checks')"
+EXPECTED_ENFORCE_ADMINS="$(echo "${CONTRACT_JSON}" | jq -r '.enforce_admins')"
 
 # ---------------------------------------------------------------------------
 # Fetch branch protection data
@@ -137,17 +169,10 @@ if [[ -z "${PR_REVIEWS}" ]]; then
   fail "required_pull_request_reviews: not configured"
 else
   REQUIRED_COUNT="$(echo "${PROTECTION_JSON}" | jq -r '.required_pull_request_reviews.required_approving_review_count // 0')"
-  if [[ "${REQUIRED_COUNT}" -ge 1 ]]; then
-    pass "required_approving_review_count >= 1 (got: ${REQUIRED_COUNT})"
+  if [[ "${REQUIRED_COUNT}" == "${EXPECTED_REQUIRED_COUNT}" ]]; then
+    pass "required_approving_review_count matches contract (expected: ${EXPECTED_REQUIRED_COUNT}, got: ${REQUIRED_COUNT})"
   else
-    fail "required_approving_review_count must be >= 1 (got: ${REQUIRED_COUNT})"
-  fi
-
-  DISMISS_STALE="$(echo "${PROTECTION_JSON}" | jq -r '.required_pull_request_reviews.dismiss_stale_reviews // false')"
-  if [[ "${DISMISS_STALE}" == "true" ]]; then
-    pass "dismiss_stale_reviews: enabled"
-  else
-    fail "dismiss_stale_reviews: must be enabled (currently: ${DISMISS_STALE})"
+    fail "required_approving_review_count must match contract (expected: ${EXPECTED_REQUIRED_COUNT}, got: ${REQUIRED_COUNT})"
   fi
 fi
 
@@ -165,23 +190,13 @@ if [[ -z "${STATUS_CHECKS}" ]]; then
   fail "required_status_checks: not configured"
 else
   STRICT="$(echo "${PROTECTION_JSON}" | jq -r '.required_status_checks.strict // false')"
-  if [[ "${STRICT}" == "true" ]]; then
-    pass "strict (require branch up-to-date): enabled"
+  if [[ "${STRICT}" == "${EXPECTED_STRICT}" ]]; then
+    pass "strict (require branch up-to-date) matches contract (expected: ${EXPECTED_STRICT})"
   else
-    fail "strict: must be enabled (branches must be up-to-date before merging)"
+    fail "strict must match contract (expected: ${EXPECTED_STRICT}, got: ${STRICT})"
   fi
 
-  # Required check names
-  # These names must match the `name:` field of jobs in .github/workflows/
-  REQUIRED_CHECKS=(
-    "Static Validation"
-    "Tutor Configuration Tests"
-    "Security Scans"
-    "Python test coverage"
-    "Review dependencies"
-    "Trivy — K8s Manifests"
-    "Trivy — Terraform"
-  )
+  mapfile -t REQUIRED_CHECKS < <(echo "${CONTRACT_JSON}" | jq -r '.required_status_checks[]')
 
   # Gather configured contexts (legacy API) and checks (rulesets/newer API)
   CONFIGURED="$(echo "${PROTECTION_JSON}" | jq -r '
@@ -231,11 +246,10 @@ echo
 echo -e "${BOLD}--- Enforce Admins ---${RESET}"
 
 ENFORCE_ADMINS="$(echo "${PROTECTION_JSON}" | jq -r '.enforce_admins.enabled // false')"
-if [[ "${ENFORCE_ADMINS}" == "true" ]]; then
-  pass "enforce_admins: enabled (admins cannot bypass protection)"
+if [[ "${ENFORCE_ADMINS}" == "${EXPECTED_ENFORCE_ADMINS}" ]]; then
+  pass "enforce_admins matches contract (expected: ${EXPECTED_ENFORCE_ADMINS})"
 else
-  warn "enforce_admins: disabled (admins can bypass protection)"
-  info "Consider enabling: Settings → Branches → main → Include administrators"
+  fail "enforce_admins must match contract (expected: ${EXPECTED_ENFORCE_ADMINS}, got: ${ENFORCE_ADMINS})"
 fi
 
 echo
