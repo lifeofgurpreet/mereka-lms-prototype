@@ -922,8 +922,7 @@ jobs:
               infrastructure/tutor/*|\
               tests/tutor/*|\
               scripts/qa/check-config-example-yaml.py|\
-              scripts/qa/verify-tutor-patches.sh|\
-              scripts/qa/verify-tutor-monitoring-plan.sh)
+              scripts/qa/verify-tutor-patches.sh)
                 echo "Tutor lane required due to change: $path"
                 echo "run_tests=true" >> "$GITHUB_OUTPUT"
                 exit 0
