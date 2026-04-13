@@ -1077,6 +1077,9 @@ PY
   local CUSTOM_APPS_SRC="$REPO_ROOT/infrastructure/tutor/custom-apps"
   local CUSTOM_APPS_DEST="$REPO_ROOT/tutor_env/env/build/openedx/infrastructure/tutor/custom-apps"
   if [ -d "$CUSTOM_APPS_SRC" ] && [ -d "$REPO_ROOT/tutor_env/env/build/openedx" ]; then
+    # Keep the rendered custom-app build context as a true mirror of source so
+    # deleted apps do not linger under tutor_env/ across repeated patch runs.
+    rm -rf "$CUSTOM_APPS_DEST"
     mkdir -p "$CUSTOM_APPS_DEST"
     cp -R "$CUSTOM_APPS_SRC/." "$CUSTOM_APPS_DEST/"
     echo "Custom apps synced to build context."

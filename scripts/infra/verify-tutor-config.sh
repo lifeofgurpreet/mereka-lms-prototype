@@ -718,6 +718,9 @@ print_section "Checking Rendered Custom App Build Context"
 
 OPENEDX_BUILD_ROOT="$TUTOR_ENV/env/build/openedx"
 if [[ -d "$OPENEDX_BUILD_ROOT" ]]; then
+  if [[ -d "$REPO_ROOT/infrastructure/tutor/custom-apps" && -d "$OPENEDX_BUILD_ROOT/infrastructure/tutor/custom-apps" ]]; then
+    dirs_match "$REPO_ROOT/infrastructure/tutor/custom-apps" "$OPENEDX_BUILD_ROOT/infrastructure/tutor/custom-apps" "Rendered custom-apps root mirrors source"
+  fi
   if [[ -d "$REPO_ROOT/infrastructure/tutor/custom-apps/mfe_oauth_fix" && -d "$OPENEDX_BUILD_ROOT/infrastructure/tutor/custom-apps/mfe_oauth_fix" ]]; then
     dirs_match "$REPO_ROOT/infrastructure/tutor/custom-apps/mfe_oauth_fix" "$OPENEDX_BUILD_ROOT/infrastructure/tutor/custom-apps/mfe_oauth_fix" "Rendered mfe_oauth_fix mirrors source"
   fi
