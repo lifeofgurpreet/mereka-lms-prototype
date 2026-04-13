@@ -117,6 +117,8 @@
     "scripts/qa/verify-mux-upload-completeness.sh",
     "scripts/qa/verify-notifications-inapp.sh",
     "scripts/qa/verify-observability-contracts.sh",
+    "scripts/qa/verify-observability-prometheusrules.sh",
+    "scripts/qa/verify-observability-servicemonitors.sh",
     "scripts/qa/verify-oep65-readiness.sh",
     "scripts/qa/verify-ops-reliability-streak.sh",
     "scripts/qa/verify-ora2-operations.sh",

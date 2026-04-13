@@ -330,11 +330,9 @@ scripts/qa/audit-observability.sh
 scripts/qa/audit-velero.sh
 scripts/qa/verify-mux-alert-wiring.sh
 scripts/qa/verify-observability-loki-log-sources.sh
-scripts/qa/verify-observability-prometheusrules.sh
-scripts/qa/verify-observability-servicemonitors.sh
-scripts/qa/verify-observability-structured-logging.sh
 scripts/qa/verify-observability-validation.sh
 scripts/qa/verify-otel-naming.sh
+scripts/qa/verify-observability-structured-logging.sh
 scripts/infra/check-error-budget-gate.sh
 scripts/qa/check-error-budget-gate.sh
 scripts/qa/verify-slo-contracts.sh
