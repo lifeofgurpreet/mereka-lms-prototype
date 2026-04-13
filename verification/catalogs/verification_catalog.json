@@ -14649,7 +14649,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-secrets-live-cluster.sh",
-      "reference_count": 7,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"

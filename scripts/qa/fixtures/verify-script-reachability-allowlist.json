@@ -143,6 +143,7 @@
     "scripts/qa/verify-runtime-authority-map.sh",
     "scripts/qa/verify-search-runtime-contract.sh",
     "scripts/qa/verify-secret-inventory.sh",
+    "scripts/qa/verify-secrets-live-cluster.sh",
     "scripts/qa/verify-secrets-infisical.sh",
     "scripts/qa/verify-secrets-precommit.sh",
     "scripts/qa/verify-selector-hardening.sh",
