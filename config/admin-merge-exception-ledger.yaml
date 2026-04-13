@@ -80,8 +80,8 @@ exceptions:
       with the process-invariants.yml workflow as a required check.
     logged_by: "agent-2 (factory-droid)"
 
-  - pr: "#1337"
-    sha: "2dc47a289"
+  - pr: "https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1337"
+    commit: "2dc47a289"
     date: "2026-04-04"
     author: "factory-droid[bot]"
     bypassed_checks:
@@ -95,8 +95,8 @@ exceptions:
       includes all 6 new verifiers in the static inventory.
     logged_by: "factory-droid (session contract-system)"
 
-  - pr: "#1338"
-    sha: "83882c7b9"
+  - pr: "https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1338"
+    commit: "83882c7b9"
     date: "2026-04-04"
     author: "factory-droid[bot]"
     bypassed_checks:
