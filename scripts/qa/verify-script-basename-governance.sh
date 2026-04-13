@@ -8,6 +8,34 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 ALLOWLIST="$SCRIPT_DIR/duplicate-script-basenames.allowlist"
+SCOPE_MODE="${VERIFY_SCRIPT_BASENAME_GOVERNANCE_SCOPE:-}"
+CHANGED_FILES_RAW="${VERIFY_SCRIPT_BASENAME_GOVERNANCE_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
+
+should_skip_scope() {
+  local changed_path
+
+  [[ "$SCOPE_MODE" == "changed" ]] || return 1
+  [[ -n "${CHANGED_FILES_RAW//[[:space:]]/}" ]] || return 1
+
+  while IFS= read -r changed_path; do
+    [[ -n "$changed_path" ]] || continue
+    case "$changed_path" in
+      .github/workflows/ci.yml|\
+      scripts/qa/verify-script-basename-governance.sh|\
+      scripts/qa/duplicate-script-basenames.allowlist|\
+      scripts/*)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
+
+if should_skip_scope; then
+  echo "PASS verify-script-basename-governance (scope skip: no executable-script-governance-relevant changes)"
+  exit 0
+fi
 
 if [[ ! -f "$ALLOWLIST" ]]; then
   echo "FAIL missing allowlist file: $ALLOWLIST"
