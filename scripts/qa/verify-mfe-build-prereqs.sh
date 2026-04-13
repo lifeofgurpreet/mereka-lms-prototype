@@ -16,6 +16,7 @@ PRUNE_DEPRECATED_SHELLS_PATCH="$REPO_ROOT/infrastructure/tutor/patches/mfe-prune
 PRUNE_DEPRECATED_SHELLS_HELPER="$REPO_ROOT/infrastructure/tutor/patches/mfe_prune_deprecated_shells.py"
 GENERATED_MFE_DOCKERFILE="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
 GENERATED_MFE_BUILD_DIR="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe"
+SNAPSHOT_MFE_DOCKERFILE="$REPO_ROOT/infrastructure/tutor/mfe-build/Dockerfile"
 ACTIVE_MFE_DOCKERFILE_PATH="tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
 LEGACY_MFE_DOCKERFILE_PATH="tutor_env/env/build/mfe/Dockerfile"
 GENERATED_MFE_INDIGO_DIR="$GENERATED_MFE_BUILD_DIR/indigo"
@@ -96,6 +97,29 @@ check_no_legacy_mfe_render_path_refs() {
   fi
 }
 
+check_snapshot_parity() {
+  if [[ ! -f "$SNAPSHOT_MFE_DOCKERFILE" ]]; then
+    echo "  ✗ tracked MFE Dockerfile snapshot missing: $SNAPSHOT_MFE_DOCKERFILE"
+    failures=1
+    return
+  fi
+
+  echo "  ✓ tracked MFE Dockerfile snapshot exists: infrastructure/tutor/mfe-build/Dockerfile"
+
+  if [[ ! -f "$GENERATED_MFE_DOCKERFILE" ]]; then
+    return
+  fi
+
+  if cmp -s "$GENERATED_MFE_DOCKERFILE" "$SNAPSHOT_MFE_DOCKERFILE"; then
+    echo "  ✓ generated Dockerfile matches tracked snapshot"
+    return
+  fi
+
+  echo "  ✗ generated Dockerfile diverges from tracked snapshot"
+  diff -u "$SNAPSHOT_MFE_DOCKERFILE" "$GENERATED_MFE_DOCKERFILE" | sed -n '1,40p' | sed 's/^/    /' || true
+  failures=1
+}
+
 check_jsx_parse() {
   local label="$1"
   local path="$2"
@@ -157,6 +181,7 @@ echo ""
 echo "2. Generated Dockerfile contract..."
 check_no_legacy_mfe_render_path_refs
 echo "  ✓ active rendered MFE Dockerfile authority path: $ACTIVE_MFE_DOCKERFILE_PATH"
+check_snapshot_parity
 if [[ -f "$GENERATED_MFE_DOCKERFILE" ]]; then
   check_contains_regex "generated Dockerfile uses supported Node image" "$GENERATED_MFE_DOCKERFILE" "$NODE_IMAGE_REGEX"
   check_contains "generated Dockerfile contains plugin install line" "$GENERATED_MFE_DOCKERFILE" "$PLUGIN_INSTALL_LINE"

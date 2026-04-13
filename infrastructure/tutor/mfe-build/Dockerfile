@@ -2,14 +2,20 @@
 # https://hub.docker.com/_/node/tags
 FROM docker.io/node:24.11.0-bullseye-slim AS base
 
-RUN apt update \
-  && apt install -y git \
+RUN printf '%s\n' \
+    'Acquire::Retries "6";' \
+    'Acquire::http::Timeout "30";' \
+    'Acquire::https::Timeout "30";' \
+    'Acquire::ForceIPv4 "true";' \
+    > /etc/apt/apt.conf.d/80-retries && \
+    apt-get update \
+  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends --fix-missing git \
     # required for cwebp-bin
     gcc libgl1 libxi6 make \
     # required for gifsicle, mozjpeg, and optipng (on arm)
     autoconf libtool pkg-config zlib1g-dev \
     # required for node-sass (on arm)
-    python g++ \
+    python3 g++ python3-distutils \
     # required for image-webpack-loader (on arm)
     libpng-dev \
     # required for building node-canvas (on arm, for authoring)
@@ -27,7 +33,7 @@ ENV PATH=/openedx/app/node_modules/.bin:${PATH}
 ####################### admin-console MFE
 ######## admin-console (git)
 FROM base AS admin-console-git
-ADD --keep-git-dir=true https://github.com/openedx/frontend-app-admin-console.git#release/ulmo .
+ADD --keep-git-dir=true https://github.com/openedx/frontend-app-admin-console.git#release/ulmo.1 .
 
 ######## admin-console (src)
 # Empty layer with just the repo at the root, for build-time bind-mounts
@@ -40,10 +46,17 @@ COPY --from=admin-console-src /package.json /openedx/app/package.json
 COPY --from=admin-console-src /package-lock.json /openedx/app/package-lock.json
 ARG NPM_REGISTRY=https://registry.npmjs.org/
 
-# Update package list and install build toolchain for Node 18
+# Update package list and install build toolchain for Node 24
 RUN apt-get update && apt-get install -y \
-    gcc g++ git libgl1 libxi6 make python3 python3-distutils \
+    ca-certificates gcc g++ git libgl1 libxi6 make python3 python3-distutils \
+    && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+# Force git to use HTTPS instead of SSH for github.com — Docker builds
+# have no SSH keys, so github: protocol (which resolves to SSH) fails.
+# This affects tutor-indigo's @edx/brand install from edly-io/brand-openedx.
+RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@github.com/" \
+    && git config --global --add url."https://github.com/".insteadOf "git@github.com:" \
+    && git config --global http.sslCAInfo /etc/ssl/certs/ca-certificates.crt
 
 ENV CPPFLAGS=-DPNG_ARM_NEON_OPT=0
 ENV PACT_SKIP_BINARY_INSTALL=true
@@ -54,21 +67,24 @@ RUN --mount=type=cache,target=/root/.npm,sharing=shared \
  && npm config set fetch-timeout 300000 \
  && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
-# Set cookie domains for MFE builds
-ARG SESSION_COOKIE_DOMAIN=""
-ARG CSRF_COOKIE_DOMAIN=""
-ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
-ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
+COPY indigo/brand-mereka /openedx/app/brand-mereka
+RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+
+COPY indigo/mereka /openedx/app/mereka
+
+COPY indigo/theme /openedx/dist/theme
 
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
-RUN npm install --legacy-peer-deps 'react-redux@^8.1.3' 'redux@^4.2.1'
-RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.2'
 
+# Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
+RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
+
+RUN npm install --legacy-peer-deps 'react-redux@^8.1.3' 'redux@^4.2.1'
 COPY --from=admin-console-src / /openedx/app
 
-RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations
-
+# pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 2025
 
 # Configuration needed at build time
@@ -78,8 +94,6 @@ ENV PUBLIC_PATH='/admin-console/'
 # have to code the LMS url into the mfe image, and this configuration is user-dependent.
 # So we point to a relative url that will be a proxy for the LMS.
 ENV MFE_CONFIG_API_URL=/api/mfe_config/v1
-ARG ENABLE_NEW_RELIC=false
-ENV ENABLE_NEW_RELIC=${ENABLE_NEW_RELIC}
 COPY env.config.jsx /openedx/app
 
 
@@ -105,10 +119,17 @@ COPY --from=authn-src /package.json /openedx/app/package.json
 COPY --from=authn-src /package-lock.json /openedx/app/package-lock.json
 ARG NPM_REGISTRY=https://registry.npmjs.org/
 
-# Update package list and install build toolchain for Node 18
+# Update package list and install build toolchain for Node 24
 RUN apt-get update && apt-get install -y \
-    gcc g++ git libgl1 libxi6 make python3 python3-distutils \
+    ca-certificates gcc g++ git libgl1 libxi6 make python3 python3-distutils \
+    && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+# Force git to use HTTPS instead of SSH for github.com — Docker builds
+# have no SSH keys, so github: protocol (which resolves to SSH) fails.
+# This affects tutor-indigo's @edx/brand install from edly-io/brand-openedx.
+RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@github.com/" \
+    && git config --global --add url."https://github.com/".insteadOf "git@github.com:" \
+    && git config --global http.sslCAInfo /etc/ssl/certs/ca-certificates.crt
 
 ENV CPPFLAGS=-DPNG_ARM_NEON_OPT=0
 ENV PACT_SKIP_BINARY_INSTALL=true
@@ -119,26 +140,26 @@ RUN --mount=type=cache,target=/root/.npm,sharing=shared \
  && npm config set fetch-timeout 300000 \
  && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
-# Set cookie domains for MFE builds
-ARG SESSION_COOKIE_DOMAIN=""
-ARG CSRF_COOKIE_DOMAIN=""
-ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
-ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
+COPY indigo/brand-mereka /openedx/app/brand-mereka
+RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+
+COPY indigo/mereka /openedx/app/mereka
+
+COPY indigo/theme /openedx/dist/theme
 
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
-RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.2'
-COPY indigo/env.config.jsx /openedx/app/
-COPY indigo/mereka /openedx/app/mereka
-COPY --from=authn-src / /openedx/app
+
+# Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
+RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
+
+RUN npm install --legacy-peer-deps 'react-redux@^8.1.3' 'redux@^4.2.1'
+
 COPY patch-authn-deep-route-handoff.py /openedx/patch-authn-deep-route-handoff.py
+COPY --from=authn-src / /openedx/app
 
-# Remove external iframe-resizer dependency from authn shell to avoid
-# third-party script fetch/CSP variance causing client-side white screens.
-RUN perl -0pi -e 's#\s*<script src="https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4\.4\.4/iframeResizer\.contentWindow\.min\.js"[^<]*</script>\s*##s' /openedx/app/public/index.html
-
-RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations
-
+# pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 1999
 
 # Configuration needed at build time
@@ -148,8 +169,6 @@ ENV PUBLIC_PATH='/authn/'
 # have to code the LMS url into the mfe image, and this configuration is user-dependent.
 # So we point to a relative url that will be a proxy for the LMS.
 ENV MFE_CONFIG_API_URL=/api/mfe_config/v1
-ARG ENABLE_NEW_RELIC=false
-ENV ENABLE_NEW_RELIC=${ENABLE_NEW_RELIC}
 COPY env.config.jsx /openedx/app
 
 
@@ -175,10 +194,17 @@ COPY --from=authoring-src /package.json /openedx/app/package.json
 COPY --from=authoring-src /package-lock.json /openedx/app/package-lock.json
 ARG NPM_REGISTRY=https://registry.npmjs.org/
 
-# Update package list and install build toolchain for Node 18
+# Update package list and install build toolchain for Node 24
 RUN apt-get update && apt-get install -y \
-    gcc g++ git libgl1 libxi6 make python3 python3-distutils \
+    ca-certificates gcc g++ git libgl1 libxi6 make python3 python3-distutils \
+    && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+# Force git to use HTTPS instead of SSH for github.com — Docker builds
+# have no SSH keys, so github: protocol (which resolves to SSH) fails.
+# This affects tutor-indigo's @edx/brand install from edly-io/brand-openedx.
+RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@github.com/" \
+    && git config --global --add url."https://github.com/".insteadOf "git@github.com:" \
+    && git config --global http.sslCAInfo /etc/ssl/certs/ca-certificates.crt
 
 ENV CPPFLAGS=-DPNG_ARM_NEON_OPT=0
 ENV PACT_SKIP_BINARY_INSTALL=true
@@ -189,20 +215,23 @@ RUN --mount=type=cache,target=/root/.npm,sharing=shared \
  && npm config set fetch-timeout 300000 \
  && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
-# Set cookie domains for MFE builds
-ARG SESSION_COOKIE_DOMAIN=""
-ARG CSRF_COOKIE_DOMAIN=""
-ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
-ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
+COPY indigo/brand-mereka /openedx/app/brand-mereka
+RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+
+COPY indigo/mereka /openedx/app/mereka
+
+COPY indigo/theme /openedx/dist/theme
 
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
-RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.2'
+
+# Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
+RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
 
 COPY --from=authoring-src / /openedx/app
 
-RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations
-
+# pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 2001
 
 # Configuration needed at build time
@@ -212,8 +241,6 @@ ENV PUBLIC_PATH='/authoring/'
 # have to code the LMS url into the mfe image, and this configuration is user-dependent.
 # So we point to a relative url that will be a proxy for the LMS.
 ENV MFE_CONFIG_API_URL=/api/mfe_config/v1
-ARG ENABLE_NEW_RELIC=false
-ENV ENABLE_NEW_RELIC=${ENABLE_NEW_RELIC}
 COPY env.config.jsx /openedx/app
 
 
@@ -239,10 +266,17 @@ COPY --from=account-src /package.json /openedx/app/package.json
 COPY --from=account-src /package-lock.json /openedx/app/package-lock.json
 ARG NPM_REGISTRY=https://registry.npmjs.org/
 
-# Update package list and install build toolchain for Node 18
+# Update package list and install build toolchain for Node 24
 RUN apt-get update && apt-get install -y \
-    gcc g++ git libgl1 libxi6 make python3 python3-distutils \
+    ca-certificates gcc g++ git libgl1 libxi6 make python3 python3-distutils \
+    && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+# Force git to use HTTPS instead of SSH for github.com — Docker builds
+# have no SSH keys, so github: protocol (which resolves to SSH) fails.
+# This affects tutor-indigo's @edx/brand install from edly-io/brand-openedx.
+RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@github.com/" \
+    && git config --global --add url."https://github.com/".insteadOf "git@github.com:" \
+    && git config --global http.sslCAInfo /etc/ssl/certs/ca-certificates.crt
 
 ENV CPPFLAGS=-DPNG_ARM_NEON_OPT=0
 ENV PACT_SKIP_BINARY_INSTALL=true
@@ -253,17 +287,35 @@ RUN --mount=type=cache,target=/root/.npm,sharing=shared \
  && npm config set fetch-timeout 300000 \
  && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
-# Set cookie domains for MFE builds
-ARG SESSION_COOKIE_DOMAIN=""
-ARG CSRF_COOKIE_DOMAIN=""
-ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
-ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
+COPY indigo/brand-mereka /openedx/app/brand-mereka
+RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+
+COPY indigo/mereka /openedx/app/mereka
+
+COPY indigo/theme /openedx/dist/theme
 
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 
-RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.2'
+# Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
+RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
+
 COPY --from=account-src / /openedx/app
+
+# pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+EXPOSE 1997
+
+# Configuration needed at build time
+ENV APP_ID=account
+ENV PUBLIC_PATH='/account/'
+# We could in theory point the mfe_config API directly to the LMS. But for that we would
+# have to code the LMS url into the mfe image, and this configuration is user-dependent.
+# So we point to a relative url that will be a proxy for the LMS.
+ENV MFE_CONFIG_API_URL=/api/mfe_config/v1
+COPY env.config.jsx /openedx/app
+
+
 RUN python3 - <<'PY'
 from pathlib import Path
 
@@ -288,23 +340,6 @@ service_path.write_text(updated, encoding="utf-8")
 print("account social_links null-safety patch applied")
 PY
 
-RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations
-
-EXPOSE 1997
-
-# Configuration needed at build time
-ENV APP_ID=account
-ENV PUBLIC_PATH='/account/'
-# We could in theory point the mfe_config API directly to the LMS. But for that we would
-# have to code the LMS url into the mfe image, and this configuration is user-dependent.
-# So we point to a relative url that will be a proxy for the LMS.
-ENV MFE_CONFIG_API_URL=/api/mfe_config/v1
-ARG ENABLE_NEW_RELIC=false
-ENV ENABLE_NEW_RELIC=${ENABLE_NEW_RELIC}
-COPY env.config.jsx /openedx/app
-
-
-
 ######## account (dev)
 FROM account-common AS account-dev
 ENV NODE_ENV=development
@@ -326,10 +361,17 @@ COPY --from=communications-src /package.json /openedx/app/package.json
 COPY --from=communications-src /package-lock.json /openedx/app/package-lock.json
 ARG NPM_REGISTRY=https://registry.npmjs.org/
 
-# Update package list and install build toolchain for Node 18
+# Update package list and install build toolchain for Node 24
 RUN apt-get update && apt-get install -y \
-    gcc g++ git libgl1 libxi6 make python3 python3-distutils \
+    ca-certificates gcc g++ git libgl1 libxi6 make python3 python3-distutils \
+    && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+# Force git to use HTTPS instead of SSH for github.com — Docker builds
+# have no SSH keys, so github: protocol (which resolves to SSH) fails.
+# This affects tutor-indigo's @edx/brand install from edly-io/brand-openedx.
+RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@github.com/" \
+    && git config --global --add url."https://github.com/".insteadOf "git@github.com:" \
+    && git config --global http.sslCAInfo /etc/ssl/certs/ca-certificates.crt
 
 ENV CPPFLAGS=-DPNG_ARM_NEON_OPT=0
 ENV PACT_SKIP_BINARY_INSTALL=true
@@ -340,20 +382,23 @@ RUN --mount=type=cache,target=/root/.npm,sharing=shared \
  && npm config set fetch-timeout 300000 \
  && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
-# Set cookie domains for MFE builds
-ARG SESSION_COOKIE_DOMAIN=""
-ARG CSRF_COOKIE_DOMAIN=""
-ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
-ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
+COPY indigo/brand-mereka /openedx/app/brand-mereka
+RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+
+COPY indigo/mereka /openedx/app/mereka
+
+COPY indigo/theme /openedx/dist/theme
 
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
-RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.2'
+
+# Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
+RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
 
 COPY --from=communications-src / /openedx/app
 
-RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations
-
+# pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 1984
 
 # Configuration needed at build time
@@ -363,8 +408,6 @@ ENV PUBLIC_PATH='/communications/'
 # have to code the LMS url into the mfe image, and this configuration is user-dependent.
 # So we point to a relative url that will be a proxy for the LMS.
 ENV MFE_CONFIG_API_URL=/api/mfe_config/v1
-ARG ENABLE_NEW_RELIC=false
-ENV ENABLE_NEW_RELIC=${ENABLE_NEW_RELIC}
 COPY env.config.jsx /openedx/app
 
 
@@ -390,10 +433,17 @@ COPY --from=discussions-src /package.json /openedx/app/package.json
 COPY --from=discussions-src /package-lock.json /openedx/app/package-lock.json
 ARG NPM_REGISTRY=https://registry.npmjs.org/
 
-# Update package list and install build toolchain for Node 18
+# Update package list and install build toolchain for Node 24
 RUN apt-get update && apt-get install -y \
-    gcc g++ git libgl1 libxi6 make python3 python3-distutils \
+    ca-certificates gcc g++ git libgl1 libxi6 make python3 python3-distutils \
+    && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+# Force git to use HTTPS instead of SSH for github.com — Docker builds
+# have no SSH keys, so github: protocol (which resolves to SSH) fails.
+# This affects tutor-indigo's @edx/brand install from edly-io/brand-openedx.
+RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@github.com/" \
+    && git config --global --add url."https://github.com/".insteadOf "git@github.com:" \
+    && git config --global http.sslCAInfo /etc/ssl/certs/ca-certificates.crt
 
 ENV CPPFLAGS=-DPNG_ARM_NEON_OPT=0
 ENV PACT_SKIP_BINARY_INSTALL=true
@@ -404,20 +454,23 @@ RUN --mount=type=cache,target=/root/.npm,sharing=shared \
  && npm config set fetch-timeout 300000 \
  && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
-# Set cookie domains for MFE builds
-ARG SESSION_COOKIE_DOMAIN=""
-ARG CSRF_COOKIE_DOMAIN=""
-ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
-ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
+COPY indigo/brand-mereka /openedx/app/brand-mereka
+RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+
+COPY indigo/mereka /openedx/app/mereka
+
+COPY indigo/theme /openedx/dist/theme
 
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 
-RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.2'
+# Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
+RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
+
 COPY --from=discussions-src / /openedx/app
 
-RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations
-
+# pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 2002
 
 # Configuration needed at build time
@@ -427,8 +480,6 @@ ENV PUBLIC_PATH='/discussions/'
 # have to code the LMS url into the mfe image, and this configuration is user-dependent.
 # So we point to a relative url that will be a proxy for the LMS.
 ENV MFE_CONFIG_API_URL=/api/mfe_config/v1
-ARG ENABLE_NEW_RELIC=false
-ENV ENABLE_NEW_RELIC=${ENABLE_NEW_RELIC}
 COPY env.config.jsx /openedx/app
 
 
@@ -454,10 +505,17 @@ COPY --from=gradebook-src /package.json /openedx/app/package.json
 COPY --from=gradebook-src /package-lock.json /openedx/app/package-lock.json
 ARG NPM_REGISTRY=https://registry.npmjs.org/
 
-# Update package list and install build toolchain for Node 18
+# Update package list and install build toolchain for Node 24
 RUN apt-get update && apt-get install -y \
-    gcc g++ git libgl1 libxi6 make python3 python3-distutils \
+    ca-certificates gcc g++ git libgl1 libxi6 make python3 python3-distutils \
+    && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+# Force git to use HTTPS instead of SSH for github.com — Docker builds
+# have no SSH keys, so github: protocol (which resolves to SSH) fails.
+# This affects tutor-indigo's @edx/brand install from edly-io/brand-openedx.
+RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@github.com/" \
+    && git config --global --add url."https://github.com/".insteadOf "git@github.com:" \
+    && git config --global http.sslCAInfo /etc/ssl/certs/ca-certificates.crt
 
 ENV CPPFLAGS=-DPNG_ARM_NEON_OPT=0
 ENV PACT_SKIP_BINARY_INSTALL=true
@@ -468,20 +526,23 @@ RUN --mount=type=cache,target=/root/.npm,sharing=shared \
  && npm config set fetch-timeout 300000 \
  && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
-# Set cookie domains for MFE builds
-ARG SESSION_COOKIE_DOMAIN=""
-ARG CSRF_COOKIE_DOMAIN=""
-ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
-ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
+COPY indigo/brand-mereka /openedx/app/brand-mereka
+RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+
+COPY indigo/mereka /openedx/app/mereka
+
+COPY indigo/theme /openedx/dist/theme
 
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
-RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.2'
+
+# Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
+RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
 
 COPY --from=gradebook-src / /openedx/app
 
-RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations
-
+# pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 1994
 
 # Configuration needed at build time
@@ -491,8 +552,6 @@ ENV PUBLIC_PATH='/gradebook/'
 # have to code the LMS url into the mfe image, and this configuration is user-dependent.
 # So we point to a relative url that will be a proxy for the LMS.
 ENV MFE_CONFIG_API_URL=/api/mfe_config/v1
-ARG ENABLE_NEW_RELIC=false
-ENV ENABLE_NEW_RELIC=${ENABLE_NEW_RELIC}
 COPY env.config.jsx /openedx/app
 
 
@@ -518,10 +577,17 @@ COPY --from=learner-dashboard-src /package.json /openedx/app/package.json
 COPY --from=learner-dashboard-src /package-lock.json /openedx/app/package-lock.json
 ARG NPM_REGISTRY=https://registry.npmjs.org/
 
-# Update package list and install build toolchain for Node 18
+# Update package list and install build toolchain for Node 24
 RUN apt-get update && apt-get install -y \
-    gcc g++ git libgl1 libxi6 make python3 python3-distutils \
+    ca-certificates gcc g++ git libgl1 libxi6 make python3 python3-distutils \
+    && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+# Force git to use HTTPS instead of SSH for github.com — Docker builds
+# have no SSH keys, so github: protocol (which resolves to SSH) fails.
+# This affects tutor-indigo's @edx/brand install from edly-io/brand-openedx.
+RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@github.com/" \
+    && git config --global --add url."https://github.com/".insteadOf "git@github.com:" \
+    && git config --global http.sslCAInfo /etc/ssl/certs/ca-certificates.crt
 
 ENV CPPFLAGS=-DPNG_ARM_NEON_OPT=0
 ENV PACT_SKIP_BINARY_INSTALL=true
@@ -532,20 +598,23 @@ RUN --mount=type=cache,target=/root/.npm,sharing=shared \
  && npm config set fetch-timeout 300000 \
  && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
-# Set cookie domains for MFE builds
-ARG SESSION_COOKIE_DOMAIN=""
-ARG CSRF_COOKIE_DOMAIN=""
-ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
-ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
+COPY indigo/brand-mereka /openedx/app/brand-mereka
+RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+
+COPY indigo/mereka /openedx/app/mereka
+
+COPY indigo/theme /openedx/dist/theme
 
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 
-RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.2'
+# Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
+RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
+
 COPY --from=learner-dashboard-src / /openedx/app
 
-RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations
-
+# pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 1996
 
 # Configuration needed at build time
@@ -555,8 +624,6 @@ ENV PUBLIC_PATH='/learner-dashboard/'
 # have to code the LMS url into the mfe image, and this configuration is user-dependent.
 # So we point to a relative url that will be a proxy for the LMS.
 ENV MFE_CONFIG_API_URL=/api/mfe_config/v1
-ARG ENABLE_NEW_RELIC=false
-ENV ENABLE_NEW_RELIC=${ENABLE_NEW_RELIC}
 COPY env.config.jsx /openedx/app
 
 
@@ -582,10 +649,17 @@ COPY --from=learning-src /package.json /openedx/app/package.json
 COPY --from=learning-src /package-lock.json /openedx/app/package-lock.json
 ARG NPM_REGISTRY=https://registry.npmjs.org/
 
-# Update package list and install build toolchain for Node 18
+# Update package list and install build toolchain for Node 24
 RUN apt-get update && apt-get install -y \
-    gcc g++ git libgl1 libxi6 make python3 python3-distutils \
+    ca-certificates gcc g++ git libgl1 libxi6 make python3 python3-distutils \
+    && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+# Force git to use HTTPS instead of SSH for github.com — Docker builds
+# have no SSH keys, so github: protocol (which resolves to SSH) fails.
+# This affects tutor-indigo's @edx/brand install from edly-io/brand-openedx.
+RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@github.com/" \
+    && git config --global --add url."https://github.com/".insteadOf "git@github.com:" \
+    && git config --global http.sslCAInfo /etc/ssl/certs/ca-certificates.crt
 
 ENV CPPFLAGS=-DPNG_ARM_NEON_OPT=0
 ENV PACT_SKIP_BINARY_INSTALL=true
@@ -596,20 +670,23 @@ RUN --mount=type=cache,target=/root/.npm,sharing=shared \
  && npm config set fetch-timeout 300000 \
  && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
-# Set cookie domains for MFE builds
-ARG SESSION_COOKIE_DOMAIN=""
-ARG CSRF_COOKIE_DOMAIN=""
-ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
-ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
+COPY indigo/brand-mereka /openedx/app/brand-mereka
+RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+
+COPY indigo/mereka /openedx/app/mereka
+
+COPY indigo/theme /openedx/dist/theme
 
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 
-RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.2'
+# Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
+RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
+
 COPY --from=learning-src / /openedx/app
 
-RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations
-
+# pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 2000
 
 # Configuration needed at build time
@@ -619,8 +696,6 @@ ENV PUBLIC_PATH='/learning/'
 # have to code the LMS url into the mfe image, and this configuration is user-dependent.
 # So we point to a relative url that will be a proxy for the LMS.
 ENV MFE_CONFIG_API_URL=/api/mfe_config/v1
-ARG ENABLE_NEW_RELIC=false
-ENV ENABLE_NEW_RELIC=${ENABLE_NEW_RELIC}
 COPY env.config.jsx /openedx/app
 
 
@@ -646,10 +721,17 @@ COPY --from=ora-grading-src /package.json /openedx/app/package.json
 COPY --from=ora-grading-src /package-lock.json /openedx/app/package-lock.json
 ARG NPM_REGISTRY=https://registry.npmjs.org/
 
-# Update package list and install build toolchain for Node 18
+# Update package list and install build toolchain for Node 24
 RUN apt-get update && apt-get install -y \
-    gcc g++ git libgl1 libxi6 make python3 python3-distutils \
+    ca-certificates gcc g++ git libgl1 libxi6 make python3 python3-distutils \
+    && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+# Force git to use HTTPS instead of SSH for github.com — Docker builds
+# have no SSH keys, so github: protocol (which resolves to SSH) fails.
+# This affects tutor-indigo's @edx/brand install from edly-io/brand-openedx.
+RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@github.com/" \
+    && git config --global --add url."https://github.com/".insteadOf "git@github.com:" \
+    && git config --global http.sslCAInfo /etc/ssl/certs/ca-certificates.crt
 
 ENV CPPFLAGS=-DPNG_ARM_NEON_OPT=0
 ENV PACT_SKIP_BINARY_INSTALL=true
@@ -660,20 +742,23 @@ RUN --mount=type=cache,target=/root/.npm,sharing=shared \
  && npm config set fetch-timeout 300000 \
  && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
-# Set cookie domains for MFE builds
-ARG SESSION_COOKIE_DOMAIN=""
-ARG CSRF_COOKIE_DOMAIN=""
-ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
-ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
+COPY indigo/brand-mereka /openedx/app/brand-mereka
+RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+
+COPY indigo/mereka /openedx/app/mereka
+
+COPY indigo/theme /openedx/dist/theme
 
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
-RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.2'
+
+# Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
+RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
 
 COPY --from=ora-grading-src / /openedx/app
 
-RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations
-
+# pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 1993
 
 # Configuration needed at build time
@@ -683,8 +768,6 @@ ENV PUBLIC_PATH='/ora-grading/'
 # have to code the LMS url into the mfe image, and this configuration is user-dependent.
 # So we point to a relative url that will be a proxy for the LMS.
 ENV MFE_CONFIG_API_URL=/api/mfe_config/v1
-ARG ENABLE_NEW_RELIC=false
-ENV ENABLE_NEW_RELIC=${ENABLE_NEW_RELIC}
 COPY env.config.jsx /openedx/app
 
 
@@ -710,10 +793,17 @@ COPY --from=profile-src /package.json /openedx/app/package.json
 COPY --from=profile-src /package-lock.json /openedx/app/package-lock.json
 ARG NPM_REGISTRY=https://registry.npmjs.org/
 
-# Update package list and install build toolchain for Node 18
+# Update package list and install build toolchain for Node 24
 RUN apt-get update && apt-get install -y \
-    gcc g++ git libgl1 libxi6 make python3 python3-distutils \
+    ca-certificates gcc g++ git libgl1 libxi6 make python3 python3-distutils \
+    && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+# Force git to use HTTPS instead of SSH for github.com — Docker builds
+# have no SSH keys, so github: protocol (which resolves to SSH) fails.
+# This affects tutor-indigo's @edx/brand install from edly-io/brand-openedx.
+RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@github.com/" \
+    && git config --global --add url."https://github.com/".insteadOf "git@github.com:" \
+    && git config --global http.sslCAInfo /etc/ssl/certs/ca-certificates.crt
 
 ENV CPPFLAGS=-DPNG_ARM_NEON_OPT=0
 ENV PACT_SKIP_BINARY_INSTALL=true
@@ -724,20 +814,23 @@ RUN --mount=type=cache,target=/root/.npm,sharing=shared \
  && npm config set fetch-timeout 300000 \
  && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
-# Set cookie domains for MFE builds
-ARG SESSION_COOKIE_DOMAIN=""
-ARG CSRF_COOKIE_DOMAIN=""
-ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
-ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
+COPY indigo/brand-mereka /openedx/app/brand-mereka
+RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+
+COPY indigo/mereka /openedx/app/mereka
+
+COPY indigo/theme /openedx/dist/theme
 
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 
-RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.2'
+# Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
+RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
+
 COPY --from=profile-src / /openedx/app
 
-RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations
-
+# pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 1995
 
 # Configuration needed at build time
@@ -747,8 +840,6 @@ ENV PUBLIC_PATH='/profile/'
 # have to code the LMS url into the mfe image, and this configuration is user-dependent.
 # So we point to a relative url that will be a proxy for the LMS.
 ENV MFE_CONFIG_API_URL=/api/mfe_config/v1
-ARG ENABLE_NEW_RELIC=false
-ENV ENABLE_NEW_RELIC=${ENABLE_NEW_RELIC}
 COPY env.config.jsx /openedx/app
 
 
@@ -759,19 +850,8 @@ ENV NODE_ENV=development
 CMD ["/bin/bash", "-c", "npm run start --- --config ./webpack.dev-tutor.config.js"]
 
 ####################### learner-record MFE
-# learner-record uses webpack 4 which is fundamentally incompatible with Node 24.
-# Node 18 is the last LTS that supports webpack 4 without OpenSSL/punycode breakage.
-# All other MFEs use webpack 5 (Node 24 compatible).
-FROM docker.io/node:18-bullseye-slim AS learner-record-base
-RUN apt-get update && apt-get install -y git gcc g++ make python3 libgl1 libxi6 \
-    libpng-dev autoconf libtool pkg-config zlib1g-dev \
-    && rm -rf /var/lib/apt/lists/*
-RUN mkdir -p /openedx/app /openedx/env
-WORKDIR /openedx/app
-ENV PATH=/openedx/app/node_modules/.bin:${PATH}
-
 ######## learner-record (git)
-FROM learner-record-base AS learner-record-git
+FROM base AS learner-record-git
 ADD --keep-git-dir=true https://github.com/openedx/frontend-app-learner-record.git#release/ulmo.1 .
 
 ######## learner-record (src)
@@ -780,17 +860,22 @@ FROM scratch AS learner-record-src
 COPY --from=learner-record-git /openedx/app /
 
 ######## learner-record (common)
-FROM learner-record-base AS learner-record-common
-# Cache bust at common stage level to force full rebuild (2026-04-08)
-ARG LEARNER_RECORD_REBUILD_V3=true
+FROM base AS learner-record-common
 COPY --from=learner-record-src /package.json /openedx/app/package.json
 COPY --from=learner-record-src /package-lock.json /openedx/app/package-lock.json
 ARG NPM_REGISTRY=https://registry.npmjs.org/
 
-# Update package list and install build toolchain for Node 18
+# Update package list and install build toolchain for Node 24
 RUN apt-get update && apt-get install -y \
-    gcc g++ git libgl1 libxi6 make python3 python3-distutils \
+    ca-certificates gcc g++ git libgl1 libxi6 make python3 python3-distutils \
+    && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+# Force git to use HTTPS instead of SSH for github.com — Docker builds
+# have no SSH keys, so github: protocol (which resolves to SSH) fails.
+# This affects tutor-indigo's @edx/brand install from edly-io/brand-openedx.
+RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@github.com/" \
+    && git config --global --add url."https://github.com/".insteadOf "git@github.com:" \
+    && git config --global http.sslCAInfo /etc/ssl/certs/ca-certificates.crt
 
 ENV CPPFLAGS=-DPNG_ARM_NEON_OPT=0
 ENV PACT_SKIP_BINARY_INSTALL=true
@@ -801,20 +886,23 @@ RUN --mount=type=cache,target=/root/.npm,sharing=shared \
  && npm config set fetch-timeout 300000 \
  && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
-# Set cookie domains for MFE builds
-ARG SESSION_COOKIE_DOMAIN=""
-ARG CSRF_COOKIE_DOMAIN=""
-ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
-ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
+COPY indigo/brand-mereka /openedx/app/brand-mereka
+RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+
+COPY indigo/mereka /openedx/app/mereka
+
+COPY indigo/theme /openedx/dist/theme
 
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
-RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.2'
+
+# Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
+RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
 
 COPY --from=learner-record-src / /openedx/app
 
-RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations
-
+# pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 1990
 
 # Configuration needed at build time
@@ -824,8 +912,6 @@ ENV PUBLIC_PATH='/learner-record/'
 # have to code the LMS url into the mfe image, and this configuration is user-dependent.
 # So we point to a relative url that will be a proxy for the LMS.
 ENV MFE_CONFIG_API_URL=/api/mfe_config/v1
-ARG ENABLE_NEW_RELIC=false
-ENV ENABLE_NEW_RELIC=${ENABLE_NEW_RELIC}
 COPY env.config.jsx /openedx/app
 
 
@@ -842,41 +928,21 @@ FROM admin-console-common AS admin-console-prod
 ENV NODE_ENV=production
 RUN npm run build
 
-
-
-######## authn (production)
-FROM authn-common AS authn-prod
-ENV NODE_ENV=production
-RUN npm run build
-RUN python3 /openedx/patch-authn-deep-route-handoff.py /openedx/app/dist
-
-
-
-######## authoring (production)
-FROM authoring-common AS authoring-prod
-ENV NODE_ENV=production
-RUN npm run build
-
-
-
-######## account (production)
-FROM account-common AS account-prod
-ENV NODE_ENV=production
-RUN npm run build
 RUN python3 - <<'PY'
 from pathlib import Path
 
 guard_revision = "account-social-links-guard-2026-04-04-cacheproof-v2"
 source_path = Path("/openedx/app/src/account-settings/data/service.js")
+if not source_path.exists():
+    raise SystemExit(0)
 
 # 1. Confirm the fix is present in the SOURCE file before minification renames variables.
 required_in_source = "const socialLinks = Array.isArray(data.social_links) ? data.social_links : [];"
-if source_path.exists():
-    source_content = source_path.read_text(encoding="utf-8")
-    if required_in_source not in source_content:
-        raise SystemExit(
-            f"{guard_revision}: guarded social_links fix missing from {source_path} — patch not applied"
-        )
+source_content = source_path.read_text(encoding="utf-8")
+if required_in_source not in source_content:
+    raise SystemExit(
+        f"{guard_revision}: guarded social_links fix missing from {source_path} — patch not applied"
+    )
 
 # 2. Confirm the OLD buggy pattern is absent from compiled assets and source maps.
 #    The original string is long enough to survive in .map files if the old code was compiled in.
@@ -888,7 +954,7 @@ forbidden = "const platformData = data.social_links.find(({ platform }) => platf
 offenders = []
 
 for asset in sorted(dist_dir.rglob("*")):
-    if asset.suffix not in {".js", ".map"}:
+    if asset.suffix != ".js":
         continue
     try:
         content = asset.read_text(encoding="utf-8")
@@ -903,6 +969,529 @@ if offenders:
     )
 PY
 
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import re
+
+index_path = Path("/openedx/app/dist/index.html")
+if not index_path.exists():
+    raise SystemExit(0)
+
+content = index_path.read_text(encoding="utf-8")
+match = re.search(r"var PARAGON_THEME = (\{.*?\});", content)
+if not match:
+    raise SystemExit(0)
+
+theme = json.loads(match.group(1))
+
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/mereka-brand-light.min.css"
+theme["brand"]["themeUrls"]["variants"].pop("dark", None)
+theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
+
+variant_theme_map = {
+    "academy.biji-biji.com": {
+        "core": "../theme/biji-biji-brand.min.css",
+        "light": "../theme/biji-biji-brand-light.min.css",
+    },
+    "biji-biji.academyv2.mereka.dev": {
+        "core": "../theme/biji-biji-brand.min.css",
+        "light": "../theme/biji-biji-brand-light.min.css",
+    },
+    "skillourfuture.academy.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.dev": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+}
+
+runtime_theme = '''(() => {
+  const theme = __THEME_JSON__;
+  const normalizeHostname = (value) => (typeof value === "string" ? value.toLowerCase() : "").replace(/^www\./, "");
+  const deriveVariantCandidates = (hostname) => {
+    const normalizedHostname = normalizeHostname(hostname);
+    if (!normalizedHostname) {
+      return [];
+    }
+    const candidates = [];
+    const queue = [normalizedHostname];
+    const enqueue = (candidate) => {
+      if (candidate && !candidates.includes(candidate)) {
+        candidates.push(candidate);
+        queue.push(candidate);
+      }
+    };
+    while (queue.length > 0) {
+      const candidate = queue.shift();
+      if (!candidate) {
+        continue;
+      }
+      enqueue(candidate.replace(/^(?:staging\.)?apps\./, ""));
+      enqueue(candidate.replace(/^apps\./, ""));
+      enqueue(candidate.replace(/^staging\./, ""));
+      enqueue(candidate.replace(/\.mereka\.dev$/, ".mereka.io"));
+    }
+    return candidates;
+  };
+  const hostname = typeof window !== "undefined" && window.location ? normalizeHostname(window.location.hostname) : "";
+  const variantThemeMap = __VARIANT_THEME_MAP__;
+  const candidates = deriveVariantCandidates(hostname);
+  const selected = candidates.map((candidate) => variantThemeMap[candidate]).find(Boolean);
+  if (selected) {
+    theme.brand.themeUrls.core.fileName = selected.core;
+    theme.brand.themeUrls.variants.light.fileName = selected.light;
+  }
+  return theme;
+})()'''
+runtime_theme = runtime_theme.replace("__THEME_JSON__", json.dumps(theme, separators=(", ", ": ")))
+runtime_theme = runtime_theme.replace("__VARIANT_THEME_MAP__", json.dumps(variant_theme_map, separators=(", ", ": ")))
+
+updated = content[:match.start(1)] + runtime_theme + content[match.end(1):]
+index_path.write_text(updated, encoding="utf-8")
+PY
+
+
+######## authn (production)
+FROM authn-common AS authn-prod
+ENV NODE_ENV=production
+RUN npm run build
+
+RUN python3 - <<'PY'
+from pathlib import Path
+
+guard_revision = "account-social-links-guard-2026-04-04-cacheproof-v2"
+source_path = Path("/openedx/app/src/account-settings/data/service.js")
+if not source_path.exists():
+    raise SystemExit(0)
+
+# 1. Confirm the fix is present in the SOURCE file before minification renames variables.
+required_in_source = "const socialLinks = Array.isArray(data.social_links) ? data.social_links : [];"
+source_content = source_path.read_text(encoding="utf-8")
+if required_in_source not in source_content:
+    raise SystemExit(
+        f"{guard_revision}: guarded social_links fix missing from {source_path} — patch not applied"
+    )
+
+# 2. Confirm the OLD buggy pattern is absent from compiled assets and source maps.
+#    The original string is long enough to survive in .map files if the old code was compiled in.
+dist_dir = Path("/openedx/app/dist")
+if not dist_dir.exists():
+    raise SystemExit(f"{guard_revision}: frontend-app-account dist missing after build")
+
+forbidden = "const platformData = data.social_links.find(({ platform }) => platform === id);"
+offenders = []
+
+for asset in sorted(dist_dir.rglob("*")):
+    if asset.suffix != ".js":
+        continue
+    try:
+        content = asset.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        continue
+    if forbidden in content:
+        offenders.append(str(asset))
+
+if offenders:
+    raise SystemExit(
+        f"{guard_revision}: unguarded social_links lookup survived account build in {', '.join(offenders)}"
+    )
+PY
+
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import re
+
+index_path = Path("/openedx/app/dist/index.html")
+if not index_path.exists():
+    raise SystemExit(0)
+
+content = index_path.read_text(encoding="utf-8")
+match = re.search(r"var PARAGON_THEME = (\{.*?\});", content)
+if not match:
+    raise SystemExit(0)
+
+theme = json.loads(match.group(1))
+
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/mereka-brand-light.min.css"
+theme["brand"]["themeUrls"]["variants"].pop("dark", None)
+theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
+
+variant_theme_map = {
+    "academy.biji-biji.com": {
+        "core": "../theme/biji-biji-brand.min.css",
+        "light": "../theme/biji-biji-brand-light.min.css",
+    },
+    "biji-biji.academyv2.mereka.dev": {
+        "core": "../theme/biji-biji-brand.min.css",
+        "light": "../theme/biji-biji-brand-light.min.css",
+    },
+    "skillourfuture.academy.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.dev": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+}
+
+runtime_theme = '''(() => {
+  const theme = __THEME_JSON__;
+  const normalizeHostname = (value) => (typeof value === "string" ? value.toLowerCase() : "").replace(/^www\./, "");
+  const deriveVariantCandidates = (hostname) => {
+    const normalizedHostname = normalizeHostname(hostname);
+    if (!normalizedHostname) {
+      return [];
+    }
+    const candidates = [];
+    const queue = [normalizedHostname];
+    const enqueue = (candidate) => {
+      if (candidate && !candidates.includes(candidate)) {
+        candidates.push(candidate);
+        queue.push(candidate);
+      }
+    };
+    while (queue.length > 0) {
+      const candidate = queue.shift();
+      if (!candidate) {
+        continue;
+      }
+      enqueue(candidate.replace(/^(?:staging\.)?apps\./, ""));
+      enqueue(candidate.replace(/^apps\./, ""));
+      enqueue(candidate.replace(/^staging\./, ""));
+      enqueue(candidate.replace(/\.mereka\.dev$/, ".mereka.io"));
+    }
+    return candidates;
+  };
+  const hostname = typeof window !== "undefined" && window.location ? normalizeHostname(window.location.hostname) : "";
+  const variantThemeMap = __VARIANT_THEME_MAP__;
+  const candidates = deriveVariantCandidates(hostname);
+  const selected = candidates.map((candidate) => variantThemeMap[candidate]).find(Boolean);
+  if (selected) {
+    theme.brand.themeUrls.core.fileName = selected.core;
+    theme.brand.themeUrls.variants.light.fileName = selected.light;
+  }
+  return theme;
+})()'''
+runtime_theme = runtime_theme.replace("__THEME_JSON__", json.dumps(theme, separators=(", ", ": ")))
+runtime_theme = runtime_theme.replace("__VARIANT_THEME_MAP__", json.dumps(variant_theme_map, separators=(", ", ": ")))
+
+updated = content[:match.start(1)] + runtime_theme + content[match.end(1):]
+index_path.write_text(updated, encoding="utf-8")
+PY
+
+RUN python3 /openedx/patch-authn-deep-route-handoff.py /openedx/app/dist \
+ && python3 - <<'PY'
+from pathlib import Path
+
+dist_dir = Path("/openedx/app/dist")
+offenders = []
+for asset in sorted(dist_dir.rglob("*.js")):
+    try:
+        content = asset.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        continue
+    if 'LMS_BASE_URL}/dashboard' in content or '"/dashboard"' in content:
+        offenders.append(str(asset))
+
+if offenders:
+    raise SystemExit(
+        "authn deep-route handoff guard failed in " + ", ".join(offenders)
+    )
+PY
+
+######## authoring (production)
+FROM authoring-common AS authoring-prod
+ENV NODE_ENV=production
+RUN npm run build
+
+RUN python3 - <<'PY'
+from pathlib import Path
+
+guard_revision = "account-social-links-guard-2026-04-04-cacheproof-v2"
+source_path = Path("/openedx/app/src/account-settings/data/service.js")
+if not source_path.exists():
+    raise SystemExit(0)
+
+# 1. Confirm the fix is present in the SOURCE file before minification renames variables.
+required_in_source = "const socialLinks = Array.isArray(data.social_links) ? data.social_links : [];"
+source_content = source_path.read_text(encoding="utf-8")
+if required_in_source not in source_content:
+    raise SystemExit(
+        f"{guard_revision}: guarded social_links fix missing from {source_path} — patch not applied"
+    )
+
+# 2. Confirm the OLD buggy pattern is absent from compiled assets and source maps.
+#    The original string is long enough to survive in .map files if the old code was compiled in.
+dist_dir = Path("/openedx/app/dist")
+if not dist_dir.exists():
+    raise SystemExit(f"{guard_revision}: frontend-app-account dist missing after build")
+
+forbidden = "const platformData = data.social_links.find(({ platform }) => platform === id);"
+offenders = []
+
+for asset in sorted(dist_dir.rglob("*")):
+    if asset.suffix != ".js":
+        continue
+    try:
+        content = asset.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        continue
+    if forbidden in content:
+        offenders.append(str(asset))
+
+if offenders:
+    raise SystemExit(
+        f"{guard_revision}: unguarded social_links lookup survived account build in {', '.join(offenders)}"
+    )
+PY
+
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import re
+
+index_path = Path("/openedx/app/dist/index.html")
+if not index_path.exists():
+    raise SystemExit(0)
+
+content = index_path.read_text(encoding="utf-8")
+match = re.search(r"var PARAGON_THEME = (\{.*?\});", content)
+if not match:
+    raise SystemExit(0)
+
+theme = json.loads(match.group(1))
+
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/mereka-brand-light.min.css"
+theme["brand"]["themeUrls"]["variants"].pop("dark", None)
+theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
+
+variant_theme_map = {
+    "academy.biji-biji.com": {
+        "core": "../theme/biji-biji-brand.min.css",
+        "light": "../theme/biji-biji-brand-light.min.css",
+    },
+    "biji-biji.academyv2.mereka.dev": {
+        "core": "../theme/biji-biji-brand.min.css",
+        "light": "../theme/biji-biji-brand-light.min.css",
+    },
+    "skillourfuture.academy.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.dev": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+}
+
+runtime_theme = '''(() => {
+  const theme = __THEME_JSON__;
+  const normalizeHostname = (value) => (typeof value === "string" ? value.toLowerCase() : "").replace(/^www\./, "");
+  const deriveVariantCandidates = (hostname) => {
+    const normalizedHostname = normalizeHostname(hostname);
+    if (!normalizedHostname) {
+      return [];
+    }
+    const candidates = [];
+    const queue = [normalizedHostname];
+    const enqueue = (candidate) => {
+      if (candidate && !candidates.includes(candidate)) {
+        candidates.push(candidate);
+        queue.push(candidate);
+      }
+    };
+    while (queue.length > 0) {
+      const candidate = queue.shift();
+      if (!candidate) {
+        continue;
+      }
+      enqueue(candidate.replace(/^(?:staging\.)?apps\./, ""));
+      enqueue(candidate.replace(/^apps\./, ""));
+      enqueue(candidate.replace(/^staging\./, ""));
+      enqueue(candidate.replace(/\.mereka\.dev$/, ".mereka.io"));
+    }
+    return candidates;
+  };
+  const hostname = typeof window !== "undefined" && window.location ? normalizeHostname(window.location.hostname) : "";
+  const variantThemeMap = __VARIANT_THEME_MAP__;
+  const candidates = deriveVariantCandidates(hostname);
+  const selected = candidates.map((candidate) => variantThemeMap[candidate]).find(Boolean);
+  if (selected) {
+    theme.brand.themeUrls.core.fileName = selected.core;
+    theme.brand.themeUrls.variants.light.fileName = selected.light;
+  }
+  return theme;
+})()'''
+runtime_theme = runtime_theme.replace("__THEME_JSON__", json.dumps(theme, separators=(", ", ": ")))
+runtime_theme = runtime_theme.replace("__VARIANT_THEME_MAP__", json.dumps(variant_theme_map, separators=(", ", ": ")))
+
+updated = content[:match.start(1)] + runtime_theme + content[match.end(1):]
+index_path.write_text(updated, encoding="utf-8")
+PY
+
+
+######## account (production)
+FROM account-common AS account-prod
+ENV NODE_ENV=production
+RUN npm run build
+
+RUN python3 - <<'PY'
+from pathlib import Path
+
+guard_revision = "account-social-links-guard-2026-04-04-cacheproof-v2"
+source_path = Path("/openedx/app/src/account-settings/data/service.js")
+if not source_path.exists():
+    raise SystemExit(0)
+
+# 1. Confirm the fix is present in the SOURCE file before minification renames variables.
+required_in_source = "const socialLinks = Array.isArray(data.social_links) ? data.social_links : [];"
+source_content = source_path.read_text(encoding="utf-8")
+if required_in_source not in source_content:
+    raise SystemExit(
+        f"{guard_revision}: guarded social_links fix missing from {source_path} — patch not applied"
+    )
+
+# 2. Confirm the OLD buggy pattern is absent from compiled assets and source maps.
+#    The original string is long enough to survive in .map files if the old code was compiled in.
+dist_dir = Path("/openedx/app/dist")
+if not dist_dir.exists():
+    raise SystemExit(f"{guard_revision}: frontend-app-account dist missing after build")
+
+forbidden = "const platformData = data.social_links.find(({ platform }) => platform === id);"
+offenders = []
+
+for asset in sorted(dist_dir.rglob("*")):
+    if asset.suffix != ".js":
+        continue
+    try:
+        content = asset.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        continue
+    if forbidden in content:
+        offenders.append(str(asset))
+
+if offenders:
+    raise SystemExit(
+        f"{guard_revision}: unguarded social_links lookup survived account build in {', '.join(offenders)}"
+    )
+PY
+
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import re
+
+index_path = Path("/openedx/app/dist/index.html")
+if not index_path.exists():
+    raise SystemExit(0)
+
+content = index_path.read_text(encoding="utf-8")
+match = re.search(r"var PARAGON_THEME = (\{.*?\});", content)
+if not match:
+    raise SystemExit(0)
+
+theme = json.loads(match.group(1))
+
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/mereka-brand-light.min.css"
+theme["brand"]["themeUrls"]["variants"].pop("dark", None)
+theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
+
+variant_theme_map = {
+    "academy.biji-biji.com": {
+        "core": "../theme/biji-biji-brand.min.css",
+        "light": "../theme/biji-biji-brand-light.min.css",
+    },
+    "biji-biji.academyv2.mereka.dev": {
+        "core": "../theme/biji-biji-brand.min.css",
+        "light": "../theme/biji-biji-brand-light.min.css",
+    },
+    "skillourfuture.academy.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.dev": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+}
+
+runtime_theme = '''(() => {
+  const theme = __THEME_JSON__;
+  const normalizeHostname = (value) => (typeof value === "string" ? value.toLowerCase() : "").replace(/^www\./, "");
+  const deriveVariantCandidates = (hostname) => {
+    const normalizedHostname = normalizeHostname(hostname);
+    if (!normalizedHostname) {
+      return [];
+    }
+    const candidates = [];
+    const queue = [normalizedHostname];
+    const enqueue = (candidate) => {
+      if (candidate && !candidates.includes(candidate)) {
+        candidates.push(candidate);
+        queue.push(candidate);
+      }
+    };
+    while (queue.length > 0) {
+      const candidate = queue.shift();
+      if (!candidate) {
+        continue;
+      }
+      enqueue(candidate.replace(/^(?:staging\.)?apps\./, ""));
+      enqueue(candidate.replace(/^apps\./, ""));
+      enqueue(candidate.replace(/^staging\./, ""));
+      enqueue(candidate.replace(/\.mereka\.dev$/, ".mereka.io"));
+    }
+    return candidates;
+  };
+  const hostname = typeof window !== "undefined" && window.location ? normalizeHostname(window.location.hostname) : "";
+  const variantThemeMap = __VARIANT_THEME_MAP__;
+  const candidates = deriveVariantCandidates(hostname);
+  const selected = candidates.map((candidate) => variantThemeMap[candidate]).find(Boolean);
+  if (selected) {
+    theme.brand.themeUrls.core.fileName = selected.core;
+    theme.brand.themeUrls.variants.light.fileName = selected.light;
+  }
+  return theme;
+})()'''
+runtime_theme = runtime_theme.replace("__THEME_JSON__", json.dumps(theme, separators=(", ", ": ")))
+runtime_theme = runtime_theme.replace("__VARIANT_THEME_MAP__", json.dumps(variant_theme_map, separators=(", ", ": ")))
+
+updated = content[:match.start(1)] + runtime_theme + content[match.end(1):]
+index_path.write_text(updated, encoding="utf-8")
+PY
 
 
 ######## communications (production)
@@ -910,6 +1499,137 @@ FROM communications-common AS communications-prod
 ENV NODE_ENV=production
 RUN npm run build
 
+RUN python3 - <<'PY'
+from pathlib import Path
+
+guard_revision = "account-social-links-guard-2026-04-04-cacheproof-v2"
+source_path = Path("/openedx/app/src/account-settings/data/service.js")
+if not source_path.exists():
+    raise SystemExit(0)
+
+# 1. Confirm the fix is present in the SOURCE file before minification renames variables.
+required_in_source = "const socialLinks = Array.isArray(data.social_links) ? data.social_links : [];"
+source_content = source_path.read_text(encoding="utf-8")
+if required_in_source not in source_content:
+    raise SystemExit(
+        f"{guard_revision}: guarded social_links fix missing from {source_path} — patch not applied"
+    )
+
+# 2. Confirm the OLD buggy pattern is absent from compiled assets and source maps.
+#    The original string is long enough to survive in .map files if the old code was compiled in.
+dist_dir = Path("/openedx/app/dist")
+if not dist_dir.exists():
+    raise SystemExit(f"{guard_revision}: frontend-app-account dist missing after build")
+
+forbidden = "const platformData = data.social_links.find(({ platform }) => platform === id);"
+offenders = []
+
+for asset in sorted(dist_dir.rglob("*")):
+    if asset.suffix != ".js":
+        continue
+    try:
+        content = asset.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        continue
+    if forbidden in content:
+        offenders.append(str(asset))
+
+if offenders:
+    raise SystemExit(
+        f"{guard_revision}: unguarded social_links lookup survived account build in {', '.join(offenders)}"
+    )
+PY
+
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import re
+
+index_path = Path("/openedx/app/dist/index.html")
+if not index_path.exists():
+    raise SystemExit(0)
+
+content = index_path.read_text(encoding="utf-8")
+match = re.search(r"var PARAGON_THEME = (\{.*?\});", content)
+if not match:
+    raise SystemExit(0)
+
+theme = json.loads(match.group(1))
+
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/mereka-brand-light.min.css"
+theme["brand"]["themeUrls"]["variants"].pop("dark", None)
+theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
+
+variant_theme_map = {
+    "academy.biji-biji.com": {
+        "core": "../theme/biji-biji-brand.min.css",
+        "light": "../theme/biji-biji-brand-light.min.css",
+    },
+    "biji-biji.academyv2.mereka.dev": {
+        "core": "../theme/biji-biji-brand.min.css",
+        "light": "../theme/biji-biji-brand-light.min.css",
+    },
+    "skillourfuture.academy.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.dev": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+}
+
+runtime_theme = '''(() => {
+  const theme = __THEME_JSON__;
+  const normalizeHostname = (value) => (typeof value === "string" ? value.toLowerCase() : "").replace(/^www\./, "");
+  const deriveVariantCandidates = (hostname) => {
+    const normalizedHostname = normalizeHostname(hostname);
+    if (!normalizedHostname) {
+      return [];
+    }
+    const candidates = [];
+    const queue = [normalizedHostname];
+    const enqueue = (candidate) => {
+      if (candidate && !candidates.includes(candidate)) {
+        candidates.push(candidate);
+        queue.push(candidate);
+      }
+    };
+    while (queue.length > 0) {
+      const candidate = queue.shift();
+      if (!candidate) {
+        continue;
+      }
+      enqueue(candidate.replace(/^(?:staging\.)?apps\./, ""));
+      enqueue(candidate.replace(/^apps\./, ""));
+      enqueue(candidate.replace(/^staging\./, ""));
+      enqueue(candidate.replace(/\.mereka\.dev$/, ".mereka.io"));
+    }
+    return candidates;
+  };
+  const hostname = typeof window !== "undefined" && window.location ? normalizeHostname(window.location.hostname) : "";
+  const variantThemeMap = __VARIANT_THEME_MAP__;
+  const candidates = deriveVariantCandidates(hostname);
+  const selected = candidates.map((candidate) => variantThemeMap[candidate]).find(Boolean);
+  if (selected) {
+    theme.brand.themeUrls.core.fileName = selected.core;
+    theme.brand.themeUrls.variants.light.fileName = selected.light;
+  }
+  return theme;
+})()'''
+runtime_theme = runtime_theme.replace("__THEME_JSON__", json.dumps(theme, separators=(", ", ": ")))
+runtime_theme = runtime_theme.replace("__VARIANT_THEME_MAP__", json.dumps(variant_theme_map, separators=(", ", ": ")))
+
+updated = content[:match.start(1)] + runtime_theme + content[match.end(1):]
+index_path.write_text(updated, encoding="utf-8")
+PY
 
 
 ######## discussions (production)
@@ -917,6 +1637,137 @@ FROM discussions-common AS discussions-prod
 ENV NODE_ENV=production
 RUN npm run build
 
+RUN python3 - <<'PY'
+from pathlib import Path
+
+guard_revision = "account-social-links-guard-2026-04-04-cacheproof-v2"
+source_path = Path("/openedx/app/src/account-settings/data/service.js")
+if not source_path.exists():
+    raise SystemExit(0)
+
+# 1. Confirm the fix is present in the SOURCE file before minification renames variables.
+required_in_source = "const socialLinks = Array.isArray(data.social_links) ? data.social_links : [];"
+source_content = source_path.read_text(encoding="utf-8")
+if required_in_source not in source_content:
+    raise SystemExit(
+        f"{guard_revision}: guarded social_links fix missing from {source_path} — patch not applied"
+    )
+
+# 2. Confirm the OLD buggy pattern is absent from compiled assets and source maps.
+#    The original string is long enough to survive in .map files if the old code was compiled in.
+dist_dir = Path("/openedx/app/dist")
+if not dist_dir.exists():
+    raise SystemExit(f"{guard_revision}: frontend-app-account dist missing after build")
+
+forbidden = "const platformData = data.social_links.find(({ platform }) => platform === id);"
+offenders = []
+
+for asset in sorted(dist_dir.rglob("*")):
+    if asset.suffix != ".js":
+        continue
+    try:
+        content = asset.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        continue
+    if forbidden in content:
+        offenders.append(str(asset))
+
+if offenders:
+    raise SystemExit(
+        f"{guard_revision}: unguarded social_links lookup survived account build in {', '.join(offenders)}"
+    )
+PY
+
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import re
+
+index_path = Path("/openedx/app/dist/index.html")
+if not index_path.exists():
+    raise SystemExit(0)
+
+content = index_path.read_text(encoding="utf-8")
+match = re.search(r"var PARAGON_THEME = (\{.*?\});", content)
+if not match:
+    raise SystemExit(0)
+
+theme = json.loads(match.group(1))
+
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/mereka-brand-light.min.css"
+theme["brand"]["themeUrls"]["variants"].pop("dark", None)
+theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
+
+variant_theme_map = {
+    "academy.biji-biji.com": {
+        "core": "../theme/biji-biji-brand.min.css",
+        "light": "../theme/biji-biji-brand-light.min.css",
+    },
+    "biji-biji.academyv2.mereka.dev": {
+        "core": "../theme/biji-biji-brand.min.css",
+        "light": "../theme/biji-biji-brand-light.min.css",
+    },
+    "skillourfuture.academy.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.dev": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+}
+
+runtime_theme = '''(() => {
+  const theme = __THEME_JSON__;
+  const normalizeHostname = (value) => (typeof value === "string" ? value.toLowerCase() : "").replace(/^www\./, "");
+  const deriveVariantCandidates = (hostname) => {
+    const normalizedHostname = normalizeHostname(hostname);
+    if (!normalizedHostname) {
+      return [];
+    }
+    const candidates = [];
+    const queue = [normalizedHostname];
+    const enqueue = (candidate) => {
+      if (candidate && !candidates.includes(candidate)) {
+        candidates.push(candidate);
+        queue.push(candidate);
+      }
+    };
+    while (queue.length > 0) {
+      const candidate = queue.shift();
+      if (!candidate) {
+        continue;
+      }
+      enqueue(candidate.replace(/^(?:staging\.)?apps\./, ""));
+      enqueue(candidate.replace(/^apps\./, ""));
+      enqueue(candidate.replace(/^staging\./, ""));
+      enqueue(candidate.replace(/\.mereka\.dev$/, ".mereka.io"));
+    }
+    return candidates;
+  };
+  const hostname = typeof window !== "undefined" && window.location ? normalizeHostname(window.location.hostname) : "";
+  const variantThemeMap = __VARIANT_THEME_MAP__;
+  const candidates = deriveVariantCandidates(hostname);
+  const selected = candidates.map((candidate) => variantThemeMap[candidate]).find(Boolean);
+  if (selected) {
+    theme.brand.themeUrls.core.fileName = selected.core;
+    theme.brand.themeUrls.variants.light.fileName = selected.light;
+  }
+  return theme;
+})()'''
+runtime_theme = runtime_theme.replace("__THEME_JSON__", json.dumps(theme, separators=(", ", ": ")))
+runtime_theme = runtime_theme.replace("__VARIANT_THEME_MAP__", json.dumps(variant_theme_map, separators=(", ", ": ")))
+
+updated = content[:match.start(1)] + runtime_theme + content[match.end(1):]
+index_path.write_text(updated, encoding="utf-8")
+PY
 
 
 ######## gradebook (production)
@@ -924,6 +1775,137 @@ FROM gradebook-common AS gradebook-prod
 ENV NODE_ENV=production
 RUN npm run build
 
+RUN python3 - <<'PY'
+from pathlib import Path
+
+guard_revision = "account-social-links-guard-2026-04-04-cacheproof-v2"
+source_path = Path("/openedx/app/src/account-settings/data/service.js")
+if not source_path.exists():
+    raise SystemExit(0)
+
+# 1. Confirm the fix is present in the SOURCE file before minification renames variables.
+required_in_source = "const socialLinks = Array.isArray(data.social_links) ? data.social_links : [];"
+source_content = source_path.read_text(encoding="utf-8")
+if required_in_source not in source_content:
+    raise SystemExit(
+        f"{guard_revision}: guarded social_links fix missing from {source_path} — patch not applied"
+    )
+
+# 2. Confirm the OLD buggy pattern is absent from compiled assets and source maps.
+#    The original string is long enough to survive in .map files if the old code was compiled in.
+dist_dir = Path("/openedx/app/dist")
+if not dist_dir.exists():
+    raise SystemExit(f"{guard_revision}: frontend-app-account dist missing after build")
+
+forbidden = "const platformData = data.social_links.find(({ platform }) => platform === id);"
+offenders = []
+
+for asset in sorted(dist_dir.rglob("*")):
+    if asset.suffix != ".js":
+        continue
+    try:
+        content = asset.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        continue
+    if forbidden in content:
+        offenders.append(str(asset))
+
+if offenders:
+    raise SystemExit(
+        f"{guard_revision}: unguarded social_links lookup survived account build in {', '.join(offenders)}"
+    )
+PY
+
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import re
+
+index_path = Path("/openedx/app/dist/index.html")
+if not index_path.exists():
+    raise SystemExit(0)
+
+content = index_path.read_text(encoding="utf-8")
+match = re.search(r"var PARAGON_THEME = (\{.*?\});", content)
+if not match:
+    raise SystemExit(0)
+
+theme = json.loads(match.group(1))
+
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/mereka-brand-light.min.css"
+theme["brand"]["themeUrls"]["variants"].pop("dark", None)
+theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
+
+variant_theme_map = {
+    "academy.biji-biji.com": {
+        "core": "../theme/biji-biji-brand.min.css",
+        "light": "../theme/biji-biji-brand-light.min.css",
+    },
+    "biji-biji.academyv2.mereka.dev": {
+        "core": "../theme/biji-biji-brand.min.css",
+        "light": "../theme/biji-biji-brand-light.min.css",
+    },
+    "skillourfuture.academy.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.dev": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+}
+
+runtime_theme = '''(() => {
+  const theme = __THEME_JSON__;
+  const normalizeHostname = (value) => (typeof value === "string" ? value.toLowerCase() : "").replace(/^www\./, "");
+  const deriveVariantCandidates = (hostname) => {
+    const normalizedHostname = normalizeHostname(hostname);
+    if (!normalizedHostname) {
+      return [];
+    }
+    const candidates = [];
+    const queue = [normalizedHostname];
+    const enqueue = (candidate) => {
+      if (candidate && !candidates.includes(candidate)) {
+        candidates.push(candidate);
+        queue.push(candidate);
+      }
+    };
+    while (queue.length > 0) {
+      const candidate = queue.shift();
+      if (!candidate) {
+        continue;
+      }
+      enqueue(candidate.replace(/^(?:staging\.)?apps\./, ""));
+      enqueue(candidate.replace(/^apps\./, ""));
+      enqueue(candidate.replace(/^staging\./, ""));
+      enqueue(candidate.replace(/\.mereka\.dev$/, ".mereka.io"));
+    }
+    return candidates;
+  };
+  const hostname = typeof window !== "undefined" && window.location ? normalizeHostname(window.location.hostname) : "";
+  const variantThemeMap = __VARIANT_THEME_MAP__;
+  const candidates = deriveVariantCandidates(hostname);
+  const selected = candidates.map((candidate) => variantThemeMap[candidate]).find(Boolean);
+  if (selected) {
+    theme.brand.themeUrls.core.fileName = selected.core;
+    theme.brand.themeUrls.variants.light.fileName = selected.light;
+  }
+  return theme;
+})()'''
+runtime_theme = runtime_theme.replace("__THEME_JSON__", json.dumps(theme, separators=(", ", ": ")))
+runtime_theme = runtime_theme.replace("__VARIANT_THEME_MAP__", json.dumps(variant_theme_map, separators=(", ", ": ")))
+
+updated = content[:match.start(1)] + runtime_theme + content[match.end(1):]
+index_path.write_text(updated, encoding="utf-8")
+PY
 
 
 ######## learner-dashboard (production)
@@ -931,6 +1913,137 @@ FROM learner-dashboard-common AS learner-dashboard-prod
 ENV NODE_ENV=production
 RUN npm run build
 
+RUN python3 - <<'PY'
+from pathlib import Path
+
+guard_revision = "account-social-links-guard-2026-04-04-cacheproof-v2"
+source_path = Path("/openedx/app/src/account-settings/data/service.js")
+if not source_path.exists():
+    raise SystemExit(0)
+
+# 1. Confirm the fix is present in the SOURCE file before minification renames variables.
+required_in_source = "const socialLinks = Array.isArray(data.social_links) ? data.social_links : [];"
+source_content = source_path.read_text(encoding="utf-8")
+if required_in_source not in source_content:
+    raise SystemExit(
+        f"{guard_revision}: guarded social_links fix missing from {source_path} — patch not applied"
+    )
+
+# 2. Confirm the OLD buggy pattern is absent from compiled assets and source maps.
+#    The original string is long enough to survive in .map files if the old code was compiled in.
+dist_dir = Path("/openedx/app/dist")
+if not dist_dir.exists():
+    raise SystemExit(f"{guard_revision}: frontend-app-account dist missing after build")
+
+forbidden = "const platformData = data.social_links.find(({ platform }) => platform === id);"
+offenders = []
+
+for asset in sorted(dist_dir.rglob("*")):
+    if asset.suffix != ".js":
+        continue
+    try:
+        content = asset.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        continue
+    if forbidden in content:
+        offenders.append(str(asset))
+
+if offenders:
+    raise SystemExit(
+        f"{guard_revision}: unguarded social_links lookup survived account build in {', '.join(offenders)}"
+    )
+PY
+
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import re
+
+index_path = Path("/openedx/app/dist/index.html")
+if not index_path.exists():
+    raise SystemExit(0)
+
+content = index_path.read_text(encoding="utf-8")
+match = re.search(r"var PARAGON_THEME = (\{.*?\});", content)
+if not match:
+    raise SystemExit(0)
+
+theme = json.loads(match.group(1))
+
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/mereka-brand-light.min.css"
+theme["brand"]["themeUrls"]["variants"].pop("dark", None)
+theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
+
+variant_theme_map = {
+    "academy.biji-biji.com": {
+        "core": "../theme/biji-biji-brand.min.css",
+        "light": "../theme/biji-biji-brand-light.min.css",
+    },
+    "biji-biji.academyv2.mereka.dev": {
+        "core": "../theme/biji-biji-brand.min.css",
+        "light": "../theme/biji-biji-brand-light.min.css",
+    },
+    "skillourfuture.academy.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.dev": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+}
+
+runtime_theme = '''(() => {
+  const theme = __THEME_JSON__;
+  const normalizeHostname = (value) => (typeof value === "string" ? value.toLowerCase() : "").replace(/^www\./, "");
+  const deriveVariantCandidates = (hostname) => {
+    const normalizedHostname = normalizeHostname(hostname);
+    if (!normalizedHostname) {
+      return [];
+    }
+    const candidates = [];
+    const queue = [normalizedHostname];
+    const enqueue = (candidate) => {
+      if (candidate && !candidates.includes(candidate)) {
+        candidates.push(candidate);
+        queue.push(candidate);
+      }
+    };
+    while (queue.length > 0) {
+      const candidate = queue.shift();
+      if (!candidate) {
+        continue;
+      }
+      enqueue(candidate.replace(/^(?:staging\.)?apps\./, ""));
+      enqueue(candidate.replace(/^apps\./, ""));
+      enqueue(candidate.replace(/^staging\./, ""));
+      enqueue(candidate.replace(/\.mereka\.dev$/, ".mereka.io"));
+    }
+    return candidates;
+  };
+  const hostname = typeof window !== "undefined" && window.location ? normalizeHostname(window.location.hostname) : "";
+  const variantThemeMap = __VARIANT_THEME_MAP__;
+  const candidates = deriveVariantCandidates(hostname);
+  const selected = candidates.map((candidate) => variantThemeMap[candidate]).find(Boolean);
+  if (selected) {
+    theme.brand.themeUrls.core.fileName = selected.core;
+    theme.brand.themeUrls.variants.light.fileName = selected.light;
+  }
+  return theme;
+})()'''
+runtime_theme = runtime_theme.replace("__THEME_JSON__", json.dumps(theme, separators=(", ", ": ")))
+runtime_theme = runtime_theme.replace("__VARIANT_THEME_MAP__", json.dumps(variant_theme_map, separators=(", ", ": ")))
+
+updated = content[:match.start(1)] + runtime_theme + content[match.end(1):]
+index_path.write_text(updated, encoding="utf-8")
+PY
 
 
 ######## learning (production)
@@ -938,6 +2051,137 @@ FROM learning-common AS learning-prod
 ENV NODE_ENV=production
 RUN npm run build
 
+RUN python3 - <<'PY'
+from pathlib import Path
+
+guard_revision = "account-social-links-guard-2026-04-04-cacheproof-v2"
+source_path = Path("/openedx/app/src/account-settings/data/service.js")
+if not source_path.exists():
+    raise SystemExit(0)
+
+# 1. Confirm the fix is present in the SOURCE file before minification renames variables.
+required_in_source = "const socialLinks = Array.isArray(data.social_links) ? data.social_links : [];"
+source_content = source_path.read_text(encoding="utf-8")
+if required_in_source not in source_content:
+    raise SystemExit(
+        f"{guard_revision}: guarded social_links fix missing from {source_path} — patch not applied"
+    )
+
+# 2. Confirm the OLD buggy pattern is absent from compiled assets and source maps.
+#    The original string is long enough to survive in .map files if the old code was compiled in.
+dist_dir = Path("/openedx/app/dist")
+if not dist_dir.exists():
+    raise SystemExit(f"{guard_revision}: frontend-app-account dist missing after build")
+
+forbidden = "const platformData = data.social_links.find(({ platform }) => platform === id);"
+offenders = []
+
+for asset in sorted(dist_dir.rglob("*")):
+    if asset.suffix != ".js":
+        continue
+    try:
+        content = asset.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        continue
+    if forbidden in content:
+        offenders.append(str(asset))
+
+if offenders:
+    raise SystemExit(
+        f"{guard_revision}: unguarded social_links lookup survived account build in {', '.join(offenders)}"
+    )
+PY
+
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import re
+
+index_path = Path("/openedx/app/dist/index.html")
+if not index_path.exists():
+    raise SystemExit(0)
+
+content = index_path.read_text(encoding="utf-8")
+match = re.search(r"var PARAGON_THEME = (\{.*?\});", content)
+if not match:
+    raise SystemExit(0)
+
+theme = json.loads(match.group(1))
+
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/mereka-brand-light.min.css"
+theme["brand"]["themeUrls"]["variants"].pop("dark", None)
+theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
+
+variant_theme_map = {
+    "academy.biji-biji.com": {
+        "core": "../theme/biji-biji-brand.min.css",
+        "light": "../theme/biji-biji-brand-light.min.css",
+    },
+    "biji-biji.academyv2.mereka.dev": {
+        "core": "../theme/biji-biji-brand.min.css",
+        "light": "../theme/biji-biji-brand-light.min.css",
+    },
+    "skillourfuture.academy.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.dev": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+}
+
+runtime_theme = '''(() => {
+  const theme = __THEME_JSON__;
+  const normalizeHostname = (value) => (typeof value === "string" ? value.toLowerCase() : "").replace(/^www\./, "");
+  const deriveVariantCandidates = (hostname) => {
+    const normalizedHostname = normalizeHostname(hostname);
+    if (!normalizedHostname) {
+      return [];
+    }
+    const candidates = [];
+    const queue = [normalizedHostname];
+    const enqueue = (candidate) => {
+      if (candidate && !candidates.includes(candidate)) {
+        candidates.push(candidate);
+        queue.push(candidate);
+      }
+    };
+    while (queue.length > 0) {
+      const candidate = queue.shift();
+      if (!candidate) {
+        continue;
+      }
+      enqueue(candidate.replace(/^(?:staging\.)?apps\./, ""));
+      enqueue(candidate.replace(/^apps\./, ""));
+      enqueue(candidate.replace(/^staging\./, ""));
+      enqueue(candidate.replace(/\.mereka\.dev$/, ".mereka.io"));
+    }
+    return candidates;
+  };
+  const hostname = typeof window !== "undefined" && window.location ? normalizeHostname(window.location.hostname) : "";
+  const variantThemeMap = __VARIANT_THEME_MAP__;
+  const candidates = deriveVariantCandidates(hostname);
+  const selected = candidates.map((candidate) => variantThemeMap[candidate]).find(Boolean);
+  if (selected) {
+    theme.brand.themeUrls.core.fileName = selected.core;
+    theme.brand.themeUrls.variants.light.fileName = selected.light;
+  }
+  return theme;
+})()'''
+runtime_theme = runtime_theme.replace("__THEME_JSON__", json.dumps(theme, separators=(", ", ": ")))
+runtime_theme = runtime_theme.replace("__VARIANT_THEME_MAP__", json.dumps(variant_theme_map, separators=(", ", ": ")))
+
+updated = content[:match.start(1)] + runtime_theme + content[match.end(1):]
+index_path.write_text(updated, encoding="utf-8")
+PY
 
 
 ######## ora-grading (production)
@@ -945,6 +2189,137 @@ FROM ora-grading-common AS ora-grading-prod
 ENV NODE_ENV=production
 RUN npm run build
 
+RUN python3 - <<'PY'
+from pathlib import Path
+
+guard_revision = "account-social-links-guard-2026-04-04-cacheproof-v2"
+source_path = Path("/openedx/app/src/account-settings/data/service.js")
+if not source_path.exists():
+    raise SystemExit(0)
+
+# 1. Confirm the fix is present in the SOURCE file before minification renames variables.
+required_in_source = "const socialLinks = Array.isArray(data.social_links) ? data.social_links : [];"
+source_content = source_path.read_text(encoding="utf-8")
+if required_in_source not in source_content:
+    raise SystemExit(
+        f"{guard_revision}: guarded social_links fix missing from {source_path} — patch not applied"
+    )
+
+# 2. Confirm the OLD buggy pattern is absent from compiled assets and source maps.
+#    The original string is long enough to survive in .map files if the old code was compiled in.
+dist_dir = Path("/openedx/app/dist")
+if not dist_dir.exists():
+    raise SystemExit(f"{guard_revision}: frontend-app-account dist missing after build")
+
+forbidden = "const platformData = data.social_links.find(({ platform }) => platform === id);"
+offenders = []
+
+for asset in sorted(dist_dir.rglob("*")):
+    if asset.suffix != ".js":
+        continue
+    try:
+        content = asset.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        continue
+    if forbidden in content:
+        offenders.append(str(asset))
+
+if offenders:
+    raise SystemExit(
+        f"{guard_revision}: unguarded social_links lookup survived account build in {', '.join(offenders)}"
+    )
+PY
+
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import re
+
+index_path = Path("/openedx/app/dist/index.html")
+if not index_path.exists():
+    raise SystemExit(0)
+
+content = index_path.read_text(encoding="utf-8")
+match = re.search(r"var PARAGON_THEME = (\{.*?\});", content)
+if not match:
+    raise SystemExit(0)
+
+theme = json.loads(match.group(1))
+
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/mereka-brand-light.min.css"
+theme["brand"]["themeUrls"]["variants"].pop("dark", None)
+theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
+
+variant_theme_map = {
+    "academy.biji-biji.com": {
+        "core": "../theme/biji-biji-brand.min.css",
+        "light": "../theme/biji-biji-brand-light.min.css",
+    },
+    "biji-biji.academyv2.mereka.dev": {
+        "core": "../theme/biji-biji-brand.min.css",
+        "light": "../theme/biji-biji-brand-light.min.css",
+    },
+    "skillourfuture.academy.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.dev": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+}
+
+runtime_theme = '''(() => {
+  const theme = __THEME_JSON__;
+  const normalizeHostname = (value) => (typeof value === "string" ? value.toLowerCase() : "").replace(/^www\./, "");
+  const deriveVariantCandidates = (hostname) => {
+    const normalizedHostname = normalizeHostname(hostname);
+    if (!normalizedHostname) {
+      return [];
+    }
+    const candidates = [];
+    const queue = [normalizedHostname];
+    const enqueue = (candidate) => {
+      if (candidate && !candidates.includes(candidate)) {
+        candidates.push(candidate);
+        queue.push(candidate);
+      }
+    };
+    while (queue.length > 0) {
+      const candidate = queue.shift();
+      if (!candidate) {
+        continue;
+      }
+      enqueue(candidate.replace(/^(?:staging\.)?apps\./, ""));
+      enqueue(candidate.replace(/^apps\./, ""));
+      enqueue(candidate.replace(/^staging\./, ""));
+      enqueue(candidate.replace(/\.mereka\.dev$/, ".mereka.io"));
+    }
+    return candidates;
+  };
+  const hostname = typeof window !== "undefined" && window.location ? normalizeHostname(window.location.hostname) : "";
+  const variantThemeMap = __VARIANT_THEME_MAP__;
+  const candidates = deriveVariantCandidates(hostname);
+  const selected = candidates.map((candidate) => variantThemeMap[candidate]).find(Boolean);
+  if (selected) {
+    theme.brand.themeUrls.core.fileName = selected.core;
+    theme.brand.themeUrls.variants.light.fileName = selected.light;
+  }
+  return theme;
+})()'''
+runtime_theme = runtime_theme.replace("__THEME_JSON__", json.dumps(theme, separators=(", ", ": ")))
+runtime_theme = runtime_theme.replace("__VARIANT_THEME_MAP__", json.dumps(variant_theme_map, separators=(", ", ": ")))
+
+updated = content[:match.start(1)] + runtime_theme + content[match.end(1):]
+index_path.write_text(updated, encoding="utf-8")
+PY
 
 
 ######## profile (production)
@@ -952,17 +2327,275 @@ FROM profile-common AS profile-prod
 ENV NODE_ENV=production
 RUN npm run build
 
+RUN python3 - <<'PY'
+from pathlib import Path
+
+guard_revision = "account-social-links-guard-2026-04-04-cacheproof-v2"
+source_path = Path("/openedx/app/src/account-settings/data/service.js")
+if not source_path.exists():
+    raise SystemExit(0)
+
+# 1. Confirm the fix is present in the SOURCE file before minification renames variables.
+required_in_source = "const socialLinks = Array.isArray(data.social_links) ? data.social_links : [];"
+source_content = source_path.read_text(encoding="utf-8")
+if required_in_source not in source_content:
+    raise SystemExit(
+        f"{guard_revision}: guarded social_links fix missing from {source_path} — patch not applied"
+    )
+
+# 2. Confirm the OLD buggy pattern is absent from compiled assets and source maps.
+#    The original string is long enough to survive in .map files if the old code was compiled in.
+dist_dir = Path("/openedx/app/dist")
+if not dist_dir.exists():
+    raise SystemExit(f"{guard_revision}: frontend-app-account dist missing after build")
+
+forbidden = "const platformData = data.social_links.find(({ platform }) => platform === id);"
+offenders = []
+
+for asset in sorted(dist_dir.rglob("*")):
+    if asset.suffix != ".js":
+        continue
+    try:
+        content = asset.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        continue
+    if forbidden in content:
+        offenders.append(str(asset))
+
+if offenders:
+    raise SystemExit(
+        f"{guard_revision}: unguarded social_links lookup survived account build in {', '.join(offenders)}"
+    )
+PY
+
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import re
+
+index_path = Path("/openedx/app/dist/index.html")
+if not index_path.exists():
+    raise SystemExit(0)
+
+content = index_path.read_text(encoding="utf-8")
+match = re.search(r"var PARAGON_THEME = (\{.*?\});", content)
+if not match:
+    raise SystemExit(0)
+
+theme = json.loads(match.group(1))
+
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/mereka-brand-light.min.css"
+theme["brand"]["themeUrls"]["variants"].pop("dark", None)
+theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
+
+variant_theme_map = {
+    "academy.biji-biji.com": {
+        "core": "../theme/biji-biji-brand.min.css",
+        "light": "../theme/biji-biji-brand-light.min.css",
+    },
+    "biji-biji.academyv2.mereka.dev": {
+        "core": "../theme/biji-biji-brand.min.css",
+        "light": "../theme/biji-biji-brand-light.min.css",
+    },
+    "skillourfuture.academy.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.dev": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+}
+
+runtime_theme = '''(() => {
+  const theme = __THEME_JSON__;
+  const normalizeHostname = (value) => (typeof value === "string" ? value.toLowerCase() : "").replace(/^www\./, "");
+  const deriveVariantCandidates = (hostname) => {
+    const normalizedHostname = normalizeHostname(hostname);
+    if (!normalizedHostname) {
+      return [];
+    }
+    const candidates = [];
+    const queue = [normalizedHostname];
+    const enqueue = (candidate) => {
+      if (candidate && !candidates.includes(candidate)) {
+        candidates.push(candidate);
+        queue.push(candidate);
+      }
+    };
+    while (queue.length > 0) {
+      const candidate = queue.shift();
+      if (!candidate) {
+        continue;
+      }
+      enqueue(candidate.replace(/^(?:staging\.)?apps\./, ""));
+      enqueue(candidate.replace(/^apps\./, ""));
+      enqueue(candidate.replace(/^staging\./, ""));
+      enqueue(candidate.replace(/\.mereka\.dev$/, ".mereka.io"));
+    }
+    return candidates;
+  };
+  const hostname = typeof window !== "undefined" && window.location ? normalizeHostname(window.location.hostname) : "";
+  const variantThemeMap = __VARIANT_THEME_MAP__;
+  const candidates = deriveVariantCandidates(hostname);
+  const selected = candidates.map((candidate) => variantThemeMap[candidate]).find(Boolean);
+  if (selected) {
+    theme.brand.themeUrls.core.fileName = selected.core;
+    theme.brand.themeUrls.variants.light.fileName = selected.light;
+  }
+  return theme;
+})()'''
+runtime_theme = runtime_theme.replace("__THEME_JSON__", json.dumps(theme, separators=(", ", ": ")))
+runtime_theme = runtime_theme.replace("__VARIANT_THEME_MAP__", json.dumps(variant_theme_map, separators=(", ", ": ")))
+
+updated = content[:match.start(1)] + runtime_theme + content[match.end(1):]
+index_path.write_text(updated, encoding="utf-8")
+PY
 
 
 ######## learner-record (production)
 FROM learner-record-common AS learner-record-prod
 ENV NODE_ENV=production
-ENV NODE_OPTIONS="--max-old-space-size=4096"
-RUN npm run build \
-    || { echo "ERROR: learner-record build failed"; ls -la /openedx/app/dist/ 2>/dev/null || echo "NO DIST DIR"; exit 1; }
-RUN test -f /openedx/app/dist/index.html \
-    || { echo "ERROR: learner-record dist/index.html missing after build"; ls -la /openedx/app/dist/ 2>/dev/null; exit 1; }
+RUN npm run build
 
+RUN python3 - <<'PY'
+from pathlib import Path
+
+guard_revision = "account-social-links-guard-2026-04-04-cacheproof-v2"
+source_path = Path("/openedx/app/src/account-settings/data/service.js")
+if not source_path.exists():
+    raise SystemExit(0)
+
+# 1. Confirm the fix is present in the SOURCE file before minification renames variables.
+required_in_source = "const socialLinks = Array.isArray(data.social_links) ? data.social_links : [];"
+source_content = source_path.read_text(encoding="utf-8")
+if required_in_source not in source_content:
+    raise SystemExit(
+        f"{guard_revision}: guarded social_links fix missing from {source_path} — patch not applied"
+    )
+
+# 2. Confirm the OLD buggy pattern is absent from compiled assets and source maps.
+#    The original string is long enough to survive in .map files if the old code was compiled in.
+dist_dir = Path("/openedx/app/dist")
+if not dist_dir.exists():
+    raise SystemExit(f"{guard_revision}: frontend-app-account dist missing after build")
+
+forbidden = "const platformData = data.social_links.find(({ platform }) => platform === id);"
+offenders = []
+
+for asset in sorted(dist_dir.rglob("*")):
+    if asset.suffix != ".js":
+        continue
+    try:
+        content = asset.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        continue
+    if forbidden in content:
+        offenders.append(str(asset))
+
+if offenders:
+    raise SystemExit(
+        f"{guard_revision}: unguarded social_links lookup survived account build in {', '.join(offenders)}"
+    )
+PY
+
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import re
+
+index_path = Path("/openedx/app/dist/index.html")
+if not index_path.exists():
+    raise SystemExit(0)
+
+content = index_path.read_text(encoding="utf-8")
+match = re.search(r"var PARAGON_THEME = (\{.*?\});", content)
+if not match:
+    raise SystemExit(0)
+
+theme = json.loads(match.group(1))
+
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/mereka-brand-light.min.css"
+theme["brand"]["themeUrls"]["variants"].pop("dark", None)
+theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
+
+variant_theme_map = {
+    "academy.biji-biji.com": {
+        "core": "../theme/biji-biji-brand.min.css",
+        "light": "../theme/biji-biji-brand-light.min.css",
+    },
+    "biji-biji.academyv2.mereka.dev": {
+        "core": "../theme/biji-biji-brand.min.css",
+        "light": "../theme/biji-biji-brand-light.min.css",
+    },
+    "skillourfuture.academy.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.io": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.dev": {
+        "core": "../theme/sof-brand.min.css",
+        "light": "../theme/sof-brand-light.min.css",
+    },
+}
+
+runtime_theme = '''(() => {
+  const theme = __THEME_JSON__;
+  const normalizeHostname = (value) => (typeof value === "string" ? value.toLowerCase() : "").replace(/^www\./, "");
+  const deriveVariantCandidates = (hostname) => {
+    const normalizedHostname = normalizeHostname(hostname);
+    if (!normalizedHostname) {
+      return [];
+    }
+    const candidates = [];
+    const queue = [normalizedHostname];
+    const enqueue = (candidate) => {
+      if (candidate && !candidates.includes(candidate)) {
+        candidates.push(candidate);
+        queue.push(candidate);
+      }
+    };
+    while (queue.length > 0) {
+      const candidate = queue.shift();
+      if (!candidate) {
+        continue;
+      }
+      enqueue(candidate.replace(/^(?:staging\.)?apps\./, ""));
+      enqueue(candidate.replace(/^apps\./, ""));
+      enqueue(candidate.replace(/^staging\./, ""));
+      enqueue(candidate.replace(/\.mereka\.dev$/, ".mereka.io"));
+    }
+    return candidates;
+  };
+  const hostname = typeof window !== "undefined" && window.location ? normalizeHostname(window.location.hostname) : "";
+  const variantThemeMap = __VARIANT_THEME_MAP__;
+  const candidates = deriveVariantCandidates(hostname);
+  const selected = candidates.map((candidate) => variantThemeMap[candidate]).find(Boolean);
+  if (selected) {
+    theme.brand.themeUrls.core.fileName = selected.core;
+    theme.brand.themeUrls.variants.light.fileName = selected.light;
+  }
+  return theme;
+})()'''
+runtime_theme = runtime_theme.replace("__THEME_JSON__", json.dumps(theme, separators=(", ", ": ")))
+runtime_theme = runtime_theme.replace("__VARIANT_THEME_MAP__", json.dumps(variant_theme_map, separators=(", ", ": ")))
+
+updated = content[:match.start(1)] + runtime_theme + content[match.end(1):]
+index_path.write_text(updated, encoding="utf-8")
+PY
 
 
 
@@ -970,6 +2603,16 @@ RUN test -f /openedx/app/dist/index.html \
 FROM docker.io/caddy:2.7.4 AS production
 
 RUN mkdir -p /openedx/dist
+COPY indigo/theme /openedx/dist/theme
+COPY indigo/brand-mereka /openedx/brand-mereka
+RUN mkdir -p /openedx/dist/theme \
+ && cp -f /openedx/brand-mereka/favicon.ico /openedx/dist/theme/favicon.ico \
+ && cp -f /openedx/brand-mereka/logo.png /openedx/dist/theme/logo-horizontal.png \
+ && cp -f /openedx/brand-mereka/logo.svg /openedx/dist/theme/logo-horizontal.svg \
+ && cp -f /openedx/brand-mereka/logo-white.png /openedx/dist/theme/logo-horizontal-white.png \
+ && cp -f /openedx/brand-mereka/logo-white.svg /openedx/dist/theme/logo-horizontal-white.svg \
+ && cp -f /openedx/brand-mereka/logo-trademark.png /openedx/dist/theme/logo.png \
+ && cp -f /openedx/brand-mereka/logo-trademark.svg /openedx/dist/theme/logo.svg
 
 # Copy static assets
 
@@ -996,3 +2639,5 @@ COPY --from=ora-grading-prod /openedx/app/dist /openedx/dist/ora-grading
 COPY --from=profile-prod /openedx/app/dist /openedx/dist/profile
 
 COPY --from=learner-record-prod /openedx/app/dist /openedx/dist/learner-record
+
+

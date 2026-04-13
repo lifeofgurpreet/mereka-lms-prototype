@@ -53,3 +53,17 @@ def test_rendered_account_mfe_dockerfile_carries_null_guard_when_available() -> 
     assert copy_line in content
     assert patch_anchor in content
     assert content.index(copy_line) < content.index(patch_anchor)
+
+
+def test_rendered_mfe_snapshot_matches_generated_authority_when_available() -> None:
+    snapshot = SNAPSHOT_DOCKERFILE.read_text(encoding="utf-8")
+
+    if not RENDERED_DOCKERFILE.exists():
+        return
+
+    rendered = RENDERED_DOCKERFILE.read_text(encoding="utf-8")
+    assert rendered == snapshot, (
+        "Generated MFE Dockerfile diverged from infrastructure/tutor/mfe-build/Dockerfile. "
+        "Refresh the tracked snapshot from tutor_env/env/plugins/mfe/build/mfe/Dockerfile "
+        "after tutor config save + apply-patches.sh."
+    )

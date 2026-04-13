@@ -65,16 +65,13 @@ CMS_FONT_DIR="${THEME_ROOT}/cms/static/fonts"
 CMS_HEAD_EXTRA="${THEME_ROOT}/cms/templates/head-extra.html"
 CMS_FOOTER_WIDGET="${THEME_ROOT}/cms/templates/widgets/footer.html"
 MFE_RENDERED_DOCKERFILE="${REPO_ROOT}/tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
-MFE_PLUGIN_DOCKERFILE="${REPO_ROOT}/infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py"
+MFE_PLUGIN_HOOK_MODULE="${REPO_ROOT}/infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py"
 MFE_SNAPSHOT_DOCKERFILE="${REPO_ROOT}/infrastructure/tutor/mfe-build/Dockerfile"
 MFE_DOCKERFILE=""
 MFE_DOCKERFILE_LABEL=""
 if [[ -f "${MFE_RENDERED_DOCKERFILE}" ]]; then
   MFE_DOCKERFILE="${MFE_RENDERED_DOCKERFILE}"
   MFE_DOCKERFILE_LABEL="rendered MFE Dockerfile"
-elif [[ -f "${MFE_PLUGIN_DOCKERFILE}" ]]; then
-  MFE_DOCKERFILE="${MFE_PLUGIN_DOCKERFILE}"
-  MFE_DOCKERFILE_LABEL="plugin MFE Dockerfile authority"
 elif [[ -f "${MFE_SNAPSHOT_DOCKERFILE}" ]]; then
   MFE_DOCKERFILE="${MFE_SNAPSHOT_DOCKERFILE}"
   MFE_DOCKERFILE_LABEL="snapshot MFE Dockerfile"
@@ -476,11 +473,19 @@ echo "[SECTION 7] MFE brand package wiring"
 if [[ -f "${MFE_DOCKERFILE}" ]]; then
   if [[ "${MFE_DOCKERFILE}" == "${MFE_RENDERED_DOCKERFILE}" ]]; then
     pass "rendered MFE Dockerfile exists"
-  elif [[ "${MFE_DOCKERFILE}" == "${MFE_PLUGIN_DOCKERFILE}" ]]; then
-    warn "rendered MFE Dockerfile missing — verifying plugin MFE Dockerfile authority instead"
   else
-    warn "rendered and plugin MFE Dockerfile authority missing — falling back to snapshot Dockerfile"
+    warn "rendered MFE Dockerfile missing — verifying tracked snapshot Dockerfile instead"
   fi
+
+  if [[ -f "${MFE_RENDERED_DOCKERFILE}" && -f "${MFE_SNAPSHOT_DOCKERFILE}" ]]; then
+    if cmp -s "${MFE_RENDERED_DOCKERFILE}" "${MFE_SNAPSHOT_DOCKERFILE}"; then
+      pass "rendered MFE Dockerfile matches tracked snapshot"
+    else
+      fail "rendered MFE Dockerfile diverges from tracked snapshot"
+      diff -u "${MFE_SNAPSHOT_DOCKERFILE}" "${MFE_RENDERED_DOCKERFILE}" | sed -n '1,40p' | sed 's/^/    /' || true
+    fi
+  fi
+
   # Brand package must be installed via the local @edx/brand alias on the active path.
   if grep -q "@edx/brand@file:./brand-mereka" "${MFE_DOCKERFILE}"; then
     pass "${MFE_DOCKERFILE_LABEL} installs local @edx/brand alias (brand-mereka)"
@@ -504,8 +509,18 @@ if [[ -f "${MFE_DOCKERFILE}" ]]; then
   else
     pass "${MFE_DOCKERFILE_LABEL} has no Google Fonts references"
   fi
+
+  if [[ -f "${MFE_PLUGIN_HOOK_MODULE}" ]]; then
+    if grep -q "@edx/brand@file:./brand-mereka" "${MFE_PLUGIN_HOOK_MODULE}"; then
+      pass "plugin hook module stages local @edx/brand alias into the rendered Dockerfile"
+    else
+      fail "plugin hook module missing local @edx/brand alias wiring"
+    fi
+  else
+    fail "plugin hook module missing: ${MFE_PLUGIN_HOOK_MODULE}"
+  fi
 else
-  warn "No rendered, plugin, or snapshot MFE Dockerfile surface found — cannot verify MFE brand wiring"
+  warn "No rendered or snapshot MFE Dockerfile surface found — cannot verify MFE brand wiring"
 fi
 
 echo ""
