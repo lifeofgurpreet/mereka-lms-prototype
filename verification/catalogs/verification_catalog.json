@@ -11364,7 +11364,7 @@
       "mutability": "mutating",
       "owner": "sre-security",
       "path": "scripts/qa/verify-observability-runtime.sh",
-      "reference_count": 14,
+      "reference_count": 15,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster",
@@ -11529,7 +11529,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-observability-validation.sh",
-      "reference_count": 11,
+      "reference_count": 12,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"

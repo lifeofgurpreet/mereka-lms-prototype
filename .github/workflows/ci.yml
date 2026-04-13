@@ -551,6 +551,8 @@ jobs:
             export TEST_VERIFY_GENERATED_SURFACES_CHANGED_FILES="$CI_CHANGED_FILES"
             export VERIFY_MFE_ROUTE_SMOKE_SCOPE=changed
             export VERIFY_MFE_ROUTE_SMOKE_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VALIDATE_OBSERVABILITY_COMPLIANCE_SCOPE=changed
+            export VALIDATE_OBSERVABILITY_COMPLIANCE_CHANGED_FILES="$CI_CHANGED_FILES"
           fi
           SCRIPT_LIST="${{ matrix.shard.file }}" PARALLELISM=4 TIMEOUT_SECS=300 \
             ./scripts/qa/run-release-verification-gates.sh
