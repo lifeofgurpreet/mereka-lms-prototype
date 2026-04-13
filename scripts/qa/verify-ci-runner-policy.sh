@@ -6,6 +6,8 @@ set -euo pipefail
 
 WORKFLOWS_DIR=".github/workflows"
 POLICY_DOC="docs/policies/operations/CI_RUNNER_POLICY.md"
+VERIFY_CI_RUNNER_POLICY_SCOPE="${VERIFY_CI_RUNNER_POLICY_SCOPE:-all}"
+VERIFY_CI_RUNNER_POLICY_CHANGED_FILES="${VERIFY_CI_RUNNER_POLICY_CHANGED_FILES:-}"
 
 # Workflows permitted to use GitHub-hosted macOS runners (Class D exceptions)
 MACOS_HOSTED_EXCEPTIONS=(
@@ -77,6 +79,26 @@ trim() {
   value="${value%"${value##*[![:space:]]}"}"
   printf '%s' "$value"
 }
+
+if [[ "$VERIFY_CI_RUNNER_POLICY_SCOPE" == "changed" ]]; then
+  SHOULD_RUN=0
+  while IFS= read -r changed_path; do
+    [[ -n "$changed_path" ]] || continue
+    case "$changed_path" in
+      .github/workflows/*|\
+      docs/policies/operations/CI_RUNNER_POLICY.md|\
+      scripts/qa/verify-ci-runner-policy.sh)
+        SHOULD_RUN=1
+        break
+        ;;
+    esac
+  done <<< "$VERIFY_CI_RUNNER_POLICY_CHANGED_FILES"
+
+  if [[ "$SHOULD_RUN" -eq 0 ]]; then
+    echo "Skipping CI runner policy verification; no workflow or runner-policy changes in PR diff."
+    exit 0
+  fi
+fi
 
 validate_runner_label() {
   local wf_name="$1"
