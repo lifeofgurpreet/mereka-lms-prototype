@@ -80,7 +80,7 @@ check_pdbs_for_critical_services() {
     # Capture yq output to avoid SIGPIPE with grep -q
     local names
     names=$("$YQ" eval 'select(.kind == "PodDisruptionBudget") | .metadata.name' "$pdb_file" 2>/dev/null || echo "")
-    if echo "$names" | grep -q "^${svc}$"; then
+    if grep -qx -- "$svc" <<< "$names"; then
       pass "PDB defined for: $svc"
     else
       fail "PDB missing for critical service: $svc"
@@ -232,7 +232,7 @@ check_stateful_services_have_pdbs() {
   for svc in "${stateful[@]}"; do
     local names
     names=$("$YQ" eval 'select(.kind == "PodDisruptionBudget") | .metadata.name' "$pdb_file" 2>/dev/null || echo "")
-    if echo "$names" | grep -q "^${svc}$"; then
+    if grep -qx -- "$svc" <<< "$names"; then
       pass "Stateful service $svc has a PDB"
     else
       fail "Stateful service $svc is missing a PDB"
@@ -251,7 +251,7 @@ check_operational_kustomization_wired() {
 
   local resources
   resources=$("$YQ" eval '.resources[]' "$base_kustomization" 2>/dev/null || echo "")
-  if echo "$resources" | grep -q "^operational$"; then
+  if grep -qx -- "operational" <<< "$resources"; then
     pass "operational/ is listed in base kustomization resources"
   else
     fail "operational/ is NOT listed in base kustomization resources"
