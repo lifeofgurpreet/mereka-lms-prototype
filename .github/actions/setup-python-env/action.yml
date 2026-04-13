@@ -22,6 +22,14 @@ inputs:
     description: 'Create and activate an isolated virtualenv before installing dependencies'
     required: false
     default: 'false'
+  cache-isolated-venv:
+    description: 'Cache the isolated virtualenv by requirements hash and reuse it across runs'
+    required: false
+    default: 'false'
+  isolated-venv-name:
+    description: 'Stable virtualenv name under .cache/venvs when isolated venv caching is enabled'
+    required: false
+    default: 'default'
 
 runs:
   using: 'composite'
@@ -111,14 +119,39 @@ runs:
       shell: bash
       run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
+    - name: Resolve isolated virtualenv path
+      if: ${{ inputs.isolated-venv == 'true' }}
+      id: choose-venv
+      shell: bash
+      run: |
+        if [[ "${{ inputs.cache-isolated-venv }}" == 'true' ]]; then
+          VENV_DIR="$GITHUB_WORKSPACE/.cache/venvs/${{ inputs.isolated-venv-name }}"
+        else
+          VENV_DIR="${RUNNER_TEMP:-$GITHUB_WORKSPACE}/setup-python-env-venv"
+        fi
+        echo "venv_dir=$VENV_DIR" >> "$GITHUB_OUTPUT"
+        mkdir -p "$(dirname "$VENV_DIR")"
+
+    - name: Cache isolated virtualenv
+      if: ${{ inputs.isolated-venv == 'true' && inputs.cache-isolated-venv == 'true' }}
+      id: isolated-venv-cache
+      uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7  # v5.0.4
+      with:
+        path: ${{ steps.choose-venv.outputs.venv_dir }}
+        key: setup-python-env-venv-v1-${{ runner.os }}-${{ runner.arch }}-py${{ inputs.python-version }}-${{ inputs.isolated-venv-name }}-${{ inputs.install-base-deps }}-${{ hashFiles(inputs.requirements-file) }}-${{ inputs.extra-deps }}
+
     - name: Create isolated virtualenv
       if: ${{ inputs.isolated-venv == 'true' }}
       shell: bash
       run: |
-        VENV_DIR="${RUNNER_TEMP:-$GITHUB_WORKSPACE}/setup-python-env-venv"
-        rm -rf "$VENV_DIR"
-        python3 -m venv "$VENV_DIR"
-        "$VENV_DIR/bin/python" -m pip install -U pip setuptools wheel
+        VENV_DIR="${{ steps.choose-venv.outputs.venv_dir }}"
+        if [[ "${{ inputs.cache-isolated-venv }}" != 'true' ]]; then
+          rm -rf "$VENV_DIR"
+        fi
+        if [[ ! -x "$VENV_DIR/bin/python" ]]; then
+          python3 -m venv "$VENV_DIR"
+          "$VENV_DIR/bin/python" -m pip install -U pip setuptools wheel
+        fi
         echo "$VENV_DIR/bin" >> "$GITHUB_PATH"
         {
           echo "VIRTUAL_ENV=$VENV_DIR"
@@ -126,7 +159,7 @@ runs:
         } >> "$GITHUB_ENV"
 
     - name: Install dependencies from requirements file
-      if: ${{ inputs.install-base-deps == 'true' }}
+      if: ${{ inputs.install-base-deps == 'true' && (inputs.cache-isolated-venv != 'true' || steps.isolated-venv-cache.outputs.cache-hit != 'true') }}
       shell: bash
       run: |
         pip install --break-system-packages -U pip 2>/dev/null || pip install -U pip
@@ -134,7 +167,7 @@ runs:
           || pip install -r ${{ inputs.requirements-file }}
 
     - name: Install extra dependencies
-      if: ${{ inputs.extra-deps != '' }}
+      if: ${{ inputs.extra-deps != '' && (inputs.cache-isolated-venv != 'true' || steps.isolated-venv-cache.outputs.cache-hit != 'true') }}
       shell: bash
       run: |
         pip install --break-system-packages ${{ inputs.extra-deps }} 2>/dev/null \

@@ -296,18 +296,14 @@ jobs:
         uses: ./.github/actions/setup-python-env
         with:
           python-version: '3.12'
-          install-base-deps: 'false'
-
-      - name: Install Tutor into CI preflight venv
-        run: |
-          python3 -m venv .ci-venv
-          source .ci-venv/bin/activate
-          pip install -U pip
-          pip install -r requirements-tutor.txt
+          requirements-file: 'requirements-tutor.txt'
+          isolated-venv: 'true'
+          cache-isolated-venv: 'true'
+          isolated-venv-name: 'tutor-preflight-py312'
 
       - name: Run rendered Dockerfile preflight tripwire
         env:
-          TUTOR_VENV: ${{ github.workspace }}/.ci-venv
+          TUTOR_VENV: ${{ github.workspace }}/.cache/venvs/tutor-preflight-py312
         run: ./scripts/ci/preflight-check.sh
 
   prepare-build-context:
