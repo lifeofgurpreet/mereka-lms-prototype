@@ -132,7 +132,8 @@ the `mfe_config` API response, where the LMS already serves correct values per
 now lives in Tutor plugin hooks under `infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py`.
 However, `apply-patches.sh` still performs post-render filesystem sync into
 `tutor_env/env/plugins/mfe/build/mfe/` for brand assets, footer assets, slot ownership helpers,
-and the authn deep-route helper.
+and the authn deep-route helper. It also retains one explicit rendered-Dockerfile retry wrapper
+for Atlas translation pulls.
 
 **OEP-65 impact**: This is materially better than regex surgery on the rendered Dockerfile, but it
 still couples downstream customisation to the current aggregate MFE build-context layout. When the
@@ -143,13 +144,14 @@ paths may still break.
 is minimized to assets or helper files that genuinely cannot be expressed through hooks.
 
 **What is already aligned**: Toolchain, cookie env, brand package installation, runtime theme copy,
-plugin-framework dependency, and other Dockerfile-level customisations are now hook-owned rather
-than regex-owned.
+plugin-framework dependency, and other durable Dockerfile-level customisations are now hook-owned
+rather than regex-owned.
 
 **Fix path**: Keep validating the post-`mfe-node` authority model. Reduce remaining
 `apply-patches.sh` MFE sync only where a durable hook- or runtime-owned replacement exists.
 
-**Effort**: Medium. The highest-risk Dockerfile surgery is already gone; remaining work is narrower.
+**Effort**: Medium. The highest-risk Dockerfile surgery is already gone; the remaining work is now
+mostly build-context sync plus the documented `pull_translations` retry exception.
 
 ---
 

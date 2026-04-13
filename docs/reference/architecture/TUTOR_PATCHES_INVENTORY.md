@@ -112,6 +112,19 @@ its relationship to the native Tutor hooks/filters in `infrastructure/tutor/plug
 
 ---
 
+### `apply-patches.sh` inline helper — pull_translations retry wrapper
+
+| Field | Value |
+|-------|-------|
+| Classification | `FILESYSTEM` |
+| What it does | Rewrites each rendered MFE Dockerfile `RUN make OPENEDX_ATLAS_PULL=true ... pull_translations` line into a retry-wrapped bash loop with a sentinel comment. This protects long cold builds from transient GitHub/DNS failures during Atlas translation pulls. |
+| Tutor hook equivalent | None today. Existing Tutor MFE hooks can inject additional Dockerfile lines around npm install/build phases, but they do not rewrite the already-rendered `pull_translations` RUN line emitted by the Tutor MFE template. |
+| Why it must stay bash | The change is positional and non-additive: it transforms an already-rendered Dockerfile line in place. Tutor `ENV_PATCHES` can append hook content, but they cannot replace the upstream `pull_translations` RUN line once rendered. |
+| Risk of conversion | MEDIUM — removal without an equivalent retry surface re-exposes cold builds to transient Atlas/GitHub DNS failures late in the Docker build graph. |
+| Notes | As of 2026-04-14 this is the only direct rendered MFE Dockerfile rewrite left in `apply-patches.sh`. Theme-copy surgery was removed; durable MFE Dockerfile ownership now lives in Tutor plugin hooks. |
+
+---
+
 ### `prometheus-metrics.sh`
 
 | Field | Value |
@@ -163,6 +176,7 @@ its relationship to the native Tutor hooks/filters in `infrastructure/tutor/plug
 | `webpack-memory.sh` | FILESYSTEM | Active — memory limits + dedup |
 | `footer-component.sh` | FILESYSTEM | Active — asset sync to build context |
 | `brand-package.sh` | FILESYSTEM | Active — OEP-48 brand package sync to MFE build context |
+| `apply-patches.sh:inline retry wrapper` | FILESYSTEM | Active — sole remaining rendered MFE Dockerfile rewrite |
 | `build-optimizations.sh` | FILESYSTEM | Active — 25+ transforms on rendered files |
 | `mfe-node.sh` | REMOVED | Removed post-rebase; replaced by Tutor plugin hooks + MFE build-context sync |
 | `mysql-auth.sh` | REMOVED | Deleted 2026-02-27 → `mereka_lms.py` |
@@ -224,6 +238,6 @@ Six `ALREADY_CONVERTED` patches were fully removed from `infrastructure/tutor/pa
 `mongodb-atlas.sh`, and `security-hardening.sh`. All functionality was already present in
 `mereka_lms.py` via `ENV_PATCHES` hooks.
 
-**Remaining 5 active patches** are all `FILESYSTEM` classification — they require regex surgery
-on rendered files or physical file copies into build contexts, which cannot be expressed as
-Tutor hooks. These must remain in bash.
+**Remaining 5 active patch modules** plus **1 inline `apply-patches.sh` exception** are all
+`FILESYSTEM` classification — they require regex surgery on rendered files or physical file
+copies into build contexts, which cannot be expressed as Tutor hooks. These must remain in bash.

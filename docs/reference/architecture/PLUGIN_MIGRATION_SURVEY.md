@@ -71,6 +71,11 @@ These live in `infrastructure/tutor/themes/mereka/` and use Open edX Comprehensi
 
 These patches exist exclusively in `apply-patches.sh` and MUST be migrated to `mereka_lms.py` or documented as exceptions.
 
+**Update 2026-04-14**: The MFE Dockerfile authority boundary is now much narrower than this
+table originally recorded. Durable MFE Dockerfile ownership lives in Tutor plugin hooks under
+`infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py`; the only remaining documented
+post-render MFE Dockerfile rewrite in `apply-patches.sh` is `wrap_mfe_pull_translations_retry`.
+
 | # | Patch | Target | Status | Risk | Expiry | Migration Plan |
 |---|-------|--------|--------|------|--------|----------------|
 | C1 | `PIPELINE['JS_COMPRESSOR'] = None` | `assets.py` | SCRIPT-ONLY | HIGH | 2026-Q3 | Add to plugin `openedx-lms-assets-settings` hook |
@@ -83,8 +88,9 @@ These patches exist exclusively in `apply-patches.sh` and MUST be migrated to `m
 | C8 | `REQUIRE_BUILD_PROFILE_OPTIMIZE=none` | `Dockerfile` | SCRIPT-ONLY | MEDIUM | 2026-Q3 | Add to plugin `openedx-dockerfile-pre-assets` hook |
 | C9 | MFE cache headers | `Caddyfile` | SCRIPT-ONLY | MEDIUM | 2026-Q3 | Add to plugin `caddy-caddyfile` hook |
 | C10 | New Relic ENV propagation | `mfe/Dockerfile` | SCRIPT-ONLY | LOW | 2026-Q4 | Add to plugin `mfe-dockerfile-post-npm-install` hook |
+| C11 | `pull_translations` retry wrapper | rendered `mfe/Dockerfile` | EXCEPTION | MEDIUM | 2026-Q4 | Keep as the sole documented post-render MFE Dockerfile rewrite until a hookable or upstream retry surface exists. |
 
-**Summary**: 10 patches remain script-only. 5 are HIGH risk (build failure without script). Target migration: 2026-Q3.
+**Summary**: Script-only/apply-patches work remains, but the live MFE rendered-Dockerfile exception set is now down to one explicit retry wrapper. Target migration remains 2026-Q3/Q4 by surface.
 
 ---
 

@@ -22,12 +22,17 @@ LEGACY_MFE_DOCKERFILE_PATH="tutor_env/env/build/mfe/Dockerfile"
 GENERATED_MFE_INDIGO_DIR="$GENERATED_MFE_BUILD_DIR/indigo"
 GENERATED_MFE_INDIGO_ENV="$GENERATED_MFE_INDIGO_DIR/env.config.jsx"
 GENERATED_MFE_INDIGO_THEME_DIR="$GENERATED_MFE_INDIGO_DIR/mereka"
+RENDERED_MFE_DOCKERFILE_TARGET='/env/plugins/mfe/build/mfe/Dockerfile'
 
 PLUGIN_INSTALL_LINE="RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'"
 LEGACY_PLUGIN_INSTALL_LINE="RUN npm install '@openedx/frontend-plugin-framework@^1.8.0'"
 REDUX_INSTALL_LINE="RUN npm install --legacy-peer-deps 'react-redux@^8.1.3' 'redux@^4.2.1'"
 PAYMENT_REACT_INTL_INSTALL_LINE="RUN npm install --legacy-peer-deps 'react-intl@^6.4.0'"
 NODE_IMAGE_REGEX="(docker.io/)?node:(18|24|20)[-a-z0-9.]*"
+PULL_TRANSLATIONS_RETRY_SENTINEL="pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry"
+PULL_TRANSLATIONS_RETRY_FRAGMENT='pull_translations attempt ${attempt} failed; retrying in 15s'
+PULL_TRANSLATIONS_WRAP_FRAGMENT="RUN bash -o pipefail -c 'for attempt in 1 2 3; do "
+RAW_PULL_TRANSLATIONS_REGEX='^RUN make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="[^"]*" pull_translations$'
 
 REQUIRE_GENERATED_DOCKERFILE="${REQUIRE_GENERATED_DOCKERFILE:-0}"
 failures=0
@@ -144,6 +149,39 @@ PY
   fi
 }
 
+check_generated_pull_translations_retry_contract() {
+  if [[ ! -f "$GENERATED_MFE_DOCKERFILE" ]]; then
+    return
+  fi
+
+  local sentinel_count retry_message_count wrap_count raw_count
+  sentinel_count="$(grep -F -c -- "$PULL_TRANSLATIONS_RETRY_SENTINEL" "$GENERATED_MFE_DOCKERFILE" || true)"
+  retry_message_count="$(grep -F -c -- "$PULL_TRANSLATIONS_RETRY_FRAGMENT" "$GENERATED_MFE_DOCKERFILE" || true)"
+  wrap_count="$(grep -F -c -- "$PULL_TRANSLATIONS_WRAP_FRAGMENT" "$GENERATED_MFE_DOCKERFILE" || true)"
+  raw_count="$(grep -E -c -- "$RAW_PULL_TRANSLATIONS_REGEX" "$GENERATED_MFE_DOCKERFILE" || true)"
+
+  if [[ "${sentinel_count:-0}" -ge 1 ]]; then
+    echo "  ✓ generated Dockerfile carries pull_translations retry sentinel (${sentinel_count})"
+  else
+    echo "  ✗ generated Dockerfile missing pull_translations retry sentinel"
+    failures=1
+  fi
+
+  if [[ "${raw_count:-0}" -eq 0 ]]; then
+    echo "  ✓ generated Dockerfile has no unwrapped pull_translations RUN lines"
+  else
+    echo "  ✗ generated Dockerfile still has ${raw_count:-0} unwrapped pull_translations RUN line(s)"
+    failures=1
+  fi
+
+  if [[ "${sentinel_count:-0}" -eq "${retry_message_count:-0}" && "${sentinel_count:-0}" -eq "${wrap_count:-0}" ]]; then
+    echo "  ✓ generated Dockerfile retry wrapper counts are internally consistent"
+  else
+    echo "  ✗ generated Dockerfile retry wrapper counts diverge (sentinels=${sentinel_count:-0}, messages=${retry_message_count:-0}, wraps=${wrap_count:-0})"
+    failures=1
+  fi
+}
+
 check_jsx_parse() {
   local label="$1"
   local path="$2"
@@ -190,6 +228,15 @@ check_contains "apply-patches sources MFE slot ownership patch" "$APPLY_PATCH_SC
 check_contains "apply-patches applies MFE slot ownership patch" "$APPLY_PATCH_SCRIPT" "apply_mfe_slot_ownership_patch"
 check_contains "apply-patches sources deprecated shell prune patch" "$APPLY_PATCH_SCRIPT" "source \"\$PATCHES_DIR/mfe-prune-deprecated-shells.sh\""
 check_contains "apply-patches applies deprecated shell prune patch" "$APPLY_PATCH_SCRIPT" "apply_mfe_prune_deprecated_shells_patch"
+check_contains "apply-patches defines pull_translations retry wrapper" "$APPLY_PATCH_SCRIPT" "wrap_mfe_pull_translations_retry()"
+check_contains "apply-patches applies pull_translations retry wrapper" "$APPLY_PATCH_SCRIPT" "wrap_mfe_pull_translations_retry"
+rendered_target_count="$(grep -F -c -- "$RENDERED_MFE_DOCKERFILE_TARGET" "$APPLY_PATCH_SCRIPT" || true)"
+if [[ "${rendered_target_count:-0}" -eq 1 ]]; then
+  echo "  ✓ apply-patches targets rendered MFE Dockerfile exactly once (retry exception only)"
+else
+  echo "  ✗ apply-patches references rendered MFE Dockerfile ${rendered_target_count:-0} times (expected 1 retry exception)"
+  failures=1
+fi
 # Plugin module now carries all MFE Dockerfile hooks (tracker #32)
 check_contains "plugin module defines pre-npm-install hook" "$PATCH_MODULE" "mfe-dockerfile-pre-npm-install"
 check_contains "plugin module defines post-npm-install hook" "$PATCH_MODULE" "mfe-dockerfile-post-npm-install"
@@ -214,6 +261,7 @@ fi
 check_snapshot_parity
 if [[ -f "$GENERATED_MFE_DOCKERFILE" ]]; then
   check_generated_production_theme_copy
+  check_generated_pull_translations_retry_contract
   check_contains_regex "generated Dockerfile uses supported Node image" "$GENERATED_MFE_DOCKERFILE" "$NODE_IMAGE_REGEX"
   check_contains "generated Dockerfile contains plugin install line" "$GENERATED_MFE_DOCKERFILE" "$PLUGIN_INSTALL_LINE"
   check_contains "generated Dockerfile hardens base-stage apt retries" "$GENERATED_MFE_DOCKERFILE" 'Acquire::Retries "6"'

@@ -29,9 +29,15 @@ authority path.
 - Atlas translations: `release/ulmo`
 - Brand package: local `@edx/brand@file:./brand-mereka`
 - Node base image: `docker.io/node:24.11.0-bullseye-slim`
+- Rendered-Dockerfile exception: `pull_translations` retry wrapping remains the
+  sole documented post-render MFE Dockerfile rewrite in `apply-patches.sh`
+  while Atlas/GitHub translation pulls can still fail transiently inside the
+  Docker build network.
 
 ## Pending migration
 
 - Reduce remaining direct rendered-build-context mutation so the hook layer and
   patch-only sync layer have a cleaner ownership boundary.
+- Either replace the `pull_translations` retry wrapper with a hookable/upstream
+  surface or retire it once build-path reliability proves it unnecessary.
 - Remove `--legacy-peer-deps` once the remaining MFE dependency tree allows it.

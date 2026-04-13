@@ -58,8 +58,10 @@ if [[ -x "$BRANDING_CHECK" ]]; then
 fi
 
 # Source all patch modules
-# NOTE: MFE node patch module removed in tracker #32; all MFE Dockerfile
-# patches are now handled by Tutor plugin hooks in _mereka_lms/mfe_dockerfile.py.
+# NOTE: MFE node patch module removed in tracker #32; durable MFE Dockerfile
+# ownership now lives in Tutor plugin hooks in _mereka_lms/mfe_dockerfile.py.
+# The only remaining direct rendered-MFE-Dockerfile rewrite in this script is
+# the pull_translations retry wrapper below.
 source "$PATCHES_DIR/brand-package.sh"
 source "$PATCHES_DIR/webpack-memory.sh"
 source "$PATCHES_DIR/footer-component.sh"
@@ -121,6 +123,10 @@ sync_mfe_theme() {
 }
 
 wrap_mfe_pull_translations_retry() {
+  # This is the sole remaining allowed rendered-MFE-Dockerfile rewrite in
+  # apply-patches.sh. All other MFE Dockerfile mutations must live in Tutor
+  # plugin hooks or in build-context asset/helper sync.
+  #
   # CI reliability fix — DinD/BuildKit DNS to github.com intermittently fails
   # during the MFE build, causing `make OPENEDX_ATLAS_PULL=true ... pull_translations`
   # to abort with:
