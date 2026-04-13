@@ -41,7 +41,14 @@ YAML
 
 cd "$tmpdir"
 
-if ./scripts/qa/verify-ci-runner-policy.sh >/tmp/test-runner-policy-pass.log 2>&1; then
+run_verify() {
+  env -u CI_CHANGED_FILES \
+      -u VERIFY_CI_RUNNER_POLICY_SCOPE \
+      -u VERIFY_CI_RUNNER_POLICY_CHANGED_FILES \
+      ./scripts/qa/verify-ci-runner-policy.sh
+}
+
+if run_verify >/tmp/test-runner-policy-pass.log 2>&1; then
   :
 else
   echo "Expected baseline ARC workflow to pass."
@@ -64,7 +71,7 @@ jobs:
       - run: echo bad
 YAML
 
-if ./scripts/qa/verify-ci-runner-policy.sh >/tmp/test-runner-policy-fail.log 2>&1; then
+if run_verify >/tmp/test-runner-policy-fail.log 2>&1; then
   echo "Expected heavy build job on hosted runner to fail, but verifier passed."
   cat /tmp/test-runner-policy-fail.log
   exit 1
@@ -90,7 +97,7 @@ jobs:
       - run: echo bad
 YAML
 
-if ./scripts/qa/verify-ci-runner-policy.sh >/tmp/test-runner-policy-expr-fail.log 2>&1; then
+if run_verify >/tmp/test-runner-policy-expr-fail.log 2>&1; then
   echo "Expected unknown-expression runs-on to fail, but verifier passed."
   cat /tmp/test-runner-policy-expr-fail.log
   exit 1
@@ -122,7 +129,7 @@ jobs:
       - run: echo build
 YAML
 
-if ! ./scripts/qa/verify-ci-runner-policy.sh >/tmp/test-runner-policy-fastlane.log 2>&1; then
+if ! run_verify >/tmp/test-runner-policy-fastlane.log 2>&1; then
   echo "Expected fastlane selector pattern to pass, but verifier failed."
   cat /tmp/test-runner-policy-fastlane.log
   exit 1
@@ -141,7 +148,7 @@ jobs:
       - run: echo lint
 YAML
 
-if ! ./scripts/qa/verify-ci-runner-policy.sh >/tmp/test-runner-policy-lightweight.log 2>&1; then
+if ! run_verify >/tmp/test-runner-policy-lightweight.log 2>&1; then
   echo "Expected lightweight hosted job to pass under fastlane policy."
   cat /tmp/test-runner-policy-lightweight.log
   exit 1
