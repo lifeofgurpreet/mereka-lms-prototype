@@ -5,7 +5,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 BUILD_SCRIPT="$ROOT_DIR/scripts/qa/build-validator-drift-review-packet.sh"
 TMP_DIR="$(mktemp -d)"
-TMP_FIXTURE_DIR="$ROOT_DIR/scripts/qa/tmp-build-validator-drift-review-packet"
+TMP_FIXTURE_DIR="$TMP_DIR/tmp-build-validator-drift-review-packet"
 TMP_FIXTURE_FILE="$TMP_FIXTURE_DIR/verify-repo-structure.sh"
 
 cleanup() {
