@@ -426,8 +426,6 @@ ci_static_inventory:
     - script: scripts/qa/verify-mfe-selector-coverage.sh
     - script: scripts/qa/verify-slot-migration-readiness.sh
     - script: scripts/branding/verify-logo-setup.sh
-    - script: scripts/qa/audit-branding-surfaces.sh
-      estimated_seconds: 46
     - script: scripts/qa/check-visual-regression-page-count.sh
     - script: scripts/qa/verify-oep48-brand-package.sh
     - script: scripts/qa/verify-rtl-theme-assets.sh
@@ -755,6 +753,9 @@ ci_runtime_inventory:
       category: LIVE_CLUSTER
     - script: scripts/qa/verify-public-branding.sh
       category: LIVE_APP
+    - script: scripts/qa/audit-branding-surfaces.sh
+      category: LIVE_APP
+      note: probes live LMS, MFE, Studio, forum, ecommerce, and credentials branding surfaces over HTTPS
     - script: scripts/qa/verify-studio-authoring-branding.sh
       category: LIVE_APP
     - script: scripts/qa/smoke-authenticated.sh
