@@ -81,15 +81,33 @@ fi
 
 IMAGE_NAME="${IMAGE_REPO##*/}"
 GHA_SCOPE="tutor-${IMAGE_NAME}-${BUILD_PROFILE}"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+BAKE_FILE="$REPO_ROOT/docker-bake.hcl"
+BAKE_TARGET="openedx-${BUILD_PROFILE}"
 
-docker buildx build \
-  --file "$DOCKERFILE" \
-  "${TAGS[@]}" \
-  --cache-from "type=gha,scope=${GHA_SCOPE}" \
-  --cache-to "type=gha,mode=max,scope=${GHA_SCOPE}" \
-  --cache-from "type=registry,ref=${CACHE_REF}" \
-  --build-arg BUILDKIT_INLINE_CACHE=1 \
-  --label "io.mereka.build-profile=${BUILD_PROFILE}" \
-  --progress plain \
-  --push \
-  "$CONTEXT_DIR"
+if [[ ! -f "$BAKE_FILE" ]]; then
+  echo "Bake file not found: $BAKE_FILE" >&2
+  exit 1
+fi
+
+BAKE_ARGS=(
+  --file "$BAKE_FILE"
+  --progress plain
+  --push
+  --set "${BAKE_TARGET}.context=${CONTEXT_DIR}"
+  --set "${BAKE_TARGET}.dockerfile=${DOCKERFILE}"
+  --set "${BAKE_TARGET}.cache-from=type=gha,scope=${GHA_SCOPE}"
+  --set "${BAKE_TARGET}.cache-from=type=registry,ref=${CACHE_REF}"
+  --set "${BAKE_TARGET}.cache-to=type=gha,mode=max,scope=${GHA_SCOPE}"
+  --set "${BAKE_TARGET}.args.BUILDKIT_INLINE_CACHE=1"
+)
+
+for ((i=1; i<${#TAGS[@]}; i+=2)); do
+  BAKE_ARGS+=(--set "${BAKE_TARGET}.tags=${TAGS[i]}")
+done
+
+printf 'docker buildx bake'
+printf ' %q' "${BAKE_ARGS[@]}"
+printf ' %q\n' "$BAKE_TARGET"
+
+docker buildx bake "${BAKE_ARGS[@]}" "$BAKE_TARGET"

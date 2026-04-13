@@ -9,7 +9,6 @@ fi
 ROOT="$(cd "$1" && pwd)"
 TARGET="$2"
 LABEL="${3:-$TARGET}"
-BENCHMARK_CLASS="${BENCHMARK_CLASS:-producer-class}"
 TIMESTAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 BENCH_DIR="$ROOT/.benchmarks/bake"
 LOG="$BENCH_DIR/${TIMESTAMP}-${LABEL}.log"
