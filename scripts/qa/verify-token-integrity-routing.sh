@@ -20,6 +20,8 @@ THEME_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka"
 CADDYFILE="$REPO_ROOT/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"
 BRANDING_VERIFIER="$REPO_ROOT/scripts/qa/verify-mfe-branding.sh"
 EVIDENCE_DOC="$REPO_ROOT/docs/evidence/operations/TOKEN_INTEGRITY_ROUTING.md"
+SCOPE_MODE="${VERIFY_TOKEN_INTEGRITY_ROUTING_SCOPE:-}"
+CHANGED_FILES_RAW="${VERIFY_TOKEN_INTEGRITY_ROUTING_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
 
 PASS=0
 FAIL=0
@@ -28,6 +30,32 @@ WARN=0
 pass_msg() { PASS=$((PASS + 1)); echo "  [PASS] $1"; }
 fail_msg() { FAIL=$((FAIL + 1)); echo "  [FAIL] $1"; }
 warn_msg() { WARN=$((WARN + 1)); echo "  [WARN] $1"; }
+
+should_skip_scope() {
+  [[ "$SCOPE_MODE" == "changed" ]] || return 1
+  [[ -n "$CHANGED_FILES_RAW" ]] || return 1
+
+  while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    case "$path" in
+      .github/workflows/ci.yml|\
+      scripts/qa/verify-token-integrity-routing.sh|\
+      scripts/qa/verify-mfe-branding.sh|\
+      deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile|\
+      docs/evidence/operations/TOKEN_INTEGRITY_ROUTING.md|\
+      infrastructure/tutor/themes/mereka/*)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
+
+if should_skip_scope; then
+  echo "PASS verify-token-integrity-routing (scope skip: no token-or-routing authority changes)"
+  exit 0
+fi
 
 echo "=== Token Integrity + Routing Verification ==="
 echo "Spec: bead-2dcy1"
