@@ -15,6 +15,36 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 SCRIPT_DIR="$REPO_ROOT/scripts/qa"
+VALIDATE_OBSERVABILITY_COMPLIANCE_SCOPE="${VALIDATE_OBSERVABILITY_COMPLIANCE_SCOPE:-all}"
+VALIDATE_OBSERVABILITY_COMPLIANCE_CHANGED_FILES="${VALIDATE_OBSERVABILITY_COMPLIANCE_CHANGED_FILES:-}"
+
+if [[ "$VALIDATE_OBSERVABILITY_COMPLIANCE_SCOPE" == "changed" ]]; then
+  SHOULD_RUN=0
+  while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    case "$path" in
+      .github/workflows/ci.yml|\
+      scripts/qa/validate-observability-compliance.sh|\
+      scripts/qa/verify-observability-validation.sh|\
+      scripts/qa/verify-observability-runtime.sh|\
+      scripts/qa/audit-observability.sh|\
+      deploy/k8s/base/monitoring/*|\
+      deploy/k8s/base/monitoring/**/*|\
+      infrastructure/monitoring/*|\
+      infrastructure/monitoring/**/*|\
+      specs/observability-stack_spec.md|\
+      specs/observability-validation-requirements_spec.md)
+        SHOULD_RUN=1
+        break
+        ;;
+    esac
+  done <<< "$VALIDATE_OBSERVABILITY_COMPLIANCE_CHANGED_FILES"
+
+  if [[ "$SHOULD_RUN" -eq 0 ]]; then
+    echo "Skipping observability compliance validation; no observability authority changes in PR diff."
+    exit 0
+  fi
+fi
 
 MODE="all"
 JSON_OUT=0
