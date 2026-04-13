@@ -1650,6 +1650,80 @@ scripts:
     proof_command: "bash scripts/qa/verify-kustomize-render.sh 2>&1 | head -20"
     criticality: release-blocking
 
+  - path: scripts/qa/no_private_key_material.sh
+    owner: platform-team
+    purpose: >
+      Standalone deploy-tree hygiene gate that rejects committed private-key
+      material under the supplied deploy package scope.
+    inputs:
+      - SCOPE_DIR path (optional positional; defaults to deploy/k8s)
+    outputs:
+      - stdout (matching file:line findings or PASS summary)
+    side_effects: none
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/no_private_key_material.sh deploy/k8s"
+    criticality: release-blocking
+
+  - path: scripts/qa/no_generated_python_artifacts.sh
+    owner: platform-team
+    purpose: >
+      Standalone deploy-tree hygiene gate that rejects committed Python build
+      artifacts such as __pycache__ directories and .pyc files.
+    inputs:
+      - SCOPE_DIR path (optional positional; defaults to deploy/k8s)
+    outputs:
+      - stdout (matching artifact paths or PASS summary)
+    side_effects: none
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/no_generated_python_artifacts.sh deploy/k8s"
+    criticality: release-blocking
+
+  - path: scripts/qa/no_mutable_or_placeholder_images.sh
+    owner: platform-team
+    purpose: >
+      Standalone deploy-tree hygiene gate that rejects mutable image tags and
+      placeholder image references inside the deploy package.
+    inputs:
+      - SCOPE_DIR path (optional positional; defaults to deploy/k8s)
+    outputs:
+      - stdout (matching image references or PASS summary)
+    side_effects: none
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/no_mutable_or_placeholder_images.sh deploy/k8s"
+    criticality: release-blocking
+
+  - path: scripts/qa/no_environment_domains_in_base.sh
+    owner: platform-team
+    purpose: >
+      Standalone base-package hygiene gate that rejects environment-specific
+      tenant domains in deploy/k8s/base except for the documented exceptions.
+    inputs: []
+    outputs:
+      - stdout (matching file:line findings or PASS summary)
+    side_effects: none
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/no_environment_domains_in_base.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/no_upward_relative_paths_in_kustomize.sh
+    owner: platform-team
+    purpose: >
+      Standalone deploy-tree hygiene gate that rejects upward relative path
+      traversal in Kustomize manifests so the deploy package stays portable.
+    inputs:
+      - SCOPE_DIR path (optional positional; defaults to deploy/k8s)
+    outputs:
+      - stdout (matching file:line findings or PASS summary)
+    side_effects: none
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/no_upward_relative_paths_in_kustomize.sh deploy/k8s"
+    criticality: release-blocking
+
   - path: scripts/qa/scan-secrets-fast.sh
     owner: platform-team
     purpose: >
