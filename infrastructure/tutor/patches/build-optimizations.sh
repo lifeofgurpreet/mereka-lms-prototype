@@ -373,13 +373,6 @@ for target in targets:
     # Redwood image. Incompatible with Ulmo (different node version, package structure).
     # Tutor 21's standard node install with BuildKit cache is the correct approach.
 
-    updated = re.sub(
-        r"\n# Now that the default theme is built, build any custom themes\n"
-        r"COPY --chown=app:app \./themes/ /openedx/themes\n+",
-        "\n",
-        updated,
-        count=1,
-    )
     updated = updated.replace("fonts\\\\.googleapis\\\\.com", "fonts[.]googleapis[.]com")
 
     # edx-platform cherry-pick removal
