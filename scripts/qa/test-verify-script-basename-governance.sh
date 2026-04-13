@@ -6,6 +6,35 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 VERIFY_SCRIPT="$REPO_ROOT/scripts/qa/verify-script-basename-governance.sh"
+SCOPE_MODE="${TEST_VERIFY_SCRIPT_BASENAME_GOVERNANCE_SCOPE:-}"
+CHANGED_FILES_RAW="${TEST_VERIFY_SCRIPT_BASENAME_GOVERNANCE_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
+
+should_skip_scope() {
+  local path
+
+  [[ "$SCOPE_MODE" == "changed" ]] || return 1
+  [[ -n "${CHANGED_FILES_RAW//[[:space:]]/}" ]] || return 1
+
+  while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    case "$path" in
+      .github/workflows/ci.yml|\
+      scripts/qa/test-verify-script-basename-governance.sh|\
+      scripts/qa/verify-script-basename-governance.sh|\
+      scripts/qa/duplicate-script-basenames.allowlist|\
+      scripts/*)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
+
+if should_skip_scope; then
+  echo "PASS test-verify-script-basename-governance (scope skip: no script-basename-governance-relevant changes)"
+  exit 0
+fi
 
 PASS=0
 FAIL=0
