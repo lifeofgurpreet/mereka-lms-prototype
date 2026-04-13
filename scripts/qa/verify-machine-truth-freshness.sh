@@ -22,6 +22,11 @@ passes=0
 
 pass() { echo "  [PASS] $*"; passes=$((passes + 1)); }
 fail() { echo "  [FAIL] $*"; failures=$((failures + 1)); }
+has_pattern() {
+  local pattern="$1"
+  local path="$2"
+  grep -Eq "$pattern" "$path"
+}
 
 echo "=== Machine-Readable Truth Freshness Verification ==="
 echo "Repo root: ${REPO_ROOT}"
@@ -82,7 +87,7 @@ fi
 echo "--- Check 3: Schema version fields present ---"
 for f in "${required_files[@]}"; do
   if [[ -f "$f" ]]; then
-    if rg -q 'schema_version("|:)' "$f"; then
+    if has_pattern 'schema_version("|:)' "$f"; then
       pass "$f has schema_version"
     else
       fail "$f missing schema_version field"
@@ -129,19 +134,19 @@ fi
 # 6. Release-object consumer points at PCP projection authority
 # ---------------------------------------------------------------------------
 echo "--- Check 6: Release-object control-plane projection consumer ---"
-if rg -q 'release-object-projection-schema\.yaml' "scripts/qa/verify-release-object.sh"; then
+if has_pattern 'release-object-projection-schema\.yaml' "scripts/qa/verify-release-object.sh"; then
   pass "verify-release-object.sh references PCP release-object projection schema"
 else
   fail "verify-release-object.sh does not reference PCP release-object projection schema"
 fi
 
-if rg -q 'PLATFORM_CONTROL_PLANE_ROOT|WAVE10_PCP_ROOT' "scripts/qa/verify-release-object.sh"; then
+if has_pattern 'PLATFORM_CONTROL_PLANE_ROOT|WAVE10_PCP_ROOT' "scripts/qa/verify-release-object.sh"; then
   pass "verify-release-object.sh resolves PCP root dynamically"
 else
   fail "verify-release-object.sh missing PCP root resolution"
 fi
 
-if rg -q 'contracts/release-object-projection-schema\.yaml' "config/source-of-truth-matrix.yaml"; then
+if has_pattern 'contracts/release-object-projection-schema\.yaml' "config/source-of-truth-matrix.yaml"; then
   pass "source-of-truth matrix points release-object at PCP projection schema"
 else
   fail "source-of-truth matrix still points release-object at local schema authority"

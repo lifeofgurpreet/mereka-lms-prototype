@@ -73,7 +73,7 @@ jobs:
           docs_only=true
           for path in "${CHANGED[@]}"; do
             case "$path" in
-              docs/*|tools/docs/*|generated/catalogs/*|generated/adr-bundles/*|generated/decision-maps/*|generated/graphs/*|specs/testmaps/README.md|specs/_generated/testmaps/README.md|scripts/qa/build_decision_graph.py|scripts/qa/generate_adr_readme.py|scripts/qa/sync-openedx-audit-pr-status.sh|.github/workflows/docs-compliance.yml|.github/workflows/docs-policy.yml|.github/workflows/ci.yml|.github/workflows/codeql.yml|*.md|CLAUDE.md|AGENTS.md|CONTRIBUTING.md|SECURITY.md|LICENSE)
+              docs/*|tools/docs/*|generated/catalogs/*|generated/adr-bundles/*|generated/decision-maps/*|generated/graphs/*|specs/testmaps/README.md|specs/_generated/testmaps/README.md|scripts/qa/build_decision_graph.py|scripts/qa/generate_adr_readme.py|scripts/qa/sync-openedx-audit-pr-status.sh|.github/workflows/docs-compliance.yml|.github/workflows/docs-policy.yml|.github/workflows/codeql.yml|*.md|CLAUDE.md|AGENTS.md|CONTRIBUTING.md|SECURITY.md|LICENSE)
                 ;;
               *)
                 docs_only=false
@@ -114,14 +114,15 @@ jobs:
           allow_merge_group: true
 
   # ============================================================================
-  # Job 1a-1d: static-validation split graph
+  # Job 1a-1e: static-validation split graph
   # Runs on every PR and push. Keeps the same overall contracts as the old
   # consolidated Static Validation job, but splits the opaque Phase C script
   # batch into generated shards:
-  #   1a. precheck   — setup, lint, manifests, spec/inventory gates
-  #   1b. shards     — generated ci_static_inventory shard manifests in parallel
-  #   1c. postchecks — sequential static follow-up checks that do not depend on shards
-  #   1d. aggregate  — final branch-protection surface named "Static Validation"
+  #   1a. precheck   — setup, manifests, spec/inventory gates
+  #   1b. lint       — shellcheck + markdown advisory lint on hosted runners
+  #   1c. shards     — generated ci_static_inventory shard manifests in parallel
+  #   1d. postchecks — sequential static follow-up checks that do not depend on shards
+  #   1e. aggregate  — final branch-protection surface named "Static Validation"
   #
   # The overall surface still replaces 65+ micro-jobs:
   #   spec-lint, generated-docs, design-token-validation, branding-preflight,
@@ -152,9 +153,8 @@ jobs:
     name: Static Validation Precheck
     needs:
       - change-scope
-      - select-ci-lane
     if: ${{ github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true' }}
-    runs-on: ${{ needs.select-ci-lane.outputs.runner_label }}
+    runs-on: ubuntu-latest
     permissions:
       contents: read
 
@@ -243,30 +243,6 @@ jobs:
 
       - name: Lint YAML files
         run: yamllint -c .yamllint.yml infrastructure/ deploy/
-
-      - name: Lint shell scripts (shellcheck)
-        run: |
-          if ! command -v shellcheck &>/dev/null; then
-            SC_VERSION="v0.10.0"
-            SC_TARBALL="shellcheck-${SC_VERSION}.linux.x86_64.tar.xz"
-            SC_URL="https://github.com/koalaman/shellcheck/releases/download/${SC_VERSION}/${SC_TARBALL}"
-            curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
-              --output "${SC_TARBALL}" "${SC_URL}"
-            if command -v xz &>/dev/null; then
-              tar xJf "${SC_TARBALL}"
-            else
-              python3 -c "
-          import lzma, tarfile, io, sys
-          with open('${SC_TARBALL}', 'rb') as f:
-              decompressed = lzma.decompress(f.read())
-          with tarfile.open(fileobj=io.BytesIO(decompressed)) as t:
-              t.extractall()
-          "
-            fi
-            install -m 0755 "shellcheck-${SC_VERSION}/shellcheck" "$GITHUB_WORKSPACE/.cache/bin/shellcheck"
-            rm -rf "${SC_TARBALL}" "shellcheck-${SC_VERSION}"
-          fi
-          find scripts/ -name '*.sh' -type f -print0 | xargs -0 shellcheck --severity=error
 
       - name: Validate Kubernetes manifests
         run: |
@@ -358,24 +334,64 @@ jobs:
           path: var/spec-coverage-pr.md
           retention-days: 3
 
-      - name: Markdown linting
-        run: |
-          npm install markdownlint-cli
-          npx markdownlint docs/ specs/ --ignore docs/archive/ || true
-
       - name: Verify generated surfaces are current
         run: bash scripts/qa/verify-generated-surfaces.sh
 
       - name: Verify CI cache policy
         run: bash scripts/qa/verify-ci-cache-policy.sh
 
+  static-validation-lint:
+    name: Static Validation Lint
+    needs:
+      - change-scope
+    if: ${{ github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Prepare local tool path
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Lint shell scripts (shellcheck)
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          if ! command -v shellcheck &>/dev/null; then
+            SC_VERSION="v0.10.0"
+            SC_TARBALL="shellcheck-${SC_VERSION}.linux.x86_64.tar.xz"
+            SC_URL="https://github.com/koalaman/shellcheck/releases/download/${SC_VERSION}/${SC_TARBALL}"
+            curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+              --output "${SC_TARBALL}" "${SC_URL}"
+            if command -v xz &>/dev/null; then
+              tar xJf "${SC_TARBALL}"
+            else
+              python3 -c "
+          import lzma, tarfile, io, sys
+          with open('${SC_TARBALL}', 'rb') as f:
+              decompressed = lzma.decompress(f.read())
+          with tarfile.open(fileobj=io.BytesIO(decompressed)) as t:
+              t.extractall()
+          "
+            fi
+            install -m 0755 "shellcheck-${SC_VERSION}/shellcheck" "$HOME/.local/bin/shellcheck"
+            rm -rf "${SC_TARBALL}" "shellcheck-${SC_VERSION}"
+          fi
+          find scripts/ -name '*.sh' -type f -print0 | xargs -0 shellcheck --severity=error
+
+      - name: Markdown linting
+        run: |
+          npx --yes markdownlint-cli docs/ specs/ --ignore docs/archive/ || true
+
   static-validation-shards:
     name: Static Validation Scripts (${{ matrix.shard.key }})
     needs:
       - change-scope
-      - static-validation-precheck
     if: ${{ github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true' }}
-    runs-on: mereka-k8s-runners
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     strategy:
@@ -448,9 +464,8 @@ jobs:
     name: Static Validation Postchecks
     needs:
       - change-scope
-      - static-validation-precheck
     if: ${{ github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true' }}
-    runs-on: mereka-k8s-runners
+    runs-on: ubuntu-latest
     permissions:
       contents: read
 
@@ -617,10 +632,11 @@ jobs:
     needs:
       - change-scope
       - static-validation-precheck
+      - static-validation-lint
       - static-validation-shards
       - static-validation-postchecks
     if: ${{ always() && (github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true') }}
-    runs-on: mereka-k8s-runners
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
@@ -650,6 +666,7 @@ jobs:
           | Lane | Result |
           |------|--------|
           | Static Validation Precheck | ${{ needs.static-validation-precheck.result }} |
+          | Static Validation Lint | ${{ needs.static-validation-lint.result }} |
           | Static Validation Scripts | ${{ needs.static-validation-shards.result }} |
           | Static Validation Postchecks | ${{ needs.static-validation-postchecks.result }} |
 
@@ -690,6 +707,7 @@ jobs:
             coverageContent = coverageContent.replace(/</g, '&lt;').replace(/>/g, '&gt;');
             const dependencyResults = {
               precheck: '${{ needs.static-validation-precheck.result }}',
+              lint: '${{ needs.static-validation-lint.result }}',
               shards: '${{ needs.static-validation-shards.result }}',
               postchecks: '${{ needs.static-validation-postchecks.result }}',
             };
@@ -703,6 +721,7 @@ jobs:
             ### Lane Results
 
             - Static Validation Precheck: ${dependencyResults.precheck}
+            - Static Validation Lint: ${dependencyResults.lint}
             - Static Validation Scripts: ${dependencyResults.shards}
             - Static Validation Postchecks: ${dependencyResults.postchecks}
 
@@ -749,7 +768,7 @@ jobs:
             }
 
       - name: Fail if any static validation dependency failed
-        if: ${{ needs.static-validation-precheck.result != 'success' || needs.static-validation-shards.result != 'success' || needs.static-validation-postchecks.result != 'success' }}
+        if: ${{ needs.static-validation-precheck.result != 'success' || needs.static-validation-lint.result != 'success' || needs.static-validation-shards.result != 'success' || needs.static-validation-postchecks.result != 'success' }}
         run: |
           echo "::error::Static validation aggregate failed because one or more lanes failed"
           exit 1
@@ -841,7 +860,7 @@ jobs:
     name: Security Scans
     needs: change-scope
     if: ${{ github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true' }}
-    runs-on: mereka-k8s-runners
+    runs-on: ubuntu-latest
     permissions:
       contents: read
 
@@ -972,6 +991,7 @@ jobs:
         with:
           python-version: '3.12'
           install-base-deps: 'false'
+          isolated-venv: 'true'
           extra-deps: 'pip-audit'
 
       - name: Install project deps (optional)
@@ -995,7 +1015,7 @@ jobs:
     name: Python test coverage
     needs: change-scope
     if: ${{ github.event_name != 'pull_request' || needs.change-scope.outputs.docs_only != 'true' }}
-    runs-on: mereka-k8s-runners
+    runs-on: ubuntu-latest
     permissions:
       contents: read
 

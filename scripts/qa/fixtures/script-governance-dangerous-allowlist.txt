@@ -10,9 +10,7 @@ scripts/branding/fix-logo-static-files.sh
 scripts/ci/preflight-check.sh
 scripts/export-k8s-manifests.sh
 scripts/export-mct-courses-from-prod.py
-scripts/import-mct-batch.sh
 scripts/import-new-mct-courses.py
-scripts/import-new-mct-courses.sh
 scripts/infra/apply-monitoring-configs.sh
 scripts/infra/apply-multisite-config.sh
 scripts/infra/create-atlas-m10-cluster.sh

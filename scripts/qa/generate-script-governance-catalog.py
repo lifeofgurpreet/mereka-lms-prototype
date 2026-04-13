@@ -193,7 +193,10 @@ def infer_env_scope(content: str) -> list[str]:
     lowered = content.lower()
     scopes: set[str] = set()
     for scope, needles in ENV_SCOPE_KEYS.items():
-        if any(needle in lowered for needle in needles):
+        if any(
+            re.search(rf"(?<![a-z0-9]){re.escape(needle)}(?![a-z0-9])", lowered)
+            for needle in needles
+        ):
             scopes.add(scope)
     if not scopes:
         scopes.add("global")
