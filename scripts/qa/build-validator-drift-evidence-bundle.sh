@@ -227,7 +227,14 @@ for source in manual_sources:
 
 invocation_graph: dict[str, set[str]] = {}
 for script_path in sorted(all_shell_scripts):
-    text = (root / script_path).read_text(encoding="utf-8", errors="ignore")
+    try:
+        text = (root / script_path).read_text(encoding="utf-8", errors="ignore")
+    except OSError:
+        # Parallel self-tests may create and remove temporary shell fixtures under
+        # scripts/** while this static evidence bundle is scanning the tree.
+        # Ignore files that disappear mid-scan; only durable repo paths should
+        # contribute to the invocation graph.
+        continue
     refs = {
         ref
         for ref in pattern.findall(text)
