@@ -14,7 +14,7 @@ concurrency:
 jobs:
   cancel-closed-pr-runs:
     name: Cancel Closed PR Runs
-    runs-on: mereka-k8s-runners
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       actions: write

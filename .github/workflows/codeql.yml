@@ -2,30 +2,6 @@ name: CodeQL
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
-    paths-ignore:
-      - 'docs/**'
-      - 'tools/docs/**'
-      - 'generated/catalogs/**'
-      - 'generated/adr-bundles/**'
-      - 'generated/decision-maps/**'
-      - 'generated/graphs/**'
-      - 'docs/catalog.json'
-      - 'specs/testmaps/README.md'
-      - 'specs/_generated/testmaps/README.md'
-      - 'scripts/qa/build_decision_graph.py'
-      - 'scripts/qa/generate_adr_readme.py'
-      - 'scripts/qa/sync-openedx-audit-pr-status.sh'
-      - '.github/workflows/docs-compliance.yml'
-      - '.github/workflows/docs-policy.yml'
-      - '.github/workflows/ci.yml'
-      - '*.md'
-      - 'CLAUDE.md'
-      - 'AGENTS.md'
-      - 'CONTRIBUTING.md'
-      - 'SECURITY.md'
-      - 'LICENSE'
   workflow_dispatch:
   merge_group:
   schedule:
@@ -42,6 +18,9 @@ concurrency:
 jobs:
   change-scope:
     name: Detect CodeQL language scope
+    # CodeQL is not a required PR merge gate. Keep it on merge_group, push to
+    # main, manual dispatch, and schedule so it remains a real security signal
+    # without holding PR merge state open behind non-required heavy analysis.
     runs-on: ubuntu-latest
     permissions:
       contents: read
