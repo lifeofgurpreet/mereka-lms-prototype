@@ -297,7 +297,12 @@ jobs:
           done
 
       - name: Run spec integrity gates
-        run: bash scripts/qa/run-spec-integrity-gates.sh
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            RUN_INFO_CHECKS=0 bash scripts/qa/run-spec-integrity-gates.sh
+          else
+            bash scripts/qa/run-spec-integrity-gates.sh
+          fi
 
       - name: Spec coverage report
         if: github.event_name != 'pull_request'
