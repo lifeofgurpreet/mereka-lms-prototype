@@ -565,6 +565,8 @@ jobs:
             export AUDIT_GRAFANA_DASHBOARD_CHANGED_FILES="$CI_CHANGED_FILES"
             export VERIFY_TOKEN_INTEGRITY_ROUTING_SCOPE=changed
             export VERIFY_TOKEN_INTEGRITY_ROUTING_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_SPEC_DEDUPE_NORMALIZE_SCOPE=changed
+            export VERIFY_SPEC_DEDUPE_NORMALIZE_CHANGED_FILES="$CI_CHANGED_FILES"
           fi
           SCRIPT_LIST="${{ matrix.shard.file }}" PARALLELISM=4 TIMEOUT_SECS=300 \
             ./scripts/qa/run-release-verification-gates.sh
