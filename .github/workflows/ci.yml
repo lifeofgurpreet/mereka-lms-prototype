@@ -882,9 +882,13 @@ jobs:
         run: bash tests/tutor/test_pre_commit_hook.sh
 
       - name: Run tutor idempotency test
+        env:
+          TUTOR_TEST_ASSUME_PATCHED_BASELINE: '1'
         run: bash tests/tutor/test_idempotency.sh
 
       - name: Run tutor edge cases test
+        env:
+          TUTOR_TEST_ASSUME_PATCHED_BASELINE: '1'
         run: bash tests/tutor/test_edge_cases.sh
 
       - name: Validate config.example.yml structure
