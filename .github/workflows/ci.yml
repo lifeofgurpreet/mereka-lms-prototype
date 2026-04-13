@@ -616,6 +616,8 @@ jobs:
             export VERIFY_LOGO_SETUP_CHANGED_FILES="$CI_CHANGED_FILES"
             export VERIFY_DESIGN_TOKEN_USAGE_SCOPE=changed
             export VERIFY_DESIGN_TOKEN_USAGE_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_DESIGN_TOKENS_SCOPE=changed
+            export VERIFY_DESIGN_TOKENS_CHANGED_FILES="$CI_CHANGED_FILES"
           fi
           SCRIPT_LIST="${{ matrix.shard.file }}" PARALLELISM=4 TIMEOUT_SECS=300 \
             ./scripts/qa/run-release-verification-gates.sh

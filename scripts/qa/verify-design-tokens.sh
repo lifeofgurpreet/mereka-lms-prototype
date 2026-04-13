@@ -19,6 +19,37 @@ TOKENS_PROVENANCE="assets/branding/tokens.provenance.json"
 OVERRIDES_CSS="infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css"
 DRIFT_SCRIPT="scripts/branding/verify-token-drift.sh"
 SYNC_SCRIPT="scripts/branding/update-token-provenance.sh"
+SCOPE_MODE="${VERIFY_DESIGN_TOKENS_SCOPE:-}"
+CHANGED_FILES_RAW="${VERIFY_DESIGN_TOKENS_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
+
+should_skip_scope() {
+  local changed_path
+
+  [[ "$SCOPE_MODE" == "changed" ]] || return 1
+  [[ -n "${CHANGED_FILES_RAW//[[:space:]]/}" ]] || return 1
+
+  while IFS= read -r changed_path; do
+    [[ -n "$changed_path" ]] || continue
+    case "$changed_path" in
+      .github/workflows/ci.yml|\
+      scripts/qa/verify-design-tokens.sh|\
+      scripts/branding/verify-token-drift.sh|\
+      scripts/branding/update-token-provenance.sh|\
+      assets/branding/tokens.css|\
+      assets/branding/tokens.provenance.json|\
+      infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
+
+if should_skip_scope; then
+  echo "PASS verify-design-tokens (scope skip: no design-token authority changes)"
+  exit 0
+fi
 
 echo "Verifying Design Tokens System spec (12 ACs)..."
 echo ""
