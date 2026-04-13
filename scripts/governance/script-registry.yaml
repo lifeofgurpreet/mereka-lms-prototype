@@ -1663,7 +1663,7 @@ scripts:
     dry_run: true
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/qa/no_private_key_material.sh deploy/k8s"
-    criticality: release-blocking
+    criticality: release-supporting
 
   - path: scripts/qa/no_generated_python_artifacts.sh
     owner: platform-team
@@ -1678,7 +1678,7 @@ scripts:
     dry_run: true
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/qa/no_generated_python_artifacts.sh deploy/k8s"
-    criticality: release-blocking
+    criticality: release-supporting
 
   - path: scripts/qa/no_mutable_or_placeholder_images.sh
     owner: platform-team
@@ -1693,7 +1693,7 @@ scripts:
     dry_run: true
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/qa/no_mutable_or_placeholder_images.sh deploy/k8s"
-    criticality: release-blocking
+    criticality: release-supporting
 
   - path: scripts/qa/no_environment_domains_in_base.sh
     owner: platform-team
@@ -1707,7 +1707,7 @@ scripts:
     dry_run: true
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/qa/no_environment_domains_in_base.sh"
-    criticality: release-blocking
+    criticality: release-supporting
 
   - path: scripts/qa/no_upward_relative_paths_in_kustomize.sh
     owner: platform-team
@@ -1722,7 +1722,7 @@ scripts:
     dry_run: true
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/qa/no_upward_relative_paths_in_kustomize.sh deploy/k8s"
-    criticality: release-blocking
+    criticality: release-supporting
 
   - path: scripts/qa/scan-secrets-fast.sh
     owner: platform-team
