@@ -530,6 +530,8 @@ jobs:
             export TEST_VERIFY_BUILD_WORKFLOW_CONTRACT_CHANGED_FILES="$CI_CHANGED_FILES"
             export VALIDATE_REGISTRY_SCOPE=changed
             export VALIDATE_REGISTRY_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_NETWORK_POLICIES_SCOPE=changed
+            export VERIFY_NETWORK_POLICIES_CHANGED_FILES="$CI_CHANGED_FILES"
           fi
           SCRIPT_LIST="${{ matrix.shard.file }}" PARALLELISM=4 TIMEOUT_SECS=300 \
             ./scripts/qa/run-release-verification-gates.sh

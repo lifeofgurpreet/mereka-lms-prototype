@@ -18,6 +18,8 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 NP_DIR="${REPO_ROOT}/deploy/k8s/base/network-policies"
 BASE_DIR="${REPO_ROOT}/deploy/k8s/base"
 NAMESPACE="${NAMESPACE:-mereka-lms}"
+SCOPE_MODE="${VERIFY_NETWORK_POLICIES_SCOPE:-}"
+CHANGED_FILES_RAW="${VERIFY_NETWORK_POLICIES_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
 
 source "$REPO_ROOT/scripts/shared/ci-skip-guards.sh"
 
@@ -34,6 +36,35 @@ pass()  { echo -e "${GREEN}PASS${NC}  $1"; PASSED=$((PASSED + 1)); }
 fail()  { echo -e "${RED}FAIL${NC}  $1"; FAILED=$((FAILED + 1)); }
 skip()  { echo -e "${YELLOW}SKIP${NC}  $1"; SKIPPED=$((SKIPPED + 1)); }
 
+should_skip_scope() {
+  local changed_path
+
+  if [[ "$SCOPE_MODE" != "changed" ]]; then
+    return 1
+  fi
+
+  if [[ -z "${CHANGED_FILES_RAW//[[:space:]]/}" ]]; then
+    return 1
+  fi
+
+  while IFS= read -r changed_path; do
+    [[ -z "$changed_path" ]] && continue
+    case "$changed_path" in
+      scripts/qa/verify-network-policies.sh|\
+      scripts/shared/ci-skip-guards.sh|\
+      deploy/k8s/base/kustomization.yaml|\
+      deploy/k8s/base/network-policies/*|\
+      deploy/k8s/base/apps/xqueue-graders/networkpolicy.yaml|\
+      deploy/k8s/overlays/local/*|\
+      deploy/k8s/overlays/production/*)
+        return 1
+        ;;
+    esac
+  done <<<"$CHANGED_FILES_RAW"
+
+  return 0
+}
+
 MODE="offline"
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -45,6 +76,18 @@ done
 
 echo "=== NetworkPolicy Verification (mode: $MODE) ==="
 echo ""
+
+if [[ "$MODE" == "offline" ]] && should_skip_scope; then
+  skip "scope skip: no network-policy-relevant changes"
+  echo ""
+  echo "=== Summary ==="
+  echo -e "${GREEN}PASSED${NC}: $PASSED"
+  echo -e "${RED}FAILED${NC}: $FAILED"
+  echo -e "${YELLOW}SKIPPED${NC}: $SKIPPED"
+  echo ""
+  echo "NetworkPolicy verification complete."
+  exit 0
+fi
 
 ###############################################################################
 # Offline checks — static analysis of manifests
