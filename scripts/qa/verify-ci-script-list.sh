@@ -15,6 +15,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+SCOPE_MODE="${VERIFY_CI_SCRIPT_LIST_SCOPE:-}"
+CHANGED_FILES_RAW="${VERIFY_CI_SCRIPT_LIST_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -29,9 +31,36 @@ do_pass() { echo -e "${GREEN}PASS${NC} $1"; PASSED=$((PASSED + 1)); }
 do_fail() { echo -e "${RED}FAIL${NC} $1"; FAILED=$((FAILED + 1)); }
 do_warn() { echo -e "${YELLOW}WARN${NC} $1"; WARNED=$((WARNED + 1)); }
 
+should_skip_scope() {
+  local changed_path
+
+  [[ "$SCOPE_MODE" == "changed" ]] || return 1
+  [[ -n "${CHANGED_FILES_RAW//[[:space:]]/}" ]] || return 1
+
+  while IFS= read -r changed_path; do
+    [[ -n "$changed_path" ]] || continue
+    case "$changed_path" in
+      .github/ci-scripts-static.txt|\
+      .github/workflows/*|\
+      scripts/*|\
+      verification/catalogs/verification_catalog.json|\
+      scripts/governance/script-registry.yaml)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
+
 LIST_FILE="$REPO_ROOT/.github/ci-scripts-static.txt"
 CATALOG_JSON="$REPO_ROOT/verification/catalogs/verification_catalog.json"
 GENERATOR="$REPO_ROOT/scripts/governance/generate-ci-static-inventory.py"
+
+if should_skip_scope; then
+  echo "PASS verify-ci-script-list (scope skip: no ci-script-inventory authority changes)"
+  exit 0
+fi
 
 echo "=== CI Script List Validation ==="
 echo
