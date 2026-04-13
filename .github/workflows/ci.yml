@@ -524,6 +524,8 @@ jobs:
             export CI_CHANGED_FILES="$(git diff --name-only "$LINT_REPO_CONVENTIONS_BASE_SHA" "$LINT_REPO_CONVENTIONS_HEAD_SHA")"
             export VERIFY_SECRETS_ISOLATION_SCOPE=changed
             export VERIFY_SECRETS_ISOLATION_CHANGED_FILES="$CI_CHANGED_FILES"
+            export TEST_BUILD_VALIDATOR_DRIFT_REVIEW_PACKET_SCOPE=changed
+            export TEST_BUILD_VALIDATOR_DRIFT_REVIEW_PACKET_CHANGED_FILES="$CI_CHANGED_FILES"
           fi
           SCRIPT_LIST="${{ matrix.shard.file }}" PARALLELISM=4 TIMEOUT_SECS=300 \
             ./scripts/qa/run-release-verification-gates.sh

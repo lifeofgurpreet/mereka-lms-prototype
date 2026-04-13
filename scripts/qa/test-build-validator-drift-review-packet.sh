@@ -4,6 +4,8 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 BUILD_SCRIPT="$ROOT_DIR/scripts/qa/build-validator-drift-review-packet.sh"
+SCOPE_MODE="${TEST_BUILD_VALIDATOR_DRIFT_REVIEW_PACKET_SCOPE:-}"
+CHANGED_FILES_RAW="${TEST_BUILD_VALIDATOR_DRIFT_REVIEW_PACKET_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
 TMP_DIR="$(mktemp -d)"
 TMP_FIXTURE_DIR="$TMP_DIR/tmp-build-validator-drift-review-packet"
 TMP_FIXTURE_FILE="$TMP_FIXTURE_DIR/verify-repo-structure.sh"
@@ -14,6 +16,34 @@ cleanup() {
   rm -rf "$TMP_DIR"
 }
 trap cleanup EXIT
+
+should_skip_scope() {
+  local changed_path
+
+  if [[ "$SCOPE_MODE" != "changed" ]]; then
+    return 1
+  fi
+
+  if [[ -z "${CHANGED_FILES_RAW//[[:space:]]/}" ]]; then
+    return 1
+  fi
+
+  while IFS= read -r changed_path; do
+    [[ -z "$changed_path" ]] && continue
+    case "$changed_path" in
+      scripts/*|.github/*|verification/*|docs/*|README.md)
+        return 1
+        ;;
+    esac
+  done <<<"$CHANGED_FILES_RAW"
+
+  return 0
+}
+
+if should_skip_scope; then
+  echo "PASS test-build-validator-drift-review-packet (scope skip: no review-packet-relevant changes)"
+  exit 0
+fi
 
 OUT_DIR="$TMP_DIR/review-default"
 "$BUILD_SCRIPT" --out-dir "$OUT_DIR" >/dev/null
