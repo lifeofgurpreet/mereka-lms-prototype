@@ -21,10 +21,42 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+SCOPE_MODE="${VERIFY_RUNTIME_PROOF_FIXTURE_PACK_SCOPE:-}"
+CHANGED_FILES_RAW="${VERIFY_RUNTIME_PROOF_FIXTURE_PACK_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
 
 # ── Counters ──────────────────────────────────────────────────────────────────
 PASS=0
 FAIL=0
+
+should_skip_scope() {
+  [[ "$SCOPE_MODE" == "changed" ]] || return 1
+  [[ -n "${CHANGED_FILES_RAW//[[:space:]]/}" ]] || return 1
+
+  while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    case "$path" in
+      .github/workflows/ci.yml|\
+      scripts/qa/verify-runtime-proof-fixture-pack.sh|\
+      scripts/tenants/*|\
+      scripts/tenants/lib/*|\
+      config/runtime-proof/*|\
+      config/smoke-account-registry.yaml|\
+      docs/stabilization/SYNTHETIC_RUNTIME_PROOF_FIXTURE_CONTRACT.md|\
+      docs/reviews/RUNTIME_PROOF_FIXTURE_EXECUTION_PACKET.md|\
+      docs/reviews/RUNTIME_PROOF_FIXTURE_ROLLBACK_PACKET.md|\
+      docs/reviews/RUNTIME_PROOF_FIXTURE_HANDOFF.md)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
+
+if should_skip_scope; then
+  echo "PASS verify-runtime-proof-fixture-pack (scope skip: no runtime-proof-fixture-relevant changes)"
+  exit 0
+fi
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 _pass() {
