@@ -1,8 +1,8 @@
 # Branch Protection Requirements
 
-_Audience: Platform Engineers • Owner: platform-team • Last verified: 2026-03-20 • Status: canonical_
+_Audience: Platform Engineers • Owner: platform-team • Last verified: 2026-04-13 • Status: canonical_
 
-<!-- Last verified: 2026-03-20 -->
+<!-- Last verified: 2026-04-13 -->
 
 This document specifies the required GitHub branch protection settings for the
 `main` branch and explains how they contribute to the repository's OpenSSF
@@ -14,8 +14,8 @@ Scorecard score.
 
 | Setting | Required Value | Why |
 |---------|---------------|-----|
-| Require pull request reviews before merging | Enabled, minimum 1 reviewer | Prevents unreviewed code reaching production |
-| Dismiss stale pull request approvals on new commits | Enabled | Ensures re-review after changes; Scorecard `Code-Review` check |
+| Require pull request reviews before merging | Enabled, minimum 0 reviewers | Keeps branch protection active without blocking the owner-merged agent workflow documented in the contract |
+| Dismiss stale pull request approvals on new commits | Disabled while required approvals = 0 | No approval state exists to invalidate in the current owner-merged workflow |
 | Require status checks to pass before merging | Enabled (see list below) | Gates on CI, IaC scan, and lint |
 | Require branches to be up to date before merging | Enabled | Prevents stale-branch merges bypassing checks |
 | Apply branch protection to admins | Enabled | Prevents admin bypass from silently weakening CI trust |
@@ -75,19 +75,21 @@ These Scorecard checks are addressed elsewhere in the repo:
 
 ## Configure via GitHub UI
 
-1. Go to **Settings → Branches** in the repository.
-2. Click **Add branch ruleset** (or edit the existing `main` ruleset).
-3. Set **Target branches** to `main`.
-4. Enable the settings listed in the table above:
+1. Treat [`config/branch-protection-contract.yaml`](../../../config/branch-protection-contract.yaml) as the machine source of truth for this repo's live settings.
+2. Go to **Settings → Branches** in the repository.
+3. Click **Add branch ruleset** (or edit the existing `main` ruleset).
+4. Set **Target branches** to `main`.
+5. Enable the settings listed in the table above:
    - **Require a pull request before merging**: checked
-     - Set **Required approvals** to `1`
-     - Check **Dismiss stale pull request approvals when new commits are pushed**
+     - Set **Required approvals** to `0`
+     - Leave **Dismiss stale pull request approvals when new commits are pushed** unchecked
    - **Require status checks to pass**:
      - Check **Require branches to be up to date before merging**
      - Add each check name from the table above
    - **Block force pushes**: checked
    - **Restrict deletions**: checked
-5. Click **Save changes**.
+   - **Include administrators**: checked
+6. Click **Save changes**.
 
 > GitHub's new **Rulesets** interface (not the legacy branch protection page) is
 > preferred. Rulesets support bypass actors and are exported via API.
@@ -132,9 +134,9 @@ gh api \
   "enforce_admins": true,
   "required_pull_request_reviews": {
     "dismissal_restrictions": {},
-    "dismiss_stale_reviews": true,
-    "require_code_owner_reviews": false,
-    "required_approving_review_count": 1
+      "dismiss_stale_reviews": false,
+      "require_code_owner_reviews": false,
+      "required_approving_review_count": 0
   },
   "restrictions": null,
   "allow_force_pushes": false,
@@ -167,15 +169,17 @@ gh api \
 
 ## Verification
 
-Use the included script to verify branch protection is correctly configured:
+Use the included scripts to verify branch protection is correctly configured:
 
 ```bash
 ./scripts/qa/verify-branch-protection.sh
+./scripts/qa/verify-branch-protection-contract.sh --live
 ```
 
-The script exits `0` if all required settings are compliant, `1` otherwise.
-It requires the `gh` CLI authenticated with a token that has at least
-**Administration: read** permission on the repository.
+The repo-local verifier reads `config/branch-protection-contract.yaml` as the
+machine contract and exits `0` if all required settings are compliant, `1`
+otherwise. It requires the `gh` CLI authenticated with a token that has at
+least **Administration: read** permission on the repository.
 
 ---
 
