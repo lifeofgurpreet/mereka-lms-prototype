@@ -5,8 +5,9 @@ set -euo pipefail
 #
 # Checks:
 #   1. Ledger file exists and is valid YAML
-#   2. Every exception entry has required fields
-#   3. No recent admin merges on main are unlogged
+#   2. Policy declaration is present
+#   3. Every exception entry uses the canonical machine-readable schema
+#   4. Duplicate PR or commit entries are rejected
 #
 # No network calls. No destructive operations.
 
@@ -37,23 +38,52 @@ else
   fail "Ledger is not valid YAML"
 fi
 
-# 2. Every exception has required fields
-echo "--- Check 2: Exception entry completeness ---"
+# 2. Policy field present
+echo "--- Check 2: Policy declaration ---"
+if grep -q 'rule:.*[Aa]dmin merge' "$LEDGER"; then
+  pass "Policy declaration present"
+else
+  fail "Policy declaration missing or unclear"
+fi
+
+# 3. Every exception uses the canonical machine-readable schema
+echo "--- Check 3: Exception entry completeness ---"
 entry_check=$(python3 -c "
 import yaml
+import re
 with open('$LEDGER') as f:
     data = yaml.safe_load(f)
 exceptions = data.get('exceptions', []) or []
 if not exceptions:
     print('EMPTY')
 else:
-    required = ['date', 'pr', 'justification', 'logged_by']
+    required = ['date', 'pr', 'commit', 'bypassed_checks', 'justification', 'follow_up', 'logged_by']
+    seen_prs = set()
+    seen_commits = set()
     for i, e in enumerate(exceptions):
         for r in required:
             if r not in e or not e[r]:
                 print(f'MISSING:{i}:{r}')
-    if not any('MISSING' in str(x) for x in []):
-        print('OK')
+        bypassed = e.get('bypassed_checks')
+        if bypassed is not None and (not isinstance(bypassed, list) or not bypassed):
+            print(f'INVALID:{i}:bypassed_checks')
+        date = str(e.get('date', ''))
+        if date and not re.fullmatch(r'\d{4}-\d{2}-\d{2}', date):
+            print(f'INVALID:{i}:date')
+        pr = str(e.get('pr', ''))
+        if pr and pr != 'direct push to main (no PR)' and not re.fullmatch(r'https://github\.com/[^/]+/[^/]+/pull/\d+', pr):
+            print(f'INVALID:{i}:pr')
+        commit = str(e.get('commit', ''))
+        if commit and commit != 'see squash merge' and not re.fullmatch(r'[0-9a-f]{7,40}', commit):
+            print(f'INVALID:{i}:commit')
+        if pr:
+            if pr in seen_prs:
+                print(f'DUPLICATE:{i}:pr')
+            seen_prs.add(pr)
+        if commit and commit != 'see squash merge':
+            if commit in seen_commits:
+                print(f'DUPLICATE:{i}:commit')
+            seen_commits.add(commit)
     print(f'COUNT:{len(exceptions)}')
 " 2>/dev/null || echo "ERROR")
 
@@ -63,17 +93,13 @@ elif echo "$entry_check" | grep -q "^MISSING:"; then
   while IFS= read -r line; do
     fail "Exception entry $line"
   done <<< "$(echo "$entry_check" | grep "^MISSING:")"
+elif echo "$entry_check" | grep -qE "^(INVALID|DUPLICATE):"; then
+  while IFS= read -r line; do
+    fail "Exception entry $line"
+  done <<< "$(echo "$entry_check" | grep -E "^(INVALID|DUPLICATE):")"
 else
   count=$(echo "$entry_check" | grep "^COUNT:" | cut -d: -f2)
-  pass "All $count exception entries have required fields"
-fi
-
-# 3. Policy field present
-echo "--- Check 3: Policy declaration ---"
-if grep -q 'rule:.*[Aa]dmin merge' "$LEDGER"; then
-  pass "Policy declaration present"
-else
-  fail "Policy declaration missing or unclear"
+  pass "All $count exception entries use the canonical schema"
 fi
 
 echo ""
