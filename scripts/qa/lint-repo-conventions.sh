@@ -17,6 +17,10 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
+LINT_SCOPE="${LINT_REPO_CONVENTIONS_SCOPE:-all}"
+LINT_BASE_SHA="${LINT_REPO_CONVENTIONS_BASE_SHA:-}"
+LINT_HEAD_SHA="${LINT_REPO_CONVENTIONS_HEAD_SHA:-HEAD}"
+declare -A SELECTED_PATHS=()
 
 # Counters
 PASS_COUNT=0
@@ -39,8 +43,84 @@ warn() {
   WARN_COUNT=$((WARN_COUNT + 1))
 }
 
+init_selected_paths() {
+  if [[ "$LINT_SCOPE" != "changed" ]]; then
+    return
+  fi
+  if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    warn "Scope: changed-file lint requested outside git repo; falling back to full-repo mode"
+    LINT_SCOPE="all"
+    return
+  fi
+  if [[ -z "$LINT_BASE_SHA" || -z "$LINT_HEAD_SHA" ]]; then
+    warn "Scope: changed-file lint requested without base/head SHAs; falling back to full-repo mode"
+    LINT_SCOPE="all"
+    return
+  fi
+
+  local path
+  while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    SELECTED_PATHS["${path#./}"]=1
+  done < <(git diff --name-only --diff-filter=ACMR "$LINT_BASE_SHA...$LINT_HEAD_SHA" || true)
+
+  if [[ "${#SELECTED_PATHS[@]}" -eq 0 ]]; then
+    warn "Scope: no changed files detected for PR diff; falling back to full-repo mode"
+    LINT_SCOPE="all"
+    return
+  fi
+
+  pass "Scope: linting PR-changed files only (${#SELECTED_PATHS[@]} paths)"
+}
+
+path_selected() {
+  local path="${1#./}"
+  if [[ "$LINT_SCOPE" != "changed" ]]; then
+    return 0
+  fi
+  [[ -n "${SELECTED_PATHS[$path]+x}" ]]
+}
+
+scope_touches_prefix() {
+  local prefix="${1#./}"
+  if [[ "$LINT_SCOPE" != "changed" ]]; then
+    return 0
+  fi
+
+  local path
+  for path in "${!SELECTED_PATHS[@]}"; do
+    [[ "$path" == "$prefix"* ]] && return 0
+  done
+  return 1
+}
+
+scope_touches_path() {
+  local path="${1#./}"
+  if [[ "$LINT_SCOPE" != "changed" ]]; then
+    return 0
+  fi
+  [[ -n "${SELECTED_PATHS[$path]+x}" ]]
+}
+
+scope_touches_shell_files() {
+  if [[ "$LINT_SCOPE" != "changed" ]]; then
+    return 0
+  fi
+
+  local path
+  for path in "${!SELECTED_PATHS[@]}"; do
+    [[ "$path" == *.sh ]] && return 0
+  done
+  return 1
+}
+
 check_legacy_testmap_worktree_freeze() {
   local verifier="tools/docs/verify/verify-legacy-testmaps-frozen.py"
+  if ! scope_touches_prefix "specs/testmaps/" && \
+     ! scope_touches_prefix "specs/_generated/testmaps/" && \
+     ! scope_touches_path "$verifier"; then
+    return
+  fi
   if [[ ! -f "$verifier" ]]; then
     warn "Glob-ability: legacy testmap freeze verifier missing: $verifier"
     return
@@ -71,8 +151,11 @@ check_glob_ability() {
 
   # Check spec files: must end in _spec.md and live in specs/
   local spec_violations=0
-  if [[ -d specs ]]; then
+  if [[ -d specs ]] && scope_touches_prefix "specs/"; then
     while IFS= read -r -d '' file; do
+      if ! path_selected "$file"; then
+        continue
+      fi
       local basename
       basename="$(basename "$file")"
       local dirname
@@ -100,8 +183,11 @@ check_glob_ability() {
 
   # Check plan files: must end in _plan.md or _testplan.md and live in specs/plans/
   local plan_violations=0
-  if [[ -d specs/plans ]]; then
+  if [[ -d specs/plans ]] && scope_touches_prefix "specs/plans/"; then
     while IFS= read -r -d '' file; do
+      if ! path_selected "$file"; then
+        continue
+      fi
       local basename
       basename="$(basename "$file")"
 
@@ -128,8 +214,11 @@ check_glob_ability() {
 
   # Check verify scripts: must start with verify- or end in -verify.sh and live in scripts/qa/
   local verify_violations=0
-  if [[ -d scripts/qa ]]; then
+  if [[ -d scripts/qa ]] && scope_touches_prefix "scripts/qa/"; then
     while IFS= read -r -d '' file; do
+      if ! path_selected "$file"; then
+        continue
+      fi
       local basename
       basename="$(basename "$file")"
       local dirname
@@ -169,8 +258,11 @@ check_glob_ability() {
 
   # Check generated testmap files: must end in .testmap.yml and live in specs/_generated/testmaps/
   local testmap_violations=0
-  if [[ -d specs/_generated/testmaps ]]; then
+  if [[ -d specs/_generated/testmaps ]] && scope_touches_prefix "specs/_generated/testmaps/"; then
     while IFS= read -r -d '' file; do
+      if ! path_selected "$file"; then
+        continue
+      fi
       local basename
       basename="$(basename "$file")"
 
@@ -185,7 +277,7 @@ check_glob_ability() {
     pass "Glob-ability: All generated testmap files follow *.testmap.yml naming"
   fi
 
-  if [[ -d specs/testmaps ]]; then
+  if [[ -d specs/testmaps ]] && scope_touches_prefix "specs/testmaps/"; then
     warn "Glob-ability: specs/testmaps is a legacy compatibility root; generated testmaps belong in specs/_generated/testmaps"
   fi
 
@@ -202,8 +294,11 @@ check_grep_ability() {
 
   # Check K8s manifests have app.kubernetes.io/name label
   local k8s_label_violations=0
-  if [[ -d deploy/k8s ]]; then
+  if [[ -d deploy/k8s ]] && scope_touches_prefix "deploy/k8s/"; then
     while IFS= read -r -d '' file; do
+      if ! path_selected "$file"; then
+        continue
+      fi
       # Skip kustomization.yaml files
       if [[ "$(basename "$file")" == "kustomization.yaml" ]]; then
         continue
@@ -233,8 +328,11 @@ check_grep_ability() {
 
   # Check shell scripts have set -euo pipefail (only check scripts/, not all)
   local pipefail_missing=0
-  if [[ -d scripts ]]; then
+  if [[ -d scripts ]] && scope_touches_prefix "scripts/"; then
     while IFS= read -r -d '' file; do
+      if ! path_selected "$file"; then
+        continue
+      fi
       # Only check scripts in scripts/ directory (not tutor_env, etc.)
       if [[ ! "$file" =~ ^scripts/ ]]; then
         continue
@@ -259,22 +357,27 @@ check_grep_ability() {
 
   # Check shell scripts have proper shebang
   local shebang_violations=0
-  while IFS= read -r -d '' file; do
-    # Skip files in hidden dirs, var/, node_modules/, tutor_env/ (generated)
-    if [[ "$file" =~ /\. ]] || [[ "$file" =~ /var/ ]] || [[ "$file" =~ /node_modules/ ]] || [[ "$file" =~ /tutor_env/ ]]; then
-      continue
-    fi
+  if scope_touches_shell_files; then
+    while IFS= read -r -d '' file; do
+      if ! path_selected "$file"; then
+        continue
+      fi
+      # Skip files in hidden dirs, var/, node_modules/, tutor_env/ (generated)
+      if [[ "$file" =~ /\. ]] || [[ "$file" =~ /var/ ]] || [[ "$file" =~ /node_modules/ ]] || [[ "$file" =~ /tutor_env/ ]]; then
+        continue
+      fi
 
-    local first_line
-    first_line="$(head -n1 "$file")"
+      local first_line
+      first_line="$(head -n1 "$file")"
 
-    if [[ ! "$first_line" =~ ^#!/usr/bin/env\ bash ]] && \
-       [[ ! "$first_line" =~ ^#!/bin/bash ]] && \
-       [[ ! "$first_line" =~ ^#!/bin/sh ]]; then
-      fail "Grep-ability: Shell script missing proper shebang: $file"
-      shebang_violations=$((shebang_violations + 1))
-    fi
-  done < <(find . -type f -name '*.sh' -print0 2>/dev/null | grep -zv '^\./\.' | grep -zv '/var/' | grep -zv '/node_modules/' | grep -zv '/tutor_env/' || true)
+      if [[ ! "$first_line" =~ ^#!/usr/bin/env\ bash ]] && \
+         [[ ! "$first_line" =~ ^#!/bin/bash ]] && \
+         [[ ! "$first_line" =~ ^#!/bin/sh ]]; then
+        fail "Grep-ability: Shell script missing proper shebang: $file"
+        shebang_violations=$((shebang_violations + 1))
+      fi
+    done < <(find . -type f -name '*.sh' -print0 2>/dev/null | grep -zv '^\./\.' | grep -zv '/var/' | grep -zv '/node_modules/' | grep -zv '/tutor_env/' || true)
+  fi
 
   if [[ $shebang_violations -eq 0 ]]; then
     pass "Grep-ability: All shell scripts have proper shebang"
@@ -286,32 +389,37 @@ check_grep_ability() {
   # fastlane selector action lives in bbi-infrastructure and is pinned by
   # branch protection on the upstream repo.
   local workflow_ref_violations=0
-  while IFS=: read -r file line ref; do
-    [[ -n "$file" ]] || continue
-    [[ "$ref" == ./* ]] && continue
-    [[ "$ref" == docker://* ]] && continue
-    # Allow first-party org refs (trusted, controlled by us)
-    [[ "$ref" == Biji-Biji-Initiative/* ]] && continue
+  if scope_touches_prefix ".github/workflows/"; then
+    while IFS=: read -r file line ref; do
+      [[ -n "$file" ]] || continue
+      if ! path_selected "$file"; then
+        continue
+      fi
+      [[ "$ref" == ./* ]] && continue
+      [[ "$ref" == docker://* ]] && continue
+      # Allow first-party org refs (trusted, controlled by us)
+      [[ "$ref" == Biji-Biji-Initiative/* ]] && continue
 
-    if [[ "$ref" != *@* ]]; then
-      fail "Grep-ability: Workflow uses ref missing @version: ${file}:${line} (${ref})"
-      workflow_ref_violations=$((workflow_ref_violations + 1))
-      continue
-    fi
+      if [[ "$ref" != *@* ]]; then
+        fail "Grep-ability: Workflow uses ref missing @version: ${file}:${line} (${ref})"
+        workflow_ref_violations=$((workflow_ref_violations + 1))
+        continue
+      fi
 
-    local version
-    version="${ref##*@}"
-    if [[ ! "$version" =~ ^[0-9a-f]{40}$ ]]; then
-      fail "Grep-ability: Workflow uses ref must be full 40-char SHA: ${file}:${line} (${ref})"
-      workflow_ref_violations=$((workflow_ref_violations + 1))
-    fi
-  done < <(
-    awk '
-      match($0, /^[[:space:]]*uses:[[:space:]]*([^[:space:]#]+)/, m) {
-        print FILENAME ":" NR ":" m[1]
-      }
-    ' .github/workflows/*.yml .github/workflows/*.yaml 2>/dev/null || true
-  )
+      local version
+      version="${ref##*@}"
+      if [[ ! "$version" =~ ^[0-9a-f]{40}$ ]]; then
+        fail "Grep-ability: Workflow uses ref must be full 40-char SHA: ${file}:${line} (${ref})"
+        workflow_ref_violations=$((workflow_ref_violations + 1))
+      fi
+    done < <(
+      awk '
+        match($0, /^[[:space:]]*uses:[[:space:]]*([^[:space:]#]+)/, m) {
+          print FILENAME ":" NR ":" m[1]
+        }
+      ' .github/workflows/*.yml .github/workflows/*.yaml 2>/dev/null || true
+    )
+  fi
 
   if [[ $workflow_ref_violations -eq 0 ]]; then
     pass "Grep-ability: All external workflow uses refs are pinned to immutable SHAs"
@@ -329,8 +437,11 @@ check_architectural_boundaries() {
   # Check spec files don't reference deprecated directories (tools/, ops/)
   # Look for path references like "tools/something" or "ops/something" but NOT "service-tools/" or "privacy-tools/"
   local deprecated_refs=0
-  if [[ -d specs ]]; then
+  if [[ -d specs ]] && scope_touches_prefix "specs/"; then
     while IFS= read -r -d '' file; do
+      if ! path_selected "$file"; then
+        continue
+      fi
       # Look for standalone tools/ or ops/ paths (not part of service names)
       # Match: "tools/", "../tools/", "./tools/" but NOT "service-tools/", "privacy-tools/"
       local violations
@@ -364,6 +475,9 @@ check_architectural_boundaries() {
   )
 
   for config in "${local_configs[@]}"; do
+    if ! scope_touches_path "$config"; then
+      continue
+    fi
     if [[ ! -f "$config" ]]; then
       continue
     fi
@@ -391,8 +505,11 @@ check_architectural_boundaries() {
   if ! [[ "$missing_script_warn_limit" =~ ^[0-9]+$ ]]; then
     missing_script_warn_limit=20
   fi
-  if [[ -d specs ]]; then
+  if [[ -d specs ]] && scope_touches_prefix "specs/"; then
     while IFS= read -r -d '' file; do
+      if ! path_selected "$file"; then
+        continue
+      fi
       local basename
       basename="$(basename "$file")"
 
@@ -457,8 +574,11 @@ check_observability() {
 
   # Check PrometheusRule files have consistent naming
   local prometheus_violations=0
-  if [[ -d deploy/k8s ]]; then
+  if [[ -d deploy/k8s ]] && scope_touches_prefix "deploy/k8s/"; then
     while IFS= read -r -d '' file; do
+      if ! path_selected "$file"; then
+        continue
+      fi
       local basename
       basename="$(basename "$file")"
 
@@ -491,7 +611,8 @@ check_observability() {
   # Check observability docs for unresolved lane/context placeholders
   local placeholder_violations=0
   local file_list
-  if [[ -d docs/qa && -d docs/operations ]]; then
+  if [[ -d docs/qa && -d docs/operations ]] && \
+     (scope_touches_prefix "docs/qa/" || scope_touches_prefix "docs/operations/"); then
     file_list=$(find docs/qa docs/operations \
       -type f \
       -name '*.md' \
@@ -500,6 +621,9 @@ check_observability() {
 
     if [[ -n "$file_list" ]]; then
       while IFS= read -r doc; do
+        if ! path_selected "$doc"; then
+          continue
+        fi
         local placeholder_hits
         placeholder_hits="$(rg -n -E '<[A-Za-z0-9._-]+-context>|<[A-Za-z0-9._-]+-project>|<dev-or-shared-project>|<lane-context>' "$doc" 2>/dev/null || true)"
         if [[ -n "$placeholder_hits" ]]; then
@@ -519,8 +643,11 @@ check_observability() {
   # Just provide a summary
   local structured_count=0
   local total_qa_scripts=0
-  if [[ -d scripts/qa ]]; then
+  if [[ -d scripts/qa ]] && scope_touches_prefix "scripts/qa/"; then
     while IFS= read -r -d '' file; do
+      if ! path_selected "$file"; then
+        continue
+      fi
       local basename
       basename="$(basename "$file")"
 
@@ -557,6 +684,7 @@ main() {
   echo "Running Factory.ai repo convention checks for mereka-lms..."
   echo ""
 
+  init_selected_paths
   check_glob_ability
   check_grep_ability
   check_architectural_boundaries
