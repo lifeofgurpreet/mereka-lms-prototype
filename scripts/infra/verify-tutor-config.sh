@@ -581,6 +581,8 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_not_in_file "webpack skipped (prebuilt bundles)" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain conditional webpack skip residue"
   pattern_not_in_file "duplicate_brand_compile_tail" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain duplicate brand compile tail shim"
   pattern_not_in_file "COPY --chown=app:app \\./themes/ /openedx/themes" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain late broad theme copy removal shim"
+  pattern_not_in_file "legacy_code_stage_custom_apps_pattern" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain legacy production-stage custom app scrubber"
+  pattern_not_in_file "production_custom_apps_pattern" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain duplicate production-stage custom app reinjection scrubber"
   pattern_not_in_file "RUN uv pip install -e /openedx/mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "No duplicate production-stage custom app reinstalls remain"
   pattern_in_file 'pip install --no-cache-dir --no-build-isolation uwsgi==2.0.24' "$OPENEDX_DOCKERFILE" "uwsgi remains on explicit pip compatibility fallback"
   fixed_pattern_count_equals "pip install" "1" "$OPENEDX_DOCKERFILE" "Only uwsgi remains on plain pip in rendered Open edX Dockerfile"

@@ -698,40 +698,7 @@ CMD ["uwsgi", "/openedx/uwsgi.ini"]
             FINAL_RUNTIME_PRUNE_BLOCK,
         )
 
-    # Remove duplicate production-stage custom app reinjection. These apps are
-    # already installed in python-requirements, and the final runtime contract
-    # is now gated by MEREKA_CUSTOM_APP_INSTALL_MODE instead of a second
-    # production-stage editable-install fan-out.
     if path.name == "Dockerfile" and "/openedx/edx-platform" in updated:
-        legacy_code_stage_custom_apps_pattern = re.compile(
-            r"\n# Copy custom apps\n"
-            r"COPY --chown=app:app \./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix\n"
-            r"COPY --chown=app:app \./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus\n"
-            r"COPY --chown=app:app \./infrastructure/tutor/plugins/multi-tenancy /openedx/plugins/mereka_tenancy\n"
-            r"RUN (?:uv pip install|pip install) -e /openedx/mfe_oauth_fix\n"
-            r"RUN (?:uv pip install|pip install) -e /openedx/openedx_prometheus\n"
-            r"RUN (?:uv pip install|pip install) -e /openedx/plugins/mereka_tenancy\n"
-            r"\n# Add repository roots to Python path via \.pth file for proper module imports\.\n"
-            r"# Include /openedx because custom app packages are mounted there as top-level Django apps\.\n"
-            r"RUN python3 -c \"import sysconfig; open\(sysconfig.get_path\('purelib'\) \+ '/mereka-plugins\.pth', 'w'\)\.write\('/openedx\\n/openedx/plugins\\n'\)\"\n",
-            re.MULTILINE,
-        )
-        updated, _ = legacy_code_stage_custom_apps_pattern.subn("\n", updated, count=1)
-
-        production_custom_apps_pattern = re.compile(
-            r"\n# Copy custom apps\n"
-            r"COPY --chown=app:app \./infrastructure/tutor/custom-apps/mfe_oauth_fix /openedx/mfe_oauth_fix\n"
-            r"COPY --chown=app:app \./infrastructure/tutor/custom-apps/openedx_prometheus /openedx/openedx_prometheus\n"
-            r"COPY --chown=app:app \./infrastructure/tutor/plugins/multi-tenancy /openedx/plugins/mereka_tenancy\n"
-            r"RUN (?:uv pip install|pip install) -e /openedx/mfe_oauth_fix\n"
-            r"RUN (?:uv pip install|pip install) -e /openedx/openedx_prometheus\n"
-            r"RUN (?:uv pip install|pip install) -e /openedx/plugins/mereka_tenancy\n"
-            r"(?:\n#.*)*\n"
-            r"RUN (?:.*mereka-plugins\.pth\"|echo '/openedx/plugins' > /openedx/venv/lib/python3\.11/site-packages/mereka-plugins\.pth)\n",
-            re.MULTILINE,
-        )
-        updated, _ = production_custom_apps_pattern.subn("\n", updated, count=1)
-
         # django-prometheus pip install in Dockerfile
         base_req_marker = "bash -o pipefail -c 'for attempt in 1 2 3; do pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo \"pip install attempt ${attempt} failed; retrying in 10s\" >&2; sleep 10; done; exit 1'"
         if base_req_marker in updated:
