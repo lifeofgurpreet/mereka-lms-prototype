@@ -293,7 +293,7 @@ The platform has strong documentation and infrastructure; the primary gaps are i
 - Post-deploy gates verify the deployment succeeded
 - Script governance registry ensures every verification script is tracked
 
-**Gaps:** Minor — no explicit approval gate (e.g., required reviewer count) visible in this repo (likely configured in GitHub branch protection settings, not in code).
+**Gaps:** Minor — branch protection is now explicit and machine-readable in `config/branch-protection-contract.yaml`; the current owner-merged policy intentionally keeps `required_approving_review_count: 0`, so reviewer count is a governance choice rather than a missing in-repo contract surface.
 
 ---
 
