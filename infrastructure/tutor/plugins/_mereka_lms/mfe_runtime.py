@@ -68,7 +68,13 @@ def _render_runtime_patch():
 
 
 def _render_compat_runtime():
-    return _deprecated_runtime_banner + "\n{% raw %}\n" + _render_runtime_body(_MFE_RUNTIME_COMPAT_MODULES) + "\n{% endraw %}\n"
+    return (
+        _deprecated_runtime_banner
+        + "\n{% raw %}\n"
+        + _render_runtime_body(_MFE_RUNTIME_COMPAT_MODULES)
+        + "\n{% endraw %}\n"
+    )
+
 
 _register_env_patch(
     "mfe-env-config-runtime-definitions",
