@@ -74,6 +74,7 @@ scripts/qa/verify-oidc-user-password-state.sh  # LIVE_CLUSTER
 scripts/qa/audit-enterprise-capacity-pressure.sh  # LIVE_CLUSTER
 scripts/qa/verify-dev-visual-correctness.sh  # LIVE_CLUSTER (optional browser layer)
 scripts/qa/verify-deployment-lanes.sh  # LIVE_CLUSTER
+scripts/qa/verify-service-endpoints.sh  # LIVE_CLUSTER (live kubectl endpoint probe; belongs in runtime inventory, not offline static CI)
 scripts/qa/verify-prod-parked-state.sh  # LIVE_CLUSTER (validates the parked production zero-replica profile against the live cluster)
 scripts/qa/verify-secret-inventory.sh  # LIVE_CLUSTER (needs gcloud)
 scripts/qa/verify-observability-pii-filtering.sh  # LIVE_CLUSTER (uses kubectl logs to sample pod output for PII; moved from static inventory)

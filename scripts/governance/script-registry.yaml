@@ -387,7 +387,6 @@ ci_static_inventory:
     - script: scripts/qa/verify-kustomize-structure.sh
     - script: scripts/qa/verify-operational-hardening.sh
     - script: scripts/qa/verify-purchase-gateway-k8s.sh
-    - script: scripts/qa/verify-service-endpoints.sh
     - script: scripts/qa/verify-slo-deployment-gate.sh
     - script: scripts/qa/verify-libraries-tenant.sh
     - script: scripts/qa/verify-tenant-auth-analytics.sh
@@ -792,6 +791,9 @@ ci_runtime_inventory:
       note: legacy manual Tutor env verifier; CI patch authority remains scripts/qa/verify-tutor-patches.sh
     - script: scripts/qa/verify-deployment-lanes.sh
       category: LIVE_CLUSTER
+    - script: scripts/qa/verify-service-endpoints.sh
+      category: LIVE_CLUSTER
+      note: live kubectl endpoint probe; belongs in runtime inventory, not offline static CI
     - script: scripts/qa/verify-prod-parked-state.sh
       category: LIVE_CLUSTER
       note: validates the parked production zero-replica profile against the live cluster
