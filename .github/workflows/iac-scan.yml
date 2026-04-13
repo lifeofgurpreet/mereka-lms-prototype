@@ -3,9 +3,6 @@ name: IaC Security Scan
 on:
   pull_request:
     branches: [main]
-    paths-ignore:
-      - 'docs/**'
-      - 'LICENSE'
   merge_group:
   push:
     branches: [main]

@@ -8668,10 +8668,10 @@
         "ci_static"
       ],
       "env_scope": [
-        "global"
+        "dev"
       ],
       "kind": "verify",
-      "mutability": "read-only",
+      "mutability": "mutating",
       "owner": "platform-core",
       "path": "scripts/qa/verify-manifest-integrity.sh",
       "reference_count": 7,
@@ -18728,8 +18728,8 @@
     },
     "mutability": {
       "destructive": 9,
-      "mutating": 20,
-      "read-only": 599
+      "mutating": 21,
+      "read-only": 598
     },
     "status_overrides_applied": 8,
     "statuses": {
