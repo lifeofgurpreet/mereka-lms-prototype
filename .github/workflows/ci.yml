@@ -532,6 +532,8 @@ jobs:
             export VALIDATE_REGISTRY_CHANGED_FILES="$CI_CHANGED_FILES"
             export VERIFY_NETWORK_POLICIES_SCOPE=changed
             export VERIFY_NETWORK_POLICIES_CHANGED_FILES="$CI_CHANGED_FILES"
+            export TEST_VERIFY_GENERATED_SURFACES_SCOPE=changed
+            export TEST_VERIFY_GENERATED_SURFACES_CHANGED_FILES="$CI_CHANGED_FILES"
           fi
           SCRIPT_LIST="${{ matrix.shard.file }}" PARALLELISM=4 TIMEOUT_SECS=300 \
             ./scripts/qa/run-release-verification-gates.sh
