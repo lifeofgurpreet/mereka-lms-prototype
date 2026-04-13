@@ -230,14 +230,14 @@ run_offline_checks() {
   # -----------------------------------------------------------------------
   echo "--- AC-ULMO-004: Brand package version ---"
 
-  if [[ -f "$active_dockerfile" ]]; then
-    OLD_BRAND=$(grep -c "indigo-brand-openedx@" "$active_dockerfile" || true)
-    LOCAL_BRAND=$(grep -c "@edx/brand@file:./brand-mereka" "$active_dockerfile" || true)
+  if [[ -f "$RENDERED_DOCKERFILE" ]]; then
+    OLD_BRAND=$(grep -c "indigo-brand-openedx@" "$RENDERED_DOCKERFILE" || true)
+    LOCAL_BRAND=$(grep -c "@edx/brand@file:./brand-mereka" "$RENDERED_DOCKERFILE" || true)
 
     if [[ "$OLD_BRAND" -eq 0 ]]; then
-      pass "No published indigo brand pin remains in ${active_label}"
+      pass "No published indigo brand pin remains in rendered MFE Dockerfile"
     else
-      fail "$OLD_BRAND published indigo brand pin occurrence(s) still in ${active_label}"
+      fail "$OLD_BRAND published indigo brand pin occurrence(s) still in rendered MFE Dockerfile"
     fi
 
     if [[ "$LOCAL_BRAND" -ge 1 ]]; then
@@ -245,6 +245,8 @@ run_offline_checks() {
     else
       fail "Rendered Dockerfile missing local brand package alias install"
     fi
+  else
+    skip "Rendered MFE Dockerfile unavailable — brand install contract checked against source plugin module only"
   fi
 
   # mfe-node.sh removed in tracker #32; the plugin now installs the staged local
