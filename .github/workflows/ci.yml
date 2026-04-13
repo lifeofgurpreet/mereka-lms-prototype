@@ -557,6 +557,8 @@ jobs:
             export VALIDATE_OBSERVABILITY_COMPLIANCE_CHANGED_FILES="$CI_CHANGED_FILES"
             export VERIFY_CI_RUNNER_POLICY_SCOPE=changed
             export VERIFY_CI_RUNNER_POLICY_CHANGED_FILES="$CI_CHANGED_FILES"
+            export TEST_VERIFY_CI_CACHE_POLICY_SCOPE=changed
+            export TEST_VERIFY_CI_CACHE_POLICY_CHANGED_FILES="$CI_CHANGED_FILES"
           fi
           SCRIPT_LIST="${{ matrix.shard.file }}" PARALLELISM=4 TIMEOUT_SECS=300 \
             ./scripts/qa/run-release-verification-gates.sh
