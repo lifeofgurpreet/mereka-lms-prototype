@@ -503,7 +503,7 @@ jobs:
 
       - name: Run static verification scripts
         run: |
-          SCRIPT_LIST="${{ matrix.shard.file }}" PARALLELISM=2 TIMEOUT_SECS=300 \
+          SCRIPT_LIST="${{ matrix.shard.file }}" PARALLELISM=4 TIMEOUT_SECS=300 \
             ./scripts/qa/run-release-verification-gates.sh
 
       - name: Upload CI results artifact
