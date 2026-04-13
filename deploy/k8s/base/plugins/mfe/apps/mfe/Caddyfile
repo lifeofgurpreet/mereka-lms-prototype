@@ -39,7 +39,7 @@
 	# API proxy routes: never cache dynamic responses.
 	# Overrides the default no-cache set above.
 	@api_proxy {
-		path /api/mfe_config/v1* /login_refresh* /orders* /payment*
+		path /api/mfe_config/v1* /login_refresh*
 	}
 	header @api_proxy Cache-Control "no-store"
 
@@ -312,15 +312,6 @@
 		root * /openedx/dist/admin-console
 		try_files /{path} /index.html
 		file_server
-	}
-
-	# orders and payment MFEs are deprecated upstream (repos archived in openedx-unsupported).
-	# Proxy to our custom payments-gateway service (PostgreSQL-backed, Stripe integration).
-	reverse_proxy /orders* payments-gateway:8080 {
-		header_up Host {http.request.host}
-	}
-	reverse_proxy /payment* payments-gateway:8080 {
-		header_up Host {http.request.host}
 	}
 
 	# Stripe webhook endpoint — must be externally reachable for Stripe event delivery.

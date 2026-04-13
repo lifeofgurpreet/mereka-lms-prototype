@@ -23,6 +23,7 @@ APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 # mfe-node.sh removed in tracker #32; MFE Dockerfile hooks now live in plugin module
 MFE_PATCH="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py"
 SNAPSHOT="$REPO_ROOT/infrastructure/tutor/mfe-build/Dockerfile"
+RENDERED_DOCKERFILE="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
 KUSTOMIZATION_PROD="$REPO_ROOT/deploy/k8s/overlays/production/kustomization.yaml"
 NAMESPACE="${NAMESPACE:-mereka-lms}"
 
@@ -60,6 +61,12 @@ echo ""
 # OFFLINE mode
 # -----------------------------------------------------------------------
 run_offline_checks() {
+  local active_dockerfile="$SNAPSHOT"
+  local active_label="snapshot Dockerfile"
+  if [[ -f "$RENDERED_DOCKERFILE" ]]; then
+    active_dockerfile="$RENDERED_DOCKERFILE"
+    active_label="rendered MFE Dockerfile"
+  fi
 
   # -----------------------------------------------------------------------
   # AC-ULMO-001: Ulmo source refs are native in Tutor v21 (no patch needed)
@@ -102,15 +109,15 @@ run_offline_checks() {
   # -----------------------------------------------------------------------
   echo "--- Stale release ref scan (nutmeg/palm/olive/quince/redwood) ---"
 
-  if [[ -f "$SNAPSHOT" ]]; then
-    STALE_COUNT=$(grep -cEi "frontend-app.*#.*(nutmeg|palm|olive|quince|open-release/redwood)" "$SNAPSHOT" || true)
+  if [[ -f "$active_dockerfile" ]]; then
+    STALE_COUNT=$(grep -cEi "frontend-app.*#.*(nutmeg|palm|olive|quince|open-release/redwood)" "$active_dockerfile" || true)
     if [[ "$STALE_COUNT" -eq 0 ]]; then
-      pass "Snapshot Dockerfile: no stale release refs (nutmeg/palm/olive/quince/redwood)"
+      pass "${active_label}: no stale release refs (nutmeg/palm/olive/quince/redwood)"
     else
-      fail "Snapshot Dockerfile: $STALE_COUNT stale release ref(s) found — run apply-patches.sh"
+      fail "${active_label}: $STALE_COUNT stale release ref(s) found"
     fi
   else
-    skip "Snapshot Dockerfile not found — cannot scan for stale refs"
+    skip "No rendered or snapshot Dockerfile found — cannot scan for stale refs"
   fi
 
   # Check patch source (may be mfe-node.sh after T018 refactor)
@@ -131,24 +138,31 @@ run_offline_checks() {
   # -----------------------------------------------------------------------
   echo "--- AC-ULMO-002: MFE source refs in snapshot Dockerfile ---"
 
-  if [[ ! -f "$SNAPSHOT" ]]; then
+  if [[ ! -f "$active_dockerfile" ]]; then
     fail "Dockerfile snapshot missing: infrastructure/tutor/mfe-build/Dockerfile"
   else
-    pass "Dockerfile snapshot exists"
+    pass "${active_label} exists"
 
-    REDWOOD_COUNT=$(grep -c "frontend-app.*\.git#open-release/redwood" "$SNAPSHOT" || true)
-    ULMO_COUNT=$(grep -c "frontend-app.*\.git#release/ulmo" "$SNAPSHOT" || true)
+    REDWOOD_COUNT=$(grep -c "frontend-app.*\.git#open-release/redwood" "$active_dockerfile" || true)
+    MASTER_COUNT=$(grep -c "frontend-app.*\.git#master" "$active_dockerfile" || true)
+    ULMO_COUNT=$(grep -c "frontend-app.*\.git#release/ulmo" "$active_dockerfile" || true)
 
     if [[ "$REDWOOD_COUNT" -eq 0 ]]; then
-      pass "No redwood-era ADD refs in snapshot (0 found)"
+      pass "No redwood-era ADD refs in ${active_label} (0 found)"
     else
-      fail "$REDWOOD_COUNT redwood-era ADD refs still in snapshot (expected 0)"
+      fail "$REDWOOD_COUNT redwood-era ADD refs still in ${active_label} (expected 0)"
     fi
 
-    if [[ "$ULMO_COUNT" -ge 11 ]]; then
-      pass "All MFE apps use release/ulmo.1 ($ULMO_COUNT refs found, expected >=11)"
+    if [[ "$MASTER_COUNT" -eq 0 ]]; then
+      pass "No master-tracking frontend refs remain in ${active_label}"
+    else
+      fail "$MASTER_COUNT master-tracking frontend refs remain in ${active_label}"
+    fi
+
+    if [[ "$ULMO_COUNT" -ge 12 ]]; then
+      pass "All active MFE apps use release/ulmo.1 ($ULMO_COUNT refs found, expected >=12)"
     elif [[ "$ULMO_COUNT" -ge 1 ]]; then
-      fail "Only $ULMO_COUNT ulmo refs found (expected >=11) — migration incomplete"
+      fail "Only $ULMO_COUNT ulmo refs found (expected >=12) — migration incomplete"
     else
       fail "No ulmo ADD refs in snapshot"
     fi
@@ -161,8 +175,8 @@ run_offline_checks() {
   # -----------------------------------------------------------------------
   echo "--- Node version: base image must be Node 18+ ---"
 
-  if [[ -f "$SNAPSHOT" ]]; then
-    BASE_IMAGE=$(grep -E "^FROM (docker\.io/)?node:" "$SNAPSHOT" | head -1 || true)
+  if [[ -f "$active_dockerfile" ]]; then
+    BASE_IMAGE=$(grep -E "^FROM (docker\.io/)?node:" "$active_dockerfile" | head -1 || true)
     if echo "$BASE_IMAGE" | grep -qE "node:(18|20|22|24)"; then
       pass "MFE base image uses Node 18+: $BASE_IMAGE"
     elif [[ -n "$BASE_IMAGE" ]]; then
@@ -171,7 +185,7 @@ run_offline_checks() {
       skip "Cannot determine Node base image from snapshot"
     fi
   else
-    skip "Snapshot Dockerfile not found — cannot verify Node version"
+    skip "No rendered or snapshot Dockerfile found — cannot verify Node version"
   fi
 
   echo ""
@@ -181,32 +195,32 @@ run_offline_checks() {
   # -----------------------------------------------------------------------
   echo "--- AC-ULMO-003: Atlas translation revision ---"
 
-  if [[ -f "$SNAPSHOT" ]]; then
-    ATLAS_REDWOOD=$(grep -c "revision=open-release/redwood" "$SNAPSHOT" || true)
-    ATLAS_OPEN_ULMO=$(grep -c "revision=open-release/ulmo" "$SNAPSHOT" || true)
-    ATLAS_ULMO=$(grep -cE "revision=release/ulmo(\\.1)?" "$SNAPSHOT" || true)
+  if [[ -f "$active_dockerfile" ]]; then
+    ATLAS_REDWOOD=$(grep -c "revision=open-release/redwood" "$active_dockerfile" || true)
+    ATLAS_OPEN_ULMO=$(grep -c "revision=open-release/ulmo" "$active_dockerfile" || true)
+    ATLAS_ULMO=$(grep -cE "revision=release/ulmo(\\.1)?" "$active_dockerfile" || true)
 
     if [[ "$ATLAS_REDWOOD" -eq 0 ]]; then
-      pass "No redwood atlas translation revisions in snapshot"
+      pass "No redwood atlas translation revisions in ${active_label}"
     else
-      fail "$ATLAS_REDWOOD redwood atlas revision ref(s) still in snapshot"
+      fail "$ATLAS_REDWOOD redwood atlas revision ref(s) still in ${active_label}"
     fi
 
     if [[ "$ATLAS_OPEN_ULMO" -eq 0 ]]; then
-      pass "No legacy open-release/ulmo atlas translation revisions in snapshot"
+      pass "No legacy open-release/ulmo atlas translation revisions in ${active_label}"
     else
-      fail "$ATLAS_OPEN_ULMO legacy open-release/ulmo atlas revision ref(s) still in snapshot"
+      fail "$ATLAS_OPEN_ULMO legacy open-release/ulmo atlas revision ref(s) still in ${active_label}"
     fi
 
-    if [[ "$ATLAS_ULMO" -ge 11 ]]; then
-      pass "All atlas pulls use release/ulmo ($ATLAS_ULMO found)"
+    if [[ "$ATLAS_ULMO" -ge 12 ]]; then
+      pass "All atlas pulls use release/ulmo ($ATLAS_ULMO found, expected >=12)"
     elif [[ "$ATLAS_ULMO" -ge 1 ]]; then
-      fail "Only $ATLAS_ULMO atlas ulmo refs found (expected >=11)"
+      fail "Only $ATLAS_ULMO atlas ulmo refs found (expected >=12)"
     else
-      fail "No ulmo atlas translation refs in snapshot"
+      fail "No ulmo atlas translation refs found in ${active_label}"
     fi
   else
-    skip "Snapshot Dockerfile not found — skipping atlas checks"
+    skip "No rendered or snapshot Dockerfile found — skipping atlas checks"
   fi
 
   echo ""
@@ -216,31 +230,28 @@ run_offline_checks() {
   # -----------------------------------------------------------------------
   echo "--- AC-ULMO-004: Brand package version ---"
 
-  if [[ -f "$SNAPSHOT" ]]; then
-    OLD_BRAND=$(grep -c "indigo-brand-openedx@\^2\.1\.1" "$SNAPSHOT" || true)
-    NEW_BRAND=$(grep -cE "indigo-brand-openedx@\^2\.[4-9]\.[0-9]" "$SNAPSHOT" || true)
+  if [[ -f "$active_dockerfile" ]]; then
+    OLD_BRAND=$(grep -c "indigo-brand-openedx@" "$active_dockerfile" || true)
+    LOCAL_BRAND=$(grep -c "@edx/brand@file:./brand-mereka" "$active_dockerfile" || true)
 
     if [[ "$OLD_BRAND" -eq 0 ]]; then
-      pass "No redwood-era brand pin (^2.1.1) in snapshot"
+      pass "No published indigo brand pin remains in ${active_label}"
     else
-      fail "$OLD_BRAND occurrence(s) of ^2.1.1 brand pin still in snapshot"
+      fail "$OLD_BRAND published indigo brand pin occurrence(s) still in ${active_label}"
     fi
 
-    if [[ "$NEW_BRAND" -ge 11 ]]; then
-      pass "Brand upgraded to ulmo-compatible version ($NEW_BRAND installs, expected >=11)"
-    elif [[ "$NEW_BRAND" -ge 1 ]]; then
-      fail "Only $NEW_BRAND ulmo-compatible brand installs found (expected >=11)"
+    if [[ "$LOCAL_BRAND" -ge 1 ]]; then
+      pass "Rendered Dockerfile installs the local brand package alias (@edx/brand@file:./brand-mereka)"
     else
-      fail "No ulmo-compatible brand version (^2.4.x+) found in snapshot"
+      fail "Rendered Dockerfile missing local brand package alias install"
     fi
   fi
 
-  # mfe-node.sh removed in tracker #32; the plugin now overlays the staged
-  # local brand package onto node_modules/@edx/brand after npm finishes.
-  # The plugin module handles brand copy; indigo-brand-openedx pin is no longer used.
+  # mfe-node.sh removed in tracker #32; the plugin now installs the staged local
+  # brand package via the @edx/brand alias after npm finishes.
   if [[ -f "$MFE_PATCH" ]]; then
-    if grep -q 'node_modules/@edx/brand' "$MFE_PATCH"; then
-      pass "Plugin module overlays the local brand package onto @edx/brand"
+    if grep -q '@edx/brand@file:\./brand-mereka' "$MFE_PATCH"; then
+      pass "Plugin module installs the local brand package alias"
     else
       fail "Plugin module missing local brand package hook"
     fi

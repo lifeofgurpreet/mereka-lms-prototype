@@ -8,14 +8,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
-# Search all plugin contract files (main + submodules)
-PLUGIN_BUNDLE="$(mktemp -t mereka-plugin-drift.XXXXXX)"
-trap 'rm -f "$PLUGIN_BUNDLE"' EXIT
-while IFS= read -r _pf; do
-  cat "$_pf" >>"$PLUGIN_BUNDLE"
-  printf '\n' >>"$PLUGIN_BUNDLE"
-done < <(mereka_plugin_contract_files "$REPO_ROOT")
-PLUGIN="$PLUGIN_BUNDLE"
+PLUGIN_MAIN="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/openedx_dockerfile.py"
 CUSTOM_APPS_DIR="$REPO_ROOT/infrastructure/tutor/custom-apps"
 LMS_SETTINGS="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/production.py"
 CMS_SETTINGS="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/cms/production.py"
@@ -40,12 +33,55 @@ echo "=== Custom App Install Drift Check ==="
 echo ""
 
 # 1. Extract apps from plugin's _CUSTOM_APPS list
-echo "--- Plugin (_CUSTOM_APPS in mereka_lms.py) ---"
+echo "--- Plugin (_CUSTOM_APPS in openedx_dockerfile.py) ---"
 plugin_apps=()
-while IFS= read -r line; do
-  app=$(echo "$line" | grep -oP '"(\w+)"' | tr -d '"' || true)
-  [ -n "$app" ] && plugin_apps+=("$app")
-done < <(sed -n '/_CUSTOM_APPS = \[/,/^\]/p' "$PLUGIN")
+if [[ ! -f "$PLUGIN_MAIN" ]]; then
+  do_fail "plugin main file missing: $PLUGIN_MAIN"
+  echo ""
+  echo "=== Results: $PASS PASS / $FAIL FAIL / $WARN WARN ==="
+  exit 1
+fi
+while IFS= read -r app; do
+  [[ -n "$app" ]] && plugin_apps+=("$app")
+done < <(python3 - "$PLUGIN_MAIN" <<'PY'
+from __future__ import annotations
+
+import ast
+import sys
+from pathlib import Path
+
+plugin = Path(sys.argv[1])
+tree = ast.parse(plugin.read_text(encoding="utf-8"), filename=str(plugin))
+lists: dict[str, list[str]] = {}
+
+
+def eval_string_list(node: ast.AST) -> list[str]:
+    if isinstance(node, ast.List):
+        values: list[str] = []
+        for elt in node.elts:
+            if isinstance(elt, ast.Constant) and isinstance(elt.value, str):
+                values.append(elt.value)
+            elif isinstance(elt, ast.Starred) and isinstance(elt.value, ast.Name):
+                values.extend(lists[elt.value.id])
+            else:
+                raise ValueError(f"unsupported list element: {ast.dump(elt)}")
+        return values
+    if isinstance(node, ast.Name):
+        return list(lists[node.id])
+    raise ValueError(f"unsupported list expression: {ast.dump(node)}")
+
+
+for node in tree.body:
+    if not isinstance(node, ast.Assign):
+        continue
+    for target in node.targets:
+        if isinstance(target, ast.Name) and target.id.endswith("_CUSTOM_APPS"):
+            lists[target.id] = eval_string_list(node.value)
+
+for app in lists.get("_CUSTOM_APPS", []):
+    print(app)
+PY
+)
 echo "  Found ${#plugin_apps[@]} apps in plugin"
 
 # 2. Extract apps from custom-apps directory

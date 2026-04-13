@@ -145,42 +145,53 @@ fi
 echo ""
 echo "── B7: No hard-coded python3.11 in CI/Dockerfile/workflow files ────────"
 
-PY311_PATTERN="python3\.11"
-
-# Directories to check (exclude docs and venvs)
-check_dirs=(
-  "${REPO_ROOT}/.github"
-  "${REPO_ROOT}/scripts"
-  "${REPO_ROOT}/infrastructure/tutor"
-)
-
-# Files we exempt: documentation, test fixtures, this ADR itself
-exempt_patterns=(
-  "docs/adr/historical/026-cicd-build-pipeline-lessons.md"
-  "verify-cicd-lessons-compliance.sh"
-)
-
 py311_hits=()
-for dir in "${check_dirs[@]}"; do
-  if [[ -d "$dir" ]]; then
-    while IFS= read -r match; do
-      # Check if this match is from an exempted file
-      exempt=0
-      for pat in "${exempt_patterns[@]}"; do
-        if [[ "$match" == *"$pat"* ]]; then
-          exempt=1
-          break
-        fi
-      done
-      if [[ "$exempt" -eq 0 ]]; then
-        py311_hits+=("$match")
-      fi
-    done < <(grep -rn "$PY311_PATTERN" "$dir" \
-      --include="*.sh" --include="*.yml" --include="*.yaml" \
-      --include="Dockerfile" --include="Dockerfile.*" \
-      2>/dev/null || true)
-  fi
-done
+while IFS= read -r match; do
+  [[ -n "$match" ]] && py311_hits+=("$match")
+done < <(python3 - "$REPO_ROOT" <<'PY'
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+repo_root = Path(sys.argv[1])
+check_dirs = (
+    repo_root / ".github",
+    repo_root / "scripts",
+    repo_root / "infrastructure" / "tutor",
+)
+exempt_patterns = (
+    "docs/adr/historical/026-cicd-build-pipeline-lessons.md",
+    "verify-cicd-lessons-compliance.sh",
+)
+include_suffixes = {".sh", ".yml", ".yaml"}
+token_pattern = re.compile(r"(?<![/\\\w.-])python3\.11(?![/\\\w.-])")
+
+for root in check_dirs:
+    if not root.exists():
+        continue
+    for path in sorted(root.rglob("*")):
+        if not path.is_file():
+            continue
+        if not (
+            path.suffix in include_suffixes
+            or path.name == "Dockerfile"
+            or path.name.startswith("Dockerfile.")
+        ):
+            continue
+        rel = path.relative_to(repo_root).as_posix()
+        if any(pattern in rel for pattern in exempt_patterns):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+        for lineno, line in enumerate(text.splitlines(), start=1):
+            if token_pattern.search(line):
+                print(f"{path}:{lineno}:{line}")
+PY
+)
 
 if [[ ${#py311_hits[@]} -eq 0 ]]; then
   pass "B7: No hard-coded python3.11 references found in CI/Dockerfile/workflow files"
