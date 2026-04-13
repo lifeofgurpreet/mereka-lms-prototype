@@ -368,7 +368,7 @@ fi
 if [[ -f "$MFE_PATCH_MODULE" ]]; then
   pattern_in_file "mfe-dockerfile-pre-npm-install" "$MFE_PATCH_MODULE" "MFE plugin defines pre-npm-install hook"
   pattern_in_file "mfe-dockerfile-post-npm-install" "$MFE_PATCH_MODULE" "MFE plugin defines post-npm-install hook"
-  pattern_in_file "@edx/brand@file:./brand-mereka" "$MFE_PATCH_MODULE" "MFE plugin installs local brand package"
+  pattern_in_file "node_modules/@edx/brand" "$MFE_PATCH_MODULE" "MFE plugin overlays local brand package onto @edx/brand"
   pattern_in_file "frontend-plugin-framework@^1.8.0" "$MFE_PATCH_MODULE" "MFE plugin installs frontend-plugin-framework"
 else
   check_fail "MFE Dockerfile patch module missing: $MFE_PATCH_MODULE"
@@ -377,25 +377,7 @@ fi
 if [[ -f "$MFE_DOCKERFILE" ]]; then
   regex_in_file "(docker.io/)?node:(18|20|24)[-a-z0-9.]*" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile uses supported Node image"
   pattern_in_file "frontend-plugin-framework@^1.8.0" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile contains frontend-plugin-framework install"
-  pattern_in_file "@edx/brand@file:./brand-mereka" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile contains local brand package install"
-fi
-else
-  check_fail "apply-patches.sh missing: $APPLY_PATCH_SCRIPT"
-fi
-
-if [[ -f "$MFE_PATCH_MODULE" ]]; then
-  pattern_in_file "mfe-dockerfile-pre-npm-install" "$MFE_PATCH_MODULE" "MFE plugin defines pre-npm-install hook"
-  pattern_in_file "mfe-dockerfile-post-npm-install" "$MFE_PATCH_MODULE" "MFE plugin defines post-npm-install hook"
-  pattern_in_file "@edx/brand@file:./brand-mereka" "$MFE_PATCH_MODULE" "MFE plugin installs local brand package"
-  pattern_in_file "frontend-plugin-framework@^1.8.0" "$MFE_PATCH_MODULE" "MFE plugin installs frontend-plugin-framework"
-else
-  check_fail "MFE Dockerfile patch module missing: $MFE_PATCH_MODULE"
-fi
-
-if [[ -f "$MFE_DOCKERFILE" ]]; then
-  regex_in_file "(docker.io/)?node:(18|20|24)[-a-z0-9.]*" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile uses supported Node image"
-  pattern_in_file "frontend-plugin-framework@^1.8.0" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile contains frontend-plugin-framework install"
-  pattern_in_file "@edx/brand@file:./brand-mereka" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile contains local brand package install"
+  pattern_in_file "node_modules/@edx/brand" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile overlays local brand package onto @edx/brand"
 fi
 
 if [[ -f "$MFE_ENV_CONFIG" ]]; then
@@ -454,8 +436,8 @@ OPENEDX_NOTIFICATIONS_MIGRATION="$OPENEDX_NOTIFICATIONS_DIR/migrations/0001_init
 if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_in_file "mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "MFE OAuth fix app copied"
   pattern_in_file "openedx_prometheus" "$OPENEDX_DOCKERFILE" "Prometheus metrics app copied"
-  pattern_in_file 'RUN $PIP_COMMAND install -e /openedx/mfe_oauth_fix' "$OPENEDX_DOCKERFILE" "MFE OAuth fix installed"
-  pattern_in_file 'RUN $PIP_COMMAND install -e /openedx/openedx_prometheus' "$OPENEDX_DOCKERFILE" "Prometheus metrics installed"
+  pattern_in_file 'if [ "$MEREKA_CUSTOM_APP_INSTALL_MODE" = "editable" ]; then' "$OPENEDX_DOCKERFILE" "High-churn custom-app install block is profile-aware"
+  pattern_in_file '-e /openedx/mfe_oauth_fix' "$OPENEDX_DOCKERFILE" "MFE OAuth fix editable install path present"
   pattern_in_file "django-prometheus" "$OPENEDX_DOCKERFILE" "django-prometheus installed"
   pattern_in_file "django-cors-headers==4.3.1" "$OPENEDX_DOCKERFILE" "django-cors-headers installed"
   fixed_pattern_count_equals "pkgconfig==1.5.5" "1" "$OPENEDX_DOCKERFILE" "pkgconfig toolchain pin is not duplicated"
@@ -475,7 +457,7 @@ if [[ -f "$LMS_SETTINGS" ]]; then
   pattern_in_file "PrometheusBeforeMiddleware" "$LMS_SETTINGS" "Prometheus middleware (before)"
   pattern_in_file "PrometheusAfterMiddleware" "$LMS_SETTINGS" "Prometheus middleware (after)"
   regex_pattern_count_equals "INSTALLED_APPS\\.append\\([\"']mfe_oauth_fix[\"']\\)" "1" "$LMS_SETTINGS" "Exactly one mfe_oauth_fix app registration"
-  regex_pattern_count_equals "INSTALLED_APPS\\.append\\([\"']openedx_prometheus[\"']\\)" "1" "$LMS_SETTINGS" "Exactly one openedx_prometheus app registration"
+  regex_pattern_count_equals "(_safe_add_app\\([\"']openedx_prometheus[\"']\\)|INSTALLED_APPS\\.append\\([\"']openedx_prometheus[\"']\\))" "1" "$LMS_SETTINGS" "Exactly one openedx_prometheus app registration path"
   regex_pattern_count_equals "(_safe_add_app\\([\"']mereka_tenancy[\"']\\)|INSTALLED_APPS\\.append\\([\"']mereka_tenancy[\"']\\))" "1" "$LMS_SETTINGS" "Exactly one mereka_tenancy app registration path"
   regex_pattern_count_equals "(_safe_add_app\\([\"']openedx_notifications[\"']\\)|INSTALLED_APPS\\.append\\([\"']openedx_notifications[\"']\\))" "1" "$LMS_SETTINGS" "Exactly one openedx_notifications app registration path"
   if grep -q 'MFE_CONFIG\["ORDER_HISTORY_URL"\] = ORDER_HISTORY_MICROFRONTEND_URL' "$LMS_SETTINGS" 2>/dev/null \
@@ -541,15 +523,45 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   fixed_pattern_count_equals "Stripped google font imports from {changed} scss files" "1" "$OPENEDX_DOCKERFILE" "Brand compile block is not duplicated"
   pattern_not_in_file "webpack skipped (prebuilt bundles)" "$OPENEDX_DOCKERFILE" "Proof lane does not use conditional webpack skip"
   pattern_not_in_file "RUN uv pip install -e /openedx/mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "No duplicate production-stage custom app reinstalls remain"
-  pattern_in_file 'RUN $PIP_COMMAND install django-prometheus==2.3.1' "$OPENEDX_DOCKERFILE" "django-prometheus install uses uv-compatible production installer"
   pattern_in_file 'pip install --no-cache-dir --no-build-isolation uwsgi==2.0.24' "$OPENEDX_DOCKERFILE" "uwsgi remains on explicit pip compatibility fallback"
   fixed_pattern_count_equals "pip install" "1" "$OPENEDX_DOCKERFILE" "Only uwsgi remains on plain pip in rendered Open edX Dockerfile"
   pattern_in_file 'RUN $PIP_COMMAND install "ora2==7.0.0"' "$OPENEDX_DOCKERFILE" "ora2 install uses uv-compatible translation installer"
   regex_in_file 'RUN \$PIP_COMMAND install .*django-prometheus==2\.3\.1.*platform-plugin-aspects==1\.1\.2' "$OPENEDX_DOCKERFILE" "Support dependency block uses uv-compatible production installer"
   pattern_not_in_file "RUN pip install -e /openedx/mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "No legacy pip editable custom-app install remains in production stage"
-  pattern_in_file "COPY --from=python-requirements --chown=app:app /openedx/mfe_oauth_fix /openedx/mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "Final runtime carries mfe_oauth_fix from python-requirements"
-  pattern_in_file "COPY --from=python-requirements --chown=app:app /openedx/openedx_prometheus /openedx/openedx_prometheus" "$OPENEDX_DOCKERFILE" "Final runtime carries openedx_prometheus from python-requirements"
-  pattern_in_file "COPY --from=python-requirements --chown=app:app /openedx/plugins/mereka_tenancy /openedx/plugins/mereka_tenancy" "$OPENEDX_DOCKERFILE" "Final runtime carries mereka_tenancy from python-requirements"
+  pattern_not_in_file "RUN pip install -e /openedx/openedx_prometheus" "$OPENEDX_DOCKERFILE" "No legacy pip editable custom-app install remains for openedx_prometheus"
+  pattern_in_file 'ARG MEREKA_CUSTOM_APP_INSTALL_MODE=editable' "$OPENEDX_DOCKERFILE" "Custom app install mode arg defaults to editable"
+  pattern_in_file 'if [ "$MEREKA_CUSTOM_APP_INSTALL_MODE" = "editable" ]; then' "$OPENEDX_DOCKERFILE" "Custom app install mode gates runtime contract"
+  pattern_in_file 'Skipping final runtime custom-app source carry (noneditable mode)' "$OPENEDX_DOCKERFILE" "Proof-ready runtime source carry skip path exists"
+  pattern_in_file 'cp -a /tmp/python-requirements-openedx/mfe_oauth_fix /openedx/mfe_oauth_fix' "$OPENEDX_DOCKERFILE" "High-churn runtime source carry preserved for mfe_oauth_fix"
+  pattern_in_file 'cp -a /tmp/python-requirements-openedx/openedx_tenant_cache /openedx/openedx_tenant_cache' "$OPENEDX_DOCKERFILE" "High-churn runtime source carry preserved for openedx_tenant_cache"
+  pattern_in_file 'cp -a /tmp/python-requirements-openedx/plugins/mereka_tenancy /openedx/plugins/mereka_tenancy' "$OPENEDX_DOCKERFILE" "High-churn runtime source carry preserved for mereka_tenancy"
+  pattern_not_in_file "COPY --from=python-requirements --chown=app:app /openedx/mfe_oauth_fix /openedx/mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "Legacy unconditional final runtime source carry removed"
+  pattern_not_in_file "COPY --from=python-requirements --chown=app:app /openedx/openedx_prometheus /openedx/openedx_prometheus" "$OPENEDX_DOCKERFILE" "Legacy unconditional final runtime source carry removed for openedx_prometheus"
+  pattern_not_in_file "COPY --from=python-requirements --chown=app:app /openedx/plugins/mereka_tenancy /openedx/plugins/mereka_tenancy" "$OPENEDX_DOCKERFILE" "Legacy unconditional final runtime source carry removed for mereka_tenancy"
+  pattern_not_in_file 'cp -a /tmp/python-requirements-openedx/openedx_prometheus /openedx/openedx_prometheus' "$OPENEDX_DOCKERFILE" "Stable app openedx_prometheus is not carried into final runtime source tree"
+  pattern_not_in_file 'FROM production AS final' "$OPENEDX_DOCKERFILE" "Final runtime image no longer inherits the full production stage"
+  pattern_in_file 'FROM docker.io/ubuntu:22.04 AS final' "$OPENEDX_DOCKERFILE" "Final runtime image is rebuilt from a dedicated Ubuntu runtime base"
+  pattern_in_file 'FROM production AS runtime-edx-platform-pruned' "$OPENEDX_DOCKERFILE" "Runtime edx-platform prune stage exists"
+  fixed_pattern_count_equals 'FROM production AS runtime-edx-platform-pruned' "1" "$OPENEDX_DOCKERFILE" "Runtime edx-platform prune stage is rendered exactly once"
+  pattern_in_file 'COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=runtime-edx-platform-pruned /openedx/edx-platform /openedx/edx-platform' "$OPENEDX_DOCKERFILE" "Final runtime image copies edx-platform from the prune stage"
+  pattern_not_in_file 'COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/edx-platform /openedx/edx-platform' "$OPENEDX_DOCKERFILE" "Final runtime image no longer copies edx-platform straight from production"
+
+  OPENEDX_FINAL_STAGE_TEXT=$(awk '/^FROM docker.io\/ubuntu:22.04 AS final/{flag=1} flag{print}' "$OPENEDX_DOCKERFILE")
+  if grep -Fq '/openedx/nodeenv' <<<"$OPENEDX_FINAL_STAGE_TEXT"; then
+    check_fail "Final runtime image no longer cargo-ships nodeenv"
+  else
+    check_pass "Final runtime image no longer cargo-ships nodeenv"
+  fi
+  if grep -Fq '/openedx/node_modules' <<<"$OPENEDX_FINAL_STAGE_TEXT"; then
+    check_fail "Final runtime image no longer cargo-ships node_modules"
+  else
+    check_pass "Final runtime image no longer cargo-ships node_modules"
+  fi
+  if grep -Fq './node_modules/.bin:/openedx/nodeenv/bin:${PATH}' <<<"$OPENEDX_FINAL_STAGE_TEXT"; then
+    check_fail "Final runtime PATH no longer depends on Node tooling"
+  else
+    check_pass "Final runtime PATH no longer depends on Node tooling"
+  fi
 fi
 
 # Check webpack config for optimization

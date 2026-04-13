@@ -13,6 +13,8 @@ from .models import Notification
 
 logger = logging.getLogger(__name__)
 
+IN_APP_CHANNEL_TYPE = getattr(ChannelType, "IN_APP", "in_app")
+
 User = get_user_model()
 
 
@@ -24,7 +26,7 @@ class InAppChannel(Channel):
     is dispatched through the in_app channel.
     """
 
-    channel_type = ChannelType.IN_APP
+    channel_type = IN_APP_CHANNEL_TYPE
 
     @classmethod
     def enabled(cls):

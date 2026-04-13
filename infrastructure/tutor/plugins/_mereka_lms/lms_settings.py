@@ -280,16 +280,6 @@ if "openedx.core.djangoapps.discussions.apps.DiscussionsConfig" not in INSTALLED
 if "openedx.core.djangoapps.theming.apps.ThemingConfig" not in INSTALLED_APPS:
     INSTALLED_APPS += ["openedx.core.djangoapps.theming.apps.ThemingConfig"]
 
-# MFE OAuth Fix - Custom app to fix OAuth provider visibility
-import sys
-sys.path.insert(0, '/openedx')
-_safe_add_app('mfe_oauth_fix')
-
-# Add middleware to fix /api/mfe_context responses
-# Insert at the end of middleware stack so it processes responses
-if 'mfe_oauth_fix' in INSTALLED_APPS:
-    MIDDLEWARE.append('mfe_oauth_fix.middleware.MFEOAuthFixMiddleware')
-
 # Prometheus Metrics Integration
 # django_prometheus must be at the START of INSTALLED_APPS
 if 'django_prometheus' not in INSTALLED_APPS:
@@ -317,6 +307,36 @@ if 'django_prometheus' in INSTALLED_APPS:
 ROOT_URLCONF_OVERRIDES = globals().get('ROOT_URLCONF_OVERRIDES', [])
 if 'openedx_prometheus.urls' not in ROOT_URLCONF_OVERRIDES:
     ROOT_URLCONF_OVERRIDES.insert(0, 'openedx_prometheus.urls')
+
+# MFE OAuth fix integration.
+try:
+    __import__('mfe_oauth_fix')
+except ImportError:
+    pass
+else:
+    if 'mfe_oauth_fix' not in INSTALLED_APPS:
+        INSTALLED_APPS.append('mfe_oauth_fix')
+    if 'mfe_oauth_fix.urls' not in ROOT_URLCONF_OVERRIDES:
+        ROOT_URLCONF_OVERRIDES.insert(0, 'mfe_oauth_fix.urls')
+    if 'mfe_oauth_fix.middleware.MFEOAuthFixMiddleware' not in MIDDLEWARE:
+        MIDDLEWARE.append('mfe_oauth_fix.middleware.MFEOAuthFixMiddleware')
+
+# Mereka Multi-Tenancy — tenant model extensions + resolution middleware.
+try:
+    __import__('mereka_tenancy')
+except ImportError:
+    pass
+else:
+    if 'mereka_tenancy' not in INSTALLED_APPS:
+        INSTALLED_APPS.append('mereka_tenancy')
+    _tenant_resolution_middleware = 'mereka_tenancy.middleware.TenantResolutionMiddleware'
+    if _tenant_resolution_middleware not in MIDDLEWARE:
+        _site_middleware = 'django.contrib.sites.middleware.CurrentSiteMiddleware'
+        if _site_middleware in MIDDLEWARE:
+            _site_index = MIDDLEWARE.index(_site_middleware) + 1
+            MIDDLEWARE.insert(_site_index, _tenant_resolution_middleware)
+        else:
+            MIDDLEWARE.append(_tenant_resolution_middleware)
 
 # In-App Notifications (Email Phase 3)
 _safe_add_app('openedx_notifications')
@@ -437,21 +457,9 @@ SEGMENT_KEY = os.environ.get("MEREKA_SEGMENT_KEY", "")
 # Mobile API — enables /api/mobile/v1/ and /api/mobile/v3/ endpoints
 _safe_add_app('openedx_mobile_api')
 
-# Multi-Tenancy Integration (Tenancy Epic Phase 1)
-_safe_add_app('mereka_tenancy')
-
-# Add TenantResolutionMiddleware after AuthenticationMiddleware
-# This ensures tenant context is available for authenticated requests
-if 'mereka_tenancy' in INSTALLED_APPS and 'mereka_tenancy.middleware.TenantResolutionMiddleware' not in MIDDLEWARE:
-    auth_middleware_index = -1
-    for i, mw in enumerate(MIDDLEWARE):
-        if 'AuthenticationMiddleware' in mw:
-            auth_middleware_index = i
-            break
-    if auth_middleware_index >= 0:
-        MIDDLEWARE.insert(auth_middleware_index + 1, 'mereka_tenancy.middleware.TenantResolutionMiddleware')
-    else:
-        MIDDLEWARE.append('mereka_tenancy.middleware.TenantResolutionMiddleware')
+# Multi-tenancy runtime wiring is already owned by the base LMS production
+# settings in this estate. Keep this Tutor plugin layer out of that path to
+# avoid duplicate app and middleware registration in rendered local settings.
 
 # Optional runtime Paragon theme URL wiring.
 # Consumers can disable by setting MEREKA_PARAGON_THEME_ENABLED=False.

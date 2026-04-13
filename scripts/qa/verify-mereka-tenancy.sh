@@ -37,8 +37,9 @@ cleanup() {
 }
 trap cleanup EXIT
 
-APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 TENANCY_SRC="$REPO_ROOT/infrastructure/tutor/plugins/multi-tenancy"
+OPENEDX_DOCKERFILE_SOURCE="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/openedx_dockerfile.py"
+OPENEDX_DOCKERFILE_RENDERED="$REPO_ROOT/tutor_env/env/build/openedx/Dockerfile"
 # setup.py uses package_dir={'mereka_tenancy': '.'} — package root IS the multi-tenancy/ dir
 MIGRATION="$TENANCY_SRC/migrations/0001_initial.py"
 
@@ -120,70 +121,69 @@ fi
 echo ""
 
 # -----------------------------------------------------------------------
-# AC-MT-005: Dockerfile COPY + pip install in apply-patches.sh (all 3 paths)
+# AC-MT-005: Dockerfile source/rendered contract
 # -----------------------------------------------------------------------
-echo "AC-MT-005: Dockerfile build paths in apply-patches.sh"
+echo "AC-MT-005: Dockerfile source/rendered contract"
 
-if [[ ! -f "$APPLY_PATCHES" ]]; then
-  fail "apply-patches.sh missing"
+if [[ ! -f "$OPENEDX_DOCKERFILE_SOURCE" ]]; then
+  fail "openedx_dockerfile.py missing"
 else
-  COPY_COUNT=$(grep -c "COPY.*multi-tenancy" "$APPLY_PATCHES" || true)
-  PIP_COUNT=$(grep -c "pip install -e.*mereka_tenancy" "$APPLY_PATCHES" || true)
-
-  if [[ "$COPY_COUNT" -ge 3 ]]; then
-    pass "multi-tenancy COPY in $COPY_COUNT Dockerfile paths (expected ≥3)"
-  elif [[ "$COPY_COUNT" -ge 1 ]]; then
-    warn "multi-tenancy COPY only in $COPY_COUNT Dockerfile paths (expected 3: base, assets, worker)"
+  if grep -q 'COPY --chown=app:app ./infrastructure/tutor/plugins/multi-tenancy /openedx/plugins/mereka_tenancy' "$OPENEDX_DOCKERFILE_SOURCE"; then
+    pass "source Dockerfile owner copies mereka_tenancy"
   else
-    fail "multi-tenancy COPY not found in apply-patches.sh Dockerfile paths"
+    fail "source Dockerfile owner missing mereka_tenancy COPY"
   fi
 
-  if [[ "$PIP_COUNT" -ge 3 ]]; then
-    pass "pip install -e mereka_tenancy in $PIP_COUNT Dockerfile paths"
-  elif [[ "$PIP_COUNT" -ge 1 ]]; then
-    warn "pip install -e mereka_tenancy only in $PIP_COUNT Dockerfile paths (expected 3)"
+  if grep -q '\-e /openedx/plugins/mereka_tenancy' "$OPENEDX_DOCKERFILE_SOURCE"; then
+    pass "source Dockerfile owner installs mereka_tenancy via \$PIP_COMMAND"
   else
-    fail "pip install -e mereka_tenancy not found in apply-patches.sh"
+    fail "source Dockerfile owner missing mereka_tenancy \$PIP_COMMAND install"
+  fi
+fi
+
+if [[ ! -f "$OPENEDX_DOCKERFILE_RENDERED" ]]; then
+  warn "rendered Open edX Dockerfile missing; skipping rendered tenancy contract checks"
+else
+  if grep -q 'COPY --chown=app:app ./infrastructure/tutor/plugins/multi-tenancy /openedx/plugins/mereka_tenancy' "$OPENEDX_DOCKERFILE_RENDERED"; then
+    pass "rendered Dockerfile copies mereka_tenancy into python-requirements"
+  else
+    fail "rendered Dockerfile missing mereka_tenancy COPY"
+  fi
+
+  if grep -q '\-e /openedx/plugins/mereka_tenancy' "$OPENEDX_DOCKERFILE_RENDERED"; then
+    pass "rendered Dockerfile installs mereka_tenancy via \$PIP_COMMAND"
+  else
+    fail "rendered Dockerfile missing mereka_tenancy \$PIP_COMMAND install"
+  fi
+
+  if grep -q 'cp -a /tmp/python-requirements-openedx/plugins/mereka_tenancy /openedx/plugins/mereka_tenancy' "$OPENEDX_DOCKERFILE_RENDERED"; then
+    pass "rendered Dockerfile carries mereka_tenancy into final runtime stage"
+  else
+    fail "rendered Dockerfile missing final-stage mereka_tenancy carry"
   fi
 fi
 
 echo ""
 
 # -----------------------------------------------------------------------
-# AC-MT-001: INSTALLED_APPS patch in apply-patches.sh
+# AC-MT-001: INSTALLED_APPS patch in plugin contract
 # -----------------------------------------------------------------------
 echo "AC-MT-001: INSTALLED_APPS patch"
 
-if [[ -f "$APPLY_PATCHES" ]]; then
-  if grep -q "'mereka_tenancy' not in INSTALLED_APPS\|mereka_tenancy.*INSTALLED_APPS" "$APPLY_PATCHES"; then
-    pass "mereka_tenancy added to INSTALLED_APPS in apply-patches.sh"
-  else
-    fail "INSTALLED_APPS patch for mereka_tenancy not found in apply-patches.sh"
-  fi
-fi
-
 if [[ -f "$PLUGIN_PY" ]]; then
   if grep -q "mereka_tenancy.*INSTALLED_APPS\|'mereka_tenancy' not in INSTALLED_APPS" "$PLUGIN_PY"; then
-    pass "mereka_tenancy added to INSTALLED_APPS in mereka_lms.py plugin"
+    pass "mereka_tenancy added to INSTALLED_APPS in plugin contract"
   else
-    fail "INSTALLED_APPS patch for mereka_tenancy not found in mereka_lms.py"
+    fail "INSTALLED_APPS patch for mereka_tenancy not found in plugin contract"
   fi
 fi
 
 echo ""
 
 # -----------------------------------------------------------------------
-# AC-MT-002: Middleware patch in apply-patches.sh and plugin
+# AC-MT-002: Middleware patch in plugin contract
 # -----------------------------------------------------------------------
 echo "AC-MT-002: TenantResolutionMiddleware patch"
-
-if [[ -f "$APPLY_PATCHES" ]]; then
-  if grep -q "TenantResolutionMiddleware" "$APPLY_PATCHES"; then
-    pass "TenantResolutionMiddleware insertion in apply-patches.sh"
-  else
-    fail "TenantResolutionMiddleware not found in apply-patches.sh"
-  fi
-fi
 
 if [[ -f "$PLUGIN_PY" ]]; then
   if grep -q "TenantResolutionMiddleware" "$PLUGIN_PY"; then

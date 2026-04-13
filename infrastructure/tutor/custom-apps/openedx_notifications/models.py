@@ -28,7 +28,7 @@ class Notification(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='notifications',
+        related_name='openedx_in_app_notifications',
         db_index=True,
         help_text="Recipient user"
     )
