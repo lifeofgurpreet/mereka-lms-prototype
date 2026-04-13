@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # @covers AC-035, AC-036, AC-037, AC-038, AC-039
 # @spec: ci-cd-pipeline_spec.md
-# Verify tutor-plugin-test.yml workflow for plugin lifecycle testing
+# Verify tutor-plugin-test.yml workflow for the promoted Tutor plugin/render contract
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -16,6 +16,16 @@ skip() { echo -e "${YELLOW}SKIP${NC} $1"; SKIP=$((SKIP + 1)); }
 
 WORKFLOW=".github/workflows/tutor-plugin-test.yml"
 
+check_contains() {
+  local label="$1"
+  local pattern="$2"
+  if grep -Fq "$pattern" "$WORKFLOW"; then
+    pass "$label"
+  else
+    fail "$label"
+  fi
+}
+
 if [[ ! -f "$WORKFLOW" ]]; then
   fail "AC-035: Workflow file $WORKFLOW not found"
   echo ""
@@ -24,78 +34,40 @@ if [[ ! -f "$WORKFLOW" ]]; then
   exit 1
 fi
 
-echo "Checking $WORKFLOW for Tutor plugin testing..."
+echo "Checking $WORKFLOW for Tutor plugin/render contract..."
 echo ""
 
-# AC-035: Workflow runs plugin syntax and lifecycle tests
-has_syntax_test=0
-has_lifecycle_test=0
+# AC-035: workflow keeps plugin-source lint/compile contract
+check_contains "AC-035: Workflow defines lint-plugins job" "lint-plugins:"
+check_contains "AC-035: Workflow compiles plugin sources" "python3 -m compileall infrastructure/tutor/plugins"
+check_contains "AC-035: Workflow runs ruff against plugin sources" "ruff check infrastructure/tutor/plugins/"
+check_contains "AC-035: Workflow runs black against plugin sources" "black --check infrastructure/tutor/plugins/"
 
-if grep -q "py_compile.*mfe_oauth_fix.py" "$WORKFLOW" || grep -q "Verify plugin syntax" "$WORKFLOW"; then
-  has_syntax_test=1
-fi
+# AC-036: workflow enforces retired standalone shim contract
+check_contains "AC-036: Workflow defines retired legacy shim job" "verify-retired-legacy-shim:"
+check_contains "AC-036: Workflow checks shim is metadata-only" "Legacy compatibility shim for the retired standalone mfe_oauth_fix Tutor plugin."
+check_contains "AC-036: Workflow blocks ENV_PATCHES in legacy shim" "Legacy shim must not emit ENV_PATCHES"
+check_contains "AC-036: Workflow keeps standalone plugin disabled in config.example.yml" "Legacy standalone plugin must remain disabled in config.example.yml"
 
-if grep -q "test-plugin-lifecycle:" "$WORKFLOW"; then
-  has_lifecycle_test=1
-fi
+# AC-037: workflow installs Tutor and runs render preflight
+check_contains "AC-037: Workflow defines render-contract-preflight job" "render-contract-preflight:"
+check_contains "AC-037: Workflow creates CI Tutor venv" "python3 -m venv .ci-venv"
+check_contains "AC-037: Workflow installs Tutor requirements" "pip install -r requirements-tutor.txt"
+check_contains "AC-037: Workflow runs rendered Dockerfile preflight" "./scripts/ci/preflight-check.sh"
+check_contains "AC-037: Workflow passes TUTOR_VENV into preflight" 'TUTOR_VENV: ${{ github.workspace }}/.ci-venv'
 
-if [[ $has_syntax_test -eq 1 && $has_lifecycle_test -eq 1 ]]; then
-  pass "AC-035: tutor-plugin-test.yml runs syntax and lifecycle tests"
-elif [[ $has_syntax_test -eq 0 ]]; then
-  fail "AC-035: Workflow missing plugin syntax test"
-else
-  fail "AC-035: Workflow missing plugin lifecycle test"
-fi
+# AC-038: workflow trigger paths cover plugin/render contract owners
+check_contains "AC-038: Workflow watches Tutor plugin sources" "'infrastructure/tutor/plugins/**'"
+check_contains "AC-038: Workflow watches Tutor config example" "'infrastructure/tutor/config.example.yml'"
+check_contains "AC-038: Workflow watches render preflight source" "'scripts/ci/preflight-check.sh'"
+check_contains "AC-038: Workflow watches Tutor plugin mirror sync source" "'scripts/infra/sync-tutor-plugin-mirror.sh'"
+check_contains "AC-038: Workflow watches Tutor config verifier source" "'scripts/infra/verify-tutor-config.sh'"
 
-# AC-036: Plugin tests verify mfe_oauth_fix installed in LMS settings
-if grep -q "mfe_oauth_fix.*production.py" "$WORKFLOW" || \
-   grep -A 10 "Verify plugin" "$WORKFLOW" | grep -q "mfe_oauth_fix"; then
-  pass "AC-036: Workflow verifies mfe_oauth_fix in LMS settings"
-else
-  fail "AC-036: Workflow missing verification of mfe_oauth_fix installation"
-fi
-
-# AC-037: Plugin enable/disable/re-enable lifecycle succeeds
-enable_count=$(grep -c "tutor plugins enable" "$WORKFLOW" || echo 0)
-disable_count=$(grep -c "tutor plugins disable" "$WORKFLOW" || echo 0)
-
-if [[ $enable_count -ge 2 && $disable_count -ge 1 ]]; then
-  pass "AC-037: Workflow tests enable → disable → re-enable lifecycle"
-else
-  fail "AC-037: Workflow missing complete enable/disable/re-enable test (enable:$enable_count disable:$disable_count)"
-fi
-
-# AC-038: Plugin + apply-patches.sh integration test validates both patches present
-if grep -q "integration-test:" "$WORKFLOW" && grep -q "apply-patches.sh" "$WORKFLOW"; then
-  # Check if it verifies both plugin and apply-patches results
-  if grep -A 20 "Verify both plugin and patches" "$WORKFLOW" | grep -q "mfe_oauth_fix" && \
-     grep -A 20 "Verify both plugin and patches" "$WORKFLOW" | grep -q "academy.biji-biji.com"; then
-    pass "AC-038: Workflow includes integration test validating plugin + patches"
-  else
-    fail "AC-038: Workflow has integration test but missing dual validation"
-  fi
-else
-  fail "AC-038: Workflow missing plugin + apply-patches.sh integration test"
-fi
-
-# AC-039: Plugin test failure posts plugin-specific troubleshooting comment
-if grep -q "post.*comment\|github-script" "$WORKFLOW"; then
-  # Check if runs on failure
-  if grep -A 5 "post.*comment\|github-script" "$WORKFLOW" | grep -q "failure()"; then
-    # Check for plugin-specific guidance
-    if grep -A 30 "github-script\|createComment" "$WORKFLOW" | grep -Eq "(Plugin.*[Ff]ailed|plugin.*syntax|ENV_PATCHES|mfe_oauth_fix)"; then
-      pass "AC-039: Workflow posts plugin-specific troubleshooting on failure"
-    else
-      fail "AC-039: Workflow posts comment but missing plugin-specific guidance"
-    fi
-  else
-    fail "AC-039: Workflow has comment step but not conditional on failure"
-  fi
-else
-  fail "AC-039: Workflow missing failure comment step"
-fi
+# AC-039: render preflight is gated behind lint + legacy shim verification
+check_contains "AC-039: Render preflight depends on lint-plugins" "needs: [lint-plugins, verify-retired-legacy-shim]"
+check_contains "AC-039: Legacy shim verification depends on lint-plugins" "needs: lint-plugins"
 
 echo ""
 echo "=== Summary ==="
 echo -e "${GREEN}PASS:${NC} $PASS | ${RED}FAIL:${NC} $FAIL | ${YELLOW}SKIP:${NC} $SKIP"
-[ "$FAIL" -gt 0 ] && exit 1 || exit 0
+[[ "$FAIL" -gt 0 ]] && exit 1 || exit 0
