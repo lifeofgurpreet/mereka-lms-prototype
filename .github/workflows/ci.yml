@@ -915,18 +915,7 @@ jobs:
           HADOLINT_DOWNLOAD_TIMEOUT="${HADOLINT_DOWNLOAD_TIMEOUT:-120}"
           HADOLINT_CONNECT_TIMEOUT="${HADOLINT_CONNECT_TIMEOUT:-15}"
           HADOLINT_MAX_TIME="${HADOLINT_MAX_TIME:-90}"
-          if [ -n "${GH_TOKEN:-${GITHUB_TOKEN:-}}" ]; then
-            GH_TOKEN="${GH_TOKEN:-${GITHUB_TOKEN:-}}" gh release download "v${HADOLINT_VERSION}" \
-              --repo "${HADOLINT_REPO}" \
-              --pattern "${HADOLINT_BINARY}" \
-              --output "${HADOLINT_BINARY}" \
-              --clobber
-            GH_TOKEN="${GH_TOKEN:-${GITHUB_TOKEN:-}}" gh release download "v${HADOLINT_VERSION}" \
-              --repo "${HADOLINT_REPO}" \
-              --pattern "${HADOLINT_BINARY}.sha256" \
-              --output "${HADOLINT_BINARY}.sha256" \
-              --clobber
-          else
+          download_hadolint_via_curl() {
             timeout "${HADOLINT_DOWNLOAD_TIMEOUT}" curl --fail --location \
               --retry 5 --retry-all-errors --retry-connrefused \
               --connect-timeout "${HADOLINT_CONNECT_TIMEOUT}" \
@@ -939,6 +928,27 @@ jobs:
               --max-time "${HADOLINT_MAX_TIME}" \
               --silent --show-error \
               --output "${HADOLINT_BINARY}.sha256" "${HADOLINT_SHA_URL}"
+          }
+          if [ -n "${GH_TOKEN:-${GITHUB_TOKEN:-}}" ]; then
+            if ! GH_TOKEN="${GH_TOKEN:-${GITHUB_TOKEN:-}}" gh release download "v${HADOLINT_VERSION}" \
+              --repo "${HADOLINT_REPO}" \
+              --pattern "${HADOLINT_BINARY}" \
+              --output "${HADOLINT_BINARY}" \
+              --clobber; then
+              echo "gh release download failed; falling back to curl"
+              rm -f "${HADOLINT_BINARY}" "${HADOLINT_BINARY}.sha256"
+              download_hadolint_via_curl
+            elif ! GH_TOKEN="${GH_TOKEN:-${GITHUB_TOKEN:-}}" gh release download "v${HADOLINT_VERSION}" \
+              --repo "${HADOLINT_REPO}" \
+              --pattern "${HADOLINT_BINARY}.sha256" \
+              --output "${HADOLINT_BINARY}.sha256" \
+              --clobber; then
+              echo "gh checksum download failed; falling back to curl"
+              rm -f "${HADOLINT_BINARY}" "${HADOLINT_BINARY}.sha256"
+              download_hadolint_via_curl
+            fi
+          else
+            download_hadolint_via_curl
           fi
           sha256sum -c "${HADOLINT_BINARY}.sha256"
           install -m 0755 "${HADOLINT_BINARY}" "$GITHUB_WORKSPACE/.cache/bin/hadolint"
