@@ -69,6 +69,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-script-basename-overlap.sh
     - script: scripts/qa/verify-script-basename-governance.sh
     - script: scripts/qa/test-verify-script-basename-governance.sh
+      estimated_seconds: 10
     - script: scripts/qa/verify-workflow-script-references.sh
     - script: scripts/qa/test-verify-workflow-script-references.sh
     - script: scripts/qa/verify-script-governance-census.sh
@@ -76,7 +77,9 @@ ci_static_inventory:
     - script: scripts/qa/verify-script-governance-orphans.sh
     - script: scripts/qa/verify-siteconfig-authority.sh
     - script: scripts/qa/test-verify-script-governance-dangerous.sh
+      estimated_seconds: 19
     - script: scripts/qa/test-verify-script-governance-orphans.sh
+      estimated_seconds: 18
     - script: scripts/qa/test-verify-siteconfig-authority.sh
     - script: scripts/qa/test-generate-script-governance-catalog.sh
     - script: scripts/qa/test-build-script-governance-review-packet.sh
@@ -138,6 +141,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-tutor-config-path-contract.sh
     - script: scripts/qa/test-build-validator-drift-evidence-bundle.sh
     - script: scripts/qa/test-build-validator-drift-review-packet.sh
+      estimated_seconds: 13
     - script: scripts/qa/test-authn-deep-route-handoff-patch.sh
     - script: scripts/qa/test-verify-no-mux-asset-ids.sh
     - script: scripts/qa/test-verify-kustomize-no-deprecated-keys.sh
@@ -146,6 +150,7 @@ ci_static_inventory:
     - script: scripts/qa/test-verify-qa-readonly-contract.sh
     - script: scripts/qa/test-verify-lms-ops-migrate-contract.sh
     - script: scripts/qa/lint-repo-conventions.sh
+      estimated_seconds: 58
     - script: scripts/qa/test-verify-secrets-isolation.sh
     - script: scripts/qa/test-verify-infisical-env-validation-coverage.sh
     - script: scripts/qa/test-verify-secrets-management.sh
@@ -159,6 +164,7 @@ ci_static_inventory:
     - script: scripts/qa/test-verify-release-promotion-wiring.sh
     - script: scripts/qa/test-verify-release-workflow-invocation.sh
     - script: scripts/qa/test-verify-build-workflow-contract.sh
+      estimated_seconds: 15
     - script: scripts/qa/test-verify-bootstrap-workflow-contract.sh
     - script: scripts/qa/test-verify-rollback-dry-run.sh
     - script: scripts/qa/test-verify-post-deploy-gate.sh
@@ -175,10 +181,12 @@ ci_static_inventory:
     - script: scripts/qa/verify-secrets-inventory.sh
     - script: scripts/qa/verify-infisical-env-validation-coverage.sh
     - script: scripts/qa/verify-secrets-isolation.sh
+      estimated_seconds: 18
     - script: scripts/qa/verify-security-hardening.sh
     - script: scripts/qa/verify-csp-headers.sh
     - script: scripts/qa/verify-csp-report-pipeline.sh
     - script: scripts/qa/verify-domain-url-invariants.sh
+      estimated_seconds: 13
     - script: scripts/qa/verify-evidence-redaction.sh
     - script: scripts/qa/validate-deploy-contract.sh
     - script: scripts/qa/verify-k8s-deployment-spec.sh
@@ -201,6 +209,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-overlay-ownership.sh
     - script: scripts/qa/verify-no-legacy-tutor-k8s-paths.sh
     - script: scripts/qa/verify-network-policies.sh
+      estimated_seconds: 13
     - script: scripts/qa/verify-no-latest-prod-tags.sh
     - script: scripts/qa/verify-gitops-image-overrides.sh
       args: ["--skip-infra"]
@@ -240,11 +249,13 @@ ci_static_inventory:
     - script: scripts/qa/verify-new-ci-static-entries.sh
     - script: scripts/qa/verify-generated-surfaces.sh
     - script: scripts/qa/test-verify-generated-surfaces.sh
+      estimated_seconds: 21
     - script: scripts/qa/verify-ci-cache-policy.sh
     - script: scripts/qa/test-verify-ci-cache-policy.sh
     - script: scripts/qa/verify-benchmark-artifact-contract.sh
     - script: scripts/qa/verify-verification-catalog.sh
     - script: scripts/qa/test-verify-verification-catalog.sh
+      estimated_seconds: 13
     - script: scripts/qa/verify-verification-sprawl-budget.sh
     - script: scripts/qa/verify-verify-script-reachability.sh
     - script: scripts/qa/verify-deprecated-verification-hygiene.sh
@@ -406,6 +417,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-mfe-footer-fallbacks.sh
     - script: scripts/qa/verify-mfe-footer-plugin-slot.sh
     - script: scripts/qa/verify-mfe-route-smoke.sh
+      estimated_seconds: 11
     - script: scripts/qa/verify-mfe-runtime-config.sh
     - script: scripts/qa/verify-mfe-selectors.sh
     - script: scripts/qa/verify-mfe-slot-nfr.sh
@@ -415,6 +427,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-slot-migration-readiness.sh
     - script: scripts/branding/verify-logo-setup.sh
     - script: scripts/qa/audit-branding-surfaces.sh
+      estimated_seconds: 46
     - script: scripts/qa/check-visual-regression-page-count.sh
     - script: scripts/qa/verify-oep48-brand-package.sh
     - script: scripts/qa/verify-rtl-theme-assets.sh

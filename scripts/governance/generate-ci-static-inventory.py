@@ -76,6 +76,12 @@ def normalize_entries(payload: dict, repo_root: Path) -> list[dict[str, object]]
                 f"ci_static_inventory.entries[{index}] args must be a list of non-empty strings"
             )
 
+        estimated_seconds = raw.get("estimated_seconds", 1)
+        if not isinstance(estimated_seconds, int) or estimated_seconds <= 0:
+            raise SystemExit(
+                f"ci_static_inventory.entries[{index}] estimated_seconds must be a positive integer"
+            )
+
         key = " ".join([script, *args])
         if key in seen_keys:
             raise SystemExit(f"duplicate ci_static_inventory entry: {key}")
@@ -87,7 +93,9 @@ def normalize_entries(payload: dict, repo_root: Path) -> list[dict[str, object]]
         if not os.access(script_path, os.X_OK):
             raise SystemExit(f"ci_static_inventory entry is not executable: {script}")
 
-        normalized.append({"script": script, "args": args})
+        normalized.append(
+            {"script": script, "args": args, "estimated_seconds": estimated_seconds}
+        )
 
     return normalized
 
@@ -144,8 +152,22 @@ def shard_entries(entries: list[dict[str, object]], shard_count: int) -> list[li
     if shard_count <= 0:
         return []
     shards: list[list[dict[str, object]]] = [[] for _ in range(shard_count)]
-    for index, entry in enumerate(entries):
-        shards[index % shard_count].append(entry)
+    shard_weights = [0 for _ in range(shard_count)]
+    ranked_entries = sorted(
+        entries,
+        key=lambda entry: (
+            -int(entry.get("estimated_seconds", 1)),
+            str(entry["script"]),
+            tuple(str(item) for item in entry["args"]),
+        ),
+    )
+    for entry in ranked_entries:
+        target_index = min(
+            range(shard_count),
+            key=lambda index: (shard_weights[index], len(shards[index]), index),
+        )
+        shards[target_index].append(entry)
+        shard_weights[target_index] += int(entry.get("estimated_seconds", 1))
     return shards
 
 
@@ -205,7 +227,13 @@ def build_report(
         "prefix_counts": dict(sorted(prefix_counts.items())),
         "entries": rendered_entries,
         "shards": [
-            {"generated_file": path.as_posix(), "entries_total": len(shard)}
+            {
+                "generated_file": path.as_posix(),
+                "entries_total": len(shard),
+                "estimated_seconds_total": sum(
+                    int(entry.get("estimated_seconds", 1)) for entry in shard
+                ),
+            }
             for path, shard in zip(
                 shard_paths, shard_entries(sharded_entries, len(shard_paths)), strict=True
             )
