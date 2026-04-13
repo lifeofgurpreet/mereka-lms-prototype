@@ -630,6 +630,8 @@ jobs:
             export VERIFY_BRANDING_TOKEN_INTEGRITY_CHANGED_FILES="$CI_CHANGED_FILES"
             export PREFLIGHT_CHECK_SCOPE=changed
             export PREFLIGHT_CHECK_CHANGED_FILES="$CI_CHANGED_FILES"
+            export RELEASE_GATE_SCOPE=changed
+            export RELEASE_GATE_CHANGED_FILES="$CI_CHANGED_FILES"
           fi
           SCRIPT_LIST="${{ matrix.shard.file }}" PARALLELISM=4 TIMEOUT_SECS=300 \
             ./scripts/qa/run-release-verification-gates.sh
