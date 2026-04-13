@@ -891,7 +891,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       - name: Scope tutor lane for PR diffs
-        id: tutor-scope
+        id: tutor_scope
         shell: bash
         run: |
           set -euo pipefail
@@ -935,7 +935,7 @@ EOF_CHANGED
           echo "run_tests=false" >> "$GITHUB_OUTPUT"
 
       - name: Set up Python environment
-        if: steps.tutor-scope.outputs.run_tests == 'true'
+        if: steps.tutor_scope.outputs.run_tests == 'true'
         uses: ./.github/actions/setup-python-env
         with:
           python-version: '3.12'
@@ -945,11 +945,11 @@ EOF_CHANGED
           isolated-venv-name: 'tutor-ci-py312'
 
       - name: Skip tutor lane for unrelated PR diff
-        if: steps.tutor-scope.outputs.run_tests != 'true'
+        if: steps.tutor_scope.outputs.run_tests != 'true'
         run: echo "Tutor Configuration Tests skipped: no tutor-authority changes in this PR."
 
       - name: Render Tutor environment + apply patches
-        if: steps.tutor-scope.outputs.run_tests == 'true'
+        if: steps.tutor_scope.outputs.run_tests == 'true'
         env:
           TUTOR_ROOT: ${{ github.workspace }}/tutor_env
         run: |
@@ -958,31 +958,31 @@ EOF_CHANGED
           ./infrastructure/tutor/apply-patches.sh
 
       - name: Run tutor apply patches test
-        if: steps.tutor-scope.outputs.run_tests == 'true'
+        if: steps.tutor_scope.outputs.run_tests == 'true'
         run: bash tests/tutor/test_tutor_apply.sh
 
       - name: Run tutor verify patches test
-        if: steps.tutor-scope.outputs.run_tests == 'true'
+        if: steps.tutor_scope.outputs.run_tests == 'true'
         run: bash tests/tutor/test_verify_patches.sh
 
       - name: Run tutor pre-commit hook test
-        if: steps.tutor-scope.outputs.run_tests == 'true'
+        if: steps.tutor_scope.outputs.run_tests == 'true'
         run: bash tests/tutor/test_pre_commit_hook.sh
 
       - name: Run tutor idempotency test
-        if: steps.tutor-scope.outputs.run_tests == 'true'
+        if: steps.tutor_scope.outputs.run_tests == 'true'
         env:
           TUTOR_TEST_ASSUME_PATCHED_BASELINE: '1'
         run: bash tests/tutor/test_idempotency.sh
 
       - name: Run tutor edge cases test
-        if: steps.tutor-scope.outputs.run_tests == 'true'
+        if: steps.tutor_scope.outputs.run_tests == 'true'
         env:
           TUTOR_TEST_ASSUME_PATCHED_BASELINE: '1'
         run: bash tests/tutor/test_edge_cases.sh
 
       - name: Validate config.example.yml structure
-        if: steps.tutor-scope.outputs.run_tests == 'true'
+        if: steps.tutor_scope.outputs.run_tests == 'true'
         run: python3 scripts/qa/check-config-example-yaml.py
 
   # ============================================================================
