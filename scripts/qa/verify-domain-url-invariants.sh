@@ -16,6 +16,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+SCOPE_MODE="${VERIFY_DOMAIN_URL_INVARIANTS_SCOPE:-}"
+CHANGED_FILES_RAW="${VERIFY_DOMAIN_URL_INVARIANTS_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
 source "$REPO_ROOT/scripts/shared/config.sh"
 source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 
@@ -48,6 +50,34 @@ do_warn() {
   fi
 }
 
+should_skip_scope() {
+  local path
+
+  [[ "$SCOPE_MODE" == "changed" ]] || return 1
+  [[ -n "${CHANGED_FILES_RAW//[[:space:]]/}" ]] || return 1
+
+  while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    case "$path" in
+      .github/workflows/ci.yml|\
+      scripts/qa/verify-domain-url-invariants.sh|\
+      scripts/shared/config.sh|\
+      scripts/shared/mereka_plugin_contract.sh|\
+      scripts/tenants/env/staging.env|\
+      deploy/k8s/tenancy/tenant-registry.yaml|\
+      deploy/k8s/base/apps/openedx/settings/lms/production.py|\
+      deploy/k8s/base/apps/openedx/settings/cms/production.py|\
+      deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile|\
+      deploy/k8s/overlays/rke2-nonprod/patches/domain-env.yaml|\
+      deploy/k8s/overlays/local/patches/domain-env.yaml)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
+
 # Key files
 PROD_PY="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/production.py"
 CMS_PY="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/cms/production.py"
@@ -56,6 +86,11 @@ NONPROD_DOMAIN_PATCH="$REPO_ROOT/deploy/k8s/overlays/rke2-nonprod/patches/domain
 LOCAL_DOMAIN_PATCH="$REPO_ROOT/deploy/k8s/overlays/local/patches/domain-env.yaml"
 TENANT_REGISTRY="$REPO_ROOT/deploy/k8s/tenancy/tenant-registry.yaml"
 STAGING_ENV_FILE="$REPO_ROOT/scripts/tenants/env/staging.env"
+
+if should_skip_scope; then
+  echo "PASS verify-domain-url-invariants (scope skip: no domain-url authority changes)"
+  exit 0
+fi
 
 printf "${BLUE}=== Domain & URL Invariant Gate ===${NC}\n\n"
 
