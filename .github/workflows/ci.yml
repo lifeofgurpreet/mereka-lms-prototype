@@ -5,24 +5,10 @@ name: CI
 on:
   pull_request:
     branches: [main]
-    paths-ignore:
-      - 'docs/**'
-      - 'tools/docs/**'
-      - 'generated/catalogs/**'
-      - 'docs/catalog.json'
-      - 'specs/testmaps/README.md'
-      - 'specs/_generated/testmaps/README.md'
-      - '.github/workflows/docs-compliance.yml'
-      - '.github/workflows/docs-policy.yml'
-      - '.github/workflows/codeql.yml'
-      - 'CLAUDE.md'
-      - 'AGENTS.md'
-      - 'CONTRIBUTING.md'
-      - 'SECURITY.md'
-      - 'LICENSE'
-      # NOTE: '*.md' glob removed. CHANGELOG.md and other root .md files
-      # are release artifacts that must trigger CI so required branch-
-      # protection checks report and PRs can merge.
+      # Keep CI attached for docs-only and control-plane-only PRs so the
+      # required branch-protection contexts still report. The jobs themselves
+      # already no-op cleanly via the docs_only scope gate when repo-static
+      # validation is not needed.
   merge_group:
   push:
     branches: [main]
