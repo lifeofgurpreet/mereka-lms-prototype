@@ -13,6 +13,8 @@ set -euo pipefail
 PASS=0; FAIL=0; SKIP=0
 NAMESPACE="mereka-lms"
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+SCOPE_MODE="${VERIFY_OBSERVABILITY_VALIDATION_SCOPE:-}"
+CHANGED_FILES_RAW="${VERIFY_OBSERVABILITY_VALIDATION_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
 KUST="${VERIFY_OBS_KUSTOMIZATION_PATH:-$REPO_ROOT/deploy/k8s/base/monitoring/kustomization.yaml}"
 MON_DIR="${VERIFY_OBS_MONITORING_DIR:-$REPO_ROOT/deploy/k8s/base/monitoring}"
 KUBECTL_TIMEOUT="${VERIFY_OBS_KUBECTL_TIMEOUT:-5}"
@@ -21,6 +23,30 @@ SKIP_LIVE_CHECKS="${VERIFY_OBS_SKIP_LIVE_CHECKS:-0}"
 pass() { echo "  PASS: $1"; PASS=$((PASS + 1)); }
 fail() { echo "  FAIL: $1"; FAIL=$((FAIL + 1)); }
 skip() { echo "  SKIP: $1"; SKIP=$((SKIP + 1)); }
+
+should_skip_scope() {
+  local path
+
+  [[ "$SCOPE_MODE" == "changed" ]] || return 1
+  [[ -n "${CHANGED_FILES_RAW//[[:space:]]/}" ]] || return 1
+
+  while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    case "$path" in
+      .github/workflows/ci.yml|\
+      scripts/qa/verify-observability-validation.sh|\
+      scripts/qa/validate-observability-compliance.sh|\
+      deploy/k8s/base/monitoring/*|\
+      deploy/k8s/base/apps/openedx/settings/lms/mereka_forwarded_headers.py|\
+      deploy/k8s/base/apps/openedx/settings/cms/mereka_forwarded_headers.py|\
+      infrastructure/monitoring/grafana/dashboard-contract.bbi-mereka-lms.json)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
 
 _HAS_KUBECTL=""
 has_kubectl() {
@@ -47,6 +73,11 @@ fi
 if [[ ! -d "$MON_DIR" ]]; then
   fail "AC-OVR-001: monitoring directory not found at $MON_DIR"
   exit 1
+fi
+
+if should_skip_scope; then
+  echo "PASS verify-observability-validation (scope skip: no observability validation authority changes)"
+  exit 0
 fi
 
 echo "=== Observability Validation Requirements Verification ==="
