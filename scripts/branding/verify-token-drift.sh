@@ -12,6 +12,35 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TOKENS_CSS="$REPO_ROOT/assets/branding/tokens.css"
 TOKENS_PROVENANCE="$REPO_ROOT/assets/branding/tokens.provenance.json"
 OVERRIDES_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css"
+SCOPE_MODE="${VERIFY_TOKEN_DRIFT_BRANDING_SCOPE:-}"
+CHANGED_FILES_RAW="${VERIFY_TOKEN_DRIFT_BRANDING_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
+
+should_skip_scope() {
+  local changed_path
+
+  [[ "$SCOPE_MODE" == "changed" ]] || return 1
+  [[ -n "${CHANGED_FILES_RAW//[[:space:]]/}" ]] || return 1
+
+  while IFS= read -r changed_path; do
+    [[ -n "$changed_path" ]] || continue
+    case "$changed_path" in
+      .github/workflows/ci.yml|\
+      scripts/branding/verify-token-drift.sh|\
+      assets/branding/tokens.css|\
+      assets/branding/tokens.provenance.json|\
+      infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
+
+if should_skip_scope; then
+  echo "PASS verify-token-drift (scope skip: no token-drift authority changes)"
+  exit 0
+fi
 
 if [[ ! -f "$TOKENS_CSS" ]]; then
   echo "Missing canonical tokens: $TOKENS_CSS" >&2
