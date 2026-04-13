@@ -48,7 +48,9 @@ run_with_timeout() {
 
 if ! docker image inspect "$IMAGE_REF" >/dev/null 2>&1; then
   echo "Pulling image for branding verification: $IMAGE_REF"
-  if ! run_with_timeout "${DOCKER_PULL_TIMEOUT_SECS}" docker pull "$IMAGE_REF" >/dev/null; then
+  if run_with_timeout "${DOCKER_PULL_TIMEOUT_SECS}" docker pull "$IMAGE_REF" >/dev/null; then
+    :
+  else
     status=$?
     if [[ "$status" -eq 124 ]]; then
       echo "ERROR: docker pull timed out after ${DOCKER_PULL_TIMEOUT_SECS}s for $IMAGE_REF" >&2
@@ -66,7 +68,7 @@ else
   echo "Expected LMS branding revision: <skipped>"
 fi
 
-if ! run_with_timeout "${DOCKER_RUN_TIMEOUT_SECS}" docker run --rm \
+if run_with_timeout "${DOCKER_RUN_TIMEOUT_SECS}" docker run --rm \
   -e EXPECTED_LMS_BRANDING_REV="$EXPECTED_REV" \
   "$IMAGE_REF" \
   python - <<'PY'
@@ -101,6 +103,8 @@ if expected and expected not in content:
 print(f"OK: /openedx/staticfiles/{hashed_css} exists")
 PY
 then
+  :
+else
   status=$?
   if [[ "$status" -eq 124 ]]; then
     echo "ERROR: docker run timed out after ${DOCKER_RUN_TIMEOUT_SECS}s for $IMAGE_REF" >&2

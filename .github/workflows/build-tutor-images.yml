@@ -91,12 +91,11 @@ on:
           - fast
         default: proof
       mfe_build_profile:
-        description: 'MFE build profile override: compat preserves legacy/default-off surfaces for explicit compatibility builds'
+        description: 'MFE build profile override'
         type: choice
         options:
           - proof
           - fast
-          - compat
         default: proof
 
 concurrency:
@@ -378,15 +377,15 @@ jobs:
       decision: ${{ steps.select.outputs.decision }}
       reason: ${{ steps.select.outputs.reason }}
     steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
       - name: Select runner lane
         id: select
-        uses: Biji-Biji-Initiative/bbi-infrastructure/.github/actions/select-runner-lane@main
+        uses: ./.github/actions/select-build-lane
         with:
           enabled: ${{ vars.CI_FASTLANE_BUILD_ENABLED }}
           lane_mode: ${{ github.event_name == 'workflow_dispatch' && inputs.lane_mode || 'auto' }}
           fastlane_label: ${{ vars.CI_FASTLANE_BUILD_LABEL }}
-          routing_policy: lms_build_prefer_fastlane
-          fallback_label: mereka-k8s-heavy-builders
           timezone: ${{ vars.CI_FASTLANE_BUILD_TIMEZONE }}
           office_hours_start: ${{ vars.CI_FASTLANE_BUILD_WINDOW_START }}
           office_hours_end: ${{ vars.CI_FASTLANE_BUILD_WINDOW_END }}
@@ -394,8 +393,6 @@ jobs:
           github_app_id: ${{ secrets.FASTLANE_GITHUB_APP_ID }}
           github_app_installation_id: ${{ secrets.FASTLANE_GITHUB_APP_INSTALLATION_ID }}
           github_app_private_key: ${{ secrets.FASTLANE_GITHUB_APP_PRIVATE_KEY }}
-          allow_push_main: 'true'
-          allow_workflow_dispatch: 'true'
 
   build-openedx:
     name: Build OpenEdX Image
@@ -778,8 +775,6 @@ jobs:
           BUILD_PROFILE="${{ github.event_name == 'workflow_dispatch' && inputs.mfe_build_profile || 'proof' }}"
           if [[ "${BUILD_PROFILE}" == "proof" ]]; then
             CACHE_REF="${{ env.REGISTRY }}/mfe:mereka-brand"
-          elif [[ "${BUILD_PROFILE}" == "compat" ]]; then
-            CACHE_REF="${{ env.REGISTRY }}/mfe:mereka-brand-compat"
           else
             CACHE_REF="${{ env.REGISTRY }}/mfe:mereka-brand-fast"
           fi

@@ -8,8 +8,20 @@ VERIFY="$ROOT_DIR/scripts/qa/verify-build-workflow-contract.sh"
 tmpdir="$(mktemp -d -t verify-build-workflow-contract.XXXXXX)"
 trap 'rm -rf "$tmpdir"' EXIT
 
-mkdir -p "$tmpdir/.github/workflows" "$tmpdir/scripts/infra"
+mkdir -p "$tmpdir/.github/workflows" "$tmpdir/.github/actions/select-build-lane" "$tmpdir/scripts/infra"
 mkdir -p "$tmpdir/scripts/qa"
+cat >"$tmpdir/.github/actions/select-build-lane/action.yml" <<'EOF'
+name: select-build-lane
+outputs:
+  runner_label:
+    value: ${{ steps.select.outputs.runner_label }}
+runs:
+  using: composite
+  steps:
+    - id: select
+      shell: bash
+      run: echo "runner_label=mereka-k8s-heavy-builders" >> "$GITHUB_OUTPUT"
+EOF
 cat >"$tmpdir/scripts/infra/resolve-build-scope.sh" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -133,6 +145,14 @@ jobs:
   lint:
     steps:
       - run: echo lint
+  select-build-lane:
+    runs-on: ubuntu-latest
+    outputs:
+      runner_label: ${{ steps.select.outputs.runner_label }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: select
+        uses: ./.github/actions/select-build-lane
   prepare-build-context:
     runs-on: mereka-k8s-runners
     needs: [resolve-build-scope, lint]
@@ -165,9 +185,9 @@ jobs:
           path: var/ci/
 
   build-openedx:
-    needs: [resolve-build-scope, lint, prepare-build-context]
+    needs: [resolve-build-scope, lint, select-build-lane, prepare-build-context]
     if: ${{ needs.resolve-build-scope.outputs.build_openedx == 'true' }}
-    runs-on: mereka-k8s-heavy-builders
+    runs-on: ${{ needs.select-build-lane.outputs.runner_label }}
     outputs:
       image_digest: ${{ steps.digest.outputs.digest }}
     steps:
@@ -198,9 +218,9 @@ jobs:
         run: echo "digest=sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" >> "$GITHUB_OUTPUT"
 
   build-mfe:
-    needs: [resolve-build-scope, lint, prepare-build-context]
+    needs: [resolve-build-scope, lint, select-build-lane, prepare-build-context]
     if: ${{ needs.resolve-build-scope.outputs.build_mfe == 'true' }}
-    runs-on: mereka-k8s-heavy-builders
+    runs-on: ${{ needs.select-build-lane.outputs.runner_label }}
     outputs:
       image_digest: ${{ steps.digest.outputs.digest }}
     steps:

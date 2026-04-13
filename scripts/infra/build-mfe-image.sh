@@ -11,8 +11,14 @@ Usage:
     --primary-tag <tag> \
     --secondary-tag <tag> \
     --cache-ref <repo:tag> \
-    [--build-profile <proof|fast|compat>] \
+    [--build-profile <proof|fast>] \
+    [--output-mode <push|docker>] \
+    [--local-defaults] \
     [--mutable-tag <tag>]
+
+Examples:
+  scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
+  scripts/infra/build-mfe-image.sh --local-defaults --build-profile proof
 EOF
 }
 
@@ -24,6 +30,8 @@ SECONDARY_TAG=""
 CACHE_REF=""
 MUTABLE_TAG=""
 BUILD_PROFILE="proof"
+OUTPUT_MODE="push"
+LOCAL_DEFAULTS=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -34,13 +42,28 @@ while [[ $# -gt 0 ]]; do
     --secondary-tag) SECONDARY_TAG="${2:-}"; shift 2 ;;
     --cache-ref) CACHE_REF="${2:-}"; shift 2 ;;
     --build-profile) BUILD_PROFILE="${2:-}"; shift 2 ;;
+    --output-mode) OUTPUT_MODE="${2:-}"; shift 2 ;;
+    --local-defaults) LOCAL_DEFAULTS=1; OUTPUT_MODE="docker"; shift ;;
     --mutable-tag) MUTABLE_TAG="${2:-}"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown argument: $1" >&2; usage >&2; exit 1 ;;
   esac
 done
 
-for required in CONTEXT_DIR DOCKERFILE IMAGE_REPO PRIMARY_TAG SECONDARY_TAG CACHE_REF; do
+if [[ "$LOCAL_DEFAULTS" == "1" ]]; then
+  CONTEXT_DIR="${CONTEXT_DIR:-tutor_env/env/plugins/mfe/build/mfe}"
+  DOCKERFILE="${DOCKERFILE:-tutor_env/env/plugins/mfe/build/mfe/Dockerfile}"
+  IMAGE_REPO="${IMAGE_REPO:-openedx-mfe}"
+  PRIMARY_TAG="${PRIMARY_TAG:-nightly}"
+  SECONDARY_TAG="${SECONDARY_TAG:-nightly-${BUILD_PROFILE}}"
+fi
+
+REQUIRED_ARGS=(CONTEXT_DIR DOCKERFILE IMAGE_REPO PRIMARY_TAG SECONDARY_TAG)
+if [[ "$OUTPUT_MODE" == "push" ]]; then
+  REQUIRED_ARGS+=(CACHE_REF)
+fi
+
+for required in "${REQUIRED_ARGS[@]}"; do
   if [[ -z "${!required}" ]]; then
     echo "Missing required argument: ${required}" >&2
     usage >&2
@@ -58,19 +81,28 @@ if [[ ! -f "$DOCKERFILE" ]]; then
   exit 1
 fi
 
-build_failed_due_to_transient_github_fetch() {
-  local log_path="$1"
-  [[ -f "$log_path" ]] || return 1
-  # Buildx logs can contain NUL bytes, so force text-mode matching.
-  grep -aEq \
-    'Could not resolve host: github\.com|DNS server returned answer with no data|failed to fetch remote https://github\.com/' \
-    "$log_path"
-}
+CONTEXT_DIR_ABS="$(cd "$CONTEXT_DIR" && pwd)"
+DOCKERFILE_ABS="$(cd "$(dirname "$DOCKERFILE")" && pwd)/$(basename "$DOCKERFILE")"
+if [[ "$DOCKERFILE_ABS" == "$CONTEXT_DIR_ABS/"* ]]; then
+  DOCKERFILE_RELATIVE="${DOCKERFILE_ABS#"$CONTEXT_DIR_ABS"/}"
+else
+  echo "Dockerfile must live under the build context for Bake-backed execution: $DOCKERFILE" >&2
+  exit 1
+fi
+DOCKERFILE_SHA256="$(sha256sum "$DOCKERFILE_ABS" | awk '{print $1}')"
 
 case "$BUILD_PROFILE" in
-  proof|fast|compat) ;;
+  proof|fast) ;;
   *)
-    echo "Unsupported build profile: $BUILD_PROFILE (expected proof, fast, or compat)" >&2
+    echo "Unsupported build profile: $BUILD_PROFILE (expected proof or fast)" >&2
+    exit 1
+    ;;
+esac
+
+case "$OUTPUT_MODE" in
+  push|docker) ;;
+  *)
+    echo "Unsupported output mode: $OUTPUT_MODE (expected push or docker)" >&2
     exit 1
     ;;
 esac
@@ -80,12 +112,12 @@ if [[ "$BUILD_PROFILE" != "proof" && -n "$MUTABLE_TAG" ]]; then
   exit 1
 fi
 
-TAGS=(
-  "--tag" "${IMAGE_REPO}:${PRIMARY_TAG}"
-  "--tag" "${IMAGE_REPO}:${SECONDARY_TAG}"
+IMAGE_TAGS=(
+  "${IMAGE_REPO}:${PRIMARY_TAG}"
+  "${IMAGE_REPO}:${SECONDARY_TAG}"
 )
 if [[ -n "$MUTABLE_TAG" ]]; then
-  TAGS+=("--tag" "${IMAGE_REPO}:${MUTABLE_TAG}")
+  IMAGE_TAGS+=("${IMAGE_REPO}:${MUTABLE_TAG}")
 fi
 
 IMAGE_NAME="${IMAGE_REPO##*/}"
@@ -93,6 +125,8 @@ GHA_SCOPE="tutor-${IMAGE_NAME}-${BUILD_PROFILE}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 BAKE_FILE="$REPO_ROOT/docker-bake.hcl"
 BAKE_TARGET="mfe-${BUILD_PROFILE}"
+TAGS_CSV="$(IFS=,; printf '%s' "${IMAGE_TAGS[*]}")"
+LOCAL_CACHE_ROOT="$REPO_ROOT/.buildx-cache"
 
 # BUILDKIT_MAX_PARALLELISM — if exported by caller, buildkitd reads it directly.
 # docker buildx bake has no --opt flag; the env var is the correct mechanism.
@@ -102,50 +136,44 @@ if [[ ! -f "$BAKE_FILE" ]]; then
   exit 1
 fi
 
-BAKE_ARGS=(
-  --file "$BAKE_FILE"
-  --progress plain
-  --push
-  --set "${BAKE_TARGET}.context=${CONTEXT_DIR}"
-  --set "${BAKE_TARGET}.dockerfile=${DOCKERFILE}"
-  --set "${BAKE_TARGET}.cache-from=type=gha,scope=${GHA_SCOPE}"
-  --set "${BAKE_TARGET}.cache-from=type=registry,ref=${CACHE_REF}"
-  --set "${BAKE_TARGET}.cache-to=type=gha,mode=max,scope=${GHA_SCOPE}"
-  --set "${BAKE_TARGET}.args.BUILDKIT_INLINE_CACHE=1"
+# Keep local cache imports quiet and deterministic for developer-mode builds.
+# buildx warns if the configured local src path does not exist yet.
+mkdir -p "$LOCAL_CACHE_ROOT/mfe"
+
+BAKE_ENV=(
+  "MFE_CONTEXT=${CONTEXT_DIR}"
+  "MFE_DOCKERFILE=${DOCKERFILE_RELATIVE}"
+  "MFE_RENDERED_CONTEXT=${CONTEXT_DIR}"
+  "MFE_RENDERED_DOCKERFILE=${DOCKERFILE_RELATIVE}"
+  "MFE_RENDERED_DOCKERFILE_SHA256=${DOCKERFILE_SHA256}"
+  "MFE_${BUILD_PROFILE^^}_TAGS=${TAGS_CSV}"
 )
+if [[ -n "$CACHE_REF" ]]; then
+  BAKE_ENV+=("MFE_CACHE_REF=${CACHE_REF}")
+fi
+if [[ "$BUILD_PROFILE" == "proof" ]]; then
+  BAKE_ENV+=("MFE_${BUILD_PROFILE^^}_GHA_SCOPE=${GHA_SCOPE}")
+fi
 
-for ((i=1; i<${#TAGS[@]}; i+=2)); do
-  BAKE_ARGS+=(--set "${BAKE_TARGET}.tags=${TAGS[i]}")
-done
+if [[ "$OUTPUT_MODE" == "push" ]]; then
+  printf 'env'
+  printf ' %q' "${BAKE_ENV[@]}"
+  printf ' docker buildx bake --file %q --progress plain --push %q\n' "$BAKE_FILE" "$BAKE_TARGET"
 
-max_attempts=2
-attempt=1
+  env "${BAKE_ENV[@]}" \
+    docker buildx bake \
+      --file "$BAKE_FILE" \
+      --progress plain \
+      --push \
+      "$BAKE_TARGET"
+else
+  printf 'env'
+  printf ' %q' "${BAKE_ENV[@]}"
+  printf ' docker buildx bake --file %q --progress plain %q\n' "$BAKE_FILE" "$BAKE_TARGET"
 
-while (( attempt <= max_attempts )); do
-  attempt_log="var/ci/build-mfe-attempt-${attempt}.log"
-  mkdir -p "$(dirname "$attempt_log")"
-
-  {
-    printf 'docker buildx bake'
-    printf ' %q' "${BAKE_ARGS[@]}"
-    printf ' %q\n' "$BAKE_TARGET"
-    docker buildx bake "${BAKE_ARGS[@]}" "$BAKE_TARGET"
-  } 2>&1 | tee "$attempt_log"
-  build_status=${PIPESTATUS[0]}
-
-  cp "$attempt_log" var/ci/build-mfe.log
-
-  if [[ $build_status -eq 0 ]]; then
-    exit 0
-  fi
-
-  if (( attempt < max_attempts )) && build_failed_due_to_transient_github_fetch "$attempt_log"; then
-    echo "Transient GitHub fetch failure detected during MFE build; retrying once..." >&2
-    attempt=$((attempt + 1))
-    sleep 5
-    continue
-  fi
-
-  echo "MFE image build failed." >&2
-  exit 1
-done
+  env "${BAKE_ENV[@]}" \
+    docker buildx bake \
+      --file "$BAKE_FILE" \
+      --progress plain \
+      "$BAKE_TARGET"
+fi

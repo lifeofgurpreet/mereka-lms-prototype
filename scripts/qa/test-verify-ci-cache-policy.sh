@@ -62,10 +62,10 @@ fi
 python3 - <<'PY'
 from pathlib import Path
 
-build_script = Path("scripts/infra/build-openedx-image.sh")
-text = build_script.read_text(encoding="utf-8")
-text = text.replace('  --set "${BAKE_TARGET}.cache-from=type=gha,scope=${GHA_SCOPE}"\n', '', 1)
-build_script.write_text(text, encoding="utf-8")
+bake_file = Path("docker-bake.hcl")
+text = bake_file.read_text(encoding="utf-8")
+text = text.replace('    "type=gha,scope=${OPENEDX_PROOF_GHA_SCOPE}",\n', '', 1)
+bake_file.write_text(text, encoding="utf-8")
 PY
 
 if bash scripts/qa/verify-ci-cache-policy.sh >/tmp/test-verify-ci-cache-policy-build.log 2>&1; then
@@ -74,7 +74,7 @@ if bash scripts/qa/verify-ci-cache-policy.sh >/tmp/test-verify-ci-cache-policy-b
   exit 1
 fi
 
-if ! rg -q "build-openedx-image uses profile-scoped GHA cache restore" /tmp/test-verify-ci-cache-policy-build.log; then
+if ! rg -q "openedx-proof resolves GHA cache restore" /tmp/test-verify-ci-cache-policy-build.log; then
   echo "Expected build drift log to mention the missing OpenEdX GHA cache restore."
   cat /tmp/test-verify-ci-cache-policy-build.log
   exit 1
