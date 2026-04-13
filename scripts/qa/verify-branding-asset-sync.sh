@@ -209,6 +209,11 @@ else
   else
     fail "apply-patches missing source for brand-package.sh"
   fi
+  if grep -q 'Injected COPY indigo/theme into production stage of rendered MFE Dockerfile\|drops this COPY' "$APPLY_PATCHES"; then
+    fail "apply-patches still contains stale rendered MFE Dockerfile theme-copy surgery"
+  else
+    pass "apply-patches keeps MFE theme handling in build-context asset sync only"
+  fi
 
   SYNC_BRAND_ASSETS="$REPO_ROOT/scripts/branding/sync-brand-assets.sh"
   SYNC_BRAND_PACKAGE="$REPO_ROOT/scripts/branding/sync-brand-package.sh"

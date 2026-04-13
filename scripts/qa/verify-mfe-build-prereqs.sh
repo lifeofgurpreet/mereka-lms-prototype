@@ -120,6 +120,30 @@ check_snapshot_parity() {
   failures=1
 }
 
+check_generated_production_theme_copy() {
+  if [[ ! -f "$GENERATED_MFE_DOCKERFILE" ]]; then
+    return
+  fi
+
+  if python3 - <<'PY' "$GENERATED_MFE_DOCKERFILE"
+from pathlib import Path
+import sys
+
+text = Path(sys.argv[1]).read_text(encoding="utf-8")
+marker = "FROM docker.io/caddy:2.7.4 AS production"
+if marker not in text:
+    raise SystemExit(1)
+production = text[text.index(marker):]
+raise SystemExit(0 if "COPY indigo/theme /openedx/dist/theme" in production else 1)
+PY
+  then
+    echo "  ✓ generated Dockerfile production stage copies runtime theme payload"
+  else
+    echo "  ✗ generated Dockerfile production stage missing runtime theme payload copy"
+    failures=1
+  fi
+}
+
 check_jsx_parse() {
   local label="$1"
   local path="$2"
@@ -181,8 +205,15 @@ echo ""
 echo "2. Generated Dockerfile contract..."
 check_no_legacy_mfe_render_path_refs
 echo "  ✓ active rendered MFE Dockerfile authority path: $ACTIVE_MFE_DOCKERFILE_PATH"
+if grep -q "Injected COPY indigo/theme into production stage of rendered MFE Dockerfile\\|drops this COPY" "$APPLY_PATCH_SCRIPT"; then
+  echo "  ✗ apply-patches.sh still contains stale rendered Dockerfile theme-copy surgery"
+  failures=1
+else
+  echo "  ✓ apply-patches.sh does not mutate rendered Dockerfile for production theme copy"
+fi
 check_snapshot_parity
 if [[ -f "$GENERATED_MFE_DOCKERFILE" ]]; then
+  check_generated_production_theme_copy
   check_contains_regex "generated Dockerfile uses supported Node image" "$GENERATED_MFE_DOCKERFILE" "$NODE_IMAGE_REGEX"
   check_contains "generated Dockerfile contains plugin install line" "$GENERATED_MFE_DOCKERFILE" "$PLUGIN_INSTALL_LINE"
   check_contains "generated Dockerfile hardens base-stage apt retries" "$GENERATED_MFE_DOCKERFILE" 'Acquire::Retries "6"'
