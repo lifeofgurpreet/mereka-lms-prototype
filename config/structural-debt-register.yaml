@@ -209,16 +209,16 @@ entries:
     status: resolved
 
   - id: DEBT-014
-    title: "Main-branch protection does not yet match required governance contract"
+    title: "Main-branch protection governance drift was closed on repo-owned surfaces"
     severity: high
     class: live-governance-gap
-    owner_repo: mereka-lms + bbi-infrastructure + platform-control-plane
+    owner_repo: mereka-lms + bbi-infrastructure
     owner_layer: proof
-    evidence: "mereka-lms and bbi-infrastructure still have enforce_admins=false; bbi-infrastructure/platform-control-plane have 0 required approvals; platform-control-plane has zero required status checks"
-    current_risk: "Direct pushes, missing reviews, or missing required checks can bypass contract enforcement on main"
+    evidence: "As of 2026-04-13, config/branch-protection-contract.yaml records live == target for Biji-Biji-Initiative/mereka-lms. Biji-Biji-Initiative/bbi-infrastructure retains only an explicit tolerated deviation for enforce_admins=false."
+    current_risk: "Residual risk is limited to documented emergency admin bypass on bbi-infrastructure, which must still be ledgered."
     decision: kill
-    action: "Applied config/branch-protection-contract.yaml to mereka-lms, bbi-infrastructure, and platform-control-plane; keep scripts/qa/verify-branch-protection-contract.sh --live green"
-    review_date: "2026-04-05"
+    action: "Realized live branch protection for mereka-lms@main, aligned verifier/docs to the machine contract, and recorded the remaining bbi-infrastructure admin bypass as a tolerated deviation instead of unresolved drift."
+    review_date: "2026-04-13"
     status: resolved
 
   - id: DEBT-015
