@@ -162,7 +162,6 @@
     "scripts/qa/verify-tenant-offboarding.sh",
     "scripts/qa/verify-tenant-visual-contract.sh",
     "scripts/qa/verify-tutor-multisite-domains.sh",
-    "scripts/qa/verify-tutor-patches.sh",
     "scripts/qa/verify-tutor-resilience-full.sh",
     "scripts/qa/verify-ulmo-parity.sh",
     "scripts/qa/verify-user-import-counts.sh",

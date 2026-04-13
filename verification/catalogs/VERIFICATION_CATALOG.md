@@ -11,18 +11,18 @@ Machine-readable source: `verification/catalogs/verification_catalog.json`.
 - Total `verify-*.sh` scripts: **628**
 - Archived deprecated scripts: **21**
 - CI static-bound scripts: **389**
-- Workflow-direct bound scripts: **67**
+- Workflow-direct bound scripts: **68**
 - Status overrides applied: **8**
 
 ### Tier Distribution
-- `exploratory_manual`: 191
+- `exploratory_manual`: 190
 - `periodic_runtime`: 21
-- `release_blocking`: 416
+- `release_blocking`: 417
 
 ### Status Distribution
-- `active`: 440
+- `active`: 441
 - `deprecated_candidate`: 1
-- `manual_only`: 187
+- `manual_only`: 186
 
 ### Kind Distribution
 - `verify`: 628
