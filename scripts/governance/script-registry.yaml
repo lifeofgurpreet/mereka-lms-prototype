@@ -401,7 +401,6 @@ ci_static_inventory:
     - script: scripts/qa/audit-grafana-dashboard.sh
       estimated_seconds: 7
     - script: scripts/qa/audit-observability.sh
-    - script: scripts/qa/audit-velero.sh
     - script: scripts/qa/verify-mux-alert-wiring.sh
     - script: scripts/qa/verify-observability-loki-log-sources.sh
     - script: scripts/qa/verify-observability-validation.sh
@@ -684,6 +683,9 @@ ci_runtime_inventory:
     - script: scripts/infra/check-cluster-status.sh
       category: LIVE_CLUSTER
       note: direct kubectl and local curl cluster probe for current namespace/services; runtime operator check, not offline static proof
+    - script: scripts/qa/audit-velero.sh
+      category: LIVE_CLUSTER
+      note: audits live Velero schedules, backups, snapshot posture, and app PVC coverage from the active cluster; runtime disaster-recovery proof, not offline static CI
     - script: scripts/qa/verify-secrets-live-cluster.sh
       category: LIVE_CLUSTER
       note: validates ExternalSecrets, deployment envFrom wiring, and pod secret env vars against the active cluster; runtime secrets proof, not offline static CI

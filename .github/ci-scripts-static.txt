@@ -325,7 +325,6 @@ scripts/qa/verify-tenant-provisioning-enhanced.sh
 scripts/qa/verify-tenant-provisioning.sh
 scripts/qa/audit-grafana-dashboard.sh
 scripts/qa/audit-observability.sh
-scripts/qa/audit-velero.sh
 scripts/qa/verify-mux-alert-wiring.sh
 scripts/qa/verify-observability-loki-log-sources.sh
 scripts/qa/verify-observability-validation.sh
