@@ -11,6 +11,7 @@ cd "$REPO_ROOT"
 
 FAIL_UNDER="${FAIL_UNDER:-50}"
 CHECK_TIMEOUT_SECONDS="${CHECK_TIMEOUT_SECONDS:-120}"
+RUN_INFO_CHECKS="${RUN_INFO_CHECKS:-1}"
 STAMP="$(date -u +%Y%m%d-%H%M%S)"
 ARTIFACT_DIR="${ARTIFACT_DIR:-var/spec-integrity-gates/${STAMP}}"
 mkdir -p "$ARTIFACT_DIR"
@@ -139,10 +140,14 @@ run_check "spec-bundles" \
   python3 tools/specs/build_spec_bundles.py --check
 
 # 12. Spec verification via @covers annotations (informational — coverage may not be 100%)
-run_check_info "spec-verify" \
-  python3 "${TOOL_DIR}/mereka_spec_verify.py" specs/ --repo-root . \
-    --scan-dirs scripts/ tests/ deploy/ infrastructure/ services/ \
-    --manual-file specs/plans/manual_verifications.yaml
+if [[ "$RUN_INFO_CHECKS" == "1" ]]; then
+  run_check_info "spec-verify" \
+    python3 "${TOOL_DIR}/mereka_spec_verify.py" specs/ --repo-root . \
+      --scan-dirs scripts/ tests/ deploy/ infrastructure/ services/ \
+      --manual-file specs/plans/manual_verifications.yaml
+else
+  echo "SKIP spec-verify (RUN_INFO_CHECKS=${RUN_INFO_CHECKS})"
+fi
 
 # 13. Coverage report with threshold
 run_check "spec-coverage" \
