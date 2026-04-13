@@ -96,12 +96,9 @@ def _render_install_block(apps: list[str], *, editable_when_requested: bool) -> 
     editable_args = " \\\n        ".join(f"-e /openedx/{app}" for app in apps)
     noneditable_args = " \\\n        ".join(f"/openedx/{app}" for app in apps)
     if not editable_when_requested:
-        return (
-            "RUN $PIP_COMMAND install \\\n"
-            f"        {noneditable_args}"
-        )
+        return "RUN $PIP_COMMAND install \\\n" f"        {noneditable_args}"
     return (
-        "RUN if [ \"$MEREKA_CUSTOM_APP_INSTALL_MODE\" = \"editable\" ]; then \\\n"
+        'RUN if [ "$MEREKA_CUSTOM_APP_INSTALL_MODE" = "editable" ]; then \\\n'
         "      $PIP_COMMAND install \\\n"
         f"        {editable_args}; \\\n"
         "    else \\\n"
@@ -113,8 +110,7 @@ def _render_install_block(apps: list[str], *, editable_when_requested: bool) -> 
 
 def _render_runtime_copy_lines(apps: list[str]) -> str:
     return "\n      ".join(
-        f"cp -a /tmp/python-requirements-openedx/{app} /openedx/{app} && \\"
-        for app in apps
+        f"cp -a /tmp/python-requirements-openedx/{app} /openedx/{app} && \\" for app in apps
     )
 
 
