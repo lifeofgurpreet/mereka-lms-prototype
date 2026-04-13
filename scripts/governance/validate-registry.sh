@@ -19,6 +19,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 REGISTRY="${SCRIPT_DIR}/script-registry.yaml"
+SCOPE_MODE="${VALIDATE_REGISTRY_SCOPE:-}"
+CHANGED_FILES_RAW="${VALIDATE_REGISTRY_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
 
 # Optional: skip the governed orphan/registration drift validation
 WARN_UNREGISTERED="${WARN_UNREGISTERED:-1}"
@@ -36,6 +38,34 @@ WARN=0
 pass() { echo -e "${GREEN}[PASS]${NC} $*"; PASS=$((PASS + 1)); }
 fail() { echo -e "${RED}[FAIL]${NC} $*"; FAIL=$((FAIL + 1)); }
 warn() { echo -e "${YELLOW}[WARN]${NC} $*"; WARN=$((WARN + 1)); }
+
+should_skip_scope() {
+  local changed_path
+
+  if [[ "$SCOPE_MODE" != "changed" ]]; then
+    return 1
+  fi
+
+  if [[ -z "${CHANGED_FILES_RAW//[[:space:]]/}" ]]; then
+    return 1
+  fi
+
+  while IFS= read -r changed_path; do
+    [[ -z "$changed_path" ]] && continue
+    case "$changed_path" in
+      scripts/*)
+        return 1
+        ;;
+    esac
+  done <<<"$CHANGED_FILES_RAW"
+
+  return 0
+}
+
+if should_skip_scope; then
+  echo "RESULT: PASS (scope skip — no script-registry-relevant changes)"
+  exit 0
+fi
 
 echo "=== Script Governance Registry Validation ==="
 echo "Registry: ${REGISTRY}"
