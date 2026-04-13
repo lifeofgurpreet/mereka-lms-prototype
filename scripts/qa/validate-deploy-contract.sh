@@ -26,6 +26,8 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 QA_DIR="${REPO_ROOT}/scripts/qa"
+SCOPE_MODE="${VALIDATE_DEPLOY_CONTRACT_SCOPE:-}"
+CHANGED_FILES_RAW="${VALIDATE_DEPLOY_CONTRACT_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
 
 # ── Colour codes ──────────────────────────────────────────────────────────────
 RED='\033[0;31m'
@@ -34,6 +36,34 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 BOLD='\033[1m'
 NC='\033[0m'
+
+should_skip_scope() {
+  [[ "$SCOPE_MODE" == "changed" ]] || return 1
+  [[ -n "${CHANGED_FILES_RAW//[[:space:]]/}" ]] || return 1
+
+  while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    case "$path" in
+      .github/workflows/ci.yml|\
+      deploy/k8s/*|\
+      scripts/qa/validate-deploy-contract.sh|\
+      scripts/qa/no_private_key_material.sh|\
+      scripts/qa/no_generated_python_artifacts.sh|\
+      scripts/qa/no_mutable_or_placeholder_images.sh|\
+      scripts/qa/no_environment_domains_in_base.sh|\
+      scripts/qa/no_upward_relative_paths_in_kustomize.sh)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
+
+if should_skip_scope; then
+  echo "PASS validate-deploy-contract (scope skip: no deploy-contract-relevant changes)"
+  exit 0
+fi
 
 # ── Argument parsing ──────────────────────────────────────────────────────────
 STRICT=0
