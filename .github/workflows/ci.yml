@@ -300,14 +300,18 @@ jobs:
         run: bash scripts/qa/run-spec-integrity-gates.sh
 
       - name: Spec coverage report
+        if: github.event_name != 'pull_request'
         run: |
           mkdir -p var
           python3 scripts/qa/spec-tools/spec_coverage_report.py \
-            --specs-dir specs/ --repo-root . \
+            --specs-dir specs/ \
+            --scan-dirs scripts/ tests/ deploy/ infrastructure/ services/ \
+            --manual-file specs/plans/manual_verifications.yaml \
+            --repo-root . \
             --format markdown --output var/spec-coverage.md --fail-under 80
 
       - name: Upload spec coverage artifact
-        if: always()
+        if: always() && github.event_name != 'pull_request'
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
           name: spec-coverage
@@ -321,10 +325,11 @@ jobs:
           python3 scripts/qa/spec-tools/spec_coverage_report.py \
             --specs-dir specs/ \
             --scan-dirs scripts/ tests/ deploy/ infrastructure/ services/ \
-            --manual-file specs/manual_verifications.yaml \
+            --manual-file specs/plans/manual_verifications.yaml \
             --repo-root . \
             --format markdown \
-            --output var/spec-coverage-pr.md
+            --output var/spec-coverage-pr.md \
+            --fail-under 80
 
       - name: Upload PR coverage artifact
         if: github.event_name == 'pull_request' && always()
