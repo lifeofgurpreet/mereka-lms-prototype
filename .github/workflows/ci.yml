@@ -526,6 +526,8 @@ jobs:
             export VERIFY_SECRETS_ISOLATION_CHANGED_FILES="$CI_CHANGED_FILES"
             export TEST_BUILD_VALIDATOR_DRIFT_REVIEW_PACKET_SCOPE=changed
             export TEST_BUILD_VALIDATOR_DRIFT_REVIEW_PACKET_CHANGED_FILES="$CI_CHANGED_FILES"
+            export TEST_VERIFY_BUILD_WORKFLOW_CONTRACT_SCOPE=changed
+            export TEST_VERIFY_BUILD_WORKFLOW_CONTRACT_CHANGED_FILES="$CI_CHANGED_FILES"
           fi
           SCRIPT_LIST="${{ matrix.shard.file }}" PARALLELISM=4 TIMEOUT_SECS=300 \
             ./scripts/qa/run-release-verification-gates.sh
