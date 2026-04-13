@@ -40,7 +40,7 @@ cat > .github/ci-scripts-runtime.txt <<'EOF_DRIFT'
 # drift
 EOF_DRIFT
 
-if bash scripts/qa/verify-generated-surfaces.sh >/tmp/test-verify-generated-surfaces-runtime.log 2>&1; then
+if bash scripts/qa/verify-generated-surfaces.sh --check ci-runtime-inventory >/tmp/test-verify-generated-surfaces-runtime.log 2>&1; then
   echo "Expected generated-surface gate to fail on runtime inventory drift."
   cat /tmp/test-verify-generated-surfaces-runtime.log
   exit 1
@@ -64,7 +64,7 @@ cat > generated/tenant-runtime/browser-matrix-dev.json <<'EOF_DRIFT'
 {}
 EOF_DRIFT
 
-if bash scripts/qa/verify-generated-surfaces.sh >/tmp/test-verify-generated-surfaces-matrix.log 2>&1; then
+if bash scripts/qa/verify-generated-surfaces.sh --check runtime-routing-matrices >/tmp/test-verify-generated-surfaces-matrix.log 2>&1; then
   echo "Expected generated-surface gate to fail on runtime-routing matrix drift."
   cat /tmp/test-verify-generated-surfaces-matrix.log
   exit 1
