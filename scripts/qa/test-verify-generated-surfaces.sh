@@ -2,6 +2,43 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+SCOPE_MODE="${TEST_VERIFY_GENERATED_SURFACES_SCOPE:-}"
+CHANGED_FILES_RAW="${TEST_VERIFY_GENERATED_SURFACES_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
+
+should_skip_scope() {
+  [[ "$SCOPE_MODE" == "changed" ]] || return 1
+  [[ -n "$CHANGED_FILES_RAW" ]] || return 1
+
+  local path
+  while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    case "$path" in
+      .github/workflows/ci.yml|\
+      .github/ci-scripts-static.txt|\
+      .github/ci-scripts-runtime.txt|\
+      generated/tenant-runtime/*|\
+      verification/*|\
+      scripts/qa/test-verify-generated-surfaces.sh|\
+      scripts/qa/verify-generated-surfaces.sh|\
+      scripts/qa/verify-verification-catalog.sh|\
+      scripts/governance/generate-ci-static-inventory.py|\
+      scripts/governance/generate-ci-runtime-inventory.py|\
+      scripts/acceptance/generate_runtime_routing_matrix.py|\
+      deploy/k8s/base/kustomization.yaml|\
+      scripts/infra/sync-vendored-openedx-settings.sh)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
+
+if should_skip_scope; then
+  echo "SKIP scope skip: no generated-surface-relevant changes"
+  exit 0
+fi
+
 tmpdir="$(mktemp -d -t verify-generated-surfaces.XXXXXX)"
 cleanup() {
   rm -rf "$tmpdir"
