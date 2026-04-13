@@ -593,6 +593,8 @@ jobs:
             export VALIDATE_DEPLOY_CONTRACT_CHANGED_FILES="$CI_CHANGED_FILES"
             export VERIFY_SECRET_CLASSIFICATION_SCOPE=changed
             export VERIFY_SECRET_CLASSIFICATION_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_DESIGN_TOKEN_USAGE_SCOPE=changed
+            export VERIFY_DESIGN_TOKEN_USAGE_CHANGED_FILES="$CI_CHANGED_FILES"
           fi
           SCRIPT_LIST="${{ matrix.shard.file }}" PARALLELISM=4 TIMEOUT_SECS=300 \
             ./scripts/qa/run-release-verification-gates.sh

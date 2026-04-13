@@ -11,6 +11,32 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+SCOPE_MODE="${VERIFY_DESIGN_TOKEN_USAGE_SCOPE:-}"
+CHANGED_FILES_RAW="${VERIFY_DESIGN_TOKEN_USAGE_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
+
+should_skip_scope() {
+  [[ "$SCOPE_MODE" == "changed" ]] || return 1
+  [[ -n "$CHANGED_FILES_RAW" ]] || return 1
+
+  while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    case "$path" in
+      .github/workflows/ci.yml|\
+      scripts/qa/verify-design-token-usage.sh|\
+      assets/branding/tokens.css|\
+      infrastructure/tutor/themes/mereka/*)
+        return 1
+        ;;
+    esac
+  done <<< "$CHANGED_FILES_RAW"
+
+  return 0
+}
+
+if should_skip_scope; then
+  echo "PASS verify-design-token-usage (scope skip: no design-token authority changes)"
+  exit 0
+fi
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
