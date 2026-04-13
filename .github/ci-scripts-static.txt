@@ -277,7 +277,6 @@ scripts/qa/verify-slot-matrix.sh
 scripts/qa/verify-analytics-key.sh
 scripts/qa/verify-analytics-undefined-regression.sh
 scripts/qa/verify-analytics-key-elimination.sh
-scripts/qa/verify-enterprise-observability.sh
 scripts/qa/verify-idempotency.sh
 scripts/qa/verify-tutor-branding-render.sh
 scripts/qa/verify-openedx-image-branding.sh
@@ -330,13 +329,10 @@ scripts/qa/audit-grafana-dashboard.sh
 scripts/qa/audit-observability.sh
 scripts/qa/audit-velero.sh
 scripts/qa/verify-mux-alert-wiring.sh
-scripts/qa/verify-observability-loki-labels.sh
 scripts/qa/verify-observability-loki-log-sources.sh
 scripts/qa/verify-observability-prometheusrules.sh
-scripts/qa/verify-observability-retention.sh
 scripts/qa/verify-observability-servicemonitors.sh
 scripts/qa/verify-observability-structured-logging.sh
-scripts/qa/verify-observability-tracing.sh
 scripts/qa/verify-observability-validation.sh
 scripts/qa/verify-otel-naming.sh
 scripts/infra/check-error-budget-gate.sh

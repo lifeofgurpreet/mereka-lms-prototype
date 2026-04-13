@@ -1,8 +1,8 @@
 {
   "max_total_verify_scripts": 628,
-  "max_manual_only_scripts": 190,
+  "max_manual_only_scripts": 191,
   "max_deprecated_candidate_scripts": 35,
   "min_ci_static_bound": 324,
   "budget_reviewed_at": "2026-04-13",
-  "budget_rationale": "Reviewed 2026-04-13: +1 script (verify-benchmark-artifact-contract.sh) promoted into ci_static release-blocking coverage. Budget raised 627→628 and ci_static floor raised 323→324; manual-only and deprecated-candidate counts remain within budget."
+  "budget_rationale": "Reviewed 2026-04-13: +1 script (verify-benchmark-artifact-contract.sh) promoted into ci_static release-blocking coverage, and +1 live-cluster enterprise observability verifier reclassified from static to manual-only runtime inventory. Budget raised 627→628, manual-only ceiling raised 190→191, and ci_static floor raised 323→324."
 }

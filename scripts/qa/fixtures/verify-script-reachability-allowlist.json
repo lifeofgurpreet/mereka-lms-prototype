@@ -60,6 +60,7 @@
     "scripts/qa/verify-enterprise-frontend-live-contract.sh",
     "scripts/qa/verify-enterprise-integrated-channels.sh",
     "scripts/qa/verify-enterprise-mfe-nreum-clean.sh",
+    "scripts/qa/verify-enterprise-observability.sh",
     "scripts/qa/verify-enterprise-secrets.sh",
     "scripts/qa/verify-enterprise-sso-saml.sh",
     "scripts/qa/verify-enterprise-tenant-isolation.sh",

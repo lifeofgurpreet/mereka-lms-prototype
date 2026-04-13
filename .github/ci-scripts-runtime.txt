@@ -45,6 +45,7 @@ scripts/release/generate_release_object.py  # WORKTREE_CONTEXT (derives the cano
 
 # ── Live infrastructure required ─────────────────────────────────────────────────────
 scripts/qa/verify-enterprise-sso-readiness.sh --mode repo  # LIVE_CLUSTER
+scripts/qa/verify-enterprise-observability.sh  # LIVE_CLUSTER (checks live enterprise service metrics, logs, and ServiceMonitor deployment state from the active cluster; not a repo-only static contract)
 scripts/qa/audit-authentik-policy-exceptions.sh  # LIVE_CLUSTER (reads live Authentik deployment logs for policy_exception events during OIDC authorize flows; not a repo-only static contract)
 scripts/qa/audit-db-exporter-telemetry.sh  # LIVE_CLUSTER
 scripts/qa/audit-velero-alert-pipeline.sh  # LIVE_CLUSTER
@@ -58,6 +59,9 @@ scripts/infra/ensure-atlas-allowlist-gke-nodes.sh  # LIVE_CLUSTER (mutates Atlas
 scripts/infra/validate-telemetry-connectivity.sh  # LIVE_CLUSTER
 scripts/qa/verify-grafana-runtime-readiness.sh  # LIVE_CLUSTER
 scripts/qa/verify-observability-loki-deployment.sh  # LIVE_CLUSTER (verifies live Promtail DaemonSet health and scrape posture from the active cluster; not a repo-only static contract)
+scripts/qa/verify-observability-loki-labels.sh  # LIVE_CLUSTER (inspects live Promtail configuration and cluster discovery to validate Loki label posture; not a repo-only static contract)
+scripts/qa/verify-observability-retention.sh  # LIVE_CLUSTER (reads live Loki, Tempo, and Prometheus runtime retention settings from the active cluster; not a repo-only static contract)
+scripts/qa/verify-observability-tracing.sh  # LIVE_CLUSTER (mixes repo tracing manifests with live Tempo and cluster readiness checks; runtime contract, not offline static proof)
 scripts/qa/verify-enterprise-service-deployment.sh  # LIVE_CLUSTER
 scripts/qa/verify-enterprise-frontend-live-contract.sh  # LIVE_CLUSTER
 scripts/qa/verify-org-role-ownership.sh  # LIVE_CLUSTER

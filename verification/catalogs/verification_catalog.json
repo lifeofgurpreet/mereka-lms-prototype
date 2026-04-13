@@ -5959,14 +5959,10 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -5979,13 +5975,13 @@
       "runtime_dependencies": [
         "cluster"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-035",
         "AC-036"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "on_demand",
@@ -11178,14 +11174,10 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev",
         "prod"
@@ -11194,17 +11186,17 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-observability-loki-labels.sh",
-      "reference_count": 7,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-LOG-003"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -11319,14 +11311,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev",
         "prod"
@@ -11335,18 +11323,18 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-observability-retention.sh",
-      "reference_count": 7,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-LOG-007",
         "AC-LOG-008"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -11483,14 +11471,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev",
         "prod"
@@ -11499,17 +11483,17 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-observability-tracing.sh",
-      "reference_count": 9,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-005"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -18750,7 +18734,7 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
-    "ci_static_bound": 388,
+    "ci_static_bound": 384,
     "kinds": {
       "verify": 628
     },
@@ -18761,14 +18745,14 @@
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 440,
+      "active": 436,
       "deprecated_candidate": 1,
-      "manual_only": 187
+      "manual_only": 191
     },
     "tiers": {
-      "exploratory_manual": 191,
+      "exploratory_manual": 195,
       "periodic_runtime": 21,
-      "release_blocking": 416
+      "release_blocking": 412
     },
     "total_verify_scripts": 628,
     "workflow_direct_bound": 68

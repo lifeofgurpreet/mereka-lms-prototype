@@ -351,7 +351,6 @@ ci_static_inventory:
     - script: scripts/qa/verify-analytics-key.sh
     - script: scripts/qa/verify-analytics-undefined-regression.sh
     - script: scripts/qa/verify-analytics-key-elimination.sh
-    - script: scripts/qa/verify-enterprise-observability.sh
     - script: scripts/qa/verify-idempotency.sh
     - script: scripts/qa/verify-tutor-branding-render.sh
     - script: scripts/qa/verify-openedx-image-branding.sh
@@ -406,13 +405,10 @@ ci_static_inventory:
     - script: scripts/qa/audit-observability.sh
     - script: scripts/qa/audit-velero.sh
     - script: scripts/qa/verify-mux-alert-wiring.sh
-    - script: scripts/qa/verify-observability-loki-labels.sh
     - script: scripts/qa/verify-observability-loki-log-sources.sh
     - script: scripts/qa/verify-observability-prometheusrules.sh
-    - script: scripts/qa/verify-observability-retention.sh
     - script: scripts/qa/verify-observability-servicemonitors.sh
     - script: scripts/qa/verify-observability-structured-logging.sh
-    - script: scripts/qa/verify-observability-tracing.sh
     - script: scripts/qa/verify-observability-validation.sh
     - script: scripts/qa/verify-otel-naming.sh
     - script: scripts/infra/check-error-budget-gate.sh
@@ -674,6 +670,9 @@ ci_runtime_inventory:
     - script: scripts/qa/verify-enterprise-sso-readiness.sh
       category: LIVE_CLUSTER
       args: ["--mode", "repo"]
+    - script: scripts/qa/verify-enterprise-observability.sh
+      category: LIVE_CLUSTER
+      note: checks live enterprise service metrics, logs, and ServiceMonitor deployment state from the active cluster; not a repo-only static contract
     - script: scripts/qa/audit-authentik-policy-exceptions.sh
       category: LIVE_CLUSTER
       note: reads live Authentik deployment logs for policy_exception events during OIDC authorize flows; not a repo-only static contract
@@ -708,6 +707,15 @@ ci_runtime_inventory:
     - script: scripts/qa/verify-observability-loki-deployment.sh
       category: LIVE_CLUSTER
       note: verifies live Promtail DaemonSet health and scrape posture from the active cluster; not a repo-only static contract
+    - script: scripts/qa/verify-observability-loki-labels.sh
+      category: LIVE_CLUSTER
+      note: inspects live Promtail configuration and cluster discovery to validate Loki label posture; not a repo-only static contract
+    - script: scripts/qa/verify-observability-retention.sh
+      category: LIVE_CLUSTER
+      note: reads live Loki, Tempo, and Prometheus runtime retention settings from the active cluster; not a repo-only static contract
+    - script: scripts/qa/verify-observability-tracing.sh
+      category: LIVE_CLUSTER
+      note: mixes repo tracing manifests with live Tempo and cluster readiness checks; runtime contract, not offline static proof
     - script: scripts/qa/verify-enterprise-service-deployment.sh
       category: LIVE_CLUSTER
     - script: scripts/qa/verify-enterprise-frontend-live-contract.sh
