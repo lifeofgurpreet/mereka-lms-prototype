@@ -5970,7 +5970,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-enterprise-observability.sh",
-      "reference_count": 6,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
