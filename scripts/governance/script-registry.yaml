@@ -75,12 +75,14 @@ ci_static_inventory:
     - script: scripts/qa/verify-script-governance-census.sh
     - script: scripts/qa/verify-script-governance-dangerous.sh
     - script: scripts/qa/verify-script-governance-orphans.sh
+      estimated_seconds: 8
     - script: scripts/qa/verify-siteconfig-authority.sh
     - script: scripts/qa/test-verify-script-governance-dangerous.sh
       estimated_seconds: 19
     - script: scripts/qa/test-verify-script-governance-orphans.sh
       estimated_seconds: 18
     - script: scripts/qa/test-verify-siteconfig-authority.sh
+      estimated_seconds: 7
     - script: scripts/qa/test-generate-script-governance-catalog.sh
     - script: scripts/qa/test-build-script-governance-review-packet.sh
     - script: scripts/qa/test-verify-authn-submodule-path-contract.sh
@@ -189,6 +191,7 @@ ci_static_inventory:
       estimated_seconds: 13
     - script: scripts/qa/verify-evidence-redaction.sh
     - script: scripts/qa/validate-deploy-contract.sh
+      estimated_seconds: 8
     - script: scripts/qa/verify-k8s-deployment-spec.sh
     - script: scripts/qa/verify-migration-init-contract.sh
     - script: scripts/qa/verify-dev-db-rebuild-contract.sh
@@ -224,6 +227,7 @@ ci_static_inventory:
     - script: scripts/qa/audit-tenant-config-safety.sh
     - script: scripts/qa/validate-observability-compliance.sh
       args: ["--mode", "local"]
+      estimated_seconds: 9
     - script: scripts/qa/verify-observability-stack.sh
     - script: scripts/qa/verify-sentry-wiring.sh
     - script: scripts/qa/verify-sentry-cli-contract.sh
@@ -235,6 +239,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-cicd-ios-build.sh
     - script: scripts/qa/verify-cicd-tutor-plugin-test.sh
     - script: scripts/qa/verify-ci-runner-policy.sh
+      estimated_seconds: 8
     - script: scripts/qa/test-verify-ci-runner-policy.sh
     - script: scripts/qa/verify-execution-invariants-pack.sh
     - script: scripts/qa/verify-stabilization-control-board.sh
@@ -252,6 +257,7 @@ ci_static_inventory:
       estimated_seconds: 21
     - script: scripts/qa/verify-ci-cache-policy.sh
     - script: scripts/qa/test-verify-ci-cache-policy.sh
+      estimated_seconds: 8
     - script: scripts/qa/verify-benchmark-artifact-contract.sh
     - script: scripts/qa/verify-verification-catalog.sh
     - script: scripts/qa/test-verify-verification-catalog.sh
@@ -310,6 +316,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-brand-package-runtime.sh
       args: ["--allow-missing-image"]
     - script: scripts/qa/verify-token-integrity-routing.sh
+      estimated_seconds: 6
     - script: scripts/qa/verify-token-contrast.sh
     - script: scripts/branding/verify-token-drift.sh
     - script: scripts/branding/validate-token-consumers.sh
@@ -362,6 +369,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-caddy-cache-policy.sh
     - script: scripts/qa/verify-build-invariants.sh
     - script: scripts/qa/verify-ci-script-list.sh
+      estimated_seconds: 10
     - script: scripts/qa/verify-externalsecret-config.sh
     - script: scripts/qa/verify-k8s-secret-scan.sh
     - script: scripts/qa/verify-mobile-secrets-inventory.sh
@@ -395,6 +403,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-tenant-provisioning-enhanced.sh
     - script: scripts/qa/verify-tenant-provisioning.sh
     - script: scripts/qa/audit-grafana-dashboard.sh
+      estimated_seconds: 7
     - script: scripts/qa/audit-observability.sh
     - script: scripts/qa/audit-velero.sh
     - script: scripts/qa/verify-mux-alert-wiring.sh
@@ -500,7 +509,9 @@ ci_static_inventory:
     - script: scripts/qa/verify-cicd-release-rollback.sh
     - script: scripts/qa/verify-deployment-critical-coverage.sh
     - script: scripts/qa/verify-spec-dedupe-normalize.sh
+      estimated_seconds: 8
     - script: scripts/qa/verify-manifest-integrity.sh
+      estimated_seconds: 17
     - script: scripts/qa/verify-commit-signing.sh
     - script: scripts/qa/verify-body-limits.sh
     - script: scripts/qa/verify-binary-pinning-pcp.sh
@@ -561,6 +572,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-arc-runner-contract.sh
     - script: scripts/qa/verify-ci-execution-contract.sh
     - script: scripts/qa/verify-runtime-proof-fixture-pack.sh
+      estimated_seconds: 7
     - script: scripts/qa/verify-course-catalog-durability.sh
     - script: scripts/qa/verify-vendored-settings-drift.sh
     - script: scripts/qa/verify-env-auth-parity.sh

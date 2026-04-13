@@ -31,16 +31,24 @@ acceptance_criteria:
         file: tests/test_example.py
 EOF
 
+run_verify() {
+  env -u CI_CHANGED_FILES \
+      -u VERIFY_SPEC_DEDUPE_NORMALIZE_SCOPE \
+      -u VERIFY_SPEC_DEDUPE_NORMALIZE_CHANGED_FILES \
+      REPO_ROOT_OVERRIDE="$tmpdir" \
+      bash "$VERIFY"
+}
+
 run_expect_pass() {
   local label="$1"
-  REPO_ROOT_OVERRIDE="$tmpdir" bash "$VERIFY" >/tmp/verify-spec-dedupe.out 2>&1
+  run_verify >/tmp/verify-spec-dedupe.out 2>&1
   echo "PASS ${label}"
 }
 
 run_expect_fail() {
   local label="$1"
   set +e
-  REPO_ROOT_OVERRIDE="$tmpdir" bash "$VERIFY" >/tmp/verify-spec-dedupe.out 2>&1
+  run_verify >/tmp/verify-spec-dedupe.out 2>&1
   local rc=$?
   set -e
   if [[ "$rc" -eq 0 ]]; then
