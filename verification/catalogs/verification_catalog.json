@@ -436,10 +436,14 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "on_demand",
+      "cadence": "per_pr_and_push",
       "canonical": true,
-      "ci_binding": [],
-      "ci_entrypoints": [],
+      "ci_binding": [
+        "workflow_direct"
+      ],
+      "ci_entrypoints": [
+        "workflow_direct"
+      ],
       "env_scope": [
         "dev",
         "prod"
@@ -448,17 +452,17 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/infra/verify-tutor-config.sh",
-      "reference_count": 39,
+      "reference_count": 40,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "low",
+      "severity": "high",
       "spec_ids": [
         "AC-TCR-004"
       ],
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "on_demand",
@@ -12570,7 +12574,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-post-deploy-smoke.sh",
-      "reference_count": 17,
+      "reference_count": 21,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -18674,17 +18678,17 @@
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 436,
+      "active": 437,
       "deprecated_candidate": 1,
-      "manual_only": 188
+      "manual_only": 187
     },
     "tiers": {
-      "exploratory_manual": 192,
+      "exploratory_manual": 191,
       "periodic_runtime": 21,
-      "release_blocking": 412
+      "release_blocking": 413
     },
     "total_verify_scripts": 625,
-    "workflow_direct_bound": 65
+    "workflow_direct_bound": 66
   },
   "version": "1"
 }

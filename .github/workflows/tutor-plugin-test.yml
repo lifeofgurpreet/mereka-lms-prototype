@@ -56,12 +56,12 @@ jobs:
 
       - name: Verify standalone shim is metadata-only
         run: |
-          rg -q --fixed-strings "Legacy compatibility shim for the retired standalone mfe_oauth_fix Tutor plugin." infrastructure/tutor/plugins/mfe_oauth_fix.py
-          if rg -q "hooks\\.Filters\\.ENV_PATCHES" infrastructure/tutor/plugins/mfe_oauth_fix.py; then
+          grep -Fq "Legacy compatibility shim for the retired standalone mfe_oauth_fix Tutor plugin." infrastructure/tutor/plugins/mfe_oauth_fix.py
+          if grep -Eq "hooks\\.Filters\\.ENV_PATCHES" infrastructure/tutor/plugins/mfe_oauth_fix.py; then
             echo "Legacy shim must not emit ENV_PATCHES" >&2
             exit 1
           fi
-          if rg -n "^\\s*- mfe_oauth_fix$" infrastructure/tutor/config.example.yml; then
+          if grep -En "^\\s*- mfe_oauth_fix$" infrastructure/tutor/config.example.yml; then
             echo "Legacy standalone plugin must remain disabled in config.example.yml" >&2
             exit 1
           fi
