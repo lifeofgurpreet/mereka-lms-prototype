@@ -377,7 +377,6 @@ ci_static_inventory:
     - script: scripts/qa/verify-precommit-secret-scan.sh
     - script: scripts/qa/verify-purchase-gateway-resilience.sh
     - script: scripts/qa/verify-purchase-gateway-security.sh
-    - script: scripts/qa/verify-secrets-live-cluster.sh
     - script: scripts/qa/verify-security-exceptions.sh
     - script: scripts/qa/verify-sla-report-security.sh
     - script: scripts/infra/check-cert-sans.sh
@@ -685,6 +684,9 @@ ci_runtime_inventory:
     - script: scripts/infra/check-cluster-status.sh
       category: LIVE_CLUSTER
       note: direct kubectl and local curl cluster probe for current namespace/services; runtime operator check, not offline static proof
+    - script: scripts/qa/verify-secrets-live-cluster.sh
+      category: LIVE_CLUSTER
+      note: validates ExternalSecrets, deployment envFrom wiring, and pod secret env vars against the active cluster; runtime secrets proof, not offline static CI
     - script: scripts/infra/monitor-atlas-allowlist-vps.sh
       category: LIVE_CLUSTER
       note: cron-friendly drift monitor; writes status file and optionally sends webhook alert

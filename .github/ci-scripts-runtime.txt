@@ -52,6 +52,7 @@ scripts/qa/audit-velero-alert-pipeline.sh  # LIVE_CLUSTER
 scripts/infra/check-atlas-allowlist.sh  # LIVE_CLUSTER
 scripts/infra/check-atlas-allowlist-vps.sh  # LIVE_CLUSTER (checks Atlas allowlist against current VPS egress IP; can refresh Atlas profile first)
 scripts/infra/check-cluster-status.sh  # LIVE_CLUSTER (direct kubectl and local curl cluster probe for current namespace/services; runtime operator check, not offline static proof)
+scripts/qa/verify-secrets-live-cluster.sh  # LIVE_CLUSTER (validates ExternalSecrets, deployment envFrom wiring, and pod secret env vars against the active cluster; runtime secrets proof, not offline static CI)
 scripts/infra/monitor-atlas-allowlist-vps.sh  # LIVE_CLUSTER (cron-friendly drift monitor; writes status file and optionally sends webhook alert)
 scripts/infra/setup-vps-atlas-allowlist-cron.sh  # LIVE_CLUSTER (installs the VPS cron entry for the Atlas allowlist drift monitor and replaces legacy Atlas cron lines)
 scripts/qa/audit-atlas-allowlist-monitor.sh  # LIVE_CLUSTER (audits VPS Atlas allowlist monitor wiring, freshness, and optional webhook posture)
