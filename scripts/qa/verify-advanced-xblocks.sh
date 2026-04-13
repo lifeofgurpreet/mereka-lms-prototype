@@ -12,7 +12,7 @@
 # - AC-ASS-028: No accessibility violations
 #
 # Usage:
-#   ./scripts/qa/verify-advanced-xblocks.sh [--verbose]
+#   ./scripts/qa/verify-advanced-xblocks.sh [--verbose] [--image-context] [--image IMAGE]
 #
 set -euo pipefail
 
@@ -27,11 +27,30 @@ TOTAL_CHECKS=0
 PASSED_CHECKS=0
 FAILED_CHECKS=0
 
-# Verbose mode
 VERBOSE=false
-if [[ "${1:-}" == "--verbose" ]]; then
-    VERBOSE=true
-fi
+IMAGE_CONTEXT=false
+OPENEDX_IMAGE="${OPENEDX_IMAGE:-docker.io/overhangio/openedx:21.0.0-indigo}"
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --verbose)
+            VERBOSE=true
+            shift
+            ;;
+        --image-context)
+            IMAGE_CONTEXT=true
+            shift
+            ;;
+        --image)
+            OPENEDX_IMAGE="${2:?--image requires an image reference}"
+            shift 2
+            ;;
+        *)
+            echo "Usage: $0 [--verbose] [--image-context] [--image IMAGE]" >&2
+            exit 1
+            ;;
+    esac
+done
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
@@ -120,6 +139,56 @@ check_contains() {
         fi
         return 1
     fi
+}
+
+check_image_xblock_resolution() {
+    local image=$1
+    local tmp_output
+    tmp_output="$(mktemp -t advanced-xblocks-image-check.XXXXXX)"
+
+    if ! command -v docker >/dev/null 2>&1; then
+        check_fail "Built image XBlock resolution: docker CLI unavailable"
+        rm -f "$tmp_output"
+        return 1
+    fi
+
+    if docker run --rm -i "$image" /openedx/venv/bin/python - >"$tmp_output" 2>&1 <<'PY'
+from importlib import import_module
+from importlib.metadata import entry_points
+
+modules = [
+    "openedx_advanced_xblocks",
+    "openedx_advanced_xblocks.xblocks",
+    "openedx_advanced_xblocks.xblocks.drag_drop_v2",
+    "openedx_advanced_xblocks.xblocks.math_input",
+    "openedx_advanced_xblocks.xblocks.randomized_pool",
+]
+required_entry_points = ["drag_drop_v2", "math_input", "randomized_pool"]
+
+for module in modules:
+    import_module(module)
+
+eps = {ep.name: ep for ep in entry_points(group="xblock.v1")}
+for name in required_entry_points:
+    if name not in eps:
+        raise SystemExit(f"missing xblock.v1 entry point: {name}")
+    eps[name].load()
+PY
+    then
+        check_pass "Built image resolves advanced XBlocks modules and xblock.v1 entry points: $image"
+        if [[ "$VERBOSE" == "true" ]]; then
+            sed 's/^/  /' "$tmp_output"
+        fi
+        rm -f "$tmp_output"
+        return 0
+    fi
+
+    check_fail "Built image resolves advanced XBlocks modules and xblock.v1 entry points: $image"
+    if [[ "$VERBOSE" == "true" ]]; then
+        sed 's/^/  /' "$tmp_output"
+    fi
+    rm -f "$tmp_output"
+    return 1
 }
 
 echo "========================================="
@@ -524,6 +593,18 @@ check_contains \
     "Randomized pool entry point"
 
 echo ""
+
+if [[ "$IMAGE_CONTEXT" == "true" ]]; then
+    # ============================================================================
+    # 12. Built Image Entry-Point Resolution
+    # ============================================================================
+    echo "12. Checking built image entry-point resolution..."
+    echo ""
+
+    check_image_xblock_resolution "$OPENEDX_IMAGE"
+
+    echo ""
+fi
 
 # ============================================================================
 # Summary

@@ -94,15 +94,15 @@ echo ""
 # Step 5: Build Images (if needed)
 echo -e "${BLUE}Step 5: Checking Docker images...${NC}"
 if ! docker images | grep -q "openedx.*nightly"; then
-    echo -e "${YELLOW}⚠️  OpenEdX image not found. Building (this takes 20-30 minutes)...${NC}"
-    tutor images build openedx
+    echo -e "${YELLOW}⚠️  OpenEdX image not found. Building fast local image (this still takes time)...${NC}"
+    ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 else
     echo -e "${GREEN}✅ OpenEdX image found${NC}"
 fi
 
 if ! docker images | grep -q "openedx-mfe.*nightly"; then
-    echo -e "${YELLOW}⚠️  MFE image not found. Building (this takes 15-20 minutes)...${NC}"
-    tutor images build mfe
+    echo -e "${YELLOW}⚠️  MFE image not found. Building fast local image (this still takes time)...${NC}"
+    ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 else
     echo -e "${GREEN}✅ MFE image found${NC}"
 fi
@@ -223,6 +223,9 @@ echo "    • Username: admin"
 echo "    • Password: changeme-local-only (reset during first local login)"
 echo ""
 echo "  🛠️  Next Steps:"
+echo "    • Fast Open edX rebuild: ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast"
+echo "    • Fast MFE rebuild: ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast"
+echo "    • Strict Open edX proof: BENCHMARK_CLASS=proof-class ./scripts/bench/measure-openedx-build.sh \"$PWD\" openedx-proof-noneditable"
 echo "    • Run: ./tools/comprehensive-test.sh"
 echo "    • Read: docs/ops/quickref/README.md"
 echo "    • Check: docs/status/readiness/README.md"

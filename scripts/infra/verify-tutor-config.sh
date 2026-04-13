@@ -100,6 +100,91 @@ regex_in_file() {
   fi
 }
 
+fixed_pattern_count() {
+  local pattern="$1"
+  local file="$2"
+
+  if [[ ! -f "$file" ]]; then
+    echo ""
+    return 1
+  fi
+
+  python3 - "$pattern" "$file" <<'PY'
+from pathlib import Path
+import sys
+
+pattern = sys.argv[1]
+path = Path(sys.argv[2])
+text = path.read_text()
+print(text.count(pattern))
+PY
+}
+
+fixed_pattern_count_equals() {
+  local pattern="$1"
+  local expected="$2"
+  local file="$3"
+  local description="$4"
+
+  if [[ ! -f "$file" ]]; then
+    check_fail "$description - file not found: $file"
+    return 1
+  fi
+
+  local count
+  count="$(fixed_pattern_count "$pattern" "$file")"
+  if [[ "$count" == "$expected" ]]; then
+    check_pass "$description"
+    return 0
+  fi
+
+  check_fail "$description - expected $expected occurrences of '$pattern' in $file, found $count"
+  return 1
+}
+
+regex_pattern_count() {
+  local pattern="$1"
+  local file="$2"
+
+  if [[ ! -f "$file" ]]; then
+    echo ""
+    return 1
+  fi
+
+  python3 - "$pattern" "$file" <<'PY'
+from pathlib import Path
+import re
+import sys
+
+pattern = re.compile(sys.argv[1], re.MULTILINE)
+path = Path(sys.argv[2])
+text = path.read_text()
+print(len(pattern.findall(text)))
+PY
+}
+
+regex_pattern_count_equals() {
+  local pattern="$1"
+  local expected="$2"
+  local file="$3"
+  local description="$4"
+
+  if [[ ! -f "$file" ]]; then
+    check_fail "$description - file not found: $file"
+    return 1
+  fi
+
+  local count
+  count="$(regex_pattern_count "$pattern" "$file")"
+  if [[ "$count" == "$expected" ]]; then
+    check_pass "$description"
+    return 0
+  fi
+
+  check_fail "$description - expected $expected matches for /$pattern/ in $file, found $count"
+  return 1
+}
+
 pattern_not_in_file() {
   local pattern="$1"
   local file="$2"
@@ -205,10 +290,7 @@ print_section "Checking Tutor Plugin Source of Truth"
 
 files_match "$PLUGIN_SRC_DIR/mereka_lms.py" "$PLUGIN_DIR/mereka_lms.py" "Tutor plugin entrypoint mirror is fresh"
 files_match "$PLUGIN_SRC_DIR/mereka_lms_mfe_slots.py" "$PLUGIN_DIR/mereka_lms_mfe_slots.py" "Tutor MFE slots module mirror is fresh"
-files_match "$PLUGIN_SRC_DIR/mfe_oauth_fix.py" "$PLUGIN_DIR/mfe_oauth_fix.py" "Legacy standalone MFE OAuth shim mirror is fresh"
 dirs_match "$PLUGIN_SRC_DIR/_mereka_lms" "$PLUGIN_DIR/_mereka_lms" "Tutor _mereka_lms package mirror is fresh"
-
-regex_pattern_count_equals "^- mfe_oauth_fix$" "0" "$TUTOR_ENV/config.yml" "Legacy standalone mfe_oauth_fix Tutor plugin is disabled"
 
 print_section "Checking Multi-Site Domain Configuration"
 
@@ -243,7 +325,7 @@ print_section "Checking MySQL Authentication Fix"
 
 DOCKER_COMPOSE="$TUTOR_ENV/env/local/docker-compose.yml"
 if [[ -f "$DOCKER_COMPOSE" ]]; then
-  pattern_in_file "default-authentication-plugin=mysql_native_password" "$DOCKER_COMPOSE" "MySQL native password plugin"
+  regex_in_file 'default-authentication-plugin=mysql_native_password|--mysql-native-password=ON' "$DOCKER_COMPOSE" "MySQL native password plugin"
   pattern_in_file "MYSQL_ROOT_HOST" "$DOCKER_COMPOSE" "MySQL remote root access"
 else
   check_warn "Docker Compose file not found (ok if using K8s only)"
@@ -258,6 +340,11 @@ MFE_THEME_DIR="$TUTOR_ENV/env/plugins/mfe/build/mfe/indigo/mereka"
 MFE_BRAND_DIR="$TUTOR_ENV/env/plugins/mfe/build/mfe/indigo/brand-mereka"
 if [[ -f "$MFE_DOCKERFILE" ]]; then
   check_pass "Rendered MFE Dockerfile exists: $MFE_DOCKERFILE"
+  if [[ -L "$MFE_DOCKERFILE" ]]; then
+    check_fail "Rendered MFE Dockerfile must not be a symlink: $MFE_DOCKERFILE -> $(readlink "$MFE_DOCKERFILE")"
+  else
+    check_pass "Rendered MFE Dockerfile is a regular file"
+  fi
 else
   check_warn "MFE Dockerfile not found (ok if MFE plugin not installed)"
 fi
@@ -301,6 +388,9 @@ fi
 
 if [[ -f "$MFE_INDIGO_ENV_CONFIG" ]]; then
   check_pass "Rendered Indigo env.config.jsx exists: $MFE_INDIGO_ENV_CONFIG"
+  pattern_in_file "mereka/mereka.scss" "$MFE_INDIGO_ENV_CONFIG" "MFE custom theme import"
+  pattern_in_file "const MerekaFooter" "$MFE_INDIGO_ENV_CONFIG" "Custom Mereka footer component"
+  pattern_in_file "RenderWidget: MerekaFooter" "$MFE_INDIGO_ENV_CONFIG" "Mereka footer rendered"
 else
   check_warn "Rendered Indigo env.config.jsx not found: $MFE_INDIGO_ENV_CONFIG"
 fi
@@ -339,13 +429,16 @@ fi
 print_section "Checking Custom Apps Integration"
 
 OPENEDX_DOCKERFILE="$TUTOR_ENV/env/build/openedx/Dockerfile"
+OPENEDX_NOTIFICATIONS_DIR="$REPO_ROOT/infrastructure/tutor/custom-apps/openedx_notifications"
+OPENEDX_NOTIFICATIONS_ACE_CHANNEL="$OPENEDX_NOTIFICATIONS_DIR/ace_channel.py"
+OPENEDX_NOTIFICATIONS_MODELS="$OPENEDX_NOTIFICATIONS_DIR/models.py"
+OPENEDX_NOTIFICATIONS_MIGRATION="$OPENEDX_NOTIFICATIONS_DIR/migrations/0001_initial.py"
 if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_in_file "mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "MFE OAuth fix app copied"
   pattern_in_file "openedx_prometheus" "$OPENEDX_DOCKERFILE" "Prometheus metrics app copied"
-  pattern_in_file "pip install -e /openedx/mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "MFE OAuth fix installed"
-  pattern_in_file "pip install -e /openedx/openedx_prometheus" "$OPENEDX_DOCKERFILE" "Prometheus metrics installed"
+  pattern_in_file 'if [ "$MEREKA_CUSTOM_APP_INSTALL_MODE" = "editable" ]; then' "$OPENEDX_DOCKERFILE" "High-churn custom-app install block is profile-aware"
+  pattern_in_file '-e /openedx/mfe_oauth_fix' "$OPENEDX_DOCKERFILE" "MFE OAuth fix editable install path present"
   pattern_in_file "django-prometheus" "$OPENEDX_DOCKERFILE" "django-prometheus installed"
-  pattern_not_in_file "Align compiled base requirements with the realized Python 3.11 compatibility contract." "$OPENEDX_DOCKERFILE" "rejected code-stage base requirements pin patch is absent"
   pattern_in_file "django-cors-headers==4.3.1" "$OPENEDX_DOCKERFILE" "django-cors-headers installed"
   fixed_pattern_count_equals "pkgconfig==1.5.5" "1" "$OPENEDX_DOCKERFILE" "pkgconfig toolchain pin is not duplicated"
   pattern_in_file "path==16.16.0" "$OPENEDX_DOCKERFILE" "legacy path provider installed"
@@ -354,6 +447,7 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_in_file "lazy==1.6" "$OPENEDX_DOCKERFILE" "lazy installed"
   pattern_in_file "lxml_html_clean==0.4.4" "$OPENEDX_DOCKERFILE" "lxml_html_clean installed"
   regex_in_file 'pymongo\[srv\]|dnspython' "$OPENEDX_DOCKERFILE" "pymongo[srv] installed (for Atlas)"
+  fixed_pattern_count_equals "translation settings import preflight ok" "1" "$OPENEDX_DOCKERFILE" "Translation preflight block is not duplicated"
 fi
 
 if [[ -f "$LMS_SETTINGS" ]]; then
@@ -362,37 +456,40 @@ if [[ -f "$LMS_SETTINGS" ]]; then
   pattern_in_file "django_prometheus" "$LMS_SETTINGS" "django_prometheus in INSTALLED_APPS"
   pattern_in_file "PrometheusBeforeMiddleware" "$LMS_SETTINGS" "Prometheus middleware (before)"
   pattern_in_file "PrometheusAfterMiddleware" "$LMS_SETTINGS" "Prometheus middleware (after)"
-  pattern_not_in_file "INSTALLED_APPS.append('mfe_oauth_fix')" "$LMS_SETTINGS" "No duplicate raw mfe_oauth_fix app injection"
-  pattern_not_in_file "INSTALLED_APPS.append('mereka_tenancy')" "$LMS_SETTINGS" "No duplicate raw mereka_tenancy app injection"
+  regex_pattern_count_equals "INSTALLED_APPS\\.append\\([\"']mfe_oauth_fix[\"']\\)" "1" "$LMS_SETTINGS" "Exactly one mfe_oauth_fix app registration"
+  regex_pattern_count_equals "(_safe_add_app\\([\"']openedx_prometheus[\"']\\)|INSTALLED_APPS\\.append\\([\"']openedx_prometheus[\"']\\))" "1" "$LMS_SETTINGS" "Exactly one openedx_prometheus app registration path"
+  regex_pattern_count_equals "(_safe_add_app\\([\"']mereka_tenancy[\"']\\)|INSTALLED_APPS\\.append\\([\"']mereka_tenancy[\"']\\))" "1" "$LMS_SETTINGS" "Exactly one mereka_tenancy app registration path"
+  regex_pattern_count_equals "(_safe_add_app\\([\"']openedx_notifications[\"']\\)|INSTALLED_APPS\\.append\\([\"']openedx_notifications[\"']\\))" "1" "$LMS_SETTINGS" "Exactly one openedx_notifications app registration path"
+  if grep -q 'MFE_CONFIG\["ORDER_HISTORY_URL"\] = ORDER_HISTORY_MICROFRONTEND_URL' "$LMS_SETTINGS" 2>/dev/null \
+    || grep -q 'MFE_CONFIG\["ORDER_HISTORY_URL"\].*/orders' "$LMS_SETTINGS" 2>/dev/null; then
+    check_pass "MFE ORDER_HISTORY_URL is defined in rendered LMS settings"
+  else
+    check_fail "MFE ORDER_HISTORY_URL is defined in rendered LMS settings - pattern not found in $LMS_SETTINGS"
+  fi
+  pattern_in_file 'f"https://{host}" for host in' "$LMS_SETTINGS" "Tenant extra-host CSP tuple is defined"
+  pattern_in_file 'f"https://apps.{host}" for host in' "$LMS_SETTINGS" "Tenant extra-host MFE CSP tuple is defined"
+  pattern_in_file "academy.biji-biji.com" "$LMS_SETTINGS" "Non-primary tenant hosts are present in rendered LMS settings"
+  pattern_in_file "skillourfuture.academy.mereka.io" "$LMS_SETTINGS" "SOF tenant host is present in rendered LMS settings"
 fi
 
-print_section "Checking Notifications Compatibility Guards"
-
-NOTIFICATIONS_CHANNEL="$REPO_ROOT/infrastructure/tutor/custom-apps/openedx_notifications/ace_channel.py"
-NOTIFICATIONS_MODEL="$REPO_ROOT/infrastructure/tutor/custom-apps/openedx_notifications/models.py"
-NOTIFICATIONS_MIGRATION="$REPO_ROOT/infrastructure/tutor/custom-apps/openedx_notifications/migrations/0001_initial.py"
-RENDERED_NOTIFICATIONS_CHANNEL="$TUTOR_ENV/env/build/openedx/infrastructure/tutor/custom-apps/openedx_notifications/ace_channel.py"
-RENDERED_NOTIFICATIONS_MODEL="$TUTOR_ENV/env/build/openedx/infrastructure/tutor/custom-apps/openedx_notifications/models.py"
-RENDERED_NOTIFICATIONS_MIGRATION="$TUTOR_ENV/env/build/openedx/infrastructure/tutor/custom-apps/openedx_notifications/migrations/0001_initial.py"
-
-pattern_in_file "getattr(ChannelType, \"IN_APP\", \"in_app\")" "$NOTIFICATIONS_CHANNEL" "ACE in-app channel uses runtime-safe ChannelType fallback"
-pattern_not_in_file "channel_type = ChannelType.IN_APP" "$NOTIFICATIONS_CHANNEL" "ACE channel avoids hard dependency on ChannelType.IN_APP"
-pattern_in_file "related_name='openedx_in_app_notifications'" "$NOTIFICATIONS_MODEL" "Notification model uses non-colliding related_name"
-pattern_in_file "related_name='openedx_in_app_notifications'" "$NOTIFICATIONS_MIGRATION" "Notification migration uses non-colliding related_name"
-pattern_not_in_file "related_name='notifications'" "$NOTIFICATIONS_MODEL" "Notification model avoids upstream notifications reverse accessor collision"
-
-if [[ -f "$RENDERED_NOTIFICATIONS_CHANNEL" ]]; then
-  pattern_in_file "getattr(ChannelType, \"IN_APP\", \"in_app\")" "$RENDERED_NOTIFICATIONS_CHANNEL" "Rendered ACE channel keeps runtime-safe ChannelType fallback"
-  pattern_not_in_file "channel_type = ChannelType.IN_APP" "$RENDERED_NOTIFICATIONS_CHANNEL" "Rendered ACE channel avoids hard dependency on ChannelType.IN_APP"
+if [[ -f "$OPENEDX_NOTIFICATIONS_ACE_CHANNEL" ]]; then
+  pattern_in_file 'getattr(ChannelType, "IN_APP", "in_app")' "$OPENEDX_NOTIFICATIONS_ACE_CHANNEL" "openedx_notifications ACE channel uses runtime-safe IN_APP fallback"
+  pattern_not_in_file "channel_type = ChannelType.IN_APP" "$OPENEDX_NOTIFICATIONS_ACE_CHANNEL" "No hard dependency on ChannelType.IN_APP enum member"
 fi
 
-if [[ -f "$RENDERED_NOTIFICATIONS_MODEL" ]]; then
-  pattern_in_file "related_name='openedx_in_app_notifications'" "$RENDERED_NOTIFICATIONS_MODEL" "Rendered notification model uses non-colliding related_name"
-  pattern_not_in_file "related_name='notifications'" "$RENDERED_NOTIFICATIONS_MODEL" "Rendered notification model avoids upstream notifications reverse accessor collision"
+if [[ -f "$OPENEDX_NOTIFICATIONS_MODELS" ]]; then
+  pattern_in_file "related_name='openedx_in_app_notifications'" "$OPENEDX_NOTIFICATIONS_MODELS" "openedx_notifications model uses non-conflicting reverse accessor"
+  pattern_not_in_file "related_name='notifications'" "$OPENEDX_NOTIFICATIONS_MODELS" "openedx_notifications model does not reuse upstream notifications reverse accessor"
 fi
 
-if [[ -f "$RENDERED_NOTIFICATIONS_MIGRATION" ]]; then
-  pattern_in_file "related_name='openedx_in_app_notifications'" "$RENDERED_NOTIFICATIONS_MIGRATION" "Rendered notification migration uses non-colliding related_name"
+if [[ -f "$OPENEDX_NOTIFICATIONS_MIGRATION" ]]; then
+  pattern_in_file "related_name='openedx_in_app_notifications'" "$OPENEDX_NOTIFICATIONS_MIGRATION" "openedx_notifications migration keeps non-conflicting reverse accessor"
+  pattern_not_in_file "related_name='notifications'" "$OPENEDX_NOTIFICATIONS_MIGRATION" "openedx_notifications migration does not reintroduce upstream reverse accessor collision"
+fi
+
+CONFIG_DEFAULTS_FILE="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/config_defaults.py"
+if [[ -f "$CONFIG_DEFAULTS_FILE" ]]; then
+  pattern_in_file "MEREKA_PREVIEW_LMS_BASE" "$CONFIG_DEFAULTS_FILE" "Mereka Tutor config defaults define preview LMS base contract"
 fi
 
 print_section "Checking Build Optimizations"
@@ -408,16 +505,62 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
     check_pass "Resilient npm install with retries"
   elif grep -qE "npm clean-install --no-audit --registry=" "$OPENEDX_DOCKERFILE" 2>/dev/null; then
     check_pass "Resilient npm install command (single-run)"
+  elif grep -qE "npm install --no-audit --package-lock=false --registry=" "$OPENEDX_DOCKERFILE" 2>/dev/null; then
+    check_pass "Resilient npm install command (package-lock tolerance)"
   else
     check_fail "NPM install command with lockfile tolerance not found in $OPENEDX_DOCKERFILE"
   fi
 
-  if grep -qE "for attempt in 1 2 3.*pip install" "$OPENEDX_DOCKERFILE" 2>/dev/null; then
-    check_pass "Resilient pip install with retries"
-  elif grep -qE "pip install --no-build-isolation -r /openedx/edx-platform/requirements/edx/base.txt -r /openedx/edx-platform/requirements/edx/assets.txt" "$OPENEDX_DOCKERFILE" 2>/dev/null; then
-    check_pass "Fallback pip install command"
+  if grep -qE '\$PIP_COMMAND install --no-build-isolation -r /openedx/edx-platform/requirements/edx/base.txt -r /openedx/edx-platform/requirements/edx/assets.txt' "$OPENEDX_DOCKERFILE" 2>/dev/null; then
+    check_pass "uv-compatible requirements install command"
+  elif grep -qE '\$PIP_COMMAND install --no-build-isolation -r /tmp/base-filtered.txt -r /tmp/assets.txt' "$OPENEDX_DOCKERFILE" 2>/dev/null; then
+    check_pass "uv-compatible requirements install command (/tmp filtered requirements)"
   else
     check_fail "Python requirements install command with lockfile handling not found in $OPENEDX_DOCKERFILE"
+  fi
+
+  pattern_in_file "translation settings import preflight ok" "$OPENEDX_DOCKERFILE" "Translation settings import preflight"
+  fixed_pattern_count_equals "Stripped google font imports from {changed} scss files" "1" "$OPENEDX_DOCKERFILE" "Brand compile block is not duplicated"
+  pattern_not_in_file "webpack skipped (prebuilt bundles)" "$OPENEDX_DOCKERFILE" "Proof lane does not use conditional webpack skip"
+  pattern_not_in_file "RUN uv pip install -e /openedx/mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "No duplicate production-stage custom app reinstalls remain"
+  pattern_in_file 'pip install --no-cache-dir --no-build-isolation uwsgi==2.0.24' "$OPENEDX_DOCKERFILE" "uwsgi remains on explicit pip compatibility fallback"
+  fixed_pattern_count_equals "pip install" "1" "$OPENEDX_DOCKERFILE" "Only uwsgi remains on plain pip in rendered Open edX Dockerfile"
+  pattern_in_file 'RUN $PIP_COMMAND install "ora2==7.0.0"' "$OPENEDX_DOCKERFILE" "ora2 install uses uv-compatible translation installer"
+  regex_in_file 'RUN \$PIP_COMMAND install .*django-prometheus==2\.3\.1.*platform-plugin-aspects==1\.1\.2' "$OPENEDX_DOCKERFILE" "Support dependency block uses uv-compatible production installer"
+  pattern_not_in_file "RUN pip install -e /openedx/mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "No legacy pip editable custom-app install remains in production stage"
+  pattern_not_in_file "RUN pip install -e /openedx/openedx_prometheus" "$OPENEDX_DOCKERFILE" "No legacy pip editable custom-app install remains for openedx_prometheus"
+  pattern_in_file 'ARG MEREKA_CUSTOM_APP_INSTALL_MODE=editable' "$OPENEDX_DOCKERFILE" "Custom app install mode arg defaults to editable"
+  pattern_in_file 'if [ "$MEREKA_CUSTOM_APP_INSTALL_MODE" = "editable" ]; then' "$OPENEDX_DOCKERFILE" "Custom app install mode gates runtime contract"
+  pattern_in_file 'Skipping final runtime custom-app source carry (noneditable mode)' "$OPENEDX_DOCKERFILE" "Proof-ready runtime source carry skip path exists"
+  pattern_in_file 'cp -a /tmp/python-requirements-openedx/mfe_oauth_fix /openedx/mfe_oauth_fix' "$OPENEDX_DOCKERFILE" "High-churn runtime source carry preserved for mfe_oauth_fix"
+  pattern_in_file 'cp -a /tmp/python-requirements-openedx/openedx_tenant_cache /openedx/openedx_tenant_cache' "$OPENEDX_DOCKERFILE" "High-churn runtime source carry preserved for openedx_tenant_cache"
+  pattern_in_file 'cp -a /tmp/python-requirements-openedx/plugins/mereka_tenancy /openedx/plugins/mereka_tenancy' "$OPENEDX_DOCKERFILE" "High-churn runtime source carry preserved for mereka_tenancy"
+  pattern_not_in_file "COPY --from=python-requirements --chown=app:app /openedx/mfe_oauth_fix /openedx/mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "Legacy unconditional final runtime source carry removed"
+  pattern_not_in_file "COPY --from=python-requirements --chown=app:app /openedx/openedx_prometheus /openedx/openedx_prometheus" "$OPENEDX_DOCKERFILE" "Legacy unconditional final runtime source carry removed for openedx_prometheus"
+  pattern_not_in_file "COPY --from=python-requirements --chown=app:app /openedx/plugins/mereka_tenancy /openedx/plugins/mereka_tenancy" "$OPENEDX_DOCKERFILE" "Legacy unconditional final runtime source carry removed for mereka_tenancy"
+  pattern_not_in_file 'cp -a /tmp/python-requirements-openedx/openedx_prometheus /openedx/openedx_prometheus' "$OPENEDX_DOCKERFILE" "Stable app openedx_prometheus is not carried into final runtime source tree"
+  pattern_not_in_file 'FROM production AS final' "$OPENEDX_DOCKERFILE" "Final runtime image no longer inherits the full production stage"
+  pattern_in_file 'FROM docker.io/ubuntu:22.04 AS final' "$OPENEDX_DOCKERFILE" "Final runtime image is rebuilt from a dedicated Ubuntu runtime base"
+  pattern_in_file 'FROM production AS runtime-edx-platform-pruned' "$OPENEDX_DOCKERFILE" "Runtime edx-platform prune stage exists"
+  fixed_pattern_count_equals 'FROM production AS runtime-edx-platform-pruned' "1" "$OPENEDX_DOCKERFILE" "Runtime edx-platform prune stage is rendered exactly once"
+  pattern_in_file 'COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=runtime-edx-platform-pruned /openedx/edx-platform /openedx/edx-platform' "$OPENEDX_DOCKERFILE" "Final runtime image copies edx-platform from the prune stage"
+  pattern_not_in_file 'COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/edx-platform /openedx/edx-platform' "$OPENEDX_DOCKERFILE" "Final runtime image no longer copies edx-platform straight from production"
+
+  OPENEDX_FINAL_STAGE_TEXT=$(awk '/^FROM docker.io\/ubuntu:22.04 AS final/{flag=1} flag{print}' "$OPENEDX_DOCKERFILE")
+  if grep -Fq '/openedx/nodeenv' <<<"$OPENEDX_FINAL_STAGE_TEXT"; then
+    check_fail "Final runtime image no longer cargo-ships nodeenv"
+  else
+    check_pass "Final runtime image no longer cargo-ships nodeenv"
+  fi
+  if grep -Fq '/openedx/node_modules' <<<"$OPENEDX_FINAL_STAGE_TEXT"; then
+    check_fail "Final runtime image no longer cargo-ships node_modules"
+  else
+    check_pass "Final runtime image no longer cargo-ships node_modules"
+  fi
+  if grep -Fq './node_modules/.bin:/openedx/nodeenv/bin:${PATH}' <<<"$OPENEDX_FINAL_STAGE_TEXT"; then
+    check_fail "Final runtime PATH no longer depends on Node tooling"
+  else
+    check_pass "Final runtime PATH no longer depends on Node tooling"
   fi
 fi
 

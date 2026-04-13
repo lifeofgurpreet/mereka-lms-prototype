@@ -32,7 +32,7 @@ acceptance_criteria:
     command: infrastructure/tutor/plugins/verify-plugin.sh
 - id: AC-TCR-003
   description: Given the Mereka plugin is enabled, when `tutor config save` is run,
-    then the rendered `docker-compose.yml` contains `mysql_native_password` without
+    then the rendered `docker-compose.yml` contains `mysql-native-password=ON` without
     running `apply-patches.sh`.
   verify:
   - type: automated

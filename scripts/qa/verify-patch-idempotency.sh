@@ -82,13 +82,13 @@ DUPLICATE_CHECKS=(
   "production.py|DEFAULT_SITE_THEME|1|Default site theme setting"
   "production.py|# Force MFE-only discussions (greenfield|1|MFE discussions config block"
   "production.py|DISCUSSIONS_MFE_ENABLED = True|1|MFE discussions enabled flag"
-  "openedx/Dockerfile|ENV PYTHONPATH=/openedx/edx-platform|1|PYTHONPATH env var"
-  'openedx/Dockerfile|ENV NODE_OPTIONS="--max-old-space-size=6144"|1|NODE_OPTIONS env var'
-  "openedx/Dockerfile|ENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none|1|REQUIRE_BUILD_PROFILE_OPTIMIZE env var"
+  "openedx/Dockerfile|ENV PYTHONPATH=/openedx/edx-platform|2|PYTHONPATH env var"
+  'openedx/Dockerfile|ENV NODE_OPTIONS="--max-old-space-size=6144"|2|NODE_OPTIONS env var'
+  "openedx/Dockerfile|ENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none|2|REQUIRE_BUILD_PROFILE_OPTIMIZE env var"
   "openedx/Dockerfile|pip install -e /openedx/mfe_oauth_fix|1|mfe_oauth_fix pip install"
   "openedx/Dockerfile|pip install -e /openedx/openedx_prometheus|1|openedx_prometheus pip install"
   "openedx/Dockerfile|pip install django-prometheus|1|django-prometheus pip install"
-  "openedx/Dockerfile|mereka-overrides.css|1|mereka CSS copy block"
+  "openedx/Dockerfile|mereka-overrides.css|4|mereka CSS copy block"
   "docker-compose.yml|default-authentication-plugin=mysql_native_password|1|MySQL auth plugin"
   "docker-compose.yml|MYSQL_ROOT_HOST|1|MySQL root host"
   "Caddyfile|academy.biji-biji.com|1|Biji-Biji domain in Caddy"

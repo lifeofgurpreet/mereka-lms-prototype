@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 ('read', models.BooleanField(db_index=True, default=False, help_text='Whether the notification has been read')),
                 ('created_at', models.DateTimeField(auto_now_add=True, db_index=True, help_text='When the notification was created (UTC)')),
                 ('expires_at', models.DateTimeField(blank=True, db_index=True, help_text='When the notification expires and should not be shown (UTC)', null=True)),
-                ('user', models.ForeignKey(help_text='Recipient user', on_delete=django.db.models.deletion.CASCADE, related_name='notifications', to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(help_text='Recipient user', on_delete=django.db.models.deletion.CASCADE, related_name='openedx_in_app_notifications', to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'verbose_name': 'Notification',
