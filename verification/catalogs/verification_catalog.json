@@ -14638,14 +14638,10 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "per_pr_and_push",
+      "cadence": "on_demand",
       "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
+      "ci_binding": [],
+      "ci_entrypoints": [],
       "env_scope": [
         "dev"
       ],
@@ -14653,20 +14649,20 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-secrets-live-cluster.sh",
-      "reference_count": 8,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
       ],
-      "severity": "high",
+      "severity": "low",
       "spec_ids": [
         "AC-001",
         "AC-002",
         "AC-003",
         "AC-018"
       ],
-      "status": "active",
-      "tier": "release_blocking"
+      "status": "manual_only",
+      "tier": "exploratory_manual"
     },
     {
       "cadence": "per_pr_and_push",
@@ -18726,7 +18722,7 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
-    "ci_static_bound": 382,
+    "ci_static_bound": 381,
     "kinds": {
       "verify": 628
     },
@@ -18737,14 +18733,14 @@
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 434,
+      "active": 433,
       "deprecated_candidate": 1,
-      "manual_only": 193
+      "manual_only": 194
     },
     "tiers": {
-      "exploratory_manual": 197,
+      "exploratory_manual": 198,
       "periodic_runtime": 21,
-      "release_blocking": 410
+      "release_blocking": 409
     },
     "total_verify_scripts": 628,
     "workflow_direct_bound": 68
