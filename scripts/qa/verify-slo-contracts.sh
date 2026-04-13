@@ -151,7 +151,7 @@ if [[ "$MODE" == "local" ]]; then
 
   # 11. Fast burn uses multi-window (1h AND 5m)
   fast_burn_expr=$(grep -A5 "alert: SLOBudgetFastBurn" "$SLO_FILE" 2>/dev/null || true)
-  if echo "$fast_burn_expr" | grep -q "burn_rate_1h" && echo "$fast_burn_expr" | grep -q "burn_rate_5m"; then
+  if [[ "$fast_burn_expr" == *"burn_rate_1h"* && "$fast_burn_expr" == *"burn_rate_5m"* ]]; then
     pass "SLOBudgetFastBurn uses multi-window (1h + 5m)"
   else
     fail "SLOBudgetFastBurn missing multi-window pattern"
@@ -159,7 +159,7 @@ if [[ "$MODE" == "local" ]]; then
 
   # 12. Slow burn uses multi-window (6h AND 30m)
   slow_burn_expr=$(grep -A5 "alert: SLOBudgetSlowBurn" "$SLO_FILE" 2>/dev/null || true)
-  if echo "$slow_burn_expr" | grep -q "burn_rate_6h" && echo "$slow_burn_expr" | grep -q "burn_rate_30m"; then
+  if [[ "$slow_burn_expr" == *"burn_rate_6h"* && "$slow_burn_expr" == *"burn_rate_30m"* ]]; then
     pass "SLOBudgetSlowBurn uses multi-window (6h + 30m)"
   else
     fail "SLOBudgetSlowBurn missing multi-window pattern"
