@@ -72,7 +72,7 @@ def test_rendered_mfe_snapshot_matches_generated_authority_when_available() -> N
     assert rendered == snapshot, (
         "Generated MFE Dockerfile diverged from infrastructure/tutor/mfe-build/Dockerfile. "
         "Refresh the tracked snapshot from tutor_env/env/plugins/mfe/build/mfe/Dockerfile "
-        "after tutor config save + apply-patches.sh."
+        "after tutor config save + prepare-tutor-build-context.sh."
     )
 
 

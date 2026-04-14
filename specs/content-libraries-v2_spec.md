@@ -28,7 +28,8 @@ tags:
 summary: "Defines the normative contract for Content Libraries v2 authoring, versioning, tenant-aware access, reuse, and operational behavior on Mereka LMS."
 links:
   related_docs:
-    - "docs/concepts/architecture/content-libraries-overview.md"
+    - "docs/architecture/CONTENT_LIBRARIES_MODEL.md"
+    - "docs/ops/runbooks/CONTENT_LIBRARIES_V2_RUNBOOK.md"
     - "docs/ops/runbooks/CONTENT_LIBRARIES_V2_MIGRATION.md"
     - "docs/ops/runbooks/TROUBLESHOOTING.md"
   related_specs:
@@ -569,7 +570,7 @@ This spec establishes the contracts for how libraries are created, governed, ver
 
 1. **Blockstore storage backend for production**: Should Blockstore use GCS bucket `lms-blockstore` (referenced in Terraform module) or the local filesystem with periodic GCS sync? GCS provides durability and scalability but may add latency for small reads. Need infrastructure team input on whether Blockstore's GCS backend is production-tested in the Ulmo release.
 
-2. **Search engine selection**: Ulmo supports both Meilisearch and Elasticsearch for content search. Which search engine is deployed (or will be deployed) on the Mereka GKE cluster? Library search indexing depends on this choice. Need infrastructure team confirmation.
+2. **Search engine selection**: Ulmo supports both Meilisearch and Elasticsearch for content search. Which search engine is deployed (or will be deployed) on the active production cluster? Library search indexing depends on this choice. Need infrastructure team confirmation.
 
 3. **Content Libraries v1 migration**: Do any Content Libraries v1 libraries exist on the current platform? If so, should they be migrated to v2 or left as-is? v1 libraries use a different storage model (modulestore-backed). Need content team inventory.
 

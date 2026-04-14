@@ -20,7 +20,7 @@ last_updated: "2026-02-10"
 
 ## Summary
 
-This plan covers the deployment of five upstream Open edX enterprise microservices (enterprise-catalog, license-manager, enterprise-access, enterprise-subsidy, enterprise-integrated-channels) plus two enterprise MFEs (admin-portal, learner-portal-enterprise) into the existing `mereka-lms` GKE namespace. All services use upstream community Docker images -- no source forking. The work is configuration-only: K8s manifests, ExternalSecrets, Caddy routing, LMS Django settings, and provisioning scripts.
+This plan covers the deployment of five upstream Open edX enterprise microservices (enterprise-catalog, license-manager, enterprise-access, enterprise-subsidy, enterprise-integrated-channels) plus two enterprise MFEs (admin-portal, learner-portal-enterprise) into the existing `mereka-lms` production namespace. All services use upstream community Docker images -- no source forking. The work is configuration-only: K8s manifests, ExternalSecrets, Caddy routing, LMS Django settings, and provisioning scripts.
 
 This is the **last spec in the Tier 4 sequential chain** (`multi-tenancy -> auth-sso -> enterprise-microservices`). It cannot begin until multi-tenancy (EnterpriseCustomer data model, tenant isolation) and auth-sso (SAML/OIDC, per-tenant IdP) are operational.
 
@@ -32,11 +32,11 @@ Before starting any task in this plan:
 
 - [ ] `EnterpriseCustomer` model and tenant isolation strategy from `multi-tenancy-architecture_spec.md` are deployed and verified
 - [ ] SAML/OIDC SSO from `auth-sso-enterprise_spec.md` is operational with at least one test IdP
-- [ ] GKE cluster has sufficient node capacity for ~5 additional Deployments + 4 Celery workers (~2.5 vCPU, 5 GB RAM)
+- [ ] Current production lane has sufficient node capacity for ~5 additional Deployments + 4 Celery workers (~2.5 vCPU, 5 GB RAM)
 - [ ] Cloud SQL tier can support 4 additional logical databases
 - [ ] Observability stack (Prometheus, Loki, Tempo, Grafana) is operational
 - [ ] Infisical secrets pipeline is functional (`Infisical -> GCP SM -> ExternalSecrets -> K8s`)
-- [ ] Artifact Registry (`asia-southeast1-docker.pkg.dev/mereka-lms/openedx/`) is accessible for pushing images
+- [ ] GHCR (`ghcr.io/biji-biji-initiative/mereka-lms/`) is accessible for pushing images
 
 ---
 
@@ -74,8 +74,8 @@ Before starting any task in this plan:
 
 - [ ] **[L] Task 0.6**: Build and push enterprise service Docker images (`scripts/infra/enterprise/build-enterprise-images.sh`) | AC: AC-001 | Depends: None
   - Pull upstream images from `edx/enterprise-catalog`, `edx/license-manager`, `edx/enterprise-access`, `edx/enterprise-subsidy`
-  - Tag and push to `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/enterprise-<name>:<tag>`
-  - **Done**: `gcloud artifacts docker images list` shows all 4 enterprise images
+  - Tag and push to `ghcr.io/biji-biji-initiative/mereka-lms/enterprise-<name>:<tag>`
+  - **Done**: registry inspection shows all 4 enterprise images
 
 - [ ] **[S] Task 0.7**: Verify `openedx-enterprise` package in LMS image (`scripts/qa/verify-enterprise-packages.sh`) | AC: AC-001 | Depends: None
   - Exec into LMS pod, run `pip show openedx-enterprise`
@@ -84,7 +84,7 @@ Before starting any task in this plan:
 
 #### Docs
 
-- [ ] **[S] Task 0.8**: Document infrastructure provisioning steps (`docs/operations/enterprise-infrastructure-setup.md`) | Depends: None
+- [x] **[S] Task 0.8**: Document infrastructure provisioning steps (`docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md` + `docs/guides/admin/ENTERPRISE_SERVICES_GUIDE.md`) | Depends: None
   - Cover database provisioning, secrets setup, OAuth2 registration, image builds
   - **Done**: Document exists with all steps
 
@@ -220,12 +220,12 @@ Before starting any task in this plan:
 
 - [ ] **[L] Task 3.1**: Build and push admin-portal MFE image (`scripts/infra/enterprise/build-enterprise-mfe.sh`) | AC: AC-007 | Depends: None
   - Build `frontend-app-admin-portal` from upstream source
-  - Push to Artifact Registry
+  - Push to GHCR
   - **Done**: Image in registry
 
 - [ ] **[L] Task 3.2**: Build and push learner-portal MFE image (`scripts/infra/enterprise/build-enterprise-mfe.sh`) | AC: AC-008 | Depends: None
   - Build `frontend-app-learner-portal-enterprise` from upstream source
-  - Push to Artifact Registry
+  - Push to GHCR
   - **Done**: Image in registry
 
 - [ ] **[M] Task 3.3**: Create MFE Deployment and Service manifests (`deploy/k8s/base/apps/enterprise/enterprise-mfe-deployment.yaml`, `deploy/k8s/base/apps/enterprise/enterprise-mfe-service.yaml`) | AC: AC-007, AC-008 | Depends: Task 3.1, Task 3.2
@@ -264,12 +264,13 @@ Before starting any task in this plan:
 
 #### Build
 
-- [ ] **[M] Task 4.1**: Configure SAML IdP for pilot enterprise client (`scripts/infra/enterprise/configure-saml-idp.sh`, `docs/operations/enterprise-saml-setup.md`) | AC: AC-026, AC-027, AC-029 | Depends: auth-sso-enterprise_spec.md complete
+- [x] **[M] Task 4.1**: Configure SAML IdP for pilot enterprise client (`scripts/infra/enterprise/configure-saml-idp.sh`, `docs/ops/runbooks/ENTERPRISE_SSO_GUIDE.md`) | AC: AC-026, AC-027, AC-029 | Depends: auth-sso-enterprise_spec.md complete
   - Register SAML provider in LMS Django admin
   - Configure `entity_id`, `metadata_url`, attribute mappings
   - Configure slug-based login URL
   - Store SAML certificates in K8s secrets via ExternalSecrets
   - **Done**: SAML IdP appears in LMS admin; metadata is fetchable
+  - **Docs note**: `ENTERPRISE_SSO_GUIDE.md` already captures the deterministic SAML onboarding/operator flow, metadata exchange, tenant mapping, and readiness verification path.
 
 - [ ] **[M] Task 4.2**: Configure enterprise integrated channels LMS settings (`deploy/k8s/base/apps/openedx/settings/lms/mereka_enterprise_channels.py`) | AC: AC-030, AC-031, AC-032 | Depends: Task 0.7
   - Enable `integrated_channels` app in LMS
@@ -277,12 +278,12 @@ Before starting any task in this plan:
   - Configure retry settings (base: 30s, max: 15min, max retries: 5)
   - **Done**: `integrated_channels` tasks visible in Celery beat schedule
 
-- [ ] **[S] Task 4.3**: Configure Degreed channel integration model (`docs/operations/enterprise-channel-setup.md`) | AC: AC-030, AC-031 | Depends: Task 4.2
+- [x] **[S] Task 4.3**: Configure Degreed channel integration model (`docs/guides/admin/ENTERPRISE_SERVICES_GUIDE.md`) | AC: AC-030, AC-031 | Depends: Task 4.2
   - Document admin steps to configure Degreed channel per enterprise customer
   - Include dry-run mode testing steps
   - **Done**: Documentation complete with screenshots/examples
 
-- [ ] **[S] Task 4.4**: Configure Cornerstone CSOD channel integration (`docs/operations/enterprise-channel-setup.md`) | AC: AC-030 | Depends: Task 4.2
+- [x] **[S] Task 4.4**: Configure Cornerstone CSOD channel integration (`docs/guides/admin/ENTERPRISE_SERVICES_GUIDE.md`) | AC: AC-030 | Depends: Task 4.2
   - Same as Degreed but for Cornerstone
   - **Done**: Documentation complete
 
@@ -374,7 +375,7 @@ Before starting any task in this plan:
 
 #### Docs
 
-- [ ] **[L] Task 5.12**: Create enterprise services operational runbook (`docs/runbooks/enterprise-services-runbook.md`) | Depends: All phases
+- [x] **[L] Task 5.12**: Create enterprise services operational runbook (`docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md`) | Depends: All phases
   - Service restart procedures
   - Common failure scenarios and fixes
   - Rollback procedures (per-service and full stack)
@@ -384,12 +385,13 @@ Before starting any task in this plan:
   - Channel sync troubleshooting
   - SAML troubleshooting
   - **Done**: Runbook exists with all sections
+  - **Docs note**: the runbook now covers service restart procedure, common enterprise failure classes, channel-sync troubleshooting, SAML/auth routing, rollback boundary, shared durability escalation, and evidence expectations instead of acting only as a router.
 
-- [ ] **[M] Task 5.13**: Update main TROUBLESHOOTING.md (`docs/ops/runbooks/TROUBLESHOOTING.md`) | Depends: All phases
+- [x] **[M] Task 5.13**: Update main TROUBLESHOOTING.md (`docs/ops/runbooks/TROUBLESHOOTING.md`) | Depends: All phases
   - Add enterprise services section with common issues and fixes
   - **Done**: Enterprise section exists in troubleshooting guide
 
-- [ ] **[S] Task 5.14**: Create architecture overview doc (`docs/concepts/architecture/enterprise-services-overview.md`) | Depends: None
+- [x] **[S] Task 5.14**: Extend the enterprise services architecture model (`docs/architecture/ENTERPRISE_SERVICES_MODEL.md`) | Depends: None
   - System diagram showing all 5 services, MFEs, LMS, event bus, databases
   - Communication patterns (internal HTTP, Redis Streams, OAuth2)
   - **Done**: Document exists with diagrams
@@ -427,7 +429,7 @@ Before starting any task in this plan:
 
 | Risk | Impact | Likelihood | Mitigation |
 |------|--------|------------|------------|
-| GKE node pool insufficient for 9 additional pods | Deployment blocked | Medium | Check current capacity before starting; pre-approve node pool resize |
+| Current production lane capacity insufficient for 9 additional pods | Deployment blocked | Medium | Check current capacity before starting; pre-approve a capacity increase if needed |
 | Cloud SQL tier cannot handle 4 extra databases | Service failures | Low | Measure current utilization; plan tier upgrade if >60% used |
 | Upstream enterprise images incompatible with Mereka LMS version | Build failures, runtime errors | Medium | Test images in local Kind cluster first; pin exact image tags |
 | Multi-level subdomain SSL for enterprise MFEs | MFE inaccessible via HTTPS | High | Use DNS-only (gray cloud) + Let's Encrypt as per CLAUDE.md guidance; alternative: use single-level subdomains |
@@ -513,12 +515,11 @@ infrastructure/monitoring/dashboards/
   enterprise-channels.json
   enterprise-auth.json
 
-docs/
-  operations/enterprise-infrastructure-setup.md
-  operations/enterprise-channel-setup.md
-  operations/enterprise-saml-setup.md
-  runbooks/enterprise-services-runbook.md
-  architecture/enterprise-services-overview.md
+docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md
+docs/ops/runbooks/ENTERPRISE_SSO_GUIDE.md
+docs/guides/admin/ENTERPRISE_SERVICES_GUIDE.md
+docs/reference/operations/ENTERPRISE_MULTI_TENANCY_NAVIGATION.md
+docs/architecture/ENTERPRISE_SERVICES_MODEL.md
 ```
 
 ---

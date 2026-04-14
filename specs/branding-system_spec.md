@@ -68,7 +68,7 @@ This spec covers the custom branding system for Mereka Academy, including theme 
 
 **Architecture Note**: The branding system uses a plugin-first approach as documented in ADR-014:
 - **Plugin** (`infrastructure/tutor/plugins/mereka_lms.py`): Configuration patches (Django settings, MFE footer component, Google Fonts stripping, build config)
-- **Script** (`infrastructure/tutor/apply-patches.sh`): File-system operations (asset sync, theme directories, font distribution)
+- **Low-level patch helper** (`infrastructure/tutor/apply-patches.sh`): File-system operations (asset sync, theme directories, font distribution) exercised through the canonical Tutor prepare path
 
 Both are required and complementary.
 
@@ -122,13 +122,13 @@ infrastructure/tutor/themes/mereka/
 
 #### Asset Sync Workflow (Script-Delivered)
 
-- The system MUST run `./infrastructure/tutor/apply-patches.sh` to sync theme assets to build directory
-- The system MUST copy logo variants to `tutor_env/env/build/openedx/themes/mereka/lms/static/images/`
-- The system MUST copy fonts to `tutor_env/env/build/openedx/themes/mereka/lms/static/fonts/`
+- The system MUST run the canonical Tutor prepare path to realize theme assets into rendered build directories before image builds
+- The system MUST mirror source theme image directories into `tutor_env/env/build/openedx/themes/mereka/**/static/images/`
+- The system MUST mirror source font directories into `tutor_env/env/build/openedx/themes/mereka/**/static/fonts/`
 - The system MUST sync templates to preserve Django template overrides
 - The system MUST sync MFE SCSS to `tutor_env/env/plugins/mfe/build/mfe/indigo/mereka/`
 
-**Note**: Asset sync is handled by `apply-patches.sh` (file-system operations). Configuration patches are handled by the Tutor plugin (automatic via hooks).
+**Note**: Asset sync is handled by the low-level patch helper behind `./scripts/infra/prepare-tutor-build-context.sh --target all` (file-system operations). Configuration patches are handled by the Tutor plugin (automatic via hooks).
 
 #### SASS Compilation (Plugin-Delivered)
 
@@ -152,7 +152,7 @@ infrastructure/tutor/themes/mereka/
 - The plugin MUST import `mereka.scss` in MFE env.config.jsx
 
 **Script-Delivered (Assets)**:
-- The system MUST copy MFE theme fonts to build context (via `apply-patches.sh`)
+- The system MUST sync MFE theme fonts to build context via the canonical Tutor prepare path
 - The system MUST sync SCSS files to MFE build directory
 
 **Note**: MFE footer is implemented via dual-path wiring: the Tutor plugin (`mereka_lms.py`) defines MerekaFooter and registers a forward-compatible `PLUGIN_SLOTS` entry for `footer_slot` (Direct plugin, not iFrame). Until `tutormfe.hooks.PLUGIN_SLOTS` ships, `apply-patches.sh` provides a fallback RenderWidget replacement. Verified by `scripts/qa/verify-mfe-footer-slot.sh` (CI gated). See ADR-014 "Plugin-First Migration" section for the operator workflow: discover slot → inject config via Tutor plugin → rebuild MFE image.
@@ -185,7 +185,7 @@ The system MUST pass the following verification checks:
 - [ ] AC-INT-002: Given multi-site domains are configured, when `scripts/branding/verify-branding-health.sh` runs in production, then it passes for all configured domains without domain-specific branding regressions.
 
 ### Tutor Configuration Integration (Tier 1 → Tier 3)
-- [ ] AC-INT-003: Given `tutor-configuration_spec.md` apply-patches workflow syncs theme assets, when `tutor images build openedx` completes, then Mereka logo variants exist in compiled static files and `grep -r "fonts.googleapis.com" tutor_env/env/build/openedx/` returns zero results.
+- [ ] AC-INT-003: Given `tutor-configuration_spec.md` canonical prepare flow realizes theme assets, when `tutor images build openedx` completes, then Mereka logo variants exist in compiled static files and `grep -r "fonts.googleapis.com" tutor_env/env/build/openedx/` returns zero results.
 
 ### Non-Functional Requirements
 
@@ -220,8 +220,8 @@ The system MUST pass the following verification checks:
 
 **Recovery**:
 ```bash
-# Re-sync assets
-./infrastructure/tutor/apply-patches.sh
+# Re-sync assets through the canonical prepare path
+./scripts/infra/prepare-tutor-build-context.sh --target all
 
 # Rebuild image (picks up new assets)
 tutor images build openedx
@@ -255,8 +255,8 @@ tutor images build openedx
 
 **Recovery**:
 ```bash
-# Re-apply patches
-./infrastructure/tutor/apply-patches.sh
+# Re-run the canonical prepare path
+./scripts/infra/prepare-tutor-build-context.sh --target mfe
 
 # Rebuild MFE image
 tutor images build mfe
@@ -277,7 +277,7 @@ tutor k8s restart mfe
 ls infrastructure/tutor/themes/mereka/lms/static/fonts/*.woff2
 
 # Re-sync and collect static
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target openedx
 tutor k8s exec lms ./manage.py lms collectstatic --noinput
 ```
 
@@ -311,7 +311,7 @@ tutor k8s exec lms ./manage.py lms collectstatic --noinput --clear
 
 ### Logs
 
-- Asset sync: Console output from `apply-patches.sh` showing "Copied logo.png to LMS theme"
+- Asset sync: Console output from the canonical prepare path showing rendered theme asset mirroring
 - SASS compilation: Build logs showing "Compiled mereka theme"
 - Collectstatic: `tutor k8s exec lms ./manage.py lms collectstatic --noinput --verbosity=2`
 
@@ -340,7 +340,7 @@ tutor k8s exec lms ./manage.py lms collectstatic --noinput --clear
 cp new-logo.png infrastructure/tutor/themes/mereka/lms/static/images/
 
 # 2. Sync to build context
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target openedx
 
 # 3. Rebuild image
 tutor images build openedx

@@ -250,7 +250,7 @@ Additionally, `PARAGON_THEME_URLS` enables runtime theming. Instead of rebuildin
 ### tutor-contrib-paragon Integration
 
 - [ ] AC-TKN-033: Given `tutor-contrib-paragon` is installed (or equivalent in `mereka_lms.py`), when `tutor images build mfe` is run, then the token compilation step executes and the compiled CSS is included in the MFE image.
-- [ ] AC-TKN-034: Given the Tutor plugin, when `tutor config save` is run followed by `apply-patches.sh`, then `PARAGON_THEME_URLS` is present in the rendered MFE environment configuration.
+- [ ] AC-TKN-034: Given the Tutor plugin, when `tutor config save` is run followed by `prepare-tutor-build-context.sh --target mfe`, then `PARAGON_THEME_URLS` is present in the rendered MFE environment configuration.
 
 ### Cross-Spec Integration
 
@@ -517,7 +517,7 @@ See `specs/plans/paragon-design-tokens-migration_test_plan.md` for comprehensive
 
 **Phase 1**: No rollback needed (additive, no runtime impact). Delete `tokens/` directory if abandoning.
 
-**Phase 2**: Set `ENABLE_PARAGON_THEME_URLS=false` in Tutor config, run `tutor config save && apply-patches.sh && tutor local restart`. MFEs revert to SCSS-compiled branding. No image rebuild required.
+**Phase 2**: Set `ENABLE_PARAGON_THEME_URLS=false` in Tutor config, run `tutor config save && ./scripts/infra/prepare-tutor-build-context.sh --target mfe && tutor local restart`. MFEs revert to SCSS-compiled branding. No image rebuild required.
 
 **Phase 3**: `git checkout HEAD~N -- infrastructure/tutor/themes/mereka/mfe/mereka.scss` to restore BEM overrides. Rebuild MFE image. Both token and SCSS paths remain active.
 

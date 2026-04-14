@@ -343,7 +343,7 @@
       "domain": "commerce",
       "id": "SPEC-COM-001",
       "lane": "normative",
-      "last_reviewed": "2026-03-09",
+      "last_reviewed": "2026-04-14",
       "links": {
         "generated_testmap": "specs/_generated/testmaps/ecommerce-purchase-gateway_spec.testmap.yml",
         "legacy_testmap": "specs/testmaps/ecommerce-purchase-gateway_spec.testmap.yml",
@@ -1753,7 +1753,7 @@
       "domain": null,
       "id": null,
       "lane": "plan",
-      "last_reviewed": "2026-02-10",
+      "last_reviewed": "2026-04-09",
       "links": {
         "generated_testmap": null,
         "legacy_testmap": null,
@@ -1767,7 +1767,7 @@
       "path": "specs/plans/mobile-apps-enterprise_plan.md",
       "review_due": null,
       "spec_class": "plan",
-      "status": "ready",
+      "status": "deferred",
       "summary": null,
       "tags": [],
       "title": "Mobile Apps (iOS + Android) Enterprise Deployment - Implementation Plan",

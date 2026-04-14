@@ -195,7 +195,7 @@ Only domain-specific NFRs are listed above.
 
 #### Branding System (Tier 3 -> this spec)
 
-- [ ] AC-INT-001: Given `branding-system_spec.md` asset sync runs via `apply-patches.sh`, when the sync completes, then all CMS theme assets (logos, fonts, SCSS, templates) MUST be present in `tutor_env/env/build/openedx/themes/mereka/cms/`.
+- [ ] AC-INT-001: Given `branding-system_spec.md` asset sync runs via the canonical Tutor prepare flow, when the sync completes, then all CMS theme assets (logos, fonts, SCSS, templates) MUST be present in `tutor_env/env/build/openedx/themes/mereka/cms/`.
 - [ ] AC-INT-002: Given `branding-system_spec.md` MerekaFooter component is deployed, when the `frontend-app-course-authoring` MFE renders its footer, then the MerekaFooter MUST render identically to other MFEs (authn, account, learning).
 
 #### MFE Plugin Slots (Tier 3 -> this spec)
@@ -207,7 +207,7 @@ Only domain-specific NFRs are listed above.
 ### Upstream
 
 - **branding-system_spec.md** (completed): Provides the foundation theme structure, MerekaFooter component, SCSS compilation pipeline, and Google Fonts stripping. Studio customization builds on top of this.
-- **tutor-configuration_spec.md**: Provides `apply-patches.sh` workflow that syncs theme assets to the build directory. Studio theme files are delivered through this pipeline.
+- **tutor-configuration_spec.md**: Provides the canonical Tutor prepare flow that syncs theme assets to the build directory. Studio theme files are delivered through this pipeline.
 - **mfe-plugin-slots_spec.md** (draft): Provides FPF slot activation pattern for `frontend-app-course-authoring` header branding (Phase 1). Studio MFE branding depends on this activation.
 
 ### Downstream
@@ -291,11 +291,11 @@ See `specs/plans/studio-customization_test_plan.md` for comprehensive test scena
 
 **Symptom**: Default Open edX Studio branding appears after `tutor images build openedx`.
 
-**Cause**: `apply-patches.sh` was not run after `tutor config save`, so CMS theme assets were not synced to the build context.
+**Cause**: The canonical Tutor prepare flow was not run after `tutor config save`, so CMS theme assets were not synced to the build context.
 
 **Recovery**:
 ```bash
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target openedx
 tutor images build openedx
 tutor k8s restart cms
 tutor k8s exec cms ./manage.py cms collectstatic --noinput

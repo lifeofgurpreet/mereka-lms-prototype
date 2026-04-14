@@ -46,7 +46,7 @@ Before starting this spec, the following must be substantially complete:
 | `auth-sso-enterprise_spec.md` | Per-tenant IdP for staff/instructor roles |
 | `enterprise-microservices_spec.md` | Enterprise API layer consumed by bulk operations |
 | `observability-stack_spec.md` | Prometheus, Loki, Tempo for assessment metrics/logs |
-| `k8s-deployment_spec.md` | GKE cluster, namespace, networking for grader pods |
+| `k8s-deployment_spec.md` | Active production lane, namespace, networking for grader pods |
 | `secrets-management_spec.md` | ExternalSecrets for XQueue/grader credentials |
 
 ---
@@ -65,7 +65,8 @@ Before starting this spec, the following must be substantially complete:
 
 - [ ] **[S] P0-4.** Verify `edx-proctoring` no-op backend is available for timed-only exams by checking Django settings `PROCTORING_BACKENDS` configuration (`infrastructure/tutor/apply-patches.sh`) | AC: #10 | Depends: None
 
-- [ ] **[S] P0-5.** Document CodeJail status: confirm `nonexistingpythonbinary` configuration, document path to enable AppArmor-secured sandbox (`docs/concepts/architecture/codejail-status.md`) | AC: N/A (open question #1) | Depends: None
+- [x] **[S] P0-5.** Extend CodeJail status: confirm `nonexistingpythonbinary` configuration, document path to enable AppArmor-secured sandbox (`docs/architecture/codejail-status.md`) | AC: N/A (open question #1) | Depends: None
+  - **Done**: `codejail-status.md` now records the current source-backed disabled proof (`nonexistingpythonbinary` in LMS/CMS production settings, `verify-assessment-audit.sh`) and the sandbox enablement path through the grader policy/verifier lane instead of leaving CodeJail as an abstract future note.
 
 - [ ] **[M] P0-6.** Create test course in Studio with basic ORA2 assignments, timed exam subsections, and standard problem types for baseline smoke testing (`scripts/qa/setup-assessment-test-course.sh`) | AC: #1, #10, #21 | Depends: P0-1, P0-4
 
@@ -73,7 +74,8 @@ Before starting this spec, the following must be substantially complete:
 
 #### Docs
 
-- [ ] **[S] P0-8.** Create assessment audit report documenting current state of ORA2, XQueue, timed exams, and advanced XBlocks (`docs/concepts/architecture/assessment-audit-report.md`) | Depends: P0-1 through P0-5
+- [x] **[S] P0-8.** Extend assessment audit report documenting current state of ORA2, XQueue, timed exams, and advanced XBlocks (`docs/architecture/assessment-audit-report.md`) | Depends: P0-1 through P0-5
+  - **Done**: `assessment-audit-report.md` now classifies ORA2, timed exams, XQueue, CodeJail, proctoring, and bulk assessment posture through a launch-readiness matrix and explicit evidence boundary.
 
 ---
 
@@ -109,7 +111,8 @@ Before starting this spec, the following must be substantially complete:
 
 #### Docs
 
-- [ ] **[M] P1-13.** Create ORA2 assessment guidelines for course authors: rubric design patterns, peer assessment configuration, file upload best practices, grading workflow (`docs/operations/ora2-assessment-guide.md`) | Depends: P1-3
+- [x] **[M] P1-13.** Extend the current advanced assessment authoring guide with ORA2 depth: rubric design patterns, peer assessment configuration, file upload best practices, grading workflow (`docs/guides/platform/ADVANCED_ASSESSMENT_AUTHORING_GUIDE.md`) | Depends: P1-3
+  - **Done**: the authoring guide now includes ORA2 rubric design patterns, peer-assessment configuration expectations, file-upload best practices, and the supported grading workflow boundary for current launches.
 
 ---
 
@@ -165,7 +168,7 @@ Before starting this spec, the following must be substantially complete:
 
 - [ ] **[S] P3-8.** Add XQueue grader secrets to ExternalSecrets: `XQUEUE_GRADER_USERNAME`, `XQUEUE_GRADER_PASSWORD` (if separate from LMS auth) (`deploy/k8s/base/secrets/external-secrets.yaml`) | AC: #16 | Depends: P0-2
 
-- [ ] **[M] P3-9.** Build and push grader worker container image to Artifact Registry (`ghcr.io/biji-biji-initiative/mereka-lms/xqueue-grader`) (`services/xqueue-graders/Dockerfile`, `.github/workflows/build-grader.yml`) | AC: #16 | Depends: P3-7
+- [ ] **[M] P3-9.** Build and push grader worker container image to the active OCI registry (`ghcr.io/biji-biji-initiative/mereka-lms/xqueue-grader`) (`services/xqueue-graders/Dockerfile`, `.github/workflows/build-grader.yml`) | AC: #16 | Depends: P3-7
 
 - [ ] **[M] P3-10.** Create XQueue-backed problem template in Studio for integration testing: Python code submission problem with expected output validation (`scripts/qa/setup-xqueue-test-problem.sh`) | AC: #16, #20 | Depends: P3-7
 
@@ -185,9 +188,11 @@ Before starting this spec, the following must be substantially complete:
 
 #### Docs
 
-- [ ] **[M] P3-17.** Create XQueue grader authoring guide for course authors: how to create XQueue-backed problems in Studio, expected input/output format, testing locally (`docs/operations/xqueue-grader-authoring.md`) | Depends: P3-10
+- [x] **[M] P3-17.** Extend the current advanced assessment authoring guide with XQueue grader authoring guidance: how to create XQueue-backed problems in Studio, expected input/output format, testing locally (`docs/guides/platform/ADVANCED_ASSESSMENT_AUTHORING_GUIDE.md`) | Depends: P3-10
+  - **Done**: the guide now documents the gated XQueue authoring contract, including payload/schema coordination, callback expectations, and the requirement for lane-specific proof before a course launch promise.
 
-- [ ] **[S] P3-18.** Create XQueue grader deployment runbook: how to build/push images, deploy workers, scale replicas, rollback, check queue depth (`docs/operations/xqueue-grader-runbook.md`) | Depends: P3-9
+- [x] **[S] P3-18.** Extend the current XQueue runbook with grader deployment procedures: how to build/push images, deploy workers, scale replicas, rollback, check queue depth (`docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md`) | Depends: P3-9
+  - **Done**: the XQueue runbook now has a gated grader deployment procedure covering build/push, deploy workers, scale and queue-depth checks, and rollback posture.
 
 ---
 
@@ -213,7 +218,8 @@ Before starting this spec, the following must be substantially complete:
 
 #### Docs
 
-- [ ] **[S] P4-9.** Create advanced question type availability guide: which types ship with Redwood, which need pip install, configuration options, known limitations (`docs/operations/advanced-xblock-guide.md`) | Depends: P4-1 through P4-4
+- [x] **[S] P4-9.** Extend the current advanced assessment authoring guide with advanced question type availability: which types ship with Redwood, which need pip install, configuration options, known limitations (`docs/guides/platform/ADVANCED_ASSESSMENT_AUTHORING_GUIDE.md`) | Depends: P4-1 through P4-4
+  - **Done**: the guide now includes an explicit advanced question type availability table and known-limitations boundary instead of implying all richer problem types are baseline-authorable.
 
 ---
 
@@ -275,7 +281,8 @@ Before starting this spec, the following must be substantially complete:
 
 #### Docs
 
-- [ ] **[M] P5-22.** Create bulk operations guide for instructors: grade export/import format, bulk regrade workflow, progress monitoring (`docs/operations/bulk-assessment-operations.md`) | Depends: P5-10 through P5-12
+- [x] **[M] P5-22.** Extend the current advanced assessment authoring guide with bulk-operations guidance for instructors: grade export/import format, bulk regrade workflow, progress monitoring (`docs/guides/platform/ADVANCED_ASSESSMENT_AUTHORING_GUIDE.md`) | Depends: P5-10 through P5-12
+  - **Done**: the guide now records the governed bulk-operations intake package, operation-type boundary, and progress/rollback expectations for instructor escalations.
 
 ---
 
@@ -297,9 +304,11 @@ Before starting this spec, the following must be substantially complete:
 
 #### Docs
 
-- [ ] **[L] P6-6.** Create comprehensive assessment operations runbook: ORA2 troubleshooting, XQueue grader rollback, timed exam issues, bulk operation recovery, alert response procedures (`docs/operations/assessment-runbook.md`) | Depends: All Phase 1-5
+- [x] **[L] P6-6.** Complete the current assessment operations runbook with deeper procedures: ORA2 troubleshooting, XQueue grader rollback, timed exam issues, bulk operation recovery, alert response procedures (`docs/ops/runbooks/ASSESSMENT_OPERATIONS_RUNBOOK.md`) | Depends: All Phase 1-5
+  - **Done**: the assessment operations runbook now includes explicit ORA2 incident handling, timed-exam response procedure, bulk-operation recovery, alert response routing, and XQueue rollback boundary guidance.
 
-- [ ] **[M] P6-7.** Create course author training materials: ORA2, timed exams, XQueue problems, advanced question types, bulk operations, analytics (`docs/operations/assessment-training-guide.md`) | Depends: All Phase 1-5
+- [x] **[M] P6-7.** Complete the current advanced assessment authoring guide with course-team training depth: ORA2, timed exams, XQueue problems, advanced question types, bulk operations, analytics (`docs/guides/platform/ADVANCED_ASSESSMENT_AUTHORING_GUIDE.md`) | Depends: All Phase 1-5
+  - **Done**: the guide now has a course-team training checklist and pre-launch drill expectation that ties ORA2, timed exams, gated XQueue problems, advanced question types, and bulk operations into one operator-safe launch posture.
 
 ---
 

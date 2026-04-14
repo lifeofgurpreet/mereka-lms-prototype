@@ -506,14 +506,15 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
 
 ## Documentation Tasks (DEFERRED)
 
-- [ ] **[M] [DEFERRED]** Write proctoring architecture overview (`docs/concepts/architecture/proctoring-architecture-overview.md`)| Depends: All build tasks
+- [x] **[M] [DEFERRED]** Extend the current proctoring architecture overview (`docs/architecture/proctoring-architecture-overview.md`)| Depends: All build tasks
   - System diagram
   - Provider integration architecture
   - Data flows: exam setup → environment check → identity verification → exam session → recording → AI analysis → proctorreview → grading
   - Multi-tenant isolation model
   - Security architecture
+  - **Done**: `proctoring-architecture-overview.md` now defines the stable provider-backed model, ownership boundaries, tenant isolation constraints, and go-live preconditions while keeping the capability explicitly deferred.
 
-- [ ] **[L] [DEFERRED]** Write proctoring operations runbook(`docs/runbooks/proctoring-operations-runbook.md`) | Depends:All build + observability tasks
+- [ ] **[L] [DEFERRED]** Complete the current proctoring operations runbook (`docs/ops/runbooks/PROCTORING_RUNBOOK.md`) | Depends: All build + observability tasks
   - Operational procedures: deploy, rollback, scaling
   - Provider outage incident playbook
   - Review queue backlog incident playbook
@@ -522,7 +523,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
   - GDPR DSAR response procedure
   - Oncall handbook
 
-- [ ] **[M] [DEFERRED]** Write provider setup guides (`docs/operations/proctoring-provider-setup/`) | Depends: Provider backends
+- [ ] **[M] [DEFERRED]** Extend provider setup companion (`docs/ops/runbooks/PROCTORING_PROVIDER_SETUP.md`) | Depends: Provider backends
   - Proctorio setup: API credentials, extension installation,monitoring configuration
   - Examity setup: API credentials, appointment scheduling, live proctor configuration
   - ProctorTrack setup: API credentials, AI scoring configuration
@@ -596,7 +597,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
   - Create indexes
   - Run as init container in K8s deployment
 
-- [ ] **[M] [DEFERRED]** Configure webhook endpoints in provider dashboards (`docs/operations/proctoring-webhook-configuration.md`) | Depends: LMS webhook handler
+- [ ] **[M] [DEFERRED]** Extend the proctoring runbook with provider webhook endpoint configuration procedures (`docs/ops/runbooks/PROCTORING_RUNBOOK.md`) | Depends: LMS webhook handler
   - Proctorio webhook: `https://academyv2.mereka.io/proctoring/webhooks/proctorio/`
   - Examity webhook: `https://academyv2.mereka.io/proctoring/webhooks/examity/`
   - ProctorTrack webhook: `https://academyv2.mereka.io/proctoring/webhooks/proctortrack/`
@@ -731,7 +732,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
   - Verify metadata deleted, provider notified, attempt rejected
   - Refine runbook based on learnings
 
-- [ ] **[M] [DEFERRED]** Establish review SLA monitoring andreviewer staffing (`docs/operations/reviewer-staffing-model.md`) | Depends: Monitoring enabled
+- [ ] **[M] [DEFERRED]** Establish review SLA monitoring and reviewer staffing (`docs/ops/runbooks/PROCTORING_REVIEWER_STAFFING.md`) | Depends: Monitoring enabled
   - Define reviewer staffing levels per enterprise customer
   - Set up SLA monitoring alerts
   - Establish escalation procedures for SLA breaches
@@ -773,7 +774,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
 
 #### Per-Provider Rollback
 
-- [ ] **[S] [DEFERRED]** Document per-provider rollback procedure (`docs/runbooks/proctoring-rollback.md`) | Depends: None
+- [ ] **[S] [DEFERRED]** Document per-provider rollback procedure (`docs/ops/runbooks/PROCTORING_RUNBOOK.md`) | Depends: None
   - Disable provider feature flag (e.g., `ENABLE_PROCTORING_PROCTORIO=false`)
   - Exams in progress continue (provider session independent)
   - New exam starts blocked
@@ -783,7 +784,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
 
 #### Full Proctoring Rollback
 
-- [ ] **[S] [DEFERRED]** Document full proctoring rollback procedure (`docs/runbooks/proctoring-rollback.md`) | Depends: None
+- [ ] **[S] [DEFERRED]** Document full proctoring rollback procedure (`docs/ops/runbooks/PROCTORING_RUNBOOK.md`) | Depends: None
   - Set `ENABLE_PROCTORING=false` globally
   - All proctored exam starts blocked
   - Exams in progress not interrupted
@@ -794,7 +795,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
 
 #### Review Dashboard Rollback
 
-- [ ] **[S] [DEFERRED]** Document review dashboard rollback procedure (`docs/runbooks/proctoring-rollback.md`) | Depends:None
+- [ ] **[S] [DEFERRED]** Document review dashboard rollback procedure (`docs/ops/runbooks/PROCTORING_RUNBOOK.md`) | Depends:None
   - Set `ENABLE_PROCTORING_REVIEW_DASHBOARD=false`
   - Review actions via Django admin as fallback
   - Webhooks continue to update statuses

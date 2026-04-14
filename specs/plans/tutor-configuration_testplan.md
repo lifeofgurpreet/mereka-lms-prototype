@@ -38,7 +38,7 @@ Existing patterns: `scripts/qa/verify-setup.sh`, `scripts/qa/smoke-test.sh`, `sc
 | AC-003 | Verify `academy.biji-biji.com` present in LMS production.py after patch | shell_verification | `scripts/qa/verify-tutor-patches.sh` | Requires rendered `tutor_env/env/apps/openedx/settings/lms/production.py` | P1 |
 | AC-004 | Verify `mfe_oauth_fix` present in LMS production.py after patch | shell_verification | `scripts/qa/verify-tutor-patches.sh` | Requires rendered `tutor_env/env/apps/openedx/settings/lms/production.py` | P1 |
 | AC-005 | Verify `django_prometheus` present in LMS production.py after patch | shell_verification | `scripts/qa/verify-tutor-patches.sh` | Requires rendered `tutor_env/env/apps/openedx/settings/lms/production.py` | P1 |
-| AC-006 | Verify MFE Dockerfile has Node 18, build tools, npm retries | shell_verification | `scripts/qa/verify-mfe-build-contract.sh` | Requires rendered `tutor_env/env/plugins/mfe/build/mfe/Dockerfile` | P1 |
+| AC-006 | Verify the rendered MFE Dockerfile matches the Node 24 build contract, build tools, and retry hardening | shell_verification | `scripts/qa/verify-mfe-build-contract.sh` | Requires rendered `tutor_env/env/plugins/mfe/build/mfe/Dockerfile` | P1 |
 | AC-007 | MySQL 8 connections succeed without authenticationerrors | manual_verification | `docs/operations/TUTOR_CONFIGURATION_RUNBOOK.md` | Requires running Docker stack with MySQL 8 | P1 |
 | AC-008 | All three production domains resolve and accept logins | shell_verification | `scripts/qa/smoke-test.sh` (existing) | Requires live production deployment | P2 |
 | AC-009 | Mereka logo and custom footer render on all MFEs |shell_verification | `scripts/qa/verify-tutor-branding-render.sh` + `scripts/branding/verify-branding-health.sh` (existing) | Requires theme assets synced to build directory | P2 |
@@ -101,8 +101,10 @@ The CI environment (GitHub Actions `ubuntu-latest`) does nothave Tutor installed
 ```bash
 # After any config change
 export TUTOR_ROOT="$(pwd)/tutor_env"
-tutor config save --set KEY=value
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/tutor-config-save.sh --set KEY=value
+
+# If you need a manual post-render refresh after source edits
+./scripts/infra/prepare-tutor-build-context.sh --target all
 
 # Run patch verification (AC-001 through AC-005)
 ./scripts/qa/verify-tutor-patches.sh
@@ -127,9 +129,9 @@ tutor config save --set KEY=value
 
 ```bash
 # Runs automatically on PR
-# validate-tutor-config job: bash -n apply-patches.sh, YAML syntax
-# tutor-patch-contract job: verify-tutor-patches.sh --offline
-# branding-preflight job: branding gates
+# ci.yml tutor-config-tests: render Tutor env, apply governed patch path, run Tutor tests
+# tutor-plugin-test.yml render-contract-preflight: plugin/render-contract preflight
+# static validation lanes: script syntax, generated drift, and branding/supporting gates
 ```
 
 ### Pre-Release (Manual)

@@ -1,10 +1,10 @@
 ---
 source_spec: specs/proposals/mobile-apps-enterprise_spec.md
-status: ready
+status: deferred
 created: 2026-02-10
-updated: 2026-02-10
+updated: 2026-04-09
 spec: proposals/mobile-apps-enterprise_spec.md
-last_updated: '2026-02-10'
+last_updated: '2026-04-09'
 ---
 
 # Mobile Apps (iOS + Android) Enterprise Deployment - Implementation Plan
@@ -12,6 +12,9 @@ last_updated: '2026-02-10'
 **Source Spec**: `specs/proposals/mobile-apps-enterprise_spec.md`
 
 **Spec Summary**: 37 Acceptance Criteria spanning mobile APIcontract, OAuth 2.0 authentication with PKCE, push notifications via FCM/APNs, deep linking, offline mode, multi-tenant branding, security hardening, and CI/CD pipelines for both iOSand Android.
+
+> **Current posture (2026-04-09)**: iOS remains a major intended product surface, but the active delivery lane is currently paused for program timing and CI/TestFlight cost reasons. Android remains deferred. This plan is a maintained implementation backlog for intentional future reactivation, not an instruction to treat the mobile lane as currently in flight.
+> **Reactivation rule**: Before implementation resumes, re-check the active iOS workflow and signing path against then-current Open edX mobile guidance and the maintained front doors in `docs/reference/operations/IOS_CI_CD_REFERENCE.md` and `docs/ops/runbooks/MOBILE_DEPLOYMENT.md`.
 
 ---
 
@@ -171,7 +174,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
   - Clear app snapshot on background: override `UIApplicationDelegate` `applicationDidEnterBackground` to show branded splash screen
   - Minimum OS version enforcement: iOS 16.0 (set in `Info.plist`)
 
-- [ ] **[M]** Update iOS CI/CD pipeline for production build(`​.github/workflows/build-ios-app.yml`) | AC: #32, #34, #35| Depends: All iOS implementation tasks
+- [ ] **[M]** Update the active iOS CI/CD lane for production/TestFlight delivery (`.github/workflows/ios-testflight.yml`, or its then-current successor if upstream guidance changes) | AC: #32, #34, #35| Depends: All iOS implementation tasks
   - Build number: use `GITHUB_RUN_NUMBER`
   - Version number: read from `marketing_version` in `project.yml`
   - Sign with distribution certificate (Team ID: `44F7G2D7U6`)
@@ -179,6 +182,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
   - Trigger on push to `mobile/ios/**` on `main` branch
   - Manual workflow_dispatch for release builds
   - Store App Store Connect API key in GitHub Secrets
+  - Historical note: the current maintained iOS CI front door is `.github/workflows/ios-testflight.yml`; do not resume work by assuming `build-ios-app.yml` is still the active lane
 
 - [ ] **[S]** Prepare iOS App Store listing assets (`mobile/ios/AppStore/`) | AC: #35 | Depends: None
   - App description (2-4 paragraphs)
@@ -438,15 +442,16 @@ validity 10000`
 
 ## Documentation Tasks
 
-- [ ] **[S]** Write mobile apps architecture overview (`docs/concepts/architecture/mobile-apps-overview.md`) | Depends: All build tasks
+- [x] **[S]** Extend mobile apps architecture overview (`docs/architecture/mobile-apps-overview.md`) | Depends: All build tasks
   - System diagram: mobile apps ↔ LMS API ↔ Open edX backend
   - OAuth 2.0 flow with PKCE
   - Push notification flow: LMS → FCM → APNs/Android
   - Deep linking architecture: AASA/assetlinks → app navigation
   - Offline mode architecture: download → local storage → sync queue
   - Multi-tenant branding: config API → dynamic theming
+  - Done (2026-04-10): the architecture overview now defines the shared-platform model, release dependencies, tenant boundary, and the distinct workflow/build/distribution/runtime truths for the paused mobile lane.
 
-- [ ] **[M]** Write mobile apps runbook (`docs/runbooks/mobile-apps-runbook.md`) | Depends: All build + observability tasks
+- [x] **[M]** Write mobile apps runbook (`docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md`) | Depends: All build + observability tasks
   - Operational procedures: deploy iOS/Android, rollback, certificate rotation
   - Incident playbooks: push notifications not delivered, deep links not working, offline sync failures, crash rate spike
   - Troubleshooting: common symptoms → fixes
@@ -454,37 +459,42 @@ validity 10000`
   - Apple distribution certificate renewal procedure (expires2027-01-22)
   - Android upload key compromise recovery procedure
   - Oncall handbook
+  - Done (2026-04-10): the runbook now defines the resumed-lane reactivation sequence, decision routing, push/deeplink/offline procedures, tenant-branding and course-access checks, and the runtime-proof boundary for real-device verification.
 
-- [ ] **[S]** Write Firebase setup guide (`docs/operations/FIREBASE_SETUP.md`) | Depends: None
+- [x] **[S]** Extend current mobile runbook/reference canon with Firebase setup procedures (`docs/reference/operations/MOBILE_SECRETS_MANAGEMENT.md`, `docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md`) | Depends: None
   - How to create Firebase project
   - Register iOS app (bundle ID: `com.mereka.academy.mobile`)
   - Register Android app (package name: `com.mereka.academy.mobile`)
   - Configure Cloud Messaging (FCM)
   - Download `GoogleService-Info.plist` (iOS) and `google-services.json` (Android)
   - Enable Crashlytics
+  - Done (2026-04-10): mobile secrets canon now carries Firebase/APNs setup procedures and the runbook frames push testing against the resumed-lane provider boundary instead of assuming push is already live.
 
-- [ ] **[S]** Write Apple Developer account setup guide (`docs/operations/APPLE_DEVELOPER_SETUP.md`) | Depends: None
+- [x] **[S]** Extend the current iOS workflow reference with Apple Developer setup procedures (`docs/reference/operations/IOS_CI_CD_REFERENCE.md`, `docs/ops/runbooks/MOBILE_DEPLOYMENT.md`) | Depends: None
   - Team ID: `44F7G2D7U6`
   - Create App ID: `com.mereka.academy.mobile`
   - Enable capabilities: Sign in with Apple, Push Notifications, Associated Domains
   - Create distribution certificate (valid until 2027-01-22)
   - Create provisioning profile for App Store distribution
   - Generate App Store Connect API key
+  - Done (2026-04-10): the iOS workflow reference and mobile deployment front door now define the Apple Developer/TestFlight resume sequence and clearly bound historical Fastlane detail as archaeology, not the active lane design.
 
-- [ ] **[S]** Write Google Play Developer account setup guide(`docs/operations/GOOGLE_PLAY_SETUP.md`) | Depends: None
+- [x] **[S]** Add Google Play account setup guidance under the current mobile reference/runbook roots (`docs/reference/operations/MOBILE_SECRETS_MANAGEMENT.md`, `docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md`) | Depends: None
   - Create app in Google Play Console
   - Configure app signing (Google manages signing key)
   - Upload initial AAB
   - Set up Internal Testing track
   - Create Service Account for API access
   - Grant permissions in Play Console → API access
+  - Done (2026-04-10): the current mobile secrets canon now records the Google Play setup and service-account boundary under the current roots while keeping Android explicitly deferred.
 
-- [ ] **[S]** Update main troubleshooting doc with mobile section (`docs/ops/runbooks/TROUBLESHOOTING.md`) | Depends: All build tasks
+- [x] **[S]** Update main troubleshooting doc with mobile section (`docs/ops/runbooks/TROUBLESHOOTING.md`) | Depends: All build tasks
   - Add mobile apps diagnostic commands
   - Check push notification delivery: query `mobile_device_tokens` table, check FCM logs
   - Check deep linking: verify AASA/assetlinks files, test Universal/App Links
   - Check offline sync: query sync queue, check backend API logs
   - Check branding config: test config endpoint, verify cache
+  - Done (2026-04-10): the troubleshooting router now has a dedicated mobile lane that separates workflow/signing, provider setup, release procedure, and runtime-device verification.
 
 ---
 
@@ -498,8 +508,9 @@ validity 10000`
   - `ENABLE_MOBILE_CERTIFICATE_PINNING` (default: on, emergency disable during cert rotation)
   - Feature flags stored in Django admin `Waffle` or similar
 
-- [ ] **[M]** iOS Phase 1: Stabilize existing TestFlight pipeline (`scripts/mobile/deploy-ios-v1.sh`) | AC: #32, #35 | Depends: iOS implementation, CI/CD pipeline
-  - Verify build-ios-app.yml workflow runs successfully
+- [ ] **[M]** iOS Phase 1: Stabilize the resumed TestFlight pipeline (`scripts/mobile/deploy-ios-v1.sh`) | AC: #32, #35 | Depends: iOS implementation, CI/CD pipeline
+  - Verify the active iOS workflow contract in `docs/reference/operations/IOS_CI_CD_REFERENCE.md` still matches the chosen upstream Open edX approach
+  - Verify `ios-testflight.yml` (or its approved successor) runs successfully
   - Deploy to TestFlight
   - Invite internal testers (5-10 users)
   - Test OAuth login, course browsing, video playback

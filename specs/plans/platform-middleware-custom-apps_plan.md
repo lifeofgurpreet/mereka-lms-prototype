@@ -103,13 +103,17 @@ All three middleware components and two custom apps are deployed to production:
 
 ### Docs -- Operational Runbooks
 
-- [ ] **[M]** D-01: Create docs/operations/MIDDLEWARE_VERIFICATION.md -- runbook for verifying middleware is loaded, checking middleware order, testing admin escalation, testing cookie domains, testing header normalization | Depends: T-01, T-02, T-03
+- [x] **[M]** D-01: Extend docs/ops/runbooks/MIDDLEWARE_VERIFICATION.md -- runbook for verifying middleware is loaded, checking middleware order, testing admin escalation, testing cookie domains, testing header normalization | Depends: T-01, T-02, T-03
+  - Done (2026-04-10): the verification runbook now defines the operator sequence, minimum expected coverage, verification routes, and verdict classes for order/runtime/metrics outcomes.
 
-- [ ] **[M]** D-02: Create docs/operations/MIDDLEWARE_TROUBLESHOOTING.md -- troubleshooting guide for all edge cases from the spec (admin email collision, cookie domain leakage, Prometheus scrape failures, empty OAuth providers, Sites framework patch race condition, middleware order violation) | Depends: None
+- [x] **[M]** D-02: Extend docs/ops/runbooks/MIDDLEWARE_TROUBLESHOOTING.md -- troubleshooting guide for all edge cases from the spec (admin email collision, cookie domain leakage, Prometheus scrape failures, empty OAuth providers, Sites framework patch race condition, middleware order violation) | Depends: None
+  - Done (2026-04-10): the troubleshooting guide now covers platform-admin escalation drift and Tutor/patch regeneration order drift in addition to auth/cookie, provider, and metrics failure classes.
 
-- [ ] **[S]** D-03: Add middleware verification to docs/operations/DEPLOYMENT_RUNBOOK.md post-deployment checklist | Depends: D-01
+- [x] **[S]** D-03: Add middleware verification to docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md post-deployment checklist | Depends: D-01
+  - Done (2026-04-10): the deployment runbook now explicitly requires middleware/custom-app verification after settings-affecting deployments.
 
-- [ ] **[S]** D-04: Document custom Prometheus metrics (labels, usage, example queries) in docs/operations/OBSERVABILITY_GUIDE.md | Depends: H-01
+- [x] **[S]** D-04: Document custom Prometheus metrics (labels, usage, example queries) in docs/guides/admin/OBSERVABILITY_GUIDE.md | Depends: H-01
+  - Done (2026-04-10): the observability guide now documents the current middleware/custom-app observability boundary honestly and no longer implies a missing `docs/ops/runbooks/OBSERVABILITY_GUIDE.md` owner path.
 
 ### Rollout -- Add to CI/CD
 

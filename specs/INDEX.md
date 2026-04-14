@@ -7,10 +7,11 @@
 
 - **approved**: 29 items
 - **completed**: 2 items
+- **deferred**: 1 items
 - **deferred_until_2027**: 2 items
 - **draft**: 63 items
 - **in_progress**: 1 items
-- **ready**: 7 items
+- **ready**: 6 items
 - **lane:normative**: 40 items
 - **lane:plan**: 29 items
 - **lane:proposal**: 4 items
@@ -34,7 +35,7 @@
 | 9 | [Data Privacy & GDPR Compliance](data-privacy-gdpr-compliance_spec.md) | normative | security | draft | 1.0.0 | 93 | 2026-03-09 |
 | 10 | [Design Tokens System](design-tokens-system_spec.md) | normative | system | approved | 1.1.0 | 12 | 2026-03-09 |
 | 11 | [Disaster Recovery & Business Continuity](disaster-recovery-business-continuity_spec.md) | normative | system | approved | 1.0.0 | 26 | 2026-02-10 |
-| 12 | [Ecommerce Purchase Gateway (Stripe -> Open edX Integration)](ecommerce-purchase-gateway_spec.md) | normative | integration | approved | 1.0.0 | 34 | 2026-03-09 |
+| 12 | [Ecommerce Purchase Gateway (Stripe -> Open edX Integration)](ecommerce-purchase-gateway_spec.md) | normative | integration | approved | 1.0.0 | 34 | 2026-04-14 |
 | 13 | [Email & Notifications Pipeline](email-notifications-pipeline_spec.md) | normative | integration | draft | 1.0.0 | 45 | 2026-03-09 |
 | 14 | [Enterprise Microservices Deployment](enterprise-microservices_spec.md) | normative | integration | approved | 1.0.0 | 37 | 2026-03-09 |
 | 15 | [Forum Service Migration: Ruby cs_comments_service to Python openedx-forum](forum-service-migration_spec.md) | normative | integration | approved | 1.0.0 | 25 | 2026-03-09 |
@@ -93,7 +94,7 @@
 | 14 | [Implementation Plan: External Registration via HubSpot](plans/external-registration-hubspot_plan.md) | plan | plan | draft | None | 0 | 2026-02-10 |
 | 15 | [Forum Service Migration - Implementation Plan](plans/forum-service-migration_plan.md) | plan | plan | completed | None | 0 | 2026-02-10 |
 | 16 | [Implementation Plan: Kubernetes Deployment Specification](plans/k8s-deployment_plan.md) | plan | plan | draft | None | 0 | 2026-02-10 |
-| 17 | [Mobile Apps (iOS + Android) Enterprise Deployment - Implementation Plan](plans/mobile-apps-enterprise_plan.md) | plan | plan | ready | None | 0 | 2026-02-10 |
+| 17 | [Mobile Apps (iOS + Android) Enterprise Deployment - Implementation Plan](plans/mobile-apps-enterprise_plan.md) | plan | plan | deferred | None | 0 | 2026-04-09 |
 | 18 | [Implementation Plan: MongoDB Atlas Integration](plans/mongodb-atlas-integration_plan.md) | plan | plan | draft | None | 0 | 2026-02-10 |
 | 19 | [Implementation Plan: Multi-Site Domain Configuration](plans/multi-site-domains_plan.md) | plan | plan | draft | None | 0 | 2026-02-10 |
 | 20 | [Multi-Tenancy Architecture - Implementation Plan](plans/multi-tenancy-architecture_plan.md) | plan | plan | draft | None | 0 | 2026-02-10 |
