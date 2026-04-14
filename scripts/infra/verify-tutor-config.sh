@@ -588,6 +588,8 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_not_in_file "legacy_translation_preflight_block = (" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain legacy translation preflight heredoc scrubber"
   pattern_not_in_file "escaped_translation_preflight_block = (" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain escaped translation preflight scrubber"
   pattern_not_in_file "# Re-install local requirements, otherwise egg-info folders are missing" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain local requirements reinstall scrubber"
+  pattern_not_in_file 'base_txt = Path("/openedx/edx-platform/requirements/edx/base.txt")' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain legacy base requirements pin heredoc scrubber"
+  pattern_not_in_file "s/django-cors-headers==4.9.0/django-cors-headers==4.3.1/g" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain sed-based base requirements pin scrubber"
   pattern_not_in_file "legacy_code_stage_custom_apps_pattern" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain legacy production-stage custom app scrubber"
   pattern_not_in_file "production_custom_apps_pattern" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain duplicate production-stage custom app reinjection scrubber"
   pattern_not_in_file "RUN uv pip install -e /openedx/mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "No duplicate production-stage custom app reinstalls remain"
