@@ -116,9 +116,16 @@ jobs:
         id: select
         uses: Biji-Biji-Initiative/bbi-infrastructure/.github/actions/select-runner-lane@main
         with:
-          enabled: ${{ vars.CI_FASTLANE_CI_ENABLED || 'false' }}
-          lane_mode: auto
-          fastlane_label: ${{ vars.CI_FASTLANE_CI_LABEL || 'mereka-vps-fastlane-ci' }}
+          # Prefer fastlane for CI by default. The selector still falls back to
+          # mereka-k8s-runners when fastlane is unavailable or the event is not
+          # trusted, so this keeps merge tails short without hard-blocking CI.
+          enabled: ${{ vars.CI_FASTLANE_CI_ENABLED || 'true' }}
+          # Force trusted CI events onto the dedicated fastlane. The selector's
+          # auto status probe is currently falling back even when the fastlane
+          # runner exists and is idle, which leaves required Tutor checks stuck
+          # behind the generic ARC queue.
+          lane_mode: fastlane
+          fastlane_label: ${{ vars.CI_FASTLANE_CI_LABEL || 'cie-vps-fastlane-ci' }}
           routing_policy: lms_ci_prefer_fastlane
           fallback_label: mereka-k8s-runners
           runner_status_token: ${{ secrets.FASTLANE_RUNNER_STATUS_TOKEN }}
