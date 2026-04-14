@@ -60,7 +60,7 @@ infrastructure/tutor/
 2. Installs django-prometheus in Open edX virtualenv
 3. Adds to INSTALLED_APPS (django_prometheus must be first)
 4. Configures middleware (PrometheusBeforeMiddleware and PrometheusAfterMiddleware)
-5. Exposes /metrics endpoint via nginx configuration
+5. Exposes `/metrics` through app URL wiring; current app-repo Caddy render does not manufacture `/health`
 
 **Verification**:
 ```bash
@@ -93,7 +93,7 @@ Tutor generates templates from scratch on every `config save`, losing any manual
 4. **Webpack memory**: Increases Node memory limit to 6144MB for asset compilation
 5. **Custom apps**: Copies and configures custom Django apps (prometheus, oauth_fix)
 6. **Branding**: Syncs Mereka theme assets and custom MFE footer
-7. **Prometheus metrics**: Installs django-prometheus and configures /metrics endpoint
+7. **Prometheus metrics**: Installs django-prometheus and configures the app-level `/metrics` endpoint
 
 ### Usage
 

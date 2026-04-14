@@ -21,6 +21,7 @@ TUTOR_ENV="${TUTOR_ROOT:-${REPO_ROOT}/tutor_env}"
 APPLY_PATCH_SCRIPT="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 MFE_PATCH_MODULE="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py"
 BUILD_OPTIMIZATIONS_SCRIPT="$REPO_ROOT/infrastructure/tutor/patches/build-optimizations.sh"
+INFRASTRUCTURE_PATCH_MODULE="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/infrastructure.py"
 PLUGIN_SRC_DIR="$REPO_ROOT/infrastructure/tutor/plugins"
 PLUGIN_DIR="${TUTOR_PLUGINS_DIR:-$HOME/.local/share/tutor-plugins}"
 
@@ -319,13 +320,6 @@ if [[ -f "$CADDYFILE" ]]; then
   pattern_in_file 'reverse_proxy /profile/api/* lms:8000 {' "$CADDYFILE" "Caddy render keeps /profile/api proxy"
 fi
 
-# Check nginx for extra domains
-NGINX_CONF="$TUTOR_ENV/env/apps/nginx/lms.conf"
-if [[ -f "$NGINX_CONF" ]]; then
-  pattern_in_file "academy.biji-biji.com" "$NGINX_CONF" "Biji-Biji domain in nginx"
-  pattern_in_file "skillourfuture.academy.mereka.io" "$NGINX_CONF" "SkillOurFuture domain in nginx"
-fi
-
 print_section "Checking MySQL Authentication Fix"
 
 DOCKER_COMPOSE="$TUTOR_ENV/env/local/docker-compose.yml"
@@ -533,7 +527,7 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   fixed_pattern_count_equals 'ENV PYTHONPATH=/openedx/edx-platform' "2" "$OPENEDX_DOCKERFILE" "Runtime PYTHONPATH env appears only in production and final runtime stages"
   fixed_pattern_count_equals 'ENV PYTHONPATH="/openedx/edx-platform"' "1" "$OPENEDX_DOCKERFILE" "Pre-assets PYTHONPATH env block is unique"
   fixed_pattern_count_equals 'ENV NODE_OPTIONS="--max-old-space-size=6144"' "2" "$OPENEDX_DOCKERFILE" "Node memory env appears only in production and pre-assets hooks"
-  fixed_pattern_count_equals 'ENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none' "1" "$OPENEDX_DOCKERFILE" "RequireJS optimize env appears only in the production stage"
+  fixed_pattern_count_equals 'ENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none' "2" "$OPENEDX_DOCKERFILE" "RequireJS optimize env appears exactly twice in the production-stage build flow"
 
   # Check for npm/pip install resilience strategy.
   # Upstream patches evolved over time from explicit retry loops to
@@ -645,6 +639,10 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_not_in_file '"$CMS_ASSETS_TEMPLATE"' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain stale CMS assets target scans"
   pattern_not_in_file '"$NGINX_LMS_TEMPLATE"' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain stale nginx target scans"
   pattern_not_in_file '"$CADDY_TEMPLATE"' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain stale Caddy target scans"
+  pattern_not_in_file '"nginx-lms-config"' "$INFRASTRUCTURE_PATCH_MODULE" "Plugin does not retain stale nginx edge patch registration"
+  pattern_not_in_file "location = /health {" "$INFRASTRUCTURE_PATCH_MODULE" "Plugin does not retain stale nginx /health edge block"
+  pattern_not_in_file "location = /metrics {" "$INFRASTRUCTURE_PATCH_MODULE" "Plugin does not retain stale nginx /metrics edge block"
+  pattern_not_in_file "location ^~ /profile/api/ {" "$INFRASTRUCTURE_PATCH_MODULE" "Plugin does not retain stale nginx /profile/api edge block"
   pattern_not_in_file "RUN uv pip install -e /openedx/mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "No duplicate production-stage custom app reinstalls remain"
   pattern_in_file 'pip install --no-cache-dir --no-build-isolation uwsgi==2.0.24' "$OPENEDX_DOCKERFILE" "uwsgi remains on explicit pip compatibility fallback"
   fixed_pattern_count_equals "pip install" "1" "$OPENEDX_DOCKERFILE" "Only uwsgi remains on plain pip in rendered Open edX Dockerfile"
@@ -727,18 +725,9 @@ fi
 
 print_section "Checking Health Endpoints"
 
-if [[ -f "$NGINX_CONF" ]]; then
-  pattern_in_file "location = /health" "$NGINX_CONF" "Health check endpoint in nginx"
-  pattern_in_file "location = /metrics" "$NGINX_CONF" "Prometheus metrics endpoint in nginx"
-fi
-
 if [[ -f "$CADDYFILE" ]]; then
-  # Caddy might have different health check config
-  if grep -q "/health" "$CADDYFILE" 2>/dev/null; then
-    check_pass "Health check endpoint referenced in Caddy"
-  else
-    check_warn "Health check endpoint not found in Caddy"
-  fi
+  pattern_in_file 'reverse_proxy /profile/api/* lms:8000 {' "$CADDYFILE" "Caddy render owns /profile/api proxy"
+  pattern_not_in_file "/health" "$CADDYFILE" "Caddy render does not claim /health edge contract"
 fi
 
 print_section "Checking Theme Assets"

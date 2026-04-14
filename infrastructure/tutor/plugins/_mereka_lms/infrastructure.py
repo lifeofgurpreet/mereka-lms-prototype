@@ -1,4 +1,4 @@
-"""Infrastructure patches — MySQL auth, Caddy multi-site, Nginx config."""
+"""Infrastructure patches — MySQL auth and Caddy edge configuration."""
 
 from _mereka_lms import _register_env_patch
 
@@ -82,40 +82,6 @@ _register_env_patch(
     reverse_proxy /api/mfe_config/v1* lms:8000 {
         header_up Host {http.request.host}
     }
-}
-""",
-)
-
-###############################################################################
-# Nginx Configuration Patches
-###############################################################################
-
-_register_env_patch(
-    "nginx-lms-config",
-    """
-# Additional server names for multi-site support
-{% for host in MEREKA_LMS_EXTRA_HOSTS %}
-{{ host }}{% if not loop.last %} {% endif %}
-{% endfor %}
-
-# Health check endpoint
-location = /health {
-    default_type text/plain;
-    return 200 "ok\\n";
-}
-
-# Prometheus metrics endpoint (internal access only)
-location = /metrics {
-    proxy_set_header Host $http_host;
-    proxy_redirect off;
-    proxy_pass http://lms-backend;
-}
-
-# MFE profile API proxy
-location ^~ /profile/api/ {
-    proxy_set_header Host $http_host;
-    proxy_redirect off;
-    proxy_pass http://lms-backend;
 }
 """,
 )

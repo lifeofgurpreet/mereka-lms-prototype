@@ -19,7 +19,7 @@ The main plugin that consolidates all Mereka LMS configuration customizations. H
    - Enables enterprise integration (`ENABLE_ENTERPRISE_INTEGRATION = True`)
    - Forces MFE-only discussions (disables legacy in-LMS panel)
    - Sets default theme to `mereka`
-   - Ensures optional Redwood apps are installed (content libraries, bookmarks, discussions)
+   - Ensures required optional apps are installed (content libraries, bookmarks, discussions)
 
 3. **Custom Apps Integration**
    - Installs `mfe_oauth_fix` custom app
@@ -42,8 +42,9 @@ The main plugin that consolidates all Mereka LMS configuration customizations. H
 
 6. **Infrastructure Configuration**
    - MySQL 8: Uses `mysql_native_password` authentication plugin
-   - Caddy: Adds multi-domain blocks for extra LMS hosts
-   - Nginx: Adds health check endpoint (`/health`), metrics endpoint (`/metrics`), profile API proxy
+   - Caddy: Adds multi-domain blocks for extra LMS hosts and owns `/profile/api`
+   - `/metrics`: remains app-owned through Django/plugin URL wiring
+   - `/health`: is not part of the current app-repo Caddy contract
 
 7. **Asset Build Fixes**
    - Monkey-patches Django's `safe_join` to allow relative CSS paths during collectstatic
