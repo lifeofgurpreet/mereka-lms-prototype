@@ -52,4 +52,4 @@ has dropped to zero (confirm via Grafana / access logs):
    ConfigMap automatically on the next sync.
 
 Do **not** `kubectl delete` ArgoCD-managed resources directly (see
-`~/.claude/rules/gitops-enforcement.md`).
+[AGENT_EXECUTION_WORKFLOW.md](../../reference/operations/AGENT_EXECUTION_WORKFLOW.md)).

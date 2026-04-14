@@ -52,7 +52,7 @@ This runbook covers operational procedures for multi-site domain management.
    ```bash
    ./scripts/infra/tutor-config-save.sh --set EXTRA_DOMAINS=<new_domain>
    ```
-3. Update Caddy configuration (via apply-patches.sh)
+3. Update Caddy configuration and refresh the rendered Open edX/Caddy build context if doing local or bootstrap verification
 4. Update CSRF trusted origins and allowed hosts
 5. Restart services and verify
 

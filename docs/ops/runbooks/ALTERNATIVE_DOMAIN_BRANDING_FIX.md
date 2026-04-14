@@ -239,7 +239,7 @@ print('Database connection successful!')
 
 ## References
 
-- **Multisite Documentation**: `docs/concepts/architecture/multi-tenancy-overview.md`
+- **Runtime host matrix**: `docs/reference/operations/RUNTIME_TRUTH_MATRIX.md`
 - **Canonical Multisite Definitions**: `infrastructure/tutor/multisite-sites.yml`
 - **Canonical Deployment Script**: `scripts/infra/apply-multisite-config.sh`
 - **Configuration File**: `infrastructure/tutor/multisite-sites.yml`

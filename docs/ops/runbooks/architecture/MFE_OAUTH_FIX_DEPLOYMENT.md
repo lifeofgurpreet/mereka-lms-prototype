@@ -36,7 +36,7 @@ scripts/qa/test-mfe-oauth-fix.sh
 
 ## Deployment Steps
 
-### 1. Apply Patches and Rebuild
+### 1. Refresh Build Context and Rebuild
 
 The custom app needs to be built into the Open edX Docker image:
 
@@ -47,8 +47,8 @@ cd <repo-root>
 source infrastructure/tutor/tutor-env.sh
 export TUTOR_ROOT="$(pwd)/tutor_env"
 
-# Apply patches (this updates settings and Dockerfile)
-./infrastructure/tutor/apply-patches.sh
+# Refresh rendered Open edX build context from current source truth
+./scripts/infra/prepare-tutor-build-context.sh --target openedx
 
 # Rebuild the Open edX image (required to include the custom app)
 # This takes 30-45 minutes
@@ -115,8 +115,8 @@ If you want to test locally first:
 ```bash
 cd <repo-root>
 
-# Apply patches
-./infrastructure/tutor/apply-patches.sh
+# Refresh rendered Open edX build context
+./scripts/infra/prepare-tutor-build-context.sh --target openedx
 
 # Rebuild the Open edX image
 tutor local dc build lms
@@ -208,7 +208,7 @@ If the fix causes issues, you can quickly rollback:
 
 2. Rebuild and redeploy:
 ```bash
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target openedx
 tutor images build openedx
 # Push and deploy
 ```

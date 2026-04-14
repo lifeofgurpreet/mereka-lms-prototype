@@ -13141,7 +13141,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-purchase-gateway-k8s.sh",
-      "reference_count": 7,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
