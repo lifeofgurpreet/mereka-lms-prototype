@@ -1,6 +1,12 @@
 """Setup script for openedx_mobile_api package."""
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
+
+_SUBPACKAGES = find_packages(where=".")
+_PACKAGES = [
+    "openedx_mobile_api",
+    *[f"openedx_mobile_api.{name}" for name in _SUBPACKAGES],
+]
 
 setup(
     name="openedx-mobile-api",
@@ -8,7 +14,8 @@ setup(
     description="Mobile Backend API for Open edX",
     author="Mereka Academy",
     author_email="tech@mereka.io",
-    packages=find_packages(),
+    packages=_PACKAGES,
+    package_dir={'openedx_mobile_api': '.'},
     install_requires=[
         "Django>=3.2",
         "djangorestframework>=3.12",

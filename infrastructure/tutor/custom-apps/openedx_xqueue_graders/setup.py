@@ -1,5 +1,11 @@
 """Setup for XQueue Graders Django App"""
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
+
+_SUBPACKAGES = find_packages(where=".")
+_PACKAGES = [
+    "openedx_xqueue_graders",
+    *[f"openedx_xqueue_graders.{name}" for name in _SUBPACKAGES],
+]
 
 setup(
     name='openedx-xqueue-graders',
@@ -7,7 +13,8 @@ setup(
     description='XQueue Graders - Python Code Sandbox for Open edX',
     author='Mereka Academy',
     author_email='tech@mereka.io',
-    packages=find_packages(),
+    packages=_PACKAGES,
+    package_dir={'openedx_xqueue_graders': '.'},
     include_package_data=True,
     install_requires=[
         'Django>=3.2',

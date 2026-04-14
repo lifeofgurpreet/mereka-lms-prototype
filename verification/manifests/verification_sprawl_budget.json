@@ -1,8 +1,8 @@
 {
-  "max_total_verify_scripts": 628,
+  "max_total_verify_scripts": 629,
   "max_manual_only_scripts": 194,
   "max_deprecated_candidate_scripts": 35,
   "min_ci_static_bound": 324,
-  "budget_reviewed_at": "2026-04-13",
-  "budget_rationale": "Reviewed 2026-04-13: +1 script (verify-benchmark-artifact-contract.sh) promoted into ci_static release-blocking coverage, +1 live-cluster enterprise observability verifier reclassified from static to manual-only runtime inventory in #1670, +2 additional live-cluster observability verifiers reclassified from static to manual-only runtime inventory in #1671, and +1 secrets live-cluster verifier reclassified from static to manual-only runtime inventory in #1673. Budget raised 627→628, manual-only ceiling raised 190→194, and ci_static floor raised 323→324."
+  "budget_reviewed_at": "2026-04-14",
+  "budget_rationale": "Reviewed 2026-04-14: +1 built-image release-blocking verifier (verify-openedx-custom-app-imports.sh) added to catch flat-root custom-app packaging regressions inside the Open edX OCI image before promotion. Budget raised 628→629; manual-only ceiling and ci_static floor unchanged."
 }

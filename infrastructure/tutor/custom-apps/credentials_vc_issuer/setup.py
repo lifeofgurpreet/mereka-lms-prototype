@@ -2,7 +2,13 @@
 Setup configuration for credentials_vc_issuer Django app.
 """
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
+
+_SUBPACKAGES = find_packages(where=".")
+_PACKAGES = [
+    "credentials_vc_issuer",
+    *[f"credentials_vc_issuer.{name}" for name in _SUBPACKAGES],
+]
 
 setup(
     name='credentials_vc_issuer',
@@ -10,7 +16,8 @@ setup(
     description='Verifiable Credentials issuer identity and DID document endpoint for Open edX Credentials',
     author='Mereka Team',
     author_email='tech@mereka.io',
-    packages=find_packages(),
+    packages=_PACKAGES,
+    package_dir={'credentials_vc_issuer': '.'},
     install_requires=[
         'Django>=3.2',
     ],

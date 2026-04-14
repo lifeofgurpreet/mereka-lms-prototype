@@ -2,7 +2,13 @@
 Setup configuration for openedx_notifications Django app.
 """
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
+
+_SUBPACKAGES = find_packages(where=".")
+_PACKAGES = [
+    "openedx_notifications",
+    *[f"openedx_notifications.{name}" for name in _SUBPACKAGES],
+]
 
 setup(
     name='openedx_notifications',
@@ -10,7 +16,8 @@ setup(
     description='In-app notification tray and ACE channel for Open edX',
     author='Mereka Team',
     author_email='tech@mereka.io',
-    packages=find_packages(),
+    packages=_PACKAGES,
+    package_dir={'openedx_notifications': '.'},
     install_requires=[
         'Django>=3.2',
         'djangorestframework>=3.14',

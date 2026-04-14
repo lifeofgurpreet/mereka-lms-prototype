@@ -2,7 +2,13 @@
 Setup configuration for openedx_email_templates Django app.
 """
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
+
+_SUBPACKAGES = find_packages(where=".")
+_PACKAGES = [
+    "openedx_email_templates",
+    *[f"openedx_email_templates.{name}" for name in _SUBPACKAGES],
+]
 
 setup(
     name='openedx_email_templates',
@@ -10,7 +16,8 @@ setup(
     description='Email templates and bulk campaign engine for Open edX',
     author='Mereka Team',
     author_email='tech@mereka.io',
-    packages=find_packages(),
+    packages=_PACKAGES,
+    package_dir={'openedx_email_templates': '.'},
     install_requires=[
         'Django>=3.2',
         'djangorestframework>=3.14',

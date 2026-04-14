@@ -31,6 +31,7 @@ scripts/qa/verify-release-readiness.sh --dry-run  # CI_ARTIFACT
 scripts/infra/verify-release-preflight.sh  # CI_ARTIFACT
 
 # ── Built image required ─────────────────────────────────────────────────────
+scripts/qa/verify-openedx-custom-app-imports.sh  # BUILT_IMAGE (Validates every Open edX custom app package imports from the built OCI image before promotion proceeds.)
 scripts/qa/verify-mfe-runtime-contract.sh  # BUILT_IMAGE (verifies compiled MFE bundles and tenant assets from a built image or deployed MFE base URL)
 
 # ── Worktree or branch context required ─────────────────────────────────────────────────────

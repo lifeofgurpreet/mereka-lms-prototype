@@ -675,6 +675,13 @@ jobs:
           fi
           echo "**OpenedX digest:** \`${DIGEST}\`" >> $GITHUB_STEP_SUMMARY
 
+      - name: Verify OpenEdX custom app imports
+        run: |
+          TAG="${{ inputs.image_tag || github.sha }}"
+          REF="${{ env.REGISTRY }}/openedx:${TAG}"
+          ./scripts/qa/verify-openedx-custom-app-imports.sh \
+            --image-ref "${REF}@${{ steps.digest.outputs.digest }}"
+
   build-mfe:
     name: Build MFE Image
     runs-on: ${{ needs.select-build-lane.outputs.runner_label }}

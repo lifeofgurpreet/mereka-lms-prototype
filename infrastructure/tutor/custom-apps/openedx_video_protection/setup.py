@@ -1,6 +1,12 @@
 """Setup script for openedx_video_protection Django app"""
 from setuptools import find_packages, setup
 
+_SUBPACKAGES = find_packages(where=".")
+_PACKAGES = [
+    "openedx_video_protection",
+    *[f"openedx_video_protection.{name}" for name in _SUBPACKAGES],
+]
+
 setup(
     name='openedx-video-protection',
     version='1.0.0',
@@ -8,7 +14,8 @@ setup(
     author='Mereka Academy',
     author_email='platform@mereka.io',
     url='https://github.com/Biji-Biji-Initiative/mereka-lms',
-    packages=find_packages(),
+    packages=_PACKAGES,
+    package_dir={'openedx_video_protection': '.'},
     include_package_data=True,
     install_requires=[
         'Django>=3.2',

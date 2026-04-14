@@ -1,5 +1,11 @@
 """Setup for Timed Exams Django App"""
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
+
+_SUBPACKAGES = find_packages(where=".")
+_PACKAGES = [
+    "openedx_timed_exams",
+    *[f"openedx_timed_exams.{name}" for name in _SUBPACKAGES],
+]
 
 setup(
     name='openedx-timed-exams',
@@ -7,7 +13,8 @@ setup(
     description='Timed Exams - Server-Side Enforcement & Accommodations for Open edX',
     author='Mereka Academy',
     author_email='tech@mereka.io',
-    packages=find_packages(),
+    packages=_PACKAGES,
+    package_dir={'openedx_timed_exams': '.'},
     include_package_data=True,
     install_requires=[
         'Django>=3.2',

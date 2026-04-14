@@ -21,9 +21,9 @@ do_pass() { PASS=$((PASS + 1)); echo "  PASS  $1"; }
 do_fail() { FAIL=$((FAIL + 1)); echo "  FAIL  $1"; }
 do_warn() { WARN=$((WARN + 1)); echo "  WARN  $1"; }
 
-verify_known_packaging_regressions() {
+verify_flat_root_packaging_contracts() {
   local app
-  for app in openedx_video_pipeline openedx_video_analytics; do
+  while IFS= read -r app; do
     local app_dir="$CUSTOM_APPS_DIR/$app"
     local setup_py="$app_dir/setup.py"
 
@@ -43,7 +43,17 @@ verify_known_packaging_regressions() {
     else
       do_fail "$app missing package_dir for root module packaging"
     fi
-  done
+  done < <(python3 - "$CUSTOM_APPS_DIR" <<'PY'
+from pathlib import Path
+import sys
+
+root = Path(sys.argv[1])
+for setup_py in sorted(root.glob("*/setup.py")):
+    app_dir = setup_py.parent
+    if (app_dir / "__init__.py").is_file() and (app_dir / "apps.py").is_file():
+        print(app_dir.name)
+PY
+)
 }
 
 contains() {
@@ -181,8 +191,8 @@ echo ""
 echo "=== Results: $PASS PASS / $FAIL FAIL / $WARN WARN ==="
 
 echo ""
-echo "--- Known Packaging Regressions ---"
-verify_known_packaging_regressions
+echo "--- Flat-Root Packaging Contract ---"
+verify_flat_root_packaging_contracts
 
 echo ""
 echo "=== Results: $PASS PASS / $FAIL FAIL / $WARN WARN ==="

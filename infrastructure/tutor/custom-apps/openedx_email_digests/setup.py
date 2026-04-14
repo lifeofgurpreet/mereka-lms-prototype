@@ -2,7 +2,13 @@
 Setup configuration for openedx_email_digests Django app.
 """
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
+
+_SUBPACKAGES = find_packages(where=".")
+_PACKAGES = [
+    "openedx_email_digests",
+    *[f"openedx_email_digests.{name}" for name in _SUBPACKAGES],
+]
 
 setup(
     name='openedx_email_digests',
@@ -10,7 +16,8 @@ setup(
     description='Email digests and engagement analytics for Open edX',
     author='Mereka Team',
     author_email='tech@mereka.io',
-    packages=find_packages(),
+    packages=_PACKAGES,
+    package_dir={'openedx_email_digests': '.'},
     install_requires=[
         'Django>=3.2',
         'djangorestframework>=3.14',

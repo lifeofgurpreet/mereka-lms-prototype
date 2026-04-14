@@ -1,5 +1,11 @@
 """Setup for Advanced XBlocks Django App"""
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
+
+_SUBPACKAGES = find_packages(where=".")
+_PACKAGES = [
+    "openedx_advanced_xblocks",
+    *[f"openedx_advanced_xblocks.{name}" for name in _SUBPACKAGES],
+]
 
 setup(
     name='openedx-advanced-xblocks',
@@ -7,7 +13,8 @@ setup(
     description='Advanced XBlocks - Drag-Drop, Math Input, Randomization for Open edX',
     author='Mereka Academy',
     author_email='tech@mereka.io',
-    packages=find_packages(),
+    packages=_PACKAGES,
+    package_dir={'openedx_advanced_xblocks': '.'},
     include_package_data=True,
     install_requires=[
         'Django>=3.2',

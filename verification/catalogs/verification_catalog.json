@@ -11729,6 +11729,32 @@
       "cadence": "per_pr_and_push",
       "canonical": true,
       "ci_binding": [
+        "workflow_direct"
+      ],
+      "ci_entrypoints": [
+        "workflow_direct"
+      ],
+      "env_scope": [
+        "dev"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-openedx-custom-app-imports.sh",
+      "reference_count": 4,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "high",
+      "spec_ids": [],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
         "ci_static",
         "workflow_direct"
       ],
@@ -18724,26 +18750,26 @@
     "archived_deprecated_scripts": 21,
     "ci_static_bound": 381,
     "kinds": {
-      "verify": 628
+      "verify": 629
     },
     "mutability": {
       "destructive": 9,
       "mutating": 21,
-      "read-only": 598
+      "read-only": 599
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 433,
+      "active": 434,
       "deprecated_candidate": 1,
       "manual_only": 194
     },
     "tiers": {
       "exploratory_manual": 198,
       "periodic_runtime": 21,
-      "release_blocking": 409
+      "release_blocking": 410
     },
-    "total_verify_scripts": 628,
-    "workflow_direct_bound": 68
+    "total_verify_scripts": 629,
+    "workflow_direct_bound": 69
   },
   "version": "1"
 }

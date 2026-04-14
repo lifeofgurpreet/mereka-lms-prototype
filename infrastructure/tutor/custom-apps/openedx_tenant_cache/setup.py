@@ -2,7 +2,13 @@
 Setup configuration for openedx_tenant_cache Django app.
 """
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
+
+_SUBPACKAGES = find_packages(where=".")
+_PACKAGES = [
+    "openedx_tenant_cache",
+    *[f"openedx_tenant_cache.{name}" for name in _SUBPACKAGES],
+]
 
 setup(
     name='openedx_tenant_cache',
@@ -10,7 +16,8 @@ setup(
     description='Multi-tenant cache namespacing and foundation for Open edX',
     author='Mereka Team',
     author_email='tech@mereka.io',
-    packages=find_packages(),
+    packages=_PACKAGES,
+    package_dir={'openedx_tenant_cache': '.'},
     install_requires=[
         'Django>=3.2',
         'djangorestframework>=3.14',

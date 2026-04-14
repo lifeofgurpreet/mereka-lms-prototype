@@ -1,5 +1,11 @@
 """Setup for Assessment Bulk Operations Django App"""
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
+
+_SUBPACKAGES = find_packages(where=".")
+_PACKAGES = [
+    "openedx_assessment_bulk",
+    *[f"openedx_assessment_bulk.{name}" for name in _SUBPACKAGES],
+]
 
 setup(
     name='openedx-assessment-bulk',
@@ -7,7 +13,8 @@ setup(
     description='Assessment Bulk Operations - Regrade, Export, Import, Security for Open edX',
     author='Mereka Academy',
     author_email='tech@mereka.io',
-    packages=find_packages(),
+    packages=_PACKAGES,
+    package_dir={'openedx_assessment_bulk': '.'},
     include_package_data=True,
     install_requires=[
         'Django>=3.2',
