@@ -86,7 +86,7 @@ kubectl rollout status deployment/lms -n mereka-lms
 #
 # Example — add version exclusion to Tutor config:
 #   tutor config save --set 'OPENEDX_EXTRA_PIP_REQUIREMENTS=["<package>!=<bad_version>"]'
-#   ./infrastructure/tutor/apply-patches.sh
+#   ./scripts/infra/prepare-tutor-build-context.sh --target openedx
 #
 # For purchase-gateway (pip-based): add exclusion to requirements.lock
 #   echo "<package>!=<bad_version>" >> services/purchase-gateway/constraints.txt

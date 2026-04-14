@@ -609,7 +609,7 @@ See `docs/ops/runbooks/COURSE_DATA_RECOVERY.md` (this is usually import/restore 
 
 **Fix (Dev kind):**
 ```bash
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target openedx
 tutor images build openedx
 kubectl rollout restart deployment/cms -n mereka-lms
 ```
@@ -1207,9 +1207,9 @@ kubectl rollout restart deploy/lms deploy/cms -n mereka-lms
    ```bash
    ./scripts/qa/verify-mfe-build-prereqs.sh
    ```
-2. Regenerate build context with patch script:
+2. Regenerate MFE build context through the governed prepare path:
    ```bash
-   ./infrastructure/tutor/apply-patches.sh
+   ./scripts/infra/prepare-tutor-build-context.sh --target mfe
    ```
 3. Re-run full MFE build:
    ```bash

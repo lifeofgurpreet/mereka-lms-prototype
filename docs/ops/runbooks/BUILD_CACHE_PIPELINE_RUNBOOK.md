@@ -612,7 +612,7 @@ workflow.
 | File | Purpose |
 |---|---|
 | `.github/workflows/build-tutor-images.yml` | Main build + push + SLSA workflow |
-| `infrastructure/tutor/apply-patches.sh` | Central patch script — always run after `tutor config save` |
+| `scripts/infra/prepare-tutor-build-context.sh` | Canonical post-render refresh path after manual `tutor config save` |
 | `infrastructure/tutor/patches/build-optimizations.sh` | Dockerfile patches (sysconfig path, PIP_COMMAND) |
 | `infrastructure/tutor/plugins/mereka_lms.py` | Tutor plugin — ENV_PATCHES for all environment customizations |
 | `deploy/k8s/base/arc/runner-scale-set-heavy.yaml` | ARC runner + DinD sidecar + PVC definitions |

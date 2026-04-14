@@ -16,7 +16,7 @@ the top layer of the Mereka Academy verification stack, sitting above unauthenti
 visual regression (`VISUAL_SMOKE_BASELINE.md`) and route-level a11y conformance
 (ACCESSIBILITY_CONFORMANCE_RUNBOOK.md).
 
-The verification script is `scripts/qa/verify-tenant-ui-smoke.sh`.
+The verification script is [`verify-tenant-ui-smoke.sh`](../../../scripts/qa/verify-tenant-ui-smoke.sh).
 
 ---
 
@@ -31,7 +31,7 @@ Three production tenant domains are in scope for this smoke gate:
 | 3 | `skillourfuture.mereka.io` | Skill Our Future Academy | Government programme |
 
 For per-domain token configuration and SITE_VARIANTS details see
-[TENANT_BRANDING_MATRIX.md](TENANT_BRANDING_MATRIX.md).
+[TENANT_BRANDING_MATRIX.md](../../reference/operations/TENANT_BRANDING_MATRIX.md).
 
 ---
 
@@ -129,7 +129,7 @@ For full threshold policy and false-positive triage see
 Every checkpoint in the Route × Domain matrix **must** also pass the
 authenticated a11y landmark + focus-indicator checks defined in:
 
-- **Script**: `scripts/qa/verify-a11y-authenticated-routes.sh`
+- **Script**: [`verify-a11y-authenticated-routes.sh`](../../../scripts/qa/verify-a11y-authenticated-routes.sh)
 - **Runbook**: `ACCESSIBILITY_CONFORMANCE_RUNBOOK.md`
 
 ### Required Landmarks (per authenticated route)
@@ -216,9 +216,9 @@ modes at the appropriate depth:
 |-------|------|---------|
 | 1. Design tokens | `verify-design-tokens.sh` | CSS variable consistency |
 | 2. Branding integrity | `verify-branding-token-integrity.sh` | Token → theme coherence |
-| 3. Unauthenticated visual | `verify-visual-smoke-baseline.sh` | RMSE diff against baseline |
-| 4. A11y conformance | `verify-a11y-authenticated-routes.sh` | Landmarks + focus indicators |
-| 5. **Tenant UI smoke** | `verify-tenant-ui-smoke.sh` ← this gate | Auth × domain × route matrix |
+| 3. Unauthenticated visual | [`verify-visual-smoke-baseline.sh`](../../../scripts/qa/verify-visual-smoke-baseline.sh) | RMSE diff against baseline |
+| 4. A11y conformance | [`verify-a11y-authenticated-routes.sh`](../../../scripts/qa/verify-a11y-authenticated-routes.sh) | Landmarks + focus indicators |
+| 5. **Tenant UI smoke** | [`verify-tenant-ui-smoke.sh`](../../../scripts/qa/verify-tenant-ui-smoke.sh) ← this gate | Auth × domain × route matrix |
 
 Adding the tenant-domain dimension in Layer 5 is what makes this world-class:
 most LMS deployments check only one domain.  By asserting across all 3 tenant
@@ -290,8 +290,8 @@ wait
 
 - [`VISUAL_SMOKE_BASELINE.md`](VISUAL_SMOKE_BASELINE.md) — RMSE threshold policy + baseline generation
 - [`ACCESSIBILITY_CONFORMANCE_RUNBOOK.md`](ACCESSIBILITY_CONFORMANCE_RUNBOOK.md) — Landmark + focus requirements
-- [`TENANT_BRANDING_MATRIX.md`](TENANT_BRANDING_MATRIX.md) — Per-domain brand configuration
-- [`../ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md`](../ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md) — Unauthenticated visual regression infrastructure
-- [`scripts/qa/verify-tenant-ui-smoke.sh`](../../scripts/qa/verify-tenant-ui-smoke.sh) — This gate's verification script
-- [`scripts/qa/verify-a11y-authenticated-routes.sh`](../../scripts/qa/verify-a11y-authenticated-routes.sh) — A11y authenticated route gate
-- [`scripts/qa/verify-visual-smoke-baseline.sh`](../../scripts/qa/verify-visual-smoke-baseline.sh) — Visual smoke baseline verification
+- [`TENANT_BRANDING_MATRIX.md`](../../reference/operations/TENANT_BRANDING_MATRIX.md) — Per-domain brand configuration
+- [`VISUAL_REGRESSION_RUNBOOK.md`](VISUAL_REGRESSION_RUNBOOK.md) — Unauthenticated visual regression infrastructure
+- [`verify-tenant-ui-smoke.sh`](../../../scripts/qa/verify-tenant-ui-smoke.sh) — This gate's verification script
+- [`verify-a11y-authenticated-routes.sh`](../../../scripts/qa/verify-a11y-authenticated-routes.sh) — A11y authenticated route gate
+- [`verify-visual-smoke-baseline.sh`](../../../scripts/qa/verify-visual-smoke-baseline.sh) — Visual smoke baseline verification

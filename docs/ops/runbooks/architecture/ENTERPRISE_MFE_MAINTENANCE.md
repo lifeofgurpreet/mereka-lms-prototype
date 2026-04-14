@@ -6,10 +6,12 @@ _Last updated: 2026-02-27_
 ## Overview
 
 Enterprise portals built on Open edX use micro-frontends (MFEs) that require
-customizations beyond what upstream Tutor ships. These customizations live in
-`infrastructure/tutor/apply-patches.sh` and are applied to both the upstream
-`tutormfe` package templates and the generated `tutor_env/` files after every
-`tutor config save`.
+customizations beyond what upstream Tutor ships. The active contract now lives
+primarily in Tutor plugin hooks under
+`infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py`, with
+`scripts/infra/prepare-tutor-build-context.sh --target mfe` as the canonical
+operator entrypoint for the remaining patch-only build-context sync and tracked
+rendered snapshot refresh.
 
 This document explains what diverges, why it diverges, and the step-by-step
 process to maintain those customizations across Tutor version bumps.
@@ -46,20 +48,19 @@ Ulmo asset pipeline on machines with 12 GB Docker RAM.
 
 ### 3. Custom Footer Component (Mereka Brand)
 
-The `indigo/env.config.jsx` template and MFE Dockerfile are patched to:
+The `indigo/env.config.jsx` template and rendered MFE Dockerfile now ensure:
 
 - Copy `indigo/mereka/` brand assets into `/openedx/app/mereka` at build time
-- Make `mereka.scss` available to all MFE build stages via the base `WORKDIR`
-  anchor
+- Keep `mereka.scss` available to the build via the Indigo-rendered config path
 
-This covers the `authn-common` stage, which Tutor upstream omits from the
-theme-copy wiring.
+The governed prepare path still refreshes the remaining MFE build-context asset
+sync, but stale ad hoc production-stage theme-copy surgery has been removed.
 
 ### 4. Indigo Brand Package Pin (Ulmo)
 
-The `@edx/brand` alias is pinned to `@edly-io/indigo-brand-openedx@^2.4.2`
-(Ulmo/Paragon v23). Earlier pins at `^2.1.1` misalign CSS design tokens with
-the Paragon version bundled in Ulmo MFEs.
+The `@edx/brand` alias now installs the local package
+`@edx/brand@file:./brand-mereka`, keeping the brand package in the repo-owned
+build context instead of pinning an external Indigo npm package.
 
 ### 5. NPM Resilience and Fallback Logic
 
@@ -78,11 +79,13 @@ during the Docker build stage to align both paths.
 `frontend-app-discussions` prompts interactively for webpack installation in
 non-TTY Docker builds. The patch forces a non-interactive path.
 
-### 8. Cookie Domain Environment Variables
+### 8. Rendered Authority Snapshot And Prereq Guard
 
-`SESSION_COOKIE_DOMAIN` and `CSRF_COOKIE_DOMAIN` are injected as `ARG`/`ENV`
-pairs adjacent to `MFE_CONFIG_API_URL` to support multi-domain enterprise
-portal deployments.
+The tracked file `infrastructure/tutor/mfe-build/Dockerfile` is now the
+reviewable snapshot of the rendered authority path
+`tutor_env/env/plugins/mfe/build/mfe/Dockerfile`. The prereq guard
+`scripts/qa/verify-mfe-build-prereqs.sh` enforces snapshot parity and confirms
+that stale production-stage theme-copy surgery is absent.
 
 ### 9. Frontend Plugin Framework Dependency
 
@@ -101,14 +104,16 @@ to satisfy `OptionalReduxProvider` imports from `frontend-platform`.
 and `tutormfe` Python packages. Any in-place edits to `tutor_env/` or the
 upstream package templates are overwritten.
 
-`apply-patches.sh` re-applies all of the above patches to both:
+`tutor config save` regenerates the rendered MFE build context from Tutor hooks.
+After that, `scripts/infra/prepare-tutor-build-context.sh --target mfe` is the
+canonical sync step:
 
-- The upstream package template (e.g., `tutormfe/templates/mfe/build/mfe/Dockerfile`)
-- The generated copy in `tutor_env/env/plugins/mfe/build/mfe/Dockerfile`
+- verify the rendered Dockerfile is fresh relative to plugin source
+- run the remaining patch-only build-context sync
+- refresh the tracked rendered Dockerfile snapshot
 
-This dual-target strategy ensures patches survive both `tutor config save`
-(which regenerates `tutor_env/`) and fresh installs where only the package
-template is present.
+Treat `infrastructure/tutor/apply-patches.sh` as the low-level helper behind
+that workflow, not as the primary MFE authority surface.
 
 ## Maintenance Checklist (Run Before Each Tutor Upgrade)
 
@@ -140,7 +145,7 @@ export TUTOR_ROOT="$(pwd)/tutor_env"
 tutor config save
 ```
 
-Do NOT run `apply-patches.sh` yet. Capture the raw new upstream output:
+Do NOT run the governed prepare path yet. Capture the raw new upstream output:
 
 ```bash
 cp tutor_env/env/plugins/mfe/build/mfe/Dockerfile \
@@ -175,27 +180,28 @@ diff <saved-env.config.jsx> <path-from-above>
 
 ### Step 4 — Re-Apply Customizations to New Template
 
-Update the relevant patch functions in `infrastructure/tutor/apply-patches.sh`
-to accommodate any structural changes found in Step 3. Common adjustments:
+Update the relevant hook or patch sources to accommodate any structural changes
+found in Step 3. Common adjustments:
 
 | Change found in diff | Patch function to update |
 |---|---|
-| Node major version changed | `re.sub(r"FROM node:...")` block (~line 440) |
-| Package list changed | `gcc g++` replacement block (~line 446) |
-| Stage rename | `ensure_mfe_theme_copy`, `ensure_mfe_admin_console_redux_deps` |
-| `npm clean-install` line changed | `ensure_mfe_npm_resilience` |
-| `@edx/brand` pin changed | `ensure_mfe_brand_ulmo_version` |
+| Node major version changed | `_mereka_lms/mfe_dockerfile.py` |
+| Package list changed | `_mereka_lms/mfe_dockerfile.py` |
+| Stage rename or rendered helper-file drift | `_mereka_lms/mfe_dockerfile.py` + rendered snapshot parity verifier |
+| `npm clean-install` line changed | `_mereka_lms/mfe_dockerfile.py` |
+| `@edx/brand` pin changed | `_mereka_lms/mfe_dockerfile.py` |
+| rendered asset mirror drift | `patches/build-optimizations.sh` |
 
-Run the patches against the new template:
+Run the governed refresh against the new rendered template:
 
 ```bash
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target mfe
 ```
 
-Verify the patch applied correctly:
+Verify the refreshed contract correctly:
 
 ```bash
-./scripts/qa/verify-mfe-customizations.sh
+./scripts/qa/verify-mfe-build-prereqs.sh
 ```
 
 ### Step 5 — Build and Test
@@ -296,9 +302,10 @@ https://discuss.openedx.org/
 
 | File | Purpose |
 |---|---|
-| `infrastructure/tutor/apply-patches.sh` | All patch functions for MFE Dockerfile and templates |
-| `scripts/qa/verify-mfe-customizations.sh` | Automated check that patches are present |
-| `scripts/infra/tutor-config-save.sh` | Safe wrapper that runs `apply-patches.sh` automatically |
+| `infrastructure/tutor/apply-patches.sh` | Low-level patch-only helper for remaining rendered build-context sync |
+| `scripts/qa/verify-mfe-build-prereqs.sh` | Active guard for rendered Dockerfile parity and snapshot truth |
+| `scripts/infra/prepare-tutor-build-context.sh` | Canonical operator entrypoint for MFE build-context refresh and snapshot sync |
+| `scripts/infra/tutor-config-save.sh` | Safe wrapper that regenerates env and delegates to the canonical prepare step |
 | `scripts/infra/verify-tutor-config.sh` | General Tutor config verification |
 | `docs/adr/019-tutor-upgrade-policy.md` | Upgrade cadence and EOL decision |
 | `infrastructure/tutor/themes/` | Mereka Indigo theme assets |

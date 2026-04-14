@@ -108,7 +108,7 @@ curl -s -G "https://loki.mereka.dev/loki/api/v1/query" \
   --data-urlencode 'limit=5' | jq
 ```
 
-See [TESTING.md](../../deploy/k8s/base/logging/TESTING.md) for comprehensive testing instructions.
+See [TESTING.md](../../../deploy/k8s/base/logging/TESTING.md) for comprehensive testing instructions.
 
 ## Configuration
 
@@ -352,7 +352,7 @@ Estimated incremental cost: **$0/month** (within existing VPS plan)
 - **LogQL query language**: https://grafana.com/docs/loki/latest/query/
 - **Kubernetes service discovery**: https://grafana.com/docs/loki/latest/send-data/promtail/configuration/#kubernetes_sd_config
 - **Deployment manifests**: `deploy/k8s/base/logging/`
-- **Testing guide**: [deploy/k8s/base/logging/TESTING.md](../../deploy/k8s/base/logging/TESTING.md)
+- **Testing guide**: [deploy/k8s/base/logging/TESTING.md](../../../deploy/k8s/base/logging/TESTING.md)
 
 ---
 

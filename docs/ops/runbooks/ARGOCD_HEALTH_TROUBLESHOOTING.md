@@ -359,8 +359,8 @@ refreshes the view; it does not change the underlying resource state.
 
 **Do not use `kubectl patch` to silence Degraded status**. ArgoCD will
 revert any direct patch to an Application or ApplicationSet it manages. See
-`docs/adr/` and `.claude/rules/gitops-enforcement.md` for the mandatory
-GitOps workflow.
+[AGENT_EXECUTION_WORKFLOW.md](../../reference/operations/AGENT_EXECUTION_WORKFLOW.md)
+for the mandatory GitOps workflow.
 
 ---
 
@@ -380,5 +380,5 @@ GitOps workflow.
 
 - `docs/ops/runbooks/ARGOCD_DRIFT.md` — "Synced but wrong" drift detection
 - `deploy/k8s/patches/argocd-configmap-ignore.yaml` — resource exclusions
-- `.claude/rules/gitops-enforcement.md` — ABSOLUTE RULE: no direct kubectl patch on ArgoCD-managed resources
+- `docs/reference/operations/AGENT_EXECUTION_WORKFLOW.md` — no direct kubectl patch on ArgoCD-managed resources; source-first GitOps workflow
 - `specs/k8s-deployment_spec.md` — AC-003, AC-028, AC-032 (probe + health requirements)

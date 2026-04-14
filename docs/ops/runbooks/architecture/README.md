@@ -27,7 +27,7 @@ This subroot holds operator procedures that implement architecture-sensitive fro
 ## What this subroot is not
 
 Do not use this subroot for:
-- architecture law, which belongs in `docs/concepts/architecture/**`
+- architecture front doors, which belong in `docs/architecture/**`
 - policy rules, which belong in `docs/policies/**`
 - proof bundles, which belong in `docs/evidence/**`
 - active reporting, which belongs in `docs/status/**`

@@ -1,10 +1,13 @@
 # Deployment Runbook – Mereka LMS (academyv2.mereka.io)
-_Audience: Platform Eng • Owner: Infra Team • Last verified: 2026-02-07_
+_Audience: Platform Eng • Owner: Infra Team • Last verified: 2026-04-09_
 
-This runbook captures the steps to roll out the nightly Open edX stack on Google Cloud in the new `mereka-lms` project. Environment model: **production (GKE)** + **dev (kind/VPS)** only; “staging” bucket names are legacy production labels.
+This runbook captures the bootstrap and recovery-oriented deployment steps for Mereka LMS. Use the
+current production/nonprod lane model from the canonical deploy and release docs; older cloud or
+bucket labels below should be read as implementation history, not present-tense environment truth.
 
 For normal application/image/theme releases, this file is **not** the canonical production rollout path. Use:
 - `docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md`
+- `docs/reference/operations/RELEASE_PROCESS.md`
 - `docs/ops/runbooks/RELEASE_EXECUTE_RUNBOOK.md`
 
 Keep the Terraform/Tutor bootstrap material below for environment bootstrap or deep recovery. Ongoing production releases must use the governed image-publish workflow plus GitOps promotion.
@@ -41,8 +44,8 @@ Reality-first note:
 - Avoid hardcoding private IPs in configs; prefer K8s service DNS (`mysql`, `redis`).
 
 Modules:
-   - `network`: VPC + subnets + secondary ranges for Autopilot.
-   - `gke`: Autopilot cluster (Workload Identity, release channel regular).
+   - `network`: historical cloud bootstrap networking module retained for environment bootstrap/recovery context.
+   - `gke`: historical managed-cluster bootstrap module retained for environment bootstrap/recovery context; do not read this as the current production-lane runtime contract.
    - `artifact_registry`: regional Docker repo `asia-southeast1/openedx`.
    - `storage`: buckets for uploads (`lms-content`), blockstore (`lms-blockstore`), backups (`lms-backup`).
    - `secret_manager`: placeholder secrets (Django key, JWT private key, DB creds, SMTP creds).
@@ -65,7 +68,7 @@ Modules:
    - `XQUEUE_DOCKER_IMAGE`: `ghcr.io/biji-biji-initiative/mereka-lms/openedx-xqueue:12.1.0`
    - `MONGODB_URI`: Atlas connection string (for forum and the Atlas-only target state).
    - Configure external service endpoints (GCS buckets, etc). For DB/cache, prefer in-cluster service DNS.
-   - For additional LMS domains (microsites), see `docs/concepts/architecture/multi-tenancy-overview.md` and re-run `./infrastructure/tutor/apply-patches.sh` so Caddy/Nginx/Django trust the new hostnames.
+  - For additional LMS domains (microsites), use `docs/guides/admin/MULTI_SITE_GUIDE.md`, `docs/policies/operations/MULTISITE_GOVERNANCE.md`, and `docs/reference/operations/OPENEDX_HOSTNAMES.md` as the current operator references, then re-run `./scripts/infra/prepare-tutor-build-context.sh --target openedx` if you are doing local/bootstrap rendered-config verification.
 2. Store sensitive values in Secret Manager and inject at runtime via Tutor environment overrides (e.g. `tutor config save --set MYSQL_HOST=...`).
 3. Prepare Kubernetes overrides, e.g. `tutor config save --set K8S_NAMESPACE=mereka-lms` and `tutor config save --set REGISTRY_URL=ghcr.io/biji-biji-initiative/mereka-lms`.
 
@@ -79,7 +82,6 @@ gh workflow run build-tutor-images.yml \
   --ref main \
   -f build_openedx=true \
   -f build_mfe=true \
-  -f update_gitops=false \
   -f target_environment=production \
   -f image_tag="${APP_SHA}"
 ```
@@ -93,9 +95,20 @@ gh run download "${RUN_ID}" --name release-bundle --dir "var/release-artifacts/$
 gh run download "${RUN_ID}" --name build-provenance --dir "var/release-artifacts/${RUN_ID}"
 ```
 
+Interpretation rule:
+- `release-bundle` is the signed workflow bundle and already contains:
+  - `var/ci/release-bundle.json`
+  - `var/ci/release-object.json`
+  - `var/ci/truth-ledger.json`
+  - `var/ci/release-bundle.sig`
+  - `var/ci/release-bundle.pem`
+- `build-provenance` is the separate provenance/gate artifact and contains:
+  - `var/ci/build-provenance.json`
+  - `var/ci/release-gate-envelope.json`
+
 Local Tutor builds remain useful for bootstrap/debugging, but they are not the canonical production publish path.
 
-## 5. Deploy to GKE Autopilot
+## 5. Promote Through The Current Production Lane
 
 For ongoing application rollouts, promote the published image coordinates through GitOps:
 
@@ -105,6 +118,7 @@ For ongoing application rollouts, promote the published image coordinates throug
   --mfe-tag "<MFE_TAG>" \
   --openedx-digest "sha256:<openedx_digest>" \
   --mfe-digest "sha256:<mfe_digest>" \
+  --release-object-json "var/release-artifacts/${RUN_ID}/var/ci/release-object.json" \
   --require-digests \
   --apply --commit --push --verify-runtime
 ```
@@ -113,14 +127,14 @@ Use the remaining steps in this section only for cluster bootstrap or deep recov
 
 ### Bootstrap / deep recovery follow-on
 
-1. Authenticate Docker with Artifact Registry if you are doing a local/bootstrap build:
+1. Authenticate Docker with GHCR if you are doing a local/bootstrap build:
    ```bash
-   gcloud auth configure-docker asia-southeast1-docker.pkg.dev
+   echo "${ORG_GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USER:-biji-biji-initiative}" --password-stdin
    ```
 2. Local/bootstrap Tutor image build only:
    ```bash
    source infrastructure/tutor/tutor-env.sh
-   ./infrastructure/tutor/apply-patches.sh
+   ./scripts/infra/prepare-tutor-build-context.sh --target all
    tutor images build all
    tutor images push all --repository ghcr.io/biji-biji-initiative/mereka-lms
    ```
@@ -140,7 +154,7 @@ Use the remaining steps in this section only for cluster bootstrap or deep recov
 4. MongoDB (production): Atlas-only. Keep `MONGODB_HOST` wired to `openedx-secrets/FORUM_MONGODB_SRV` and ensure legacy `Service/mongodb` remains removed via production overlay patching (see `docs/guides/admin/MONGODB_ATLAS_GUIDE.md`).
 5. Verify pods: `kubectl get pods -n mereka-lms`.
 6. Provision HTTPS certificates (either Tutor Let’s Encrypt or Cloud Load Balancer + managed cert). Update DNS records in Cloud DNS zone `academyv2-mereka-io`.
-   - Cloudflare automation: `CLOUDFLARE_ZONE_ID=0f75c87585234a3b4b265a0973944736 ./scripts/infra/cloudflare-sync.sh` keeps the `academyv2`, `studio.academyv2`, and `apps.academyv2` hostnames pointed at the GKE ingress (records defined in `infrastructure/cloudflare/records.json`). Provide either `CLOUDFLARE_API_TOKEN` *or* the `CLOUDFLARE_EMAIL` + `CLOUDFLARE_API_KEY` pair.
+   - Cloudflare automation: `CLOUDFLARE_ZONE_ID=0f75c87585234a3b4b265a0973944736 ./scripts/infra/cloudflare-sync.sh` keeps the `academyv2`, `studio.academyv2`, and `apps.academyv2` hostnames pointed at the current production public ingress (records defined in `infrastructure/cloudflare/records.json`). Provide either `CLOUDFLARE_API_TOKEN` *or* the `CLOUDFLARE_EMAIL` + `CLOUDFLARE_API_KEY` pair.
    - Certificate hygiene: the same JSON also enforces a `CAA 0 issue "letsencrypt.org"` record on `academyv2.mereka.io` so only Let’s Encrypt can mint certs for the academyv2 sub-tree. Follow up with `./scripts/infra/cloudflare-harden-zone.sh` to keep TLS min version at 1.2, `ssl=strict`, `always_use_https=on`, and HSTS enabled across subdomains.
 
 ## 6. Post-deploy tasks
@@ -152,19 +166,29 @@ Use the remaining steps in this section only for cluster bootstrap or deep recov
   See `docs/guides/admin/ADMIN_LOGIN_GUIDE.md` for the current admin-account policy and local recovery flow. Never hardcode credentials in docs or shell history.
 - Smoke test LMS, Studio, Discovery, MFEs (`./scripts/qa/smoke-test.sh` covers the public endpoints).
 - Configure backups (Velero-driven):
-  - Audit posture: `./scripts/qa/audit-velero.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster`
+  - Audit posture: `./scripts/qa/audit-velero.sh --context "${OBS_PARITY_PROD_K8S_CONTEXT:-rke2-prod}"`
   - Pre-op backup before risky operations:
     `velero backup create pre-op-mereka-lms-$(date +%Y%m%d-%H%M) --include-namespaces mereka-lms --wait`
   - Docs: `docs/ops/runbooks/VELERO_BACKUP_AUDIT.md`, `docs/ops/runbooks/DISASTER_RECOVERY.md`
 - Store long-lived secrets in Google Secret Manager so CI and operators pull values without editing `tutor_env/config.yml` directly. Minimum list: Django secret key, JWT private key, LMS superuser password, SMTP password, and Atlas host/user/password inputs for `FORUM_MONGODB_SRV`. Add new values with `gcloud secrets versions add NAME --data-file=-` and reference them via `tutor config save --set KEY="$(gcloud secrets versions access ...)"`.
+- Verify the middleware/custom-app lane after any deployment that could affect
+  rendered LMS settings, auth/cookie behavior, or `/metrics` exposure:
+  ```bash
+  scripts/qa/verify-middleware-order.sh
+  scripts/qa/verify-auth-surfaces.sh
+  scripts/qa/test-mfe-oauth-fix.sh
+  ```
+  Use [../../reference/operations/AUTH_AND_PERMISSIONS.md](../../reference/operations/AUTH_AND_PERMISSIONS.md)
+  and [architecture/MFE_OAUTH_FIX_DEPLOYMENT.md](architecture/MFE_OAUTH_FIX_DEPLOYMENT.md)
+  for the current verification and recovery path.
 - Apply the Mereka branding pack after each upgrade by publishing a governed build and promoting it through GitOps:
   ```bash
   ./scripts/branding/sync-brand-assets.sh
   AUDIT_STRICT=1 ./scripts/branding/run-branding-gates.sh prod
-  gh workflow run build-tutor-images.yml --ref main -f build_openedx=true -f build_mfe=true -f update_gitops=false -f target_environment=production -f image_tag="$(git rev-parse origin/main)"
-  ./scripts/infra/release-openedx-gitops.sh --openedx-tag "<OPENEDX_TAG>" --mfe-tag "<MFE_TAG>" --openedx-digest "sha256:<openedx_digest>" --mfe-digest "sha256:<mfe_digest>" --require-digests --apply --commit --push --verify-runtime
+  gh workflow run build-tutor-images.yml --ref main -f build_openedx=true -f build_mfe=true -f target_environment=production -f image_tag="$(git rev-parse origin/main)"
+  ./scripts/infra/release-openedx-gitops.sh --openedx-tag "<OPENEDX_TAG>" --mfe-tag "<MFE_TAG>" --openedx-digest "sha256:<openedx_digest>" --mfe-digest "sha256:<mfe_digest>" --release-object-json "var/release-artifacts/${RUN_ID}/var/ci/release-object.json" --require-digests --apply --commit --push --verify-runtime
   ```
-  The build workflow already performs the required Tutor setup and `apply-patches.sh` step before publishing the image artifacts.
+  The build workflow already performs the required Tutor setup and governed prepare path before publishing the image artifacts.
 - Hook monitoring dashboards/alerts (see `docs/reference/operations/MONITORING.md` + JSON templates in `infrastructure/monitoring/`).
 - Review the DR runbook and backup cadence in `docs/ops/runbooks/DISASTER_RECOVERY.md`.
 - Enforce cost guardrails via Terraform budgets. Populate `billing_account_id`, `monthly_budget_myr`, and `budget_thresholds` in `infrastructure/terraform/terraform.tfvars`, then apply:
@@ -179,7 +203,7 @@ Use the remaining steps in this section only for cluster bootstrap or deep recov
 
 - Repo: `https://github.com/Biji-Biji-Initiative/mereka-lms` (remote `origin` already configured locally).
 - Backups: Cloud SQL backup workflow is legacy and manual-only. Production backups are Velero-driven (see `docs/ops/runbooks/VELERO_BACKUP_AUDIT.md`).
-- Next pipeline work: add workflows for (a) Tutor image build/push + smoke tests and (b) Terraform plan/apply with manual approvals. Store any additional credentials (Artifact Registry robot, MongoDB Atlas API, etc.) as repo secrets instead of committing them here.
+- Next pipeline work: add workflows for (a) Tutor image build/push + smoke tests and (b) Terraform plan/apply with manual approvals. Store any additional credentials (GHCR robot/token path, MongoDB Atlas API, etc.) as repo secrets instead of committing them here.
 
 ## 8. Cutover checklist
 
