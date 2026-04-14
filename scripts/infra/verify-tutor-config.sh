@@ -586,6 +586,7 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_not_in_file "duplicate_brand_compile_tail" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain duplicate brand compile tail shim"
   pattern_not_in_file "COPY --chown=app:app \\./themes/ /openedx/themes" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain late broad theme copy removal shim"
   pattern_not_in_file "legacy_runtime_cluster = re.compile(" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain broad legacy runtime cluster scrubber"
+  pattern_not_in_file "theme_marker = '\\n# Set default theme for all sites\\nDEFAULT_SITE_THEME = \"mereka\"\\n'" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain DEFAULT_SITE_THEME dedupe shim"
   pattern_not_in_file "legacy_translation_preflight_block = (" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain legacy translation preflight heredoc scrubber"
   pattern_not_in_file "escaped_translation_preflight_block = (" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain escaped translation preflight scrubber"
   pattern_not_in_file "translation_preflight_block = (" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain render-owned translation preflight insertion"

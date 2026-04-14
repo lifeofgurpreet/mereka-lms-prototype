@@ -237,9 +237,6 @@ if "DISCUSSIONS_MICROFRONTEND_URL" not in globals():
 if "DISCUSSIONS_MFE_FEEDBACK_URL" not in globals():
     DISCUSSIONS_MFE_FEEDBACK_URL = None
 
-# Set default theme for all sites
-DEFAULT_SITE_THEME = "mereka"
-
 # Fix JWT_ALGORITHM: the infra overlay sets JWT_AUTH["JWT_ALGORITHM"] = "RS512"
 # but the symmetric JWT path (used by enterprise backend service clients via
 # create_jwt_for_user) creates an 'oct' key incompatible with RS512.

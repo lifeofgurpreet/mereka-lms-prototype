@@ -81,18 +81,6 @@ for target in targets:
     # COPY still referenced /openedx/edx-platform/node_modules → build failure.
     # Upstream Tutor 21 fixed the paths natively. Do not re-add.
 
-    # ── production.py patches ───────────────────────────────────────────
-
-    if path.name == "production.py":
-        # Upstream/local render inputs can still emit DEFAULT_SITE_THEME twice.
-        # Keep the first canonical mereka assignment and strip later duplicates
-        # without preserving the old broad runtime-cluster scrubber.
-        theme_marker = '\n# Set default theme for all sites\nDEFAULT_SITE_THEME = "mereka"\n'
-        first_theme = updated.find(theme_marker)
-        last_theme = updated.rfind(theme_marker)
-        if first_theme != -1 and last_theme != -1 and first_theme != last_theme:
-            updated = updated[:last_theme] + updated[last_theme + len(theme_marker):]
-
     # ── assets.py patches ───────────────────────────────────────────────
 
     if updated != original:
