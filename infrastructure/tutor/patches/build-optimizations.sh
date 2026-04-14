@@ -27,48 +27,9 @@ apply_build_optimizations_patch() {
 
   "${PYTHON_BIN}" - "${targets[@]}" <<'PY'
 from pathlib import Path
-import re
-import textwrap
 import sys
 
 targets = sys.argv[1:]
-
-STATIC_PAYLOAD_TRIM_BLOCK = textwrap.dedent(
-    """\
-    RUN rm -rf /openedx/staticfiles/stylelint-config-edx \\
-               /openedx/staticfiles/frontend-component-cookie-policy-banner/node_modules \\
-               /openedx/staticfiles/frontend-component-cookie-policy-banner/README* \\
-               /openedx/staticfiles/frontend-component-cookie-policy-banner/package* \\
-               /openedx/staticfiles/frontend-component-cookie-policy-banner/openedx*.yaml \\
-               /openedx/staticfiles/frontend-component-cookie-policy-banner/babel.config* \\
-               /openedx/staticfiles/frontend-component-cookie-policy-banner/renovate* \\
-               /openedx/staticfiles/frontend-component-cookie-policy-banner/LICENSE* \\
-               /openedx/staticfiles/frontend-component-cookie-policy-banner/build/*.scss \\
-               /openedx/staticfiles/frontend-component-cookie-policy-banner/build/*/*.stories.* \\
-               /openedx/staticfiles/frontend-component-cookie-policy-banner/build/*/_storybook-styles* \\
-               /openedx/staticfiles/frontend-component-cookie-policy-banner/build/setupTest* \\
-               /openedx/staticfiles/edx-bootstrap/README* \\
-               /openedx/staticfiles/edx-bootstrap/stylelint.config* \\
-               /openedx/staticfiles/edx-bootstrap/postcss.config* \\
-               /openedx/staticfiles/edx-bootstrap/Makefile* \\
-               /openedx/staticfiles/edx-bootstrap/package* \\
-               /openedx/staticfiles/edx-bootstrap/samples \\
-               /openedx/staticfiles/edx-bootstrap/node_modules"""
-)
-
-STATIC_PAYLOAD_TRIM_RE = re.compile(
-    r"RUN rm -rf /openedx/staticfiles/stylelint-config-edx \\\n"
-    r"(?:\s+/openedx/staticfiles/[^\n]+(?: \\\n|\n))+",
-    re.MULTILINE,
-)
-
-def normalize_single_block(text: str, marker: str, pattern: re.Pattern[str], canonical_block: str) -> str:
-    if marker not in text:
-        return text
-    normalized = pattern.sub(canonical_block + "\n", text)
-    if normalized == text:
-        return text
-    return normalized
 
 for target in targets:
     path = Path(target)
@@ -91,19 +52,7 @@ for target in targets:
     # signatures. Treat this as an explicit compatibility exception, not a
     # forgotten uv seam.
 
-    build_profile_arg = "ARG MEREKA_BUILD_PROFILE=proof\n"
     custom_app_install_mode_arg = "ARG MEREKA_CUSTOM_APP_INSTALL_MODE=editable\n"
-    if build_profile_arg not in updated and custom_app_install_mode_arg in updated:
-        updated = updated.replace(
-            custom_app_install_mode_arg,
-            build_profile_arg + custom_app_install_mode_arg,
-            1,
-        )
-
-    updated = updated.replace(
-        "RUN make clean_translations",
-        "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then echo \"Skipping translation refresh (fast build profile)\"; else make clean_translations; fi",
-    )
 
     updated = updated.replace(
         "RUN ./manage.py lms --settings=tutor.i18n pull_plugin_translations --verbose --repository='openedx/openedx-translations' --revision='release/ulmo.1' ",
@@ -132,66 +81,6 @@ for target in targets:
     # COPY still referenced /openedx/edx-platform/node_modules → build failure.
     # Upstream Tutor 21 fixed the paths natively. Do not re-add.
 
-    # mereka-overrides.css bake into staticfiles
-    if path.name == "Dockerfile" and "rdfind -makesymlinks" in updated and "mereka-overrides.css" not in updated:
-        rdfind_marker = "rdfind -makesymlinks true -followsymlinks true /openedx/staticfiles/"
-        css_copy = (
-            "rdfind -makesymlinks true -followsymlinks true /openedx/staticfiles/\n\n"
-            "# Ensure mereka theme CSS + logo images are baked into staticfiles.\n"
-            "# collectstatic with tutor.assets settings may not pick these up via\n"
-            "# ThemeFileSystemFinder when COMPREHENSIVE_THEME_DIRS is only an ENV var.\n"
-            "# static.url() in production (ProductionStorage) strips the theme-name prefix,\n"
-            "# so files land in staticfiles/css/ and staticfiles/images/ (not staticfiles/mereka/).\n"
-            "RUN mkdir -p /openedx/staticfiles/css /openedx/staticfiles/images && \\\n"
-            "    cp -f /openedx/themes/mereka/lms/static/css/mereka-overrides.css \\\n"
-            "       /openedx/staticfiles/css/mereka-overrides.css || true && \\\n"
-            "    cp -f /openedx/themes/mereka/cms/static/css/mereka-overrides.css \\\n"
-            "       /openedx/staticfiles/css/mereka-overrides.css 2>/dev/null || true && \\\n"
-            "    for img in logo-horizontal.png logo-horizontal.svg \\\n"
-            "               logo-horizontal-white.png logo-horizontal-white.svg \\\n"
-            "               logo-square.png logo-square.svg logo.png; do \\\n"
-            "      cp -f /openedx/themes/mereka/lms/static/images/$img \\\n"
-            "         /openedx/staticfiles/images/$img 2>/dev/null || true; \\\n"
-            "    done && \\\n"
-            "    for hashed in /openedx/staticfiles/images/logo.*.png; do \\\n"
-            "      [ -f \"$hashed\" ] && cp -f /openedx/themes/mereka/lms/static/images/logo.png \"$hashed\" 2>/dev/null || true; \\\n"
-            "    done"
-        )
-        updated = updated.replace(rdfind_marker, css_copy)
-    if path.name == "Dockerfile" and "RUN rm -rf /openedx/staticfiles/stylelint-config-edx" not in updated:
-        updated = updated.replace(
-            "    for hashed in /openedx/staticfiles/images/logo.*.png; do \\\n"
-            "      [ -f \"$hashed\" ] && cp -f /openedx/themes/mereka/lms/static/images/logo.png \"$hashed\" 2>/dev/null || true; \\\n"
-            "    done",
-            "    for hashed in /openedx/staticfiles/images/logo.*.png; do \\\n"
-            "      [ -f \"$hashed\" ] && cp -f /openedx/themes/mereka/lms/static/images/logo.png \"$hashed\" 2>/dev/null || true; \\\n"
-            f"    done\n{STATIC_PAYLOAD_TRIM_BLOCK}",
-        )
-    if path.name == "Dockerfile":
-        updated = normalize_single_block(
-            updated,
-            "RUN rm -rf /openedx/staticfiles/stylelint-config-edx",
-            STATIC_PAYLOAD_TRIM_RE,
-            STATIC_PAYLOAD_TRIM_BLOCK,
-        )
-
-    if path.name == "Dockerfile" and "/openedx/edx-platform" in updated:
-        advanced_xblocks_marker = "RUN $PIP_COMMAND install -e .\n"
-        advanced_xblocks_copy = (
-            "RUN $PIP_COMMAND install -e .\n\n"
-            "# Carry openedx_advanced_xblocks into production before translation and\n"
-            "# XBlock entry-point discovery. Its install metadata already lives\n"
-            "# in the venv from python-requirements, but the source tree must also exist\n"
-            "# in this stage before pull_plugin_translations / compile_xblock_translations.\n"
-            "COPY --from=python-requirements --chown=app:app /openedx/openedx_advanced_xblocks /openedx/openedx_advanced_xblocks\n"
-        )
-        if (
-            "pull_plugin_translations" in updated
-            and "COPY --from=python-requirements --chown=app:app /openedx/openedx_advanced_xblocks /openedx/openedx_advanced_xblocks" not in updated
-            and advanced_xblocks_marker in updated
-        ):
-            updated = updated.replace(advanced_xblocks_marker, advanced_xblocks_copy, 1)
-
     # ── production.py patches ───────────────────────────────────────────
 
     if path.name == "production.py":
@@ -205,11 +94,6 @@ for target in targets:
             updated = updated[:last_theme] + updated[last_theme + len(theme_marker):]
 
     # ── assets.py patches ───────────────────────────────────────────────
-
-    # ── Caddyfile patches ───────────────────────────────────────────────
-
-    if path.name == "Caddyfile":
-        pass
 
     if updated != original:
         path.write_text(updated)
