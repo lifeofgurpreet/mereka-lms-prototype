@@ -2,12 +2,31 @@
 
 _Last updated: 2026-02-27_
 
-**Status**: ~70% mapped as of 2026-02-12 (Sprint 1+2 complete)
-**Goal**: 100% coverage across all 31 specifications
+This is a historical implementation-planning snapshot from the earlier
+spec-coverage phase. It does not define the current docs-program execution
+front door.
 
-This document provides the systematic implementation order for all Mereka Academy features based on dependency analysis and current progress.
+For current docs-program execution, use:
+
+- [POST_REBASE_INTAKE_2026-04-13.md](POST_REBASE_INTAKE_2026-04-13.md)
+- [REVIEW_HARDENING_BOARD_2026-04-13.md](REVIEW_HARDENING_BOARD_2026-04-13.md)
+- [DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md](DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md)
+
+For the current architecture front door, use:
+
+- [../../architecture/README.md](../../architecture/README.md)
+
+This document is retained only as a historical implementation-order reference
+for the earlier spec-coverage mapping pass.
 
 ---
+
+## Historical Snapshot Context
+
+- historical status: `~70% mapped as of 2026-02-12`
+- historical goal: `100% coverage across all 31 specifications`
+- historical basis: dependency analysis from
+  `specs/plans/IMPLEMENTATION_ORDER.md`
 
 ## Progress Overview
 
@@ -126,7 +145,7 @@ These specs are **100% mapped** and need comprehensive documentation:
 
 ---
 
-## Development Workflow
+## Historical Development Workflow
 
 When implementing a new AC:
 

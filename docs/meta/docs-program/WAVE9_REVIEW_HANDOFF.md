@@ -1,9 +1,28 @@
 # Wave 9 Review Handoff
-_Audience: Reviewers and coding agents • Owner: Platform Team • Last verified: 2026-03-09 • Status: canonical_
+_Audience: Reviewers and coding agents • Owner: Platform Team • Last verified: 2026-03-09 • Status: historical review handoff snapshot_
 
-## Purpose
+This is a historical handoff for the completed Wave 9 review/runtime hardening
+packet. It does not define the current docs-program review or execution front
+door.
 
-This is the review-safe entrypoint for Wave 9.
+For current docs-program execution, use:
+
+- [POST_REBASE_INTAKE_2026-04-13.md](POST_REBASE_INTAKE_2026-04-13.md)
+- [REVIEW_HARDENING_BOARD_2026-04-13.md](REVIEW_HARDENING_BOARD_2026-04-13.md)
+- [DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md](DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md)
+
+For the current architecture front door, use:
+
+- [../../architecture/README.md](../../architecture/README.md)
+
+Retain this document only as historical review-handoff context for the
+completed Wave 9 packet. If the earlier packet evidence is needed, use
+`WAVE9_FINDINGS_LEDGER.md` as the audit artifact rather than treating this file
+as the live handoff surface.
+
+## Historical Purpose
+
+This was the review-safe entrypoint for Wave 9.
 
 Use it when you need to answer:
 
@@ -17,7 +36,7 @@ Use it when you need to answer:
 1. `docs/meta/docs-program/WAVE9_FINDINGS_LEDGER.md`
 2. `docs/meta/docs-program/WAVE9_CLOSEOUT.md`
 3. `docs/README.md`
-4. `docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md`
+4. `docs/architecture/PLATFORM_AUTHORITY_MAP.md`
 
 ## If the review touches release or cross-repo fallout
 

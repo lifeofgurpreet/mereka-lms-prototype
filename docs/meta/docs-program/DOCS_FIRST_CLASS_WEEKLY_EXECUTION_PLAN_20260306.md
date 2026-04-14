@@ -1,9 +1,28 @@
 # One-Week First-Class Docs Execution Plan
 
-_Audience: Docs Team • Owner: Docs Lead • Last verified: 2026-03-06 • Status: supporting_
+_Audience: Docs Team • Owner: Docs Lead • Last verified: 2026-03-06 • Status: historical weekly execution snapshot_
 
-## Scope
-This is a concrete PR-ready one-week execution package to continue from the current handover state in the isolated docs worktree branch (`docs/docs-first-class-20260307-followup-7`).
+This is a historical one-week execution package from the earlier first-class
+docs hardening wave. It does not define the current docs-program execution
+front door.
+
+For current docs-program execution, use:
+
+- [POST_REBASE_INTAKE_2026-04-13.md](POST_REBASE_INTAKE_2026-04-13.md)
+- [REVIEW_HARDENING_BOARD_2026-04-13.md](REVIEW_HARDENING_BOARD_2026-04-13.md)
+- [DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md](DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md)
+
+For the current architecture front door, use:
+
+- [../../architecture/README.md](../../architecture/README.md)
+
+Retain this document only as historical execution-planning context for the
+earlier docs-first-class hardening wave.
+
+## Historical Scope
+This was a concrete PR-ready one-week execution package to continue from the
+then-current handover state in the isolated docs worktree branch
+(`docs/docs-first-class-20260307-followup-7`).
 
 Use this as the next agent’s executable plan, not prose. Each day ends with a small PR and a closed tracker row.
 

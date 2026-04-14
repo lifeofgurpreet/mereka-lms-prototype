@@ -1,8 +1,28 @@
 # Docs Governance Sign-Off Checklist (2026-03-07)
 
+_Audience: Docs Team • Owner: Docs Lead • Last verified: 2026-03-07 • Status: historical governance closure snapshot_
+
+This is a historical governance closeout checklist for the earlier first-class
+docs hardening wave. It does not define the current docs-program execution or
+closure front door.
+
+For current docs-program execution, use:
+
+- [POST_REBASE_INTAKE_2026-04-13.md](POST_REBASE_INTAKE_2026-04-13.md)
+- [REVIEW_HARDENING_BOARD_2026-04-13.md](REVIEW_HARDENING_BOARD_2026-04-13.md)
+- [DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md](DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md)
+
+For the current architecture front door, use:
+
+- [../../architecture/README.md](../../architecture/README.md)
+
+Retain this document only as historical sign-off context for the earlier docs
+governance closure wave.
+
 ## Scope
 
-Use this checklist to close remaining governance gates for docs remediation and first-class docs hardening.
+Use this checklist as historical evidence of how governance gates were closed
+for the earlier docs remediation and first-class docs hardening wave.
 
 ## Current Status Snapshot
 

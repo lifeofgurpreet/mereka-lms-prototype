@@ -1,5 +1,21 @@
 # Foundations Rework Program (v2 Overlay)
-_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-09 • Status: canonical_
+_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-09 • Status: historical overlay planning snapshot_
+
+This is a historical overlay-program plan for the ADR-governance rework wave.
+It does not define the current docs-program execution front door.
+
+For current docs-program execution, use:
+
+- [POST_REBASE_INTAKE_2026-04-13.md](POST_REBASE_INTAKE_2026-04-13.md)
+- [REVIEW_HARDENING_BOARD_2026-04-13.md](REVIEW_HARDENING_BOARD_2026-04-13.md)
+- [DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md](DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md)
+
+For the current architecture front door, use:
+
+- [../../architecture/README.md](../../architecture/README.md)
+
+Retain this document only as a historical target-state reference for the
+earlier ADR-overlay restructuring plan.
 
 ## Mission
 

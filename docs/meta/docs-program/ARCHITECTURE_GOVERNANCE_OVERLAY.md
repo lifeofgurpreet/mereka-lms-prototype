@@ -1,10 +1,28 @@
 # Architecture Governance Overlay
-_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-03-09 • Status: canonical_
+_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-04-14 • Status: historical overlay snapshot_
+
+This document is retained as historical ADR-overlay governance context.
+It does not define the current docs-program execution front door or the current
+architecture front door.
+
+For current docs-program execution, use:
+
+- [POST_REBASE_INTAKE_2026-04-13.md](POST_REBASE_INTAKE_2026-04-13.md)
+- [REVIEW_HARDENING_BOARD_2026-04-13.md](REVIEW_HARDENING_BOARD_2026-04-13.md)
+- [DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md](DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md)
+
+For the current architecture front door, use:
+
+- [../../architecture/README.md](../../architecture/README.md)
+
+The ADR corpus and generated bundles referenced below remain historical
+governance context, not the active docs-program control plane.
 
 ## Purpose
 
-This document defines the architecture-governance control plane for Mereka LMS.
-It is an overlay re-platform on top of the existing ADR corpus in `docs/adr/`, but ADRs are no longer treated as the whole architecture system.
+This document records the earlier architecture-governance overlay model for
+Mereka LMS. It was an overlay re-platform on top of the existing ADR corpus in
+`docs/adr/`, but it is no longer the active control plane.
 
 Wave 1 is in-place:
 - ADR file paths remain stable.

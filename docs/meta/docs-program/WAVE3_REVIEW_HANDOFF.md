@@ -1,5 +1,24 @@
 # Wave 3 Review Handoff
 
+_Audience: Reviewers and coding agents • Owner: Platform Team • Last verified: 2026-03-09 • Status: historical review handoff snapshot_
+
+This is a historical handoff for the completed Wave 3 twin-root normalization
+packet. It does not define the current docs-program review or execution front
+door.
+
+For current docs-program execution, use:
+
+- [POST_REBASE_INTAKE_2026-04-13.md](POST_REBASE_INTAKE_2026-04-13.md)
+- [REVIEW_HARDENING_BOARD_2026-04-13.md](REVIEW_HARDENING_BOARD_2026-04-13.md)
+- [DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md](DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md)
+
+For the current architecture front door, use:
+
+- [../../architecture/README.md](../../architecture/README.md)
+
+Retain this document only as historical review-handoff context for the
+completed Wave 3 packet.
+
 ## Review focus
 
 - Confirm the twin-root model is now physically true: normative root specs remain normative, proposal material lives under `specs/proposals/`, and plans/testplans live under `specs/plans/`.
