@@ -1,8 +1,8 @@
 # Mobile Apps Overview
-_Audience: Engineering Team, Mobile Release Owners, Platform Operators • Owner: Platform Team • Status: canonical • Last verified: 2026-04-10_
+_Audience: Engineering Team, Mobile Release Owners, Platform Operators • Owner: Platform Team • Status: detailed-reference • Last verified: 2026-04-10_
 
 This document defines the stable architecture-root view of the Mereka mobile-app
-lane.
+lane as reference guidance, not a current front door.
 
 Use it to understand the current platform boundary for iOS and Android without
 treating paused delivery work as active runtime proof.
