@@ -119,11 +119,11 @@ spec:
                 - inspect
                 - ping
                 - -t
-                - "10"
+                - "25"
             initialDelaySeconds: 30
             periodSeconds: 30
-            failureThreshold: 3
-            timeoutSeconds: 15
+            failureThreshold: 5
+            timeoutSeconds: 45
           securityContext:
             allowPrivilegeEscalation: false
       volumes:

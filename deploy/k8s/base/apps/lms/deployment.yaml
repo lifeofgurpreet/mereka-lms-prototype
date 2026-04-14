@@ -118,21 +118,21 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 5
             failureThreshold: 30
-            timeoutSeconds: 5
+            timeoutSeconds: 30
           livenessProbe:
             httpGet:
               path: /heartbeat
               port: 8000
             periodSeconds: 30
-            failureThreshold: 3
-            timeoutSeconds: 15
+            failureThreshold: 5
+            timeoutSeconds: 30
           readinessProbe:
             httpGet:
               path: /heartbeat
               port: 8000
             periodSeconds: 15
-            failureThreshold: 3
-            timeoutSeconds: 10
+            failureThreshold: 5
+            timeoutSeconds: 30
           # collectstatic runs at image build time, not pod startup
           securityContext:
             allowPrivilegeEscalation: false
