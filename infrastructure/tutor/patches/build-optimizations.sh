@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
-# Patch: residual build-context normalization that Tutor 21.x still does not
-# expose as first-class hook ownership.
-# Target: Tutor 21.x (Ulmo). The remaining live render mutations here are
-# narrow: MySQL 8.4 local compose compatibility plus fast-profile translation
-# pull wrappers for the Open edX Dockerfile. File sync operations below keep
-# rendered theme/custom-app build context aligned with repo truth.
+# Patch: residual rendered-file normalization for Tutor 21.x (Ulmo).
+# Scope: Open edX Dockerfile text replacements that remain patch-owned:
+#        MySQL 8.4 local compose compatibility plus fast-profile translation
+#        pull wrappers. Build-context file sync now lives in apply-patches.sh.
 
 apply_build_optimizations_patch() {
   local targets=(
@@ -83,112 +81,4 @@ for target in targets:
     if updated != original:
         path.write_text(updated)
 PY
-
-  # ── File sync operations ────────────────────────────────────────────
-
-  # Sync logo files from theme source to build directory
-  echo "Syncing logo files from theme source to build directory..."
-  local THEME_BUILD_DIR="$REPO_ROOT/tutor_env/env/build/openedx/themes/mereka"
-  if [ -d "$THEME_BUILD_DIR" ]; then
-    if [ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/images" ]; then
-      rm -rf "$THEME_BUILD_DIR/lms/static/images"
-      mkdir -p "$THEME_BUILD_DIR/lms/static/images"
-      cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/images/." "$THEME_BUILD_DIR/lms/static/images/"
-      echo "  Mirrored LMS theme images"
-    fi
-
-    if [ -d "$THEME_BUILD_DIR/cms" ]; then
-      if [ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/images" ]; then
-        rm -rf "$THEME_BUILD_DIR/cms/static/images"
-        mkdir -p "$THEME_BUILD_DIR/cms/static/images"
-        cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/images/." "$THEME_BUILD_DIR/cms/static/images/"
-        echo "  Mirrored CMS theme images"
-      fi
-    fi
-    echo "Logo files synced successfully."
-
-    # Copy font assets
-    echo "Syncing font files from theme source to build directory..."
-    if [ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/fonts" ]; then
-      rm -rf "$THEME_BUILD_DIR/lms/static/fonts"
-      mkdir -p "$THEME_BUILD_DIR/lms/static/fonts"
-      cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/fonts/." "$THEME_BUILD_DIR/lms/static/fonts/"
-      echo "  Mirrored LMS theme fonts"
-    else
-      echo "  No LMS fonts found to copy"
-    fi
-
-    if [ -d "$THEME_BUILD_DIR/cms" ]; then
-      if [ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/fonts" ]; then
-        rm -rf "$THEME_BUILD_DIR/cms/static/fonts"
-        mkdir -p "$THEME_BUILD_DIR/cms/static/fonts"
-        cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/fonts/." "$THEME_BUILD_DIR/cms/static/fonts/"
-        echo "  Mirrored CMS theme fonts"
-      else
-        echo "  No CMS fonts found to copy"
-      fi
-    fi
-
-    # Sync theme templates/static overrides
-    echo "Syncing theme templates/static overrides to build directory..."
-    rm -rf \
-      "$THEME_BUILD_DIR/common/templates" \
-      "$THEME_BUILD_DIR/common/static/css" \
-      "$THEME_BUILD_DIR/lms/templates" \
-      "$THEME_BUILD_DIR/lms/static/css"
-    mkdir -p "$THEME_BUILD_DIR/common/templates" "$THEME_BUILD_DIR/common/static/css"
-    mkdir -p "$THEME_BUILD_DIR/lms/templates" "$THEME_BUILD_DIR/lms/static/css"
-    cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/." "$THEME_BUILD_DIR/lms/templates/"
-    if [ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/css" ]; then
-      cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/static/css/." "$THEME_BUILD_DIR/lms/static/css/"
-    fi
-    if [ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/common/templates" ]; then
-      cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/common/templates/." "$THEME_BUILD_DIR/common/templates/"
-    fi
-    if [ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css" ]; then
-      cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/." "$THEME_BUILD_DIR/common/static/css/"
-    fi
-    if [ -d "$THEME_BUILD_DIR/cms" ]; then
-      rm -rf \
-        "$THEME_BUILD_DIR/cms/templates" \
-        "$THEME_BUILD_DIR/cms/static/css" \
-        "$THEME_BUILD_DIR/cms/static/sass"
-      mkdir -p "$THEME_BUILD_DIR/cms/templates" "$THEME_BUILD_DIR/cms/static/css" "$THEME_BUILD_DIR/cms/static/sass"
-      cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates/." "$THEME_BUILD_DIR/cms/templates/" 2>/dev/null || true
-      if [ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/css" ]; then
-        cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/css/." "$THEME_BUILD_DIR/cms/static/css/"
-      fi
-      if [ -d "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/sass" ]; then
-        cp -R "$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/static/sass/." "$THEME_BUILD_DIR/cms/static/sass/"
-      fi
-    fi
-  else
-    echo "Warning: Theme build directory not found. Logo sync skipped."
-  fi
-
-  # Sync custom apps into build context
-  local CUSTOM_APPS_SRC="$REPO_ROOT/infrastructure/tutor/custom-apps"
-  local CUSTOM_APPS_DEST="$REPO_ROOT/tutor_env/env/build/openedx/infrastructure/tutor/custom-apps"
-  if [ -d "$CUSTOM_APPS_SRC" ] && [ -d "$REPO_ROOT/tutor_env/env/build/openedx" ]; then
-    # Keep the rendered custom-app build context as a true mirror of source so
-    # deleted apps do not linger under tutor_env/ across repeated patch runs.
-    rm -rf "$CUSTOM_APPS_DEST"
-    mkdir -p "$CUSTOM_APPS_DEST"
-    cp -R "$CUSTOM_APPS_SRC/." "$CUSTOM_APPS_DEST/"
-    echo "Custom apps synced to build context."
-  else
-    echo "Warning: Custom apps sync skipped (missing build context)."
-  fi
-
-  # Sync multi-tenancy plugin into build context
-  local TENANCY_PLUGIN_SRC="$REPO_ROOT/infrastructure/tutor/plugins/multi-tenancy"
-  local TENANCY_PLUGIN_DEST="$REPO_ROOT/tutor_env/env/build/openedx/infrastructure/tutor/plugins/multi-tenancy"
-  if [ -d "$TENANCY_PLUGIN_SRC" ] && [ -d "$REPO_ROOT/tutor_env/env/build/openedx" ]; then
-    rm -rf "$TENANCY_PLUGIN_DEST"
-    mkdir -p "$TENANCY_PLUGIN_DEST"
-    cp -R "$TENANCY_PLUGIN_SRC/." "$TENANCY_PLUGIN_DEST/"
-    echo "Multi-tenancy plugin synced to build context."
-  else
-    echo "Warning: Multi-tenancy plugin sync skipped (missing build context)."
-  fi
 }

@@ -80,17 +80,53 @@ apply_patch() {
   fi
 }
 
+mirror_tree() {
+  local source_dir="$1"
+  local dest_dir="$2"
+  local label="$3"
+
+  if [[ ! -d "$source_dir" ]]; then
+    echo "WARNING: $label source not found at $source_dir" >&2
+    return 0
+  fi
+
+  rm -rf "$dest_dir"
+  mkdir -p "$dest_dir"
+  cp -R "$source_dir/." "$dest_dir/"
+  echo "Synced $label to build context: $dest_dir"
+}
+
 sync_openedx_theme() {
   local tutor_theme_dir="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}/env/build/openedx/themes/mereka"
   local mereka_theme_src="$REPO_ROOT/infrastructure/tutor/themes/mereka"
 
-  if [[ -d "$mereka_theme_src" ]]; then
-    mkdir -p "$tutor_theme_dir"
-    cp -R "$mereka_theme_src/." "$tutor_theme_dir/"
-    echo "Synced Mereka theme to Open edX build context: $tutor_theme_dir"
-  else
-    echo "WARNING: Mereka theme source not found at $mereka_theme_src"
+  mirror_tree "$mereka_theme_src" "$tutor_theme_dir" "Mereka Open edX theme"
+}
+
+sync_openedx_custom_apps() {
+  local tutor_openedx_root="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}/env/build/openedx"
+  local custom_apps_src="$REPO_ROOT/infrastructure/tutor/custom-apps"
+  local custom_apps_dest="$tutor_openedx_root/infrastructure/tutor/custom-apps"
+
+  if [[ ! -d "$tutor_openedx_root" ]]; then
+    echo "WARNING: Open edX build root missing at $tutor_openedx_root" >&2
+    return 0
   fi
+
+  mirror_tree "$custom_apps_src" "$custom_apps_dest" "Open edX custom apps"
+}
+
+sync_openedx_multi_tenancy_plugin() {
+  local tutor_openedx_root="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}/env/build/openedx"
+  local multi_tenancy_src="$REPO_ROOT/infrastructure/tutor/plugins/multi-tenancy"
+  local multi_tenancy_dest="$tutor_openedx_root/infrastructure/tutor/plugins/multi-tenancy"
+
+  if [[ ! -d "$tutor_openedx_root" ]]; then
+    echo "WARNING: Open edX build root missing at $tutor_openedx_root" >&2
+    return 0
+  fi
+
+  mirror_tree "$multi_tenancy_src" "$multi_tenancy_dest" "Open edX multi-tenancy plugin"
 }
 
 sync_mfe_patch_helpers() {
@@ -193,6 +229,8 @@ apply_openedx_patches() {
   apply_patch apply_webpack_memory_patch
   apply_patch apply_build_optimizations_patch
   sync_openedx_theme
+  sync_openedx_custom_apps
+  sync_openedx_multi_tenancy_plugin
 }
 
 apply_mfe_patches() {
