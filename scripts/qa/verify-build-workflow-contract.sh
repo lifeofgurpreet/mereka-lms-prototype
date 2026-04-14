@@ -448,7 +448,7 @@ else
 fi
 
 # Informational SBOM generation must be bounded so it cannot occupy the main
-# image-build lane indefinitely, and it must run off the heavy builders.
+# image-build lane indefinitely, and it must run off the heavy build pool.
 if [[ "$BUILD_OPENEDX_BLOCK" == *"Generate SBOM for OpenEdX image"* || "$BUILD_OPENEDX_BLOCK" == *"Scan OpenEdX image for vulnerabilities"* || "$BUILD_OPENEDX_BLOCK" == *"Install Trivy CLI"* ]]; then
   fail "OpenEdX image scanning still runs inside the heavy build job"
 else
@@ -461,14 +461,14 @@ else
   pass "MFE heavy build job no longer performs SBOM/Trivy scanning"
 fi
 
-if [[ "$SCAN_OPENEDX_BLOCK" == *"runs-on: mereka-k8s-heavy-builders"* && "$SCAN_OPENEDX_BLOCK" == *"needs: [build-openedx]"* ]]; then
-  pass "OpenEdX post-push scan runs on heavy builders after build-openedx"
+if [[ "$SCAN_OPENEDX_BLOCK" == *"runs-on: mereka-k8s-runners"* && "$SCAN_OPENEDX_BLOCK" == *"needs: [build-openedx]"* ]]; then
+  pass "OpenEdX post-push scan runs on release runners after build-openedx"
 else
   fail "OpenEdX post-push scan job missing canonical runner or dependency"
 fi
 
-if [[ "$SCAN_MFE_BLOCK" == *"runs-on: mereka-k8s-heavy-builders"* && "$SCAN_MFE_BLOCK" == *"needs: [build-mfe]"* ]]; then
-  pass "MFE post-push scan runs on heavy builders after build-mfe"
+if [[ "$SCAN_MFE_BLOCK" == *"runs-on: mereka-k8s-runners"* && "$SCAN_MFE_BLOCK" == *"needs: [build-mfe]"* ]]; then
+  pass "MFE post-push scan runs on release runners after build-mfe"
 else
   fail "MFE post-push scan job missing canonical runner or dependency"
 fi
