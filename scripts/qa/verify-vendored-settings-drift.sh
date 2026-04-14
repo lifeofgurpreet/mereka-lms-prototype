@@ -2,10 +2,10 @@
 # @covers AC-DEP-204
 # @spec: repository-structure_spec.md
 #
-# Detect drift between app-repo Django settings (canonical source)
+# Detect drift between app-repo Open edX deploy surfaces (canonical source)
 # and the vendored copies in bbi-infrastructure.
 #
-# The app repo (mereka-lms) owns Django/application settings logic.
+# The app repo (mereka-lms) owns these Open edX application surfaces.
 # The infra repo (bbi-infrastructure) vendors a copy at:
 #   apps/mereka-lms/base/deploy/k8s/base/
 #
@@ -48,7 +48,7 @@ if [[ -n "$INFRA_REPO" ]] && [[ ! -d "$INFRA_REPO/apps/mereka-lms" ]]; then
   fi
 fi
 
-if [[ -z "$INFRA_REPO" ]] || [[ ! -d "$INFRA_REPO/.git" ]]; then
+if [[ -z "$INFRA_REPO" ]] || [[ ! -e "$INFRA_REPO/.git" ]]; then
   echo "SKIP: bbi-infrastructure repo not found — set INFRA_REPO"
   exit 0
 fi
@@ -71,6 +71,10 @@ SKIP=0
 # Files that must be identical between app repo and vendored copy
 VENDORED_BASE="apps/mereka-lms/base/deploy/k8s/base"
 TRACKED_FILES=(
+  "apps/lms/deployment.yaml"
+  "apps/cms/deployment.yaml"
+  "apps/lms/worker-deployment.yaml"
+  "apps/cms/worker-deployment.yaml"
   "apps/openedx/settings/lms/production.py"
   "apps/openedx/settings/cms/production.py"
   "apps/openedx/settings/lms/mereka_multisite.py"
@@ -109,14 +113,17 @@ should_skip_for_unchanged_ci_surface() {
       if [[ "$changed" == "$app_path" || "$changed" == "scripts/qa/verify-vendored-settings-drift.sh" ]]; then
         return 1
       fi
+      if [[ "$changed" == "scripts/infra/sync-vendored-openedx-settings.sh" || "$changed" == "tests/test_vendored_settings_drift.py" ]]; then
+        return 1
+      fi
     done
   done
 
-  echo "SKIP: no vendored-settings surfaces changed in current CI diff"
+  echo "SKIP: no vendored Open edX surfaces changed in current CI diff"
   return 0
 }
 
-echo "=== Vendored Settings Drift Check ==="
+echo "=== Vendored Open edX Drift Check ==="
 echo "App repo: $REPO_ROOT"
 echo "Infra repo: $INFRA_REPO"
 echo "Infra ref: $INFRA_REF ($INFRA_REF_SHORT)"
@@ -170,5 +177,5 @@ if [[ $FAIL -gt 0 ]]; then
   exit 1
 fi
 
-echo "OK: all tracked vendored settings are in sync"
+echo "OK: all tracked vendored Open edX surfaces are in sync"
 exit 0

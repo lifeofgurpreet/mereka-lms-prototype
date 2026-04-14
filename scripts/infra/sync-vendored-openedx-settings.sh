@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# sync-vendored-openedx-settings.sh — sync canonical Open edX settings into infra vendored base.
+# sync-vendored-openedx-settings.sh — sync canonical Open edX runtime surfaces into infra vendored base.
 #
 # Default behavior is dry-run (report drift only). Use --apply to copy canonical
-# settings from the app repo into the infra checkout.
+# runtime surfaces from the app repo into the infra checkout.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -11,6 +11,10 @@ INFRA_REPO=""
 APPLY=0
 
 TRACKED_FILES=(
+  "apps/lms/deployment.yaml"
+  "apps/cms/deployment.yaml"
+  "apps/lms/worker-deployment.yaml"
+  "apps/cms/worker-deployment.yaml"
   "apps/openedx/settings/lms/development.py"
   "apps/openedx/settings/lms/production.py"
   "apps/openedx/settings/lms/mereka_xblock_iframe.py"
@@ -65,7 +69,7 @@ if [[ -z "$INFRA_REPO" ]]; then
   for candidate in \
     "${WORKSPACE_ROOT}/infrastructure" \
     "${WORKSPACE_ROOT}/bbi-infrastructure"; do
-    if [[ -d "$candidate/.git" ]]; then
+    if [[ -e "$candidate/.git" ]]; then
       INFRA_REPO="$candidate"
       break
     fi
@@ -92,7 +96,7 @@ fi
 PASS=0
 FAIL=0
 
-echo "=== Vendored Open edX Settings Sync ==="
+echo "=== Vendored Open edX Surface Sync ==="
 echo "Source base: $SRC_BASE"
 echo "Dest base:   $DST_BASE"
 echo ""
@@ -130,7 +134,7 @@ echo ""
 echo "=== Summary: PASS=$PASS DRIFT=$FAIL APPLY=$APPLY ==="
 
 if [[ "$FAIL" -eq 0 ]]; then
-  echo "OK: vendored Open edX settings already synchronized."
+  echo "OK: vendored Open edX surfaces already synchronized."
   exit 0
 fi
 
@@ -143,8 +147,8 @@ if [[ "$APPLY" -eq 0 ]]; then
 fi
 
 echo ""
-echo "APPLIED: copied canonical Open edX settings into infra vendored base."
+echo "APPLIED: copied canonical Open edX surfaces into infra vendored base."
 echo "Next steps:"
 echo "1. cd \"$INFRA_REPO\""
-echo "2. git add apps/mereka-lms/base/deploy/k8s/base/apps/openedx/settings"
-echo "3. git commit -m \"chore(gitops): sync vendored openedx settings\""
+echo "2. git add apps/mereka-lms/base/deploy/k8s/base/apps/openedx/settings apps/mereka-lms/base/deploy/k8s/base/apps/lms apps/mereka-lms/base/deploy/k8s/base/apps/cms"
+echo "3. git commit -m \"chore(gitops): sync vendored openedx surfaces\""
