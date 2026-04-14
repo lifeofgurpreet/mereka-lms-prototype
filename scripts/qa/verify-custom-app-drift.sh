@@ -22,25 +22,28 @@ do_fail() { FAIL=$((FAIL + 1)); echo "  FAIL  $1"; }
 do_warn() { WARN=$((WARN + 1)); echo "  WARN  $1"; }
 
 verify_known_packaging_regressions() {
-  local app_dir="$CUSTOM_APPS_DIR/openedx_video_pipeline"
-  local setup_py="$app_dir/setup.py"
+  local app
+  for app in openedx_video_pipeline openedx_video_analytics; do
+    local app_dir="$CUSTOM_APPS_DIR/$app"
+    local setup_py="$app_dir/setup.py"
 
-  if [[ ! -f "$setup_py" ]]; then
-    do_fail "openedx_video_pipeline setup.py missing"
-    return
-  fi
+    if [[ ! -f "$setup_py" ]]; then
+      do_fail "$app setup.py missing"
+      continue
+    fi
 
-  if rg -n --fixed-strings "packages=find_packages()" "$setup_py" >/dev/null 2>&1; then
-    do_fail "openedx_video_pipeline still uses bare find_packages() and will omit the root package"
-  else
-    do_pass "openedx_video_pipeline avoids bare find_packages() packaging"
-  fi
+    if rg -n --fixed-strings "packages=find_packages()" "$setup_py" >/dev/null 2>&1; then
+      do_fail "$app still uses bare find_packages() and will omit the root package"
+    else
+      do_pass "$app avoids bare find_packages() packaging"
+    fi
 
-  if rg -n --fixed-strings "package_dir={'openedx_video_pipeline': '.'}" "$setup_py" >/dev/null 2>&1; then
-    do_pass "openedx_video_pipeline declares package_dir for the root module"
-  else
-    do_fail "openedx_video_pipeline missing package_dir for root module packaging"
-  fi
+    if rg -n --fixed-strings "package_dir={'$app': '.'}" "$setup_py" >/dev/null 2>&1; then
+      do_pass "$app declares package_dir for the root module"
+    else
+      do_fail "$app missing package_dir for root module packaging"
+    fi
+  done
 }
 
 contains() {

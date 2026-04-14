@@ -20,9 +20,11 @@ Run from repo root:
 """
 
 import importlib
+import runpy
 import sys
 import unittest
 from datetime import date, timedelta
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 # ---------------------------------------------------------------------------
@@ -104,6 +106,19 @@ class TestModuleImports(unittest.TestCase):
         self.assertTrue(hasattr(mod, 'aggregate_video_analytics_daily'))
         self.assertTrue(hasattr(mod, 'cleanup_old_video_events'))
         self.assertTrue(hasattr(mod, 'backfill_video_analytics'))
+
+    def test_setup_installs_flat_package_root(self):
+        setup_path = Path(__file__).with_name('setup.py')
+        captured = {}
+
+        def _capture_setup(**kwargs):
+            captured.update(kwargs)
+
+        with patch('setuptools.setup', _capture_setup):
+            runpy.run_path(str(setup_path), run_name='__main__')
+
+        self.assertIn('openedx_video_analytics', captured['packages'])
+        self.assertEqual(captured['package_dir']['openedx_video_analytics'], '.')
 
 
 # ---------------------------------------------------------------------------

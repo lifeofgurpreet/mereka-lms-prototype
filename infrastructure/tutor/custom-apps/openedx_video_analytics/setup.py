@@ -1,4 +1,10 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
+
+_SUBPACKAGES = find_packages(where=".")
+_PACKAGES = [
+    "openedx_video_analytics",
+    *[f"openedx_video_analytics.{name}" for name in _SUBPACKAGES],
+]
 
 setup(
     name='openedx-video-analytics',
@@ -7,7 +13,8 @@ setup(
     author='Mereka Academy',
     author_email='platform@mereka.io',
     url='https://github.com/Biji-Biji-Initiative/mereka-lms',
-    packages=find_packages(),
+    packages=_PACKAGES,
+    package_dir={'openedx_video_analytics': '.'},
     install_requires=[
         'Django>=3.2',
         'djangorestframework>=3.14',
