@@ -433,6 +433,8 @@ run_negative_control_check() {
   set +e
   if [[ "$STRICT" == "1" ]]; then
     output="$(
+      VALIDATE_OBSERVABILITY_COMPLIANCE_SCOPE="all" \
+      VALIDATE_OBSERVABILITY_COMPLIANCE_CHANGED_FILES="" \
       VERIFY_OBS_KUSTOMIZATION_PATH="$temp_kustomization" \
       VERIFY_OBS_MONITORING_DIR="$temp_monitoring_root" \
       VERIFY_OBS_SKIP_LIVE_CHECKS="1" \
@@ -440,6 +442,8 @@ run_negative_control_check() {
     )"
   else
     output="$(
+      VALIDATE_OBSERVABILITY_COMPLIANCE_SCOPE="all" \
+      VALIDATE_OBSERVABILITY_COMPLIANCE_CHANGED_FILES="" \
       VERIFY_OBS_KUSTOMIZATION_PATH="$temp_kustomization" \
       VERIFY_OBS_MONITORING_DIR="$temp_monitoring_root" \
       VERIFY_OBS_SKIP_LIVE_CHECKS="1" \

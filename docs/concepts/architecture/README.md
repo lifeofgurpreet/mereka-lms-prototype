@@ -27,13 +27,16 @@ governs:
 ## Use this root for
 
 Come here when you need:
+- retained explicitly canonical standards,
 - detailed standards and concept context,
 - deep architecture overviews,
 - or real architecture overviews that still belong in a concepts root.
 
 ## Authority boundary
 
-- Living architecture standards live here.
+- Stable architecture front doors live in `docs/architecture/**`.
+- Retained architecture standards live here only when they remain explicitly
+  canonical.
 - ADRs in `docs/adr/` remain the decision ledger.
 - Contracts, inventories, and audit-style reference live in `docs/reference/**`.
 - Policy lives in `docs/policies/**`.
@@ -43,17 +46,18 @@ Come here when you need:
 
 ## Supporting standards path
 
-1. [ARCHITECTURE_CHARTER.md](ARCHITECTURE_CHARTER.md)
-2. [DOCUMENTATION_AUTHORITY_RESOLVER.md](DOCUMENTATION_AUTHORITY_RESOLVER.md)
-3. [CONTROL_PLANES.md](CONTROL_PLANES.md)
-4. [IDENTITY_DOMAIN_BOUNDARIES.md](IDENTITY_DOMAIN_BOUNDARIES.md)
-5. [TENANT_LIFECYCLE.md](TENANT_LIFECYCLE.md)
-6. [TUTOR_AND_EXTENSION_MODEL.md](TUTOR_AND_EXTENSION_MODEL.md)
-7. [RELEASE_ROLLOUT_AND_REMOVAL.md](RELEASE_ROLLOUT_AND_REMOVAL.md)
-8. [DATA_GOVERNANCE.md](DATA_GOVERNANCE.md)
-9. [AUTHORIZATION_MODEL.md](AUTHORIZATION_MODEL.md)
+1. [../../architecture/README.md](../../architecture/README.md)
+2. [../../architecture/PLATFORM_AUTHORITY_MAP.md](../../architecture/PLATFORM_AUTHORITY_MAP.md)
+3. [TENANT_OPERATING_SYSTEM.md](TENANT_OPERATING_SYSTEM.md)
+4. [TENANT_LIFECYCLE.md](TENANT_LIFECYCLE.md)
+5. [CONTROL_PLANES.md](CONTROL_PLANES.md)
+6. [IDENTITY_DOMAIN_BOUNDARIES.md](IDENTITY_DOMAIN_BOUNDARIES.md)
+7. [TUTOR_AND_EXTENSION_MODEL.md](TUTOR_AND_EXTENSION_MODEL.md)
+8. [RELEASE_ROLLOUT_AND_REMOVAL.md](RELEASE_ROLLOUT_AND_REMOVAL.md)
+9. [DATA_GOVERNANCE.md](DATA_GOVERNANCE.md)
+10. [AUTHORIZATION_MODEL.md](AUTHORIZATION_MODEL.md)
 
-## Living standards
+## Retained standards
 
 - [ARCHITECTURE_CHARTER.md](ARCHITECTURE_CHARTER.md)
 - [DOCUMENTATION_AUTHORITY_RESOLVER.md](DOCUMENTATION_AUTHORITY_RESOLVER.md)
@@ -65,7 +69,7 @@ Come here when you need:
 - [DATA_GOVERNANCE.md](DATA_GOVERNANCE.md)
 - [AUTHORIZATION_MODEL.md](AUTHORIZATION_MODEL.md)
 
-## Living overviews
+## Detailed overviews
 
 - [content-libraries-overview.md](content-libraries-overview.md)
 - [enterprise-services-overview.md](enterprise-services-overview.md)
@@ -93,7 +97,8 @@ Do not use this root for:
 ## Contributing
 
 When adding architecture documentation:
-1. Put living standards and real overviews here.
+1. Put retained standards and real overviews here only when `docs/architecture/**`
+   is not the better current owner.
 2. Put contracts, inventories, and audits in `docs/reference/**`.
 3. Put rules in `docs/policies/**`.
 4. Put decisions and proposals in `docs/adr/**`.

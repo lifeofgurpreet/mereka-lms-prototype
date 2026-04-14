@@ -1,12 +1,12 @@
 ---
 title: Architecture Charter
 owner: Platform Team
-status: canonical
-last_reviewed: 2026-03-08
-last_updated: 2026-03-10
-canonical_root: docs/concepts/architecture
-doc_class: architecture-standard
-summary: Defines the documentation and architecture control plane, winning roots, and non-negotiable authority rules.
+status: detailed-reference
+last_reviewed: 2026-04-13
+last_updated: 2026-04-13
+canonical_root: docs/architecture
+doc_class: architecture-reference
+summary: Records the bounded role of the retained concept-root governance docs relative to the canonical architecture root.
 tags:
   - architecture
   - governance
@@ -20,13 +20,17 @@ review_cycle: quarterly
 
 # Architecture Charter
 
-This charter defines the living architecture control model for the repository. It exists so humans and agents can determine which documentation roots are current law, which ones are transitional, and which ones are cold storage.
+This charter records the bounded governance model for the retained
+`docs/concepts/architecture/**` surfaces. Stable architecture front doors now
+live under `docs/architecture/**`; this file remains background context for the
+concept-root standards that are still explicitly canonical.
 
 ## Mission
 
 Operate one documentation control plane per artifact kind:
 
-- living architecture standards
+- stable architecture front doors
+- retained architecture standards and deep reference
 - operator procedure
 - decision history
 - normative specs
@@ -58,13 +62,19 @@ It defines the control plane that tells you which of those artifacts wins.
 ## Authority model
 
 1. `specs/**` is the normative intended-behavior system.
-2. `docs/concepts/architecture/**` is the canonical living architecture and standards root.
-3. `docs/ops/**` is the canonical operator-doc root.
-4. `docs/adr/**` is the decision ledger. ADRs record accepted, superseded, historical, and exception decisions; they are not the whole living architecture system.
-5. `docs/guides/**`, `docs/reference/**`, and `docs/policies/**` are canonical supporting surfaces.
-6. `docs/evidence/**` is the only active evidence root.
-7. `docs/status/**` is the only active reporting and status root.
-8. `docs/archive/**` is cold storage only.
+2. `docs/architecture/**` is the canonical stable architecture front-door root.
+3. `docs/concepts/architecture/**` is retained for explicitly canonical
+   standards and detailed concept/reference material; it is not the default
+   starting point for platform authority.
+4. `docs/ops/**` is the canonical operator-doc root.
+5. `docs/adr/**` is the decision ledger. ADRs record accepted, superseded,
+   historical, and exception decisions; they are not the whole living
+   architecture system.
+6. `docs/guides/**`, `docs/reference/**`, and `docs/policies/**` are canonical
+   supporting surfaces.
+7. `docs/evidence/**` is the only active evidence root.
+8. `docs/status/**` is the only active reporting and status root.
+9. `docs/archive/**` is cold storage only.
 
 ## Operating rule
 
@@ -90,11 +100,11 @@ If two documents appear to answer the same question, the one in the winning root
 
 Start here before broad repo exploration:
 
-1. [DOCUMENTATION_AUTHORITY_RESOLVER.md](DOCUMENTATION_AUTHORITY_RESOLVER.md)
-2. [DOCS_SPECS_CONTRACT.md](../../guides/standards/DOCS_SPECS_CONTRACT.md)
-3. the relevant architecture standard in this directory
-4. the relevant ops quickref or runbook under `docs/ops/**`
-5. accepted ADRs or active exceptions only if the work changes an already-decided area
+1. [../../architecture/README.md](../../architecture/README.md)
+2. [../../architecture/PLATFORM_AUTHORITY_MAP.md](../../architecture/PLATFORM_AUTHORITY_MAP.md)
+3. [DOCS_SPECS_CONTRACT.md](../../guides/standards/DOCS_SPECS_CONTRACT.md)
+4. the relevant retained standard in this directory
+5. the relevant ops quickref or runbook under `docs/ops/**`
 
 ## Fast reading paths
 
@@ -102,11 +112,11 @@ Use the smallest path that matches the task:
 
 - Change architecture or governance:
   1. this charter
-  2. authority resolver
+  2. architecture root
   3. docs/specs contract
-  4. relevant architecture standard
+  4. relevant retained architecture standard
 - Change operational behavior:
-  1. authority resolver
+  1. architecture root
   2. relevant `docs/ops/**` index
   3. relevant policy or reference doc
 - Review whether a claim is true:
@@ -116,7 +126,9 @@ Use the smallest path that matches the task:
 
 ## Operational meaning
 
-- If you are deciding what MUST be true now, read `docs/concepts/architecture/**`.
+- If you are deciding what MUST be true now, start with `docs/architecture/**`,
+  then read `docs/concepts/architecture/**` only when the retained detailed
+  standard is the relevant owner.
 - If you are deciding how to operate the platform, read `docs/ops/**`.
 - If you are deciding what the system is intended to do, read `specs/**`.
 - If you are deciding what was previously chosen, read `docs/adr/**`.
@@ -129,7 +141,6 @@ The following retained paths are tombstone-only compatibility surfaces:
 
 - `docs/operations/README.md`
 - `docs/runbooks/README.md`
-- `docs/architecture/README.md`
 - `docs/branding/README.md`
 - `docs/ci-cd/README.md`
 - `docs/migrations/README.md`

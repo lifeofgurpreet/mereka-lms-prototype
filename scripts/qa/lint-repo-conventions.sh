@@ -611,9 +611,9 @@ check_observability() {
   # Check observability docs for unresolved lane/context placeholders
   local placeholder_violations=0
   local file_list
-  if [[ -d docs/qa && -d docs/operations ]] && \
-     (scope_touches_prefix "docs/qa/" || scope_touches_prefix "docs/operations/"); then
-    file_list=$(find docs/qa docs/operations \
+  if [[ -d docs/qa && -d docs/ops/runbooks ]] && \
+     (scope_touches_prefix "docs/qa/" || scope_touches_prefix "docs/ops/runbooks/"); then
+    file_list=$(find docs/qa docs/ops/runbooks \
       -type f \
       -name '*.md' \
       \( -iname '*observability*' -o -iname '*OBSERVABILITY*' -o -iname '*parity*' -o -iname '*ONCALL*' \) \

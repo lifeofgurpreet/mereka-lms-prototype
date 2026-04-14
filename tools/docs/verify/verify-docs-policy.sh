@@ -53,7 +53,7 @@ TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
 ALLOWLIST=("README.md" "CONTRIBUTING.md" "DOCS_REMEDIATION_PLAN_AND_TRACKER.md" "catalog.json")
-TRANSITIONAL_PREFIXES=("docs/operations/" "docs/onboarding/" "docs/branding/" "docs/runbooks/" "docs/architecture/" "reports/2026/status/" "reports/2026/readiness/" "evidence/")
+TRANSITIONAL_PREFIXES=("docs/operations/" "docs/onboarding/" "docs/branding/" "docs/runbooks/" "reports/2026/status/" "reports/2026/readiness/" "evidence/")
 ARCHIVE_PREFIXES=("docs/archive/")
 
 is_allowlisted_root_file() {
@@ -163,7 +163,6 @@ def check_transitional_stub(path: Path, text: str) -> list[str]:
         "docs/onboarding/",
         "docs/branding/",
         "docs/runbooks/",
-        "docs/architecture/",
         "reports/2026/status/",
         "reports/2026/readiness/",
         "evidence/",
@@ -187,7 +186,6 @@ def check_canonical_links(path: Path, text: str, canonical: bool) -> list[str]:
         "docs/onboarding/",
         "docs/branding/",
         "docs/runbooks/",
-        "docs/architecture/",
     )
     archive_prefixes = ("docs/archive/",)
     legacy_markers = ("legacy", "historical", "superseded", "archive", "compatibility")
@@ -281,14 +279,14 @@ range_touches_retired_root_contract() {
   return 1
 }
 
-echo "Check 5/11: legacy architecture root retired"
+echo "Check 5/11: architecture root authority consistent"
 legacy_arch_status="pass"
 if range_touches_retired_root_contract "docs/architecture/" "docs/architecture/"; then
   if ! python3 tools/docs/verify/verify_legacy_architecture_root.py --repo-root .; then
     legacy_arch_status="fail"
   fi
 else
-  echo "LEGACY_ARCHITECTURE_ROOT_SKIPPED range_untouched"
+  echo "ARCHITECTURE_ROOT_AUTHORITY_SKIPPED range_untouched"
 fi
 
 echo "Check 6/11: legacy operations root retired"
@@ -386,7 +384,7 @@ payload = {
     "content_status": content_summary.get("status", content_status),
     "content_files_checked": content_summary.get("files_checked", 0),
     "content_errors": content_summary.get("errors", []),
-    "legacy_architecture_root": legacy_arch_status,
+    "architecture_root_authority": legacy_arch_status,
     "legacy_operations_root": legacy_ops_status,
     "legacy_ci_cd_root": legacy_ci_cd_status,
     "legacy_branding_root": legacy_branding_status,
@@ -407,7 +405,7 @@ if [[ "$content_status" = "fail" ]]; then
   echo "Docs policy failed due to canonical metadata/superseded/link errors."
 fi
 if [[ "$legacy_arch_status" = "fail" ]]; then
-  echo "Docs policy failed because docs/architecture is still acting like a living root."
+  echo "Docs policy failed because docs/architecture is still treated as retired."
 fi
 if [[ "$legacy_ops_status" = "fail" ]]; then
   echo "Docs policy failed because docs/operations is still acting like a living root."
