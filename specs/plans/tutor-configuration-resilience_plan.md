@@ -86,12 +86,12 @@ Significant implementation has already been completed by prior agents. Below is 
   - **Complexity**: M (3-5h) -- integrate with existing hook, add file-path matching, performance constraints.
 
 - [ ] **[M] Task B-5: Upgrade CI workflow to use manifest-driven verification** | AC: AC-TCR-006, AC-TCR-010 | Depends: B-1, B-2
-  - **Description**: Refactor `.github/workflows/tutor-config-verify.yml` to: (1) install the Mereka plugin package, (2) run `tutor config save`, (3) run `apply-patches.sh`, (4) run `verify-tutor-patches.sh`, (5) report per-patch pass/fail. Must complete within 5 minutes. Must cache the Tutor venv. Must produce a downloadable verification report artifact. Must block merges to `main` on any patch failure. Add handling for Tutor version upgrade PRs that reports which patches need adaptation.
+  - **Description**: Refactor `.github/workflows/tutor-config-verify.yml` to: (1) install the Mereka plugin package, (2) run `tutor config save`, (3) run `prepare-tutor-build-context.sh --target all`, (4) run `verify-tutor-patches.sh`, (5) report per-patch pass/fail. Must complete within 5 minutes. Must cache the Tutor venv. Must produce a downloadable verification report artifact. Must block merges to `main` on any patch failure. Add handling for Tutor version upgrade PRs that reports which patches need adaptation.
   - **Done definition**: CI workflow uses `verify-tutor-patches.sh` instead of inline grep checks. Produces verification report artifact. Completes in <5 minutes. Blocks merge on failure.
   - **Complexity**: M (4-6h) -- refactor existing workflow, add artifact upload, caching, plugin install step.
 
 - [ ] **[S] Task B-6: Update `make tutor-apply` to execute full pipeline** | AC: AC-TCR-012 | Depends: B-2, B-3
-  - **Description**: Update the Makefile `tutor-apply` target to: (1) run `tutor config save`, (2) enable the Mereka plugin, (3) run `apply-patches.sh`, (4) run `verify-tutor-patches.sh`, (5) restart services. Fail fast on any step.
+  - **Description**: Update the Makefile `tutor-apply` target to use the canonical `tutor-config-save.sh` wrapper so it: (1) enables the Mereka plugin, (2) runs `tutor config save`, (3) runs `prepare-tutor-build-context.sh --target all`, (4) runs `verify-tutor-patches.sh`, (5) restarts services. Fail fast on any step.
   - **Done definition**: `make tutor-apply` executes all 5 steps in order. Any step failure aborts the pipeline.
   - **Complexity**: S (1-2h) -- Makefile edits.
 
@@ -113,7 +113,7 @@ Significant implementation has already been completed by prior agents. Below is 
   - **Complexity**: M (4-6h) -- create test fixtures (patched vs unpatched tutor_env snapshots), implement test runner.
 
 - [ ] **[M] Task T-2: Integration tests for plugin + apply-patches.sh** (`tests/tutor/test_plugin_integration.sh`) | AC: AC-TCR-002, AC-TCR-003, AC-TCR-004 | Depends: B-3
-  - **Description**: Write integration tests that: (1) install the plugin, (2) enable it, (3) run `tutor config save`, (4) verify plugin patches are present in rendered templates without running `apply-patches.sh`, (5) run `apply-patches.sh`, (6) verify all patches pass. This validates that plugin and script work together and independently.
+  - **Description**: Write integration tests that: (1) install the plugin, (2) enable it, (3) run `tutor config save`, (4) verify plugin patches are present in rendered templates without running the canonical prepare step, (5) run `prepare-tutor-build-context.sh --target all`, (6) verify all patches pass. This validates that plugin and patch-only sync work together and independently.
   - **Done definition**: Test passes in CI. Verifies plugin-only patches (AC-TCR-002, AC-TCR-003) and combined patches (AC-TCR-004).
   - **Complexity**: M (4-6h) -- requires Tutor installation in test environment.
 
@@ -138,7 +138,7 @@ Significant implementation has already been completed by prior agents. Below is 
   - **Complexity**: S (2-3h) -- extend existing CI workflow tests.
 
 - [ ] **[S] Task T-7: Negative tests for unpatched config** (`tests/tutor/test_unpatched_config.sh`) | AC: AC-TCR-008 | Depends: B-2
-  - **Description**: Run `tutor config save` WITHOUT the plugin AND without `apply-patches.sh`, then run `verify-tutor-patches.sh`. Verify all critical patches report FAIL and exit code is non-zero.
+  - **Description**: Run `tutor config save` WITHOUT the plugin AND without `prepare-tutor-build-context.sh --target all`, then run `verify-tutor-patches.sh`. Verify all critical patches report FAIL and exit code is non-zero.
   - **Done definition**: All critical patches fail. Non-critical patches may pass or fail (both acceptable). Exit code is non-zero.
   - **Complexity**: S (2-3h) -- straightforward negative test.
 

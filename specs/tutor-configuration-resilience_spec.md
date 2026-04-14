@@ -9,7 +9,7 @@ vehicle: "talent_platform"
 created: "2026-02-10"
 last_reviewed: "2026-03-09"
 review_due: "2026-06-09"
-last_updated: "2026-02-10"
+last_updated: "2026-04-14"
 version: "1.0.0"
 domain: "platform"
 normativity: "normative"
@@ -54,7 +54,7 @@ A three-layered defense system that prevents Tutor configuration regressions whe
 
 ## Why it matters
 
-The Mereka Academy platform maintains approximately 30 distinct patches to Tutor-generated templates covering MySQL authentication, MFE build toolchain, multi-site domain support, theme integration, custom application installation, Redwood compatibility, and observability instrumentation. Today, all patches live in a single `apply-patches.sh` script that must be run manually after every `tutor config save`. This workflow has failed repeatedly:
+The Mereka Academy platform still carries a broad patch surface across Tutor-generated templates covering MySQL authentication, MFE build/toolchain behavior, multi-site domain support, theme integration, custom application installation, Redwood compatibility, and observability instrumentation. The current state is mixed: Tutor plugin hooks own durable settings and Dockerfile-level customization, while `apply-patches.sh` still handles the remaining filesystem sync/template rewrites and one explicit `pull_translations` retry exception in the rendered MFE Dockerfile. This workflow has still failed repeatedly whenever the governed post-render sync step was skipped:
 
 - The Tutor v18 to v21 upgrade wiped all multi-site configuration because `apply-patches.sh` was not run after `tutor config save` during the upgrade process.
 - Forum configuration patches were silently lost after a routine config change, causing 500 errors on discussion pages.
@@ -66,7 +66,7 @@ Every one of these incidents was caused by the same root failure: reliance on a 
 
 - Zero incidents caused by missing patches in the 90 days following implementation.
 - Every configuration change is automatically verified within 60 seconds of `tutor config save`.
-- The Tutor plugin applies at least 80% of current patches at template-render time, removing them from the post-hoc `apply-patches.sh` script.
+- The Tutor plugin applies all durable hook-expressible patches at template-render time, leaving only bounded filesystem sync and explicit exception handling in `apply-patches.sh`.
 - CI/CD rejects any PR that would produce a configuration state missing required patches.
 - An upgrade from one Tutor version to the next triggers automatic patch verification with clear pass/fail reporting before any deployment proceeds.
 
@@ -164,8 +164,9 @@ The `mereka_lms` plugin implements 15 ENV_PATCHES hooks covering:
 #### MFE Dockerfile Patches
 - **Hooks:** `mfe-dockerfile-pre-npm-install`, `mfe-dockerfile-post-npm-install`, `mfe-dockerfile-npm-install`
 - **Patches Applied:**
-  - Node 18 build toolchain installation (gcc, g++, python3)
-  - Cookie domain environment variables
+  - Node 24 build toolchain installation plus HTTPS git rewrite hardening
+  - Local `@edx/brand@file:./brand-mereka` install contract
+  - Rendered production-stage runtime theme payload copy
   - `@openedx/frontend-plugin-framework` installation with legacy peer deps
   - npm install resilience (retry logic: 6 attempts, configurable timeouts)
 
@@ -251,7 +252,7 @@ git config --local include.path ../.gitconfig
 **1. `tutor-config-verify.yml`**
 - Runs on pushes to `main` and pull requests
 - **Jobs:**
-  - `verify-patches`: Checks critical patches (MySQL auth, MFE Node 18, forum MongoDB SRV, multi-site domains)
+  - `verify-patches`: Checks critical patches (MySQL auth, MFE Node 24 contract, forum MongoDB SRV, multi-site domains)
   - `verify-multi-site-domains`: Validates ALLOWED_HOSTS and CSRF origins
   - `verify-idempotency`: Runs `apply-patches.sh` twice and compares checksums
   - `verify-plugin-patches`: Checks plugin applies expected patches (placeholder)
@@ -330,8 +331,8 @@ grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.
 
 ### Known Limitations
 
-1. **Theme file copying:** Plugin does NOT handle file copying (logos, fonts, SCSS files). These must be copied manually or via Tutor mounts.
-2. **MFE theme assets:** `indigo/mereka` directory requires manual setup or Dockerfile COPY.
+1. **Theme file copying:** Plugin does NOT handle file copying (logos, fonts, SCSS files). These must be realized through the canonical Tutor prepare path, not by plugin hooks alone.
+2. **MFE theme assets:** `indigo/mereka` still depends on the post-render build-context sync path rather than plugin hooks alone.
 3. **Hook API stability:** Plugin tested with Tutor 21.0.0; may need adjustments for other versions.
 
 ---
@@ -404,9 +405,9 @@ grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.
 #### Migration Path
 
 - The system MUST support a phased migration from `apply-patches.sh` to the Tutor plugin:
-  - Phase 1: Plugin handles Django settings patches and Dockerfile environment patches. `apply-patches.sh` handles file-copy and template-rewrite patches. Both run; verification checks all patches regardless of source.
-  - Phase 2: Plugin handles all hook-expressible patches. `apply-patches.sh` handles only file-system operations (theme sync, logo copy, custom app copy).
-  - Phase 3: `apply-patches.sh` is reduced to file-system operations only. All configuration-level patches are in the plugin.
+  - Phase 1: Plugin handles Django settings patches and durable Dockerfile environment/build patches. `apply-patches.sh` handles file-copy, template-rewrite, and bounded rendered-file exceptions. Both run; verification checks all patches regardless of source.
+  - Phase 2: Plugin handles all hook-expressible patches. `apply-patches.sh` handles only file-system operations plus explicitly documented rendered-file exceptions.
+  - Phase 3: `apply-patches.sh` is reduced to file-system operations plus any still-approved explicit exception; all durable configuration-level patches are in the plugin.
 - The system MUST NOT break the existing `make tutor-apply` workflow at any migration phase.
 - The system MUST maintain a compatibility matrix documenting which Tutor versions (18.x, 21.x) are supported by which plugin version.
 
@@ -435,7 +436,7 @@ grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.
   - **Status:** ✅ Implemented (via `mysql-docker-compose` ENV_PATCHES hook)
   - **Verification:** CI job `verify-patches` checks `mysql-native-password=ON` (note: current job runs after `apply-patches.sh`, needs plugin-only test)
 
-- [ ] AC-TCR-004: Given the Mereka plugin is enabled and `apply-patches.sh` is run, when `scripts/infra/verify-tutor-patches.sh` is executed, then all patches in `patch-manifest.yml` report PASS.
+- [ ] AC-TCR-004: Given the Mereka plugin is enabled and `prepare-tutor-build-context.sh --target all` is run, when `scripts/infra/verify-tutor-patches.sh` is executed, then all patches in `patch-manifest.yml` report PASS.
   - **Status:** ❌ Not implemented (manifest-driven verification script does not exist; existing `verify-tutor-config.sh` uses inline checks)
   - **Blocker:** `infrastructure/tutor/patch-manifest.yml` not yet created; `scripts/infra/verify-tutor-patches.sh` not yet implemented
 
@@ -451,7 +452,7 @@ grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.
   - **Status:** ❌ Not implemented (verification script does not exist)
   - **Blocker:** `scripts/infra/verify-tutor-patches.sh` not yet implemented
 
-- [ ] AC-TCR-008: Given `tutor config save` is run without enabling the Mereka plugin and without running `apply-patches.sh`, when `verify-tutor-patches.sh` is executed, then it reports FAIL for all critical patches and exits with non-zero status.
+- [ ] AC-TCR-008: Given `tutor config save` is run without enabling the Mereka plugin and without running `prepare-tutor-build-context.sh --target all`, when `verify-tutor-patches.sh` is executed, then it reports FAIL for all critical patches and exits with non-zero status.
   - **Status:** ❌ Not implemented (verification script does not exist)
   - **Blocker:** `scripts/infra/verify-tutor-patches.sh` not yet implemented
 
@@ -467,9 +468,9 @@ grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.
   - **Status:** ❌ Not implemented (verification script does not exist)
   - **Blocker:** `scripts/infra/verify-tutor-patches.sh` not yet implemented
 
-- [ ] AC-TCR-012: Given the `make tutor-apply` command is run, then it executes `tutor config save`, enables the Mereka plugin, runs `apply-patches.sh`, runs `verify-tutor-patches.sh`, and restarts services -- in that order, failing fast on any step.
-  - **Status:** ⚠️ Partially implemented (Makefile runs `tutor config save` + `apply-patches.sh` + `restart`, but does not enable plugin or run verification)
-  - **Gap:** Needs plugin enablement step and manifest-driven verification
+- [ ] AC-TCR-012: Given the `make tutor-apply` command is run, then it executes the canonical `tutor-config-save.sh` wrapper, which enables the canonical Tutor plugins, runs `tutor config save`, prepares the build context, runs verification, and then restarts services -- failing fast on any step.
+  - **Status:** ⚠️ Partially implemented (`make tutor-apply` calls `tutor-config-save.sh` and restart, but manifest-driven verification remains incomplete)
+  - **Gap:** Needs manifest-driven verification parity and complete patch reporting
 
 ---
 

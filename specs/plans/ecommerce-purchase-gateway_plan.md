@@ -29,7 +29,7 @@ Before starting implementation, the following MUST be in place:
 2. **Cloud SQL PostgreSQL instance** provisioned (or decision made on in-cluster PostgreSQL) -- see Open Question #1 in spec
 3. **Stripe account** operational with test/live keys available in Infisical
 4. **Redis** available in cluster with capacity for an additional queue namespace
-5. **Artifact Registry** accessible for pushing gateway Docker images
+5. **GHCR** accessible for pushing gateway Docker images
 6. **LMS OAuth2 application** registered for `payments-gateway` client
 
 ## Decisions Required Before Implementation
@@ -167,7 +167,7 @@ These map to the spec's Open Questions. Each MUST be resolved before starting th
 - [ ] **[S]** 6.5 — Add Caddy reverse proxy route for `/purchase/*`, `/api/v1/checkout/*`, `/api/v1/claim/*`, `/webhooks/stripe/` to `payments-gateway` service (`deploy/k8s/base/apps/caddy/Caddyfile`) | AC: AC-001, AC-033 | Depends: 6.2
 - [ ] **[S]** 6.6 — Add Prometheus scrape config for the gateway metrics endpoint (`infrastructure/monitoring/` or annotations in Deployment) | AC: AC-029 | Depends: 6.2
 - [ ] **[S]** 6.7 — Provision secrets in Infisical and sync to GCP Secret Manager (`scripts/infra/`) | AC: AC-031 | Depends: None
-- [ ] **[S]** 6.8 — Build and push Docker images to Artifact Registry (`asia-southeast1-docker.pkg.dev/mereka-lms/openedx`) (`scripts/infra/build-gateway.sh`) | AC: AC-031 | Depends: 6.1
+- [ ] **[S]** 6.8 — Build and push Docker images to GHCR (`ghcr.io/biji-biji-initiative/mereka-lms`) (`scripts/infra/build-gateway.sh`) | AC: AC-031 | Depends: 6.1
 
 #### Test
 
@@ -209,10 +209,14 @@ These map to the spec's Open Questions. Each MUST be resolved before starting th
 
 ### Docs
 
-- [ ] **[M]** D.1 — Write Stripe webhook setup guide for the gateway endpoint (`docs/ops/runbooks/STRIPE_WEBHOOKS_SETUP.md` -- update existing) | Depends: 3.1
-- [ ] **[M]** D.2 — Write operational runbook: startup, health checks, troubleshooting, manual enrollment, manual refund (`docs/runbooks/purchase-gateway-runbook.md`) | Depends: All Milestone 1-6
-- [ ] **[M]** D.3 — Write architecture overview: component diagram, data flow, integration points (`docs/concepts/architecture/purchase-gateway-overview.md`) | Depends: None
-- [ ] **[S]** D.4 — Write OAuth2 troubleshooting guide for gateway <-> LMS authentication (`docs/ops/runbooks/ECOMMERCE_OAUTH_TROUBLESHOOTING.md` -- update existing) | Depends: 4.2
+- [x] **[M]** D.1 — Write Stripe webhook setup guide for the gateway endpoint (`docs/ops/runbooks/STRIPE_WEBHOOKS_SETUP.md` -- update existing) | Depends: 3.1
+  Done (2026-04-10): the runbook is now gateway-first, documents the current `/payments/webhooks/stripe/` endpoint, the gateway webhook secret path, the current Stripe event set, and the current validation flow; legacy Oscar continuity is explicitly bounded as secondary context.
+- [x] **[M]** D.2 — Write operational runbook: startup, health checks, troubleshooting, manual enrollment, manual refund (`docs/ops/runbooks/PURCHASE_GATEWAY_K8S.md`) | Depends: All Milestone 1-6
+  Done (2026-04-10): the runbook now covers startup sequence, purchase-readiness gates, webhook-vs-fulfillment classification, OAuth handoff, rollback boundary, and the operator split between gateway K8s, fulfillment recovery, webhook setup, and OAuth troubleshooting.
+- [x] **[M]** D.3 — Extend architecture overview: component diagram, data flow, integration points (`docs/architecture/purchase-gateway-overview.md`) | Depends: None
+  Done (2026-04-10): the architecture overview now covers integration points, fulfillment branches, webhook boundaries, runtime deployment shape, and current gateway-vs-Oscar migration posture.
+- [x] **[S]** D.4 — Write OAuth2 troubleshooting guide for gateway <-> LMS authentication (`docs/ops/runbooks/ECOMMERCE_OAUTH_TROUBLESHOOTING.md` -- update existing) | Depends: 4.2
+  Done (2026-04-10): the troubleshooting guide is now gateway-first for current LMS OAuth failures and preserves Oscar-specific guidance only as bounded legacy continuity.
 - [ ] **[S]** D.5 — Update `CLAUDE.md` with gateway service details, ports, PM2/K8s references | Depends: 6.2
 
 ---

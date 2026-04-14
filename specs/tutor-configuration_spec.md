@@ -45,13 +45,13 @@ links:
 # Human Summary
 
 ## What we're building
-A deterministic configuration workflow for Tutor-managed Open edX deployments. Every time a Tutor configuration changes, a series of patches must be applied to fix MySQL authentication, Node.js build toolchain, multi-site domain support, theme integration, custom application installation, and Redwood compatibility. This spec codifies that workflow as a testable contract so that no patch step is ever skipped or applied out of order.
+A deterministic configuration workflow for Tutor-managed Open edX deployments. Every time a Tutor configuration changes, the repo must re-realize the rendered Tutor build context through the canonical prepare path so MySQL authentication, MFE build contract, multi-site domain support, theme integration, and custom application delivery stay in sync. This spec codifies that workflow as a testable contract so that no operator step is skipped or applied out of order.
 
 ## Why it matters
-Open edX on Tutor regenerates all Docker Compose, Dockerfile, and Django settings templates from scratch on every `tutor config save`. Without re-applying patches afterward, production-critical fixes (MySQL auth, MFE builds, multi-site domains) are silently lost. This has caused outages in the past and will continue to do so if the workflow is not enforced. The spec protects against human error and enables automation.
+Open edX on Tutor regenerates all Docker Compose, Dockerfile, and Django settings templates from scratch on every `tutor config save`. Without running the canonical build-context prepare path afterward, production-critical fixes (MySQL auth, MFE builds, multi-site domains) drift out of the rendered environment. This has caused outages in the past and will continue to do so if the workflow is not enforced. The spec protects against human error and enables automation.
 
 ## Success looks like
-- Every `tutor config save` is followed by `apply-patches.sh` within 5 minutes, with zero manual intervention in CI.
+- Every manual `tutor config save` is followed by `prepare-tutor-build-context.sh --target all` within 5 minutes, with zero manual intervention in CI.
 - All 10 acceptance criteria pass on every configuration change.
 - Zero incidents caused by missing patches in the last 90 days.
 
@@ -63,9 +63,10 @@ This spec covers the Tutor configuration save-patch-restart workflow required to
 
 **Architecture Note**: Per ADR-006, the system uses a two-layer approach:
 - **Plugin** (`infrastructure/tutor/plugins/mereka_lms.py`): PRIMARY mechanism for configuration patches (automatic via Tutor hooks)
-- **Script** (`infrastructure/tutor/apply-patches.sh`): COMPLEMENTARY mechanism for file-system operations (manual but required)
+- **Prepare path** (`scripts/infra/prepare-tutor-build-context.sh`): canonical operator entrypoint that verifies rendered freshness, runs the remaining patch-only sync, and refreshes tracked rendered surfaces
+- **Script** (`infrastructure/tutor/apply-patches.sh`): low-level helper used by the prepare path for remaining file-system operations
 
-Both are required. Reference ADR-006 for full rationale.
+The plugin plus canonical prepare path are required. Reference ADR-006 for full rationale.
 
 ## Non-goals
 
@@ -77,7 +78,7 @@ Both are required. Reference ADR-006 for full rationale.
 
 ### Configuration Workflow
 
-- The system MUST run `./infrastructure/tutor/apply-patches.sh` after every `tutor config save` operation
+- The system MUST run `./scripts/infra/prepare-tutor-build-context.sh --target all` after every manual `tutor config save` operation
 - The system MUST set `TUTOR_ROOT="$(pwd)/tutor_env"` before any Tutor command
 - The system MUST verify local service names (`mysql`, `mongodb`, `redis`) in local deployments
 - The system MUST NOT use cloud IPs (10.97.x.x) in local configuration
@@ -89,7 +90,7 @@ The following table shows the division of responsibility between plugin and scri
 | Patch Category | Delivered By | Mechanism |
 |----------------|-------------|-----------|
 | **MySQL Authentication** | Plugin | `ENV_PATCHES` hook on Docker Compose template |
-| **MFE Build Toolchain (Node 18)** | Plugin | `mfe-dockerfile-pre-npm-install` hook |
+| **MFE Build Toolchain (Node 24)** | Plugin | `mfe-dockerfile-pre-npm-install` hook |
 | **Multi-Site Domain Support** | Plugin | `openedx-lms-production-settings` hook |
 | **MFE Footer Component** | Plugin | `mfe-dockerfile-post-npm-install` hook (hardcoded JS) |
 | **Google Fonts Stripping** | Plugin | `openedx-dockerfile-pre-assets` hook |
@@ -98,13 +99,14 @@ The following table shows the division of responsibility between plugin and scri
 | **Theme Assets (logos, fonts)** | Script | File-system copy operations |
 | **Theme Directory Setup** | Script | Directory creation and sync |
 | **MFE SCSS Distribution** | Script | File copying to build context |
+| **Rendered MFE snapshot refresh** | Prepare path | Sync tracked `infrastructure/tutor/mfe-build/Dockerfile` from rendered authority |
 
-The `apply-patches.sh` script MUST apply the following file-system patches:
+The low-level patch helper used by the canonical prepare path MUST apply the following file-system patches:
 
 #### Theme Integration (Script-Delivered)
 - MUST sync Mereka theme assets to build directory before image builds
-- MUST copy logo variants (PNG, SVG, favicon) to LMS and CMS themes
-- MUST sync font files (.woff2) to static directories
+- MUST mirror source image directories into rendered LMS and CMS theme destinations
+- MUST mirror source font directories into rendered static destinations
 - MUST copy SCSS files to theme directories
 - MUST set up theme directory structure
 
@@ -112,7 +114,7 @@ The `apply-patches.sh` script MUST apply the following file-system patches:
 
 ### Non-Functional Requirements
 
-- `apply-patches.sh` execution time MUST be <= 30 seconds on a standard development machine
+- `prepare-tutor-build-context.sh --target all` execution time MUST be <= 30 seconds on a standard development machine
 - Image build time with patches applied SHOULD be <= 45 minutes for `openedx` image on a 12GB RAM host
 - Patch idempotency: running `apply-patches.sh` multiple times consecutively MUST produce identical output
 - Patch script MUST exit with non-zero status code if any patch fails to apply
@@ -126,7 +128,7 @@ The `apply-patches.sh` script MUST apply the following file-system patches:
 - [ ] AC-003: `grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.py` returns results
 - [ ] AC-004: `grep "mfe_oauth_fix" tutor_env/env/apps/openedx/settings/lms/production.py` returns results
 - [ ] AC-005: `grep "django_prometheus" tutor_env/env/apps/openedx/settings/lms/production.py` returns results
-- [ ] AC-006: MFE images build successfully with Node 18
+- [ ] AC-006: MFE images build successfully with the Node 24 rendered build contract
 - [ ] AC-007: MySQL 8 connections succeed without authentication errors
 - [ ] AC-008: All three production domains (academyv2.mereka.io, academy.biji-biji.com, skillourfuture.academy.mereka.io) resolve and accept logins
 - [ ] AC-009: Mereka logo and custom footer render on all MFEs
@@ -208,14 +210,14 @@ tutor local restart lms cms
 ### Metrics
 
 - Build time: Track duration of `tutor images build openedx` (baseline: 30-45 min)
-- Theme sync duration: Time for `apply-patches.sh` to complete (baseline: <30s)
-- Patch success rate: Percentage of `apply-patches.sh` executions that exit 0
+- Theme/build-context sync duration: Time for `prepare-tutor-build-context.sh --target all` to complete (baseline: <30s)
+- Patch success rate: Percentage of canonical prepare executions that exit 0
 
 ### Alerts
 
-- MUST alert if `tutor config save` runs without subsequent `apply-patches.sh` within 5 minutes
+- MUST alert if `tutor config save` runs without subsequent `prepare-tutor-build-context.sh --target all` within 5 minutes
 - SHOULD alert if MySQL authentication fails with caching_sha2_password error
-- SHOULD alert if `apply-patches.sh` execution time exceeds 60 seconds
+- SHOULD alert if canonical build-context preparation exceeds 60 seconds
 
 ### Dashboards
 

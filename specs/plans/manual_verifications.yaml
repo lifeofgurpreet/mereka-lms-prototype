@@ -1220,7 +1220,7 @@ entries:
       needs Docker environment
 - id: AC-006
   spec: tutor-configuration_spec.md
-  description: MFE images build successfully with Node 18
+  description: MFE images build successfully with the Node 24 rendered build contract
   verify:
   - type: manual
     runbook: docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md

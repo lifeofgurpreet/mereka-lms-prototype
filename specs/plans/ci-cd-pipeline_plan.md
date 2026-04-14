@@ -114,14 +114,14 @@ last_updated: '2026-02-10'
 
 #### iOS Build Pipeline
 
-- [ ] **[M]** Add Ruby gems and CocoaPods caching (`.github/workflows/build-ios-app.yml`) | Req: iOS-8 | Depends: None
+- [ ] **[M]** Add Ruby gems and CocoaPods caching to the active iOS workflow (`.github/workflows/ios-testflight.yml`, or its approved successor when the lane resumes) | Req: iOS-8 | Depends: None
   - Use `actions/cache@v4` for `~/.gem` and `Pods/`
   - Cache key based on Gemfile.lock and Podfile.lock
   - Document cache hit/miss in step summary
 
-- [ ] **[S]** Ensure SSH key cleanup in `always()` step (`.github/workflows/build-ios-app.yml`) | Req: iOS-7 | Depends: None
+- [ ] **[S]** Ensure signing-material cleanup in `always()` step for the active iOS workflow | Req: iOS-7 | Depends: None
   - Add cleanup step with `if: always()`
-  - Remove SSH keys used for Fastlane Match
+  - Remove any temporary signing material used by the active iOS lane
   - Log cleanup completion
 
 #### Release Policy Checks
@@ -138,7 +138,7 @@ last_updated: '2026-02-10'
 
 - [ ] **[L]** Implement release evidence workflow with metadata bundle (`.github/workflows/release-evidence.yml`) | AC: #19, #21 | Depends: None
   - Accept required inputs: `openedx_tag`, `mfe_tag`, `target_environment`
-  - Resolve image digests from Artifact Registry for providedtags
+  - Resolve image digests from the active OCI registry for provided tags
   - Run all policy check scripts and capture output
   - Execute dry-run of `release-openedx-gitops.sh` (no `--apply --commit --push`)
   - Generate `release-metadata.json` with required fields (AC-21)
@@ -153,9 +153,10 @@ last_updated: '2026-02-10'
   - Upload artifacts with 30-day retention
   - Support configurable environment scope (`prod`/`dev`/`both`)
 
-- [ ] **[S]** Configure observability audit JSON output (`.github/workflows/observability-audit.yml`) | AC: #23 | Depends:None
-  - Produce JSON artifacts for local and runtime audits
-  - Upload with default (90-day) retention
+- [ ] **[S]** Configure consolidated daily infrastructure audit artifacts (`.github/workflows/daily-infrastructure-audit.yml`) | AC: #23 | Depends: None
+  - Produce JSON artifacts for local and runtime observability audits plus alert-routing verification
+  - Preserve the scheduled parity-rollup artifact stream, including `observability-parity-stability.json`
+  - Upload with the workflow's governed retention contract
   - Include audit timestamp and scope in artifact names
 
 - [ ] **[M]** Implement public health check with branding andauth verification (`.github/workflows/public-health-check.yml`) | AC: #24 | Depends: None
@@ -195,20 +196,21 @@ last_updated: '2026-02-10'
   - Release evidence: default (90 days)
   - Document retention rationale in workflow comments
 
-- [ ] **[M]** Implement Artifact Registry lifecycle policy for non-production images (GCP Console or Terraform) | Req: Artifact-3 | Depends: None
+- [ ] **[M]** Implement active OCI registry lifecycle policy for non-production images (registry settings or Terraform) | Req: Artifact-3 | Depends: None
   - Clean up images after 90 days for non-production tags
   - Preserve images with production tags indefinitely
   - Tag production images with `prod-<sha>` prefix for lifecycle filtering
-  - Document policy in `docs/operations/IMAGE_LIFECYCLE.md`
+  - Document policy in the current CI/release canon (`docs/reference/operations/CI_CD_SETUP.md`, `docs/reference/operations/BACKUP_COVERAGE_MATRIX.md`, `docs/ops/runbooks/BUILD_CACHE_PIPELINE_RUNBOOK.md`)
 
 #### Rollback Mechanism
 
-- [ ] **[M]** Document rollback procedure in release checklist (`docs/ops/runbooks/RELEASE_CHECKLIST.md` section 7) | AC: #2| Depends: None
+- [x] **[M]** Document rollback procedure in release checklist (`docs/ops/runbooks/RELEASE_CHECKLIST.md` section 7) | AC: #2| Depends: None
   - Step-by-step rollback instructions
   - How to identify last 5 successful production deployments
   - Command to re-run `release-openedx-gitops.sh` with priortags
   - Expected rollback completion time (10 minutes)
   - Verification steps after rollback
+  - Done (2026-04-10): the release checklist now carries a concrete rollback procedure, time expectation, and minimum evidence requirements layered on top of the governed release-identity contract.
 
 - [ ] **[S]** Create script to list last N successful production releases (`scripts/releases/list-recent-releases.sh`) | Req: Rollback-5 | Depends: None
   - Query GitHub API for successful `release-evidence.yml` runs
@@ -222,7 +224,7 @@ last_updated: '2026-02-10'
   - Add Slack webhook notification step (conditional on failure) to workflows on main branch
   - Include workflow name, run URL, failure reason in notification
   - High priority for `public-health-check.yml` failures
-  - Document notification configuration in `docs/operations/CI_CD_ALERTING.md`
+  - Document notification configuration in the current monitoring/on-call canon (`docs/reference/operations/MONITORING.md`, `docs/reference/operations/ALERT_SEVERITY_MATRIX.md`, `docs/ops/runbooks/ON_CALL.md`, `docs/policies/operations/MAINTENANCE_WINDOWS.md`)
 
 - [ ] **[S]** Add actionable remediation guidance to step summaries (`.github/workflows/*.yml`) | Req: Notification-3 | Depends: None
   - For common failures (OOM, timeout, auth, secret issues),provide copy-paste fix commands
@@ -236,18 +238,20 @@ last_updated: '2026-02-10'
   - Cache key based on Python version and requirements files
   - Document cache effectiveness in workflow comments
 
-- [ ] **[S]** Audit scheduled workflow frequency against GitHub Actions quota (manual analysis) | Req: Cost-5 | Depends: None
+- [x] **[S]** Audit scheduled workflow frequency against GitHub Actions quota (manual analysis) | Req: Cost-5 | Depends: None
   - Calculate estimated monthly minutes for all scheduled workflows
   - Compare against GitHub Actions quota (2,000 free, 3,000 Team)
   - Propose frequency reductions if quota exceeded
-  - Document analysis in `docs/operations/CI_CD_COST_ANALYSIS.md`
+  - Document analysis in `docs/reference/operations/GITHUB_ACTIONS_COST_MONITORING.md`
+  - Done (2026-04-10): the cost-monitoring guide now treats scheduled-workflow cadence as an explicit operator concern and classifies current GitHub Actions cost-driver families.
 
-- [ ] **[S]** Document cost optimization recommendations (`docs/operations/CI_CD_COST_OPTIMIZATION.md`) | Req: Cost-1 to Cost-6 | Depends: None
+- [x] **[S]** Document cost optimization recommendations (`docs/reference/operations/GITHUB_ACTIONS_COST_MONITORING.md`) | Req: Cost-1 to Cost-6 | Depends: None
   - Runner selection guidance (ubuntu-latest vs self-hosted)
   - Caching strategies for different workflows
   - Scheduled workflow frequency tuning
   - Path filters for build triggers
   - When to use `--no-cache` vs incremental builds
+  - Done (2026-04-10): the cost guide now records current caching rules, cadence tuning, and cost-driver classes as operator guidance rather than generic billing reference.
 
 ### Test
 
@@ -291,7 +295,7 @@ last_updated: '2026-02-10'
   - Test with intentional failures to verify merge blocking
 
 - [ ] **[M]** Create build workflow integration test (mock registry) (`tests/integration/test_build_workflow_e2e.sh`) | AC: #9-13 | Depends: None
-  - Use local Docker registry as mock Artifact Registry
+  - Use local Docker registry as a mock active OCI registry
   - Trigger build workflow
   - Verify images tagged with SHA
   - Verify digests resolved
@@ -367,45 +371,51 @@ last_updated: '2026-02-10'
 
 ### Docs
 
-- [ ] **[M]** Write CI/CD pipeline runbook (`docs/operations/CI_CD_RUNBOOK.md`) | Depends: All implementations
+- [x] **[M]** Write CI/CD pipeline runbook (`docs/ops/runbooks/CI_CD_RUNBOOK.md`) | Depends: All implementations
   - Overview of 11 workflows and their purposes
   - How to trigger manual workflows
   - How to interpret workflow failures
   - Common failure scenarios and fixes
   - Emergency bypass procedures
   - Rollback procedures
+  - Done (2026-04-10): the CI/CD runbook now defines the current operator split, major failure classes, scheduled-workflow cost boundary, and emergency-boundary rules on top of the existing workflow guidance.
 
-- [ ] **[M]** Update release checklist with CI/CD integration(`docs/ops/runbooks/RELEASE_CHECKLIST.md`) | AC: #21 | Depends: None
+- [x] **[M]** Update release checklist with CI/CD integration(`docs/ops/runbooks/RELEASE_CHECKLIST.md`) | AC: #21 | Depends: None
   - Pre-release: run policy checks, generate release evidence
   - Release: trigger build workflow with GitOps update
   - Post-release: verify deployment, check observability
   - Rollback: procedure with time estimates
   - Link to CI/CD runbook for detailed troubleshooting
+  - Done (2026-04-10): the release checklist already routes preflight, build, promotion, post-release proof, and rollback through the current CI/release canon and now makes the rollback lane explicit.
 
-- [ ] **[S]** Document branch protection rules (`docs/policies/operations/BRANCH_PROTECTION.md`) | AC: #7, #8 | Depends: Branch protection setup
+- [x] **[S]** Document branch protection rules (`docs/policies/operations/BRANCH_PROTECTION.md`) | AC: #7, #8 | Depends: Branch protection setup
   - Current protection rules for main branch
   - Rationale for each rule
   - Emergency hotfix bypass procedure
   - How to update protection rules
+  - Done (2026-04-10): branch-protection policy now explicitly records the emergency boundary and the required update sequence for keeping the documented merge gate aligned with the actual ruleset.
 
-- [ ] **[S]** Document CI/CD cost optimization strategies (`docs/operations/CI_CD_COST_OPTIMIZATION.md`) | Req: Cost-1 toCost-6 | Depends: Cost analysis
+- [x] **[S]** Document CI/CD cost optimization strategies (`docs/reference/operations/GITHUB_ACTIONS_COST_MONITORING.md`) | Req: Cost-1 toCost-6 | Depends: Cost analysis
   - GitHub Actions quota tracking
   - Scheduled workflow frequency tuning
   - Caching strategies
   - Runner selection (hosted vs self-hosted)
   - Build optimization (incremental vs clean)
+  - Done (2026-04-10): the cost-monitoring guide now carries explicit operator guidance for quota tracking, cadence tuning, cache use, and cost-driver classification.
 
-- [ ] **[S]** Document image lifecycle policy (`docs/operations/IMAGE_LIFECYCLE.md`) | Req: Artifact-3 | Depends: ArtifactRegistry lifecycle setup
+- [x] **[S]** Document image lifecycle policy in current CI/release canon (`docs/reference/operations/CI_CD_SETUP.md`, `docs/reference/operations/BACKUP_COVERAGE_MATRIX.md`, `docs/ops/runbooks/BUILD_CACHE_PIPELINE_RUNBOOK.md`) | Req: Artifact-3 | Depends: active OCI registry lifecycle setup
   - Tag naming conventions
   - Retention policy for production vs non-production images
   - How to query image history
   - Cleanup procedures
+  - **Done**: current CI/release canon now defines image classes, retention stance, query commands, and cleanup order across `CI_CD_SETUP.md` and `BUILD_CACHE_PIPELINE_RUNBOOK.md`.
 
-- [ ] **[S]** Document notification and alerting setup (`docs/operations/CI_CD_ALERTING.md`) | Req: Notification-1 to Notification-4 | Depends: Notification setup
+- [x] **[S]** Document notification and alerting setup in current monitoring/on-call canon (`docs/reference/operations/MONITORING.md`, `docs/reference/operations/ALERT_SEVERITY_MATRIX.md`, `docs/ops/runbooks/ON_CALL.md`, `docs/policies/operations/MAINTENANCE_WINDOWS.md`) | Req: Notification-1 to Notification-4 | Depends: notification setup
   - Slack webhook configuration
   - Alert channels and severity levels
   - On-call escalation for critical alerts
   - How to silence alerts during maintenance
+  - **Done**: current monitoring/on-call canon now defines owner split, routing model, maintenance silence rules, and verification entrypoints for alert delivery.
 
 ### Rollout
 

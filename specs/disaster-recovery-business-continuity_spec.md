@@ -29,8 +29,11 @@ depends_on:
 links:
   related_docs:
     - "docs/ops/runbooks/DISASTER_RECOVERY.md"
+    - "docs/ops/runbooks/CONTENT_LIBRARIES_DISASTER_RECOVERY.md"
     - "docs/ops/runbooks/VELERO_BACKUP_AUDIT.md"
     - "docs/reference/operations/BACKUP_COVERAGE_MATRIX.md"
+    - "docs/reference/operations/LIBRARIES_GCS_SETUP.md"
+    - "docs/architecture/CONTENT_LIBRARIES_MODEL.md"
     - "docs/status/readiness/DR_TEST_RESULTS.md"
     - "docs/ops/runbooks/COURSE_DATA_RECOVERY.md"
     - "docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md"
@@ -47,7 +50,7 @@ links:
 
 ## What we're building
 
-A formal Disaster Recovery (DR) and Business Continuity (BC) framework for Mereka Academy (Open edX on GKE). This spec codifies RPO/RTO commitments, backup strategy, failover procedures, recovery validation, compliance evidence generation, and recovery testing cadences into machine-checkable requirements. It unifies the existing ad-hoc backup tooling (Velero schedules, Atlas snapshots, GCS exports, restore-test CronJobs, DR evidence bundles) into a single contractual specification that enterprise clients can audit.
+A formal Disaster Recovery (DR) and Business Continuity (BC) framework for Mereka Academy's Open edX platform. This spec codifies RPO/RTO commitments, backup strategy, failover procedures, recovery validation, compliance evidence generation, and recovery testing cadences into machine-checkable requirements. It unifies the existing ad-hoc backup tooling (Velero schedules, Atlas snapshots, GCS exports, restore-test CronJobs, DR evidence bundles) into a single contractual specification that enterprise clients can audit.
 
 ## Why it matters
 
@@ -69,6 +72,7 @@ Enterprise clients require contractual SLA guarantees for data durability and se
   - RPO/RTO definitions for all data tiers (MySQL, MongoDB Atlas, Redis, Elasticsearch, configuration)
   - Backup strategy for in-cluster stateful services (Velero VolumeSnapshots)
   - Backup strategy for managed services (MongoDB Atlas snapshots, GCS exports)
+  - Composite recovery of Content Libraries v2 metadata plus Blockstore bundle storage
   - Backup strategy for configuration and secrets (Git, Infisical, GCP Secret Manager)
   - Disaster scenario classification and response procedures
   - Automated restore drill requirements and validation criteria
@@ -105,7 +109,7 @@ Enterprise clients require contractual SLA guarantees for data durability and se
 - Git repository is the source of truth for all K8s manifests and configurations
 - DR evidence bundle automation exists via `.github/workflows/dr-evidence-bundle.yml`
 - Restore-test script exists at `infrastructure/k8s/velero/restore-test-script.sh`
-- GKE cluster has a single zone deployment (not regional) as of this writing
+- The active production cluster has a single-zone deployment (not regional) as of this writing
 
 ## Requirements
 
@@ -122,11 +126,17 @@ Enterprise clients require contractual SLA guarantees for data durability and se
   | Tier 3: Redis (cache, sessions, Celery) | N/A (ephemeral) | 15 minutes | Velero hourly VolumeSnapshots (warm data) | Cache rebuild acceptable; persistent queues restored from snapshot |
   | Tier 4: Elasticsearch (search index) | N/A (rebuildable) | 1 hour | Velero daily snapshots + full reindex | Index rebuilt from MySQL/MongoDB source data |
   | Tier 5: Configuration (K8s manifests, Tutor config) | 0 (no loss) | 15 minutes | Git + Infisical + GCP Secret Manager | Declarative; apply from source control |
-  | Tier 6: Container images | 0 (no loss) | 30 minutes | Artifact Registry (`ghcr.io/biji-biji-initiative/mereka-lms`) | Immutable; tagged by git SHA |
+  | Tier 6: Container images | 0 (no loss) | 30 minutes | Active OCI registry (`ghcr.io/biji-biji-initiative/mereka-lms`) | Immutable; tagged by git SHA |
+  | Tier 7: Content Libraries v2 bundles + metadata linkage | 24 hours | 1 hour | MySQL snapshots for library metadata + GCS versioning for Blockstore bundles | Recovery is only complete when both metadata and bundle payloads are restored and revalidated |
 
 - The system MUST guarantee a composite RPO of 1 hour for full platform recovery (bounded by Tier 1)
 - The system MUST guarantee a composite RTO of 4 hours for full platform recovery from complete cluster loss
 - The system MUST guarantee an RTO of 30 minutes for single-component failure recovery
+- The system MUST treat Content Libraries v2 as a composite recovery surface:
+  library metadata follows the MySQL recovery lane, while Blockstore bundle
+  payloads follow the GCS-backed object-storage lane; the end-to-end
+  content-library recovery target is bounded by the slower bundle/object lane
+  unless stronger versioning evidence is available in the active environment
 
 #### Backup Strategy
 
@@ -143,6 +153,13 @@ Enterprise clients require contractual SLA guarantees for data durability and se
 - The system MUST NOT store critical stateful data on `emptyDir` volumes in any production namespace
 - MongoDB Atlas MUST have continuous backup enabled for `cluster-mereka-lms`
 - MongoDB Atlas SHOULD have point-in-time recovery (PITR) enabled with a minimum 7-day window
+- The system MUST include Content Libraries v2 in the backup checklist as a
+  composite authoring surface:
+  - library metadata and ownership state are covered by the MySQL backup lane
+  - Blockstore bundle content is covered by GCS versioning / object recovery
+    for the active `lms-blockstore` bucket
+  - restore procedures and evidence requirements are owned by
+    `docs/ops/runbooks/CONTENT_LIBRARIES_DISASTER_RECOVERY.md`
 - The system MUST maintain a legacy Cloud SQL backup workflow (`.github/workflows/cloud-sql-backup.yml`) in disabled state, activatable via `ENABLE_CLOUD_SQL_BACKUPS=true` for future Cloud SQL migration
 - The system MUST create a pre-operation Velero backup (`pre-op-mereka-lms-YYYYMMDD-HHMM`) before any risky operation (PVC/PV deletions, StatefulSet scale-to-zero, storage changes, major config changes)
 
@@ -174,6 +191,9 @@ Enterprise clients require contractual SLA guarantees for data durability and se
   - Restored resource count matches the source backup's resource count within 10% tolerance
 - The system MUST run a `backup-verification` CronJob daily to confirm backup freshness and completeness
 - The system MUST generate a DR evidence bundle monthly via `./scripts/qa/build-dr-evidence-bundle.sh --tar` or the GitHub Actions workflow `.github/workflows/dr-evidence-bundle.yml`
+- The system SHOULD exercise Content Libraries v2 recovery as part of the DR
+  validation lane whenever a target environment has active library data, using
+  the current content-library recovery runbook as the operator companion
 - Each DR evidence bundle MUST include:
   - `audit-velero.json` (backup schedule health)
   - `audit-velero-alert-pipeline.json` (alert pipeline health)
@@ -191,15 +211,20 @@ Enterprise clients require contractual SLA guarantees for data durability and se
 - The system MUST verify MongoDB Atlas data accessibility post-incident by confirming modulestore course count is non-zero: `sum(1 for _ in modulestore().get_courses()) > 0`
 - The system SHOULD verify post-restore data consistency by running `./scripts/qa/public-health-check.sh prod` against the restored environment
 - The system MUST maintain a backup coverage matrix (`docs/reference/operations/BACKUP_COVERAGE_MATRIX.md`) that maps every stateful component to its backup mechanism and verification command
+- The system MUST treat Content Libraries v2 verification as incomplete unless:
+  - the owning library record is visible in the correct organization scope
+  - sample components render in the authoring or API surface
+  - any required re-index or course-reference follow-up is either complete or
+    explicitly recorded
 
 #### Cross-Region Failover Readiness
 
-- The system MUST maintain infrastructure-as-code (Terraform, Kustomize) capable of deploying a secondary GKE cluster in a different GCP region
+- The system MUST maintain infrastructure-as-code (Terraform, Kustomize) capable of deploying a secondary production cluster in a different GCP region
 - The system SHOULD store Velero backups in a multi-region GCS bucket (or replicate to a secondary region bucket)
 - The system MUST ensure MongoDB Atlas cluster is accessible from multiple GCP regions (Atlas networking/peering)
 - The system SHOULD maintain a documented procedure for cross-region DNS cutover via Cloudflare
-- The system MUST maintain container images in Artifact Registry with multi-region replication enabled (`asia-southeast1` primary)
-- The system MAY implement automated GKE cluster provisioning in a secondary region triggered by primary region health check failure
+- The system MUST maintain container images in the active OCI registry (`ghcr.io/biji-biji-initiative/mereka-lms`) with immutable tag/digest retention sufficient for full rebuild and rollback.
+- The system MAY implement automated secondary-cluster provisioning in a secondary region triggered by primary region health check failure
 
 #### Secrets Recovery
 
@@ -309,7 +334,7 @@ Enterprise clients require contractual SLA guarantees for data durability and se
 
 ### Cross-Region Readiness
 
-- [ ] AC-025: Given Terraform/Kustomize configs exist, when `kubectl kustomize deploy/k8s/overlays/production` is run, then it produces valid manifests deployable to any GKE cluster
+- [ ] AC-025: Given Terraform/Kustomize configs exist, when `kubectl kustomize deploy/k8s/overlays/production` is run, then it produces valid manifests deployable to any supported production cluster
 - [ ] AC-026: Given Velero backups are stored in GCS, when the backup bucket is inspected, then it is configured for multi-region storage or cross-region replication
 
 ## Edge Cases
@@ -504,7 +529,7 @@ This spec formalizes existing infrastructure. Rollout is incremental:
 
 **Phase 3 -- Cross-Region Readiness (Week 5-8)**
 1. Configure GCS backup bucket for multi-region or cross-region replication
-2. Enable Artifact Registry multi-region replication
+2. Enable active OCI registry multi-region continuity policy
 3. Document cross-region cluster provisioning procedure
 4. Document DNS failover procedure via Cloudflare
 5. Gate: Documented procedure tested in tabletop exercise
@@ -512,7 +537,7 @@ This spec formalizes existing infrastructure. Rollout is incremental:
 **Phase 4 -- Compliance and Evidence (Week 9-10)**
 1. Verify DR evidence bundle workflow produces complete output
 2. Configure evidence retention for 12 months
-3. Create DR compliance report template for enterprise clients
+3. Complete and maintain the DR compliance report companion for enterprise clients
 4. Conduct first formal tabletop DR exercise
 5. Gate: Evidence bundle passes audit review
 
@@ -533,7 +558,7 @@ If any phase introduces issues:
 
 1. **Phase 1**: No rollback needed (verification only)
 2. **Phase 2**: Delete new alert rules via `kubectl delete prometheusrule <name> -n mereka-lms`; dashboard deletion in Grafana UI
-3. **Phase 3**: GCS bucket config is non-destructive; Artifact Registry replication can be disabled; no cluster changes
+3. **Phase 3**: GCS bucket config is non-destructive; OCI registry continuity settings can be changed without cluster mutations
 4. **Phase 4**: Evidence workflow is additive; can be disabled by removing the GitHub Actions schedule
 
 ## Open Questions

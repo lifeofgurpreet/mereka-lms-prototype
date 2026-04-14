@@ -22,7 +22,7 @@ This plan codifies the Tutor configuration save-patch-restartworkflow into verif
 Key deliverables:
 1. A dedicated `verify-tutor-patches.sh` script that checks all 10 acceptance criteria
 2. A CI job that validates patch script syntax and idempotency
-3. A wrapper script or Makefile guard to prevent `tutor config save` without subsequent `apply-patches.sh`
+3. A wrapper script or Makefile guard to prevent `tutor config save` without subsequent canonical build-context preparation
 4. Documentation updates linking the spec to runbooks
 
 ---
@@ -46,7 +46,7 @@ Key deliverables:
 
 - [ ] **[M] Task 1: Create `scripts/qa/verify-tutor-patches.sh` verification script** (`scripts/qa/verify-tutor-patches.sh`) | AC: #1, #2, #3, #4, #5 | Depends: None
   - **Description**: Write a shell script that verifies all five grep-based acceptance criteria (AC-001 through AC-005) against the rendered tutor_env files. The script should outputpass/fail for each check and exit non-zero if any fail.
-  - **Done definition**: Running `./scripts/qa/verify-tutor-patches.sh` on a fresh `tutor config save && apply-patches.sh`output returns exit 0 with all 5 checks passing.
+  - **Done definition**: Running `./scripts/qa/verify-tutor-patches.sh` on a fresh `tutor config save && ./scripts/infra/prepare-tutor-build-context.sh --target all` output returns exit 0 with all 5 checks passing.
   - **Complexity**: M (2-4h) -- grep patterns already definedin spec, need to structure as reusable script with proper error handling.
 
 - [ ] **[S] Task 2: Add idempotency guard to `apply-patches.sh`** (`infrastructure/tutor/apply-patches.sh`) | AC: NFR (idempotency) | Depends: None
@@ -59,9 +59,9 @@ Key deliverables:
   - **Done definition**: Script verifies MySQL auth works and`tutor local dc ps` shows all services Up. Exits non-zero onany failure.
   - **Complexity**: M (2-4h) -- need to handle Docker not running gracefully, merge with existing verify-setup.sh patterns.
 
-- [ ] **[S] Task 4: Add config-save wrapper to enforce patchapplication** (`infrastructure/tutor/tutor-config-save.sh`) |AC: Workflow requirement, Edge Case (forgetting patches) | Depends: None
-  - **Description**: Create a wrapper script `tutor-config-save.sh` that runs `tutor config save "$@"`, then automaticallyruns `apply-patches.sh`, then optionally restarts services.This prevents the "forgot to run patches" failure mode. Update `Makefile` target `tutor-apply` to use this wrapper.
-  - **Done definition**: Running `./infrastructure/tutor/tutor-config-save.sh --set KEY=value` executes config save, patches, and optionally restarts. `make tutor-apply` calls the wrapper.
+- [ ] **[S] Task 4: Add config-save wrapper to enforce canonical build-context preparation** (`scripts/infra/tutor-config-save.sh`) |AC: Workflow requirement, Edge Case (forgetting patches) | Depends: None
+  - **Description**: Create a wrapper script `tutor-config-save.sh` that runs `tutor config save "$@"`, then automatically runs `prepare-tutor-build-context.sh --target all`, then optionally restarts services. This prevents the "forgot to refresh rendered build context" failure mode. Update `Makefile` target `tutor-apply` to use this wrapper.
+  - **Done definition**: Running `./scripts/infra/tutor-config-save.sh --set KEY=value` executes config save, canonical build-context preparation, and optionally restarts. `make tutor-apply` calls the wrapper.
   - **Complexity**: S (1-2h) -- simple wrapper script.
 
 - [ ] **[S] Task 5: Add local service name validation to `apply-patches.sh`** (`infrastructure/tutor/apply-patches.sh`) |AC: Workflow requirement (no cloud IPs) | Depends: None
@@ -70,8 +70,8 @@ Key deliverables:
   - **Complexity**: S (<1h) -- simple grep check appended toexisting script.
 
 - [ ] **[M] Task 6: Create MFE build verification script** (`scripts/qa/verify-mfe-build-contract.sh`) | AC: #6 | Depends:None
-  - **Description**: Write a script that verifies the MFE Dockerfile contains Node 18 base image, the required build tools, npm retry configuration, and the 6144MB memory limit. Thisproves AC-006 without requiring a full image build.
-  - **Done definition**: Script checks rendered `tutor_env/env/plugins/mfe/build/mfe/Dockerfile` for Node 18, build tools,npm retries, and NODE_OPTIONS. Exits non-zero if any check fails.
+  - **Description**: Write a script that verifies the MFE Dockerfile contains the Node 24 base image, the required build tools, HTTPS git rewrite hardening, local brand package install, runtime theme payload copy, npm retry configuration, and the 6144MB memory limit. This proves AC-006 without requiring a full image build.
+  - **Done definition**: Script checks the rendered/tracked MFE Dockerfile contract for Node 24, build tools, git rewrite hardening, local brand package install, theme payload copy, npm retries, and NODE_OPTIONS. Exits non-zero if any check fails.
   - **Complexity**: M (2-3h) -- need to parse Dockerfile patterns carefully.
 
 - [ ] **[S] Task 7: Create multi-site domain verification script** (`scripts/qa/verify-tutor-multisite-domains.sh`) | AC:#8 | Depends: None

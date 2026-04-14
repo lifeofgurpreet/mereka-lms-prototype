@@ -31,6 +31,10 @@ tags:
 summary: "Defines the contract for non-proctored advanced assessment flows, including ORA2 and XQueue-backed grading, across the Mereka Open edX platform."
 links:
   related_docs:
+    - "docs/architecture/assessment-audit-report.md"
+    - "docs/architecture/codejail-status.md"
+    - "docs/guides/platform/ADVANCED_ASSESSMENT_AUTHORING_GUIDE.md"
+    - "docs/ops/runbooks/ASSESSMENT_OPERATIONS_RUNBOOK.md"
     - "docs/ops/runbooks/TROUBLESHOOTING.md"
     - "docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md"
     - "docs/ops/runbooks/OBSERVABILITY_QUICKSTART.md"
@@ -616,7 +620,7 @@ Proctoring features referenced in this spec are defined in `specs/proposals/proc
 5. Verify grade integration: ORA2 scores appear correctly in the gradebook
 6. Verify email notifications for ORA2 grading events
 7. Set up Prometheus metrics for ORA2 (submission count, grading queue size, file storage usage)
-8. Create ORA2 assessment guidelines documentation for course authors
+8. Extend the current advanced assessment authoring guide with ORA2 guidance for course authors
 9. Monitor storage usage at `/openedx/data/ora2` and set up the storage capacity alert
 
 #### Phase 2: Timed Exams (Week 4-6)
@@ -782,6 +786,6 @@ Proctoring features referenced in this spec are defined in `specs/proposals/proc
 
 11. **Timed exam accommodation workflow**: How should time accommodations be requested and approved? Options: (a) instructor manually sets per student in the instructor dashboard, (b) student self-service request with instructor approval, (c) enterprise admin bulk upload of accommodation lists. This affects both UX design and access control.
 
-12. **XQueue grader container image registry**: Should XQueue grader worker container images be stored in the same Artifact Registry (`ghcr.io/biji-biji-initiative/mereka-lms`) as the Open edX images, or in a separate repository? Course-author-provided grading scripts need a secure build and deployment pipeline.
+12. **XQueue grader container image registry**: Should XQueue grader worker container images be stored in the same active OCI registry (`ghcr.io/biji-biji-initiative/mereka-lms`) as the Open edX images, or in a separate repository? Course-author-provided grading scripts need a secure build and deployment pipeline.
 
 13. **Integration with Badges & Credentials**: Should assessment completion events (particularly ORA2 staff-graded assignments and timed exam passes) trigger badge issuance (per `specs/badges-credentials-enterprise_spec.md`)? If so, what assessment events should be badge-eligible, and how is the mapping configured?

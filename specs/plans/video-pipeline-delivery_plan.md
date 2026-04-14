@@ -70,7 +70,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
   - Support Vietnamese (vi) and Chinese (zh) subtitle tracks
   - Set `closed_captions` flag appropriately
 
-- [ ] **[S]** Document subtitle upload workflow (`docs/operations/VIDEO_SUBTITLE_MANAGEMENT.md`) | AC: #8 | Depends: Subtitle upload
+- [ ] **[S]** Extend subtitle workflow guidance (`docs/ops/runbooks/VIDEO_SUBTITLE_MANAGEMENT.md`) | AC: #8 | Depends: Subtitle upload
   - How to add subtitles to existing Mux assets
   - How to enable multi-language tracks in Video XBlock
   - Auto-transcription integration (future consideration)
@@ -190,25 +190,29 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
 
 ## Documentation Tasks
 
-- [ ] **[S]** Write video pipeline architecture overview (`docs/concepts/architecture/video-pipeline-overview.md`) | Depends: All build tasks
+- [x] **[S]** Extend video pipeline architecture overview (`docs/architecture/video-pipeline-overview.md`) | Depends: All build tasks
   - System diagram: MCT/Kajabi → Mux → CDN → Video XBlock → Analytics
   - Data flow: upload → transcode → playback
   - Integration points: Mux API, Aspects pipeline
+  - Done (2026-04-10): architecture overview now covers stable system view, integration points, current playback/analytics/subtitle boundaries, and the split between migration history, current playback operations, observability, and future protected-playback work.
 
-- [ ] **[M]** Write video operations runbook (`docs/operations/VIDEO_OPERATIONS_RUNBOOK.md`) | Depends: All build + observability tasks
+- [x] **[M]** Extend video operations runbook (`docs/ops/runbooks/VIDEO_OPERATIONS_RUNBOOK.md`) | Depends: All build + observability tasks
   - Operational procedures: upload new videos, troubleshoot playback issues
   - Incident playbooks: Mux asset error, CDN degradation, cost spike
   - Troubleshooting: common symptoms → fixes
   - Rollback: revert to Azure CDN URLs if needed
+  - Done (2026-04-10): runbook now defines current operational procedures, incident playbooks, diagnostic commands, observability/cost routing, and explicitly bounds emergency fallback work instead of pretending Azure rollback is a routine current toggle.
 
-- [ ] **[S]** Write Mux API setup guide (`docs/operations/MUX_API_SETUP.md`) | Depends: Secrets management
+- [x] **[S]** Extend the current Mux deployment guide with API setup procedures (`docs/ops/runbooks/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md`) | Depends: Secrets management
   - How to obtain Mux credentials (dashboard → API Access Tokens)
   - How to store credentials in Infisical
   - How to test Mux API connection
+  - Done (2026-04-10): guide now defines canonical Mux secret names, runtime env mapping, consumer boundary, current verifier set, and the difference between API wiring proof and learner playback proof.
 
-- [ ] **[S]** Update main troubleshooting doc with video section (`docs/ops/runbooks/TROUBLESHOOTING.md`) | Depends: All build tasks
+- [x] **[S]** Update main troubleshooting doc with video section (`docs/ops/runbooks/TROUBLESHOOTING.md`) | Depends: All build tasks
   - Add video diagnostic commands
   - Add video playback issues to 5-command diagnostic flow
+  - Done (2026-04-10): troubleshooting router now has a dedicated video/Mux lane with the 5-command base diagnostic set and explicit routing to playback, subtitle, Mux API, and migration-history companions.
 
 ---
 

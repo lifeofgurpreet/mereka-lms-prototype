@@ -34,7 +34,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
   - Verify Blockstore Django app is configured in INSTALLED_APPS
   - Verify Blockstore storage backend points to GCS bucket `lms-blockstore` for production
   - Verify local filesystem path for development
-  - Document current Blockstore configuration in `docs/concepts/architecture/content-libraries-overview.md`
+  - Document current Blockstore configuration in `docs/architecture/CONTENT_LIBRARIES_MODEL.md`
 
 - [ ] **[M]** Configure Content Libraries v2 REST API routes(`deploy/k8s/base/apps/openedx/urls/lms.py`, `deploy/k8s/base/apps/openedx/urls/cms.py`) | AC: #1 | Depends: Blockstore verification
   - Verify `/api/libraries/v2/` routes are exposed
@@ -47,7 +47,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
   - Add library content index configuration to CMS settings
   - Configure index mapping for library titles, descriptions,component content
   - Add feature flag `CONTENT_LIBRARIES_SEARCH_ENABLED` (default: off)
-  - Document search configuration in `docs/concepts/architecture/content-libraries-overview.md`
+  - Document search configuration in `docs/architecture/CONTENT_LIBRARIES_MODEL.md`
 
 - [ ] **[S]** Add Content Libraries v2 feature flags to Django settings (`deploy/k8s/base/apps/openedx/settings/common.py`) | AC: All | Depends: None
   - `CONTENT_LIBRARIES_V2_ENABLED` (default: on) -- master gate for UI in Studio
@@ -304,7 +304,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
   - Test full library restore from Cloud SQL + GCS backup (staging environment)
   - Measure recovery time and verify it meets platform RTO
   - Verify all component content, version history, permissions are restored correctly
-  - Document recovery procedure in `docs/operations/disaster-recovery-library-content.md`
+  - Extend recovery procedure in `docs/ops/runbooks/CONTENT_LIBRARIES_DISASTER_RECOVERY.md`
 
 ### Content Quality Assurance and Review Workflows
 
@@ -331,7 +331,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
   - Create management command `./manage.py create_libraries_from_csv` with CSV format: `org,slug,title,description,library_type`
   - Test creating 10 libraries from CSV
   - Verify error handling for invalid org or duplicate slugs
-  - Document CSV format in `docs/operations/library-bulk-operations.md`
+  - Document CSV format in [`docs/ops/runbooks/CONTENT_LIBRARIES_V2_RUNBOOK.md`](../../docs/ops/runbooks/CONTENT_LIBRARIES_V2_RUNBOOK.md)
   - Add feature flag `CONTENT_LIBRARIES_BULK_IMPORT_ENABLED`gate
 
 - [ ] **[M]** Implement library migration between organizations | AC: #30 | Depends: Export/import
@@ -339,7 +339,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
   - Test migrating library from Tenant A to Tenant B
   - Verify permissions are reset (new org's admins take ownership)
   - Verify content and version history are preserved
-  - Document in `docs/operations/library-bulk-operations.md`
+  - Document in [`docs/ops/runbooks/CONTENT_LIBRARIES_V2_RUNBOOK.md`](../../docs/ops/runbooks/CONTENT_LIBRARIES_V2_RUNBOOK.md)
 
 ---
 
@@ -499,7 +499,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
 - [ ] **[M]** Expose Prometheus metrics endpoint (`/metrics/`) | AC: All | Depends: Metrics implementation
   - Verify metrics endpoint is accessible from Prometheus scraper
   - Test metrics are updated in real-time
-  - Document metrics in `docs/concepts/architecture/content-libraries-overview.md`
+  - Document metrics in `docs/architecture/CONTENT_LIBRARIES_MODEL.md`
 
 ### Logging
 
@@ -544,7 +544,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
   - **Tenant Library Health**: Per-tenant library count, component count, publish activity, storage consumption (Blockstore bundle sizes)
 
 - [ ] **[S]** Document dashboard usage in runbook | AC: All |Depends: Dashboards
-  - Add screenshots of dashboards to `docs/operations/content-libraries-runbook.md`
+  - Add screenshots of dashboards to `docs/ops/runbooks/CONTENT_LIBRARIES_V2_RUNBOOK.md`
   - Document key metrics to monitor
   - Document alert thresholds
 
@@ -554,7 +554,7 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
 
 ### Architecture Documentation
 
-- [ ] **[M]** Write Content Libraries v2 architecture overview (`docs/concepts/architecture/content-libraries-overview.md`) | AC: All | Depends: Build tasks
+- [x] **[M]** Extend the Content Libraries architecture model (`docs/architecture/CONTENT_LIBRARIES_MODEL.md`) | AC: All | Depends: Build tasks
   - System architecture diagram (Blockstore, LMS/CMS, Studio,authoring MFE, search index)
   - Data flow: component authoring → draft → publish → coursereference → learner view
   - Blockstore integration: bundle storage, versioning, GCS backend
@@ -562,17 +562,19 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
   - Search indexing architecture
   - Analytics integration
   - Document all feature flags
+  - **Done**: `docs/architecture/CONTENT_LIBRARIES_MODEL.md` now covers the end-to-end authoring-to-learner flow, Blockstore/GCS durability and versioning model, tenant isolation boundary, search and analytics companion lanes, and the current `CONTENT_LIBRARIES_*` feature-flag roles
 
-- [ ] **[M]** Update disaster recovery spec with library content backup (`specs/disaster-recovery-business-continuity_spec.md`) | AC: #28 | Depends: Backup tasks
+- [x] **[M]** Update disaster recovery spec with library content backup (`specs/disaster-recovery-business-continuity_spec.md`) | AC: #28 | Depends: Backup tasks
   - Add Content Libraries v2 to backup checklist
   - Document library metadata backup (Cloud SQL)
   - Document Blockstore content backup (GCS versioning)
   - Document library restore procedure
   - Add RTO/RPO targets for library content
+  - **Done**: `specs/disaster-recovery-business-continuity_spec.md` now treats Content Libraries v2 as a first-class composite recovery surface, covering the backup checklist, metadata + Blockstore bundle ownership, current restore companion runbook, and explicit library-content recovery targets
 
 ### Operational Documentation
 
-- [ ] **[L]** Write Content Libraries v2 runbook (`docs/operations/content-libraries-runbook.md`) | AC: All | Depends: Allbuild tasks
+- [x] **[L]** Write Content Libraries v2 runbook (`docs/ops/runbooks/CONTENT_LIBRARIES_V2_RUNBOOK.md`) | AC: All | Depends: Allbuild tasks
   - Library lifecycle operations: create, edit, delete, restore
   - Publishing workflow: draft changes, review, publish, rollback
   - Access control management: grant/revoke permissions, manage teams
@@ -582,18 +584,20 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
   - Performance tuning: optimize large libraries, tune searchindex
   - Troubleshooting common issues: publish failures, sync errors, access denials
   - Monitoring and alerting: key metrics, alert response procedures
+  - **Done**: Runbook now exists as the current canonical owner for bulk library-operations procedure shape, operation classes, source inventory, and post-operation verification boundaries
 
-- [ ] **[M]** Update troubleshooting guide with library-specific issues (`docs/ops/runbooks/TROUBLESHOOTING.md`) | AC: All |Depends: Runbook
+- [x] **[M]** Update troubleshooting guide with library-specific issues (`docs/ops/runbooks/TROUBLESHOOTING.md`) | AC: All |Depends: Runbook
   - Issue: Library not visible in Studio → Check organizationmembership, feature flag
   - Issue: Component not rendering in course → Check publishstatus, XBlock type installed
   - Issue: Sync from library fails → Check library exists, check permissions
   - Issue: Search not returning results → Check search indexstatus, re-index
   - Issue: Cross-tenant access denial → Check organization membership, security log
   - Issue: Publish operation times out → Check Blockstore storage, check database connectivity
+  - **Done**: `docs/ops/runbooks/TROUBLESHOOTING.md` now contains the current Content Libraries v2 troubleshooting lane with symptom routing for Studio visibility, publish-vs-draft confusion, course-reference rendering, search-index lag, tenant isolation, and Blockstore/database-backed publish failures
 
 ### User Documentation
 
-- [ ] **[L]** Write Content Libraries v2 user guide (`docs/user-guides/content-libraries-user-guide.md`) | AC: All | Depends: Build tasks
+- [x] **[L]** Write Content Libraries v2 user guide (`docs/guides/platform/CONTENT_LIBRARIES_AUTHORING_GUIDE.md`) | AC: All | Depends: Build tasks
   - Audience: Content authors, enterprise admins
   - Creating and configuring libraries
   - Adding and editing components
@@ -603,13 +607,15 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
   - Searching and discovering library content
   - Best practices for library organization
   - Screenshots of Studio UI
+  - **Done**: authored under the current guides root instead of the dead `docs/user-guides/**` path; `docs/guides/platform/CONTENT_LIBRARIES_AUTHORING_GUIDE.md` now owns the current author-facing library workflow boundary, creation/publish/reuse flow, permission model, and escalation posture
 
-- [ ] **[M]** Write enterprise onboarding guide for libraries(`docs/enterprise/library-onboarding-guide.md`) | AC: All |Depends: User guide
+- [x] **[M]** Write enterprise onboarding guide for libraries(`docs/guides/admin/CONTENT_LIBRARIES_ENTERPRISE_ONBOARDING.md`) | AC: All |Depends: User guide
   - Setting up tenant-scoped libraries
   - Bulk library creation for enterprise clients
   - Configuring shared library catalogs
   - Training content authors on library workflows
   - Analytics and usage tracking for enterprise libraries
+  - **Done**: authored under the current admin-guides root instead of the dead `docs/enterprise/**` path; `docs/guides/admin/CONTENT_LIBRARIES_ENTERPRISE_ONBOARDING.md` now owns the tenant-onboarding intake, ownership-model decisions, shared-vs-private library rules, and launch checklist
 
 ---
 
@@ -776,8 +782,8 @@ Tasks are grouped by category and ordered by dependency. Eachtask includes:
   - Verify API latency, search performance, publish durationmeet NFR thresholds
   - Document load test results
 
-- [ ] **[M]** Document library disaster recovery runbook | AC: #28 | Depends: Phase 1
-  - Finalize `docs/operations/disaster-recovery-library-content.md`
+- [ ] **[M]** Extend library disaster recovery runbook | AC: #28 | Depends: Phase 1
+  - Finalize `docs/ops/runbooks/CONTENT_LIBRARIES_DISASTER_RECOVERY.md`
   - Include: backup verification, restore procedures, RTO/RPOtargets
   - Test disaster recovery procedure in staging environment
 

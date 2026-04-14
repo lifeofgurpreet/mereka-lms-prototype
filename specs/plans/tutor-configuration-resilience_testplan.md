@@ -127,7 +127,7 @@ The existing CI workflows (`.github/workflows/tutor-config-verify.yml` and `.git
 
 | Fixture | Description | Location |
 |---------|-------------|----------|
-| Patched tutor_env | Full `tutor config save` + `apply-patches.sh` output | Generated at test time |
+| Patched tutor_env | Full `tutor config save` + `prepare-tutor-build-context.sh --target all` output | Generated at test time |
 | Unpatched tutor_env | Raw `tutor config save` output (no plugin, no patches) | Generated at test time |
 | Patch manifest | `infrastructure/tutor/patch-manifest.yml` | Source-controlled |
 | Plugin package | `infrastructure/tutor/tutor-plugin-mereka/` | Source-controlled |
