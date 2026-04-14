@@ -1,0 +1,166 @@
+version: 1
+owner: Docs Lead
+last_updated: "2026-04-14"
+scope: docs/meta/docs-program root markdown surfaces only
+allowed_authorities:
+  - active
+  - historical
+  - generated
+  - deprecated_retained
+allowed_doc_kinds:
+  - front_door
+  - board
+  - ledger
+  - reference
+  - bundle
+  - packet
+  - reset_packet
+  - generated_evidence
+  - deprecated_stub
+entries:
+  - paths:
+      - docs/meta/docs-program/README.md
+    authority: active
+    doc_kind: front_door
+    consumers:
+      - contributors
+      - reviewers
+    rationale: Stable root front door for the docs-program control plane.
+  - paths:
+      - docs/meta/docs-program/POST_REBASE_INTAKE_2026-04-13.md
+      - docs/meta/docs-program/REVIEW_HARDENING_BOARD_2026-04-13.md
+    authority: active
+    doc_kind: board
+    consumers:
+      - docs_lead
+      - maintainers
+      - reviewers
+    rationale: Active execution and review boards for the current docs-program phase.
+  - paths:
+      - docs/meta/docs-program/DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md
+    authority: active
+    doc_kind: ledger
+    consumers:
+      - docs_lead
+      - maintainers
+      - reviewers
+    rationale: Active closeout ledger for the current tranche sequence.
+  - paths:
+      - docs/meta/docs-program/ADR_CONTRADICTIONS_REGISTER.md
+    authority: historical
+    doc_kind: packet
+    routes_to:
+      - docs/adr/README.md
+      - docs/meta/docs-program/REVIEW_HARDENING_BOARD_2026-04-13.md
+    rationale: Retained ADR-overlay contradiction tracker; current ADR authority lives in the ADR root and current docs-program review board.
+  - paths:
+      - docs/meta/docs-program/REPO_TOPOLOGY_MOVE_LEDGER.md
+    authority: deprecated_retained
+    doc_kind: deprecated_stub
+    routes_to:
+      - docs/meta/docs-program/root-collapse/README.md
+    rationale: Retained compatibility stub after compressing the remaining topology-lane guidance into the root-collapse front door.
+  - paths:
+      - docs/meta/docs-program/SPEC_COVERAGE.md
+    authority: deprecated_retained
+    doc_kind: deprecated_stub
+    routes_to:
+      - docs/reference/operations/SPEC_COVERAGE.md
+    rationale: Retained compatibility stub after moving the spec coverage verifier reference into the operations reference root.
+  - paths:
+      - docs/meta/docs-program/boundary-debt-manifest.md
+    authority: historical
+    doc_kind: packet
+    routes_to:
+      - docs/meta/docs-program/root-collapse/README.md
+      - docs/meta/contracts/INFRA_CROSSWALK.md
+    rationale: Retained boundary-debt snapshot; current routing and cross-repo ownership context lives in the root-collapse front door and infra crosswalk.
+  - paths:
+      - docs/meta/docs-program/UI_UX_HARDENING_BUNDLE.md
+    authority: deprecated_retained
+    doc_kind: deprecated_stub
+    routes_to:
+      - docs/reference/operations/UI_UX_HARDENING_BUNDLE.md
+    rationale: Retained compatibility stub after moving the UI/UX hardening lane contract into the operations reference root.
+  - paths:
+      - docs/meta/docs-program/DEPLOY_TENANCY_EPIC.md
+    authority: historical
+    doc_kind: packet
+    routes_to:
+      - docs/ops/runbooks/TENANT_ONBOARDING_PLAYBOOK.md
+      - docs/ops/runbooks/MULTI_TENANCY_RUNBOOK.md
+      - docs/ops/runbooks/RELEASE_CHECKLIST.md
+    rationale: Retained deployment-epic packet; current tenancy rollout authority belongs to active ops runbooks, not the docs-program root.
+  - paths:
+      - docs/meta/docs-program/AGENT_WORKPACKETS.md
+      - docs/meta/docs-program/ARCHITECTURE_GOVERNANCE_OVERLAY.md
+      - docs/meta/docs-program/DOCS_FIRST_CLASS_WEEKLY_EXECUTION_PLAN_20260306.md
+      - docs/meta/docs-program/DOCS_GOVERNANCE_SIGNOFF_CHECKLIST_20260307.md
+      - docs/meta/docs-program/FOUNDATIONS_PROGRAM.md
+      - docs/meta/docs-program/IMPLEMENTATION_ROADMAP.md
+      - docs/meta/docs-program/PROGRAM_UPDATE_V2_BRIEF.md
+      - docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md
+    authority: historical
+    doc_kind: packet
+    routes_to:
+      - docs/meta/docs-program/POST_REBASE_INTAKE_2026-04-13.md
+      - docs/meta/docs-program/REVIEW_HARDENING_BOARD_2026-04-13.md
+      - docs/meta/docs-program/DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md
+    rationale: Retained historical overlays and planning packets that must route back to the active control plane.
+  - paths:
+      - docs/meta/docs-program/WAVE3_CLOSEOUT.md
+      - docs/meta/docs-program/WAVE3_EXECUTION_TRACKER.md
+      - docs/meta/docs-program/WAVE3_REVIEW_HANDOFF.md
+      - docs/meta/docs-program/WAVE4_CHARTER.md
+      - docs/meta/docs-program/WAVE4_CLOSEOUT.md
+      - docs/meta/docs-program/WAVE4_EXECUTION_TRACKER.md
+      - docs/meta/docs-program/WAVE4_REVIEWER_CHECKLIST.md
+      - docs/meta/docs-program/WAVE4_REVIEW_FRONT_DOOR.md
+      - docs/meta/docs-program/WAVE4_REVIEW_HANDOFF.md
+      - docs/meta/docs-program/WAVE9_CLOSEOUT.md
+      - docs/meta/docs-program/WAVE9_EXECUTION_TRACKER.md
+      - docs/meta/docs-program/WAVE9_REVIEW_HANDOFF.md
+    authority: historical
+    doc_kind: packet
+    routes_to:
+      - docs/meta/docs-program/POST_REBASE_INTAKE_2026-04-13.md
+      - docs/meta/docs-program/REVIEW_HARDENING_BOARD_2026-04-13.md
+      - docs/meta/docs-program/DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md
+    rationale: Completed packet-family snapshots retained for review history, not live authority.
+  - path_glob: docs/meta/docs-program/WAVE_*_ROOT_RESET_*.md
+    authority: historical
+    doc_kind: reset_packet
+    routes_to:
+      - docs/meta/docs-program/POST_REBASE_INTAKE_2026-04-13.md
+      - docs/meta/docs-program/REVIEW_HARDENING_BOARD_2026-04-13.md
+      - docs/meta/docs-program/DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md
+    rationale: Reset-wave packets are retained as historical evidence only and must not act as current front doors.
+  - path_glob: docs/meta/docs-program/WAVE_ADR_RESET_*.md
+    authority: historical
+    doc_kind: reset_packet
+    routes_to:
+      - docs/meta/docs-program/POST_REBASE_INTAKE_2026-04-13.md
+      - docs/meta/docs-program/REVIEW_HARDENING_BOARD_2026-04-13.md
+      - docs/meta/docs-program/DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md
+    rationale: ADR-reset packet surfaces are retained as historical packet material, not current authority.
+  - paths:
+      - docs/meta/docs-program/WAVE9_FINDINGS_LEDGER.md
+    authority: generated
+    doc_kind: generated_evidence
+    generated_from: tools/knowledge/build_wave9_findings_ledger.py
+    rationale: Historical generated evidence ledger retained for audit context.
+  - paths:
+      - docs/meta/docs-program/MOBILE_OAUTH_PREPARATION.md
+    authority: deprecated_retained
+    doc_kind: deprecated_stub
+    routes_to:
+      - docs/ops/runbooks/MOBILE_OAUTH_PROVISIONING.md
+      - docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
+    rationale: Retained compatibility stub that must redirect to the current mobile OAuth and resumed-lane runbooks.
+  - paths:
+      - docs/meta/docs-program/bead-v2-format.md
+    authority: deprecated_retained
+    doc_kind: deprecated_stub
+    routes_to:
+      - docs/guides/standards/bead-v2-format.md
+    rationale: Retained compatibility stub after moving the Bead format rule into the standards root.

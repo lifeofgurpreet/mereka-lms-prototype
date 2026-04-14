@@ -1,0 +1,102 @@
+version: 1
+owner: Docs Lead
+last_updated: "2026-04-13"
+allowed_statuses:
+  - OPEN
+  - DEFERRED
+  - RESOLVED
+entries:
+  - placeholder_id: owner-gap-android-google-play-guide
+    topic: android and google play release guidance
+    intended_root_family: docs/reference/operations
+    doc_type_needed: release-reference companion
+    current_owner_candidates:
+      - docs/reference/operations/IOS_CI_CD_REFERENCE.md
+      - docs/ops/runbooks/MOBILE_DEPLOYMENT.md
+      - docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
+    status: RESOLVED
+    why_unresolved: A separate Android release-reference doc is not warranted while Android remains deferred. The current owner split is IOS_CI_CD_REFERENCE for resumed iOS workflow truth plus MOBILE_DEPLOYMENT and MOBILE_APPS_RUNBOOK for paused-lane Android and Google Play boundary decisions.
+    blocking_dependencies: []
+    last_audited_commit: a7e00565e
+  - placeholder_id: owner-gap-library-bulk-operations-guide
+    topic: self-serve or semi-structured content-library bulk operations
+    intended_root_family: docs/guides/platform
+    doc_type_needed: author-or-admin guide companion
+    current_owner_candidates:
+      - docs/guides/platform/CONTENT_LIBRARIES_AUTHORING_GUIDE.md
+      - docs/ops/runbooks/CONTENT_LIBRARIES_V2_RUNBOOK.md
+    status: RESOLVED
+    why_unresolved: A separate bulk-operations guide would duplicate or overstate current capability. The author-facing boundary is already owned by CONTENT_LIBRARIES_AUTHORING_GUIDE and the operator boundary by CONTENT_LIBRARIES_V2_RUNBOOK.
+    blocking_dependencies: []
+    last_audited_commit: a7e00565e
+  - placeholder_id: owner-gap-xqueue-grader-authoring-guide
+    topic: external grader authoring
+    intended_root_family: docs/guides/platform
+    doc_type_needed: authoring guide companion
+    current_owner_candidates:
+      - docs/guides/platform/ADVANCED_ASSESSMENT_AUTHORING_GUIDE.md
+      - docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+      - docs/ops/runbooks/ASSESSMENT_OPERATIONS_RUNBOOK.md
+    status: RESOLVED
+    why_unresolved: A dedicated XQueue grader authoring guide would over-claim the current lane. Coordinated authoring already lives in ADVANCED_ASSESSMENT_AUTHORING_GUIDE, with runtime and rollback owned by XQUEUE_HEALTH_RUNBOOK and ASSESSMENT_OPERATIONS_RUNBOOK.
+    blocking_dependencies: []
+    last_audited_commit: a7e00565e
+  - placeholder_id: owner-gap-exhausted-error-budget-runbook
+    topic: exhausted error-budget response
+    intended_root_family: docs/ops/runbooks
+    doc_type_needed: incident-response companion
+    current_owner_candidates:
+      - docs/policies/operations/SLO_POLICY.md
+      - docs/ops/runbooks/POST_DEPLOY_GATE.md
+    status: RESOLVED
+    why_unresolved: A standalone exhausted-budget runbook is not warranted on the rebased branch. The current response boundary belongs in SLO policy plus post-deploy gate control logic.
+    blocking_dependencies: []
+    last_audited_commit: a7e00565e
+  - placeholder_id: owner-gap-deployment-gate-evidence-rollup
+    topic: deployment approval and evidence rollup surface
+    intended_root_family: docs/ops/runbooks
+    doc_type_needed: structured evidence companion
+    current_owner_candidates:
+      - docs/ops/runbooks/POST_DEPLOY_GATE.md
+      - docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md
+    status: RESOLVED
+    why_unresolved: A separate deployment-gate evidence companion is not warranted on the rebased branch. POST_DEPLOY_GATE now owns runtime gate exception logging and evidence minimums, while DEPLOYMENT_RUNBOOK keeps the broader release mechanics.
+    blocking_dependencies: []
+    last_audited_commit: efbc203d9
+  - placeholder_id: owner-gap-proctoring-provider-setup
+    topic: provider-backed proctoring setup
+    intended_root_family: docs/ops/runbooks
+    doc_type_needed: operator setup companion
+    current_owner_candidates:
+      - docs/ops/runbooks/PROCTORING_RUNBOOK.md
+      - docs/ops/runbooks/ASSESSMENT_OPERATIONS_RUNBOOK.md
+    status: DEFERRED
+    why_unresolved: Provider-backed proctoring is still disabled on the rebased branch. A standalone setup companion would over-claim live capability before provider selection and backend enablement exist.
+    blocking_dependencies:
+      - provider contract and backend selection
+    last_audited_commit: a7e00565e
+  - placeholder_id: owner-gap-proctoring-reviewer-staffing
+    topic: reviewer staffing and SLA handling for provider-backed proctoring
+    intended_root_family: docs/ops/runbooks
+    doc_type_needed: staffing-governance companion
+    current_owner_candidates:
+      - docs/ops/runbooks/PROCTORING_RUNBOOK.md
+      - docs/ops/runbooks/ASSESSMENT_OPERATIONS_RUNBOOK.md
+    status: DEFERRED
+    why_unresolved: Reviewer staffing only becomes a durable current-owner surface once a provider-backed proctoring lane is actually live.
+    blocking_dependencies:
+      - provider-backed proctoring enablement
+      - live reviewer SLA policy
+    last_audited_commit: a7e00565e
+  - placeholder_id: owner-gap-unified-migration-front-door
+    topic: unified migration execution front door
+    intended_root_family: docs/ops/runbooks
+    doc_type_needed: execution front-door companion
+    current_owner_candidates:
+      - docs/ops/runbooks/migrations/README.md
+      - docs/reference/migrations/README.md
+      - docs/ops/runbooks/migrations/kajabi/KAJABI_REMIGRATION_RUNBOOK.md
+    status: RESOLVED
+    why_unresolved: The generic migration execution front door already exists at docs/ops/runbooks/migrations/README.md. The reference root now routes execution questions there instead of implying a missing standalone MIGRATION_RUNBOOK companion.
+    blocking_dependencies: []
+    last_audited_commit: efbc203d9
