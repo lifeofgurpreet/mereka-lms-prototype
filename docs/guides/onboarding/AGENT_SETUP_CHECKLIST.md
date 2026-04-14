@@ -49,7 +49,7 @@ tutor config printroot  # Should show tutor_env path
 export TUTOR_ROOT="$(pwd)/tutor_env"
 source .venv/bin/activate
 
-tutor config save \
+./scripts/infra/tutor-config-save.sh \
   --set LMS_HOST=localhost \
   --set CMS_HOST=studio.localhost \
   --set MFE_HOST=apps.localhost \
@@ -59,9 +59,6 @@ tutor config save \
   --set MONGODB_PORT=27017 \
   --set MYSQL_PORT=3306 \
   --set REDIS_PORT=6379
-
-# ALWAYS run patches after config save
-./infrastructure/tutor/apply-patches.sh
 ```
 
 **Verify config:**
@@ -83,9 +80,6 @@ tutor images build mfe
 ```bash
 # First-time launch (runs migrations, creates databases)
 tutor local launch -I --skip-build
-
-# Apply patches again
-./infrastructure/tutor/apply-patches.sh
 
 # Restart services
 tutor local restart
@@ -147,8 +141,7 @@ source infrastructure/tutor/tutor-env.sh
 **Fix:** Reconfigure immediately:
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
-tutor config save --set MYSQL_HOST=mysql --set MONGODB_HOST=mongodb
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/tutor-config-save.sh --set MYSQL_HOST=mysql --set MONGODB_HOST=mongodb
 tutor local restart
 ```
 
@@ -182,4 +175,3 @@ Once setup is complete:
 
 **Setup Time:** ~45-60 minutes (mostly waiting for image builds)  
 **Status:** Ready for development once all checks pass ✅
-

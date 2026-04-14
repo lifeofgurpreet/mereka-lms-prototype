@@ -111,11 +111,10 @@ skillourfuture.academy.mereka.io {
 }
 ```
 
-**Apply Caddy changes**:
+**Refresh rendered Caddy config for local/bootstrap verification**:
 ```bash
-# After modifying Caddyfile patch
-./infrastructure/tutor/apply-patches.sh
-kubectl rollout restart deployment/caddy -n mereka-lms
+# After modifying Caddyfile patch sources
+./scripts/infra/prepare-tutor-build-context.sh --target openedx
 ```
 
 ### OIDC Provider
@@ -167,9 +166,9 @@ Checks:
    }
    ```
 
-3. **Apply patches**:
+3. **Refresh rendered config for local/bootstrap verification**:
    ```bash
-   ./infrastructure/tutor/apply-patches.sh
+   ./scripts/infra/prepare-tutor-build-context.sh --target openedx
    ```
 
 4. **Update K8s Ingress** (`deploy/k8s/overlays/production/ingress-openedx-lms.yaml`):
@@ -229,10 +228,9 @@ Checks:
 2. **Remove from Caddyfile**:
    - Delete domain block
 
-3. **Apply patches and restart**:
+3. **Refresh rendered config for local/bootstrap verification**:
    ```bash
-   ./infrastructure/tutor/apply-patches.sh
-   kubectl rollout restart deployment/lms deployment/caddy -n mereka-lms
+   ./scripts/infra/prepare-tutor-build-context.sh --target openedx
    ```
 
 4. **Remove from K8s Ingress**:
@@ -374,8 +372,7 @@ request_body @profile_image {
 
 **Apply**:
 ```bash
-./infrastructure/tutor/apply-patches.sh
-kubectl rollout restart deployment/caddy -n mereka-lms
+./scripts/infra/prepare-tutor-build-context.sh --target openedx
 ```
 
 ---

@@ -229,7 +229,7 @@ tutor local restart
 
 **Fix**:
 ```bash
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
 tutor local restart
 ```
 
@@ -250,11 +250,11 @@ tutor images build mfe --no-cache
 
 **Webpack out of memory**:
 ```bash
-# Increase memory limit (apply-patches.sh sets this)
+# Increase memory limit (rendered MFE authority sets this)
 grep "NODE_OPTIONS" tutor_env/env/plugins/mfe/build/mfe/Dockerfile
 # Should show: ENV NODE_OPTIONS="--max-old-space-size=6144"
 
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target mfe
 tutor images build mfe
 ```
 
@@ -550,7 +550,7 @@ make qa-smoke
 | `<none>` in endpoints | Service selector mismatch | `./scripts/infra/fix-service-selectors.sh` |
 | `Can't connect to MySQL` | Cloud SQL proxy down | `kubectl rollout restart deployment/cloud-sql-proxy` |
 | `Authentication failed (MongoDB)` | Wrong password in secret | Update `mongodb-secret` |
-| `collectstatic SuspiciousFileOperation` | CSS path outside STATIC_ROOT | Apply patches: `./infrastructure/tutor/apply-patches.sh` |
+| `collectstatic SuspiciousFileOperation` | CSS path outside STATIC_ROOT | Refresh build context: `./scripts/infra/prepare-tutor-build-context.sh --target openedx` |
 | `Module 'loremipsum' not found` | Tutor v21 uv pip issue | Build with `PIP_COMMAND=pip` |
 | `node_modules not found` | MFE build path issue | Check `RUN mv` in Dockerfile |
 | `Heap out of memory` | Webpack memory limit | Check `NODE_OPTIONS` in patches |

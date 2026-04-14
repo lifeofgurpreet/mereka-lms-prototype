@@ -47,7 +47,7 @@ Do not use these losing roots as live operator authority:
 ## What this root is not
 
 Do not use this root for:
-- living architecture rules that belong in `docs/concepts/architecture/**`,
+- stable architecture front doors that belong in `docs/architecture/**`,
 - active proof that belongs in `docs/evidence/**`,
 - active reporting that belongs in `docs/status/**`,
 - or contributor guidance that belongs in `docs/guides/**`.
@@ -55,5 +55,5 @@ Do not use this root for:
 ## Resolver
 
 For the authority contract behind this root, read:
-- [`../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md`](../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md)
-- [`../concepts/architecture/ARCHITECTURE_CHARTER.md`](../concepts/architecture/ARCHITECTURE_CHARTER.md)
+- [`../architecture/README.md`](../architecture/README.md)
+- [`../architecture/PLATFORM_AUTHORITY_MAP.md`](../architecture/PLATFORM_AUTHORITY_MAP.md)

@@ -63,7 +63,7 @@ tutor local status
 ### Safe Config Workflow (RECOMMENDED)
 
 ```bash
-# Use wrapper script (auto-applies patches)
+# Use wrapper script (auto-runs the governed refresh path)
 export TUTOR_ROOT="$(pwd)/tutor_env"
 ./scripts/infra/tutor-config-save.sh --set KEY=value
 tutor local restart
@@ -76,10 +76,10 @@ tutor local restart
 export TUTOR_ROOT="$(pwd)/tutor_env"
 tutor config save --set KEY=value
 
-# 2. CRITICAL: Apply patches (NEVER skip this)
-./infrastructure/tutor/apply-patches.sh
+# 2. CRITICAL: Refresh rendered build context (NEVER skip this)
+./scripts/infra/prepare-tutor-build-context.sh --target all
 
-# 3. Verify patches applied correctly
+# 3. Verify refresh applied correctly
 ./scripts/infra/verify-tutor-config.sh
 
 # 4. Restart services
@@ -104,20 +104,20 @@ tutor config printvalue OPENEDX_COMMON_VERSION
 
 ---
 
-## What apply-patches.sh Fixes
+## What the Governed Refresh Path Realizes
 
-**CRITICAL**: `tutor config save` regenerates templates from scratch. Always run `apply-patches.sh` after.
+**CRITICAL**: `tutor config save` regenerates the rendered Tutor environment from source hooks. Always run `prepare-tutor-build-context.sh --target all` after manual changes, or use `tutor-config-save.sh`.
 
-Patches applied:
+Refresh covers:
 - MySQL 8 authentication plugin (`mysql_native_password`)
-- MFE Node build toolchain (g++, python3)
+- MFE rendered build contract (Node 24 toolchain, local brand package, tracked snapshot parity)
 - Extra domains (biji-biji.com, skillourfuture)
 - Webpack memory limit (`NODE_OPTIONS=--max-old-space-size=6144`)
 - CSRF trusted origins and allowed hosts
 - Custom Mereka footer component
 - Prometheus metrics integration
 - MongoDB Atlas SRV support
-- Build optimizations and retry logic
+- Build optimizations, mirror sync, and retry logic
 
 ---
 
@@ -310,7 +310,7 @@ tutor plugins disable ecommerce
 
 # After plugin changes
 tutor config save
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
 tutor local restart
 ```
 
@@ -390,8 +390,8 @@ tutor local launch -I
 # 2. tutor local do init (migrations, static assets, superuser)
 # 3. tutor local start -d
 
-# Then apply patches (CRITICAL)
-./infrastructure/tutor/apply-patches.sh
+# Then refresh the rendered build context (CRITICAL)
+./scripts/infra/prepare-tutor-build-context.sh --target all
 tutor local restart
 ```
 
@@ -475,7 +475,7 @@ tutor config save --set LANGUAGE_CODE=en
 tutor config save --set CONTACT_EMAIL=admin@example.com
 ```
 
-**REMEMBER**: Always run `./infrastructure/tutor/apply-patches.sh` after `tutor config save`!
+**REMEMBER**: Always run `./scripts/infra/prepare-tutor-build-context.sh --target all` after manual `tutor config save`, or use `./scripts/infra/tutor-config-save.sh` instead.
 
 ---
 
@@ -507,7 +507,7 @@ tutor local restart
 tutor images build openedx -a PIP_COMMAND=pip
 ```
 
-### Forgot to Run apply-patches.sh
+### Forgot to Run the Prepare Path
 
 ```bash
 # Symptoms: MySQL auth fails, MFE build breaks, missing domains
@@ -515,7 +515,7 @@ tutor images build openedx -a PIP_COMMAND=pip
 ./scripts/infra/verify-tutor-config.sh
 
 # Fix:
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
 tutor local restart
 ```
 

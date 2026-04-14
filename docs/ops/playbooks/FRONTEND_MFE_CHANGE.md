@@ -94,7 +94,7 @@ kubectl logs -n mereka-lms-dev -l app.kubernetes.io/name=mfe --tail=20
 - **Never patch the generated MFE Dockerfile** without fixing the generator (`mereka_lms.py`)
 - **Never trust build success as proof of served asset** — a built image ≠ a deployed image
 - **Never edit `env.config.jsx` at Dockerfile level** — use plugin hooks in `mereka_lms.py`
-- **Never skip `apply-patches.sh`** after `tutor config save` (use the wrapper script)
+- **Never skip `prepare-tutor-build-context.sh --target mfe`** after `tutor config save` — it is the governed wrapper that refreshes the rendered MFE build context and runs the bounded patch helper path
 - **Never promote without a release object** — no manual SHA joins in overlays
 
 ## Rollback

@@ -3,6 +3,7 @@ title: Status Reporting Standard
 owner: Platform Team
 status: canonical
 last_reviewed: 2026-03-08
+last_verified: 2026-04-13
 canonical_root: docs/guides/standards
 doc_class: guide
 audience:
@@ -102,5 +103,5 @@ Do not keep active reporting in archive roots. If a status document is retained 
 ## Related authority docs
 
 - [Status Index](../../status/INDEX.md)
-- [Documentation Authority Resolver](../../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md)
+- [Documentation Index](../../README.md)
 - [Docs / Specs Contract](./DOCS_SPECS_CONTRACT.md)

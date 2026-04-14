@@ -247,4 +247,4 @@ Before calling a fix "done":
 - [PROMOTION_REALIZATION_AND_INCIDENT_FLOW.md](../architecture/PROMOTION_REALIZATION_AND_INCIDENT_FLOW.md) — sanctioned promotion path + five truths
 - [PLATFORM_AUTHORITY_MAP.md](../architecture/PLATFORM_AUTHORITY_MAP.md) — layer ownership
 - [AGENT_EXECUTION_WORKFLOW.md](../reference/operations/AGENT_EXECUTION_WORKFLOW.md) — agent working method
-- [gitops-enforcement rules](../../.claude/rules/gitops-enforcement.md) — global GitOps enforcement for all agents
+- [AGENT_EXECUTION_WORKFLOW.md](../reference/operations/AGENT_EXECUTION_WORKFLOW.md) — agent working method and GitOps durability rules

@@ -214,5 +214,5 @@ Once all 19 items have a non-`pending_review` decision:
 ## Related Documents
 
 - [README.md](README.md) — Operating method, data contract, field definitions, change log
-- [STATUS.md](STATUS.md) — Live snapshot of all counts (updated per batch run)
+- [drive-airtable-STATUS.md](../../../status/migrations/drive-airtable-STATUS.md) — Live snapshot of all counts (updated per batch run)
 - `scripts/qa/verify-airtable-readiness.sh` — CI gate script verifying STATUS.md structural integrity

@@ -147,7 +147,7 @@ If an agent encounters a blocker outside its lane:
 ## What Agents Must Not Do
 
 - Commit directly to `main` (see EXECUTION_INVARIANTS.md Invariant 1).
-- Mutate ArgoCD-managed resources directly (see `.claude/rules/gitops-enforcement.md`).
+- Mutate ArgoCD-managed resources directly (see `docs/reference/operations/AGENT_EXECUTION_WORKFLOW.md`).
 - Downgrade package versions to resolve build failures.
 - Push experimental "let's try this" commits to shared branches.
 - Merge a PR when CI is red on the feature branch.

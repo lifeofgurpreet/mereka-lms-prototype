@@ -113,7 +113,7 @@ data visibly rendered.
 | `/learner-dashboard/` | **L4 PROVEN** | Branded "Mereka Academy IN SESSION" header, Courses/Dashboard/Course Catalog nav, "MEREKA UPDATE" banner, "My Courses" heading, "Your Mereka Academy dashboard is ready" card, Learning Cockpit sidebar |
 | `/account/` | **L4 PROVEN** | "Account Settings" heading, 7 sidebar sections (Account Info, Profile Info, Social Media, Notifications, Site Preferences, Linked Accounts, Delete Account), Mereka footer with social links |
 | `/u/testadmin` (Profile) | **🔴 BROKEN** | Completely blank page. Title set to "Learner Profile" but DOM empty. Shared TypeError with other blank MFEs. Separate bug from missing MFE_CONFIG keys (see below). |
-| `/learner-record/` | **🔴 BROKEN (404)** | Caddy returns HTTP 404. Root cause: learner-record MFE not packaged in the mfe container. 11 MFEs built but not learner-record. Webpack 4/Node 18 build chain broken. |
+| `/learner-record/` | **L1 PROVEN** | Current dev image serves the route and authenticated redirect proof exists. This surface is no longer a packaging/Node 18 issue; visual/browser depth beyond L1 still needs fresh proof. |
 | `/discussions/` | **🔴 BROKEN** | "Unexpected error occurred. Try again" error boundary. `TypeError: Cannot read properties of undefined (reading 'path')` in console. |
 | `/communications/` | **🔴 BROKEN** | Blank page, no visible content. |
 | `/learning/` | ⚠️ Partial | MFE shell renders "Mereka Academy learning flow — FOCUS MODE", footer. Body shows "Page not found" — expected: no course context. Needs course-open test for real L3+. |
@@ -161,18 +161,18 @@ JS bundles load HTTP 200 (verified).
 **Blocker:** Cannot read the minified JS bundle to identify the call site without sourcemaps.
 Next step: enable Sentry in dev to capture the full stack trace, or fetch a sourcemap build.
 
-### Root cause 3: learner-record not packaged
+### Root cause 3: learner-record packaging gap (historical, now resolved on dev)
 
-**Evidence:** `/openedx/dist/` in mfe container has 11 MFEs: account, admin-console, authn,
-authoring, communications, discussions, gradebook, learner-dashboard, learning, ora-grading,
-profile. **learner-record is missing from the list.**
+**Current source/runtime evidence:** the tracked MFE Dockerfile builds `learner-record`,
+the MFE Caddyfile now has a `/learner-record` route, and later 2026-04-11 browser/runtime
+proof in this same document records the route as present in the current dev image.
 
-**Source state:** `infrastructure/tutor/plugins/_mereka_lms/__init__.py:27` registers
-learner-record via `MFE_APPS.add()`. The registration is there but the build doesn't produce it.
-Recent Tutor build history (Sessions 2/3) shows a "learner-record build broken" chain that
-was not fully resolved.
+**Interpretation:** the older "not packaged / Node 18 build chain broken" diagnosis is stale.
+The remaining work is to re-prove visual/runtime depth across environments, not to describe
+`learner-record` as absent from the build anymore.
 
-**Impact:** Any /learner-record/ route returns 404 on all tenants all environments.
+**Impact:** current dev proof only reaches L1 authenticated-route confirmation. Deeper
+browser proof still needs to be refreshed where learner-record behavior matters.
 
 ### Confirmed working on dev (L4 proven, real browser)
 
@@ -185,7 +185,6 @@ was not fully resolved.
 ### Confirmed broken on dev (real browser)
 
 - Profile (blank, shared TypeError)
-- Learner-Record (404, not built)
 - Discussions (error boundary, shared TypeError)
 - Communications (blank, shared TypeError)
 - Authoring (404 / router crash without course context)

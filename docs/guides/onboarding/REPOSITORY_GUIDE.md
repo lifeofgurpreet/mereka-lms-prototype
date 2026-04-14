@@ -156,7 +156,7 @@ echo "Deploying to $GCP_PROJECT in $GCP_REGION"
 ```
 infrastructure/
 ├── tutor/                     # Tutor configuration and patches
-│   ├── apply-patches.sh       # CRITICAL: Run after tutor config save
+│   ├── apply-patches.sh       # Low-level helper behind the governed prepare path
 │   ├── patches/               # Jinja2 patch templates
 │   │   ├── lms-env-features   # Feature flags
 │   │   ├── openedx-dockerfile-post-python-requirements  # Build patches
@@ -187,7 +187,7 @@ export TUTOR_ROOT="$(pwd)/tutor_env"
 ./scripts/infra/tutor-config-save.sh --set KEY=value  # Safe wrapper
 # OR manually:
 tutor config save --set KEY=value
-./infrastructure/tutor/apply-patches.sh  # MUST RUN!
+./scripts/infra/prepare-tutor-build-context.sh --target all
 tutor local restart
 ```
 
@@ -240,7 +240,7 @@ docs/
 **Where to add**:
 - New runbook → `docs/ops/runbooks/`
 - Getting started guide → `docs/guides/onboarding/`
-- Architecture doc → `docs/concepts/architecture/`
+- Architecture doc → `docs/architecture/`
 - ADR → `docs/adr/` (numbered sequentially)
 
 **Never add docs at repository root** — they belong in `docs/` (except root allowlist).
@@ -570,7 +570,7 @@ python3 scripts/qa/spec-tools/compute_dependency_graph.py \
 # 1. Determine correct subdirectory
 # Onboarding? → docs/guides/onboarding/
 # Runbook? → docs/ops/runbooks/
-# Architecture? → docs/concepts/architecture/
+# Architecture? → docs/architecture/
 
 # 2. Create the file
 # Use SHOUTY_SNAKE_CASE.md naming
@@ -633,6 +633,6 @@ RESULT: PASS (all checks passed)
 
 - Check `docs/README.md` for documentation index
 - Check `docs/meta/standing-orders/README.md` for active standing orders
-- Check `docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md` for canonical doc roots
+- Check `docs/architecture/README.md` and `docs/architecture/PLATFORM_AUTHORITY_MAP.md` for current architecture roots and authority boundaries
 - Check `AGENTS.md` for repository guidelines
 - Run `./scripts/qa/verify-repo-structure.sh` to verify compliance

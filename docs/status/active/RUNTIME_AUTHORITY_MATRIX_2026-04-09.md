@@ -75,7 +75,7 @@ SiteConfiguration/DB   → generated runtime material via bootstrap replay, not 
 |-------|-----------|--------|----------|
 | **RCB-09** | MFE_CONFIG missing 5 required footer/header keys (SUPPORT_EMAIL, TERMS_OF_SERVICE_URL, PRIVACY_POLICY_URL, ENABLE_ACCESSIBILITY_PAGE, ORDER_HISTORY_URL) platform-wide | **SOURCE FIX MERGED-PENDING (PR #1536)** | Dev live-patched, API returns all 5 keys on 3 tenants × 2 hosts. Next image rebuild consumes source fix. |
 | **RCB-10** | Shared `TypeError: Cannot read properties of undefined (reading 'path')` blanks Profile, Discussions, Communications | **DIAGNOSED, NOT FIXED** | Fires during MFE shell bootstrap. Bundles load 200, config API returns valid data. Need sourcemaps/Sentry to identify call site. Profile still blank even after RCB-09 live fix. |
-| **RCB-11** | learner-record MFE registered in Tutor plugin but not packaged in mfe container | **DIAGNOSED, NOT FIXED** | `/openedx/dist/` has 11 MFEs: account, admin-console, authn, authoring, communications, discussions, gradebook, learner-dashboard, learning, ora-grading, profile. learner-record absent. Webpack 4/Node 18 build chain broken from Session 2/3. |
+| **RCB-11** | learner-record packaging/route gap | **RESOLVED ON CURRENT DEV IMAGE** | Current source includes learner-record in the tracked MFE Dockerfile and the MFE Caddyfile route. Later 2026-04-11 proof in this document records `/learner-record/` returning 200 with authenticated-route proof on dev. |
 
 ### WS8 status unchanged: 7/7 PASS
 
@@ -89,7 +89,7 @@ SiteConfiguration/DB   → generated runtime material via bootstrap replay, not 
 | learner-dashboard | L3 (HTTP 200 claim) | **L4 PROVEN** ("Mereka Academy IN SESSION", My Courses, Learning Cockpit sidebar visually rendered) |
 | account | L3 (HTTP 200 claim) | **L4 PROVEN** (Account Settings heading + 7 sidebar sections + footer) |
 | profile | L3 (title claim) | **🔴 BROKEN** (completely blank, RCB-10 TypeError) |
-| learner-record | not listed | **🔴 BROKEN 404** (RCB-11 not packaged) |
+| learner-record | listed in current build/route contract | **⚠️ L1 proven on dev; deeper runtime proof still pending by env** |
 | discussions | L3 (HTTP 200 claim) | **🔴 BROKEN** (error boundary, RCB-10 TypeError) |
 | communications | not listed | **🔴 BROKEN** (blank, RCB-10 TypeError) |
 | gradebook | L3 (HTTP 200 claim) | **⚠️ partial** (shell+footer render, body needs course context) |

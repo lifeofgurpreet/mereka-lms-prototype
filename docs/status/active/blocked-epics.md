@@ -44,11 +44,11 @@
 | Item | Detail |
 |------|--------|
 | Blocker | No Apple Developer account or Google Play Developer account registered |
-| Platform prep | OAuth2 app, deep-link URIs, branding endpoints documented (`docs/meta/docs-program/MOBILE_OAUTH_PREPARATION.md`) |
-| OAuth2 app | NOT yet created in LMS — creation command ready in MOBILE_OAUTH_PREPARATION.md |
+| Platform prep | OAuth2 app, deep-link URIs, branding endpoints documented (`docs/ops/runbooks/MOBILE_OAUTH_PROVISIONING.md`) |
+| OAuth2 app | NOT yet created in LMS — creation command ready in `docs/ops/runbooks/MOBILE_OAUTH_PROVISIONING.md` |
 | LMS branding | Confirmed correct for all 3 tenants |
 | Estimated App Store review | 1–3 business days (iOS), 2–7 days (Android) |
-| **Next actions (in order)** | 1. Create mobile OAuth2 app (command in MOBILE_OAUTH_PREPARATION.md) |
+| **Next actions (in order)** | 1. Create mobile OAuth2 app (command in `docs/ops/runbooks/MOBILE_OAUTH_PROVISIONING.md`) |
 | | 2. Register Apple Developer Program account ($99/yr) |
 | | 3. Register Google Play Developer account ($25 one-time) |
 | | 4. Configure Firebase project for FCM push notifications |
@@ -91,6 +91,6 @@
 ## References
 
 - `docs/status/readiness/PROCTORING_IMPLEMENTATION_READINESS.md`
-- `docs/meta/docs-program/MOBILE_OAUTH_PREPARATION.md`
+- `docs/ops/runbooks/MOBILE_OAUTH_PROVISIONING.md`
 - `docs/archive/evidence/operations/evidence/1bdm1-mux-creds-mapping-cleanup.md`
 - `deploy/k8s/base/secrets/external-secrets.yaml` — ExternalSecret mappings

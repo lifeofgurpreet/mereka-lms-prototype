@@ -79,9 +79,9 @@ Already GREEN. Maintain code coverage and prevent regressions.
 
 1. Run `./scripts/tenants/provision-tenant.sh --from-env scripts/tenants/mereka-tenant.env` (production)
 2. Verify tenant provisioning: `./scripts/qa/verify-tenant-isolation.sh`
-3. Set `ENABLE_MULTI_TENANT_BRANDING=True` in Tutor config
-4. Apply patches and restart: `./infrastructure/tutor/apply-patches.sh && tutor k8s restart`
-5. Verify branding gates pass: `./scripts/branding/run-branding-gates.sh prod`
+3. Set `ENABLE_MULTI_TENANT_BRANDING=True` through `./scripts/infra/tutor-config-save.sh --set ENABLE_MULTI_TENANT_BRANDING=True`
+4. If a manual post-render refresh is needed before restart, run `./scripts/infra/prepare-tutor-build-context.sh --target all`
+5. Restart Tutor and verify branding gates pass: `tutor k8s restart && ./scripts/branding/run-branding-gates.sh prod`
 
 **Estimated effort**: 2-4 hours (provisioning + verification + rollout)
 
@@ -236,7 +236,7 @@ Already GREEN. Add any new verifiers for tenant-specific branding contracts as n
 
 - **Contract**: `docs/guides/branding/TENANT_BRANDING_CONTRACT.md`
 - **Provisioning**: `docs/ops/runbooks/TENANT_PROVISIONING.md`
-- **Architecture**: `docs/concepts/architecture/multi-tenancy-overview.md`
+- **Tenant standard**: `docs/concepts/architecture/TENANT_LIFECYCLE.md`
 - **Spec**: `specs/multi-tenancy-architecture_spec.md`
 - **Branding Model**: `docs/guides/branding/BRANDING_OPERATING_MODEL.md`
 - **Verifier**: `scripts/qa/verify-tenant-branding-contract.sh`

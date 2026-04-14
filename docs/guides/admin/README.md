@@ -23,7 +23,7 @@ This directory contains canonical administrator guidance for operating and valid
 ## Do not use this directory for
 
 - low-level operator runbooks, which belong in `docs/ops/**`
-- living architecture policy, which belongs in `docs/concepts/architecture/**`
+- stable architecture front doors, which belong in `docs/architecture/**`
 - docs-program plans, scorecards, or closure notes that belong in `docs/meta/**`, `docs/status/**`, or archive surfaces
 
 ## Core admin guides
@@ -40,7 +40,7 @@ This directory contains canonical administrator guidance for operating and valid
 
 If the reader needs:
 - a low-level runbook, send them to `docs/ops/**`
-- a living architecture rule, send them to `docs/concepts/architecture/**`
+- stable architecture front doors, send them to `docs/architecture/**` first
 - active proof, send them to `docs/evidence/**`
 - active status, send them to `docs/status/**`
 - docs-program planning or remediation tracking, send them to `docs/meta/docs-program/**`

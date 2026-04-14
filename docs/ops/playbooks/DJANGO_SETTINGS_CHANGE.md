@@ -118,7 +118,7 @@ kubectl get pods -n mereka-lms-dev -l app.kubernetes.io/name=lms
 - **Never edit rendered ConfigMap in-cluster** (`kubectl edit configmap`) — it will be overwritten by ArgoCD
 - **Never edit `tutor_env/` generated files** — they are overwritten on next `tutor config save`
 - **Never confuse local Docker settings with K8s settings** — local uses `tutor_env/`, K8s uses ConfigMaps from overlays
-- **Never skip `apply-patches.sh`** — MySQL auth, CSRF origins, and other critical settings depend on it
+- **Never skip the governed Tutor refresh path** — use `tutor-config-save.sh` for config changes or `prepare-tutor-build-context.sh --target ...` for manual post-render refresh
 - **Never add secrets as Django settings** — use environment variables via ExternalSecrets
 - **Never assume a merged PR means the setting is live** — verify ConfigMap + pod restart + runtime check
 

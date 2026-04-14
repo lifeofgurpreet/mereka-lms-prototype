@@ -7,6 +7,7 @@ Use this root for factual migration reference: source-system inventories, API an
 
 | If you need to... | Read this first | Then go deeper in |
 |---|---|---|
+| Run a migration safely rather than study source reference | [`../../ops/runbooks/migrations/README.md`](../../ops/runbooks/migrations/README.md) | The migration-family runbook there |
 | Work on the Drive/Airtable pipeline | [`drive-airtable/README.md`](drive-airtable/README.md) | [`drive-airtable/REVIEW_QUEUE.md`](drive-airtable/REVIEW_QUEUE.md) |
 | Work on Kajabi migration inputs | [`kajabi/README.md`](kajabi/README.md) | [`kajabi/OPS_KAJABI_README.md`](kajabi/OPS_KAJABI_README.md) |
 | Work on MCT migration reference | [`mct/README.md`](mct/README.md) | [`mct/DOCUMENTATION_INDEX.md`](mct/DOCUMENTATION_INDEX.md) |
@@ -31,7 +32,7 @@ Use this root for factual migration reference: source-system inventories, API an
 - [`mct/API_ENDPOINTS_TEMPLATE.md`](mct/API_ENDPOINTS_TEMPLATE.md) for endpoint reference templates
 - [`mct/DOCUMENTATION_INDEX.md`](mct/DOCUMENTATION_INDEX.md) for MCT documentation navigation
 - [`mct/PROGRAMS_QUICK_REFERENCE.md`](mct/PROGRAMS_QUICK_REFERENCE.md) for program mappings
-- [`mct/QUICK_REFERENCE_USER_IMPORT.md`](mct/QUICK_REFERENCE_USER_IMPORT.md) for user import reference
+- [`../../archive/reports/mct/MCT_USER_IMPORT_COMPLETE.md`](../../archive/reports/mct/MCT_USER_IMPORT_COMPLETE.md) for historical user import results
 
 ## Do not use this directory for
 
@@ -42,5 +43,5 @@ Use this root for factual migration reference: source-system inventories, API an
 ## How To Use This Root Well
 
 1. Start here for source truth and lookup material.
-2. If you need a step-by-step migration procedure, move to [`../../ops/runbooks/README.md`](../../ops/runbooks/README.md).
+2. If you need a step-by-step migration procedure, move to [`../../ops/runbooks/migrations/README.md`](../../ops/runbooks/migrations/README.md).
 3. If you need to know what is currently blocked, ready, or finished, move to [`../../status/migrations/README.md`](../../status/migrations/README.md).

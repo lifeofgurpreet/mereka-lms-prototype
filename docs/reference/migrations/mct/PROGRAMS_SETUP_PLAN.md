@@ -63,13 +63,13 @@ This document outlines the complete plan for migrating 13 MCT Learning Pathways 
 # Enable Discovery service
 tutor plugins enable discovery
 tutor config save
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
 tutor k8s launch
 
 # Enable Credentials service (for certificates)
 tutor plugins enable credentials
 tutor config save
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
 tutor k8s launch
 
 # Verify services are running
@@ -1090,7 +1090,7 @@ import requests
 from pathlib import Path
 
 # Load mapping
-with open('/home/dev/code/mereka-lms/var/migrations/mct/programs_mapping.json') as f:
+with open('var/migrations/mct/programs_mapping.json') as f:
     mapping = json.load(f)
 
 # Configuration
@@ -1299,7 +1299,7 @@ tutor plugins list
 # Enable if not active
 tutor plugins enable discovery
 tutor config save
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
 tutor k8s launch
 ```
 

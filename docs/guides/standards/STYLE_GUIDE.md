@@ -17,20 +17,20 @@ tags:
 
 # Documentation Style Guide
 
-Use this checklist when writing or editing docs in this repository. This guide is for style, naming, and practical writing quality. Use the documentation authority resolver for root ownership.
+Use this checklist when writing or editing docs in this repository. This guide is for style, naming, and practical writing quality. Use the architecture root plus standards docs for root ownership.
 
 ## 1. Choose the right root
 
 - `docs/guides/**` for human workflows and onboarding
 - `docs/ops/**` for operator procedures and quick references
-- `docs/concepts/architecture/**` for living architecture narratives and standards
+- `docs/architecture/**` for stable architecture narratives and standards
 - `docs/reference/**` for factual reference
 - `docs/policies/**` for boundary rules and policy
 - `docs/evidence/**` for active proof
 - `docs/status/**` for active reporting
 - `docs/adr/**` for decisions and proposals
 
-Do not create new canonical docs under retired or transitional roots such as `docs/operations/README.md`, `docs/runbooks/README.md`, or `docs/architecture/README.md`.
+Do not create new canonical docs under retired or transitional roots such as `docs/operations/README.md`, `docs/runbooks/README.md`, or `docs/onboarding/README.md`.
 
 ## 2. Metadata block
 

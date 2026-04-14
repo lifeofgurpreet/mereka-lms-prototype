@@ -44,8 +44,10 @@ tutor local start -d
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
 source .venv/bin/activate
-tutor config save --set KEY=value
-./infrastructure/tutor/apply-patches.sh  # CRITICAL: Always run this
+./scripts/infra/tutor-config-save.sh --set KEY=value
+# Manual advanced path:
+# tutor config save --set KEY=value
+# ./scripts/infra/prepare-tutor-build-context.sh --target all
 tutor local restart <affected-services>
 ```
 
@@ -133,8 +135,7 @@ tutor local stop
 **Local (for testing):**
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
-tutor config save --set KEY=value
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/tutor-config-save.sh --set KEY=value
 tutor local restart
 ```
 
@@ -226,7 +227,7 @@ tutor local launch -I --skip-build
 # Recreate from example
 cp infrastructure/tutor/config.example.yml tutor_env/config.yml
 tutor config save  # Reconfigure
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
 ```
 
 ## 📚 Documentation
