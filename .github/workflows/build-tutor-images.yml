@@ -1438,10 +1438,10 @@ jobs:
     name: Generate Release Bundle
     runs-on: mereka-k8s-runners
     timeout-minutes: 15
-    needs: [build-openedx, build-mfe, scan-openedx-image, scan-mfe-image, slsa-provenance]
+    needs: [build-openedx, build-mfe, slsa-provenance]
     # Keep release-bundle generation available for diagnostics even if SLSA failed.
-    # Automatic GitOps mutation is gated separately below so red builds cannot
-    # mutate infra state while still leaving evidence behind for debugging.
+    # Automatic GitOps mutation is gated separately below on the post-push scan
+    # lanes so red/slow scan tails cannot delay release evidence generation.
     # Accept 'skipped' for either image: partial builds (e.g. only OpenEdX changed)
     # should still generate a release bundle using the existing other image's digest.
     # Manual proof runs may intentionally leave target_environment at the
@@ -1846,15 +1846,117 @@ jobs:
             var/ci/release-bundle.pem
           retention-days: 90
 
-      - name: Enforce successful provenance before automatic dev promotion
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.slsa-provenance.result != 'success' }}
+  dispatch-dev-promotion:
+    name: Dispatch Dev Promotion
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 15
+    needs: [release-bundle, scan-openedx-image, scan-mfe-image, slsa-provenance]
+    if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.release-bundle.result == 'success' && (needs.scan-openedx-image.result == 'success' || needs.scan-openedx-image.result == 'skipped') && (needs.scan-mfe-image.result == 'success' || needs.scan-mfe-image.result == 'skipped') && needs.slsa-provenance.result == 'success' }}
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Download release bundle artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: release-bundle
+          path: var/ci
+
+      - name: Generate GitHub App token for cross-repo dispatch
+        id: app-token
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349  # v2
+        with:
+          app-id: ${{ secrets.BBI_ARC_GITHUB_APP_ID }}
+          private-key: ${{ secrets.BBI_ARC_GITHUB_APP_PRIVATE_KEY }}
+          owner: Biji-Biji-Initiative
+          repositories: bbi-infrastructure,platform-control-plane
+
+      - name: Resolve control-plane contract ref
+        id: resolve_control_plane_contract_ref
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          echo "Automatic dev promotion is blocked because SLSA provenance did not succeed." >&2
-          echo "slsa-provenance result: ${{ needs.slsa-provenance.result }}" >&2
-          exit 1
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import os
+          import urllib.request
+          from pathlib import Path
+
+          token = os.environ["GH_TOKEN"]
+          req = urllib.request.Request(
+              "https://api.github.com/repos/Biji-Biji-Initiative/platform-control-plane/commits/main",
+              headers={
+                  "Authorization": f"Bearer {token}",
+                  "Accept": "application/vnd.github+json",
+                  "X-GitHub-Api-Version": "2022-11-28",
+              },
+          )
+          with urllib.request.urlopen(req) as resp:
+              payload = json.loads(resp.read().decode("utf-8"))
+          sha = str(payload["sha"]).strip()
+          out = Path(os.environ["GITHUB_OUTPUT"])
+          out.write_text(
+              f"contract_sha={sha}\n"
+              f"contract_ref=Biji-Biji-Initiative/platform-control-plane@{sha}\n",
+              encoding="utf-8",
+          )
+          print(f"Resolved PCP contract ref: Biji-Biji-Initiative/platform-control-plane@{sha}")
+          PY
+
+      - name: Fetch control-plane release contracts
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          PCP_CONTRACT_SHA: ${{ steps.resolve_control_plane_contract_ref.outputs.contract_sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p var/ci/platform-control-plane/contracts
+          python3 - <<'PY'
+          import base64
+          import json
+          import os
+          import urllib.parse
+          import urllib.request
+          from pathlib import Path
+
+          token = os.environ["GH_TOKEN"]
+          ref = os.environ["PCP_CONTRACT_SHA"]
+          root = Path("var/ci/platform-control-plane/contracts")
+          files = [
+              "contracts/release-contracts.yaml",
+              "contracts/promotion-dispatch-envelope-schema.yaml",
+              "contracts/release-object-projection-schema.yaml",
+          ]
+          headers = {
+              "Authorization": f"Bearer {token}",
+              "Accept": "application/vnd.github+json",
+              "X-GitHub-Api-Version": "2022-11-28",
+          }
+          for relpath in files:
+              encoded = urllib.parse.quote(relpath, safe="/")
+              url = (
+                  "https://api.github.com/repos/Biji-Biji-Initiative/platform-control-plane/contents/"
+                  f"{encoded}?ref={ref}"
+              )
+              req = urllib.request.Request(url, headers=headers)
+              with urllib.request.urlopen(req) as resp:
+                  payload = json.loads(resp.read().decode("utf-8"))
+              content = base64.b64decode(payload["content"])
+              dest = root / Path(relpath).name
+              dest.write_bytes(content)
+          print(f"Fetched PCP contracts at {ref} into {root}")
+          PY
+
+      - name: Re-verify release object after artifact download
+        env:
+          PLATFORM_CONTROL_PLANE_ROOT: var/ci/platform-control-plane
+        run: |
+          set -euo pipefail
+          ./scripts/qa/verify-release-object.sh var/ci/release-object.json
 
       - name: Dispatch dev promotion to infra repo
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.slsa-provenance.result == 'success' }}
         env:
           APP_TOKEN: ${{ steps.app-token.outputs.token }}
           CONTRACT_REF: ${{ steps.resolve_control_plane_contract_ref.outputs.contract_ref }}
@@ -1862,7 +1964,7 @@ jobs:
           GITHUB_RUN_ID_VAL: ${{ github.run_id }}
           GITHUB_REPOSITORY_VAL: ${{ github.repository }}
           GITHUB_SERVER_URL_VAL: ${{ github.server_url }}
-          BUNDLE_ID: ${{ steps.bundle.outputs.bundle_id }}
+          BUNDLE_ID: ${{ needs.release-bundle.outputs.bundle_id }}
         run: |
           set -euo pipefail
           # Build the release_evidence envelope that promote-dev-image.yml expects.

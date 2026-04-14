@@ -11,7 +11,8 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 REPO_ROOT="${REPO_ROOT_OVERRIDE:-$REPO_ROOT}"
 BUILD_WF="${BUILD_WF_OVERRIDE:-$REPO_ROOT/.github/workflows/build-tutor-images.yml}"
-RELEASE_BUNDLE_BLOCK="$(sed -n '/^  release-bundle:/,/^  update-gitops:/p' "$BUILD_WF")"
+RELEASE_BUNDLE_BLOCK="$(sed -n '/^  release-bundle:/,/^  dispatch-dev-promotion:/p' "$BUILD_WF")"
+DISPATCH_DEV_PROMOTION_BLOCK="$(sed -n '/^  dispatch-dev-promotion:/,/^  update-gitops:/p' "$BUILD_WF")"
 UPDATE_GITOPS_BLOCK="$(sed -n '/^  update-gitops:/,$p' "$BUILD_WF")"
 OPENEDX_CACHE_HEALTH_BLOCK="$(sed -n '/Verify OpenEdX build cache health/,/Generate image metadata/p' "$BUILD_WF")"
 RESOLVE_SCOPE_BLOCK="$(sed -n '/^  resolve-build-scope:/,/^  lint:/p' "$BUILD_WF")"
@@ -571,10 +572,16 @@ else
   pass "MFE build no longer depends on a local daemon image"
 fi
 
-if [[ "$RELEASE_BUNDLE_BLOCK" == *"scan-openedx-image"* && "$RELEASE_BUNDLE_BLOCK" == *"scan-mfe-image"* ]]; then
-  pass "release bundle waits for post-push scan artifact jobs"
+if [[ "$RELEASE_BUNDLE_BLOCK" == *"needs: [build-openedx, build-mfe, slsa-provenance]"* ]]; then
+  pass "release bundle waits only for build digests and provenance"
 else
-  fail "release bundle missing post-push scan dependencies"
+  fail "release bundle missing build/provenance-only dependency split"
+fi
+
+if [[ "$DISPATCH_DEV_PROMOTION_BLOCK" == *"needs: [release-bundle, scan-openedx-image, scan-mfe-image, slsa-provenance]"* ]]; then
+  pass "dispatch-dev-promotion waits for post-push scan gates plus release bundle"
+else
+  fail "dispatch-dev-promotion missing post-push scan gating"
 fi
 
 if [[ "$RELEASE_BUNDLE_BLOCK" == *'scripts/release/generate_release_object.py'* ]]; then

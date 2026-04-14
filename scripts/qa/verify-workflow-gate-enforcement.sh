@@ -10,7 +10,8 @@ set -euo pipefail
 #   1. Live-asset gate in smoke workflow uses exit 1 on failure
 #   2. Release-object projection consumer validation in release workflow uses exit 1
 #   3. Promotion job requires create-github-release via needs:
-#   4. Release-bundle job requires all build+scan jobs via needs:
+#   4. Release-bundle job requires build+provenance truth; dispatch-dev-promotion
+#      job requires release evidence plus post-push scan gates
 #   5. continue-on-error steps are explicitly classified with comments
 #   6. Process invariant jobs are listed as required branch protection checks
 
@@ -88,7 +89,7 @@ else
   fail "promotion does NOT require production environment"
 fi
 
-# ── Gate 4: Release bundle requires all build jobs ──────────────────
+# ── Gate 4: Release evidence and promotion gating (build-tutor-images.yml) ──
 echo "--- Gate 4: Release bundle gating (build-tutor-images.yml) ---"
 
 BUILD="$WORKFLOWS/build-tutor-images.yml"
@@ -96,11 +97,26 @@ if [[ ! -f "$BUILD" ]]; then
   fail "build-tutor-images.yml not found"
 else
   BUNDLE_NEEDS=$(grep -A5 '^\s*release-bundle:' "$BUILD" | grep 'needs:' || true)
-  for dep in build-openedx build-mfe scan-openedx-image scan-mfe-image; do
+  for dep in build-openedx build-mfe slsa-provenance; do
     if echo "$BUNDLE_NEEDS" | grep -q "$dep"; then
       pass "release-bundle depends on $dep"
     else
       fail "release-bundle does NOT depend on $dep"
+    fi
+  done
+
+  if echo "$BUNDLE_NEEDS" | grep -q 'scan-openedx-image\|scan-mfe-image'; then
+    fail "release-bundle still waits on post-push scan jobs"
+  else
+    pass "release-bundle no longer waits on post-push scan jobs"
+  fi
+
+  DISPATCH_NEEDS=$(grep -A5 '^\s*dispatch-dev-promotion:' "$BUILD" | grep 'needs:' || true)
+  for dep in release-bundle scan-openedx-image scan-mfe-image slsa-provenance; do
+    if echo "$DISPATCH_NEEDS" | grep -q "$dep"; then
+      pass "dispatch-dev-promotion depends on $dep"
+    else
+      fail "dispatch-dev-promotion does NOT depend on $dep"
     fi
   done
 fi

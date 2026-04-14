@@ -399,7 +399,7 @@ jobs:
       - run: echo provenance
 
   release-bundle:
-    needs: [build-openedx, build-mfe, scan-openedx-image, scan-mfe-image, slsa-provenance]
+    needs: [build-openedx, build-mfe, slsa-provenance]
     if: ${{ always() && (github.event_name != 'workflow_dispatch' || (inputs.target_environment != 'select-environment' && inputs.build_profile == 'proof')) }}
     steps:
       - run: ./scripts/infra/generate-release-bundle.sh --output var/ci/release-bundle.json --repo Biji-Biji-Initiative/mereka-lms --commit-sha aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa --workflow .github/workflows/build-tutor-images.yml --run-id 1 --run-attempt 1 --target-environment dev --openedx-image ghcr.io/biji-biji-initiative/mereka-lms/openedx --openedx-digest sha256:1111111111111111111111111111111111111111111111111111111111111111 --mfe-image ghcr.io/biji-biji-initiative/mereka-lms/mfe --mfe-digest sha256:2222222222222222222222222222222222222222222222222222222222222222
@@ -425,6 +425,7 @@ jobs:
           PY
 
   dispatch-dev-promotion:
+    needs: [release-bundle, scan-openedx-image, scan-mfe-image, slsa-provenance]
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     steps:
       - run: |
@@ -567,8 +568,8 @@ import sys
 p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
 text = p.read_text()
 text = text.replace(
-    "  release-bundle:\n    needs: [build-openedx, build-mfe, scan-openedx-image, scan-mfe-image, slsa-provenance]\n    if: ${{ always() && (github.event_name != 'workflow_dispatch' || (inputs.target_environment != 'select-environment' && inputs.build_profile == 'proof')) }}\n",
-    "  release-bundle:\n    needs: [build-openedx, build-mfe, scan-openedx-image, scan-mfe-image, slsa-provenance]\n    steps:\n      - run: |\n          if [[ \"${{ github.event_name }}\" == \"workflow_dispatch\" ]]; then\n            TARGET_ENV=\"${{ inputs.target_environment }}\"\n            if [[ \"$TARGET_ENV\" == \"select-environment\" ]]; then\n              echo \"target_environment must be explicitly selected before generating a release bundle.\" >&2\n              exit 1\n            fi\n          fi\n",
+    "  release-bundle:\n    needs: [build-openedx, build-mfe, slsa-provenance]\n    if: ${{ always() && (github.event_name != 'workflow_dispatch' || (inputs.target_environment != 'select-environment' && inputs.build_profile == 'proof')) }}\n",
+    "  release-bundle:\n    needs: [build-openedx, build-mfe, slsa-provenance]\n    steps:\n      - run: |\n          if [[ \"${{ github.event_name }}\" == \"workflow_dispatch\" ]]; then\n            TARGET_ENV=\"${{ inputs.target_environment }}\"\n            if [[ \"$TARGET_ENV\" == \"select-environment\" ]]; then\n              echo \"target_environment must be explicitly selected before generating a release bundle.\" >&2\n              exit 1\n            fi\n          fi\n",
 )
 p.write_text(text)
 PY
@@ -1079,12 +1080,12 @@ import sys
 p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
 text = p.read_text()
 text = text.replace(
-    "  release-bundle:\n    needs: [build-openedx, build-mfe, scan-openedx-image, scan-mfe-image, slsa-provenance]\n",
-    "  release-bundle:\n    needs: [build-openedx, build-mfe, slsa-provenance]\n",
+    "  dispatch-dev-promotion:\n    needs: [release-bundle, scan-openedx-image, scan-mfe-image, slsa-provenance]\n",
+    "  dispatch-dev-promotion:\n    needs: [release-bundle, slsa-provenance]\n",
 )
 p.write_text(text)
 PY
-run_expect_fail "release bundle must wait for post-push scan jobs"
+run_expect_fail "dispatch-dev-promotion must wait for post-push scan jobs"
 
 scope_output="$(printf 'infrastructure/tutor/themes/mereka/mfe/mereka.scss\n' | bash "$ROOT_DIR/scripts/infra/resolve-build-scope.sh")"
 [[ "$scope_output" == *'Scope label: `mfe-only`'* ]] || { echo "FAIL classifier should treat MFE theme changes as mfe-only" >&2; exit 1; }
