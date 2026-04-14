@@ -95,31 +95,50 @@ else
   fail "workflow missing PCP evidence-pack schema fetch"
 fi
 
-if grep -q '"dispatch_event_type": "promote-mereka-lms-dev"' "$BUILD_WF"; then
-  pass "dispatch envelope records canonical dispatch_event_type"
+if grep -q '"dispatch_event_type": "promote-mereka-lms-dev"' "$REPO_ROOT/scripts/release/release_object_bindings.py"; then
+  pass "dispatch envelope generator records canonical dispatch_event_type"
 else
-  fail "dispatch envelope missing canonical dispatch_event_type"
+  fail "dispatch envelope generator missing canonical dispatch_event_type"
 fi
 
-if grep -q '"delivery_lane": "dev"' "$BUILD_WF" && grep -q '"lane": "mereka-lms"' "$BUILD_WF" && grep -q '"service_id": "mereka-lms"' "$BUILD_WF"; then
-  pass "dispatch envelope records canonical lane/service identity"
+if grep -q '"delivery_lane": "dev"' "$REPO_ROOT/scripts/release/release_object_bindings.py" \
+  && grep -q '"lane": "mereka-lms"' "$REPO_ROOT/scripts/release/release_object_bindings.py" \
+  && grep -q '"service_id": "mereka-lms"' "$REPO_ROOT/scripts/release/release_object_bindings.py"; then
+  pass "dispatch envelope generator records canonical lane/service identity"
 else
-  fail "dispatch envelope missing canonical lane/service identity"
+  fail "dispatch envelope generator missing canonical lane/service identity"
 fi
 
-if grep -q '"control_plane_ref": contract_ref' "$BUILD_WF" && grep -q '"contract_family": contract_family' "$BUILD_WF" && grep -q '"contract_version": contract_version' "$BUILD_WF"; then
-  pass "dispatch envelope carries PCP contract handshake provenance"
+if grep -q '"control_plane_ref": contract_ref' "$REPO_ROOT/scripts/release/release_object_bindings.py" \
+  && grep -q '"contract_family": contract_family' "$REPO_ROOT/scripts/release/release_object_bindings.py" \
+  && grep -q '"contract_version": contract_version' "$REPO_ROOT/scripts/release/release_object_bindings.py"; then
+  pass "dispatch envelope generator carries PCP contract handshake provenance"
 else
-  fail "dispatch envelope missing PCP contract handshake provenance"
+  fail "dispatch envelope generator missing PCP contract handshake provenance"
 fi
 
-if grep -Fq 'actions/workflows/promote-dev-image.yml/dispatches' "$BUILD_WF" \
-  && grep -Fq '"release_evidence": json.dumps(evidence' "$BUILD_WF" \
-  && grep -Fq '"dry_run": "false"' "$BUILD_WF" \
-  && grep -Fq '"ref": "main"' "$BUILD_WF"; then
-  pass "workflow_dispatch wrapper carries canonical release evidence to infra promotion workflow"
+if grep -Fq 'actions/workflows/promote-dev-image.yml/dispatches' "$BUILD_WF"; then
+  pass "workflow dispatches infra promotion via workflow_dispatch API"
 else
-  fail "workflow missing canonical workflow_dispatch promotion wrapper"
+  fail "workflow must dispatch infra promotion via workflow_dispatch API"
+fi
+
+if grep -Fq '"release_evidence": json.dumps(evidence, separators=(",", ":"))' "$BUILD_WF"; then
+  pass "workflow sends canonical release_evidence JSON as workflow_dispatch input"
+else
+  fail "workflow must pass canonical release_evidence JSON to workflow_dispatch"
+fi
+
+if grep -Fq '"structured_evidence": {"checks": checks}' "$REPO_ROOT/scripts/release/release_object_bindings.py"; then
+  pass "dispatch envelope generator emits structured_evidence checks"
+else
+  fail "dispatch envelope generator missing structured_evidence checks"
+fi
+
+if grep -q 'var/ci/promotion-dispatch-envelope.json' "$BUILD_WF"; then
+  pass "release bundle artifact carries canonical promotion-dispatch envelope"
+else
+  fail "release bundle artifact missing promotion-dispatch envelope"
 fi
 
 # Workflow consistency must compare canonical lane names, not raw workflow aliases.

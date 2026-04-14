@@ -75,6 +75,19 @@ runs:
       shell: bash
       run: echo "runner_label=mereka-k8s-heavy-builders" >> "$GITHUB_OUTPUT"
 EOF
+mkdir -p "$tmpdir/scripts/release"
+cat >"$tmpdir/.github/actions/select-build-lane/action.yml" <<'EOF'
+name: select-build-lane
+outputs:
+  runner_label:
+    value: ${{ steps.select.outputs.runner_label }}
+runs:
+  using: composite
+  steps:
+    - id: select
+      shell: bash
+      run: echo "runner_label=mereka-k8s-heavy-builders" >> "$GITHUB_OUTPUT"
+EOF
 cat >"$tmpdir/scripts/infra/resolve-build-scope.sh" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -414,6 +427,7 @@ jobs:
             var/ci/release-object.json
             var/ci/build-provenance.json
             var/ci/release-gate-envelope.json
+            var/ci/promotion-dispatch-envelope.json
             var/ci/release-bundle.sig
             var/ci/release-bundle.pem
       - run: |
@@ -433,6 +447,7 @@ jobs:
     steps:
       - run: |
           python3 - <<'PY'
+          import json
           bundle_id = "rb-aaaaaaaa-20260410T120000Z"
           contract_family = "promotion_dispatch_envelope_schema"
           contract_version = "1.0"
@@ -445,6 +460,19 @@ jobs:
               "dispatch_event_type": "promote-mereka-lms-dev",
               "created_at": "2026-04-10T12:00:00Z",
               "validation_evidence": "ci-build-pass:1",
+              "structured_evidence": {
+                  "checks": [
+                      {
+                          "id": "release-gate-result",
+                          "type": "release_gate_result",
+                          "status": "passed",
+                          "summary": "release gate passed",
+                          "check_run_id": "gha://Biji-Biji-Initiative/mereka-lms/runs/1/release-gate-result",
+                          "artifact_uri": "actions/artifacts/release-bundle@run-1#release-gate-envelope.json",
+                          "hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+                      }
+                  ]
+              },
               "release_object": {
                   "schema_version": "release-object/v1",
                   "release_id": "ro-rb-aaaaaaaa-20260410T120000Z",
@@ -467,7 +495,7 @@ jobs:
               "inputs": {
                   "release_evidence": json.dumps(evidence, separators=(",", ":")),
                   "dry_run": "false",
-                  "control_plane_ref": contract_ref,
+                  "control_plane_ref": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
               },
           }
           url = "https://api.github.com/repos/Biji-Biji-Initiative/bbi-infrastructure/actions/workflows/promote-dev-image.yml/dispatches"
@@ -523,6 +551,19 @@ jobs:
           path: |
             var/ci/build-provenance.json
             var/ci/release-gate-envelope.json
+            var/ci/promotion-dispatch-envelope.json
+EOF
+  cat >"$tmpdir/scripts/release/release_object_bindings.py" <<'EOF'
+payload = {
+    "dispatch_event_type": "promote-mereka-lms-dev",
+    "lane": "mereka-lms",
+    "delivery_lane": "dev",
+    "service_id": "mereka-lms",
+    "control_plane_ref": contract_ref,
+    "contract_family": contract_family,
+    "contract_version": contract_version,
+    "structured_evidence": {"checks": checks},
+}
 EOF
 }
 
