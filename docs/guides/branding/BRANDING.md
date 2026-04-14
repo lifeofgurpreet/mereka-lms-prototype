@@ -266,7 +266,7 @@ See `docs/programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md` § "Plugin-First
 
 - For local reproduction / parity checks: `export TUTOR_ROOT="$(pwd)/tutor_env" && source infrastructure/tutor/tutor-env.sh && tutor images build mfe`.
 - For production: publish the updated MFE image through `.github/workflows/build-tutor-images.yml`, then promote it with `./scripts/infra/release-openedx-gitops.sh --require-digests`.
-- For local Tutor regeneration before `tutor images build mfe`, use `./scripts/infra/tutor-config-save.sh`; it invokes `apply-patches.sh` internally and is the canonical operator front door.
+- For local Tutor regeneration before `tutor images build mfe`, use `./scripts/infra/tutor-config-save.sh`; it is the canonical operator front door, and any internal `apply-patches.sh` call remains wrapper detail rather than an operator step.
 - Never run parallel `tutor images build mfe` commands; a single active build is the supported path.
 
 ## Favicons & Meta
