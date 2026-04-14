@@ -1,5 +1,5 @@
 # DEPRECATION_LEDGER
-_Audience: Operators, reviewers, and docs agents · Owner: Platform Team · Status: canonical_
+_Audience: Operators, reviewers, and docs agents · Owner: Platform Team · Last verified: 2026-04-13 · Status: canonical_
 
 This ledger tracks document overlap and deprecation state using evidence-backed
 labels only.
@@ -24,6 +24,7 @@ labels only.
 | `docs/reference/contracts/VERIFIER_CONTRACT_CATALOG.md` | canonical | proof-lane contract owner | this file |
 | `docs/reference/operations/VERIFIER_CONTRACT_CATALOG.md` | detailed-reference | script-level detail only | `docs/reference/contracts/VERIFIER_CONTRACT_CATALOG.md` |
 | `docs/architecture/AUTHORITY_MATRIX.md` | superseded | older tool-centric matrix | `docs/architecture/PLATFORM_AUTHORITY_MAP.md` |
+| `docs/concepts/architecture/ARCHITECTURE_CHARTER.md` | detailed-reference | retained concept-root governance context, not the primary architecture front door | architecture root canonicals |
 | `docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md` | detailed-reference | broad docs-program resolver, not incident flow owner | architecture + governance canonicals |
 | `docs/concepts/architecture/RELEASE_ROLLOUT_AND_REMOVAL.md` | detailed-reference | policy/standards context | `docs/architecture/PROMOTION_REALIZATION_AND_INCIDENT_FLOW.md` |
 | `docs/status/active/MASTER_LAUNCH_ROADMAP_2026-04-04.md` | status-only | active execution state | status root |

@@ -21,7 +21,7 @@ It does not attempt a repo-wide prose rewrite. If a destination is ambiguous, th
 | `SUPERSEDED` | A stronger canonical replacement already existed |
 | `DUPLICATE` | The retired-root file duplicated another active artifact and should collapse |
 | `TOMBSTONE_CANDIDATE` | Transitional file that should shrink to a stub or disappear once references are repaired |
-| `REFERENCE_ONLY` | Intentional compatibility tombstone; may remain in the retired root |
+| `REFERENCE_ONLY` | Intentional compatibility redirect or bounded governance reference; may remain where path continuity still matters |
 
 ## Retired-Root Inventory
 
@@ -37,7 +37,7 @@ It does not attempt a repo-wide prose rewrite. If a destination is ambiguous, th
 | docs/operations/ENTERPRISE_BOOTSTRAP_APPLY_RUNBOOK.md | `ACTIVE` | `docs/ops/runbooks/ENTERPRISE_BOOTSTRAP_APPLY_RUNBOOK.md` | `docs/reviews/ENTERPRISE_TENANCY_REVIEW_SUMMARY.md` | Moved to canonical runbook root; retired-root file removed |
 | docs/operations/ENTERPRISE_DATA_AUDIT.md | `DUPLICATE` | `docs/stabilization/ENTERPRISE_DATA_MODEL_AUDIT.md` | `docs/reviews/ENTERPRISE_TENANCY_REVIEW_SUMMARY.md` | Retired-root duplicate removed; canonical stabilization copy retained |
 | docs/operations/ENTERPRISE_DATA_MODEL_AUDIT.md | `ACTIVE` | `docs/stabilization/ENTERPRISE_DATA_MODEL_AUDIT.md` | `docs/reviews/ENTERPRISE_TENANCY_REVIEW_SUMMARY.md` | Moved to stabilization root; retired-root file removed |
-| `docs/architecture/README.md` | `REFERENCE_ONLY` | `docs/concepts/architecture/README.md` | governance docs only | Retained as the only allowed architecture-root tombstone |
+| `docs/architecture/README.md` | `REFERENCE_ONLY` | `docs/architecture/README.md` | governance docs only | Architecture root retained as the canonical stable-model front door; older retirement assumptions are superseded |
 | `docs/operations/README.md` | `REFERENCE_ONLY` | `docs/ops/README.md` | governance docs only | Retained as the only allowed operations-root tombstone |
 
 ## References Repaired
@@ -65,7 +65,7 @@ Governance and proof artifacts are allowed to name retired roots only as retirem
 
 Remaining retired-root debt after this slice is intentionally narrow:
 
-- `docs/architecture/README.md` stays as a tombstone-only redirect
+- `docs/architecture/README.md` remains the canonical front door for the restored architecture root
 - `docs/operations/README.md` stays as a tombstone-only redirect
 - governance docs may still reference retired roots when documenting the retirement contract itself
 
