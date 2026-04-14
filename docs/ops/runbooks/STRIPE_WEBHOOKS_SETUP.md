@@ -1,82 +1,105 @@
-# Stripe Webhooks (Ecommerce)
-_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
-_Audience: Platform Eng • Last updated: 2026-02-17_
+# Stripe Webhooks Setup
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-04-10 • Status: active_
 
-> **DEPRECATED**: This document covers Stripe webhook integration for the legacy Oscar-based ecommerce service. The custom Purchase Gateway (`services/purchase-gateway/`) handles its own Stripe integration. See `specs/ecommerce-purchase-gateway_spec.md` for the migration plan and `docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md` for the architectural decision. Retained for reference during the transition period.
+This is the current webhook setup guide for the Purchase Gateway payment lane.
 
-Ecommerce uses Stripe webhooks to verify and finalize payment state changes.
-Without webhooks, you can see inconsistent behavior at scale (orders stuck as
-pending, delayed enrollments, or retries not being processed).
+For the stable system model, dual-stack transition boundary, and non-webhook
+commerce ownership split, start with
+[Purchase Gateway Overview](../../concepts/architecture/purchase-gateway-overview.md).
+
+Use it to:
+
+- register the right Stripe endpoint
+- sync the current webhook signing secret through the governed bridge
+- validate delivery to the gateway webhook handler
+- distinguish current gateway setup from legacy Oscar continuity
+
+Without webhooks, purchases can look successful in Stripe while staying stuck as
+`pending` or never entering the fulfillment queue.
 
 ## Endpoint
 
 Stripe should send events to:
 
-- Prod (GKE): `https://ecommerce.academyv2.mereka.io/api/v2/webhooks/stripe/`
-- Dev (kind): `https://ecommerce.academyv2.mereka.dev/api/v2/webhooks/stripe/`
+- Prod: `https://academyv2.mereka.io/payments/webhooks/stripe/`
+- Dev: `https://academyv2.mereka.dev/payments/webhooks/stripe/`
 
-This route is defined in the ecommerce service:
-`/api/v2/webhooks/stripe/` (Django: `extensions/api/v2/urls.py`).
+External Caddy routing strips `/payments` and forwards to the gateway's
+internal `/webhooks/stripe/` route.
+
+For current production behavior, treat the purchase-gateway endpoint as the
+primary authority. Legacy Oscar endpoints are historical continuity only.
 
 ## Required Secret
 
-Stripe signs webhook requests. Ecommerce verifies the signature using the
-webhook signing secret (`whsec_...`) which must be injected as:
+Stripe signs webhook requests. The Purchase Gateway verifies the signature using
+the webhook signing secret (`whsec_...`) which must be injected as:
 
-- Prod: `MEREKA_LMS_STRIPE_WEBHOOK_SECRET` (Infisical env `prod`, path `/k8s/mereka-lms`)
-- Dev: `MEREKA_LMS_STRIPE_WEBHOOK_SECRET_DEV` (Infisical env `dev`, path `/k8s/mereka-lms`)
+- Prod: `MEREKA_LMS_STRIPE_WEBHOOK_SECRET_GATEWAY`
+- Dev: `MEREKA_LMS_STRIPE_WEBHOOK_SECRET_GATEWAY_DEV` when the dev lane uses
+  distinct gateway secrets
 
 K8s maps this to the container env var:
 - `STRIPE_WEBHOOK_SECRET`
 
-Note: our current scripts treat this as **optional** until webhooks are
-configured, but for real checkout readiness you should require it.
+For a real purchase-ready lane, treat this secret as required.
 
 ## Stripe Dashboard Setup
 
 1. Stripe Dashboard
 2. Developers -> Webhooks -> Add endpoint
 3. Set the endpoint URL (prod or dev)
-4. Subscribe to events (minimum for current code paths):
+4. Subscribe to the current gateway event set:
+   - `checkout.session.completed`
+   - `checkout.session.expired`
    - `payment_intent.succeeded`
    - `payment_intent.payment_failed`
-   - `payment_intent.requires_action`
+   - `charge.refunded`
+   - `charge.refund.updated`
+   - `charge.dispute.created`
+   - `charge.dispute.closed`
+   - subscription and invoice events if enterprise recurring billing is active
 5. Copy the webhook signing secret (`whsec_...`)
-6. Save it into Infisical under the correct key (prod vs dev).
+6. Save it into Infisical under the correct gateway secret key.
 
-## Propagate Secret to GKE (Infisical -> GCP SM -> ExternalSecrets)
+## Propagate Secret Through the Governed Bridge
 
-This repo uses External Secrets Operator (ESO) reading from GCP Secret Manager.
-Use the sync helper to ensure the new secret exists in GCP SM:
+This repo uses External Secrets Operator (ESO) through the governed secrets bridge.
+The current production implementation still resolves through
+`gcp-secret-manager`. Use the sync helper to move the new secret through that
+bridge:
 
 ```bash
 INFISICAL_ENV=prod ./scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh
 INFISICAL_ENV=dev ./scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh
 ```
 
-Then restart ecommerce workloads so env vars are reloaded:
+Then restart the gateway workloads so env vars are reloaded:
 
 ```bash
-kubectl rollout restart deploy/ecommerce deploy/ecommerce-worker -n mereka-lms
-kubectl --context kind-dev rollout restart deploy/ecommerce deploy/ecommerce-worker -n mereka-lms
+kubectl rollout restart deploy/payments-gateway deploy/payments-worker -n mereka-lms
+kubectl --context kind-dev rollout restart deploy/payments-gateway deploy/payments-worker -n mereka-lms
 ```
 
 ## Verify
 
 ```bash
-REQUIRE_STRIPE_WEBHOOK_SECRET=1 ./scripts/qa/verify-ecommerce-config.sh
-REQUIRE_STRIPE_WEBHOOK_SECRET=1 K8S_CONTEXT=kind-dev ./scripts/qa/verify-ecommerce-config.sh
+./scripts/qa/verify-purchase-gateway-k8s.sh --online
+./scripts/qa/verify-caddy-payments-route.sh
 ```
 
 ## Verify Webhook Delivery (Without Stripe CLI)
 
 This sends a locally signed webhook payload (using the webhook secret already
-injected into the running ecommerce pod) and expects HTTP 200.
+injected into the running gateway pod) and expects HTTP 200.
 
 ```bash
 ./scripts/qa/test-stripe-webhook-delivery.sh prod
 K8S_CONTEXT=kind-dev ./scripts/qa/test-stripe-webhook-delivery.sh dev
 ```
+
+After the probe succeeds, confirm the order lane advances out of `pending`. A
+`200` alone proves receipt, not full learner fulfillment.
 
 ## Stripe CLI (Dev Testing)
 
@@ -94,7 +117,7 @@ stripe login
 
 2. Forward webhook events to your dev endpoint:
 ```bash
-stripe listen --forward-to https://ecommerce.academyv2.mereka.dev/api/v2/webhooks/stripe/
+stripe listen --forward-to https://academyv2.mereka.dev/payments/webhooks/stripe/
 ```
 
 3. Trigger test events:
@@ -105,3 +128,10 @@ stripe trigger payment_intent.requires_action
 ```
 
 If your dev endpoint is not publicly reachable, port-forward or use a tunnel.
+
+## Legacy Oscar continuity
+
+Legacy Oscar webhook setup is no longer the primary authority for current
+production purchases. Keep the old `ecommerce.*` endpoints only if the dual
+stack transition still explicitly requires them. Do not route new operator work
+through the Oscar endpoint by default.

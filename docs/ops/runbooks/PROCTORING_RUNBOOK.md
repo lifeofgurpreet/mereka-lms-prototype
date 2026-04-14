@@ -5,6 +5,16 @@ _Audience: Platform Eng + Educators • Owner: Engineering Lead • Last updated
 > **Date**: 2026-02-18
 > **Status**: Proctoring DISABLED (null backend, timed exams only)
 
+Companion surfaces:
+
+- [ASSESSMENT_OPERATIONS_RUNBOOK.md](ASSESSMENT_OPERATIONS_RUNBOOK.md)
+- [../../guides/platform/ADVANCED_ASSESSMENT_AUTHORING_GUIDE.md](../../guides/platform/ADVANCED_ASSESSMENT_AUTHORING_GUIDE.md)
+
+Deferred companion decisions:
+
+- provider-backed setup remains deferred until a real provider lane exists
+- reviewer staffing remains deferred until provider-backed proctoring is live
+
 ## Current State
 
 | Setting | Value | Notes |
@@ -13,25 +23,25 @@ _Audience: Platform Eng + Educators • Owner: Engineering Lead • Last updated
 | `edx-proctoring` | Installed | Part of edx-platform dependencies |
 | Provider contract | **NOT SIGNED** | Blocked on vendor selection |
 
+Do not treat provider onboarding or reviewer staffing as active current-owner
+docs on this branch. Those remain deferred owner-gap decisions until a real
+provider-backed lane exists.
+
 ## 1. Enabling Proctoring (AC-PROCTOR-001)
 
 ### Prerequisites
 
 - [ ] Provider contract signed (Proctorio, ProctorU, or custom)
 - [ ] Provider API credentials provisioned
-- [ ] Secrets created in GCP Secret Manager (`bbi-k8` project)
+- [ ] Secrets created in the governed secrets path
 - [ ] ExternalSecret added for proctoring secrets
 - [ ] LMS settings updated with provider backend
 
 ### Enable Steps
 
 ```bash
-# 1. Create secrets in GCP SM
-gcloud secrets create MEREKA_LMS_PROCTORING_BACKEND_API_KEY --project=bbi-k8
-printf '%s' '<api-key>' | gcloud secrets versions add MEREKA_LMS_PROCTORING_BACKEND_API_KEY --data-file=- --project=bbi-k8
-
-gcloud secrets create MEREKA_LMS_PROCTORING_BACKEND_API_SECRET --project=bbi-k8
-printf '%s' '<api-secret>' | gcloud secrets versions add MEREKA_LMS_PROCTORING_BACKEND_API_SECRET --data-file=- --project=bbi-k8
+# 1. Store the provider secrets in Infisical, then sync the governed bridge
+./scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh
 
 # 2. Add ExternalSecret mapping
 # Edit deploy/k8s/base/secrets/external-secrets.yaml
@@ -47,8 +57,8 @@ printf '%s' '<api-secret>' | gcloud secrets versions add MEREKA_LMS_PROCTORING_B
 #     }
 # }
 
-# 4. Apply patches and rebuild
-./infrastructure/tutor/apply-patches.sh
+# 4. Refresh rendered Open edX build context and rebuild
+./scripts/infra/prepare-tutor-build-context.sh --target openedx
 # Build + deploy via canonical release flow
 
 # 5. Verify
@@ -63,8 +73,8 @@ kubectl exec -n mereka-lms deployment/lms -- \
 # In apply-patches.sh:
 # PROCTORING_BACKENDS = {'DEFAULT': 'null', 'null': {}}
 
-# Apply and rebuild
-./infrastructure/tutor/apply-patches.sh
+# Refresh rendered Open edX build context and rebuild
+./scripts/infra/prepare-tutor-build-context.sh --target openedx
 # Deploy via canonical release flow
 ```
 
@@ -84,17 +94,17 @@ kubectl exec -n mereka-lms deployment/lms -- \
 
 | Secret | Owner | Location | Rotation |
 |--------|-------|----------|----------|
-| `PROCTORING_BACKEND_API_KEY` | Security team | GCP SM (`bbi-k8`) | Quarterly |
-| `PROCTORING_BACKEND_API_SECRET` | Security team | GCP SM (`bbi-k8`) | Quarterly |
+| `PROCTORING_BACKEND_API_KEY` | Security team | Governed secrets bridge | Quarterly |
+| `PROCTORING_BACKEND_API_SECRET` | Security team | Governed secrets bridge | Quarterly |
 | Provider admin credentials | Platform lead | Vendor portal | As needed |
-| LTI consumer key | LMS team | GCP SM | On provider change |
-| LTI consumer secret | LMS team | GCP SM | On provider change |
+| LTI consumer key | LMS team | Governed secrets bridge | On provider change |
+| LTI consumer secret | LMS team | Governed secrets bridge | On provider change |
 
 ### Pre-Go-Live Checklist
 
 - [ ] Provider contract signed and countersigned
 - [ ] API credentials issued by provider
-- [ ] Secrets provisioned in GCP SM
+- [ ] Secrets provisioned through the governed bridge
 - [ ] ExternalSecret deployed and synced
 - [ ] LMS settings updated with correct backend
 - [ ] Test exam created and proctored session verified

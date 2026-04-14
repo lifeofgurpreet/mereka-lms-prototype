@@ -3,18 +3,23 @@ _Audience: Platform Eng • Owner: Engineering Lead • Last verified: 2026-02-1
 
 > **Bead**: mereka-lms-1si5.2
 
+Companion surfaces:
+
+- [ASSESSMENT_OPERATIONS_RUNBOOK.md](ASSESSMENT_OPERATIONS_RUNBOOK.md)
+- [../../guides/platform/ADVANCED_ASSESSMENT_AUTHORING_GUIDE.md](../../guides/platform/ADVANCED_ASSESSMENT_AUTHORING_GUIDE.md)
+
 ## Quick Status Check
 
 ```bash
 # Pod status
-kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster get pods -n mereka-lms -l app.kubernetes.io/name=xqueue
+kubectl --context "${OBS_PARITY_PROD_K8S_CONTEXT:-rke2-prod}" get pods -n mereka-lms -l app.kubernetes.io/name=xqueue
 
 # Both containers should be Running
 # - xqueue: uWSGI web server (port 8000)
 # - xqueue-consumer: Polls for submissions to process
 
 # Submission count (0 = normal if no code assessments exist)
-kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster exec -n mereka-lms deployment/xqueue -c xqueue -- bash -c 'cd /openedx/xqueue && python manage.py shell -c "from submission_queue.models import Submission; print(\"Total:\", Submission.objects.count()); print(\"Queued:\", Submission.objects.filter(retired=False, lms_ack=False).count())"'
+kubectl --context "${OBS_PARITY_PROD_K8S_CONTEXT:-rke2-prod}" exec -n mereka-lms deployment/xqueue -c xqueue -- bash -c 'cd /openedx/xqueue && python manage.py shell -c "from submission_queue.models import Submission; print(\"Total:\", Submission.objects.count()); print(\"Queued:\", Submission.objects.filter(retired=False, lms_ack=False).count())"'
 ```
 
 ## Architecture
@@ -65,17 +70,17 @@ Missing: `app.kubernetes.io/name: xqueue` label on the Service. Also, the servic
 
 ```bash
 # Check events
-kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster describe pod -n mereka-lms -l app.kubernetes.io/name=xqueue
+kubectl --context "${OBS_PARITY_PROD_K8S_CONTEXT:-rke2-prod}" describe pod -n mereka-lms -l app.kubernetes.io/name=xqueue
 
 # Check logs
-kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster logs -n mereka-lms deployment/xqueue -c xqueue --tail=50
-kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster logs -n mereka-lms deployment/xqueue -c xqueue-consumer --tail=50
+kubectl --context "${OBS_PARITY_PROD_K8S_CONTEXT:-rke2-prod}" logs -n mereka-lms deployment/xqueue -c xqueue --tail=50
+kubectl --context "${OBS_PARITY_PROD_K8S_CONTEXT:-rke2-prod}" logs -n mereka-lms deployment/xqueue -c xqueue-consumer --tail=50
 ```
 
 **Common causes**:
 - MySQL connection failure (check `database-secrets` sync)
 - Secret reference mismatch (check ExternalSecrets)
-- Image pull error (check Artifact Registry auth)
+- Image pull error (check GHCR / active registry auth)
 
 ### XQueue Consumer Not Processing
 
@@ -83,10 +88,10 @@ The consumer logs should show "running consumers" in a loop. If stuck:
 
 ```bash
 # Check consumer is running
-kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster logs -n mereka-lms deployment/xqueue -c xqueue-consumer --tail=10
+kubectl --context "${OBS_PARITY_PROD_K8S_CONTEXT:-rke2-prod}" logs -n mereka-lms deployment/xqueue -c xqueue-consumer --tail=10
 
 # Check MySQL connectivity
-kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster exec -n mereka-lms deployment/xqueue -c xqueue -- bash -c 'cd /openedx/xqueue && python manage.py dbshell <<< "SELECT 1;"'
+kubectl --context "${OBS_PARITY_PROD_K8S_CONTEXT:-rke2-prod}" exec -n mereka-lms deployment/xqueue -c xqueue -- bash -c 'cd /openedx/xqueue && python manage.py dbshell <<< "SELECT 1;"'
 ```
 
 ### Submissions Queued But Not Graded
@@ -99,7 +104,7 @@ If `Queued > 0` and growing:
 
 ```bash
 # Check for grader pods
-kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster get pods -n mereka-lms -l app.kubernetes.io/name=xqueue-graders
+kubectl --context "${OBS_PARITY_PROD_K8S_CONTEXT:-rke2-prod}" get pods -n mereka-lms -l app.kubernetes.io/name=xqueue-graders
 
 # If no grader exists, submissions will stay queued indefinitely
 ```
@@ -108,7 +113,7 @@ kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster get pods -n mereka
 
 ```bash
 # Verify LMS XQueue config
-kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster exec -n mereka-lms deployment/lms -- python manage.py lms shell -c "
+kubectl --context "${OBS_PARITY_PROD_K8S_CONTEXT:-rke2-prod}" exec -n mereka-lms deployment/lms -- python manage.py lms shell -c "
 from django.conf import settings
 xq = settings.XQUEUE_INTERFACE
 print('URL:', xq.get('url'))
@@ -117,10 +122,10 @@ print('Auth user:', xq.get('django_auth', {}).get('username'))
 "
 
 # Verify XQueue endpoint is reachable from LMS
-kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster exec -n mereka-lms deployment/lms -- curl -s -o /dev/null -w "%{http_code}" http://xqueue:8000/xqueue/status/
+kubectl --context "${OBS_PARITY_PROD_K8S_CONTEXT:-rke2-prod}" exec -n mereka-lms deployment/lms -- curl -s -o /dev/null -w "%{http_code}" http://xqueue:8000/xqueue/status/
 
 # Verify XQueue Django user exists
-kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster exec -n mereka-lms deployment/xqueue -c xqueue -- bash -c 'cd /openedx/xqueue && python manage.py shell -c "from django.contrib.auth.models import User; print([u.username for u in User.objects.all()])"'
+kubectl --context "${OBS_PARITY_PROD_K8S_CONTEXT:-rke2-prod}" exec -n mereka-lms deployment/xqueue -c xqueue -- bash -c 'cd /openedx/xqueue && python manage.py shell -c "from django.contrib.auth.models import User; print([u.username for u in User.objects.all()])"'
 ```
 
 ## Configuration Reference
@@ -131,7 +136,7 @@ kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster exec -n mereka-lms
 | Callback URL | `http://lms:8000` | LMS `XQUEUE_INTERFACE.callback_url` |
 | Auth username | `lms` | LMS `XQUEUE_INTERFACE.django_auth.username` |
 | MySQL DB | `xqueue` | XQueue Django settings |
-| Image | `openedx-xqueue` | Artifact Registry |
+| Image | `openedx-xqueue` | GHCR / current image registry |
 
 ## Future: Grader Deployment
 
@@ -139,8 +144,55 @@ When code assessment courses are created, deploy the grader:
 
 1. Build `xqueue-graders` image with `xqueue-watcher` + grading scripts
 2. Add to kustomization (manifests already scaffolded at `deploy/k8s/base/apps/xqueue-graders/`)
-3. Simplify deployment: use `RuntimeDefault` seccomp (not localhost profiles on GKE)
+3. Simplify deployment: use `RuntimeDefault` seccomp (not cluster-specific localhost profiles)
 4. Verify end-to-end: submit code → XQueue → grader → callback → LMS gradebook
 5. Enable HPA + monitoring alerts for grader pods
 
 See `docs/evidence/operations/ASSESSMENT_XQUEUE_EVIDENCE.md` for full deployment analysis.
+
+## Grader Deployment Procedure (Gated)
+
+Use this section only for a coordinated rollout. Do not treat it as permission
+to self-enable code graders in a launch lane.
+
+### Build And Push
+
+1. Build the `xqueue-graders` image from the governed grader source.
+2. Push the image to the active registry used by the current lane.
+3. Record the exact image reference in the rollout handoff so queue behavior can
+   be traced back to a concrete grader build.
+
+### Deploy Workers
+
+1. Apply the manifests under `deploy/k8s/base/apps/xqueue-graders/`.
+2. Confirm deployment, HPA, NetworkPolicy, and PrometheusRule objects exist.
+3. Confirm the sandbox policy or sanctioned replacement isolation model is
+   loaded before declaring the deployment valid.
+
+### Scale And Queue Depth Checks
+
+After rollout, confirm:
+
+- worker replicas are running and stable
+- queue depth is not growing unbounded
+- grading latency and callback behavior are consistent with the launch target
+- dead letters and grader errors remain within the rollout tolerance
+
+Use the existing verifier and metrics surfaces before calling the lane healthy.
+
+### Rollback
+
+Rollback is required when:
+
+- queue depth keeps growing without successful callbacks
+- grader images crash or fail readiness repeatedly
+- callback payloads or scores are malformed
+- the sandbox policy cannot be proved in the current lane
+
+Rollback order:
+
+1. stop or scale down grader workers
+2. preserve queue evidence and failing submission samples
+3. move the launch back to a non-grader fallback if one exists
+4. do not call the XQueue authoring path live again until a new verified build
+   is deployed

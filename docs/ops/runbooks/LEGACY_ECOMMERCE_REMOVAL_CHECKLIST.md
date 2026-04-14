@@ -61,7 +61,7 @@ _Audience: Operators and developers • Owner: Platform Team • Last verified: 
 - [ ] Remove ecommerce references from `docs/ops/quickref/access-urls.md`
 - [ ] Remove ecommerce references from `docs/reference/operations/USER_FACING_URLS.md`
 - [ ] Update `docs/reference/operations/CAPABILITY_MATRIX.md` to remove legacy ecommerce row
-- [ ] Remove ecommerce from `docs/concepts/architecture/multi-tenancy-overview.md` shared services list
+- [ ] Remove ecommerce from `docs/reference/operations/RUNTIME_TRUTH_MATRIX.md` declared host matrix
 - [ ] Update `scripts/shared/config.sh` to remove `ECOMMERCE_DOMAIN` and `DEV_ECOMMERCE_DOMAIN` variables
 
 ---

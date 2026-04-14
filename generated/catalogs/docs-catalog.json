@@ -578,6 +578,24 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-10",
+    "owner": "Platform Team",
+    "path": "architecture/mobile-apps-overview.md",
+    "status": "supporting",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "architecture/video-pipeline-overview.md",
+    "status": "supporting",
+    "type": "concept"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
     "path": "archive/ALTERNATIVE_DOMAIN_FIX_SUMMARY.md",
@@ -3944,10 +3962,10 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-10",
+    "last_verified_or_updated": "2026-04-13",
     "owner": "Platform Team",
     "path": "concepts/architecture/ARCHITECTURE_CHARTER.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "concept"
   },
   {
@@ -4038,15 +4056,6 @@
     "owner": "Platform Team",
     "path": "concepts/architecture/TUTOR_AND_EXTENSION_MODEL.md",
     "status": "canonical",
-    "type": "concept"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-04-07",
-    "owner": "Platform Team",
-    "path": "concepts/architecture/WS4_PROMOTION_CONTRACT.md",
-    "status": "supporting",
     "type": "concept"
   },
   {
@@ -4621,6 +4630,15 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "guides/platform/ADVANCED_ASSESSMENT_AUTHORING_GUIDE.md",
+    "status": "supporting",
+    "type": "guide"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "guides/platform/COURSE_AUTHORING_QUICKSTART.md",
     "status": "supporting",
     "type": "guide"
@@ -4790,7 +4808,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-09",
+    "last_verified_or_updated": "2026-04-14",
     "owner": "Platform Team",
     "path": "meta/README.md",
     "status": "canonical",
@@ -4919,16 +4937,16 @@
     "last_verified_or_updated": "2026-03-09",
     "owner": "Platform Team",
     "path": "meta/docs-program/AGENT_WORKPACKETS.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "other"
   },
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-09",
+    "last_verified_or_updated": "2026-04-14",
     "owner": "Platform Team",
     "path": "meta/docs-program/ARCHITECTURE_GOVERNANCE_OVERLAY.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "other"
   },
   {
@@ -4952,9 +4970,18 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-03-07",
+    "owner": "Docs Lead",
+    "path": "meta/docs-program/DOCS_GOVERNANCE_SIGNOFF_CHECKLIST_20260307.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
-    "path": "meta/docs-program/DOCS_GOVERNANCE_SIGNOFF_CHECKLIST_20260307.md",
+    "path": "meta/docs-program/DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md",
     "status": "supporting",
     "type": "other"
   },
@@ -4964,7 +4991,7 @@
     "last_verified_or_updated": "2026-03-09",
     "owner": "Platform Team",
     "path": "meta/docs-program/FOUNDATIONS_PROGRAM.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "other"
   },
   {
@@ -4988,16 +5015,25 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-09",
-    "owner": "Platform Team",
-    "path": "meta/docs-program/PROGRAM_UPDATE_V2_BRIEF.md",
-    "status": "canonical",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/docs-program/POST_REBASE_INTAKE_2026-04-13.md",
+    "status": "supporting",
     "type": "other"
   },
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-09",
+    "last_verified_or_updated": "2026-04-14",
+    "owner": "Platform Team",
+    "path": "meta/docs-program/PROGRAM_UPDATE_V2_BRIEF.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-14",
     "owner": "Platform Team",
     "path": "meta/docs-program/README.md",
     "status": "canonical",
@@ -5009,6 +5045,15 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "meta/docs-program/REPO_TOPOLOGY_MOVE_LEDGER.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/docs-program/REVIEW_HARDENING_BOARD_2026-04-13.md",
     "status": "supporting",
     "type": "other"
   },
@@ -5033,8 +5078,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
     "path": "meta/docs-program/WAVE3_CLOSEOUT.md",
     "status": "supporting",
     "type": "other"
@@ -5042,8 +5087,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
     "path": "meta/docs-program/WAVE3_EXECUTION_TRACKER.md",
     "status": "supporting",
     "type": "other"
@@ -5051,8 +5096,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
     "path": "meta/docs-program/WAVE3_REVIEW_HANDOFF.md",
     "status": "supporting",
     "type": "other"
@@ -5060,8 +5105,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
     "path": "meta/docs-program/WAVE4_CHARTER.md",
     "status": "supporting",
     "type": "other"
@@ -5069,8 +5114,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
     "path": "meta/docs-program/WAVE4_CLOSEOUT.md",
     "status": "supporting",
     "type": "other"
@@ -5078,8 +5123,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
     "path": "meta/docs-program/WAVE4_EXECUTION_TRACKER.md",
     "status": "supporting",
     "type": "other"
@@ -5087,8 +5132,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
     "path": "meta/docs-program/WAVE4_REVIEWER_CHECKLIST.md",
     "status": "supporting",
     "type": "other"
@@ -5105,8 +5150,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
     "path": "meta/docs-program/WAVE4_REVIEW_HANDOFF.md",
     "status": "supporting",
     "type": "other"
@@ -5126,14 +5171,14 @@
     "last_verified_or_updated": "2026-03-09",
     "owner": "Platform Team",
     "path": "meta/docs-program/WAVE9_CLOSEOUT.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "other"
   },
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-03-09",
+    "owner": "Platform Team",
     "path": "meta/docs-program/WAVE9_EXECUTION_TRACKER.md",
     "status": "supporting",
     "type": "other"
@@ -5153,14 +5198,14 @@
     "last_verified_or_updated": "2026-03-09",
     "owner": "Platform Team",
     "path": "meta/docs-program/WAVE9_REVIEW_HANDOFF.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "other"
   },
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-04-14",
+    "owner": "Platform Team",
     "path": "meta/docs-program/WAVE_ADR_RESET_CLOSEOUT.md",
     "status": "supporting",
     "type": "other"
@@ -5168,8 +5213,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-04-14",
+    "owner": "Platform Team",
     "path": "meta/docs-program/WAVE_ADR_RESET_REVIEW_HANDOFF.md",
     "status": "supporting",
     "type": "other"
@@ -5177,8 +5222,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-04-14",
+    "owner": "Platform Team",
     "path": "meta/docs-program/WAVE_ADR_RESET_TRACKER.md",
     "status": "supporting",
     "type": "other"
@@ -5186,19 +5231,19 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-10",
+    "last_verified_or_updated": "2026-04-14",
     "owner": "Platform Team",
     "path": "meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_CLOSEOUT.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "other"
   },
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-10",
+    "last_verified_or_updated": "2026-04-14",
     "owner": "Platform Team",
     "path": "meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_REVIEW_HANDOFF.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "other"
   },
   {
@@ -5213,8 +5258,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-04-14",
+    "owner": "Platform Team",
     "path": "meta/docs-program/WAVE_BRANDING_ROOT_RESET_CLOSEOUT.md",
     "status": "supporting",
     "type": "other"
@@ -5222,8 +5267,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-04-14",
+    "owner": "Platform Team",
     "path": "meta/docs-program/WAVE_BRANDING_ROOT_RESET_REVIEW_HANDOFF.md",
     "status": "supporting",
     "type": "other"
@@ -5231,17 +5276,17 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-10",
+    "last_verified_or_updated": "2026-04-14",
     "owner": "Platform Team",
     "path": "meta/docs-program/WAVE_BRANDING_ROOT_RESET_TRACKER.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "other"
   },
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-04-14",
+    "owner": "Platform Team",
     "path": "meta/docs-program/WAVE_CI_CD_ROOT_RESET_CLOSEOUT.md",
     "status": "supporting",
     "type": "other"
@@ -5249,8 +5294,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-04-14",
+    "owner": "Platform Team",
     "path": "meta/docs-program/WAVE_CI_CD_ROOT_RESET_REVIEW_HANDOFF.md",
     "status": "supporting",
     "type": "other"
@@ -5258,44 +5303,44 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-10",
+    "last_verified_or_updated": "2026-04-14",
     "owner": "Platform Team",
     "path": "meta/docs-program/WAVE_CI_CD_ROOT_RESET_TRACKER.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "other"
   },
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-10",
+    "last_verified_or_updated": "2026-04-14",
     "owner": "Platform Team",
     "path": "meta/docs-program/WAVE_MIGRATIONS_ROOT_RESET_CLOSEOUT.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "other"
   },
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-10",
+    "last_verified_or_updated": "2026-04-14",
     "owner": "Platform Team",
     "path": "meta/docs-program/WAVE_MIGRATIONS_ROOT_RESET_REVIEW_HANDOFF.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "other"
   },
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-10",
+    "last_verified_or_updated": "2026-04-14",
     "owner": "Platform Team",
     "path": "meta/docs-program/WAVE_MIGRATIONS_ROOT_RESET_TRACKER.md",
-    "status": "canonical",
+    "status": "supporting",
     "type": "other"
   },
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-04-14",
+    "owner": "Platform Team",
     "path": "meta/docs-program/WAVE_OPERATIONS_ROOT_RESET_CLOSEOUT.md",
     "status": "supporting",
     "type": "other"
@@ -5303,8 +5348,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-04-14",
+    "owner": "Platform Team",
     "path": "meta/docs-program/WAVE_OPERATIONS_ROOT_RESET_REVIEW_HANDOFF.md",
     "status": "supporting",
     "type": "other"
@@ -5321,8 +5366,8 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-04-14",
+    "owner": "Platform Team",
     "path": "meta/docs-program/WAVE_RUNBOOKS_ROOT_RESET_CLOSEOUT.md",
     "status": "supporting",
     "type": "other"
@@ -5330,9 +5375,18 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
+    "last_verified_or_updated": "2026-04-14",
+    "owner": "Platform Team",
     "path": "meta/docs-program/WAVE_RUNBOOKS_ROOT_RESET_REVIEW_HANDOFF.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-14",
+    "owner": "Platform Team",
+    "path": "meta/docs-program/WAVE_RUNBOOKS_ROOT_RESET_TRACKER.md",
     "status": "supporting",
     "type": "other"
   },
@@ -5341,7 +5395,7 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
-    "path": "meta/docs-program/WAVE_RUNBOOKS_ROOT_RESET_TRACKER.md",
+    "path": "meta/docs-program/authority-registry.v1.yaml",
     "status": "supporting",
     "type": "other"
   },
@@ -5368,6 +5422,15 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "meta/docs-program/companion-surface-review.v1.yaml",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "meta/docs-program/guides-cleanup/DOCS_CMDREF_BACKLOG_20260313.md",
     "status": "supporting",
     "type": "other"
@@ -5375,7 +5438,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-09",
+    "last_verified_or_updated": "2026-04-14",
     "owner": "Platform Team",
     "path": "meta/docs-program/metadata/METADATA_MODEL.md",
     "status": "canonical",
@@ -5405,6 +5468,24 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "meta/docs-program/metadata/governs-taxonomy.yaml",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/docs-program/metadata/merge-back-wave-execution.v1.yaml",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/docs-program/metadata/merge-back-waves.v1.yaml",
     "status": "supporting",
     "type": "other"
   },
@@ -5531,6 +5612,15 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "meta/docs-program/openedx-repo-audit/OPENEDX_REPO_AUDIT_ISSUE_222_PACKET.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "meta/docs-program/owner-gap-ledger.v1.yaml",
     "status": "supporting",
     "type": "other"
   },
@@ -6554,6 +6644,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-10",
+    "owner": "Platform Team",
+    "path": "ops/runbooks/ASSESSMENT_OPERATIONS_RUNBOOK.md",
+    "status": "canonical",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-12",
     "owner": "Platform Team",
     "path": "ops/runbooks/ATLAS_HEALTH.md",
@@ -6653,9 +6752,27 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-10",
+    "owner": "Platform Team",
+    "path": "ops/runbooks/CONTENT_LIBRARIES_DISASTER_RECOVERY.md",
+    "status": "canonical",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-10",
     "owner": "Platform Team",
     "path": "ops/runbooks/CONTENT_LIBRARIES_V2_MIGRATION.md",
+    "status": "canonical",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-10",
+    "owner": "Platform Team",
+    "path": "ops/runbooks/CONTENT_LIBRARIES_V2_RUNBOOK.md",
     "status": "canonical",
     "type": "runbook"
   },
@@ -6779,7 +6896,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-12",
+    "last_verified_or_updated": "2026-04-10",
     "owner": "Platform Team",
     "path": "ops/runbooks/ECOMMERCE_OAUTH_TROUBLESHOOTING.md",
     "status": "supporting",
@@ -6815,7 +6932,7 @@
   {
     "canonical_conflict_group": "enterprise-services-runbook",
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-10",
+    "last_verified_or_updated": "2026-04-09",
     "owner": "Platform Team",
     "path": "ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md",
     "status": "canonical",
@@ -6986,6 +7103,24 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-10",
+    "owner": "Platform Team",
+    "path": "ops/runbooks/MIDDLEWARE_TROUBLESHOOTING.md",
+    "status": "canonical",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-10",
+    "owner": "Platform Team",
+    "path": "ops/runbooks/MIDDLEWARE_VERIFICATION.md",
+    "status": "canonical",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-13",
     "owner": "Engineering Lead",
     "path": "ops/runbooks/MOBILE_APPS_RUNBOOK.md",
@@ -7067,7 +7202,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-12",
+    "last_verified_or_updated": "2026-04-11",
     "owner": "Platform Team",
     "path": "ops/runbooks/OBSERVABILITY_QUICKSTART.md",
     "status": "supporting",
@@ -7076,7 +7211,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-12",
+    "last_verified_or_updated": "2026-04-11",
     "owner": "Platform Team",
     "path": "ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md",
     "status": "supporting",
@@ -7265,7 +7400,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-12",
+    "last_verified_or_updated": "2026-04-11",
     "owner": "Platform Team",
     "path": "ops/runbooks/SLO_DASHBOARDS_SETUP.md",
     "status": "supporting",
@@ -7283,7 +7418,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-12",
+    "last_verified_or_updated": "2026-04-10",
     "owner": "Platform Team",
     "path": "ops/runbooks/STRIPE_WEBHOOKS_SETUP.md",
     "status": "supporting",
@@ -7413,6 +7548,15 @@
     "owner": "Infra",
     "path": "ops/runbooks/VELERO_BACKUP_AUDIT.md",
     "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-10",
+    "owner": "Platform Team",
+    "path": "ops/runbooks/VIDEO_OPERATIONS_RUNBOOK.md",
+    "status": "canonical",
     "type": "runbook"
   },
   {
@@ -8066,7 +8210,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-20",
+    "last_verified_or_updated": "2026-04-13",
     "owner": "platform-team",
     "path": "policies/operations/BRANCH_PROTECTION.md",
     "status": "canonical",
@@ -8246,7 +8390,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-13",
+    "last_verified_or_updated": "2026-04-14",
     "owner": null,
     "path": "policies/operations/TUTOR_CONFIG_SAFETY.md",
     "status": "supporting",
@@ -8615,6 +8759,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "reference/VERSION_MATRIX.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-10",
     "owner": "Analytics Guild",
     "path": "reference/analytics/DATA_SOURCES_EXPLAINED.md",
@@ -8950,6 +9103,15 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "reference/architecture/SEARCH_ARCHITECTURE.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "reference/architecture/TENANT_DOMAIN_AUTHORITY_MATRIX.md",
     "status": "supporting",
     "type": "other"
@@ -9025,6 +9187,33 @@
     "path": "reference/contracts/VERIFIER_CONTRACT_CATALOG.md",
     "status": "supporting",
     "type": "contract"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "reference/generated/docs-program-authority-summary.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "reference/generated/docs-program-merge-back-execution.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "reference/generated/docs-program-merge-back-waves.md",
+    "status": "supporting",
+    "type": "other"
   },
   {
     "canonical_conflict_group": null,
@@ -9362,7 +9551,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-07",
+    "last_verified_or_updated": "2026-04-08",
     "owner": null,
     "path": "reference/operations/BACKUP_COVERAGE_MATRIX.md",
     "status": "supporting",
@@ -9560,7 +9749,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-10",
+    "last_verified_or_updated": "2026-04-09",
     "owner": "Platform Team",
     "path": "reference/operations/IOS_CI_CD_REFERENCE.md",
     "status": "canonical",
@@ -9623,7 +9812,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-10",
+    "last_verified_or_updated": "2026-04-11",
     "owner": "Infra Team",
     "path": "reference/operations/MONITORING.md",
     "status": "canonical",
@@ -9677,7 +9866,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
+    "last_verified_or_updated": "2026-04-11",
     "owner": "Engineering Lead",
     "path": "reference/operations/OPERATOR_DASHBOARD_GUIDE.md",
     "status": "canonical",
@@ -9812,6 +10001,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-14",
+    "owner": "Platform Team",
+    "path": "reference/operations/SPEC_COVERAGE.md",
+    "status": "canonical",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
     "path": "reference/operations/SSO_CANARY.md",
@@ -9857,9 +10055,18 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-10",
+    "last_verified_or_updated": "2026-04-14",
     "owner": "Platform Team",
     "path": "reference/operations/TUTOR_CONFIG_CI.md",
+    "status": "canonical",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-14",
+    "owner": "Platform Team",
+    "path": "reference/operations/UI_UX_HARDENING_BUNDLE.md",
     "status": "canonical",
     "type": "other"
   },
@@ -10388,6 +10595,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "Agent 2 | Last verified: 2026-04-12T22:10:52Z | Status: active",
+    "path": "status/active/AGENT2_LANE_TRACKER_2026-04-10.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-04-01",
     "owner": null,
     "path": "status/active/ASPECTS_ANALYTICS_ACTIVATION_TRACKER.md",
@@ -10435,7 +10651,34 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "status/active/BROWSER_PROOF_MATRIX_2026-04-09.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "status/active/CI_OPTIMIZATION_TRACKER.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "Agent 2 | Last verified: 2026-04-10T13:52:00Z | Status: active",
+    "path": "status/active/CI_VERIFIER_FALSE_GREEN_REGISTER_2026-04-10.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "Agent 2 | Last verified: 2026-04-10T10:53:23Z | Status: active",
+    "path": "status/active/CONTROL_PLANE_AUTHORITY_MAP_2026-04-10.md",
     "status": "supporting",
     "type": "status"
   },
@@ -10524,6 +10767,15 @@
     "canonical_conflict_group": null,
     "freshness_risk": "low",
     "last_verified_or_updated": null,
+    "owner": "Agent 2 | Last verified: 2026-04-10T10:53:23Z | Status: active",
+    "path": "status/active/DUPLICATE_WRITER_RETIREMENT_REGISTER_2026-04-10.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
     "owner": null,
     "path": "status/active/FINISH_LINE_MASTER_TRACKER_2026-04-03.md",
     "status": "supporting",
@@ -10535,6 +10787,15 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "status/active/FINISH_LINE_TAKEOVER_PROMPT_2026-04-03.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "Agent 1. Created: 2026-04-10. Status: active",
+    "path": "status/active/FIXTURE_REPLAY_LEDGER_2026-04-10.md",
     "status": "supporting",
     "type": "status"
   },
@@ -10640,6 +10901,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "Agent 1. Created: 2026-04-10. Status: active",
+    "path": "status/active/MUTATION_LEDGER_2026-04-10.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-13",
     "owner": null,
     "path": "status/active/NEXT-PHASE-ROADMAP.md",
@@ -10721,6 +10991,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "Agent 2 | Last verified: 2026-04-12T22:10:52Z | Status: active",
+    "path": "status/active/PROMOTION_TRUST_LEDGER_2026-04-10.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-26",
     "owner": "Platform Team",
     "path": "status/active/README.md",
@@ -10731,8 +11010,26 @@
     "canonical_conflict_group": null,
     "freshness_risk": "low",
     "last_verified_or_updated": null,
+    "owner": "Agent 2 | Last verified: 2026-04-12T22:10:52Z | Status: active",
+    "path": "status/active/RELEASE_IDENTITY_CHAIN_MAP_2026-04-10.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
     "owner": null,
     "path": "status/active/REVIEWER_OPERATOR_BOARD_2026-04-02.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/RUNTIME_AUTHORITY_MATRIX_2026-04-09.md",
     "status": "supporting",
     "type": "status"
   },
@@ -10751,6 +11048,15 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "status/active/RUNTIME_TRUTH_LEDGER_TRACKER_2026-04-03.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/SEARCH_EVIDENCE_LEDGER_2026-04-10.md",
     "status": "supporting",
     "type": "status"
   },
