@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-# Patch: Build optimizations and openedx Dockerfile/settings patches.
-# Target: Tutor 21.x (Ulmo). Some replacements target Redwood-era template
-# patterns and are harmless no-ops on Ulmo (str.replace returns unchanged text).
-# Covers: pip retries, compile-sass, collectstatic fixes, i18n fixes,
-#         custom apps, django settings (discussions, theme, oauth fix,
-#         tenancy), assets.py (JS_COMPRESSOR, safe_join), MFE cache headers,
-#         nginx health/profile endpoints, Caddy profile proxy.
+# Patch: residual build-context normalization that Tutor 21.x still does not
+# expose as first-class hook ownership.
+# Target: Tutor 21.x (Ulmo). The remaining live render mutations here are
+# narrow: MySQL 8.4 local compose compatibility plus fast-profile translation
+# pull wrappers for the Open edX Dockerfile. File sync operations below keep
+# rendered theme/custom-app build context aligned with repo truth.
 
 apply_build_optimizations_patch() {
   local targets=(
@@ -51,8 +50,6 @@ for target in targets:
     # still fails in wheel build with C compiler errors around signal handler
     # signatures. Treat this as an explicit compatibility exception, not a
     # forgotten uv seam.
-
-    custom_app_install_mode_arg = "ARG MEREKA_CUSTOM_APP_INSTALL_MODE=editable\n"
 
     updated = updated.replace(
         "RUN ./manage.py lms --settings=tutor.i18n pull_plugin_translations --verbose --repository='openedx/openedx-translations' --revision='release/ulmo.1' ",
