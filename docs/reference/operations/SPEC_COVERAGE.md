@@ -52,7 +52,7 @@ REPO_ROOT=/path/to/checkout ./scripts/qa/verify-spec-coverage.sh
 
 ```text
 === Spec Coverage Report ===
-Repo:  /home/gurpreet/projects/k8s/mereka-lms
+Repo:  /path/to/repo
 Floor: 40%  (override with SPEC_COVERAGE_FLOOR=N)
 
 Spec File                                            Total ACs  Covered Coverage
