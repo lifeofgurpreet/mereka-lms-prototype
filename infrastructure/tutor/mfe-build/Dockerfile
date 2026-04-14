@@ -979,11 +979,37 @@ if not index_path.exists():
     raise SystemExit(0)
 
 content = index_path.read_text(encoding="utf-8")
-match = re.search(r"var PARAGON_THEME = (\{.*?\});", content)
-if not match:
+
+paragon_theme_expr = None
+replacement_start = None
+replacement_end = None
+
+object_match = re.search(r"var PARAGON_THEME = (\{.*?\});", content, re.DOTALL)
+if object_match:
+    paragon_theme_expr = object_match.group(1)
+    replacement_start = object_match.start(1)
+    replacement_end = object_match.end(1)
+else:
+    iife_match = re.search(
+        r"var PARAGON_THEME = (?P<expr>\(\(\) => \{.*?\}\)\(\));",
+        content,
+        re.DOTALL,
+    )
+    if iife_match:
+        theme_object_match = re.search(
+            r"const theme = (\{.*?\});",
+            iife_match.group("expr"),
+            re.DOTALL,
+        )
+        if theme_object_match:
+            paragon_theme_expr = theme_object_match.group(1)
+            replacement_start = iife_match.start("expr")
+            replacement_end = iife_match.end("expr")
+
+if paragon_theme_expr is None:
     raise SystemExit(0)
 
-theme = json.loads(match.group(1))
+theme = json.loads(paragon_theme_expr)
 
 theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
 theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
@@ -1056,7 +1082,7 @@ runtime_theme = '''(() => {
 runtime_theme = runtime_theme.replace("__THEME_JSON__", json.dumps(theme, separators=(", ", ": ")))
 runtime_theme = runtime_theme.replace("__VARIANT_THEME_MAP__", json.dumps(variant_theme_map, separators=(", ", ": ")))
 
-updated = content[:match.start(1)] + runtime_theme + content[match.end(1):]
+updated = content[:replacement_start] + runtime_theme + content[replacement_end:]
 index_path.write_text(updated, encoding="utf-8")
 PY
 
@@ -1117,11 +1143,37 @@ if not index_path.exists():
     raise SystemExit(0)
 
 content = index_path.read_text(encoding="utf-8")
-match = re.search(r"var PARAGON_THEME = (\{.*?\});", content)
-if not match:
+
+paragon_theme_expr = None
+replacement_start = None
+replacement_end = None
+
+object_match = re.search(r"var PARAGON_THEME = (\{.*?\});", content, re.DOTALL)
+if object_match:
+    paragon_theme_expr = object_match.group(1)
+    replacement_start = object_match.start(1)
+    replacement_end = object_match.end(1)
+else:
+    iife_match = re.search(
+        r"var PARAGON_THEME = (?P<expr>\(\(\) => \{.*?\}\)\(\));",
+        content,
+        re.DOTALL,
+    )
+    if iife_match:
+        theme_object_match = re.search(
+            r"const theme = (\{.*?\});",
+            iife_match.group("expr"),
+            re.DOTALL,
+        )
+        if theme_object_match:
+            paragon_theme_expr = theme_object_match.group(1)
+            replacement_start = iife_match.start("expr")
+            replacement_end = iife_match.end("expr")
+
+if paragon_theme_expr is None:
     raise SystemExit(0)
 
-theme = json.loads(match.group(1))
+theme = json.loads(paragon_theme_expr)
 
 theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
 theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
@@ -1194,7 +1246,7 @@ runtime_theme = '''(() => {
 runtime_theme = runtime_theme.replace("__THEME_JSON__", json.dumps(theme, separators=(", ", ": ")))
 runtime_theme = runtime_theme.replace("__VARIANT_THEME_MAP__", json.dumps(variant_theme_map, separators=(", ", ": ")))
 
-updated = content[:match.start(1)] + runtime_theme + content[match.end(1):]
+updated = content[:replacement_start] + runtime_theme + content[replacement_end:]
 index_path.write_text(updated, encoding="utf-8")
 PY
 
@@ -1274,11 +1326,37 @@ if not index_path.exists():
     raise SystemExit(0)
 
 content = index_path.read_text(encoding="utf-8")
-match = re.search(r"var PARAGON_THEME = (\{.*?\});", content)
-if not match:
+
+paragon_theme_expr = None
+replacement_start = None
+replacement_end = None
+
+object_match = re.search(r"var PARAGON_THEME = (\{.*?\});", content, re.DOTALL)
+if object_match:
+    paragon_theme_expr = object_match.group(1)
+    replacement_start = object_match.start(1)
+    replacement_end = object_match.end(1)
+else:
+    iife_match = re.search(
+        r"var PARAGON_THEME = (?P<expr>\(\(\) => \{.*?\}\)\(\));",
+        content,
+        re.DOTALL,
+    )
+    if iife_match:
+        theme_object_match = re.search(
+            r"const theme = (\{.*?\});",
+            iife_match.group("expr"),
+            re.DOTALL,
+        )
+        if theme_object_match:
+            paragon_theme_expr = theme_object_match.group(1)
+            replacement_start = iife_match.start("expr")
+            replacement_end = iife_match.end("expr")
+
+if paragon_theme_expr is None:
     raise SystemExit(0)
 
-theme = json.loads(match.group(1))
+theme = json.loads(paragon_theme_expr)
 
 theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
 theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
@@ -1351,7 +1429,7 @@ runtime_theme = '''(() => {
 runtime_theme = runtime_theme.replace("__THEME_JSON__", json.dumps(theme, separators=(", ", ": ")))
 runtime_theme = runtime_theme.replace("__VARIANT_THEME_MAP__", json.dumps(variant_theme_map, separators=(", ", ": ")))
 
-updated = content[:match.start(1)] + runtime_theme + content[match.end(1):]
+updated = content[:replacement_start] + runtime_theme + content[replacement_end:]
 index_path.write_text(updated, encoding="utf-8")
 PY
 
@@ -1412,11 +1490,37 @@ if not index_path.exists():
     raise SystemExit(0)
 
 content = index_path.read_text(encoding="utf-8")
-match = re.search(r"var PARAGON_THEME = (\{.*?\});", content)
-if not match:
+
+paragon_theme_expr = None
+replacement_start = None
+replacement_end = None
+
+object_match = re.search(r"var PARAGON_THEME = (\{.*?\});", content, re.DOTALL)
+if object_match:
+    paragon_theme_expr = object_match.group(1)
+    replacement_start = object_match.start(1)
+    replacement_end = object_match.end(1)
+else:
+    iife_match = re.search(
+        r"var PARAGON_THEME = (?P<expr>\(\(\) => \{.*?\}\)\(\));",
+        content,
+        re.DOTALL,
+    )
+    if iife_match:
+        theme_object_match = re.search(
+            r"const theme = (\{.*?\});",
+            iife_match.group("expr"),
+            re.DOTALL,
+        )
+        if theme_object_match:
+            paragon_theme_expr = theme_object_match.group(1)
+            replacement_start = iife_match.start("expr")
+            replacement_end = iife_match.end("expr")
+
+if paragon_theme_expr is None:
     raise SystemExit(0)
 
-theme = json.loads(match.group(1))
+theme = json.loads(paragon_theme_expr)
 
 theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
 theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
@@ -1489,7 +1593,7 @@ runtime_theme = '''(() => {
 runtime_theme = runtime_theme.replace("__THEME_JSON__", json.dumps(theme, separators=(", ", ": ")))
 runtime_theme = runtime_theme.replace("__VARIANT_THEME_MAP__", json.dumps(variant_theme_map, separators=(", ", ": ")))
 
-updated = content[:match.start(1)] + runtime_theme + content[match.end(1):]
+updated = content[:replacement_start] + runtime_theme + content[replacement_end:]
 index_path.write_text(updated, encoding="utf-8")
 PY
 
@@ -1550,11 +1654,37 @@ if not index_path.exists():
     raise SystemExit(0)
 
 content = index_path.read_text(encoding="utf-8")
-match = re.search(r"var PARAGON_THEME = (\{.*?\});", content)
-if not match:
+
+paragon_theme_expr = None
+replacement_start = None
+replacement_end = None
+
+object_match = re.search(r"var PARAGON_THEME = (\{.*?\});", content, re.DOTALL)
+if object_match:
+    paragon_theme_expr = object_match.group(1)
+    replacement_start = object_match.start(1)
+    replacement_end = object_match.end(1)
+else:
+    iife_match = re.search(
+        r"var PARAGON_THEME = (?P<expr>\(\(\) => \{.*?\}\)\(\));",
+        content,
+        re.DOTALL,
+    )
+    if iife_match:
+        theme_object_match = re.search(
+            r"const theme = (\{.*?\});",
+            iife_match.group("expr"),
+            re.DOTALL,
+        )
+        if theme_object_match:
+            paragon_theme_expr = theme_object_match.group(1)
+            replacement_start = iife_match.start("expr")
+            replacement_end = iife_match.end("expr")
+
+if paragon_theme_expr is None:
     raise SystemExit(0)
 
-theme = json.loads(match.group(1))
+theme = json.loads(paragon_theme_expr)
 
 theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
 theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
@@ -1627,7 +1757,7 @@ runtime_theme = '''(() => {
 runtime_theme = runtime_theme.replace("__THEME_JSON__", json.dumps(theme, separators=(", ", ": ")))
 runtime_theme = runtime_theme.replace("__VARIANT_THEME_MAP__", json.dumps(variant_theme_map, separators=(", ", ": ")))
 
-updated = content[:match.start(1)] + runtime_theme + content[match.end(1):]
+updated = content[:replacement_start] + runtime_theme + content[replacement_end:]
 index_path.write_text(updated, encoding="utf-8")
 PY
 
@@ -1688,11 +1818,37 @@ if not index_path.exists():
     raise SystemExit(0)
 
 content = index_path.read_text(encoding="utf-8")
-match = re.search(r"var PARAGON_THEME = (\{.*?\});", content)
-if not match:
+
+paragon_theme_expr = None
+replacement_start = None
+replacement_end = None
+
+object_match = re.search(r"var PARAGON_THEME = (\{.*?\});", content, re.DOTALL)
+if object_match:
+    paragon_theme_expr = object_match.group(1)
+    replacement_start = object_match.start(1)
+    replacement_end = object_match.end(1)
+else:
+    iife_match = re.search(
+        r"var PARAGON_THEME = (?P<expr>\(\(\) => \{.*?\}\)\(\));",
+        content,
+        re.DOTALL,
+    )
+    if iife_match:
+        theme_object_match = re.search(
+            r"const theme = (\{.*?\});",
+            iife_match.group("expr"),
+            re.DOTALL,
+        )
+        if theme_object_match:
+            paragon_theme_expr = theme_object_match.group(1)
+            replacement_start = iife_match.start("expr")
+            replacement_end = iife_match.end("expr")
+
+if paragon_theme_expr is None:
     raise SystemExit(0)
 
-theme = json.loads(match.group(1))
+theme = json.loads(paragon_theme_expr)
 
 theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
 theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
@@ -1765,7 +1921,7 @@ runtime_theme = '''(() => {
 runtime_theme = runtime_theme.replace("__THEME_JSON__", json.dumps(theme, separators=(", ", ": ")))
 runtime_theme = runtime_theme.replace("__VARIANT_THEME_MAP__", json.dumps(variant_theme_map, separators=(", ", ": ")))
 
-updated = content[:match.start(1)] + runtime_theme + content[match.end(1):]
+updated = content[:replacement_start] + runtime_theme + content[replacement_end:]
 index_path.write_text(updated, encoding="utf-8")
 PY
 
@@ -1826,11 +1982,37 @@ if not index_path.exists():
     raise SystemExit(0)
 
 content = index_path.read_text(encoding="utf-8")
-match = re.search(r"var PARAGON_THEME = (\{.*?\});", content)
-if not match:
+
+paragon_theme_expr = None
+replacement_start = None
+replacement_end = None
+
+object_match = re.search(r"var PARAGON_THEME = (\{.*?\});", content, re.DOTALL)
+if object_match:
+    paragon_theme_expr = object_match.group(1)
+    replacement_start = object_match.start(1)
+    replacement_end = object_match.end(1)
+else:
+    iife_match = re.search(
+        r"var PARAGON_THEME = (?P<expr>\(\(\) => \{.*?\}\)\(\));",
+        content,
+        re.DOTALL,
+    )
+    if iife_match:
+        theme_object_match = re.search(
+            r"const theme = (\{.*?\});",
+            iife_match.group("expr"),
+            re.DOTALL,
+        )
+        if theme_object_match:
+            paragon_theme_expr = theme_object_match.group(1)
+            replacement_start = iife_match.start("expr")
+            replacement_end = iife_match.end("expr")
+
+if paragon_theme_expr is None:
     raise SystemExit(0)
 
-theme = json.loads(match.group(1))
+theme = json.loads(paragon_theme_expr)
 
 theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
 theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
@@ -1903,7 +2085,7 @@ runtime_theme = '''(() => {
 runtime_theme = runtime_theme.replace("__THEME_JSON__", json.dumps(theme, separators=(", ", ": ")))
 runtime_theme = runtime_theme.replace("__VARIANT_THEME_MAP__", json.dumps(variant_theme_map, separators=(", ", ": ")))
 
-updated = content[:match.start(1)] + runtime_theme + content[match.end(1):]
+updated = content[:replacement_start] + runtime_theme + content[replacement_end:]
 index_path.write_text(updated, encoding="utf-8")
 PY
 
@@ -1964,11 +2146,37 @@ if not index_path.exists():
     raise SystemExit(0)
 
 content = index_path.read_text(encoding="utf-8")
-match = re.search(r"var PARAGON_THEME = (\{.*?\});", content)
-if not match:
+
+paragon_theme_expr = None
+replacement_start = None
+replacement_end = None
+
+object_match = re.search(r"var PARAGON_THEME = (\{.*?\});", content, re.DOTALL)
+if object_match:
+    paragon_theme_expr = object_match.group(1)
+    replacement_start = object_match.start(1)
+    replacement_end = object_match.end(1)
+else:
+    iife_match = re.search(
+        r"var PARAGON_THEME = (?P<expr>\(\(\) => \{.*?\}\)\(\));",
+        content,
+        re.DOTALL,
+    )
+    if iife_match:
+        theme_object_match = re.search(
+            r"const theme = (\{.*?\});",
+            iife_match.group("expr"),
+            re.DOTALL,
+        )
+        if theme_object_match:
+            paragon_theme_expr = theme_object_match.group(1)
+            replacement_start = iife_match.start("expr")
+            replacement_end = iife_match.end("expr")
+
+if paragon_theme_expr is None:
     raise SystemExit(0)
 
-theme = json.loads(match.group(1))
+theme = json.loads(paragon_theme_expr)
 
 theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
 theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
@@ -2041,7 +2249,7 @@ runtime_theme = '''(() => {
 runtime_theme = runtime_theme.replace("__THEME_JSON__", json.dumps(theme, separators=(", ", ": ")))
 runtime_theme = runtime_theme.replace("__VARIANT_THEME_MAP__", json.dumps(variant_theme_map, separators=(", ", ": ")))
 
-updated = content[:match.start(1)] + runtime_theme + content[match.end(1):]
+updated = content[:replacement_start] + runtime_theme + content[replacement_end:]
 index_path.write_text(updated, encoding="utf-8")
 PY
 
@@ -2102,11 +2310,37 @@ if not index_path.exists():
     raise SystemExit(0)
 
 content = index_path.read_text(encoding="utf-8")
-match = re.search(r"var PARAGON_THEME = (\{.*?\});", content)
-if not match:
+
+paragon_theme_expr = None
+replacement_start = None
+replacement_end = None
+
+object_match = re.search(r"var PARAGON_THEME = (\{.*?\});", content, re.DOTALL)
+if object_match:
+    paragon_theme_expr = object_match.group(1)
+    replacement_start = object_match.start(1)
+    replacement_end = object_match.end(1)
+else:
+    iife_match = re.search(
+        r"var PARAGON_THEME = (?P<expr>\(\(\) => \{.*?\}\)\(\));",
+        content,
+        re.DOTALL,
+    )
+    if iife_match:
+        theme_object_match = re.search(
+            r"const theme = (\{.*?\});",
+            iife_match.group("expr"),
+            re.DOTALL,
+        )
+        if theme_object_match:
+            paragon_theme_expr = theme_object_match.group(1)
+            replacement_start = iife_match.start("expr")
+            replacement_end = iife_match.end("expr")
+
+if paragon_theme_expr is None:
     raise SystemExit(0)
 
-theme = json.loads(match.group(1))
+theme = json.loads(paragon_theme_expr)
 
 theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
 theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
@@ -2179,7 +2413,7 @@ runtime_theme = '''(() => {
 runtime_theme = runtime_theme.replace("__THEME_JSON__", json.dumps(theme, separators=(", ", ": ")))
 runtime_theme = runtime_theme.replace("__VARIANT_THEME_MAP__", json.dumps(variant_theme_map, separators=(", ", ": ")))
 
-updated = content[:match.start(1)] + runtime_theme + content[match.end(1):]
+updated = content[:replacement_start] + runtime_theme + content[replacement_end:]
 index_path.write_text(updated, encoding="utf-8")
 PY
 
@@ -2240,11 +2474,37 @@ if not index_path.exists():
     raise SystemExit(0)
 
 content = index_path.read_text(encoding="utf-8")
-match = re.search(r"var PARAGON_THEME = (\{.*?\});", content)
-if not match:
+
+paragon_theme_expr = None
+replacement_start = None
+replacement_end = None
+
+object_match = re.search(r"var PARAGON_THEME = (\{.*?\});", content, re.DOTALL)
+if object_match:
+    paragon_theme_expr = object_match.group(1)
+    replacement_start = object_match.start(1)
+    replacement_end = object_match.end(1)
+else:
+    iife_match = re.search(
+        r"var PARAGON_THEME = (?P<expr>\(\(\) => \{.*?\}\)\(\));",
+        content,
+        re.DOTALL,
+    )
+    if iife_match:
+        theme_object_match = re.search(
+            r"const theme = (\{.*?\});",
+            iife_match.group("expr"),
+            re.DOTALL,
+        )
+        if theme_object_match:
+            paragon_theme_expr = theme_object_match.group(1)
+            replacement_start = iife_match.start("expr")
+            replacement_end = iife_match.end("expr")
+
+if paragon_theme_expr is None:
     raise SystemExit(0)
 
-theme = json.loads(match.group(1))
+theme = json.loads(paragon_theme_expr)
 
 theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
 theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
@@ -2317,7 +2577,7 @@ runtime_theme = '''(() => {
 runtime_theme = runtime_theme.replace("__THEME_JSON__", json.dumps(theme, separators=(", ", ": ")))
 runtime_theme = runtime_theme.replace("__VARIANT_THEME_MAP__", json.dumps(variant_theme_map, separators=(", ", ": ")))
 
-updated = content[:match.start(1)] + runtime_theme + content[match.end(1):]
+updated = content[:replacement_start] + runtime_theme + content[replacement_end:]
 index_path.write_text(updated, encoding="utf-8")
 PY
 
@@ -2378,11 +2638,37 @@ if not index_path.exists():
     raise SystemExit(0)
 
 content = index_path.read_text(encoding="utf-8")
-match = re.search(r"var PARAGON_THEME = (\{.*?\});", content)
-if not match:
+
+paragon_theme_expr = None
+replacement_start = None
+replacement_end = None
+
+object_match = re.search(r"var PARAGON_THEME = (\{.*?\});", content, re.DOTALL)
+if object_match:
+    paragon_theme_expr = object_match.group(1)
+    replacement_start = object_match.start(1)
+    replacement_end = object_match.end(1)
+else:
+    iife_match = re.search(
+        r"var PARAGON_THEME = (?P<expr>\(\(\) => \{.*?\}\)\(\));",
+        content,
+        re.DOTALL,
+    )
+    if iife_match:
+        theme_object_match = re.search(
+            r"const theme = (\{.*?\});",
+            iife_match.group("expr"),
+            re.DOTALL,
+        )
+        if theme_object_match:
+            paragon_theme_expr = theme_object_match.group(1)
+            replacement_start = iife_match.start("expr")
+            replacement_end = iife_match.end("expr")
+
+if paragon_theme_expr is None:
     raise SystemExit(0)
 
-theme = json.loads(match.group(1))
+theme = json.loads(paragon_theme_expr)
 
 theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
 theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
@@ -2455,7 +2741,7 @@ runtime_theme = '''(() => {
 runtime_theme = runtime_theme.replace("__THEME_JSON__", json.dumps(theme, separators=(", ", ": ")))
 runtime_theme = runtime_theme.replace("__VARIANT_THEME_MAP__", json.dumps(variant_theme_map, separators=(", ", ": ")))
 
-updated = content[:match.start(1)] + runtime_theme + content[match.end(1):]
+updated = content[:replacement_start] + runtime_theme + content[replacement_end:]
 index_path.write_text(updated, encoding="utf-8")
 PY
 
@@ -2516,11 +2802,37 @@ if not index_path.exists():
     raise SystemExit(0)
 
 content = index_path.read_text(encoding="utf-8")
-match = re.search(r"var PARAGON_THEME = (\{.*?\});", content)
-if not match:
+
+paragon_theme_expr = None
+replacement_start = None
+replacement_end = None
+
+object_match = re.search(r"var PARAGON_THEME = (\{.*?\});", content, re.DOTALL)
+if object_match:
+    paragon_theme_expr = object_match.group(1)
+    replacement_start = object_match.start(1)
+    replacement_end = object_match.end(1)
+else:
+    iife_match = re.search(
+        r"var PARAGON_THEME = (?P<expr>\(\(\) => \{.*?\}\)\(\));",
+        content,
+        re.DOTALL,
+    )
+    if iife_match:
+        theme_object_match = re.search(
+            r"const theme = (\{.*?\});",
+            iife_match.group("expr"),
+            re.DOTALL,
+        )
+        if theme_object_match:
+            paragon_theme_expr = theme_object_match.group(1)
+            replacement_start = iife_match.start("expr")
+            replacement_end = iife_match.end("expr")
+
+if paragon_theme_expr is None:
     raise SystemExit(0)
 
-theme = json.loads(match.group(1))
+theme = json.loads(paragon_theme_expr)
 
 theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
 theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
@@ -2593,7 +2905,7 @@ runtime_theme = '''(() => {
 runtime_theme = runtime_theme.replace("__THEME_JSON__", json.dumps(theme, separators=(", ", ": ")))
 runtime_theme = runtime_theme.replace("__VARIANT_THEME_MAP__", json.dumps(variant_theme_map, separators=(", ", ": ")))
 
-updated = content[:match.start(1)] + runtime_theme + content[match.end(1):]
+updated = content[:replacement_start] + runtime_theme + content[replacement_end:]
 index_path.write_text(updated, encoding="utf-8")
 PY
 

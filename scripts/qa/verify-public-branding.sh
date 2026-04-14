@@ -61,6 +61,58 @@ CURL_TIMEOUT_SECONDS="${CURL_TIMEOUT_SECONDS:-20}"
 STRICT_PROXY_AUTHN_BRANDING="${STRICT_PROXY_AUTHN_BRANDING:-0}"
 failures=0
 
+expected_mfe_site_name() {
+  local host="${1,,}"
+  case "$host" in
+    *academy.biji-biji.com|*biji-biji.academyv2.mereka.dev)
+      printf "Biji-Biji Academy"
+      ;;
+    *skillourfuture.academy.mereka.io|*skillourfuture.academyv2.mereka.io|*skillourfuture.academyv2.mereka.dev)
+      printf "Skill Our Future Academy"
+      ;;
+    *)
+      printf "Mereka Academy"
+      ;;
+  esac
+}
+
+expected_mfe_brand_slug() {
+  local host="${1,,}"
+  case "$host" in
+    *academy.biji-biji.com|*biji-biji.academyv2.mereka.dev)
+      printf "biji-biji"
+      ;;
+    *skillourfuture.academy.mereka.io|*skillourfuture.academyv2.mereka.io|*skillourfuture.academyv2.mereka.dev)
+      printf "skillourfuture"
+      ;;
+    *)
+      printf ""
+      ;;
+  esac
+}
+
+expected_mfe_brand_css_path() {
+  local host=$1
+  local slug
+  slug="$(expected_mfe_brand_slug "$host")"
+  if [[ -n "$slug" ]]; then
+    printf "/theme/%s-brand.min.css" "$slug"
+  else
+    printf "/theme/mereka-brand.min.css"
+  fi
+}
+
+expected_mfe_logo_path_regex() {
+  local host=$1
+  local slug
+  slug="$(expected_mfe_brand_slug "$host")"
+  if [[ -n "$slug" ]]; then
+    printf 'theme/%s/logo-horizontal' "$slug"
+  else
+    printf 'theme/logo-horizontal'
+  fi
+}
+
 check_follow_200() {
   local url=$1
   local label=$2
@@ -151,6 +203,10 @@ check_mfe_authn_surface() {
   local html config authn_css_path authn_css authn_url route_label
   local theme_css_url theme_css_headers theme_css_content_type theme_css_body
   local ts
+  local expected_site_name expected_brand_css_path expected_logo_path_regex
+  expected_site_name="$(expected_mfe_site_name "$mfe_host")"
+  expected_brand_css_path="$(expected_mfe_brand_css_path "$mfe_host")"
+  expected_logo_path_regex="$(expected_mfe_logo_path_regex "$mfe_host")"
 
   for route_label in "login" "register"; do
     authn_url="https://${mfe_host}/authn/${route_label}"
@@ -198,14 +254,14 @@ check_mfe_authn_surface() {
       printf "✗ MFE %s page still uses relative ../theme CSS references in PARAGON_THEME\n" "$route_label" >&2
       failures=$((failures + 1))
     elif rg -q '/theme/core.min.css' <<<"$html" \
-      && rg -q '/theme/mereka-brand.min.css' <<<"$html"; then
+      && rg -F -q "$expected_brand_css_path" <<<"$html"; then
       printf "✓ MFE %s page references absolute /theme CSS runtime contract\n" "$route_label"
     else
       printf "✗ MFE %s page missing absolute /theme CSS runtime contract markers\n" "$route_label" >&2
       failures=$((failures + 1))
     fi
 
-    theme_css_url="https://${mfe_host}/theme/mereka-brand.min.css?nocache=${ts}"
+    theme_css_url="https://${mfe_host}${expected_brand_css_path}?nocache=${ts}"
     theme_css_headers="$(curl -sSI --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "$theme_css_url" 2>/dev/null || true)"
     theme_css_content_type="$(printf '%s' "$theme_css_headers" | awk -F': ' 'tolower($1)=="content-type"{print tolower($2)}' | tr -d '\r' | tail -n 1)"
     theme_css_body="$(curl -sS -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "$theme_css_url" 2>/dev/null || true)"
@@ -220,8 +276,8 @@ check_mfe_authn_surface() {
   done
 
   config="$(curl -sS --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "$config_url" 2>/dev/null || true)"
-  if rg -F -q '"SITE_NAME": "Mereka Academy"' <<<"$config" \
-    && rg -q '"LOGO_URL":[[:space:]]*"https://[^"]+/theme/logo-horizontal\.(svg|png)"' <<<"$config" \
+  if rg -F -q "\"SITE_NAME\": \"${expected_site_name}\"" <<<"$config" \
+    && rg -q "\"LOGO_URL\":[[:space:]]*\"https://[^\"]+/${expected_logo_path_regex}\\.(svg|png)\"" <<<"$config" \
     && rg -F -q '"MEREKA_PUBLIC_FOOTER": {' <<<"$config"; then
     printf "✓ MFE config exposes Mereka site + /theme logo branding\n"
   else
