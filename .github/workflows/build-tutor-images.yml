@@ -469,6 +469,11 @@ jobs:
           # dependency from this lane, so we can use docker-container and first-
           # class GHA cache exporters like the MFE build.
           driver: docker-container
+          # This job runs on disposable runners, and the OpenEdX lane has
+          # already proven that Buildx teardown can hang long after the image
+          # digest is published. Skip builder cleanup to keep the critical path
+          # bounded; the runner is discarded at job exit anyway.
+          cleanup: false
 
       - name: Fix DinD network MTU
         run: |
@@ -722,6 +727,9 @@ jobs:
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd  # v4.0.0
         with:
           driver: docker-container
+          # Heavy image-build lanes run on ephemeral runners, so leaving the
+          # builder behind is cheaper than risking post-job cleanup stalls.
+          cleanup: false
           # Note: the previous attempt to cap parallelism via
           #   buildkitd-flags: --oci-worker-max-parallelism=4
           # was bogus — that flag does not exist in buildkitd. Baseline builds
