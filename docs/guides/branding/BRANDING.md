@@ -99,7 +99,7 @@ tutor local run lms ./manage.py lms collectstatic --noinput
 
 Run `./scripts/branding/verify-branding-health.sh` before building or deploying images. It enforces
 the presence of required logos, fonts, SCSS imports, and favicon assets. `./scripts/infra/tutor-config-save.sh`
-(via its internal `apply-patches.sh` call) and `./scripts/branding/deploy-branded-image.sh` now execute this
+(via its governed build-context refresh path) and `./scripts/branding/deploy-branded-image.sh` now execute this
 check automatically and fail fast if any asset is missing.
 
 To ensure the runtime CSS carries the full branded experience (course cards, courseware chrome), run:
@@ -152,6 +152,10 @@ If authn index points to an unbranded CSS bundle, repair image deterministically
 - `https://credentials.<domain>/health/` includes `overall_status` and `database_status`
 - `https://credentials.<domain>/` may be API-first and redirect to `/health/` (accepted)
 - `https://forum.<domain>/heartbeat` returns `200`
+- MFE authn pages use the expected host-specific runtime contract:
+  - absolute `/theme/*-brand.min.css` path for that tenant host
+  - tenant-specific `SITE_NAME` in `/api/mfe_config/v1`
+  - tenant-specific `/theme/.../logo-horizontal.*` logo path
 
 ## Subsites (Different Clients)
 
@@ -160,8 +164,9 @@ Production includes additional client hostnames:
 - `academy.biji-biji.com`
 
 These should still load the brand fonts + themed logo assets. `verify-public-branding.sh` checks those
-hosts in production (logo + local fonts), and `capture-branding-screenshots.sh` captures snapshots for
-those hosts (plus the Biji studio/MFEs where applicable).
+hosts in production (logo + local fonts), and also proves that each host serves its own
+tenant-specific authn shell contract instead of the generic Mereka fallback. `capture-branding-screenshots.sh`
+captures snapshots for those hosts (plus the Biji studio/MFEs where applicable).
 
 Note: LMS pages reference fingerprinted (hashed) CSS assets. If an edge cache briefly serves
 an older HTML page after a deploy, it may reference an older hash that no longer exists in the

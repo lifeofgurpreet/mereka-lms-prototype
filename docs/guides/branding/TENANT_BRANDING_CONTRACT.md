@@ -52,11 +52,11 @@ This table is the canonical decision reference for where branding changes belong
 | **Tenant favicon** | Per-tenant | Runtime (no rebuild) | `FAVICON_URL` in `TenantSiteConfiguration.mfe_config` |
 | **Tenant primary domain** | Per-tenant | DNS + Caddy config | Caddy block + Django `Site` model must both be updated |
 | **`PLATFORM_NAME`** | Per-tenant | Runtime via multisite registry + `apply-multisite-config.sh` | `site_values.platform_name` in `multisite-sites*.yml`, reconciled into `SiteConfiguration` |
-| **MFE `SITE_NAME`** | Per-tenant | Runtime `SiteConfiguration.site_values["MFE_CONFIG"]` for portal/API truth; image rebuild only for plugin-owned footer fallback | Enterprise portal shell may bootstrap from `env.config.js`, but canonical runtime truth is split across env config, LMS global `MFE_CONFIG`, and per-site `SiteConfiguration` |
+| **MFE `SITE_NAME`** | Per-tenant | Runtime `SiteConfiguration.site_values["MFE_CONFIG"]` for portal/API truth; image rebuild only for plugin-owned footer fallback | Enterprise portal shell may bootstrap from `env.config.js`, but canonical runtime truth is split across env config, LMS global `MFE_CONFIG`, and per-site `SiteConfiguration`. Live proof must validate the host-specific `SITE_NAME` on authn/runtime config surfaces, not assume the generic Mereka default. |
 | **MFE `SUPPORT_EMAIL`** | Per-tenant | Runtime `SiteConfiguration.site_values["MFE_CONFIG"]` or plugin-owned fallback rebuild | Do not assume base `enterprise-mfe-env.js` alone proves final runtime value |
 | **LMS SCSS/CSS overrides** | Global | LMS image rebuild | Theme-level; not per-tenant at runtime |
 | **Studio SCSS** | Global | LMS image rebuild | Same image as LMS theming |
-| **MFE CSS variables** | Global | MFE image rebuild | Compiled from `mfe/mereka.scss`; final enterprise portal theme also depends on runtime theme URLs / shell theme config |
+| **MFE CSS variables** | Global | MFE image rebuild | Compiled from `mfe/mereka.scss`; final enterprise portal theme also depends on runtime theme URLs / shell theme config. Live proof must validate the host-specific `/theme/*-brand.min.css` path realized for that tenant host, not one shared generic CSS URL. |
 | **`--mereka-mfe-branding-rev`** | Global | MFE image rebuild | Version marker in `mfe/mereka.scss`; verified by `verify-public-branding.sh` |
 
 ### Non-Goals
@@ -334,7 +334,7 @@ For each tenant domain:
    ```bash
    tutor config save --set "ALLOWED_HOSTS=['academyv2.mereka.io', 'acme.academyv2.mereka.io']"
    tutor config save --set "CSRF_TRUSTED_ORIGINS=['https://academyv2.mereka.io', 'https://acme.academyv2.mereka.io']"
-   ./infrastructure/tutor/apply-patches.sh
+   ./scripts/infra/prepare-tutor-build-context.sh --target all
    tutor k8s restart
    ```
 
@@ -725,7 +725,7 @@ curl -s https://studio.academyv2.mereka.io/ | grep -i "powered by open edx" && e
 
 - **Provisioning Guide**: `docs/ops/runbooks/TENANT_PROVISIONING.md`
 - **RAG Assessment**: `docs/status/readiness/TENANT_BRANDING_READINESS_RAG.md`
-- **Architecture**: `docs/concepts/architecture/multi-tenancy-overview.md`
+- **Tenant standard**: `docs/concepts/architecture/TENANT_LIFECYCLE.md`
 - **Spec**: `specs/multi-tenancy-architecture_spec.md`
 - **Branding Model**: `docs/guides/branding/BRANDING_OPERATING_MODEL.md`
 - **Domain/SSL**: `docs/ops/runbooks/DOMAIN_MANAGEMENT.md`

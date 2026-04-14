@@ -100,12 +100,12 @@ dig +short <tenant-domain>
 
 ### Step 2 — Add hostname to Caddy/Ingress routing
 
-Update the Caddyfile patch in `infrastructure/tutor/apply-patches.sh` or the Ingress
-manifest in `deploy/k8s/base/apps/` to accept the new hostname:
+Update the Caddyfile source patch in `infrastructure/tutor/patches/caddyfile` or the
+Ingress manifest in `deploy/k8s/base/apps/` to accept the new hostname:
 
 ```bash
-# Verify domain mapping in apply-patches.sh
-grep '<tenant-domain>' infrastructure/tutor/apply-patches.sh
+# Verify domain mapping in the Caddy patch source
+grep '<tenant-domain>' infrastructure/tutor/patches/caddyfile
 ```
 
 ### Step 3 — Add SITE_VARIANTS entry in mereka_lms.py
@@ -190,7 +190,7 @@ Local reproduction only:
 
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
 tutor images build mfe
 tutor local restart
 ```
@@ -299,7 +299,7 @@ git revert <commit-sha>
 
 # 3. Local reproduction only:
 export TUTOR_ROOT="$(pwd)/tutor_env"
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
 tutor images build mfe
 tutor local restart
 ```
@@ -339,8 +339,8 @@ git log --oneline -- infrastructure/tutor/plugins/mereka_lms.py | head -5
 # Revert
 git revert <commit-sha>
 
-# Re-apply patches and restart
-./infrastructure/tutor/apply-patches.sh
+# Refresh rendered build context and restart
+./scripts/infra/prepare-tutor-build-context.sh --target all
 tutor local restart
 ```
 
@@ -371,7 +371,7 @@ Check the `_PLUGIN_SLOTS_AVAILABLE` flag in logs to confirm whether slot wiring 
 | Tenant Branding Contract | `docs/guides/branding/TENANT_BRANDING_CONTRACT.md` | Contract between tenant config and rendering layer |
 | Brand Pack Schema | `docs/reference/operations/TENANT_BRAND_PACK_SCHEMA.md` | Required fields for a tenant brand pack |
 | Legacy Footer Removal | `docs/ops/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md` | Rollback steps for footer slot migration |
-| Multisite Config | `docs/concepts/architecture/multi-tenancy-overview.md` | Hostname routing and SITE_ID configuration |
+| Runtime host matrix | `docs/reference/operations/RUNTIME_TRUTH_MATRIX.md` | Declared hostname roles, environments, and backend mapping |
 | Enterprise Navigation | `docs/reference/operations/ENTERPRISE_MULTI_TENANCY_NAVIGATION.md` | Enterprise host mapping and navigation |
 
 ### Plugin and Config Files
@@ -393,5 +393,6 @@ Check the `_PLUGIN_SLOTS_AVAILABLE` flag in logs to confirm whether slot wiring 
 | `skillourfuture.academy.mereka.io` | Skill Our Future | Government programme host |
 
 For the full subsystem mapping (Studio, MFEs, discovery, forum), see
-`docs/concepts/architecture/multi-tenancy-overview.md` and the Caddyfile template in
-`infrastructure/tutor/apply-patches.sh`.
+`docs/reference/operations/RUNTIME_TRUTH_MATRIX.md`,
+`docs/reference/operations/ENTERPRISE_MULTI_TENANCY_NAVIGATION.md`, and the
+Caddyfile template in `infrastructure/tutor/patches/caddyfile`.
