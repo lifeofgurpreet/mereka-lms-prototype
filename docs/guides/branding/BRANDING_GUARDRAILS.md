@@ -54,6 +54,11 @@ Notes:
   MFE auth branding CTA text, Credentials health/admin reachability, Credentials API-root routing
   (`/` can be API-first redirect to `/health/`), Ecommerce root landing/dashboard auth shell,
   and Forum heartbeat/root landing.
+- On MFE authn surfaces, the live gate now proves the tenant-specific runtime contract per host rather
+  than assuming one generic Mereka payload:
+  - absolute `/theme/*-brand.min.css` path for that host
+  - expected `SITE_NAME` in `/api/mfe_config/v1`
+  - expected tenant logo path under `/theme/`
 - To enforce exact live-vs-source MFE branding revision parity, run:
   `STRICT_MFE_BRANDING_REV=1 ./scripts/branding/run-branding-gates.sh prod`
 - If `BRANDING_LEVEL=deep` fails live but passes locally, production is running an older `openedx` image.
@@ -70,7 +75,8 @@ This is intentionally non-fatal by default and answers: "which surface is still 
 Current audit coverage:
 - LMS + microsite runtime override CSS depth
 - Studio compiled CSS token/font wiring (primary + biji studio host)
-- MFE authn shell + `mfe_config` brand fields
+- MFE authn shell + `mfe_config` brand fields, including host-specific `SITE_NAME`,
+  logo path, and `/theme/*-brand.min.css` runtime contract
 - MFE authn parity for primary + `apps.academy.biji-biji.com`
 - Service-domain authn proxy surfaces (`ecommerce.* /dashboard`, `credentials.* /admin/login`)
 - Service-domain root branding contract (`ecommerce.* /`, `forum.* /`, credentials API-first root)
@@ -124,14 +130,14 @@ override with `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env` if 
 
 2c. Tutor template drift removes authn theme copy lines
    - Cause: generated MFE Dockerfile can omit theme asset copy in `authn-common`.
-   - Fix: rerun `./scripts/infra/tutor-config-save.sh`; it replays the canonical local regeneration path and re-invokes `apply-patches.sh` internally to enforce:
+   - Fix: rerun `./scripts/infra/tutor-config-save.sh`; it replays the canonical local regeneration path, runs the governed prepare step, and refreshes the rendered MFE Dockerfile contract so it enforces:
      - `COPY indigo/env.config.jsx /openedx/app/`
      - `COPY indigo/mereka /openedx/app/mereka`
 
 2d. Full MFE build fails with `Can't resolve '@openedx/frontend-plugin-framework'`
    - Cause: Tutor-generated MFE Dockerfile has Indigo `env.config.jsx` (which imports plugin framework),
      but missing plugin dependency install in one or more `*-common` stages.
-   - Fix: rerun `./scripts/infra/tutor-config-save.sh`; it replays the canonical local regeneration path and re-invokes `apply-patches.sh`, which injects
+   - Fix: rerun `./scripts/infra/tutor-config-save.sh`; it replays the canonical local regeneration path and refreshes the bounded rendered-build contract, which injects
      `npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'`
      idempotently across MFE common stages.
    - Verify by rebuilding and running:

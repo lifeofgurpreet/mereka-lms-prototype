@@ -6,15 +6,15 @@ This is the canonical workflow for branding changes in Mereka LMS.
 ## Non-Negotiable Rules
 
 1. `assets/branding/*` is the source input; runtime truth is `infrastructure/tutor/themes/mereka/*`.
-2. Any `tutor config save` must be followed by `./infrastructure/tutor/apply-patches.sh`.
-   - **Why**: Plugin handles configuration via Tutor hooks (automatic). Script handles asset sync (manual but required).
+2. Any manual `tutor config save` must be followed by `./scripts/infra/prepare-tutor-build-context.sh --target all`.
+   - **Why**: plugin hooks own the rendered MFE/Open edX Dockerfiles; the prepare step refreshes the remaining patch-only filesystem sync and tracked rendered-build snapshot from that source truth.
 3. No branding release is complete until both source and live gates pass.
 4. Production deploys are GitOps-managed; do not treat direct `kubectl set image` as source-of-truth.
 5. Drift is a defect: fix with governed publish + GitOps promotion, not by loosening checks.
 6. Run only one `tutor images build mfe` at a time; parallel runs cause cache contention and slow/fail builds.
-7. `./infrastructure/tutor/apply-patches.sh` is idempotent and required before every MFE/openedx build.
-   - **What it does**: Syncs theme assets (logos, fonts, SCSS), sets up theme directories, distributes font files.
-   - **What plugin does**: Django settings, MFE footer component, Google Fonts stripping, build config.
+7. `./scripts/infra/prepare-tutor-build-context.sh` is the canonical operator entrypoint before MFE/Open edX builds.
+   - **What it does**: verifies rendered freshness, runs the remaining patch-only filesystem sync, and refreshes the tracked rendered MFE Dockerfile snapshot.
+   - **What plugin does**: owns the rendered Dockerfile/env.config build contract, including Node 24, local `@edx/brand`, runtime theme payload copy, tenant-specific `/theme/*` runtime URLs, and HTTPS git rewrites. The active runtime-theme rewrite now accepts both raw object and IIFE-wrapped `PARAGON_THEME` payloads from upstream authn shells.
 
 ## Canonical Workflow
 
@@ -86,7 +86,8 @@ Preferred production promotion command after a successful image publish:
 5. Verify Argo rollout and rerun branding gates.
 
 Local Tutor builds remain valid for debug/dev parity:
-- Before local `tutor images build mfe`, run `scripts/qa/verify-mfe-build-prereqs.sh`
+- Before local `tutor images build mfe`, run `./scripts/infra/prepare-tutor-build-context.sh --target mfe`
+- Then run `scripts/qa/verify-mfe-build-prereqs.sh`
 - After local `tutor images build mfe`, verify the built image before any local/manual use:
   `scripts/qa/verify-mfe-image-branding.sh <image_ref>`
 - CI enforces the same contract in `.github/workflows/build-tutor-images.yml`
@@ -103,7 +104,7 @@ Local Tutor builds remain valid for debug/dev parity:
 
 3. **Studio token/font drift**
    - Cause: Studio Sass entrypoints not synced into Tutor build context.
-   - Fix: keep `cms/static/sass/studio-main-v1*.scss` tracked; rerun `apply-patches.sh` before build.
+   - Fix: keep `cms/static/sass/studio-main-v1*.scss` tracked; rerun `./scripts/infra/prepare-tutor-build-context.sh --target openedx` before build.
 
 4. **Credentials root returns Page Not Found**
    - Cause: service is API-first.
@@ -115,7 +116,7 @@ Local Tutor builds remain valid for debug/dev parity:
 
 6. **MFE build flakes on npm network (`ECONNRESET`/`ETIMEDOUT`)**
    - Cause: transient registry/network failures during multi-MFE npm installs.
-   - Fix: rerun from a single build session only; `apply-patches.sh` now injects npm retry/timeouts into MFE Dockerfile.
+   - Fix: rerun from a single build session only; the rendered MFE Dockerfile now carries the retry/timeouts and HTTPS git rewrite contract directly, and `verify-mfe-build-prereqs.sh` should stay green before rebuild.
    - Do not start a second `tutor images build mfe` while one is active.
 
 7. **MFE authn serves unthemed CSS even after branded build**
@@ -125,16 +126,16 @@ Local Tutor builds remain valid for debug/dev parity:
      2) if failing and rollout is urgent, repair image deterministically:
         `scripts/branding/repair-mfe-authn-branding.sh <source_image> <target_image>`
      3) redeploy with GitOps and rerun strict gate.
-   - Prevention (root-cause): `./infrastructure/tutor/apply-patches.sh` now enforces
-     authn parity by injecting both `COPY indigo/env.config.jsx /openedx/app/` and
-     `COPY indigo/mereka /openedx/app/mereka` into `authn-common` when Tutor template
-     drift omits them.
+   - Prevention (root-cause): `./scripts/infra/prepare-tutor-build-context.sh --target mfe`
+     realizes the authn parity enforcement implemented in `apply-patches.sh`, including
+     both `COPY indigo/env.config.jsx /openedx/app/` and `COPY indigo/mereka /openedx/app/mereka`
+     in `authn-common` when Tutor template drift omits them.
 
 8. **`tutor images build mfe` fails at `authn-prod` with `Can't resolve '@openedx/frontend-plugin-framework'`**
    - Cause: Indigo `env.config.jsx` imports plugin framework, but generated MFE Dockerfile is missing
      dependency install in one or more `*-common` stages.
    - Fix:
-     1) rerun `./infrastructure/tutor/apply-patches.sh`
+     1) rerun `./scripts/infra/prepare-tutor-build-context.sh --target mfe`
      2) rerun `tutor images build mfe`
      3) validate image contract with `./scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest`
    - Prevention: patch script now injects
@@ -155,7 +156,7 @@ Local Tutor builds remain valid for debug/dev parity:
    - Cause: regex in generated Dockerfile patch block is over-escaped and does not match
      real import lines.
    - Fix:
-     1) regenerate with `./infrastructure/tutor/apply-patches.sh`
+     1) regenerate with `./scripts/infra/prepare-tutor-build-context.sh --target openedx`
      2) confirm `tutor_env/env/build/openedx/Dockerfile` uses `fonts[.]googleapis[.]com`
         in both strip blocks
      3) rebuild/push `openedx`, bump GitOps ref/tag, rerun strict branding gates.
@@ -236,7 +237,7 @@ Direct DOM manipulation, monkey-patching, or injecting HTML/JS into MFE bundles 
 | MFE styling | SCSS theme override (`mereka.scss`) | `[data-testid*="..."]` selectors preferred |
 | LMS templates | Mako template theming (`head-extra.html`, `footer.html`, `header/brand.html`) | Standard Open edX theming mechanism |
 | Studio templates | Mako template theming (`head-extra.html`) | Standard Open edX theming mechanism |
-| Build-time transforms | `apply-patches.sh` (idempotent, reviewed) | Google Fonts stripping, npm config |
+| Build-time transforms | `prepare-tutor-build-context.sh` via `apply-patches.sh` | Google Fonts stripping, npm config |
 
 ### Forbidden Patterns
 
