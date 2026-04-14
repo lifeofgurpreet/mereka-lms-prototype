@@ -17,8 +17,10 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 COMMON_OVERRIDE_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css"
 MFE_THEME_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
+MFE_TOKEN_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/scss/_mfe-tokens.scss"
 EXPECTED_BRANDING_REV="$(sed -nE 's/.*--mereka-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' "$COMMON_OVERRIDE_CSS" | head -n 1)"
-EXPECTED_MFE_BRANDING_REV="$(sed -nE 's/.*--mereka-mfe-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' "$MFE_THEME_SCSS" | head -n 1)"
+EXPECTED_MFE_BRANDING_REV="$(sed -nE 's/.*--mereka-mfe-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' "$MFE_TOKEN_SCSS" | head -n 1)"
+CURL_TIMEOUT_SECONDS="${CURL_TIMEOUT_SECONDS:-20}"
 
 ENVIRONMENT="${1:-prod}"
 STRICT=0
@@ -160,6 +162,7 @@ check_mfe_authn_surface() {
   local authn_url="https://${host}/authn/login"
   local config_url="https://${host}/api/mfe_config/v1"
   local html config css_path css ts
+  local theme_css_url theme_css_headers theme_css_content_type theme_css_body
   ts="$(date +%s)"
 
   html="$(fetch "${authn_url}?nocache=${ts}")"
@@ -196,6 +199,26 @@ check_mfe_authn_surface() {
     fi
   fi
 
+  if rg -q '\.\./theme/[^"]+\.css' <<<"$html"; then
+    gap "MFE authn (${host}): PARAGON_THEME still uses relative ../theme CSS references"
+  elif rg -q '/theme/core.min.css' <<<"$html" \
+    && rg -q '/theme/mereka-brand.min.css' <<<"$html"; then
+    ok "MFE authn (${host}): authn shell uses absolute /theme CSS references"
+  else
+    gap "MFE authn (${host}): authn shell missing absolute /theme CSS references"
+  fi
+
+  theme_css_url="https://${host}/theme/mereka-brand.min.css?nocache=${ts}"
+  theme_css_headers="$(curl -sSI --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "$theme_css_url" 2>/dev/null || true)"
+  theme_css_content_type="$(printf '%s' "$theme_css_headers" | awk -F': ' 'tolower($1)=="content-type"{print tolower($2)}' | tr -d '\r' | tail -n 1)"
+  theme_css_body="$(fetch "$theme_css_url")"
+  if [[ "$theme_css_content_type" == text/css* ]] \
+    && grep -Eq -- '--pgn-color-primary-base|--mereka-color-magenta|--mereka-mfe-gradient' <<<"$theme_css_body"; then
+    ok "MFE authn (${host}): runtime /theme CSS resolves as branded CSS"
+  else
+    gap "MFE authn (${host}): runtime /theme CSS does not resolve as branded CSS (content-type=${theme_css_content_type:-<missing>})"
+  fi
+
   config="$(fetch "$config_url")"
   if [[ -z "${config:-}" ]]; then
     gap "MFE authn (${host}): mfe_config endpoint unreachable"
@@ -203,7 +226,8 @@ check_mfe_authn_surface() {
   fi
 
   if rg -F -q '"SITE_NAME": "Mereka Academy"' <<<"$config" \
-    && rg -F -q '/theming/asset/mereka/images/logo-horizontal.png' <<<"$config"; then
+    && rg -q '"LOGO_URL":[[:space:]]*"https://[^"]+/theme/logo-horizontal\.(svg|png)"' <<<"$config" \
+    && rg -F -q '"MEREKA_PUBLIC_FOOTER": {' <<<"$config"; then
     ok "MFE authn (${host}): mfe_config branding fields present"
   else
     gap "MFE authn (${host}): mfe_config branding fields missing"

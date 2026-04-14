@@ -180,6 +180,12 @@ preflight_runtime_theme_contract() {
       echo "Runtime-theme preflight: PASS ($MFE_BASE_URL/authn/login uses /theme/*.css)"
       return 0
     fi
+    if [[ "$authn_html" == *"../theme/"* ]]; then
+      echo "ERROR: Runtime-theme preflight failed — authn shell still uses relative ../theme URLs." >&2
+      echo "       Expected: /theme/core.min.css and /theme/mereka-brand.min.css in $MFE_BASE_URL/authn/login" >&2
+      echo "       Action: rebuild/redeploy MFE image with absolute /theme runtime URLs, then re-run smoke." >&2
+      return 1
+    fi
     if echo "$authn_html" | grep -Eq 'paragon-theme-core\.[a-z0-9]+\.css' \
       && echo "$authn_html" | grep -Eq 'brand-theme-core\.[a-z0-9]+\.css'; then
       echo "ERROR: Runtime-theme preflight failed — authn shell is using embedded theme bundles, not /theme URLs." >&2

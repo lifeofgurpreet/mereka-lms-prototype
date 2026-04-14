@@ -233,11 +233,15 @@ if [[ -n "${RUNTIME_URL:-}" ]]; then
     authn_shell_status="$(curl "${CURL_FLAGS[@]}" -sSL -o /tmp/paragon-authn-shell.$$ -w "%{http_code}" "$authn_shell_url" || true)"
     if [[ "$authn_shell_status" =~ ^[0-9]+$ ]] && [[ "$authn_shell_status" -ge 200 ]] && [[ "$authn_shell_status" -lt 400 ]]; then
       has_runtime_theme_urls=0
+      has_relative_theme_urls=0
       has_embedded_theme_files=0
 
       if grep -q '/theme/core.min.css' /tmp/paragon-authn-shell.$$ \
         && grep -q '/theme/mereka-brand.min.css' /tmp/paragon-authn-shell.$$; then
         has_runtime_theme_urls=1
+      fi
+      if grep -q '\.\./theme/' /tmp/paragon-authn-shell.$$; then
+        has_relative_theme_urls=1
       fi
 
       if grep -Eq 'paragon-theme-core\.[A-Za-z0-9]+\.css' /tmp/paragon-authn-shell.$$ \
@@ -245,7 +249,13 @@ if [[ -n "${RUNTIME_URL:-}" ]]; then
         has_embedded_theme_files=1
       fi
 
-      if [[ "$has_runtime_theme_urls" -eq 1 ]]; then
+      if [[ "$has_relative_theme_urls" -eq 1 ]]; then
+        if [[ "$REQUIRE_RUNTIME" -eq 1 ]]; then
+          fail "Runtime authn shell still uses relative ../theme URLs (${authn_shell_url})"
+        else
+          warn "Runtime authn shell still uses relative ../theme URLs (${authn_shell_url})"
+        fi
+      elif [[ "$has_runtime_theme_urls" -eq 1 ]]; then
         pass "Runtime authn shell references /theme/core.min.css + /theme/mereka-brand.min.css (${authn_shell_url})"
       elif [[ "$has_embedded_theme_files" -eq 1 ]]; then
         if [[ "$REQUIRE_RUNTIME" -eq 1 ]]; then

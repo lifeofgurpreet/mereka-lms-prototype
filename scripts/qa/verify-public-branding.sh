@@ -10,8 +10,9 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 COMMON_OVERRIDE_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css"
 MFE_THEME_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
+MFE_TOKEN_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/scss/_mfe-tokens.scss"
 EXPECTED_BRANDING_REV="$(sed -nE 's/.*--mereka-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' "$COMMON_OVERRIDE_CSS" | head -n 1)"
-EXPECTED_MFE_BRANDING_REV="$(sed -nE 's/.*--mereka-mfe-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' "$MFE_THEME_SCSS" | head -n 1)"
+EXPECTED_MFE_BRANDING_REV="$(sed -nE 's/.*--mereka-mfe-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' "$MFE_TOKEN_SCSS" | head -n 1)"
 
 SOURCE_ONLY=0
 for _arg in "$@"; do
@@ -48,11 +49,11 @@ if [[ "$ENVIRONMENT" == "prod" ]]; then
   FORUM_HOST="$FORUM_DOMAIN"
   EXTRA_HOSTS=("$BIJI_DOMAIN" "$SKILLOURFUTURE_DOMAIN")
 else
-  BASE_DOMAIN="$DEV_LMS_DOMAIN"
-  STUDIO_HOST="$DEV_STUDIO_DOMAIN"
-  MFE_HOST="$DEV_MFE_DOMAIN"
-  ECOMMERCE_HOST="$DEV_ECOMMERCE_DOMAIN"
-  FORUM_HOST="$DEV_FORUM_DOMAIN"
+  BASE_DOMAIN="${DEV_LMS_DOMAIN:-academyv2.mereka.dev}"
+  STUDIO_HOST="${DEV_STUDIO_DOMAIN:-studio.academyv2.mereka.dev}"
+  MFE_HOST="${DEV_MFE_DOMAIN:-apps.academyv2.mereka.dev}"
+  ECOMMERCE_HOST="${DEV_ECOMMERCE_DOMAIN:-ecommerce.academyv2.mereka.dev}"
+  FORUM_HOST="${DEV_FORUM_DOMAIN:-forum.academyv2.mereka.dev}"
   EXTRA_HOSTS=()
 fi
 
@@ -148,6 +149,7 @@ check_mfe_authn_surface() {
   local mfe_host=$1
   local config_url="https://${mfe_host}/api/mfe_config/v1"
   local html config authn_css_path authn_css authn_url route_label
+  local theme_css_url theme_css_headers theme_css_content_type theme_css_body
   local ts
 
   for route_label in "login" "register"; do
@@ -191,14 +193,39 @@ check_mfe_authn_surface() {
         failures=$((failures + 1))
       fi
     fi
+
+    if rg -q '\.\./theme/[^"]+\.css' <<<"$html"; then
+      printf "✗ MFE %s page still uses relative ../theme CSS references in PARAGON_THEME\n" "$route_label" >&2
+      failures=$((failures + 1))
+    elif rg -q '/theme/core.min.css' <<<"$html" \
+      && rg -q '/theme/mereka-brand.min.css' <<<"$html"; then
+      printf "✓ MFE %s page references absolute /theme CSS runtime contract\n" "$route_label"
+    else
+      printf "✗ MFE %s page missing absolute /theme CSS runtime contract markers\n" "$route_label" >&2
+      failures=$((failures + 1))
+    fi
+
+    theme_css_url="https://${mfe_host}/theme/mereka-brand.min.css?nocache=${ts}"
+    theme_css_headers="$(curl -sSI --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "$theme_css_url" 2>/dev/null || true)"
+    theme_css_content_type="$(printf '%s' "$theme_css_headers" | awk -F': ' 'tolower($1)=="content-type"{print tolower($2)}' | tr -d '\r' | tail -n 1)"
+    theme_css_body="$(curl -sS -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "$theme_css_url" 2>/dev/null || true)"
+    if [[ "$theme_css_content_type" == text/css* ]] \
+      && grep -Eq -- '--pgn-color-primary-base|--mereka-color-magenta|--mereka-mfe-gradient' <<<"$theme_css_body"; then
+      printf "✓ MFE %s runtime /theme CSS resolves as branded CSS\n" "$route_label"
+    else
+      printf "✗ MFE %s runtime /theme CSS is not resolving as branded CSS (content-type=%s)\n" \
+        "$route_label" "${theme_css_content_type:-<missing>}" >&2
+      failures=$((failures + 1))
+    fi
   done
 
   config="$(curl -sS --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "$config_url" 2>/dev/null || true)"
   if rg -F -q '"SITE_NAME": "Mereka Academy"' <<<"$config" \
-    && rg -F -q '/theming/asset/mereka/images/logo-horizontal.png' <<<"$config"; then
-    printf "✓ MFE config exposes Mereka site + logo branding\n"
+    && rg -q '"LOGO_URL":[[:space:]]*"https://[^"]+/theme/logo-horizontal\.(svg|png)"' <<<"$config" \
+    && rg -F -q '"MEREKA_PUBLIC_FOOTER": {' <<<"$config"; then
+    printf "✓ MFE config exposes Mereka site + /theme logo branding\n"
   else
-    printf "✗ MFE config missing expected Mereka branding fields\n" >&2
+    printf "✗ MFE config missing expected Mereka branding contract fields\n" >&2
     failures=$((failures + 1))
   fi
 }
@@ -627,12 +654,12 @@ check_source_integrity() {
   fi
   [[ -f "$MFE_THEME_SCSS" ]] \
     && ok_label "MFE SCSS (mereka.scss) exists" || fail_label "MFE SCSS missing"
-  if [[ -f "$MFE_THEME_SCSS" ]]; then
+  if [[ -f "$MFE_TOKEN_SCSS" ]]; then
     local mfe_rev
-    mfe_rev="$(sed -nE 's/.*--mereka-mfe-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' "$MFE_THEME_SCSS" | head -n 1)"
+    mfe_rev="$(sed -nE 's/.*--mereka-mfe-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' "$MFE_TOKEN_SCSS" | head -n 1)"
     [[ -n "$mfe_rev" ]] \
-      && ok_label "MFE SCSS has mfe-branding-rev marker (${mfe_rev})" \
-      || fail_label "MFE SCSS missing --mereka-mfe-branding-rev marker"
+      && ok_label "MFE token SCSS has mfe-branding-rev marker (${mfe_rev})" \
+      || fail_label "MFE token SCSS missing --mereka-mfe-branding-rev marker"
   fi
 
   # Static logo assets
