@@ -130,12 +130,29 @@
         "rollback_target_reference"
       ],
       "rollback_method": "gitops_revert_to_previous_release_bundle"
+    },
+    "zoom-rtms": {
+      "approved_intake_paths": [
+        "gitops-manifest-pr",
+        "internal-image-build-and-promotion"
+      ],
+      "owners": [
+        "@platform",
+        "@applications"
+      ],
+      "required_evidence": [
+        "release_notes_diff",
+        "config_change_summary",
+        "smoke_test_result",
+        "rollback_target_reference"
+      ],
+      "rollback_method": "gitops_revert_to_previous_release_bundle"
     }
   },
   "source_pointers": [
-    "/home/gurpreet/projects/platform-control-plane-wt-wave10-contract-docsync/contracts/release-contracts.yaml",
-    "/home/gurpreet/projects/k8s/mereka-lms-wt-wave10-agent-consumption-runtime/docs/ops/runbooks/DEPLOY_EVIDENCE_GATES.md",
-    "/home/gurpreet/projects/k8s/bbi-infrastructure-wt-wave10-contract-compiled-front-doors/docs/reference/PROMOTION_CONTRACT_REFERENCE.md"
+    "platform-control-plane:contracts/release-contracts.yaml",
+    "mereka-lms:docs/ops/runbooks/DEPLOY_EVIDENCE_GATES.md",
+    "bbi-infrastructure:docs/reference/PROMOTION_CONTRACT_REFERENCE.md"
   ],
   "version": 1
 }

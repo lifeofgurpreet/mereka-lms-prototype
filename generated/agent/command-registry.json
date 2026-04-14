@@ -55,7 +55,7 @@
       "when_to_use": "Validate runtime_review_evidence_rules truth or drift risk"
     },
     {
-      "command": "/home/gurpreet/projects/platform-control-plane/scripts/plan-all.sh --validate-only",
+      "command": "platform-control-plane:scripts/plan-all.sh --validate-only",
       "domain": "opentofu_backend_workspace_rules",
       "owner_repo": "platform-control-plane",
       "when_to_use": "Validate opentofu_backend_workspace_rules truth or drift risk"
@@ -67,7 +67,7 @@
       "when_to_use": "Validate release_lanes truth or drift risk"
     },
     {
-      "command": "/home/gurpreet/projects/platform-control-plane/scripts/plan-all.sh --validate-only",
+      "command": "platform-control-plane:scripts/plan-all.sh --validate-only",
       "domain": "service_identity_aliases",
       "owner_repo": "platform-control-plane",
       "when_to_use": "Validate service_identity_aliases truth or drift risk"
