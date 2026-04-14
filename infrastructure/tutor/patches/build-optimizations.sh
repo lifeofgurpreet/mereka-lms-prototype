@@ -192,19 +192,6 @@ for target in targets:
         "RUN atlas pull --repository='openedx/openedx-translations' --revision='release/ulmo.1'  \\\n    translations/edx-platform/conf/locale:conf/locale \\\n    translations/studio-frontend/src/i18n/messages:conf/plugins-locale/studio-frontend\n",
         "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then echo \"Skipping atlas translation pull (fast build profile)\"; else atlas pull --repository='openedx/openedx-translations' --revision='release/ulmo.1'  \\\n    translations/edx-platform/conf/locale:conf/locale \\\n    translations/studio-frontend/src/i18n/messages:conf/plugins-locale/studio-frontend; fi\n",
     )
-    updated = updated.replace(
-        "RUN ./manage.py lms --settings=tutor.i18n compile_xblock_translations\nRUN ./manage.py cms --settings=tutor.i18n compile_xblock_translations\n",
-        "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then echo \"Skipping XBlock translation compile (fast build profile)\"; else ./manage.py lms --settings=tutor.i18n compile_xblock_translations && ./manage.py cms --settings=tutor.i18n compile_xblock_translations; fi\n",
-    )
-    updated = updated.replace(
-        "RUN ./manage.py lms --settings=tutor.i18n compile_plugin_translations\n",
-        "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then echo \"Skipping compile_plugin_translations (fast build profile)\"; else ./manage.py lms --settings=tutor.i18n compile_plugin_translations; fi\n",
-    )
-    updated = updated.replace(
-        "RUN ./manage.py lms --settings=tutor.i18n compilemessages -v1\n",
-        "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then echo \"Skipping compilemessages (fast build profile)\"; else ./manage.py lms --settings=tutor.i18n compilemessages -v1; fi\n",
-    )
-
     # REMOVED: Redwood-era node_modules COPY path fixes + node cache reuse (FROM overhangio/openedx:18.2.2)
     # This was a Tutor 18/Redwood optimization that copied node_modules from the upstream
     # Redwood image. Incompatible with Ulmo (different node version, package structure).
