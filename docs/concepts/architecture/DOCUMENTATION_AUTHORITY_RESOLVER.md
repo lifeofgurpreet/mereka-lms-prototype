@@ -17,7 +17,7 @@ Use this table before reading or writing:
 | --- | --- |
 | Intended behavior or acceptance criteria | `specs/**` |
 | Stable platform authority model and incident ownership | `docs/architecture/**` |
-| Detailed architecture standards and concept overviews | `docs/concepts/architecture/**` |
+| Retained architecture standards and deep concept overviews | `docs/concepts/architecture/**` |
 | How to operate or recover the platform | `docs/ops/**` |
 | Why a technical decision was made | `docs/adr/**` |
 | How contributors or users should do something | `docs/guides/**` |
@@ -33,7 +33,7 @@ Apply these rules in order:
 
 1. If the question is about intended behavior, `specs/**` wins.
 2. If the question is about stable platform authority model and flow ownership, `docs/architecture/**` wins.
-3. If the question is about detailed architecture standards or concept overviews, `docs/concepts/architecture/**` wins.
+3. If the question is about a retained architecture standard or deep concept overview, `docs/concepts/architecture/**` wins.
 4. If the question is about operator procedure, `docs/ops/**` wins.
 5. If the question is about accepted or superseded technical decisions, `docs/adr/**` wins.
 6. If the question is about user or contributor guidance, `docs/guides/**` wins.
@@ -57,7 +57,8 @@ If a transitional or archive path contradicts a winning root, the winning root g
 
 | Artifact kind | Canonical root | Transitional roots | Cold / historical root |
 | --- | --- | --- | --- |
-| Stable platform architecture model | `docs/architecture/**` | `docs/concepts/architecture/**` | `docs/archive/**` |
+| Stable platform architecture model and front doors | `docs/architecture/**` | none | `docs/archive/**` |
+| Retained architecture standards and concept overviews | `docs/concepts/architecture/**` | none | `docs/archive/**` |
 | Operator procedures | `docs/ops/**` | `docs/operations/README.md`, `docs/runbooks/README.md` | `docs/archive/**` |
 | Human guidance / onboarding | `docs/guides/**` | `docs/onboarding/README.md`, `docs/branding/README.md` | `docs/archive/**` |
 | Stable lookup / reference | `docs/reference/**` | none | `docs/archive/**` |
@@ -151,7 +152,7 @@ These are locked for this wave:
 - `docs/evidence/**` is the single active evidence root
 - `docs/status/**` is the single active status root
 - `docs/architecture/**` is the canonical stable system-model root for platform authority and flow ownership
-- `docs/concepts/architecture/**` is detailed standards/reference context
+- `docs/concepts/architecture/**` is retained standards/reference context, not the default architecture front door
 - proposed `ADR-034` to `ADR-041` must leave the accepted ADR hot path and live in `docs/adr/rfc/`
 
 ## Local validation entrypoints

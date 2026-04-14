@@ -17,6 +17,7 @@ ALLOWED_FILES = {
     "docs/concepts/architecture/IDENTITY_DOMAIN_BOUNDARIES.md",
     "docs/concepts/architecture/RELEASE_ROLLOUT_AND_REMOVAL.md",
     "docs/concepts/architecture/TENANT_LIFECYCLE.md",
+    "docs/concepts/architecture/TENANT_OPERATING_SYSTEM.md",
     "docs/concepts/architecture/TUTOR_AND_EXTENSION_MODEL.md",
     "docs/concepts/architecture/content-libraries-overview.md",
     "docs/concepts/architecture/enterprise-services-overview.md",

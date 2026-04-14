@@ -10,7 +10,7 @@ audience:
   - Engineering Team
   - Platform Operators
   - Reviewers
-summary: Defines the target tenant platform operating model: one contract plane, one acceptance plane, one proof plane, one delivery plane, and one review plane.
+summary: "Defines the target tenant platform operating model: one contract plane, one acceptance plane, one proof plane, one delivery plane, and one review plane."
 tags:
   - architecture
   - tenant.platform
