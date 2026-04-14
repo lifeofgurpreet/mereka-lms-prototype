@@ -1,11 +1,12 @@
 version: 1
 owner: Platform Team
 status: canonical
-last_reviewed: 2026-03-09
+last_reviewed: 2026-04-14
 
 classes:
   architecture-standard:
     canonical_roots:
+      - docs/architecture
       - docs/concepts/architecture
     schema_ref: frontmatter-schema.json#/allOf/0
     required_common:

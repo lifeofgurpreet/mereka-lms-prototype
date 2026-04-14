@@ -1,5 +1,5 @@
 # Documentation Metadata Model
-_Audience: Contributors and tooling maintainers • Owner: Platform Team • Last verified: 2026-03-09 • Status: canonical_
+_Audience: Contributors and tooling maintainers • Owner: Platform Team • Last verified: 2026-04-14 • Status: canonical_
 
 This document defines the current metadata model for canonical documentation. It exists to reduce metadata split-brain without reopening repository topology.
 
@@ -7,6 +7,7 @@ This document defines the current metadata model for canonical documentation. It
 
 This model applies first to canonical hot-path docs under:
 
+- `docs/architecture/**`
 - `docs/concepts/architecture/**`
 - `docs/ops/**`
 - `docs/guides/standards/**`
@@ -18,6 +19,11 @@ This model applies first to canonical hot-path docs under:
 - `docs/adr/rfc/**`
 
 Archive and transitional roots are out of scope for first-pass normalization.
+That includes historical docs-program packet records that remain intentionally
+retained under `docs/meta/docs-program/**`; those surfaces should be bounded and
+routed correctly under
+[`../authority-registry.v1.yaml`](../authority-registry.v1.yaml), but they are
+not first-pass canonical metadata targets.
 
 ## Objectives
 
@@ -59,6 +65,7 @@ All canonical hot-path docs should provide these metadata fields:
 
 Allowed canonical roots for active docs in this wave:
 
+- `docs/architecture`
 - `docs/concepts/architecture`
 - `docs/ops`
 - `docs/guides`
@@ -206,6 +213,6 @@ Reviewers should reject changes when:
 
 ## Related docs
 
-- [Documentation Authority Resolver](../../../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md)
+- [Platform Authority Map](../../../architecture/PLATFORM_AUTHORITY_MAP.md)
 - [Documentation Standards](../../../guides/standards/DOCUMENTATION_STANDARDS.md)
 - [Docs / Specs Contract](../../../guides/standards/DOCS_SPECS_CONTRACT.md)
