@@ -475,41 +475,6 @@ CMD ["uwsgi", "/openedx/uwsgi.ini"]
     # ── production.py patches ───────────────────────────────────────────
 
     if path.name == "production.py":
-        def force_mfe_discussions_only(text):
-            if "lms/production.py" not in str(path):
-                return text
-            if "# Force MFE-only discussions (greenfield" in text:
-                return text
-            marker = 'FEATURES["ENABLE_DISCUSSION_SERVICE"] = True'
-            if marker not in text:
-                marker = 'FEATURES["ENABLE_DISCUSSION_SERVICE"] = False'
-            if marker not in text:
-                return text
-            mfe_config = textwrap.dedent("""
-
-            # Force MFE-only discussions (greenfield - no legacy views needed)
-            FEATURES["ENABLE_DISCUSSION_HOME_PANEL"] = False  # Disable legacy in-LMS panel
-
-            # Ensure all courses use MFE by default
-            DISCUSSIONS_MFE_ENABLED = True
-            if "DISCUSSIONS_MICROFRONTEND_URL" not in globals():
-                _mfe_base = globals().get("MEREKA_MFE_BASE_URL", "https://apps.academyv2.mereka.io")
-                DISCUSSIONS_MICROFRONTEND_URL = f"{_mfe_base}/discussions"
-            if "DISCUSSIONS_MFE_FEEDBACK_URL" not in globals():
-                DISCUSSIONS_MFE_FEEDBACK_URL = None
-            """)
-            lines = text.splitlines()
-            last_idx = None
-            for idx, line in enumerate(lines):
-                if marker in line and not line.strip().startswith("#"):
-                    last_idx = idx
-            if last_idx is not None:
-                lines.insert(last_idx + 1, mfe_config)
-                return "\n".join(lines)
-            return text
-
-        updated = force_mfe_discussions_only(updated)
-
         # Upstream/local render inputs can still emit DEFAULT_SITE_THEME twice.
         # Keep the first canonical mereka assignment and strip later duplicates
         # without preserving the old broad runtime-cluster scrubber.

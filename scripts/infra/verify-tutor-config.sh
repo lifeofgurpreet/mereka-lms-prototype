@@ -613,6 +613,7 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_not_in_file 'RUN ./manage.py lms --settings=tutor.i18n compilemessages -v1\n' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain legacy compilemessages source rewrite"
   pattern_not_in_file 'if [ "$MEREKA_BUILD_PROFILE" = "fast" ]; then echo "Skipping rdfind static dedupe (fast build profile)"; else rdfind -makesymlinks true -followsymlinks true /openedx/staticfiles/; fi' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain fast rdfind skip rewrite"
   pattern_not_in_file "# Mereka adjustments keep Redwood optional apps enabled" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain dead optional-app compatibility rewrite"
+  pattern_not_in_file "# Force MFE-only discussions (greenfield - no legacy views needed)" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain dead MFE discussions compatibility rewrite"
   pattern_not_in_file 'fonts\\\\.googleapis\\\\.com' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain escaped Google Fonts regex rewrite"
   pattern_not_in_file 'RUN git clone https://github.com/pyenv/pyenv $PYENV_ROOT --branch v2.3.36 --depth 1' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain plain pyenv clone rewrite"
   pattern_not_in_file 'retry_pyenv_marker = "pyenv clone attempt"' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain retry pyenv clone rewrite"
