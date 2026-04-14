@@ -21,7 +21,8 @@ repo_discovery:
       - ../../platform-control-plane-wt-wave11-skill-exports
       - ../../platform-control-plane-wt-wave10-contract-docsync
 authoritative_policy:
-  - docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md
+  - docs/README.md
+  - docs/architecture/PLATFORM_AUTHORITY_MAP.md
   - docs/meta/standing-orders/README.md
   - docs/meta/skills/SKILL_TAXONOMY.yaml
 repos:
@@ -53,7 +54,6 @@ stability_levels:
 forbidden_canonical_prefixes:
   - docs/archive/
   - docs/operations/
-  - docs/architecture/
   - reports/
   - evidence/
   - specs/archive/

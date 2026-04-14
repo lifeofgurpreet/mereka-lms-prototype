@@ -45,6 +45,7 @@ task_types:
     review_mandatory: true
     trigger_patterns:
       - "docs/adr/**"
+      - "docs/architecture/**"
       - "docs/concepts/architecture/**"
   cross_repo_contract_change:
     description: Change service, environment, release, or cross-repo deployment contract truth.

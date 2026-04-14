@@ -5,7 +5,7 @@
 
 Start here before repo spelunking. These are the default canonical surfaces for humans and agents.
 
-1. `mereka-lms` -> `docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md`
+1. `mereka-lms` -> `docs/architecture/PLATFORM_AUTHORITY_MAP.md`
 2. `mereka-lms` -> `docs/meta/standing-orders/GOVERNANCE_AGENT.md`
 3. `mereka-lms` -> `docs/meta/standing-orders/README.md`
 4. `bbi-infrastructure` -> `config/bootstrap-lane-topology.yaml`

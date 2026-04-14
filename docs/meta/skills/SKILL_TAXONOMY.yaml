@@ -27,7 +27,8 @@ skills:
     primary_repo: mereka-lms
     secondary_repos: []
     source_paths:
-      - { repo: mereka-lms, path: docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md }
+      - { repo: mereka-lms, path: docs/README.md }
+      - { repo: mereka-lms, path: docs/architecture/PLATFORM_AUTHORITY_MAP.md }
       - { repo: mereka-lms, path: docs/meta/standing-orders/README.md }
       - { repo: mereka-lms, path: tools/docs/verify/verify-docs-policy.sh }
       - { repo: mereka-lms, path: tools/docs/verify/verify-doc-catalog-governance.py }
@@ -114,7 +115,7 @@ skills:
     primary_repo: mereka-lms
     secondary_repos: [bbi-infrastructure, platform-control-plane]
     source_paths:
-      - { repo: mereka-lms, path: docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md }
+      - { repo: mereka-lms, path: docs/architecture/PLATFORM_AUTHORITY_MAP.md }
       - { repo: bbi-infrastructure, path: config/bootstrap-lane-topology.yaml }
       - { repo: platform-control-plane, path: contracts/release-contracts.yaml }
     command_refs:
@@ -131,7 +132,7 @@ skills:
     primary_repo: mereka-lms
     secondary_repos: []
     source_paths:
-      - { repo: mereka-lms, path: docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md }
+      - { repo: mereka-lms, path: docs/reference/governance/DEPRECATION_LEDGER.md }
       - { repo: mereka-lms, path: tools/docs/verify/scan-doc-catalog-residue.py }
       - { repo: mereka-lms, path: tools/docs/verify/report-nonstub-transitional-files.py }
     command_refs:

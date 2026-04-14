@@ -10,7 +10,6 @@ from typing import Any
 FORBIDDEN_PREFIXES = (
     "docs/archive/",
     "docs/operations/",
-    "docs/architecture/",
     "reports/",
     "evidence/",
     "specs/archive/",
