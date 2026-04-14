@@ -42,7 +42,7 @@ def verify(repo_root: Path, range_spec: str) -> dict[str, int]:
     if entrypoints_payload["unresolved_domains"]:
         raise SystemExit("UNRESOLVED_DOMAINS_PRESENT")
 
-    bundle_dir = repo_root / "generated" / "knowledge" / "task-bundles"
+    bundle_dir = repo_root / "generated" / "knowledge" / "agent-task-bundles"
     actual_files = {path.name for path in bundle_dir.glob("*.md")}
     if actual_files != expected_bundle_files():
         raise SystemExit("AGENT_TASK_BUNDLE_SET_MISMATCH")

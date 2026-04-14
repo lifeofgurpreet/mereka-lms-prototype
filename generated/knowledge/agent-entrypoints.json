@@ -46,10 +46,8 @@
         "generated",
         "specs"
       ],
-      "cross_repo_overall_verdict": "infra_counterpart_required",
-      "cross_repo_repositories": [
-        "bbi-infrastructure"
-      ],
+      "cross_repo_overall_verdict": "infra_counterpart_not_required",
+      "cross_repo_repositories": [],
       "cross_repo_surfaces": [
         "generated/contracts/deployment-impact-report.json"
       ],
@@ -101,10 +99,8 @@
         "generated",
         "specs"
       ],
-      "cross_repo_overall_verdict": "infra_counterpart_required",
-      "cross_repo_repositories": [
-        "bbi-infrastructure"
-      ],
+      "cross_repo_overall_verdict": "infra_counterpart_not_required",
+      "cross_repo_repositories": [],
       "cross_repo_surfaces": [
         "generated/contracts/cross-repo-manifest.json",
         "generated/contracts/deployment-impact-report.json",
@@ -156,10 +152,8 @@
         "docs",
         "generated"
       ],
-      "cross_repo_overall_verdict": "infra_counterpart_required",
-      "cross_repo_repositories": [
-        "bbi-infrastructure"
-      ],
+      "cross_repo_overall_verdict": "infra_counterpart_not_required",
+      "cross_repo_repositories": [],
       "cross_repo_surfaces": [
         "generated/contracts/cross-repo-manifest.json",
         "generated/contracts/deployment-impact-report.json",
@@ -298,10 +292,8 @@
         "generated",
         "specs"
       ],
-      "cross_repo_overall_verdict": "infra_counterpart_required",
-      "cross_repo_repositories": [
-        "bbi-infrastructure"
-      ],
+      "cross_repo_overall_verdict": "infra_counterpart_not_required",
+      "cross_repo_repositories": [],
       "cross_repo_surfaces": [
         "generated/contracts/cross-repo-manifest.json",
         "generated/contracts/release-obligations.md"
@@ -347,10 +339,8 @@
         "generated",
         "specs"
       ],
-      "cross_repo_overall_verdict": "infra_counterpart_required",
-      "cross_repo_repositories": [
-        "bbi-infrastructure"
-      ],
+      "cross_repo_overall_verdict": "infra_counterpart_not_required",
+      "cross_repo_repositories": [],
       "cross_repo_surfaces": [
         "generated/contracts/deployment-impact-report.json",
         "generated/contracts/cross-repo-manifest.json"
@@ -399,10 +389,8 @@
         "docs",
         "generated"
       ],
-      "cross_repo_overall_verdict": "infra_counterpart_required",
-      "cross_repo_repositories": [
-        "bbi-infrastructure"
-      ],
+      "cross_repo_overall_verdict": "infra_counterpart_not_required",
+      "cross_repo_repositories": [],
       "cross_repo_surfaces": [
         "generated/contracts/cross-repo-manifest.json",
         "generated/contracts/deployment-impact-report.json",
@@ -491,10 +479,8 @@
         "generated",
         "specs"
       ],
-      "cross_repo_overall_verdict": "infra_counterpart_required",
-      "cross_repo_repositories": [
-        "bbi-infrastructure"
-      ],
+      "cross_repo_overall_verdict": "infra_counterpart_not_required",
+      "cross_repo_repositories": [],
       "cross_repo_surfaces": [
         "generated/contracts/deployment-impact-report.json"
       ],

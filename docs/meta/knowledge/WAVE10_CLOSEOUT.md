@@ -41,7 +41,7 @@ Use `generated/agent/read-first.md` as the first cross-repo pack.
 Then use these repo-specific anchors only if needed:
 
 1. `docs/README.md`
-2. `docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md`
+2. `docs/architecture/PLATFORM_AUTHORITY_MAP.md`
 3. `specs/INDEX.md`
 4. `docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md`
 5. `docs/ops/runbooks/DEPLOY_EVIDENCE_GATES.md`

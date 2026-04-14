@@ -1,11 +1,20 @@
 {
   "classifications": {
-    "archival": 298,
-    "canonical": 44,
+    "archival": 316,
+    "canonical": 45,
     "generated": 49,
-    "supporting": 825
+    "supporting": 997
   },
   "entries": [
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/BASELINE-TRUTH.md",
+      "root": "docs",
+      "status": "",
+      "title": "Baseline Truth"
+    },
     {
       "classification": "canonical",
       "lane": "index",
@@ -25,6 +34,15 @@
       "title": "Documentation Remediation Operating System (Self-Contained)"
     },
     {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/OPEN-BLOCKERS.md",
+      "root": "docs",
+      "status": "",
+      "title": "Open Blockers"
+    },
+    {
       "classification": "canonical",
       "lane": "index",
       "owner": "",
@@ -32,6 +50,15 @@
       "root": "docs",
       "status": "",
       "title": "Documentation Index"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/TEMPORARY-PATCHES.md",
+      "root": "docs",
+      "status": "",
+      "title": "Temporary Patches"
     },
     {
       "classification": "generated",
@@ -496,10 +523,82 @@
       "classification": "supporting",
       "lane": "concept",
       "owner": "",
+      "path": "docs/architecture/AUTHORITY_MATRIX.md",
+      "root": "docs",
+      "status": "",
+      "title": "Authority Matrix \u2014 Mereka LMS Architecture Convergence Program"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/architecture/CONFIGMAP_ROLLOUT_DESIGN.md",
+      "root": "docs",
+      "status": "",
+      "title": "ConfigMap Rollout Semantics \u2014 Design Decision"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/architecture/PLATFORM_AUTHORITY_MAP.md",
+      "root": "docs",
+      "status": "",
+      "title": "PLATFORM_AUTHORITY_MAP"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/architecture/PROMOTION_REALIZATION_AND_INCIDENT_FLOW.md",
+      "root": "docs",
+      "status": "",
+      "title": "PROMOTION_REALIZATION_AND_INCIDENT_FLOW"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
       "path": "docs/architecture/README.md",
       "root": "docs",
       "status": "",
-      "title": "Architecture Root Retired"
+      "title": "Architecture"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/architecture/SALVAGE_BRANCH_LEDGER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Salvage Branch Ledger: fix/enterprise-mfe-theme-config"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/architecture/SETTINGS-OWNERSHIP-CONSOLIDATION.md",
+      "root": "docs",
+      "status": "",
+      "title": "Settings Ownership Consolidation"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/architecture/mobile-apps-overview.md",
+      "root": "docs",
+      "status": "",
+      "title": "Mobile Apps Overview"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/architecture/video-pipeline-overview.md",
+      "root": "docs",
+      "status": "",
+      "title": "Video Pipeline Overview"
     },
     {
       "classification": "archival",
@@ -568,6 +667,33 @@
       "classification": "archival",
       "lane": "archive",
       "owner": "",
+      "path": "docs/archive/COURSE-CATALOG-DURABILITY-CLOSURE.md",
+      "root": "docs",
+      "status": "",
+      "title": "COURSE CATALOG DURABILITY CLOSURE"
+    },
+    {
+      "classification": "archival",
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/COURSE-CONSUMPTION-AND-STAFF-ACCEPTANCE.md",
+      "root": "docs",
+      "status": "",
+      "title": "COURSE-CONSUMPTION-AND-STAFF-ACCEPTANCE"
+    },
+    {
+      "classification": "archival",
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/COURSE-STUDIO-AUTH-RUNTIME-SEAM-CLOSURE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Course / Studio Auth Runtime Seam Closure"
+    },
+    {
+      "classification": "archival",
+      "lane": "archive",
+      "owner": "",
       "path": "docs/archive/CRITICAL_FINDINGS.md",
       "root": "docs",
       "status": "",
@@ -599,6 +725,24 @@
       "root": "docs",
       "status": "",
       "title": "Tools Directory (Deprecated)"
+    },
+    {
+      "classification": "archival",
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/DURABILITY-CLOSEOUT-D1.md",
+      "root": "docs",
+      "status": "",
+      "title": "Lane D1 \u2014 Durability Closeout"
+    },
+    {
+      "classification": "archival",
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/ENV-PARITY-AUTH-RECURRENCE-ERADICATION.md",
+      "root": "docs",
+      "status": "",
+      "title": "Environment Parity + Auth Recurrence Eradication"
     },
     {
       "classification": "archival",
@@ -658,6 +802,15 @@
       "classification": "archival",
       "lane": "archive",
       "owner": "",
+      "path": "docs/archive/GENERIC-MFE-INSTABILITY-ROOT-CAUSE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Generic MFE Instability Root Cause"
+    },
+    {
+      "classification": "archival",
+      "lane": "archive",
+      "owner": "",
       "path": "docs/archive/GITHUB_SECRETS_READY.md",
       "root": "docs",
       "status": "",
@@ -671,6 +824,15 @@
       "root": "docs",
       "status": "",
       "title": "GKE to VPS Loki Log Forwarding - Implementation Summary"
+    },
+    {
+      "classification": "archival",
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/IMAGE-PUBLISH-DEPLOY-CHAIN-BASELINE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Image Build / Publish / Deploy Chain Baseline"
     },
     {
       "classification": "archival",
@@ -698,6 +860,60 @@
       "root": "docs",
       "status": "",
       "title": "Kajabi Lesson Content Migration Fix"
+    },
+    {
+      "classification": "archival",
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/LANE-A3-ENTERPRISE-RUNTIME-CLOSURE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Lane A3 \u2014 Enterprise Runtime Closure Bundle"
+    },
+    {
+      "classification": "archival",
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/LANE-A4-ENTERPRISE-FINAL-ACCEPTANCE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Lane A6 \u2014 Enterprise App Final Live Close"
+    },
+    {
+      "classification": "archival",
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/LANE-P1-COLD-STANDBY-CLOSURE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Lane P1 \u2014 Cold-Standby Truth + Governed Readiness"
+    },
+    {
+      "classification": "archival",
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/LANE-P1-FINAL-CLOSURE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Lane P1 \u2014 Final Closure"
+    },
+    {
+      "classification": "archival",
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/LANE-P2-PROD-WAKE-REHEARSAL.md",
+      "root": "docs",
+      "status": "",
+      "title": "Lane P2 \u2014 Prod Wake-Up Rehearsal"
+    },
+    {
+      "classification": "archival",
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/LIVE-LMS-APPS-REGRESSION-TRIAGE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Live LMS + Apps Regression Triage"
     },
     {
       "classification": "archival",
@@ -784,6 +1000,15 @@
       "classification": "archival",
       "lane": "archive",
       "owner": "",
+      "path": "docs/archive/PRE-AUDIT-READINESS-DECISION.md",
+      "root": "docs",
+      "status": "",
+      "title": "Pre-Audit Readiness Decision"
+    },
+    {
+      "classification": "archival",
+      "lane": "archive",
+      "owner": "",
       "path": "docs/archive/PRODUCTION_INFRASTRUCTURE_PLAN_LEGACY.md",
       "root": "docs",
       "status": "",
@@ -820,6 +1045,15 @@
       "classification": "archival",
       "lane": "archive",
       "owner": "",
+      "path": "docs/archive/STUDIO-AUTH-JWT-CLOSURE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Studio Auth JWT Closure"
+    },
+    {
+      "classification": "archival",
+      "lane": "archive",
+      "owner": "",
       "path": "docs/archive/STUDIO_BRANDING_FIX_VERIFIED.md",
       "root": "docs",
       "status": "",
@@ -851,6 +1085,33 @@
       "root": "docs",
       "status": "",
       "title": "Task 3: SES SMTP Setup - Completion Report"
+    },
+    {
+      "classification": "archival",
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/WAVE1-MULTISITE-CANONICALIZATION.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 1 \u2014 Multisite Canonicalization"
+    },
+    {
+      "classification": "archival",
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/WAVE2A-OVERLAY-DECOMPOSITION.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 2A \u2014 Overlay Decomposition (Frontend/Routing/Theming Slice)"
+    },
+    {
+      "classification": "archival",
+      "lane": "archive",
+      "owner": "",
+      "path": "docs/archive/WAVE2B-AUTH-OVERLAY-DECOMPOSITION.md",
+      "root": "docs",
+      "status": "",
+      "title": "Wave 2B \u2014 Auth/OIDC/Session Overlay Decomposition"
     },
     {
       "classification": "archival",
@@ -3252,7 +3513,7 @@
       "owner": "Platform Team",
       "path": "docs/concepts/architecture/ARCHITECTURE_CHARTER.md",
       "root": "docs",
-      "status": "canonical",
+      "status": "detailed-reference",
       "title": "Architecture Charter"
     },
     {
@@ -3306,7 +3567,7 @@
       "owner": "Platform Team",
       "path": "docs/concepts/architecture/README.md",
       "root": "docs",
-      "status": "canonical",
+      "status": "detailed-reference",
       "title": "Architecture Documentation"
     },
     {
@@ -3326,6 +3587,15 @@
       "root": "docs",
       "status": "canonical",
       "title": "Tenant Lifecycle"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "Platform Team",
+      "path": "docs/concepts/architecture/TENANT_OPERATING_SYSTEM.md",
+      "root": "docs",
+      "status": "canonical",
+      "title": "Tenant Operating System"
     },
     {
       "classification": "supporting",
@@ -3515,6 +3785,24 @@
       "root": "docs",
       "status": "",
       "title": "Token Integrity and Routing Verification"
+    },
+    {
+      "classification": "supporting",
+      "lane": "evidence",
+      "owner": "",
+      "path": "docs/evidence/operations/a11y-regression-lane-report.md",
+      "root": "docs",
+      "status": "",
+      "title": "A11y Regression Lane Evidence Report"
+    },
+    {
+      "classification": "supporting",
+      "lane": "evidence",
+      "owner": "",
+      "path": "docs/evidence/operations/authenticated-smoke-a11y-report.md",
+      "root": "docs",
+      "status": "",
+      "title": "Authenticated Smoke + A11y Evidence Report"
     },
     {
       "classification": "supporting",
@@ -3821,6 +4109,15 @@
       "root": "docs",
       "status": "",
       "title": "Local Workflow Cheat Sheet"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/guides/platform/ADVANCED_ASSESSMENT_AUTHORING_GUIDE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Advanced Assessment Authoring Guide"
     },
     {
       "classification": "supporting",
@@ -4168,6 +4465,15 @@
       "classification": "supporting",
       "lane": "review",
       "owner": "",
+      "path": "docs/meta/docs-program/DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md",
+      "root": "docs",
+      "status": "",
+      "title": "Docs Tranche Milestone Ledger \u2014 2026-04-13"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "",
       "path": "docs/meta/docs-program/FOUNDATIONS_PROGRAM.md",
       "root": "docs",
       "status": "",
@@ -4195,6 +4501,15 @@
       "classification": "supporting",
       "lane": "review",
       "owner": "",
+      "path": "docs/meta/docs-program/POST_REBASE_INTAKE_2026-04-13.md",
+      "root": "docs",
+      "status": "",
+      "title": "Post-Rebase Intake Board \u2014 2026-04-13"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "",
       "path": "docs/meta/docs-program/PROGRAM_UPDATE_V2_BRIEF.md",
       "root": "docs",
       "status": "",
@@ -4217,6 +4532,15 @@
       "root": "docs",
       "status": "",
       "title": "Repository Topology Move Ledger"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "",
+      "path": "docs/meta/docs-program/REVIEW_HARDENING_BOARD_2026-04-13.md",
+      "root": "docs",
+      "status": "",
+      "title": "Docs Review And Hardening Board \u2014 2026-04-13"
     },
     {
       "classification": "supporting",
@@ -4440,7 +4764,7 @@
       "owner": "Platform Team",
       "path": "docs/meta/docs-program/WAVE_BRANDING_ROOT_RESET_TRACKER.md",
       "root": "docs",
-      "status": "canonical",
+      "status": "historical tracker snapshot",
       "title": "Wave Branding Root Reset Tracker"
     },
     {
@@ -4467,7 +4791,7 @@
       "owner": "Platform Team",
       "path": "docs/meta/docs-program/WAVE_CI_CD_ROOT_RESET_TRACKER.md",
       "root": "docs",
-      "status": "canonical",
+      "status": "historical tracker snapshot",
       "title": "Wave CI/CD Root Reset Tracker"
     },
     {
@@ -4476,7 +4800,7 @@
       "owner": "Platform Team",
       "path": "docs/meta/docs-program/WAVE_MIGRATIONS_ROOT_RESET_CLOSEOUT.md",
       "root": "docs",
-      "status": "canonical",
+      "status": "historical closeout snapshot",
       "title": "Wave Migrations Root Reset Closeout"
     },
     {
@@ -4485,7 +4809,7 @@
       "owner": "Platform Team",
       "path": "docs/meta/docs-program/WAVE_MIGRATIONS_ROOT_RESET_REVIEW_HANDOFF.md",
       "root": "docs",
-      "status": "canonical",
+      "status": "historical review handoff snapshot",
       "title": "Wave Migrations Root Reset Review Handoff"
     },
     {
@@ -4494,7 +4818,7 @@
       "owner": "Platform Team",
       "path": "docs/meta/docs-program/WAVE_MIGRATIONS_ROOT_RESET_TRACKER.md",
       "root": "docs",
-      "status": "canonical",
+      "status": "historical tracker snapshot",
       "title": "Wave Migrations Root Reset Tracker"
     },
     {
@@ -4555,6 +4879,15 @@
       "classification": "supporting",
       "lane": "review",
       "owner": "",
+      "path": "docs/meta/docs-program/authority-registry.v1.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "authority-registry.v1"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "",
       "path": "docs/meta/docs-program/bead-v2-format.md",
       "root": "docs",
       "status": "",
@@ -4568,6 +4901,15 @@
       "root": "docs",
       "status": "",
       "title": "Boundary Debt Manifest"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "",
+      "path": "docs/meta/docs-program/companion-surface-review.v1.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "companion-surface-review.v1"
     },
     {
       "classification": "supporting",
@@ -4613,6 +4955,24 @@
       "root": "docs",
       "status": "",
       "title": "governs-taxonomy"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "",
+      "path": "docs/meta/docs-program/metadata/merge-back-wave-execution.v1.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "merge-back-wave-execution.v1"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "",
+      "path": "docs/meta/docs-program/metadata/merge-back-waves.v1.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "merge-back-waves.v1"
     },
     {
       "classification": "supporting",
@@ -4739,6 +5099,15 @@
       "root": "docs",
       "status": "",
       "title": "Issue #222 Implementation Packet - Authn Submodule Path Canonicalization"
+    },
+    {
+      "classification": "supporting",
+      "lane": "review",
+      "owner": "",
+      "path": "docs/meta/docs-program/owner-gap-ledger.v1.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "owner-gap-ledger.v1"
     },
     {
       "classification": "supporting",
@@ -5536,10 +5905,64 @@
       "classification": "supporting",
       "lane": "runbook",
       "owner": "",
+      "path": "docs/ops/frontend/HEAD_EXTRA_OWNERSHIP_MAP.md",
+      "root": "docs",
+      "status": "",
+      "title": "head-extra.html Ownership Correction Map"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
       "path": "docs/ops/monitoring/README.md",
       "root": "docs",
       "status": "",
       "title": "Monitoring and Observability"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
+      "path": "docs/ops/playbooks/CADDY_DOMAIN_ROUTING_CHANGE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Caddy / Domain Routing Change Playbook"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
+      "path": "docs/ops/playbooks/DJANGO_SETTINGS_CHANGE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Django Settings Change Playbook"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
+      "path": "docs/ops/playbooks/FRONTEND_MFE_CHANGE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Frontend MFE Change Playbook"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
+      "path": "docs/ops/playbooks/RELEASE_PROMOTION.md",
+      "root": "docs",
+      "status": "",
+      "title": "Release Promotion Playbook"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
+      "path": "docs/ops/playbooks/RUNTIME_PROOF_VERIFICATION.md",
+      "root": "docs",
+      "status": "",
+      "title": "Runtime Proof Verification Playbook"
     },
     {
       "classification": "supporting",
@@ -5689,10 +6112,28 @@
       "classification": "supporting",
       "lane": "runbook",
       "owner": "",
+      "path": "docs/ops/runbooks/ASPECTS_OPERATIONS.md",
+      "root": "docs",
+      "status": "",
+      "title": "Aspects Analytics Operations Runbook"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
       "path": "docs/ops/runbooks/ASPECTS_WIRING_CHECKLIST.md",
       "root": "docs",
       "status": "",
       "title": "Aspects Wiring Checklist"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
+      "path": "docs/ops/runbooks/ASSESSMENT_OPERATIONS_RUNBOOK.md",
+      "root": "docs",
+      "status": "",
+      "title": "Assessment Operations Runbook"
     },
     {
       "classification": "supporting",
@@ -5797,10 +6238,28 @@
       "classification": "supporting",
       "lane": "runbook",
       "owner": "",
+      "path": "docs/ops/runbooks/CONTENT_LIBRARIES_DISASTER_RECOVERY.md",
+      "root": "docs",
+      "status": "",
+      "title": "Content Libraries v2 Disaster Recovery"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
       "path": "docs/ops/runbooks/CONTENT_LIBRARIES_V2_MIGRATION.md",
       "root": "docs",
       "status": "",
       "title": "Content Libraries V2 Migration Runbook"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
+      "path": "docs/ops/runbooks/CONTENT_LIBRARIES_V2_RUNBOOK.md",
+      "root": "docs",
+      "status": "",
+      "title": "Content Libraries v2 Operations Runbook"
     },
     {
       "classification": "supporting",
@@ -5855,6 +6314,15 @@
       "root": "docs",
       "status": "",
       "title": "Deploy Evidence Gates for GKE Parity"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
+      "path": "docs/ops/runbooks/DEV_CONVERGENCE_PROOF_CHECKLIST.md",
+      "root": "docs",
+      "status": "",
+      "title": "DEV Convergence Proof Checklist"
     },
     {
       "classification": "supporting",
@@ -5917,7 +6385,7 @@
       "path": "docs/ops/runbooks/ECOMMERCE_OAUTH_TROUBLESHOOTING.md",
       "root": "docs",
       "status": "",
-      "title": "Ecommerce OAuth 500 Troubleshooting"
+      "title": "Ecommerce OAuth Troubleshooting"
     },
     {
       "classification": "supporting",
@@ -5936,6 +6404,15 @@
       "root": "docs",
       "status": "",
       "title": "Email Notifications Pipeline Runbook"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
+      "path": "docs/ops/runbooks/ENTERPRISE_BOOTSTRAP_APPLY_RUNBOOK.md",
+      "root": "docs",
+      "status": "",
+      "title": "Enterprise Bootstrap Apply Runbook"
     },
     {
       "classification": "supporting",
@@ -6112,6 +6589,24 @@
       "classification": "supporting",
       "lane": "runbook",
       "owner": "",
+      "path": "docs/ops/runbooks/MIDDLEWARE_TROUBLESHOOTING.md",
+      "root": "docs",
+      "status": "",
+      "title": "Middleware Troubleshooting"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
+      "path": "docs/ops/runbooks/MIDDLEWARE_VERIFICATION.md",
+      "root": "docs",
+      "status": "",
+      "title": "Middleware Verification"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
       "path": "docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md",
       "root": "docs",
       "status": "",
@@ -6274,6 +6769,15 @@
       "classification": "supporting",
       "lane": "runbook",
       "owner": "",
+      "path": "docs/ops/runbooks/PROD_PARKED_MODE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Production Parked Mode"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
       "path": "docs/ops/runbooks/PURCHASE_GATEWAY_FULFILLMENT_RECOVERY.md",
       "root": "docs",
       "status": "",
@@ -6394,7 +6898,7 @@
       "path": "docs/ops/runbooks/STAGING_ACTIVATION.md",
       "root": "docs",
       "status": "",
-      "title": "Staging Activation Runbook"
+      "title": "Staging Lane Runbook"
     },
     {
       "classification": "supporting",
@@ -6403,7 +6907,7 @@
       "path": "docs/ops/runbooks/STRIPE_WEBHOOKS_SETUP.md",
       "root": "docs",
       "status": "",
-      "title": "Stripe Webhooks (Ecommerce)"
+      "title": "Stripe Webhooks Setup"
     },
     {
       "classification": "supporting",
@@ -6530,6 +7034,15 @@
       "root": "docs",
       "status": "",
       "title": "Velero Backup Audit (End-to-End)"
+    },
+    {
+      "classification": "supporting",
+      "lane": "runbook",
+      "owner": "",
+      "path": "docs/ops/runbooks/VIDEO_OPERATIONS_RUNBOOK.md",
+      "root": "docs",
+      "status": "",
+      "title": "Video Operations Runbook"
     },
     {
       "classification": "supporting",
@@ -7012,6 +7525,15 @@
       "classification": "supporting",
       "lane": "other",
       "owner": "",
+      "path": "docs/policies/architecture/ENTERPRISE_FRONTEND_PARITY_POLICY.md",
+      "root": "docs",
+      "status": "",
+      "title": "Enterprise Frontend Parity Policy"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
       "path": "docs/policies/architecture/GDPR_COMPLIANCE.md",
       "root": "docs",
       "status": "",
@@ -7124,6 +7646,15 @@
       "root": "docs",
       "status": "",
       "title": "Accessibility Exceptions Register"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/policies/operations/AGENT_EXECUTION_INVARIANTS.md",
+      "root": "docs",
+      "status": "",
+      "title": "Agent Execution Invariants"
     },
     {
       "classification": "supporting",
@@ -7363,10 +7894,37 @@
       "classification": "supporting",
       "lane": "other",
       "owner": "",
+      "path": "docs/programs/frontend/ENTERPRISE_FRONTEND_DELIVERY_CONTRACT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Enterprise Frontend Delivery Contract"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
       "path": "docs/programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md",
       "root": "docs",
       "status": "",
       "title": "ADR-014: MFE Branding Strategy - Migration Path Analysis"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/programs/frontend/enterprise-frontend-config-consumption.v1.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "enterprise-frontend-config-consumption.v1"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/programs/frontend/enterprise-frontend-route-owner.v1.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "enterprise-frontend-route-owner.v1"
     },
     {
       "classification": "supporting",
@@ -7394,6 +7952,24 @@
       "root": "docs",
       "status": "",
       "title": "ADR-020: Tracing Scope and Pilot Decision for Mereka LMS"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/proposals/DOMAIN_TRUTH_CONVERGENCE_MEMO.md",
+      "root": "docs",
+      "status": "",
+      "title": "Domain Truth Convergence Memo"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/proposals/TENANT_SURFACE_ENTITLEMENT_MATRIX.md",
+      "root": "docs",
+      "status": "",
+      "title": "Tenant Surface Entitlement Matrix"
     },
     {
       "classification": "supporting",
@@ -7471,6 +8047,15 @@
       "classification": "supporting",
       "lane": "concept",
       "owner": "",
+      "path": "docs/reference/VERSION_MATRIX.md",
+      "root": "docs",
+      "status": "",
+      "title": "Version Matrix"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
       "path": "docs/reference/analytics/DATA_SOURCES_EXPLAINED.md",
       "root": "docs",
       "status": "",
@@ -7493,6 +8078,15 @@
       "root": "docs",
       "status": "",
       "title": "Analytics Reference"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/architecture/ADMIN_SURFACES_AND_ENTRYPOINTS.md",
+      "root": "docs",
+      "status": "",
+      "title": "Admin Surfaces and Entrypoints"
     },
     {
       "classification": "supporting",
@@ -7529,6 +8123,33 @@
       "root": "docs",
       "status": "",
       "title": "Deployment Contract: mereka-lms"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/architecture/DOMAIN_AUTHORITY_END_STATE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Domain Authority End State"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/architecture/ENTERPRISE_BROWSER_PROOF_PLAN.md",
+      "root": "docs",
+      "status": "",
+      "title": "Enterprise Browser Proof Plan"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/architecture/ENTERPRISE_TENANT_VARIANTS.md",
+      "root": "docs",
+      "status": "",
+      "title": "Enterprise Tenant Variants"
     },
     {
       "classification": "supporting",
@@ -7723,6 +8344,60 @@
       "classification": "supporting",
       "lane": "concept",
       "owner": "",
+      "path": "docs/reference/architecture/ROUTE_TRUTH_RECONCILIATION.md",
+      "root": "docs",
+      "status": "",
+      "title": "Route Truth Reconciliation"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/architecture/SALVAGE_BRANCH_LEDGER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Salvage Branch Ledger"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/architecture/SEARCH_ARCHITECTURE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Search / Catalog / Discovery Runtime Contract"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/architecture/TENANT_DOMAIN_AUTHORITY_MATRIX.md",
+      "root": "docs",
+      "status": "",
+      "title": "Tenant / Domain Authority Matrix"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/architecture/TENANT_DOMAIN_SURFACE_AUTHORITY.md",
+      "root": "docs",
+      "status": "",
+      "title": "Tenant / Domain / Surface Authority"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/architecture/TENANT_MODEL_RECOMMENDATION.md",
+      "root": "docs",
+      "status": "",
+      "title": "Tenant Model Recommendation"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
       "path": "docs/reference/architecture/THEMING_GENERATED_ARTIFACT_CONTRACT.md",
       "root": "docs",
       "status": "",
@@ -7754,6 +8429,78 @@
       "root": "docs",
       "status": "",
       "title": "Tutor Patches Inventory"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/contracts/SMOKE_ACCOUNT_REGISTRY_CONTRACT.md",
+      "root": "docs",
+      "status": "",
+      "title": "SMOKE_ACCOUNT_REGISTRY_CONTRACT"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/contracts/VERIFIER_CONTRACT_CATALOG.md",
+      "root": "docs",
+      "status": "",
+      "title": "VERIFIER_CONTRACT_CATALOG"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/generated/docs-program-authority-summary.md",
+      "root": "docs",
+      "status": "",
+      "title": "Docs Program Authority Summary"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/generated/docs-program-merge-back-execution.md",
+      "root": "docs",
+      "status": "",
+      "title": "Docs Program Merge-Back Execution"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/generated/docs-program-merge-back-waves.md",
+      "root": "docs",
+      "status": "",
+      "title": "Docs Program Merge-Back Waves"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/generated/domain-authority-classification.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "Domain Authority Surface Classification"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/generated/domain-authority-matrix.md",
+      "root": "docs",
+      "status": "",
+      "title": "Domain Authority Matrix"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/governance/DEPRECATION_LEDGER.md",
+      "root": "docs",
+      "status": "",
+      "title": "DEPRECATION_LEDGER"
     },
     {
       "classification": "supporting",
@@ -7807,7 +8554,7 @@
       "path": "docs/reference/migrations/kajabi/KAJABI_MIGRATION_NOTES.md",
       "root": "docs",
       "status": "",
-      "title": "Kajabi \u2192 Open edX Data Migration Notes"
+      "title": "Kajabi Data Migration Notes"
     },
     {
       "classification": "supporting",
@@ -7816,7 +8563,7 @@
       "path": "docs/reference/migrations/kajabi/OPS_KAJABI_README.md",
       "root": "docs",
       "status": "",
-      "title": "Kajabi \u2192 Open edX Transformation Pipeline"
+      "title": "Kajabi Transformation Reference"
     },
     {
       "classification": "supporting",
@@ -8002,6 +8749,15 @@
       "classification": "supporting",
       "lane": "concept",
       "owner": "",
+      "path": "docs/reference/operations/AGENT_EXECUTION_WORKFLOW.md",
+      "root": "docs",
+      "status": "",
+      "title": "AGENT_EXECUTION_WORKFLOW"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
       "path": "docs/reference/operations/ALERT_NOISE_CLASSIFICATION_FEED.md",
       "root": "docs",
       "status": "",
@@ -8060,6 +8816,15 @@
       "root": "docs",
       "status": "",
       "title": "Backup Coverage Matrix (Reality-First)"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/operations/BUILD_TRUTH_CONTRACT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Build Truth Contract"
     },
     {
       "classification": "supporting",
@@ -8173,6 +8938,15 @@
       "classification": "supporting",
       "lane": "concept",
       "owner": "",
+      "path": "docs/reference/operations/EXECUTION_CONTEXT_LOCK.md",
+      "root": "docs",
+      "status": "",
+      "title": "Execution Context Lock"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
       "path": "docs/reference/operations/FOOTER_VARIANT_MATRIX.md",
       "root": "docs",
       "status": "",
@@ -8254,6 +9028,15 @@
       "classification": "supporting",
       "lane": "concept",
       "owner": "",
+      "path": "docs/reference/operations/LIVE_MUTATION_EXCEPTION_LEDGER_TEMPLATE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Live Mutation Exception Ledger Template"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
       "path": "docs/reference/operations/LOGGING_AND_SENTRY.md",
       "root": "docs",
       "status": "",
@@ -8308,6 +9091,15 @@
       "classification": "supporting",
       "lane": "concept",
       "owner": "",
+      "path": "docs/reference/operations/MUTATION_CLASS_MATRIX.md",
+      "root": "docs",
+      "status": "",
+      "title": "Mutation Class Matrix"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
       "path": "docs/reference/operations/OBSERVABILITY_PARITY_MATRIX.md",
       "root": "docs",
       "status": "",
@@ -8353,10 +9145,28 @@
       "classification": "supporting",
       "lane": "concept",
       "owner": "",
+      "path": "docs/reference/operations/PROOF_REPAIR_SEPARATION_PROTOCOL.md",
+      "root": "docs",
+      "status": "",
+      "title": "Proof Repair Separation Protocol"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
       "path": "docs/reference/operations/README.md",
       "root": "docs",
       "status": "",
       "title": "Operations Reference"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/operations/REAL_ACCOUNT_AND_CREDENTIAL_BOUNDARY.md",
+      "root": "docs",
+      "status": "",
+      "title": "Real Account And Credential Boundary"
     },
     {
       "classification": "supporting",
@@ -8398,6 +9208,24 @@
       "classification": "supporting",
       "lane": "concept",
       "owner": "",
+      "path": "docs/reference/operations/RUNNER_CAPABILITY_CONTRACT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Runner Capability Contract"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/operations/RUNTIME_TRUTH_MATRIX.md",
+      "root": "docs",
+      "status": "",
+      "title": "Runtime Truth Matrix \u2014 Mereka LMS"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
       "path": "docs/reference/operations/SECRETS_SNAPSHOT.md",
       "root": "docs",
       "status": "",
@@ -8429,6 +9257,15 @@
       "root": "docs",
       "status": "",
       "title": "SLSA Provenance Reference"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/operations/SPEC_COVERAGE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Spec Coverage"
     },
     {
       "classification": "supporting",
@@ -8488,10 +9325,37 @@
       "classification": "supporting",
       "lane": "concept",
       "owner": "",
+      "path": "docs/reference/operations/UI_UX_HARDENING_BUNDLE.md",
+      "root": "docs",
+      "status": "",
+      "title": "UI/UX Hardening Bundle"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
       "path": "docs/reference/operations/USER_FACING_URLS.md",
       "root": "docs",
       "status": "",
       "title": "User-Facing URLs - Complete Registry"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/operations/VERIFIER_CONTRACT_CATALOG.md",
+      "root": "docs",
+      "status": "",
+      "title": "Verifier Catalog (Detailed Reference)"
+    },
+    {
+      "classification": "supporting",
+      "lane": "concept",
+      "owner": "",
+      "path": "docs/reference/operations/execution-invariants-pack.v1.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "execution-invariants-pack.v1"
     },
     {
       "classification": "supporting",
@@ -8513,6 +9377,177 @@
     },
     {
       "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/reviews/CONVERGENCE_EVIDENCE_PROMOTION_HANDOFF.md",
+      "root": "docs",
+      "status": "",
+      "title": "Convergence Evidence Promotion Handoff"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/reviews/COURSE-CONSUMPTION-AND-STAFF-ACCEPTANCE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Course Consumption And Staff Acceptance"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/reviews/DEV_RUNTIME_CONVERGENCE_EVIDENCE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Dev Runtime Convergence Evidence Bundle"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/reviews/ENTERPRISE_BOOTSTRAP_DRYRUN_PARTNER_ISOLATED.md",
+      "root": "docs",
+      "status": "",
+      "title": "Enterprise Bootstrap Dry-Run: partner-isolated Variant"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/reviews/ENTERPRISE_BOOTSTRAP_DRYRUN_SHARED_MEREKA.md",
+      "root": "docs",
+      "status": "",
+      "title": "Enterprise Bootstrap Dry-Run: shared-mereka Variant"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/reviews/ENTERPRISE_BOOTSTRAP_EVIDENCE_TEMPLATE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Enterprise Bootstrap Evidence Template"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/reviews/ENTERPRISE_BOOTSTRAP_ROLLBACK_EVIDENCE_TEMPLATE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Enterprise Bootstrap Rollback Evidence Template"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/reviews/ENTERPRISE_OPERATOR_DECISION_PACKET.md",
+      "root": "docs",
+      "status": "",
+      "title": "Enterprise Operator Decision Packet"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/reviews/ENTERPRISE_OPERATOR_DEFAULTS.md",
+      "root": "docs",
+      "status": "",
+      "title": "Enterprise Operator Defaults"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/reviews/ENTERPRISE_TENANCY_FINAL_HANDOFF.md",
+      "root": "docs",
+      "status": "",
+      "title": "Enterprise Tenancy \u2014 Final Handoff"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/reviews/ENTERPRISE_TENANCY_REVIEW_SUMMARY.md",
+      "root": "docs",
+      "status": "",
+      "title": "Enterprise Tenancy \u2014 Review Summary"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/reviews/EXECUTION_INVARIANTS_PACK_REVIEW_SUMMARY.md",
+      "root": "docs",
+      "status": "",
+      "title": "Execution Invariants Pack Review Summary"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/reviews/GITOPS_INTEGRITY_CLOSURE_AUDIT_2026-04-07.md",
+      "root": "docs",
+      "status": "",
+      "title": "GitOps Integrity System \u2014 Closure Audit"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/reviews/POST_RUNTIME_ENTERPRISE_BOOTSTRAP_EXECUTION.md",
+      "root": "docs",
+      "status": "",
+      "title": "Post-Runtime Enterprise Bootstrap Execution Packet"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/reviews/RUNTIME_PROOF_FIXTURE_EXECUTION_PACKET.md",
+      "root": "docs",
+      "status": "",
+      "title": "Runtime Proof Fixture Execution Packet"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/reviews/RUNTIME_PROOF_FIXTURE_HANDOFF.md",
+      "root": "docs",
+      "status": "",
+      "title": "Runtime Proof Fixture Handoff"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/reviews/RUNTIME_PROOF_FIXTURE_ROLLBACK_PACKET.md",
+      "root": "docs",
+      "status": "",
+      "title": "Runtime Proof Fixture Rollback Packet"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/reviews/STABILIZATION_CONTROL_BOARD_HANDOFF.md",
+      "root": "docs",
+      "status": "",
+      "title": "Stabilization Control Board Handoff"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/reviews/STAGING_RUNTIME_CONVERGENCE_EVIDENCE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Staging Runtime Convergence Evidence Bundle"
+    },
+    {
+      "classification": "supporting",
       "lane": "runbook",
       "owner": "",
       "path": "docs/runbooks/README.md",
@@ -8524,10 +9559,262 @@
       "classification": "supporting",
       "lane": "other",
       "owner": "",
+      "path": "docs/runtime-proof/ENTERPRISE_MFE_RUNTIME_CONFIG_TRUTH_CONTRACT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Enterprise MFE Runtime Config Truth Contract"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
       "path": "docs/runtime-proof/LMS_RUNTIME_PROOF_CONTRACT.md",
       "root": "docs",
       "status": "",
       "title": "LMS Runtime Proof Contract"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/runtime-proof/enterprise-mfe-runtime-config-contract.v1.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "enterprise-mfe-runtime-config-contract.v1"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/stabilization/AGENT_OPERATING_MODEL.md",
+      "root": "docs",
+      "status": "",
+      "title": "Agent Operating Model"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/stabilization/ARC_HEAVY_BUILDER_FAILURE_TAXONOMY.md",
+      "root": "docs",
+      "status": "",
+      "title": "ARC Heavy Builder Failure Taxonomy"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/stabilization/ARC_RUNNER_CAPABILITY_CONTRACT.md",
+      "root": "docs",
+      "status": "",
+      "title": "ARC Runner Capability Contract"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/stabilization/CI_FALSE_RED_PREVENTION.md",
+      "root": "docs",
+      "status": "",
+      "title": "CI False-Red Prevention"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/stabilization/CONVERGENCE_EVIDENCE_BUNDLE_CONTRACT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Convergence Evidence Bundle Contract"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/stabilization/DOCS_ROOT_AUTHORITY_CONTRACT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Docs Root Authority Contract"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/stabilization/DURABLE_VS_MANUAL_STATE_MATRIX.md",
+      "root": "docs",
+      "status": "",
+      "title": "Durable vs Manual State Matrix"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/stabilization/ENTERPRISE_AUTH_RUNTIME_CONTRACT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Enterprise Auth Runtime Contract"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/stabilization/ENTERPRISE_CONFIG_GEN_DEDUP_PLAN.md",
+      "root": "docs",
+      "status": "",
+      "title": "Stabilization: Enterprise Config-Gen Dedup Plan"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/stabilization/ENTERPRISE_DATA_MODEL_AUDIT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Enterprise Data Audit"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/stabilization/ENTERPRISE_MFE_BUILD_CONTRACT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Enterprise MFE Build Contract"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/stabilization/EXECUTION_INVARIANTS.md",
+      "root": "docs",
+      "status": "",
+      "title": "Execution Invariants"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/stabilization/FAILURE_TAXONOMY.md",
+      "root": "docs",
+      "status": "",
+      "title": "Failure Taxonomy"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/stabilization/PR_UNBLOCK_SWEEP_LEDGER.md",
+      "root": "docs",
+      "status": "",
+      "title": "PR Unblock Sweep Ledger"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/stabilization/RELEASE_EVIDENCE_BUNDLE_CONTRACT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Release Evidence Bundle Contract"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/stabilization/REPO_ONLY_CI_BLOCKER_LEDGER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Repo-Only CI Blocker Ledger"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/stabilization/RETIRED_ROOT_REMEDIATION_LEDGER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Retired Root Remediation Ledger"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/stabilization/STABILIZATION_AUTHORITY_AND_ROLLOUT_PLAN.md",
+      "root": "docs",
+      "status": "",
+      "title": "Stabilization: Authority and Rollout Plan"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/stabilization/STABILIZATION_CONTROL_BOARD.md",
+      "root": "docs",
+      "status": "",
+      "title": "Stabilization Control Board"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/stabilization/STABILIZATION_PHASE_GATES.md",
+      "root": "docs",
+      "status": "",
+      "title": "Stabilization Phase Gates"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/stabilization/STABLE_CONFIG_ROLLOUT_DEBT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Stable Config Rollout Debt"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/stabilization/STATIC_VALIDATION_CONTRACT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Static Validation Contract"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/stabilization/SYNTHETIC_RUNTIME_PROOF_FIXTURE_CONTRACT.md",
+      "root": "docs",
+      "status": "",
+      "title": "Synthetic Runtime Proof Fixture Contract"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/stabilization/dev-runtime-convergence-bundle.v1.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "Dev Runtime Convergence Evidence Bundle \u2014 Machine-Readable Manifest"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/stabilization/retired-root-remediation-ledger.v1.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "retired-root-remediation-ledger.v1"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/stabilization/stabilization-control-board.v1.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "stabilization-control-board.v1"
     },
     {
       "classification": "canonical",
@@ -8542,10 +9829,64 @@
       "classification": "supporting",
       "lane": "other",
       "owner": "",
+      "path": "docs/status/active/ACTIVE_SURFACE_RUNTIME_MATRIX_2026-04-04.md",
+      "root": "docs",
+      "status": "",
+      "title": "ACTIVE_SURFACE_RUNTIME_MATRIX_2026-04-04"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/ACTIVE_SURFACE_STATUS_BOARD_2026-04-04.md",
+      "root": "docs",
+      "status": "",
+      "title": "ACTIVE_SURFACE_STATUS_BOARD_2026-04-04"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/AGENT1_V2_OPERATING_CONTRACT_2026-04-07.md",
+      "root": "docs",
+      "status": "",
+      "title": "Agent 1 V2 Operating Contract \u2014 Mereka LMS Finish-Line"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/AGENT2_LANE_TRACKER_2026-04-10.md",
+      "root": "docs",
+      "status": "",
+      "title": "Agent 2 Lane Tracker"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/ASPECTS_ANALYTICS_ACTIVATION_TRACKER.md",
+      "root": "docs",
+      "status": "",
+      "title": "Aspects Analytics \u2014 Operational Activation Tracker"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
       "path": "docs/status/active/BACKUP_TOOLING_STATUS.md",
       "root": "docs",
       "status": "",
       "title": "Backup Coverage Matrix & PVC Inventory Tooling - Status"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/BRANCH_CAPABILITY_CONVERGENCE_2026-04-04.md",
+      "root": "docs",
+      "status": "",
+      "title": "Branch/Capability Convergence Inventory"
     },
     {
       "classification": "supporting",
@@ -8569,6 +9910,15 @@
       "classification": "supporting",
       "lane": "other",
       "owner": "",
+      "path": "docs/status/active/BROWSER_PROOF_MATRIX_2026-04-09.md",
+      "root": "docs",
+      "status": "",
+      "title": "Browser Proof Matrix"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
       "path": "docs/status/active/CI_OPTIMIZATION_TRACKER.md",
       "root": "docs",
       "status": "",
@@ -8578,10 +9928,136 @@
       "classification": "supporting",
       "lane": "other",
       "owner": "",
+      "path": "docs/status/active/CI_VERIFIER_FALSE_GREEN_REGISTER_2026-04-10.md",
+      "root": "docs",
+      "status": "",
+      "title": "CI / Verifier False-Green Register"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/CONTROL_PLANE_AUTHORITY_MAP_2026-04-10.md",
+      "root": "docs",
+      "status": "",
+      "title": "Control-Plane Authority / Migration Map"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/DEV_CONVERGENCE_CONTROL.md",
+      "root": "docs",
+      "status": "",
+      "title": "DEV Convergence Control"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/DEV_CONVERGENCE_LEDGER.md",
+      "root": "docs",
+      "status": "",
+      "title": "DEV Convergence Ledger"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/DEV_CONVERGENCE_PARKED_ISSUES.md",
+      "root": "docs",
+      "status": "",
+      "title": "DEV Convergence Parked Issues"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/DEV_CONVERGENCE_RESUME.md",
+      "root": "docs",
+      "status": "",
+      "title": "DEV Convergence Resume"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/DEV_STAGING_TRUTH_TAKEOVER_PROMPT_2026-03-25.md",
+      "root": "docs",
+      "status": "",
+      "title": "DEV / Staging Truth Takeover Prompt"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/DEV_STAGING_TRUTH_TRACKER_2026-03-25.md",
+      "root": "docs",
+      "status": "",
+      "title": "DEV / Staging Truth Tracker"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
       "path": "docs/status/active/DOCS_WAVE2_CONTROL_PLANE_STATUS_2026-03-08.md",
       "root": "docs",
       "status": "",
       "title": "Docs Wave 2 Control Plane Status"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/DOMAIN_TRUTH_CONVERGENCE_TAKEOVER_PROMPT_2026-03-31.md",
+      "root": "docs",
+      "status": "",
+      "title": "Domain Truth Convergence Takeover Prompt"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/DOMAIN_TRUTH_CONVERGENCE_TRACKER_2026-03-31.md",
+      "root": "docs",
+      "status": "",
+      "title": "Domain Truth Convergence Tracker"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/DUPLICATE_WRITER_RETIREMENT_REGISTER_2026-04-10.md",
+      "root": "docs",
+      "status": "",
+      "title": "Duplicate Writer Retirement Register"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/FINISH_LINE_MASTER_TRACKER_2026-04-03.md",
+      "root": "docs",
+      "status": "",
+      "title": "Finish-Line Master Tracker"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/FINISH_LINE_TAKEOVER_PROMPT_2026-04-03.md",
+      "root": "docs",
+      "status": "",
+      "title": "Finish-Line Takeover Prompt"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/FIXTURE_REPLAY_LEDGER_2026-04-10.md",
+      "root": "docs",
+      "status": "",
+      "title": "Fixture Replay Ledger \u2014 Agent 1 VNext"
     },
     {
       "classification": "supporting",
@@ -8614,10 +10090,46 @@
       "classification": "supporting",
       "lane": "other",
       "owner": "",
+      "path": "docs/status/active/FRONTEND_RUNTIME_CLOSURE_TRACKER_2026-04-01.md",
+      "root": "docs",
+      "status": "",
+      "title": "Frontend Runtime Closure Tracker (2026-04-01)"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
       "path": "docs/status/active/FRONTEND_RUNTIME_STABILITY_STATUS_2026-03-02.md",
       "root": "docs",
       "status": "",
       "title": "Frontend Runtime Stability Status (2026-03-02) (Superseded)"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "Platform Team",
+      "path": "docs/status/active/IMPLEMENTATION_TRACKER_2026-04-03.md",
+      "root": "docs",
+      "status": "active",
+      "title": "Mereka LMS \u2014 Master Implementation Tracker"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/IMPORT_MISSING_COURSES.md",
+      "root": "docs",
+      "status": "",
+      "title": "Import Lane \u2014 Missing Courses Decision Record"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/IMPORT_STATUS_2026-04-01.md",
+      "root": "docs",
+      "status": "",
+      "title": "Import Lane Status \u2014 2026-04-01"
     },
     {
       "classification": "supporting",
@@ -8636,6 +10148,24 @@
       "root": "docs",
       "status": "",
       "title": "Local Environment Work Remaining"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/MASTER_LAUNCH_ROADMAP_2026-04-04.md",
+      "root": "docs",
+      "status": "",
+      "title": "MASTER_LAUNCH_ROADMAP_2026-04-04"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/MUTATION_LEDGER_2026-04-10.md",
+      "root": "docs",
+      "status": "",
+      "title": "Durable Mutation Ledger \u2014 Agent 1 VNext"
     },
     {
       "classification": "supporting",
@@ -8704,10 +10234,181 @@
       "classification": "supporting",
       "lane": "other",
       "owner": "",
+      "path": "docs/status/active/PRODUCTION_READINESS_AUDIT_2026-04-04.md",
+      "root": "docs",
+      "status": "",
+      "title": "Production Readiness Audit \u2014 Mereka LMS"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/PROD_REALIZATION_PROOF_2026-04-02.md",
+      "root": "docs",
+      "status": "",
+      "title": "Prod Domain Realization \u2014 Final Proof Bundle"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/PROMOTION_TRUST_LEDGER_2026-04-10.md",
+      "root": "docs",
+      "status": "",
+      "title": "Promotion Trust Ledger"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
       "path": "docs/status/active/README.md",
       "root": "docs",
       "status": "",
       "title": "Active Status Reports"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/RELEASE_IDENTITY_CHAIN_MAP_2026-04-10.md",
+      "root": "docs",
+      "status": "",
+      "title": "Release Identity Chain Map"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/REVIEWER_OPERATOR_BOARD_2026-04-02.md",
+      "root": "docs",
+      "status": "",
+      "title": "Reviewer Operator Board \u2014 2026-04-02"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/RUNTIME_AUTHORITY_MATRIX_2026-04-09.md",
+      "root": "docs",
+      "status": "",
+      "title": "Runtime Authority Matrix"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/RUNTIME_TRUTH_LEDGER_TAKEOVER_PROMPT_2026-04-03.md",
+      "root": "docs",
+      "status": "",
+      "title": "Runtime Truth Ledger Takeover Prompt \u2014 2026-04-03"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/RUNTIME_TRUTH_LEDGER_TRACKER_2026-04-03.md",
+      "root": "docs",
+      "status": "",
+      "title": "Runtime Truth Ledger Tracker - 2026-04-03"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/SEARCH_EVIDENCE_LEDGER_2026-04-10.md",
+      "root": "docs",
+      "status": "",
+      "title": "Search Evidence Ledger \u2014 2026-04-10"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/SMOKE_ACCOUNT_REGISTRY_2026-04-04.md",
+      "root": "docs",
+      "status": "",
+      "title": "SMOKE_ACCOUNT_REGISTRY_2026-04-04"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/TENANT_EXPERIENCE_CONTRACT_TRACKER_2026-04-05.md",
+      "root": "docs",
+      "status": "",
+      "title": "Tenant Experience Contract Tracker"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/TENANT_OPERATING_SYSTEM_BLUEPRINT_2026-04-03.md",
+      "root": "docs",
+      "status": "",
+      "title": "Tenant Operating System Blueprint \u2014 2026-04-03"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/TODAY_WORKLOAD_TRACKER_2026-03-25.md",
+      "root": "docs",
+      "status": "",
+      "title": "Today Workload Tracker"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/TODAY_WORKLOAD_TRACKER_2026-03-26.md",
+      "root": "docs",
+      "status": "",
+      "title": "Today Workload Tracker"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/TRUTH_BOARD_2026-03-30.md",
+      "root": "docs",
+      "status": "",
+      "title": "Platform Truth Board \u2014 2026-03-30"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/TWO_WEEK_PLATFORM_TRUTH_TAKEOVER_PROMPT_2026-03-28.md",
+      "root": "docs",
+      "status": "",
+      "title": "Two-Week Platform Truth Takeover Prompt"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/TWO_WEEK_PLATFORM_TRUTH_TRACKER_2026-03-28.md",
+      "root": "docs",
+      "status": "",
+      "title": "Two-Week Platform Truth Tracker"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/UI_RUNTIME_TRUTH_TAKEOVER_PROMPT_2026-03-25.md",
+      "root": "docs",
+      "status": "",
+      "title": "UI Runtime Truth Takeover Prompt"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "",
+      "path": "docs/status/active/UI_RUNTIME_TRUTH_TRACKER_2026-03-25.md",
+      "root": "docs",
+      "status": "",
+      "title": "UI Runtime Truth Tracker"
     },
     {
       "classification": "supporting",
@@ -9667,6 +11368,15 @@
       "classification": "canonical",
       "lane": "normative",
       "owner": "engineering",
+      "path": "specs/gitops-integrity-system_spec.md",
+      "root": "specs",
+      "status": "draft",
+      "title": "GitOps Integrity System"
+    },
+    {
+      "classification": "canonical",
+      "lane": "normative",
+      "owner": "engineering",
       "path": "specs/k8s-deployment_spec.md",
       "root": "specs",
       "status": "approved",
@@ -10083,7 +11793,7 @@
       "owner": "",
       "path": "specs/plans/mobile-apps-enterprise_plan.md",
       "root": "specs",
-      "status": "ready",
+      "status": "deferred",
       "title": "Mobile Apps (iOS + Android) Enterprise Deployment - Implementation Plan"
     },
     {
@@ -10328,6 +12038,15 @@
       "root": "specs",
       "status": "approved",
       "title": "Platform Middleware and Custom Apps"
+    },
+    {
+      "classification": "supporting",
+      "lane": "other",
+      "owner": "platform-frontend",
+      "path": "specs/programs/frontend/enterprise_frontend_delivery_contract_spec.md",
+      "root": "specs",
+      "status": "approved",
+      "title": "Enterprise Frontend Delivery Contract"
     },
     {
       "classification": "supporting",
@@ -10951,29 +12670,29 @@
       "title": "Video Pipeline & Delivery System"
     }
   ],
-  "entry_count": 1216,
+  "entry_count": 1407,
   "generated_by": "tools/knowledge/build_knowledge_catalog.py",
   "lanes": {
     "docs:adr": 50,
-    "docs:archive": 298,
-    "docs:concept": 196,
-    "docs:evidence": 9,
+    "docs:archive": 316,
+    "docs:concept": 238,
+    "docs:evidence": 11,
     "docs:generated": 1,
     "docs:index": 5,
-    "docs:other": 194,
-    "docs:review": 79,
-    "docs:runbook": 166,
+    "docs:other": 297,
+    "docs:review": 87,
+    "docs:runbook": 182,
     "specs:evidence": 43,
     "specs:generated": 48,
-    "specs:normative": 39,
-    "specs:other": 15,
+    "specs:normative": 40,
+    "specs:other": 16,
     "specs:plan": 29,
     "specs:proposal": 4,
     "specs:reference": 9,
     "specs:testplan": 31
   },
   "roots": {
-    "docs": 998,
-    "specs": 218
+    "docs": 1187,
+    "specs": 220
   }
 }

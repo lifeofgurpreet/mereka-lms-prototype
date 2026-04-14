@@ -1,128 +1,16 @@
 {
-  "cross_repo_manifest_overall_verdict": "infra_counterpart_required",
-  "deployment_impacts": [
-    {
-      "argocd_surfaces": [
-        "apps/mereka-lms/"
-      ],
-      "cross_repo_verdict": "manual_review_required",
-      "deployment_repo": "bbi-infrastructure",
-      "notes": [
-        "Enterprise service rollout remains coupled to shared Open edX deployment surfaces unless explicitly split in GitOps"
-      ],
-      "overlay_roots": {
-        "dev": "apps/mereka-lms/overlays/dev/",
-        "prod": "apps/mereka-lms/overlays/prod/"
-      },
-      "required_reviewers": [
-        "architecture",
-        "platform",
-        "release",
-        "tenancy_auth"
-      ],
-      "service": "enterprise-services",
-      "unknowns": [
-        "service-specific overlay decomposition for enterprise-catalog, enterprise-access, and related services is not declared in this repo"
-      ]
-    },
-    {
-      "argocd_surfaces": [
-        "apps/mereka-lms/"
-      ],
-      "cross_repo_verdict": "manual_review_required",
-      "deployment_repo": "bbi-infrastructure",
-      "notes": [
-        "deploy/k8s/overlays/rke2-nonprod in this repo is deprecated in favor of bbi-infrastructure dev overlays",
-        "deploy/k8s/overlays/production in this repo is deprecated in favor of bbi-infrastructure prod overlays"
-      ],
-      "overlay_roots": {
-        "dev": "apps/mereka-lms/overlays/dev/",
-        "prod": "apps/mereka-lms/overlays/prod/",
-        "staging": "apps/mereka-lms/overlays/staging/"
-      },
-      "required_reviewers": [
-        "architecture",
-        "platform",
-        "release"
-      ],
-      "service": "openedx",
-      "unknowns": [
-        "exact ArgoCD application or ApplicationSet filenames are not declared in this repo",
-        "exact secret store resource paths are not declared in this repo"
-      ]
-    },
-    {
-      "argocd_surfaces": [
-        "apps/mereka-lms/"
-      ],
-      "cross_repo_verdict": "infra_counterpart_required",
-      "deployment_repo": "bbi-infrastructure",
-      "notes": [
-        "production rollout requires GitOps overlay image pinning and ingress realization"
-      ],
-      "overlay_roots": {
-        "dev": "apps/mereka-lms/overlays/dev/",
-        "prod": "apps/mereka-lms/overlays/prod/"
-      },
-      "required_reviewers": [
-        "architecture",
-        "platform",
-        "release",
-        "security"
-      ],
-      "service": "purchase-gateway",
-      "unknowns": [
-        "Stripe secret materialization path is not declared in this repo",
-        "exact purchase-gateway ingress and service object files are not declared in this repo"
-      ]
-    },
-    {
-      "argocd_surfaces": [
-        "none"
-      ],
-      "cross_repo_verdict": "infra_counterpart_required",
-      "deployment_repo": "bbi-infrastructure",
-      "notes": [
-        "runner and release automation are cross-repo because release scripts write into bbi-infrastructure"
-      ],
-      "overlay_roots": {
-        "prod": "apps/mereka-lms/overlays/prod/"
-      },
-      "required_reviewers": [
-        "platform",
-        "release",
-        "security"
-      ],
-      "service": "runner-ci",
-      "unknowns": [
-        "exact self-hosted runner host configuration and secret provisioning files are not declared in this repo"
-      ]
-    }
-  ],
+  "cross_repo_manifest_overall_verdict": "infra_counterpart_not_required",
+  "deployment_impacts": [],
   "generated_by": "tools/contracts/build_deployment_impact_report.py",
-  "overall_verdict": "infra_counterpart_required",
+  "overall_verdict": "infra_counterpart_not_required",
   "range": "origin/main...HEAD",
-  "required_repositories": [
-    "bbi-infrastructure"
-  ],
-  "required_reviewers": [
-    "architecture",
-    "platform",
-    "release",
-    "security",
-    "tenancy_auth"
-  ],
-  "service_count": 4,
+  "required_repositories": [],
+  "required_reviewers": [],
+  "service_count": 0,
   "summary": {
     "infra_counterpart_not_required": [],
-    "infra_counterpart_required": [
-      "purchase-gateway",
-      "runner-ci"
-    ],
-    "manual_review_required": [
-      "enterprise-services",
-      "openedx"
-    ],
+    "infra_counterpart_required": [],
+    "manual_review_required": [],
     "unknown_mapping": []
   }
 }

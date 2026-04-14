@@ -1,6 +1,6 @@
 {
   "catalog": "generated/catalogs/knowledge-catalog.json",
-  "edge_count": 4215,
+  "edge_count": 4221,
   "edges": [
     {
       "edge_type": "classifies",
@@ -2335,11 +2335,6 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
-      "target": "docs/architecture/CONTENT_LIBRARIES_MODEL.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
       "target": "docs/architecture/PLATFORM_AUTHORITY_MAP.md"
     },
     {
@@ -2365,22 +2360,7 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
-      "target": "docs/architecture/assessment-audit-report.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/codejail-status.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
       "target": "docs/architecture/mobile-apps-overview.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/architecture/purchase-gateway-overview.md"
     },
     {
       "edge_type": "classifies",
@@ -2600,11 +2580,6 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
-      "target": "docs/guides/admin/CONTENT_LIBRARIES_ENTERPRISE_ONBOARDING.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
       "target": "docs/guides/admin/ENTERPRISE_SERVICES_GUIDE.md"
     },
     {
@@ -2756,11 +2731,6 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/guides/platform/ADVANCED_ASSESSMENT_AUTHORING_GUIDE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "classification:supporting",
-      "target": "docs/guides/platform/CONTENT_LIBRARIES_AUTHORING_GUIDE.md"
     },
     {
       "edge_type": "classifies",
@@ -3185,6 +3155,11 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
+      "target": "docs/meta/docs-program/authority-registry.v1.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
       "target": "docs/meta/docs-program/bead-v2-format.md"
     },
     {
@@ -3221,6 +3196,16 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/meta/docs-program/metadata/governs-taxonomy.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/docs-program/metadata/merge-back-wave-execution.v1.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/meta/docs-program/metadata/merge-back-waves.v1.yaml"
     },
     {
       "edge_type": "classifies",
@@ -5155,6 +5140,21 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
+      "target": "docs/reference/generated/docs-program-authority-summary.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/reference/generated/docs-program-merge-back-execution.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/reference/generated/docs-program-merge-back-waves.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
       "target": "docs/reference/generated/domain-authority-classification.yaml"
     },
     {
@@ -5590,6 +5590,11 @@
     {
       "edge_type": "classifies",
       "source": "classification:supporting",
+      "target": "docs/reference/operations/SPEC_COVERAGE.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
       "target": "docs/reference/operations/SSO_CANARY.md"
     },
     {
@@ -5616,6 +5621,11 @@
       "edge_type": "classifies",
       "source": "classification:supporting",
       "target": "docs/reference/operations/TUTOR_CONFIG_CI.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "classification:supporting",
+      "target": "docs/reference/operations/UI_UX_HARDENING_BUNDLE.md"
     },
     {
       "edge_type": "classifies",
@@ -7325,11 +7335,6 @@
     {
       "edge_type": "contains",
       "source": "docs",
-      "target": "docs/architecture/CONTENT_LIBRARIES_MODEL.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
       "target": "docs/architecture/PLATFORM_AUTHORITY_MAP.md"
     },
     {
@@ -7355,22 +7360,7 @@
     {
       "edge_type": "contains",
       "source": "docs",
-      "target": "docs/architecture/assessment-audit-report.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/codejail-status.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
       "target": "docs/architecture/mobile-apps-overview.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/architecture/purchase-gateway-overview.md"
     },
     {
       "edge_type": "contains",
@@ -9180,11 +9170,6 @@
     {
       "edge_type": "contains",
       "source": "docs",
-      "target": "docs/guides/admin/CONTENT_LIBRARIES_ENTERPRISE_ONBOARDING.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
       "target": "docs/guides/admin/ENTERPRISE_SERVICES_GUIDE.md"
     },
     {
@@ -9336,11 +9321,6 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/guides/platform/ADVANCED_ASSESSMENT_AUTHORING_GUIDE.md"
-    },
-    {
-      "edge_type": "contains",
-      "source": "docs",
-      "target": "docs/guides/platform/CONTENT_LIBRARIES_AUTHORING_GUIDE.md"
     },
     {
       "edge_type": "contains",
@@ -9765,6 +9745,11 @@
     {
       "edge_type": "contains",
       "source": "docs",
+      "target": "docs/meta/docs-program/authority-registry.v1.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
       "target": "docs/meta/docs-program/bead-v2-format.md"
     },
     {
@@ -9801,6 +9786,16 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/meta/docs-program/metadata/governs-taxonomy.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/docs-program/metadata/merge-back-wave-execution.v1.yaml"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/meta/docs-program/metadata/merge-back-waves.v1.yaml"
     },
     {
       "edge_type": "contains",
@@ -11735,6 +11730,21 @@
     {
       "edge_type": "contains",
       "source": "docs",
+      "target": "docs/reference/generated/docs-program-authority-summary.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/reference/generated/docs-program-merge-back-execution.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/reference/generated/docs-program-merge-back-waves.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
       "target": "docs/reference/generated/domain-authority-classification.yaml"
     },
     {
@@ -12170,6 +12180,11 @@
     {
       "edge_type": "contains",
       "source": "docs",
+      "target": "docs/reference/operations/SPEC_COVERAGE.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
       "target": "docs/reference/operations/SSO_CANARY.md"
     },
     {
@@ -12196,6 +12211,11 @@
       "edge_type": "contains",
       "source": "docs",
       "target": "docs/reference/operations/TUTOR_CONFIG_CI.md"
+    },
+    {
+      "edge_type": "contains",
+      "source": "docs",
+      "target": "docs/reference/operations/UI_UX_HARDENING_BUNDLE.md"
     },
     {
       "edge_type": "contains",
@@ -14795,11 +14815,6 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:concept",
-      "target": "docs/architecture/CONTENT_LIBRARIES_MODEL.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
       "target": "docs/architecture/PLATFORM_AUTHORITY_MAP.md"
     },
     {
@@ -14825,22 +14840,7 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:concept",
-      "target": "docs/architecture/assessment-audit-report.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/codejail-status.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
       "target": "docs/architecture/mobile-apps-overview.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/architecture/purchase-gateway-overview.md"
     },
     {
       "edge_type": "classifies",
@@ -15000,11 +15000,6 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:concept",
-      "target": "docs/guides/admin/CONTENT_LIBRARIES_ENTERPRISE_ONBOARDING.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
       "target": "docs/guides/admin/ENTERPRISE_SERVICES_GUIDE.md"
     },
     {
@@ -15156,11 +15151,6 @@
       "edge_type": "classifies",
       "source": "lane:docs:concept",
       "target": "docs/guides/platform/ADVANCED_ASSESSMENT_AUTHORING_GUIDE.md"
-    },
-    {
-      "edge_type": "classifies",
-      "source": "lane:docs:concept",
-      "target": "docs/guides/platform/CONTENT_LIBRARIES_AUTHORING_GUIDE.md"
     },
     {
       "edge_type": "classifies",
@@ -15486,6 +15476,21 @@
       "edge_type": "classifies",
       "source": "lane:docs:concept",
       "target": "docs/reference/contracts/VERIFIER_CONTRACT_CATALOG.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
+      "target": "docs/reference/generated/docs-program-authority-summary.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
+      "target": "docs/reference/generated/docs-program-merge-back-execution.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
+      "target": "docs/reference/generated/docs-program-merge-back-waves.md"
     },
     {
       "edge_type": "classifies",
@@ -15925,6 +15930,11 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:concept",
+      "target": "docs/reference/operations/SPEC_COVERAGE.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
       "target": "docs/reference/operations/SSO_CANARY.md"
     },
     {
@@ -15951,6 +15961,11 @@
       "edge_type": "classifies",
       "source": "lane:docs:concept",
       "target": "docs/reference/operations/TUTOR_CONFIG_CI.md"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:concept",
+      "target": "docs/reference/operations/UI_UX_HARDENING_BUNDLE.md"
     },
     {
       "edge_type": "classifies",
@@ -17810,6 +17825,11 @@
     {
       "edge_type": "classifies",
       "source": "lane:docs:review",
+      "target": "docs/meta/docs-program/authority-registry.v1.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:review",
       "target": "docs/meta/docs-program/bead-v2-format.md"
     },
     {
@@ -17846,6 +17866,16 @@
       "edge_type": "classifies",
       "source": "lane:docs:review",
       "target": "docs/meta/docs-program/metadata/governs-taxonomy.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:review",
+      "target": "docs/meta/docs-program/metadata/merge-back-wave-execution.v1.yaml"
+    },
+    {
+      "edge_type": "classifies",
+      "source": "lane:docs:review",
+      "target": "docs/meta/docs-program/metadata/merge-back-waves.v1.yaml"
     },
     {
       "edge_type": "classifies",
@@ -21079,7 +21109,7 @@
     }
   ],
   "generated_by": "tools/knowledge/build_knowledge_graph.py",
-  "node_count": 1428,
+  "node_count": 1430,
   "nodes": [
     {
       "id": "classification:archival",
@@ -21762,17 +21792,6 @@
     },
     {
       "classification": "supporting",
-      "id": "docs/architecture/CONTENT_LIBRARIES_MODEL.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/CONTENT_LIBRARIES_MODEL.md",
-      "root": "docs",
-      "status": "",
-      "title": "Content Libraries Model"
-    },
-    {
-      "classification": "supporting",
       "id": "docs/architecture/PLATFORM_AUTHORITY_MAP.md",
       "lane": "concept",
       "node_type": "docs:concept",
@@ -21828,28 +21847,6 @@
     },
     {
       "classification": "supporting",
-      "id": "docs/architecture/assessment-audit-report.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/assessment-audit-report.md",
-      "root": "docs",
-      "status": "",
-      "title": "Assessment Audit Report"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/codejail-status.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/codejail-status.md",
-      "root": "docs",
-      "status": "",
-      "title": "CodeJail Status"
-    },
-    {
-      "classification": "supporting",
       "id": "docs/architecture/mobile-apps-overview.md",
       "lane": "concept",
       "node_type": "docs:concept",
@@ -21858,17 +21855,6 @@
       "root": "docs",
       "status": "",
       "title": "Mobile Apps Overview"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/architecture/purchase-gateway-overview.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/architecture/purchase-gateway-overview.md",
-      "root": "docs",
-      "status": "",
-      "title": "Purchase Gateway Overview"
     },
     {
       "classification": "supporting",
@@ -25843,17 +25829,6 @@
     },
     {
       "classification": "supporting",
-      "id": "docs/guides/admin/CONTENT_LIBRARIES_ENTERPRISE_ONBOARDING.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/admin/CONTENT_LIBRARIES_ENTERPRISE_ONBOARDING.md",
-      "root": "docs",
-      "status": "",
-      "title": "Content Libraries Enterprise Onboarding"
-    },
-    {
-      "classification": "supporting",
       "id": "docs/guides/admin/ENTERPRISE_SERVICES_GUIDE.md",
       "lane": "concept",
       "node_type": "docs:concept",
@@ -26192,17 +26167,6 @@
       "root": "docs",
       "status": "",
       "title": "Advanced Assessment Authoring Guide"
-    },
-    {
-      "classification": "supporting",
-      "id": "docs/guides/platform/CONTENT_LIBRARIES_AUTHORING_GUIDE.md",
-      "lane": "concept",
-      "node_type": "docs:concept",
-      "owner": "",
-      "path": "docs/guides/platform/CONTENT_LIBRARIES_AUTHORING_GUIDE.md",
-      "root": "docs",
-      "status": "",
-      "title": "Content Libraries Authoring Guide"
     },
     {
       "classification": "supporting",
@@ -26993,7 +26957,7 @@
       "owner": "Platform Team",
       "path": "docs/meta/docs-program/WAVE_BRANDING_ROOT_RESET_TRACKER.md",
       "root": "docs",
-      "status": "canonical",
+      "status": "historical tracker snapshot",
       "title": "Wave Branding Root Reset Tracker"
     },
     {
@@ -27026,7 +26990,7 @@
       "owner": "Platform Team",
       "path": "docs/meta/docs-program/WAVE_CI_CD_ROOT_RESET_TRACKER.md",
       "root": "docs",
-      "status": "canonical",
+      "status": "historical tracker snapshot",
       "title": "Wave CI/CD Root Reset Tracker"
     },
     {
@@ -27037,7 +27001,7 @@
       "owner": "Platform Team",
       "path": "docs/meta/docs-program/WAVE_MIGRATIONS_ROOT_RESET_CLOSEOUT.md",
       "root": "docs",
-      "status": "canonical",
+      "status": "historical closeout snapshot",
       "title": "Wave Migrations Root Reset Closeout"
     },
     {
@@ -27048,7 +27012,7 @@
       "owner": "Platform Team",
       "path": "docs/meta/docs-program/WAVE_MIGRATIONS_ROOT_RESET_REVIEW_HANDOFF.md",
       "root": "docs",
-      "status": "canonical",
+      "status": "historical review handoff snapshot",
       "title": "Wave Migrations Root Reset Review Handoff"
     },
     {
@@ -27059,7 +27023,7 @@
       "owner": "Platform Team",
       "path": "docs/meta/docs-program/WAVE_MIGRATIONS_ROOT_RESET_TRACKER.md",
       "root": "docs",
-      "status": "canonical",
+      "status": "historical tracker snapshot",
       "title": "Wave Migrations Root Reset Tracker"
     },
     {
@@ -27127,6 +27091,17 @@
       "root": "docs",
       "status": "",
       "title": "Wave Runbooks Root Reset Tracker"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/docs-program/authority-registry.v1.yaml",
+      "lane": "review",
+      "node_type": "docs:review",
+      "owner": "",
+      "path": "docs/meta/docs-program/authority-registry.v1.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "authority-registry.v1"
     },
     {
       "classification": "supporting",
@@ -27215,6 +27190,28 @@
       "root": "docs",
       "status": "",
       "title": "governs-taxonomy"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/docs-program/metadata/merge-back-wave-execution.v1.yaml",
+      "lane": "review",
+      "node_type": "docs:review",
+      "owner": "",
+      "path": "docs/meta/docs-program/metadata/merge-back-wave-execution.v1.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "merge-back-wave-execution.v1"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/meta/docs-program/metadata/merge-back-waves.v1.yaml",
+      "lane": "review",
+      "node_type": "docs:review",
+      "owner": "",
+      "path": "docs/meta/docs-program/metadata/merge-back-waves.v1.yaml",
+      "root": "docs",
+      "status": "",
+      "title": "merge-back-waves.v1"
     },
     {
       "classification": "supporting",
@@ -31464,6 +31461,39 @@
     },
     {
       "classification": "supporting",
+      "id": "docs/reference/generated/docs-program-authority-summary.md",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/reference/generated/docs-program-authority-summary.md",
+      "root": "docs",
+      "status": "",
+      "title": "Docs Program Authority Summary"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/reference/generated/docs-program-merge-back-execution.md",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/reference/generated/docs-program-merge-back-execution.md",
+      "root": "docs",
+      "status": "",
+      "title": "Docs Program Merge-Back Execution"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/reference/generated/docs-program-merge-back-waves.md",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/reference/generated/docs-program-merge-back-waves.md",
+      "root": "docs",
+      "status": "",
+      "title": "Docs Program Merge-Back Waves"
+    },
+    {
+      "classification": "supporting",
       "id": "docs/reference/generated/domain-authority-classification.yaml",
       "lane": "concept",
       "node_type": "docs:concept",
@@ -32421,6 +32451,17 @@
     },
     {
       "classification": "supporting",
+      "id": "docs/reference/operations/SPEC_COVERAGE.md",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/reference/operations/SPEC_COVERAGE.md",
+      "root": "docs",
+      "status": "",
+      "title": "Spec Coverage"
+    },
+    {
+      "classification": "supporting",
       "id": "docs/reference/operations/SSO_CANARY.md",
       "lane": "concept",
       "node_type": "docs:concept",
@@ -32484,6 +32525,17 @@
       "root": "docs",
       "status": "",
       "title": "Tutor Configuration CI/CD Reference"
+    },
+    {
+      "classification": "supporting",
+      "id": "docs/reference/operations/UI_UX_HARDENING_BUNDLE.md",
+      "lane": "concept",
+      "node_type": "docs:concept",
+      "owner": "",
+      "path": "docs/reference/operations/UI_UX_HARDENING_BUNDLE.md",
+      "root": "docs",
+      "status": "",
+      "title": "UI/UX Hardening Bundle"
     },
     {
       "classification": "supporting",

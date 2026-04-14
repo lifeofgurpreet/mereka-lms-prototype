@@ -226,7 +226,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", default=".")
     parser.add_argument("--range", default="origin/main...HEAD")
-    parser.add_argument("--output-dir", default="generated/knowledge/task-bundles")
+    parser.add_argument("--output-dir", default="generated/knowledge/agent-task-bundles")
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
 
