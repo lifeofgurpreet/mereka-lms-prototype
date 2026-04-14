@@ -1,5 +1,24 @@
 # Wave 3 Closeout
 
+_Audience: Reviewers, contributors, and agents • Owner: Platform Team • Last verified: 2026-03-09 • Status: historical closeout snapshot_
+
+This is a historical closeout for the completed Wave 3 twin-root normalization
+packet. It does not define the current docs-program execution or review front
+door.
+
+For current docs-program execution, use:
+
+- [POST_REBASE_INTAKE_2026-04-13.md](POST_REBASE_INTAKE_2026-04-13.md)
+- [REVIEW_HARDENING_BOARD_2026-04-13.md](REVIEW_HARDENING_BOARD_2026-04-13.md)
+- [DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md](DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md)
+
+For the current architecture front door, use:
+
+- [../../architecture/README.md](../../architecture/README.md)
+
+Retain this document only as historical closeout context for the completed
+Wave 3 packet.
+
 ## What became truthful
 
 - Proposal material that did not belong in the normative root lane was moved into `specs/proposals/` with compatibility wrappers left behind only where active references still exist.

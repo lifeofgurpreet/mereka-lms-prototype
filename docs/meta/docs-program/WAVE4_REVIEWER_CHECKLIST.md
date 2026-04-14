@@ -1,5 +1,23 @@
 # Wave 4 Reviewer Checklist
 
+_Audience: Reviewers and coding agents • Owner: Platform Team • Last verified: 2026-03-09 • Status: historical reviewer checklist snapshot_
+
+This is a historical reviewer checklist for the completed Wave 4 packet. It
+does not define the current docs-program review front door.
+
+For current docs-program execution, use:
+
+- [POST_REBASE_INTAKE_2026-04-13.md](POST_REBASE_INTAKE_2026-04-13.md)
+- [REVIEW_HARDENING_BOARD_2026-04-13.md](REVIEW_HARDENING_BOARD_2026-04-13.md)
+- [DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md](DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md)
+
+For the current architecture front door, use:
+
+- [../../architecture/README.md](../../architecture/README.md)
+
+Retain this document only as historical reviewer-checklist context for the
+completed Wave 4 packet.
+
 Use this checklist for any PR that changes docs/specs knowledge surfaces.
 
 ## Control-plane checks

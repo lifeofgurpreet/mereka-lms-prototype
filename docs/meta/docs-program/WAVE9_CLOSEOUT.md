@@ -1,5 +1,24 @@
 # Wave 9 Closeout
-_Audience: Reviewers, contributors, and agents • Owner: Platform Team • Last verified: 2026-03-09 • Status: canonical_
+_Audience: Reviewers, contributors, and agents • Owner: Platform Team • Last verified: 2026-03-09 • Status: historical review closeout snapshot_
+
+This is a historical closeout for the completed Wave 9 review/runtime
+hardening packet. It does not define the current docs-program execution or
+review front door.
+
+For current docs-program execution, use:
+
+- [POST_REBASE_INTAKE_2026-04-13.md](POST_REBASE_INTAKE_2026-04-13.md)
+- [REVIEW_HARDENING_BOARD_2026-04-13.md](REVIEW_HARDENING_BOARD_2026-04-13.md)
+- [DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md](DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md)
+
+For the current architecture front door, use:
+
+- [../../architecture/README.md](../../architecture/README.md)
+
+Retain this document only as historical closeout context for the completed
+Wave 9 packet. If the earlier packet evidence is needed, use
+`WAVE9_FINDINGS_LEDGER.md` as the audit artifact rather than treating this file
+as the live review front door.
 
 ## What Wave 9 added
 
@@ -34,7 +53,7 @@ It added:
 For humans and agents, use this order:
 
 1. `docs/README.md`
-2. `docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md`
+2. `docs/architecture/PLATFORM_AUTHORITY_MAP.md`
 3. `docs/reference/operations/RELEASE_PROCESS.md`
 4. `docs/meta/standing-orders/README.md`
 5. `specs/_generated/indexes/spec-read-first.md`
@@ -62,7 +81,7 @@ Agents should start from:
 
 - `docs/meta/docs-program/WAVE9_FINDINGS_LEDGER.md`
 - `docs/README.md`
-- `docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md`
+- `docs/architecture/PLATFORM_AUTHORITY_MAP.md`
 - `specs/_generated/indexes/spec-read-first.md`
 
 Then branch by task type:
