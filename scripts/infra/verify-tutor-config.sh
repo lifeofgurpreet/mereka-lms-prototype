@@ -475,6 +475,9 @@ if [[ -f "$LMS_SETTINGS" ]]; then
   regex_pattern_count_equals "(_safe_add_app\\([\"']openedx_prometheus[\"']\\)|INSTALLED_APPS\\.append\\([\"']openedx_prometheus[\"']\\))" "1" "$LMS_SETTINGS" "Exactly one openedx_prometheus app registration path"
   regex_pattern_count_equals "(_safe_add_app\\([\"']mereka_tenancy[\"']\\)|INSTALLED_APPS\\.append\\([\"']mereka_tenancy[\"']\\))" "1" "$LMS_SETTINGS" "Exactly one mereka_tenancy app registration path"
   regex_pattern_count_equals "(_safe_add_app\\([\"']openedx_notifications[\"']\\)|INSTALLED_APPS\\.append\\([\"']openedx_notifications[\"']\\))" "1" "$LMS_SETTINGS" "Exactly one openedx_notifications app registration path"
+  fixed_pattern_count_equals '# Set default theme for all sites
+DEFAULT_SITE_THEME = "mereka"
+' "1" "$LMS_SETTINGS" "Exactly one DEFAULT_SITE_THEME assignment remains in rendered LMS settings"
   if grep -q 'MFE_CONFIG\["ORDER_HISTORY_URL"\] = ORDER_HISTORY_MICROFRONTEND_URL' "$LMS_SETTINGS" 2>/dev/null \
     || grep -q 'MFE_CONFIG\["ORDER_HISTORY_URL"\].*/orders' "$LMS_SETTINGS" 2>/dev/null; then
     check_pass "MFE ORDER_HISTORY_URL is defined in rendered LMS settings"
@@ -581,6 +584,7 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_not_in_file "webpack skipped (prebuilt bundles)" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain conditional webpack skip residue"
   pattern_not_in_file "duplicate_brand_compile_tail" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain duplicate brand compile tail shim"
   pattern_not_in_file "COPY --chown=app:app \\./themes/ /openedx/themes" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain late broad theme copy removal shim"
+  pattern_not_in_file "legacy_runtime_cluster = re.compile(" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain broad legacy runtime cluster scrubber"
   pattern_not_in_file "legacy_code_stage_custom_apps_pattern" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain legacy production-stage custom app scrubber"
   pattern_not_in_file "production_custom_apps_pattern" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain duplicate production-stage custom app reinjection scrubber"
   pattern_not_in_file "RUN uv pip install -e /openedx/mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "No duplicate production-stage custom app reinstalls remain"

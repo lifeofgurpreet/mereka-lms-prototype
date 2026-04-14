@@ -761,17 +761,9 @@ RUN uv pip install django-prometheus==2.3.1"""
 
         updated = force_mfe_discussions_only(updated)
 
-        # Strip the legacy runtime-settings cluster that used to inject default
-        # theme + MFE OAuth + Prometheus + tenancy directly into rendered Tutor
-        # settings. Source authority for this contract now lives in the
-        # consolidated mereka_lms plugin stack.
-        legacy_runtime_cluster = re.compile(
-            r"# MFE OAuth Fix - Custom app to fix OAuth provider visibility\n"
-            r".*?"
-            r"MIDDLEWARE\.append\('mereka_tenancy\.middleware\.TenantResolutionMiddleware'\)",
-            re.MULTILINE | re.DOTALL,
-        )
-        updated, _ = legacy_runtime_cluster.subn("\n", updated, count=1)
+        # Upstream/local render inputs can still emit DEFAULT_SITE_THEME twice.
+        # Keep the first canonical mereka assignment and strip later duplicates
+        # without preserving the old broad runtime-cluster scrubber.
         theme_marker = '\n# Set default theme for all sites\nDEFAULT_SITE_THEME = "mereka"\n'
         first_theme = updated.find(theme_marker)
         last_theme = updated.rfind(theme_marker)
