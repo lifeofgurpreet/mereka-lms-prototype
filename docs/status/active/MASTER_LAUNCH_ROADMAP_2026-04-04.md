@@ -28,6 +28,7 @@ Rule: active surfaces remain in scope until explicitly removed from authority.
 - [ACTIVE_SURFACE_RUNTIME_MATRIX_2026-04-04.md](ACTIVE_SURFACE_RUNTIME_MATRIX_2026-04-04.md)
 - [ACTIVE_SURFACE_STATUS_BOARD_2026-04-04.md](ACTIVE_SURFACE_STATUS_BOARD_2026-04-04.md)
 - [SMOKE_ACCOUNT_REGISTRY_2026-04-04.md](SMOKE_ACCOUNT_REGISTRY_2026-04-04.md)
+- [ACTIVE_SURFACE_STATUS_AUDIT_2026-04-14.md](ACTIVE_SURFACE_STATUS_AUDIT_2026-04-14.md)
 
 ## Current known blockers (status)
 
@@ -42,3 +43,5 @@ Rule: active surfaces remain in scope until explicitly removed from authority.
 
 - This file is an active execution board, not architecture law.
 - Historical/replaced status trackers must link here or be marked superseded.
+- Next-priority run uses a one-pass audit against the active status surface in
+  [ACTIVE_SURFACE_STATUS_AUDIT_2026-04-14.md](ACTIVE_SURFACE_STATUS_AUDIT_2026-04-14.md).
