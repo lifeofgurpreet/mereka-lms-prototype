@@ -1,16 +1,14 @@
 #!/usr/bin/env bash
 # Patch: residual rendered-file normalization for Tutor 21.x (Ulmo).
 # Scope: Open edX Dockerfile text replacements that remain patch-owned:
-#        MySQL 8.4 local compose compatibility plus fast-profile translation
-#        pull wrappers. Build-context file sync now lives in apply-patches.sh.
+#        fast-profile translation pull wrappers.
+#        Build-context file sync now lives in apply-patches.sh.
 
 apply_build_optimizations_patch() {
   local tutor_root="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
   local targets=(
     "$OPENEDX_TEMPLATE"
     "$tutor_root/env/build/openedx/Dockerfile"
-    "$MYSQL_TEMPLATE"
-    "$tutor_root/env/local/docker-compose.yml"
   )
 
   "${PYTHON_BIN}" - "${targets[@]}" <<'PY'
@@ -27,13 +25,6 @@ for target in targets:
     updated = original
 
     # ── openedx Dockerfile patches ──────────────────────────────────────
-
-    # MySQL 8.4 removed default_authentication_plugin. Keep the local Tutor
-    # compose authority aligned with the repo-owned MySQL contract.
-    updated = updated.replace(
-        "--default-authentication-plugin=mysql_native_password",
-        "--mysql-native-password=ON",
-    )
 
     # Keep uwsgi on plain pip for now: a local uv preflight against uwsgi==2.0.24
     # still fails in wheel build with C compiler errors around signal handler

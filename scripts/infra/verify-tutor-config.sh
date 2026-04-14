@@ -637,6 +637,8 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_not_in_file "Syncing logo files from theme source to build directory..." "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain Open edX theme sync ownership"
   pattern_not_in_file "Custom apps synced to build context." "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain custom-app build-context sync ownership"
   pattern_not_in_file "Multi-tenancy plugin synced to build context." "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain multi-tenancy build-context sync ownership"
+  pattern_not_in_file "--default-authentication-plugin=mysql_native_password" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain MySQL auth compatibility rewrite"
+  pattern_not_in_file '"$MYSQL_TEMPLATE"' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain stale docker-compose target scans"
   pattern_not_in_file '"$LMS_SETTINGS_TEMPLATE"' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain stale LMS settings target scans"
   pattern_not_in_file '"$LMS_ASSETS_TEMPLATE"' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain stale LMS assets target scans"
   pattern_not_in_file '"$CMS_ASSETS_TEMPLATE"' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain stale CMS assets target scans"
