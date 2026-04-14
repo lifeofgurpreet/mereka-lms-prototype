@@ -730,12 +730,12 @@ entries:
   owner: agent-ops-collapse
   notes: canonical operations reference
 - old_path: docs/operations/SPEC_COVERAGE.md
-  destination_path: docs/meta/docs-program/SPEC_COVERAGE.md
-  destination_root: docs/meta
-  classification: meta.program
+  destination_path: docs/reference/operations/SPEC_COVERAGE.md
+  destination_root: docs/reference
+  classification: reference.operations
   action: move_and_stub
   owner: agent-ops-collapse
-  notes: auto-mapped from current canonical surfaces
+  notes: canonical operations reference
 - old_path: docs/operations/STAGING_ACTIVATION.md
   destination_path: docs/ops/runbooks/STAGING_ACTIVATION.md
   destination_root: docs/ops
@@ -863,12 +863,12 @@ entries:
   owner: agent-ops-collapse
   notes: auto-mapped from current canonical surfaces
 - old_path: docs/operations/UI_UX_HARDENING_BUNDLE.md
-  destination_path: docs/meta/docs-program/UI_UX_HARDENING_BUNDLE.md
-  destination_root: docs/meta
-  classification: meta.docs-program
+  destination_path: docs/reference/operations/UI_UX_HARDENING_BUNDLE.md
+  destination_root: docs/reference
+  classification: reference.operations
   action: stub_to_existing
   owner: agent-ops-collapse
-  notes: docs-program internal bundle
+  notes: canonical operations reference
 - old_path: docs/operations/ULMO_DEV_STAGING_PARITY.md
   destination_path: docs/status/active/ULMO_DEV_STAGING_PARITY.md
   destination_root: docs/status

@@ -30,6 +30,9 @@ waves:
     pr_title: "docs: align stable architecture root authority"
     include_paths:
       - docs/reference/governance/DEPRECATION_LEDGER.md
+      - docs/stabilization/RETIRED_ROOT_REMEDIATION_LEDGER.md
+      - infrastructure/monitoring/grafana/dashboards/public-endpoints.json
+      - scripts/qa/lint-repo-conventions.sh
       - tools/docs/verify/verify-docs-policy.sh
       - tools/docs/verify/verify_legacy_architecture_root.py
     validators:
@@ -47,14 +50,20 @@ waves:
       - wave-0b-architecture-root-authority
     pr_title: "docs: refresh active docs control plane"
     include_paths:
+      - docs/meta/docs-program/authority-registry.v1.yaml
+      - docs/meta/docs-program/companion-surface-review.v1.yaml
       - docs/meta/docs-program/POST_REBASE_INTAKE_2026-04-13.md
       - docs/meta/docs-program/REVIEW_HARDENING_BOARD_2026-04-13.md
       - docs/meta/docs-program/DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md
       - docs/meta/docs-program/README.md
+      - docs/meta/docs-program/owner-gap-ledger.v1.yaml
       - docs/meta/README.md
       - docs/meta/docs-program/metadata/METADATA_MODEL.md
       - docs/meta/docs-program/metadata/doc-class-schema-map.yaml
       - docs/meta/docs-program/metadata/governs-taxonomy.yaml
+      - docs/meta/docs-program/metadata/merge-back-waves.v1.yaml
+      - docs/reference/generated/docs-program-authority-summary.md
+      - docs/reference/generated/docs-program-merge-back-waves.md
     validators:
       - bash tools/docs/verify/verify-docs-policy.sh --range origin/main...HEAD
       - git diff --check

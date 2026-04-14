@@ -15,6 +15,10 @@ The merge-back review bundles now also have a machine-readable source of truth:
 [`metadata/merge-back-waves.v1.yaml`](metadata/merge-back-waves.v1.yaml) with
 the generated reviewer view at
 [`../../reference/generated/docs-program-merge-back-waves.md`](../../reference/generated/docs-program-merge-back-waves.md).
+The extracted review branches are recorded separately in
+[`metadata/merge-back-wave-execution.v1.yaml`](metadata/merge-back-wave-execution.v1.yaml)
+with the generated execution view at
+[`../../reference/generated/docs-program-merge-back-execution.md`](../../reference/generated/docs-program-merge-back-execution.md).
 
 It exists to prevent the wrong move:
 
@@ -22,15 +26,18 @@ It exists to prevent the wrong move:
 - do **not** reopen broad cleanup
 - do **not** treat every unique file on the old branch as still worth keeping
 
-The correct move now is selective transplant.
+The correct move here is selective transplant into reviewable merge-back waves.
 
 ## Current Base
 
-- current branch head: `68376a84c`
-- current `origin/main`: `ab3112cb9`
-- current divergence: `ahead 114, behind 0`
 - preserved pre-rebase snapshot: `docs/isolated-docs-20260413-snapshot`
-- current fresh-intake backlog: none pending after the latest `#1723` sync
+- current fresh-intake backlog: none pending after the merged wave stack
+
+## Current Control Point
+
+- the planned merge-back wave stack is merged on `origin/main`
+- the next docs work is bounded follow-through on the remaining truth families,
+  not more merge-wave shaping
 
 ## Current Verified State
 
