@@ -56,6 +56,9 @@ usage() {
 parse_args() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
+      --concern)
+        SUBCONCERN="${2:?--concern requires a value}"
+        shift 2 ;;
       --lane)
         LANE="$(normalize_lane_to_canonical "${2:?--lane requires a value}")"
         shift 2 ;;
@@ -75,6 +78,12 @@ parse_args() {
       --dry-run)
         DRY_RUN=true
         shift ;;
+      --skip-cluster)
+        PASSTHROUGH_ARGS+=("$1")
+        shift ;;
+      --release-object-json|--ci-failure-baseline-json|--output-dir|--ci-run-id|--domain|--overlay)
+        PASSTHROUGH_ARGS+=("$1" "${2:?$1 requires a value}")
+        shift 2 ;;
       -h|--help)
         usage
         exit 0 ;;
