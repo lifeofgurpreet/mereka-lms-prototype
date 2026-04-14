@@ -950,7 +950,7 @@ jobs:
 
   scan-openedx-image:
     name: Post-push OpenEdX Scan
-    runs-on: mereka-k8s-heavy-builders
+    runs-on: mereka-k8s-runners
     timeout-minutes: 45
     needs: [build-openedx]
     if: ${{ needs.build-openedx.result == 'success' }}
@@ -967,9 +967,9 @@ jobs:
 
       - name: Fix DinD network MTU
         run: |
-          # Keep post-push image verification aligned with the heavy build
-          # lanes. MTU authority lives in the heavy-runner dockerd startup
-          # flags and ARC daemon config; this step only injects DNS fallback.
+          # Keep post-push image verification aligned with the runner pool that
+          # handles release orchestration. MTU authority lives in ARC dockerd
+          # startup flags and daemon config; this step only injects DNS fallback.
           if docker info >/dev/null 2>&1; then
             docker run --privileged --pid=host busybox \
               nsenter -t 1 -m -- sh -c '
@@ -1104,7 +1104,7 @@ jobs:
 
   scan-mfe-image:
     name: Post-push MFE Scan
-    runs-on: mereka-k8s-heavy-builders
+    runs-on: mereka-k8s-runners
     timeout-minutes: 45
     needs: [build-mfe]
     if: ${{ needs.build-mfe.result == 'success' }}
@@ -1121,9 +1121,9 @@ jobs:
 
       - name: Fix DinD network MTU
         run: |
-          # Keep post-push image verification aligned with the heavy build
-          # lanes. MTU authority lives in the heavy-runner dockerd startup
-          # flags and ARC daemon config; this step only injects DNS fallback.
+          # Keep post-push image verification aligned with the runner pool that
+          # handles release orchestration. MTU authority lives in ARC dockerd
+          # startup flags and daemon config; this step only injects DNS fallback.
           if docker info >/dev/null 2>&1; then
             docker run --privileged --pid=host busybox \
               nsenter -t 1 -m -- sh -c '
