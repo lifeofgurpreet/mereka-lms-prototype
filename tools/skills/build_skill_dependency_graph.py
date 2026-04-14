@@ -27,25 +27,27 @@ def load_json(path: Path) -> Any:
 
 
 def rank_source(path: str) -> tuple[int, str]:
-    if path.startswith("docs/concepts/architecture/"):
+    if path.startswith("docs/architecture/"):
         return (0, path)
-    if path.startswith("docs/meta/standing-orders/"):
+    if path.startswith("docs/concepts/architecture/"):
         return (1, path)
-    if path.startswith("specs/"):
+    if path.startswith("docs/meta/standing-orders/"):
         return (2, path)
-    if path.startswith("config/"):
+    if path.startswith("specs/"):
         return (3, path)
-    if path.startswith("contracts/"):
+    if path.startswith("config/"):
         return (4, path)
-    if path.startswith("docs/ops/"):
+    if path.startswith("contracts/"):
         return (5, path)
-    if path.startswith("tools/"):
+    if path.startswith("docs/ops/"):
         return (6, path)
-    if path.startswith("scripts/"):
+    if path.startswith("tools/"):
         return (7, path)
-    if path.startswith(".github/"):
+    if path.startswith("scripts/"):
         return (8, path)
-    return (9, path)
+    if path.startswith(".github/"):
+        return (9, path)
+    return (10, path)
 
 
 def build_read_first(skills: list[dict[str, Any]], max_docs: int = 12) -> tuple[list[dict[str, str]], str, dict[str, Any]]:
@@ -62,7 +64,7 @@ def build_read_first(skills: list[dict[str, Any]], max_docs: int = 12) -> tuple[
     filtered = []
     for source in candidates:
         path = source["path"]
-        if path.startswith(("docs/archive/", "docs/operations/", "docs/architecture/", "reports/", "evidence/", "specs/archive/")):
+        if path.startswith(("docs/archive/", "docs/operations/", "reports/", "evidence/", "specs/archive/")):
             continue
         filtered.append(source)
 

@@ -11,7 +11,6 @@ HIGH_RISK_CATEGORIES = {"review", "release", "contracts", "cross-repo-impact"}
 FORBIDDEN_PREFIXES = (
     "docs/archive/",
     "docs/operations/",
-    "docs/architecture/",
     "reports/",
     "evidence/",
     "specs/archive/",

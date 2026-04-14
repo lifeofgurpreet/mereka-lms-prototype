@@ -28,7 +28,7 @@
       ],
       "authoritative_sources": [
         {
-          "path": "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
+          "path": "docs/architecture/PLATFORM_AUTHORITY_MAP.md",
           "repo": "mereka-lms"
         },
         {
@@ -105,7 +105,7 @@
       "purpose": "Determine which repos and truth surfaces a change affects.",
       "read_first_paths": [
         {
-          "path": "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
+          "path": "docs/architecture/PLATFORM_AUTHORITY_MAP.md",
           "repo": "mereka-lms"
         },
         {
@@ -140,7 +140,7 @@
       "stability_level": "evolving",
       "stable_inputs": [
         {
-          "path": "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
+          "path": "docs/architecture/PLATFORM_AUTHORITY_MAP.md",
           "repo": "mereka-lms"
         },
         {
@@ -472,7 +472,11 @@
       ],
       "authoritative_sources": [
         {
-          "path": "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
+          "path": "docs/README.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "docs/architecture/PLATFORM_AUTHORITY_MAP.md",
           "repo": "mereka-lms"
         },
         {
@@ -546,14 +550,18 @@
         "read-first"
       ],
       "preconditions": [
-        "4 canonical source paths resolve",
+        "5 canonical source paths resolve",
         "all allowed commands exist"
       ],
       "primary_repo": "mereka-lms",
       "purpose": "Determine canonical documentation truth and validate docs-policy compliance.",
       "read_first_paths": [
         {
-          "path": "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
+          "path": "docs/README.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "docs/architecture/PLATFORM_AUTHORITY_MAP.md",
           "repo": "mereka-lms"
         },
         {
@@ -590,7 +598,11 @@
       "stability_level": "stable",
       "stable_inputs": [
         {
-          "path": "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
+          "path": "docs/README.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "docs/architecture/PLATFORM_AUTHORITY_MAP.md",
           "repo": "mereka-lms"
         },
         {
@@ -1339,7 +1351,7 @@
       ],
       "authoritative_sources": [
         {
-          "path": "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
+          "path": "docs/reference/governance/DEPRECATION_LEDGER.md",
           "repo": "mereka-lms"
         },
         {
@@ -1413,7 +1425,7 @@
       "purpose": "Assess whether transitional docs paths can be retired safely.",
       "read_first_paths": [
         {
-          "path": "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
+          "path": "docs/reference/governance/DEPRECATION_LEDGER.md",
           "repo": "mereka-lms"
         },
         {
@@ -1443,7 +1455,7 @@
       "stability_level": "evolving",
       "stable_inputs": [
         {
-          "path": "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
+          "path": "docs/reference/governance/DEPRECATION_LEDGER.md",
           "repo": "mereka-lms"
         },
         {

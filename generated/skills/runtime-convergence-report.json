@@ -17,7 +17,7 @@
         "platform-control-plane/contracts/release-contracts.yaml"
       ],
       "check_id": "promotion-contract-alignment",
-      "details": "workflow target environments=['prod', 'staging']; release contract lanes=['authentik', 'cal.com', 'listmonk', 'mereka-lms', 'reka-slackbot', 'temporal', 'weaviate']; promote-help present=True; cross-repo-release-contract-review present=True",
+      "details": "workflow target environments=['prod', 'staging']; release contract lanes=['authentik', 'cal.com', 'listmonk', 'mereka-lms', 'reka-slackbot', 'temporal', 'weaviate', 'zoom-rtms']; promote-help present=True; cross-repo-release-contract-review present=True",
       "evidence": [
         "generated/skills/command-registry.json",
         "generated/skills/skill-registry.json"
@@ -30,7 +30,7 @@
         "platform-control-plane/contracts/service-identity-contract.yaml"
       ],
       "check_id": "service-identity-normalization",
-      "details": "canonical service ids=['authentik', 'cal.com', 'listmonk', 'mereka-lms', 'reka-slackbot', 'temporal', 'weaviate']",
+      "details": "canonical service ids=['authentik', 'cal.com', 'listmonk', 'mereka-lms', 'reka-slackbot', 'temporal', 'weaviate', 'zoom-rtms']",
       "evidence": [
         "generated/skills/skill-registry.json",
         "generated/skills/scenario-packs.json"

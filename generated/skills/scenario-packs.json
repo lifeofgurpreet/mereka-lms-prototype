@@ -142,7 +142,11 @@
       "goal": "Resolve the review path and truth owners for the current change set.",
       "read_first": [
         {
-          "path": "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
+          "path": "docs/README.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "docs/architecture/PLATFORM_AUTHORITY_MAP.md",
           "repo": "mereka-lms"
         },
         {
@@ -235,7 +239,7 @@
       "goal": "Determine the authoritative repo and canonical source for a truth surface.",
       "read_first": [
         {
-          "path": "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
+          "path": "docs/architecture/PLATFORM_AUTHORITY_MAP.md",
           "repo": "mereka-lms"
         },
         {
@@ -336,7 +340,7 @@
           "repo": "mereka-lms"
         },
         {
-          "path": "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
+          "path": "docs/architecture/PLATFORM_AUTHORITY_MAP.md",
           "repo": "mereka-lms"
         },
         {
@@ -399,7 +403,7 @@
       "goal": "Assess whether transitional documentation residue can be safely removed or must stay stubbed.",
       "read_first": [
         {
-          "path": "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
+          "path": "docs/reference/governance/DEPRECATION_LEDGER.md",
           "repo": "mereka-lms"
         },
         {
@@ -408,6 +412,14 @@
         },
         {
           "path": "tools/docs/verify/report-nonstub-transitional-files.py",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "docs/README.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "docs/architecture/PLATFORM_AUTHORITY_MAP.md",
           "repo": "mereka-lms"
         },
         {
@@ -477,7 +489,7 @@
       "goal": "Map a change to affected repos, truth surfaces, and validation steps.",
       "read_first": [
         {
-          "path": "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
+          "path": "docs/architecture/PLATFORM_AUTHORITY_MAP.md",
           "repo": "mereka-lms"
         },
         {
@@ -631,7 +643,11 @@
           "repo": "mereka-lms"
         },
         {
-          "path": "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
+          "path": "docs/README.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "docs/architecture/PLATFORM_AUTHORITY_MAP.md",
           "repo": "mereka-lms"
         },
         {
