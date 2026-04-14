@@ -1,8 +1,8 @@
 ---
 title: Wave Branding Root Reset Tracker
 owner: Platform Team
-status: canonical
-last_verified: 2026-03-10
+status: historical tracker snapshot
+last_verified: 2026-04-14
 canonical_root: docs/meta/docs-program
 doc_class: tracker
 summary: Packet tracker for retiring docs/branding as a living documentation root.
@@ -15,7 +15,22 @@ audience: Contributors
 
 # Wave Branding Root Reset Tracker
 
-## Objective
+> Historical tracker for a completed root-retirement wave.
+>
+> This file records how `docs/branding/**` was retired. Current branding canon
+> lives under `docs/guides/branding/**`.
+
+For current docs-program execution, use:
+
+- [POST_REBASE_INTAKE_2026-04-13.md](POST_REBASE_INTAKE_2026-04-13.md)
+- [REVIEW_HARDENING_BOARD_2026-04-13.md](REVIEW_HARDENING_BOARD_2026-04-13.md)
+- [DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md](DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md)
+
+For the current architecture front door, use:
+
+- [../../architecture/README.md](../../architecture/README.md)
+
+## Historical Objective
 
 Retire `docs/branding/**` as a living documentation root. The canonical branding guidance already lives under `docs/guides/branding/**`, so this wave removes the duplicate compatibility tree and leaves only a tombstone README.
 
@@ -89,3 +104,8 @@ No canonical sidecar or generator-owned data was found under `docs/branding/**`.
 ### Packet E
 
 - Scope: closeout and review handoff.
+
+## Current Canonical Model
+
+- branding guidance: `docs/guides/branding/**`
+- retired `docs/branding/**` remains tombstone-only and historical

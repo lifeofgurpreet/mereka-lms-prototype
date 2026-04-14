@@ -1,8 +1,8 @@
 ---
 title: Wave CI/CD Root Reset Tracker
 owner: Platform Team
-status: canonical
-last_verified: 2026-03-10
+status: historical tracker snapshot
+last_verified: 2026-04-14
 canonical_root: docs/meta/docs-program
 doc_class: tracker
 summary: Packet tracker for retiring docs/ci-cd as a living documentation root.
@@ -15,7 +15,22 @@ audience: Contributors
 
 # Wave CI/CD Root Reset Tracker
 
-## Objective
+> Historical tracker for a completed root-retirement wave.
+>
+> This file records how `docs/ci-cd/**` was retired. Current CI/CD operator
+> canon lives under `docs/ops/ci-cd/**`.
+
+For current docs-program execution, use:
+
+- [POST_REBASE_INTAKE_2026-04-13.md](POST_REBASE_INTAKE_2026-04-13.md)
+- [REVIEW_HARDENING_BOARD_2026-04-13.md](REVIEW_HARDENING_BOARD_2026-04-13.md)
+- [DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md](DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md)
+
+For the current architecture front door, use:
+
+- [../../architecture/README.md](../../architecture/README.md)
+
+## Historical Objective
 
 Retire `docs/ci-cd/**` as a living documentation root. The canonical CI/CD operator surface already lives under `docs/ops/ci-cd/**`.
 
@@ -66,3 +81,8 @@ No canonical sidecars or generator-owned assets exist under `docs/ci-cd/**`. The
 ### Packet E
 
 - Scope: closeout and review handoff.
+
+## Current Canonical Model
+
+- CI/CD operator guidance: `docs/ops/ci-cd/**`
+- retired `docs/ci-cd/**` remains tombstone-only and historical
