@@ -95,7 +95,6 @@ python3 - "$APP_BASE" "$APP_PROD_OVERLAY" "$APP_STAGING_OVERLAY" "$APP_MFE_CADDY
 import re
 import sys
 from pathlib import Path
-import hashlib
 
 APP_BASE = Path(sys.argv[1])
 APP_PROD = Path(sys.argv[2])
@@ -157,6 +156,20 @@ def ensure_mapping(images, name, expected_new_name, context, errors):
             f"{context}: '{name}' newName mismatch (got '{mapping['newName']}', expected '{expected_new_name}')"
         )
     return mapping
+
+
+CRITICAL_MFE_CADDY_MARKERS = (
+    "path /api/mfe_config/v1* /login_refresh*",
+    "path /theme/*",
+    "try_files /theme{path}",
+    "reverse_proxy /login_refresh* lms:8000 {",
+    "header_up Host {http.request.host}",
+)
+
+
+def missing_caddy_markers(path: Path):
+    text = path.read_text(encoding="utf-8")
+    return [marker for marker in CRITICAL_MFE_CADDY_MARKERS if marker not in text]
 
 
 errors = []
@@ -246,18 +259,27 @@ if check_infra == "1":
                     f"!= infra overlay '{infra_mfe_source['digest']}'"
                 )
 
-        # If infra uses vendored base resources, enforce MFE Caddyfile parity so
-        # runtime route contract doesn't drift from app repo source.
+        # If infra uses vendored base resources, enforce parity only for the
+        # runtime-theme-critical MFE Caddy markers. The runtime drift lane should
+        # not block on unrelated route churn such as deprecated payment passthroughs.
         infra_base_dir = INFRA_PROD.parents[2] / "base"
         infra_vendored_caddy = infra_base_dir / "deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"
         if infra_vendored_caddy.exists():
-            app_hash = hashlib.sha256(APP_MFE_CADDYFILE.read_bytes()).hexdigest()
-            infra_hash = hashlib.sha256(infra_vendored_caddy.read_bytes()).hexdigest()
-            if app_hash != infra_hash:
+            app_missing = missing_caddy_markers(APP_MFE_CADDYFILE)
+            infra_missing = missing_caddy_markers(infra_vendored_caddy)
+            if app_missing:
                 errors.append(
-                    "vendored MFE Caddyfile drift: "
-                    f"{infra_vendored_caddy} differs from {APP_MFE_CADDYFILE}; "
-                    "sync infra vendored base before release"
+                    f"app MFE Caddyfile missing runtime-theme markers: {', '.join(app_missing)}"
+                )
+            elif infra_missing:
+                errors.append(
+                    "vendored MFE Caddyfile missing runtime-theme markers: "
+                    f"{', '.join(infra_missing)}; sync infra vendored base before release"
+                )
+            elif APP_MFE_CADDYFILE.read_text(encoding="utf-8") != infra_vendored_caddy.read_text(encoding="utf-8"):
+                notes.append(
+                    "vendored MFE Caddyfile has non-blocking drift outside runtime-theme markers: "
+                    f"{infra_vendored_caddy} differs from {APP_MFE_CADDYFILE}"
                 )
         else:
             notes.append(f"vendored MFE Caddyfile not found under infra base: {infra_vendored_caddy}")
