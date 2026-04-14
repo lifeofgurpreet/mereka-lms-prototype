@@ -182,19 +182,6 @@ for target in targets:
         updated,
     )
 
-    # compilejsi18n
-    updated = updated.replace(
-        "RUN ./manage.py lms --settings=tutor.i18n compilejsi18n\nRUN ./manage.py cms --settings=tutor.i18n compilejsi18n\n",
-        "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then mkdir -p /openedx/staticfiles/js/i18n /openedx/staticfiles/studio/js/i18n && echo \"Skipping compilejsi18n (fast build profile)\"; else ./manage.py lms --settings=tutor.i18n compilejsi18n --output /openedx/staticfiles/js/i18n && ./manage.py cms --settings=tutor.i18n compilejsi18n --output /openedx/staticfiles/studio/js/i18n; fi\n",
-    )
-    updated = updated.replace(
-        "RUN ./manage.py lms --settings=tutor.i18n compilejsi18n --output /openedx/staticfiles/js/i18n\nRUN ./manage.py cms --settings=tutor.i18n compilejsi18n --output /openedx/staticfiles/studio/js/i18n\n",
-        "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then mkdir -p /openedx/staticfiles/js/i18n /openedx/staticfiles/studio/js/i18n && echo \"Skipping compilejsi18n (fast build profile)\"; else ./manage.py lms --settings=tutor.i18n compilejsi18n --output /openedx/staticfiles/js/i18n && ./manage.py cms --settings=tutor.i18n compilejsi18n --output /openedx/staticfiles/studio/js/i18n; fi\n",
-    )
-    updated = updated.replace(
-        "# Redwood skips manual compilejsi18n while content libraries mature.\n",
-        "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then mkdir -p /openedx/staticfiles/js/i18n /openedx/staticfiles/studio/js/i18n && echo \"Skipping compilejsi18n (fast build profile)\"; else ./manage.py lms --settings=tutor.i18n compilejsi18n --output /openedx/staticfiles/js/i18n && ./manage.py cms --settings=tutor.i18n compilejsi18n --output /openedx/staticfiles/studio/js/i18n; fi\n",
-    )
     updated = updated.replace(
         "RUN ./manage.py lms --settings=tutor.i18n pull_plugin_translations --verbose --repository='openedx/openedx-translations' --revision='release/ulmo.1' ",
         "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then echo \"Skipping plugin translation pull (fast build profile)\"; else ./manage.py lms --settings=tutor.i18n pull_plugin_translations --verbose --repository='openedx/openedx-translations' --revision='release/ulmo.1'; fi",
@@ -225,67 +212,10 @@ for target in targets:
     # Redwood image. Incompatible with Ulmo (different node version, package structure).
     # Tutor 21's standard node install with BuildKit cache is the correct approach.
 
-    updated = updated.replace("fonts\\\\.googleapis\\\\.com", "fonts[.]googleapis[.]com")
-
-    # edx-platform cherry-pick removal
-    patch_block = """# Patch edx-platform
-# edx-proctoring security fix https://github.com/edx/edx-platform/pull/29347/
-RUN git fetch --depth=2 https://github.com/edx/edx-platform d61dcac29d1651956623c150be53a8bbe69e9346 \\
-  && git cherry-pick d61dcac29d1651956623c150be53a8bbe69e9346
-# Fix "from" address in course bulk emails
-# https://github.com/edx/edx-platform/pull/29001
-RUN git fetch --depth=4 https://github.com/bitmakerla/edx-platform 6b0e9f50e9425d17cd62d1b3e9d1cab220e3fe7f \\
-  && git cherry-pick 01216d9e0637a2260b4c264bda2f22c1e34b38de \\
-  && git cherry-pick a057853a85560759d1d922b00db110207252c6a2 \\
-  && git cherry-pick 6b0e9f50e9425d17cd62d1b3e9d1cab220e3fe7f
-
-
-
-
-"""
-    updated = updated.replace(
-        patch_block,
-        "# Patch edx-platform\n# Redwood already bundles the required security/email fixes; cherry-picks disabled locally.\n\n",
-    )
-
     # ── Network resilience for ARC DinD runners ───────────────────────
     # ARC container runners have flaky outbound networking (gnutls_handshake
     # failures, connection timeouts).  Wrap git-clone and apt-get in retry
     # loops so transient failures don't kill 30-minute builds.
-
-    # pyenv download: replace git clone with curl tarball download.
-    # ARC DinD containers have broken gnutls (git+HTTPS fails consistently).
-    # curl uses OpenSSL, not gnutls, so it works where git doesn't.
-    if path.name == "Dockerfile":
-        plain_pyenv = "RUN git clone https://github.com/pyenv/pyenv $PYENV_ROOT --branch v2.3.36 --depth 1"
-        curl_pyenv = (
-            "RUN mkdir -p $PYENV_ROOT && \\\n"
-            "    for attempt in 1 2 3 4 5; do \\\n"
-            "      curl -fsSL --retry 5 --retry-delay 10 \\\n"
-            "        https://github.com/pyenv/pyenv/archive/refs/tags/v2.3.36.tar.gz \\\n"
-            "        | tar xz --strip-components=1 -C $PYENV_ROOT && break; \\\n"
-            '      echo "pyenv download attempt $attempt failed; retrying in 15s" >&2; \\\n'
-            "      rm -rf $PYENV_ROOT/*; \\\n"
-            "      sleep 15; \\\n"
-            "    done && test -x \"$PYENV_ROOT/bin/pyenv\""
-        )
-        # Also handle the retry version from a previous patch
-        retry_pyenv_marker = "pyenv clone attempt"
-        if plain_pyenv in updated:
-            updated = updated.replace(plain_pyenv, curl_pyenv)
-        elif retry_pyenv_marker in updated:
-            # Replace the retry-git-clone version with curl version
-            import re as _re
-            updated = _re.sub(
-                r"RUN for attempt in 1 2 3 4 5; do \\\n"
-                r"      git clone https://github\.com/pyenv/pyenv \$PYENV_ROOT --branch v2\.3\.36 --depth 1 && break; \\\n"
-                r'      echo "pyenv clone attempt \$attempt failed; retrying in 15s" >&2; \\\n'
-                r"      rm -rf \$PYENV_ROOT; \\\n"
-                r"      sleep 15; \\\n"
-                r'    done && test -d "\$PYENV_ROOT/bin"',
-                curl_pyenv,
-                updated,
-            )
 
     # REMOVED: Tutor v21 node_modules path fix (was lines 277-282)
     # This `mv` moved node_modules to /openedx/node_modules but the production stage
