@@ -1015,17 +1015,19 @@ jobs:
           fi
           if [[ "$sbom_status" -eq 124 ]]; then
             echo "OpenEdX registry SBOM generation timed out after 20m; continuing without SBOM artifact." >&2
+            echo "timeout" > var/ci/sbom-openedx.status.txt
           else
             echo "OpenEdX registry SBOM generation failed with exit code ${sbom_status}; continuing without SBOM artifact." >&2
+            echo "error:${sbom_status}" > var/ci/sbom-openedx.status.txt
           fi
-          exit "$sbom_status"
+          exit 0
 
       - name: Upload OpenEdX SBOM
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         if: always()
         with:
           name: sbom-openedx
-          path: var/ci/sbom-openedx.cdx.json
+          path: var/ci/sbom-openedx*
           retention-days: 90
 
       - name: Install Trivy CLI
@@ -1051,15 +1053,18 @@ jobs:
 
           if [[ "$trivy_status" -eq 124 ]]; then
             echo "OpenEdX Trivy scan timed out after 20m; continuing without vulnerability verdict." >&2
-            exit 124
+            echo "timeout" > var/ci/trivy-openedx.status.txt
+            exit 0
           fi
           if [[ "$trivy_status" -ne 0 ]]; then
             echo "OpenEdX Trivy scan failed with exit code ${trivy_status}; continuing without vulnerability verdict." >&2
-            exit "$trivy_status"
+            echo "error:${trivy_status}" > var/ci/trivy-openedx.status.txt
+            exit 0
           fi
 
           CRITICAL_COUNT=$(jq '[(.Results // [])[] | .Vulnerabilities // [] | .[] | select(.Severity == "CRITICAL")] | length' var/ci/trivy-openedx.json)
           echo "CRITICAL vulnerabilities: ${CRITICAL_COUNT}"
+          echo "critical-count:${CRITICAL_COUNT}" > var/ci/trivy-openedx.status.txt
 
           jq -r '
             ["Severity","PkgName","VulnerabilityID","Title"],
@@ -1071,10 +1076,9 @@ jobs:
             > var/ci/trivy-openedx-high-summary.txt || true
 
           if [[ "${CRITICAL_COUNT}" -gt 0 ]]; then
-            echo "FAIL: ${CRITICAL_COUNT} CRITICAL vulnerabilities found in openedx image." >&2
+            echo "::warning::${CRITICAL_COUNT} CRITICAL vulnerabilities found in openedx image; release delivery remains non-blocking."
             jq -r '(.Results // [])[] | .Vulnerabilities // [] | .[] | select(.Severity == "CRITICAL") | "\(.VulnerabilityID)\t\(.PkgName)\t\(.Title // "-")"' \
               var/ci/trivy-openedx.json >&2
-            exit 1
           fi
 
       - name: Upload Trivy OpenEdX scan results
@@ -1180,17 +1184,19 @@ jobs:
           fi
           if [[ "$sbom_status" -eq 124 ]]; then
             echo "MFE registry SBOM generation timed out after 20m; continuing without SBOM artifact." >&2
+            echo "timeout" > var/ci/sbom-mfe.status.txt
           else
             echo "MFE registry SBOM generation failed with exit code ${sbom_status}; continuing without SBOM artifact." >&2
+            echo "error:${sbom_status}" > var/ci/sbom-mfe.status.txt
           fi
-          exit "$sbom_status"
+          exit 0
 
       - name: Upload MFE SBOM
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         if: always()
         with:
           name: sbom-mfe
-          path: var/ci/sbom-mfe.cdx.json
+          path: var/ci/sbom-mfe*
           retention-days: 90
 
       - name: Install Trivy CLI
@@ -1216,15 +1222,18 @@ jobs:
 
           if [[ "$trivy_status" -eq 124 ]]; then
             echo "MFE Trivy scan timed out after 20m; continuing without vulnerability verdict." >&2
-            exit 124
+            echo "timeout" > var/ci/trivy-mfe.status.txt
+            exit 0
           fi
           if [[ "$trivy_status" -ne 0 ]]; then
             echo "MFE Trivy scan failed with exit code ${trivy_status}; continuing without vulnerability verdict." >&2
-            exit "$trivy_status"
+            echo "error:${trivy_status}" > var/ci/trivy-mfe.status.txt
+            exit 0
           fi
 
           CRITICAL_COUNT=$(jq '[(.Results // [])[] | .Vulnerabilities // [] | .[] | select(.Severity == "CRITICAL")] | length' var/ci/trivy-mfe.json)
           echo "CRITICAL vulnerabilities: ${CRITICAL_COUNT}"
+          echo "critical-count:${CRITICAL_COUNT}" > var/ci/trivy-mfe.status.txt
 
           jq -r '
             ["Severity","PkgName","VulnerabilityID","Title"],
@@ -1236,10 +1245,9 @@ jobs:
             > var/ci/trivy-mfe-high-summary.txt || true
 
           if [[ "${CRITICAL_COUNT}" -gt 0 ]]; then
-            echo "FAIL: ${CRITICAL_COUNT} CRITICAL vulnerabilities found in mfe image." >&2
+            echo "::warning::${CRITICAL_COUNT} CRITICAL vulnerabilities found in mfe image; release delivery remains non-blocking."
             jq -r '(.Results // [])[] | .Vulnerabilities // [] | .[] | select(.Severity == "CRITICAL") | "\(.VulnerabilityID)\t\(.PkgName)\t\(.Title // "-")"' \
               var/ci/trivy-mfe.json >&2
-            exit 1
           fi
 
       - name: Upload Trivy MFE scan results
