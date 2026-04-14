@@ -3,6 +3,33 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 PATCH_SCRIPT="${REPO_ROOT}/infrastructure/tutor/patches/patch-authn-deep-route-handoff.py"
+SOURCE_PATCH_SCRIPT="${REPO_ROOT}/infrastructure/tutor/patches/patch-authn-dashboard-fallbacks.py"
+VERIFY_SCRIPT="${REPO_ROOT}/infrastructure/tutor/patches/verify-authn-dashboard-fallbacks.py"
+PYTHON_BIN="${PYTHON_BIN:-$(command -v python3 || true)}"
+
+if [[ -z "${PYTHON_BIN}" ]]; then
+  echo "[FAIL] python3 not found on PATH"
+  exit 1
+fi
+
+readarray -t PATCH_CONTRACT < <("${PYTHON_BIN}" - "${PATCH_SCRIPT}" <<'PY'
+import importlib.util
+import pathlib
+import sys
+
+script_path = pathlib.Path(sys.argv[1])
+spec = importlib.util.spec_from_file_location("patch_authn_deep_route_handoff", script_path)
+module = importlib.util.module_from_spec(spec)
+assert spec.loader is not None
+spec.loader.exec_module(module)
+
+print(module.REPLACEMENT)
+print(module.ROUTE_SCOPE)
+PY
+)
+
+EXPECTED_REPLACEMENT="${PATCH_CONTRACT[0]}"
+EXPECTED_ROUTE_SCOPE="${PATCH_CONTRACT[1]}"
 
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "${TMPDIR}"' EXIT
@@ -43,8 +70,8 @@ python3 "${PATCH_SCRIPT}" "${DIST_DIR}" >/dev/null
 FIXTURE="${DIST_DIR}/app-fixture.js"
 
 assert_not_contains "${FIXTURE}" "old LMS_BASE_URL handoff removed" 'u=r&&!o.includes(r)?(0,s.zj)().LMS_BASE_URL+r:o'
-assert_contains "${FIXTURE}" "patch routes known MFE deep routes to current apps origin" '/^\/(?:authn|account|course-authoring|authoring|communications|discussions|gradebook|learner-dashboard|learner-record|learning|ora-grading|profile|u)(?:\/|$)/.test(r)?window.location.origin+r:(0,s.zj)().LMS_BASE_URL+r'
-assert_contains "${FIXTURE}" "patch scopes only known active MFE deep-route prefixes" 'authn|account|course-authoring|authoring|communications|discussions|gradebook|learner-dashboard|learner-record|learning|ora-grading|profile|u'
+assert_contains "${FIXTURE}" "patch routes authn deep-route contract to current apps origin" "${EXPECTED_REPLACEMENT}"
+assert_contains "${FIXTURE}" "patch scopes only authority-owned authn deep-route prefixes" "${EXPECTED_ROUTE_SCOPE}"
 NODE_BIN="${NODE_BIN:-$(command -v node || true)}"
 if [[ -z "${NODE_BIN}" ]]; then
   echo "[FAIL] node not found on PATH"
@@ -61,7 +88,51 @@ if python3 "${PATCH_SCRIPT}" "${BROKEN_DIR}" >/dev/null 2>&1; then
   echo "[FAIL] patch should fail when expected authn signature is missing"
   exit 1
 else
-  echo "[PASS] patch fails when expected authn signature is missing"
+echo "[PASS] patch fails when expected authn signature is missing"
+fi
+
+APP_DIR="${TMPDIR}/authn-app"
+mkdir -p "${APP_DIR}/src/login/data" "${APP_DIR}/src/register/data"
+
+cat >"${APP_DIR}/src/login/data/service.js" <<'EOF'
+redirectUrl: data.redirect_url || `${getConfig().LMS_BASE_URL}/dashboard`,
+EOF
+
+cat >"${APP_DIR}/src/register/data/service.js" <<'EOF'
+redirectUrl: data.redirect_url || `${getConfig().LMS_BASE_URL}/dashboard`,
+EOF
+
+cat >"${APP_DIR}/src/login/LoginFailure.jsx" <<'EOF'
+const url = `${getConfig().LMS_BASE_URL}/dashboard/?tpa_hint=${context.tpaHint}`;
+EOF
+
+python3 "${SOURCE_PATCH_SCRIPT}" "${APP_DIR}" >/dev/null
+
+assert_contains "${APP_DIR}/src/login/data/service.js" "login service uses relative dashboard fallback" 'redirectUrl: data.redirect_url || "/dashboard",'
+assert_contains "${APP_DIR}/src/register/data/service.js" "register service uses relative dashboard fallback" 'redirectUrl: data.redirect_url || "/dashboard",'
+assert_contains "${APP_DIR}/src/login/LoginFailure.jsx" "login failure uses relative dashboard fallback" 'const url = `/dashboard/?tpa_hint=${context.tpaHint}`;'
+
+VERIFY_DIST="${TMPDIR}/verify-dist"
+mkdir -p "${VERIFY_DIST}"
+
+cat >"${VERIFY_DIST}/safe-fixture.js" <<'EOF'
+const dashboardHref = "/dashboard";
+const redirect = window.location.origin+r;
+EOF
+
+python3 "${VERIFY_SCRIPT}" "${VERIFY_DIST}" >/dev/null
+echo "[PASS] verifier allows canonical /dashboard literals when LMS_BASE_URL fallback is gone"
+
+cat >"${VERIFY_DIST}/broken-fixture.js" <<'EOF'
+const redirect = `${getConfig().LMS_BASE_URL}/dashboard`;
+const compat = window.location.origin+r;
+EOF
+
+if python3 "${VERIFY_SCRIPT}" "${VERIFY_DIST}" >/dev/null 2>&1; then
+  echo "[FAIL] verifier should fail when LMS_BASE_URL dashboard fallback survives"
+  exit 1
+else
+  echo "[PASS] verifier fails when LMS_BASE_URL dashboard fallback survives"
 fi
 
 echo "AUTHN_DEEP_ROUTE_HANDOFF_PATCH_OK"

@@ -12,11 +12,13 @@ from pathlib import Path
 
 
 SEARCH = "u=r&&!o.includes(r)?(0,s.zj)().LMS_BASE_URL+r:o"
+ROUTE_SCOPE = (
+    "authn|account|course-authoring|authoring|communications|discussions|"
+    "gradebook|learner-dashboard|learner-record|learning|ora-grading|profile|u"
+)
 REPLACEMENT = (
     "u=r&&!o.includes(r)?"
-    "(/^\\/(?:authn|account|course-authoring|authoring|communications|discussions|"
-    "gradebook|learner-dashboard|learner-record|learning|ora-grading|profile|u)"
-    "(?:\\/|$)/.test(r)?window.location.origin+r:(0,s.zj)().LMS_BASE_URL+r):o"
+    f"(/^\\/(?:{ROUTE_SCOPE})(?:\\/|$)/.test(r)?window.location.origin+r:(0,s.zj)().LMS_BASE_URL+r):o"
 )
 
 

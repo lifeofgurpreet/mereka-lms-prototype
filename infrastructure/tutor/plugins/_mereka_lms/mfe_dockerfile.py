@@ -107,6 +107,18 @@ PY
 """,
 )
 
+# Patch the authn MFE source BEFORE webpack builds.
+# Upstream authn still falls back to `${getConfig().LMS_BASE_URL}/dashboard`
+# in login/register/LoginFailure flows, which rebuilds apps-host authn handoffs
+# onto the LMS host. Replace those with relative dashboard routes so the authn
+# shell stays on the current apps origin through the build.
+_register_env_patch(
+    "mfe-dockerfile-pre-npm-build-authn",
+    """
+RUN python3 /openedx/patch-authn-dashboard-fallbacks.py /openedx/app
+""",
+)
+
 # Fail the account build if a stale compiled bundle or source map still contains the
 # unguarded social_links lookup after webpack finishes.
 # v2: check fix presence in SOURCE (pre-minification) not in compiled dist where
@@ -195,6 +207,8 @@ _register_env_patch(
     "mfe-dockerfile-post-npm-install-authn",
     """
 COPY patch-authn-deep-route-handoff.py /openedx/patch-authn-deep-route-handoff.py
+COPY patch-authn-dashboard-fallbacks.py /openedx/patch-authn-dashboard-fallbacks.py
+COPY verify-authn-dashboard-fallbacks.py /openedx/verify-authn-dashboard-fallbacks.py
 """,
 )
 
@@ -340,23 +354,6 @@ _register_env_patch(
     "mfe-dockerfile-post-npm-build-authn",
     """
 RUN python3 /openedx/patch-authn-deep-route-handoff.py /openedx/app/dist \\
- && python3 - <<'PY'
-from pathlib import Path
-
-dist_dir = Path("/openedx/app/dist")
-offenders = []
-for asset in sorted(dist_dir.rglob("*.js")):
-    try:
-        content = asset.read_text(encoding="utf-8")
-    except UnicodeDecodeError:
-        continue
-    if 'LMS_BASE_URL}/dashboard' in content or '"/dashboard"' in content:
-        offenders.append(str(asset))
-
-if offenders:
-    raise SystemExit(
-        "authn deep-route handoff guard failed in " + ", ".join(offenders)
-    )
-PY
+ && python3 /openedx/verify-authn-dashboard-fallbacks.py /openedx/app/dist
 """,
 )

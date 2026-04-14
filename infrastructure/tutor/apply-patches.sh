@@ -134,7 +134,11 @@ sync_mfe_patch_helpers() {
   mkdir -p "$tutor_mfe_build_dir"
   cp "$PATCHES_DIR/patch-authn-deep-route-handoff.py" \
     "$tutor_mfe_build_dir/patch-authn-deep-route-handoff.py"
-  echo "Synced authn deep-route patch helper to MFE build context: $tutor_mfe_build_dir"
+  cp "$PATCHES_DIR/patch-authn-dashboard-fallbacks.py" \
+    "$tutor_mfe_build_dir/patch-authn-dashboard-fallbacks.py"
+  cp "$PATCHES_DIR/verify-authn-dashboard-fallbacks.py" \
+    "$tutor_mfe_build_dir/verify-authn-dashboard-fallbacks.py"
+  echo "Synced authn patch helpers to MFE build context: $tutor_mfe_build_dir"
 }
 
 sync_mfe_theme() {

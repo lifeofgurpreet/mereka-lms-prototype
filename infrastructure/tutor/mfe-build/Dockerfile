@@ -156,6 +156,8 @@ RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exe
 RUN npm install --legacy-peer-deps 'react-redux@^8.1.3' 'redux@^4.2.1'
 
 COPY patch-authn-deep-route-handoff.py /openedx/patch-authn-deep-route-handoff.py
+COPY patch-authn-dashboard-fallbacks.py /openedx/patch-authn-dashboard-fallbacks.py
+COPY verify-authn-dashboard-fallbacks.py /openedx/verify-authn-dashboard-fallbacks.py
 COPY --from=authn-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
@@ -172,6 +174,7 @@ ENV MFE_CONFIG_API_URL=/api/mfe_config/v1
 COPY env.config.jsx /openedx/app
 
 
+RUN python3 /openedx/patch-authn-dashboard-fallbacks.py /openedx/app
 
 ######## authn (dev)
 FROM authn-common AS authn-dev
@@ -1251,24 +1254,7 @@ index_path.write_text(updated, encoding="utf-8")
 PY
 
 RUN python3 /openedx/patch-authn-deep-route-handoff.py /openedx/app/dist \
- && python3 - <<'PY'
-from pathlib import Path
-
-dist_dir = Path("/openedx/app/dist")
-offenders = []
-for asset in sorted(dist_dir.rglob("*.js")):
-    try:
-        content = asset.read_text(encoding="utf-8")
-    except UnicodeDecodeError:
-        continue
-    if 'LMS_BASE_URL}/dashboard' in content or '"/dashboard"' in content:
-        offenders.append(str(asset))
-
-if offenders:
-    raise SystemExit(
-        "authn deep-route handoff guard failed in " + ", ".join(offenders)
-    )
-PY
+ && python3 /openedx/verify-authn-dashboard-fallbacks.py /openedx/app/dist
 
 ######## authoring (production)
 FROM authoring-common AS authoring-prod
