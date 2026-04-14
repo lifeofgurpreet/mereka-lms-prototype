@@ -44,8 +44,9 @@ PATCHES_SCRIPT="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 SYNC_PLUGIN_MIRROR_SCRIPT="$REPO_ROOT/scripts/infra/sync-tutor-plugin-mirror.sh"
 TUTOR_CONFIG_SAVE_SCRIPT="$REPO_ROOT/scripts/infra/tutor-config-save.sh"
 PLUGIN_SOURCE_ROOT="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms"
-OPENEDX_RENDERED_DOCKERFILE="$REPO_ROOT/tutor_env/env/build/openedx/Dockerfile"
-MFE_RENDERED_DOCKERFILE="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
+ACTIVE_TUTOR_ROOT="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
+OPENEDX_RENDERED_DOCKERFILE="$ACTIVE_TUTOR_ROOT/env/build/openedx/Dockerfile"
+MFE_RENDERED_DOCKERFILE="$ACTIVE_TUTOR_ROOT/env/plugins/mfe/build/mfe/Dockerfile"
 MFE_SNAPSHOT_DOCKERFILE="$REPO_ROOT/infrastructure/tutor/mfe-build/Dockerfile"
 
 if [[ ! -x "$PATCHES_SCRIPT" ]]; then
@@ -57,6 +58,39 @@ if [[ ! -x "$SYNC_PLUGIN_MIRROR_SCRIPT" ]]; then
   echo "Canonical plugin mirror sync script missing or not executable: $SYNC_PLUGIN_MIRROR_SCRIPT" >&2
   exit 1
 fi
+
+ensure_patch_runtime() {
+  if python3 - <<'PY' >/dev/null 2>&1
+import tutormfe
+PY
+  then
+    return 0
+  fi
+
+  local activate_script=""
+
+  if [[ -n "${TUTOR_VENV:-}" && -f "${TUTOR_VENV}/bin/activate" ]]; then
+    activate_script="${TUTOR_VENV}/bin/activate"
+  elif [[ -n "${VIRTUAL_ENV:-}" && -f "${VIRTUAL_ENV}/bin/activate" ]]; then
+    activate_script="${VIRTUAL_ENV}/bin/activate"
+  elif [[ -f "$REPO_ROOT/.venv/bin/activate" ]]; then
+    activate_script="$REPO_ROOT/.venv/bin/activate"
+  fi
+
+  if [[ -n "$activate_script" ]]; then
+    # shellcheck disable=SC1090
+    source "$activate_script"
+  fi
+
+  if ! python3 - <<'PY' >/dev/null 2>&1
+import tutormfe
+PY
+  then
+    echo "Tutor patch runtime missing Python dependency 'tutormfe'." >&2
+    echo "Set TUTOR_VENV or activate a Tutor virtualenv before running $0." >&2
+    exit 1
+  fi
+}
 
 require_fresh_rendered_env() {
   local rendered_file="$1"
@@ -85,6 +119,7 @@ sync_mfe_snapshot() {
 }
 
 "$SYNC_PLUGIN_MIRROR_SCRIPT"
+ensure_patch_runtime
 
 case "$TARGET" in
   openedx)

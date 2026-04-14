@@ -12,9 +12,17 @@ apply_build_optimizations_patch() {
 
   "${PYTHON_BIN}" - "${targets[@]}" <<'PY'
 from pathlib import Path
+import re
 import sys
 
 targets = sys.argv[1:]
+
+
+def wrap_translation_step(text: str, pattern: str, builder) -> str:
+    match = re.search(pattern, text, flags=re.MULTILINE)
+    if not match:
+        return text
+    return text.replace(match.group(0), builder(match), 1)
 
 for target in targets:
     path = Path(target)
@@ -30,17 +38,41 @@ for target in targets:
     # signatures. Treat this as an explicit compatibility exception, not a
     # forgotten uv seam.
 
-    updated = updated.replace(
-        "RUN ./manage.py lms --settings=tutor.i18n pull_plugin_translations --verbose --repository='openedx/openedx-translations' --revision='release/ulmo.1' ",
-        "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then echo \"Skipping plugin translation pull (fast build profile)\"; else ./manage.py lms --settings=tutor.i18n pull_plugin_translations --verbose --repository='openedx/openedx-translations' --revision='release/ulmo.1'; fi",
+    updated = wrap_translation_step(
+        updated,
+        r"RUN \./manage\.py lms --settings=tutor\.i18n pull_plugin_translations --verbose --repository='openedx/openedx-translations' --revision='(?P<revision>[^']+)'[ \t]*\n",
+        lambda match: (
+            "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then "
+            "echo \"Skipping plugin translation pull (fast build profile)\"; "
+            "else ./manage.py lms --settings=tutor.i18n pull_plugin_translations "
+            "--verbose --repository='openedx/openedx-translations' "
+            f"--revision='{match.group('revision')}'; fi\n"
+        ),
     )
-    updated = updated.replace(
-        "RUN ./manage.py lms --settings=tutor.i18n pull_xblock_translations --repository='openedx/openedx-translations' --revision='release/ulmo.1' \n",
-        "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then echo \"Skipping XBlock translation pull (fast build profile)\"; else ./manage.py lms --settings=tutor.i18n pull_xblock_translations --repository='openedx/openedx-translations' --revision='release/ulmo.1'; fi\n",
+    updated = wrap_translation_step(
+        updated,
+        r"RUN \./manage\.py lms --settings=tutor\.i18n pull_xblock_translations --repository='openedx/openedx-translations' --revision='(?P<revision>[^']+)'[ \t]*\n",
+        lambda match: (
+            "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then "
+            "echo \"Skipping XBlock translation pull (fast build profile)\"; "
+            "else ./manage.py lms --settings=tutor.i18n pull_xblock_translations "
+            "--repository='openedx/openedx-translations' "
+            f"--revision='{match.group('revision')}'; fi\n"
+        ),
     )
-    updated = updated.replace(
-        "RUN atlas pull --repository='openedx/openedx-translations' --revision='release/ulmo.1'  \\\n    translations/edx-platform/conf/locale:conf/locale \\\n    translations/studio-frontend/src/i18n/messages:conf/plugins-locale/studio-frontend\n",
-        "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then echo \"Skipping atlas translation pull (fast build profile)\"; else atlas pull --repository='openedx/openedx-translations' --revision='release/ulmo.1'  \\\n    translations/edx-platform/conf/locale:conf/locale \\\n    translations/studio-frontend/src/i18n/messages:conf/plugins-locale/studio-frontend; fi\n",
+    updated = wrap_translation_step(
+        updated,
+        r"RUN atlas pull --repository='openedx/openedx-translations' --revision='(?P<revision>[^']+)'  \\\n"
+        r"    translations/edx-platform/conf/locale:conf/locale \\\n"
+        r"    translations/studio-frontend/src/i18n/messages:conf/plugins-locale/studio-frontend\n",
+        lambda match: (
+            "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then "
+            "echo \"Skipping atlas translation pull (fast build profile)\"; "
+            "else atlas pull --repository='openedx/openedx-translations' "
+            f"--revision='{match.group('revision')}'  \\\n"
+            "    translations/edx-platform/conf/locale:conf/locale \\\n"
+            "    translations/studio-frontend/src/i18n/messages:conf/plugins-locale/studio-frontend; fi\n"
+        ),
     )
     # REMOVED: Redwood-era node_modules COPY path fixes + node cache reuse (FROM overhangio/openedx:18.2.2)
     # This was a Tutor 18/Redwood optimization that copied node_modules from the upstream

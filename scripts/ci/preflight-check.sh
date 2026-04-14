@@ -61,6 +61,7 @@ TUTOR_REQ="$REPO_ROOT/requirements-tutor.txt"
 PASS=0
 FAIL=0
 SKIP=0
+export TUTOR_VENV
 
 pass() { PASS=$((PASS + 1)); echo "  PASS: $1"; }
 fail() { FAIL=$((FAIL + 1)); echo "  FAIL: $1" >&2; }
@@ -78,9 +79,19 @@ fi
 TUTOR_ROOT=$(mktemp -d)
 export TUTOR_ROOT
 export REPO_ROOT
+PREP_SCRIPT="$REPO_ROOT/scripts/infra/prepare-tutor-build-context.sh"
+RAW_OPENEDX_DF_SNAPSHOT="$(mktemp -t preflight-openedx-raw.XXXXXX)"
 
 if [[ ! -x "$SYNC_SCRIPT" ]]; then
   echo "ERROR: Tutor plugin sync script not found or not executable at $SYNC_SCRIPT" >&2
+  rm -f "$RAW_OPENEDX_DF_SNAPSHOT"
+  rm -rf "$TUTOR_ROOT"
+  exit 1
+fi
+
+if [[ ! -x "$PREP_SCRIPT" ]]; then
+  echo "ERROR: Canonical build-context script not found or not executable at $PREP_SCRIPT" >&2
+  rm -f "$RAW_OPENEDX_DF_SNAPSHOT"
   rm -rf "$TUTOR_ROOT"
   exit 1
 fi
@@ -96,6 +107,9 @@ echo "Generating Dockerfiles (tutor config save + apply-patches.sh)..."
   --set CMS_HOST=studio.preflight-check.test \
   --set ENABLE_HTTPS=true \
   >/dev/null 2>&1
+
+cp "$TUTOR_ROOT/env/build/openedx/Dockerfile" "$RAW_OPENEDX_DF_SNAPSHOT"
+TUTOR_ROOT="$TUTOR_ROOT" "$PREP_SCRIPT" --target openedx >/dev/null 2>&1
 
 # Apply patches to the rendered Dockerfile.
 # NOTE: mfe-node.sh was removed in tracker #32. MFE Dockerfile patches are now
@@ -151,6 +165,93 @@ for i in range(start+1, len(lines)):
         break
 print('\n'.join(lines[start:end]))
 " 2>/dev/null
+}
+
+check_openedx_render_delta_allowlist() {
+  local raw_df="$1"
+  local patched_df="$2"
+
+  python3 - "$raw_df" "$patched_df" <<'PY'
+from pathlib import Path
+import difflib
+import re
+import sys
+
+raw_text = Path(sys.argv[1]).read_text()
+patched_text = Path(sys.argv[2]).read_text()
+raw_match = re.search(
+    r"RUN \./manage\.py lms --settings=tutor\.i18n pull_plugin_translations --verbose --repository='openedx/openedx-translations' --revision='(?P<revision>[^']+)'[ \t]*\n"
+    r"RUN \./manage\.py lms --settings=tutor\.i18n pull_xblock_translations --repository='openedx/openedx-translations' --revision='(?P=revision)'[ \t]*\n"
+    r"RUN atlas pull --repository='openedx/openedx-translations' --revision='(?P=revision)'  \\\n"
+    r"    translations/edx-platform/conf/locale:conf/locale \\\n"
+    r"    translations/studio-frontend/src/i18n/messages:conf/plugins-locale/studio-frontend\n?",
+    raw_text,
+    flags=re.MULTILINE,
+)
+
+errors = []
+raw_block = ""
+wrapped_block = ""
+if raw_match is None:
+    errors.append(
+        "Raw Open edX Dockerfile no longer contains the expected upstream translation pull block."
+    )
+else:
+    revision = raw_match.group("revision")
+    raw_block = raw_match.group(0).rstrip("\n")
+    wrapped_block = "\n".join(
+        [
+            "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then echo \"Skipping plugin translation pull (fast build profile)\"; else ./manage.py lms --settings=tutor.i18n pull_plugin_translations --verbose --repository='openedx/openedx-translations' --revision='" + revision + "'; fi",
+            "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then echo \"Skipping XBlock translation pull (fast build profile)\"; else ./manage.py lms --settings=tutor.i18n pull_xblock_translations --repository='openedx/openedx-translations' --revision='" + revision + "'; fi",
+            "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then echo \"Skipping atlas translation pull (fast build profile)\"; else atlas pull --repository='openedx/openedx-translations' --revision='" + revision + "'  \\",
+            "    translations/edx-platform/conf/locale:conf/locale \\",
+            "    translations/studio-frontend/src/i18n/messages:conf/plugins-locale/studio-frontend; fi",
+        ]
+    )
+
+raw_count = raw_text.count(raw_block) if raw_block else 0
+wrapped_in_raw_count = raw_text.count(wrapped_block) if wrapped_block else 0
+patched_count = patched_text.count(wrapped_block) if wrapped_block else 0
+raw_in_patched_count = patched_text.count(raw_block) if raw_block else 0
+
+if raw_count != 1:
+    errors.append(
+        f"Expected raw Open edX Dockerfile to contain the unwrapped translation block exactly once; found {raw_count} occurrence(s)."
+    )
+if wrapped_in_raw_count != 0:
+    errors.append(
+        f"Expected raw Open edX Dockerfile to contain zero wrapped translation blocks; found {wrapped_in_raw_count}."
+    )
+if patched_count != 1:
+    errors.append(
+        f"Expected patched Open edX Dockerfile to contain the wrapped translation block exactly once; found {patched_count} occurrence(s)."
+    )
+if raw_in_patched_count != 0:
+    errors.append(
+        f"Expected patched Open edX Dockerfile to contain zero unwrapped translation blocks; found {raw_in_patched_count}."
+    )
+
+normalized_patched = patched_text.replace(wrapped_block, raw_block) if wrapped_block else patched_text
+if raw_block and normalized_patched != raw_text:
+    errors.append(
+        "Unexpected raw-vs-patched Open edX Dockerfile delta remains after normalizing the translation wrapper block."
+    )
+    diff = "".join(
+        difflib.unified_diff(
+            raw_text.splitlines(keepends=True),
+            normalized_patched.splitlines(keepends=True),
+            fromfile="raw-openedx-dockerfile",
+            tofile="patched-openedx-dockerfile-normalized",
+        )
+    ).rstrip()
+    if diff:
+        errors.append(diff)
+
+if errors:
+    for error in errors:
+        print(error, file=sys.stderr)
+    sys.exit(1)
+PY
 }
 
 # ── MFE Dockerfile Checks ───────────────────────────────────────
@@ -247,6 +348,12 @@ if [[ -f "$OPENEDX_DF" ]]; then
   else
     skip "MySQL auth plugin not checked (may be in settings, not Dockerfile)"
   fi
+
+  if check_openedx_render_delta_allowlist "$RAW_OPENEDX_DF_SNAPSHOT" "$OPENEDX_DF"; then
+    pass "Raw-vs-patched Open edX Dockerfile delta is limited to the fast-profile translation wrapper block"
+  else
+    fail "Raw-vs-patched Open edX Dockerfile delta exceeds the fast-profile translation wrapper allowlist"
+  fi
 else
   skip "OpenEdX Dockerfile not found"
 fi
@@ -256,6 +363,7 @@ echo ""
 echo "=== Preflight Summary: $PASS PASS, $FAIL FAIL, $SKIP SKIP ==="
 
 # Cleanup
+rm -f "$RAW_OPENEDX_DF_SNAPSHOT"
 rm -rf "$TUTOR_ROOT"
 
 if [[ $FAIL -gt 0 ]]; then

@@ -479,7 +479,7 @@
       "mutability": "mutating",
       "owner": "platform-infra",
       "path": "scripts/infra/verify-tutor-config.sh",
-      "reference_count": 41,
+      "reference_count": 42,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
