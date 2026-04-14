@@ -199,9 +199,8 @@ COPY patch-authn-deep-route-handoff.py /openedx/patch-authn-deep-route-handoff.p
 )
 
 # Enforce runtime Paragon theme URLs in built MFE shells.
-# We write ../theme/* (not /theme/*) because Ulmo joins fileName against the MFE
-# app base path (e.g. /authn/), and a leading slash can become /authn//theme/*.
-# The relative hop resolves consistently to /theme/* at runtime.
+# Use absolute /theme/* paths so authn/account/profile routes do not resolve the
+# brand contract under route-local prefixes such as /authn/theme/*.
 _register_env_patch(
     "mfe-dockerfile-post-npm-build",
     """
@@ -221,33 +220,33 @@ if not match:
 
 theme = json.loads(match.group(1))
 
-theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/core.min.css"
-theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/light.min.css"
-theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/mereka-brand.min.css"
-theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/mereka-brand-light.min.css"
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/mereka-brand-light.min.css"
 theme["brand"]["themeUrls"]["variants"].pop("dark", None)
 theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
 
 variant_theme_map = {
     "academy.biji-biji.com": {
-        "core": "../theme/biji-biji-brand.min.css",
-        "light": "../theme/biji-biji-brand-light.min.css",
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
     },
     "biji-biji.academyv2.mereka.dev": {
-        "core": "../theme/biji-biji-brand.min.css",
-        "light": "../theme/biji-biji-brand-light.min.css",
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
     },
     "skillourfuture.academy.mereka.io": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
     "skillourfuture.academyv2.mereka.io": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
     "skillourfuture.academyv2.mereka.dev": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
 }
 

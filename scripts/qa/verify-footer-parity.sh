@@ -36,6 +36,26 @@ fail() { FAIL=$((FAIL + 1)); echo "  FAIL: $1"; }
 warn() { WARN=$((WARN + 1)); echo "  WARN: $1"; }
 skip() { SKIP=$((SKIP + 1)); echo "  SKIP: $1"; }
 
+effective_variant_block() {
+  local domain=$1
+  local variants_block=$2
+  local plugin_file=$3
+  local domain_block domain_alias alias_block
+
+  domain_block="$(awk "/'${domain}':/,/^[[:space:]]*},/" <<<"$variants_block")"
+  if [[ -z "$domain_block" ]]; then
+    return 1
+  fi
+
+  domain_alias="$(sed -nE "s/.*'${domain}':[[:space:]]*([A-Z_]+).*/\\1/p" <<<"$domain_block" | head -n 1 || true)"
+  alias_block=""
+  if [[ -n "${domain_alias:-}" ]]; then
+    alias_block="$(awk "/const ${domain_alias} = \\{/,/^\\s*\\};/" "$plugin_file" || true)"
+  fi
+
+  printf '%s\n%s\n' "$domain_block" "$alias_block"
+}
+
 # Parse flags
 LIVE_MODE=0
 LMS_URL="https://${LMS_DOMAIN:-academyv2.mereka.io}"
@@ -362,10 +382,7 @@ else
   BASE_VARIANT_BLOCK=$(awk '/const MEREKA_BASE_VARIANT = \{/,/^\s*\};/' "$PLUGIN")
 
   for domain in "${DOMAINS[@]}"; do
-    # Extract the domain object block (from the domain key line to the closing '},')
-    # Supports both single-line and multi-line object formats
-    DOMAIN_BLOCK=$(awk "/'${domain}':/,/^[[:space:]]*},/" <<<"$VARIANTS_BLOCK")
-
+    DOMAIN_BLOCK="$(effective_variant_block "$domain" "$VARIANTS_BLOCK" "$PLUGIN" || true)"
     if [[ -z "$DOMAIN_BLOCK" ]]; then
       fail "Domain '${domain}' not found in MEREKA_SITE_VARIANTS"
       continue
@@ -608,7 +625,7 @@ if [[ -f "$PLUGIN" ]]; then
   BASE_VARIANT_BLOCK=$(awk '/const MEREKA_BASE_VARIANT = \{/,/^\s*\};/' "$PLUGIN")
 
   for domain in "${DOMAINS[@]}"; do
-    DOMAIN_BLOCK=$(awk "/'${domain}':/,/^[[:space:]]*},/" <<<"$VARIANTS_BLOCK")
+    DOMAIN_BLOCK="$(effective_variant_block "$domain" "$VARIANTS_BLOCK" "$PLUGIN" || true)"
     if [[ -z "$DOMAIN_BLOCK" ]]; then
       fail "Domain '${domain}' block not found for contract field check"
       continue

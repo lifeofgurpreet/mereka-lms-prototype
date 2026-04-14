@@ -985,33 +985,33 @@ if not match:
 
 theme = json.loads(match.group(1))
 
-theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/core.min.css"
-theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/light.min.css"
-theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/mereka-brand.min.css"
-theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/mereka-brand-light.min.css"
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/mereka-brand-light.min.css"
 theme["brand"]["themeUrls"]["variants"].pop("dark", None)
 theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
 
 variant_theme_map = {
     "academy.biji-biji.com": {
-        "core": "../theme/biji-biji-brand.min.css",
-        "light": "../theme/biji-biji-brand-light.min.css",
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
     },
     "biji-biji.academyv2.mereka.dev": {
-        "core": "../theme/biji-biji-brand.min.css",
-        "light": "../theme/biji-biji-brand-light.min.css",
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
     },
     "skillourfuture.academy.mereka.io": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
     "skillourfuture.academyv2.mereka.io": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
     "skillourfuture.academyv2.mereka.dev": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
 }
 
@@ -1123,33 +1123,33 @@ if not match:
 
 theme = json.loads(match.group(1))
 
-theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/core.min.css"
-theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/light.min.css"
-theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/mereka-brand.min.css"
-theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/mereka-brand-light.min.css"
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/mereka-brand-light.min.css"
 theme["brand"]["themeUrls"]["variants"].pop("dark", None)
 theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
 
 variant_theme_map = {
     "academy.biji-biji.com": {
-        "core": "../theme/biji-biji-brand.min.css",
-        "light": "../theme/biji-biji-brand-light.min.css",
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
     },
     "biji-biji.academyv2.mereka.dev": {
-        "core": "../theme/biji-biji-brand.min.css",
-        "light": "../theme/biji-biji-brand-light.min.css",
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
     },
     "skillourfuture.academy.mereka.io": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
     "skillourfuture.academyv2.mereka.io": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
     "skillourfuture.academyv2.mereka.dev": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
 }
 
@@ -1280,33 +1280,33 @@ if not match:
 
 theme = json.loads(match.group(1))
 
-theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/core.min.css"
-theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/light.min.css"
-theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/mereka-brand.min.css"
-theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/mereka-brand-light.min.css"
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/mereka-brand-light.min.css"
 theme["brand"]["themeUrls"]["variants"].pop("dark", None)
 theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
 
 variant_theme_map = {
     "academy.biji-biji.com": {
-        "core": "../theme/biji-biji-brand.min.css",
-        "light": "../theme/biji-biji-brand-light.min.css",
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
     },
     "biji-biji.academyv2.mereka.dev": {
-        "core": "../theme/biji-biji-brand.min.css",
-        "light": "../theme/biji-biji-brand-light.min.css",
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
     },
     "skillourfuture.academy.mereka.io": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
     "skillourfuture.academyv2.mereka.io": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
     "skillourfuture.academyv2.mereka.dev": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
 }
 
@@ -1418,33 +1418,33 @@ if not match:
 
 theme = json.loads(match.group(1))
 
-theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/core.min.css"
-theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/light.min.css"
-theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/mereka-brand.min.css"
-theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/mereka-brand-light.min.css"
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/mereka-brand-light.min.css"
 theme["brand"]["themeUrls"]["variants"].pop("dark", None)
 theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
 
 variant_theme_map = {
     "academy.biji-biji.com": {
-        "core": "../theme/biji-biji-brand.min.css",
-        "light": "../theme/biji-biji-brand-light.min.css",
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
     },
     "biji-biji.academyv2.mereka.dev": {
-        "core": "../theme/biji-biji-brand.min.css",
-        "light": "../theme/biji-biji-brand-light.min.css",
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
     },
     "skillourfuture.academy.mereka.io": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
     "skillourfuture.academyv2.mereka.io": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
     "skillourfuture.academyv2.mereka.dev": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
 }
 
@@ -1556,33 +1556,33 @@ if not match:
 
 theme = json.loads(match.group(1))
 
-theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/core.min.css"
-theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/light.min.css"
-theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/mereka-brand.min.css"
-theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/mereka-brand-light.min.css"
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/mereka-brand-light.min.css"
 theme["brand"]["themeUrls"]["variants"].pop("dark", None)
 theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
 
 variant_theme_map = {
     "academy.biji-biji.com": {
-        "core": "../theme/biji-biji-brand.min.css",
-        "light": "../theme/biji-biji-brand-light.min.css",
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
     },
     "biji-biji.academyv2.mereka.dev": {
-        "core": "../theme/biji-biji-brand.min.css",
-        "light": "../theme/biji-biji-brand-light.min.css",
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
     },
     "skillourfuture.academy.mereka.io": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
     "skillourfuture.academyv2.mereka.io": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
     "skillourfuture.academyv2.mereka.dev": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
 }
 
@@ -1694,33 +1694,33 @@ if not match:
 
 theme = json.loads(match.group(1))
 
-theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/core.min.css"
-theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/light.min.css"
-theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/mereka-brand.min.css"
-theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/mereka-brand-light.min.css"
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/mereka-brand-light.min.css"
 theme["brand"]["themeUrls"]["variants"].pop("dark", None)
 theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
 
 variant_theme_map = {
     "academy.biji-biji.com": {
-        "core": "../theme/biji-biji-brand.min.css",
-        "light": "../theme/biji-biji-brand-light.min.css",
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
     },
     "biji-biji.academyv2.mereka.dev": {
-        "core": "../theme/biji-biji-brand.min.css",
-        "light": "../theme/biji-biji-brand-light.min.css",
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
     },
     "skillourfuture.academy.mereka.io": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
     "skillourfuture.academyv2.mereka.io": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
     "skillourfuture.academyv2.mereka.dev": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
 }
 
@@ -1832,33 +1832,33 @@ if not match:
 
 theme = json.loads(match.group(1))
 
-theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/core.min.css"
-theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/light.min.css"
-theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/mereka-brand.min.css"
-theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/mereka-brand-light.min.css"
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/mereka-brand-light.min.css"
 theme["brand"]["themeUrls"]["variants"].pop("dark", None)
 theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
 
 variant_theme_map = {
     "academy.biji-biji.com": {
-        "core": "../theme/biji-biji-brand.min.css",
-        "light": "../theme/biji-biji-brand-light.min.css",
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
     },
     "biji-biji.academyv2.mereka.dev": {
-        "core": "../theme/biji-biji-brand.min.css",
-        "light": "../theme/biji-biji-brand-light.min.css",
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
     },
     "skillourfuture.academy.mereka.io": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
     "skillourfuture.academyv2.mereka.io": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
     "skillourfuture.academyv2.mereka.dev": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
 }
 
@@ -1970,33 +1970,33 @@ if not match:
 
 theme = json.loads(match.group(1))
 
-theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/core.min.css"
-theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/light.min.css"
-theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/mereka-brand.min.css"
-theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/mereka-brand-light.min.css"
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/mereka-brand-light.min.css"
 theme["brand"]["themeUrls"]["variants"].pop("dark", None)
 theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
 
 variant_theme_map = {
     "academy.biji-biji.com": {
-        "core": "../theme/biji-biji-brand.min.css",
-        "light": "../theme/biji-biji-brand-light.min.css",
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
     },
     "biji-biji.academyv2.mereka.dev": {
-        "core": "../theme/biji-biji-brand.min.css",
-        "light": "../theme/biji-biji-brand-light.min.css",
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
     },
     "skillourfuture.academy.mereka.io": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
     "skillourfuture.academyv2.mereka.io": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
     "skillourfuture.academyv2.mereka.dev": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
 }
 
@@ -2108,33 +2108,33 @@ if not match:
 
 theme = json.loads(match.group(1))
 
-theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/core.min.css"
-theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/light.min.css"
-theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/mereka-brand.min.css"
-theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/mereka-brand-light.min.css"
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/mereka-brand-light.min.css"
 theme["brand"]["themeUrls"]["variants"].pop("dark", None)
 theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
 
 variant_theme_map = {
     "academy.biji-biji.com": {
-        "core": "../theme/biji-biji-brand.min.css",
-        "light": "../theme/biji-biji-brand-light.min.css",
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
     },
     "biji-biji.academyv2.mereka.dev": {
-        "core": "../theme/biji-biji-brand.min.css",
-        "light": "../theme/biji-biji-brand-light.min.css",
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
     },
     "skillourfuture.academy.mereka.io": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
     "skillourfuture.academyv2.mereka.io": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
     "skillourfuture.academyv2.mereka.dev": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
 }
 
@@ -2246,33 +2246,33 @@ if not match:
 
 theme = json.loads(match.group(1))
 
-theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/core.min.css"
-theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/light.min.css"
-theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/mereka-brand.min.css"
-theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/mereka-brand-light.min.css"
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/mereka-brand-light.min.css"
 theme["brand"]["themeUrls"]["variants"].pop("dark", None)
 theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
 
 variant_theme_map = {
     "academy.biji-biji.com": {
-        "core": "../theme/biji-biji-brand.min.css",
-        "light": "../theme/biji-biji-brand-light.min.css",
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
     },
     "biji-biji.academyv2.mereka.dev": {
-        "core": "../theme/biji-biji-brand.min.css",
-        "light": "../theme/biji-biji-brand-light.min.css",
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
     },
     "skillourfuture.academy.mereka.io": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
     "skillourfuture.academyv2.mereka.io": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
     "skillourfuture.academyv2.mereka.dev": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
 }
 
@@ -2384,33 +2384,33 @@ if not match:
 
 theme = json.loads(match.group(1))
 
-theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/core.min.css"
-theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/light.min.css"
-theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/mereka-brand.min.css"
-theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/mereka-brand-light.min.css"
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/mereka-brand-light.min.css"
 theme["brand"]["themeUrls"]["variants"].pop("dark", None)
 theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
 
 variant_theme_map = {
     "academy.biji-biji.com": {
-        "core": "../theme/biji-biji-brand.min.css",
-        "light": "../theme/biji-biji-brand-light.min.css",
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
     },
     "biji-biji.academyv2.mereka.dev": {
-        "core": "../theme/biji-biji-brand.min.css",
-        "light": "../theme/biji-biji-brand-light.min.css",
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
     },
     "skillourfuture.academy.mereka.io": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
     "skillourfuture.academyv2.mereka.io": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
     "skillourfuture.academyv2.mereka.dev": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
 }
 
@@ -2522,33 +2522,33 @@ if not match:
 
 theme = json.loads(match.group(1))
 
-theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/core.min.css"
-theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/light.min.css"
-theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "../theme/mereka-brand.min.css"
-theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "../theme/mereka-brand-light.min.css"
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/mereka-brand-light.min.css"
 theme["brand"]["themeUrls"]["variants"].pop("dark", None)
 theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
 
 variant_theme_map = {
     "academy.biji-biji.com": {
-        "core": "../theme/biji-biji-brand.min.css",
-        "light": "../theme/biji-biji-brand-light.min.css",
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
     },
     "biji-biji.academyv2.mereka.dev": {
-        "core": "../theme/biji-biji-brand.min.css",
-        "light": "../theme/biji-biji-brand-light.min.css",
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
     },
     "skillourfuture.academy.mereka.io": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
     "skillourfuture.academyv2.mereka.io": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
     "skillourfuture.academyv2.mereka.dev": {
-        "core": "../theme/sof-brand.min.css",
-        "light": "../theme/sof-brand-light.min.css",
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
     },
 }
 

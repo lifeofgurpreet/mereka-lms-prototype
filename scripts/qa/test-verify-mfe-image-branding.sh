@@ -39,9 +39,9 @@ cat >"$tmpdir/pass/openedx/dist/authn/index.html" <<'EOF'
         const theme = {
           "brand": {
             "themeUrls": {
-              "core": { "fileName": "../theme/mereka-brand.min.css" },
+              "core": { "fileName": "/theme/mereka-brand.min.css" },
               "variants": {
-                "light": { "fileName": "../theme/mereka-brand-light.min.css" }
+                "light": { "fileName": "/theme/mereka-brand-light.min.css" }
               }
             }
           }

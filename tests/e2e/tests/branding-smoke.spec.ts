@@ -110,11 +110,7 @@ function getExpectedThemeCss(mfeBaseUrl: string): { brandCore: string; brandLigh
 
 function getRuntimeThemeReferences(cssPath: string): string[] {
   const normalizedPath = cssPath.startsWith('/') ? cssPath : `/${cssPath}`;
-  const references = new Set([normalizedPath]);
-  if (normalizedPath.startsWith('/theme/')) {
-    references.add(normalizedPath.replace(/^\/theme\//, '../theme/'));
-  }
-  return [...references];
+  return [normalizedPath];
 }
 
 function htmlContainsAnyThemeReference(html: string, cssPath: string): boolean {

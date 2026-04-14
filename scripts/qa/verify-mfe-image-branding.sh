@@ -141,8 +141,11 @@ if run_with_timeout "${DOCKER_RUN_TIMEOUT_SECS}" docker run --rm \
     if ! printf "%s" "$paragon_block" | grep -q "var PARAGON_THEME = "; then
       echo "WARN: No PARAGON_THEME variable found in authn/index.html"
     else
-      if printf "%s" "$paragon_block" | grep -qE "var PARAGON_THEME = .*\"themeUrls\".*\\.css"; then
-        echo "OK: PARAGON_THEME brand URLs contain CSS references"
+      if printf "%s" "$paragon_block" | grep -qE "var PARAGON_THEME = .*\"/theme/[^\"]+\\.css\""; then
+        echo "OK: PARAGON_THEME brand URLs contain absolute /theme CSS references"
+      elif printf "%s" "$paragon_block" | grep -qE "var PARAGON_THEME = .*\"\\.\\./theme/[^\"]+\\.css\""; then
+        echo "ERROR: PARAGON_THEME still uses relative ../theme CSS references (broken on route-prefixed MFEs)" >&2
+        exit 1
       else
         echo "ERROR: PARAGON_THEME brand URLs are empty (plugin hook did not fire during build)" >&2
         echo "  Ensure mereka_lms plugin is enabled before tutor images build mfe" >&2

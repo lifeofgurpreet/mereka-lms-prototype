@@ -1,19 +1,22 @@
 // ╔═══════════════════════════════════════════════════════════════════════╗
-// ║ DEPRECATED — NOT THE SHIPPED MFE RUNTIME SOURCE                     ║
+// ║ GENERATED COMPATIBILITY MIRROR — DO NOT EDIT DIRECTLY              ║
 // ║                                                                     ║
 // ║ The actual runtime is assembled from the split modules in:          ║
-// ║   infrastructure/tutor/plugins/_mereka_lms/mfe_runtime/             ║
+// ║   infrastructure/tutor/plugins/_mereka_lms/mfe_runtime/            ║
 // ║     tenant-resolution.js  header-menu.js  dashboard.js              ║
 // ║     learning.js  certificate-profile.js  authoring.js  footer.js   ║
 // ║                                                                     ║
-// ║ Loaded by: infrastructure/tutor/plugins/_mereka_lms/mfe_runtime.py  ║
+// ║ Loaded by: infrastructure/tutor/plugins/_mereka_lms/mfe_runtime.py ║
 // ║                                                                     ║
-// ║ This file is kept for QA script compatibility only. It WILL diverge ║
-// ║ from the shipped runtime. Do NOT debug against this file.           ║
+// ║ Regenerate with:                                                    ║
+// ║   PYTHONPATH=. python -m _mereka_lms.mfe_runtime --sync-compat      ║
 // ╚═══════════════════════════════════════════════════════════════════════╝
 {% raw %}
+// Tenant branding data contracts and resolution logic.
+// Used by all surface modules to look up per-tenant branding, URLs, and copy.
+
 const normalizeHostname = (hostname) => {
-  return (typeof hostname === 'string' ? hostname.toLowerCase() : '').replace(/^www\\./, '');
+  return (typeof hostname === 'string' ? hostname.toLowerCase() : '').replace(/^www\./, '');
 };
 
 // Tenant branding + footer data contract.
@@ -21,8 +24,8 @@ const normalizeHostname = (hostname) => {
 const MEREKA_BASE_VARIANT = {
   logoUrl: '/theme/logo-horizontal.svg',
   mobileLogoUrl: '/theme/logo.svg',
-  themeBrandUrl: '../theme/mereka-brand.min.css',
-  themeBrandLightUrl: '../theme/mereka-brand-light.min.css',
+  themeBrandUrl: '/theme/mereka-brand.min.css',
+  themeBrandLightUrl: '/theme/mereka-brand-light.min.css',
   helpUrl: 'https://help.mereka.io/',
   whatsapp: '601135271981',
   privacyUrl: 'https://legal.mereka.io/privacy-policy/',
@@ -30,33 +33,53 @@ const MEREKA_BASE_VARIANT = {
   cookiesUrl: 'https://legal.mereka.io/#cookie-policy',
 };
 
+// Shared tenant configs — reused for prod and dev hostname entries.
+const _MEREKA_ACADEMY = {
+  ...MEREKA_BASE_VARIANT,
+  slug: 'mereka',
+  brand: 'Mereka Academy',
+  copyrightHolder: 'MEREKA',
+  supportEmail: 'support@mereka.io',
+};
+
+const _BIJI_BIJI = {
+  ...MEREKA_BASE_VARIANT,
+  slug: 'biji-biji',
+  logoUrl: '/theme/biji-biji/logo-horizontal.svg',
+  mobileLogoUrl: '/theme/biji-biji/logo.svg',
+  themeBrandUrl: '/theme/biji-biji-brand.min.css',
+  themeBrandLightUrl: '/theme/biji-biji-brand-light.min.css',
+  brand: 'Biji-Biji Academy',
+  copyrightHolder: 'Biji-Biji Initiative',
+  supportEmail: 'techadmin@biji-biji.com',
+};
+
+const _SKILL_OUR_FUTURE = {
+  ...MEREKA_BASE_VARIANT,
+  slug: 'skillourfuture',
+  logoUrl: '/theme/skillourfuture/logo-horizontal.svg',
+  mobileLogoUrl: '/theme/skillourfuture/logo.svg',
+  themeBrandUrl: '/theme/sof-brand.min.css',
+  themeBrandLightUrl: '/theme/sof-brand-light.min.css',
+  brand: 'Skill Our Future Academy',
+  copyrightHolder: 'MEREKA',
+  supportEmail: 'support@mereka.io',
+};
+
 const MEREKA_SITE_VARIANTS = {
-  'academyv2.mereka.io': {
-    ...MEREKA_BASE_VARIANT,
-    brand: 'Mereka Academy',
-    copyrightHolder: 'MEREKA',
-    supportEmail: 'support@mereka.io',
-  },
-  'academy.biji-biji.com': {
-    ...MEREKA_BASE_VARIANT,
-    logoUrl: '/theme/biji-biji/logo-horizontal.svg',
-    mobileLogoUrl: '/theme/biji-biji/logo.svg',
-    themeBrandUrl: '../theme/biji-biji-brand.min.css',
-    themeBrandLightUrl: '../theme/biji-biji-brand-light.min.css',
-    brand: 'Biji-Biji Academy',
-    copyrightHolder: 'Biji-Biji Initiative',
-    supportEmail: 'techadmin@biji-biji.com',
-  },
-  'skillourfuture.academy.mereka.io': {
-    ...MEREKA_BASE_VARIANT,
-    logoUrl: '/theme/skillourfuture/logo-horizontal.svg',
-    mobileLogoUrl: '/theme/skillourfuture/logo.svg',
-    themeBrandUrl: '../theme/sof-brand.min.css',
-    themeBrandLightUrl: '../theme/sof-brand-light.min.css',
-    brand: 'Skill Our Future Academy',
-    copyrightHolder: 'MEREKA',
-    supportEmail: 'support@mereka.io',
-  },
+  // Production hostnames
+  'academyv2.mereka.io': _MEREKA_ACADEMY,
+  'academy.biji-biji.com': _BIJI_BIJI,
+  'skillourfuture.academy.mereka.io': _SKILL_OUR_FUTURE,
+  'skillourfuture.academyv2.mereka.io': _SKILL_OUR_FUTURE,  // D-08: apps/studio on academyv2 domain
+  // Staging hostnames
+  'staging.academyv2.mereka.io': _MEREKA_ACADEMY,
+  'staging.academy.biji-biji.com': _BIJI_BIJI,
+  'staging.skillourfuture.academy.mereka.io': _SKILL_OUR_FUTURE,
+  // Dev hostnames (academyv2.mereka.dev zone)
+  'academyv2.mereka.dev': _MEREKA_ACADEMY,
+  'biji-biji.academyv2.mereka.dev': _BIJI_BIJI,
+  'skillourfuture.academyv2.mereka.dev': _SKILL_OUR_FUTURE,
 };
 
 const deriveVariantCandidates = (hostname) => {
@@ -140,6 +163,27 @@ const normalizeTenantPaletteValue = (value) => {
   return typeof value === 'string' ? value.trim() : '';
 };
 
+const applyMerekaTenantIdentity = () => {
+  if (typeof document === 'undefined' || typeof getConfig !== 'function') {
+    return;
+  }
+
+  const config = getConfig() || {};
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  const variant = getMerekaVariant(hostname, config);
+  const tenantSlug = variant && variant.slug ? variant.slug : 'mereka';
+  const root = document.documentElement;
+  const body = document.body;
+
+  if (root && typeof root.setAttribute === 'function') {
+    root.setAttribute('data-mereka-tenant', tenantSlug);
+  }
+  if (body && body.classList && typeof body.classList.add === 'function') {
+    body.classList.remove('mereka-tenant--mereka', 'mereka-tenant--biji-biji', 'mereka-tenant--skillourfuture');
+    body.classList.add(`mereka-tenant--${tenantSlug}`);
+  }
+};
+
 const applyMerekaTenantPaletteBridge = () => {
   if (typeof document === 'undefined' || typeof getConfig !== 'function') {
     return;
@@ -151,26 +195,39 @@ const applyMerekaTenantPaletteBridge = () => {
   }
 
   const config = getConfig() || {};
+  const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
   const primary = normalizeTenantPaletteValue(config.PRIMARY_COLOR);
   const secondary = normalizeTenantPaletteValue(config.SECONDARY_COLOR);
   const accent = normalizeTenantPaletteValue(config.ACCENT_COLOR);
   const textOnPrimary = normalizeTenantPaletteValue(config.TEXT_ON_PRIMARY);
+  const tenantSlug = variant && variant.slug ? variant.slug : 'mereka';
 
   const paletteBridge = {
     '--tenant-color-primary': primary,
     '--tenant-color-secondary': secondary,
     '--tenant-color-accent': accent,
     '--tenant-color-text-on-primary': textOnPrimary,
+    '--tenant-shell-identity': tenantSlug,
     '--mereka-color-magenta': primary,
+    '--mereka-color-magenta-dark': primary,
     '--mereka-color-teal': secondary,
     '--mereka-color-blue': accent,
     '--mereka-color-info': accent,
     '--pgn-color-primary-base': primary,
+    // Paragon utility classes (bg-primary-400, bg-primary-500, etc.) use
+    // these shade variables, not primary-base. Without setting them, the
+    // authn left panel and buttons stay on the default Mereka magenta.
+    '--pgn-color-primary-400': primary,
+    '--pgn-color-primary-500': primary,
+    '--pgn-color-primary-700': primary,
+    '--pgn-color-brand-base': primary,
+    '--pgn-color-brand-700': primary,
     '--pgn-color-secondary-base': secondary,
     '--pgn-color-info-base': accent,
-    '--pgn-color-brand-base': primary,
     '--pgn-link-color': primary,
     '--pgn-link-hover-color': secondary,
+    '--pgn-btn-color': primary,
+    '--pgn-btn-hover-color': primary,
   };
 
   for (const [propertyName, value] of Object.entries(paletteBridge)) {
@@ -180,7 +237,28 @@ const applyMerekaTenantPaletteBridge = () => {
   }
 };
 
-applyMerekaTenantPaletteBridge();
+// The palette bridge must run AFTER the MFE config API response is merged
+// into getConfig(). At module evaluation time, getConfig() returns build-time
+// defaults only — PRIMARY_COLOR etc. are not yet populated. Defer execution
+// and retry until the config contains tenant-specific values.
+(function _deferPaletteBridge() {
+  const _tryApply = () => {
+    if (typeof getConfig !== 'function') return false;
+    const cfg = getConfig() || {};
+    // PRIMARY_COLOR is only present after the config API response is merged.
+    if (!cfg.PRIMARY_COLOR) return false;
+    applyMerekaTenantIdentity();
+    applyMerekaTenantPaletteBridge();
+    return true;
+  };
+  // Try immediately (covers SSR / pre-loaded config).
+  if (_tryApply()) return;
+  // Retry on short intervals until config is loaded (max ~10s).
+  let attempts = 0;
+  const _interval = setInterval(() => {
+    if (_tryApply() || ++attempts > 50) clearInterval(_interval);
+  }, 200);
+})();
 
 const getLearnerHomeHref = () => '/learner-dashboard/';
 
@@ -194,18 +272,78 @@ const getMerekaBaseUrl = (config) => {
 
 const getMerekaThemeAssetUrl = (config, assetPath) => {
   const normalizedPath = typeof assetPath === 'string' ? assetPath.trim() : '';
-  const baseUrl = getMerekaBaseUrl(config);
   if (!normalizedPath) {
     return '';
   }
   if (!normalizedPath.startsWith('/')) {
     return normalizedPath;
   }
+  // Theme assets (/theme/*) live in the MFE image, not LMS. Use the current
+  // page origin (always the MFE domain) so the browser resolves to the MFE
+  // pod directly, without relying on the Caddy /theme/* proxy on the LMS host.
+  // This aligns with lms_settings.py which sets MFE_CONFIG logo URLs to the
+  // MFE static base, not the LMS base.
+  if (normalizedPath.startsWith('/theme/') && typeof window !== 'undefined') {
+    return `${window.location.origin}${normalizedPath}`;
+  }
+  const baseUrl = getMerekaBaseUrl(config);
   return baseUrl ? `${baseUrl}${normalizedPath}` : normalizedPath;
 };
 
 const getMerekaShellCopy = (variant) => {
   const brand = variant && variant.brand ? variant.brand : 'Mereka Academy';
+  const slug = variant && variant.slug ? variant.slug : 'mereka';
+
+  if (slug === 'biji-biji') {
+    return {
+      authn: {
+        eyebrow: 'Community-powered learning',
+        title: 'Step back into the makerspace',
+        subtitle: `Sign in to continue with ${brand} pathways, cohorts, and practical studio work.`,
+        supportCtaLabel: 'Talk to support',
+        trustNote: 'Built for creative communities, practical making, and shared learning momentum.',
+      },
+      dashboard: {
+        eyebrow: 'Maker dashboard',
+        title: `Your ${brand} makerspace is live`,
+        subtitle: 'Pick up cohort work, studio sessions, and project-based pathways without losing context.',
+        primaryCtaLabel: 'Browse pathways',
+        secondaryCtaLabel: 'Community support',
+      },
+      learning: {
+        eyebrow: 'Studio session',
+        title: `${brand} learning flow`,
+        subtitle: 'Keep the session tactile, collaborative, and grounded in the work you are building.',
+        supportCtaLabel: 'Get help',
+      },
+    };
+  }
+
+  if (slug === 'skillourfuture') {
+    return {
+      authn: {
+        eyebrow: 'Career acceleration workspace',
+        title: 'Return to your next breakthrough',
+        subtitle: `Sign in to continue with ${brand} career pathways, coaching, and employability tracks.`,
+        supportCtaLabel: 'Career support',
+        trustNote: 'Designed for confident career moves, employer-aligned learning, and verified progress.',
+      },
+      dashboard: {
+        eyebrow: 'Career dashboard',
+        title: `Your ${brand} growth plan is ready`,
+        subtitle: 'See your next milestone, keep progress visible, and move quickly between coaching and coursework.',
+        primaryCtaLabel: 'Explore programs',
+        secondaryCtaLabel: 'Career support',
+      },
+      learning: {
+        eyebrow: 'Career session',
+        title: `${brand} learning flow`,
+        subtitle: 'Stay focused on the next capability, credential, or career move without losing momentum.',
+        supportCtaLabel: 'Get help',
+      },
+    };
+  }
+
   return {
     authn: {
       eyebrow: 'Learning workspace',
@@ -231,6 +369,9 @@ const getMerekaShellCopy = (variant) => {
 };
 
 const getLogoHref = () => getLearnerHomeHref();
+
+// Header and menu components.
+// Includes MerekaHeaderLogo, withMerekaMenuItems, and all header/menu widget helpers.
 
 const withMerekaMenuItems = (widget, menuItems = []) => {
   const widgetProps = (widget && widget.RenderWidget && widget.RenderWidget.props) || {};
@@ -394,8 +535,8 @@ const withMerekaLearningUserMenuSupport = (widget) => {
 };
 
 const appendClassName = (baseValue, classNameToAppend) => {
-  const baseTokens = typeof baseValue === 'string' ? baseValue.split(/\\s+/).filter(Boolean) : [];
-  const appendTokens = typeof classNameToAppend === 'string' ? classNameToAppend.split(/\\s+/).filter(Boolean) : [];
+  const baseTokens = typeof baseValue === 'string' ? baseValue.split(/\s+/).filter(Boolean) : [];
+  const appendTokens = typeof classNameToAppend === 'string' ? classNameToAppend.split(/\s+/).filter(Boolean) : [];
   const merged = [...new Set([...baseTokens, ...appendTokens])];
   return merged.join(' ');
 };
@@ -493,10 +634,16 @@ const MerekaHeaderLogo = () => {
   const isMobileViewport = typeof window !== 'undefined' ? window.matchMedia('(max-width: 767px)').matches : false;
   const selectedLogo = isMobileViewport && variant.mobileLogoUrl ? variant.mobileLogoUrl : variant.logoUrl;
   const shellCopy = getMerekaShellCopy(variant);
+  const svgUrl = getMerekaThemeAssetUrl(config, selectedLogo);
+  const pngFallback = svgUrl.replace(/\.svg$/, '.png');
 
   return (
     <a href={getLogoHref()} aria-label={`${variant.brand} learning home`} className="mereka-header-logo">
-      <img src={getMerekaThemeAssetUrl(config, selectedLogo)} alt={`${variant.brand} logo`} />
+      <img
+        src={svgUrl}
+        alt={`${variant.brand} logo`}
+        onError={(e) => { if (e.target.src !== pngFallback) { e.target.src = pngFallback; } }}
+      />
       <span className="mereka-header-logo__lockup">
         <span className="mereka-header-logo__brand">{variant.brand}</span>
         <span className="mereka-header-logo__meta">{shellCopy.learning.eyebrow}</span>
@@ -522,203 +669,34 @@ const MerekaAuthnLoginBranding = () => {
   const config = getConfig();
   const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
   const variant = getMerekaVariant(hostname, config);
+  const shellCopy = getMerekaShellCopy(variant);
+  const svgUrl = getMerekaThemeAssetUrl(config, variant.logoUrl);
+  // Fallback: if SVG fails (e.g. raster-in-SVG blocked by browser sandbox),
+  // try the PNG equivalent. This is a narrow workaround for defective SVG
+  // source assets — the SVG should be replaced with a proper vector file.
+  const pngFallback = svgUrl.replace(/\.svg$/, '.png');
 
   return (
     <div className="mereka-authn-login-branding">
       <a href="/" className="mereka-authn-login-branding__logo">
         <img
-          src={getMerekaThemeAssetUrl(config, variant.logoUrl)}
+          src={svgUrl}
           alt={`${variant.brand} logo`}
           className="mereka-authn-login-branding__logo-img"
+          onError={(e) => { if (e.target.src !== pngFallback) { e.target.src = pngFallback; } }}
         />
-        <span className="mereka-authn-login-branding__brand">{variant.brand}</span>
+        <span className="mereka-authn-login-branding__copy">
+          <span className="mereka-authn-login-branding__eyebrow">{shellCopy.authn.eyebrow}</span>
+          <span className="mereka-authn-login-branding__brand">{variant.brand}</span>
+          <span className="mereka-authn-login-branding__subtitle">{shellCopy.authn.trustNote}</span>
+        </span>
       </a>
     </div>
   );
 };
 
-const MerekaStudioFooter = () => {
-  const config = getConfig();
-  const baseUrl = (config.LMS_BASE_URL || '').replace(/\/$/, '');
-  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
-  const variant = getMerekaVariant(hostname, config);
-  const siteName = config.SITE_NAME || variant.brand || 'Mereka Studio';
-
-  return (
-    <footer className="mereka-studio-footer" role="contentinfo">
-      <div className="mereka-studio-footer__inner">
-        <a href={baseUrl || '/'} className="mereka-studio-footer__logo-link">
-          <img
-            src={baseUrl ? `${baseUrl}${variant.logoUrl}` : variant.logoUrl}
-            alt={`${siteName} logo`}
-            className="mereka-studio-footer__logo"
-          />
-        </a>
-        <p className="mereka-studio-footer__tagline">
-          Built for creators. Built for teams. Built for growth.
-        </p>
-      </div>
-    </footer>
-  );
-};
-
-// Studio authoring course-unit sidebar helper.
-// Wired into org.openedx.frontend.authoring.course_unit_sidebar.v1.
-const MerekaAuthoringCourseUnitSidebarHint = () => {
-  return (
-    <aside className="mereka-authoring-course-unit-sidebar-hint p-3 rounded">
-      <p className="mereka-badge mb-2">Studio Unit</p>
-      <p className="mb-0 small text-muted">Use this sidebar to keep activities and outcomes aligned with your learning goals.</p>
-    </aside>
-  );
-};
-
-// Studio authoring course-outline sidebar helper.
-// Wired into org.openedx.frontend.authoring.course_outline_sidebar.v1.
-const MerekaAuthoringCourseOutlineSidebarHint = () => {
-  return (
-    <aside className="mereka-authoring-course-outline-sidebar-hint p-3 rounded">
-      <p className="mereka-badge mb-2">Outline Guide</p>
-      <p className="mb-0 small text-muted">Use this panel to keep weekly objectives and sequencing decisions aligned.</p>
-    </aside>
-  );
-};
-
-// Studio outline header actions helper.
-// Wired into org.openedx.frontend.authoring.course_outline_header_actions.v1.
-const MerekaAuthoringCourseOutlineHeaderActionsHint = () => {
-  return (
-    <div className="mereka-authoring-course-outline-header-actions-hint">
-      <span className="mereka-badge">Mereka Studio</span>
-    </div>
-  );
-};
-
-// Studio unit header actions helper.
-// Wired into org.openedx.frontend.authoring.course_unit_header_actions.v1.
-const MerekaAuthoringCourseUnitHeaderActionsHint = () => {
-  return (
-    <div className="mereka-authoring-course-unit-header-actions-hint">
-      <span className="small">Keep unit activities outcomes-focused for your learner path.</span>
-    </div>
-  );
-};
-
-// Studio outline page alerts helper.
-// Wired into org.openedx.frontend.authoring.course_outline_page_alerts.v1.
-const MerekaAuthoringCourseOutlinePageAlertsHint = () => {
-  return (
-    <div className="mereka-authoring-course-outline-page-alerts-hint">
-      <span className="mereka-badge me-2">Quality Check</span>
-      <span className="small">Review pacing and prerequisites before publishing this outline.</span>
-    </div>
-  );
-};
-
-// Studio video editor alerts helper.
-// Wired into org.openedx.frontend.authoring.edit_video_alerts.v1.
-const MerekaAuthoringEditVideoAlertsHint = () => {
-  return (
-    <div className="mereka-authoring-edit-video-alerts-hint">
-      <span className="mereka-badge me-2">Video Ready</span>
-      <span className="small">Confirm captions and transcript quality for accessibility.</span>
-    </div>
-  );
-};
-
-// Studio file editor alerts helper.
-// Wired into org.openedx.frontend.authoring.edit_file_alerts.v1.
-const MerekaAuthoringEditFileAlertsHint = () => {
-  return (
-    <div className="mereka-authoring-edit-file-alerts-hint">
-      <span className="mereka-badge me-2">File Review</span>
-      <span className="small">Check filename clarity and learner-facing download labels.</span>
-    </div>
-  );
-};
-
-// Studio additional course plugin helper.
-// Wired into org.openedx.frontend.authoring.additional_course_plugin.v1.
-const MerekaAuthoringAdditionalCoursePluginHint = () => {
-  return (
-    <div className="mereka-authoring-additional-course-plugin-hint">
-      <span className="mereka-badge me-2">Course Plugin</span>
-      <span className="small">Add external tools that match your program outcomes.</span>
-    </div>
-  );
-};
-
-// Studio additional course content plugin helper.
-// Wired into org.openedx.frontend.authoring.additional_course_content_plugin.v1.
-const MerekaAuthoringAdditionalCourseContentPluginHint = () => {
-  return (
-    <div className="mereka-authoring-additional-course-content-plugin-hint">
-      <span className="mereka-badge me-2">Content Plugin</span>
-      <span className="small">Use reusable content blocks to keep experiences consistent.</span>
-    </div>
-  );
-};
-
-// Studio outline subsection extra-actions helper.
-// Wired into org.openedx.frontend.authoring.course_outline_subsection_card_extra_actions.v1.
-const MerekaAuthoringOutlineSubsectionExtraActionsHint = () => {
-  return (
-    <div className="mereka-authoring-outline-subsection-extra-actions-hint">
-      <span className="small">Subsection actions are available for sequencing and visibility controls.</span>
-    </div>
-  );
-};
-
-// Studio outline unit-card extra-actions helper.
-// Wired into org.openedx.frontend.authoring.course_outline_unit_card_extra_actions.v1.
-const MerekaAuthoringOutlineUnitExtraActionsHint = () => {
-  return (
-    <div className="mereka-authoring-outline-unit-extra-actions-hint">
-      <span className="small">Unit-level actions help you align assessments with outcomes.</span>
-    </div>
-  );
-};
-
-// Studio course-unit sidebar v2 helper.
-// Wired into org.openedx.frontend.authoring.course_unit_sidebar.v2.
-const MerekaAuthoringCourseUnitSidebarV2Hint = () => {
-  return (
-    <div className="mereka-authoring-course-unit-sidebar-v2-hint">
-      <span className="mereka-badge me-2">Studio Unit v2</span>
-      <span className="small">Use quick controls to refine component flow and accessibility.</span>
-    </div>
-  );
-};
-
-// Studio files-upload page table helper.
-// Wired into org.openedx.frontend.authoring.files_upload_page_table.v1.
-const MerekaAuthoringFilesUploadPageTableHint = () => {
-  return (
-    <div className="mereka-authoring-files-upload-page-table-hint">
-      <span className="small">Label files clearly so learners can discover the right assets fast.</span>
-    </div>
-  );
-};
-
-// Studio videos-upload page table helper.
-// Wired into org.openedx.frontend.authoring.videos_upload_page_table.v1.
-const MerekaAuthoringVideosUploadPageTableHint = () => {
-  return (
-    <div className="mereka-authoring-videos-upload-page-table-hint">
-      <span className="small">Prioritize transcripts and descriptive titles for each uploaded video.</span>
-    </div>
-  );
-};
-
-// Studio video transcript translations helper.
-// Wired into org.openedx.frontend.authoring.video_transcript_additional_translations_component.v1.
-const MerekaAuthoringVideoTranscriptTranslationsHint = () => {
-  return (
-    <div className="mereka-authoring-video-transcript-translations-hint">
-      <span className="small">Add multilingual transcript tracks to improve inclusivity and completion.</span>
-    </div>
-  );
-};
+// Dashboard surface components.
+// Includes MerekaDashboardHeader, course-card slots, sidebar widget, and no-courses view.
 
 // Custom learner-dashboard sidebar widget for branded links and support prompts.
 // Registered via org.openedx.frontend.learner_dashboard.widget_sidebar.v1.
@@ -764,9 +742,22 @@ const MerekaNoCoursesView = () => {
   const baseUrl = (config.LMS_BASE_URL || '').replace(/\/$/, '');
   const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
   const shellCopy = getMerekaShellCopy(variant);
+  const emptyStateSignals = {
+    'biji-biji': [
+      'Start with hands-on pathways built around community making and creative practice.',
+      'Return here to keep cohort work, events, and projects in one visible workspace.',
+      'Reach support quickly if you need help joining the right makerspace track.',
+    ],
+    skillourfuture: [
+      'Start with career pathways aligned to employability, confidence, and verified progress.',
+      'Return here to keep coaching, coursework, and milestones in one clear runway.',
+      'Reach support quickly if you need help choosing the next program or pathway.',
+    ],
+  };
+  const variantSlug = variant && variant.slug ? variant.slug : 'mereka';
   const discoverPath = getCatalogHref(baseUrl);
   const helpPath = variant.helpUrl || '/help/';
-  const noCourseSignals = [
+  const noCourseSignals = emptyStateSignals[variantSlug] || [
     'Start with curated pathways tailored to your goals.',
     'Return here anytime to keep momentum visible.',
     'Reach support fast if you need enrollment help.',
@@ -852,9 +843,16 @@ const MerekaDashboardMicroShell = ({
 // Wired into org.openedx.frontend.learner_dashboard.course_card_banner.v1.
 const MerekaCourseCardAccent = ({ cardId }) => {
   const safeCardId = typeof cardId === 'string' ? cardId : '';
+  const config = getConfig();
+  const variant = getMerekaVariant(typeof window !== 'undefined' ? window.location.hostname : '', config);
+  const badgeLabelMap = {
+    'biji-biji': 'Biji-Biji Pick',
+    skillourfuture: 'SOF Track',
+  };
+  const badgeLabel = badgeLabelMap[variant && variant.slug ? variant.slug : 'mereka'] || 'Mereka Curated';
   return (
     <div className="mereka-course-card-accent">
-      <span className="mereka-badge">Mereka Curated</span>
+      <span className="mereka-badge">{badgeLabel}</span>
       {safeCardId ? <span className="mereka-course-card-accent__meta">{safeCardId}</span> : null}
     </div>
   );
@@ -886,6 +884,9 @@ const MerekaDashboardModalHint = () => {
     />
   );
 };
+
+// Learning and courseware surface components.
+// Includes course outline sidebar, learning header, progress helpers, and in-course slot hints.
 
 // Learning course-outline sidebar branding card inserted into course-outline-sidebar slot.
 // Wired into org.openedx.frontend.learning.course_outline_sidebar.v1.
@@ -1219,6 +1220,9 @@ const MerekaLearningCourseExitDashboardFootnoteLinkHint = () => {
   );
 };
 
+// Certificate, profile, and account verification components.
+// Includes MerekaProgressCertificateStatus, MerekaAdditionalProfileFields, and ID verification hint.
+
 const getCertificateReadinessSteps = (variantBrand) => ([
   {
     label: '01',
@@ -1353,6 +1357,195 @@ const MerekaAdditionalProfileFields = () => {
   );
 };
 
+// Studio/authoring hint components.
+// All MerekaAuthoring* components wired into Studio frontend plugin slots.
+
+const MerekaStudioFooter = () => {
+  const config = getConfig();
+  const baseUrl = (config.LMS_BASE_URL || '').replace(/\/$/, '');
+  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+  const variant = getMerekaVariant(hostname, config);
+  const siteName = config.SITE_NAME || variant.brand || 'Mereka Studio';
+
+  return (
+    <footer className="mereka-studio-footer" role="contentinfo">
+      <div className="mereka-studio-footer__inner">
+        <a href={baseUrl || '/'} className="mereka-studio-footer__logo-link">
+          <img
+            src={baseUrl ? `${baseUrl}${variant.logoUrl}` : variant.logoUrl}
+            alt={`${siteName} logo`}
+            className="mereka-studio-footer__logo"
+          />
+        </a>
+        <p className="mereka-studio-footer__tagline">
+          Built for creators. Built for teams. Built for growth.
+        </p>
+      </div>
+    </footer>
+  );
+};
+
+// Studio authoring course-unit sidebar helper.
+// Wired into org.openedx.frontend.authoring.course_unit_sidebar.v1.
+const MerekaAuthoringCourseUnitSidebarHint = () => {
+  return (
+    <aside className="mereka-authoring-course-unit-sidebar-hint p-3 rounded">
+      <p className="mereka-badge mb-2">Studio Unit</p>
+      <p className="mb-0 small text-muted">Use this sidebar to keep activities and outcomes aligned with your learning goals.</p>
+    </aside>
+  );
+};
+
+// Studio authoring course-outline sidebar helper.
+// Wired into org.openedx.frontend.authoring.course_outline_sidebar.v1.
+const MerekaAuthoringCourseOutlineSidebarHint = () => {
+  return (
+    <aside className="mereka-authoring-course-outline-sidebar-hint p-3 rounded">
+      <p className="mereka-badge mb-2">Outline Guide</p>
+      <p className="mb-0 small text-muted">Use this panel to keep weekly objectives and sequencing decisions aligned.</p>
+    </aside>
+  );
+};
+
+// Studio outline header actions helper.
+// Wired into org.openedx.frontend.authoring.course_outline_header_actions.v1.
+const MerekaAuthoringCourseOutlineHeaderActionsHint = () => {
+  return (
+    <div className="mereka-authoring-course-outline-header-actions-hint">
+      <span className="mereka-badge">Mereka Studio</span>
+    </div>
+  );
+};
+
+// Studio unit header actions helper.
+// Wired into org.openedx.frontend.authoring.course_unit_header_actions.v1.
+const MerekaAuthoringCourseUnitHeaderActionsHint = () => {
+  return (
+    <div className="mereka-authoring-course-unit-header-actions-hint">
+      <span className="small">Keep unit activities outcomes-focused for your learner path.</span>
+    </div>
+  );
+};
+
+// Studio outline page alerts helper.
+// Wired into org.openedx.frontend.authoring.course_outline_page_alerts.v1.
+const MerekaAuthoringCourseOutlinePageAlertsHint = () => {
+  return (
+    <div className="mereka-authoring-course-outline-page-alerts-hint">
+      <span className="mereka-badge me-2">Quality Check</span>
+      <span className="small">Review pacing and prerequisites before publishing this outline.</span>
+    </div>
+  );
+};
+
+// Studio video editor alerts helper.
+// Wired into org.openedx.frontend.authoring.edit_video_alerts.v1.
+const MerekaAuthoringEditVideoAlertsHint = () => {
+  return (
+    <div className="mereka-authoring-edit-video-alerts-hint">
+      <span className="mereka-badge me-2">Video Ready</span>
+      <span className="small">Confirm captions and transcript quality for accessibility.</span>
+    </div>
+  );
+};
+
+// Studio file editor alerts helper.
+// Wired into org.openedx.frontend.authoring.edit_file_alerts.v1.
+const MerekaAuthoringEditFileAlertsHint = () => {
+  return (
+    <div className="mereka-authoring-edit-file-alerts-hint">
+      <span className="mereka-badge me-2">File Review</span>
+      <span className="small">Check filename clarity and learner-facing download labels.</span>
+    </div>
+  );
+};
+
+// Studio additional course plugin helper.
+// Wired into org.openedx.frontend.authoring.additional_course_plugin.v1.
+const MerekaAuthoringAdditionalCoursePluginHint = () => {
+  return (
+    <div className="mereka-authoring-additional-course-plugin-hint">
+      <span className="mereka-badge me-2">Course Plugin</span>
+      <span className="small">Add external tools that match your program outcomes.</span>
+    </div>
+  );
+};
+
+// Studio additional course content plugin helper.
+// Wired into org.openedx.frontend.authoring.additional_course_content_plugin.v1.
+const MerekaAuthoringAdditionalCourseContentPluginHint = () => {
+  return (
+    <div className="mereka-authoring-additional-course-content-plugin-hint">
+      <span className="mereka-badge me-2">Content Plugin</span>
+      <span className="small">Use reusable content blocks to keep experiences consistent.</span>
+    </div>
+  );
+};
+
+// Studio outline subsection extra-actions helper.
+// Wired into org.openedx.frontend.authoring.course_outline_subsection_card_extra_actions.v1.
+const MerekaAuthoringOutlineSubsectionExtraActionsHint = () => {
+  return (
+    <div className="mereka-authoring-outline-subsection-extra-actions-hint">
+      <span className="small">Subsection actions are available for sequencing and visibility controls.</span>
+    </div>
+  );
+};
+
+// Studio outline unit-card extra-actions helper.
+// Wired into org.openedx.frontend.authoring.course_outline_unit_card_extra_actions.v1.
+const MerekaAuthoringOutlineUnitExtraActionsHint = () => {
+  return (
+    <div className="mereka-authoring-outline-unit-extra-actions-hint">
+      <span className="small">Unit-level actions help you align assessments with outcomes.</span>
+    </div>
+  );
+};
+
+// Studio course-unit sidebar v2 helper.
+// Wired into org.openedx.frontend.authoring.course_unit_sidebar.v2.
+const MerekaAuthoringCourseUnitSidebarV2Hint = () => {
+  return (
+    <div className="mereka-authoring-course-unit-sidebar-v2-hint">
+      <span className="mereka-badge me-2">Studio Unit v2</span>
+      <span className="small">Use quick controls to refine component flow and accessibility.</span>
+    </div>
+  );
+};
+
+// Studio files-upload page table helper.
+// Wired into org.openedx.frontend.authoring.files_upload_page_table.v1.
+const MerekaAuthoringFilesUploadPageTableHint = () => {
+  return (
+    <div className="mereka-authoring-files-upload-page-table-hint">
+      <span className="small">Label files clearly so learners can discover the right assets fast.</span>
+    </div>
+  );
+};
+
+// Studio videos-upload page table helper.
+// Wired into org.openedx.frontend.authoring.videos_upload_page_table.v1.
+const MerekaAuthoringVideosUploadPageTableHint = () => {
+  return (
+    <div className="mereka-authoring-videos-upload-page-table-hint">
+      <span className="small">Prioritize transcripts and descriptive titles for each uploaded video.</span>
+    </div>
+  );
+};
+
+// Studio video transcript translations helper.
+// Wired into org.openedx.frontend.authoring.video_transcript_additional_translations_component.v1.
+const MerekaAuthoringVideoTranscriptTranslationsHint = () => {
+  return (
+    <div className="mereka-authoring-video-transcript-translations-hint">
+      <span className="small">Add multilingual transcript tracks to improve inclusivity and completion.</span>
+    </div>
+  );
+};
+
+// Footer component and related helpers.
+// MerekaFooter is wired into org.openedx.frontend.layout.footer.v1 by PLUGIN_SLOTS in mereka_lms.py.
+
 const getMerekaFooterNavLinks = (footerContent, footerSupport, variant) => {
   const configuredLinks = Array.isArray(footerContent.navLinks) ? footerContent.navLinks : [];
   return [
@@ -1471,11 +1664,7 @@ const MerekaFooter = () => {
                 <p className="footer-app-label">{footerMarketplace.appLabel || 'Manage your bookings'}</p>
                 <div className="footer-app-badges">
                   {(footerMarketplace.appBadges || []).map(badge => (
-                    <a key={badge.label} href={badge.url} target="_blank" rel="noopener noreferrer" className="footer-badge">
-                      {/apple|app.store/i.test(badge.url || badge.label) && <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{marginRight:'0.4rem',verticalAlign:'middle'}}><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>}
-                      {/google|play/i.test(badge.url || badge.label) && <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{marginRight:'0.4rem',verticalAlign:'middle'}}><path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 01-.61-.92V2.734a1 1 0 01.609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.2l2.807 1.626a1 1 0 010 1.734l-2.808 1.626L15.206 12l2.492-2.493zM5.864 2.658L16.8 8.99l-2.3 2.3-8.636-8.632z"/></svg>}
-                      {badge.label}
-                    </a>
+                    <a key={badge.label} href={badge.url} target="_blank" rel="noopener noreferrer" className="footer-badge">{badge.label}</a>
                   ))}
                 </div>
                 <a href={(footerMarketplace.cta && footerMarketplace.cta.url) || 'https://mereka.io/welcome/hub'} target="_blank" rel="noopener noreferrer" className="footer-cta-btn">{(footerMarketplace.cta && footerMarketplace.cta.label) || 'Become a Hub'}</a>
@@ -1505,4 +1694,5 @@ const MerekaFooter = () => {
     </footer>
   );
 };
+
 {% endraw %}

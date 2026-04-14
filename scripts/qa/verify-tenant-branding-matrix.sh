@@ -176,24 +176,31 @@ if [[ -f "$PLUGIN" ]]; then
       continue
     fi
 
+    DOMAIN_ALIAS="$(sed -nE "s/.*'${domain}':[[:space:]]*([A-Z_]+).*/\\1/p" <<<"$DOMAIN_BLOCK" | head -n 1 || true)"
+    ALIAS_BLOCK=""
+    if [[ -n "${DOMAIN_ALIAS:-}" ]]; then
+      ALIAS_BLOCK="$(awk "/const ${DOMAIN_ALIAS} = \\{/,/^\\s*\\};/" "$PLUGIN" || true)"
+    fi
+    EFFECTIVE_BLOCK="${DOMAIN_BLOCK}"$'\n'"${ALIAS_BLOCK}"
+
     # Check for brand: either directly or inherited via ...MEREKA_BASE_VARIANT
-    if grep -qE "brand: '[^']+'" <<<"$DOMAIN_BLOCK" ; then
+    if grep -qE "brand: '[^']+'" <<<"$EFFECTIVE_BLOCK" ; then
       pass "Domain '${domain}' has non-empty brand value"
     else
       fail "Domain '${domain}' missing or empty brand value"
     fi
 
     # Check copyrightHolder: either directly or inherited
-    if grep -qE "copyrightHolder: '[^']+'" <<<"$DOMAIN_BLOCK" ; then
+    if grep -qE "copyrightHolder: '[^']+'" <<<"$EFFECTIVE_BLOCK" ; then
       pass "Domain '${domain}' has non-empty copyrightHolder value"
     else
       fail "Domain '${domain}' missing or empty copyrightHolder value"
     fi
 
     # Check whatsapp: directly on domain block or inherited from MEREKA_BASE_VARIANT
-    if grep -qE "whatsapp: '[0-9]+'" <<<"$DOMAIN_BLOCK" ; then
+    if grep -qE "whatsapp: '[0-9]+'" <<<"$EFFECTIVE_BLOCK" ; then
       pass "Domain '${domain}' has non-empty whatsapp number"
-    elif grep -qF "...MEREKA_BASE_VARIANT" <<<"$DOMAIN_BLOCK" && \
+    elif grep -qF "...MEREKA_BASE_VARIANT" <<<"$EFFECTIVE_BLOCK" && \
          grep -qE "whatsapp: '[0-9]+'" <<<"$BASE_VARIANT_BLOCK" ; then
       pass "Domain '${domain}' inherits whatsapp from MEREKA_BASE_VARIANT"
     else

@@ -227,8 +227,8 @@ else
   fail "Source contract: learner-home href resolution markers missing"
 fi
 
-if rg -qF "'academy.biji-biji.com': {" "$PLUGIN_FILE" \
-  && rg -qF "'skillourfuture.academy.mereka.io': {" "$PLUGIN_FILE" \
+if rg -qF "'academy.biji-biji.com':" "$PLUGIN_FILE" \
+  && rg -qF "'skillourfuture.academy.mereka.io':" "$PLUGIN_FILE" \
   && rg -qF "const MEREKA_SITE_VARIANTS = {" "$PLUGIN_FILE"; then
   pass "Source contract: tenant hostnames are present in SITE_VARIANTS map"
 else
