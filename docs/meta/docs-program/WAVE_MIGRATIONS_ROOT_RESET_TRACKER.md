@@ -1,8 +1,8 @@
 ---
 title: Wave Migrations Root Reset Tracker
 owner: Platform Team
-status: canonical
-last_verified: 2026-03-10
+status: historical tracker snapshot
+last_verified: 2026-04-14
 canonical_root: docs/meta/docs-program
 doc_class: tracker
 summary: Classification tracker for retiring docs/migrations as a mixed legacy root.
@@ -14,6 +14,20 @@ audience: Contributors
 ---
 
 # Wave Migrations Root Reset Tracker
+
+This document is retained as historical migrations-root reset context.
+It does not define the current docs-program execution front door or the
+current architecture front door.
+
+For current docs-program execution, use:
+
+- [POST_REBASE_INTAKE_2026-04-13.md](POST_REBASE_INTAKE_2026-04-13.md)
+- [REVIEW_HARDENING_BOARD_2026-04-13.md](REVIEW_HARDENING_BOARD_2026-04-13.md)
+- [DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md](DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md)
+
+For the current architecture front door, use:
+
+- [../../architecture/README.md](../../architecture/README.md)
 
 ## Objective
 

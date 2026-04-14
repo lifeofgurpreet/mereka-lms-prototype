@@ -1,5 +1,21 @@
 # Wave Runbooks Root Reset Closeout
 
+_Audience: Reviewers and maintainers • Owner: Platform Team • Last verified: 2026-04-14 • Status: historical closeout snapshot_
+
+This document is retained as historical runbooks-root reset closeout context.
+It does not define the current docs-program execution front door or the
+current architecture front door.
+
+For current docs-program execution, use:
+
+- [POST_REBASE_INTAKE_2026-04-13.md](POST_REBASE_INTAKE_2026-04-13.md)
+- [REVIEW_HARDENING_BOARD_2026-04-13.md](REVIEW_HARDENING_BOARD_2026-04-13.md)
+- [DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md](DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md)
+
+For the current architecture front door, use:
+
+- [../../architecture/README.md](../../architecture/README.md)
+
 ## End state
 
 `docs/runbooks/**` is retired as an active documentation root.

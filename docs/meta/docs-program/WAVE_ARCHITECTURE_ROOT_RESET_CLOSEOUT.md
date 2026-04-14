@@ -1,7 +1,24 @@
 # Wave Architecture Root Reset Closeout
-_Audience: Reviewers and maintainers • Owner: Platform Team • Last verified: 2026-03-10 • Status: canonical_
+_Audience: Reviewers and maintainers • Owner: Platform Team • Last verified: 2026-04-14 • Status: historical closeout snapshot_
 
-## Outcome
+> Historical closeout for a superseded reset model.
+>
+> This wave closed an attempt to retire `docs/architecture/**` entirely.
+> Current repo truth is different: `docs/architecture/**` is the stable
+> architecture front-door root, and `docs/concepts/architecture/**` is bounded
+> retained standards and deep reference context.
+
+For current docs-program execution, use:
+
+- [POST_REBASE_INTAKE_2026-04-13.md](POST_REBASE_INTAKE_2026-04-13.md)
+- [REVIEW_HARDENING_BOARD_2026-04-13.md](REVIEW_HARDENING_BOARD_2026-04-13.md)
+- [DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md](DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md)
+
+For the current architecture front door, use:
+
+- [../../architecture/README.md](../../architecture/README.md)
+
+## Historical Wave Outcome
 
 `docs/architecture/**` has been retired as an active documentation root.
 
@@ -33,16 +50,27 @@ docs/architecture/
 - `docs/architecture/bundle-rules.yaml` -> `docs/concepts/architecture/bundle-rules.yaml`
 - `docs/architecture/glossary.yaml` -> `docs/concepts/architecture/glossary.yaml`
 
-## Canonical Owners After Reset
+## Canonical Owners After Reset (Historical)
 
 - living architecture: `docs/concepts/architecture/**`
 - ADRs and RFCs: `docs/adr/**`
 - standards and process-writing guidance: `docs/guides/standards/**`
 - docs-program governance and migration records: `docs/meta/docs-program/**`
 
-## Guardrail
+## Current Canonical Owners
+
+- stable architecture front doors: `docs/architecture/**`
+- retained architecture standards and deep reference:
+  `docs/concepts/architecture/**`
+- ADRs and RFCs: `docs/adr/**`
+- standards and process-writing guidance: `docs/guides/standards/**`
+- docs-program governance and migration records: `docs/meta/docs-program/**`
+
+## Historical Guardrail
 
 `tools/docs/verify/verify_legacy_architecture_root.py` now enforces that `docs/architecture/**` contains no substantive files beyond the tombstone `README.md`, and `tools/docs/verify/verify-docs-policy.sh` runs that guard in policy gates.
+
+This section records the reset wave's enforcement model, not the current one.
 
 ## Validation
 

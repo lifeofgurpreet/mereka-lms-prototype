@@ -1,12 +1,29 @@
 # Wave Operations Root Reset Tracker
 
-Status: in_progress
+> Historical tracker for a completed root-retirement wave.
+>
+> This file records how `docs/operations/**` was retired. It is not the current
+> front door for operator guidance. Current operator canon lives under
+> `docs/ops/**`, `docs/reference/operations/**`, and
+> `docs/policies/operations/**`.
+
+For current docs-program execution, use:
+
+- [POST_REBASE_INTAKE_2026-04-13.md](POST_REBASE_INTAKE_2026-04-13.md)
+- [REVIEW_HARDENING_BOARD_2026-04-13.md](REVIEW_HARDENING_BOARD_2026-04-13.md)
+- [DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md](DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md)
+
+For the current architecture front door, use:
+
+- [../../architecture/README.md](../../architecture/README.md)
+
+Status: historical tracker snapshot
 Owner: codex
 Branch: docs/operations-root-reset
 Worktree: /home/gurpreet/projects/k8s/mereka-lms-wt-operations-root-reset
 Started from: 4225380d7b4af95e9a41e8a7a5e8ab310c1d61e5
 
-## Objective
+## Historical Objective
 
 Determine whether `docs/operations/**` can be retired as an active root, partially collapsed, or must be split into narrower packets because it still contains live operational truth.
 
@@ -185,7 +202,7 @@ Fifth duplicate-collapse packet for additional wrapper-only files whose canonica
 - `docs/operations/ECOMMERCE_OAUTH_TROUBLESHOOTING.md` -> `docs/ops/runbooks/ECOMMERCE_OAUTH_TROUBLESHOOTING.md`
 - `docs/operations/ECOMMERCE_THEMING.md` -> `docs/reference/operations/ECOMMERCE_THEMING.md`
 
-## Final State
+## Historical Wave End State
 
 - `docs/operations/**` reduced to `docs/operations/README.md` only
 - all remaining wrapper files deleted
@@ -194,3 +211,10 @@ Fifth duplicate-collapse packet for additional wrapper-only files whose canonica
 - closeout docs:
   - `docs/meta/docs-program/WAVE_OPERATIONS_ROOT_RESET_CLOSEOUT.md`
   - `docs/meta/docs-program/WAVE_OPERATIONS_ROOT_RESET_REVIEW_HANDOFF.md`
+
+## Current Canonical Model
+
+- operator procedures: `docs/ops/**`
+- operations reference: `docs/reference/operations/**`
+- operations policy: `docs/policies/operations/**`
+- retired `docs/operations/**` remains tombstone-only and historical

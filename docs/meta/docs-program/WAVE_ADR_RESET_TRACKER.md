@@ -1,5 +1,21 @@
 # Wave ADR Reset Tracker
 
+_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-04-14 • Status: historical tracker snapshot_
+
+This document is retained as historical ADR-reset context.
+It does not define the current docs-program execution front door or the
+current architecture front door.
+
+For current docs-program execution, use:
+
+- [POST_REBASE_INTAKE_2026-04-13.md](POST_REBASE_INTAKE_2026-04-13.md)
+- [REVIEW_HARDENING_BOARD_2026-04-13.md](REVIEW_HARDENING_BOARD_2026-04-13.md)
+- [DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md](DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md)
+
+For the current architecture front door, use:
+
+- [../../architecture/README.md](../../architecture/README.md)
+
 ## Objective
 
 Reset `docs/adr/` into a pre-launch decision ledger:

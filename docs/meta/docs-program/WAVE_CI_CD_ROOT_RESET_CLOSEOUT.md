@@ -1,6 +1,23 @@
 # Wave CI/CD Root Reset Closeout
 
-## End state
+_Audience: Reviewers and maintainers • Owner: Platform Team • Last verified: 2026-04-14 • Status: historical closeout snapshot_
+
+> Historical closeout for a completed root-retirement wave.
+>
+> This file records the retirement of `docs/ci-cd/**`. It does not define the
+> current CI/CD operator front door.
+
+For current docs-program execution, use:
+
+- [POST_REBASE_INTAKE_2026-04-13.md](POST_REBASE_INTAKE_2026-04-13.md)
+- [REVIEW_HARDENING_BOARD_2026-04-13.md](REVIEW_HARDENING_BOARD_2026-04-13.md)
+- [DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md](DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md)
+
+For the current architecture front door, use:
+
+- [../../architecture/README.md](../../architecture/README.md)
+
+## Historical Wave End State
 
 `docs/ci-cd/**` is retired as an active documentation root.
 
@@ -21,12 +38,12 @@ The canonical living CI/CD operator root is now `docs/ops/ci-cd/**`.
 - Added a guard that blocks `docs/ci-cd/**` from regrowing as a living root.
 - Refreshed generated docs catalogs affected by the root collapse.
 
-## Canonical ownership now
+## Current Canonical Model
 
 - CI/CD operator guidance: `docs/ops/ci-cd/**`
 - Docs-program governance: `docs/meta/docs-program/**`
 
-## Guardrail
+## Historical Guardrail
 
 `tools/docs/verify/verify_legacy_ci_cd_root.py` prevents regrowth by failing when:
 
