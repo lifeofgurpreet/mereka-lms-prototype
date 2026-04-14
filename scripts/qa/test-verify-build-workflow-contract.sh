@@ -412,6 +412,8 @@ jobs:
           path: |
             var/ci/release-bundle.json
             var/ci/release-object.json
+            var/ci/build-provenance.json
+            var/ci/release-gate-envelope.json
             var/ci/release-bundle.sig
             var/ci/release-bundle.pem
       - run: |
@@ -419,6 +421,7 @@ jobs:
           files = [
             "contracts/release-contracts.yaml",
             "contracts/release-bundle-schema.yaml",
+            "contracts/evidence-pack-schema.yaml",
             "contracts/promotion-dispatch-envelope-schema.yaml",
           ]
           print(files)
@@ -460,9 +463,15 @@ jobs:
               "contract_ref": contract_ref,
           }
           payload = {
-              "event_type": evidence["dispatch_event_type"],
-              "client_payload": evidence,
+              "ref": "main",
+              "inputs": {
+                  "release_evidence": json.dumps(evidence, separators=(",", ":")),
+                  "dry_run": "false",
+                  "control_plane_ref": contract_ref,
+              },
           }
+          url = "https://api.github.com/repos/Biji-Biji-Initiative/bbi-infrastructure/actions/workflows/promote-dev-image.yml/dispatches"
+          print(url)
           print(payload)
           PY
 

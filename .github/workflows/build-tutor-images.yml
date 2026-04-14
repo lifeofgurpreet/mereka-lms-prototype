@@ -1750,6 +1750,7 @@ jobs:
           files = [
               "contracts/release-contracts.yaml",
               "contracts/release-bundle-schema.yaml",
+              "contracts/evidence-pack-schema.yaml",
               "contracts/promotion-dispatch-envelope-schema.yaml",
               "contracts/release-object-projection-schema.yaml",
           ]
@@ -1795,6 +1796,106 @@ jobs:
           print(f"**Projection status:** `{projection['projection_status']}`")
           print("**Unresolved PCP fields:** " + ", ".join(f"`{field}`" for field in unresolved))
           PY
+
+      - name: Resolve GitOps main commit for promotion provenance
+        id: resolve_gitops_main_ref
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import os
+          import urllib.request
+          from pathlib import Path
+
+          token = os.environ["GH_TOKEN"]
+          req = urllib.request.Request(
+              "https://api.github.com/repos/Biji-Biji-Initiative/bbi-infrastructure/commits/main",
+              headers={
+                  "Authorization": f"Bearer {token}",
+                  "Accept": "application/vnd.github+json",
+                  "X-GitHub-Api-Version": "2022-11-28",
+              },
+          )
+          with urllib.request.urlopen(req) as resp:
+              payload = json.loads(resp.read().decode("utf-8"))
+          sha = str(payload["sha"]).strip()
+          out = Path(os.environ["GITHUB_OUTPUT"])
+          out.write_text(f"gitops_commit_sha={sha}\n", encoding="utf-8")
+          print(f"Resolved bbi-infrastructure main SHA: {sha}")
+          PY
+
+      - name: Generate app build provenance for automatic promotion
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            PROMOTION_TARGET_ENV="dev"
+          else
+            PROMOTION_TARGET_ENV="${{ inputs.target_environment }}"
+          fi
+          ./scripts/infra/generate-build-provenance.sh \
+            --output var/ci/build-provenance.json \
+            --repository "${{ github.repository }}" \
+            --commit-sha "${{ github.sha }}" \
+            --target-environment "${PROMOTION_TARGET_ENV}" \
+            --openedx-digest "${{ steps.resolve_digests.outputs.openedx_digest }}" \
+            --mfe-digest "${{ steps.resolve_digests.outputs.mfe_digest }}" \
+            --release-bundle-id "${{ steps.bundle.outputs.bundle_id }}" \
+            --gitops-repo "Biji-Biji-Initiative/bbi-infrastructure" \
+            --gitops-commit "${{ steps.resolve_gitops_main_ref.outputs.gitops_commit_sha }}"
+          ./scripts/qa/verify-build-provenance.sh var/ci/build-provenance.json
+
+      - name: Regenerate release object with promotion provenance
+        env:
+          PLATFORM_CONTROL_PLANE_ROOT: var/ci/platform-control-plane
+        run: |
+          set -euo pipefail
+          python3 ./scripts/release/generate_release_object.py \
+            --release-bundle-json var/ci/release-bundle.json \
+            --build-provenance-json var/ci/build-provenance.json \
+            --output var/ci/release-object.json
+          ./scripts/qa/verify-release-object.sh var/ci/release-object.json
+
+      - name: Emit app release-gate proof envelope via lms-ops
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            TARGET_ENV="dev"
+          else
+            TARGET_ENV="${{ inputs.target_environment }}"
+          fi
+          case "$TARGET_ENV" in
+            production) LANE="prod" ;;
+            staging)    LANE="staging" ;;
+            dev)        LANE="dev" ;;
+            *)
+              echo "Unsupported target environment for lms-ops proof lane mapping: $TARGET_ENV" >&2
+              exit 1
+              ;;
+          esac
+          ./bin/lms-ops proof \
+            --concern release-gate \
+            --lane "$LANE" \
+            --release-object-json var/ci/release-object.json \
+            --skip-cluster
+          python3 ./scripts/release/release_object_bindings.py \
+            verify-proof-envelope \
+            --envelope-json var/proof/release-gate.json \
+            --release-object-json var/ci/release-object.json
+          cp var/proof/release-gate.json var/ci/release-gate-envelope.json
+
+      - name: Regenerate release object with proof refs
+        env:
+          PLATFORM_CONTROL_PLANE_ROOT: var/ci/platform-control-plane
+        run: |
+          set -euo pipefail
+          python3 ./scripts/release/generate_release_object.py \
+            --release-bundle-json var/ci/release-bundle.json \
+            --build-provenance-json var/ci/build-provenance.json \
+            --proof-ref var/proof/release-gate.json \
+            --output var/ci/release-object.json
+          ./scripts/qa/verify-release-object.sh var/ci/release-object.json
 
       - name: Generate truth ledger (repo + release planes)
         run: |
@@ -1849,6 +1950,8 @@ jobs:
             var/ci/release-bundle.json
             var/ci/control-plane-release-bundle-projection.json
             var/ci/release-object.json
+            var/ci/build-provenance.json
+            var/ci/release-gate-envelope.json
             var/ci/truth-ledger.json
             var/ci/release-bundle.sig
             var/ci/release-bundle.pem
@@ -1934,6 +2037,7 @@ jobs:
           root = Path("var/ci/platform-control-plane/contracts")
           files = [
               "contracts/release-contracts.yaml",
+              "contracts/evidence-pack-schema.yaml",
               "contracts/promotion-dispatch-envelope-schema.yaml",
               "contracts/release-object-projection-schema.yaml",
           ]
@@ -1978,7 +2082,13 @@ jobs:
           # Build the release_evidence envelope that promote-dev-image.yml expects.
           # All data comes from var/ci/ artifacts generated by earlier steps.
           python3 - <<'DISPATCH_PY'
-          import json, os, subprocess, sys, urllib.request
+          import hashlib
+          import json
+          import os
+          import subprocess
+          import sys
+          import urllib.request
+          from pathlib import Path
 
           bundle_id = os.environ["BUNDLE_ID"]
           sha = os.environ["GITHUB_SHA_FULL"]
@@ -1987,10 +2097,14 @@ jobs:
           server = os.environ["GITHUB_SERVER_URL_VAL"]
           token = os.environ["APP_TOKEN"]
           dispatch_schema_path = "var/ci/platform-control-plane/contracts/promotion-dispatch-envelope-schema.yaml"
+          release_contracts_path = "var/ci/platform-control-plane/contracts/release-contracts.yaml"
+          evidence_schema_path = "var/ci/platform-control-plane/contracts/evidence-pack-schema.yaml"
 
           # Load the full release object (already validated by verify-release-object.sh)
           release_object = json.loads(open("var/ci/release-object.json").read())
           release_bundle = json.loads(open("var/ci/release-bundle.json").read())
+          build_provenance = json.loads(open("var/ci/build-provenance.json").read())
+          release_gate_envelope = json.loads(open("var/ci/release-gate-envelope.json").read())
 
           schema = json.loads(
               subprocess.run(
@@ -2000,9 +2114,135 @@ jobs:
                   text=True,
               ).stdout
           )
+          release_contracts = json.loads(
+              subprocess.run(
+                  ["yq", "-o=json", ".", release_contracts_path],
+                  check=True,
+                  capture_output=True,
+                  text=True,
+              ).stdout
+          )
+          evidence_schema = json.loads(
+              subprocess.run(
+                  ["yq", "-o=json", ".", evidence_schema_path],
+                  check=True,
+                  capture_output=True,
+                  text=True,
+              ).stdout
+          )
           contract_family = str(schema["contract"]).strip().replace("-", "_")
           contract_version = str(schema["schema_version"]).strip()
           contract_ref = str(release_bundle["contract_ref"]).strip()
+          lane_contract = release_contracts["lanes"]["mereka-lms"]
+          runtime_profile = str(lane_contract["runtime_profile"]).strip()
+          evidence_contract_family = str(evidence_schema["contract"]).strip().replace("-", "_")
+          evidence_contract_version = str(evidence_schema["schema_version"]).strip()
+          run_url = f"{server}/{repo}/actions/runs/{run_id}"
+          release_bundle_artifact_uri = f"actions/artifacts/release-bundle@run-{run_id}"
+
+          def sha256_file(path: str) -> str:
+              digest = hashlib.sha256()
+              digest.update(Path(path).read_bytes())
+              return f"sha256:{digest.hexdigest()}"
+
+          release_bundle_hash = sha256_file("var/ci/release-bundle.json")
+          projection_hash = sha256_file("var/ci/control-plane-release-bundle-projection.json")
+          release_gate_hash = sha256_file("var/ci/release-gate-envelope.json")
+          truth_ledger_hash = sha256_file("var/ci/truth-ledger.json")
+          build_provenance_hash = sha256_file("var/ci/build-provenance.json")
+
+          def mk_check(*, evidence_type: str, status: str, summary: str, artifact_uri: str, evidence_hash: str):
+              return {
+                  "id": f"{bundle_id}:{evidence_type}",
+                  "type": evidence_type,
+                  "status": status,
+                  "summary": summary,
+                  "check_run_id": f"gha://{repo}/runs/{run_id}/checks/{evidence_type}",
+                  "artifact_uri": artifact_uri,
+                  "hash": evidence_hash,
+              }
+
+          structured_checks = [
+              mk_check(
+                  evidence_type="release_notes_diff",
+                  status="passed",
+                  summary=f"Release bundle {bundle_id} captures source revision {sha} for this promotion candidate.",
+                  artifact_uri=release_bundle_artifact_uri,
+                  evidence_hash=release_bundle_hash,
+              ),
+              mk_check(
+                  evidence_type="config_change_summary",
+                  status="passed",
+                  summary="Control-plane projection and truth ledger were generated for this release bundle.",
+                  artifact_uri=release_bundle_artifact_uri,
+                  evidence_hash=projection_hash,
+              ),
+              mk_check(
+                  evidence_type="migration_summary",
+                  status="skipped",
+                  summary="No dedicated migration summary artifact is produced in app CI; migration authority remains downstream runtime/proof lanes.",
+                  artifact_uri="actions/artifacts/release-gate-envelope@run-" + run_id,
+                  evidence_hash=release_gate_hash,
+              ),
+              mk_check(
+                  evidence_type="smoke_test_result",
+                  status="skipped",
+                  summary="App CI build lane does not execute live runtime smoke; runtime smoke happens after promotion.",
+                  artifact_uri="actions/artifacts/release-gate-envelope@run-" + run_id,
+                  evidence_hash=release_gate_hash,
+              ),
+              mk_check(
+                  evidence_type="release_gate_result",
+                  status="passed",
+                  summary="App release-gate proof envelope was emitted and bound to the canonical release object.",
+                  artifact_uri="actions/artifacts/release-gate-envelope@run-" + run_id,
+                  evidence_hash=release_gate_hash,
+              ),
+              mk_check(
+                  evidence_type="rollback_target_reference",
+                  status="blocked",
+                  summary="Rollback target selection is owned by infra promotion against the previous known-good release bundle.",
+                  artifact_uri=release_bundle_artifact_uri,
+                  evidence_hash=truth_ledger_hash,
+              ),
+              mk_check(
+                  evidence_type="security_delta_summary",
+                  status="passed",
+                  summary="SBOM and Trivy artifacts were generated in the producing CI run for both images.",
+                  artifact_uri="actions/artifacts/slsa-provenance@run-" + run_id,
+                  evidence_hash=release_bundle["images"]["openedx"]["digest"],
+              ),
+          ]
+          structured_evidence = {
+              "evidence_pack_id": f"ep-{bundle_id}",
+              "bundle_id": bundle_id,
+              "lane": "mereka-lms",
+              "delivery_lane": "dev",
+              "service_id": "mereka-lms",
+              "contract_family": evidence_contract_family,
+              "contract_version": evidence_contract_version,
+              "contract_ref": contract_ref,
+              "runtime_profile": runtime_profile,
+              "generated_at": release_bundle["created_at"],
+              "checks": structured_checks,
+              "artifacts": [
+                  {"kind": "ci-run", "uri": run_url},
+                  {"kind": "release-bundle", "uri": release_bundle_artifact_uri},
+                  {"kind": "build-provenance", "uri": "actions/artifacts/build-provenance@run-" + run_id},
+                  {"kind": "release-gate-envelope", "uri": "actions/artifacts/release-gate-envelope@run-" + run_id},
+              ],
+              "verifiable_evidence": [
+                  {
+                      "evidence_type": item["type"],
+                      "artifact_uri": item["artifact_uri"],
+                      "check_run_id": item["check_run_id"],
+                      "hash": item["hash"],
+                      "status": item["status"],
+                  }
+                  for item in structured_checks
+              ],
+              "notes": "Build-lane evidence pack for automatic dev promotion; runtime smoke and rollback target are resolved later in infra/runtime lanes.",
+          }
 
           # Build the canonical app->infra dispatch envelope governed by PCP.
           evidence = {
@@ -2013,6 +2253,7 @@ jobs:
               "dispatch_event_type": "promote-mereka-lms-dev",
               "created_at": release_bundle["created_at"],
               "validation_evidence": f"ci-build-pass:{run_id}",
+              "structured_evidence": structured_evidence,
               "release_object": release_object,
               "build_provenance": {
                   "run_url": f"{server}/{repo}/actions/runs/{run_id}",
@@ -2067,25 +2308,52 @@ jobs:
               f"release_object contract_family missing or wrong"
           assert release_object.get("service_id") == "mereka-lms", \
               f"release_object service_id must be mereka-lms"
+          assert release_object.get("promotion_target_environment") == "dev", \
+              "release_object promotion_target_environment must be dev for auto-promotion"
           assert re.fullmatch(r"[0-9a-f]{40}", str(release_object.get("app_commit_sha", ""))), \
               f"release_object app_commit_sha invalid"
           assert release_object.get("build", {}).get("release_bundle_id") == bundle_id, \
               f"release_object.build.release_bundle_id must match bundle_id"
+          assert build_provenance.get("release_bundle_id") == bundle_id, \
+              "build_provenance release_bundle_id must match bundle_id"
+          assert build_provenance.get("target_environment") == "dev", \
+              "build_provenance target_environment must be dev for auto-promotion"
+          assert release_gate_envelope.get("concern") == "release-gate", \
+              "release-gate envelope concern missing or wrong"
           assert evidence["control_plane_ref"] == os.environ["CONTRACT_REF"], \
               "dispatch envelope control_plane_ref must match resolved PCP contract ref"
           assert evidence["contract_family"] == contract_family, \
               "dispatch envelope contract_family must match PCP contract"
           assert evidence["contract_version"] == contract_version, \
               "dispatch envelope contract_version must match PCP schema_version"
+          required_evidence = [
+              item
+              for item in lane_contract.get("required_evidence", [])
+              if isinstance(item, str) and item.strip()
+          ]
+          runtime_required = [
+              item
+              for item in evidence_schema["applies_to_runtime_profiles"][runtime_profile]["required_evidence_types"]
+              if isinstance(item, str) and item.strip()
+          ]
+          structured_types = {item["type"] for item in structured_checks}
+          missing_types = sorted((set(required_evidence) | set(runtime_required)) - structured_types)
+          assert not missing_types, \
+              f"structured_evidence missing required evidence types: {', '.join(missing_types)}"
           print(f"PASS: self-validated dispatch payload (bundle={bundle_id})")
 
-          # Dispatch via GitHub API (better diagnostics than peter-evans action)
+          # Dispatch via workflow_dispatch so the full release_evidence travels
+          # as a single typed input instead of overflowing repository_dispatch.
           payload = json.dumps({
-              "event_type": evidence["dispatch_event_type"],
-              "client_payload": evidence,
+              "ref": "main",
+              "inputs": {
+                  "release_evidence": json.dumps(evidence, separators=(",", ":")),
+                  "dry_run": "false",
+                  "control_plane_ref": contract_ref,
+              },
           }).encode("utf-8")
 
-          url = "https://api.github.com/repos/Biji-Biji-Initiative/bbi-infrastructure/dispatches"
+          url = "https://api.github.com/repos/Biji-Biji-Initiative/bbi-infrastructure/actions/workflows/promote-dev-image.yml/dispatches"
           req = urllib.request.Request(url, data=payload, method="POST", headers={
               "Authorization": f"Bearer {token}",
               "Accept": "application/vnd.github+json",

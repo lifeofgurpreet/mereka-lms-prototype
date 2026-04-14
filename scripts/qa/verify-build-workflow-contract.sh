@@ -89,6 +89,12 @@ else
   fail "workflow missing PCP promotion-dispatch-envelope schema fetch"
 fi
 
+if grep -q 'contracts/evidence-pack-schema.yaml' "$BUILD_WF"; then
+  pass "workflow fetches PCP evidence-pack schema"
+else
+  fail "workflow missing PCP evidence-pack schema fetch"
+fi
+
 if grep -q '"dispatch_event_type": "promote-mereka-lms-dev"' "$BUILD_WF"; then
   pass "dispatch envelope records canonical dispatch_event_type"
 else
@@ -107,10 +113,13 @@ else
   fail "dispatch envelope missing PCP contract handshake provenance"
 fi
 
-if grep -Fq '"event_type": evidence["dispatch_event_type"]' "$BUILD_WF"; then
-  pass "repository_dispatch event_type is derived from canonical envelope"
+if grep -Fq 'actions/workflows/promote-dev-image.yml/dispatches' "$BUILD_WF" \
+  && grep -Fq '"release_evidence": json.dumps(evidence' "$BUILD_WF" \
+  && grep -Fq '"dry_run": "false"' "$BUILD_WF" \
+  && grep -Fq '"ref": "main"' "$BUILD_WF"; then
+  pass "workflow_dispatch wrapper carries canonical release evidence to infra promotion workflow"
 else
-  fail "repository_dispatch event_type must be derived from canonical envelope"
+  fail "workflow missing canonical workflow_dispatch promotion wrapper"
 fi
 
 # Workflow consistency must compare canonical lane names, not raw workflow aliases.
@@ -405,11 +414,11 @@ else
   fail "build workflow missing bin/lms-ops proof emission"
 fi
 
-# Promotion artifact upload must include release-gate envelope
-if grep -q "var/ci/release-gate-envelope.json" "$BUILD_WF"; then
-  pass "build workflow uploads release-gate envelope artifact"
+# Promotion artifact upload must include build provenance and release-gate envelope
+if grep -q "var/ci/build-provenance.json" "$BUILD_WF" && grep -q "var/ci/release-gate-envelope.json" "$BUILD_WF"; then
+  pass "build workflow uploads build provenance and release-gate envelope artifacts"
 else
-  fail "build workflow missing release-gate envelope artifact upload"
+  fail "build workflow missing build provenance or release-gate envelope artifact upload"
 fi
 
 if [[ "$UPDATE_GITOPS_BLOCK" == *'./scripts/qa/verify-release-object.sh var/ci/release-object.json'* && "$UPDATE_GITOPS_BLOCK" == *'scripts/release/release_object_bindings.py'* && "$UPDATE_GITOPS_BLOCK" == *'promotion-inputs'* ]]; then
