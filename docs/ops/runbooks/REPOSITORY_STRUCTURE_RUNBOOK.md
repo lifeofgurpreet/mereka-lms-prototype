@@ -30,7 +30,7 @@ This runbook covers manual verification procedures for repository structure comp
    ls ops/    # Should only contain README.md (if dir exists)
    ```
 4. Check CI/CD workflows for references to deprecated paths
-5. Check standing orders, the authority resolver, and documentation for outdated path references
+5. Check standing orders, the documentation index, and architecture front doors for outdated path references
 
 ### Acceptance
 - No scripts import from `tools/` or `ops/` directories

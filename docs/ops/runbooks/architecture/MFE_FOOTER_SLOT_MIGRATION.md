@@ -196,7 +196,7 @@ except ImportError:
 ### Step 4 — Rebuild After Rollback
 
 ```bash
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target mfe
 tutor images build mfe
 ./scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest
 ```

@@ -261,7 +261,7 @@ Before tagging a release and deploying:
 - [ ] `Powered by Open edX` absent from all MFE shell page HTML
 - [ ] `MerekaFooter` confirmed present in `env.config.jsx`
 - [ ] No broken font/CSS asset references detected
-- [ ] `apply-patches.sh` run after last `tutor config save`
+- [ ] `prepare-tutor-build-context.sh --target all` run after the last manual `tutor config save`, or `tutor-config-save.sh` used instead
 
 ### CI Integration
 

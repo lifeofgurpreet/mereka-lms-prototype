@@ -41,11 +41,10 @@ This runbook covers procedures for Tutor version upgrades and plugin migration.
    ```bash
    pip install "tutor[full]==<new_version>"
    ```
-3. Run config save with patches:
+3. Regenerate config through the governed wrapper:
    ```bash
    export TUTOR_ROOT="$(pwd)/tutor_env"
-   tutor config save
-   ./infrastructure/tutor/apply-patches.sh
+   ./scripts/infra/tutor-config-save.sh
    ```
 4. Verify patches applied cleanly:
    ```bash
@@ -79,8 +78,7 @@ This runbook covers procedures for Tutor version upgrades and plugin migration.
    ```
 3. Regenerate environment:
    ```bash
-   tutor config save
-   ./infrastructure/tutor/apply-patches.sh
+   ./scripts/infra/tutor-config-save.sh
    tutor local restart
    ```
 

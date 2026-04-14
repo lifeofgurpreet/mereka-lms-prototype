@@ -110,9 +110,9 @@ Seeds are idempotent — safe to re-run. They use `get_or_create` / `update_or_c
 
 ## How to Update Coordination Spine After a Proof Run
 
-The coordination spine lives at:
-- `/home/gurpreet/projects/k8s/_coordination/staging-tenant-closure/`
-- `/home/gurpreet/projects/k8s/_coordination/dev-runtime-closure/`
+The coordination spine lives in the shared workspace coordination area:
+- `_coordination/staging-tenant-closure/`
+- `_coordination/dev-runtime-closure/`
 
 After a proof run:
 

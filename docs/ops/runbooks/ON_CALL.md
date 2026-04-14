@@ -3,7 +3,7 @@
 
 _Audience: Engineers on rotation · Owner: Engineering Lead · Last updated: 2026-02-24_
 
-This document is the quick reference for whoever is currently on-call. For the full rotation schedule and role definitions, see [ONCALL_ROTATION.md](ONCALL_ROTATION.md).
+This document is the quick reference for whoever is currently on-call. For the full rotation schedule and role definitions, see [ONCALL_ROTATION.md](../../policies/operations/ONCALL_ROTATION.md).
 
 **Incident response procedures**: [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md)
 
@@ -124,9 +124,9 @@ kubectl get pods -n mereka-lms | grep -v Running
 
 ## References
 
-- Full rotation rules: [ONCALL_ROTATION.md](ONCALL_ROTATION.md)
+- Full rotation rules: [ONCALL_ROTATION.md](../../policies/operations/ONCALL_ROTATION.md)
 - Incident procedures: [INCIDENT_RESPONSE.md](INCIDENT_RESPONSE.md)
 - Communication templates: [INCIDENT_TEMPLATES.md](INCIDENT_TEMPLATES.md)
 - Observability quick-start: [ONCALL_OBSERVABILITY_PLAYBOOK.md](ONCALL_OBSERVABILITY_PLAYBOOK.md)
-- Site-down runbook: [../ops/runbooks/site-down.md](../ops/runbooks/site-down.md)
-- Emergency rollback: [../ops/runbooks/emergency-rollback.md](../ops/runbooks/emergency-rollback.md)
+- Site-down runbook: [site-down.md](site-down.md)
+- Emergency rollback: [emergency-rollback.md](emergency-rollback.md)

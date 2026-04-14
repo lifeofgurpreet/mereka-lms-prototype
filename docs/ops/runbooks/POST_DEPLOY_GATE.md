@@ -212,6 +212,29 @@ A release may only be marked complete after the relevant runtime lane proof pass
 
 If the gate fails and the failure is a known flake (not a real regression), document the exception in a PR comment and get sign-off from a second engineer before proceeding.
 
+## Exception Logging And Evidence Minimums
+
+This runbook is the current owner for deployment-gate exception logging on the
+rebased branch. Do not assume a separate deployment-gate evidence companion
+exists unless a distinct operator workflow is later justified.
+
+When a deployment proceeds with a known flake, manual exception, or temporary
+runtime qualification, record all of the following in the release evidence or
+PR discussion:
+
+1. the exact failing gate or degraded assertion
+2. the reason the failure is being treated as non-blocking
+3. the artifact set reviewed:
+   - run URL
+   - screenshots, logs, or downloaded artifacts
+   - verifier output used for the decision
+4. the approving second engineer
+5. the follow-up action required to remove the exception
+
+Use [DEPLOYMENT_RUNBOOK.md](DEPLOYMENT_RUNBOOK.md) for the wider release and
+promotion mechanics. Use this runbook for the runtime gate decision and the
+minimum evidence needed to defend it.
+
 ---
 
 ## Edge Cases

@@ -79,7 +79,7 @@ git revert <commit-sha>
 
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target mfe
 tutor local restart
 ```
 
