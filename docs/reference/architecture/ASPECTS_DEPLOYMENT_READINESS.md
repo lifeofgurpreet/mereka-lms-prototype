@@ -193,7 +193,7 @@ Execute these steps in order when prerequisites are satisfied:
    # In tutor_env/config.yml (production overlay)
    # Ensure 'aspects' is in PLUGINS list
    tutor config save
-   ./infrastructure/tutor/apply-patches.sh
+   ./scripts/infra/prepare-tutor-build-context.sh --target all
    ```
 
 2. **Generate K8s manifests**:
@@ -449,7 +449,7 @@ If issues arise after deployment, execute these steps to disable Aspects. Treat 
    # In tutor_env/config.yml
    # Remove 'aspects' from PLUGINS list
    tutor config save
-   ./infrastructure/tutor/apply-patches.sh
+   ./scripts/infra/prepare-tutor-build-context.sh --target all
    ```
 
 3. **Delete K8s resources**:

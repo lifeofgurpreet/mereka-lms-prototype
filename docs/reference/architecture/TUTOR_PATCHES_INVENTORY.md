@@ -47,8 +47,8 @@ its relationship to the native Tutor hooks/filters in `infrastructure/tutor/plug
 |-------|-------|
 | Classification | `REMOVED` (post-2026-04-10 rebase) |
 | What it did | Historically performed regex surgery on the rendered Tutor MFE Dockerfile for toolchain, cookie env, theme and brand copy, npm resilience, dependency additions, source-ref rewrites, and other stage-specific mutations. |
-| Replaced by | Tutor plugin MFE Dockerfile hooks in `infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py` plus remaining post-render MFE build-context sync in `apply-patches.sh`. |
-| Notes | Historical only. This file is no longer part of the active patch chain and must not be treated as current MFE authority. |
+| Replaced by | Tutor plugin MFE Dockerfile hooks in `infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py` plus bounded patch-only build-context sync via `scripts/infra/prepare-tutor-build-context.sh` / `apply-patches.sh`. |
+| Notes | Historical only. This file is no longer part of the active patch chain and must not be treated as current MFE authority. The plugin-owned runtime theme contract now handles both legacy object-form `PARAGON_THEME` payloads and newer IIFE-wrapped payloads before it rewrites absolute `/theme/*` URLs and tenant-specific variant maps into the rendered authn shell. |
 
 ---
 
@@ -139,12 +139,12 @@ its relationship to the native Tutor hooks/filters in `infrastructure/tutor/plug
 
 | Field | Value |
 |-------|-------|
-| LOC | 686 |
+| LOC | 927 |
 | Classification | `FILESYSTEM` |
-| What it does | The largest patch module. Split into two sections: **Python string surgery** on 6 target files (openedx Dockerfile, production.py, assets.py x2, lms.conf, Caddyfile), plus **bash filesystem operations**: 1. i18n archive URL fix. 2. uv pip / no-build-isolation. 3. pip install retry wrapping. 4. Local requirements removal. 5. Optional app injection (coursewarehistoryextended). 6. compilemessages fix. 7. compilejsi18n output paths. 8. node_modules COPY path fix. 9. Static bundles COPY normalization. 10. Node cache reuse (FROM openedx_node_cache). 11. postinstall fix. 12. Brand SASS compile + Google fonts strip. 13. Webpack conditional. 14. cherry-pick removal. 15. Tutor v21 node_modules mv. 16. mereka-overrides.css bake. 17. Custom apps block in Dockerfile. 18. django-prometheus pip install. 19. DEFAULT_SITE_THEME. 20. MFE OAuth fix config. 21. mereka_tenancy config. 22. MFE discussions settings. 23. assets.py optional apps + pipeline + safe_join. 24. lms.conf /health + /profile/api/ blocks. 25. Caddyfile MFE cache headers + /profile/api/ proxy. **Bash filesystem section**: Syncs logos, fonts, theme templates/CSS, custom apps, and multi-tenancy plugin into `tutor_env/env/build/openedx/`. |
-| Tutor hook equivalent | Many sub-operations are partially covered: openedx Dockerfile install steps are in `openedx-dockerfile-post-python-requirements`; custom app copy in `openedx-dockerfile-post-python-requirements`; LMS settings in `openedx-lms-production-settings`; assets.py patches in `openedx-lms-assets-settings` + `openedx-cms-assets-settings`; Caddy in `caddy-caddyfile`; nginx in `nginx-lms-config`. However the positional string surgery (find-replace in the middle of multi-stage Dockerfiles), deduplication, branch-ref rewrites, and file sync cannot be expressed as ENV_PATCHES. |
-| Why it must stay bash | 1. The Dockerfile surgery is positional and non-additive. 2. The bash section (lines 586–685) does physical file copies into the build context — cannot be a Tutor hook. 3. Several transforms guard against stale rendered-file content from prior runs. |
-| Risk of conversion | HIGH — the Python surgery section is deeply entangled. Safe extraction would require per-operation ENV_PATCHES and careful ordering. |
+| What it does | Residual rendered Open edX Dockerfile normalization only. It now owns the fast-build translation-pull wrappers that still need positional post-render surgery in the rendered Open edX Dockerfile. It no longer owns the Tutor Dockerfile template target, rendered `docker-compose.yml`, `production.py`, `assets.py`, `lms.conf`, or Caddyfile rewrites, and it no longer owns build-context mirror sync for theme assets, custom apps, or the multi-tenancy plugin. It also no longer owns the duplicate brand compile tail, conditional webpack skip, legacy translation preflight scrubbers, local requirements reinstall scrubber, legacy base requirements pin scrubbers, stale openedx-i18n archive/version rewrites, ancient pip bootstrap rewrite, duplicate production-stage custom-app reinjection scrubbers, dead compilejsi18n source rewrites, obsolete edx-platform cherry-pick scrubbers, escaped Google Fonts regex rewrites, raw pyenv clone compatibility rewrites, stale target scans, or the dead MySQL auth compatibility rewrite. The verifier now enforces those absences directly. |
+| Tutor hook equivalent | Most of the former scope is source-owned elsewhere: Dockerfile install steps are in `openedx-dockerfile-post-python-requirements`; LMS settings in `openedx-lms-production-settings`; assets settings in `openedx-lms-assets-settings` + `openedx-cms-assets-settings`; edge config in `nginx-lms-config` and `caddy-caddyfile`; and build-context mirror sync in `apply-patches.sh`. The remaining fast-build translation wrappers still mutate rendered `RUN` lines after render, so they do not map cleanly to additive Tutor hooks yet. |
+| Why it must stay bash | 1. The remaining Dockerfile surgery is positional and non-additive. 2. The wrappers patch rendered `RUN` lines after Tutor emits the rendered Open edX Dockerfile. 3. The verifier now depends on this module staying tightly scoped so stale template or rendered-target scans do not creep back in. |
+| Risk of conversion | MEDIUM — the remaining scope is much smaller, but it still patches rendered Dockerfile text in place and needs render-contract proof if moved. |
 
 ---
 
@@ -177,7 +177,7 @@ its relationship to the native Tutor hooks/filters in `infrastructure/tutor/plug
 | `footer-component.sh` | FILESYSTEM | Active — asset sync to build context |
 | `brand-package.sh` | FILESYSTEM | Active — OEP-48 brand package sync to MFE build context |
 | `apply-patches.sh:inline retry wrapper` | FILESYSTEM | Active — sole remaining rendered MFE Dockerfile rewrite |
-| `build-optimizations.sh` | FILESYSTEM | Active — 25+ transforms on rendered files |
+| `build-optimizations.sh` | FILESYSTEM | Active — residual Open edX Dockerfile translation wrapper surgery |
 | `mfe-node.sh` | REMOVED | Removed post-rebase; replaced by Tutor plugin hooks + MFE build-context sync |
 | `mysql-auth.sh` | REMOVED | Deleted 2026-02-27 → `mereka_lms.py` |
 | `domain-names.sh` | REMOVED | Deleted 2026-02-27 → `mereka_lms.py` |
@@ -200,7 +200,7 @@ corresponding bash patches. These survive `tutor config save` without any post-r
 | `openedx-cms-assets-settings` | build-optimizations (assets.py portion) |
 | `openedx-dockerfile-pre-python-requirements` | build-optimizations (pip filter) |
 | `openedx-dockerfile-python-requirements` | build-optimizations (pip install) |
-| `openedx-dockerfile-pre-assets` | webpack-memory (NODE_OPTIONS), build-optimizations (sass compile) |
+| `openedx-dockerfile-pre-assets` | webpack-memory (NODE_OPTIONS), source-owned brand compile + Google Fonts stripping |
 | `openedx-dockerfile-post-python-requirements` | build-optimizations (custom apps, django-prometheus), mongodb-atlas |
 | `openedx-dockerfile-npm-install-cmd` | build-optimizations (npm install cmd) |
 | `webpack-prod-config` | webpack-memory (Terser, requireCompatConfig) |

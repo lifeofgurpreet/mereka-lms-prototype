@@ -1,5 +1,18 @@
 # iOS CI/CD Reference
-_Audience: Operators and release owners • Owner: Platform Team • Last verified: 2026-03-10 • Status: canonical_
+_Audience: Operators and release owners • Owner: Platform Team • Last verified: 2026-04-09 • Status: canonical_
+
+> Historical note (2026-04-09): the detailed signing failure analysis below was
+> developed around the legacy `build-ios-app.yml` / Open edX iOS Fastlane lane.
+> The current repo-owned CI front door is `.github/workflows/ios-testflight.yml`.
+> Use this doc first for the current workflow contract at the top of the page,
+> then treat the deeper Fastlane/match sections as historical debugging context,
+> not as the active lane design.
+>
+> Current posture: iOS remains a first-class strategic surface, but the delivery
+> lane is intentionally paused for program timing and CI/TestFlight cost control.
+> Treat `.github/workflows/ios-testflight.yml` as the maintained front door for
+> the resumed lane, not as proof that the lane is being exercised continuously
+> right now.
 
 ---
 
@@ -7,12 +20,79 @@ _Audience: Operators and release owners • Owner: Platform Team • Last verifi
 
 | Item | Value |
 |------|-------|
-| **Workflow** | `.github/workflows/build-ios-app.yml` |
+| **Workflow** | `.github/workflows/ios-testflight.yml` |
+| **Legacy workflow** | `.github/workflows/build-ios-app.yml` (deprecated reference only) |
 | **Certificates Repo** | `git@github.com:Biji-Biji-Initiative/ios-certificates.git` |
-| **Scheme** | `OpenEdXProd` |
+| **Scheme** | `MerekaAcademy` |
 | **Team ID** | Stored in `APPLE_TEAM_ID` secret |
-| **Xcode Version** | 16.4 (Swift 6) |
-| **Fastlane** | Via `bundle exec fastlane` |
+| **Xcode Version** | 15.2 (current `ios-testflight.yml` lane) |
+| **Current upload path** | `xcrun altool` via `ios-testflight.yml` |
+| **Legacy Fastlane detail** | Preserved below for debugging historical signing/Fastlane issues |
+
+---
+
+## Current Workflow Contract
+
+Treat `.github/workflows/ios-testflight.yml` as the current operator front door.
+It does **not** use the older Open edX iOS Fastlane/match flow.
+
+| Item | Current value |
+|------|---------------|
+| Runner | `macos-14` |
+| Xcode | `15.2` |
+| Trigger | `v*-ios` tags, `workflow_dispatch` |
+| Build path | direct `xcodebuild archive` + `xcodebuild -exportArchive` |
+| Upload path | `xcrun altool` |
+| Bundle/build bump | `CFBundleVersion` set from current timestamp-minutes |
+
+### Current GitHub Secrets
+
+| Secret | Current `ios-testflight.yml` use |
+|--------|----------------------------------|
+| `IOS_DISTRIBUTION_CERTIFICATE` | Base64-encoded `.p12` certificate import |
+| `IOS_CERTIFICATE_PASSWORD` | Password for the imported `.p12` |
+| `KEYCHAIN_PASSWORD` | Temporary build keychain password |
+| `IOS_PROVISIONING_PROFILE` | Base64-encoded provisioning profile |
+| `APPLE_TEAM_ID` | Manual signing team value during archive |
+| `PROVISIONING_PROFILE_SPECIFIER` | Manual profile selection during archive |
+| `APP_STORE_CONNECT_API_KEY_ID` | TestFlight upload |
+| `APP_STORE_CONNECT_API_KEY_ISSUER_ID` | TestFlight upload |
+| `APP_STORE_CONNECT_API_KEY` | Inline App Store Connect key material for upload |
+
+If the workflow contract changes, update this section first and keep the
+historical Fastlane analysis below clearly bounded.
+
+## Apple Developer Setup Procedures
+
+Use this section before resuming iOS delivery or rotating signing/distribution
+inputs.
+
+### Required external state
+
+Confirm these are still true in Apple Developer / App Store Connect:
+
+- the intended bundle identifier exists
+- the correct team owns it
+- the distribution certificate and provisioning profile match the maintained
+  workflow contract
+- the App Store Connect API key in use still has upload rights
+- the app record still maps to the expected TestFlight surface
+
+### Resume sequence
+
+1. confirm the current workflow contract at the top of this document
+2. confirm certificate and provisioning inputs still correspond to that
+   contract
+3. confirm App Store Connect API credentials are current
+4. produce a build through the maintained workflow front door
+5. verify the upload lands in the expected TestFlight app record before calling
+   the distribution lane healthy
+
+### Boundary
+
+Do not revive older Fastlane/match habits as the default just because they are
+documented below. The historical sections are debugging archaeology, not the
+active design authority.
 
 ---
 
@@ -26,13 +106,15 @@ _Audience: Operators and release owners • Owner: Platform Team • Last verifi
 
 ---
 
-## Failure Modes and Why They Happened
+## Historical Fastlane Failure Modes and Why They Happened
 
 ### 1. Swift Toolchain Mismatch
 
 **Problem**: OpenEdX iOS v2.2+ uses Swift 6. Mixing Xcode 15.x with Swift 6 packages causes compiler errors.
 
-**Solution**: Always use Xcode 16+ via `xcodes` Fastlane plugin.
+**Historical solution**: the older Fastlane lane moved to Xcode 16+ via the
+`xcodes` plugin. The current `ios-testflight.yml` workflow instead pins Xcode
+15.2 directly and should be debugged against that workflow first.
 
 ### 2. Global Signing Overrides via xcargs (CRITICAL)
 
@@ -112,7 +194,11 @@ done
 
 ---
 
-## Correct Architecture
+## Historical Fastlane/Match Architecture
+
+The sections below describe the earlier `build-ios-app.yml` / Fastlane / match
+design. Keep them for signing archaeology and fallback debugging only; they are
+not the first authority for the active `ios-testflight.yml` lane.
 
 ### Signing Repository
 
@@ -122,7 +208,7 @@ done
 | **Purpose** | Store encrypted certificates and provisioning profiles |
 | **Access** | SSH deploy key in `MATCH_DEPLOY_KEY` secret |
 
-### GitHub Secrets Required
+### Historical Fastlane Secrets
 
 | Secret | Description |
 |--------|-------------|
@@ -135,7 +221,7 @@ done
 
 Do not record actual secret values in docs.
 
-### CI Environment
+### Historical Fastlane CI Environment
 
 | Component | Requirement |
 |-----------|-------------|
@@ -184,7 +270,7 @@ DEVELOPMENT_TEAM = <YOUR_TEAM_ID>;
 
 ---
 
-## Correct Fastlane Configuration
+## Historical Fastlane Configuration
 
 ### Key Points
 

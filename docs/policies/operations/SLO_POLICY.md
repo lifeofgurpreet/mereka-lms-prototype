@@ -102,6 +102,13 @@ Prometheus job: `lms-metrics` (filtered by `view=~"forum.*"`)
 - Reliability sprint activated: team focuses exclusively on error-rate reduction
 - Executive notification within 1 business hour
 
+Current execution boundary:
+
+- use [../../ops/runbooks/POST_DEPLOY_GATE.md](../../ops/runbooks/POST_DEPLOY_GATE.md)
+  for release blocking, exception handling, and post-deploy control flow
+- do not assume a separate exhausted-budget runbook exists on this rebased
+  branch unless a distinct operator workflow is later justified
+
 ---
 
 ## Burn-Rate Alert Thresholds
@@ -159,4 +166,5 @@ Alertmanager config: `deploy/k8s/base/monitoring/README.md`
 - SLO dashboards: `docs/ops/runbooks/SLO_DASHBOARDS_SETUP.md`
 - SLA reporting: `docs/policies/operations/SLA_REPORTING.md`
 - Incident response: `docs/ops/runbooks/INCIDENT_RESPONSE.md`
+- Post-deploy gate control flow: `docs/ops/runbooks/POST_DEPLOY_GATE.md`
 - Alert severity matrix: `docs/reference/operations/ALERT_SEVERITY_MATRIX.md`

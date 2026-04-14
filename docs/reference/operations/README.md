@@ -20,7 +20,8 @@ Use this root for factual operator reference: inventories, matrices, contracts, 
   [`DEPLOYMENT_LANES.md`](DEPLOYMENT_LANES.md),
   [`RELEASE_PROCESS.md`](RELEASE_PROCESS.md),
   [`RELEASE_BUNDLE.md`](RELEASE_BUNDLE.md),
-  [`SLSA_PROVENANCE.md`](SLSA_PROVENANCE.md)
+  [`SLSA_PROVENANCE.md`](SLSA_PROVENANCE.md),
+  [`SPEC_COVERAGE.md`](SPEC_COVERAGE.md)
 - Routing and tenancy:
   [`OPENEDX_HOSTNAMES.md`](OPENEDX_HOSTNAMES.md),
   [`DOMAIN_MATRIX.md`](DOMAIN_MATRIX.md),
@@ -37,7 +38,8 @@ Use this root for factual operator reference: inventories, matrices, contracts, 
   [`MONITORING.md`](MONITORING.md),
   [`ALERT_SEVERITY_MATRIX.md`](ALERT_SEVERITY_MATRIX.md),
   [`LOGGING_AND_SENTRY.md`](LOGGING_AND_SENTRY.md),
-  [`OPERATOR_DASHBOARD_GUIDE.md`](OPERATOR_DASHBOARD_GUIDE.md)
+  [`OPERATOR_DASHBOARD_GUIDE.md`](OPERATOR_DASHBOARD_GUIDE.md),
+  [`UI_UX_HARDENING_BUNDLE.md`](UI_UX_HARDENING_BUNDLE.md)
 - Service and environment specifics:
   [`ADMIN_CONSOLE_SETUP.md`](ADMIN_CONSOLE_SETUP.md),
   [`ASPECTS_ANALYTICS_SETUP.md`](ASPECTS_ANALYTICS_SETUP.md),

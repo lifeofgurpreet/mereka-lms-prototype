@@ -9,26 +9,26 @@ This is the one-page starting point for platform-level multi-tenancy, enterprise
 - [`Operations quick reference`](../../ops/quickref/README.md) - Operations documentation index.
 - [`docs/reference/operations/USER_FACING_URLS.md`](USER_FACING_URLS.md) - Complete URL matrix for production/dev/local and tenant-specific hosts.
 - [`docs/reference/operations/OPENEDX_HOSTNAMES.md`](OPENEDX_HOSTNAMES.md) - Generated hostname registry used by infrastructure.
-- [`docs/concepts/architecture/multi-tenancy-overview.md`](../../concepts/architecture/multi-tenancy-overview.md) - Domain + platform configuration details for tenant deployment.
+- [`docs/reference/operations/RUNTIME_TRUTH_MATRIX.md`](RUNTIME_TRUTH_MATRIX.md) - Declared host/domain matrix and backend mapping by environment.
 - [`docs/policies/operations/MULTISITE_GOVERNANCE.md`](../../policies/operations/MULTISITE_GOVERNANCE.md) - Governance checks and recurring controls.
 - [`docs/ops/runbooks/DOMAIN_CHANGE_RUNBOOK.md`](../../ops/runbooks/DOMAIN_CHANGE_RUNBOOK.md) - Domain update and validation sequence.
 - [`docs/ops/runbooks/RELEASE_CHECKLIST_DOMAIN_SECRETS.md`](../../ops/runbooks/RELEASE_CHECKLIST_DOMAIN_SECRETS.md) - Domain/secret change safety checks.
 
 ## 2) Multi-Tenant Architecture & Provisioning
 
-- [`docs/concepts/architecture/multi-tenancy-overview.md`](../../concepts/architecture/multi-tenancy-overview.md) - Architecture model and data isolation.
-- [`docs/concepts/architecture/enterprise-services-overview.md`](../../concepts/architecture/enterprise-services-overview.md) - Enterprise services design.
-- [`docs/concepts/architecture/multi-tenancy-overview.md`](../../concepts/architecture/multi-tenancy-overview.md) - Tenant model (shared services vs per-tenant domains).
+- [`docs/concepts/architecture/TENANT_OPERATING_SYSTEM.md`](../../concepts/architecture/TENANT_OPERATING_SYSTEM.md) - Tenant operating-model standard and truth hierarchy.
+- [`docs/concepts/architecture/TENANT_LIFECYCLE.md`](../../concepts/architecture/TENANT_LIFECYCLE.md) - Tenant lifecycle and isolation standard.
+- [`docs/architecture/PLATFORM_AUTHORITY_MAP.md`](../../architecture/PLATFORM_AUTHORITY_MAP.md) - Current authority boundary and owner-layer model.
 - [`docs/ops/runbooks/MULTI_TENANCY_RUNBOOK.md`](../../ops/runbooks/MULTI_TENANCY_RUNBOOK.md) - Runbook for verification and isolation checks.
 - [`docs/ops/runbooks/TENANT_PROVISIONING.md`](../../ops/runbooks/TENANT_PROVISIONING.md) - Provisioning command and brand-pack path.
-- [`docs/archive/superseded/runbooks/tenant-provisioning-runbook.md`](../../archive/superseded/runbooks/tenant-provisioning-runbook.md) - Full provision + offboarding workflow.
+- [`docs/reference/operations/RUNTIME_TRUTH_MATRIX.md`](RUNTIME_TRUTH_MATRIX.md) - Runtime-facing host matrix used during provisioning review.
 - [`scripts/qa/verify-multisite-config.sh`](../../../scripts/qa/verify-multisite-config.sh) / [`scripts/qa/verify-org-role-ownership.sh`](../../../scripts/qa/verify-org-role-ownership.sh) - Readiness checks.
 
 ## 3) Enterprise Features, Licensing, and Admin Surfaces
 
 - [`docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md`](../../ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md) - Operational surface for enterprise microservices.
-- [`docs/archive/superseded/runbooks/enterprise-services-runbook.md`](../../archive/superseded/runbooks/enterprise-services-runbook.md) - End-user runbook for onboarding, allocations, and service health.
-- [`docs/concepts/architecture/enterprise-services-overview.md`](../../concepts/architecture/enterprise-services-overview.md) - Data flow and component model.
+- [`docs/guides/admin/ENTERPRISE_SERVICES_GUIDE.md`](../../guides/admin/ENTERPRISE_SERVICES_GUIDE.md) - Admin-facing service setup and operating guidance.
+- [`docs/reference/architecture/ENTERPRISE_TENANT_VARIANTS.md`](../../reference/architecture/ENTERPRISE_TENANT_VARIANTS.md) - Current tenant-variant model for enterprise rollout.
 - `specs/enterprise-microservices_spec.md` - Formal acceptance criteria.
 - `specs/multi-tenancy-architecture_spec.md` - Multi-tenancy ACs.
 

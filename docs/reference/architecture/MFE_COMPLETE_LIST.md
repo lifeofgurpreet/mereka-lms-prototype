@@ -75,7 +75,7 @@ Until all four surfaces are consistent, repo-only proof must remain weaker than
 
 ## Open edX Release: Ulmo (Tutor v21)
 
-- **Default Node.js**: 24.11.0 (we currently patch to Node 18.20.5 — upgrade planned)
+- **Default Node.js**: 24.11.0 (active rendered build contract)
 - **Paragon version**: v23+ (supports JSON design tokens)
 - **Frontend Plugin Framework**: ~130+ plugin slots available across MFEs
 - **PARAGON_THEME_URLS**: Runtime CDN theming supported (not yet enabled)

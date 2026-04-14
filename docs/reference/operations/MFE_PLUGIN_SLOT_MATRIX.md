@@ -63,7 +63,7 @@ When migrating a hardcoded customization to plugin-slot wiring:
 2. Choose operation type: `Insert` (add before/after), `Replace` (full override), or `Hide` (remove default)
 3. Implement React component in `infrastructure/tutor/plugins/mereka_lms.py` mfe-env-config patch
 4. Wire slot via `config['pluginSlots'][SLOT_ID] = { op: PLUGIN_OPERATIONS.X, widget: ComponentName }`
-5. Apply patches: `./infrastructure/tutor/apply-patches.sh`
+5. Refresh the governed MFE build context: `./scripts/infra/prepare-tutor-build-context.sh --target mfe`
 6. Validate locally: `tutor images build mfe`
 7. For production, publish the updated MFE image through `.github/workflows/build-tutor-images.yml` and promote it with `./scripts/infra/release-openedx-gitops.sh --require-digests`
 8. Verify slot wiring: `./scripts/qa/verify-plugin-slot-wiring.sh`
@@ -214,17 +214,17 @@ The MFE override layer (`infrastructure/tutor/themes/mereka/mfe/mereka.scss`) ha
 
 ## Migration Register
 
-For the complete override-to-slot migration plan, see [MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md](MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md).
+For the complete override-to-slot migration plan, see [MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md](../architecture/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md).
 
 ---
 
 ## References
 
 - **Canonical Inventory**: [MFE_PLUGIN_SLOT_INVENTORY.md](../architecture/MFE_PLUGIN_SLOT_INVENTORY.md)
-- **Migration Register**: [MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md](MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md)
+- **Migration Register**: [MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md](../architecture/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md)
 - **Selector Hardening Audit**: [MFE_SELECTOR_AUDIT.md](../architecture/MFE_SELECTOR_AUDIT.md)
 - **ADR-014**: [MFE Branding Strategy](../../programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md)
-- **Verification Script**: [verify-plugin-slot-wiring.sh](../../scripts/qa/verify-plugin-slot-wiring.sh)
-- **Selector Hardening Verification**: [verify-mfe-selector-hardening.sh](../../scripts/qa/verify-mfe-selector-hardening.sh)
+- **Verification Script**: [verify-plugin-slot-wiring.sh](../../../scripts/qa/verify-plugin-slot-wiring.sh)
+- **Selector Hardening Verification**: [verify-mfe-selector-hardening.sh](../../../scripts/qa/verify-mfe-selector-hardening.sh)
 - **OEP-65**: [Frontend Plugin Framework](https://open-edx-proposals.readthedocs.io/en/latest/architectural-decisions/oep-0065-frontend-plugin-framework.html)
-- **Footer Slot Verification**: [verify-mfe-footer-slot.sh](../../scripts/qa/verify-mfe-footer-slot.sh)
+- **Footer Slot Verification**: [verify-mfe-footer-slot.sh](../../../scripts/qa/verify-mfe-footer-slot.sh)

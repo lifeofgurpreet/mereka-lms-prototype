@@ -70,11 +70,11 @@ its own React tree from scratch and includes its own copy of React and all share
 | Dark theme toggle | `PLUGIN_SLOTS` insert into `footer_slot` | **Aligned** — slot-driven |
 | Mereka SCSS | `npm install @edx/brand` alias + `mereka.scss` COPY in Dockerfile | **Aligned** — brand package pattern |
 | `@openedx/frontend-plugin-framework` | Installed at build time per MFE | **Aligned** — FPF is OEP-65 prerequisite |
-| Cookie domains baked in image | `ARG SESSION_COOKIE_DOMAIN` / `ARG CSRF_COOKIE_DOMAIN` per MFE | **Not aligned** — should be runtime |
-| `ENABLE_NEW_RELIC` build ARG | Per-MFE Docker `ARG ENABLE_NEW_RELIC=false` | **Not aligned** — should be runtime |
+| Build-time cookie-domain injection | Removed from the active MFE Dockerfile contract | **Improved** — no active baked cookie-domain args remain |
+| Build-time New Relic toggle | Removed from the active MFE Dockerfile contract | **Improved** — no active `ENABLE_NEW_RELIC` build arg remains |
 | `SITE_VARIANTS` hostname map | Hardcoded in `env.config.jsx` React component | **Not aligned** — tight coupling to domain list |
 | Hardcoded footer nav/social links | Arrays in `env.config.jsx` component body | **Not aligned** — should be runtime config |
-| `@edx/brand` package version | Pinned in Dockerfile (`@edly-io/indigo-brand-openedx@^2.4.2`) | **Aligned** — brand package pattern |
+| `@edx/brand` package delivery | Local package in Dockerfile (`@edx/brand@file:./brand-mereka`) | **Aligned** — brand package pattern |
 | MFE Dockerfile customisation | Tutor plugin hooks in `_mereka_lms/mfe_dockerfile.py` plus limited post-render build-context sync | **Partially aligned** — hook-led authority is correct, but build-context sync is still a downstream coupling point |
 | Node/runtime/toolchain policy | Tutor plugin MFE Dockerfile hooks | **Partially aligned** — no regex surgery remains, but downstream still owns non-upstream build choices |
 | Branch/ref alignment (historical) | Previously handled by rendered Dockerfile surgery; removed with `mfe-node.sh` retirement | **No longer active** — keep as historical migration context only |
@@ -108,17 +108,17 @@ until Tutor MFE plugin integrates Module Federation.
 
 ### Gap 2 — Build-Time Domain Coupling (Actionable Now)
 
-**Current state**: Every MFE bakes `SESSION_COOKIE_DOMAIN=.academyv2.mereka.io` and
-`CSRF_COOKIE_DOMAIN=.academyv2.mereka.io` as Docker `ARG`/`ENV` in every `*-common` stage of
-`infrastructure/tutor/mfe-build/Dockerfile` (12 occurrences).
+**Current state**: The old cookie-domain Docker `ARG`/`ENV` coupling has been removed from the
+active MFE Dockerfile contract. The remaining domain coupling risk is now concentrated in
+hardcoded runtime data such as `SITE_VARIANTS` and footer/navigation configuration.
 
 **OEP-65 target**: All environment-specific config is runtime-delivered via `mfe_config` API.
 
-**Impact**: The same image cannot be used for dev (`academyv2.mereka.dev`) and prod
-(`academyv2.mereka.io`) without rebuild. A staging environment would require a third build.
+**Impact**: The removed cookie-domain args no longer force separate builds for dev vs prod. The
+remaining portability risk is runtime-coupled host/tenant data that still lives in `env.config.jsx`.
 
-**Fix** (T108 Phase 1): Remove the four `ARG`/`ENV` lines from each `*-common` stage. The
-upstream `@edx/frontend-platform` reads `SESSION_COOKIE_DOMAIN` and `CSRF_COOKIE_DOMAIN` from
+**Fix** (T108 Phase 1): Completed. The active MFE Dockerfile no longer carries the cookie-domain
+build args; `@edx/frontend-platform` reads `SESSION_COOKIE_DOMAIN` and `CSRF_COOKIE_DOMAIN` from
 the `mfe_config` API response, where the LMS already serves correct values per
 `SiteConfiguration`.
 
@@ -265,7 +265,7 @@ change to the `MerekaFooter` component.
 The Mereka brand is delivered as an npm package alias:
 
 ```dockerfile
-RUN npm install --legacy-peer-deps '@edx/brand@npm:@edly-io/indigo-brand-openedx@^2.4.2'
+RUN npm install --legacy-peer-deps '@edx/brand@file:./brand-mereka'
 ```
 
 SCSS is imported in `env.config.jsx`:
@@ -323,10 +323,8 @@ release cycle. The recommended actions below should be prioritised for Palms (ne
 
 ### P1 — Actionable now, low risk
 
-| Action | File(s) | Effort | OEP-65 gap |
-|--------|---------|--------|------------|
-| Remove `SESSION_COOKIE_DOMAIN` / `CSRF_COOKIE_DOMAIN` from Dockerfile | `infrastructure/tutor/mfe-build/Dockerfile` (12 occurrences) | Low | Gap 2 |
-| Remove `ENABLE_NEW_RELIC` build ARG; drive from `mfe_config` LMS key | `infrastructure/tutor/mfe-build/Dockerfile` + LMS settings | Low | Gap 2 |
+This bucket is currently closed. The cookie-domain and `ENABLE_NEW_RELIC`
+build-ARG removals have already landed in the active MFE Dockerfile contract.
 
 ### P2 — Medium effort, medium payoff
 
@@ -368,7 +366,7 @@ Dockerfile and verify Mereka Plugin Slots and brand still work."
 | `infrastructure/tutor/mfe-build/Dockerfile` | Build-time config gaps (Gap 2) |
 | `tutor_env/env/plugins/mfe/build/mfe/indigo/env.config.jsx` | `SITE_VARIANTS`, nav links (Gap 4, 5) |
 | `infrastructure/tutor/plugins/mereka_lms.py` | `PLUGIN_SLOTS` registration, `ENV_PATCHES` |
-| `infrastructure/tutor/apply-patches.sh` | Dockerfile surgery (Gap 3) |
+| `scripts/infra/prepare-tutor-build-context.sh` | Canonical build-context refresh path for the remaining patch-only sync |
 | `docs/reference/architecture/MFE_RUNTIME_CONFIG.md` | Full runtime config migration plan |
 | `docs/reference/architecture/TUTOR_PATCHES_INVENTORY.md` | Bash patch classification and risk assessment |
 | `scripts/qa/verify-oep65-readiness.sh` | Automated readiness checks for this document |

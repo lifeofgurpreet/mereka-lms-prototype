@@ -48,7 +48,7 @@ echo ""
 # ---------------------------------------------------------------------------
 # Canonical paths used across multiple ACs
 # ---------------------------------------------------------------------------
-HARDENING_DOC="$REPO_ROOT/docs/meta/docs-program/UI_UX_HARDENING_BUNDLE.md"
+HARDENING_DOC="$REPO_ROOT/docs/reference/operations/UI_UX_HARDENING_BUNDLE.md"
 CI_FILE="$REPO_ROOT/.github/workflows/ci.yml"
 PERF_BUDGET_DOC="$REPO_ROOT/docs/policies/architecture/PERFORMANCE_BUDGETS.md"
 A11Y_GATE_DOC="$REPO_ROOT/docs/ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md"
@@ -65,7 +65,7 @@ echo "--- AC-HB-001: Visual Regression Baseline ---"
 if [[ -f "$HARDENING_DOC" ]]; then
   do_pass "AC-HB-001: UI_UX_HARDENING_BUNDLE.md exists"
 else
-  do_fail "AC-HB-001: UI_UX_HARDENING_BUNDLE.md not found at docs/meta/docs-program/"
+  do_fail "AC-HB-001: UI_UX_HARDENING_BUNDLE.md not found at docs/reference/operations/"
 fi
 
 # 1b. Hardening doc must declare 10+ critical routes.
@@ -456,14 +456,14 @@ echo "=== Results: $PASS PASS / $FAIL FAIL / $WARN WARN ==="
 if [[ "$FAIL" -gt 0 ]]; then
   echo ""
   echo "Action required: Fix FAIL items above."
-  echo "  - Create or update docs/meta/docs-program/UI_UX_HARDENING_BUNDLE.md"
+  echo "  - Create or update docs/reference/operations/UI_UX_HARDENING_BUNDLE.md"
   echo "  - Ensure 10+ critical routes listed in the visual regression baseline"
   echo "  - Declare a11y gate (focus/landmark/contrast) + route-level exception policy"
   echo "  - Define bundle size, LCP proxy, and JS error budget thresholds"
   echo "  - Add ui-ux-hardening-bundle job to .github/workflows/ci.yml"
   echo "  - Include weekly trend report template and triage template in doc"
   echo "  - Document exception register with rollback safety and owner/expiry fields"
-  echo "  See: docs/meta/docs-program/UI_UX_HARDENING_BUNDLE.md for full specification."
+  echo "  See: docs/reference/operations/UI_UX_HARDENING_BUNDLE.md for full specification."
   exit 1
 fi
 

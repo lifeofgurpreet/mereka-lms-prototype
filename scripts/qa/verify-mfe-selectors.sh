@@ -133,7 +133,7 @@ fi
 if [[ "$BRITTLE_TESTID" -eq 0 ]]; then
   do_pass "AC-UISEL-001: No [data-testid*=] selectors in production CSS (T102 complete)"
 else
-  do_warn "AC-UISEL-001: $BRITTLE_TESTID [data-testid*=] selector line(s) found — data-testid is for tests, not production CSS (SELECTOR_HARDENING_POLICY)"
+  do_warn "AC-UISEL-001: $BRITTLE_TESTID [data-testid*=] selector line(s) found — data-testid is for tests, not production CSS (docs/policies/architecture/SELECTOR_HARDENING_POLICY.md)"
 fi
 
 # ── Check 4/5: Exception docs only required when brittle selectors remain ──
@@ -244,13 +244,13 @@ if [[ "$FAIL" -eq 0 ]]; then
     echo ""
     echo "Notes:"
     echo "  - WARN items are non-blocking. Review before Q3 2026 expiry sweep."
-    echo "  - See docs/concepts/architecture/SELECTOR_HARDENING_POLICY.md for exception process."
+    echo "  - See docs/policies/architecture/SELECTOR_HARDENING_POLICY.md for exception process."
   fi
   exit 0
 else
   echo -e "${RED}MFE selector brittleness gate FAILED${NC}"
   echo ""
   echo "Fix FAIL items before merging."
-  echo "See docs/concepts/architecture/SELECTOR_HARDENING_POLICY.md for guidance."
+  echo "See docs/policies/architecture/SELECTOR_HARDENING_POLICY.md for guidance."
   exit 1
 fi

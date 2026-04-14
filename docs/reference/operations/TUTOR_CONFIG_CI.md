@@ -1,184 +1,182 @@
 # Tutor Configuration CI/CD Reference
-_Audience: Operators and release owners • Owner: Platform Team • Last verified: 2026-03-10 • Status: canonical_
+_Audience: Operators and release owners • Owner: Platform Team • Last verified: 2026-04-14 • Status: canonical_
 
-This document describes the automated Tutor configuration verification workflows that run on every code change.
+This document describes the current CI surfaces that validate Tutor render,
+patch, and plugin contracts.
 
-## Workflows
+## Current Workflow Owners
 
-### Tutor Config Verification
+### Main CI Tutor Lane
 
-**Workflow:** `.github/workflows/tutor-config-verify.yml`
+**Workflow:** `.github/workflows/ci.yml`
+**Job:** `tutor-config-tests`
 
-**Triggers:**
-- Push to any branch when `tutor_env/config.yml` or `infrastructure/tutor/**` changes
-- Pull requests touching Tutor configuration files
-- Manual workflow dispatch
+**Current behavior:**
 
-**Jobs:**
+- runs only when the change-scope selector marks Tutor authority as in scope
+- on unrelated PRs, the lane is skipped and workflow-contract verifiers enforce
+  CI-control-plane truth instead
+- on Tutor-authority PRs, the job renders a clean Tutor environment with
+  `tutor config save`, then directly runs
+  `./infrastructure/tutor/apply-patches.sh`
+- after that render-plus-patch baseline, CI runs the Tutor verification shell
+  tests, including:
+  - `tests/tutor/test_tutor_apply.sh`
+  - `tests/tutor/test_verify_patches.sh`
+  - `tests/tutor/test_idempotency.sh`
+  - `tests/tutor/test_edge_cases.sh`
+  - `scripts/qa/check-config-example-yaml.py`
 
-1. **verify-patches** - Verifies all patches are correctly applied
-   - AC-001: MySQL authentication patch
-   - AC-002: MFE Node.js memory patch
+This is an important boundary:
 
-2. **verify-multi-site-domains** - Verifies multi-site domain configuration
-   - All production domains in `ALLOWED_HOSTS`
-   - All domains in `CSRF_TRUSTED_ORIGINS`
-   - `SESSION_COOKIE_DOMAIN` set correctly
+- **operator front door:** `./scripts/infra/tutor-config-save.sh`, with
+  `./scripts/infra/prepare-tutor-build-context.sh --target ...` as the manual
+  post-render refresh path
+- **CI implementation contract:** clean render plus direct
+  `./infrastructure/tutor/apply-patches.sh`, followed by contract tests
 
-3. **verify-enterprise-features** - Verifies custom apps and enterprise features
-   - AC-004: mfe_oauth_fix installed
-   - AC-005: django_prometheus installed
-   - Redwood compatibility apps enabled
+Do not rewrite this doc to hide direct helper use in CI while the workflow
+still does it.
 
-4. **verify-idempotency** - Verifies patch script is idempotent
-   - Runs `apply-patches.sh` twice
-   - Compares file checksums to ensure no changes
-
-5. **post-failure-comment** - Posts helpful comment on PR if verification fails
-
-### Tutor Plugin Tests
+### Tutor Plugin / Render Contract
 
 **Workflow:** `.github/workflows/tutor-plugin-test.yml`
 
-**Triggers:**
-- Push to any branch when `infrastructure/tutor/plugins/**` changes
-- Pull requests touching plugin files
-- Manual workflow dispatch
+**Current jobs:**
 
-**Jobs:**
+1. `lint-plugins`
+   - compiles Tutor plugin sources
+   - runs `ruff` and `black --check`
+2. `verify-retired-legacy-shim`
+   - verifies `mfe_oauth_fix.py` stays a metadata-only compatibility shim
+   - rejects old `ENV_PATCHES` behavior or config-example re-enablement
+3. `render-contract-preflight`
+   - installs Tutor into an isolated CI venv
+   - runs `./scripts/ci/preflight-check.sh`
+   - validates rendered Dockerfile and plugin/render-contract assumptions
 
-1. **test-mfe-oauth-plugin** - Tests MFE OAuth fix plugin
-   - Verifies plugin syntax
-   - Enables plugin
-   - Verifies patches applied
-   - Validates plugin metadata
-
-2. **test-plugin-lifecycle** - Tests enable/disable lifecycle
-   - Enable plugin
-   - Generate config
-   - Disable plugin
-   - Re-enable plugin
-
-3. **verify-custom-app-structure** - Documents expected custom app structure
-
-4. **lint-plugins** - Lints plugin code
-   - Runs ruff
-   - Checks formatting with black
-
-5. **integration-test** - Tests plugin works with apply-patches.sh
-   - Enables plugin
-   - Applies patches
-   - Verifies both plugin and patches work together
-
-6. **post-failure-comment** - Posts helpful comment on PR if tests fail
+This workflow is the current plugin/render-contract owner. It is not the older
+"plugin lifecycle plus PR comment" workflow described in superseded docs.
 
 ## Running Locally
 
-### Verify Tutor Configuration
+### Verify Tutor Configuration Contract
 
 ```bash
 # Quick check (Make target)
 make tutor-verify
 
-# Full verification script
+# Full verifier
 ./scripts/infra/verify-tutor-config.sh
 ```
 
-### Test Tutor Plugins
+### Recreate The Governed Operator Flow
 
 ```bash
-# Syntax check
-python3 -m py_compile infrastructure/tutor/plugins/mfe_oauth_fix.py
+./scripts/infra/tutor-config-save.sh
 
-# Enable and test
-source .venv/bin/activate
-export TUTOR_ROOT="$(pwd)/tutor_env"
-mkdir -p tutor_env/plugins
-cp infrastructure/tutor/plugins/mfe_oauth_fix.py tutor_env/plugins/
-tutor plugins enable mfe_oauth_fix
-tutor config save
-
-# Verify patches applied
-grep -q "mfe_oauth_fix" tutor_env/env/apps/openedx/settings/lms/production.py
+# Or, after a manual tutor config save:
+./scripts/infra/prepare-tutor-build-context.sh --target all
 ```
 
-## Acceptance Criteria
+### Recreate CI Helper-Level Baseline
 
-The workflows verify all acceptance criteria from `specs/tutor-configuration_spec.md`:
+```bash
+export TUTOR_ROOT="$(pwd)/tutor_env"
+tutor config save
+./infrastructure/tutor/apply-patches.sh
+bash tests/tutor/test_tutor_apply.sh
+bash tests/tutor/test_verify_patches.sh
+```
 
-- **AC-001:** MySQL authentication plugin set to `mysql_native_password`
-- **AC-002:** MFE Node.js memory limit set to 6144MB
-- **AC-003:** All production domains (academyv2.mereka.io, academy.biji-biji.com, skillourfuture.academy.mereka.io) in `ALLOWED_HOSTS`
-- **AC-004:** mfe_oauth_fix custom app installed in `INSTALLED_APPS`
-- **AC-005:** django_prometheus installed for metrics
-- **AC-006:** MFE images build successfully with Node 18 (not tested in CI, requires Docker)
-- **AC-007:** MySQL 8 connections succeed (not tested in CI, requires MySQL)
-- **AC-008:** All domains accept logins (not tested in CI, requires runtime)
-- **AC-009:** Mereka branding renders (not tested in CI, requires runtime)
-- **AC-010:** All services run (not tested in CI, requires Docker)
+### Test Tutor Plugin / Render Contract
+
+```bash
+# Source lint and compile checks
+python3 -m compileall infrastructure/tutor/plugins
+ruff check infrastructure/tutor/plugins/
+black --check infrastructure/tutor/plugins/
+
+# Render-contract preflight
+python3 -m venv .ci-venv
+source .ci-venv/bin/activate
+pip install -U pip
+pip install -r requirements-tutor.txt
+TUTOR_VENV="$(pwd)/.ci-venv" ./scripts/ci/preflight-check.sh
+```
+
+## What CI Actually Proves
+
+Current CI covers these contract classes:
+
+- Tutor render-plus-patch chain still works from a clean baseline
+- the Makefile and wrapper scripts are wired correctly
+- patch verification tests still pass against the rendered baseline
+- `apply-patches.sh` remains re-runnable enough for the declared idempotency
+  contract
+- plugin sources lint and compile
+- the retired standalone `mfe_oauth_fix` shim stays metadata-only
+- rendered plugin and Dockerfile contract preflight still passes
 
 ## Failure Scenarios
 
-### MySQL Authentication Patch Not Applied
+### Tutor Config Lane Fails In `ci.yml`
 
-**Symptom:** CI fails with "AC-001 FAILED: MySQL native password patch not applied"
-
-**Fix:**
-```bash
-./infrastructure/tutor/apply-patches.sh
-git add tutor_env/env/local/docker-compose.yml
-git commit -m "fix: apply MySQL authentication patch"
-```
-
-### Multi-Site Domains Missing
-
-**Symptom:** CI fails with "AC-003 FAILED: Missing domains in ALLOWED_HOSTS"
-
-**Fix:**
-Verify `infrastructure/tutor/apply-patches.sh` includes all production domains in the `extra_lms_hosts` patch:
-```python
-extra_lms_hosts = [
-    "academy.biji-biji.com",
-    "skillourfuture.academy.mereka.io",
-]
-```
-
-### Custom Apps Not Installed
-
-**Symptom:** CI fails with "AC-004 FAILED: mfe_oauth_fix app not installed"
-
-**Fix:**
-Ensure `apply-patches.sh` installs custom apps in the OpenEdX Dockerfile patch.
-
-### Plugin Syntax Error
-
-**Symptom:** Plugin test fails with "Plugin syntax invalid"
+**Symptom:** `Tutor Configuration Tests` fails in `.github/workflows/ci.yml`
 
 **Fix:**
 ```bash
-# Check syntax
-python3 -m py_compile infrastructure/tutor/plugins/mfe_oauth_fix.py
+./scripts/infra/tutor-config-save.sh
+bash tests/tutor/test_tutor_apply.sh
+bash tests/tutor/test_verify_patches.sh
+```
 
-# Fix syntax errors, then test locally
-tutor plugins enable mfe_oauth_fix
+If the failure reproduces only after a raw clean render, recreate the CI lane
+more closely:
+
+```bash
+export TUTOR_ROOT="$(pwd)/tutor_env"
 tutor config save
+./infrastructure/tutor/apply-patches.sh
 ```
 
-### Plugin Not Loading
+Use the wrapper path for operator guidance, and the raw helper path only when
+you are reproducing the CI implementation contract.
 
-**Symptom:** Plugin test fails with "Plugin not enabled"
+### Plugin / Render Contract Fails
+
+**Symptom:** `.github/workflows/tutor-plugin-test.yml` fails
 
 **Fix:**
-Verify plugin uses correct Tutor hooks API. Check `tutor plugins list` output.
+
+```bash
+python3 -m compileall infrastructure/tutor/plugins
+ruff check infrastructure/tutor/plugins/
+black --check infrastructure/tutor/plugins/
+TUTOR_VENV="$(pwd)/.ci-venv" ./scripts/ci/preflight-check.sh
+```
+
+### Multi-Site Domain Or Hostname Drift
+
+**Symptom:** Tutor verification fails on host or Caddy contract checks
+
+**Fix:**
+Review the actual source owners first:
+
+- `infrastructure/tutor/patches/caddyfile`
+- `infrastructure/tutor/plugins/mereka_lms.py`
+- `infrastructure/tutor/config.example.yml`
+- `scripts/infra/verify-tutor-config.sh`
 
 ## Integration with CI Pipeline
 
-These workflows integrate with the main CI pipeline (`.github/workflows/ci.yml`):
+The current split is:
 
-1. Main CI runs linting, validation, security scans
-2. Tutor config verification ensures patches are applied
-3. Plugin tests ensure custom plugins work correctly
-4. All workflows must pass before merge
+1. `.github/workflows/ci.yml` owns the main Tutor configuration contract lane.
+2. `.github/workflows/tutor-plugin-test.yml` owns plugin/render-contract
+   preflight.
+3. Docs-only or workflow-only diffs may skip the full Tutor render lane and are
+   instead enforced by workflow contract verifiers.
 
 ## Monitoring
 
@@ -190,34 +188,45 @@ These workflows integrate with the main CI pipeline (`.github/workflows/ci.yml`)
 
 - **Spec:** `specs/tutor-configuration_spec.md` - Full requirements
 - **Spec:** `specs/multi-site-domains_spec.md` - Multi-site domain requirements
-- **Script:** `infrastructure/tutor/apply-patches.sh` - Patch application script
+- **Script:** `scripts/infra/tutor-config-save.sh` - Governed operator front door
+- **Script:** `scripts/infra/prepare-tutor-build-context.sh` - Manual post-render refresh path
+- **Script:** `infrastructure/tutor/apply-patches.sh` - Low-level CI/helper patch application script
 - **Script:** `scripts/infra/verify-tutor-config.sh` - Verification script
-- **Plugin:** `infrastructure/tutor/plugins/mfe_oauth_fix.py` - MFE OAuth fix plugin
+- **Workflow:** `.github/workflows/ci.yml` - Main Tutor configuration lane
+- **Workflow:** `.github/workflows/tutor-plugin-test.yml` - Tutor plugin / render-contract lane
 
 ## Troubleshooting
 
 ### Workflow Fails But Local Verification Passes
 
-**Cause:** CI uses clean environment with config.example.yml
+**Cause:** CI starts from a cleaner rendered baseline than most local flows.
 
 **Fix:** Ensure `infrastructure/tutor/config.example.yml` is up to date
 
 ### Patch Idempotency Test Fails
 
-**Cause:** `apply-patches.sh` modifies files differently on each run
+**Cause:** `apply-patches.sh` changed its re-apply behavior against the rendered
+baseline.
 
-**Fix:** Ensure all patches are deterministic (no timestamps, no random values)
+**Fix:** Reproduce with `bash tests/tutor/test_idempotency.sh` and correct the
+helper-level patch contract. This is a CI/helper contract, not a reason to
+change the operator front door back to raw helper execution.
 
-### Plugin Integration Test Fails
+### Render-Contract Preflight Fails
 
-**Cause:** Plugin patches conflict with `apply-patches.sh` patches
+**Cause:** Plugin mirror, rendered Dockerfile contract, or helper ownership
+split drifted.
 
-**Fix:** Ensure plugin and script patches target different files or use different patch strategies
+**Fix:** Inspect:
+
+- `scripts/ci/preflight-check.sh`
+- `infrastructure/tutor/plugins/`
+- `infrastructure/tutor/custom-apps/`
+- rendered snapshot expectations in the current MFE/Tutor owner docs
 
 ## Future Improvements
 
-- Add runtime tests using Docker-in-Docker
-- Test actual service connectivity (MySQL, MongoDB, Redis)
-- Verify branding assets render correctly
-- Add performance benchmarks for patch application
-- Test upgrade path from previous Tutor versions
+- fold CI helper-level steps into the governed wrapper path if the workflow
+  contract is intentionally changed in source, then update this doc again
+- expand render-contract preflight coverage only when source truth adds a new
+  durable contract

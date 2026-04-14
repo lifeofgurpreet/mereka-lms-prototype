@@ -19,17 +19,16 @@ The canonical sequence for enterprise UI/branding changes:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  1. tutor config save --set KEY=value                       │
-│  2. ./infrastructure/tutor/apply-patches.sh                 │
-│  3. ./scripts/infra/verify-tutor-config.sh                  │
-│  4. tutor images build openedx / mfe                        │
-│  5. tutor images push openedx / mfe                         │
-│  6. Update deploy/k8s/overlays/production/kustomization.yaml│
+│  1. ./scripts/infra/tutor-config-save.sh --set KEY=value    │
+│  2. ./scripts/infra/verify-tutor-config.sh                  │
+│  3. tutor images build openedx / mfe                        │
+│  4. tutor images push openedx / mfe                         │
+│  5. Update deploy/k8s/overlays/production/kustomization.yaml│
 │     (image tag → new SHA)                                   │
-│  7. git add → commit → push → PR → merge to main           │
-│  8. ArgoCD auto-syncs (infrastructure watches main)     │
-│  9. ./scripts/qa/verify-post-deploy-smoke.sh --env prod     │
-│ 10. ./scripts/qa/ops-confidence.sh --env prod               │
+│  6. git add → commit → push → PR → merge to main           │
+│  7. ArgoCD auto-syncs (infrastructure watches main)     │
+│  8. ./scripts/qa/verify-post-deploy-smoke.sh --env prod     │
+│  9. ./scripts/qa/ops-confidence.sh --env prod               │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -40,22 +39,23 @@ The canonical sequence for enterprise UI/branding changes:
 export TUTOR_ROOT="$(pwd)/tutor_env"
 ./scripts/infra/tutor-config-save.sh --set KEY=value
 
-# 2-3. Apply patches + verify (done by wrapper above)
+# 2. Verify rendered state
+./scripts/infra/verify-tutor-config.sh
 
-# 4. Build images
+# 3. Build images
 tutor images build openedx -a PIP_COMMAND=pip   # ~30 min
 tutor images build mfe                           # ~15 min
 
-# 5. Push to Artifact Registry
+# 4. Push to Artifact Registry
 tutor images push openedx
 tutor images push mfe
 
-# 6. Update GitOps overlay
+# 5. Update GitOps overlay
 # Get the image SHA:
 IMAGE_SHA=$(docker inspect --format='{{.Id}}' docker.io/overhangio/openedx:18.2.2 | cut -d: -f2 | head -c12)
 # Edit kustomization.yaml with new tag
 
-# 7. PR workflow
+# 6. PR workflow
 git checkout -b feat/<bead-id>-<slug>
 git add -A && git commit -m "feat: ..."
 git push -u origin feat/<bead-id>-<slug>
@@ -105,7 +105,7 @@ This checks:
 | `kubectl patch` on live cluster | ArgoCD reverts within sync interval | Commit to `infrastructure`, let ArgoCD apply |
 | Deploy from feature branch | Other agents may overwrite | Merge to main first, deploy from main |
 | Cherry-pick to main without PR | No CI, no review trail | Create PR even for single-commit changes |
-| Direct `tutor config save` on cluster | Loses apply-patches.sh customizations | Use `tutor-config-save.sh` wrapper locally, commit result |
+| Direct `tutor config save` on cluster | Leaves rendered build context stale and bypasses the canonical prepare flow | Use `tutor-config-save.sh` wrapper locally, commit result |
 | Amend published commits | Destroys history, breaks other agents | Create new commit instead |
 | Build from stale worktree | Image won't match main | Run `check-worktree-freshness.sh` first |
 
@@ -172,9 +172,9 @@ When a build, push, or rollout is blocked:
 | Symptom | Likely Cause | Fix |
 |---------|-------------|-----|
 | OOM during webpack | Docker < 12GB RAM | Increase Docker memory to 12GB+ |
-| `pip install` timeout | Network/PyPI outage | Retry with `--retries 3` (built into apply-patches.sh) |
-| `SuspiciousFileOperation` | Missing safe_join monkey-patch | Re-run `apply-patches.sh` |
-| Node 18 version mismatch | MFE Dockerfile not patched | Re-run `apply-patches.sh` |
+| `pip install` timeout | Network/PyPI outage | Re-run `prepare-tutor-build-context.sh --target all`, then rebuild |
+| `SuspiciousFileOperation` | Missing rendered safe_join patch | Re-run `prepare-tutor-build-context.sh --target openedx` |
+| MFE build contract drift | Rendered MFE Dockerfile or tracked snapshot is stale | Re-run `prepare-tutor-build-context.sh --target all` |
 | `loremipsum` build failure | `uv pip` missing `pkg_resources` | Build with `-a PIP_COMMAND=pip` |
 
 ### Push blocked
