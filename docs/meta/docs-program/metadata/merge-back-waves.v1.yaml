@@ -1,0 +1,135 @@
+version: 1
+owner: Docs Lead
+last_updated: "2026-04-14"
+scope: merge-back review waves for docs/rebased-intake-20260413
+waves:
+  - id: wave-0a-concepts-root-authority
+    title: Concepts root authority baseline
+    readiness: ready
+    pr_title: "docs: align concepts architecture root authority"
+    include_paths:
+      - docs/concepts/architecture/ARCHITECTURE_CHARTER.md
+      - docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md
+      - docs/concepts/architecture/README.md
+      - docs/concepts/architecture/TENANT_OPERATING_SYSTEM.md
+      - tools/docs/verify/verify_concepts_architecture_clean.py
+    remove_paths:
+      - docs/concepts/architecture/WS4_PROMOTION_CONTRACT.md
+    validators:
+      - bash tools/docs/verify/verify-docs-policy.sh --range origin/main...HEAD
+      - git diff --check
+    out_of_scope:
+      - stable architecture root retirement and deprecation-ledger cleanup
+      - active docs-program control-plane refresh
+      - historical packet and reset-wave normalization
+  - id: wave-0b-architecture-root-authority
+    title: Stable architecture root authority baseline
+    readiness: ready
+    depends_on:
+      - wave-0a-concepts-root-authority
+    pr_title: "docs: align stable architecture root authority"
+    include_paths:
+      - docs/reference/governance/DEPRECATION_LEDGER.md
+      - tools/docs/verify/verify-docs-policy.sh
+      - tools/docs/verify/verify_legacy_architecture_root.py
+    validators:
+      - bash tools/docs/verify/verify-docs-policy.sh --range origin/main...HEAD
+      - git diff --check
+    out_of_scope:
+      - concepts-root authority cleanup already claimed by Wave 0A
+      - active docs-program control-plane refresh
+      - historical packet and reset-wave normalization
+  - id: wave-1-control-plane
+    title: Active docs control plane
+    readiness: ready
+    depends_on:
+      - wave-0a-concepts-root-authority
+      - wave-0b-architecture-root-authority
+    pr_title: "docs: refresh active docs control plane"
+    include_paths:
+      - docs/meta/docs-program/POST_REBASE_INTAKE_2026-04-13.md
+      - docs/meta/docs-program/REVIEW_HARDENING_BOARD_2026-04-13.md
+      - docs/meta/docs-program/DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md
+      - docs/meta/docs-program/README.md
+      - docs/meta/README.md
+      - docs/meta/docs-program/metadata/METADATA_MODEL.md
+      - docs/meta/docs-program/metadata/doc-class-schema-map.yaml
+      - docs/meta/docs-program/metadata/governs-taxonomy.yaml
+    validators:
+      - bash tools/docs/verify/verify-docs-policy.sh --range origin/main...HEAD
+      - git diff --check
+    out_of_scope:
+      - historical packet and reset-wave docs
+      - companion compression and review-source changes
+      - Tutor, branding, CI, or contract-truth sync families
+      - runtime-proof or cross-repo follow-through
+  - id: wave-2a-packet-normalization
+    title: Historical packet normalization
+    readiness: ready
+    depends_on:
+      - wave-1-control-plane
+    pr_title: "docs: bound historical docs program packets"
+    include_paths:
+      - docs/meta/docs-program/PROGRAM_UPDATE_V2_BRIEF.md
+      - docs/meta/docs-program/IMPLEMENTATION_ROADMAP.md
+      - docs/meta/docs-program/AGENT_WORKPACKETS.md
+      - docs/meta/docs-program/FOUNDATIONS_PROGRAM.md
+      - docs/meta/docs-program/DOCS_FIRST_CLASS_WEEKLY_EXECUTION_PLAN_20260306.md
+      - docs/meta/docs-program/DOCS_GOVERNANCE_SIGNOFF_CHECKLIST_20260307.md
+      - docs/meta/docs-program/ARCHITECTURE_GOVERNANCE_OVERLAY.md
+      - docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md
+      - docs/meta/docs-program/WAVE3_CLOSEOUT.md
+      - docs/meta/docs-program/WAVE3_REVIEW_HANDOFF.md
+      - docs/meta/docs-program/WAVE3_EXECUTION_TRACKER.md
+      - docs/meta/docs-program/WAVE4_CHARTER.md
+      - docs/meta/docs-program/WAVE4_REVIEWER_CHECKLIST.md
+      - docs/meta/docs-program/WAVE4_REVIEW_FRONT_DOOR.md
+      - docs/meta/docs-program/WAVE4_CLOSEOUT.md
+      - docs/meta/docs-program/WAVE4_EXECUTION_TRACKER.md
+      - docs/meta/docs-program/WAVE4_REVIEW_HANDOFF.md
+      - docs/meta/docs-program/WAVE9_CLOSEOUT.md
+      - docs/meta/docs-program/WAVE9_EXECUTION_TRACKER.md
+      - docs/meta/docs-program/WAVE9_REVIEW_HANDOFF.md
+    validators:
+      - bash tools/docs/verify/verify-docs-policy.sh --range origin/main...HEAD
+      - git diff --check
+    out_of_scope:
+      - reset-wave families
+      - docs/meta/docs-program/WAVE9_FINDINGS_LEDGER.md historical evidence
+      - live control surfaces already claimed by Wave 1
+      - companion compression and fresh source-truth intake
+  - id: wave-2b-reset-wave-normalization
+    title: Historical reset-wave normalization
+    readiness: ready
+    depends_on:
+      - wave-1-control-plane
+    pr_title: "docs: bound reset-wave packet families"
+    include_paths:
+      - docs/meta/docs-program/WAVE_ADR_RESET_TRACKER.md
+      - docs/meta/docs-program/WAVE_ADR_RESET_CLOSEOUT.md
+      - docs/meta/docs-program/WAVE_ADR_RESET_REVIEW_HANDOFF.md
+      - docs/meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_TRACKER.md
+      - docs/meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_CLOSEOUT.md
+      - docs/meta/docs-program/WAVE_ARCHITECTURE_ROOT_RESET_REVIEW_HANDOFF.md
+      - docs/meta/docs-program/WAVE_BRANDING_ROOT_RESET_TRACKER.md
+      - docs/meta/docs-program/WAVE_BRANDING_ROOT_RESET_CLOSEOUT.md
+      - docs/meta/docs-program/WAVE_BRANDING_ROOT_RESET_REVIEW_HANDOFF.md
+      - docs/meta/docs-program/WAVE_CI_CD_ROOT_RESET_TRACKER.md
+      - docs/meta/docs-program/WAVE_CI_CD_ROOT_RESET_CLOSEOUT.md
+      - docs/meta/docs-program/WAVE_CI_CD_ROOT_RESET_REVIEW_HANDOFF.md
+      - docs/meta/docs-program/WAVE_OPERATIONS_ROOT_RESET_TRACKER.md
+      - docs/meta/docs-program/WAVE_OPERATIONS_ROOT_RESET_CLOSEOUT.md
+      - docs/meta/docs-program/WAVE_OPERATIONS_ROOT_RESET_REVIEW_HANDOFF.md
+      - docs/meta/docs-program/WAVE_RUNBOOKS_ROOT_RESET_TRACKER.md
+      - docs/meta/docs-program/WAVE_RUNBOOKS_ROOT_RESET_CLOSEOUT.md
+      - docs/meta/docs-program/WAVE_RUNBOOKS_ROOT_RESET_REVIEW_HANDOFF.md
+      - docs/meta/docs-program/WAVE_MIGRATIONS_ROOT_RESET_TRACKER.md
+      - docs/meta/docs-program/WAVE_MIGRATIONS_ROOT_RESET_CLOSEOUT.md
+      - docs/meta/docs-program/WAVE_MIGRATIONS_ROOT_RESET_REVIEW_HANDOFF.md
+    validators:
+      - bash tools/docs/verify/verify-docs-policy.sh --range origin/main...HEAD
+      - git diff --check
+    out_of_scope:
+      - packet-normalization files claimed by Wave 2A
+      - live control surfaces already claimed by Wave 1
+      - companion compression and fresh source-truth intake
