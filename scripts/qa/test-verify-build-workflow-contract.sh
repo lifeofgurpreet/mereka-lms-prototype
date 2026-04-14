@@ -316,8 +316,8 @@ jobs:
         run: echo "digest=sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" >> "$GITHUB_OUTPUT"
 
   scan-openedx-image:
-    runs-on: mereka-k8s-runners
-    needs: [build-openedx]
+    runs-on: ${{ needs.select-build-lane.outputs.runner_label }}
+    needs: [build-openedx, select-build-lane]
     if: ${{ needs.build-openedx.result == 'success' }}
     steps:
       - name: Set up Docker Buildx
@@ -357,8 +357,8 @@ jobs:
           OPENEDX_IMAGE_REF: ${{ env.REGISTRY }}/openedx@${{ needs.build-openedx.outputs.image_digest }}
 
   scan-mfe-image:
-    runs-on: mereka-k8s-runners
-    needs: [build-mfe]
+    runs-on: ${{ needs.select-build-lane.outputs.runner_label }}
+    needs: [build-mfe, select-build-lane]
     if: ${{ needs.build-mfe.result == 'success' }}
     steps:
       - name: Set up Docker Buildx

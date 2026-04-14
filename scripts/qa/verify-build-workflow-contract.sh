@@ -480,16 +480,16 @@ else
   pass "MFE heavy build job no longer performs SBOM/Trivy scanning"
 fi
 
-if [[ "$SCAN_OPENEDX_BLOCK" == *"runs-on: mereka-k8s-runners"* && "$SCAN_OPENEDX_BLOCK" == *"needs: [build-openedx]"* ]]; then
-  pass "OpenEdX post-push scan runs on release runners after build-openedx"
+if [[ "$SCAN_OPENEDX_BLOCK" == *'runs-on: ${{ needs.select-build-lane.outputs.runner_label }}'* && "$SCAN_OPENEDX_BLOCK" == *"needs: [build-openedx, select-build-lane]"* ]]; then
+  pass "OpenEdX post-push scan runs on the selected Docker-capable build lane after build-openedx"
 else
-  fail "OpenEdX post-push scan job missing canonical runner or dependency"
+  fail "OpenEdX post-push scan job missing canonical Docker-capable runner or dependency"
 fi
 
-if [[ "$SCAN_MFE_BLOCK" == *"runs-on: mereka-k8s-runners"* && "$SCAN_MFE_BLOCK" == *"needs: [build-mfe]"* ]]; then
-  pass "MFE post-push scan runs on release runners after build-mfe"
+if [[ "$SCAN_MFE_BLOCK" == *'runs-on: ${{ needs.select-build-lane.outputs.runner_label }}'* && "$SCAN_MFE_BLOCK" == *"needs: [build-mfe, select-build-lane]"* ]]; then
+  pass "MFE post-push scan runs on the selected Docker-capable build lane after build-mfe"
 else
-  fail "MFE post-push scan job missing canonical runner or dependency"
+  fail "MFE post-push scan job missing canonical Docker-capable runner or dependency"
 fi
 
 if [[ "$SCAN_OPENEDX_BLOCK" == *'uses: docker/setup-buildx-action'* && "$SCAN_OPENEDX_BLOCK" == *'Fix DinD network MTU'* ]]; then
