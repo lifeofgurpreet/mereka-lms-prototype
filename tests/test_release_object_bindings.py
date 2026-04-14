@@ -23,6 +23,7 @@ def sample_release_object() -> dict:
         "schema_version": "release-object/v1",
         "release_id": "ro-rb-abcdef1234567-20260403T120000Z",
         "created_at_utc": "2026-04-03T12:00:00Z",
+        "lane": "mereka-lms",
         "service_id": "mereka-lms",
         "repository": "Biji-Biji-Initiative/mereka-lms",
         "app_commit_sha": "a" * 40,

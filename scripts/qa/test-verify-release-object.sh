@@ -17,6 +17,7 @@ required_fields:
   - "schema_version"
   - "release_id"
   - "created_at_utc"
+  - "lane"
   - "service_id"
   - "repository"
   - "app_commit_sha"
@@ -32,6 +33,7 @@ properties:
   schema_version: { type: "string", enum: ["release-object/v1"] }
   release_id: { type: "string", pattern: "^ro-rb-[0-9a-f]{7,40}-[0-9]{8}T[0-9]{6}Z$" }
   created_at_utc: { type: "string", format: "date-time" }
+  lane: { type: "string", enum: ["mereka-lms"] }
   service_id: { type: "string", enum: ["mereka-lms"] }
   repository: { type: "string" }
   app_commit_sha: { type: "string", pattern: "^[0-9a-f]{40}$" }
@@ -101,6 +103,7 @@ cat >"${tmpdir}/var/ci/release-object.json" <<'EOF'
   "schema_version": "release-object/v1",
   "release_id": "ro-rb-abcdef1234567-20260403T120000Z",
   "created_at_utc": "2026-04-03T12:00:00Z",
+  "lane": "mereka-lms",
   "service_id": "mereka-lms",
   "repository": "Biji-Biji-Initiative/mereka-lms",
   "app_commit_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",

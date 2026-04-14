@@ -66,6 +66,7 @@ def build_payload(
         "schema_version": "release-object/v1",
         "release_id": payload_release_id,
         "created_at_utc": release_bundle["created_at"],
+        "lane": release_bundle["service_id"],
         "service_id": release_bundle["service_id"],
         "repository": release_bundle["repository"],
         "app_commit_sha": release_bundle["commit_sha"],
