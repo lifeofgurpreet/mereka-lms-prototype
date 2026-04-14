@@ -1,15 +1,27 @@
 # Purchase Gateway K8s Operations
 _Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
 
-<!-- Last verified: 2026-02-24 -->
+Operations guide for the Purchase Gateway service deployed in the current production lane under the `mereka-lms` namespace. The Purchase Gateway is the canonical replacement for the deprecated Oscar/ecommerce service.
 
-_Audience: Developers & SRE | Owner: SRE | Status: Active_
-
-Operations guide for the Purchase Gateway service deployed in the `mereka-lms` GKE namespace. The Purchase Gateway is the canonical replacement for the deprecated Oscar/ecommerce service.
-
-Related: `specs/ecommerce-purchase-gateway_spec.md` | `docs/ops/runbooks/STRIPE_WEBHOOKS_SETUP.md`
+Related: [Purchase Gateway Overview](../../concepts/architecture/purchase-gateway-overview.md) | `specs/ecommerce-purchase-gateway_spec.md` | [STRIPE_WEBHOOKS_SETUP.md](STRIPE_WEBHOOKS_SETUP.md)
 
 ---
+
+## Operator Boundary
+
+Use this runbook for the current gateway service:
+
+- startup and rollout shape
+- health checks and live traffic readiness
+- secrets, routing, and pod-level troubleshooting
+- manual recovery handoff into fulfillment replay, refunds, and OAuth checks
+
+Do not treat this doc as the authority for the legacy Oscar service. Legacy
+continuity belongs only where the dual-stack transition still explicitly
+requires it.
+
+For the stable system model, dark-launch boundary, and legacy cutover posture,
+start with [Purchase Gateway Overview](../../concepts/architecture/purchase-gateway-overview.md).
 
 ## Architecture
 
@@ -17,29 +29,30 @@ Related: `specs/ecommerce-purchase-gateway_spec.md` | `docs/ops/runbooks/STRIPE_
 
 | Component | K8s Resource | Port | Image |
 |-----------|--------------|------|-------|
-| payments-gateway | Deployment | 8080 | `ghcr.io/biji-biji-initiative/mereka-lms/payments-gateway:0.1.1` |
+| payments-gateway | Deployment | 8080 | `ghcr.io/biji-biji-initiative/purchase-gateway:0.1.1` |
 | postgresql-payments | Deployment | 5432 | `docker.io/postgres:16-alpine` |
 | postgresql-payments | PVC | — | 5Gi, ReadWriteOnce |
 | payments-gateway | HPA | — | minReplicas=1, maxReplicas=3, CPU=70% |
-| payments-gateway-secrets | ExternalSecret | — | synced from GCP SM every 1h |
+| payments-gateway-secrets | ExternalSecret | — | synced from the governed secrets bridge every 1h |
 
 ### Manifests Location
 
 ```
-services/purchase-gateway/k8s/
+deploy/k8s/base/apps/purchase-gateway/
   deployment.yaml           # FastAPI app + Alembic init container
   service.yaml              # ClusterIP:8080
   hpa.yaml                  # autoscaling/v2
-  external-secrets.yaml     # 6 GCP Secret Manager refs
+  external-secrets.yaml     # 6 secret bridge refs
   postgresql-deployment.yaml
   postgresql-service.yaml   # ClusterIP:5432
   postgresql-pvc.yaml       # 5Gi data volume
+  servicemonitor-purchase-gateway.yaml
   kustomization.yaml
 ```
 
-Referenced by `deploy/k8s/base/kustomization.yaml` as `../../../services/purchase-gateway/k8s`.
+Referenced by `deploy/k8s/base/kustomization.yaml` through the governed base app package.
 
-### Secrets (GCP Secret Manager — project: bbi-k8)
+### Secrets (governed bridge: Infisical -> Secret Manager -> ExternalSecrets)
 
 | K8s Key | GCP Secret Name |
 |---------|-----------------|
@@ -50,7 +63,13 @@ Referenced by `deploy/k8s/base/kustomization.yaml` as `../../../services/purchas
 | `LMS_OAUTH_CLIENT_SECRET` | `MEREKA_LMS_PAYMENTS_GATEWAY_OAUTH2_SECRET` |
 | `POSTGRESQL_PASSWORD` | `MEREKA_LMS_PAYMENTS_GATEWAY_POSTGRESQL_PASSWORD` |
 
-All secrets sync via `ExternalSecret` -> `ClusterSecretStore: gcp-secret-manager` (project `bbi-k8`, not `mereka-lms`).
+The operator flow is:
+1. update the source secret in Infisical
+2. sync the governed bridge into Secret Manager
+3. let `ExternalSecret` refresh the Kubernetes secret
+4. restart the affected workload
+
+The current implementation still resolves through `ClusterSecretStore: gcp-secret-manager`; treat that resource name as an implementation detail, not the primary operator mental model.
 
 ### Caddy Route
 
@@ -80,7 +99,7 @@ The `/payments` prefix is stripped before forwarding — paths map as follows:
 | Production | `https://academyv2.mereka.io/payments/webhooks/stripe/` |
 | Dev | `https://academyv2.mereka.dev/payments/webhooks/stripe/` |
 
-Register these URLs in the Stripe Dashboard → Developers → Webhooks. The gateway validates the `Stripe-Signature` header using `STRIPE_WEBHOOK_SECRET` (synced from GCP SM `MEREKA_LMS_STRIPE_WEBHOOK_SECRET_GATEWAY`).
+Register these URLs in the Stripe Dashboard → Developers → Webhooks. The gateway validates the `Stripe-Signature` header using `STRIPE_WEBHOOK_SECRET` (synced through the current Secret Manager bridge from `MEREKA_LMS_STRIPE_WEBHOOK_SECRET_GATEWAY`).
 
 ---
 
@@ -92,31 +111,49 @@ The manifests are included in the base kustomization and deploy with the rest of
 
 ```bash
 # ArgoCD will auto-sync on merge to main.
-# To manually apply (emergency only — see gitops-enforcement rules):
+# To manually apply (emergency only — see docs/reference/operations/AGENT_EXECUTION_WORKFLOW.md):
 kubectl apply -k deploy/k8s/base/
 ```
 
 The `migrate` init container runs `alembic upgrade head` on every pod start — it is idempotent and safe to re-run.
 
+### Startup sequence
+
+Use this order when bringing up or revalidating the lane after a disruptive
+change:
+
+1. confirm `payments-gateway-secrets` is synced and recent
+2. confirm PostgreSQL pod is ready and accepting connections
+3. confirm the `migrate` init container completes successfully
+4. confirm `payments-gateway` has endpoints and returns `200` from `/health/`
+   and `/ready/`
+5. confirm Caddy routing for `/payments/*`
+6. confirm Stripe webhook secret and LMS OAuth client secret are present before
+   declaring purchase readiness
+
+If webhook or OAuth material is missing, the service may be up while the
+purchase lane is still not operationally ready.
+
 ### Image Update
 
-1. Build and push the new image:
+Use the governed build-and-promotion lane for any production image change. Do not manually build, push, and edit deployment YAML as the normal path.
 
-```bash
-docker build -t ghcr.io/biji-biji-initiative/mereka-lms/payments-gateway:NEW_TAG \
-  services/purchase-gateway/
-docker push ghcr.io/biji-biji-initiative/mereka-lms/payments-gateway:NEW_TAG
-```
+Normal path:
+1. publish the updated image through the governed build workflow
+2. promote the resulting release coordinates through the sanctioned GitOps lane
+3. let ArgoCD realize the updated deployment from git
 
-2. Update the image tag in `services/purchase-gateway/k8s/deployment.yaml`:
+If the purchase-gateway image tag itself must be changed in source, update both container references in:
 
 ```yaml
-image: ghcr.io/biji-biji-initiative/mereka-lms/payments-gateway:NEW_TAG
+deploy/k8s/base/apps/purchase-gateway/deployment.yaml
 ```
 
-3. Also update the init container image tag (same file, `migrate` container).
+Then verify the service package with:
 
-4. Commit and push — ArgoCD will roll out the new deployment.
+```bash
+./scripts/qa/verify-purchase-gateway-k8s.sh
+```
 
 ### Verify After Deploy
 
@@ -139,7 +176,7 @@ kubectl rollout undo deployment/payments-gateway -n mereka-lms
 kubectl rollout status deployment/payments-gateway -n mereka-lms
 ```
 
-Then revert the image tag in `services/purchase-gateway/k8s/deployment.yaml` and push, so ArgoCD does not re-apply the bad version.
+Then revert the image tag in `deploy/k8s/base/apps/purchase-gateway/deployment.yaml` and push, so ArgoCD does not re-apply the bad version.
 
 ### Rollback to a Specific Revision
 
@@ -154,6 +191,22 @@ kubectl rollout undo deployment/payments-gateway -n mereka-lms --to-revision=3
 ```
 
 **Important**: After any manual rollback, update the manifest in git within 5 minutes to prevent ArgoCD from re-applying the reverted version.
+
+### Fulfillment rollback boundary
+
+Roll back gateway API or worker images only after classifying which lane is
+actually broken:
+
+- webhook receipt broken -> fix gateway ingress, secret, or webhook path
+- fulfillment broken after payment receipt -> use
+  [PURCHASE_GATEWAY_FULFILLMENT_RECOVERY.md](PURCHASE_GATEWAY_FULFILLMENT_RECOVERY.md)
+  to pause/replay jobs rather than immediately reverting everything
+- LMS OAuth broken -> use
+  [ECOMMERCE_OAUTH_TROUBLESHOOTING.md](ECOMMERCE_OAUTH_TROUBLESHOOTING.md)
+  before treating the incident as a generic gateway outage
+
+Do not call the lane healthy just because the API pod rolled back cleanly if
+paid orders still cannot fulfill.
 
 ---
 
@@ -204,21 +257,36 @@ kubectl exec -n mereka-lms "$PG_POD" -- \
 
 Expected: `payments_gateway - accepting connections`
 
+### Purchase-readiness quick verdict
+
+Treat the lane as purchase-ready only when all of the following are true:
+
+- gateway pod healthy and ready
+- Postgres reachable
+- Caddy `/payments/*` route present
+- Stripe webhook secret present and current
+- LMS OAuth client secret present and accepted by current OAuth checks
+- no unresolved dead-letter fulfillment backlog blocking current orders
+
+Use these companions when the pod is healthy but the purchase lane is not:
+
+- [STRIPE_WEBHOOKS_SETUP.md](STRIPE_WEBHOOKS_SETUP.md)
+- [ECOMMERCE_OAUTH_TROUBLESHOOTING.md](ECOMMERCE_OAUTH_TROUBLESHOOTING.md)
+- [PURCHASE_GATEWAY_FULFILLMENT_RECOVERY.md](PURCHASE_GATEWAY_FULFILLMENT_RECOVERY.md)
+
 ---
 
 ## Secret Rotation
 
 ### Rotate a Single Secret
 
-1. Update the secret value in GCP Secret Manager (project `bbi-k8`):
+1. Update the source secret in Infisical and sync the governed bridge:
 
 ```bash
-printf '%s' 'NEW_VALUE' | \
-  gcloud secrets versions add MEREKA_LMS_STRIPE_SECRET_KEY \
-    --data-file=- --project=bbi-k8
+./scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh
 ```
 
-2. Force ExternalSecret to re-sync immediately (optional — auto-syncs within 1h):
+2. Force `ExternalSecret` to re-sync immediately (optional — auto-syncs within 1h):
 
 ```bash
 kubectl annotate externalsecret payments-gateway-secrets \
@@ -247,7 +315,7 @@ The Stripe webhook secret (`MEREKA_LMS_STRIPE_WEBHOOK_SECRET_GATEWAY`) is tied t
 
 1. Create a new webhook endpoint in the Stripe Dashboard.
 2. Copy the new signing secret.
-3. Add a new GCP Secret Manager version (step 1 above).
+3. Sync the updated source secret through the governed bridge (step 1 above).
 4. Wait for ExternalSecret sync or force it (step 2 above).
 5. Restart the deployment (step 4 above).
 6. Verify test webhook events reach the new endpoint.
@@ -261,10 +329,8 @@ Reference: `docs/ops/runbooks/STRIPE_WEBHOOKS_SETUP.md`
 # 1. Generate a new password
 NEW_PW=$(openssl rand -base64 32)
 
-# 2. Update GCP Secret Manager
-printf '%s' "$NEW_PW" | \
-  gcloud secrets versions add MEREKA_LMS_PAYMENTS_GATEWAY_POSTGRESQL_PASSWORD \
-    --data-file=- --project=bbi-k8
+# 2. Sync the governed secrets bridge after updating the source secret
+./scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh
 
 # 3. Update the password in PostgreSQL (BEFORE the K8s secret updates)
 PG_POD=$(kubectl get pods -n mereka-lms -l app.kubernetes.io/name=postgresql-payments \
@@ -285,17 +351,17 @@ kubectl rollout restart deployment/payments-gateway -n mereka-lms
 
 ## Live Traffic Status (ENABLE_GATEWAY_FULFILLMENT)
 
-`ENABLE_GATEWAY_FULFILLMENT=true` is set in `services/purchase-gateway/k8s/deployment.yaml`.
+`ENABLE_GATEWAY_FULFILLMENT=true` is set in `deploy/k8s/base/apps/purchase-gateway/deployment.yaml`.
 
 The gateway is activated. Before routing real user traffic, confirm:
 
-- [ ] Real Stripe live-mode keys set in GCP SM (not test keys)
+- [ ] Real Stripe live-mode keys set in the governed secrets path (not test keys)
 - [ ] Stripe webhook endpoint registered in the Stripe Dashboard:
   - Production: `https://academyv2.mereka.io/payments/webhooks/stripe/`
   - Dev: `https://academyv2.mereka.dev/payments/webhooks/stripe/`
 - [ ] Stripe sends a test event and the gateway returns `{"status": "received"}`
 - [ ] OAuth2 client `payments-gateway` registered in the LMS Django admin
-- [ ] `LMS_OAUTH_CLIENT_SECRET` set correctly in GCP SM
+- [ ] `LMS_OAUTH_CLIENT_SECRET` set correctly in the governed secrets path
 - [ ] Legacy Oscar ecommerce service decommissioned (or routing rules updated)
 - [ ] `./scripts/qa/verify-purchase-gateway-k8s.sh --online` returns 0 FAILs
 - [ ] `./scripts/qa/verify-caddy-payments-route.sh` returns 0 FAILs
@@ -304,7 +370,7 @@ The gateway is activated. Before routing real user traffic, confirm:
 To disable fulfillment without removing the service (dark launch mode):
 
 ```yaml
-# services/purchase-gateway/k8s/deployment.yaml
+# deploy/k8s/base/apps/purchase-gateway/deployment.yaml
 - name: ENABLE_GATEWAY_FULFILLMENT
   value: "false"
 ```
@@ -330,7 +396,7 @@ kubectl logs -n mereka-lms deploy/payments-gateway --tail=100
 
 Common causes:
 - `migrate` init container fails: DATABASE_URL secret not synced yet, or PostgreSQL not ready
-- `ImagePullBackOff`: image tag does not exist in Artifact Registry or RBAC issue
+- `ImagePullBackOff`: image tag does not exist in GHCR / the active image registry, or RBAC issue
 - `CrashLoopBackOff`: bad environment variable, DB connection refused, or startup error
 
 ### ExternalSecret Not Syncing
@@ -341,7 +407,7 @@ kubectl describe externalsecret payments-gateway-secrets -n mereka-lms
 
 Check the `Status.Conditions` section for error messages. Common causes:
 - GCP Workload Identity not configured for the ESO service account
-- Secret does not exist in GCP SM project `bbi-k8` (not `mereka-lms`)
+- Secret is missing from the governed Secret Manager bridge after sync
 - Secret name typo in `external-secrets.yaml`
 
 ### Service Has No Endpoints
@@ -354,6 +420,47 @@ kubectl get endpoints payments-gateway -n mereka-lms
 kubectl get pods -n mereka-lms -l app.kubernetes.io/name=payments-gateway --show-labels
 ```
 
+### Webhook events not arriving
+
+If checkout completes in Stripe but orders stay `pending` or no webhook logs
+arrive:
+
+1. verify the registered Stripe endpoint URL matches the current gateway route
+2. verify `STRIPE_WEBHOOK_SECRET` is present in `payments-gateway-secrets`
+3. verify Caddy still strips the `/payments` prefix correctly
+4. run the delivery probe from
+   [STRIPE_WEBHOOKS_SETUP.md](STRIPE_WEBHOOKS_SETUP.md)
+5. only after the gateway webhook lane is green, move to fulfillment replay
+
+Webhook receipt failure is an ingress/secret problem, not a fulfillment replay
+problem.
+
+### Paid orders not fulfilling
+
+If Stripe events are arriving but learners are not enrolled:
+
+1. inspect gateway and worker logs for OAuth or LMS API failures
+2. inspect failed or dead-letter jobs using
+   [PURCHASE_GATEWAY_FULFILLMENT_RECOVERY.md](PURCHASE_GATEWAY_FULFILLMENT_RECOVERY.md)
+3. verify LMS OAuth client and scopes using
+   [ECOMMERCE_OAUTH_TROUBLESHOOTING.md](ECOMMERCE_OAUTH_TROUBLESHOOTING.md)
+4. replay only after downstream auth/API health is confirmed
+
+### Manual enrollment and refund boundary
+
+Current manual operator actions are split deliberately:
+
+- enrollment replay, failed jobs, and reconciliation belong in
+  [PURCHASE_GATEWAY_FULFILLMENT_RECOVERY.md](PURCHASE_GATEWAY_FULFILLMENT_RECOVERY.md)
+- Stripe webhook endpoint and secret setup belong in
+  [STRIPE_WEBHOOKS_SETUP.md](STRIPE_WEBHOOKS_SETUP.md)
+- LMS OAuth2 client and scope failures belong in
+  [ECOMMERCE_OAUTH_TROUBLESHOOTING.md](ECOMMERCE_OAUTH_TROUBLESHOOTING.md)
+
+Do not improvise direct DB edits or ad-hoc refunds from this runbook unless the
+incident has already been classified and the governed recovery procedure calls
+for them.
+
 ### PostgreSQL PVC Expansion
 
 The PVC is 5Gi. If storage is filling up:
@@ -363,7 +470,7 @@ The PVC is 5Gi. If storage is filling up:
 kubectl exec -n mereka-lms -l app.kubernetes.io/name=postgresql-payments -- \
   df -h /var/lib/postgresql/data
 
-# Expand (GKE standard storage class supports online expansion)
+# Expand (current storage class must support online expansion)
 kubectl patch pvc postgresql-payments -n mereka-lms \
   -p '{"spec":{"resources":{"requests":{"storage":"10Gi"}}}}'
 ```

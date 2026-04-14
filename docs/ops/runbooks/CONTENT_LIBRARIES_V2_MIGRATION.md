@@ -5,6 +5,8 @@ Use this runbook for the operator view of the content-libraries-v2 migration sur
 
 ## Start here
 
+- [`CONTENT_LIBRARIES_V2_RUNBOOK.md`](CONTENT_LIBRARIES_V2_RUNBOOK.md)
+- [`CONTENT_LIBRARIES_DISASTER_RECOVERY.md`](CONTENT_LIBRARIES_DISASTER_RECOVERY.md)
 - [`../../reference/operations/LIBRARIES_GCS_SETUP.md`](../../reference/operations/LIBRARIES_GCS_SETUP.md)
 - [`../../../specs/content-libraries-v2_spec.md`](../../../specs/content-libraries-v2_spec.md)
 - [`../../../scripts/qa/verify-content-libraries-v2.sh`](../../../scripts/qa/verify-content-libraries-v2.sh)
