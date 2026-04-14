@@ -43,6 +43,30 @@ require_grep "mysql_native_password" "tutor_env/env/local/docker-compose.yml"
 
 require_file "tutor_env/env/build/openedx/Dockerfile"
 require_grep "NODE_OPTIONS=\"--max-old-space-size=6144\"" "tutor_env/env/build/openedx/Dockerfile"
+require_grep "COPY --chown=app:app ./infrastructure/tutor/custom-apps/openedx_video_pipeline /openedx/openedx_video_pipeline" "tutor_env/env/build/openedx/Dockerfile"
+
+require_file "tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
+python3 - <<'PY'
+from pathlib import Path
+import sys
+
+dockerfile = Path("tutor_env/env/plugins/mfe/build/mfe/Dockerfile")
+if not dockerfile.exists():
+    print("[FAIL] Missing tutor_env/env/plugins/mfe/build/mfe/Dockerfile")
+    sys.exit(1)
+
+content = dockerfile.read_text(encoding="utf-8")
+parts = content.split("AS production", 1)
+if len(parts) != 2:
+    print("[FAIL] Could not locate production stage in rendered MFE Dockerfile")
+    sys.exit(1)
+
+if "COPY indigo/theme /openedx/dist/theme" not in parts[1]:
+    print("[FAIL] Rendered MFE production stage missing theme COPY")
+    sys.exit(1)
+
+print("[PASS] Rendered MFE production stage carries theme COPY")
+PY
 
 require_file "tutor_env/env/apps/openedx/settings/lms/production.py"
 require_grep "academy.biji-biji.com" "tutor_env/env/apps/openedx/settings/lms/production.py"
@@ -55,4 +79,3 @@ if [[ "$failures" -gt 0 ]]; then
   exit 1
 fi
 echo "OK"
-

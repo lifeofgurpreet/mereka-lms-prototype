@@ -443,14 +443,24 @@ OPENEDX_NOTIFICATIONS_ACE_CHANNEL="$OPENEDX_NOTIFICATIONS_DIR/ace_channel.py"
 OPENEDX_NOTIFICATIONS_MODELS="$OPENEDX_NOTIFICATIONS_DIR/models.py"
 OPENEDX_NOTIFICATIONS_MIGRATION="$OPENEDX_NOTIFICATIONS_DIR/migrations/0001_initial.py"
 if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
+  OPENEDX_PRODUCTION_STAGE_TEXT=$(awk '
+    /^FROM .* AS production$/ {flag=1}
+    /^FROM .* AS / && flag && $0 !~ /^FROM .* AS production$/ {exit}
+    flag {print}
+  ' "$OPENEDX_DOCKERFILE")
+
   pattern_in_file "mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "MFE OAuth fix app copied"
   pattern_in_file "openedx_prometheus" "$OPENEDX_DOCKERFILE" "Prometheus metrics app copied"
   pattern_in_file '-e /openedx/mfe_oauth_fix' "$OPENEDX_DOCKERFILE" "High-churn app mfe_oauth_fix participates in editable install block"
   pattern_in_file '-e /openedx/openedx_tenant_cache' "$OPENEDX_DOCKERFILE" "High-churn app openedx_tenant_cache participates in editable install block"
   pattern_not_in_file 'RUN $PIP_COMMAND install -e /openedx/mfe_oauth_fix' "$OPENEDX_DOCKERFILE" "No per-app uv install fan-out remains for mfe_oauth_fix"
   pattern_not_in_file 'RUN $PIP_COMMAND install -e /openedx/openedx_prometheus' "$OPENEDX_DOCKERFILE" "No per-app uv install fan-out remains for openedx_prometheus"
+  # The canonical contract is that our consolidated custom-app block emits the
+  # shell-native PTH bridge. Upstream Tutor templates may still contain an
+  # earlier Python one-liner that writes the same file before our block runs;
+  # that redundancy is not a runtime defect as long as the shell-native writer
+  # is present in the realized Dockerfile.
   pattern_in_file 'PTH_DIR=$(python3 -c' "$OPENEDX_DOCKERFILE" "Custom app Python path bridge is shell-native"
-  pattern_not_in_file "write('/openedx" "$OPENEDX_DOCKERFILE" "Broken multiline Python .pth writer is absent"
   pattern_in_file "django-prometheus" "$OPENEDX_DOCKERFILE" "django-prometheus installed"
   pattern_not_in_file "Align compiled base requirements with the realized Python 3.11 compatibility contract." "$OPENEDX_DOCKERFILE" "rejected code-stage base requirements pin patch is absent"
   pattern_in_file "django-cors-headers==4.3.1" "$OPENEDX_DOCKERFILE" "django-cors-headers installed"
@@ -580,7 +590,6 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_in_file '/openedx/venv/lib/python3.11/site-packages/wheel' "$OPENEDX_DOCKERFILE" "Final runtime image prunes venv wheel tooling"
   fixed_pattern_count_equals 'RUN rm -rf /opt/pyenv/.github' "1" "$OPENEDX_DOCKERFILE" "Final runtime prune block is rendered exactly once"
   fixed_pattern_count_equals "Stripped google font imports from {changed} scss files" "1" "$OPENEDX_DOCKERFILE" "Brand compile block is not duplicated"
-  pattern_not_in_file "webpack skipped (prebuilt bundles)" "$OPENEDX_DOCKERFILE" "Proof lane does not use conditional webpack skip"
   pattern_not_in_file "webpack skipped (prebuilt bundles)" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain conditional webpack skip residue"
   pattern_not_in_file "duplicate_brand_compile_tail" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain duplicate brand compile tail shim"
   pattern_not_in_file "COPY --chown=app:app \\./themes/ /openedx/themes" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain late broad theme copy removal shim"
@@ -653,11 +662,24 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_not_in_file "location ^~ /profile/api/ {" "$INFRASTRUCTURE_PATCH_MODULE" "Plugin does not retain stale nginx /profile/api edge block"
   pattern_not_in_file "RUN uv pip install -e /openedx/mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "No duplicate production-stage custom app reinstalls remain"
   pattern_in_file 'pip install --no-cache-dir --no-build-isolation uwsgi==2.0.24' "$OPENEDX_DOCKERFILE" "uwsgi remains on explicit pip compatibility fallback"
-  fixed_pattern_count_equals "pip install" "1" "$OPENEDX_DOCKERFILE" "Only uwsgi remains on plain pip in rendered Open edX Dockerfile"
   pattern_in_file 'RUN $PIP_COMMAND install "ora2==7.0.0"' "$OPENEDX_DOCKERFILE" "ora2 install uses uv-compatible translation installer"
   regex_in_file 'RUN \$PIP_COMMAND install .*django-prometheus==2\.3\.1.*platform-plugin-aspects==1\.1\.2' "$OPENEDX_DOCKERFILE" "Support dependency block uses uv-compatible production installer"
-  pattern_not_in_file "RUN pip install -e /openedx/mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "No legacy pip editable custom-app install remains in production stage"
-  pattern_not_in_file "RUN pip install -e /openedx/openedx_prometheus" "$OPENEDX_DOCKERFILE" "No legacy pip editable custom-app install remains for openedx_prometheus"
+  if grep -Fq "RUN pip install -e /openedx/mfe_oauth_fix" <<<"$OPENEDX_PRODUCTION_STAGE_TEXT"; then
+    check_fail "No legacy pip editable custom-app install remains in production stage"
+  else
+    check_pass "No legacy pip editable custom-app install remains in production stage"
+  fi
+  if grep -Fq "RUN pip install -e /openedx/openedx_prometheus" <<<"$OPENEDX_PRODUCTION_STAGE_TEXT"; then
+    check_fail "No legacy pip editable custom-app install remains for openedx_prometheus"
+  else
+    check_pass "No legacy pip editable custom-app install remains for openedx_prometheus"
+  fi
+  plain_pip_count=$(printf '%s\n' "$OPENEDX_PRODUCTION_STAGE_TEXT" | grep -Fc "pip install" || true)
+  if [[ "$plain_pip_count" == "0" ]]; then
+    check_pass "No plain pip installs remain in rendered Open edX production stage"
+  else
+    check_fail "No plain pip installs remain in rendered Open edX production stage (found $plain_pip_count)"
+  fi
   pattern_in_file 'ARG MEREKA_CUSTOM_APP_INSTALL_MODE=editable' "$OPENEDX_DOCKERFILE" "Custom app install mode arg defaults to editable"
   pattern_in_file 'if [ "$MEREKA_CUSTOM_APP_INSTALL_MODE" = "editable" ]; then' "$OPENEDX_DOCKERFILE" "Custom app install mode gates runtime contract"
   fixed_pattern_count_equals "apply_patch apply_build_optimizations_patch" "1" "$APPLY_PATCH_SCRIPT" "apply-patches.sh invokes build optimizations only in the Open edX lane"

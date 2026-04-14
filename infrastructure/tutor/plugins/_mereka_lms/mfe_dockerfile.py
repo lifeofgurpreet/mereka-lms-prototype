@@ -62,6 +62,15 @@ COPY indigo/theme /openedx/dist/theme
 """,
 )
 
+# The final production stage serves /theme/* at runtime.
+# Keep the compiled theme assets in the production image, not only in build stages.
+_register_env_patch(
+    "mfe-dockerfile-production-final",
+    """
+COPY indigo/theme /openedx/dist/theme
+""",
+)
+
 # Install frontend-plugin-framework with legacy peer deps
 _register_env_patch(
     "mfe-dockerfile-post-npm-install",

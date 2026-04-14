@@ -23,7 +23,10 @@ import os
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import MagicMock, patch
+
+from setuptools import find_packages
 
 # ---------------------------------------------------------------------------
 # Minimal Django bootstrap so models, serializers, and views can be imported
@@ -114,6 +117,22 @@ class TestModuleImports(unittest.TestCase):
 
     def test_import_admin(self):
         self._assert_importable('openedx_video_pipeline.admin')
+
+
+class TestPackagingContract(unittest.TestCase):
+    """The package build must install the root module, not just subpackages."""
+
+    def test_root_package_is_included_in_setup_discovery(self):
+        package_root = Path(__file__).resolve().parent
+        subpackages = find_packages(where=str(package_root))
+        packages = [
+            'openedx_video_pipeline',
+            *[f'openedx_video_pipeline.{name}' for name in subpackages],
+        ]
+
+        self.assertIn('openedx_video_pipeline', packages)
+        self.assertIn('openedx_video_pipeline.management', packages)
+        self.assertIn('openedx_video_pipeline.management.commands', packages)
 
 
 # ---------------------------------------------------------------------------

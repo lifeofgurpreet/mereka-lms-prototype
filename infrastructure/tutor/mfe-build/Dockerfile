@@ -2939,3 +2939,5 @@ COPY --from=profile-prod /openedx/app/dist /openedx/dist/profile
 COPY --from=learner-record-prod /openedx/app/dist /openedx/dist/learner-record
 
 
+
+COPY indigo/theme /openedx/dist/theme
