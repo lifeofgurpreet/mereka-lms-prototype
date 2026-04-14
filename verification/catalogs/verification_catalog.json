@@ -1134,7 +1134,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-architecture-doc-path-drift.sh",
-      "reference_count": 6,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -14016,7 +14016,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-retired-root-remediation.sh",
-      "reference_count": 8,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -15947,7 +15947,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-superset-runbook.sh",
-      "reference_count": 6,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -16968,7 +16968,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-theming-generated-artifacts.sh",
-      "reference_count": 14,
+      "reference_count": 13,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
