@@ -158,6 +158,13 @@ Caching dependencies reduces build time and minutes consumed.
     buildkitd-flags: --cache-to type=gha,mode=max --cache-from type=gha
 ```
 
+Current operator rule:
+
+- prefer caching for repeated CI/build lanes when cache correctness is well
+  understood
+- do not use cache hit rate as proof that a workflow is healthy; correctness
+  still wins over minute savings
+
 ### Minimize Matrix Builds
 
 Matrix strategies multiply job execution time. Limit matrix dimensions to necessary variations.
@@ -234,6 +241,15 @@ Scheduled workflows consume minutes even when code hasn't changed.
 
 2. **Use external monitoring**: Move health checks to Prometheus/Grafana (no GitHub Actions minutes)
 
+### Current cost-driver classes
+
+| Class | Typical drivers | Current handling |
+| --- | --- | --- |
+| heavy builds | Open edX image builds, MFE builds, macOS/iOS runs | use only when lane value justifies the cost |
+| scheduled audits | parity, health, DR, public checks | tune cadence deliberately, not by drift |
+| docs-only / low-signal runs | workflows triggered by path/filter mistakes | reduce via trigger discipline and branch-protection alignment |
+| avoidable cache misses | pod/gem/npm/pip/Docker cache cold starts | optimize where correctness is preserved |
+
 ### Self-Hosted Runners via ARC (Implemented)
 
 Actions Runner Controller (ARC) provisions ephemeral Kubernetes runners on the existing RKE2 cluster.
@@ -246,8 +262,7 @@ Two runner pools are deployed:
 | `mereka-k8s-runners` | Cron audits, linting, spec verification | Eliminates ~$20–30/month of scheduled workflow minutes |
 | `mereka-k8s-heavy-builders` | Tutor image builds, E2E Playwright | Eliminates ~$30–40/month of heavy compute minutes |
 
-**Expected outcome**: Monthly GitHub Actions cost drops from ~$56 to near-zero after Phase 5 migration
-(see `docs/status/active/CI_OPTIMIZATION_TRACKER.md` Phase 5 tasks for the per-workflow migration checklist).
+**Expected outcome**: Monthly GitHub Actions cost drops from ~$56 to near-zero after the ARC/self-hosted migration.
 
 For ARC setup details, runner labels, PVC caching strategy, and troubleshooting, see:
 `docs/ops/ci-cd/CI_CD_RUNNERS.md`
@@ -311,7 +326,8 @@ A Grafana dashboard can visualize GitHub Actions usage trends.
 - **CI/CD Setup**: `docs/reference/operations/CI_CD_SETUP.md` - GitHub Actions configuration
 - **Release Checklist**: `docs/ops/runbooks/RELEASE_CHECKLIST.md` - Deployment workflows
 - **Cost Optimization Analysis**: `reports/2026/learnings/CI_PIPELINE_COST_OPTIMIZATION.md` - Expert review findings and phased plan
-- **Optimization Tracker**: `docs/status/active/CI_OPTIMIZATION_TRACKER.md` - Implementation tasks with file mappings
+- **ARC Runner Setup**: `docs/ops/ci-cd/CI_CD_RUNNERS.md` - current runner topology and operator guidance
+- **Cost Optimization Analysis**: `reports/2026/learnings/CI_PIPELINE_COST_OPTIMIZATION.md` - dated implementation analysis and findings
 
 ## Verification Script
 

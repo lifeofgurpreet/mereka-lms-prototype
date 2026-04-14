@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Bead v2 Format Linter
-# Validates beads against the v2 format standard (docs/meta/docs-program/bead-v2-format.md)
+# Validates beads against the v2 format standard (docs/guides/standards/bead-v2-format.md)
 
 set -euo pipefail
 
@@ -138,7 +138,7 @@ while [[ $# -gt 0 ]]; do
             cat <<EOF
 Usage: $0 [OPTIONS]
 
-Validate beads against v2 format standard (docs/meta/docs-program/bead-v2-format.md)
+Validate beads against v2 format standard (docs/guides/standards/bead-v2-format.md)
 
 OPTIONS:
   --json          Output machine-readable JSON

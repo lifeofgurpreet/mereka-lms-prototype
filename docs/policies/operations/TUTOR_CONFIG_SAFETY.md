@@ -1,34 +1,36 @@
 # Tutor Configuration Safety Guide
 
-<!-- Last verified: 2026-02-13 -->
+<!-- Last verified: 2026-04-14 -->
 
-This guide explains the safety mechanisms in place to prevent Tutor configuration mistakes.
+This guide defines the safe operator path for Tutor config changes.
 
 ## Problem Statement
 
-When you run `tutor config save`, Tutor regenerates **all templates from scratch**. This means:
+When you run `tutor config save`, Tutor regenerates the rendered environment from
+current source hooks. That part is expected. The risk is the layer after that:
+the remaining patch-only filesystem sync and tracked rendered build-context
+surfaces still need a governed refresh.
 
-1. Custom patches are lost
-2. Multi-site domain configurations disappear
-3. MySQL authentication fixes are removed
-4. MFE build toolchain reverts to Node 12
-5. Prometheus metrics integration is removed
-6. Custom Mereka footer disappears
+If that refresh step is skipped, you can still end up with:
 
-**Common failure modes:**
-- Site goes down after config change
-- MySQL authentication fails
-- MFE builds fail with out-of-memory errors
-- Multi-site domains return 404
-- Prometheus metrics stop working
+1. rendered Open edX and MFE build context drifting from current source truth
+2. stale custom-app or theme-asset mirrors under `tutor_env/`
+3. tracked rendered MFE Dockerfile snapshot drift
+4. verification failures that look like config regressions but are really
+   missing post-render refresh
 
-## Solution: Three-Layer Safety System
+Common failure modes:
 
-### Layer 1: Safe Wrapper Script
+- site instability after a config change
+- rendered build contracts falling behind Tutor plugin source
+- stale theme or custom-app files lingering after source deletions
+- verification failures after a manual `tutor config save`
 
-**Recommended for all users**
+## Canonical Safety System
 
-Use `tutor-config-save.sh` instead of `tutor config save`:
+### Layer 1: Safe Wrapper
+
+Preferred path:
 
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
@@ -36,256 +38,126 @@ export TUTOR_ROOT="$(pwd)/tutor_env"
 tutor local restart
 ```
 
-**What it does:**
-1. Backs up existing config (`config.yml.backup.YYYYMMDD_HHMMSS`)
-2. Runs `tutor config save` with your arguments
-3. Automatically applies all patches
-4. Verifies patches were applied correctly
-5. Shows clear next steps
-6. Restores backup if anything fails
+What it does:
 
-**Example output:**
-```
-=== Tutor Configuration Manager ===
+1. backs up `config.yml`
+2. runs `tutor config save`
+3. runs `./scripts/infra/prepare-tutor-build-context.sh --target all`
+4. verifies the rendered environment
+5. restores the backup on failure
 
-Repository:  <repo-root>
-Tutor Root:  <repo-root>/tutor_env
+This is the default operator front door.
 
-Backing up existing config...
-  → tutor_env/config.yml.backup.20260210_125000
+### Layer 2: Verification
 
-Step 1: Running 'tutor config save'
-✓ Config saved successfully
-
-Step 2: Applying custom patches
-✓ Patches applied successfully
-
-Step 3: Verifying configuration
-✓ All required patches verified successfully!
-
-=== Configuration Complete ===
-
-Next steps:
-  Local development:
-    tutor local restart
-
-  Kubernetes:
-    tutor k8s restart
-```
-
-### Layer 2: Verification Script
-
-**Manual verification**
-
-Run after any `tutor config save`:
+Verification command:
 
 ```bash
 ./scripts/infra/verify-tutor-config.sh
 ```
 
-**Checks performed:**
-- ✓ Multi-site domain configuration (biji-biji.com, skillourfuture)
-- ✓ MySQL authentication fix
-- ✓ MFE Node 24 toolchain
-- ✓ MFE cookie domain config
-- ✓ Custom Mereka footer
-- ✓ Forum MongoDB Atlas SRV
-- ✓ Custom apps integration (mfe_oauth_fix, openedx_prometheus)
-- ✓ Prometheus metrics middleware
-- ✓ Build optimizations (npm/pip retry logic)
-- ✓ Asset build fixes (collectstatic safe_join)
-- ✓ Theme assets (logos, fonts, SCSS)
-- ✓ Health endpoints (/health, /metrics)
-- ✓ Enterprise features (content_libraries, bookmarks, discussions)
+What it proves:
 
-**Exit codes:**
-- `0` - All checks passed
-- `1` - One or more checks failed
+- multi-site host and CSRF configuration
+- MySQL authentication contract
+- rendered MFE Node 24 toolchain contract
+- MFE cookie domain config
+- exactly one rendered `DEFAULT_SITE_THEME = "mereka"` assignment
+- custom-app mirror correctness
+- theme asset mirror correctness
+- absence of rejected `build-optimizations.sh` residue, including stale Tutor Dockerfile-template and docker-compose/settings/assets/nginx/Caddy target scans, the dead MySQL auth compatibility rewrite, stale i18n and pip-bootstrap rewrites, dead compilejsi18n/cherry-pick compatibility rewrites, escaped Google Fonts rewrites, and raw pyenv clone fallbacks
+- health endpoints and selected feature flags
 
-**Example output:**
-```
-=== Checking Multi-Site Domain Configuration ===
-✓ Biji-Biji domain in ALLOWED_HOSTS
-✓ SkillOurFuture domain in ALLOWED_HOSTS
-✓ Biji-Biji domain in CSRF_TRUSTED_ORIGINS
-✓ SkillOurFuture domain in CSRF_TRUSTED_ORIGINS
+Exit codes:
 
-=== Checking MySQL Authentication Fix ===
-✓ MySQL native password plugin
-✓ MySQL remote root access
+- `0`: verification passed
+- `1`: one or more required checks failed
 
-=== Verification Summary ===
-✓ All required patches verified successfully!
-```
+### Layer 3: Pre-Commit Guard
 
-### Layer 3: Git Pre-Commit Hook
+The git hook activates when you stage `tutor_env/` files.
 
-**Automatic safety net**
+Setup:
 
-Activates when committing `tutor_env/` files.
-
-**Setup (one-time):**
 ```bash
 git config --local include.path ../.gitconfig
 ```
 
-**What it does:**
-1. Detects commits touching `tutor_env/` files
-2. Warns if `config.yml` contains secrets
-3. Prompts: "Did you run apply-patches.sh?"
-4. Optionally runs verification checks
-5. Blocks commit if verification fails
+What it does:
 
-**Example interaction:**
-```
-$ git add tutor_env/env/apps/openedx/settings/lms/production.py
-$ git commit -m "feat: update LMS settings"
+1. detects staged Tutor-generated files
+2. warns if `config.yml` is staged
+3. asks whether you reran the governed Tutor refresh path
+4. optionally runs verification
+5. blocks the commit if verification fails
 
-=== Tutor Configuration Change Detected ===
+The hook now points operators at the real recovery command:
 
-The following Tutor-generated files are being committed:
-  - tutor_env/env/apps/openedx/settings/lms/production.py
-
-IMPORTANT: Did you run apply-patches.sh?
-
-Patches applied:
-  • MySQL authentication fix
-  • MFE Node 24 toolchain
-  • Multi-site domain configuration
-  • Custom Mereka footer
-  • Prometheus metrics integration
-  • MongoDB Atlas SRV support
-  • Build optimizations
-
-Have you run apply-patches.sh after 'tutor config save'? [y/N] y
-
-Running verification checks...
-✓ All required patches verified successfully!
-
-✓ Proceeding with commit
-```
-
-**Bypass (emergencies only):**
 ```bash
-git commit --no-verify
+./scripts/infra/prepare-tutor-build-context.sh --target all
 ```
 
 ## Workflows
 
-### Recommended Workflow (Safest)
+### Recommended Workflow
 
 ```bash
-# 1. Set environment
 export TUTOR_ROOT="$(pwd)/tutor_env"
-
-# 2. Use safe wrapper
 ./scripts/infra/tutor-config-save.sh --set KEY=value
-
-# 3. Restart services
-tutor local restart  # or 'tutor k8s restart'
-
-# 4. Commit (git hook verifies automatically)
+tutor local restart
 git add tutor_env/
 git commit -m "feat: update config"
 ```
 
-### Manual Workflow (Advanced Users)
+### Manual Workflow
+
+Use this only when you intentionally need the lower-level sequence:
 
 ```bash
-# 1. Set environment
 export TUTOR_ROOT="$(pwd)/tutor_env"
-
-# 2. Save config
 tutor config save --set KEY=value
-
-# 3. Apply patches (CRITICAL!)
-./infrastructure/tutor/apply-patches.sh
-
-# 4. Verify patches
+./scripts/infra/prepare-tutor-build-context.sh --target all
 ./scripts/infra/verify-tutor-config.sh
-
-# 5. Restart services
 tutor local restart
-
-# 6. Commit
 git add tutor_env/
 git commit -m "feat: update config"
 ```
 
 ### Emergency Recovery
 
-If you forgot to apply patches:
-
 ```bash
-# 1. Check what's wrong
 ./scripts/infra/verify-tutor-config.sh
-
-# 2. Apply patches
-./infrastructure/tutor/apply-patches.sh
-
-# 3. Verify fixed
+./scripts/infra/prepare-tutor-build-context.sh --target all
 ./scripts/infra/verify-tutor-config.sh
-
-# 4. Restart
 tutor local restart
 ```
 
-## Patch Details
+## Refresh Responsibilities
 
-### Critical Patches Applied
+The governed refresh path covers:
 
-**MySQL Authentication:**
-- Changes `--mysql-native-password=ON` to `--default-authentication-plugin=mysql_native_password`
-- Adds `MYSQL_ROOT_HOST: "%"` for remote root access
+- rendered Open edX and MFE build-context refresh
+- tracked rendered MFE Dockerfile snapshot refresh
+- theme and custom-app mirror sync
+- remaining patch-only filesystem transforms
 
-**MFE Build Toolchain:**
-- Upgrades Node 12 → Node 18
-- Adds `g++` and `python3` to build dependencies
-- Sets cookie domain environment variables
+The low-level helper:
 
-**Multi-Site Configuration:**
-- Adds `academy.biji-biji.com` to ALLOWED_HOSTS
-- Adds `skillourfuture.academy.mereka.io` to ALLOWED_HOSTS
-- Adds CSRF trusted origins for both domains
-- Configures Caddy/nginx for extra domains
+- `infrastructure/tutor/apply-patches.sh`
 
-**Build Optimizations:**
-- Increases Node memory: `NODE_OPTIONS=--max-old-space-size=6144`
-- Adds retry logic for npm/pip installs (3 attempts)
-- Disables Terser parallelism (memory-intensive)
+still implements part of that refresh, but it is not the default operator front
+door. Use it directly only when debugging the patch layer itself.
 
-**Custom Apps:**
-- Copies and installs `mfe_oauth_fix` (OAuth provider visibility)
-- Copies and installs `openedx_prometheus` (metrics endpoint)
-- Installs `django-prometheus==2.3.1`
-- Installs `pymongo[srv]` (MongoDB Atlas SRV support)
+## Files Realized Or Refreshed
 
-**Theme Integration:**
-- Syncs logo files (PNG/SVG variants)
-- Syncs font files (WOFF2)
-- Syncs SCSS overrides
-- Injects custom Mereka footer in MFE env.config.jsx
+Typical refreshed surfaces include:
 
-**Asset Build Fixes:**
-- Monkey-patches `safe_join` to fix SuspiciousFileOperation errors
-- Strips Google Fonts imports from SCSS
-- Ensures optional Redwood apps are enabled
-
-### Files Modified by Patches
-
-**Templates:**
 - `tutor_env/env/plugins/mfe/build/mfe/Dockerfile`
 - `tutor_env/env/plugins/mfe/build/mfe/indigo/env.config.jsx`
-- `tutor_env/env/local/docker-compose.yml`
 - `tutor_env/env/build/openedx/Dockerfile`
 - `tutor_env/env/apps/caddy/Caddyfile`
 - `tutor_env/env/apps/nginx/lms.conf`
 - `tutor_env/env/apps/openedx/settings/lms/production.py`
-- `tutor_env/env/build/openedx/settings/lms/assets.py`
-- `tutor_env/env/build/openedx/settings/cms/assets.py`
-- `tutor_env/env/build/openedx/edx-platform/webpack.prod.config.js`
-
-**Theme Assets:**
 - `tutor_env/env/build/openedx/themes/mereka/`
 - `tutor_env/env/plugins/mfe/build/mfe/indigo/mereka/`
 
@@ -293,91 +165,67 @@ tutor local restart
 
 ### Verification Failed
 
-If `verify-tutor-config.sh` fails:
+```bash
+./scripts/infra/verify-tutor-config.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
+./scripts/infra/verify-tutor-config.sh
+```
 
-1. Check which patches failed:
-   ```bash
-   ./scripts/infra/verify-tutor-config.sh
-   ```
-
-2. Re-apply patches:
-   ```bash
-   ./infrastructure/tutor/apply-patches.sh
-   ```
-
-3. If still failing, check for template drift:
-   ```bash
-   # Compare with upstream Tutor templates
-   tutor --version
-   # Check if Tutor version changed
-   ```
+If it still fails, inspect Tutor/plugin source drift before changing docs or
+generated outputs.
 
 ### Site Down After Config Change
 
-1. Run diagnostics:
-   ```bash
-   ./scripts/infra/verify-tutor-config.sh
-   ```
-
-2. If patches missing, apply and restart:
-   ```bash
-   ./infrastructure/tutor/apply-patches.sh
-   tutor local restart
-   ```
-
-3. Check logs:
-   ```bash
-   tutor local logs --tail=100 lms
-   ```
+```bash
+./scripts/infra/verify-tutor-config.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
+tutor local restart
+tutor local logs --tail=100 lms
+```
 
 ### Git Hook Not Running
 
-1. Check hook path is configured:
-   ```bash
-   git config --local core.hooksPath
-   # Should show: .githooks
-   ```
-
-2. Configure if missing:
-   ```bash
-   git config --local include.path ../.gitconfig
-   ```
-
-3. Verify hook is executable:
-   ```bash
-   ls -l .githooks/pre-tutor-config
-   # Should show: -rwxr-xr-x
-   ```
+```bash
+git config --local core.hooksPath
+git config --local include.path ../.gitconfig
+ls -l .githooks/pre-tutor-config
+```
 
 ## Related Documentation
 
-- `docs/meta/standing-orders/README.md` - Canonical standing orders
-- `docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md` - Canonical doc roots
-- `infrastructure/tutor/apply-patches.sh` - Patch implementation
-- `docs/ops/runbooks/TROUBLESHOOTING.md` - General troubleshooting
-- `.githooks/pre-tutor-config` - Git hook source code
-- `scripts/infra/verify-tutor-config.sh` - Verification script source
+- `docs/README.md`
+- `docs/meta/standing-orders/README.md`
+- `docs/ops/runbooks/TROUBLESHOOTING.md`
+- `scripts/infra/tutor-config-save.sh`
+- `scripts/infra/prepare-tutor-build-context.sh`
+- `scripts/infra/verify-tutor-config.sh`
+- `infrastructure/tutor/apply-patches.sh`
+- `.githooks/pre-tutor-config`
 
 ## Quick Reference
 
-**Safe config change:**
+Safe config change:
+
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
 ./scripts/infra/tutor-config-save.sh --set KEY=value
 tutor local restart
 ```
 
-**Manual verification:**
+Manual verification:
+
 ```bash
 ./scripts/infra/verify-tutor-config.sh
 ```
 
-**Emergency patch re-apply:**
+Emergency refresh:
+
 ```bash
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
 ```
 
-**Setup git hooks:**
+Hook setup:
+
 ```bash
 git config --local include.path ../.gitconfig
 ```

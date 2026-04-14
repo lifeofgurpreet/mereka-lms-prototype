@@ -7,7 +7,7 @@ Use this root when you need factual architecture reference: contracts, inventori
 
 | If you need to... | Read this first | Then go deeper in |
 |---|---|---|
-| Understand the platform/runtime contract surface | [`API_CONTRACTS.md`](API_CONTRACTS.md) | [`../../concepts/architecture/README.md`](../../concepts/architecture/README.md) |
+| Understand the platform/runtime contract surface | [`API_CONTRACTS.md`](API_CONTRACTS.md) | [`../../architecture/README.md`](../../architecture/README.md) |
 | Check deployment boundaries or ownership | [`DEPLOYMENT_CONTRACT.md`](DEPLOYMENT_CONTRACT.md) | [`../../policies/operations/README.md`](../../policies/operations/README.md) |
 | Understand the MFE/runtime composition surface | [`MFE_RUNTIME_CONFIG.md`](MFE_RUNTIME_CONFIG.md) | [`MFE_COMPLETE_LIST.md`](MFE_COMPLETE_LIST.md) |
 | Inspect plugin slots or override inventory | [`FPF_PLUGIN_SLOT_REGISTRY.md`](FPF_PLUGIN_SLOT_REGISTRY.md) | [`MFE_PLUGIN_SLOT_INVENTORY.md`](MFE_PLUGIN_SLOT_INVENTORY.md) |
@@ -48,11 +48,11 @@ Use this root when you need factual architecture reference: contracts, inventori
 ## Do not use this directory for
 
 - accepted decisions, which belong in `docs/adr/**`
-- living architecture law, which belongs in `docs/concepts/architecture/**`
+- living architecture law, which belongs in `docs/architecture/**`
 - operator procedures, which belong in `docs/ops/**`
 
 ## How To Use This Root Well
 
 1. Use this root to answer factual questions about structure, contracts, or inventories.
-2. If you need to know what rule governs the system, leave this root and go to [`../../concepts/architecture/README.md`](../../concepts/architecture/README.md) or [`../../policies/README.md`](../../policies/README.md).
+2. If you need to know what rule governs the system, leave this root and go to [`../../architecture/README.md`](../../architecture/README.md) or [`../../policies/README.md`](../../policies/README.md).
 3. If you need execution steps, leave this root and go to [`../../ops/README.md`](../../ops/README.md).

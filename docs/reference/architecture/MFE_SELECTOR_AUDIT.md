@@ -9,7 +9,7 @@
 **Date**: 2026-02-25
 **Task**: T102 — Reduce MFE brittle selectors by 50%
 **Author**: Automated (Claude / implementor agent)
-**Related**: [SELECTOR_HARDENING_POLICY.md](./SELECTOR_HARDENING_POLICY.md)
+**Related**: [SELECTOR_HARDENING_POLICY.md](../../policies/architecture/SELECTOR_HARDENING_POLICY.md)
 
 ---
 

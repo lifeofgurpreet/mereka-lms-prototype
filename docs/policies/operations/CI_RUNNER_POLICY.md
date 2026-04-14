@@ -1,7 +1,7 @@
 # CI Runner Policy
 
-**Parent docs**: [CI_CD_RUNNERS.md](CI_CD_RUNNERS.md) | [CI_OPTIMIZATION_TRACKER.md](CI_OPTIMIZATION_TRACKER.md)
-**Related**: [CI_CD_SETUP.md](CI_CD_SETUP.md) | [CI_PIPELINE_COST_OPTIMIZATION.md](CI_PIPELINE_COST_OPTIMIZATION.md)
+**Parent docs**: [CI_CD_RUNNERS.md](../../ops/ci-cd/CI_CD_RUNNERS.md) | [CI_OPTIMIZATION_TRACKER.md](../../status/active/CI_OPTIMIZATION_TRACKER.md)
+**Related**: [CI_CD_SETUP.md](../../reference/operations/CI_CD_SETUP.md) | [CI_PIPELINE_COST_OPTIMIZATION.md](../../../reports/2026/learnings/CI_PIPELINE_COST_OPTIMIZATION.md)
 
 ---
 
@@ -230,4 +230,4 @@ The script runs as part of the `static-validation` job in `ci.yml` through the g
 blocked by `python3 scripts/governance/generate-ci-static-inventory.py --check`.
 It exits non-zero on violations so CI blocks merges.
 
-See [CI_CD_RUNNERS.md](CI_CD_RUNNERS.md) for ARC infrastructure setup and troubleshooting.
+See [CI_CD_RUNNERS.md](../../ops/ci-cd/CI_CD_RUNNERS.md) for ARC infrastructure setup and troubleshooting.

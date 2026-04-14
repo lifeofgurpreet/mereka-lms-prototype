@@ -43,12 +43,10 @@ The following values are set as Docker `ARG`/`ENV` in
 | `APP_ID` | e.g. `authn`, `learning`, `account` | Per-MFE `ENV` in Dockerfile |
 | `PUBLIC_PATH` | e.g. `/authn/`, `/learning/` | Per-MFE `ENV` in Dockerfile |
 | `MFE_CONFIG_API_URL` | `/api/mfe_config/v1` (relative) | Per-MFE `ENV` in Dockerfile |
-| `SESSION_COOKIE_DOMAIN` | `.academyv2.mereka.io` | `ARG` with default in Dockerfile |
-| `CSRF_COOKIE_DOMAIN` | `.academyv2.mereka.io` | `ARG` with default in Dockerfile |
-| `ENABLE_NEW_RELIC` | `false` (default) | `ARG` with default in Dockerfile |
 | `NODE_ENV` | `production` | Build-stage `ENV` in Dockerfile |
-| Brand package | `@edly-io/indigo-brand-openedx` | `npm install` in Dockerfile |
-| Mereka SCSS | `mereka.scss` | Copied from `indigo/mereka/` in Dockerfile |
+| Brand package | `@edx/brand@file:./brand-mereka` | `npm install` in Dockerfile |
+| Runtime theme payload | `indigo/theme/` | Copied into `/openedx/dist/theme` in production stage |
+| Mereka SCSS | `mereka.scss` | Imported by `env.config.jsx` from `indigo/mereka/` |
 
 **Key observation**: `MFE_CONFIG_API_URL` is intentionally set to a relative path
 (`/api/mfe_config/v1`) so that it resolves against whatever origin the MFE is served
@@ -143,9 +141,8 @@ prevent image reuse across environments:
 
 | Variable | Current state | Target |
 |----------|--------------|--------|
-| `SESSION_COOKIE_DOMAIN` | Hardcoded to `.academyv2.mereka.io` in Dockerfile | Remove from Dockerfile; LMS serves via mfe_config |
-| `CSRF_COOKIE_DOMAIN` | Hardcoded to `.academyv2.mereka.io` in Dockerfile | Remove from Dockerfile; LMS serves via mfe_config |
-| `ENABLE_NEW_RELIC` | Build ARG defaulting to false | LMS feature flag via mfe_config |
+| Cookie domain keys | Removed from the active MFE Dockerfile; LMS/runtime config owns delivery | Keep runtime-owned via `mfe_config` |
+| New Relic toggle | Removed from the active MFE Dockerfile | Keep runtime- or release-owned; do not restore build ARGs |
 | Footer nav links | Hardcoded array in `env.config.jsx` | Fetch from `INDIGO_FOOTER_NAV_LINKS` runtime key |
 | `SITE_VARIANTS` hostname map | Hardcoded in `env.config.jsx` | LMS `SiteConfiguration` already handles per-site branding; remove from MFE |
 | `DISCUSSIONS_MICROFRONTEND_URL` default | Hardcoded string in mereka_lms.py plugin | Set via `SiteConfiguration` or Tutor config variable only |
@@ -159,21 +156,11 @@ variants) should be sourced from runtime config keys.
 
 ## Migration Plan
 
-### Phase 1 — Cookie domain (low risk, high value)
+### Phase 1 — Cookie domain (completed)
 
-Remove `SESSION_COOKIE_DOMAIN` and `CSRF_COOKIE_DOMAIN` from the MFE Dockerfile.
-The Open edX frontend reads these from the mfe_config API response, where the LMS
-already sets them correctly based on the `SiteConfiguration`.
-
-Affected file: `infrastructure/tutor/mfe-build/Dockerfile`
-Lines to remove from each MFE's `common` stage:
-```dockerfile
-# Remove these from all MFE stages:
-ARG SESSION_COOKIE_DOMAIN=.academyv2.mereka.io
-ARG CSRF_COOKIE_DOMAIN=.academyv2.mereka.io
-ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
-ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
-```
+`SESSION_COOKIE_DOMAIN` and `CSRF_COOKIE_DOMAIN` are no longer baked into the
+active MFE Dockerfile. The frontend now relies on the runtime config posture
+served by the LMS instead of build-time cookie-domain args.
 
 Verification: `scripts/qa/verify-mfe-config-contract.sh` already checks that the
 correct cookie posture is present in the mfe_config API response.
@@ -198,11 +185,10 @@ key, e.g. `MEREKA_SITE_VARIANT`, served by the LMS based on the current
 `SiteConfiguration`. The LMS already resolves the site from the `Host` header and
 the mfe_config proxy forwards `Host`, so this is straightforward.
 
-### Phase 4 — New Relic toggle (low complexity)
+### Phase 4 — New Relic toggle (completed)
 
-Remove the `ENABLE_NEW_RELIC` build ARG and drive it from an LMS feature flag key
-in mfe_config. This enables enabling/disabling New Relic instrumentation without a
-rebuild.
+The active MFE Dockerfile no longer carries `ENABLE_NEW_RELIC` build args.
+Keep any New Relic enablement decision outside the MFE build ARG contract.
 
 ### Phase 5 — DISCUSSIONS_MICROFRONTEND_URL default (cleanup)
 
@@ -218,7 +204,7 @@ This prevents the production domain from leaking into non-production environment
 │  BUILD-TIME (requires image rebuild to change)      │
 │                                                     │
 │  APP_ID, PUBLIC_PATH, NODE_ENV                      │
-│  Brand npm package (@edly-io/indigo-brand-openedx)  │
+│  Brand npm package (@edx/brand@file:./brand-mereka) │
 │  mereka.scss (compiled into CSS bundle)             │
 │  env.config.jsx plugin slot structure               │
 │                                                     │
@@ -275,9 +261,12 @@ The Indigo theme plugin (tutor-contrib-indigo) overrides the template entirely. 
 uses the Indigo-rendered `env.config.jsx` stored at
 `tutor_env/env/plugins/mfe/build/mfe/indigo/env.config.jsx`.
 
-After any `tutor config save`, run `./infrastructure/tutor/apply-patches.sh` to
-re-apply all Mereka customizations. The `env.config.jsx` rendered by Indigo is
-the output of this process.
+After any manual `tutor config save`, run
+`./scripts/infra/prepare-tutor-build-context.sh --target mfe` before treating
+the rendered Dockerfile or tracked snapshot as current. That canonical wrapper
+checks rendered freshness, runs the remaining patch-only build-context sync, and
+refreshes `infrastructure/tutor/mfe-build/Dockerfile` from the rendered
+authority path.
 
 ## Files Referenced
 

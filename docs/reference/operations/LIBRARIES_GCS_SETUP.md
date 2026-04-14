@@ -22,5 +22,5 @@ This reference records the storage expectations for Content Libraries v2.
 
 ## Related docs
 
-- [`../../concepts/architecture/content-libraries-overview.md`](../../concepts/architecture/content-libraries-overview.md)
 - [`../../ops/runbooks/CONTENT_LIBRARIES_V2_MIGRATION.md`](../../ops/runbooks/CONTENT_LIBRARIES_V2_MIGRATION.md)
+- [content-libraries-overview.md](../../concepts/architecture/content-libraries-overview.md) remains background context only.

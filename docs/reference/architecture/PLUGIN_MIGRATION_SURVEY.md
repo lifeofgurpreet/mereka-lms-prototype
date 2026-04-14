@@ -75,11 +75,13 @@ These patches exist exclusively in `apply-patches.sh` and MUST be migrated to `m
 table originally recorded. Durable MFE Dockerfile ownership lives in Tutor plugin hooks under
 `infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py`; the only remaining documented
 post-render MFE Dockerfile rewrite in `apply-patches.sh` is `wrap_mfe_pull_translations_retry`.
+Legacy migration IDs may still appear below for bookkeeping; read the `Status`
+column literally instead of assuming every row is still live script-only authority.
 
 | # | Patch | Target | Status | Risk | Expiry | Migration Plan |
 |---|-------|--------|--------|------|--------|----------------|
 | C1 | `PIPELINE['JS_COMPRESSOR'] = None` | `assets.py` | SCRIPT-ONLY | HIGH | 2026-Q3 | Add to plugin `openedx-lms-assets-settings` hook |
-| C2 | Node 18 base image pin | `mfe/Dockerfile` | SCRIPT-ONLY | HIGH | 2026-Q3 | Add to plugin or resolve via `DOCKER_IMAGE_OPENEDX_MFE_NODE` config |
+| C2 | Node 24 build toolchain (historical ID) | `mfe_dockerfile.py` | MIGRATED | LOW | Closed | Already owned by plugin `mfe-dockerfile-pre-npm-install` hook; do not treat as live script-only authority. |
 | C3 | Node cache reuse from upstream | `Dockerfile` | EXCEPTION | HIGH | 2026-Q4 | Requires Tutor hook for pre-npm-install Dockerfile lines. File exception. |
 | C4 | Course authoring directory fix | `mfe/Dockerfile` | SCRIPT-ONLY | HIGH | 2026-Q3 | Add symlink to plugin `mfe-dockerfile-post-npm-install` hook |
 | C5 | MFE theme COPY (`indigo/mereka`) | `mfe/Dockerfile` | SCRIPT-ONLY | HIGH | 2026-Q3 | Add to plugin `mfe-dockerfile-post-npm-install` hook |

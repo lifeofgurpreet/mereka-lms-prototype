@@ -105,7 +105,7 @@ if [[ -d infrastructure/tutor/themes/mereka/ ]]; then
 fi
 
 # Count documented slot-wirable customizations from policy doc
-POLICY_DOC="docs/concepts/architecture/SELECTOR_HARDENING_POLICY.md"
+POLICY_DOC="docs/policies/architecture/SELECTOR_HARDENING_POLICY.md"
 SLOT_WIRABLE=0
 
 if [[ -f "$POLICY_DOC" ]]; then

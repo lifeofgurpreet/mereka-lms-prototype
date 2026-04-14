@@ -2,7 +2,7 @@
 
 **Purpose**: Track MFE versions to prevent unexpected upstream version drift (AC-UI-004, AC-UIVER-001)
 
-**Last Updated**: 2026-02-17
+**Last Updated**: 2026-04-14
 
 ## Version Baseline (Canonical Source of Truth)
 
@@ -13,7 +13,7 @@ This section is the **authoritative reference** for all frontend tooling version
 | **Tutor (pip)** | 21.0.0 | `requirements-tutor.txt` | Tutor 21.0.0 (Ulmo release) |
 | **Tutor MFE Plugin** | 21.0.0 | `requirements-tutor.txt` | Official plugin for MFE builds |
 | **Open edX Release** | Ulmo | Named release | Tutor v21.0.0 |
-| **Node.js** | 20+ | Patched via MFE Dockerfile | Current LTS |
+| **Node.js** | 24.11.0 | Tutor plugin MFE Dockerfile hooks | Current supported build base |
 | **Python (CI/Dev)** | 3.12 | CI workflows, local dev | Minimum: 3.10 |
 | **Webpack Memory Limit** | 6144 MB | `NODE_OPTIONS=--max-old-space-size=6144` | Required for Ulmo asset pipeline |
 | **Mereka Plugin** | 1.0.0 | `infrastructure/tutor/plugins/mereka_lms.py` | Custom Tutor plugin for Mereka patches |
@@ -35,17 +35,17 @@ These apps are installed via the Mereka Tutor plugin and verified by `scripts/qa
 
 ## Current MFE Versions
 
-All MFEs are built from Tutor 21.0.0 (Ulmo release) with custom patches.
+All MFEs are built from Tutor 21.0.0 (Ulmo release) with the current plugin-first MFE build contract.
 
 | MFE | Version | Tutor Image Tag | Node Version | Notes |
 |-----|---------|-----------------|--------------|-------|
-| learner-dashboard | v21.0.0 | `openedx-mfe:21.0.0` | 20+ | Learner progress, recommendations |
-| learning | v21.0.0 | `openedx-mfe:21.0.0` | 20+ | Course player, unit navigation |
-| profile | v21.0.0 | `openedx-mfe:21.0.0` | 20+ | User profiles |
-| account | v21.0.0 | `openedx-mfe:21.0.0` | 20+ | Account settings |
-| gradebook | v21.0.0 | `openedx-mfe:21.0.0` | 20+ | Instructor gradebook |
-| authn | v21.0.0 | `openedx-mfe:21.0.0` | 20+ | Login, registration |
-| course-authoring | v21.0.0 | `openedx-mfe:21.0.0` | 20+ | Studio content authoring |
+| learner-dashboard | v21.0.0 | `openedx-mfe:21.0.0` | 24.11.0 | Learner progress, recommendations |
+| learning | v21.0.0 | `openedx-mfe:21.0.0` | 24.11.0 | Course player, unit navigation |
+| profile | v21.0.0 | `openedx-mfe:21.0.0` | 24.11.0 | User profiles |
+| account | v21.0.0 | `openedx-mfe:21.0.0` | 24.11.0 | Account settings |
+| gradebook | v21.0.0 | `openedx-mfe:21.0.0` | 24.11.0 | Instructor gradebook |
+| authn | v21.0.0 | `openedx-mfe:21.0.0` | 24.11.0 | Login, registration |
+| course-authoring | v21.0.0 | `openedx-mfe:21.0.0` | 24.11.0 | Studio content authoring |
 
 ## Version Pinning Strategy
 
@@ -54,24 +54,21 @@ All MFEs are built from Tutor 21.0.0 (Ulmo release) with custom patches.
 - Tutor handles MFE builds with specific git commits
 - No automatic upstream updates
 
-### Custom Patches Applied
+### Current Build Authority Split
 
-All MFEs receive the following patches via `infrastructure/tutor/apply-patches.sh`:
+The current MFE build path is no longer driven by broad post-render Dockerfile surgery.
 
-1. **Node Build Toolchain** (`00-mfe-node18.patch`):
-   - Adds build essentials: `g++`, `python3`, `make`
-   - Fixes webpack compilation errors
-   - Required for: all MFEs
+1. **Tutor plugin MFE Dockerfile hooks** (`infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py`)
+   - Own the durable Dockerfile contract: Node 24 base image, build prerequisites, plugin framework install, Redux/runtime package additions, and related hook-expressible lines.
+   - These hooks are the canonical source for MFE Dockerfile customization.
 
-2. **Webpack Memory Limit** (`02-mfe-webpack-memory.patch`):
-   - Sets `NODE_OPTIONS=--max-old-space-size=6144`
-   - Prevents OOM during asset compilation
-   - Required for: all MFEs
+2. **Governed build-context refresh** (`./scripts/infra/prepare-tutor-build-context.sh --target mfe`)
+   - Refreshes the rendered MFE build context and then runs the bounded patch helper path required for asset sync, helper file copy, and other filesystem-only operations.
+   - This is the sanctioned operator entrypoint after `tutor config save`.
 
-3. **Mereka Footer** (`03-mfe-mereka-footer.patch`):
-   - Injects custom Mereka footer component
-   - Branding consistency across all MFEs
-   - Required for: learner-dashboard, learning, profile, account, gradebook, authn, course-authoring
+3. **Single documented rendered-Dockerfile exception** (`infrastructure/tutor/apply-patches.sh`)
+   - Retains the `wrap_mfe_pull_translations_retry` rewrite so Atlas translation pulls are retried inside the rendered MFE Dockerfile.
+   - This is the only allowed post-render MFE Dockerfile rewrite still documented on 2026-04-14.
 
 ## Upstream Update Policy
 
@@ -107,13 +104,14 @@ Follow these steps to upgrade Tutor, Open edX, or MFE versions:
    # Update Tutor version
    pip install "tutor[full]==<new-version>" "tutor-mfe==<new-version>"
 
+   # Refresh governed MFE build context
+   ./scripts/infra/prepare-tutor-build-context.sh --target mfe
+
    # Validate MFEs locally
    tutor images build mfe
 
-   # Apply patches
-   ./infrastructure/tutor/apply-patches.sh
-
    # Verify patches applied
+   ./scripts/qa/verify-mfe-build-prereqs.sh
    ./scripts/infra/verify-tutor-config.sh
 
    # Test locally
@@ -134,10 +132,10 @@ Follow these steps to upgrade Tutor, Open edX, or MFE versions:
    ```
 
 #### 6. Update Patches (if needed)
-   - Review `infrastructure/tutor/apply-patches.sh`
-   - Verify all patches still apply cleanly
-   - Add new patches if Tutor upstream changes broke existing behavior
-   - Run verification: `./scripts/infra/verify-tutor-config.sh`
+   - Review Tutor plugin hook ownership in `infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py`
+   - Review `infrastructure/tutor/apply-patches.sh` only for the bounded retry/file-sync exceptions
+   - Verify the governed refresh path still reproduces the tracked snapshot
+   - Run verification: `./scripts/qa/verify-mfe-build-prereqs.sh` and `./scripts/infra/verify-tutor-config.sh`
 
 #### 7. CI Validation
    ```bash
@@ -173,7 +171,7 @@ After upgrading Tutor/Open edX, verify these contracts:
 ## MFE Build Configuration
 
 ### Build Environment
-- **Base Image**: `node:20-bullseye` (current LTS)
+- **Base Image**: `docker.io/node:24.11.0-bullseye-slim`
 - **Build Tool**: Webpack 5
 - **Memory Limit**: 6GB (`NODE_OPTIONS=--max-old-space-size=6144`)
 - **Build Time**: ~15-20 minutes (all MFEs)

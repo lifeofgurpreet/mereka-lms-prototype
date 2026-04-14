@@ -3,8 +3,8 @@
 # @spec: tutor-configuration_spec.md
 # Verify the MFE build contract after patches are applied.
 #
-# This is a light wrapper that reuses existing prereq checks and enforces Node 18+
-# appears in the generated MFE Dockerfile.
+# This is a light wrapper that reuses existing prereq checks and enforces the
+# Node 24 rendered MFE build contract.
 #
 # Usage:
 #   ./scripts/qa/verify-mfe-build-contract.sh
@@ -24,10 +24,10 @@ if [[ ! -f "$dockerfile" ]]; then
   exit 1
 fi
 
-if rg -n "FROM.*node:(18|20|22|24)" "$dockerfile" >/dev/null 2>&1; then
+if rg -n "FROM.*node:24" "$dockerfile" >/dev/null 2>&1; then
   echo "OK"
   exit 0
 fi
 
-echo "[FAIL] Expected Node 18+ base image in $dockerfile" >&2
+echo "[FAIL] Expected Node 24 base image in $dockerfile" >&2
 exit 1

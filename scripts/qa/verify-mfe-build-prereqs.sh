@@ -28,7 +28,7 @@ PLUGIN_INSTALL_LINE="RUN npm install --legacy-peer-deps '@openedx/frontend-plugi
 LEGACY_PLUGIN_INSTALL_LINE="RUN npm install '@openedx/frontend-plugin-framework@^1.8.0'"
 REDUX_INSTALL_LINE="RUN npm install --legacy-peer-deps 'react-redux@^8.1.3' 'redux@^4.2.1'"
 PAYMENT_REACT_INTL_INSTALL_LINE="RUN npm install --legacy-peer-deps 'react-intl@^6.4.0'"
-NODE_IMAGE_REGEX="(docker.io/)?node:(18|24|20)[-a-z0-9.]*"
+NODE_IMAGE_REGEX="(docker.io/)?node:24[-a-z0-9.]*"
 PULL_TRANSLATIONS_RETRY_SENTINEL="pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry"
 PULL_TRANSLATIONS_RETRY_FRAGMENT='pull_translations attempt ${attempt} failed; retrying in 15s'
 PULL_TRANSLATIONS_WRAP_FRAGMENT="RUN bash -o pipefail -c 'for attempt in 1 2 3; do "
@@ -181,7 +181,6 @@ check_generated_pull_translations_retry_contract() {
     failures=1
   fi
 }
-
 check_jsx_parse() {
   local label="$1"
   local path="$2"
@@ -262,7 +261,7 @@ check_snapshot_parity
 if [[ -f "$GENERATED_MFE_DOCKERFILE" ]]; then
   check_generated_production_theme_copy
   check_generated_pull_translations_retry_contract
-  check_contains_regex "generated Dockerfile uses supported Node image" "$GENERATED_MFE_DOCKERFILE" "$NODE_IMAGE_REGEX"
+  check_contains_regex "generated Dockerfile uses Node 24 image" "$GENERATED_MFE_DOCKERFILE" "$NODE_IMAGE_REGEX"
   check_contains "generated Dockerfile contains plugin install line" "$GENERATED_MFE_DOCKERFILE" "$PLUGIN_INSTALL_LINE"
   check_contains "generated Dockerfile hardens base-stage apt retries" "$GENERATED_MFE_DOCKERFILE" 'Acquire::Retries "6"'
   check_contains "generated Dockerfile hardens base-stage apt https timeout" "$GENERATED_MFE_DOCKERFILE" 'Acquire::https::Timeout "30"'

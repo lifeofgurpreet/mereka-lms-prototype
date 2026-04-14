@@ -41,6 +41,12 @@ These check names must match the job names reported by GitHub Actions:
 > currently run on PRs but are informational here; they are not part of the
 > required merge gate in this policy.
 
+### Emergency boundary
+
+Emergency hotfixes may justify controlled admin bypass, but they do not justify
+quietly weakening the standing ruleset. Any bypass should be explicit,
+exceptional, and followed by a return to the normal required-check path.
+
 ---
 
 ## OpenSSF Scorecard Alignment
@@ -54,7 +60,7 @@ at 06:00 UTC.
 | Scorecard Check | Impact | How Branch Protection Helps |
 |----------------|--------|----------------------------|
 | `Branch-Protection` | High | All settings in the table above directly raise this score |
-| `Code-Review` | High | Require PR reviews + dismiss stale approvals |
+| `Code-Review` | High | Pull requests remain mandatory, but the current owner-merged contract intentionally sets approvals to `0`; that tradeoff is explicit repo governance, not hidden drift |
 | `CI-Tests` | Medium | Required status checks gate merges on CI |
 | `Pinned-Dependencies` | High | Enforced by `verify-actions-pinned.sh` in CI (not branch protection directly, but blocks merges that violate the policy) |
 | `Signed-Releases` | Medium | Require signed commits when escalated per T064 |
@@ -90,6 +96,15 @@ These Scorecard checks are addressed elsewhere in the repo:
    - **Restrict deletions**: checked
    - **Include administrators**: checked
 6. Click **Save changes**.
+
+### Update rule
+
+When the required workflow set changes:
+
+1. update this policy first
+2. update the actual ruleset
+3. verify the check names still match what GitHub reports
+4. only then treat the merge gate as aligned
 
 > GitHub's new **Rulesets** interface (not the legacy branch protection page) is
 > preferred. Rulesets support bypass actors and are exported via API.
