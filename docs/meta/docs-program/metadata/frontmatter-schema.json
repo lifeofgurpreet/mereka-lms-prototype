@@ -39,6 +39,7 @@
       "type": "string",
       "enum": [
         "docs/concepts/architecture",
+        "docs/architecture",
         "docs/ops",
         "docs/guides",
         "docs/reference",

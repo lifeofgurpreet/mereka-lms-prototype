@@ -48,7 +48,7 @@ _Do not hand-edit. Regenerate with: `python3 tools/docs/build_docs_program_merge
 - readiness: `ready`
 - depends on: `wave-0a-concepts-root-authority`
 - proposed PR title: `docs: align stable architecture root authority`
-- include paths: `3`
+- include paths: `6`
 - remove paths: `0`
 - validators:
   - `bash tools/docs/verify/verify-docs-policy.sh --range origin/main...HEAD`
@@ -59,6 +59,9 @@ _Do not hand-edit. Regenerate with: `python3 tools/docs/build_docs_program_merge
   - historical packet and reset-wave normalization
 - bundle:
   - [`docs/reference/governance/DEPRECATION_LEDGER.md`](../../reference/governance/DEPRECATION_LEDGER.md)
+  - [`docs/stabilization/RETIRED_ROOT_REMEDIATION_LEDGER.md`](../../stabilization/RETIRED_ROOT_REMEDIATION_LEDGER.md)
+  - `infrastructure/monitoring/grafana/dashboards/public-endpoints.json`
+  - `scripts/qa/lint-repo-conventions.sh`
   - `tools/docs/verify/verify-docs-policy.sh`
   - `tools/docs/verify/verify_legacy_architecture_root.py`
 
@@ -67,7 +70,7 @@ _Do not hand-edit. Regenerate with: `python3 tools/docs/build_docs_program_merge
 - readiness: `ready`
 - depends on: `wave-0a-concepts-root-authority, wave-0b-architecture-root-authority`
 - proposed PR title: `docs: refresh active docs control plane`
-- include paths: `8`
+- include paths: `14`
 - remove paths: `0`
 - validators:
   - `bash tools/docs/verify/verify-docs-policy.sh --range origin/main...HEAD`
@@ -78,14 +81,20 @@ _Do not hand-edit. Regenerate with: `python3 tools/docs/build_docs_program_merge
   - Tutor, branding, CI, or contract-truth sync families
   - runtime-proof or cross-repo follow-through
 - bundle:
+  - [`docs/meta/docs-program/authority-registry.v1.yaml`](../../meta/docs-program/authority-registry.v1.yaml)
+  - [`docs/meta/docs-program/companion-surface-review.v1.yaml`](../../meta/docs-program/companion-surface-review.v1.yaml)
   - [`docs/meta/docs-program/POST_REBASE_INTAKE_2026-04-13.md`](../../meta/docs-program/POST_REBASE_INTAKE_2026-04-13.md)
   - [`docs/meta/docs-program/REVIEW_HARDENING_BOARD_2026-04-13.md`](../../meta/docs-program/REVIEW_HARDENING_BOARD_2026-04-13.md)
   - [`docs/meta/docs-program/DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md`](../../meta/docs-program/DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md)
   - [`docs/meta/docs-program/README.md`](../../meta/docs-program/README.md)
+  - [`docs/meta/docs-program/owner-gap-ledger.v1.yaml`](../../meta/docs-program/owner-gap-ledger.v1.yaml)
   - [`docs/meta/README.md`](../../meta/README.md)
   - [`docs/meta/docs-program/metadata/METADATA_MODEL.md`](../../meta/docs-program/metadata/METADATA_MODEL.md)
   - [`docs/meta/docs-program/metadata/doc-class-schema-map.yaml`](../../meta/docs-program/metadata/doc-class-schema-map.yaml)
   - [`docs/meta/docs-program/metadata/governs-taxonomy.yaml`](../../meta/docs-program/metadata/governs-taxonomy.yaml)
+  - [`docs/meta/docs-program/metadata/merge-back-waves.v1.yaml`](../../meta/docs-program/metadata/merge-back-waves.v1.yaml)
+  - [`docs/reference/generated/docs-program-authority-summary.md`](../../reference/generated/docs-program-authority-summary.md)
+  - [`docs/reference/generated/docs-program-merge-back-waves.md`](../../reference/generated/docs-program-merge-back-waves.md)
 
 ## wave-2a-packet-normalization: Historical packet normalization
 

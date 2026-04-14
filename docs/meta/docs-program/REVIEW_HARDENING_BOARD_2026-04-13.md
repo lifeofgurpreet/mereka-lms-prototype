@@ -16,6 +16,10 @@ The merge-back wave bundle definitions now live in
 [`metadata/merge-back-waves.v1.yaml`](metadata/merge-back-waves.v1.yaml) and
 the generated reviewer summary
 [`../../reference/generated/docs-program-merge-back-waves.md`](../../reference/generated/docs-program-merge-back-waves.md).
+The extracted branch receipts now live in
+[`metadata/merge-back-wave-execution.v1.yaml`](metadata/merge-back-wave-execution.v1.yaml)
+with the generated execution summary
+[`../../reference/generated/docs-program-merge-back-execution.md`](../../reference/generated/docs-program-merge-back-execution.md).
 
 ## Bucket 1: Retired-Root Normalization
 
