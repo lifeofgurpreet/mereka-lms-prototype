@@ -5,21 +5,12 @@
 #        pull wrappers. Build-context file sync now lives in apply-patches.sh.
 
 apply_build_optimizations_patch() {
+  local tutor_root="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
   local targets=(
     "$OPENEDX_TEMPLATE"
-    "$REPO_ROOT/tutor_env/env/build/openedx/Dockerfile"
+    "$tutor_root/env/build/openedx/Dockerfile"
     "$MYSQL_TEMPLATE"
-    "$REPO_ROOT/tutor_env/env/local/docker-compose.yml"
-    "$LMS_SETTINGS_TEMPLATE"
-    "$REPO_ROOT/tutor_env/env/apps/openedx/settings/lms/production.py"
-    "$LMS_ASSETS_TEMPLATE"
-    "$REPO_ROOT/tutor_env/env/build/openedx/settings/lms/assets.py"
-    "$CMS_ASSETS_TEMPLATE"
-    "$REPO_ROOT/tutor_env/env/build/openedx/settings/cms/assets.py"
-    "$NGINX_LMS_TEMPLATE"
-    "$REPO_ROOT/tutor_env/env/apps/nginx/lms.conf"
-    "$CADDY_TEMPLATE"
-    "$REPO_ROOT/tutor_env/env/apps/caddy/Caddyfile"
+    "$tutor_root/env/local/docker-compose.yml"
   )
 
   "${PYTHON_BIN}" - "${targets[@]}" <<'PY'

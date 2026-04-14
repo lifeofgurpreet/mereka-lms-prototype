@@ -533,7 +533,7 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   fixed_pattern_count_equals 'ENV PYTHONPATH=/openedx/edx-platform' "2" "$OPENEDX_DOCKERFILE" "Runtime PYTHONPATH env appears only in production and final runtime stages"
   fixed_pattern_count_equals 'ENV PYTHONPATH="/openedx/edx-platform"' "1" "$OPENEDX_DOCKERFILE" "Pre-assets PYTHONPATH env block is unique"
   fixed_pattern_count_equals 'ENV NODE_OPTIONS="--max-old-space-size=6144"' "2" "$OPENEDX_DOCKERFILE" "Node memory env appears only in production and pre-assets hooks"
-  fixed_pattern_count_equals 'ENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none' "2" "$OPENEDX_DOCKERFILE" "RequireJS optimize env appears only in production and pre-assets hooks"
+  fixed_pattern_count_equals 'ENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none' "1" "$OPENEDX_DOCKERFILE" "RequireJS optimize env appears only in the production stage"
 
   # Check for npm/pip install resilience strategy.
   # Upstream patches evolved over time from explicit retry loops to
@@ -637,6 +637,11 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_not_in_file "Syncing logo files from theme source to build directory..." "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain Open edX theme sync ownership"
   pattern_not_in_file "Custom apps synced to build context." "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain custom-app build-context sync ownership"
   pattern_not_in_file "Multi-tenancy plugin synced to build context." "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain multi-tenancy build-context sync ownership"
+  pattern_not_in_file '"$LMS_SETTINGS_TEMPLATE"' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain stale LMS settings target scans"
+  pattern_not_in_file '"$LMS_ASSETS_TEMPLATE"' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain stale LMS assets target scans"
+  pattern_not_in_file '"$CMS_ASSETS_TEMPLATE"' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain stale CMS assets target scans"
+  pattern_not_in_file '"$NGINX_LMS_TEMPLATE"' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain stale nginx target scans"
+  pattern_not_in_file '"$CADDY_TEMPLATE"' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain stale Caddy target scans"
   pattern_not_in_file "RUN uv pip install -e /openedx/mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "No duplicate production-stage custom app reinstalls remain"
   pattern_in_file 'pip install --no-cache-dir --no-build-isolation uwsgi==2.0.24' "$OPENEDX_DOCKERFILE" "uwsgi remains on explicit pip compatibility fallback"
   fixed_pattern_count_equals "pip install" "1" "$OPENEDX_DOCKERFILE" "Only uwsgi remains on plain pip in rendered Open edX Dockerfile"
