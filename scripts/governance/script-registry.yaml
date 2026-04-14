@@ -3119,6 +3119,17 @@ scripts:
     purpose: Verify Argocd Drift
     criticality: release-supporting
 
+  - path: scripts/qa/verify_adr_governs_vocabulary.py
+    owner: platform-team
+    purpose: Verify ADR governs vocabulary against the declared taxonomy and manifest
+    inputs: []
+    outputs: [stdout, exit code]
+    side_effects: none
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: python3 scripts/qa/verify_adr_governs_vocabulary.py
+    criticality: release-supporting
+
   - path: scripts/qa/verify-assessment-audit.sh
     owner: platform-team
     purpose: Verify Assessment Audit

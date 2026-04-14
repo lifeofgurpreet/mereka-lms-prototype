@@ -9,9 +9,16 @@ import yaml
 
 
 REPOS = {
-    "mereka-lms": Path("/home/gurpreet/projects/k8s/mereka-lms-wt-wave10-agent-consumption-runtime"),
-    "bbi-infrastructure": Path("/home/gurpreet/projects/k8s/bbi-infrastructure-wt-wave10-contract-compiled-front-doors"),
-    "platform-control-plane": Path("/home/gurpreet/projects/platform-control-plane-wt-wave10-contract-docsync"),
+    "mereka-lms": (
+        Path.cwd(),
+        Path("/home/gurpreet/projects/k8s/mereka-lms"),
+    ),
+    "bbi-infrastructure": (
+        Path("/home/gurpreet/projects/k8s/bbi-infrastructure"),
+    ),
+    "platform-control-plane": (
+        Path("/home/gurpreet/projects/platform-control-plane"),
+    ),
 }
 
 
@@ -28,12 +35,19 @@ def assert_exists(path: Path) -> None:
         raise FileNotFoundError(path)
 
 
+def resolve_repo_path(candidates: tuple[Path, ...], required: str) -> Path:
+    for candidate in candidates:
+        if (candidate / required).exists():
+            return candidate
+    raise FileNotFoundError(f"no repo candidate contains {required}")
+
+
 def detect_paths() -> dict[str, Path]:
     paths = {
         "repo_root": Path.cwd(),
-        "mereka-lms": REPOS["mereka-lms"],
-        "bbi-infrastructure": REPOS["bbi-infrastructure"],
-        "platform-control-plane": REPOS["platform-control-plane"],
+        "mereka-lms": resolve_repo_path(REPOS["mereka-lms"], "docs/README.md"),
+        "bbi-infrastructure": resolve_repo_path(REPOS["bbi-infrastructure"], "docs/README.md"),
+        "platform-control-plane": resolve_repo_path(REPOS["platform-control-plane"], "docs/README.md"),
     }
     for path in paths.values():
         if path != Path.cwd():
@@ -41,26 +55,26 @@ def detect_paths() -> dict[str, Path]:
     return paths
 
 
-def rel(path: Path) -> str:
-    return str(path)
+def repo_rel(paths: dict[str, Path], repo_key: str, path: Path) -> str:
+    return f"{repo_key}:{path.relative_to(paths[repo_key]).as_posix()}"
 
 
 def build_cross_repo_manifest(paths: dict[str, Path], source_map: dict) -> dict:
     canonical_roots = {
         "mereka-lms": [
-            rel(paths["mereka-lms"] / "docs/README.md"),
-            rel(paths["mereka-lms"] / "specs/INDEX.md"),
-            rel(paths["mereka-lms"] / "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md"),
+            repo_rel(paths, "mereka-lms", paths["mereka-lms"] / "docs/README.md"),
+            repo_rel(paths, "mereka-lms", paths["mereka-lms"] / "specs/INDEX.md"),
+            repo_rel(paths, "mereka-lms", paths["mereka-lms"] / "docs/architecture/PLATFORM_AUTHORITY_MAP.md"),
         ],
         "bbi-infrastructure": [
-            rel(paths["bbi-infrastructure"] / "docs/README.md"),
-            rel(paths["bbi-infrastructure"] / "docs/reference/CANONICAL_TOPOLOGY.md"),
-            rel(paths["bbi-infrastructure"] / "docs/reference/PROMOTION_CONTRACT_REFERENCE.md"),
+            repo_rel(paths, "bbi-infrastructure", paths["bbi-infrastructure"] / "docs/README.md"),
+            repo_rel(paths, "bbi-infrastructure", paths["bbi-infrastructure"] / "docs/reference/CANONICAL_TOPOLOGY.md"),
+            repo_rel(paths, "bbi-infrastructure", paths["bbi-infrastructure"] / "docs/reference/PROMOTION_CONTRACT_REFERENCE.md"),
         ],
         "platform-control-plane": [
-            rel(paths["platform-control-plane"] / "docs/README.md"),
-            rel(paths["platform-control-plane"] / "contracts/release-contracts.yaml"),
-            rel(paths["platform-control-plane"] / "contracts/service-identity-contract.yaml"),
+            repo_rel(paths, "platform-control-plane", paths["platform-control-plane"] / "docs/README.md"),
+            repo_rel(paths, "platform-control-plane", paths["platform-control-plane"] / "contracts/release-contracts.yaml"),
+            repo_rel(paths, "platform-control-plane", paths["platform-control-plane"] / "contracts/service-identity-contract.yaml"),
         ],
     }
     return {
@@ -176,27 +190,27 @@ def build_release_obligations_pack(paths: dict[str, Path]) -> dict:
         "generated_by": "tools/knowledge/build_cross_repo_agent_packs.py",
         "release_lanes": obligations,
         "source_pointers": [
-            rel(paths["platform-control-plane"] / "contracts/release-contracts.yaml"),
-            rel(paths["mereka-lms"] / "docs/ops/runbooks/DEPLOY_EVIDENCE_GATES.md"),
-            rel(paths["bbi-infrastructure"] / "docs/reference/PROMOTION_CONTRACT_REFERENCE.md"),
+            repo_rel(paths, "platform-control-plane", paths["platform-control-plane"] / "contracts/release-contracts.yaml"),
+            repo_rel(paths, "mereka-lms", paths["mereka-lms"] / "docs/ops/runbooks/DEPLOY_EVIDENCE_GATES.md"),
+            repo_rel(paths, "bbi-infrastructure", paths["bbi-infrastructure"] / "docs/reference/PROMOTION_CONTRACT_REFERENCE.md"),
         ],
     }
 
 
 def build_read_first(paths: dict[str, Path]) -> str:
     ordered = [
-        rel(paths["mereka-lms"] / "docs/README.md"),
-        rel(paths["mereka-lms"] / "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md"),
-        rel(paths["mereka-lms"] / "specs/INDEX.md"),
-        rel(paths["mereka-lms"] / "docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md"),
-        rel(paths["mereka-lms"] / "docs/ops/runbooks/DEPLOY_EVIDENCE_GATES.md"),
-        rel(paths["mereka-lms"] / "docs/meta/knowledge/WAVE10_SOURCE_OF_TRUTH_MAP.md"),
-        rel(paths["bbi-infrastructure"] / "docs/README.md"),
-        rel(paths["bbi-infrastructure"] / "docs/reference/CANONICAL_TOPOLOGY.md"),
-        rel(paths["bbi-infrastructure"] / "docs/reference/PROMOTION_CONTRACT_REFERENCE.md"),
-        rel(paths["bbi-infrastructure"] / "docs/reference/SERVICE_IDENTITY_REFERENCE.md"),
-        rel(paths["platform-control-plane"] / "docs/README.md"),
-        rel(paths["platform-control-plane"] / "contracts/release-contracts.yaml"),
+        repo_rel(paths, "mereka-lms", paths["mereka-lms"] / "docs/README.md"),
+        repo_rel(paths, "mereka-lms", paths["mereka-lms"] / "docs/architecture/PLATFORM_AUTHORITY_MAP.md"),
+        repo_rel(paths, "mereka-lms", paths["mereka-lms"] / "specs/INDEX.md"),
+        repo_rel(paths, "mereka-lms", paths["mereka-lms"] / "docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md"),
+        repo_rel(paths, "mereka-lms", paths["mereka-lms"] / "docs/ops/runbooks/DEPLOY_EVIDENCE_GATES.md"),
+        repo_rel(paths, "mereka-lms", paths["mereka-lms"] / "docs/meta/knowledge/AGENT_CONSUMPTION_MODEL.md"),
+        repo_rel(paths, "bbi-infrastructure", paths["bbi-infrastructure"] / "docs/README.md"),
+        repo_rel(paths, "bbi-infrastructure", paths["bbi-infrastructure"] / "docs/reference/CANONICAL_TOPOLOGY.md"),
+        repo_rel(paths, "bbi-infrastructure", paths["bbi-infrastructure"] / "docs/reference/PROMOTION_CONTRACT_REFERENCE.md"),
+        repo_rel(paths, "bbi-infrastructure", paths["bbi-infrastructure"] / "docs/reference/SERVICE_IDENTITY_REFERENCE.md"),
+        repo_rel(paths, "platform-control-plane", paths["platform-control-plane"] / "docs/README.md"),
+        repo_rel(paths, "platform-control-plane", paths["platform-control-plane"] / "contracts/release-contracts.yaml"),
     ]
     lines = [
         "# Cross-Repo Read First",

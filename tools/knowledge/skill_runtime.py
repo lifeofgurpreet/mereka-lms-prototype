@@ -16,6 +16,24 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+LEGACY_DETAILED_REFERENCE_SURFACES = {
+    "docs/concepts/architecture/ARCHITECTURE_CHARTER.md",
+    "docs/concepts/architecture/AUTHORIZATION_MODEL.md",
+    "docs/concepts/architecture/CONTROL_PLANES.md",
+    "docs/concepts/architecture/DATA_GOVERNANCE.md",
+    "docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md",
+    "docs/concepts/architecture/README.md",
+    "docs/concepts/architecture/TENANT_LIFECYCLE.md",
+    "docs/concepts/architecture/TENANT_OPERATING_SYSTEM.md",
+    "docs/concepts/architecture/TUTOR_AND_EXTENSION_MODEL.md",
+    "docs/concepts/architecture/multi-tenancy-overview.md",
+    "docs/concepts/architecture/notification-pipeline-overview.md",
+    "docs/concepts/architecture/proctoring-architecture-overview.md",
+    "docs/concepts/architecture/content-libraries-overview.md",
+    "docs/concepts/architecture/enterprise-services-overview.md",
+    "docs/concepts/architecture/purchase-gateway-overview.md",
+}
+
 
 def load_yaml(path: Path) -> dict[str, Any]:
     return yaml.safe_load(path.read_text())
@@ -39,7 +57,11 @@ def changed_files(repo_root: Path, range_spec: str) -> list[str]:
 def is_canonical_surface(repo_root: Path, surface: str) -> bool:
     if not (repo_root / surface).exists():
         return False
-    return not (surface.startswith("docs/archive/") or surface.startswith("specs/archive/"))
+    return not (
+        surface.startswith("docs/archive/")
+        or surface.startswith("specs/archive/")
+        or surface in LEGACY_DETAILED_REFERENCE_SURFACES
+    )
 
 
 def load_runtime_inputs(repo_root: Path) -> dict[str, Any]:

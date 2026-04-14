@@ -6734,7 +6734,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-10",
+    "last_verified_or_updated": "2026-04-09",
     "owner": "Engineering Lead",
     "path": "ops/runbooks/CI_CD_RUNBOOK.md",
     "status": "supporting",
@@ -6806,7 +6806,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-07",
+    "last_verified_or_updated": "2026-04-09",
     "owner": "Infra Team",
     "path": "ops/runbooks/DEPLOYMENT_RUNBOOK.md",
     "status": "supporting",
@@ -7319,7 +7319,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-12",
+    "last_verified_or_updated": "2026-04-09",
     "owner": "Platform Team",
     "path": "ops/runbooks/RELEASE_CHECKLIST.md",
     "status": "supporting",

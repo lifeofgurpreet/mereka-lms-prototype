@@ -33,7 +33,7 @@ def build_report(repo_root: Path, range_spec: str) -> dict[str, Any]:
     taxonomy = load_yaml(repo_root / "docs" / "meta" / "knowledge" / "AGENT_TASK_TAXONOMY.yaml")["task_types"]
     entrypoints = build_entrypoints(repo_root)
     expected_tasks = set(taxonomy)
-    bundle_dir = repo_root / "generated" / "knowledge" / "task-bundles"
+    bundle_dir = repo_root / "generated" / "knowledge" / "agent-task-bundles"
     actual_bundle_files = {path.name for path in bundle_dir.glob("*.md")}
     expected_bundle_files = set(FILE_NAME_MAP.values())
 

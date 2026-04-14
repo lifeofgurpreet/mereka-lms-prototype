@@ -5,7 +5,7 @@
 Review Wave 8 in this order:
 
 1. `generated/knowledge/agent-entrypoints.json`
-2. `generated/knowledge/task-bundles/`
+2. `generated/knowledge/agent-task-bundles/`
 3. `generated/knowledge/agent-readiness-report.json`
 4. `docs/meta/knowledge/AGENT_CONSUMPTION_MODEL.md`
 5. `docs/meta/knowledge/AGENT_TASK_TAXONOMY.yaml`
@@ -31,7 +31,7 @@ Humans should verify:
 Future skills and coding agents should start from:
 
 - `generated/knowledge/agent-entrypoints.json` for domain routing
-- `generated/knowledge/task-bundles/*.md` for task execution
+- `generated/knowledge/agent-task-bundles/*.md` for task execution
 - `generated/knowledge/agent-readiness-report.json` for safety and gap checks
 
 ## What Still Requires Human Judgment

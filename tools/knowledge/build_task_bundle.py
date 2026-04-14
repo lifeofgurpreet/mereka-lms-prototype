@@ -84,8 +84,8 @@ def render_markdown(bundle: dict) -> str:
     lines.extend(["", "## Related Runbooks"])
     lines.extend(f"- `{path}`" for path in bundle["related_runbooks"] or ["none"])
     lines.extend(["", "## Reviewers And Evidence"])
-    lines.extend(f"- reviewers: {', '.join(bundle['required_reviewers']) or 'none'}")
-    lines.extend(f"- evidence: {', '.join(bundle['required_evidence']) or 'none'}")
+    lines.append(f"- reviewers: {', '.join(bundle['required_reviewers']) or 'none'}")
+    lines.append(f"- evidence: {', '.join(bundle['required_evidence']) or 'none'}")
     lines.extend(["", "## Cross-Repo Dependencies"])
     if bundle["likely_cross_repo_dependencies"]:
         for item in bundle["likely_cross_repo_dependencies"]:
