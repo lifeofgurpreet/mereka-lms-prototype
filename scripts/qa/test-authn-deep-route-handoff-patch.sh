@@ -123,6 +123,21 @@ EOF
 python3 "${VERIFY_SCRIPT}" "${VERIFY_DIST}" >/dev/null
 echo "[PASS] verifier allows canonical /dashboard literals when LMS_BASE_URL fallback is gone"
 
+VERIFY_MAP_DIST="${TMPDIR}/verify-map-dist"
+mkdir -p "${VERIFY_MAP_DIST}"
+
+cat >"${VERIFY_MAP_DIST}/safe-fixture.js" <<'EOF'
+const dashboardHref = "/dashboard";
+const redirect = window.location.origin+r;
+EOF
+
+cat >"${VERIFY_MAP_DIST}/safe-fixture.js.map" <<'EOF'
+{"sources":["app.js"],"names":["LMS_BASE_URL"],"mappings":"AAAA","x_fallback":"`${getConfig().LMS_BASE_URL}/dashboard`"}
+EOF
+
+python3 "${VERIFY_SCRIPT}" "${VERIFY_MAP_DIST}" >/dev/null
+echo "[PASS] verifier ignores dashboard fallback residues that survive only in source maps"
+
 cat >"${VERIFY_DIST}/broken-fixture.js" <<'EOF'
 const redirect = `${getConfig().LMS_BASE_URL}/dashboard`;
 const compat = window.location.origin+r;

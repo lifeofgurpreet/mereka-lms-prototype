@@ -23,7 +23,8 @@ def verify_dist(dist_dir: Path) -> tuple[list[str], bool]:
     saw_required_marker = False
 
     for asset in sorted(dist_dir.rglob("*")):
-        if asset.suffix not in {".js", ".map"}:
+        # Runtime behavior is determined by compiled JavaScript bundles, not source maps.
+        if asset.suffix != ".js":
             continue
         try:
             content = asset.read_text(encoding="utf-8")
