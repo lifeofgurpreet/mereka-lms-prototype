@@ -129,8 +129,6 @@ for target in targets:
         "--mysql-native-password=ON",
     )
 
-    updated = updated.replace("\n\n\n# Identify tutor user to apply patches using git", "\n\n# Identify tutor user to apply patches using git")
-
     # Keep uwsgi on plain pip for now: a local uv preflight against uwsgi==2.0.24
     # still fails in wheel build with C compiler errors around signal handler
     # signatures. Treat this as an explicit compatibility exception, not a
