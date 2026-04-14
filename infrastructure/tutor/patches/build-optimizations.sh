@@ -131,47 +131,10 @@ for target in targets:
 
     updated = updated.replace("\n\n\n# Identify tutor user to apply patches using git", "\n\n# Identify tutor user to apply patches using git")
 
-    # uv pip / no-build-isolation fixes
-    updated = updated.replace(
-        "$PIP_COMMAND install -r /openedx/edx-platform/requirements/edx/base.txt -r /openedx/edx-platform/requirements/edx/assets.txt",
-        "$PIP_COMMAND install --no-build-isolation -r /openedx/edx-platform/requirements/edx/base.txt -r /openedx/edx-platform/requirements/edx/assets.txt",
-    )
-    updated = updated.replace(
-        "([ -s /tmp/base-filtered.txt ] && pip install --no-build-isolation -r /tmp/base-filtered.txt -r /tmp/assets.txt || pip install --no-build-isolation -r /tmp/assets.txt) && \\\n"
-        "    ([ -s /tmp/git-packages.txt ] && xargs -r -a /tmp/git-packages.txt pip install --no-build-isolation || true)",
-        "([ -s /tmp/base-filtered.txt ] && $PIP_COMMAND install --no-build-isolation -r /tmp/base-filtered.txt -r /tmp/assets.txt || $PIP_COMMAND install --no-build-isolation -r /tmp/assets.txt) && \\\n"
-        "    ([ -s /tmp/git-packages.txt ] && xargs -r -a /tmp/git-packages.txt $PIP_COMMAND install --no-build-isolation || true)",
-    )
-    updated = updated.replace(
-        "$PIP_COMMAND install -r requirements/edx/development.txt",
-        "$PIP_COMMAND install --no-build-isolation -r requirements/edx/development.txt",
-    )
-    updated = updated.replace(
-        "setuptools==69.1.1 setuptools-scm==8.1.0 pip==24.0 wheel==0.43.0",
-        "setuptools==69.1.1 setuptools-scm==8.1.0 pip==24.0 wheel==0.43.0 pkgconfig==1.5.5",
-    )
-    updated = re.sub(
-        r"(setuptools==69\.1\.1 setuptools-scm==8\.1\.0 pip==24\.0 wheel==0\.43\.0)(?: pkgconfig==1\.5\.5)+",
-        r"\1 pkgconfig==1.5.5",
-        updated,
-    )
-    updated = re.sub(
-        r"(?: pkgconfig==1\.5\.5){2,}",
-        " pkgconfig==1.5.5",
-        updated,
-    )
     # Keep uwsgi on plain pip for now: a local uv preflight against uwsgi==2.0.24
     # still fails in wheel build with C compiler errors around signal handler
     # signatures. Treat this as an explicit compatibility exception, not a
     # forgotten uv seam.
-    updated = updated.replace(
-        '$PIP_COMMAND install --no-cache-dir --compile uwsgi==2.0.24',
-        'pip install --no-cache-dir --no-build-isolation uwsgi==2.0.24',
-    )
-    updated = updated.replace(
-        'RUN pip install "ora2==7.0.0"',
-        'RUN $PIP_COMMAND install "ora2==7.0.0"',
-    )
 
     # pip install retry wrapping
     updated = updated.replace(
@@ -205,15 +168,6 @@ for target in targets:
         'INSTALLED_APPS.remove("lms.djangoapps.coursewarehistoryextended")\n# Mereka adjustments keep Redwood optional apps enabled\nDATABASE_ROUTERS.remove(\n    "openedx.core.lib.django_courseware_routers.StudentModuleHistoryExtendedRouter"\n)\nif "openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig" not in INSTALLED_APPS:\n    INSTALLED_APPS += ["openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig"]\nif "openedx.core.djangoapps.bookmarks.apps.BookmarksConfig" not in INSTALLED_APPS:\n    INSTALLED_APPS += ["openedx.core.djangoapps.bookmarks.apps.BookmarksConfig"]\nif "openedx.core.djangoapps.discussions.apps.DiscussionsConfig" not in INSTALLED_APPS:\n    INSTALLED_APPS += ["openedx.core.djangoapps.discussions.apps.DiscussionsConfig"]\nif "openedx.core.djangoapps.theming.apps.ThemingConfig" not in INSTALLED_APPS:\n    INSTALLED_APPS += [\"openedx.core.djangoapps.theming.apps.ThemingConfig\"]\n',
     )
 
-    # compilemessages fix
-    updated = updated.replace(
-        "RUN cd /openedx/locale/user && \\\n    django-admin.py compilemessages -v1",
-        "RUN cd /openedx/locale/user && \\\n    /openedx/venv/bin/python -m django compilemessages -v1",
-    )
-    updated = updated.replace(
-        "RUN cd /openedx/locale/user && \\\n    /openedx/venv/bin/django-admin.py compilemessages -v1",
-        "RUN cd /openedx/locale/user && \\\n    /openedx/venv/bin/python -m django compilemessages -v1",
-    )
     build_profile_arg = "ARG MEREKA_BUILD_PROFILE=proof\n"
     custom_app_install_mode_arg = "ARG MEREKA_CUSTOM_APP_INSTALL_MODE=editable\n"
     if build_profile_arg not in updated and custom_app_install_mode_arg in updated:
