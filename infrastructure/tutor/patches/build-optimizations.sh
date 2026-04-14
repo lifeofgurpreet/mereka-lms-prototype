@@ -129,19 +129,6 @@ for target in targets:
         "--mysql-native-password=ON",
     )
 
-    # i18n archive URL fix
-    updated = updated.replace(
-        "https://github.com/openedx/openedx-i18n/archive/",
-        "https://github.com/openedx-unsupported/openedx-i18n/archive/",
-    )
-    updated = updated.replace(
-        "ARG OPENEDX_I18N_VERSION=open-release/redwood.master",
-        "ARG OPENEDX_I18N_VERSION=master",
-    )
-    updated = updated.replace(
-        "ARG OPENEDX_I18N_VERSION={{ OPENEDX_COMMON_VERSION }}",
-        "ARG OPENEDX_I18N_VERSION=master",
-    )
     updated = updated.replace("\n\n\n# Identify tutor user to apply patches using git", "\n\n# Identify tutor user to apply patches using git")
 
     # uv pip / no-build-isolation fixes
@@ -158,10 +145,6 @@ for target in targets:
     updated = updated.replace(
         "$PIP_COMMAND install -r requirements/edx/development.txt",
         "$PIP_COMMAND install --no-build-isolation -r requirements/edx/development.txt",
-    )
-    updated = updated.replace(
-        "RUN pip install setuptools==44.1.0 pip==20.0.2 wheel==0.34.2",
-        "RUN pip install --upgrade pip==25.0.1 setuptools==75.3.0 wheel==0.45.1",
     )
     updated = updated.replace(
         "setuptools==69.1.1 setuptools-scm==8.1.0 pip==24.0 wheel==0.43.0",
