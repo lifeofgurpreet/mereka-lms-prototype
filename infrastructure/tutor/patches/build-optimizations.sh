@@ -248,12 +248,6 @@ for target in targets:
     bash -o pipefail -c 'for attempt in 1 2 3; do $PIP_COMMAND install --no-build-isolation -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo "$PIP_COMMAND install attempt ${attempt} failed; retrying in 10s" >&2; sleep 10; done; exit 1'""",
     )
 
-    # Local requirements removal
-    updated = updated.replace(
-        "# Re-install local requirements, otherwise egg-info folders are missing\nRUN pip install -r requirements/edx/local.in\n\n",
-        "# Local requirements list removed in Redwood; skip redundant reinstall step.\n",
-    )
-
     # coursewarehistoryextended + optional apps
     updated = updated.replace(
         'INSTALLED_APPS.remove("lms.djangoapps.coursewarehistoryextended")\nDATABASE_ROUTERS.remove(\n    "openedx.core.lib.django_courseware_routers.StudentModuleHistoryExtendedRouter"\n)\n',
@@ -278,15 +272,6 @@ for target in targets:
             1,
         )
 
-    legacy_translation_preflight_block = (
-        "RUN python - <<'PY'\n"
-        "import importlib\n"
-        "import os\n\n"
-        "os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lms.envs.tutor.i18n')\n"
-        "importlib.import_module('lms.envs.tutor.i18n')\n"
-        "print('translation settings import preflight ok')\n"
-        "PY\n"
-    )
     translation_preflight_block = (
         'RUN if [ "$MEREKA_BUILD_PROFILE" = "fast" ]; then '
         'echo "Skipping translation settings import preflight (fast build profile)"; '
@@ -297,18 +282,6 @@ for target in targets:
         "print(\"translation settings import preflight ok\")'; "
         "fi\n"
     )
-    escaped_translation_preflight_block = (
-        "RUN if [ \\\"$MEREKA_BUILD_PROFILE\\\" = \\\"fast\\\" ]; then "
-        "echo \\\"Skipping translation settings import preflight (fast build profile)\\\"; "
-        "else "
-        "python -c \\\"import importlib, os; "
-        "os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lms.envs.tutor.i18n'); "
-        "importlib.import_module('lms.envs.tutor.i18n'); "
-        "print('translation settings import preflight ok')\\\"; "
-        "fi\n"
-    )
-    updated = updated.replace(legacy_translation_preflight_block, "")
-    updated = updated.replace(escaped_translation_preflight_block, translation_preflight_block)
     if f"{build_profile_arg}{translation_preflight_block}" not in updated and translation_preflight_block in updated:
         updated = updated.replace(
             translation_preflight_block,
