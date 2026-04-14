@@ -234,7 +234,6 @@ apply_openedx_patches() {
 }
 
 apply_mfe_patches() {
-  apply_patch apply_build_optimizations_patch
   apply_patch apply_brand_package_patch
   apply_patch apply_footer_component_patch
   apply_patch apply_mfe_slot_ownership_patch

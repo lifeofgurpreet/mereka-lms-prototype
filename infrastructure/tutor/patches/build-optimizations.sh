@@ -7,7 +7,6 @@
 apply_build_optimizations_patch() {
   local tutor_root="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
   local targets=(
-    "$OPENEDX_TEMPLATE"
     "$tutor_root/env/build/openedx/Dockerfile"
   )
 
