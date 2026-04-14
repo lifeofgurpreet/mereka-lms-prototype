@@ -98,12 +98,12 @@ For the complete list of 15 courses and their structure, see `MCT_MIGRATION_STAT
 | [`VIDEO_MIGRATION_TO_MUX.md`](VIDEO_MIGRATION_TO_MUX.md) | Completed video migration reference for Mux ingestion and Open edX wiring. |
 | [`PROGRAMS_SETUP_PLAN.md`](PROGRAMS_SETUP_PLAN.md) | Planning-phase program setup design for Open edX Programs. |
 | [`../../../archive/reports/mct/EXPORT_TEST_RESULTS.md`](../../../archive/reports/mct/EXPORT_TEST_RESULTS.md) | Latest historical test evidence and validation. |
-| [`../../../reports/2025/mct/MCT_USER_IMPORT_QUICK_REFERENCE_2025-12-18.md`](../../../reports/2025/mct/MCT_USER_IMPORT_QUICK_REFERENCE_2025-12-18.md) | Historical quick summary of the completed 2025 MCT user import. |
+| [`../../../archive/reports/mct/MCT_USER_IMPORT_COMPLETE.md`](../../../archive/reports/mct/MCT_USER_IMPORT_COMPLETE.md) | Historical summary of the completed MCT user import. |
 | [`API_COMPLETE_REFERENCE.md`](API_COMPLETE_REFERENCE.md) | Full API reference captured during migration. |
 | [`API_EXPLORATION.md`](API_EXPLORATION.md) | API discovery results and version comparison notes. |
 | [`DATA_MODEL_COMPLETE.md`](DATA_MODEL_COMPLETE.md) | Detailed data model mapping. |
 | [`MCT_PLATFORM_RESEARCH.md`](MCT_PLATFORM_RESEARCH.md) | Platform research and migration constraints. |
 | [`../../../status/migrations/MCT_MIGRATION_STATUS.md`](../../../status/migrations/MCT_MIGRATION_STATUS.md) | Status tracker for processed artifacts. |
-| [`../../../reports/2025/mct/MCT_PRE_MIGRATION_INVENTORY_2025-12-17.md`](../../../reports/2025/mct/MCT_PRE_MIGRATION_INVENTORY_2025-12-17.md) | Historical pre-migration inventory snapshot and structure assumptions captured before the 2025 import. |
+| [`../../../../reports/2025/mct/MCT_PRE_MIGRATION_INVENTORY_2025-12-17.md`](../../../../reports/2025/mct/MCT_PRE_MIGRATION_INVENTORY_2025-12-17.md) | Historical pre-migration inventory snapshot and structure assumptions captured before the 2025 import. |
 | [`MCT_TO_OPENEDX_MAPPING.md`](MCT_TO_OPENEDX_MAPPING.md) | Mapping between MCT entities and Open edX. |
 | [`OPENEDX_PROGRAMS_SETUP.md`](OPENEDX_PROGRAMS_SETUP.md) | Original notes for Open edX programs setup. |

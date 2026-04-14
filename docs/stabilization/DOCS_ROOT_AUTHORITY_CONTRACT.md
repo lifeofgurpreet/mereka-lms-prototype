@@ -9,7 +9,8 @@ Use these roots for living content:
 
 | Content type | Canonical root |
 | --- | --- |
-| living architecture narrative and standards | `docs/concepts/architecture/**` |
+| stable architecture front doors and control-plane model | `docs/architecture/**` |
+| retained architecture standards and concept overviews | `docs/concepts/architecture/**` |
 | operator procedures and runbooks | `docs/ops/**` |
 | stable lookup and architecture/operations reference | `docs/reference/**` |
 | policies and control contracts | `docs/policies/**` |
@@ -25,7 +26,6 @@ These roots are retired and must not carry new living content:
 
 | Retired root | Allowed content |
 | --- | --- |
-| `docs/architecture/**` | `docs/architecture/README.md` tombstone only |
 | `docs/operations/**` | `docs/operations/README.md` tombstone only |
 
 The retired roots may be named in governance artifacts when the point of the document is retirement itself, but they must not regain substantive living documents.
@@ -47,12 +47,13 @@ If the destination is ambiguous, stop at classification and defer it instead of 
 
 `scripts/qa/verify-retired-root-remediation.sh` treats retired roots as follows:
 
-- fails on substantive files still living under `docs/architecture/**` or `docs/operations/**`
-- allows only the root README tombstones
+- fails on substantive files still living under `docs/operations/**`
+- allows only the root README tombstone
 - fails when active docs still point to retired-root substantive targets
 - allows governance-only references that explain the retirement contract itself
 
-The underlying legacy-root verifiers remain the enforcement mechanism for root emptiness and live-reference cleanup.
+The underlying legacy-root verifiers remain the enforcement mechanism for
+retired-root emptiness and live-reference cleanup.
 
 ## Migration Rules
 

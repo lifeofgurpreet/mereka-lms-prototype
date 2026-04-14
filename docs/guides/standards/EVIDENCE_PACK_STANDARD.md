@@ -3,6 +3,7 @@ title: Evidence Pack Standard
 owner: Platform Team
 status: canonical
 last_reviewed: 2026-03-08
+last_verified: 2026-04-13
 canonical_root: docs/guides/standards
 doc_class: guide
 audience:
@@ -103,5 +104,5 @@ When an evidence pack is no longer active:
 ## Related authority docs
 
 - [Evidence Index](../../evidence/INDEX.md)
-- [Documentation Authority Resolver](../../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md)
+- [Documentation Index](../../README.md)
 - [Docs / Specs Contract](./DOCS_SPECS_CONTRACT.md)

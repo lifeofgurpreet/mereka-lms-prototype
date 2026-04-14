@@ -1,9 +1,15 @@
 # Observability Operations Guide
-_Audience: Operations & SREs • Owner: Infra Team • Last updated: 2026-02-11_
+_Audience: Operations & SREs • Owner: Infra Team • Last updated: 2026-04-09_
 
 **Purpose**: Monitor, alert, and troubleshoot the Mereka LMS observability stack (Prometheus, Loki, Tempo, Grafana).
 
 **TL;DR**: Prometheus scrapes metrics, Loki aggregates logs, Tempo collects traces, Grafana visualizes. All deployed via kube-prometheus-stack. Alerts route to Slack. 30-day retention. ServiceMonitors auto-discover pods.
+
+**Scope note (2026-04-09):** This guide remains useful for stack shape and common checks, but some
+examples still reflect legacy public monitoring hostnames and older access assumptions. For current
+environment and runtime authority, confirm against `docs/reference/operations/MONITORING.md`,
+`docs/reference/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md`, and
+`docs/reference/platform/DOMAIN_AND_ACCESS_REFERENCE.md`.
 
 ---
 
@@ -24,12 +30,12 @@ _Audience: Operations & SREs • Owner: Infra Team • Last updated: 2026-02-11_
 
 ### Access URLs
 
-**Local (Kind)**:
+**Local (Tutor/local)**:
 - Prometheus: http://prometheus.localhost
 - Grafana: http://grafana.localhost (admin/admin)
 - Alertmanager: http://alertmanager.localhost
 
-**Production (GKE)**:
+**Production / nonprod public surfaces**:
 - Prometheus: https://prometheus.mereka.dev
 - Grafana: https://grafana.mereka.dev
 - Alertmanager: https://alertmanager.mereka.dev
@@ -87,6 +93,19 @@ sum(rate(django_http_requests_total_by_view_transport_method_total[5m])) by (sta
 sum(rate(django_cache_operations_total{result="hit"}[5m])) /
 sum(rate(django_cache_operations_total[5m]))
 ```
+
+### Middleware and custom-app boundary
+
+The middleware/custom-app lane currently relies primarily on:
+
+- middleware verification scripts
+- django-prometheus baseline exposure
+- route-/host-specific proof for `/metrics`
+
+Do not claim the custom middleware metrics lane is complete unless the specific
+middleware counters have actually been implemented. Until then, treat
+middleware observability as a bounded companion lane, not a fully expanded
+custom-metric surface.
 
 ---
 
@@ -207,7 +226,8 @@ amtool silence add alertname=OpenEdxHighMemoryUsage --duration=2h \
 - **Redis Performance** - Hit rate, memory, connections
 - **Nginx Ingress** - Request rate, latency, status codes
 
-**Access**: https://grafana.mereka.dev → Dashboards
+**Access**: use the current Grafana URL from `docs/reference/platform/DOMAIN_AND_ACCESS_REFERENCE.md`
+→ Dashboards
 
 **Create custom dashboard**:
 1. Login to Grafana
@@ -312,11 +332,11 @@ If Grafana pod is stuck in `CreateContainerConfigError` with message like `secre
 ./scripts/qa/verify-grafana-runtime-readiness.sh
 ```
 
-To restore the missing secret from GCP Secret Manager:
+To restore the missing secret through the current Secret Manager bridge:
 
 ```bash
 PROJECT_ID=bbi-k8 \
-K8S_CONTEXT=gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster \
+K8S_CONTEXT=rke2-prod \
 GCP_SECRET_NAME=mereka-lms-oidc-client-secret \
 ./scripts/infra/sync-grafana-oidc-secret.sh
 ```
@@ -337,10 +357,10 @@ Then verify telemetry path:
 ```bash
 ./scripts/qa/audit-observability.sh --mode runtime --strict-runtime
 
-kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster -n velero \
+kubectl --context rke2-prod -n velero \
   get backup.velero.io --sort-by=.metadata.creationTimestamp | tail -n 12
 
-kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster -n velero \
+kubectl --context rke2-prod -n velero \
   logs deploy/velero-local --since=3h \
   | rg 'snapshots quota on Google Cloud Platform has been reached'
 ```
@@ -368,7 +388,7 @@ If `usage >= limit`, backup snapshots will fail until quota headroom is restored
 
 **Verify**:
 ```bash
-kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster -n velero \
+kubectl --context rke2-prod -n velero \
   logs deploy/velero-local --since=15m \
   | rg 'iam.serviceAccounts.signBlob|IAM_PERMISSION_DENIED'
 

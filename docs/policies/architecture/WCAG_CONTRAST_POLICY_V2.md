@@ -224,7 +224,7 @@ From `infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css`:
 
 **Action**:
 1. Run `tutor config save` (regenerates templates)
-2. Run `./infrastructure/tutor/apply-patches.sh` (re-applies patches)
+2. Run `./scripts/infra/prepare-tutor-build-context.sh --target openedx` (refreshes rendered Open edX assets)
 3. Extract runtime values from `mereka-overrides.css`
 4. Verify Layer 2 ↔ Layer 3 match
 5. Re-run `verify-contrast-compliance.sh` (should still show 27 PASS)

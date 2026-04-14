@@ -2,6 +2,9 @@
 
 Use this page when you need to get from "I need a course" to "I am in the correct Studio and can start safely."
 
+This page is for course-start and staffing flow.
+It is not the authority for current URLs, tenant topology, or platform ownership boundaries; those stay in the generated references and the settings/extension guides.
+
 ## 1. Pick The Correct Studio URL
 
 Do not guess the Studio hostname.
@@ -10,6 +13,8 @@ Do not guess the Studio hostname.
 2. Find the current lane and tenant.
 3. Use the listed `Studio URL`.
 4. If the Studio field is unresolved for your tenant, escalate before creating the course.
+
+Do not fall back to older support docs or assume a tenant “just shares main Studio” unless the current generated access reference proves it.
 
 ## 2. Confirm Permissions First
 
@@ -58,7 +63,12 @@ Users must already exist on the site before you can add them to the course team.
 
 - official course build flow: Open edX quick start and Studio docs
 - internal tenant/platform context: [Open edX For Team Members](OPENEDX_FOR_TEAM_MEMBERS.md)
+- reusable content authoring:
+  [Content Libraries Authoring Guide](../../concepts/architecture/content-libraries-overview.md)
+- advanced assessment authoring boundary:
+  [Advanced Assessment Authoring Guide](ADVANCED_ASSESSMENT_AUTHORING_GUIDE.md)
 - settings ownership boundaries: [Open edX Settings Matrix](OPENEDX_SETTINGS_MATRIX.md)
+- repo or platform implementation changes: [Docs Root](../../README.md) and [Architecture Root](../../architecture/README.md)
 
 ## 7. Escalate When
 
@@ -69,10 +79,10 @@ Users must already exist on the site before you can add them to the course team.
 
 ## Metadata
 
-- Canonical internal sources: `docs/reference/platform/DOMAIN_AND_ACCESS_REFERENCE.md`, `docs/guides/admin/ADMIN_LOGIN_GUIDE.md`, `docs/guides/admin/MULTI_SITE_GUIDE.md`
+- Canonical internal sources: `docs/reference/platform/DOMAIN_AND_ACCESS_REFERENCE.md`, `docs/reference/platform/TEAM_TOPOLOGY_REFERENCE.md`, `docs/guides/admin/ADMIN_LOGIN_GUIDE.md`, `docs/reference/operations/OPENEDX_HOSTNAMES.md`
 - Official external references: `https://docs.openedx.org/en/latest/educators/how-tos/set_up_course/create_new_course.html`, `https://docs.openedx.org/en/release-teak/educators/quickstarts/build_a_course.html`, `https://docs.openedx.org/en/open-release-palm.master/educators/how-tos/add_course_creators.html`
 - Owner: Platform Team
-- Last reviewed: 2026-03-10
+- Last reviewed: 2026-04-09
 - Applies to: course teams creating or staffing courses in Mereka LMS tenants
 - What is tenant-specific: which Studio URL to use, which organization scope is valid for the tenant, which admins can approve access
 - What is platform-wide: account provisioning, Studio availability, site configuration, domain routing

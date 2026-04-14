@@ -39,7 +39,7 @@ Docker Desktop RAM setting: Settings > Resources > Advanced > Memory: 12 GB (16 
 The devcontainer sets up the following automatically:
 
 - Python 3.12 with a `.venv` virtual environment
-- Node 20+ (required for Tutor MFE builds)
+- Node 24+ (required for the current Tutor MFE build contract)
 - Tutor and plugins per requirements-tutor.txt
 - shellcheck, shfmt, ruff, pre-commit, uv, gh CLI
 - kubectl and helm (via devcontainer features)
@@ -47,7 +47,7 @@ The devcontainer sets up the following automatically:
 - Git submodules initialised
 - Pre-commit hooks installed
 - Tutor configured with local Docker service names (`mysql`, `mongodb`, `redis`)
-- Mereka patches applied via `apply-patches.sh`
+- Tutor build context prepared via `prepare-tutor-build-context.sh`
 - `TUTOR_ROOT` environment variable set to `<workspace>/tutor_env`
 - A named Docker volume (`mereka-lms-tutor-env`) mounts at `tutor_env/` so data persists across container rebuilds
 
@@ -66,6 +66,8 @@ VS Code extensions installed automatically:
 On first run you need to build images (30-45 minutes, requires 12 GB RAM):
 
 ```bash
+./scripts/infra/prepare-tutor-build-context.sh --target all
+
 # Build Open edX platform image
 tutor images build openedx
 
@@ -78,7 +80,6 @@ Then start the platform:
 ```bash
 # Option A: full launch (initialises DB, creates admin, starts everything)
 tutor local launch -I --skip-build
-./infrastructure/tutor/apply-patches.sh
 tutor local restart
 
 # Option B: use Makefile wrapper
@@ -122,9 +123,12 @@ make tutor-start
 # Stop services
 make tutor-stop
 
-# After Tutor config changes (CRITICAL: always run apply-patches.sh)
+# After Tutor config changes (preferred)
+./scripts/infra/tutor-config-save.sh --set KEY=value
+
+# Manual advanced path
 tutor config save --set KEY=value
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
 make tutor-restart
 ```
 
@@ -192,7 +196,7 @@ The post-create script sets local service names. If you see `MYSQL_HOST: 10.97.0
 
 ```bash
 tutor config save --set MYSQL_HOST=mysql --set MONGODB_HOST=mongodb --set REDIS_HOST=redis
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
 make tutor-restart
 ```
 
@@ -216,4 +220,4 @@ VS Code auto-forwards ports 80, 443, 8000, 8001, 8002. Check the Ports panel (`C
 - Full setup guide: `docs/guides/onboarding/LOCAL_SETUP.md`
 - Troubleshooting: `docs/ops/runbooks/TROUBLESHOOTING.md`
 - Standing orders: `docs/meta/standing-orders/README.md`
-- Authority resolver: `docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md`
+- Architecture authority: `docs/architecture/PLATFORM_AUTHORITY_MAP.md`

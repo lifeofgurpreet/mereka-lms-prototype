@@ -19,7 +19,7 @@
 | LMS → Credentials service URL | READY | `CREDENTIALS_INTERNAL_SERVICE_URL` defaults correct |
 | OAuth2 client keys registered in LMS | UNKNOWN | `credentials-key` and `credentials-key-sso` must be registered as DOT apps |
 | DB migrations run | UNKNOWN | `credentials` MySQL DB must exist and migrations applied |
-| **learner-record MFE — Caddyfile route** | **MISSING** | No `/learner-record` block in MFE Caddyfile (T108 gap) |
+| **learner-record MFE — Caddyfile route** | **READY** | `/learner-record` block is present in the MFE Caddyfile |
 | learner-record MFE — Dockerfile build | READY | Built from `release/ulmo.1`, dist copied to `/openedx/dist/learner-record` |
 | learner-record MFE — settings pointer | READY | `LEARNER_RECORD_MFE_RECORDS_PAGE_URL` set in production.py |
 | Badge/cert issuance — LMS wiring | READY | `CREDENTIALS_INTERNAL_SERVICE_URL` / `CREDENTIALS_PUBLIC_SERVICE_URL` set |
@@ -114,21 +114,20 @@ is copied into `/openedx/dist/learner-record` inside the MFE image. `PUBLIC_PATH
 
 ## What Is Missing / Gaps
 
-### Gap 1: learner-record Caddyfile Route (BLOCKER)
+### Gap 1: learner-record Caddyfile Route (historical, now resolved)
 
 **File**: `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile`
 
-The MFE Caddyfile (served by the `mfe` pod on port 8002) contains routes for every built MFE
-**except** `learner-record`. The dist directory exists at `/openedx/dist/learner-record` in the
-image, but there is no Caddy block to serve it.
+The earlier audit identified a missing learner-record route in the MFE Caddyfile. That is no
+longer true on the current source baseline.
 
-Any request to `https://apps.academyv2.mereka.io/learner-record/` will receive a 404 or fall
-through to the default handler.
+Current source now contains:
+- the learner-record build output in `infrastructure/tutor/mfe-build/Dockerfile`
+- `LEARNER_RECORD_MICROFRONTEND_URL` in LMS settings
+- the `/learner-record` Caddyfile route in `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile`
 
-**Confirmed present routes**: authn, account, communications, course-authoring, authoring, discussions,
-gradebook, learner-dashboard, learning, ora-grading, profile.
-
-**Missing route** (must be added to `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile`):
+This row should now be treated as closed source debt. Runtime/browser proof of the current
+route remains a separate validation concern.
 
 ```caddy
 @mfe_learner-record {
@@ -141,8 +140,6 @@ handle @mfe_learner-record {
     file_server
 }
 ```
-
-This gap was identified in T108 and remains unresolved.
 
 ### Gap 2: VC Signing Key — Needs Verification
 
@@ -313,7 +310,7 @@ For live cluster checks (requires `kubectl` access):
 | `deploy/k8s/base/apps/credentials/service.yaml` | Credentials Service (NodePort 8000) |
 | `deploy/k8s/overlays/production/ingress-openedx-lms.yaml` | Ingress for `credentials.academyv2.mereka.io` |
 | `deploy/k8s/base/apps/caddy/Caddyfile` | Caddy proxy block for credentials subdomain |
-| `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile` | MFE Caddyfile — **missing learner-record route** |
+| `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile` | MFE Caddyfile — learner-record route present |
 | `deploy/k8s/base/plugins/credentials/apps/credentials/settings/production.py` | Mereka production settings |
 | `deploy/k8s/base/secrets/external-secrets.yaml` | Credentials secret mappings |
 | `infrastructure/tutor/custom-apps/credentials_vc_issuer/` | VC issuer custom Django app |

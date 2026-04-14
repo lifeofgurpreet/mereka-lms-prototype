@@ -15,7 +15,8 @@ The repo now has:
 
 ## Current enforced winners
 
-- living architecture: `docs/concepts/architecture/**`
+- stable architecture front doors: `docs/architecture/**`
+- retained architecture standards and deep reference: `docs/concepts/architecture/**`
 - operator docs: `docs/ops/**`
 - evidence: `docs/evidence/**`
 - active reporting: `docs/status/**`

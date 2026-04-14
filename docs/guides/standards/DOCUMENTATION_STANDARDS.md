@@ -15,7 +15,7 @@ audience: All contributors
 
 # Documentation Standards
 
-This guide defines the baseline writing and structure standards for documentation in this repository. Use it with the documentation authority resolver and the docs/specs contract.
+This guide defines the baseline writing and structure standards for documentation in this repository. Use it with the architecture root guidance and the docs/specs contract.
 
 ## Purpose
 
@@ -29,7 +29,7 @@ This standard exists to keep docs:
 
 Before writing, decide what kind of thing you are producing.
 
-- Use `docs/concepts/architecture/**` for living architecture, standards, and current policy-level narratives.
+- Use `docs/architecture/**` for stable architecture models, standards, and current system-governance narratives.
 - Use `docs/guides/**` for human workflows, onboarding, and step-by-step guidance.
 - Use `docs/ops/**` for operator procedures and quick references.
 - Use `docs/reference/**` for factual reference material.
@@ -44,7 +44,6 @@ Do not place new canonical docs in transitional roots such as:
 - `docs/operations/README.md` tombstone only
 - `docs/onboarding/README.md` tombstone only
 - `docs/runbooks/README.md` tombstone only
-- `docs/architecture/README.md` tombstone only
 
 ## Required metadata
 
@@ -157,6 +156,7 @@ python3 tools/docs/verify/verify-doc-catalog-governance.py --range HEAD~1...HEAD
 
 ## Related docs
 
-- [Documentation Authority Resolver](../../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md)
+- [Architecture Root](../../architecture/README.md)
+- [Platform Authority Map](../../architecture/PLATFORM_AUTHORITY_MAP.md)
 - [Docs / Specs Contract](./DOCS_SPECS_CONTRACT.md)
 - [Documentation Contributing Guide](../../CONTRIBUTING.md)

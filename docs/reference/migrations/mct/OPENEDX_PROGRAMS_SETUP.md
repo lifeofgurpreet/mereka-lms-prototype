@@ -60,7 +60,7 @@ If not running, enable in Tutor:
 ```bash
 tutor plugins enable discovery
 tutor config save
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
 tutor k8s launch
 ```
 
@@ -80,7 +80,7 @@ If not running:
 ```bash
 tutor plugins enable credentials
 tutor config save
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
 tutor k8s launch
 ```
 

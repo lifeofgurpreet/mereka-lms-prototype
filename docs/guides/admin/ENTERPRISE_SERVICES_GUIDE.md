@@ -555,7 +555,7 @@ Checks:
 
 **Spec**: `specs/enterprise-microservices_spec.md` (36 ACs, 100% complete)
 
-**Architecture**: `docs/concepts/architecture/enterprise-services-overview.md`
+**Authority + routing**: `docs/reference/operations/ENTERPRISE_MULTI_TENANCY_NAVIGATION.md`
 
 **Runbooks**: `docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md`
 

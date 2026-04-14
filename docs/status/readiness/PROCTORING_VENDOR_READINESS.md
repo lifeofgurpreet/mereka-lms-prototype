@@ -191,7 +191,7 @@ print('Exam/proctoring feature flags:', flags)
        }
    }
    ↓
-7. Run apply-patches.sh → build image → deploy via canonical-release.sh
+7. Run governed Tutor refresh (`./scripts/infra/prepare-tutor-build-context.sh --target openedx`) → build image → deploy via canonical-release.sh
    ↓
 8. Run §3 smoke checklist
    ↓

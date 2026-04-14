@@ -18,8 +18,18 @@ Compact reference for classifying and resolving CI failures without blocking unr
 
 ## Prevention Rules
 
-### 1. Docs-Only Path Gating
-`ci.yml` uses `paths-ignore` to skip the full CI suite for documentation-only PRs. Docs compliance gates run in a separate `docs-compliance.yml` workflow. Never add non-doc logic to docs-only paths.
+### 1. Docs-Only Scope Gating
+`ci.yml` stays attached for documentation-only and CI-control-plane PRs so the
+required branch-protection contexts still report. The current prevention model
+is:
+
+- `change-scope` computes `docs_only` for PR diffs
+- heavyweight Tutor rendering is further narrowed by `tutor_required`
+- dependency review and IaC scan no longer use workflow-level `paths-ignore`
+  for docs-only PRs, so their required contexts still attach
+
+Never reintroduce broad docs-only workflow detachment for required checks.
+Scope heavy work inside jobs, not by dropping the workflow from the PR.
 
 ### 2. K8s vs Non-K8s YAML Separation
 `kubeconform` must exclude data files that are valid YAML but not K8s API objects. The pipeline in `ci.yml` uses a `grep -v` chain before piping to `kubeconform`:
@@ -104,6 +114,7 @@ When CI fails on a PR, work through these questions in order:
 | Symptom | Category | Fix |
 |---|---|---|
 | `ruff: E501 line too long` in changed file | REPO_CONTENT_DEFECT | Fix in PR |
+| required checks absent on a docs-only PR | CI_WORKFLOW_DEFECT | Restore workflow attachment and scope inside jobs |
 | `kubeconform: failed to parse` on a Helm values file | CI_WORKFLOW_DEFECT | Add grep -v exclusion |
 | `xz: command not found` during shellcheck install | RUNNER_CAPABILITY_DEFECT | Python lzma fallback (already present) |
 | `lsb_release: command not found` | RUNNER_CAPABILITY_DEFECT | setup-python-env stub (already present) |

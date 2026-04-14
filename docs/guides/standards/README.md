@@ -40,7 +40,7 @@ This directory contains canonical standards for how documentation is authored, c
 ## Do not use this directory for
 
 - ADR decision records, which belong in `docs/adr/**`
-- living architecture law, which belongs in `docs/concepts/architecture/**`
+- living architecture law, which belongs in `docs/architecture/**`
 - runtime operator procedures, which belong in `docs/ops/**`
 
 ## Core standards
@@ -64,10 +64,10 @@ This directory contains canonical standards for how documentation is authored, c
 - [`ADR_LANGUAGE_STYLE.md`](ADR_LANGUAGE_STYLE.md)
 - [`ADR_NUMBERING_AND_NAMING.md`](ADR_NUMBERING_AND_NAMING.md)
 
-## Docs-program workflow note
+## Workflow standards
 
-Bead format guidance is docs-program internal process material and now lives in
-`docs/meta/docs-program/bead-v2-format.md`.
+- [`bead-v2-format.md`](../../meta/docs-program/bead-v2-format.md) for the Bead title, description,
+  and definition-of-done contract
 
 ## What this directory is not
 

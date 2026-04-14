@@ -3,6 +3,7 @@ title: Docs / Specs Contract
 owner: Platform Team
 status: canonical
 last_reviewed: 2026-03-08
+last_verified: 2026-04-13
 canonical_root: docs/guides
 doc_class: guide
 summary: Defines the boundary between specs, docs, and generated testmaps so verification truth stays unambiguous.
@@ -57,7 +58,7 @@ Use `specs/**` when the change answers:
 Use `docs/**` when the change answers:
 - how to operate the current system,
 - how contributors should work,
-- what architecture decisions and standards currently govern the repo,
+- what architecture standards and current system-governance docs currently govern the repo,
 - what evidence proves a claim,
 - what the current status or readiness posture is.
 
@@ -100,7 +101,7 @@ The practical reading rule is:
 
 Use `docs/**` for:
 
-- living architecture standards under `docs/concepts/architecture/**`
+- living architecture standards under `docs/architecture/**`
 - operator procedure under `docs/ops/**`
 - contributor and user guidance under `docs/guides/**`
 - reference and policy under `docs/reference/**` and `docs/policies/**`
@@ -143,6 +144,6 @@ Reviewers should ask:
 
 ## Related authority docs
 
-- [ARCHITECTURE_CHARTER.md](../../concepts/architecture/ARCHITECTURE_CHARTER.md)
-- [DOCUMENTATION_AUTHORITY_RESOLVER.md](../../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md)
+- [Architecture Root](../../architecture/README.md)
+- [Platform Authority Map](../../architecture/PLATFORM_AUTHORITY_MAP.md)
 - [ADR-011: Convention-Based Spec Verification](SPEC_VERIFICATION_METHOD.md)

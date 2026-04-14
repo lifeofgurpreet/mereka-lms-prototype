@@ -47,4 +47,5 @@ Do not use this root for:
 ## Resolver
 
 For the authority contract behind this root, read:
-- [`../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md`](../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md)
+- [`../README.md`](../README.md)
+- [`../architecture/PLATFORM_AUTHORITY_MAP.md`](../architecture/PLATFORM_AUTHORITY_MAP.md)

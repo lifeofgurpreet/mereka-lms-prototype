@@ -63,7 +63,7 @@
 ```bash
 tutor plugins enable discovery credentials
 tutor config save
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
 tutor k8s launch
 ```
 

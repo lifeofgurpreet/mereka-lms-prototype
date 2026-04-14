@@ -44,5 +44,5 @@ if a credential is ever exposed.
 
 Do not use this directory for:
 - low-level operator procedures that belong in `docs/ops/**`
-- living architecture rules that belong in `docs/concepts/architecture/**`
+- stable architecture front doors that belong in `docs/architecture/**`
 - active status or proof that belongs in `docs/status/**` or `docs/evidence/**`

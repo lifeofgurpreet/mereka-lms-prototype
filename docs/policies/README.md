@@ -11,9 +11,9 @@ Use this root when the question is normative:
 
 | If you need to... | Start here | Then go deeper in |
 |---|---|---|
-| Check design rules, UX constraints, or architecture guardrails | `docs/policies/architecture/**` | `docs/concepts/architecture/**` for the broader architecture context |
+| Check design rules, UX constraints, or architecture guardrails | `docs/policies/architecture/**` | `docs/architecture/**` for the stable architecture context |
 | Check operator safety, service posture, or runtime governance | `docs/policies/operations/**` | `docs/ops/**` if you need the execution procedure afterward |
-| Resolve a disagreement about where a rule belongs | `docs/concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md` | `docs/CONTRIBUTING.md` for the contribution workflow |
+| Resolve a disagreement about where a rule belongs | `docs/architecture/README.md` | `docs/guides/standards/DOCS_SPECS_CONTRACT.md` for docs/spec routing |
 
 Do not use these roots as live policy authority:
 - `docs/operations/README.md` tombstone only
@@ -46,5 +46,5 @@ Policy docs answer:
 3. If you need execution steps, leave this root and move to `docs/ops/**`.
 
 For the full authority contract, read:
-- [`../concepts/architecture/ARCHITECTURE_CHARTER.md`](../concepts/architecture/ARCHITECTURE_CHARTER.md)
-- [`../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md`](../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md)
+- [`../architecture/README.md`](../architecture/README.md)
+- [`../architecture/PLATFORM_AUTHORITY_MAP.md`](../architecture/PLATFORM_AUTHORITY_MAP.md)

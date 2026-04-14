@@ -7,7 +7,8 @@ Wave 2B-Final closed the gap between the documentation governance model and the 
 
 ## Final winning roots
 
-- Living architecture: `docs/concepts/architecture/**`
+- Stable architecture front doors: `docs/architecture/**`
+- Retained architecture standards and deep reference: `docs/concepts/architecture/**`
 - Operator procedures and quick references: `docs/ops/**`
 - Human guidance: `docs/guides/**`
 - Stable lookup/reference: `docs/reference/**`
@@ -23,7 +24,6 @@ Wave 2B-Final closed the gap between the documentation governance model and the 
 These losing roots are now tombstone-only or archival and must not carry live substantive content:
 
 - `docs/operations/README.md`
-- `docs/architecture/README.md`
 - `docs/runbooks/README.md`
 - `docs/onboarding/README.md`
 - `docs/branding/README.md`
@@ -77,7 +77,6 @@ python3 tools/docs/verify/verify-legacy-testmaps-frozen.py --range origin/main..
 - Orphan scan: `orphan_docs=0`
 - Transitional-root inventory:
   - `docs/operations nonstub_files=0`
-  - `docs/architecture nonstub_files=0`
   - `docs/runbooks nonstub_files=0`
   - `docs/onboarding nonstub_files=0`
   - `docs/branding nonstub_files=0`

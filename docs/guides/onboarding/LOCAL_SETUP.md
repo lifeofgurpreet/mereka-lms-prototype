@@ -18,11 +18,11 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements-tutor.txt
-
-./infrastructure/tutor/apply-patches.sh
+source infrastructure/tutor/tutor-env.sh
 ```
 
 Installing from `requirements-tutor.txt` pulls the exact Tutor version (currently 21.0.0 Ulmo) plus first-party plugins (MFE, Indigo, discovery, ecommerce, notes, xqueue, forum).
+The first rendered build-context refresh happens after configuration below, via `./scripts/infra/prepare-tutor-build-context.sh --target all`; do not use the low-level patch helper as the bootstrap front door.
 
 > ❗ The legacy `tutor-license` plugin does not compile against Python 3.12 (`longintrepr.h` removed). We will revisit licensing once an updated plugin is published.
 
@@ -34,7 +34,7 @@ Source the helper script whenever you enter a new shell:
 source infrastructure/tutor/tutor-env.sh
 ```
 
-This sets `TUTOR_ROOT=$REPO/tutor_env`, `OPENEDX_RELEASE=nightly`, and activates the local virtualenv. Re-run `./infrastructure/tutor/apply-patches.sh` after every `tutor config save` to keep patches and MFE build configuration in sync.
+This sets `TUTOR_ROOT=$REPO/tutor_env`, `OPENEDX_RELEASE=nightly`, and activates the local virtualenv. After any manual `tutor config save`, run `./scripts/infra/prepare-tutor-build-context.sh --target all` so the remaining patch-only sync and rendered build-context surfaces are refreshed from current source truth.
 
 ### Docker resources
 
@@ -68,12 +68,11 @@ tutor config save \
   --set OPENEDX_CMS_VERSION=open-release/ulmo.master \
   --set MFE_COMMON_VERSION=master \
   --set MFE_DOCKER_IMAGE=openedx-mfe:nightly
-./infrastructure/tutor/apply-patches.sh
 tutor plugins enable discovery ecommerce forum mfe notes xqueue
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
 ```
 
-Enabling/disabling plugins regenerates the rendered Tutor environment, so always rerun `./infrastructure/tutor/apply-patches.sh` afterwards to keep the Caddy/MySQL tweaks in sync.
+Enabling/disabling plugins regenerates the rendered Tutor environment, so always rerun `./scripts/infra/prepare-tutor-build-context.sh --target all` afterwards to refresh the remaining patch-only sync and rendered build-context snapshots from current source truth.
 
 Secrets (`config.yml`) live in `tutor_env/` which is git-ignored. For reference, `infrastructure/tutor/config.example.yml` records the non-secret overrides.
 
@@ -86,7 +85,7 @@ source infrastructure/tutor/tutor-env.sh
 tutor config save \
   --set THEME_DIR="$(pwd)/infrastructure/tutor/themes" \
   --set THEME_NAME=mereka
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target openedx
 tutor images build openedx
 tutor local start -d
 ```
@@ -97,9 +96,9 @@ Tutor will copy everything under `infrastructure/tutor/themes/` into `tutor_env/
 
 ```bash
 source infrastructure/tutor/tutor-env.sh
-tutor images build mfe        # rebuild if you've touched the shared SCSS
+./scripts/infra/prepare-tutor-build-context.sh --target all
+tutor images build mfe        # rebuild if you've touched shared SCSS or MFE build inputs
 tutor local launch -I --skip-build
-./infrastructure/tutor/apply-patches.sh
 tutor local restart lms cms mfe caddy
 ```
 
@@ -150,7 +149,7 @@ tutor local createuser --superuser --staff -p mereka_admin mereka_admin mereka@e
 ## Daily development workflow
 
 - Start/stop stack: `tutor local start -d` / `tutor local stop`.
-- Bring services back after config changes: rerun `tutor config save`, `./infrastructure/tutor/apply-patches.sh`, then `tutor local restart lms cms mfe ecommerce`.
+- Bring services back after config changes: rerun `tutor config save`, `./scripts/infra/prepare-tutor-build-context.sh --target all`, then `tutor local restart lms cms mfe ecommerce`.
 - Keep databases clean while iterating on configuration: `docker-compose -f tutor_env/env/local/docker-compose.yml -f tutor_env/env/local/docker-compose.prod.yml down -v && rm -rf tutor_env/data`. After wiping `tutor_env/data/mysql`, re-run `tutor local launch -I --skip-build` (or at least `tutor local do init`) so the `openedx` schema and users are recreated before you hit the LMS.
 
 ### MFE development
@@ -166,7 +165,7 @@ npm install
 npm start
 ```
 
-Run unit tests with `tutor dev run mfe npm test -- --watch`. Re-run `./infrastructure/tutor/apply-patches.sh` whenever Tutor regenerates templates so the MySQL command stays compatible with 8.0.
+Run unit tests with `tutor dev run mfe npm test -- --watch`. Re-run `./scripts/infra/prepare-tutor-build-context.sh --target all` whenever Tutor regenerates templates so the rendered build context and remaining patch-only sync stay current.
 Design work references Paragon components and tokens (`https://edx.github.io/paragon/`); theme overrides live alongside the cloned MFEs.
 
 ### Previewing the Mereka theme locally
@@ -179,9 +178,9 @@ Design work references Paragon components and tokens (`https://edx.github.io/par
    ```bash
    tutor config save --set THEME_DIR="$(pwd)/infrastructure/tutor/themes" --set THEME_NAME=mereka
    ```
-3. Re-run the patch helper so LMS/Studio templates and the Indigo plugin pick up the latest SCSS, then restart your stack:
+3. Re-run the canonical build-context prepare step so LMS/Studio templates and the rendered MFE build context pick up the latest SCSS, then restart your stack:
    ```bash
-   ./infrastructure/tutor/apply-patches.sh
+   ./scripts/infra/prepare-tutor-build-context.sh --target all
    tutor local start -d
    ```
 4. Rebuild MFEs (`tutor images build mfe` or `tutor dev start mfe`) to bundle the same SCSS inside `frontend-app-*`. The plugin automatically imports `mereka/mereka.scss`.
@@ -199,7 +198,7 @@ Design work references Paragon components and tokens (`https://edx.github.io/par
 
 - Capture backups before upgrades: `tutor local stop && tutor local do backup-db`. Store dumps outside this repo.
 - Update packages regularly: `pip install -r requirements-tutor.txt` (version pins live in `requirements-tutor.txt`).
-- After any upgrade, rerun `./infrastructure/tutor/apply-patches.sh` before rebuilding MFEs.
+- After any upgrade, rerun `./scripts/infra/prepare-tutor-build-context.sh --target all` before rebuilding MFEs.
 - Apply Tutor upgrades: `source infrastructure/tutor/tutor-env.sh && tutor local do upgrade`.
 
 ## Troubleshooting

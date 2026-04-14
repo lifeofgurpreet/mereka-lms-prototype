@@ -56,4 +56,4 @@ Use `docs/status/**` for:
 ## Standards
 
 - [Status Reporting Standard](../guides/standards/STATUS_REPORTING_STANDARD.md)
-- [Documentation Authority Resolver](../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md)
+- [Documentation Index](../README.md)

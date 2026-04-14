@@ -3,7 +3,7 @@
 **Purpose**: Guidelines for writing maintainable, stable CSS/SCSS selectors in Mereka Academy themes.
 **Last updated**: 2026-02-17
 **Covers**: `AC-UISEL-001`, `AC-UISEL-002`
-**Related**: [MFE_PLUGIN_SLOT_INVENTORY.md](./MFE_PLUGIN_SLOT_INVENTORY.md), [MFE_FIRST_POLICY.md](./MFE_FIRST_POLICY.md)
+**Related**: [MFE_PLUGIN_SLOT_INVENTORY.md](../../reference/architecture/MFE_PLUGIN_SLOT_INVENTORY.md), [MFE_FIRST_POLICY.md](./MFE_FIRST_POLICY.md)
 
 > **2026-02-28 status note**: This document captures the pre-Phase C/T102 policy baseline and includes historical examples.
 > Current production selector contracts are enforced by:
@@ -12,8 +12,8 @@
 > - `scripts/qa/verify-no-dom-overrides.sh`
 >
 > For current truth, prefer:
-> - [MFE_SELECTOR_OVERRIDE_INVENTORY.md](./MFE_SELECTOR_OVERRIDE_INVENTORY.md)
-> - [FPF_PLUGIN_SLOT_REGISTRY.md](./FPF_PLUGIN_SLOT_REGISTRY.md)
+> - [MFE_SELECTOR_OVERRIDE_INVENTORY.md](../../reference/architecture/MFE_SELECTOR_OVERRIDE_INVENTORY.md)
+> - [FPF_PLUGIN_SLOT_REGISTRY.md](../../reference/architecture/FPF_PLUGIN_SLOT_REGISTRY.md)
 
 ---
 
@@ -228,7 +228,7 @@ hooks.Filters.ENV_TEMPLATE_VARIABLES.add_item(
 
 ### Slot-Wirable Customizations (Not Yet Migrated)
 
-From [MFE_PLUGIN_SLOT_INVENTORY.md](./MFE_PLUGIN_SLOT_INVENTORY.md), 100+ slots are available but unwired. Top migration candidates:
+From [MFE_PLUGIN_SLOT_INVENTORY.md](../../reference/architecture/MFE_PLUGIN_SLOT_INVENTORY.md), 100+ slots are available but unwired. Top migration candidates:
 
 | Customization | Current Method | Slot ID | Priority |
 |---------------|----------------|---------|----------|
@@ -278,7 +278,7 @@ From [MFE_PLUGIN_SLOT_INVENTORY.md](./MFE_PLUGIN_SLOT_INVENTORY.md), 100+ slots 
 
 ## Related Documents
 
-- [MFE_PLUGIN_SLOT_INVENTORY.md](./MFE_PLUGIN_SLOT_INVENTORY.md) — Complete slot catalog
+- [MFE_PLUGIN_SLOT_INVENTORY.md](../../reference/architecture/MFE_PLUGIN_SLOT_INVENTORY.md) — Complete slot catalog
 - [MFE_FIRST_POLICY.md](./MFE_FIRST_POLICY.md) — Slot-first implementation strategy
 - [ADR-014: MFE Branding Strategy](../../programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md) — Historical context
 - [verify-selector-hardening.sh](../../../scripts/qa/verify-selector-hardening.sh) — Automated checks
