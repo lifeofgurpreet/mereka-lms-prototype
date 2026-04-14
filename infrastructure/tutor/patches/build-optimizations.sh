@@ -251,10 +251,6 @@ for target in targets:
         )
 
     if path.name == "Dockerfile":
-        updated = updated.replace(
-            'if [ "$MEREKA_BUILD_PROFILE" = "fast" ]; then echo "Skipping rdfind static dedupe (fast build profile)"; else rdfind -makesymlinks true -followsymlinks true /openedx/staticfiles/; fi',
-            "rdfind -makesymlinks true -followsymlinks true /openedx/staticfiles/",
-        )
         final_stage_legacy = """###### Final image with production cmd
 FROM production AS final
 
@@ -532,17 +528,6 @@ CMD ["uwsgi", "/openedx/uwsgi.ini"]
     # ── assets.py patches ───────────────────────────────────────────────
 
     if path.name == "assets.py" and "derive_settings" in updated:
-        # Ensure optional apps exist when collecting assets (Redwood-era, harmless no-op on Ulmo)
-        updated = updated.replace(
-            "derive_settings(__name__)\n\nLOCALE_PATHS.append(\"/openedx/locale/contrib/locale\")\n",
-            "derive_settings(__name__)\n\n# Ensure optional Redwood apps exist when collecting assets\nif \"openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig\" not in INSTALLED_APPS:\n    INSTALLED_APPS += [\"openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig\"]\nif \"openedx.core.djangoapps.bookmarks.apps.BookmarksConfig\" not in INSTALLED_APPS:\n    INSTALLED_APPS += [\"openedx.core.djangoapps.bookmarks.apps.BookmarksConfig\"]\nif \"openedx.core.djangoapps.discussions.apps.DiscussionsConfig\" not in INSTALLED_APPS:\n    INSTALLED_APPS += [\"openedx.core.djangoapps.discussions.apps.DiscussionsConfig\"]\nif \"openedx.core.djangoapps.theming.apps.ThemingConfig\" not in INSTALLED_APPS:\n    INSTALLED_APPS += [\"openedx.core.djangoapps.theming.apps.ThemingConfig\"]\n\nLOCALE_PATHS.append(\"/openedx/locale/contrib/locale\")\n",
-        )
-
-        # Disable django-pipeline UglifyJS compression
-        pipeline_patch = "PIPELINE['JS_COMPRESSOR'] = None\n"
-        if "JS_COMPRESSOR" not in updated:
-            updated = updated.rstrip() + "\n\n" + pipeline_patch
-
         # Fix collectstatic SuspiciousFileOperation
         safe_join_patch = (
             "# Monkey-patch safe_join to be permissive during asset build.\n"
