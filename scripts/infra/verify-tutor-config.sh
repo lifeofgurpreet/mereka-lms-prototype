@@ -626,6 +626,8 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_not_in_file 'final_stage_runtime = """FROM production AS runtime-edx-platform-pruned' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain render-owned runtime prune stage rewrite"
   pattern_not_in_file "safe_join_patch = (" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain render-owned safe_join injection"
   pattern_not_in_file 'reverse_proxy /profile/api/* lms:8000 {' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain render-owned Caddy /profile/api rewrite"
+  pattern_not_in_file 'if path.name == "lms.conf":' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain dead nginx-era edge rewrites"
+  pattern_not_in_file "apps.academyv2.mereka.io" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain stale academyv2 .io host rewrites"
   pattern_not_in_file "RUN uv pip install -e /openedx/mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "No duplicate production-stage custom app reinstalls remain"
   pattern_in_file 'pip install --no-cache-dir --no-build-isolation uwsgi==2.0.24' "$OPENEDX_DOCKERFILE" "uwsgi remains on explicit pip compatibility fallback"
   fixed_pattern_count_equals "pip install" "1" "$OPENEDX_DOCKERFILE" "Only uwsgi remains on plain pip in rendered Open edX Dockerfile"

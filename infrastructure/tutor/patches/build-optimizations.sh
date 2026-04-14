@@ -206,61 +206,10 @@ for target in targets:
 
     # ── assets.py patches ───────────────────────────────────────────────
 
-    # ── lms.conf patches ────────────────────────────────────────────────
-
-    if path.name == "lms.conf":
-        # /health endpoint
-        if "location = /health" not in updated:
-            health_block = (
-                "  location = /health {\n"
-                "    default_type text/plain;\n"
-                "    return 200 \"ok\\n\";\n"
-                "  }\n\n"
-            )
-            marker = "  location / {"
-            if marker in updated:
-                updated = updated.replace(marker, health_block + marker, 1)
-
-        # /profile/api/ proxy
-        if "apps.academyv2.mereka.io" in updated and "/profile/api/" not in updated:
-            pattern = re.compile(
-                r"(server_name apps\.academyv2\.mereka\.io;.*?)(\n  location / \{)",
-                re.S,
-            )
-            profile_proxy = (
-                "  location ^~ /profile/api/ {\n"
-                "    proxy_set_header Host $http_host;\n"
-                "    proxy_redirect off;\n"
-                "    proxy_pass http://lms-backend;\n"
-                "  }\n\n"
-            )
-            updated = pattern.sub(rf"\\1\n{profile_proxy}\\2", updated, count=1)
-
     # ── Caddyfile patches ───────────────────────────────────────────────
 
     if path.name == "Caddyfile":
-        # MFE cache headers
-        if "apps.academyv2.mereka.io" in updated:
-            if "Cache-Control" not in updated or "no-cache" not in updated:
-                needle = "apps.academyv2.mereka.io {"
-                if needle in updated:
-                    cache_config = """    # MFE cache headers to prevent stale blank pages (mereka-lms-2pne)
-    header {
-        # HTML: no-cache to prevent stale pages after deployment
-        @html {
-            path *.html /
-        }
-        Cache-Control "no-cache, no-store, must-revalidate" @html
-
-        # JS/CSS with content-hash: long cache + immutable
-        @static {
-            path *.js *.css *.woff2 *.woff *.ttf *.eot *.svg *.png *.jpg *.jpeg *.gif *.ico
-        }
-        Cache-Control "public, max-age=31536000, immutable" @static
-    }
-
-"""
-                    updated = updated.replace(needle, needle + "\n" + cache_config)
+        pass
 
     if updated != original:
         path.write_text(updated)
