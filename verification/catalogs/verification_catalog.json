@@ -731,7 +731,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-admin-merge-exceptions.sh",
-      "reference_count": 5,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -2070,7 +2070,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-branch-protection.sh",
-      "reference_count": 5,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -8674,7 +8674,7 @@
       "mutability": "mutating",
       "owner": "platform-core",
       "path": "scripts/qa/verify-manifest-integrity.sh",
-      "reference_count": 8,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -9643,7 +9643,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-selectors.sh",
-      "reference_count": 6,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -14817,7 +14817,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-selector-hardening.sh",
-      "reference_count": 6,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -15529,7 +15529,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-slot-migration-readiness.sh",
-      "reference_count": 6,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

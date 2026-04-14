@@ -32,53 +32,6 @@
       "cross_repo_verdict": "manual_review_required",
       "deployment_repo": "bbi-infrastructure",
       "notes": [
-        "MFE image pin and ingress host updates are expected to land in GitOps overlays, not in app-repo production overlays"
-      ],
-      "overlay_roots": {
-        "dev": "apps/mereka-lms/overlays/dev/",
-        "prod": "apps/mereka-lms/overlays/prod/",
-        "staging": "apps/mereka-lms/overlays/staging/"
-      },
-      "required_reviewers": [
-        "architecture",
-        "platform",
-        "release"
-      ],
-      "service": "mfe",
-      "unknowns": [
-        "exact ingress object, edge route, or CDN-related files are not declared in this repo"
-      ]
-    },
-    {
-      "argocd_surfaces": [
-        "apps/mereka-lms/",
-        "platform monitoring applications"
-      ],
-      "cross_repo_verdict": "infra_counterpart_required",
-      "deployment_repo": "bbi-infrastructure",
-      "notes": [
-        "observability is a mixed ownership surface: app repo owns contracts and runbooks, infra repo owns realization"
-      ],
-      "overlay_roots": {
-        "dev": "apps/mereka-lms/overlays/dev/",
-        "prod": "apps/mereka-lms/overlays/prod/"
-      },
-      "required_reviewers": [
-        "platform",
-        "release"
-      ],
-      "service": "observability-runtime",
-      "unknowns": [
-        "exact monitoring and alerting application paths in bbi-infrastructure are not declared in this repo"
-      ]
-    },
-    {
-      "argocd_surfaces": [
-        "apps/mereka-lms/"
-      ],
-      "cross_repo_verdict": "manual_review_required",
-      "deployment_repo": "bbi-infrastructure",
-      "notes": [
         "deploy/k8s/overlays/rke2-nonprod in this repo is deprecated in favor of bbi-infrastructure dev overlays",
         "deploy/k8s/overlays/production in this repo is deprecated in favor of bbi-infrastructure prod overlays"
       ],
@@ -159,17 +112,15 @@
     "security",
     "tenancy_auth"
   ],
-  "service_count": 6,
+  "service_count": 4,
   "summary": {
     "infra_counterpart_not_required": [],
     "infra_counterpart_required": [
-      "observability-runtime",
       "purchase-gateway",
       "runner-ci"
     ],
     "manual_review_required": [
       "enterprise-services",
-      "mfe",
       "openedx"
     ],
     "unknown_mapping": []
