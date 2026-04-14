@@ -136,32 +136,6 @@ for target in targets:
     # signatures. Treat this as an explicit compatibility exception, not a
     # forgotten uv seam.
 
-    # pip install retry wrapping
-    updated = updated.replace(
-        "RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/openedx/edx-platform/requirements/edx/base.txt \\\n    --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\\n    pip install -r /openedx/edx-platform/requirements/edx/base.txt",
-        """RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/openedx/edx-platform/requirements/edx/base.txt \\
-    --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\
-    bash -o pipefail -c 'for attempt in 1 2 3; do $PIP_COMMAND install --no-build-isolation -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo "$PIP_COMMAND install attempt ${attempt} failed; retrying in 10s" >&2; sleep 10; done; exit 1'""",
-    )
-    updated = updated.replace(
-        "RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/openedx/edx-platform/requirements/edx/base.txt \\\n    --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\\n    bash -o pipefail -c 'for attempt in 1 2 3; do \\n        pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0 \\n        echo \"pip install attempt ${attempt} failed; retrying in 10s\" >&2 \\n        sleep 10 \\n    done; exit 1'",
-        """RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/openedx/edx-platform/requirements/edx/base.txt \\
-    --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\
-    bash -o pipefail -c 'for attempt in 1 2 3; do $PIP_COMMAND install --no-build-isolation -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo "$PIP_COMMAND install attempt ${attempt} failed; retrying in 10s" >&2; sleep 10; done; exit 1'""",
-    )
-    updated = updated.replace(
-        """RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/openedx/edx-platform/requirements/edx/base.txt \\
-    --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\
-    bash -o pipefail -c 'for attempt in 1 2 3; do
-        pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0
-        echo "pip install attempt ${attempt} failed; retrying in 10s" >&2
-        sleep 10
-    done; exit 1'""",
-        """RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/openedx/edx-platform/requirements/edx/base.txt \\
-    --mount=type=cache,target=/openedx/.cache/pip,sharing=shared \\
-    bash -o pipefail -c 'for attempt in 1 2 3; do $PIP_COMMAND install --no-build-isolation -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo "$PIP_COMMAND install attempt ${attempt} failed; retrying in 10s" >&2; sleep 10; done; exit 1'""",
-    )
-
     # coursewarehistoryextended + optional apps
     updated = updated.replace(
         'INSTALLED_APPS.remove("lms.djangoapps.coursewarehistoryextended")\nDATABASE_ROUTERS.remove(\n    "openedx.core.lib.django_courseware_routers.StudentModuleHistoryExtendedRouter"\n)\n',
@@ -577,14 +551,6 @@ CMD ["uwsgi", "/openedx/uwsgi.ini"]
         )
 
     if path.name == "Dockerfile" and "/openedx/edx-platform" in updated:
-        # django-prometheus pip install in Dockerfile
-        base_req_marker = "bash -o pipefail -c 'for attempt in 1 2 3; do pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo \"pip install attempt ${attempt} failed; retrying in 10s\" >&2; sleep 10; done; exit 1'"
-        if base_req_marker in updated:
-            if "django-prometheus" not in updated:
-                prometheus_install = base_req_marker + """\n\n# Install django-prometheus for metrics
-RUN uv pip install django-prometheus==2.3.1"""
-                updated = updated.replace(base_req_marker, prometheus_install)
-
         advanced_xblocks_marker = "RUN $PIP_COMMAND install -e .\n"
         advanced_xblocks_copy = (
             "RUN $PIP_COMMAND install -e .\n\n"

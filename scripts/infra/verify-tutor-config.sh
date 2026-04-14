@@ -602,6 +602,8 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_not_in_file 'RUN pip install "ora2==7.0.0"' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain plain-pip ora2 rewrite"
   pattern_not_in_file 'RUN cd /openedx/locale/user && \\' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain legacy compilemessages admin rewrites"
   pattern_not_in_file 'django-admin.py compilemessages -v1' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain django-admin compilemessages rewrite signatures"
+  pattern_not_in_file 'RUN --mount=type=bind,from=edx-platform,source=/requirements/edx/base.txt,target=/openedx/edx-platform/requirements/edx/base.txt \\' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain plain pip retry source signature"
+  pattern_not_in_file "base_req_marker = \"bash -o pipefail -c 'for attempt in 1 2 3; do pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo \\\"pip install attempt \${attempt} failed; retrying in 10s\\\" >&2; sleep 10; done; exit 1'\"" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain dead django-prometheus insertion marker"
   pattern_not_in_file "legacy_code_stage_custom_apps_pattern" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain legacy production-stage custom app scrubber"
   pattern_not_in_file "production_custom_apps_pattern" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain duplicate production-stage custom app reinjection scrubber"
   pattern_not_in_file "RUN uv pip install -e /openedx/mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "No duplicate production-stage custom app reinstalls remain"
