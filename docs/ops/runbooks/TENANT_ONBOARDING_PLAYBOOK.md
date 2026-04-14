@@ -94,9 +94,9 @@ sites:
       homepage_banner_enabled: false
 ```
 
-## Step 4: Add to Django Settings
+## Step 4: Add To Django Settings Source Patch
 
-Edit `infrastructure/tutor/apply-patches.sh`:
+Edit the host/CSRF source patch in `infrastructure/tutor/apply-patches.sh`:
 
 ```python
 # Add to extra_lms_hosts list
@@ -218,7 +218,7 @@ This flow gives you:
 
 ### CSRF trusted origins
 
-- [ ] Domain added to `extra_csrf_origins` in `apply-patches.sh`
+- [ ] Domain added to the `extra_csrf_origins` source patch in `apply-patches.sh`
 - [ ] Domain added to `mereka_lms.py` CSRF patch (dual-path)
 - [ ] `https://` prefix included (Django requires scheme)
 
@@ -444,8 +444,8 @@ print([h for h in settings.ALLOWED_HOSTS if 'newclient' in h])
 print([o for o in settings.CSRF_TRUSTED_ORIGINS if 'newclient' in o])
 "
 
-# Repair: re-run apply-patches.sh and rebuild
-./infrastructure/tutor/apply-patches.sh
+# Repair: refresh through the governed prepare path, then rebuild
+./scripts/infra/prepare-tutor-build-context.sh --target all
 # Then follow `docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md` for image rebuild + deploy
 ```
 
@@ -638,7 +638,9 @@ When a verification gate fails, use this triage map to identify root cause and r
 | SESSION_COOKIE_DOMAIN | `kubectl exec -n mereka-lms deploy/lms -- python manage.py lms shell -c "from django.conf import settings; print(settings.SESSION_COOKIE_DOMAIN)"` | `None` (host-only) |
 | OIDC provider active | `./scripts/qa/verify-oidc-provider-configs.sh --env prod` | PASS |
 
-**Repair**: If domain missing from ALLOWED_HOSTS/CSRF → update `apply-patches.sh`, rebuild image. If cookie domain wrong → update settings, restart pods.
+**Repair**: If domain missing from ALLOWED_HOSTS/CSRF → update the source patch in
+`apply-patches.sh`, run `./scripts/infra/prepare-tutor-build-context.sh --target all`,
+then rebuild the affected image. If cookie domain wrong → update settings, restart pods.
 
 ---
 

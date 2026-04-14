@@ -6,7 +6,7 @@ _Audience: Operators and developers • Owner: Platform Team • Last verified: 
 This guide covers deploying branding/theme changes from the Mereka brand system to the production (GKE) and dev (kind) Open edX environments.
 
 Canonical branding workflow:
-- `docs/guides/branding/BRANDING_OPERATING_MODEL.md`
+- [BRANDING_OPERATING_MODEL.md](../../guides/branding/BRANDING_OPERATING_MODEL.md)
 - `./scripts/branding/run-branding-gates.sh prod`
 
 Important:
@@ -236,16 +236,16 @@ Portability guard (recommended before PR):
 
 ### Step 3: Apply Tutor Patches
 
-**CRITICAL**: Always run this before building:
+**CRITICAL**: Always run the governed prepare path before building:
 
 ```bash
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
 ```
 
-**What the script does** (file-system operations):
-- Syncs theme assets (logos, fonts, SCSS files)
-- Copies assets to build directories
-- Sets up theme directory structure
+**What the prepare path realizes** (file-system operations via the low-level patch helper):
+- Mirrors rendered LMS/CMS theme asset trees from source, not just a hand-picked file list
+- Clears rendered theme asset destinations first so removed source assets do not linger
+- Syncs templates, CSS, and theme directory structure
 - Distributes font files to MFE build context
 
 **What the plugin does** (automatic via Tutor hooks):
@@ -302,7 +302,7 @@ Use local Tutor builds only for debugging, parity checks, or kind workflows:
 ```bash
 source .venv/bin/activate
 export TUTOR_ROOT="$(pwd)/tutor_env"
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
 tutor images build openedx
 ./scripts/qa/verify-mfe-build-prereqs.sh
 tutor images build mfe
@@ -415,7 +415,7 @@ rg -n "openedx-mfe|openedx:" "${INFRA_REPO}/apps/mereka-lms/overlays/prod/kustom
 
 1. Check browser cache (hard refresh: Ctrl+Shift+R)
 2. Verify theme is enabled in Tutor config
-3. Check that `apply-patches.sh` was run before build
+3. Check that `prepare-tutor-build-context.sh --target all` or `tutor-config-save.sh` was run before build
 4. Inspect element to verify CSS is loading
 
 ### Font Not Loading
@@ -445,7 +445,7 @@ kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster -n mereka-lms get 
 
 ## Related Documentation
 
-- [BRANDING.md](../guides/branding/BRANDING.md) - Brand guidelines and token reference
+- [BRANDING.md](../../guides/branding/BRANDING.md) - Brand guidelines and token reference
 - [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) - General troubleshooting
 - [Standing Orders](../../meta/standing-orders/README.md) - Canonical maintainer and agent standing orders
 - [Brand Assets Repository](https://github.com/biji-biji-initiative/bbbi-mereka-brand-assets)

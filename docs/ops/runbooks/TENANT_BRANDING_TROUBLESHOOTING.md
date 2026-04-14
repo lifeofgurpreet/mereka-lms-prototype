@@ -492,7 +492,7 @@ kubectl exec -n mereka-lms -it deploy/lms -- \
 - **Contract**: `docs/guides/branding/TENANT_BRANDING_CONTRACT.md`
 - **Provisioning**: `docs/ops/runbooks/TENANT_PROVISIONING.md`
 - **Readiness**: `docs/status/readiness/TENANT_BRANDING_READINESS_RAG.md`
-- **Architecture**: `docs/concepts/architecture/multi-tenancy-overview.md`
+- **Tenant standard**: `docs/concepts/architecture/TENANT_LIFECYCLE.md`
 - **Spec**: `specs/multi-tenancy-architecture_spec.md`
 - **General troubleshooting**: `docs/ops/runbooks/TROUBLESHOOTING.md`
 
