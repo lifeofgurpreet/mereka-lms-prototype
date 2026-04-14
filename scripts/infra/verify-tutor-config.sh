@@ -316,6 +316,7 @@ CADDYFILE="$TUTOR_ENV/env/apps/caddy/Caddyfile"
 if [[ -f "$CADDYFILE" ]]; then
   pattern_in_file "academy.biji-biji.com" "$CADDYFILE" "Biji-Biji domain in Caddyfile"
   pattern_in_file "skillourfuture.academy.mereka.io" "$CADDYFILE" "SkillOurFuture domain in Caddyfile"
+  pattern_in_file 'reverse_proxy /profile/api/* lms:8000 {' "$CADDYFILE" "Caddy render keeps /profile/api proxy"
 fi
 
 # Check nginx for extra domains
@@ -587,6 +588,7 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_not_in_file "legacy_runtime_cluster = re.compile(" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain broad legacy runtime cluster scrubber"
   pattern_not_in_file "legacy_translation_preflight_block = (" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain legacy translation preflight heredoc scrubber"
   pattern_not_in_file "escaped_translation_preflight_block = (" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain escaped translation preflight scrubber"
+  pattern_not_in_file "translation_preflight_block = (" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain render-owned translation preflight insertion"
   pattern_not_in_file "# Re-install local requirements, otherwise egg-info folders are missing" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain local requirements reinstall scrubber"
   pattern_not_in_file 'base_txt = Path("/openedx/edx-platform/requirements/edx/base.txt")' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain legacy base requirements pin heredoc scrubber"
   pattern_not_in_file "s/django-cors-headers==4.9.0/django-cors-headers==4.3.1/g" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain sed-based base requirements pin scrubber"
@@ -621,6 +623,9 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_not_in_file "PIPELINE['JS_COMPRESSOR'] = None" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain dead assets pipeline rewrite"
   pattern_not_in_file "legacy_code_stage_custom_apps_pattern" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain legacy production-stage custom app scrubber"
   pattern_not_in_file "production_custom_apps_pattern" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain duplicate production-stage custom app reinjection scrubber"
+  pattern_not_in_file 'final_stage_runtime = """FROM production AS runtime-edx-platform-pruned' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain render-owned runtime prune stage rewrite"
+  pattern_not_in_file "safe_join_patch = (" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain render-owned safe_join injection"
+  pattern_not_in_file 'reverse_proxy /profile/api/* lms:8000 {' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain render-owned Caddy /profile/api rewrite"
   pattern_not_in_file "RUN uv pip install -e /openedx/mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "No duplicate production-stage custom app reinstalls remain"
   pattern_in_file 'pip install --no-cache-dir --no-build-isolation uwsgi==2.0.24' "$OPENEDX_DOCKERFILE" "uwsgi remains on explicit pip compatibility fallback"
   fixed_pattern_count_equals "pip install" "1" "$OPENEDX_DOCKERFILE" "Only uwsgi remains on plain pip in rendered Open edX Dockerfile"

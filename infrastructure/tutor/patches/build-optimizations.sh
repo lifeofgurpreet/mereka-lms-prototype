@@ -56,54 +56,11 @@ STATIC_PAYLOAD_TRIM_BLOCK = textwrap.dedent(
                /openedx/staticfiles/edx-bootstrap/node_modules"""
 )
 
-FINAL_RUNTIME_PRUNE_BLOCK = textwrap.dedent(
-    """\
-    RUN rm -rf /opt/pyenv/.github \\
-               /opt/pyenv/test \\
-               /opt/pyenv/src \\
-               /opt/pyenv/man \\
-               /opt/pyenv/completions \\
-               /opt/pyenv/terminal_output.png \\
-               /opt/pyenv/versions/3.11.8/bin/pip \\
-               /opt/pyenv/versions/3.11.8/bin/pip3 \\
-               /opt/pyenv/versions/3.11.8/bin/pip3.11 \\
-               /opt/pyenv/versions/3.11.8/lib/python3.11/test \\
-               /opt/pyenv/versions/3.11.8/lib/python3.11/__pycache__ \\
-               /opt/pyenv/versions/3.11.8/lib/python3.11/idlelib \\
-               /opt/pyenv/versions/3.11.8/lib/python3.11/tkinter \\
-               /opt/pyenv/versions/3.11.8/lib/python3.11/turtledemo \\
-               /opt/pyenv/versions/3.11.8/lib/python3.11/site-packages/pip \\
-               /opt/pyenv/versions/3.11.8/lib/python3.11/site-packages/pip-24.0.dist-info \\
-               /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/libpython3.11.a \\
-               /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/Makefile \\
-               /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/Setup \\
-               /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/Setup.bootstrap \\
-               /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/Setup.local \\
-               /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/Setup.stdlib \\
-               /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/install-sh \\
-               /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/makesetup \\
-               /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/python.o \\
-               /openedx/venv/bin/pip \\
-               /openedx/venv/bin/pip3 \\
-               /openedx/venv/bin/pip3.11 \\
-               /openedx/venv/lib/python3.11/site-packages/pip \\
-               /openedx/venv/lib/python3.11/site-packages/pip-24.0.dist-info \\
-               /openedx/venv/lib/python3.11/site-packages/wheel \\
-               /openedx/venv/lib/python3.11/site-packages/wheel-0.45.1.dist-info"""
-)
-
 STATIC_PAYLOAD_TRIM_RE = re.compile(
     r"RUN rm -rf /openedx/staticfiles/stylelint-config-edx \\\n"
     r"(?:\s+/openedx/staticfiles/[^\n]+(?: \\\n|\n))+",
     re.MULTILINE,
 )
-
-FINAL_RUNTIME_PRUNE_RE = re.compile(
-    r"RUN rm -rf /opt/pyenv/\.github \\\n"
-    r"(?:\s+/(?:opt/pyenv|openedx/venv)[^\n]+(?: \\\n|\n))+",
-    re.MULTILINE,
-)
-
 
 def normalize_single_block(text: str, marker: str, pattern: re.Pattern[str], canonical_block: str) -> str:
     if marker not in text:
@@ -143,35 +100,9 @@ for target in targets:
             1,
         )
 
-    translation_preflight_block = (
-        'RUN if [ "$MEREKA_BUILD_PROFILE" = "fast" ]; then '
-        'echo "Skipping translation settings import preflight (fast build profile)"; '
-        "else "
-        "python -c 'import importlib, os; "
-        "os.environ.setdefault(\"DJANGO_SETTINGS_MODULE\", \"lms.envs.tutor.i18n\"); "
-        "importlib.import_module(\"lms.envs.tutor.i18n\"); "
-        "print(\"translation settings import preflight ok\")'; "
-        "fi\n"
-    )
-    if f"{build_profile_arg}{translation_preflight_block}" not in updated and translation_preflight_block in updated:
-        updated = updated.replace(
-            translation_preflight_block,
-            build_profile_arg + translation_preflight_block,
-            1,
-        )
     updated = updated.replace(
         "RUN make clean_translations",
-        f"{translation_preflight_block}RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then echo \"Skipping translation refresh (fast build profile)\"; else make clean_translations; fi",
-    )
-    updated = re.sub(
-        rf"(?:{re.escape(translation_preflight_block)})+RUN make clean_translations",
-        f"{translation_preflight_block}RUN make clean_translations",
-        updated,
-    )
-    updated = re.sub(
-        rf"(?:{re.escape(translation_preflight_block)}){{2,}}",
-        translation_preflight_block,
-        updated,
+        "RUN if [ \"$MEREKA_BUILD_PROFILE\" = \"fast\" ]; then echo \"Skipping translation refresh (fast build profile)\"; else make clean_translations; fi",
     )
 
     updated = updated.replace(
@@ -244,217 +175,6 @@ for target in targets:
             STATIC_PAYLOAD_TRIM_BLOCK,
         )
 
-    if path.name == "Dockerfile":
-        final_stage_legacy = """###### Final image with production cmd
-FROM production AS final
-
-# Default amount of uWSGI processes
-ENV UWSGI_WORKERS=2
-
-# Copy the default uWSGI configuration
-COPY --chown=app:app settings/uwsgi.ini /openedx
-
-# Run server
-CMD ["uwsgi", "/openedx/uwsgi.ini"]
-"""
-        final_stage_minimal = """###### Final image with production cmd
-FROM minimal AS final
-
-ARG APP_USER_ID=1000
-
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \\
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \\
-    apt update \\
-    && apt install -y gettext gfortran graphviz graphviz-dev libffi-dev libfreetype6-dev libgeos-dev libjpeg8-dev liblapack-dev libmysqlclient-dev libpng-dev libsqlite3-dev libxmlsec1-dev lynx mysql-client ntp pkg-config
-
-RUN if [ "$APP_USER_ID" = 0 ]; then echo "app user may not be root" && false; fi
-RUN useradd --no-log-init --home-dir /openedx --create-home --shell /bin/bash --uid ${APP_USER_ID} app
-USER ${APP_USER_ID}
-
-COPY --link --from=docker.io/powerman/dockerize:0.19.0 /usr/local/bin/dockerize /usr/local/bin/dockerize
-COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/edx-platform /openedx/edx-platform
-COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=python /opt/pyenv /opt/pyenv
-COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=python-requirements /openedx/venv /openedx/venv
-COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /mnt /mnt
-COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/bin /openedx/bin
-COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/config /openedx/config
-COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/themes /openedx/themes
-COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/staticfiles /openedx/staticfiles
-COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/data /openedx/data
-
-RUN rm -rf /opt/pyenv/.github \\
-           /opt/pyenv/test \\
-           /opt/pyenv/src \\
-           /opt/pyenv/man \\
-           /opt/pyenv/completions \\
-           /opt/pyenv/terminal_output.png \\
-           /opt/pyenv/versions/3.11.8/bin/pip \\
-           /opt/pyenv/versions/3.11.8/bin/pip3 \\
-           /opt/pyenv/versions/3.11.8/bin/pip3.11 \\
-           /opt/pyenv/versions/3.11.8/lib/python3.11/test \\
-           /opt/pyenv/versions/3.11.8/lib/python3.11/__pycache__ \\
-           /opt/pyenv/versions/3.11.8/lib/python3.11/idlelib \\
-           /opt/pyenv/versions/3.11.8/lib/python3.11/tkinter \\
-           /opt/pyenv/versions/3.11.8/lib/python3.11/turtledemo \\
-           /opt/pyenv/versions/3.11.8/lib/python3.11/site-packages/pip \\
-           /opt/pyenv/versions/3.11.8/lib/python3.11/site-packages/pip-24.0.dist-info \\
-           /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/libpython3.11.a \\
-           /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/Makefile \\
-           /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/Setup \\
-           /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/Setup.bootstrap \\
-           /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/Setup.local \\
-           /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/Setup.stdlib \\
-           /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/install-sh \\
-           /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/makesetup \\
-           /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/python.o \\
-           /openedx/venv/bin/pip \\
-           /openedx/venv/bin/pip3 \\
-           /openedx/venv/bin/pip3.11 \\
-           /openedx/venv/lib/python3.11/site-packages/pip \\
-           /openedx/venv/lib/python3.11/site-packages/pip-24.0.dist-info \\
-           /openedx/venv/lib/python3.11/site-packages/wheel \\
-           /openedx/venv/lib/python3.11/site-packages/wheel-0.45.1.dist-info
-
-ENV PATH=/openedx/venv/bin:/openedx/bin:${PATH}
-ENV VIRTUAL_ENV=/openedx/venv/
-ENV PYTHONPATH=/openedx/edx-platform
-ENV COMPREHENSIVE_THEME_DIRS=/openedx/themes
-ENV STATIC_ROOT_LMS=/openedx/staticfiles
-ENV STATIC_ROOT_CMS=/openedx/staticfiles/studio
-ENV SERVICE_VARIANT=lms
-ENV DJANGO_SETTINGS_MODULE=lms.envs.tutor.production
-ENV UWSGI_WORKERS=2
-
-# Copy the default uWSGI configuration
-COPY --chown=app:app settings/uwsgi.ini /openedx
-
-# Run server
-CMD ["uwsgi", "/openedx/uwsgi.ini"]
-"""
-        final_stage_runtime = """FROM production AS runtime-edx-platform-pruned
-
-RUN rm -rf /openedx/edx-platform/.git \\
-           /openedx/edx-platform/.github \\
-           /openedx/edx-platform/docs \\
-           /openedx/edx-platform/test_root \\
-           /openedx/edx-platform/results.txt
-
-###### Final image with production cmd
-FROM docker.io/ubuntu:22.04 AS final
-
-ARG APP_USER_ID=1000
-
-ENV DEBIAN_FRONTEND=noninteractive
-ENV LANG=C.UTF-8
-ENV LC_ALL=C.UTF-8
-
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \\
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \\
-    apt update \\
-    && apt install -y --no-install-recommends \\
-        ca-certificates \\
-        curl \\
-        gettext-base \\
-        graphviz \\
-        libffi8 \\
-        libfreetype6 \\
-        libgeos-c1v5 \\
-        libjpeg-turbo8 \\
-        liblapack3 \\
-        default-mysql-client \\
-        libmysqlclient21 \\
-        libpng16-16 \\
-        libsqlite3-0 \\
-        libxml2 \\
-        libxmlsec1 \\
-        libxmlsec1-openssl \\
-        libxslt1.1 \\
-        locales \\
-        xmlsec1 \\
-    && rm -rf /var/lib/apt/lists/*
-
-RUN if [ "$APP_USER_ID" = 0 ]; then echo "app user may not be root" && false; fi
-RUN useradd --no-log-init --home-dir /openedx --create-home --shell /bin/bash --uid ${APP_USER_ID} app
-USER ${APP_USER_ID}
-
-COPY --link --from=docker.io/powerman/dockerize:0.19.0 /usr/local/bin/dockerize /usr/local/bin/dockerize
-COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=runtime-edx-platform-pruned /openedx/edx-platform /openedx/edx-platform
-COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=python /opt/pyenv /opt/pyenv
-COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=python-requirements /openedx/venv /openedx/venv
-COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /mnt /mnt
-COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/bin /openedx/bin
-COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/config /openedx/config
-COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/themes /openedx/themes
-COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/staticfiles /openedx/staticfiles
-COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/data /openedx/data
-
-ENV PATH=/openedx/venv/bin:/openedx/bin:${PATH}
-ENV VIRTUAL_ENV=/openedx/venv/
-ENV PYTHONPATH=/openedx/edx-platform
-ENV COMPREHENSIVE_THEME_DIRS=/openedx/themes
-ENV STATIC_ROOT_LMS=/openedx/staticfiles
-ENV STATIC_ROOT_CMS=/openedx/staticfiles/studio
-ENV SERVICE_VARIANT=lms
-ENV DJANGO_SETTINGS_MODULE=lms.envs.tutor.production
-ENV UWSGI_WORKERS=2
-
-# Copy the default uWSGI configuration
-COPY --chown=app:app settings/uwsgi.ini /openedx
-
-# Run server
-CMD ["uwsgi", "/openedx/uwsgi.ini"]
-"""
-        updated = updated.replace(final_stage_legacy, final_stage_runtime)
-        updated = updated.replace(final_stage_minimal, final_stage_runtime)
-        if "FROM production AS runtime-edx-platform-pruned" not in updated and "###### Final image with production cmd\nFROM docker.io/ubuntu:22.04 AS final\n" in updated:
-            updated = updated.replace(
-                "###### Final image with production cmd\nFROM docker.io/ubuntu:22.04 AS final\n",
-                "FROM production AS runtime-edx-platform-pruned\n\nRUN rm -rf /openedx/edx-platform/.git \\\n"
-                "           /openedx/edx-platform/.github \\\n"
-                "           /openedx/edx-platform/docs \\\n"
-                "           /openedx/edx-platform/test_root \\\n"
-                "           /openedx/edx-platform/results.txt\n\n"
-                "###### Final image with production cmd\nFROM docker.io/ubuntu:22.04 AS final\n",
-                1,
-            )
-        updated = updated.replace(
-            "FROM docker.io/ubuntu:22.04 AS final\n\nARG APP_USER_ID=1000\n\nENV DEBIAN_FRONTEND=noninteractive\nENV LC_ALL=en_US.UTF-8\n",
-            "FROM docker.io/ubuntu:22.04 AS final\n\nARG APP_USER_ID=1000\n\nENV DEBIAN_FRONTEND=noninteractive\nENV LANG=C.UTF-8\nENV LC_ALL=C.UTF-8\n",
-        )
-        updated = updated.replace(
-            "COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/edx-platform /openedx/edx-platform",
-            "COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=runtime-edx-platform-pruned /openedx/edx-platform /openedx/edx-platform",
-        )
-        updated = updated.replace(
-            "COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/data /openedx/data\n\nENV PATH=/openedx/venv/bin:/openedx/bin:${PATH}\n",
-            "COPY --link --chown=$APP_USER_ID:$APP_USER_ID --from=production /openedx/data /openedx/data\n\n"
-            f"{FINAL_RUNTIME_PRUNE_BLOCK}\n\n"
-            "ENV PATH=/openedx/venv/bin:/openedx/bin:${PATH}\n",
-        )
-        updated = updated.replace(
-            "           /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/python.o\n\nENV PATH=/openedx/venv/bin:/openedx/bin:${PATH}\n",
-            "           /opt/pyenv/versions/3.11.8/lib/python3.11/config-3.11-x86_64-linux-gnu/python.o \\\n"
-            "           /opt/pyenv/versions/3.11.8/bin/pip \\\n"
-            "           /opt/pyenv/versions/3.11.8/bin/pip3 \\\n"
-            "           /opt/pyenv/versions/3.11.8/bin/pip3.11 \\\n"
-            "           /opt/pyenv/versions/3.11.8/lib/python3.11/site-packages/pip \\\n"
-            "           /opt/pyenv/versions/3.11.8/lib/python3.11/site-packages/pip-24.0.dist-info \\\n"
-            "           /openedx/venv/bin/pip \\\n"
-            "           /openedx/venv/bin/pip3 \\\n"
-            "           /openedx/venv/bin/pip3.11 \\\n"
-            "           /openedx/venv/lib/python3.11/site-packages/pip \\\n"
-            "           /openedx/venv/lib/python3.11/site-packages/pip-24.0.dist-info \\\n"
-            "           /openedx/venv/lib/python3.11/site-packages/wheel \\\n"
-            "           /openedx/venv/lib/python3.11/site-packages/wheel-0.45.1.dist-info\n\n"
-            "ENV PATH=/openedx/venv/bin:/openedx/bin:${PATH}\n",
-        )
-        updated = normalize_single_block(
-            updated,
-            "RUN rm -rf /opt/pyenv/.github",
-            FINAL_RUNTIME_PRUNE_RE,
-            FINAL_RUNTIME_PRUNE_BLOCK,
-        )
-
     if path.name == "Dockerfile" and "/openedx/edx-platform" in updated:
         advanced_xblocks_marker = "RUN $PIP_COMMAND install -e .\n"
         advanced_xblocks_copy = (
@@ -485,27 +205,6 @@ CMD ["uwsgi", "/openedx/uwsgi.ini"]
             updated = updated[:last_theme] + updated[last_theme + len(theme_marker):]
 
     # ── assets.py patches ───────────────────────────────────────────────
-
-    if path.name == "assets.py" and "derive_settings" in updated:
-        # Fix collectstatic SuspiciousFileOperation
-        safe_join_patch = (
-            "# Monkey-patch safe_join to be permissive during asset build.\n"
-            "import sys as _sys\n"
-            "import os.path as _osp\n"
-            "import django.utils._os as _os_mod\n"
-            "_orig_safe_join = _os_mod.safe_join\n"
-            "def _build_safe_join(base, *paths):\n"
-            "    return _osp.abspath(_osp.join(base, *paths))\n"
-            "_os_mod.safe_join = _build_safe_join\n"
-            "for _m in list(_sys.modules.values()):\n"
-            "    try:\n"
-            "        if getattr(_m, 'safe_join', None) is _orig_safe_join:\n"
-            "            _m.safe_join = _build_safe_join\n"
-            "    except Exception:\n"
-            "        pass\n"
-        )
-        if "_build_safe_join" not in updated:
-            updated = updated.rstrip() + "\n\n" + safe_join_patch
 
     # ── lms.conf patches ────────────────────────────────────────────────
 
@@ -562,18 +261,6 @@ CMD ["uwsgi", "/openedx/uwsgi.ini"]
 
 """
                     updated = updated.replace(needle, needle + "\n" + cache_config)
-
-        # /profile/api/ proxy in Caddy
-        if "apps.academyv2.mereka.io" in updated and "/profile/api/" not in updated:
-            needle = "apps.academyv2.mereka.io {\n        reverse_proxy nginx:80"
-            replacement = (
-                "apps.academyv2.mereka.io {\n"
-                "        reverse_proxy /profile/api/* lms:8000 {\n"
-                "            header_up Host {http.request.host}\n"
-                "        }\n"
-                "        reverse_proxy nginx:80"
-            )
-            updated = updated.replace(needle, replacement, 1)
 
     if updated != original:
         path.write_text(updated)
