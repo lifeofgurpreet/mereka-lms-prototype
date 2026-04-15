@@ -1,6 +1,20 @@
 # Docs Review And Hardening Board — 2026-04-13
 
-_Audience: Docs Lead + maintainers · Owner: Docs Lead · Status: active review board_
+_Audience: Docs Lead + maintainers · Owner: Docs Lead · Status: closed review board (residual extraction merged 2026-04-15)_
+
+> **Program status (2026-04-15):** the residual extraction program tracked by
+> this board is **closed**. The 11 residual extraction PRs are merged on
+> `origin/main` (`#1736`, `#1738`, `#1741`, `#1742`, `#1745`, `#1748`, `#1750`,
+> `#1752`, `#1754`, `#1755`, `#1759`), plus two post-closeout micro-lanes
+> `#1763` and `#1760` (2026-04-15). The residual execution ledger lives only
+> on the frozen control branch `docs/rebased-intake-20260413` with final
+> closeout commit `ee151c5e9`. Do not reopen this board to plan new waves.
+> Any new docs work must start from a fresh branch off current `origin/main`,
+> not from `docs/rebased-intake-20260413`. Companion-surface compression
+> decisions captured in
+> [`companion-surface-review.v1.yaml`](companion-surface-review.v1.yaml) are
+> sealed at `v1` for this tranche and should not be re-scored without a fresh
+> authority decision.
 
 This board records the post-rebase review phase.
 

@@ -1,5 +1,5 @@
 # Docs Program
-_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-04-14 • Status: canonical_
+_Audience: Contributors and reviewers • Owner: Platform Team • Last verified: 2026-04-15 • Status: canonical_
 
 Use this root for the active documentation review-and-hardening program:
 intake control surfaces, deterministic collapse inventories, metadata
@@ -7,6 +7,19 @@ contracts, and the bounded docs-program surfaces that still guide work.
 Start here when you are coordinating or reviewing documentation work across
 multiple slices. Do not use this root for reader-facing product guidance or
 runtime operations.
+
+> **Residual extraction program closed (2026-04-15).** All 11 residual
+> extraction PRs merged on `origin/main` (`#1736`, `#1738`, `#1741`, `#1742`,
+> `#1745`, `#1748`, `#1750`, `#1752`, `#1754`, `#1755`, `#1759`) plus two
+> post-closeout micro-lanes `#1763` and `#1760`. The residual execution ledger
+> lives only on the frozen control branch `docs/rebased-intake-20260413`. The
+> post-rebase intake board
+> ([`POST_REBASE_INTAKE_2026-04-13.md`](POST_REBASE_INTAKE_2026-04-13.md)) and
+> review-hardening board
+> ([`REVIEW_HARDENING_BOARD_2026-04-13.md`](REVIEW_HARDENING_BOARD_2026-04-13.md))
+> remain authoritative as sealed program records but are no longer active
+> transport lanes. New docs work must start from a fresh branch off current
+> `origin/main`; do not rebase or cherry-pick from `docs/rebased-intake-20260413`.
 
 Root-level docs-program authority is declared in
 [`authority-registry.v1.yaml`](authority-registry.v1.yaml). The intake board,

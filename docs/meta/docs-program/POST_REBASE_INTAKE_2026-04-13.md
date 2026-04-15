@@ -1,6 +1,18 @@
 # Post-Rebase Intake Board — 2026-04-13
 
-_Audience: Docs Lead + maintainers · Owner: Docs Lead · Status: active intake board_
+_Audience: Docs Lead + maintainers · Owner: Docs Lead · Status: closed intake board (residual extraction merged 2026-04-15)_
+
+> **Program status (2026-04-15):** the residual extraction program that this
+> board governed is **closed**. All 11 residual extraction PRs merged on
+> `origin/main` (`#1736`, `#1738`, `#1741`, `#1742`, `#1745`, `#1748`, `#1750`,
+> `#1752`, `#1754`, `#1755`, `#1759`), and the two post-closeout micro-lanes
+> `#1763` (status-surface audit, `6d8967c396`) and `#1760` (evidence docs sync,
+> `7ff101b6959d`) landed on 2026-04-15. The residual execution ledger itself
+> lives only on the frozen control branch `docs/rebased-intake-20260413` and is
+> no longer a transport lane; it must not be rebased or cherry-picked. Any new
+> docs work must cut a fresh branch from current `origin/main`. For the
+> merge-back wave history that is still tracked on `origin/main`, see
+> [`../../reference/generated/docs-program-merge-back-execution.md`](../../reference/generated/docs-program-merge-back-execution.md).
 
 This board starts from current `origin/main` and defines what should be carried
 forward from the preserved pre-rebase docs snapshot.
