@@ -551,7 +551,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-10",
+    "last_verified_or_updated": "2026-04-13",
     "owner": "Platform Team",
     "path": "architecture/README.md",
     "status": "canonical",
@@ -4358,6 +4358,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "guides/admin/CONTENT_LIBRARIES_ENTERPRISE_ONBOARDING.md",
+    "status": "supporting",
+    "type": "guide"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-11",
     "owner": "Platform Team",
     "path": "guides/admin/ENTERPRISE_SERVICES_GUIDE.md",
@@ -4394,7 +4403,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-11",
+    "last_verified_or_updated": "2026-04-09",
     "owner": "Infra Team",
     "path": "guides/admin/OBSERVABILITY_GUIDE.md",
     "status": "supporting",
@@ -4639,6 +4648,15 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "guides/platform/CONTENT_LIBRARIES_AUTHORING_GUIDE.md",
+    "status": "supporting",
+    "type": "guide"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "guides/platform/COURSE_AUTHORING_QUICKSTART.md",
     "status": "supporting",
     "type": "guide"
@@ -4718,7 +4736,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
+    "last_verified_or_updated": "2026-04-13",
     "owner": "Platform Team",
     "path": "guides/standards/DOCS_SPECS_CONTRACT.md",
     "status": "canonical",
@@ -4745,7 +4763,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
+    "last_verified_or_updated": "2026-04-13",
     "owner": "Platform Team",
     "path": "guides/standards/EVIDENCE_PACK_STANDARD.md",
     "status": "canonical",
@@ -4781,7 +4799,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-08",
+    "last_verified_or_updated": "2026-04-13",
     "owner": "Platform Team",
     "path": "guides/standards/STATUS_REPORTING_STANDARD.md",
     "status": "canonical",
@@ -5033,7 +5051,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-04-14",
+    "last_verified_or_updated": "2026-04-15",
     "owner": "Platform Team",
     "path": "meta/docs-program/README.md",
     "status": "canonical",
@@ -10571,6 +10589,15 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "status/active/ACTIVE_SURFACE_RUNTIME_MATRIX_2026-04-04.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/ACTIVE_SURFACE_STATUS_AUDIT_2026-04-14.md",
     "status": "supporting",
     "type": "status"
   },
