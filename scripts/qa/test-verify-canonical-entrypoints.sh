@@ -20,7 +20,8 @@ if [[ ! -x "$VERIFY" ]]; then
 fi
 
 tmpdir="$(mktemp -d -t verify-canonical-entrypoints.XXXXXX)"
-trap 'rm -rf "$tmpdir"' EXIT
+stdout_file="$(mktemp "${TMPDIR:-/tmp}/tce.out.XXXXXX")"
+trap 'rm -rf "$tmpdir"; rm -f "$stdout_file"' EXIT
 
 PASS=0
 FAIL=0
@@ -28,15 +29,15 @@ FAIL=0
 run_expect_pass() {
   local label="$1"
   set +e
-  REPO_ROOT_OVERRIDE="$tmpdir" bash "$VERIFY" >/tmp/tce.out 2>&1
+  REPO_ROOT_OVERRIDE="$tmpdir" bash "$VERIFY" >"$stdout_file" 2>&1
   local rc=$?
   set -e
-  if [[ $rc -eq 0 ]] && ! grep -q "Broken pipe" /tmp/tce.out; then
+  if [[ $rc -eq 0 ]] && ! grep -q "Broken pipe" "$stdout_file"; then
     echo "PASS ${label}"
     PASS=$((PASS + 1))
   else
     echo "FAIL ${label} (expected PASS, got exit ${rc})"
-    cat /tmp/tce.out
+    cat "$stdout_file"
     FAIL=$((FAIL + 1))
   fi
 }
@@ -44,7 +45,7 @@ run_expect_pass() {
 run_expect_fail() {
   local label="$1"
   set +e
-  REPO_ROOT_OVERRIDE="$tmpdir" bash "$VERIFY" >/tmp/tce.out 2>&1
+  REPO_ROOT_OVERRIDE="$tmpdir" bash "$VERIFY" >"$stdout_file" 2>&1
   local rc=$?
   set -e
   if [[ $rc -ne 0 ]]; then
@@ -52,7 +53,7 @@ run_expect_fail() {
     PASS=$((PASS + 1))
   else
     echo "FAIL ${label} (expected FAIL, got PASS)"
-    cat /tmp/tce.out
+    cat "$stdout_file"
     FAIL=$((FAIL + 1))
   fi
 }

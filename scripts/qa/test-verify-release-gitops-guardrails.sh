@@ -6,7 +6,8 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 VERIFY="$ROOT_DIR/scripts/qa/verify-release-gitops-guardrails.sh"
 
 tmpdir="$(mktemp -d -t verify-release-gitops-guardrails.XXXXXX)"
-trap 'rm -rf "$tmpdir"' EXIT
+stdout_file="$(mktemp "${TMPDIR:-/tmp}/verify-release-gitops-guardrails.out.XXXXXX")"
+trap 'rm -rf "$tmpdir"; rm -f "$stdout_file"' EXIT
 
 mkdir -p "$tmpdir/scripts/infra"
 
@@ -30,19 +31,19 @@ EOF
 
 run_expect_pass() {
   local label="$1"
-  REPO_ROOT_OVERRIDE="$tmpdir" bash "$VERIFY" >/tmp/verify-release-gitops-guardrails.out 2>&1
+  REPO_ROOT_OVERRIDE="$tmpdir" bash "$VERIFY" >"$stdout_file" 2>&1
   echo "PASS ${label}"
 }
 
 run_expect_fail() {
   local label="$1"
   set +e
-  REPO_ROOT_OVERRIDE="$tmpdir" bash "$VERIFY" >/tmp/verify-release-gitops-guardrails.out 2>&1
+  REPO_ROOT_OVERRIDE="$tmpdir" bash "$VERIFY" >"$stdout_file" 2>&1
   local rc=$?
   set -e
   if [[ "$rc" -eq 0 ]]; then
     echo "FAIL ${label}: expected failure but command succeeded" >&2
-    cat /tmp/verify-release-gitops-guardrails.out >&2 || true
+    cat "$stdout_file" >&2 || true
     exit 1
   fi
   echo "PASS ${label}"

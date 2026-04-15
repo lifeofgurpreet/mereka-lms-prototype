@@ -177,7 +177,8 @@ jobs:
     name: Static Validation Precheck
     needs:
       - change-scope
-    runs-on: ubuntu-latest
+      - select-ci-lane
+    runs-on: ${{ needs.select-ci-lane.outputs.runner_label }}
     permissions:
       contents: read
 
@@ -377,7 +378,8 @@ jobs:
     name: Static Validation Lint
     needs:
       - change-scope
-    runs-on: ubuntu-latest
+      - select-ci-lane
+    runs-on: ${{ needs.select-ci-lane.outputs.runner_label }}
     permissions:
       contents: read
 
@@ -491,7 +493,8 @@ jobs:
     name: Static Validation Scripts (${{ matrix.shard.key }})
     needs:
       - change-scope
-    runs-on: ubuntu-latest
+      - select-ci-lane
+    runs-on: ${{ needs.select-ci-lane.outputs.runner_label }}
     permissions:
       contents: read
     strategy:
@@ -656,7 +659,8 @@ jobs:
     name: Static Validation Postchecks
     needs:
       - change-scope
-    runs-on: ubuntu-latest
+      - select-ci-lane
+    runs-on: ${{ needs.select-ci-lane.outputs.runner_label }}
     permissions:
       contents: read
 
@@ -1016,23 +1020,23 @@ jobs:
         run: bash tests/tutor/test_verify_patches.sh
 
       - name: Run tutor pre-commit hook test
-        if: steps.tutor_scope.outputs.run_tests == 'true'
+        if: needs.change-scope.outputs.tutor_required == 'true'
         run: bash tests/tutor/test_pre_commit_hook.sh
 
       - name: Run tutor idempotency test
-        if: steps.tutor_scope.outputs.run_tests == 'true'
+        if: needs.change-scope.outputs.tutor_required == 'true'
         env:
           TUTOR_TEST_ASSUME_PATCHED_BASELINE: '1'
         run: bash tests/tutor/test_idempotency.sh
 
       - name: Run tutor edge cases test
-        if: steps.tutor_scope.outputs.run_tests == 'true'
+        if: needs.change-scope.outputs.tutor_required == 'true'
         env:
           TUTOR_TEST_ASSUME_PATCHED_BASELINE: '1'
         run: bash tests/tutor/test_edge_cases.sh
 
       - name: Validate config.example.yml structure
-        if: steps.tutor_scope.outputs.run_tests == 'true'
+        if: needs.change-scope.outputs.tutor_required == 'true'
         run: python3 scripts/qa/check-config-example-yaml.py
 
   # ============================================================================
@@ -1042,8 +1046,10 @@ jobs:
   # ============================================================================
   security-scans:
     name: Security Scans
-    needs: change-scope
-    runs-on: ubuntu-latest
+    needs:
+      - change-scope
+      - select-ci-lane
+    runs-on: ${{ needs.select-ci-lane.outputs.runner_label }}
     permissions:
       contents: read
 
@@ -1196,8 +1202,10 @@ jobs:
   # ============================================================================
   test-coverage:
     name: Python test coverage
-    needs: change-scope
-    runs-on: ubuntu-latest
+    needs:
+      - change-scope
+      - select-ci-lane
+    runs-on: ${{ needs.select-ci-lane.outputs.runner_label }}
     permissions:
       contents: read
 
