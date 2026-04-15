@@ -958,9 +958,11 @@ jobs:
 
   scan-openedx-image:
     name: Post-push OpenEdX Scan
-    # These verifiers use docker pull/run against the published image, so they
-    # must stay on the Docker-capable build lane rather than lightweight ARC.
-    runs-on: ${{ needs.select-build-lane.outputs.runner_label }}
+    # These verifiers use docker pull/run against the published image and need a
+    # persistent Docker daemon (DinD). Hardcoded to heavy-builders so fastlane
+    # slots are not consumed by scan work, freeing build-openedx/build-mfe
+    # concurrency when the timing-board shows elevated concurrency pressure.
+    runs-on: mereka-k8s-heavy-builders
     timeout-minutes: 45
     needs: [build-openedx, select-build-lane]
     if: ${{ needs.build-openedx.result == 'success' }}
@@ -1114,9 +1116,11 @@ jobs:
 
   scan-mfe-image:
     name: Post-push MFE Scan
-    # These verifiers use docker pull/run against the published image, so they
-    # must stay on the Docker-capable build lane rather than lightweight ARC.
-    runs-on: ${{ needs.select-build-lane.outputs.runner_label }}
+    # These verifiers use docker pull/run against the published image and need a
+    # persistent Docker daemon (DinD). Hardcoded to heavy-builders so fastlane
+    # slots are not consumed by scan work, freeing build-openedx/build-mfe
+    # concurrency when the timing-board shows elevated concurrency pressure.
+    runs-on: mereka-k8s-heavy-builders
     timeout-minutes: 45
     needs: [build-mfe, select-build-lane]
     if: ${{ needs.build-mfe.result == 'success' }}
