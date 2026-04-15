@@ -184,6 +184,7 @@ fi
 # scripts the workflow executes. Broad globs here create expensive build fan-out
 # for docs/proof-only changes.
 required_trigger_paths=(
+  "docker-bake.hcl"
   "requirements-tutor.txt"
   ".github/actions/setup-python-env/**"
   "infrastructure/tutor/config.example.yml"

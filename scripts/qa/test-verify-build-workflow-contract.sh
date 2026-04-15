@@ -148,6 +148,7 @@ on:
   push:
     branches: [main]
     paths:
+      - 'docker-bake.hcl'
       - 'requirements-tutor.txt'
       - '.github/actions/setup-python-env/**'
       - 'infrastructure/tutor/config.example.yml'
