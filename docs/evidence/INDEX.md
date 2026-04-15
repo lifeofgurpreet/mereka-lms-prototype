@@ -14,7 +14,7 @@ Use `docs/evidence/**` for proof packs, validation bundles, screenshots, exporte
 - Need to know how an evidence pack should be written:
   - read the [Evidence Pack Standard](../guides/standards/EVIDENCE_PACK_STANDARD.md)
 - Need to know whether evidence is the right artifact type:
-  - read the [Documentation Authority Resolver](../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md)
+  - read the [Documentation Index](../README.md)
 
 ## Authority rule
 
@@ -56,4 +56,4 @@ Each pack should include:
 ## Standards
 
 - [Evidence Pack Standard](../guides/standards/EVIDENCE_PACK_STANDARD.md)
-- [Documentation Authority Resolver](../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md)
+- [Documentation Index](../README.md)

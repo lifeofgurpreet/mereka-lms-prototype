@@ -9,7 +9,7 @@ This directory is the active evidence surface for operational proof packs. Start
 |---|---|---|
 | Verify a runtime or deployment claim | The relevant proof pack in this root | [`../../status/readiness/README.md`](../../status/readiness/README.md) if you need the corresponding readiness judgment |
 | Find the canonical evidence location rules | [`../INDEX.md`](../INDEX.md) | [`../../guides/standards/EVIDENCE_PACK_STANDARD.md`](../../guides/standards/EVIDENCE_PACK_STANDARD.md) |
-| Understand whether something belongs in evidence or status | [`../../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md`](../../concepts/architecture/DOCUMENTATION_AUTHORITY_RESOLVER.md) | The relevant winning root |
+| Understand whether something belongs in evidence or status | [`../../README.md`](../../README.md) | The relevant winning root |
 
 ## Use this directory for
 
