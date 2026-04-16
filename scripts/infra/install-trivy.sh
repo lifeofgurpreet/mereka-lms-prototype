@@ -145,7 +145,9 @@ main() {
     log "GitHub release download unavailable or failed; falling back to curl."
     if ! download_with_curl "${tarball_path}"; then
       install_container_wrapper "${install_dir}"
-      echo "${install_dir}" >> "${GITHUB_PATH:-/dev/null}"
+      if [[ -n "${GITHUB_PATH:-}" ]]; then
+        echo "${install_dir}" >> "${GITHUB_PATH}"
+      fi
       "${install_dir}/trivy" --version
       exit 0
     fi
@@ -154,7 +156,9 @@ main() {
   echo "${TRIVY_SHA256}  ${tarball_path}" | sha256sum -c -
   tar -xzf "${tarball_path}" -C "${tmpdir}" trivy
   install -m 0755 "${tmpdir}/trivy" "${install_dir}/trivy"
-  echo "${install_dir}" >> "${GITHUB_PATH:-/dev/null}"
+  if [[ -n "${GITHUB_PATH:-}" ]]; then
+    echo "${install_dir}" >> "${GITHUB_PATH}"
+  fi
   "${install_dir}/trivy" --version
 }
 

@@ -1031,7 +1031,10 @@ jobs:
           sh /tmp/syft-install.sh -b "$HOME/.local/bin"
           rm /tmp/syft-install.sh
           set +e
-          timeout 20m "$HOME/.local/bin/syft" scan "registry:${OPENEDX_IMAGE_REF}" \
+          # Use docker: source so syft reuses the image the branding step
+          # already pulled into the local daemon, avoiding a redundant
+          # ~5 min registry re-pull of the ~5 GB OpenEdX image.
+          timeout 20m "$HOME/.local/bin/syft" scan "docker:${OPENEDX_IMAGE_REF}" \
             -o cyclonedx-json=var/ci/sbom-openedx.cdx.json
           sbom_status=$?
           set -e
@@ -1204,7 +1207,8 @@ jobs:
           sh /tmp/syft-install.sh -b "$HOME/.local/bin"
           rm /tmp/syft-install.sh
           set +e
-          timeout 20m "$HOME/.local/bin/syft" scan "registry:${MFE_IMAGE_REF}" \
+          # Use docker: source to reuse the locally-pulled MFE image.
+          timeout 20m "$HOME/.local/bin/syft" scan "docker:${MFE_IMAGE_REF}" \
             -o cyclonedx-json=var/ci/sbom-mfe.cdx.json
           sbom_status=$?
           set -e

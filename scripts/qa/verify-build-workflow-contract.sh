@@ -505,10 +505,10 @@ else
   fail "MFE post-push scan missing canonical Docker/MTU setup"
 fi
 
-if grep -q 'timeout 20m "\$HOME/\.local/bin/syft" scan "registry:\${OPENEDX_IMAGE_REF}"' "$BUILD_WF"; then
-  pass "OpenEdX post-push SBOM generation has a timeout guard"
+if grep -q 'timeout 20m "\$HOME/\.local/bin/syft" scan "docker:\${OPENEDX_IMAGE_REF}"' "$BUILD_WF"; then
+  pass "OpenEdX post-push SBOM uses local docker cache with timeout guard"
 else
-  fail "OpenEdX post-push SBOM generation missing timeout guard"
+  fail "OpenEdX post-push SBOM missing docker-mode timeout guard"
 fi
 
 if [[ "$SCAN_OPENEDX_BLOCK" == *'timeout 20m trivy image'* && "$SCAN_OPENEDX_BLOCK" == *'OpenEdX Trivy scan timed out after 20m'* ]]; then
@@ -517,10 +517,10 @@ else
   fail "OpenEdX post-push Trivy scan missing timeout guard"
 fi
 
-if grep -q 'timeout 20m "\$HOME/\.local/bin/syft" scan "registry:\${MFE_IMAGE_REF}"' "$BUILD_WF"; then
-  pass "MFE post-push SBOM generation has a timeout guard"
+if grep -q 'timeout 20m "\$HOME/\.local/bin/syft" scan "docker:\${MFE_IMAGE_REF}"' "$BUILD_WF"; then
+  pass "MFE post-push SBOM uses local docker cache with timeout guard"
 else
-  fail "MFE post-push SBOM generation missing timeout guard"
+  fail "MFE post-push SBOM missing docker-mode timeout guard"
 fi
 
 if [[ "$SCAN_MFE_BLOCK" == *'timeout 20m trivy image'* && "$SCAN_MFE_BLOCK" == *'MFE Trivy scan timed out after 20m'* ]]; then

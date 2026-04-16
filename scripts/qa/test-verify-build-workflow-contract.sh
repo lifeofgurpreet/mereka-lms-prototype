@@ -335,7 +335,7 @@ jobs:
           name: openedx-branding-contract-log
           path: var/ci/verify-openedx-image-branding.log
       - name: Generate SBOM for OpenEdX image
-        run: timeout 20m "$HOME/.local/bin/syft" scan "registry:${OPENEDX_IMAGE_REF}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json
+        run: timeout 20m "$HOME/.local/bin/syft" scan "docker:${OPENEDX_IMAGE_REF}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json
         env:
           OPENEDX_IMAGE_REF: ${{ env.REGISTRY }}/openedx@${{ needs.build-openedx.outputs.image_digest }}
       - name: Install Trivy CLI
@@ -385,7 +385,7 @@ jobs:
           name: mfe-runtime-contract-log
           path: var/ci/verify-mfe-runtime-contract.log
       - name: Generate SBOM for MFE image
-        run: timeout 20m "$HOME/.local/bin/syft" scan "registry:${MFE_IMAGE_REF}" -o cyclonedx-json=var/ci/sbom-mfe.cdx.json
+        run: timeout 20m "$HOME/.local/bin/syft" scan "docker:${MFE_IMAGE_REF}" -o cyclonedx-json=var/ci/sbom-mfe.cdx.json
         env:
           MFE_IMAGE_REF: ${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs.image_digest }}
       - name: Install Trivy CLI
@@ -1073,9 +1073,9 @@ p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
 text = p.read_text()
 text = text.replace(
     '      - name: Generate SBOM for OpenEdX image\n'
-    '        run: timeout 20m "$HOME/.local/bin/syft" scan "registry:${OPENEDX_IMAGE_REF}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json\n',
+    '        run: timeout 20m "$HOME/.local/bin/syft" scan "docker:${OPENEDX_IMAGE_REF}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json\n',
     '      - name: Generate SBOM for OpenEdX image\n'
-    '        run: "$HOME/.local/bin/syft" scan "registry:${OPENEDX_IMAGE_REF}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json\n',
+    '        run: "$HOME/.local/bin/syft" scan "docker:${OPENEDX_IMAGE_REF}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json\n',
 )
 p.write_text(text)
 PY
@@ -1089,7 +1089,7 @@ p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
 text = p.read_text()
 text = text.replace(
     '      - name: Generate SBOM for OpenEdX image\n'
-    '        run: timeout 20m "$HOME/.local/bin/syft" scan "registry:${OPENEDX_IMAGE_REF}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json\n'
+    '        run: timeout 20m "$HOME/.local/bin/syft" scan "docker:${OPENEDX_IMAGE_REF}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json\n'
     '        env:\n'
     '          OPENEDX_IMAGE_REF: ${{ env.REGISTRY }}/openedx@${{ needs.build-openedx.outputs.image_digest }}\n'
     '      - name: Install Trivy CLI\n'
@@ -1118,7 +1118,7 @@ text = text.replace(
     '      - name: Verify OpenEdX image branding contract\n'
     '        run: echo ok\n'
     '      - name: Generate SBOM for OpenEdX image\n'
-    '        run: timeout 20m "$HOME/.local/bin/syft" scan "registry:${OPENEDX_IMAGE_REF}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json\n',
+    '        run: timeout 20m "$HOME/.local/bin/syft" scan "docker:${OPENEDX_IMAGE_REF}" -o cyclonedx-json=var/ci/sbom-openedx.cdx.json\n',
 )
 p.write_text(text)
 PY
