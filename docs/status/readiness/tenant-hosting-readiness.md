@@ -2,7 +2,7 @@
 
 > **Bead**: mereka-lms-jptf
 > **Date**: 2026-03-26
-> **Cluster**: gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
+> **Cluster**: rke2-prod
 > **Spec**: AC-OPS-201..205
 >
 > **Current staging truth**: staging now uses the canonical `staging.<service>.academyv2.mereka.io` host family in live runtime, but the app image is still behind merged truth until promotion catches up.
@@ -66,7 +66,7 @@ Django `django.contrib.sites` + `SiteConfiguration` resolves per-domain branding
 ### Gate 1: list-openedx-hostnames
 
 ```bash
-CTX="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
+CTX="rke2-prod"
 NS="mereka-lms"
 
 # All active hostnames from Ingress resources
@@ -74,7 +74,7 @@ kubectl --context $CTX get ingress -n $NS \
   -o jsonpath='{range .items[*]}{range .spec.rules[*]}{.host}{"\n"}{end}{end}' | sort -u
 ```
 
-**Expected output** (GKE production):
+**Expected output** (rke2-prod production):
 ```
 academyv2.mereka.io
 academy.biji-biji.com
@@ -192,7 +192,7 @@ docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:${OPENEDX_TAG}
   --apply --commit --push --verify-runtime
 
 # 4. Monitor ArgoCD sync
-watch kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster \
+watch kubectl --context rke2-prod \
   get pods -n mereka-lms
 
 # 5. Run smoke tests
@@ -244,7 +244,7 @@ git -C $REPO_ROOT revert HEAD --no-edit && git -C $REPO_ROOT push
 git -C $INFRA_REPO revert HEAD --no-edit && git -C $INFRA_REPO push
 
 # ArgoCD auto-syncs within ~2min. Monitor:
-watch kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster \
+watch kubectl --context rke2-prod \
   get pods -n mereka-lms
 
 # Force cache bust (when image digest mismatch suspected)
@@ -261,7 +261,7 @@ git checkout main
 git stash pop
 
 # Emergency pod restart (last resort — clears CrashLoop backoff)
-kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster \
+kubectl --context rke2-prod \
   rollout restart deployment/lms -n mereka-lms
 ```
 

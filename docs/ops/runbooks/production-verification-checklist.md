@@ -154,7 +154,7 @@ curl https://academy.biji-biji.com | grep -i "biji-biji"
 ```bash
 # Preview canonical multisite reconciliation first
 ./scripts/infra/apply-multisite-config.sh \
-  --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster \
+  --context rke2-prod \
   --env prod \
   --dry-run
 
@@ -162,7 +162,7 @@ curl https://academy.biji-biji.com | grep -i "biji-biji"
 ALLOW_PROD_APPLY=1 \
 CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG \
 ./scripts/infra/apply-multisite-config.sh \
-  --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster \
+  --context rke2-prod \
   --env prod \
   --apply
 ```

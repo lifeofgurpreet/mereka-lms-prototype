@@ -331,7 +331,7 @@ kubectl logs -n mereka-lms -l app.kubernetes.io/name=caddy --tail=50
 
 Before an operator can respond to incidents independently, verify:
 
-- [ ] `kubectl config use-context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster` works
+- [ ] `kubectl config use-context rke2-prod` works
 - [ ] Can open Grafana at https://grafana.mereka.io (Authentik login)
 - [ ] Can access Django admin at https://academyv2.mereka.io/admin
 - [ ] Can access Admin Console MFE at https://apps.academyv2.mereka.io/admin-console/

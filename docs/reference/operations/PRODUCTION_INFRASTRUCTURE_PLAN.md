@@ -72,7 +72,7 @@ See:
 ## Backups
 
 - **Source of truth**: Velero schedules + restore drills (GitOps-managed outside this repo).
-- Audit posture with: `./scripts/qa/audit-velero.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster`
+- Audit posture with: `./scripts/qa/audit-velero.sh --context rke2-prod`
 - Evidence bundles (recommended): `STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar`
 - Monthly automation: `.github/workflows/dr-evidence-bundle.yml`
 
