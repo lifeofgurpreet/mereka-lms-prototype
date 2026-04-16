@@ -53,13 +53,13 @@ This is the canonical operator front door. It:
 **Usage**:
 ```bash
 # Preview changes (safe)
-./scripts/infra/apply-multisite-config.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster --env prod --dry-run
+./scripts/infra/apply-multisite-config.sh --context rke2-prod --env prod --dry-run
 
 # Apply changes to production
-./scripts/infra/apply-multisite-config.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster --env prod --apply
+./scripts/infra/apply-multisite-config.sh --context rke2-prod --env prod --apply
 
 # Apply to different namespace
-./scripts/infra/apply-multisite-config.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster --namespace production --env prod --apply
+./scripts/infra/apply-multisite-config.sh --context rke2-prod --namespace production --env prod --apply
 ```
 
 ### 3. Updated Documentation
@@ -89,7 +89,7 @@ curl -I https://academy.biji-biji.com/
 ### Step 2: Preview Changes (Dry Run)
 
 ```bash
-./scripts/infra/apply-multisite-config.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster --env prod --dry-run
+./scripts/infra/apply-multisite-config.sh --context rke2-prod --env prod --dry-run
 ```
 
 Expected output:
@@ -108,7 +108,7 @@ Expected output:
 ### Step 3: Apply Changes
 
 ```bash
-./scripts/infra/apply-multisite-config.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster --env prod --apply
+./scripts/infra/apply-multisite-config.sh --context rke2-prod --env prod --apply
 ```
 
 ### Step 4: Restart LMS Pods (Optional but Recommended)

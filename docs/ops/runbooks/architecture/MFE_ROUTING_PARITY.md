@@ -187,7 +187,7 @@ All MFE routing parity checks passed.
 
 ```bash
 ./scripts/qa/verify-mfe-route-contract.sh \
-  --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster \
+  --context rke2-prod \
   --namespace mereka-lms \
   --strict-runtime
 ```

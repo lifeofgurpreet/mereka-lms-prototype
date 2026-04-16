@@ -7,8 +7,8 @@ Quick reference for common kubectl operations in Mereka LMS.
 ## Context Setup
 
 ```bash
-# Set GKE cluster context
-kubectl config use-context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
+# Set RKE2 production cluster context
+kubectl config use-context rke2-prod
 
 # Set default namespace (avoids -n flag)
 kubectl config set-context --current --namespace=mereka-lms

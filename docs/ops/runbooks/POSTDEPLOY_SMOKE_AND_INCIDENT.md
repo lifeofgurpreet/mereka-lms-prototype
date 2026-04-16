@@ -3,14 +3,14 @@ _Audience: Operators and developers • Owner: Platform Team • Last verified: 
 
 > **Beads**: mereka-lms-36va.3, mereka-lms-36va.3.1, mereka-lms-36va.4
 > **Date**: 2026-02-18
-> **Cluster**: gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
+> **Cluster**: rke2-prod
 
 ## 1. Enterprise and Ecommerce Service Inventory (AC-OPS-131..135)
 
 ### Service Status Map
 
-| Service | Status | GKE | Kind | Port | Health Endpoint |
-|---------|--------|-----|------|------|----------------|
+| Service | Status | RKE2 prod | Kind | Port | Health Endpoint |
+|---------|--------|-----------|------|------|----------------|
 | **enterprise-catalog** | Active | Running | Scaled to 0 | 8160 | `/health/` |
 | **enterprise-catalog-worker** | Active | Running | Scaled to 0 | — | — |
 | **enterprise-subsidy** | Active | Running | Scaled to 0 | 18280 | `/health/` |
@@ -50,7 +50,7 @@ When Purchase Gateway replaces ecommerce:
 
 ### Route-Level Checks
 
-| Route | URL (GKE) | URL (Kind) | Expected | Check Command |
+| Route | URL (RKE2 prod) | URL (Kind) | Expected | Check Command |
 |-------|-----------|-----------|----------|---------------|
 | LMS home | `https://academyv2.mereka.io` | `http://localhost` | 200 | `curl -sI URL \| head -1` |
 | LMS login | `https://academyv2.mereka.io/login` | `http://localhost/login` | 200/302 | `curl -sI URL \| head -1` |
@@ -90,7 +90,7 @@ HTTP/2 502
 ### Minute 0-2: Detect
 
 ```bash
-CTX="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
+CTX="rke2-prod"
 NS="mereka-lms"
 
 # Quick health

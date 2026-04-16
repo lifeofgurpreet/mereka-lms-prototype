@@ -226,19 +226,21 @@ gh workflow run dr-evidence-bundle.yml
 
 ### DR-007: Full Cluster Loss
 
-**Severity**: Critical | **Max RTO**: 4 hours | **Trigger**: Complete GKE cluster loss (deletion, region outage)
+**Severity**: Critical | **Max RTO**: 4 hours | **Trigger**: Complete RKE2 production cluster (`rke2-prod`) loss (deletion, node outage)
+
+<!-- HISTORICAL: production has migrated from GKE (asia-southeast1) to RKE2 (rke2-prod). The gcloud block below is kept as historical record only. -->
 
 **Procedure**:
 
-1. **Provision new GKE cluster** (manual or Terraform):
+1. **Provision new RKE2 cluster** (refer to the bbi-infrastructure repo for current provisioning runbooks):
    ```bash
    # Using Terraform (preferred)
    cd infrastructure/terraform
    terraform apply -var="cluster_name=mereka-lms-recovery"
 
-   # Or manual GKE creation
-   gcloud container clusters create mereka-lms-recovery \
-     --zone asia-southeast1-c --num-nodes=3 --machine-type=e2-standard-4
+   # HISTORICAL: GKE creation (decommissioned — production is RKE2 on Contabo VPS)
+   # gcloud container clusters create mereka-lms-recovery \
+   #   --zone asia-southeast1-c --num-nodes=3 --machine-type=e2-standard-4
    ```
 
 2. **Install Velero** on the new cluster pointing to the same GCS backup bucket:
@@ -374,7 +376,7 @@ Post-restore data integrity checks:
 
 Verify cross-region DR readiness:
 
-1. **Kustomize manifests are portable** (deployable to any GKE cluster):
+1. **Kustomize manifests are portable** (deployable to any RKE2 cluster):
    ```bash
    kubectl kustomize deploy/k8s/overlays/production | kubectl apply --dry-run=server -f -
    ```

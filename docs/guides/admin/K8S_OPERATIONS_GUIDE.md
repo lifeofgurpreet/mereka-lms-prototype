@@ -3,7 +3,7 @@
 _Audience: Platform Engineers, SREs, Developers_
 _Last updated: 2026-02-03_
 
-This guide provides practical commands and procedures for operating the Mereka LMS Kubernetes deployment. Environment model: **production (GKE)** + **dev (kind/VPS)** only; any “staging” wording in commands or buckets is legacy production naming.
+This guide provides practical commands and procedures for operating the Mereka LMS Kubernetes deployment. Environment model: **production (RKE2, `rke2-prod`)** + **dev (kind/VPS)** only; any “staging” wording in commands or buckets is legacy production naming.
 
 ---
 
@@ -12,8 +12,8 @@ This guide provides practical commands and procedures for operating the Mereka L
 ### Cluster Context
 
 ```bash
-# Set the correct context (GKE cluster)
-kubectl config use-context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
+# Set the correct context (RKE2 production cluster)
+kubectl config use-context rke2-prod
 
 # Verify context
 kubectl config current-context
@@ -90,7 +90,7 @@ deploy/k8s/
     plugins/               # Plugin configs (MFE, Discovery, etc.)
   overlays/
     local/                 # Local development overrides
-    production/            # GKE production (academyv2.mereka.io)
+    production/            # RKE2 production (`rke2-prod`) (academyv2.mereka.io)
     production/            # Production environment
   patches/                 # Ad-hoc patches
 ```
@@ -521,7 +521,7 @@ Gotcha:
 ```bash
 # Production MySQL/Redis are PVC-backed. Backups are Velero-driven.
 # Use the audit script to verify schedules/recency/coverage:
-./scripts/qa/audit-velero.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
+./scripts/qa/audit-velero.sh --context rke2-prod
 
 # Before any risky operation: create a pre-op Velero backup (data protection rule)
 velero backup create pre-op-mereka-lms-$(date +%Y%m%d-%H%M) --include-namespaces mereka-lms --wait
@@ -705,7 +705,7 @@ To avoid password mismatches in the future:
 
 ```bash
 # === CONTEXT ===
-kubectl config use-context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
+kubectl config use-context rke2-prod
 kubectl config set-context --current --namespace=mereka-lms
 
 # === STATUS ===
@@ -735,7 +735,7 @@ kubectl rollout undo deployment/lms -n mereka-lms
 ./scripts/infra/fix-service-selectors.sh
 
 # === BACKUP ===
-./scripts/qa/audit-velero.sh --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
+./scripts/qa/audit-velero.sh --context rke2-prod
 velero backup create pre-op-mereka-lms-$(date +%Y%m%d-%H%M) --include-namespaces mereka-lms --wait
 ```
 

@@ -3,7 +3,7 @@ _Audience: Operators and developers • Owner: Platform Team • Last verified: 
 
 > **Bead**: mereka-lms-3qy2
 > **Date**: 2026-02-18
-> **Cluster**: gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
+> **Cluster**: rke2-prod
 
 ## Redaction Requirement
 
@@ -20,7 +20,7 @@ See `docs/policies/operations/EVIDENCE_REDACTION_POLICY.md`.
 ### Route Parity
 
 ```bash
-# GKE production routes
+# RKE2 production (`rke2-prod`) routes
 curl -sI https://academyv2.mereka.io | head -1              # LMS: HTTP/2 200
 curl -sI https://studio.academyv2.mereka.io | head -1       # CMS: HTTP/2 200 or 302
 curl -sI https://apps.academyv2.mereka.io | head -1          # MFE: HTTP/2 200
@@ -35,7 +35,7 @@ curl -sI http://apps.localhost | head -1                      # MFE
 ### Rollout Status
 
 ```bash
-CTX="gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster"
+CTX="rke2-prod"
 NS="mereka-lms"
 
 # All deployments should show READY = desired count

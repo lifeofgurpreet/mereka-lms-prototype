@@ -42,7 +42,7 @@ Scale core workloads to serving state:
 
 ```bash
 # Context
-kubectl config use-context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster
+kubectl config use-context rke2-prod
 
 # Scale core
 kubectl scale deployment lms cms mfe redis -n mereka-lms --replicas=1

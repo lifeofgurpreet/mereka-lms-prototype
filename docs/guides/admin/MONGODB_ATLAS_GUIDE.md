@@ -110,9 +110,9 @@ Checks:
 
 ## Common Operations
 
-### Add GKE IP to Allowlist
+### Add Cluster IP to Allowlist
 
-**When**: Deploying to new GKE cluster or adding VPS access.
+**When**: Deploying to a new RKE2 cluster (`rke2-prod`) or adding VPS access.
 
 **Steps**:
 1. Get cluster egress IP:
@@ -123,7 +123,7 @@ Checks:
 2. Add to Atlas:
    - Login to Atlas dashboard
    - Navigate to: Cluster → Network Access → IP Access List
-   - Add IP address with description (e.g., "GKE Production Cluster")
+   - Add IP address with description (e.g., "RKE2 Production Cluster (rke2-prod)")
    - Click "Confirm"
 
 3. Verify:

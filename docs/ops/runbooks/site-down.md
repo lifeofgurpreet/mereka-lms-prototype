@@ -560,7 +560,7 @@ git -C <repo-root> rev-parse HEAD
 
 # update pinned ref in BBI-K8 (active GitOps repo) and push
 # then force Argo refresh for app:
-kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster \
+kubectl --context rke2-prod \
   -n argocd annotate application mereka-lms-local \
   argocd.argoproj.io/refresh=hard --overwrite
 ```

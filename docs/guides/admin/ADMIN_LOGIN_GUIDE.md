@@ -40,7 +40,7 @@ Notes:
 
 Use these shared credentials for:
 - verifying the **SSO login flow** end-to-end (as a normal end-user)
-- both **GKE production** (`academyv2.mereka.io`) and **VPS kind dev** (`academyv2.mereka.dev`)
+- both **RKE2 production (`rke2-prod`)** (`academyv2.mereka.io`) and **VPS kind dev** (`academyv2.mereka.dev`)
 
 Authentik **admin UI access** is separate from Open edX admin access and is restricted to Gurpreet
 (see `docs/reference/operations/AUTH_AND_PERMISSIONS.md`).
@@ -61,7 +61,7 @@ Important:
 - **URL:** http://apps.localhost/authn/login
 - **Note:** This uses the modern micro-frontend interface
 
-### Production (GKE)
+### Production (RKE2, `rke2-prod`)
 
 **LMS Login:**
 - **URL:** https://academyv2.mereka.io/login

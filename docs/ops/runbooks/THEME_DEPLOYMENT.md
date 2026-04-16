@@ -17,7 +17,7 @@ Important:
 
 - Docker installed and running
 - `gcloud` CLI authenticated (`gcloud auth login`)
-- `kubectl` configured for GKE cluster (`gcloud container clusters get-credentials bbi-k8-cluster --zone asia-southeast1-c`)
+- `kubectl` configured for RKE2 production cluster (`kubectl config use-context rke2-prod`)
 - Python 3.10+ with venv activated
 - Tutor 21.0.0 installed (via `pip install -r requirements-tutor.txt`)
 
@@ -374,9 +374,9 @@ git -C "${INFRA_REPO}" revert <bad_commit_sha>
 git -C "${INFRA_REPO}" push
 
 # 2) Confirm Argo converges back to known-good revision/images.
-kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster -n argocd get applications.argoproj.io mereka-lms-local \
+kubectl --context rke2-prod -n argocd get applications.argoproj.io mereka-lms-local \
   -o jsonpath='{.status.sync.status} {.status.health.status} {.status.sync.revision}{"\n"}'
-kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster -n mereka-lms get deploy mfe \
+kubectl --context rke2-prod -n mereka-lms get deploy mfe \
   -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
 ```
 
@@ -439,8 +439,8 @@ gh run download "${RUN_ID}" --name build-provenance --dir "var/release-artifacts
 ./scripts/infra/release-openedx-gitops.sh --openedx-tag "${APP_SHA}" --mfe-tag "${APP_SHA}" --openedx-digest "sha256:<openedx_digest>" --mfe-digest "sha256:<mfe_digest>" --require-digests --apply --commit --push --verify-runtime
 
 # Check Argo + live image
-kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster -n argocd get applications.argoproj.io mereka-lms-local -o jsonpath='{.status.sync.status} {.status.health.status} {.status.sync.revision}{"\n"}'
-kubectl --context gke_bbi-k8_asia-southeast1-c_bbi-k8-cluster -n mereka-lms get deploy mfe -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
+kubectl --context rke2-prod -n argocd get applications.argoproj.io mereka-lms-local -o jsonpath='{.status.sync.status} {.status.health.status} {.status.sync.revision}{"\n"}'
+kubectl --context rke2-prod -n mereka-lms get deploy mfe -o jsonpath='{.spec.template.spec.containers[0].image}{"\n"}'
 ```
 
 ## Related Documentation
