@@ -38,7 +38,7 @@ runs:
     - name: Parse build metrics
       shell: bash
       run: |
-        "${{ github.action_path }}/../../scripts/ci/emit-build-metrics.sh" \
+        "${GITHUB_WORKSPACE}/scripts/ci/emit-build-metrics.sh" \
           --metadata-file "${{ inputs.metadata-file }}" \
           --log-file "${{ inputs.log-file }}" \
           --image-family "${{ inputs.image-family }}" \
