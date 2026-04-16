@@ -4430,7 +4430,7 @@
   {
     "canonical_conflict_group": "branding",
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-07",
+    "last_verified_or_updated": "2026-04-16",
     "owner": "Branding Guild",
     "path": "guides/branding/BRANDING.md",
     "status": "canonical",
@@ -4466,7 +4466,7 @@
   {
     "canonical_conflict_group": "branding-verification-checklist",
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-07",
+    "last_verified_or_updated": "2026-04-16",
     "owner": "Branding Guild",
     "path": "guides/branding/BRANDING_VERIFICATION_CHECKLIST.md",
     "status": "canonical",

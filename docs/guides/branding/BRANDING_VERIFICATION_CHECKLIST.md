@@ -1,5 +1,5 @@
 # Branding Verification Checklist
-_Audience: Design + Platform Eng • Owner: Branding Guild • Last verified: 2026-02-07 • Status: canonical_
+_Audience: Design + Platform Eng • Owner: Branding Guild • Last verified: 2026-04-16 • Status: canonical_
 
 Use this checklist for any branding PR or branding deployment.
 

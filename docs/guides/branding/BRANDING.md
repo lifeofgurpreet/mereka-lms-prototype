@@ -1,5 +1,5 @@
 # Mereka.io Theme Reference
-_Audience: Design + Platform Eng • Owner: Branding Guild • Last verified: 2026-02-07 • Status: canonical_
+_Audience: Design + Platform Eng • Owner: Branding Guild • Last verified: 2026-04-16 • Status: canonical_
 
 This document captures the brand tokens we apply across LMS/Studio and all MFEs so every surface feels like mereka.io while still leaning on Paragon.
 
