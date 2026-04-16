@@ -492,6 +492,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-tutor-services.sh
     - script: scripts/qa/verify-tutor-version-pin.sh
     - script: scripts/qa/verify-build-workflow-contract.sh
+    - script: scripts/qa/verify-red-line-contract.sh
     - script: scripts/qa/verify-bootstrap-workflow-contract.sh
     - script: scripts/qa/test-install-envsubst-fallback.sh
     - script: scripts/qa/test-install-trivy-fallback.sh
@@ -871,6 +872,15 @@ ci_runtime_inventory:
     - script: scripts/release/generate_release_object.py
       category: WORKTREE_CONTEXT
       note: derives the canonical release object from the signed release bundle
+    - script: scripts/runner/buildx-cleanup.sh
+      category: LIVE_CLUSTER
+      note: prunes stale buildx_buildkit containers from the fastlane VPS runner; supports --dry-run and --max-keep; never removes the default builder; install at /opt/runner/ on the fastlane host
+    - script: scripts/runner/buildx-monitor.sh
+      category: LIVE_CLUSTER
+      note: health check for the fastlane VPS runner buildx estate; checks docker daemon, socket permissions, and builder container count; exits 0/1/2
+    - script: scripts/ci/emit-build-metrics.sh
+      category: CI_ARTIFACT
+      note: parses buildx metadata JSON and build log for cache-source facts, export success, layer reuse counts, and build duration; writes build-metrics-<image-family>.json artifact (bead jj97.5)
 
 scripts:
 

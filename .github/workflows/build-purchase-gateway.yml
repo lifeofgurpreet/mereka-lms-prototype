@@ -48,9 +48,9 @@ jobs:
           office_hours_start: ${{ vars.CI_FASTLANE_BUILD_WINDOW_START }}
           office_hours_end: ${{ vars.CI_FASTLANE_BUILD_WINDOW_END }}
           runner_status_token: ${{ secrets.FASTLANE_RUNNER_STATUS_TOKEN }}
-          github_app_id: ${{ secrets.FASTLANE_GITHUB_APP_ID }}
-          github_app_installation_id: ${{ secrets.FASTLANE_GITHUB_APP_INSTALLATION_ID }}
-          github_app_private_key: ${{ secrets.FASTLANE_GITHUB_APP_PRIVATE_KEY }}
+          github_app_id: ${{ secrets.GITOPS_GITHUB_APP_ID }}
+          github_app_installation_id: ${{ secrets.GITOPS_GITHUB_APP_INSTALLATION_ID }}
+          github_app_private_key: ${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}
           allow_push_main: 'true'
           allow_workflow_dispatch: 'true'
 
@@ -88,6 +88,6 @@ jobs:
       kustomization_file: apps/mereka-lms/overlays/profiles/dev/kustomization.yaml
       kustomize_image_name: ghcr.io/biji-biji-initiative/purchase-gateway
     secrets:
-      GITHUB_APP_ID: ${{ secrets.FASTLANE_GITHUB_APP_ID }}
-      GITHUB_APP_INSTALLATION_ID: ${{ secrets.FASTLANE_GITHUB_APP_INSTALLATION_ID }}
-      GITHUB_APP_PRIVATE_KEY: ${{ secrets.FASTLANE_GITHUB_APP_PRIVATE_KEY }}
+      GITHUB_APP_ID: ${{ secrets.GITOPS_GITHUB_APP_ID }}
+      GITHUB_APP_INSTALLATION_ID: ${{ secrets.GITOPS_GITHUB_APP_INSTALLATION_ID }}
+      GITHUB_APP_PRIVATE_KEY: ${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}

@@ -261,9 +261,17 @@ check_bake_label "$OPENEDX_PROOF_JSON" "openedx-proof" "io.mereka.build-profile"
 check_bake_label "$OPENEDX_PROOF_JSON" "openedx-proof" "io.mereka.build-scope" "openedx" "openedx-proof resolves build-scope label"
 check_bake_list_contains "$OPENEDX_PROOF_JSON" "target.openedx-proof.tags" "example.invalid/openedx:one" "openedx-proof resolves first image tag"
 check_bake_list_contains "$OPENEDX_PROOF_JSON" "target.openedx-proof.tags" "example.invalid/openedx:two" "openedx-proof resolves second image tag"
-check_bake_object_array_contains "$OPENEDX_PROOF_JSON" "target.openedx-proof.cache-from" "type=gha,scope=verify-openedx-proof" "openedx-proof resolves GHA cache restore"
-check_bake_object_array_contains "$OPENEDX_PROOF_JSON" "target.openedx-proof.cache-from" "type=registry,ref=example.invalid/openedx:cache" "openedx-proof resolves registry cache fallback"
-check_bake_object_array_contains "$OPENEDX_PROOF_JSON" "target.openedx-proof.cache-to" "type=gha,mode=max,scope=verify-openedx-proof" "openedx-proof resolves GHA cache write-back"
+# L2 shared GHCR registry cache (authoritative) — RFC-BUILD-AUTHORITY-001
+check_bake_object_array_contains "$OPENEDX_PROOF_JSON" "target.openedx-proof.cache-from" "type=registry,ref=ghcr.io/biji-biji-initiative/mereka-lms/cache/openedx:main-amd64" "openedx-proof resolves L2 shared GHCR registry cache"
+# L3 final-image fallback (transitional)
+check_bake_object_array_contains "$OPENEDX_PROOF_JSON" "target.openedx-proof.cache-from" "type=registry,ref=example.invalid/openedx:cache" "openedx-proof resolves L3 registry cache fallback"
+# cache-to is variable-driven: when CACHE_TO_OPENEDX="" buildx omits cache-to entirely
+# This is correct behavior (PRs don't write shared cache)
+if echo "$OPENEDX_PROOF_JSON" | python3 -c "import json,sys; d=json.load(sys.stdin); sys.exit(0 if 'cache-to' not in d['target']['openedx-proof'] else 1)" 2>/dev/null; then
+  pass "openedx-proof cache-to absent by default (variable-driven, empty = no export)"
+else
+  fail "openedx-proof cache-to should be absent when CACHE_TO_OPENEDX is empty"
+fi
 check_bake_object_array_contains "$OPENEDX_PROOF_JSON" "target.openedx-proof.output" "type=docker" "openedx-proof retains docker output"
 check_bake_object_array_contains "$OPENEDX_PROOF_JSON" "target.openedx-proof.output" "type=image,push=true" "openedx-proof resolves push image output"
 
@@ -275,9 +283,16 @@ check_bake_label "$MFE_PROOF_JSON" "mfe-proof" "io.mereka.rendered-context" "tut
 check_bake_label "$MFE_PROOF_JSON" "mfe-proof" "io.mereka.rendered-dockerfile" "Dockerfile" "mfe-proof resolves rendered-dockerfile label"
 check_bake_list_contains "$MFE_PROOF_JSON" "target.mfe-proof.tags" "example.invalid/mfe:one" "mfe-proof resolves first image tag"
 check_bake_list_contains "$MFE_PROOF_JSON" "target.mfe-proof.tags" "example.invalid/mfe:two" "mfe-proof resolves second image tag"
-check_bake_object_array_contains "$MFE_PROOF_JSON" "target.mfe-proof.cache-from" "type=gha,scope=verify-mfe-proof" "mfe-proof resolves GHA cache restore"
-check_bake_object_array_contains "$MFE_PROOF_JSON" "target.mfe-proof.cache-from" "type=registry,ref=example.invalid/mfe:cache" "mfe-proof resolves registry cache fallback"
-check_bake_object_array_contains "$MFE_PROOF_JSON" "target.mfe-proof.cache-to" "type=gha,mode=max,scope=verify-mfe-proof" "mfe-proof resolves GHA cache write-back"
+# L2 shared GHCR registry cache (authoritative) — RFC-BUILD-AUTHORITY-001
+check_bake_object_array_contains "$MFE_PROOF_JSON" "target.mfe-proof.cache-from" "type=registry,ref=ghcr.io/biji-biji-initiative/mereka-lms/cache/mfe:main-amd64" "mfe-proof resolves L2 shared GHCR registry cache"
+# L3 final-image fallback (transitional)
+check_bake_object_array_contains "$MFE_PROOF_JSON" "target.mfe-proof.cache-from" "type=registry,ref=example.invalid/mfe:cache" "mfe-proof resolves L3 registry cache fallback"
+# cache-to is variable-driven: when CACHE_TO_MFE="" buildx omits cache-to entirely
+if echo "$MFE_PROOF_JSON" | python3 -c "import json,sys; d=json.load(sys.stdin); sys.exit(0 if 'cache-to' not in d['target']['mfe-proof'] else 1)" 2>/dev/null; then
+  pass "mfe-proof cache-to absent by default (variable-driven, empty = no export)"
+else
+  fail "mfe-proof cache-to should be absent when CACHE_TO_MFE is empty"
+fi
 check_bake_object_array_contains "$MFE_PROOF_JSON" "target.mfe-proof.output" "type=docker" "mfe-proof retains docker output"
 check_bake_object_array_contains "$MFE_PROOF_JSON" "target.mfe-proof.output" "type=image,push=true" "mfe-proof resolves push image output"
 

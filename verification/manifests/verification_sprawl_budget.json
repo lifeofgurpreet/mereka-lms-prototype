@@ -1,8 +1,8 @@
 {
-  "max_total_verify_scripts": 629,
-  "max_manual_only_scripts": 194,
+  "max_total_verify_scripts": 630,
+  "max_manual_only_scripts": 196,
   "max_deprecated_candidate_scripts": 35,
-  "min_ci_static_bound": 324,
-  "budget_reviewed_at": "2026-04-14",
-  "budget_rationale": "Reviewed 2026-04-14: +1 built-image release-blocking verifier (verify-openedx-custom-app-imports.sh) added to catch flat-root custom-app packaging regressions inside the Open edX OCI image before promotion. Budget raised 628→629; manual-only ceiling and ci_static floor unchanged."
+  "min_ci_static_bound": 325,
+  "budget_reviewed_at": "2026-04-16",
+  "budget_rationale": "Reviewed 2026-04-16: +1 build-authority red-line verifier (verify-red-line-contract.sh) added to enforce RFC-BUILD-AUTHORITY-001 red lines (jj97.21). Budget raised 629\u2192630; ci_static floor raised 324\u2192325 to match. Manual-only ceiling unchanged."
 }

@@ -123,6 +123,38 @@
       "version": "1.1.0"
     },
     {
+      "acceptance_criteria_count": 10,
+      "created": "2026-04-16",
+      "doc_type": "spec",
+      "domain": "platform",
+      "id": "SPEC-BUILD-AUTHORITY",
+      "lane": "normative",
+      "last_reviewed": "2026-04-16",
+      "links": {
+        "generated_testmap": null,
+        "legacy_testmap": null,
+        "plan": null,
+        "source_plan": null,
+        "source_spec": null,
+        "testplan": null
+      },
+      "normativity": "normative",
+      "owner": "platform-ci",
+      "path": "specs/build-authority-deterministic-builds_spec.md",
+      "review_due": "2026-07-16",
+      "spec_class": "domain",
+      "status": "draft",
+      "summary": "Defines the single-owner model for how Open edX and MFE images are built, scanned, promoted, and proven. Every image-affecting change has one authoritative trigger path, one build owner, one promotion path, and one proof surface.",
+      "tags": [
+        "build",
+        "ci",
+        "deterministic",
+        "authority"
+      ],
+      "title": "Build Authority and Deterministic Build Truth",
+      "version": null
+    },
+    {
       "acceptance_criteria_count": 43,
       "created": "2026-02-12",
       "doc_type": "spec",
@@ -2957,7 +2989,7 @@
       "version": "1.0.0"
     }
   ],
-  "entry_count": 104,
+  "entry_count": 105,
   "generated_by": "scripts/qa/spec-tools/build_spec_catalog.py",
   "root": "specs",
   "taxonomy": "specs/standards/spec-taxonomy.yaml"

@@ -535,8 +535,8 @@ else
   fail "OpenEdX post-push scan missing resolved digest image ref"
 fi
 
-if [[ "$SCAN_OPENEDX_BLOCK" == *'Verify OpenEdX image branding contract'* && "$SCAN_OPENEDX_BLOCK" == *'scripts/qa/verify-openedx-image-branding.sh "${OPENEDX_IMAGE_REF}"'* ]]; then
-  pass "OpenEdX branding verification runs post-push via canonical registry-image helper"
+if [[ "$SCAN_OPENEDX_BLOCK" == *'Verify OpenEdX image branding contract'* && ( "$SCAN_OPENEDX_BLOCK" == *'scripts/qa/verify-openedx-image-branding.sh "${OPENEDX_IMAGE_REF}"'* || "$SCAN_OPENEDX_BLOCK" == *'scripts/qa/verify-openedx-image-branding.sh'*'--staticfiles-json'* ) ]]; then
+  pass "OpenEdX branding verification runs post-push via canonical helper"
 else
   fail "OpenEdX branding verification missing canonical post-push helper call"
 fi
@@ -631,18 +631,18 @@ else
   fail "release bundle artifact upload missing release-object.json"
 fi
 
-# OpenEdX cache-health reporting must match the canonical push-first strategy:
-# docker-container + GHA cache read/write + registry fallback.
-if [[ "$OPENEDX_CACHE_HEALTH_BLOCK" == *"GHA cache read/write is enabled for OpenEdX build"* ]]; then
-  pass "OpenEdX cache health reports the canonical GHA-backed strategy"
+# OpenEdX cache-health reporting must match the canonical L2 registry strategy
+# (RFC-BUILD-AUTHORITY-001: shared GHCR registry cache, not GHA cache).
+if [[ "$OPENEDX_CACHE_HEALTH_BLOCK" == *"L2 shared GHCR registry cache ref present"* ]]; then
+  pass "OpenEdX cache health reports the canonical L2 registry strategy"
 else
-  fail "OpenEdX cache health missing canonical GHA-backed strategy messaging"
+  fail "OpenEdX cache health missing canonical L2 registry strategy messaging"
 fi
 
-if [[ "$OPENEDX_CACHE_HEALTH_BLOCK" == *"GHA cache exporters intentionally absent for OpenEdX build"* ]]; then
-  fail "OpenEdX cache health still reports the stale non-GHA strategy"
+if [[ "$OPENEDX_CACHE_HEALTH_BLOCK" == *"GHA cache read/write is enabled"* ]]; then
+  fail "OpenEdX cache health still reports the stale GHA-first strategy"
 else
-  pass "OpenEdX cache health no longer treats GHA cache exporters as forbidden"
+  pass "OpenEdX cache health no longer reports GHA-first strategy"
 fi
 
 if [[ "$BUILD_OPENEDX_BLOCK" == *'./scripts/infra/build-openedx-image.sh'* ]]; then

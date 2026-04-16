@@ -129,9 +129,9 @@ jobs:
           routing_policy: lms_ci_prefer_fastlane
           fallback_label: mereka-k8s-runners
           runner_status_token: ${{ secrets.FASTLANE_RUNNER_STATUS_TOKEN }}
-          github_app_id: ${{ secrets.FASTLANE_GITHUB_APP_ID }}
-          github_app_installation_id: ${{ secrets.FASTLANE_GITHUB_APP_INSTALLATION_ID }}
-          github_app_private_key: ${{ secrets.FASTLANE_GITHUB_APP_PRIVATE_KEY }}
+          github_app_id: ${{ secrets.GITOPS_GITHUB_APP_ID }}
+          github_app_installation_id: ${{ secrets.GITOPS_GITHUB_APP_INSTALLATION_ID }}
+          github_app_private_key: ${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}
           allow_push_main: true
           allow_workflow_dispatch: true
           allow_pull_request: true

@@ -38,6 +38,7 @@ FASTLANE_RUNNER_EXPRESSIONS=(
   'needs.select-build-lane.outputs.runner_label'
   'needs.select-ci-lane.outputs.runner_label'
   'needs.select-bootstrap-lane.outputs.runner_label'
+  'needs.select-runner.outputs.runner_label'
 )
 
 # Workflows permitted to use mereka-k8s-heavy-builders (Class B)

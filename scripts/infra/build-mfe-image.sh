@@ -154,6 +154,11 @@ fi
 if [[ "$BUILD_PROFILE" == "proof" ]]; then
   BAKE_ENV+=("MFE_${BUILD_PROFILE^^}_GHA_SCOPE=${GHA_SCOPE}")
 fi
+# Shared registry cache export — only propagated when CACHE_TO_MFE is set
+# (trusted main builds set this; all others leave it empty = no cache export)
+if [[ -n "${CACHE_TO_MFE:-}" ]]; then
+  BAKE_ENV+=("CACHE_TO_MFE=${CACHE_TO_MFE}")
+fi
 
 if [[ "$OUTPUT_MODE" == "push" ]]; then
   printf 'env'
