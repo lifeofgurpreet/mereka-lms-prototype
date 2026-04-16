@@ -387,7 +387,7 @@ jobs:
         with:
           enabled: ${{ vars.CI_FASTLANE_BUILD_ENABLED }}
           lane_mode: ${{ github.event_name == 'workflow_dispatch' && inputs.lane_mode || 'auto' }}
-          fastlane_label: ${{ vars.CI_FASTLANE_BUILD_LABEL || 'cie-vps-fastlane-build' }}
+          fastlane_label: ${{ vars.CI_FASTLANE_BUILD_LABEL || 'mereka-lms-vps-fastlane-build' }}
           timezone: ${{ vars.CI_FASTLANE_BUILD_TIMEZONE }}
           office_hours_start: ${{ vars.CI_FASTLANE_BUILD_WINDOW_START }}
           office_hours_end: ${{ vars.CI_FASTLANE_BUILD_WINDOW_END }}
