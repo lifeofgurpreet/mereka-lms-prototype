@@ -155,7 +155,39 @@ kubectl -n mereka-lms rollout status deployment/cms
 kubectl -n mereka-lms rollout status deployment/mfe
 ```
 
-### 9. Post-Deploy Smoke Test
+### 9. Seed SiteConfiguration (after any DB reset or fresh install)
+
+Skip this step on routine image-tag rollouts. Run it whenever the LMS MySQL
+database was reset, restored from backup, or newly provisioned — the
+migration job alone will NOT repopulate Site/SiteConfiguration rows, and
+without them the MFE config API returns main-tenant data to every tenant
+(SOF, BijiBiji, etc. all resolve to Mereka primary).
+
+```bash
+# Pick the script for the env
+./scripts/tenants/seed-dev-sites.sh       # dev
+./scripts/tenants/seed-staging-sites.sh   # staging
+./scripts/tenants/seed-prod-sites.sh      # prod
+```
+
+Verify seeding:
+
+```bash
+# Each tenant should have TWO SiteConfiguration rows (LMS host + apps host)
+kubectl -n mereka-lms-dev exec deploy/lms -- python manage.py lms shell -c \
+  "from django.contrib.sites.models import Site; \
+   from openedx.core.djangoapps.site_configuration.models import SiteConfiguration; \
+   [print(s.domain, bool(getattr(s, 'configuration', None))) for s in Site.objects.all()]"
+```
+
+Expected: one row per tenant's LMS domain and one per the tenant's `apps.`
+domain, both with `configuration=True`. Missing rows cause the cross-tenant
+MFE redirect bug.
+
+**Follow-up**: Making this a post-migrate Kubernetes Job is tracked in
+the open-ended backlog; the checklist step above is the safety net.
+
+### 10. Post-Deploy Smoke Test
 
 ```bash
 # Branding and public health
