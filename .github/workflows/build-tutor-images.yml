@@ -1133,15 +1133,27 @@ jobs:
           path: var/ci/sbom-openedx*
           retention-days: 90
 
+      - name: Compute Trivy DB cache date key
+        id: trivy-cache-date
+        # Date-based key (UTC day) so the cache rotates daily, matches Aquasec's
+        # DB publish cadence, and — crucially — does NOT contain github.run_id
+        # so repeat builds on the same day get a cache HIT and do NOT trigger a
+        # Post-save write. The old key pinned run_id, which made every run a
+        # miss-then-save (144s wasted on the Post step per build).
+        run: echo "ymd=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+
       - name: Restore Trivy vulnerability DB cache
         id: trivy-db-cache
         # Cache the Trivy CVE database (~50 MB download) across runs.
         # On ARC heavy-builders the DB download accounts for ~60-90s of the
-        # 246s Trivy step.  Cache key rotates daily so CVE data stays current.
+        # 246s Trivy step. Date-based key means: first build of the day
+        # downloads fresh DB, subsequent builds hit the cache (skip download
+        # AND skip the Post save step — save is only triggered when the key
+        # does not already exist in the cache).
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4.2.3
         with:
           path: ~/.cache/trivy
-          key: trivy-db-${{ runner.os }}-${{ hashFiles('.trivyignore') }}-${{ github.run_id }}
+          key: trivy-db-${{ runner.os }}-${{ hashFiles('.trivyignore') }}-${{ steps.trivy-cache-date.outputs.ymd }}
           restore-keys: |
             trivy-db-${{ runner.os }}-${{ hashFiles('.trivyignore') }}-
             trivy-db-${{ runner.os }}-
