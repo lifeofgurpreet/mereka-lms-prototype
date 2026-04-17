@@ -349,7 +349,7 @@ CSRF_COOKIE_DOMAIN = ".academyv2.mereka.io"
 3. **DNS not pointing to cluster**:
    ```bash
    nslookup academy.biji-biji.com
-   # Should resolve to GKE LoadBalancer IP
+   # Should resolve via Cloudflare to the rke2-prod ingress / LoadBalancer IP
    ```
 
 **Fix**: Follow "Adding a New Domain" procedure above.

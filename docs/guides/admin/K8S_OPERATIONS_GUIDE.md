@@ -187,7 +187,7 @@ kubectl scale deployment/cms-worker --replicas=2 -n mereka-lms
 
 ### Current Replica Counts by Environment
 
-| Deployment | Local (kind) | Production (GKE) |
+| Deployment | Local (kind) | Production (rke2-prod) |
 |------------|---------------|------------------|
 | lms | 1 | 2 |
 | cms | 1 | 1 |
@@ -924,7 +924,9 @@ kubectl rollout undo deployment/lms -n mereka-lms
 
 ### Image Pull Secrets (if needed)
 
-**Current**: GKE nodes have built-in Artifact Registry access (Workload Identity).
+**Current**: RKE2 clusters pull from GHCR via the `ghcr-pull` secret (sync'd by
+`sync-ghcr-shared-pull-secrets.sh`, see bbi-infrastructure). GKE is decommissioned —
+legacy Workload Identity + Artifact Registry pattern no longer applies.
 
 **For external clusters** (Kind, other K8s):
 ```bash

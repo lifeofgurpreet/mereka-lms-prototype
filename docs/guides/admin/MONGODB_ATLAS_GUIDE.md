@@ -69,7 +69,7 @@ kubectl exec -it -n mereka-lms deployment/lms -- pip list | grep -E "pymongo|dns
 
 **Key metrics**:
 - **Connections**: Should be 50-200 under normal load
-- **Network**: Read/write latency (p95 <100ms from GKE)
+- **Network**: Read/write latency (p95 <100ms from RKE2 cluster)
 - **Operations**: Queries, inserts, updates per second
 - **Storage**: Disk usage (10GB max for M10, alerts at 80%)
 
