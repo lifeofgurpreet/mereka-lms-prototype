@@ -14258,6 +14258,32 @@
       "tier": "release_blocking"
     },
     {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
+      "env_scope": [
+        "dev"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-runner-class-taxonomy-upstream.sh",
+      "reference_count": 5,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "high",
+      "spec_ids": [],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
       "cadence": "scheduled_or_post_deploy",
       "canonical": true,
       "ci_binding": [],
@@ -18776,27 +18802,27 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 21,
-    "ci_static_bound": 382,
+    "ci_static_bound": 383,
     "kinds": {
-      "verify": 630
+      "verify": 631
     },
     "mutability": {
       "destructive": 9,
       "mutating": 21,
-      "read-only": 600
+      "read-only": 601
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 435,
+      "active": 436,
       "deprecated_candidate": 1,
       "manual_only": 194
     },
     "tiers": {
       "exploratory_manual": 198,
       "periodic_runtime": 21,
-      "release_blocking": 411
+      "release_blocking": 412
     },
-    "total_verify_scripts": 630,
+    "total_verify_scripts": 631,
     "workflow_direct_bound": 69
   },
   "version": "1"

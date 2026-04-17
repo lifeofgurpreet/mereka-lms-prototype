@@ -10,7 +10,16 @@ blocks: [jj97.13, jj97.14, jj97.15]
 # Benchmark Classes — Build Performance Taxonomy
 
 > **Audience**: CI/CD engineers, infra team, anyone comparing "fastlane vs ARC" or "this PR built faster".
-> **Related**: `RFC-BUILD-AUTHORITY-001.md`, `BUILD-AUTHORITY-SPRINT-AGENT-BRIEF.md`, `CI_METRICS.md` (forthcoming)
+> **Related**: `RFC-BUILD-AUTHORITY-001.md`, `BUILD-AUTHORITY-SPRINT-AGENT-BRIEF.md`, `CI_METRICS.md`
+> **Runner-class taxonomy source-of-truth**: [`bbi-infrastructure/config/runner-class-taxonomy.yaml`](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/blob/main/config/runner-class-taxonomy.yaml) (per ADR-025 §1). The `runner_class` label values used throughout this document (`fastlane`, `arc-standard`, `arc-heavy`, `arc-prod`, `github-hosted`) are closed-set enums defined upstream. Do NOT redefine them locally.
+
+---
+
+## Upstream taxonomy binding
+
+This document treats the upstream `runner-class-taxonomy.yaml` as authoritative. When the LMS build-workflow gate `scripts/qa/verify-runner-class-taxonomy-upstream.sh` runs in CI, every `runs-on:` label in `.github/workflows/` is checked against that file's `label_globs`. Labels outside the closed set are rejected unless marked with `# ci:allow-github-hosted` or `# ci:runner-exempt <reason>`.
+
+Ownership: infra team owns the YAML; the LMS repo's drift gate is the consumer. When infra adds, removes, or renames a runner class, the LMS gate picks it up on its next CI run — there is no local taxonomy to update here.
 
 ---
 

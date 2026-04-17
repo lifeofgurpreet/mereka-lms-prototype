@@ -1,8 +1,8 @@
 {
-  "max_total_verify_scripts": 630,
+  "max_total_verify_scripts": 631,
   "max_manual_only_scripts": 196,
   "max_deprecated_candidate_scripts": 35,
-  "min_ci_static_bound": 325,
-  "budget_reviewed_at": "2026-04-16",
-  "budget_rationale": "Reviewed 2026-04-16: +1 build-authority red-line verifier (verify-red-line-contract.sh) added to enforce RFC-BUILD-AUTHORITY-001 red lines (jj97.21). Budget raised 629\u2192630; ci_static floor raised 324\u2192325 to match. Manual-only ceiling unchanged."
+  "min_ci_static_bound": 326,
+  "budget_reviewed_at": "2026-04-17",
+  "budget_rationale": "Reviewed 2026-04-17: +1 runner-class taxonomy upstream drift gate (verify-runner-class-taxonomy-upstream.sh) added per ADR-025 §1 / mereka-lms-5dwe.4. Budget raised 630\u2192631; ci_static floor raised 325\u2192326. Manual-only ceiling unchanged. Previous (2026-04-16): +1 build-authority red-line verifier (jj97.21)."
 }

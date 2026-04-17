@@ -493,6 +493,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-tutor-version-pin.sh
     - script: scripts/qa/verify-build-workflow-contract.sh
     - script: scripts/qa/verify-red-line-contract.sh
+    - script: scripts/qa/verify-runner-class-taxonomy-upstream.sh
     - script: scripts/qa/verify-bootstrap-workflow-contract.sh
     - script: scripts/qa/test-install-envsubst-fallback.sh
     - script: scripts/qa/test-install-trivy-fallback.sh
