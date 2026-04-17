@@ -2,6 +2,20 @@
 # Sync MongoDB content from production Atlas to local development
 set -euo pipefail
 
+# Safety guard: require explicit confirmation for production-mutating operations
+if [[ "${CONFIRM:-}" != "yes-i-am-sure" ]]; then
+  echo "ERROR: This script mutates production. To proceed, run:"
+  echo "  CONFIRM=yes-i-am-sure $0 $*"
+  exit 1
+fi
+
+DRY_RUN="${DRY_RUN:-true}"
+if [[ "$DRY_RUN" == "true" ]]; then
+  echo "DRY RUN mode (default). Set DRY_RUN=false to execute the production sync."
+  echo "This script drops and replaces local MongoDB databases with production data."
+  exit 0
+fi
+
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'

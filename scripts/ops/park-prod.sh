@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# park-prod.sh — Put GKE prod into warm-park-mode (cost-save, reversible).
+# park-prod.sh — Put RKE2 prod into warm-park-mode (cost-save, reversible).
+#
+# NOTE: "GKE" references in comments below are historical (GKE was decommissioned;
+# prod now runs on RKE2). GKE_CONTEXT variable below already points to rke2-prod.
 #
 # Warm-park mode scales all stateless LMS workloads to 0 while keeping the
 # data plane running (mysql, redis, postgresql-payments). All PVCs remain
@@ -15,9 +18,16 @@
 #   Parked pods: LMS, CMS, workers, MFEs, enterprise services, notes, smtp,
 #                elasticsearch, meilisearch, xqueue, caddy (~22 deployments → 0)
 #   Kept running: mysql, redis, postgresql-payments, promtail, mux-monitor
-#   Estimated GKE node pool reduction: 2-3 nodes depending on node autoscaling
+#   Estimated node pool reduction: 2-3 nodes depending on node autoscaling
 
 set -euo pipefail
+
+# Safety guard: require explicit confirmation for production-mutating operations
+if [[ "${CONFIRM:-}" != "yes-i-am-sure" ]]; then
+  echo "ERROR: This script mutates production. To proceed, run:"
+  echo "  CONFIRM=yes-i-am-sure $0 $*"
+  exit 1
+fi
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"

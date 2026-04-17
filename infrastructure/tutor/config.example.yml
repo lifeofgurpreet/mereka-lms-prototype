@@ -8,7 +8,7 @@ XQUEUE_HOST: xqueue.localhost
 DOCKER_IMAGE_MYSQL: docker.io/mysql:8.0
 MYSQL_ROOT_HOST: '%'
 MFE_DOCKER_IMAGE: openedx-mfe:nightly
-MFE_COMMON_VERSION: master
+MFE_COMMON_VERSION: master  # WARNING: 'master' is a floating ref. Pin to release tag for reproducible builds.
 OPENEDX_COMMON_VERSION: open-release/ulmo.1
 OPENEDX_LMS_VERSION: open-release/ulmo.1
 OPENEDX_CMS_VERSION: open-release/ulmo.1
@@ -19,21 +19,21 @@ PLUGINS:
   - discovery
   - mfe
   - notes
-  - ecommerce  # DEPRECATED — legacy Oscar ecommerce, being replaced by purchase-gateway (services/purchase-gateway/)
+  - ecommerce  # DEPRECATED — legacy Oscar ecommerce. Do NOT enable for new deployments. Replaced by Purchase Gateway (services/purchase-gateway/).
   - xqueue
   - forum
   - aspects
-RUN_MONGODB: true
+RUN_MONGODB: false  # ALWAYS false — we use MongoDB Atlas SRV exclusively
 MONGODB_URI: ""
-MONGODB_HOST: mongodb
-MONGODB_PORT: 27017
+MONGODB_HOST: mongodb  # Unused with Atlas SRV. Connection via MONGODB_URI from Infisical.
+MONGODB_PORT: 27017    # Unused with Atlas SRV. Connection via MONGODB_URI from Infisical.
 MONGODB_AUTH: ""
 MYSQL_HOST: mysql
 MYSQL_PORT: 3306
 REDIS_HOST: redis
 REDIS_PORT: 6379
 AWS_S3_REGION_NAME: asia-southeast1
-AWS_STORAGE_BUCKET_NAME: staging-academy-mereka-io-content  # legacy bucket name (prod data)
+AWS_STORAGE_BUCKET_NAME: staging-academy-mereka-io-content  # Environment-specific — replace per env (staging/prod). Do not copy this value verbatim.
 LMS_DEFAULT_SITE_THEME: mereka
 ADDL_INSTALLED_APPS:
   - openedx.core.djangoapps.content_libraries.apps.ContentLibrariesConfig

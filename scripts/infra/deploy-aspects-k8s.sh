@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# NOTE: GKE (mereka-lms GCP project) was decommissioned. The GKE Autopilot reference
+# in this script's description is historical; Aspects now runs on RKE2. The script is
+# also disabled by default (ALLOW_LEGACY_TUTOR_K8S guard below) — do not re-enable.
+#
 # Deploy Aspects Analytics to GKE Autopilot with appropriate resource limits
 set -euo pipefail
 

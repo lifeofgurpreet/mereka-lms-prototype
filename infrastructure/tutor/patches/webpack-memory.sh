@@ -18,6 +18,20 @@ import sys
 
 targets = sys.argv[1:]
 
+# The canonical ENV trio we want present (unquoted form, Tutor 21 / Ulmo style).
+# This is the authoritative value; all dedup logic targets this exact string.
+ENV_TRIO = (
+    'ENV PYTHONPATH=/openedx/edx-platform\n'
+    'ENV NODE_OPTIONS="--max-old-space-size=6144"\n'
+    'ENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\n'
+)
+
+# The PATH+VIRTUAL_ENV anchor that should precede the trio in the assets build stage.
+ENV_ANCHOR_SHORT = (
+    'ENV PATH=/openedx/venv/bin:./node_modules/.bin:/openedx/nodeenv/bin:${PATH}\n'
+    'ENV VIRTUAL_ENV=/openedx/venv/\n'
+)
+
 for target in targets:
     path = Path(target)
     if not path.exists():
@@ -25,56 +39,63 @@ for target in targets:
     original = path.read_text()
     updated = original
 
-    # ENV block normalization and NODE_OPTIONS / PYTHONPATH / REQUIRE_BUILD_PROFILE_OPTIMIZE
-    env_block_spaces = "ENV PATH /openedx/venv/bin:./node_modules/.bin:/openedx/nodeenv/bin:${PATH}\nENV VIRTUAL_ENV /openedx/venv/\nWORKDIR /openedx/edx-platform\n"
-    env_block_equals = "ENV PATH=/openedx/venv/bin:./node_modules/.bin:/openedx/nodeenv/bin:${PATH}\nENV VIRTUAL_ENV=/openedx/venv/\nWORKDIR /openedx/edx-platform\n"
-    env_block_short = "ENV PATH=/openedx/venv/bin:./node_modules/.bin:/openedx/nodeenv/bin:${PATH}\nENV VIRTUAL_ENV=/openedx/venv/\n"
-    env_replacement = "ENV PATH=/openedx/venv/bin:./node_modules/.bin:/openedx/nodeenv/bin:${PATH}\nENV VIRTUAL_ENV=/openedx/venv/\nENV PYTHONPATH=/openedx/edx-platform\nENV NODE_OPTIONS=\"--max-old-space-size=6144\"\nENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\nWORKDIR /openedx/edx-platform\n"
-    updated = updated.replace(env_block_spaces, env_replacement)
-    updated = updated.replace(env_block_equals, env_replacement)
+    # ── Step 1: Normalise legacy spacing / WORKDIR-inline variants ──────────
+    # These only appear when the template is very old or was hand-edited.
+    # Replace the space-separated (pre-Tutor-19) form with the equals form.
     updated = updated.replace(
-        env_block_short,
-        "ENV PATH=/openedx/venv/bin:./node_modules/.bin:/openedx/nodeenv/bin:${PATH}\nENV VIRTUAL_ENV=/openedx/venv/\nENV PYTHONPATH=/openedx/edx-platform\nENV NODE_OPTIONS=\"--max-old-space-size=6144\"\nENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\n",
+        'ENV PATH /openedx/venv/bin:./node_modules/.bin:/openedx/nodeenv/bin:${PATH}\n'
+        'ENV VIRTUAL_ENV /openedx/venv/\n'
+        'WORKDIR /openedx/edx-platform\n',
+        ENV_ANCHOR_SHORT + 'WORKDIR /openedx/edx-platform\n',
     )
-    updated = updated.replace('ENV NODE_OPTIONS="--max-old-space-size=1536"\n', "")
-    while "ENV PYTHONPATH=/openedx/edx-platform\nENV PYTHONPATH=/openedx/edx-platform\n" in updated:
-        updated = updated.replace(
-            "ENV PYTHONPATH=/openedx/edx-platform\nENV PYTHONPATH=/openedx/edx-platform\n",
-            "ENV PYTHONPATH=/openedx/edx-platform\n",
-        )
-    dup_suffix = "ENV PYTHONPATH=/openedx/edx-platform\nENV NODE_OPTIONS=\"--max-old-space-size=6144\"\n"
-    while env_replacement + dup_suffix in updated:
-        updated = updated.replace(env_replacement + dup_suffix, env_replacement)
-    while dup_suffix + dup_suffix in updated:
-        updated = updated.replace(dup_suffix + dup_suffix, dup_suffix)
-    updated = updated.replace('ENV NODE_OPTIONS="--max-old-space-size=4096"\n', "")
+    # Replace equals+WORKDIR-inline form (old rendered Dockerfile variant).
+    updated = updated.replace(
+        ENV_ANCHOR_SHORT + 'WORKDIR /openedx/edx-platform\n',
+        ENV_ANCHOR_SHORT,
+    )
+
+    # ── Step 2: Inject trio if the anchor exists but trio is missing ─────────
+    # Sentinel check: only inject when the line immediately after VIRTUAL_ENV
+    # is NOT already the PYTHONPATH line.  This makes the replacement idempotent
+    # regardless of how many times apply-patches.sh is run.
+    anchor_with_trio = ENV_ANCHOR_SHORT + ENV_TRIO
+    if ENV_ANCHOR_SHORT in updated and anchor_with_trio not in updated:
+        updated = updated.replace(ENV_ANCHOR_SHORT, ENV_ANCHOR_SHORT + ENV_TRIO, 1)
+
+    # ── Step 3: Collapse duplicate trio blocks (any count → exactly one) ─────
+    # Handles accumulated duplicates from previous broken runs.  A single re.sub
+    # with a + quantifier collapses N consecutive copies to 1 regardless of N.
+    updated = re.sub(
+        r'(?:' + re.escape(ENV_TRIO) + r')+',
+        ENV_TRIO,
+        updated,
+    )
+
+    # ── Step 4: Remove stale NODE_OPTIONS lines left by older patch variants ──
+    updated = updated.replace('ENV NODE_OPTIONS="--max-old-space-size=1536"\n', '')
+    updated = updated.replace('ENV NODE_OPTIONS="--max-old-space-size=4096"\n', '')
+
+    # ── Step 5: Remove orphaned PYTHONPATH that trailed NODE_OPTIONS earlier ──
+    # Old patch inserted: NODE_OPTIONS … PYTHONPATH … COMPREHENSIVE_THEME_DIRS.
+    # Tutor 21 already has PYTHONPATH before NODE_OPTIONS, so the trailing one
+    # was a stray duplicate.  Strip it only when it directly precedes COMPREHENSIVE.
     updated = updated.replace(
         'ENV NODE_OPTIONS="--max-old-space-size=6144"\nENV PYTHONPATH=/openedx/edx-platform\nENV COMPREHENSIVE_THEME_DIRS',
         'ENV NODE_OPTIONS="--max-old-space-size=6144"\nENV COMPREHENSIVE_THEME_DIRS',
     )
 
-    # Fix collectstatic uglify-js parse error by disabling RequireJS r.js minification
+    # ── Step 6: Fix collectstatic/uglify: ensure REQUIRE_BUILD_PROFILE_OPTIMIZE
+    # is present after the quoted PYTHONPATH variant (rendered Dockerfile only).
     updated = updated.replace(
         'ENV NODE_OPTIONS="--max-old-space-size=6144"\nENV PYTHONPATH="/openedx/edx-platform"\n',
         'ENV NODE_OPTIONS="--max-old-space-size=6144"\nENV PYTHONPATH="/openedx/edx-platform"\nENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\n',
     )
-    env_trio_unquoted = (
-        'ENV PYTHONPATH=/openedx/edx-platform\n'
-        'ENV NODE_OPTIONS="--max-old-space-size=6144"\n'
-        'ENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\n'
+    # Collapse any duplicate REQUIRE_BUILD_PROFILE_OPTIMIZE from step 6.
+    updated = re.sub(
+        r'(?:ENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\n)+',
+        'ENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\n',
+        updated,
     )
-    env_trio_quoted = (
-        'ENV NODE_OPTIONS="--max-old-space-size=6144"\n'
-        'ENV PYTHONPATH="/openedx/edx-platform"\n'
-        'ENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\n'
-    )
-    updated = re.sub(rf"(?:{re.escape(env_trio_unquoted)})+", env_trio_unquoted, updated)
-    updated = re.sub(rf"(?:{re.escape(env_trio_quoted)})+", env_trio_quoted, updated)
-    while "ENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\nENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\n" in updated:
-        updated = updated.replace(
-            "ENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\nENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\n",
-            "ENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\n",
-        )
 
     # Webpack config patches
     updated = updated.replace(

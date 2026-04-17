@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# DECOMMISSIONED: GKE (mereka-lms GCP project) was decommissioned and the migration
+# to BBI-K8/RKE2 is complete. This script was the one-shot migration tool; running it
+# again would target a dead source cluster. Retained for historical reference only.
+#
 set -euo pipefail
 
 # Mereka-LMS Migration Script to BBI-K8

@@ -74,6 +74,8 @@ require_cmd() {
 
 is_prod_like_context() {
   local ctx="$1"
+  # NOTE: gke_bbi-k8 and gke-prod patterns are historical (GKE decommissioned).
+  # Active prod context is rke2-prod; add it here if tighter prod-guard is needed.
   [[ "$ctx" == *"gke_bbi-k8"* ]] || [[ "$ctx" == "prod" ]] || [[ "$ctx" == "production" ]] || [[ "$ctx" == "gke-prod" ]]
 }
 
