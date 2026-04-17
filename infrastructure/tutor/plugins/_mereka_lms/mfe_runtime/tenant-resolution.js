@@ -355,3 +355,17 @@ const getMerekaShellCopy = (variant) => {
 };
 
 const getLogoHref = () => getLearnerHomeHref();
+
+// Expose helpers on window so React components compiled into separate webpack
+// chunks can reference them at runtime.  env.config.jsx runs in module scope;
+// without these assignments the functions are invisible to component code.
+if (typeof window !== 'undefined') {
+  window.getMerekaVariant        = getMerekaVariant;
+  window.getMerekaBaseUrl        = getMerekaBaseUrl;
+  window.getMerekaThemeAssetUrl  = getMerekaThemeAssetUrl;
+  window.getMerekaShellCopy      = getMerekaShellCopy;
+  window.getMerekaPublicFooter   = getMerekaPublicFooter;
+  window.getLogoHref             = getLogoHref;
+  window.getLearnerHomeHref      = getLearnerHomeHref;
+  window.getCatalogHref          = getCatalogHref;
+}
