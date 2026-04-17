@@ -668,6 +668,16 @@ jobs:
           image-family: openedx
           release-unit-id: ${{ github.sha }}
 
+      - name: Push OpenEdX build metrics to ci-metrics-receiver
+        # ADR-025 §5 (metrics bridge, trailing push). Populates the cache/layer
+        # gauges in Prometheus that webhook-only delivery cannot fill.
+        if: ${{ always() && hashFiles('build-metrics-openedx.json') != '' }}
+        continue-on-error: true  # Non-blocking: metrics delivery must never block image delivery
+        uses: Biji-Biji-Initiative/bbi-infrastructure/.github/actions/push-build-metrics@main
+        with:
+          metrics-file: build-metrics-openedx.json
+          secret: ${{ secrets.CI_METRICS_WEBHOOK_SECRET }}
+
       - name: Generate image metadata
         id: meta
         run: |
@@ -967,6 +977,15 @@ jobs:
           log-file: var/ci/build-mfe.log
           image-family: mfe
           release-unit-id: ${{ github.sha }}
+
+      - name: Push MFE build metrics to ci-metrics-receiver
+        # ADR-025 §5 (metrics bridge, trailing push).
+        if: ${{ always() && hashFiles('build-metrics-mfe.json') != '' }}
+        continue-on-error: true  # Non-blocking: metrics delivery must never block image delivery
+        uses: Biji-Biji-Initiative/bbi-infrastructure/.github/actions/push-build-metrics@main
+        with:
+          metrics-file: build-metrics-mfe.json
+          secret: ${{ secrets.CI_METRICS_WEBHOOK_SECRET }}
 
       - name: Verify generated MFE runtime contract
         run: |
