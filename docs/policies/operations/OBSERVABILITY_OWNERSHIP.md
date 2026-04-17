@@ -60,7 +60,7 @@ This document defines who owns each observability layer and how changes are sync
 ## Drift Rules
 
 - Do not edit GCP Monitoring objects manually and leave templates stale.
-- Do not add panel-only fixes in VPS Grafana for metrics that should exist in `infrastructure/monitoring/`.
+- Do not add panel-only fixes in the canonical Grafana (`grafana.mereka.dev` / `grafana.mereka.io`) for metrics that should exist in `infrastructure/monitoring/`. The VPS docker-compose Grafana (localhost:3000) is an internal data-plane component only and must not receive operator-facing panels.
 - Keep legacy Cloud SQL templates opt-in only:
   - `INCLUDE_LEGACY_MONITORING=1` for intentional legacy operations.
 

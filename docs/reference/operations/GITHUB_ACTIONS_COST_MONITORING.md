@@ -150,18 +150,22 @@ Caching dependencies reduces build time and minutes consumed.
       ${{ runner.os }}-node-
 ```
 
-**Example: Cache Docker layers**:
+**Example: Cache Docker layers** (ADR-024 compliant — registry cache only):
 ```yaml
+# type=gha is RETIRED per ADR-024. Use GHCR registry refs instead:
 - name: Set up Docker Buildx
   uses: docker/setup-buildx-action@v2
-  with:
-    buildkitd-flags: --cache-to type=gha,mode=max --cache-from type=gha
+# Cache is passed via --cache-from=type=registry,ref=ghcr.io/... in the build step,
+# not via buildkitd-flags. See docker-bake.hcl for the canonical cache-from refs
+# (L0 platform bases at ghcr.io/biji-biji-initiative/platform/cache/<toolchain>-base:latest,
+#  L2 app cache at ghcr.io/biji-biji-initiative/mereka-lms/cache/<family>:main-amd64).
 ```
 
 Current operator rule:
 
 - prefer caching for repeated CI/build lanes when cache correctness is well
   understood
+- use registry-backed cache (`type=registry`) only — `type=gha` is retired per ADR-024
 - do not use cache hit rate as proof that a workflow is healthy; correctness
   still wins over minute savings
 
