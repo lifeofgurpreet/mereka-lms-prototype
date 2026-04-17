@@ -152,7 +152,12 @@ target "openedx-proof" {
     MEREKA_CUSTOM_APP_INSTALL_MODE = "noneditable"
   }
   cache-from = [
-    // L2 — shared GHCR registry cache (authoritative)
+    // L0 — platform-wide shared base-layer cache (ADR-025 §4). buildx
+    // silently skips missing refs, so this is safe to reference before
+    // the platform-bases.yml workflow has published its first images.
+    "type=registry,ref=ghcr.io/biji-biji-initiative/platform/cache/python3.11-base:latest",
+    "type=registry,ref=ghcr.io/biji-biji-initiative/platform/cache/debian-bookworm-base:latest",
+    // L2 — shared GHCR registry cache (app-scoped, authoritative per ADR-024)
     "type=registry,ref=ghcr.io/biji-biji-initiative/mereka-lms/cache/openedx:main-amd64",
     // L3 — final-image fallback (transitional, retire Phase 5)
     "type=registry,ref=${OPENEDX_CACHE_REF}",
@@ -217,7 +222,12 @@ target "mfe-proof" {
   inherits = ["_mfe-common"]
   tags = MFE_PROOF_TAGS
   cache-from = [
-    // L2 — shared GHCR registry cache (authoritative)
+    // L0 — platform-wide shared base-layer cache (ADR-025 §4). MFE builds
+    // use a Node toolchain, so pull the node20 + debian bases. Missing refs
+    // are skipped silently by buildx.
+    "type=registry,ref=ghcr.io/biji-biji-initiative/platform/cache/node20-base:latest",
+    "type=registry,ref=ghcr.io/biji-biji-initiative/platform/cache/debian-bookworm-base:latest",
+    // L2 — shared GHCR registry cache (app-scoped, authoritative per ADR-024)
     "type=registry,ref=ghcr.io/biji-biji-initiative/mereka-lms/cache/mfe:main-amd64",
     // L3 — final-image fallback (transitional, retire Phase 5)
     "type=registry,ref=${MFE_CACHE_REF}",
