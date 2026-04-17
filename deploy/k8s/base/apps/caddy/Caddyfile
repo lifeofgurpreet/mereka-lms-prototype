@@ -230,6 +230,21 @@ http://{$DISCOVERY_HOST} {
         }
     }
 
+    # MFE basename-prefixed theme assets: PARAGON_THEME references /theme/*
+    # relative to document base, so an MFE at /{basename}/ causes the browser
+    # to request /{basename}/theme/core.min.css. Without this handler the SPA
+    # fallback returns index.html (text/html) instead of the CSS file.
+    @mfe_prefixed_theme path_regexp mfe_theme ^/(authn|account|communications|course-authoring|authoring|discussions|gradebook|learner-dashboard|learning|learner-record|ora-grading|profile)/theme/(.+)$
+    handle @mfe_prefixed_theme {
+        rewrite * /theme/{http.regexp.mfe_theme.2}
+        reverse_proxy mfe:8002 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
+        }
+    }
+
     # Route all apps.* traffic through the MFE service. The MFE pod owns the
     # LMS-facing API/auth proxy logic and has the live network path to LMS.
 

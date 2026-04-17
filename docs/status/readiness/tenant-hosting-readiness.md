@@ -13,18 +13,18 @@
 
 | Tenant | Domain | Service | Cluster | Status | SSL |
 |--------|--------|---------|---------|--------|-----|
-| **Mereka Academy** (primary) | `academyv2.mereka.io` | LMS | GKE prod | ✅ Active | Let's Encrypt |
-| Mereka Academy | `studio.academyv2.mereka.io` | CMS/Studio | GKE prod | ✅ Active | Let's Encrypt |
-| Mereka Academy | `apps.academyv2.mereka.io` | MFE | GKE prod | ✅ Active | Let's Encrypt |
-| Mereka Academy | `preview.academyv2.mereka.io` | LMS Preview | GKE prod | ✅ Active | Let's Encrypt |
-| Mereka Academy | `discovery.academyv2.mereka.io` | Course Discovery | GKE prod | ✅ Active | Let's Encrypt |
-| Mereka Academy | `notes.academyv2.mereka.io` | Notes | GKE prod | ✅ Active | Let's Encrypt |
-| Mereka Academy | `credentials.academyv2.mereka.io` | Credentials | GKE prod | ✅ Active | Let's Encrypt |
-| Mereka Academy | `ecommerce.academyv2.mereka.io` | Ecommerce (legacy) | GKE prod | ⚠️ Deprecated | Let's Encrypt |
-| **Biji-Biji** (alt domain) | `academy.biji-biji.com` | LMS | GKE prod | ✅ Active | Let's Encrypt |
-| Biji-Biji | `studio.academy.biji-biji.com` | CMS/Studio | GKE prod | ✅ Active | Let's Encrypt |
-| Biji-Biji | `apps.academy.biji-biji.com` | MFE | GKE prod | ✅ Active | Let's Encrypt |
-| **Skill of Future** (sub-tenant) | `skillourfuture.academy.mereka.io` | LMS | GKE prod | ✅ Active | Let's Encrypt |
+| **Mereka Academy** (primary) | `academyv2.mereka.io` | LMS | rke2-prod | ✅ Active | Let's Encrypt |
+| Mereka Academy | `studio.academyv2.mereka.io` | CMS/Studio | rke2-prod | ✅ Active | Let's Encrypt |
+| Mereka Academy | `apps.academyv2.mereka.io` | MFE | rke2-prod | ✅ Active | Let's Encrypt |
+| Mereka Academy | `preview.academyv2.mereka.io` | LMS Preview | rke2-prod | ✅ Active | Let's Encrypt |
+| Mereka Academy | `discovery.academyv2.mereka.io` | Course Discovery | rke2-prod | ✅ Active | Let's Encrypt |
+| Mereka Academy | `notes.academyv2.mereka.io` | Notes | rke2-prod | ✅ Active | Let's Encrypt |
+| Mereka Academy | `credentials.academyv2.mereka.io` | Credentials | rke2-prod | ✅ Active | Let's Encrypt |
+| Mereka Academy | `ecommerce.academyv2.mereka.io` | Ecommerce (legacy) | rke2-prod | ⚠️ Deprecated | Let's Encrypt |
+| **Biji-Biji** (alt domain) | `academy.biji-biji.com` | LMS | rke2-prod | ✅ Active | Let's Encrypt |
+| Biji-Biji | `studio.academy.biji-biji.com` | CMS/Studio | rke2-prod | ✅ Active | Let's Encrypt |
+| Biji-Biji | `apps.academy.biji-biji.com` | MFE | rke2-prod | ✅ Active | Let's Encrypt |
+| **Skill of Future** (sub-tenant) | `skillourfuture.academy.mereka.io` | LMS | rke2-prod | ✅ Active | Let's Encrypt |
 | **Staging** (RKE2) | `staging.<service>.academyv2.mereka.io` | All | RKE2 nonprod | ⚠️ Live runtime, public DNS publication pending | Pending external DNS/TLS publication |
 | **Dev** (Kind) | `*.localhost` | All | Kind | ✅ Active (local only) | Self-signed |
 

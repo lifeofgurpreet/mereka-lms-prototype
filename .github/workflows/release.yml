@@ -243,7 +243,7 @@ jobs:
         # resolve-image-digest.sh uses 'docker buildx imagetools inspect' which requires
         # GHCR login for private packages.
         env:
-          GHCR_TOKEN: ${{ secrets.ORG_GHCR_TOKEN }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
@@ -282,7 +282,7 @@ jobs:
           GITHUB_APP_INSTALLATION_ID: ${{ secrets.GITOPS_GITHUB_APP_INSTALLATION_ID }}
           GITHUB_APP_PRIVATE_KEY: ${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}
         if: ${{ env.GITHUB_APP_ID != '' && env.GITHUB_APP_PRIVATE_KEY != '' }}
-        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3
         with:
           app-id: ${{ env.GITHUB_APP_ID }}
           private-key: ${{ env.GITHUB_APP_PRIVATE_KEY }}

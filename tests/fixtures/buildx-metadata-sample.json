@@ -1,0 +1,41 @@
+{
+  "buildx.build.provenance": {
+    "mode": "max",
+    "builder": {
+      "id": "buildx_buildkit_mereka_lms0",
+      "driver": "docker-container",
+      "nodes": [
+        {
+          "name": "buildx_buildkit_mereka_lms0",
+          "endpoint": "unix:///var/run/docker.sock",
+          "platforms": "linux/amd64",
+          "driverOpts": null,
+          "files": null
+        }
+      ]
+    },
+    "materials": [
+      {
+        "uri": "pkg:docker/ghcr.io/biji-biji-initiative/mereka-lms/cache/openedx:main-amd64@sha256:a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+        "digest": {
+          "sha256": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"
+        }
+      }
+    ],
+    "buildConfig": {
+      "llbDefinition": []
+    },
+    "metadata": {
+      "buildStartedOn": "2026-04-16T14:58:00Z",
+      "buildFinishedOn": "2026-04-16T15:01:06Z"
+    }
+  },
+  "buildx.build.ref": "buildx_buildkit_mereka_lms0/buildx_buildkit_mereka_lms0",
+  "buildx.build.duration": 186,
+  "containerimage.descriptor": {
+    "mediaType": "application/vnd.oci.image.manifest.v1+json",
+    "digest": "sha256:dfbe7ef31806e7c3f9e4b2a5d3c1a9f8e2b4d6c8a0f2e4d6b8c0a2e4f6b8d0a",
+    "size": 12345
+  },
+  "containerimage.digest": "sha256:dfbe7ef31806e7c3f9e4b2a5d3c1a9f8e2b4d6c8a0f2e4d6b8c0a2e4f6b8d0a"
+}

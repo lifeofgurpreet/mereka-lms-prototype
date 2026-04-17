@@ -130,7 +130,7 @@ This runbook covers the complete process for adding a new tenant's branding to t
 
 1. Add a DNS record in Cloudflare for the tenant's primary domain pointing to the cluster's LoadBalancer IP or Cloudflare Tunnel:
 
-   - For `*.academyv2.mereka.io` subdomains: create a CNAME to the GKE LoadBalancer.
+   - For `*.academyv2.mereka.io` subdomains: create a CNAME / A record to the rke2-prod ingress (or Cloudflare Tunnel if used).
    - For external domains (e.g., `academy.biji-biji.com`): create a CNAME or A record.
    - **Multi-level subdomains** (e.g., `tenant.academyv2.mereka.io`): Cloudflare Free SSL does NOT cover `*.*.mereka.dev`. Use DNS-only (gray cloud) with Let's Encrypt via cert-manager.
 

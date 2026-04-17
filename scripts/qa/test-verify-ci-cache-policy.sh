@@ -107,18 +107,21 @@ from pathlib import Path
 
 bake_file = Path("docker-bake.hcl")
 text = bake_file.read_text(encoding="utf-8")
-text = text.replace('    "type=gha,scope=${OPENEDX_PROOF_GHA_SCOPE}",\n', '', 1)
+# Remove the L2 shared GHCR registry cache ref from openedx-proof cache-from
+text = text.replace(
+    '    "type=registry,ref=ghcr.io/biji-biji-initiative/mereka-lms/cache/openedx:main-amd64",\n',
+    '', 1)
 bake_file.write_text(text, encoding="utf-8")
 PY
 
 if bash scripts/qa/verify-ci-cache-policy.sh >/tmp/test-verify-ci-cache-policy-build.log 2>&1; then
-  echo "Expected cache policy check to fail when OpenEdX build loses gha cache restore."
+  echo "Expected cache policy check to fail when OpenEdX build loses L2 registry cache."
   cat /tmp/test-verify-ci-cache-policy-build.log
   exit 1
 fi
 
-if ! rg -q "openedx-proof resolves GHA cache restore" /tmp/test-verify-ci-cache-policy-build.log; then
-  echo "Expected build drift log to mention the missing OpenEdX GHA cache restore."
+if ! rg -q "openedx-proof resolves L2 shared GHCR registry cache" /tmp/test-verify-ci-cache-policy-build.log; then
+  echo "Expected build drift log to mention the missing L2 GHCR registry cache."
   cat /tmp/test-verify-ci-cache-policy-build.log
   exit 1
 fi

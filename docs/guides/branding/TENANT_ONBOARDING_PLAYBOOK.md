@@ -29,7 +29,7 @@ Related deep-dive docs (read before implementing):
 | Tenant domain | `provision_tenant --domain` | ✅ | `client.academyv2.mereka.io` |
 | Contact email | `provision_tenant --contact-email` | ✅ | `admin@clientcorp.com` |
 | Country | `provision_tenant --country` | ✅ | `MY` |
-| DNS record | Cloudflare + K8s Ingress | ✅ | `client.academyv2.mereka.io → GKE ingress` |
+| DNS record | Cloudflare + K8s Ingress | ✅ | `client.academyv2.mereka.io → rke2-prod ingress` |
 | Caddy host block | `deploy/k8s/base/apps/caddy/Caddyfile` | ✅ | `http://client.academyv2.mereka.io { ... }` |
 | ALLOWED_HOSTS entry | `infrastructure/tutor/apply-patches.sh` | ✅ | Added to CSRF_TRUSTED_ORIGINS list |
 | SITE_VARIANTS entry | `infrastructure/tutor/plugins/mereka_lms.py` | ✅ | `'client.academyv2.mereka.io': { brand: '...', ... }` |
@@ -85,7 +85,7 @@ All three tenants validated live on 2026-02-19:
 
 ### Skillourfuture (`skillourfuture.academy.mereka.io`) Path
 
-1. GKE subdomain under `academyv2.mereka.io` — same wildcard cert
+1. Subdomain under `academyv2.mereka.io` on rke2-prod — same wildcard cert
 2. `SITE_VARIANTS` entry: `{ brand: 'Skill Our Future Academy', copyrightHolder: 'MEREKA', whatsapp: '601135271981' }`
 3. Themed logo URL confirmed serving (homepage_logo_url contains `skillourfuture` hostname)
 4. MFE config serves correctly via `/api/mfe_config/v1`
@@ -196,7 +196,7 @@ Use this checklist when handing off a new tenant from engineering to operations.
 ### Pre-Handoff (Engineering completes)
 
 - [ ] `provision_tenant.sh` run successfully (idempotent, no errors)
-- [ ] DNS record live and resolving to GKE ingress
+- [ ] DNS record live and resolving to rke2-prod ingress
 - [ ] Caddy host block deployed and routing correctly (`curl -I https://new-tenant.domain/`)
 - [ ] `SITE_VARIANTS` entry in `mereka_lms.py` merged and deployed
 - [ ] Logo assets in theme static dir or ConfigMap (logo.png, favicon.ico)

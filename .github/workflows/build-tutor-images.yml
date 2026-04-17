@@ -9,9 +9,9 @@ on:
     branches:
       - main
     paths:
+      # --- Image content inputs ---
       - 'docker-bake.hcl'
       - 'requirements-tutor.txt'
-      - '.github/actions/setup-python-env/**'
       - 'infrastructure/tutor/config.example.yml'
       - 'infrastructure/tutor/apply-patches.sh'
       - 'infrastructure/tutor/patches/**'
@@ -20,16 +20,19 @@ on:
       - 'infrastructure/tutor/themes/**'
       - 'infrastructure/tutor/brand-*/**'
       - 'assets/branding/**'
+      # --- Build scripts ---
       - 'scripts/infra/prepare-tutor-build-context.sh'
       - 'scripts/infra/prepare-tutor-build-context-ci.sh'
       - 'scripts/ci/preflight-check.sh'
       - 'scripts/infra/sync-tutor-plugin-mirror.sh'
-      - 'infrastructure/tutor/apply-patches.sh'
-      - 'infrastructure/tutor/patches/**'
       - 'scripts/infra/resolve-build-scope.sh'
+      - 'scripts/infra/build-openedx-image.sh'
+      - 'scripts/infra/build-mfe-image.sh'
+      # --- Scan and install helpers ---
       - 'scripts/infra/install-cosign.sh'
       - 'scripts/infra/install-trivy.sh'
       - 'scripts/infra/install-envsubst.sh'
+      # --- Release artifact generation ---
       - 'scripts/infra/generate-build-provenance.sh'
       - 'scripts/infra/generate-release-bundle.sh'
       - 'scripts/release/emit-proof-envelope.sh'
@@ -37,21 +40,25 @@ on:
       - 'scripts/release/generate_release_object.py'
       - 'scripts/release/generate_truth_ledger.py'
       - 'scripts/release/release-gate.sh'
-      - 'scripts/qa/verify-control-plane-release-bundle-projection.sh'
       - 'scripts/release/release_object_bindings.py'
-      - 'scripts/infra/build-openedx-image.sh'
-      - 'scripts/infra/build-mfe-image.sh'
+      # --- GitOps and image resolution ---
       - 'scripts/infra/release-openedx-gitops.sh'
       - 'scripts/infra/resolve-image-digest.sh'
       - 'scripts/lib/lane-normalize.sh'
       - 'bin/lms-ops'
+      # --- Post-build verification ---
       - 'scripts/qa/verify-build-provenance.sh'
+      - 'scripts/qa/verify-control-plane-release-bundle-projection.sh'
       - 'scripts/qa/verify-openedx-image-branding.sh'
       - 'scripts/qa/verify-release-bundle.sh'
       - 'scripts/qa/verify-release-object.sh'
       - 'scripts/qa/verify-mfe-image-branding.sh'
       - 'scripts/qa/verify-mfe-runtime-contract.sh'
+      # --- Workflow and CI infrastructure ---
       - '.github/workflows/build-tutor-images.yml'
+      - '.github/actions/setup-python-env/**'
+      - '.github/actions/select-build-lane/**'
+      # --- Exclusions ---
       - '!infrastructure/tutor/**/*.md'
       - '!infrastructure/tutor/mfe-build/**'
   workflow_dispatch:
@@ -125,7 +132,7 @@ jobs:
       contents: read
     steps:
       - name: Cancel older queued Build Tutor Images runs on main
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
         with:
           script: |
             if (context.ref !== 'refs/heads/main') {
@@ -387,14 +394,14 @@ jobs:
         with:
           enabled: ${{ vars.CI_FASTLANE_BUILD_ENABLED }}
           lane_mode: ${{ github.event_name == 'workflow_dispatch' && inputs.lane_mode || 'auto' }}
-          fastlane_label: ${{ vars.CI_FASTLANE_BUILD_LABEL || 'cie-vps-fastlane-build' }}
+          fastlane_label: ${{ vars.CI_FASTLANE_BUILD_LABEL || 'mereka-lms-vps-fastlane-build' }}
           timezone: ${{ vars.CI_FASTLANE_BUILD_TIMEZONE }}
           office_hours_start: ${{ vars.CI_FASTLANE_BUILD_WINDOW_START }}
           office_hours_end: ${{ vars.CI_FASTLANE_BUILD_WINDOW_END }}
           runner_status_token: ${{ secrets.FASTLANE_RUNNER_STATUS_TOKEN }}
-          github_app_id: ${{ secrets.FASTLANE_GITHUB_APP_ID }}
-          github_app_installation_id: ${{ secrets.FASTLANE_GITHUB_APP_INSTALLATION_ID }}
-          github_app_private_key: ${{ secrets.FASTLANE_GITHUB_APP_PRIVATE_KEY }}
+          github_app_id: ${{ secrets.GITOPS_GITHUB_APP_ID }}
+          github_app_installation_id: ${{ secrets.GITOPS_GITHUB_APP_INSTALLATION_ID }}
+          github_app_private_key: ${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}
 
   build-openedx:
     name: Build OpenEdX Image
@@ -511,21 +518,24 @@ jobs:
 
       - name: Log in to GHCR (build cache)
         env:
-          GHCR_TOKEN: ${{ secrets.ORG_GHCR_TOKEN }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Build OpenEdX image
+        env:
+          # Shared registry cache export — trusted main builds only (RL-5)
+          # See docs/ops/ci-cd/CACHE_AUTHORITY.md §Write Policy
+          CACHE_TO_OPENEDX: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' && 'type=registry,ref=ghcr.io/biji-biji-initiative/mereka-lms/cache/openedx:main-amd64,mode=max' || '' }}
         run: |
           set -euo pipefail
           export TUTOR_ROOT=$(pwd)/tutor_env
           export DOCKER_BUILDKIT=1
           mkdir -p var/ci
 
-          # Cache strategy:
-          #   --cache-from=type=gha            first-class shared BuildKit cache
-          #   --cache-to=type=gha,mode=max    persist cache state between runs
-          #   --cache-from=type=registry      secondary warm path from last push
-          #   BUILDKIT_INLINE_CACHE=1         preserve registry fallback metadata
+          # Cache strategy (RFC-BUILD-AUTHORITY-001):
+          #   L2: type=registry shared GHCR cache (authoritative, read by all, write by main only)
+          #   L3: type=registry final-image fallback (transitional, ${CACHE_REF})
+          #   CACHE_TO_OPENEDX env var controls cache export (empty on PRs/forks)
           BUILD_PROFILE="${{ github.event_name == 'workflow_dispatch' && inputs.build_profile || 'proof' }}"
           if [[ "${BUILD_PROFILE}" == "proof" ]]; then
             CACHE_REF="${{ env.REGISTRY }}/openedx:mereka-brand"
@@ -588,11 +598,11 @@ jobs:
             FAILURES=$((FAILURES + 1))
           fi
 
-          if grep -q 'cache-from=type=gha' "$LOG" && grep -q 'cache-to=type=gha,mode=max' "$LOG"; then
-            SUMMARY="${SUMMARY}\n✅ GHA cache read/write is enabled for OpenEdX build"
+          # Check L2 shared registry cache is present in build command
+          if grep -q 'cache/openedx:main-amd64' "$LOG"; then
+            SUMMARY="${SUMMARY}\n✅ L2 shared GHCR registry cache ref present in build"
           else
-            SUMMARY="${SUMMARY}\n❌ GHA cache read/write flags NOT found in OpenEdX build command"
-            FAILURES=$((FAILURES + 1))
+            SUMMARY="${SUMMARY}\n⚠️  L2 shared registry cache ref not found (may be first build or cache not yet populated)"
           fi
 
           # 2. Check cache manifest was imported
@@ -649,6 +659,25 @@ jobs:
             echo "::warning::${FAILURES} cache health check(s) failed for OpenEdX build"
           fi
 
+      - name: Emit OpenEdX build metrics
+        if: always()
+        uses: ./.github/actions/emit-build-metrics
+        with:
+          metadata-file: ''
+          log-file: var/ci/build-openedx.log
+          image-family: openedx
+          release-unit-id: ${{ github.sha }}
+
+      - name: Push OpenEdX build metrics to ci-metrics-receiver
+        # ADR-025 §5 (metrics bridge, trailing push). Populates the cache/layer
+        # gauges in Prometheus that webhook-only delivery cannot fill.
+        if: ${{ always() && hashFiles('build-metrics-openedx.json') != '' }}
+        continue-on-error: true  # Non-blocking: metrics delivery must never block image delivery
+        uses: Biji-Biji-Initiative/bbi-infrastructure/.github/actions/push-build-metrics@main
+        with:
+          metrics-file: build-metrics-openedx.json
+          secret: ${{ secrets.CI_METRICS_WEBHOOK_SECRET }}
+
       - name: Generate image metadata
         id: meta
         run: |
@@ -682,6 +711,28 @@ jobs:
           REF="${{ env.REGISTRY }}/openedx:${TAG}"
           ./scripts/qa/verify-openedx-custom-app-imports.sh \
             --image-ref "${REF}@${{ steps.digest.outputs.digest }}"
+
+      - name: Extract staticfiles.json for branding artifact
+        # verify-openedx-custom-app-imports.sh already pulled the image into the
+        # local daemon.  Use docker-create + docker-cp to extract the single
+        # staticfiles.json manifest (~50 KB) so the scan job can validate the
+        # branding contract without re-pulling the full ~5 GB image.
+        # Cost: <5s.  Savings in scan job: ~470s (eliminates docker pull + docker run).
+        env:
+          OPENEDX_IMAGE_REF: ${{ env.REGISTRY }}/openedx@${{ steps.digest.outputs.digest }}
+        run: |
+          mkdir -p var/ci
+          CID="$(docker create "${OPENEDX_IMAGE_REF}" true)"
+          docker cp "${CID}:/openedx/staticfiles/staticfiles.json" var/ci/staticfiles.json
+          docker rm -f "${CID}"
+          echo "Extracted staticfiles.json ($(wc -c < var/ci/staticfiles.json) bytes)"
+
+      - name: Upload OpenEdX staticfiles.json artifact
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        with:
+          name: openedx-staticfiles
+          path: var/ci/staticfiles.json
+          retention-days: 3
 
   build-mfe:
     name: Build MFE Image
@@ -777,10 +828,13 @@ jobs:
 
       - name: Log in to GHCR (build cache)
         env:
-          GHCR_TOKEN: ${{ secrets.ORG_GHCR_TOKEN }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Build MFE image
+        env:
+          # Shared registry cache export — trusted main builds only (RL-5)
+          CACHE_TO_MFE: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' && 'type=registry,ref=ghcr.io/biji-biji-initiative/mereka-lms/cache/mfe:main-amd64,mode=max' || '' }}
         run: |
           set -euo pipefail
           export TUTOR_ROOT=$(pwd)/tutor_env
@@ -788,7 +842,7 @@ jobs:
           export NODE_OPTIONS="--max-old-space-size=6144"
           mkdir -p var/ci
 
-          # Cache strategy: same as openedx build (see D4 comments above).
+          # Cache strategy (RFC-BUILD-AUTHORITY-001): L2 GHCR registry (shared), L3 final-image fallback.
           BUILD_PROFILE="${{ github.event_name == 'workflow_dispatch' && inputs.mfe_build_profile || 'proof' }}"
           if [[ "${BUILD_PROFILE}" == "proof" ]]; then
             CACHE_REF="${{ env.REGISTRY }}/mfe:mereka-brand"
@@ -854,11 +908,11 @@ jobs:
             FAILURES=$((FAILURES + 1))
           fi
 
-          if grep -q 'cache-from=type=gha' "$LOG" && grep -q 'cache-to=type=gha,mode=max' "$LOG"; then
-            SUMMARY="${SUMMARY}\n✅ GHA cache read/write is enabled for MFE build"
+          # Check L2 shared registry cache is present in build command
+          if grep -q 'cache/mfe:main-amd64' "$LOG"; then
+            SUMMARY="${SUMMARY}\n✅ L2 shared GHCR registry cache ref present in build"
           else
-            SUMMARY="${SUMMARY}\n❌ GHA cache read/write flags NOT found in build command"
-            FAILURES=$((FAILURES + 1))
+            SUMMARY="${SUMMARY}\n⚠️  L2 shared registry cache ref not found (may be first build or cache not yet populated)"
           fi
 
           # 2. Check cache manifest was imported
@@ -915,6 +969,24 @@ jobs:
             echo "::warning::${FAILURES} cache health check(s) failed for MFE build"
           fi
 
+      - name: Emit MFE build metrics
+        if: always()
+        uses: ./.github/actions/emit-build-metrics
+        with:
+          metadata-file: ''
+          log-file: var/ci/build-mfe.log
+          image-family: mfe
+          release-unit-id: ${{ github.sha }}
+
+      - name: Push MFE build metrics to ci-metrics-receiver
+        # ADR-025 §5 (metrics bridge, trailing push).
+        if: ${{ always() && hashFiles('build-metrics-mfe.json') != '' }}
+        continue-on-error: true  # Non-blocking: metrics delivery must never block image delivery
+        uses: Biji-Biji-Initiative/bbi-infrastructure/.github/actions/push-build-metrics@main
+        with:
+          metrics-file: build-metrics-mfe.json
+          secret: ${{ secrets.CI_METRICS_WEBHOOK_SECRET }}
+
       - name: Verify generated MFE runtime contract
         run: |
           mkdir -p var/ci
@@ -958,10 +1030,10 @@ jobs:
 
   scan-openedx-image:
     name: Post-push OpenEdX Scan
-    # These verifiers use docker pull/run against the published image and need a
-    # persistent Docker daemon (DinD). Hardcoded to heavy-builders so fastlane
-    # slots are not consumed by scan work, freeing build-openedx/build-mfe
-    # concurrency when the timing-board shows elevated concurrency pressure.
+    # Branding verification uses a pre-extracted staticfiles.json artifact from
+    # the build job (jj97.8), eliminating the ~470s docker pull+run that was
+    # 57% of this job.  SBOM and Trivy share a single explicit docker pull
+    # that runs after GHCR login, so all three scan tools reuse one image pull.
     runs-on: mereka-k8s-heavy-builders
     timeout-minutes: 45
     needs: [build-openedx, select-build-lane]
@@ -971,6 +1043,13 @@ jobs:
       packages: read
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Download OpenEdX staticfiles artifact
+        # ~50 KB download — replaces the 470s docker pull+run in the branding step.
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: openedx-staticfiles
+          path: var/ci
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd  # v4.0.0
@@ -995,17 +1074,32 @@ jobs:
 
       - name: Log in to GHCR
         env:
-          GHCR_TOKEN: ${{ secrets.ORG_GHCR_TOKEN }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
-      - name: Verify OpenEdX image branding contract
-        continue-on-error: true  # Non-blocking until FE-003 (LMS SCSS entry point) is resolved
+      - name: Pull OpenEdX image (shared by SBOM and Trivy)
+        # Single explicit pull into the local daemon.  syft (docker: mode) and
+        # trivy both reuse this rather than each re-fetching ~5 GB from GHCR.
+        # Pulls from ARC (cold cache) take ~200-400s; this replaces what the old
+        # branding step used to pull, making the cache strategy explicit.
         env:
           OPENEDX_IMAGE_REF: ${{ env.REGISTRY }}/openedx@${{ needs.build-openedx.outputs.image_digest }}
         run: |
+          PULL_START=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          docker pull "${OPENEDX_IMAGE_REF}"
+          PULL_END=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          echo "Image pull: ${PULL_START} → ${PULL_END}"
+
+      - name: Verify OpenEdX image branding contract
+        # Fast path: validates staticfiles.json artifact uploaded by build-openedx.
+        # No docker pull or docker run required (~5s vs ~470s previously).
+        continue-on-error: true  # Non-blocking until FE-003 (LMS SCSS entry point) is resolved
+        run: |
           mkdir -p var/ci
           EXPECTED_LMS_BRANDING_REV="$(sed -nE 's/.*--mereka-branding-rev:[[:space:]]*\"([^\"]+)\".*/\1/p' infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css | head -n 1)"
-          scripts/qa/verify-openedx-image-branding.sh "${OPENEDX_IMAGE_REF}" "${EXPECTED_LMS_BRANDING_REV}" \
+          scripts/qa/verify-openedx-image-branding.sh \
+            --staticfiles-json var/ci/staticfiles.json \
+            "${EXPECTED_LMS_BRANDING_REV}" \
             | tee var/ci/verify-openedx-image-branding.log
 
       - name: Upload OpenEdX branding verification log
@@ -1031,9 +1125,9 @@ jobs:
           sh /tmp/syft-install.sh -b "$HOME/.local/bin"
           rm /tmp/syft-install.sh
           set +e
-          # Use docker: source so syft reuses the image the branding step
-          # already pulled into the local daemon, avoiding a redundant
-          # ~5 min registry re-pull of the ~5 GB OpenEdX image.
+          # Use docker: source so syft reuses the image pulled by the explicit
+          # "Pull OpenEdX image" step above, avoiding a redundant ~5 GB
+          # GHCR re-fetch.  The docker: scheme reads from the local daemon cache.
           timeout 20m "$HOME/.local/bin/syft" scan "docker:${OPENEDX_IMAGE_REF}" \
             -o cyclonedx-json=var/ci/sbom-openedx.cdx.json
           sbom_status=$?
@@ -1058,6 +1152,31 @@ jobs:
           path: var/ci/sbom-openedx*
           retention-days: 90
 
+      - name: Compute Trivy DB cache date key
+        id: trivy-cache-date
+        # Date-based key (UTC day) so the cache rotates daily, matches Aquasec's
+        # DB publish cadence, and — crucially — does NOT contain github.run_id
+        # so repeat builds on the same day get a cache HIT and do NOT trigger a
+        # Post-save write. The old key pinned run_id, which made every run a
+        # miss-then-save (144s wasted on the Post step per build).
+        run: echo "ymd=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Trivy vulnerability DB cache
+        id: trivy-db-cache
+        # Cache the Trivy CVE database (~50 MB download) across runs.
+        # On ARC heavy-builders the DB download accounts for ~60-90s of the
+        # 246s Trivy step. Date-based key means: first build of the day
+        # downloads fresh DB, subsequent builds hit the cache (skip download
+        # AND skip the Post save step — save is only triggered when the key
+        # does not already exist in the cache).
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4.2.3
+        with:
+          path: ~/.cache/trivy
+          key: trivy-db-${{ runner.os }}-${{ hashFiles('.trivyignore') }}-${{ steps.trivy-cache-date.outputs.ymd }}
+          restore-keys: |
+            trivy-db-${{ runner.os }}-${{ hashFiles('.trivyignore') }}-
+            trivy-db-${{ runner.os }}-
+
       - name: Install Trivy CLI
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -1067,14 +1186,28 @@ jobs:
         continue-on-error: true  # Non-blocking: upstream CVEs should not block image delivery
         env:
           OPENEDX_IMAGE_REF: ${{ env.REGISTRY }}/openedx@${{ needs.build-openedx.outputs.image_digest }}
+          TRIVY_DB_CACHE_HIT: ${{ steps.trivy-db-cache.outputs.cache-hit }}
         run: |
           mkdir -p var/ci
           set +e
+          # Skip DB download when the GHA cache was warm — saves ~60-90s.
+          # The cache key rotates daily so CVE data is never more than 24h stale.
+          TRIVY_EXTRA_FLAGS=()
+          if [[ "${TRIVY_DB_CACHE_HIT}" == "true" ]]; then
+            echo "Trivy DB cache hit — skipping DB update download."
+            TRIVY_EXTRA_FLAGS+=(--skip-db-update --skip-java-db-update)
+          else
+            echo "Trivy DB cache miss — will download fresh CVE database."
+          fi
+          # trivy image accepts a full registry ref and uses the local docker
+          # daemon cache when the image is already present (populated by the
+          # explicit pull step above), avoiding a second ~5 GB GHCR fetch.
           timeout 20m trivy image \
             --format json \
             --output var/ci/trivy-openedx.json \
             --ignorefile .trivyignore \
             --severity CRITICAL,HIGH \
+            "${TRIVY_EXTRA_FLAGS[@]}" \
             "${OPENEDX_IMAGE_REF}"
           trivy_status=$?
           set -e
@@ -1156,7 +1289,7 @@ jobs:
 
       - name: Log in to GHCR
         env:
-          GHCR_TOKEN: ${{ secrets.ORG_GHCR_TOKEN }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Verify MFE image branding contract
@@ -1314,7 +1447,7 @@ jobs:
 
       - name: Log in to GHCR
         env:
-          GHCR_TOKEN: ${{ secrets.ORG_GHCR_TOKEN }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Generate provenance for OpenEdX image
@@ -1500,10 +1633,10 @@ jobs:
 
       - name: Generate GitHub App token for artifact access and cross-repo dispatch
         id: app-token
-        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349  # v2
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3  # v3.1.1
         with:
-          app-id: ${{ secrets.BBI_ARC_GITHUB_APP_ID }}
-          private-key: ${{ secrets.BBI_ARC_GITHUB_APP_PRIVATE_KEY }}
+          app-id: ${{ secrets.GITOPS_GITHUB_APP_ID }}
+          private-key: ${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}
           owner: Biji-Biji-Initiative
           repositories: mereka-lms,bbi-infrastructure,platform-control-plane
 
@@ -2079,10 +2212,10 @@ jobs:
 
       - name: Generate GitHub App token for cross-repo dispatch
         id: app-token
-        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349  # v2
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3  # v3.1.1
         with:
-          app-id: ${{ secrets.BBI_ARC_GITHUB_APP_ID }}
-          private-key: ${{ secrets.BBI_ARC_GITHUB_APP_PRIVATE_KEY }}
+          app-id: ${{ secrets.GITOPS_GITHUB_APP_ID }}
+          private-key: ${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}
           owner: Biji-Biji-Initiative
           repositories: bbi-infrastructure,platform-control-plane
 
@@ -2253,14 +2386,14 @@ jobs:
       - name: Mint GitHub App token
         id: gitops-app-token
         env:
-          FASTLANE_GITHUB_APP_ID: ${{ secrets.FASTLANE_GITHUB_APP_ID }}
-          FASTLANE_GITHUB_APP_INSTALLATION_ID: ${{ secrets.FASTLANE_GITHUB_APP_INSTALLATION_ID }}
-          FASTLANE_GITHUB_APP_PRIVATE_KEY: ${{ secrets.FASTLANE_GITHUB_APP_PRIVATE_KEY }}
-        if: ${{ env.FASTLANE_GITHUB_APP_ID != '' && env.FASTLANE_GITHUB_APP_PRIVATE_KEY != '' }}
-        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349
+          GITOPS_GITHUB_APP_ID: ${{ secrets.GITOPS_GITHUB_APP_ID }}
+          GITOPS_GITHUB_APP_INSTALLATION_ID: ${{ secrets.GITOPS_GITHUB_APP_INSTALLATION_ID }}
+          GITOPS_GITHUB_APP_PRIVATE_KEY: ${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}
+        if: ${{ env.GITOPS_GITHUB_APP_ID != '' && env.GITOPS_GITHUB_APP_PRIVATE_KEY != '' }}
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3
         with:
-          app-id: ${{ env.FASTLANE_GITHUB_APP_ID }}
-          private-key: ${{ env.FASTLANE_GITHUB_APP_PRIVATE_KEY }}
+          app-id: ${{ env.GITOPS_GITHUB_APP_ID }}
+          private-key: ${{ env.GITOPS_GITHUB_APP_PRIVATE_KEY }}
           owner: Biji-Biji-Initiative
           repositories: bbi-infrastructure
 

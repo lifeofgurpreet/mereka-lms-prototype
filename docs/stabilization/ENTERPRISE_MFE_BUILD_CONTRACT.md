@@ -43,11 +43,17 @@ Recovery: manually trigger the upstream Open edX MFE build pipeline first, then 
 
 ## Cache Truth
 
-Build cache uses GitHub Actions cache (`type=gha`). This is managed entirely by the reusable workflow and is transparent to the Dockerfile.
+Build cache uses GHCR registry cache (`type=registry`, per ADR-024). The enterprise
+MFE builds are derivative images and operate at L2 (app cache) only — they do not
+consume the L0 platform-base caches. This is managed entirely by the reusable
+workflow and is transparent to the Dockerfile.
+
+Note: `type=gha` (GitHub Actions cache) is retired for image builds per ADR-024 and
+must not be reintroduced. Registry-backed cache is the only authorised form.
 
 **Cache miss behavior**: Build runs without cache — slower but never fails. Cache is optional acceleration, never a hard dependency.
 
-**Cache location**: GitHub Actions cache scoped to the repository and branch.
+**Cache location**: GHCR registry ref scoped to the repository and branch (L2 app cache).
 
 The Dockerfiles contain zero cache-related directives. Cache is a workflow concern, not a Dockerfile concern.
 

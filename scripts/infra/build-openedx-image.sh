@@ -147,6 +147,12 @@ fi
 if [[ "$BUILD_PROFILE" == "proof" ]]; then
   BAKE_ENV+=("OPENEDX_PROOF_GHA_SCOPE=${GHA_SCOPE}")
 fi
+# Shared registry cache export — only propagated when CACHE_TO_OPENEDX is set
+# (trusted main builds set this; all others leave it empty = no cache export)
+# See docs/ops/ci-cd/CACHE_AUTHORITY.md and RFC-BUILD-AUTHORITY-001 §Cache Write Policy
+if [[ -n "${CACHE_TO_OPENEDX:-}" ]]; then
+  BAKE_ENV+=("CACHE_TO_OPENEDX=${CACHE_TO_OPENEDX}")
+fi
 
 if [[ "$OUTPUT_MODE" == "push" ]]; then
   printf 'env'

@@ -60,7 +60,7 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 15
             failureThreshold: 3
-            timeoutSeconds: 5
+            timeoutSeconds: 15
           readinessProbe:
             httpGet:
               path: /health/
@@ -68,7 +68,7 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 15
             failureThreshold: 3
-            timeoutSeconds: 5
+            timeoutSeconds: 15
           securityContext:
             allowPrivilegeEscalation: false
       volumes:

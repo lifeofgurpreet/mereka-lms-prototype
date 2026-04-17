@@ -49,7 +49,7 @@ The platform requires analytics capabilities for learning insights (enrollments,
 - Superset + Superset Worker (visualization)
 - Estimated operational overhead: 3-5 hours/month (upgrades, schema evolution, query optimization)
 - Storage costs: ~$50/month for 90-day retention with compression
-- Compute costs: Additional pods in GKE cluster
+- Compute costs: Additional pods in the RKE2 cluster
 
 ## Decision
 

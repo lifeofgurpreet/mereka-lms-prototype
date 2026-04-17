@@ -267,7 +267,7 @@ jobs:
           tar -C tutor_env/env/build -xzf var/ci/openedx-build-context.tgz
       - name: Verify OpenEdX build cache health
         run: |
-          SUMMARY="${SUMMARY}\n✅ GHA cache read/write is enabled for OpenEdX build"
+          SUMMARY="${SUMMARY}\n✅ L2 shared GHCR registry cache ref present in build"
       - name: Build OpenEdX image
         run: |
           BUILD_PROFILE="proof"
@@ -882,10 +882,10 @@ text = p.read_text()
 text = text.replace(
     '      - name: Verify OpenEdX build cache health\n'
     '        run: |\n'
-    '          SUMMARY="${SUMMARY}\\n✅ GHA cache read/write is enabled for OpenEdX build"\n',
+    '          SUMMARY="${SUMMARY}\\n✅ L2 shared GHCR registry cache ref present in build"\n',
     '      - name: Verify OpenEdX build cache health\n'
     '        run: |\n'
-    '          SUMMARY="${SUMMARY}\\n❌ GHA cache read/write flags NOT found in OpenEdX build command"\n',
+    '          SUMMARY="${SUMMARY}\\n✅ GHA cache read/write is enabled for OpenEdX build"\n',
 )
 p.write_text(text)
 PY

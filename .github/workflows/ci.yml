@@ -125,13 +125,13 @@ jobs:
           # runner exists and is idle, which leaves required Tutor checks stuck
           # behind the generic ARC queue.
           lane_mode: fastlane
-          fastlane_label: ${{ vars.CI_FASTLANE_CI_LABEL || 'cie-vps-fastlane-ci' }}
+          fastlane_label: ${{ vars.CI_FASTLANE_CI_LABEL || 'mereka-lms-vps-fastlane-ci' }}
           routing_policy: lms_ci_prefer_fastlane
           fallback_label: mereka-k8s-runners
           runner_status_token: ${{ secrets.FASTLANE_RUNNER_STATUS_TOKEN }}
-          github_app_id: ${{ secrets.FASTLANE_GITHUB_APP_ID }}
-          github_app_installation_id: ${{ secrets.FASTLANE_GITHUB_APP_INSTALLATION_ID }}
-          github_app_private_key: ${{ secrets.FASTLANE_GITHUB_APP_PRIVATE_KEY }}
+          github_app_id: ${{ secrets.GITOPS_GITHUB_APP_ID }}
+          github_app_installation_id: ${{ secrets.GITOPS_GITHUB_APP_INSTALLATION_ID }}
+          github_app_private_key: ${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}
           allow_push_main: true
           allow_workflow_dispatch: true
           allow_pull_request: true
@@ -886,7 +886,7 @@ jobs:
 
       - name: Post PR comment with spec verification summary
         if: always() && github.event_name == 'pull_request'
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd  # v8.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
         with:
           script: |
             const fs = require('fs');

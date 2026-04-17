@@ -99,10 +99,10 @@
 | Capability | Status | Environment | Verification | Notes |
 |-----------|--------|-------------|--------------|-------|
 | **Prometheus Metrics** | DEPLOYED | prod+dev | ServiceMonitors in deploy/k8s/base/monitoring/ | Spec: observability-stack_spec.md (completed) |
-| **Grafana Dashboards** | DEPLOYED | prod | External VPS | https://grafana.mereka.dev |
+| **Grafana Dashboards** | DEPLOYED | prod+dev | kube-prometheus-stack (bbi-infrastructure) | prod: https://grafana.mereka.io · dev: https://grafana.mereka.dev |
 | **Loki Log Aggregation** | DEPLOYED | prod+dev | Promtail DaemonSet deployed | Spec: observability-stack_spec.md (completed) |
-| **Tempo Distributed Tracing** | DEPLOYED | prod | External VPS | https://tempo.mereka.dev |
-| **Alertmanager** | DEPLOYED | prod | External VPS | https://alertmanager.mereka.dev |
+| **Tempo Distributed Tracing** | DEPLOYED | prod+dev | VPS docker-compose datasource | https://tempo.mereka.dev (datasource only; canonical UI is Grafana) |
+| **Alertmanager** | DEPLOYED | prod+dev | kube-prometheus-stack (bbi-infrastructure) | https://alertmanager.mereka.dev |
 | **PrometheusRules** | DEPLOYED | prod+dev | 5 rule files in deploy/k8s/base/monitoring/ | Auth, LMS, Enterprise, Velero, SLO |
 | **Velero Backups** | DEPLOYED | prod | GCS backend | Disaster recovery. Spec: disaster-recovery-business-continuity_spec.md (completed) |
 | **Secrets (ExternalSecrets)** | DEPLOYED | prod+dev | Synced from Infisical → GCP SM → K8s | Spec: secrets-management_spec.md (completed) |
@@ -283,7 +283,7 @@ curl -I https://academyv2.mereka.io
 curl -I https://studio.academyv2.mereka.io
 curl -I https://apps.academyv2.mereka.io/authn/login
 
-# Check monitoring stack (external VPS)
+# Check canonical Grafana (kube-prometheus-stack via bbi-infrastructure)
 curl -I https://grafana.mereka.dev
 curl -I https://prometheus.mereka.dev
 curl -I https://loki.mereka.dev
@@ -301,7 +301,7 @@ curl -I https://loki.mereka.dev
 
 4. **HubSpot integration** is deferred for registration flow but webhook service exists for purchase-gateway.
 
-5. **Observability stack** (Prometheus/Tempo/Loki/Grafana/Alertmanager) is deployed on an external VPS at *.mereka.dev, not in the K8s cluster.
+5. **Observability stack**: Canonical Grafana/Alertmanager/Prometheus run in the K8s cluster via kube-prometheus-stack (managed by `bbi-infrastructure`). VPS docker-compose services at *.mereka.dev (Prometheus, Loki, Tempo, Alertmanager) are datasource components — their data is surfaced through the canonical Grafana instances (`grafana.mereka.dev` for dev, `grafana.mereka.io` for prod). The VPS docker-compose Grafana itself (localhost:3000) is an internal/legacy component only.
 
 6. **All K8s manifests** are managed via Kustomize in `deploy/k8s/base/` with overlays for local and production environments.
 

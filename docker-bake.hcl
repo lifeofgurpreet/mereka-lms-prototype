@@ -41,6 +41,12 @@ variable "OPENEDX_PROOF_GHA_SCOPE" {
   default = "tutor-openedx-proof"
 }
 
+// Shared GHCR registry cache refs (L2 — authoritative)
+// See docs/ops/ci-cd/CACHE_AUTHORITY.md and ADR-024
+variable "CACHE_TO_OPENEDX" {
+  default = ""  // Empty = no cache export; set by workflow on trusted main only
+}
+
 variable "MFE_CONTEXT" {
   default = "tutor_env/env/plugins/mfe/build/mfe"
 }
@@ -96,6 +102,10 @@ variable "MFE_PROOF_GHA_SCOPE" {
   default = "tutor-openedx-mfe-proof"
 }
 
+variable "CACHE_TO_MFE" {
+  default = ""  // Empty = no cache export; set by workflow on trusted main only
+}
+
 variable "LOCAL_CACHE_DIR" {
   default = ".buildx-cache"
 }
@@ -142,11 +152,19 @@ target "openedx-proof" {
     MEREKA_CUSTOM_APP_INSTALL_MODE = "noneditable"
   }
   cache-from = [
-    "type=gha,scope=${OPENEDX_PROOF_GHA_SCOPE}",
+    // L0 — platform-wide shared base-layer cache (ADR-025 §4). buildx
+    // silently skips missing refs, so this is safe to reference before
+    // the platform-bases.yml workflow has published its first images.
+    "type=registry,ref=ghcr.io/biji-biji-initiative/platform/cache/python3.11-base:latest",
+    "type=registry,ref=ghcr.io/biji-biji-initiative/platform/cache/debian-bookworm-base:latest",
+    // L2 — shared GHCR registry cache (app-scoped, authoritative per ADR-024)
+    "type=registry,ref=ghcr.io/biji-biji-initiative/mereka-lms/cache/openedx:main-amd64",
+    // L3 — final-image fallback (transitional, retire Phase 5)
     "type=registry,ref=${OPENEDX_CACHE_REF}",
   ]
   cache-to = [
-    "type=gha,mode=max,scope=${OPENEDX_PROOF_GHA_SCOPE}",
+    // Set via CACHE_TO_OPENEDX env; empty on non-main builds (RL-5)
+    "${CACHE_TO_OPENEDX}",
   ]
   labels = {
     "io.mereka.build-profile" = "proof"
@@ -204,11 +222,19 @@ target "mfe-proof" {
   inherits = ["_mfe-common"]
   tags = MFE_PROOF_TAGS
   cache-from = [
-    "type=gha,scope=${MFE_PROOF_GHA_SCOPE}",
+    // L0 — platform-wide shared base-layer cache (ADR-025 §4). MFE builds
+    // use a Node toolchain, so pull the node20 + debian bases. Missing refs
+    // are skipped silently by buildx.
+    "type=registry,ref=ghcr.io/biji-biji-initiative/platform/cache/node20-base:latest",
+    "type=registry,ref=ghcr.io/biji-biji-initiative/platform/cache/debian-bookworm-base:latest",
+    // L2 — shared GHCR registry cache (app-scoped, authoritative per ADR-024)
+    "type=registry,ref=ghcr.io/biji-biji-initiative/mereka-lms/cache/mfe:main-amd64",
+    // L3 — final-image fallback (transitional, retire Phase 5)
     "type=registry,ref=${MFE_CACHE_REF}",
   ]
   cache-to = [
-    "type=gha,mode=max,scope=${MFE_PROOF_GHA_SCOPE}",
+    // Set via CACHE_TO_MFE env; empty on non-main builds (RL-5)
+    "${CACHE_TO_MFE}",
   ]
   labels = {
     "io.mereka.build-profile"              = "proof"

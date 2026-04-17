@@ -1169,7 +1169,7 @@
     }
   ],
   "generated_by": "tools/specs/build_spec_graph.py",
-  "node_count": 194,
+  "node_count": 195,
   "nodes": [
     {
       "id": "specs/_generated/testmaps/advanced-assessment-xqueue_spec.testmap.yml",
@@ -1458,6 +1458,17 @@
       "node_type": "spec",
       "path": "specs/branding-system_spec.md",
       "title": "branding-system_spec.md"
+    },
+    {
+      "id": "specs/build-authority-deterministic-builds_spec.md",
+      "lane": "normative",
+      "node_type": "spec",
+      "normativity": "normative",
+      "owner": "platform-ci",
+      "path": "specs/build-authority-deterministic-builds_spec.md",
+      "spec_class": "domain",
+      "status": "draft",
+      "title": "Build Authority and Deterministic Build Truth"
     },
     {
       "id": "specs/ci-cd-pipeline_spec.md",

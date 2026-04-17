@@ -76,7 +76,7 @@ deploy/k8s/
 │   └── plugins/               # Plugin configs (discovery, mfe, credentials, notes, aspects)
 └── overlays/                  # Environment-specific overrides
     ├── local/                 # Local Kind development (APP_LOCAL_ONLY — stays here)
-    ├── production/            # Production GKE (ENVIRONMENT_SPECIFIC — ownership in infrastructure)
+    ├── production/            # Production on rke2-prod (ENVIRONMENT_SPECIFIC — ownership in infrastructure; GKE decommissioned)
     ├── rke2-nonprod/          # Dev RKE2 cluster (ENVIRONMENT_SPECIFIC — ownership in infrastructure)
     └── staging/               # Staging overlay (ENVIRONMENT_SPECIFIC — deprecated)
 ```
@@ -171,7 +171,7 @@ infrastructure/
 ├── cloudflare/                # DNS record definitions
 │   └── dns-records.json       # Cloudflare DNS automation
 ├── terraform/                 # Terraform infrastructure
-│   ├── gcp/                   # GCP resources (GKE, Cloud SQL, VPC)
+│   ├── gcp/                   # Historical GCP resources (GKE decommissioned; kept for archive)
 │   └── modules/               # Reusable Terraform modules
 └── monitoring/                # Monitoring configs
     ├── prometheus/            # Prometheus rules and scrape configs

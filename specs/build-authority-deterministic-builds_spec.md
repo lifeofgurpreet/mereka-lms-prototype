@@ -1,0 +1,227 @@
+---
+id: SPEC-BUILD-AUTHORITY
+title: Build Authority and Deterministic Build Truth
+status: draft
+spec_class: domain
+owner: platform-ci
+created: 2026-04-16
+last_reviewed: 2026-04-16
+review_due: 2026-07-16
+domain: platform
+normativity: normative
+depends_on:
+  - ci-cd-pipeline_spec
+supersedes: []
+superseded_by: null
+verification_sources:
+  - .github/workflows/build-tutor-images.yml
+  - docs/ops/ci-cd/BUILD_FAILURE_TAXONOMY.md
+  - docs/ops/ci-cd/AUTOMATION_AUTHORSHIP_AUDIT.md
+interfaces:
+  - bbi-infrastructure promote-dev-image.yml
+  - platform-control-plane contracts/
+tags:
+  - build
+  - ci
+  - deterministic
+  - authority
+summary: >
+  Defines the single-owner model for how Open edX and MFE images are built,
+  scanned, promoted, and proven. Every image-affecting change has one
+  authoritative trigger path, one build owner, one promotion path, and one
+  proof surface.
+---
+
+# Build Authority and Deterministic Build Truth
+
+## Problem Statement
+
+The release conveyor can be "correct" while the underlying build truth is
+split across workflow YAML, build scripts, generated artifacts, trigger
+filters, app/bot identity, runner topology, and scan/runtime proof surfaces.
+That is too many quiet owners.
+
+When a build fails, operators cannot quickly classify whether the failure is
+a source defect, workflow contract defect, runner infrastructure defect, or
+external platform defect. This ambiguity wastes hours on misdiagnosis.
+
+## Scope
+
+This spec covers the two primary images built in this repository:
+
+1. **OpenEdX image** (`ghcr.io/biji-biji-initiative/mereka-lms/openedx`)
+2. **MFE image** (`ghcr.io/biji-biji-initiative/mereka-lms/mfe`)
+
+It does NOT cover enterprise MFE images (separate workflow) or purchase-gateway
+(separate workflow).
+
+## Requirements
+
+### R1: Trigger Completeness
+
+Every file that affects image build output MUST be in the `on.push.paths`
+trigger list of `build-tutor-images.yml`.
+
+**Verification**: `scripts/qa/verify-build-workflow-contract.sh` checks
+the trigger structure today; comprehensive completeness check
+(`verify-build-trigger-completeness.sh`) is planned per
+`docs/rfcs/RFC-BUILD-AUTHORITY-001.md` Phase 1.
+
+**Current state**: 44 watched paths. No known image-content gaps after
+2026-04-16 cleanup (removed duplicates, added `select-build-lane` action).
+
+### R2: No Duplicate Trigger Entries
+
+The `on.push.paths` list MUST NOT contain duplicate entries.
+
+**Verification**: Parse YAML, check `len(paths) == len(set(paths))`.
+
+### R3: Automation PR Authorship
+
+Every automation flow that creates PRs in repositories with required status
+checks MUST use a GitHub App token (not `GITHUB_TOKEN` or
+`github-actions[bot]`) so that `pull_request` event checks attach naturally.
+
+**Flows in scope**:
+- Dev promotion dispatch (build-tutor-images.yml -> bbi-infrastructure)
+- Any future automation that creates PRs
+
+**Verification**: After each graduation test cycle, confirm PR author is the
+GitHub App identity by checking `gh pr view --json author`.
+
+### R4: Failure Classification
+
+Every build failure MUST be classifiable into exactly one of four buckets
+within 5 minutes of observing the failure:
+
+1. **Source defect** — code/config in repo is wrong
+2. **Workflow contract defect** — CI YAML/scripts have logic error
+3. **Runner infrastructure defect** — Docker/buildx/disk/network on runner
+4. **External platform defect** — GitHub/GHCR/CDN degradation
+
+**Verification**: `docs/ops/ci-cd/BUILD_FAILURE_TAXONOMY.md` provides the
+decision tree. Operator can follow it mechanically.
+
+### R5: Cold Build Proof
+
+A cold build (no cache, no prior state) of each image MUST succeed
+deterministically given only:
+
+- The repository at a specific commit SHA
+- Network access to package registries (PyPI, npm, apt)
+- A functional Docker daemon with buildx
+
+**Verification**: planned cold-build benchmark workflow (jj97.14, see
+`docs/ops/ci-cd/BENCHMARK_CLASSES.md` `true-cold` class) runs a cache-less
+build and records the output image digest. Manual proof via
+`docker buildx build --no-cache` against a clean runner is the interim path.
+
+**Current state**: NOT YET IMPLEMENTED. Cold builds succeed but are not
+formally verified or measured.
+
+### R6: Build Timing Governance
+
+Each build step MUST have a measured baseline time and an alert threshold.
+
+| Step | Warm Baseline | Cold Baseline | Alert Threshold |
+|------|--------------|---------------|-----------------|
+| Pre-build (checkout, setup) | 73s | 73s | 120s |
+| OpenEdX image build | 71s (cache hit) | ~30min | 45min |
+| MFE image build | 107s (cache hit) | ~44min | 60min |
+| Post-push OpenEdX scan | ~5min | ~8min | 15min |
+| Post-push MFE scan | ~2min | ~3min | 5min |
+| Release bundle generation | ~10s | ~10s | 60s |
+| Dispatch + infra PR | ~30s | ~30s | 120s |
+
+**Verification**: Timing data emitted to `var/ci/build-*-timing.env` and
+reported in GitHub step summary.
+
+### R7: Single Build Owner
+
+Each image build behavior MUST have exactly one authoritative source:
+
+| Behavior | Owner |
+|----------|-------|
+| OpenEdX Dockerfile content | `infrastructure/tutor/plugins/mereka_lms.py` + Tutor hooks |
+| MFE Dockerfile content | `infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py` + Tutor hooks |
+| Patch application | `infrastructure/tutor/apply-patches.sh` |
+| Build orchestration | `.github/workflows/build-tutor-images.yml` |
+| Runner selection | `.github/actions/select-build-lane/action.yml` |
+| Release object schema | `scripts/release/release_object_bindings.py` |
+| Promotion dispatch envelope | `scripts/release/emit-proof-envelope.sh` |
+| Scan behavior | `scripts/infra/install-trivy.sh` + workflow inline steps |
+
+No hidden or duplicate ownership.
+
+## Non-goals
+
+- Replacing GitHub Actions as the CI orchestrator
+- Building a custom CI scheduler or runner manager
+- Optimizing individual Docker layers beyond what shared cache provides
+- Touching enterprise MFE or purchase-gateway build workflows (separate scope)
+- Optimizing GitHub-hosted runner cost (we run on self-hosted)
+- Replacing the existing observability stack (Prometheus/Grafana/Tempo/Loki)
+- Defining runtime proof or promotion contracts (owned by platform-control-plane)
+
+## Out of Scope (Future Specs)
+
+- Runner economics and lane governance (depends on build timing data)
+- Staging rehearsal (depends on proven dev conveyor)
+- Production readiness (depends on staging rehearsal)
+- Enterprise MFE build authority (separate workflow, separate spec)
+
+## Acceptance Criteria
+
+This spec is satisfied when ALL of:
+
+- [ ] AC-BAUTH-001: Every image-affecting file has an explicit conveyor trigger (R1)
+- [ ] AC-BAUTH-002: No duplicate trigger entries exist (R2)
+- [ ] AC-BAUTH-003: Automation PR authorship is consistent and trusted (R3)
+- [ ] AC-BAUTH-004: Build failures can be classified in under 5 minutes (R4)
+- [ ] AC-BAUTH-005: Cold-proof work has a design stub or first implemented slice (R5)
+- [ ] AC-BAUTH-006: Timing baselines are measured and documented (R6)
+- [ ] AC-BAUTH-007: Build ownership is single-source for each behavior (R7)
+- [ ] AC-BAUTH-008: The team can explain the build system without branch archaeology
+- [ ] AC-BAUTH-009: `verify-build-workflow-contract.sh` and `verify-red-line-contract.sh` pass on `main`
+- [ ] AC-BAUTH-010: Heavy image builds use shared registry cache as primary authority
+
+## Edge Cases
+
+- **Workflow_dispatch on main with no source changes**: must still produce a release object that is byte-identical to the prior push-driven build for the same SHA.
+- **Cache import 404 on a fresh trusted-main build**: build must proceed with empty cache and produce a valid manifest, populating the shared cache for the next run.
+- **GHCR rate-limit during cache export**: build outcome must be `success` (build itself worked); cache-export-failure surfaces as a separate metric and alert, not a build failure.
+- **Concurrent main pushes**: GitHub Actions concurrency group must serialize cache-writing builds; cache export from the older run must not overwrite a newer manifest.
+- **Runner cleanup mid-build**: a runner pruned during build (buildx daemon restart) must fail fast with a recognizable error class (Runner infrastructure defect, R4 bucket 3) — not a silent corruption.
+- **Forked PR**: must read shared cache (public read) and never write (enforced by GitHub fork-secret policy).
+
+## Observability
+
+- All metrics carry `release_unit_id = source_sha` per `docs/ops/ci-cd/CI_METRICS.md`
+- Single dashboard `ci-build-overview` (six rows) is the operator surface — see RFC-BUILD-AUTHORITY-001 §Dashboard
+- Alerts: `CICacheImportFailing`, `CICacheExportFailing`, `CIBuildP95Breach`, `CIQueueP95Breach`, `CIPromotionStuck`, `CIRealizationStuck`, `CIRuntimeProofRedAfterRealization`
+- Cache health: `ci_cache_source_found`, `ci_cache_export_success`, `ci_layer_reuse_count` / `ci_layer_total_count`
+- Failure classification follows `docs/ops/ci-cd/BUILD_FAILURE_TAXONOMY.md` (4 buckets)
+
+## Rollout & Rollback
+
+**Rollout** (per RFC-BUILD-AUTHORITY-001 phases):
+
+1. Phase 0 — Baseline capture (jj97.10) — DONE 2026-04-16
+2. Phase 1 — Shared registry cache for OpenEdX + MFE (jj97.1)
+3. Phase 2 — Telemetry ingestion (jj97.2, jj97.11)
+4. Phase 3 — Dashboard + alerts (jj97.3, jj97.4)
+5. Phase 4 — Developer consumption (jj97.20)
+6. Phase 5 — Retire L3 fallback (after 30d stable)
+
+**Rollback**: each phase is independently revertable via PR revert. Cache changes (Phase 1) leave shared cache refs in place even after revert — no destructive cleanup needed; old refs become inert. Dashboard/alerts (Phase 3) are infrastructure-repo PRs; revert restores prior state without affecting builds.
+
+## Open Questions
+
+- OQ-1 — `ci_realization_duration_seconds` source: which Argo webhook endpoint emits the realization timestamp? (Resolve before jj97.3 alert PromQL.)
+- OQ-2 — `ci_promotion_duration_seconds` timer boundary: clock starts at workflow completion or dispatch call? (Resolve before alert calibration.)
+- OQ-3 — workflow_dispatch escape hatch for forced cache write: deliberate input `force_cache_write: bool` gated by actor check, or rely on empty-commit pattern?
+- OQ-4 — L3 `OPENEDX_CACHE_REF` default in `docker-bake.hcl` points at upstream Overhangio image, not Mereka — update or remove after PR 2.
+- OQ-5 — PR-scoped cache TTL mechanism: GHCR package retention, scheduled cleanup workflow, or manual?
+- OQ-6 — GHCR 429 retry semantics for `cache-to`: confirm buildkit's behavior under registry rate-limit on push.
+- OQ-7 — `local-hot` vs `registry-warm` precedence when both L1 and L2 succeed: precedence order should be `scan-only` > `local-hot` > `registry-warm` > `true-cold` (proposed).
+- OQ-8 — `partial-warm` from RFC §Derived Classification: dashboard-only diagnostic class, not a `benchmark_class` workflow input value.

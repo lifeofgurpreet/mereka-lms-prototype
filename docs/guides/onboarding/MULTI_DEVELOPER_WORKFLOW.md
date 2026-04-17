@@ -75,11 +75,14 @@ tutor local stop
 - **URLs:** `localhost`, `*.localhost`
 - **Config:** `tutor_env/config.yml` (git-ignored)
 
-### GKE/Kind
-- **Database:** Cloud SQL, MongoDB Atlas, managed Redis
-- **Storage:** GCS buckets
+### RKE2 (dev / staging / prod) and Kind
+- **Database:** MySQL (cluster-internal), MongoDB Atlas, Redis (cluster-internal)
+- **Storage:** Longhorn CSI on RKE2 (see bbi-infrastructure storage overlays)
 - **URLs:** `academyv2.mereka.io`, `academyv2.mereka.dev`
-- **Config:** Kubernetes ConfigMaps/Secrets
+- **Config:** Kubernetes ConfigMaps / ExternalSecrets synced from Infisical
+
+> GKE is decommissioned as of 2026-04. All workloads run on RKE2 now. Older docs
+> that reference GCS / Cloud SQL / Workload Identity describe a past state.
 
 ### Key Rule
 **NEVER mix local and production configs!**

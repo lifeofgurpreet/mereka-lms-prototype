@@ -15,7 +15,9 @@
 > **CORRECTION (2026-04-06)**: Production is now on **rke2-prod** (Contabo VPS), not GKE.
 > GKE is decommissioned. There IS a staging environment (`stg-mereka-lms` on rke2-nonprod).
 
-This plan improves **production rke2-prod monitoring** and the **VPS Grafana view**.  
+This plan improves **production rke2-prod monitoring** surfaced through the canonical
+Grafana instance (`grafana.mereka.io`). Dev/staging monitoring is surfaced through
+`grafana.mereka.dev` (kube-prometheus-stack, managed by `bbi-infrastructure`).
 Dev (rke2-nonprod) and staging (rke2-nonprod, stg-mereka-lms namespace) health checks
 use `bin/accept` acceptance lanes.
 
@@ -178,12 +180,18 @@ Defined in `infrastructure/monitoring/uptime/` and applied via
 ### 2) Service‑specific auth failure visibility (forum + credentials)
 **Status:** Done (log metrics + alerts exist for credentials/forum).
 
-### 3) Validate Grafana ↔ GKE telemetry path
-**Why:** The VPS Grafana dashboard exists, but datasource connectivity to GKE
-metrics needs explicit validation and documentation.
+### 3) Validate Grafana ↔ cluster telemetry path
+**Why:** The canonical Grafana instance (`grafana.mereka.dev` / `grafana.mereka.io`,
+managed by `bbi-infrastructure`) surfaces VPS datasources (vps-prometheus, vps-loki,
+vps-tempo) alongside in-cluster Prometheus. Datasource connectivity and panel
+correctness need explicit validation.
+
+Note: the VPS docker-compose Grafana (localhost:3000) is an internal data-plane
+component only — it is not a user-facing surface and should not receive operator
+panel additions.
 
 **Deliverables**
-- Confirm datasource config and connectivity.
+- Confirm datasource config and connectivity for the canonical Grafana instances.
 - Document steps in `docs/ops/runbooks/SLO_DASHBOARDS_SETUP.md`.
 
 ### 4) SLO burn‑rate alerts (optional / if required)

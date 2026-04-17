@@ -44,16 +44,16 @@ jobs:
         with:
           enabled: ${{ vars.CI_FASTLANE_BUILD_ENABLED || 'false' }}
           lane_mode: auto
-          fastlane_label: ${{ vars.CI_FASTLANE_BUILD_LABEL || 'cie-vps-fastlane-build' }}
+          fastlane_label: ${{ vars.CI_FASTLANE_BUILD_LABEL || 'mereka-lms-vps-fastlane-build' }}
           routing_policy: lms_build_prefer_fastlane
           fallback_label: mereka-k8s-heavy-builders
           timezone: ${{ vars.CI_FASTLANE_BUILD_TIMEZONE || 'Asia/Kuala_Lumpur' }}
           office_hours_start: ${{ vars.CI_FASTLANE_BUILD_WINDOW_START || '09:00' }}
           office_hours_end: ${{ vars.CI_FASTLANE_BUILD_WINDOW_END || '18:00' }}
           runner_status_token: ${{ secrets.FASTLANE_RUNNER_STATUS_TOKEN }}
-          github_app_id: ${{ secrets.FASTLANE_GITHUB_APP_ID }}
-          github_app_installation_id: ${{ secrets.FASTLANE_GITHUB_APP_INSTALLATION_ID }}
-          github_app_private_key: ${{ secrets.FASTLANE_GITHUB_APP_PRIVATE_KEY }}
+          github_app_id: ${{ secrets.GITOPS_GITHUB_APP_ID }}
+          github_app_installation_id: ${{ secrets.GITOPS_GITHUB_APP_INSTALLATION_ID }}
+          github_app_private_key: ${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}
           allow_push_main: 'true'
           allow_workflow_dispatch: 'true'
 
