@@ -74,6 +74,16 @@ _register_env_patch(
         }
     }
 
+    # Strip MFE basename from theme asset requests so /authn/theme/core.min.css
+    # resolves to /theme/core.min.css instead of hitting the SPA fallback.
+    @mfe_prefixed_theme path_regexp mfe_theme ^/(authn|account|communications|course-authoring|authoring|discussions|gradebook|learner-dashboard|learning|learner-record|ora-grading|profile)/theme/(.+)$
+    handle @mfe_prefixed_theme {
+        rewrite * /theme/{http.regexp.mfe_theme.2}
+        reverse_proxy mfe:8002 {
+            header_up Host {http.request.host}
+        }
+    }
+
     reverse_proxy /profile/api/* lms:8000 {
         # Preserve incoming host for tenant-aware SiteConfiguration resolution
         header_up Host {http.request.host}
