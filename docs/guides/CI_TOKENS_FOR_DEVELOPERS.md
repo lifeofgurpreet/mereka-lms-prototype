@@ -71,14 +71,19 @@ steps:
 
 ### Plane 3 — Cluster Pull-Secret Sync
 
-**Credential**: `ORG_GHCR_TOKEN` (classic PAT — permanently required for this plane)
+**Credential**: `GHCR_PULL_CLASSIC_PAT` — classic PAT, permanently required for this plane.
+(Renamed from `ORG_GHCR_TOKEN` on 2026-04-17 in bbi-infrastructure. Both names may exist at
+the org level during the transition window; the new name documents the PULL scope + CLASSIC
+credential type. If you see `ORG_GHCR_TOKEN` referenced in older code or docs, it refers to
+the same token type and usage.)
+
 **Scope**: Produces a long-lived dockerconfigjson stored in Infisical, synced to K8s via ESO.
 **Why this must be a classic PAT (not GITHUB_TOKEN, not a GitHub App token)**:
 - Fine-grained PATs **cannot** access org-level packages scope (GitHub limitation, still true as of 2026)
 - GitHub App installation tokens expire after **1 hour** — the K8s dockerconfigjson must survive until the next sync run (schedule: every 6h). Pods scheduled between runs would fail with 401s if the token expired.
 - Classic PAT with `read:packages` scope is the only viable option.
 
-`ORG_GHCR_TOKEN` is **retired for GHCR push** (those use `GITHUB_TOKEN` per ADR-004) but is **permanently active for pull-secret sync**. This is intentional, not a gap.
+The classic PAT is **retired for GHCR push** (those use `GITHUB_TOKEN` per ADR-004) but is **permanently active for pull-secret sync**. This is intentional, not a gap.
 
 You do not need to interact with this plane directly. The sync runs automatically via `sync-ghcr-shared-pull-secrets.yml`.
 
@@ -91,7 +96,7 @@ You do not need to interact with this plane directly. The sync runs automaticall
 | `GITOPS_GITHUB_APP_ID` | All repos | GitHub App client ID (Plane 2) |
 | `GITOPS_GITHUB_APP_INSTALLATION_ID` | All repos | App installation ID (Plane 2) |
 | `GITOPS_GITHUB_APP_PRIVATE_KEY` | All repos | App private key (Plane 2) |
-| `ORG_GHCR_TOKEN` | bbi-infrastructure only | Classic PAT for cluster pull-secret sync (Plane 3) — do not use in other workflows |
+| `GHCR_PULL_CLASSIC_PAT` (legacy: `ORG_GHCR_TOKEN`) | bbi-infrastructure only | Classic PAT for cluster pull-secret sync (Plane 3). Renamed 2026-04-17 — `ORG_GHCR_TOKEN` kept as alias during transition. Do not use in other workflows. |
 
 **Rule**: For CI workflows, consume GitHub org secrets directly. Do not try to fetch them from Infisical — the CI credentials are not synced there.
 
@@ -102,7 +107,7 @@ Infisical is for **runtime secrets** (DB passwords, API keys, third-party creden
 | Path | Environment | What's There |
 |------|------------|--------------|
 | `/k8s/shared/GHCR_DOCKER_CONFIG_JSON` | dev, staging, prod | Base64 dockerconfigjson, synced to K8s imagePullSecrets |
-| `/k8s/shared/GHCR_PULL_USERNAME` | dev, staging, prod | Fixed machine identity username that owns `ORG_GHCR_TOKEN` |
+| `/k8s/shared/GHCR_PULL_USERNAME` | dev, staging, prod | Fixed machine identity username that owns `GHCR_PULL_CLASSIC_PAT` (legacy name: `ORG_GHCR_TOKEN`) |
 | `/k8s/shared/GITOPS_GITHUB_APP_*` | dev, staging, prod | GitHub App creds for ARC runners and CI dispatch |
 | `/k8s/{app}/` | dev, staging, prod | Per-app runtime secrets (DB, Redis, JWT, etc.) |
 
@@ -229,7 +234,8 @@ jobs:
 |---|---|---|---|
 | `GITHUB_TOKEN` | 1 (GHCR push) | **Active** (use this) | Auto-minted, no config |
 | `GITOPS_GITHUB_APP_*` | 2 (cross-repo) | **Active** (use this) | Org secrets, all repos |
-| `ORG_GHCR_TOKEN` | 3 (pull-secret sync) | **Active — Plane 3 only** | Classic PAT, permanently required for cluster pull secrets |
+| `GHCR_PULL_CLASSIC_PAT` | 3 (pull-secret sync) | **Active — Plane 3 only** | Classic PAT, permanently required for cluster pull secrets. Renamed from `ORG_GHCR_TOKEN` on 2026-04-17. |
+| `ORG_GHCR_TOKEN` | 3 (pull-secret sync) | **Alias — transitional** | Still present at org level as alias; will be removed once all workflows reference `GHCR_PULL_CLASSIC_PAT` directly. |
 | `ORG_GHCR_TOKEN` | 1 (GHCR push) | **RETIRED** 2026-04-16 | Replaced by `GITHUB_TOKEN` in all push workflows |
 | `BBI_ARC_GITHUB_APP_*` | — | **RETIRED** | Consolidated into `GITOPS_GITHUB_APP_*` |
 | `FASTLANE_GITHUB_APP_*` | — | **DELETED** 2026-04-16 | Same App as `GITOPS_*`, dead org secrets removed |
