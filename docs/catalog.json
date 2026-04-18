@@ -11389,6 +11389,15 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "status/active/evidence/rc02-102a56a07d/OG-03-RELIABILITY-VERDICT.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "status/active/evidence/rc02-102a56a07d/OG-AUTHORITY-VERDICT.md",
     "status": "supporting",
     "type": "status"
