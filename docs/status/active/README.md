@@ -12,6 +12,8 @@ This root is for current operational state only.
 
 Authority principle: **canonical state is generated, not written**. Numbered/timestamped handoff docs in this directory are historical snapshots and must not be treated as current authority. If the rolling state file and a numbered doc disagree, trust the rolling state file. If the rolling state file and a direct `gh pr view` / `kubectl --context rke2-nonprod ...` command disagree, trust the direct command and regenerate.
 
+The full rule set governing canonical artifacts in this repo is the [Truth Repair Doctrine](../../meta/standing-orders/TRUTH_REPAIR_DOCTRINE.md). Rule 1 ("canonical = generated") is enforced by `scripts/governance/generate-current-operator-state.sh`. Rule 2 ("retractions patch source") by `scripts/governance/verify-retraction-sweep.sh`. Rule 3 ("runbook is not executable until run") by `scripts/governance/verify-runbook-executable.sh`. Read the doctrine before writing or repairing any status doc.
+
 ## Primary active boards
 
 - [MASTER_LAUNCH_ROADMAP_2026-04-04.md](MASTER_LAUNCH_ROADMAP_2026-04-04.md)

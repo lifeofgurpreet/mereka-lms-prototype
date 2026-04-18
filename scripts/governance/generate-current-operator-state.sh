@@ -187,6 +187,21 @@ Default next move if nothing else is obviously higher-leverage:
 
 Before ending a loop, write the next concrete action here so the next iteration can start without oral context. Canonical authority here is the last human-authored sentence on this line — the default text above is a floor, not a plan.
 
+### Authority
+
+This file is regenerated from live state by
+\`scripts/governance/generate-current-operator-state.sh\`. That mechanism
+is the enforcement of [Truth Repair Doctrine](../meta/standing-orders/TRUTH_REPAIR_DOCTRINE.md)
+Rule 1 — *canonical state is generated, not written*. The three dynamic
+sections above (Current Live Truth, Current Queue Truth, Next Exact Move)
+are rewritten on every run; the stable skeleton (Purpose, Operating Rules,
+Refresh Procedure, Standing Priorities) is preserved verbatim. Hand-edits
+to the dynamic sections are drafts, not authority.
+
+If the doctrine itself needs to change, update the doctrine file first,
+then the generator, then this file — in that order, in one tranche, per
+the doctrine's own Rule 5 on coordinated verifier-affecting changes.
+
 EOF
 }
 

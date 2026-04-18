@@ -44,7 +44,7 @@ Tracker rules:
 - if execution reveals new real work, create or split beads immediately
 - keep dependencies and priorities honest
 
-Execution rules:
+Execution rules (governed by docs/meta/standing-orders/TRUTH_REPAIR_DOCTRINE.md):
 - work through a sprint slice, not a single tiny task
 - push as many bounded, high-leverage items as are truly ready this hour
 - merged defects on `main` outrank helper work
@@ -53,7 +53,17 @@ Execution rules:
   prevents stale authority, or enables the next loop to run autonomously
 - if CI fails, inspect the real failure and fix it
 - if an open PR is stale, rebase, narrow, fix, supersede, or close it
-- if a merged artifact on `main` is wrong, patch `main`
+- if a merged artifact on `main` is wrong, patch `main` (Rule 2: retractions
+  patch source, not margins — if retracting, sweep the term across canonical
+  artifacts in the same tranche)
+- if shipping a helper, either wire it into its call site in the same PR or
+  file a wire-in bead (Rule 4: helpers ship with a call site or wire-in bead)
+- if shipping a runbook with status:executable, dry-run it and capture
+  evidence in docs/ops/evidence/<name>-YYYY-MM-DD.md (Rule 3: a runbook is
+  not executable until it has been run)
+- if changing a verifier, coordinate all five layers — workflow +
+  policy/config + verifier + self-test + runbook — in the same tranche or
+  mark layers N/A explicitly (Rule 5)
 - when in doubt, check relevant docs and source before acting
 - do not rely on ambient kubectl context for dev checks; use explicit context
 
@@ -88,3 +98,21 @@ Definition of success:
 - ambiguity is lower
 - the next loop can continue autonomously without oral context
 ```
+
+## Authority
+
+The execution rules above are enforced by the **Truth Repair Doctrine**
+(`docs/meta/standing-orders/TRUTH_REPAIR_DOCTRINE.md`). The five rules and
+their mechanical enforcement:
+
+| Rule | Claim | Enforcement |
+|---|---|---|
+| 1 | Canonical = generated or dry-run-verified | `scripts/governance/generate-current-operator-state.sh` (this file's regenerator) |
+| 2 | Retractions patch source, not margins | `scripts/governance/verify-retraction-sweep.sh` (bead y69t.2, PR #1825) |
+| 3 | A runbook is not executable until run | `scripts/governance/verify-runbook-executable.sh` (bead y69t.1, PR #1824) |
+| 4 | Helpers ship with call site or wire-in bead | Social discipline + bead closure convention |
+| 5 | Verifier changes update all 5 layers | PR template checkbox |
+
+If a loop iteration ever conflicts with a rule, the doctrine wins. If the
+doctrine itself is wrong, patch the doctrine first, then update the
+enforcement scripts and this prompt in the same tranche.
