@@ -2390,7 +2390,104 @@ jobs:
               body = e.read().decode("utf-8", errors="replace")
               print(f"FAIL: dispatch rejected (HTTP {e.code}): {body}", file=sys.stderr)
               sys.exit(1)
+          # Expose bundle_id for the follow-on metric-emit step.
+          with open(os.environ.get("GITHUB_ENV", "/dev/null"), "a", encoding="utf-8") as fh:
+              fh.write(f"PROMOTION_CHAIN_RELEASE_UNIT_ID={bundle_id}\n")
           DISPATCH_PY
+
+      - name: Emit bbi_pr_opened promotion-chain metric (poll for real PR)
+        # S6.1 wire-in (bead lb4c.6, companion to #1828's app_merge stage).
+        #
+        # Truthful signal: this step polls the bbi-infrastructure repo for
+        # the actual promotion PR opened by the dispatched workflow and
+        # emits bbi_pr_opened with the real PR number. Does NOT approximate
+        # by emitting at dispatch-accept time — that would log the
+        # "mereka-lms hit the dispatch API" moment, not the "bbi PR
+        # actually exists" moment. For conveyor latency truth, the real PR
+        # creation timestamp is what matters.
+        #
+        # Poll loop: search bbi-infrastructure for an open PR created in
+        # the last 5 minutes by the bbi-gitops-writer GitHub App whose body
+        # references the release_bundle_id. Timeout after 120 seconds; if
+        # the PR hasn't appeared by then, emit with no PR number and log a
+        # warning — that's itself a meaningful signal (dispatch → PR gap
+        # exceeded threshold).
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        # non-blocking: S6.1 bbi_pr_opened stage emit is observability, not a guard; poll/emit failure must never block dispatch (classification per verify-workflow-gate-enforcement.sh)
+        continue-on-error: true
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          RELEASE_UNIT_ID: ${{ env.PROMOTION_CHAIN_RELEASE_UNIT_ID }}
+          POLL_TIMEOUT_SECONDS: "120"
+          POLL_INTERVAL_SECONDS: "5"
+        run: |
+          mkdir -p var/ci/promotion-metrics
+          if [[ -z "${RELEASE_UNIT_ID:-}" ]]; then
+            echo "warn: RELEASE_UNIT_ID empty — dispatch step may have failed before export" >&2
+            exit 0
+          fi
+
+          start="$(date +%s)"
+          found_pr=""
+          while true; do
+              now="$(date +%s)"
+              elapsed=$(( now - start ))
+              if [[ $elapsed -ge ${POLL_TIMEOUT_SECONDS} ]]; then
+                  echo "warn: timed out after ${POLL_TIMEOUT_SECONDS}s waiting for bbi-infrastructure PR matching release_unit_id=${RELEASE_UNIT_ID}" >&2
+                  break
+              fi
+              # Search open PRs in bbi-infrastructure whose body contains the bundle_id.
+              # GitHub search API is rate-limited and eventually consistent (~5-15s
+              # lag after PR creation); 5s interval is deliberate to respect that.
+              # Returns JSON; we extract .items[0].number if any match.
+              search_q="repo:Biji-Biji-Initiative/bbi-infrastructure+type:pr+state:open+in:body+${RELEASE_UNIT_ID}"
+              found_pr="$(
+                  curl -sS --max-time 10 \
+                      -H "Authorization: Bearer ${APP_TOKEN}" \
+                      -H "Accept: application/vnd.github+json" \
+                      -H "X-GitHub-Api-Version: 2022-11-28" \
+                      "https://api.github.com/search/issues?q=${search_q}&per_page=1" \
+                      | python3 -c 'import sys,json
+                                    try:
+                                        d = json.load(sys.stdin)
+                                        items = d.get("items", [])
+                                        print(items[0]["number"] if items else "", end="")
+                                    except Exception:
+                                        print("", end="")' 2>/dev/null || echo ""
+              )"
+              if [[ -n "$found_pr" ]]; then
+                  echo "found bbi-infrastructure PR #${found_pr} for release_unit_id=${RELEASE_UNIT_ID} after ${elapsed}s"
+                  break
+              fi
+              sleep "${POLL_INTERVAL_SECONDS}"
+          done
+
+          if [[ -n "${found_pr}" ]]; then
+              bash scripts/ci/emit-promotion-chain-metrics.sh \
+                --stage bbi_pr_opened \
+                --release-unit-id "${RELEASE_UNIT_ID}" \
+                --bbi-pr "${found_pr}" \
+                --out-dir var/ci/promotion-metrics
+          else
+              # Dispatch → PR gap exceeded threshold. Emit without --bbi-pr so
+              # the downstream collector can flag this as a conveyor anomaly.
+              bash scripts/ci/emit-promotion-chain-metrics.sh \
+                --stage bbi_pr_opened \
+                --release-unit-id "${RELEASE_UNIT_ID}" \
+                --out-dir var/ci/promotion-metrics
+              echo "note: bbi_pr_opened emitted without --bbi-pr; poll timed out. Downstream collector should treat missing bbi-pr + elapsed >= ${POLL_TIMEOUT_SECONDS}s as a conveyor anomaly." >&2
+          fi
+
+      - name: Upload promotion-chain metrics artifact (dispatch stage)
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        # non-blocking: artifact upload for bbi_pr_opened stage is observability; metrics may not exist if emit failed (classification per verify-workflow-gate-enforcement.sh)
+        continue-on-error: true
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4  # v5.0.0
+        with:
+          name: promotion-chain-metrics-dispatch-${{ github.sha }}
+          path: var/ci/promotion-metrics/
+          if-no-files-found: ignore
+          retention-days: 30
 
   update-gitops:
     name: Manual GitOps Bridge
