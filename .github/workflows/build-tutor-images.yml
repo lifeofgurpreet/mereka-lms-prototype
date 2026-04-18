@@ -262,6 +262,34 @@ jobs:
             cat var/ci/build-scope-summary.md
           } >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Emit app_merge promotion-chain metric
+        # S6.1 wire-in — bead mereka-lms-lb4c.6. Emits a JSONL record + a
+        # markdown summary row for the app-repo merge stage of the promotion
+        # chain. Non-blocking: observability metric, not a guard — an emit
+        # failure must never gate image delivery.
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        # non-blocking: S6.1 promotion-chain timing is observability; emit failure must never block build (classification per verify-workflow-gate-enforcement.sh)
+        continue-on-error: true
+        env:
+          GH_SHA: ${{ github.sha }}
+        run: |
+          mkdir -p var/ci/promotion-metrics
+          bash scripts/ci/emit-promotion-chain-metrics.sh \
+            --stage app_merge \
+            --release-unit-id "${GH_SHA}" \
+            --out-dir var/ci/promotion-metrics
+
+      - name: Upload promotion-chain metrics artifact
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        # non-blocking: artifact upload is observability; metrics may not exist if emit step failed (classification per verify-workflow-gate-enforcement.sh)
+        continue-on-error: true
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4  # v5.0.0
+        with:
+          name: promotion-chain-metrics-resolve-${{ github.sha }}
+          path: var/ci/promotion-metrics/
+          if-no-files-found: ignore
+          retention-days: 30
+
   lint:
     name: Lint & Validate
     runs-on: ubuntu-latest
