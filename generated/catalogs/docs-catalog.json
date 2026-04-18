@@ -11406,6 +11406,15 @@
     "canonical_conflict_group": null,
     "freshness_risk": "low",
     "last_verified_or_updated": null,
+    "owner": "platform-runtime",
+    "path": "status/active/evidence/rc02-102a56a07d/RC-05-LIVE-CLOSURE-EVIDENCE-2026-04-18.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
     "owner": null,
     "path": "status/active/evidence/rc02-102a56a07d/RUNTIME_MATRIX.md",
     "status": "supporting",
