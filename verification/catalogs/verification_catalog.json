@@ -370,7 +370,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/governance/verify-runbook-executable.sh",
-      "reference_count": 4,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
