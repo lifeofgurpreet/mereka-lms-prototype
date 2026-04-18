@@ -2,7 +2,6 @@ scripts/analytics/certificate-breakdown-by-course.py
 scripts/analytics/export-openedx-data-standalone.py
 scripts/analytics/openedx-export-certificates.py
 scripts/aspects/bootstrap-aspects-env.sh
-scripts/bench/export-build-proof-inventory.py
 scripts/ci/emit-promotion-chain-metrics.sh
 scripts/clickup_import.py
 scripts/download-mct-thumbnails.py
@@ -33,11 +32,6 @@ scripts/qa/experience-proof.py
 scripts/qa/gate-timing-tracker.sh
 scripts/qa/generate_adr_aux_maps.py
 scripts/qa/inventory_k8s_resources.sh
-scripts/qa/no_environment_domains_in_base.sh
-scripts/qa/no_generated_python_artifacts.sh
-scripts/qa/no_mutable_or_placeholder_images.sh
-scripts/qa/no_private_key_material.sh
-scripts/qa/no_upward_relative_paths_in_kustomize.sh
 scripts/qa/validate_monitor_selectors.sh
 scripts/qa/validate_service_selectors.sh
 scripts/qa/verify_adr_aux_maps.py
