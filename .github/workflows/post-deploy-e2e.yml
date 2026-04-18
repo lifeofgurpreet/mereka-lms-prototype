@@ -76,7 +76,7 @@ jobs:
 
           target_url_input="${{ github.event.inputs.target_url || '' }}"
           run_mode="e2e"
-          status_context="post-deploy-e2e/critical-paths/${environment}"
+          status_context="dev-runtime/e2e"
           status_description="Post-deploy ${environment} E2E gate"
           default_target_url=""
 

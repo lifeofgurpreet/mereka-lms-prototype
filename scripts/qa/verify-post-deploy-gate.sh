@@ -116,7 +116,7 @@ if [[ -f "$POLICY_FILE" ]] \
   && grep -q '^AUTHORITATIVE_RUNTIME_PROOF_ENV=staging$' "$POLICY_FILE" \
   && grep -q '^POST_DEPLOY_WORKFLOW_RUN_ENV=production$' "$POLICY_FILE" \
   && grep -q '^PROD_RUNTIME_MODE=parked$' "$POLICY_FILE" \
-  && grep -q '^PROD_PARKED_STATUS_CONTEXT=post-deploy/production-parked-state$' "$POLICY_FILE" \
+  && grep -q '^PROD_PARKED_STATUS_CONTEXT=prod-parked-state/auth$' "$POLICY_FILE" \
   && grep -q '^PROD_PARKED_VERIFIER=scripts/qa/verify-prod-parked-state.sh$' "$POLICY_FILE" \
   && grep -q '^PROD_FULL_RUNTIME_PROOF_VERIFIER=scripts/tenants/verify-prod-runtime-proof.sh$' "$POLICY_FILE" \
   && grep -q '^STAGING_RUNTIME_FIXTURE_MANIFEST=config/runtime-proof/staging.synthetic-proof-fixtures.yaml$' "$POLICY_FILE" \

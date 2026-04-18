@@ -12972,7 +12972,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-prod-parked-state.sh",
-      "reference_count": 13,
+      "reference_count": 14,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
