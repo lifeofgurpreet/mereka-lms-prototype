@@ -25,7 +25,12 @@ This drill exercises the full promotion rollback path so operators know exactly 
 
 ## Prerequisites
 
-- `kubectl` access to the non-prod cluster context (`kubectl config use-context rke2-nonprod`)
+- `kubectl` access to the non-prod cluster context. **Pin it explicitly** — do not rely on ambient context, which drifts between operator sessions:
+  ```bash
+  kubectl config use-context rke2-nonprod
+  kubectl config current-context  # must print: rke2-nonprod
+  ```
+  Every `kubectl` invocation below also passes `--context rke2-nonprod` so the drill is safe to copy-paste even if the ambient context drifted mid-session.
 - `gh` CLI authenticated with write on `Biji-Biji-Initiative/bbi-infrastructure`
 - ArgoCD UI access or `argocd` CLI authenticated
 - A stopwatch or scripted timer
@@ -45,18 +50,40 @@ The drill MUST run against dev, NEVER staging or production. Production has a ma
 
 ### Phase 0 — Capture baseline (T-5 min, not counted toward SLO)
 
-1. Record current promoted commit SHA:
+1. Record current promoted commit SHA into `BASELINE_SHA` (exported so later phases can reference it):
    ```bash
-   kubectl -n argocd get application mereka-lms-dev -o jsonpath='{.status.sync.revision}{"\n"}'
+   export BASELINE_SHA="$(
+     kubectl --context rke2-nonprod -n argocd get application mereka-lms-dev \
+       -o jsonpath='{.status.sync.revision}'
+   )"
+   [[ -n "$BASELINE_SHA" ]] || { echo "ERROR: could not read BASELINE_SHA from Argo"; exit 1; }
+   echo "BASELINE_SHA=$BASELINE_SHA"
    ```
-   Save as `BASELINE_SHA`.
 
-2. Record current pod imageIDs:
+2. Record current pod imageIDs and derive the drill baseline digest:
    ```bash
-   kubectl -n mereka-lms-dev get pods -o json | \
+   kubectl --context rke2-nonprod -n mereka-lms-dev get pods -o json | \
      jq -r '.items[] | select(.metadata.name|test("^(lms|cms|mfe|lms-worker|cms-worker)-")) |
             [.metadata.name, (.status.containerStatuses[0].imageID // "-")] | @tsv' \
      > /tmp/rollback-drill-baseline-pods.tsv
+
+   # Derive BASELINE_DIGEST from the TSV.
+   # Phase 2 and Phase 4 validate rollback against the cms-worker deployment,
+   # so BASELINE_DIGEST is the cms-worker digest captured at T-5 min.
+   # imageID format from kubectl is typically 'docker-pullable://...@sha256:XXX'
+   # or '...@sha256:XXX'; split on '@' and keep the sha256:... suffix.
+   export BASELINE_DIGEST="$(
+     awk -F'\t' '$1 ~ /^cms-worker-/ {
+       n = split($2, a, "@");
+       if (n > 1) { print a[n]; exit }
+     }' /tmp/rollback-drill-baseline-pods.tsv
+   )"
+   [[ -n "$BASELINE_DIGEST" ]] || { echo "ERROR: failed to derive BASELINE_DIGEST from /tmp/rollback-drill-baseline-pods.tsv"; exit 1; }
+   case "$BASELINE_DIGEST" in
+     sha256:*) ;;
+     *) echo "ERROR: BASELINE_DIGEST is not in sha256:... form: $BASELINE_DIGEST"; exit 1 ;;
+   esac
+   echo "BASELINE_DIGEST=$BASELINE_DIGEST"
    ```
 
 3. Start the stopwatch. Record `T_0` = current wall-clock.
@@ -73,17 +100,18 @@ The drill MUST run against dev, NEVER staging or production. Production has a ma
 
 1. Watch Argo reconcile the "bad" change:
    ```bash
-   watch -n 10 'kubectl -n argocd get application mereka-lms-dev \
+   watch -n 10 'kubectl --context rke2-nonprod -n argocd get application mereka-lms-dev \
      -o jsonpath="sync={.status.sync.status} health={.status.health.status} rev={.status.sync.revision}{\"\\n\"}"'
    ```
 
-2. Confirm cluster pods moved to the older digest:
+2. Confirm cluster pods moved to the older digest. `verify-pods-on-digest.sh` uses the **ambient** kubectl context (does not accept `--context`); the Phase 0 `kubectl config use-context rke2-nonprod` must still be in effect here:
    ```bash
+   kubectl config current-context  # must print: rke2-nonprod
    bash scripts/qa/verify-pods-on-digest.sh \
      --namespace mereka-lms-dev \
      --selector app.kubernetes.io/name=cms-worker \
-     --digest <baseline-digest>
-   # Expected: FAIL (pods on the bad/older digest)
+     --digest "${BASELINE_DIGEST}"
+   # Expected: FAIL (pods on the bad/older digest; BASELINE_DIGEST is the pre-injection baseline)
    ```
 
 3. Record `T_DETECTED`.
@@ -98,23 +126,29 @@ The drill MUST run against dev, NEVER staging or production. Production has a ma
 
 2. Wait for Argo to reconcile (may take 1–3 min; pay attention to the `ArgoAppSelfHealStuck` pattern — if autoHealAttemptsCount climbs without live spec change within 5 min, issue hard-refresh annotation):
    ```bash
-   kubectl -n argocd annotate application mereka-lms-dev argocd.argoproj.io/refresh=hard --overwrite
+   kubectl --context rke2-nonprod -n argocd annotate application mereka-lms-dev \
+     argocd.argoproj.io/refresh=hard --overwrite
    ```
 
 3. Record `T_REVERT_MERGED` and `T_RECONCILE_STARTED`.
 
 ### Phase 4 — Confirm rollback landed (T = 8–10 min)
 
-1. Confirm cluster pods are back on baseline digest:
+1. Confirm cluster pods are back on baseline digest (ambient context must still be `rke2-nonprod`):
    ```bash
+   kubectl config current-context  # must print: rke2-nonprod
    bash scripts/qa/verify-pods-on-digest.sh \
      --namespace mereka-lms-dev \
      --selector app.kubernetes.io/name=cms-worker \
-     --digest ${BASELINE_DIGEST}
+     --digest "${BASELINE_DIGEST}"
    # Expected: PASS
    ```
 
-2. Confirm Argo `health=Healthy` and `sync.revision` matches the revert-merge commit.
+2. Confirm Argo `health=Healthy` and `sync.revision` matches the revert-merge commit:
+   ```bash
+   kubectl --context rke2-nonprod -n argocd get application mereka-lms-dev \
+     -o jsonpath='health={.status.health.status} rev={.status.sync.revision}{"\n"}'
+   ```
 
 3. Confirm product surfaces still 200 (minimum smoke):
    ```bash
