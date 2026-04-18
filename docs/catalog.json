@@ -6321,6 +6321,15 @@
     "canonical_conflict_group": null,
     "freshness_risk": "low",
     "last_verified_or_updated": null,
+    "owner": "platform-release",
+    "path": "meta/standing-orders/TRUTH_REPAIR_DOCTRINE.md",
+    "status": "canonical",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
     "owner": null,
     "path": "meta/templates/AUTH_PR_SECTION.md",
     "status": "supporting",
@@ -6512,6 +6521,42 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "ops/ci-cd/baseline-pre-cache-authority-2026-04-16.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-release",
+    "path": "ops/evidence/studio-sso-tenant-chain-2026-04-18.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/evidence/velero-dr-audit-2026-04-18.json",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-release",
+    "path": "ops/evidence/velero-dr-audit-2026-04-18.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-release",
+    "path": "ops/evidence/velero-rca-wk03-node-agent-2026-04-18.md",
     "status": "supporting",
     "type": "runbook"
   },
@@ -8015,6 +8060,15 @@
     "last_verified_or_updated": null,
     "owner": "platform-release",
     "path": "ops/runbooks/promotion-rollback-drill.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-release",
+    "path": "ops/runbooks/rolling-state-refresh.md",
     "status": "supporting",
     "type": "runbook"
   },
@@ -10875,6 +10929,15 @@
     "canonical_conflict_group": null,
     "freshness_risk": "low",
     "last_verified_or_updated": null,
+    "owner": "platform-release",
+    "path": "status/active/CURRENT-OPERATOR-STATE.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
     "owner": "Platform Team | Last verified: 2026-03-20 | Status: active",
     "path": "status/active/DEV_CONVERGENCE_CONTROL.md",
     "status": "supporting",
@@ -11031,6 +11094,15 @@
     "owner": "Platform Team",
     "path": "status/active/FRONTEND_RUNTIME_STABILITY_STATUS_2026-03-02.md",
     "status": "superseded",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-release",
+    "path": "status/active/HOURLY-OPERATOR-LOOP-PROMPT.md",
+    "status": "supporting",
     "type": "status"
   },
   {
