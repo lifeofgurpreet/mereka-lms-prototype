@@ -88,7 +88,7 @@
       ]
     },
     {
-      "cluster_class": "gke",
+      "cluster_class": "rke2",
       "lane": "prod",
       "note": null,
       "root_count": 1,
@@ -145,13 +145,13 @@
     },
     {
       "Domain": "`academy.biji-biji.com`",
-      "MFE Subdomain": "Uses primary MFE",
+      "MFE Subdomain": "`apps.academy.biji-biji.com`",
       "Purpose": "Biji-Biji Initiative partner branding",
       "Session Scope": "Independent (no subdomain sharing)"
     },
     {
       "Domain": "`skillourfuture.academy.mereka.io`",
-      "MFE Subdomain": "Uses primary MFE",
+      "MFE Subdomain": "`apps.skillourfuture.academyv2.mereka.io`",
       "Purpose": "SkillOurFuture program",
       "Session Scope": "Independent"
     }
@@ -165,7 +165,8 @@
       "mereka-lms",
       "reka-slackbot",
       "temporal",
-      "weaviate"
+      "weaviate",
+      "zoom-rtms"
     ],
     "global_platform_endpoints": [
       "argocd",
@@ -179,7 +180,8 @@
       "mereka-lms",
       "reka-slackbot",
       "temporal",
-      "weaviate"
+      "weaviate",
+      "zoom-rtms"
     ]
   },
   "schema_version": 1,

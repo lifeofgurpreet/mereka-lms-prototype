@@ -13,7 +13,7 @@ This page is a projection from lane topology, domain registry, release-control c
 | dev | rke2 | 3 | n/a |
 | nonprod_platform | rke2 | 1 | Shared cluster-scoped operators for the nonprod RKE2 cluster (dev + staging share one cluster). Consolidates duplicate dev/staging platform ownership per ADR-015. Uses platform-dev project as the active project since dev is the current active environment. Source paths reference dev overlays until a unified overlays/nonprod/ is created in a follow-up PR. |
 | preview | rke2 | 1 | Preview environments run on the dev RKE2 cluster, bootstrapped via the dev overlay (preview-environments-preview.yaml is included in overlays/dev/). There is no separate preview bootstrap overlay — preview is a named scope managed by the dev lane ApplicationSet controller. |
-| prod | gke | 1 | n/a |
+| prod | rke2 | 1 | n/a |
 | staging | rke2 | 3 | n/a |
 
 ## Tenant And Site Relationships
@@ -63,8 +63,8 @@ This page is a projection from lane topology, domain registry, release-control c
 
 ## Platform Service Context
 
-- Canonical service IDs: `authentik, cal.com, listmonk, mereka-lms, reka-slackbot, temporal, weaviate`
-- Release contract lanes: `authentik, cal.com, listmonk, mereka-lms, reka-slackbot, temporal, weaviate`
+- Canonical service IDs: `authentik, cal.com, listmonk, mereka-lms, reka-slackbot, temporal, weaviate, zoom-rtms`
+- Release contract lanes: `authentik, cal.com, listmonk, mereka-lms, reka-slackbot, temporal, weaviate, zoom-rtms`
 - Global platform endpoints: `argocd, authentik, infisical`
 
 ## Canonical Inputs
