@@ -1,0 +1,48 @@
+{
+  "schema_version": "release-object/v1",
+  "release_id": "ro-rb-102a56a0-20260417T232409Z",
+  "created_at_utc": "2026-04-17T23:24:09Z",
+  "lane": "mereka-lms",
+  "service_id": "mereka-lms",
+  "repository": "Biji-Biji-Initiative/mereka-lms",
+  "app_commit_sha": "102a56a07d3270bb61d7c95b28d6ed0d67919360",
+  "build_origin_environment": "prod",
+  "promotion_target_environment": "dev",
+  "target_environment": "prod",
+  "contract_family": "release_object_projection_schema",
+  "contract_version": "1.0",
+  "contract_ref": "Biji-Biji-Initiative/platform-control-plane@fa5065b9b083f569278ab80c67fc1dfa25c82b3c",
+  "tenant_contract": {
+    "path": "/home/runner/_work/mereka-lms/mereka-lms/deploy/k8s/tenancy/tenant-registry.yaml",
+    "sha256": "57dd04bcc1969d2b0d37c10affc32918e842ba4fe4ff356e7d805414105d827c",
+    "control_plane_ref": "Biji-Biji-Initiative/platform-control-plane@fa5065b9b083f569278ab80c67fc1dfa25c82b3c"
+  },
+  "build": {
+    "workflow": ".github/workflows/build-tutor-images.yml",
+    "run_id": "24590743862",
+    "run_attempt": "1",
+    "release_bundle_id": "rb-102a56a0-20260417T232409Z"
+  },
+  "images": {
+    "openedx": {
+      "digest": "sha256:d17ae77f533be1690b969b220b3507c4d9780ef7f477ecd5c47e2b7777b54578",
+      "name": "ghcr.io/biji-biji-initiative/mereka-lms/openedx"
+    },
+    "mfe": {
+      "digest": "sha256:377923c0a2ce22c8e7bac7baf488c80f345a1445e2f7ac47b5c29e5b475b35e1",
+      "name": "ghcr.io/biji-biji-initiative/mereka-lms/mfe"
+    }
+  },
+  "source_artifacts": {
+    "release_bundle_json": "/home/runner/_work/mereka-lms/mereka-lms/var/ci/release-bundle.json",
+    "build_provenance_json": "/home/runner/_work/mereka-lms/mereka-lms/var/ci/build-provenance.json"
+  },
+  "proof_refs": [
+    "var/proof/release-gate.json"
+  ],
+  "promotion": {
+    "status": "gitops-linked",
+    "gitops_repository": "Biji-Biji-Initiative/bbi-infrastructure",
+    "gitops_commit_sha": "1a2241bb279e89dbc801f8d61d63cce79d0a21fc"
+  }
+}

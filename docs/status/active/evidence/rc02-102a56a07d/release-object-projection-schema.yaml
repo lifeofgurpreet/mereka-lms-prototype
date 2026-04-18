@@ -1,0 +1,203 @@
+schema_version: "1.0"
+contract: "release-object-projection-schema"
+description: "Machine-checkable projection contract for release-object/v1 payloads emitted by the app build and consumed by promotion workflows."
+
+required_fields:
+  - "schema_version"
+  - "release_id"
+  - "created_at_utc"
+  - "service_id"
+  - "repository"
+  - "app_commit_sha"
+  - "build_origin_environment"
+  - "promotion_target_environment"
+  - "tenant_contract"
+  - "build"
+  - "images"
+  - "source_artifacts"
+  - "proof_refs"
+  - "promotion"
+
+properties:
+  schema_version:
+    type: "string"
+    enum: ["release-object/v1"]
+  release_id:
+    type: "string"
+    pattern: "^ro-rb-[0-9a-f]{7,40}-[0-9]{8}T[0-9]{6}Z$"
+  created_at_utc:
+    type: "string"
+    format: "date-time"
+  service_id:
+    type: "string"
+    enum: ["mereka-lms"]
+  repository:
+    type: "string"
+    min_length: 3
+  app_commit_sha:
+    type: "string"
+    pattern: "^[0-9a-f]{40}$"
+  build_origin_environment:
+    type: "string"
+    enum: ["dev", "nonprod", "staging", "production", "prod", "rke2-nonprod"]
+  promotion_target_environment:
+    type: "string"
+    enum: ["dev", "nonprod", "staging", "production", "prod", "rke2-nonprod"]
+    nullable: true
+  target_environment:
+    type: "string"
+    enum: ["dev", "nonprod", "staging", "production", "prod", "rke2-nonprod"]
+    nullable: true
+    description: "Deprecated transitional alias; use build_origin_environment and promotion_target_environment."
+  contract_family:
+    type: "string"
+    enum: ["release_object_projection_schema"]
+  contract_version:
+    type: "string"
+    enum: ["1.0"]
+  contract_ref:
+    type: "string"
+    pattern: "^Biji-Biji-Initiative/platform-control-plane@[0-9a-f]{40}$"
+  tenant_contract:
+    type: "object"
+    required_object_fields:
+      - "path"
+      - "sha256"
+      - "control_plane_ref"
+    object_schema:
+      properties:
+        path:
+          type: "string"
+          min_length: 1
+        sha256:
+          type: "string"
+          pattern: "^[0-9a-f]{64}$"
+        control_plane_ref:
+          type: "string"
+          pattern: "^Biji-Biji-Initiative/platform-control-plane@[0-9a-f]{40}$"
+  build:
+    type: "object"
+    required_object_fields:
+      - "workflow"
+      - "run_id"
+      - "run_attempt"
+      - "release_bundle_id"
+    object_schema:
+      properties:
+        workflow:
+          type: "string"
+          min_length: 1
+        run_id:
+          type: "string"
+          pattern: "^[0-9]+$"
+        run_attempt:
+          type: "string"
+          pattern: "^[0-9]+$"
+        release_bundle_id:
+          type: "string"
+          pattern: "^rb-[0-9a-f]{7,40}-[0-9]{8}T[0-9]{6}Z$"
+  images:
+    type: "object"
+    required_object_fields:
+      - "openedx"
+      - "mfe"
+    object_schema:
+      properties:
+        openedx:
+          type: "object"
+          required_object_fields:
+            - "name"
+            - "digest"
+          object_schema:
+            properties:
+              name:
+                type: "string"
+                min_length: 1
+              digest:
+                type: "string"
+                pattern: "^sha256:[0-9a-f]{64}$"
+        mfe:
+          type: "object"
+          required_object_fields:
+            - "name"
+            - "digest"
+          object_schema:
+            properties:
+              name:
+                type: "string"
+                min_length: 1
+              digest:
+                type: "string"
+                pattern: "^sha256:[0-9a-f]{64}$"
+  source_artifacts:
+    type: "object"
+    required_object_fields:
+      - "release_bundle_json"
+      - "build_provenance_json"
+    object_schema:
+      properties:
+        release_bundle_json:
+          type: "string"
+          min_length: 1
+        build_provenance_json:
+          type: "string"
+          nullable: true
+  proof_refs:
+    type: "array"
+    min_items: 0
+  promotion:
+    type: "object"
+    required_object_fields:
+      - "status"
+      - "gitops_repository"
+      - "gitops_commit_sha"
+    object_schema:
+      properties:
+        status:
+          type: "string"
+          enum: ["build-only", "gitops-linked"]
+        gitops_repository:
+          type: "string"
+          nullable: true
+        gitops_commit_sha:
+          type: "string"
+          pattern: "^[0-9a-f]{40}$"
+          nullable: true
+
+examples:
+  - schema_version: "release-object/v1"
+    release_id: "ro-rb-e4764d58-20260410T142410Z"
+    created_at_utc: "2026-04-10T14:24:10Z"
+    service_id: "mereka-lms"
+    repository: "Biji-Biji-Initiative/mereka-lms"
+    app_commit_sha: "e4764d5834b6e24c26069e7edb2a527d05ae3b1d"
+    build_origin_environment: "dev"
+    promotion_target_environment: null
+    target_environment: "dev"
+    contract_family: "release_object_projection_schema"
+    contract_version: "1.0"
+    contract_ref: "Biji-Biji-Initiative/platform-control-plane@efbf7f9bd023eebea6b22f6b8305b8e62d4a5522"
+    tenant_contract:
+      path: "/home/runner/_work/mereka-lms/mereka-lms/deploy/k8s/tenancy/tenant-registry.yaml"
+      sha256: "8df3ea4c5e0ef4ca2892f3aa6c23c4f25fd09a7efa50a0ac680e4ce8512e73d2"
+      control_plane_ref: "Biji-Biji-Initiative/platform-control-plane@efbf7f9bd023eebea6b22f6b8305b8e62d4a5522"
+    build:
+      workflow: ".github/workflows/build-tutor-images.yml"
+      run_id: "24244345117"
+      run_attempt: "1"
+      release_bundle_id: "rb-e4764d58-20260410T142410Z"
+    images:
+      openedx:
+        name: "ghcr.io/biji-biji-initiative/mereka-lms/openedx"
+        digest: "sha256:2eed29dbd0cf5df5ddb55f4075d23cdeb4bb3c48704d20b540f7746379dd4ea4"
+      mfe:
+        name: "ghcr.io/biji-biji-initiative/mereka-lms/mfe"
+        digest: "sha256:9fff8d031b00feed62f1103baf21d2127c5f5721be064c6158aac018b3a15347"
+    source_artifacts:
+      release_bundle_json: "/home/runner/_work/mereka-lms/mereka-lms/var/ci/release-bundle.json"
+      build_provenance_json: null
+    proof_refs: []
+    promotion:
+      status: "build-only"
+      gitops_repository: null
+      gitops_commit_sha: null

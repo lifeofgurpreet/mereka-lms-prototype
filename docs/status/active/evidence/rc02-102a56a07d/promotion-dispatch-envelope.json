@@ -1,0 +1,151 @@
+{
+  "release_bundle_id": "rb-102a56a0-20260417T232409Z",
+  "lane": "mereka-lms",
+  "delivery_lane": "dev",
+  "service_id": "mereka-lms",
+  "dispatch_event_type": "promote-mereka-lms-dev",
+  "created_at": "2026-04-17T23:24:09Z",
+  "validation_evidence": "ci-build-pass:24590743862",
+  "structured_evidence": {
+    "checks": [
+      {
+        "id": "release-notes-diff",
+        "type": "release_notes_diff",
+        "status": "passed",
+        "summary": "Release bundle rb-102a56a0-20260417T232409Z anchors app commit 102a56a07d3270bb61d7c95b28d6ed0d67919360 for promotion review.",
+        "check_run_id": "gha://Biji-Biji-Initiative/mereka-lms/runs/24590743862/release-notes-diff",
+        "artifact_uri": "actions/artifacts/release-bundle@run-24590743862",
+        "hash": "sha256:faa5578ad5df632410fe2d3e505f262a8664d48ad088bfe813615ef8f983df6e"
+      },
+      {
+        "id": "config-change-summary",
+        "type": "config_change_summary",
+        "status": "passed",
+        "summary": "Promotion changes only the Open edX and MFE image digests; GitOps overlay mutation happens downstream.",
+        "check_run_id": "gha://Biji-Biji-Initiative/mereka-lms/runs/24590743862/config-change-summary",
+        "artifact_uri": "actions/artifacts/release-bundle@run-24590743862",
+        "hash": "sha256:03dde85846704d867f7816520d0a6c9320dcaf7ccdc7e23300299e1968c0588b"
+      },
+      {
+        "id": "migration-summary",
+        "type": "migration_summary",
+        "status": "skipped",
+        "summary": "App image-build does not execute Open edX migrations; migration truth is validated during promotion/runtime.",
+        "check_run_id": "gha://Biji-Biji-Initiative/mereka-lms/runs/24590743862/migration-summary",
+        "artifact_uri": "actions/artifacts/release-bundle@run-24590743862",
+        "hash": "sha256:eb875c6828e9ad8c87218bbf4ece9e67c1c28e8ba9c8cd30785274904adbd2ce"
+      },
+      {
+        "id": "smoke-test-result",
+        "type": "smoke_test_result",
+        "status": "passed",
+        "summary": "release-gate proof pass with 0 failing gates and 8 passing gates for release ro-rb-102a56a0-20260417T232409Z.",
+        "check_run_id": "gha://Biji-Biji-Initiative/mereka-lms/runs/24590743862/smoke-test-result",
+        "artifact_uri": "actions/artifacts/release-bundle@run-24590743862#release-gate-envelope.json",
+        "hash": "sha256:692a3da7e218dbf55f09567a9deca6fe71b20ea3752f0db4234c6f2d51188978"
+      },
+      {
+        "id": "release-gate-result",
+        "type": "release_gate_result",
+        "status": "passed",
+        "summary": "release-gate proof pass with 0 failing gates and 8 passing gates for release ro-rb-102a56a0-20260417T232409Z.",
+        "check_run_id": "gha://Biji-Biji-Initiative/mereka-lms/runs/24590743862/release-gate-result",
+        "artifact_uri": "actions/artifacts/release-bundle@run-24590743862#release-gate-envelope.json",
+        "hash": "sha256:692a3da7e218dbf55f09567a9deca6fe71b20ea3752f0db4234c6f2d51188978"
+      },
+      {
+        "id": "rollback-target-reference",
+        "type": "rollback_target_reference",
+        "status": "blocked",
+        "summary": "Rollback target selection is infra-owned and is resolved from the previously promoted dev bundle.",
+        "check_run_id": "gha://Biji-Biji-Initiative/mereka-lms/runs/24590743862/rollback-target-reference",
+        "artifact_uri": "actions/artifacts/release-bundle@run-24590743862",
+        "hash": "sha256:98bcd4a475b2b3d98a16f75e627ddd221bcc410ea79d02a2c4800bb299962089"
+      },
+      {
+        "id": "security-delta-summary",
+        "type": "security_delta_summary",
+        "status": "skipped",
+        "summary": "Security delta is carried by post-push scan artifacts and enforced later in the promotion gate.",
+        "check_run_id": "gha://Biji-Biji-Initiative/mereka-lms/runs/24590743862/security-delta-summary",
+        "artifact_uri": "actions/artifacts/release-bundle@run-24590743862",
+        "hash": "sha256:1e464db5b97ca0df5379ca2680974536bc926adbcb5016ab2b686c5b4fc724d2"
+      }
+    ]
+  },
+  "release_object": {
+    "schema_version": "release-object/v1",
+    "release_id": "ro-rb-102a56a0-20260417T232409Z",
+    "created_at_utc": "2026-04-17T23:24:09Z",
+    "lane": "mereka-lms",
+    "service_id": "mereka-lms",
+    "repository": "Biji-Biji-Initiative/mereka-lms",
+    "app_commit_sha": "102a56a07d3270bb61d7c95b28d6ed0d67919360",
+    "build_origin_environment": "prod",
+    "promotion_target_environment": "dev",
+    "target_environment": "prod",
+    "contract_family": "release_object_projection_schema",
+    "contract_version": "1.0",
+    "contract_ref": "Biji-Biji-Initiative/platform-control-plane@fa5065b9b083f569278ab80c67fc1dfa25c82b3c",
+    "tenant_contract": {
+      "path": "/home/runner/_work/mereka-lms/mereka-lms/deploy/k8s/tenancy/tenant-registry.yaml",
+      "sha256": "57dd04bcc1969d2b0d37c10affc32918e842ba4fe4ff356e7d805414105d827c",
+      "control_plane_ref": "Biji-Biji-Initiative/platform-control-plane@fa5065b9b083f569278ab80c67fc1dfa25c82b3c"
+    },
+    "build": {
+      "workflow": ".github/workflows/build-tutor-images.yml",
+      "run_id": "24590743862",
+      "run_attempt": "1",
+      "release_bundle_id": "rb-102a56a0-20260417T232409Z"
+    },
+    "images": {
+      "openedx": {
+        "digest": "sha256:d17ae77f533be1690b969b220b3507c4d9780ef7f477ecd5c47e2b7777b54578",
+        "name": "ghcr.io/biji-biji-initiative/mereka-lms/openedx"
+      },
+      "mfe": {
+        "digest": "sha256:377923c0a2ce22c8e7bac7baf488c80f345a1445e2f7ac47b5c29e5b475b35e1",
+        "name": "ghcr.io/biji-biji-initiative/mereka-lms/mfe"
+      }
+    },
+    "source_artifacts": {
+      "release_bundle_json": "/home/runner/_work/mereka-lms/mereka-lms/var/ci/release-bundle.json",
+      "build_provenance_json": "/home/runner/_work/mereka-lms/mereka-lms/var/ci/build-provenance.json"
+    },
+    "proof_refs": [
+      "var/proof/release-gate.json"
+    ],
+    "promotion": {
+      "status": "gitops-linked",
+      "gitops_repository": "Biji-Biji-Initiative/bbi-infrastructure",
+      "gitops_commit_sha": "1a2241bb279e89dbc801f8d61d63cce79d0a21fc"
+    }
+  },
+  "build_provenance": {
+    "commit_sha": "102a56a07d3270bb61d7c95b28d6ed0d67919360",
+    "contract_family": "build-provenance",
+    "contract_ref": "Biji-Biji-Initiative/platform-control-plane@194e6001c924902e8bf3dafefdc37fc842c56653",
+    "contract_version": "1.0",
+    "created_at": "2026-04-17T23:24:39Z",
+    "gitops": {
+      "commit_sha": "1a2241bb279e89dbc801f8d61d63cce79d0a21fc",
+      "repository": "Biji-Biji-Initiative/bbi-infrastructure"
+    },
+    "images": {
+      "mfe_digest": "sha256:377923c0a2ce22c8e7bac7baf488c80f345a1445e2f7ac47b5c29e5b475b35e1",
+      "openedx_digest": "sha256:d17ae77f533be1690b969b220b3507c4d9780ef7f477ecd5c47e2b7777b54578"
+    },
+    "release_bundle_id": "rb-102a56a0-20260417T232409Z",
+    "repository": "Biji-Biji-Initiative/mereka-lms",
+    "schema_version": "1.0.0",
+    "service_id": "mereka-lms",
+    "target_environment": "prod",
+    "run_url": "https://github.com/Biji-Biji-Initiative/mereka-lms/actions/runs/24590743862",
+    "artifact_uri": "actions/artifacts/release-bundle@run-24590743862",
+    "build_commit_sha": "102a56a07d3270bb61d7c95b28d6ed0d67919360"
+  },
+  "control_plane_ref": "Biji-Biji-Initiative/platform-control-plane@fa5065b9b083f569278ab80c67fc1dfa25c82b3c",
+  "contract_family": "promotion_dispatch_envelope_schema",
+  "contract_version": "1.0",
+  "contract_ref": "Biji-Biji-Initiative/platform-control-plane@fa5065b9b083f569278ab80c67fc1dfa25c82b3c"
+}

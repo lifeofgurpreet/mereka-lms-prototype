@@ -1,0 +1,107 @@
+{
+  "schema_version": "runtime-truth-ledger/v1",
+  "generated_at_utc": "2026-04-17T23:24:37.971944+00:00",
+  "lane": "ci-build",
+  "environment": "production",
+  "tenant_filter": null,
+  "record_id": "ci-build:production:all",
+  "contract_truth": {
+    "source": null,
+    "source_version": null,
+    "schema_version": null,
+    "matrix_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+  },
+  "repo_truth": {
+    "app_commit_sha": "102a56a07d3270bb61d7c95b28d6ed0d67919360",
+    "acceptance_command": "bin/accept ci-build --env production",
+    "acceptance_mode": null,
+    "acceptance_summary_json": "/home/runner/_work/mereka-lms/mereka-lms/var/ci/ci-build-summary.json"
+  },
+  "release_truth": {
+    "release_object_id": "ro-rb-102a56a0-20260417T232409Z",
+    "release_id": "ro-rb-102a56a0-20260417T232409Z",
+    "release_bundle_id": "rb-102a56a0-20260417T232409Z",
+    "release_object_json": "/home/runner/_work/mereka-lms/mereka-lms/var/ci/release-object.json",
+    "build_origin_environment": "prod",
+    "promotion_target_environment": "dev",
+    "openedx_image": {
+      "reference": "ghcr.io/biji-biji-initiative/mereka-lms/openedx:102a56a07d3270bb61d7c95b28d6ed0d67919360",
+      "repository": "ghcr.io/biji-biji-initiative/mereka-lms/openedx",
+      "tag": "102a56a07d3270bb61d7c95b28d6ed0d67919360",
+      "digest": null
+    },
+    "mfe_image": {
+      "reference": "ghcr.io/biji-biji-initiative/mereka-lms/mfe:102a56a07d3270bb61d7c95b28d6ed0d67919360",
+      "repository": "ghcr.io/biji-biji-initiative/mereka-lms/mfe",
+      "tag": "102a56a07d3270bb61d7c95b28d6ed0d67919360",
+      "digest": null
+    },
+    "proof_refs": [
+      "var/proof/release-gate.json"
+    ]
+  },
+  "infra_truth": {
+    "status": "unknown",
+    "infra_commit_sha": null
+  },
+  "argo_truth": {
+    "status": "unknown",
+    "app_name": null
+  },
+  "runtime_truth": {
+    "status": "unknown",
+    "namespace": null,
+    "deployments": []
+  },
+  "acceptance_truth": {
+    "bundle_path": null,
+    "summary_json": "/home/runner/_work/mereka-lms/mereka-lms/var/ci/ci-build-summary.json",
+    "verdict": {
+      "status": "pass",
+      "failed_checks": 0
+    },
+    "check_statuses": [
+      {
+        "name": "release-bundle-generated",
+        "status": "pass"
+      },
+      {
+        "name": "release-object-generated",
+        "status": "pass"
+      },
+      {
+        "name": "release-bundle-signed",
+        "status": "pass"
+      }
+    ]
+  },
+  "plane_comparisons": [
+    {
+      "plane": "openedx_image",
+      "status": "unknown",
+      "reason": "runtime image missing for ghcr.io/biji-biji-initiative/mereka-lms/openedx"
+    },
+    {
+      "plane": "mfe_image",
+      "status": "unknown",
+      "reason": "runtime image missing for ghcr.io/biji-biji-initiative/mereka-lms/mfe"
+    }
+  ],
+  "final_verdict": {
+    "status": "partial",
+    "reasons": [
+      "runtime image missing for ghcr.io/biji-biji-initiative/mereka-lms/openedx"
+    ]
+  },
+  "artifacts": {
+    "truth_ledger_json": "/home/runner/_work/mereka-lms/mereka-lms/var/ci/truth-ledger.json",
+    "acceptance_bundle": null,
+    "acceptance_summary_json": "/home/runner/_work/mereka-lms/mereka-lms/var/ci/ci-build-summary.json"
+  },
+  "release_identity": {
+    "release_id": "ro-rb-102a56a0-20260417T232409Z",
+    "release_bundle_id": "rb-102a56a0-20260417T232409Z",
+    "app_commit_sha": "102a56a07d3270bb61d7c95b28d6ed0d67919360",
+    "release_object_json": "/home/runner/_work/mereka-lms/mereka-lms/var/ci/release-object.json"
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "schema_version": "control-plane-release-bundle-projection/v1",
+  "projection_status": "partial",
+  "source_release_bundle": {
+    "bundle_id": "rb-102a56a0-20260417T232409Z",
+    "commit_sha": "102a56a07d3270bb61d7c95b28d6ed0d67919360",
+    "target_environment": "prod",
+    "service_id": "mereka-lms",
+    "contract_ref": "Biji-Biji-Initiative/platform-control-plane@fa5065b9b083f569278ab80c67fc1dfa25c82b3c"
+  },
+  "control_plane_contract": {
+    "root": "/home/runner/_work/mereka-lms/mereka-lms/var/ci/platform-control-plane",
+    "release_contracts": "/home/runner/_work/mereka-lms/mereka-lms/var/ci/platform-control-plane/contracts/release-contracts.yaml",
+    "release_bundle_schema": "/home/runner/_work/mereka-lms/mereka-lms/var/ci/platform-control-plane/contracts/release-bundle-schema.yaml",
+    "lane": "mereka-lms"
+  },
+  "canonical_projection": {
+    "bundle_id": "rb-102a56a0-20260417T232409Z",
+    "lane": "mereka-lms",
+    "service_id": "mereka-lms",
+    "contract_family": "release_bundle_schema",
+    "contract_version": "1.1",
+    "contract_ref": "Biji-Biji-Initiative/platform-control-plane@fa5065b9b083f569278ab80c67fc1dfa25c82b3c",
+    "runtime_profile": "R2",
+    "source_provenance_class": "S1",
+    "created_at": "2026-04-17T23:24:09Z",
+    "source_revision": "git:102a56a07d3270bb61d7c95b28d6ed0d67919360",
+    "artifacts": [
+      {
+        "name": "openedx",
+        "image": "ghcr.io/biji-biji-initiative/mereka-lms/openedx",
+        "digest": "sha256:d17ae77f533be1690b969b220b3507c4d9780ef7f477ecd5c47e2b7777b54578"
+      },
+      {
+        "name": "mfe",
+        "image": "ghcr.io/biji-biji-initiative/mereka-lms/mfe",
+        "digest": "sha256:377923c0a2ce22c8e7bac7baf488c80f345a1445e2f7ac47b5c29e5b475b35e1"
+      }
+    ]
+  },
+  "required_field_resolution": {
+    "resolved": [
+      "bundle_id",
+      "lane",
+      "service_id",
+      "runtime_profile",
+      "source_provenance_class",
+      "created_at",
+      "source_revision",
+      "artifacts"
+    ],
+    "unresolved": [
+      {
+        "field": "config_digest",
+        "reason": "Rendered GitOps/app config digest is not known at app image-build time; it becomes authoritative during promotion/realization."
+      },
+      {
+        "field": "evidence_pack_ref",
+        "reason": "Evidence pack identity is assembled from promotion/runtime proof after the build bundle is emitted."
+      },
+      {
+        "field": "rollback_target",
+        "reason": "Rollback target requires current promotion context and previous known-good bundle selection, which is not owned by the app build."
+      }
+    ]
+  },
+  "notes": [
+    "This projection is preparatory and non-authoritative.",
+    "delivery_lane is intentionally omitted because app build target_environment is not the same thing as promotion delivery lane.",
+    "The unresolved fields must be bound during later promotion/realization stages rather than guessed at build time."
+  ]
+}
