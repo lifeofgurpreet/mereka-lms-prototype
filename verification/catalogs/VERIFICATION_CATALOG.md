@@ -21,8 +21,8 @@ Machine-readable source: `verification/catalogs/verification_catalog.json`.
 
 ### Status Distribution
 - `active`: 436
-- `deprecated_candidate`: 2
-- `manual_only`: 194
+- `deprecated_candidate`: 1
+- `manual_only`: 195
 
 ### Kind Distribution
 - `verify`: 632
@@ -36,7 +36,6 @@ Machine-readable source: `verification/catalogs/verification_catalog.json`.
 
 Scripts currently not CI-bound and with near-zero references:
 - `scripts/qa/verify-phase7-selector-list-coverage.sh` (owner: `platform-core`, refs: 1)
-- `scripts/qa/verify-pods-on-digest.sh` (owner: `platform-core`, refs: 1)
 
 ## Archived Deprecated Scripts
 

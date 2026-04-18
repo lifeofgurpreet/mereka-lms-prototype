@@ -8012,6 +8012,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-release",
+    "path": "ops/runbooks/promotion-rollback-drill.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-02-12",
     "owner": "SRE",
     "path": "ops/runbooks/scaling.md",

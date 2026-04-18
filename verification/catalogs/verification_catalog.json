@@ -12593,7 +12593,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-pods-on-digest.sh",
-      "reference_count": 1,
+      "reference_count": 2,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster",
@@ -12601,7 +12601,7 @@
       ],
       "severity": "low",
       "spec_ids": [],
-      "status": "deprecated_candidate",
+      "status": "manual_only",
       "tier": "exploratory_manual"
     },
     {
@@ -18837,8 +18837,8 @@
     "status_overrides_applied": 8,
     "statuses": {
       "active": 436,
-      "deprecated_candidate": 2,
-      "manual_only": 194
+      "deprecated_candidate": 1,
+      "manual_only": 195
     },
     "tiers": {
       "exploratory_manual": 199,
