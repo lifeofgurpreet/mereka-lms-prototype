@@ -1,0 +1,325 @@
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: mereka-lms
+  description: Mereka Academy Learning Management System built on Open edX
+  annotations:
+    github.com/project-slug: Biji-Biji-Initiative/mereka-lms
+  tags:
+    - openedx
+    - python
+    - kubernetes
+    - tutor
+  links:
+    - url: https://academyv2.mereka.dev
+      title: LMS (Dev)
+    - url: https://academy.mereka.io
+      title: LMS (Prod)
+spec:
+  owner: guests
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-app
+  description: Open edX LMS - core learning management service
+  annotations:
+    github.com/project-slug: Biji-Biji-Initiative/mereka-lms
+    backstage.io/techdocs-ref: dir:.
+  tags:
+    - python
+    - django
+    - openedx
+spec:
+  type: service
+  lifecycle: production
+  owner: guests
+  system: mereka-lms
+  providesApis:
+    - mereka-lms-api
+  dependsOn:
+    - component:mereka-lms-mysql
+    - component:mereka-lms-redis
+    - component:mereka-lms-elasticsearch
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-cms
+  description: Open edX Studio - course authoring and content management
+  tags:
+    - python
+    - django
+    - openedx
+spec:
+  type: service
+  lifecycle: production
+  owner: guests
+  system: mereka-lms
+  dependsOn:
+    - component:mereka-lms-mysql
+    - component:mereka-lms-redis
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-mfe
+  description: React micro-frontends (learning, profile, account, authoring, etc.)
+  tags:
+    - react
+    - typescript
+    - openedx
+spec:
+  type: service
+  lifecycle: production
+  owner: guests
+  system: mereka-lms
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-caddy
+  description: Caddy reverse proxy routing traffic to LMS, Studio, and MFEs
+  tags:
+    - caddy
+    - proxy
+spec:
+  type: service
+  lifecycle: production
+  owner: guests
+  system: mereka-lms
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-enterprise-access
+  description: Enterprise B2B access control service
+  tags:
+    - python
+    - django
+    - enterprise
+spec:
+  type: service
+  lifecycle: production
+  owner: guests
+  system: mereka-lms
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-enterprise-catalog
+  description: Enterprise course catalog service
+  tags:
+    - python
+    - django
+    - enterprise
+spec:
+  type: service
+  lifecycle: production
+  owner: guests
+  system: mereka-lms
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-enterprise-subsidy
+  description: Enterprise subsidy and licensing management
+  tags:
+    - python
+    - django
+    - enterprise
+spec:
+  type: service
+  lifecycle: production
+  owner: guests
+  system: mereka-lms
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-license-manager
+  description: Enterprise license management service
+  tags:
+    - python
+    - django
+    - enterprise
+spec:
+  type: service
+  lifecycle: production
+  owner: guests
+  system: mereka-lms
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-discovery
+  description: Course discovery and catalog API
+  tags:
+    - python
+    - django
+spec:
+  type: service
+  lifecycle: production
+  owner: guests
+  system: mereka-lms
+  providesApis:
+    - mereka-lms-discovery-api
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-credentials
+  description: Certificate and credential issuance service
+  tags:
+    - python
+    - django
+spec:
+  type: service
+  lifecycle: production
+  owner: guests
+  system: mereka-lms
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-purchase-gateway
+  description: Custom ecommerce service (FastAPI + Stripe)
+  tags:
+    - python
+    - fastapi
+    - stripe
+spec:
+  type: service
+  lifecycle: production
+  owner: guests
+  system: mereka-lms
+  providesApis:
+    - mereka-lms-purchase-api
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-mysql
+  description: MySQL 8 database for course and user data
+  tags:
+    - mysql
+    - database
+spec:
+  type: resource
+  lifecycle: production
+  owner: guests
+  system: mereka-lms
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-redis
+  description: Redis caching and Celery broker
+  tags:
+    - redis
+    - cache
+spec:
+  type: resource
+  lifecycle: production
+  owner: guests
+  system: mereka-lms
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-elasticsearch
+  description: Elasticsearch for course and content search
+  tags:
+    - elasticsearch
+    - search
+spec:
+  type: resource
+  lifecycle: production
+  owner: guests
+  system: mereka-lms
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: mereka-lms-api
+  description: Core Open edX LMS REST API
+  tags:
+    - rest
+    - openedx
+spec:
+  type: openapi
+  lifecycle: production
+  owner: guests
+  system: mereka-lms
+  definition: |
+    openapi: "3.0.0"
+    info:
+      title: Mereka LMS API
+      version: "1.0"
+    servers:
+      - url: https://academyv2.mereka.dev
+        description: Dev
+      - url: https://academy.mereka.io
+        description: Production
+    paths:
+      /api/user/v1/me:
+        get:
+          summary: Current user info
+      /api/enrollment/v1/enrollment:
+        get:
+          summary: User enrollments
+      /oauth2/access_token:
+        post:
+          summary: OAuth2 token endpoint
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: mereka-lms-discovery-api
+  description: Course Discovery and Catalog API
+  tags:
+    - rest
+spec:
+  type: openapi
+  lifecycle: production
+  owner: guests
+  system: mereka-lms
+  definition: |
+    openapi: "3.0.0"
+    info:
+      title: Course Discovery API
+      version: "1.0"
+    paths:
+      /api/v1/catalogs:
+        get:
+          summary: List course catalogs
+      /api/v1/courses:
+        get:
+          summary: List courses
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: mereka-lms-purchase-api
+  description: Purchase Gateway ecommerce API (Stripe)
+  tags:
+    - rest
+    - fastapi
+    - stripe
+spec:
+  type: openapi
+  lifecycle: production
+  owner: guests
+  system: mereka-lms
+  definition: |
+    openapi: "3.0.0"
+    info:
+      title: Purchase Gateway API
+      version: "1.0"
+    paths:
+      /api/v1/checkout:
+        post:
+          summary: Create checkout session
+      /api/v1/webhooks/stripe:
+        post:
+          summary: Stripe webhook handler
