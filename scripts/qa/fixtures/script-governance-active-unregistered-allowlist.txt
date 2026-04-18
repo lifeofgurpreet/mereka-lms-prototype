@@ -1,4 +1,5 @@
-# Governed baseline for active-but-unregistered top-level shell entrypoints in critical directories.
 # Generated from generate-script-governance-catalog.py execution caller reachability
+# Governed baseline for active-but-unregistered top-level shell entrypoints in critical directories.
 # and registry/inventory membership. New entries indicate active caller wiring
 # without registration; stale entries are safe to remove.
+scripts/qa/verify-pods-on-digest.sh

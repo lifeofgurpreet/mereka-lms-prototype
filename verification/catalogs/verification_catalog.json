@@ -12593,7 +12593,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-pods-on-digest.sh",
-      "reference_count": 3,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster",
