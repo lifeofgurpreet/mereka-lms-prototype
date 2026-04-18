@@ -2173,6 +2173,22 @@ jobs:
             --contract-ref "${CONTRACT_REF}" \
             --output var/ci/promotion-dispatch-envelope.json
 
+      - name: Stage projection schema + checksum for self-contained packet
+        # The release-bundle artifact should be independently re-verifiable
+        # without requiring a local platform-control-plane checkout. Ship
+        # the projection schema alongside release-object.json and emit a
+        # SHA-256 checksum so `verify-release-object.sh` can use it
+        # (precedence: --schema > sibling w/ checksum > PCP env > discovery).
+        run: |
+          set -euo pipefail
+          cp var/ci/platform-control-plane/contracts/release-object-projection-schema.yaml \
+             var/ci/release-object-projection-schema.yaml
+          sha256sum var/ci/release-object-projection-schema.yaml \
+            | awk '{print $1}' \
+            > var/ci/release-object-projection-schema.yaml.sha256
+          echo "Staged schema + checksum for evidence packet:"
+          ls -la var/ci/release-object-projection-schema.yaml*
+
       - name: Upload release bundle
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
         with:
@@ -2181,6 +2197,8 @@ jobs:
             var/ci/release-bundle.json
             var/ci/control-plane-release-bundle-projection.json
             var/ci/release-object.json
+            var/ci/release-object-projection-schema.yaml
+            var/ci/release-object-projection-schema.yaml.sha256
             var/ci/build-provenance.json
             var/ci/release-gate-envelope.json
             var/ci/truth-ledger.json

@@ -4331,6 +4331,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "guides/CI_TOKENS_FOR_DEVELOPERS.md",
+    "status": "supporting",
+    "type": "guide"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-10",
     "owner": "Documentation Team",
     "path": "guides/INDEX_BY_AUDIENCE.md",
@@ -6408,11 +6417,56 @@
     "type": "runbook"
   },
   {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/ci-cd/AUTOMATION_AUTHORSHIP_AUDIT.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/ci-cd/BENCHMARK_CLASSES.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/ci-cd/BUILD_FAILURE_TAXONOMY.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/ci-cd/CACHE_AUTHORITY.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
     "canonical_conflict_group": "ci-cd-runners",
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
     "path": "ops/ci-cd/CI_CD_RUNNERS.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/ci-cd/CI_METRICS.md",
     "status": "supporting",
     "type": "runbook"
   },
@@ -6432,6 +6486,33 @@
     "owner": "Platform Team",
     "path": "ops/ci-cd/README.md",
     "status": "canonical",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/ci-cd/RELEASE_UNIT_SCHEMA.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/ci-cd/RUNNER_HYGIENE.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/ci-cd/baseline-pre-cache-authority-2026-04-16.md",
+    "status": "supporting",
     "type": "runbook"
   },
   {
@@ -10309,6 +10390,33 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "rfcs/BUILD-AUTHORITY-SPRINT-AGENT-BRIEF.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "rfcs/BUILD-AUTHORITY-SPRINT-HANDOFF.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "rfcs/RFC-BUILD-AUTHORITY-001.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "runbooks/README.md",
     "status": "superseded",
     "type": "runbook"
@@ -10685,6 +10793,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-16",
+    "owner": null,
+    "path": "status/active/BUILD_AUTHORITY_PHASE2_COORDINATION_2026-04-16.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
     "path": "status/active/CI_OPTIMIZATION_TRACKER.md",
@@ -10993,6 +11110,15 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "status/active/OPENEDX_CONVEYOR_CLOSURE_CHARTER_2026-04-18.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "status/active/PLUGIN_SPLIT_STATUS_2026-03-02.md",
     "status": "supporting",
     "type": "status"
@@ -11192,6 +11318,186 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "status/active/blocked-epics.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/evidence/rc02-102a56a07d/CHAIN_PROOF.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/evidence/rc02-102a56a07d/EVIDENCE.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/evidence/rc02-102a56a07d/FINAL_DELIVERABLES_2026-04-18.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-18",
+    "owner": null,
+    "path": "status/active/evidence/rc02-102a56a07d/OG-01-STALE-ARGO-OP-RUNBOOK.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-18",
+    "owner": null,
+    "path": "status/active/evidence/rc02-102a56a07d/OG-02-TIMING-SCOREBOARD.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/evidence/rc02-102a56a07d/OG-03-PROMOTE-AUDIT.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/evidence/rc02-102a56a07d/OG-AUTHORITY-VERDICT.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/evidence/rc02-102a56a07d/RUNTIME_MATRIX.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/evidence/rc02-102a56a07d/RUNTIME_MATRIX_ADDENDUM_2026-04-18T02.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/evidence/rc02-102a56a07d/build-provenance.json",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/evidence/rc02-102a56a07d/control-plane-release-bundle-projection.json",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/evidence/rc02-102a56a07d/promotion-dispatch-envelope.json",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/evidence/rc02-102a56a07d/release-bundle.json",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/evidence/rc02-102a56a07d/release-gate-envelope.json",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/evidence/rc02-102a56a07d/release-object-projection-schema.yaml",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/evidence/rc02-102a56a07d/release-object-projection-schema.yaml.sha256",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/evidence/rc02-102a56a07d/release-object.json",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/evidence/rc02-102a56a07d/truth-ledger.json",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/evidence/rc02-102a56a07d/verify-build-workflow-contract.out.txt",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/evidence/rc02-102a56a07d/verify-release-object.out.txt",
     "status": "supporting",
     "type": "status"
   },

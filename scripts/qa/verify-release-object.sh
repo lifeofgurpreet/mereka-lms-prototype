@@ -1,4 +1,22 @@
 #!/usr/bin/env bash
+# verify-release-object.sh — validate a release-object/v1 projection.
+#
+# Schema-discovery precedence (first match wins):
+#   1. --schema <path> / $RELEASE_OBJECT_SCHEMA_PATH (explicit override)
+#   2. Sibling file: release-object-projection-schema.yaml in the same dir
+#      as the release object. If a matching .sha256 file is present, the
+#      schema contents are verified against it before use.
+#   3. $PLATFORM_CONTROL_PLANE_ROOT / $WAVE10_PCP_ROOT (explicit control-plane root)
+#   4. Discoverable platform-control-plane checkout (see DEFAULT_PLATFORM_ROOTS)
+#
+# Usage:
+#   verify-release-object.sh [<release-object.json>]
+#   verify-release-object.sh <release-object.json> --schema <schema.yaml>
+#
+# Evidence packets authored by the build workflow SHOULD ship the schema
+# next to the release-object.json plus a sibling .sha256 checksum. This
+# makes the packet self-contained and independently re-verifiable without
+# requiring a local platform-control-plane checkout.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -12,12 +30,74 @@ DEFAULT_PLATFORM_ROOTS=(
   "$HOME/projects/platform-control-plane"
 )
 
-RELEASE_OBJECT_PATH="${1:-${REPO_ROOT}/var/ci/release-object.json}"
+# Parse positional + --schema flag
+RELEASE_OBJECT_PATH=""
+SCHEMA_OVERRIDE="${RELEASE_OBJECT_SCHEMA_PATH:-}"
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --schema)
+      SCHEMA_OVERRIDE="$2"; shift 2 ;;
+    --schema=*)
+      SCHEMA_OVERRIDE="${1#*=}"; shift ;;
+    -h|--help)
+      sed -n '2,20p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+      exit 0 ;;
+    *)
+      if [[ -z "$RELEASE_OBJECT_PATH" ]]; then
+        RELEASE_OBJECT_PATH="$1"
+      else
+        echo "FAIL: unexpected argument: $1" >&2
+        exit 2
+      fi
+      shift ;;
+  esac
+done
+RELEASE_OBJECT_PATH="${RELEASE_OBJECT_PATH:-${REPO_ROOT}/var/ci/release-object.json}"
+
+if [[ ! -f "${RELEASE_OBJECT_PATH}" ]]; then
+  echo "FAIL: release object not found at ${RELEASE_OBJECT_PATH}" >&2
+  exit 1
+fi
+
+# Resolve schema path per precedence
+SCHEMA_PATH=""
+SCHEMA_SOURCE=""
+
+# (1) explicit override
+if [[ -n "$SCHEMA_OVERRIDE" ]]; then
+  SCHEMA_PATH="$SCHEMA_OVERRIDE"
+  SCHEMA_SOURCE="override"
+fi
+
+# (2) sibling in the release-object directory
+if [[ -z "$SCHEMA_PATH" ]]; then
+  release_dir="$(cd "$(dirname "${RELEASE_OBJECT_PATH}")" && pwd)"
+  candidate="${release_dir}/release-object-projection-schema.yaml"
+  if [[ -f "$candidate" ]]; then
+    SCHEMA_PATH="$candidate"
+    SCHEMA_SOURCE="sibling"
+    sha_file="${candidate}.sha256"
+    if [[ -f "$sha_file" ]]; then
+      expected=$(awk '{print $1; exit}' "$sha_file")
+      actual=$(sha256sum "$candidate" | awk '{print $1}')
+      if [[ "$expected" != "$actual" ]]; then
+        echo "FAIL: sibling schema checksum mismatch" >&2
+        echo "  expected: $expected" >&2
+        echo "  actual:   $actual" >&2
+        echo "  file:     $candidate" >&2
+        exit 1
+      fi
+    fi
+  fi
+fi
+
+# (3) explicit control-plane root
 PLATFORM_ROOT="${PLATFORM_CONTROL_PLANE_ROOT:-${WAVE10_PCP_ROOT:-}}"
 platform_root_explicit=0
 [[ -n "${PLATFORM_CONTROL_PLANE_ROOT:-}" || -n "${WAVE10_PCP_ROOT:-}" ]] && platform_root_explicit=1
 
-if [[ -z "$PLATFORM_ROOT" ]]; then
+# (4) discoverable control-plane checkout
+if [[ -z "$SCHEMA_PATH" && -z "$PLATFORM_ROOT" ]]; then
   for candidate in "${DEFAULT_PLATFORM_ROOTS[@]}"; do
     if [[ -f "$candidate/contracts/release-object-projection-schema.yaml" ]]; then
       PLATFORM_ROOT="$candidate"
@@ -26,11 +106,15 @@ if [[ -z "$PLATFORM_ROOT" ]]; then
   done
 fi
 
-SCHEMA_PATH="${RELEASE_OBJECT_SCHEMA_PATH:-${PLATFORM_ROOT}/contracts/release-object-projection-schema.yaml}"
+if [[ -z "$SCHEMA_PATH" ]]; then
+  SCHEMA_PATH="${PLATFORM_ROOT}/contracts/release-object-projection-schema.yaml"
+  SCHEMA_SOURCE="platform-control-plane"
+fi
 
-if [[ ! -f "${RELEASE_OBJECT_PATH}" ]]; then
-  echo "FAIL: release object not found at ${RELEASE_OBJECT_PATH}" >&2
-  exit 1
+# Emit which precedence branch resolved the schema (for operator visibility
+# and future debugging — referenced in evidence packets).
+if [[ -n "${VERBOSE:-}" || -n "${CI:-}" ]]; then
+  echo "schema source: ${SCHEMA_SOURCE:-<unset>} -> ${SCHEMA_PATH}" >&2
 fi
 
 if [[ ! -f "${SCHEMA_PATH}" ]]; then
@@ -38,8 +122,13 @@ if [[ ! -f "${SCHEMA_PATH}" ]]; then
     echo "FAIL: release-object projection schema not found at ${SCHEMA_PATH}" >&2
     exit 1
   fi
-  echo "FAIL: platform-control-plane release-object projection schema unavailable" >&2
-  echo "Looked for: ${SCHEMA_PATH}" >&2
+  echo "FAIL: release-object projection schema unavailable" >&2
+  echo "Tried (in order):" >&2
+  echo "  1. --schema / \$RELEASE_OBJECT_SCHEMA_PATH — unset" >&2
+  echo "  2. sibling: $(dirname "${RELEASE_OBJECT_PATH}")/release-object-projection-schema.yaml — not found" >&2
+  echo "  3. \$PLATFORM_CONTROL_PLANE_ROOT / \$WAVE10_PCP_ROOT — unset" >&2
+  echo "  4. default platform-control-plane roots:" >&2
+  for p in "${DEFAULT_PLATFORM_ROOTS[@]}"; do echo "       - ${p}/contracts/release-object-projection-schema.yaml" >&2; done
   exit 1
 fi
 
