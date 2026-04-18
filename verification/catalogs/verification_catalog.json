@@ -13884,7 +13884,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-release-object.sh",
-      "reference_count": 18,
+      "reference_count": 19,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
