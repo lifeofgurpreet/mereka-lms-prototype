@@ -15,13 +15,60 @@ RELEASE_OBJECT_CONTRACT_VERSION = "1.0"
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--release-bundle-json", required=True, type=Path)
-    parser.add_argument("--output", required=True, type=Path)
-    parser.add_argument("--tenant-contract-path", type=Path, default=DEFAULT_TENANT_CONTRACT_PATH)
-    parser.add_argument("--build-provenance-json", type=Path)
-    parser.add_argument("--proof-ref", action="append", default=[])
-    parser.add_argument("--release-id")
+    parser = argparse.ArgumentParser(
+        description=(
+            "Build the canonical release-object/v1 projection from a signed "
+            "release bundle. Consumed by the promotion workflow to authorize "
+            "a dev/staging/prod image promotion."
+        ),
+    )
+    parser.add_argument(
+        "--release-bundle-json",
+        required=True,
+        type=Path,
+        help="Path to the signed release-bundle.json produced by the build workflow.",
+    )
+    parser.add_argument(
+        "--output",
+        required=True,
+        type=Path,
+        help="Where to write the resulting release-object.json (parent dirs are created).",
+    )
+    parser.add_argument(
+        "--tenant-contract-path",
+        type=Path,
+        default=DEFAULT_TENANT_CONTRACT_PATH,
+        help=(
+            "Path to the tenant registry contract whose SHA-256 is embedded in "
+            f"the release object. Default: {DEFAULT_TENANT_CONTRACT_PATH.relative_to(REPO_ROOT)}"
+        ),
+    )
+    parser.add_argument(
+        "--build-provenance-json",
+        type=Path,
+        help=(
+            "Optional build-provenance.json. When provided, its release_bundle_id "
+            "is cross-checked with the bundle and the release object is marked "
+            "promotion.status=gitops-linked."
+        ),
+    )
+    parser.add_argument(
+        "--proof-ref",
+        action="append",
+        default=[],
+        help=(
+            "Zero or more proof references to attach (repeatable). Each ref is a "
+            "free-form string such as a URL or contract identifier the consumer "
+            "can dereference."
+        ),
+    )
+    parser.add_argument(
+        "--release-id",
+        help=(
+            "Override the generated release_id. Default: ro-<bundle_id>. Use "
+            "sparingly — the projection contract prefers the deterministic form."
+        ),
+    )
     return parser.parse_args()
 
 
