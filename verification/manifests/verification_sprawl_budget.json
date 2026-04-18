@@ -1,8 +1,8 @@
 {
-  "max_total_verify_scripts": 633,
+  "max_total_verify_scripts": 634,
   "max_manual_only_scripts": 196,
   "max_deprecated_candidate_scripts": 35,
   "min_ci_static_bound": 326,
   "budget_reviewed_at": "2026-04-18",
-  "budget_rationale": "Reviewed 2026-04-18: +1 runbook-executable verifier (verify-runbook-executable.sh) per Truth Repair Doctrine Rule 3 enforcement, bead mereka-lms-y69t.1 (P2). Closes the runbook-executed-without-evidence failure class. Budget raised 632\u2192633. Previous (2026-04-18): +1 pod-imageID verifier (verify-pods-on-digest.sh) added per S6.4 bead mereka-lms-lb4c.4 (P1). Closes the silent-sync-stuck gap observed on 2026-04-18 during RC-05 closure (infrastructure-nj48). Budget raised 631\u2192632. Previous (2026-04-17): +1 runner-class taxonomy upstream drift gate (verify-runner-class-taxonomy-upstream.sh) added per ADR-025 \u00a71 / mereka-lms-5dwe.4. Previous (2026-04-16): +1 build-authority red-line verifier (jj97.21)."
+  "budget_rationale": "Reviewed 2026-04-18 (slice 18, #1825 post-conflict-resolve): +1 retraction-sweep verifier (verify-retraction-sweep.sh) per Truth Repair Doctrine Rule 2 enforcement, bead mereka-lms-y69t.2 (P2). Closes the retracted-theory-survives-in-canonical-artifacts failure class (observed in ArgoAppSelfHealStuck managedFields case). Total budget raised 633\u2192634. Manual-only capacity unchanged (196) because verify-retraction-sweep.sh fits within existing headroom. Previous (2026-04-18): +1 runbook-executable verifier (verify-runbook-executable.sh) per Truth Repair Doctrine Rule 3 enforcement, bead mereka-lms-y69t.1 (P2). Closes the runbook-executed-without-evidence failure class. Budget raised 632\u2192633. Previous (2026-04-18): +1 pod-imageID verifier (verify-pods-on-digest.sh) added per S6.4 bead mereka-lms-lb4c.4 (P1). Closes the silent-sync-stuck gap observed on 2026-04-18 during RC-05 closure (infrastructure-nj48). Budget raised 631\u2192632. Previous (2026-04-17): +1 runner-class taxonomy upstream drift gate (verify-runner-class-taxonomy-upstream.sh) added per ADR-025 \u00a71 / mereka-lms-5dwe.4. Previous (2026-04-16): +1 build-authority red-line verifier (jj97.21)."
 }
