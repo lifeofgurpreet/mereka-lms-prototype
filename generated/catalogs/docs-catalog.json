@@ -11351,6 +11351,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/evidence/rc02-102a56a07d/INERT-WORKFLOW-VERDICT.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-04-18",
     "owner": null,
     "path": "status/active/evidence/rc02-102a56a07d/OG-01-STALE-ARGO-OP-RUNBOOK.md",
