@@ -12604,10 +12604,14 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
+      "cadence": "per_pr_and_push",
       "canonical": true,
-      "ci_binding": [],
-      "ci_entrypoints": [],
+      "ci_binding": [
+        "workflow_direct"
+      ],
+      "ci_entrypoints": [
+        "workflow_direct"
+      ],
       "env_scope": [
         "dev"
       ],
@@ -12615,16 +12619,16 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-pods-on-digest.sh",
-      "reference_count": 4,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster",
         "vendor"
       ],
-      "severity": "low",
+      "severity": "high",
       "spec_ids": [],
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -18858,17 +18862,17 @@
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 436,
+      "active": 437,
       "deprecated_candidate": 1,
-      "manual_only": 196
+      "manual_only": 195
     },
     "tiers": {
-      "exploratory_manual": 200,
+      "exploratory_manual": 199,
       "periodic_runtime": 21,
-      "release_blocking": 412
+      "release_blocking": 413
     },
     "total_verify_scripts": 633,
-    "workflow_direct_bound": 69
+    "workflow_direct_bound": 70
   },
   "version": "1"
 }
