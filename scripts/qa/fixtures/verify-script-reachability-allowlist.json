@@ -128,7 +128,6 @@
     "scripts/qa/verify-pii-inventory.sh",
     "scripts/qa/verify-platform-middleware.sh",
     "scripts/qa/verify-plugin-surface-matrix.sh",
-    "scripts/qa/verify-pods-on-digest.sh",
     "scripts/qa/verify-post-deploy-smoke.sh",
     "scripts/qa/verify-pr-handoff-guardrails.sh",
     "scripts/qa/verify-preview-redirect.sh",

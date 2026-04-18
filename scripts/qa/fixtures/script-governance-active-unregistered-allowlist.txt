@@ -2,5 +2,6 @@
 # Generated from generate-script-governance-catalog.py execution caller reachability
 # and registry/inventory membership. New entries indicate active caller wiring
 # without registration; stale entries are safe to remove.
+scripts/ci/emit-promotion-chain-metrics.sh
 scripts/ci/run-with-retry.sh
 scripts/qa/verify-pods-on-digest.sh
