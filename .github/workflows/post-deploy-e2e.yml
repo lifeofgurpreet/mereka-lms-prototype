@@ -76,7 +76,7 @@ jobs:
 
           target_url_input="${{ github.event.inputs.target_url || '' }}"
           run_mode="e2e"
-          status_context="post-deploy-e2e/critical-paths/${environment}"
+          status_context="dev-runtime/e2e"
           status_description="Post-deploy ${environment} E2E gate"
           default_target_url=""
 
@@ -346,9 +346,25 @@ jobs:
           if-no-files-found: warn
 
   prod-parked-state:
-    name: Verify Production Parked State
+    # Parked-state verification is LEGACY. It was designed for the GKE prod
+    # cluster during the RKE2 migration. GKE is decommissioned, so the
+    # GCP auth step here always fails, and the resulting "Post-Deploy E2E
+    # Gate FAILED" signal reads to operators like an app-runtime break when
+    # it's actually stale-infrastructure noise.
+    #
+    # As of 2026-04-18 this job is gated off by default. To re-enable it
+    # when production genuinely goes back to parked-state on rke2-prod,
+    # set the repo variable ENABLE_PROD_PARKED_STATE_GATE=true AND update
+    # the GKE auth step to either RKE2 auth or removal.
+    #
+    # See: docs/status/active/evidence/rc02-102a56a07d/
+    #      GKE-ACTIVE-SURFACE-CLASSIFICATION.md
+    name: Verify Production Parked State (legacy — gated off)
     needs: gate-check
-    if: needs.gate-check.outputs.should_run == 'true' && needs.gate-check.outputs.run_mode == 'prod-parked'
+    if: >-
+      needs.gate-check.outputs.should_run == 'true'
+      && needs.gate-check.outputs.run_mode == 'prod-parked'
+      && vars.ENABLE_PROD_PARKED_STATE_GATE == 'true'
     runs-on: mereka-k8s-runners
     timeout-minutes: 15
     permissions:
@@ -361,7 +377,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
-      - name: Authenticate to GCP and get GKE credentials
+      # LEGACY ACTION NAME: "gcp-gke-auth" dates from the GKE era.
+      # GKE is decommissioned; RKE2 is the cluster substrate.
+      # This step is retained only because the composite action still provides
+      # valid GCP workload-identity auth for Secret Manager access.
+      # See: docs/status/active/15-ACTIVE-CONTROL-PLANE-SURFACE-CLASSIFICATION-2026-04-18.md (Bucket C)
+      - name: Authenticate to GCP Secret Manager (legacy action name, RKE2 substrate)
         uses: ./.github/actions/gcp-gke-auth
         with:
           workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}

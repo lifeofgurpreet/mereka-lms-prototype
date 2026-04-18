@@ -1,0 +1,50 @@
+{
+  "schema_version": "1",
+  "concern": "release-gate",
+  "timestamp": "2026-04-17T23:24:39Z",
+  "commit_sha": "102a56a07d3270bb61d7c95b28d6ed0d67919360",
+  "ci_run_id": "24590743862",
+  "lane": "prod",
+  "service_id": "mereka-lms",
+  "contract_family": "proof-envelope",
+  "contract_version": "1.0",
+  "contract_ref": "Biji-Biji-Initiative/platform-control-plane@194e6001c924902e8bf3dafefdc37fc842c56653",
+  "dry_run": false,
+  "result": "pass",
+  "details": {
+    "timestamp": "2026-04-17T23:24:53Z",
+    "sha": "102a56a07d3270bb61d7c95b28d6ed0d67919360",
+    "overlay": "deploy/k8s/overlays/production",
+    "skip_cluster": true,
+    "closure_level": "static",
+    "gates_pass": 8,
+    "gates_fail": 0,
+    "gates_warn": 3,
+    "gates_skip": 1,
+    "verdict": "pass",
+    "release_identity": {
+      "release_id": "ro-rb-102a56a0-20260417T232409Z",
+      "release_bundle_id": "rb-102a56a0-20260417T232409Z",
+      "app_commit_sha": "102a56a07d3270bb61d7c95b28d6ed0d67919360",
+      "release_object_json": "/home/runner/_work/mereka-lms/mereka-lms/var/ci/release-object.json",
+      "build_origin_environment": "prod",
+      "promotion_target_environment": "dev",
+      "proof_refs": [
+        "var/proof/release-gate.json"
+      ]
+    }
+  },
+  "warnings": [],
+  "duration_ms": 13788,
+  "release_identity": {
+    "release_id": "ro-rb-102a56a0-20260417T232409Z",
+    "release_bundle_id": "rb-102a56a0-20260417T232409Z",
+    "app_commit_sha": "102a56a07d3270bb61d7c95b28d6ed0d67919360",
+    "release_object_json": "/home/runner/_work/mereka-lms/mereka-lms/var/ci/release-object.json",
+    "build_origin_environment": "prod",
+    "promotion_target_environment": "dev",
+    "proof_refs": [
+      "var/proof/release-gate.json"
+    ]
+  }
+}

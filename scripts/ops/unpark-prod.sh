@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# unpark-prod.sh — Restore GKE prod from warm-park-mode to full operation.
+# unpark-prod.sh — Restore RKE2 prod from warm-park-mode to full operation.
+#
+# NOTE: "GKE" in the variable name GKE_CONTEXT below is a historical artifact;
+# GKE was decommissioned and the variable already points to rke2-prod.
 #
 # Warm-park mode scales all stateless LMS workloads to 0, keeping data-plane
 # pods (mysql, redis, postgresql-payments) running. This script reverses it via
@@ -15,6 +18,13 @@
 #   - ArgoCD CLI (optional, for status polling)
 
 set -euo pipefail
+
+# Safety guard: require explicit confirmation for production-mutating operations
+if [[ "${CONFIRM:-}" != "yes-i-am-sure" ]]; then
+  echo "ERROR: This script mutates production. To proceed, run:"
+  echo "  CONFIRM=yes-i-am-sure $0 $*"
+  exit 1
+fi
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"

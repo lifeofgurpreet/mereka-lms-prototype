@@ -3,6 +3,13 @@
 # @spec: secrets-management_spec.md
 set -euo pipefail
 
+# Safety guard: require explicit confirmation for production-mutating operations
+if [[ "${CONFIRM:-}" != "yes-i-am-sure" ]]; then
+  echo "ERROR: This script mutates production. To proceed, run:"
+  echo "  CONFIRM=yes-i-am-sure $0 $*"
+  exit 1
+fi
+
 # Normalize trailing CR/LF for MySQL password secrets across:
 # - Infisical (source of truth)
 # - GCP Secret Manager (ESO reads from here)

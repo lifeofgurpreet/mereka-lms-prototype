@@ -2547,11 +2547,6 @@ scripts:
     purpose: Fix Service Selectors
     criticality: release-supporting
 
-  - path: scripts/infra/fix-velero-restore-test.sh
-    owner: platform-team
-    purpose: Fix Velero Restore Test
-    criticality: release-supporting
-
   - path: scripts/infra/increase-gke-quota.sh
     owner: platform-team
     purpose: Increase Gke Quota

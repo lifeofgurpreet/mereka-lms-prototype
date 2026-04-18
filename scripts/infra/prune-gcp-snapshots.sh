@@ -14,6 +14,13 @@
 #     ALLOW_PROD_APPLY=1 ./scripts/infra/prune-gcp-snapshots.sh --apply --max-delete 300
 set -euo pipefail
 
+# Safety guard: require explicit confirmation for production-mutating operations
+if [[ "${CONFIRM:-}" != "yes-i-am-sure" ]]; then
+  echo "ERROR: This script mutates production. To proceed, run:"
+  echo "  CONFIRM=yes-i-am-sure $0 $*"
+  exit 1
+fi
+
 PROJECT_ID="${PROJECT_ID:-bbi-k8}"
 RETENTION_DAYS="${RETENTION_DAYS:-30}"
 NAME_PREFIX="${NAME_PREFIX:-pvc-}"

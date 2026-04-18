@@ -1,0 +1,3 @@
+PASS: release object contract valid
+Release ID: ro-rb-102a56a0-20260417T232409Z
+Contract ref: Biji-Biji-Initiative/platform-control-plane@fa5065b9b083f569278ab80c67fc1dfa25c82b3c

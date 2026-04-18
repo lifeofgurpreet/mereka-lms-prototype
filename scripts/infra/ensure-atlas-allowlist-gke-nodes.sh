@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# DECOMMISSIONED: GKE (mereka-lms GCP project) was decommissioned; all workloads
+# now run on RKE2 (rke2-nonprod cluster, Contabo VPS). GKE nodes no longer exist.
+# For the RKE2 equivalent, use scripts/infra/ensure-atlas-allowlist-vps.sh instead.
+# Retained for historical reference only — do NOT run against live infra.
+#
 # ensure-atlas-allowlist-gke-nodes.sh
 #
 # Ensures all GKE node external IPs are in the MongoDB Atlas allowlist.

@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# DECOMMISSIONED: GKE (mereka-lms GCP project) was decommissioned and all workloads
+# migrated to RKE2 on Contabo VPS. This script manages GKE Autopilot quotas that no
+# longer exist. Retained for historical reference only — do NOT run against live infra.
+# See docs/adr/ for the GKE→RKE2 migration rationale.
+#
 # Increase GKE Autopilot quotas for Aspects Analytics deployment
 set -euo pipefail
 

@@ -3,6 +3,13 @@
 # @spec: analytics-pipeline_spec.md
 set -euo pipefail
 
+# Safety guard: require explicit confirmation for production-mutating operations
+if [[ "${CONFIRM:-}" != "yes-i-am-sure" ]]; then
+  echo "ERROR: This script mutates production. To proceed, run:"
+  echo "  CONFIRM=yes-i-am-sure $0 $*"
+  exit 1
+fi
+
 # delete-user-events.sh - Delete user analytics events (GDPR right-to-be-forgotten)
 #
 # Usage:
@@ -37,7 +44,10 @@ CLICKHOUSE_USER="${CLICKHOUSE_USER:-default}"
 CLICKHOUSE_PASSWORD="${CLICKHOUSE_PASSWORD:-}"
 
 USER_ID=""
-DRY_RUN=false
+DRY_RUN="${DRY_RUN:-true}"
+if [[ "$DRY_RUN" == "true" ]]; then
+  echo "DRY RUN mode (default). Set DRY_RUN=false to execute real deletions."
+fi
 
 # Helper functions
 log_info() {

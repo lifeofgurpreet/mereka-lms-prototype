@@ -35,6 +35,13 @@
 
 set -euo pipefail
 
+# Safety guard: require explicit confirmation for production-mutating operations
+if [[ "${CONFIRM:-}" != "yes-i-am-sure" ]]; then
+  echo "ERROR: This script mutates production. To proceed, run:"
+  echo "  CONFIRM=yes-i-am-sure $0 $*"
+  exit 1
+fi
+
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 NAMESPACE="${NAMESPACE:-mereka-lms}"

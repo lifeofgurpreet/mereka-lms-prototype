@@ -2551,7 +2551,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-build-provenance.sh",
-      "reference_count": 10,
+      "reference_count": 11,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -2579,7 +2579,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-build-workflow-contract.sh",
-      "reference_count": 19,
+      "reference_count": 22,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -9277,7 +9277,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-image-branding.sh",
-      "reference_count": 28,
+      "reference_count": 29,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -9544,7 +9544,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-runtime-contract.sh",
-      "reference_count": 8,
+      "reference_count": 9,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -11769,7 +11769,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-openedx-image-branding.sh",
-      "reference_count": 8,
+      "reference_count": 9,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -12582,6 +12582,29 @@
       "tier": "release_blocking"
     },
     {
+      "cadence": "on_demand",
+      "canonical": true,
+      "ci_binding": [],
+      "ci_entrypoints": [],
+      "env_scope": [
+        "dev"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-pods-on-digest.sh",
+      "reference_count": 5,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "cluster",
+        "vendor"
+      ],
+      "severity": "low",
+      "spec_ids": [],
+      "status": "manual_only",
+      "tier": "exploratory_manual"
+    },
+    {
       "cadence": "per_pr_and_push",
       "canonical": true,
       "ci_binding": [
@@ -12972,7 +12995,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-prod-parked-state.sh",
-      "reference_count": 13,
+      "reference_count": 14,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -13717,7 +13740,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-release-bundle.sh",
-      "reference_count": 13,
+      "reference_count": 14,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -13861,7 +13884,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-release-object.sh",
-      "reference_count": 12,
+      "reference_count": 19,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -18804,25 +18827,25 @@
     "archived_deprecated_scripts": 21,
     "ci_static_bound": 383,
     "kinds": {
-      "verify": 631
+      "verify": 632
     },
     "mutability": {
       "destructive": 9,
       "mutating": 21,
-      "read-only": 601
+      "read-only": 602
     },
     "status_overrides_applied": 8,
     "statuses": {
       "active": 436,
       "deprecated_candidate": 1,
-      "manual_only": 194
+      "manual_only": 195
     },
     "tiers": {
-      "exploratory_manual": 198,
+      "exploratory_manual": 199,
       "periodic_runtime": 21,
       "release_blocking": 412
     },
-    "total_verify_scripts": 631,
+    "total_verify_scripts": 632,
     "workflow_direct_bound": 69
   },
   "version": "1"

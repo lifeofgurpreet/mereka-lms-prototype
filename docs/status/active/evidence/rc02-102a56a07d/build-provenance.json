@@ -1,0 +1,20 @@
+{
+  "commit_sha": "102a56a07d3270bb61d7c95b28d6ed0d67919360",
+  "contract_family": "build-provenance",
+  "contract_ref": "Biji-Biji-Initiative/platform-control-plane@194e6001c924902e8bf3dafefdc37fc842c56653",
+  "contract_version": "1.0",
+  "created_at": "2026-04-17T23:24:39Z",
+  "gitops": {
+    "commit_sha": "1a2241bb279e89dbc801f8d61d63cce79d0a21fc",
+    "repository": "Biji-Biji-Initiative/bbi-infrastructure"
+  },
+  "images": {
+    "mfe_digest": "sha256:377923c0a2ce22c8e7bac7baf488c80f345a1445e2f7ac47b5c29e5b475b35e1",
+    "openedx_digest": "sha256:d17ae77f533be1690b969b220b3507c4d9780ef7f477ecd5c47e2b7777b54578"
+  },
+  "release_bundle_id": "rb-102a56a0-20260417T232409Z",
+  "repository": "Biji-Biji-Initiative/mereka-lms",
+  "schema_version": "1.0.0",
+  "service_id": "mereka-lms",
+  "target_environment": "prod"
+}

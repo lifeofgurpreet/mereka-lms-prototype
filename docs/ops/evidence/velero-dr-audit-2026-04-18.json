@@ -1,0 +1,392 @@
+{
+  "app_data_risks": [
+    {
+      "risk": "No VolumeSnapshotLocation found. PV snapshots may not be configured.",
+      "severity": "warning"
+    },
+    {
+      "risk": "Daily schedule dev-agent-e-daily latest completed backup is stale (114.7h old).",
+      "severity": "warning"
+    },
+    {
+      "risk": "Daily schedule dev-cie-daily latest completed backup is stale (114.3h old).",
+      "severity": "warning"
+    },
+    {
+      "risk": "Daily schedule dev-mereka-lms-daily latest completed backup is stale (138.1h old).",
+      "severity": "warning"
+    },
+    {
+      "risk": "Daily schedule dev-reka-slackbot-daily latest completed backup is stale (110.3h old).",
+      "severity": "warning"
+    }
+  ],
+  "checks": {
+    "failures": 0,
+    "warnings": 5
+  },
+  "coverage": {
+    "modulestore_runtime": {
+      "cms_mongodb_host_is_atlas": false,
+      "lms_mongodb_host_is_atlas": false
+    },
+    "pvc_by_namespace": {
+      "agent-e-dev": {
+        "bound": 3,
+        "pending": 0
+      },
+      "authentik": {
+        "bound": 1,
+        "pending": 0
+      },
+      "calcom-dev": {
+        "bound": 1,
+        "pending": 0
+      },
+      "cie-dev": {
+        "bound": 2,
+        "pending": 0
+      },
+      "listmonk-dev": {
+        "bound": 2,
+        "pending": 0
+      },
+      "mereka-lms-dev": {
+        "bound": 8,
+        "pending": 0
+      },
+      "n8n-dev": {
+        "bound": 4,
+        "pending": 0
+      },
+      "nfc-cards-dev": {
+        "bound": 1,
+        "pending": 0
+      },
+      "reka-slackbot-dev": {
+        "bound": 2,
+        "pending": 0
+      },
+      "team-analytics-dev": {
+        "bound": 1,
+        "pending": 0
+      },
+      "temporal-dev": {
+        "bound": 1,
+        "pending": 0
+      },
+      "twentycrm-dev": {
+        "bound": 2,
+        "pending": 0
+      },
+      "zoom-rtms-dev": {
+        "bound": 1,
+        "pending": 0
+      }
+    }
+  },
+  "velero": {
+    "backup_storage_locations": [
+      {
+        "is_default": true,
+        "last_validation_time": "2026-04-18T13:54:58Z",
+        "name": "default",
+        "phase": "Available"
+      }
+    ],
+    "backup_verification": {
+      "exists": false
+    },
+    "restore_drill": {
+      "exists": false
+    },
+    "schedules": [
+      {
+        "excluded_namespaces": [],
+        "include_cluster_resources": false,
+        "included_namespaces": [
+          "agent-e-dev"
+        ],
+        "latest_completed_backup": {
+          "age_hours": 114.70009897444444,
+          "completed_at": "2026-04-13T19:14:52Z",
+          "name": "dev-agent-e-daily-20260413183518",
+          "volume_snapshots_attempted": null,
+          "volume_snapshots_completed": null
+        },
+        "name": "dev-agent-e-daily",
+        "paused": false,
+        "schedule": "35 18 * * *",
+        "ttl": "720h0m0s",
+        "volume_snapshot_locations": []
+      },
+      {
+        "excluded_namespaces": [],
+        "include_cluster_resources": false,
+        "included_namespaces": [
+          "authentik"
+        ],
+        "latest_completed_backup": {
+          "age_hours": 0.8264879158333334,
+          "completed_at": "2026-04-18T13:07:17Z",
+          "name": "dev-authentik-hourly-20260418130019",
+          "volume_snapshots_attempted": null,
+          "volume_snapshots_completed": null
+        },
+        "name": "dev-authentik-hourly",
+        "paused": false,
+        "schedule": "0 * * * *",
+        "ttl": "168h0m0s",
+        "volume_snapshot_locations": []
+      },
+      {
+        "excluded_namespaces": [],
+        "include_cluster_resources": false,
+        "included_namespaces": [
+          "calcom-dev"
+        ],
+        "latest_completed_backup": {
+          "age_hours": 19.165099051666665,
+          "completed_at": "2026-04-17T18:46:58Z",
+          "name": "dev-calcom-daily-20260417182006",
+          "volume_snapshots_attempted": null,
+          "volume_snapshots_completed": null
+        },
+        "name": "dev-calcom-daily",
+        "paused": false,
+        "schedule": "20 18 * * *",
+        "ttl": "720h0m0s",
+        "volume_snapshot_locations": []
+      },
+      {
+        "excluded_namespaces": [],
+        "include_cluster_resources": false,
+        "included_namespaces": [
+          "cie-dev"
+        ],
+        "latest_completed_backup": {
+          "age_hours": 114.34037684166667,
+          "completed_at": "2026-04-13T19:36:27Z",
+          "name": "dev-cie-daily-20260413184018",
+          "volume_snapshots_attempted": null,
+          "volume_snapshots_completed": null
+        },
+        "name": "dev-cie-daily",
+        "paused": false,
+        "schedule": "40 18 * * *",
+        "ttl": "720h0m0s",
+        "volume_snapshot_locations": []
+      },
+      {
+        "excluded_namespaces": [],
+        "include_cluster_resources": false,
+        "included_namespaces": [
+          "listmonk-dev"
+        ],
+        "latest_completed_backup": {
+          "age_hours": 19.555932410833336,
+          "completed_at": "2026-04-17T18:23:31Z",
+          "name": "dev-listmonk-daily-20260417180500",
+          "volume_snapshots_attempted": null,
+          "volume_snapshots_completed": null
+        },
+        "name": "dev-listmonk-daily",
+        "paused": false,
+        "schedule": "5 18 * * *",
+        "ttl": "720h0m0s",
+        "volume_snapshot_locations": []
+      },
+      {
+        "excluded_namespaces": [],
+        "include_cluster_resources": false,
+        "included_namespaces": [
+          "mereka-lms-dev"
+        ],
+        "latest_completed_backup": {
+          "age_hours": 138.115654645,
+          "completed_at": "2026-04-12T19:49:56Z",
+          "name": "dev-mereka-lms-daily-20260412185055",
+          "volume_snapshots_attempted": null,
+          "volume_snapshots_completed": null
+        },
+        "name": "dev-mereka-lms-daily",
+        "paused": false,
+        "schedule": "50 18 * * *",
+        "ttl": "720h0m0s",
+        "volume_snapshot_locations": []
+      },
+      {
+        "excluded_namespaces": [],
+        "include_cluster_resources": false,
+        "included_namespaces": [
+          "n8n-dev"
+        ],
+        "latest_completed_backup": {
+          "age_hours": 19.68732132888889,
+          "completed_at": "2026-04-17T18:15:38Z",
+          "name": "dev-n8n-daily-20260417180108",
+          "volume_snapshots_attempted": null,
+          "volume_snapshots_completed": null
+        },
+        "name": "dev-n8n-daily",
+        "paused": false,
+        "schedule": "0 18 * * *",
+        "ttl": "720h0m0s",
+        "volume_snapshot_locations": []
+      },
+      {
+        "excluded_namespaces": [],
+        "include_cluster_resources": false,
+        "included_namespaces": [
+          "nfc-cards-dev"
+        ],
+        "latest_completed_backup": {
+          "age_hours": 10.905099123333335,
+          "completed_at": "2026-04-18T03:02:34Z",
+          "name": "dev-nfc-cards-daily-20260417184508",
+          "volume_snapshots_attempted": null,
+          "volume_snapshots_completed": null
+        },
+        "name": "dev-nfc-cards-daily",
+        "paused": false,
+        "schedule": "45 18 * * *",
+        "ttl": "720h0m0s",
+        "volume_snapshot_locations": []
+      },
+      {
+        "excluded_namespaces": [],
+        "include_cluster_resources": false,
+        "included_namespaces": [
+          "reka-slackbot-dev"
+        ],
+        "latest_completed_backup": {
+          "age_hours": 110.28621024638888,
+          "completed_at": "2026-04-13T23:39:42Z",
+          "name": "dev-reka-slackbot-daily-20260413185517",
+          "volume_snapshots_attempted": null,
+          "volume_snapshots_completed": null
+        },
+        "name": "dev-reka-slackbot-daily",
+        "paused": false,
+        "schedule": "55 18 * * *",
+        "ttl": "720h0m0s",
+        "volume_snapshot_locations": []
+      },
+      {
+        "excluded_namespaces": [],
+        "include_cluster_resources": false,
+        "included_namespaces": [
+          "team-analytics-dev"
+        ],
+        "latest_completed_backup": {
+          "age_hours": 19.066210259166667,
+          "completed_at": "2026-04-17T18:52:54Z",
+          "name": "dev-team-analytics-daily-20260417182508",
+          "volume_snapshots_attempted": null,
+          "volume_snapshots_completed": null
+        },
+        "name": "dev-team-analytics-daily",
+        "paused": false,
+        "schedule": "25 18 * * *",
+        "ttl": "720h0m0s",
+        "volume_snapshot_locations": []
+      },
+      {
+        "excluded_namespaces": [],
+        "include_cluster_resources": false,
+        "included_namespaces": [
+          "temporal-dev"
+        ],
+        "latest_completed_backup": {
+          "age_hours": 19.47898804638889,
+          "completed_at": "2026-04-17T18:28:08Z",
+          "name": "dev-temporal-daily-20260417181004",
+          "volume_snapshots_attempted": null,
+          "volume_snapshots_completed": null
+        },
+        "name": "dev-temporal-daily",
+        "paused": false,
+        "schedule": "10 18 * * *",
+        "ttl": "720h0m0s",
+        "volume_snapshot_locations": []
+      },
+      {
+        "excluded_namespaces": [],
+        "include_cluster_resources": false,
+        "included_namespaces": [
+          "twentycrm-dev"
+        ],
+        "latest_completed_backup": {
+          "age_hours": 19.402876945000003,
+          "completed_at": "2026-04-17T18:32:42Z",
+          "name": "dev-twentycrm-daily-20260417181503",
+          "volume_snapshots_attempted": null,
+          "volume_snapshots_completed": null
+        },
+        "name": "dev-twentycrm-daily",
+        "paused": false,
+        "schedule": "15 18 * * *",
+        "ttl": "720h0m0s",
+        "volume_snapshot_locations": []
+      },
+      {
+        "excluded_namespaces": [],
+        "include_cluster_resources": false,
+        "included_namespaces": [
+          "agent-e-dev",
+          "authentik",
+          "calcom-dev",
+          "cie-dev",
+          "listmonk-dev",
+          "mereka-lms-dev",
+          "n8n-dev",
+          "nfc-cards-dev",
+          "reka-slackbot-dev",
+          "team-analytics-dev",
+          "temporal-dev",
+          "twentycrm-dev",
+          "zoom-rtms-dev"
+        ],
+        "latest_completed_backup": {
+          "age_hours": 136.38509917,
+          "completed_at": "2026-04-12T21:33:46Z",
+          "name": "dev-weekly-full-20260412190058",
+          "volume_snapshots_attempted": null,
+          "volume_snapshots_completed": null
+        },
+        "name": "dev-weekly-full",
+        "paused": false,
+        "schedule": "0 19 * * 0",
+        "ttl": "2160h0m0s",
+        "volume_snapshot_locations": []
+      },
+      {
+        "excluded_namespaces": [],
+        "include_cluster_resources": false,
+        "included_namespaces": [
+          "zoom-rtms-dev"
+        ],
+        "latest_completed_backup": {
+          "age_hours": 19.00315473527778,
+          "completed_at": "2026-04-17T18:56:41Z",
+          "name": "dev-zoom-rtms-daily-20260417183014",
+          "volume_snapshots_attempted": null,
+          "volume_snapshots_completed": null
+        },
+        "name": "dev-zoom-rtms-daily",
+        "paused": false,
+        "schedule": "30 18 * * *",
+        "ttl": "720h0m0s",
+        "volume_snapshot_locations": []
+      }
+    ],
+    "volume_snapshot_classes": [
+      {
+        "deletion_policy": "Delete",
+        "driver": "driver.longhorn.io",
+        "name": "longhorn-snapshot-class"
+      }
+    ],
+    "volume_snapshot_locations": []
+  }
+}

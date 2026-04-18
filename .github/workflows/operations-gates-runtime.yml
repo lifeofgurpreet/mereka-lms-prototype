@@ -89,7 +89,12 @@ jobs:
         run: |
           ./scripts/qa/verify-authenticated-sso-canary.sh --env "$INPUT_ENV_SCOPE"
 
-      - name: Authenticate to GCP and get GKE credentials
+      # LEGACY ACTION NAME: "gcp-gke-auth" dates from the GKE era.
+      # GKE is decommissioned; RKE2 is the cluster substrate.
+      # This step is retained only because the composite action still provides
+      # valid GCP workload-identity auth for Secret Manager / Cloud SQL backup access.
+      # See: docs/status/active/15-ACTIVE-CONTROL-PLANE-SURFACE-CLASSIFICATION-2026-04-18.md (Bucket C)
+      - name: Authenticate to GCP Secret Manager (legacy action name, RKE2 substrate)
         if: ${{ vars.GCP_WIF_PROVIDER != '' && vars.GCP_WIF_SA != '' }}
         uses: ./.github/actions/gcp-gke-auth
         with:
