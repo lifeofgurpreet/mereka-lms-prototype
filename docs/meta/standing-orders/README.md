@@ -7,9 +7,12 @@ This directory contains active standing orders for recurring contributor and age
 
 | If you need to... | Read this first |
 |---|---|
+| Write or repair a canonical artifact (runbook, handoff, verifier, helper) | [`TRUTH_REPAIR_DOCTRINE.md`](TRUTH_REPAIR_DOCTRINE.md) |
 | Check the GitOps/operator lane expectations | `GITOPS_AGENT.md` |
 | Check governance-review expectations | `GOVERNANCE_AGENT.md` |
 | Check LMS/platform lane expectations | `LMS_AGENT.md` |
+
+The **Truth Repair Doctrine** is the governing standing order for every canonical artifact in this repo. If any other standing order, runbook, or handoff conflicts with it, the doctrine wins.
 
 ## Use this directory for
 
