@@ -7328,6 +7328,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/OPERATOR_PREFLIGHT.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-10",
     "owner": "Platform Team",
     "path": "ops/runbooks/PATCH_IDEMPOTENCY.md",
@@ -11119,6 +11128,24 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "status/active/OPENEDX_INDEPENDENT_REMOTE_AUDIT_2026-04-18.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/OPENEDX_NEXT_PHASE_PLAN_2026-04-18.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "status/active/PLUGIN_SPLIT_STATUS_2026-03-02.md",
     "status": "supporting",
     "type": "status"
@@ -11353,6 +11380,15 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "status/active/evidence/rc02-102a56a07d/GKE-ACTIVE-SURFACE-CLASSIFICATION.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "status/active/evidence/rc02-102a56a07d/INERT-WORKFLOW-VERDICT.md",
     "status": "supporting",
     "type": "status"
@@ -11408,6 +11444,24 @@
     "last_verified_or_updated": null,
     "owner": "platform-runtime",
     "path": "status/active/evidence/rc02-102a56a07d/RC-05-LIVE-CLOSURE-EVIDENCE-2026-04-18.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/evidence/rc02-102a56a07d/RC-02-REPRODUCIBILITY-VERDICT.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/evidence/rc02-102a56a07d/RC-05-PROBE-DIAGNOSIS.md",
     "status": "supporting",
     "type": "status"
   },

@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# Operator preflight: run this at the start of every ssh mereka session.
+# Records branch / local HEAD / origin/main / dirty state for every repo
+# that operators use as canonical ground truth on the VPS.
+#
+# Usage:
+#   bin/preflight              # default set of VPS repos
+#   bin/preflight /path1 /p2   # custom paths
+#   bin/preflight --json       # machine-readable output
+#
+# Exit code: 0 if all repos clean and on origin/main; 2 if any drift detected.
+# Non-zero is NOT a failure — it's a signal for the operator to decide.
+set -u
+
+JSON=0
+if [ "${1:-}" = "--json" ]; then JSON=1; shift; fi
+
+DEFAULT_REPOS=(
+  "/home/gurpreet/projects/k8s/mereka-lms"
+  "/home/gurpreet/projects/k8s/bbi-infrastructure"
+  "/home/gurpreet/projects/bbi-infrastructure"
+)
+
+REPOS=("$@")
+if [ "${#REPOS[@]}" -eq 0 ]; then REPOS=("${DEFAULT_REPOS[@]}"); fi
+
+drift=0
+first=1
+[ $JSON -eq 1 ] && printf '['
+
+for repo in "${REPOS[@]}"; do
+  if [ ! -d "$repo/.git" ]; then
+    [ $JSON -eq 1 ] || echo "MISSING: $repo (not a git repo)"
+    drift=$((drift+1))
+    continue
+  fi
+
+  branch=$(git -C "$repo" symbolic-ref --short HEAD 2>/dev/null || echo "detached")
+  head_sha=$(git -C "$repo" rev-parse --short=12 HEAD 2>/dev/null)
+  git -C "$repo" fetch origin main --quiet 2>/dev/null || true
+  origin_main=$(git -C "$repo" rev-parse --short=12 origin/main 2>/dev/null)
+  # Local main (may differ from HEAD when on a feature branch)
+  local_main=$(git -C "$repo" rev-parse --short=12 main 2>/dev/null || echo "-")
+  dirty=$(git -C "$repo" status --porcelain 2>/dev/null | wc -l | tr -d ' ')
+  ahead_behind=$(git -C "$repo" rev-list --left-right --count origin/main...HEAD 2>/dev/null | tr '\t' '/' || echo "-/-")
+
+  status="CLEAN"
+  [ "$head_sha" != "$origin_main" ] && status="DRIFTED"
+  [ "$dirty" -gt 0 ] && status="${status}+DIRTY"
+  [ "$local_main" != "$origin_main" ] && [ "$local_main" != "-" ] && status="${status}+STALE-MAIN"
+
+  if [ "$status" != "CLEAN" ]; then drift=$((drift+1)); fi
+
+  if [ $JSON -eq 1 ]; then
+    [ $first -eq 0 ] && printf ','
+    first=0
+    printf '{"repo":"%s","branch":"%s","head":"%s","origin_main":"%s","local_main":"%s","dirty_files":%s,"ahead_behind":"%s","status":"%s"}' \
+      "$repo" "$branch" "$head_sha" "$origin_main" "$local_main" "$dirty" "$ahead_behind" "$status"
+  else
+    printf '%-50s branch=%-50s head=%s origin/main=%s local/main=%s dirty=%s ahead/behind=%s → %s\n' \
+      "$repo" "$branch" "$head_sha" "$origin_main" "$local_main" "$dirty" "$ahead_behind" "$status"
+  fi
+done
+
+[ $JSON -eq 1 ] && printf ']\n'
+
+if [ $drift -gt 0 ]; then
+  exit 2
+fi
+exit 0
