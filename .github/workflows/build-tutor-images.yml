@@ -1405,7 +1405,16 @@ jobs:
         run: |
           mkdir -p var/ci
           set +e
-          timeout 20m trivy image \
+          # S6.2 wire-in (bead lb4c.7, companion to OpenEdX wrap in #1829):
+          # retry timeout-only failures up to 3 attempts (max 30 min total).
+          # --retry-on-exit-codes "124" per run-with-retry.sh safe default:
+          # exit 124 = transient timeout, exit 1 = real CVE finding (propagates).
+          scripts/ci/run-with-retry.sh \
+            --max-attempts 3 \
+            --delay-seconds 30 \
+            --max-total-seconds 1800 \
+            --retry-on-exit-codes "124" \
+            -- timeout 20m trivy image \
             --format json \
             --output var/ci/trivy-mfe.json \
             --ignorefile .trivyignore \
@@ -1415,7 +1424,7 @@ jobs:
           set -e
 
           if [[ "$trivy_status" -eq 124 ]]; then
-            echo "MFE Trivy scan timed out after 20m; continuing without vulnerability verdict." >&2
+            echo "MFE Trivy scan timed out after 20m (3 attempts exhausted via run-with-retry); continuing without vulnerability verdict." >&2
             echo "timeout" > var/ci/trivy-mfe.status.txt
             exit 0
           fi
