@@ -10731,6 +10731,15 @@
     "canonical_conflict_group": null,
     "freshness_risk": "low",
     "last_verified_or_updated": null,
+    "owner": "platform-release",
+    "path": "status/active/23-SESSION-CLOSURE-2026-04-18T11Z.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
     "owner": null,
     "path": "status/active/ACTIVE_SURFACE_RUNTIME_MATRIX_2026-04-04.md",
     "status": "supporting",
