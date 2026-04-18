@@ -14,6 +14,13 @@ RELEASE_OBJECT_CONTRACT_FAMILY = "release_object_projection_schema"
 RELEASE_OBJECT_CONTRACT_VERSION = "1.0"
 
 
+def _tenant_contract_default_display() -> str:
+    try:
+        return str(DEFAULT_TENANT_CONTRACT_PATH.relative_to(REPO_ROOT))
+    except ValueError:
+        return str(DEFAULT_TENANT_CONTRACT_PATH)
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
@@ -40,7 +47,7 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_TENANT_CONTRACT_PATH,
         help=(
             "Path to the tenant registry contract whose SHA-256 is embedded in "
-            f"the release object. Default: {DEFAULT_TENANT_CONTRACT_PATH.relative_to(REPO_ROOT)}"
+            f"the release object. Default: {_tenant_contract_default_display()}"
         ),
     )
     parser.add_argument(
