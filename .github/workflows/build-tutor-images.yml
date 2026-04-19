@@ -1230,7 +1230,21 @@ jobs:
           # trivy image accepts a full registry ref and uses the local docker
           # daemon cache when the image is already present (populated by the
           # explicit pull step above), avoiding a second ~5 GB GHCR fetch.
-          timeout 20m trivy image \
+          #
+          # S6.2 wire-in (bead lb4c.7): wrap Trivy with run-with-retry.sh to
+          # retry timeout-only failures up to 3 attempts (max 30 min total).
+          # --retry-on-exit-codes "124" is the SAFE DEFAULT (run-with-retry's
+          # own policy): exit 124 = GNU timeout expiry, which is transient;
+          # exit 1 = real CVE finding, which must propagate immediately. This
+          # converts silent-timeout "no scan verdict" cases (previously
+          # logged as 'timeout' and exit 0) into retried scans that typically
+          # produce a real verdict.
+          scripts/ci/run-with-retry.sh \
+            --max-attempts 3 \
+            --delay-seconds 30 \
+            --max-total-seconds 1800 \
+            --retry-on-exit-codes "124" \
+            -- timeout 20m trivy image \
             --format json \
             --output var/ci/trivy-openedx.json \
             --ignorefile .trivyignore \
@@ -1241,7 +1255,7 @@ jobs:
           set -e
 
           if [[ "$trivy_status" -eq 124 ]]; then
-            echo "OpenEdX Trivy scan timed out after 20m; continuing without vulnerability verdict." >&2
+            echo "OpenEdX Trivy scan timed out after 20m (3 attempts exhausted via run-with-retry); continuing without vulnerability verdict." >&2
             echo "timeout" > var/ci/trivy-openedx.status.txt
             exit 0
           fi
