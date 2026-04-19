@@ -575,6 +575,8 @@ ci_static_inventory:
     - script: scripts/qa/verify-domain-authority-chain.sh
     - script: scripts/qa/verify-domain-generated-surfaces.sh
     - script: scripts/qa/test-verify-enterprise-sso-readiness.sh
+    - script: scripts/qa/test-verify-deployment-lanes.sh
+    - script: scripts/qa/test-verify-enterprise-observability.sh
 
 ci_runtime_inventory:
   generated_file: .github/ci-scripts-runtime.txt

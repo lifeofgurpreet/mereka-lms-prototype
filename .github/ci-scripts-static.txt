@@ -492,3 +492,5 @@ scripts/qa/verify-env-auth-parity.sh
 scripts/qa/verify-domain-authority-chain.sh
 scripts/qa/verify-domain-generated-surfaces.sh
 scripts/qa/test-verify-enterprise-sso-readiness.sh
+scripts/qa/test-verify-deployment-lanes.sh
+scripts/qa/test-verify-enterprise-observability.sh

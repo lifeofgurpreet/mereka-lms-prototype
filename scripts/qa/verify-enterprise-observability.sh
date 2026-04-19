@@ -6,7 +6,7 @@
 # Exit 0 = all checks pass, exit 1 = failures
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 source "$REPO_ROOT/scripts/shared/ci-skip-guards.sh"
 require_kubectl || exit 0
 NAMESPACE="mereka-lms"
