@@ -215,6 +215,7 @@ scripts/qa/verify-mfe-slot-source-alignment.sh
 scripts/qa/verify-enterprise-frontend-route-contract.sh
 scripts/qa/verify-enterprise-frontend-config-contract.sh
 scripts/qa/test-verify-enterprise-frontend-live-contract.sh
+scripts/qa/test-verify-enterprise-catalog.sh
 scripts/qa/test-enterprise-mfe-optional-endpoint-hardening.sh
 scripts/qa/test-enterprise-mfe-patch-contract.sh
 scripts/qa/test-mfe-slot-operation-compat.sh

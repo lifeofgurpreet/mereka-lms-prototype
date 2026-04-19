@@ -288,6 +288,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-enterprise-frontend-route-contract.sh
     - script: scripts/qa/verify-enterprise-frontend-config-contract.sh
     - script: scripts/qa/test-verify-enterprise-frontend-live-contract.sh
+    - script: scripts/qa/test-verify-enterprise-catalog.sh
     - script: scripts/qa/test-enterprise-mfe-optional-endpoint-hardening.sh
     - script: scripts/qa/test-enterprise-mfe-patch-contract.sh
     - script: scripts/qa/test-mfe-slot-operation-compat.sh
