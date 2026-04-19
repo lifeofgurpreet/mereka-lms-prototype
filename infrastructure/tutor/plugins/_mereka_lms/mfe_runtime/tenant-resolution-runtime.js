@@ -58,6 +58,122 @@ const getMerekaPublicFooter = (config) => {
   };
 };
 
+const getLearnerHomeHref = () => '/learner-dashboard/';
+
+const getCatalogHref = (baseUrl) => {
+  return baseUrl ? `${baseUrl}/courses` : '/courses';
+};
+
+const getMerekaBaseUrl = (config) => {
+  return (config && typeof config.LMS_BASE_URL === 'string' ? config.LMS_BASE_URL : '').replace(/\/$/, '');
+};
+
+const getMerekaThemeAssetUrl = (config, assetPath) => {
+  const normalizedPath = typeof assetPath === 'string' ? assetPath.trim() : '';
+  if (!normalizedPath) {
+    return '';
+  }
+  if (!normalizedPath.startsWith('/')) {
+    return normalizedPath;
+  }
+  if (normalizedPath.startsWith('/theme/') && typeof window !== 'undefined') {
+    return `${window.location.origin}${normalizedPath}`;
+  }
+  const baseUrl = getMerekaBaseUrl(config);
+  return baseUrl ? `${baseUrl}${normalizedPath}` : normalizedPath;
+};
+
+const getMerekaShellCopy = (variant) => {
+  const brand = variant && variant.brand ? variant.brand : 'Mereka Academy';
+  const slug = variant && variant.slug ? variant.slug : 'mereka';
+
+  if (slug === 'biji-biji') {
+    return {
+      authn: {
+        eyebrow: 'Community-powered learning',
+        title: 'Step back into the makerspace',
+        subtitle: `Sign in to continue with ${brand} pathways, cohorts, and practical studio work.`,
+        supportCtaLabel: 'Talk to support',
+        trustNote: 'Built for creative communities, practical making, and shared learning momentum.',
+      },
+      dashboard: {
+        eyebrow: 'Maker dashboard',
+        title: `Your ${brand} makerspace is live`,
+        subtitle: 'Pick up cohort work, studio sessions, and project-based pathways without losing context.',
+        primaryCtaLabel: 'Browse pathways',
+        secondaryCtaLabel: 'Community support',
+      },
+      learning: {
+        eyebrow: 'Studio session',
+        title: `${brand} learning flow`,
+        subtitle: 'Keep the session tactile, collaborative, and grounded in the work you are building.',
+        supportCtaLabel: 'Get help',
+      },
+    };
+  }
+
+  if (slug === 'skillourfuture') {
+    return {
+      authn: {
+        eyebrow: 'Career acceleration workspace',
+        title: 'Return to your next breakthrough',
+        subtitle: `Sign in to continue with ${brand} career pathways, coaching, and employability tracks.`,
+        supportCtaLabel: 'Career support',
+        trustNote: 'Designed for confident career moves, employer-aligned learning, and verified progress.',
+      },
+      dashboard: {
+        eyebrow: 'Career dashboard',
+        title: `Your ${brand} growth plan is ready`,
+        subtitle: 'See your next milestone, keep progress visible, and move quickly between coaching and coursework.',
+        primaryCtaLabel: 'Explore programs',
+        secondaryCtaLabel: 'Career support',
+      },
+      learning: {
+        eyebrow: 'Career session',
+        title: `${brand} learning flow`,
+        subtitle: 'Stay focused on the next capability, credential, or career move without losing momentum.',
+        supportCtaLabel: 'Get help',
+      },
+    };
+  }
+
+  return {
+    authn: {
+      eyebrow: 'Learning workspace',
+      title: 'Welcome back',
+      subtitle: `Sign in to continue with ${brand}.`,
+      supportCtaLabel: 'Support',
+      trustNote: 'Secure access for your active learning environment.',
+    },
+    dashboard: {
+      eyebrow: 'Learning cockpit',
+      title: `Welcome back to ${brand}`,
+      subtitle: 'Resume your work, explore what is next, and keep momentum across every active pathway.',
+      primaryCtaLabel: 'Explore courses',
+      secondaryCtaLabel: 'Support',
+    },
+    learning: {
+      eyebrow: 'In session',
+      title: `${brand} learning flow`,
+      subtitle: 'Stay oriented, keep your progress visible, and reach support without breaking context.',
+      supportCtaLabel: 'Get help',
+    },
+  };
+};
+
+const getLogoHref = () => getLearnerHomeHref();
+
+if (typeof window !== 'undefined') {
+  window.getMerekaVariant = getMerekaVariant;
+  window.getMerekaBaseUrl = getMerekaBaseUrl;
+  window.getMerekaThemeAssetUrl = getMerekaThemeAssetUrl;
+  window.getMerekaShellCopy = getMerekaShellCopy;
+  window.getMerekaPublicFooter = getMerekaPublicFooter;
+  window.getLogoHref = getLogoHref;
+  window.getLearnerHomeHref = getLearnerHomeHref;
+  window.getCatalogHref = getCatalogHref;
+}
+
 const normalizeTenantPaletteValue = (value) => {
   return typeof value === 'string' ? value.trim() : '';
 };

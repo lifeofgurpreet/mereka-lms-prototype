@@ -78,7 +78,14 @@ if [[ ${MIGRATED_COUNT} -gt 0 ]]; then
   for script in verify-mfe-footer-slot.sh verify-footer-parity.sh; do
     SCRIPT_PATH="$REPO_ROOT/scripts/qa/$script"
     if grep -q "$script" "$REGISTER_DOC"; then
-      if [[ -f "$SCRIPT_PATH" ]]; then pass_check "Referenced verification script exists: $script"; else fail_check "Referenced verification script exists: $script"; fi
+      DEPRECATED_SCRIPT_PATH="$REPO_ROOT/scripts/qa/deprecated/$script"
+      if [[ -f "$SCRIPT_PATH" ]]; then
+        pass_check "Referenced verification script exists: $script"
+      elif [[ -f "$DEPRECATED_SCRIPT_PATH" ]]; then
+        pass_check "Referenced verification script exists in deprecated/: $script"
+      else
+        fail_check "Referenced verification script exists: $script"
+      fi
     fi
   done
 fi

@@ -6,6 +6,8 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+# shellcheck source=scripts/shared/mereka_plugin_contract.sh
+# shellcheck disable=SC1091
 source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 PLUGIN_BUNDLE=""
@@ -26,7 +28,9 @@ if mereka_plugin_has_any "$REPO_ROOT"; then
 fi
 
 cleanup() {
+  # shellcheck disable=SC2317
   if [[ -n "$PLUGIN_BUNDLE" && -f "$PLUGIN_BUNDLE" ]]; then
+    # shellcheck disable=SC2317
     rm -f "$PLUGIN_BUNDLE"
   fi
 }
@@ -98,6 +102,8 @@ if [ -f "$FOOTER_SH" ]; then
   else
     _pass "footer-component.sh does not inject MerekaFooter (correct: it belongs in mereka_lms.py)"
   fi
+else
+  _pass "legacy footer-component.sh absent; no legacy footer JSX injection possible"
 fi
 
 # 8. Rendered env.config.jsx (if present) uses slot-based MerekaFooter
