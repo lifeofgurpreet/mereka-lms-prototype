@@ -283,7 +283,7 @@ jobs:
         if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         # non-blocking: artifact upload is observability; metrics may not exist if emit step failed (classification per verify-workflow-gate-enforcement.sh)
         continue-on-error: true
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4  # v5.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: promotion-chain-metrics-resolve-${{ github.sha }}
           path: var/ci/promotion-metrics/
@@ -396,7 +396,7 @@ jobs:
           fi
 
       - name: Upload Tutor build-context artifacts
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: tutor-build-contexts
           path: var/ci/
@@ -756,7 +756,7 @@ jobs:
           echo "Extracted staticfiles.json ($(wc -c < var/ci/staticfiles.json) bytes)"
 
       - name: Upload OpenEdX staticfiles.json artifact
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: openedx-staticfiles
           path: var/ci/staticfiles.json
@@ -1049,7 +1049,7 @@ jobs:
           echo "**MFE digest:** \`${DIGEST}\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload generated MFE runtime contract log
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         if: always()
         with:
           name: mfe-generated-runtime-contract-log
@@ -1131,7 +1131,7 @@ jobs:
             | tee var/ci/verify-openedx-image-branding.log
 
       - name: Upload OpenEdX branding verification log
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         if: always()
         with:
           name: openedx-branding-contract-log
@@ -1173,7 +1173,7 @@ jobs:
           exit 0
 
       - name: Upload OpenEdX SBOM
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         if: always()
         with:
           name: sbom-openedx
@@ -1285,7 +1285,7 @@ jobs:
           fi
 
       - name: Upload Trivy OpenEdX scan results
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         if: always()
         with:
           name: trivy-openedx-scan
@@ -1344,7 +1344,7 @@ jobs:
             | tee var/ci/verify-mfe-image-branding.log
 
       - name: Upload MFE branding verification log
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         if: always()
         with:
           name: mfe-branding-contract-log
@@ -1360,7 +1360,7 @@ jobs:
             | tee var/ci/verify-mfe-runtime-contract.log
 
       - name: Upload MFE runtime contract log
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         if: always()
         with:
           name: mfe-runtime-contract-log
@@ -1400,7 +1400,7 @@ jobs:
           exit 0
 
       - name: Upload MFE SBOM
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         if: always()
         with:
           name: sbom-mfe
@@ -1468,7 +1468,7 @@ jobs:
           fi
 
       - name: Upload Trivy MFE scan results
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         if: always()
         with:
           name: trivy-mfe-scan
@@ -1644,7 +1644,7 @@ jobs:
           echo "**Image:** \`${IMAGE_REF}\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload provenance artifacts
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         if: always()
         with:
           name: slsa-provenance
@@ -2241,7 +2241,7 @@ jobs:
           ls -la var/ci/release-object-projection-schema.yaml*
 
       - name: Upload release bundle
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: release-bundle
           path: |
@@ -2505,7 +2505,7 @@ jobs:
         if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         # non-blocking: artifact upload for bbi_pr_opened stage is observability; metrics may not exist if emit failed (classification per verify-workflow-gate-enforcement.sh)
         continue-on-error: true
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4  # v5.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: promotion-chain-metrics-dispatch-${{ github.sha }}
           path: var/ci/promotion-metrics/
@@ -2794,7 +2794,7 @@ jobs:
           cp var/proof/release-gate.json var/ci/release-gate-envelope.json
 
       - name: Upload build provenance
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: build-provenance
           path: |

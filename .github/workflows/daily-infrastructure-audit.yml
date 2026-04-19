@@ -77,7 +77,7 @@ jobs:
           ./scripts/qa/audit-observability.sh --mode local --json | tee observability-audit-local.json
 
       - name: Upload local audit artifact
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           # Preserve original artifact name from observability-audit.yml
           name: observability-audit-local
@@ -148,7 +148,7 @@ jobs:
 
       - name: Upload observability runtime audit artifact
         if: ${{ env.CAN_RUN_RUNTIME == 'true' }}
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           # Preserve original artifact name from observability-audit.yml
           name: observability-audit-runtime
@@ -187,7 +187,7 @@ jobs:
 
       - name: Upload alert routing audit artifact
         if: ${{ env.CAN_RUN_RUNTIME == 'true' }}
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           # Preserve original artifact name from alert-routing-audit.yml (includes run_id for dedup)
           name: alert-routing-audit-${{ github.run_id }}-${{ github.run_attempt }}
@@ -399,7 +399,7 @@ jobs:
 
       - name: Upload parity artifacts
         if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           # Preserve original artifact naming from observability-parity-runtime.yml
           name: observability-parity-${{ matrix.env_label }}
@@ -471,7 +471,7 @@ jobs:
 
       - name: Upload parity rollup artifact
         if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           # Preserve original artifact name from observability-parity-runtime.yml
           name: observability-parity-rollup
@@ -547,7 +547,7 @@ jobs:
 
       - name: Upload GitOps integrity results
         if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: gitops-integrity-results
           path: var/ci/gitops-integrity-results.txt
@@ -581,7 +581,7 @@ jobs:
 
       - name: Upload scorecard artifact
         if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: code-quality-scorecard
           path: |

@@ -341,7 +341,7 @@ jobs:
 
       - name: Upload spec coverage artifact
         if: always() && github.event_name != 'pull_request'
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: spec-coverage
           path: var/spec-coverage.md
@@ -362,7 +362,7 @@ jobs:
 
       - name: Upload PR coverage artifact
         if: github.event_name == 'pull_request' && always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: spec-coverage-pr
           path: var/spec-coverage-pr.md
@@ -650,7 +650,7 @@ jobs:
 
       - name: Upload CI results artifact
         if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: ci-results-${{ matrix.shard.key }}
           path: var/ci-results/
@@ -768,7 +768,7 @@ jobs:
           grep -q "gcloud monitoring" monitoring-plan.txt
 
       - name: Upload monitoring plan artifact
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: monitoring-offline-plan-static
           path: monitoring-plan.txt
@@ -816,7 +816,7 @@ jobs:
 
       - name: Upload translation validation log
         if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: translation-validation-log
           path: var/ci/translation-validation.log
@@ -879,7 +879,7 @@ jobs:
 
       - name: Upload verification summary artifact
         if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
           name: verification-summary
           path: var/verification-summary.md
@@ -1228,7 +1228,7 @@ jobs:
         continue-on-error: true  # Non-blocking until coverage improves
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         if: always()
         with:
           name: coverage-report
