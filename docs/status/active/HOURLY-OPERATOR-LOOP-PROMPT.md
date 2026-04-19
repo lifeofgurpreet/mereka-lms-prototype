@@ -16,14 +16,18 @@ You are not operating from this prompt as a frozen snapshot. You are operating
 from live sources of truth:
 
 1. `docs/status/active/CURRENT-OPERATOR-STATE.md`
-2. the beads tracker (`br`)
-3. current repo truth (`git`, `gh`)
-4. current platform truth (`kubectl`, Argo, runtime checks)
+2. `docs/status/active/IMPLEMENTER-MARCHING-ORDERS.md`
+3. `docs/status/active/TRACKER-HYGIENE-RECOVERY-PLAN.md` when tracker repair is open
+4. the beads tracker (`br`)
+5. current repo truth (`git`, `gh`)
+6. current platform truth (`kubectl`, Argo, runtime checks)
 
 Primary rule:
 - reconcile tracker truth, doc truth, repo truth, and live system truth first
 - then execute a meaningful sprint slice
 - then update tracker + rolling state doc before the hour ends
+- if repo inventory matters, compare the current checkout to `origin/main`
+  before claiming a script/doc/surface is missing
 
 Repos in scope:
 - `Biji-Biji-Initiative/mereka-lms` (app repo; local checkout varies per operator workstation)
@@ -39,12 +43,14 @@ Doc rules:
 
 Tracker rules:
 - use `br` as the live task graph
+- if tracker hygiene is degraded, follow `TRACKER-HYGIENE-RECOVERY-PLAN.md`
+  before doing non-trivial mutation
 - if the bead graph is stale, incomplete, poorly split, or missing follow-up
   work, fix the bead graph first
 - if execution reveals new real work, create or split beads immediately
 - keep dependencies and priorities honest
 
-Execution rules (governed by docs/meta/standing-orders/TRUTH_REPAIR_DOCTRINE.md):
+Execution rules:
 - work through a sprint slice, not a single tiny task
 - push as many bounded, high-leverage items as are truly ready this hour
 - merged defects on `main` outrank helper work
@@ -53,28 +59,22 @@ Execution rules (governed by docs/meta/standing-orders/TRUTH_REPAIR_DOCTRINE.md)
   prevents stale authority, or enables the next loop to run autonomously
 - if CI fails, inspect the real failure and fix it
 - if an open PR is stale, rebase, narrow, fix, supersede, or close it
-- if a merged artifact on `main` is wrong, patch `main` (Rule 2: retractions
-  patch source, not margins — if retracting, sweep the term across canonical
-  artifacts in the same tranche)
-- if shipping a helper, either wire it into its call site in the same PR or
-  file a wire-in bead (Rule 4: helpers ship with a call site or wire-in bead)
-- if shipping a runbook with status:executable, dry-run it and capture
-  evidence in docs/ops/evidence/<name>-YYYY-MM-DD.md (Rule 3: a runbook is
-  not executable until it has been run)
-- if changing a verifier, coordinate all five layers — workflow +
-  policy/config + verifier + self-test + runbook — in the same tranche or
-  mark layers N/A explicitly (Rule 5)
+- if a merged artifact on `main` is wrong, patch `main`
 - when in doubt, check relevant docs and source before acting
 - do not rely on ambient kubectl context for dev checks; use explicit context
 
 Start-of-loop procedure:
 1. Read `docs/status/active/CURRENT-OPERATOR-STATE.md`.
-2. Refresh repo truth in both repos.
-3. Refresh the live platform truth needed for the active queue.
-4. Refresh the bead graph.
-5. Repair `CURRENT-OPERATOR-STATE.md` if it drifted before implementation
+2. Read `docs/status/active/IMPLEMENTER-MARCHING-ORDERS.md`.
+3. Refresh repo truth in both repos.
+4. Compare current checkout branch truth to `origin/main` when the task depends
+   on repo inventory or landed files.
+5. Refresh the live platform truth needed for the active queue.
+6. Refresh the bead graph.
+7. Repair `CURRENT-OPERATOR-STATE.md` if it drifted before implementation
    starts.
-6. Choose the highest-leverage ready sprint slice and go.
+8. Choose the lane using `IMPLEMENTER-MARCHING-ORDERS.md`, then take the
+   highest-leverage ready sprint slice inside that lane.
 
 Expected scope for one hour:
 - multiple related fixes / PR updates are allowed
@@ -98,21 +98,3 @@ Definition of success:
 - ambiguity is lower
 - the next loop can continue autonomously without oral context
 ```
-
-## Authority
-
-The execution rules above are enforced by the **Truth Repair Doctrine**
-(`docs/meta/standing-orders/TRUTH_REPAIR_DOCTRINE.md`). The five rules and
-their mechanical enforcement:
-
-| Rule | Claim | Enforcement |
-|---|---|---|
-| 1 | Canonical = generated or dry-run-verified | `scripts/governance/generate-current-operator-state.sh` (this file's regenerator) |
-| 2 | Retractions patch source, not margins | `scripts/governance/verify-retraction-sweep.sh` (bead y69t.2, PR #1825) |
-| 3 | A runbook is not executable until run | `scripts/governance/verify-runbook-executable.sh` (bead y69t.1, PR #1824) |
-| 4 | Helpers ship with call site or wire-in bead | Social discipline + bead closure convention |
-| 5 | Verifier changes update all 5 layers | PR template checkbox |
-
-If a loop iteration ever conflicts with a rule, the doctrine wins. If the
-doctrine itself is wrong, patch the doctrine first, then update the
-enforcement scripts and this prompt in the same tranche.

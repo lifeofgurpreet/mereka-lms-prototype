@@ -5,6 +5,8 @@ scripts/aspects/bootstrap-aspects-env.sh
 scripts/clickup_import.py
 scripts/download-mct-thumbnails.py
 scripts/export-mct-courses-from-prod.py
+scripts/governance/probe-tracker-store-health.sh
+scripts/governance/reproduce-tracker-rebuild-bug.sh
 scripts/import-new-mct-courses.py
 scripts/infra/copy-theme-assets-emergency.sh
 scripts/migrations/import_missing_courses.sh

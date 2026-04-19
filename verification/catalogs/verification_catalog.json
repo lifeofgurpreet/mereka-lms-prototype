@@ -348,7 +348,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/governance/verify-retraction-sweep.sh",
-      "reference_count": 6,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -370,7 +370,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/governance/verify-runbook-executable.sh",
-      "reference_count": 6,
+      "reference_count": 4,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -4946,7 +4946,7 @@
       "mutability": "read-only",
       "owner": "identity-access",
       "path": "scripts/qa/verify-docs-authority-invariants.sh",
-      "reference_count": 7,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -12641,7 +12641,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-pods-on-digest.sh",
-      "reference_count": 7,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster",
@@ -14559,7 +14559,7 @@
       "mutability": "mutating",
       "owner": "platform-core",
       "path": "scripts/qa/verify-script-governance-orphans.sh",
-      "reference_count": 5,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

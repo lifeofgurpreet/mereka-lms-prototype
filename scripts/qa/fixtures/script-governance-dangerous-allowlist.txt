@@ -10,6 +10,7 @@ scripts/branding/fix-logo-static-files.sh
 scripts/ci/preflight-check.sh
 scripts/export-k8s-manifests.sh
 scripts/export-mct-courses-from-prod.py
+scripts/governance/reproduce-tracker-rebuild-bug.sh
 scripts/import-new-mct-courses.py
 scripts/infra/apply-monitoring-configs.sh
 scripts/infra/apply-multisite-config.sh
@@ -19,6 +20,7 @@ scripts/infra/data-retention-jobs.sh
 scripts/infra/decommission-legacy-ecommerce.sh
 scripts/infra/fix-mfe-refresh-endpoint-site-config.sh
 scripts/infra/fix-velero-restore-test.sh
+scripts/infra/install-trivy.sh
 scripts/infra/mongodb-atlas-cutover.sh
 scripts/infra/normalize-mysql-secrets.sh
 scripts/infra/prepare-tutor-build-context-ci.sh
@@ -35,7 +37,6 @@ scripts/infra/retire-legacy-mongodb.sh
 scripts/infra/sync-github-authenticated-sso-canary-from-infisical.sh
 scripts/infra/sync-gitops-prod-image-tags.sh
 scripts/infra/sync-grafana-oidc-secret.sh
-scripts/infra/install-trivy.sh
 scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh
 scripts/infra/sync-mongodb-from-production.sh
 scripts/infra/sync-production-config.sh
