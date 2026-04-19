@@ -137,6 +137,30 @@ fi
 
 rm -f ".github/workflows/pass-fastlane.yml"
 
+# Repo-variable fastlane routing (CI_FASTLANE_BUILD_LABEL / CI_FASTLANE_CI_LABEL)
+# is ALLOWED. Falls back to ARC when unset, so ARC-first guarantee is preserved.
+cat > ".github/workflows/pass-fastlane-vars.yml" <<'YAML'
+name: pass-fastlane-vars
+on: [push]
+jobs:
+  heavy-build:
+    runs-on: ${{ vars.CI_FASTLANE_BUILD_LABEL || 'mereka-k8s-heavy-builders' }}
+    steps:
+      - run: echo build
+  standard-ci:
+    runs-on: ${{ vars.CI_FASTLANE_CI_LABEL || 'mereka-k8s-runners' }}
+    steps:
+      - run: echo ci
+YAML
+
+if ! run_verify >/tmp/test-runner-policy-fastlane-vars.log 2>&1; then
+  echo "Expected repo-variable fastlane routing to pass, but verifier failed."
+  cat /tmp/test-runner-policy-fastlane-vars.log
+  exit 1
+fi
+
+rm -f ".github/workflows/pass-fastlane-vars.yml"
+
 # Lightweight orchestration jobs using ubuntu-latest should still pass.
 cat > ".github/workflows/pass-lightweight.yml" <<'YAML'
 name: pass-lightweight

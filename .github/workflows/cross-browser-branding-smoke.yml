@@ -43,7 +43,7 @@ on:
 
 jobs:
   branding-smoke:
-    runs-on: mereka-k8s-heavy-builders
+    runs-on: ${{ vars.CI_FASTLANE_BUILD_LABEL || 'mereka-k8s-heavy-builders' }}
     timeout-minutes: 45
     permissions:
       contents: read  # checkout

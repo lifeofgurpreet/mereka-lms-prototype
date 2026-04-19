@@ -25,7 +25,7 @@ concurrency:
 jobs:
   trivy-k8s-manifests:
     name: Trivy — K8s Manifests
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.CI_FASTLANE_CI_LABEL || 'mereka-k8s-runners' }}
     permissions:
       contents: read
     steps:
@@ -54,7 +54,7 @@ jobs:
 
   trivy-terraform:
     name: Trivy — Terraform
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.CI_FASTLANE_CI_LABEL || 'mereka-k8s-runners' }}
     permissions:
       contents: read
     steps:

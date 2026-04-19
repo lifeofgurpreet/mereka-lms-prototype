@@ -23,7 +23,7 @@ permissions: {}
 jobs:
   lint-plugins:
     name: Lint Plugin Sources
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.CI_FASTLANE_CI_LABEL || 'mereka-k8s-runners' }}
     permissions:
       contents: read
     steps:
@@ -47,7 +47,7 @@ jobs:
 
   verify-retired-legacy-shim:
     name: Verify Retired Legacy Shim Contract
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.CI_FASTLANE_CI_LABEL || 'mereka-k8s-runners' }}
     needs: lint-plugins
     permissions:
       contents: read
@@ -68,7 +68,7 @@ jobs:
 
   render-contract-preflight:
     name: Render Contract Preflight
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.CI_FASTLANE_CI_LABEL || 'mereka-k8s-runners' }}
     needs: [lint-plugins, verify-retired-legacy-shim]
     permissions:
       contents: read

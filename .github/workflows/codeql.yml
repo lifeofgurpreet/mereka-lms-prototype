@@ -85,8 +85,10 @@ jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
     # ARC heavy runners now ship the pre-bundled CodeQL archive at
-    # /opt/codeql/codeql-bundle-linux64.tar.zst, so restore the job to the
-    # self-hosted runner class that carries that runtime contract.
+    # /opt/codeql/codeql-bundle-linux64.tar.zst. Fastlane VPS runners do
+    # not currently ship this archive, so keep CodeQL pinned to ARC
+    # heavy-builders for now — moving it to fastlane requires baking the
+    # CodeQL bundle into the fastlane host bootstrap first.
     needs: change-scope
     if: needs.change-scope.outputs.should_run == 'true'
     runs-on: mereka-k8s-heavy-builders

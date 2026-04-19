@@ -39,6 +39,12 @@ FASTLANE_RUNNER_EXPRESSIONS=(
   'needs.select-ci-lane.outputs.runner_label'
   'needs.select-bootstrap-lane.outputs.runner_label'
   'needs.select-runner.outputs.runner_label'
+  # Direct repo-variable routing for dedicated LMS fastlane lanes on
+  # vmi3220759 (mereka-lms-vps-fastlane-{build,ci}). The expression
+  # falls back to mereka-k8s-{heavy-builders,runners} when the var is
+  # unset, so the ARC-first guarantee still holds.
+  "vars.CI_FASTLANE_BUILD_LABEL || 'mereka-k8s-heavy-builders'"
+  "vars.CI_FASTLANE_CI_LABEL || 'mereka-k8s-runners'"
 )
 
 # Workflows permitted to use mereka-k8s-heavy-builders (Class B)
