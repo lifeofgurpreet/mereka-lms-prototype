@@ -74,8 +74,14 @@ ci_runtime_inventory:
   entries: []
 YAML
 
+# Ambient CI env hoists VALIDATE_REGISTRY_SCOPE=changed + CI_CHANGED_FILES.
+# When the PR under test doesn't change scripts/*, the validator early-exits
+# with "scope skip" → exit 0 → fixture 2/3 false-pass. Strip those env vars
+# from the fixture runs so the validator executes its real checks.
 expect_fail "fixture 2: seeded nonexistent registered script" \
-  env REGISTRY_OVERRIDE="${TMPD}/registry-nonexistent.yaml" WARN_UNREGISTERED=0 \
+  env -u VALIDATE_REGISTRY_SCOPE -u CI_CHANGED_FILES \
+      -u VALIDATE_REGISTRY_CHANGED_FILES \
+      REGISTRY_OVERRIDE="${TMPD}/registry-nonexistent.yaml" WARN_UNREGISTERED=0 \
   bash "${REAL_SCRIPT}"
 
 # ── Fixture 3: seeded non-executable registered script ───────────────────────
@@ -96,7 +102,9 @@ ci_runtime_inventory:
 YAML
 
 expect_fail "fixture 3: seeded non-executable registered script" \
-  env REGISTRY_OVERRIDE="${TMPD}/registry-nonexec.yaml" WARN_UNREGISTERED=0 \
+  env -u VALIDATE_REGISTRY_SCOPE -u CI_CHANGED_FILES \
+      -u VALIDATE_REGISTRY_CHANGED_FILES \
+      REGISTRY_OVERRIDE="${TMPD}/registry-nonexec.yaml" WARN_UNREGISTERED=0 \
   bash "${REAL_SCRIPT}"
 
 echo ""
