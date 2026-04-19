@@ -6574,6 +6574,15 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": "platform-release",
+    "path": "ops/evidence/m0u5.10-learning-mfe-browser-proof-artifact-manifest-2026-04-19.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-release",
     "path": "ops/evidence/mfe-plugin-slot-audit-2026-04-19.md",
     "status": "supporting",
     "type": "runbook"
