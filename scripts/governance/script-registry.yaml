@@ -572,6 +572,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-env-auth-parity.sh
     - script: scripts/qa/verify-domain-authority-chain.sh
     - script: scripts/qa/verify-domain-generated-surfaces.sh
+    - script: scripts/qa/test-emit-build-metrics.sh
 
 ci_runtime_inventory:
   generated_file: .github/ci-scripts-runtime.txt
