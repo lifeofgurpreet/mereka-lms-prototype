@@ -1,0 +1,60 @@
+# Code Quality Scorecard — Tier-A script first-class scorecard
+#
+# Runs `scripts/governance/score-tier-a-scripts.py` in both --auto-discover
+# (Phase 2) and hardcoded (Phase 1) modes. Observer-only this phase — no
+# --threshold gating. Phase 4 follow-up can add a floor once a baseline is
+# established.
+#
+# Why this standalone workflow exists:
+#   The same job is also defined in daily-infrastructure-audit.yml (added
+#   via #1844), but that host workflow has been `disabled_manually` on
+#   GitHub's side since 2026-03-14. This standalone workflow ensures the
+#   scorecard runs nightly regardless of the host's status. The host's
+#   other 6 jobs remain dormant until a separate remediation PR re-enables
+#   the host workflow.
+#
+# Spec:      docs/ops/evidence/script-first-class-tier-0-discovery-2026-04-18.md
+# Baseline:  docs/ops/evidence/tier-a-scorecard-baseline-2026-04-19.md
+# Bead:      mereka-lms-q69f.4
+# Runbook:   scripts/governance/score-tier-a-scripts.py --help
+name: Code Quality Scorecard
+
+permissions: {}
+
+on:
+  # Daily at 03:00 UTC — slot chosen to avoid the 01:00 UTC and 02:00 UTC
+  # slots used by daily-infrastructure-audit.yml and tenant-safety-audit.yml
+  # respectively, keeping GCP auth contention low.
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  code-quality-scorecard:
+    name: "Code Quality Scorecard (Tier-A)"
+    runs-on: mereka-k8s-runners
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Run Tier-A scorecard (auto-discover + hardcoded)
+        # non-blocking observability: scorer failures should not alert; artifact
+        # capture downstream is the load-bearing output.
+        continue-on-error: true
+        run: |
+          mkdir -p var/ci
+          python3 scripts/governance/score-tier-a-scripts.py --auto-discover --json \
+            > var/ci/score-tier-a-scripts.json
+          python3 scripts/governance/score-tier-a-scripts.py --json \
+            > var/ci/score-tier-a-scripts-hardcoded.json
+
+      - name: Upload scorecard artifact
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        with:
+          name: code-quality-scorecard
+          path: |
+            var/ci/score-tier-a-scripts.json
+            var/ci/score-tier-a-scripts-hardcoded.json
+          retention-days: 7
