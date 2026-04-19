@@ -97,7 +97,7 @@ Without `git blame` / Argo history of the specific deployment manifest, the exac
 
 This evidence only covers the UNAUTHENTICATED redirect chain. The bead implied the bug might manifest at or after login. A full verification requires:
 
-1. Logging in as a SOF test user (`lanea-platform-admin`, password `Cr3ativity`) via the authn MFE.
+1. Logging in as a SOF test user (`lanea-platform-admin`; password fetched from Infisical at `MEREKA_LMS_TEST_USER_PASSWORD`) via the authn MFE.
 2. Confirming that the OAuth callback returns to Studio with a valid session.
 3. Confirming that Studio post-login renders SOF tenant content, not Mereka content.
 
@@ -120,7 +120,7 @@ The P0 "STRUCTURAL: goes to WRONG authn page" framing is no longer accurate. The
 ## Related
 
 - Bead: `mereka-lms-cm9c` (this evidence)
-- Test user credentials: `lanea-platform-admin` / `Cr3ativity` (per CLAUDE.md)
+- Test user: `lanea-platform-admin` (password fetched from Infisical at `MEREKA_LMS_TEST_USER_PASSWORD`; value redacted from this doc 2026-04-19 per bead `mereka-lms-m0u5.10.7`)
 - Authn MFE: `apps.{tenant}.academyv2.mereka.dev/authn`
 - Studio: `studio.{tenant}.academyv2.mereka.dev`
 - LMS OAuth endpoint: `{tenant}.academyv2.mereka.dev/oauth2/authorize` (client_id=cms-sso)

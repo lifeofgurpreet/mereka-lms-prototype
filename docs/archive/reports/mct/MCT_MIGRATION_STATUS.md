@@ -77,7 +77,7 @@ _Audience: Leadership • Owner: Migration Squad • Last verified: 2025-08-31_
    - Once resolved, re-run a quick `manage.py cms shell -c "len(modulestore().get_courses())"` check.
 
 2. **UI Verification Runbook**
-   - Log in as `gurpreet@biji-biji.com / Cr3ativity` after Mongo is online.
+   - Log in as `gurpreet@biji-biji.com` (fetch password from Infisical at `MEREKA_LMS_TEST_USER_PASSWORD`; value redacted from this archive doc 2026-04-19 per bead `mereka-lms-m0u5.10.7`) after Mongo is online.
    - Spot-check the 4 populated courses (MCTCAT-24, 27, 45, 46) plus one empty shell.
    - Capture screenshots for leadership.
 

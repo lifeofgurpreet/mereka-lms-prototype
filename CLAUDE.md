@@ -478,8 +478,8 @@ gcloud secrets create MEREKA_LMS_NEW_SECRET --data-file=- <<< "value"
 See `specs/secrets-management.md` for full specification.
 
 **Test & Operational Credentials (ALL in Infisical)**:
-- **INVARIANT**: Everything you need to test, deploy, or operate is already in Infisical. Do NOT create new tokens or ask for credentials.
-- **Test user password**: `Cr3ativity` (all envs)
+- **INVARIANT**: Everything you need to test, deploy, or operate is already in Infisical. Do NOT create new tokens or ask for credentials. Do NOT hardcode credential values in this file or in evidence bundles.
+- **Test user password**: fetch from Infisical at `MEREKA_LMS_TEST_USER_PASSWORD` (dev env; staging/prod may differ after per-env rotation). Was previously hardcoded here; redacted 2026-04-19 per bead `mereka-lms-m0u5.10.7` rotation. If you need the value, pull from Infisical; don't read it from git history.
 - **Test users**: `testadmin` (staff+super), `lanea-platform-admin` (staff+super), `lanea-enterprise-learner` (enterprise), `synthetic-learner-01` (basic learner)
 - **GitHub App (cross-repo dispatch)**: `BBI_ARC_GITHUB_APP_ID` + `BBI_ARC_GITHUB_APP_PRIVATE_KEY` + `BBI_ARC_GITHUB_APP_INSTALLATION_ID` in Infisical root path
 - **GHCR image push/pull**: `CIE_{DEV,STAGING,PROD}_GHCR_DOCKERCONFIGJSON`
