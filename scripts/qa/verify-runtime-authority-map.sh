@@ -32,6 +32,7 @@ failures=0
 
 pass() { echo "  PASS: $*"; }
 fail() { echo "  FAIL: $*"; failures=$((failures + 1)); }
+skip() { echo "  SKIP: $*"; }
 section() { echo ""; echo "==> $*"; }
 
 # ─── frozen baselines ─────────────────────────────────────────────────────────
@@ -55,8 +56,12 @@ check_overlay_baseline() {
     local baseline="$2"
     local label="$3"
 
+    # Absence-tolerant (Wave 9 prep, bead mereka-lms-2xwo item 6):
+    # post-Wave-9 these deprecated overlay directories are deleted and the
+    # authoritative source is bbi-infrastructure/apps/mereka-lms/overlays/.
+    # Skip (not fail) if the directory is absent.
     if [ ! -d "${K8S_DIR}/overlays/${overlay_path}" ]; then
-        fail "${label}: directory not found (${K8S_DIR}/overlays/${overlay_path})"
+        skip "${label}: directory absent (Wave 9 deletion complete) — bbi-infra is authoritative"
         return
     fi
 
@@ -181,8 +186,9 @@ check_deprecated_marker() {
     local label="$2"
     local kustomization_file="${K8S_DIR}/overlays/${overlay_path}/kustomization.yaml"
 
+    # Absence-tolerant (Wave 9 prep, bead mereka-lms-2xwo item 6).
     if [ ! -f "${kustomization_file}" ]; then
-        fail "${label}: kustomization.yaml not found"
+        skip "${label}: kustomization.yaml absent (Wave 9 deletion complete)"
         return
     fi
 
@@ -206,8 +212,9 @@ check_overlay_image_sentinel() {
     local label="$2"
     local kustomization_file="${K8S_DIR}/overlays/${overlay_path}/kustomization.yaml"
 
+    # Absence-tolerant (Wave 9 prep, bead mereka-lms-2xwo item 6).
     if [ ! -f "${kustomization_file}" ]; then
-        fail "${label}: kustomization.yaml not found"
+        skip "${label}: kustomization.yaml absent (Wave 9 deletion complete)"
         return
     fi
 
