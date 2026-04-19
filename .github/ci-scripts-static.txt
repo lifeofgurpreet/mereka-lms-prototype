@@ -27,7 +27,7 @@ scripts/qa/test-verify-script-governance-dangerous.sh
 scripts/qa/test-verify-script-governance-orphans.sh
 scripts/qa/test-verify-siteconfig-authority.sh
 scripts/qa/test-generate-script-governance-catalog.sh
-scripts/qa/test-verify-runbook-executable.sh
+scripts/qa/test-score-tier-a-scripts.sh
 scripts/qa/test-build-script-governance-review-packet.sh
 scripts/qa/test-verify-authn-submodule-path-contract.sh
 scripts/qa/test-verify-theming-generated-artifacts.sh

@@ -11,7 +11,7 @@ scripts/qa/verify-mfe-route-smoke.sh
 scripts/qa/verify-ci-script-list.sh
 scripts/qa/validate-deploy-contract.sh
 scripts/qa/verify-spec-dedupe-normalize.sh
-scripts/qa/test-verify-runbook-executable.sh
+scripts/qa/test-score-tier-a-scripts.sh
 scripts/branding/validate-token-consumers.sh
 scripts/branding/verify-token-drift.sh
 scripts/infra/check-cert-sans.sh

@@ -552,3 +552,39 @@ jobs:
           name: gitops-integrity-results
           path: var/ci/gitops-integrity-results.txt
           retention-days: 7
+
+  # ============================================================================
+  # Job 6: code-quality-scorecard — Tier-A script first-class scorecard
+  # Runs score-tier-a-scripts.py in both --auto-discover (Phase 2) and
+  # hardcoded (Phase 1) modes. Observer-only this phase — no --threshold
+  # gating. Phase 4 follow-up adds a floor once a baseline is established.
+  # Spec: docs/ops/evidence/script-first-class-tier-0-discovery-2026-04-18.md
+  # Bead: mereka-lms-q69f.4
+  # ============================================================================
+  code-quality-scorecard:
+    name: "Code Quality Scorecard (Tier-A)"
+    needs: []
+    runs-on: mereka-k8s-runners
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Run Tier-A scorecard (auto-discover + hardcoded)
+        continue-on-error: true
+        run: |
+          mkdir -p var/ci
+          python3 scripts/governance/score-tier-a-scripts.py --auto-discover --json \
+            > var/ci/score-tier-a-scripts.json
+          python3 scripts/governance/score-tier-a-scripts.py --json \
+            > var/ci/score-tier-a-scripts-hardcoded.json
+
+      - name: Upload scorecard artifact
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f  # v7.0.0
+        with:
+          name: code-quality-scorecard
+          path: |
+            var/ci/score-tier-a-scripts.json
+            var/ci/score-tier-a-scripts-hardcoded.json
+          retention-days: 7

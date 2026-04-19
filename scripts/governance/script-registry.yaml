@@ -84,7 +84,7 @@ ci_static_inventory:
     - script: scripts/qa/test-verify-siteconfig-authority.sh
       estimated_seconds: 7
     - script: scripts/qa/test-generate-script-governance-catalog.sh
-    - script: scripts/qa/test-verify-runbook-executable.sh
+    - script: scripts/qa/test-score-tier-a-scripts.sh
       estimated_seconds: 5
     - script: scripts/qa/test-build-script-governance-review-packet.sh
     - script: scripts/qa/test-verify-authn-submodule-path-contract.sh
