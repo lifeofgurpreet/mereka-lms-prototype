@@ -114,6 +114,7 @@ scripts/qa/test-verify-post-deploy-gate.sh
 scripts/qa/test-verify-wif-readiness.sh
 scripts/qa/test-verify-slsa-provenance.sh
 scripts/qa/test-verify-migration-rollback.sh
+scripts/qa/test-verify-cross-system-identity.sh
 scripts/qa/test-verify-zero-pending-migrations-service-filter.sh
 scripts/qa/test-lms-ops-migrate-unknown-service-guardrails.sh
 scripts/qa/verify-no-hardcoded-secrets.sh

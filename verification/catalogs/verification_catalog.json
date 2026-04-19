@@ -4096,7 +4096,7 @@
       "mutability": "mutating",
       "owner": "platform-core",
       "path": "scripts/qa/verify-cross-system-identity.sh",
-      "reference_count": 9,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

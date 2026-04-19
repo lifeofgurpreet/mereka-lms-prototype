@@ -175,6 +175,7 @@ ci_static_inventory:
     - script: scripts/qa/test-verify-wif-readiness.sh
     - script: scripts/qa/test-verify-slsa-provenance.sh
     - script: scripts/qa/test-verify-migration-rollback.sh
+    - script: scripts/qa/test-verify-cross-system-identity.sh
     - script: scripts/qa/test-verify-zero-pending-migrations-service-filter.sh
     - script: scripts/qa/test-lms-ops-migrate-unknown-service-guardrails.sh
     - script: scripts/qa/verify-no-hardcoded-secrets.sh
