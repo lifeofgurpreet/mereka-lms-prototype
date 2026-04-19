@@ -529,6 +529,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-brand-parity.sh
     - script: scripts/qa/verify-certificate-branding.sh
     - script: scripts/qa/verify-mfe-plugin-slots.sh
+    - script: scripts/qa/test-verify-mfe-plugin-slots.sh
     - script: scripts/qa/verify-mfe-slot-profile-persistence.sh
     - script: scripts/qa/verify-e2e-framework.sh
     - script: scripts/qa/verify-authenticated-ui-smoke.sh

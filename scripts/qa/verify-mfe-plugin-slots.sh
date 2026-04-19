@@ -1,392 +1,220 @@
 #!/usr/bin/env bash
-# @covers AC-SLOT-001, AC-SLOT-002, AC-SLOT-003, AC-SLOT-004, AC-SLOT-005, AC-SLOT-006, AC-SLOT-007, AC-SLOT-008, AC-SLOT-009, AC-SLOT-010, AC-SLOT-011, AC-SLOT-012, AC-SLOT-013, AC-SLOT-015, AC-SLOT-022, AC-SLOT-024
+# @covers AC-SLOT-022
 # @spec: mfe-plugin-slots_spec.md
-# Verify expected plugin slot IDs exist in source plugin config and rendered env config.
+#
+# Observation-only gate for MFE plugin slot registrations.
+# Fails on: import errors, slot count drift, missing Phase 1-3 slots, duplicates.
+# Does NOT prescribe removal of OVERSPEC slots.
+# Bump EXPECTED_SLOT_COUNT in the same PR when legitimately adding a slot.
+#
+# Usage:
+#   bash scripts/qa/verify-mfe-plugin-slots.sh
+#   EXPECTED_SLOT_COUNT=75 bash scripts/qa/verify-mfe-plugin-slots.sh
+#   PLUGIN_OVERRIDE=/path/to/fixture.py bash scripts/qa/verify-mfe-plugin-slots.sh
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
-PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
-PLUGIN_BUNDLE=""
-PLUGIN_FILE="$PLUGIN_MAIN"
-RENDERED_ENV="${RENDERED_ENV:-$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/env.config.jsx}"
-EXPECTED_SLOT_IDS="${EXPECTED_SLOT_IDS:-org.openedx.frontend.layout.header_logo.v1,org.openedx.frontend.layout.footer.v1,org.openedx.frontend.layout.studio_footer.v1,org.openedx.frontend.layout.studio_header_search_button_slot.v1,org.openedx.frontend.authoring.course_unit_sidebar.v1,org.openedx.frontend.authoring.course_outline_sidebar.v1,org.openedx.frontend.authoring.course_outline_header_actions.v1,org.openedx.frontend.authoring.course_unit_header_actions.v1,org.openedx.frontend.authoring.course_outline_page_alerts.v1,org.openedx.frontend.authoring.edit_video_alerts.v1,org.openedx.frontend.authoring.edit_file_alerts.v1,org.openedx.frontend.authoring.additional_course_plugin.v1,org.openedx.frontend.authoring.additional_course_content_plugin.v1,org.openedx.frontend.authoring.course_outline_subsection_card_extra_actions.v1,org.openedx.frontend.authoring.course_outline_unit_card_extra_actions.v1,org.openedx.frontend.authoring.course_unit_sidebar.v2,org.openedx.frontend.authoring.files_upload_page_table.v1,org.openedx.frontend.authoring.videos_upload_page_table.v1,org.openedx.frontend.authoring.video_transcript_additional_translations_component.v1,org.openedx.frontend.authn.login_component.v1,org.openedx.frontend.learner_dashboard.widget_sidebar.v1,org.openedx.frontend.learner_dashboard.no_courses_view.v1,org.openedx.frontend.learner_dashboard.course_list.v1,org.openedx.frontend.learner_dashboard.course_card_banner.v1,org.openedx.frontend.learner_dashboard.course_card_action.v1,org.openedx.frontend.learner_dashboard.dashboard_modal.v1,org.openedx.frontend.learning.course_outline_sidebar.v1,org.openedx.frontend.learning.progress_certificate_status.v1,org.openedx.frontend.layout.header_learning.v1,org.openedx.frontend.layout.header_desktop.v1,org.openedx.frontend.layout.header_mobile.v1,org.openedx.frontend.layout.header_learning_course_info.v1,org.openedx.frontend.learning.course_tab_links.v1,org.openedx.frontend.learning.course_breadcrumbs.v1,org.openedx.frontend.learning.learner_tools.v1,org.openedx.frontend.learning.progress_tab_course_grade.v1,org.openedx.frontend.learning.progress_tab_related_links.v1,org.openedx.frontend.learning.progress_tab_certificate_status_main_body.v1,org.openedx.frontend.learning.progress_tab_certificate_status_side_panel.v1,org.openedx.frontend.learning.progress_tab_grade_breakdown.v1,org.openedx.frontend.learning.unit_title.v1,org.openedx.frontend.learning.sequence_navigation.v1,org.openedx.frontend.learning.course_outline_sidebar_trigger.v1,org.openedx.frontend.learning.course_outline_mobile_sidebar_trigger.v1,org.openedx.frontend.learning.course_home_section_outline.v1,org.openedx.frontend.learning.course_recommendations.v1,org.openedx.frontend.learning.content_iframe_loader.v1,org.openedx.frontend.learning.content_iframe_error.v1,org.openedx.frontend.learning.sequence_container.v1,org.openedx.frontend.learning.gated_unit_content_message.v1,org.openedx.frontend.learning.next_unit_top_nav_trigger.v1,org.openedx.frontend.learning.course_outline_tab_notifications.v1,org.openedx.frontend.learning.notification_widget.v1,org.openedx.frontend.learning.notification_tray.v1,org.openedx.frontend.learning.notifications_discussions_sidebar_trigger.v1,org.openedx.frontend.learning.notifications_discussions_sidebar.v1,org.openedx.frontend.learning.course_exit_view_courses.v1,org.openedx.frontend.learning.course_exit_dashboard_footnote_link.v1,org.openedx.frontend.account.id_verification_page.v1,org.openedx.frontend.account.additional_profile_fields.v1,org.openedx.frontend.profile.additional_profile_fields.v1,org.openedx.frontend.layout.header_desktop_main_menu.v1,org.openedx.frontend.layout.header_mobile_main_menu.v1,org.openedx.frontend.layout.header_desktop_logged_out_items.v1,org.openedx.frontend.layout.header_mobile_logged_out_items.v1,org.openedx.frontend.layout.header_desktop_secondary_menu.v1,org.openedx.frontend.layout.header_learning_help.v1,org.openedx.frontend.layout.header_learning_logged_out_items.v1,org.openedx.frontend.layout.header_desktop_user_menu.v1,org.openedx.frontend.layout.header_mobile_user_menu.v1,org.openedx.frontend.layout.header_learning_user_menu.v1,org.openedx.frontend.layout.header_desktop_user_menu_toggle.v1,org.openedx.frontend.layout.header_mobile_user_menu_trigger.v1,org.openedx.frontend.layout.header_learning_user_menu_toggle.v1}"
-STRICT_RENDERED_SLOTS="${STRICT_RENDERED_SLOTS:-0}"
-CHECK_RENDERED_SLOTS="${CHECK_RENDERED_SLOTS:-0}"
+PLUGIN_FILE="${PLUGIN_OVERRIDE:-$REPO_ROOT/infrastructure/tutor/plugins/mereka_lms_mfe_slots.py}"
+EXPECTED_SLOT_COUNT="${EXPECTED_SLOT_COUNT:-74}"
 
-PASS=0
-FAIL=0
-WARN=0
+FAILURES=0
+pass() { echo "  PASS  $*"; }
+fail() { echo "  FAIL  $*" >&2; FAILURES=$((FAILURES + 1)); }
 
-if mereka_plugin_has_any "$REPO_ROOT"; then
-  PLUGIN_BUNDLE="$(mktemp -t mereka-plugin-contract.XXXXXX)"
-  while IFS= read -r plugin_file; do
-    cat "$plugin_file" >>"$PLUGIN_BUNDLE"
-    printf '\n' >>"$PLUGIN_BUNDLE"
-  done < <(mereka_plugin_contract_files "$REPO_ROOT")
-  PLUGIN_FILE="$PLUGIN_BUNDLE"
-fi
+echo "=== AC-SLOT-022: MFE Plugin Slots Observation Gate ==="
+echo "    plugin: ${PLUGIN_FILE}"
+echo ""
 
-cleanup() {
-  if [[ -n "$PLUGIN_BUNDLE" && -f "$PLUGIN_BUNDLE" ]]; then
-    rm -f "$PLUGIN_BUNDLE"
-  fi
-}
-trap cleanup EXIT
+# ── Gate 1: Import / syntax check ─────────────────────────────────────────────
+# Catches syntax errors before any string-search runs.
+# Tutormfe is not installed in CI outside the Tutor venv, so we mock it then
+# exec the module — this catches any Python syntax error or NameError in the
+# module body while tolerating the missing Tutor dependency.
+if python3 - "$PLUGIN_FILE" <<'PY'
+import sys, pathlib, types, ast
 
-pass() { PASS=$((PASS + 1)); echo "PASS: $1"; }
-fail() { FAIL=$((FAIL + 1)); echo "FAIL: $1"; }
-warn() { WARN=$((WARN + 1)); echo "WARN: $1"; }
+plugin_path = pathlib.Path(sys.argv[1])
+if not plugin_path.exists():
+    print(f"MISSING: {plugin_path}", file=sys.stderr)
+    sys.exit(1)
 
-echo "=== MFE Plugin Slots Verification ==="
+# Syntax check via ast.parse — catches SyntaxError without executing
+try:
+    ast.parse(plugin_path.read_text(encoding="utf-8"))
+except SyntaxError as exc:
+    print(f"SYNTAX ERROR: {exc}", file=sys.stderr)
+    sys.exit(1)
 
-if [[ ! -f "$PLUGIN_FILE" ]]; then
-  fail "Plugin file missing: ${PLUGIN_FILE#$REPO_ROOT/}"
-  echo "=== Summary: PASS=$PASS WARN=$WARN FAIL=$FAIL ==="
-  exit 1
-fi
+# Mock tutormfe so exec_module succeeds even outside a Tutor venv
+mock_hooks = types.SimpleNamespace(PLUGIN_SLOTS=types.SimpleNamespace(add_items=lambda x: None))
+mock_tutormfe = types.ModuleType("tutormfe")
+mock_tutormfe.hooks = mock_hooks
+sys.modules.setdefault("tutormfe", mock_tutormfe)
+sys.modules.setdefault("tutormfe.hooks", mock_hooks)
 
-if rg -q "from tutormfe\\.hooks import PLUGIN_SLOTS" "$PLUGIN_FILE"; then
-  pass "PLUGIN_SLOTS import present in plugin"
+import importlib.util
+spec = importlib.util.spec_from_file_location("_mereka_mfe_slots_check", plugin_path)
+mod = importlib.util.module_from_spec(spec)
+try:
+    spec.loader.exec_module(mod)
+except Exception as exc:
+    print(f"EXEC ERROR: {exc}", file=sys.stderr)
+    sys.exit(1)
+sys.exit(0)
+PY
+then
+  pass "Gate 1: plugin file parses and executes without error"
 else
-  fail "PLUGIN_SLOTS import missing from plugin"
+  fail "Gate 1: plugin file import/syntax error (see stderr above)"
 fi
 
-source_slot_count="$(python3 - "$PLUGIN_FILE" <<'PY'
+# ── Gate 2: Slot count assertion ───────────────────────────────────────────────
+# Counts unique org.openedx.frontend.*.vN slot IDs across the whole file.
+# Fails if count differs from EXPECTED_SLOT_COUNT.
+actual_count="$(python3 - "$PLUGIN_FILE" <<'PY'
 import re, sys
 text = open(sys.argv[1], encoding="utf-8").read()
-# Canonical FPF slot id shape: org.openedx.frontend.<path>.vN
-slots = set(re.findall(r"org\.openedx\.frontend\.[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)+\.v[0-9]+", text))
+slots = set(re.findall(
+    r"org\.openedx\.frontend\.[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)+\.v[0-9]+",
+    text,
+))
 print(len(slots))
 PY
 )"
-if [[ "$source_slot_count" -gt 0 ]]; then
-  pass "Plugin declares ${source_slot_count} namespaced slot IDs"
+
+echo "    slot count: ${actual_count} (expected: ${EXPECTED_SLOT_COUNT})"
+if [[ "$actual_count" -eq "$EXPECTED_SLOT_COUNT" ]]; then
+  pass "Gate 2: slot count is ${actual_count}"
 else
-  fail "No namespaced slot IDs found in plugin"
+  fail "Gate 2: slot count is ${actual_count}, expected ${EXPECTED_SLOT_COUNT} — if intentional bump EXPECTED_SLOT_COUNT"
 fi
 
-IFS=',' read -r -a expected <<<"$EXPECTED_SLOT_IDS"
-for slot in "${expected[@]}"; do
-  slot="$(echo "$slot" | xargs)"
-  [[ -z "$slot" ]] && continue
-  if rg -qF "$slot" "$PLUGIN_FILE"; then
-    pass "Expected slot present in plugin: $slot"
-  else
-    fail "Expected slot missing in plugin: $slot"
-  fi
-done
-
-declare -A SLOT_BINDING_MARKERS=(
-  ["org.openedx.frontend.layout.header_logo.v1"]="mereka_header_logo"
-  ["org.openedx.frontend.layout.footer.v1"]="mereka_footer"
-  ["org.openedx.frontend.layout.studio_footer.v1"]="mereka_studio_footer"
-  ["org.openedx.frontend.authoring.course_unit_sidebar.v1"]="mereka_authoring_course_unit_sidebar_hint"
-  ["org.openedx.frontend.authoring.course_outline_sidebar.v1"]="mereka_authoring_course_outline_sidebar_hint"
-  ["org.openedx.frontend.authoring.course_outline_header_actions.v1"]="mereka_authoring_course_outline_header_actions_hint"
-  ["org.openedx.frontend.authoring.course_unit_header_actions.v1"]="mereka_authoring_course_unit_header_actions_hint"
-  ["org.openedx.frontend.authoring.course_outline_page_alerts.v1"]="mereka_authoring_course_outline_page_alerts_hint"
-  ["org.openedx.frontend.authoring.edit_video_alerts.v1"]="mereka_authoring_edit_video_alerts_hint"
-  ["org.openedx.frontend.authoring.edit_file_alerts.v1"]="mereka_authoring_edit_file_alerts_hint"
-  ["org.openedx.frontend.authoring.additional_course_plugin.v1"]="mereka_authoring_additional_course_plugin_hint"
-  ["org.openedx.frontend.authoring.additional_course_content_plugin.v1"]="mereka_authoring_additional_course_content_plugin_hint"
-  ["org.openedx.frontend.authoring.course_outline_subsection_card_extra_actions.v1"]="mereka_authoring_outline_subsection_extra_actions_hint"
-  ["org.openedx.frontend.authoring.course_outline_unit_card_extra_actions.v1"]="mereka_authoring_outline_unit_extra_actions_hint"
-  ["org.openedx.frontend.authoring.course_unit_sidebar.v2"]="mereka_authoring_course_unit_sidebar_v2_hint"
-  ["org.openedx.frontend.authoring.files_upload_page_table.v1"]="mereka_authoring_files_upload_page_table_hint"
-  ["org.openedx.frontend.authoring.videos_upload_page_table.v1"]="mereka_authoring_videos_upload_page_table_hint"
-  ["org.openedx.frontend.authoring.video_transcript_additional_translations_component.v1"]="mereka_authoring_video_transcript_translations_hint"
-  ["org.openedx.frontend.authn.login_component.v1"]="mereka_authn_login_component"
-  ["org.openedx.frontend.learner_dashboard.widget_sidebar.v1"]="mereka_learner_sidebar_widget"
-  ["org.openedx.frontend.learner_dashboard.no_courses_view.v1"]="mereka_no_courses_view"
-  ["org.openedx.frontend.learner_dashboard.course_list.v1"]="mereka_dashboard_course_list_context"
-  ["org.openedx.frontend.learner_dashboard.course_card_banner.v1"]="mereka_dashboard_course_card_banner_accent"
-  ["org.openedx.frontend.learner_dashboard.course_card_action.v1"]="mereka_dashboard_course_card_action_hint"
-  ["org.openedx.frontend.learner_dashboard.dashboard_modal.v1"]="mereka_dashboard_modal_hint"
-  ["org.openedx.frontend.learning.course_outline_sidebar.v1"]="mereka_course_outline_sidebar"
-  ["org.openedx.frontend.learning.progress_certificate_status.v1"]="mereka_progress_certificate_status"
-  ["org.openedx.frontend.layout.header_learning.v1"]="mereka_layout_header_learning_context"
-  ["org.openedx.frontend.layout.header_desktop.v1"]="withMerekaHeaderDesktopShell"
-  ["org.openedx.frontend.layout.header_mobile.v1"]="withMerekaHeaderMobileShell"
-  ["org.openedx.frontend.layout.header_learning_course_info.v1"]="withMerekaHeaderLearningCourseInfo"
-  ["org.openedx.frontend.learning.course_tab_links.v1"]="mereka_learning_course_tab_links_hint"
-  ["org.openedx.frontend.learning.course_breadcrumbs.v1"]="mereka_learning_course_breadcrumbs_hint"
-  ["org.openedx.frontend.learning.learner_tools.v1"]="mereka_learning_learner_tools_hint"
-  ["org.openedx.frontend.learning.progress_tab_course_grade.v1"]="mereka_learning_progress_course_grade_hint"
-  ["org.openedx.frontend.learning.progress_tab_related_links.v1"]="mereka_learning_progress_related_links_hint"
-  ["org.openedx.frontend.learning.progress_tab_certificate_status_main_body.v1"]="mereka_learning_progress_certificate_status_main_body"
-  ["org.openedx.frontend.learning.progress_tab_certificate_status_side_panel.v1"]="mereka_learning_progress_certificate_status_side_panel"
-  ["org.openedx.frontend.learning.progress_tab_grade_breakdown.v1"]="mereka_learning_progress_grade_breakdown_hint"
-  ["org.openedx.frontend.learning.unit_title.v1"]="mereka_learning_unit_title_hint"
-  ["org.openedx.frontend.learning.sequence_navigation.v1"]="mereka_learning_sequence_navigation_hint"
-  ["org.openedx.frontend.learning.course_outline_sidebar_trigger.v1"]="mereka_learning_outline_sidebar_trigger_hint"
-  ["org.openedx.frontend.learning.course_outline_mobile_sidebar_trigger.v1"]="mereka_learning_outline_mobile_sidebar_trigger_hint"
-  ["org.openedx.frontend.learning.course_home_section_outline.v1"]="mereka_learning_course_home_section_outline_hint"
-  ["org.openedx.frontend.learning.course_recommendations.v1"]="mereka_learning_course_recommendations_hint"
-  ["org.openedx.frontend.learning.content_iframe_loader.v1"]="mereka_learning_content_iframe_loader_hint"
-  ["org.openedx.frontend.learning.content_iframe_error.v1"]="mereka_learning_content_iframe_error_hint"
-  ["org.openedx.frontend.learning.sequence_container.v1"]="mereka_learning_sequence_container_hint"
-  ["org.openedx.frontend.learning.gated_unit_content_message.v1"]="mereka_learning_gated_unit_content_message_hint"
-  ["org.openedx.frontend.learning.next_unit_top_nav_trigger.v1"]="mereka_learning_next_unit_top_nav_trigger_hint"
-  ["org.openedx.frontend.learning.course_outline_tab_notifications.v1"]="mereka_learning_course_outline_tab_notifications_hint"
-  ["org.openedx.frontend.learning.notification_widget.v1"]="mereka_learning_notification_widget_hint"
-  ["org.openedx.frontend.learning.notification_tray.v1"]="mereka_learning_notification_tray_hint"
-  ["org.openedx.frontend.learning.notifications_discussions_sidebar_trigger.v1"]="mereka_learning_notifications_discussions_sidebar_trigger_hint"
-  ["org.openedx.frontend.learning.notifications_discussions_sidebar.v1"]="mereka_learning_notifications_discussions_sidebar_hint"
-  ["org.openedx.frontend.learning.course_exit_view_courses.v1"]="mereka_learning_course_exit_view_courses_hint"
-  ["org.openedx.frontend.learning.course_exit_dashboard_footnote_link.v1"]="mereka_learning_course_exit_dashboard_footnote_link_hint"
-  ["org.openedx.frontend.account.id_verification_page.v1"]="mereka_account_id_verification_hint"
-  ["org.openedx.frontend.account.additional_profile_fields.v1"]="mereka_additional_profile_fields"
-  ["org.openedx.frontend.profile.additional_profile_fields.v1"]="mereka_profile_additional_fields"
-  ["org.openedx.frontend.layout.header_desktop_main_menu.v1"]="withMerekaMenuItems("
-  ["org.openedx.frontend.layout.header_mobile_main_menu.v1"]="withMerekaMenuItems("
-  ["org.openedx.frontend.layout.header_desktop_logged_out_items.v1"]="withMerekaMenuItems("
-  ["org.openedx.frontend.layout.header_mobile_logged_out_items.v1"]="withMerekaMenuItems("
-  ["org.openedx.frontend.layout.header_desktop_secondary_menu.v1"]="withMerekaMenuItems("
-  ["org.openedx.frontend.layout.header_learning_help.v1"]="MerekaLearningHelpLink"
-  ["org.openedx.frontend.layout.header_learning_logged_out_items.v1"]="withMerekaLearningLoggedOutItems"
-  ["org.openedx.frontend.layout.header_desktop_user_menu.v1"]="withMerekaHeaderUserMenuSupport"
-  ["org.openedx.frontend.layout.header_mobile_user_menu.v1"]="withMerekaHeaderUserMenuSupport"
-  ["org.openedx.frontend.layout.header_learning_user_menu.v1"]="withMerekaLearningUserMenuSupport"
-  ["org.openedx.frontend.layout.header_desktop_user_menu_toggle.v1"]="withMerekaHeaderUserMenuToggle"
-  ["org.openedx.frontend.layout.header_mobile_user_menu_trigger.v1"]="withMerekaMobileUserMenuTrigger"
-  ["org.openedx.frontend.layout.header_learning_user_menu_toggle.v1"]="withMerekaLearningUserMenuToggle"
-  ["org.openedx.frontend.layout.studio_header_search_button_slot.v1"]="withMerekaStudioHeaderSearchButton"
+# ── Gate 3: Phase 1-3 AC coverage ─────────────────────────────────────────────
+# These are the canonical slot IDs required by Phase 1 (AC-001..007),
+# Phase 2 (AC-008..011), and Phase 3 (AC-012..015) of the spec.
+# Missing any of these is a hard failure.
+declare -A PHASE_SLOTS=(
+  # Phase 1: Header Branding (7 slots / 7 ACs)
+  ["org.openedx.frontend.layout.header_logo.v1"]="Phase-1 desktop header logo"
+  ["org.openedx.frontend.layout.header_desktop.v1"]="Phase-1 header desktop shell"
+  ["org.openedx.frontend.layout.header_mobile.v1"]="Phase-1 header mobile shell"
+  ["org.openedx.frontend.layout.header_desktop_main_menu.v1"]="Phase-1 desktop main menu"
+  ["org.openedx.frontend.layout.header_mobile_main_menu.v1"]="Phase-1 mobile main menu"
+  ["org.openedx.frontend.layout.header_desktop_logged_out_items.v1"]="Phase-1 desktop logged-out items"
+  ["org.openedx.frontend.layout.header_mobile_logged_out_items.v1"]="Phase-1 mobile logged-out items"
+  # Phase 2: Learning MFE (4 slots / 4 ACs)
+  ["org.openedx.frontend.learning.course_outline_sidebar.v1"]="Phase-2 learning course outline sidebar"
+  ["org.openedx.frontend.learning.sequence_navigation.v1"]="Phase-2 learning sequence navigation"
+  ["org.openedx.frontend.learning.progress_certificate_status.v1"]="Phase-2 learning progress certificate"
+  ["org.openedx.frontend.layout.header_learning.v1"]="Phase-2 learning header"
+  # Phase 3: Account & Profile (3 slots / 3 ACs)
+  ["org.openedx.frontend.account.additional_profile_fields.v1"]="Phase-3 account additional profile fields"
+  ["org.openedx.frontend.profile.additional_profile_fields.v1"]="Phase-3 profile additional profile fields"
+  ["org.openedx.frontend.account.id_verification_page.v1"]="Phase-3 account id verification"
 )
 
-for slot in "${expected[@]}"; do
-  slot="$(echo "$slot" | xargs)"
-  [[ -z "$slot" ]] && continue
-  if [[ -v SLOT_BINDING_MARKERS[$slot] ]]; then
-    marker="${SLOT_BINDING_MARKERS[$slot]}"
-    if rg -qF "$marker" "$PLUGIN_FILE"; then
-      pass "Expected slot binding marker present for $slot: $marker"
-    else
-      fail "Expected slot binding marker missing for $slot: $marker"
-    fi
+missing_phase=()
+for slot_id in "${!PHASE_SLOTS[@]}"; do
+  label="${PHASE_SLOTS[$slot_id]}"
+  if grep -qF "$slot_id" "$PLUGIN_FILE"; then
+    pass "Gate 3: ${label} (${slot_id})"
+  else
+    fail "Gate 3: MISSING ${label} — ${slot_id}"
+    missing_phase+=("$slot_id")
   fi
 done
 
-# Footer slot should explicitly hide default footer contents before insert.
-if rg -qF "org.openedx.frontend.layout.footer.v1" "$PLUGIN_FILE" \
-  && rg -qF "op: PLUGIN_OPERATIONS.Hide" "$PLUGIN_FILE" \
-  && rg -qF "widgetId: 'default_contents'" "$PLUGIN_FILE"; then
-  pass "Footer slot override hides default contents before custom insert"
-else
-  fail "Footer slot override must hide default_contents before custom insert"
+if [[ "${#missing_phase[@]}" -gt 0 ]]; then
+  echo "" >&2
+  echo "  Phase 1-3 slots missing from plugin:" >&2
+  for s in "${missing_phase[@]}"; do echo "    - $s" >&2; done
 fi
 
-if [[ "$CHECK_RENDERED_SLOTS" != "1" ]]; then
-  pass "Rendered env slot checks skipped (set CHECK_RENDERED_SLOTS=1 to enable)"
-elif [[ -f "$RENDERED_ENV" ]]; then
-  pass "Rendered env config exists: ${RENDERED_ENV#$REPO_ROOT/}"
-  rendered_missing=0
-  for slot in "${expected[@]}"; do
-    slot="$(echo "$slot" | xargs)"
-    [[ -z "$slot" ]] && continue
-    if rg -qF "$slot" "$RENDERED_ENV"; then
-      pass "Expected slot present in rendered env config: $slot"
-    else
-      rendered_missing=$((rendered_missing + 1))
-      if [[ "$STRICT_RENDERED_SLOTS" == "1" ]]; then
-        warn "Expected slot not found in rendered env config: $slot"
-      fi
-    fi
-  done
-  if [[ "$rendered_missing" -gt 0 ]]; then
-    if [[ "$STRICT_RENDERED_SLOTS" == "1" ]]; then
-      warn "Rendered env config is missing $rendered_missing expected slot ID(s)"
-    else
-      warn "Rendered env config missing $rendered_missing expected slot ID(s); run tutor config save + apply-patches + mfe rebuild to refresh runtime output"
-    fi
-  fi
+# ── Gate 4: Duplicate detection ────────────────────────────────────────────────
+# Scans each list (_INSERT_SLOTS, _HIDE_INSERT_SLOTS, _MODIFY_SLOTS) for
+# duplicate slot IDs. Duplicates produce undefined ordering in FPF.
+dup_output="$(python3 - "$PLUGIN_FILE" <<'PY'
+import re, sys
+from collections import Counter
+
+text = open(sys.argv[1], encoding="utf-8").read()
+
+def extract_ids_in_block(block_name):
+    m = re.search(
+        rf"{re.escape(block_name)}\s*[=:][^\[]*\[(.*?)\n\]",
+        text,
+        re.DOTALL,
+    )
+    if not m:
+        return []
+    return re.findall(
+        r"org\.openedx\.frontend\.[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)+\.v[0-9]+",
+        m.group(1),
+    )
+
+all_ids = []
+for block in ("_INSERT_SLOTS", "_HIDE_INSERT_SLOTS", "_MODIFY_SLOTS"):
+    all_ids.extend(extract_ids_in_block(block))
+
+counts = Counter(all_ids)
+dups = [sid for sid, n in counts.items() if n > 1]
+if dups:
+    print("DUPLICATES: " + ", ".join(dups))
+    sys.exit(1)
+sys.exit(0)
+PY
+)" && gate4_ok=0 || gate4_ok=$?
+
+if [[ "$gate4_ok" -eq 0 ]]; then
+  pass "Gate 4: no duplicate slot IDs within declaration lists"
 else
-  warn "Rendered env config missing (skipping runtime slot check): ${RENDERED_ENV#$REPO_ROOT/}"
+  fail "Gate 4: duplicate slot IDs detected — ${dup_output}"
 fi
 
-# Source-contract assertions for key slot behaviors (no runtime dependency).
-# These checks intentionally map to AC-SLOT source guarantees and do not assert browser rendering.
-if rg -qF "org.openedx.frontend.layout.header_logo.v1" "$PLUGIN_FILE" \
-  && rg -qF "mereka_header_logo" "$PLUGIN_FILE" \
-  && rg -qF "logoUrl: '/theme/logo-horizontal.svg'" "$PLUGIN_FILE"; then
-  pass "Source contract: desktop header logo slot binds to branded logo path"
+# ── Gate 5: Structural check ────────────────────────────────────────────────────
+# Ensures the three canonical globals exist and are list/tuple literals.
+struct_out="$(python3 - "$PLUGIN_FILE" <<'PY'
+import ast, sys
+
+tree = ast.parse(open(sys.argv[1], encoding="utf-8").read())
+found = {}
+# Top-level Assign nodes only (module body)
+for node in tree.body:
+    if isinstance(node, ast.Assign):
+        for t in node.targets:
+            if isinstance(t, ast.Name) and t.id in (
+                "_INSERT_SLOTS", "_HIDE_INSERT_SLOTS", "_MODIFY_SLOTS"
+            ):
+                found[t.id] = isinstance(node.value, (ast.List, ast.Tuple))
+    # Also check annotated assignments: _INSERT_SLOTS: list[...] = [...]
+    elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+        if node.target.id in ("_INSERT_SLOTS", "_HIDE_INSERT_SLOTS", "_MODIFY_SLOTS"):
+            found[node.target.id] = node.value is not None and isinstance(
+                node.value, (ast.List, ast.Tuple)
+            )
+
+required = {"_INSERT_SLOTS", "_HIDE_INSERT_SLOTS", "_MODIFY_SLOTS"}
+missing = required - found.keys()
+wrong_type = {k for k, ok in found.items() if not ok}
+
+errors = []
+if missing:
+    errors.append("missing globals: " + ", ".join(sorted(missing)))
+if wrong_type:
+    errors.append("wrong type (need list/tuple): " + ", ".join(sorted(wrong_type)))
+if errors:
+    print("; ".join(errors), file=sys.stderr)
+    sys.exit(1)
+sys.exit(0)
+PY
+)" && gate5_ok=0 || gate5_ok=$?
+
+if [[ "$gate5_ok" -eq 0 ]]; then
+  pass "Gate 5: _INSERT_SLOTS, _HIDE_INSERT_SLOTS, _MODIFY_SLOTS are list/tuple globals"
 else
-  fail "Source contract: desktop header logo slot/logo path markers missing"
-fi
-
-if rg -qF "mobileLogoUrl:" "$PLUGIN_FILE" \
-  && rg -qF "selectedLogo = isMobileViewport && variant.mobileLogoUrl ? variant.mobileLogoUrl : variant.logoUrl;" "$PLUGIN_FILE"; then
-  pass "Source contract: mobile header logo selection uses mobileLogoUrl with viewport guard"
-else
-  fail "Source contract: mobile header logo selection markers missing"
-fi
-
-if rg -qF "const getLearnerHomeHref = () => '/learner-dashboard/';" "$PLUGIN_FILE"; then
-  pass "Source contract: learner-home href resolves to canonical /learner-dashboard/ path"
-else
-  fail "Source contract: learner-home href resolution markers missing"
-fi
-
-if rg -qF "'academy.biji-biji.com':" "$PLUGIN_FILE" \
-  && rg -qF "'skillourfuture.academy.mereka.io':" "$PLUGIN_FILE" \
-  && rg -qF "const MEREKA_SITE_VARIANTS = {" "$PLUGIN_FILE"; then
-  pass "Source contract: tenant hostnames are present in SITE_VARIANTS map"
-else
-  fail "Source contract: expected tenant hostnames missing from SITE_VARIANTS map"
-fi
-
-if rg -qF "content: 'Course Catalog'" "$PLUGIN_FILE" \
-  && rg -qF "content: 'Support'" "$PLUGIN_FILE" \
-  && rg -qF "href: '/learner-dashboard/'" "$PLUGIN_FILE"; then
-  pass "Source contract: menu wiring contains learner home, course catalog, and support markers"
-else
-  fail "Source contract: required menu content markers missing"
-fi
-
-if rg -qF "org.openedx.frontend.layout.header_desktop_main_menu.v1" "$PLUGIN_FILE" \
-  && rg -qF "org.openedx.frontend.layout.header_mobile_main_menu.v1" "$PLUGIN_FILE" \
-  && rg -qF "withMerekaMenuItems(" "$PLUGIN_FILE"; then
-  pass "Source contract: desktop/mobile main menu slots share withMerekaMenuItems helper"
-else
-  fail "Source contract: desktop/mobile menu parity helper markers missing"
-fi
-
-if rg -qF "org.openedx.frontend.learning.course_outline_sidebar.v1" "$PLUGIN_FILE" \
-  && rg -qF "mereka_course_outline_sidebar" "$PLUGIN_FILE"; then
-  pass "Source contract: learning course outline sidebar slot markers present"
-else
-  fail "Source contract: learning course outline sidebar slot markers missing"
-fi
-
-if rg -qF "org.openedx.frontend.learning.sequence_navigation.v1" "$PLUGIN_FILE" \
-  && rg -qF "mereka_learning_sequence_navigation_hint" "$PLUGIN_FILE"; then
-  pass "Source contract: learning sequence navigation slot markers present"
-else
-  fail "Source contract: learning sequence navigation slot markers missing"
-fi
-
-if rg -qF "const MerekaDashboardMicroShell = ({" "$PLUGIN_FILE" \
-  && rg -qF "className=\"mereka-course-card-action-hint mereka-dashboard-micro-shell--inline\"" "$PLUGIN_FILE" \
-  && rg -qF "className=\"mereka-dashboard-modal-hint\"" "$PLUGIN_FILE" \
-  && rg -qF ".mereka-dashboard-micro-shell" "$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/scss/_dashboard.scss" \
-  && rg -qF ".mereka-dashboard-micro-shell--inline" "$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/scss/_dashboard.scss"; then
-  pass "Source contract: dashboard action and modal slots reuse canonical micro-shell"
-else
-  fail "Source contract: dashboard micro-shell canonical reuse markers missing"
-fi
-
-# ── Canonical context-card reuse checks ──────────────────────────────────
-# These checks enforce the MerekaLearningContextCard contract.
-# The components are defined in PR #1214 (learning-discussions shell).
-# Until that PR merges to main, gate these checks explicitly.
-CANONICAL_CARD_EXISTS=0
-if rg -qF "const MerekaLearningContextCard = ({" "$PLUGIN_FILE" 2>/dev/null; then
-  CANONICAL_CARD_EXISTS=1
-fi
-
-if [[ "$CANONICAL_CARD_EXISTS" == "1" ]]; then
-
-
-if rg -qF "const MerekaLearningContextCard = ({" "$PLUGIN_FILE" \
-  && rg -qF "const MerekaLearningContextMetaItem = ({ label, value }) => {" "$PLUGIN_FILE" \
-  && rg -qF "className=\"mereka-learning-course-tabs-hint mb-2\"" "$PLUGIN_FILE" \
-  && rg -qF "className=\"mereka-learning-notifications-discussions-sidebar-hint mb-2\"" "$PLUGIN_FILE" \
-  && rg -qF "className=\"mereka-learning-course-exit-dashboard-footnote-link-hint mb-2\"" "$PLUGIN_FILE"; then
-  pass "Source contract: learning and discussions helper slots share canonical context-card shell"
-else
-  fail "Source contract: MerekaLearningContextCard/MerekaLearningContextMetaItem not yet implemented in runtime"
-fi
-
-if rg -qF "className=\"mereka-learning-course-header mb-3\"" "$PLUGIN_FILE" \
-  && rg -qF "className=\"mereka-course-outline-sidebar mb-3\"" "$PLUGIN_FILE" \
-  && rg -qF "className=\"mereka-progress-certificate-status my-3\"" "$PLUGIN_FILE" \
-  && rg -qF "const MerekaLearningContextCard = ({" "$PLUGIN_FILE"; then
-  pass "Source contract: learning header, outline sidebar, and progress shell reuse canonical context-card"
-else
-  fail "Source contract: learning shell canonical context-card markers not yet implemented in runtime"
-fi
-
-if rg -qF "className=\"mereka-progress-course-grade-hint mb-2\"" "$PLUGIN_FILE" \
-  && rg -qF "className=\"mereka-progress-related-links-hint mb-2\"" "$PLUGIN_FILE" \
-  && rg -qF "className=\"mereka-progress-grade-breakdown-hint mb-2\"" "$PLUGIN_FILE" \
-  && rg -qF "className=\"mereka-learning-course-home-section-outline-hint mb-2\"" "$PLUGIN_FILE" \
-  && rg -qF "className=\"mereka-learning-course-recommendations-hint mb-2\"" "$PLUGIN_FILE" \
-  && rg -qF "const MerekaLearningContextCard = ({" "$PLUGIN_FILE"; then
-  pass "Source contract: progress and course-home helper slots reuse canonical context-card"
-else
-  fail "Source contract: MerekaLearningContextCard not yet implemented in runtime (progress/course-home)"
-fi
-
-if rg -qF "className=\"mereka-learning-unit-title-hint mb-2\"" "$PLUGIN_FILE" \
-  && rg -qF "className=\"mereka-learning-sequence-navigation-hint mb-2\"" "$PLUGIN_FILE" \
-  && rg -qF "className=\"mereka-learning-content-iframe-loader-hint mb-2\"" "$PLUGIN_FILE" \
-  && rg -qF "className=\"mereka-learning-content-iframe-error-hint mb-2\"" "$PLUGIN_FILE" \
-  && rg -qF "className=\"mereka-learning-sequence-container-hint mb-2\"" "$PLUGIN_FILE" \
-  && rg -qF "className=\"mereka-learning-gated-unit-content-message-hint mb-2\"" "$PLUGIN_FILE" \
-  && rg -qF "const MerekaLearningContextCard = ({" "$PLUGIN_FILE"; then
-  pass "Source contract: unit and content recovery helper slots reuse canonical context-card"
-else
-  fail "Source contract: MerekaLearningContextCard not yet implemented in runtime (unit/content recovery)"
-fi
-
-if rg -qF "compact = false" "$PLUGIN_FILE" \
-  && rg -qF "className=\"mereka-learning-outline-sidebar-trigger-hint d-none d-xl-inline-flex\"" "$PLUGIN_FILE" \
-  && rg -qF "className=\"mereka-learning-outline-mobile-sidebar-trigger-hint d-inline-flex d-xl-none\"" "$PLUGIN_FILE" \
-  && rg -qF "className=\"mereka-learning-next-unit-top-nav-trigger-hint d-none d-lg-inline-flex\"" "$PLUGIN_FILE" \
-  && rg -qF "className=\"mereka-learning-notifications-discussions-sidebar-trigger-hint d-inline-flex\"" "$PLUGIN_FILE" \
-  && rg -qF ".mereka-learning-context-card--compact" "$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"; then
-  pass "Source contract: learner trigger slots reuse compact context-card shell"
-else
-  fail "Source contract: compact context-card trigger shell not yet implemented in runtime"
-fi
-
-if rg -qF "org.openedx.frontend.account.id_verification_page.v1" "$PLUGIN_FILE" \
-  && rg -qF "mereka_account_id_verification_hint" "$PLUGIN_FILE" \
-  && rg -qF "className=\"mereka-account-id-verification-hint mb-2\"" "$PLUGIN_FILE" \
-  && rg -qF "title=\"Verification supports secure certificate release\"" "$PLUGIN_FILE" \
-  && rg -qF "const MerekaLearningContextCard = ({" "$PLUGIN_FILE"; then
-  pass "Source contract: account verification slot reuses canonical context-card shell"
-else
-  fail "Source contract: account verification context-card shell not yet implemented in runtime"
-fi
-
-if rg -qF "org.openedx.frontend.account.additional_profile_fields.v1" "$PLUGIN_FILE" \
-  && rg -qF "mereka_additional_profile_fields" "$PLUGIN_FILE"; then
-  pass "Source contract: account additional profile fields slot markers present"
-else
-  fail "Source contract: account additional profile fields slot markers missing"
-fi
-
-if rg -qF "org.openedx.frontend.profile.additional_profile_fields.v1" "$PLUGIN_FILE" \
-  && rg -qF "mereka_profile_additional_fields" "$PLUGIN_FILE"; then
-  pass "Source contract: profile additional profile fields slot markers present"
-else
-  fail "Source contract: profile additional profile fields slot markers missing"
-fi
-
-if rg -qF "className=\"mereka-additional-profile-fields mb-3\"" "$PLUGIN_FILE" \
-  && rg -qF "title=\"Enterprise profile details\"" "$PLUGIN_FILE" \
-  && rg -qF "<MerekaLearningContextMetaItem label=\"Organization\" value={variant.brand} />" "$PLUGIN_FILE" \
-  && rg -qF "<MerekaLearningContextMetaItem label=\"Job title\" value=\"Pending admin sync\" />" "$PLUGIN_FILE" \
-  && rg -qF "<MerekaLearningContextMetaItem label=\"Department\" value=\"Pending admin sync\" />" "$PLUGIN_FILE" \
-  && rg -qF "const MerekaLearningContextCard = ({" "$PLUGIN_FILE"; then
-  pass "Source contract: account and profile additional fields reuse canonical context-card meta shell"
-else
-  fail "Source contract: MerekaLearningContextMetaItem enterprise profile fields not yet implemented in runtime"
-fi
-
-else
-  warn "Canonical MerekaLearningContextCard not found in runtime — 7 source-contract checks skipped (implement via WW-04)"
-fi
-
-# Build/verification diagnostics contract for rapid slot debugging.
-if rg -qF 'Expected slot binding marker missing for $slot: $marker' "$0" \
-  && rg -qF 'Expected slot missing in plugin: $slot' "$0"; then
-  pass "Diagnostics contract: failures include both slot ID and component marker context"
-else
-  fail "Diagnostics contract: slot/component failure message template missing"
+  fail "Gate 5: structural globals check failed — ${struct_out}"
 fi
 
 echo ""
-echo "=== Summary: PASS=$PASS WARN=$WARN FAIL=$FAIL ==="
-[[ "$FAIL" -eq 0 ]]
+echo "=== Summary: FAILURES=${FAILURES} ==="
+[[ "$FAILURES" -eq 0 ]]

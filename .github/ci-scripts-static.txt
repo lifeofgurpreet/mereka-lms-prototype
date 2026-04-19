@@ -449,6 +449,7 @@ scripts/qa/verify-mako-template-syntax.sh
 scripts/qa/verify-brand-parity.sh
 scripts/qa/verify-certificate-branding.sh
 scripts/qa/verify-mfe-plugin-slots.sh
+scripts/qa/test-verify-mfe-plugin-slots.sh
 scripts/qa/verify-mfe-slot-profile-persistence.sh
 scripts/qa/verify-e2e-framework.sh
 scripts/qa/verify-authenticated-ui-smoke.sh

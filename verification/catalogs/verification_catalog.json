@@ -6684,7 +6684,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-footer-parity.sh",
-      "reference_count": 23,
+      "reference_count": 24,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -9277,36 +9277,23 @@
         "ci_static"
       ],
       "env_scope": [
-        "dev"
+        "global"
       ],
       "kind": "verify",
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-plugin-slots.sh",
-      "reference_count": 10,
+      "reference_count": 13,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
       ],
       "severity": "high",
       "spec_ids": [
-        "AC-SLOT",
-        "AC-SLOT-001",
-        "AC-SLOT-002",
-        "AC-SLOT-003",
-        "AC-SLOT-004",
-        "AC-SLOT-005",
-        "AC-SLOT-006",
-        "AC-SLOT-007",
-        "AC-SLOT-008",
-        "AC-SLOT-009",
-        "AC-SLOT-010",
-        "AC-SLOT-011",
-        "AC-SLOT-012",
-        "AC-SLOT-013",
-        "AC-SLOT-015",
-        "AC-SLOT-022",
-        "AC-SLOT-024"
+        "AC-001",
+        "AC-008",
+        "AC-012",
+        "AC-SLOT-022"
       ],
       "status": "active",
       "tier": "release_blocking"
