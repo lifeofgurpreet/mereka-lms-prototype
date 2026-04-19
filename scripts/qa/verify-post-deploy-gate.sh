@@ -111,10 +111,15 @@ else
   fail "Workflow missing canonical E2E credential fallback wiring"
 fi
 
-# Runtime policy must codify staging authority and parked prod posture
+# Runtime policy must codify staging authority and parked prod posture.
+# POST_DEPLOY_WORKFLOW_RUN_ENV was aligned to `staging` (matching
+# AUTHORITATIVE_RUNTIME_PROOF_ENV) to stop the post-deploy gate from
+# routing into the decommissioned gcp-gke-auth prod-parked path on every
+# build (bead 64a3; evidence bundle
+# docs/ops/evidence/gke-auth-workflow-classification-2026-04-19.md).
 if [[ -f "$POLICY_FILE" ]] \
   && grep -q '^AUTHORITATIVE_RUNTIME_PROOF_ENV=staging$' "$POLICY_FILE" \
-  && grep -q '^POST_DEPLOY_WORKFLOW_RUN_ENV=production$' "$POLICY_FILE" \
+  && grep -q '^POST_DEPLOY_WORKFLOW_RUN_ENV=staging$' "$POLICY_FILE" \
   && grep -q '^PROD_RUNTIME_MODE=parked$' "$POLICY_FILE" \
   && grep -q '^PROD_PARKED_STATUS_CONTEXT=prod-parked-state/auth$' "$POLICY_FILE" \
   && grep -q '^PROD_PARKED_VERIFIER=scripts/qa/verify-prod-parked-state.sh$' "$POLICY_FILE" \
@@ -122,7 +127,7 @@ if [[ -f "$POLICY_FILE" ]] \
   && grep -q '^STAGING_RUNTIME_FIXTURE_MANIFEST=config/runtime-proof/staging.synthetic-proof-fixtures.yaml$' "$POLICY_FILE" \
   && grep -q '^PROD_RUNTIME_FIXTURE_MANIFEST=config/runtime-proof/prod.synthetic-proof-fixtures.yaml$' "$POLICY_FILE" \
   && grep -q '^SMOKE_ACCOUNT_REGISTRY_CONTRACT=config/smoke-account-registry.yaml$' "$POLICY_FILE"; then
-  pass "Runtime proof policy codifies staging authority, parked prod, and the successor prod/non-dev proof surfaces"
+  pass "Runtime proof policy codifies staging authority, staging-routed post-deploy gate, parked prod, and the successor prod/non-dev proof surfaces"
 else
   fail "Runtime proof policy missing canonical staging/prod proof contract entries"
 fi

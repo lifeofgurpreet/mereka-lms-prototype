@@ -13,7 +13,7 @@ mkdir -p "$tmpdir/.github/workflows" "$tmpdir/config"
 write_pass_fixtures() {
   cat >"$tmpdir/config/runtime-proof-policy.env" <<'EOF'
 AUTHORITATIVE_RUNTIME_PROOF_ENV=staging
-POST_DEPLOY_WORKFLOW_RUN_ENV=production
+POST_DEPLOY_WORKFLOW_RUN_ENV=staging
 POST_DEPLOY_MANUAL_DEFAULT_ENV=staging
 STAGING_RUNTIME_BASE_URL=https://staging.academyv2.mereka.io
 PROD_RUNTIME_MODE=parked
@@ -88,7 +88,7 @@ run_expect_fail "missing --verify-runtime flag is rejected"
 write_pass_fixtures
 cat >"$tmpdir/config/runtime-proof-policy.env" <<'EOF'
 AUTHORITATIVE_RUNTIME_PROOF_ENV=staging
-POST_DEPLOY_WORKFLOW_RUN_ENV=production
+POST_DEPLOY_WORKFLOW_RUN_ENV=staging
 POST_DEPLOY_MANUAL_DEFAULT_ENV=staging
 STAGING_RUNTIME_BASE_URL=https://staging.academyv2.mereka.io
 PROD_RUNTIME_MODE=parked
