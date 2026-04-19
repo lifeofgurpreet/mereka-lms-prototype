@@ -42,6 +42,18 @@ do_warn() {
 do_info() { echo -e "${CYAN}[INFO]${NC} $1"; }
 
 PROD_PY="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/production.py"
+PROD_PY_SOURCE="app-repo-shadow (non-authoritative per PR #1886; retirement pending bead mereka-lms-mefk.3)"
+
+# Bead mereka-lms-mefk.2: the app-repo production.py is a SHADOW —
+# authoritative LMS Django settings live in
+#   bbi-infrastructure/apps/mereka-lms/overlays/<env>/patches/production-<env>.py
+# (see docs/ops/evidence/shadow-settings-source-identified-2026-04-19.md).
+#
+# This verifier continues to read the app-repo shadow for backward
+# compatibility until the shadow is retired via mereka-lms-mefk.3.
+# When the shadow is absent (post-retirement), checks SKIP gracefully
+# rather than hard-failing CI.
+do_info "Using production.py source: $PROD_PY_SOURCE"
 
 check_plugin_pattern() {
   local pattern="$1"
@@ -56,10 +68,15 @@ check_plugin_pattern() {
 check_prod_pattern() {
   local pattern="$1"
   local description="$2"
+  # Skip if PROD_PY is absent (mereka-lms-mefk.3 shadow-retirement-ready).
+  if [[ ! -f "$PROD_PY" ]]; then
+    do_info "SKIP ${description} — production.py source absent (${PROD_PY_SOURCE})"
+    return
+  fi
   if grep -qF "$pattern" "$PROD_PY"; then
     do_pass "$description"
   else
-    do_fail "$description — missing '$pattern' in production.py"
+    do_fail "$description — missing '$pattern' in production.py (${PROD_PY_SOURCE})"
   fi
 }
 
@@ -88,10 +105,12 @@ else
   do_pass "Plugin does not hardcode sentry.io API endpoint"
 fi
 
-if grep -qF "https://sentry.io/api/" "$PROD_PY"; then
-  do_fail "production.py still hardcodes sentry.io API endpoint"
+if [[ ! -f "$PROD_PY" ]]; then
+  do_info "SKIP production.py sentry.io hardcode check — source absent ($PROD_PY_SOURCE)"
+elif grep -qF "https://sentry.io/api/" "$PROD_PY"; then
+  do_fail "production.py still hardcodes sentry.io API endpoint ($PROD_PY_SOURCE)"
 else
-  do_pass "production.py does not hardcode sentry.io API endpoint"
+  do_pass "production.py does not hardcode sentry.io API endpoint ($PROD_PY_SOURCE)"
 fi
 
 printf "\n${BLUE}── 2. Runtime collector check (optional) ───────────────────────${NC}\n"
