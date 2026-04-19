@@ -748,6 +748,12 @@ FEATURES['ENABLE_AUTHN_MICROFRONTEND'] = True
 FEATURES["ENABLE_ACCOUNT_MICROFRONTEND"] = True
 FEATURES["ENABLE_PROFILE_MICROFRONTEND"] = True
 FEATURES["ENABLE_DISCUSSIONS_MFE"] = True
+# Enable courseware and progress MFE routing.
+# Without this, the LMS serves /courses/.../courseware and /courses/.../progress
+# via legacy Django views regardless of LEARNING_MICROFRONTEND_URL.
+# Root-cause for D-03/D-04 (courseware error boundary) and D-05/D-06 (progress
+# route timeout / legacy-Django redirect). Fix: bead mereka-lms-m0u5.10.1.
+FEATURES["ENABLE_COURSEWARE_MICROFRONTEND"] = True
 
 
 FEATURES['ENABLE_NEW_BULK_EMAIL_EXPERIENCE'] = True
@@ -2045,6 +2051,9 @@ FEATURES['MFE_CONFIG'] = MFE_CONFIG
 MFE_CONFIG.setdefault("LEARNER_HOME_MICROFRONTEND_URL", LEARNER_HOME_MICROFRONTEND_URL)
 MFE_CONFIG.setdefault("ACCOUNT_MICROFRONTEND_URL", ACCOUNT_MICROFRONTEND_URL)
 MFE_CONFIG.setdefault("DISCUSSIONS_MICROFRONTEND_URL", DISCUSSIONS_MICROFRONTEND_URL)
+# Expose LEARNING_MICROFRONTEND_URL in the MFE config API response so MFEs
+# can discover the learning surface base URL from runtime config.
+MFE_CONFIG.setdefault("LEARNING_MICROFRONTEND_URL", LEARNING_MICROFRONTEND_URL)
 # PROFILE_MICROFRONTEND_URL is already in MFE_CONFIG (added earlier)
 
 # ── End Security Hardening ───────────────────────────────────────────────────

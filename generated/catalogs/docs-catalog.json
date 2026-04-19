@@ -6590,6 +6590,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-19",
+    "owner": "platform-release",
+    "path": "ops/evidence/m0u5.10.1-courseware-root-cause-2026-04-19.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": "platform-release",
     "path": "ops/evidence/m0u5.9-mfe-sha-drift-is-reference-overlay-confusion-2026-04-19.md",
