@@ -6538,8 +6538,6 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": "platform-release",
-<<<<<<< HEAD
-=======
     "path": "ops/evidence/enterprise-21-upstream-archived-2026-04-19.md",
     "status": "supporting",
     "type": "runbook"
@@ -6549,7 +6547,42 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": "platform-release",
->>>>>>> 02a169464 (docs(evidence): enterprise 21.0.0 upstream archived — mnf5 closure)
+    "path": "ops/evidence/fastlane-runner-capacity-bottleneck-2026-04-19.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-release",
+    "path": "ops/evidence/gke-auth-workflow-classification-2026-04-19.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-release",
+    "path": "ops/evidence/mfe-plugin-slot-audit-2026-04-19.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-19",
+    "owner": "platform-release",
+    "path": "ops/evidence/mfe-slot-phase1-3-gap-2026-04-19.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-release",
     "path": "ops/evidence/script-first-class-tier-0-discovery-2026-04-18.md",
     "status": "supporting",
     "type": "runbook"
@@ -6569,6 +6602,15 @@
     "last_verified_or_updated": null,
     "owner": "platform-release",
     "path": "ops/evidence/tier-a-scorecard-baseline-2026-04-19.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-release",
+    "path": "ops/evidence/tier-a-scorecard-delta-2026-04-19-post-q69f3.md",
     "status": "supporting",
     "type": "runbook"
   },

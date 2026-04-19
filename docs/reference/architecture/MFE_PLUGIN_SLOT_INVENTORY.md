@@ -1,8 +1,10 @@
 # MFE Plugin-Slot Inventory & Migration Map
 
 **Purpose**: Comprehensive inventory of all FPF (Frontend Plugin Framework) plugin slots available in Open edX Tutor 21 (Ulmo), with Mereka Academy's current wiring status and migration roadmap.
-**Last verified**: 2026-02-28
+**Last verified**: 2026-04-19
 **Related**: [ADR-014: MFE Branding Strategy](../../programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md), [OEP-65: FPF](https://open-edx-proposals.readthedocs.io/en/latest/architectural-decisions/oep-0065-frontend-plugin-framework.html), [mfe-plugin-slots_spec.md](../../../specs/mfe-plugin-slots_spec.md)
+
+> **Count updated 2026-04-19** — `mereka_lms_mfe_slots.py` now registers **74 unique slots**. The "ACTIVE: 12" row below reflects the 12 slots documented at the time of initial inventory (2026-02-28) and is retained for historical traceability. For the authoritative full registry see `docs/ops/evidence/mfe-slot-phase1-3-gap-2026-04-19.md` (bead m0u5).
 
 ---
 
@@ -24,7 +26,9 @@ Plugin slots are named extension points in MFE React components. Operators injec
 
 | Status | Count | Meaning |
 |--------|-------|---------|
-| ACTIVE | 12 | They override or extend default components |
+| ACTIVE | **74** | Registered in `mereka_lms_mfe_slots.py` as of 2026-04-19 (was 12 on 2026-02-28) |
+| ACTIVE (spec-AC'd) | **25** | Of the 74, only 25 map to Phase 1–3 acceptance criteria in `mfe-plugin-slots_spec.md` |
+| ACTIVE (OVERSPEC) | **49** | Registered with no spec AC — see gap audit for retirement/extension recommendations |
 | INDIGO | 3 | Indigo theme wires it; we inherit |
 | AVAILABLE | 100+ | Slot exists upstream; not wired |
 
