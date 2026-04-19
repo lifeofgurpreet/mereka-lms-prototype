@@ -280,7 +280,6 @@ ci_static_inventory:
     - script: scripts/qa/verify-mfe-header-branding.sh
     - script: scripts/qa/verify-plugin-slot-wiring.sh
     - script: scripts/qa/verify-mfe-route-drift.sh
-    - script: scripts/qa/verify-mfe-footer-slot-migration.sh
     - script: scripts/qa/verify-mfe-selector-hardening.sh
     - script: scripts/qa/verify-mfe-css-architecture.sh
     - script: scripts/qa/verify-mfe-reduced-motion.sh
@@ -343,7 +342,6 @@ ci_static_inventory:
     - script: scripts/qa/verify-multi-tenant-branding-ops.sh
     - script: scripts/qa/verify-studio-customization.sh
     - script: scripts/qa/verify-footer-parity.sh
-    - script: scripts/qa/verify-footer-slot-only.sh
     - script: scripts/qa/verify-no-dom-overrides.sh
     - script: scripts/qa/verify-migration-lock.sh
     - script: scripts/qa/verify-visual-smoke-baseline.sh
@@ -3260,10 +3258,42 @@ scripts:
     purpose: Verify Enterprise Runtime App Wiring
     criticality: release-supporting
 
-  - path: scripts/qa/verify-footer-slot-migration.sh
+  - path: scripts/qa/verify-footer-parity.sh
+    owner: platform-team
+    purpose: Verify Footer Parity — canonical gate for Mereka v2 footer across LMS and MFEs
+    criticality: release-blocking
+
+  - path: scripts/qa/deprecated/verify-footer-slot-migration.sh
     owner: platform-team
     purpose: Verify Footer Slot Migration
     criticality: release-supporting
+    status: deprecated
+    deprecated_by: verify-footer-parity.sh
+    deprecated_at: "2026-04-19"
+
+  - path: scripts/qa/deprecated/verify-footer-slot-only.sh
+    owner: platform-team
+    purpose: Verify Footer Slot Only
+    criticality: release-supporting
+    status: deprecated
+    deprecated_by: verify-footer-parity.sh
+    deprecated_at: "2026-04-19"
+
+  - path: scripts/qa/deprecated/verify-footer-slot-evidence-rollback.sh
+    owner: platform-team
+    purpose: Verify Footer Slot Evidence Rollback
+    criticality: release-supporting
+    status: deprecated
+    deprecated_by: verify-footer-parity.sh
+    deprecated_at: "2026-04-19"
+
+  - path: scripts/qa/deprecated/verify-mfe-footer-slot-migration.sh
+    owner: platform-team
+    purpose: Verify Mfe Footer Slot Migration
+    criticality: release-supporting
+    status: deprecated
+    deprecated_by: verify-footer-parity.sh
+    deprecated_at: "2026-04-19"
 
   - path: scripts/qa/verify-forum-smoke.sh
     owner: platform-team

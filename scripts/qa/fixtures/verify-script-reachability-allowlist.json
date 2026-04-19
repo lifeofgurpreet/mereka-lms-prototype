@@ -67,8 +67,6 @@
     "scripts/qa/verify-enterprise-ui-review.sh",
     "scripts/qa/verify-eso-alerting.sh",
     "scripts/qa/verify-footer-content-parity.sh",
-    "scripts/qa/verify-footer-slot-evidence-rollback.sh",
-    "scripts/qa/verify-footer-slot-migration.sh",
     "scripts/qa/verify-footer-variant-matrix.sh",
     "scripts/qa/verify-forum-meilisearch.sh",
     "scripts/qa/verify-forum-migration-contracts.sh",

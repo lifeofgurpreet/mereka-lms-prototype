@@ -207,7 +207,6 @@ scripts/qa/verify-mfe-footer-slot.sh
 scripts/qa/verify-mfe-header-branding.sh
 scripts/qa/verify-plugin-slot-wiring.sh
 scripts/qa/verify-mfe-route-drift.sh
-scripts/qa/verify-mfe-footer-slot-migration.sh
 scripts/qa/verify-mfe-selector-hardening.sh
 scripts/qa/verify-mfe-css-architecture.sh
 scripts/qa/verify-mfe-reduced-motion.sh
@@ -268,7 +267,6 @@ scripts/qa/verify-multitenant-brand-platform.sh
 scripts/qa/verify-multi-tenant-branding-ops.sh
 scripts/qa/verify-studio-customization.sh
 scripts/qa/verify-footer-parity.sh
-scripts/qa/verify-footer-slot-only.sh
 scripts/qa/verify-no-dom-overrides.sh
 scripts/qa/verify-migration-lock.sh
 scripts/qa/verify-visual-smoke-baseline.sh

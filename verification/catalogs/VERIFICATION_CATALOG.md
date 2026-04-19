@@ -8,29 +8,29 @@ Machine-readable source: `verification/catalogs/verification_catalog.json`.
 - `scripts/qa/run-multisite-governance-gates.sh` — **Multisite runtime gates**: Tenant/multisite runtime governance checks
 
 ## Summary
-- Total `verify-*.sh` scripts: **634**
-- Archived deprecated scripts: **21**
-- CI static-bound scripts: **383**
+- Total `verify-*.sh` scripts: **630**
+- Archived deprecated scripts: **25**
+- CI static-bound scripts: **381**
 - Workflow-direct bound scripts: **70**
 - Status overrides applied: **8**
 
 ### Tier Distribution
-- `exploratory_manual`: 200
+- `exploratory_manual`: 198
 - `periodic_runtime`: 21
-- `release_blocking`: 413
+- `release_blocking`: 411
 
 ### Status Distribution
-- `active`: 437
+- `active`: 435
 - `deprecated_candidate`: 1
-- `manual_only`: 196
+- `manual_only`: 194
 
 ### Kind Distribution
-- `verify`: 634
+- `verify`: 630
 
 ### Mutability Distribution
 - `destructive`: 9
 - `mutating`: 21
-- `read-only`: 604
+- `read-only`: 600
 
 ## Deprecated Candidates
 
@@ -60,6 +60,10 @@ Scripts currently not CI-bound and with near-zero references:
 - `scripts/qa/deprecated/verify-email-digests-code.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check against optional email-digests plugin paths that are absent in the active stack and currently emit warning-only results.)
 - `scripts/qa/deprecated/verify-email-inapp-code.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check against optional in-app notifications plugin paths that are absent in the active stack and currently emit warning-only results.)
 - `scripts/qa/deprecated/verify-email-push-code.sh` → `scripts/qa/run-release-verification-gates.sh` (Unbound exploratory check against optional push-notifications plugin paths that are absent in the active stack and currently emit warning-only results.)
+- `scripts/qa/deprecated/verify-footer-slot-only.sh` → `scripts/qa/run-release-verification-gates.sh` (Overlapping scope superseded by verify-footer-parity.sh (canonical gate). AC-FTR-301/302/304 checks are fully covered by the parity gate. Bead: mereka-lms-1kwf.1 PR-B.)
+- `scripts/qa/deprecated/verify-footer-slot-migration.sh` → `scripts/qa/run-release-verification-gates.sh` (Transient migration-phase verifier; migration complete. Coverage subsumed by verify-footer-parity.sh canonical gate. Bead: mereka-lms-1kwf.1 PR-B.)
+- `scripts/qa/deprecated/verify-mfe-footer-slot-migration.sh` → `scripts/qa/run-release-verification-gates.sh` (Transient MFE slot migration verifier; migration complete. MFE footer slot coverage subsumed by verify-footer-parity.sh canonical gate. Bead: mereka-lms-1kwf.1 PR-B.)
+- `scripts/qa/deprecated/verify-footer-slot-evidence-rollback.sh` → `scripts/qa/run-release-verification-gates.sh` (Rollback-guard verifier for a one-time migration; migration complete and stable. Evidence-rollback risk now monitored by verify-footer-parity.sh. Bead: mereka-lms-1kwf.1 PR-B.)
 
 ## Lifecycle Policy
 - `release_blocking`: MUST stay bound to CI static or direct workflow execution.

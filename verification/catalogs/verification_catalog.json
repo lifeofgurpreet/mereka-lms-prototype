@@ -125,6 +125,30 @@
       "path": "scripts/qa/deprecated/verify-email-push-code.sh",
       "reason": "Unbound exploratory check against optional push-notifications plugin paths that are absent in the active stack and currently emit warning-only results.",
       "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "archived_at": "2026-04-19",
+      "path": "scripts/qa/deprecated/verify-footer-slot-only.sh",
+      "reason": "Overlapping scope superseded by verify-footer-parity.sh (canonical gate). AC-FTR-301/302/304 checks are fully covered by the parity gate. Bead: mereka-lms-1kwf.1 PR-B.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "archived_at": "2026-04-19",
+      "path": "scripts/qa/deprecated/verify-footer-slot-migration.sh",
+      "reason": "Transient migration-phase verifier; migration complete. Coverage subsumed by verify-footer-parity.sh canonical gate. Bead: mereka-lms-1kwf.1 PR-B.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "archived_at": "2026-04-19",
+      "path": "scripts/qa/deprecated/verify-mfe-footer-slot-migration.sh",
+      "reason": "Transient MFE slot migration verifier; migration complete. MFE footer slot coverage subsumed by verify-footer-parity.sh canonical gate. Bead: mereka-lms-1kwf.1 PR-B.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "archived_at": "2026-04-19",
+      "path": "scripts/qa/deprecated/verify-footer-slot-evidence-rollback.sh",
+      "reason": "Rollback-guard verifier for a one-time migration; migration complete and stable. Evidence-rollback risk now monitored by verify-footer-parity.sh. Bead: mereka-lms-1kwf.1 PR-B.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
     }
   ],
   "entrypoints": [
@@ -6660,7 +6684,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-footer-parity.sh",
-      "reference_count": 22,
+      "reference_count": 23,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -6678,91 +6702,6 @@
         "AC-FTPAR-006",
         "AC-FTPAR-007",
         "AC-FTPAR-008"
-      ],
-      "status": "active",
-      "tier": "release_blocking"
-    },
-    {
-      "cadence": "on_demand",
-      "canonical": true,
-      "ci_binding": [],
-      "ci_entrypoints": [],
-      "env_scope": [
-        "global"
-      ],
-      "kind": "verify",
-      "mutability": "read-only",
-      "owner": "sre-security",
-      "path": "scripts/qa/verify-footer-slot-evidence-rollback.sh",
-      "reference_count": 6,
-      "replaced_by": "",
-      "runtime_dependencies": [
-        "none"
-      ],
-      "severity": "low",
-      "spec_ids": [
-        "AC-FRONT-081",
-        "AC-FRONT-082",
-        "AC-FRONT-083",
-        "AC-FRONT-084"
-      ],
-      "status": "manual_only",
-      "tier": "exploratory_manual"
-    },
-    {
-      "cadence": "on_demand",
-      "canonical": true,
-      "ci_binding": [],
-      "ci_entrypoints": [],
-      "env_scope": [
-        "global"
-      ],
-      "kind": "verify",
-      "mutability": "read-only",
-      "owner": "sre-security",
-      "path": "scripts/qa/verify-footer-slot-migration.sh",
-      "reference_count": 8,
-      "replaced_by": "",
-      "runtime_dependencies": [
-        "none"
-      ],
-      "severity": "low",
-      "spec_ids": [
-        "AC-FTSLOT-001",
-        "AC-FTSLOT-002",
-        "AC-FTSLOT-003"
-      ],
-      "status": "manual_only",
-      "tier": "exploratory_manual"
-    },
-    {
-      "cadence": "per_pr_and_push",
-      "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
-      "env_scope": [
-        "dev"
-      ],
-      "kind": "verify",
-      "mutability": "read-only",
-      "owner": "sre-security",
-      "path": "scripts/qa/verify-footer-slot-only.sh",
-      "reference_count": 7,
-      "replaced_by": "",
-      "runtime_dependencies": [
-        "none"
-      ],
-      "severity": "high",
-      "spec_ids": [
-        "AC-FTR-301",
-        "AC-FTR-302",
-        "AC-FTR-303",
-        "AC-FTR-304",
-        "AC-FTR-305"
       ],
       "status": "active",
       "tier": "release_blocking"
@@ -9201,38 +9140,6 @@
       ],
       "severity": "high",
       "spec_ids": [],
-      "status": "active",
-      "tier": "release_blocking"
-    },
-    {
-      "cadence": "per_pr_and_push",
-      "canonical": true,
-      "ci_binding": [
-        "ci_static"
-      ],
-      "ci_entrypoints": [
-        "ci_static"
-      ],
-      "env_scope": [
-        "global"
-      ],
-      "kind": "verify",
-      "mutability": "read-only",
-      "owner": "frontend-platform",
-      "path": "scripts/qa/verify-mfe-footer-slot-migration.sh",
-      "reference_count": 11,
-      "replaced_by": "",
-      "runtime_dependencies": [
-        "none"
-      ],
-      "severity": "high",
-      "spec_ids": [
-        "AC-FRONT-061",
-        "AC-FRONT-062",
-        "AC-FRONT-063",
-        "AC-FRONT-064",
-        "AC-FRONT-065"
-      ],
       "status": "active",
       "tier": "release_blocking"
     },
@@ -18872,28 +18779,28 @@
     }
   ],
   "summary": {
-    "archived_deprecated_scripts": 21,
-    "ci_static_bound": 383,
+    "archived_deprecated_scripts": 25,
+    "ci_static_bound": 381,
     "kinds": {
-      "verify": 634
+      "verify": 630
     },
     "mutability": {
       "destructive": 9,
       "mutating": 21,
-      "read-only": 604
+      "read-only": 600
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 437,
+      "active": 435,
       "deprecated_candidate": 1,
-      "manual_only": 196
+      "manual_only": 194
     },
     "tiers": {
-      "exploratory_manual": 200,
+      "exploratory_manual": 198,
       "periodic_runtime": 21,
-      "release_blocking": 413
+      "release_blocking": 411
     },
-    "total_verify_scripts": 634,
+    "total_verify_scripts": 630,
     "workflow_direct_bound": 70
   },
   "version": "1"

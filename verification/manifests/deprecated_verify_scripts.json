@@ -126,6 +126,30 @@
       "archived_at": "2026-03-06",
       "reason": "Unbound exploratory check against optional push-notifications plugin paths that are absent in the active stack and currently emit warning-only results.",
       "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-footer-slot-only.sh",
+      "archived_at": "2026-04-19",
+      "reason": "Overlapping scope superseded by verify-footer-parity.sh (canonical gate). AC-FTR-301/302/304 checks are fully covered by the parity gate. Bead: mereka-lms-1kwf.1 PR-B.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-footer-slot-migration.sh",
+      "archived_at": "2026-04-19",
+      "reason": "Transient migration-phase verifier; migration complete. Coverage subsumed by verify-footer-parity.sh canonical gate. Bead: mereka-lms-1kwf.1 PR-B.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-mfe-footer-slot-migration.sh",
+      "archived_at": "2026-04-19",
+      "reason": "Transient MFE slot migration verifier; migration complete. MFE footer slot coverage subsumed by verify-footer-parity.sh canonical gate. Bead: mereka-lms-1kwf.1 PR-B.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-footer-slot-evidence-rollback.sh",
+      "archived_at": "2026-04-19",
+      "reason": "Rollback-guard verifier for a one-time migration; migration complete and stable. Evidence-rollback risk now monitored by verify-footer-parity.sh. Bead: mereka-lms-1kwf.1 PR-B.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
     }
   ]
 }

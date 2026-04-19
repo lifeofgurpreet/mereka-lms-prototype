@@ -103,6 +103,24 @@ it is NOT deprecated.
 
 ---
 
+### DEPR-007 — Footer Slot Sibling Verifiers (4 scripts)
+
+| Field | Value |
+|-------|-------|
+| **Status** | Deprecated |
+| **Affects** | `verify-footer-slot-only.sh`, `verify-footer-slot-migration.sh`, `verify-mfe-footer-slot-migration.sh`, `verify-footer-slot-evidence-rollback.sh` |
+| **Replacement** | `scripts/qa/verify-footer-parity.sh` (canonical gate, `criticality: release-blocking`) |
+| **Target removal** | 2026-Q3 |
+| **Owner** | Platform team |
+| **Bead** | mereka-lms-1kwf.1 PR-B |
+
+**Migration notes**: All four scripts were written during the footer plugin-slot migration
+(2026-Q1). The migration is complete and stable. Their assertion surface is fully subsumed
+by `verify-footer-parity.sh` which is the canonical footer parity gate. Scripts are archived
+under `scripts/qa/deprecated/` and must not be referenced in CI or new verifiers.
+
+---
+
 ## Completed Deprecations
 
 | ID | Item | Removed | Replacement |
