@@ -11,8 +11,7 @@ variable "OPENEDX_PROOF_TAG" {
 }
 
 variable "OPENEDX_PROOF_TAGS" {
-  type    = list(string)
-  default = ["docker.io/overhangio/openedx:21.0.0-indigo"]
+  default = "docker.io/overhangio/openedx:21.0.0-indigo"
 }
 
 variable "OPENEDX_FAST_TAG" {
@@ -20,8 +19,7 @@ variable "OPENEDX_FAST_TAG" {
 }
 
 variable "OPENEDX_FAST_TAGS" {
-  type    = list(string)
-  default = ["docker.io/overhangio/openedx:21.0.0-indigo-fast"]
+  default = "docker.io/overhangio/openedx:21.0.0-indigo-fast"
 }
 
 variable "OPENEDX_PRODUCER_TAG" {
@@ -29,8 +27,7 @@ variable "OPENEDX_PRODUCER_TAG" {
 }
 
 variable "OPENEDX_PRODUCER_TAGS" {
-  type    = list(string)
-  default = ["docker.io/overhangio/openedx:21.0.0-indigo-producer"]
+  default = "docker.io/overhangio/openedx:21.0.0-indigo-producer"
 }
 
 variable "OPENEDX_CACHE_REF" {
@@ -72,8 +69,7 @@ variable "MFE_PROOF_TAG" {
 }
 
 variable "MFE_PROOF_TAGS" {
-  type    = list(string)
-  default = ["docker.io/overhangio/openedx-mfe:21.0.0-indigo"]
+  default = "docker.io/overhangio/openedx-mfe:21.0.0-indigo"
 }
 
 variable "MFE_FAST_TAG" {
@@ -81,8 +77,7 @@ variable "MFE_FAST_TAG" {
 }
 
 variable "MFE_FAST_TAGS" {
-  type    = list(string)
-  default = ["docker.io/overhangio/openedx-mfe:21.0.0-indigo-fast"]
+  default = "docker.io/overhangio/openedx-mfe:21.0.0-indigo-fast"
 }
 
 variable "MFE_PRODUCER_TAG" {
@@ -90,8 +85,7 @@ variable "MFE_PRODUCER_TAG" {
 }
 
 variable "MFE_PRODUCER_TAGS" {
-  type    = list(string)
-  default = ["docker.io/overhangio/openedx-mfe:21.0.0-indigo-producer"]
+  default = "docker.io/overhangio/openedx-mfe:21.0.0-indigo-producer"
 }
 
 variable "MFE_CACHE_REF" {
@@ -146,7 +140,7 @@ target "_openedx-common" {
 
 target "openedx-proof" {
   inherits = ["_openedx-common"]
-  tags = OPENEDX_PROOF_TAGS
+  tags = [for tag in split(",", OPENEDX_PROOF_TAGS) : trimspace(tag) if trimspace(tag) != ""]
   args = {
     MEREKA_BUILD_PROFILE           = "proof"
     MEREKA_CUSTOM_APP_INSTALL_MODE = "noneditable"
@@ -174,7 +168,7 @@ target "openedx-proof" {
 
 target "openedx-fast" {
   inherits = ["_openedx-common"]
-  tags = OPENEDX_FAST_TAGS
+  tags = [for tag in split(",", OPENEDX_FAST_TAGS) : trimspace(tag) if trimspace(tag) != ""]
   args = {
     MEREKA_BUILD_PROFILE           = "fast"
     MEREKA_CUSTOM_APP_INSTALL_MODE = "editable"
@@ -190,7 +184,7 @@ target "openedx-fast" {
 
 target "openedx-producer" {
   inherits = ["_openedx-common"]
-  tags = OPENEDX_PRODUCER_TAGS
+  tags = [for tag in split(",", OPENEDX_PRODUCER_TAGS) : trimspace(tag) if trimspace(tag) != ""]
   args = {
     MEREKA_BUILD_PROFILE           = "producer"
     MEREKA_CUSTOM_APP_INSTALL_MODE = "noneditable"
@@ -220,7 +214,7 @@ target "_mfe-common" {
 
 target "mfe-proof" {
   inherits = ["_mfe-common"]
-  tags = MFE_PROOF_TAGS
+  tags = [for tag in split(",", MFE_PROOF_TAGS) : trimspace(tag) if trimspace(tag) != ""]
   cache-from = [
     // L0 — platform-wide shared base-layer cache (ADR-025 §4). MFE builds
     // use a Node toolchain, so pull the node20 + debian bases. Missing refs
@@ -247,7 +241,7 @@ target "mfe-proof" {
 
 target "mfe-fast" {
   inherits = ["_mfe-common"]
-  tags = MFE_FAST_TAGS
+  tags = [for tag in split(",", MFE_FAST_TAGS) : trimspace(tag) if trimspace(tag) != ""]
   cache-to = [
     "type=local,dest=${LOCAL_CACHE_DIR}/mfe-fast,mode=max",
   ]
@@ -262,7 +256,7 @@ target "mfe-fast" {
 
 target "mfe-producer" {
   inherits = ["_mfe-common"]
-  tags = MFE_PRODUCER_TAGS
+  tags = [for tag in split(",", MFE_PRODUCER_TAGS) : trimspace(tag) if trimspace(tag) != ""]
   output = ["type=cacheonly"]
   labels = {
     "io.mereka.build-profile"              = "producer"
