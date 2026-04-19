@@ -23,6 +23,21 @@ if [[ ! -x "$VERIFY_OVERRIDES" ]]; then
   exit 1
 fi
 
+# Wave 9 prep (bead mereka-lms-2xwo item 5): this contract test uses the
+# app-repo DEPRECATED production overlay as a seed fixture for the infra
+# overlay. Once Wave 9 deletion (bead mereka-lms-m0u5.9) retires the
+# app-repo overlay, there is no source to copy from — and the contract
+# itself is moot because the shadow-vs-infra dual-repo relationship no
+# longer exists. Skip the test gracefully in that case.
+APP_PROD_SOURCE="$REPO_ROOT/deploy/k8s/overlays/production/kustomization.yaml"
+if [[ ! -f "$APP_PROD_SOURCE" ]]; then
+  echo "⏭  SKIP: app-repo production overlay absent (Wave 9 deletion complete)"
+  echo "   The shadow-vs-bbi-infra contract is moot — bbi-infra is authoritative."
+  echo "   Source:    ${APP_PROD_SOURCE#"$REPO_ROOT"/}"
+  echo "   Authority: bbi-infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml"
+  exit 0
+fi
+
 TMP_INFRA="$(mktemp -d)"
 cleanup() {
   rm -rf "$TMP_INFRA"
