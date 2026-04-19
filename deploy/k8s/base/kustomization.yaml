@@ -39,15 +39,21 @@ resources:
 # Base uses sentinel tag `pin-required` — this tag does NOT exist in the registry.
 # Every environment overlay MUST override with a real pinned tag (or tag+digest).
 # This prevents accidental deployment of an unpinned base.
+#
+# Post-Wave-9 (slice 72, PR #1900): the app-repo overlays (production/,
+# staging/, rke2-nonprod/) are deleted. Only the local/ overlay remains
+# in-repo. bbi-infrastructure/apps/mereka-lms/overlays/{dev,staging,prod}/
+# is the authoritative production consumer — it pins real tags through
+# its own kustomization.yaml. So the base MUST carry `pin-required` to
+# match the design comment above and pass verify-runtime-authority-map.sh
+# Check 8.
 images:
 - name: docker.io/overhangio/openedx
   newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx
-  newTag: d6e9f14f623d26256ed55c0ef174a3fea19eada5
-  digest: sha256:b08fbb6223faceb4ccc49e89869dcfe3b9752aca4226a9dc153c74f8760b311f
+  newTag: pin-required
 - name: docker.io/overhangio/openedx-mfe
   newName: ghcr.io/biji-biji-initiative/mereka-lms/mfe
-  newTag: d6e9f14f623d26256ed55c0ef174a3fea19eada5
-  digest: sha256:5e68fd69af068e7c36f0945f12cfcbe970dfcbd18a92ff5ea2c61d871fcdef08
+  newTag: pin-required
 
 # namespace to deploy all Resources to
 namespace: mereka-lms

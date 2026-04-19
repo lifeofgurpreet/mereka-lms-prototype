@@ -901,7 +901,13 @@ APP_REQUIRED_NAMES="docker.io/overhangio/openedx,docker.io/overhangio/openedx-mf
 INFRA_REQUIRED_NAMES="ghcr.io/biji-biji-initiative/mereka-lms/openedx,ghcr.io/biji-biji-initiative/mereka-lms/mfe"
 
 if [[ "$TARGET_ENV" == "production" ]]; then
-  UPDATE_APP_BASE=1
+  # Post-Wave-9 (#1900): app-repo overlays are deleted; bbi-infra is
+  # authoritative. The app-repo base MUST carry `pin-required` sentinel
+  # per deploy/k8s/base/kustomization.yaml comment — do NOT write real
+  # SHAs into it from here. UPDATE_BASE_REF still defaults to 1 because
+  # the bbi-infra base kustomization reference (git ref to app-repo)
+  # needs the real SHA.
+  UPDATE_APP_BASE=0
   UPDATE_BASE_REF_DEFAULT=1
   APP_OVERLAY_REL="$APP_PROD_REL"
   INFRA_OVERLAY_REL="$INFRA_PROD_REL"

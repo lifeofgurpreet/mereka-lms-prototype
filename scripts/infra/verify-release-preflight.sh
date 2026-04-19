@@ -79,9 +79,13 @@ else
   warn ".gitignore not found"
 fi
 
-# Check no cloud IPs leaked into any committed config file
+# Check no cloud IPs leaked into any committed config file.
+# Exclusions:
+#   - tutor_env/ (generated, gitignored)
+#   - evals/ (AI eval prompt data — intentionally contains cloud-IP examples
+#     as failure-mode descriptions, NOT deployable config)
 COMMITTED_CLOUD_IPS_RAW=$(git -C "${REPO_ROOT}" grep -l "MYSQL_HOST.*10\.\|MONGODB_HOST.*10\.\|REDIS_HOST.*10\." \
-  -- '*.yml' '*.yaml' '*.py' 2>/dev/null | grep -v tutor_env/ || true)
+  -- '*.yml' '*.yaml' '*.py' 2>/dev/null | grep -vE '^(tutor_env/|evals/)' || true)
 COMMITTED_CLOUD_IPS=$(echo "${COMMITTED_CLOUD_IPS_RAW}" | grep -c . || echo 0)
 COMMITTED_CLOUD_IPS="${COMMITTED_CLOUD_IPS//[[:space:]]/}"
 if [[ "${COMMITTED_CLOUD_IPS}" -eq 0 ]]; then
