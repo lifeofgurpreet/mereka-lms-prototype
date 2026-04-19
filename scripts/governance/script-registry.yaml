@@ -293,6 +293,7 @@ ci_static_inventory:
     - script: scripts/qa/test-verify-enterprise-catalog.sh
     - script: scripts/qa/test-enterprise-mfe-optional-endpoint-hardening.sh
     - script: scripts/qa/test-enterprise-mfe-patch-contract.sh
+    - script: scripts/qa/test-verify-enterprise-service-deployment.sh
     - script: scripts/qa/test-mfe-slot-operation-compat.sh
     - script: scripts/qa/verify-oidc-cookie-middleware-order.sh
     - script: scripts/qa/verify-jwt-uniqueness.sh
