@@ -12,8 +12,39 @@
 #   --apply           Write updated tags into the overlay file (default: dry-run)
 #   --overlay PATH    Path to kustomization.yaml (default: production overlay)
 #   -h, --help        Show this help
+#
+# DEPRECATED — do not use (Wave 9 prep, bead mereka-lms-2xwo item 2)
+# ----------------------------------------------------------------------
+# This script is a GKE/GCR relic:
+#   - Queries `gcloud artifacts docker tags list` (Google Artifact Registry),
+#     which is no longer our image registry (now ghcr.io).
+#   - Writes to the app-repo DEPRECATED `deploy/k8s/overlays/production/`
+#     overlay, which is not runtime-authoritative per ADR-025 (authoritative
+#     source is bbi-infrastructure/apps/mereka-lms/overlays/prod/).
+# Use `scripts/infra/release-openedx-gitops.sh` for the canonical release
+# workflow. canonical-entrypoints.yaml already flags this script as
+# non-canonical.
 
 set -euo pipefail
+
+# Hard-fail unless explicit opt-in — prevent accidental use.
+if [[ "${ALLOW_DEPRECATED_BUMP_IMAGE_TAGS:-}" != "1" ]]; then
+  cat >&2 <<'EOF'
+❌ scripts/infra/bump-image-tags.sh is DEPRECATED (Wave 9 / bead mereka-lms-2xwo item 2).
+
+Why:
+  - Targets GCR Artifact Registry (we now use ghcr.io)
+  - Writes to DEPRECATED app-repo overlay (bbi-infrastructure is authoritative)
+  - Flagged as non-canonical in scripts/governance/canonical-entrypoints.yaml
+
+Use instead:
+  scripts/infra/release-openedx-gitops.sh
+
+Override only for explicit historical inspection:
+  ALLOW_DEPRECATED_BUMP_IMAGE_TAGS=1 scripts/infra/bump-image-tags.sh ...
+EOF
+  exit 2
+fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
