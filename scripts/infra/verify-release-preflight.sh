@@ -137,7 +137,7 @@ echo "-- Gate 3: GitOps ref sync"
 
 PROD_KUSTOMIZATION="${REPO_ROOT}/deploy/k8s/overlays/production/kustomization.yaml"
 if [[ -f "${PROD_KUSTOMIZATION}" ]]; then
-  pass "Production kustomization.yaml exists"
+  pass "Production kustomization.yaml exists (pending Wave 9 deletion)"
 
   # Verify no 'latest' tag in production overlay
   LATEST_COUNT=0
@@ -160,7 +160,11 @@ if [[ -f "${PROD_KUSTOMIZATION}" ]]; then
     warn "Production kustomization may not reference Artifact Registry — verify image names"
   fi
 else
-  fail "Production kustomization.yaml missing: deploy/k8s/overlays/production/kustomization.yaml"
+  # Wave 9 prep (bead mereka-lms-2xwo item 3): the app-repo production
+  # overlay is DEPRECATED per ADR-025. Authoritative production overlay
+  # lives in bbi-infrastructure/apps/mereka-lms/overlays/prod/. Warn (not
+  # fail) post-deletion so this preflight stays green after Wave 9 ships.
+  warn "Production kustomization.yaml absent (Wave 9 deletion complete) — bbi-infra is authoritative"
 fi
 
 # Check for uncommitted changes to deploy manifests
