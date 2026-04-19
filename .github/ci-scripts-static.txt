@@ -489,4 +489,4 @@ scripts/qa/verify-vendored-settings-drift.sh
 scripts/qa/verify-env-auth-parity.sh
 scripts/qa/verify-domain-authority-chain.sh
 scripts/qa/verify-domain-generated-surfaces.sh
-scripts/qa/test-emit-build-metrics.sh
+scripts/qa/test-verify-deployment-lanes.sh
