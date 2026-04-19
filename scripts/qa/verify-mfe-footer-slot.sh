@@ -14,6 +14,11 @@ PLUGIN_BUNDLE=""
 PLUGIN="$PLUGIN_MAIN"
 PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 FOOTER_PAYLOAD="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/mereka_footer.py"
+# Bead mereka-lms-mefk.2: FOOTER_PAYLOAD points at the app-repo shadow settings
+# directory (non-authoritative per PR #1886; retirement pending bead mereka-lms-mefk.3).
+# uses_shared_footer_payload() already guards [ -f "$FOOTER_PAYLOAD" ] before
+# grepping, so this script is already absence-tolerant for post-retirement runs.
+# No hard-fail path reaches $FOOTER_PAYLOAD without the file-existence check.
 
 PASS=0
 FAIL=0
