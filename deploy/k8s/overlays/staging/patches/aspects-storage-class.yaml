@@ -1,9 +1,0 @@
-# Patch ClickHouse PVC to use local-path storage class (rke2-nonprod default)
-# instead of standard-rwo which is GKE-specific.
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: clickhouse-data
-  namespace: mereka-lms
-spec:
-  storageClassName: local-path

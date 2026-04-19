@@ -497,7 +497,8 @@ if [[ "$MODE_OFFLINE" == true ]]; then
   if [[ -d "$REPO_ROOT/deploy/k8s/overlays/staging" ]]; then
     check_prereq "app-repo historical staging overlay remains present and non-authoritative" "pass"
   else
-    check_prereq "mereka-lms staging overlay exists (deploy/k8s/overlays/staging/)" "fail"
+    # Wave 9 (bead mereka-lms-m0u5.9): app-repo overlay deleted; bbi-infra is authoritative.
+    check_prereq "app-repo staging overlay absent (Wave 9 deletion complete — bbi-infra is authoritative)" "skip"
   fi
 
   if [[ -n "$BBI_INFRA" && -d "$BBI_INFRA/apps/mereka-lms/overlays/staging" ]]; then
