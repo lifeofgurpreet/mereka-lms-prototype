@@ -317,11 +317,22 @@ check_contains "$SYNC_CRONJOB" "concurrencyPolicy: Forbid" "CronJob uses Forbid 
 
 section "8. Ingress Routing"
 
+# Wave 9 (bead mereka-lms-m0u5.9, PR #1900) deleted deploy/k8s/overlays/production/.
+# Authoritative prod ingress lives in bbi-infrastructure/apps/mereka-lms/overlays/prod/.
+# Skip the app-repo ingress check when the overlay is absent.
 INGRESS_PROD="$REPO_ROOT/deploy/k8s/overlays/production/ingress-openedx-lms.yaml"
 
-check_file_exists "$INGRESS_PROD" "Production ingress manifest exists"
-check_contains "$INGRESS_PROD" "discovery.academyv2.mereka.io" "Discovery subdomain present in prod ingress"
-check_contains "$INGRESS_PROD" "discovery.academyv2.mereka.io" "Discovery subdomain in TLS hosts"
+if [[ -f "$INGRESS_PROD" ]]; then
+  check_file_exists "$INGRESS_PROD" "Production ingress manifest exists (pending Wave 9 deletion)"
+  check_contains "$INGRESS_PROD" "discovery.academyv2.mereka.io" "Discovery subdomain present in prod ingress"
+  check_contains "$INGRESS_PROD" "discovery.academyv2.mereka.io" "Discovery subdomain in TLS hosts"
+else
+  # Post-Wave-9: skip the 3 app-repo ingress checks; authority moved to bbi-infra.
+  # Note: we don't echo to stdout here because the verifier's section framework
+  # already printed "=== 8. Ingress Routing ===" and a silent skip keeps the
+  # output terse. The harness treats absent app-repo artifact as expected.
+  :
+fi
 
 # ─── 9. SEO Gaps (Documentation) ────────────────────────────────────────────
 

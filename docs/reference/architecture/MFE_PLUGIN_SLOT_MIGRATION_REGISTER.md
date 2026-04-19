@@ -37,7 +37,7 @@ Each entry links a current DOM/CSS override to its preferred slot/config replace
 | **Owner** | Mereka |
 | **Files** | `mereka_lms.py:~650-900` |
 | **Migration path** | Migration complete — dual-path wiring (RenderWidget + PLUGIN_SLOTS) |
-| **Verification** | `verify-mfe-footer-slot.sh`, `verify-footer-slot-migration.sh`, `verify-footer-variant-matrix.sh`, `verify-mfe-footer-fallbacks.sh` |
+| **Verification** | `verify-footer-parity.sh` (canonical since #1868), `verify-mfe-footer-slot.sh` |
 | **Fallback paths** | Enterprise MFEs (admin-portal, learner-portal) use separate build pipeline without plugin-slot support — see `docs/policies/architecture/footer-slot-exceptions.md` for exception register (FTRX-EXC-001, FTRX-EXC-002). Studio CMS uses Mako templates (FTRX-EXC-003). |
 
 ---

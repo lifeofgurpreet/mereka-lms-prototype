@@ -72,8 +72,10 @@ if [[ ${MIGRATED_COUNT} -gt 0 ]]; then
   VERIFICATION_REFS=$(grep -c '| \*\*Verification\*\*' "$REGISTER_DOC" || true)
   if [[ $VERIFICATION_REFS -ge $MIGRATED_COUNT ]]; then pass_check "MIGRATED items have verification references (found: $VERIFICATION_REFS >= $MIGRATED_COUNT)"; else fail_check "MIGRATED items have verification references (found: $VERIFICATION_REFS >= $MIGRATED_COUNT)"; fi
 
-  # Check that referenced verification scripts exist
-  for script in verify-mfe-footer-slot.sh verify-footer-slot-migration.sh; do
+  # Check that referenced verification scripts exist.
+  # Canonical verifier since #1868 footer consolidation: verify-footer-parity.sh.
+  # Legacy verify-footer-slot-migration.sh + friends were retired in #1868.
+  for script in verify-mfe-footer-slot.sh verify-footer-parity.sh; do
     SCRIPT_PATH="$REPO_ROOT/scripts/qa/$script"
     if grep -q "$script" "$REGISTER_DOC"; then
       if [[ -f "$SCRIPT_PATH" ]]; then pass_check "Referenced verification script exists: $script"; else fail_check "Referenced verification script exists: $script"; fi

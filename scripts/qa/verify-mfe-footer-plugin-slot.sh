@@ -75,21 +75,23 @@ else
   _fail "mereka.scss import not found in mfe-env-config-buildtime-imports in mereka_lms.py"
 fi
 
-# 6. footer-component.sh does NOT contain old JSX string surgery code
-# Note: check for code patterns, not comment references to them.
+# 6. footer-component.sh status — RETIRED
+# Commit bc60c8a62 (#1867, "feat(mfe): footer v2 runtime consolidation (1kwf.1 PR-A)")
+# deleted infrastructure/tutor/patches/footer-component.sh as part of the
+# string-surgery → plugin-slot-runtime migration. Footer is now injected
+# via:
+#   - MerekaFooter component definition in the mfe-env-config-runtime-definitions patch
+#   - PLUGIN_SLOTS slot registration in mereka_lms.py (org.openedx.frontend.layout.footer.v1)
+#   - SCSS import in mfe-env-config-buildtime-imports patch
+# Any reintroduction of footer-component.sh is a regression.
 if [ -f "$FOOTER_SH" ]; then
-  if grep -qF "RenderWidget: IndigoFooter," "$FOOTER_SH" || \
-     grep -qF "const themePluginSlot" "$FOOTER_SH" || \
-     grep -qF "FOOTERPY" "$FOOTER_SH"; then
-    _fail "footer-component.sh still contains old string surgery code — remove it"
-  else
-    _pass "footer-component.sh free of JSX string surgery"
-  fi
+  _fail "footer-component.sh was retired in #1867 — do NOT reintroduce it. Footer consolidation is plugin-slot-driven; use mereka_lms.py PLUGIN_SLOTS and runtime-definition patches."
 else
-  _fail "footer-component.sh not found at $FOOTER_SH"
+  _pass "footer-component.sh correctly absent (retired in #1867, footer v2 runtime consolidation)"
 fi
 
-# 7. footer-component.sh does NOT inject MerekaFooter component via Python heredoc
+# 7. footer-component.sh does NOT inject MerekaFooter component via Python heredoc.
+# Same rationale as #6 — only runs a content check if the file re-appeared.
 if [ -f "$FOOTER_SH" ]; then
   if grep -qF "const MerekaFooter" "$FOOTER_SH"; then
     _fail "footer-component.sh still injects MerekaFooter via string surgery"
