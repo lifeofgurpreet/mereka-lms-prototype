@@ -175,7 +175,24 @@ def missing_caddy_markers(path: Path):
 errors = []
 notes = []
 
-for required in (APP_BASE, APP_PROD, APP_STAGING, APP_MFE_CADDYFILE):
+# Wave 9 prep (bead mereka-lms-m0u5.9 prerequisite): the app-repo shadow
+# overlays (APP_BASE/APP_PROD/APP_STAGING) and the MFE Caddyfile are
+# DEPRECATED per ADR-025 and scheduled for deletion. When all four
+# app-side files are absent, this verifier has nothing to cross-check —
+# emit a SKIP and exit 0. Authoritative target is bbi-infrastructure.
+app_side_files = (APP_BASE, APP_PROD, APP_STAGING, APP_MFE_CADDYFILE)
+app_side_missing = [p for p in app_side_files if not p.exists()]
+if len(app_side_missing) == len(app_side_files):
+    print("⏭  SKIP: all app-side shadow files absent (Wave 9 deletion complete)")
+    print("   The shadow-vs-bbi-infra image-override contract is moot.")
+    print("   Authority: bbi-infrastructure/apps/mereka-lms/overlays/{prod,staging}/kustomization.yaml")
+    if check_infra == "1" and not INFRA_PROD.exists():
+        print(f"✗ --check-infra requested but INFRA_PROD_OVERLAY missing: {INFRA_PROD}")
+        sys.exit(1)
+    sys.exit(0)
+
+# Partial absence is still a drift error — all 4 or none.
+for required in app_side_files:
     if not required.exists():
         errors.append(f"missing required file: {required}")
 
