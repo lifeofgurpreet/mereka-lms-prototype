@@ -23,8 +23,8 @@ scripts/qa/test-verify-authn-submodule-path-contract.sh
 scripts/qa/test-verify-branding-asset-sync.sh
 scripts/qa/test-verify-ci-runner-policy.sh
 scripts/qa/test-verify-csp-report-pipeline.sh
-scripts/qa/test-verify-deprecated-verification-hygiene.sh
-scripts/qa/test-verify-documentation-links.sh
+scripts/qa/test-verify-deprecation-discipline.sh
+scripts/qa/test-verify-documentation-standards.sh
 scripts/qa/test-verify-evidence-redaction.sh
 scripts/qa/test-verify-infisical-env-validation-coverage.sh
 scripts/qa/test-verify-lms-ops-migrate-contract.sh

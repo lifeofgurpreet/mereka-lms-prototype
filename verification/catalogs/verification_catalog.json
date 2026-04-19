@@ -1697,7 +1697,7 @@
       "mutability": "read-only",
       "owner": "identity-access",
       "path": "scripts/qa/verify-auth-surfaces.sh",
-      "reference_count": 45,
+      "reference_count": 46,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -6196,7 +6196,7 @@
       "mutability": "read-only",
       "owner": "identity-access",
       "path": "scripts/qa/verify-enterprise-sso-readiness.sh",
-      "reference_count": 15,
+      "reference_count": 16,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
