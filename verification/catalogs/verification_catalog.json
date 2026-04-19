@@ -5928,7 +5928,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-enterprise-license-management.sh",
-      "reference_count": 7,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
