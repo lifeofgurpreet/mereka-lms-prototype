@@ -921,8 +921,11 @@ scripts:
   - path: scripts/infra/release-openedx-gitops.sh
     owner: platform-team
     purpose: >
-      Core gitops release orchestrator — writes image tags into the production
-      overlay, commits, pushes, triggers ArgoCD sync, runs runtime verification
+      Core gitops release orchestrator — writes image tags into the
+      authoritative bbi-infrastructure production overlay (and, while the
+      DEPRECATED app-repo shadow overlay still exists, also to that overlay
+      for parity — Wave 9 pending retirement per bead mereka-lms-m0u5.9),
+      commits, pushes, triggers ArgoCD sync, runs runtime verification
       guards, and optionally purges the frontend cache.
     inputs:
       - CONFIRM_RELEASE_OPENEDX_GITOPS=RELEASE_OPENEDX_GITOPS
@@ -933,11 +936,13 @@ scripts:
       - --openedx-digest sha256:...
       - --mfe-digest sha256:...
     outputs:
-      - deploy/k8s/overlays/production/kustomization.yaml (modified)
+      - bbi-infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml (authoritative, modified every release)
+      - deploy/k8s/overlays/production/kustomization.yaml (modified while present; absence-tolerant per PR #1897)
       - stdout (ArgoCD sync status)
     side_effects:
-      - Writes and git-commits production overlay image tags
-      - Pushes to origin main (with --push)
+      - Writes and git-commits production overlay image tags to bbi-infra (authoritative)
+      - Writes and git-commits to app-repo shadow overlay while present (skipped post-Wave-9)
+      - Pushes to origin main in both repos (with --push; app-repo push skipped if shadow absent)
       - Triggers ArgoCD sync (live cluster mutation)
       - Purges Cloudflare frontend cache (with --purge-frontend-cache)
     dry_run: true  # --dry-run flag supported
@@ -1124,22 +1129,28 @@ scripts:
 
   - path: scripts/infra/bump-image-tags.sh
     owner: platform-team
+    status: DEPRECATED  # GCR/GKE relic — hard-fails unless ALLOW_DEPRECATED_BUMP_IMAGE_TAGS=1 (PR #1893)
+    deprecated_by: scripts/infra/release-openedx-gitops.sh
     purpose: >
-      Queries GCR Artifact Registry for the latest available tag for each image
-      in the production Kustomize overlay and shows current vs latest. Writes
-      changes only when --apply is passed.
+      DEPRECATED — queried GCR Artifact Registry for latest tags and wrote
+      into the app-repo production Kustomize overlay. Both the registry
+      (now ghcr.io) and the overlay (Wave 9 pending retirement) have been
+      superseded. Use release-openedx-gitops.sh instead.
     inputs:
+      - ALLOW_DEPRECATED_BUMP_IMAGE_TAGS=1  # required to run
       - --apply (flag; default dry-run)
       - --overlay PATH (optional)
     outputs:
-      - stdout (diff of current vs latest tags)
-      - deploy/k8s/overlays/production/kustomization.yaml (when --apply)
+      - stderr (deprecation notice + usage guidance)
+      - stdout (diff of current vs latest tags, only with override)
+      - deploy/k8s/overlays/production/kustomization.yaml (when --apply + override)
     side_effects:
-      - Modifies production overlay kustomization.yaml (only with --apply)
+      - Prints DEPRECATED error and exits 2 unless override set
+      - Modifies production overlay kustomization.yaml (only with --apply + override)
     dry_run: true  # default mode is dry-run
     lanes: [prod]
-    proof_command: "bash scripts/infra/bump-image-tags.sh 2>&1 | head -5"
-    criticality: release-blocking
+    proof_command: "bash scripts/infra/bump-image-tags.sh 2>&1 | head -1"  # prints deprecation notice
+    criticality: release-blocking  # still in registry because canonical-entrypoints.yaml references it
 
   - path: scripts/infra/resolve-image-digest.sh
     owner: platform-team
