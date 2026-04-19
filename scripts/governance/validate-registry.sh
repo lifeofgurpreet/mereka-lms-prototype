@@ -18,7 +18,9 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-REGISTRY="${SCRIPT_DIR}/script-registry.yaml"
+# REGISTRY_OVERRIDE: fixture injection point for self-tests (bead q69f.1).
+# Defaults to the canonical in-repo registry when unset.
+REGISTRY="${REGISTRY_OVERRIDE:-${SCRIPT_DIR}/script-registry.yaml}"
 SCOPE_MODE="${VALIDATE_REGISTRY_SCOPE:-}"
 CHANGED_FILES_RAW="${VALIDATE_REGISTRY_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
 
