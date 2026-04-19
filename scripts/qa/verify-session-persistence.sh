@@ -41,6 +41,19 @@ done
 echo "=== Session Persistence Verification ==="
 echo ""
 
+# Bead mereka-lms-mefk.2: the $LMS_SETTINGS path points at the app-repo
+# SHADOW production.py — not authoritative at runtime (see PR #1886).
+# Skip gracefully when the shadow is absent (post-mefk.3 retirement).
+if [[ ! -f "$LMS_SETTINGS" ]]; then
+  echo "⏭  SKIP: $LMS_SETTINGS absent (shadow retired via mereka-lms-mefk.3)."
+  echo "   Authoritative production.py lives in bbi-infrastructure/apps/mereka-lms/overlays/<env>/patches/production-<env>.py"
+  echo "   This verifier's source-level drift detection is moot once the shadow is gone."
+  echo "=== Summary ==="
+  echo "  PASS=0 FAIL=0 WARN=0 (verifier skipped)"
+  exit 0
+fi
+
+
 # Test 1: Cross-subdomain session sharing
 test_cross_subdomain() {
   echo -n "Checking SESSION_COOKIE_DOMAIN for .mereka.io... "
