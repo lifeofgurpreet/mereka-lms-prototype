@@ -6529,7 +6529,25 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": "platform-release",
+    "path": "ops/evidence/script-first-class-tier-0-discovery-2026-04-18.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-release",
     "path": "ops/evidence/studio-sso-tenant-chain-2026-04-18.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-release",
+    "path": "ops/evidence/tier-a-scorecard-baseline-2026-04-19.md",
     "status": "supporting",
     "type": "runbook"
   },
