@@ -100,60 +100,71 @@ if [[ "$MODE_OFFLINE" == true ]]; then
   echo ""
 
   # ── 1a. mereka-lms repo: staging overlay ─────────────────────────────────
+  # NOTE (Wave 9 prep, bead mereka-lms-2xwo item 4): the app-repo staging and
+  # production overlays are DEPRECATED shadow artifacts per ADR-025, pending
+  # deletion. Authoritative overlays live in
+  # bbi-infrastructure/apps/mereka-lms/overlays/{staging,prod}/.
+  # Assertions below are absence-tolerant: they skip (not fail) if the
+  # directory has been deleted, so this verifier stays green after Wave 9
+  # ships. While the overlay still exists, we assert the DEPRECATED marker
+  # is present to prevent drift.
   STAGING_OVERLAY="$REPO_ROOT/deploy/k8s/overlays/staging"
   if [[ -d "$STAGING_OVERLAY" ]]; then
-    pass_check "staging overlay directory exists: deploy/k8s/overlays/staging/"
+    pass_check "staging overlay directory exists: deploy/k8s/overlays/staging/ (pending Wave 9 deletion)"
+
+    if [[ -f "$STAGING_OVERLAY/kustomization.yaml" ]]; then
+      pass_check "staging kustomization.yaml present"
+
+      # Verify it has image overrides (not pinned to deprecated latest tags)
+      if grep -q "newTag:" "$STAGING_OVERLAY/kustomization.yaml" 2>/dev/null; then
+        pass_check "staging kustomization.yaml defines image tag overrides"
+      else
+        fail_check "staging kustomization.yaml has no image tag overrides (images unpinned)"
+      fi
+
+      # Verify it extends base
+      if grep -q '../../base' "$STAGING_OVERLAY/kustomization.yaml" 2>/dev/null; then
+        pass_check "staging overlay references ../../base"
+      else
+        fail_check "staging overlay does not reference ../../base"
+      fi
+
+      # The app-repo staging overlay is a historical producer-side artifact.
+      # Live staging is realized from bbi-infrastructure/apps/mereka-lms/overlays/staging.
+      if grep -q 'DEPRECATED' "$STAGING_OVERLAY/kustomization.yaml" 2>/dev/null; then
+        pass_check "staging/kustomization.yaml is explicitly marked as a non-authoritative historical overlay"
+      else
+        fail_check "staging/kustomization.yaml should stay marked DEPRECATED to prevent app-repo overlay drift"
+      fi
+    else
+      fail_check "staging kustomization.yaml missing (directory exists but kustomization.yaml is gone)"
+    fi
   else
-    fail_check "staging overlay directory missing: deploy/k8s/overlays/staging/"
+    # Wave 9 has shipped — overlay correctly deleted. Authoritative source is bbi-infra.
+    skip_check "staging overlay directory absent (Wave 9 deletion complete): deploy/k8s/overlays/staging/ — bbi-infra is authoritative"
   fi
 
-  if [[ -f "$STAGING_OVERLAY/kustomization.yaml" ]]; then
-    pass_check "staging kustomization.yaml present"
-
-    # Verify it has image overrides (not pinned to deprecated latest tags)
-    if grep -q "newTag:" "$STAGING_OVERLAY/kustomization.yaml" 2>/dev/null; then
-      pass_check "staging kustomization.yaml defines image tag overrides"
-    else
-      fail_check "staging kustomization.yaml has no image tag overrides (images unpinned)"
-    fi
-
-    # Verify it extends base
-    if grep -q '../../base' "$STAGING_OVERLAY/kustomization.yaml" 2>/dev/null; then
-      pass_check "staging overlay references ../../base"
-    else
-      fail_check "staging overlay does not reference ../../base"
-    fi
-
-    # The app-repo staging overlay is a historical producer-side artifact.
-    # Live staging is realized from bbi-infrastructure/apps/mereka-lms/overlays/staging.
-    if grep -q 'DEPRECATED' "$STAGING_OVERLAY/kustomization.yaml" 2>/dev/null; then
-      pass_check "staging/kustomization.yaml is explicitly marked as a non-authoritative historical overlay"
-    else
-      fail_check "staging/kustomization.yaml should stay marked DEPRECATED to prevent app-repo overlay drift"
-    fi
-  else
-    fail_check "staging kustomization.yaml missing"
-  fi
-
-  # Check production overlay exists (required for promotion target)
+  # Check production overlay (historical release-tooling target until Wave 9
+  # retargeting lands; absence-tolerant post-deletion).
   PROD_OVERLAY="$REPO_ROOT/deploy/k8s/overlays/production"
   if [[ -d "$PROD_OVERLAY" ]]; then
-    pass_check "production overlay directory exists: deploy/k8s/overlays/production/"
-  else
-    fail_check "production overlay directory missing: deploy/k8s/overlays/production/"
-  fi
+    pass_check "production overlay directory exists: deploy/k8s/overlays/production/ (pending Wave 9 deletion)"
 
-  if [[ -f "$PROD_OVERLAY/kustomization.yaml" ]]; then
-    pass_check "production kustomization.yaml present"
-  else
-    fail_check "production kustomization.yaml missing"
-  fi
+    if [[ -f "$PROD_OVERLAY/kustomization.yaml" ]]; then
+      pass_check "production kustomization.yaml present"
 
-  # Verify no latest tags in production overlay
-  if grep -q "newTag: latest" "$PROD_OVERLAY/kustomization.yaml" 2>/dev/null; then
-    fail_check "production kustomization.yaml contains 'latest' tag — use pinned SHA tags only"
+      # Verify no latest tags in production overlay
+      if grep -q "newTag: latest" "$PROD_OVERLAY/kustomization.yaml" 2>/dev/null; then
+        fail_check "production kustomization.yaml contains 'latest' tag — use pinned SHA tags only"
+      else
+        pass_check "production kustomization.yaml: no 'latest' image tags"
+      fi
+    else
+      fail_check "production kustomization.yaml missing (directory exists but kustomization.yaml is gone)"
+    fi
   else
-    pass_check "production kustomization.yaml: no 'latest' image tags"
+    # Wave 9 has shipped — overlay correctly deleted.
+    skip_check "production overlay directory absent (Wave 9 deletion complete): deploy/k8s/overlays/production/ — bbi-infra is authoritative"
   fi
 
   echo ""
