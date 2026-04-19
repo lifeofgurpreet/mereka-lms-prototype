@@ -82,7 +82,7 @@ source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
 PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 PLUGIN_BUNDLE=""
 PLUGIN="$PLUGIN_MAIN"
-FOOTER_PATCH="$REPO_ROOT/infrastructure/tutor/patches/footer-component.sh"
+FOOTER_PATCH="$REPO_ROOT/infrastructure/tutor/patches/sync-footer-assets.sh"
 APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 MEREKA_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
 MFE_INDIGO_RENDERED="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/indigo/env.config.jsx"
@@ -125,21 +125,21 @@ echo ""
 echo "[OFFLINE] Patch module and apply-patches.sh wiring"
 
 if [[ -f "$FOOTER_PATCH" ]]; then
-  pass "footer-component.sh patch module exists"
+  pass "sync-footer-assets.sh patch module exists"
 else
-  fail "footer-component.sh patch module missing: $FOOTER_PATCH"
+  fail "sync-footer-assets.sh patch module missing: $FOOTER_PATCH"
 fi
 
 if [[ -f "$APPLY_PATCHES" ]]; then
-  if grep -q "footer-component.sh" "$APPLY_PATCHES"; then
-    pass "apply-patches.sh sources footer-component.sh"
+  if grep -q "sync-footer-assets.sh" "$APPLY_PATCHES"; then
+    pass "apply-patches.sh sources sync-footer-assets.sh"
   else
-    fail "apply-patches.sh does not source footer-component.sh"
+    fail "apply-patches.sh does not source sync-footer-assets.sh"
   fi
-  if grep -q "apply_footer_component_patch" "$APPLY_PATCHES"; then
-    pass "apply-patches.sh calls apply_footer_component_patch"
+  if grep -q "sync_footer_assets" "$APPLY_PATCHES"; then
+    pass "apply-patches.sh calls sync_footer_assets"
   else
-    fail "apply-patches.sh does not call apply_footer_component_patch"
+    fail "apply-patches.sh does not call sync_footer_assets"
   fi
 else
   fail "apply-patches.sh not found: $APPLY_PATCHES"
@@ -154,14 +154,14 @@ echo "[OFFLINE] Patch module migration guard (no legacy footer JSX surgery)"
 
 if [[ -f "$FOOTER_PATCH" ]]; then
   if grep -q "const MerekaFooter" "$FOOTER_PATCH"; then
-    fail "footer-component.sh still injects const MerekaFooter (legacy path should be removed)"
+    fail "sync-footer-assets.sh still injects const MerekaFooter (legacy path should be removed)"
   else
-    pass "footer-component.sh does not inject const MerekaFooter (plugin-slot path active)"
+    pass "sync-footer-assets.sh does not inject const MerekaFooter (plugin-slot path active)"
   fi
   if grep -q "mereka-footer--v2" "$FOOTER_PATCH"; then
-    fail "footer-component.sh still contains mereka-footer--v2 markup hooks (legacy path should be removed)"
+    fail "sync-footer-assets.sh still contains mereka-footer--v2 markup hooks (legacy path should be removed)"
   else
-    pass "footer-component.sh contains no legacy footer markup hooks"
+    pass "sync-footer-assets.sh contains no legacy footer markup hooks"
   fi
 fi
 
@@ -174,9 +174,9 @@ echo "[OFFLINE] SCSS import wiring"
 
 if [[ -f "$FOOTER_PATCH" ]]; then
   if grep -q "mereka/mereka.scss" "$FOOTER_PATCH"; then
-    pass "footer-component.sh syncs mereka.scss into Indigo build context"
+    pass "sync-footer-assets.sh syncs mereka.scss into Indigo build context"
   else
-    fail "footer-component.sh does not sync mereka.scss into Indigo build context"
+    fail "sync-footer-assets.sh does not sync mereka.scss into Indigo build context"
   fi
 fi
 
@@ -257,7 +257,7 @@ fi
 
 if [[ -f "$FOOTER_PATCH" ]]; then
   if grep -q "fonts.googleapis.com" "$FOOTER_PATCH" 2>/dev/null; then
-    fail "footer-component.sh references fonts.googleapis.com (privacy violation)"
+    fail "sync-footer-assets.sh references fonts.googleapis.com (privacy violation)"
   else
     pass "Footer patch module has no Google Fonts references"
   fi

@@ -410,7 +410,14 @@ The full methodology is in `docs/adr/021-openedx-tutor-methodology.md`. Every ag
 **Current debt** (do not add to; migrate away from):
 - `infrastructure/tutor/patches/mfe-node.sh` — Dockerfile surgery, migrating to plugin hooks
 - `infrastructure/tutor/patches/brand-package.sh` — sed/Python brand injection, migrating to `@edx/brand`
-- `infrastructure/tutor/patches/footer-component.sh` — footer injection, migrating to `PLUGIN_SLOTS`
+
+**Migration closed** (plugin-first path landed; patch retained only for asset sync):
+- `infrastructure/tutor/patches/sync-footer-assets.sh` — renamed from
+  `footer-component.sh`. Footer v2 is registered via the
+  `org.openedx.frontend.layout.footer.v1` MFE plugin slot in
+  `infrastructure/tutor/plugins/mereka_lms_mfe_slots.py` (closed bead
+  `115d.21`). This script now only syncs SCSS/font assets into the MFE
+  build; it no longer performs JSX injection.
 
 ## Code Style
 

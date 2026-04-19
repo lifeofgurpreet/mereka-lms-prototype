@@ -104,7 +104,7 @@ MFE_FONT_DIR="$THEME_ROOT/mfe/fonts"
 
 # Plugin and patches
 APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
-FOOTER_PATCH="$REPO_ROOT/infrastructure/tutor/patches/footer-component.sh"
+FOOTER_PATCH="$REPO_ROOT/infrastructure/tutor/patches/sync-footer-assets.sh"
 
 echo "========================================================"
 echo "WhiteCliff Brand Parity Verifier (T016)"
@@ -604,7 +604,7 @@ echo "[OFFLINE] AC-BRAND-014: apply-patches.sh branding wiring"
 if [[ -f "$APPLY_PATCHES" ]]; then
   pass "apply-patches.sh exists"
   # Footer component must be sourced
-  if grep -q "footer-component.sh\|apply_footer_component_patch" "$APPLY_PATCHES"; then
+  if grep -q "sync-footer-assets.sh\|sync_footer_assets" "$APPLY_PATCHES"; then
     pass "apply-patches.sh wires footer-component patch"
   else
     fail "apply-patches.sh does not wire footer-component patch"
@@ -613,7 +613,7 @@ if [[ -f "$APPLY_PATCHES" ]]; then
   if grep -q "mereka.scss\|mereka_scss\|mfe.*branding\|MFE_BRANDING" "$APPLY_PATCHES"; then
     pass "apply-patches.sh references MFE mereka.scss injection"
   elif [[ -f "$FOOTER_PATCH" ]] && grep -q "mereka/mereka.scss" "$FOOTER_PATCH"; then
-    pass "MFE mereka.scss injection is handled by footer-component.sh asset sync path"
+    pass "MFE mereka.scss injection is handled by sync-footer-assets.sh asset sync path"
   else
     warn "MFE mereka.scss injection path not detected — check apply-patches + footer-component wiring"
   fi
@@ -628,9 +628,9 @@ else
 fi
 
 if [[ -f "$FOOTER_PATCH" ]]; then
-  pass "footer-component.sh patch module exists"
+  pass "sync-footer-assets.sh patch module exists"
 else
-  fail "footer-component.sh patch module missing: $FOOTER_PATCH"
+  fail "sync-footer-assets.sh patch module missing: $FOOTER_PATCH"
 fi
 
 echo ""

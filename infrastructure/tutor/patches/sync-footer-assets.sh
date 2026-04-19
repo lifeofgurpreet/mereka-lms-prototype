@@ -1,17 +1,15 @@
 #!/usr/bin/env bash
-# Patch: Mereka MFE theme assets — copies SCSS/fonts into the Indigo build directory.
+# Patch: sync-footer-assets.sh — Syncs Mereka MFE theme assets (SCSS/fonts) into the Indigo build directory.
 #
-# MIGRATION COMPLETE (Tutor v21 / Ulmo):
-#   MerekaFooter is now registered via Tutor's plugin slot system:
-#     - Component JSX:  mfe-env-config-runtime-definitions patch in mereka_lms.py
-#     - Slot wiring:    PLUGIN_SLOTS.add_items() in mereka_lms.py
+# SINGLE-SOURCE PATTERN (Tutor v21 / Ulmo):
+#   MerekaFooter JSX is defined in a single place:
+#     - Component JSX:  infrastructure/tutor/plugins/_mereka_lms/mfe_runtime/footer.js
+#     - Slot wiring:    PLUGIN_SLOTS.add_items() in mereka_lms_mfe_slots.py
 #     - Slot name:      org.openedx.frontend.layout.footer.v1
-#   The old env.config.jsx string surgery (inject MerekaFooter def, replace
-#   RenderWidget: IndigoFooter) has been removed. Do NOT re-add it here.
-#
-# This function now only syncs static assets (SCSS, fonts) needed at MFE build time.
+#   This script ONLY syncs static assets (SCSS, fonts) needed at MFE build time.
+#   Do NOT add JSX component definitions here — the plugin slot system is canonical.
 
-apply_footer_component_patch() {
+sync_footer_assets() {
   # Copy MFE theme SCSS/fonts into Indigo build directory.
   # Some Tutor renders place env.config.jsx at build root, but our patched
   # Dockerfile expects indigo/env.config.jsx and indigo/mereka/.

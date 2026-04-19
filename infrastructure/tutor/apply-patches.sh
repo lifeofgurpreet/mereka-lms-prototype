@@ -64,7 +64,7 @@ fi
 # the pull_translations retry wrapper below.
 source "$PATCHES_DIR/brand-package.sh"
 source "$PATCHES_DIR/webpack-memory.sh"
-source "$PATCHES_DIR/footer-component.sh"
+source "$PATCHES_DIR/sync-footer-assets.sh"
 source "$PATCHES_DIR/mfe-slot-ownership.sh"
 source "$PATCHES_DIR/mfe-prune-deprecated-shells.sh"
 source "$PATCHES_DIR/build-optimizations.sh"
@@ -239,7 +239,7 @@ apply_openedx_patches() {
 
 apply_mfe_patches() {
   apply_patch apply_brand_package_patch
-  apply_patch apply_footer_component_patch
+  apply_patch sync_footer_assets
   apply_patch apply_mfe_slot_ownership_patch
   apply_patch apply_mfe_prune_deprecated_shells_patch
   sync_mfe_patch_helpers

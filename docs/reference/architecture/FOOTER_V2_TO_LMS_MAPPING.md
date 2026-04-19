@@ -12,10 +12,11 @@ The `MerekaFooter` React component is injected into all MFEs via the `footer_slo
 
 | Path | Role | Priority |
 |------|------|----------|
-| `infrastructure/tutor/plugins/mereka_lms.py` | Primary definition (mfe-env-config patch) | 1 (Tutor plugin) |
-| `infrastructure/tutor/apply-patches.sh` | Fallback definition (defense-in-depth) | 2 (post-config) |
+| `infrastructure/tutor/plugins/mereka_lms_mfe_slots.py` | Primary and ONLY definition; registered to slot `org.openedx.frontend.layout.footer.v1` via `PLUGIN_OPERATIONS.Replace` | 1 (Tutor plugin) |
 
-Both MUST contain identical JSX. The component is registered in `footer_slot` via `PLUGIN_OPERATIONS.Replace`.
+Single source of truth. The prior `apply-patches.sh` fallback JSX
+duplicate has been removed; `verify-footer-parity.sh` now asserts the
+plugin slot registration directly.
 
 ## Zone Mapping
 
@@ -57,13 +58,21 @@ App store links use styled text badges (no external hotlinks):
 
 To update footer content:
 
-1. Edit the `MerekaFooter` JSX in `infrastructure/tutor/plugins/mereka_lms.py`
-2. Copy identical JSX to `infrastructure/tutor/apply-patches.sh` (the `footer_component` variable)
-3. Run verification: `./scripts/qa/verify-mfe-footer-slot.sh`
-4. For local parity only, rebuild MFE with `tutor images build mfe`
-5. For shared environments, publish via `.github/workflows/build-tutor-images.yml` and promote with `./scripts/infra/release-openedx-gitops.sh --require-digests`
+1. Edit the `MerekaFooter` JSX in
+   `infrastructure/tutor/plugins/mereka_lms_mfe_slots.py` — the footer
+   is registered to `org.openedx.frontend.layout.footer.v1` via
+   `PLUGIN_OPERATIONS.Replace`. This is the single source of truth.
+2. Run verification: `./scripts/qa/verify-footer-parity.sh`
+3. For local parity, rebuild MFE with `tutor images build mfe`
+4. For shared environments, publish via
+   `.github/workflows/build-tutor-images.yml` and promote with
+   `./scripts/infra/release-openedx-gitops.sh --require-digests`
 
-**IMPORTANT**: Both files MUST contain identical JSX. The verifier checks for sync.
+**Single-source JSX.** A prior workflow required duplicating the JSX
+into `infrastructure/tutor/apply-patches.sh` as a fallback; that
+duplication is removed. The `sync-footer-assets.sh` script (renamed
+from `footer-component.sh` for clarity) now only copies SCSS/font
+assets into the MFE build tree — it no longer writes JSX.
 
 ## Related Files
 
