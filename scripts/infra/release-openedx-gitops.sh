@@ -1095,26 +1095,43 @@ run_frontend_cache_purge() {
   fi
 }
 
-if [[ "$UPDATE_APP_BASE" -eq 1 ]]; then
+# Wave 9 prep (bead mereka-lms-2xwo item 1): the app-repo overlays are
+# DEPRECATED per ADR-025. bbi-infrastructure overlays are authoritative.
+# Once Wave 9 deletion (bead mereka-lms-m0u5.9) retires the app-repo
+# overlay+base, the write/commit/push paths here become no-ops.
+# We keep the write paths gated on file existence so the script stays
+# green before AND after Wave 9 ships.
+if [[ -f "$APP_BASE_FILE" && "$UPDATE_APP_BASE" -eq 1 ]]; then
   update_image_tags_file \
     "$APP_BASE_FILE" "$OPENEDX_TAG" "$MFE_TAG" "$OPENEDX_DIGEST" "$MFE_DIGEST" "$APPLY" \
     "docker.io/overhangio/openedx,docker.io/overhangio/openedx-mfe"
+elif [[ ! -f "$APP_BASE_FILE" ]]; then
+  echo "= skipping app base tag update: $APP_BASE_REL absent (Wave 9 deletion complete) — bbi-infra is authoritative"
 else
   echo "= skipping app base tag update for target env '$TARGET_ENV'"
 fi
 
-update_image_tags_file \
-  "$APP_OVERLAY_FILE" "$OPENEDX_TAG" "$MFE_TAG" "$OPENEDX_DIGEST" "$MFE_DIGEST" "$APPLY" \
-  "$APP_REQUIRED_NAMES"
+if [[ -f "$APP_OVERLAY_FILE" ]]; then
+  update_image_tags_file \
+    "$APP_OVERLAY_FILE" "$OPENEDX_TAG" "$MFE_TAG" "$OPENEDX_DIGEST" "$MFE_DIGEST" "$APPLY" \
+    "$APP_REQUIRED_NAMES"
+else
+  echo "= skipping app overlay tag update: $APP_OVERLAY_REL absent (Wave 9 deletion complete) — bbi-infra is authoritative"
+fi
 
 if [[ "$COMMIT" -eq 1 ]]; then
-  APP_COMMIT_PATHS=("$APP_OVERLAY_REL")
-  if [[ "$UPDATE_APP_BASE" -eq 1 ]]; then
-    APP_COMMIT_PATHS=("$APP_BASE_REL" "$APP_OVERLAY_REL")
+  APP_COMMIT_PATHS=()
+  [[ -f "$APP_OVERLAY_FILE" ]] && APP_COMMIT_PATHS+=("$APP_OVERLAY_REL")
+  if [[ -f "$APP_BASE_FILE" && "$UPDATE_APP_BASE" -eq 1 ]]; then
+    APP_COMMIT_PATHS=("$APP_BASE_REL" "${APP_COMMIT_PATHS[@]}")
   fi
-  commit_if_needed "$APP_REPO" \
-    "chore: release openedx tags $OPENEDX_TAG/$MFE_TAG ($TARGET_ENV)" \
-    "${APP_COMMIT_PATHS[@]}"
+  if [[ ${#APP_COMMIT_PATHS[@]} -gt 0 ]]; then
+    commit_if_needed "$APP_REPO" \
+      "chore: release openedx tags $OPENEDX_TAG/$MFE_TAG ($TARGET_ENV)" \
+      "${APP_COMMIT_PATHS[@]}"
+  else
+    echo "= skipping app-repo commit: no shadow overlay paths present (Wave 9 deletion complete)"
+  fi
 fi
 
 if [[ "$UPDATE_BASE_REF" -eq 1 ]]; then
@@ -1141,10 +1158,18 @@ update_image_tags_file \
 
 if [[ "$APPLY" -eq 1 ]]; then
   if [[ "$TARGET_ENV" == "production" ]]; then
-    INFRA_PROD_OVERLAY="$INFRA_OVERLAY_FILE" \
-    APP_BASE="$APP_BASE_FILE" \
-    APP_PROD_OVERLAY="$APP_OVERLAY_FILE" \
-      "$REPO_ROOT/scripts/qa/verify-gitops-image-overrides.sh" --check-infra
+    # Wave 9 prep: once app-repo shadow overlay is deleted (bead
+    # mereka-lms-m0u5.9), the cross-repo image contract check becomes a
+    # single-repo check against bbi-infra only. Pass app-side paths when
+    # they still exist; otherwise let the verifier fall back to its own
+    # defaults + skip app-side assertions when it is updated to do so.
+    VERIFY_ENV=(INFRA_PROD_OVERLAY="$INFRA_OVERLAY_FILE")
+    if [[ -f "$APP_BASE_FILE" && -f "$APP_OVERLAY_FILE" ]]; then
+      VERIFY_ENV+=(APP_BASE="$APP_BASE_FILE" APP_PROD_OVERLAY="$APP_OVERLAY_FILE")
+    else
+      echo "= Wave 9: skipping app-side env vars for verify-gitops-image-overrides.sh (shadow overlay absent)"
+    fi
+    env "${VERIFY_ENV[@]}" "$REPO_ROOT/scripts/qa/verify-gitops-image-overrides.sh" --check-infra
   else
     echo "= skipping production-only cross-repo image contract check for staging target"
   fi
@@ -1161,7 +1186,13 @@ if [[ "$COMMIT" -eq 1 ]]; then
 fi
 
 if [[ "$PUSH" -eq 1 ]]; then
-  push_with_rebase_if_needed "$APP_REPO"
+  # Wave 9 prep: only push app repo if we actually committed something to it.
+  # Post-Wave-9 (shadow overlay deleted), the app-repo push is a no-op.
+  if [[ -f "$APP_OVERLAY_FILE" ]] || [[ -f "$APP_BASE_FILE" ]]; then
+    push_with_rebase_if_needed "$APP_REPO"
+  else
+    echo "= Wave 9: skipping app-repo push (no shadow overlay present to have committed)"
+  fi
   push_with_rebase_if_needed "$INFRA_REPO"
 fi
 
