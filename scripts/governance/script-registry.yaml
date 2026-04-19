@@ -158,6 +158,7 @@ ci_static_inventory:
     - script: scripts/qa/test-verify-secrets-isolation.sh
     - script: scripts/qa/test-verify-infisical-env-validation-coverage.sh
     - script: scripts/qa/test-verify-secrets-management.sh
+    - script: scripts/qa/test-verify-enterprise-secrets.sh
     - script: scripts/qa/test-verify-security-hardening.sh
     - script: scripts/qa/test-verify-csp-headers.sh
     - script: scripts/qa/test-verify-evidence-redaction.sh

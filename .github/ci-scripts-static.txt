@@ -98,6 +98,7 @@ scripts/qa/lint-repo-conventions.sh
 scripts/qa/test-verify-secrets-isolation.sh
 scripts/qa/test-verify-infisical-env-validation-coverage.sh
 scripts/qa/test-verify-secrets-management.sh
+scripts/qa/test-verify-enterprise-secrets.sh
 scripts/qa/test-verify-security-hardening.sh
 scripts/qa/test-verify-csp-headers.sh
 scripts/qa/test-verify-evidence-redaction.sh
