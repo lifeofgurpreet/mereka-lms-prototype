@@ -1564,6 +1564,23 @@ scripts:
     proof_command: "bash scripts/infra/infisical-audit-mereka-lms.sh --help 2>&1 || true"
     criticality: informational
 
+  - path: scripts/infra/preflight-checkouts.sh
+    owner: platform-team
+    purpose: >
+      Prints live branch/HEAD/origin-main/dirty/fetch-age state for the
+      canonical VPS checkouts (mereka-lms, bbi-infrastructure). Observability
+      helper so operators and agents can see which truth they are looking at
+      at session start (bead mereka-lms-p74m).
+    inputs:
+      - CHECKOUT_ROOT (default: $HOME/projects/k8s)
+    outputs:
+      - stdout (per-checkout state report)
+    side_effects: none
+    dry_run: true  # read-only always
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/preflight-checkouts.sh --quiet 2>&1 | head -4"
+    criticality: informational
+
   - path: scripts/infra/bootstrap-kind-secrets.sh
     owner: platform-team
     purpose: >

@@ -4169,42 +4169,6 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "evidence/observability/pilot-nonprod-20260226-054126/run-observability-first-class.log",
-    "status": "supporting",
-    "type": "evidence"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "evidence/observability/pilot-nonprod-20260226-054522/run-observability-first-class.log",
-    "status": "supporting",
-    "type": "evidence"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "evidence/observability/pilot-nonprod-20260226-054812/run-observability-first-class.log",
-    "status": "supporting",
-    "type": "evidence"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "evidence/observability/pilot-nonprod-20260303-040914/run-observability-first-class.log",
-    "status": "supporting",
-    "type": "evidence"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-09",
     "owner": "Platform Team",
     "path": "evidence/operations/2026-03-wave-2b-final-closeout/README.md",
@@ -6447,402 +6411,6 @@
     "canonical_conflict_group": null,
     "freshness_risk": "low",
     "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/1lj6/route-matrix-20260219-1119.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/1lj6/verify-enterprise-nreum-20260219-1118.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/1lj6/verify-mfe-config-20260219-1118.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/1lj6/verify-public-branding-20260219-1118.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/1qw2/1qw2-argo-image-20260219-1057.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/1qw2/1qw2-enterprise-image-20260219-0953.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/1qw2/1qw2-mfe-config-20260219-1056.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/1qw2/1qw2-nreum-20260219-0952.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/1qw2/1qw2-nreum-20260219-1056.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/1qw2/1qw2-route-matrix-20260219-0952.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/1qw2/1qw2-route-matrix-20260219-1057.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/1qw2/mfe-config-20260219-0952.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/2q42-route-matrix-20260219-1200.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/brand/prod-brand-gates-20260219T1343.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/coordinator/os4w-coord-20260219-1134.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/cu7l/branding-gates-20260219-1212.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/cu7l/route-curl-20260219-1211.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/gke-parity/20260219-2220/branding-gates-deep.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/gke-parity/20260219-2220/footer-parity.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/gke-parity/20260219-2220/studio-branding.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/os4w/brand-gates-20260219-1138.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/os4w/branding-gates-20260219T1005.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/rke2/5ngf-bootstrap-20260219-1205.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/rke2/5ngf-gates-20260219-1205.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/ui_continue/20260219-2216/audit-branding-surfaces.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/ui_continue/20260219-2216/branding-gates-deep.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/ui_continue/20260219-2216/branding-gates-strict.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/ui_continue/20260219-2216/verify-public-branding.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/ui_continue/20260219-2216/verify-studio.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/ui_finality/audit-branding-surfaces.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/ui_finality/strict-gates.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/ui_finality/verify-public-branding.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/ui_finality/verify-studio-authoring.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/uiux/20260220T012327Z/audit-branding-surfaces.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/uiux/20260220T012327Z/branding-gates-deep.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/uiux/20260220T012327Z/verify-footer-parity.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/uiux/20260220T012327Z/verify-public-branding-strict.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/uiux/20260220T012327Z/verify-studio-authoring-branding.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/uiux/20260220T103719Z/verify-footer-parity.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/uiux/20260220T103719Z/verify-mereka-tenancy.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/uiux/20260220T103719Z/verify-mfe-footer-slot.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/uiux/20260220T103719Z/verify-public-branding.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/uiux/20260220T103719Z/verify-studio-authoring-branding.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "operations/evidence/uiux/ui_finality/branding-gates-deep.log",
-    "status": "supporting",
-    "type": "runbook"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
     "owner": "platform-release",
     "path": "ops/CI_GATE_DEFECT_TAXONOMY.md",
     "status": "supporting",
@@ -8213,6 +7781,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-release",
+    "path": "ops/runbooks/VPS_PREFLIGHT.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-03-10",
     "owner": "Platform Team",
     "path": "ops/runbooks/WINDOWS_SSH_SETUP.md",
@@ -9205,78 +8782,6 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
-    "path": "qa/helpers/__pycache__/summarize-archive-write.cpython-313.pyc",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "qa/helpers/__pycache__/summarize-doc-catalog-governance.cpython-313.pyc",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "qa/helpers/__pycache__/summarize-doc-catalog-residue.cpython-313.pyc",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "qa/helpers/__pycache__/summarize-doc-orphans.cpython-313.pyc",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "qa/helpers/__pycache__/summarize-evidence-status-root.cpython-313.pyc",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "qa/helpers/__pycache__/summarize-legacy-testmaps-freeze.cpython-313.pyc",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "qa/helpers/__pycache__/summarize-nonstub-transitional.cpython-313.pyc",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "qa/helpers/__pycache__/summarize-transitional-stub.cpython-313.pyc",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
     "path": "qa/helpers/summarize-archive-write.py",
     "status": "supporting",
     "type": "other"
@@ -9953,15 +9458,6 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "reference/generated/domain-authority-matrix.md",
-    "status": "supporting",
-    "type": "other"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "reference/generated/domain-runtime-audit.md",
     "status": "supporting",
     "type": "other"
   },
@@ -11328,141 +10824,6 @@
     "canonical_conflict_group": null,
     "freshness_risk": "low",
     "last_verified_or_updated": null,
-    "owner": null,
-    "path": "status/active/01-MASTER-ROADMAP.md",
-    "status": "supporting",
-    "type": "status"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "status/active/05-EVIDENCE-LEDGER.md",
-    "status": "supporting",
-    "type": "status"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "status/active/09-MFE-CONSOLIDATION-PLAN-2026-04-18.md",
-    "status": "supporting",
-    "type": "status"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "status/active/10-MFE-SPRINT-A-EXECUTION-PLAN-2026-04-18.md",
-    "status": "supporting",
-    "type": "status"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "status/active/11-MFE-SPRINT-B-ENTERPRISE-PARITY-PLAN-2026-04-18.md",
-    "status": "supporting",
-    "type": "status"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "status/active/12-MFE-PROGRAM-DECISIONS-2026-04-18.md",
-    "status": "supporting",
-    "type": "status"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "status/active/13-MFE-PLUGIN-BACKLOG-CLASSIFICATION-2026-04-18.md",
-    "status": "supporting",
-    "type": "status"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "status/active/14-IMPLEMENTER-ANTI-DRIFT-MEMO-2026-04-18.md",
-    "status": "supporting",
-    "type": "status"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "status/active/15-ACTIVE-CONTROL-PLANE-SURFACE-CLASSIFICATION-2026-04-18.md",
-    "status": "supporting",
-    "type": "status"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "status/active/16-ENTERPRISE-OWNERSHIP-SPLIT-2026-04-18.md",
-    "status": "supporting",
-    "type": "status"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "status/active/17-EXECUTION-GRAPH-2026-04-18.md",
-    "status": "supporting",
-    "type": "status"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "status/active/18-AGENT-ASSIGNMENT-MAP-2026-04-18.md",
-    "status": "supporting",
-    "type": "status"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "status/active/19-LANE-KICKOFF-PROMPTS-2026-04-18.md",
-    "status": "supporting",
-    "type": "status"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "status/active/20-FOUR-WEEK-WORK-PLAN-2026-04-18.md",
-    "status": "supporting",
-    "type": "status"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": null,
-    "path": "status/active/21-NEW-AGENT-24H-KICKOFF-2026-04-18.md",
-    "status": "supporting",
-    "type": "status"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
     "owner": "operator-next",
     "path": "status/active/22-NEXT-AGENT-HANDOFF-2026-04-18T07Z.md",
     "status": "supporting",
@@ -11618,15 +10979,6 @@
     "last_verified_or_updated": null,
     "owner": "platform-release",
     "path": "status/active/CURRENT-OPERATOR-STATE.md",
-    "status": "supporting",
-    "type": "status"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
-    "owner": "platform-review",
-    "path": "status/active/DEBT-BURN-REGISTER.md",
     "status": "supporting",
     "type": "status"
   },
@@ -11877,15 +11229,6 @@
     "canonical_conflict_group": null,
     "freshness_risk": "low",
     "last_verified_or_updated": null,
-    "owner": "platform-review",
-    "path": "status/active/MFE-ISSUE-MAP.md",
-    "status": "supporting",
-    "type": "status"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": null,
     "owner": "Agent 1. Created: 2026-04-10. Status: active",
     "path": "status/active/MUTATION_LEDGER_2026-04-10.md",
     "status": "supporting",
@@ -11951,15 +11294,6 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "status/active/OBSERVABILITY_ROADMAP_MEREKA_LMS.md",
-    "status": "supporting",
-    "type": "status"
-  },
-  {
-    "canonical_conflict_group": null,
-    "freshness_risk": "low",
-    "last_verified_or_updated": "2026-04-17",
-    "owner": null,
-    "path": "status/active/OPENEDX_AGENT_REVIEW_PROMPT_2026-04-17.md",
     "status": "supporting",
     "type": "status"
   },
@@ -12084,6 +11418,15 @@
     "canonical_conflict_group": null,
     "freshness_risk": "low",
     "last_verified_or_updated": null,
+    "owner": "platform-review",
+    "path": "status/active/SCRIPT-TIER-A-FIRST-10.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
     "owner": null,
     "path": "status/active/SEARCH_EVIDENCE_LEDGER_2026-04-10.md",
     "status": "supporting",
@@ -12095,6 +11438,24 @@
     "last_verified_or_updated": "2026-04-04",
     "owner": "Platform Team",
     "path": "status/active/SMOKE_ACCOUNT_REGISTRY_2026-04-04.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-review",
+    "path": "status/active/TEAM-BATCH-SEQUENCING-PLAN.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-review",
+    "path": "status/active/TEAM-LONG-RUN-HANDOVER-PROMPT.md",
     "status": "supporting",
     "type": "status"
   },
@@ -12131,6 +11492,42 @@
     "last_verified_or_updated": "2026-03-26T10:45:00Z",
     "owner": "Platform Team",
     "path": "status/active/TODAY_WORKLOAD_TRACKER_2026-03-26.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-release",
+    "path": "status/active/TRACKER-HYGIENE-RECOVERY-PLAN.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/TRACKER-LEGACY-ID-NORMALIZATION-MAP.json",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-review",
+    "path": "status/active/TRACKER-LEGACY-ID-NORMALIZATION-MAP.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-review",
+    "path": "status/active/TRACKER-RESTORE-SEED-BEADS.md",
     "status": "supporting",
     "type": "status"
   },
