@@ -6601,6 +6601,15 @@
     "freshness_risk": "low",
     "last_verified_or_updated": "2026-04-19",
     "owner": "platform-release",
+    "path": "ops/evidence/m0u5.10.7-testadmin-credential-rotation-2026-04-19.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-19",
+    "owner": "platform-release",
     "path": "ops/evidence/m0u5.2-mfe-hint-slot-decision-matrix-2026-04-19.md",
     "status": "supporting",
     "type": "runbook"
