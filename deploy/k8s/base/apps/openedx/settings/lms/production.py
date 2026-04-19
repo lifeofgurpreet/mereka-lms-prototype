@@ -748,12 +748,14 @@ FEATURES['ENABLE_AUTHN_MICROFRONTEND'] = True
 FEATURES["ENABLE_ACCOUNT_MICROFRONTEND"] = True
 FEATURES["ENABLE_PROFILE_MICROFRONTEND"] = True
 FEATURES["ENABLE_DISCUSSIONS_MFE"] = True
-# Enable courseware and progress MFE routing.
-# Without this, the LMS serves /courses/.../courseware and /courses/.../progress
-# via legacy Django views regardless of LEARNING_MICROFRONTEND_URL.
-# Root-cause for D-03/D-04 (courseware error boundary) and D-05/D-06 (progress
-# route timeout / legacy-Django redirect). Fix: bead mereka-lms-m0u5.10.1.
-FEATURES["ENABLE_COURSEWARE_MICROFRONTEND"] = True
+# RETRACTION NOTE (bead mereka-lms-m0u5.10.1): an earlier attempt here
+# set `FEATURES["ENABLE_COURSEWARE_MICROFRONTEND"] = True` as the fix for
+# D-03/D-04/D-05 (courseware error boundaries + progress timeout). Live
+# runtime verification (2026-04-19 post-rollout, image e7bfe2e0a9):
+# `grep -rln 'ENABLE_COURSEWARE_MICROFRONTEND' /openedx/` returns ONLY
+# test files. The flag is NOT read by the edx-platform Ulmo LMS in
+# courseware routing. Setting it here was a no-op. D-03/D-04/D-05 remain
+# open. See docs/ops/evidence/m0u5.10.1-retraction-noop-flag-2026-04-19.md
 
 
 FEATURES['ENABLE_NEW_BULK_EMAIL_EXPERIENCE'] = True
