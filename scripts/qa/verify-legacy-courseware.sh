@@ -40,6 +40,9 @@ warn() { WARN=$((WARN + 1)); echo -e "${YELLOW}[WARN]${NC} $1"; }
 skip() { SKIP=$((SKIP + 1)); echo -e "${BLUE}[SKIP]${NC} $1"; }
 
 LMS_PROD="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/production.py"
+# Bead mereka-lms-mefk.2: LMS_PROD is the app-repo SHADOW production.py
+# (non-authoritative per PR #1886; retirement pending bead mereka-lms-mefk.3).
+# All checks below skip gracefully when the file is absent (post-retirement).
 LMS_DEV="$REPO_ROOT/deploy/k8s/base/apps/openedx/settings/lms/development.py"
 CADDYFILE="$REPO_ROOT/deploy/k8s/base/apps/caddy/Caddyfile"
 ASSESSMENT_BULK_MW="$REPO_ROOT/infrastructure/tutor/custom-apps/openedx_assessment_bulk/middleware.py"
@@ -53,7 +56,7 @@ echo ""
 # ── Check 1: LEARNING_MICROFRONTEND_URL configured ───────────────────
 echo "-- Check 1: LEARNING_MICROFRONTEND_URL configured in production"
 if [[ ! -f "$LMS_PROD" ]]; then
-  fail "LMS production settings not found: $LMS_PROD"
+  skip "LMS_PROD absent (shadow retired via mereka-lms-mefk.3) — check skipped"
 elif grep -q "LEARNING_MICROFRONTEND_URL" "$LMS_PROD"; then
   pass "LEARNING_MICROFRONTEND_URL is set in LMS production settings"
 else
@@ -62,7 +65,9 @@ fi
 
 # ── Check 2: MFE_CONFIG["LEARNING_BASE_URL"] set ─────────────────────
 echo "-- Check 2: MFE_CONFIG[\"LEARNING_BASE_URL\"] configured"
-if [[ -f "$LMS_PROD" ]] && grep -q 'MFE_CONFIG\["LEARNING_BASE_URL"\]' "$LMS_PROD"; then
+if [[ ! -f "$LMS_PROD" ]]; then
+  skip "LMS_PROD absent (shadow retired via mereka-lms-mefk.3) — check skipped"
+elif grep -q 'MFE_CONFIG\["LEARNING_BASE_URL"\]' "$LMS_PROD"; then
   pass "MFE_CONFIG[\"LEARNING_BASE_URL\"] is set in LMS production settings"
 else
   fail "MFE_CONFIG[\"LEARNING_BASE_URL\"] missing from $LMS_PROD — MFE runtime config incomplete"
