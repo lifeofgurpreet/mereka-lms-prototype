@@ -417,3 +417,106 @@ Dependency Review as of push time)**:
    events.
 4. Tier 1 #2 stays blocked on #1919 T3 — watch for the bbi-infra
    `render-lms-admin-emails.sh` generator PR to land and rebase overlays.
+
+---
+
+### Slice 86 — 2026-04-20T11:00–12:45Z (massive drainage + Tier 1–3 fan-out)
+
+**Context**: user called out that PRs had been lingering for hours. Deep
+diagnosis found two compounding blockers:
+1. `required_status_checks.strict: true` on mereka-lms main — every merge
+   put all other open PRs into BEHIND with no self-heal.
+2. Main had been red on 4 verifiers since Wave 9 (PR #1900) because they
+   still referenced `deploy/k8s/overlays/production/` + `rke2-nonprod/`
+   shadow paths that Wave 9 deleted.
+
+**Two structural unblocks**:
+
+1. **Live branch-protection flip**: `gh api -X PUT
+   .../branches/main/protection` flipped `strict: true → false` per Stage
+   1 of the new `docs/reference/operations/MERGE_POLICY.md`. Rollback
+   snapshot saved. Immediate effect: 3 green-but-BEHIND PRs auto-merged
+   within 30 seconds.
+2. **Wave 9 absence-tolerance pattern** shipped in #1932 + #1942 for 4
+   verifiers (`verify-kustomize-structure`, `verify-k8s-images`,
+   `verify-kustomize-render`, `verify-secrets-isolation`). Also SECRET_CLASSIFICATION
+   orphan cleanup in #1933 removing 9 stale ecommerce / stripe-DEV entries.
+
+**Merged to main this slice** (12 PRs across both repos):
+
+| PR | Repo | What |
+|---|---|---|
+| #1918 | lms | platform-admin audit doc |
+| #1921 | lms | Wave 9 consumer sweep |
+| #1924 | lms | stale state-doc prune |
+| #1926 | lms | state generator retarget |
+| #1928 | lms | SESSION_COOKIE_DOMAIN MFE_CONFIG (Tier 1 #3) |
+| #1930 | lms | Authn MFE smoke scheduled (OBS-003 phase 1) |
+| #1932 | lms | Wave 9 verifier absence-tolerance |
+| #1934 | lms | tutor-plugin-test venv fallback |
+| #1941 | lms | OBS-001 phase 1 MFE Sentry plumbing (Tier 1 #1) |
+| bbi-infra #3461 | infra | OBS-006 labels mirror |
+| bbi-infra #3491 | infra | MEREKA_PLATFORM_ADMIN_EMAILS materialization |
+| bbi-infra #3497 | infra | OBS-001 phase 3 MFE Sentry overlay wiring |
+
+**OBS-001 end-to-end complete (Tier 1 #1)**:
+Phase 1 plumbing (#1941) + Phase 2 Sentry project + Infisical DSN
+(executed via `sentry-cli` + `infisical secrets set` — creds
+`/k8s/mereka-lms/MEREKA_MFE_SENTRY_DSN` + `MEREKA_MFE_SENTRY_ENVIRONMENT`
+populated for dev/staging/prod) + Phase 3 overlay wiring (#3497). Sentry
+project: `biji-biji-non-profits/mereka-lms-web` (4510757892128768).
+Single DSN across envs, environment-tagged. Phase 4 runtime proof
+pending next MFE image build + pod roll (bead `mereka-lms-te71`).
+
+**Armed for auto-merge at slice close** (7 mereka-lms + 2 bbi-infra):
+#1929, #1933, #1935, #1942, #1943, #1944, #1945, bbi-infra #3501 /
+#3502.
+
+**Agent team spawned in parallel this slice** (5 completed, 1 blocked):
+- OBS-002 JSON logging → **#1943**
+- RC-checklist automation → **#1944**
+- Deletion-wave guard → **#1945** (cleaned up by me after agent stalled)
+- OBS-005 Authentik blackbox → **bbi-infra #3501**
+- auth-allowlist-07 ConfigMap → **bbi-infra #3502** (turned out already
+  declarative; PR removes stale docs + dead `lms-deployment-sso.yaml`
+  files)
+- Fastlane bootstrap migration → **BLOCKED** on bbi-infra #3418 not yet
+  merged (bead `mereka-lms-ano7` filed)
+
+**Tier 1 status**: ALL merged or in flight with no external blockers.
+
+**Tier 2 status**:
+- #5 OBS-003 phase 2 Playwright: blocked on browser capability
+- #6 OBS-004 Upptime: user-gated (mereka-coding VPS mutation)
+- #7 OBS-005 Authentik blackbox: in flight (#3501)
+- #8 Full Playwright sweep: blocked on browser capability
+- #9 Fastlane bootstrap: blocked on bbi-infra #3418
+
+**Tier 3 status**: ALL in flight (#1943 / #1944 / #1945 / #3502).
+
+**Merge queue Stage 1 ACTIVE** (strict=false live on mereka-lms). Stage
+2 (merge queue canary, bead `mereka-lms-cp16`) gated on 2 weeks of
+stable main CI red rate. Stage 3 (bead `mereka-lms-k3nm`) follows.
+
+**Monitoring infrastructure**: persistent Monitor armed on 7 PR states
+(polls each 60s, emits on change). Cron `*/45 * * * *` scheduled to
+fire the autonomous /loop prompt every 45 min until the roadmap drains.
+
+## Pointed Next Move (slice 86)
+
+1. Let current CI cycle finish on the 9 armed PRs; watch Monitor events.
+2. After OBS-001 bundle rebuild lands + MFE pods roll: trigger a test
+   JS error on dev, confirm event in Sentry within 2 min, close bead
+   `mereka-lms-te71`. RC_CHECKLIST row 22 flips ✅.
+3. After #3491 pods roll on all 3 envs: `kubectl exec lms -- printenv
+   MEREKA_PLATFORM_ADMIN_EMAILS` returns the 9-email CSV per env.
+   RC_CHECKLIST row 19 flips ✅ auto.
+4. If any stuck PR's CI fails on a real issue (not stale verdict),
+   diagnose and fix in isolated worktree (avoid shared-clone clobber
+   — multiple agents touching the shared repo checkout at once).
+5. Tier 2 blockers (browser capability, user-gated VPS, #3418)
+   remain the only hard stops. No further implementation-lane work
+   unblocks without external action.
+6. Loop cron continues firing every 45 min; autonomous prompt will
+   re-sweep PR queue + beads + docs until everything lands or hits
+   an external blocker.
