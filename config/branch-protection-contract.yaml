@@ -9,7 +9,7 @@
 # tolerated_deviations.
 ---
 schema_version: "2.0"
-audited_at: "2026-04-13"
+audited_at: "2026-04-20"
 
 repos:
   - repo: "Biji-Biji-Initiative/mereka-lms"
@@ -17,7 +17,11 @@ repos:
     live:
       enforce_admins: true
       required_approving_review_count: 0
-      strict_status_checks: true
+      # Flipped 2026-04-20 as Stage 1 of the merge-queue rollout, per
+      # docs/reference/operations/MERGE_POLICY.md. See rollback snapshot
+      # under /tmp/protection-rollback/mereka-lms-main-pre-*.json on the
+      # operator host. Reversible via a single PUT call.
+      strict_status_checks: false
       required_status_checks:
         - "Static Validation"
         - "Tutor Configuration Tests"
@@ -29,7 +33,12 @@ repos:
     target:
       enforce_admins: true
       required_approving_review_count: 0
-      strict_status_checks: true
+      # Stage 1 of merge queue rollout per docs/reference/operations/MERGE_POLICY.md.
+      # strict=false stops the rebase-storm pattern where every merge to main
+      # dumps every other open PR into BEHIND. Merge queue (Stage 2) is the
+      # world-class replacement but requires a canary first (0 historical
+      # merge_group runs on the repo as of 2026-04-20).
+      strict_status_checks: false
       required_status_checks:
         - "Static Validation"
         - "Tutor Configuration Tests"
@@ -39,7 +48,11 @@ repos:
         - "Trivy — K8s Manifests"
         - "Trivy — Terraform"
     gaps: []
-    notes: "0 required reviews: PRs are agent-authored, owner-merged."
+    notes: >
+      0 required reviews: PRs are agent-authored, owner-merged. strict=false
+      is Stage 1 of MERGE_POLICY.md; Stage 2 (merge queue canary) and Stage 3
+      (queue-only path to main) are tracked as beads mereka-lms-cp16 and
+      mereka-lms-k3nm, not in this contract.
 
   - repo: "Biji-Biji-Initiative/bbi-infrastructure"
     branch: main
