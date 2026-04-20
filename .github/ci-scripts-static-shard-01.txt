@@ -10,6 +10,7 @@ scripts/qa/test-verify-ci-cache-policy.sh
 scripts/qa/verify-ci-runner-policy.sh
 scripts/qa/audit-grafana-dashboard.sh
 scripts/qa/verify-runtime-proof-fixture-pack.sh
+scripts/branding/verify-logo-setup.sh
 scripts/ci/preflight-check.sh
 scripts/infra/check-error-budget-gate.sh
 scripts/qa/audit-observability.sh

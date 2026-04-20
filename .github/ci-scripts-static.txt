@@ -123,6 +123,7 @@ scripts/qa/verify-secrets-naming-convention.sh
 scripts/qa/verify-dev-prod-secret-separation.sh
 scripts/qa/verify-secrets-management.sh
 scripts/qa/verify-secret-classification.sh
+scripts/qa/verify-deletion-wave-consumer-sweep.sh
 scripts/qa/verify-secrets-inventory.sh
 scripts/qa/verify-infisical-env-validation-coverage.sh
 scripts/qa/verify-secrets-isolation.sh

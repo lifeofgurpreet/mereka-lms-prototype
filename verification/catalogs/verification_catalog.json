@@ -4488,6 +4488,34 @@
       ],
       "kind": "verify",
       "mutability": "read-only",
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-deletion-wave-consumer-sweep.sh",
+      "reference_count": 4,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "high",
+      "spec_ids": [
+        "AC-DEPL-001"
+      ],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
+      "env_scope": [
+        "dev"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-deployment-contract.sh",
       "reference_count": 6,
@@ -18794,27 +18822,27 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 25,
-    "ci_static_bound": 382,
+    "ci_static_bound": 383,
     "kinds": {
-      "verify": 631
+      "verify": 632
     },
     "mutability": {
       "destructive": 9,
       "mutating": 21,
-      "read-only": 601
+      "read-only": 602
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 436,
+      "active": 437,
       "deprecated_candidate": 1,
       "manual_only": 194
     },
     "tiers": {
       "exploratory_manual": 198,
       "periodic_runtime": 21,
-      "release_blocking": 412
+      "release_blocking": 413
     },
-    "total_verify_scripts": 631,
+    "total_verify_scripts": 632,
     "workflow_direct_bound": 70
   },
   "version": "1"

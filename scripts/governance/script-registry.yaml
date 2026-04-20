@@ -184,6 +184,8 @@ ci_static_inventory:
     - script: scripts/qa/verify-dev-prod-secret-separation.sh
     - script: scripts/qa/verify-secrets-management.sh
     - script: scripts/qa/verify-secret-classification.sh
+    - script: scripts/qa/verify-deletion-wave-consumer-sweep.sh
+      estimated_seconds: 3
     - script: scripts/qa/verify-secrets-inventory.sh
     - script: scripts/qa/verify-infisical-env-validation-coverage.sh
     - script: scripts/qa/verify-secrets-isolation.sh
