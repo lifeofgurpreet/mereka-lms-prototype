@@ -80,6 +80,19 @@ RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 """,
 )
 
+# Install @sentry/browser for MFE client-side error telemetry (OBS-001).
+# The SDK is initialized at APP_READY from env.config.jsx — see
+# mfe-env-config-buildtime-imports in mfe_runtime.py. Pin the major so the
+# init code's API assumptions stay stable; bump deliberately.
+_register_env_patch(
+    "mfe-dockerfile-post-npm-install",
+    """
+# Sentry Browser SDK — client-side error telemetry (OBS-001, bead mereka-lms-m88z).
+# Init gated on getConfig().SENTRY_DSN at runtime; empty DSN → no-op.
+RUN npm install --legacy-peer-deps '@sentry/browser@^8.0.0'
+""",
+)
+
 # Patch the account MFE source BEFORE webpack builds.
 # The upstream open-release/redwood.3 source has a null-unsafe lookup:
 #   data.social_links.find(...)

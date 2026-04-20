@@ -73,6 +73,28 @@ MFE_CONFIG["ORDER_HISTORY_URL"] = f"{_lms_url}/orders"
 # USER_RETENTION_COOKIE/cross-MFE cookies get the correct parent domain.
 MFE_CONFIG["SESSION_COOKIE_DOMAIN"] = SESSION_COOKIE_DOMAIN
 
+# MFE client-side Sentry DSN (OBS-001, bead mereka-lms-m88z).
+# The MFE bundle carries an APP_READY subscriber (see
+# mfe-env-config-buildtime-imports patch) that calls Sentry.init() only
+# when this key is present and non-empty. Safe default: empty string
+# → Sentry is a no-op, zero runtime cost.
+#
+# Per-env DSN provisioning:
+# - A DSN MUST be a CLIENT-SIDE (browser-exposed) Sentry key, scoped to
+#   the MFE project only. DO NOT reuse MEREKA_LMS_SENTRY_DSN (backend).
+# - Expected Sentry project naming: mereka-lms-mfe-{dev,staging,prod}.
+# - Infisical key: MEREKA_MFE_SENTRY_DSN (populated per env); empty on
+#   envs where the Sentry project doesn't exist yet — the SDK stays
+#   dormant.
+#
+# Also expose the environment tag so Sentry segments releases by env.
+MFE_CONFIG["SENTRY_DSN"] = os.environ.get("MEREKA_MFE_SENTRY_DSN", "") or ""
+MFE_CONFIG["SENTRY_ENVIRONMENT"] = (
+    os.environ.get("MEREKA_MFE_SENTRY_ENVIRONMENT", "")
+    or os.environ.get("MEREKA_SENTRY_ENVIRONMENT", "")
+    or ""
+)
+
 # ── Content Security Policy ────────────────────────────────────────────────
 # Migration plan: docs/adr/025-csp-nonce-migration.md
 #

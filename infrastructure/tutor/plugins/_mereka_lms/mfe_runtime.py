@@ -15,6 +15,52 @@ _register_env_patch(
     """
 // Import Mereka theme SCSS
 import './mereka/mereka.scss';
+
+// Sentry Browser SDK — client-side error telemetry (OBS-001, bead mereka-lms-m88z).
+// The SDK is installed via mfe-dockerfile-post-npm-install. Init is gated
+// on getConfig().SENTRY_DSN being non-empty at runtime — empty DSN means
+// the SDK stays dormant and never makes a network call.
+//
+// APP_READY fires after @edx/frontend-platform finishes loading the MFE
+// config API response, so getConfig() is populated by the time we init.
+// That misses the earliest bootstrap window (0-500ms before config
+// arrives), which is an acceptable tradeoff to keep the DSN per-env and
+// avoid hardcoding it into the bundle at build time.
+import * as Sentry from '@sentry/browser';
+import { subscribe, APP_READY } from '@edx/frontend-platform';
+import { getConfig } from '@edx/frontend-platform/config';
+
+subscribe(APP_READY, () => {
+  try {
+    const cfg = getConfig() || {};
+    const dsn = (cfg.SENTRY_DSN || '').trim();
+    if (!dsn) return;
+    Sentry.init({
+      dsn,
+      environment: cfg.SENTRY_ENVIRONMENT || 'unknown',
+      // Release tag derived from MFE build-time SHA if webpack DefinePlugin
+      // set process.env.MEREKA_RELEASE_SHA; falls back to undefined which
+      // lets Sentry auto-detect.
+      release: (typeof process !== 'undefined' && process.env && process.env.MEREKA_RELEASE_SHA) || undefined,
+      // Conservative sample rates for Phase 1 — tune once we have baseline
+      // traffic volume. No profiling until explicitly enabled per env.
+      tracesSampleRate: 0.05,
+      // Attach the MFE's BASE_URL so event filtering by MFE surface works.
+      initialScope: {
+        tags: {
+          mfe_base_url: cfg.BASE_URL || 'unknown',
+          lms_base_url: cfg.LMS_BASE_URL || 'unknown',
+        },
+      },
+    });
+  } catch (err) {
+    // Never let Sentry initialization failure break the app. Log to
+    // console so issues surface during local dev / E2E runs.
+    if (typeof console !== 'undefined' && console.warn) {
+      console.warn('[mereka-obs-001] Sentry.init failed', err);
+    }
+  }
+});
 """,
 )
 
