@@ -47,7 +47,23 @@ function normalizePaletteValue(value: unknown): string {
 
 function getMfeBaseUrl(lmsBaseUrl: string): string {
   const parsed = new URL(lmsBaseUrl);
-  const host = parsed.hostname.startsWith('apps.') ? parsed.hostname : `apps.${parsed.hostname}`;
+  // Tenant MFE hostname rule:
+  //   prod:     academyv2.mereka.io           → apps.academyv2.mereka.io
+  //   dev:      academyv2.mereka.dev          → apps.academyv2.mereka.dev
+  //   staging:  staging.academyv2.mereka.io   → staging.apps.academyv2.mereka.io
+  //                                             (NOT apps.staging.* — that 4-level
+  //                                             subdomain is not covered by the
+  //                                             Cloudflare Free *.academyv2.mereka.io
+  //                                             wildcard cert, so no DNS record exists.)
+  // So for staging we insert `apps.` AFTER the first label instead of prepending.
+  let host: string;
+  if (parsed.hostname.startsWith('apps.')) {
+    host = parsed.hostname;
+  } else if (parsed.hostname.startsWith('staging.')) {
+    host = parsed.hostname.replace(/^staging\./, 'staging.apps.');
+  } else {
+    host = `apps.${parsed.hostname}`;
+  }
   const port = parsed.port ? `:${parsed.port}` : '';
   return `${parsed.protocol}//${host}${port}`;
 }
