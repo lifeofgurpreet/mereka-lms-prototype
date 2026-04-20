@@ -517,7 +517,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/infra/verify-release-preflight.sh",
-      "reference_count": 11,
+      "reference_count": 13,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -9133,7 +9133,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-footer-plugin-slot.sh",
-      "reference_count": 4,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -9159,7 +9159,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-footer-slot.sh",
-      "reference_count": 21,
+      "reference_count": 22,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -9228,7 +9228,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-image-branding.sh",
-      "reference_count": 29,
+      "reference_count": 30,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -9500,10 +9500,14 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "scheduled_or_post_deploy",
+      "cadence": "per_pr_and_push",
       "canonical": true,
-      "ci_binding": [],
-      "ci_entrypoints": [],
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
       "env_scope": [
         "global"
       ],
@@ -9511,15 +9515,15 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-runtime-helper-contract.sh",
-      "reference_count": 0,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "medium",
+      "severity": "high",
       "spec_ids": [],
       "status": "active",
-      "tier": "periodic_runtime"
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -10895,7 +10899,8 @@
         "ci_static"
       ],
       "env_scope": [
-        "dev"
+        "dev",
+        "prod"
       ],
       "kind": "verify",
       "mutability": "read-only",
@@ -11729,7 +11734,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-openedx-image-branding.sh",
-      "reference_count": 9,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -16464,7 +16469,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-tenant-foundation.sh",
-      "reference_count": 5,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -18789,7 +18794,7 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 25,
-    "ci_static_bound": 381,
+    "ci_static_bound": 382,
     "kinds": {
       "verify": 631
     },
@@ -18806,8 +18811,8 @@
     },
     "tiers": {
       "exploratory_manual": 198,
-      "periodic_runtime": 22,
-      "release_blocking": 411
+      "periodic_runtime": 21,
+      "release_blocking": 412
     },
     "total_verify_scripts": 631,
     "workflow_direct_bound": 70

@@ -109,7 +109,14 @@ deployment_paths = {
 external_secrets = (repo / "deploy/k8s/base/secrets/external-secrets.yaml").read_text(encoding="utf-8")
 lms_settings = (repo / "deploy/k8s/base/apps/openedx/settings/lms/production.py").read_text(encoding="utf-8")
 cms_settings = (repo / "deploy/k8s/base/apps/openedx/settings/cms/production.py").read_text(encoding="utf-8")
-prod_overlay = (repo / "deploy/k8s/overlays/production/kustomization.yaml").read_text(encoding="utf-8")
+
+# Wave 9 deletion (PR #1900): deploy/k8s/overlays/production/ is a deprecated
+# shadow overlay; authoritative production overlay lives in
+# bbi-infrastructure/apps/mereka-lms/overlays/prod/. Treat the shadow as
+# absence-tolerant — if the files are gone, the legacy-mongo delete patch
+# assertions are not applicable in this repo anymore.
+_prod_overlay_path = repo / "deploy/k8s/overlays/production/kustomization.yaml"
+prod_overlay = _prod_overlay_path.read_text(encoding="utf-8") if _prod_overlay_path.exists() else None
 prod_mongo_delete_patch = repo / "deploy/k8s/overlays/production/patches/remove-legacy-mongodb-service.yaml"
 
 errors = []
@@ -170,23 +177,26 @@ for name, content in (("lms", lms_settings), ("cms", cms_settings)):
     if not any(all(token in content for token in variant) for variant in detection_variants):
         errors.append(f"{name} settings missing Atlas detection contract")
 
-if (
-    "- patches/remove-legacy-mongodb-service.yaml" not in prod_overlay
-    and "path: patches/remove-legacy-mongodb-service.yaml" not in prod_overlay
-):
-    errors.append(
-        "Production overlay missing patches/remove-legacy-mongodb-service.yaml reference"
-    )
+if prod_overlay is not None:
+    if (
+        "- patches/remove-legacy-mongodb-service.yaml" not in prod_overlay
+        and "path: patches/remove-legacy-mongodb-service.yaml" not in prod_overlay
+    ):
+        errors.append(
+            "Production overlay missing patches/remove-legacy-mongodb-service.yaml reference"
+        )
 
-if not prod_mongo_delete_patch.exists():
-    errors.append("Missing production patch file: remove-legacy-mongodb-service.yaml")
+    if not prod_mongo_delete_patch.exists():
+        errors.append("Missing production patch file: remove-legacy-mongodb-service.yaml")
+    else:
+        patch_text = prod_mongo_delete_patch.read_text(encoding="utf-8")
+        for token in ("kind: Service", "name: mongodb", "$patch: delete"):
+            if token not in patch_text:
+                errors.append(
+                    f"Production mongodb service delete patch missing token: {token}"
+                )
 else:
-    patch_text = prod_mongo_delete_patch.read_text(encoding="utf-8")
-    for token in ("kind: Service", "name: mongodb", "$patch: delete"):
-        if token not in patch_text:
-            errors.append(
-                f"Production mongodb service delete patch missing token: {token}"
-            )
+    print("SKIP: production overlay absent (Wave 9 deletion); legacy-mongo delete patch assertions not applicable")
 
 if errors:
     for err in errors:

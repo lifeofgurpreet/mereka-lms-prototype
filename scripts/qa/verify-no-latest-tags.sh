@@ -77,8 +77,12 @@ done
 PROD_OVERLAY_DIR="${REPO_ROOT}/deploy/k8s/overlays/production"
 
 if [[ ! -d "$PROD_OVERLAY_DIR" ]]; then
-  echo "ERROR: Production overlay directory not found: $PROD_OVERLAY_DIR" >&2
-  exit 1
+  # Wave 9 (#1900) deleted the shadow production overlay. Authoritative
+  # overlay lives in bbi-infrastructure/apps/mereka-lms/overlays/prod/
+  # where the same latest-tag policy is enforced by bbi-infra's own CI.
+  # Treat absence as not-applicable here.
+  echo "SKIP: $PROD_OVERLAY_DIR absent (Wave 9 shadow deletion); latest-tag policy enforced in bbi-infrastructure"
+  exit 0
 fi
 
 violations=0

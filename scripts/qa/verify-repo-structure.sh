@@ -182,10 +182,21 @@ if [[ -f "scripts/shared/config.sh" ]]; then
     || fail "scripts/shared/config.sh missing exports (GCP_PROJECT/GCP_REGION/LMS_DOMAIN)"
 fi
 
-# AC-005: deploy/k8s overlays local + production exist.
+# AC-005: deploy/k8s overlays — local is permanent; production is a Wave 9
+# deleted shadow overlay (authoritative copy lives in bbi-infrastructure per
+# ADR-025 deployment boundary). Absence of the shadow is the expected state,
+# but ONLY if the canonical ADR-025 deployment boundary doc is still present —
+# otherwise the "Wave 9 is the reason" story is unverifiable and the absence
+# could hide a real regression.
 check_dir "deploy/k8s/overlays"
 check_dir "deploy/k8s/overlays/local"
-check_dir "deploy/k8s/overlays/production"
+if [[ -d "deploy/k8s/overlays/production" ]]; then
+  check_dir "deploy/k8s/overlays/production"
+elif [[ -f "docs/reference/architecture/DEPLOYMENT_CONTRACT.md" ]]; then
+  pass "deploy/k8s/overlays/production absent (Wave 9 shadow deletion — canonical boundary doc present at docs/reference/architecture/DEPLOYMENT_CONTRACT.md)"
+else
+  fail "deploy/k8s/overlays/production/ missing AND canonical boundary doc docs/reference/architecture/DEPLOYMENT_CONTRACT.md missing — absence cannot be attributed to Wave 9"
+fi
 
 # AC-006: deploy/k8s/base/secrets: no committed secret values in Secret data/stringData.
 check_dir "deploy/k8s/base/secrets"

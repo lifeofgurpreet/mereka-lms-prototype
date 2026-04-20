@@ -3,12 +3,15 @@
 schema_version: "1.0"
 
 surfaces:
+  # Wave 9 (#1900) deleted these three app-repo shadow overlays.
+  # Authoritative copies live in bbi-infrastructure. must_exist: false
+  # reflects the post-deletion reality.
   - id: app-repo-production-overlays
     repo: mereka-lms
     path: "deploy/k8s/overlays/production/**"
     path_hint: "deploy/k8s/overlays/production"
     class: ghost
-    must_exist: true
+    must_exist: false
     canonical_source:
       repo: bbi-infrastructure
       path: "apps/mereka-lms/overlays/prod/**"
@@ -17,7 +20,7 @@ surfaces:
     path: "deploy/k8s/overlays/staging/**"
     path_hint: "deploy/k8s/overlays/staging"
     class: ghost
-    must_exist: true
+    must_exist: false
     canonical_source:
       repo: bbi-infrastructure
       path: "apps/mereka-lms/overlays/staging/**"
@@ -26,7 +29,7 @@ surfaces:
     path: "deploy/k8s/overlays/rke2-nonprod/**"
     path_hint: "deploy/k8s/overlays/rke2-nonprod"
     class: ghost
-    must_exist: true
+    must_exist: false
     canonical_source:
       repo: bbi-infrastructure
       path: "apps/mereka-lms/overlays/profiles/**"

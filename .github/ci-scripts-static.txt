@@ -203,6 +203,8 @@ scripts/qa/verify-release-gitops-guardrails.sh
 scripts/qa/verify-release-deployment-choreography.sh
 scripts/qa/verify-release-invocation-guardrail-wiring.sh
 scripts/qa/verify-mfe-build-prereqs.sh
+scripts/qa/verify-mfe-runtime-helper-contract.sh
+scripts/qa/test-resolve-build-scope.sh
 scripts/qa/verify-mfe-footer-slot.sh
 scripts/qa/verify-mfe-header-branding.sh
 scripts/qa/verify-plugin-slot-wiring.sh

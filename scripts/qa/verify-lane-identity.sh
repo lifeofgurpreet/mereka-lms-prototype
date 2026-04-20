@@ -49,12 +49,16 @@ for lane in dev staging prod; do
 done
 
 # 4. Overlay directories exist
+# Wave 9 (#1900) deleted deploy/k8s/overlays/{rke2-nonprod,staging,production}
+# as deprecated shadow overlays; authoritative overlays now live in
+# bbi-infrastructure/apps/mereka-lms/overlays/. Treat absence of these
+# app-repo shadows as not-applicable, not a failure.
 for overlay_dir in rke2-nonprod staging production; do
   overlay_path="$REPO_ROOT/deploy/k8s/overlays/$overlay_dir"
   if [[ -d "$overlay_path" ]]; then
     pass "overlay directory exists: overlays/$overlay_dir"
   else
-    fail "overlay directory missing: overlays/$overlay_dir"
+    pass "overlay '$overlay_dir' absent (Wave 9 shadow deletion — authoritative copy in bbi-infrastructure)"
   fi
 done
 

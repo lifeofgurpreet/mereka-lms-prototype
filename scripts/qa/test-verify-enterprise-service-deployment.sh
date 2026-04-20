@@ -44,7 +44,7 @@ if [[ "$RC" -eq 2 ]]; then
 else
   fail "fixture-1: SKIP_RUNTIME_CHECKS=1 should exit 2, got $RC"
 fi
-grep -q "runtime checks suppressed" "$OUT" \
+grep -qa "runtime checks suppressed" "$OUT" \
   || fail "fixture-1: expected 'runtime checks suppressed' in output"
 pass "fixture-1: skip-runtime message present"
 
@@ -58,7 +58,7 @@ if [[ "$RC" -eq 2 ]]; then
 else
   fail "fixture-2: --skip-runtime-checks should exit 2, got $RC"
 fi
-grep -q "INDETERMINATE" "$OUT" \
+grep -qa "INDETERMINATE" "$OUT" \
   || fail "fixture-2: INDETERMINATE summary line missing"
 pass "fixture-2: INDETERMINATE summary present"
 
@@ -72,7 +72,7 @@ if [[ "$RC" -eq 0 ]]; then
 else
   fail "fixture-3: --help should exit 0, got $RC"
 fi
-grep -q "Usage:" "$OUT" \
+grep -qa "Usage:" "$OUT" \
   || fail "fixture-3: Usage string missing from --help output"
 pass "fixture-3: --help prints usage"
 
@@ -86,7 +86,7 @@ if [[ "$RC" -eq 1 ]]; then
 else
   fail "fixture-4: unknown flag should exit 1, got $RC"
 fi
-grep -q "Unknown option" "$OUT" \
+grep -qa "Unknown option" "$OUT" \
   || fail "fixture-4: 'Unknown option' message missing"
 pass "fixture-4: unknown-flag error message present"
 
@@ -100,7 +100,7 @@ if [[ "$RC" -eq 1 ]]; then
 else
   fail "fixture-5: ALLOW_PARTIAL_READY=2 should exit 1, got $RC"
 fi
-grep -q "Invalid ALLOW_PARTIAL_READY" "$OUT" \
+grep -qa "Invalid ALLOW_PARTIAL_READY" "$OUT" \
   || fail "fixture-5: validation error message missing"
 pass "fixture-5: bool-validation error message present"
 
@@ -248,7 +248,7 @@ if [[ "$RC" -eq 0 ]]; then
 else
   fail "fixture-6: ALLOW_PARKED_SERVICES=1 all-zero should exit 0, got $RC ($(cat "$OUT" | tail -5))"
 fi
-grep -q "explicitly parked at replicas=0" "$OUT" \
+grep -qa "explicitly parked at replicas=0" "$OUT" \
   || fail "fixture-6: parked-state message missing"
 pass "fixture-6: parked-state message present"
 
@@ -266,12 +266,12 @@ else
   fail "fixture-7: healthy profile should exit 0, got $RC (output follows)
 $(cat "$OUT")"
 fi
-grep -q "AC-001:" "$OUT" \
+grep -qa "AC-001:" "$OUT" \
   || fail "fixture-7: AC-001 checks missing from output"
-grep -q "AC-003:" "$OUT" \
+grep -qa "AC-003:" "$OUT" \
   || fail "fixture-7: AC-003 health check missing from output"
 pass "fixture-7: AC-001 and AC-003 check lines present in output"
-if grep -q "^.*✗.*" "$OUT"; then
+if grep -qa "^.*✗.*" "$OUT"; then
   fail "fixture-7: unexpected FAIL (✗) lines found in healthy output"
 fi
 pass "fixture-7: no FAIL lines in healthy output"

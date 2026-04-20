@@ -36,17 +36,31 @@ declared_keys = {entry["name"]: entry for entry in key_entries}
 failures: list[str] = []
 passes: list[str] = []
 
-env_files = [
+# Wave 9 (#1900) deleted deploy/k8s/overlays/{staging,rke2-nonprod}/ as
+# shadow overlays. Authoritative copies live in bbi-infrastructure. Treat
+# absence of these two app-repo shadow files as not-applicable.
+required_env_files = [
     repo_root / "deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js",
+    repo_root / "deploy/k8s/overlays/local/enterprise-mfe-env.js",
+]
+shadow_env_files = [
     repo_root / "deploy/k8s/overlays/staging/enterprise-mfe-env.js",
     repo_root / "deploy/k8s/overlays/rke2-nonprod/enterprise-mfe-env.js",
-    repo_root / "deploy/k8s/overlays/local/enterprise-mfe-env.js",
 ]
 env_key_pattern = re.compile(r"^\s*([A-Z0-9_]+)\s*:", re.MULTILINE)
 actual_env_keys: set[str] = set()
-for path in env_files:
+for path in required_env_files:
     if not path.exists():
         failures.append(f"env file missing: {path.relative_to(repo_root)}")
+        continue
+    text = path.read_text(encoding="utf-8")
+    actual_env_keys.update(env_key_pattern.findall(text))
+    passes.append(f"env file exists {path.relative_to(repo_root)}")
+    if "window.PARAGON_THEME" in text:
+        passes.append(f"{path.relative_to(repo_root)} declares PARAGON_THEME")
+for path in shadow_env_files:
+    if not path.exists():
+        passes.append(f"shadow env file absent (Wave 9): {path.relative_to(repo_root)}")
         continue
     text = path.read_text(encoding="utf-8")
     actual_env_keys.update(env_key_pattern.findall(text))

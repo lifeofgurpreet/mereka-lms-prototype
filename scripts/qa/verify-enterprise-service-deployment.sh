@@ -34,14 +34,10 @@ indet() { echo -e "${YELLOW}?${NC} $1"; INDET=$((INDET + 1)); }
 NODE_PRESSURE_REPORTED=0
 CPU_PRESSURE_DETECTED=0
 
-if ! require_kubectl; then
-  indet "kubectl is unavailable; enterprise deployment truth is not locally provable"
-  echo "=== Summary ==="
-  echo -e "${GREEN}PASS:${NC} $PASS"
-  echo -e "${YELLOW}INDETERMINATE:${NC} $INDET"
-  echo -e "${RED}FAIL:${NC} $FAIL"
-  exit 2
-fi
+# Pre-guard placeholder: full SKIP and kubectl guards now run AFTER argument
+# parsing (see below) so that --help and --skip-runtime-checks flag are
+# honored before either guard fires.
+:
 
 pending_reason_summary() {
   local app_name="$1"
@@ -114,6 +110,50 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# Post-arg-parse ordering. Priority:
+#   1. Bool-env validation (require_bool_01) — must run first so invalid
+#      values like ALLOW_PARTIAL_READY=2 exit 1 before any guard fires
+#   2. SKIP_RUNTIME_CHECKS guard — caller explicit opt-out beats kubectl
+#   3. require_kubectl guard — kubectl-less env falls through to indet
+#   4. env name resolution + actual runtime work below
+require_bool_01() {
+  local var_name="$1"
+  local value="$2"
+  case "$value" in
+    0|1) ;;
+    *)
+      echo "Invalid $var_name='$value' (expected 0 or 1)" >&2
+      exit 1
+      ;;
+  esac
+}
+require_bool_01 "ALLOW_PARTIAL_READY" "$ALLOW_PARTIAL_READY"
+require_bool_01 "ALLOW_PARKED_SERVICES" "$ALLOW_PARKED_SERVICES"
+require_bool_01 "SKIP_RUNTIME_CHECKS" "$SKIP_RUNTIME_CHECKS"
+
+if [[ "${SKIP_RUNTIME_CHECKS:-0}" -eq 1 ]]; then
+  echo "Skipping enterprise service deployment runtime checks (SKIP_RUNTIME_CHECKS=1)"
+  echo "Namespace: ${NAMESPACE:-mereka-lms}"
+  if [[ -n "$KUBE_CONTEXT" ]]; then
+    echo "Context: $KUBE_CONTEXT"
+  fi
+  indet "runtime checks suppressed by flag; enterprise deployment truth not proven"
+  echo "=== Summary ==="
+  echo -e "${GREEN}PASS:${NC} $PASS"
+  echo -e "${YELLOW}INDETERMINATE:${NC} $INDET"
+  echo -e "${RED}FAIL:${NC} $FAIL"
+  exit 2
+fi
+
+if ! require_kubectl; then
+  indet "kubectl is unavailable; enterprise deployment truth is not locally provable"
+  echo "=== Summary ==="
+  echo -e "${GREEN}PASS:${NC} $PASS"
+  echo -e "${YELLOW}INDETERMINATE:${NC} $INDET"
+  echo -e "${RED}FAIL:${NC} $FAIL"
+  exit 2
+fi
+
 if [[ -n "$ENV_NAME" ]]; then
   case "$ENV_NAME" in
     prod)
@@ -135,35 +175,9 @@ if [[ -n "$ENV_NAME" ]]; then
   esac
 fi
 
-require_bool_01() {
-  local var_name="$1"
-  local value="$2"
-  case "$value" in
-    0|1) ;;
-    *)
-      echo "Invalid $var_name='$value' (expected 0 or 1)" >&2
-      exit 1
-      ;;
-  esac
-}
-
-require_bool_01 "ALLOW_PARTIAL_READY" "$ALLOW_PARTIAL_READY"
-require_bool_01 "ALLOW_PARKED_SERVICES" "$ALLOW_PARKED_SERVICES"
-require_bool_01 "SKIP_RUNTIME_CHECKS" "$SKIP_RUNTIME_CHECKS"
-
-if [[ "$SKIP_RUNTIME_CHECKS" -eq 1 ]]; then
-  echo "Skipping enterprise service deployment runtime checks (--skip-runtime-checks)"
-  echo "Namespace: $NAMESPACE"
-  if [[ -n "$KUBE_CONTEXT" ]]; then
-    echo "Context: $KUBE_CONTEXT"
-  fi
-  indet "runtime checks suppressed by flag; enterprise deployment truth not proven"
-  echo "=== Summary ==="
-  echo -e "${GREEN}PASS:${NC} $PASS"
-  echo -e "${YELLOW}INDETERMINATE:${NC} $INDET"
-  echo -e "${RED}FAIL:${NC} $FAIL"
-  exit 2
-fi
+# (Above: require_bool_01 + SKIP_RUNTIME_CHECKS guard + kubectl guard all
+# run earlier post-arg-parse. Removed duplicate definitions that used to
+# live here.)
 
 if [[ -n "$KUBE_CONTEXT" ]]; then
   if ! command -v kubectl >/dev/null 2>&1; then

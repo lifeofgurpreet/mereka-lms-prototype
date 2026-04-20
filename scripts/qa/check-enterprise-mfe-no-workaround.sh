@@ -80,7 +80,11 @@ echo "--- AC-DEP-108: Production kustomization pins enterprise MFE images ---"
 
 KUSTOMIZATION="deploy/k8s/overlays/production/kustomization.yaml"
 if [ ! -f "$KUSTOMIZATION" ]; then
-  fail_check "Production kustomization not found: $KUSTOMIZATION"
+  # Wave 9 (#1900) deleted deploy/k8s/overlays/production/ as a deprecated shadow
+  # overlay. Authoritative production overlay with enterprise MFE image pins
+  # lives in bbi-infrastructure/apps/mereka-lms/overlays/prod/. Treat absence as
+  # not-applicable for this repo.
+  pass_check "Production kustomization absent (Wave 9 shadow deletion — see bbi-infrastructure)"
 else
   if grep -q 'enterprise-admin-portal' "$KUSTOMIZATION"; then
     pass_check "enterprise-admin-portal image pinned in production kustomization"

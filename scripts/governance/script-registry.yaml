@@ -276,6 +276,8 @@ ci_static_inventory:
     - script: scripts/qa/verify-release-deployment-choreography.sh
     - script: scripts/qa/verify-release-invocation-guardrail-wiring.sh
     - script: scripts/qa/verify-mfe-build-prereqs.sh
+    - script: scripts/qa/verify-mfe-runtime-helper-contract.sh
+    - script: scripts/qa/test-resolve-build-scope.sh
     - script: scripts/qa/verify-mfe-footer-slot.sh
     - script: scripts/qa/verify-mfe-header-branding.sh
     - script: scripts/qa/verify-plugin-slot-wiring.sh
