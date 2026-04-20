@@ -118,9 +118,12 @@ data:
             target_label: instance
 
           # Add environment label
-          - replacement: gke-production
+          # Historical value was gke-production; GKE is decommissioned (ADR-024)
+          # and prod now runs on rke2-nonprod. Label updated so Grafana/alert
+          # routing queries filtering by `environment` match the live cluster.
+          - replacement: rke2-production
             target_label: environment
 
           # Add cluster label
-          - replacement: bbi-k8-cluster
+          - replacement: rke2-nonprod
             target_label: cluster
