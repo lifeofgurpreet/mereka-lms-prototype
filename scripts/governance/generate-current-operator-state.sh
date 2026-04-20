@@ -44,7 +44,13 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-TARGET="${REPO_ROOT}/docs/status/active/CURRENT-OPERATOR-STATE.md"
+# As of 2026-04-20 (mereka-lms#1924), the generator writes to a dedicated
+# snapshot file. The canonical CURRENT-OPERATOR-STATE.md is framework +
+# historical slice wraps only — live truth is re-computed via commands
+# documented in that file's "Current Live Truth — recompute, don't cache"
+# section. This prevents stale snapshots from misleading implementers when
+# the generator hasn't been re-run in hours or days.
+TARGET="${REPO_ROOT}/docs/status/active/CURRENT-OPERATOR-STATE.snapshot.md"
 NO_CLUSTER=0
 DRY_RUN=0
 
