@@ -1,0 +1,78 @@
+name: Mirror CI Tools (Docker Hub → GHCR)
+
+# Purpose: mirror small utility images that the build pipeline depends on
+# (busybox, etc.) from Docker Hub to GHCR. The ARC runner pool shares a
+# small /24 egress IP range and routinely hits Docker Hub's unauthenticated
+# pull rate limit, which blocks the DinD MTU-fix step in build-tutor-images.yml.
+#
+# This workflow runs on GitHub-hosted `ubuntu-latest` runners — a separate
+# IP pool with its own rate-limit budget — then pushes the result to our
+# GHCR, where authenticated pulls are unrestricted for within-org consumers.
+#
+# Bootstrap: dispatch manually after a fresh clone or when a new tag is needed.
+# The image is then consumed via `ghcr.io/biji-biji-initiative/mereka-lms/cache/busybox:<tag>`.
+
+on:
+  workflow_dispatch:
+    inputs:
+      busybox_tag:
+        description: Docker Hub busybox tag to mirror (e.g. "1.36", "stable", "1.36.1-uclibc")
+        required: false
+        default: "1.36"
+  schedule:
+    # Weekly refresh to pick up upstream busybox security fixes.
+    # Sunday 03:00 UTC — outside the weekday build window.
+    - cron: "0 3 * * 0"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  mirror-busybox:
+    # Intentionally uses GitHub-hosted runners (NOT self-hosted ARC) so the
+    # Docker Hub pull benefits from GitHub's separate IP pool.
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log in to GHCR
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Pull busybox from Docker Hub
+        env:
+          SOURCE_TAG: ${{ github.event.inputs.busybox_tag || '1.36' }}
+        run: |
+          set -euo pipefail
+          docker pull "docker.io/library/busybox:${SOURCE_TAG}"
+          docker image inspect "docker.io/library/busybox:${SOURCE_TAG}" \
+            --format 'pulled: {{.Id}} size={{.Size}}B'
+
+      - name: Push busybox to GHCR
+        env:
+          SOURCE_TAG: ${{ github.event.inputs.busybox_tag || '1.36' }}
+          REGISTRY: ghcr.io/biji-biji-initiative/mereka-lms
+        run: |
+          set -euo pipefail
+          # Tag as both the versioned tag and a `stable` floating tag so consumers
+          # can depend on a predictable reference. The versioned tag is the
+          # integrity anchor; `stable` follows the most recent successful mirror.
+          docker tag "docker.io/library/busybox:${SOURCE_TAG}" "${REGISTRY}/cache/busybox:${SOURCE_TAG}"
+          docker tag "docker.io/library/busybox:${SOURCE_TAG}" "${REGISTRY}/cache/busybox:stable"
+          docker push "${REGISTRY}/cache/busybox:${SOURCE_TAG}"
+          docker push "${REGISTRY}/cache/busybox:stable"
+
+      - name: Summary
+        env:
+          SOURCE_TAG: ${{ github.event.inputs.busybox_tag || '1.36' }}
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
+          ## Mirrored busybox to GHCR
+
+          - Source: \`docker.io/library/busybox:${SOURCE_TAG}\`
+          - Target: \`ghcr.io/biji-biji-initiative/mereka-lms/cache/busybox:${SOURCE_TAG}\`
+          - Floating tag: \`ghcr.io/biji-biji-initiative/mereka-lms/cache/busybox:stable\`
+
+          Consumers (e.g. \`.github/workflows/build-tutor-images.yml\`) should reference the
+          floating \`:stable\` tag; the versioned tag stays available for pinning.
+          EOF
