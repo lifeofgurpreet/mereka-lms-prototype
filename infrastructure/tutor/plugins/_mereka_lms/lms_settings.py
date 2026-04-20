@@ -66,6 +66,13 @@ MFE_CONFIG["PRIVACY_POLICY_URL"] = "https://legal.mereka.io/privacy-policy/"
 MFE_CONFIG["ENABLE_ACCESSIBILITY_PAGE"] = False
 MFE_CONFIG["ORDER_HISTORY_URL"] = f"{_lms_url}/orders"
 
+# MFE bundles bake `SESSION_COOKIE_DOMAIN:"MISSING_ENV_VAR".SESSION_COOKIE_DOMAIN`
+# at build time when the env var is absent, which evaluates to `undefined` at
+# runtime. Surface the Django SESSION_COOKIE_DOMAIN through the MFE config API
+# so getConfig() overrides the dead placeholder and
+# USER_RETENTION_COOKIE/cross-MFE cookies get the correct parent domain.
+MFE_CONFIG["SESSION_COOKIE_DOMAIN"] = SESSION_COOKIE_DOMAIN
+
 # ── Content Security Policy ────────────────────────────────────────────────
 # Migration plan: docs/adr/025-csp-nonce-migration.md
 #
