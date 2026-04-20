@@ -76,6 +76,20 @@ mark_shared() {
   shared_hits+=("$1")
 }
 
+# Paths that DO NOT affect image content (docs, verifier scripts, governance
+# catalogs, manifest-only kustomize files, bead tracker, etc.). If ALL changed
+# paths match skip patterns, neither image needs a rebuild. Added in PR for
+# bead mereka-lms-2xwo follow-up + evidence doc
+# docs/ops/evidence/build-tutor-images-over-triggering-regression-2026-04-20.md
+# The previous `* -> mark_shared` fallback triggered MFE+OpenEdX rebuilds on
+# pure-config PRs (e.g. #1901 pin-required restore). Real example: #1901
+# caused run 24639215635 to spend 1h 20min on MFE webpack for zero MFE source
+# change. Cancelled manually.
+declare -a skip_hits=()
+mark_skip() {
+  skip_hits+=("$1")
+}
+
 classify_path() {
   local path="$1"
   case "$path" in
@@ -99,10 +113,64 @@ classify_path() {
     infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py|\
     infrastructure/tutor/plugins/_mereka_lms/mfe_runtime.py|\
     infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js|\
+    infrastructure/tutor/plugins/_mereka_lms/mfe_runtime/*|\
     scripts/infra/build-mfe-image.sh|\
     scripts/qa/verify-mfe-image-branding.sh|\
-    scripts/qa/verify-mfe-runtime-contract.sh)
+    scripts/qa/verify-mfe-runtime-contract.sh|\
+    scripts/qa/verify-mfe-runtime-helper-contract.sh|\
+    scripts/qa/verify-mfe-footer-plugin-slot.sh|\
+    scripts/qa/verify-mfe-footer-slot.sh)
       mark_mfe "$path"
+      ;;
+    # Skip paths: documentation, verifier scripts that don't feed images,
+    # governance catalogs, manifest-only kustomize, bead tracker, release
+    # tooling, CI workflow/actions config. These do not affect image content.
+    docs/**|docs/*|\
+    '*.md'|\
+    '*/README.md'|\
+    README.md|\
+    AGENTS.md|\
+    CLAUDE.md|\
+    reports/**|reports/*|\
+    .beads/**|.beads/*|\
+    .github/**|.github/*|\
+    .githooks/**|.githooks/*|\
+    .gitignore|\
+    .editorconfig|\
+    scripts/qa/fixtures/*|\
+    scripts/qa/deprecated/*|\
+    scripts/qa/verify-*.sh|\
+    scripts/qa/audit-*.sh|\
+    scripts/qa/test-*.sh|\
+    scripts/qa/generate-*.sh|\
+    scripts/qa/generate-*.py|\
+    scripts/qa/run-*.sh|\
+    scripts/qa/diagnose-*.sh|\
+    scripts/governance/**|scripts/governance/*|\
+    scripts/infra/verify-*.sh|\
+    scripts/infra/release-*.sh|\
+    scripts/infra/canonical-release.sh|\
+    scripts/infra/assemble-release-evidence.sh|\
+    scripts/infra/sync-gitops-prod-image-tags.sh|\
+    scripts/infra/bump-image-tags.sh|\
+    scripts/infra/tutor-config-save.sh|\
+    scripts/infra/fix-service-selectors.sh|\
+    deploy/k8s/base/kustomization.yaml|\
+    deploy/k8s/base/VERSION|\
+    deploy/k8s/base/contract.json|\
+    deploy/k8s/base/RUNTIME_AUTHORITY_MAP.md|\
+    deploy/k8s/VERSION|\
+    deploy/k8s/contract.json|\
+    deploy/k8s/overlays/local/**|deploy/k8s/overlays/local/*|\
+    generated/**|generated/*|\
+    verification/**|verification/*|\
+    tests/**|tests/*|\
+    evals/**|evals/*|\
+    specs/**|specs/*|\
+    specdocs/**|specdocs/*|\
+    tutor_env/**|tutor_env/*|\
+    var/**|var/*)
+      mark_skip "$path"
       ;;
     *)
       mark_shared "$path"
@@ -114,14 +182,36 @@ for changed_file in "${CHANGED_FILES[@]}"; do
   classify_path "$changed_file"
 done
 
+# Decision logic:
+# - NO files at all (empty input) → build both (safety fallback; we don't know)
+# - Some files ALL classified as skip → build neither (real skip case — saves
+#   build-hours on docs/verifier/config-only PRs)
+# - Any openedx-triggering or mfe-triggering path → build the matching image(s)
 if [[ "$build_openedx" == false && "$build_mfe" == false ]]; then
-  build_openedx=true
-  build_mfe=true
-  shared_hits+=("<no changed files supplied>")
+  if [[ ${#CHANGED_FILES[@]} -eq 0 ]]; then
+    # No changed files supplied at all (e.g. manual dispatch with no payload)
+    # — safety fallback to build both.
+    build_openedx=true
+    build_mfe=true
+    shared_hits+=("<no changed files supplied>")
+  elif [[ ${#skip_hits[@]} -gt 0 ]]; then
+    # All changed files matched skip patterns. Leave both=false so the
+    # workflow's `if: build_openedx==true || build_mfe==true` gate skips the
+    # build jobs entirely. This is the real fix: docs/config/verifier PRs
+    # should not rebuild images.
+    :
+  else
+    # Shouldn't reach here if classify_path covers all inputs, but safety net.
+    build_openedx=true
+    build_mfe=true
+    shared_hits+=("<unclassified fallback>")
+  fi
 fi
 
 scope_label="both"
-if [[ "$build_openedx" == true && "$build_mfe" == false ]]; then
+if [[ "$build_openedx" == false && "$build_mfe" == false ]]; then
+  scope_label="skip"
+elif [[ "$build_openedx" == true && "$build_mfe" == false ]]; then
   scope_label="openedx-only"
 elif [[ "$build_openedx" == false && "$build_mfe" == true ]]; then
   scope_label="mfe-only"
@@ -152,7 +242,11 @@ summary_md=$(
     emit_list "MFE-owned paths" "${mfe_hits[@]}"
     printf '\n'
     emit_list "Shared or ambiguous paths" "${shared_hits[@]}"
-    if [[ "$scope_label" != "both" ]]; then
+    printf '\n'
+    emit_list "Skip paths (non-image, does not trigger build)" "${skip_hits[@]}"
+    if [[ "$scope_label" == "skip" ]]; then
+      printf '\n- All changed paths classified as skip. Neither image needs a rebuild.\n'
+    elif [[ "$scope_label" != "both" ]]; then
       printf '\n- Release bundle supports partial builds by inheriting the unchanged component digest.\n'
     fi
   }
