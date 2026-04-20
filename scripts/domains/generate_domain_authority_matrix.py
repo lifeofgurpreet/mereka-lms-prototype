@@ -37,13 +37,17 @@ MD_OUT = REPO_ROOT / "docs" / "reference" / "generated" / "domain-authority-matr
 # ---------------------------------------------------------------------------
 # Default placement fields (v1.3.0 forward; gracefully absent in v1.2.0)
 # ---------------------------------------------------------------------------
+# NOTE: gitops_overlay_path values point at the AUTHORITATIVE bbi-infrastructure
+# overlay paths per ADR-025 deployment boundary. The old app-repo shadow paths
+# under deploy/k8s/overlays/{production,staging,rke2-nonprod}/ were deleted by
+# Wave 9 (PR #1900). cluster_ref is the RKE2 cluster now — GKE is decommissioned.
 ENV_DEFAULTS: dict[str, dict[str, str | None]] = {
     "production": {
         "namespace": "mereka-lms",
         "argocd_app": "mereka-lms-prod",
-        "cluster_ref": "gke-prod",
-        "cluster_class": "gke",
-        "gitops_overlay_path": "deploy/k8s/overlays/production",
+        "cluster_ref": "rke2-prod",
+        "cluster_class": "rke2",
+        "gitops_overlay_path": "bbi-infrastructure:apps/mereka-lms/overlays/prod",
         "dns_zone": "mereka.io",
     },
     "dev": {
@@ -51,7 +55,7 @@ ENV_DEFAULTS: dict[str, dict[str, str | None]] = {
         "argocd_app": "mereka-lms-dev",
         "cluster_ref": "rke2-nonprod",
         "cluster_class": "rke2",
-        "gitops_overlay_path": "deploy/k8s/overlays/rke2-nonprod",
+        "gitops_overlay_path": "bbi-infrastructure:apps/mereka-lms/overlays/profiles/dev",
         "dns_zone": "mereka.dev",
     },
     "profiles-dev": {
@@ -59,7 +63,7 @@ ENV_DEFAULTS: dict[str, dict[str, str | None]] = {
         "argocd_app": "mereka-lms-dev",
         "cluster_ref": "rke2-nonprod",
         "cluster_class": "rke2",
-        "gitops_overlay_path": "deploy/k8s/overlays/profiles/dev",
+        "gitops_overlay_path": "bbi-infrastructure:apps/mereka-lms/overlays/profiles/dev",
         "dns_zone": "mereka.dev",
     },
     "staging": {
@@ -67,7 +71,7 @@ ENV_DEFAULTS: dict[str, dict[str, str | None]] = {
         "argocd_app": "mereka-lms-staging",
         "cluster_ref": "rke2-nonprod",
         "cluster_class": "rke2",
-        "gitops_overlay_path": "deploy/k8s/overlays/staging",
+        "gitops_overlay_path": "bbi-infrastructure:apps/mereka-lms/overlays/staging",
         "dns_zone": "mereka.io",
     },
     "local": {

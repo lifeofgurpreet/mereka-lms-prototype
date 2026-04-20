@@ -114,7 +114,9 @@ entrypoints:
         --openedx-digest sha256:<DIGEST> --mfe-digest sha256:<DIGEST> \
         --apply --commit --push
     proof_output: |
-      - deploy/k8s/overlays/production/kustomization.yaml: updated image tags
+      - bbi-infrastructure:apps/mereka-lms/overlays/prod/kustomization.yaml: updated image tags
+        (authoritative overlay per ADR-025; the app-repo shadow path
+        deploy/k8s/overlays/production/kustomization.yaml was deleted by Wave 9 PR #1900)
       - stdout: ArgoCD sync status
       - Build provenance written to var/ci/build-provenance.json (when called
         from build-tutor-images.yml via generate-build-provenance.sh)

@@ -70,15 +70,26 @@ surfaces:
         path: "apps/mereka-lms/overlays/**"
         local_checkout: "../bbi-infrastructure/apps/mereka-lms/overlays"
     mirror_locations:
+      # Wave 9 (#1900) deleted these three app-repo shadow overlay paths.
+      # Authoritative copies live in bbi-infrastructure per ADR-025.
+      # Classification preserved as "deleted-ghost" so consumers know the
+      # path is intentionally absent; historical context maintained for
+      # future agents investigating legacy docs/scripts.
       - repo: mereka-lms
         path: "deploy/k8s/overlays/production/**"
-        class: transitional-ghost
+        class: deleted-ghost
+        deleted_in: "mereka-lms#1900"
+        deleted_on: "2026-04-18"
       - repo: mereka-lms
         path: "deploy/k8s/overlays/staging/**"
-        class: transitional-ghost
+        class: deleted-ghost
+        deleted_in: "mereka-lms#1900"
+        deleted_on: "2026-04-18"
       - repo: mereka-lms
         path: "deploy/k8s/overlays/rke2-nonprod/**"
-        class: transitional-ghost
+        class: deleted-ghost
+        deleted_in: "mereka-lms#1900"
+        deleted_on: "2026-04-18"
     consumer_guards:
       - "scripts/qa/verify-ghost-truth-surfaces.sh"
       - "scripts/qa/verify-cross-repo-boundaries.sh"

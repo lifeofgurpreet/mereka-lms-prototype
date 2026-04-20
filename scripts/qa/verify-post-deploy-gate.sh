@@ -120,14 +120,18 @@ fi
 if [[ -f "$POLICY_FILE" ]] \
   && grep -q '^AUTHORITATIVE_RUNTIME_PROOF_ENV=staging$' "$POLICY_FILE" \
   && grep -q '^POST_DEPLOY_WORKFLOW_RUN_ENV=staging$' "$POLICY_FILE" \
-  && grep -q '^PROD_RUNTIME_MODE=parked$' "$POLICY_FILE" \
+  && grep -qE '^PROD_RUNTIME_MODE=(parked|live)$' "$POLICY_FILE" \
   && grep -q '^PROD_PARKED_STATUS_CONTEXT=prod-parked-state/auth$' "$POLICY_FILE" \
   && grep -q '^PROD_PARKED_VERIFIER=scripts/qa/verify-prod-parked-state.sh$' "$POLICY_FILE" \
   && grep -q '^PROD_FULL_RUNTIME_PROOF_VERIFIER=scripts/tenants/verify-prod-runtime-proof.sh$' "$POLICY_FILE" \
   && grep -q '^STAGING_RUNTIME_FIXTURE_MANIFEST=config/runtime-proof/staging.synthetic-proof-fixtures.yaml$' "$POLICY_FILE" \
   && grep -q '^PROD_RUNTIME_FIXTURE_MANIFEST=config/runtime-proof/prod.synthetic-proof-fixtures.yaml$' "$POLICY_FILE" \
   && grep -q '^SMOKE_ACCOUNT_REGISTRY_CONTRACT=config/smoke-account-registry.yaml$' "$POLICY_FILE"; then
-  pass "Runtime proof policy codifies staging authority, staging-routed post-deploy gate, parked prod, and the successor prod/non-dev proof surfaces"
+  # PROD_RUNTIME_MODE accepts either `parked` (historical GKE cutover) or
+  # `live` (current rke2-prod reality verified 2026-04-19). Both are valid
+  # states of the prod runtime lifecycle; the canonical parked verifier
+  # entries remain declared for future re-parking scenarios even when mode=live.
+  pass "Runtime proof policy codifies staging authority, staging-routed post-deploy gate, current prod mode, and the successor prod/non-dev proof surfaces"
 else
   fail "Runtime proof policy missing canonical staging/prod proof contract entries"
 fi
