@@ -10,30 +10,30 @@ consumer_rule: GitHub/runtime consumers mirror from Infisical only
 # CURRENT WORKING TEST ACCOUNTS (verified 2026-04-07)
 #
 # These accounts exist on ALL environments (dev, staging, prod).
-# Password for all: Cr3ativity (stored in Infisical)
+# Password for all: fetch from MEREKA_LMS_TEST_USER_PASSWORD (stored in Infisical)
 # ============================================================================
 current_accounts:
   platform_admin:
     username: lanea-platform-admin
-    password_ref: Infisical (Cr3ativity across all envs)
+    password_ref: Infisical (fetch from MEREKA_LMS_TEST_USER_PASSWORD)
     role: staff + superuser
     envs: [dev, staging, prod]
     use_for: Studio access, admin operations, staff masquerading
   enterprise_learner:
     username: lanea-enterprise-learner
-    password_ref: Infisical (Cr3ativity across all envs)
+    password_ref: Infisical (fetch from MEREKA_LMS_TEST_USER_PASSWORD)
     role: enterprise-linked learner
     envs: [dev, staging, prod]
     use_for: Enterprise course access, learner portal, consent flows
   enterprise_admin:
     username: lanea-enterprise-admin
-    password_ref: Infisical (Cr3ativity across all envs)
+    password_ref: Infisical (fetch from MEREKA_LMS_TEST_USER_PASSWORD)
     role: enterprise admin (not staff)
     envs: [dev, staging, prod]
     use_for: Enterprise admin portal, catalog management
   unlinked_user:
     username: lanea-unlinked-user
-    password_ref: Infisical (Cr3ativity across all envs)
+    password_ref: Infisical (fetch from MEREKA_LMS_TEST_USER_PASSWORD)
     role: basic learner (no enterprise link)
     envs: [dev, staging, prod]
     use_for: Standard non-enterprise user flows
@@ -44,7 +44,7 @@ current_accounts:
   mereka_learner:
     username: lanea-mereka-learner
     email: lanea-mereka-learner@synthetic.test
-    password_ref: Infisical (Cr3ativity across all envs)
+    password_ref: Infisical (fetch from MEREKA_LMS_TEST_USER_PASSWORD)
     role: enterprise learner (Mereka only)
     enterprise: mereka
     envs: [dev, staging, prod]
@@ -52,7 +52,7 @@ current_accounts:
   bb_learner:
     username: lanea-bb-learner
     email: lanea-bb-learner@synthetic.test
-    password_ref: Infisical (Cr3ativity across all envs)
+    password_ref: Infisical (fetch from MEREKA_LMS_TEST_USER_PASSWORD)
     role: enterprise learner (Biji-Biji only)
     enterprise: biji-biji
     envs: [dev, staging, prod]
@@ -60,7 +60,7 @@ current_accounts:
   sof_learner:
     username: lanea-sof-learner
     email: lanea-sof-learner@synthetic.test
-    password_ref: Infisical (Cr3ativity across all envs)
+    password_ref: Infisical (fetch from MEREKA_LMS_TEST_USER_PASSWORD)
     role: enterprise learner (Skill Our Future only)
     enterprise: skillourfuture
     envs: [dev, staging, prod]

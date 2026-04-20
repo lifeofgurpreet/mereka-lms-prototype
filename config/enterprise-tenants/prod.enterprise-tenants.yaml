@@ -23,7 +23,7 @@ lms_domain: academyv2.mereka.io
 
 # Standalone test users — not linked to any enterprise.
 # Created by bootstrap if they don't exist (synthetic emails only).
-# Password from BOOTSTRAP_TEST_PASSWORD env (default: Cr3ativity).
+# Password from BOOTSTRAP_TEST_PASSWORD env (default: required (no fallback; see bead mereka-lms-m0u5.10.7)).
 standalone_users:
   - username: lanea-platform-admin
     email: lanea-platform-admin@synthetic.test

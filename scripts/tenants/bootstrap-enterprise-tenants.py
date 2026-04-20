@@ -261,7 +261,13 @@ def bootstrap_tenant(tenant: dict, dry_run: bool) -> dict:
                 )
             else:
                 import os
-                password = os.environ.get("BOOTSTRAP_TEST_PASSWORD", "Cr3ativity")
+                password = os.environ.get("BOOTSTRAP_TEST_PASSWORD")
+                if not password:
+                    raise RuntimeError(
+                        "BOOTSTRAP_TEST_PASSWORD env var is required; fetch from Infisical "
+                        "at MEREKA_LMS_TEST_USER_PASSWORD. Hardcoded fallback removed per "
+                        "bead mereka-lms-m0u5.10.7 (credential rotation)."
+                    )
                 is_staff = role == "admin"
                 user = User.objects.create_user(
                     username=username,
@@ -584,7 +590,13 @@ def main():
         from django.contrib.auth import get_user_model
 
         StandaloneUser = get_user_model()
-        password = os.environ.get("BOOTSTRAP_TEST_PASSWORD", "Cr3ativity")
+        password = os.environ.get("BOOTSTRAP_TEST_PASSWORD")
+        if not password:
+            raise RuntimeError(
+                "BOOTSTRAP_TEST_PASSWORD env var is required; fetch from Infisical "
+                "at MEREKA_LMS_TEST_USER_PASSWORD. Hardcoded fallback removed per "
+                "bead mereka-lms-m0u5.10.7 (credential rotation)."
+            )
 
         for su in standalone_users:
             email = su["email"]

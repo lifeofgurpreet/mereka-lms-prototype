@@ -59,13 +59,17 @@ EXAMPLES:
   # Apply on rke2-nonprod + rke2-prod (default)
   $0
 
-  # Set password for all admins on dev
-  $0 --context rke2-nonprod --namespace mereka-lms-dev --password 'Cr3ativity'
-
-  # Run on all 3 envs with password
-  $0 --namespace mereka-lms-dev --context rke2-nonprod --password 'Cr3ativity'
-  $0 --namespace stg-mereka-lms --context rke2-nonprod --password 'Cr3ativity'
-  $0 --namespace mereka-lms --context rke2-prod --password 'Cr3ativity'
+  # Fetch the current test-user password from Infisical and pass to this script.
+  # Do NOT hardcode the password in command history or wrapper scripts.
+  #   export PASSWORD=\$(infisical secrets get MEREKA_LMS_TEST_USER_PASSWORD --env prod --path / --plain)
+  #
+  # Then run:
+  #   \$0 --context rke2-nonprod --namespace mereka-lms-dev --password "\$PASSWORD"
+  #   \$0 --namespace stg-mereka-lms --context rke2-nonprod --password "\$PASSWORD"
+  #   \$0 --namespace mereka-lms --context rke2-prod --password "\$PASSWORD"
+  #
+  # Historical note: these examples previously embedded the plaintext value.
+  # Redacted 2026-04-20 per bead mereka-lms-m0u5.10.7 (credential rotation).
 EOF
   exit 1
 }
