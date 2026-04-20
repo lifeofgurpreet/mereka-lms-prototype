@@ -88,7 +88,13 @@ check_no_latest() {
   echo "Checking for :latest tags in production images..."
 
   if [[ ! -f "$PROD_KUSTOMIZATION" ]]; then
-    fail "File not found: $PROD_KUSTOMIZATION"
+    # Wave 9 (ADR-025): production overlay relocated to bbi-infrastructure.
+    # Boundary doc presence is the canonical statement of the move.
+    if [[ -f "${REPO_ROOT}/docs/reference/architecture/DEPLOYMENT_CONTRACT.md" ]]; then
+      pass "Production kustomization absent (Wave 9 shadow deletion — canonical boundary doc present); skipping :latest scan"
+    else
+      fail "File not found: $PROD_KUSTOMIZATION AND deployment-boundary doc missing — absence cannot be attributed to Wave 9"
+    fi
     return
   fi
 

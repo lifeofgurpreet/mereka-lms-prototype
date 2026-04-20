@@ -113,6 +113,14 @@ verify_overlay() {
 
     # Check 1: Overlay directory exists
     if [[ ! -d "${overlay_path}" ]]; then
+        # Wave 9 (ADR-025): the production overlay was relocated to
+        # bbi-infrastructure. Boundary doc presence is the canonical
+        # statement of the move — treat absence of that specific overlay
+        # as PASS when the doc is present.
+        if [[ "${overlay}" == "production" && -f "${REPO_ROOT}/docs/reference/architecture/DEPLOYMENT_CONTRACT.md" ]]; then
+            print_success "Overlay absent: ${overlay} (Wave 9 shadow deletion — canonical boundary doc present, skipping render)"
+            return 0
+        fi
         print_error "Overlay directory not found: ${overlay_path}"
         return 1
     fi

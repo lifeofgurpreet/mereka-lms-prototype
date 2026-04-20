@@ -134,6 +134,11 @@ for overlay_name in local production; do
 
   if [[ -d "${overlay_dir}" ]]; then
     pass "[${ac}] Overlay directory exists: overlays/${overlay_name}/"
+  elif [[ "${overlay_name}" == "production" && -f "${REPO_ROOT}/docs/reference/architecture/DEPLOYMENT_CONTRACT.md" ]]; then
+    # Wave 9 (ADR-025): production overlay relocated to bbi-infrastructure.
+    # Boundary doc presence is the canonical statement of the move.
+    pass "[${ac}] Overlay absent: overlays/${overlay_name}/ (Wave 9 shadow deletion — canonical boundary doc present)"
+    continue
   else
     fail "[${ac}] Overlay directory missing: overlays/${overlay_name}/"
     continue
@@ -243,19 +248,30 @@ fi
 
 # ---------------------------------------------------------------------------
 # 9. Production overlay namespace is mereka-lms
+# Wave 9 (ADR-025): the production overlay was relocated to
+# bbi-infrastructure. When the directory is absent in this repo, treat as
+# PASS if the deployment-boundary doc is present — that's the canonical
+# statement that authority moved. Still FAIL if both are absent (something
+# broke) or if the file exists but declares the wrong namespace.
 # ---------------------------------------------------------------------------
 echo ""
 echo "--- Namespace ---"
-prod_ns=$(python3 -c "
+if [[ -f "${PROD_DIR}/kustomization.yaml" ]]; then
+  prod_ns=$(python3 -c "
 import yaml
 data = yaml.safe_load(open('${PROD_DIR}/kustomization.yaml'))
 print(data.get('namespace', ''))
 " 2>/dev/null || true)
 
-if [[ "${prod_ns}" == "mereka-lms" ]]; then
-  pass "[AC-002] Production overlay namespace is mereka-lms"
+  if [[ "${prod_ns}" == "mereka-lms" ]]; then
+    pass "[AC-002] Production overlay namespace is mereka-lms"
+  else
+    fail "[AC-002] Production overlay namespace is '${prod_ns}', expected 'mereka-lms'"
+  fi
+elif [[ -f "${REPO_ROOT}/docs/reference/architecture/DEPLOYMENT_CONTRACT.md" ]]; then
+  pass "[AC-002] Production overlay absent (Wave 9 shadow deletion — canonical boundary doc present)"
 else
-  fail "[AC-002] Production overlay namespace is '${prod_ns}', expected 'mereka-lms'"
+  fail "[AC-002] Production overlay absent AND deployment-boundary doc missing — absence cannot be attributed to Wave 9"
 fi
 
 # ---------------------------------------------------------------------------
