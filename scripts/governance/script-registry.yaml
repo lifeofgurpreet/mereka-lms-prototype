@@ -892,6 +892,9 @@ ci_runtime_inventory:
     - script: scripts/ci/emit-build-metrics.sh
       category: CI_ARTIFACT
       note: parses buildx metadata JSON and build log for cache-source facts, export success, layer reuse counts, and build duration; writes build-metrics-<image-family>.json artifact (bead jj97.5)
+    - script: scripts/ops/rc-check.sh
+      category: LIVE_CLUSTER
+      note: "checks all 9 ✅-auto rows from RC_CHECKLIST.md: Build Tutor Images, bbi-infra promo PR, Argo sync, pod digests, bundle hash, MEREKA_PLATFORM_ADMIN_EMAILS, Post-Deploy E2E, br doctor, admin-parity.sh; gracefully SKIPs rows that need kubectl/GITHUB_TOKEN when running offline"
 
 scripts:
 

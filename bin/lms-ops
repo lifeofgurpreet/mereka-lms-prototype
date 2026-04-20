@@ -22,6 +22,7 @@
 #   smoke [basic]     Post-migration/post-deploy runtime smoke
 #   smoke wave        Service-wave grouped smoke (5 waves: core→workers→services→enterprise→platform)
 #   preflight        Pre-migration safety gate
+#   rc-check         Check all ✅-auto rows from RC_CHECKLIST.md (exits 0 only if all PASS)
 #
 # Global options:
 #   --lane <lane>    Canonical lane: dev|staging|prod
@@ -412,6 +413,14 @@ do_preflight() {
   exec "$REPO_ROOT/scripts/release/migration-preflight.sh" "${args[@]}"
 }
 
+# ── Concern: rc-check ─────────────────────────────────────────────────────
+do_rc_check() {
+  local args=("--lane" "$LANE")
+  [[ "$FORMAT" == "json" ]] && args+=("--format" "json")
+  args+=("${PASSTHROUGH_ARGS[@]}")
+  exec "$REPO_ROOT/scripts/ops/rc-check.sh" "${args[@]}"
+}
+
 # ── Concern: topology ─────────────────────────────────────────────────
 do_topology() {
   local args=("--lane" "$LANE")
@@ -458,8 +467,9 @@ case "$CONCERN" in
   smoke)        do_smoke ;;
   preflight)    do_preflight ;;
   topology)     do_topology ;;
+  rc-check)     do_rc_check ;;
   *)
     echo "Unknown concern: $CONCERN" >&2
-    echo "Valid concerns: migrate, accept, inventory, proof, release-gate, smoke, preflight, topology" >&2
+    echo "Valid concerns: migrate, accept, inventory, proof, release-gate, smoke, preflight, topology, rc-check" >&2
     exit 1 ;;
 esac

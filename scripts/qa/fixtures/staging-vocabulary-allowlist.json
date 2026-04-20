@@ -33,6 +33,7 @@
     "scripts/migrations/kajabi/export.sh",
     "scripts/migrations/mct/export.sh",
     "scripts/migrations/run_full_import.sh",
+    "scripts/ops/rc-check.sh",
     "scripts/qa/audit-auth-access.sh",
     "scripts/qa/audit-authenticated-sso-canary-wiring.sh",
     "scripts/qa/audit-infra-mereka-lms-staging-references.sh",
