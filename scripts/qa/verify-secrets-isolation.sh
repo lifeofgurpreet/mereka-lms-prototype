@@ -159,10 +159,23 @@ else
   fi
 fi
 
+# Wave 9 (ADR-025): the rke2-nonprod and production overlays were relocated
+# to bbi-infrastructure. The deployment-boundary doc is the canonical
+# statement of the move. When the app-repo copy is absent but the boundary
+# doc is present, skip sections 2 and 3 as not applicable — the authority
+# for ExternalSecret store isolation lives in bbi-infra now and is verified
+# there.
+WAVE9_ABSENT=0
+if [[ ! -d "$RKE2_KUSTOMIZE" && -f "docs/reference/architecture/DEPLOYMENT_CONTRACT.md" ]]; then
+  WAVE9_ABSENT=1
+fi
+
 # ── Section 2: rke2-nonprod patch file exists ─────────────────────────────────
 section "2. rke2-nonprod ExternalSecrets patch file exists"
 
-if [[ ! -f "$RKE2_PATCH" ]]; then
+if [[ $WAVE9_ABSENT -eq 1 ]]; then
+  pass "rke2-nonprod overlay relocated to bbi-infrastructure (Wave 9); isolation checks are bbi-infra's responsibility now"
+elif [[ ! -f "$RKE2_PATCH" ]]; then
   fail "rke2-nonprod ExternalSecrets patch missing: $RKE2_PATCH"
   echo "  This patch must override secretStoreRef for all ExternalSecrets."
   echo "  Without it, the cluster reads from '${PROD_STORE}' (prod GCP), causing auth failures."
@@ -178,7 +191,9 @@ fi
 # ── Section 3: rke2-nonprod patch store isolation ─────────────────────────────
 section "3. rke2-nonprod patch store isolation"
 
-if [[ ! -f "$RKE2_PATCH" ]]; then
+if [[ $WAVE9_ABSENT -eq 1 ]]; then
+  pass "rke2-nonprod store-isolation checks skipped — overlay is in bbi-infra (Wave 9)"
+elif [[ ! -f "$RKE2_PATCH" ]]; then
   skip "rke2-nonprod patch absent — already failed in section 2"
 else
   patch_stores=$(stores_in_file "$RKE2_PATCH")
@@ -284,9 +299,23 @@ fi
 # ── Section 5: No two overlays share the same Infisical store ─────────────────
 section "5. Overlay store uniqueness (no shared Infisical stores)"
 
-declare -A store_to_overlays
+# Wave 9: if all overlays moved to bbi-infra and only the base + local remain,
+# there's nothing cross-overlay to check here. Skip cleanly instead of
+# letting set -u crash on an empty associative array.
+if [[ $WAVE9_ABSENT -eq 1 ]]; then
+  pass "Overlay uniqueness check skipped — production + rke2-nonprod moved to bbi-infra (Wave 9)"
+  # Print final summary then exit cleanly
+  echo ""
+  echo "=== Summary ==="
+  echo "PASS: $PASS  FAIL: $FAIL  WARN: $WARN  SKIP: $SKIP"
+  if [[ $FAIL -gt 0 ]]; then exit 1; fi
+  exit 0
+fi
+
+declare -A store_to_overlays=()
 
 for overlay_dir in deploy/k8s/overlays/*/; do
+  [[ -d "$overlay_dir" ]] || continue
   overlay_name="$(basename "$overlay_dir")"
 
   # Gather all YAML files in this overlay (patches + root)
