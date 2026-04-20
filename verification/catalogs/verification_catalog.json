@@ -182,7 +182,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/analytics/verify-user-deletion.sh",
-      "reference_count": 6,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

@@ -30,6 +30,7 @@ scripts/qa/test-verify-release-object.sh  # CI_ARTIFACT
 scripts/qa/verify-release-readiness.sh --dry-run  # CI_ARTIFACT
 scripts/infra/verify-release-preflight.sh  # CI_ARTIFACT
 scripts/ci/emit-build-metrics.sh  # CI_ARTIFACT (parses buildx metadata JSON and build log for cache-source facts, export success, layer reuse counts, and build duration; writes build-metrics-<image-family>.json artifact (bead jj97.5))
+scripts/ops/generate-sla-report.sh  # CI_ARTIFACT (generates a monthly Markdown SLA report from Prometheus metrics; requires Prometheus access)
 
 # ── Built image required ─────────────────────────────────────────────────────
 scripts/qa/verify-openedx-custom-app-imports.sh  # BUILT_IMAGE (Validates every Open edX custom app package imports from the built OCI image before promotion proceeds.)
@@ -44,6 +45,7 @@ scripts/qa/ops-preflight.sh  # WORKTREE_CONTEXT (operator preflight for br+tutor
 scripts/acceptance/generate_runtime_routing_matrix.py  # WORKTREE_CONTEXT (generates the runtime-routing contract from tenant-registry.yaml)
 scripts/release/generate_truth_ledger.py  # WORKTREE_CONTEXT (joins runtime-routing proof with repo, release, infra, Argo, and runtime truths)
 scripts/release/generate_release_object.py  # WORKTREE_CONTEXT (derives the canonical release object from the signed release bundle)
+scripts/gen/update-openedx-hostnames-doc.sh  # WORKTREE_CONTEXT (regenerates the Open edX hostnames documentation file from tenant-registry.yaml)
 
 # ── Live infrastructure required ─────────────────────────────────────────────────────
 scripts/qa/verify-enterprise-sso-readiness.sh --mode repo  # LIVE_CLUSTER
@@ -93,6 +95,14 @@ scripts/qa/verify-realized-image-identity.sh  # LIVE_CLUSTER (compares live pod 
 scripts/runner/buildx-cleanup.sh  # LIVE_CLUSTER (prunes stale buildx_buildkit containers from the fastlane VPS runner; supports --dry-run and --max-keep; never removes the default builder; install at /opt/runner/ on the fastlane host)
 scripts/runner/buildx-monitor.sh  # LIVE_CLUSTER (health check for the fastlane VPS runner buildx estate; checks docker daemon, socket permissions, and builder container count; exits 0/1/2)
 scripts/ops/rc-check.sh  # LIVE_CLUSTER (checks all 9 ✅-auto rows from RC_CHECKLIST.md: Build Tutor Images, bbi-infra promo PR, Argo sync, pod digests, bundle hash, MEREKA_PLATFORM_ADMIN_EMAILS, Post-Deploy E2E, br doctor, admin-parity.sh; gracefully SKIPs rows that need kubectl/GITHUB_TOKEN when running offline)
+scripts/ops/park-prod.sh  # LIVE_CLUSTER (scales GKE prod stateless workloads to 0 (warm-park mode); supports --dry-run and Velero backup validation)
+scripts/ops/unpark-prod.sh  # LIVE_CLUSTER (reverses warm-park mode via GitOps commit to bbi-infrastructure + ArgoCD reconcile; supports --dry-run)
+scripts/analytics/delete-user-events.sh  # LIVE_CLUSTER (deletes ClickHouse analytics events for a user (GDPR right to erasure); supports --dry-run)
+scripts/analytics/openedx-export-enrollments.sh  # LIVE_CLUSTER (exports enrollment CSV from Open edX via tutor local run lms)
+scripts/analytics/verify-user-deletion.sh  # LIVE_CLUSTER (verifies that a user's analytics data has been deleted from ClickHouse after GDPR erasure)
+scripts/migrations/mct/run_full_user_import.sh  # LIVE_CLUSTER (runs MCT user import in batches with state tracking; requires live LMS pod)
+scripts/migrations/mct/run_program_setup.sh  # LIVE_CLUSTER (sets up MCT programs in Open edX Discovery service)
+scripts/mobile/setup-ios-app.sh  # LIVE_CLUSTER (one-time setup for the iOS mobile app (certificates, provisioning profiles))
 
 # ── Live app required ─────────────────────────────────────────────────────
 scripts/qa/verify-tenant-visual-contract.sh  # LIVE_APP
@@ -117,6 +127,11 @@ scripts/qa/verify-certificate-issuance.sh  # DATA_FILE
 scripts/qa/verify-cross-system-identity.sh  # DATA_FILE
 scripts/qa/verify-mux-upload-completeness.sh  # DATA_FILE
 scripts/qa/verify-migration-completion-plan.sh  # DATA_FILE
+scripts/migrations/kajabi/export.sh  # DATA_FILE (verifies Kajabi export infrastructure and readiness (read-only); requires export data files)
+scripts/migrations/kajabi/resilient_import.sh  # DATA_FILE (batch-imports Kajabi data into Open edX with retry logic and progress state)
+scripts/migrations/mct/export.sh  # DATA_FILE (verifies MCT export infrastructure and readiness (read-only))
+scripts/migrations/mct/run_validation.sh  # DATA_FILE (validates MCT import results against export data)
+scripts/migrations/mct/verify_mux_upload.sh  # DATA_FILE (verifies Mux video upload completeness against MCT video mapping)
 
 # ── Stale expectation or missing dependency ─────────────────────────────────────────────────────
 scripts/qa/verify-superset-runbook.sh  # STALE_EXPECT
