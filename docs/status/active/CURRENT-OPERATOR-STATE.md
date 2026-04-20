@@ -533,3 +533,68 @@ Issue body captures the user's strategic reframe:
 2. Monitor #1920 + #3394 for auto-merge.
 3. If user answers on staging `miranda.io` drift + ci-metrics restart: execute.
 4. Otherwise continue existing queue: m0u5.10.1, Wave 9 cleanup, tracker repair.
+
+---
+
+### Slice 85 — 2026-04-20T08:30–09:55Z (sprint queue Tier 1 execution begins)
+
+**Context**: #1927 (RC_CHECKLIST + NEXT-SPRINT-QUEUE.md) merged at start of
+slice. That gave a 13-item tiered roadmap — began draining Tier 1 items
+while older cascade PRs (#1918/#1921/#1924/#1926) continued waiting on CI
+rebases.
+
+**Shipped this slice (auto-merge armed, all 4 green on Process Invariants +
+Dependency Review as of push time)**:
+
+- **[#1928](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1928)** `fix(mfe): surface SESSION_COOKIE_DOMAIN through MFE_CONFIG API`
+  — Tier 1 #3, one-line plugin change in `_mereka_lms/lms_settings.py`.
+  Evidence confirmed: bundle has `SESSION_COOKIE_DOMAIN:"MISSING_ENV_VAR".SESSION_COOKIE_DOMAIN`
+  → `undefined` at runtime. MFE config API was silent on the key. Fix uses
+  Django `SESSION_COOKIE_DOMAIN` as single source of truth.
+- **[#1929](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1929)** `chore(obs): rename stale gke-production → rke2-production Promtail label`
+  — Tier 1 #4 (OBS-006) app-repo half. Zero runtime effect — file is
+  PLATFORM_SHARED shadow — but prevents dormant config from broadcasting
+  wrong label on re-consumption.
+- **[bbi-infrastructure#3461](https://github.com/Biji-Biji-Initiative/bbi-infrastructure/pull/3461)** OBS-006 bbi-infra mirror.
+  Minor detour: `git commit` accidentally scooped 9 other staged files from
+  another agent's temporal-oidc work; reset and recommitted clean (1 file).
+- **[#1930](https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1930)** `feat(obs): schedule Authn MFE smoke` — Tier 1 #5 (OBS-003 phase 1).
+  Scheduled cron `*/5 * * * *` dev, `*/15 * * * *` prod. Removed
+  `continue-on-error: true` silent-fail posture. Split critical vs soft
+  keys in `smoke-authn-mfe.sh` — critical keys still fail, soft keys warn
+  (tracked as beads).
+
+**Defects uncovered by scheduled smoke posture**:
+- `LOGIN_ISSUE_SUPPORT_LINK` missing from MFE config API → bead
+  `mereka-lms-jdsx` opened P2. (Was silently hidden by prior `--dry-run +
+  continue-on-error: true` workflow.)
+- `SESSION_COOKIE_DOMAIN` missing from MFE config API → fix is PR #1928.
+
+**Currently armed for auto-merge** (7 PRs in mereka-lms, 1 in bbi-infra):
+- `#1918`, `#1921`, `#1924`, `#1926`, `#1928`, `#1929`, `#1930`
+- `bbi-infrastructure#3461`
+
+**Tier 1 remaining (not yet started)**:
+- **Tier 1 #1** (OBS-001): MFE client-side Sentry SDK — cross-lane
+  (plugin hook in mereka-lms + DSN env plumbing in bbi-infra). Non-trivial;
+  needs a dedicated slice.
+- **Tier 1 #2** (auth-allowlist-03): `MEREKA_PLATFORM_ADMIN_EMAILS` env
+  var population — BLOCKED on #1919 Tranche 3 (other agent, bbi-infra
+  `render-lms-admin-emails.sh` generator).
+
+## Pointed Next Move (slice 85)
+
+1. Wait for current auto-merge cascade to drain. Once #1928 lands, its
+   promotion chain produces new MFE image digests; after pods roll, hit
+   `curl -s 'https://apps.academyv2.mereka.dev/api/mfe_config/v1?mfe=authn' | jq '.SESSION_COOKIE_DOMAIN'`
+   and confirm `.academyv2.mereka.dev` surfaces. Then the smoke WARN should
+   flip to PASS on the scheduled run and RC_CHECKLIST row 18 can be ticked.
+2. Once #1924 + #1926 land, the queue-truth section (lines 149–233 above)
+   becomes obsolete — the generator writes to `CURRENT-OPERATOR-STATE.snapshot.md`
+   now and the pruned section stays out of this file.
+3. Start Tier 1 #1 (OBS-001 MFE Sentry). Scope the first PR narrowly:
+   plugin hook + `MFE_CONFIG["SENTRY_DSN"]` wiring + dev-only DSN in
+   bbi-infra overlay. Staging/prod DSNs follow once dev Sentry is receiving
+   events.
+4. Tier 1 #2 stays blocked on #1919 T3 — watch for the bbi-infra
+   `render-lms-admin-emails.sh` generator PR to land and rebase overlays.
