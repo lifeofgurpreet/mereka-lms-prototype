@@ -79,9 +79,25 @@ expect "mfe branding verifier"             "mfe-only"     "scripts/qa/verify-mfe
 expect "mfe footer plugin slot verifier"   "mfe-only"     "scripts/qa/verify-mfe-footer-plugin-slot.sh"
 expect "mfe runtime helper contract"       "mfe-only"     "scripts/qa/verify-mfe-runtime-helper-contract.sh"
 
+# --- control-plane-only (classifier + its test). Changes here skip image builds.
+# Deliberately narrow: broadening this section requires reviewer sign-off so we
+# don't accidentally skip image-affecting paths.
+expect "classifier source"                 "skip"         "scripts/infra/resolve-build-scope.sh"
+expect "classifier self-test"              "skip"         "scripts/qa/test-resolve-build-scope.sh"
+
 # --- shared / ambiguous (still builds both) ---
 expect "random unclassified python file"   "both"         "some/unknown/file.py"
 expect "infrastructure/tutor/apply-patches.sh" "both"     "infrastructure/tutor/apply-patches.sh"
+
+# --- "dangerous skip" guardrail: paths that LOOK skippable but actually feed
+# image content. These must NOT classify as skip. If any of these start
+# classifying as skip, the deny-list has drifted and is under-building.
+# Per reviewer feedback on #1910 (slice 78).
+expect "openedx dockerfile plugin guardrail"   "openedx-only" "infrastructure/tutor/plugins/_mereka_lms/openedx_dockerfile.py"
+expect "mfe dockerfile plugin guardrail"       "mfe-only"     "infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py"
+expect "mfe slot registration guardrail"       "mfe-only"     "infrastructure/tutor/plugins/mereka_lms_mfe_slots.py"
+expect "apply-patches.sh guardrail"            "both"         "infrastructure/tutor/apply-patches.sh"
+expect "requirements-tutor.txt guardrail"      "both"         "requirements-tutor.txt"
 
 # --- safety fallback (no changed files at all) ---
 expected="both"

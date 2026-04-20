@@ -93,6 +93,17 @@ mark_skip() {
 classify_path() {
   local path="$1"
   case "$path" in
+    # Control-plane-only paths: the CI classifier itself and its test/workflow
+    # surface. Changes here SHOULD NOT trigger image builds — they validate via
+    # the classifier self-test (scripts/qa/test-resolve-build-scope.sh) and CI
+    # contract tests. Kept narrow and explicit to avoid accidentally skipping
+    # real image-affecting files. See reviewer feedback on PR #1910 for the
+    # rationale (world-class form: artifact-ownership manifest with generated
+    # tests; this is step 1 toward that).
+    scripts/infra/resolve-build-scope.sh|\
+    scripts/qa/test-resolve-build-scope.sh)
+      mark_skip "$path"
+      ;;
     deploy/k8s/base/apps/openedx/*|\
     infrastructure/tutor/custom-apps/*|\
     infrastructure/tutor/themes/mereka/lms/*|\
