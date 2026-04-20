@@ -1,19 +1,46 @@
 # Admin Login Guide
-_Last updated: 2026-02-06_
+_Last updated: 2026-04-20_
 
 This document is intentionally conservative: it prioritizes **prod-safe verification** and avoids
-“quick fixes” that mutate databases unless you explicitly intend to do that.
+"quick fixes" that mutate databases unless you explicitly intend to do that.
 
 For how auth/permissions work (and what does not sync), see:
 - `docs/reference/operations/AUTH_AND_PERMISSIONS.md`
 
-## ✅ Required Platform Admins (Authoritative)
+## ✅ Current Operational Baseline — Platform Admins
 
-These humans must have full admin permissions across the Open edX ecosystem:
+> **Status**: P1 operational drift with manual workaround in place, not "fixed".
+> Structural consolidation (single canonical registry) tracked in
+> [#1919 — Unified Platform-Access Contract](https://github.com/Biji-Biji-Initiative/mereka-lms/issues/1919).
+>
+> Until that consolidation lands, this list is the **current operational
+> baseline** enforced via `ensure-platform-admins.sh` default CSV. It is
+> NOT a canonical registry — multiple disagreeing copies of "the list"
+> exist across Authentik blueprints, scripts, docs, and runtime env vars.
+
+These humans must have full admin permissions across the Open edX ecosystem
+(LMS/CMS/Discovery/Credentials/Ecommerce) on **all 3 envs (dev/staging/prod)**:
+
 - `gurpreet@biji-biji.com`
 - `malasari@mereka.my`
+- `miranda@mereka.my`
+- `hira@mereka.io`
+- `eugene@biji-biji.com`
+- `eugene@mereka.my`
+- `faiz@mereka.io`
+- `fadlan@mereka.io`
 
-Enforce (prod + dev, idempotent):
+**Legacy, to be removed at expiry** (tracked as `legacy_exceptions` in future `config/platform-access.yaml`):
+- `admin@greentactsolutions.com` — consultancy holdover, demoted on dev+staging 2026-04-20. Review by 2026-05-15.
+
+**Synthetic canary accounts** (separate class — do NOT mix with human admins):
+- `lanea-platform-admin@synthetic.test` — uses password `Cr3ativity` from Infisical `LANEA_PLATFORM_ADMIN_PASSWORD`. Exists on all 3 envs.
+- `testadmin@mereka.test` — dev only. Password from Infisical `MEREKA_LMS_TESTADMIN_PASSWORD`.
+
+> **`Cr3ativity` is ONLY for synthetic `lanea-*` canaries. It is NOT a human admin password.**
+> Human admins log in via Google SSO — no password.
+
+Enforce (prod + dev + staging, idempotent):
 ```bash
 ./scripts/infra/ensure-platform-admins.sh
 ```

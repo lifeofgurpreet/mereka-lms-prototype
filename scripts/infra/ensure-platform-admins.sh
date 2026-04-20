@@ -27,7 +27,7 @@ DEFAULT_CONTEXTS=(
   "rke2-prod"
 )
 
-ADMINS_CSV_DEFAULT="gurpreet@biji-biji.com,malasari@mereka.my,miranda@mereka.my,hira@mereka.io,eugene@biji-biji.com,eugene@mereka.my,faiz@mereka.io"
+ADMINS_CSV_DEFAULT="gurpreet@biji-biji.com,malasari@mereka.my,miranda@mereka.my,hira@mereka.io,eugene@biji-biji.com,eugene@mereka.my,faiz@mereka.io,fadlan@mereka.io"
 ADMINS_CSV="${ADMINS_CSV:-$ADMINS_CSV_DEFAULT}"
 ADMIN_PASSWORD="${ADMIN_PASSWORD:-}"
 
