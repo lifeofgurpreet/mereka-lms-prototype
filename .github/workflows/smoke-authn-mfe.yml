@@ -1,20 +1,65 @@
 name: Smoke - Authn MFE Config
 
+# Scheduled synthetic probe for Authn MFE. Catches LMS/MFE config API
+# platform-down regressions within 5 min on dev (OBS-003 tier 1 floor).
+#
+# NOT a substitute for a browser-level DOM assertion — an HTML 200 + JSON
+# keys response can still ship a JS crash like the getMerekaShellCopy
+# regression seen in PR #1906. The Playwright-level DOM check is tracked
+# separately (OBS-003 phase 2) and requires an ARC runner with browser
+# capability.
+
 on:
   workflow_dispatch:
+    inputs:
+      target:
+        description: "Target environment"
+        type: choice
+        options: [dev, prod, both]
+        default: dev
+  schedule:
+    # Every 5 min against dev — fastest signal for a regression on main.
+    - cron: "*/5 * * * *"
+    # Every 15 min against prod — keeps runner budget reasonable.
+    - cron: "*/15 * * * *"
 
 permissions: {}
 
+concurrency:
+  group: smoke-authn-mfe-${{ github.event.schedule || inputs.target || 'dispatch' }}
+  cancel-in-progress: false
+
 jobs:
-  smoke-authn-mfe:
-    name: Authn MFE Smoke Tests
+  smoke-dev:
+    if: |
+      github.event_name == 'schedule' && github.event.schedule == '*/5 * * * *' ||
+      github.event_name == 'workflow_dispatch' && (inputs.target == 'dev' || inputs.target == 'both')
+    name: Authn MFE Smoke (dev)
     runs-on: mereka-k8s-runners
-    timeout-minutes: 10
-    continue-on-error: true
+    timeout-minutes: 5
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - name: Smoke authn MFE config
+        run: |
+          ./scripts/qa/smoke-authn-mfe.sh \
+            --mfe-url https://apps.academyv2.mereka.dev \
+            --lms-url https://academyv2.mereka.dev
 
-      - name: Run authn MFE smoke tests (dry-run)
-        run: ./scripts/qa/smoke-authn-mfe.sh --dry-run
+  smoke-prod:
+    if: |
+      github.event_name == 'schedule' && github.event.schedule == '*/15 * * * *' ||
+      github.event_name == 'workflow_dispatch' && (inputs.target == 'prod' || inputs.target == 'both')
+    name: Authn MFE Smoke (prod)
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - name: Smoke authn MFE config
+        run: |
+          ./scripts/qa/smoke-authn-mfe.sh \
+            --mfe-url https://apps.academyv2.mereka.io \
+            --lms-url https://academyv2.mereka.io
