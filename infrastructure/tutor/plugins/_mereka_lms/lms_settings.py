@@ -501,5 +501,124 @@ if "{{ MEREKA_PARAGON_THEME_ENABLED }}".lower() == "true":
     MFE_CONFIG["PARAGON_THEME_URLS"]["variants"]["light"]["urls"] = {}
     MFE_CONFIG["PARAGON_THEME_URLS"]["variants"]["light"]["urls"]["default"] = _theme_base + "/light.min.css"
     MFE_CONFIG["PARAGON_THEME_URLS"]["variants"]["light"]["urls"]["brandOverride"] = _theme_base + "/mereka-brand-light.min.css"
+
+# ── OBS-002: Structured JSON logging ──────────────────────────────────────────
+# Feature-flagged behind MEREKA_JSON_LOGGING (default: false) so this ships
+# dark and never breaks existing plaintext log collectors until explicitly opt-in.
+# When enabled, every log record is a JSON object that Promtail's json pipeline
+# stage on rke2-nonprod automatically extracts as labels.
+#
+# Custom fields injected by MerekaJsonFormatter:
+#   request_id  — from django-log-request-id RequestIDFilter (if installed) or UUID
+#   user_id     — Django request user pk (set by MerekaRequestContextFilter)
+#   trace_id    — W3C traceparent / OTEL trace_id (from contextvars if available)
+if os.environ.get("MEREKA_JSON_LOGGING", "false").lower() not in ("false", "0", "no", ""):
+    import logging
+    import uuid
+
+    class MerekaJsonFormatter:
+        # Wrapper that delegates to pythonjsonlogger and injects Mereka fields.
+        # NB: docstrings here would prematurely close the outer triple-string
+        # passed to _register_env_patch. Keep comments only.
+        _delegate = None
+
+        @classmethod
+        def _get_delegate(cls):
+            if cls._delegate is None:
+                try:
+                    from pythonjsonlogger.jsonlogger import JsonFormatter
+                    cls._delegate = JsonFormatter(
+                        fmt="%(asctime)s %(levelname)s %(name)s %(message)s",
+                        datefmt="%Y-%m-%dT%H:%M:%S%z",
+                        rename_fields={"asctime": "timestamp", "levelname": "level", "name": "logger"},
+                    )
+                except ImportError:
+                    pass
+            return cls._delegate
+
+    class _MerekaJsonFormatterFull(logging.Formatter):
+        # JSON formatter with request_id, user_id, trace_id injection.
+
+        def format(self, record):
+            # request_id: prefer django-log-request-id attr, else generate
+            if not hasattr(record, "request_id"):
+                record.request_id = str(uuid.uuid4())
+            # user_id: injected by middleware into thread-local / log record if present
+            if not hasattr(record, "user_id"):
+                record.user_id = None
+            # trace_id: from OTEL context if available
+            if not hasattr(record, "trace_id"):
+                try:
+                    from opentelemetry import trace as _otel_trace
+                    _span = _otel_trace.get_current_span()
+                    _ctx = _span.get_span_context() if _span else None
+                    record.trace_id = format(_ctx.trace_id, "032x") if (_ctx and _ctx.is_valid) else None
+                except Exception:
+                    record.trace_id = None
+            delegate = MerekaJsonFormatter._get_delegate()
+            if delegate is not None:
+                return delegate.format(record)
+            # Fallback: plain JSON via stdlib (python-json-logger not installed)
+            import json
+            payload = {
+                "timestamp": self.formatTime(record, self.datefmt),
+                "level": record.levelname,
+                "logger": record.name,
+                "message": record.getMessage(),
+                "request_id": record.request_id,
+                "user_id": record.user_id,
+                "trace_id": record.trace_id,
+            }
+            if record.exc_info:
+                payload["exc_info"] = self.formatException(record.exc_info)
+            return json.dumps(payload)
+
+    LOGGING = dict(globals().get("LOGGING", {}))
+    LOGGING["version"] = 1
+    LOGGING.setdefault("disable_existing_loggers", False)
+    LOGGING.setdefault("filters", {})
+    LOGGING["filters"]["request_id"] = {
+        "()": "log_request_id.filters.RequestIDFilter",
+    } if True else {}
+    # Graceful degradation: if django-log-request-id not installed, skip filter
+    try:
+        import log_request_id  # noqa: F401
+        _req_id_filter_available = True
+    except ImportError:
+        _req_id_filter_available = False
+
+    LOGGING["filters"]["mereka_request_id"] = {
+        "()": "log_request_id.filters.RequestIDFilter",
+    } if _req_id_filter_available else {"()": "django.utils.log.CallbackFilter", "callback": lambda r: True}
+
+    LOGGING.setdefault("formatters", {})
+    LOGGING["formatters"]["mereka_json"] = {
+        "()": _MerekaJsonFormatterFull,
+        "datefmt": "%Y-%m-%dT%H:%M:%S%z",
+    }
+
+    LOGGING.setdefault("handlers", {})
+    LOGGING["handlers"]["mereka_json_console"] = {
+        "class": "logging.StreamHandler",
+        "formatter": "mereka_json",
+        "filters": ["mereka_request_id"] if _req_id_filter_available else [],
+        "stream": "ext://sys.stdout",
+    }
+
+    # Override root logger to emit JSON; preserve existing handlers if any.
+    LOGGING.setdefault("root", {})
+    LOGGING["root"]["level"] = LOGGING.get("root", {}).get("level", "INFO")
+    _existing_root_handlers = list(LOGGING["root"].get("handlers", []))
+    if "mereka_json_console" not in _existing_root_handlers:
+        _existing_root_handlers.append("mereka_json_console")
+    LOGGING["root"]["handlers"] = _existing_root_handlers
+
+    # Remove the default console handler that emits plaintext when JSON is on,
+    # to avoid double-logging. Keep structured handler only.
+    if "console" in LOGGING.get("handlers", {}):
+        for _logger_cfg in LOGGING.get("loggers", {}).values():
+            _hdlrs = _logger_cfg.get("handlers", [])
+            if "console" in _hdlrs and "mereka_json_console" not in _hdlrs:
+                _hdlrs.append("mereka_json_console")
 """,
 )

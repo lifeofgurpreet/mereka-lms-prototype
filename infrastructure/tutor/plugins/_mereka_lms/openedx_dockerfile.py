@@ -135,7 +135,7 @@ ARG MEREKA_CUSTOM_APP_INSTALL_MODE=editable
 # Install support dependencies needed for metrics, translation settings, Atlas,
 # enterprise, and Python 3.11-compatible Aspects in one resolver invocation.
 # Keep this above all custom-app COPY layers so app iteration does not invalidate it.
-RUN $PIP_COMMAND install     django-prometheus==2.3.1     django-ratelimit==4.1.0     django-cors-headers==4.3.1     "path==16.16.0"     "pymongo[srv]"     "defusedxml==0.7.1"     "edx-enterprise==6.6.9"     "lazy==1.6"     "lxml_html_clean==0.4.4"     "edx-event-routing-backends==9.3.8"     "platform-plugin-aspects==1.1.2"
+RUN $PIP_COMMAND install     django-prometheus==2.3.1     django-ratelimit==4.1.0     django-cors-headers==4.3.1     "path==16.16.0"     "pymongo[srv]"     "defusedxml==0.7.1"     "edx-enterprise==6.6.9"     "lazy==1.6"     "lxml_html_clean==0.4.4"     "edx-event-routing-backends==9.3.8"     "platform-plugin-aspects==1.1.2"     "python-json-logger==2.0.7"
 
 # Add repository roots to Python path via .pth file for proper module imports.
 # Include /openedx because custom app packages are mounted there and should be importable
