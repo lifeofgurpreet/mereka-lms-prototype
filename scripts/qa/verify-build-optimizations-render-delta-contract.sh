@@ -67,6 +67,24 @@ removed_patterns: list[re.Pattern[str]] = []
 source_text_cache: dict[Path, str] = {}
 
 
+def inventory_contains_token(token: str) -> bool:
+    escaped = re.escape(token)
+    return re.search(rf"(?<![A-Za-z0-9_-]){escaped}(?![A-Za-z0-9_-])", inventory_text) is not None
+
+
+def human_class(authority_class: str) -> str:
+    return authority_class.replace("_", " ")
+
+
+def pattern_is_too_broad(pattern: re.Pattern[str]) -> bool:
+    sentinels = (
+        "__mereka_unrelated_render_delta_sentinel__",
+        "RUN echo unexpected unrelated render delta",
+        "COPY unrelated/source unrelated/destination",
+    )
+    return any(pattern.search(sentinel) for sentinel in sentinels)
+
+
 def source_text_for(path: Path) -> str:
     resolved = path.resolve()
     if resolved not in source_text_cache:
@@ -88,11 +106,15 @@ for index, delta in enumerate(deltas, start=1):
         failures.append(f"duplicate delta id: {delta_id}")
     else:
         ids.add(delta_id)
-    if delta_id and delta_id not in inventory_text:
-        failures.append(f"{delta_id} missing from {inventory_doc_path}")
+    if delta_id and not inventory_contains_token(delta_id):
+        failures.append(f"{delta_id} missing as an exact token from {inventory_doc_path}")
     authority_class = str(delta.get("authority_class") or "")
     if authority_class not in allowed_classes:
         failures.append(f"{delta_id}: invalid authority_class {authority_class!r}")
+    elif not inventory_contains_token(authority_class) and human_class(authority_class) not in inventory_text:
+        failures.append(
+            f"{delta_id}: authority_class {authority_class!r} missing from {inventory_doc_path}"
+        )
     if not str(delta.get("retirement_trigger") or "").strip():
         failures.append(f"{delta_id}: missing retirement_trigger")
     delta_source_value = delta.get("source_script")
@@ -125,9 +147,14 @@ for index, delta in enumerate(deltas, start=1):
                 failures.append(f"{delta_id}: empty/non-string {field} entry")
                 continue
             try:
-                target.append(re.compile(pattern))
+                compiled = re.compile(pattern)
             except re.error as exc:
                 failures.append(f"{delta_id}: invalid regex {pattern!r}: {exc}")
+                continue
+            if pattern_is_too_broad(compiled):
+                failures.append(f"{delta_id}: overly broad {field} regex {pattern!r}")
+                continue
+            target.append(compiled)
 
 
 def line_allowed(line: str, patterns: list[re.Pattern[str]]) -> bool:

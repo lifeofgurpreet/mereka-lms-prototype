@@ -211,6 +211,13 @@ for index, entry in enumerate(entries, start=1):
         args = []
     if not isinstance(args, list) or any(not isinstance(arg, str) or not arg for arg in args):
         raise SystemExit(f"ci_static_inventory.entries[{index}] args must be a list of non-empty strings")
+    timeout_seconds = entry.get("timeout_seconds")
+    if timeout_seconds is not None and (
+        not isinstance(timeout_seconds, int) or timeout_seconds <= 0
+    ):
+        raise SystemExit(
+            f"ci_static_inventory.entries[{index}] timeout_seconds must be a positive integer when present"
+        )
 
     key = " ".join([script, *args])
     if key in seen:

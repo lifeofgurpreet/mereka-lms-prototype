@@ -12,14 +12,16 @@
 | Script list | Generated `.github/ci-scripts-static.txt` from `scripts/governance/script-registry.yaml` `ci_static_inventory` | `python3 scripts/governance/generate-ci-static-inventory.py --write` |
 | Entrypoint | `scripts/qa/run-release-verification-gates.sh` | — |
 | Parallelism | `PARALLELISM=4` | env var |
-| Per-script timeout | `TIMEOUT_SECS=120` | env var |
+| Default per-script timeout | `TIMEOUT_SECS=300` in CI | env var |
+| Per-entry timeout override | `timeout_seconds` in `scripts/governance/script-registry.yaml`, rendered as `# timeout=N` in generated shard files | registry |
 | Results dir | `var/ci-results/` | hardcoded |
 | Summary file | `var/ci-results/summary.txt` | hardcoded |
 
 Runner mechanics (`run-scripts-parallel.sh`):
 - Reads list file; skips blank lines and `#` comments
-- Strips inline comments (`entry%% #*`) before execution
-- Invokes each script via `timeout $TIMEOUT_SECS bash $script $extra_args`
+- Reads supported runner metadata from inline comments before execution; today this includes `# timeout=N`
+- Strips inline comments (`entry%% #*`) before executing the script and args
+- Invokes each script via `timeout $entry_timeout bash $script $extra_args`, where `entry_timeout` is the registry override or `TIMEOUT_SECS`
 - Emits `PASS`, `FAIL (exit N)`, or `TIMEOUT` per script to stdout, teed to `summary.txt`
 - On any FAIL or TIMEOUT: dumps last 20 lines of `var/ci-results/<name>.log` and exits 1
 - SKIP lines are counted but do not cause job failure
@@ -95,7 +97,7 @@ as a repo-content failure.
 
 | # | Step name | Mechanics |
 |---|-----------|-----------|
-| 11 | Run static verification scripts | Parallel runner over the generated `.github/ci-scripts-static.txt` derivative; `PARALLELISM=4`, `TIMEOUT_SECS=120` |
+| 11 | Run static verification scripts | Parallel runner over the generated shard derivatives; `PARALLELISM=4`, `TIMEOUT_SECS=300`, with explicit per-entry overrides for known long-running full-repo checks |
 
 Each script in `.github/ci-scripts-static.txt`:
 - Must exit 0 on success, non-zero on failure
@@ -105,8 +107,9 @@ Each script in `.github/ci-scripts-static.txt`:
 
 Adding a new static verification script:
 1. Add the script to `scripts/governance/script-registry.yaml` under `ci_static_inventory`
-2. Regenerate `.github/ci-scripts-static.txt` with `python3 scripts/governance/generate-ci-static-inventory.py --write`
-3. Re-run `python3 scripts/governance/generate-ci-static-inventory.py --check`
+2. Add `timeout_seconds` only when the script has measured full-repo runtime near the default budget; do not use it to hide hangs
+3. Regenerate `.github/ci-scripts-static.txt` and shard files with `python3 scripts/governance/generate-ci-static-inventory.py --write`
+4. Re-run `python3 scripts/governance/generate-ci-static-inventory.py --check`
 
 Scripts listed only in `ci_runtime_inventory` are source-owned inventory for manual/runtime paths.
 They are not executed by the offline static-validation runner.

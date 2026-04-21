@@ -14,7 +14,7 @@ scripts/qa/test-verify-siteconfig-authority.sh
 scripts/qa/verify-token-integrity-routing.sh
 scripts/qa/test-dependency-image-mirrors-patch.sh
 scripts/qa/test-mfe-prune-deprecated-shells.sh
-scripts/qa/verify-build-optimizations-render-delta-contract.sh
+scripts/qa/verify-deletion-wave-consumer-sweep.sh
 scripts/ci/preflight-check.sh
 scripts/infra/check-error-budget-gate.sh
 scripts/qa/audit-observability.sh

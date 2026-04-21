@@ -151,7 +151,7 @@ its relationship to the native Tutor hooks/filters in `infrastructure/tutor/plug
 This file is a controlled compatibility layer, not a second source generator.
 The J-exit target is raw Tutor render -> explicit allowed delta -> artifact.
 Do not add another post-render mutation unless the change is classified as
-`authority correction`, `obsolete expectation removal`, `temporary waiver`, or
+`authority correction`, `obsolete expectation removal`, `temporary compatibility layer`, or
 `intentional architecture change`, and this ledger is updated in the same PR.
 
 | Mutation | Authority class | Why it remains post-render | Retirement trigger | Guard |

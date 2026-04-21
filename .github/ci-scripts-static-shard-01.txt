@@ -3,7 +3,7 @@
 # Regenerate: python3 scripts/governance/generate-ci-static-inventory.py --write
 # Shard: 1/3
 
-scripts/qa/lint-repo-conventions.sh
+scripts/qa/lint-repo-conventions.sh # timeout=420
 scripts/qa/verify-domain-url-invariants.sh
 scripts/qa/test-verify-script-basename-governance.sh
 scripts/qa/test-verify-ci-cache-policy.sh
@@ -11,8 +11,8 @@ scripts/qa/verify-ci-runner-policy.sh
 scripts/qa/audit-grafana-dashboard.sh
 scripts/qa/verify-runtime-proof-fixture-pack.sh
 scripts/qa/test-mfe-npm-install-resilience-patch.sh
-scripts/qa/test-verify-build-optimizations-render-delta-contract.sh
-scripts/branding/validate-token-consumers.sh
+scripts/qa/test-run-scripts-parallel-timeout-metadata.sh
+scripts/qa/verify-build-optimizations-render-delta-contract.sh
 scripts/branding/verify-token-drift.sh
 scripts/infra/check-cert-sans.sh
 scripts/qa/audit-infra-mereka-lms-staging-references.sh

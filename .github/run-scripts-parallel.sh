@@ -27,7 +27,12 @@ run_one() {
     entry="${numbered_entry#*$'\t'}"
   fi
 
-  # Strip inline comments
+  local script_timeout="$TIMEOUT_SECS"
+  if [[ "$entry" =~ (^|[[:space:]])#[[:space:]]*timeout=([0-9]+)($|[[:space:]]) ]]; then
+    script_timeout="${BASH_REMATCH[2]}"
+  fi
+
+  # Strip inline comments after reading supported runner metadata.
   local entry_clean="${entry%% #*}"
   entry_clean="${entry_clean## }"
   entry_clean="${entry_clean%% }"
@@ -50,10 +55,10 @@ run_one() {
     return 0
   fi
 
-  echo "START ${name} [${index}/${total}]"
+  echo "START ${name} [${index}/${total}] (timeout ${script_timeout}s)"
 
   # shellcheck disable=SC2086
-  if timeout "$TIMEOUT_SECS" bash "$script_path" $extra_args > "$logfile" 2>&1; then
+  if timeout "$script_timeout" bash "$script_path" $extra_args > "$logfile" 2>&1; then
     echo "PASS ${name} [${index}/${total}] (${SECONDS-started_at}s)"
   else
     local rc=$?

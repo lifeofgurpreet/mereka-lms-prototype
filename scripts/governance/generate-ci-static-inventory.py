@@ -81,6 +81,13 @@ def normalize_entries(payload: dict, repo_root: Path) -> list[dict[str, object]]
             raise SystemExit(
                 f"ci_static_inventory.entries[{index}] estimated_seconds must be a positive integer"
             )
+        timeout_seconds = raw.get("timeout_seconds")
+        if timeout_seconds is not None and (
+            not isinstance(timeout_seconds, int) or timeout_seconds <= 0
+        ):
+            raise SystemExit(
+                f"ci_static_inventory.entries[{index}] timeout_seconds must be a positive integer when present"
+            )
 
         key = " ".join([script, *args])
         if key in seen_keys:
@@ -93,9 +100,14 @@ def normalize_entries(payload: dict, repo_root: Path) -> list[dict[str, object]]
         if not os.access(script_path, os.X_OK):
             raise SystemExit(f"ci_static_inventory entry is not executable: {script}")
 
-        normalized.append(
-            {"script": script, "args": args, "estimated_seconds": estimated_seconds}
-        )
+        normalized_entry: dict[str, object] = {
+            "script": script,
+            "args": args,
+            "estimated_seconds": estimated_seconds,
+        }
+        if timeout_seconds is not None:
+            normalized_entry["timeout_seconds"] = timeout_seconds
+        normalized.append(normalized_entry)
 
     return normalized
 
@@ -190,6 +202,9 @@ def render_inventory(
         script = str(entry["script"])
         args = [str(item) for item in entry["args"]]
         line = " ".join([script, *args]).rstrip()
+        timeout_seconds = entry.get("timeout_seconds")
+        if timeout_seconds is not None:
+            line = f"{line} # timeout={timeout_seconds}"
         lines.append(line)
     return "\n".join(lines) + "\n"
 

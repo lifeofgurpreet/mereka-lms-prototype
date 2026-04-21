@@ -41,6 +41,7 @@ cat >"$inventory_doc" <<'EOF'
 # Inventory
 
 fixture-delta
+temporary compatibility layer
 EOF
 
 raw="$TMP_DIR/raw.Dockerfile"
@@ -103,6 +104,84 @@ else
   cat /tmp/build-delta-missing.out >&2 || true
   cat /tmp/build-delta-missing.err >&2 || true
   fail "missing inventory doc fails closed"
+fi
+
+cat >"$inventory_doc" <<'EOF'
+# Inventory
+
+fixture-delta-extra
+temporary compatibility layer
+EOF
+
+set +e
+BUILD_OPTIMIZATIONS_DELTA_CONTRACT="$contract" \
+  BUILD_OPTIMIZATIONS_SCRIPT="$patch_script" \
+  PATCH_INVENTORY_DOC="$inventory_doc" \
+  "$VERIFY" >/tmp/build-delta-substring.out 2>/tmp/build-delta-substring.err
+rc=$?
+set -e
+
+if [[ "$rc" -ne 0 ]] && grep -q "fixture-delta missing as an exact token" /tmp/build-delta-substring.err; then
+  pass "inventory delta id substring match fails closed"
+else
+  cat /tmp/build-delta-substring.out >&2 || true
+  cat /tmp/build-delta-substring.err >&2 || true
+  fail "inventory delta id substring match fails closed"
+fi
+
+cat >"$inventory_doc" <<'EOF'
+# Inventory
+
+fixture-delta
+EOF
+
+set +e
+BUILD_OPTIMIZATIONS_DELTA_CONTRACT="$contract" \
+  BUILD_OPTIMIZATIONS_SCRIPT="$patch_script" \
+  PATCH_INVENTORY_DOC="$inventory_doc" \
+  "$VERIFY" >/tmp/build-delta-class.out 2>/tmp/build-delta-class.err
+rc=$?
+set -e
+
+if [[ "$rc" -ne 0 ]] && grep -q "authority_class 'temporary_compatibility_layer' missing" /tmp/build-delta-class.err; then
+  pass "inventory authority class omission fails closed"
+else
+  cat /tmp/build-delta-class.out >&2 || true
+  cat /tmp/build-delta-class.err >&2 || true
+  fail "inventory authority class omission fails closed"
+fi
+
+cat >"$inventory_doc" <<'EOF'
+# Inventory
+
+fixture-delta
+temporary compatibility layer
+EOF
+
+python3 - "$contract" <<'PY'
+import sys
+from pathlib import Path
+
+contract = Path(sys.argv[1])
+text = contract.read_text(encoding="utf-8")
+text = text.replace("      - 'allowed added line'", "      - '.*'")
+contract.write_text(text, encoding="utf-8")
+PY
+
+set +e
+BUILD_OPTIMIZATIONS_DELTA_CONTRACT="$contract" \
+  BUILD_OPTIMIZATIONS_SCRIPT="$patch_script" \
+  PATCH_INVENTORY_DOC="$inventory_doc" \
+  "$VERIFY" >/tmp/build-delta-broad.out 2>/tmp/build-delta-broad.err
+rc=$?
+set -e
+
+if [[ "$rc" -ne 0 ]] && grep -q "overly broad added_patterns regex" /tmp/build-delta-broad.err; then
+  pass "over-broad render delta regex fails closed"
+else
+  cat /tmp/build-delta-broad.out >&2 || true
+  cat /tmp/build-delta-broad.err >&2 || true
+  fail "over-broad render delta regex fails closed"
 fi
 
 echo "Summary: PASS=$PASS FAIL=$FAIL"

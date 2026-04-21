@@ -63,7 +63,7 @@ If the fastlane selector is needed later and fails before measurement with `fall
 - Do not call cold-start fixed unless a clean Tutor bootstrap proof is green.
 - Do not call cold builds fixed unless app-cache-cold Open edX and MFE build proof is green, or the waiver is explicit and fresh. The legacy `benchmark_class=true-cold` alias is not a machine-cold clean-room claim and should not be used for new evidence.
 - Do not grow `build-optimizations.sh` unless the change is classified and added to `build-optimizations.allowed-delta.yaml` plus the mutation ledger.
-- Do not change verifier expectations without classifying the edit as an authority correction, obsolete expectation removal, temporary waiver, or intentional architecture change.
+- Do not change verifier expectations without classifying the edit as an authority correction, obsolete expectation removal, temporary compatibility layer, or intentional architecture change.
 - Do not reintroduce `apply-patches.sh` as a quick-start front door.
 - Do not add fixed local passwords or hardcoded Tutor database credentials.
 - Do not upload raw `tutor_env/config.yml` as CI evidence; it contains generated local secrets.

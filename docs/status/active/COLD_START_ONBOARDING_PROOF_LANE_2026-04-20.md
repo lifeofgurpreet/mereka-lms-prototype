@@ -112,7 +112,7 @@ gh run list --branch main --limit 20 \
 - `./scripts/infra/verify-local-bootstrap-readiness.sh` passes after setup.
 - `.github/workflows/bootstrap-local-readiness.yml` completes green for the branch or merge commit.
 - App-cache-cold image build proof is green for Open edX and MFE, or explicitly waived with fresh evidence explaining why bootstrap proof is sufficient for the change.
-- Every verifier change in this lane is classified as an authority correction, obsolete expectation removal, temporary waiver, or intentional architecture change. Unclassified verifier edits are merge blockers.
+- Every verifier change in this lane is classified as an authority correction, obsolete expectation removal, temporary compatibility layer, or intentional architecture change. Unclassified verifier edits are merge blockers.
 - `build-optimizations.sh` has no new mutation outside `infrastructure/tutor/patches/build-optimizations.allowed-delta.yaml` and the remaining mutation ledger in `docs/reference/architecture/TUTOR_PATCHES_INVENTORY.md`.
 - The guide contains no missing internal links and no secret-like fixed local credentials.
 - A new developer can follow the quick start without needing undocumented Slack/agent context.

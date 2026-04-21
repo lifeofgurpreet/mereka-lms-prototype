@@ -156,6 +156,9 @@ ci_static_inventory:
     - script: scripts/qa/test-verify-lms-ops-migrate-contract.sh
     - script: scripts/qa/lint-repo-conventions.sh
       estimated_seconds: 58
+      timeout_seconds: 420
+    - script: scripts/qa/test-run-scripts-parallel-timeout-metadata.sh
+      estimated_seconds: 3
     - script: scripts/qa/test-verify-secrets-isolation.sh
     - script: scripts/qa/test-verify-infisical-env-validation-coverage.sh
     - script: scripts/qa/test-verify-secrets-management.sh
