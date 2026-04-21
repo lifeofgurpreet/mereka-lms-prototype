@@ -107,7 +107,7 @@ else
   echo "  Found: $TUTOR_ENV"
 
   # Check Node 24+ base image
-  if grep -qE '^FROM docker.io/node:([2-9][0-9]|[1-9][0-9]{1,})' "$TUTOR_ENV" 2>/dev/null; then
+  if grep -qE '^FROM (docker\.io/|mirror\.gcr\.io/library/)?node:([2-9][0-9]|[1-9][0-9]{1,})' "$TUTOR_ENV" 2>/dev/null; then
     check_pass "Node 24+ base image present in MFE Dockerfile"
   else
     NODE_LINE=$(grep '^FROM.*node:' "$TUTOR_ENV" 2>/dev/null | head -1 || true)

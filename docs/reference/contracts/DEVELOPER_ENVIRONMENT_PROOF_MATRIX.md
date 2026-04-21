@@ -45,9 +45,12 @@ developer build lane or weakening the source/render/artifact contract.
 Cancelled persistent-runner bootstrap runs can also leave `tutor_local` Docker
 containers, volumes, and networks behind; the bootstrap workflow owns bounded
 cleanup for that stale proof state before checkout.
-Run `24738471266` also showed the launch phase can take about 56 minutes before
-readiness passes, so phase timing/heartbeat artifacts are required follow-up for
-operator-grade feedback.
+Run `24738471266` showed the launch phase can take about 56 minutes before
+readiness passes; post-merge run `24743995049` on `2b86de8` confirmed that long
+launches are normal enough to need first-class operator feedback. The bootstrap
+workflow now emits `bootstrap-phase-timings.tsv` and
+`bootstrap-phase-summary.md` so proof artifacts show phase duration instead of
+only final pass/fail.
 
 Known coverage gaps from the same green bootstrap run:
 

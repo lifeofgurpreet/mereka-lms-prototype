@@ -5,10 +5,10 @@ Last verified: 2026-04-21
 
 ## Current Verified State
 
-- `repo_truth`: current `main` is `12db1b6` after PR #1989. The local quick-start source contract, bounded build-optimization delta contract, and repo-owned runner Buildx cleanup remain the app-repo truth surfaces.
+- `repo_truth`: current `main` is `2b86de83` after PR #1991. The local quick-start source contract, bounded build-optimization delta contract, and repo-owned runner Buildx cleanup remain the app-repo truth surfaces.
 - `infra_truth`: `.github/workflows/bootstrap-local-readiness.yml` is the clean bootstrap proof lane. `build-benchmark.yml` with `benchmark_class=app-cache-cold` / `image_family=both` is the separate app-cache-cold image-build proof lane. The old `true-cold` input remains a legacy alias only; the proof class disables app-level BuildKit cache imports but does not prove a pristine Docker daemon or absent base images on persistent runners. App repo Kustomize proof owns base/local contracts; production and rke2 environment overlays are infra-owned unless an explicit require flag is set.
-- `proof_truth`: app-cache-cold image-build proof `24721668598` is green on `39ae0fb86`; last accepted bootstrap baseline `24711453019` is green on `e7a4472cd`; current-main bootstrap rerun `24730265503` is green on `12db1b6` after Buildx cleanup and fastlane hook repair. Branch bootstrap run `24736358890` on `1506f9d90` selected fastlane and was cancelled by the runner/control plane during active migrations; no source error was observed before cancellation, and provenance/readiness did not run. Rerun `24737898005` on the same head exposed stale runner-local `tutor_local` Docker project state left by the cancelled run plus opaque plugin-enable failure output. Branch run `24738471266` on `878994d0c` passed on `lane_mode=fallback` after the workflow removed stale Tutor Docker state and the Tutor config wrapper made already-enabled canonical plugins idempotent.
-- `runtime_truth`: local/bootstrap proof is green for current main as initialized-state proof only. PR #1991 branch proof is green for the local MFE authn HTTP route (`http://apps.localhost/authn/login` returned HTTP 302) and upstream-image unbranded behavior. It does not prove GitOps realization, live cluster runtime, browser-rendered MFE login, or branded theme assets in a repo-built image.
+- `proof_truth`: app-cache-cold image-build proof `24721668598` is green on `39ae0fb86`; last accepted bootstrap baseline `24711453019` is green on `e7a4472cd`; current-main bootstrap rerun `24730265503` is green on `12db1b6` after Buildx cleanup and fastlane hook repair; PR #1991 branch bootstrap `24738471266` is green on `878994d0c`; post-merge Bootstrap Local Readiness `24743995049` is green on `2b86de83`. Build Tutor Images `24743995019` remains separate image-build proof and must not be collapsed into bootstrap proof.
+- `runtime_truth`: local/bootstrap proof is green for current main as initialized-state proof only. PR #1991 branch and post-merge main proof are green for the local MFE authn HTTP route (`http://apps.localhost/authn/login` returned HTTP 302) and upstream-image unbranded behavior. It does not prove GitOps realization, live cluster runtime, browser-rendered MFE login, or branded theme assets in a repo-built image.
 
 ## What We Achieved Already
 
@@ -42,12 +42,12 @@ Last verified: 2026-04-21
 
 ## Current Control Point
 
-Current truth: the lane is locally source-green, current-main bootstrap proof is
-green, and PR #1991 branch bootstrap proof is green on `878994d0c` after the
-stale-runner-state cleanup. The next control point is to keep these contracts
-green on any build-path edit, dispatch `bootstrap-local-readiness.yml` with
-`lane_mode=fallback` if fastlane remains under investigation, and classify any
-red result by authority:
+Current truth: the lane is locally source-green, PR #1991 branch bootstrap
+proof is green on `878994d0c`, and merged `main` (`2b86de83`) has green
+Bootstrap Local Readiness. The next control point is to keep these contracts
+green on any build-path edit, preserve one source -> render -> artifact chain,
+dispatch `bootstrap-local-readiness.yml` with `lane_mode=fallback` if fastlane
+remains under investigation, and classify any red result by authority:
 
 ```bash
 bash -n scripts/shared/setup-local.sh scripts/qa/verify-setup.sh scripts/qa/verify-cold-start-onboarding-contract.sh scripts/qa/verify-cicd-merge-gates-and-secrets.sh
@@ -134,10 +134,11 @@ gh run list --branch main --limit 20 \
 - The heavy workflows cannot prove every host laptop has enough Docker resources, so host requirements stay explicit in docs.
 - `mirror.gcr.io` is dependency acquisition for local/bootstrap/benchmark service, helper, frontend, and base images. Tutor-exposed refs should stay in Tutor config; hardcoded upstream Dockerfile refs must only be normalized by the named `dependency-image-mirrors.sh` compatibility patch with fixture coverage and a retirement trigger. It must not become a separate Dockerfile, Compose generator, or artifact semantics layer.
 - Fastlane and ARC caches are acceleration layers only. GHCR registry cache, ARC PVC/cache state, and fastlane host-local cache may make builds faster, but they are not source authority and must not change artifact semantics.
-- Bootstrap Local Readiness run `24738471266` spent about 56 minutes inside
-  `tutor local launch -I --skip-build` before readiness passed. That is
-  acceptable as proof evidence, but not yet world-class operator feedback.
-  Future work should add phase timing/heartbeat artifacts around image refresh,
-  migrations, and readiness so long runs are diagnosable before completion.
+- Bootstrap Local Readiness runs `24738471266` and `24743995049` spent most of
+  their wall time inside `tutor local launch -I --skip-build` before readiness
+  passed. That is acceptable proof evidence, but it needs better operator
+  feedback. The follow-up timing branch adds `bootstrap-phase-timings.tsv`,
+  `bootstrap-phase-summary.md`, and phase heartbeat notices to the same
+  bootstrap artifact so long runs are diagnosable before completion.
 - Production/rke2 overlay proof moved out of this app-repo static lane. That proof belongs in `bbi-infrastructure` and must be reported separately as infra/runtime truth.
 - `./scripts/qa/verify-multi-brand-site.sh` still fails on Caddy/domain coverage for public tenant hosts. That is domain routing debt outside this cold-start onboarding lane; do not hide it, but do not treat it as proof that local quick start is still broken.

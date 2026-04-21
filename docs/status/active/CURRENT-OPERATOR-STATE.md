@@ -791,3 +791,33 @@ The launch phase ran from about 18:19Z to 19:15Z. That is acceptable proof, but
 not acceptable operator feedback for a world-class lane. Add phase
 timing/heartbeat artifacts around image refresh, migrations, and readiness so
 long first-run bootstraps are diagnosable before the final log bundle exists.
+
+---
+
+### Slice 92 — 2026-04-21T21:15Z (post-merge bootstrap proof and timing follow-up)
+
+**Merged truth**: PR #1991 merged to `main` at
+`2b86de8349934149161d739326d0ae34030dc9a2`.
+
+**Post-merge proof run**: `24743995049`.
+
+**Result**: success on `main`.
+
+**What it proved**:
+
+- repo-scoped Tutor render completed
+- mirror-backed bootstrap image refresh completed
+- `tutor local launch -I --skip-build` completed
+- image provenance matched rendered compose refs and freshly pulled image IDs
+- local readiness passed, including:
+  - LMS route HTTP 200
+  - Studio route HTTP 302
+  - `http://apps.localhost/authn/login` HTTP 302
+
+**Follow-up now in progress**:
+
+The same run again spent most of its wall time inside the launch phase. The
+next branch keeps the same source -> render -> artifact lane but adds
+`bootstrap-phase-timings.tsv` and `bootstrap-phase-summary.md` to the existing
+bootstrap artifact so future long launches show phase durations and heartbeat
+notices instead of only final pass/fail.

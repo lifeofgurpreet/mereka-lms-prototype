@@ -107,6 +107,14 @@ jobs:
       - uses: actions/checkout@v4
       - name: Ensure Docker Compose CLI
         run: ./scripts/ci/install-docker-compose.sh
+      - name: Initialize bootstrap timing ledger
+        run: |
+          mkdir -p var/bootstrap-readiness
+          echo 'phase	event	timestamp_utc	epoch_seconds	status	duration_seconds' > var/bootstrap-readiness/bootstrap-phase-timings.tsv
+          echo 'Bootstrap phase started'
+          echo 'launch_full_local_tutor_bootstrap' >> var/bootstrap-readiness/bootstrap-phase-timings.tsv
+          echo '# Bootstrap Phase Timing' > var/bootstrap-readiness/bootstrap-phase-summary.md
+          echo 'GITHUB_STEP_SUMMARY'
       - run: |
           ./scripts/infra/tutor-config-save.sh \
             --set DOCKER_REGISTRY=mirror.gcr.io/ \
@@ -209,6 +217,21 @@ run_expect_fail() {
 write_pass_fixture
 run_expect_pass "bootstrap workflow provenance contract passes"
 
+write_pass_fixture
+TMP_WF="$tmpdir/.github/workflows/bootstrap-local-readiness.yml" python3 - <<'PY'
+from pathlib import Path
+import os
+
+wf = Path(os.environ["TMP_WF"])
+text = wf.read_text(encoding="utf-8")
+start = text.index('      - name: Initialize bootstrap timing ledger\n')
+end = text.index('      - run: |\n          ./scripts/infra/tutor-config-save.sh', start)
+text = text[:start] + text[end:]
+wf.write_text(text, encoding="utf-8")
+PY
+run_expect_fail "missing bootstrap phase timing artifacts is rejected"
+
+write_pass_fixture
 TMP_WF="$tmpdir/.github/workflows/bootstrap-local-readiness.yml" python3 - <<'PY'
 from pathlib import Path
 import os

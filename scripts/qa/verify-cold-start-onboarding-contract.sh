@@ -304,6 +304,10 @@ require_contains ".github/workflows/bootstrap-local-readiness.yml" '^[[:space:]]
 require_contains ".github/workflows/bootstrap-local-readiness.yml" 'config\.redacted\.yml' "bootstrap-local-readiness uploads only a redacted Tutor config snapshot"
 require_contains ".github/workflows/bootstrap-local-readiness.yml" 'line.strip\(\) == ""' "bootstrap-local-readiness redacts multi-line secret blocks in Tutor config artifacts"
 reject_contains ".github/workflows/bootstrap-local-readiness.yml" 'cp "\$TUTOR_ROOT/config\.yml" var/bootstrap-readiness/config\.yml' "bootstrap-local-readiness does not upload raw Tutor config secrets"
+require_contains ".github/workflows/bootstrap-local-readiness.yml" 'bootstrap-phase-timings\.tsv' "bootstrap-local-readiness emits machine-readable phase timing artifact"
+require_contains ".github/workflows/bootstrap-local-readiness.yml" 'bootstrap-phase-summary\.md' "bootstrap-local-readiness emits human-readable phase timing summary"
+require_contains ".github/workflows/bootstrap-local-readiness.yml" 'Bootstrap phase started' "bootstrap-local-readiness writes phase heartbeat notices"
+require_contains ".github/workflows/bootstrap-local-readiness.yml" 'launch_full_local_tutor_bootstrap' "bootstrap-local-readiness times the long Tutor launch phase"
 
 printf '\n== Documentation contract ==\n'
 require_contains "README.md" 'verify-cold-start-onboarding-contract\.sh' "README exposes offline cold-start contract verifier"

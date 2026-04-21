@@ -168,11 +168,62 @@ jobs:
       - name: Ensure Docker Compose CLI
         run: ./scripts/ci/install-docker-compose.sh
 
+      - name: Initialize bootstrap timing ledger
+        run: |
+          set -euo pipefail
+          mkdir -p var/bootstrap-readiness/phase-starts
+          cat > var/bootstrap-readiness/bootstrap-phase-timings.tsv <<'EOF'
+          phase	event	timestamp_utc	epoch_seconds	status	duration_seconds
+          EOF
+          cat > var/bootstrap-readiness/bootstrap-phase-timing.sh <<'EOF'
+          bootstrap_phase_key() {
+            printf '%s\n' "$1" | tr -c 'A-Za-z0-9_.-' '_'
+          }
+
+          bootstrap_phase_start() {
+            local phase="$1"
+            local key now_iso now_epoch
+            key="$(bootstrap_phase_key "$phase")"
+            now_iso="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            now_epoch="$(date -u +%s)"
+            mkdir -p var/bootstrap-readiness/phase-starts
+            printf '%s\n' "$now_epoch" > "var/bootstrap-readiness/phase-starts/${key}.epoch"
+            printf '%s\tstart\t%s\t%s\t\t\n' "$phase" "$now_iso" "$now_epoch" >> var/bootstrap-readiness/bootstrap-phase-timings.tsv
+            echo "::notice title=Bootstrap phase started::${phase} at ${now_iso}"
+          }
+
+          bootstrap_phase_finish() {
+            local phase="$1"
+            local phase_status="$2"
+            local key start_epoch end_iso end_epoch duration
+            key="$(bootstrap_phase_key "$phase")"
+            end_iso="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            end_epoch="$(date -u +%s)"
+            start_epoch="$end_epoch"
+            if [[ -f "var/bootstrap-readiness/phase-starts/${key}.epoch" ]]; then
+              start_epoch="$(cat "var/bootstrap-readiness/phase-starts/${key}.epoch")"
+            fi
+            duration=$((end_epoch - start_epoch))
+            printf '%s\tfinish\t%s\t%s\t%s\t%s\n' "$phase" "$end_iso" "$end_epoch" "$phase_status" "$duration" >> var/bootstrap-readiness/bootstrap-phase-timings.tsv
+            echo "::notice title=Bootstrap phase finished::${phase} status=${phase_status} duration_seconds=${duration}"
+          }
+
+          bootstrap_phase_guard() {
+            BOOTSTRAP_PHASE="$1"
+            export BOOTSTRAP_PHASE
+            bootstrap_phase_start "$BOOTSTRAP_PHASE"
+            trap 'rc=$?; bootstrap_phase_finish "$BOOTSTRAP_PHASE" "$rc"; exit "$rc"' EXIT
+          }
+          EOF
+
       - name: Render repo-scoped Tutor environment
         env:
           TUTOR_ROOT: ${{ github.workspace }}/tutor_env
         run: |
           set -euo pipefail
+          # shellcheck source=/dev/null
+          source var/bootstrap-readiness/bootstrap-phase-timing.sh
+          bootstrap_phase_guard "render_repo_scoped_tutor_environment"
           if [[ -f "$TUTOR_ROOT/env/local/docker-compose.yml" ]]; then
             timeout 10m tutor local stop >/dev/null 2>&1 || true
             timeout 10m tutor local down -v >/dev/null 2>&1 || true
@@ -207,6 +258,9 @@ jobs:
           TUTOR_ROOT: ${{ github.workspace }}/tutor_env
         run: |
           set -euo pipefail
+          # shellcheck source=/dev/null
+          source var/bootstrap-readiness/bootstrap-phase-timing.sh
+          bootstrap_phase_guard "resolve_rendered_bootstrap_image_set"
           mkdir -p var/bootstrap-readiness
           COMPOSE_ARGS=(
             -f "$TUTOR_ROOT/env/local/docker-compose.yml"
@@ -228,6 +282,9 @@ jobs:
       - name: Refresh rendered bootstrap images
         run: |
           set -euo pipefail
+          # shellcheck source=/dev/null
+          source var/bootstrap-readiness/bootstrap-phase-timing.sh
+          bootstrap_phase_guard "refresh_rendered_bootstrap_images"
           : > var/bootstrap-readiness/pulled-image-ids.txt
           pull_with_retry() {
             local image_ref="$1"
@@ -256,6 +313,9 @@ jobs:
           TUTOR_ROOT: ${{ github.workspace }}/tutor_env
         run: |
           set -euo pipefail
+          # shellcheck source=/dev/null
+          source var/bootstrap-readiness/bootstrap-phase-timing.sh
+          bootstrap_phase_guard "launch_full_local_tutor_bootstrap"
           # This lane is a full first-run bootstrap proof, not a fast steady-state smoke.
           # Let the job timeout define the budget instead of truncating the bootstrap mid-flight.
           tutor local launch -I --skip-build
@@ -263,6 +323,9 @@ jobs:
       - name: Validate bootstrap image provenance
         run: |
           set -euo pipefail
+          # shellcheck source=/dev/null
+          source var/bootstrap-readiness/bootstrap-phase-timing.sh
+          bootstrap_phase_guard "validate_bootstrap_image_provenance"
           mkdir -p var/bootstrap-readiness
           mapfile -t CONTAINER_IDS < <(docker ps -aq --filter name=tutor_local)
           if [[ "${#CONTAINER_IDS[@]}" -eq 0 ]]; then
@@ -311,7 +374,12 @@ jobs:
       - name: Verify bootstrap readiness
         env:
           TUTOR_ROOT: ${{ github.workspace }}/tutor_env
-        run: ./scripts/infra/verify-local-bootstrap-readiness.sh
+        run: |
+          set -euo pipefail
+          # shellcheck source=/dev/null
+          source var/bootstrap-readiness/bootstrap-phase-timing.sh
+          bootstrap_phase_guard "verify_bootstrap_readiness"
+          ./scripts/infra/verify-local-bootstrap-readiness.sh
 
       - name: Capture bootstrap provenance
         if: ${{ always() }}
@@ -319,6 +387,11 @@ jobs:
           TUTOR_ROOT: ${{ github.workspace }}/tutor_env
         run: |
           set -euo pipefail
+          if [[ -f var/bootstrap-readiness/bootstrap-phase-timing.sh ]]; then
+            # shellcheck source=/dev/null
+            source var/bootstrap-readiness/bootstrap-phase-timing.sh
+            bootstrap_phase_guard "capture_bootstrap_provenance"
+          fi
           mkdir -p var/bootstrap-readiness
           docker ps -a --filter name=tutor_local --format '{{.Names}} {{.Image}} {{.Status}}' > var/bootstrap-readiness/docker-ps.txt || true
           mapfile -t CONTAINER_IDS < <(docker ps -aq --filter name=tutor_local)
@@ -361,9 +434,56 @@ jobs:
           TUTOR_ROOT: ${{ github.workspace }}/tutor_env
         run: |
           set -euo pipefail
+          if [[ -f var/bootstrap-readiness/bootstrap-phase-timing.sh ]]; then
+            # shellcheck source=/dev/null
+            source var/bootstrap-readiness/bootstrap-phase-timing.sh
+            bootstrap_phase_guard "capture_failure_evidence"
+          fi
           mkdir -p var/bootstrap-readiness
           tutor local status > var/bootstrap-readiness/tutor-status.txt 2>&1 || true
           tutor local logs --tail 200 > var/bootstrap-readiness/tutor-logs.txt 2>&1 || true
+
+      - name: Write bootstrap timing summary
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          mkdir -p var/bootstrap-readiness
+          if [[ ! -f var/bootstrap-readiness/bootstrap-phase-timings.tsv ]]; then
+            {
+              echo 'phase	event	timestamp_utc	epoch_seconds	status	duration_seconds'
+              echo "workflow	not-started	$(date -u +%Y-%m-%dT%H:%M:%SZ)	$(date -u +%s)	cancelled	0"
+            } > var/bootstrap-readiness/bootstrap-phase-timings.tsv
+          fi
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+
+          timing_file = Path("var/bootstrap-readiness/bootstrap-phase-timings.tsv")
+          summary_file = Path("var/bootstrap-readiness/bootstrap-phase-summary.md")
+          rows = []
+          for line in timing_file.read_text(encoding="utf-8").splitlines()[1:]:
+              if not line.strip():
+                  continue
+              phase, event, timestamp, _epoch, status, duration = line.split("\t")
+              if event == "finish":
+                  rows.append((phase, timestamp, status, duration))
+
+          lines = ["# Bootstrap Phase Timing", "", "| Phase | Finished UTC | Status | Duration seconds |", "|---|---:|---:|---:|"]
+          if rows:
+              for phase, timestamp, status, duration in rows:
+                  lines.append(f"| `{phase}` | `{timestamp}` | `{status}` | `{duration}` |")
+          else:
+              lines.append("| `_none_` |  |  |  |")
+          lines.append("")
+          summary = "\n".join(lines)
+          summary_file.write_text(summary + "\n", encoding="utf-8")
+
+          step_summary = os.environ.get("GITHUB_STEP_SUMMARY")
+          if step_summary:
+              with Path(step_summary).open("a", encoding="utf-8") as handle:
+                  handle.write(summary + "\n")
+          PY
+          rm -rf var/bootstrap-readiness/phase-starts
 
       - name: Clean up local Tutor bootstrap
         if: ${{ always() }}

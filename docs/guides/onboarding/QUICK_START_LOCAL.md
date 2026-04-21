@@ -16,11 +16,13 @@ The first run builds local Open edX and MFE images, initializes Tutor data, star
 
 ## Current Proof Snapshot
 
-As of 2026-04-21, the onboarding source/docs contract, app-cache-cold image
-build proof, and current-main clean bootstrap proof are green. The clean
-bootstrap proof is an initialized-state proof only; it does not yet prove the
-MFE authn HTTP route or that an upstream bootstrap image contains repo-owned
-theme files.
+As of 2026-04-21, the onboarding source/docs contract and post-merge
+repo-scoped bootstrap proof are green. Post-merge `main` at `2b86de83` has
+green render-contract, Authn smoke, and Bootstrap Local Readiness checks. The
+heavy image-build workflow is still being monitored and must not be reported as
+closed. The clean bootstrap proof is an initialized-state proof only; it does
+not yet prove browser-rendered Learning MFE branding or GitOps/live-cluster
+realization.
 
 | Proof | Run | Commit | Result | What it proves |
 |---|---|---|---|---|
@@ -28,6 +30,12 @@ theme files.
 | App-cache-cold image build | `24721668598` | `39ae0fb86` | success | Open edX and MFE image helpers build with app-level BuildKit cache imports disabled. |
 | Last accepted bootstrap baseline | `24711453019` | `e7a4472cd` | success | A clean repo-scoped `TUTOR_ROOT` launched and passed readiness checks before the current runner incident. |
 | Current-main bootstrap rerun | `24730265503` | `12db1b6` | success | Rerun after repo Buildx cleanup and fastlane hook repair. This proves the clean repo-scoped Tutor bootstrap readiness lane, not the MFE authn browser route or branded runtime image content. |
+| PR #1991 branch bootstrap | `24738471266` | `878994d0c` | success | Proved fallback-lane repo-scoped bootstrap, image provenance, LMS/Studio readiness, and `http://apps.localhost/authn/login` returning HTTP 302. |
+| Post-merge render contract | `24743995056` | `2b86de83` | success | Tutor plugin/render contract remains green on merged `main`. |
+| Post-merge Authn smoke | `24745579089` | `2b86de83` | success | Scheduled Authn MFE config smoke remains green on merged `main`. |
+| Post-merge Build Tutor Images | `24743995019` | `2b86de83` | in progress / mixed | OpenEdX image job is marked failed while its build step remains log-unavailable; MFE image job is still running. Do not classify root cause until logs or rerun evidence exist. |
+| Post-merge Bootstrap Local Readiness | `24743995049` | `2b86de83` | success | Clean repo-scoped Tutor bootstrap passed on merged `main` after launch, image provenance, readiness, and artifact capture. |
+| Local manual Tutor render | local worktree | this branch | success | `python3 -m venv .venv`, `pip install -r requirements-tutor.txt`, and `./scripts/infra/tutor-config-save.sh ...` completed through render, build-context prep, and `verify-tutor-config`. |
 
 These are shared proof lanes, not alternate build systems. Do not create a
 second Dockerfile, Compose stack, or local-only build path to work around a
@@ -136,7 +144,7 @@ curl -I http://apps.localhost/authn/login   # MFE Login
 
 ## Separate CI Proof Lane
 
-The clean bootstrap proof is [`.github/workflows/bootstrap-local-readiness.yml`](../../../.github/workflows/bootstrap-local-readiness.yml). It creates a fresh repo-scoped `TUTOR_ROOT`, launches `tutor local launch -I --skip-build`, validates image provenance, and runs `./scripts/infra/verify-local-bootstrap-readiness.sh`.
+The clean bootstrap proof is [`.github/workflows/bootstrap-local-readiness.yml`](../../../.github/workflows/bootstrap-local-readiness.yml). It creates a fresh repo-scoped `TUTOR_ROOT`, launches `tutor local launch -I --skip-build`, validates image provenance, and runs `./scripts/infra/verify-local-bootstrap-readiness.sh`. Its artifact includes `bootstrap-phase-timings.tsv` and `bootstrap-phase-summary.md` so long runs show which phase consumed time instead of leaving operators with only a final pass/fail.
 
 The bootstrap workflow uses the same Tutor render path as local setup, including the named dependency-image mirror patch for Tutor-emitted hardcoded Docker Hub refs and `mirror.gcr.io` settings where Tutor exposes dependency images. The benchmark image-build proof also configures BuildKit with a `docker.io` registry mirror as a fallback guard, but the explicit render patch is what makes the known upstream dependency refs deterministic. Those mirror settings are not build semantic changes; they exist so proof and first-run setup do not depend on anonymous Docker Hub quota.
 
@@ -176,7 +184,7 @@ gh workflow run bootstrap-local-readiness.yml \
 
 Do not mark cold-start onboarding fixed until the offline contract passes, the bootstrap workflow is green for the branch being merged, app-cache-cold image build proof is either green or explicitly waived with a fresh reason, and any route/theme checks required by the proof matrix are either green or explicitly listed as not covered by that lane.
 
-Current follow-up from run `24730265503`: during the successful bootstrap, a direct runner probe saw `http://apps.localhost/authn/login` return HTTP 400 because Django rejected `apps.localhost` as an `ALLOWED_HOSTS` value, and LMS logs showed `Theme 'mereka' not found` for the upstream bootstrap image. This branch fixes the MFE host source contract, makes the MFE authn route fail closed in local readiness, and skips SiteTheme convergence when the running image does not contain the repo-owned theme directory. Branch run `24736358890` was cancelled during active migrations, and rerun `24737898005` exposed stale `tutor_local` Docker state left by that cancellation; this branch now cleans that state before checkout. Branch run `24738471266` on `878994d0c` then passed on `lane_mode=fallback`, including the MFE authn route with HTTP 302. The heavy launch phase still needs better timing/heartbeat output so long first-run bootstraps are easier to diagnose.
+Current follow-up from run `24730265503`: during the successful bootstrap, a direct runner probe saw `http://apps.localhost/authn/login` return HTTP 400 because Django rejected `apps.localhost` as an `ALLOWED_HOSTS` value, and LMS logs showed `Theme 'mereka' not found` for the upstream bootstrap image. PR #1991 fixed the MFE host source contract, makes the MFE authn route fail closed in local readiness, and skips SiteTheme convergence when the running image does not contain the repo-owned theme directory. Branch run `24736358890` was cancelled during active migrations, and rerun `24737898005` exposed stale `tutor_local` Docker state left by that cancellation; the workflow now cleans that state before checkout. Post-merge run `24743995049` on `2b86de8` passed on `main`, including the MFE authn route with HTTP 302. The workflow now records phase timing artifacts so long first-run bootstraps are easier to diagnose.
 
 ## Daily Commands
 

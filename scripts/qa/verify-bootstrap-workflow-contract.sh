@@ -163,6 +163,16 @@ else
   fail "workflow missing bootstrap readiness verifier invocation"
 fi
 
+if grep -q 'bootstrap-phase-timings.tsv' "$BOOTSTRAP_WF" \
+  && grep -q 'bootstrap-phase-summary.md' "$BOOTSTRAP_WF" \
+  && grep -q 'Bootstrap phase started' "$BOOTSTRAP_WF" \
+  && grep -q 'launch_full_local_tutor_bootstrap' "$BOOTSTRAP_WF" \
+  && grep -q 'GITHUB_STEP_SUMMARY' "$BOOTSTRAP_WF"; then
+  pass "workflow emits machine-readable phase timing and human-readable heartbeat summary artifacts"
+else
+  fail "workflow missing bootstrap phase timing/heartbeat artifact contract"
+fi
+
 if grep -Fq 'if: ${{ always() }}' "$BOOTSTRAP_WF" \
   && grep -q 'actions/upload-artifact' "$BOOTSTRAP_WF" \
   && grep -q 'tutor local down -v' "$BOOTSTRAP_WF"; then
