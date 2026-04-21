@@ -1,0 +1,89 @@
+name: Publish TechDocs to R2
+
+# Builds the mkdocs site from this repo and uploads it to the shared
+# mereka-techdocs Cloudflare R2 bucket. Backstage (dev/staging/prod) reads
+# from that bucket, so all three envs pick up the same content.
+#
+# We only republish when docs or the mkdocs/catalog configs change — that
+# way a typical PR doesn't trigger an unnecessary docs rebuild.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - "catalog-info.yaml"
+      - ".github/workflows/techdocs-publish.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: techdocs-publish
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Generate and publish TechDocs
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ENTITY_REF: default/component/mereka-lms-app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Set up Node (for techdocs-cli)
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f  # v6.3.0
+        with:
+          node-version: "20"
+
+      - name: Install MkDocs + TechDocs toolchain
+        run: |
+          python -m pip install --upgrade pip
+          # Pinned for reproducible builds; bump as upstream releases.
+          pip install "mkdocs-techdocs-core==1.6.0"
+          npm install -g "@techdocs/cli@1.9.4"
+          techdocs-cli --version
+          mkdocs --version
+
+      - name: Generate docs (mkdocs build)
+        run: |
+          techdocs-cli generate \
+            --source-dir . \
+            --output-dir ./site \
+            --no-docker \
+            --verbose
+
+      - name: Publish to Cloudflare R2
+        env:
+          # R2 is S3-compatible — the AWS SDK + techdocs-cli drivers accept
+          # AWS_* env vars + a custom --awsEndpoint pointing at the R2 URL.
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_TECHDOCS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_TECHDOCS_SECRET_ACCESS_KEY }}
+          AWS_REGION: auto
+          R2_ACCOUNT_ID: ${{ secrets.R2_TECHDOCS_ACCOUNT_ID }}
+          R2_BUCKET: ${{ secrets.R2_TECHDOCS_BUCKET }}
+        run: |
+          techdocs-cli publish \
+            --publisher-type awsS3 \
+            --storage-name "$R2_BUCKET" \
+            --awsEndpoint "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com" \
+            --awsS3ForcePathStyle \
+            --entity "$ENTITY_REF"
+
+      - name: Summary
+        run: |
+          echo "## TechDocs published" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Entity: \`$ENTITY_REF\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Bucket: \`$R2_BUCKET\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- View: https://backstage.mereka.io/docs/default/component/mereka-lms-app" >> "$GITHUB_STEP_SUMMARY"

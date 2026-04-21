@@ -1,0 +1,65 @@
+# MkDocs configuration for Backstage TechDocs.
+#
+# This config is intentionally minimal. Its job is to produce a navigable
+# introduction to mereka-lms inside the Backstage portal, not to surface
+# every file in docs/. We pick a small curated nav of the most useful
+# pages; unlisted files in docs/ are still built (so direct links work)
+# but don't clutter the sidebar.
+#
+# strict: false is important. The existing 100+ docs have a lot of
+# cross-references that MkDocs treats as "broken" (links between files
+# that live in different subdirectories, links to files outside docs/,
+# etc.). We're not cleaning those up in this PR; turning strict on would
+# fail every build.
+#
+# How it's published:
+#   .github/workflows/techdocs-publish.yml runs `techdocs-cli generate`
+#   + `techdocs-cli publish --publisher-type awsS3` on every push to main
+#   that touches docs/, mkdocs.yml, or catalog-info.yaml. Output lands in
+#   the mereka-techdocs R2 bucket at
+#   default/component/mereka-lms-app/. Backstage reads from the same
+#   bucket (see app-config.production.yaml in the backstage repo).
+
+site_name: Mereka LMS
+site_description: Open edX-based learning management system for Mereka Academy
+docs_dir: docs
+site_url: https://backstage.mereka.io/docs/default/component/mereka-lms-app
+
+# TechDocs uses this theme to render inside the Backstage shell.
+# It wraps mkdocs-material + Backstage-specific extensions.
+plugins:
+  - techdocs-core
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: true
+
+# Curated navigation. Add to this as docs stabilize.
+# Files under docs/ that are NOT listed here still get built and are
+# accessible via their direct URL — they just don't appear in the sidebar.
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Quick Start: guides/onboarding/QUICK_START_LOCAL.md
+    - Local Setup: guides/onboarding/LOCAL_SETUP.md
+    - Devcontainer: guides/onboarding/DEVCONTAINER_GUIDE.md
+    - Workflow: guides/onboarding/WORKFLOW_LOCAL.md
+  - Guides:
+    - Index by Audience: guides/INDEX_BY_AUDIENCE.md
+    - CI tokens for developers: guides/CI_TOKENS_FOR_DEVELOPERS.md
+  - Operations:
+    - Troubleshooting: ops/runbooks/TROUBLESHOOTING.md
+  - Architecture:
+    - Platform sources of truth: adr/028-platform-sources-of-truth-and-control-planes.md
+    - Tenant lifecycle contract: adr/033-tenant-lifecycle-contract.md
+    - Open edX + Tutor methodology: adr/021-openedx-tutor-methodology.md
+    - Multi-tenancy model: adr/024-multi-tenancy-true-tenants.md
+  - Contributing: CONTRIBUTING.md
+
+# Do not fail the build on unresolved links. We'll tighten this later.
+strict: false
