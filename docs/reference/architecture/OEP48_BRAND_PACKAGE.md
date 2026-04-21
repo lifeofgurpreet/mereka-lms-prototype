@@ -179,7 +179,7 @@ CI enforces no drift between layers via the `design-token-validation` job.
 | Colors / SCSS variables | `scss/_tokens.scss` + runtime overrides (`mereka-overrides.css`) | YES |
 | CSS custom properties | `--mereka-*` + `--pgn-*` via `_tokens.scss` and `mereka-overrides.css` | YES |
 | Typography / font declarations | `scss/_fonts.scss` (woff2, no Google Fonts dependency) | YES |
-| Header component | `lms/templates/header/brand.html` (LMS); MFE header via Paragon/navbar overrides in `mereka.scss` | PARTIAL — LMS has Mako template; MFE uses CSS-only header overrides, no React header component |
+| Header component | `lms/templates/header/brand.html` (LMS); `MerekaHeaderLogo` via the MFE `org.openedx.frontend.layout.header_logo.v1` plugin slot | YES — LMS uses the Mako theme hook; MFEs use the React slot component |
 | Footer component | `lms/templates/footer.html` (LMS); MFE footer React component via plugin slot | YES — both surfaces |
 | Package manifest (`package.json`) | Present at `infrastructure/tutor/brand-mereka/package.json` | YES |
 | OEP-48 `logo.js` exports | Present at `infrastructure/tutor/brand-mereka/logo.js` | YES |
@@ -216,13 +216,13 @@ export { default as favicon } from './favicon.ico';
 
 ---
 
-### GAP-3: No automated brand package build / packaging step
+### GAP-3: Automated brand package sync gate (resolved for repo-local package)
 
 **What OEP-48 envisions**: A CI job that assembles the brand package (logos, fonts, SCSS, JS exports) into a publishable artifact.
 
-**Current state**: Token sync is automated via `scripts/branding/generate-tokens-from-canonical.sh` (run in CI). Logo/font sync from `assets/branding/` into the three theme surfaces (`lms/`, `cms/`, `mfe/`) is currently a manual step (`scripts/branding/sync-brand-assets.sh`). There is no `npm pack` or GitHub release step that produces a versioned brand package artifact.
+**Current state**: Resolved for repo-local package use. Token sync is automated via `scripts/branding/generate-tokens-from-canonical.sh`, logo/font/package sync is handled by `scripts/branding/sync-brand-assets.sh` and `scripts/branding/sync-brand-package.sh`, and `scripts/qa/verify-branding-asset-sync.sh` is wired into static CI. There is still no external `npm pack` or GitHub release step that produces a separately versioned brand package artifact.
 
-**Impact**: Manual sync risk — logo/font files could drift between `assets/branding/` (canonical) and the three theme surfaces. The token pipeline is automated and CI-enforced; the logo/font sync is not.
+**Impact**: Runtime and repo-local build gap closed. Remaining optional work is release artifact publishing/versioning if the brand package needs to be consumed outside this repo.
 
 ---
 
@@ -236,13 +236,13 @@ export { default as favicon } from './favicon.ico';
 
 ---
 
-### GAP-5: MFE header — CSS-only, no React component override
+### GAP-5: MFE header React slot override (resolved)
 
 **What OEP-48 expects**: An optional React header component exported from the brand package to replace the default Open edX header.
 
-**Current state**: Mereka MFE header branding is achieved via CSS overrides in `mereka.scss` (navbar background, logo height, typography). There is no Mereka React header component. The MFE runtime config passes `LOGO_URL` which Paragon's default header renders.
+**Current state**: Resolved. `MerekaHeaderLogo` is defined in the MFE runtime definitions and registered through `mereka_lms_mfe_slots.py` on `org.openedx.frontend.layout.header_logo.v1` using the supported hide-and-insert replacement pattern. `scripts/qa/verify-mfe-header-branding.sh` and `scripts/qa/verify-plugin-slot-wiring.sh` both verify this source contract.
 
-**Impact**: Low-medium. The current approach is visually correct and functionally equivalent for learner-facing MFEs. An operator who wants a structurally different MFE header (e.g., different nav items, different layout) would need a React header component. Not required for current use cases.
+**Impact**: Gap closed for current MFE runtime branding. The remaining work is browser proof on the branded Learning MFE route after a repo-built runtime image is available.
 
 ---
 
@@ -255,11 +255,11 @@ export { default as favicon } from './favicon.ico';
 | Self-hosted fonts | YES — 9 woff2 files × 3 surfaces | Same fonts in an npm package | LOW |
 | CSS custom properties (colors, typography) | YES — 110+ tokens, CI-enforced, no drift | Same token file in an npm package | LOW |
 | SCSS variables | YES — `_tokens.scss` with all brand colors | Same SCSS file in an npm package | LOW |
-| Design token pipeline (automated) | YES — `generate-tokens-from-canonical.sh`, CI gate | Extend to cover logo/font sync | MEDIUM |
+| Design token pipeline (automated) | YES — `generate-tokens-from-canonical.sh`, asset/package sync scripts, CI gate | Optional external package publishing | LOW |
 | LMS header branding | YES — `brand.html` Mako template | Same (Mako is correct for LMS) | NONE |
 | LMS footer branding | YES — custom `footer.html` with logo | Same (Mako is correct for LMS) | NONE |
 | MFE footer component | YES — React plugin slot component | Same | NONE |
-| MFE header component (React) | NO — CSS-only | Optional React header export | LOW |
+| MFE header component (React) | YES — `MerekaHeaderLogo` via `header_logo.v1` plugin slot | Browser proof after repo-built runtime image | LOW |
 | npm brand package (`package.json`) | YES (local package) | Optional publish pipeline | LOW |
 | JS logo exports (`logo.js`) | YES | Keep exports in sync with asset aliases | LOW |
 | Automated brand package versioning | NO | CI job: `npm pack` or GitHub release | MEDIUM |
@@ -277,6 +277,16 @@ These are improvements beyond the current T110 scope, listed for completeness:
 
 ---
 
+## Verifier Boundary
+
+`scripts/qa/verify-oep48-brand-package.sh` verifies the brand package source
+contract and may use the tracked MFE Dockerfile snapshot when ignored local
+render output is stale. Rendered Dockerfile parity remains a separate build
+contract enforced by `scripts/qa/verify-mfe-build-prereqs.sh` and the Tutor
+render/build-context lanes.
+
+---
+
 ## Related Documentation
 
 - `docs/reference/architecture/OEP48_BRAND_PACKAGE.md` — token pipeline architecture (Phase 3 complete)
@@ -285,6 +295,6 @@ These are improvements beyond the current T110 scope, listed for completeness:
 - `docs/guides/branding/BRANDING_GUARDRAILS.md` — brand parity across surfaces
 - `specs/design-tokens-system_spec.md` — acceptance criteria for token system
 - `assets/branding/tokens.provenance.json` — upstream sync metadata
-- `infrastructure/tutor/mfe-build/README.md` — MFE Dockerfile notes including brand migration pending
+- `infrastructure/tutor/mfe-build/README.md` — MFE Dockerfile snapshot and remaining rendered-build-context mutation notes
 - `scripts/qa/verify-brand-parity.sh` — comprehensive brand parity verifier
 - `scripts/qa/verify-oep48-brand-package.sh` — OEP-48 specific verifier (this task)

@@ -2365,7 +2365,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-branding-asset-sync.sh",
-      "reference_count": 10,
+      "reference_count": 11,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -3410,7 +3410,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-configmap-hash-suffixes.sh",
-      "reference_count": 4,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -9005,7 +9005,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-build-prereqs.sh",
-      "reference_count": 19,
+      "reference_count": 20,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -9280,7 +9280,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-header-branding.sh",
-      "reference_count": 6,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -12595,7 +12595,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-plugin-slot-wiring.sh",
-      "reference_count": 16,
+      "reference_count": 17,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

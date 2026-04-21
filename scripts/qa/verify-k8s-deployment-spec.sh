@@ -17,6 +17,7 @@ NC='\033[0m' # No Color
 PASS_COUNT=0
 FAIL_COUNT=0
 WARN_COUNT=0
+SKIP_COUNT=0
 
 # Paths
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -59,6 +60,11 @@ warn() {
     WARN_COUNT=$((WARN_COUNT + 1))
 }
 
+skip() {
+    echo -e "${YELLOW}SKIP${NC}: $1"
+    SKIP_COUNT=$((SKIP_COUNT + 1))
+}
+
 # Check functions
 
 check_replicas() {
@@ -68,12 +74,13 @@ check_replicas() {
     local kustomization="${OVERLAYS_DIR}/${overlay}/kustomization.yaml"
 
     if [[ ! -f "$kustomization" ]]; then
-        fail "Kustomization file not found: $kustomization"
+        skip "Overlay '$overlay' is not present in this repo; non-local environment overlays are GitOps-owned"
         return
     fi
 
     if [[ "$overlay" == "production" ]]; then
-        # Check for replicas section in production overlay
+        # Check for replicas section in the GitOps production overlay when
+        # a local checkout of that overlay is explicitly supplied.
         local lms_replicas
         local worker_replicas
 
@@ -92,14 +99,46 @@ check_replicas() {
             fail "Production lms-worker replicas = $worker_replicas (expected 2)"
         fi
     elif [[ "$overlay" == "local" ]]; then
-        # Local should have no explicit replicas (defaults to 1)
         local has_replicas
         has_replicas=$("$YQ" '.replicas' "$kustomization" 2>/dev/null || echo "null")
 
         if [[ "$has_replicas" == "null" ]]; then
             pass "Local overlay has no explicit replicas (defaults to 1)"
         else
-            warn "Local overlay has explicit replicas section"
+            local all_passed=true
+            local core_workloads=("lms" "cms" "lms-worker" "cms-worker")
+            local disabled_workloads=(
+                "enterprise-access"
+                "enterprise-access-worker"
+                "enterprise-admin-portal"
+                "enterprise-catalog"
+                "enterprise-catalog-worker"
+                "enterprise-learner-portal"
+                "enterprise-subsidy"
+                "payments-gateway"
+            )
+
+            for workload in "${core_workloads[@]}"; do
+                local count
+                count=$("$YQ" ".replicas[] | select(.name == \"${workload}\") | .count" "$kustomization" 2>/dev/null || echo "")
+                if [[ "$count" != "1" ]]; then
+                    fail "Local overlay ${workload} replicas = ${count:-unset} (expected 1)"
+                    all_passed=false
+                fi
+            done
+
+            for workload in "${disabled_workloads[@]}"; do
+                local count
+                count=$("$YQ" ".replicas[] | select(.name == \"${workload}\") | .count" "$kustomization" 2>/dev/null || echo "")
+                if [[ -n "$count" && "$count" != "0" ]]; then
+                    fail "Local overlay ${workload} replicas = ${count} (expected 0 when explicitly listed)"
+                    all_passed=false
+                fi
+            done
+
+            if [[ "$all_passed" == true ]]; then
+                pass "Local overlay replica contract matches core=1 and known disabled workloads=0"
+            fi
         fi
     fi
 }
@@ -169,9 +208,11 @@ check_redis_exporter() {
     echo "Checking Redis exporter sidecar"
 
     local deployments="$RENDERED_BASE"
+    local exporter_port
 
-    if grep -A 50 "name: redis$" "$deployments" | grep -q "name: redis-exporter" && \
-       grep -A 50 "name: redis$" "$deployments" | grep -A 20 "name: redis-exporter" | grep -q "containerPort: 9121"; then
+    exporter_port=$("$YQ" eval 'select(.kind == "Deployment" and .metadata.name == "redis") | .spec.template.spec.containers[] | select(.name == "redis-exporter") | .ports[]? | select(.containerPort == 9121) | .containerPort' "$deployments" 2>/dev/null | grep -v "^---$" | head -1 || echo "")
+
+    if [[ "$exporter_port" == "9121" ]]; then
         pass "Redis Deployment has redis-exporter sidecar with port 9121"
     else
         fail "Redis Deployment missing redis-exporter sidecar or port 9121"
@@ -289,7 +330,7 @@ check_selector_match() {
             # mongodb service exists in base but has no Deployment (Atlas-only architecture)
             # Production overlay removes it via remove-legacy-mongodb-service.yaml
             if [[ "$service_name" == "mongodb" ]]; then
-                warn "Service mongodb has no matching Deployment (expected: Atlas-only, removed in production overlay)"
+                warn "Service mongodb has no matching Deployment (expected: Atlas-only, removed in GitOps production overlay)"
             elif [[ "$service_name" == "promtail" ]]; then
                 warn "Service promtail has no matching Deployment (expected: runs as DaemonSet, not Deployment)"
             else
@@ -374,6 +415,11 @@ check_ingress_count() {
     echo "Checking production Ingress count"
 
     local ingress_dir="${OVERLAYS_DIR}/production"
+    if [[ ! -d "$ingress_dir" ]]; then
+        skip "Production Ingress is GitOps-owned; deploy/k8s/overlays/production is absent in this repo"
+        return
+    fi
+
     local ingress_count
     ingress_count=$(find "$ingress_dir" -name "ingress-*.yaml" -o -name "*-ingress.yaml" | wc -l)
 
@@ -388,6 +434,11 @@ check_ingress_annotations() {
     echo "Checking Ingress cert-manager annotations"
 
     local ingress_dir="${OVERLAYS_DIR}/production"
+    if [[ ! -d "$ingress_dir" ]]; then
+        skip "Production Ingress annotations are verified in the GitOps overlay, not this app repo"
+        return
+    fi
+
     local ingress_files
     ingress_files=$(find "$ingress_dir" -name "ingress-*.yaml" -o -name "*-ingress.yaml")
 
@@ -412,6 +463,11 @@ check_ingress_annotations() {
 
 check_ingress_hosts() {
     echo "Checking LMS Ingress hosts"
+
+    if [[ ! -d "${OVERLAYS_DIR}/production" ]]; then
+        skip "Production Ingress hosts are verified in the GitOps overlay, not this app repo"
+        return
+    fi
 
     local lms_ingress
     lms_ingress=$(find "${OVERLAYS_DIR}/production" -name "*lms*.yaml" | grep -i ingress | head -1)
@@ -555,7 +611,7 @@ Verify K8s deployment manifests against k8s-deployment spec (static analysis).
 
 OPTIONS:
     --check <name>      Run specific check (see list below)
-    --overlay <name>    Specify overlay for checks that need it (production, local)
+    --overlay <name>    Specify overlay for checks that need it (local by default)
     --help              Show this help message
 
 AVAILABLE CHECKS:
@@ -581,7 +637,7 @@ AVAILABLE CHECKS:
 
 EXAMPLES:
     $(basename "$0")                                    # Run all checks
-    $(basename "$0") --check replicas --overlay production
+    $(basename "$0") --check replicas --overlay local
     $(basename "$0") --check envfrom
     $(basename "$0") --check mysql-args
 
@@ -590,7 +646,7 @@ EOF
 
 # Parse arguments
 CHECK_NAME=""
-OVERLAY="production"
+OVERLAY="local"
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -734,6 +790,7 @@ echo "================================="
 echo -e "${GREEN}Passed: $PASS_COUNT${NC}"
 echo -e "${RED}Failed: $FAIL_COUNT${NC}"
 echo -e "${YELLOW}Warnings: $WARN_COUNT${NC}"
+echo -e "${YELLOW}Skipped: $SKIP_COUNT${NC}"
 
 if [[ $FAIL_COUNT -gt 0 ]]; then
     exit 1

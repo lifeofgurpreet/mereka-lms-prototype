@@ -5,6 +5,10 @@ acceptance_criteria:
     K8s deployments reference `openedx-secrets` and `database-secrets`, then all pods
     reach Running state with no missing environment variable errors in logs.
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-configmap-hash-suffixes.sh
+    command: scripts/qa/verify-configmap-hash-suffixes.sh
   - type: manual
     runbook: docs/ops/runbooks/K8S_DEPLOYMENT_RUNBOOK.md
     section: Integration Tests
@@ -89,8 +93,9 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_checkout_route.py
     command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
 - id: AC-002
-  description: Given the production overlay, when `kubectl kustomize deploy/k8s/overlays/production`
-    is run, then it renders without errors and all resources are in namespace `mereka-lms`.
+  description: Given the GitOps production overlay, when `kubectl kustomize bbi-infrastructure/apps/mereka-lms/overlays/prod`
+    is run from the GitOps checkout, then it renders without errors and all resources
+    are in namespace `mereka-lms`.
   verify:
   - type: automated
     test_type: shell_verification
@@ -133,8 +138,8 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
 - id: AC-004
-  description: Given the production overlay, when LMS Deployment replicas are inspected,
-    then LMS has 2 replicas and LMS-Worker has 2 replicas.
+  description: Given the GitOps production overlay, when LMS Deployment replicas are
+    inspected, then LMS has 2 replicas and LMS-Worker has 2 replicas.
   verify:
   - type: automated
     test_type: shell_verification
@@ -158,7 +163,8 @@ acceptance_criteria:
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-005
   description: Given the local overlay, when Deployment replicas are inspected, then
-    all Deployments have exactly 1 replica.
+    core Open edX workloads (`lms`, `cms`, `lms-worker`, `cms-worker`) have 1 replica
+    and intentionally disabled optional local workloads have 0 replicas.
   verify:
   - type: automated
     test_type: shell_verification
@@ -368,7 +374,7 @@ acceptance_criteria:
     file: scripts/qa/verify-lms-rke2-validation.sh
     command: scripts/qa/verify-lms-rke2-validation.sh
 - id: AC-017
-  description: 'Given the production overlay, when Ingress resources are inspected,
+  description: 'Given the GitOps production overlay, when Ingress resources are inspected,
     then three Ingresses exist: openedx-lms, openedx-studio, openedx-mfe.'
   verify:
   - type: automated
@@ -495,8 +501,8 @@ acceptance_criteria:
     file: scripts/qa/verify-lms-rke2-validation.sh
     command: scripts/qa/verify-lms-rke2-validation.sh
 - id: AC-025
-  description: Given the production overlay, when image tags are inspected, then no
-    image uses the `latest` tag.
+  description: Given the GitOps production overlay, when image tags are inspected,
+    then no image uses the `latest` tag.
   verify:
   - type: automated
     test_type: shell_verification
@@ -511,9 +517,9 @@ acceptance_criteria:
     file: scripts/qa/verify-rke2-tenant-routes.sh
     command: scripts/qa/verify-rke2-tenant-routes.sh
 - id: AC-026
-  description: Given the production overlay, when openedx image references are inspected,
-    then they point to `ghcr.io/biji-biji-initiative/mereka-lms/` with date-prefixed
-    SHA tags.
+  description: Given the GitOps production overlay, when openedx image references
+    are inspected, then they point to `ghcr.io/biji-biji-initiative/mereka-lms/` with
+    date-prefixed SHA tags.
   verify:
   - type: automated
     test_type: shell_verification
