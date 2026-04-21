@@ -516,7 +516,17 @@ jobs:
           # bounded; the runner is discarded at job exit anyway.
           cleanup: false
 
+      - name: Log in to GHCR (build cache)
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
       - name: Fix DinD network MTU
+        env:
+          # GHCR-mirrored busybox — see .github/workflows/mirror-ci-tools.yml.
+          # Replaces docker.io/library/busybox, which blocks the ARC pool on
+          # Docker Hub unauthenticated rate limits.
+          BUSYBOX_IMAGE: ghcr.io/biji-biji-initiative/mereka-lms/cache/busybox:stable
         run: |
           # ARC DinD containers inherit docker0 bridge MTU 1500, but the pod
           # network (eth0) uses MTU 1280 on rke2-nonprod.  Large packets
@@ -532,7 +542,7 @@ jobs:
           # Uses --pid=host + nsenter to access the DinD daemon's mount
           # namespace and modify /etc/docker/daemon.json in-place.
           if docker info >/dev/null 2>&1; then
-            docker run --privileged --pid=host busybox \
+            docker run --privileged --pid=host "${BUSYBOX_IMAGE}" \
               nsenter -t 1 -m -- sh -c '
                 mkdir -p /etc/docker
                 echo "{\"dns\":[\"8.8.8.8\",\"1.1.1.1\"]}" > /etc/docker/daemon.json
@@ -543,11 +553,6 @@ jobs:
             # Verify the MTU took effect
             docker network inspect bridge --format '{{json .Options}}' || true
           fi
-
-      - name: Log in to GHCR (build cache)
-        env:
-          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Build OpenEdX image
         env:
@@ -833,7 +838,14 @@ jobs:
           #       max-parallelism = 4
           # which writes a real buildkitd.toml the worker respects.
 
+      - name: Log in to GHCR (build cache)
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
       - name: Fix DinD network MTU
+        env:
+          BUSYBOX_IMAGE: ghcr.io/biji-biji-initiative/mereka-lms/cache/busybox:stable
         run: |
           # ARC DinD containers inherit docker0 bridge MTU 1500, but the pod
           # network (eth0) uses MTU 1280 on rke2-nonprod.  Large packets
@@ -842,8 +854,11 @@ jobs:
           # MTU authority lives in the heavy-runner dockerd startup flags and
           # ARC daemon config. Do not rewrite "mtu" here; doing so collides
           # with dockerd's existing --mtu flag during SIGHUP reload.
+          #
+          # BUSYBOX_IMAGE is the GHCR-mirrored copy (see mirror-ci-tools.yml);
+          # docker.io/library/busybox hits Docker Hub anon rate limits on ARC.
           if docker info >/dev/null 2>&1; then
-            docker run --privileged --pid=host busybox \
+            docker run --privileged --pid=host "${BUSYBOX_IMAGE}" \
               nsenter -t 1 -m -- sh -c '
                 mkdir -p /etc/docker
                 echo "{\"dns\":[\"8.8.8.8\",\"1.1.1.1\"]}" > /etc/docker/daemon.json
@@ -853,11 +868,6 @@ jobs:
             sleep 2
             docker network inspect bridge --format '{{json .Options}}' || true
           fi
-
-      - name: Log in to GHCR (build cache)
-        env:
-          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Build MFE image
         env:
@@ -1084,13 +1094,23 @@ jobs:
         with:
           driver: docker-container
 
+      - name: Log in to GHCR
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
       - name: Fix DinD network MTU
+        env:
+          BUSYBOX_IMAGE: ghcr.io/biji-biji-initiative/mereka-lms/cache/busybox:stable
         run: |
           # Keep post-push image verification aligned with the runner pool that
           # handles release orchestration. MTU authority lives in ARC dockerd
           # startup flags and daemon config; this step only injects DNS fallback.
+          #
+          # BUSYBOX_IMAGE is the GHCR-mirrored copy (see mirror-ci-tools.yml);
+          # docker.io/library/busybox hits Docker Hub anon rate limits on ARC.
           if docker info >/dev/null 2>&1; then
-            docker run --privileged --pid=host busybox \
+            docker run --privileged --pid=host "${BUSYBOX_IMAGE}" \
               nsenter -t 1 -m -- sh -c '
                 mkdir -p /etc/docker
                 echo "{\"dns\":[\"8.8.8.8\",\"1.1.1.1\"]}" > /etc/docker/daemon.json
@@ -1099,11 +1119,6 @@ jobs:
             sleep 2
             docker network inspect bridge --format '{{json .Options}}' || true
           fi
-
-      - name: Log in to GHCR
-        env:
-          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Pull OpenEdX image (shared by SBOM and Trivy)
         # Single explicit pull into the local daemon.  syft (docker: mode) and
@@ -1313,13 +1328,23 @@ jobs:
         with:
           driver: docker-container
 
+      - name: Log in to GHCR
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
       - name: Fix DinD network MTU
+        env:
+          BUSYBOX_IMAGE: ghcr.io/biji-biji-initiative/mereka-lms/cache/busybox:stable
         run: |
           # Keep post-push image verification aligned with the runner pool that
           # handles release orchestration. MTU authority lives in ARC dockerd
           # startup flags and daemon config; this step only injects DNS fallback.
+          #
+          # BUSYBOX_IMAGE is the GHCR-mirrored copy (see mirror-ci-tools.yml);
+          # docker.io/library/busybox hits Docker Hub anon rate limits on ARC.
           if docker info >/dev/null 2>&1; then
-            docker run --privileged --pid=host busybox \
+            docker run --privileged --pid=host "${BUSYBOX_IMAGE}" \
               nsenter -t 1 -m -- sh -c '
                 mkdir -p /etc/docker
                 echo "{\"dns\":[\"8.8.8.8\",\"1.1.1.1\"]}" > /etc/docker/daemon.json
@@ -1328,11 +1353,6 @@ jobs:
             sleep 2
             docker network inspect bridge --format '{{json .Options}}' || true
           fi
-
-      - name: Log in to GHCR
-        env:
-          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Verify MFE image branding contract
         env:
