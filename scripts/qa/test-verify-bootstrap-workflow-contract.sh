@@ -63,20 +63,47 @@ jobs:
       - name: Pre-clean persistent Tutor workspace
         run: |
           set -euo pipefail
-          cleanup_target() {
-            local target="$1"
-            if [[ ! -e "$target" ]]; then
-              return 0
+          cleanup_workspace_paths() {
+            local path target
+            local existing=()
+            for path in "$@"; do
+              case "$path" in
+                tutor_env|var/bootstrap-readiness|var/ci|.buildx-cache) ;;
+                *) echo "Refusing to cleanup unexpected workspace path: $path" >&2; exit 64 ;;
+              esac
+              target="$GITHUB_WORKSPACE/$path"
+              [[ -e "$target" ]] && existing+=("$path")
+            done
+            [[ "${#existing[@]}" -eq 0 ]] && return 0
+            if command -v docker >/dev/null 2>&1 && timeout 30s docker info >/dev/null 2>&1; then
+              if timeout 2m docker run --rm \
+                --network none \
+                -v "$GITHUB_WORKSPACE:/workspace" \
+                mirror.gcr.io/library/alpine:3.20 \
+                sh -eu -c '
+                  for rel in "$@"; do
+                    case "$rel" in
+                      tutor_env|var/bootstrap-readiness|var/ci|.buildx-cache) ;;
+                      *) echo "Refusing to cleanup unexpected workspace path: $rel" >&2; exit 64 ;;
+                    esac
+                    rm -rf "/workspace/$rel"
+                  done
+                ' sh "${existing[@]}"; then
+                return 0
+              fi
+              echo "Docker-owned cleanup failed; falling back to sudo/user cleanup." >&2
             fi
-            if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
-              sudo rm -rf --one-file-system "$target"
-            else
-              rm -rf --one-file-system "$target"
-            fi
+            for path in "${existing[@]}"; do
+              target="$GITHUB_WORKSPACE/$path"
+              [[ -e "$target" ]] || continue
+              if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+                sudo rm -rf --one-file-system "$target"
+              else
+                rm -rf --one-file-system "$target"
+              fi
+            done
           }
-          for path in tutor_env var/bootstrap-readiness var/ci .buildx-cache; do
-            cleanup_target "$GITHUB_WORKSPACE/$path"
-          done
+          cleanup_workspace_paths tutor_env var/bootstrap-readiness var/ci .buildx-cache
       - uses: actions/checkout@v4
       - name: Ensure Docker Compose CLI
         run: ./scripts/ci/install-docker-compose.sh
@@ -248,30 +275,36 @@ import os
 
 wf = Path(os.environ["TMP_WF"])
 text = wf.read_text(encoding="utf-8")
-text = text.replace(
-    '      - name: Pre-clean persistent Tutor workspace\n'
-    '        run: |\n'
-    '          set -euo pipefail\n'
-    '          cleanup_target() {\n'
-    '            local target="$1"\n'
-    '            if [[ ! -e "$target" ]]; then\n'
-    '              return 0\n'
-    '            fi\n'
-    '            if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then\n'
-    '              sudo rm -rf --one-file-system "$target"\n'
-    '            else\n'
-    '              rm -rf --one-file-system "$target"\n'
-    '            fi\n'
-    '          }\n'
-    '          for path in tutor_env var/bootstrap-readiness var/ci .buildx-cache; do\n'
-    '            cleanup_target "$GITHUB_WORKSPACE/$path"\n'
-    '          done\n',
-    '',
-    1,
-)
+start = text.index('      - name: Pre-clean persistent Tutor workspace\n')
+end = text.index('      - uses: actions/checkout@v4\n', start)
+text = text[:start] + text[end:]
 wf.write_text(text, encoding="utf-8")
 PY
 run_expect_fail "missing pre-checkout persistent Tutor workspace cleanup is rejected"
+
+write_pass_fixture
+TMP_WF="$tmpdir/.github/workflows/bootstrap-local-readiness.yml" python3 - <<'PY'
+from pathlib import Path
+import os
+
+wf = Path(os.environ["TMP_WF"])
+text = wf.read_text(encoding="utf-8")
+text = text.replace(" && timeout 30s docker info >/dev/null 2>&1", "", 1)
+wf.write_text(text, encoding="utf-8")
+PY
+run_expect_fail "missing Docker-root cleanup fallback is rejected"
+
+write_pass_fixture
+TMP_WF="$tmpdir/.github/workflows/bootstrap-local-readiness.yml" python3 - <<'PY'
+from pathlib import Path
+import os
+
+wf = Path(os.environ["TMP_WF"])
+text = wf.read_text(encoding="utf-8")
+text = text.replace("                --network none \\\n", "", 1)
+wf.write_text(text, encoding="utf-8")
+PY
+run_expect_fail "networked cleanup helper is rejected"
 
 write_pass_fixture
 TMP_WF="$tmpdir/.github/workflows/bootstrap-local-readiness.yml" python3 - <<'PY'

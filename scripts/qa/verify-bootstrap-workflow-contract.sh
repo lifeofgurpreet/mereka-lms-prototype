@@ -72,13 +72,19 @@ else
 fi
 
 if grep -q 'Pre-clean persistent Tutor workspace' "$BOOTSTRAP_WF" \
+  && grep -q 'cleanup_workspace_paths()' "$BOOTSTRAP_WF" \
+  && grep -q 'timeout 30s docker info' "$BOOTSTRAP_WF" \
+  && grep -q 'timeout 2m docker run --rm' "$BOOTSTRAP_WF" \
+  && grep -q -- '--network none' "$BOOTSTRAP_WF" \
+  && grep -q 'mirror.gcr.io/library/alpine:3.20' "$BOOTSTRAP_WF" \
+  && grep -q 'tutor_env|var/bootstrap-readiness|var/ci|.buildx-cache' "$BOOTSTRAP_WF" \
   && grep -q 'sudo -n true' "$BOOTSTRAP_WF" \
   && grep -q 'sudo rm -r[f] --one-file-system "\$target"' "$BOOTSTRAP_WF" \
   && grep -q '^[[:space:]]*rm -r[f] --one-file-system "\$target"' "$BOOTSTRAP_WF" \
-  && grep -q 'tutor_env var/bootstrap-readiness var/ci .buildx-cache' "$BOOTSTRAP_WF"; then
-  pass "workflow pre-cleans generated Tutor state before checkout with non-interactive sudo fallback"
+  && grep -q 'cleanup_workspace_paths tutor_env var/bootstrap-readiness var/ci .buildx-cache' "$BOOTSTRAP_WF"; then
+  pass "workflow pre-cleans generated Tutor state before checkout with Docker-root and non-interactive sudo fallbacks"
 else
-  fail "workflow missing pre-checkout persistent Tutor workspace cleanup with sudo fallback"
+  fail "workflow missing pre-checkout persistent Tutor workspace cleanup with Docker-root/sudo fallback"
 fi
 
 if grep -q './scripts/infra/tutor-config-save.sh' "$BOOTSTRAP_WF"; then

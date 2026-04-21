@@ -45,16 +45,20 @@ job_has_precheckout_tutor_cleanup() {
   local cleanup_command cleanup_line checkout_line fallback_command
 
   cleanup_command='sudo rm -r''f --one-file-system "$target"'
-  fallback_command=$'else\n              rm -r''f --one-file-system "$target"'
+  fallback_command=$'else\n                rm -r''f --one-file-system "$target"'
   cleanup_line="$(awk '/Pre-clean persistent Tutor workspace/ { print NR; exit }' <<<"$block")"
   checkout_line="$(awk '/actions\/checkout@/ { print NR; exit }' <<<"$block")"
 
   [[ -n "$cleanup_line" && -n "$checkout_line" ]] || return 1
   [[ "$cleanup_line" -lt "$checkout_line" ]] || return 1
-  [[ "$block" == *'cleanup_target()'* ]] || return 1
+  [[ "$block" == *'cleanup_workspace_paths()'* ]] || return 1
+  [[ "$block" == *'timeout 30s docker info'* ]] || return 1
+  [[ "$block" == *'timeout 2m docker run --rm'* ]] || return 1
+  [[ "$block" == *'--network none'* ]] || return 1
+  [[ "$block" == *'mirror.gcr.io/library/alpine:3.20'* ]] || return 1
+  [[ "$block" == *'tutor_env|var/bootstrap-readiness|var/ci|.buildx-cache'* ]] || return 1
   [[ "$block" == *'sudo -n true'* ]] || return 1
-  [[ "$block" == *'for path in tutor_env var/ci .buildx-cache; do'* ]] || return 1
-  [[ "$block" == *'cleanup_target "$GITHUB_WORKSPACE/$path"'* ]] || return 1
+  [[ "$block" == *'cleanup_workspace_paths tutor_env var/ci .buildx-cache'* ]] || return 1
   [[ "$block" == *"$cleanup_command"* ]] || return 1
   [[ "$block" == *"$fallback_command"* ]] || return 1
 }
@@ -343,9 +347,9 @@ else
 fi
 
 if job_has_precheckout_tutor_cleanup "$BUILD_OPENEDX_BLOCK"; then
-  pass "build-openedx pre-cleans generated Tutor state before checkout with non-interactive sudo fallback"
+  pass "build-openedx pre-cleans generated Tutor state before checkout with Docker-root and non-interactive sudo fallbacks"
 else
-  fail "build-openedx missing pre-checkout generated Tutor state cleanup with sudo fallback"
+  fail "build-openedx missing pre-checkout generated Tutor state cleanup with Docker-root/sudo fallback"
 fi
 
 if [[ "$BUILD_MFE_BLOCK" == *"needs.resolve-build-scope.outputs.build_mfe == 'true'"* ]]; then
@@ -361,9 +365,9 @@ else
 fi
 
 if job_has_precheckout_tutor_cleanup "$BUILD_MFE_BLOCK"; then
-  pass "build-mfe pre-cleans generated Tutor state before checkout with non-interactive sudo fallback"
+  pass "build-mfe pre-cleans generated Tutor state before checkout with Docker-root and non-interactive sudo fallbacks"
 else
-  fail "build-mfe missing pre-checkout generated Tutor state cleanup with sudo fallback"
+  fail "build-mfe missing pre-checkout generated Tutor state cleanup with Docker-root/sudo fallback"
 fi
 
 # Fastlane (PR #1518, #1524) moves lightweight orchestration jobs to
