@@ -617,6 +617,17 @@ else
   fail "MFE build missing canonical push-first helper"
 fi
 
+if [[ "$BUILD_MFE_BLOCK" == *'Upload MFE build diagnostics'* \
+   && "$BUILD_MFE_BLOCK" == *'if: always()'* \
+   && "$BUILD_MFE_BLOCK" == *'name: mfe-build-diagnostics'* \
+   && "$BUILD_MFE_BLOCK" == *'var/ci/build-mfe.log'* \
+   && "$BUILD_MFE_BLOCK" == *'var/ci/build-mfe-timing.env'* \
+   && "$BUILD_MFE_BLOCK" == *'build-metrics-mfe.json'* ]]; then
+  pass "MFE build uploads diagnostics artifacts on success or failure"
+else
+  fail "MFE build missing always-on diagnostics artifact upload"
+fi
+
 if [[ "$BUILD_MFE_BLOCK" == *'--build-profile "${BUILD_PROFILE}"'* ]]; then
   pass "MFE build passes explicit build profile to the helper"
 else
@@ -683,6 +694,17 @@ if [[ "$BUILD_OPENEDX_BLOCK" == *'./scripts/infra/build-openedx-image.sh'* ]]; t
   pass "OpenEdX build uses the canonical push-first helper"
 else
   fail "OpenEdX build missing canonical push-first helper"
+fi
+
+if [[ "$BUILD_OPENEDX_BLOCK" == *'Upload OpenEdX build diagnostics'* \
+   && "$BUILD_OPENEDX_BLOCK" == *'if: always()'* \
+   && "$BUILD_OPENEDX_BLOCK" == *'name: openedx-build-diagnostics'* \
+   && "$BUILD_OPENEDX_BLOCK" == *'var/ci/build-openedx.log'* \
+   && "$BUILD_OPENEDX_BLOCK" == *'var/ci/build-openedx-timing.env'* \
+   && "$BUILD_OPENEDX_BLOCK" == *'build-metrics-openedx.json'* ]]; then
+  pass "OpenEdX build uploads diagnostics artifacts on success or failure"
+else
+  fail "OpenEdX build missing always-on diagnostics artifact upload"
 fi
 
 if [[ "$BUILD_OPENEDX_BLOCK" == *'--build-profile "${BUILD_PROFILE}"'* ]]; then

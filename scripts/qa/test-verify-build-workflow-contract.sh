@@ -325,6 +325,15 @@ jobs:
             --cache-ref ghcr.io/biji-biji-initiative/mereka-lms/openedx:mereka-brand \
             --build-profile "${BUILD_PROFILE}" \
             --mutable-tag mereka-brand
+      - name: Upload OpenEdX build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: openedx-build-diagnostics
+          path: |
+            var/ci/build-openedx.log
+            var/ci/build-openedx-timing.env
+            build-metrics-openedx.json
       - name: Resolve pushed openedx digest
         id: digest
         run: echo "digest=sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" >> "$GITHUB_OUTPUT"
@@ -402,6 +411,15 @@ jobs:
             --cache-ref ghcr.io/biji-biji-initiative/mereka-lms/mfe:mereka-brand \
             --build-profile "${BUILD_PROFILE}" \
             --mutable-tag mereka-brand
+      - name: Upload MFE build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mfe-build-diagnostics
+          path: |
+            var/ci/build-mfe.log
+            var/ci/build-mfe-timing.env
+            build-metrics-mfe.json
       - name: Resolve pushed mfe digest
         id: digest
         run: echo "digest=sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" >> "$GITHUB_OUTPUT"
@@ -869,6 +887,28 @@ from pathlib import Path
 import sys
 p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
 text = p.read_text()
+text = text.replace(
+    '      - name: Upload OpenEdX build diagnostics\n'
+    '        if: always()\n'
+    '        uses: actions/upload-artifact@v4\n'
+    '        with:\n'
+    '          name: openedx-build-diagnostics\n'
+    '          path: |\n'
+    '            var/ci/build-openedx.log\n'
+    '            var/ci/build-openedx-timing.env\n'
+    '            build-metrics-openedx.json\n',
+    '',
+)
+p.write_text(text)
+PY
+run_expect_fail "missing OpenEdX build diagnostics artifact is rejected"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
 text = text.replace("      - 'scripts/infra/build-mfe-image.sh'\n", "")
 p.write_text(text)
 PY
@@ -899,6 +939,28 @@ text = text.replace(
 p.write_text(text)
 PY
 run_expect_fail "direct tutor images build mfe call is rejected"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    '      - name: Upload MFE build diagnostics\n'
+    '        if: always()\n'
+    '        uses: actions/upload-artifact@v4\n'
+    '        with:\n'
+    '          name: mfe-build-diagnostics\n'
+    '          path: |\n'
+    '            var/ci/build-mfe.log\n'
+    '            var/ci/build-mfe-timing.env\n'
+    '            build-metrics-mfe.json\n',
+    '',
+)
+p.write_text(text)
+PY
+run_expect_fail "missing MFE build diagnostics artifact is rejected"
 
 write_pass_fixture
 python3 - "$tmpdir" <<'PY'
