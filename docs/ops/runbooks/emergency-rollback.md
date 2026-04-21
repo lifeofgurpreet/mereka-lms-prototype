@@ -1,5 +1,5 @@
 # Emergency Rollback Runbook
-_Audience: Platform Eng + SRE + DevOps • Owner: Engineering Lead • Last updated: 2026-02-12_
+_Audience: Platform Eng + SRE + DevOps • Owner: Engineering Lead • Last updated: 2026-04-21_
 
 This runbook provides procedures for emergency rollback of failed deployments on Mereka Academy (academyv2.mereka.io). It covers when to rollback, decision criteria, procedures for GitOps and database rollbacks, and post-rollback verification.
 
@@ -126,13 +126,13 @@ The following issues require investigation before rollback decision:
 
 ### Overview
 
-Mereka Academy uses **GitOps** with Kustomize overlays and ArgoCD-style deployment. Images are tagged by git SHA and deployed via `deploy/k8s/overlays/production/kustomization.yaml`. Rollback means reverting to a previous image tag.
+Mereka Academy uses **GitOps** with Kustomize overlays and ArgoCD-style deployment. Images are tagged by git SHA and realized through the active infrastructure GitOps repository. Rollback means reverting to a previous image tag or digest through that GitOps source.
 
 ### Prerequisites
 
-- `kubectl` access to `mereka-lms` namespace in production GKE cluster
+- `kubectl` access to `mereka-lms` namespace in the production RKE2 cluster
 - Git access to `Biji-Biji-Initiative/mereka-lms` repository
-- Access to Artifact Registry (`ghcr.io/biji-biji-initiative/mereka-lms`)
+- Access to GHCR packages under `ghcr.io/biji-biji-initiative/mereka-lms`
 
 ### Procedure: Rollback to Previous Image Tag
 
@@ -149,14 +149,13 @@ Mereka Academy uses **GitOps** with Kustomize overlays and ArgoCD-style deployme
    ```
 
 2. **Find the previous stable image**:
-   ```bash
-   # Check Artifact Registry for recent tags
-   gcloud artifacts docker images list \
-     ghcr.io/biji-biji-initiative/mereka-lms/openedx \
-     --include-tags --limit=10 --sort-by=~UPDATE_TIME
-   ```
+   Use the prior release object, the promotion PR, or the GHCR package version
+   history for `ghcr.io/biji-biji-initiative/mereka-lms/openedx` and
+   `ghcr.io/biji-biji-initiative/mereka-lms/mfe`. Do not use `gcloud artifacts`
+   for GHCR images.
 
-   Identify the previous tag (e.g., `20260208-mfe-discussions-pass4-c17df16`).
+   Identify the previous tag or digest (for example, the last known-good git SHA
+   tag recorded in the promotion PR).
 
 3. **Create pre-rollback backup** (CRITICAL):
    ```bash

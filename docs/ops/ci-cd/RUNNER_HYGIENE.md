@@ -222,6 +222,76 @@ ssh root@"${RUNNER_IP}" docker ps -a --filter name=buildx_buildkit
 
 ---
 
+## GitHub Runner Workspace Hygiene
+
+The fastlane runner uses persistent workspaces. Containerized Tutor and Docker
+steps can leave generated files owned by `root` under the checkout. If the next
+GitHub Actions job starts as an unprivileged runner user, `actions/checkout` or
+pre-clean can fail before any build code runs.
+
+PR #1979 added bounded pre-checkout cleanup in the local bootstrap and image
+build workflows. The allowlist is intentionally narrow:
+
+- `tutor_env`
+- `var/bootstrap-readiness`
+- `var/ci`
+- `.buildx-cache`
+
+When Docker is available, the cleanup runs a short-lived Docker-root helper with
+`--network none` so it can remove root-owned generated state without granting
+the runner passwordless sudo. If Docker is unavailable, the workflow falls back
+to normal user cleanup and then sudo only when the runner already has it.
+
+This cleanup is runner hygiene only. Do not add source files, docs, plugins,
+workflow YAML, or any non-generated path to the cleanup allowlist. If another
+path needs cleanup, first classify why generated state is being written there.
+
+### Root-owned checkout cleanup failure
+
+**Symptom**:
+
+```text
+EACCES: permission denied, rmdir .../tutor_env/data/...
+```
+
+**Classification**: runner / workspace hygiene, not source, render, or build
+authority.
+
+**Fix path**:
+
+1. Confirm the failure happens before checkout or before Dockerfile render.
+2. Confirm the path is generated state, not source.
+3. If the path is one of the allowlisted generated paths, re-run after the
+   #1979 cleanup is present on the branch.
+4. If the path is not allowlisted, do not widen the cleanup list casually. Add a
+   failure-taxonomy entry and decide whether the writer should move or the path
+   should become explicit generated state.
+
+### Runner diagnostic disk pressure
+
+**Symptom**:
+
+```text
+No space left on device : '/srv/github-runner-.../_diag/Worker_...log'
+```
+
+This can happen before checkout, which means the repository never had a chance
+to run its cleanup scripts. Treat it as host capacity pressure.
+
+**Fix path**:
+
+```bash
+ssh root@"${RUNNER_IP}" df -h / /srv /var/lib/docker
+ssh root@"${RUNNER_IP}" du -xh /srv/github-runner-lms-ci/_diag 2>/dev/null | sort -h | tail -20
+ssh root@"${RUNNER_IP}" journalctl --disk-usage
+ssh root@"${RUNNER_IP}" docker system df
+```
+
+After classifying the pressure source, clean the host-level offender. Do not
+change repository build semantics to work around runner `_diag` exhaustion.
+
+---
+
 ## Troubleshooting
 
 ### Docker socket permission drift

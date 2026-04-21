@@ -469,7 +469,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/infra/verify-local-bootstrap-readiness.sh",
-      "reference_count": 14,
+      "reference_count": 16,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -2620,7 +2620,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-build-optimizations-render-delta-contract.sh",
-      "reference_count": 8,
+      "reference_count": 9,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -3352,7 +3352,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-cold-start-onboarding-contract.sh",
-      "reference_count": 12,
+      "reference_count": 13,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -6775,7 +6775,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-footer-parity.sh",
-      "reference_count": 24,
+      "reference_count": 25,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -12594,7 +12594,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-plugin-slot-wiring.sh",
-      "reference_count": 17,
+      "reference_count": 16,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

@@ -1,5 +1,5 @@
 # Quick Start: Local Development Setup
-_Audience: Developers + Agent Operators • Owner: Platform Team • Last verified: 2026-04-20 • Status: canonical_
+_Audience: Developers + Agent Operators • Owner: Platform Team • Last verified: 2026-04-21 • Status: canonical_
 
 ## Fast Setup
 
@@ -12,6 +12,20 @@ cd mereka-lms
 ```
 
 The first run builds local Open edX and MFE images, initializes Tutor data, starts the stack, and creates a local-only admin user. If `LOCAL_ADMIN_PASSWORD` is not set, the setup script writes generated credentials to `tutor_env/local-admin-credentials.txt`.
+
+## Latest Proof
+
+Current `main` proof from 2026-04-21:
+
+| Proof | Run | Commit | Result | What it proves |
+|---|---|---|---|---|
+| Build Tutor Images | `24711505579` | `e7a4472cd` | success | Existing source/render/build-helper path builds and scans both Open edX and MFE images. |
+| Bootstrap Local Readiness | `24711453019` | `e7a4472cd` | success | A clean repo-scoped `TUTOR_ROOT` can launch the local Tutor baseline and pass readiness checks. |
+
+These are shared proof lanes, not alternate build systems. Do not create a
+second Dockerfile, Compose stack, or local-only build path to work around a
+failure. Classify the failure, fix the source/render/build-helper chain, and
+update the proof matrix when the contract changes.
 
 ## Host Requirements
 
@@ -115,6 +129,12 @@ curl -I http://apps.localhost/authn/login   # MFE Login
 The clean bootstrap proof is [`.github/workflows/bootstrap-local-readiness.yml`](../../../.github/workflows/bootstrap-local-readiness.yml). It creates a fresh repo-scoped `TUTOR_ROOT`, launches `tutor local launch -I --skip-build`, validates image provenance, and runs `./scripts/infra/verify-local-bootstrap-readiness.sh`.
 
 The bootstrap workflow uses the same Tutor render path as local setup, including the named dependency-image mirror patch for Tutor-emitted hardcoded Docker Hub refs and `mirror.gcr.io` settings where Tutor exposes dependency images. The benchmark image-build proof also configures BuildKit with a `docker.io` registry mirror as a fallback guard, but the explicit render patch is what makes the known upstream dependency refs deterministic. Those mirror settings are not build semantic changes; they exist so proof and first-run setup do not depend on anonymous Docker Hub quota.
+
+The CI bootstrap and build workflows also perform bounded pre-checkout cleanup
+for repo-generated state (`tutor_env`, `var/bootstrap-readiness`, `var/ci`,
+and `.buildx-cache`). That cleanup exists because containerized Tutor steps can
+leave root-owned files on persistent fastlane runners. It is runner hygiene only;
+it does not change build semantics.
 
 The app-cache-cold image-build proof is [`.github/workflows/build-benchmark.yml`](../../../.github/workflows/build-benchmark.yml) with `benchmark_class=app-cache-cold` and `image_family=both`. That lane proves the Open edX and MFE image build helpers with app-level BuildKit cache imports disabled; persistent runner Docker daemon/base-image state can still exist. The bootstrap lane proves the rendered Tutor stack initializes from a clean `TUTOR_ROOT`. The old `benchmark_class=true-cold` input remains accepted as a legacy alias, but new evidence should use `app-cache-cold`.
 

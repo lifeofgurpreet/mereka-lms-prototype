@@ -1,5 +1,5 @@
 # Developer Environment Proof Matrix
-_Audience: Developers, platform operators, and agents | Owner: Platform Team | Last verified: 2026-04-20 | Status: canonical_
+_Audience: Developers, platform operators, and agents | Owner: Platform Team | Last verified: 2026-04-21 | Status: canonical_
 
 This contract keeps local development, CI bootstrap, devspace, and Kubernetes preview work on one source to render to artifact chain. A developer environment is not supported until it names its source authority, artifact authority, cache class, and proof lane here or in a contract that links back here.
 
@@ -24,6 +24,20 @@ This contract keeps local development, CI bootstrap, devspace, and Kubernetes pr
 | RKE2 dev GitOps | Active | app repo source + infra repo `profiles/dev` overlay | ArgoCD-realized Kubernetes manifests | image pulls; no local build cache claim | `./scripts/qa/verify-rke2-dev-readiness.sh`; live checks when cluster access exists | local Tutor bootstrap proof |
 | Kubernetes preview | Planned | app repo source + infra repo preview overlay | GitOps-realized preview namespace/manifests | must be declared before launch | preview readiness verifier before supported use | ad-hoc namespaces or hand-applied manifests |
 | Devspace development | Planned | same app source/build contracts as local and GitOps lanes | devspace config may sync code, but must consume canonical images/settings | developer-local sync/cache, explicitly declared | devspace readiness verifier before supported use | independent Dockerfile/build semantics |
+
+## Latest Accepted Proofs
+
+| Date | Proof | Run | Commit | Result | Interpretation |
+|---|---|---|---|---|---|
+| 2026-04-21 | Build Tutor Images | `24711505579` | `e7a4472cd` | success | Current shared image build path builds and scans Open edX and MFE. |
+| 2026-04-21 | Bootstrap Local Readiness | `24711453019` | `e7a4472cd` | success | Current local Tutor bootstrap path works from a clean repo-scoped `TUTOR_ROOT`. |
+
+The 2026-04-21 proof set also covers the pre-checkout generated-workspace
+cleanup added by `mereka-lms#1979`. That cleanup is limited to generated
+workspace paths (`tutor_env`, `var/bootstrap-readiness`, `var/ci`,
+`.buildx-cache`) and is runner hygiene only. It is not a new build lane, not a
+second renderer, and not permission for source files to depend on generated
+workspace state.
 
 ## Entry Criteria for New Developer Lanes
 

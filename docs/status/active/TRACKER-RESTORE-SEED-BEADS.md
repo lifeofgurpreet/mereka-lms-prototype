@@ -149,6 +149,45 @@ degraded mode.
 - goal:
   - stop broad selector debt from obscuring the narrower live-risk set
 
+## Seed 13 — CI Runner: Fastlane Host Disk Pressure Before Checkout
+
+- title: `CI runner: monitor and clean fastlane diagnostic disk pressure before checkout`
+- priority: `P1`
+- lane: runner reliability
+- goal:
+  - prevent repeats of the 2026-04-21 fastlane failure where the GitHub runner
+    could not write `_diag/Worker_*.log` before checkout
+  - add host-level monitoring/cleanup for `/srv/github-runner-*`, runner `_diag`
+    logs, and Docker storage so repository workflows are not blamed for
+    pre-checkout capacity failures
+  - document the operator command path in `RUNNER_HYGIENE.md`
+
+## Seed 14 — CI/CD Spec: Reconcile GKE/GAR Legacy Claims With RKE2/GHCR Reality
+
+- title: `CI/CD spec: reconcile legacy GKE/GAR assumptions with current RKE2/GHCR release flow`
+- priority: `P1`
+- lane: docs and contracts
+- goal:
+  - rewrite `specs/ci-cd-pipeline_spec.md` against current release-object,
+    GHCR, RKE2, ArgoCD, and bbi-infrastructure authority
+  - remove or explicitly mark legacy GKE/GAR sections so agents do not use them
+    as live build or deployment truth
+  - map each acceptance criterion to an existing verifier or a named follow-up
+    verifier
+
+## Seed 15 — Observability Docs: Reconcile GKE Prometheus Runbooks With Current RKE2/Grafana Substrate
+
+- title: `Observability docs: reconcile GKE Prometheus runbooks with current RKE2/Grafana substrate`
+- priority: `P2`
+- lane: observability docs
+- goal:
+  - audit `docs/ops/runbooks/SLO_DASHBOARDS_SETUP.md` and related observability
+    runbooks for stale GKE-primary wording
+  - update them only from fresh live evidence of the current RKE2/Grafana/Loki
+    substrate
+  - avoid docs-only claims that are not backed by a verifier, dashboard, or
+    operator command
+
 ## Recommended First Creation Order
 
 1. Seed 1
@@ -156,9 +195,11 @@ degraded mode.
 3. Seed 3
 4. Seed 3.5
 5. Seed 4
-6. Seed 8
-7. Seed 9
-8. Seed 10
+6. Seed 13
+7. Seed 14
+8. Seed 8
+9. Seed 9
+10. Seed 10
 
 That ordering restores the execution graph first, then installs the next
 highest-leverage script and MFE lanes.

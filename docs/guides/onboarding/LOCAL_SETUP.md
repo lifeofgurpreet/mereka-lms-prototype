@@ -1,5 +1,5 @@
 # Local Tutor Sandbox
-_Audience: Platform Eng • Owner: Infra Team • Last verified: 2026-04-20 • Status: supporting_
+_Audience: Platform Eng • Owner: Infra Team • Last verified: 2026-04-21 • Status: supporting_
 
 These instructions reproduce the nightly Open edX environment provisioned in this repository. For a day-to-day command cheat sheet, see [`WORKFLOW_LOCAL.md`](WORKFLOW_LOCAL.md). For the complete documentation index, visit [`docs/README.md`](../../README.md).
 
@@ -48,7 +48,7 @@ The current configuration pins:
 - `LMS_HOST=localhost`
 - `CMS_HOST=studio.localhost`
 - Open edX release branch: `open-release/ulmo.1`
-- MFE branch: `master` (frontends track the latest master while Ulmo branches are published)
+- MFE branch: `release/ulmo.2`
 - Enabled repo-owned plugins: `mereka_lms`, `mereka_lms_mfe_slots`; the wrapper also preserves the Tutor service plugins required by the selected configuration.
 
 To regenerate the environment after editing configuration values:

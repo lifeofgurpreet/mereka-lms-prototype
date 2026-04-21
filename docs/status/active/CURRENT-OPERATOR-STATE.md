@@ -520,3 +520,84 @@ fire the autonomous /loop prompt every 45 min until the roadmap drains.
 6. Loop cron continues firing every 45 min; autonomous prompt will
    re-sweep PR queue + beads + docs until everything lands or hits
    an external blocker.
+
+---
+
+### Slice 87 — 2026-04-21T10:30Z (current-head local build factory proven; runner hygiene blocker closed)
+
+**Context**: other developers reported cold local build / quick-start trouble
+after prior proof work. The follow-up goal was to verify whether current `main`
+still had one coherent source -> render -> artifact chain and whether the new
+failures were build authority drift or runner hygiene.
+
+**Current `main` at wrap time**:
+
+- `mereka-lms` `main`: `e7a4472cd`
+- Merged PR: #1979 `fix(ci): cleanup root-owned runner workspaces`
+
+**Current-head proof completed on `e7a4472cd`**:
+
+| Proof | Run | Result | Interpretation |
+|---|---|---|---|
+| Build Tutor Images | `24711505579` | success | Existing build workflow/build helpers rendered, built, scanned, and attested both Open edX and MFE images. |
+| Bootstrap Local Readiness | `24711453019` | success | Clean repo-scoped `TUTOR_ROOT` local Tutor bootstrap path launches and passes readiness checks. |
+
+**Failure classification from the slice**:
+
+- `24708921916`: Bucket 3 runner/workspace hygiene. MFE failed before checkout
+  because root-owned generated Tutor state under `tutor_env/data/*` could not be
+  removed by the unprivileged fastlane runner. Fixed by #1979 with bounded
+  Docker-root cleanup for generated paths only.
+- `24710721353`: Bucket 3 runner capacity. Static validation initially failed
+  before checkout because the fastlane CI host could not write a GitHub runner
+  `_diag/Worker_*.log` file (`No space left on device`). Rerun passed. This is
+  not a source or verifier failure; it remains runner host hygiene debt.
+
+**Authority decision**:
+
+- #1979 is workflow/runner hygiene only.
+- It does not change Dockerfile rendering, bake semantics, cache semantics, or
+  Tutor plugin authority.
+- The cleanup allowlist is generated state only: `tutor_env`,
+  `var/bootstrap-readiness`, `var/ci`, `.buildx-cache`.
+- `build-optimizations.sh` remains a bounded compatibility layer governed by
+  `infrastructure/tutor/patches/build-optimizations.allowed-delta.yaml`,
+  `docs/reference/architecture/TUTOR_PATCHES_INVENTORY.md`, and
+  `scripts/qa/verify-build-optimizations-render-delta-contract.sh`.
+
+**Developer lane reminder**:
+
+New local developers should start with
+`docs/guides/onboarding/QUICK_START_LOCAL.md` and run:
+
+```bash
+./scripts/qa/verify-cold-start-onboarding-contract.sh
+./scripts/shared/setup-local.sh
+./scripts/infra/verify-local-bootstrap-readiness.sh
+```
+
+Eugene and Hira should stay on this local Tutor lane until the future
+Loft/vcluster/devspace lane is declared in
+`docs/reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md` with its own
+copy-paste setup command and readiness verifier. Do not invent a second build
+path for devspaces.
+
+**Open debt to track, not closed by this slice**:
+
+- Fastlane host-level disk pressure before checkout needs monitoring/cleanup
+  beyond repository scripts.
+- `specs/ci-cd-pipeline_spec.md` still contains older GKE/GAR-era assumptions
+  and needs a dedicated reconciliation pass rather than opportunistic edits.
+- `.beads` tracker mutation remains degraded per
+  `TRACKER-HYGIENE-RECOVERY-PLAN.md`; keep using read-only `br` commands and
+  record planner truth in docs when write safety is uncertain.
+
+## Pointed Next Move (slice 87)
+
+1. Merge the docs/spec/runbook truth-sync PR for the 2026-04-21 build factory
+   proof.
+2. File or preserve follow-up tracker work for fastlane host disk pressure and
+   CI/CD spec reconciliation once tracker mutation is safe.
+3. Keep devspace/vcluster work blocked from "supported" status until it has a
+   row, setup command, verifier, cache classification, and failure taxonomy
+   entry in the developer environment proof matrix.

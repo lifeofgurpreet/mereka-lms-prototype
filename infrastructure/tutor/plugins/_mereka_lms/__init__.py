@@ -19,7 +19,7 @@ def _register_env_patch(patch_name: str, patch_body: str) -> None:
 
 
 # Register learner-record as an additional MFE (not in tutor-mfe 21.0.0 core).
-# Uses webpack 4 → requires Node 18 (patched by patches/learner-record-node18.sh).
+# It builds through the shared Tutor/Ulmo MFE Dockerfile toolchain.
 from tutormfe.hooks import MFE_APPS  # noqa: E402
 
 

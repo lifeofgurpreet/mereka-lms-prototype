@@ -29,12 +29,12 @@ INFRA_REPO="${INFRA_REPO:-<path-to-bbi-infrastructure>}"
 │                   mereka-lms (App Repo)                         │
 │  - Source code                                                  │
 │  - Base K8s manifests (deploy/k8s/base/)                        │
-│  - Production overlay (deploy/k8s/overlays/production/)         │
-│  - CI pipeline builds images → pushes to Artifact Registry      │
+│  - Local/base proof contracts                                   │
+│  - CI pipeline builds images → pushes to GHCR                   │
 └─────────────────────────────────────────────────────────────────┘
                               │
-                              │ Image tags defined here
-                              │ (but NOT used directly by ArgoCD)
+                              │ Release objects / image digests
+                              │ consumed by infra promotion
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │              BBI-K8 / infrastructure (Infra Repo)           │
@@ -44,9 +44,9 @@ INFRA_REPO="${INFRA_REPO:-<path-to-bbi-infrastructure>}"
 └─────────────────────────────────────────────────────────────────┘
                               │
                               │ ArgoCD watches this repo
-                              │ and syncs to GKE cluster
+                              │ and syncs to RKE2 cluster
                               ▼
-                       GKE Production Cluster
+                       RKE2 Production Cluster
 ```
 
 ## Why Drift Happens
@@ -428,16 +428,15 @@ kubectl patch deployment lms -n mereka-lms -p \
 
 ### Issue: Image Pull Errors After Tag Update
 
-**Cause**: Tag doesn't exist in Artifact Registry.
+**Cause**: Tag or digest does not exist in GHCR, or the GitOps source points at
+the wrong image ref.
 
 **Solution:**
 ```bash
-# List available tags
-gcloud artifacts docker tags list \
-  ghcr.io/biji-biji-initiative/mereka-lms/openedx \
-  --limit 20 --sort-by=~UPDATE_TIME
-
-# Verify tag exists before updating kustomization.yaml
+# Verify the running/ref requested image through the release object, promotion PR,
+# or GHCR package version history before updating GitOps source.
+gh run view <build-run-id> --repo Biji-Biji-Initiative/mereka-lms
+gh pr view <promotion-pr> --repo Biji-Biji-Initiative/bbi-infrastructure
 ```
 
 ## Related Documentation

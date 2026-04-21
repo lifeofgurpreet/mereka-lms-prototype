@@ -28,7 +28,7 @@ This repository tracks the infrastructure-as-code, configuration, and runbooks f
   - `k8s/` – Kubernetes manifests
   - `themes/` – Mereka branding themes
 - `scripts/` – Automation scripts organized by domain:
-  - `infra/` – Infrastructure operations (GKE, Cloudflare, MongoDB, etc.)
+  - `infra/` – Infrastructure operations (RKE2, Cloudflare, MongoDB, etc.)
   - `migrations/` – Data migration scripts (Kajabi, MCT)
   - `branding/` – Branding asset sync and theme helpers
   - `analytics/` – Analytics exports and reconciliation
@@ -73,12 +73,12 @@ This ensures the login experience stays in sync with upstream Open edX changes
 
 ## Container Images
 
-Tutor now pulls most runtime images from our Artifact Registry (`ghcr.io/biji-biji-initiative/mereka-lms`):
+Tutor now pulls most runtime images from GHCR (`ghcr.io/biji-biji-initiative/mereka-lms`):
 
 | Service | Image | Notes |
 |---------|-------|-------|
 | LMS/CMS + workers | `openedx` | Built via `./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast`. |
-| Micro-frontends | `openedx-mfe` | Patched to build on Node 18. |
+| Micro-frontends | `openedx-mfe` | Built on the current Tutor/Ulmo Node 24 MFE toolchain. |
 | Discovery | `openedx-discovery` | Uses in-cluster MySQL + in-cluster Elasticsearch. |
 | Forum (cs_comments_service) | `openedx-forum` | Uses MongoDB Atlas (managed service). |
 | Notes service | `openedx-notes` | Handles ORA notes. |

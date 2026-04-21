@@ -5,7 +5,7 @@ status: draft
 spec_class: domain
 owner: platform-ci
 created: 2026-04-16
-last_reviewed: 2026-04-16
+last_reviewed: 2026-04-21
 review_due: 2026-07-16
 domain: platform
 normativity: normative
@@ -15,7 +15,10 @@ supersedes: []
 superseded_by: null
 verification_sources:
   - .github/workflows/build-tutor-images.yml
+  - .github/workflows/bootstrap-local-readiness.yml
+  - .github/workflows/build-benchmark.yml
   - docs/ops/ci-cd/BUILD_FAILURE_TAXONOMY.md
+  - docs/reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md
   - docs/ops/ci-cd/AUTOMATION_AUTHORSHIP_AUDIT.md
 interfaces:
   - bbi-infrastructure promote-dev-image.yml
@@ -102,22 +105,30 @@ within 5 minutes of observing the failure:
 **Verification**: `docs/ops/ci-cd/BUILD_FAILURE_TAXONOMY.md` provides the
 decision tree. Operator can follow it mechanically.
 
-### R5: Cold Build Proof
+### R5: Cold-Proof Class Honesty
 
-A cold build (no cache, no prior state) of each image MUST succeed
-deterministically given only:
+Every build or bootstrap proof MUST name its cache and state class. A proof
+MUST NOT be called pristine, machine-cold, or true cold unless the runner has a
+fresh Docker daemon state, no pre-existing base images, no app-level BuildKit
+cache imports, no runner-local layer cache, and a clean repo-scoped `TUTOR_ROOT`.
 
-- The repository at a specific commit SHA
-- Network access to package registries (PyPI, npm, apt)
-- A functional Docker daemon with buildx
+Supported proof classes:
 
-**Verification**: planned cold-build benchmark workflow (jj97.14, see
-`docs/ops/ci-cd/BENCHMARK_CLASSES.md` `true-cold` class) runs a cache-less
-build and records the output image digest. Manual proof via
-`docker buildx build --no-cache` against a clean runner is the interim path.
+| Class | What is disabled or reset | What may still exist | Verification |
+|---|---|---|---|
+| `app-cache-cold` image build | app-level BuildKit cache imports | persistent runner Docker daemon state, base images, registry mirror state | `build-benchmark.yml` with `benchmark_class=app-cache-cold`, `image_family=both` |
+| clean local bootstrap | repo-scoped `TUTOR_ROOT` | prebuilt or pulled images; dependency mirrors | `bootstrap-local-readiness.yml` plus `scripts/infra/verify-local-bootstrap-readiness.sh` |
+| registry-warm build | none; intentionally imports durable registry cache | GHCR BuildKit cache and optional runner-local cache | `build-tutor-images.yml` or benchmark registry-warm proof |
+| machine-cold/pristine daemon | all app-level, runner-local, and daemon/base-image state | only network/package registry state | not currently a supported CI proof class |
 
-**Current state**: NOT YET IMPLEMENTED. Cold builds succeed but are not
-formally verified or measured.
+**Verification**: `docs/reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md`
+is the canonical lane matrix. Current accepted 2026-04-21 proofs on
+`e7a4472cd` are Build Tutor Images run `24711505579` and Bootstrap Local
+Readiness run `24711453019`.
+
+**Current state**: app-cache-cold image proof and clean local bootstrap proof
+are implemented classes. A pristine machine-cold proof remains a future explicit
+lane, not something implied by existing fastlane or ARC runs.
 
 ### R6: Build Timing Governance
 
@@ -150,6 +161,7 @@ Each image build behavior MUST have exactly one authoritative source:
 | Release object schema | `scripts/release/release_object_bindings.py` |
 | Promotion dispatch envelope | `scripts/release/emit-proof-envelope.sh` |
 | Scan behavior | `scripts/infra/install-trivy.sh` + workflow inline steps |
+| Pre-checkout generated workspace cleanup | CI workflow cleanup steps bounded to generated paths only |
 
 No hidden or duplicate ownership.
 
@@ -178,7 +190,7 @@ This spec is satisfied when ALL of:
 - [ ] AC-BAUTH-002: No duplicate trigger entries exist (R2)
 - [ ] AC-BAUTH-003: Automation PR authorship is consistent and trusted (R3)
 - [ ] AC-BAUTH-004: Build failures can be classified in under 5 minutes (R4)
-- [ ] AC-BAUTH-005: Cold-proof work has a design stub or first implemented slice (R5)
+- [x] AC-BAUTH-005: Cold-proof work has a design stub or first implemented slice (R5)
 - [ ] AC-BAUTH-006: Timing baselines are measured and documented (R6)
 - [ ] AC-BAUTH-007: Build ownership is single-source for each behavior (R7)
 - [ ] AC-BAUTH-008: The team can explain the build system without branch archaeology
@@ -223,5 +235,5 @@ This spec is satisfied when ALL of:
 - OQ-4 — L3 `OPENEDX_CACHE_REF` default in `docker-bake.hcl` points at upstream Overhangio image, not Mereka — update or remove after PR 2.
 - OQ-5 — PR-scoped cache TTL mechanism: GHCR package retention, scheduled cleanup workflow, or manual?
 - OQ-6 — GHCR 429 retry semantics for `cache-to`: confirm buildkit's behavior under registry rate-limit on push.
-- OQ-7 — `local-hot` vs `registry-warm` precedence when both L1 and L2 succeed: precedence order should be `scan-only` > `local-hot` > `registry-warm` > `true-cold` (proposed).
+- OQ-7 — `local-hot` vs `registry-warm` precedence when both L1 and L2 succeed: precedence order should be `scan-only` > `local-hot` > `registry-warm` > `app-cache-cold` (proposed).
 - OQ-8 — `partial-warm` from RFC §Derived Classification: dashboard-only diagnostic class, not a `benchmark_class` workflow input value.

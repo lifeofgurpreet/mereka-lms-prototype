@@ -57,11 +57,12 @@ The repo-owned `mereka/env.config.jsx` template and rendered MFE Dockerfile now 
 The governed prepare path still refreshes the remaining MFE build-context asset
 sync, but stale ad hoc production-stage theme-copy surgery has been removed.
 
-### 4. Indigo Brand Package Pin (Ulmo)
+### 4. Local Brand Package (Ulmo)
 
 The `@edx/brand` alias now installs the local package
 `@edx/brand@file:./brand-mereka`, keeping the brand package in the repo-owned
-build context instead of pinning an external Indigo npm package.
+build context. The external Indigo npm package is retired and must not be
+reintroduced as a build dependency.
 
 ### 5. NPM Resilience and Fallback Logic
 

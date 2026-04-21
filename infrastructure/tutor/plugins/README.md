@@ -34,7 +34,7 @@ The main plugin that consolidates all Mereka LMS configuration customizations. H
    - Disables Terser parallel processing (build stability)
 
 5. **MFE Configuration**
-   - Installs Node 18 build toolchain (gcc, g++, python3)
+   - Installs Node 24 build toolchain prerequisites (gcc, g++, python3)
    - Configures npm with retry logic (network resilience)
    - Installs frontend-plugin-framework with legacy peer deps
    - Adds custom Mereka footer component

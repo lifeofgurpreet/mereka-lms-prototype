@@ -272,12 +272,12 @@ require_contains "README.md" 'benchmark_class=app-cache-cold' "README names app-
 reject_contains "README.md" 'README_SETUP\.md' "README does not link missing README_SETUP.md"
 reject_contains "README.md" 'DEVELOPER_ONBOARDING\.md' "README does not link missing developer onboarding doc"
 
-require_contains "docs/guides/onboarding/README.md" '2026-04-20' "onboarding index carries current verification date"
+require_contains "docs/guides/onboarding/README.md" '2026-04-21' "onboarding index carries current verification date"
 require_contains "docs/guides/onboarding/README.md" 'bootstrap-local-readiness\.yml' "onboarding index names heavy proof workflow"
 require_contains "docs/guides/onboarding/README.md" 'benchmark_class=app-cache-cold' "onboarding index names app-cache-cold image build proof"
 require_contains "docs/guides/onboarding/README.md" 'DEVELOPER_ENVIRONMENT_PROOF_MATRIX\.md' "onboarding index links developer environment proof matrix"
 
-require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" '2026-04-20' "quick start carries current verification date"
+require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" '2026-04-21' "quick start carries current verification date"
 require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" 'verify-cold-start-onboarding-contract\.sh' "quick start names offline contract verifier"
 require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" 'verify-local-bootstrap-readiness\.sh' "quick start names local bootstrap readiness verifier"
 require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" 'bootstrap-local-readiness\.yml' "quick start names heavy proof workflow"
@@ -291,7 +291,7 @@ require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" '--set RUN_MONGOD
 reject_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" 'site-down\.md' "quick start does not link missing site-down runbook"
 reject_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" 'changeme-local-only' "quick start does not publish fixed local admin password"
 
-require_contains "docs/guides/onboarding/LOCAL_SETUP.md" '2026-04-20' "local setup guide carries current verification date"
+require_contains "docs/guides/onboarding/LOCAL_SETUP.md" '2026-04-21' "local setup guide carries current verification date"
 require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'tutor-config-save\.sh' "local setup guide uses canonical Tutor config wrapper"
 require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'prepare-tutor-build-context\.sh' "local setup guide uses canonical build-context wrapper"
 require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'benchmark_class=app-cache-cold' "local setup guide names app-cache-cold image build proof"

@@ -1,10 +1,10 @@
 # Footer Slot Migration Contract
-_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-04-21 • Status: active_
 
 **Status**: Active Migration Path
 **Created**: 2026-02-17
 **Related**: [ADR-014: MFE Branding Strategy](../../../programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md)
-**Verification**: `scripts/qa/verify-footer-slot-migration.sh`
+**Verification**: `scripts/qa/verify-mfe-footer-slot.sh`, `scripts/qa/verify-footer-parity.sh`
 
 ---
 
@@ -14,132 +14,100 @@ This document defines the migration lifecycle for the MFE footer customization f
 
 ---
 
-## Current State: Defense-in-Depth Dual-Path
+## Current State: Plugin-Owned Footer With Retired-Indigo Guards
 
-The MerekaFooter component (v2, 5-zone dark footer) is currently delivered via two redundant paths:
+> 2026-04-21 truth note: the active footer owner is the repo-local Tutor plugin
+> surface. `MerekaFooter` lives in
+> `infrastructure/tutor/plugins/_mereka_lms/mfe_runtime/footer.js`, is assembled
+> by `infrastructure/tutor/plugins/_mereka_lms/mfe_runtime.py`, and is registered
+> through `infrastructure/tutor/plugins/mereka_lms_mfe_slots.py`. External Tutor
+> Indigo is retired. Any remaining Indigo logic is a stale-render guard, not a
+> live dependency or second owner.
 
-### Path 1: Plugin (Canonical Source)
+The MerekaFooter component (v2, 5-zone dark footer) is delivered through the
+repo-local Tutor plugin path:
 
-**File**: `infrastructure/tutor/plugins/mereka_lms.py` lines 568-769
+### Canonical Source
 
-**Mechanism**:
-1. **Forward-compat registration** (lines 568-593): `PLUGIN_SLOTS.add_item("footer_slot", ...)` with ImportError guard
-   - This path activates when `tutormfe.hooks.PLUGIN_SLOTS` becomes available in tutor-mfe
-   - Currently inactive (Tutor 21 doesn't expose the filter yet)
-2. **mfe-env-config patch** (lines 599-769): Injects MerekaFooter component inline in `env.config.jsx`
-   - Full React component definition (171 lines)
-   - Contains all footer logic: SITE_VARIANTS, socialLinks, navLinks, 4-column layout
-   - mereka.scss import
-   - This is the **canonical source of truth** for the footer component
+| Concern | Current owner |
+|---|---|
+| Footer React component | `infrastructure/tutor/plugins/_mereka_lms/mfe_runtime/footer.js` |
+| Runtime assembly into `env.config.jsx` | `infrastructure/tutor/plugins/_mereka_lms/mfe_runtime.py` |
+| Footer slot registration | `infrastructure/tutor/plugins/mereka_lms_mfe_slots.py` |
+| Stale Indigo residue guard | governed patch path only, with verifier coverage |
 
-### Path 2: apply-patches.sh (Fallback)
-
-**File**: `infrastructure/tutor/apply-patches.sh` lines 1031-1207
-
-**Mechanism**:
-1. **Indigo import stripping** (line 1031): Removes `import Footer from '@edly-io/indigo-frontend-component-footer';`
-2. **mereka.scss import injection** (lines 1032-1042): Safety net for CSS import
-3. **MerekaFooter component duplication** (lines 1043-1206): Entire component inline
-4. **RenderWidget replacement** (line 1207): `RenderWidget: <Footer />` → `RenderWidget: <MerekaFooter />`
-
-**Why dual-path**: Defense-in-depth redundancy. If the plugin path fails (env.config.jsx generation issue, patch ordering problem), the string surgery in apply-patches.sh provides a fallback.
+`apply-patches.sh` must not carry a duplicate `MerekaFooter` implementation or
+be treated as a second footer owner. If a render still contains an external
+Indigo footer import, strip it as stale upstream residue and keep the verifier
+red until the render is clean.
 
 ---
 
-## Target State: Single-Source Plugin-Config
+## Target State: Single-Source Plugin Config
 
-**When PLUGIN_SLOTS filter ships in tutor-mfe**:
+The target is already the active direction: footer component source and slot
+registration live in the repo-local plugin modules. The remaining work is to
+delete stale-render guards only after verifier evidence shows Tutor/upstream no
+longer emits the external Indigo residue they protect against.
 
-### Keep (Plugin Only)
-
-**File**: `mereka_lms.py`
-
-1. **PLUGIN_SLOTS registration** (lines 568-593): Remove ImportError guard, make it the active path
-2. **mfe-env-config patch** (lines 599-769): Keep as-is (component definition + mereka.scss import)
-
-**Why keep mfe-env-config**: Even with PLUGIN_SLOTS, the component definition must live somewhere. The env.config.jsx patch is the right place for inline component definitions.
-
-### Remove (apply-patches.sh)
+### Retain (Stale-Render Guards)
 
 **File**: `apply-patches.sh`
 
-1. **Footer component duplication** (lines 1043-1206): DELETE
-2. **RenderWidget replacement** (line 1207): DELETE
+1. **Indigo import stripping**: keep only as a guard against stale upstream or
+   stale rendered artifacts reintroducing the retired external Indigo package.
+2. **mereka.scss import**: keep only if the plugin-owned runtime path still
+   needs the safety net for rendered `env.config.jsx` compatibility.
 
-**Why remove**: Once PLUGIN_SLOTS is active, the string surgery is redundant. The plugin path handles both component injection and slot wiring.
-
-### Retain (Safety Nets)
-
-**File**: `apply-patches.sh`
-
-1. **Indigo import stripping** (lines 1031): KEEP until we confirm Indigo is fully removed from upstream
-2. **mereka.scss import** (lines 1032-1042): KEEP as safety net (ensures CSS loads even if plugin path has issues)
-
-**Why retain**: These are low-risk safety nets that don't duplicate the component logic. They can be removed in a later cleanup phase once we have 6+ months of stable PLUGIN_SLOTS operation.
+**Why retain**: These guards do not make Indigo live again and must not
+duplicate footer component logic. If a future render proves they are obsolete,
+remove them together with the verifier expectation that required them.
 
 ---
 
 ## Migration Steps
 
-### Phase 0: Current State (DONE)
+### Phase 0: Plugin-Owned Footer (DONE)
 
-- [x] MerekaFooter v2 defined in `mereka_lms.py` mfe-env-config patch
-- [x] PLUGIN_SLOTS forward-compat registration with ImportError guard
-- [x] apply-patches.sh fallback (full duplication)
+- [x] MerekaFooter v2 defined in `_mereka_lms/mfe_runtime/footer.js`
+- [x] Runtime JSX assembled by `_mereka_lms/mfe_runtime.py`
+- [x] Footer slot registered through `mereka_lms_mfe_slots.py`
+- [x] External Indigo package retired from active build authority
 - [x] FPF dependency (`@openedx/frontend-plugin-framework@^1.8.0`) in MFE builds
 - [x] Verification script (`verify-mfe-footer-slot.sh`)
-- [x] CI gate (`.github/workflows/ci.yml` mfe-footer-slot job)
+- [x] CI/static gates include footer and plugin slot checks
 
-### Phase 1: PLUGIN_SLOTS Filter Ships (Trigger)
+### Phase 1: Retire Stale-Render Guards
 
-**When**: tutor-mfe upstream exposes `tutormfe.hooks.PLUGIN_SLOTS` filter
-
-**Actions**:
-
-1. Remove ImportError guard from `mereka_lms.py` lines 568-593
-2. Set `_PLUGIN_SLOTS_AVAILABLE = True` as unconditional
-3. Test: `tutor images build mfe && tutor k8s restart mfe`
-4. Verify: `scripts/qa/verify-mfe-footer-slot.sh` (all checks PASS)
-5. Verify: Live cluster footer renders identically
-
-### Phase 2: Remove apply-patches.sh Duplication (After 2 Weeks Stable)
-
-**When**: PLUGIN_SLOTS path has been stable in production for 2+ weeks
+**When**: a fresh Tutor render proves the external Indigo import and
+`mereka.scss` safety-net injection are no longer needed.
 
 **Actions**:
-1. **DELETE** `apply-patches.sh` lines 1043-1206 (MerekaFooter component)
-2. **DELETE** `apply-patches.sh` line 1207 (RenderWidget replacement)
-3. **KEEP** lines 1031-1042 (Indigo import stripping + mereka.scss safety net)
-4. Update verification script to expect single-source (plugin only)
-5. Test: `tutor images build mfe && tutor k8s restart mfe`
-6. Verify: `scripts/qa/verify-footer-slot-migration.sh` (PASS on migration debt = 0)
 
-### Phase 3: Remove Safety Nets (Optional, After 6 Months)
-
-**When**: PLUGIN_SLOTS path has been stable in production for 6+ months
-
-**Actions**:
-1. **DELETE** `apply-patches.sh` lines 1031-1042 (Indigo import + mereka.scss safety net)
-2. All footer logic now lives exclusively in `mereka_lms.py`
-3. Update verification script accordingly
+1. Remove the obsolete guard from the governed patch path.
+2. Update `verify-mfe-footer-slot.sh` or the relevant parity verifier to fail if
+   external Indigo dependency wiring is reintroduced.
+3. Test: `./scripts/qa/verify-mfe-footer-slot.sh` and
+   `./scripts/qa/verify-footer-parity.sh`.
+4. Rebuild MFE and verify live footer rendering before closing the lane.
 
 ---
 
 ## Risk Analysis
 
-### Risks of Dual-Path
+### Risks of Reintroducing Dual-Path Footer Logic
 
 | Risk | Impact | Mitigation |
 |------|--------|------------|
-| **Component drift** | Plugin and patches diverge, footer breaks | Verification script checks parity (key identifiers: SITE_VARIANTS, mereka-footer--v2, 4 zones) |
-| **Confusion for maintainers** | "Which one is the source of truth?" | This document + @covers annotations point to plugin as canonical |
-| **Migration debt** | 177 lines of redundant code | Track as metric in verification script |
+| **Component drift** | Plugin and patches diverge, footer breaks | Keep component code in `_mereka_lms/mfe_runtime/footer.js` only |
+| **Confusion for maintainers** | "Which one is the source of truth?" | This document and `MFE_PLUGIN_SLOT_INVENTORY.md` point to plugin modules as canonical |
+| **Indigo relapse** | Retired external package becomes live again | CI must reject `indigo-frontend-component-footer` in active render/build output |
 
 ### Risks of Single-Source (Post-Migration)
 
 | Risk | Impact | Mitigation |
 |------|--------|------------|
-| **PLUGIN_SLOTS filter breaks** | Footer doesn't render | Retain mfe-env-config patch (doesn't rely on filter) |
+| **PLUGIN_SLOTS filter breaks** | Footer doesn't render | Keep slot verifier and runtime browser proof current |
 | **env.config.jsx generation failure** | No footer component | Monitoring: alert on 404 for footer assets |
 | **Regression** | Accidentally re-introduce Footer import | CI gate: check for `import Footer from '@edly-io/indigo-frontend-component-footer'` |
 
@@ -149,21 +117,22 @@ The MerekaFooter component (v2, 5-zone dark footer) is currently delivered via t
 
 ### Migration Debt
 
-**Definition**: Lines of redundant footer code in `apply-patches.sh`
+**Definition**: footer component implementation outside the repo-local plugin
+runtime modules.
 
-**Current**: 177 lines (1043-1206: 164 lines component + 1207: 1 line RenderWidget + 1031-1042: 12 lines safety nets)
-
-**Target**: 12 lines (safety nets only) after Phase 2, 0 lines after Phase 3
+**Current target**: zero duplicate `MerekaFooter` implementations in
+`apply-patches.sh` or rendered patch helpers.
 
 ### Component Parity
 
-**Check**: Both sources (plugin + patches) contain identical key identifiers:
+**Check**: The plugin source and rendered output contain the expected identifiers:
 
 - `SITE_VARIANTS` object with 3 domains
 - `mereka-footer--v2` CSS class
 - 4 zones: `footer-social`, `footer-nav`, `footer-body`, `footer-legal`
 
-**Failure mode**: If identifiers differ → drift detected → alert maintainer
+**Failure mode**: If plugin source and rendered output differ in behavior, fix the
+plugin/render path. Do not add a second footer implementation.
 
 ### Slot Wiring Integrity
 
@@ -176,34 +145,29 @@ The MerekaFooter component (v2, 5-zone dark footer) is currently delivered via t
 
 ## Rollback Plan
 
-If PLUGIN_SLOTS path fails in production:
+If footer slot wiring fails in production:
 
-1. **Immediate**: Revert to dual-path by uncommenting apply-patches.sh footer block
-2. **Short-term**: Investigate plugin issue (env.config.jsx generation, patch ordering)
-3. **Long-term**: If PLUGIN_SLOTS proves unreliable, document decision to remain on dual-path
+1. **Immediate**: revert the source PR or roll back to the prior known-good MFE
+   image through GitOps.
+2. **Short-term**: investigate plugin slot registration, `env.config.jsx`
+   generation, and runtime component assembly.
+3. **Long-term**: repair the plugin/render path and add a regression guard.
+   Reintroducing a duplicate `apply-patches.sh` footer component is an
+   intentional architecture change and requires a new authority decision.
 
-**Rollback cost**: 5 minutes (revert commit + `tutor images build mfe` + `tutor k8s restart mfe`)
+**Rollback cost**: depends on image availability and GitOps realization time;
+do not use live-only `kubectl` mutation as closure.
 
 ---
 
 ## Success Criteria
 
-### Phase 1 Complete When:
-- [x] PLUGIN_SLOTS filter is available in tutor-mfe
-- [ ] ImportError guard removed from `mereka_lms.py`
-- [ ] Footer renders identically in all MFEs (authn, account, learning, profile, etc.)
-- [ ] `verify-mfe-footer-slot.sh` passes (30+ PASS / 0 FAIL)
-
-### Phase 2 Complete When:
-- [ ] apply-patches.sh footer component (lines 1043-1206) deleted
-- [ ] apply-patches.sh RenderWidget replacement (line 1207) deleted
-- [ ] `verify-footer-slot-migration.sh` reports migration debt = 12 lines (safety nets only)
-- [ ] Footer renders identically for 2+ weeks in production
-
-### Phase 3 Complete When:
-- [ ] All safety nets removed from apply-patches.sh
-- [ ] Migration debt = 0 lines
-- [ ] Footer stable for 6+ months
+### Current Lane Complete When:
+- [x] Footer source lives in the plugin runtime modules.
+- [x] Slot registration lives in `mereka_lms_mfe_slots.py`.
+- [ ] Any remaining stale-render guards have verifier coverage and a retirement
+  trigger.
+- [ ] Footer renders correctly in active MFEs after the next MFE image proof.
 
 ---
 
@@ -211,23 +175,25 @@ If PLUGIN_SLOTS path fails in production:
 
 | File | Role | Status |
 |------|------|--------|
-| `infrastructure/tutor/plugins/mereka_lms.py` | Canonical source (plugin) | Active |
-| `infrastructure/tutor/apply-patches.sh` | Fallback (string surgery) | Active, to be removed |
-| `scripts/qa/verify-mfe-footer-slot.sh` | Component parity check | Active |
-| `scripts/qa/verify-plugin-slot-wiring.sh` | Slot wiring integrity | Active |
-| `scripts/qa/verify-footer-slot-migration.sh` | Migration progress tracking | NEW (this bead) |
+| `infrastructure/tutor/plugins/_mereka_lms/mfe_runtime/footer.js` | Footer component source | Active |
+| `infrastructure/tutor/plugins/_mereka_lms/mfe_runtime.py` | Runtime assembly into `env.config.jsx` | Active |
+| `infrastructure/tutor/plugins/mereka_lms_mfe_slots.py` | Slot registration | Active |
+| `infrastructure/tutor/apply-patches.sh` | Governed patch entrypoint; not footer source authority | Active |
+| `scripts/qa/verify-mfe-footer-slot.sh` | Footer slot wiring check | Active |
+| `scripts/qa/verify-footer-parity.sh` | Footer parity check | Active |
 | `docs/programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md` | Strategic decision (plugin-first) | Reference |
 
 ---
 
 ## Acceptance Criteria Mapping
 
-- **AC-FTSLOT-001**: This document defines the footer slot migration lifecycle (dual-path → single-source plugin-config)
-- **AC-FTSLOT-002**: Verification script confirms MerekaFooter lives in exactly one canonical source (mereka_lms.py), detects drift between plugin and patches
-- **AC-FTSLOT-003**: CI gate prevents regression to string-surgery-only footer wiring
+- **AC-FTSLOT-001**: This document defines the footer slot migration lifecycle toward single-source plugin config.
+- **AC-FTSLOT-002**: Verification confirms MerekaFooter remains plugin-owned and rendered output stays aligned.
+- **AC-FTSLOT-003**: CI gates prevent regression to string-surgery-only footer wiring or live Indigo dependency wiring.
 
 ---
 
-**Last Updated**: 2026-02-17
+**Last Updated**: 2026-04-21
 **Owner**: Platform Team
-**Revisit**: When `tutormfe.hooks.PLUGIN_SLOTS` filter ships in tutor-mfe
+**Revisit**: When the remaining stale-render guards have fresh render evidence
+showing they can be removed.

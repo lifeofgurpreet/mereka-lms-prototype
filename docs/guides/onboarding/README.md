@@ -1,5 +1,5 @@
 # Onboarding Documentation
-_Audience: Developers + Agent Operators • Owner: Platform Team • Last verified: 2026-04-20 • Status: canonical_
+_Audience: Developers + Agent Operators • Owner: Platform Team • Last verified: 2026-04-21 • Status: canonical_
 
 ## Scope
 This is the canonical onboarding index for local setup and daily development workflow.
@@ -31,6 +31,11 @@ This is the canonical onboarding index for local setup and daily development wor
   - [`../../reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md`](../../reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md)
 
 Do not call onboarding fixed from docs-only review. The contract verifier proves source and guide consistency. The bootstrap workflow proves a clean repo-scoped Tutor launch path. The `benchmark_class=app-cache-cold` benchmark proves image-build helpers with app-level BuildKit cache imports disabled. It is not a machine-cold clean-room build: a persistent runner may still have Docker daemon/base-image state, and a local developer machine can still fail for host-resource reasons.
+
+Latest current-main proof from 2026-04-21:
+
+- Build Tutor Images run `24711505579` on `e7a4472cd`: success.
+- Bootstrap Local Readiness run `24711453019` on `e7a4472cd`: success.
 
 The local setup path must stay one source chain: Tutor source/config plus `docker-bake.hcl` build helpers. It builds `openedx:nightly` and `openedx-mfe:nightly`, renders Tutor to those local tags, applies the named dependency-image mirror patch for Tutor-emitted hardcoded Docker Hub refs, selects the repo-owned BuildKit dependency-mirror builder as a fallback guard, and uses `mirror.gcr.io` image refs where Tutor exposes them. Mirror use is dependency acquisition, not a second build strategy.
 

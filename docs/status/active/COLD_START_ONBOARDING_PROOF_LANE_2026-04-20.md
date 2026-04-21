@@ -1,13 +1,14 @@
 # Cold-start Onboarding Proof Lane - 2026-04-20
 
 Status: active
-Last verified: 2026-04-20
+Last verified: 2026-04-21
 
 ## Current Verified State
 
-- `repo_truth`: PR #1925 / branch `fix/cold-start-onboarding-proof-20260420` is the active repair lane for local quick start, Tutor render resilience, app-cache-cold proof semantics, and stale verifier/docs truth. Local validation in `/tmp/mereka-lms-coldstart-worktree` is green for the source contracts listed below. Resolve the current pushed head with `gh pr view 1925 --json headRefOid`.
+- `repo_truth`: current `main` is `e7a4472cd` after PR #1979. The local quick-start source contract and bounded build-optimization delta contract remain the app-repo truth surfaces.
 - `infra_truth`: `.github/workflows/bootstrap-local-readiness.yml` is the clean bootstrap proof lane. `build-benchmark.yml` with `benchmark_class=app-cache-cold` / `image_family=both` is the separate app-cache-cold image-build proof lane. The old `true-cold` input remains a legacy alias only; the proof class disables app-level BuildKit cache imports but does not prove a pristine Docker daemon or absent base images on persistent runners. App repo Kustomize proof owns base/local contracts; production and rke2 environment overlays are infra-owned unless an explicit require flag is set.
-- `runtime_truth`: pending on the current PR head. Fresh GitHub proof lanes must be matched by `headSha == headRefOid`; runs from earlier heads are stale evidence only. Do not claim cold-start onboarding is proven until the corrected GitHub bootstrap workflow and app-cache-cold build proof are green on the current head or explicitly waived with fresh evidence.
+- `proof_truth`: current-head Build Tutor Images run `24711505579` and Bootstrap Local Readiness run `24711453019` are green on `e7a4472cd`. This proves the current shared build/bootstrap lanes after the root-owned generated-workspace cleanup fix. It does not add a pristine machine-cold proof.
+- `runtime_truth`: local/bootstrap proof is green for current main. GitOps realization and live cluster runtime proof remain separate truth planes and must not be inferred from local bootstrap success.
 
 ## What We Achieved Already
 
@@ -37,7 +38,10 @@ Last verified: 2026-04-20
 
 ## Current Control Point
 
-Current truth: the lane is locally source-green, with GitHub proof still open. The next control point is watching current-head proof lanes and classifying any red result by authority:
+Current truth: the lane is locally source-green and current-head GitHub proof is
+green for the shared build/bootstrap paths. The next control point is to keep
+these contracts green on any build-path edit and classify any red result by
+authority:
 
 ```bash
 bash -n scripts/shared/setup-local.sh scripts/qa/verify-setup.sh scripts/qa/verify-cold-start-onboarding-contract.sh scripts/qa/verify-cicd-merge-gates-and-secrets.sh
@@ -68,11 +72,11 @@ python3 scripts/qa/spec-tools/mereka_spec_lint.py specs/ --severity-filter error
 git diff --check
 ```
 
-Current-head GitHub proof lanes:
+Current-head GitHub proof examples:
 
 ```bash
-CURRENT_HEAD="$(gh pr view 1925 --json headRefOid --jq .headRefOid)"
-gh run list --branch fix/cold-start-onboarding-proof-20260420 --limit 20 \
+CURRENT_HEAD="$(git rev-parse origin/main)"
+gh run list --branch main --limit 20 \
   --json databaseId,workflowName,status,conclusion,headSha,createdAt,event \
   --jq ".[] | select(.headSha == \"${CURRENT_HEAD}\") | [.databaseId,.workflowName,.status,(.conclusion//\"\"),.event,.createdAt] | @tsv"
 ```
@@ -84,15 +88,15 @@ gh run list --branch fix/cold-start-onboarding-proof-20260420 --limit 20 \
 | P0 | Fix setup script root/path/security drift | app repo | local green | `bash -n`, contract verifier |
 | P0 | Make quick-start docs copy-paste truthful | docs | local green | contract verifier markdown link check |
 | P0 | Keep local setup image/service authority truthful | app repo + docs | local render proved: `openedx:nightly`, `openedx-mfe:nightly`, local services enabled, mirrored third-party pulls, BuildKit dependency-mirror builder selected before local builds | isolated Tutor render + `verify-cold-start-onboarding-contract.sh` |
-| P0 | Remove Docker Hub anonymous quota from bootstrap dependency acquisition | CI | local workflow contract green; current-head rerun pending | `verify-bootstrap-workflow-contract.sh`, bootstrap workflow green run |
+| P0 | Remove Docker Hub anonymous quota from bootstrap dependency acquisition | CI | current-head bootstrap green on `e7a4472cd` (`24711453019`) | `verify-bootstrap-workflow-contract.sh`, bootstrap workflow green run |
 | P0 | Ensure heavy workflow covers doc/setup drift | CI | local green | `verify-bootstrap-workflow-contract.sh`, workflow path trigger review |
-| P1 | Run clean Tutor bootstrap proof | CI runner | current-head GitHub proof pending | `bootstrap-local-readiness.yml` green run + redacted artifact |
-| P0 | Keep `build-optimizations.sh` as bounded J-exit layer | app repo | local contract green; current-head CI/render proof pending | `verify-build-optimizations-render-delta-contract.sh`, `test-verify-build-optimizations-render-delta-contract.sh` |
-| P0 | Fix render preflight venv portability | CI | local contract green; current-head render proof pending | `verify-cicd-tutor-plugin-test.sh`, `tutor-plugin-test.yml` green |
-| P0 | Correct app-vs-infra Kustomize ownership checks | app repo + infra repo boundary | local green; current-head CI proof pending | `verify-k8s-images.sh`, `verify-kustomize-structure.sh`, `verify-kustomize-render.sh`, `verify-network-policies.sh`, `verify-secrets-isolation.sh` |
+| P1 | Run clean Tutor bootstrap proof | CI runner | current-head GitHub proof green on `e7a4472cd` (`24711453019`) | `bootstrap-local-readiness.yml` green run + redacted artifact |
+| P0 | Keep `build-optimizations.sh` as bounded J-exit layer | app repo | local contract green; current-head Build Tutor Images proof green on `e7a4472cd` (`24711505579`) | `verify-build-optimizations-render-delta-contract.sh`, `test-verify-build-optimizations-render-delta-contract.sh` |
+| P0 | Fix render preflight venv portability | CI | current-head Build Tutor Images render preflight green on `e7a4472cd` (`24711505579`) | `verify-cicd-tutor-plugin-test.sh`, `tutor-plugin-test.yml` green |
+| P0 | Correct app-vs-infra Kustomize ownership checks | app repo + infra repo boundary | local green; static CI proof should be checked when this surface changes | `verify-k8s-images.sh`, `verify-kustomize-structure.sh`, `verify-kustomize-render.sh`, `verify-network-policies.sh`, `verify-secrets-isolation.sh` |
 | P0 | Remove app-repo live Velero patch authority | app repo docs/specs; infra repo owns CronJob realization | local green; runtime restore-drill proof registered as runtime inventory, not static CI | `verify-disaster-recovery.sh --skip-cluster`, generated DR testmap, spec lint, `verify-restore-drill.sh` runtime proof |
-| P0 | Repair CI secret-scan harness truth | CI | local green; current-head CI proof pending | `verify-cicd-merge-gates-and-secrets.sh` |
-| P0 | Repair secret classification and Paragon token verification drift | app repo | local green; current-head CI proof pending | `verify-secret-classification.sh`, `verify-paragon-tokens.sh` |
+| P0 | Repair CI secret-scan harness truth | CI | local green; static CI proof should be checked when this surface changes | `verify-cicd-merge-gates-and-secrets.sh` |
+| P0 | Repair secret classification and Paragon token verification drift | app repo | local green; static CI proof should be checked when this surface changes | `verify-secret-classification.sh`, `verify-paragon-tokens.sh` |
 | P1 | Run app-cache-cold image-build proof | CI runner | current-head ARC run `24680694038` failed correctly after exposing Docker Hub fallback from hardcoded upstream dependency refs; rerun after the dependency-image mirror normalization fix lands | `build-benchmark.yml` with `benchmark_class=app-cache-cold`, `image_family=both` |
 | P1 | Gather dev feedback after guide update | humans | pending | one new developer follows guide without out-of-band steps |
 

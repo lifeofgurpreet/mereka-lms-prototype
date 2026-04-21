@@ -959,7 +959,7 @@ jobs:
           ) &
           HEARTBEAT_PID=$!
           trap 'kill $HEARTBEAT_PID 2>/dev/null || true' EXIT
-          # 140m: 12 MFEs + learner-record on separate Node 18 base needs extra time.
+          # 140m: 12 MFEs + learner-record on the Ulmo Node 24 base needs extra time.
           # Note: BUILDKIT_MAX_PARALLELISM env var is not read by the
           # docker-container driver, so exporting it here was a no-op. Removed.
           if ! timeout 140m ./scripts/infra/build-mfe-image.sh \

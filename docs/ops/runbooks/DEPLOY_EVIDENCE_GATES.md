@@ -1,5 +1,5 @@
-# Deploy Evidence Gates for GKE Parity
-_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
+# Deploy Evidence Gates for RKE2 Parity
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-04-21 • Status: active_
 
 > **Bead**: mereka-lms-3qy2
 > **Date**: 2026-02-18
@@ -15,7 +15,7 @@ Use:
 
 See `docs/policies/operations/EVIDENCE_REDACTION_POLICY.md`.
 
-## 1. GKE/Dev Parity Proof Commands (AC-OPS-301)
+## 1. RKE2/Dev Parity Proof Commands (AC-OPS-301)
 
 ### Route Parity
 
@@ -129,7 +129,7 @@ Every release PR must include:
 
 ### Default: Cache Reuse
 
-If `canonical-release.sh --dry-run` reports "cache hit" for both images, **skip the build step**. The existing images in Artifact Registry are identical.
+If `canonical-release.sh --dry-run` reports "cache hit" for both images, **skip the build step**. The existing images in GHCR are identical.
 
 ### Justified Full-Rebuild Exceptions
 
@@ -145,7 +145,7 @@ If `canonical-release.sh --dry-run` reports "cache hit" for both images, **skip 
 
 ### Cache Lock Mechanism
 
-Cache digests stored in `var/build-cache/` (gitignored). Format: `<image>_<tag>.digest` containing the sha256 digest from Artifact Registry.
+Cache digests stored in `var/build-cache/` (gitignored). Format: `<image>_<tag>.digest` containing the sha256 digest from GHCR.
 
 To force a full rebuild regardless of cache:
 ```bash

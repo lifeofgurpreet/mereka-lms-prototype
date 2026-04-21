@@ -57,7 +57,9 @@
 - Error references Docker socket, daemon, or buildx builder
 - `apt update` or `pip install` fails with network timeouts (DNS, connection refused)
 - `permission denied` on `/var/run/docker.sock`
+- `permission denied` deleting generated workspace files before checkout
 - Disk full errors (`no space left on device`)
+- GitHub runner fails before checkout while writing `_diag` worker logs
 - The same commit succeeded before (proves it's not source)
 - Re-running on a different runner (or after cleanup) succeeds
 
@@ -68,6 +70,8 @@
 - `no space left on device` during layer extraction
 - 29 stale buildx builder containers exhausting Docker resources
 - `error: failed to receive status: connection reset by peer` (broken pipe from daemon overload)
+- `EACCES: permission denied, rmdir .../tutor_env/data/...` before checkout
+- `No space left on device : '/srv/github-runner-.../_diag/Worker_...log'` before checkout
 
 **Resolution path**: SSH to runner, diagnose daemon/disk/network, clean up. Re-run the build. File an issue for long-term fix (automated cleanup, monitoring).
 
@@ -151,6 +155,8 @@ Build failed
 
 | Date | Run | Bucket | Root Cause |
 |------|-----|--------|------------|
+| 2026-04-21 | 24708921916 | **3 (Runner Infra)** | Fastlane MFE job failed before checkout because root-owned generated Tutor state under `tutor_env/data/*` could not be removed without passwordless sudo. Fixed by PR #1979 with bounded Docker-root pre-checkout cleanup for generated paths. |
+| 2026-04-21 | 24710721353 | **3 (Runner Infra)** | Fastlane CI host hit disk pressure before checkout while the GitHub runner wrote `_diag/Worker_*.log` (`No space left on device`). Rerun passed; host cleanup/monitoring remains a runner hygiene follow-up. |
 | 2026-04-16 | 24491141960 | **3 (Runner Infra)** | Docker socket permissions drift + 29 stale buildx containers + transient network outage to archive.ubuntu.com on vmi3220759 |
 | 2026-04-14 | 24419232252 | Check | Unknown — investigate |
 | 2026-04-14 | 24400318736 | Check | Unknown — investigate |

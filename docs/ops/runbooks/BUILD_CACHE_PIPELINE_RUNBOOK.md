@@ -238,7 +238,9 @@ site_packages = sysconfig.get_path('purelib')
 # Returns /usr/local/lib/python3.12/site-packages on the CI runner
 ```
 
-This is how `build-optimizations.sh` writes the `mereka-plugins.pth` file.
+This is how the Tutor plugin source in
+`infrastructure/tutor/plugins/_mereka_lms/openedx_dockerfile.py` writes the
+`mereka-plugins.pth` file in the Open edX image.
 
 ### 5. Tutor version is pinned in `requirements-tutor.txt` — do not duplicate it
 
@@ -483,16 +485,17 @@ kubectl annotate application mereka-lms-prod -n argocd \
 
 ### Detailed: `python3.12/site-packages: No such file or directory`
 
-The symptom is a container that starts and immediately exits with an ImportError or
-a pth file that silently does nothing. Cause: `build-optimizations.sh` (or another
-patch file) wrote:
+The symptom is a container that starts and immediately exits with an ImportError
+or a pth file that silently does nothing. Cause: a Dockerfile hook or patch file
+wrote:
 
 ```bash
 echo "mereka_plugins" > "${SITE_PACKAGES}/python3.12/site-packages/mereka-plugins.pth"
 ```
 
-This path exists on the CI runner (Python 3.12) but not inside the image (Python 3.11).
-The fix is in `infrastructure/tutor/patches/build-optimizations.sh` — use Python to
+This path exists on the CI runner (Python 3.12) but not inside the image
+(Python 3.11). The current owner is
+`infrastructure/tutor/plugins/_mereka_lms/openedx_dockerfile.py`: use Python to
 resolve the path dynamically at build time:
 
 ```bash
