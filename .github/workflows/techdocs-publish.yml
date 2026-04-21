@@ -62,23 +62,32 @@ jobs:
             --output-dir ./site \
             --no-docker \
             --verbose
+          # TechDocs reader looks for techdocs_metadata.json at the entity
+          # prefix root; mkdocs-techdocs-core emits it into ./site during
+          # build. Confirm it's there before we upload.
+          ls -la ./site/techdocs_metadata.json
+          head -c 200 ./site/techdocs_metadata.json; echo
 
       - name: Publish to Cloudflare R2
         env:
-          # R2 is S3-compatible — the AWS SDK + techdocs-cli drivers accept
-          # AWS_* env vars + a custom --awsEndpoint pointing at the R2 URL.
+          # R2 is S3-compatible. We use `aws s3 sync` directly instead of
+          # `techdocs-cli publish` because the latter's
+          # `--awsS3ForcePathStyle` flag in 1.9.4 silently fails to propagate
+          # into the underlying @aws-sdk/client-s3 config, causing the SDK to
+          # build a virtual-hosted bucket URL that fails auth on R2. The
+          # bucket layout required by Backstage's TechDocs reader is just
+          # `<bucket>/<namespace>/<kind>/<name>/**`, which `aws s3 sync`
+          # reproduces faithfully.
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_TECHDOCS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_TECHDOCS_SECRET_ACCESS_KEY }}
           AWS_REGION: auto
           R2_ACCOUNT_ID: ${{ secrets.R2_TECHDOCS_ACCOUNT_ID }}
           R2_BUCKET: ${{ secrets.R2_TECHDOCS_BUCKET }}
         run: |
-          techdocs-cli publish \
-            --publisher-type awsS3 \
-            --storage-name "$R2_BUCKET" \
-            --awsEndpoint "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com" \
-            --awsS3ForcePathStyle \
-            --entity "$ENTITY_REF"
+          aws s3 sync ./site "s3://${R2_BUCKET}/${ENTITY_REF}/" \
+            --endpoint-url "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com" \
+            --delete \
+            --no-progress
 
       - name: Summary
         run: |
