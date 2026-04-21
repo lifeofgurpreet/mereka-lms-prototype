@@ -2632,7 +2632,7 @@ a:hover { text-decoration: underline; }
         <p>Strategy-grade learning journeys, hands-on pathways, and industry mentors — built for operators, creators, and curious builders across the region.</p>
         <div class="disc__hero-cta">
           <button class="btn btn--primary" onclick="goto('register')">Join the community</button>
-          <button class="btn btn--outline">Browse courses</button>
+          <button class="btn btn--outline" onclick="document.getElementById('courses-grid').scrollIntoView({behavior:'smooth', block:'start'});">Browse courses</button>
         </div>
         <div class="disc__search">
           <span class="disc__search-icon"><span class="material-symbols-outlined">search</span></span>
@@ -2681,7 +2681,7 @@ a:hover { text-decoration: underline; }
       </div>
     </div>
 
-    <div class="disc__grid">
+    <div class="disc__grid" id="courses-grid" style="scroll-margin-top: 96px;">
       <article class="card course-card" data-course-id="f101" data-course-title="Freelancing 101" data-course-price="RM 180" data-course-icon="rocket_launch" data-course-tag="Soft skills" onclick="goto('course')">
         <div class="course-card__img course-art" data-topic="freelancing">
           <span class="course-card__type"><span class="material-symbols-outlined" style="font-size:12px;">workspace_premium</span> Curated pathway</span>
