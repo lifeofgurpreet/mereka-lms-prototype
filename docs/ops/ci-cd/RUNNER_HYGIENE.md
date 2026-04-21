@@ -43,7 +43,7 @@ Install path on the runner: `/opt/runner/` (see [Manual Install](#manual-install
 
 | Code | Meaning |
 |------|---------|
-| `0` | All requested removals succeeded (or dry-run) |
+| `0` | All requested removals succeeded, dry-run completed, or destructive cleanup was deferred because an active Docker/Buildx build process was present |
 | `1` | Docker daemon unavailable |
 | `2` | Partial failure — some removed, some failed |
 
@@ -200,6 +200,10 @@ ssh root@"${RUNNER_IP}" crontab -l | grep buildx
 ```bash
 ssh root@"${RUNNER_IP}" /opt/runner/buildx-cleanup.sh
 ```
+
+If a Docker/Buildx/buildctl build is still active, the cleanup script exits 0
+without removing builders or orphan containers. Wait for the active build to
+finish, then rerun cleanup.
 
 ### Preview what would be removed
 

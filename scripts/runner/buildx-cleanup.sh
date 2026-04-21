@@ -161,6 +161,21 @@ builder_container_is_running() {
   [[ "${status}" == "running" ]]
 }
 
+# ── Check for active build commands before destructive cleanup ───────────────
+# BuildKit containers are long-running daemons, so container state alone cannot
+# distinguish an idle stale builder from a live build.  The post-job/cron path
+# must therefore defer destructive cleanup when an actual build command is still
+# present on the shared runner.
+active_build_processes() {
+  if ! command -v pgrep >/dev/null 2>&1; then
+    return 1
+  fi
+
+  pgrep -af '(^|[[:space:]])(docker|buildctl)([[:space:]].*)?(buildx[[:space:]]+build|build)([[:space:]]|$)' 2>/dev/null \
+    | grep -v -F "${SCRIPT_NAME}" \
+    || true
+}
+
 # ── Main logic ───────────────────────────────────────────────────────────────
 log "Starting buildx cleanup (dry_run=${DRY_RUN}, max_keep=${MAX_KEEP}, max_age_hours=${MAX_AGE_HOURS})"
 
@@ -260,6 +275,19 @@ total_to_remove=$(( ${#to_remove[@]} + ${#orphan_containers[@]} ))
 if [[ "${total_to_remove}" -eq 0 ]]; then
   log "Nothing to remove. builders=${count_before}, kept=${#to_keep[@]}, orphans=0"
   exit 0
+fi
+
+active_processes="$(active_build_processes || true)"
+if [[ -n "${active_processes}" ]]; then
+  log "Active Docker/Buildx build process detected; deferring destructive cleanup"
+  while IFS= read -r proc_line; do
+    [[ -n "${proc_line}" ]] || continue
+    log "  active: ${proc_line}"
+  done <<<"${active_processes}"
+  if [[ "${DRY_RUN}" -eq 0 ]]; then
+    log "Deferred cleanup. candidates=${#to_remove[@]}, orphans=${#orphan_containers[@]}"
+    exit 0
+  fi
 fi
 
 if [[ "${DRY_RUN}" -eq 1 ]]; then

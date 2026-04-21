@@ -159,6 +159,8 @@ ci_static_inventory:
       timeout_seconds: 420
     - script: scripts/qa/test-run-scripts-parallel-timeout-metadata.sh
       estimated_seconds: 3
+    - script: scripts/qa/test-buildx-cleanup-active-guard.sh
+      estimated_seconds: 3
     - script: scripts/qa/test-verify-secrets-isolation.sh
     - script: scripts/qa/test-verify-infisical-env-validation-coverage.sh
     - script: scripts/qa/test-verify-secrets-management.sh
@@ -2111,6 +2113,24 @@ scripts:
     dry_run: true
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/qa/test-build-context-fingerprint.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/test-buildx-cleanup-active-guard.sh
+    owner: platform-team
+    purpose: >
+      Regression harness for the fastlane Buildx cleanup active-build guard.
+      Uses fake docker/pgrep commands to prove destructive cleanup defers when
+      a Docker/Buildx build command is active and still removes a stale builder
+      when no build is active.
+    inputs: []
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects:
+      - Creates temporary fake command shims under /tmp
+    dry_run: true
+    lanes: [ci]
+    proof_command: "bash scripts/qa/test-buildx-cleanup-active-guard.sh"
     criticality: release-blocking
 
   # ── CI Preflight & Build ─────────────────────────────────────────────────────

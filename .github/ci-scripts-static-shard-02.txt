@@ -12,9 +12,10 @@ scripts/qa/validate-observability-compliance.sh --mode local
 scripts/qa/verify-script-governance-orphans.sh
 scripts/qa/test-verify-siteconfig-authority.sh
 scripts/qa/verify-token-integrity-routing.sh
-scripts/qa/test-dependency-image-mirrors-patch.sh
-scripts/qa/test-mfe-prune-deprecated-shells.sh
-scripts/qa/verify-deletion-wave-consumer-sweep.sh
+scripts/qa/test-buildx-cleanup-active-guard.sh
+scripts/qa/test-mfe-npm-install-resilience-patch.sh
+scripts/qa/test-verify-build-optimizations-render-delta-contract.sh
+scripts/branding/validate-token-consumers.sh
 scripts/ci/preflight-check.sh
 scripts/infra/check-error-budget-gate.sh
 scripts/qa/audit-observability.sh
