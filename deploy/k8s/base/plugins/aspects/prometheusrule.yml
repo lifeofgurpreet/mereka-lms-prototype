@@ -15,7 +15,7 @@ spec:
       rules:
         - alert: ClickHousePodDown
           expr: |
-            kube_deployment_status_available_replicas{namespace=~"mereka-lms.*|stg-mereka-lms", deployment="clickhouse"} == 0
+            kube_deployment_status_replicas_available{namespace=~"mereka-lms.*|stg-mereka-lms", deployment="clickhouse"} == 0
             and kube_deployment_spec_replicas{namespace=~"mereka-lms.*|stg-mereka-lms", deployment="clickhouse"} > 0
           for: 5m
           labels:
@@ -27,7 +27,7 @@ spec:
 
         - alert: SupersetPodDown
           expr: |
-            kube_deployment_status_available_replicas{namespace=~"mereka-lms.*|stg-mereka-lms", deployment="superset"} == 0
+            kube_deployment_status_replicas_available{namespace=~"mereka-lms.*|stg-mereka-lms", deployment="superset"} == 0
             and kube_deployment_spec_replicas{namespace=~"mereka-lms.*|stg-mereka-lms", deployment="superset"} > 0
           for: 5m
           labels:
@@ -39,7 +39,7 @@ spec:
 
         - alert: RalphPodDown
           expr: |
-            kube_deployment_status_available_replicas{namespace=~"mereka-lms.*|stg-mereka-lms", deployment="ralph"} == 0
+            kube_deployment_status_replicas_available{namespace=~"mereka-lms.*|stg-mereka-lms", deployment="ralph"} == 0
             and kube_deployment_spec_replicas{namespace=~"mereka-lms.*|stg-mereka-lms", deployment="ralph"} > 0
           for: 5m
           labels:
@@ -51,7 +51,7 @@ spec:
 
         - alert: SupersetWorkerDown
           expr: |
-            kube_deployment_status_available_replicas{namespace=~"mereka-lms.*|stg-mereka-lms", deployment="superset-worker"} == 0
+            kube_deployment_status_replicas_available{namespace=~"mereka-lms.*|stg-mereka-lms", deployment="superset-worker"} == 0
             and kube_deployment_spec_replicas{namespace=~"mereka-lms.*|stg-mereka-lms", deployment="superset-worker"} > 0
           for: 10m
           labels:
