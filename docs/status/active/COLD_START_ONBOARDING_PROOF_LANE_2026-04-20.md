@@ -5,9 +5,9 @@ Last verified: 2026-04-21
 
 ## Current Verified State
 
-- `repo_truth`: current `main` is `2b86de83` after PR #1991. The local quick-start source contract, bounded build-optimization delta contract, and repo-owned runner Buildx cleanup remain the app-repo truth surfaces.
+- `repo_truth`: current `main` is `497954538` after PR #1998. The local quick-start source contract, bounded build-optimization delta contract, repo-owned runner Buildx cleanup, and Bootstrap Local Readiness timing artifact contract remain the app-repo truth surfaces.
 - `infra_truth`: `.github/workflows/bootstrap-local-readiness.yml` is the clean bootstrap proof lane. `build-benchmark.yml` with `benchmark_class=app-cache-cold` / `image_family=both` is the separate app-cache-cold image-build proof lane. The old `true-cold` input remains a legacy alias only; the proof class disables app-level BuildKit cache imports but does not prove a pristine Docker daemon or absent base images on persistent runners. App repo Kustomize proof owns base/local contracts; production and rke2 environment overlays are infra-owned unless an explicit require flag is set.
-- `proof_truth`: app-cache-cold image-build proof `24721668598` is green on `39ae0fb86`; last accepted bootstrap baseline `24711453019` is green on `e7a4472cd`; current-main bootstrap rerun `24730265503` is green on `12db1b6` after Buildx cleanup and fastlane hook repair; PR #1991 branch bootstrap `24738471266` is green on `878994d0c`; post-merge Bootstrap Local Readiness `24743995049` is green on `2b86de83`. Build Tutor Images `24743995019` remains separate image-build proof and must not be collapsed into bootstrap proof.
+- `proof_truth`: app-cache-cold image-build proof `24721668598` is green on `39ae0fb86`; last accepted bootstrap baseline `24711453019` is green on `e7a4472cd`; current-main bootstrap rerun `24730265503` is green on `12db1b6` after Buildx cleanup and fastlane hook repair; PR #1991 branch bootstrap `24738471266` is green on `878994d0c`; post-merge Bootstrap Local Readiness `24743995049` is green on `2b86de83`; PR #1998 static CI `24747204826` is green and proves the bootstrap timing artifact contract. Build Tutor Images `24743995019` remains separate image-build proof and must not be collapsed into bootstrap proof.
 - `runtime_truth`: local/bootstrap proof is green for current main as initialized-state proof only. PR #1991 branch and post-merge main proof are green for the local MFE authn HTTP route (`http://apps.localhost/authn/login` returned HTTP 302) and upstream-image unbranded behavior. It does not prove GitOps realization, live cluster runtime, browser-rendered MFE login, or branded theme assets in a repo-built image.
 
 ## What We Achieved Already
@@ -43,9 +43,13 @@ Last verified: 2026-04-21
 ## Current Control Point
 
 Current truth: the lane is locally source-green, PR #1991 branch bootstrap
-proof is green on `878994d0c`, and merged `main` (`2b86de83`) has green
-Bootstrap Local Readiness. The next control point is to keep these contracts
-green on any build-path edit, preserve one source -> render -> artifact chain,
+proof is green on `878994d0c`, merged `main` has green Bootstrap Local
+Readiness, and PR #1998 has merged the phase timing artifact contract. In this
+branch, a clean manual local render also passed after creating `.venv` and
+installing `requirements-tutor.txt`: `tutor-config-save.sh` completed plugin
+sync, retired local `indigo`, config save, build-context prep, and
+`verify-tutor-config`. The next control point is to keep these contracts green
+on any build-path edit, preserve one source -> render -> artifact chain,
 dispatch `bootstrap-local-readiness.yml` with `lane_mode=fallback` if fastlane
 remains under investigation, and classify any red result by authority:
 
@@ -137,7 +141,7 @@ gh run list --branch main --limit 20 \
 - Bootstrap Local Readiness runs `24738471266` and `24743995049` spent most of
   their wall time inside `tutor local launch -I --skip-build` before readiness
   passed. That is acceptable proof evidence, but it needs better operator
-  feedback. The follow-up timing branch adds `bootstrap-phase-timings.tsv`,
+  feedback. PR #1998 added `bootstrap-phase-timings.tsv`,
   `bootstrap-phase-summary.md`, and phase heartbeat notices to the same
   bootstrap artifact so long runs are diagnosable before completion.
 - Production/rke2 overlay proof moved out of this app-repo static lane. That proof belongs in `bbi-infrastructure` and must be reported separately as infra/runtime truth.

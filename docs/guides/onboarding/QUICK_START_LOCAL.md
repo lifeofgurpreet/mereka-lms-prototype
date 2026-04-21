@@ -17,9 +17,10 @@ The first run builds local Open edX and MFE images, initializes Tutor data, star
 ## Current Proof Snapshot
 
 As of 2026-04-21, the onboarding source/docs contract and post-merge
-repo-scoped bootstrap proof are green. Post-merge `main` at `2b86de83` has
-green render-contract, Authn smoke, and Bootstrap Local Readiness checks. The
-heavy image-build workflow is still being monitored and must not be reported as
+repo-scoped bootstrap proof are green. Current `main` includes the Bootstrap
+Local Readiness timing artifact follow-up from PR #1998; the accepted
+post-merge bootstrap proof ran on `2b86de83` after PR #1991. The heavy
+image-build workflow is still being monitored and must not be reported as
 closed. The clean bootstrap proof is an initialized-state proof only; it does
 not yet prove browser-rendered Learning MFE branding or GitOps/live-cluster
 realization.

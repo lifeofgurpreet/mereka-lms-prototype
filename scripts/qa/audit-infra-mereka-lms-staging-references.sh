@@ -52,7 +52,7 @@ if [[ -z "$INFRA_REPO" ]]; then
     "${WORKSPACE_ROOT}/bbi-infrastructure" \
     "${HOME}/projects/k8s/infrastructure" \
     "${HOME}/projects/k8s/bbi-infrastructure"; do
-    if [[ -d "$candidate/.git" ]]; then
+    if [[ -e "$candidate/.git" ]] && git -C "$candidate" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
       INFRA_REPO="$candidate"
       break
     fi
@@ -64,8 +64,8 @@ if [[ -z "$INFRA_REPO" ]]; then
   exit 0
 fi
 
-if [[ ! -d "$INFRA_REPO/.git" ]]; then
-  echo "Not a git repo: $INFRA_REPO" >&2
+if ! git -C "$INFRA_REPO" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  echo "Not a git worktree: $INFRA_REPO" >&2
   exit 1
 fi
 

@@ -110,20 +110,35 @@ spec:
             limits:
               cpu: "1"
               memory: 1536Mi
+          # Probes: local-only signal (NO broker traversal).
+          # Previous design used `celery -A lms inspect ping` which broadcasts
+          # cluster-wide via Redis control queue and waits for all workers to
+          # reply. Measured latency: ~34s at 5 workers (see RC-05 diagnosis
+          # memo in mereka-lms repo). It grew with replica count and caused
+          # restart storms + broken rollout safety.
+          # Local-only check: is PID 1 the celery worker process?
+          # Weaker liveness contract is mitigated via Prometheus alert on
+          # celery_worker_last_heartbeat_seconds (separate observability concern).
           livenessProbe:
             exec:
               command:
-                - celery
-                - -A
-                - lms
-                - inspect
-                - ping
-                - -t
-                - "25"
-            initialDelaySeconds: 30
+                - /bin/sh
+                - -c
+                - "ps -o comm= -p 1 | grep -qE 'celery|python'"
+            initialDelaySeconds: 60
             periodSeconds: 30
             failureThreshold: 5
-            timeoutSeconds: 45
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - "ps -o comm= -p 1 | grep -qE 'celery|python'"
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 5
           securityContext:
             allowPrivilegeEscalation: false
       volumes:

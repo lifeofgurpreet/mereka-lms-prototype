@@ -26,7 +26,7 @@ verification_sources:
 interfaces:
   - "deploy/k8s/base"
   - "deploy/k8s/overlays/local"
-  - "deploy/k8s/overlays/production"
+  - "bbi-infrastructure/apps/mereka-lms/overlays/prod"
 tags:
   - "platform.control-plane"
   - "build.gitops-promotion"
@@ -53,14 +53,17 @@ links:
 > **Deployment boundary (ADR-025)**: For the authoritative classification of which files in
 > `deploy/k8s/` stay in this repo vs migrate to `bbi-infrastructure`, see
 > `docs/reference/architecture/DEPLOYMENT_CONTRACT.md` and `docs/reference/architecture/RESOURCE_OWNERSHIP_MATRIX.md`.
-> Active environments: rke2-nonprod (dev + staging) and rke2-prod (production).
-> The legacy GKE production overlay is frozen at zero replicas (decommissioning).
+> Active environments: local (owned here), rke2-nonprod (dev + staging), and
+> rke2-prod (production). This repo owns the app package under `deploy/k8s/base/`
+> and the local developer overlay under `deploy/k8s/overlays/local/`. GitOps owns
+> non-local realization overlays in `bbi-infrastructure`; this repo must not
+> require `deploy/k8s/overlays/production` to exist.
 
 # Human Summary
 
 ## What we're building
 
-A production-grade Kubernetes deployment of the Open edX learning platform (Tutor 21.0.0, Ulmo). The deployment consists of 17+ workloads spanning the LMS, Studio (CMS), micro-frontends, supporting services (Forum, Discovery, Credentials, Notes, XQueue, Purchase Gateway), infrastructure databases (MySQL, Redis, Meilisearch), an SMTP relay, a Caddy reverse proxy, and an analytics stack (ClickHouse, Superset). All resources live in the `mereka-lms` namespace, managed through Kustomize overlays. Active environments: local (Kind), rke2-nonprod (dev + staging), and rke2-prod (production). Legacy GKE overlay is frozen/decommissioning.
+A production-grade Kubernetes deployment of the Open edX learning platform (Tutor 21.0.0, Ulmo). The deployment consists of 17+ workloads spanning the LMS, Studio (CMS), micro-frontends, supporting services (Forum, Discovery, Credentials, Notes, XQueue, Purchase Gateway), infrastructure databases (MySQL, Redis, Meilisearch), an SMTP relay, a Caddy reverse proxy, and an analytics stack (ClickHouse, Superset). The app package is exported from this repo as `deploy/k8s/base/`; environment realization overlays for dev, staging, and production are owned by the GitOps repo. The app-owned local overlay remains under `deploy/k8s/overlays/local/`.
 
 ## Why it matters
 
@@ -71,7 +74,8 @@ The Mereka Academy LMS serves learners across Biji-Biji Initiative and SkillOurF
 - All 17+ Deployments reach Ready state within 10 minutes of applying manifests.
 - ExternalSecrets sync from GCP Secret Manager without manual intervention.
 - TLS certificates auto-provision via cert-manager for all production domains.
-- Kustomize overlays render cleanly for both local and production targets.
+- The app-owned base and local overlay render cleanly in this repo; GitOps-owned
+  production overlays render cleanly in the GitOps repo.
 - On-call engineers can diagnose site-down conditions using the 5-command diagnostic in under 5 minutes.
 - Zero hardcoded secrets in any manifest checked into version control.
 
@@ -84,10 +88,10 @@ The Mereka Academy LMS serves learners across Biji-Biji Initiative and SkillOurF
   - All Deployment specifications (replica counts, images, security contexts, resource requests/limits, volume mounts, environment variables)
   - All Service definitions (type, ports, selectors)
   - All PersistentVolumeClaim definitions (access modes, storage sizes)
-  - Ingress resources (hosts, TLS, cert-manager annotations)
+  - Ingress contract (hosts, TLS, cert-manager annotations) consumed by GitOps-owned overlays
   - ConfigMap generation via Kustomize (Caddy, OpenEdX settings, Redis, plugin settings)
   - ExternalSecrets integration (ClusterSecretStore, refresh intervals, key mappings)
-  - Kustomize overlay structure (base, local, production)
+  - Kustomize package structure (base, local overlay, external GitOps environment overlays)
   - Image management (Artifact Registry, tag strategy, Kustomize image overrides)
   - Monitoring resources (ServiceMonitors, PrometheusRules)
   - Logging resources (Promtail DaemonSet)
@@ -215,7 +219,7 @@ The Mereka Academy LMS serves learners across Biji-Biji Initiative and SkillOurF
 
 #### Ingress
 
-- Production MUST define three Ingress resources:
+- The GitOps production overlay MUST define three Ingress resources:
 
   | Ingress | Hosts | Backend Service | TLS Secret |
   |---|---|---|---|
@@ -264,8 +268,9 @@ The Mereka Academy LMS serves learners across Biji-Biji Initiative and SkillOurF
     base/          -- shared resources, configMapGenerator, image defaults
     overlays/
       local/       -- Kind/Minikube dev environment
-      production/  -- GKE production
   ```
+- Non-local environment overlays MUST live in the GitOps repo, currently
+  `bbi-infrastructure/apps/mereka-lms/overlays/{dev,staging,prod}/`.
 - The base `kustomization.yaml` MUST define:
   - `namespace: mereka-lms`
   - `commonAnnotations` with `app.kubernetes.io/version` matching the Tutor release
@@ -276,13 +281,13 @@ The Mereka Academy LMS serves learners across Biji-Biji Initiative and SkillOurF
   - Include dev secret patches
   - Include a `ClusterIssuer` for local cert-manager
   - Provide a `secretGenerator` for `ses-smtp-credentials` with dev placeholder values
-- The production overlay MUST:
+- The GitOps production overlay MUST:
   - Set LMS replicas to 2 and LMS-Worker replicas to 2
   - Set CMS and CMS-Worker replicas to 1
   - Use specific image tags (date-prefixed SHA format: `YYYYMMDD-description-shortsha`)
   - Include production Ingress resources
   - Patch out legacy resources (e.g., `remove-legacy-mongodb-service.yaml`)
-- Both overlays MUST render without errors via `kubectl kustomize`.
+- The app-owned local overlay and GitOps-owned environment overlays MUST render without errors via `kubectl kustomize`.
 
 #### Image Management
 
@@ -380,12 +385,12 @@ The Mereka Academy LMS serves learners across Biji-Biji Initiative and SkillOurF
 
 ### Namespace and Structure
 - [ ] AC-001: Given the base Kustomize directory, when `kubectl kustomize deploy/k8s/overlays/local` is run, then it renders without errors and all resources are in namespace `mereka-lms`.
-- [ ] AC-002: Given the production overlay, when `kubectl kustomize deploy/k8s/overlays/production` is run, then it renders without errors and all resources are in namespace `mereka-lms`.
+- [ ] AC-002: Given the GitOps production overlay, when `kubectl kustomize bbi-infrastructure/apps/mereka-lms/overlays/prod` is run from the GitOps checkout, then it renders without errors and all resources are in namespace `mereka-lms`.
 
 ### Deployments
 - [ ] AC-003: Given a fresh cluster, when production manifests are applied, then all 17 base Deployments reach Ready state within 10 minutes.
-- [ ] AC-004: Given the production overlay, when LMS Deployment replicas are inspected, then LMS has 2 replicas and LMS-Worker has 2 replicas.
-- [ ] AC-005: Given the local overlay, when Deployment replicas are inspected, then all Deployments have exactly 1 replica.
+- [ ] AC-004: Given the GitOps production overlay, when LMS Deployment replicas are inspected, then LMS has 2 replicas and LMS-Worker has 2 replicas.
+- [ ] AC-005: Given the local overlay, when Deployment replicas are inspected, then core Open edX workloads (`lms`, `cms`, `lms-worker`, `cms-worker`) have 1 replica and intentionally disabled optional local workloads have 0 replicas.
 - [ ] AC-006: Given any LMS, CMS, or worker Deployment, when its envFrom is inspected, then it references `openedx-secrets`, `database-secrets`, and `mereka-lms-runtime-secrets`.
 - [ ] AC-007: Given the mysql Deployment, when its container args are inspected, then `--mysql-native-password=ON` is present.
 - [ ] AC-008: Given the mysql Deployment, when its containers are inspected, then a `mysqld-exporter` sidecar exists exposing port 9104.
@@ -405,7 +410,7 @@ The Mereka Academy LMS serves learners across Biji-Biji Initiative and SkillOurF
 - [ ] AC-016: Given stateful Deployments (elasticsearch, mysql, redis), when their strategy is inspected, then `type: Recreate` is set.
 
 ### Ingress and TLS
-- [ ] AC-017: Given the production overlay, when Ingress resources are inspected, then three Ingresses exist: openedx-lms, openedx-studio, openedx-mfe.
+- [ ] AC-017: Given the GitOps production overlay, when Ingress resources are inspected, then three Ingresses exist: openedx-lms, openedx-studio, openedx-mfe.
 - [ ] AC-018: Given any production Ingress, when its annotations are inspected, then `cert-manager.io/cluster-issuer: letsencrypt-prod`, `nginx.ingress.kubernetes.io/ssl-redirect: "true"`, and `nginx.ingress.kubernetes.io/proxy-body-size: 100m` are present.
 - [ ] AC-019: Given the openedx-lms Ingress, when its hosts are inspected, then it includes: academyv2.mereka.io, preview.academyv2.mereka.io, academy.biji-biji.com, discovery.academyv2.mereka.io, ecommerce.academyv2.mereka.io, notes.academyv2.mereka.io, credentials.academyv2.mereka.io.
 - [ ] AC-020: Given production TLS, when certificates are inspected after Ingress creation, then cert-manager has issued valid certificates for all declared hosts.
@@ -419,8 +424,8 @@ The Mereka Academy LMS serves learners across Biji-Biji Initiative and SkillOurF
 - [ ] AC-024: Given the base Kustomize rendering, when ConfigMaps are inspected, then at least 13 ConfigMaps are generated (caddy-config, openedx-settings-lms, openedx-settings-cms, openedx-config, openedx-uwsgi-config, openedx-theme-head-extra, redis-config, discovery-settings, credentials-settings, ecommerce-settings, ecommerce-worker-settings, mfe-caddy-config, notes-settings, xqueue-settings).
 
 ### Images
-- [ ] AC-025: Given the production overlay, when image tags are inspected, then no image uses the `latest` tag.
-- [ ] AC-026: Given the production overlay, when openedx image references are inspected, then they point to `ghcr.io/biji-biji-initiative/mereka-lms/` with date-prefixed SHA tags.
+- [ ] AC-025: Given the GitOps production overlay, when image tags are inspected, then no image uses the `latest` tag.
+- [ ] AC-026: Given the GitOps production overlay, when openedx image references are inspected, then they point to `ghcr.io/biji-biji-initiative/mereka-lms/` with date-prefixed SHA tags.
 
 ### Monitoring
 - [ ] AC-027: Given the base monitoring resources, when they are applied, then ServiceMonitors for lms, cms, mysql, and redis exist with 30-second scrape intervals.
@@ -516,9 +521,9 @@ The Mereka Academy LMS serves learners across Biji-Biji Initiative and SkillOurF
 ### Rollout Plan
 
 1. **Image Build**: Build and push new images to Artifact Registry with date-SHA tags.
-2. **Manifest Update**: Update image tags in the production overlay `kustomization.yaml`.
-3. **Dry Run**: Run `kubectl kustomize deploy/k8s/overlays/production` to verify rendering.
-4. **Apply**: Run `kubectl apply -k deploy/k8s/overlays/production`.
+2. **Manifest Update**: Update image tags in the GitOps production overlay `kustomization.yaml`.
+3. **Dry Run**: From the GitOps checkout, run `kubectl kustomize apps/mereka-lms/overlays/prod` to verify rendering.
+4. **Apply**: Promote through the release/GitOps path; do not apply an app-repo production overlay.
 5. **Verify Deployments**: Wait for all Deployments to reach Ready state:
    ```bash
    kubectl rollout status deployment/lms -n mereka-lms --timeout=300s
@@ -543,8 +548,8 @@ The Mereka Academy LMS serves learners across Biji-Biji Initiative and SkillOurF
 ### Rollback Steps
 
 1. **Identify**: Check which Deployment is failing via `kubectl get pods -n mereka-lms` and alerts.
-2. **Revert Image Tag**: Change the image tag in the production overlay back to the previous known-good tag.
-3. **Apply Rollback**: Run `kubectl apply -k deploy/k8s/overlays/production`.
+2. **Revert Image Tag**: Change the image tag in the GitOps production overlay back to the previous known-good tag.
+3. **Apply Rollback**: Promote the reverted GitOps overlay through the release/GitOps path.
 4. **Alternatively (per-Deployment)**: Use `kubectl rollout undo deployment/<name> -n mereka-lms` for a single workload.
 5. **Verify**: Confirm all pods are Running and endpoints are populated.
 6. **Post-mortem**: Document the failure in a bead and update manifests to prevent recurrence.
@@ -577,16 +582,17 @@ kubectl get externalsecrets -n mereka-lms -o wide
 kubectl get deploy lms -n mereka-lms -o jsonpath='{.spec.template.spec.containers[0].envFrom}'
 # MUST include secretRef to openedx-secrets, database-secrets, mereka-lms-runtime-secrets
 
-# 6. Kustomize overlays render cleanly
+# 6. App-owned Kustomize surfaces render cleanly
 kubectl kustomize deploy/k8s/overlays/local 2>&1 | head -5      # MUST not error
-kubectl kustomize deploy/k8s/overlays/production 2>&1 | head -5  # MUST not error
+# In the GitOps checkout, the production overlay MUST also render:
+# kubectl kustomize apps/mereka-lms/overlays/prod 2>&1 | head -5
 
 # 7. No hardcoded secrets in manifests
 grep -rn "password\|secret_key\|api_key" deploy/k8s/base/ --include="*.yml" --include="*.yaml" | grep -v "secretKeyRef\|secretRef\|remoteRef\|SecretStore\|ExternalSecret\|secretName\|Secret\|secretGenerator" | grep -v "#"
 # MUST return empty (no hardcoded values)
 
-# 8. Production images use specific tags (not latest)
-kubectl kustomize deploy/k8s/overlays/production | grep "image:" | grep -c "latest"
+# 8. Production images use specific tags (not latest; run in GitOps checkout)
+kubectl kustomize apps/mereka-lms/overlays/prod | grep "image:" | grep -c "latest"
 # MUST return 0
 
 # 9. Monitoring resources exist
