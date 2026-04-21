@@ -109,7 +109,7 @@ unblock larger classes of future failure even if they take longer.
 
 - Learning MFE m0u5.10.1 diagnosis resumption (blocked on operator browser-capable lane)
 - ADR-031 Cilium soak + graduation (bbi-infra-team, separate cadence)
-- Tutor 21.0.4 upgrade (when upstream releases)
+- Tutor post-21.0.4 runtime proof follow-up, if the patch bump merges before this queue is retired
 - Aspects analytics reactivation (out of scope until current work closes)
 
 ## Owner key

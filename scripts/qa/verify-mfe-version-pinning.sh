@@ -19,6 +19,15 @@ do_pass() { PASS=$((PASS + 1)); echo "  PASS  $1"; }
 do_fail() { FAIL=$((FAIL + 1)); echo "  FAIL  $1"; }
 do_warn() { WARN=$((WARN + 1)); echo "  WARN  $1"; }
 
+extract_kustomize_tag() {
+  local image_name="$1"
+  awk -v image="$image_name" '
+    $0 == "- name: " image { found = 1; next }
+    found && $1 == "newTag:" { print $2; exit }
+    found && /^- name:/ { exit }
+  ' "$KUSTOMIZATION"
+}
+
 echo "=== AC-UI-004: MFE Version Pinning Check ==="
 echo ""
 
@@ -26,7 +35,7 @@ echo ""
 echo "--- Image Pinning (kustomization.yaml) ---"
 if grep -q 'openedx-mfe' "$KUSTOMIZATION" 2>/dev/null; then
   do_pass "MFE image referenced in kustomization.yaml"
-  mfe_tag=$(grep -A1 'openedx-mfe' "$KUSTOMIZATION" | grep 'newTag' | sed 's/.*newTag: //' | tr -d ' ')
+  mfe_tag="$(extract_kustomize_tag "docker.io/overhangio/openedx-mfe")"
   if [ -n "$mfe_tag" ] && [ "$mfe_tag" != "latest" ]; then
     do_pass "MFE image pinned to specific tag: $mfe_tag"
   elif [ "$mfe_tag" = "latest" ]; then
@@ -39,8 +48,8 @@ else
 fi
 
 # Also check openedx image
-if grep -A1 'name: docker.io/overhangio/openedx$' "$KUSTOMIZATION" | grep -q 'newTag'; then
-  openedx_tag=$(grep -A2 'name: docker.io/overhangio/openedx$' "$KUSTOMIZATION" | grep 'newTag' | sed 's/.*newTag: //' | tr -d ' ')
+openedx_tag="$(extract_kustomize_tag "docker.io/overhangio/openedx")"
+if [ -n "$openedx_tag" ]; then
   if [ -n "$openedx_tag" ] && [ "$openedx_tag" != "latest" ]; then
     do_pass "OpenEdX image pinned to: $openedx_tag"
   else

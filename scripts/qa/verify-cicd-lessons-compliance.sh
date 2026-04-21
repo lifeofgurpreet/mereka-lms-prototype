@@ -102,7 +102,7 @@ REQUIREMENTS_FILE="${REPO_ROOT}/requirements-tutor.txt"
 if [[ ! -f "$REQUIREMENTS_FILE" ]]; then
   fail "B6: requirements-tutor.txt not found at ${REQUIREMENTS_FILE}"
 else
-  # Extract pinned tutor version (e.g. "tutor==21.0.3" → "21.0.3")
+  # Extract the pinned tutor version from requirements-tutor.txt.
   tutor_version=""
   tutor_version=$(grep -E '^tutor(\[full\])?==' "$REQUIREMENTS_FILE" 2>/dev/null | \
     grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1 || true)

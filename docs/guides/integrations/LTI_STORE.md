@@ -1,7 +1,7 @@
 # Reusable LTI Store Guide
 
 _Audience: Platform Admins · Course Authors · Platform Engineers_
-_Stack: Open edX Ulmo (Tutor 21.0.3)_
+_Stack: Open edX Ulmo (Tutor 21.0.4)_
 _Last verified: 2026-02-24_
 
 ---
@@ -49,7 +49,7 @@ Ulmo. No extra installation is needed.
 
 ## Prerequisites
 
-- Open edX Ulmo (Tutor 21.0.3+)
+- Open edX Ulmo (Tutor 21.0.4+)
 - `lti_consumer` XBlock in `INSTALLED_APPS` (bundled — no manual setup needed)
 - Platform admin access to `/admin/lti_consumer/ltitool/`
 

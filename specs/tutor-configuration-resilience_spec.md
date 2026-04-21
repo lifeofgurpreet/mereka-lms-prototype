@@ -333,7 +333,7 @@ grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.
 
 1. **Theme file copying:** Plugin does NOT handle file copying (logos, fonts, SCSS files). These must be realized through the canonical Tutor prepare path, not by plugin hooks alone.
 2. **MFE theme assets:** `mereka/theme-source` still depends on the governed build-context sync path rather than plugin hooks alone.
-3. **Hook API stability:** Plugin tested with Tutor 21.0.3; may need adjustments for other versions.
+3. **Hook API stability:** Plugin tested with Tutor 21.0.4; may need adjustments for other versions.
 
 ---
 

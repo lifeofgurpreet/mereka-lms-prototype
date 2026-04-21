@@ -35,13 +35,13 @@ removal_condition: null
 
 # ADR-019: Tutor Upgrade Cadence and EOL Policy
 
-**Status**: Accepted (Updated 2026-03-03)
+**Status**: Accepted (Updated 2026-04-21)
 **Date**: 2026-02-24 (original), 2026-03-03 (updated)
 **Deciders**: Platform Team
 
 ## Context
 
-We run **Tutor 21.0.3 (Ulmo)** with explicit first-party plugin pins. The canonical version pin lives in `requirements-tutor.txt` and all workflows/scripts consume that pin.
+We run **Tutor 21.0.4 (Ulmo)** with explicit first-party plugin pins. The canonical version pin lives in `requirements-tutor.txt` and all workflows/scripts consume that pin.
 
 Open edX named releases follow alphabetical naming: Palm → Quince → Redwood → Sumac → Teak → Ulmo. Community support for each named release is typically ~12 months after the next release ships, though exact EOL dates are not formally published and must be monitored via the Open edX forum and GitHub.
 
@@ -103,7 +103,7 @@ When a decision to upgrade is made, follow these steps on a spike branch:
 | Redwood | 18.x | EOL (superseded by Sumac) |
 | Sumac | 19.x | ~12 months after Teak GA |
 | Teak | 20.x | ~12 months after Ulmo GA |
-| Ulmo | 21.x | **Active (current, latest as of 2026-03)** |
+| Ulmo | 21.x | **Active (current, latest as of 2026-04)** |
 
 **Note**: These dates are estimates. The Open edX community does not publish hard EOL dates. Subscribe to the `openedx-announce` mailing list and monitor https://github.com/openedx/openedx-releases for official announcements.
 
@@ -111,7 +111,7 @@ When a decision to upgrade is made, follow these steps on a spike branch:
 
 | Package | Version | Release Track |
 |---------|---------|---------------|
-| `tutor` | **21.0.3** | Ulmo |
+| `tutor` | **21.0.4** | Ulmo |
 | `tutor-mfe` | **21.0.0** | Ulmo |
 | `tutor-indigo` | **Retired** | Replaced by repo-owned Mereka theme/plugin path |
 

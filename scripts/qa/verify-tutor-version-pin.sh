@@ -8,10 +8,14 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
-# Canonical versions — update these when intentionally upgrading
-# Updated to Tutor 21.0.3 (Ulmo) from broad tutor[full] install — 2026-04-21
-EXPECTED_TUTOR_VERSION="21.0.3"
-EXPECTED_MFE_VERSION="21.0.0"
+# Canonical versions come from the shared Tutor requirements file.
+REQUIREMENTS_FILE="$REPO_ROOT/requirements-tutor.txt"
+EXPECTED_TUTOR_VERSION="$(sed -nE 's/^tutor==([0-9]+\.[0-9]+\.[0-9]+)$/\1/p' "$REQUIREMENTS_FILE" | head -1)"
+EXPECTED_MFE_VERSION="$(sed -nE 's/^tutor-mfe==([0-9]+\.[0-9]+\.[0-9]+)$/\1/p' "$REQUIREMENTS_FILE" | head -1)"
+if [[ -z "$EXPECTED_TUTOR_VERSION" || -z "$EXPECTED_MFE_VERSION" ]]; then
+  echo "FAIL: requirements-tutor.txt must pin tutor and tutor-mfe explicitly" >&2
+  exit 1
+fi
 
 PASS=0
 FAIL=1

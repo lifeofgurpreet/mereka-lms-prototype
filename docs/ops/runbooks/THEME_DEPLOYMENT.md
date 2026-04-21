@@ -19,7 +19,7 @@ Important:
 - `gcloud` CLI authenticated (`gcloud auth login`)
 - `kubectl` configured for RKE2 production cluster (`kubectl config use-context rke2-prod`)
 - Python 3.10+ with venv activated
-- Tutor 21.0.3 installed (via `pip install -r requirements-tutor.txt`)
+- Tutor 21.0.4 installed (via `pip install -r requirements-tutor.txt`)
 
 ## One-Command Release (Canonical)
 

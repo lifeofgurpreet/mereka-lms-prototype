@@ -2,7 +2,7 @@
 
 **Purpose**: Track MFE versions to prevent unexpected upstream version drift (AC-UI-004, AC-UIVER-001)
 
-**Last Updated**: 2026-04-14
+**Last Updated**: 2026-04-21
 
 ## Version Baseline (Canonical Source of Truth)
 
@@ -10,7 +10,7 @@ This section is the **authoritative reference** for all frontend tooling version
 
 | Component | Version | Source | Notes |
 |-----------|---------|--------|-------|
-| **Tutor (pip)** | 21.0.3 | `requirements-tutor.txt` | Tutor 21.0.3 (Ulmo release) |
+| **Tutor (pip)** | 21.0.4 | `requirements-tutor.txt` | Tutor 21.0.4 (Ulmo release) |
 | **Tutor MFE Plugin** | 21.0.0 | `requirements-tutor.txt` | Official plugin for MFE builds |
 | **Open edX Release** | Ulmo | Named release | Tutor v21.0.0 |
 | **Node.js** | 24.11.0 | Tutor plugin MFE Dockerfile hooks | Current supported build base |
@@ -35,7 +35,7 @@ These apps are installed via the Mereka Tutor plugin and verified by `scripts/qa
 
 ## Current MFE Versions
 
-All MFEs are built from Tutor 21.0.3 (Ulmo release) with the current plugin-first MFE build contract.
+All MFEs are built from the Tutor 21.0.x Ulmo release line with the current plugin-first MFE build contract.
 
 | MFE | Version | Tutor Image Tag | Node Version | Notes |
 |-----|---------|-----------------|--------------|-------|
@@ -50,7 +50,7 @@ All MFEs are built from Tutor 21.0.3 (Ulmo release) with the current plugin-firs
 ## Version Pinning Strategy
 
 ### Current Approach (Tutor-managed)
-- MFE versions are pinned via Tutor release (21.0.3 / Ulmo)
+- MFE versions are pinned via the Tutor Ulmo release line (current core pin: 21.0.4)
 - Tutor handles MFE builds with specific git commits
 - No automatic upstream updates
 

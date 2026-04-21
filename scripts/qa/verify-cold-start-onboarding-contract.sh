@@ -146,9 +146,17 @@ require_contains "scripts/shared/setup-local.sh" '--set MFE_COMMON_VERSION=relea
 require_contains "docs/guides/onboarding/LOCAL_SETUP.md" '--set MFE_COMMON_VERSION=release/ulmo\.2' "local setup guide pins MFE source refs to the Ulmo release tag"
 reject_contains "requirements-tutor.txt" 'tutor-indigo' "Tutor Indigo package is retired from local build dependencies"
 reject_contains "requirements-tutor.txt" 'tutor\[full\]' "Tutor requirements do not use the broad full extra that pulls Tutor Indigo transitively"
-require_contains "requirements-tutor.txt" '^tutor==21\.0\.3$' "Tutor core package is pinned explicitly"
+tutor_core_pin="$(rg -o '^tutor==[0-9]+\.[0-9]+\.[0-9]+$' requirements-tutor.txt | sed 's/^tutor==//' || true)"
+if [[ -n "$tutor_core_pin" ]]; then
+  pass "Tutor core package is pinned explicitly"
+else
+  fail "Tutor core package is pinned explicitly"
+fi
 require_contains "requirements-tutor.txt" '^tutor-contrib-aspects==3\.0\.3$' "Tutor Aspects plugin is pinned explicitly"
-require_contains ".env.example" '^TUTOR_VERSION=21\.0\.3$' ".env.example matches the explicit Tutor core pin"
+if [[ -n "$tutor_core_pin" ]]; then
+  tutor_core_pin_pattern="${tutor_core_pin//./\\.}"
+  require_contains ".env.example" "^TUTOR_VERSION=${tutor_core_pin_pattern}$" ".env.example matches the explicit Tutor core pin"
+fi
 reject_contains ".env.example" '(^TUTOR_PLUGINS=.*indigo|21\.0\.0-indigo|tutor-indigo|tutor\[full\])' ".env.example does not advertise retired Tutor Indigo or Indigo-tagged images"
 reject_contains "infrastructure/tutor/config.example.yml" '^[[:space:]]+- indigo$' "Tutor Indigo plugin is retired from the sample local config"
 reject_contains "infrastructure/tutor/patches/_common.sh" 'tutorindigo' "Tutor patch runtime no longer imports Tutor Indigo"

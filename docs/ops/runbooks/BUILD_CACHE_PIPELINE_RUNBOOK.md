@@ -247,7 +247,7 @@ This is how the Tutor plugin source in
 `requirements-tutor.txt` is the single source of truth for the Tutor version:
 
 ```
-tutor==21.0.3
+tutor==21.0.4
 ```
 
 Do not specify the version anywhere else: not in workflow YAML, not in scripts,
