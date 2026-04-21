@@ -60,6 +60,15 @@ jobs:
     needs: [select-bootstrap-lane]
     runs-on: ${{ needs.select-bootstrap-lane.outputs.runner_label }}
     steps:
+      - name: Pre-clean persistent Tutor workspace
+        run: |
+          set -euo pipefail
+          for path in tutor_env var/bootstrap-readiness var/ci .buildx-cache; do
+            target="$GITHUB_WORKSPACE/$path"
+            if [[ -e "$target" ]]; then
+              sudo rm -rf --one-file-system "$target"
+            fi
+          done
       - uses: actions/checkout@v4
       - name: Ensure Docker Compose CLI
         run: ./scripts/ci/install-docker-compose.sh
@@ -223,5 +232,29 @@ text = text.replace('            pull_with_retry "$image_ref"\n', '            t
 wf.write_text(text, encoding="utf-8")
 PY
 run_expect_fail "missing bootstrap image pull retry is rejected"
+
+write_pass_fixture
+TMP_WF="$tmpdir/.github/workflows/bootstrap-local-readiness.yml" python3 - <<'PY'
+from pathlib import Path
+import os
+
+wf = Path(os.environ["TMP_WF"])
+text = wf.read_text(encoding="utf-8")
+text = text.replace(
+    '      - name: Pre-clean persistent Tutor workspace\n'
+    '        run: |\n'
+    '          set -euo pipefail\n'
+    '          for path in tutor_env var/bootstrap-readiness var/ci .buildx-cache; do\n'
+    '            target="$GITHUB_WORKSPACE/$path"\n'
+    '            if [[ -e "$target" ]]; then\n'
+    '              sudo rm -rf --one-file-system "$target"\n'
+    '            fi\n'
+    '          done\n',
+    '',
+    1,
+)
+wf.write_text(text, encoding="utf-8")
+PY
+run_expect_fail "missing pre-checkout persistent Tutor workspace cleanup is rejected"
 
 echo "OK"

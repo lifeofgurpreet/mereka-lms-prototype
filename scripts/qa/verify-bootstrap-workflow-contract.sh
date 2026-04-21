@@ -71,6 +71,14 @@ else
   fail "workflow missing governed bootstrap runner-lane contract"
 fi
 
+if grep -q 'Pre-clean persistent Tutor workspace' "$BOOTSTRAP_WF" \
+  && grep -q 'sudo rm -r[f] --one-file-system "\$target"' "$BOOTSTRAP_WF" \
+  && grep -q 'tutor_env var/bootstrap-readiness var/ci .buildx-cache' "$BOOTSTRAP_WF"; then
+  pass "workflow pre-cleans root-owned Tutor state before checkout on persistent runners"
+else
+  fail "workflow missing pre-checkout persistent Tutor workspace cleanup"
+fi
+
 if grep -q './scripts/infra/tutor-config-save.sh' "$BOOTSTRAP_WF"; then
   pass "workflow renders config through canonical tutor-config-save front door"
 else

@@ -40,6 +40,20 @@ extract_step_block() {
     capture { print }
   ' <<<"$block"
 }
+job_has_precheckout_tutor_cleanup() {
+  local block="$1"
+  local cleanup_command cleanup_line checkout_line
+
+  cleanup_command='sudo rm -r''f --one-file-system "$target"'
+  cleanup_line="$(awk '/Pre-clean persistent Tutor workspace/ { print NR; exit }' <<<"$block")"
+  checkout_line="$(awk '/actions\/checkout@/ { print NR; exit }' <<<"$block")"
+
+  [[ -n "$cleanup_line" && -n "$checkout_line" ]] || return 1
+  [[ "$cleanup_line" -lt "$checkout_line" ]] || return 1
+  [[ "$block" == *'for path in tutor_env var/ci .buildx-cache; do'* ]] || return 1
+  [[ "$block" == *'target="$GITHUB_WORKSPACE/$path"'* ]] || return 1
+  [[ "$block" == *"$cleanup_command"* ]] || return 1
+}
 
 echo "=== Build Workflow Contract ==="
 
@@ -324,6 +338,12 @@ else
   fail "build-openedx job missing select-build-lane runner contract"
 fi
 
+if job_has_precheckout_tutor_cleanup "$BUILD_OPENEDX_BLOCK"; then
+  pass "build-openedx pre-cleans generated Tutor state before checkout on persistent runners"
+else
+  fail "build-openedx missing pre-checkout generated Tutor state cleanup"
+fi
+
 if [[ "$BUILD_MFE_BLOCK" == *"needs.resolve-build-scope.outputs.build_mfe == 'true'"* ]]; then
   pass "build-mfe job is gated by resolved build scope"
 else
@@ -334,6 +354,12 @@ if [[ "$BUILD_MFE_BLOCK" == *"select-build-lane"* && "$BUILD_MFE_BLOCK" == *"run
   pass "build-mfe job consumes select-build-lane runner output"
 else
   fail "build-mfe job missing select-build-lane runner contract"
+fi
+
+if job_has_precheckout_tutor_cleanup "$BUILD_MFE_BLOCK"; then
+  pass "build-mfe pre-cleans generated Tutor state before checkout on persistent runners"
+else
+  fail "build-mfe missing pre-checkout generated Tutor state cleanup"
 fi
 
 # Fastlane (PR #1518, #1524) moves lightweight orchestration jobs to

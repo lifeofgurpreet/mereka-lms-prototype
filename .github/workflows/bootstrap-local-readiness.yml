@@ -74,6 +74,16 @@ jobs:
     runs-on: ${{ needs.select-bootstrap-lane.outputs.runner_label }}
     timeout-minutes: 90
     steps:
+      - name: Pre-clean persistent Tutor workspace
+        run: |
+          set -euo pipefail
+          for path in tutor_env var/bootstrap-readiness var/ci .buildx-cache; do
+            target="$GITHUB_WORKSPACE/$path"
+            if [[ -e "$target" ]]; then
+              sudo rm -rf --one-file-system "$target"
+            fi
+          done
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       - name: Set up Python environment

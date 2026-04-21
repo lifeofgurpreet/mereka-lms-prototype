@@ -452,6 +452,16 @@ jobs:
       image_tag: ${{ steps.meta.outputs.tags }}
       image_digest: ${{ steps.digest.outputs.digest }}
     steps:
+      - name: Pre-clean persistent Tutor workspace
+        run: |
+          set -euo pipefail
+          for path in tutor_env var/ci .buildx-cache; do
+            target="$GITHUB_WORKSPACE/$path"
+            if [[ -e "$target" ]]; then
+              sudo rm -rf --one-file-system "$target"
+            fi
+          done
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       - name: Free disk space for large image builds
@@ -764,6 +774,16 @@ jobs:
       image_tag: ${{ steps.meta.outputs.tags }}
       image_digest: ${{ steps.digest.outputs.digest }}
     steps:
+      - name: Pre-clean persistent Tutor workspace
+        run: |
+          set -euo pipefail
+          for path in tutor_env var/ci .buildx-cache; do
+            target="$GITHUB_WORKSPACE/$path"
+            if [[ -e "$target" ]]; then
+              sudo rm -rf --one-file-system "$target"
+            fi
+          done
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       - name: Enable swap for heavy image builds

@@ -251,6 +251,8 @@ require_contains ".github/workflows/bootstrap-local-readiness.yml" 'scripts/qa/v
 require_contains ".github/workflows/bootstrap-local-readiness.yml" '--set MYSQL_ROOT_HOST=%' "bootstrap-local-readiness renders MySQL remote-root contract required by local verifier"
 require_contains ".github/workflows/bootstrap-local-readiness.yml" 'tutor local launch -I --skip-build' "bootstrap-local-readiness proves first-run Tutor launch path"
 require_contains ".github/workflows/bootstrap-local-readiness.yml" '\./scripts/infra/verify-local-bootstrap-readiness\.sh' "bootstrap-local-readiness runs initialized-state verifier"
+require_contains ".github/workflows/bootstrap-local-readiness.yml" 'Pre-clean persistent Tutor workspace' "bootstrap-local-readiness cleans stale generated Tutor state before checkout"
+require_contains ".github/workflows/bootstrap-local-readiness.yml" 'sudo rm -r[f] --one-file-system "\$target"' "bootstrap-local-readiness cleanup is bounded to explicit workspace targets"
 require_contains ".github/workflows/bootstrap-local-readiness.yml" 'config\.redacted\.yml' "bootstrap-local-readiness uploads only a redacted Tutor config snapshot"
 require_contains ".github/workflows/bootstrap-local-readiness.yml" 'line.strip\(\) == ""' "bootstrap-local-readiness redacts multi-line secret blocks in Tutor config artifacts"
 reject_contains ".github/workflows/bootstrap-local-readiness.yml" 'cp "\$TUTOR_ROOT/config\.yml" var/bootstrap-readiness/config\.yml' "bootstrap-local-readiness does not upload raw Tutor config secrets"

@@ -258,6 +258,16 @@ jobs:
     outputs:
       image_digest: ${{ steps.digest.outputs.digest }}
     steps:
+      - name: Pre-clean persistent Tutor workspace
+        run: |
+          set -euo pipefail
+          for path in tutor_env var/ci .buildx-cache; do
+            target="$GITHUB_WORKSPACE/$path"
+            if [[ -e "$target" ]]; then
+              sudo rm -rf --one-file-system "$target"
+            fi
+          done
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           name: tutor-build-contexts
@@ -291,6 +301,16 @@ jobs:
     outputs:
       image_digest: ${{ steps.digest.outputs.digest }}
     steps:
+      - name: Pre-clean persistent Tutor workspace
+        run: |
+          set -euo pipefail
+          for path in tutor_env var/ci .buildx-cache; do
+            target="$GITHUB_WORKSPACE/$path"
+            if [[ -e "$target" ]]; then
+              sudo rm -rf --one-file-system "$target"
+            fi
+          done
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           name: tutor-build-contexts
@@ -594,6 +614,60 @@ run_expect_fail() {
 
 write_pass_fixture
 run_expect_pass "build workflow contract passes with scope-aware routing and post-push scan jobs"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    '      - name: Pre-clean persistent Tutor workspace\n'
+    '        run: |\n'
+    '          set -euo pipefail\n'
+    '          for path in tutor_env var/ci .buildx-cache; do\n'
+    '            target="$GITHUB_WORKSPACE/$path"\n'
+    '            if [[ -e "$target" ]]; then\n'
+    '              sudo rm -rf --one-file-system "$target"\n'
+    '            fi\n'
+    '          done\n'
+    '      - uses: actions/checkout@v4\n',
+    '      - uses: actions/checkout@v4\n',
+    1,
+)
+p.write_text(text)
+PY
+run_expect_fail "missing OpenEdX pre-checkout generated-state cleanup is rejected"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+needle = (
+    '      - name: Pre-clean persistent Tutor workspace\n'
+    '        run: |\n'
+    '          set -euo pipefail\n'
+    '          for path in tutor_env var/ci .buildx-cache; do\n'
+    '            target="$GITHUB_WORKSPACE/$path"\n'
+    '            if [[ -e "$target" ]]; then\n'
+    '              sudo rm -rf --one-file-system "$target"\n'
+    '            fi\n'
+    '          done\n'
+    '      - uses: actions/checkout@v4\n'
+)
+first = text.find(needle)
+second = text.find(needle, first + len(needle))
+if second == -1:
+    raise SystemExit("MFE cleanup fixture block not found")
+text = text[:second] + '      - uses: actions/checkout@v4\n' + text[second + len(needle):]
+p.write_text(text)
+PY
+run_expect_fail "missing MFE pre-checkout generated-state cleanup is rejected"
+
 write_pass_fixture
 python3 - "$tmpdir" <<'PY'
 from pathlib import Path
