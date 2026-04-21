@@ -77,7 +77,7 @@ tutor local launch -I --skip-build
 tutor local restart
 ```
 
-After the first launch has initialized databases, daily starts can use the Makefile wrapper:
+After the first launch has initialized databases, daily starts can use the Makefile wrapper. Do not use `make tutor-start` as a replacement for the first launch on a fresh `tutor_env`.
 
 ```bash
 make tutor-start

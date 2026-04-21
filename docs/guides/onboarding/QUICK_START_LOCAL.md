@@ -6,6 +6,7 @@ _Audience: Developers + Agent Operators • Owner: Platform Team • Last verifi
 ```bash
 git clone git@github.com:Biji-Biji-Initiative/mereka-lms.git
 cd mereka-lms
+git submodule update --init --recursive
 ./scripts/qa/verify-cold-start-onboarding-contract.sh
 ./scripts/shared/setup-local.sh
 ./scripts/infra/verify-local-bootstrap-readiness.sh
@@ -13,14 +14,18 @@ cd mereka-lms
 
 The first run builds local Open edX and MFE images, initializes Tutor data, starts the stack, and creates a local-only admin user. If `LOCAL_ADMIN_PASSWORD` is not set, the setup script writes generated credentials to `tutor_env/local-admin-credentials.txt`.
 
-## Latest Proof
+## Current Proof Snapshot
 
-Current `main` proof from 2026-04-21:
+As of 2026-04-21, the onboarding source/docs contract and static validation
+proof are current on `main`, but the fresh bootstrap workflow must not be
+reported as green until the fastlane runner substrate is repaired and rerun.
 
 | Proof | Run | Commit | Result | What it proves |
 |---|---|---|---|---|
-| Build Tutor Images | `24711505579` | `e7a4472cd` | success | Existing source/render/build-helper path builds and scans both Open edX and MFE images. |
-| Bootstrap Local Readiness | `24711453019` | `e7a4472cd` | success | A clean repo-scoped `TUTOR_ROOT` can launch the local Tutor baseline and pass readiness checks. |
+| Static validation PR proof | `24727872257` | `8ce05a308` | success | Current source/docs/verifier contracts are green, including the static script shards. |
+| App-cache-cold image build | `24721668598` | `39ae0fb86` | success | Open edX and MFE image helpers build with app-level BuildKit cache imports disabled. |
+| Last accepted bootstrap baseline | `24711453019` | `e7a4472cd` | success | A clean repo-scoped `TUTOR_ROOT` launched and passed readiness checks before the current runner incident. |
+| Current-main bootstrap rerun | `24726833355` | `9a1090657` | runner failure | Fastlane Docker/containerd failed while pulling `mirror.gcr.io/overhangio/openedx:21.0.4`; this is tracked as runner substrate debt, not a local guide contract pass. |
 
 These are shared proof lanes, not alternate build systems. Do not create a
 second Dockerfile, Compose stack, or local-only build path to work around a
@@ -39,6 +44,8 @@ update the proof matrix when the contract changes.
 Use this when debugging the setup script step by step:
 
 ```bash
+git submodule update --init --recursive
+
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
@@ -74,7 +81,8 @@ export TUTOR_ROOT="$(pwd)/tutor_env"
   --set MONGODB_PORT=27017 \
   --set MYSQL_PORT=3306 \
   --set MYSQL_ROOT_HOST=% \
-  --set REDIS_PORT=6379
+  --set REDIS_PORT=6379 \
+  --set ASPECTS_SUPERSET_DATABASE_HOST=clickhouse
 ```
 
 The config wrapper syncs the repo-local Tutor plugin mirror and enables the
