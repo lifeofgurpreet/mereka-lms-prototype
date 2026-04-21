@@ -277,6 +277,8 @@ ci_static_inventory:
     - script: scripts/qa/verify-ci-cache-policy.sh
     - script: scripts/qa/test-verify-ci-cache-policy.sh
       estimated_seconds: 8
+    - script: scripts/qa/test-build-context-fingerprint.sh
+      estimated_seconds: 1
     - script: scripts/qa/verify-benchmark-artifact-contract.sh
     - script: scripts/qa/verify-verification-catalog.sh
     - script: scripts/qa/test-verify-verification-catalog.sh
@@ -1330,6 +1332,24 @@ scripts:
     proof_command: "bash -n scripts/infra/buildx-local-builder.sh"
     criticality: release-blocking
 
+  - path: scripts/infra/build-context-fingerprint.sh
+    owner: platform-team
+    purpose: >
+      Shared helper sourced by local Tutor image build and setup entrypoints to
+      compute deterministic rendered build-context fingerprints for image
+      freshness labels.
+    inputs:
+      - context directory path
+      - file path
+    outputs:
+      - sha256 fingerprint on stdout
+      - exit code
+    side_effects: none
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/test-build-context-fingerprint.sh"
+    criticality: release-blocking
+
   - path: scripts/infra/install-cosign.sh
     owner: platform-team
     purpose: >
@@ -2073,6 +2093,23 @@ scripts:
     proof_command: "bash scripts/qa/test-verify-ci-cache-policy.sh"
     criticality: release-blocking
 
+  - path: scripts/qa/test-build-context-fingerprint.sh
+    owner: platform-team
+    purpose: >
+      Regression harness for the rendered build-context fingerprint helper.
+      Proves fingerprints are stable, ignore `.git`, and change when context
+      file content changes.
+    inputs: []
+    outputs:
+      - stdout (PASS/FAIL summary)
+      - exit code
+    side_effects:
+      - Creates a temporary context under /tmp
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/test-build-context-fingerprint.sh"
+    criticality: release-blocking
+
   # ── CI Preflight & Build ─────────────────────────────────────────────────────
 
   - path: scripts/infra/ensure-buildx-dependency-mirror.sh
@@ -2332,21 +2369,27 @@ scripts:
   - path: scripts/infra/tutor-config-save.sh
     owner: platform-team
     purpose: >
-      Safe wrapper for 'tutor config save'. Automatically applies patches and
-      verifies configuration. Use this instead of bare 'tutor config save'.
+      Canonical wrapper for 'tutor config save'. Syncs the repo-owned Tutor
+      plugin mirror, disables retired local plugins, enables canonical plugins,
+      regenerates the Tutor build context, verifies configuration, and restores
+      the previous rendered Tutor state if save, prepare, or verify fails. Use
+      this instead of bare 'tutor config save'.
     inputs:
       - TUTOR_ROOT (required env var)
       - tutor config save args (passed through)
     outputs:
       - tutor_env/ directory (regenerated)
-      - stdout (patch application summary)
+      - stdout (configuration, build-context, and verification summary)
     side_effects:
-      - Regenerates tutor_env/ from scratch (overwrites rendered files)
-      - Applies all infrastructure patches
+      - Syncs the repo-owned Tutor plugin mirror under TUTOR_PLUGINS_ROOT
+      - Disables retired local Tutor plugins if present
+      - Enables canonical Tutor plugins
+      - Regenerates tutor_env/ and rendered build context
+      - On failure, removes and restores TUTOR_ROOT/env from a temporary backup
     dry_run: false
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/infra/tutor-config-save.sh --help 2>&1 | head -5"
-    criticality: release-supporting
+    criticality: operational-dangerous
 
   - path: scripts/infra/verify-local-bootstrap-readiness.sh
     owner: platform-team

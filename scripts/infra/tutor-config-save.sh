@@ -20,10 +20,6 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-is_noninteractive() {
-  [[ "${CI:-}" == "true" || ! -t 0 ]]
-}
-
 # Get repository root
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
@@ -105,6 +101,8 @@ echo ""
 
 # Backup config if it exists
 BACKUP_FILE=""
+ENV_BACKUP_DIR=""
+ENV_BACKUP_PARENT=""
 if [[ -f "$TUTOR_ROOT/config.yml" ]]; then
   BACKUP_FILE="$TUTOR_ROOT/config.yml.backup.$(date +%Y%m%d_%H%M%S)"
   echo -e "${YELLOW}Backing up existing config...${NC}"
@@ -112,6 +110,38 @@ if [[ -f "$TUTOR_ROOT/config.yml" ]]; then
   echo "  → $BACKUP_FILE"
   echo ""
 fi
+
+if [[ -d "$TUTOR_ROOT/env" ]]; then
+  ENV_BACKUP_PARENT="$(mktemp -d -t tutor-env-backup.XXXXXX)"
+  ENV_BACKUP_DIR="$ENV_BACKUP_PARENT/env"
+  cp -a "$TUTOR_ROOT/env" "$ENV_BACKUP_DIR"
+  trap '[[ -n "${ENV_BACKUP_PARENT:-}" ]] && rm -rf "$ENV_BACKUP_PARENT"' EXIT
+fi
+
+restore_generated_state() {
+  local restored=0
+
+  if [[ -n "$BACKUP_FILE" && -f "$BACKUP_FILE" ]]; then
+    echo "Restoring backup config..."
+    cp "$BACKUP_FILE" "$TUTOR_ROOT/config.yml"
+    restored=1
+  fi
+
+  if [[ -n "$ENV_BACKUP_DIR" && -d "$ENV_BACKUP_DIR" ]]; then
+    if [[ -z "$TUTOR_ROOT" || "$TUTOR_ROOT" == "/" ]]; then
+      echo -e "${RED}Refusing to restore generated env because TUTOR_ROOT is unsafe: ${TUTOR_ROOT:-<empty>}${NC}" >&2
+      exit 1
+    fi
+    echo "Restoring generated Tutor env backup..."
+    rm -rf "$TUTOR_ROOT/env"
+    cp -a "$ENV_BACKUP_DIR" "$TUTOR_ROOT/env"
+    restored=1
+  fi
+
+  if [[ "$restored" == "1" ]]; then
+    echo -e "${GREEN}✓ Backup state restored${NC}"
+  fi
+}
 
 # Run tutor config save
 echo -e "${BLUE}Step 1: Running 'tutor config save'${NC}"
@@ -133,11 +163,7 @@ else
   echo ""
   echo -e "${RED}✗ Config save failed (exit code: $EXIT_CODE)${NC}"
   echo ""
-  if [[ -n "$BACKUP_FILE" && -f "$BACKUP_FILE" ]]; then
-    echo "Restoring backup..."
-    cp "$BACKUP_FILE" "$TUTOR_ROOT/config.yml"
-    echo -e "${GREEN}✓ Backup restored${NC}"
-  fi
+  restore_generated_state
   exit $EXIT_CODE
 fi
 
@@ -162,25 +188,7 @@ else
   echo ""
   echo -e "${RED}✗ Tutor build context preparation failed (exit code: $EXIT_CODE)${NC}"
   echo ""
-  if [[ -n "$BACKUP_FILE" && -f "$BACKUP_FILE" ]]; then
-    if is_noninteractive; then
-      echo "Restoring backup automatically (non-interactive mode)..."
-      cp "$BACKUP_FILE" "$TUTOR_ROOT/config.yml"
-      echo -e "${GREEN}✓ Backup restored${NC}"
-    else
-      read -rp "Restore backup? [Y/n] " response
-      case "$response" in
-        [nN][oO]|[nN])
-          echo "Backup not restored"
-          ;;
-        *)
-          echo "Restoring backup..."
-          cp "$BACKUP_FILE" "$TUTOR_ROOT/config.yml"
-          echo -e "${GREEN}✓ Backup restored${NC}"
-          ;;
-      esac
-    fi
-  fi
+  restore_generated_state
   exit $EXIT_CODE
 fi
 
@@ -201,21 +209,9 @@ if [[ -x "$VERIFY_SCRIPT" ]]; then
     echo ""
     echo "Some build-context mutations may not have been applied correctly."
     echo ""
-    if is_noninteractive; then
-      echo -e "${RED}Aborted in non-interactive mode${NC}"
-      exit $EXIT_CODE
-    else
-      read -rp "Continue anyway? [y/N] " response
-      case "$response" in
-        [yY][eE][sS]|[yY])
-          echo -e "${YELLOW}Continuing despite verification failure...${NC}"
-          ;;
-        *)
-          echo -e "${RED}Aborted${NC}"
-          exit $EXIT_CODE
-          ;;
-      esac
-    fi
+    restore_generated_state
+    echo -e "${RED}Aborted after verification failure${NC}"
+    exit $EXIT_CODE
   fi
 else
   echo -e "${YELLOW}⚠ Verification script not found, skipping verification${NC}"

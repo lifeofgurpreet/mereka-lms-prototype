@@ -2956,7 +2956,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-ci-cache-policy.sh",
-      "reference_count": 6,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -7132,7 +7132,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-generated-surfaces.sh",
-      "reference_count": 10,
+      "reference_count": 11,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -17579,7 +17579,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-tutor-config-safety.sh",
-      "reference_count": 13,
+      "reference_count": 14,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

@@ -147,6 +147,7 @@ TAGS_CSV="$(IFS=,; printf '%s' "${IMAGE_TAGS[*]}")"
 LOCAL_CACHE_ROOT="$REPO_ROOT/.buildx-cache"
 BUILDX_BAKE_ARGS=()
 source "$REPO_ROOT/scripts/infra/buildx-local-builder.sh"
+source "$REPO_ROOT/scripts/infra/build-context-fingerprint.sh"
 
 if [[ ! -f "$BAKE_FILE" ]]; then
   echo "Bake file not found: $BAKE_FILE" >&2
@@ -155,11 +156,15 @@ fi
 
 mkdir -p "$LOCAL_CACHE_ROOT/openedx" "$LOCAL_CACHE_ROOT/openedx-${BUILD_PROFILE}"
 ensure_local_buildx_builder
+DOCKERFILE_SHA256="$(mereka_file_sha256 "$DOCKERFILE_ABS")"
+BUILD_CONTEXT_SHA256="$(mereka_build_context_fingerprint "$CONTEXT_DIR_ABS")"
 
 BAKE_ENV=(
   "LOCAL_CACHE_DIR=${LOCAL_CACHE_ROOT}"
   "OPENEDX_CONTEXT=${CONTEXT_DIR}"
   "OPENEDX_DOCKERFILE=${DOCKERFILE_RELATIVE}"
+  "OPENEDX_RENDERED_DOCKERFILE_SHA256=${DOCKERFILE_SHA256}"
+  "OPENEDX_BUILD_CONTEXT_SHA256=${BUILD_CONTEXT_SHA256}"
   "OPENEDX_${BUILD_PROFILE^^}_TAGS=${TAGS_CSV}"
 )
 append_local_cache_from OPENEDX_LOCAL_CACHE_FROM "$LOCAL_CACHE_ROOT/openedx"

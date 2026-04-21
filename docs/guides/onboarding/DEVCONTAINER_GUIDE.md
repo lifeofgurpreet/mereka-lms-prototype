@@ -1,6 +1,6 @@
 # Devcontainer Guide
 
-_Last updated: 2026-02-27_
+_Last updated: 2026-04-21_
 
 _One-click dev environment for Mereka LMS_
 
@@ -46,8 +46,8 @@ The devcontainer sets up the following automatically:
 - Docker-in-Docker (so Tutor can run Docker Compose services)
 - Git submodules initialised
 - Pre-commit hooks installed
-- Tutor configured with local Docker service names (`mysql`, `mongodb`, `redis`)
-- Tutor build context prepared via `prepare-tutor-build-context.sh`
+- Tutor configured through `./scripts/infra/tutor-config-save.sh` with local Docker service names (`mysql`, `mongodb`, `redis`)
+- Tutor build context prepared by the canonical wrapper
 - `TUTOR_ROOT` environment variable set to `<workspace>/tutor_env`
 - A named Docker volume (`mereka-lms-tutor-env`) mounts at `tutor_env/` so data persists across container rebuilds
 
@@ -66,12 +66,7 @@ VS Code extensions installed automatically:
 On first run you need to build images (30-45 minutes, requires 12 GB RAM):
 
 ```bash
-./scripts/infra/prepare-tutor-build-context.sh --target all
-
-# Build Open edX platform image
 ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
-
-# Build micro-frontends image
 ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 ```
 

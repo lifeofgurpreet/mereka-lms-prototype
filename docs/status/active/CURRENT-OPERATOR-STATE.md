@@ -523,6 +523,56 @@ fire the autonomous /loop prompt every 45 min until the roadmap drains.
 
 ---
 
+### Slice 88 — 2026-04-21T11:30Z (local build freshness tranche in progress)
+
+**Context**: after #1982 merged, follow-up audit found that `setup-local.sh`
+could reuse an old `openedx:nightly` or `openedx-mfe:nightly` image purely
+because the tag existed. That made the new-dev lane too trusting: a developer
+could rerun setup after source/render changes and still launch stale local
+images.
+
+**Current branch**: `fix/local-build-freshness-2026-04-21`
+
+**Authority decision**:
+
+- Local image reuse is now tied to a rendered build-context fingerprint label,
+  not tag existence alone.
+- The fingerprint is produced by
+  `scripts/infra/build-context-fingerprint.sh`, passed through the canonical
+  image helpers, and stamped by `docker-bake.hcl`.
+- `setup-local.sh` rebuilds when the existing image label does not match the
+  current rendered context.
+- `tutor-config-save.sh` now restores config and generated Tutor env backup
+  state after prepare or verification failure, then exits. It no longer offers
+  an interactive "continue anyway" path after a failed render verifier.
+- The devcontainer setup was moved back onto the canonical
+  `tutor-config-save.sh` and helper-build lane; raw `tutor images build` is no
+  longer the advertised devcontainer path.
+
+**Local proof completed before PR**:
+
+```bash
+bash scripts/qa/test-build-context-fingerprint.sh
+bash scripts/qa/verify-cold-start-onboarding-contract.sh
+bash scripts/qa/test-build-image-profile-guards.sh
+bash scripts/qa/verify-ci-cache-policy.sh
+bash scripts/qa/test-verify-ci-cache-policy.sh
+bash scripts/qa/verify-tutor-config-safety.sh
+bash tests/tutor/test_tutor_root_authority.sh
+bash tests/tutor/test_tutor_apply.sh
+./scripts/qa/verify-generated-surfaces.sh
+git diff --check
+```
+
+**Still not claimed by this slice**:
+
+- It does not prove a full Docker image build in this worktree; CI/benchmark
+  lanes must still prove build execution after PR.
+- It does not make the future devspace/vcluster lane supported.
+- It does not fix broader observability/GKE-era docs drift.
+
+---
+
 ### Slice 87 — 2026-04-21T10:30Z (current-head local build factory proven; runner hygiene blocker closed)
 
 **Context**: other developers reported cold local build / quick-start trouble

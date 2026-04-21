@@ -41,6 +41,7 @@ scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh
 scripts/infra/sync-mongodb-from-production.sh
 scripts/infra/sync-production-config.sh
 scripts/infra/sync-vendored-openedx-settings.sh
+scripts/infra/tutor-config-save.sh
 scripts/migrate-to-bbi-k8.sh
 scripts/migrations/import-production-courses.sh
 scripts/migrations/mct/import_2_courses.sh

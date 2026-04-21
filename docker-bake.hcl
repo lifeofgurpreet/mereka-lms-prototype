@@ -38,6 +38,14 @@ variable "OPENEDX_PROOF_GHA_SCOPE" {
   default = "tutor-openedx-proof"
 }
 
+variable "OPENEDX_RENDERED_DOCKERFILE_SHA256" {
+  default = ""
+}
+
+variable "OPENEDX_BUILD_CONTEXT_SHA256" {
+  default = ""
+}
+
 // Shared GHCR registry cache refs (L2 — authoritative)
 // See docs/ops/ci-cd/CACHE_AUTHORITY.md and ADR-024
 variable "CACHE_TO_OPENEDX" {
@@ -61,6 +69,10 @@ variable "MFE_RENDERED_DOCKERFILE" {
 }
 
 variable "MFE_RENDERED_DOCKERFILE_SHA256" {
+  default = ""
+}
+
+variable "MFE_BUILD_CONTEXT_SHA256" {
   default = ""
 }
 
@@ -177,8 +189,10 @@ target "openedx-proof" {
     "${CACHE_TO_OPENEDX}",
   ]
   labels = {
-    "io.mereka.build-profile" = "proof"
-    "io.mereka.build-scope"   = "openedx"
+    "io.mereka.build-profile"              = "proof"
+    "io.mereka.build-scope"                = "openedx"
+    "io.mereka.rendered-dockerfile-sha256" = "${OPENEDX_RENDERED_DOCKERFILE_SHA256}"
+    "io.mereka.build-context-sha256"       = "${OPENEDX_BUILD_CONTEXT_SHA256}"
   }
 }
 
@@ -193,8 +207,10 @@ target "openedx-proof-nocache" {
   output = ["type=docker"]
   tags = [for tag in split(",", OPENEDX_PROOF_TAGS) : trimspace(tag) if trimspace(tag) != ""]
   labels = {
-    "io.mereka.build-profile" = "proof"
-    "io.mereka.build-scope"   = "openedx"
+    "io.mereka.build-profile"              = "proof"
+    "io.mereka.build-scope"                = "openedx"
+    "io.mereka.rendered-dockerfile-sha256" = "${OPENEDX_RENDERED_DOCKERFILE_SHA256}"
+    "io.mereka.build-context-sha256"       = "${OPENEDX_BUILD_CONTEXT_SHA256}"
   }
 }
 
@@ -214,8 +230,10 @@ target "openedx-fast" {
     "${OPENEDX_LOCAL_CACHE_FROM}",
   ]
   labels = {
-    "io.mereka.build-profile" = "fast"
-    "io.mereka.build-scope"   = "openedx"
+    "io.mereka.build-profile"              = "fast"
+    "io.mereka.build-scope"                = "openedx"
+    "io.mereka.rendered-dockerfile-sha256" = "${OPENEDX_RENDERED_DOCKERFILE_SHA256}"
+    "io.mereka.build-context-sha256"       = "${OPENEDX_BUILD_CONTEXT_SHA256}"
   }
 }
 
@@ -228,8 +246,10 @@ target "openedx-producer" {
   }
   output = ["type=cacheonly"]
   labels = {
-    "io.mereka.build-profile" = "producer"
-    "io.mereka.build-scope"   = "openedx"
+    "io.mereka.build-profile"              = "producer"
+    "io.mereka.build-scope"                = "openedx"
+    "io.mereka.rendered-dockerfile-sha256" = "${OPENEDX_RENDERED_DOCKERFILE_SHA256}"
+    "io.mereka.build-context-sha256"       = "${OPENEDX_BUILD_CONTEXT_SHA256}"
   }
 }
 
@@ -273,6 +293,7 @@ target "mfe-proof" {
     "io.mereka.rendered-context"           = "${MFE_RENDERED_CONTEXT}"
     "io.mereka.rendered-dockerfile"        = "${MFE_RENDERED_DOCKERFILE}"
     "io.mereka.rendered-dockerfile-sha256" = "${MFE_RENDERED_DOCKERFILE_SHA256}"
+    "io.mereka.build-context-sha256"       = "${MFE_BUILD_CONTEXT_SHA256}"
   }
 }
 
@@ -290,6 +311,7 @@ target "mfe-proof-nocache" {
     "io.mereka.rendered-context"           = "${MFE_RENDERED_CONTEXT}"
     "io.mereka.rendered-dockerfile"        = "${MFE_RENDERED_DOCKERFILE}"
     "io.mereka.rendered-dockerfile-sha256" = "${MFE_RENDERED_DOCKERFILE_SHA256}"
+    "io.mereka.build-context-sha256"       = "${MFE_BUILD_CONTEXT_SHA256}"
   }
 }
 
@@ -310,6 +332,7 @@ target "mfe-fast" {
     "io.mereka.rendered-context"           = "${MFE_RENDERED_CONTEXT}"
     "io.mereka.rendered-dockerfile"        = "${MFE_RENDERED_DOCKERFILE}"
     "io.mereka.rendered-dockerfile-sha256" = "${MFE_RENDERED_DOCKERFILE_SHA256}"
+    "io.mereka.build-context-sha256"       = "${MFE_BUILD_CONTEXT_SHA256}"
   }
 }
 
@@ -323,5 +346,6 @@ target "mfe-producer" {
     "io.mereka.rendered-context"           = "${MFE_RENDERED_CONTEXT}"
     "io.mereka.rendered-dockerfile"        = "${MFE_RENDERED_DOCKERFILE}"
     "io.mereka.rendered-dockerfile-sha256" = "${MFE_RENDERED_DOCKERFILE_SHA256}"
+    "io.mereka.build-context-sha256"       = "${MFE_BUILD_CONTEXT_SHA256}"
   }
 }

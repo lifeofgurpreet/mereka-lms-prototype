@@ -1,5 +1,5 @@
 # Local Workflow Cheat Sheet
-_Audience: Platform Eng • Owner: Infra Team • Last verified: 2026-03-06 • Status: supporting_
+_Audience: Platform Eng • Owner: Infra Team • Last verified: 2026-04-21 • Status: supporting_
 
 Your daily reference for working on the Tutor sandbox. For detailed setup instructions see [`LOCAL_SETUP.md`](LOCAL_SETUP.md).
 
@@ -23,7 +23,7 @@ source infrastructure/tutor/tutor-env.sh
 After any `tutor config save` or plugin change:
 
 ```bash
-./scripts/infra/tutor-config-save.sh --env-only
+./scripts/infra/tutor-config-save.sh
 ```
 
 > **Why?** Tutor rewrites rendered templates each time you save. The canonical wrapper regenerates config, re-prepares the Tutor build context, and runs verification in one path.
@@ -33,8 +33,9 @@ After any `tutor config save` or plugin change:
 First boot (runs migrations + init jobs):
 
 ```bash
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 tutor local launch -I --skip-build
-./scripts/infra/prepare-tutor-build-context.sh --target all
 ```
 
 Daily use:

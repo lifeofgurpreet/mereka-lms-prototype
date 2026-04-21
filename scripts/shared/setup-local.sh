@@ -105,19 +105,36 @@ echo ""
 # Step 4: Build Images (if needed)
 echo -e "${BLUE}Step 4: Checking Docker images...${NC}"
 ./scripts/infra/ensure-buildx-dependency-mirror.sh
+source "$REPO_ROOT/scripts/infra/build-context-fingerprint.sh"
 FORCE_LOCAL_IMAGE_BUILD="${FORCE_LOCAL_IMAGE_BUILD:-0}"
-if [[ "$FORCE_LOCAL_IMAGE_BUILD" == "1" ]] || ! docker image inspect openedx:nightly >/dev/null 2>&1; then
-    echo -e "${YELLOW}⚠️  OpenEdX image not found. Building fast local image (this still takes time)...${NC}"
+
+image_matches_context() {
+    local image_ref="$1"
+    local context_dir="$2"
+    local expected_sha
+    local actual_sha
+
+    docker image inspect "$image_ref" >/dev/null 2>&1 || return 1
+    expected_sha="$(mereka_build_context_fingerprint "$context_dir")"
+    actual_sha="$(docker image inspect \
+        --format '{{ index .Config.Labels "io.mereka.build-context-sha256" }}' \
+        "$image_ref" 2>/dev/null || true)"
+
+    [[ -n "$actual_sha" && "$actual_sha" == "$expected_sha" ]]
+}
+
+if [[ "$FORCE_LOCAL_IMAGE_BUILD" == "1" ]] || ! image_matches_context openedx:nightly tutor_env/env/build/openedx; then
+    echo -e "${YELLOW}⚠️  OpenEdX image missing or stale. Building fast local image (this still takes time)...${NC}"
     ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 else
-    echo -e "${GREEN}✅ OpenEdX image found${NC}"
+    echo -e "${GREEN}✅ OpenEdX image matches current rendered build context${NC}"
 fi
 
-if [[ "$FORCE_LOCAL_IMAGE_BUILD" == "1" ]] || ! docker image inspect openedx-mfe:nightly >/dev/null 2>&1; then
-    echo -e "${YELLOW}⚠️  MFE image not found. Building fast local image (this still takes time)...${NC}"
+if [[ "$FORCE_LOCAL_IMAGE_BUILD" == "1" ]] || ! image_matches_context openedx-mfe:nightly tutor_env/env/plugins/mfe/build/mfe; then
+    echo -e "${YELLOW}⚠️  MFE image missing or stale. Building fast local image (this still takes time)...${NC}"
     ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 else
-    echo -e "${GREEN}✅ MFE image found${NC}"
+    echo -e "${GREEN}✅ MFE image matches current rendered build context${NC}"
 fi
 echo ""
 

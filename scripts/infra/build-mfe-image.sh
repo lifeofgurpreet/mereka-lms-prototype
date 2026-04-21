@@ -92,8 +92,6 @@ else
   echo "Dockerfile must live under the build context for Bake-backed execution: $DOCKERFILE" >&2
   exit 1
 fi
-DOCKERFILE_SHA256="$(sha256sum "$DOCKERFILE_ABS" | awk '{print $1}')"
-
 case "$BUILD_PROFILE" in
   proof|fast) ;;
   *)
@@ -148,6 +146,7 @@ TAGS_CSV="$(IFS=,; printf '%s' "${IMAGE_TAGS[*]}")"
 LOCAL_CACHE_ROOT="$REPO_ROOT/.buildx-cache"
 BUILDX_BAKE_ARGS=()
 source "$REPO_ROOT/scripts/infra/buildx-local-builder.sh"
+source "$REPO_ROOT/scripts/infra/build-context-fingerprint.sh"
 
 # BUILDKIT_MAX_PARALLELISM — if exported by caller, buildkitd reads it directly.
 # docker buildx bake has no --opt flag; the env var is the correct mechanism.
@@ -159,6 +158,8 @@ fi
 
 mkdir -p "$LOCAL_CACHE_ROOT/mfe" "$LOCAL_CACHE_ROOT/mfe-${BUILD_PROFILE}"
 ensure_local_buildx_builder
+DOCKERFILE_SHA256="$(mereka_file_sha256 "$DOCKERFILE_ABS")"
+BUILD_CONTEXT_SHA256="$(mereka_build_context_fingerprint "$CONTEXT_DIR_ABS")"
 
 BAKE_ENV=(
   "LOCAL_CACHE_DIR=${LOCAL_CACHE_ROOT}"
@@ -167,6 +168,7 @@ BAKE_ENV=(
   "MFE_RENDERED_CONTEXT=${CONTEXT_DIR}"
   "MFE_RENDERED_DOCKERFILE=${DOCKERFILE_RELATIVE}"
   "MFE_RENDERED_DOCKERFILE_SHA256=${DOCKERFILE_SHA256}"
+  "MFE_BUILD_CONTEXT_SHA256=${BUILD_CONTEXT_SHA256}"
   "MFE_${BUILD_PROFILE^^}_TAGS=${TAGS_CSV}"
 )
 append_local_cache_from MFE_LOCAL_CACHE_FROM "$LOCAL_CACHE_ROOT/mfe"

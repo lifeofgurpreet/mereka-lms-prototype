@@ -56,7 +56,7 @@ on the `rke2-nonprod` cluster:
 Runners scale 0 → 3. When idle, no pods exist. A queued build triggers the scale-up.
 
 **DinD sidecar** (`docker:24-dind`):
-- Provides a full Docker daemon for `tutor images build`
+- Provides a full Docker daemon for the Bake-backed Tutor image helpers
 - Communicates over TLS TCP socket (`tcp://localhost:2376`)
 - MTU is **1280** (required for Cilium VXLAN tunneling on RKE2)
 - `--data-root=/cache/docker/daemon` (persistent PVC)
@@ -459,7 +459,7 @@ docker builder prune -af
 | LMS pods not rolling after GitOps update | GitOps repo has stale tag on one of two override entries | Check all image entries in the prod kustomization: `grep newTag infrastructure/.../kustomization.yaml` |
 | `mereka-brand` tag stale after manual trigger | `mereka-brand` is only pushed on `push` to `main`, not on `workflow_dispatch` | Trigger via push, or manually retag and push after a `workflow_dispatch` build |
 | DinD container does not start in time | Timing race between runner start and DinD daemon readiness | Add a readiness poll at the start of steps that need Docker: `until docker info >/dev/null 2>&1; do sleep 1; done` |
-| `loremipsum==1.0.5` build failure | `uv pip` does not provide `pkg_resources`; Tutor 21 default is `uv pip` | Always pass `-a PIP_COMMAND=pip` to `tutor images build openedx` |
+| `loremipsum==1.0.5` build failure | `uv pip` does not provide `pkg_resources`; Tutor 21 default is `uv pip` | Use `./scripts/infra/build-openedx-image.sh`; do not bypass the helper with raw Tutor builds |
 | Swap provisioning skipped on ARC | ARC container runners lack `CAP_SYS_ADMIN`; swap step is non-fatal | Expected behavior; build continues. OOM risk is reduced by DinD having 8 Gi RAM limit and the 50 Gi cache |
 
 ### Detailed: LMS pods not rolling after release
@@ -533,8 +533,10 @@ python3 -c "content = \"\"\"line one\"\"\"; ..."
 
 ## Local Development Builds
 
-For local iterative development, build images directly with Tutor. The CI pipeline
-is not required for local testing.
+For local iterative development, use the same repo-owned image helpers that CI
+uses. The CI pipeline is not required for local testing, but raw `tutor images
+build` is not the default local lane because it bypasses the Bake/cache labels
+and build-context freshness checks.
 
 These commands are for local reproduction, cache diagnosis, and parity checks.
 Do not use them as a substitute for the governed production publish path.
@@ -550,18 +552,26 @@ Do not use them as a substitute for the governed production publish path.
 export TUTOR_ROOT="$(pwd)/tutor_env"
 source infrastructure/tutor/tutor-env.sh
 
-# Full rebuild: LMS/CMS/workers (30-45 min, needs >=12 GB Docker RAM)
-tutor images build openedx -a PIP_COMMAND=pip
+./scripts/infra/tutor-config-save.sh \
+  --set LMS_HOST=localhost \
+  --set CMS_HOST=studio.localhost \
+  --set MFE_HOST=apps.localhost \
+  --set RUN_MONGODB=true \
+  --set RUN_MYSQL=true \
+  --set RUN_REDIS=true \
+  --set DOCKER_IMAGE_OPENEDX=openedx:nightly \
+  --set MFE_DOCKER_IMAGE=openedx-mfe:nightly
 
-# Full rebuild: MFE (15-20 min)
-tutor images build mfe
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 
 # Verify images are present
-docker images | grep -E "tutor_local/openedx|tutor_local/openedx-mfe"
+docker image inspect openedx:nightly openedx-mfe:nightly >/dev/null
 ```
 
-`PIP_COMMAND=pip` is required because Tutor 21 defaults to `uv pip`, which does
-not provide `pkg_resources`. `loremipsum==1.0.5` (a transitive dep) requires it.
+The helpers route through `docker-bake.hcl`, stamp the resulting images with the
+rendered build-context fingerprint, and let `scripts/shared/setup-local.sh`
+rebuild instead of silently reusing stale local tags.
 
 ### When to use cache (incremental build)
 
@@ -569,30 +579,30 @@ When only theme or static files changed and you want to skip the 20+ min pip ins
 layer:
 
 ```bash
-# BuildKit reuses cached layers automatically when Dockerfile layers are unchanged
-DOCKER_BUILDKIT=1 tutor images build openedx -a PIP_COMMAND=pip
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 ```
 
 Force a complete rebuild with `--no-cache`:
 
 ```bash
-tutor images build openedx -a PIP_COMMAND=pip --no-cache
+FORCE_LOCAL_IMAGE_BUILD=1 ./scripts/shared/setup-local.sh
 ```
 
 ### Post-build local artifact check
 
 ```bash
 # Confirm image size (expected: ~3-4 GB for openedx, ~500 MB for mfe)
-docker images tutor_local/openedx:latest --format "{{.Size}}"
+docker images openedx:nightly openedx-mfe:nightly --format "{{.Repository}}:{{.Tag}} {{.Size}}"
 
 # Inspect entrypoint
-docker inspect tutor_local/openedx:latest --format '{{.Config.Entrypoint}}'
+docker inspect openedx:nightly --format '{{.Config.Entrypoint}}'
 # Expected: [/usr/local/bin/uwsgi ...]
 
 # Quick smoke (bring up LMS in isolation)
 docker run --rm -d --name smoke-lms \
   -p 18001:8000 \
-  tutor_local/openedx:latest lms
+  openedx:nightly lms
 sleep 5 && curl -sI http://localhost:18001/ | head -1
 docker stop smoke-lms
 ```
@@ -602,7 +612,7 @@ docker stop smoke-lms
 If the MFE webpack build OOMs locally:
 
 ```bash
-tutor images build mfe -a NODE_OPTIONS="--max-old-space-size=6144"
+NODE_OPTIONS="--max-old-space-size=6144" ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 ```
 
 This is also applied automatically in CI via the `NODE_OPTIONS` env var in the

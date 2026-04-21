@@ -30,6 +30,7 @@ fi
 source .venv/bin/activate
 pip install --upgrade pip --quiet
 pip install uv --quiet
+pip install -r requirements-tutor.txt --quiet
 ok "Python environment ready"
 
 # ---------------------------------------------------------------------------
@@ -69,28 +70,40 @@ ok "tutor_env directory ready (TUTOR_ROOT=${TUTOR_ROOT:-$REPO_ROOT/tutor_env})"
 export TUTOR_ROOT="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
 
 # ---------------------------------------------------------------------------
-# 6. Tutor config save + apply patches
+# 6. Tutor config save through the canonical front door
 # ---------------------------------------------------------------------------
-log "Running tutor config save (sets local Docker service names)..."
-tutor config save \
+log "Running canonical Tutor config wrapper (sets local Docker service names and prepares build context)..."
+# shellcheck source=/dev/null
+source infrastructure/tutor/tutor-env.sh
+./scripts/infra/tutor-config-save.sh \
   --set LMS_HOST=localhost \
   --set CMS_HOST=studio.localhost \
   --set MFE_HOST=apps.localhost \
+  --set DISCOVERY_HOST=discovery.localhost \
+  --set ECOMMERCE_HOST=ecommerce.localhost \
+  --set XQUEUE_HOST=xqueue.localhost \
+  --set RUN_MONGODB=true \
+  --set RUN_MYSQL=true \
+  --set RUN_REDIS=true \
+  --set RUN_MEILISEARCH=true \
+  --set RUN_SMTP=true \
+  --set DOCKER_REGISTRY=mirror.gcr.io/ \
+  --set DOCKER_IMAGE_OPENEDX=openedx:nightly \
+  --set MFE_DOCKER_IMAGE=openedx-mfe:nightly \
+  --set DOCKER_IMAGE_CADDY=mirror.gcr.io/library/caddy:2.7.4 \
+  --set DOCKER_IMAGE_MEILISEARCH=mirror.gcr.io/getmeili/meilisearch:v1.8.4 \
+  --set DOCKER_IMAGE_MONGODB=mirror.gcr.io/library/mongo:7.0.28 \
+  --set DOCKER_IMAGE_MYSQL=mirror.gcr.io/library/mysql:8.4.0 \
+  --set DOCKER_IMAGE_REDIS=mirror.gcr.io/library/redis:7.4.5 \
+  --set DOCKER_IMAGE_SMTP=mirror.gcr.io/devture/exim-relay:4.96-r1-0 \
   --set MYSQL_HOST=mysql \
   --set MONGODB_HOST=mongodb \
   --set REDIS_HOST=redis \
   --set MONGODB_PORT=27017 \
   --set MYSQL_PORT=3306 \
+  --set MYSQL_ROOT_HOST=% \
   --set REDIS_PORT=6379
-ok "tutor config saved"
-
-log "Applying Mereka patches..."
-if [ -x "infrastructure/tutor/apply-patches.sh" ]; then
-  ./infrastructure/tutor/apply-patches.sh
-  ok "Patches applied"
-else
-  warn "apply-patches.sh not found or not executable, skipping"
-fi
+ok "Tutor config saved and build context prepared"
 
 # ---------------------------------------------------------------------------
 # 7. Seed demo course (opt-in)
@@ -117,8 +130,8 @@ echo "  Devcontainer ready."
 echo ""
 echo "  Next steps:"
 echo "    1. Build images (first time only, 30-45 min):"
-echo "         tutor images build openedx"
-echo "         tutor images build mfe"
+echo "         ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast"
+echo "         ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast"
 echo "    2. Launch local platform:"
 echo "         make tutor-start"
 echo "         # or: tutor local launch -I --skip-build"

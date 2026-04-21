@@ -198,6 +198,7 @@ scripts/qa/verify-generated-surfaces.sh
 scripts/qa/test-verify-generated-surfaces.sh
 scripts/qa/verify-ci-cache-policy.sh
 scripts/qa/test-verify-ci-cache-policy.sh
+scripts/qa/test-build-context-fingerprint.sh
 scripts/qa/verify-benchmark-artifact-contract.sh
 scripts/qa/verify-verification-catalog.sh
 scripts/qa/test-verify-verification-catalog.sh
