@@ -74,8 +74,10 @@ spec:
             ) > 0.005
           for: 5m
           labels:
+            speculative: "true"
             severity: critical
             component: purchase-gateway
           annotations:
+            speculative_reason: "Awaiting app-level instrumentation — see bead mereka-lms-zuv1"
             summary: "Purchase Gateway 5xx error rate is high"
             description: "Purchase gateway 5xx ratio is {{ $value | humanizePercentage }} in the last 5 minutes, above 0.5%."

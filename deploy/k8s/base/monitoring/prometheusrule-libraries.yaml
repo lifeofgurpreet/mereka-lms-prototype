@@ -21,9 +21,11 @@ spec:
           expr: rate(content_library_cross_tenant_denial_total[5m]) > 2
           for: 5m
           labels:
+            speculative: "true"
             severity: critical
             component: content-libraries
           annotations:
+            speculative_reason: "Awaiting app-level instrumentation — see bead mereka-lms-c7t0"
             summary: "Content library cross-tenant access denials are spiking"
             description: "User {{ $labels.user }} has triggered {{ $value }} cross-tenant access denials per minute over the last 5 minutes. This may indicate an unauthorized access attempt or misconfigured tenant isolation."
             runbook_url: "docs/archive/superseded/runbooks/content-libraries-runbook.md#cross-tenant-denial-spike"
@@ -36,9 +38,11 @@ spec:
           expr: increase(content_library_publish_total{outcome="failure"}[10m]) > 5
           for: 0m
           labels:
+            speculative: "true"
             severity: critical
             component: content-libraries
           annotations:
+            speculative_reason: "Awaiting app-level instrumentation — see bead mereka-lms-c7t0"
             summary: "Content library publish failures are spiking"
             description: "More than 5 content library publish operations have failed in the last 10 minutes. Library {{ $labels.library_key }} publish pipeline may be degraded."
             runbook_url: "docs/archive/superseded/runbooks/content-libraries-runbook.md#publish-failure-spike"
@@ -48,9 +52,11 @@ spec:
           expr: content_library_search_index_lag_seconds > 3600
           for: 15m
           labels:
+            speculative: "true"
             severity: warning
             component: content-libraries
           annotations:
+            speculative_reason: "Awaiting app-level instrumentation — see bead mereka-lms-c7t0"
             summary: "Content library search index is lagging behind"
             description: "Content library {{ $labels.library_key }} search index is {{ $value | humanizeDuration }} behind the primary datastore. Search results may be stale."
             runbook_url: "docs/archive/superseded/runbooks/content-libraries-runbook.md#search-index-lag"
@@ -60,9 +66,11 @@ spec:
           expr: histogram_quantile(0.95, rate(content_library_api_latency_seconds_bucket[5m])) > 2
           for: 15m
           labels:
+            speculative: "true"
             severity: warning
             component: content-libraries
           annotations:
+            speculative_reason: "Awaiting app-level instrumentation — see bead mereka-lms-c7t0"
             summary: "Content library API latency is high"
             description: "95th percentile API latency for {{ $labels.endpoint }} is {{ $value | humanizeDuration }}, exceeding 2s threshold for 15 minutes. Users may experience slow responses."
             runbook_url: "docs/archive/superseded/runbooks/content-libraries-runbook.md#api-latency-high"
@@ -72,9 +80,11 @@ spec:
           expr: content_library_export_size_bytes > 104857600
           for: 0m
           labels:
+            speculative: "true"
             severity: info
             component: content-libraries
           annotations:
+            speculative_reason: "Awaiting app-level instrumentation — see bead mereka-lms-c7t0"
             summary: "Content library export is unusually large"
             description: "Library {{ $labels.library_key }} export size is {{ $value | humanize1024 }}, exceeding 100MB. Consider reviewing library size and export configuration."
             runbook_url: "docs/archive/superseded/runbooks/content-libraries-runbook.md#export-large"
