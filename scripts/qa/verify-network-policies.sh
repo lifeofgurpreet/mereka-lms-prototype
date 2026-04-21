@@ -150,12 +150,12 @@ offline_checks() {
   if [[ -f "$NP_DIR/default-deny.yaml" ]]; then
     local deny_content
     deny_content="$(cat "$NP_DIR/default-deny.yaml")"
-    if echo "$deny_content" | grep -q "Ingress" && echo "$deny_content" | grep -q "Egress"; then
+    if grep -q "Ingress" <<<"$deny_content" && grep -q "Egress" <<<"$deny_content"; then
       pass "default-deny covers both Ingress and Egress"
     else
       fail "default-deny must cover both Ingress and Egress policyTypes"
     fi
-    if echo "$deny_content" | grep -q "podSelector: {}"; then
+    if grep -q "podSelector: {}" <<<"$deny_content"; then
       pass "default-deny applies to all pods (empty podSelector)"
     else
       fail "default-deny should use empty podSelector to apply to all pods"
@@ -166,17 +166,17 @@ offline_checks() {
   if [[ -f "$NP_DIR/allow-dns.yaml" ]]; then
     local dns_content
     dns_content="$(cat "$NP_DIR/allow-dns.yaml")"
-    if echo "$dns_content" | grep -q "port: 53"; then
+    if grep -q "port: 53" <<<"$dns_content"; then
       pass "DNS policy allows port 53"
     else
       fail "DNS policy must allow port 53"
     fi
-    if echo "$dns_content" | grep -q "protocol: UDP" && echo "$dns_content" | grep -q "protocol: TCP"; then
+    if grep -q "protocol: UDP" <<<"$dns_content" && grep -q "protocol: TCP" <<<"$dns_content"; then
       pass "DNS policy allows both UDP and TCP"
     else
       fail "DNS policy should allow both UDP and TCP for port 53"
     fi
-    if echo "$dns_content" | grep -q "kubernetes.io/metadata.name: kube-system"; then
+    if grep -q "kubernetes.io/metadata.name: kube-system" <<<"$dns_content"; then
       pass "DNS policy uses standard kube-system namespace label"
     else
       fail "DNS policy should use kubernetes.io/metadata.name label selector"
@@ -187,12 +187,12 @@ offline_checks() {
   if [[ -f "$NP_DIR/allow-caddy-external.yaml" ]]; then
     local caddy_content
     caddy_content="$(cat "$NP_DIR/allow-caddy-external.yaml")"
-    if echo "$caddy_content" | grep -q "app.kubernetes.io/name: caddy"; then
+    if grep -q "app.kubernetes.io/name: caddy" <<<"$caddy_content"; then
       pass "caddy policy selects caddy pods"
     else
       fail "caddy policy must select caddy pods"
     fi
-    if echo "$caddy_content" | grep -q "port: 80" && echo "$caddy_content" | grep -q "port: 443"; then
+    if grep -q "port: 80" <<<"$caddy_content" && grep -q "port: 443" <<<"$caddy_content"; then
       pass "caddy policy allows ports 80 and 443"
     else
       fail "caddy policy must allow both port 80 and 443"
