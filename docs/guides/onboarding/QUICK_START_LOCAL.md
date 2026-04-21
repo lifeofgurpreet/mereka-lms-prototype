@@ -1,64 +1,104 @@
 # Quick Start: Local Development Setup
-_Audience: Developers + Agent Operators • Owner: Platform Team • Last verified: 2026-03-10 • Status: canonical_
+_Audience: Developers + Agent Operators • Owner: Platform Team • Last verified: 2026-04-20 • Status: canonical_
 
-## 🚀 Fast Setup (Copy-Paste Ready)
+## Fast Setup
 
 ```bash
-# 1. Clone and enter repo
-cd /path/to/mereka.academy
+git clone git@github.com:Biji-Biji-Initiative/mereka-lms.git
+cd mereka-lms
+./scripts/qa/verify-cold-start-onboarding-contract.sh
+./scripts/shared/setup-local.sh
+./scripts/infra/verify-local-bootstrap-readiness.sh
+```
 
-# 2. Create Python environment
+The first run builds local Open edX and MFE images, initializes Tutor data, starts the stack, and creates a local-only admin user. If `LOCAL_ADMIN_PASSWORD` is not set, the setup script writes generated credentials to `tutor_env/local-admin-credentials.txt`.
+
+## Host Requirements
+
+- Docker Engine or Docker Desktop with Docker Compose v2.
+- Python 3.12 with `venv`.
+- At least 8 vCPU, 16 GB RAM, and 40 GB free disk.
+- Docker Desktop on macOS: set RAM to 12 GB and swap to 2-4 GB before the first image build.
+
+## Manual Equivalent
+
+Use this when debugging the setup script step by step:
+
+```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements-tutor.txt
 
-# 3. Configure Docker Desktop (macOS)
-# Open Docker Desktop → Settings → Resources → Advanced
-# Set RAM: 12 GB, Swap: 2-4 GB, then Apply & Restart
-
-# 4. Set up Tutor
 source infrastructure/tutor/tutor-env.sh
 export TUTOR_ROOT="$(pwd)/tutor_env"
-tutor plugins enable mereka_lms
 
-# 5. Render local Tutor config through the canonical wrapper
 ./scripts/infra/tutor-config-save.sh \
   --set LMS_HOST=localhost \
   --set CMS_HOST=studio.localhost \
   --set MFE_HOST=apps.localhost \
+  --set DISCOVERY_HOST=discovery.localhost \
+  --set ECOMMERCE_HOST=ecommerce.localhost \
+  --set XQUEUE_HOST=xqueue.localhost \
+  --set RUN_MONGODB=true \
+  --set RUN_MYSQL=true \
+  --set RUN_REDIS=true \
+  --set RUN_MEILISEARCH=true \
+  --set RUN_SMTP=true \
+  --set DOCKER_REGISTRY=mirror.gcr.io/ \
+  --set DOCKER_IMAGE_OPENEDX=openedx:nightly \
+  --set MFE_DOCKER_IMAGE=openedx-mfe:nightly \
+  --set DOCKER_IMAGE_CADDY=mirror.gcr.io/library/caddy:2.7.4 \
+  --set DOCKER_IMAGE_MEILISEARCH=mirror.gcr.io/getmeili/meilisearch:v1.8.4 \
+  --set DOCKER_IMAGE_MONGODB=mirror.gcr.io/library/mongo:7.0.28 \
+  --set DOCKER_IMAGE_MYSQL=mirror.gcr.io/library/mysql:8.4.0 \
+  --set DOCKER_IMAGE_REDIS=mirror.gcr.io/library/redis:7.4.5 \
+  --set DOCKER_IMAGE_SMTP=mirror.gcr.io/devture/exim-relay:4.96-r1-0 \
   --set MYSQL_HOST=mysql \
   --set MONGODB_HOST=mongodb \
   --set REDIS_HOST=redis \
   --set MONGODB_PORT=27017 \
   --set MYSQL_PORT=3306 \
+  --set MYSQL_ROOT_HOST=% \
   --set REDIS_PORT=6379
-
-# 6. Build images (first time only, takes 30-45 min total)
-tutor images build openedx
-tutor images build mfe
-
-# 7. Launch services
-tutor local launch -I --skip-build
-
-# 8. Create local admin user
-export LOCAL_ADMIN_PASSWORD='<choose-a-local-only-password>'
-docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms manage_user --superuser --staff admin admin@mereka.academy
-docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "import os; from django.contrib.auth import get_user_model; User = get_user_model(); u = User.objects.get(username='admin'); u.set_password(os.environ['LOCAL_ADMIN_PASSWORD']); u.is_staff = True; u.is_superuser = True; u.save(); print('✅ Local admin updated')"
-
-# 9. Verify
-curl -I http://localhost
-curl -I http://apps.localhost/authn/login
 ```
 
-## ✅ Verification Checklist
+The config wrapper syncs the repo-local Tutor plugin mirror and enables the
+canonical plugins with `tutor plugins enable mereka_lms` and
+`tutor plugins enable mereka_lms_mfe_slots` before saving config.
+
+```bash
+./scripts/infra/prepare-tutor-build-context.sh --target all
+./scripts/infra/ensure-buildx-dependency-mirror.sh
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
+tutor local launch -I --skip-build
+tutor local start -d
+./scripts/infra/verify-local-bootstrap-readiness.sh
+```
+
+The local quick start builds `openedx:nightly` and `openedx-mfe:nightly`, then points Tutor at those exact tags. Render prep applies the named dependency-image mirror patch for Tutor-emitted hardcoded Docker Hub dependency refs, selects a repo-owned BuildKit builder with a `docker.io` registry mirror as a fallback guard, and uses `mirror.gcr.io` where Tutor exposes third-party service/helper image refs. That is dependency acquisition only; it does not create a second Dockerfile or image strategy.
+
+To force a local image rebuild even when `openedx:nightly` or `openedx-mfe:nightly` already exists:
+
+```bash
+FORCE_LOCAL_IMAGE_BUILD=1 ./scripts/shared/setup-local.sh
+```
+
+## Verification Checklist
 
 Run these to verify everything works:
 
 ```bash
+# Check source/docs contract without starting Docker
+./scripts/qa/verify-cold-start-onboarding-contract.sh
+
+# Check initialized local Tutor state after setup
+./scripts/infra/verify-local-bootstrap-readiness.sh
+
 # Check containers
 docker ps --filter "name=tutor_local" | wc -l
-# Should show: 24
+# Should show 20+ once the full Tutor stack is running
 
 # Check config is local (not cloud)
 grep -E "MYSQL_HOST|MONGODB_HOST" tutor_env/config.yml
@@ -70,7 +110,29 @@ curl -I http://studio.localhost             # Studio
 curl -I http://apps.localhost/authn/login   # MFE Login
 ```
 
-## 🔄 Daily Commands
+## Separate CI Proof Lane
+
+The clean bootstrap proof is [`.github/workflows/bootstrap-local-readiness.yml`](../../../.github/workflows/bootstrap-local-readiness.yml). It creates a fresh repo-scoped `TUTOR_ROOT`, launches `tutor local launch -I --skip-build`, validates image provenance, and runs `./scripts/infra/verify-local-bootstrap-readiness.sh`.
+
+The bootstrap workflow uses the same Tutor render path as local setup, including the named dependency-image mirror patch for Tutor-emitted hardcoded Docker Hub refs and `mirror.gcr.io` settings where Tutor exposes dependency images. The benchmark image-build proof also configures BuildKit with a `docker.io` registry mirror as a fallback guard, but the explicit render patch is what makes the known upstream dependency refs deterministic. Those mirror settings are not build semantic changes; they exist so proof and first-run setup do not depend on anonymous Docker Hub quota.
+
+The app-cache-cold image-build proof is [`.github/workflows/build-benchmark.yml`](../../../.github/workflows/build-benchmark.yml) with `benchmark_class=app-cache-cold` and `image_family=both`. That lane proves the Open edX and MFE image build helpers with app-level BuildKit cache imports disabled; persistent runner Docker daemon/base-image state can still exist. The bootstrap lane proves the rendered Tutor stack initializes from a clean `TUTOR_ROOT`. The old `benchmark_class=true-cold` input remains accepted as a legacy alias, but new evidence should use `app-cache-cold`.
+
+To run it from a branch:
+
+```bash
+gh workflow run bootstrap-local-readiness.yml --ref "$(git branch --show-current)"
+gh run list --workflow bootstrap-local-readiness.yml --limit 5
+
+gh workflow run build-benchmark.yml --ref "$(git branch --show-current)" \
+  -f runner_class=fastlane \
+  -f benchmark_class=app-cache-cold \
+  -f image_family=both
+```
+
+Do not mark cold-start onboarding fixed until the offline contract passes, the bootstrap workflow is green for the branch being merged, and app-cache-cold image build proof is either green or explicitly waived with a fresh reason.
+
+## Daily Commands
 
 ```bash
 # Start
@@ -86,7 +148,7 @@ tutor local stop
 tutor local restart
 ```
 
-## 🆘 Common Issues
+## Common Issues
 
 **"Can't connect to MySQL"**
 ```bash
@@ -111,10 +173,10 @@ tutor local restart
 
 ## 📚 Full Documentation
 
-- **Full setup:** `docs/guides/onboarding/LOCAL_SETUP.md`
-- **Daily workflow:** `docs/guides/onboarding/WORKFLOW_LOCAL.md`
-- **Repository map:** `docs/guides/onboarding/REPOSITORY_GUIDE.md`
-- **Troubleshooting:** `docs/ops/runbooks/site-down.md`
+- **Full setup:** [`LOCAL_SETUP.md`](LOCAL_SETUP.md)
+- **Daily workflow:** [`WORKFLOW_LOCAL.md`](WORKFLOW_LOCAL.md)
+- **Repository map:** [`REPOSITORY_GUIDE.md`](REPOSITORY_GUIDE.md)
+- **Troubleshooting:** [`../../ops/runbooks/TROUBLESHOOTING.md`](../../ops/runbooks/TROUBLESHOOTING.md)
 
 ## 🌐 Access URLs
 

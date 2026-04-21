@@ -23,6 +23,47 @@ grep -q "ERROR: --url requires a value" /tmp/mfe_runtime_missing_url.out || fail
 grep -q "Usage:" /tmp/mfe_runtime_missing_url.out || fail "usage not printed for --url failure"
 pass "missing --url value fails cleanly"
 
+GENERATED_ENV_DIR="${TMPDIR}/generated-env-config"
+mkdir -p "$GENERATED_ENV_DIR"
+
+cat >"${GENERATED_ENV_DIR}/env.config.jsx" <<'EOF'
+import { getConfig } from '@edx/frontend-platform/config';
+
+const runtimeMarkers = {
+  footer: 'MerekaFooter',
+  sidebar: 'mereka_learner_sidebar_widget',
+  dashboard: 'mereka_dashboard_course_list_context',
+};
+
+window.__MEREKA_RUNTIME_MARKERS__ = runtimeMarkers;
+window.__MEREKA_RUNTIME_PADDING__ = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+EOF
+
+bash "$VERIFY_SCRIPT" --generated-env-config "${GENERATED_ENV_DIR}/env.config.jsx" >/tmp/mfe_runtime_generated_env_healthy.out 2>&1 \
+  || fail "healthy generated env.config.jsx should pass"
+grep -q "at most one getConfig declaration/import" /tmp/mfe_runtime_generated_env_healthy.out || fail "healthy generated env.config.jsx did not validate getConfig uniqueness"
+pass "healthy generated env.config.jsx passes build-time ownership verifier"
+
+cat >"${GENERATED_ENV_DIR}/duplicate-get-config.env.config.jsx" <<'EOF'
+import { getConfig } from '@edx/frontend-platform/config';
+import { getConfig } from '@edx/frontend-platform/config';
+
+const runtimeMarkers = {
+  footer: 'MerekaFooter',
+  sidebar: 'mereka_learner_sidebar_widget',
+  dashboard: 'mereka_dashboard_course_list_context',
+};
+
+window.__MEREKA_RUNTIME_MARKERS__ = runtimeMarkers;
+window.__MEREKA_RUNTIME_PADDING__ = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+EOF
+
+if bash "$VERIFY_SCRIPT" --generated-env-config "${GENERATED_ENV_DIR}/duplicate-get-config.env.config.jsx" >/tmp/mfe_runtime_generated_env_duplicate.out 2>&1; then
+  fail "generated env.config.jsx with duplicate getConfig imports should fail"
+fi
+grep -q "duplicate getConfig" /tmp/mfe_runtime_generated_env_duplicate.out || fail "duplicate generated env.config.jsx did not flag duplicate getConfig"
+pass "duplicate getConfig generated env.config.jsx fails build-time ownership verifier"
+
 FAKEBIN="${TMPDIR}/bin"
 mkdir -p "$FAKEBIN"
 
@@ -97,6 +138,10 @@ print(payload, end="")
 PY
 }
 
+authoring_config_json() {
+  printf '{"BASE_URL":"https://healthy.example/authoring","LMS_BASE_URL":"https://lms.example.test"}'
+}
+
 case "$mode" in
   status)
     printf '200'
@@ -120,6 +165,9 @@ case "$mode" in
           printf 'content-type: application/javascript\r\n'
         fi
         ;;
+      /api/mfe_config/v1?mfe=authoring)
+        printf 'content-type: application/json\r\n'
+        ;;
       /learner-dashboard/)
         printf 'content-type: text/html; charset=utf-8\r\n'
         ;;
@@ -142,6 +190,9 @@ case "$mode" in
         else
           env_js
         fi
+        ;;
+      /api/mfe_config/v1?mfe=authoring)
+        authoring_config_json
         ;;
       /learner-dashboard/)
         dashboard_html

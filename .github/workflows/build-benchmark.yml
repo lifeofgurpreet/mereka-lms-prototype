@@ -11,7 +11,7 @@
 #
 #   gh workflow run build-benchmark.yml \
 #     -f runner_class=fastlane \
-#     -f benchmark_class=registry-warm \
+#     -f benchmark_class=app-cache-cold \
 #     -f image_family=openedx
 #
 # OR via GitHub Actions UI → Actions → "Build Benchmark" → Run workflow.
@@ -20,22 +20,22 @@
 # WHAT EACH benchmark_class CONTROLS
 # =============================================================================
 #
-# true-cold
+# app-cache-cold (`true-cold` remains accepted as a legacy alias)
 #   Executes: docker buildx prune -af + rm builder state + CACHE_FROM_ARG=""
 #   This suppresses L1 (local) cache and the shared registry ref from cache-from,
 #   so BuildKit starts with zero layer imports from any shared authority.
-#   LIMITATION: Perfect isolation is not possible without changing docker-bake.hcl
-#   (PR 2 territory). If the Dockerfile base image is cached in the Docker daemon
-#   image store, it may still be pulled locally. True-cold guarantees no shared
-#   registry cache is consulted; it does NOT guarantee a completely cold Docker
-#   daemon layer store on a persistent VPS runner.
+#   LIMITATION: This is not a machine-cold clean-room build. If the Dockerfile
+#   base image is cached in the Docker daemon image store, it may still be used
+#   locally. The class guarantees no app-level BuildKit registry cache is
+#   consulted; it does NOT guarantee a pristine Docker daemon on a persistent
+#   runner.
 #
 # registry-warm
 #   Executes: docker buildx prune -af (wipes L1 only), then build with
 #   CACHE_FROM_ARG pointing at the shared GHCR registry ref.
 #   Prerequisite: the registry cache must be populated by at least one
 #   trusted main build (PR 2). If the cache ref is absent (404), this run
-#   degrades to effectively true-cold — a warning is emitted in prepare-conditions.
+#   degrades to app-cache-cold-like behavior — a warning is emitted in prepare-conditions.
 #
 # local-hot
 #   No cache wipe. Relies on persistent runner state (fastlane VPS daemon or
@@ -53,7 +53,8 @@
 # =============================================================================
 #
 # Each run uploads: benchmark-results/benchmark_metadata.json
-#   { run_id, benchmark_class, runner_class, image_family,
+#   { run_id, requested_benchmark_class, benchmark_class, proof_class,
+#     machine_cold_claim, runner_class, image_family,
 #     build_start_utc, build_end_utc, build_duration_seconds,
 #     scan_start_utc, scan_end_utc, scan_duration_seconds,
 #     total_duration_seconds, cache_from_arg,
@@ -63,9 +64,9 @@
 # The receiver (ci-metrics-receiver, bead jj97.2) consumes the GitHub
 # webhook workflow_run event for this workflow. benchmark_class is NOT
 # emitted as a Prometheus label — it is written to benchmark_metadata.json
-# as an annotation so the receiver can group runs. Classification (warm/cold)
-# is ALWAYS derived from ci_cache_source_found + ci_layer_reuse_ratio in
-# Prometheus recording rules (RFC red line #4).
+# as an annotation so the receiver can group requested proof preconditions.
+# Classification (warm/cold) is ALWAYS derived from ci_cache_source_found +
+# ci_layer_reuse_ratio in Prometheus recording rules (RFC red line #4).
 #
 # A GitHub Step Summary table is also written showing:
 #   benchmark entry | measured time | expected band (BENCHMARK_CLASSES.md) | result
@@ -104,6 +105,7 @@ on:
         default: registry-warm
         type: choice
         options:
+          - app-cache-cold
           - true-cold
           - registry-warm
           - local-hot
@@ -120,7 +122,8 @@ on:
 
   schedule:
     # Weekly trend baseline — representative subset only (see §Schedule).
-    # Full matrix (16 combos) is never run automatically; true-cold is on-demand.
+    # Full matrix (16 combos) is never run automatically; legacy true-cold
+    # input / app-cache-cold setup is on-demand.
     # Four runs: ~registry-warm × fastlane × openedx, registry-warm × arc-heavy × openedx,
     #            registry-warm × fastlane × mfe, scan-only × fastlane × openedx
     # Estimated weekly cost: 4 runs × ~10 min avg ≈ 40 runner-minutes.
@@ -162,6 +165,7 @@ jobs:
     outputs:
       runner_class: ${{ steps.inputs.outputs.runner_class }}
       benchmark_class: ${{ steps.inputs.outputs.benchmark_class }}
+      proof_class: ${{ steps.inputs.outputs.proof_class }}
       image_family: ${{ steps.inputs.outputs.image_family }}
       build_openedx: ${{ steps.inputs.outputs.build_openedx }}
       build_mfe: ${{ steps.inputs.outputs.build_mfe }}
@@ -193,6 +197,20 @@ jobs:
             image_family="${INPUT_IMAGE_FAMILY:-openedx}"
           fi
 
+          case "$benchmark_class" in
+            true-cold)
+              proof_class="app-cache-cold"
+              echo "::warning::benchmark_class=true-cold is a legacy alias; artifacts and metadata use proof_class=app-cache-cold."
+              ;;
+            app-cache-cold|registry-warm|local-hot|scan-only)
+              proof_class="$benchmark_class"
+              ;;
+            *)
+              echo "::error::Unknown benchmark_class: $benchmark_class"
+              exit 1
+              ;;
+          esac
+
           build_openedx="false"
           build_mfe="false"
           is_scan_only="false"
@@ -210,6 +228,7 @@ jobs:
           {
             echo "runner_class=${runner_class}"
             echo "benchmark_class=${benchmark_class}"
+            echo "proof_class=${proof_class}"
             echo "image_family=${image_family}"
             echo "build_openedx=${build_openedx}"
             echo "build_mfe=${build_mfe}"
@@ -221,12 +240,14 @@ jobs:
             echo "| Key | Value |"
             echo "|-----|-------|"
             echo "| runner_class | \`${runner_class}\` |"
-            echo "| benchmark_class | \`${benchmark_class}\` |"
+            echo "| requested_benchmark_class | \`${benchmark_class}\` |"
+            echo "| proof_class | \`${proof_class}\` |"
             echo "| image_family | \`${image_family}\` |"
             echo "| is_scan_only | \`${is_scan_only}\` |"
             echo "| triggered_by | \`${EVENT_NAME}\` |"
             echo ""
-            echo "> benchmark_class is an input constraint (pre-condition), NOT a Prometheus label."
+            echo "> proof_class is the machine-readable requested proof precondition."
+            echo "> benchmark_class is a legacy-compatible workflow input, NOT a Prometheus label."
             echo "> Classification is derived from ci_cache_source_found + ci_layer_reuse_ratio"
             echo "> in Prometheus recording rules (RFC red line #4 / BENCHMARK_CLASSES.md)."
           } >> "$GITHUB_STEP_SUMMARY"
@@ -275,7 +296,7 @@ jobs:
   # Job 3: Prepare cache conditions on the target runner
   # --------------------------------------------------------------------------
   prepare-conditions:
-    name: Prepare Benchmark Conditions (${{ needs.resolve-benchmark-inputs.outputs.benchmark_class }})
+    name: Prepare Benchmark Conditions (${{ needs.resolve-benchmark-inputs.outputs.proof_class }})
     runs-on: ${{ needs.select-runner.outputs.runner_label }}
     timeout-minutes: 90
     needs:
@@ -286,6 +307,7 @@ jobs:
       packages: read
     env:
       BENCHMARK_CLASS: ${{ needs.resolve-benchmark-inputs.outputs.benchmark_class }}
+      PROOF_CLASS: ${{ needs.resolve-benchmark-inputs.outputs.proof_class }}
       RUNNER_CLASS: ${{ needs.resolve-benchmark-inputs.outputs.runner_class }}
       IMAGE_FAMILY: ${{ needs.resolve-benchmark-inputs.outputs.image_family }}
     outputs:
@@ -298,16 +320,16 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       # ── Log in to GHCR for registry-warm and local-hot (read-only pull) ───
-      # Not performed for true-cold: suppressing registry login prevents the
+      # Not performed for app-cache-cold: suppressing registry login prevents the
       # docker credential store from providing L2 registry cache.
       # Note: docker buildx cache-from will still attempt to pull the cache ref
-      # if the arg is present. For true-cold we clear cache_from_arg so BuildKit
+      # if the arg is present. For app-cache-cold we clear cache_from_arg so BuildKit
       # has no ref to attempt. The limitation is that if the Docker daemon has
       # the base image already loaded in its image store (fastlane persistent
       # daemon), those layers may still be reused. This is documented in the
-      # header comment and in BENCHMARK_CLASSES.md §true-cold LIMITATION.
+      # header comment and in BENCHMARK_CLASSES.md §app-cache-cold LIMITATION.
       - name: Log in to GHCR (registry-warm / local-hot / scan-only only)
-        if: env.BENCHMARK_CLASS != 'true-cold'
+        if: env.PROOF_CLASS != 'app-cache-cold'
         env:
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
@@ -316,24 +338,30 @@ jobs:
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd  # v4.0.0
         with:
           driver: docker-container
+          driver-opts: |
+            image=mirror.gcr.io/moby/buildkit:buildx-stable-1
           cleanup: false
 
-      # ── true-cold: wipe all L1 cache state ─────────────────────────────────
-      - name: "[true-cold] Wipe L1 cache and builder state"
-        if: env.BENCHMARK_CLASS == 'true-cold'
+      # ── app-cache-cold: wipe all L1 cache state ────────────────────────────
+      - name: "[app-cache-cold] Wipe L1 cache and builder state"
+        if: env.PROOF_CLASS == 'app-cache-cold'
         run: |
           set -euo pipefail
-          echo "=== Wiping L1 (local) buildx cache for true-cold run ==="
+          echo "=== Wiping L1 (local) buildx cache for app-cache-cold run ==="
           docker buildx prune -af || true
           rm -rf /tmp/buildx-* ~/.docker/buildx || true
           docker buildx rm mereka-builder 2>/dev/null || true
-          docker buildx create --name mereka-builder --driver docker-container --use 2>/dev/null || true
+          docker buildx create \
+            --name mereka-builder \
+            --driver docker-container \
+            --driver-opt image=mirror.gcr.io/moby/buildkit:buildx-stable-1 \
+            --use 2>/dev/null || true
           echo "L1 wipe complete."
           docker buildx du 2>/dev/null || true
 
       # ── registry-warm: wipe L1 only, verify registry cache is reachable ────
       - name: "[registry-warm] Wipe L1 cache"
-        if: env.BENCHMARK_CLASS == 'registry-warm'
+        if: env.PROOF_CLASS == 'registry-warm'
         run: |
           set -euo pipefail
           echo "=== Wiping L1 (local) buildx cache for registry-warm run ==="
@@ -343,7 +371,7 @@ jobs:
           echo "L1 wipe complete."
 
       - name: "[registry-warm] Verify GHCR registry cache is populated"
-        if: env.BENCHMARK_CLASS == 'registry-warm'
+        if: env.PROOF_CLASS == 'registry-warm'
         env:
           BUILD_OPENEDX: ${{ needs.resolve-benchmark-inputs.outputs.build_openedx }}
           BUILD_MFE: ${{ needs.resolve-benchmark-inputs.outputs.build_mfe }}
@@ -355,7 +383,7 @@ jobs:
               echo "✅ OpenEdX registry cache ref reachable: ${{ env.OPENEDX_CACHE_REF }}"
             else
               echo "::warning::OpenEdX registry cache ref not found: ${{ env.OPENEDX_CACHE_REF }}"
-              echo "  This registry-warm run will degrade to effectively true-cold."
+              echo "  This registry-warm run will degrade to app-cache-cold-like behavior."
               echo "  Run a trusted main build (PR 2) to populate the cache first."
               WARN=1
             fi
@@ -365,13 +393,13 @@ jobs:
               echo "✅ MFE registry cache ref reachable: ${{ env.MFE_CACHE_REF }}"
             else
               echo "::warning::MFE registry cache ref not found: ${{ env.MFE_CACHE_REF }}"
-              echo "  This registry-warm run will degrade to effectively true-cold."
+              echo "  This registry-warm run will degrade to app-cache-cold-like behavior."
               echo "  Run a trusted main build (PR 2) to populate the cache first."
               WARN=1
             fi
           fi
           if [[ "$WARN" -eq 1 ]]; then
-            echo "::warning::One or more registry cache refs are absent. Benchmark will proceed but results may resemble true-cold."
+            echo "::warning::One or more registry cache refs are absent. Benchmark will proceed but results may resemble app-cache-cold."
           fi
 
       # ── local-hot: warm-up build (discarded timing) ─────────────────────────
@@ -379,7 +407,7 @@ jobs:
       # The measured phase is in the measured-build job.
       - name: "[local-hot] Assert cache state (no wipe)"
         id: warmup
-        if: env.BENCHMARK_CLASS == 'local-hot'
+        if: env.PROOF_CLASS == 'local-hot'
         env:
           BUILD_OPENEDX: ${{ needs.resolve-benchmark-inputs.outputs.build_openedx }}
           BUILD_MFE: ${{ needs.resolve-benchmark-inputs.outputs.build_mfe }}
@@ -397,7 +425,7 @@ jobs:
 
       # ── scan-only: resolve the latest image digest ──────────────────────────
       - name: "[scan-only] Resolve latest image digest from GHCR"
-        if: env.BENCHMARK_CLASS == 'scan-only'
+        if: env.PROOF_CLASS == 'scan-only'
         id: scan-digest
         env:
           BUILD_OPENEDX: ${{ needs.resolve-benchmark-inputs.outputs.build_openedx }}
@@ -422,15 +450,15 @@ jobs:
           fi
 
       # ── Emit cache_from_arg for each family ─────────────────────────────────
-      # true-cold: empty (suppresses registry cache from all build commands)
+      # app-cache-cold: empty (suppresses registry cache from all build commands)
       # registry-warm + local-hot: shared GHCR registry ref
       # scan-only: not relevant (no build step), but emitted as empty
       - name: Derive CACHE_FROM_ARG per image family
         id: conditions
         run: |
           set -euo pipefail
-          case "$BENCHMARK_CLASS" in
-            true-cold)
+          case "$PROOF_CLASS" in
+            app-cache-cold)
               CACHE_FROM_OPENEDX=""
               CACHE_FROM_MFE=""
               ;;
@@ -443,7 +471,7 @@ jobs:
               CACHE_FROM_MFE=""
               ;;
             *)
-              echo "::error::Unknown benchmark_class: $BENCHMARK_CLASS"
+              echo "::error::Unknown proof_class: $PROOF_CLASS"
               exit 1
               ;;
           esac
@@ -458,7 +486,7 @@ jobs:
   # Job 4a: Measured build — OpenEdX
   # --------------------------------------------------------------------------
   measured-build-openedx:
-    name: Measured Build — openedx (${{ needs.resolve-benchmark-inputs.outputs.benchmark_class }})
+    name: Measured Build — openedx (${{ needs.resolve-benchmark-inputs.outputs.proof_class }})
     runs-on: ${{ needs.select-runner.outputs.runner_label }}
     timeout-minutes: 90
     needs:
@@ -473,6 +501,7 @@ jobs:
       packages: read
     env:
       BENCHMARK_CLASS: ${{ needs.resolve-benchmark-inputs.outputs.benchmark_class }}
+      PROOF_CLASS: ${{ needs.resolve-benchmark-inputs.outputs.proof_class }}
       RUNNER_CLASS: ${{ needs.resolve-benchmark-inputs.outputs.runner_class }}
       CACHE_FROM_ARG: ${{ needs.prepare-conditions.outputs.cache_from_arg_openedx }}
     outputs:
@@ -499,7 +528,8 @@ jobs:
           TUTOR_VENV: ${{ github.workspace }}/.cache/venvs/benchmark-preflight-py312
         run: |
           set -euo pipefail
-          export TUTOR_ROOT=$(pwd)/tutor_env
+          TUTOR_ROOT="$(pwd)/tutor_env"
+          export TUTOR_ROOT
           ./scripts/infra/prepare-tutor-build-context-ci.sh --target openedx
           mkdir -p var/ci
 
@@ -507,11 +537,16 @@ jobs:
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd  # v4.0.0
         with:
           driver: docker-container
+          driver-opts: |
+            image=mirror.gcr.io/moby/buildkit:buildx-stable-1
           cleanup: false
+          config-inline: |
+            [registry."docker.io"]
+              mirrors = ["mirror.gcr.io"]
 
       # GHCR login only for classes that use the registry cache
       - name: Log in to GHCR (non-cold classes)
-        if: env.BENCHMARK_CLASS != 'true-cold'
+        if: env.PROOF_CLASS != 'app-cache-cold'
         env:
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
@@ -520,7 +555,8 @@ jobs:
         id: build
         run: |
           set -euo pipefail
-          export TUTOR_ROOT=$(pwd)/tutor_env
+          TUTOR_ROOT="$(pwd)/tutor_env"
+          export TUTOR_ROOT
           export DOCKER_BUILDKIT=1
           mkdir -p var/ci
 
@@ -528,17 +564,23 @@ jobs:
           BUILD_START_EPOCH=$(date -u +%s)
 
           # Emit the benchmark context (annotation — NOT a Prometheus label per RL-4)
-          echo "BENCHMARK_CLASS=${BENCHMARK_CLASS}" >> var/ci/benchmark-context-openedx.env
-          echo "RUNNER_CLASS=${RUNNER_CLASS}" >> var/ci/benchmark-context-openedx.env
-          echo "IMAGE_FAMILY=openedx" >> var/ci/benchmark-context-openedx.env
-          echo "WORKFLOW_RUN_ID=${{ github.run_id }}" >> var/ci/benchmark-context-openedx.env
+          {
+            echo "REQUESTED_BENCHMARK_CLASS=${BENCHMARK_CLASS}"
+            echo "PROOF_CLASS=${PROOF_CLASS}"
+            echo "RUNNER_CLASS=${RUNNER_CLASS}"
+            echo "IMAGE_FAMILY=openedx"
+            echo "WORKFLOW_RUN_ID=${{ github.run_id }}"
+          } >> var/ci/benchmark-context-openedx.env
 
           TAG="${GITHUB_SHA::8}-benchmark"
 
           # NOTE: cache-to is intentionally omitted (RL-5: benchmarks are read-only).
-          # CACHE_FROM_ARG is empty for true-cold runs (suppresses registry import).
+          # CACHE_FROM_ARG is empty for app-cache-cold runs (suppresses registry import).
           CACHE_ARGS=()
-          if [[ -n "${CACHE_FROM_ARG:-}" ]]; then
+          CACHE_MODE_ARGS=()
+          if [[ "$PROOF_CLASS" == "app-cache-cold" ]]; then
+            CACHE_MODE_ARGS+=(--cache-mode none)
+          elif [[ -n "${CACHE_FROM_ARG:-}" ]]; then
             CACHE_ARGS+=(--cache-ref "${CACHE_FROM_ARG}")
           fi
 
@@ -557,8 +599,10 @@ jobs:
             --dockerfile "${TUTOR_ROOT}/env/build/openedx/Dockerfile" \
             --image-repo "${{ env.REGISTRY }}/openedx" \
             --primary-tag "${TAG}" \
-            --secondary-tag "benchmark-${BENCHMARK_CLASS}" \
+            --secondary-tag "benchmark-${PROOF_CLASS}" \
             --build-profile proof \
+            --output-mode docker \
+            "${CACHE_MODE_ARGS[@]}" \
             "${CACHE_ARGS[@]}" \
             2>&1 | tee var/ci/build-openedx-benchmark.log; then
             BUILD_OUTCOME="failure"
@@ -574,15 +618,17 @@ jobs:
 
           # Parse layer stats from build log
           LOG="var/ci/build-openedx-benchmark.log"
-          CACHED_LAYERS=$(grep -c 'CACHED' "$LOG" 2>/dev/null || echo 0)
-          TOTAL_LAYERS=$(grep -cE '^\#[0-9]+ \[' "$LOG" 2>/dev/null || echo 0)
+          CACHED_LAYERS="$(grep -c 'CACHED' "$LOG" 2>/dev/null || true)"
+          CACHED_LAYERS="${CACHED_LAYERS:-0}"
+          TOTAL_LAYERS="$(grep -cE '^\#[0-9]+ \[' "$LOG" 2>/dev/null || true)"
+          TOTAL_LAYERS="${TOTAL_LAYERS:-0}"
 
           # Check if any shared cache was imported
           CACHE_EVIDENCE="none"
           if grep -q 'importing cache manifest from' "$LOG" 2>/dev/null; then
             CACHE_EVIDENCE=$(grep 'importing cache manifest from' "$LOG" | head -1 | sed 's/.*from //' || echo "registry")
           elif [[ -z "${CACHE_FROM_ARG:-}" ]]; then
-            CACHE_EVIDENCE="suppressed (true-cold run)"
+            CACHE_EVIDENCE="suppressed (app-cache-cold proof)"
           fi
 
           {
@@ -605,12 +651,16 @@ jobs:
           } >> var/ci/benchmark-context-openedx.env
 
           echo "OpenEdX benchmark build: ${BUILD_DURATION}s, outcome=${BUILD_OUTCOME}, layers=${CACHED_LAYERS}/${TOTAL_LAYERS} cached"
+          if [[ "$BUILD_OUTCOME" != "success" ]]; then
+            echo "::error::OpenEdX benchmark build failed; see uploaded benchmark artifact for logs."
+            exit 1
+          fi
 
       - name: Upload OpenEdX benchmark build log
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
-          name: benchmark-log-openedx-${{ needs.resolve-benchmark-inputs.outputs.benchmark_class }}-${{ needs.resolve-benchmark-inputs.outputs.runner_class }}
+          name: benchmark-log-openedx-${{ needs.resolve-benchmark-inputs.outputs.proof_class }}-${{ needs.resolve-benchmark-inputs.outputs.runner_class }}
           path: |
             var/ci/build-openedx-benchmark.log
             var/ci/benchmark-context-openedx.env
@@ -620,7 +670,7 @@ jobs:
   # Job 4b: Measured build — MFE
   # --------------------------------------------------------------------------
   measured-build-mfe:
-    name: Measured Build — mfe (${{ needs.resolve-benchmark-inputs.outputs.benchmark_class }})
+    name: Measured Build — mfe (${{ needs.resolve-benchmark-inputs.outputs.proof_class }})
     runs-on: ${{ needs.select-runner.outputs.runner_label }}
     timeout-minutes: 90
     needs:
@@ -635,6 +685,7 @@ jobs:
       packages: read
     env:
       BENCHMARK_CLASS: ${{ needs.resolve-benchmark-inputs.outputs.benchmark_class }}
+      PROOF_CLASS: ${{ needs.resolve-benchmark-inputs.outputs.proof_class }}
       RUNNER_CLASS: ${{ needs.resolve-benchmark-inputs.outputs.runner_class }}
       CACHE_FROM_ARG: ${{ needs.prepare-conditions.outputs.cache_from_arg_mfe }}
     outputs:
@@ -661,7 +712,8 @@ jobs:
           TUTOR_VENV: ${{ github.workspace }}/.cache/venvs/benchmark-preflight-mfe-py312
         run: |
           set -euo pipefail
-          export TUTOR_ROOT=$(pwd)/tutor_env
+          TUTOR_ROOT="$(pwd)/tutor_env"
+          export TUTOR_ROOT
           ./scripts/infra/prepare-tutor-build-context-ci.sh --target mfe
           mkdir -p var/ci
 
@@ -669,10 +721,15 @@ jobs:
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd  # v4.0.0
         with:
           driver: docker-container
+          driver-opts: |
+            image=mirror.gcr.io/moby/buildkit:buildx-stable-1
           cleanup: false
+          config-inline: |
+            [registry."docker.io"]
+              mirrors = ["mirror.gcr.io"]
 
       - name: Log in to GHCR (non-cold classes)
-        if: env.BENCHMARK_CLASS != 'true-cold'
+        if: env.PROOF_CLASS != 'app-cache-cold'
         env:
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
@@ -681,22 +738,29 @@ jobs:
         id: build
         run: |
           set -euo pipefail
-          export TUTOR_ROOT=$(pwd)/tutor_env
+          TUTOR_ROOT="$(pwd)/tutor_env"
+          export TUTOR_ROOT
           export DOCKER_BUILDKIT=1
           mkdir -p var/ci
 
           BUILD_START=$(date -u +%Y-%m-%dT%H:%M:%SZ)
           BUILD_START_EPOCH=$(date -u +%s)
 
-          echo "BENCHMARK_CLASS=${BENCHMARK_CLASS}" >> var/ci/benchmark-context-mfe.env
-          echo "RUNNER_CLASS=${RUNNER_CLASS}" >> var/ci/benchmark-context-mfe.env
-          echo "IMAGE_FAMILY=mfe" >> var/ci/benchmark-context-mfe.env
-          echo "WORKFLOW_RUN_ID=${{ github.run_id }}" >> var/ci/benchmark-context-mfe.env
+          {
+            echo "REQUESTED_BENCHMARK_CLASS=${BENCHMARK_CLASS}"
+            echo "PROOF_CLASS=${PROOF_CLASS}"
+            echo "RUNNER_CLASS=${RUNNER_CLASS}"
+            echo "IMAGE_FAMILY=mfe"
+            echo "WORKFLOW_RUN_ID=${{ github.run_id }}"
+          } >> var/ci/benchmark-context-mfe.env
 
           TAG="${GITHUB_SHA::8}-benchmark"
 
           CACHE_ARGS=()
-          if [[ -n "${CACHE_FROM_ARG:-}" ]]; then
+          CACHE_MODE_ARGS=()
+          if [[ "$PROOF_CLASS" == "app-cache-cold" ]]; then
+            CACHE_MODE_ARGS+=(--cache-mode none)
+          elif [[ -n "${CACHE_FROM_ARG:-}" ]]; then
             CACHE_ARGS+=(--cache-ref "${CACHE_FROM_ARG}")
           fi
 
@@ -712,10 +776,13 @@ jobs:
           BUILD_OUTCOME="success"
           if ! timeout 85m ./scripts/infra/build-mfe-image.sh \
             --context-dir "${TUTOR_ROOT}/env/plugins/mfe/build/mfe" \
+            --dockerfile "${TUTOR_ROOT}/env/plugins/mfe/build/mfe/Dockerfile" \
             --image-repo "${{ env.REGISTRY }}/mfe" \
             --primary-tag "${TAG}" \
-            --secondary-tag "benchmark-${BENCHMARK_CLASS}" \
+            --secondary-tag "benchmark-${PROOF_CLASS}" \
             --build-profile proof \
+            --output-mode docker \
+            "${CACHE_MODE_ARGS[@]}" \
             "${CACHE_ARGS[@]}" \
             2>&1 | tee var/ci/build-mfe-benchmark.log; then
             BUILD_OUTCOME="failure"
@@ -730,14 +797,16 @@ jobs:
           BUILD_DURATION=$((BUILD_END_EPOCH - BUILD_START_EPOCH))
 
           LOG="var/ci/build-mfe-benchmark.log"
-          CACHED_LAYERS=$(grep -c 'CACHED' "$LOG" 2>/dev/null || echo 0)
-          TOTAL_LAYERS=$(grep -cE '^\#[0-9]+ \[' "$LOG" 2>/dev/null || echo 0)
+          CACHED_LAYERS="$(grep -c 'CACHED' "$LOG" 2>/dev/null || true)"
+          CACHED_LAYERS="${CACHED_LAYERS:-0}"
+          TOTAL_LAYERS="$(grep -cE '^\#[0-9]+ \[' "$LOG" 2>/dev/null || true)"
+          TOTAL_LAYERS="${TOTAL_LAYERS:-0}"
 
           CACHE_EVIDENCE="none"
           if grep -q 'importing cache manifest from' "$LOG" 2>/dev/null; then
             CACHE_EVIDENCE=$(grep 'importing cache manifest from' "$LOG" | head -1 | sed 's/.*from //' || echo "registry")
           elif [[ -z "${CACHE_FROM_ARG:-}" ]]; then
-            CACHE_EVIDENCE="suppressed (true-cold run)"
+            CACHE_EVIDENCE="suppressed (app-cache-cold proof)"
           fi
 
           {
@@ -760,12 +829,16 @@ jobs:
           } >> var/ci/benchmark-context-mfe.env
 
           echo "MFE benchmark build: ${BUILD_DURATION}s, outcome=${BUILD_OUTCOME}, layers=${CACHED_LAYERS}/${TOTAL_LAYERS} cached"
+          if [[ "$BUILD_OUTCOME" != "success" ]]; then
+            echo "::error::MFE benchmark build failed; see uploaded benchmark artifact for logs."
+            exit 1
+          fi
 
       - name: Upload MFE benchmark build log
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
         with:
-          name: benchmark-log-mfe-${{ needs.resolve-benchmark-inputs.outputs.benchmark_class }}-${{ needs.resolve-benchmark-inputs.outputs.runner_class }}
+          name: benchmark-log-mfe-${{ needs.resolve-benchmark-inputs.outputs.proof_class }}-${{ needs.resolve-benchmark-inputs.outputs.runner_class }}
           path: |
             var/ci/build-mfe-benchmark.log
             var/ci/benchmark-context-mfe.env
@@ -790,6 +863,7 @@ jobs:
       packages: read
     env:
       BENCHMARK_CLASS: ${{ needs.resolve-benchmark-inputs.outputs.benchmark_class }}
+      PROOF_CLASS: ${{ needs.resolve-benchmark-inputs.outputs.proof_class }}
       RUNNER_CLASS: ${{ needs.resolve-benchmark-inputs.outputs.runner_class }}
     outputs:
       scan_start_utc: ${{ steps.scan.outputs.scan_start_utc }}
@@ -819,10 +893,13 @@ jobs:
           SCAN_START_EPOCH=$(date -u +%s)
           SCAN_OUTCOME="success"
 
-          echo "BENCHMARK_CLASS=${BENCHMARK_CLASS}" >> var/ci/benchmark-context-scan-openedx.env
-          echo "RUNNER_CLASS=${RUNNER_CLASS}" >> var/ci/benchmark-context-scan-openedx.env
-          echo "IMAGE_FAMILY=openedx" >> var/ci/benchmark-context-scan-openedx.env
-          echo "WORKFLOW_RUN_ID=${{ github.run_id }}" >> var/ci/benchmark-context-scan-openedx.env
+          {
+            echo "REQUESTED_BENCHMARK_CLASS=${BENCHMARK_CLASS}"
+            echo "PROOF_CLASS=${PROOF_CLASS}"
+            echo "RUNNER_CLASS=${RUNNER_CLASS}"
+            echo "IMAGE_FAMILY=openedx"
+            echo "WORKFLOW_RUN_ID=${{ github.run_id }}"
+          } >> var/ci/benchmark-context-scan-openedx.env
 
           echo "=== Pulling image for scan ==="
           docker pull "${IMAGE_REF}" 2>&1 | tee var/ci/scan-openedx-pull.log || {
@@ -909,6 +986,7 @@ jobs:
       contents: read
     env:
       BENCHMARK_CLASS: ${{ needs.resolve-benchmark-inputs.outputs.benchmark_class }}
+      PROOF_CLASS: ${{ needs.resolve-benchmark-inputs.outputs.proof_class }}
       RUNNER_CLASS: ${{ needs.resolve-benchmark-inputs.outputs.runner_class }}
       IMAGE_FAMILY: ${{ needs.resolve-benchmark-inputs.outputs.image_family }}
     steps:
@@ -918,36 +996,29 @@ jobs:
           set -euo pipefail
           mkdir -p benchmark-results
 
-          # Gather timing from whichever build/scan jobs ran
-          BUILD_DURATION_OPENEDX="${{ needs.measured-build-openedx.outputs.build_duration_seconds || '0' }}"
-          BUILD_DURATION_MFE="${{ needs.measured-build-mfe.outputs.build_duration_seconds || '0' }}"
-          SCAN_DURATION="${{ needs.scan-openedx.outputs.scan_duration_seconds || '0' }}"
-          BUILD_OUTCOME_OPENEDX="${{ needs.measured-build-openedx.outputs.outcome || 'skipped' }}"
-          BUILD_OUTCOME_MFE="${{ needs.measured-build-mfe.outputs.outcome || 'skipped' }}"
-          SCAN_OUTCOME="${{ needs.scan-openedx.outputs.outcome || 'skipped' }}"
-
-          BUILD_START_OPENEDX="${{ needs.measured-build-openedx.outputs.build_start_utc || '' }}"
-          BUILD_END_OPENEDX="${{ needs.measured-build-openedx.outputs.build_end_utc || '' }}"
-          BUILD_START_MFE="${{ needs.measured-build-mfe.outputs.build_start_utc || '' }}"
-          BUILD_END_MFE="${{ needs.measured-build-mfe.outputs.build_end_utc || '' }}"
-
-          # Total duration = sum of all recorded job durations
-          TOTAL_DURATION=$(( BUILD_DURATION_OPENEDX + BUILD_DURATION_MFE + SCAN_DURATION ))
-
-          # Compute release_unit_id (short SHA — join key per CI_METRICS.md §2)
-          RELEASE_UNIT_ID="${GITHUB_SHA::7}"
-
           # benchmark_metadata.json is an annotation artifact — NOT a Prometheus label.
           # The ci-metrics-receiver (bead jj97.2) reads this file to group runs by
-          # benchmark_class for dashboard Row 4. Classification is still DERIVED
-          # from ci_cache_source_found + ci_layer_reuse_ratio in recording rules.
+          # requested proof precondition. Classification is still DERIVED from
+          # ci_cache_source_found + ci_layer_reuse_ratio in recording rules.
           python3 - <<PYEOF
           import json, os
+          proof_class = os.environ["PROOF_CLASS"]
+          openedx_duration = int(os.environ.get("BUILD_DURATION_OPENEDX", 0))
+          mfe_duration = int(os.environ.get("BUILD_DURATION_MFE", 0))
+          scan_duration = int(os.environ.get("SCAN_DURATION", 0))
           meta = {
               "schema_version": "benchmark-metadata/v1",
               "run_id": os.environ["GITHUB_RUN_ID"],
               "release_unit_id": os.environ["RELEASE_UNIT_ID"],
-              "benchmark_class": os.environ["BENCHMARK_CLASS"],
+              "requested_benchmark_class": os.environ["BENCHMARK_CLASS"],
+              "benchmark_class": proof_class,
+              "proof_class": proof_class,
+              "machine_cold_claim": False,
+              "proof_limitations": (
+                  ["persistent runner daemon/base-image state may exist"]
+                  if proof_class == "app-cache-cold"
+                  else []
+              ),
               "runner_class": os.environ["RUNNER_CLASS"],
               "image_family": os.environ["IMAGE_FAMILY"],
               "triggered_by": os.environ["GITHUB_EVENT_NAME"],
@@ -958,7 +1029,7 @@ jobs:
               "openedx": {
                   "build_start_utc": os.environ.get("BUILD_START_OPENEDX", ""),
                   "build_end_utc": os.environ.get("BUILD_END_OPENEDX", ""),
-                  "build_duration_seconds": int(os.environ.get("BUILD_DURATION_OPENEDX", 0)),
+                  "build_duration_seconds": openedx_duration,
                   "outcome": os.environ.get("BUILD_OUTCOME_OPENEDX", "skipped"),
                   "cached_layers": int("${{ needs.measured-build-openedx.outputs.cached_layers || '0' }}".strip() or 0),
                   "total_layers": int("${{ needs.measured-build-openedx.outputs.total_layers || '0' }}".strip() or 0),
@@ -966,19 +1037,19 @@ jobs:
               "mfe": {
                   "build_start_utc": os.environ.get("BUILD_START_MFE", ""),
                   "build_end_utc": os.environ.get("BUILD_END_MFE", ""),
-                  "build_duration_seconds": int(os.environ.get("BUILD_DURATION_MFE", 0)),
+                  "build_duration_seconds": mfe_duration,
                   "outcome": os.environ.get("BUILD_OUTCOME_MFE", "skipped"),
                   "cached_layers": int("${{ needs.measured-build-mfe.outputs.cached_layers || '0' }}".strip() or 0),
                   "total_layers": int("${{ needs.measured-build-mfe.outputs.total_layers || '0' }}".strip() or 0),
               },
               "scan": {
-                  "duration_seconds": int(os.environ.get("SCAN_DURATION", 0)),
+                  "duration_seconds": scan_duration,
                   "outcome": os.environ.get("SCAN_OUTCOME", "skipped"),
               },
-              "total_duration_seconds": int(os.environ.get("TOTAL_DURATION", 0)),
+              "total_duration_seconds": openedx_duration + mfe_duration + scan_duration,
               "note": (
-                  "benchmark_class is a pre-condition annotation, NOT a Prometheus label. "
-                  "Classification (true-cold/registry-warm/local-hot/scan-only) is always "
+                  "benchmark_class/proof_class are requested proof preconditions, NOT Prometheus labels. "
+                  "Classification (observed true-cold/registry-warm/local-hot/scan-only) is always "
                   "DERIVED from ci_cache_source_found + ci_layer_reuse_ratio in Prometheus "
                   "recording rules (RFC-BUILD-AUTHORITY-001 red line #4)."
               ),
@@ -999,18 +1070,17 @@ jobs:
           BUILD_END_OPENEDX: ${{ needs.measured-build-openedx.outputs.build_end_utc || '' }}
           BUILD_START_MFE: ${{ needs.measured-build-mfe.outputs.build_start_utc || '' }}
           BUILD_END_MFE: ${{ needs.measured-build-mfe.outputs.build_end_utc || '' }}
-          TOTAL_DURATION: ${{ needs.measured-build-openedx.outputs.build_duration_seconds && needs.measured-build-mfe.outputs.build_duration_seconds && needs.scan-openedx.outputs.scan_duration_seconds || '0' }}
 
       - name: Write workflow step summary table
         run: |
           set -euo pipefail
 
           # Expected bands from BENCHMARK_CLASSES.md §Expected timing reference table
-          # Format: "benchmark_class:image_family:low_min:high_min:unit"
+          # Format: "proof_class:image_family:low_min:high_min:unit"
           # These are P50 reference bands, NOT SLOs.
           declare -A BANDS
-          BANDS["true-cold:openedx"]="30–90 min"
-          BANDS["true-cold:mfe"]="44 min (observed)"
+          BANDS["app-cache-cold:openedx"]="30–90 min"
+          BANDS["app-cache-cold:mfe"]="44 min (observed)"
           BANDS["registry-warm:openedx"]="<10 min (target)"
           BANDS["registry-warm:mfe"]="<5 min (target)"
           BANDS["local-hot:openedx"]="~71s (observed best-case)"
@@ -1023,23 +1093,26 @@ jobs:
           MFE_SECS="${{ needs.measured-build-mfe.outputs.build_duration_seconds || '—' }}"
           SCAN_SECS="${{ needs.scan-openedx.outputs.scan_duration_seconds || '—' }}"
 
-          BAND_OPENEDX="${BANDS["${BENCHMARK_CLASS}:openedx"]:-N/A}"
-          BAND_MFE="${BANDS["${BENCHMARK_CLASS}:mfe"]:-N/A}"
-          BAND_SCAN="${BANDS["${BENCHMARK_CLASS}:openedx"]:-N/A}"
+          BAND_OPENEDX="${BANDS["${PROOF_CLASS}:openedx"]:-N/A}"
+          BAND_MFE="${BANDS["${PROOF_CLASS}:mfe"]:-N/A}"
+          BAND_SCAN="${BANDS["${PROOF_CLASS}:openedx"]:-N/A}"
 
           {
             echo "## Benchmark Results"
             echo ""
             echo "| Entry | Measured | Expected Band (BENCHMARK_CLASSES.md P50) |"
             echo "|-------|----------|------------------------------------------|"
-            if [[ "${BENCHMARK_CLASS}" != "scan-only" ]]; then
-              echo "| openedx build (${BENCHMARK_CLASS} / ${RUNNER_CLASS}) | ${OPENEDX_SECS}s | ${BAND_OPENEDX} |"
-              echo "| mfe build (${BENCHMARK_CLASS} / ${RUNNER_CLASS}) | ${MFE_SECS}s | ${BAND_MFE} |"
+            if [[ "${PROOF_CLASS}" != "scan-only" ]]; then
+              echo "| openedx build (${PROOF_CLASS} / ${RUNNER_CLASS}) | ${OPENEDX_SECS}s | ${BAND_OPENEDX} |"
+              echo "| mfe build (${PROOF_CLASS} / ${RUNNER_CLASS}) | ${MFE_SECS}s | ${BAND_MFE} |"
             else
               echo "| openedx scan (scan-only / ${RUNNER_CLASS}) | ${SCAN_SECS}s | ${BAND_SCAN} |"
             fi
             echo ""
-            echo "> **Note**: benchmark_class is a pre-condition annotation."
+            if [[ "${BENCHMARK_CLASS}" != "${PROOF_CLASS}" ]]; then
+              echo "> Legacy alias normalized: requested \`${BENCHMARK_CLASS}\` -> proof_class \`${PROOF_CLASS}\`."
+            fi
+            echo "> **Note**: benchmark_class/proof_class are pre-condition annotations."
             echo "> Prometheus classification is derived from \`ci_cache_source_found\`"
             echo "> and \`ci_layer_reuse_ratio\` in recording rules — never hand-labeled."
             echo "> See: \`docs/ops/ci-cd/BENCHMARK_CLASSES.md §How classification is DERIVED\`"

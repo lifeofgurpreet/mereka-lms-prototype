@@ -195,8 +195,13 @@ tutor --version
 The post-create script sets local service names. If you see `MYSQL_HOST: 10.97.0.2`:
 
 ```bash
-tutor config save --set MYSQL_HOST=mysql --set MONGODB_HOST=mongodb --set REDIS_HOST=redis
-./scripts/infra/prepare-tutor-build-context.sh --target all
+./scripts/infra/tutor-config-save.sh \
+  --set MYSQL_HOST=mysql \
+  --set MONGODB_HOST=mongodb \
+  --set REDIS_HOST=redis \
+  --set RUN_MONGODB=true \
+  --set DOCKER_IMAGE_OPENEDX=openedx:nightly \
+  --set MFE_DOCKER_IMAGE=openedx-mfe:nightly
 make tutor-restart
 ```
 

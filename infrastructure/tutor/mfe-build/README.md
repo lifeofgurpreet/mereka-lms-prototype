@@ -28,11 +28,11 @@ authority path.
 - MFE apps: all 12 on `release/ulmo.1`
 - Atlas translations: `release/ulmo`
 - Brand package: local `@edx/brand@file:./brand-mereka`
-- Node base image: `docker.io/node:24.11.0-bullseye-slim`
-- Rendered-Dockerfile exception: `pull_translations` retry wrapping remains the
-  sole documented post-render MFE Dockerfile rewrite in `apply-patches.sh`
-  while Atlas/GitHub translation pulls can still fail transiently inside the
-  Docker build network.
+- Node base image: `mirror.gcr.io/library/node:24.11.0-bullseye-slim`
+- Rendered-Dockerfile exceptions: dependency image mirror normalization and
+  `pull_translations` retry wrapping remain documented post-render MFE
+  Dockerfile compatibility rewrites while Tutor/tutormfe do not expose source
+  hooks for those exact concerns.
 
 ## Pending migration
 

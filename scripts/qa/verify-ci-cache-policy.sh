@@ -246,11 +246,21 @@ check_contains "$OPENEDX_BUILD" '--local-defaults' "build-openedx-image exposes 
 check_contains "$MFE_BUILD" '--local-defaults' "build-mfe-image exposes repo-local front-door defaults"
 check_contains "$OPENEDX_BUILD" '--output-mode <push|docker>' "build-openedx-image documents explicit output mode selection"
 check_contains "$MFE_BUILD" '--output-mode <push|docker>' "build-mfe-image documents explicit output mode selection"
+check_contains "$OPENEDX_BUILD" '--cache-mode <default|none>' "build-openedx-image documents explicit cache mode selection"
+check_contains "$MFE_BUILD" '--cache-mode <default|none>' "build-mfe-image documents explicit cache mode selection"
 OPENEDX_PROOF_JSON="$(bake_print openedx-proof \
   "OPENEDX_PROOF_TAGS=example.invalid/openedx:one,example.invalid/openedx:two" \
   "OPENEDX_CACHE_REF=example.invalid/openedx:cache" \
   "OPENEDX_PROOF_GHA_SCOPE=verify-openedx-proof")"
 MFE_PROOF_JSON="$(bake_print mfe-proof \
+  "MFE_PROOF_TAGS=example.invalid/mfe:one,example.invalid/mfe:two" \
+  "MFE_CACHE_REF=example.invalid/mfe:cache" \
+  "MFE_PROOF_GHA_SCOPE=verify-mfe-proof")"
+OPENEDX_PROOF_NOCACHE_JSON="$(bake_print openedx-proof-nocache \
+  "OPENEDX_PROOF_TAGS=example.invalid/openedx:one,example.invalid/openedx:two" \
+  "OPENEDX_CACHE_REF=example.invalid/openedx:cache" \
+  "OPENEDX_PROOF_GHA_SCOPE=verify-openedx-proof")"
+MFE_PROOF_NOCACHE_JSON="$(bake_print mfe-proof-nocache \
   "MFE_PROOF_TAGS=example.invalid/mfe:one,example.invalid/mfe:two" \
   "MFE_CACHE_REF=example.invalid/mfe:cache" \
   "MFE_PROOF_GHA_SCOPE=verify-mfe-proof")"
@@ -274,6 +284,11 @@ else
 fi
 check_bake_object_array_contains "$OPENEDX_PROOF_JSON" "target.openedx-proof.output" "type=docker" "openedx-proof retains docker output"
 check_bake_object_array_contains "$OPENEDX_PROOF_JSON" "target.openedx-proof.output" "type=image,push=true" "openedx-proof resolves push image output"
+if echo "$OPENEDX_PROOF_NOCACHE_JSON" | python3 -c "import json,sys; d=json.load(sys.stdin); t=d['target']['openedx-proof-nocache']; sys.exit(0 if 'cache-from' not in t and 'cache-to' not in t else 1)" 2>/dev/null; then
+  pass "openedx-proof-nocache omits cache-from/cache-to for app-cache-cold proof"
+else
+  fail "openedx-proof-nocache must omit cache-from/cache-to for app-cache-cold proof"
+fi
 
 check_bake_scalar "$MFE_PROOF_JSON" "target.mfe-proof.context" "tutor_env/env/plugins/mfe/build/mfe" "mfe-proof resolves expected context"
 check_bake_scalar "$MFE_PROOF_JSON" "target.mfe-proof.dockerfile" "Dockerfile" "mfe-proof resolves expected dockerfile"
@@ -295,6 +310,11 @@ else
 fi
 check_bake_object_array_contains "$MFE_PROOF_JSON" "target.mfe-proof.output" "type=docker" "mfe-proof retains docker output"
 check_bake_object_array_contains "$MFE_PROOF_JSON" "target.mfe-proof.output" "type=image,push=true" "mfe-proof resolves push image output"
+if echo "$MFE_PROOF_NOCACHE_JSON" | python3 -c "import json,sys; d=json.load(sys.stdin); t=d['target']['mfe-proof-nocache']; sys.exit(0 if 'cache-from' not in t and 'cache-to' not in t else 1)" 2>/dev/null; then
+  pass "mfe-proof-nocache omits cache-from/cache-to for app-cache-cold proof"
+else
+  fail "mfe-proof-nocache must omit cache-from/cache-to for app-cache-cold proof"
+fi
 
 check_contains "$BUILD_WORKFLOW" "uses: docker/setup-buildx-action" "build-tutor-images uses buildx"
 check_contains "$BUILD_WORKFLOW" "./scripts/infra/build-openedx-image.sh" "build-tutor-images routes OpenEdX through the cache-aware helper"

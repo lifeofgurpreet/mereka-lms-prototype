@@ -84,9 +84,11 @@ Fix path (implemented in this repo):
    - restore PVC/PV resources (no manifest-only exclusions)
    - fail when no PVC is restored/bound
    - run read-only `SELECT 1` probe against restored MySQL pod when present
-4. Patch CronJob + ConfigMap and run a verification drill:
+4. Repair the restore-test CronJob + ConfigMap in the GitOps repo that owns
+   Velero, then run a verification drill and inspect it from this repo:
    ```bash
-   ./scripts/infra/fix-velero-restore-test.sh
+   STRICT_RUNTIME=1 ./scripts/qa/audit-velero-alert-pipeline.sh
+   STRICT=1 ./scripts/qa/verify-restore-drill.sh --namespace velero-restore-test
    ```
 5. Confirm freshness:
    ```bash

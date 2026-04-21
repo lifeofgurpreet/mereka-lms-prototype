@@ -9,6 +9,8 @@
 #
 # Usage: ./verify-restore-drill.sh [--namespace NAMESPACE] [--backup-name NAME]
 #
+# @covers AC-007, AC-021, AC-022, AC-023, AC-024
+# @spec: disaster-recovery-business-continuity_spec.md
 # Spec: specs/disaster-recovery-business-continuity_spec.md
 # ACs: AC-021, AC-022, AC-023, AC-024
 

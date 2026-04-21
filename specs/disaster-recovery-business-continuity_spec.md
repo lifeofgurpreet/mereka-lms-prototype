@@ -298,7 +298,7 @@ Enterprise clients require contractual SLA guarantees for data durability and se
 
 - [ ] AC-005: Given the monthly restore-test CronJob runs, when it completes, then a throwaway namespace is created, PVCs are restored to Bound state, and a MySQL `SELECT 1` probe succeeds
 - [ ] AC-006: Given a restore drill completes, when the throwaway namespace is inspected, then at least 1 PVC is in Bound state matching the source backup
-- [ ] AC-007: Given a restore drill, when `./scripts/infra/fix-velero-restore-test.sh` executes, then the drill passes end-to-end including PV validation and MySQL probe
+- [ ] AC-007: Given a restore drill, when the infra-owned restore-test CronJob completes and `STRICT=1 ./scripts/qa/verify-restore-drill.sh --namespace velero-restore-test` executes, then the drill passes end-to-end including PV validation and MySQL probe
 - [ ] AC-008: Given the backup-verification CronJob, when it runs daily, then it confirms backup freshness within the last 2 hours for hourly schedule and 26 hours for daily schedule
 
 ### DR Evidence
@@ -364,8 +364,13 @@ kubectl -n velero get schedule <name> -o yaml | grep -A5 volumeSnapshot
 
 **Recovery**:
 ```bash
-./scripts/infra/fix-velero-restore-test.sh
+STRICT_RUNTIME=1 ./scripts/qa/audit-velero-alert-pipeline.sh
+STRICT=1 ./scripts/qa/verify-restore-drill.sh --namespace velero-restore-test
 ```
+
+If the CronJob, image, or ConfigMap is wrong, repair it in the GitOps repo that
+owns Velero. Do not live-patch ArgoCD-managed Velero resources from this app
+repo.
 
 ### Backup-Restore Namespace Stuck in Terminating
 
@@ -490,7 +495,7 @@ kubectl -n external-secrets rollout restart deployment external-secrets
 |------------|----------|-----------|----------|
 | `VeleroBackupFailed` | P2 | Any backup fails | Investigate Velero logs, check BSL phase, verify GCS access |
 | `VeleroBackupStale` | P2 | Hourly backup >2h stale | Check Velero controller, CronJob status |
-| `VeleroRestoreTestStale` | P2 | Restore-test not succeeded in >45 days | Run `./scripts/infra/fix-velero-restore-test.sh` |
+| `VeleroRestoreTestStale` | P2 | Restore-test not succeeded in >45 days | Audit with `STRICT_RUNTIME=1 ./scripts/qa/audit-velero-alert-pipeline.sh`; repair the infra-owned restore-test CronJob through GitOps |
 | `VeleroSnapshotMismatch` | P1 | `volumeSnapshotsCompleted` < bound PVC count | Investigate CSI driver, snapshot provider |
 | `BackupVerificationFailed` | P2 | Daily verification job fails | Check backup-verification CronJob logs |
 | `DREvidenceBundleStale` | P3 | Evidence bundle >35 days old | Run evidence bundle workflow manually |

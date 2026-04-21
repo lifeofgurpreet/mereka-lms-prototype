@@ -17,7 +17,6 @@ Scripts for managing infrastructure: GKE clusters, Cloudflare, MongoDB Atlas, ba
 - `ensure-atlas-allowlist-vps.sh` - Add VPS egress IP to Atlas allowlist if missing
 - `monitor-atlas-allowlist-vps.sh` - Drift monitor + webhook alert wrapper for VPS Atlas allowlist
 - `atlas-config-from-infisical.sh` - Configure Atlas CLI profile from Infisical API keys
-- `fix-velero-restore-test.sh` - Patch/verify `velero/restore-test` CronJob so restore drills run successfully
 - `retire-legacy-mongodb.sh` - Velero-first guarded retirement flow for legacy in-cluster MongoDB
 - `release-openedx-gitops.sh` - Canonical one-command Open edX release orchestrator (app tags + GitOps ref/tags + optional push/runtime verify)
 - `prepare-bbi-infra-ref-bump.sh` - Prepare/apply GitOps pinned ref bump (active repo is typically `BBI-K8`) to current `mereka-lms` commit
@@ -96,8 +95,9 @@ OFFLINE_PLAN=1 ./scripts/infra/apply-monitoring-configs.sh plan
 ./scripts/qa/audit-atlas-allowlist-monitor.sh
 STRICT_WEBHOOK=1 ./scripts/qa/audit-atlas-allowlist-monitor.sh
 
-# Patch + verify Velero restore-test CronJob (fixes shell/image mismatch)
-./scripts/infra/fix-velero-restore-test.sh
+# Verify Velero restore-test evidence. Repair CronJob/image drift through GitOps.
+STRICT_RUNTIME=1 ./scripts/qa/audit-velero-alert-pipeline.sh
+STRICT=1 ./scripts/qa/verify-restore-drill.sh --namespace velero-restore-test
 
 # Verify Atlas modulestore contracts (repo + runtime)
 ./scripts/qa/verify-atlas-modulestore-path.sh --mode all

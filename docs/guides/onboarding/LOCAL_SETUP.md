@@ -1,5 +1,5 @@
 # Local Tutor Sandbox
-_Audience: Platform Eng • Owner: Infra Team • Last verified: 2026-03-06 • Status: supporting_
+_Audience: Platform Eng • Owner: Infra Team • Last verified: 2026-04-20 • Status: supporting_
 
 These instructions reproduce the nightly Open edX environment provisioned in this repository. For a day-to-day command cheat sheet, see [`WORKFLOW_LOCAL.md`](WORKFLOW_LOCAL.md). For the complete documentation index, visit [`docs/README.md`](../../README.md).
 
@@ -9,7 +9,7 @@ These instructions reproduce the nightly Open edX environment provisioned in thi
 - Docker Engine 28+ and Docker Compose v2.
 - Python 3.12 (system) with `venv` module.
 - GNU Make (optional, handy for future automation).
-- `gcloud` CLI (already installed for future GCP work).
+- GitHub CLI (`gh`) only if you want to dispatch the cold-start proof workflow from your shell.
 
 ## Bootstrap
 
@@ -21,7 +21,7 @@ pip install -r requirements-tutor.txt
 source infrastructure/tutor/tutor-env.sh
 ```
 
-Installing from `requirements-tutor.txt` pulls the exact Tutor version (currently 21.0.0 Ulmo) plus first-party plugins (MFE, Indigo, discovery, ecommerce, notes, xqueue, forum).
+Installing from `requirements-tutor.txt` pulls the exact Tutor version used by this repo plus first-party plugins (MFE, Indigo, discovery, ecommerce, notes, xqueue, forum).
 The first rendered build-context refresh happens after configuration below, via `./scripts/infra/prepare-tutor-build-context.sh --target all`; do not use the low-level patch helper as the bootstrap front door.
 
 > ❗ The legacy `tutor-license` plugin does not compile against Python 3.12 (`longintrepr.h` removed). We will revisit licensing once an updated plugin is published.
@@ -35,6 +35,7 @@ source infrastructure/tutor/tutor-env.sh
 ```
 
 This sets `TUTOR_ROOT=$REPO/tutor_env`, `OPENEDX_RELEASE=nightly`, and activates the local virtualenv. After any manual `tutor config save`, run `./scripts/infra/prepare-tutor-build-context.sh --target all` so the remaining patch-only sync and rendered build-context surfaces are refreshed from current source truth.
+For normal setup, use `./scripts/infra/tutor-config-save.sh`; it wraps `tutor config save`, enables the canonical plugins, syncs the plugin mirror, and prepares build contexts.
 
 ### Docker resources
 
@@ -46,7 +47,7 @@ The current configuration pins:
 
 - `LMS_HOST=localhost`
 - `CMS_HOST=studio.localhost`
-- Open edX release branch: `open-release/ulmo.master`
+- Open edX release branch: `open-release/ulmo.1`
 - MFE branch: `master` (frontends track the latest master while Ulmo branches are published)
 - Enabled plugins: `mfe`, `discovery`, `notes`, `ecommerce`, `forum`, `xqueue`
 
@@ -54,25 +55,35 @@ To regenerate the environment after editing configuration values:
 
 ```bash
 source infrastructure/tutor/tutor-env.sh
-tutor config save \
+./scripts/infra/tutor-config-save.sh \
   --set LMS_HOST=localhost \
   --set CMS_HOST=studio.localhost \
   --set DISCOVERY_HOST=discovery.localhost \
   --set ECOMMERCE_HOST=ecommerce.localhost \
   --set MFE_HOST=apps.localhost \
   --set XQUEUE_HOST=xqueue.localhost \
-  --set DOCKER_IMAGE_MYSQL=docker.io/mysql:8.0 \
+  --set RUN_MONGODB=true \
+  --set RUN_MYSQL=true \
+  --set RUN_REDIS=true \
+  --set RUN_MEILISEARCH=true \
+  --set RUN_SMTP=true \
+  --set DOCKER_REGISTRY=mirror.gcr.io/ \
+  --set DOCKER_IMAGE_OPENEDX=openedx:nightly \
+  --set MFE_DOCKER_IMAGE=openedx-mfe:nightly \
+  --set DOCKER_IMAGE_CADDY=mirror.gcr.io/library/caddy:2.7.4 \
+  --set DOCKER_IMAGE_MEILISEARCH=mirror.gcr.io/getmeili/meilisearch:v1.8.4 \
+  --set DOCKER_IMAGE_MONGODB=mirror.gcr.io/library/mongo:7.0.28 \
+  --set DOCKER_IMAGE_MYSQL=mirror.gcr.io/library/mysql:8.4.0 \
+  --set DOCKER_IMAGE_REDIS=mirror.gcr.io/library/redis:7.4.5 \
+  --set DOCKER_IMAGE_SMTP=mirror.gcr.io/devture/exim-relay:4.96-r1-0 \
   --set MYSQL_ROOT_HOST=% \
-  --set OPENEDX_COMMON_VERSION=open-release/ulmo.master \
-  --set OPENEDX_LMS_VERSION=open-release/ulmo.master \
-  --set OPENEDX_CMS_VERSION=open-release/ulmo.master \
-  --set MFE_COMMON_VERSION=master \
-  --set MFE_DOCKER_IMAGE=openedx-mfe:nightly
-tutor plugins enable discovery ecommerce forum mfe notes xqueue
-./scripts/infra/prepare-tutor-build-context.sh --target all
+  --set OPENEDX_COMMON_VERSION=open-release/ulmo.1 \
+  --set OPENEDX_LMS_VERSION=open-release/ulmo.1 \
+  --set OPENEDX_CMS_VERSION=open-release/ulmo.1 \
+  --set MFE_COMMON_VERSION=master
 ```
 
-Enabling/disabling plugins regenerates the rendered Tutor environment, so always rerun `./scripts/infra/prepare-tutor-build-context.sh --target all` afterwards to refresh the remaining patch-only sync and rendered build-context snapshots from current source truth.
+The wrapper enables the canonical first-party plugins and runs `./scripts/infra/prepare-tutor-build-context.sh --target all` after configuration. Local setup builds `openedx:nightly` and `openedx-mfe:nightly`, then points Tutor at those tags. The render prep applies `infrastructure/tutor/patches/dependency-image-mirrors.sh` for Tutor-emitted hardcoded Docker Hub dependency refs, selects `scripts/infra/ensure-buildx-dependency-mirror.sh` as a BuildKit fallback guard, and uses `mirror.gcr.io` image refs where Tutor exposes third-party service images. If you deliberately enable or disable plugins outside the wrapper, rerun `./scripts/infra/prepare-tutor-build-context.sh --target all` afterwards.
 
 Secrets (`config.yml`) live in `tutor_env/` which is git-ignored. For reference, `infrastructure/tutor/config.example.yml` records the non-secret overrides.
 
@@ -82,10 +93,9 @@ The shared palette/typography overrides live under `infrastructure/tutor/themes/
 
 ```bash
 source infrastructure/tutor/tutor-env.sh
-tutor config save \
+./scripts/infra/tutor-config-save.sh \
   --set THEME_DIR="$(pwd)/infrastructure/tutor/themes" \
   --set THEME_NAME=mereka
-./scripts/infra/prepare-tutor-build-context.sh --target openedx
 tutor images build openedx
 tutor local start -d
 ```
@@ -123,7 +133,7 @@ Use `tutor local start -d` / `tutor local stop` for daily use, and `tutor local 
   rm -rf tutor_env/data/mysql tutor_env/data/mongodb tutor_env/data/redis
   tutor local launch -I --skip-build
   ```
-- Production uses Cloud SQL / Atlas / managed Redis—never copy secrets or dumps back into git. Store sanitized dumps in the secure bucket referenced in `docs/reference/operations/SECRETS_SNAPSHOT.md`.
+- Production data stores are managed outside local `tutor_env`; never copy secrets or dumps back into git. Store sanitized dumps only in the approved secure storage referenced by the current operations runbooks.
 
 ### Access
 
@@ -149,7 +159,7 @@ tutor local createuser --superuser --staff -p mereka_admin mereka_admin mereka@e
 ## Daily development workflow
 
 - Start/stop stack: `tutor local start -d` / `tutor local stop`.
-- Bring services back after config changes: rerun `tutor config save`, `./scripts/infra/prepare-tutor-build-context.sh --target all`, then `tutor local restart lms cms mfe ecommerce`.
+- Bring services back after config changes: rerun `./scripts/infra/tutor-config-save.sh`, then `tutor local restart lms cms mfe ecommerce`.
 - Keep databases clean while iterating on configuration: `docker-compose -f tutor_env/env/local/docker-compose.yml -f tutor_env/env/local/docker-compose.prod.yml down -v && rm -rf tutor_env/data`. After wiping `tutor_env/data/mysql`, re-run `tutor local launch -I --skip-build` (or at least `tutor local do init`) so the `openedx` schema and users are recreated before you hit the LMS.
 
 ### MFE development
@@ -176,7 +186,7 @@ Design work references Paragon components and tokens (`https://edx.github.io/par
    ```
 2. Ensure Tutor points at the custom theme:
    ```bash
-   tutor config save --set THEME_DIR="$(pwd)/infrastructure/tutor/themes" --set THEME_NAME=mereka
+   ./scripts/infra/tutor-config-save.sh --set THEME_DIR="$(pwd)/infrastructure/tutor/themes" --set THEME_NAME=mereka
    ```
 3. Re-run the canonical build-context prepare step so LMS/Studio templates and the rendered MFE build context pick up the latest SCSS, then restart your stack:
    ```bash
@@ -201,9 +211,26 @@ Design work references Paragon components and tokens (`https://edx.github.io/par
 - After any upgrade, rerun `./scripts/infra/prepare-tutor-build-context.sh --target all` before rebuilding MFEs.
 - Apply Tutor upgrades: `source infrastructure/tutor/tutor-env.sh && tutor local do upgrade`.
 
+## Cold-start proof lane
+
+- Source/docs contract: `./scripts/qa/verify-cold-start-onboarding-contract.sh`
+- Initialized local state proof: `./scripts/infra/verify-local-bootstrap-readiness.sh`
+- Clean bootstrap proof: [`.github/workflows/bootstrap-local-readiness.yml`](../../../.github/workflows/bootstrap-local-readiness.yml)
+- App-cache-cold image-build proof: [`.github/workflows/build-benchmark.yml`](../../../.github/workflows/build-benchmark.yml) with `benchmark_class=app-cache-cold` and `image_family=both`
+
+Run the GitHub workflow from a branch with:
+
+```bash
+gh workflow run bootstrap-local-readiness.yml --ref "$(git branch --show-current)"
+gh workflow run build-benchmark.yml --ref "$(git branch --show-current)" \
+  -f runner_class=fastlane \
+  -f benchmark_class=app-cache-cold \
+  -f image_family=both
+```
+
 ## Troubleshooting
 
 - Docker image pulls are large; if `tutor local launch` fails mid-way, rerun `tutor local launch -I --skip-build` after ensuring adequate disk space (and rerun `tutor local do init` if the LMS still 500s).
 - If the forum container keeps restarting, check logs with `tutor local logs forum` — forum v2 is Python-based and uses Meilisearch (no rake commands or Elasticsearch).
 - Ecommerce returning `OperationalError: Access denied for user 'ecommerce'` means the init job didn’t finish—rerun `tutor local do init --limit=ecommerce` to recreate the database, user, and OAuth clients.
-- For plugin template changes, run `tutor config save` to regenerate YAML manifests.
+- For plugin template changes, run `./scripts/infra/tutor-config-save.sh` to regenerate YAML manifests and rendered build contexts.

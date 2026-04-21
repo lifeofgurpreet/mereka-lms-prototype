@@ -166,6 +166,22 @@ target "openedx-proof" {
   }
 }
 
+target "openedx-proof-nocache" {
+  context = "${OPENEDX_CONTEXT}"
+  dockerfile = "${OPENEDX_DOCKERFILE}"
+  args = {
+    MEREKA_BUILD_PROFILE           = "proof"
+    BUILDKIT_INLINE_CACHE           = "1"
+    MEREKA_CUSTOM_APP_INSTALL_MODE = "noneditable"
+  }
+  output = ["type=docker"]
+  tags = [for tag in split(",", OPENEDX_PROOF_TAGS) : trimspace(tag) if trimspace(tag) != ""]
+  labels = {
+    "io.mereka.build-profile" = "proof"
+    "io.mereka.build-scope"   = "openedx"
+  }
+}
+
 target "openedx-fast" {
   inherits = ["_openedx-common"]
   tags = [for tag in split(",", OPENEDX_FAST_TAGS) : trimspace(tag) if trimspace(tag) != ""]
@@ -230,6 +246,23 @@ target "mfe-proof" {
     // Set via CACHE_TO_MFE env; empty on non-main builds (RL-5)
     "${CACHE_TO_MFE}",
   ]
+  labels = {
+    "io.mereka.build-profile"              = "proof"
+    "io.mereka.build-scope"                = "mfe"
+    "io.mereka.rendered-context"           = "${MFE_RENDERED_CONTEXT}"
+    "io.mereka.rendered-dockerfile"        = "${MFE_RENDERED_DOCKERFILE}"
+    "io.mereka.rendered-dockerfile-sha256" = "${MFE_RENDERED_DOCKERFILE_SHA256}"
+  }
+}
+
+target "mfe-proof-nocache" {
+  context = "${MFE_CONTEXT}"
+  dockerfile = "${MFE_DOCKERFILE}"
+  args = {
+    BUILDKIT_INLINE_CACHE = "1"
+  }
+  output = ["type=docker"]
+  tags = [for tag in split(",", MFE_PROOF_TAGS) : trimspace(tag) if trimspace(tag) != ""]
   labels = {
     "io.mereka.build-profile"              = "proof"
     "io.mereka.build-scope"                = "mfe"

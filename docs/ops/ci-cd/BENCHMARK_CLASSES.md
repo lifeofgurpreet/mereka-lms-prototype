@@ -27,15 +27,59 @@ Ownership: infra team owns the YAML; the LMS repo's drift gate is the consumer. 
 
 Comparing ARC-heavy runners against fastlane VPS runners is meaningless without first controlling for cache state. A warm fastlane run (local Docker cache intact, all layers reused) measured against a cold ARC run (freshly provisioned ephemeral runner, no registry cache yet imported) will make fastlane look faster by 30–40 minutes — not because it is fundamentally faster, but because the comparison is confounded by cache state. Benchmark classes provide the controlled variable: they define the exact cache conditions under which a build is measured, so that runner-class comparisons (`runner_class=fastlane` vs `runner_class=arc-heavy`) are apples-to-apples. Without this control, every "fastlane vs ARC" discussion reduces to folklore and confirmation bias. With it, the question becomes a query.
 
+### 2026-04-20 truth correction
+
+The workflow input now accepts `benchmark_class=app-cache-cold`. The old
+`benchmark_class=true-cold` value remains accepted only as a legacy alias. Both
+select **app-cache-cold**: wipe local BuildKit builder/cache state and suppress
+the shared app-level GHCR `cache-from` ref before running the canonical
+bake/build helpers. This does **not** prove a pristine Docker daemon, an empty
+base-image store, a fresh VM, or an empty ARC/fastlane host outside the explicit
+BuildKit state the workflow controls.
+
+Use `app-cache-cold` in prose, workflow dispatches, artifact names, and new
+metadata. Use `true-cold` only when discussing historical dashboard values or
+the backwards-compatible alias.
+
 ---
 
 ## The four classes
 
-### 1. `true-cold`
+### 1. `app-cache-cold`
 
 #### Definition
 
-No L1, L2, or L3 cache is available. Concretely: `ci_cache_source_found{source=~"registry|image|gha|local"}` has no successful import for any source, AND `ci_layer_reuse_ratio < 0.20` (less than 20% of layers were reused from any cache). If a single layer imports successfully from any source, this is NOT a true-cold run.
+Current workflow contract:
+
+- wipes local BuildKit cache and builder state (`docker buildx prune -af`,
+  buildx state removal, recreated builder)
+- skips GHCR login for the class
+- clears `CACHE_FROM_ARG`, so the canonical build helpers use no shared
+  app-level registry cache import
+- renders Tutor build contexts with the same dependency-acquisition contract
+  used by local/bootstrap lanes: Tutor-exposed images use `mirror.gcr.io`, and
+  `dependency-image-mirrors.sh` normalizes the known Tutor-emitted hardcoded
+  Docker Hub refs
+- configures the measured BuildKit builders with a `docker.io` registry mirror
+  as a fallback guard; this is not the primary contract for hardcoded upstream
+  `FROM`/`COPY --from` refs because BuildKit can still fall back to Docker Hub
+- selects no-cache bake targets through `--cache-mode none`
+- keeps benchmark output local (`--output-mode docker`) and does not write
+  registry cache
+- fails the measured build job if the benchmark artifact records
+  `OUTCOME=failure`; uploaded artifacts are diagnostics, not a waiver
+
+Limitations:
+
+- it is not a machine-cold clean-room build
+- it does not prove the Docker daemon image store is empty
+- it does not prove base images were absent before the run
+- it does not prove a brand-new fastlane host or ARC PVC
+
+If the measured telemetry later shows no successful cache import and
+`ci_layer_reuse_ratio < 0.20`, the observed run may be classified as true-cold
+by the metrics layer. That is an observed outcome, not something the current
+workflow input can guarantee on persistent runners.
 
 #### Reproducible setup
 
@@ -52,19 +96,33 @@ rm -rf /tmp/buildx-* ~/.docker/buildx
 docker buildx rm mereka-builder 2>/dev/null || true
 docker buildx create --name mereka-builder --driver docker-container --use
 
-# 4. For registry cache (L2): temporarily override cache-from to a
-#    non-existent or zeroed ref so import finds nothing:
+# 4. Suppress the shared app-level registry cache import.
 #    Set CACHE_FROM_ARG="" in the benchmark workflow step.
+#    The current workflow does this automatically for benchmark_class=app-cache-cold.
 #    Do NOT push a zeroed cache; this is a read-only suppression.
 
-# 5. Verify state before triggering build:
-docker system df          # Layer store should show minimal usage
-docker buildx du          # Should show 0B or minimal cache
+# 5. Select no-cache bake targets through the canonical helpers:
+#    scripts/infra/build-openedx-image.sh --cache-mode none ...
+#    scripts/infra/build-mfe-image.sh --cache-mode none ...
+
+# 6. Verify explicit BuildKit state before triggering build:
+docker buildx du          # Should show 0B or minimal buildx cache
+
+# Optional note:
+# docker system df may still show base images on persistent runners.
+# That is outside this class guarantee.
 ```
 
 #### What it tests
 
-The disaster-recovery baseline: how long does a from-scratch build take with zero assistance from any cache tier? This is the "wiped runner" scenario that currently causes 60–90 minute surprise builds. Measures the absolute floor performance and the business cost of cache authority loss.
+The app-cache-cold recovery path: how long do the canonical Open edX and MFE
+build helpers take when shared app-level BuildKit cache imports are disabled?
+This catches hidden dependency on registry cache, cache-importing bake targets,
+and helper arguments that only work on the warm path.
+
+It is not a full disaster-recovery baseline for a pristine machine. A separate
+machine-cold lane would need an explicitly fresh runner/daemon contract and its
+own proof artifacts.
 
 #### Expected timing band
 
@@ -77,9 +135,14 @@ P95 entries become bead `jj97.10` (baseline capture) outputs.
 
 #### Anti-uses
 
-- Do NOT use `true-cold` as a routine regression test — it is slow by definition and tells you nothing about steady-state performance.
-- Do NOT compare `true-cold` timings across runner classes without also controlling for CPU count and DinD overhead — the bottleneck is different per runner type.
-- Do NOT use `true-cold` results to argue for or against fastlane; this class measures catastrophic failure recovery, not normal operations.
+- Do NOT market `benchmark_class=app-cache-cold` or the legacy `true-cold` alias
+  as pristine machine-cold proof.
+- Do NOT use app-cache-cold as a routine regression test — it is slow by
+  definition and tells you little about steady-state performance.
+- Do NOT compare app-cache-cold timings across runner classes without also
+  controlling for CPU count, daemon state, and DinD overhead.
+- Do NOT use app-cache-cold results to argue for or against fastlane normal
+  operations; use `registry-warm` or `local-hot` for those questions.
 
 ---
 
@@ -235,6 +298,13 @@ The scan pipeline in isolation from the build pipeline. Answers: how much of the
 
 **Red line #4 from the program brief**: do not hand-label builds as "warm" or "cold" from vibes. Classification MUST be computed from raw signal metrics in Prometheus recording rules. No workflow step may emit `benchmark_class` as a hand-set string label — it is always a derived value.
 
+The GitHub workflow still accepts an input named `benchmark_class`. Treat that
+field as a requested precondition, not as final truth. The final observed class
+must come from telemetry. In particular, the requested precondition
+`benchmark_class=app-cache-cold` means app-level cache imports are disabled; the
+observed metrics decide whether the run actually behaved like true-cold,
+registry-warm, or local-hot.
+
 The raw facts emitted per build:
 
 ```
@@ -254,7 +324,8 @@ ci_layer_reuse_ratio = ci_layer_reuse_count / ci_layer_total_count
 **Recording rule logic (PromQL pseudocode)**:
 
 ```promql
-# true-cold: no successful cache import from any shared source AND <20% layer reuse
+# observed true-cold: no successful cache import from any shared source
+# AND <20% layer reuse
 benchmark_class:true_cold =
   absent(ci_cache_source_found{source=~"registry|image"} == 1)
   and ci_layer_reuse_ratio < 0.20
@@ -290,17 +361,23 @@ Bead `jj97.14` delivers `.github/workflows/build-benchmark.yml`. This workflow e
 | Input | Values | Purpose |
 |---|---|---|
 | `runner_class` | `fastlane` \| `arc-heavy` | Which runner pool to use |
-| `benchmark_class` | `true-cold` \| `registry-warm` \| `local-hot` \| `scan-only` | Which cache condition to enforce before the build |
+| `benchmark_class` | `app-cache-cold` \| `true-cold` \| `registry-warm` \| `local-hot` \| `scan-only` | Requested cache precondition before the build; `true-cold` is a legacy alias for `app-cache-cold` |
 | `image_family` | `openedx` \| `mfe` | Which image to build |
 
 **How the workflow enforces conditions per class** (before invoking the actual build step):
 
-- `true-cold`: executes `docker buildx prune -af` + drops `CACHE_FROM_ARG` to empty string
+- `app-cache-cold`: executes `docker buildx prune -af`, drops `CACHE_FROM_ARG` to empty string, renders Tutor build context with mirrored dependency pulls plus the explicit dependency-image mirror patch, configures the measured BuildKit builder with a Docker Hub registry mirror fallback, invokes no-cache bake targets through the canonical helpers, and fails the job if the measured build records `OUTCOME=failure`
+- `true-cold`: legacy alias normalized to `proof_class=app-cache-cold` in artifacts and metadata
 - `registry-warm`: executes `docker buildx prune -af` to remove L1, leaves `CACHE_FROM_ARG` pointing at the shared GHCR registry ref
 - `local-hot`: no cache wipe; relies on persistent runner state; asserts `ci_layer_reuse_ratio > 0.90` post-build as a guard
 - `scan-only`: skips build steps entirely; uses an already-pushed image digest as input
 
-**Outputs** per run: a structured artifact containing `benchmark_class`, `runner_class`, `image_family`, `release_unit_id`, and stage timings — importable by `jj97.10` baseline collection.
+**Outputs** per run: a structured artifact containing
+`requested_benchmark_class`, normalized `proof_class`, normalized
+`benchmark_class`, `machine_cold_claim`, `runner_class`, `image_family`,
+`release_unit_id`, and stage timings — importable by `jj97.10` baseline
+collection. Consumers must not treat the requested `benchmark_class` field as
+final observed cache truth.
 
 ---
 
@@ -310,8 +387,8 @@ The only valid comparisons are **same class, same image_family, different runner
 
 ```
 Valid:   registry-warm / openedx / fastlane  vs  registry-warm / openedx / arc-heavy
-Valid:   true-cold / mfe / fastlane           vs  true-cold / mfe / arc-heavy
-Invalid: registry-warm / openedx / fastlane  vs  true-cold / openedx / arc-heavy
+Valid:   app-cache-cold / mfe / fastlane      vs  app-cache-cold / mfe / arc-heavy
+Invalid: registry-warm / openedx / fastlane  vs  app-cache-cold / openedx / arc-heavy
 Invalid: local-hot / mfe / fastlane          vs  registry-warm / mfe / arc-heavy
 ```
 
@@ -341,18 +418,18 @@ on:
 
 | runner_class | benchmark_class | image_family | Est. duration |
 |---|---|---|---|
-| fastlane | true-cold | openedx | 30–90 min |
-| fastlane | true-cold | mfe | ~44 min |
+| fastlane | app-cache-cold | openedx | 30–90 min |
+| fastlane | app-cache-cold | mfe | ~44 min |
 | fastlane | registry-warm | openedx | ~10 min |
 | fastlane | registry-warm | mfe | ~5–8 min |
 | fastlane | local-hot | openedx | ~2 min |
 | fastlane | local-hot | mfe | ~5–8 min |
-| arc-heavy | true-cold | openedx | 30–90 min |
-| arc-heavy | true-cold | mfe | ~44 min |
+| arc-heavy | app-cache-cold | openedx | 30–90 min |
+| arc-heavy | app-cache-cold | mfe | ~44 min |
 | arc-heavy | registry-warm | openedx | ~10 min |
 | arc-heavy | registry-warm | mfe | ~5–8 min |
 
-**Budget estimate**: if run sequentially, the full matrix is approximately **5–7 hours** of wall-clock runner time per week. In practice, the `true-cold` runs will not be scheduled weekly (too expensive) — they are run on demand when the disaster-recovery baseline needs refreshing. The weekly cron runs only `registry-warm` and `scan-only` per image_family and runner_class, bringing the weekly budget to approximately **60–90 minutes**.
+**Budget estimate**: if run sequentially, the full matrix is approximately **5–7 hours** of wall-clock runner time per week. In practice, the app-cache-cold runs will not be scheduled weekly (too expensive) — they are run on demand when the cache-disabled helper baseline needs refreshing. The weekly cron runs only `registry-warm` and `scan-only` per image_family and runner_class, bringing the weekly budget to approximately **60–90 minutes**.
 
 ---
 
@@ -360,11 +437,11 @@ on:
 
 | image_family | class | P50 | P95 | source |
 |---|---|---|---|---|
-| openedx | true-cold | 30–90 min | TBD (jj97.10) | RFC problem statement |
+| openedx | app-cache-cold | 30–90 min | TBD (jj97.10) | no pristine daemon claim |
 | openedx | registry-warm | <10 min target | TBD (jj97.10) | RFC DoD |
 | openedx | local-hot | ~71s observed | TBD (jj97.10) | MEMORY ref, run 24226842382 |
 | openedx | scan-only | ~20 min current → ~5 min target | TBD (jj97.10) | jj97.8 analysis |
-| mfe | true-cold | 44:12 (2652s) observed | TBD (jj97.10) | MEMORY ref, run 24226842382 |
+| mfe | app-cache-cold | 44:12 (2652s) observed | TBD (jj97.10) | no pristine daemon claim |
 | mfe | registry-warm | <5 min target | TBD (jj97.10) | RFC DoD |
 | mfe | local-hot | 5–8 min observed | TBD (jj97.10) | MEMORY ref warm-path measurement |
 | mfe | scan-only | inherited from openedx scan pattern | TBD (jj97.10) | Same toolchain |
@@ -375,9 +452,9 @@ TBD (jj97.10) entries are filled by the Phase 0 baseline capture (10 builds of p
 
 ## Anti-patterns
 
-**DO NOT hand-set the class label.** No workflow step may emit `benchmark_class` as a hardcoded string or `echo` into a GITHUB_ENV. Classification is always derived from `ci_cache_source_found` and `ci_layer_reuse_ratio` in Prometheus recording rules. A workflow that writes `BENCHMARK_CLASS=registry-warm` into its environment is lying — it is asserting what it hopes happened, not what actually happened.
+**DO NOT hand-set observed class labels.** The workflow may carry `benchmark_class` / `proof_class` as requested precondition annotations in JSON artifacts, but Prometheus cache classification is always derived from `ci_cache_source_found` and `ci_layer_reuse_ratio`. A dashboard or metrics exporter that treats `BENCHMARK_CLASS=registry-warm` as observed runtime truth is lying — it is asserting what it hopes happened, not what actually happened.
 
-**DO NOT compare across classes without controlling.** A `true-cold` ARC run vs a `local-hot` fastlane run tells you nothing about runner class performance. Before publishing any "ARC vs fastlane" number, verify that both runs share the same `benchmark_class` value in Grafana Row 4.
+**DO NOT compare across classes without controlling.** An app-cache-cold ARC run vs a `local-hot` fastlane run tells you nothing about runner class performance. Before publishing any "ARC vs fastlane" number, verify that both runs share the same requested precondition and the same observed telemetry class in Grafana Row 4.
 
 **DO NOT treat "warm" as one number.** `registry-warm` with 25% layer reuse and `registry-warm` with 89% layer reuse are both in the same class by definition, but their wall-clock times differ significantly. When reporting P50, include the layer reuse ratio distribution. When setting SLOs, use a specific layer reuse sub-band.
 

@@ -3,8 +3,8 @@
 ## Purpose
 
 This document defines the policy for GitHub Actions used in this repository.
-All actions must be pinned to a full 40-character commit SHA to eliminate the
-risk of tag-mutation attacks (supply-chain compromise via mutable tags).
+External third-party actions must be pinned to a full 40-character commit SHA to
+reduce tag-mutation risk.
 
 This policy is enforced automatically by `scripts/qa/verify-actions-pinned.sh`,
 which is run as part of CI (`ci.yml`).
@@ -13,10 +13,10 @@ which is run as part of CI (`ci.yml`).
 
 ## Pinning Requirement
 
-**Every `uses:` line in every workflow file MUST reference a full SHA-1 commit
-hash (40 hex characters).** Version tags (`@v4`, `@main`, `@master`) are
-forbidden as the sole reference. The human-readable version MUST be included as
-a trailing comment for reviewability:
+**Every external third-party `uses:` line in every workflow file MUST reference
+a full SHA-1 commit hash (40 hex characters).** Version tags (`@v4`, `@main`,
+`@master`) are forbidden as the sole reference. The human-readable version
+SHOULD be included as a trailing comment for reviewability:
 
 ```yaml
 # CORRECT
@@ -26,14 +26,22 @@ a trailing comment for reviewability:
 - uses: actions/checkout@v4
 ```
 
+Policy exemptions:
+
+- Local actions such as `./.github/actions/setup-python-env`.
+- First-party `Biji-Biji-Initiative/*` actions and reusable workflows governed
+  by the organization’s own branch protection and review policy.
+- `docker://` action references, which are governed by image pinning policy
+  instead of GitHub action ref pinning.
+
 ---
 
-## Currently Approved Actions
+## Baseline Approved External Actions
 
-The table below is the authoritative list of actions permitted in this
-repository. Every entry was reviewed and SHA-pinned as part of T052 (completed
-2026-02-24). The `# comment` column records the human-readable version at the
-time of pinning for quick auditing.
+The table below is the historical approved-action baseline from T052 (completed
+2026-02-24). The current workflow files and `verify-actions-pinned.sh` output
+are the executable source of truth for exact SHAs; update this table during
+periodic supply-chain review, not by hand-editing workflow refs alone.
 
 | Action | Pinned SHA | Version | Used In |
 |--------|-----------|---------|---------|

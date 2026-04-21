@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# @covers AC-007, AC-008, AC-028
+# @covers AC-005, AC-007, AC-008, AC-028
 # @spec: ci-cd-pipeline_spec.md
-# Verify CI/CD merge gates and secret masking for AC-007, AC-008, AC-028.
+# Verify CI/CD merge gates, secret scanning, and secret masking for AC-005, AC-007, AC-008, AC-028.
 #
+# AC-005: Secret scanning runs against the intended Git range and cannot scan .git packs.
 # AC-007: All CI jobs pass → merge button enabled (branch protection + required checks)
 # AC-008: CI job fails → merge button disabled (branch protection enforces checks)
 # AC-028: Secrets masked in workflow logs (GitHub Actions ${{ secrets.* }} auto-masking)
@@ -12,9 +13,11 @@
 #   2. ci.yml defines all required consolidated jobs (which become status checks)
 #   3. All workflows use ${{ secrets.* }} (auto-masked by GitHub), never raw echo
 #   4. No set -x or debug tracing before secret usage
+#   5. Manual/fallback TruffleHog scans do not read stale .git objects
 #
 # Usage:
 #   ./scripts/qa/verify-cicd-merge-gates-and-secrets.sh
+#   ./scripts/qa/verify-cicd-merge-gates-and-secrets.sh --ac 005
 #   ./scripts/qa/verify-cicd-merge-gates-and-secrets.sh --ac 007
 #   ./scripts/qa/verify-cicd-merge-gates-and-secrets.sh --ac 008
 #   ./scripts/qa/verify-cicd-merge-gates-and-secrets.sh --ac 028
@@ -34,7 +37,7 @@ AC_FILTER=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --ac) AC_FILTER="$2"; shift 2 ;;
-    -h|--help) echo "Usage: $0 [--ac 007|008|028]"; exit 0 ;;
+    -h|--help) echo "Usage: $0 [--ac 005|007|008|028]"; exit 0 ;;
     *) echo "Unknown arg: $1" >&2; exit 1 ;;
   esac
 done
@@ -224,6 +227,22 @@ check_secret_masking() {
     fail "TruffleHog missing --only-verified flag"
   fi
 
+  if grep -q 'workflow_dispatch)' "$CI_YML" \
+      && grep -q 'git merge-base HEAD origin/main' "$CI_YML" \
+      && grep -q 'git rev-parse HEAD' "$CI_YML"; then
+    pass "TruffleHog workflow_dispatch scans a Git diff range instead of filesystem fallback"
+  else
+    fail "TruffleHog workflow_dispatch path does not establish a Git diff range"
+  fi
+
+  if grep -q 'trufflehog filesystem \.' "$CI_YML" \
+      && grep -q 'trufflehog-exclude-paths.txt' "$CI_YML" \
+      && grep -q '\-\-exclude-paths "\$RUNNER_TEMP/trufflehog-exclude-paths.txt"' "$CI_YML"; then
+    pass "TruffleHog filesystem fallback excludes .git object packs"
+  else
+    fail "TruffleHog filesystem fallback does not exclude .git object packs"
+  fi
+
   # Verify pre-commit hook exists for secret scanning
   if [[ -f ".githooks/pre-commit" ]] && grep -q 'PASSWORD' .githooks/pre-commit; then
     pass "Pre-commit secret scanning hook exists"
@@ -240,6 +259,7 @@ check_secret_masking() {
 echo "╔══════════════════════════════════════════════════════════════╗"
 echo "║    CI/CD Merge Gates & Secret Masking Verification           ║"
 echo "╠══════════════════════════════════════════════════════════════╣"
+echo "  AC-005: Secret scan range/fallback hygiene"
 echo "  AC-007: CI pass → merge enabled (branch protection)"
 echo "  AC-008: CI fail → merge disabled (branch protection)"
 echo "  AC-028: Secrets masked in workflow logs"
@@ -250,7 +270,7 @@ if [[ -z "$AC_FILTER" || "$AC_FILTER" == "007" || "$AC_FILTER" == "008" ]]; then
   check_merge_gates
 fi
 
-if [[ -z "$AC_FILTER" || "$AC_FILTER" == "028" ]]; then
+if [[ -z "$AC_FILTER" || "$AC_FILTER" == "005" || "$AC_FILTER" == "028" ]]; then
   check_secret_masking
 fi
 
@@ -263,9 +283,11 @@ echo "╚═══════════════════════�
 
 if [[ "$FAILED" -eq 0 ]]; then
   echo ""
-  echo -e "${GREEN}All CI/CD merge gate and secret masking checks passed.${NC}"
+  echo -e "${GREEN}All CI/CD merge gate, secret scan, and secret masking checks passed.${NC}"
   echo ""
   echo "Verified:"
+  echo "  AC-005:     TruffleHog uses verified findings, manual dispatch gets a Git diff"
+  echo "              range, and filesystem fallback excludes stale .git object packs."
   echo "  AC-007/008: ci.yml defines 4 required consolidated jobs (static-validation,"
   echo "              tutor-config-tests, security-scans, test-coverage) as PR status checks."
   echo "              All action refs are SHA-pinned (immutable). GitHub branch protection"
@@ -276,6 +298,6 @@ if [[ "$FAILED" -eq 0 ]]; then
   exit 0
 else
   echo ""
-  echo -e "${RED}CI/CD merge gate or secret masking verification failed.${NC}"
+  echo -e "${RED}CI/CD merge gate, secret scan, or secret masking verification failed.${NC}"
   exit 1
 fi

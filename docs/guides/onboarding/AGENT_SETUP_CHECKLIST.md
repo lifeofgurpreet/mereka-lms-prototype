@@ -53,6 +53,20 @@ source .venv/bin/activate
   --set LMS_HOST=localhost \
   --set CMS_HOST=studio.localhost \
   --set MFE_HOST=apps.localhost \
+  --set RUN_MONGODB=true \
+  --set RUN_MYSQL=true \
+  --set RUN_REDIS=true \
+  --set RUN_MEILISEARCH=true \
+  --set RUN_SMTP=true \
+  --set DOCKER_REGISTRY=mirror.gcr.io/ \
+  --set DOCKER_IMAGE_OPENEDX=openedx:nightly \
+  --set MFE_DOCKER_IMAGE=openedx-mfe:nightly \
+  --set DOCKER_IMAGE_CADDY=mirror.gcr.io/library/caddy:2.7.4 \
+  --set DOCKER_IMAGE_MEILISEARCH=mirror.gcr.io/getmeili/meilisearch:v1.8.4 \
+  --set DOCKER_IMAGE_MONGODB=mirror.gcr.io/library/mongo:7.0.28 \
+  --set DOCKER_IMAGE_MYSQL=mirror.gcr.io/library/mysql:8.4.0 \
+  --set DOCKER_IMAGE_REDIS=mirror.gcr.io/library/redis:7.4.5 \
+  --set DOCKER_IMAGE_SMTP=mirror.gcr.io/devture/exim-relay:4.96-r1-0 \
   --set MYSQL_HOST=mysql \
   --set MONGODB_HOST=mongodb \
   --set REDIS_HOST=redis \
@@ -141,7 +155,13 @@ source infrastructure/tutor/tutor-env.sh
 **Fix:** Reconfigure immediately:
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
-./scripts/infra/tutor-config-save.sh --set MYSQL_HOST=mysql --set MONGODB_HOST=mongodb
+./scripts/infra/tutor-config-save.sh \
+  --set MYSQL_HOST=mysql \
+  --set MONGODB_HOST=mongodb \
+  --set REDIS_HOST=redis \
+  --set RUN_MONGODB=true \
+  --set DOCKER_IMAGE_OPENEDX=openedx:nightly \
+  --set MFE_DOCKER_IMAGE=openedx-mfe:nightly
 tutor local restart
 ```
 

@@ -72,6 +72,7 @@ ci_static_inventory:
       estimated_seconds: 10
     - script: scripts/qa/verify-workflow-script-references.sh
     - script: scripts/qa/test-verify-workflow-script-references.sh
+    - script: scripts/qa/verify-actions-pinned.sh
     - script: scripts/qa/verify-script-governance-census.sh
     - script: scripts/qa/verify-script-governance-dangerous.sh
     - script: scripts/qa/verify-script-governance-orphans.sh
@@ -171,6 +172,18 @@ ci_static_inventory:
     - script: scripts/qa/test-verify-build-workflow-contract.sh
       estimated_seconds: 15
     - script: scripts/qa/test-verify-bootstrap-workflow-contract.sh
+    - script: scripts/qa/test-install-docker-compose.sh
+      estimated_seconds: 5
+    - script: scripts/qa/test-dependency-image-mirrors-patch.sh
+      estimated_seconds: 3
+    - script: scripts/qa/test-mfe-npm-install-resilience-patch.sh
+      estimated_seconds: 3
+    - script: scripts/qa/test-mfe-prune-deprecated-shells.sh
+      estimated_seconds: 3
+    - script: scripts/qa/verify-build-optimizations-render-delta-contract.sh
+      estimated_seconds: 2
+    - script: scripts/qa/test-verify-build-optimizations-render-delta-contract.sh
+      estimated_seconds: 3
     - script: scripts/qa/test-verify-rollback-dry-run.sh
     - script: scripts/qa/test-verify-post-deploy-gate.sh
     - script: scripts/qa/test-verify-wif-readiness.sh
@@ -503,6 +516,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-red-line-contract.sh
     - script: scripts/qa/verify-runner-class-taxonomy-upstream.sh
     - script: scripts/qa/verify-bootstrap-workflow-contract.sh
+    - script: scripts/qa/verify-cold-start-onboarding-contract.sh
     - script: scripts/qa/test-install-envsubst-fallback.sh
     - script: scripts/qa/test-install-trivy-fallback.sh
     - script: scripts/qa/test-verify-post-deploy-smoke.sh
@@ -703,6 +717,10 @@ ci_runtime_inventory:
     - script: scripts/qa/audit-velero.sh
       category: LIVE_CLUSTER
       note: audits live Velero schedules, backups, snapshot posture, and app PVC coverage from the active cluster; runtime disaster-recovery proof, not offline static CI
+    - script: scripts/qa/verify-restore-drill.sh
+      category: LIVE_CLUSTER
+      args: ["--strict"]
+      note: verifies live Velero restore-drill PVC/MySQL proof and writes local DR evidence; runtime disaster-recovery proof, not offline static CI
     - script: scripts/qa/verify-secrets-live-cluster.sh
       category: LIVE_CLUSTER
       note: validates ExternalSecrets, deployment envFrom wiring, and pod secret env vars against the active cluster; runtime secrets proof, not offline static CI
@@ -2037,6 +2055,163 @@ scripts:
 
   # ── CI Preflight & Build ─────────────────────────────────────────────────────
 
+  - path: scripts/infra/ensure-buildx-dependency-mirror.sh
+    owner: platform-team
+    purpose: >
+      Selects or creates the local Buildx builder that routes Docker Hub
+      dependency pulls through the configured dependency mirror before local
+      Tutor image builds. This is dependency acquisition support only; it does
+      not own build semantics or rendered artifact shape.
+    inputs:
+      - MEREKA_BUILDX_BUILDER
+      - MEREKA_DOCKERHUB_MIRROR
+      - MEREKA_BUILDKIT_IMAGE
+      - MEREKA_RECREATE_BUILDX_MIRROR
+    outputs:
+      - stdout builder readiness summary
+      - exit code
+    side_effects:
+      - Creates or selects a Docker Buildx builder in the local Docker daemon
+      - Boots a BuildKit container for that builder
+    dry_run: false
+    lanes: [dev, ci]
+    proof_command: "bash -n scripts/infra/ensure-buildx-dependency-mirror.sh"
+    criticality: release-supporting
+
+  - path: scripts/ci/install-docker-compose.sh
+    owner: platform-team
+    purpose: >
+      Installs the pinned Docker Compose v2 CLI plugin for bootstrap proof
+      runners when the runner image lacks a compose plugin. Downloads the
+      platform-specific release asset and verifies the upstream checksum before
+      installing into the Docker CLI plugin directory.
+    inputs:
+      - DOCKER_COMPOSE_VERSION
+      - DOCKER_CONFIG
+      - DOCKER_COMPOSE_PLUGIN_DIR
+      - DOCKER_COMPOSE_BASE_URL
+      - DOCKER_COMPOSE_FORCE_INSTALL
+      - DOCKER_COMPOSE_UNAME_M
+    outputs:
+      - Docker Compose plugin under Docker CLI plugin directory
+      - stdout version confirmation
+      - exit code
+    side_effects:
+      - Downloads Docker Compose release assets
+      - Writes Docker CLI plugin file under the selected Docker config root
+    dry_run: false
+    lanes: [ci]
+    proof_command: "bash scripts/qa/test-install-docker-compose.sh"
+    criticality: release-supporting
+
+  - path: scripts/qa/test-install-docker-compose.sh
+    owner: platform-team
+    purpose: >
+      Fixture test for scripts/ci/install-docker-compose.sh. Proves x86_64
+      architecture mapping, checksum verification, checksum-failure behavior,
+      and unsupported-architecture failure without reaching the network.
+    inputs: []
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects:
+      - Creates temporary fixture directories under /tmp
+    dry_run: true
+    lanes: [ci]
+    proof_command: "bash scripts/qa/test-install-docker-compose.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/test-dependency-image-mirrors-patch.sh
+    owner: platform-team
+    purpose: >
+      Fixture test for infrastructure/tutor/patches/dependency-image-mirrors.sh.
+      Proves the dependency-acquisition mirror normalization is idempotent,
+      target-scoped, and fail-loud when upstream Dockerfile dependency selectors
+      drift.
+    inputs: []
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects:
+      - Creates temporary rendered-Dockerfile fixtures under /tmp
+    dry_run: true
+    lanes: [ci]
+    proof_command: "bash scripts/qa/test-dependency-image-mirrors-patch.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/test-mfe-npm-install-resilience-patch.sh
+    owner: platform-team
+    purpose: >
+      Fixture test for the rendered MFE npm install resilience patch. Proves
+      golden Dockerfile transformation, idempotence, and fail-loud behavior when
+      upstream MFE Dockerfile install selector shape changes.
+    inputs: []
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects:
+      - Creates temporary rendered-Dockerfile fixtures under /tmp
+    dry_run: true
+    lanes: [ci]
+    proof_command: "bash scripts/qa/test-mfe-npm-install-resilience-patch.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/test-mfe-prune-deprecated-shells.sh
+    owner: platform-team
+    purpose: >
+      Fixture test for mfe_prune_deprecated_shells.py. Proves the helper
+      hardens upstream apt install residue, prunes deprecated MFE/New Relic
+      fragments, preserves unrelated MFE sections, and is idempotent.
+    inputs: []
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects:
+      - Creates temporary rendered Dockerfile and Caddyfile fixtures under /tmp
+    dry_run: true
+    lanes: [ci]
+    proof_command: "bash scripts/qa/test-mfe-prune-deprecated-shells.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/verify-build-optimizations-render-delta-contract.sh
+    owner: platform-team
+    purpose: >
+      Static and optional raw-vs-patched-render verifier for the
+      build-optimizations.sh J-exit contract. Validates the machine-readable
+      allowed-delta ledger, source markers, retirement triggers, and fail-closed
+      diff behavior when raw/patched render files are provided.
+    inputs:
+      - BUILD_OPTIMIZATIONS_DELTA_CONTRACT
+      - BUILD_OPTIMIZATIONS_SCRIPT
+      - PATCH_INVENTORY_DOC
+      - RAW_RENDER_FILE
+      - PATCHED_RENDER_FILE
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects: none
+    dry_run: true
+    lanes: [ci]
+    proof_command: "bash scripts/qa/verify-build-optimizations-render-delta-contract.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/test-verify-build-optimizations-render-delta-contract.sh
+    owner: platform-team
+    purpose: >
+      Seeded fixture test for verify-build-optimizations-render-delta-contract.sh.
+      Proves allowed raw-vs-patched deltas pass and unexpected render deltas fail
+      closed with a clear diagnostic.
+    inputs: []
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects:
+      - Creates temporary contract and render fixtures under /tmp
+    dry_run: true
+    lanes: [ci]
+    proof_command: "bash scripts/qa/test-verify-build-optimizations-render-delta-contract.sh"
+    criticality: release-blocking
+
   - path: scripts/ci/preflight-check.sh
     owner: platform-team
     purpose: >
@@ -2157,6 +2332,28 @@ scripts:
     owner: platform-team
     purpose: Verify Local Bootstrap Readiness
     criticality: release-blocking
+
+  - path: scripts/qa/verify-setup.sh
+    owner: platform-team
+    purpose: >
+      Local developer setup verifier. Checks the repo-local Tutor environment,
+      local Docker images and containers, local service URLs, MySQL access, the
+      canonical local bootstrap readiness contract, and the local admin user.
+      It skips when Docker or a local Tutor environment is absent.
+    inputs:
+      - Local Docker daemon
+      - tutor_env/config.yml
+      - .venv
+    outputs:
+      - stdout PASS/WARN/FAIL summary
+      - exit code
+    side_effects:
+      - Creates temporary log files
+      - Reads local Docker and Tutor runtime state
+    dry_run: true
+    lanes: [local]
+    proof_command: "bash scripts/qa/verify-setup.sh"
+    criticality: release-supporting
 
   # ── Database & Migrations ────────────────────────────────────────────────────
 
@@ -2935,6 +3132,32 @@ scripts:
   - path: scripts/qa/collect-velero-evidence.sh
     owner: platform-team
     purpose: Collect Velero Evidence
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-restore-drill.sh
+    owner: platform-team
+    purpose: >
+      Verifies live Velero restore-drill recovery evidence in the throwaway
+      restore namespace, including PVC bound state and MySQL probe checks.
+      Strict mode currently fails until checksum verification is implemented,
+      so this remains a runtime DR proof gate rather than an offline static CI
+      check.
+    inputs:
+      - VELERO_RESTORE_NAMESPACE
+      - BACKUP_NAME
+      - DR_EVIDENCE_DIR
+      - STRICT / --strict
+      - kubectl context
+    outputs:
+      - stdout PASS/FAIL summary
+      - var/dr-evidence/restore-drills/*.json
+      - exit code
+    side_effects:
+      - Reads live cluster restore namespace state
+      - Writes local DR evidence JSON under DR_EVIDENCE_DIR
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "STRICT=1 bash scripts/qa/verify-restore-drill.sh --namespace velero-restore-test"
     criticality: release-supporting
 
   - path: scripts/qa/comprehensive-test.sh

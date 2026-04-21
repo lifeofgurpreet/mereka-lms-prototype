@@ -115,7 +115,7 @@ The codebase already provides substantial coverage:
 
 - [ ] **[M]** B-16: Harden restore-test CronJob -- verify it restores into throwaway namespace (`velero-restore-test` or `mereka-lms-dr`), validates PVC Bound state, runs MySQL `SELECT 1` probe, compares resource count within 10% tolerance, deletes throwaway namespace within 1 hour (`infrastructure/k8s/velero/restore-test-script.sh`) | AC: #005, #006, #007 | Depends: None
 
-- [ ] **[M]** B-17: Create/harden `scripts/infra/fix-velero-restore-test.sh` -- fixes common restore-test failures (stuck namespace, wrong image, missing command) and runs the drill end-to-end (`scripts/infra/fix-velero-restore-test.sh`) | AC: #007 | Depends: B-16
+- [ ] **[M]** B-17: Harden infra-owned restore-test GitOps resources -- fixes common restore-test failures (stuck namespace, wrong image, missing command) in the Velero owner repo, then verifies the app-side proof with `STRICT=1 ./scripts/qa/verify-restore-drill.sh --namespace velero-restore-test` | AC: #007 | Depends: B-16
 
 - [ ] **[S]** B-18: Verify restore drill runs monthly via CronJob schedule -- confirm CronJob schedule expression triggers at least monthly (`infrastructure/k8s/velero/restore-test-cronjob.yaml`) | AC: #005 | Depends: None
 

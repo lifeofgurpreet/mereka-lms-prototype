@@ -80,7 +80,7 @@ column literally instead of assuming every row is still live script-only authori
 
 | # | Patch | Target | Status | Risk | Expiry | Migration Plan |
 |---|-------|--------|--------|------|--------|----------------|
-| C1 | `PIPELINE['JS_COMPRESSOR'] = None` | `assets.py` | SCRIPT-ONLY | HIGH | 2026-Q3 | Add to plugin `openedx-lms-assets-settings` hook |
+| C1 | `PIPELINE['JS_COMPRESSOR'] = None` | `assets.py` | MIGRATED | LOW | Closed | Owned by plugin `openedx-common-assets-settings`; do not reintroduce the old LMS/CMS-specific hook names. |
 | C2 | Node 24 build toolchain (historical ID) | `mfe_dockerfile.py` | MIGRATED | LOW | Closed | Already owned by plugin `mfe-dockerfile-pre-npm-install` hook; do not treat as live script-only authority. |
 | C3 | Node cache reuse from upstream | `Dockerfile` | EXCEPTION | HIGH | 2026-Q4 | Requires Tutor hook for pre-npm-install Dockerfile lines. File exception. |
 | C4 | Course authoring directory fix | `mfe/Dockerfile` | SCRIPT-ONLY | HIGH | 2026-Q3 | Add symlink to plugin `mfe-dockerfile-post-npm-install` hook |

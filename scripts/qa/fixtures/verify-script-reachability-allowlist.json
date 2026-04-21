@@ -1,7 +1,6 @@
 {
   "version": 1,
   "manual_only_verify_allowlist": [
-    "scripts/qa/verify-actions-pinned.sh",
     "scripts/qa/verify-analytics-decision-gate.sh",
     "scripts/qa/verify-analytics-drift-guardrails.sh",
     "scripts/qa/verify-analytics-hardening.sh",
@@ -146,7 +145,6 @@
     "scripts/qa/verify-secrets-precommit.sh",
     "scripts/qa/verify-selector-hardening.sh",
     "scripts/qa/verify-selector-to-slot-migration.sh",
-    "scripts/qa/verify-setup.sh",
     "scripts/qa/verify-skill-frontmatter-integrity.sh",
     "scripts/qa/verify-slo-reporting.sh",
     "scripts/qa/verify-slo-service-metrics.sh",

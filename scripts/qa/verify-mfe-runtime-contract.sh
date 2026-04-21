@@ -170,6 +170,17 @@ if [[ "${#generated_env_configs[@]}" -gt 0 ]]; then
       fail "Generated env.config.jsx is too small (${env_size} bytes <= 100): ${env_config_path}"
     fi
 
+    get_config_declarations="$(
+      { grep -E "^[[:space:]]*import[[:space:]].*\{[^}]*getConfig[^}]*\}[[:space:]]*from|^[[:space:]]*(const|let|var|function)[[:space:]]+getConfig([^[:alnum:]_]|$)" "$env_config_path" || true; } \
+        | wc -l \
+        | tr -d ' '
+    )"
+    if [[ "$get_config_declarations" -le 1 ]]; then
+      pass "Generated env.config.jsx has at most one getConfig declaration/import: ${env_config_path}"
+    else
+      fail "Generated env.config.jsx has duplicate getConfig declarations/imports (${get_config_declarations}): ${env_config_path}"
+    fi
+
     for marker in \
       "MerekaFooter" \
       "mereka_learner_sidebar_widget" \

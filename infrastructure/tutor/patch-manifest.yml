@@ -111,10 +111,10 @@ patches:
   - id: mfe-node-24
     name: "MFE Node 24 Base Image"
     category: mfe-build
-    description: "Updates MFE Dockerfile to use Node 24 instead of Node 12"
+    description: "Verifies the MFE Dockerfile uses the mirrored Node 24 base image"
     target_file: "tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
-    verify_command: "grep -F 'docker.io/node:24.11.0-bullseye-slim' tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
-    verify_pattern: "docker.io/node:24.11.0-bullseye-slim"
+    verify_command: "grep -F 'mirror.gcr.io/library/node:24.11.0-bullseye-slim' tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
+    verify_pattern: "mirror.gcr.io/library/node:24.11.0-bullseye-slim"
     severity: critical
     required: false  # Only if MFE plugin is installed
 

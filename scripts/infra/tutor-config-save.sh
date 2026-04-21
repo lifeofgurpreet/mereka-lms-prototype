@@ -70,6 +70,10 @@ echo "Repository:  $REPO_ROOT"
 echo "Tutor Root:  $TUTOR_ROOT"
 echo ""
 
+PLUGIN_DIR="${TUTOR_PLUGINS_ROOT:-${TUTOR_PLUGINS_DIR:-$HOME/.local/share/tutor-plugins}}"
+export TUTOR_PLUGINS_ROOT="$PLUGIN_DIR"
+export TUTOR_PLUGINS_DIR="$PLUGIN_DIR"
+
 SYNC_SCRIPT="$REPO_ROOT/scripts/infra/sync-tutor-plugin-mirror.sh"
 if [[ ! -x "$SYNC_SCRIPT" ]]; then
   echo -e "${RED}ERROR: Tutor plugin sync script not found or not executable${NC}"

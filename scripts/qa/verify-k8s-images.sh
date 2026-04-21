@@ -3,11 +3,19 @@
 # @spec: k8s-deployment_spec.md
 set -euo pipefail
 
-# verify-k8s-images.sh - Verifies production image tags in K8s manifests
+# verify-k8s-images.sh - Verifies K8s image tags in app-owned manifests
 #
-# Default (strict) mode: production images MUST use deterministic immutable tags
-# (SHA-based or digest-pinned). Mutable tags like :mereka-brand or :latest are
-# rejected in the production overlay unless RELAXED_MODE=1 is set.
+# App repo ownership note:
+#   deploy/k8s/base/ and deploy/k8s/overlays/local/ live in this repo.
+#   Environment-specific overlays, including production, are realized by
+#   bbi-infrastructure. If a production overlay is absent here, this verifier
+#   validates base sentinel/registry contracts and treats production image-pin
+#   enforcement as infra-owned.
+#
+# Default (strict) mode: if a production kustomization is present or explicitly
+# provided, production images MUST use deterministic immutable tags (SHA-based
+# or digest-pinned). Mutable tags like :mereka-brand or :latest are rejected in
+# that production overlay unless RELAXED_MODE=1 is set.
 #
 # RELAXED_MODE=1: Allows mutable convenience tags in the production overlay.
 #   Use only for temporary local testing. NEVER set in CI.
@@ -83,18 +91,16 @@ warn() {
   echo -e "${YELLOW}⚠${NC} $1"
 }
 
+production_overlay_present() {
+  [[ -f "$PROD_KUSTOMIZATION" ]]
+}
+
 # Check 1: No :latest tags in production
 check_no_latest() {
   echo "Checking for :latest tags in production images..."
 
-  if [[ ! -f "$PROD_KUSTOMIZATION" ]]; then
-    # Wave 9 (ADR-025): production overlay relocated to bbi-infrastructure.
-    # Boundary doc presence is the canonical statement of the move.
-    if [[ -f "${REPO_ROOT}/docs/reference/architecture/DEPLOYMENT_CONTRACT.md" ]]; then
-      pass "Production kustomization absent (Wave 9 shadow deletion — canonical boundary doc present); skipping :latest scan"
-    else
-      fail "File not found: $PROD_KUSTOMIZATION AND deployment-boundary doc missing — absence cannot be attributed to Wave 9"
-    fi
+  if ! production_overlay_present; then
+    pass "Production overlay absent in app repo; production image pins are infra-owned"
     return
   fi
 

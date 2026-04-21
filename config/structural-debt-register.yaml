@@ -215,22 +215,26 @@ entries:
     owner_repo: mereka-lms + bbi-infrastructure
     owner_layer: proof
     evidence: >
-      As of 2026-04-13, config/branch-protection-contract.yaml records
-      mereka-lms@main live == target. bbi-infrastructure@main still drifts from
-      target: live strict status checks are disabled and live required contexts
-      are ['policy-guards', 'validate'] instead of ['auth-verify',
+      Reviewed 2026-04-20 with gh api. mereka-lms@main live == target.
+      bbi-infrastructure@main still drifts from target: live enforce_admins
+      is true, required approving review count is 0, strict status checks are
+      disabled, and live required contexts are ['eso-self-secrets-check',
+      'policy-guards', 'validate'] instead of target ['auth-verify',
       'policy-guards'].
     current_risk: >
       Merge governance is no longer uniformly enforced across the paired repos.
       Infra changes can bypass the stricter contract expected by this repo's
-      cross-repo branch-protection audit.
+      cross-repo branch-protection audit, and scripts/qa/verify-branch-protection-contract.sh
+      --live still fails until the target is either restored in GitHub or
+      intentionally changed in a dedicated governance tranche.
     decision: kill
     action: >
-      Keep mereka-lms@main aligned, refresh repo-local contract/debt truth to
-      match audited live state, and restore bbi-infrastructure@main to the
-      declared target so scripts/qa/verify-branch-protection-contract.sh --live
-      returns green again.
-    review_date: "2026-04-20"
+      Keep mereka-lms@main aligned. The 2026-04-20 review refreshed the
+      repo-local live snapshot. Next tranche must decide whether to restore
+      bbi-infrastructure@main to the declared target or update the target as an
+      intentional architecture change, then rerun
+      scripts/qa/verify-branch-protection-contract.sh --live.
+    review_date: "2026-04-27"
     status: open
 
   - id: DEBT-015

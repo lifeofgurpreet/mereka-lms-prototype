@@ -6,9 +6,15 @@
 #   - Base and overlay directories exist with valid kustomization.yaml
 #   - All referenced patches and resources exist on disk
 #   - No orphaned YAML files in patches/ directories
-#   - Production images do not use :latest tag
-#   - Production overlay sets namespace to mereka-lms
+#   - Production images do not use :latest tag when production overlay is app-local
+#   - Production overlay sets namespace to mereka-lms when production overlay is app-local
 #   - ExternalSecrets file exists in base/secrets/
+#
+# App repo ownership note:
+#   deploy/k8s/base/ and deploy/k8s/overlays/local/ live in this repo.
+#   Environment-specific overlays, including production, are realized by
+#   bbi-infrastructure. A missing production overlay here is therefore not an
+#   app-repo structural failure unless VERIFY_KUSTOMIZE_REQUIRE_PRODUCTION_OVERLAY=1.
 #
 # Usage:
 #   scripts/qa/verify-kustomize-structure.sh
@@ -21,6 +27,7 @@ K8S_DIR="${REPO_ROOT}/deploy/k8s"
 BASE_DIR="${K8S_DIR}/base"
 LOCAL_DIR="${K8S_DIR}/overlays/local"
 PROD_DIR="${K8S_DIR}/overlays/production"
+REQUIRE_PRODUCTION_OVERLAY="${VERIFY_KUSTOMIZE_REQUIRE_PRODUCTION_OVERLAY:-0}"
 SCOPE_MODE="${VERIFY_KUSTOMIZE_STRUCTURE_SCOPE:-}"
 CHANGED_FILES_RAW="${VERIFY_KUSTOMIZE_STRUCTURE_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
 
@@ -63,6 +70,10 @@ pass() {
 fail() {
   echo -e "${RED}FAIL${NC}  $1"
   FAIL=$((FAIL + 1))
+}
+
+production_overlay_present() {
+  [[ -d "${PROD_DIR}" && -f "${PROD_DIR}/kustomization.yaml" ]]
 }
 
 # ---------------------------------------------------------------------------
@@ -120,7 +131,14 @@ fi
 # ---------------------------------------------------------------------------
 # 2. Overlay directories and kustomization.yaml
 # ---------------------------------------------------------------------------
-for overlay_name in local production; do
+overlay_names=(local)
+if [[ -d "${PROD_DIR}" || "${REQUIRE_PRODUCTION_OVERLAY}" == "1" ]]; then
+  overlay_names+=(production)
+else
+  pass "[AC-002] Production overlay absent in app repo; environment overlays are infra-owned"
+fi
+
+for overlay_name in "${overlay_names[@]}"; do
   if [[ "${overlay_name}" == "local" ]]; then
     overlay_dir="${LOCAL_DIR}"
     ac="AC-001"
@@ -233,30 +251,35 @@ fi
 echo ""
 echo "--- Production image tags ---"
 latest_count=0
-while IFS= read -r tag_line; do
-  [[ -z "${tag_line}" ]] && continue
-  if echo "${tag_line}" | grep -qiE '^\s*newTag:\s*["'"'"']?latest["'"'"']?\s*$'; then
-    latest_count=$((latest_count + 1))
-  fi
-done < <(grep -E '^\s*newTag:' "${PROD_DIR}/kustomization.yaml" 2>/dev/null || true)
-
-if [[ ${latest_count} -eq 0 ]]; then
-  pass "[AC-025] No :latest image tags in production overlay"
+if ! production_overlay_present; then
+  pass "[AC-025] Production overlay absent in app repo; production image tags are infra-owned"
 else
-  fail "[AC-025] Found ${latest_count} :latest image tag(s) in production overlay"
+  while IFS= read -r tag_line; do
+    [[ -z "${tag_line}" ]] && continue
+    if echo "${tag_line}" | grep -qiE '^\s*newTag:\s*["'"'"']?latest["'"'"']?\s*$'; then
+      latest_count=$((latest_count + 1))
+    fi
+  done < <(grep -E '^\s*newTag:' "${PROD_DIR}/kustomization.yaml" 2>/dev/null || true)
+
+  if [[ ${latest_count} -eq 0 ]]; then
+    pass "[AC-025] No :latest image tags in production overlay"
+  else
+    fail "[AC-025] Found ${latest_count} :latest image tag(s) in production overlay"
+  fi
 fi
 
 # ---------------------------------------------------------------------------
 # 9. Production overlay namespace is mereka-lms
 # Wave 9 (ADR-025): the production overlay was relocated to
-# bbi-infrastructure. When the directory is absent in this repo, treat as
-# PASS if the deployment-boundary doc is present — that's the canonical
-# statement that authority moved. Still FAIL if both are absent (something
-# broke) or if the file exists but declares the wrong namespace.
+# bbi-infrastructure. When the directory is absent in this repo, treat the
+# namespace contract as infra-owned unless the caller explicitly requires the
+# production overlay in this app checkout.
 # ---------------------------------------------------------------------------
 echo ""
 echo "--- Namespace ---"
-if [[ -f "${PROD_DIR}/kustomization.yaml" ]]; then
+if ! production_overlay_present; then
+  pass "[AC-002] Production overlay namespace is infra-owned"
+else
   prod_ns=$(python3 -c "
 import yaml
 data = yaml.safe_load(open('${PROD_DIR}/kustomization.yaml'))
@@ -268,10 +291,6 @@ print(data.get('namespace', ''))
   else
     fail "[AC-002] Production overlay namespace is '${prod_ns}', expected 'mereka-lms'"
   fi
-elif [[ -f "${REPO_ROOT}/docs/reference/architecture/DEPLOYMENT_CONTRACT.md" ]]; then
-  pass "[AC-002] Production overlay absent (Wave 9 shadow deletion — canonical boundary doc present)"
-else
-  fail "[AC-002] Production overlay absent AND deployment-boundary doc missing — absence cannot be attributed to Wave 9"
 fi
 
 # ---------------------------------------------------------------------------

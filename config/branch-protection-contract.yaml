@@ -57,10 +57,11 @@ repos:
   - repo: "Biji-Biji-Initiative/bbi-infrastructure"
     branch: main
     live:
-      enforce_admins: false
-      required_approving_review_count: 1
+      enforce_admins: true
+      required_approving_review_count: 0
       strict_status_checks: false
       required_status_checks:
+        - "eso-self-secrets-check"
         - "policy-guards"
         - "validate"
     target:
@@ -71,16 +72,16 @@ repos:
         - "auth-verify"
         - "policy-guards"
     gaps:
+      - "enforce_admins"
+      - "required_approving_review_count"
       - "strict_status_checks"
       - "required_status_checks"
-    tolerated_deviations:
-      - field: enforce_admins
-        live_value: false
-        reason: >
-          bbi-infrastructure handles live GitOps (ArgoCD). Admin bypass
-          is retained for emergency patches to cluster state. Admin
-          merges must be logged in admin-merge-exception-ledger.yaml.
-        review_date: "2026-07-01"
     notes: >
-      Admin bypass is tolerated with ledger logging. Live GitHub protection
-      still drifts from target on strict status checks and required contexts.
+      Live GitHub protection still drifts from target. As of the 2026-04-20
+      audit, admin enforcement is stronger than the stored target, approving
+      review count is lower than target, strict status checks are disabled,
+      and live required contexts are policy-guards, validate, and
+      eso-self-secrets-check instead of the target auth-verify and
+      policy-guards set. Changing the bbi-infrastructure protection policy is
+      a dedicated cross-repo governance action, not a cold-start onboarding
+      side effect.

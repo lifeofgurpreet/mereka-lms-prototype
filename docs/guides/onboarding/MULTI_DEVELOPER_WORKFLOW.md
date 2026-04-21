@@ -229,8 +229,13 @@ tutor local launch -I --skip-build
 ```bash
 # Recreate from example
 cp infrastructure/tutor/config.example.yml tutor_env/config.yml
-tutor config save  # Reconfigure
-./scripts/infra/prepare-tutor-build-context.sh --target all
+./scripts/infra/tutor-config-save.sh \
+  --set MYSQL_HOST=mysql \
+  --set MONGODB_HOST=mongodb \
+  --set REDIS_HOST=redis \
+  --set RUN_MONGODB=true \
+  --set DOCKER_IMAGE_OPENEDX=openedx:nightly \
+  --set MFE_DOCKER_IMAGE=openedx-mfe:nightly
 ```
 
 ## 📚 Documentation

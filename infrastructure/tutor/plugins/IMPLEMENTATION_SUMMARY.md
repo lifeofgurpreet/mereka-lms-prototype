@@ -9,17 +9,17 @@ Converted the 1065-line `apply-patches.sh` bash script into a proper 555-line Tu
 ### 1. Main Plugin (`infrastructure/tutor/plugins/mereka_lms.py`)
 
 **Size:** 555 lines
-**Hooks Used:** 15 ENV_PATCHES hooks + 1 CONFIG_DEFAULTS
+**Hooks Used:** ENV_PATCHES hooks + CONFIG defaults
 
 **Patches Implemented:**
 
 | Category | Patches | Hooks Used |
 |----------|---------|------------|
 | **LMS Settings** | Multi-site domains, CSRF, sessions, enterprise, discussions | `openedx-lms-production-settings` |
-| **Asset Settings** | Optional apps, safe_join monkey-patch | `openedx-lms-assets-settings`, `openedx-cms-assets-settings` |
+| **Asset Settings** | Optional apps, safe_join monkey-patch | `openedx-common-assets-settings` |
 | **Open edX Build** | Node memory, custom apps, dependencies, SASS compilation | `openedx-dockerfile-pre-assets`, `openedx-dockerfile-post-python-requirements` |
 | **Webpack** | Terser optimization | `webpack-prod-config` |
-| **MFE Build** | Node 24 toolchain, cookie domains, plugin framework, npm resilience | `mfe-dockerfile-pre-npm-install`, `mfe-dockerfile-post-npm-install`, `mfe-dockerfile-npm-install` |
+| **MFE Build** | Node 24 toolchain, cookie domains, plugin framework; npm resilience is post-render until Tutor exposes a live hook | `mfe-dockerfile-pre-npm-install`, `mfe-dockerfile-post-npm-install`, `patches/mfe-npm-install-resilience.sh` |
 | **MFE Theme** | Mereka footer, SCSS imports | `mfe-env-config` |
 | **MySQL** | Authentication plugin fix | `mysql-docker-compose` |
 | **Caddy** | Multi-domain blocks, profile API proxy | `caddy-caddyfile` |
@@ -83,14 +83,13 @@ Plugin System Architecture:
 ├─────────────────────────────────────────────────────────────┤
 │ ENV_PATCHES (15 hooks)                                      │
 │   ├─ openedx-lms-production-settings                        │
-│   ├─ openedx-lms-assets-settings                            │
-│   ├─ openedx-cms-assets-settings                            │
+│   ├─ openedx-common-assets-settings                         │
 │   ├─ openedx-dockerfile-pre-assets                          │
 │   ├─ openedx-dockerfile-post-python-requirements            │
 │   ├─ webpack-prod-config                                    │
 │   ├─ mfe-dockerfile-pre-npm-install                         │
 │   ├─ mfe-dockerfile-post-npm-install (2 hooks)              │
-│   ├─ mfe-dockerfile-npm-install                             │
+│   ├─ patches/mfe-npm-install-resilience.sh                  │
 │   ├─ mfe-env-config                                         │
 │   ├─ mysql-docker-compose                                   │
 │   ├─ caddy-caddyfile                                        │
@@ -149,7 +148,7 @@ Plugin System Architecture:
 
 6. **MFE Build**
    - Node 24 toolchain (gcc, g++, python3)
-   - npm install retry logic (3 attempts)
+   - npm install retry/fallback logic via post-render patch
    - frontend-plugin-framework with legacy peer deps
    - Cookie domain environment variables
 

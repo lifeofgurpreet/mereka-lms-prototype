@@ -4358,7 +4358,7 @@
   {
     "canonical_conflict_group": "admin-login-guide",
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-02-06",
+    "last_verified_or_updated": "2026-04-20",
     "owner": null,
     "path": "guides/admin/ADMIN_LOGIN_GUIDE.md",
     "status": "supporting",
@@ -4592,7 +4592,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-06",
+    "last_verified_or_updated": "2026-04-20",
     "owner": "Infra Team",
     "path": "guides/onboarding/LOCAL_SETUP.md",
     "status": "supporting",
@@ -4610,7 +4610,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-10",
+    "last_verified_or_updated": "2026-04-20",
     "owner": "Platform Team",
     "path": "guides/onboarding/QUICK_START_LOCAL.md",
     "status": "canonical",
@@ -4619,7 +4619,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-03-10",
+    "last_verified_or_updated": "2026-04-20",
     "owner": "Platform Team",
     "path": "guides/onboarding/README.md",
     "status": "canonical",
@@ -6538,7 +6538,34 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": "platform-release",
+    "path": "ops/evidence/authn-mfe-followups-2026-04-20.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-release",
+    "path": "ops/evidence/build-tutor-images-over-triggering-regression-2026-04-20.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-release",
     "path": "ops/evidence/enterprise-21-upstream-archived-2026-04-19.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/evidence/fastlane-containerd-race-fix-2026-04-20.md",
     "status": "supporting",
     "type": "runbook"
   },
@@ -6601,6 +6628,15 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": "platform-release",
+    "path": "ops/evidence/m0u5.10.1-diagnosis-stage-2026-04-20.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-release",
     "path": "ops/evidence/m0u5.10.1-retraction-noop-flag-2026-04-19.md",
     "status": "supporting",
     "type": "runbook"
@@ -6654,6 +6690,24 @@
     "canonical_conflict_group": null,
     "freshness_risk": "low",
     "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/evidence/observability-audit-2026-04-20.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/evidence/platform-admin-allowlist-audit-2026-04-20.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
     "owner": "platform-release",
     "path": "ops/evidence/script-first-class-tier-0-discovery-2026-04-18.md",
     "status": "supporting",
@@ -6664,7 +6718,43 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": "platform-release",
+    "path": "ops/evidence/shadow-settings-180d-audit-result-2026-04-19.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-release",
+    "path": "ops/evidence/shadow-settings-correction-addendum-2026-04-19.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-release",
     "path": "ops/evidence/shadow-settings-file-defect-2026-04-19.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-release",
+    "path": "ops/evidence/shadow-settings-mefk-1-result-2026-04-19.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-release",
+    "path": "ops/evidence/shadow-settings-source-identified-2026-04-19.md",
     "status": "supporting",
     "type": "runbook"
   },
@@ -6699,6 +6789,15 @@
     "canonical_conflict_group": null,
     "freshness_risk": "low",
     "last_verified_or_updated": null,
+    "owner": "platform-release",
+    "path": "ops/evidence/tracker-repair-diagnosis-2026-04-20.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
     "owner": null,
     "path": "ops/evidence/velero-dr-audit-2026-04-18.json",
     "status": "supporting",
@@ -6719,6 +6818,15 @@
     "last_verified_or_updated": null,
     "owner": "platform-release",
     "path": "ops/evidence/velero-rca-wk03-node-agent-2026-04-18.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-release",
+    "path": "ops/evidence/vfd5-mfe-consumption-proof-2026-04-19.md",
     "status": "supporting",
     "type": "runbook"
   },
@@ -9533,6 +9641,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-04-04",
     "owner": "Platform Team",
     "path": "reference/contracts/SMOKE_ACCOUNT_REGISTRY_CONTRACT.md",
@@ -10146,6 +10263,15 @@
     "canonical_conflict_group": null,
     "freshness_risk": "low",
     "last_verified_or_updated": null,
+    "owner": "platform-release",
+    "path": "reference/operations/MERGE_POLICY.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
     "owner": null,
     "path": "reference/operations/MFE_ANALYTICS_PLUGIN_PARITY.md",
     "status": "supporting",
@@ -10247,6 +10373,15 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "reference/operations/PROOF_REPAIR_SEPARATION_PROTOCOL.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-release",
+    "path": "reference/operations/RC_CHECKLIST.md",
     "status": "supporting",
     "type": "other"
   },
@@ -11100,6 +11235,24 @@
     "canonical_conflict_group": null,
     "freshness_risk": "low",
     "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/COLD_START_ONBOARDING_PROOF_LANE_2026-04-20.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/COLD_START_ONBOARDING_TAKEOVER_PROMPT_2026-04-20.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
     "owner": "Agent 2 | Last verified: 2026-04-10T10:53:23Z | Status: active",
     "path": "status/active/CONTROL_PLANE_AUTHORITY_MAP_2026-04-10.md",
     "status": "supporting",
@@ -11111,6 +11264,15 @@
     "last_verified_or_updated": null,
     "owner": "platform-release",
     "path": "status/active/CURRENT-OPERATOR-STATE.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": "platform-release",
+    "path": "status/active/CURRENT-OPERATOR-STATE.snapshot.md",
     "status": "supporting",
     "type": "status"
   },
@@ -11372,6 +11534,15 @@
     "last_verified_or_updated": "2026-02-13",
     "owner": null,
     "path": "status/active/NEXT-PHASE-ROADMAP.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": "2026-04-20",
+    "owner": "platform-release",
+    "path": "status/active/NEXT-SPRINT-QUEUE.md",
     "status": "supporting",
     "type": "status"
   },

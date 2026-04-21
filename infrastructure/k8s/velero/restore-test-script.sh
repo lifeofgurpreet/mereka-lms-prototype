@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @covers AC-005, AC-006, AC-019
+# @covers AC-005, AC-006, AC-007, AC-019
 # @spec: disaster-recovery-business-continuity_spec.md
 set -euo pipefail
 

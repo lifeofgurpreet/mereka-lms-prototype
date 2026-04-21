@@ -3,7 +3,7 @@
 This document classifies every patch module in `infrastructure/tutor/patches/` and describes
 its relationship to the native Tutor hooks/filters in `infrastructure/tutor/plugins/mereka_lms.py`.
 
-**Maintained as of**: 2026-02-27
+**Maintained as of**: 2026-04-20
 
 ## Classification Key
 
@@ -141,10 +141,53 @@ its relationship to the native Tutor hooks/filters in `infrastructure/tutor/plug
 |-------|-------|
 | LOC | 927 |
 | Classification | `FILESYSTEM` |
-| What it does | Residual rendered Open edX Dockerfile normalization only. It now owns the fast-build translation-pull wrappers that still need positional post-render surgery in the rendered Open edX Dockerfile. It no longer owns the Tutor Dockerfile template target, rendered `docker-compose.yml`, `production.py`, `assets.py`, `lms.conf`, or Caddyfile rewrites, and it no longer owns build-context mirror sync for theme assets, custom apps, or the multi-tenancy plugin. It also no longer owns the duplicate brand compile tail, conditional webpack skip, legacy translation preflight scrubbers, local requirements reinstall scrubber, legacy base requirements pin scrubbers, stale openedx-i18n archive/version rewrites, ancient pip bootstrap rewrite, duplicate production-stage custom-app reinjection scrubbers, dead compilejsi18n source rewrites, obsolete edx-platform cherry-pick scrubbers, escaped Google Fonts regex rewrites, raw pyenv clone compatibility rewrites, stale target scans, or the dead MySQL auth compatibility rewrite. The verifier now enforces those absences directly. |
-| Tutor hook equivalent | Most of the former scope is source-owned elsewhere: Dockerfile install steps are in `openedx-dockerfile-post-python-requirements`; LMS settings in `openedx-lms-production-settings`; assets settings in `openedx-lms-assets-settings` + `openedx-cms-assets-settings`; edge config in `nginx-lms-config` and `caddy-caddyfile`; and build-context mirror sync in `apply-patches.sh`. The remaining fast-build translation wrappers still mutate rendered `RUN` lines after render, so they do not map cleanly to additive Tutor hooks yet. |
-| Why it must stay bash | 1. The remaining Dockerfile surgery is positional and non-additive. 2. The wrappers patch rendered `RUN` lines after Tutor emits the rendered Open edX Dockerfile. 3. The verifier now depends on this module staying tightly scoped so stale template or rendered-target scans do not creep back in. |
+| What it does | Residual rendered Open edX Dockerfile normalization only. It now owns the base/assets `uv pip --no-build-isolation` normalization, plain-pip `uwsgi` fallback, production-stage build-profile arg, translation settings preflight, `openedx_advanced_xblocks` source carry before translation discovery, and fast-build translation command wrappers that still need positional post-render surgery in the rendered Open edX Dockerfile. It no longer owns the Tutor Dockerfile template target, rendered `docker-compose.yml`, `production.py`, `assets.py`, `lms.conf`, or Caddyfile rewrites, and it no longer owns build-context mirror sync for theme assets, custom apps, or the multi-tenancy plugin. It also no longer owns the duplicate brand compile tail, conditional webpack skip, legacy translation preflight scrubbers, local requirements reinstall scrubber, legacy base requirements pin scrubbers, stale openedx-i18n archive/version rewrites, ancient pip bootstrap rewrite, duplicate production-stage custom-app reinjection scrubbers, obsolete edx-platform cherry-pick scrubbers, escaped Google Fonts regex rewrites, raw pyenv clone compatibility rewrites, stale target scans, static payload trim, final runtime prune-stage rewrites, or the dead MySQL auth compatibility rewrite. The verifier now enforces those boundaries directly. |
+| Tutor hook equivalent | Most of the former scope is source-owned elsewhere: support dependency install steps are in `openedx-dockerfile-post-python-requirements`; LMS settings in `openedx-lms-production-settings`; asset build settings in `openedx-common-assets-settings`; edge config in `nginx-lms-config` and `caddy-caddyfile`; and build-context mirror sync in `apply-patches.sh`. Tutor 21 exposes no additive hook before the base/assets install, `uwsgi` install, or production translation block, so those remaining cold-build compatibility changes still mutate rendered lines after render. |
+| Why it must stay bash | 1. The remaining Dockerfile surgery is positional and non-additive. 2. Base/assets install, `uwsgi`, the profile-aware translation block, and advanced-xblock source carry must be inserted before later Tutor hooks exist in Tutor 21. 3. The verifier now depends on this module staying tightly scoped so stale template or rendered-target scans do not creep back in. |
 | Risk of conversion | MEDIUM — the remaining scope is much smaller, but it still patches rendered Dockerfile text in place and needs render-contract proof if moved. |
+
+#### Remaining `build-optimizations.sh` Mutation Ledger
+
+This file is a controlled compatibility layer, not a second source generator.
+The J-exit target is raw Tutor render -> explicit allowed delta -> artifact.
+Do not add another post-render mutation unless the change is classified as
+`authority correction`, `obsolete expectation removal`, `temporary waiver`, or
+`intentional architecture change`, and this ledger is updated in the same PR.
+
+| Mutation | Authority class | Why it remains post-render | Retirement trigger | Guard |
+|---|---|---|---|---|
+| `base-assets-no-build-isolation`: base/assets `uv pip --no-build-isolation` normalization | temporary compatibility layer | Tutor 21 emits the install line before any live local hook can replace it without text surgery. | Tutor/upstream exposes a source hook or bake-owned dependency install stage that can express the exact install contract before render. | `verify-tutor-config.sh`, `verify-cold-start-onboarding-contract.sh`, `verify-build-optimizations-render-delta-contract.sh` |
+| `uwsgi-plain-pip-fallback`: plain-pip `uwsgi` fallback | temporary compatibility layer | The rendered install path needs a non-PEP-517 fallback for the cold-build runtime dependency; current source hooks cannot replace the emitted line in place. | Dependency install semantics move to a source hook, upstream image, or bake stage with equivalent cold-build proof. | `verify-tutor-config.sh`, `verify-build-optimizations-render-delta-contract.sh` |
+| `production-build-profile-arg`: production-stage `ARG MEREKA_BUILD_PROFILE=proof` | intentional architecture change | The profile switch is a repo-owned build behavior used to distinguish proof/fast translation behavior in the rendered production stage. | Bake/HCL owns the profile contract directly and render no longer needs a Dockerfile arg injection. | `verify-cold-start-onboarding-contract.sh`, benchmark workflow proof |
+| `translation-settings-preflight`: translation settings preflight | intentional architecture change | Open edX translation discovery fails late without repo-owned settings validation before the production translation commands. | Translation preflight becomes source-owned through a Tutor hook or an upstream-supported build step before translation discovery. | `verify-tutor-config.sh`, true-cold benchmark proof |
+| `advanced-xblocks-production-copy`: advanced XBlock source carry before translation discovery | intentional architecture change | Translation discovery needs source files before the rendered production stage reaches them. | XBlock source placement becomes bake/source-hook owned before translation discovery. | `verify-cold-start-onboarding-contract.sh`, true-cold benchmark proof |
+| `fast-profile-translation-wrappers`: fast-profile translation command wrappers | temporary compatibility layer | The wrapper changes existing rendered translation command behavior; current Tutor hooks cannot replace those command lines cleanly. | Bake/HCL or a source hook owns fast/proof translation semantics without command-line text rewrites. | `verify-tutor-config.sh`, benchmark workflow proof |
+
+Owner: platform build authority lane. Review date: 2026-04-27 or before merge
+of any PR that changes `build-optimizations.sh`.
+
+---
+
+### `dependency-image-mirrors.sh`
+
+| Field | Value |
+|-------|-------|
+| Classification | `FILESYSTEM` temporary compatibility layer |
+| What it does | Rewrites only upstream hardcoded Docker Hub dependency image references in rendered Open edX/MFE Dockerfiles to equivalent `mirror.gcr.io` references: Dockerfile frontend, Open edX Ubuntu base, Open edX `powerman/dockerize`, and MFE Node base. |
+| Tutor hook equivalent | None in Tutor 21/tutormfe for the Dockerfile frontend line, base `FROM` image, or `COPY --from` helper image before render. Tutor config covers exposed service/helper image refs, but not these emitted Dockerfile dependency refs. |
+| Why it must stay bash | The rendered lines are emitted before any additive hook can express them, and BuildKit registry mirror config falls back to Docker Hub for these digests under ARC rate limits. |
+| Risk of conversion | LOW if kept exact-match only. Any expansion must add a fixture and update this inventory. |
+
+#### Remaining `dependency-image-mirrors.sh` Mutation Ledger
+
+Allowed render-delta id: `dependency-image-mirror-normalization`.
+
+| Mutation | Authority class | Why it remains post-render | Retirement trigger | Guard |
+|---|---|---|---|---|
+| Dockerfile frontend mirror: `# syntax=mirror.gcr.io/docker/dockerfile:1` | temporary compatibility layer | The syntax directive is emitted by upstream templates and resolved before normal build stages. | Tutor/tutormfe exposes a source setting for Dockerfile frontend image, or CI can authenticate Docker Hub without affecting developer cold start. | `test-dependency-image-mirrors-patch.sh`, `verify-cold-start-onboarding-contract.sh`, app-cache-cold benchmark proof |
+| Open edX Ubuntu base mirror | temporary compatibility layer | Tutor 21 emits `FROM docker.io/ubuntu:22.04 AS minimal`; no config key owns this base ref. | Tutor exposes a base-image config/hook or upstream switches to non-rate-limited acquisition. | same |
+| Open edX dockerize helper mirror | temporary compatibility layer | Tutor 21 emits `COPY --from=docker.io/powerman/dockerize:0.19.0`; no config key owns this helper ref. | Tutor exposes helper-image config/hook or upstream switches to non-rate-limited acquisition. | same |
+| MFE Node base mirror | temporary compatibility layer | tutormfe 21 emits `FROM docker.io/node:24.11.0-bullseye-slim AS base`; no hook exists before the base stage. | tutormfe exposes a base-image setting/hook or upstream switches to non-rate-limited acquisition. | same |
 
 ---
 
@@ -176,8 +219,9 @@ its relationship to the native Tutor hooks/filters in `infrastructure/tutor/plug
 | `webpack-memory.sh` | FILESYSTEM | Active — memory limits + dedup |
 | `footer-component.sh` | FILESYSTEM | Active — asset sync to build context |
 | `brand-package.sh` | FILESYSTEM | Active — OEP-48 brand package sync to MFE build context |
-| `apply-patches.sh:inline retry wrapper` | FILESYSTEM | Active — sole remaining rendered MFE Dockerfile rewrite |
-| `build-optimizations.sh` | FILESYSTEM | Active — residual Open edX Dockerfile translation wrapper surgery |
+| `dependency-image-mirrors.sh` | FILESYSTEM | Active — exact dependency-acquisition mirror normalization for upstream hardcoded Docker Hub refs |
+| `apply-patches.sh:inline retry wrapper` | FILESYSTEM | Active — rendered MFE pull-translations retry wrapper |
+| `build-optimizations.sh` | FILESYSTEM | Active — residual Open edX cold-build compatibility and translation preflight/wrapper surgery |
 | `mfe-node.sh` | REMOVED | Removed post-rebase; replaced by Tutor plugin hooks + MFE build-context sync |
 | `mysql-auth.sh` | REMOVED | Deleted 2026-02-27 → `mereka_lms.py` |
 | `domain-names.sh` | REMOVED | Deleted 2026-02-27 → `mereka_lms.py` |
@@ -196,8 +240,7 @@ corresponding bash patches. These survive `tutor config save` without any post-r
 | ENV_PATCH name | Replaces |
 |----------------|---------- |
 | `openedx-lms-production-settings` | mysql-auth, domain-names, csrf-origins, prometheus-metrics (settings portions) |
-| `openedx-lms-assets-settings` | build-optimizations (assets.py portion) |
-| `openedx-cms-assets-settings` | build-optimizations (assets.py portion) |
+| `openedx-common-assets-settings` | build-optimizations (assets.py portion) |
 | `openedx-dockerfile-pre-python-requirements` | build-optimizations (pip filter) |
 | `openedx-dockerfile-python-requirements` | build-optimizations (pip install) |
 | `openedx-dockerfile-pre-assets` | webpack-memory (NODE_OPTIONS), source-owned brand compile + Google Fonts stripping |
@@ -206,7 +249,7 @@ corresponding bash patches. These survive `tutor config save` without any post-r
 | `webpack-prod-config` | webpack-memory (Terser, requireCompatConfig) |
 | `mfe-dockerfile-pre-npm-install` | historical `mfe-node` toolchain / MFE Dockerfile customisation |
 | `mfe-dockerfile-post-npm-install` | historical `mfe-node` cookie env, frontend-plugin-framework, and related MFE Dockerfile customisation |
-| `mfe-dockerfile-npm-install` | historical `mfe-node` npm resilience |
+| `mfe-dockerfile-npm-install` | historical `mfe-node` npm resilience; retired in Tutor 21 path because the current template does not consume this patch |
 | `mfe-env-config-buildtime-imports` | footer-component (SCSS import) |
 | `mfe-env-config-runtime-definitions` | footer-component (MerekaFooter JSX — T101) |
 | `mysql-docker-compose` | mysql-auth |
@@ -214,17 +257,18 @@ corresponding bash patches. These survive `tutor config save` without any post-r
 | `nginx-lms-config` | domain-names (nginx), prometheus-metrics (nginx), build-optimizations (health) |
 | `credentials-dockerfile-post-python-requirements` | (credentials VC issuer) |
 
-### Dead Patches (registered but no template consumes them)
+### Retired / Dead Patch Names
 
-These patch names are registered in `mereka_lms.py` via `ENV_PATCHES.add_item()` but
-**no Tutor template contains `{{ patch("name") }}`** for them — content is silently discarded.
+These patch names are either historical Tutor hook names or retired plugin hooks.
+Do not register them as live source-owned hooks unless `tutor config save` proves
+that the rendered template consumes them.
 
 | Dead Patch Name | Content | Impact |
 | --- | --- | --- |
-| `openedx-cms-assets-settings` | CMS safe_join monkey-patch | CMS collectstatic may fail on edge-case theme paths |
+| `openedx-lms-assets-settings`, `openedx-cms-assets-settings` | old LMS/CMS safe_join monkey-patch hook names | Tutor 21 ignores them; the live hook is `openedx-common-assets-settings` |
 | `openedx-dockerfile-npm-install-cmd` | npm install lockfile drift override | Builds fall back to default `npm ci` |
 | `webpack-prod-config` | Terser parallel=false | Parallel Terser may OOM on constrained builders |
-| `mfe-dockerfile-npm-install` | npm retry + resilience config | MFE builds use default npm install without retries |
+| `mfe-dockerfile-npm-install` | npm retry + resilience config | Tutor 21 MFE templates do not consume it; npm resilience is currently owned by `patches/mfe-npm-install-resilience.sh` |
 
 **Fix approach**: These need to be converted to Tutor filter hooks (`ENV_TEMPLATE_*`)
 or filesystem patches in `apply-patches.sh`. Tracked for future cleanup.

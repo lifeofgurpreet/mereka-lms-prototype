@@ -32,31 +32,17 @@ for _m in list(_sys.modules.values()):
 """.strip()
 
 ###############################################################################
-# LMS Assets Settings Patches (for collectstatic)
+# Common LMS/CMS asset settings patches (for collectstatic)
 ###############################################################################
 
 _register_env_patch(
-    "openedx-lms-assets-settings",
+    "openedx-common-assets-settings",
     f"""
 {_REDWOOD_OPTIONAL_APPS_SNIPPET}
 
 # Monkey-patch safe_join to be permissive during asset build.
 # This fixes collectstatic SuspiciousFileOperation errors when CSS files
 # reference relative paths like ../../css/images/correct-icon.png
-{_SAFE_JOIN_MONKEYPATCH_SNIPPET}
-""",
-)
-
-###############################################################################
-# CMS Assets Settings Patches
-###############################################################################
-
-_register_env_patch(
-    "openedx-cms-assets-settings",
-    f"""
-{_REDWOOD_OPTIONAL_APPS_SNIPPET}
-
-# Same safe_join patch for CMS
 {_SAFE_JOIN_MONKEYPATCH_SNIPPET}
 """,
 )

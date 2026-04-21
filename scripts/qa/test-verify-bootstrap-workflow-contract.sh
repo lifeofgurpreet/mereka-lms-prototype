@@ -8,7 +8,7 @@ VERIFY="$ROOT_DIR/scripts/qa/verify-bootstrap-workflow-contract.sh"
 tmpdir="$(mktemp -d -t verify-bootstrap-workflow-contract.XXXXXX)"
 trap 'rm -rf "$tmpdir"' EXIT
 
-mkdir -p "$tmpdir/.github/workflows" "$tmpdir/scripts/infra"
+mkdir -p "$tmpdir/.github/workflows" "$tmpdir/scripts/ci" "$tmpdir/scripts/infra"
 
 cat >"$tmpdir/scripts/infra/tutor-config-save.sh" <<'EOF'
 #!/usr/bin/env bash
@@ -24,6 +24,19 @@ EOF
 
 chmod +x "$tmpdir/scripts/infra/tutor-config-save.sh" "$tmpdir/scripts/infra/verify-local-bootstrap-readiness.sh"
 
+cat >"$tmpdir/scripts/ci/install-docker-compose.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+compose_arch="x86_64"
+asset="docker-compose-linux-${compose_arch}"
+curl -fsSLo "$asset" "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/${asset}"
+curl -fsSLo "$asset.sha256" "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/${asset}.sha256"
+sha256sum -c "$asset.sha256"
+docker compose version
+EOF
+
+chmod +x "$tmpdir/scripts/ci/install-docker-compose.sh"
+
 write_pass_fixture() {
   cat >"$tmpdir/.github/workflows/bootstrap-local-readiness.yml" <<'EOF'
 name: Bootstrap Local Readiness
@@ -31,6 +44,8 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+env:
+  DOCKER_COMPOSE_VERSION: v5.1.3
 concurrency:
   group: bootstrap-local-readiness
   cancel-in-progress: false
@@ -46,16 +61,50 @@ jobs:
     runs-on: ${{ needs.select-bootstrap-lane.outputs.runner_label }}
     steps:
       - uses: actions/checkout@v4
-      - run: ./scripts/infra/tutor-config-save.sh
+      - name: Ensure Docker Compose CLI
+        run: ./scripts/ci/install-docker-compose.sh
+      - run: |
+          ./scripts/infra/tutor-config-save.sh \
+            --set DOCKER_REGISTRY=mirror.gcr.io/ \
+            --set DOCKER_IMAGE_CADDY=mirror.gcr.io/library/caddy:2.7.4 \
+            --set DOCKER_IMAGE_MEILISEARCH=mirror.gcr.io/getmeili/meilisearch:v1.8.4 \
+            --set DOCKER_IMAGE_MONGODB=mirror.gcr.io/library/mongo:7.0.28 \
+            --set DOCKER_IMAGE_MYSQL=mirror.gcr.io/library/mysql:8.4.0 \
+            --set DOCKER_IMAGE_REDIS=mirror.gcr.io/library/redis:7.4.5 \
+            --set DOCKER_IMAGE_SMTP=mirror.gcr.io/devture/exim-relay:4.96-r1-0
       - run: |
           COMPOSE_ARGS=(
             -f "$TUTOR_ROOT/env/local/docker-compose.yml"
             -f "$TUTOR_ROOT/env/local/docker-compose.prod.yml"
           )
-          docker compose "${COMPOSE_ARGS[@]}" config --images > expected-compose-images.txt
+          compose() {
+            if docker compose version >/dev/null 2>&1; then
+              docker compose "$@"
+            elif command -v docker-compose >/dev/null 2>&1; then
+              docker-compose "$@"
+            else
+              echo "Neither docker compose nor docker-compose is available on this runner" >&2
+              return 127
+            fi
+          }
+          compose "${COMPOSE_ARGS[@]}" config --images > expected-compose-images.txt
       - run: |
+          pull_with_retry() {
+            local image_ref="$1"
+            local attempt
+            for attempt in 1 2 3; do
+              if timeout 20m docker pull "$image_ref"; then
+                return 0
+              fi
+              if [[ "$attempt" -eq 3 ]]; then
+                echo "docker pull failed after ${attempt} attempts for ${image_ref}" >&2
+                return 1
+              fi
+              sleep $((attempt * 20))
+            done
+          }
           while IFS= read -r image_ref; do
-            timeout 20m docker pull "$image_ref"
+            pull_with_retry "$image_ref"
             echo "$image_ref|sha256:abc" >> pulled-image-ids.txt
           done < expected-compose-images.txt
       - run: tutor local launch -I --skip-build
@@ -63,6 +112,29 @@ jobs:
           docker inspect tutor_local-lms-1 --format '{{.Name}}|{{.Config.Image}}|{{.Image}}' > actual-running-images.txt
           echo PASS > bootstrap-image-provenance-check.txt
       - run: ./scripts/infra/verify-local-bootstrap-readiness.sh
+      - if: ${{ always() }}
+        run: |
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          secret_key = re.compile(r"(PASSWORD|SECRET|TOKEN|PRIVATE_KEY|API_KEY|MASTER_KEY|RSA_PRIVATE_KEY)", re.I)
+          lines = []
+          skip_block = False
+          for line in Path("config.yml").read_text(encoding="utf-8").splitlines():
+              if skip_block and line.startswith((" ", "-")):
+                  continue
+              if skip_block and line.strip() == "":
+                  continue
+              if skip_block:
+                  skip_block = False
+              key = line.split(":", 1)[0].strip() if ":" in line else ""
+              if key and secret_key.search(key):
+                  lines.append(f"{key}: <redacted>")
+                  skip_block = True
+              else:
+                  lines.append(line)
+          Path("config.redacted.yml").write_text("\n".join(lines) + "\n", encoding="utf-8")
+          PY
       - if: ${{ always() }}
         uses: actions/upload-artifact@v4
       - if: ${{ always() }}
@@ -99,9 +171,57 @@ import os
 
 wf = Path(os.environ["TMP_WF"])
 text = wf.read_text(encoding="utf-8")
-text = text.replace('          docker compose "${COMPOSE_ARGS[@]}" config --images > expected-compose-images.txt\n', '', 1)
+text = text.replace('        run: ./scripts/ci/install-docker-compose.sh\n', '        run: docker compose version\n', 1)
+wf.write_text(text, encoding="utf-8")
+PY
+run_expect_fail "missing Docker Compose CLI bootstrap is rejected"
+
+write_pass_fixture
+TMP_WF="$tmpdir/.github/workflows/bootstrap-local-readiness.yml" python3 - <<'PY'
+from pathlib import Path
+import os
+
+wf = Path(os.environ["TMP_WF"])
+text = wf.read_text(encoding="utf-8")
+text = text.replace('            --set DOCKER_IMAGE_MONGODB=mirror.gcr.io/library/mongo:7.0.28 \\\n', '', 1)
+wf.write_text(text, encoding="utf-8")
+PY
+run_expect_fail "missing public image mirror contract is rejected"
+
+write_pass_fixture
+TMP_WF="$tmpdir/.github/workflows/bootstrap-local-readiness.yml" python3 - <<'PY'
+from pathlib import Path
+import os
+
+wf = Path(os.environ["TMP_WF"])
+text = wf.read_text(encoding="utf-8")
+text = text.replace('              if skip_block and line.strip() == "":\n                  continue\n', '', 1)
+wf.write_text(text, encoding="utf-8")
+PY
+run_expect_fail "missing multi-line config redaction is rejected"
+
+write_pass_fixture
+TMP_WF="$tmpdir/.github/workflows/bootstrap-local-readiness.yml" python3 - <<'PY'
+from pathlib import Path
+import os
+
+wf = Path(os.environ["TMP_WF"])
+text = wf.read_text(encoding="utf-8")
+text = text.replace('          compose "${COMPOSE_ARGS[@]}" config --images > expected-compose-images.txt\n', '', 1)
 wf.write_text(text, encoding="utf-8")
 PY
 run_expect_fail "missing rendered compose image resolution is rejected"
+
+write_pass_fixture
+TMP_WF="$tmpdir/.github/workflows/bootstrap-local-readiness.yml" python3 - <<'PY'
+from pathlib import Path
+import os
+
+wf = Path(os.environ["TMP_WF"])
+text = wf.read_text(encoding="utf-8")
+text = text.replace('            pull_with_retry "$image_ref"\n', '            timeout 20m docker pull "$image_ref"\n', 1)
+wf.write_text(text, encoding="utf-8")
+PY
+run_expect_fail "missing bootstrap image pull retry is rejected"
 
 echo "OK"

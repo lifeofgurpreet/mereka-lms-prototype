@@ -3,7 +3,8 @@
 # into the Tutor MFE Indigo build context.
 
 apply_brand_package_patch() {
-  local MFE_INDIGO_DIR="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/indigo"
+  local tutor_root="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
+  local MFE_INDIGO_DIR="$tutor_root/env/plugins/mfe/build/mfe/indigo"
   local SOURCE_DIR="$REPO_ROOT/infrastructure/tutor/brand-mereka"
   local THEME_SOURCE_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme"
   local THEME_TARGET_DIR="$MFE_INDIGO_DIR/theme"

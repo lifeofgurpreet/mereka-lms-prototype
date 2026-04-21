@@ -73,10 +73,15 @@ velero backup create pre-op-mereka-lms-$(date +%Y%m%d-%H%M) \
      --from-backup <latest-backup> \
      --namespace-mappings mereka-lms:mereka-lms-dr
    ```
-   Preferred automated path for ongoing monthly drills:
+   Preferred automated path for ongoing monthly drills is the infra-owned
+   restore-test CronJob. From this repo, verify its results:
    ```bash
-   ./scripts/infra/fix-velero-restore-test.sh
+   STRICT_RUNTIME=1 ./scripts/qa/audit-velero-alert-pipeline.sh
+   STRICT=1 ./scripts/qa/verify-restore-drill.sh --namespace velero-restore-test
    ```
+   If the CronJob, image, or ConfigMap is wrong, repair it in the GitOps repo
+   that owns Velero. Do not live-patch ArgoCD-managed Velero resources from this
+   app repo.
 3. **Verify**
    ```bash
    ./scripts/qa/public-health-check.sh prod

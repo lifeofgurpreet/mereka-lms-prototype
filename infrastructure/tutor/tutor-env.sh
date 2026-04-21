@@ -8,7 +8,9 @@ export OPENEDX_RELEASE="nightly"
 # The primary authority is the consolidated mereka_lms plugin stack plus the
 # retired standalone mfe_oauth_fix compatibility shim.
 PLUGIN_SRC_DIR="$REPO_ROOT/infrastructure/tutor/plugins"
-PLUGIN_DIR="${TUTOR_PLUGINS_DIR:-$HOME/.local/share/tutor-plugins}"
+PLUGIN_DIR="${TUTOR_PLUGINS_ROOT:-${TUTOR_PLUGINS_DIR:-$HOME/.local/share/tutor-plugins}}"
+export TUTOR_PLUGINS_ROOT="$PLUGIN_DIR"
+export TUTOR_PLUGINS_DIR="$PLUGIN_DIR"
 
 if [ -f "$PLUGIN_SRC_DIR/mereka_lms.py" ]; then
   mkdir -p "$PLUGIN_DIR"
@@ -51,10 +53,14 @@ if [ -f "$PLUGIN_SRC_DIR/mereka_lms.py" ]; then
   fi
 fi
 
-if [ -d "$REPO_ROOT/.venv" ]; then
+if [ -n "${VIRTUAL_ENV:-}" ] && [ -x "$VIRTUAL_ENV/bin/tutor" ]; then
+  :
+elif [ -d "$REPO_ROOT/.venv" ]; then
   # shellcheck disable=SC1090
   source "$REPO_ROOT/.venv/bin/activate"
+elif command -v tutor >/dev/null 2>&1; then
+  :
 else
-  echo "Python virtualenv not found at $REPO_ROOT/.venv" >&2
+  echo "Tutor virtualenv not found. Expected active VIRTUAL_ENV or $REPO_ROOT/.venv" >&2
   exit 1
 fi

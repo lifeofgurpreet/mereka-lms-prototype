@@ -20,6 +20,45 @@ CANONICAL_APT_HARDENING_BLOCK = (
     "  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends --fix-missing git"
 )
 
+UPSTREAM_BASE_APT_BLOCK = (
+    "RUN apt update \\\n"
+    "  && apt install -y git \\\n"
+    "    # required for cwebp-bin\n"
+    "    gcc libgl1 libxi6 make \\\n"
+    "    # required for gifsicle, mozjpeg, and optipng (on arm)\n"
+    "    autoconf libtool pkg-config zlib1g-dev \\\n"
+    "    # required for node-sass (on arm)\n"
+    "    python g++ \\\n"
+    "    # required for image-webpack-loader (on arm)\n"
+    "    libpng-dev \\\n"
+    "    # required for building node-canvas (on arm, for authoring)\n"
+    "    # https://www.npmjs.com/package/canvas\n"
+    "    libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev"
+)
+
+CANONICAL_BASE_APT_BLOCK = (
+    "RUN printf '%s\\n' \\\n"
+    "    'Acquire::Retries \"6\";' \\\n"
+    "    'Acquire::http::Timeout \"30\";' \\\n"
+    "    'Acquire::https::Timeout \"30\";' \\\n"
+    "    'Acquire::ForceIPv4 \"true\";' \\\n"
+    "    > /etc/apt/apt.conf.d/80-retries && \\\n"
+    "    apt-get update \\\n"
+    "  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends --fix-missing git \\\n"
+    "    # required for cwebp-bin\n"
+    "    gcc libgl1 libxi6 make \\\n"
+    "    # required for gifsicle, mozjpeg, and optipng (on arm)\n"
+    "    autoconf libtool pkg-config zlib1g-dev \\\n"
+    "    # required for node-sass (on arm)\n"
+    "    python3 g++ python3-distutils \\\n"
+    "    # required for image-webpack-loader (on arm)\n"
+    "    libpng-dev \\\n"
+    "    # required for building node-canvas (on arm, for authoring)\n"
+    "    # https://www.npmjs.com/package/canvas\n"
+    "    libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev \\\n"
+    "  && rm -rf /var/lib/apt/lists/*"
+)
+
 
 def _replace_count(pattern: str, repl: str, text: str) -> tuple[str, int]:
     compiled = re.compile(pattern, re.S | re.M)
@@ -31,9 +70,21 @@ def _replace_literal(pattern: str, repl: str, text: str) -> tuple[str, int]:
     return compiled.subn(lambda _: repl, text)
 
 
+def _replace_exact(needle: str, repl: str, text: str) -> tuple[str, int]:
+    count = text.count(needle)
+    return text.replace(needle, repl), count
+
+
 def prune_dockerfile(path: Path) -> int:
     text = path.read_text(encoding="utf-8")
     total = 0
+
+    text, count = _replace_exact(
+        UPSTREAM_BASE_APT_BLOCK,
+        CANONICAL_BASE_APT_BLOCK,
+        text,
+    )
+    total += count
 
     text, count = _replace_literal(
         r"RUN printf 'Acquire::Retries \"5\";\\nAcquire::http::Timeout \"120\";\\n' > /etc/apt/apt\.conf\.d/80-retries && \\\n    apt-get update \\\n  && apt-get install -y --fix-broken git",
@@ -76,6 +127,12 @@ def prune_dockerfile(path: Path) -> int:
 
     text, count = _replace_count(
         r"\nARG ENABLE_NEW_RELIC=false\nENV ENABLE_NEW_RELIC=\$\{ENABLE_NEW_RELIC\}\n",
+        "\n",
+        text,
+    )
+    total += count
+    text, count = _replace_count(
+        r"\nARG ENABLE_NEW_RELIC=false\n",
         "\n",
         text,
     )

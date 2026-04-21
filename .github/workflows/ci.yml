@@ -1094,6 +1094,11 @@ jobs:
               fi
               HEAD_SHA="${{ github.sha }}"
               ;;
+            workflow_dispatch)
+              git fetch --no-tags --prune origin main
+              BASE_SHA="$(git merge-base HEAD origin/main || true)"
+              HEAD_SHA="$(git rev-parse HEAD)"
+              ;;
           esac
 
           if [ -n "$BASE_SHA" ] && [ -n "$HEAD_SHA" ]; then
@@ -1105,7 +1110,9 @@ jobs:
               --github-actions \
               --only-verified
           else
+            printf '^\\.git/' > "$RUNNER_TEMP/trufflehog-exclude-paths.txt"
             trufflehog filesystem . \
+              --exclude-paths "$RUNNER_TEMP/trufflehog-exclude-paths.txt" \
               --fail \
               --no-update \
               --github-actions \

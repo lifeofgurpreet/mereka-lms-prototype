@@ -28,7 +28,6 @@ import './mereka/mereka.scss';
 // avoid hardcoding it into the bundle at build time.
 import * as Sentry from '@sentry/browser';
 import { subscribe, APP_READY } from '@edx/frontend-platform';
-import { getConfig } from '@edx/frontend-platform/config';
 
 subscribe(APP_READY, () => {
   try {

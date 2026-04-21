@@ -43,6 +43,10 @@ export TUTOR_ROOT="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
 PLUGIN_SRC_DIR="$REPO_ROOT/infrastructure/tutor/plugins"
 PLUGIN_DIR="${TUTOR_PLUGINS_DIR:-$HOME/.local/share/tutor-plugins}"
 SYNC_PLUGIN_MIRROR_SCRIPT="$REPO_ROOT/scripts/infra/sync-tutor-plugin-mirror.sh"
+CI_DEPENDENCY_IMAGE_ARGS=(
+  --set DOCKER_REGISTRY=mirror.gcr.io/
+  --set DOCKER_IMAGE_CADDY=mirror.gcr.io/library/caddy:2.7.4
+)
 
 # Clean ALL stale Tutor state from previous builds on PVC-backed runners.
 # Without this, Python's module cache and Tutor's config cache serve stale
@@ -75,20 +79,23 @@ case "$TARGET" in
     tutor config save \
       --set LMS_HOST=academyv2.mereka.io \
       --set CMS_HOST=studio.academyv2.mereka.io \
-      --set ENABLE_HTTPS=true
+      --set ENABLE_HTTPS=true \
+      "${CI_DEPENDENCY_IMAGE_ARGS[@]}"
     ;;
   mfe)
     tutor config save \
       --set LMS_HOST=academyv2.mereka.io \
       --set MFE_HOST=apps.academyv2.mereka.io \
-      --set ENABLE_HTTPS=true
+      --set ENABLE_HTTPS=true \
+      "${CI_DEPENDENCY_IMAGE_ARGS[@]}"
     ;;
   all)
     tutor config save \
       --set LMS_HOST=academyv2.mereka.io \
       --set CMS_HOST=studio.academyv2.mereka.io \
       --set MFE_HOST=apps.academyv2.mereka.io \
-      --set ENABLE_HTTPS=true
+      --set ENABLE_HTTPS=true \
+      "${CI_DEPENDENCY_IMAGE_ARGS[@]}"
     ;;
 esac
 

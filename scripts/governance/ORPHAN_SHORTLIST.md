@@ -83,7 +83,7 @@ grouped at the bottom.
 | `scripts/infra/verify-k8s-overrides.sh` | Verifies K8s overlay overrides are applied. | **ARCHIVE** (superseded by CI verification scripts) |
 | `scripts/infra/verify-prometheus-integration.sh` | Verifies Prometheus scrape targets are reachable. | **ARCHIVE** (superseded by CI observability scripts) |
 | `scripts/infra/docker-cleanup.sh` | Runs `docker system prune` and shows disk usage. | **ARCHIVE** (trivial helper) |
-| `scripts/infra/fix-velero-restore-test.sh` | Patches Velero restore-test CronJob to use a repo-managed script and correct image. | **REGISTER** |
+| `scripts/infra/fix-velero-restore-test.sh` | Patches ArgoCD-managed Velero restore-test resources from the app repo. | **RESTRICT** (GitOps violation; repair in bbi-infrastructure) |
 | `scripts/infra/monitor-atlas-allowlist-vps.sh` | Continuously monitors Atlas allowlist for VPS IP drift. | **REGISTER** |
 | `scripts/infra/check-atlas-allowlist-vps.sh` | One-shot check of Atlas allowlist vs. current VPS IP. | **REGISTER** |
 | `scripts/infra/check-pr-handoff-discipline.sh` | Checks PR handoff discipline (open PRs, CI status, reviewer assignment). | **REGISTER** |

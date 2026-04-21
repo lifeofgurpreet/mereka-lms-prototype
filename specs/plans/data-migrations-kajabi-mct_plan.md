@@ -498,7 +498,7 @@ Before starting implementation:
 
 #### Test (Phase 4)
 
-- [ ] **[M]** Run full restore drill via `./scripts/infra/fix-velero-restore-test.sh` and verify end-to-end | AC: #5, #6,#7 | Depends: CronJob hardening
+- [ ] **[M]** Run the infra-owned restore-test CronJob and verify end-to-end with `STRICT=1 ./scripts/qa/verify-restore-drill.sh --namespace velero-restore-test` | AC: #5, #6,#7 | Depends: CronJob hardening
   - **Done**: Restore creates throwaway namespace, PVCs are Bound, MySQL probe succeeds, namespace cleaned up
 
 - [ ] **[M]** Run `STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar` and inspect tarball contents | AC: #9| Depends: Evidence bundle hardening
@@ -562,7 +562,7 @@ Before starting implementation:
 | No budget for cross-region | Phase 3 partially blocked | Document as accepted risk; implement what is budget-neutral |
 | DR coordinator not assigned | Business continuity plan incomplete | Escalate to leadership; assign interim coordinator |
 | Velero CSI driver issues | Volume snapshots may silently fail | `audit-velero.sh` catches this; fix CSI driver config |
-| Restore drill namespace stuck in Terminating | Blocks subsequent drills | `fix-velero-restore-test.sh` handles finalizercleanup |
+| Restore drill namespace stuck in Terminating | Blocks subsequent drills | Restore-test GitOps script uses non-blocking cleanup; namespace finalizer repair is an operator action in the infra-owned Velero surface |
 | Clock skew on GKE nodes | False stale-backup alerts | NTP is GKE default; verify in audit scripts using UTC |
 
 ## Complexity Summary

@@ -11,6 +11,7 @@
 # Checks:
 #   1. Base external-secrets.yaml uses gcp-secret-manager (prod/GKE base)
 #   2. rke2-nonprod patch file exists and overrides to a non-prod Infisical store
+#      when rke2-nonprod is app-local. Environment overlays may be infra-owned.
 #   3. rke2-nonprod patch must NOT use infisical-secret-store (prod Infisical)
 #      and MUST use infisical-secret-store-dev
 #   4. Rendered kustomize output per overlay has the correct store (kubectl optional)
@@ -52,6 +53,7 @@ BASE_ES="deploy/k8s/base/secrets/external-secrets.yaml"
 RKE2_KUSTOMIZE="deploy/k8s/overlays/rke2-nonprod"
 PROD_KUSTOMIZE="deploy/k8s/overlays/production"
 RKE2_PATCH="deploy/k8s/overlays/rke2-nonprod/patches/externalsecrets-infisical.yaml"
+REQUIRE_RKE2_OVERLAY="${VERIFY_SECRETS_REQUIRE_RKE2_OVERLAY:-0}"
 
 PROD_STORE="gcp-secret-manager"
 # On rke2-nonprod, the ClusterSecretStore must point to the dev Infisical environment.
@@ -175,6 +177,8 @@ section "2. rke2-nonprod ExternalSecrets patch file exists"
 
 if [[ $WAVE9_ABSENT -eq 1 ]]; then
   pass "rke2-nonprod overlay relocated to bbi-infrastructure (Wave 9); isolation checks are bbi-infra's responsibility now"
+elif [[ ! -d "$RKE2_KUSTOMIZE" && "$REQUIRE_RKE2_OVERLAY" != "1" ]]; then
+  skip "rke2-nonprod overlay absent in app repo; ExternalSecret patch is infra-owned"
 elif [[ ! -f "$RKE2_PATCH" ]]; then
   fail "rke2-nonprod ExternalSecrets patch missing: $RKE2_PATCH"
   echo "  This patch must override secretStoreRef for all ExternalSecrets."
@@ -193,6 +197,8 @@ section "3. rke2-nonprod patch store isolation"
 
 if [[ $WAVE9_ABSENT -eq 1 ]]; then
   pass "rke2-nonprod store-isolation checks skipped — overlay is in bbi-infra (Wave 9)"
+elif [[ ! -d "$RKE2_KUSTOMIZE" && "$REQUIRE_RKE2_OVERLAY" != "1" ]]; then
+  skip "rke2-nonprod overlay absent in app repo; patch store isolation is infra-owned"
 elif [[ ! -f "$RKE2_PATCH" ]]; then
   skip "rke2-nonprod patch absent — already failed in section 2"
 else
@@ -313,6 +319,7 @@ if [[ $WAVE9_ABSENT -eq 1 ]]; then
 fi
 
 declare -A store_to_overlays=()
+store_ref_count=0
 
 for overlay_dir in deploy/k8s/overlays/*/; do
   [[ -d "$overlay_dir" ]] || continue
@@ -327,26 +334,29 @@ for overlay_dir in deploy/k8s/overlays/*/; do
       # Avoid duplicate overlay names
       if [[ "$existing" != *"$overlay_name"* ]]; then
         store_to_overlays["$store_name"]="${existing:+$existing, }$overlay_name"
+        store_ref_count=$((store_ref_count + 1))
       fi
     done <<< "$stores_here"
   done < <(find "$overlay_dir" \( -name "*.yaml" -o -name "*.yml" \) -print0 2>/dev/null)
 done
 
 collision_found=false
-for store in "${!store_to_overlays[@]}"; do
-  overlays_using="${store_to_overlays[$store]}"
-  count=$(echo "$overlays_using" | tr ',' '\n' | wc -l)
-  if [[ "$count" -gt 1 ]]; then
-    # Transitional: rke2-nonprod and staging share the same ClusterSecretStore name
-    # but use different Infisical environmentSlug. These overlays are moving to GitOps.
-    warn "Infisical store '${store}' referenced by multiple overlays: ${overlays_using}"
-    echo "  Note: overlays share store name but use different Infisical environments via slug."
-    collision_found=true
-  fi
-done
+if [[ "$store_ref_count" -gt 0 ]]; then
+  for store in "${!store_to_overlays[@]}"; do
+    overlays_using="${store_to_overlays[$store]}"
+    count=$(echo "$overlays_using" | tr ',' '\n' | wc -l)
+    if [[ "$count" -gt 1 ]]; then
+      # Transitional: rke2-nonprod and staging share the same ClusterSecretStore name
+      # but use different Infisical environmentSlug. These overlays are moving to GitOps.
+      warn "Infisical store '${store}' referenced by multiple overlays: ${overlays_using}"
+      echo "  Note: overlays share store name but use different Infisical environments via slug."
+      collision_found=true
+    fi
+  done
+fi
 
 if [[ "$collision_found" == "false" ]]; then
-  if [[ ${#store_to_overlays[@]} -eq 0 ]]; then
+  if [[ "$store_ref_count" -eq 0 ]]; then
     skip "No Infisical store references found in overlays (nothing to cross-check)"
   else
     pass "No Infisical store is shared across multiple overlays"

@@ -177,22 +177,18 @@ check_ac_003() {
 check_ac_004() {
   echo "--- AC-004: No critical stateful service uses emptyDir for persistent data ---"
 
-  local deployments="${REPO_ROOT}/deploy/k8s/base/deployments.yml"
   local critical_services=("mysql" "redis" "elasticsearch")
   local violations=0
 
-  if [[ ! -f "$deployments" ]]; then
-    fail "AC-004: deployments.yml not found at $deployments"
-    return
-  fi
-
   for svc in "${critical_services[@]}"; do
-    # Check if this service's deployment uses emptyDir for its main volume
-    # Extract the section for this deployment and look for emptyDir
-    local svc_section
-    svc_section=$(awk "/name: ${svc}\$/,/^---/" "$deployments" 2>/dev/null || echo "")
+    local manifest="${REPO_ROOT}/deploy/k8s/base/apps/${svc}/deployment.yaml"
+    if [[ ! -f "$manifest" ]]; then
+      fail "AC-004: Critical stateful service manifest not found: $manifest"
+      violations=$((violations + 1))
+      continue
+    fi
 
-    if echo "$svc_section" | grep -q "emptyDir:"; then
+    if grep -q "emptyDir:" "$manifest"; then
       fail "AC-004: Critical stateful service '$svc' uses emptyDir volume"
       violations=$((violations + 1))
     fi
@@ -287,18 +283,34 @@ check_ac_006() {
   fi
 }
 
-# ─── AC-007: fix-velero-restore-test.sh exists and is executable ───
+# ─── AC-007: Restore drill proof uses GitOps-owned CronJob + app-owned verifier ───
 
 check_ac_007() {
-  echo "--- AC-007: fix-velero-restore-test.sh exists ---"
+  echo "--- AC-007: restore-test proof boundary ---"
 
-  local script="${REPO_ROOT}/scripts/infra/fix-velero-restore-test.sh"
-  if [[ -x "$script" ]]; then
-    pass "AC-007: fix-velero-restore-test.sh exists and is executable"
-  elif [[ -f "$script" ]]; then
-    fail "AC-007: fix-velero-restore-test.sh exists but is not executable"
+  local forbidden_script="${REPO_ROOT}/scripts/infra/fix-velero-restore-test.sh"
+  if [[ -e "$forbidden_script" ]]; then
+    fail "AC-007: direct Velero CronJob patcher exists in app repo; repair restore-test through GitOps"
   else
-    fail "AC-007: fix-velero-restore-test.sh not found at $script"
+    pass "AC-007: direct Velero CronJob patcher absent from app repo"
+  fi
+
+  local restore_script="${REPO_ROOT}/infrastructure/k8s/velero/restore-test-script.sh"
+  if [[ -x "$restore_script" ]]; then
+    pass "AC-007: restore-test script exists and is executable"
+  elif [[ -f "$restore_script" ]]; then
+    fail "AC-007: restore-test script exists but is not executable"
+  else
+    fail "AC-007: restore-test script not found at $restore_script"
+  fi
+
+  local verifier="${REPO_ROOT}/scripts/qa/verify-restore-drill.sh"
+  if [[ -x "$verifier" ]]; then
+    pass "AC-007: restore drill verifier exists and is executable"
+  elif [[ -f "$verifier" ]]; then
+    fail "AC-007: restore drill verifier exists but is not executable"
+  else
+    fail "AC-007: restore drill verifier not found at $verifier"
   fi
 }
 
@@ -535,7 +547,7 @@ check_ac_016() {
       found=true
       break
     fi
-  done < <(find "${REPO_ROOT}/docs/operations" "${REPO_ROOT}/infrastructure/k8s/velero" -name "*.md" -o -name "*.sh" 2>/dev/null)
+  done < <(find "${REPO_ROOT}/docs/operations" "${REPO_ROOT}/docs/ops" "${REPO_ROOT}/infrastructure/k8s/velero" \( -name "*.md" -o -name "*.sh" \) -type f 2>/dev/null)
 
   if [[ "$found" == true ]]; then
     pass "AC-016: Full namespace restore procedure documented (with namespace-mappings)"
@@ -624,13 +636,19 @@ check_ac_020() {
 check_ac_021() {
   echo "--- AC-021: Kustomize renders valid production manifests ---"
 
+  local prod_overlay="${REPO_ROOT}/deploy/k8s/overlays/production"
+  if [[ ! -f "${prod_overlay}/kustomization.yaml" ]]; then
+    skip "AC-021: production Kustomize render" "production overlay is infra-owned and absent from app repo"
+    return
+  fi
+
   if ! command -v kubectl &>/dev/null; then
     skip "AC-021: Kustomize render" "kubectl not installed"
     return
   fi
 
   local output
-  output=$(kubectl kustomize "${REPO_ROOT}/deploy/k8s/overlays/production" 2>&1) || true
+  output=$(kubectl kustomize "$prod_overlay" 2>&1) || true
 
   if [[ -n "$output" ]] && ! echo "$output" | grep -qi "error"; then
     pass "AC-021: kubectl kustomize deploy/k8s/overlays/production produces valid output"

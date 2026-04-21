@@ -51,14 +51,16 @@ check_contains "AC-036: Workflow keeps standalone plugin disabled in config.exam
 
 # AC-037: workflow installs Tutor and runs render preflight
 check_contains "AC-037: Workflow defines render-contract-preflight job" "render-contract-preflight:"
-check_contains "AC-037: Workflow creates CI Tutor venv" "python3 -m venv .ci-venv"
-check_contains "AC-037: Workflow installs Tutor requirements" "pip install -r requirements-tutor.txt"
+check_contains "AC-037: Workflow uses isolated Tutor render venv" "isolated-venv: 'true'"
+check_contains "AC-037: Workflow installs Tutor requirements" "requirements-file: 'requirements-tutor.txt'"
 check_contains "AC-037: Workflow runs rendered Dockerfile preflight" "./scripts/ci/preflight-check.sh"
-check_contains "AC-037: Workflow passes TUTOR_VENV into preflight" 'TUTOR_VENV: ${{ github.workspace }}/.ci-venv'
+check_contains "AC-037: Workflow passes isolated venv into preflight" 'TUTOR_VENV="$VIRTUAL_ENV"'
 
 # AC-038: workflow trigger paths cover plugin/render contract owners
 check_contains "AC-038: Workflow watches Tutor plugin sources" "'infrastructure/tutor/plugins/**'"
 check_contains "AC-038: Workflow watches Tutor config example" "'infrastructure/tutor/config.example.yml'"
+check_contains "AC-038: Workflow watches Tutor requirements" "'requirements-tutor.txt'"
+check_contains "AC-038: Workflow watches Python setup action" "'.github/actions/setup-python-env/**'"
 check_contains "AC-038: Workflow watches render preflight source" "'scripts/ci/preflight-check.sh'"
 check_contains "AC-038: Workflow watches Tutor plugin mirror sync source" "'scripts/infra/sync-tutor-plugin-mirror.sh'"
 check_contains "AC-038: Workflow watches Tutor config verifier source" "'scripts/infra/verify-tutor-config.sh'"

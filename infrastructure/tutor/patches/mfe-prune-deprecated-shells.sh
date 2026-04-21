@@ -8,8 +8,9 @@
 # truth follows the current estate contract.
 
 apply_mfe_prune_deprecated_shells_patch() {
-  local dockerfile="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
-  local caddyfile="$REPO_ROOT/tutor_env/env/plugins/mfe/apps/mfe/Caddyfile"
+  local tutor_root="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
+  local dockerfile="$tutor_root/env/plugins/mfe/build/mfe/Dockerfile"
+  local caddyfile="$tutor_root/env/plugins/mfe/apps/mfe/Caddyfile"
   "${PYTHON_BIN}" "$REPO_ROOT/infrastructure/tutor/patches/mfe_prune_deprecated_shells.py" \
     "$dockerfile" \
     "$caddyfile"

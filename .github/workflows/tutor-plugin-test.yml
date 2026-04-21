@@ -5,6 +5,8 @@ on:
     paths:
       - 'infrastructure/tutor/plugins/**'
       - 'infrastructure/tutor/config.example.yml'
+      - 'requirements-tutor.txt'
+      - '.github/actions/setup-python-env/**'
       - 'scripts/ci/preflight-check.sh'
       - 'scripts/infra/sync-tutor-plugin-mirror.sh'
       - 'scripts/infra/verify-tutor-config.sh'
@@ -12,6 +14,8 @@ on:
     paths:
       - 'infrastructure/tutor/plugins/**'
       - 'infrastructure/tutor/config.example.yml'
+      - 'requirements-tutor.txt'
+      - '.github/actions/setup-python-env/**'
       - 'scripts/ci/preflight-check.sh'
       - 'scripts/infra/sync-tutor-plugin-mirror.sh'
       - 'scripts/infra/verify-tutor-config.sh'
@@ -79,32 +83,9 @@ jobs:
         uses: ./.github/actions/setup-python-env
         with:
           python-version: '3.12'
-          install-base-deps: 'false'
-
-      - name: Install Tutor into CI preflight venv
-        run: |
-          # `python3 -m venv` needs the ensurepip stdlib module, which is
-          # packaged separately on Debian/Ubuntu (python3.12-venv). Some
-          # fastlane-ci-* runners are provisioned without it and fail with:
-          #   "The virtual environment was not created successfully because
-          #    ensurepip is not available."
-          # Mirror the fallback pattern from .github/actions/setup-python-env:
-          # try normal venv first, then fall back to --without-pip + get-pip.py.
-          if ! python3 -m venv .ci-venv 2>/dev/null; then
-            echo "::notice::ensurepip unavailable on this runner — falling back to get-pip.py"
-            rm -rf .ci-venv
-            python3 -m venv --without-pip .ci-venv
-            GET_PIP="${RUNNER_TEMP:-/tmp}/get-pip.py"
-            curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
-              --output "$GET_PIP" "https://bootstrap.pypa.io/get-pip.py"
-            .ci-venv/bin/python "$GET_PIP"
-            rm -f "$GET_PIP"
-          fi
-          source .ci-venv/bin/activate
-          pip install -U pip
-          pip install -r requirements-tutor.txt
+          requirements-file: 'requirements-tutor.txt'
+          isolated-venv: 'true'
+          isolated-venv-name: 'tutor-render-contract'
 
       - name: Run rendered Dockerfile preflight
-        env:
-          TUTOR_VENV: ${{ github.workspace }}/.ci-venv
-        run: ./scripts/ci/preflight-check.sh
+        run: TUTOR_VENV="$VIRTUAL_ENV" ./scripts/ci/preflight-check.sh

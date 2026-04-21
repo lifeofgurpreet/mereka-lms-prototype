@@ -27,6 +27,9 @@ CSRF_TRUSTED_ORIGINS.append("{{ origin }}")
 SESSION_COOKIE_DOMAIN = "{{ MEREKA_SESSION_COOKIE_DOMAIN }}"
 CSRF_COOKIE_DOMAIN = "{{ MEREKA_CSRF_COOKIE_DOMAIN }}"
 
+# Set default theme for all sites
+DEFAULT_SITE_THEME = "mereka"
+
 # Security hardening.
 SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True
@@ -35,10 +38,26 @@ CSRF_COOKIE_HTTPONLY = False
 
 CSP_REPORT_ONLY = os.environ.get("CSP_REPORT_ONLY", "true").lower() not in ("false", "0", "no")
 
-# Activate CSPMiddleware — django-csp ships with Open edX but the middleware
-# is not enabled by default.  Adding it emits CSP headers (report-only by default).
-if 'csp.middleware.CSPMiddleware' not in MIDDLEWARE:
-    MIDDLEWARE.append('csp.middleware.CSPMiddleware')
+import importlib.util as _mereka_importlib_util
+
+_mereka_built_image_sentinel = "/openedx/.mereka-built-openedx-image"
+_mereka_require_csp = os.environ.get("MEREKA_REQUIRE_CSP")
+if _mereka_require_csp is None:
+    _mereka_require_csp = "true" if os.path.exists(_mereka_built_image_sentinel) else "false"
+
+# Activate CSPMiddleware when django-csp is present. Bootstrap/local readiness
+# may run against upstream prebuilt Indigo images, which do not carry this
+# repo-owned dependency; repo-built images install django-csp and carry the
+# sentinel above, so a missing package there is a hard failure.
+if _mereka_importlib_util.find_spec("csp") is not None:
+    if 'csp.middleware.CSPMiddleware' not in MIDDLEWARE:
+        MIDDLEWARE.append('csp.middleware.CSPMiddleware')
+elif _mereka_require_csp.lower() not in ("false", "0", "no"):
+    raise ImportError(
+        "django-csp is required for repo-built Mereka Open edX images. "
+        "Install django-csp in the build image or set MEREKA_REQUIRE_CSP=false "
+        "only for non-production bootstrap images."
+    )
 
 _lms_url = globals().get("MEREKA_LMS_BASE_URL", "https://{{ LMS_HOST }}")
 _mfe_url = globals().get("MEREKA_MFE_BASE_URL", "https://{{ MFE_HOST }}")
@@ -230,7 +249,7 @@ if _csp_report_uri:
 
 REST_FRAMEWORK = dict(globals().get("REST_FRAMEWORK", {}))
 REST_FRAMEWORK.setdefault("DEFAULT_THROTTLE_CLASSES", [
-    "openedx.core.lib.api.throttle.ScopedRateThrottle",
+    "rest_framework.throttling.ScopedRateThrottle",
 ])
 REST_FRAMEWORK.setdefault("DEFAULT_THROTTLE_RATES", {})
 _throttle_rates = dict(REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"])

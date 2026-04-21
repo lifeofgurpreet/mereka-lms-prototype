@@ -4,6 +4,11 @@
 # Verify that Kustomize overlays render without errors and all resources
 # are in the mereka-lms namespace.
 #
+# App repo ownership note:
+#   deploy/k8s/overlays/local is app-owned. Environment overlays such as
+#   production/rke2-nonprod are realized in bbi-infrastructure; if absent here,
+#   default verification skips them instead of inventing an app-repo failure.
+#
 # Usage:
 #   scripts/qa/verify-kustomize-render.sh [--overlay local|production]
 #
@@ -22,6 +27,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 OVERLAYS_DIR="${REPO_ROOT}/deploy/k8s/overlays"
 EXPECTED_NAMESPACE="mereka-lms"
+REQUIRE_PRODUCTION_OVERLAY="${VERIFY_KUSTOMIZE_REQUIRE_PRODUCTION_OVERLAY:-0}"
 SCOPE_MODE="${VERIFY_KUSTOMIZE_RENDER_SCOPE:-}"
 CHANGED_FILES_RAW="${VERIFY_KUSTOMIZE_RENDER_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
 
@@ -113,12 +119,9 @@ verify_overlay() {
 
     # Check 1: Overlay directory exists
     if [[ ! -d "${overlay_path}" ]]; then
-        # Wave 9 (ADR-025): the production overlay was relocated to
-        # bbi-infrastructure. Boundary doc presence is the canonical
-        # statement of the move — treat absence of that specific overlay
-        # as PASS when the doc is present.
-        if [[ "${overlay}" == "production" && -f "${REPO_ROOT}/docs/reference/architecture/DEPLOYMENT_CONTRACT.md" ]]; then
-            print_success "Overlay absent: ${overlay} (Wave 9 shadow deletion — canonical boundary doc present, skipping render)"
+        if [[ "${overlay}" == "production" && "${REQUIRE_PRODUCTION_OVERLAY}" != "1" ]]; then
+            print_warning "Overlay directory not found: ${overlay_path} (infra-owned; skipping)"
+            echo -e "\n${GREEN}PASSED${NC}: ${overlay} skipped (infra-owned overlay absent)\n"
             return 0
         fi
         print_error "Overlay directory not found: ${overlay_path}"
@@ -245,7 +248,10 @@ main() {
 
     # If no overlay specified, test both
     if [[ ${#overlays_to_test[@]} -eq 0 ]]; then
-        overlays_to_test=("local" "production")
+        overlays_to_test=("local")
+        if [[ -d "${OVERLAYS_DIR}/production" || "${REQUIRE_PRODUCTION_OVERLAY}" == "1" ]]; then
+            overlays_to_test+=("production")
+        fi
     fi
 
     if should_skip_scope; then

@@ -8,9 +8,10 @@
 # env.config artifacts after Tutor renders them.
 
 apply_mfe_slot_ownership_patch() {
+  local tutor_root="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
   local candidates=(
-    "$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/env.config.jsx"
-    "$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/indigo/env.config.jsx"
+    "$tutor_root/env/plugins/mfe/build/mfe/env.config.jsx"
+    "$tutor_root/env/plugins/mfe/build/mfe/indigo/env.config.jsx"
   )
   "${PYTHON_BIN}" "$REPO_ROOT/infrastructure/tutor/patches/mfe_slot_ownership.py" "${candidates[@]}"
 }

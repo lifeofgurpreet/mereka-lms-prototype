@@ -42,12 +42,12 @@ This is an infrastructure/operations spec. There is no application-level test fr
 
 | AC # | Test Case | Type | File / Command | Mocks/Fixtures |
 |------|-----------|------|----------------|----------------|
-| AC-005 | Happy: Monthly restore-test CronJob creates throwaway NS, restores PVCs to Bound, MySQL SELECT 1 succeeds | shell_verification | `scripts/infra/fix-velero-restore-test.sh` (with RUN_NOW=1) | Live cluster; throwaway NS `velero-restore-test` |
+| AC-005 | Happy: Monthly restore-test CronJob creates throwaway NS, restores PVCs to Bound, MySQL SELECT 1 succeeds | shell_verification | Infra-owned restore-test CronJob plus `scripts/qa/verify-restore-drill.sh --namespace velero-restore-test` | Live cluster; throwaway NS `velero-restore-test` |
 | AC-005 | Negative: Restore-test fails if no valid backup exists | shell_verification | `infrastructure/k8s/velero/restore-test-script.sh` | Live cluster with deleted backups |
 | AC-006 | Happy: At least 1 PVC in Bound state after restore | kubectl_check | `kubectl -n velero-restore-test get pvc -o json \| jq '[.items[] \| select(.status.phase=="Bound")] \| length'` | Live cluster post-restore |
 | AC-006 | Negative: Zero Bound PVCs treated as drill failure | shell_verification | `infrastructure/k8s/velero/restore-test-script.sh` (REQUIRE_PVC_RESTORE=true) | Live cluster |
-| AC-007 | Happy: fix-velero-restore-test.sh runs end-to-end including PV validation and MySQL probe | shell_verification | `scripts/infra/fix-velero-restore-test.sh` | Live cluster |
-| AC-007 | Negative: Script fails if ConfigMap or CronJob cannot be patched | shell_verification | `scripts/infra/fix-velero-restore-test.sh` | Revoke RBAC temporarily |
+| AC-007 | Happy: Restore-test CronJob runs end-to-end including PV validation and MySQL probe | shell_verification | `STRICT=1 scripts/qa/verify-restore-drill.sh --namespace velero-restore-test` | Live cluster |
+| AC-007 | Negative: App repo fails if a direct Velero CronJob patcher is reintroduced | shell_verification | `scripts/qa/verify-disaster-recovery.sh` | Add forbidden script path in a disposable worktree |
 | AC-008 | Happy: backup-verification CronJob confirms freshness within 2h (hourly) and 26h (daily) | kubectl_check | `kubectl -n velero get cronjob backup-verification -o json` + check last successful job timestamp | Live cluster |
 | AC-008 | Negative: Stale backup (>2h for hourly) triggers verification failure | shell_verification | `scripts/qa/audit-velero-alert-pipeline.sh --json` | Live cluster with paused schedule |
 

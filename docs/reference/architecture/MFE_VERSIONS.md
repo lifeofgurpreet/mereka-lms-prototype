@@ -171,7 +171,7 @@ After upgrading Tutor/Open edX, verify these contracts:
 ## MFE Build Configuration
 
 ### Build Environment
-- **Base Image**: `docker.io/node:24.11.0-bullseye-slim`
+- **Base Image**: `mirror.gcr.io/library/node:24.11.0-bullseye-slim`
 - **Build Tool**: Webpack 5
 - **Memory Limit**: 6GB (`NODE_OPTIONS=--max-old-space-size=6144`)
 - **Build Time**: ~15-20 minutes (all MFEs)

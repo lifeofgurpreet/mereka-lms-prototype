@@ -76,10 +76,6 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
-    file: scripts/infra/fix-velero-restore-test.sh
-    command: scripts/infra/fix-velero-restore-test.sh
-  - type: automated
-    test_type: shell_verification
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
   - type: automated
@@ -111,17 +107,22 @@ acceptance_criteria:
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
 - id: AC-007
-  description: Given a restore drill, when `./scripts/infra/fix-velero-restore-test.sh`
+  description: Given a restore drill, when the infra-owned restore-test CronJob completes
+    and `STRICT=1 ./scripts/qa/verify-restore-drill.sh --namespace velero-restore-test`
     executes, then the drill passes end-to-end including PV validation and MySQL probe
   verify:
   - type: automated
     test_type: shell_verification
-    file: scripts/infra/fix-velero-restore-test.sh
-    command: scripts/infra/fix-velero-restore-test.sh
-  - type: automated
-    test_type: shell_verification
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-restore-drill.sh
+    command: scripts/qa/verify-restore-drill.sh
+  - type: automated
+    test_type: shell_verification
+    file: infrastructure/k8s/velero/restore-test-script.sh
+    command: infrastructure/k8s/velero/restore-test-script.sh
   - type: automated
     test_type: unit
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
@@ -350,9 +351,9 @@ acceptance_criteria:
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
   - type: automated
-    test_type: automated
-    file: deploy/k8s/overlays/production/kustomization.yaml
-    command: deploy/k8s/overlays/production/kustomization.yaml
+    test_type: shell_verification
+    file: scripts/qa/verify-restore-drill.sh
+    command: scripts/qa/verify-restore-drill.sh
   - type: automated
     test_type: unit
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
@@ -370,6 +371,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-disaster-recovery.sh
     command: scripts/qa/verify-disaster-recovery.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-restore-drill.sh
+    command: scripts/qa/verify-restore-drill.sh
   - type: manual
     runbook: docs/ops/runbooks/DISASTER_RECOVERY.md
     section: Cross-Region Readiness Verification
@@ -388,6 +393,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-dr-drill-schedule.sh
     command: scripts/qa/verify-dr-drill-schedule.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-restore-drill.sh
+    command: scripts/qa/verify-restore-drill.sh
 - id: AC-024
   description: 'Given quarterly restore drill schedule, when the schedule is documented,
     then it MUST specify: drill cadence (quarterly), responsible team, notification
@@ -398,6 +407,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-dr-drill-schedule.sh
     command: scripts/qa/verify-dr-drill-schedule.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-restore-drill.sh
+    command: scripts/qa/verify-restore-drill.sh
   - type: manual
     runbook: docs/ops/runbooks/DISASTER_RECOVERY.md
     section: Quarterly Restore Drill Schedule
@@ -405,7 +418,8 @@ acceptance_criteria:
       during quarterly DR planning cycle
 - id: AC-025
   description: Given Terraform/Kustomize configs exist, when `kubectl kustomize deploy/k8s/overlays/production`
-    is run, then it produces valid manifests deployable to any GKE cluster
+    is run, then it produces valid manifests deployable to any supported production
+    cluster
   verify:
   - type: manual
     runbook: docs/ops/runbooks/DISASTER_RECOVERY.md

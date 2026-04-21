@@ -11,6 +11,7 @@ Usage:
     --primary-tag <tag> \
     --secondary-tag <tag> \
     --cache-ref <repo:tag> \
+    [--cache-mode <default|none>] \
     [--build-profile <proof|fast>] \
     [--output-mode <push|docker>] \
     [--local-defaults] \
@@ -28,6 +29,7 @@ IMAGE_REPO=""
 PRIMARY_TAG=""
 SECONDARY_TAG=""
 CACHE_REF=""
+CACHE_MODE="default"
 MUTABLE_TAG=""
 BUILD_PROFILE="proof"
 OUTPUT_MODE="push"
@@ -41,6 +43,7 @@ while [[ $# -gt 0 ]]; do
     --primary-tag) PRIMARY_TAG="${2:-}"; shift 2 ;;
     --secondary-tag) SECONDARY_TAG="${2:-}"; shift 2 ;;
     --cache-ref) CACHE_REF="${2:-}"; shift 2 ;;
+    --cache-mode) CACHE_MODE="${2:-}"; shift 2 ;;
     --build-profile) BUILD_PROFILE="${2:-}"; shift 2 ;;
     --output-mode) OUTPUT_MODE="${2:-}"; shift 2 ;;
     --local-defaults) LOCAL_DEFAULTS=1; OUTPUT_MODE="docker"; shift ;;
@@ -59,7 +62,7 @@ if [[ "$LOCAL_DEFAULTS" == "1" ]]; then
 fi
 
 REQUIRED_ARGS=(CONTEXT_DIR DOCKERFILE IMAGE_REPO PRIMARY_TAG SECONDARY_TAG)
-if [[ "$OUTPUT_MODE" == "push" ]]; then
+if [[ "$OUTPUT_MODE" == "push" && "$CACHE_MODE" != "none" ]]; then
   REQUIRED_ARGS+=(CACHE_REF)
 fi
 
@@ -99,6 +102,19 @@ case "$BUILD_PROFILE" in
     ;;
 esac
 
+case "$CACHE_MODE" in
+  default|none) ;;
+  *)
+    echo "Unsupported cache mode: $CACHE_MODE (expected default or none)" >&2
+    exit 1
+    ;;
+esac
+
+if [[ "$CACHE_MODE" == "none" && "$BUILD_PROFILE" != "proof" ]]; then
+  echo "cache-mode none is only supported for proof builds." >&2
+  exit 1
+fi
+
 case "$OUTPUT_MODE" in
   push|docker) ;;
   *)
@@ -108,7 +124,7 @@ case "$OUTPUT_MODE" in
 esac
 
 if [[ "$BUILD_PROFILE" != "proof" && -n "$MUTABLE_TAG" ]]; then
-  echo "Only the proof build profile can publish mutable tags." >&2
+  echo "Fast build profile cannot publish mutable tags; use proof for promotable builds." >&2
   exit 1
 fi
 
@@ -125,6 +141,9 @@ GHA_SCOPE="tutor-${IMAGE_NAME}-${BUILD_PROFILE}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 BAKE_FILE="$REPO_ROOT/docker-bake.hcl"
 BAKE_TARGET="mfe-${BUILD_PROFILE}"
+if [[ "$CACHE_MODE" == "none" ]]; then
+  BAKE_TARGET="${BAKE_TARGET}-nocache"
+fi
 TAGS_CSV="$(IFS=,; printf '%s' "${IMAGE_TAGS[*]}")"
 LOCAL_CACHE_ROOT="$REPO_ROOT/.buildx-cache"
 
@@ -148,7 +167,7 @@ BAKE_ENV=(
   "MFE_RENDERED_DOCKERFILE_SHA256=${DOCKERFILE_SHA256}"
   "MFE_${BUILD_PROFILE^^}_TAGS=${TAGS_CSV}"
 )
-if [[ -n "$CACHE_REF" ]]; then
+if [[ -n "$CACHE_REF" && "$CACHE_MODE" != "none" ]]; then
   BAKE_ENV+=("MFE_CACHE_REF=${CACHE_REF}")
 fi
 if [[ "$BUILD_PROFILE" == "proof" ]]; then

@@ -1,6 +1,6 @@
-# syntax=docker/dockerfile:1
+# syntax=mirror.gcr.io/docker/dockerfile:1
 # https://hub.docker.com/_/node/tags
-FROM docker.io/node:24.11.0-bullseye-slim AS base
+FROM mirror.gcr.io/library/node:24.11.0-bullseye-slim AS base
 
 RUN printf '%s\n' \
     'Acquire::Retries "6";' \
@@ -20,11 +20,11 @@ RUN printf '%s\n' \
     libpng-dev \
     # required for building node-canvas (on arm, for authoring)
     # https://www.npmjs.com/package/canvas
-    libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+    libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev \
+  && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /openedx/app /openedx/env
 WORKDIR /openedx/app
-COPY indigo/mereka /openedx/app/mereka
 ENV PATH=/openedx/app/node_modules/.bin:${PATH}
 
 
@@ -33,7 +33,7 @@ ENV PATH=/openedx/app/node_modules/.bin:${PATH}
 ####################### admin-console MFE
 ######## admin-console (git)
 FROM base AS admin-console-git
-ADD --keep-git-dir=true https://github.com/openedx/frontend-app-admin-console.git#release/ulmo.1 .
+ADD --keep-git-dir=true https://github.com/openedx/frontend-app-admin-console.git#release/ulmo.2 .
 
 ######## admin-console (src)
 # Empty layer with just the repo at the root, for build-time bind-mounts
@@ -60,12 +60,8 @@ RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@git
 
 ENV CPPFLAGS=-DPNG_ARM_NEON_OPT=0
 ENV PACT_SKIP_BINARY_INSTALL=true
-RUN --mount=type=cache,target=/root/.npm,sharing=shared \
-    npm config set fetch-retries 6 \
- && npm config set fetch-retry-mintimeout 20000 \
- && npm config set fetch-retry-maxtimeout 120000 \
- && npm config set fetch-timeout 300000 \
- && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+# mfe-npm-install-resilience-sentinel - apply-patches.sh
+RUN --mount=type=cache,target=/root/.npm,sharing=shared bash -o pipefail -c 'npm config set fetch-retries 6; npm config set fetch-retry-mintimeout 20000; npm config set fetch-retry-maxtimeout 120000; npm config set fetch-timeout 300000; for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install fallback attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 COPY indigo/brand-mereka /openedx/app/brand-mereka
 RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
@@ -77,6 +73,10 @@ COPY indigo/theme /openedx/dist/theme
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 
+# Sentry Browser SDK — client-side error telemetry (OBS-001, bead mereka-lms-m88z).
+# Init gated on getConfig().SENTRY_DSN at runtime; empty DSN → no-op.
+RUN npm install --legacy-peer-deps '@sentry/browser@^8.0.0'
+
 # Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
 RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
 
@@ -84,7 +84,7 @@ RUN npm install --legacy-peer-deps 'react-redux@^8.1.3' 'redux@^4.2.1'
 COPY --from=admin-console-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.2 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 2025
 
 # Configuration needed at build time
@@ -106,7 +106,7 @@ CMD ["/bin/bash", "-c", "npm run start --- --config ./webpack.dev-tutor.config.j
 ####################### authn MFE
 ######## authn (git)
 FROM base AS authn-git
-ADD --keep-git-dir=true https://github.com/openedx/frontend-app-authn.git#release/ulmo.1 .
+ADD --keep-git-dir=true https://github.com/openedx/frontend-app-authn.git#release/ulmo.2 .
 
 ######## authn (src)
 # Empty layer with just the repo at the root, for build-time bind-mounts
@@ -133,12 +133,8 @@ RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@git
 
 ENV CPPFLAGS=-DPNG_ARM_NEON_OPT=0
 ENV PACT_SKIP_BINARY_INSTALL=true
-RUN --mount=type=cache,target=/root/.npm,sharing=shared \
-    npm config set fetch-retries 6 \
- && npm config set fetch-retry-mintimeout 20000 \
- && npm config set fetch-retry-maxtimeout 120000 \
- && npm config set fetch-timeout 300000 \
- && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+# mfe-npm-install-resilience-sentinel - apply-patches.sh
+RUN --mount=type=cache,target=/root/.npm,sharing=shared bash -o pipefail -c 'npm config set fetch-retries 6; npm config set fetch-retry-mintimeout 20000; npm config set fetch-retry-maxtimeout 120000; npm config set fetch-timeout 300000; for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install fallback attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 COPY indigo/brand-mereka /openedx/app/brand-mereka
 RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
@@ -149,6 +145,10 @@ COPY indigo/theme /openedx/dist/theme
 
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
+
+# Sentry Browser SDK — client-side error telemetry (OBS-001, bead mereka-lms-m88z).
+# Init gated on getConfig().SENTRY_DSN at runtime; empty DSN → no-op.
+RUN npm install --legacy-peer-deps '@sentry/browser@^8.0.0'
 
 # Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
 RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
@@ -161,7 +161,7 @@ COPY verify-authn-dashboard-fallbacks.py /openedx/verify-authn-dashboard-fallbac
 COPY --from=authn-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.2 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 1999
 
 # Configuration needed at build time
@@ -184,7 +184,7 @@ CMD ["/bin/bash", "-c", "npm run start --- --config ./webpack.dev-tutor.config.j
 ####################### authoring MFE
 ######## authoring (git)
 FROM base AS authoring-git
-ADD --keep-git-dir=true https://github.com/openedx/frontend-app-authoring.git#release/ulmo.1 .
+ADD --keep-git-dir=true https://github.com/openedx/frontend-app-authoring.git#release/ulmo.2 .
 
 ######## authoring (src)
 # Empty layer with just the repo at the root, for build-time bind-mounts
@@ -211,12 +211,8 @@ RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@git
 
 ENV CPPFLAGS=-DPNG_ARM_NEON_OPT=0
 ENV PACT_SKIP_BINARY_INSTALL=true
-RUN --mount=type=cache,target=/root/.npm,sharing=shared \
-    npm config set fetch-retries 6 \
- && npm config set fetch-retry-mintimeout 20000 \
- && npm config set fetch-retry-maxtimeout 120000 \
- && npm config set fetch-timeout 300000 \
- && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+# mfe-npm-install-resilience-sentinel - apply-patches.sh
+RUN --mount=type=cache,target=/root/.npm,sharing=shared bash -o pipefail -c 'npm config set fetch-retries 6; npm config set fetch-retry-mintimeout 20000; npm config set fetch-retry-maxtimeout 120000; npm config set fetch-timeout 300000; for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install fallback attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 COPY indigo/brand-mereka /openedx/app/brand-mereka
 RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
@@ -228,13 +224,17 @@ COPY indigo/theme /openedx/dist/theme
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 
+# Sentry Browser SDK — client-side error telemetry (OBS-001, bead mereka-lms-m88z).
+# Init gated on getConfig().SENTRY_DSN at runtime; empty DSN → no-op.
+RUN npm install --legacy-peer-deps '@sentry/browser@^8.0.0'
+
 # Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
 RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
 
 COPY --from=authoring-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.2 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 2001
 
 # Configuration needed at build time
@@ -256,7 +256,7 @@ CMD ["/bin/bash", "-c", "npm run start --- --config ./webpack.dev-tutor.config.j
 ####################### account MFE
 ######## account (git)
 FROM base AS account-git
-ADD --keep-git-dir=true https://github.com/openedx/frontend-app-account.git#release/ulmo.1 .
+ADD --keep-git-dir=true https://github.com/openedx/frontend-app-account.git#release/ulmo.2 .
 
 ######## account (src)
 # Empty layer with just the repo at the root, for build-time bind-mounts
@@ -283,12 +283,8 @@ RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@git
 
 ENV CPPFLAGS=-DPNG_ARM_NEON_OPT=0
 ENV PACT_SKIP_BINARY_INSTALL=true
-RUN --mount=type=cache,target=/root/.npm,sharing=shared \
-    npm config set fetch-retries 6 \
- && npm config set fetch-retry-mintimeout 20000 \
- && npm config set fetch-retry-maxtimeout 120000 \
- && npm config set fetch-timeout 300000 \
- && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+# mfe-npm-install-resilience-sentinel - apply-patches.sh
+RUN --mount=type=cache,target=/root/.npm,sharing=shared bash -o pipefail -c 'npm config set fetch-retries 6; npm config set fetch-retry-mintimeout 20000; npm config set fetch-retry-maxtimeout 120000; npm config set fetch-timeout 300000; for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install fallback attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 COPY indigo/brand-mereka /openedx/app/brand-mereka
 RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
@@ -300,13 +296,17 @@ COPY indigo/theme /openedx/dist/theme
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 
+# Sentry Browser SDK — client-side error telemetry (OBS-001, bead mereka-lms-m88z).
+# Init gated on getConfig().SENTRY_DSN at runtime; empty DSN → no-op.
+RUN npm install --legacy-peer-deps '@sentry/browser@^8.0.0'
+
 # Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
 RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
 
 COPY --from=account-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.2 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 1997
 
 # Configuration needed at build time
@@ -351,7 +351,7 @@ CMD ["/bin/bash", "-c", "npm run start --- --config ./webpack.dev-tutor.config.j
 ####################### communications MFE
 ######## communications (git)
 FROM base AS communications-git
-ADD --keep-git-dir=true https://github.com/openedx/frontend-app-communications.git#release/ulmo.1 .
+ADD --keep-git-dir=true https://github.com/openedx/frontend-app-communications.git#release/ulmo.2 .
 
 ######## communications (src)
 # Empty layer with just the repo at the root, for build-time bind-mounts
@@ -378,12 +378,8 @@ RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@git
 
 ENV CPPFLAGS=-DPNG_ARM_NEON_OPT=0
 ENV PACT_SKIP_BINARY_INSTALL=true
-RUN --mount=type=cache,target=/root/.npm,sharing=shared \
-    npm config set fetch-retries 6 \
- && npm config set fetch-retry-mintimeout 20000 \
- && npm config set fetch-retry-maxtimeout 120000 \
- && npm config set fetch-timeout 300000 \
- && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+# mfe-npm-install-resilience-sentinel - apply-patches.sh
+RUN --mount=type=cache,target=/root/.npm,sharing=shared bash -o pipefail -c 'npm config set fetch-retries 6; npm config set fetch-retry-mintimeout 20000; npm config set fetch-retry-maxtimeout 120000; npm config set fetch-timeout 300000; for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install fallback attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 COPY indigo/brand-mereka /openedx/app/brand-mereka
 RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
@@ -395,13 +391,17 @@ COPY indigo/theme /openedx/dist/theme
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 
+# Sentry Browser SDK — client-side error telemetry (OBS-001, bead mereka-lms-m88z).
+# Init gated on getConfig().SENTRY_DSN at runtime; empty DSN → no-op.
+RUN npm install --legacy-peer-deps '@sentry/browser@^8.0.0'
+
 # Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
 RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
 
 COPY --from=communications-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.2 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 1984
 
 # Configuration needed at build time
@@ -423,7 +423,7 @@ CMD ["/bin/bash", "-c", "npm run start --- --config ./webpack.dev-tutor.config.j
 ####################### discussions MFE
 ######## discussions (git)
 FROM base AS discussions-git
-ADD --keep-git-dir=true https://github.com/openedx/frontend-app-discussions.git#release/ulmo.1 .
+ADD --keep-git-dir=true https://github.com/openedx/frontend-app-discussions.git#release/ulmo.2 .
 
 ######## discussions (src)
 # Empty layer with just the repo at the root, for build-time bind-mounts
@@ -450,12 +450,8 @@ RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@git
 
 ENV CPPFLAGS=-DPNG_ARM_NEON_OPT=0
 ENV PACT_SKIP_BINARY_INSTALL=true
-RUN --mount=type=cache,target=/root/.npm,sharing=shared \
-    npm config set fetch-retries 6 \
- && npm config set fetch-retry-mintimeout 20000 \
- && npm config set fetch-retry-maxtimeout 120000 \
- && npm config set fetch-timeout 300000 \
- && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+# mfe-npm-install-resilience-sentinel - apply-patches.sh
+RUN --mount=type=cache,target=/root/.npm,sharing=shared bash -o pipefail -c 'npm config set fetch-retries 6; npm config set fetch-retry-mintimeout 20000; npm config set fetch-retry-maxtimeout 120000; npm config set fetch-timeout 300000; for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install fallback attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 COPY indigo/brand-mereka /openedx/app/brand-mereka
 RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
@@ -467,13 +463,17 @@ COPY indigo/theme /openedx/dist/theme
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 
+# Sentry Browser SDK — client-side error telemetry (OBS-001, bead mereka-lms-m88z).
+# Init gated on getConfig().SENTRY_DSN at runtime; empty DSN → no-op.
+RUN npm install --legacy-peer-deps '@sentry/browser@^8.0.0'
+
 # Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
 RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
 
 COPY --from=discussions-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.2 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 2002
 
 # Configuration needed at build time
@@ -495,7 +495,7 @@ CMD ["/bin/bash", "-c", "npm run start --- --config ./webpack.dev-tutor.config.j
 ####################### gradebook MFE
 ######## gradebook (git)
 FROM base AS gradebook-git
-ADD --keep-git-dir=true https://github.com/openedx/frontend-app-gradebook.git#release/ulmo.1 .
+ADD --keep-git-dir=true https://github.com/openedx/frontend-app-gradebook.git#release/ulmo.2 .
 
 ######## gradebook (src)
 # Empty layer with just the repo at the root, for build-time bind-mounts
@@ -522,12 +522,8 @@ RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@git
 
 ENV CPPFLAGS=-DPNG_ARM_NEON_OPT=0
 ENV PACT_SKIP_BINARY_INSTALL=true
-RUN --mount=type=cache,target=/root/.npm,sharing=shared \
-    npm config set fetch-retries 6 \
- && npm config set fetch-retry-mintimeout 20000 \
- && npm config set fetch-retry-maxtimeout 120000 \
- && npm config set fetch-timeout 300000 \
- && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+# mfe-npm-install-resilience-sentinel - apply-patches.sh
+RUN --mount=type=cache,target=/root/.npm,sharing=shared bash -o pipefail -c 'npm config set fetch-retries 6; npm config set fetch-retry-mintimeout 20000; npm config set fetch-retry-maxtimeout 120000; npm config set fetch-timeout 300000; for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install fallback attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 COPY indigo/brand-mereka /openedx/app/brand-mereka
 RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
@@ -539,13 +535,17 @@ COPY indigo/theme /openedx/dist/theme
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 
+# Sentry Browser SDK — client-side error telemetry (OBS-001, bead mereka-lms-m88z).
+# Init gated on getConfig().SENTRY_DSN at runtime; empty DSN → no-op.
+RUN npm install --legacy-peer-deps '@sentry/browser@^8.0.0'
+
 # Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
 RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
 
 COPY --from=gradebook-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.2 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 1994
 
 # Configuration needed at build time
@@ -567,7 +567,7 @@ CMD ["/bin/bash", "-c", "npm run start --- --config ./webpack.dev-tutor.config.j
 ####################### learner-dashboard MFE
 ######## learner-dashboard (git)
 FROM base AS learner-dashboard-git
-ADD --keep-git-dir=true https://github.com/openedx/frontend-app-learner-dashboard.git#release/ulmo.1 .
+ADD --keep-git-dir=true https://github.com/openedx/frontend-app-learner-dashboard.git#release/ulmo.2 .
 
 ######## learner-dashboard (src)
 # Empty layer with just the repo at the root, for build-time bind-mounts
@@ -594,12 +594,8 @@ RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@git
 
 ENV CPPFLAGS=-DPNG_ARM_NEON_OPT=0
 ENV PACT_SKIP_BINARY_INSTALL=true
-RUN --mount=type=cache,target=/root/.npm,sharing=shared \
-    npm config set fetch-retries 6 \
- && npm config set fetch-retry-mintimeout 20000 \
- && npm config set fetch-retry-maxtimeout 120000 \
- && npm config set fetch-timeout 300000 \
- && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+# mfe-npm-install-resilience-sentinel - apply-patches.sh
+RUN --mount=type=cache,target=/root/.npm,sharing=shared bash -o pipefail -c 'npm config set fetch-retries 6; npm config set fetch-retry-mintimeout 20000; npm config set fetch-retry-maxtimeout 120000; npm config set fetch-timeout 300000; for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install fallback attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 COPY indigo/brand-mereka /openedx/app/brand-mereka
 RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
@@ -611,13 +607,17 @@ COPY indigo/theme /openedx/dist/theme
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 
+# Sentry Browser SDK — client-side error telemetry (OBS-001, bead mereka-lms-m88z).
+# Init gated on getConfig().SENTRY_DSN at runtime; empty DSN → no-op.
+RUN npm install --legacy-peer-deps '@sentry/browser@^8.0.0'
+
 # Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
 RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
 
 COPY --from=learner-dashboard-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.2 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 1996
 
 # Configuration needed at build time
@@ -639,7 +639,7 @@ CMD ["/bin/bash", "-c", "npm run start --- --config ./webpack.dev-tutor.config.j
 ####################### learning MFE
 ######## learning (git)
 FROM base AS learning-git
-ADD --keep-git-dir=true https://github.com/openedx/frontend-app-learning.git#release/ulmo.1 .
+ADD --keep-git-dir=true https://github.com/openedx/frontend-app-learning.git#release/ulmo.2 .
 
 ######## learning (src)
 # Empty layer with just the repo at the root, for build-time bind-mounts
@@ -666,12 +666,8 @@ RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@git
 
 ENV CPPFLAGS=-DPNG_ARM_NEON_OPT=0
 ENV PACT_SKIP_BINARY_INSTALL=true
-RUN --mount=type=cache,target=/root/.npm,sharing=shared \
-    npm config set fetch-retries 6 \
- && npm config set fetch-retry-mintimeout 20000 \
- && npm config set fetch-retry-maxtimeout 120000 \
- && npm config set fetch-timeout 300000 \
- && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+# mfe-npm-install-resilience-sentinel - apply-patches.sh
+RUN --mount=type=cache,target=/root/.npm,sharing=shared bash -o pipefail -c 'npm config set fetch-retries 6; npm config set fetch-retry-mintimeout 20000; npm config set fetch-retry-maxtimeout 120000; npm config set fetch-timeout 300000; for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install fallback attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 COPY indigo/brand-mereka /openedx/app/brand-mereka
 RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
@@ -683,13 +679,17 @@ COPY indigo/theme /openedx/dist/theme
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 
+# Sentry Browser SDK — client-side error telemetry (OBS-001, bead mereka-lms-m88z).
+# Init gated on getConfig().SENTRY_DSN at runtime; empty DSN → no-op.
+RUN npm install --legacy-peer-deps '@sentry/browser@^8.0.0'
+
 # Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
 RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
 
 COPY --from=learning-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.2 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 2000
 
 # Configuration needed at build time
@@ -711,7 +711,7 @@ CMD ["/bin/bash", "-c", "npm run start --- --config ./webpack.dev-tutor.config.j
 ####################### ora-grading MFE
 ######## ora-grading (git)
 FROM base AS ora-grading-git
-ADD --keep-git-dir=true https://github.com/openedx/frontend-app-ora-grading.git#release/ulmo.1 .
+ADD --keep-git-dir=true https://github.com/openedx/frontend-app-ora-grading.git#release/ulmo.2 .
 
 ######## ora-grading (src)
 # Empty layer with just the repo at the root, for build-time bind-mounts
@@ -738,12 +738,8 @@ RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@git
 
 ENV CPPFLAGS=-DPNG_ARM_NEON_OPT=0
 ENV PACT_SKIP_BINARY_INSTALL=true
-RUN --mount=type=cache,target=/root/.npm,sharing=shared \
-    npm config set fetch-retries 6 \
- && npm config set fetch-retry-mintimeout 20000 \
- && npm config set fetch-retry-maxtimeout 120000 \
- && npm config set fetch-timeout 300000 \
- && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+# mfe-npm-install-resilience-sentinel - apply-patches.sh
+RUN --mount=type=cache,target=/root/.npm,sharing=shared bash -o pipefail -c 'npm config set fetch-retries 6; npm config set fetch-retry-mintimeout 20000; npm config set fetch-retry-maxtimeout 120000; npm config set fetch-timeout 300000; for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install fallback attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 COPY indigo/brand-mereka /openedx/app/brand-mereka
 RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
@@ -755,13 +751,17 @@ COPY indigo/theme /openedx/dist/theme
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 
+# Sentry Browser SDK — client-side error telemetry (OBS-001, bead mereka-lms-m88z).
+# Init gated on getConfig().SENTRY_DSN at runtime; empty DSN → no-op.
+RUN npm install --legacy-peer-deps '@sentry/browser@^8.0.0'
+
 # Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
 RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
 
 COPY --from=ora-grading-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.2 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 1993
 
 # Configuration needed at build time
@@ -783,7 +783,7 @@ CMD ["/bin/bash", "-c", "npm run start --- --config ./webpack.dev-tutor.config.j
 ####################### profile MFE
 ######## profile (git)
 FROM base AS profile-git
-ADD --keep-git-dir=true https://github.com/openedx/frontend-app-profile.git#release/ulmo.1 .
+ADD --keep-git-dir=true https://github.com/openedx/frontend-app-profile.git#release/ulmo.2 .
 
 ######## profile (src)
 # Empty layer with just the repo at the root, for build-time bind-mounts
@@ -810,12 +810,8 @@ RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@git
 
 ENV CPPFLAGS=-DPNG_ARM_NEON_OPT=0
 ENV PACT_SKIP_BINARY_INSTALL=true
-RUN --mount=type=cache,target=/root/.npm,sharing=shared \
-    npm config set fetch-retries 6 \
- && npm config set fetch-retry-mintimeout 20000 \
- && npm config set fetch-retry-maxtimeout 120000 \
- && npm config set fetch-timeout 300000 \
- && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+# mfe-npm-install-resilience-sentinel - apply-patches.sh
+RUN --mount=type=cache,target=/root/.npm,sharing=shared bash -o pipefail -c 'npm config set fetch-retries 6; npm config set fetch-retry-mintimeout 20000; npm config set fetch-retry-maxtimeout 120000; npm config set fetch-timeout 300000; for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install fallback attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 COPY indigo/brand-mereka /openedx/app/brand-mereka
 RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
@@ -827,13 +823,17 @@ COPY indigo/theme /openedx/dist/theme
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 
+# Sentry Browser SDK — client-side error telemetry (OBS-001, bead mereka-lms-m88z).
+# Init gated on getConfig().SENTRY_DSN at runtime; empty DSN → no-op.
+RUN npm install --legacy-peer-deps '@sentry/browser@^8.0.0'
+
 # Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
 RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
 
 COPY --from=profile-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.2 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 1995
 
 # Configuration needed at build time
@@ -855,7 +855,7 @@ CMD ["/bin/bash", "-c", "npm run start --- --config ./webpack.dev-tutor.config.j
 ####################### learner-record MFE
 ######## learner-record (git)
 FROM base AS learner-record-git
-ADD --keep-git-dir=true https://github.com/openedx/frontend-app-learner-record.git#release/ulmo.1 .
+ADD --keep-git-dir=true https://github.com/openedx/frontend-app-learner-record.git#release/ulmo.2 .
 
 ######## learner-record (src)
 # Empty layer with just the repo at the root, for build-time bind-mounts
@@ -882,12 +882,8 @@ RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@git
 
 ENV CPPFLAGS=-DPNG_ARM_NEON_OPT=0
 ENV PACT_SKIP_BINARY_INSTALL=true
-RUN --mount=type=cache,target=/root/.npm,sharing=shared \
-    npm config set fetch-retries 6 \
- && npm config set fetch-retry-mintimeout 20000 \
- && npm config set fetch-retry-maxtimeout 120000 \
- && npm config set fetch-timeout 300000 \
- && bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+# mfe-npm-install-resilience-sentinel - apply-patches.sh
+RUN --mount=type=cache,target=/root/.npm,sharing=shared bash -o pipefail -c 'npm config set fetch-retries 6; npm config set fetch-retry-mintimeout 20000; npm config set fetch-retry-maxtimeout 120000; npm config set fetch-timeout 300000; for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install fallback attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 COPY indigo/brand-mereka /openedx/app/brand-mereka
 RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
@@ -899,13 +895,17 @@ COPY indigo/theme /openedx/dist/theme
 # Install frontend-plugin-framework with legacy peer deps
 RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
 
+# Sentry Browser SDK — client-side error telemetry (OBS-001, bead mereka-lms-m88z).
+# Init gated on getConfig().SENTRY_DSN at runtime; empty DSN → no-op.
+RUN npm install --legacy-peer-deps '@sentry/browser@^8.0.0'
+
 # Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
 RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
 
 COPY --from=learner-record-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.1 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.2 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 1990
 
 # Configuration needed at build time
@@ -2898,19 +2898,9 @@ PY
 
 
 ####### final production image with all static assets
-FROM docker.io/caddy:2.7.4 AS production
+FROM mirror.gcr.io/library/caddy:2.7.4 AS production
 
 RUN mkdir -p /openedx/dist
-COPY indigo/theme /openedx/dist/theme
-COPY indigo/brand-mereka /openedx/brand-mereka
-RUN mkdir -p /openedx/dist/theme \
- && cp -f /openedx/brand-mereka/favicon.ico /openedx/dist/theme/favicon.ico \
- && cp -f /openedx/brand-mereka/logo.png /openedx/dist/theme/logo-horizontal.png \
- && cp -f /openedx/brand-mereka/logo.svg /openedx/dist/theme/logo-horizontal.svg \
- && cp -f /openedx/brand-mereka/logo-white.png /openedx/dist/theme/logo-horizontal-white.png \
- && cp -f /openedx/brand-mereka/logo-white.svg /openedx/dist/theme/logo-horizontal-white.svg \
- && cp -f /openedx/brand-mereka/logo-trademark.png /openedx/dist/theme/logo.png \
- && cp -f /openedx/brand-mereka/logo-trademark.svg /openedx/dist/theme/logo.svg
 
 # Copy static assets
 

@@ -170,10 +170,10 @@ print('\n'.join(lines[start:end]))
 check_openedx_render_delta_allowlist() {
   local raw_df="$1"
   local patched_df="$2"
+  local delta_contract_verifier="$REPO_ROOT/scripts/qa/verify-build-optimizations-render-delta-contract.sh"
 
   python3 - "$raw_df" "$patched_df" <<'PY'
 from pathlib import Path
-import difflib
 import re
 import sys
 
@@ -231,27 +231,15 @@ if raw_in_patched_count != 0:
         f"Expected patched Open edX Dockerfile to contain zero unwrapped translation blocks; found {raw_in_patched_count}."
     )
 
-normalized_patched = patched_text.replace(wrapped_block, raw_block) if wrapped_block else patched_text
-if raw_block and normalized_patched != raw_text:
-    errors.append(
-        "Unexpected raw-vs-patched Open edX Dockerfile delta remains after normalizing the translation wrapper block."
-    )
-    diff = "".join(
-        difflib.unified_diff(
-            raw_text.splitlines(keepends=True),
-            normalized_patched.splitlines(keepends=True),
-            fromfile="raw-openedx-dockerfile",
-            tofile="patched-openedx-dockerfile-normalized",
-        )
-    ).rstrip()
-    if diff:
-        errors.append(diff)
-
 if errors:
     for error in errors:
         print(error, file=sys.stderr)
     sys.exit(1)
 PY
+
+  RAW_RENDER_FILE="$raw_df" \
+  PATCHED_RENDER_FILE="$patched_df" \
+    "$delta_contract_verifier"
 }
 
 # ── MFE Dockerfile Checks ───────────────────────────────────────
@@ -350,9 +338,9 @@ if [[ -f "$OPENEDX_DF" ]]; then
   fi
 
   if check_openedx_render_delta_allowlist "$RAW_OPENEDX_DF_SNAPSHOT" "$OPENEDX_DF"; then
-    pass "Raw-vs-patched Open edX Dockerfile delta is limited to the fast-profile translation wrapper block"
+    pass "Raw-vs-patched Open edX Dockerfile delta matches the build-optimizations allowed-delta ledger"
   else
-    fail "Raw-vs-patched Open edX Dockerfile delta exceeds the fast-profile translation wrapper allowlist"
+    fail "Raw-vs-patched Open edX Dockerfile delta exceeds the build-optimizations allowed-delta ledger"
   fi
 else
   skip "OpenEdX Dockerfile not found"

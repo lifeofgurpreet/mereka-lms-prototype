@@ -13,7 +13,8 @@ sync_footer_assets() {
   # Copy MFE theme SCSS/fonts into Indigo build directory.
   # Some Tutor renders place env.config.jsx at build root, but our patched
   # Dockerfile expects indigo/env.config.jsx and indigo/mereka/.
-  local MFE_BUILD_DIR="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe"
+  local tutor_root="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
+  local MFE_BUILD_DIR="$tutor_root/env/plugins/mfe/build/mfe"
   local MFE_INDIGO_DIR="$MFE_BUILD_DIR/indigo"
   local ENV_CONFIG_SOURCE="$MFE_BUILD_DIR/env.config.jsx"
   local THEME_SCSS_SOURCE="$REPO_ROOT/infrastructure/tutor/themes/mereka/scss"

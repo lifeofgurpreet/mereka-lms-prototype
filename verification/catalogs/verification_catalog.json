@@ -469,7 +469,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/infra/verify-local-bootstrap-readiness.sh",
-      "reference_count": 4,
+      "reference_count": 13,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -736,10 +736,14 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "on_demand",
+      "cadence": "per_pr_and_push",
       "canonical": true,
-      "ci_binding": [],
-      "ci_entrypoints": [],
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
       "env_scope": [
         "global"
       ],
@@ -747,15 +751,15 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-actions-pinned.sh",
-      "reference_count": 8,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "low",
+      "severity": "high",
       "spec_ids": [],
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -2090,7 +2094,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-bootstrap-workflow-contract.sh",
-      "reference_count": 4,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -2604,6 +2608,34 @@
       "cadence": "per_pr_and_push",
       "canonical": true,
       "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
+      "env_scope": [
+        "global"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "frontend-platform",
+      "path": "scripts/qa/verify-build-optimizations-render-delta-contract.sh",
+      "reference_count": 8,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "high",
+      "spec_ids": [
+        "AC-CI-ONBOARDING-001"
+      ],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
         "workflow_direct"
       ],
       "ci_entrypoints": [
@@ -2924,7 +2956,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-ci-cache-policy.sh",
-      "reference_count": 5,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -3155,13 +3187,14 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-cicd-merge-gates-and-secrets.sh",
-      "reference_count": 8,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
       ],
       "severity": "high",
       "spec_ids": [
+        "AC-005",
         "AC-007",
         "AC-008",
         "AC-028"
@@ -3213,7 +3246,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-cicd-tutor-plugin-test.sh",
-      "reference_count": 5,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -3300,6 +3333,36 @@
       ],
       "status": "manual_only",
       "tier": "exploratory_manual"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
+        "ci_static",
+        "workflow_direct"
+      ],
+      "ci_entrypoints": [
+        "ci_static",
+        "workflow_direct"
+      ],
+      "env_scope": [
+        "preview"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-cold-start-onboarding-contract.sh",
+      "reference_count": 11,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "cluster"
+      ],
+      "severity": "high",
+      "spec_ids": [
+        "AC-CI-ONBOARDING-001"
+      ],
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -4947,7 +5010,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-disaster-recovery.sh",
-      "reference_count": 10,
+      "reference_count": 13,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -7069,7 +7132,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-generated-surfaces.sh",
-      "reference_count": 8,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -7728,7 +7791,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-k8s-images.sh",
-      "reference_count": 13,
+      "reference_count": 15,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -8071,13 +8134,14 @@
         "ci_static"
       ],
       "env_scope": [
-        "dev"
+        "dev",
+        "nonprod"
       ],
       "kind": "verify",
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-kustomize-render.sh",
-      "reference_count": 13,
+      "reference_count": 15,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -8106,7 +8170,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-kustomize-structure.sh",
-      "reference_count": 9,
+      "reference_count": 11,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -10271,7 +10335,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-multi-brand-site.sh",
-      "reference_count": 4,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -10709,7 +10773,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-network-policies.sh",
-      "reference_count": 4,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -10737,7 +10801,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-new-ci-static-entries.sh",
-      "reference_count": 4,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -12150,7 +12214,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-paragon-tokens.sh",
-      "reference_count": 8,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -14063,13 +14127,14 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-restore-drill.sh",
-      "reference_count": 4,
+      "reference_count": 17,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
       ],
       "severity": "medium",
       "spec_ids": [
+        "AC-007",
         "AC-021",
         "AC-022",
         "AC-023",
@@ -14142,7 +14207,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-rke2-dev-readiness.sh",
-      "reference_count": 10,
+      "reference_count": 11,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster",
@@ -14609,7 +14674,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-secret-classification.sh",
-      "reference_count": 6,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -14723,7 +14788,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-secrets-isolation.sh",
-      "reference_count": 8,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster",
@@ -15074,10 +15139,14 @@
       "tier": "release_blocking"
     },
     {
-      "cadence": "on_demand",
+      "cadence": "per_pr_and_push",
       "canonical": true,
-      "ci_binding": [],
-      "ci_entrypoints": [],
+      "ci_binding": [
+        "workflow_direct"
+      ],
+      "ci_entrypoints": [
+        "workflow_direct"
+      ],
       "env_scope": [
         "dev"
       ],
@@ -15085,15 +15154,15 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-setup.sh",
-      "reference_count": 6,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "low",
+      "severity": "high",
       "spec_ids": [],
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "per_pr_and_push",
@@ -18822,28 +18891,28 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 25,
-    "ci_static_bound": 383,
+    "ci_static_bound": 386,
     "kinds": {
-      "verify": 632
+      "verify": 634
     },
     "mutability": {
       "destructive": 9,
       "mutating": 21,
-      "read-only": 602
+      "read-only": 604
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 437,
+      "active": 441,
       "deprecated_candidate": 1,
-      "manual_only": 194
+      "manual_only": 192
     },
     "tiers": {
-      "exploratory_manual": 198,
+      "exploratory_manual": 196,
       "periodic_runtime": 21,
-      "release_blocking": 413
+      "release_blocking": 417
     },
-    "total_verify_scripts": 632,
-    "workflow_direct_bound": 70
+    "total_verify_scripts": 634,
+    "workflow_direct_bound": 72
   },
   "version": "1"
 }

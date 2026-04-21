@@ -49,6 +49,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 PATCHES_DIR="$REPO_ROOT/infrastructure/tutor/patches"
 
 # Source shared setup (venv activation, template path discovery)
+# shellcheck source=infrastructure/tutor/patches/_common.sh
 source "$PATCHES_DIR/_common.sh"
 
 # Run branding health check if available
@@ -60,13 +61,25 @@ fi
 # Source all patch modules
 # NOTE: MFE node patch module removed in tracker #32; durable MFE Dockerfile
 # ownership now lives in Tutor plugin hooks in _mereka_lms/mfe_dockerfile.py.
-# The only remaining direct rendered-MFE-Dockerfile rewrite in this script is
-# the pull_translations retry wrapper below.
+# Remaining direct rendered-Dockerfile rewrites must be named patch modules or
+# explicitly documented wrappers with fixture coverage and retirement triggers.
+# shellcheck source=infrastructure/tutor/patches/brand-package.sh
 source "$PATCHES_DIR/brand-package.sh"
+# shellcheck source=infrastructure/tutor/patches/webpack-memory.sh
 source "$PATCHES_DIR/webpack-memory.sh"
+# shellcheck source=infrastructure/tutor/patches/sync-footer-assets.sh
 source "$PATCHES_DIR/sync-footer-assets.sh"
+# shellcheck source=infrastructure/tutor/patches/mysql-root-host.sh
+source "$PATCHES_DIR/mysql-root-host.sh"
+# shellcheck source=infrastructure/tutor/patches/mfe-npm-install-resilience.sh
+source "$PATCHES_DIR/mfe-npm-install-resilience.sh"
+# shellcheck source=infrastructure/tutor/patches/mfe-slot-ownership.sh
 source "$PATCHES_DIR/mfe-slot-ownership.sh"
+# shellcheck source=infrastructure/tutor/patches/mfe-prune-deprecated-shells.sh
 source "$PATCHES_DIR/mfe-prune-deprecated-shells.sh"
+# shellcheck source=infrastructure/tutor/patches/dependency-image-mirrors.sh
+source "$PATCHES_DIR/dependency-image-mirrors.sh"
+# shellcheck source=infrastructure/tutor/patches/build-optimizations.sh
 source "$PATCHES_DIR/build-optimizations.sh"
 
 apply_patch() {
@@ -163,9 +176,9 @@ sync_mfe_theme() {
 }
 
 wrap_mfe_pull_translations_retry() {
-  # This is the sole remaining allowed rendered-MFE-Dockerfile rewrite in
-  # apply-patches.sh. All other MFE Dockerfile mutations must live in Tutor
-  # plugin hooks or in build-context asset/helper sync.
+  # This is one of the remaining allowed rendered-MFE-Dockerfile rewrites in
+  # apply-patches.sh. Other direct mutations must be named patch modules with
+  # docs and contract checks, or live in Tutor plugin hooks/build-context sync.
   #
   # CI reliability fix — DinD/BuildKit DNS to github.com intermittently fails
   # during the MFE build, causing `make OPENEDX_ATLAS_PULL=true ... pull_translations`
@@ -230,7 +243,9 @@ PY
 }
 
 apply_openedx_patches() {
+  apply_patch apply_mysql_root_host_patch
   apply_patch apply_webpack_memory_patch
+  apply_patch apply_dependency_image_mirrors_patch
   apply_patch apply_build_optimizations_patch
   sync_openedx_theme
   sync_openedx_custom_apps
@@ -242,6 +257,8 @@ apply_mfe_patches() {
   apply_patch sync_footer_assets
   apply_patch apply_mfe_slot_ownership_patch
   apply_patch apply_mfe_prune_deprecated_shells_patch
+  apply_patch apply_mfe_npm_install_resilience_patch
+  apply_patch apply_dependency_image_mirrors_patch
   sync_mfe_patch_helpers
   sync_mfe_theme
   wrap_mfe_pull_translations_retry

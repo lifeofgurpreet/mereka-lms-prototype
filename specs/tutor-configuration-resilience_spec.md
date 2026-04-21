@@ -123,7 +123,7 @@ The three-layer defense system has been partially implemented with the Tutor plu
 **Size:** 555 lines
 **Version:** 1.0.0
 
-The `mereka_lms` plugin implements 15 ENV_PATCHES hooks covering:
+The `mereka_lms` Tutor integration implements ENV_PATCHES hooks plus tightly scoped post-render patches covering:
 
 #### Django Settings Patches
 - **Hook:** `openedx-lms-production-settings`
@@ -140,7 +140,7 @@ The `mereka_lms` plugin implements 15 ENV_PATCHES hooks covering:
   - Prometheus metrics integration
 
 #### Asset Build Fixes
-- **Hooks:** `openedx-lms-assets-settings`, `openedx-cms-assets-settings`
+- **Hooks:** `openedx-common-assets-settings`
 - **Patches Applied:**
   - Ensures optional Redwood apps exist during collectstatic
   - Monkey-patches Django's `safe_join` to prevent `SuspiciousFileOperation` errors (fixes CSS relative path references like `../../css/images/correct-icon.png`)
@@ -162,13 +162,13 @@ The `mereka_lms` plugin implements 15 ENV_PATCHES hooks covering:
   - Disables Terser parallel processing for build stability
 
 #### MFE Dockerfile Patches
-- **Hooks:** `mfe-dockerfile-pre-npm-install`, `mfe-dockerfile-post-npm-install`, `mfe-dockerfile-npm-install`
+- **Hooks / patches:** `mfe-dockerfile-pre-npm-install`, `mfe-dockerfile-post-npm-install`, `patches/mfe-npm-install-resilience.sh`
 - **Patches Applied:**
   - Node 24 build toolchain installation plus HTTPS git rewrite hardening
   - Local `@edx/brand@file:./brand-mereka` install contract
   - Rendered production-stage runtime theme payload copy
   - `@openedx/frontend-plugin-framework` installation with legacy peer deps
-  - npm install resilience (retry logic: 6 attempts, configurable timeouts)
+  - npm install resilience (retry/fallback logic, configurable timeouts)
 
 #### MFE Theme Patches
 - **Hook:** `mfe-env-config`

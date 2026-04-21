@@ -7,6 +7,7 @@ scripts/aspects/init-aspects-env.sh
 scripts/branding/build-tokens.sh
 scripts/branding/deploy-logo-fix.sh
 scripts/branding/fix-logo-static-files.sh
+scripts/ci/install-docker-compose.sh
 scripts/ci/preflight-check.sh
 scripts/export-k8s-manifests.sh
 scripts/export-mct-courses-from-prod.py
@@ -19,7 +20,6 @@ scripts/infra/create-release.sh
 scripts/infra/data-retention-jobs.sh
 scripts/infra/decommission-legacy-ecommerce.sh
 scripts/infra/fix-mfe-refresh-endpoint-site-config.sh
-scripts/infra/fix-velero-restore-test.sh
 scripts/infra/install-trivy.sh
 scripts/infra/mongodb-atlas-cutover.sh
 scripts/infra/normalize-mysql-secrets.sh

@@ -7,7 +7,7 @@
 This repository tracks the infrastructure-as-code, configuration, and runbooks for the Mereka Academy Open edX deployment. The goals are:
 
 - provision a repeatable local sandbox using Tutor and the nightly Open edX release;
-- evolve toward a production-grade deployment on Google Cloud Platform;
+- operate production through GitOps-managed RKE2 infrastructure with clear local, source, and runtime proof boundaries;
 - keep documentation and automation in sync with upstream Open edX updates.
 
 > 🧠 Prerequisite: configure Docker Desktop with at least **12 GB RAM** and **2 GB+ swap** (Settings → Resources) before running `tutor images build openedx`. The Redwood asset pipeline freely uses 6–8 GB during webpack and will OOM if the daemon stays on the default 2 GB cap.
@@ -36,24 +36,30 @@ This repository tracks the infrastructure-as-code, configuration, and runbooks f
 - `services/` – Standalone microservices and webhooks
 - `var/` – Runtime artifacts (gitignored): logs, exports, migration outputs
 
-## 🚀 Quick Start (New Developers)
+## Quick Start
 
-**One-Command Setup:**
+For a new local sandbox, use the one-click setup from the repo root:
+
 ```bash
+git clone git@github.com:Biji-Biji-Initiative/mereka-lms.git
+cd mereka-lms
+./scripts/qa/verify-cold-start-onboarding-contract.sh
 ./scripts/shared/setup-local.sh
+./scripts/infra/verify-local-bootstrap-readiness.sh
 ```
 
-Or use Make:
+For day-to-day work after the sandbox exists:
+
 ```bash
 make bootstrap
 make tutor-start
 ```
 
-This automatically sets up everything you need for local development. See `README_SETUP.md` for details.
+The source-level onboarding contract is [`scripts/qa/verify-cold-start-onboarding-contract.sh`](scripts/qa/verify-cold-start-onboarding-contract.sh).
+The local setup path builds `openedx:nightly` and `openedx-mfe:nightly`, points Tutor at those exact tags, and pulls third-party service images through `mirror.gcr.io` to avoid anonymous Docker Hub quota during first-run setup.
+The clean bootstrap proof lane is [`bootstrap-local-readiness.yml`](.github/workflows/bootstrap-local-readiness.yml), which launches a fresh repo-scoped Tutor environment and then runs [`scripts/infra/verify-local-bootstrap-readiness.sh`](scripts/infra/verify-local-bootstrap-readiness.sh). The image-build proof lane is [`build-benchmark.yml`](.github/workflows/build-benchmark.yml) with `benchmark_class=app-cache-cold` and `image_family=both`; that means app-level BuildKit cache imports are disabled, not that the persistent runner has a pristine Docker daemon or no base images.
 
-**For complete onboarding:** See [`docs/guides/onboarding/DEVELOPER_ONBOARDING.md`](docs/guides/onboarding/DEVELOPER_ONBOARDING.md)
-
-See [`docs/guides/onboarding/LOCAL_SETUP.md`](docs/guides/onboarding/LOCAL_SETUP.md) for detailed setup instructions and [`docs/archive/reports/GCP_ROADMAP.md`](docs/archive/reports/GCP_ROADMAP.md) for the cloud deployment plan.
+For detailed setup instructions, see [`docs/guides/onboarding/QUICK_START_LOCAL.md`](docs/guides/onboarding/QUICK_START_LOCAL.md) and [`docs/guides/onboarding/LOCAL_SETUP.md`](docs/guides/onboarding/LOCAL_SETUP.md).
 
 ## Submodules
 

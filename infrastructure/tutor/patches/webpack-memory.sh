@@ -4,11 +4,12 @@
 # TerserPlugin parallel:false, removes requireCompatConfig.
 
 apply_webpack_memory_patch() {
+  local tutor_root="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
   local targets=(
     "$OPENEDX_TEMPLATE"
-    "$REPO_ROOT/tutor_env/env/build/openedx/Dockerfile"
+    "$tutor_root/env/build/openedx/Dockerfile"
     "$WEBPACK_PROD_TEMPLATE"
-    "$REPO_ROOT/tutor_env/env/build/openedx/edx-platform/webpack.prod.config.js"
+    "$tutor_root/env/build/openedx/edx-platform/webpack.prod.config.js"
   )
 
   "${PYTHON_BIN}" - "${targets[@]}" <<'PY'

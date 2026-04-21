@@ -3,6 +3,9 @@
 # Verify Local Setup is Complete and Ready
 set -euo pipefail
 
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$REPO_ROOT"
+
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
@@ -25,6 +28,24 @@ check_fail() {
 check_warn() {
     echo -e "${YELLOW}⚠️  $1${NC}"
     WARNINGS=$((WARNINGS + 1))
+}
+
+mysql_query() {
+    local database="$1"
+    local query="$2"
+
+    if [[ -n "$database" ]]; then
+        docker exec \
+            -e MYSQL_DATABASE="$database" \
+            -e MYSQL_QUERY="$query" \
+            tutor_local-mysql-1 \
+            sh -lc 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" -Nse "$MYSQL_QUERY"'
+    else
+        docker exec \
+            -e MYSQL_QUERY="$query" \
+            tutor_local-mysql-1 \
+            sh -lc 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -Nse "$MYSQL_QUERY"'
+    fi
 }
 
 # This script requires a local Tutor development environment with Docker.
@@ -121,27 +142,21 @@ else
 fi
 
 # Check database
-if docker exec tutor_local-mysql-1 mysql -uroot -p1EebOQxu -e "SELECT 1;" >/dev/null 2>&1; then
+if mysql_query "" "SELECT 1;" >/dev/null 2>&1; then
     check_pass "MySQL accessible"
 else
     check_fail "MySQL not accessible"
 fi
 
-# Check organizations
-ORG_COUNT=$(docker exec tutor_local-mysql-1 mysql -uroot -p1EebOQxu openedx -e "SELECT COUNT(*) FROM organizations_organization;" 2>/dev/null | tail -1 | tr -d ' ')
-if [ "$ORG_COUNT" -ge 2 ]; then
-    check_pass "Organizations configured: $ORG_COUNT"
+# Check canonical local bootstrap readiness
+BOOTSTRAP_READINESS_LOG="$(mktemp)"
+if ./scripts/infra/verify-local-bootstrap-readiness.sh >"$BOOTSTRAP_READINESS_LOG" 2>&1; then
+    check_pass "Local bootstrap readiness contract passes"
 else
-    check_fail "Organizations missing (expected 2+, found $ORG_COUNT)"
+    check_fail "Local bootstrap readiness contract failed"
+    sed 's/^/  /' "$BOOTSTRAP_READINESS_LOG"
 fi
-
-# Check sites
-SITE_COUNT=$(docker exec tutor_local-mysql-1 mysql -uroot -p1EebOQxu openedx -e "SELECT COUNT(*) FROM django_site WHERE domain LIKE '%biji%' OR domain LIKE '%skill%';" 2>/dev/null | tail -1 | tr -d ' ')
-if [ "$SITE_COUNT" -ge 2 ]; then
-    check_pass "Multi-site configured: $SITE_COUNT sites"
-else
-    check_fail "Multi-site missing (expected 2+ sites, found $SITE_COUNT)"
-fi
+rm -f "$BOOTSTRAP_READINESS_LOG"
 
 # Check admin user
 ADMIN_EXISTS=$(docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "from django.contrib.auth import get_user_model; print('True' if get_user_model().objects.filter(username='admin').exists() else 'False')" 2>/dev/null | tail -1)
@@ -170,4 +185,3 @@ else
     echo "Quick fix: ./scripts/shared/setup-local.sh"
     exit 1
 fi
-

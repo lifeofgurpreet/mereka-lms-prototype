@@ -1,5 +1,5 @@
 # Onboarding Documentation
-_Audience: Developers + Agent Operators • Owner: Platform Team • Last verified: 2026-03-10 • Status: canonical_
+_Audience: Developers + Agent Operators • Owner: Platform Team • Last verified: 2026-04-20 • Status: canonical_
 
 ## Scope
 This is the canonical onboarding index for local setup and daily development workflow.
@@ -16,6 +16,23 @@ This is the canonical onboarding index for local setup and daily development wor
   - [`DEVCONTAINER_GUIDE.md`](DEVCONTAINER_GUIDE.md)
 - Coordinating with multiple contributors or agents:
   - [`MULTI_DEVELOPER_WORKFLOW.md`](MULTI_DEVELOPER_WORKFLOW.md)
+
+## Proof lane
+
+- Offline source/docs contract:
+  - `./scripts/qa/verify-cold-start-onboarding-contract.sh`
+- Initialized local Tutor proof after setup:
+  - `./scripts/infra/verify-local-bootstrap-readiness.sh`
+- Fresh bootstrap proof:
+  - [`.github/workflows/bootstrap-local-readiness.yml`](../../../.github/workflows/bootstrap-local-readiness.yml)
+- App-cache-cold image-build proof:
+  - [`.github/workflows/build-benchmark.yml`](../../../.github/workflows/build-benchmark.yml) with `benchmark_class=app-cache-cold` and `image_family=both`
+- Developer environment proof matrix:
+  - [`../../reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md`](../../reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md)
+
+Do not call onboarding fixed from docs-only review. The contract verifier proves source and guide consistency. The bootstrap workflow proves a clean repo-scoped Tutor launch path. The `benchmark_class=app-cache-cold` benchmark proves image-build helpers with app-level BuildKit cache imports disabled. It is not a machine-cold clean-room build: a persistent runner may still have Docker daemon/base-image state, and a local developer machine can still fail for host-resource reasons.
+
+The local setup path must stay one source chain: Tutor source/config plus `docker-bake.hcl` build helpers. It builds `openedx:nightly` and `openedx-mfe:nightly`, renders Tutor to those local tags, applies the named dependency-image mirror patch for Tutor-emitted hardcoded Docker Hub refs, selects the repo-owned BuildKit dependency-mirror builder as a fallback guard, and uses `mirror.gcr.io` image refs where Tutor exposes them. Mirror use is dependency acquisition, not a second build strategy.
 
 ## Canonical onboarding set
 

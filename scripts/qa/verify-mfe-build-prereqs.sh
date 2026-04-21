@@ -135,10 +135,12 @@ from pathlib import Path
 import sys
 
 text = Path(sys.argv[1]).read_text(encoding="utf-8")
-marker = "FROM docker.io/caddy:2.7.4 AS production"
-if marker not in text:
+import re
+
+match = re.search(r"(?m)^FROM .*/?caddy:2\.7\.4 AS production$", text)
+if not match:
     raise SystemExit(1)
-production = text[text.index(marker):]
+production = text[match.start():]
 raise SystemExit(0 if "COPY indigo/theme /openedx/dist/theme" in production else 1)
 PY
   then

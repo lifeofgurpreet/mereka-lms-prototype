@@ -192,24 +192,6 @@ PY
 """,
 )
 
-# NPM install resilience (retry on failure)
-# NOTE: Prefer `npm clean-install` when the lockfile is usable, but fall back to
-# `npm install` if upstream lockfile drift breaks the strict path. This matches
-# the rendered MFE build authority and keeps lockfile tolerance explicit.
-_register_env_patch(
-    "mfe-dockerfile-npm-install",
-    """
-# Configure npm for resilience
-RUN npm config set fetch-retries 6 \\
- && npm config set fetch-retry-mintimeout 20000 \\
- && npm config set fetch-retry-maxtimeout 120000 \\
- && npm config set fetch-timeout 300000
-
-# Install with retries (clean-install first, npm install fallback for lockfile drift)
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
-""",
-)
-
 # Admin console requires react-redux and redux (not bundled by default)
 _register_env_patch(
     "mfe-dockerfile-post-npm-install-admin-console",

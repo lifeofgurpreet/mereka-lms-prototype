@@ -60,7 +60,7 @@ if [ -f "tutor_env/config.yml" ]; then
     echo ""
     if grep -q "10\.97\.0\." tutor_env/config.yml; then
         echo -e "${RED}❌ Config contains cloud IPs (should use local Docker services)${NC}"
-        echo "   Run: tutor config save --set MYSQL_HOST=mysql --set MONGODB_HOST=mongodb"
+        echo "   Run: ./scripts/infra/tutor-config-save.sh --set MYSQL_HOST=mysql --set MONGODB_HOST=mongodb --set REDIS_HOST=redis --set RUN_MONGODB=true --set DOCKER_IMAGE_OPENEDX=openedx:nightly --set MFE_DOCKER_IMAGE=openedx-mfe:nightly"
     else
         echo -e "${GREEN}✅ Config uses local Docker services${NC}"
     fi
@@ -104,4 +104,3 @@ echo "║        Parity Check Complete                                  ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
 echo "For detailed parity strategy, see: docs/LOCAL_PRODUCTION_PARITY.md"
-
