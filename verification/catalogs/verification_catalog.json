@@ -16658,7 +16658,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-tenant-isolation-gates.sh",
-      "reference_count": 11,
+      "reference_count": 12,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
