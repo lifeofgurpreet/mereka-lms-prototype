@@ -85,19 +85,6 @@ for target in targets:
         'ENV NODE_OPTIONS="--max-old-space-size=6144"\nENV COMPREHENSIVE_THEME_DIRS',
     )
 
-    # ── Step 6: Fix collectstatic/uglify: ensure REQUIRE_BUILD_PROFILE_OPTIMIZE
-    # is present after the quoted PYTHONPATH variant (rendered Dockerfile only).
-    updated = updated.replace(
-        'ENV NODE_OPTIONS="--max-old-space-size=6144"\nENV PYTHONPATH="/openedx/edx-platform"\n',
-        'ENV NODE_OPTIONS="--max-old-space-size=6144"\nENV PYTHONPATH="/openedx/edx-platform"\nENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\n',
-    )
-    # Collapse any duplicate REQUIRE_BUILD_PROFILE_OPTIMIZE from step 6.
-    updated = re.sub(
-        r'(?:ENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\n)+',
-        'ENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none\n',
-        updated,
-    )
-
     # Webpack config patches
     updated = updated.replace(
         "new TerserPlugin(),",

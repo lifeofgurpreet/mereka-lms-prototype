@@ -2,14 +2,9 @@
 # https://hub.docker.com/_/node/tags
 FROM mirror.gcr.io/library/node:24.11.0-bullseye-slim AS base
 
-RUN printf '%s\n' \
-    'Acquire::Retries "6";' \
-    'Acquire::http::Timeout "30";' \
-    'Acquire::https::Timeout "30";' \
-    'Acquire::ForceIPv4 "true";' \
-    > /etc/apt/apt.conf.d/80-retries && \
+RUN printf 'Acquire::Retries "5";\nAcquire::http::Timeout "120";\n' > /etc/apt/apt.conf.d/80-retries && \
     apt-get update \
-  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends --fix-missing git \
+  && apt-get install -y --fix-broken git \
     # required for cwebp-bin
     gcc libgl1 libxi6 make \
     # required for gifsicle, mozjpeg, and optipng (on arm)
@@ -94,6 +89,12 @@ ENV PUBLIC_PATH='/admin-console/'
 # have to code the LMS url into the mfe image, and this configuration is user-dependent.
 # So we point to a relative url that will be a proxy for the LMS.
 ENV MFE_CONFIG_API_URL=/api/mfe_config/v1
+ARG SESSION_COOKIE_DOMAIN=""
+ARG CSRF_COOKIE_DOMAIN=""
+ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
+ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
+ARG ENABLE_NEW_RELIC=false
+ENV ENABLE_NEW_RELIC=${ENABLE_NEW_RELIC}
 COPY env.config.jsx /openedx/app
 
 
@@ -152,6 +153,7 @@ RUN npm install --legacy-peer-deps '@sentry/browser@^8.0.0'
 
 # Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
 RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
+RUN npm install '@edx/brand@github:@edly-io/brand-openedx#indigo-2.5.0'
 
 RUN npm install --legacy-peer-deps 'react-redux@^8.1.3' 'redux@^4.2.1'
 
@@ -171,6 +173,12 @@ ENV PUBLIC_PATH='/authn/'
 # have to code the LMS url into the mfe image, and this configuration is user-dependent.
 # So we point to a relative url that will be a proxy for the LMS.
 ENV MFE_CONFIG_API_URL=/api/mfe_config/v1
+ARG SESSION_COOKIE_DOMAIN=""
+ARG CSRF_COOKIE_DOMAIN=""
+ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
+ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
+ARG ENABLE_NEW_RELIC=false
+ENV ENABLE_NEW_RELIC=${ENABLE_NEW_RELIC}
 COPY env.config.jsx /openedx/app
 
 
@@ -244,6 +252,12 @@ ENV PUBLIC_PATH='/authoring/'
 # have to code the LMS url into the mfe image, and this configuration is user-dependent.
 # So we point to a relative url that will be a proxy for the LMS.
 ENV MFE_CONFIG_API_URL=/api/mfe_config/v1
+ARG SESSION_COOKIE_DOMAIN=""
+ARG CSRF_COOKIE_DOMAIN=""
+ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
+ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
+ARG ENABLE_NEW_RELIC=false
+ENV ENABLE_NEW_RELIC=${ENABLE_NEW_RELIC}
 COPY env.config.jsx /openedx/app
 
 
@@ -303,6 +317,7 @@ RUN npm install --legacy-peer-deps '@sentry/browser@^8.0.0'
 # Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
 RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
 
+RUN npm install '@edx/brand@github:@edly-io/brand-openedx#indigo-2.5.0'
 COPY --from=account-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
@@ -316,6 +331,12 @@ ENV PUBLIC_PATH='/account/'
 # have to code the LMS url into the mfe image, and this configuration is user-dependent.
 # So we point to a relative url that will be a proxy for the LMS.
 ENV MFE_CONFIG_API_URL=/api/mfe_config/v1
+ARG SESSION_COOKIE_DOMAIN=""
+ARG CSRF_COOKIE_DOMAIN=""
+ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
+ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
+ARG ENABLE_NEW_RELIC=false
+ENV ENABLE_NEW_RELIC=${ENABLE_NEW_RELIC}
 COPY env.config.jsx /openedx/app
 
 
@@ -411,6 +432,12 @@ ENV PUBLIC_PATH='/communications/'
 # have to code the LMS url into the mfe image, and this configuration is user-dependent.
 # So we point to a relative url that will be a proxy for the LMS.
 ENV MFE_CONFIG_API_URL=/api/mfe_config/v1
+ARG SESSION_COOKIE_DOMAIN=""
+ARG CSRF_COOKIE_DOMAIN=""
+ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
+ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
+ARG ENABLE_NEW_RELIC=false
+ENV ENABLE_NEW_RELIC=${ENABLE_NEW_RELIC}
 COPY env.config.jsx /openedx/app
 
 
@@ -470,6 +497,7 @@ RUN npm install --legacy-peer-deps '@sentry/browser@^8.0.0'
 # Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
 RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
 
+RUN npm install '@edx/brand@github:@edly-io/brand-openedx#indigo-2.5.0'
 COPY --from=discussions-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
@@ -483,6 +511,12 @@ ENV PUBLIC_PATH='/discussions/'
 # have to code the LMS url into the mfe image, and this configuration is user-dependent.
 # So we point to a relative url that will be a proxy for the LMS.
 ENV MFE_CONFIG_API_URL=/api/mfe_config/v1
+ARG SESSION_COOKIE_DOMAIN=""
+ARG CSRF_COOKIE_DOMAIN=""
+ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
+ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
+ARG ENABLE_NEW_RELIC=false
+ENV ENABLE_NEW_RELIC=${ENABLE_NEW_RELIC}
 COPY env.config.jsx /openedx/app
 
 
@@ -555,6 +589,12 @@ ENV PUBLIC_PATH='/gradebook/'
 # have to code the LMS url into the mfe image, and this configuration is user-dependent.
 # So we point to a relative url that will be a proxy for the LMS.
 ENV MFE_CONFIG_API_URL=/api/mfe_config/v1
+ARG SESSION_COOKIE_DOMAIN=""
+ARG CSRF_COOKIE_DOMAIN=""
+ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
+ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
+ARG ENABLE_NEW_RELIC=false
+ENV ENABLE_NEW_RELIC=${ENABLE_NEW_RELIC}
 COPY env.config.jsx /openedx/app
 
 
@@ -614,6 +654,7 @@ RUN npm install --legacy-peer-deps '@sentry/browser@^8.0.0'
 # Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
 RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
 
+RUN npm install '@edx/brand@github:@edly-io/brand-openedx#indigo-2.5.0'
 COPY --from=learner-dashboard-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
@@ -627,6 +668,12 @@ ENV PUBLIC_PATH='/learner-dashboard/'
 # have to code the LMS url into the mfe image, and this configuration is user-dependent.
 # So we point to a relative url that will be a proxy for the LMS.
 ENV MFE_CONFIG_API_URL=/api/mfe_config/v1
+ARG SESSION_COOKIE_DOMAIN=""
+ARG CSRF_COOKIE_DOMAIN=""
+ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
+ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
+ARG ENABLE_NEW_RELIC=false
+ENV ENABLE_NEW_RELIC=${ENABLE_NEW_RELIC}
 COPY env.config.jsx /openedx/app
 
 
@@ -686,6 +733,7 @@ RUN npm install --legacy-peer-deps '@sentry/browser@^8.0.0'
 # Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
 RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
 
+RUN npm install '@edx/brand@github:@edly-io/brand-openedx#indigo-2.5.0'
 COPY --from=learning-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
@@ -699,6 +747,12 @@ ENV PUBLIC_PATH='/learning/'
 # have to code the LMS url into the mfe image, and this configuration is user-dependent.
 # So we point to a relative url that will be a proxy for the LMS.
 ENV MFE_CONFIG_API_URL=/api/mfe_config/v1
+ARG SESSION_COOKIE_DOMAIN=""
+ARG CSRF_COOKIE_DOMAIN=""
+ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
+ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
+ARG ENABLE_NEW_RELIC=false
+ENV ENABLE_NEW_RELIC=${ENABLE_NEW_RELIC}
 COPY env.config.jsx /openedx/app
 
 
@@ -771,6 +825,12 @@ ENV PUBLIC_PATH='/ora-grading/'
 # have to code the LMS url into the mfe image, and this configuration is user-dependent.
 # So we point to a relative url that will be a proxy for the LMS.
 ENV MFE_CONFIG_API_URL=/api/mfe_config/v1
+ARG SESSION_COOKIE_DOMAIN=""
+ARG CSRF_COOKIE_DOMAIN=""
+ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
+ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
+ARG ENABLE_NEW_RELIC=false
+ENV ENABLE_NEW_RELIC=${ENABLE_NEW_RELIC}
 COPY env.config.jsx /openedx/app
 
 
@@ -830,6 +890,7 @@ RUN npm install --legacy-peer-deps '@sentry/browser@^8.0.0'
 # Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
 RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exec sed -i 's/const endDateObj = moment\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} +     || true
 
+RUN npm install '@edx/brand@github:@edly-io/brand-openedx#indigo-2.5.0'
 COPY --from=profile-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
@@ -843,6 +904,12 @@ ENV PUBLIC_PATH='/profile/'
 # have to code the LMS url into the mfe image, and this configuration is user-dependent.
 # So we point to a relative url that will be a proxy for the LMS.
 ENV MFE_CONFIG_API_URL=/api/mfe_config/v1
+ARG SESSION_COOKIE_DOMAIN=""
+ARG CSRF_COOKIE_DOMAIN=""
+ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
+ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
+ARG ENABLE_NEW_RELIC=false
+ENV ENABLE_NEW_RELIC=${ENABLE_NEW_RELIC}
 COPY env.config.jsx /openedx/app
 
 
@@ -915,6 +982,12 @@ ENV PUBLIC_PATH='/learner-record/'
 # have to code the LMS url into the mfe image, and this configuration is user-dependent.
 # So we point to a relative url that will be a proxy for the LMS.
 ENV MFE_CONFIG_API_URL=/api/mfe_config/v1
+ARG SESSION_COOKIE_DOMAIN=""
+ARG CSRF_COOKIE_DOMAIN=""
+ENV SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN}
+ENV CSRF_COOKIE_DOMAIN=${CSRF_COOKIE_DOMAIN}
+ARG ENABLE_NEW_RELIC=false
+ENV ENABLE_NEW_RELIC=${ENABLE_NEW_RELIC}
 COPY env.config.jsx /openedx/app
 
 

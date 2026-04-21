@@ -4,7 +4,7 @@
 >
 > **Bead**: mereka-lms-8jao.25
 > **AC**: AC-WC-007, AC-WC-008
-> **Last updated**: 2026-02-20
+> **Last updated**: 2026-04-21
 > **Related**: `docs/reference/architecture/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md` (MFE-only subset)
 
 ## Scope
@@ -87,7 +87,7 @@ column literally instead of assuming every row is still live script-only authori
 | C5 | MFE theme COPY (`indigo/mereka`) | `mfe/Dockerfile` | SCRIPT-ONLY | HIGH | 2026-Q3 | Add to plugin `mfe-dockerfile-post-npm-install` hook |
 | C6 | Admin console Redux deps | `mfe/Dockerfile` | SCRIPT-ONLY | MEDIUM | 2026-Q3 | Add to plugin `mfe-dockerfile-post-npm-install` hook |
 | C7 | Indigo footer package removal | `env.config.jsx` | SCRIPT-ONLY | MEDIUM | 2026-Q3 | Add to plugin `mfe-env-config` hook |
-| C8 | `REQUIRE_BUILD_PROFILE_OPTIMIZE=none` | `Dockerfile` | SCRIPT-ONLY | MEDIUM | 2026-Q3 | Add to plugin `openedx-dockerfile-pre-assets` hook |
+| C8 | `REQUIRE_BUILD_PROFILE_OPTIMIZE=none` | `Dockerfile` | MIGRATED | LOW | Closed 2026-04-21 | Now owned by plugin `openedx-dockerfile-pre-assets` hook; bash keeps only rendered drift cleanup. |
 | C9 | MFE cache headers | `Caddyfile` | SCRIPT-ONLY | MEDIUM | 2026-Q3 | Add to plugin `caddy-caddyfile` hook |
 | C10 | New Relic ENV propagation | `mfe/Dockerfile` | SCRIPT-ONLY | LOW | 2026-Q4 | Add to plugin `mfe-dockerfile-post-npm-install` hook |
 | C11 | `pull_translations` retry wrapper | rendered `mfe/Dockerfile` | EXCEPTION | MEDIUM | 2026-Q4 | Keep as the sole documented post-render MFE Dockerfile rewrite until a hookable or upstream retry surface exists. |

@@ -199,6 +199,7 @@ _register_env_patch(
 # Increase Node memory limit for webpack builds
 ENV NODE_OPTIONS="--max-old-space-size=6144"
 ENV PYTHONPATH="/openedx/edx-platform"
+ENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none
 
 # Early-copy the mereka theme so it exists when compile-sass runs.
 # Tutor's standard COPY ./themes/ happens AFTER pre-assets hooks, but we need

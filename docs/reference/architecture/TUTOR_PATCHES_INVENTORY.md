@@ -3,7 +3,7 @@
 This document classifies every patch module in `infrastructure/tutor/patches/` and describes
 its relationship to the native Tutor hooks/filters in `infrastructure/tutor/plugins/mereka_lms.py`.
 
-**Maintained as of**: 2026-04-20
+**Maintained as of**: 2026-04-21
 
 ## Classification Key
 
@@ -68,10 +68,10 @@ its relationship to the native Tutor hooks/filters in `infrastructure/tutor/plug
 |-------|-------|
 | LOC | 74 |
 | Classification | `FILESYSTEM` |
-| What it does | Mutates the openedx Dockerfile and `webpack.prod.config.js`: 1. Adds `ENV NODE_OPTIONS="--max-old-space-size=6144"`, `ENV REQUIRE_BUILD_PROFILE_OPTIMIZE=none`, `ENV PYTHONPATH=`. 2. Removes lower memory limits. 3. Deduplicates ENV blocks from prior runs. 4. Disables parallel Terser. 5. Removes `requireCompatConfig` from the webpack export. Targets both templates and rendered copies. |
-| Tutor hook equivalent | `openedx-dockerfile-pre-assets` ENV_PATCH (line 382–391) covers NODE_OPTIONS + PYTHONPATH for new renders. `webpack-prod-config` ENV_PATCH (line 536–548) covers Terser. But the deduplication logic and removal of lower limits must act on the already-rendered file. |
-| Why it must stay bash | The ENV block injection is positional (must come after a specific WORKDIR line) and the existing file may have stale ENV values from prior renders. Tutor ENV_PATCHES cannot remove or replace existing content. |
-| Risk of conversion | MEDIUM — the new-render path is covered; the rendered-file cleanup is the only remaining bash responsibility. |
+| What it does | Mutates the openedx Dockerfile and `webpack.prod.config.js` only as a compatibility cleanup layer: 1. Removes lower `NODE_OPTIONS` limits. 2. Deduplicates stale runtime ENV trio blocks in already-rendered Dockerfiles. 3. Keeps the legacy webpack `TerserPlugin` / `requireCompatConfig` normalization for environments that have not been re-rendered yet. Targets Tutor templates plus the active `TUTOR_ROOT` rendered copies. |
+| Tutor hook equivalent | `openedx-dockerfile-pre-assets` ENV_PATCH now covers `NODE_OPTIONS`, `PYTHONPATH`, and `REQUIRE_BUILD_PROFILE_OPTIMIZE` for fresh renders. `webpack-prod-config` ENV_PATCH covers Terser. Bash remains only for stale rendered-file cleanup and legacy webpack export normalization. |
+| Why it must stay bash | Tutor ENV_PATCHES can add the fresh-render blocks, but they cannot scrub stale lower memory settings or collapse duplicate ENV clusters already present in an existing rendered Dockerfile. |
+| Risk of conversion | LOW-MEDIUM — fresh renders are source-owned; bash is now a bounded cleanup path for pre-existing rendered drift. |
 
 ---
 
