@@ -84,8 +84,20 @@ jobs:
           R2_ACCOUNT_ID: ${{ secrets.R2_TECHDOCS_ACCOUNT_ID }}
           R2_BUCKET: ${{ secrets.R2_TECHDOCS_BUCKET }}
         run: |
-          aws s3 sync ./site "s3://${R2_BUCKET}/${ENTITY_REF}/" \
-            --endpoint-url "https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com" \
+          aws --version
+          # Don't echo the values themselves; just confirm they reached the step.
+          echo "R2_ACCOUNT_ID length=${#R2_ACCOUNT_ID}"
+          echo "R2_BUCKET length=${#R2_BUCKET}"
+          echo "AWS_ACCESS_KEY_ID length=${#AWS_ACCESS_KEY_ID}"
+          echo "AWS_SECRET_ACCESS_KEY length=${#AWS_SECRET_ACCESS_KEY}"
+          if [ -z "${R2_ACCOUNT_ID:-}" ] || [ -z "${R2_BUCKET:-}" ]; then
+            echo "ERROR: required secret missing" >&2
+            exit 2
+          fi
+          ENDPOINT="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          DEST="s3://${R2_BUCKET}/${ENTITY_REF}/"
+          aws s3 sync ./site "$DEST" \
+            --endpoint-url "$ENDPOINT" \
             --delete \
             --no-progress
 
