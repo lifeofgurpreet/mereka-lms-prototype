@@ -40,6 +40,7 @@ scripts/qa/verify_adr_generated_clean.sh
 scripts/qa/verify_adr_links.py
 scripts/qa/verify_adr_readme.py
 scripts/tenants/disable-sso-nonprod.sh
+scripts/tenants/migrate-tenant-domain.sh
 scripts/tenants/seed-siteconfigs.sh
 scripts/transform_mct_to_course_packages.py
 scripts/verify-mct-thumbnails.py

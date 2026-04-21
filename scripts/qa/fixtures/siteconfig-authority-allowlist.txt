@@ -8,13 +8,14 @@ scripts/shared/multisite_bootstrap_django.py
 # Legacy and manual-only migration paths still present on main
 scripts/shared/multisite_bootstrap.py
 scripts/shared/sync-from-production.sh
-scripts/tenants/lib/site-reconcile-common.sh
-scripts/tenants/seed-siteconfigs.sh
-scripts/tenants/provision-mfe-config.sh
+scripts/tenants/bootstrap-enterprise-tenants.py
 scripts/tenants/configure-tenant-idp.sh
-scripts/tenants/sync-tenant-enterprise-mapping.sh
+scripts/tenants/lib/site-reconcile-common.sh
+scripts/tenants/migrate-tenant-domain.sh
+scripts/tenants/provision-mfe-config.sh
 scripts/infra/fix-mfe-refresh-endpoint-site-config.sh
 infrastructure/tutor/plugins/multi-tenancy/management/commands/provision_tenant.py
 
 # Enterprise tenant bootstrap (creates and cleans SiteConfiguration MFE_CONFIG)
-scripts/tenants/bootstrap-enterprise-tenants.py
+scripts/tenants/seed-siteconfigs.sh
+scripts/tenants/sync-tenant-enterprise-mapping.sh
