@@ -5,10 +5,10 @@ Last verified: 2026-04-21
 
 ## Current Verified State
 
-- `repo_truth`: current `main` is `addb05cb0` after PR #1997. The local quick-start source contract, bounded build-optimization delta contract, repo-owned runner Buildx cleanup, Bootstrap Local Readiness timing artifact contract, and k8s/onboarding truth-alignment contracts remain the app-repo truth surfaces.
+- `repo_truth`: current `main` is `48dc97927` after PR #2000. The local quick-start source contract, bounded build-optimization delta contract, repo-owned runner Buildx cleanup, Bootstrap Local Readiness timing artifact contract, k8s/onboarding truth-alignment contracts, and Build Tutor Images diagnostics coverage remain the app-repo truth surfaces.
 - `infra_truth`: `.github/workflows/bootstrap-local-readiness.yml` is the clean bootstrap proof lane. `build-benchmark.yml` with `benchmark_class=app-cache-cold` / `image_family=both` is the separate app-cache-cold image-build proof lane. The old `true-cold` input remains a legacy alias only; the proof class disables app-level BuildKit cache imports but does not prove a pristine Docker daemon or absent base images on persistent runners. App repo Kustomize proof owns base/local contracts; production and rke2 environment overlays are infra-owned unless an explicit require flag is set.
-- `proof_truth`: app-cache-cold image-build proof `24721668598` is green on `39ae0fb86`; last accepted bootstrap baseline `24711453019` is green on `e7a4472cd`; current-main bootstrap rerun `24730265503` is green on `12db1b6` after Buildx cleanup and fastlane hook repair; PR #1991 branch bootstrap `24738471266` is green on `878994d0c`; post-merge Bootstrap Local Readiness `24743995049` is green on `2b86de83`; PR #1998 static CI `24747204826` is green and proves the bootstrap timing artifact contract; PR #1997 CI was green before merge and local isolated validation passed the k8s/onboarding truth contracts before merge. Post-#1998 bootstrap run `24747538663` is still in `tutor local launch -I --skip-build` on `497954538`; post-#1997 bootstrap run `24748203836` is queued on `addb05cb0`. Build Tutor Images `24743995019` remains a separate unresolved image-build proof/stuck-run issue and must not be collapsed into bootstrap proof.
-- `runtime_truth`: local/bootstrap proof is green for current main as initialized-state proof only. PR #1991 branch and post-merge main proof are green for the local MFE authn HTTP route (`http://apps.localhost/authn/login` returned HTTP 302) and upstream-image unbranded behavior. It does not prove GitOps realization, live cluster runtime, browser-rendered MFE login, or branded theme assets in a repo-built image.
+- `proof_truth`: app-cache-cold image-build proof `24721668598` is green on `39ae0fb86`; last accepted bootstrap baseline `24711453019` is green on `e7a4472cd`; then-current-main bootstrap rerun `24730265503` is green on `12db1b6` after Buildx cleanup and fastlane hook repair; PR #1991 branch bootstrap `24738471266` is green on `878994d0c`; post-#1991-merge Bootstrap Local Readiness `24743995049` is green on `2b86de83`; PR #1998 static CI `24747204826` is green and proves the bootstrap timing artifact contract only; PR #1997 CI was green before merge and local isolated validation passed the k8s/onboarding truth contracts before merge. Post-#1998 Bootstrap Local Readiness `24747538663` is still in progress, post-#1997 Bootstrap Local Readiness `24748203836` is still queued/pending, and neither is closure evidence until completed green. Build Tutor Images runs remain separate image-build proof and must not be collapsed into bootstrap proof; current rerun `24749060617` is still in progress on `4f6b75175`.
+- `runtime_truth`: local/bootstrap proof is green for the last completed main bootstrap evidence as initialized-state proof only, not for the latest `main` head until a current-head Bootstrap Local Readiness run completes. PR #1991 branch and post-merge main proof are green for the local MFE authn HTTP route (`http://apps.localhost/authn/login` returned HTTP 302) and upstream-image unbranded behavior. It does not prove GitOps realization, live cluster runtime, browser-rendered MFE login, or branded theme assets in a repo-built image.
 
 ## What We Achieved Already
 
@@ -43,16 +43,18 @@ Last verified: 2026-04-21
 ## Current Control Point
 
 Current truth: the lane is locally source-green, PR #1991 branch bootstrap
-proof is green on `878994d0c`, PR #1998 merged the phase timing artifact
-contract, and PR #1997 merged the k8s/onboarding truth alignment at
-`addb05cb0`. The accepted bootstrap baseline is still the latest completed
-green run; the two newer main bootstrap runs above are not closure evidence
-until they finish green and their artifacts are inspected. A clean manual local
-render also passed after creating `.venv` and installing
-`requirements-tutor.txt`: `tutor-config-save.sh` completed plugin sync, retired
-local `indigo`, config save, build-context prep, and `verify-tutor-config`.
-The next control point is to keep these contracts green on any build-path edit,
-preserve one source -> render -> artifact chain, dispatch
+proof is green on `878994d0c`, the latest completed main Bootstrap Local
+Readiness proof is green on `2b86de83`, and PR #1998 has merged the phase
+timing artifact contract with static CI proof only, PR #1997 merged the
+k8s/onboarding truth alignment at `addb05cb0`, and PR #2000 merged the
+proof-state guard at `48dc97927`. In this branch, a clean manual local render
+also passed after creating `.venv` and installing `requirements-tutor.txt`:
+`tutor-config-save.sh` completed plugin sync, retired local `indigo`, config
+save, build-context prep, and `verify-tutor-config`. The next control point is
+to keep these contracts green on any build-path edit, preserve one source ->
+render -> artifact chain, wait for queued/in-progress Bootstrap Local Readiness
+runs before calling newer heads closed, wait for Build Tutor Images rerun
+`24749060617` before calling the image-build lane closed, dispatch
 `bootstrap-local-readiness.yml` with `lane_mode=fallback` if fastlane remains
 under investigation, and classify any red result by authority:
 
@@ -101,16 +103,16 @@ gh run list --branch main --limit 20 \
 | P0 | Fix setup script root/path/security drift | app repo | local green | `bash -n`, contract verifier |
 | P0 | Make quick-start docs copy-paste truthful | docs | local green | contract verifier markdown link check |
 | P0 | Keep local setup image/service authority truthful | app repo + docs | local render proved: `openedx:nightly`, `openedx-mfe:nightly`, local services enabled, mirrored third-party pulls, BuildKit dependency-mirror builder selected before local builds | isolated Tutor render + `verify-cold-start-onboarding-contract.sh` |
-| P0 | Remove Docker Hub anonymous quota from bootstrap dependency acquisition | CI | current-main bootstrap green on `12db1b6` (`24730265503`) after runner repair | `verify-bootstrap-workflow-contract.sh`, bootstrap workflow green run |
+| P0 | Remove Docker Hub anonymous quota from bootstrap dependency acquisition | CI | latest completed main bootstrap proof green on `2b86de83` (`24743995049`); PR #1998 static CI `24747204826` proves the timing artifact contract only, not bootstrap closure | `verify-bootstrap-workflow-contract.sh`, bootstrap workflow green run |
 | P0 | Ensure heavy workflow covers doc/setup drift | CI | local green | `verify-bootstrap-workflow-contract.sh`, workflow path trigger review |
-| P1 | Run clean Tutor bootstrap proof | CI runner | accepted completed proof: current-main bootstrap green on `12db1b6` (`24730265503`) plus PR #1991 branch proof green on `878994d0c` (`24738471266`); newer main runs `24747538663` and `24748203836` are pending/in progress and not closure evidence yet | `bootstrap-local-readiness.yml` green run + redacted artifact |
+| P1 | Run clean Tutor bootstrap proof | CI runner | latest completed main bootstrap proof green on `2b86de83` (`24743995049`); PR #1991 branch proof green on `878994d0c` (`24738471266`); newer bootstrap runs `24747538663` and `24748203836` are not closure evidence until completed green | `bootstrap-local-readiness.yml` green run + redacted artifact |
 | P0 | Keep `build-optimizations.sh` as bounded J-exit layer | app repo | local contract green; prior Build Tutor Images proof green on `e7a4472cd` (`24711505579`) | `verify-build-optimizations-render-delta-contract.sh`, `test-verify-build-optimizations-render-delta-contract.sh` |
 | P0 | Fix render preflight venv portability | CI | prior Build Tutor Images render preflight green on `e7a4472cd` (`24711505579`) | `verify-cicd-tutor-plugin-test.sh`, `tutor-plugin-test.yml` green |
 | P0 | Correct app-vs-infra Kustomize ownership checks | app repo + infra repo boundary | local green; static CI proof should be checked when this surface changes | `verify-k8s-images.sh`, `verify-kustomize-structure.sh`, `verify-kustomize-render.sh`, `verify-network-policies.sh`, `verify-secrets-isolation.sh` |
 | P0 | Remove app-repo live Velero patch authority | app repo docs/specs; infra repo owns CronJob realization | local green; runtime restore-drill proof registered as runtime inventory, not static CI | `verify-disaster-recovery.sh --skip-cluster`, generated DR testmap, spec lint, `verify-restore-drill.sh` runtime proof |
 | P0 | Repair CI secret-scan harness truth | CI | local green; static CI proof should be checked when this surface changes | `verify-cicd-merge-gates-and-secrets.sh` |
 | P0 | Repair secret classification and Paragon token verification drift | app repo | local green; static CI proof should be checked when this surface changes | `verify-secret-classification.sh`, `verify-paragon-tokens.sh` |
-| P1 | Run app-cache-cold image-build proof | CI runner | app-cache-cold proof `24721668598` is green on `39ae0fb86`; Build Tutor Images run `24743995019` is a separate unresolved/stuck run and should be diagnosed from build diagnostics artifacts once PR #1999 or equivalent artifact coverage lands | `build-benchmark.yml` with `benchmark_class=app-cache-cold`, `image_family=both`; Build Tutor Images diagnostics artifact inspection |
+| P1 | Run app-cache-cold image-build proof | CI runner | accepted app-cache-cold proof green on `39ae0fb86` (`24721668598`) after dependency-image mirror normalization; this proves app-level cache imports disabled on a persistent runner, not pristine-daemon cold. Build Tutor Images rerun `24749060617` is separate current-main image-build proof and is still in progress. | `build-benchmark.yml` with `benchmark_class=app-cache-cold`, `image_family=both`; Build Tutor Images diagnostics artifact inspection |
 | P1 | Gather dev feedback after guide update | humans | pending | one new developer follows guide without out-of-band steps |
 
 ## Ownership Boundary

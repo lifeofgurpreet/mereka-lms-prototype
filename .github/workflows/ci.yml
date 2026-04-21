@@ -1003,14 +1003,13 @@ jobs:
           echo "Workflow-only CI control-plane changes are enforced by the"
           echo "workflow contract verifiers, not by a full Tutor render."
 
-      - name: Render Tutor environment + apply patches
+      - name: Render Tutor environment through canonical wrapper
         if: needs.change-scope.outputs.tutor_required == 'true'
         env:
           TUTOR_ROOT: ${{ github.workspace }}/tutor_env
         run: |
           export TUTOR_ROOT="${{ github.workspace }}/tutor_env"
-          tutor config save
-          ./infrastructure/tutor/apply-patches.sh
+          ./scripts/infra/tutor-config-save.sh
 
       - name: Run tutor apply patches test
         if: needs.change-scope.outputs.tutor_required == 'true'

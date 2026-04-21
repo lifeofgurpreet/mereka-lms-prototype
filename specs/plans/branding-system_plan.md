@@ -173,7 +173,7 @@ The work is primarily verification and hardening, not greenfield development.
 |------|-----------|--------|------------|
 | Google Fonts imports re-introduced by upstream Open edX SCSS updates | Medium | Medium | Post-compilation grep guard in`apply-patches.sh`; CI enforcement |
 | `tutor config save` regenerates templates, wiping patches |High (happens on every config change) | High | `apply-patches.sh` always runs after `config save`; documented in CLAUDE.md |
-| MFE build cache serves stale branding | Medium | Low | `tutor images build mfe --no-cache`; documented in edge cases |
+| MFE build cache serves stale branding | Medium | Low | `./scripts/infra/build-mfe-image.sh --local-defaults --build-profile proof --cache-mode none`; documented in edge cases |
 | Browser/CDN cache masks branding updates | Medium | Low | `collectstatic --clear` + cache-busting query params; documented in rollout |
 | Studio preview uses different theme rendering path | Low |Medium | Separate `verify-studio-authoring-branding.sh` checkcovers this |
 | Multi-domain SiteConfiguration misconfiguration | Low | Medium | `verify-public-branding.sh` checks both domains; alerton failure |

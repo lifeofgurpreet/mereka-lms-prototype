@@ -161,7 +161,7 @@ The system MUST use the following databases on the Atlas cluster:
 kubectl exec -it lms-pod -- pip list | grep dnspython
 
 # If missing, rebuild image with pymongo[srv]
-tutor images build openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 ```
 
 ### IP Allowlist Block
@@ -268,8 +268,9 @@ tutor config save \
   --set MONGODB_DATABASE=openedx \
   --set MONGODB_USE_SSL=true
 
-# 5. Rebuild images (picks up pymongo[srv])
-tutor images build openedx forum
+# 5. Rebuild Open edX through the repo helper (picks up pymongo[srv]).
+# If the forum image itself changed, build that optional service separately.
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 
 # 6. Restart services
 tutor k8s restart

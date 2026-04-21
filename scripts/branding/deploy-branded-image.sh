@@ -46,7 +46,7 @@ if [[ -z "$SOURCE_IMAGE" ]]; then
   else
     echo "ERROR: No local Open edX image found."
     echo "  Looked for: $DEST_IMAGE and tutor_local/openedx:latest"
-    echo "  Run: tutor images build openedx"
+    echo "  Run: ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast"
     exit 1
   fi
 fi

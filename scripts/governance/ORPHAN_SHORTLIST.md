@@ -22,8 +22,8 @@ grouped at the bottom.
 | `scripts/infra/backup-db.sh` | Export Cloud SQL databases to GCS; wraps `gcloud sql export`. Used as a pre-operation backup step in many other scripts. | **REGISTER** |
 | `scripts/infra/argocd-refresh.sh` | Forces a hard ArgoCD refresh on named applications. Used after GitOps commits to speed up reconciliation without waiting 3 min. | **REGISTER** |
 | `scripts/infra/verify-deployment.sh` | Post-deploy readiness check — polls pod status and core rollouts, wraps public health checks. Referenced in runbooks as the "one command after a rollout." | **REGISTER** |
-| `scripts/infra/verify-tutor-config.sh` | Verifies all required Tutor patches are present in generated files. Superseded by `scripts/qa/verify-tutor-patches.sh` (which IS in CI). | **ARCHIVE** (duplicate of CI-registered script) |
-| `scripts/infra/verify-tutor-patches.sh` | Manifest-driven patch verification with JSON output. Superseded by the CI-registered `scripts/qa/verify-tutor-patches.sh`. | **ARCHIVE** |
+| `scripts/infra/verify-tutor-config.sh` | Canonical rendered Tutor verifier used by `tutor-config-save.sh`; `scripts/qa/verify-tutor-patches.sh` delegates here for stable CI/manual entrypoint compatibility. | **REGISTER** |
+| `scripts/infra/verify-tutor-patches.sh` | Legacy manifest-driven patch verification with JSON output; not the branch-protection rendered verifier. | **ARCHIVE** |
 | `scripts/infra/tutor-config-rollback.sh` | Restore `tutor_env/config.yml` from a timestamped backup; re-applies patches. Valuable recovery step not covered elsewhere. | **REGISTER** |
 | `scripts/infra/apply-monitoring-configs.sh` | Applies Prometheus/Alertmanager configs to the cluster. | **REGISTER** |
 | `scripts/infra/apply-multisite-config.sh` | Runs Django multisite bootstrap inside an LMS pod to set up Site + SiteConfiguration records. Dry-run by default. | **REGISTER** |

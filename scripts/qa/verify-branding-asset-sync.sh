@@ -5,7 +5,7 @@ set -euo pipefail
 
 # verify-branding-asset-sync.sh - Verify apply-patches workflow syncs theme assets correctly
 #
-# AC-INT-003: After tutor images build openedx completes, Mereka logo variants exist
+# AC-INT-003: After the repo Open edX build helper completes, Mereka logo variants exist
 # in compiled static files and grep -r "fonts.googleapis.com" tutor_env/env/build/openedx/
 # returns zero results.
 
@@ -287,7 +287,7 @@ if [[ $FAIL -gt 0 ]]; then
   echo
   echo "Action required: Re-sync branding assets and rebuild images."
   echo "  1. Run: ./scripts/infra/prepare-tutor-build-context.sh --target openedx"
-  echo "  2. Build: tutor images build openedx"
+  echo "  2. Build: ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast"
   echo "  3. Verify: grep -r 'fonts.googleapis.com' tutor_env/env/build/openedx/"
   exit 1
 fi
@@ -295,7 +295,7 @@ fi
 if [[ "$BUILD_AVAILABLE" -eq 0 ]]; then
   echo
   echo "Note: Runtime asset checks were skipped because Tutor build artifacts are unavailable."
-  echo "  Run: tutor images build openedx"
+  echo "  Run: ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast"
 fi
 
 exit 0

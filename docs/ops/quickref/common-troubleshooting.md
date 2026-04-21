@@ -237,15 +237,15 @@ tutor local restart
 
 **loremipsum package error (Tutor v21)**:
 ```bash
-# Use pip instead of uv pip
-tutor images build openedx -a PIP_COMMAND=pip
+# Use the repo helper; it owns the Tutor 21 compatibility path.
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 ```
 
 **node_modules not found (MFE)**:
 ```bash
-# Check Dockerfile WORKDIR vs COPY path
-# Should move node_modules: RUN mv /openedx/edx-platform/node_modules /openedx/
-tutor images build mfe --no-cache
+# Refresh the governed MFE build context and rebuild through the helper.
+./scripts/infra/prepare-tutor-build-context.sh --target mfe
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 ```
 
 **Webpack out of memory**:
@@ -255,7 +255,7 @@ grep "NODE_OPTIONS" tutor_env/env/plugins/mfe/build/mfe/Dockerfile
 # Should show: ENV NODE_OPTIONS="--max-old-space-size=6144"
 
 ./scripts/infra/prepare-tutor-build-context.sh --target mfe
-tutor images build mfe
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 ```
 
 ---
@@ -364,7 +364,7 @@ make branding-sync
 # Exact sequence: docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md
 
 # Local reproduction only:
-tutor images build openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 ```
 
 ### MFE Branding Not Applied
@@ -387,7 +387,7 @@ kubectl exec -n mereka-lms deployment/mfe -- \
 # Exact sequence: docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md
 
 # Local reproduction only:
-tutor images build mfe
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 ```
 
 ---

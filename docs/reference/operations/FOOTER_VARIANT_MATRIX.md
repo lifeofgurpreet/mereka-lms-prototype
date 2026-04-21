@@ -149,7 +149,7 @@ Follow this checklist when onboarding a 4th (or nth) branded domain:
 - [ ] **6. Publish updated MFE assets**:
   - local validation:
     ```bash
-    tutor images build mfe
+    ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
     tutor local restart mfe
     ```
   - shared environments:

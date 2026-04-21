@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # @covers AC-CI-ONBOARDING-001
 # @spec: ci-cd-pipeline_spec.md
+# @runtime-dependencies: none
 #
 # Verify that cold-start onboarding docs, setup scripts, and the heavy bootstrap
 # workflow stay aligned.
@@ -107,6 +108,8 @@ require_contains "infrastructure/tutor/tutor-env.sh" 'TUTOR_PLUGINS_ROOT' "tutor
 require_contains "scripts/infra/sync-tutor-plugin-mirror.sh" 'TUTOR_PLUGINS_ROOT' "plugin mirror sync honors Tutor's native plugin root override"
 require_contains "scripts/infra/tutor-config-save.sh" 'TUTOR_PLUGINS_ROOT' "tutor-config-save.sh renders against the synced Tutor plugin root"
 require_contains "scripts/infra/tutor-config-save.sh" 'retired_plugin in mfe_oauth_fix indigo' "tutor-config-save.sh retires stale local Tutor plugins before render"
+require_contains ".github/workflows/ci.yml" '\./scripts/infra/tutor-config-save\.sh' "CI Tutor Configuration Tests use canonical Tutor config wrapper"
+reject_contains ".github/workflows/ci.yml" '^[[:space:]]*tutor config save$' "CI Tutor Configuration Tests do not use raw Tutor config save"
 require_contains "scripts/shared/setup-local.sh" 'dirname "\$\{BASH_SOURCE\[0\]\}"\)/\.\./\.\.' "setup-local.sh resolves repo root from scripts/shared to repo root"
 require_contains "scripts/shared/setup-local.sh" '\./scripts/infra/tutor-config-save\.sh' "setup-local.sh uses canonical Tutor config wrapper"
 require_contains "scripts/shared/setup-local.sh" '--set MYSQL_ROOT_HOST=%' "setup-local.sh renders MySQL remote-root contract required by local verifier"
@@ -177,6 +180,10 @@ require_contains "infrastructure/tutor/patches/dependency-image-mirrors.sh" 'mir
 require_contains "infrastructure/tutor/patches/dependency-image-mirrors.sh" 'mirror.gcr.io/library/node:24.11.0-bullseye-slim' "dependency image mirror patch mirrors MFE Node base acquisition"
 require_contains "infrastructure/tutor/patches/dependency-image-mirrors.sh" 'mirror.gcr.io/library/caddy:2.7.4' "dependency image mirror patch mirrors MFE Caddy base acquisition"
 require_contains "infrastructure/tutor/patches/dependency-image-mirrors.sh" 'revalidate mirror authority' "dependency image mirror patch fails loud on upstream selector drift"
+require_contains "infrastructure/tutor/patches/build-optimizations.allowed-delta.yaml" 'mirror\\\.gcr\\\.io/library/caddy:2\\\.7\\\.4' "render-delta ledger includes MFE Caddy mirror normalization"
+require_contains "scripts/ci/preflight-check.sh" 'check_mfe_dependency_image_mirror_delta' "render preflight proves MFE dependency image mirror delta"
+require_contains "scripts/ci/preflight-check.sh" 'sync-footer-assets\.sh' "render preflight uses active footer asset sync patch"
+reject_contains "scripts/ci/preflight-check.sh" 'footer-component\.sh' "render preflight no longer references deleted footer-component patch"
 require_contains "docs/reference/architecture/TUTOR_PATCHES_INVENTORY.md" 'dependency-image-mirrors\.sh' "Tutor patch inventory documents dependency image mirror normalization"
 require_contains "docs/reference/architecture/TUTOR_PATCHES_INVENTORY.md" 'temporary compatibility layer' "Tutor patch inventory classifies dependency image mirror normalization as temporary compatibility"
 require_contains "docs/reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md" 'dependency-image mirror normalization' "developer proof matrix names dependency image mirror normalization"

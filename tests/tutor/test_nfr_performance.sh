@@ -10,7 +10,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m'
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-VERIFY_SCRIPT="$REPO_ROOT/scripts/infra/verify-tutor-patches.sh"
+VERIFY_SCRIPT="$REPO_ROOT/scripts/qa/verify-tutor-patches.sh"
 MANIFEST_FILE="$REPO_ROOT/infrastructure/tutor/patch-manifest.yml"
 
 TESTS_RUN=0
@@ -79,54 +79,101 @@ else
   echo -e "  ${YELLOW}SKIP: tutor_env not found${NC}"
 fi
 
-# NFR-004: Manifest completeness (>40 patches documented)
-test_start "Manifest documents >40 patches"
-PATCH_COUNT=$(grep -c "^  - id:" "$MANIFEST_FILE" || echo "0")
+# NFR-004: Active manifest has authority metadata for every remaining patch
+test_start "Manifest documents active patch authority and retirement metadata"
+set +e
+MANIFEST_CHECK_OUTPUT=$(
+  python3 - "$MANIFEST_FILE" <<'PY'
+import sys
+from pathlib import Path
 
-if [[ $PATCH_COUNT -gt 40 ]]; then
+try:
+    import yaml
+except ImportError as exc:
+    raise SystemExit(f"PyYAML unavailable: {exc}")
+
+payload = yaml.safe_load(Path(sys.argv[1]).read_text(encoding="utf-8")) or {}
+patches = payload.get("patches") or []
+required_fields = {
+    "id",
+    "module",
+    "function",
+    "authority_class",
+    "description",
+    "retirement_trigger",
+    "required",
+}
+errors = []
+
+if not patches:
+    errors.append("no active patches listed")
+
+for patch in patches:
+    patch_id = patch.get("id", "<missing id>")
+    missing = sorted(field for field in required_fields if not patch.get(field))
+    if missing:
+        errors.append(f"{patch_id}: missing {', '.join(missing)}")
+
+if errors:
+    print("; ".join(errors))
+    raise SystemExit(1)
+
+print(len(patches))
+PY
+)
+MANIFEST_CHECK_RC=$?
+set -e
+
+if [[ "$MANIFEST_CHECK_RC" -eq 0 ]]; then
   test_pass
-  echo -e "  ${GREEN}  Found $PATCH_COUNT patches${NC}"
+  echo -e "  ${GREEN}  Active patches with authority metadata: $MANIFEST_CHECK_OUTPUT${NC}"
 else
-  test_fail "Only $PATCH_COUNT patches documented (expected >40)"
+  test_fail "$MANIFEST_CHECK_OUTPUT"
 fi
 
-# NFR-005: All critical patches have remediation info
-test_start "All critical patches have descriptions and verify commands"
-CRITICAL_PATCHES=$(grep -A 10 "severity: critical" "$MANIFEST_FILE" || echo "")
-MISSING_DESC=0
-MISSING_VERIFY=0
+# NFR-005: Temporary compatibility patches have retirement triggers
+test_start "Temporary compatibility patches have retirement triggers"
+set +e
+TEMPORARY_CHECK_OUTPUT=$(
+  python3 - "$MANIFEST_FILE" <<'PY'
+import sys
+from pathlib import Path
 
-while IFS= read -r line; do
-  if [[ "$line" =~ severity:.*critical ]]; then
-    # Check next 10 lines for description and verify_command
-    BLOCK=$(echo "$CRITICAL_PATCHES" | grep -A 10 "$line" || echo "")
-    if ! echo "$BLOCK" | grep -q "description:"; then
-      MISSING_DESC=$((MISSING_DESC + 1))
-    fi
-    if ! echo "$BLOCK" | grep -q "verify_command:"; then
-      MISSING_VERIFY=$((MISSING_VERIFY + 1))
-    fi
-  fi
-done <<< "$CRITICAL_PATCHES"
+try:
+    import yaml
+except ImportError as exc:
+    raise SystemExit(f"PyYAML unavailable: {exc}")
 
-if [[ $MISSING_DESC -eq 0 && $MISSING_VERIFY -eq 0 ]]; then
+payload = yaml.safe_load(Path(sys.argv[1]).read_text(encoding="utf-8")) or {}
+patches = payload.get("patches") or []
+missing = [
+    patch.get("id", "<missing id>")
+    for patch in patches
+    if patch.get("authority_class") == "temporary_compatibility_layer"
+    and not patch.get("retirement_trigger")
+]
+if missing:
+    print(", ".join(missing))
+    raise SystemExit(1)
+print(sum(1 for patch in patches if patch.get("authority_class") == "temporary_compatibility_layer"))
+PY
+)
+TEMPORARY_CHECK_RC=$?
+set -e
+
+if [[ "$TEMPORARY_CHECK_RC" -eq 0 ]]; then
   test_pass
+  echo -e "  ${GREEN}  Temporary compatibility patches with retirement triggers: $TEMPORARY_CHECK_OUTPUT${NC}"
 else
-  test_fail "$MISSING_DESC critical patches missing description, $MISSING_VERIFY missing verify_command"
+  test_fail "Missing retirement trigger for: $TEMPORARY_CHECK_OUTPUT"
 fi
 
-# NFR-006: JSON output is machine-parseable
-test_start "JSON output can be parsed by jq without errors"
-if [[ -d "$REPO_ROOT/tutor_env" ]]; then
-  JSON_OUTPUT=$("$VERIFY_SCRIPT" --json 2>/dev/null || echo "{}")
-
-  if echo "$JSON_OUTPUT" | jq . >/dev/null 2>&1; then
-    test_pass
-  else
-    test_fail "JSON is not valid"
-  fi
+# NFR-006: Manifest is machine-parseable
+test_start "Patch manifest can be parsed as YAML"
+if python3 -c "import yaml, sys; yaml.safe_load(open(sys.argv[1], encoding='utf-8'))" "$MANIFEST_FILE" 2>/dev/null; then
+  test_pass
 else
-  echo -e "  ${YELLOW}SKIP: tutor_env not found${NC}"
+  test_fail "Patch manifest is not valid YAML"
 fi
 
 # NFR-007: Verification script has proper error handling

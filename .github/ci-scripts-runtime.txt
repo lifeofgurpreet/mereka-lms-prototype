@@ -142,8 +142,8 @@ scripts/qa/verify-selector-to-slot-migration.sh  # STALE_EXPECT
 
 # ── Tutor environment required ─────────────────────────────────────────────────────
 scripts/qa/verify-tutor-multisite-domains.sh  # TUTOR_ENV
-scripts/qa/verify-tutor-patches.sh  # TUTOR_ENV
-scripts/infra/verify-tutor-config.sh  # TUTOR_ENV (legacy manual Tutor env verifier; CI patch authority remains scripts/qa/verify-tutor-patches.sh)
+scripts/qa/verify-tutor-patches.sh  # TUTOR_ENV (stable QA/CI entrypoint that delegates to scripts/infra/verify-tutor-config.sh)
+scripts/infra/verify-tutor-config.sh  # TUTOR_ENV (canonical rendered Tutor verifier for source-to-render patch authority)
 
 # ── Documentation gap checks ─────────────────────────────────────────────────────
 scripts/qa/verify-pii-inventory.sh  # DOC_GAP

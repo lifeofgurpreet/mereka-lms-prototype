@@ -165,12 +165,12 @@ tutor local restart
 
 ### Insufficient Docker RAM
 
-**Symptom**: Webpack build OOM during `tutor images build openedx`
+**Symptom**: Webpack build OOM during `./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast`
 
 **Recovery**:
 - Increase Docker Desktop RAM to >=12GB
 - Increase swap to >=2GB
-- Rebuild: `tutor images build openedx`
+- Rebuild: `./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast`
 
 ### Theme Assets Not Syncing
 
@@ -179,7 +179,7 @@ tutor local restart
 **Recovery**:
 ```bash
 ./infrastructure/tutor/apply-patches.sh
-tutor images build openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 tutor local restart lms cms
 ```
 
@@ -209,7 +209,7 @@ tutor local restart lms cms
 
 ### Metrics
 
-- Build time: Track duration of `tutor images build openedx` (baseline: 30-45 min)
+- Build time: Track duration of `./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast` (baseline: 30-45 min)
 - Theme/build-context sync duration: Time for `prepare-tutor-build-context.sh --target all` to complete (baseline: <30s)
 - Patch success rate: Percentage of canonical prepare executions that exit 0
 

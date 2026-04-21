@@ -1,26 +1,26 @@
 #!/usr/bin/env bash
-# @covers AC-TCR-004, AC-TCR-007, AC-TCR-008, AC-TCR-011
+# @covers AC-TCR-004, AC-TCR-008
 # @spec: tutor-configuration-resilience_spec.md
-# Tests for verify-tutor-patches.sh script
-# Coverage: AC-TCR-004, AC-TCR-007, AC-TCR-008, AC-TCR-011
+# Tests for the current Tutor patch authority ledger and canonical rendered verifier.
 
 set -euo pipefail
 
-# Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-VERIFY_SCRIPT="$REPO_ROOT/scripts/infra/verify-tutor-patches.sh"
+VERIFY_SCRIPT="$REPO_ROOT/scripts/qa/verify-tutor-patches.sh"
+CANONICAL_VERIFY_SCRIPT="$REPO_ROOT/scripts/infra/verify-tutor-config.sh"
+MANIFEST_FILE="$REPO_ROOT/infrastructure/tutor/patch-manifest.yml"
+APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 
-# Test counters
 TESTS_RUN=0
 TESTS_PASSED=0
 TESTS_FAILED=0
+VERIFY_OUTPUT=""
 
-# Test helper functions
 test_start() {
   TESTS_RUN=$((TESTS_RUN + 1))
   echo -e "${YELLOW}TEST $TESTS_RUN: $1${NC}"
@@ -28,177 +28,212 @@ test_start() {
 
 test_pass() {
   TESTS_PASSED=$((TESTS_PASSED + 1))
-  echo -e "${GREEN}  ✓ PASS${NC}"
+  echo -e "${GREEN}  PASS${NC}"
 }
 
 test_fail() {
   TESTS_FAILED=$((TESTS_FAILED + 1))
-  echo -e "${RED}  ✗ FAIL: $1${NC}"
+  echo -e "${RED}  FAIL: $1${NC}"
 }
 
-# Ensure verify script exists
-if [[ ! -x "$VERIFY_SCRIPT" ]]; then
-  echo -e "${RED}ERROR: Verify script not found or not executable: $VERIFY_SCRIPT${NC}"
-  exit 1
-fi
+run_manifest_check() {
+  python3 - "$REPO_ROOT" "$MANIFEST_FILE" "$APPLY_PATCHES" <<'PY'
+import sys
+from pathlib import Path
 
-echo "=== Test Suite: verify-tutor-patches.sh ==="
+try:
+    import yaml
+except ImportError as exc:
+    raise SystemExit(f"PyYAML is required for patch manifest validation: {exc}")
+
+repo_root = Path(sys.argv[1])
+manifest_path = Path(sys.argv[2])
+apply_patches_path = Path(sys.argv[3])
+
+payload = yaml.safe_load(manifest_path.read_text(encoding="utf-8")) or {}
+patches = payload.get("patches") or []
+inactive = payload.get("inactive_modules") or []
+apply_text = apply_patches_path.read_text(encoding="utf-8")
+
+required_fields = {
+    "id",
+    "module",
+    "function",
+    "target",
+    "target_family",
+    "authority_class",
+    "description",
+    "retirement_trigger",
+    "required",
+}
+allowed_authority = {
+    "temporary_compatibility_layer",
+    "migration_guard",
+    "filesystem_sync",
+}
+errors = []
+
+if not patches:
+    errors.append("manifest has no active patches")
+
+for patch in patches:
+    patch_id = patch.get("id", "<missing id>")
+    missing = sorted(field for field in required_fields if field not in patch)
+    if missing:
+        errors.append(f"{patch_id}: missing fields: {', '.join(missing)}")
+        continue
+
+    if patch["authority_class"] not in allowed_authority:
+        errors.append(f"{patch_id}: unsupported authority_class {patch['authority_class']!r}")
+
+    module_path = repo_root / patch["module"]
+    if not module_path.exists():
+        errors.append(f"{patch_id}: module does not exist: {patch['module']}")
+        continue
+
+    module_text = module_path.read_text(encoding="utf-8")
+    function_name = patch["function"]
+    if function_name not in module_text:
+        errors.append(f"{patch_id}: function {function_name} not found in {patch['module']}")
+    if function_name not in apply_text:
+        errors.append(f"{patch_id}: function {function_name} not wired by apply-patches.sh")
+
+for item in inactive:
+    module = item.get("module")
+    if not module:
+        errors.append("inactive_modules entry missing module")
+        continue
+    source_line = f'source "$PATCHES_DIR/{Path(module).name}"'
+    if source_line in apply_text:
+        errors.append(f"inactive module is still sourced by apply-patches.sh: {module}")
+
+if errors:
+    print("\n".join(errors))
+    raise SystemExit(1)
+
+print(len(patches))
+PY
+}
+
+echo "=== Test Suite: Tutor Patch Authority ==="
 echo ""
 
-# TEST-TCR-001: Verify script exists and is executable
-test_start "Verify script is executable"
+test_start "QA verifier entrypoint is executable"
 if [[ -x "$VERIFY_SCRIPT" ]]; then
   test_pass
 else
-  test_fail "Script not executable"
+  test_fail "Script not executable: $VERIFY_SCRIPT"
 fi
 
-# TEST-TCR-002: Manifest file exists
+test_start "Canonical rendered verifier is executable"
+if [[ -x "$CANONICAL_VERIFY_SCRIPT" ]]; then
+  test_pass
+else
+  test_fail "Script not executable: $CANONICAL_VERIFY_SCRIPT"
+fi
+
 test_start "Patch manifest exists"
-MANIFEST_FILE="$REPO_ROOT/infrastructure/tutor/patch-manifest.yml"
 if [[ -f "$MANIFEST_FILE" ]]; then
   test_pass
 else
   test_fail "Manifest file not found: $MANIFEST_FILE"
 fi
 
-# TEST-TCR-003: Verify script runs and produces output (exit code may be non-zero
-# in CI where not all Tutor plugins are installed, so some patches cannot apply)
-test_start "Verification script runs and produces structured output"
-if [[ -d "$REPO_ROOT/tutor_env" ]]; then
-  VERIFY_OUTPUT=$("$VERIFY_SCRIPT" --json 2>/dev/null || true)
-  if echo "$VERIFY_OUTPUT" | jq '.summary.total' >/dev/null 2>&1; then
-    TOTAL=$(echo "$VERIFY_OUTPUT" | jq '.summary.total')
-    PASSED=$(echo "$VERIFY_OUTPUT" | jq '.summary.passed')
-    FAILED=$(echo "$VERIFY_OUTPUT" | jq '.summary.failed')
-    echo -e "  ${GREEN}  Patches: $PASSED/$TOTAL passed, $FAILED failed${NC}"
-    test_pass
-  else
-    test_fail "Script did not produce valid JSON output"
-  fi
+test_start "Patch manifest schema and apply-patches wiring are valid"
+if MANIFEST_PATCH_COUNT="$(run_manifest_check 2>&1)"; then
+  test_pass
+  echo -e "  ${GREEN}  Active manifest patches: ${MANIFEST_PATCH_COUNT}${NC}"
 else
-  echo -e "  ${YELLOW}SKIP: tutor_env not found${NC}"
+  test_fail "$MANIFEST_PATCH_COUNT"
 fi
 
-# TEST-TCR-004: Verify --json flag produces valid JSON
-test_start "JSON output is valid JSON"
-if [[ -d "$REPO_ROOT/tutor_env" ]]; then
-  JSON_OUTPUT=$("$VERIFY_SCRIPT" --json 2>/dev/null || true)
-  if echo "$JSON_OUTPUT" | jq . >/dev/null 2>&1; then
-    test_pass
-  else
-    test_fail "Invalid JSON output"
-  fi
+test_start "QA verifier delegates to canonical rendered verifier"
+if grep -q 'scripts/infra/verify-tutor-config.sh' "$VERIFY_SCRIPT"; then
+  test_pass
 else
-  echo -e "  ${YELLOW}SKIP: tutor_env not found${NC}"
+  test_fail "QA verifier must delegate to scripts/infra/verify-tutor-config.sh"
 fi
 
-# TEST-TCR-005: JSON output contains required keys
-test_start "JSON output contains required keys (id, description, status, target_file, severity)"
-if [[ -d "$REPO_ROOT/tutor_env" ]]; then
-  JSON_OUTPUT=$("$VERIFY_SCRIPT" --json 2>/dev/null || true)
-  HAS_ID=$(echo "$JSON_OUTPUT" | jq '.patches[0].id' 2>/dev/null || echo "null")
-  HAS_DESC=$(echo "$JSON_OUTPUT" | jq '.patches[0].description' 2>/dev/null || echo "null")
-  HAS_STATUS=$(echo "$JSON_OUTPUT" | jq '.patches[0].status' 2>/dev/null || echo "null")
-  HAS_FILE=$(echo "$JSON_OUTPUT" | jq '.patches[0].target_file' 2>/dev/null || echo "null")
-  HAS_SEVERITY=$(echo "$JSON_OUTPUT" | jq '.patches[0].severity' 2>/dev/null || echo "null")
-
-  if [[ "$HAS_ID" != "null" && "$HAS_DESC" != "null" && "$HAS_STATUS" != "null" && "$HAS_FILE" != "null" && "$HAS_SEVERITY" != "null" ]]; then
-    test_pass
-  else
-    test_fail "Missing required keys in JSON output"
-  fi
+test_start "Canonical verifier checks current MySQL 8.4 native-password flag"
+if grep -q 'mysql-native-password=ON' "$CANONICAL_VERIFY_SCRIPT"; then
+  test_pass
 else
-  echo -e "  ${YELLOW}SKIP: tutor_env not found${NC}"
+  test_fail "Canonical verifier must check --mysql-native-password=ON, not retired mysql_native_password syntax"
 fi
 
-# TEST-TCR-006: JSON output has summary section
-test_start "JSON output has summary with total, passed, failed, skipped"
-if [[ -d "$REPO_ROOT/tutor_env" ]]; then
-  JSON_OUTPUT=$("$VERIFY_SCRIPT" --json 2>/dev/null || true)
-  HAS_TOTAL=$(echo "$JSON_OUTPUT" | jq '.summary.total' 2>/dev/null || echo "null")
-  HAS_PASSED=$(echo "$JSON_OUTPUT" | jq '.summary.passed' 2>/dev/null || echo "null")
-  HAS_FAILED=$(echo "$JSON_OUTPUT" | jq '.summary.failed' 2>/dev/null || echo "null")
-  HAS_SKIPPED=$(echo "$JSON_OUTPUT" | jq '.summary.skipped' 2>/dev/null || echo "null")
-
-  if [[ "$HAS_TOTAL" != "null" && "$HAS_PASSED" != "null" && "$HAS_FAILED" != "null" && "$HAS_SKIPPED" != "null" ]]; then
-    test_pass
-  else
-    test_fail "Missing summary keys in JSON output"
-  fi
+test_start "Canonical verifier checks local MYSQL_ROOT_HOST contract"
+if grep -q 'MYSQL_ROOT_HOST' "$CANONICAL_VERIFY_SCRIPT"; then
+  test_pass
 else
-  echo -e "  ${YELLOW}SKIP: tutor_env not found${NC}"
+  test_fail "Canonical verifier does not check rendered MYSQL_ROOT_HOST"
 fi
 
-# TEST-TCR-007: Human output contains color codes for critical failures
-test_start "Human output uses red/bold formatting for critical failures"
-if [[ -d "$REPO_ROOT/tutor_env" ]]; then
-  HUMAN_OUTPUT=$("$VERIFY_SCRIPT" 2>&1 || true)
+test_start "QA verifier runs against tutor_env through canonical verifier"
+if [[ -d "$REPO_ROOT/tutor_env/env" ]]; then
+  set +e
+  VERIFY_OUTPUT="$("$VERIFY_SCRIPT" 2>&1)"
+  VERIFY_RC=$?
+  set -e
 
-  # Check for ANSI color codes (red: \033[0;31m, bold: \033[1m)
-  if echo "$HUMAN_OUTPUT" | grep -qE '\[0;31m|\[1m'; then
+  if [[ "$VERIFY_RC" -eq 0 ]]; then
     test_pass
   else
-    test_fail "No color codes found in output (may indicate all patches passed or no critical failures)"
-    echo -e "  ${YELLOW}Note: This is expected if all patches are present${NC}"
+    test_fail "Verifier exited $VERIFY_RC"
+    printf '%s\n' "$VERIFY_OUTPUT"
   fi
 else
-  echo -e "  ${YELLOW}SKIP: tutor_env not found${NC}"
+  echo -e "  ${YELLOW}SKIP: tutor_env/env not found${NC}"
 fi
 
-# TEST-TCR-008: Human output includes remediation steps
-test_start "Human output includes remediation steps on failure"
-if [[ -d "$REPO_ROOT/tutor_env" ]]; then
-  HUMAN_OUTPUT=$("$VERIFY_SCRIPT" 2>&1 || true)
-
-  if echo "$HUMAN_OUTPUT" | grep -q "apply-patches.sh"; then
-    test_pass
+test_start "Canonical verifier output has no failed checks"
+if [[ -n "$VERIFY_OUTPUT" ]]; then
+  if grep -Eq '(^\[FAIL\]|✗|ERROR:|FAIL \(|FAILURES:)' <<<"$VERIFY_OUTPUT"; then
+    test_fail "Verifier reported failed checks"
+    printf '%s\n' "$VERIFY_OUTPUT"
   else
-    # This might fail if all patches pass
-    echo -e "  ${YELLOW}INFO: No remediation steps found (all patches may have passed)${NC}"
     test_pass
   fi
 else
-  echo -e "  ${YELLOW}SKIP: tutor_env not found${NC}"
+  echo -e "  ${YELLOW}SKIP: verifier did not run${NC}"
 fi
 
-# TEST-TCR-009: Verification tool reports each patch individually
-test_start "Verification reports each patch individually in human output"
-if [[ -d "$REPO_ROOT/tutor_env" ]]; then
-  HUMAN_OUTPUT=$("$VERIFY_SCRIPT" 2>&1 || true)
-
-  # Count patch entries (look for "✓" or "✗" or "⊘" symbols)
-  PATCH_COUNT=$(echo "$HUMAN_OUTPUT" | grep -cE '✓|✗|⊘' || true)
-
-  if [[ $PATCH_COUNT -gt 10 ]]; then
+test_start "Canonical verifier reports concrete pass checks"
+if [[ -n "$VERIFY_OUTPUT" ]]; then
+  PATCH_COUNT=$(grep -c '✓' <<<"$VERIFY_OUTPUT" || true)
+  if [[ "$PATCH_COUNT" -ge 20 ]]; then
     test_pass
-    echo -e "  ${GREEN}  Found $PATCH_COUNT patch checks${NC}"
+    echo -e "  ${GREEN}  Found $PATCH_COUNT canonical rendered pass checks${NC}"
   else
-    test_fail "Expected >10 patch checks, found $PATCH_COUNT"
+    test_fail "Expected at least 20 canonical rendered pass checks, found $PATCH_COUNT"
   fi
 else
-  echo -e "  ${YELLOW}SKIP: tutor_env not found${NC}"
+  echo -e "  ${YELLOW}SKIP: verifier did not run${NC}"
 fi
 
-# TEST-TCR-010: Verification completes within 30 seconds (NFR)
-test_start "Verification completes within 30 seconds"
-if [[ -d "$REPO_ROOT/tutor_env" ]]; then
+test_start "Legacy manifest verifier is not the branch-protection verifier"
+if grep -qF "scripts/infra/verify-tutor-patches.sh" "$REPO_ROOT/.github/ci-scripts-static.txt"; then
+  test_fail "Legacy infra verifier is still registered in static CI"
+else
+  test_pass
+fi
+
+test_start "Rendered verifier completes within 30 seconds"
+if [[ -d "$REPO_ROOT/tutor_env/env" ]]; then
   START_TIME=$(date +%s)
-  "$VERIFY_SCRIPT" >/dev/null 2>&1 || true
+  "$VERIFY_SCRIPT" >/dev/null 2>&1
   END_TIME=$(date +%s)
   DURATION=$((END_TIME - START_TIME))
 
-  if [[ $DURATION -lt 30 ]]; then
+  if [[ "$DURATION" -lt 30 ]]; then
     test_pass
     echo -e "  ${GREEN}  Completed in ${DURATION}s${NC}"
   else
     test_fail "Took ${DURATION}s (threshold: 30s)"
   fi
 else
-  echo -e "  ${YELLOW}SKIP: tutor_env not found${NC}"
+  echo -e "  ${YELLOW}SKIP: tutor_env/env not found${NC}"
 fi
 
-# Summary
 echo ""
 echo "=== Test Summary ==="
 echo "Tests run: $TESTS_RUN"
@@ -206,10 +241,10 @@ echo -e "${GREEN}Passed: $TESTS_PASSED${NC}"
 echo -e "${RED}Failed: $TESTS_FAILED${NC}"
 echo ""
 
-if [[ $TESTS_FAILED -eq 0 ]]; then
-  echo -e "${GREEN}✓ All tests passed!${NC}"
+if [[ "$TESTS_FAILED" -eq 0 ]]; then
+  echo -e "${GREEN}All Tutor patch authority tests passed.${NC}"
   exit 0
-else
-  echo -e "${RED}✗ Some tests failed${NC}"
-  exit 1
 fi
+
+echo -e "${RED}Some Tutor patch authority tests failed.${NC}"
+exit 1

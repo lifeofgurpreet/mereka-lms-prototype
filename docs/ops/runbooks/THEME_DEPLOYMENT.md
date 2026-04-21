@@ -303,13 +303,13 @@ Use local Tutor builds only for debugging, parity checks, or kind workflows:
 source .venv/bin/activate
 export TUTOR_ROOT="$(pwd)/tutor_env"
 ./scripts/infra/prepare-tutor-build-context.sh --target all
-tutor images build openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 ./scripts/qa/verify-mfe-build-prereqs.sh
-tutor images build mfe
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 ./scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest
 ```
 
-Run only one `tutor images build mfe` at a time. If npm network errors occur (`ECONNRESET`, `ETIMEDOUT`), rerun the same command after the active run exits; do not launch parallel retries.
+Run only one MFE image build at a time. If npm network errors occur (`ECONNRESET`, `ETIMEDOUT`), rerun the same helper command after the active run exits; do not launch parallel retries.
 
 ### Step 5: Promote via GitOps
 

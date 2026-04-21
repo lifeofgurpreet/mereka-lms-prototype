@@ -11,7 +11,7 @@ This is the canonical workflow for branding changes in Mereka LMS.
 3. No branding release is complete until both source and live gates pass.
 4. Production deploys are GitOps-managed; do not treat direct `kubectl set image` as source-of-truth.
 5. Drift is a defect: fix with governed publish + GitOps promotion, not by loosening checks.
-6. Run only one `tutor images build mfe` at a time; parallel runs cause cache contention and slow/fail builds.
+6. Run only one MFE image build at a time; parallel runs cause cache contention and slow/fail builds.
 7. `./scripts/infra/prepare-tutor-build-context.sh` is the canonical operator entrypoint before MFE/Open edX builds.
    - **What it does**: verifies rendered freshness, runs the remaining patch-only filesystem sync, and refreshes the tracked rendered MFE Dockerfile snapshot.
    - **What plugin does**: owns the rendered Dockerfile/env.config build contract, including Node 24, local `@edx/brand`, runtime theme payload copy, tenant-specific `/theme/*` runtime URLs, and HTTPS git rewrites. The active runtime-theme rewrite now accepts both raw object and IIFE-wrapped `PARAGON_THEME` payloads from upstream authn shells.
@@ -85,10 +85,11 @@ Preferred production promotion command after a successful image publish:
 4. Promote those exact coordinates through `release-openedx-gitops.sh --require-digests`.
 5. Verify Argo rollout and rerun branding gates.
 
-Local Tutor builds remain valid for debug/dev parity:
-- Before local `tutor images build mfe`, run `./scripts/infra/prepare-tutor-build-context.sh --target mfe`
+Local Tutor builds remain valid for debug/dev parity through the repo helpers:
+- Before local MFE image builds, run `./scripts/infra/prepare-tutor-build-context.sh --target mfe`
 - Then run `scripts/qa/verify-mfe-build-prereqs.sh`
-- After local `tutor images build mfe`, verify the built image before any local/manual use:
+- Build with `./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast`
+- After local MFE image builds, verify the built image before any local/manual use:
   `scripts/qa/verify-mfe-image-branding.sh <image_ref>`
 - CI enforces the same contract in `.github/workflows/build-tutor-images.yml`
 
@@ -117,7 +118,7 @@ Local Tutor builds remain valid for debug/dev parity:
 6. **MFE build flakes on npm network (`ECONNRESET`/`ETIMEDOUT`)**
    - Cause: transient registry/network failures during multi-MFE npm installs.
    - Fix: rerun from a single build session only; the rendered MFE Dockerfile now carries the retry/timeouts and HTTPS git rewrite contract directly, and `verify-mfe-build-prereqs.sh` should stay green before rebuild.
-   - Do not start a second `tutor images build mfe` while one is active.
+   - Do not start a second MFE image build while one is active.
 
 7. **MFE authn serves unthemed CSS even after branded build**
    - Cause: authn `index.html` points to an unbranded bundle hash while branded CSS artifacts exist in the image.
@@ -131,12 +132,12 @@ Local Tutor builds remain valid for debug/dev parity:
      both `COPY mereka/env.config.jsx /openedx/app/` and `COPY mereka/theme-source /openedx/app/theme-source`
      in `authn-common` when Tutor template drift omits them.
 
-8. **`tutor images build mfe` fails at `authn-prod` with `Can't resolve '@openedx/frontend-plugin-framework'`**
+8. **The MFE image build fails at `authn-prod` with `Can't resolve '@openedx/frontend-plugin-framework'`**
    - Cause: Mereka `env.config.jsx` imports plugin framework, but generated MFE Dockerfile is missing
      dependency install in one or more `*-common` stages.
    - Fix:
      1) rerun `./scripts/infra/prepare-tutor-build-context.sh --target mfe`
-     2) rerun `tutor images build mfe`
+     2) rerun `./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast`
      3) validate image contract with `./scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest`
    - Prevention: patch script now injects
      `npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'`
@@ -162,7 +163,7 @@ Local Tutor builds remain valid for debug/dev parity:
      3) rebuild/push `openedx`, bump GitOps ref/tag, rerun strict branding gates.
 
 12. **Build command appears to "finish" instantly (no real image change)**
-   - Cause: `tutor images build openedx` executed without `TUTOR_ROOT` set; Tutor exits early with
+   - Cause: a raw `tutor images build openedx` was executed without `TUTOR_ROOT` set; Tutor exits early with
      project-root/config error.
    - Fix:
      1) `export TUTOR_ROOT="$(pwd)/tutor_env"`
@@ -385,7 +386,7 @@ If slot injection fails (MFE build error or runtime slot not rendering):
 2. **footer_slot failure**: The `apply-patches.sh` fallback (string replacement) is always active. Verify with `grep 'MerekaFooter' tutor_env/env/plugins/mfe/build/mfe/env.config.jsx`.
 3. **Full rollback**: Set `_PLUGIN_SLOTS_AVAILABLE = False` in `mereka_lms.py` (by ensuring `PLUGIN_SLOTS` import fails gracefully via the existing `try/except ImportError` block).
 4. **Production rollback**: publish the reverted SHA through `build-tutor-images.yml`, then promote it with `release-openedx-gitops.sh` using the workflow-emitted release coordinates.
-5. **Local reproduction only**: `tutor images build mfe`
+5. **Local reproduction only**: `./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast`
 6. Local image verification: `./scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest`
 
 ## Related Documents

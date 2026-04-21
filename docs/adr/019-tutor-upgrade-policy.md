@@ -86,7 +86,7 @@ When a decision to upgrade is made, follow these steps on a spike branch:
 3. **Run `tutor config save`** with new version to generate new templates
 4. **Audit patches**: Diff old vs new templates to find what changed. Update `apply-patches.sh` and `mereka_lms.py` patch targets accordingly. Expect 2-8 hours of work per major version.
 5. **Run compatibility test suite** (T067): Verify all patches apply cleanly, services start, login works, course enrollment works
-6. **Build images**: `tutor images build openedx && tutor images build mfe`. Tag with upgrade version.
+6. **Build images**: `./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast` and `./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast`. Tag with upgrade version.
 7. **Test in nonprod**: Full smoke test against nonprod cluster. Verify LMS, Studio, MFE, Forum, Discovery
 8. **Cut release**: Merge spike branch, tag release, deploy to prod
 9. **Rollback plan active**: Keep previous image tags live for 48 hours post-deploy. Document rollback command:

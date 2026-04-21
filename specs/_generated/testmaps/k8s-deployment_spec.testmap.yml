@@ -608,4 +608,13 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-lms-rke2-validation.sh
     command: scripts/qa/verify-lms-rke2-validation.sh
+- id: AC-033
+  description: Given LMS and CMS worker Deployments, when liveness/readiness probes
+    are inspected, then probes use local process checks and MUST NOT use Celery broker
+    traversal such as `celery inspect ping` or cluster-wide control broadcasts.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-k8s-deployment-spec.sh
+    command: scripts/qa/verify-k8s-deployment-spec.sh
 

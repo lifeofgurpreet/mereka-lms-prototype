@@ -171,7 +171,7 @@ if [[ "$CHECK" == "true" ]]; then
   echo "--- Platform locale files (${PLATFORM_LOCALE_DIR}) ---"
   if [[ ! -d "$PLATFORM_LOCALE_DIR" ]]; then
     warn "Platform locale directory not found: ${PLATFORM_LOCALE_DIR}"
-    warn "Run 'tutor images build openedx' or pull translations first."
+    warn "Run './scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast' or pull translations first."
     WARN=$((WARN + 1))
   else
     for lang in "${TARGET_LANGS[@]}"; do
@@ -297,5 +297,5 @@ info "Translation sync complete."
 echo ""
 echo "Next steps:"
 echo "  1. Verify completeness : $0 --check"
-echo "  2. Rebuild MFE images  : tutor images build mfe"
+echo "  2. Rebuild MFE images  : ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast"
 echo "  3. Restart services    : tutor local restart mfe"

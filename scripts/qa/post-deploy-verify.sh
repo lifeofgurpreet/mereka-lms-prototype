@@ -3,8 +3,9 @@
 #
 # Purpose: Single-command live verification that all critical branding fixes
 #          are live. Designed to be run by WhiteCliff after:
-#            - tutor images build openedx + push + pod restart
-#            - ArgoCD sync of MFE image (bz9p)
+#            - Build Tutor Images workflow publishes the Open edX/MFE images
+#            - release-openedx-gitops.sh updates GitOps image digests
+#            - ArgoCD sync realizes the new image digests
 #
 # Usage:
 #   ./scripts/qa/post-deploy-verify.sh [prod|dev]
@@ -162,8 +163,8 @@ else
   echo "POST-DEPLOY: FAIL (${PASS} pass, ${WARN} warn, ${FAIL} fail)" >&2
   echo "" >&2
   echo "Remediation:" >&2
-  echo "  - Studio footer failures → tutor images build openedx + push + restart" >&2
-  echo "  - MFE rev failures       → argocd sync or update kustomization.yaml image tag" >&2
+  echo "  - Studio footer failures → rebuild/publish via Build Tutor Images, then promote with release-openedx-gitops.sh" >&2
+  echo "  - MFE rev failures       → verify GitOps image digest update, then ArgoCD sync" >&2
   echo "  - CSS unreachable        → check collectstatic ran, theming enabled" >&2
 fi
 echo "========================================"

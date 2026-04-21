@@ -617,13 +617,13 @@
       "version": "1.0.0"
     },
     {
-      "acceptance_criteria_count": 37,
+      "acceptance_criteria_count": 38,
       "created": "2026-02-10",
       "doc_type": "spec",
       "domain": "platform",
       "id": "SPEC-K8S-DEPLOYMENT",
       "lane": "normative",
-      "last_reviewed": "2026-03-09",
+      "last_reviewed": "2026-04-21",
       "links": {
         "generated_testmap": "specs/_generated/testmaps/k8s-deployment_spec.testmap.yml",
         "legacy_testmap": "specs/testmaps/k8s-deployment_spec.testmap.yml",
@@ -646,7 +646,7 @@
         "auth.oidc"
       ],
       "title": "Kubernetes Deployment Specification",
-      "version": "1.0.0"
+      "version": "1.0.1"
     },
     {
       "acceptance_criteria_count": 29,
@@ -2770,7 +2770,7 @@
         "build.version-pin"
       ],
       "title": "Tutor Configuration Resilience and Patch Automation",
-      "version": "1.0.0"
+      "version": "1.1.0"
     },
     {
       "acceptance_criteria_count": 10,

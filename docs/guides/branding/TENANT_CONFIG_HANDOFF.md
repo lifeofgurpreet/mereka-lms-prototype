@@ -191,7 +191,7 @@ Local reproduction only:
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
 ./scripts/infra/prepare-tutor-build-context.sh --target all
-tutor images build mfe
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 tutor local restart
 ```
 
@@ -300,7 +300,7 @@ git revert <commit-sha>
 # 3. Local reproduction only:
 export TUTOR_ROOT="$(pwd)/tutor_env"
 ./scripts/infra/prepare-tutor-build-context.sh --target all
-tutor images build mfe
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 tutor local restart
 ```
 

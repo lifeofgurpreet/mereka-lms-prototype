@@ -238,9 +238,9 @@ acceptance_criteria:
     section: Handoff
     justification: Handoff artifacts are operator-reviewed, not CI-verifiable
 - id: AC-INT-001
-  description: Given `branding-system_spec.md` asset sync runs via `apply-patches.sh`,
-    when the sync completes, then all CMS theme assets (logos, fonts, SCSS, templates)
-    MUST be present in `tutor_env/env/build/openedx/themes/mereka/cms/`.
+  description: Given `branding-system_spec.md` asset sync runs via the canonical Tutor
+    prepare flow, when the sync completes, then all CMS theme assets (logos, fonts,
+    SCSS, templates) MUST be present in `tutor_env/env/build/openedx/themes/mereka/cms/`.
   verify: []
 - id: AC-INT-002
   description: Given `branding-system_spec.md` MerekaFooter component is deployed,

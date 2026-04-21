@@ -1,7 +1,7 @@
 # Merge-First Deployment Protocol
 
 **Status**: Active
-**Last Updated**: 2026-02-18
+**Last Updated**: 2026-04-21
 
 ## Protocol
 
@@ -21,12 +21,11 @@ The canonical sequence for enterprise UI/branding changes:
 ┌─────────────────────────────────────────────────────────────┐
 │  1. ./scripts/infra/tutor-config-save.sh --set KEY=value    │
 │  2. ./scripts/infra/verify-tutor-config.sh                  │
-│  3. tutor images build openedx / mfe                        │
-│  4. tutor images push openedx / mfe                         │
-│  5. Update deploy/k8s/overlays/production/kustomization.yaml│
-│     (image tag → new SHA)                                   │
-│  6. git add → commit → push → PR → merge to main           │
-│  7. ArgoCD auto-syncs (infrastructure watches main)     │
+│  3. Optional local helper build for parity/debug            │
+│  4. git add -> commit -> push -> PR -> merge to main        │
+│  5. Build Tutor Images publishes release tags/digests       │
+│  6. release-openedx-gitops.sh promotes exact digests        │
+│  7. ArgoCD realizes the GitOps change                       │
 │  8. ./scripts/qa/verify-post-deploy-smoke.sh --env prod     │
 │  9. ./scripts/qa/ops-confidence.sh --env prod               │
 └─────────────────────────────────────────────────────────────┘
@@ -42,29 +41,29 @@ export TUTOR_ROOT="$(pwd)/tutor_env"
 # 2. Verify rendered state
 ./scripts/infra/verify-tutor-config.sh
 
-# 3. Build images
-tutor images build openedx -a PIP_COMMAND=pip   # ~30 min
-tutor images build mfe                           # ~15 min
+# 3. Optional local parity/debug build
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast   # ~30 min
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast       # ~15 min
 
-# 4. Push to Artifact Registry
-tutor images push openedx
-tutor images push mfe
-
-# 5. Update GitOps overlay
-# Get the image SHA:
-IMAGE_SHA=$(docker inspect --format='{{.Id}}' docker.io/overhangio/openedx:18.2.2 | cut -d: -f2 | head -c12)
-# Edit kustomization.yaml with new tag
-
-# 6. PR workflow
+# 4. PR workflow
 git checkout -b feat/<bead-id>-<slug>
 git add -A && git commit -m "feat: ..."
 git push -u origin feat/<bead-id>-<slug>
 gh pr create --title "..." --body "..."
 gh pr merge --merge --delete-branch
 
-# 8. Wait for ArgoCD sync (~3 min)
+# 5. Production publish: use the Build Tutor Images workflow result from main.
+# 6. Promote exact workflow-emitted tags/digests:
+./scripts/infra/release-openedx-gitops.sh \
+  --openedx-tag <OPENEDX_TAG> \
+  --mfe-tag <MFE_TAG> \
+  --openedx-digest sha256:<OPENEDX_DIGEST> \
+  --mfe-digest sha256:<MFE_DIGEST> \
+  --require-digests --apply --commit --push --verify-runtime
 
-# 9-10. Verify
+# 7. Wait for ArgoCD sync (~3 min)
+
+# 8-9. Verify
 ./scripts/qa/verify-post-deploy-smoke.sh --env prod
 ./scripts/qa/ops-confidence.sh --env prod --evidence-dir var/evidence/release-$(date +%Y%m%d)
 ```
@@ -139,10 +138,10 @@ Verifier → Ticket Owner:
 When one person handles all roles:
 
 ```bash
-# All-in-one: build → push → deploy → verify
+# All-in-one: local parity -> PR -> workflow publish -> GitOps promote -> verify
 ./scripts/infra/check-worktree-freshness.sh    # pre-gate
-tutor images build openedx -a PIP_COMMAND=pip && tutor images push openedx
-# Update overlay, commit, merge
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
+# Merge the PR, wait for Build Tutor Images on main, then promote the exact workflow digests.
 ./scripts/qa/ops-confidence.sh --env prod --evidence-dir var/evidence/release-$(date +%Y%m%d)
 ```
 

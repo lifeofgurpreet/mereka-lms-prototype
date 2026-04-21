@@ -209,9 +209,9 @@ acceptance_criteria:
     file: scripts/qa/verify-brand-package-runtime.sh
     command: scripts/qa/verify-brand-package-runtime.sh
 - id: AC-BRAND-025
-  description: Given the local brand package is registered as `@edx/brand`, when `tutor images
-    build mfe` completes, then the build exits 0 and the resolved runtime package exposes
-    `logo.js`, `logo_white.png`, and `favicon.png`.
+  description: Given the local brand package is registered as `@edx/brand`, when `./scripts/infra/build-mfe-image.sh
+    --local-defaults --build-profile fast` completes, then the build exits 0 and the
+    resolved runtime package exposes `logo.js`, `logo_white.png`, and `favicon.png`.
   verify:
   - type: automated
     test_type: shell_verification

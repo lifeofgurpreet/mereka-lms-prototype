@@ -102,13 +102,13 @@ fi
 if docker images | grep -q "openedx.*nightly"; then
     check_pass "OpenEdX image exists"
 else
-    check_fail "OpenEdX image missing (run: tutor images build openedx)"
+    check_fail "OpenEdX image missing (run: ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast)"
 fi
 
 if docker images | grep -q "openedx-mfe.*nightly"; then
     check_pass "MFE image exists"
 else
-    check_fail "MFE image missing (run: tutor images build mfe)"
+    check_fail "MFE image missing (run: ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast)"
 fi
 
 # Check containers

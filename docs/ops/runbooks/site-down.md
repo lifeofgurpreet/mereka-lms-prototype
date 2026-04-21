@@ -522,7 +522,7 @@ Kind nodes do not have Artifact Registry credentials by default.
 ### Issue 6b: Tutor Build No-Op / Fast-Fail (`Project root does not exist`)
 
 **Symptoms:**
-- `tutor images build openedx` exits immediately with:
+- `./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast` exits immediately with:
   `Project root does not exist. Make sure to generate the initial configuration...`
 - Subsequent rollout still serves old image/tag.
 
@@ -534,7 +534,7 @@ Kind nodes do not have Artifact Registry credentials by default.
 cd <repo-root>
 source .venv/bin/activate
 export TUTOR_ROOT="$(pwd)/tutor_env"
-tutor images build openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 ```
 
 **Operator rule:**
@@ -610,7 +610,7 @@ See `docs/ops/runbooks/COURSE_DATA_RECOVERY.md` (this is usually import/restore 
 **Fix (Dev kind):**
 ```bash
 ./scripts/infra/prepare-tutor-build-context.sh --target openedx
-tutor images build openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 kubectl rollout restart deployment/cms -n mereka-lms
 ```
 
@@ -1191,7 +1191,7 @@ kubectl rollout restart deploy/lms deploy/cms -n mereka-lms
 
 ---
 
-### Issue 9c: `tutor images build mfe` fails in `authn-prod` with plugin framework error
+### Issue 9c: `./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast` fails in `authn-prod` with plugin framework error
 
 **Symptoms:**
 - MFE build fails at `RUN npm run build` in `authn-prod`.
@@ -1215,7 +1215,7 @@ kubectl rollout restart deploy/lms deploy/cms -n mereka-lms
    ```bash
    source .venv/bin/activate
    export TUTOR_ROOT="$(pwd)/tutor_env"
-   tutor images build mfe
+   ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
    ```
 4. Validate branding contract before push/deploy:
    ```bash

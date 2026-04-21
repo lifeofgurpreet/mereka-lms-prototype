@@ -1,6 +1,6 @@
 // Mereka MFE theme — import manifest.
 // Shared design-system partials (fonts, tokens, base, utilities, footer) are
-// resolved from the co-located scss/ directory at build time (see footer-component.sh).
+// resolved from the co-located scss/ directory at build time (see sync-footer-assets.sh).
 // MFE surface partials (split from monolith, WW-05) live in mfe/scss/ in the
 // source tree and are merged into the same scss/ slot during the build copy.
 

@@ -86,26 +86,18 @@ RUN_LIVE_GATE=0 BRANDING_LEVEL=deep ./scripts/branding/run-branding-gates.sh pro
 
 ## 2. Deploy Steps
 
-### 2.1 Image build (skip if tags already pushed)
+### 2.1 Image publish
 
 ```bash
-export TUTOR_ROOT="$(pwd)/tutor_env"
-
-# Backend / LMS (if changed)
-tutor images build openedx -a PIP_COMMAND=pip   # ~30 min, requires 12 GB RAM
-tutor images push openedx
-
-# MFE (if changed)
-tutor images build mfe                           # ~15 min
-tutor images push mfe
+# Production images are published by .github/workflows/build-tutor-images.yml
+# from the merged main SHA. Local helper builds are parity/debug only:
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 ```
 
-Record pushed digests:
+Record workflow-emitted digests from the release bundle:
 ```bash
-docker inspect --format='{{index .RepoDigests 0}}' \
-  ghcr.io/biji-biji-initiative/mereka-lms/openedx:${OPENEDX_TAG}
-docker inspect --format='{{index .RepoDigests 0}}' \
-  ghcr.io/biji-biji-initiative/mereka-lms/mfe:${MFE_TAG}
+gh run download <build_run_id> --name release-bundle
 ```
 
 | Image | Tag | Digest (sha256:…) |

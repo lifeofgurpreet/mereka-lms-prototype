@@ -867,7 +867,7 @@ gcloud artifacts docker images describe \
 
 **Local dev** (`overlays/local`):
 - Uses `latest` tag for rapid iteration
-- Build locally: `tutor images build openedx`
+- Build locally: `./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast`
 - Load to Kind: `./scripts/infra/kind-load-openedx-image.sh`
 
 **Production** (`overlays/production`):

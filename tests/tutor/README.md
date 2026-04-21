@@ -1,48 +1,47 @@
 # Tutor Configuration Resilience Test Suite
 
-Comprehensive test suite for verifying Tutor configuration patches and automation.
+Test suite for verifying current Tutor patch authority, canonical rendered verification, and automation.
 
 ## Test Coverage
 
-This test suite implements **50 test cases** covering all acceptance criteria, edge cases, and non-functional requirements from `specs/tutor-configuration-resilience_spec.md`.
+This test suite covers the active acceptance criteria, edge cases, and non-functional requirements from `specs/tutor-configuration-resilience_spec.md`.
 
 ### Test Categories
 
 | Test Suite | File | Test Cases | Coverage |
 |------------|------|------------|----------|
-| **Verification Tool Tests** | `test_verify_patches.sh` | 10 | AC-TCR-004, AC-TCR-007, AC-TCR-008, AC-TCR-011 |
+| **Verification Tool Tests** | `test_verify_patches.sh` | 12 | AC-TCR-004, AC-TCR-008 |
 | **Idempotency Tests** | `test_idempotency.sh` | 4 | AC-TCR-009 |
 | **Pre-commit Hook Tests** | `test_pre_commit_hook.sh` | 6 | AC-TCR-005 |
 | **Edge Case Tests** | `test_edge_cases.sh` | 8 | EC-TCR-001 through EC-TCR-007 |
-| **NFR/Performance Tests** | `test_nfr_performance.sh` | 7 | Performance, offline, manifest quality |
+| **NFR/Performance Tests** | `test_nfr_performance.sh` | 7 | Performance, offline verifier behavior, manifest authority metadata |
 
-**Total: 35+ automated test cases** (plus skipped/conditional tests)
+**Total: 37+ automated test cases** (plus skipped/conditional tests)
 
 ### Acceptance Criteria Coverage
 
 | AC ID | Description | Status |
 |-------|-------------|--------|
 | AC-TCR-001 | Plugin installation | Covered in CI (tutor-plugin-test.yml) |
-| AC-TCR-002 | Plugin-enabled config | Covered in CI (tutor-config-verify.yml) |
+| AC-TCR-002 | Plugin-enabled config | Covered in CI (`ci.yml` Tutor Configuration Tests + `tutor-plugin-test.yml`) |
 | AC-TCR-003 | MySQL auth fix | Covered in CI + test_verify_patches.sh |
 | AC-TCR-004 | Manifest verification | **test_verify_patches.sh** |
 | AC-TCR-005 | Pre-commit hook | **test_pre_commit_hook.sh** |
-| AC-TCR-006 | CI workflow | Covered in CI (tutor-config-verify.yml) |
-| AC-TCR-007 | JSON output | **test_verify_patches.sh** |
+| AC-TCR-006 | CI workflow | Covered in CI (`ci.yml`) |
+| AC-TCR-007 | Machine-readable patch authority | `patch-manifest.yml` + **test_nfr_performance.sh** |
 | AC-TCR-008 | Unpatched config fails | **test_verify_patches.sh** |
 | AC-TCR-009 | Idempotency | **test_idempotency.sh** + CI |
 | AC-TCR-010 | Version upgrade handling | Manual + CI |
-| AC-TCR-011 | Critical failure formatting | **test_verify_patches.sh** |
+| AC-TCR-011 | Classified patch authority | `patch-manifest.yml` + **test_verify_patches.sh** |
 | AC-TCR-012 | make tutor-apply | Manual (requires Docker) |
 
 ## Running Tests
 
 ### Prerequisites
 
-- Tutor environment initialized: `tutor config save`
-- Apply patches at least once: `./infrastructure/tutor/apply-patches.sh`
+- Tutor environment initialized through the canonical wrapper: `./scripts/infra/tutor-config-save.sh`
+- Build context prepared at least once: `./scripts/infra/prepare-tutor-build-context.sh --target all`
 - Optional: `yamllint` for manifest validation tests
-- Optional: `jq` for JSON validation tests
 
 ### Quick Start
 
@@ -75,7 +74,7 @@ Run all test suites:
 
 Tests are also integrated into GitHub Actions:
 
-- `.github/workflows/tutor-config-verify.yml` - Runs on PRs touching `infrastructure/tutor/`
+- `.github/workflows/ci.yml` / **Tutor Configuration Tests** - Runs on PRs touching Tutor authority
 - `.github/workflows/tutor-plugin-test.yml` - Tests plugin lifecycle
 
 ## Test Environment Requirements
@@ -86,8 +85,8 @@ Most tests require a Tutor environment:
 
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
-tutor config save
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/tutor-config-save.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
 ```
 
 ### Skipped Tests
@@ -95,7 +94,6 @@ tutor config save
 Some tests will skip if:
 - `tutor_env/` doesn't exist → Most tests skip gracefully
 - `yamllint` not installed → Manifest linting skips
-- `jq` not installed → JSON validation skips
 
 This is by design to allow running tests in minimal environments.
 
@@ -103,16 +101,14 @@ This is by design to allow running tests in minimal environments.
 
 ### Verification Tool Tests (`test_verify_patches.sh`)
 
-Tests the manifest-driven verification script:
-- Script executability
+Tests current patch authority:
+- QA verifier entrypoint executability
+- Canonical rendered verifier executability
 - Manifest file existence
-- Exit code behavior (0 on success, 1 on failure)
-- JSON output validation
-- Required JSON keys (id, description, status, target_file, severity)
-- Summary section
-- Color-coded output for critical failures
-- Remediation steps
-- Individual patch reporting
+- Manifest schema and `apply-patches.sh` wiring
+- QA entrypoint delegation to `scripts/infra/verify-tutor-config.sh`
+- MySQL 8.4 native-password and `MYSQL_ROOT_HOST` checks in the canonical verifier
+- Canonical verifier exit code and failure output
 - Performance (<30s threshold)
 
 ### Idempotency Tests (`test_idempotency.sh`)
@@ -150,9 +146,9 @@ Non-functional requirements:
 - Verification completes in <30s
 - Manifest passes yamllint
 - No network calls in verification
-- Manifest documents >40 patches
-- Critical patches have descriptions and verify commands
-- JSON output is parseable
+- Manifest documents active patch authority and retirement metadata
+- Temporary compatibility patches have retirement triggers
+- Manifest is machine-parseable YAML
 - Scripts use proper error handling
 
 ## Expected Test Output
@@ -179,8 +175,8 @@ Failed: 0
 ### Some Tests Fail
 
 ```
-TEST 5: JSON output contains required keys
-  ✗ FAIL: Missing required keys in JSON output
+TEST 6: Rendered verifier runs against tutor_env
+  FAIL: Verifier exited 1
 
 === Test Summary ===
 Tests run: 10
@@ -198,22 +194,16 @@ Run:
 
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
-tutor config save
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/tutor-config-save.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
 ```
 
 ### Verification Tests Fail
 
-Patches may be missing. Apply them:
+Patches may be missing. Re-prepare the build context:
 
 ```bash
-./infrastructure/tutor/apply-patches.sh
-```
-
-Or use auto-fix:
-
-```bash
-./scripts/infra/verify-tutor-patches.sh --fix
+./scripts/infra/prepare-tutor-build-context.sh --target all
 ```
 
 ### Idempotency Tests Fail
@@ -236,9 +226,10 @@ Verification taking >30s suggests:
 
 The test suite integrates with existing CI workflows:
 
-1. **tutor-config-verify.yml** - Runs on PRs touching `infrastructure/tutor/`
-   - Verifies all patches after `tutor config save`
-   - Uses manifest-driven verification
+1. **ci.yml / Tutor Configuration Tests** - Runs on PRs touching Tutor authority
+   - Renders Tutor through `scripts/infra/tutor-config-save.sh` and runs the Tutor test suite
+   - Uses `scripts/qa/verify-tutor-patches.sh` as the stable entrypoint into
+     `scripts/infra/verify-tutor-config.sh`
    - Blocks merge on failures
 
 2. **tutor-plugin-test.yml** - Tests plugin lifecycle
@@ -266,8 +257,8 @@ git commit --no-verify
 When adding new patches to `apply-patches.sh`:
 
 1. Add entry to `infrastructure/tutor/patch-manifest.yml`
-2. Include `verify_command` and `verify_pattern`
-3. Run verification: `./scripts/infra/verify-tutor-patches.sh`
+2. Include authority class, target family, description, and retirement trigger
+3. Add or update the rendered guard in `scripts/infra/verify-tutor-config.sh` or a dedicated patch fixture test
 4. Run tests: `./tests/tutor/run_all_tests.sh`
 
 ### Updating Test Suite
@@ -276,7 +267,7 @@ When modifying test suite:
 
 1. Update relevant test file
 2. Update this README if coverage changes
-3. Update `specs/testmaps/tutor-configuration-resilience_testmap.yaml`
+3. Update `specs/_generated/testmaps/tutor-configuration-resilience_spec.testmap.yml` if coverage changes
 4. Run full suite to ensure no regressions
 
 ## Related Documentation
@@ -286,4 +277,5 @@ When modifying test suite:
 - **Test Map**: `specs/testmaps/tutor-configuration-resilience_testmap.yaml`
 - **Patch Manifest**: `infrastructure/tutor/patch-manifest.yml`
 - **Apply Patches**: `infrastructure/tutor/apply-patches.sh`
-- **Verification Script**: `scripts/infra/verify-tutor-patches.sh`
+- **Canonical Rendered Verification Script**: `scripts/infra/verify-tutor-config.sh`
+- **Stable QA/CI Entrypoint**: `scripts/qa/verify-tutor-patches.sh`

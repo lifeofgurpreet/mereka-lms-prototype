@@ -70,8 +70,7 @@ To update footer content:
 
 **Single-source JSX.** A prior workflow required duplicating the JSX
 into `infrastructure/tutor/apply-patches.sh` as a fallback; that
-duplication is removed. The `sync-footer-assets.sh` script (renamed
-from `footer-component.sh` for clarity) now only copies SCSS/font
+duplication is removed. The `sync-footer-assets.sh` script now only copies SCSS/font
 assets into the MFE build tree — it no longer writes JSX.
 
 ## Related Files

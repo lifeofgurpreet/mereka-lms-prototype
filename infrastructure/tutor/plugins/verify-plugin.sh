@@ -104,6 +104,7 @@ echo "==============================="
 echo "✓ Plugin verification passed"
 echo
 echo "Next steps:"
-echo "  1. Build images: tutor images build openedx mfe"
+echo "  1. Build Open edX: ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast"
+echo "  2. Build MFE: ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast"
 echo "  2. Test locally: tutor local launch"
 echo "  3. Verify services: curl -I http://localhost"

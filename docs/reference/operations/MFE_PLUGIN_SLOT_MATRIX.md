@@ -64,7 +64,7 @@ When migrating a hardcoded customization to plugin-slot wiring:
 3. Implement React component in `infrastructure/tutor/plugins/mereka_lms.py` mfe-env-config patch
 4. Wire slot via `config['pluginSlots'][SLOT_ID] = { op: PLUGIN_OPERATIONS.X, widget: ComponentName }`
 5. Refresh the governed MFE build context: `./scripts/infra/prepare-tutor-build-context.sh --target mfe`
-6. Validate locally: `tutor images build mfe`
+6. Validate locally: `./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast`
 7. For production, publish the updated MFE image through `.github/workflows/build-tutor-images.yml` and promote it with `./scripts/infra/release-openedx-gitops.sh --require-digests`
 8. Verify slot wiring: `./scripts/qa/verify-plugin-slot-wiring.sh`
 9. Remove old hardcoded approach (if applicable)

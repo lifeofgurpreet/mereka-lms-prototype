@@ -245,7 +245,7 @@ Only domain-specific NFRs are listed above.
 
 - [ ] AC-BRAND-023: Given `infrastructure/tutor/plugins/mereka_lms.py`, when inspected, then it contains a `mfe-dockerfile-pre-npm-install` patch that copies the `brand-mereka/` directory into the MFE build context.
 - [ ] AC-BRAND-024: Given the Tutor plugin MFE Dockerfile patches, when the MFE image is built, then `require.resolve("@edx/brand/package.json")` inside the built container resolves successfully and the resolved package name is `@edx/brand`.
-- [ ] AC-BRAND-025: Given the local brand package is registered as `@edx/brand`, when `tutor images build mfe` completes, then the build exits 0 and the resolved runtime package exposes `logo.js`, `logo_white.png`, and `favicon.png`.
+- [ ] AC-BRAND-025: Given the local brand package is registered as `@edx/brand`, when `./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast` completes, then the build exits 0 and the resolved runtime package exposes `logo.js`, `logo_white.png`, and `favicon.png`.
 
 ### Verification Gates
 
@@ -316,7 +316,7 @@ grep -A5 "brand-mereka" infrastructure/tutor/plugins/mereka_lms.py
 tutor config render --extra-config "MFE_DOCKERFILE" | grep brand-mereka
 
 # Rebuild with verbose output
-tutor images build mfe --no-cache 2>&1 | grep -i brand
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile proof --cache-mode none 2>&1 | grep -i brand
 ```
 
 ### SVG Logo Missing viewBox
@@ -380,7 +380,7 @@ npm info @openedx/paragon | grep -i token
 ./scripts/branding/sync-brand-package.sh
 
 # Rebuild MFE image
-tutor images build mfe
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 
 # Restart MFE pods
 tutor k8s restart mfe
@@ -390,7 +390,7 @@ tutor k8s restart mfe
 
 ### Logs
 
-- MFE build logs MUST show the npm alias installation of `@edx/brand`: look for `+ @edx/brand@file:brand-mereka` in `tutor images build mfe` output.
+- MFE build logs MUST show the npm alias installation of `@edx/brand`: look for `+ @edx/brand@file:brand-mereka` in `./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast` output.
 - The verification script MUST output PASS/FAIL per check with the AC ID: `PASS AC-BRAND-001: Package structure valid`.
 - The sync script (`sync-brand-package.sh`) MUST log which files were copied and their sha256 checksums.
 
@@ -429,7 +429,7 @@ mkdir -p infrastructure/tutor/brand-mereka/paragon infrastructure/tutor/brand-me
 ./scripts/qa/verify-brand-package/verify-brand-package-structure.sh
 
 # 6. Build MFE image
-tutor images build mfe
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 
 # 7. Deploy and verify
 tutor k8s restart mfe
@@ -449,7 +449,7 @@ cp new-logo.svg infrastructure/tutor/themes/mereka/lms/static/images/logo.svg
 ./scripts/qa/verify-brand-package/verify-brand-package-structure.sh
 
 # 4. Rebuild and deploy
-tutor images build mfe
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 tutor k8s restart mfe
 ```
 
@@ -458,12 +458,12 @@ tutor k8s restart mfe
 ```bash
 # Option 1: Revert the Tutor plugin patch (MFEs fall back to stock branding)
 git checkout HEAD~1 -- infrastructure/tutor/plugins/mereka_lms.py
-tutor images build mfe
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 tutor k8s restart mfe
 
 # Option 2: Revert a specific brand asset change
 git checkout HEAD~1 -- infrastructure/tutor/brand-mereka/
-tutor images build mfe
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 tutor k8s restart mfe
 ```
 

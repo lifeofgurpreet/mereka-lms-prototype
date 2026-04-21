@@ -1,5 +1,5 @@
 # Tutor Configuration CI/CD Reference
-_Audience: Operators and release owners • Owner: Platform Team • Last verified: 2026-04-14 • Status: canonical_
+_Audience: Operators and release owners • Owner: Platform Team • Last verified: 2026-04-21 • Status: canonical_
 
 This document describes the current CI surfaces that validate Tutor render,
 patch, and plugin contracts.
@@ -16,10 +16,11 @@ patch, and plugin contracts.
 - runs only when the change-scope selector marks Tutor authority as in scope
 - on unrelated PRs, the lane is skipped and workflow-contract verifiers enforce
   CI-control-plane truth instead
-- on Tutor-authority PRs, the job renders a clean Tutor environment with
-  `tutor config save`, then directly runs
-  `./infrastructure/tutor/apply-patches.sh`
-- after that render-plus-patch baseline, CI runs the Tutor verification shell
+- on Tutor-authority PRs, the job renders a clean Tutor environment through
+  `./scripts/infra/tutor-config-save.sh`; the wrapper is the single front door
+  for `tutor config save`, build-context preparation, and
+  `./scripts/infra/verify-tutor-config.sh`
+- after that governed render baseline, CI runs the Tutor verification shell
   tests, including:
   - `tests/tutor/test_tutor_apply.sh`
   - `tests/tutor/test_verify_patches.sh`
@@ -29,14 +30,15 @@ patch, and plugin contracts.
 
 This is an important boundary:
 
-- **operator front door:** `./scripts/infra/tutor-config-save.sh`, with
+- **operator and CI front door:** `./scripts/infra/tutor-config-save.sh`, with
   `./scripts/infra/prepare-tutor-build-context.sh --target ...` as the manual
   post-render refresh path
-- **CI implementation contract:** clean render plus direct
-  `./infrastructure/tutor/apply-patches.sh`, followed by contract tests
-
-Do not rewrite this doc to hide direct helper use in CI while the workflow
-still does it.
+- **low-level helper contract:** `./infrastructure/tutor/apply-patches.sh`
+  remains directly tested for re-run/idempotency behavior, but it is not the
+  clean-render entrypoint in CI
+- **render verifier authority:** `./scripts/infra/verify-tutor-config.sh` is the
+  canonical rendered verifier; `./scripts/qa/verify-tutor-patches.sh` is a stable
+  compatibility entrypoint that delegates to it
 
 ### Tutor Plugin / Render Contract
 
@@ -83,8 +85,7 @@ make tutor-verify
 
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
-tutor config save
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/tutor-config-save.sh
 bash tests/tutor/test_tutor_apply.sh
 bash tests/tutor/test_verify_patches.sh
 ```
@@ -109,9 +110,10 @@ TUTOR_VENV="$(pwd)/.ci-venv" ./scripts/ci/preflight-check.sh
 
 Current CI covers these contract classes:
 
-- Tutor render-plus-patch chain still works from a clean baseline
+- Tutor source -> render -> build-context -> verifier chain still works from a
+  clean baseline through the canonical wrapper
 - the Makefile and wrapper scripts are wired correctly
-- patch verification tests still pass against the rendered baseline
+- patch verification tests still pass against the canonical rendered verifier
 - `apply-patches.sh` remains re-runnable enough for the declared idempotency
   contract
 - plugin sources lint and compile
@@ -131,17 +133,17 @@ bash tests/tutor/test_tutor_apply.sh
 bash tests/tutor/test_verify_patches.sh
 ```
 
-If the failure reproduces only after a raw clean render, recreate the CI lane
-more closely:
+If the failure reproduces only after a helper-level rerun, isolate the helper
+contract separately:
 
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
-tutor config save
 ./infrastructure/tutor/apply-patches.sh
 ```
 
-Use the wrapper path for operator guidance, and the raw helper path only when
-you are reproducing the CI implementation contract.
+Use the wrapper path for clean-render/operator guidance. Use the raw helper path
+only when reproducing apply/idempotency behavior after a rendered baseline
+already exists.
 
 ### Plugin / Render Contract Fails
 
@@ -167,6 +169,7 @@ Review the actual source owners first:
 - `infrastructure/tutor/plugins/mereka_lms.py`
 - `infrastructure/tutor/config.example.yml`
 - `scripts/infra/verify-tutor-config.sh`
+- `scripts/qa/verify-tutor-patches.sh`
 
 ## Integration with CI Pipeline
 
@@ -199,7 +202,8 @@ The current split is:
 
 ### Workflow Fails But Local Verification Passes
 
-**Cause:** CI starts from a cleaner rendered baseline than most local flows.
+**Cause:** CI starts from a cleaner rendered baseline than most local flows, but
+it should still use the same wrapper/verifier path as local development.
 
 **Fix:** Ensure `infrastructure/tutor/config.example.yml` is up to date
 
@@ -226,7 +230,7 @@ split drifted.
 
 ## Future Improvements
 
-- fold CI helper-level steps into the governed wrapper path if the workflow
-  contract is intentionally changed in source, then update this doc again
+- keep reducing direct helper tests to fixture-level proofs where possible, but
+  do not reintroduce a second clean-render lane
 - expand render-contract preflight coverage only when source truth adds a new
   durable contract

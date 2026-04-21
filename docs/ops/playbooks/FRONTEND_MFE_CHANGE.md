@@ -7,7 +7,7 @@ _Audience: Developers, Operators · Owner: Platform Team · Status: active_
 | Layer | Owner | Artifact |
 |---|---|---|
 | **Source** | App repo (`mereka-lms`) | `infrastructure/tutor/plugins/mereka_lms.py`, MFE source patches |
-| **Build/Render** | Tutor image build | `tutor images build mfe` → `ghcr.io/biji-biji-initiative/mereka-lms` |
+| **Build/Render** | Repo Tutor build helper | `./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast` for local proof; `.github/workflows/build-tutor-images.yml` for release |
 | **Promotion** | Release workflow | `.github/workflows/release.yml` → release object |
 | **Realization** | ArgoCD + Kustomize | `deploy/k8s/overlays/*/kustomization.yaml` → pod image tag |
 | **Runtime proof** | Smoke scripts + browser canary | `scripts/qa/verify-mfe-*.sh`, live DOM inspection |
@@ -41,10 +41,11 @@ Common injection points inside the plugin:
 ```bash
 # Regenerate Tutor environment from plugin
 ./scripts/infra/tutor-config-save.sh
-# Verify patches applied
-./scripts/infra/verify-tutor-config.sh
+# Realize and verify the rendered MFE build context
+./scripts/infra/prepare-tutor-build-context.sh --target mfe
+./scripts/qa/verify-mfe-build-prereqs.sh
 # Build the MFE image locally
-tutor images build mfe
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 ```
 
 ### 3. Verify local build

@@ -185,7 +185,7 @@ The system MUST pass the following verification checks:
 - [ ] AC-INT-002: Given multi-site domains are configured, when `scripts/branding/verify-branding-health.sh` runs in production, then it passes for all configured domains without domain-specific branding regressions.
 
 ### Tutor Configuration Integration (Tier 1 → Tier 3)
-- [ ] AC-INT-003: Given `tutor-configuration_spec.md` canonical prepare flow realizes theme assets, when `tutor images build openedx` completes, then Mereka logo variants exist in compiled static files and `grep -r "fonts.googleapis.com" tutor_env/env/build/openedx/` returns zero results.
+- [ ] AC-INT-003: Given `tutor-configuration_spec.md` canonical prepare flow realizes theme assets, when `./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast` completes, then Mereka logo variants exist in compiled static files and `grep -r "fonts.googleapis.com" tutor_env/env/build/openedx/` returns zero results.
 
 ### Non-Functional Requirements
 
@@ -224,7 +224,7 @@ The system MUST pass the following verification checks:
 ./scripts/infra/prepare-tutor-build-context.sh --target all
 
 # Rebuild image (picks up new assets)
-tutor images build openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 
 # Restart and collect static
 tutor k8s restart lms
@@ -244,7 +244,7 @@ grep -r "fonts.googleapis.com" infrastructure/tutor/themes/mereka/
 
 # If found, remove manually or update strip_google_fonts logic in apply-patches.sh
 # Rebuild and verify
-tutor images build openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 ```
 
 ### MFE Footer Not Rendering
@@ -259,7 +259,7 @@ tutor images build openedx
 ./scripts/infra/prepare-tutor-build-context.sh --target mfe
 
 # Rebuild MFE image
-tutor images build mfe
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 
 # Restart MFE pods
 tutor k8s restart mfe
@@ -343,7 +343,7 @@ cp new-logo.png infrastructure/tutor/themes/mereka/lms/static/images/
 ./scripts/infra/prepare-tutor-build-context.sh --target openedx
 
 # 3. Rebuild image
-tutor images build openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 
 # 4. Deploy
 tutor k8s restart lms
@@ -362,7 +362,7 @@ curl -I https://academyv2.mereka.io/static/images/new-logo.png
 ./infrastructure/tutor/apply-patches.sh
 
 # 3. Rebuild MFE
-tutor images build mfe
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 
 # 4. Deploy
 tutor k8s restart mfe
@@ -375,7 +375,7 @@ tutor k8s restart mfe
 tutor config save --unset DEFAULT_SITE_THEME
 
 # 2. Rebuild (picks up default theme)
-tutor images build openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 
 # 3. Restart
 tutor k8s restart lms cms

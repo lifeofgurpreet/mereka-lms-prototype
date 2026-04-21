@@ -81,17 +81,18 @@ export TUTOR_ROOT
 export REPO_ROOT
 PREP_SCRIPT="$REPO_ROOT/scripts/infra/prepare-tutor-build-context.sh"
 RAW_OPENEDX_DF_SNAPSHOT="$(mktemp -t preflight-openedx-raw.XXXXXX)"
+RAW_MFE_DF_SNAPSHOT="$(mktemp -t preflight-mfe-raw.XXXXXX)"
 
 if [[ ! -x "$SYNC_SCRIPT" ]]; then
   echo "ERROR: Tutor plugin sync script not found or not executable at $SYNC_SCRIPT" >&2
-  rm -f "$RAW_OPENEDX_DF_SNAPSHOT"
+  rm -f "$RAW_OPENEDX_DF_SNAPSHOT" "$RAW_MFE_DF_SNAPSHOT"
   rm -rf "$TUTOR_ROOT"
   exit 1
 fi
 
 if [[ ! -x "$PREP_SCRIPT" ]]; then
   echo "ERROR: Canonical build-context script not found or not executable at $PREP_SCRIPT" >&2
-  rm -f "$RAW_OPENEDX_DF_SNAPSHOT"
+  rm -f "$RAW_OPENEDX_DF_SNAPSHOT" "$RAW_MFE_DF_SNAPSHOT"
   rm -rf "$TUTOR_ROOT"
   exit 1
 fi
@@ -110,31 +111,42 @@ echo "Generating Dockerfiles (tutor config save + apply-patches.sh)..."
   >/dev/null 2>&1
 
 cp "$TUTOR_ROOT/env/build/openedx/Dockerfile" "$RAW_OPENEDX_DF_SNAPSHOT"
+cp "$TUTOR_ROOT/env/plugins/mfe/build/mfe/Dockerfile" "$RAW_MFE_DF_SNAPSHOT"
 TUTOR_ROOT="$TUTOR_ROOT" "$PREP_SCRIPT" --target openedx >/dev/null 2>&1
 
-# Apply patches to the rendered Dockerfile.
-# NOTE: mfe-node.sh was removed in tracker #32. MFE Dockerfile patches are now
-# handled by Tutor plugin hooks in _mereka_lms/mfe_dockerfile.py, applied at
-# `tutor config save` time. This block now only runs brand-package and footer
-# asset sync patches (file I/O operations that plugins cannot perform).
+# Apply MFE patches directly to the temp render without refreshing the tracked
+# MFE snapshot. This proves the same MFE patch chain used by apply-patches.sh
+# while keeping preflight read-only against the repository checkout.
 export MFE_TEMPLATE="$TUTOR_ROOT/env/plugins/mfe/build/mfe/Dockerfile"
 RENDERED_DF="$TUTOR_ROOT/env/plugins/mfe/build/mfe/Dockerfile"
 if [[ -f "$RENDERED_DF" ]]; then
   (
     export VIRTUAL_ENV="$TUTOR_VENV"
     export PATH="$TUTOR_VENV/bin:$PATH"
-    export REPO_ROOT TUTOR_ROOT MFE_TEMPLATE
-    mkdir -p "$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe" 2>/dev/null || true
-    rm -f "$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile" 2>/dev/null || true
-    cp "$RENDERED_DF" "$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/Dockerfile" 2>/dev/null || true
+    export REPO_ROOT TUTOR_ROOT MFE_TEMPLATE TARGET=mfe
     cd "$REPO_ROOT"
+    # shellcheck source=infrastructure/tutor/patches/_common.sh
     source infrastructure/tutor/patches/_common.sh
-    _discover_template_paths 2>/dev/null || true
+    _discover_template_paths
+    # shellcheck source=infrastructure/tutor/patches/brand-package.sh
     source infrastructure/tutor/patches/brand-package.sh
-    apply_brand_package_patch 2>/dev/null || true
-    source infrastructure/tutor/patches/footer-component.sh
-    apply_footer_component_patch 2>/dev/null || true
-  ) >/dev/null 2>&1 || true
+    # shellcheck source=infrastructure/tutor/patches/sync-footer-assets.sh
+    source infrastructure/tutor/patches/sync-footer-assets.sh
+    # shellcheck source=infrastructure/tutor/patches/mfe-slot-ownership.sh
+    source infrastructure/tutor/patches/mfe-slot-ownership.sh
+    # shellcheck source=infrastructure/tutor/patches/mfe-prune-deprecated-shells.sh
+    source infrastructure/tutor/patches/mfe-prune-deprecated-shells.sh
+    # shellcheck source=infrastructure/tutor/patches/mfe-npm-install-resilience.sh
+    source infrastructure/tutor/patches/mfe-npm-install-resilience.sh
+    # shellcheck source=infrastructure/tutor/patches/dependency-image-mirrors.sh
+    source infrastructure/tutor/patches/dependency-image-mirrors.sh
+    apply_brand_package_patch
+    sync_footer_assets
+    apply_mfe_slot_ownership_patch
+    apply_mfe_prune_deprecated_shells_patch
+    apply_mfe_npm_install_resilience_patch
+    apply_dependency_image_mirrors_patch
+  ) >/dev/null
 fi
 
 MFE_DF="$TUTOR_ROOT/env/plugins/mfe/build/mfe/Dockerfile"
@@ -142,6 +154,7 @@ OPENEDX_DF="$TUTOR_ROOT/env/build/openedx/Dockerfile"
 
 if [[ ! -f "$MFE_DF" ]]; then
   echo "ERROR: MFE Dockerfile not generated at $MFE_DF" >&2
+  rm -f "$RAW_OPENEDX_DF_SNAPSHOT" "$RAW_MFE_DF_SNAPSHOT"
   rm -rf "$TUTOR_ROOT"
   exit 1
 fi
@@ -243,6 +256,51 @@ PY
     "$delta_contract_verifier"
 }
 
+check_mfe_dependency_image_mirror_delta() {
+  local raw_df="$1"
+  local patched_df="$2"
+
+  python3 - "$raw_df" "$patched_df" <<'PY'
+from pathlib import Path
+import sys
+
+raw_text = Path(sys.argv[1]).read_text(encoding="utf-8")
+patched_text = Path(sys.argv[2]).read_text(encoding="utf-8")
+
+expectations = [
+    (
+        "# syntax=docker/dockerfile:1",
+        "# syntax=mirror.gcr.io/docker/dockerfile:1",
+        "Dockerfile frontend",
+    ),
+    (
+        "FROM docker.io/node:24.11.0-bullseye-slim AS base",
+        "FROM mirror.gcr.io/library/node:24.11.0-bullseye-slim AS base",
+        "MFE Node base",
+    ),
+    (
+        "FROM docker.io/caddy:2.7.4 AS production",
+        "FROM mirror.gcr.io/library/caddy:2.7.4 AS production",
+        "MFE Caddy production base",
+    ),
+]
+
+errors = []
+for source, mirror, label in expectations:
+    if source not in raw_text:
+        errors.append(f"Raw MFE Dockerfile missing expected upstream {label} selector: {source}")
+    if mirror not in patched_text:
+        errors.append(f"Patched MFE Dockerfile missing expected mirrored {label} selector: {mirror}")
+    if source in patched_text:
+        errors.append(f"Patched MFE Dockerfile still contains upstream {label} selector: {source}")
+
+if errors:
+    for error in errors:
+        print(error, file=sys.stderr)
+    sys.exit(1)
+PY
+}
+
 # ── MFE Dockerfile Checks ───────────────────────────────────────
 echo ""
 echo "--- MFE Dockerfile Invariants ---"
@@ -328,6 +386,14 @@ if [[ -n "$authn_block_check" ]]; then
   fi
 fi
 
+# 7. Dependency image mirrors are acquisition-only and must cover the MFE
+# frontend, Node base, and Caddy runtime base selectors.
+if check_mfe_dependency_image_mirror_delta "$RAW_MFE_DF_SNAPSHOT" "$MFE_DF"; then
+  pass "Raw-vs-patched MFE Dockerfile dependency image mirror delta covers frontend, Node, and Caddy refs"
+else
+  fail "Raw-vs-patched MFE Dockerfile dependency image mirror delta is missing an expected mirrored ref"
+fi
+
 # ── OpenEdX Dockerfile Checks ───────────────────────────────────
 echo ""
 echo "--- OpenEdX Dockerfile Invariants ---"
@@ -353,7 +419,7 @@ echo ""
 echo "=== Preflight Summary: $PASS PASS, $FAIL FAIL, $SKIP SKIP ==="
 
 # Cleanup
-rm -f "$RAW_OPENEDX_DF_SNAPSHOT"
+rm -f "$RAW_OPENEDX_DF_SNAPSHOT" "$RAW_MFE_DF_SNAPSHOT"
 rm -rf "$TUTOR_ROOT"
 
 if [[ $FAIL -gt 0 ]]; then

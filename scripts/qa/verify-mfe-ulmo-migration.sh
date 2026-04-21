@@ -449,7 +449,7 @@ fi
 # Summary
 # -----------------------------------------------------------------------
 echo "[INFO] Full build verification requires the image build lane:"
-echo "  tutor images build mfe -a PIP_COMMAND=pip"
+echo "  ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast"
 echo "  tutor images push mfe"
 echo ""
 echo "========================================"

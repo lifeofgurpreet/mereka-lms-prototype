@@ -208,8 +208,8 @@ kubectl scale deployment/lms --replicas=3 -n mereka-lms
 kubectl exec -it -n mereka-lms deployment/lms -- pip show dnspython
 
 # If missing, rebuild image with pymongo[srv]
-tutor images build openedx -a PIP_COMMAND=pip
-# (v21 defaults to uv pip which breaks loremipsum; use pip)
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
+# The helper owns the Tutor 21 compatibility path; do not bypass it with raw Tutor builds.
 ```
 
 ### Connection Timeout

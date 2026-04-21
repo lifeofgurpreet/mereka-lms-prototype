@@ -135,10 +135,9 @@ without turning them into a second styling authority.
 # From the repo root
 export TUTOR_ROOT="$(pwd)/tutor_env"
 source infrastructure/tutor/tutor-env.sh
-tutor config save --set THEME_DIR="$(pwd)/infrastructure/tutor/themes"
-tutor config save --set THEME_NAME=mereka
-./infrastructure/tutor/apply-patches.sh   # CRITICAL: always run after config save
-tutor images build openedx
+./scripts/infra/tutor-config-save.sh --set THEME_DIR="$(pwd)/infrastructure/tutor/themes" --set THEME_NAME=mereka
+./scripts/infra/prepare-tutor-build-context.sh --target openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 tutor local start -d
 ```
 

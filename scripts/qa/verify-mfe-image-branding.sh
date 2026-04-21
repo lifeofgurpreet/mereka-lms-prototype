@@ -148,7 +148,7 @@ if run_with_timeout "${DOCKER_RUN_TIMEOUT_SECS}" docker run --rm \
         exit 1
       else
         echo "ERROR: PARAGON_THEME brand URLs are empty (plugin hook did not fire during build)" >&2
-        echo "  Ensure mereka_lms plugin is enabled before tutor images build mfe" >&2
+        echo "  Ensure mereka_lms plugin is enabled before running ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast" >&2
         exit 1
       fi
     fi

@@ -26,6 +26,10 @@ TEXT_SUFFIXES = {
 }
 SCRIPT_REF_PATTERN = re.compile(r"scripts/[A-Za-z0-9_./-]*verify-[A-Za-z0-9_./-]*\.sh")
 SPEC_ID_PATTERN = re.compile(r"AC-[A-Z0-9-]+")
+RUNTIME_DEPENDENCIES_PATTERN = re.compile(
+    r"^#\s*@runtime-dependencies:\s*(?P<deps>[a-z_, -]+)\s*$",
+    re.MULTILINE,
+)
 STATUS_OVERRIDE_KEYS = {
     "owner",
     "tier",
@@ -174,6 +178,26 @@ def classify_env_scope(content: str) -> list[str]:
 
 
 def classify_runtime_dependencies(content: str) -> list[str]:
+    override = RUNTIME_DEPENDENCIES_PATTERN.search(content)
+    if override:
+        deps = [
+            item.strip()
+            for item in re.split(r"[, ]+", override.group("deps"))
+            if item.strip()
+        ]
+        allowed = {"none", "cluster", "cloud", "vendor"}
+        invalid = sorted(set(deps) - allowed)
+        if invalid:
+            raise ValueError(
+                "Invalid @runtime-dependencies value(s): "
+                + ", ".join(invalid)
+                + ". Allowed values: "
+                + ", ".join(sorted(allowed))
+            )
+        if "none" in deps and len(set(deps)) > 1:
+            raise ValueError("@runtime-dependencies none cannot be combined with other values")
+        return sorted(set(deps))
+
     deps: list[str] = []
     if re.search(r"\bkubectl\b", content):
         deps.append("cluster")

@@ -128,7 +128,7 @@ if command -v kubectl &> /dev/null; then
         kubectl exec -n mereka-lms deploy/lms -- curl -s localhost:8000/metrics 2>/dev/null | head -5
       else
         echo "  ⚠ /metrics endpoint not accessible (expected if image not rebuilt yet)"
-        echo "  ℹ  Rebuild Open edX image to activate metrics: tutor images build openedx"
+        echo "  ℹ  Rebuild Open edX image to activate metrics: ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast"
       fi
     fi
   else
@@ -153,7 +153,7 @@ echo "  ✓ Bash syntax valid"
 echo
 echo "Next Steps:"
 echo "  1. Prepare build context: ./scripts/infra/prepare-tutor-build-context.sh --target openedx"
-echo "  2. Rebuild image: tutor images build openedx (takes 30-45 min)"
+echo "  2. Rebuild image: ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast"
 echo "  3. Restart services: tutor local restart (or kubectl rollout restart)"
 echo "  4. Test endpoint: curl http://localhost/metrics"
 echo

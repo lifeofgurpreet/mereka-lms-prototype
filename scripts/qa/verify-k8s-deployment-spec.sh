@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# @covers AC-004, AC-005, AC-006, AC-007, AC-008, AC-009, AC-010, AC-011, AC-014, AC-015, AC-016, AC-017, AC-018, AC-019, AC-024, AC-027, AC-028, AC-029, AC-030, AC-032, AC-CCR-002, AC-CCR-008, AC-CCR-009
+# @covers AC-004, AC-005, AC-006, AC-007, AC-008, AC-009, AC-010, AC-011, AC-014, AC-015, AC-016, AC-017, AC-018, AC-019, AC-024, AC-027, AC-028, AC-029, AC-030, AC-032, AC-033, AC-CCR-002, AC-CCR-008, AC-CCR-009
 # @spec: k8s-deployment_spec.md
+# @runtime-dependencies: none
 set -euo pipefail
 
 # verify-k8s-deployment-spec.sh
 # Static analysis of K8s manifests to verify k8s-deployment spec compliance
-# Covers 20 of 32 acceptance criteria (no live cluster needed)
+# Covers 21 of 33 acceptance criteria (no live cluster needed)
 
 # Colors
 RED='\033[0;31m'
@@ -175,6 +176,41 @@ check_envfrom() {
             pass "${deployment} Deployment has all required envFrom secrets"
         fi
     done
+}
+
+check_worker_probes() {
+    echo "Checking worker probe contract"
+
+    local deployments="$RENDERED_BASE"
+    local worker_deployments=("lms-worker" "cms-worker")
+    local all_passed=true
+
+    for deployment in "${worker_deployments[@]}"; do
+        for probe in livenessProbe readinessProbe; do
+            local command
+            command=$("$YQ" eval "select(.kind == \"Deployment\" and .metadata.name == \"${deployment}\") | .spec.template.spec.containers[0].${probe}.exec.command[]?" "$deployments" 2>/dev/null | grep -v "^---$" | paste -sd ' ' - || echo "")
+
+            if [[ -z "$command" ]]; then
+                fail "${deployment} ${probe} has no exec command"
+                all_passed=false
+                continue
+            fi
+
+            if [[ "$command" != *"ps -o comm= -p 1"* ]]; then
+                fail "${deployment} ${probe} does not use the local PID probe contract"
+                all_passed=false
+            fi
+
+            if [[ "$command" == *"inspect ping"* || "$command" == *"celery inspect"* || "$command" == *"celery -A"* ]]; then
+                fail "${deployment} ${probe} uses Celery broker traversal instead of a local process check"
+                all_passed=false
+            fi
+        done
+    done
+
+    if [[ "$all_passed" == true ]]; then
+        pass "Worker liveness/readiness probes use local process checks and avoid Celery broker traversal"
+    fi
 }
 
 check_mysql_args() {
@@ -617,6 +653,7 @@ OPTIONS:
 AVAILABLE CHECKS:
     replicas            Replica counts (requires --overlay)
     envfrom             envFrom configuration
+    worker-probes       Worker liveness/readiness probes
     mysql-args          MySQL native password argument
     mysql-exporter      MySQL exporter sidecar
     redis-exporter      Redis exporter sidecar
@@ -681,6 +718,8 @@ if [[ -z "$CHECK_NAME" ]]; then
     echo ""
     check_envfrom
     echo ""
+    check_worker_probes
+    echo ""
     check_mysql_args
     echo ""
     check_mysql_exporter
@@ -722,6 +761,9 @@ else
             ;;
         envfrom)
             check_envfrom
+            ;;
+        worker-probes)
+            check_worker_probes
             ;;
         mysql-args)
             check_mysql_args

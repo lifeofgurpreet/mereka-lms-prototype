@@ -52,7 +52,7 @@ export TUTOR_ROOT="$(pwd)/tutor_env"
 
 # Rebuild the Open edX image (required to include the custom app)
 # This takes 30-45 minutes
-tutor images build openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 
 # If deploying to production, tag and push the image
 docker tag localhost/openedx:latest ghcr.io/biji-biji-initiative/mereka-lms/openedx:$(git rev-parse --short HEAD)
@@ -209,7 +209,7 @@ If the fix causes issues, you can quickly rollback:
 2. Rebuild and redeploy:
 ```bash
 ./scripts/infra/prepare-tutor-build-context.sh --target openedx
-tutor images build openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 # Push and deploy
 ```
 

@@ -7,12 +7,12 @@ spec_class: "system"
 owner: "engineering"
 vehicle: "talent_platform"
 created: "2026-02-10"
-last_reviewed: "2026-03-09"
+last_reviewed: "2026-04-21"
 review_due: "2026-06-09"
 domain: "platform"
 normativity: "normative"
-last_updated: "2026-02-10"
-version: "1.0.0"
+last_updated: "2026-04-21"
+version: "1.0.1"
 depends_on:
   - "specs/repository-structure_spec.md"
   - "specs/secrets-management_spec.md"
@@ -440,6 +440,9 @@ The Mereka Academy LMS serves learners across Biji-Biji Initiative and SkillOurF
 
 ### Analytics Stack
 - [ ] AC-032: Given the Aspects plugin, when its Deployments are inspected, then ClickHouse, Superset, and Superset-Worker exist with health probes and resource limits defined.
+
+### Worker Health
+- [ ] AC-033: Given LMS and CMS worker Deployments, when liveness/readiness probes are inspected, then probes use local process checks and MUST NOT use Celery broker traversal such as `celery inspect ping` or cluster-wide control broadcasts.
 
 ## Edge Cases
 

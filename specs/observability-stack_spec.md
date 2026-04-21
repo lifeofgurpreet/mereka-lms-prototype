@@ -463,7 +463,7 @@ kubectl apply -f infrastructure/monitoring/grafana-dashboards.yaml
 # INSTALLED_APPS.append('openedx_prometheus')
 
 # 4. Rebuild and deploy
-tutor images build openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 tutor k8s restart lms cms
 
 # 5. Verify metrics endpoint

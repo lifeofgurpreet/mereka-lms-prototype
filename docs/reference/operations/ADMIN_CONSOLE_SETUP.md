@@ -235,7 +235,7 @@ Check that the MFE image was built with the `admin-console` stage. Run:
 ```
 
 If the Dockerfile check fails, the image needs to be rebuilt:
-- Local reproduction / debugging: `tutor images build mfe`
+- Local reproduction / debugging: `./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast`
 - Production repair: publish a new MFE image through `.github/workflows/build-tutor-images.yml`
   and promote it with `./scripts/infra/release-openedx-gitops.sh --require-digests`
 

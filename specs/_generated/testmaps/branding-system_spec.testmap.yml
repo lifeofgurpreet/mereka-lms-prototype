@@ -20,10 +20,10 @@ acceptance_criteria:
     file: scripts/qa/verify-branding-multi-domain.sh
     command: scripts/qa/verify-branding-multi-domain.sh
 - id: AC-INT-003
-  description: Given `tutor-configuration_spec.md` apply-patches workflow syncs theme
-    assets, when `tutor images build openedx` completes, then Mereka logo variants
-    exist in compiled static files and `grep -r "fonts.googleapis.com" tutor_env/env/build/openedx/`
-    returns zero results.
+  description: Given `tutor-configuration_spec.md` canonical prepare flow realizes
+    theme assets, when `./scripts/infra/build-openedx-image.sh --local-defaults --build-profile
+    fast` completes, then Mereka logo variants exist in compiled static files and
+    `grep -r "fonts.googleapis.com" tutor_env/env/build/openedx/` returns zero results.
   verify:
   - type: automated
     test_type: shell_verification

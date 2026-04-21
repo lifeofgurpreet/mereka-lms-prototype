@@ -17,7 +17,7 @@ PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
 PLUGIN_BUNDLE=""
 PLUGIN="$PLUGIN_MAIN"
 PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
-FOOTER_COMPONENT_PATCH="$REPO_ROOT/infrastructure/tutor/patches/footer-component.sh"
+FOOTER_ASSET_SYNC_PATCH="$REPO_ROOT/infrastructure/tutor/patches/sync-footer-assets.sh"
 THEME_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka"
 CONFIG="$REPO_ROOT/infrastructure/tutor/config.example.yml"
 
@@ -97,10 +97,10 @@ else
   do_fail "Footer FPF slot wiring not found in plugin"
 fi
 
-if [ -f "$FOOTER_COMPONENT_PATCH" ] && grep -q 'source "\$PATCHES_DIR/footer-component.sh"' "$PATCHES" 2>/dev/null; then
-  do_pass "apply-patches.sh sources footer-component patch module"
+if [ -f "$FOOTER_ASSET_SYNC_PATCH" ] && grep -q 'source "\$PATCHES_DIR/sync-footer-assets.sh"' "$PATCHES" 2>/dev/null; then
+  do_pass "apply-patches.sh sources sync-footer-assets patch module"
 else
-  do_warn "footer-component patch module wiring not found in apply-patches.sh"
+  do_warn "sync-footer-assets patch module wiring not found in apply-patches.sh"
 fi
 
 # 5. Head-extra template for theme CSS injection

@@ -1,503 +1,112 @@
-version: "1.0"
+version: "2.0"
 metadata:
-  description: "Comprehensive manifest of all Tutor patches applied by apply-patches.sh"
-  last_updated: "2026-02-10"
+  description: "Active Tutor patch authority manifest. Source hooks and bake/HCL remain canonical wherever they can express the behavior."
+  last_updated: "2026-04-21"
+  inventory: "docs/reference/architecture/TUTOR_PATCHES_INVENTORY.md"
   spec: "specs/tutor-configuration-resilience_spec.md"
 
 patches:
-  # Multi-Site Domain Configuration
-  - id: multi-site-allowed-hosts-biji
-    name: "Biji-Biji Domain in ALLOWED_HOSTS"
-    category: django-settings
-    description: "Adds academy.biji-biji.com to Django ALLOWED_HOSTS"
-    target_file: "tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_command: "grep -F 'academy.biji-biji.com' tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_pattern: "academy.biji-biji.com"
-    severity: critical
-    required: true
-
-  - id: multi-site-allowed-hosts-sof
-    name: "SkillOurFuture Domain in ALLOWED_HOSTS"
-    category: django-settings
-    description: "Adds skillourfuture.academy.mereka.io to Django ALLOWED_HOSTS"
-    target_file: "tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_command: "grep -F 'skillourfuture.academy.mereka.io' tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_pattern: "skillourfuture.academy.mereka.io"
-    severity: critical
-    required: true
-
-  - id: multi-site-csrf-biji
-    name: "Biji-Biji Domain in CSRF_TRUSTED_ORIGINS"
-    category: django-settings
-    description: "Adds https://academy.biji-biji.com to CSRF_TRUSTED_ORIGINS"
-    target_file: "tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_command: "grep -F 'https://academy.biji-biji.com' tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_pattern: "https://academy.biji-biji.com"
-    severity: critical
-    required: true
-
-  - id: multi-site-csrf-sof
-    name: "SkillOurFuture Domain in CSRF_TRUSTED_ORIGINS"
-    category: django-settings
-    description: "Adds https://skillourfuture.academy.mereka.io to CSRF_TRUSTED_ORIGINS"
-    target_file: "tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_command: "grep -F 'https://skillourfuture.academy.mereka.io' tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_pattern: "https://skillourfuture.academy.mereka.io"
-    severity: critical
-    required: true
-
-  - id: multi-site-caddy-biji
-    name: "Biji-Biji Domain in Caddyfile"
-    category: reverse-proxy
-    description: "Adds Caddy reverse proxy block for academy.biji-biji.com"
-    target_file: "tutor_env/env/apps/caddy/Caddyfile"
-    verify_command: "grep -F 'academy.biji-biji.com' tutor_env/env/apps/caddy/Caddyfile"
-    verify_pattern: "academy.biji-biji.com"
-    severity: high
-    required: true
-
-  - id: multi-site-caddy-sof
-    name: "SkillOurFuture Domain in Caddyfile"
-    category: reverse-proxy
-    description: "Adds Caddy reverse proxy block for skillourfuture.academy.mereka.io"
-    target_file: "tutor_env/env/apps/caddy/Caddyfile"
-    verify_command: "grep -F 'skillourfuture.academy.mereka.io' tutor_env/env/apps/caddy/Caddyfile"
-    verify_pattern: "skillourfuture.academy.mereka.io"
-    severity: high
-    required: true
-
-  - id: multi-site-nginx-biji
-    name: "Biji-Biji Domain in Nginx"
-    category: reverse-proxy
-    description: "Adds nginx server_name for academy.biji-biji.com"
-    target_file: "tutor_env/env/apps/nginx/lms.conf"
-    verify_command: "grep -F 'academy.biji-biji.com' tutor_env/env/apps/nginx/lms.conf"
-    verify_pattern: "academy.biji-biji.com"
-    severity: high
-    required: true
-
-  - id: multi-site-nginx-sof
-    name: "SkillOurFuture Domain in Nginx"
-    category: reverse-proxy
-    description: "Adds nginx server_name for skillourfuture.academy.mereka.io"
-    target_file: "tutor_env/env/apps/nginx/lms.conf"
-    verify_command: "grep -F 'skillourfuture.academy.mereka.io' tutor_env/env/apps/nginx/lms.conf"
-    verify_pattern: "skillourfuture.academy.mereka.io"
-    severity: high
-    required: true
-
-  # MySQL Authentication Fix
-  - id: mysql-auth-plugin
-    name: "MySQL 8 Authentication Plugin"
-    category: infrastructure
-    description: "Sets MySQL to use mysql_native_password for compatibility"
-    target_file: "tutor_env/env/local/docker-compose.yml"
-    verify_command: "grep -F 'default-authentication-plugin=mysql_native_password' tutor_env/env/local/docker-compose.yml"
-    verify_pattern: "default-authentication-plugin=mysql_native_password"
-    severity: critical
-    required: true
-
   - id: mysql-root-host
-    name: "MySQL Remote Root Access"
-    category: infrastructure
-    description: "Enables remote root access for MySQL (MYSQL_ROOT_HOST)"
-    target_file: "tutor_env/env/local/docker-compose.yml"
-    verify_command: "grep -F 'MYSQL_ROOT_HOST' tutor_env/env/local/docker-compose.yml"
-    verify_pattern: "MYSQL_ROOT_HOST"
-    severity: high
+    module: "infrastructure/tutor/patches/mysql-root-host.sh"
+    function: "apply_mysql_root_host_patch"
+    target: "tutor_env/env/local/docker-compose.yml"
+    target_family: "openedx"
+    authority_class: "temporary_compatibility_layer"
+    description: "Adds MYSQL_ROOT_HOST: \"%\" to the rendered local MySQL service so sibling Tutor containers can connect during local bootstrap."
+    retirement_trigger: "Tutor exposes this local compose setting directly or the local bootstrap no longer needs remote root access."
     required: true
 
-  # MFE Configuration
-  - id: mfe-node-24
-    name: "MFE Node 24 Base Image"
-    category: mfe-build
-    description: "Verifies the MFE Dockerfile uses the mirrored Node 24 base image"
-    target_file: "tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
-    verify_command: "grep -F 'mirror.gcr.io/library/node:24.11.0-bullseye-slim' tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
-    verify_pattern: "mirror.gcr.io/library/node:24.11.0-bullseye-slim"
-    severity: critical
-    required: false  # Only if MFE plugin is installed
-
-  - id: mfe-build-toolchain
-    name: "MFE Build Toolchain (g++, Python 3)"
-    category: mfe-build
-    description: "Adds g++ and python3 to MFE build dependencies"
-    target_file: "tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
-    verify_command: "grep -E 'gcc g\\+\\+ git' tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
-    verify_pattern: "g++"
-    severity: critical
-    required: false  # Only if MFE plugin is installed
-
-  - id: mfe-cookie-domain
-    name: "MFE Cookie Domain Configuration"
-    category: mfe-build
-    description: "Adds SESSION_COOKIE_DOMAIN and CSRF_COOKIE_DOMAIN to MFE Dockerfile"
-    target_file: "tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
-    verify_command: "grep -F 'SESSION_COOKIE_DOMAIN' tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
-    verify_pattern: "SESSION_COOKIE_DOMAIN"
-    severity: high
-    required: false
-
-  - id: mfe-theme-import
-    name: "MFE Custom Theme Import"
-    category: mfe-branding
-    description: "Imports theme-source/mereka.scss in MFE env.config.jsx"
-    target_file: "tutor_env/env/plugins/mfe/build/mfe/mereka/env.config.jsx"
-    verify_command: "grep -F 'theme-source/mereka.scss' tutor_env/env/plugins/mfe/build/mfe/mereka/env.config.jsx"
-    verify_pattern: "theme-source/mereka.scss"
-    severity: high
-    required: false
-
-  - id: mfe-custom-footer
-    name: "Custom Mereka Footer Component"
-    category: mfe-branding
-    description: "Registers custom Mereka footer in repo-owned MFE runtime config"
-    target_file: "tutor_env/env/plugins/mfe/build/mfe/mereka/env.config.jsx"
-    verify_command: "grep -F 'const MerekaFooter' tutor_env/env/plugins/mfe/build/mfe/mereka/env.config.jsx"
-    verify_pattern: "const MerekaFooter"
-    severity: medium
-    required: false
-
-  - id: mfe-npm-resilience
-    name: "Resilient MFE npm Install"
-    category: mfe-build
-    description: "Adds retry logic to MFE npm clean-install"
-    target_file: "tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
-    verify_command: "grep -F 'for attempt in 1 2 3; do npm clean-install' tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
-    verify_pattern: "for attempt in 1 2 3"
-    severity: high
-    required: false
-
-  - id: mfe-plugin-framework
-    name: "MFE Plugin Framework Dependency"
-    category: mfe-build
-    description: "Installs frontend-plugin-framework with legacy-peer-deps"
-    target_file: "tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
-    verify_command: "grep -F '@openedx/frontend-plugin-framework' tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
-    verify_pattern: "@openedx/frontend-plugin-framework"
-    severity: high
-    required: false
-
-  # Forum/Discussion Configuration
-  - id: discussions-mfe-enabled
-    name: "MFE Discussions Enabled"
-    category: django-settings
-    description: "Forces all courses to use MFE discussions (greenfield mode)"
-    target_file: "tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_command: "grep -F 'DISCUSSIONS_MFE_ENABLED = True' tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_pattern: "DISCUSSIONS_MFE_ENABLED = True"
-    severity: high
+  - id: webpack-memory-legacy-cleanup
+    module: "infrastructure/tutor/patches/webpack-memory.sh"
+    function: "apply_webpack_memory_patch"
+    target: "tutor_env/env/build/openedx/Dockerfile"
+    target_family: "openedx"
+    authority_class: "migration_guard"
+    description: "Deduplicates stale rendered memory/runtime ENV blocks and normalizes legacy webpack build settings. Fresh render authority lives in Tutor plugin hooks."
+    retirement_trigger: "Fresh-render proof plus stale-render cleanup retirement plan shows no older rendered Dockerfiles remain in supported workflows."
     required: true
 
-  - id: discussions-legacy-disabled
-    name: "Legacy Discussion Panel Disabled"
-    category: django-settings
-    description: "Disables legacy in-LMS discussion panel in favor of MFE"
-    target_file: "tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_command: "grep -F 'ENABLE_DISCUSSION_HOME_PANEL' tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_pattern: "ENABLE_DISCUSSION_HOME_PANEL"
-    severity: medium
+  - id: dependency-image-mirror-normalization
+    module: "infrastructure/tutor/patches/dependency-image-mirrors.sh"
+    function: "apply_dependency_image_mirrors_patch"
+    target: "tutor_env/env/build/openedx/Dockerfile and tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
+    target_family: "openedx,mfe"
+    authority_class: "temporary_compatibility_layer"
+    description: "Rewrites exact upstream hardcoded Docker Hub dependency refs to mirror.gcr.io equivalents for Dockerfile frontend, Open edX Ubuntu/dockerize, MFE Node, and MFE Caddy acquisition."
+    retirement_trigger: "Tutor/tutormfe exposes source-owned selectors for these refs or local/CI cold starts no longer depend on anonymous Docker Hub acquisition."
     required: true
 
-  # Custom Apps Integration
-  - id: custom-app-mfe-oauth-dockerfile
-    name: "MFE OAuth Fix App in Dockerfile"
-    category: custom-apps
-    description: "Copies and installs mfe_oauth_fix custom app"
-    target_file: "tutor_env/env/build/openedx/Dockerfile"
-    verify_command: "grep -F 'mfe_oauth_fix' tutor_env/env/build/openedx/Dockerfile"
-    verify_pattern: "mfe_oauth_fix"
-    severity: critical
+  - id: build-optimizations-render-delta
+    module: "infrastructure/tutor/patches/build-optimizations.sh"
+    function: "apply_build_optimizations_patch"
+    target: "tutor_env/env/build/openedx/Dockerfile"
+    target_family: "openedx"
+    authority_class: "temporary_compatibility_layer"
+    description: "Residual cold-build compatibility and translation preflight/wrapper surgery, bounded by build-optimizations.allowed-delta.yaml and the inventory mutation ledger."
+    retirement_trigger: "Bake/HCL, Tutor hooks, or upstream templates own the base/assets, uwsgi, build-profile, translation, and XBlock placement semantics without rendered-line rewrites."
     required: true
 
-  - id: custom-app-prometheus-dockerfile
-    name: "Prometheus Metrics App in Dockerfile"
-    category: custom-apps
-    description: "Copies and installs openedx_prometheus custom app"
-    target_file: "tutor_env/env/build/openedx/Dockerfile"
-    verify_command: "grep -F 'openedx_prometheus' tutor_env/env/build/openedx/Dockerfile"
-    verify_pattern: "openedx_prometheus"
-    severity: high
+  - id: oep48-brand-package-sync
+    module: "infrastructure/tutor/patches/brand-package.sh"
+    function: "apply_brand_package_patch"
+    target: "tutor_env/env/plugins/mfe/build/mfe/mereka/brand-mereka"
+    target_family: "mfe"
+    authority_class: "filesystem_sync"
+    description: "Copies the repo-owned OEP-48 brand package and compiled theme CSS into the rendered MFE build context."
+    retirement_trigger: "Tutor/tutormfe supports declaring local file package payloads without post-render filesystem sync."
     required: true
 
-  - id: custom-app-mfe-oauth-settings
-    name: "MFE OAuth Fix in INSTALLED_APPS"
-    category: django-settings
-    description: "Adds mfe_oauth_fix to LMS INSTALLED_APPS"
-    target_file: "tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_command: "grep -F 'mfe_oauth_fix' tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_pattern: "mfe_oauth_fix"
-    severity: critical
+  - id: mfe-theme-source-sync
+    module: "infrastructure/tutor/patches/sync-footer-assets.sh"
+    function: "sync_footer_assets"
+    target: "tutor_env/env/plugins/mfe/build/mfe/mereka/theme-source"
+    target_family: "mfe"
+    authority_class: "filesystem_sync"
+    description: "Copies repo-owned MFE theme SCSS and font assets into the rendered MFE build context. Footer JSX and slot wiring are source-owned by the Tutor plugin."
+    retirement_trigger: "Tutor/tutormfe supports declaring the repo-owned theme-source tree without post-render filesystem sync."
     required: true
 
-  - id: custom-app-prometheus-settings
-    name: "Prometheus Metrics in INSTALLED_APPS"
-    category: django-settings
-    description: "Adds openedx_prometheus to LMS INSTALLED_APPS"
-    target_file: "tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_command: "grep -F 'openedx_prometheus' tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_pattern: "openedx_prometheus"
-    severity: high
+  - id: mfe-slot-ownership-guard
+    module: "infrastructure/tutor/patches/mfe-slot-ownership.sh"
+    function: "apply_mfe_slot_ownership_patch"
+    target: "tutor_env/env/plugins/mfe/build/mfe/env.config.jsx"
+    target_family: "mfe"
+    authority_class: "migration_guard"
+    description: "Removes stale Tutor Indigo slot ownership from generated env.config artifacts so retired external ownership cannot become live."
+    retirement_trigger: "Fresh tutormfe renders no longer emit the retired external Indigo slot residue and CI keeps an absence guard."
     required: true
 
-  - id: django-prometheus-dependency
-    name: "django-prometheus Package"
-    category: custom-apps
-    description: "Installs django-prometheus for metrics collection"
-    target_file: "tutor_env/env/build/openedx/Dockerfile"
-    verify_command: "grep -F 'django-prometheus' tutor_env/env/build/openedx/Dockerfile"
-    verify_pattern: "django-prometheus"
-    severity: high
+  - id: mfe-prune-deprecated-shells
+    module: "infrastructure/tutor/patches/mfe-prune-deprecated-shells.sh"
+    function: "apply_mfe_prune_deprecated_shells_patch"
+    target: "tutor_env/env/plugins/mfe/build/mfe/Dockerfile and tutor_env/env/plugins/mfe/apps/mfe/Caddyfile"
+    target_family: "mfe"
+    authority_class: "migration_guard"
+    description: "Removes generated legacy MFE shell and Caddy residue outside the active MFE estate."
+    retirement_trigger: "Upstream render no longer emits deprecated shells/routes, and fixture tests prove the patch is a no-op."
     required: true
 
-  - id: django-prometheus-settings
-    name: "django-prometheus in INSTALLED_APPS"
-    category: django-settings
-    description: "Adds django_prometheus to LMS INSTALLED_APPS"
-    target_file: "tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_command: "grep -F 'django_prometheus' tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_pattern: "django_prometheus"
-    severity: high
+  - id: mfe-npm-install-resilience
+    module: "infrastructure/tutor/patches/mfe-npm-install-resilience.sh"
+    function: "apply_mfe_npm_install_resilience_patch"
+    target: "tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
+    target_family: "mfe"
+    authority_class: "temporary_compatibility_layer"
+    description: "Wraps the rendered MFE npm clean-install layer with retry/fallback behavior and explicit selector-drift failure."
+    retirement_trigger: "tutormfe exposes npm install resilience as source-owned config or upstream render includes equivalent behavior."
     required: true
 
-  - id: prometheus-middleware
-    name: "Prometheus Middleware"
-    category: django-settings
-    description: "Adds Prometheus middleware to wrap all requests"
-    target_file: "tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_command: "grep -F 'PrometheusBeforeMiddleware' tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_pattern: "PrometheusBeforeMiddleware"
-    severity: high
+  - id: mfe-pull-translations-retry
+    module: "infrastructure/tutor/apply-patches.sh"
+    function: "wrap_mfe_pull_translations_retry"
+    target: "tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
+    target_family: "mfe"
+    authority_class: "temporary_compatibility_layer"
+    description: "Wraps rendered Atlas pull_translations RUN lines with retry loops to protect long builds from transient GitHub/DNS failures."
+    retirement_trigger: "tutormfe exposes the translation pull step as source-owned config or upstream includes equivalent retry semantics."
     required: true
 
-  - id: pymongo-srv-dependency
-    name: "pymongo[srv] for MongoDB Atlas"
-    category: infrastructure
-    description: "Installs pymongo[srv] for MongoDB Atlas SRV connection support"
-    target_file: "tutor_env/env/build/openedx/Dockerfile"
-    verify_command: "grep -E 'pymongo\\[srv\\]|dnspython' tutor_env/env/build/openedx/Dockerfile"
-    verify_pattern: "pymongo[srv]"
-    severity: critical
-    required: true
-
-  # Build Optimizations
-  - id: node-memory-limit
-    name: "Node Memory Limit Increase"
-    category: build-optimization
-    description: "Increases Node heap size to 6GB for webpack builds"
-    target_file: "tutor_env/env/build/openedx/Dockerfile"
-    verify_command: "grep -F 'NODE_OPTIONS=\"--max-old-space-size=6144\"' tutor_env/env/build/openedx/Dockerfile"
-    verify_pattern: "NODE_OPTIONS=\"--max-old-space-size=6144\""
-    severity: high
-    required: true
-
-  - id: pythonpath-env
-    name: "PYTHONPATH Environment Variable"
-    category: build-optimization
-    description: "Sets PYTHONPATH to /openedx/edx-platform"
-    target_file: "tutor_env/env/build/openedx/Dockerfile"
-    verify_command: "grep -F 'ENV PYTHONPATH=/openedx/edx-platform' tutor_env/env/build/openedx/Dockerfile"
-    verify_pattern: "PYTHONPATH=/openedx/edx-platform"
-    severity: medium
-    required: true
-
-  - id: resilient-pip-install
-    name: "Resilient pip Install with Retries"
-    category: build-optimization
-    description: "Adds retry logic to pip install in Dockerfile"
-    target_file: "tutor_env/env/build/openedx/Dockerfile"
-    verify_command: "grep -E 'for attempt in 1 2 3.*pip install' tutor_env/env/build/openedx/Dockerfile"
-    verify_pattern: "for attempt in 1 2 3"
-    severity: high
-    required: true
-
-  - id: webpack-terser-parallelism
-    name: "Webpack Terser Plugin Parallelism Disabled"
-    category: build-optimization
-    description: "Disables Terser parallelism to reduce memory usage"
-    target_file: "tutor_env/env/build/openedx/edx-platform/webpack.prod.config.js"
-    verify_command: "grep -E 'TerserPlugin.*parallel.*false' tutor_env/env/build/openedx/edx-platform/webpack.prod.config.js"
-    verify_pattern: "parallel: false"
-    severity: medium
-    required: false  # Only if webpack.prod.config.js exists
-
-  # Asset Build Fixes
-  - id: collectstatic-safe-join-lms
-    name: "LMS collectstatic safe_join Patch"
-    category: asset-build
-    description: "Monkey-patches Django safe_join to avoid SuspiciousFileOperation"
-    target_file: "tutor_env/env/build/openedx/settings/lms/assets.py"
-    verify_command: "grep -F '_build_safe_join' tutor_env/env/build/openedx/settings/lms/assets.py"
-    verify_pattern: "_build_safe_join"
-    severity: critical
-    required: true
-
-  - id: collectstatic-safe-join-cms
-    name: "CMS collectstatic safe_join Patch"
-    category: asset-build
-    description: "Monkey-patches Django safe_join for CMS asset builds"
-    target_file: "tutor_env/env/build/openedx/settings/cms/assets.py"
-    verify_command: "grep -F '_build_safe_join' tutor_env/env/build/openedx/settings/cms/assets.py"
-    verify_pattern: "_build_safe_join"
-    severity: critical
-    required: true
-
-  - id: theme-sass-compilation
-    name: "Theme SASS Compilation"
-    category: asset-build
-    description: "Compiles Mereka theme SASS during image build"
-    target_file: "tutor_env/env/build/openedx/Dockerfile"
-    verify_command: "grep -F 'npm run compile-sass -- --skip-default --theme-dir /openedx/themes --theme mereka' tutor_env/env/build/openedx/Dockerfile"
-    verify_pattern: "theme mereka"
-    severity: high
-    required: true
-
-  - id: google-fonts-stripping
-    name: "Google Fonts Import Stripping"
-    category: asset-build
-    description: "Removes Google Fonts imports for offline-friendly builds"
-    target_file: "tutor_env/env/build/openedx/Dockerfile"
-    verify_command: "grep -F 'Stripped google font imports from {changed} scss files' tutor_env/env/build/openedx/Dockerfile"
-    verify_pattern: "Stripped google font imports"
-    severity: medium
-    required: true
-
-  # Enterprise Features
-  - id: content-libraries-app
-    name: "Content Libraries App Enabled"
-    category: django-settings
-    description: "Ensures content_libraries app is in INSTALLED_APPS"
-    target_file: "tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_command: "grep -F 'content_libraries' tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_pattern: "content_libraries"
-    severity: medium
-    required: true
-
-  - id: bookmarks-app
-    name: "Bookmarks App Enabled"
-    category: django-settings
-    description: "Ensures bookmarks app is in INSTALLED_APPS"
-    target_file: "tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_command: "grep -F 'bookmarks' tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_pattern: "bookmarks"
-    severity: low
-    required: true
-
-  - id: discussions-app
-    name: "Discussions App Enabled"
-    category: django-settings
-    description: "Ensures discussions app is in INSTALLED_APPS"
-    target_file: "tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_command: "grep -F 'discussions' tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_pattern: "discussions"
-    severity: medium
-    required: true
-
-  - id: theming-app
-    name: "Theming App Enabled"
-    category: django-settings
-    description: "Ensures theming app is in INSTALLED_APPS"
-    target_file: "tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_command: "grep -F 'theming' tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_pattern: "theming"
-    severity: high
-    required: true
-
-  - id: default-site-theme
-    name: "Default Site Theme"
-    category: django-settings
-    description: "Sets DEFAULT_SITE_THEME to 'mereka' for fallback branding"
-    target_file: "tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_command: "grep -F 'DEFAULT_SITE_THEME = \"mereka\"' tutor_env/env/apps/openedx/settings/lms/production.py"
-    verify_pattern: "DEFAULT_SITE_THEME"
-    severity: high
-    required: true
-
-  # Health/Observability Endpoints
-  - id: health-endpoint-nginx
-    name: "Health Check Endpoint in Nginx"
-    category: observability
-    description: "Adds /health endpoint for Kubernetes liveness probes"
-    target_file: "tutor_env/env/apps/nginx/lms.conf"
-    verify_command: "grep -F 'location = /health' tutor_env/env/apps/nginx/lms.conf"
-    verify_pattern: "location = /health"
-    severity: critical
-    required: true
-
-  - id: metrics-endpoint-nginx
-    name: "Prometheus Metrics Endpoint in Nginx"
-    category: observability
-    description: "Adds /metrics endpoint for Prometheus scraping"
-    target_file: "tutor_env/env/apps/nginx/lms.conf"
-    verify_command: "grep -F 'location = /metrics' tutor_env/env/apps/nginx/lms.conf"
-    verify_pattern: "location = /metrics"
-    severity: high
-    required: true
-
-  - id: profile-api-proxy-nginx
-    name: "Profile API Proxy in Nginx (MFE Apps)"
-    category: reverse-proxy
-    description: "Proxies /profile/api/ from apps.academyv2.mereka.io to LMS"
-    target_file: "tutor_env/env/apps/nginx/lms.conf"
-    verify_command: "grep -F 'location ^~ /profile/api/' tutor_env/env/apps/nginx/lms.conf"
-    verify_pattern: "/profile/api/"
-    severity: high
-    required: true
-
-  - id: profile-api-proxy-caddy
-    name: "Profile API Proxy in Caddy (MFE Apps)"
-    category: reverse-proxy
-    description: "Proxies /profile/api/ from apps.academyv2.mereka.io to LMS in Caddy"
-    target_file: "tutor_env/env/apps/caddy/Caddyfile"
-    verify_command: "grep -F '/profile/api/' tutor_env/env/apps/caddy/Caddyfile"
-    verify_pattern: "/profile/api/"
-    severity: high
-    required: false  # Only for Caddy deployments
-
-  # MFE Directory Name Fixes
-  - id: mfe-course-authoring-directory
-    name: "Course Authoring MFE Directory Name Fix"
-    category: mfe-build
-    description: "Symlinks frontend-app-course-authoring to course-authoring to fix blank page (mereka-lms-3f8g)"
-    target_file: "tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
-    verify_command: "grep -F 'ln -sf /openedx/app/frontend-app-course-authoring /openedx/app/course-authoring' tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
-    verify_pattern: "course-authoring"
-    severity: high
-    required: false  # Only if course-authoring MFE is used
-    bead: mereka-lms-3f8g
-
-  # MFE Cache Headers
-  - id: mfe-cache-headers-html
-    name: "MFE HTML Cache Headers"
-    category: mfe-caching
-    description: "Sets no-cache for MFE HTML files to prevent stale blank pages (mereka-lms-2pne)"
-    target_file: "tutor_env/env/apps/caddy/Caddyfile"
-    verify_command: "grep -A 2 'Cache-Control.*no-cache' tutor_env/env/apps/caddy/Caddyfile"
-    verify_pattern: "no-cache, no-store, must-revalidate"
-    severity: high
-    required: true
-    bead: mereka-lms-2pne
-
-  - id: mfe-cache-headers-static
-    name: "MFE Static Asset Cache Headers"
-    category: mfe-caching
-    description: "Sets long cache + immutable for MFE JS/CSS assets (mereka-lms-2pne)"
-    target_file: "tutor_env/env/apps/caddy/Caddyfile"
-    verify_command: "grep -F 'max-age=31536000, immutable' tutor_env/env/apps/caddy/Caddyfile"
-    verify_pattern: "max-age=31536000, immutable"
-    severity: high
-    required: true
-    bead: mereka-lms-2pne
-
-  # ArgoCD ConfigMap Ignore
-  - id: argocd-configmap-ignore
-    name: "ArgoCD CSS ConfigMap ignoreDifferences"
-    category: argocd
-    description: "Prevents ArgoCD from triggering pod rolling on CSS ConfigMap hash changes (mereka-lms-dcd)"
-    target_file: "deploy/k8s/patches/argocd-configmap-ignore.yaml"
-    verify_command: "test -f deploy/k8s/patches/argocd-configmap-ignore.yaml"
-    verify_pattern: "ignoreDifferences"
-    severity: critical
-    required: true
-    bead: mereka-lms-dcd
-    notes: "Requires manual application: kubectl patch application mereka-lms -n argocd --type=merge --patch-file=deploy/k8s/patches/argocd-configmap-ignore.yaml"
+inactive_modules:
+  - module: "infrastructure/tutor/patches/enterprise-template-guard.sh"
+    status: "not_sourced"
+    note: "Not active authority until wired through apply-patches.sh with docs, tests, and a retirement trigger."

@@ -9,8 +9,8 @@ vehicle: "talent_platform"
 created: "2026-02-10"
 last_reviewed: "2026-03-09"
 review_due: "2026-06-09"
-last_updated: "2026-04-14"
-version: "1.0.0"
+last_updated: "2026-04-21"
+version: "1.1.0"
 domain: "platform"
 normativity: "normative"
 depends_on:
@@ -80,7 +80,7 @@ Every one of these incidents was caused by the same root failure: reliance on a 
   - Tutor plugin architecture for applying patches via the Tutor hook system (filters and actions)
   - Git pre-commit hook that validates patched configuration state
   - CI/CD GitHub Actions workflow for configuration integrity verification
-  - Patch manifest format defining all required patches with verification commands
+  - Patch manifest format defining active post-render patch authority, ownership class, and retirement metadata
   - Rollback procedures when configuration changes break the deployment
   - Migration path from current `apply-patches.sh` monolith to plugin-based architecture
   - Verification tooling that tests patch application idempotency and completeness
@@ -110,12 +110,12 @@ Every one of these incidents was caused by the same root failure: reliance on a 
 
 ### Overview
 
-The three-layer defense system has been partially implemented with the Tutor plugin architecture as the foundation. The plugin consolidates the majority of patches from the legacy `apply-patches.sh` script into native Tutor hooks.
+The three-layer defense system is implemented with the Tutor plugin, canonical build-context preparation path, and CI rendered verification. Remaining post-render mutations are explicitly classified in the active patch manifest and inventory.
 
 **Current State:**
 - **Layer 1 (Tutor Plugin)**: ✅ Implemented (`infrastructure/tutor/plugins/mereka_lms.py`)
 - **Layer 2 (Git Hooks)**: ✅ Implemented (`.githooks/pre-tutor-config`)
-- **Layer 3 (CI/CD)**: ⚠️ Partially implemented (`.github/workflows/tutor-config-verify.yml`, `.github/workflows/tutor-plugin-test.yml`)
+- **Layer 3 (CI/CD)**: ✅ Implemented for Tutor authority changes (`.github/workflows/ci.yml`, `.github/workflows/tutor-plugin-test.yml`)
 
 ### Layer 1: Tutor Plugin Architecture
 
@@ -177,9 +177,10 @@ The `mereka_lms` Tutor integration implements ENV_PATCHES hooks plus tightly sco
   - Custom Mereka footer component (React)
 
 #### Infrastructure Configuration
-- **Hook:** `mysql-docker-compose`
+- **Rendered local compose compatibility:** `infrastructure/tutor/patches/mysql-root-host.sh`
 - **Patches Applied:**
-  - MySQL 8 authentication plugin fix (`--mysql-native-password=ON`)
+  - Local `MYSQL_ROOT_HOST: "%"` so sibling Tutor containers can connect during bootstrap.
+  - MySQL native password mode is currently emitted by Tutor 21.0.4 as `--mysql-native-password=ON` and is verified as a rendered contract.
 
 - **Hook:** `caddy-caddyfile`
 - **Patches Applied:**
@@ -245,18 +246,19 @@ git config --local include.path ../.gitconfig
 
 ### Layer 3: CI/CD Verification
 
-**Status:** ⚠️ Partially implemented
+**Status:** ✅ Implemented for current Tutor-authority PRs through `ci.yml`
 
 #### Existing Workflows
 
-**1. `tutor-config-verify.yml`**
-- Runs on pushes to `main` and pull requests
-- **Jobs:**
-  - `verify-patches`: Checks critical patches (MySQL auth, MFE Node 24 contract, forum MongoDB SRV, multi-site domains)
-  - `verify-multi-site-domains`: Validates ALLOWED_HOSTS and CSRF origins
-  - `verify-idempotency`: Runs `apply-patches.sh` twice and compares checksums
-  - `verify-plugin-patches`: Checks plugin applies expected patches (placeholder)
-- **Limitation:** Uses inline checks instead of manifest-driven verification
+**1. `ci.yml` / Tutor Configuration Tests**
+- Runs on pull requests that touch Tutor authority.
+- Renders Tutor, runs the canonical patch path, then executes:
+  - `tests/tutor/test_tutor_apply.sh`
+  - `tests/tutor/test_verify_patches.sh`
+  - `tests/tutor/test_pre_commit_hook.sh`
+  - `tests/tutor/test_idempotency.sh`
+  - `tests/tutor/test_edge_cases.sh`
+- Blocks merge on rendered patch or manifest authority failures.
 
 **2. `tutor-plugin-test.yml`**
 - Tests plugin lifecycle (enable, disable, re-enable)
@@ -269,29 +271,29 @@ git config --local include.path ../.gitconfig
 |-------------|--------|----------------|
 | Install Tutor and plugin in clean environment | ✅ Implemented | Both workflows install Tutor + plugin |
 | Run `tutor config save` with production settings | ✅ Implemented | Both workflows generate config |
-| Run `apply-patches.sh` | ✅ Implemented | `tutor-config-verify.yml` runs patches |
-| Execute manifest-driven verification | ❌ Not implemented | Workflows use inline checks, not `verify-tutor-patches.sh` |
-| Report per-patch pass/fail | ⚠️ Partial | `verify-patches` job reports 4 checks, not all patches |
+| Run canonical patch path | ✅ Implemented | `ci.yml` runs `apply-patches.sh` after Tutor render |
+| Execute rendered patch verification | ✅ Implemented | `tests/tutor/test_verify_patches.sh` invokes `scripts/qa/verify-tutor-patches.sh` |
+| Verify manifest authority metadata | ✅ Implemented | `tests/tutor/test_verify_patches.sh` and `test_nfr_performance.sh` parse `patch-manifest.yml` |
 | Block merges on failure | ✅ Implemented | Both workflows are required checks |
 | Complete within 5 minutes | ✅ Implemented | Workflows complete in ~3-4 minutes |
-| Produce audit artifact | ❌ Not implemented | No artifact upload of verification report |
+| Produce audit artifact | ⚠️ Partial | CI logs include detailed output; no dedicated Tutor verification artifact yet |
 
 ### Migration Path from `apply-patches.sh`
 
 The plugin architecture enables a phased migration:
 
 **Phase 1 (Current):**
-- Plugin handles Django settings patches and Dockerfile environment patches
-- `apply-patches.sh` handles file-copy operations and template rewrites
-- Both run; verification checks all patches
+- Plugin handles source-owned Django settings, Dockerfile hooks, and MFE runtime config where Tutor hooks can express the behavior.
+- `apply-patches.sh` is a controlled compatibility layer for filesystem sync, migration guards, dependency mirror normalization, and bounded rendered-file exceptions.
+- Manifest and inventory classify each remaining active patch with retirement triggers.
 
 **Phase 2 (Target):**
-- Plugin handles all hook-expressible patches
-- `apply-patches.sh` reduced to file-system operations only (theme sync, logo copy)
+- Plugin, bake/HCL, or upstream Tutor hooks own all hook-expressible build semantics.
+- `apply-patches.sh` shrinks to filesystem sync plus explicitly approved temporary compatibility exceptions.
 
 **Phase 3 (Future):**
-- `apply-patches.sh` eliminated entirely
-- All patches expressed as plugin hooks or Tutor mounts
+- `apply-patches.sh` is either eliminated or remains a named, tested filesystem-sync layer only.
+- No durable build semantics are hidden in post-render bash rewrites.
 
 **Documentation:**
 - Plugin README: `infrastructure/tutor/plugins/README.md`
@@ -303,7 +305,9 @@ The plugin architecture enables a phased migration:
 **Test Files:**
 - `infrastructure/tutor/plugins/test_plugin.py`: Python syntax validation
 - `infrastructure/tutor/plugins/verify-plugin.sh`: Plugin verification script
-- Test suite planned: `tests/tutor/` (referenced in testmap but not yet implemented)
+- `tests/tutor/test_verify_patches.sh`: active manifest and rendered verifier checks
+- `tests/tutor/test_idempotency.sh`: double-apply stability
+- `tests/tutor/test_edge_cases.sh`: rerun and rendered-verification edge cases
 
 **Verification Commands:**
 ```bash
@@ -317,17 +321,16 @@ tutor plugins list | grep mereka_lms
 tutor config printvalue MEREKA_LMS_VERSION
 
 # Verify patches applied
-tutor config save
-grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.py
+./scripts/infra/tutor-config-save.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
+./scripts/qa/verify-tutor-patches.sh
 ```
 
 ### Outstanding Work
 
-1. **Patch Manifest:** `infrastructure/tutor/patch-manifest.yml` not yet created (specification exists in this document)
-2. **Verification Script:** `scripts/infra/verify-tutor-patches.sh` not yet implemented (existing `verify-tutor-config.sh` uses inline checks)
-3. **CI Refactor:** Workflows need refactor to use manifest-driven verification
-4. **Test Suite:** `tests/tutor/` directory tests not yet implemented (testmap references exist)
-5. **Makefile Integration:** `make tutor-apply` does not yet enable plugin or run manifest verification
+1. **Artifact-grade report:** CI logs are detailed, but there is not yet a dedicated Tutor verification JSON artifact.
+2. **Negative fixture depth:** Some edge-case tests remain non-destructive; dedicated fixture tests cover individual text-rewrite modules where available.
+3. **Retirement work:** Temporary compatibility patches must keep shrinking as Tutor hooks, bake/HCL, or upstream templates take over.
 
 ### Known Limitations
 
@@ -343,10 +346,9 @@ grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.
 
 #### Layer 1: Tutor Plugin
 
-- The system MUST implement a Tutor plugin (`tutor-plugin-mereka`) that registers hooks to apply patches at template-render time.
+- The system MUST implement a Tutor plugin (`mereka_lms`) that registers hooks to apply source-owned behavior at template-render time.
 - The plugin MUST use Tutor's `Filters` API to modify templates before they are written to disk (e.g., `ENV_PATCHES`, `OPENEDX_DOCKERFILE_PRE_ASSETS`, `OPENEDX_LMS_PRODUCTION_SETTINGS`).
-- The plugin MUST apply the following patch categories via hooks:
-  - MySQL authentication plugin configuration (`mysql-native-password=ON`)
+- The plugin MUST apply hook-expressible patch categories via hooks:
   - MFE Node.js version and build toolchain additions
   - Webpack memory limit (`NODE_OPTIONS=--max-old-space-size=6144`)
   - Multi-site domain additions to `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS`
@@ -356,51 +358,51 @@ grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.
   - MFE discussions configuration (`DISCUSSIONS_MFE_ENABLED`, `DISCUSSIONS_MICROFRONTEND_URL`)
   - Default site theme (`DEFAULT_SITE_THEME = "mereka"`)
   - Extra pip dependencies (`django-prometheus`, `pymongo[srv]`)
-- The plugin MUST be installable via `pip install -e ./infrastructure/tutor/tutor-plugin-mereka`.
+- The plugin MUST be synced into `TUTOR_PLUGINS_ROOT` by the canonical wrapper and enabled as `mereka_lms`.
 - The plugin MUST be idempotent: applying it multiple times MUST produce identical output.
 - The plugin SHOULD define a version number that is bumped when patch content changes.
 
 #### Layer 2: Git Hooks
 
-- The system MUST provide a pre-commit hook that runs `make verify-tutor-config` when files under `infrastructure/tutor/` or `tutor_env/config.yml` are modified.
-- The pre-commit hook MUST verify that all patches defined in the patch manifest are present in the rendered templates.
+- The system MUST provide a pre-commit hook that warns or verifies when files under `infrastructure/tutor/` or `tutor_env/config.yml` are modified.
+- The local hook SHOULD invoke the rendered patch verifier when a rendered Tutor environment is available; CI MUST be the final enforcement layer.
 - The pre-commit hook MUST complete within 15 seconds on a standard development machine.
 - The pre-commit hook MUST produce a clear error message listing which patches failed verification, with remediation instructions.
 - The pre-commit hook SHOULD be skippable with `--no-verify` for emergencies, but the CI/CD layer MUST catch any skipped verification.
 
 #### Layer 3: CI/CD Verification
 
-- The system MUST include a GitHub Actions workflow (`verify-tutor-config.yml`) that runs on every push to `main` and on every pull request.
+- The system MUST include GitHub Actions coverage for Tutor authority changes through `ci.yml` and `tutor-plugin-test.yml`.
 - The CI workflow MUST perform the following checks in order:
   1. Install Tutor and the Mereka plugin in a clean environment.
   2. Run `tutor config save` with production-equivalent settings.
-  3. Run `./infrastructure/tutor/apply-patches.sh`.
-  4. Execute the patch verification tool against the rendered templates.
-  5. Report pass/fail with per-patch granularity.
+  3. Run the canonical patch path.
+  4. Execute rendered patch verification against the rendered templates.
+  5. Validate the active patch manifest authority metadata and `apply-patches.sh` wiring.
 - The CI workflow MUST block merges to `main` if any patch verification check fails.
 - The CI workflow MUST complete within 5 minutes.
 - The CI workflow SHOULD cache the Tutor virtual environment to reduce execution time.
-- The CI workflow MUST produce an artifact containing the verification report for audit purposes.
+- The CI workflow SHOULD produce an artifact containing the verification report for audit purposes.
 
 #### Patch Manifest
 
-- The system MUST maintain a patch manifest file (`infrastructure/tutor/patch-manifest.yml`) listing every required patch with:
-  - A unique identifier (e.g., `mysql-auth`, `mfe-node18`, `multisite-domains`)
+- The system MUST maintain a patch manifest file (`infrastructure/tutor/patch-manifest.yml`) listing every active post-render patch with:
+  - A unique identifier
   - A human-readable description
   - The target file(s) affected
-  - A verification command (grep pattern or script) that confirms the patch is applied
-  - The layer responsible (plugin, apply-patches.sh, or both)
-  - A severity level (`critical`, `high`, `medium`, `low`)
-- The patch manifest MUST be the single source of truth for what constitutes a "fully patched" configuration.
-- The verification tool MUST read the patch manifest and execute each verification command, reporting pass/fail per patch.
+  - The module and function that realize the patch
+  - The authority class (`temporary_compatibility_layer`, `migration_guard`, or `filesystem_sync`)
+  - A retirement trigger
+  - Required status
+- The patch manifest MUST be the active ledger for remaining post-render patch authority.
+- Rendered pass/fail checks MAY live in dedicated verifier scripts or fixture tests rather than inline manifest commands.
 
 #### Verification Tool
 
-- The system MUST provide a verification script (`scripts/infra/verify-tutor-patches.sh`) that reads the patch manifest and checks each patch.
+- The system MUST provide a rendered verification script (`scripts/qa/verify-tutor-patches.sh`) that checks high-signal rendered patch markers.
 - The verification script MUST exit with code 0 if all patches pass and non-zero if any fail.
-- The verification script MUST output a summary table showing each patch ID, description, status (PASS/FAIL), and the file checked.
-- The verification script MUST support a `--json` flag for machine-readable output.
-- The verification script SHOULD support a `--fix` flag that runs `apply-patches.sh` and re-verifies.
+- The verification script MUST output clear PASS/FAIL lines naming the file or rendered marker checked.
+- Machine-readable patch authority MUST be available through `patch-manifest.yml`; a dedicated JSON report is optional until artifact reporting is added.
 
 #### Migration Path
 
@@ -424,7 +426,7 @@ grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.
 
 ## Acceptance Criteria
 
-- [ ] AC-TCR-001: Given a clean checkout of the repository, when `pip install -e ./infrastructure/tutor/tutor-plugin-mereka` is run, then the plugin installs without errors and `tutor plugins list` shows `mereka` as available.
+- [ ] AC-TCR-001: Given a clean checkout of the repository, when the Mereka Tutor plugin is installed and enabled, then the plugin loads without errors and `tutor plugins list` shows `mereka_lms` as available.
   - **Status:** ✅ Implemented (plugin at `infrastructure/tutor/plugins/mereka_lms.py`, enabled via `tutor plugins enable mereka_lms`)
   - **Verification:** `.github/workflows/tutor-plugin-test.yml` tests plugin lifecycle (enable/disable/re-enable)
 
@@ -432,45 +434,45 @@ grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.
   - **Status:** ✅ Implemented (via `openedx-lms-production-settings` ENV_PATCHES hook)
   - **Verification:** CI job `verify-multi-site-domains` checks ALLOWED_HOSTS (note: current job runs after `apply-patches.sh`, needs plugin-only test)
 
-- [ ] AC-TCR-003: Given the Mereka plugin is enabled, when `tutor config save` is run, then the rendered `docker-compose.yml` contains `mysql-native-password=ON` without running `apply-patches.sh`.
-  - **Status:** ✅ Implemented (via `mysql-docker-compose` ENV_PATCHES hook)
-  - **Verification:** CI job `verify-patches` checks `mysql-native-password=ON` (note: current job runs after `apply-patches.sh`, needs plugin-only test)
+- [ ] AC-TCR-003: Given Tutor 21.0.4 renders local MySQL and the canonical patch path runs, then the rendered `docker-compose.yml` contains `mysql-native-password=ON` and `MYSQL_ROOT_HOST: "%"`.
+  - **Status:** ✅ Implemented (`mysql-native-password=ON` comes from the Tutor 21 render; `MYSQL_ROOT_HOST` is the active local compatibility patch)
+  - **Verification:** `scripts/qa/verify-tutor-patches.sh` and `tests/tutor/test_verify_patches.sh`
 
-- [ ] AC-TCR-004: Given the Mereka plugin is enabled and `prepare-tutor-build-context.sh --target all` is run, when `scripts/infra/verify-tutor-patches.sh` is executed, then all patches in `patch-manifest.yml` report PASS.
-  - **Status:** ❌ Not implemented (manifest-driven verification script does not exist; existing `verify-tutor-config.sh` uses inline checks)
-  - **Blocker:** `infrastructure/tutor/patch-manifest.yml` not yet created; `scripts/infra/verify-tutor-patches.sh` not yet implemented
+- [ ] AC-TCR-004: Given the Mereka plugin is enabled and `prepare-tutor-build-context.sh --target all` is run, when `scripts/qa/verify-tutor-patches.sh` is executed, then all high-signal rendered patch markers report PASS.
+  - **Status:** ✅ Implemented
+  - **Verification:** `tests/tutor/test_verify_patches.sh`
 
-- [ ] AC-TCR-005: Given a developer modifies `infrastructure/tutor/apply-patches.sh` and attempts to commit, when the pre-commit hook runs, then it executes `verify-tutor-patches.sh` and blocks the commit if any patch verification fails.
-  - **Status:** ⚠️ Partially implemented (`.githooks/pre-tutor-config` hook exists and warns on Tutor changes, but does not yet call manifest-driven `verify-tutor-patches.sh`)
-  - **Current Behavior:** Hook prompts user to confirm patches were applied, optionally runs `verify-tutor-config.sh`
+- [ ] AC-TCR-005: Given a developer modifies Tutor authority and attempts to commit, when the pre-commit hook runs, then it detects Tutor-scope changes and invokes the local verification path when available.
+  - **Status:** ✅ Implemented for local hook wiring
+  - **Verification:** `tests/tutor/test_pre_commit_hook.sh`
 
-- [ ] AC-TCR-006: Given a pull request that modifies any file under `infrastructure/tutor/`, when the CI workflow runs, then it executes the full patch verification and reports per-patch pass/fail status in the PR checks.
-  - **Status:** ⚠️ Partially implemented (`.github/workflows/tutor-config-verify.yml` has inline checks for 4 critical patches, not manifest-driven per-patch reporting)
-  - **Gap:** Workflow needs refactor to use `verify-tutor-patches.sh` reading from `patch-manifest.yml`
+- [ ] AC-TCR-006: Given a pull request that modifies any file under Tutor authority, when the CI workflow runs, then it renders Tutor, applies the canonical patch path, validates active manifest wiring, and executes rendered patch verification.
+  - **Status:** ✅ Implemented
+  - **Verification:** `.github/workflows/ci.yml` Tutor Configuration Tests
 
-- [ ] AC-TCR-007: Given the verification script is run with `--json` flag, then the output is valid JSON containing an array of objects with keys `id`, `description`, `status`, `target_file`, and `severity`.
-  - **Status:** ❌ Not implemented (verification script does not exist)
-  - **Blocker:** `scripts/infra/verify-tutor-patches.sh` not yet implemented
+- [ ] AC-TCR-007: Given `infrastructure/tutor/patch-manifest.yml` is parsed, then every active patch entry contains id, module, function, target, target_family, authority_class, description, retirement_trigger, and required status.
+  - **Status:** ✅ Implemented
+  - **Verification:** `tests/tutor/test_verify_patches.sh`, `tests/tutor/test_nfr_performance.sh`
 
-- [ ] AC-TCR-008: Given `tutor config save` is run without enabling the Mereka plugin and without running `prepare-tutor-build-context.sh --target all`, when `verify-tutor-patches.sh` is executed, then it reports FAIL for all critical patches and exits with non-zero status.
-  - **Status:** ❌ Not implemented (verification script does not exist)
-  - **Blocker:** `scripts/infra/verify-tutor-patches.sh` not yet implemented
+- [ ] AC-TCR-008: Given a rendered Tutor environment is missing a required rendered marker checked by `scripts/qa/verify-tutor-patches.sh`, when the verifier is executed, then it emits a `[FAIL]` line and exits non-zero.
+  - **Status:** ✅ Implemented for rendered verifier behavior
+  - **Verification:** `scripts/qa/verify-tutor-patches.sh`; destructive clean-negative proof remains fixture/manual class
 
 - [ ] AC-TCR-009: Given the `apply-patches.sh` script is run twice consecutively, when the rendered templates are compared, then they are byte-identical (idempotency).
-  - **Status:** ✅ Implemented (CI job `verify-idempotency` runs double-apply checksum comparison)
-  - **Verification:** `.github/workflows/tutor-config-verify.yml` job checks byte-identical output for Python, YAML, Dockerfile files
+  - **Status:** ✅ Implemented
+  - **Verification:** `tests/tutor/test_idempotency.sh`
 
 - [ ] AC-TCR-010: Given a Tutor version upgrade from 18.x to 21.x, when the CI workflow runs on the upgrade PR, then it reports which patches need adaptation and blocks merge until all patches pass verification.
   - **Status:** ❌ Not implemented (CI does not detect version upgrades or report patch adaptation needs)
   - **Note:** Version upgrades are manual events; CI catches failures but upgrade planning requires human judgment
 
-- [ ] AC-TCR-011: Given the patch manifest contains a patch with severity `critical`, when that patch fails verification, then the verification tool outputs the failure in red/bold formatting (terminal) and includes remediation steps.
-  - **Status:** ❌ Not implemented (verification script does not exist)
-  - **Blocker:** `scripts/infra/verify-tutor-patches.sh` not yet implemented
+- [ ] AC-TCR-011: Given an active patch remains in `patch-manifest.yml`, then it has an explicit authority class and retirement trigger.
+  - **Status:** ✅ Implemented
+  - **Verification:** `tests/tutor/test_verify_patches.sh`, `tests/tutor/test_nfr_performance.sh`
 
 - [ ] AC-TCR-012: Given the `make tutor-apply` command is run, then it executes the canonical `tutor-config-save.sh` wrapper, which enables the canonical Tutor plugins, runs `tutor config save`, prepares the build context, runs verification, and then restarts services -- failing fast on any step.
-  - **Status:** ⚠️ Partially implemented (`make tutor-apply` calls `tutor-config-save.sh` and restart, but manifest-driven verification remains incomplete)
-  - **Gap:** Needs manifest-driven verification parity and complete patch reporting
+  - **Status:** ✅ Implemented for wrapper wiring
+  - **Verification:** `tests/tutor/test_tutor_apply.sh`
 
 ---
 
@@ -498,7 +500,7 @@ grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.
 
 **Symptom**: A Tutor upgrade changes the template structure such that existing string-replacement patches no longer match their target strings. `apply-patches.sh` silently skips the patch.
 
-**Mitigation**: The verification tool checks for patch presence in rendered output, not for string-match success in `apply-patches.sh`. If a patch is not present in the output, verification fails. The patch manifest's `severity: critical` patches block CI. Recovery: update `apply-patches.sh` and/or the plugin to handle the new template structure, then re-verify.
+**Mitigation**: The rendered verifier checks for required markers in rendered output, not for string-match success in `apply-patches.sh`. If a required marker is not present in the output, verification fails. The patch manifest classifies active post-render authority and retirement triggers. Recovery: update the source hook, patch module, manifest, and verifier together, then re-verify.
 
 ### Plugin Conflicts with Third-Party Tutor Plugins
 
@@ -510,13 +512,13 @@ grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.
 
 **Symptom**: During migration, some patches are in the plugin and some in `apply-patches.sh`. A developer disables the plugin thinking `apply-patches.sh` covers everything, or vice versa.
 
-**Mitigation**: The patch manifest records which layer is responsible for each patch. The verification tool checks all patches regardless of source. Both layers can safely apply the same patch (idempotency requirement). The `make tutor-apply` command runs both the plugin and `apply-patches.sh`.
+**Mitigation**: The patch manifest records each active post-render patch module and authority class. Rendered verifier scripts and fixture tests check final output regardless of source. The `make tutor-apply` command runs the plugin render and canonical patch path.
 
 ### Verification Tool False Positive
 
 **Symptom**: A patch verification grep pattern matches unrelated text, reporting PASS when the patch is actually missing.
 
-**Mitigation**: Verification commands in the patch manifest SHOULD use specific, multi-line grep patterns or script checks rather than single-word matches. The patch manifest SHOULD be reviewed when patches are added or modified. Integration tests SHOULD include a negative case (unpatched config) to confirm the verification tool correctly reports FAIL.
+**Mitigation**: Rendered verifier checks SHOULD use specific markers or dedicated fixture tests rather than single-word matches. The patch manifest SHOULD be reviewed when patches are added or modified. Integration tests SHOULD include a negative case where practical; destructive clean-negative proof may remain manual or fixture-based.
 
 ---
 
@@ -524,15 +526,15 @@ grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.
 
 ### Logs
 
-- `apply-patches.sh`: MUST log each patch application with timestamp, patch ID, target file, and result (applied/skipped/already-present).
-- `verify-tutor-patches.sh`: MUST log each verification check with timestamp, patch ID, status (PASS/FAIL), and target file.
-- Tutor plugin: MUST log a summary line at the end of `tutor config save` listing how many patches were applied via hooks.
-- CI workflow: MUST produce a downloadable verification report artifact with full per-patch results.
+- `apply-patches.sh`: SHOULD log each patch function and result.
+- `scripts/qa/verify-tutor-patches.sh`: MUST log each rendered verification check with PASS/FAIL and target file or marker.
+- Tutor plugin: SHOULD log a summary line when loaded.
+- CI workflow: SHOULD produce a downloadable verification report artifact with full patch verification results.
 
 ### Metrics
 
 - `tutor_patch_verification_total` counter: Total verification runs, labeled by `result` (pass/fail) and `trigger` (pre-commit/ci/manual).
-- `tutor_patch_verification_failures` counter: Total individual patch failures, labeled by `patch_id` and `severity`.
+- `tutor_patch_verification_failures` counter: Total individual patch failures, labeled by check id and authority class where available.
 - `tutor_config_save_duration_seconds` histogram: Duration of `tutor config save` including plugin hooks.
 - `tutor_patches_applied_total` gauge: Number of patches currently applied, labeled by `layer` (plugin/script).
 
@@ -551,43 +553,17 @@ grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.
 
 ## Rollout & Rollback
 
-### Rollout Plan
+### Current Operating Plan
 
-**Phase 1: Verification Infrastructure (Week 1-2)**
-
-1. Create `infrastructure/tutor/patch-manifest.yml` with all current patches cataloged.
-2. Implement `scripts/infra/verify-tutor-patches.sh` that reads the manifest and verifies each patch.
-3. Add `verify-tutor-config` target to Makefile.
-4. Run verification manually to baseline current patch coverage.
-
-**Phase 2: CI Integration (Week 3)**
-
-5. Add `verify-tutor-config.yml` GitHub Actions workflow.
-6. Configure as a required check for PRs touching `infrastructure/tutor/`.
-7. Extend to all PRs once confidence is established.
-
-**Phase 3: Git Hooks (Week 4)**
-
-8. Add pre-commit hook that runs verification when `infrastructure/tutor/` files change.
-9. Document hook installation in `docs/guides/onboarding/LOCAL_SETUP.md`.
-
-**Phase 4: Tutor Plugin (Week 5-8)**
-
-10. Scaffold `tutor-plugin-mereka` with initial hooks for Django settings patches.
-11. Migrate patches incrementally: settings first, then Dockerfile patches, then Caddy/nginx.
-12. After each migration batch, verify that both `apply-patches.sh` and the plugin produce identical results.
-13. Update patch manifest to record layer responsibility.
-
-**Phase 5: Stabilization (Week 9-12)**
-
-14. Monitor CI verification pass rate for 4 weeks.
-15. Reduce `apply-patches.sh` to file-system operations only.
-16. Update documentation and onboarding guides.
+1. Keep `infrastructure/tutor/patch-manifest.yml` limited to active post-render patch authority.
+2. Keep `docs/reference/architecture/TUTOR_PATCHES_INVENTORY.md` as the mutation ledger and retirement map.
+3. Use `./scripts/infra/tutor-config-save.sh` and `./scripts/infra/prepare-tutor-build-context.sh --target all` as local front doors.
+4. Use `scripts/qa/verify-tutor-patches.sh` for rendered marker checks.
+5. Shrink temporary compatibility patches when Tutor hooks, bake/HCL, or upstream templates can own the behavior directly.
 
 ### Feature Flags
 
-- `MEREKA_PLUGIN_ENABLED=true/false`: Controls whether the Tutor plugin is active. Default: `true` after Phase 4 rollout.
-- The Makefile `tutor-apply` target MUST work correctly regardless of plugin enablement (it runs both plugin and script).
+- The Makefile `tutor-apply` target MUST work correctly with the canonical plugin and patch path.
 
 ### Backward Compatibility
 
@@ -598,18 +574,15 @@ grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.
 
 ### Rollback Steps
 
-1. **Plugin causes issues**: Disable plugin with `tutor plugins disable mereka`. Run `apply-patches.sh` to ensure all patches are applied via the script path. Verify with `verify-tutor-patches.sh`.
-2. **CI workflow blocking legitimate PRs**: Add `[skip-tutor-verify]` to commit message as emergency bypass. File issue to fix false positive. Remove bypass after fix.
+1. **Plugin causes issues**: Disable only as an emergency diagnostic. Re-enable before closure, run the canonical prepare path, and verify with `scripts/qa/verify-tutor-patches.sh`.
+2. **CI workflow blocking legitimate PRs**: Treat as a verifier or authority classification incident. File/fix the false positive and update the manifest or verifier in the same PR.
 3. **Pre-commit hook too slow**: Temporarily remove hook with `pre-commit uninstall`. CI layer still provides protection.
-4. **Full rollback**: Revert to pre-implementation state by removing the plugin, CI workflow, and hooks. `apply-patches.sh` continues to work as before. This is a safe rollback because the spec adds layers on top of the existing system rather than replacing it.
+4. **Full rollback**: Revert the specific source hook or patch module change. Do not remove the plugin, manifest, or CI guardrails as a routine rollback.
 
 ---
 
 ## Open Questions
 
-1. Which Tutor hook API is stable across 18.x and 21.x? The `tutor hooks` module changed significantly between versions. The plugin compatibility matrix needs to be validated against both versions before Phase 4.
-2. Should the patch manifest include patches for local-only vs production-only configurations, or should all patches be verified regardless of target environment?
-3. What is the appropriate CI runner size for the verification workflow? Installing Tutor and running `config save` may require more resources than the default GitHub Actions runner provides.
-4. Should the verification tool integrate with the existing `scripts/qa/smoke-test.sh` or remain independent?
-5. How should the plugin handle patches that depend on Tutor plugin load order (e.g., `tutor-mfe` must load before `tutor-plugin-mereka` for MFE Dockerfile patches)?
-6. Should we implement a "patch expiry" mechanism where patches are flagged for review after a configurable time period (e.g., 6 months)?
+1. Which remaining temporary compatibility patches can move to bake/HCL or Tutor hooks next?
+2. What artifact format should CI publish for machine-readable Tutor verification evidence?
+3. Should each temporary compatibility patch get an explicit expiry date in addition to a retirement trigger?

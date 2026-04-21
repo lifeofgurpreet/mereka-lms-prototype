@@ -125,7 +125,7 @@ kubectl get events -n mereka-lms --field-selector reason=Issued -w
 
 ### OOM During Image Build
 
-**Symptom**: `tutor images build openedx` fails with OOM or webpack heap error.
+**Symptom**: `./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast` fails with OOM or webpack heap error.
 
 **Symptom strings**: `FATAL ERROR: Ineffective mark-compacts near heap limit`, `Killed`.
 
@@ -133,7 +133,7 @@ kubectl get events -n mereka-lms --field-selector reason=Issued -w
 ```bash
 # Ensure Docker has ≥12 GB RAM and 2-4 GB swap configured in Docker Desktop
 # Build with explicit pip backend (avoids uv pip isolation issues)
-tutor images build openedx -a PIP_COMMAND=pip
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 # If webpack OOM specifically:
 # Verify NODE_OPTIONS=--max-old-space-size=6144 patch is in apply-patches.sh output
 ./scripts/infra/verify-tutor-config.sh

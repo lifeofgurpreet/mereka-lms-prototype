@@ -1,7 +1,7 @@
 # Footer Slot-Only Policy
 
 > **Bead**: mereka-lms-115d.19
-> **Last updated**: 2026-03-27
+> **Last updated**: 2026-04-21
 > **Status**: ENFORCED — CI gate active (`footer-slot-only` job)
 
 ---
@@ -16,7 +16,7 @@ No raw HTML footer injection, `innerHTML` manipulation, `document.querySelector`
 - slot wiring truth in `infrastructure/tutor/plugins/mereka_lms_mfe_slots.py`
 - Tutor build assembly in `infrastructure/tutor/plugins/mereka_lms.py`
 
-The legacy `apply-patches.sh` / `footer-component.sh` path no longer swaps `RenderWidget` or injects `MerekaFooter`. It only syncs build-time assets.
+The legacy `footer-component.sh` path is retired. The active `apply-patches.sh` footer-related path is `sync-footer-assets.sh`, and it only syncs build-time assets.
 
 ---
 
@@ -37,7 +37,7 @@ mereka_lms_mfe_slots.py
 mereka_lms.py
   └── assembles/imports the runtime definitions into generated MFE config
 
-footer-component.sh
+sync-footer-assets.sh
   └── asset sync only (copies env.config.jsx + SCSS/fonts into build context)
 ```
 
@@ -225,6 +225,6 @@ Expected output: `0 FAIL / 0 WARN`.
 - [`docs/reference/operations/FOOTER_VARIANT_MATRIX.md`](../../reference/operations/FOOTER_VARIANT_MATRIX.md) — per-domain footer config
 - [`infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js`](../../../infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js) — `MerekaFooter`, `MEREKA_SITE_VARIANTS`, `getMerekaVariant`
 - [`infrastructure/tutor/plugins/mereka_lms_mfe_slots.py`](../../../infrastructure/tutor/plugins/mereka_lms_mfe_slots.py) — footer slot registration
-- [`infrastructure/tutor/patches/footer-component.sh`](../../../infrastructure/tutor/patches/footer-component.sh) — asset sync only
+- [`infrastructure/tutor/patches/sync-footer-assets.sh`](../../../infrastructure/tutor/patches/sync-footer-assets.sh) — asset sync only
 - [`scripts/qa/verify-footer-slot-only.sh`](../../../scripts/qa/verify-footer-slot-only.sh) — policy gate
 - [OEP-65: Frontend Plugin Framework](https://open-edx-proposals.readthedocs.io/en/latest/architectural-decisions/oep-0065-frontend-plugin-framework.html) — upstream slot spec

@@ -204,14 +204,14 @@ Verify the refreshed contract correctly:
 
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
-tutor images build mfe
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 tutor local restart
 ```
 
 For a full build with no cached layers (required for major version bumps):
 
 ```bash
-tutor images build mfe --no-cache
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile proof --cache-mode none
 ```
 
 Expected build time: 15–20 minutes on a machine with 12 GB+ Docker RAM.

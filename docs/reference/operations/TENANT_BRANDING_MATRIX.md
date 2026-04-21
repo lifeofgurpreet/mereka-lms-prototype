@@ -91,7 +91,7 @@ Follow this checklist when onboarding a new branded domain:
 
 - [ ] **7. Publish updated MFE image** because `MEREKA_SITE_VARIANTS` is embedded in the bundle:
   ```bash
-  tutor images build mfe
+  ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
   tutor local restart mfe
   ```
   For shared environments, publish through the GitHub build workflow and promote through reviewed GitOps.

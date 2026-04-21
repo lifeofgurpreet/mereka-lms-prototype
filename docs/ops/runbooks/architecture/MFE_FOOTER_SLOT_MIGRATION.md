@@ -1,5 +1,5 @@
 # MFE Footer / Slot Migration
-_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
+_Audience: Operators and developers | Owner: Platform Team | Last verified: 2026-04-21 | Status: active migration history_
 
 _Audience: Platform Engineering_
 _Last updated: 2026-02-18 (bead 2dcy.6)_
@@ -8,6 +8,11 @@ _Owner: Mereka Frontend_
 This document tracks the migration of MFE structural customizations from brittle
 CSS selector blocks to the Frontend Plugin Framework (FPF) slot system. It
 complements `docs/guides/branding/BRANDING_OPERATING_MODEL.md § Plugin Slot Migration`.
+
+Current authority: Tutor Indigo is retired. Any Indigo references below describe
+historical/default upstream behavior or stale-render guardrails, not an active
+dependency. Active footer and slot ownership lives in the repo-local Tutor
+plugins plus the named `sync-footer-assets.sh` filesystem sync.
 
 ---
 
@@ -49,7 +54,7 @@ tagged with `/* RISK: HIGH */`, `/* RISK: MEDIUM */`, or `/* RISK: LOW */`.
 
 | Slot ID | What It Replaces | Migration Status | Fallback |
 |---------|-----------------|-----------------|----------|
-| `footer_slot` | Default Indigo `<Footer />` | MIGRATED (dual-path) | `apply-patches.sh` RenderWidget replacement |
+| `footer_slot` | Retired default Indigo `<Footer />` ownership | MIGRATED | Repo-local plugin slot wiring plus stale-render absence guards |
 | `header_logo_slot` | Default MFE header logo | REGISTERED (pending slot availability) | CSS `.navbar .navbar-brand img` (RISK: HIGH) |
 | `learner_dashboard.sidebar.v1` | Dashboard sidebar (append) | REGISTERED (pending) | SCSS `[data-testid*="learner-dashboard"]` scoped rules |
 
@@ -197,7 +202,7 @@ except ImportError:
 
 ```bash
 ./scripts/infra/prepare-tutor-build-context.sh --target mfe
-tutor images build mfe
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 ./scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest
 ```
 

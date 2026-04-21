@@ -855,9 +855,10 @@ ci_runtime_inventory:
       category: TUTOR_ENV
     - script: scripts/qa/verify-tutor-patches.sh
       category: TUTOR_ENV
+      note: stable QA/CI entrypoint that delegates to scripts/infra/verify-tutor-config.sh
     - script: scripts/infra/verify-tutor-config.sh
       category: TUTOR_ENV
-      note: legacy manual Tutor env verifier; CI patch authority remains scripts/qa/verify-tutor-patches.sh
+      note: canonical rendered Tutor verifier for source-to-render patch authority
     - script: scripts/qa/verify-deployment-lanes.sh
       category: LIVE_CLUSTER
     - script: scripts/qa/verify-service-endpoints.sh

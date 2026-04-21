@@ -349,7 +349,7 @@ vim deploy/k8s/base/apps/openedx/settings/lms/mereka_multisite.py
 
 # 2. Apply patches and rebuild
 ./infrastructure/tutor/apply-patches.sh
-tutor images build openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 
 # 3. Deploy
 kubectl set image deployment/lms -n mereka-lms lms=<new-image>
@@ -372,7 +372,7 @@ kubectl rollout restart deployment/lms -n mereka-lms
 ```bash
 # 1. Remove middleware imports from settings
 # 2. Rebuild image without patches
-tutor images build openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 
 # 3. Deploy
 tutor k8s restart lms cms

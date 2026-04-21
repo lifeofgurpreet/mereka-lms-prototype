@@ -87,10 +87,10 @@ make branding-sync
 **Local reproduction / design review**
 ```bash
 # Rebuild LMS/Studio images
-tutor images build openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 
 # Rebuild MFE images
-tutor images build mfe
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 
 # Deploy locally
 tutor local restart
@@ -143,9 +143,8 @@ tutor local restart
 **Setup**:
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
-tutor config save --set THEME_DIR="$(pwd)/infrastructure/tutor/themes"
-tutor config save --set THEME_NAME=mereka
-tutor images build openedx
+./scripts/infra/tutor-config-save.sh --set THEME_DIR="$(pwd)/infrastructure/tutor/themes" --set THEME_NAME=mereka
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 ```
 
 **Force asset rebuild** (local dev):
@@ -224,7 +223,7 @@ ls -la infrastructure/tutor/themes/mereka/mfe/fonts/
 ./scripts/branding/sync-brand-assets.sh
 
 # Rebuild MFE image
-tutor images build mfe
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 ```
 
 ### CSS Variables Not Applied

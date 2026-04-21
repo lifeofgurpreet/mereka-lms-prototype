@@ -1,9 +1,9 @@
 spec: tutor-configuration-resilience_spec.md
 acceptance_criteria:
 - id: AC-TCR-001
-  description: Given a clean checkout of the repository, when `pip install -e ./infrastructure/tutor/tutor-plugin-mereka`
-    is run, then the plugin installs without errors and `tutor plugins list` shows
-    `mereka` as available.
+  description: Given a clean checkout of the repository, when the Mereka Tutor plugin
+    is installed and enabled, then the plugin loads without errors and `tutor plugins
+    list` shows `mereka_lms` as available.
   verify:
   - type: automated
     test_type: shell_verification
@@ -31,9 +31,9 @@ acceptance_criteria:
     file: infrastructure/tutor/plugins/verify-plugin.sh
     command: infrastructure/tutor/plugins/verify-plugin.sh
 - id: AC-TCR-003
-  description: Given the Mereka plugin is enabled, when `tutor config save` is run,
-    then the rendered `docker-compose.yml` contains `mysql_native_password` without
-    running `apply-patches.sh`.
+  description: 'Given Tutor 21.0.4 renders local MySQL and the canonical patch path
+    runs, then the rendered `docker-compose.yml` contains `mysql-native-password=ON`
+    and `MYSQL_ROOT_HOST: "%"`.'
   verify:
   - type: automated
     test_type: shell_verification
@@ -44,9 +44,9 @@ acceptance_criteria:
     file: infrastructure/tutor/plugins/verify-plugin.sh
     command: infrastructure/tutor/plugins/verify-plugin.sh
 - id: AC-TCR-004
-  description: Given the Mereka plugin is enabled and `apply-patches.sh` is run, when
-    `scripts/infra/verify-tutor-patches.sh` is executed, then all patches in `patch-manifest.yml`
-    report PASS.
+  description: Given the Mereka plugin is enabled and `prepare-tutor-build-context.sh
+    --target all` is run, when `scripts/qa/verify-tutor-patches.sh` is executed, then
+    all high-signal rendered patch markers report PASS.
   verify:
   - type: automated
     test_type: shell_verification
@@ -61,9 +61,9 @@ acceptance_criteria:
     file: tests/tutor/test_verify_patches.sh
     command: tests/tutor/test_verify_patches.sh
 - id: AC-TCR-005
-  description: Given a developer modifies `infrastructure/tutor/apply-patches.sh`
-    and attempts to commit, when the pre-commit hook runs, then it executes `verify-tutor-patches.sh`
-    and blocks the commit if any patch verification fails.
+  description: Given a developer modifies Tutor authority and attempts to commit,
+    when the pre-commit hook runs, then it detects Tutor-scope changes and invokes
+    the local verification path when available.
   verify:
   - type: automated
     test_type: shell_verification
@@ -82,18 +82,18 @@ acceptance_criteria:
     file: tests/tutor/test_pre_commit_hook.sh
     command: tests/tutor/test_pre_commit_hook.sh
 - id: AC-TCR-006
-  description: Given a pull request that modifies any file under `infrastructure/tutor/`,
-    when the CI workflow runs, then it executes the full patch verification and reports
-    per-patch pass/fail status in the PR checks.
+  description: Given a pull request that modifies any file under Tutor authority,
+    when the CI workflow runs, then it renders Tutor, applies the canonical patch
+    path, validates active manifest wiring, and executes rendered patch verification.
   verify:
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-tutor-resilience-full.sh
     command: scripts/qa/verify-tutor-resilience-full.sh
 - id: AC-TCR-007
-  description: Given the verification script is run with `--json` flag, then the output
-    is valid JSON containing an array of objects with keys `id`, `description`, `status`,
-    `target_file`, and `severity`.
+  description: Given `infrastructure/tutor/patch-manifest.yml` is parsed, then every
+    active patch entry contains id, module, function, target, target_family, authority_class,
+    description, retirement_trigger, and required status.
   verify:
   - type: automated
     test_type: shell_verification
@@ -103,14 +103,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tutor-resilience-full.sh
     command: scripts/qa/verify-tutor-resilience-full.sh
-  - type: automated
-    test_type: shell_verification
-    file: tests/tutor/test_verify_patches.sh
-    command: tests/tutor/test_verify_patches.sh
 - id: AC-TCR-008
-  description: Given `tutor config save` is run without enabling the Mereka plugin
-    and without running `apply-patches.sh`, when `verify-tutor-patches.sh` is executed,
-    then it reports FAIL for all critical patches and exits with non-zero status.
+  description: Given a rendered Tutor environment is missing a required rendered marker
+    checked by `scripts/qa/verify-tutor-patches.sh`, when the verifier is executed,
+    then it emits a `[FAIL]` line and exits non-zero.
   verify:
   - type: automated
     test_type: shell_verification
@@ -151,22 +147,18 @@ acceptance_criteria:
     justification: Version upgrades are infrequent events requiring human judgment
       on patch adaptation; CI catches failures but upgrade planning is manual
 - id: AC-TCR-011
-  description: Given the patch manifest contains a patch with severity `critical`,
-    when that patch fails verification, then the verification tool outputs the failure
-    in red/bold formatting (terminal) and includes remediation steps.
+  description: Given an active patch remains in `patch-manifest.yml`, then it has
+    an explicit authority class and retirement trigger.
   verify:
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-tutor-resilience-full.sh
     command: scripts/qa/verify-tutor-resilience-full.sh
-  - type: automated
-    test_type: shell_verification
-    file: tests/tutor/test_verify_patches.sh
-    command: tests/tutor/test_verify_patches.sh
 - id: AC-TCR-012
-  description: Given the `make tutor-apply` command is run, then it executes `tutor
-    config save`, enables the Mereka plugin, runs `apply-patches.sh`, runs `verify-tutor-patches.sh`,
-    and restarts services -- in that order, failing fast on any step.
+  description: Given the `make tutor-apply` command is run, then it executes the canonical
+    `tutor-config-save.sh` wrapper, which enables the canonical Tutor plugins, runs
+    `tutor config save`, prepares the build context, runs verification, and then restarts
+    services -- failing fast on any step.
   verify:
   - type: automated
     test_type: shell_verification

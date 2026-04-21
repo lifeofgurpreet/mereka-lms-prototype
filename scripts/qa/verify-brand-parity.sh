@@ -605,9 +605,9 @@ if [[ -f "$APPLY_PATCHES" ]]; then
   pass "apply-patches.sh exists"
   # Footer component must be sourced
   if grep -q "sync-footer-assets.sh\|sync_footer_assets" "$APPLY_PATCHES"; then
-    pass "apply-patches.sh wires footer-component patch"
+    pass "apply-patches.sh wires active MFE footer asset sync patch"
   else
-    fail "apply-patches.sh does not wire footer-component patch"
+    fail "apply-patches.sh does not wire active MFE footer asset sync patch"
   fi
   # SCSS/MFE theme injection
   if grep -q "mereka.scss\|mereka_scss\|mfe.*branding\|MFE_BRANDING" "$APPLY_PATCHES"; then
@@ -615,7 +615,7 @@ if [[ -f "$APPLY_PATCHES" ]]; then
   elif [[ -f "$FOOTER_PATCH" ]] && grep -q "theme-source" "$FOOTER_PATCH"; then
     pass "MFE mereka.scss injection is handled by sync-footer-assets.sh asset sync path"
   else
-    warn "MFE mereka.scss injection path not detected — check apply-patches + footer-component wiring"
+    warn "MFE mereka.scss injection path not detected — check apply-patches + sync-footer-assets wiring"
   fi
   # Branding health check invocation
   if grep -q "verify-branding-health\|branding.*check\|BRANDING_CHECK" "$APPLY_PATCHES"; then

@@ -132,7 +132,7 @@ gh run watch "${RUN_ID}"
 kubectl get endpoints -n mereka-lms
 ```
 
-Local `tutor images build ...`, `docker push`, and direct `kubectl apply` remain valid for local/dev workflows and debugging, not as the normal production deployment contract.
+Repo build helpers, local `docker push`, and direct `kubectl apply` remain valid for local/dev workflows and debugging, not as the normal production deployment contract. Use raw `tutor images build ...` only for low-level Tutor debugging after the helper path has been ruled out.
 
 ### Update Configuration
 
@@ -142,7 +142,7 @@ export TUTOR_ROOT="$(pwd)/tutor_env"
 ./scripts/infra/tutor-config-save.sh --set LMS_HOST=new-domain.com
 
 # 2. Rebuild if needed
-tutor images build openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 
 # 3. Restart services
 tutor local restart

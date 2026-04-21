@@ -619,10 +619,10 @@ echo
 if [[ "$FAILED" -gt 0 ]]; then
   echo "One or more MFE runtime contract checks failed." >&2
   echo "  - If compiled bundle markers are missing: the mereka_lms runtime definitions did not reach the built MFE bundle." >&2
-  echo "    Ensure the plugin is enabled before running: tutor images build mfe" >&2
-  echo "  - If theme assets are missing: re-run: make branding-sync && tutor images build mfe" >&2
+  echo "    Ensure the plugin is enabled before running: ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast" >&2
+  echo "  - If theme assets are missing: re-run: make branding-sync && ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast" >&2
   echo "  - If live checks fail: the deployed image may pre-date this contract." >&2
-  echo "    Rebuild and redeploy: tutor images build mfe && tutor k8s restart mfe" >&2
+  echo "    Rebuild and redeploy with the MFE build helper, then restart MFE services." >&2
   exit 1
 fi
 

@@ -432,7 +432,7 @@ echo
 if [[ $FAILED -gt 0 ]]; then
   echo "Action required: Fix MFE branding or routing issues."
   echo "  1. Check Caddyfile: deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"
-  echo "  2. Rebuild MFE images: tutor images build mfe"
+  echo "  2. Rebuild MFE images: ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast"
   echo "  3. Verify branding sync: make branding-sync"
   echo "  4. Check production.py MFE_CONFIG settings"
   exit 1

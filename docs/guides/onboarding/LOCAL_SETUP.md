@@ -123,7 +123,7 @@ The launch wizard will:
 
 Use `tutor local start -d` / `tutor local stop` for daily use, and `tutor local dc ps` or `tutor local logs --tail=100` to inspect health.
 
-> ⏱ `tutor local launch` may run for 10–15 minutes on the first pass while it runs Django migrations. If your terminal times out, re-run `tutor local do init` until it completes—the `openedx` MySQL user will be missing otherwise, and the LMS/Studio will 500 with “Access denied for user 'openedx'”.
+> `tutor local launch` may run for 10-60+ minutes on the first pass depending on Docker resources, image freshness, and database init time. If your terminal times out, re-run `tutor local do init` until it completes. The `openedx` MySQL user will be missing otherwise, and the LMS/Studio will 500 with "Access denied for user 'openedx'". Use the bootstrap workflow phase-timing artifact as the current CI reference point instead of assuming a fixed laptop duration.
 
 ### Local vs Production Data
 

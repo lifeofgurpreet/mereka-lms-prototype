@@ -98,8 +98,8 @@ These are handled by Tutor's native features:
 
 4. **Build images:**
    ```bash
-   tutor images build openedx  # Will take 30-45 min
-   tutor images build mfe      # Will take 15-20 min
+   ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
+   ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
    ```
 
 5. **Test locally:**
@@ -201,7 +201,7 @@ cat tutor_env/env/apps/openedx/settings/lms/production.py | grep MEREKA
 
 ```bash
 # Check Docker logs
-tutor images build openedx 2>&1 | tee build.log
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast 2>&1 | tee build.log
 
 # Look for errors in custom app installation
 grep -A 10 "mfe_oauth_fix" build.log
@@ -235,7 +235,8 @@ operator path remains `./scripts/infra/tutor-config-save.sh`.
 
 3. **Rebuild images:**
    ```bash
-   tutor images build openedx mfe
+   ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
+   ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
    ```
 
 ## Known Limitations

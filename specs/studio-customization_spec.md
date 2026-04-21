@@ -289,14 +289,14 @@ See `specs/plans/studio-customization_test_plan.md` for comprehensive test scena
 
 ### Studio Theme Not Applied After Rebuild
 
-**Symptom**: Default Open edX Studio branding appears after `tutor images build openedx`.
+**Symptom**: Default Open edX Studio branding appears after `./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast`.
 
 **Cause**: The canonical Tutor prepare flow was not run after `tutor config save`, so CMS theme assets were not synced to the build context.
 
 **Recovery**:
 ```bash
 ./scripts/infra/prepare-tutor-build-context.sh --target openedx
-tutor images build openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 tutor k8s restart cms
 tutor k8s exec cms ./manage.py cms collectstatic --noinput
 ```
@@ -310,7 +310,7 @@ tutor k8s exec cms ./manage.py cms collectstatic --noinput
 **Recovery**:
 ```bash
 ./infrastructure/tutor/apply-patches.sh
-tutor images build mfe
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 tutor k8s restart mfe
 ```
 
@@ -386,7 +386,7 @@ tutor config save --set ENABLE_STUDIO_WELCOME_CUSTOMIZATION=false
 tutor config save --unset STUDIO_HELP_URL
 
 # 3. Rebuild and restart
-tutor images build openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 tutor k8s restart cms
 ```
 

@@ -547,7 +547,7 @@
       "mutability": "mutating",
       "owner": "platform-infra",
       "path": "scripts/infra/verify-tutor-config.sh",
-      "reference_count": 45,
+      "reference_count": 48,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -571,7 +571,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/infra/verify-tutor-patches.sh",
-      "reference_count": 18,
+      "reference_count": 12,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -3355,7 +3355,7 @@
       "reference_count": 13,
       "replaced_by": "",
       "runtime_dependencies": [
-        "cluster"
+        "none"
       ],
       "severity": "high",
       "spec_ids": [
@@ -7715,7 +7715,7 @@
       "reference_count": 12,
       "replaced_by": "",
       "runtime_dependencies": [
-        "cluster"
+        "none"
       ],
       "severity": "high",
       "spec_ids": [
@@ -7739,6 +7739,7 @@
         "AC-029",
         "AC-030",
         "AC-032",
+        "AC-033",
         "AC-CCR-002",
         "AC-CCR-008",
         "AC-CCR-009"
@@ -9005,7 +9006,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-build-prereqs.sh",
-      "reference_count": 20,
+      "reference_count": 21,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -17628,13 +17629,13 @@
         "workflow_direct"
       ],
       "env_scope": [
-        "dev"
+        "global"
       ],
       "kind": "verify",
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-tutor-patches.sh",
-      "reference_count": 13,
+      "reference_count": 22,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -17645,7 +17646,9 @@
         "AC-002",
         "AC-003",
         "AC-004",
-        "AC-005"
+        "AC-005",
+        "AC-TCR-004",
+        "AC-TCR-008"
       ],
       "status": "active",
       "tier": "release_blocking"

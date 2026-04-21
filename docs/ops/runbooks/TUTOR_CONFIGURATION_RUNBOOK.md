@@ -11,6 +11,7 @@ This runbook covers manual verification procedures for Tutor configuration that 
 - `TUTOR_ROOT` set to `$(pwd)/tutor_env`
 - Docker Compose running (`tutor local start`)
 - Access to Tutor CLI
+- Repo build helpers available from the repository root
 
 ---
 
@@ -21,9 +22,11 @@ This runbook covers manual verification procedures for Tutor configuration that 
    ```bash
    grep -E "g\+\+|python3|build-essential" tutor_env/env/plugins/mfe/build/mfe/Dockerfile
    ```
-2. Build MFE image and verify it completes:
+2. Build the MFE image through the canonical repo helper and verify it completes:
    ```bash
-   tutor images build mfe
+   ./scripts/infra/tutor-config-save.sh
+   ./scripts/infra/prepare-tutor-build-context.sh --target mfe
+   ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
    ```
 3. Verify MFE containers start and serve content:
    ```bash

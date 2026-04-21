@@ -52,7 +52,7 @@ npm install
 npm start
 ```
 
-`scripts/branding/setup-mfe-branding.sh` clones the key MFEs into `tutor_env/dev/`, drops the shared fonts into each `public/fonts/` directory, copies the Mereka logos/favicons into `public/` + `public/images/`, writes `src/styles/mereka.scss`, and prepends `@import "./styles/mereka.scss";` to `src/index.scss`. The SCSS import points back to the shared tokens at `../../../../../infrastructure/tutor/themes/mereka/scss/theme`, so edits remain centralized. Use `npm start` for interactive review, then rebuild via `tutor images build mfe` once approved.
+`scripts/branding/setup-mfe-branding.sh` clones the key MFEs into `tutor_env/dev/`, drops the shared fonts into each `public/fonts/` directory, copies the Mereka logos/favicons into `public/` + `public/images/`, writes `src/styles/mereka.scss`, and prepends `@import "./styles/mereka.scss";` to `src/index.scss`. The SCSS import points back to the shared tokens at `../../../../../infrastructure/tutor/themes/mereka/scss/theme`, so edits remain centralized. Use `npm start` for interactive review, then rebuild via `./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast` once approved.
 
 ## Asset Checklist
 
@@ -255,7 +255,7 @@ The target approach uses `tutormfe.hooks.PLUGIN_SLOTS` to register a **Direct pl
 **Operator workflow** for slot-based customization:
 1. **Discover slot** — `grep -r "PluginSlot" node_modules/@openedx/*/src/`
 2. **Inject config** — add `PLUGIN_SLOTS` entry in `mereka_lms.py`
-3. **Validate locally** — `tutor images build mfe`
+3. **Validate locally** — `./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast`
 4. **Publish for production** — run `.github/workflows/build-tutor-images.yml`
 5. **Promote for production** — `./scripts/infra/release-openedx-gitops.sh --require-digests`
 6. **Verify** — confirm component renders on all MFE routes
@@ -264,10 +264,10 @@ The target approach uses `tutormfe.hooks.PLUGIN_SLOTS` to register a **Direct pl
 
 See `docs/programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md` § "Plugin-First Migration" for full migration steps and available slots.
 
-- For local reproduction / parity checks: `export TUTOR_ROOT="$(pwd)/tutor_env" && source infrastructure/tutor/tutor-env.sh && tutor images build mfe`.
+- For local reproduction / parity checks: `./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast`.
 - For production: publish the updated MFE image through `.github/workflows/build-tutor-images.yml`, then promote it with `./scripts/infra/release-openedx-gitops.sh --require-digests`.
-- For local Tutor regeneration before `tutor images build mfe`, use `./scripts/infra/tutor-config-save.sh`; it is the canonical operator front door, and any internal `apply-patches.sh` call remains wrapper detail rather than an operator step.
-- Never run parallel `tutor images build mfe` commands; a single active build is the supported path.
+- For local Tutor regeneration before building, use `./scripts/infra/tutor-config-save.sh` and `./scripts/infra/prepare-tutor-build-context.sh --target mfe`; any internal `apply-patches.sh` call remains wrapper detail rather than an operator step.
+- Never run parallel MFE image builds; a single active build is the supported path.
 
 ## Favicons & Meta
 
@@ -372,7 +372,7 @@ grep -r "google" infrastructure/tutor/themes/mereka/scss/
 
 # Rebuild through the canonical Tutor wrapper
 ./scripts/infra/tutor-config-save.sh
-tutor images build openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 ```
 
 ### MFE Shows Default Theme
@@ -391,7 +391,7 @@ tutor images build openedx
    - Local reproduction:
      ```bash
      ./scripts/infra/tutor-config-save.sh
-     tutor images build mfe
+     ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
      ```
    - Production repair:
      - publish the updated MFE image through `.github/workflows/build-tutor-images.yml`

@@ -125,21 +125,21 @@ Refresh covers:
 
 ### Build Commands
 
-These `tutor images build ...` commands are for local development, parity
-checks, and debugging. Production releases must publish through
+Use the repo helpers for local development, parity checks, and debugging.
+They render through the canonical Tutor path, apply the bounded compatibility
+layer, select the dependency mirror builder, and preserve build-context labels.
+Production releases must publish through
 `.github/workflows/build-tutor-images.yml` and promote with
 `./scripts/infra/release-openedx-gitops.sh --require-digests`.
 
 ```bash
 # Build Open edX platform (LMS/CMS/workers)
-# Requires: 12GB+ RAM, 30-45 min
-tutor images build openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 
 # Build micro-frontends (MFEs)
-# Requires: 15-20 min
-tutor images build mfe
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 
-# Build specific service
+# Raw Tutor builds for non-repo-owned optional services remain debugging-only.
 tutor images build discovery
 tutor images build forum
 tutor images build ecommerce
@@ -149,14 +149,15 @@ tutor images build notes
 ### Build with Custom Args
 
 ```bash
-# Use pip instead of uv pip (for compatibility)
-tutor images build openedx -a PIP_COMMAND=pip
+# Use the Open edX helper instead of raw PIP_COMMAND overrides.
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 
 # Skip cache (fresh build)
-tutor images build openedx --no-cache
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile proof --cache-mode none
 
-# Build multiple in parallel
-tutor images build openedx mfe discovery
+# Build Open edX and MFE sequentially; do not run parallel local image builds.
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 ```
 
 ### Push to Registry
@@ -350,7 +351,7 @@ Local theme workflow:
 make branding-sync
 
 # Rebuild Open edX with new theme
-tutor images build openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 
 # Restart to apply theme changes
 tutor local restart lms cms
@@ -368,7 +369,7 @@ Local MFE workflow:
 ./scripts/branding/setup-mfe-branding.sh
 
 # Rebuild MFE with branding
-tutor images build mfe
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 tutor local restart mfe
 ```
 
@@ -502,9 +503,9 @@ tutor local restart
 ### Build Fails with "loremipsum" Error
 
 ```bash
-# Tutor v21 (Ulmo) uses `uv pip` which breaks loremipsum package
-# Fix: use `pip` instead
-tutor images build openedx -a PIP_COMMAND=pip
+# Tutor v21 (Ulmo) raw builds can hit the `uv pip`/loremipsum edge.
+# Fix: use the repo helper, which owns the compatibility path.
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 ```
 
 ### Forgot to Run the Prepare Path

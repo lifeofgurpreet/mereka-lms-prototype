@@ -40,6 +40,86 @@ error() { echo -e "${RED}[ERROR]${NC} $*"; }
 
 plugin_has_fixed() { mereka_plugin_has_fixed "$REPO_ROOT" "$1"; }
 
+manifest_has_patch_id() {
+  local manifest="$1"
+  local patch_id="$2"
+  python3 - "$manifest" "$patch_id" <<'PY'
+import sys
+from pathlib import Path
+
+import yaml
+
+manifest = Path(sys.argv[1])
+patch_id = sys.argv[2]
+data = yaml.safe_load(manifest.read_text(encoding="utf-8")) or {}
+for patch in data.get("patches", []):
+    if patch.get("id") == patch_id and patch.get("required") is True:
+        raise SystemExit(0)
+raise SystemExit(1)
+PY
+}
+
+manifest_active_entries_have_fields() {
+  local manifest="$1"
+  python3 - "$manifest" <<'PY'
+import sys
+from pathlib import Path
+
+import yaml
+
+required = {
+    "id",
+    "module",
+    "function",
+    "target",
+    "target_family",
+    "authority_class",
+    "description",
+    "retirement_trigger",
+    "required",
+}
+manifest = Path(sys.argv[1])
+data = yaml.safe_load(manifest.read_text(encoding="utf-8")) or {}
+patches = data.get("patches", [])
+if not isinstance(patches, list) or not patches:
+    raise SystemExit(1)
+for index, patch in enumerate(patches):
+    if not isinstance(patch, dict):
+        raise SystemExit(1)
+    missing = sorted(field for field in required if field not in patch or patch[field] in ("", None))
+    if missing:
+        print(f"patch[{index}] missing fields: {', '.join(missing)}", file=sys.stderr)
+        raise SystemExit(1)
+raise SystemExit(0)
+PY
+}
+
+manifest_active_entries_have_retirement_metadata() {
+  local manifest="$1"
+  python3 - "$manifest" <<'PY'
+import sys
+from pathlib import Path
+
+import yaml
+
+manifest = Path(sys.argv[1])
+data = yaml.safe_load(manifest.read_text(encoding="utf-8")) or {}
+for patch in data.get("patches", []):
+    if not str(patch.get("authority_class", "")).strip():
+        raise SystemExit(1)
+    if not str(patch.get("retirement_trigger", "")).strip():
+        raise SystemExit(1)
+raise SystemExit(0)
+PY
+}
+
+rendered_docker_compose_has_current_mysql_contract() {
+  local docker_compose="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}/env/local/docker-compose.yml"
+  [[ -f "$docker_compose" ]] || return 2
+  grep -q "mysql-native-password=ON" "$docker_compose" &&
+    grep -q 'MYSQL_ROOT_HOST: "%"' "$docker_compose"
+}
+
 plugin_contract_python_valid() {
   local plugin_file
   while IFS= read -r plugin_file; do
@@ -114,14 +194,37 @@ check "AC-TCR-002" "Plugin configures CSRF_TRUSTED_ORIGINS" \
 echo ""
 
 # ==============================================================================
-# AC-TCR-003: Plugin applies MySQL auth fix without apply-patches.sh
+# AC-TCR-003: Current rendered MySQL local contract is verified
 # ==============================================================================
-echo "--- AC-TCR-003: Plugin MySQL Patches ---"
-check "AC-TCR-003" "Plugin has mysql-docker-compose hook" \
-  plugin_has_fixed "mysql-docker-compose"
+echo "--- AC-TCR-003: MySQL Render Contract ---"
+MYSQL_ROOT_PATCH="$REPO_ROOT/infrastructure/tutor/patches/mysql-root-host.sh"
+ACTIVE_RENDERED_VERIFY="$REPO_ROOT/scripts/infra/verify-tutor-config.sh"
+QA_RENDERED_VERIFY_ENTRYPOINT="$REPO_ROOT/scripts/qa/verify-tutor-patches.sh"
 
-check "AC-TCR-003" "Plugin sets mysql_native_password authentication" \
-  plugin_has_fixed "mysql_native_password"
+check "AC-TCR-003" "Active rendered verifier checks Tutor 21 mysql-native-password=ON" \
+  grep -q "mysql-native-password=ON" "$ACTIVE_RENDERED_VERIFY"
+
+check "AC-TCR-003" "Active rendered verifier checks MYSQL_ROOT_HOST local compatibility" \
+  grep -q "MYSQL_ROOT_HOST" "$ACTIVE_RENDERED_VERIFY"
+
+check "AC-TCR-003" "QA rendered verifier entrypoint delegates to canonical verifier" \
+  grep -q "scripts/infra/verify-tutor-config.sh" "$QA_RENDERED_VERIFY_ENTRYPOINT"
+
+check "AC-TCR-003" "MYSQL_ROOT_HOST compatibility patch module exists" \
+  test -f "$MYSQL_ROOT_PATCH"
+
+if rendered_docker_compose_has_current_mysql_contract; then
+  echo -e "${GREEN}✓ PASS${NC}: [AC-TCR-003] Rendered docker-compose.yml has current MySQL contract"
+  PASS=$((PASS+1))
+else
+  rc=$?
+  if [[ "$rc" -eq 2 ]]; then
+    skip "AC-TCR-003" "Rendered docker-compose.yml not present; rendered marker proof runs in Tutor Configuration Tests"
+  else
+    echo -e "${RED}✗ FAIL${NC}: [AC-TCR-003] Rendered docker-compose.yml missing current MySQL contract"
+    FAIL=$((FAIL+1))
+  fi
+fi
 echo ""
 
 # ==============================================================================
@@ -129,7 +232,8 @@ echo ""
 # ==============================================================================
 echo "--- AC-TCR-004: Patch Manifest & Verification ---"
 MANIFEST="$REPO_ROOT/infrastructure/tutor/patch-manifest.yml"
-VERIFY_SCRIPT="$REPO_ROOT/scripts/infra/verify-tutor-patches.sh"
+VERIFY_SCRIPT="$REPO_ROOT/scripts/qa/verify-tutor-patches.sh"
+CANONICAL_VERIFY_SCRIPT="$REPO_ROOT/scripts/infra/verify-tutor-config.sh"
 
 if [[ -f "$MANIFEST" ]]; then
   check "AC-TCR-004" "Patch manifest exists at infrastructure/tutor/patch-manifest.yml" \
@@ -138,14 +242,17 @@ if [[ -f "$MANIFEST" ]]; then
   check "AC-TCR-004" "Patch manifest is valid YAML" \
     python3 -c "import yaml; yaml.safe_load(open('$MANIFEST'))"
 
-  check "AC-TCR-004" "Patch manifest contains mysql-auth patch" \
-    grep -q "mysql-auth" "$MANIFEST"
+  check "AC-TCR-004" "Patch manifest active entries have required authority fields" \
+    manifest_active_entries_have_fields "$MANIFEST"
 
-  check "AC-TCR-004" "Patch manifest contains mfe-node18 patch" \
-    grep -q "mfe-node18\|mfe.*node" "$MANIFEST"
+  check "AC-TCR-004" "Patch manifest contains mysql-root-host active patch" \
+    manifest_has_patch_id "$MANIFEST" "mysql-root-host"
 
-  check "AC-TCR-004" "Patch manifest contains multisite-domains patch" \
-    grep -q "multisite.*domain\|multi.*site" "$MANIFEST"
+  check "AC-TCR-004" "Patch manifest contains build-optimizations render-delta patch" \
+    manifest_has_patch_id "$MANIFEST" "build-optimizations-render-delta"
+
+  check "AC-TCR-004" "Patch manifest contains MFE npm install resilience patch" \
+    manifest_has_patch_id "$MANIFEST" "mfe-npm-install-resilience"
 else
   skip "AC-TCR-004" "Patch manifest not yet created (planned implementation)"
   SKIP=$((SKIP+4))
@@ -154,10 +261,15 @@ fi
 if [[ -f "$VERIFY_SCRIPT" ]]; then
   check "AC-TCR-004" "verify-tutor-patches.sh exists" test -f "$VERIFY_SCRIPT"
   check "AC-TCR-004" "verify-tutor-patches.sh is executable" test -x "$VERIFY_SCRIPT"
+  check "AC-TCR-004" "verify-tutor-patches.sh delegates to canonical rendered verifier" \
+    grep -q "scripts/infra/verify-tutor-config.sh" "$VERIFY_SCRIPT"
 else
   skip "AC-TCR-004" "verify-tutor-patches.sh not yet created (planned implementation)"
   SKIP=$((SKIP+1))
 fi
+
+check "AC-TCR-004" "Canonical rendered verifier exists" test -f "$CANONICAL_VERIFY_SCRIPT"
+check "AC-TCR-004" "Canonical rendered verifier is executable" test -x "$CANONICAL_VERIFY_SCRIPT"
 echo ""
 
 # ==============================================================================
@@ -188,7 +300,7 @@ echo ""
 # AC-TCR-006: CI workflow runs patch verification on PRs
 # ==============================================================================
 echo "--- AC-TCR-006: CI Verification Workflow ---"
-CI_WORKFLOW="$REPO_ROOT/.github/workflows/tutor-config-verify.yml"
+CI_WORKFLOW="$REPO_ROOT/.github/workflows/ci.yml"
 check "AC-TCR-006" "CI workflow exists" test -f "$CI_WORKFLOW"
 
 if [[ -f "$CI_WORKFLOW" ]]; then
@@ -198,25 +310,28 @@ if [[ -f "$CI_WORKFLOW" ]]; then
   check "AC-TCR-006" "Workflow triggers on push" \
     grep -q "push" "$CI_WORKFLOW"
 
-  check "AC-TCR-006" "Workflow runs verify-patches job" \
-    grep -q "verify.*patch" "$CI_WORKFLOW"
+  check "AC-TCR-006" "Workflow contains Tutor Configuration Tests lane" \
+    grep -q "tutor-config-tests" "$CI_WORKFLOW"
 
-  check "AC-TCR-006" "Workflow checks multi-site domains" \
-    grep -q "multi.*site\|academy.biji" "$CI_WORKFLOW"
+  check "AC-TCR-006" "Workflow executes active rendered patch verifier test" \
+    grep -q "tests/tutor/test_verify_patches.sh" "$CI_WORKFLOW"
+
+  check "AC-TCR-006" "Workflow executes Tutor idempotency test" \
+    grep -q "tests/tutor/test_idempotency.sh" "$CI_WORKFLOW"
 else
   FAIL=$((FAIL+4))
 fi
 echo ""
 
 # ==============================================================================
-# AC-TCR-007: Verification script supports --json flag
+# AC-TCR-007: Patch manifest entries carry active authority metadata
 # ==============================================================================
-echo "--- AC-TCR-007: JSON Output Support ---"
-if [[ -f "$VERIFY_SCRIPT" ]]; then
-  check "AC-TCR-007" "verify-tutor-patches.sh supports --json flag" \
-    grep -q "\-\-json" "$VERIFY_SCRIPT"
+echo "--- AC-TCR-007: Manifest Authority Metadata ---"
+if [[ -f "$MANIFEST" ]]; then
+  check "AC-TCR-007" "All active manifest entries carry required fields" \
+    manifest_active_entries_have_fields "$MANIFEST"
 else
-  skip "AC-TCR-007" "verify-tutor-patches.sh not yet created"
+  skip "AC-TCR-007" "Patch manifest not present"
 fi
 echo ""
 
@@ -224,20 +339,18 @@ echo ""
 # AC-TCR-008: Verification fails when patches missing
 # ==============================================================================
 echo "--- AC-TCR-008: Failure Detection ---"
-# This is tested by the existence of verification logic
-VERIFY_CONFIG="$REPO_ROOT/scripts/infra/verify-tutor-config.sh"
-check "AC-TCR-008" "verify-tutor-config.sh exists and checks patches" \
-  test -f "$VERIFY_CONFIG"
+check "AC-TCR-008" "Canonical rendered verifier exists" \
+  test -f "$CANONICAL_VERIFY_SCRIPT"
 
-if [[ -f "$VERIFY_CONFIG" ]]; then
-  check "AC-TCR-008" "Verification checks mysql_native_password" \
-    grep -q "mysql_native_password" "$VERIFY_CONFIG"
+if [[ -f "$CANONICAL_VERIFY_SCRIPT" ]]; then
+  check "AC-TCR-008" "Canonical rendered verifier emits explicit failure markers" \
+    grep -Eq "check_fail|✗|FAILURES" "$CANONICAL_VERIFY_SCRIPT"
 
-  check "AC-TCR-008" "Verification checks multi-site domains" \
-    grep -q "academy.biji-biji.com\|biji-biji" "$VERIFY_CONFIG"
+  check "AC-TCR-008" "Canonical rendered verifier checks current MySQL marker" \
+    grep -q "mysql-native-password=ON" "$CANONICAL_VERIFY_SCRIPT"
 
-  check "AC-TCR-008" "Verification exits non-zero on failure" \
-    grep -q "exit 1" "$VERIFY_CONFIG"
+  check "AC-TCR-008" "Canonical rendered verifier exits non-zero on failure" \
+    grep -q "exit 1" "$CANONICAL_VERIFY_SCRIPT"
 else
   FAIL=$((FAIL+3))
 fi
@@ -250,32 +363,32 @@ echo "--- AC-TCR-009: Idempotency ---"
 PATCHES_SCRIPT="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 check "AC-TCR-009" "apply-patches.sh exists" test -f "$PATCHES_SCRIPT"
 
-# Check if CI has idempotency test
 check "AC-TCR-009" "CI workflow tests idempotency" \
-  grep -q "idempotent\|double.*apply\|twice" "$CI_WORKFLOW"
+  grep -q "tests/tutor/test_idempotency.sh" "$CI_WORKFLOW"
+
+check "AC-TCR-009" "Dedicated idempotency test exists" \
+  test -f "$REPO_ROOT/tests/tutor/test_idempotency.sh"
 echo ""
 
 # ==============================================================================
 # AC-TCR-010: Version upgrade detection in CI
 # ==============================================================================
 echo "--- AC-TCR-010: Version Upgrade Handling ---"
-# This is more of a manual workflow check, but we can verify CI structure exists
-check "AC-TCR-010" "CI workflow runs on infrastructure/ changes" \
-  grep -q "infrastructure/\|tutor/" "$CI_WORKFLOW"
+check "AC-TCR-010" "Tutor CI lane blocks patch failures during upgrades" \
+  grep -q "test_verify_patches.sh" "$CI_WORKFLOW"
 
-warn "AC-TCR-010 note: Version upgrade detection requires manual PR review workflow"
+skip "AC-TCR-010" "Per-patch Tutor version upgrade adaptation report remains manual per spec"
 echo ""
 
 # ==============================================================================
 # AC-TCR-011: Critical patch failures highlighted
 # ==============================================================================
-echo "--- AC-TCR-011: Error Formatting ---"
-if [[ -f "$VERIFY_SCRIPT" ]]; then
-  check "AC-TCR-011" "Verification script uses colored output" \
-    grep -q "RED\|GREEN\|YELLOW\|\\\\033" "$VERIFY_SCRIPT"
+echo "--- AC-TCR-011: Authority Class & Retirement Triggers ---"
+if [[ -f "$MANIFEST" ]]; then
+  check "AC-TCR-011" "Active manifest entries include authority class and retirement trigger" \
+    manifest_active_entries_have_retirement_metadata "$MANIFEST"
 else
-  check "AC-TCR-011" "verify-tutor-config.sh has colored output" \
-    grep -q "RED\|GREEN\|YELLOW\|\\\\033" "$VERIFY_CONFIG"
+  skip "AC-TCR-011" "Patch manifest not present"
 fi
 echo ""
 
@@ -327,9 +440,9 @@ if [[ -f "$ROLLBACK" ]]; then
 fi
 
 # Documentation sync
-QUICK_START="$REPO_ROOT/docs/onboarding/QUICK_START_LOCAL.md"
-check "Infrastructure" "Documentation references apply-patches workflow" \
-  grep -q "apply-patches\|tutor-config-save" "$QUICK_START"
+QUICK_START="$REPO_ROOT/docs/guides/onboarding/QUICK_START_LOCAL.md"
+check "Infrastructure" "Documentation references canonical Tutor config wrapper" \
+  grep -q "tutor-config-save" "$QUICK_START"
 
 echo ""
 

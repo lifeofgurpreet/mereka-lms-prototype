@@ -155,10 +155,11 @@ if [[ $MISSING_THEME -eq 0 ]]; then
   echo "✓ All logo files and configurations are in place!"
   echo ""
   echo "Next steps:"
-  echo "  1. Apply Tutor patches: ./infrastructure/tutor/apply-patches.sh"
-  echo "  2. Rebuild images: tutor images build openedx && tutor images build mfe"
-  echo "  3. Restart services: tutor local restart (or kubectl rollout restart)"
-  echo "  4. Run collectstatic: tutor local run lms ./manage.py lms collectstatic --noinput"
+  echo "  1. Prepare Tutor build context: ./scripts/infra/prepare-tutor-build-context.sh --target both"
+  echo "  2. Rebuild Open edX image: ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast"
+  echo "  3. Rebuild MFE image: ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast"
+  echo "  4. Restart services: tutor local restart (or kubectl rollout restart)"
+  echo "  5. Run collectstatic: tutor local run lms ./manage.py lms collectstatic --noinput"
   exit 0
 else
   echo "✗ Some logo files or configurations are missing."

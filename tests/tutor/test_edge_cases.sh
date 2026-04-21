@@ -11,7 +11,7 @@ NC='\033[0m'
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 APPLY_PATCHES_SCRIPT="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
-VERIFY_SCRIPT="$REPO_ROOT/scripts/infra/verify-tutor-patches.sh"
+VERIFY_SCRIPT="$REPO_ROOT/scripts/qa/verify-tutor-patches.sh"
 ASSUME_PATCHED_BASELINE="${TUTOR_TEST_ASSUME_PATCHED_BASELINE:-0}"
 
 TESTS_RUN=0
@@ -34,8 +34,8 @@ test_fail() {
 }
 
 HAS_TUTOR_ENV=0
-VERIFY_JSON_VALID=0
-VERIFY_JSON=""
+VERIFY_SUCCESS=0
+VERIFY_OUTPUT=""
 DOUBLE_APPLY_SUCCESS=0
 
 echo "=== Test Suite: Edge Cases ==="
@@ -58,23 +58,21 @@ else
 
   # Gather shared verification evidence once so we do not keep paying the same
   # verify cost across multiple edge-case assertions in CI.
-  VERIFY_JSON=$("$VERIFY_SCRIPT" --json 2>/dev/null || true)
-  if echo "$VERIFY_JSON" | jq '.summary.total' >/dev/null 2>&1; then
-    VERIFY_JSON_VALID=1
+  if VERIFY_OUTPUT=$("$VERIFY_SCRIPT" 2>&1); then
+    VERIFY_SUCCESS=1
   fi
 fi
 
 # EC-TCR-001: Plugin hook not firing (verification catches missing patches)
 test_start "Verification tool catches missing patches from disabled plugin"
 if (( HAS_TUTOR_ENV )); then
-  # If verification produced valid JSON, patches are present or detectable.
-  # If it did not, this environment still exercised the failure-detection path.
-  if (( VERIFY_JSON_VALID )); then
+  # If verification exits cleanly with rendered marker evidence, the detection
+  # path is active. Dedicated negative fixtures cover individual patch selectors.
+  if [[ -n "$VERIFY_OUTPUT" ]]; then
     test_pass
-    echo -e "  ${YELLOW}  Note: Verification produced valid patch evidence${NC}"
+    echo -e "  ${YELLOW}  Note: Verification produced rendered patch evidence${NC}"
   else
-    test_pass
-    echo -e "  ${YELLOW}  Note: Verification did not emit JSON; missing-patch detection path remains acceptable here${NC}"
+    test_fail "Verifier produced no output"
   fi
 else
   echo -e "  ${YELLOW}SKIP${NC}"
@@ -116,10 +114,10 @@ fi
 # EC-TCR-005: Plugin conflicts (idempotent hooks)
 test_start "apply-patches.sh is idempotent (handles double-application)"
 if (( HAS_TUTOR_ENV )); then
-  if (( DOUBLE_APPLY_SUCCESS )) && (( VERIFY_JSON_VALID )); then
+  if (( DOUBLE_APPLY_SUCCESS )) && (( VERIFY_SUCCESS )); then
     test_pass
   else
-    test_fail "Verification did not produce valid JSON after double-apply"
+    test_fail "Verification did not pass after double-apply"
   fi
 else
   echo -e "  ${YELLOW}SKIP${NC}"
@@ -128,33 +126,53 @@ fi
 # EC-TCR-006: Partial plugin migration (script handles rest)
 test_start "Verification runs after apply-patches.sh"
 if (( HAS_TUTOR_ENV )); then
-  if (( VERIFY_JSON_VALID )); then
-    PASSED=$(echo "$VERIFY_JSON" | jq '.summary.passed')
-    TOTAL=$(echo "$VERIFY_JSON" | jq '.summary.total')
-    echo -e "  ${GREEN}  Verification: $PASSED/$TOTAL patches verified${NC}"
+  if (( VERIFY_SUCCESS )); then
+    PASSED=$(grep -c '✓' <<<"$VERIFY_OUTPUT" || true)
+    echo -e "  ${GREEN}  Verification: $PASSED rendered checks passed${NC}"
     test_pass
   else
-    test_fail "Verification did not produce valid JSON after apply-patches"
+    test_fail "Verification did not pass after apply-patches"
   fi
 else
   echo -e "  ${YELLOW}SKIP${NC}"
 fi
 
-# EC-TCR-007: Verification false positive (pattern matches unrelated text)
-test_start "Verification patterns are specific enough to avoid false positives"
+# EC-TCR-007: Verification false positive (authority selectors are specific)
+test_start "Manifest authority entries have concrete targets and retirement triggers"
 if [[ -d "$REPO_ROOT/tutor_env" ]]; then
-  # This is a meta-test - we trust the manifest patterns are specific
-  # We check that patterns include domain names or specific strings
   MANIFEST_FILE="$REPO_ROOT/infrastructure/tutor/patch-manifest.yml"
+  set +e
+  AUTHORITY_CHECK_OUTPUT=$(
+    python3 - "$MANIFEST_FILE" <<'PY'
+import sys
+from pathlib import Path
 
-  # Count patterns that look specific (contain dots, URLs, or specific terms)
-  SPECIFIC_PATTERNS=$(grep -E "verify_pattern:" "$MANIFEST_FILE" | grep -cE '\.|https|mereka|prometheus|django' || echo "0")
+try:
+    import yaml
+except ImportError as exc:
+    raise SystemExit(f"PyYAML unavailable: {exc}")
 
-  if [[ $SPECIFIC_PATTERNS -gt 10 ]]; then
+payload = yaml.safe_load(Path(sys.argv[1]).read_text(encoding="utf-8")) or {}
+patches = payload.get("patches") or []
+missing = [
+    patch.get("id", "<missing id>")
+    for patch in patches
+    if not patch.get("target") or not patch.get("retirement_trigger")
+]
+if missing:
+    print(", ".join(missing))
+    raise SystemExit(1)
+print(len(patches))
+PY
+  )
+  AUTHORITY_CHECK_RC=$?
+  set -e
+
+  if [[ "$AUTHORITY_CHECK_RC" -eq 0 ]]; then
     test_pass
-    echo -e "  ${GREEN}  Found $SPECIFIC_PATTERNS specific patterns${NC}"
+    echo -e "  ${GREEN}  Manifest entries checked: $AUTHORITY_CHECK_OUTPUT${NC}"
   else
-    test_fail "Only $SPECIFIC_PATTERNS specific patterns found"
+    test_fail "Missing target or retirement trigger for: $AUTHORITY_CHECK_OUTPUT"
   fi
 else
   echo -e "  ${YELLOW}SKIP${NC}"
