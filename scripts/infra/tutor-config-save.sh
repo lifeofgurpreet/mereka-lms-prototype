@@ -89,13 +89,56 @@ for retired_plugin in mfe_oauth_fix indigo; do
   fi
 done
 
-for plugin in mereka_lms mereka_lms_mfe_slots; do
-  if tutor plugins enable "$plugin" >/dev/null 2>&1; then
+plugin_enabled_in_config() {
+  local plugin="$1"
+  [[ -f "$TUTOR_ROOT/config.yml" ]] || return 1
+  python3 - "$TUTOR_ROOT/config.yml" "$plugin" <<'PY'
+from pathlib import Path
+import sys
+
+config = Path(sys.argv[1])
+plugin = sys.argv[2]
+in_plugins = False
+for line in config.read_text(encoding="utf-8").splitlines():
+    if line.startswith("PLUGINS:"):
+        in_plugins = True
+        continue
+    if not in_plugins:
+        continue
+    if line.startswith((" ", "-")):
+        if line.strip() == f"- {plugin}":
+            raise SystemExit(0)
+        continue
+    break
+raise SystemExit(1)
+PY
+}
+
+enable_canonical_plugin() {
+  local plugin="$1"
+  local enable_output
+  local enable_status
+
+  if enable_output="$(tutor plugins enable "$plugin" 2>&1)"; then
+    [[ -n "$enable_output" ]] && printf '%s\n' "$enable_output"
     echo -e "${GREEN}Canonical Tutor plugin enabled: ${plugin}${NC}"
-  else
-    echo -e "${RED}ERROR: Failed to enable canonical Tutor plugin: ${plugin}${NC}" >&2
-    exit 1
+    return 0
   fi
+
+  enable_status=$?
+  if plugin_enabled_in_config "$plugin"; then
+    [[ -n "$enable_output" ]] && printf '%s\n' "$enable_output"
+    echo -e "${YELLOW}Canonical Tutor plugin already enabled in config: ${plugin}${NC}"
+    return 0
+  fi
+
+  echo -e "${RED}ERROR: Failed to enable canonical Tutor plugin: ${plugin}${NC}" >&2
+  [[ -n "$enable_output" ]] && printf '%s\n' "$enable_output" >&2
+  exit "$enable_status"
+}
+
+for plugin in mereka_lms mereka_lms_mfe_slots; do
+  enable_canonical_plugin "$plugin"
 done
 echo ""
 

@@ -108,6 +108,7 @@ hooks.Filters.CLI_DO_INIT_TASKS.add_item(
         """
 # Ensure local/dev site rows converge to the Mereka theme during Tutor init.
 ./manage.py lms shell -c "
+from pathlib import Path
 from django.contrib.sites.models import Site
 
 domains = [
@@ -115,13 +116,20 @@ domains = [
     '{{ LMS_HOST }}:8000',
     '{{ CMS_HOST }}',
     '{{ CMS_HOST }}:8001',
+    '{{ MFE_HOST }}',
 {% for host in MEREKA_LMS_EXTRA_HOSTS %}
     '{{ host }}',
 {% endfor %}
 ]
 
+theme_dir = Path('/openedx/themes/mereka')
+if not theme_dir.exists():
+    print('Mereka theme directory is absent; skipping SiteTheme convergence for this image')
+
 for domain in dict.fromkeys(domains):
     site, _ = Site.objects.get_or_create(domain=domain)
+    if not theme_dir.exists():
+        continue
     theme = site.themes.order_by('id').first()
     if theme is None:
         site.themes.create(theme_dir_name='mereka')

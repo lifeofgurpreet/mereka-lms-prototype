@@ -16,7 +16,7 @@ This contract keeps local development, CI bootstrap, devspace, and Kubernetes pr
 | Lane | Status | Source authority | Render/artifact authority | Cache class | Required proof | Non-goal |
 |---|---|---|---|---|---|---|
 | Local laptop quick start | Active | `scripts/shared/setup-local.sh`, `scripts/infra/ensure-buildx-dependency-mirror.sh`, `infrastructure/tutor/**`, `docker-bake.hcl` | repo-scoped Tutor render under `tutor_env/`, local Compose, local image tags `openedx:nightly` / `openedx-mfe:nightly` | developer-local build cache; dependency-image mirror normalization; BuildKit `docker.io` registry mirror fallback; `mirror.gcr.io` dependency pulls | `./scripts/qa/verify-cold-start-onboarding-contract.sh`; initialized state via `./scripts/infra/verify-local-bootstrap-readiness.sh` | production deployment proof |
-| CI local bootstrap | Active | same as local laptop quick start | `.github/workflows/bootstrap-local-readiness.yml` rendered Compose + pulled image provenance | `mirror.gcr.io` dependency pulls; no image-build cache claim | green bootstrap workflow with redacted artifact | machine-cold image build proof |
+| CI local bootstrap | Active | same as local laptop quick start | `.github/workflows/bootstrap-local-readiness.yml` rendered Compose + pulled image provenance; `lane_mode=fallback` may force ARC when fastlane substrate is under investigation | `mirror.gcr.io` dependency pulls; no image-build cache claim | green bootstrap workflow with redacted artifact | machine-cold image build proof |
 | App-cache-cold image build | Active | `docker-bake.hcl`, `scripts/infra/prepare-tutor-build-context-ci.sh`, `scripts/infra/build-openedx-image.sh`, `scripts/infra/build-mfe-image.sh` | `build-benchmark.yml` no-cache bake targets and local Docker output | dependency-image mirror normalization plus `mirror.gcr.io` dependency pulls; BuildKit `docker.io` registry mirror fallback; app-level BuildKit cache imports disabled | `build-benchmark.yml` with `benchmark_class=app-cache-cold`, `image_family=both`; failed measured build outcomes fail the workflow | pristine daemon/base-image proof |
 | Registry-warm build | Active | same bake/build helpers | GHCR image + provenance artifacts | durable GHCR BuildKit registry cache, runner-local cache optional | build workflow or benchmark registry-warm artifact | new source authority |
 | ARC heavy build | Active | same bake/build helpers | ARC DinD builder output | ARC PVC cache plus GHCR cache where enabled | CI workflow proof on `mereka-k8s-heavy-builders` | assuming PVC cache is the source of truth |
@@ -25,19 +25,42 @@ This contract keeps local development, CI bootstrap, devspace, and Kubernetes pr
 | Kubernetes preview | Planned | app repo source + infra repo preview overlay | GitOps-realized preview namespace/manifests | must be declared before launch | preview readiness verifier before supported use | ad-hoc namespaces or hand-applied manifests |
 | Devspace development | Planned | same app source/build contracts as local and GitOps lanes | devspace config may sync code, but must consume canonical images/settings | developer-local sync/cache, explicitly declared | devspace readiness verifier before supported use | independent Dockerfile/build semantics |
 
-## Latest Accepted Proofs
+## Latest Accepted Proofs And Current Gaps
 
 | Date | Proof | Run | Commit | Result | Interpretation |
 |---|---|---|---|---|---|
-| 2026-04-21 | Build Tutor Images | `24711505579` | `e7a4472cd` | success | Current shared image build path builds and scans Open edX and MFE. |
-| 2026-04-21 | Bootstrap Local Readiness | `24711453019` | `e7a4472cd` | success | Current local Tutor bootstrap path works from a clean repo-scoped `TUTOR_ROOT`. |
+| 2026-04-21 | App-cache-cold image build | `24721668598` | `39ae0fb86` | success | Open edX and MFE image helpers build with app-level BuildKit cache imports disabled. This is not pristine machine-cold proof. |
+| 2026-04-21 | Last accepted Bootstrap Local Readiness baseline | `24711453019` | `e7a4472cd` | success | A clean repo-scoped `TUTOR_ROOT` launched and passed readiness checks before the current fastlane host incident. |
+| 2026-04-21 | Current-main Bootstrap Local Readiness rerun | `24730265503` | `12db1b6` | success | Clean repo-scoped Tutor bootstrap readiness passed after repo Buildx cleanup and fastlane hook repair. This is initialized-state proof, not MFE authn route or branded runtime image proof. |
+| 2026-04-21 | Branch Bootstrap Local Readiness attempt | `24736358890` | `1506f9d90` | cancelled | Fastlane runner/control plane cancelled during active migrations. No source stack trace or readiness proof was produced. |
+| 2026-04-21 | Branch Bootstrap Local Readiness rerun | `24737898005` | `1506f9d90` | failed | Persistent-runner state from the cancelled run left stale `tutor_local` Docker project resources and opaque plugin-enable output. The branch now adds Docker-level Tutor cleanup and idempotent canonical plugin enable handling. |
+| 2026-04-21 | Branch Bootstrap Local Readiness rerun | `24738471266` | `878994d0c` | success | ARC fallback proof passed pre-clean, render, image refresh, `tutor local launch -I --skip-build`, image provenance, and local readiness. MFE authn route returned HTTP 302. |
 
-The 2026-04-21 proof set also covers the pre-checkout generated-workspace
-cleanup added by `mereka-lms#1979`. That cleanup is limited to generated
-workspace paths (`tutor_env`, `var/bootstrap-readiness`, `var/ci`,
-`.buildx-cache`) and is runner hygiene only. It is not a new build lane, not a
-second renderer, and not permission for source files to depend on generated
-workspace state.
+The 2026-04-21 proof set also covers the repo-owned pre-checkout generated
+workspace cleanup and Buildx orphan cleanup, but host Docker/containerd health
+remains a separate runner substrate truth. Fastlane failures while extracting
+`mirror.gcr.io/overhangio/openedx:21.0.4` layers are runner/host failures until
+fresh evidence proves otherwise. They must not be fixed by inventing a second
+developer build lane or weakening the source/render/artifact contract.
+Cancelled persistent-runner bootstrap runs can also leave `tutor_local` Docker
+containers, volumes, and networks behind; the bootstrap workflow owns bounded
+cleanup for that stale proof state before checkout.
+Run `24738471266` also showed the launch phase can take about 56 minutes before
+readiness passes, so phase timing/heartbeat artifacts are required follow-up for
+operator-grade feedback.
+
+Known coverage gaps from the same green bootstrap run:
+
+- `http://apps.localhost/authn/login` returned HTTP 400 in a live runner probe
+  because Django rejected `apps.localhost` as an `ALLOWED_HOSTS` value. This is
+  a source/render contract gap for MFE-prefixed LMS routes, not verifier
+  accommodation. This branch adds the source fix and makes local readiness fail
+  closed on non-200/302 MFE authn responses; branch bootstrap proof must rerun.
+- LMS logs reported `Theme 'mereka' not found` while the upstream bootstrap
+  image served `localhost` with HTTP 200. This branch skips SiteTheme convergence
+  when `/openedx/themes/mereka` is absent, so the upstream bootstrap lane stays
+  explicitly unbranded. Branded runtime proof still belongs to a repo-built image
+  lane; do not let a SiteTheme database check stand in for branded asset proof.
 
 ## Entry Criteria for New Developer Lanes
 

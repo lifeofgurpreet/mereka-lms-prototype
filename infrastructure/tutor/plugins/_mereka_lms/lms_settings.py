@@ -16,12 +16,20 @@ def _safe_add_app(app_name):
         except ImportError:
             pass
 
-# Mereka LMS: Multi-site domain configuration
-ALLOWED_HOSTS += {{ MEREKA_LMS_EXTRA_HOSTS }}
+# Mereka LMS: Multi-site and MFE-prefixed LMS route configuration.
+# Caddy forwards /authn/login and related MFE-prefixed LMS routes from MFE_HOST
+# to lms:8000 while preserving the incoming host. Django must therefore accept
+# MFE_HOST directly; otherwise the authn route returns HTTP 400 before routing.
+for _mereka_host in ["{{ MFE_HOST }}"] + {{ MEREKA_LMS_EXTRA_HOSTS }}:
+    if _mereka_host and _mereka_host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(_mereka_host)
 
-{% for origin in MEREKA_LMS_EXTRA_CSRF_ORIGINS %}
-CSRF_TRUSTED_ORIGINS.append("{{ origin }}")
-{% endfor %}
+for _mereka_origin in [
+    "http://{{ MFE_HOST }}",
+    "https://{{ MFE_HOST }}",
+] + {{ MEREKA_LMS_EXTRA_CSRF_ORIGINS }}:
+    if _mereka_origin and _mereka_origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(_mereka_origin)
 
 # Session and CSRF cookie domains for multi-site support
 SESSION_COOKIE_DOMAIN = "{{ MEREKA_SESSION_COOKIE_DOMAIN }}"

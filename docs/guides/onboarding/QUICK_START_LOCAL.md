@@ -16,16 +16,18 @@ The first run builds local Open edX and MFE images, initializes Tutor data, star
 
 ## Current Proof Snapshot
 
-As of 2026-04-21, the onboarding source/docs contract and static validation
-proof are current on `main`, but the fresh bootstrap workflow must not be
-reported as green until the fastlane runner substrate is repaired and rerun.
+As of 2026-04-21, the onboarding source/docs contract, app-cache-cold image
+build proof, and current-main clean bootstrap proof are green. The clean
+bootstrap proof is an initialized-state proof only; it does not yet prove the
+MFE authn HTTP route or that an upstream bootstrap image contains repo-owned
+theme files.
 
 | Proof | Run | Commit | Result | What it proves |
 |---|---|---|---|---|
 | Static validation PR proof | `24727872257` | `8ce05a308` | success | Current source/docs/verifier contracts are green, including the static script shards. |
 | App-cache-cold image build | `24721668598` | `39ae0fb86` | success | Open edX and MFE image helpers build with app-level BuildKit cache imports disabled. |
 | Last accepted bootstrap baseline | `24711453019` | `e7a4472cd` | success | A clean repo-scoped `TUTOR_ROOT` launched and passed readiness checks before the current runner incident. |
-| Current-main bootstrap rerun | `24726833355` | `9a1090657` | runner failure | Fastlane Docker/containerd failed while pulling `mirror.gcr.io/overhangio/openedx:21.0.4`; this is tracked as runner substrate debt, not a local guide contract pass. |
+| Current-main bootstrap rerun | `24730265503` | `12db1b6` | success | Rerun after repo Buildx cleanup and fastlane hook repair. This proves the clean repo-scoped Tutor bootstrap readiness lane, not the MFE authn browser route or branded runtime image content. |
 
 These are shared proof lanes, not alternate build systems. Do not create a
 second Dockerfile, Compose stack, or local-only build path to work around a
@@ -144,6 +146,11 @@ and `.buildx-cache`). That cleanup exists because containerized Tutor steps can
 leave root-owned files on persistent fastlane runners. It is runner hygiene only;
 it does not change build semantics.
 
+The bootstrap workflow also removes stale `tutor_local` Docker containers,
+volumes, and networks before a new run starts. That guard exists for cancelled
+or interrupted persistent-runner jobs; it keeps the proof lane clean without
+creating another build path.
+
 The app-cache-cold image-build proof is [`.github/workflows/build-benchmark.yml`](../../../.github/workflows/build-benchmark.yml) with `benchmark_class=app-cache-cold` and `image_family=both`. That lane proves the Open edX and MFE image build helpers with app-level BuildKit cache imports disabled; persistent runner Docker daemon/base-image state can still exist. The bootstrap lane proves the rendered Tutor stack initializes from a clean `TUTOR_ROOT`. The old `benchmark_class=true-cold` input remains accepted as a legacy alias, but new evidence should use `app-cache-cold`.
 
 To run it from a branch:
@@ -158,7 +165,18 @@ gh workflow run build-benchmark.yml --ref "$(git branch --show-current)" \
   -f image_family=both
 ```
 
-Do not mark cold-start onboarding fixed until the offline contract passes, the bootstrap workflow is green for the branch being merged, and app-cache-cold image build proof is either green or explicitly waived with a fresh reason.
+If fastlane is under runner-substrate investigation and you need the same
+bootstrap proof on ARC, force the workflow's fallback lane:
+
+```bash
+gh workflow run bootstrap-local-readiness.yml \
+  --ref "$(git branch --show-current)" \
+  -f lane_mode=fallback
+```
+
+Do not mark cold-start onboarding fixed until the offline contract passes, the bootstrap workflow is green for the branch being merged, app-cache-cold image build proof is either green or explicitly waived with a fresh reason, and any route/theme checks required by the proof matrix are either green or explicitly listed as not covered by that lane.
+
+Current follow-up from run `24730265503`: during the successful bootstrap, a direct runner probe saw `http://apps.localhost/authn/login` return HTTP 400 because Django rejected `apps.localhost` as an `ALLOWED_HOSTS` value, and LMS logs showed `Theme 'mereka' not found` for the upstream bootstrap image. This branch fixes the MFE host source contract, makes the MFE authn route fail closed in local readiness, and skips SiteTheme convergence when the running image does not contain the repo-owned theme directory. Branch run `24736358890` was cancelled during active migrations, and rerun `24737898005` exposed stale `tutor_local` Docker state left by that cancellation; this branch now cleans that state before checkout. Branch run `24738471266` on `878994d0c` then passed on `lane_mode=fallback`, including the MFE authn route with HTTP 302. The heavy launch phase still needs better timing/heartbeat output so long first-run bootstraps are easier to diagnose.
 
 ## Daily Commands
 

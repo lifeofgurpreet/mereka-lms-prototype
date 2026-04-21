@@ -231,16 +231,18 @@ else
     echo -e "${YELLOW}⚠️  Only $CONTAINERS containers running (expected 20+)${NC}"
 fi
 
-if curl -s http://localhost >/dev/null 2>&1; then
-    echo -e "${GREEN}✅ LMS accessible${NC}"
+LMS_STATUS="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 http://localhost 2>/dev/null || true)"
+if [[ " 200 302 " == *" ${LMS_STATUS:-000} "* ]]; then
+    echo -e "${GREEN}✅ LMS accessible (HTTP ${LMS_STATUS})${NC}"
 else
-    echo -e "${RED}❌ LMS not accessible${NC}"
+    echo -e "${RED}❌ LMS not accessible (HTTP ${LMS_STATUS:-000})${NC}"
 fi
 
-if curl -s http://apps.localhost/authn/login >/dev/null 2>&1; then
-    echo -e "${GREEN}✅ MFE accessible${NC}"
+MFE_STATUS="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 http://apps.localhost/authn/login 2>/dev/null || true)"
+if [[ " 200 302 " == *" ${MFE_STATUS:-000} "* ]]; then
+    echo -e "${GREEN}✅ MFE accessible (HTTP ${MFE_STATUS})${NC}"
 else
-    echo -e "${RED}❌ MFE not accessible${NC}"
+    echo -e "${RED}❌ MFE not accessible (HTTP ${MFE_STATUS:-000})${NC}"
 fi
 echo ""
 

@@ -128,17 +128,24 @@ for service in lms cms mfe mysql mongodb redis; do
     fi
 done
 
+http_status() {
+    local url="$1"
+    curl -sS -o /dev/null -w '%{http_code}' --max-time 15 "$url" 2>/dev/null || true
+}
+
 # Check URLs
-if curl -s http://localhost >/dev/null 2>&1; then
-    check_pass "LMS accessible"
+LMS_STATUS="$(http_status http://localhost)"
+if [[ " 200 302 " == *" ${LMS_STATUS:-000} "* ]]; then
+    check_pass "LMS accessible (HTTP ${LMS_STATUS})"
 else
-    check_fail "LMS not accessible"
+    check_fail "LMS not accessible (HTTP ${LMS_STATUS:-000})"
 fi
 
-if curl -s http://apps.localhost/authn/login >/dev/null 2>&1; then
-    check_pass "MFE accessible"
+MFE_STATUS="$(http_status http://apps.localhost/authn/login)"
+if [[ " 200 302 " == *" ${MFE_STATUS:-000} "* ]]; then
+    check_pass "MFE accessible (HTTP ${MFE_STATUS})"
 else
-    check_fail "MFE not accessible"
+    check_fail "MFE not accessible (HTTP ${MFE_STATUS:-000})"
 fi
 
 # Check database

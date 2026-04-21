@@ -1,5 +1,5 @@
 # Repository Structure Guide
-_Audience: Developers & AI Agents • Owner: Engineering Team • Last updated: 2026-02-11_
+_Audience: Developers & AI Agents • Owner: Engineering Team • Last updated: 2026-04-21_
 
 **Purpose**: Understand the Mereka LMS repository layout, find files quickly, and place new files in the correct location.
 
@@ -35,17 +35,17 @@ The repository is organized into these primary top-level directories:
 
 ```
 mereka-lms/
-├── deploy/                # Kubernetes manifests, Kustomize configs
-├── scripts/               # All executable automation scripts
-├── infrastructure/        # Infrastructure-as-code (Tutor, Terraform, monitoring)
-├── docs/                  # All documentation
+├── deploy/                # App-repo Kubernetes manifests and Kustomize overlays
+├── scripts/               # Supported automation, verifiers, and build helpers
+├── infrastructure/        # Tutor, Terraform, monitoring, Cloudflare, and support IaC
+├── docs/                  # Canonical docs, runbooks, evidence, and archived history
 ├── specs/                 # Machine-checkable specifications
-├── services/              # Microservices source code
-├── assets/                # Static assets (logos, brand files)
+├── services/              # Standalone microservices source
+├── assets/                # Static and brand assets
 ├── tools/                 # Developer and maintenance utilities
 ├── tmp/                   # Git submodules and temporary source checkouts
 ├── var/                   # Runtime artifacts (gitignored)
-└── tutor_env/             # Tutor-generated state (gitignored)
+└── tutor_env/             # Tutor-generated local state (gitignored)
 ```
 
 **Gitignored/generated directories**: `var/`, `tutor_env/`, and most of `tmp/` contain runtime artifacts, generated configs, or submodule working trees. Do not commit generated Tutor output.
@@ -105,6 +105,7 @@ deploy/k8s/
 **Structure**:
 ```
 scripts/
+├── ci/                        # CI helper scripts
 ├── shared/                    # Common utilities and configuration
 │   ├── config.sh              # Central config (GCP_PROJECT, LMS_DOMAIN)
 │   └── setup-local.sh         # Local environment setup
@@ -119,6 +120,8 @@ scripts/
 ├── branding/                  # Theme and branding
 │   ├── sync-brand-assets.sh   # Sync assets to Tutor themes
 │   └── setup-mfe-branding.sh  # MFE branding setup
+├── bench/                     # Benchmark/proof helper wrappers
+├── governance/                # Script/catalog governance helpers
 ├── analytics/                 # Analytics exports
 │   ├── delete-user-events.sh  # GDPR user data deletion
 │   └── verify-user-deletion.sh # Verify deletion complete
@@ -158,18 +161,20 @@ echo "Deploying to $GCP_PROJECT in $GCP_REGION"
 ```
 infrastructure/
 ├── tutor/                     # Tutor configuration and patches
+│   ├── tutor-env.sh           # Repo-scoped local Tutor environment helper
 │   ├── apply-patches.sh       # Low-level helper behind the governed prepare path
-│   ├── patches/               # Jinja2 patch templates
-│   │   ├── lms-env-features   # Feature flags
-│   │   ├── openedx-dockerfile-post-python-requirements  # Build patches
-│   │   └── caddyfile           # Caddy reverse proxy config
+│   ├── patches/               # Controlled render compatibility layer
 │   ├── plugins/               # Tutor plugins
-│   │   └── multi-tenancy/     # Multi-tenancy plugin
+│   │   ├── _mereka_lms/       # Local LMS/plugin source authority
+│   │   └── multi-tenancy/     # Multisite plugin support
 │   ├── custom-apps/           # Custom Django apps
 │   │   ├── mfe_oauth_fix/     # MFE OAuth middleware
-│   │   └── openedx_prometheus/  # Prometheus metrics
-│   └── themes/                # Open edX themes
-│       └── mereka/            # Mereka branding theme
+│   │   ├── openedx_advanced_xblocks/
+│   │   └── openedx_prometheus/ # Prometheus metrics
+│   ├── mfe-build/             # Rendered MFE build helpers/source inputs
+│   ├── themes/                # Open edX themes
+│   │   └── mereka/            # Mereka branding theme
+│   └── brand-mereka/          # Brand package source/assets
 ├── cloudflare/                # DNS record definitions
 │   └── dns-records.json       # Cloudflare DNS automation
 ├── terraform/                 # Terraform infrastructure
@@ -213,25 +218,26 @@ docs/
 ├── adr/                       # Architecture Decision Records
 │   ├── README.md              # ADR index
 │   └── 001-mongodb-atlas.md   # Numbered ADRs
-├── onboarding/                # Setup and getting started
-│   ├── QUICK_START_LOCAL.md   # 5-minute setup
-│   ├── LOCAL_SETUP.md           # Complete onboarding setup
-│   └── REPOSITORY_GUIDE.md    # This file
-├── operations/                # Runbooks and operational procedures
-│   ├── TROUBLESHOOTING.md     # Site down diagnostic
-│   ├── ACCESS_URLS.md         # All service URLs
-│   └── SECRETS_SNAPSHOT.md    # Secrets inventory
+├── guides/                    # Human-facing guides
+│   └── onboarding/            # Setup and getting started
+│       ├── QUICK_START_LOCAL.md   # First local setup path
+│       ├── LOCAL_SETUP.md         # Complete local Tutor setup
+│       └── REPOSITORY_GUIDE.md    # This file
+├── ops/                       # Canonical runbooks, quickrefs, CI/CD docs
+│   ├── runbooks/              # Deterministic operator runbooks
+│   ├── quickref/              # Short operational references
+│   └── ci-cd/                 # Build, cache, and CI proof docs
+├── reference/                 # Contracts, governance, migrations, platform refs
+│   ├── contracts/
+│   ├── architecture/
+│   └── operations/
 ├── migrations/                # Migration playbooks
 │   ├── kajabi/                # Kajabi migration docs
 │   └── mct/                   # MCT migration docs
 ├── architecture/              # System design
-│   └── DATABASE_ARCHITECTURE.md  # Database overview
-├── sprints/                   # Sprint planning
-│   ├── SPRINT-01-foundation-complete.md
-│   ├── SPRINT-02-multi-tenancy.md
-│   └── SPRINT-03-auth-sso-phase1.md
-└── archive/                   # Historical documentation
-    └── FINAL_STATUS_REPORT.md
+├── status/                    # Active and historical state trackers
+│   └── active/
+└── archive/                   # Historical documentation and superseded evidence
 ```
 
 **Naming conventions**:
@@ -291,8 +297,9 @@ specs/
 ```
 services/
 ├── hubspot-webhook/           # HubSpot → Open edX user registration
-│   ├── index.js               # Firebase Cloud Function
-│   ├── package.json
+│   ├── functions/             # Firebase Cloud Function source
+│   ├── firebase.json
+│   ├── functions/package.json
 │   └── README.md
 ├── purchase-gateway/          # Stripe payment integration
 │   ├── app/                   # FastAPI application
@@ -382,12 +389,15 @@ git commit -m "chore: update authn MFE"
 | File | Purpose |
 |------|---------|
 | `README.md` | Project overview, badges, quick links |
-| `docs/meta/standing-orders/README.md` | Canonical standing orders for maintainers and agents |
+| `CLAUDE.md` | Claude/Codex compatibility pointer |
 | `AGENTS.md` | Agent guidelines, data protection rules |
 | `CONTRIBUTING.md` | Contributor guide |
+| `CHANGELOG.md` | Repository changelog |
 | `MIGRATION_CHECKLIST.md` | Active migration tracking |
-| `CHANGES.md` | Repository changelog |
-| `GEMINI.md` | Cross-tool adapter for Gemini |
+| `LOCAL_SETUP_COMPLETE.md` | Legacy local setup completion marker |
+| `DEPR.md` | Root deprecation register |
+| `SECURITY.md` | Security policy |
+| `TRACKER.md` | Active tracker pointer |
 
 **Important**: Any other markdown file at root **MUST be moved** to `docs/` or `docs/archive/`.
 

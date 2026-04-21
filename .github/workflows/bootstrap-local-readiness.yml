@@ -25,6 +25,15 @@ on:
       - 'scripts/governance/script-registry.yaml'
       - '.github/workflows/bootstrap-local-readiness.yml'
   workflow_dispatch:
+    inputs:
+      lane_mode:
+        description: "Runner lane selection. Use lane_mode=fallback to force ARC when fastlane substrate is under investigation."
+        type: choice
+        default: auto
+        options:
+          - auto
+          - fallback
+          - fastlane-required
 
 permissions:
   contents: read
@@ -54,7 +63,7 @@ jobs:
         uses: Biji-Biji-Initiative/bbi-infrastructure/.github/actions/select-runner-lane@main
         with:
           enabled: ${{ vars.CI_FASTLANE_BUILD_ENABLED || 'false' }}
-          lane_mode: auto
+          lane_mode: ${{ github.event_name == 'workflow_dispatch' && inputs.lane_mode || 'auto' }}
           fastlane_label: ${{ vars.CI_FASTLANE_BUILD_LABEL || 'mereka-lms-vps-fastlane-build' }}
           routing_policy: lms_build_prefer_fastlane
           fallback_label: mereka-k8s-heavy-builders
@@ -77,6 +86,27 @@ jobs:
       - name: Pre-clean persistent Tutor workspace
         run: |
           set -euo pipefail
+          cleanup_tutor_project_state() {
+            if ! command -v docker >/dev/null 2>&1 || ! timeout 30s docker info >/dev/null 2>&1; then
+              return 0
+            fi
+
+            mapfile -t tutor_containers < <(docker ps -aq --filter name=tutor_local)
+            if [[ "${#tutor_containers[@]}" -gt 0 ]]; then
+              docker rm -f "${tutor_containers[@]}" >/dev/null 2>&1 || true
+            fi
+
+            mapfile -t tutor_volumes < <(docker volume ls -q --filter name=tutor_local)
+            if [[ "${#tutor_volumes[@]}" -gt 0 ]]; then
+              docker volume rm -f "${tutor_volumes[@]}" >/dev/null 2>&1 || true
+            fi
+
+            mapfile -t tutor_networks < <(docker network ls -q --filter name=tutor_local)
+            if [[ "${#tutor_networks[@]}" -gt 0 ]]; then
+              docker network rm "${tutor_networks[@]}" >/dev/null 2>&1 || true
+            fi
+          }
+
           cleanup_workspace_paths() {
             local path target
             local existing=()
@@ -120,6 +150,7 @@ jobs:
               fi
             done
           }
+          cleanup_tutor_project_state
           cleanup_workspace_paths tutor_env var/bootstrap-readiness var/ci .buildx-cache
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
@@ -149,7 +180,7 @@ jobs:
           if [[ -d "$TUTOR_ROOT" ]]; then
             docker run --rm \
               -v "$TUTOR_ROOT:/target" \
-              alpine:3.20 \
+              mirror.gcr.io/library/alpine:3.20 \
               sh -c 'rm -rf /target/* /target/.[!.]* /target/..?*'
           fi
           rm -rf "$TUTOR_ROOT"

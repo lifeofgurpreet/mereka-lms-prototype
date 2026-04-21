@@ -197,6 +197,93 @@ EOF
   fi
 }
 
+test_start "tutor-config-save.sh tolerates already-enabled canonical plugins"
+{
+  fixture="$TMP_DIR/already-enabled-fixture"
+  custom_root="$fixture/custom-root"
+  mkdir -p "$fixture/scripts/infra" \
+    "$fixture/scripts/shared" \
+    "$fixture/infrastructure/tutor" \
+    "$fixture/bin" \
+    "$custom_root"
+
+  cp "$SAVE_SOURCE" "$fixture/scripts/infra/tutor-config-save.sh"
+
+  cat >"$fixture/scripts/shared/config.sh" <<'EOF'
+#!/usr/bin/env bash
+EOF
+
+  cat >"$custom_root/config.yml" <<'EOF'
+PLUGINS:
+  - mereka_lms
+  - mereka_lms_mfe_slots
+EOF
+
+  cat >"$fixture/bin/tutor" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+if [[ "${1:-}" == "plugins" && "${2:-}" == "enable" ]]; then
+  echo "plugin ${3:-} is already enabled"
+  exit 42
+fi
+if [[ "${1:-}" == "plugins" ]]; then
+  exit 0
+fi
+if [[ "${1:-}" == "config" && "${2:-}" == "save" ]]; then
+  : "${TUTOR_ROOT:?}"
+  printf 'saved=true\n' >> "$TUTOR_ROOT/config.yml"
+  exit 0
+fi
+echo "unsupported tutor stub invocation: $*" >&2
+exit 1
+EOF
+  make_executable "$fixture/bin/tutor"
+
+  cat >"$fixture/scripts/infra/sync-tutor-plugin-mirror.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+exit 0
+EOF
+  make_executable "$fixture/scripts/infra/sync-tutor-plugin-mirror.sh"
+
+  cat >"$fixture/scripts/infra/prepare-tutor-build-context.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+printf 'prepare\n' > "$REPO_ROOT/already-enabled-prepare.txt"
+exit 0
+EOF
+  make_executable "$fixture/scripts/infra/prepare-tutor-build-context.sh"
+
+  cat >"$fixture/scripts/infra/verify-tutor-config.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+printf 'verify\n' > "$REPO_ROOT/already-enabled-verify.txt"
+exit 0
+EOF
+  make_executable "$fixture/scripts/infra/verify-tutor-config.sh"
+
+  (
+    cd "$fixture"
+    PATH="$fixture/bin:$PATH" \
+    TUTOR_ROOT="$custom_root" \
+    bash "$fixture/scripts/infra/tutor-config-save.sh" --set LMS_HOST=authority.example >/tmp/test-tutor-root-authority.already-enabled.out 2>&1
+  )
+
+  if [[ ! -f "$fixture/already-enabled-prepare.txt" ]]; then
+    test_fail "tutor-config-save.sh did not continue to prepare after already-enabled plugin state"
+  elif [[ ! -f "$fixture/already-enabled-verify.txt" ]]; then
+    test_fail "tutor-config-save.sh did not continue to verify after already-enabled plugin state"
+  elif ! grep -q "Canonical Tutor plugin already enabled in config: mereka_lms" /tmp/test-tutor-root-authority.already-enabled.out; then
+    test_fail "tutor-config-save.sh did not report already-enabled mereka_lms"
+  elif ! grep -q "Canonical Tutor plugin already enabled in config: mereka_lms_mfe_slots" /tmp/test-tutor-root-authority.already-enabled.out; then
+    test_fail "tutor-config-save.sh did not report already-enabled mereka_lms_mfe_slots"
+  else
+    test_pass
+  fi
+}
+
 echo ""
 echo "=== Test Summary ==="
 echo "Tests run: $TESTS_RUN"

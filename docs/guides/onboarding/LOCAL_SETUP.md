@@ -230,6 +230,15 @@ gh workflow run build-benchmark.yml --ref "$(git branch --show-current)" \
   -f image_family=both
 ```
 
+When fastlane is being investigated, run the same bootstrap proof on the ARC
+fallback lane instead of changing the build path:
+
+```bash
+gh workflow run bootstrap-local-readiness.yml \
+  --ref "$(git branch --show-current)" \
+  -f lane_mode=fallback
+```
+
 ## Troubleshooting
 
 - Docker image pulls are large; if `tutor local launch` fails mid-way, rerun `tutor local launch -I --skip-build` after ensuring adequate disk space (and rerun `tutor local do init` if the LMS still 500s).

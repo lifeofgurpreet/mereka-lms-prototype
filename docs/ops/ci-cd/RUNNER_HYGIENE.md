@@ -294,6 +294,56 @@ ssh root@"${RUNNER_IP}" docker system df
 After classifying the pressure source, clean the host-level offender. Do not
 change repository build semantics to work around runner `_diag` exhaustion.
 
+### Containerd snapshot/content-store pull failures
+
+**Symptom**:
+
+```text
+failed to extract layer ... failed to Lchown
+/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/...:
+no such file or directory
+```
+
+or:
+
+```text
+failed commit on ref ... /var/lib/containerd/io.containerd.content.v1.content/ingest/.../data:
+no such file or directory
+```
+
+**Classification**: runner Docker/containerd substrate, not Tutor source,
+render, verifier, or local-guide authority.
+
+**Important boundary**: `scripts/runner/buildx-cleanup.sh` owns stale Buildx
+builder/container cleanup from this repo. The GitHub runner job-completed hook
+at `/usr/local/lib/gha-fastlane/cleanup.sh` is owned by `bbi-infrastructure`
+under `scripts/ops/fastlane/runner-cleanup/cleanup.sh`.
+
+If the job-completed hook logs a high-disk prune while other `Runner.Worker`,
+`docker pull`, `docker buildx build`, or `buildctl` processes are active, treat
+that as host-hook debt. Do not accommodate it by weakening LMS build verifiers.
+The hook must skip Docker/containerd prune while runner workers are active and
+ask operators to drain or clean the host during maintenance.
+
+**Triage**:
+
+```bash
+ssh root@"${RUNNER_IP}" df -h / /srv
+ssh root@"${RUNNER_IP}" 'pgrep -af "Runner.Worker|docker pull|docker buildx build|buildctl" | sed -n "1,120p"'
+ssh root@"${RUNNER_IP}" /opt/runner/buildx-cleanup.sh --dry-run
+ssh root@"${RUNNER_IP}" 'grep -n "forcing prune\\|skipping prune to avoid containerd race" /usr/local/lib/gha-fastlane/cleanup.sh || true'
+```
+
+**Fix path**:
+
+1. Run the repo-owned Buildx cleanup first; it should defer if an active Docker
+   or Buildx build is detected.
+2. If disk pressure remains high, drain/idle the fastlane host before any broad
+   Docker/containerd prune.
+3. Patch and deploy the infra-owned fastlane cleanup hook from
+   `bbi-infrastructure` if it can still prune during active runner work.
+4. Rerun `Bootstrap Local Readiness` on the same commit after the host fix.
+
 ---
 
 ## Troubleshooting

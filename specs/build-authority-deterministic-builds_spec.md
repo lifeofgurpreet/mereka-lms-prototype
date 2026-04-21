@@ -122,9 +122,19 @@ Supported proof classes:
 | machine-cold/pristine daemon | all app-level, runner-local, and daemon/base-image state | only network/package registry state | not currently a supported CI proof class |
 
 **Verification**: `docs/reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md`
-is the canonical lane matrix. Current accepted 2026-04-21 proofs on
-`e7a4472cd` are Build Tutor Images run `24711505579` and Bootstrap Local
-Readiness run `24711453019`.
+is the canonical lane matrix. The latest accepted app-cache-cold image-build
+proof is run `24721668598` on `39ae0fb86`. The last accepted clean-bootstrap
+baseline is run `24711453019` on `e7a4472cd`; current-main bootstrap rerun
+`24730265503` on `12db1b6` is green as initialized-state proof after the
+fastlane runner repair. That proof does not cover MFE authn route HTTP status
+or branded theme asset presence when the bootstrap lane uses upstream images.
+PR #1991 branch proof `24738471266` passed on `878994d0c` after run
+`24736358890` was cancelled during active migrations and rerun `24737898005`
+exposed stale `tutor_local` Docker project state left on the persistent runner.
+The cleanup for that state is runner-proof hygiene, not a second build
+authority. The green proof still showed about 56 minutes inside
+`tutor local launch -I --skip-build`; future proof-lane work should make that
+duration visible with phase timing and heartbeat artifacts.
 
 **Current state**: app-cache-cold image proof and clean local bootstrap proof
 are implemented classes. A pristine machine-cold proof remains a future explicit

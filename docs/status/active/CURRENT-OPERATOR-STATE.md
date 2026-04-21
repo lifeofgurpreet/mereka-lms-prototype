@@ -651,3 +651,143 @@ path for devspaces.
 3. Keep devspace/vcluster work blocked from "supported" status until it has a
    row, setup command, verifier, cache classification, and failure taxonomy
    entry in the developer environment proof matrix.
+
+---
+
+### Slice 88 — 2026-04-21T15:45Z (current-main bootstrap blocked on fastlane host substrate)
+
+**Current app repo main**: `12db1b6` after #1989.
+
+**What is proven**:
+
+| Proof | Run | Result | Interpretation |
+|---|---|---|---|
+| App-cache-cold image build | `24721668598` | success | Open edX and MFE build helpers work with app-level BuildKit cache imports disabled. |
+| Last accepted Bootstrap Local Readiness baseline | `24711453019` | success | Clean repo-scoped Tutor bootstrap worked before the current fastlane host incident. |
+| Current-main Bootstrap Local Readiness rerun | `24730265503` | success | Clean repo-scoped Tutor bootstrap readiness passed after #1989 Buildx cleanup and fastlane hook repair. This is initialized-state proof only, not MFE authn route or branded runtime image proof. |
+
+**Resolved failure class**:
+
+Recent current-main bootstrap failures pulled
+`mirror.gcr.io/overhangio/openedx:21.0.4` and failed under
+`/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/...`
+with missing files during layer extraction. This is fastlane Docker/containerd
+substrate debt. Run `24730265503` completed green after repo Buildx cleanup and
+infra #3641 removed the unsafe concurrent prune override.
+
+**New proof-coverage gaps found while watching the green run**:
+
+- Direct runner probe: `http://apps.localhost/authn/login` returned HTTP 400.
+  LMS logs showed `Invalid HTTP_HOST header: 'apps.localhost'`. This was a
+  source/render contract gap for MFE-prefixed LMS routes; the current branch
+  fixes the source setting and makes local readiness fail closed on non-200/302
+  MFE authn responses. Superseded by Slice 91: branch bootstrap proof is green.
+- LMS logs also showed `Theme 'mereka' not found` while the upstream bootstrap
+  image served `localhost` with HTTP 200. The current bootstrap verifier checks
+  SiteTheme database convergence, not branded theme asset presence. The current
+  branch skips SiteTheme convergence when `/openedx/themes/mereka` is absent, so
+  upstream-image bootstrap stays explicitly unbranded.
+
+Treat both as follow-up work. Do not weaken bootstrap truth or create another
+build lane to hide them.
+
+**Host remediation performed**:
+
+- Installed and ran repo-owned `/opt/runner/buildx-cleanup.sh`; it removed 49
+  orphan Buildx containers with `failed=0`.
+- Disk remained high (`96-97%`), so the remaining blocker is not stale Buildx
+  containers alone.
+- Found infra-owned `/usr/local/lib/gha-fastlane/cleanup.sh` could still force
+  Docker prune above 92% disk despite concurrent runner jobs.
+- Merged `bbi-infrastructure#3641` (`e874892a43c08be64f72cb0c14e2c3800edb18f8`)
+  to remove that unsafe override, and deployed the patched hook to
+  `vmi3220759`.
+
+**Developer guidance**:
+
+Eugene, Hira, and new developers should keep using
+`docs/guides/onboarding/QUICK_START_LOCAL.md`. Do not create alternate local
+Dockerfiles, Compose files, or preview-only image semantics. The future
+Loft/vcluster/devspace lane remains planned until it has a proof matrix row,
+setup command, verifier, cache class, and failure taxonomy.
+
+---
+
+### Slice 89 — 2026-04-21T17:55Z (PR #1991 exact-head bootstrap reroute)
+
+**Current PR head**: `1506f9d90` on
+`docs/runner-bootstrap-truth-2026-04-21`.
+
+**PR checks**: green after the repository-guide truth cleanup.
+
+**Bootstrap result to classify**:
+
+- Run `24736358890` selected fastlane
+  (`vmi3220759-mereka-lms-fastlane-build-2`) and reached active LMS migrations.
+- The terminal log line is GitHub `The operation was canceled`; there was no
+  source stack trace before cancellation.
+- Provenance/readiness/failure-artifact steps did not run, so this is not a
+  valid branch bootstrap proof.
+
+**Current decision**:
+
+Expose the existing runner selector as a workflow_dispatch input and rerun the
+same bootstrap proof with `lane_mode=fallback` so ARC can prove the source path
+while fastlane cancellation remains runner/workflow substrate debt. This is a
+runner-lane override for the same source -> render -> artifact chain, not a new
+developer build path.
+
+---
+
+### Slice 90 — 2026-04-21T18:40Z (PR #1991 stale-runner-state hardening)
+
+**Current PR head before this slice**: `1506f9d90` on
+`docs/runner-bootstrap-truth-2026-04-21`.
+
+**Bootstrap result to classify**:
+
+- Run `24737898005` reran the same head after the cancellation.
+- It failed early in render while the runner still had `tutor_local-*`
+  containers, volumes, and networks from the cancelled run.
+- The redacted config artifact showed the canonical plugin already listed under
+  `PLUGINS`, but `scripts/infra/tutor-config-save.sh` hid the Tutor
+  `plugins enable` output and treated that opaque state as a hard source
+  failure.
+
+**Current decision**:
+
+This is proof-lane hygiene debt, not evidence that local build semantics should
+move into a second generator. The branch now removes stale Tutor Docker project
+state before checkout, uses the public mirror for the root-owned cleanup helper,
+and makes canonical plugin enablement idempotent when the plugin is already in
+`TUTOR_ROOT/config.yml` while preserving fail-loud behavior for real enable
+errors. Superseded by Slice 91: exact-head branch bootstrap proof is green.
+
+---
+
+### Slice 91 — 2026-04-21T19:20Z (PR #1991 branch bootstrap proof green)
+
+**Proof run**: `24738471266` on
+`878994d0c5eb9285d7dc591c14ef833c25bea70c`.
+
+**Result**: success on `lane_mode=fallback` / ARC heavy builder.
+
+**What it proved**:
+
+- pre-checkout cleanup completed, including the new stale `tutor_local` Docker
+  project cleanup guard
+- Tutor render completed through the canonical `tutor-config-save.sh` wrapper
+- rendered bootstrap images refreshed from mirror-backed refs
+- `tutor local launch -I --skip-build` completed
+- image provenance matched rendered compose refs and freshly pulled image IDs
+- local readiness passed, including:
+  - LMS route HTTP 200
+  - Studio route HTTP 302
+  - `http://apps.localhost/authn/login` HTTP 302
+
+**Remaining debt**:
+
+The launch phase ran from about 18:19Z to 19:15Z. That is acceptable proof, but
+not acceptable operator feedback for a world-class lane. Add phase
+timing/heartbeat artifacts around image refresh, migrations, and readiness so
+long first-run bootstraps are diagnosable before the final log bundle exists.
