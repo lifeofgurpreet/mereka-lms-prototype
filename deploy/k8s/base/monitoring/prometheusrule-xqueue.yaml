@@ -41,7 +41,7 @@ spec:
           expr: |
             (
               container_memory_working_set_bytes{namespace="mereka-lms", pod=~"xqueue-.*", container="xqueue"}
-              / container_spec_memory_limit_bytes{namespace="mereka-lms", pod=~"xqueue-.*", container="xqueue"}
+              / on(pod, namespace) kube_pod_container_resource_limits{resource="memory", namespace="mereka-lms", pod=~"xqueue-.*", container="xqueue"}
             ) > 0.85
           for: 10m
           labels:
@@ -56,8 +56,7 @@ spec:
           expr: |
             (
               rate(container_cpu_usage_seconds_total{namespace="mereka-lms", pod=~"xqueue-.*", container="xqueue"}[5m])
-              / container_spec_cpu_quota{namespace="mereka-lms", pod=~"xqueue-.*", container="xqueue"}
-              * container_spec_cpu_period{namespace="mereka-lms", pod=~"xqueue-.*", container="xqueue"}
+              / on(pod, namespace) kube_pod_container_resource_limits{resource="cpu", namespace="mereka-lms", pod=~"xqueue-.*", container="xqueue"}
             ) > 0.85
           for: 10m
           labels:

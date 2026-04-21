@@ -52,7 +52,7 @@ spec:
           expr: |
             (
               container_memory_working_set_bytes{namespace="mereka-lms", pod=~"enterprise-catalog-.*", container="enterprise-catalog"}
-              / container_spec_memory_limit_bytes{namespace="mereka-lms", pod=~"enterprise-catalog-.*", container="enterprise-catalog"}
+              / on(pod, namespace) kube_pod_container_resource_limits{resource="memory", namespace="mereka-lms", pod=~"enterprise-catalog-.*", container="enterprise-catalog"}
             ) > 0.85
           for: 10m
           labels:
@@ -67,8 +67,7 @@ spec:
           expr: |
             (
               rate(container_cpu_usage_seconds_total{namespace="mereka-lms", pod=~"enterprise-catalog-.*", container="enterprise-catalog"}[5m])
-              / container_spec_cpu_quota{namespace="mereka-lms", pod=~"enterprise-catalog-.*", container="enterprise-catalog"}
-              * container_spec_cpu_period{namespace="mereka-lms", pod=~"enterprise-catalog-.*", container="enterprise-catalog"}
+              / on(pod, namespace) kube_pod_container_resource_limits{resource="cpu", namespace="mereka-lms", pod=~"enterprise-catalog-.*", container="enterprise-catalog"}
             ) > 0.85
           for: 10m
           labels:
@@ -118,7 +117,7 @@ spec:
           expr: |
             (
               container_memory_working_set_bytes{namespace="mereka-lms", pod=~"enterprise-access-.*", container="enterprise-access"}
-              / container_spec_memory_limit_bytes{namespace="mereka-lms", pod=~"enterprise-access-.*", container="enterprise-access"}
+              / on(pod, namespace) kube_pod_container_resource_limits{resource="memory", namespace="mereka-lms", pod=~"enterprise-access-.*", container="enterprise-access"}
             ) > 0.85
           for: 10m
           labels:
@@ -133,8 +132,7 @@ spec:
           expr: |
             (
               rate(container_cpu_usage_seconds_total{namespace="mereka-lms", pod=~"enterprise-access-.*", container="enterprise-access"}[5m])
-              / container_spec_cpu_quota{namespace="mereka-lms", pod=~"enterprise-access-.*", container="enterprise-access"}
-              * container_spec_cpu_period{namespace="mereka-lms", pod=~"enterprise-access-.*", container="enterprise-access"}
+              / on(pod, namespace) kube_pod_container_resource_limits{resource="cpu", namespace="mereka-lms", pod=~"enterprise-access-.*", container="enterprise-access"}
             ) > 0.85
           for: 10m
           labels:
@@ -184,7 +182,7 @@ spec:
           expr: |
             (
               container_memory_working_set_bytes{namespace="mereka-lms", pod=~"enterprise-subsidy-.*", container="enterprise-subsidy"}
-              / container_spec_memory_limit_bytes{namespace="mereka-lms", pod=~"enterprise-subsidy-.*", container="enterprise-subsidy"}
+              / on(pod, namespace) kube_pod_container_resource_limits{resource="memory", namespace="mereka-lms", pod=~"enterprise-subsidy-.*", container="enterprise-subsidy"}
             ) > 0.85
           for: 10m
           labels:
@@ -199,8 +197,7 @@ spec:
           expr: |
             (
               rate(container_cpu_usage_seconds_total{namespace="mereka-lms", pod=~"enterprise-subsidy-.*", container="enterprise-subsidy"}[5m])
-              / container_spec_cpu_quota{namespace="mereka-lms", pod=~"enterprise-subsidy-.*", container="enterprise-subsidy"}
-              * container_spec_cpu_period{namespace="mereka-lms", pod=~"enterprise-subsidy-.*", container="enterprise-subsidy"}
+              / on(pod, namespace) kube_pod_container_resource_limits{resource="cpu", namespace="mereka-lms", pod=~"enterprise-subsidy-.*", container="enterprise-subsidy"}
             ) > 0.85
           for: 10m
           labels:
@@ -239,7 +236,7 @@ spec:
           expr: |
             (
               container_memory_working_set_bytes{namespace="mereka-lms", pod=~"license-manager-.*", container="license-manager"}
-              / container_spec_memory_limit_bytes{namespace="mereka-lms", pod=~"license-manager-.*", container="license-manager"}
+              / on(pod, namespace) kube_pod_container_resource_limits{resource="memory", namespace="mereka-lms", pod=~"license-manager-.*", container="license-manager"}
             ) > 0.85
           for: 10m
           labels:
@@ -254,8 +251,7 @@ spec:
           expr: |
             (
               rate(container_cpu_usage_seconds_total{namespace="mereka-lms", pod=~"license-manager-.*", container="license-manager"}[5m])
-              / container_spec_cpu_quota{namespace="mereka-lms", pod=~"license-manager-.*", container="license-manager"}
-              * container_spec_cpu_period{namespace="mereka-lms", pod=~"license-manager-.*", container="license-manager"}
+              / on(pod, namespace) kube_pod_container_resource_limits{resource="cpu", namespace="mereka-lms", pod=~"license-manager-.*", container="license-manager"}
             ) > 0.85
           for: 10m
           labels:
