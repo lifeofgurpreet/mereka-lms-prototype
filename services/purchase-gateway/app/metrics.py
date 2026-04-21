@@ -2,6 +2,22 @@
 
 from prometheus_client import Counter, Histogram
 
+# Generic HTTP request counter consumed by PurchaseGatewayHighErrorRate alert
+# (deploy/k8s/base/monitoring/prometheusrule-services.yaml). Label names
+# (method, handler, status_code) match the alert expr verbatim — see bead
+# mereka-lms-zuv1 for context.
+HTTP_REQUESTS_TOTAL = Counter(
+    "http_requests_total",
+    "Count of HTTP requests handled by the purchase-gateway app.",
+    labelnames=("method", "handler", "status_code"),
+)
+
+HTTP_REQUEST_DURATION_SECONDS = Histogram(
+    "http_request_duration_seconds",
+    "Latency of HTTP requests handled by the purchase-gateway app.",
+    labelnames=("method", "handler", "status_code"),
+)
+
 CHECKOUT_CREATED_TOTAL = Counter(
     "purchase_gateway_checkout_total",
     "Number of successful checkout sessions created.",

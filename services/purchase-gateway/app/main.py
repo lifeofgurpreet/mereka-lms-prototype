@@ -15,6 +15,7 @@ from slowapi.middleware import SlowAPIMiddleware
 
 from app.config import settings
 from app.database import engine
+from app.middleware.metrics import PrometheusHTTPMetricsMiddleware
 from app.middleware.tenant import TenantMiddleware
 from app.rate_limit import limiter
 from app.routers import (
@@ -80,6 +81,9 @@ app.add_middleware(
 
 app.add_middleware(SlowAPIMiddleware)
 app.add_middleware(TenantMiddleware)
+# HTTP request metrics (http_requests_total + duration) — consumed by
+# PurchaseGatewayHighErrorRate alert; see bead mereka-lms-zuv1.
+app.add_middleware(PrometheusHTTPMetricsMiddleware)
 
 # Routers
 app.include_router(health.router)
