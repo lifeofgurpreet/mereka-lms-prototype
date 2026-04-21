@@ -100,6 +100,22 @@ variable "CACHE_TO_MFE" {
   default = ""  // Empty = no cache export; set by workflow on trusted main only
 }
 
+variable "OPENEDX_LOCAL_CACHE_FROM" {
+  default = ""
+}
+
+variable "OPENEDX_FAST_LOCAL_CACHE_FROM" {
+  default = ""
+}
+
+variable "MFE_LOCAL_CACHE_FROM" {
+  default = ""
+}
+
+variable "MFE_FAST_LOCAL_CACHE_FROM" {
+  default = ""
+}
+
 variable "LOCAL_CACHE_DIR" {
   default = ".buildx-cache"
 }
@@ -131,7 +147,7 @@ target "_openedx-common" {
   output = ["type=docker"]
   cache-from = [
     "type=registry,ref=${OPENEDX_CACHE_REF}",
-    "type=local,src=${LOCAL_CACHE_DIR}/openedx",
+    "${OPENEDX_LOCAL_CACHE_FROM}",
   ]
   cache-to = [
     "type=local,dest=${LOCAL_CACHE_DIR}/openedx,mode=max",
@@ -192,6 +208,11 @@ target "openedx-fast" {
   cache-to = [
     "type=local,dest=${LOCAL_CACHE_DIR}/openedx-fast,mode=max",
   ]
+  cache-from = [
+    "type=registry,ref=${OPENEDX_CACHE_REF}",
+    "${OPENEDX_FAST_LOCAL_CACHE_FROM}",
+    "${OPENEDX_LOCAL_CACHE_FROM}",
+  ]
   labels = {
     "io.mereka.build-profile" = "fast"
     "io.mereka.build-scope"   = "openedx"
@@ -221,7 +242,7 @@ target "_mfe-common" {
   output = ["type=docker"]
   cache-from = [
     "type=registry,ref=${MFE_CACHE_REF}",
-    "type=local,src=${LOCAL_CACHE_DIR}/mfe",
+    "${MFE_LOCAL_CACHE_FROM}",
   ]
   cache-to = [
     "type=local,dest=${LOCAL_CACHE_DIR}/mfe,mode=max",
@@ -277,6 +298,11 @@ target "mfe-fast" {
   tags = [for tag in split(",", MFE_FAST_TAGS) : trimspace(tag) if trimspace(tag) != ""]
   cache-to = [
     "type=local,dest=${LOCAL_CACHE_DIR}/mfe-fast,mode=max",
+  ]
+  cache-from = [
+    "type=registry,ref=${MFE_CACHE_REF}",
+    "${MFE_FAST_LOCAL_CACHE_FROM}",
+    "${MFE_LOCAL_CACHE_FROM}",
   ]
   labels = {
     "io.mereka.build-profile"              = "fast"

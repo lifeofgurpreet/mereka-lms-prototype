@@ -146,67 +146,26 @@ fi
 TAGS_CSV="$(IFS=,; printf '%s' "${IMAGE_TAGS[*]}")"
 LOCAL_CACHE_ROOT="$REPO_ROOT/.buildx-cache"
 BUILDX_BAKE_ARGS=()
-
-ensure_local_buildx_builder() {
-  [[ "$OUTPUT_MODE" == "docker" ]] || return 0
-  [[ -z "${BUILDX_BUILDER:-}" ]] || return 0
-
-  local current_driver
-  current_driver="$(docker buildx ls --format '{{json .}}' | python3 -c '
-import json
-import sys
-
-for line in sys.stdin:
-    item = json.loads(line)
-    if item.get("Current"):
-        print(item.get("Driver", ""))
-        break
-')"
-
-  [[ "$current_driver" == "docker" ]] || return 0
-
-  local builder_name
-  builder_name="$(docker buildx ls --format '{{json .}}' | python3 -c '
-import json
-import sys
-
-for line in sys.stdin:
-    item = json.loads(line)
-    if item.get("Driver") != "docker-container":
-        continue
-    nodes = item.get("Nodes") or []
-    if any(node.get("Status") == "running" for node in nodes):
-        print(item.get("Name", ""))
-        break
-')"
-
-  if [[ -z "$builder_name" ]]; then
-    builder_name="${MEREKA_LOCAL_BUILDX_BUILDER:-mereka-local-build}"
-    if ! docker buildx inspect "$builder_name" >/dev/null 2>&1; then
-      docker buildx create --name "$builder_name" --driver docker-container >/dev/null
-    fi
-  fi
-
-  docker buildx inspect --bootstrap "$builder_name" >/dev/null
-  BUILDX_BAKE_ARGS+=(--builder "$builder_name")
-  echo "Using buildx builder '$builder_name' for local cache export"
-}
+source "$REPO_ROOT/scripts/infra/buildx-local-builder.sh"
 
 if [[ ! -f "$BAKE_FILE" ]]; then
   echo "Bake file not found: $BAKE_FILE" >&2
   exit 1
 fi
 
-# Keep local cache imports quiet and deterministic for developer-mode builds.
-# buildx warns if the configured local src path does not exist yet.
-mkdir -p "$LOCAL_CACHE_ROOT/openedx"
+mkdir -p "$LOCAL_CACHE_ROOT/openedx" "$LOCAL_CACHE_ROOT/openedx-${BUILD_PROFILE}"
 ensure_local_buildx_builder
 
 BAKE_ENV=(
+  "LOCAL_CACHE_DIR=${LOCAL_CACHE_ROOT}"
   "OPENEDX_CONTEXT=${CONTEXT_DIR}"
   "OPENEDX_DOCKERFILE=${DOCKERFILE_RELATIVE}"
   "OPENEDX_${BUILD_PROFILE^^}_TAGS=${TAGS_CSV}"
 )
+append_local_cache_from OPENEDX_LOCAL_CACHE_FROM "$LOCAL_CACHE_ROOT/openedx"
+if [[ "$BUILD_PROFILE" == "fast" ]]; then
+  append_local_cache_from OPENEDX_FAST_LOCAL_CACHE_FROM "$LOCAL_CACHE_ROOT/openedx-fast"
+fi
 if [[ -n "$CACHE_REF" && "$CACHE_MODE" != "none" ]]; then
   BAKE_ENV+=("OPENEDX_CACHE_REF=${CACHE_REF}")
 fi
