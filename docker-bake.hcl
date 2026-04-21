@@ -7,31 +7,31 @@ variable "OPENEDX_DOCKERFILE" {
 }
 
 variable "OPENEDX_PROOF_TAG" {
-  default = "docker.io/overhangio/openedx:21.0.0-indigo"
+  default = "docker.io/overhangio/openedx:21.0.0"
 }
 
 variable "OPENEDX_PROOF_TAGS" {
-  default = "docker.io/overhangio/openedx:21.0.0-indigo"
+  default = "docker.io/overhangio/openedx:21.0.0"
 }
 
 variable "OPENEDX_FAST_TAG" {
-  default = "docker.io/overhangio/openedx:21.0.0-indigo-fast"
+  default = "docker.io/overhangio/openedx:21.0.0-fast"
 }
 
 variable "OPENEDX_FAST_TAGS" {
-  default = "docker.io/overhangio/openedx:21.0.0-indigo-fast"
+  default = "docker.io/overhangio/openedx:21.0.0-fast"
 }
 
 variable "OPENEDX_PRODUCER_TAG" {
-  default = "docker.io/overhangio/openedx:21.0.0-indigo-producer"
+  default = "docker.io/overhangio/openedx:21.0.0-producer"
 }
 
 variable "OPENEDX_PRODUCER_TAGS" {
-  default = "docker.io/overhangio/openedx:21.0.0-indigo-producer"
+  default = "docker.io/overhangio/openedx:21.0.0-producer"
 }
 
 variable "OPENEDX_CACHE_REF" {
-  default = "docker.io/overhangio/openedx:21.0.0-indigo-cache"
+  default = "docker.io/overhangio/openedx:21.0.0-cache"
 }
 
 variable "OPENEDX_PROOF_GHA_SCOPE" {
@@ -65,31 +65,31 @@ variable "MFE_RENDERED_DOCKERFILE_SHA256" {
 }
 
 variable "MFE_PROOF_TAG" {
-  default = "docker.io/overhangio/openedx-mfe:21.0.0-indigo"
+  default = "docker.io/overhangio/openedx-mfe:21.0.0"
 }
 
 variable "MFE_PROOF_TAGS" {
-  default = "docker.io/overhangio/openedx-mfe:21.0.0-indigo"
+  default = "docker.io/overhangio/openedx-mfe:21.0.0"
 }
 
 variable "MFE_FAST_TAG" {
-  default = "docker.io/overhangio/openedx-mfe:21.0.0-indigo-fast"
+  default = "docker.io/overhangio/openedx-mfe:21.0.0-fast"
 }
 
 variable "MFE_FAST_TAGS" {
-  default = "docker.io/overhangio/openedx-mfe:21.0.0-indigo-fast"
+  default = "docker.io/overhangio/openedx-mfe:21.0.0-fast"
 }
 
 variable "MFE_PRODUCER_TAG" {
-  default = "docker.io/overhangio/openedx-mfe:21.0.0-indigo-producer"
+  default = "docker.io/overhangio/openedx-mfe:21.0.0-producer"
 }
 
 variable "MFE_PRODUCER_TAGS" {
-  default = "docker.io/overhangio/openedx-mfe:21.0.0-indigo-producer"
+  default = "docker.io/overhangio/openedx-mfe:21.0.0-producer"
 }
 
 variable "MFE_CACHE_REF" {
-  default = "docker.io/overhangio/openedx-mfe:21.0.0-indigo-cache"
+  default = "docker.io/overhangio/openedx-mfe:21.0.0-cache"
 }
 
 variable "MFE_PROOF_GHA_SCOPE" {

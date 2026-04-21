@@ -15,12 +15,11 @@ DOCKER_IMAGE_REDIS: mirror.gcr.io/library/redis:7.4.5
 DOCKER_IMAGE_SMTP: mirror.gcr.io/devture/exim-relay:4.96-r1-0
 MYSQL_ROOT_HOST: '%'
 MFE_DOCKER_IMAGE: openedx-mfe:nightly
-MFE_COMMON_VERSION: master  # WARNING: 'master' is a floating ref. Pin to release tag for reproducible builds.
+MFE_COMMON_VERSION: release/ulmo.2
 OPENEDX_COMMON_VERSION: open-release/ulmo.1
 OPENEDX_LMS_VERSION: open-release/ulmo.1
 OPENEDX_CMS_VERSION: open-release/ulmo.1
 PLUGINS:
-  - indigo
   - mereka_lms
   - mereka_lms_mfe_slots
   - discovery

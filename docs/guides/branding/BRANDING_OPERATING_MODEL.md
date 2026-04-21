@@ -128,11 +128,11 @@ Local Tutor builds remain valid for debug/dev parity:
      3) redeploy with GitOps and rerun strict gate.
    - Prevention (root-cause): `./scripts/infra/prepare-tutor-build-context.sh --target mfe`
      realizes the authn parity enforcement implemented in `apply-patches.sh`, including
-     both `COPY indigo/env.config.jsx /openedx/app/` and `COPY indigo/mereka /openedx/app/mereka`
+     both `COPY mereka/env.config.jsx /openedx/app/` and `COPY mereka/theme-source /openedx/app/theme-source`
      in `authn-common` when Tutor template drift omits them.
 
 8. **`tutor images build mfe` fails at `authn-prod` with `Can't resolve '@openedx/frontend-plugin-framework'`**
-   - Cause: Indigo `env.config.jsx` imports plugin framework, but generated MFE Dockerfile is missing
+   - Cause: Mereka `env.config.jsx` imports plugin framework, but generated MFE Dockerfile is missing
      dependency install in one or more `*-common` stages.
    - Fix:
      1) rerun `./scripts/infra/prepare-tutor-build-context.sh --target mfe`
@@ -330,7 +330,7 @@ _Added: 2026-02-18 (bead 2dcy.6 / AC-FRONT-064)_
 
 | Slot ID | What It Replaces | Registration | Fallback Strategy |
 |---------|-----------------|--------------|-------------------|
-| `footer_slot` | Default Indigo/OpenedX `<Footer />` component | `mereka_lms.py` `PLUGIN_SLOTS.add_item` | `apply-patches.sh` `RenderWidget: <MerekaFooter />` string replacement |
+| `footer_slot` | Default Open edX `<Footer />` component | `mereka_lms.py` `PLUGIN_SLOTS.add_item` | `apply-patches.sh` `RenderWidget: <MerekaFooter />` string replacement |
 | `header_logo_slot` | Default MFE header bar logo | `mereka_lms.py` `PLUGIN_SLOTS.add_item` | Scoped `.mereka-header-logo` fallback sizing in `mereka.scss` |
 | `learner_dashboard.sidebar.v1` | Dashboard sidebar (append mode) | `mereka_lms.py` `PLUGIN_SLOTS.add_item` | SCSS scoped layout rules under `[data-testid*="learner-dashboard"]` (RISK: HIGH) |
 

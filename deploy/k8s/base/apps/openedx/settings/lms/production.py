@@ -119,7 +119,7 @@ if not SECRET_KEY:
     raise ValueError("OPENEDX_SECRET_KEY environment variable is required")
 
 # Comprehensive theming is enabled via env.yml; actually activate the theme.
-# Without DEFAULT_SITE_THEME, Open edX will keep serving stock Indigo styles/assets.
+# Without DEFAULT_SITE_THEME, Open edX will keep serving stock upstream styles/assets.
 DEFAULT_SITE_THEME = os.environ.get("DEFAULT_SITE_THEME", "mereka")
 
 # Override database password from environment variable.
@@ -1052,8 +1052,6 @@ ECOMMERCE_API_URL = ECOMMERCE_PUBLIC_URL_ROOT + "/api/v2"
 # will be the replacement. Re-enable these when Purchase Gateway is live.
 # MFE_CONFIG["ECOMMERCE_BASE_URL"] = ECOMMERCE_PUBLIC_URL_ROOT
 # MFE_CONFIG["ORDER_HISTORY_URL"] = ORDER_HISTORY_MICROFRONTEND_URL
-
-MFE_CONFIG['INDIGO_ENABLE_DARK_TOGGLE'] = True
 
 # MFE Config API URLs - maps MFE names to their base URLs
 MFE_CONFIG_API_URLS = {

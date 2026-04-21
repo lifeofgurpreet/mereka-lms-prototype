@@ -84,10 +84,10 @@ grep -E "MYSQL_HOST|MONGODB_HOST|REDIS_HOST" tutor_env/config.yml
 ### 5. Build Images
 ```bash
 # OpenEdX image (20-30 minutes, needs 12GB+ RAM)
-tutor images build openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 
 # MFE image (15-20 minutes)
-tutor images build mfe
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 ```
 
 ### 6. Initialize and Launch

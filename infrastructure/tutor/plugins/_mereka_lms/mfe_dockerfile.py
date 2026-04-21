@@ -6,7 +6,7 @@ from _mereka_lms import _register_env_patch
 # MFE Dockerfile Patches
 ###############################################################################
 
-# Node 24 build toolchain + git HTTPS override
+# Node 24 build toolchain + git HTTPS override.
 _register_env_patch(
     "mfe-dockerfile-pre-npm-install",
     """
@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y \\
     && rm -rf /var/lib/apt/lists/*
 # Force git to use HTTPS instead of SSH for github.com — Docker builds
 # have no SSH keys, so github: protocol (which resolves to SSH) fails.
-# This affects tutor-indigo's @edx/brand install from edly-io/brand-openedx.
+# This protects any git-based npm dependency resolution in upstream MFE sources.
 RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@github.com/" \\
     && git config --global --add url."https://github.com/".insteadOf "git@github.com:" \\
     && git config --global http.sslCAInfo /etc/ssl/certs/ca-certificates.crt
@@ -25,7 +25,7 @@ RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@git
 )
 
 # Install local OEP-48 brand package for MFEs.
-# We ship the package in tutor_env/plugins/mfe/build/mfe/indigo/brand-mereka and
+# We ship the package in tutor_env/plugins/mfe/build/mfe/mereka/brand-mereka and
 # alias it as @edx/brand for all frontend app builds.
 #
 # IMPORTANT: This MUST be post-npm-install, not pre-npm-install.
@@ -38,18 +38,18 @@ RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@git
 _register_env_patch(
     "mfe-dockerfile-post-npm-install",
     """
-COPY indigo/brand-mereka /openedx/app/brand-mereka
+COPY mereka/brand-mereka /openedx/app/brand-mereka
 RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
 """,
 )
 
 # Copy Mereka SCSS theme into the MFE container so that
-# `import './mereka/mereka.scss'` in env.config.jsx resolves.
-# The mereka/ directory is populated by footer-component.sh during apply-patches.
+# `import './theme-source/mereka.scss'` in env.config.jsx resolves.
+# The theme-source/ directory is populated by sync-footer-assets.sh during apply-patches.
 _register_env_patch(
     "mfe-dockerfile-post-npm-install",
     """
-COPY indigo/mereka /openedx/app/mereka
+COPY mereka/theme-source /openedx/app/theme-source
 """,
 )
 
@@ -58,7 +58,7 @@ COPY indigo/mereka /openedx/app/mereka
 _register_env_patch(
     "mfe-dockerfile-post-npm-install",
     """
-COPY indigo/theme /openedx/dist/theme
+COPY mereka/theme /openedx/dist/theme
 """,
 )
 
@@ -67,7 +67,7 @@ COPY indigo/theme /openedx/dist/theme
 _register_env_patch(
     "mfe-dockerfile-production-final",
     """
-COPY indigo/theme /openedx/dist/theme
+COPY mereka/theme /openedx/dist/theme
 """,
 )
 

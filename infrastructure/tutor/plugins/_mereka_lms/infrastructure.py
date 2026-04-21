@@ -106,8 +106,7 @@ hooks.Filters.CLI_DO_INIT_TASKS.add_item(
     (
         "lms",
         """
-# Ensure local/dev site rows converge to the Mereka theme after tutor-indigo's
-# default init task has created initial SiteTheme records.
+# Ensure local/dev site rows converge to the Mereka theme during Tutor init.
 ./manage.py lms shell -c "
 from django.contrib.sites.models import Site
 

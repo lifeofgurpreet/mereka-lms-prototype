@@ -44,13 +44,13 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 2. Indigo/Mereka env.config.jsx source exists
+# 2. Mereka env.config.jsx source exists
 # ---------------------------------------------------------------------------
-INDIGO_ENV_CONFIG="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/indigo/env.config.jsx"
-if [[ ! -f "$INDIGO_ENV_CONFIG" ]]; then
-  _skip "Indigo env.config.jsx source not found (tutor config save not run): $INDIGO_ENV_CONFIG"
+MEREKA_ENV_CONFIG="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/mereka/env.config.jsx"
+if [[ ! -f "$MEREKA_ENV_CONFIG" ]]; then
+  _skip "Mereka env.config.jsx source not found (tutor config save not run): $MEREKA_ENV_CONFIG"
 else
-  _pass "Indigo env.config.jsx source exists: $INDIGO_ENV_CONFIG"
+  _pass "Mereka env.config.jsx source exists: $MEREKA_ENV_CONFIG"
 fi
 
 # ---------------------------------------------------------------------------

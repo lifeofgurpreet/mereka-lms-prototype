@@ -104,7 +104,7 @@ All UI customizations MUST flow through Tutor plugin hooks. Direct modification 
 | `hooks.Filters.CONFIG_DEFAULTS.add_items(...)` | Hardcoding values in `tutor_env/config.yml` |
 | `apply-patches.sh` for Tutor-generated template patching | Patching upstream edx-platform Python/Mako files |
 | `PLUGIN_SLOTS.add_item(...)` when `tutormfe.hooks` available | String-replacing compiled MFE JS bundles |
-| SCSS overrides via Indigo theme + `_tokens.scss` | Overriding Paragon component internals via `!important` chains |
+| SCSS overrides via repo-owned Mereka theme source + `_tokens.scss` | Overriding Paragon component internals via `!important` chains |
 
 ### apply-patches.sh Boundary
 

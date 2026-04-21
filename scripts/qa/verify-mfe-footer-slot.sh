@@ -70,7 +70,7 @@ else
 fi
 
 # 3. Plugin imports mereka.scss
-if grep -q "mereka/mereka.scss" "$PLUGIN"; then
+if grep -q "theme-source/mereka.scss" "$PLUGIN"; then
   do_pass "Mereka SCSS import present in plugin"
 else
   do_fail "Mereka SCSS import missing from plugin"

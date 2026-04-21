@@ -61,7 +61,7 @@ if len(parts) != 2:
     print("[FAIL] Could not locate production stage in rendered MFE Dockerfile")
     sys.exit(1)
 
-if "COPY indigo/theme /openedx/dist/theme" not in parts[1]:
+if "COPY mereka/theme /openedx/dist/theme" not in parts[1]:
     print("[FAIL] Rendered MFE production stage missing theme COPY")
     sys.exit(1)
 

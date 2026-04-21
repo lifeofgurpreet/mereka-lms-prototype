@@ -161,7 +161,7 @@ tutor local restart lms cms
 **"MFE login white screen"**
 ```bash
 curl http://localhost/api/mfe_config/v1?mfe=authn  # Check API
-tutor images build mfe  # Rebuild if needed
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 tutor local restart mfe
 ```
 

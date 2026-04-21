@@ -168,7 +168,7 @@ hooks.Filters.ENV_PATCHES.add_item(
         "mfe-env-config",
         """
 // Import Mereka theme SCSS
-import './mereka/mereka.scss';
+import './theme-source/mereka.scss';
 
 // Register custom footer component
 const MerekaFooter = () => { ... };

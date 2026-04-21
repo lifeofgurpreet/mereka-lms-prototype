@@ -325,7 +325,7 @@ $font-family-base: $mereka-font-primary;
 
 1. **Edit CSS**: Modify `tutor_env/plugins/forum/static/css/forum-theme.css`
 2. **Test Locally**: `tutor local restart lms`
-3. **Local parity build**: `tutor images build openedx`
+3. **Local parity build**: `./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast`
 4. **Shared-environment release**: publish via `.github/workflows/build-tutor-images.yml`
 5. **Promote runtime**: follow `docs/ops/runbooks/THEME_DEPLOYMENT.md` and use `./scripts/infra/release-openedx-gitops.sh --require-digests`
 

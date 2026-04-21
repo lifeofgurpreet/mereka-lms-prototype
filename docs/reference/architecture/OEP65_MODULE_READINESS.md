@@ -157,7 +157,7 @@ mostly build-context sync plus the documented `pull_translations` retry exceptio
 
 ### Gap 4 — `env.config.jsx` Contains Build-Time Hostname Coupling
 
-**Current state**: `tutor_env/env/plugins/mfe/build/mfe/indigo/env.config.jsx` contains:
+**Current state**: `tutor_env/env/plugins/mfe/build/mfe/mereka/env.config.jsx` contains:
 
 ```jsx
 const SITE_VARIANTS = {
@@ -204,7 +204,7 @@ by the LMS). Fall back to current hardcoded values for backward compatibility.
 
 **Current state**: `@openedx/frontend-plugin-framework@^1.8.0` requires `--legacy-peer-deps`
 because it has peer dependency conflicts with some upstream MFE packages (React version
-mismatches between FPF and Indigo or individual MFEs).
+mismatches between FPF and individual MFEs).
 
 **OEP-65 target**: FPF is a first-class dependency of all Open edX MFEs. No `--legacy-peer-deps`
 should be needed. Upstream FPF and MFEs should agree on React and peer versions.
@@ -219,7 +219,7 @@ should be needed. Upstream FPF and MFEs should agree on React and peer versions.
 ### Gap 7 — No Shared Shell for `env.config.jsx` (Architectural)
 
 **Current state**: Each MFE has its own `COPY env.config.jsx` in its Dockerfile stage. The
-shared `env.config.jsx` (from Indigo) is copied into every app. If the file changes, all 12
+shared `env.config.jsx` is copied into every app. If the file changes, all 12
 MFEs must rebuild.
 
 **OEP-65 target**: The shell loads `env.config.jsx` once. Remote MFEs inherit the slot
@@ -271,7 +271,7 @@ RUN npm install --legacy-peer-deps '@edx/brand@file:./brand-mereka'
 SCSS is imported in `env.config.jsx`:
 
 ```jsx
-import './mereka/mereka.scss';
+import './theme-source/mereka.scss';
 ```
 
 This is the OEP-65/OEP-50 endorsed brand override pattern.
@@ -364,7 +364,7 @@ Dockerfile and verify Mereka Plugin Slots and brand still work."
 | File | Relevance |
 |------|-----------|
 | `infrastructure/tutor/mfe-build/Dockerfile` | Build-time config gaps (Gap 2) |
-| `tutor_env/env/plugins/mfe/build/mfe/indigo/env.config.jsx` | `SITE_VARIANTS`, nav links (Gap 4, 5) |
+| `tutor_env/env/plugins/mfe/build/mfe/mereka/env.config.jsx` | `SITE_VARIANTS`, nav links (Gap 4, 5) |
 | `infrastructure/tutor/plugins/mereka_lms.py` | `PLUGIN_SLOTS` registration, `ENV_PATCHES` |
 | `scripts/infra/prepare-tutor-build-context.sh` | Canonical build-context refresh path for the remaining patch-only sync |
 | `docs/reference/architecture/MFE_RUNTIME_CONFIG.md` | Full runtime config migration plan |

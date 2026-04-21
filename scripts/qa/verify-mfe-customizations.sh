@@ -62,7 +62,7 @@ else
   declare -A PATCH_SIGNATURES=(
     ["Node 24 toolchain (pre-npm-install hook)"]="mfe-dockerfile-pre-npm-install"
     ["g++ python3 toolchain extension"]="gcc g++ git libgl1 libxi6 make python3 python3-distutils"
-    ["Mereka brand package copy"]="COPY indigo/brand-mereka /openedx/app/brand-mereka"
+    ["Mereka brand package copy"]="COPY mereka/brand-mereka /openedx/app/brand-mereka"
     ["Frontend plugin framework install"]="frontend-plugin-framework@^1.8.0"
     ["Local brand alias"]="@edx/brand@file:./brand-mereka"
     ["Admin console Redux deps"]="react-redux@^8.1.3"
@@ -126,7 +126,7 @@ else
   fi
 
   # Check Mereka theme copy
-  if grep -q 'COPY indigo/mereka /openedx/app/mereka' "$TUTOR_ENV" 2>/dev/null; then
+  if grep -q 'COPY mereka/theme-source /openedx/app/theme-source' "$TUTOR_ENV" 2>/dev/null; then
     check_pass "Mereka brand theme copy present in MFE Dockerfile"
   else
     check_fail "Mereka theme copy not found — custom footer branding may be broken"
@@ -186,18 +186,18 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 4. Check for tutor_env/ Indigo env.config.jsx
+# 4. Check for tutor_env/ Mereka env.config.jsx
 # ---------------------------------------------------------------------------
 
-section "tutor_env/ Indigo env.config.jsx (if generated)"
+section "tutor_env/ Mereka env.config.jsx (if generated)"
 
-INDIGO_ENV="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/indigo/env.config.jsx"
+MEREKA_ENV="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/mereka/env.config.jsx"
 
-if [[ ! -f "$INDIGO_ENV" ]]; then
-  check_warn "indigo/env.config.jsx not found — tutor config save may not have been run"
+if [[ ! -f "$MEREKA_ENV" ]]; then
+  check_warn "mereka/env.config.jsx not found — tutor config save may not have been run"
 else
-  echo "  Found: $INDIGO_ENV"
-  if grep -q 'mereka' "$INDIGO_ENV" 2>/dev/null; then
+  echo "  Found: $MEREKA_ENV"
+  if grep -q 'mereka' "$MEREKA_ENV" 2>/dev/null; then
     check_pass "Mereka references present in env.config.jsx"
   else
     check_warn "No mereka references found in env.config.jsx — footer wiring may be incomplete"

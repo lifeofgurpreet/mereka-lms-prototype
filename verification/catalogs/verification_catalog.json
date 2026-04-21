@@ -469,7 +469,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/infra/verify-local-bootstrap-readiness.sh",
-      "reference_count": 13,
+      "reference_count": 14,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -547,7 +547,7 @@
       "mutability": "mutating",
       "owner": "platform-infra",
       "path": "scripts/infra/verify-tutor-config.sh",
-      "reference_count": 44,
+      "reference_count": 45,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -3352,7 +3352,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-cold-start-onboarding-contract.sh",
-      "reference_count": 11,
+      "reference_count": 12,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -15154,7 +15154,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-setup.sh",
-      "reference_count": 10,
+      "reference_count": 9,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

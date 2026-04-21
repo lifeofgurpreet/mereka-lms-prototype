@@ -91,7 +91,7 @@ its relationship to the native Tutor hooks/filters in `infrastructure/tutor/plug
 |-------|-------|
 | LOC | 25 |
 | Classification | `FILESYSTEM` |
-| What it does | Copies MFE theme SCSS and font assets from `infrastructure/tutor/themes/mereka/` into `tutor_env/env/plugins/mfe/build/mfe/indigo/mereka/`. This is a pure filesystem operation: `mkdir`, `rm -rf`, `cp -R`. |
+| What it does | Copies MFE theme SCSS and font assets from `infrastructure/tutor/themes/mereka/` into `tutor_env/env/plugins/mfe/build/mfe/mereka/theme-source/`. This is a pure filesystem operation: `mkdir`, `rm -rf`, `cp -R`. |
 | Tutor hook equivalent | None. The active MFE Dockerfile authority expects these assets to physically exist in the build context before image build. A Tutor ENV_PATCH cannot create files. |
 | Why it must stay bash | Filesystem operations (copy files into the build context). Cannot be expressed as a Tutor filter. |
 | Risk of conversion | N/A — inherently a filesystem operation. |
@@ -105,7 +105,7 @@ its relationship to the native Tutor hooks/filters in `infrastructure/tutor/plug
 |-------|-------|
 | LOC | 22 |
 | Classification | `FILESYSTEM` |
-| What it does | Copies the OEP-48 brand package from `infrastructure/tutor/brand-mereka/` into `tutor_env/env/plugins/mfe/build/mfe/indigo/brand-mereka/`. Pure filesystem operation. |
+| What it does | Copies the OEP-48 brand package from `infrastructure/tutor/brand-mereka/` into `tutor_env/env/plugins/mfe/build/mfe/mereka/brand-mereka/`. Pure filesystem operation. |
 | Tutor hook equivalent | None. The MFE Dockerfile `COPY` and `npm install @edx/brand@file:./brand-mereka` require the package to physically exist in the build context. |
 | Why it must stay bash | Filesystem operations. Cannot be expressed as a Tutor filter. |
 | Notes | Added 2026-02-27 for OEP-48 brand package support (FE-001). |
@@ -159,8 +159,8 @@ Do not add another post-render mutation unless the change is classified as
 | `base-assets-no-build-isolation`: base/assets `uv pip --no-build-isolation` normalization | temporary compatibility layer | Tutor 21 emits the install line before any live local hook can replace it without text surgery. | Tutor/upstream exposes a source hook or bake-owned dependency install stage that can express the exact install contract before render. | `verify-tutor-config.sh`, `verify-cold-start-onboarding-contract.sh`, `verify-build-optimizations-render-delta-contract.sh` |
 | `uwsgi-plain-pip-fallback`: plain-pip `uwsgi` fallback | temporary compatibility layer | The rendered install path needs a non-PEP-517 fallback for the cold-build runtime dependency; current source hooks cannot replace the emitted line in place. | Dependency install semantics move to a source hook, upstream image, or bake stage with equivalent cold-build proof. | `verify-tutor-config.sh`, `verify-build-optimizations-render-delta-contract.sh` |
 | `production-build-profile-arg`: production-stage `ARG MEREKA_BUILD_PROFILE=proof` | intentional architecture change | The profile switch is a repo-owned build behavior used to distinguish proof/fast translation behavior in the rendered production stage. | Bake/HCL owns the profile contract directly and render no longer needs a Dockerfile arg injection. | `verify-cold-start-onboarding-contract.sh`, benchmark workflow proof |
-| `translation-settings-preflight`: translation settings preflight | intentional architecture change | Open edX translation discovery fails late without repo-owned settings validation before the production translation commands. | Translation preflight becomes source-owned through a Tutor hook or an upstream-supported build step before translation discovery. | `verify-tutor-config.sh`, true-cold benchmark proof |
-| `advanced-xblocks-production-copy`: advanced XBlock source carry before translation discovery | intentional architecture change | Translation discovery needs source files before the rendered production stage reaches them. | XBlock source placement becomes bake/source-hook owned before translation discovery. | `verify-cold-start-onboarding-contract.sh`, true-cold benchmark proof |
+| `translation-settings-preflight`: translation settings preflight | intentional architecture change | Open edX translation discovery fails late without repo-owned settings validation before the production translation commands. | Translation preflight becomes source-owned through a Tutor hook or an upstream-supported build step before translation discovery. | `verify-tutor-config.sh`, app-cache-cold benchmark proof |
+| `advanced-xblocks-production-copy`: advanced XBlock source carry before translation discovery | intentional architecture change | Translation discovery needs source files before the rendered production stage reaches them. | XBlock source placement becomes bake/source-hook owned before translation discovery. | `verify-cold-start-onboarding-contract.sh`, app-cache-cold benchmark proof |
 | `fast-profile-translation-wrappers`: fast-profile translation command wrappers | temporary compatibility layer | The wrapper changes existing rendered translation command behavior; current Tutor hooks cannot replace those command lines cleanly. | Bake/HCL or a source hook owns fast/proof translation semantics without command-line text rewrites. | `verify-tutor-config.sh`, benchmark workflow proof |
 
 Owner: platform build authority lane. Review date: 2026-04-27 or before merge

@@ -190,9 +190,23 @@ fi
 if [[ -z "$PLUGIN_FILE" || ! -f "$PLUGIN_FILE" ]]; then
   fail "Plugin contract sources not found (expected at least ${PLUGIN_MAIN})"
 else
-  # Extract SITE_VARIANTS keys from the JS literal embedded in the Python file.
-  # Pattern: lines of the form  'domain.tld': {
-  site_variants_keys=$(grep -oP "'\K[a-zA-Z0-9][a-zA-Z0-9.\-]+(?=':\s*\{)" "${PLUGIN_FILE}" || true)
+  # Extract SITE_VARIANTS keys from the JS literal embedded in plugin sources.
+  # Supported shapes:
+  #   'domain.tld': { ... }
+  #   'domain.tld': _TENANT_CONSTANT
+  site_variants_keys=$(python3 - "${PLUGIN_FILE}" <<'PY'
+import re
+import sys
+
+content = open(sys.argv[1], encoding="utf-8").read()
+match = re.search(r"const\s+(?:MEREKA_)?SITE_VARIANTS\s*=\s*\{(.+?)\n\s*\};", content, re.DOTALL)
+if not match:
+    sys.exit(0)
+
+for key in re.findall(r"'([a-zA-Z0-9][a-zA-Z0-9.\-]+)'\s*:\s*(?:\{|_\w+)", match.group(1)):
+    print(key)
+PY
+)
 
   if [[ -z "$site_variants_keys" ]]; then
     fail "Could not extract any SITE_VARIANTS keys from plugin contract sources"
@@ -263,28 +277,34 @@ if not match:
 
 block = match.group(1)
 
-# Resolve spread bases: extract fields from "const <NAME> = { ... };" blocks
-# so that "...NAME" in a tenant block inherits those fields.
-spread_bases = {}
+# Resolve constant objects: extract fields from "const <NAME> = { ... };" blocks.
+constant_fields = {}
 for bm in re.finditer(r'const\s+(\w+)\s*=\s*\{([^}]+)\}', content):
-    base_name = bm.group(1)
-    base_body = bm.group(2)
-    spread_bases[base_name] = {
-        fm.group(1) for fm in re.finditer(r"(\w+)\s*:", base_body)
-    }
+    name = bm.group(1)
+    body = bm.group(2)
+    fields = {fm.group(1) for fm in re.finditer(r"(\w+)\s*:", body)}
+    for spread in re.findall(r'\.\.\.\s*(\w+)', body):
+        fields |= constant_fields.get(spread, set())
+    constant_fields[name] = fields
 
-# Find each tenant block: 'domain': { ... }
-# We look for the key, then grab up to the closing brace of its object.
-tenant_pattern = re.compile(r"'([^']+)':\s*\{([^}]+)\}", re.DOTALL)
+# Find each tenant entry:
+#   'domain': { ... }
+#   'domain': _TENANT_CONSTANT
+tenant_pattern = re.compile(r"'([^']+)':\s*(?:\{([^}]+)\}|(\w+))", re.DOTALL)
 errors = []
 for m in tenant_pattern.finditer(block):
     domain = m.group(1)
-    body = m.group(2)
-    # Collect fields directly present in the tenant block
-    tenant_fields = {fm.group(1) for fm in re.finditer(r"(\w+)\s*:", body)}
-    # Resolve spread operators: ...SOME_BASE adds that base's fields
-    for spread in re.findall(r'\.\.\.\s*(\w+)', body):
-        tenant_fields |= spread_bases.get(spread, set())
+    body = m.group(2) or ""
+    constant_name = m.group(3)
+    if constant_name:
+        tenant_fields = set(constant_fields.get(constant_name, set()))
+        if not tenant_fields:
+            errors.append(f"SITE_VARIANTS['{domain}'] references unknown constant '{constant_name}'")
+            continue
+    else:
+        tenant_fields = {fm.group(1) for fm in re.finditer(r"(\w+)\s*:", body)}
+        for spread in re.findall(r'\.\.\.\s*(\w+)', body):
+            tenant_fields |= constant_fields.get(spread, set())
     for field in required:
         if field not in tenant_fields:
             errors.append(f"SITE_VARIANTS['{domain}'] missing field '{field}'")

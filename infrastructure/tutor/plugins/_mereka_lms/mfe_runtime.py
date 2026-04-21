@@ -14,7 +14,7 @@ _register_env_patch(
     "mfe-env-config-buildtime-imports",
     """
 // Import Mereka theme SCSS
-import './mereka/mereka.scss';
+import './theme-source/mereka.scss';
 
 // Sentry Browser SDK — client-side error telemetry (OBS-001, bead mereka-lms-m88z).
 // The SDK is installed via mfe-dockerfile-post-npm-install. Init is gated

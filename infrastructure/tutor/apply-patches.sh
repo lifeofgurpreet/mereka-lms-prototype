@@ -154,27 +154,6 @@ sync_mfe_patch_helpers() {
   echo "Synced authn patch helpers to MFE build context: $tutor_mfe_build_dir"
 }
 
-sync_mfe_theme() {
-  # Sync Paragon/brand theme CSS + logo assets into the MFE build context at
-  # tutor_env/env/plugins/mfe/build/mfe/indigo/theme/.
-  #
-  # The rendered Dockerfile produced by plain `tutor config save` now already
-  # carries the final production-stage `COPY indigo/theme /openedx/dist/theme`
-  # line, so apply-patches must not keep post-render Dockerfile surgery for
-  # that concern. This function is asset sync only.
-  local tutor_mfe_indigo_dir="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}/env/plugins/mfe/build/mfe/indigo"
-  local mereka_mfe_theme_src="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme"
-
-  if [[ ! -d "$mereka_mfe_theme_src" ]]; then
-    echo "WARNING: Mereka MFE theme source not found at $mereka_mfe_theme_src" >&2
-    return 0
-  fi
-
-  mkdir -p "$tutor_mfe_indigo_dir/theme"
-  cp -R "$mereka_mfe_theme_src/." "$tutor_mfe_indigo_dir/theme/"
-  echo "Synced Mereka MFE theme assets to MFE build context: $tutor_mfe_indigo_dir/theme"
-}
-
 wrap_mfe_pull_translations_retry() {
   # This is one of the remaining allowed rendered-MFE-Dockerfile rewrites in
   # apply-patches.sh. Other direct mutations must be named patch modules with
@@ -260,7 +239,6 @@ apply_mfe_patches() {
   apply_patch apply_mfe_npm_install_resilience_patch
   apply_patch apply_dependency_image_mirrors_patch
   sync_mfe_patch_helpers
-  sync_mfe_theme
   wrap_mfe_pull_translations_retry
 }
 

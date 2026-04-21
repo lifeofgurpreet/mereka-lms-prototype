@@ -176,7 +176,7 @@ From `docker-bake.hcl` and `.github/workflows/build-tutor-images.yml`:
 ```
 cache-from = [
   "type=gha,scope=tutor-openedx-proof",
-  "type=registry,ref=${OPENEDX_CACHE_REF}",   # defaults to overhangio/openedx:21.0.0-indigo-cache
+  "type=registry,ref=${OPENEDX_CACHE_REF}",   # defaults to overhangio/openedx:21.0.0-cache
 ]
 cache-to = [
   "type=gha,mode=max,scope=tutor-openedx-proof",
@@ -187,7 +187,7 @@ cache-to = [
 ```
 cache-from = [
   "type=gha,scope=tutor-openedx-mfe-proof",
-  "type=registry,ref=${MFE_CACHE_REF}",        # defaults to overhangio/openedx-mfe:21.0.0-indigo-cache
+  "type=registry,ref=${MFE_CACHE_REF}",        # defaults to overhangio/openedx-mfe:21.0.0-cache
 ]
 cache-to = [
   "type=gha,mode=max,scope=tutor-openedx-mfe-proof",

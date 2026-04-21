@@ -12,7 +12,7 @@ mkdir -p \
   "$tmpdir/tutor_env/env/build/openedx/themes/mereka/lms/static/images" \
   "$tmpdir/tutor_env/env/build/openedx/themes/mereka/lms/static/fonts" \
   "$tmpdir/tutor_env/env/build/openedx/themes/mereka/cms/static/images" \
-  "$tmpdir/tutor_env/env/plugins/mfe/build/mfe/indigo/mereka" \
+  "$tmpdir/tutor_env/env/plugins/mfe/build/mfe/mereka/theme-source" \
   "$tmpdir/tutor_env/env/apps/openedx/settings/lms" \
   "$tmpdir/infrastructure/tutor" \
   "$tmpdir/infrastructure/tutor/patches" \
@@ -33,7 +33,7 @@ done
 
 : >"$tmpdir/tutor_env/env/build/openedx/themes/mereka/lms/static/fonts/Lato-Regular.woff2"
 : >"$tmpdir/tutor_env/env/build/openedx/themes/mereka/cms/static/images/logo.png"
-: >"$tmpdir/tutor_env/env/plugins/mfe/build/mfe/indigo/mereka/mereka.scss"
+: >"$tmpdir/tutor_env/env/plugins/mfe/build/mfe/mereka/theme-source/mereka.scss"
 
 cat >"$tmpdir/infrastructure/tutor/apply-patches.sh" <<'EOF'
 #!/usr/bin/env bash

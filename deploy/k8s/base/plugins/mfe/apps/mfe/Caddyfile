@@ -59,10 +59,10 @@
 	# Runtime PARAGON theme assets are served from /theme/* in the MFE image.
 	# This path serves two categories of files:
 	#   1. CSS bundles: core.min.css, mereka-brand.min.css, light.min.css, etc.
-	#      (copied from indigo/theme/ at Docker build time)
+	#      (copied from mereka/theme/ at Docker build time)
 	#   2. Brand logo images: logo-horizontal.png, logo-horizontal-white.png, logo.png,
 	#      favicon.ico, and their SVG variants.
-	#      (copied from indigo/brand-mereka/ at Docker build time via `cp -f` in Dockerfile)
+	#      (copied from mereka/brand-mereka/ at Docker build time via `cp -f` in Dockerfile)
 	# Do NOT force Content-Type here — file_server auto-detects the correct MIME type
 	# for each file (text/css for .css, image/png for .png, image/svg+xml for .svg,
 	# image/x-icon for .ico). Overriding it breaks logos: browsers reject a PNG served

@@ -63,7 +63,7 @@ To update footer content:
    is registered to `org.openedx.frontend.layout.footer.v1` via
    `PLUGIN_OPERATIONS.Replace`. This is the single source of truth.
 2. Run verification: `./scripts/qa/verify-footer-parity.sh`
-3. For local parity, rebuild MFE with `tutor images build mfe`
+3. For local parity, rebuild MFE with `./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast`
 4. For shared environments, publish via
    `.github/workflows/build-tutor-images.yml` and promote with
    `./scripts/infra/release-openedx-gitops.sh --require-digests`

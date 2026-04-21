@@ -162,7 +162,7 @@ else
 fi
 
 # 4d. SCSS theme import injection is via plugin env-config patch
-if plugin_has_fixed "mfe-env-config-buildtime-imports" && plugin_has_fixed 'mereka/mereka.scss'; then
+if plugin_has_fixed "mfe-env-config-buildtime-imports" && plugin_has_fixed 'theme-source/mereka.scss'; then
   do_pass "mereka.scss import is injected via plugin env-config hook"
 else
   do_fail "mereka.scss import not found in plugin env-config buildtime hook"

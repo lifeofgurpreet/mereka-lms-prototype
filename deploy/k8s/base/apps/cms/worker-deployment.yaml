@@ -32,7 +32,7 @@ spec:
         runAsGroup: 1000
       containers:
         - name: cms-worker
-          image: docker.io/overhangio/openedx:21.0.0-indigo
+          image: docker.io/overhangio/openedx:21.0.0
           args:
 
           - "celery"

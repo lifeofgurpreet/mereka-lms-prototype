@@ -116,11 +116,11 @@ def process_paths(paths: list[str]) -> int:
         if updated != original:
             path.write_text(updated, encoding="utf-8")
             print(
-                "Stripped tutor-indigo learner MFE slot ownership from"
+                "Stripped legacy Indigo learner MFE slot ownership from"
                 f" {path}: {', '.join(stripped_apps)}"
             )
         else:
-            print(f"No tutor-indigo learner MFE slot ownership found in {path}")
+            print(f"No legacy Indigo learner MFE slot ownership found in {path}")
 
     return 0
 

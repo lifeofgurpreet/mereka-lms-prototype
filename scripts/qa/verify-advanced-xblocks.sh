@@ -29,7 +29,7 @@ FAILED_CHECKS=0
 
 VERBOSE=false
 IMAGE_CONTEXT=false
-OPENEDX_IMAGE="${OPENEDX_IMAGE:-docker.io/overhangio/openedx:21.0.0-indigo}"
+OPENEDX_IMAGE="${OPENEDX_IMAGE:-docker.io/overhangio/openedx:21.0.0}"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in

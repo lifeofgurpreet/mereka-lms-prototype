@@ -13,7 +13,7 @@
 
 ## Context (historical — see correction above)
 
-Tutor v21 (Open edX Ulmo / Indigo) is the current release on production ~~GKE~~
+Tutor v21 (Open edX Ulmo, repo-owned Mereka theme/plugin path) is the current release on production ~~GKE~~
 rke2-prod (`academyv2.mereka.io`). ~~The cluster is scaled to 0 replicas to reduce
 costs but the images and config are fully deployed and validated.~~
 
@@ -41,7 +41,7 @@ verification scripts, and reference overlays retained in this repo.
 
 | Item | Status |
 |------|--------|
-| Platform | Tutor v21 / Open edX Ulmo / Indigo theme |
+| Platform | Tutor v21 / Open edX Ulmo / Mereka theme and plugin path |
 | LMS | Lane-realized GHCR pin is GitOps-owned in `bbi-infrastructure` |
 | MFE | Lane-realized GHCR pin is GitOps-owned in `bbi-infrastructure` |
 | Enterprise Admin MFE | `…/enterprise-admin-portal:nreum-clean-202602200416` |
@@ -56,8 +56,8 @@ verification scripts, and reference overlays retained in this repo.
 | Item | Status |
 |------|--------|
 | Platform | App repo ships Ulmo-era base manifests; final lane realization is GitOps-owned |
-| LMS | Base deployment uses `docker.io/overhangio/openedx:21.0.0-indigo`; base kustomization redirects to GHCR with `pin-required` sentinel |
-| MFE | Base deployment uses `docker.io/overhangio/openedx-mfe:21.0.0-indigo`; reference overlay carries explicit GHCR pins |
+| LMS | Base deployment uses `docker.io/overhangio/openedx:21.0.0`; base kustomization redirects to GHCR with `pin-required` sentinel |
+| MFE | Base deployment uses `docker.io/overhangio/openedx-mfe:21.0.0`; reference overlay carries explicit GHCR pins |
 | Enterprise MFEs | Reference overlay carries explicit GHCR tags; live dev/staging parity is infra-owned |
 | Secret store | `infisical-secret-store-dev` ClusterSecretStore (patched via `patches/externalsecrets-infisical.yaml`) |
 | Domain env | `patches/domain-env.yaml` overrides `MEREKA_LMS_DOMAIN`, `LMS_BASE_URL`, `MFE_BASE_URL` for LMS/CMS/workers/discovery/notes |
@@ -78,8 +78,8 @@ kustomization then redirects the core Open edX images to GHCR with a
 
 | Service | Base image in split deployment manifests | Override in `base/kustomization.yaml` |
 |---------|---------------------------------|---------------------------------------|
-| `lms` / `cms` / workers | `docker.io/overhangio/openedx:21.0.0-indigo` | `ghcr.io/biji-biji-initiative/mereka-lms/openedx:pin-required` |
-| `mfe` | `docker.io/overhangio/openedx-mfe:21.0.0-indigo` | `ghcr.io/biji-biji-initiative/mereka-lms/mfe:pin-required` |
+| `lms` / `cms` / workers | `docker.io/overhangio/openedx:21.0.0` | `ghcr.io/biji-biji-initiative/mereka-lms/openedx:pin-required` |
+| `mfe` | `docker.io/overhangio/openedx-mfe:21.0.0` | `ghcr.io/biji-biji-initiative/mereka-lms/mfe:pin-required` |
 | `discovery` | `docker.io/overhangio/openedx-discovery:21.0.1` | (none) |
 | `ecommerce` | `docker.io/overhangio/openedx-ecommerce:19.0.0` | (none) |
 | `credentials` | `docker.io/overhangio/openedx-credentials:21.0.0` | (none) |
@@ -156,8 +156,8 @@ The example config now references `OPENEDX_COMMON_VERSION: open-release/ulmo.1`,
 matches the Ulmo baseline used by parity verifiers.
 
 The MFE Dockerfile at `infrastructure/tutor/mfe-build/Dockerfile` is the canonical
-Ulmo MFE build definition. It uses `release/ulmo.1` for all 11+ MFE app source refs
-and `release/ulmo` for Atlas translation pulls — this is correct.
+Ulmo MFE build definition. It uses `release/ulmo.2` for all 12 MFE app source refs
+and `release/ulmo.2` for Atlas translation pulls — this is correct.
 
 ---
 

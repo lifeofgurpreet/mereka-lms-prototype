@@ -13,7 +13,7 @@
 # mereka_lms.py modify those templates. Errors are only caught after a 30-45 min
 # build. This script catches them in < 1 minute by rendering + validating locally.
 #
-# The build stack is pinned in requirements-tutor.txt (currently Tutor 21.0.0 Ulmo).
+# The build stack is pinned in requirements-tutor.txt (currently Tutor 21.0.3 Ulmo).
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -105,6 +105,7 @@ echo "Generating Dockerfiles (tutor config save + apply-patches.sh)..."
 "$TUTOR_VENV/bin/tutor" config save \
   --set LMS_HOST=preflight-check.test \
   --set CMS_HOST=studio.preflight-check.test \
+  --set MFE_COMMON_VERSION=release/ulmo.2 \
   --set ENABLE_HTTPS=true \
   >/dev/null 2>&1
 
@@ -251,19 +252,20 @@ echo "--- MFE Dockerfile Invariants ---"
 # MUST be installed in that MFE's build stage. Otherwise webpack fails with
 # "Module not found" at build time.
 ENV_CONFIG="$TUTOR_ROOT/env/plugins/mfe/build/mfe/env.config.jsx"
-INDIGO_ENV_CONFIG="$TUTOR_ROOT/env/plugins/mfe/build/mfe/indigo/env.config.jsx"
-# Determine which env.config.jsx will be used (varies by Tutor version)
+MEREKA_ENV_CONFIG="$TUTOR_ROOT/env/plugins/mfe/build/mfe/mereka/env.config.jsx"
+# Determine which env.config.jsx will be used.
 ACTIVE_ENV_CONFIG=""
-if [[ -f "$INDIGO_ENV_CONFIG" ]]; then
-  ACTIVE_ENV_CONFIG="$INDIGO_ENV_CONFIG"
+if [[ -f "$MEREKA_ENV_CONFIG" ]]; then
+  ACTIVE_ENV_CONFIG="$MEREKA_ENV_CONFIG"
 elif [[ -f "$ENV_CONFIG" ]]; then
   ACTIVE_ENV_CONFIG="$ENV_CONFIG"
 fi
 
-# Check if env.config.jsx imports the indigo footer package
+# The retired Tutor Indigo footer package must not be imported by active MFE config.
 ENV_CONFIG_IMPORTS_FOOTER=false
 if [[ -n "$ACTIVE_ENV_CONFIG" ]] && grep -q "indigo-frontend-component-footer" "$ACTIVE_ENV_CONFIG" 2>/dev/null; then
   ENV_CONFIG_IMPORTS_FOOTER=true
+  fail "active env.config.jsx imports retired Tutor Indigo footer package: $ACTIVE_ENV_CONFIG"
 fi
 
 for mfe in authn learning discussions learner-dashboard profile account; do
@@ -287,12 +289,12 @@ for mfe in authn learning discussions learner-dashboard profile account; do
   fi
 done
 
-# 3. All indigo component installs must use --legacy-peer-deps
-bad_installs=$(grep -E "RUN npm install.*indigo-frontend-component" "$MFE_DF" | grep -v "legacy-peer-deps" || true)
+# 3. Retired Tutor Indigo component installs must not be present.
+bad_installs=$(grep -E "RUN npm install.*indigo-frontend-component" "$MFE_DF" || true)
 if [[ -n "$bad_installs" ]]; then
-  fail "indigo component install without --legacy-peer-deps: $bad_installs"
+  fail "retired Tutor Indigo component install remains in MFE Dockerfile: $bad_installs"
 else
-  pass "all indigo component installs use --legacy-peer-deps"
+  pass "no retired Tutor Indigo component install remains"
 fi
 
 # 4. Node version check

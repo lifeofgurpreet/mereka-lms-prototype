@@ -25,10 +25,11 @@ authority path.
 
 ## Current state
 
-- MFE apps: all 12 on `release/ulmo.1`
-- Atlas translations: `release/ulmo`
+- MFE apps: all 12 on `release/ulmo.2`
+- Atlas translations: `release/ulmo.2`
 - Brand package: local `@edx/brand@file:./brand-mereka`
 - Node base image: `mirror.gcr.io/library/node:24.11.0-bullseye-slim`
+- Caddy production base image: `mirror.gcr.io/library/caddy:2.7.4`
 - Rendered-Dockerfile exceptions: dependency image mirror normalization and
   `pull_translations` retry wrapping remain documented post-render MFE
   Dockerfile compatibility rewrites while Tutor/tutormfe do not expose source

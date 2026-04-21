@@ -153,13 +153,14 @@ door. Use it directly only when debugging the patch layer itself.
 Typical refreshed surfaces include:
 
 - `tutor_env/env/plugins/mfe/build/mfe/Dockerfile`
-- `tutor_env/env/plugins/mfe/build/mfe/indigo/env.config.jsx`
+- `tutor_env/env/plugins/mfe/build/mfe/mereka/env.config.jsx`
 - `tutor_env/env/build/openedx/Dockerfile`
 - `tutor_env/env/apps/caddy/Caddyfile`
 - `tutor_env/env/apps/nginx/lms.conf`
 - `tutor_env/env/apps/openedx/settings/lms/production.py`
 - `tutor_env/env/build/openedx/themes/mereka/`
-- `tutor_env/env/plugins/mfe/build/mfe/indigo/mereka/`
+- `tutor_env/env/plugins/mfe/build/mfe/mereka/theme-source/`
+- `tutor_env/env/plugins/mfe/build/mfe/mereka/brand-mereka/`
 
 ## Troubleshooting
 

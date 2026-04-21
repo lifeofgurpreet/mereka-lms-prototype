@@ -51,8 +51,10 @@ the backwards-compatible alias.
 
 Current workflow contract:
 
-- wipes local BuildKit cache and builder state (`docker buildx prune -af`,
-  buildx state removal, recreated builder)
+- wipes local BuildKit cache and builder state inside each measured image-family
+  job (`docker buildx prune -af` after that job's Buildx builder is created).
+  The prepare job may run on a different machine, so measured-job wipe evidence
+  is the proof signal.
 - skips GHCR login for the class
 - clears `CACHE_FROM_ARG`, so the canonical build helpers use no shared
   app-level registry cache import

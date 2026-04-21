@@ -108,7 +108,7 @@ Plugin System Architecture:
 │   ├─ build/openedx/settings/lms/assets.py                  │
 │   ├─ build/openedx/webpack.prod.config.js                  │
 │   ├─ plugins/mfe/build/mfe/Dockerfile                      │
-│   ├─ plugins/mfe/build/mfe/indigo/env.config.jsx           │
+│   ├─ plugins/mfe/build/mfe/mereka/env.config.jsx           │
 │   ├─ local/docker-compose.yml                              │
 │   ├─ apps/caddy/Caddyfile                                  │
 │   └─ apps/nginx/lms.conf                                   │
@@ -170,7 +170,7 @@ Plugin System Architecture:
    - **Solution:** Use Tutor's `mounts` feature or pre-build script
 
 2. **MFE Theme Assets**
-   - indigo/mereka directory needs manual setup
+   - `mereka/theme-source` directory needs build-context sync
    - **Solution:** Include in Dockerfile COPY or use mounts
 
 ### ❌ Intentionally Excluded
@@ -183,9 +183,8 @@ Plugin System Architecture:
 
 Before declaring the plugin production-ready:
 
-- [ ] Enable plugin: `tutor plugins enable mereka_lms`
-- [ ] Regenerate config: `tutor config save`
-- [ ] Build images: `tutor images build openedx mfe`
+- [ ] Regenerate config through `./scripts/infra/tutor-config-save.sh`
+- [ ] Build images through `./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast` and `./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast`
 - [ ] Start locally: `tutor local launch`
 - [ ] Verify LMS loads: `curl -I http://localhost`
 - [ ] Check ALLOWED_HOSTS: `tutor local run lms ./manage.py lms shell -c "from django.conf import settings; print(settings.ALLOWED_HOSTS)"`

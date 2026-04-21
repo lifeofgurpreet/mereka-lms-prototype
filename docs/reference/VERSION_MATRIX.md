@@ -10,7 +10,7 @@ configuration files match these values.
 | Component | Version | Source | Notes |
 |-----------|---------|--------|-------|
 | Open edX | Ulmo | Named release | Current supported release line |
-| Tutor | 21.0.0 | `requirements-tutor.txt` | Deployment tool for Open edX |
+| Tutor | 21.0.3 | `requirements-tutor.txt` | Deployment tool for Open edX |
 | Python | 3.12 | CI workflows, local dev | Minimum: 3.10 |
 | Node.js | 24.11.0 | `infrastructure/tutor/mfe-build/Dockerfile` | MFE build toolchain |
 | MySQL | 8.4 | Tutor default | Course data, user data |

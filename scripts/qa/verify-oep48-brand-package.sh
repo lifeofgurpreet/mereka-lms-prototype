@@ -498,7 +498,7 @@ if [[ -f "${MFE_DOCKERFILE}" ]]; then
     pass "${MFE_DOCKERFILE_LABEL} has no legacy indigo-brand-openedx package reference"
   fi
   # The Mereka SCSS directory must be copied into the container
-  if grep -q "COPY.*mereka\|COPY.*indigo/mereka" "${MFE_DOCKERFILE}"; then
+  if grep -q "COPY.*mereka/theme-source" "${MFE_DOCKERFILE}"; then
     pass "${MFE_DOCKERFILE_LABEL} copies Mereka SCSS directory into MFE container"
   else
     warn "${MFE_DOCKERFILE_LABEL} may not copy mereka/ SCSS dir into container — MFE branding may be missing"

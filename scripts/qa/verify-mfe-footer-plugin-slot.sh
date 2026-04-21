@@ -73,7 +73,7 @@ fi
 
 # 5. SCSS import is in mfe-env-config-buildtime-imports (not string surgery)
 if grep -qF "mfe-env-config-buildtime-imports" "$PLUGIN_PY" && \
-   grep -qF "mereka/mereka.scss" "$PLUGIN_PY"; then
+   grep -qF "theme-source/mereka.scss" "$PLUGIN_PY"; then
   _pass "mereka.scss import in mfe-env-config-buildtime-imports patch"
 else
   _fail "mereka.scss import not found in mfe-env-config-buildtime-imports in mereka_lms.py"

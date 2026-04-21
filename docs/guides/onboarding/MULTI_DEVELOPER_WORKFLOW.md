@@ -1,15 +1,17 @@
 # Multi-Developer Workflow Guide
-_Audience: Developer Operations • Owner: Docs Team • Last verified: 2026-03-10 • Status: canonical_
+_Audience: Developer Operations • Owner: Platform Team • Last verified: 2026-04-21 • Status: canonical_
 
 ## 🎯 Overview
 
-This guide ensures all developers can work efficiently without conflicts, with clear separation between local and production environments.
+This guide keeps every developer on the same local source-to-render-to-artifact lane. The short version is: use the repo wrapper scripts, keep `tutor_env/` local and uncommitted, and prove setup with the same contracts CI uses.
 
 ## 🚀 New Developer Setup
 
 ### One-Command Setup
 ```bash
+./scripts/qa/verify-cold-start-onboarding-contract.sh
 ./scripts/shared/setup-local.sh
+./scripts/infra/verify-local-bootstrap-readiness.sh
 ```
 
 This automatically:
@@ -21,18 +23,19 @@ This automatically:
 - Creates or prepares a local admin user
 - Verifies everything works
 
-**Time:** 45-60 minutes (first time), < 5 minutes (subsequent)
+**Time:** 45-90 minutes first time depending on image cache state, under 5 minutes for normal restart once images and data exist.
 
 ### Verify Setup
 ```bash
-./scripts/qa/verify-setup.sh
+./scripts/qa/verify-cold-start-onboarding-contract.sh
+./scripts/infra/verify-local-bootstrap-readiness.sh
 ```
 
 ## 🔄 Daily Workflow
 
 ### Starting Work
 ```bash
-cd /path/to/mereka.academy
+cd /path/to/mereka-lms
 source infrastructure/tutor/tutor-env.sh
 export TUTOR_ROOT="$(pwd)/tutor_env"
 tutor local start -d
@@ -45,9 +48,6 @@ tutor local start -d
 export TUTOR_ROOT="$(pwd)/tutor_env"
 source .venv/bin/activate
 ./scripts/infra/tutor-config-save.sh --set KEY=value
-# Manual advanced path:
-# tutor config save --set KEY=value
-# ./scripts/infra/prepare-tutor-build-context.sh --target all
 tutor local restart <affected-services>
 ```
 
@@ -75,7 +75,7 @@ tutor local stop
 - **URLs:** `localhost`, `*.localhost`
 - **Config:** `tutor_env/config.yml` (git-ignored)
 
-### RKE2 (dev / staging / prod) and Kind
+### RKE2 (dev / staging / prod)
 - **Database:** MySQL (cluster-internal), MongoDB Atlas, Redis (cluster-internal)
 - **Storage:** Longhorn CSI on RKE2 (see bbi-infrastructure storage overlays)
 - **URLs:** `academyv2.mereka.io`, `academyv2.mereka.dev`
@@ -84,8 +84,12 @@ tutor local stop
 > GKE is decommissioned as of 2026-04. All workloads run on RKE2 now. Older docs
 > that reference GCS / Cloud SQL / Workload Identity describe a past state.
 
+### Upcoming Developer Kubernetes Lanes
+
+Kubernetes preview namespaces, Loft/vCluster, and devspace-style development are planned lanes. They are not the current quick-start path until they have rows and proof gates in `docs/reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md`.
+
 ### Key Rule
-**NEVER mix local and production configs!**
+**Never mix local and production configs.**
 
 ## 📊 Verifying Parity
 
@@ -128,7 +132,8 @@ tutor local stop
 
 2. **Verify:**
    ```bash
-   ./scripts/qa/verify-setup.sh
+   ./scripts/qa/verify-cold-start-onboarding-contract.sh
+   ./scripts/infra/verify-local-bootstrap-readiness.sh
    ```
 
 3. **Done!** Developer is ready to work.
@@ -144,8 +149,8 @@ tutor local restart
 
 **Production (after local testing):**
 ```bash
-# Via kubectl or Tutor k8s commands
-# Always test locally first!
+# Use the release-object-driven GitOps path documented in:
+# docs/architecture/PROMOTION_REALIZATION_AND_INCIDENT_FLOW.md
 ```
 
 ### Syncing Production Data (Read-Only)
@@ -178,18 +183,18 @@ tutor local restart
 ### Code Conflicts
 - Use Git branches for features
 - Test locally before pushing
-- Run `./scripts/qa/comprehensive-test.sh` before PR
+- Run `./scripts/qa/verify-cold-start-onboarding-contract.sh` and the smallest relevant QA gate before PR
 
 ## 📋 Best Practices
 
 ### Before Starting Work
 1. Pull latest changes: `git pull`
-2. Verify setup: `./scripts/qa/verify-setup.sh`
+2. Verify setup: `./scripts/qa/verify-cold-start-onboarding-contract.sh`
 3. Start services: `tutor local start -d`
 
 ### During Development
 1. Test locally first
-2. Run tests: `./scripts/qa/comprehensive-test.sh`
+2. Run the smallest relevant test or verifier for the changed surface
 3. Check parity: `./scripts/qa/check-parity.sh`
 4. Document changes
 
@@ -202,7 +207,7 @@ tutor local restart
 ### Before Deploying
 1. Verify locally works perfectly
 2. Compare with production config
-3. Test in dev (kind) first
+3. Test in the approved dev GitOps lane when the change affects deployed runtime
 4. Document deployment steps
 
 ## 🔍 Troubleshooting
@@ -249,7 +254,8 @@ cp infrastructure/tutor/config.example.yml tutor_env/config.yml
 ## ✅ Checklist for New Developers
 
 - [ ] Ran `./scripts/shared/setup-local.sh`
-- [ ] Verified with `./scripts/qa/verify-setup.sh`
+- [ ] Verified source/docs contract with `./scripts/qa/verify-cold-start-onboarding-contract.sh`
+- [ ] Verified initialized state with `./scripts/infra/verify-local-bootstrap-readiness.sh`
 - [ ] Can access http://localhost
 - [ ] Can log in with the local admin account created during setup
 - [ ] Read `docs/guides/onboarding/LOCAL_SETUP.md`
@@ -258,4 +264,4 @@ cp infrastructure/tutor/config.example.yml tutor_env/config.yml
 
 ---
 
-**Remember:** Always test locally first, never mix configs, and verify parity regularly!
+**Remember:** stay in the documented lane, never mix configs, and record anything that blocks setup so the guide or verifier can be improved.

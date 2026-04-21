@@ -84,9 +84,9 @@ column literally instead of assuming every row is still live script-only authori
 | C2 | Node 24 build toolchain (historical ID) | `mfe_dockerfile.py` | MIGRATED | LOW | Closed | Already owned by plugin `mfe-dockerfile-pre-npm-install` hook; do not treat as live script-only authority. |
 | C3 | Node cache reuse from upstream | `Dockerfile` | EXCEPTION | HIGH | 2026-Q4 | Requires Tutor hook for pre-npm-install Dockerfile lines. File exception. |
 | C4 | Course authoring directory fix | `mfe/Dockerfile` | SCRIPT-ONLY | HIGH | 2026-Q3 | Add symlink to plugin `mfe-dockerfile-post-npm-install` hook |
-| C5 | MFE theme COPY (`indigo/mereka`) | `mfe/Dockerfile` | SCRIPT-ONLY | HIGH | 2026-Q3 | Add to plugin `mfe-dockerfile-post-npm-install` hook |
+| C5 | MFE theme COPY (`mereka/theme-source`) | `mfe/Dockerfile` | MIGRATED | LOW | Closed 2026-04-21 | Owned by plugin `mfe-dockerfile-post-npm-install` hook plus build-context sync. |
 | C6 | Admin console Redux deps | `mfe/Dockerfile` | SCRIPT-ONLY | MEDIUM | 2026-Q3 | Add to plugin `mfe-dockerfile-post-npm-install` hook |
-| C7 | Indigo footer package removal | `env.config.jsx` | SCRIPT-ONLY | MEDIUM | 2026-Q3 | Add to plugin `mfe-env-config` hook |
+| C7 | Legacy Indigo footer package removal | `env.config.jsx` | MIGRATED | LOW | Closed 2026-04-21 | Tutor Indigo dependency retired; verifier keeps a migration guard for stale renders. |
 | C8 | `REQUIRE_BUILD_PROFILE_OPTIMIZE=none` | `Dockerfile` | MIGRATED | LOW | Closed 2026-04-21 | Now owned by plugin `openedx-dockerfile-pre-assets` hook; bash keeps only rendered drift cleanup. |
 | C9 | MFE cache headers | `Caddyfile` | SCRIPT-ONLY | MEDIUM | 2026-Q3 | Add to plugin `caddy-caddyfile` hook |
 | C10 | New Relic ENV propagation | `mfe/Dockerfile` | SCRIPT-ONLY | LOW | 2026-Q4 | Add to plugin `mfe-dockerfile-post-npm-install` hook |
@@ -183,7 +183,7 @@ See full details in `MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md`.
 The script can be retired (or reduced to asset-sync only) when:
 
 1. All Section C items are migrated to `mereka_lms.py` plugin hooks
-2. Local parity remains reproducible without `apply-patches.sh` (`tutor images build openedx` + `mfe` may still be used as a debug/local check)
+2. Local parity remains reproducible through the repo-owned build helpers without broad post-render Dockerfile surgery
 3. The governed publish lane (`.github/workflows/build-tutor-images.yml`) ships the same plugin-only sources without `apply-patches.sh`, and all verification gates pass there
 4. Section D items are verified as redundant (plugin handles them)
 

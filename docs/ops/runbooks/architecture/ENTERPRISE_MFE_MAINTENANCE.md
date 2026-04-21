@@ -48,10 +48,11 @@ Ulmo asset pipeline on machines with 12 GB Docker RAM.
 
 ### 3. Custom Footer Component (Mereka Brand)
 
-The `indigo/env.config.jsx` template and rendered MFE Dockerfile now ensure:
+The repo-owned `mereka/env.config.jsx` template and rendered MFE Dockerfile now ensure:
 
-- Copy `indigo/mereka/` brand assets into `/openedx/app/mereka` at build time
-- Keep `mereka.scss` available to the build via the Indigo-rendered config path
+- Copy `mereka/theme-source/` theme assets into `/openedx/app/theme-source` at build time
+- Copy `mereka/brand-mereka/` into `/openedx/app/brand-mereka` and install it as `@edx/brand`
+- Keep `theme-source/mereka.scss` available to the build via the repo-owned config path
 
 The governed prepare path still refreshes the remaining MFE build-context asset
 sync, but stale ad hoc production-stage theme-copy surgery has been removed.
@@ -140,7 +141,7 @@ PY
 ### Step 2 — Upgrade Tutor and Run Config Save
 
 ```bash
-pip install "tutor[full]==<new-version>" tutor-mfe==<new-mfe-version>
+pip install "tutor==<new-version>" tutor-mfe==<new-mfe-version>
 export TUTOR_ROOT="$(pwd)/tutor_env"
 tutor config save
 ```
@@ -166,16 +167,10 @@ Focus on:
 - `RUN` ordering — have `npm clean-install` lines moved?
 - New stages — have any new MFE stages been added?
 
-Also diff the `env.config.jsx` template:
+Also diff the rendered `env.config.jsx` output against the repo-owned runtime source:
 
 ```bash
-python3 - <<'PY'
-from pathlib import Path
-import tutorindigo
-print(Path(tutorindigo.__file__).parent / "templates" / "indigo" / "env.config.jsx")
-PY
-# Then:
-diff <saved-env.config.jsx> <path-from-above>
+diff <saved-env.config.jsx> infrastructure/tutor/plugins/_mereka_lms/mfe_runtime_definitions.js
 ```
 
 ### Step 4 — Re-Apply Customizations to New Template
@@ -293,7 +288,7 @@ evaluated quarterly. Run this maintenance checklist:
 
 - Before any Tutor patch release (minor version bump within the same track)
 - Mandatory before any major version upgrade (e.g., Redwood → Ulmo)
-- After any update to the `tutormfe` or `tutorindigo` Python packages
+- After any update to the `tutormfe` Python package
 
 Subscribe to the Open edX forum release announcements thread:
 https://discuss.openedx.org/
@@ -308,4 +303,4 @@ https://discuss.openedx.org/
 | `scripts/infra/tutor-config-save.sh` | Safe wrapper that regenerates env and delegates to the canonical prepare step |
 | `scripts/infra/verify-tutor-config.sh` | General Tutor config verification |
 | `docs/adr/019-tutor-upgrade-policy.md` | Upgrade cadence and EOL decision |
-| `infrastructure/tutor/themes/` | Mereka Indigo theme assets |
+| `infrastructure/tutor/themes/` | Repo-owned Mereka theme assets |

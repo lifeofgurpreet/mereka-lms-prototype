@@ -29,7 +29,7 @@ Plugin slots are named extension points in MFE React components. Operators injec
 | ACTIVE | **74** | Registered in `mereka_lms_mfe_slots.py` as of 2026-04-19 (was 12 on 2026-02-28) |
 | ACTIVE (spec-AC'd) | **25** | Of the 74, only 25 map to Phase 1–3 acceptance criteria in `mfe-plugin-slots_spec.md` |
 | ACTIVE (OVERSPEC) | **49** | Registered with no spec AC — see gap audit for retirement/extension recommendations |
-| INDIGO | 3 | Indigo theme wires it; we inherit |
+| RETIRED-INDIGO | 0 | Tutor Indigo is no longer an active slot owner |
 | AVAILABLE | 100+ | Slot exists upstream; not wired |
 
 ---
@@ -174,24 +174,24 @@ Plugin slots are named extension points in MFE React components. Operators injec
 
 ---
 
-## 2. Slots Wired by Indigo (Inherited)
+## 2. Retired Indigo Slot Ownership
 
-These slots are configured by the Indigo theme in the generated `env.config.jsx`. We inherit them without overriding.
+Tutor Indigo is retired. These slots are no longer inherited from a second theme owner; any active slot wiring must live in `mereka_lms_mfe_slots.py`.
 
 ### `desktop_secondary_menu_slot`
 - **Scope**: account, discussions, learner-dashboard, profile
-- **Indigo wires**: `ToggleThemeButton` (dark mode toggle)
-- **Mereka status**: Inherited as-is
+- **Previous Indigo behavior**: `ToggleThemeButton` dark-mode toggle
+- **Mereka status**: retired unless explicitly reintroduced in `mereka_lms_mfe_slots.py`
 
 ### `mobile_header_slot`
 - **Scope**: account, discussions, learner-dashboard, profile
-- **Indigo wires**: `MobileViewHeader` with theme toggle
-- **Mereka status**: Inherited as-is
+- **Previous Indigo behavior**: `MobileViewHeader` with theme toggle
+- **Mereka status**: retired unless explicitly reintroduced in `mereka_lms_mfe_slots.py`
 
 ### `learning_help_slot`
 - **Scope**: frontend-app-learning only
-- **Indigo wires**: `ToggleThemeButton`
-- **Mereka status**: Inherited as-is
+- **Previous Indigo behavior**: `ToggleThemeButton`
+- **Mereka status**: retired unless explicitly reintroduced in `mereka_lms_mfe_slots.py`
 - **Note**: ADR-014 listed this as `learning_help_sidebar_slot` — actual runtime ID is `learning_help_slot`
 
 ---

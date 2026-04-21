@@ -352,20 +352,18 @@ check_contains "$AUDIT_DOC" "DEFAULT_PRODUCT_SOURCE_SLUG" "Audit documents DEFAU
 
 section "10. Course-About Ownership + SEO Gap Tracking"
 
-INDIGO_ABOUT=".venv/lib/python3.13/site-packages/tutorindigo/templates/indigo/lms/templates/courseware/course_about.html"
-INDIGO_ABOUT_ABS="$REPO_ROOT/$INDIGO_ABOUT"
+MEREKA_ABOUT="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/courseware/course_about.html"
 
-if [[ -f "$INDIGO_ABOUT_ABS" ]]; then
-  check_contains "$INDIGO_ABOUT_ABS" "og:title" "Indigo course_about.html has og:title"
-  check_contains "$INDIGO_ABOUT_ABS" "og:description" "Indigo course_about.html has og:description"
-  # Verify NO og:image (this is the known gap)
-  if grep -qF "og:image" "$INDIGO_ABOUT_ABS"; then
-    pass "Indigo course_about.html has og:image (gap resolved upstream)"
+if [[ -f "$MEREKA_ABOUT" ]]; then
+  check_contains "$MEREKA_ABOUT" "og:title" "Mereka course_about.html has og:title"
+  check_contains "$MEREKA_ABOUT" "og:description" "Mereka course_about.html has og:description"
+  if grep -qF "og:image" "$MEREKA_ABOUT"; then
+    pass "Mereka course_about.html has og:image"
   else
-    skip "Indigo course_about.html missing og:image (known SEO gap, tracked in CATALOG_DISCOVERY_AUDIT.md)"
+    skip "Mereka course_about.html missing og:image (known SEO gap, tracked in CATALOG_DISCOVERY_AUDIT.md)"
   fi
 else
-  skip "Indigo course_about.html not present (venv not installed — run make bootstrap)"
+  skip "Mereka course_about.html not present"
 fi
 
 # Current truth: the dedicated Mereka course_about override was intentionally

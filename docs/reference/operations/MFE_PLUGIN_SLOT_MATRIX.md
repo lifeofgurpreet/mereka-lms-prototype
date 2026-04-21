@@ -4,21 +4,21 @@
 
 **Canonical Inventory**: [MFE_PLUGIN_SLOT_INVENTORY.md](../architecture/MFE_PLUGIN_SLOT_INVENTORY.md) — This document is a derived view focused on operational planning and migration tracking.
 
-**Last updated**: 2026-02-28
+**Last updated**: 2026-04-21
 **Covers**: Bead 1aj1 AC-UISLOT-001 through AC-UISLOT-005
 
 ---
 
 ## Active Plugin-Slot Wiring Matrix
 
-This table lists all plugin slots currently wired by Mereka Academy or inherited from Indigo theme.
+This table lists plugin slots wired by Mereka Academy and retired Tutor Indigo slot ownership that must remain absent from active renders.
 
 | Slot ID | Target MFE | Operation Type | Plugin Type | Owner | Rollout Priority | Status |
 |---------|-----------|----------------|-------------|-------|------------------|--------|
 | `org.openedx.frontend.layout.footer.v1` | All MFEs (shared) | Hide + Insert | Direct | Mereka | P0 (Live) | **ACTIVE** |
-| `desktop_secondary_menu_slot` | account, discussions, learner-dashboard, profile | Insert | Direct | Indigo | N/A | INDIGO |
-| `mobile_header_slot` | account, discussions, learner-dashboard, profile | Replace | Direct | Indigo | N/A | INDIGO |
-| `learning_help_slot` | frontend-app-learning | Insert | Direct | Indigo | N/A | INDIGO |
+| `desktop_secondary_menu_slot` | account, discussions, learner-dashboard, profile | Insert | Direct | Retired Tutor Indigo | N/A | RETIRED |
+| `mobile_header_slot` | account, discussions, learner-dashboard, profile | Replace | Direct | Retired Tutor Indigo | N/A | RETIRED |
+| `learning_help_slot` | frontend-app-learning | Insert | Direct | Retired Tutor Indigo | N/A | RETIRED |
 | `org.openedx.frontend.layout.header_logo.v1` | Header (all MFEs) | Replace | Direct | Mereka | P1 | **ACTIVE** |
 | `org.openedx.frontend.layout.studio_footer.v1` | Frontend-app-authoring | Insert | Direct | Mereka | P1 | **ACTIVE** |
 | `org.openedx.frontend.authn.login_component.v1` | Frontend-app-authn | Insert | Direct | Mereka | P1 | **ACTIVE** |
@@ -33,7 +33,7 @@ This table lists all plugin slots currently wired by Mereka Academy or inherited
 
 **Legend**:
 - **ACTIVE**: Mereka overrides deployed in production
-- **INDIGO**: Inherited from Indigo theme, not customized
+- **RETIRED**: Previously inherited from Tutor Indigo; active renders must not contain this owner
 - **AVAILABLE**: Slot exists upstream, ready for wiring
 
 ---
@@ -47,9 +47,9 @@ This section maps current hardcoded customizations in `env.config.jsx` to their 
 | Current Approach | File/Location | Slot-Based Equivalent | Migration Path |
 |------------------|---------------|----------------------|----------------|
 | Direct footer component override | `mereka_lms.py` RenderWidget swap | `org.openedx.frontend.layout.footer.v1` | **COMPLETE** — Dual-path wiring (RenderWidget + PLUGIN_SLOTS.add_item) |
-| Dark mode toggle (Indigo) | Generated `env.config.jsx` | `desktop_secondary_menu_slot` | No action needed (inherited) |
-| Mobile header override (Indigo) | Generated `env.config.jsx` | `mobile_header_slot` | No action needed (inherited) |
-| Learning help button (Indigo) | Generated `env.config.jsx` | `learning_help_slot` | No action needed (inherited) |
+| Dark mode toggle (retired Tutor Indigo) | Generated `env.config.jsx` | `desktop_secondary_menu_slot` | Closed — stripped/replaced; keep absence guard active |
+| Mobile header override (retired Tutor Indigo) | Generated `env.config.jsx` | `mobile_header_slot` | Closed — stripped/replaced; keep absence guard active |
+| Learning help button (retired Tutor Indigo) | Generated `env.config.jsx` | `learning_help_slot` | Closed — stripped/replaced; keep absence guard active |
 | Custom logo | Manual CSS override (legacy) | `org.openedx.frontend.layout.header_logo.v1` | Complete — migrated to plugin-slot-driven `MerekaHeaderLogo` |
 | Studio footer branding | N/A (legacy) | `org.openedx.frontend.layout.studio_footer.v1` | Complete — active in `mereka_lms.py` |
 | Login banner | N/A (legacy) | `org.openedx.frontend.authn.login_component.v1` | Complete — active `MerekaAuthnLoginBranding` widget |
@@ -148,7 +148,7 @@ After `tutor config save`, inspect the generated config:
 grep -A5 "pluginSlots" tutor_env/env/plugins/mfe/build/mfe/env.config.jsx
 ```
 
-This shows all slots wired by Tutor core + Indigo theme.
+This shows slots wired by Tutor core and the Mereka plugin path; retired Tutor Indigo ownership must remain absent.
 
 ### 5. Automated Verification
 
@@ -172,7 +172,7 @@ Open edX uses two naming conventions. Always use the **namespaced ID** in `env.c
 | Convention | Example | Where Used |
 |-----------|---------|------------|
 | **Namespaced** (official) | `org.openedx.frontend.layout.footer.v1` | Source code `<PluginSlot id="...">`, `env.config.jsx` |
-| **Shorthand** | `footer_slot` | `tutormfe.hooks.PLUGIN_SLOTS` (Python hook), legacy Indigo configs |
+| **Shorthand** | `footer_slot` | `tutormfe.hooks.PLUGIN_SLOTS` (Python hook), legacy rendered configs |
 
 **Critical**: Mismatching conventions causes silent failures (slot not found, default content rendered).
 

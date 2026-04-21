@@ -206,7 +206,7 @@ else
   fi
 
   # mereka.scss import for branded CSS
-  if grep -q "mereka/mereka.scss" "$PLUGIN_FILE"; then
+  if grep -q "theme-source/mereka.scss" "$PLUGIN_FILE"; then
     pass "AC-UI-403: mereka.scss import present in mfe-env-config (CSS coverage)"
   else
     fail "AC-UI-403: mereka.scss import missing from mfe-env-config patch"

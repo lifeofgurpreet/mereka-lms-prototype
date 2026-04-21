@@ -34,8 +34,8 @@ trusted-main build log for `importing cache manifest` and `exporting cache manif
 | **L1** | Runner-local | `type=local,src=.buildx-cache/...` | Per-runner job | Same runner only | Ephemeral; wiped on ARC pod recycle or fastlane daemon reset. Best-effort only. |
 | **L2** | Shared GHCR — OpenEdX | `ghcr.io/biji-biji-initiative/mereka-lms/cache/openedx:main-amd64` | Trusted main push only | All contexts | **Authoritative.** Written with `mode=max`. Primary import for all builds. |
 | **L2** | Shared GHCR — MFE | `ghcr.io/biji-biji-initiative/mereka-lms/cache/mfe:main-amd64` | Trusted main push only | All contexts | **Authoritative.** Written with `mode=max`. Primary import for MFE builds. |
-| **L3** | Final-image fallback — OpenEdX | `${OPENEDX_CACHE_REF}` (currently `docker.io/overhangio/openedx:21.0.0-indigo-cache`) | CI only | All contexts | **Transitional.** Secondary `cache-from` source. Mark for retirement at Phase 5. |
-| **L3** | Final-image fallback — MFE | `${MFE_CACHE_REF}` (currently `docker.io/overhangio/openedx-mfe:21.0.0-indigo-cache`) | CI only | All contexts | **Transitional.** Secondary `cache-from` source. Mark for retirement at Phase 5. |
+| **L3** | Final-image fallback — OpenEdX | `${OPENEDX_CACHE_REF}` (currently `docker.io/overhangio/openedx:21.0.0-cache`) | CI only | All contexts | **Transitional.** Secondary `cache-from` source. Mark for retirement at Phase 5. |
+| **L3** | Final-image fallback — MFE | `${MFE_CACHE_REF}` (currently `docker.io/overhangio/openedx-mfe:21.0.0-cache`) | CI only | All contexts | **Transitional.** Secondary `cache-from` source. Mark for retirement at Phase 5. |
 
 ### Optional future refs (not in scope for PR 1)
 

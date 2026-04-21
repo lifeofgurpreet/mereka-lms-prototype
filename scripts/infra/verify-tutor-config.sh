@@ -296,6 +296,14 @@ files_match "$PLUGIN_SRC_DIR/mfe_oauth_fix.py" "$PLUGIN_DIR/mfe_oauth_fix.py" "L
 dirs_match "$PLUGIN_SRC_DIR/_mereka_lms" "$PLUGIN_DIR/_mereka_lms" "Tutor _mereka_lms package mirror is fresh"
 
 regex_pattern_count_equals "^- mfe_oauth_fix$" "0" "$TUTOR_ENV/config.yml" "Legacy standalone mfe_oauth_fix Tutor plugin is disabled"
+regex_pattern_count_equals "^- indigo$" "0" "$TUTOR_ENV/config.yml" "Retired Tutor Indigo plugin is disabled"
+
+INDIGO_THEME_DIR="$TUTOR_ENV/env/build/openedx/themes/indigo"
+if [[ -d "$INDIGO_THEME_DIR" ]]; then
+  check_fail "Retired Open edX Indigo theme directory must not be rendered: $INDIGO_THEME_DIR"
+else
+  check_pass "Retired Open edX Indigo theme directory is absent"
+fi
 
 print_section "Checking Multi-Site Domain Configuration"
 
@@ -304,6 +312,7 @@ LMS_SETTINGS="$TUTOR_ENV/env/apps/openedx/settings/lms/production.py"
 if [[ -f "$LMS_SETTINGS" ]]; then
   pattern_in_file "academy.biji-biji.com" "$LMS_SETTINGS" "Biji-Biji domain in ALLOWED_HOSTS"
   pattern_in_file "skillourfuture.academy.mereka.io" "$LMS_SETTINGS" "SkillOurFuture domain in ALLOWED_HOSTS"
+  pattern_not_in_file "indigo/js/dark-theme.js" "$LMS_SETTINGS" "Retired Indigo dark-theme asset is not injected into LMS settings"
 else
   check_fail "LMS settings file not found"
 fi
@@ -334,9 +343,9 @@ print_section "Checking MFE Build Authority"
 
 MFE_DOCKERFILE="$TUTOR_ENV/env/plugins/mfe/build/mfe/Dockerfile"
 MFE_ENV_CONFIG="$TUTOR_ENV/env/plugins/mfe/build/mfe/env.config.jsx"
-MFE_INDIGO_ENV_CONFIG="$TUTOR_ENV/env/plugins/mfe/build/mfe/indigo/env.config.jsx"
-MFE_THEME_DIR="$TUTOR_ENV/env/plugins/mfe/build/mfe/indigo/mereka"
-MFE_BRAND_DIR="$TUTOR_ENV/env/plugins/mfe/build/mfe/indigo/brand-mereka"
+MFE_MEREKA_ENV_CONFIG="$TUTOR_ENV/env/plugins/mfe/build/mfe/mereka/env.config.jsx"
+MFE_THEME_DIR="$TUTOR_ENV/env/plugins/mfe/build/mfe/mereka/theme-source"
+MFE_BRAND_DIR="$TUTOR_ENV/env/plugins/mfe/build/mfe/mereka/brand-mereka"
 if [[ -f "$MFE_DOCKERFILE" ]]; then
   check_pass "Rendered MFE Dockerfile exists: $MFE_DOCKERFILE"
   if [[ -L "$MFE_DOCKERFILE" ]]; then
@@ -395,25 +404,25 @@ else
   check_warn "Rendered MFE env.config.jsx not found: $MFE_ENV_CONFIG"
 fi
 
-if [[ -f "$MFE_INDIGO_ENV_CONFIG" ]]; then
-  check_pass "Rendered Indigo env.config.jsx exists: $MFE_INDIGO_ENV_CONFIG"
-  pattern_in_file "mereka/mereka.scss" "$MFE_INDIGO_ENV_CONFIG" "MFE custom theme import"
-  pattern_in_file "const MerekaFooter" "$MFE_INDIGO_ENV_CONFIG" "Custom Mereka footer component"
-  pattern_in_file "RenderWidget: MerekaFooter" "$MFE_INDIGO_ENV_CONFIG" "Mereka footer rendered"
+if [[ -f "$MFE_MEREKA_ENV_CONFIG" ]]; then
+  check_pass "Rendered Mereka env.config.jsx exists: $MFE_MEREKA_ENV_CONFIG"
+  pattern_in_file "theme-source/mereka.scss" "$MFE_MEREKA_ENV_CONFIG" "MFE custom theme import"
+  pattern_in_file "const MerekaFooter" "$MFE_MEREKA_ENV_CONFIG" "Custom Mereka footer component"
+  pattern_in_file "RenderWidget: MerekaFooter" "$MFE_MEREKA_ENV_CONFIG" "Mereka footer rendered"
 else
-  check_warn "Rendered Indigo env.config.jsx not found: $MFE_INDIGO_ENV_CONFIG"
+  check_warn "Rendered Mereka env.config.jsx not found: $MFE_MEREKA_ENV_CONFIG"
 fi
 
 if [[ -d "$MFE_THEME_DIR" ]]; then
-  check_pass "Rendered Indigo theme directory exists: $MFE_THEME_DIR"
+  check_pass "Rendered Mereka theme-source directory exists: $MFE_THEME_DIR"
 else
-  check_warn "Rendered Indigo theme directory not found: $MFE_THEME_DIR"
+  check_warn "Rendered Mereka theme-source directory not found: $MFE_THEME_DIR"
 fi
 
 if [[ -d "$MFE_BRAND_DIR" ]]; then
-  check_pass "Rendered Indigo brand package exists: $MFE_BRAND_DIR"
+  check_pass "Rendered Mereka brand package exists: $MFE_BRAND_DIR"
 else
-  check_warn "Rendered Indigo brand package not found: $MFE_BRAND_DIR"
+  check_warn "Rendered Mereka brand package not found: $MFE_BRAND_DIR"
 fi
 
 print_section "Checking Forum Configuration (MongoDB Atlas)"
@@ -808,7 +817,7 @@ else
 fi
 
 # Check for MFE theme assets
-MFE_THEME_DIR="$TUTOR_ENV/env/plugins/mfe/build/mfe/indigo/mereka"
+MFE_THEME_DIR="$TUTOR_ENV/env/plugins/mfe/build/mfe/mereka/theme-source"
 if [[ -d "$MFE_THEME_DIR" ]]; then
   check_pass "MFE theme directory exists"
 

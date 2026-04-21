@@ -332,8 +332,8 @@ grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.
 ### Known Limitations
 
 1. **Theme file copying:** Plugin does NOT handle file copying (logos, fonts, SCSS files). These must be realized through the canonical Tutor prepare path, not by plugin hooks alone.
-2. **MFE theme assets:** `indigo/mereka` still depends on the post-render build-context sync path rather than plugin hooks alone.
-3. **Hook API stability:** Plugin tested with Tutor 21.0.0; may need adjustments for other versions.
+2. **MFE theme assets:** `mereka/theme-source` still depends on the governed build-context sync path rather than plugin hooks alone.
+3. **Hook API stability:** Plugin tested with Tutor 21.0.3; may need adjustments for other versions.
 
 ---
 
@@ -502,7 +502,7 @@ grep "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.
 
 ### Plugin Conflicts with Third-Party Tutor Plugins
 
-**Symptom**: Another Tutor plugin (e.g., `tutor-mfe`, `tutor-indigo`) modifies the same template sections, causing conflicts or double-application.
+**Symptom**: Another Tutor plugin modifies the same template sections, causing conflicts or double-application; retired plugins such as `tutor-indigo` must be rejected before render.
 
 **Mitigation**: The Mereka plugin MUST define explicit ordering dependencies using Tutor's hook priority system. Patches MUST be idempotent (check-before-apply pattern). The verification tool checks for correct final state, not for individual hook execution.
 

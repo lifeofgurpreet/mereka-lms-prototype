@@ -1,7 +1,7 @@
 # LTI Integration Guide
 
 _Audience: Course Authors · Platform Engineers · Site Operators_
-_Stack: Open edX Ulmo (Tutor 21.0.0) · LTI 1.1 + LTI 1.3_
+_Stack: Open edX Ulmo (Tutor 21.0.3) · LTI 1.1 + LTI 1.3_
 _Last verified: 2026-02-24_
 
 ---

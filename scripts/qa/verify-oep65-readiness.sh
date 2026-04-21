@@ -76,7 +76,7 @@ if [[ -f "$RENDERED_DOCKERFILE" ]]; then
 else
   DOCKERFILE="$SNAPSHOT_DOCKERFILE"
 fi
-ENV_CONFIG_JSX="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/indigo/env.config.jsx"
+ENV_CONFIG_JSX="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/mereka/env.config.jsx"
 PLUGIN_PY="${PLUGIN_BUNDLE:-$PLUGIN_MAIN}"
 APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 READINESS_DOC="$REPO_ROOT/docs/reference/architecture/OEP65_MODULE_READINESS.md"

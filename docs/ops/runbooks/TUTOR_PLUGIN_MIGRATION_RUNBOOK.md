@@ -39,7 +39,7 @@ This runbook covers procedures for Tutor version upgrades and plugin migration.
 1. Update Tutor version in dependency specification
 2. Install new version:
    ```bash
-   pip install "tutor[full]==<new_version>"
+   pip install "tutor==<new_version>"
    ```
 3. Regenerate config through the governed wrapper:
    ```bash
@@ -74,7 +74,7 @@ This runbook covers procedures for Tutor version upgrades and plugin migration.
    ```
 2. Reinstall previous Tutor version:
    ```bash
-   pip install "tutor[full]==<previous_version>"
+   pip install "tutor==<previous_version>"
    ```
 3. Regenerate environment:
    ```bash

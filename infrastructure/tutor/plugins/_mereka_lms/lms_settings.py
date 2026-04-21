@@ -46,7 +46,7 @@ if _mereka_require_csp is None:
     _mereka_require_csp = "true" if os.path.exists(_mereka_built_image_sentinel) else "false"
 
 # Activate CSPMiddleware when django-csp is present. Bootstrap/local readiness
-# may run against upstream prebuilt Indigo images, which do not carry this
+# may run against upstream prebuilt Open edX images, which do not carry this
 # repo-owned dependency; repo-built images install django-csp and carry the
 # sentinel above, so a missing package there is a hard failure.
 if _mereka_importlib_util.find_spec("csp") is not None:

@@ -95,7 +95,7 @@ else
 
   # Check Tutor version pin in workflow.
   # Supported patterns:
-  #   1) Inline pin: pip install "tutor[full]==X.Y.Z" "tutor-mfe==A.B.C"
+  #   1) Inline pin: pip install "tutor==X.Y.Z" "tutor-mfe==A.B.C"
   #   2) Requirements file pin via setup-python-env action.
   if grep -q "pip install.*tutor\[full\]==" "$BUILD_WORKFLOW"; then
     workflow_tutor=$(grep "pip install.*tutor\[full\]==" "$BUILD_WORKFLOW" | head -1 | sed -E 's/.*tutor\[full\]==([0-9.]+).*/\1/')
@@ -118,13 +118,13 @@ else
     if [ -f "$requirements_path" ]; then
       do_pass "CI workflow pins via requirements file: $requirements_file"
 
-      workflow_tutor=$(grep -E '^tutor\[full\]==[0-9.]+' "$requirements_path" | head -1 | sed -E 's/^tutor\[full\]==([0-9.]+).*/\1/')
+      workflow_tutor=$(grep -E '^tutor(\[full\])?==[0-9.]+' "$requirements_path" | head -1 | sed -E 's/^tutor(\[full\])?==([0-9.]+).*/\2/')
       if [ -n "$workflow_tutor" ] && [ "$workflow_tutor" = "$doc_tutor_version" ]; then
         do_pass "CI Tutor version matches docs: $workflow_tutor"
       elif [ -n "$workflow_tutor" ]; then
         do_fail "CI Tutor version ($workflow_tutor) != docs ($doc_tutor_version)"
       else
-        do_fail "CI requirements file missing tutor[full] pin: $requirements_file"
+        do_fail "CI requirements file missing tutor pin: $requirements_file"
       fi
 
       workflow_mfe_plugin=$(grep -E '^tutor-mfe==[0-9.]+' "$requirements_path" | head -1 | sed -E 's/^tutor-mfe==([0-9.]+).*/\1/')
@@ -162,9 +162,9 @@ if [ ! -f "$SETUP_SCRIPT" ]; then
 else
   do_pass "setup-local.sh exists"
 
-  if grep -q "pip install.*tutor\[full\]==" "$SETUP_SCRIPT"; then
+  if grep -Eq "pip install.*tutor(\\[full\\])?==" "$SETUP_SCRIPT"; then
     # Inline version pin in setup-local.sh
-    setup_tutor=$(grep "pip install.*tutor\[full\]==" "$SETUP_SCRIPT" | head -1 | sed -E 's/.*tutor\[full\]==([0-9.]+).*/\1/')
+    setup_tutor=$(grep -E "pip install.*tutor(\\[full\\])?==" "$SETUP_SCRIPT" | head -1 | sed -E 's/.*tutor(\[full\])?==([0-9.]+).*/\2/')
     if [ "$setup_tutor" = "$doc_tutor_version" ]; then
       do_pass "setup-local.sh Tutor version matches docs: $setup_tutor"
     else
@@ -185,13 +185,13 @@ else
     else
       do_pass "setup-local.sh delegates Tutor version pin to requirements-tutor.txt"
 
-      setup_tutor=$(grep -E '^tutor\[full\]==[0-9.]+' "$req_file" | head -1 | sed -E 's/^tutor\[full\]==([0-9.]+).*/\1/')
+      setup_tutor=$(grep -E '^tutor(\[full\])?==[0-9.]+' "$req_file" | head -1 | sed -E 's/^tutor(\[full\])?==([0-9.]+).*/\2/')
       if [ -n "$setup_tutor" ] && [ "$setup_tutor" = "$doc_tutor_version" ]; then
         do_pass "requirements-tutor.txt Tutor version matches docs: $setup_tutor"
       elif [ -n "$setup_tutor" ]; then
         do_fail "requirements-tutor.txt Tutor version ($setup_tutor) != docs ($doc_tutor_version)"
       else
-        do_fail "requirements-tutor.txt missing tutor[full] pin"
+        do_fail "requirements-tutor.txt missing tutor pin"
       fi
 
       setup_mfe_plugin=$(grep -E '^tutor-mfe==[0-9.]+' "$req_file" | head -1 | sed -E 's/^tutor-mfe==([0-9.]+).*/\1/')

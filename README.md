@@ -10,7 +10,7 @@ This repository tracks the infrastructure-as-code, configuration, and runbooks f
 - operate production through GitOps-managed RKE2 infrastructure with clear local, source, and runtime proof boundaries;
 - keep documentation and automation in sync with upstream Open edX updates.
 
-> 🧠 Prerequisite: configure Docker Desktop with at least **12 GB RAM** and **2 GB+ swap** (Settings → Resources) before running `tutor images build openedx`. The Redwood asset pipeline freely uses 6–8 GB during webpack and will OOM if the daemon stays on the default 2 GB cap.
+> Prerequisite: configure Docker Desktop with at least **12 GB RAM** and **2 GB+ swap** (Settings -> Resources) before the first Open edX image build. The Ulmo asset pipeline freely uses 6-8 GB during webpack and will OOM if the daemon stays on the default 2 GB cap.
 
 ## Structure
 
@@ -23,7 +23,7 @@ This repository tracks the infrastructure-as-code, configuration, and runbooks f
   - `architecture/` – Compatibility transitional folder (archived to `concepts/architecture/` where canonical)
   - `archive/reports/status/` – Status trackers and backlog (see [`docs/archive/reports/status/NEXT10_TASKS.md`](docs/archive/reports/status/NEXT10_TASKS.md))
 - `infrastructure/` – Infrastructure-as-code:
-  - `tutor/` – Tutor configuration templates and patches (`apply-patches.sh`, `tutor-env.sh`)
+  - `tutor/` – Tutor plugin source, local config examples, and the governed render-prep compatibility layer
   - `terraform/` – Terraform modules and configs
   - `k8s/` – Kubernetes manifests
   - `themes/` – Mereka branding themes
@@ -77,7 +77,7 @@ Tutor now pulls most runtime images from our Artifact Registry (`ghcr.io/biji-bi
 
 | Service | Image | Notes |
 |---------|-------|-------|
-| LMS/CMS + workers | `openedx` | Built via `tutor images build openedx`. |
+| LMS/CMS + workers | `openedx` | Built via `./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast`. |
 | Micro-frontends | `openedx-mfe` | Patched to build on Node 18. |
 | Discovery | `openedx-discovery` | Uses in-cluster MySQL + in-cluster Elasticsearch. |
 | Forum (cs_comments_service) | `openedx-forum` | Uses MongoDB Atlas (managed service). |

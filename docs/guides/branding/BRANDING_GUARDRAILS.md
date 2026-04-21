@@ -131,11 +131,11 @@ override with `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env` if 
 2c. Tutor template drift removes authn theme copy lines
    - Cause: generated MFE Dockerfile can omit theme asset copy in `authn-common`.
    - Fix: rerun `./scripts/infra/tutor-config-save.sh`; it replays the canonical local regeneration path, runs the governed prepare step, and refreshes the rendered MFE Dockerfile contract so it enforces:
-     - `COPY indigo/env.config.jsx /openedx/app/`
-     - `COPY indigo/mereka /openedx/app/mereka`
+     - `COPY mereka/env.config.jsx /openedx/app/`
+     - `COPY mereka/theme-source /openedx/app/theme-source`
 
 2d. Full MFE build fails with `Can't resolve '@openedx/frontend-plugin-framework'`
-   - Cause: Tutor-generated MFE Dockerfile has Indigo `env.config.jsx` (which imports plugin framework),
+   - Cause: Tutor-generated MFE Dockerfile has Mereka `env.config.jsx` (which imports plugin framework),
      but missing plugin dependency install in one or more `*-common` stages.
    - Fix: rerun `./scripts/infra/tutor-config-save.sh`; it replays the canonical local regeneration path and refreshes the bounded rendered-build contract, which injects
      `npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'`

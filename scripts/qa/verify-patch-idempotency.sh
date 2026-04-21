@@ -56,7 +56,7 @@ TUTOR_ENV="${TUTOR_ROOT:-${REPO_ROOT}/tutor_env}"
 PATCH_TARGETS=(
   "env/local/docker-compose.yml"
   "env/plugins/mfe/build/mfe/Dockerfile"
-  "env/plugins/mfe/build/mfe/indigo/env.config.jsx"
+  "env/plugins/mfe/build/mfe/mereka/env.config.jsx"
   "env/build/openedx/Dockerfile"
   "env/apps/caddy/Caddyfile"
   "env/apps/nginx/lms.conf"
@@ -93,7 +93,7 @@ DUPLICATE_CHECKS=(
   "docker-compose.yml|MYSQL_ROOT_HOST|1|MySQL root host"
   "Caddyfile|academy.biji-biji.com|1|Biji-Biji domain in Caddy"
   "lms.conf|academy.biji-biji.com|1|Biji-Biji domain in nginx"
-  "env.config.jsx|mereka/mereka.scss|1|MFE theme SCSS import"
+  "env.config.jsx|theme-source/mereka.scss|1|MFE theme SCSS import"
   "env.config.jsx|const MerekaFooter|1|MFE Mereka footer component"
 )
 

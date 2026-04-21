@@ -92,8 +92,8 @@ When brand files change:
 
 ```bash
 ./scripts/branding/sync-brand-assets.sh   # updates infrastructure/tutor/themes/mereka/* and MFE copies
-tutor images build openedx                # LMS/Studio theme rebuild
-tutor images build mfe                    # optional if bundling MFEs
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 ```
 
 ## 8. Screenshots & QA

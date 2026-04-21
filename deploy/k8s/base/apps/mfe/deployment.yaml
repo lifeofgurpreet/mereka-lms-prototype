@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
         - name: mfe
-          image: docker.io/overhangio/openedx-mfe:21.0.0-indigo
+          image: docker.io/overhangio/openedx-mfe:21.0.0
           env:
           # Domain env vars consumed by MFE Caddyfile CSP {$VAR} placeholders.
           # Overlays MUST override with environment-specific hostnames.

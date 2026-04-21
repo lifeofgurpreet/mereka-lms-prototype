@@ -245,7 +245,7 @@ This is how `build-optimizations.sh` writes the `mereka-plugins.pth` file.
 `requirements-tutor.txt` is the single source of truth for the Tutor version:
 
 ```
-tutor==21.0.0
+tutor==21.0.3
 ```
 
 Do not specify the version anywhere else: not in workflow YAML, not in scripts,

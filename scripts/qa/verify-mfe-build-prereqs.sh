@@ -19,9 +19,9 @@ GENERATED_MFE_BUILD_DIR="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe"
 SNAPSHOT_MFE_DOCKERFILE="$REPO_ROOT/infrastructure/tutor/mfe-build/Dockerfile"
 ACTIVE_MFE_DOCKERFILE_PATH="tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
 LEGACY_MFE_DOCKERFILE_PATH="tutor_env/env/build/mfe/Dockerfile"
-GENERATED_MFE_INDIGO_DIR="$GENERATED_MFE_BUILD_DIR/indigo"
-GENERATED_MFE_INDIGO_ENV="$GENERATED_MFE_INDIGO_DIR/env.config.jsx"
-GENERATED_MFE_INDIGO_THEME_DIR="$GENERATED_MFE_INDIGO_DIR/mereka"
+GENERATED_MFE_MEREKA_DIR="$GENERATED_MFE_BUILD_DIR/mereka"
+GENERATED_MFE_MEREKA_ENV="$GENERATED_MFE_MEREKA_DIR/env.config.jsx"
+GENERATED_MFE_MEREKA_THEME_DIR="$GENERATED_MFE_MEREKA_DIR/theme-source"
 RENDERED_MFE_DOCKERFILE_TARGET='/env/plugins/mfe/build/mfe/Dockerfile'
 
 PLUGIN_INSTALL_LINE="RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'"
@@ -141,7 +141,7 @@ match = re.search(r"(?m)^FROM .*/?caddy:2\.7\.4 AS production$", text)
 if not match:
     raise SystemExit(1)
 production = text[match.start():]
-raise SystemExit(0 if "COPY indigo/theme /openedx/dist/theme" in production else 1)
+raise SystemExit(0 if "COPY mereka/theme /openedx/dist/theme" in production else 1)
 PY
   then
     echo "  ✓ generated Dockerfile production stage copies runtime theme payload"
@@ -253,7 +253,7 @@ echo ""
 echo "2. Generated Dockerfile contract..."
 check_no_legacy_mfe_render_path_refs
 echo "  ✓ active rendered MFE Dockerfile authority path: $ACTIVE_MFE_DOCKERFILE_PATH"
-if grep -q "Injected COPY indigo/theme into production stage of rendered MFE Dockerfile\\|drops this COPY" "$APPLY_PATCH_SCRIPT"; then
+if grep -q "Injected COPY .*theme into production stage of rendered MFE Dockerfile\\|drops this COPY" "$APPLY_PATCH_SCRIPT"; then
   echo "  ✗ apply-patches.sh still contains stale rendered Dockerfile theme-copy surgery"
   failures=1
 else
@@ -265,6 +265,7 @@ if [[ -f "$GENERATED_MFE_DOCKERFILE" ]]; then
   check_generated_pull_translations_retry_contract
   check_contains_regex "generated Dockerfile uses Node 24 image" "$GENERATED_MFE_DOCKERFILE" "$NODE_IMAGE_REGEX"
   check_contains "generated Dockerfile contains plugin install line" "$GENERATED_MFE_DOCKERFILE" "$PLUGIN_INSTALL_LINE"
+  check_contains "generated Dockerfile uses mirrored Caddy production base" "$GENERATED_MFE_DOCKERFILE" "FROM mirror.gcr.io/library/caddy:2.7.4 AS production"
   check_contains "generated Dockerfile hardens base-stage apt retries" "$GENERATED_MFE_DOCKERFILE" 'Acquire::Retries "6"'
   check_contains "generated Dockerfile hardens base-stage apt https timeout" "$GENERATED_MFE_DOCKERFILE" 'Acquire::https::Timeout "30"'
   check_contains "generated Dockerfile forces IPv4 for apt" "$GENERATED_MFE_DOCKERFILE" 'Acquire::ForceIPv4 "true"'
@@ -346,29 +347,29 @@ if [[ -f "$GENERATED_MFE_DOCKERFILE" ]]; then
     failures=1
   fi
 
-  if [[ -d "$GENERATED_MFE_INDIGO_DIR" ]]; then
-    echo "  ✓ generated Indigo build directory exists"
+  if [[ -d "$GENERATED_MFE_MEREKA_DIR" ]]; then
+    echo "  ✓ generated Mereka build directory exists"
   else
-    echo "  ✗ generated Indigo build directory missing: $GENERATED_MFE_INDIGO_DIR"
+    echo "  ✗ generated Mereka build directory missing: $GENERATED_MFE_MEREKA_DIR"
     failures=1
   fi
 
-  if [[ -f "$GENERATED_MFE_INDIGO_ENV" ]]; then
-    echo "  ✓ generated indigo/env.config.jsx exists"
+  if [[ -f "$GENERATED_MFE_MEREKA_ENV" ]]; then
+    echo "  ✓ generated mereka/env.config.jsx exists"
   else
-    echo "  ✗ generated indigo/env.config.jsx missing: $GENERATED_MFE_INDIGO_ENV"
+    echo "  ✗ generated mereka/env.config.jsx missing: $GENERATED_MFE_MEREKA_ENV"
     failures=1
   fi
 
-  if [[ -d "$GENERATED_MFE_INDIGO_THEME_DIR" ]]; then
-    echo "  ✓ generated indigo/mereka theme directory exists"
+  if [[ -d "$GENERATED_MFE_MEREKA_THEME_DIR" ]]; then
+    echo "  ✓ generated mereka/theme-source directory exists"
   else
-    echo "  ✗ generated indigo/mereka theme directory missing: $GENERATED_MFE_INDIGO_THEME_DIR"
+    echo "  ✗ generated mereka/theme-source directory missing: $GENERATED_MFE_MEREKA_THEME_DIR"
     failures=1
   fi
 
   check_jsx_parse "generated env.config.jsx parses as JSX" "$GENERATED_MFE_BUILD_DIR/env.config.jsx"
-  check_jsx_parse "generated indigo/env.config.jsx parses as JSX" "$GENERATED_MFE_INDIGO_ENV"
+  check_jsx_parse "generated mereka/env.config.jsx parses as JSX" "$GENERATED_MFE_MEREKA_ENV"
 else
   if [[ "$REQUIRE_GENERATED_DOCKERFILE" == "1" ]]; then
     echo "  ✗ generated Dockerfile missing: $GENERATED_MFE_DOCKERFILE"

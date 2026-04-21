@@ -218,7 +218,7 @@ hooks.Filters.ENV_TEMPLATE_VARIABLES.add_item(
 **Wired via `apply-patches.sh`** (string replacement method):
 
 1. **SCSS import injection** (line 1326-1357)
-   - Injects `import './mereka/mereka.scss'` into `env.config.jsx`
+   - Injects `import './theme-source/mereka.scss'` into `env.config.jsx`
    - **Slot alternative**: N/A (SCSS loading is required, not replaceable by slots)
 
 2. **MerekaFooter component** (line 560-610 in `mereka_lms.py`)

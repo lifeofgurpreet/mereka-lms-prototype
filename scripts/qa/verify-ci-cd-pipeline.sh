@@ -155,7 +155,7 @@ check_build_pipeline() {
 
   # AC-009: Tutor versions must stay pinned in the shared requirements file
   if [[ -f "requirements-tutor.txt" ]] \
-    && grep -Eq '^tutor\[full\]==[0-9]+\.[0-9]+\.[0-9]+$' requirements-tutor.txt \
+    && grep -Eq '^tutor==[0-9]+\.[0-9]+\.[0-9]+$' requirements-tutor.txt \
     && grep -Eq '^tutor-mfe==[0-9]+\.[0-9]+\.[0-9]+$' requirements-tutor.txt \
     && grep -q "requirements-file: 'requirements-tutor.txt'" "$BUILD_WF"; then
     pass "[AC-009] Tutor version pinned via requirements-tutor.txt and wired into build workflow"
@@ -331,9 +331,9 @@ check_gitops() {
   fi
 
   # AC-014: GitOps writer app validation
-  if grep -q 'FASTLANE_GITHUB_APP_ID' "$BUILD_WF" \
-    && grep -q 'FASTLANE_GITHUB_APP_INSTALLATION_ID' "$BUILD_WF" \
-    && grep -q 'FASTLANE_GITHUB_APP_PRIVATE_KEY' "$BUILD_WF"; then
+  if grep -q 'GITOPS_GITHUB_APP_ID' "$BUILD_WF" \
+    && grep -q 'GITOPS_GITHUB_APP_INSTALLATION_ID' "$BUILD_WF" \
+    && grep -q 'GITOPS_GITHUB_APP_PRIVATE_KEY' "$BUILD_WF"; then
     pass "[AC-014] GitOps writer app secret tuple referenced in build workflow"
   else
     fail "[AC-014] GitOps writer app secret tuple not referenced in build workflow"

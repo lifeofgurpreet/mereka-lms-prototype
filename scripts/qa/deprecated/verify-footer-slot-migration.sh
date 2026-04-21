@@ -120,7 +120,7 @@ else
     do_pass "No ImportError guard required for current active PLUGIN_SLOTS-first path"
 fi
 
-if grep -q "import './mereka/mereka.scss'" "${PLUGIN_FILE}"; then
+if grep -q "import './theme-source/mereka.scss'" "${PLUGIN_FILE}"; then
     do_pass "mereka.scss import exists in mfe-env-config patch"
 else
     do_fail "mereka.scss import missing from mfe-env-config patch"

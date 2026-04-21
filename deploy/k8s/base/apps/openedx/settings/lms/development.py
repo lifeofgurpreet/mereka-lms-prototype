@@ -579,13 +579,5 @@ MFE_CONFIG["MEREKA_PUBLIC_FOOTER"] = MEREKA_PUBLIC_FOOTER
 
 # Forum v2 (Python) runs in-process within LMS - no external service URL needed.
 
-javascript_files = ['base_application', 'application', 'certificates_wv']
-dark_theme_filepath = ['indigo/js/dark-theme.js']
-
-for filename in javascript_files:
-    if filename in PIPELINE['JAVASCRIPT']:
-        PIPELINE['JAVASCRIPT'][filename]['source_filenames'] += dark_theme_filepath
-
-MFE_CONFIG['INDIGO_ENABLE_DARK_TOGGLE'] = True
 EDXNOTES_PUBLIC_API = "http://notes.localhost:8120/api/v1"
 EDXNOTES_INTERNAL_API = "http://notes:8120/api/v1"

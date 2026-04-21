@@ -62,18 +62,14 @@ Plugin for fixing MFE OAuth provider visibility (example plugin, functionality m
 # From repository root
 export TUTOR_ROOT="$(pwd)/tutor_env"
 
-# Enable the plugin
-tutor plugins enable mereka_lms
+# Regenerate configuration through the governed wrapper. It syncs the
+# repo-local plugin mirror, enables `mereka_lms` and `mereka_lms_mfe_slots`,
+# disables retired local plugins, and refreshes rendered build contexts.
+./scripts/infra/tutor-config-save.sh
 
-# Verify it's enabled
-tutor plugins list
-
-# Regenerate configuration (applies all patches)
-tutor config save
-
-# Rebuild images with patches applied
-tutor images build openedx
-tutor images build mfe
+# Rebuild repo-owned local images.
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 ```
 
 ### Configuration Variables
@@ -113,7 +109,7 @@ The plugin and `apply-patches.sh` form a complementary two-layer system:
 | Aspect | `apply-patches.sh` (File Operations) | `mereka_lms.py` Plugin (Configuration) |
 |--------|--------------------------------------|----------------------------------------|
 | **Purpose** | Asset sync, theme directories, file copying | Django settings, Dockerfile patches, build config |
-| **Execution** | Must run manually after `tutor config save` | Automatic when plugin is enabled |
+| **Execution** | Invoked by `tutor-config-save.sh` / `prepare-tutor-build-context.sh` | Automatic when plugin is enabled |
 | **Scope** | File-system operations requiring direct file access | Configuration patches via Tutor hooks |
 | **Maintenance** | Bash scripts for copy/sync operations | Structured Python hooks |
 | **Idempotency** | Script-enforced idempotency checks | Tutor handles merging |
@@ -122,17 +118,12 @@ The plugin and `apply-patches.sh` form a complementary two-layer system:
 
 ### Migration Steps
 
-1. **Enable the plugin:**
+1. **Regenerate config through the governed wrapper:**
    ```bash
-   tutor plugins enable mereka_lms
+   ./scripts/infra/tutor-config-save.sh
    ```
 
-2. **Regenerate config:**
-   ```bash
-   tutor config save
-   ```
-
-3. **Verify patches:**
+2. **Verify patches:**
    Check that settings are applied:
    ```bash
    tutor local run lms ./manage.py lms shell -c "from django.conf import settings; print(settings.ALLOWED_HOSTS)"
@@ -140,8 +131,8 @@ The plugin and `apply-patches.sh` form a complementary two-layer system:
 
 4. **Rebuild images:**
    ```bash
-   tutor images build openedx
-   tutor images build mfe
+   ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
+   ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
    ```
 
 5. **(Optional) Archive `apply-patches.sh`:**
@@ -185,7 +176,7 @@ tutor local run lms ./manage.py lms check
 
 Enable Tutor debug mode:
 ```bash
-tutor config save --set DEBUG=true
+./scripts/infra/tutor-config-save.sh --set DEBUG=true
 tutor local restart lms
 ```
 
@@ -205,9 +196,9 @@ cat tutor_env/env/build/openedx/Dockerfile
 
 ## Known Issues
 
-1. **Theme assets not synced:** The plugin does NOT handle file copying (logos, fonts, SCSS). This is by design. File-system operations are handled by `apply-patches.sh`:
+1. **Theme assets not synced:** The plugin does NOT handle file copying (logos, fonts, SCSS). This is by design. File-system operations are handled by the governed render-prep path:
    - Copies theme files to `tutor_env/env/build/openedx/themes/mereka/`
-   - Copies MFE assets to `tutor_env/env/plugins/mfe/build/mfe/indigo/mereka/`
+   - Copies MFE assets to `tutor_env/env/plugins/mfe/build/mfe/mereka/theme-source/`
    - Syncs logos, fonts, SCSS files from source to theme directories
 
    Both the plugin (configuration via hooks) and the script (asset sync) are required and complementary.

@@ -612,7 +612,7 @@ if [[ -f "$APPLY_PATCHES" ]]; then
   # SCSS/MFE theme injection
   if grep -q "mereka.scss\|mereka_scss\|mfe.*branding\|MFE_BRANDING" "$APPLY_PATCHES"; then
     pass "apply-patches.sh references MFE mereka.scss injection"
-  elif [[ -f "$FOOTER_PATCH" ]] && grep -q "mereka/mereka.scss" "$FOOTER_PATCH"; then
+  elif [[ -f "$FOOTER_PATCH" ]] && grep -q "theme-source" "$FOOTER_PATCH"; then
     pass "MFE mereka.scss injection is handled by sync-footer-assets.sh asset sync path"
   else
     warn "MFE mereka.scss injection path not detected — check apply-patches + footer-component wiring"

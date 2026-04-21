@@ -41,7 +41,7 @@ removal_condition: null
 
 ## Context
 
-We run **Tutor 21.0.0 (Ulmo)**, the latest community-supported Open edX release as of March 2026. The canonical version pin lives in `requirements-tutor.txt` and all workflows/scripts consume that pin.
+We run **Tutor 21.0.3 (Ulmo)** with explicit first-party plugin pins. The canonical version pin lives in `requirements-tutor.txt` and all workflows/scripts consume that pin.
 
 Open edX named releases follow alphabetical naming: Palm → Quince → Redwood → Sumac → Teak → Ulmo. Community support for each named release is typically ~12 months after the next release ships, though exact EOL dates are not formally published and must be monitored via the Open edX forum and GitHub.
 
@@ -111,9 +111,9 @@ When a decision to upgrade is made, follow these steps on a spike branch:
 
 | Package | Version | Release Track |
 |---------|---------|---------------|
-| `tutor[full]` | **21.0.0** | Ulmo |
+| `tutor` | **21.0.3** | Ulmo |
 | `tutor-mfe` | **21.0.0** | Ulmo |
-| `tutor-indigo` | **21.1.0** | Ulmo |
+| `tutor-indigo` | **Retired** | Replaced by repo-owned Mereka theme/plugin path |
 
 ### Where the pin lives
 
@@ -133,7 +133,7 @@ Files that consume this pin:
 
 ```bash
 # List all available Tutor patch releases on the 21.x line
-pip index versions "tutor[full]" 2>/dev/null | grep -oE '21\.[0-9]+\.[0-9]+'
+pip index versions tutor 2>/dev/null | grep -oE '21\.[0-9]+\.[0-9]+'
 
 # Or check PyPI directly
 # https://pypi.org/project/tutor/#history

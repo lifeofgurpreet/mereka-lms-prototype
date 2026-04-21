@@ -487,7 +487,7 @@ mereka_lms.py → tutormfe.hooks.PLUGIN_SLOTS filter
    ```
 
 3. **Keep runtime definitions colocated with slot registration**
-   - `mfe-env-config-buildtime-imports` injects `import './mereka/mereka.scss'`.
+   - `mfe-env-config-buildtime-imports` injects `import './theme-source/mereka.scss'`.
    - `mfe-env-config-runtime-definitions` injects `MerekaHeaderLogo` and `MerekaFooter` components used by the slots.
 
 4. **Verify** — rebuild MFE image, confirm slot components render identically

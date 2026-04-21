@@ -57,7 +57,7 @@ These require additional file operations that plugins cannot handle directly:
    - **Workaround**: Use `./scripts/infra/tutor-config-save.sh --set ...` or Tutor's theme mounting system
    - **Status**: May require a separate script or Tutor's `PLUGIN_FILES` hook
 
-2. **MFE theme assets** (indigo/mereka directory)
+2. **MFE theme assets** (`mereka/theme-source` and `mereka/theme` directories)
    - **Workaround**: Regenerate through `./scripts/infra/tutor-config-save.sh`, which invokes the residual asset-sync layer
    - **Status**: Tutor's `mounts` feature can handle this
 

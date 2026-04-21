@@ -38,14 +38,6 @@ print(Path(inspect.getfile(tutormfe)).parent / "templates" / "mfe" / "build" / "
 PY
 )
 
-  export MFE_INDIGO_ENV_TEMPLATE
-  MFE_INDIGO_ENV_TEMPLATE=$("${PYTHON_BIN}" - <<'PY'
-from pathlib import Path
-import tutorindigo
-print(Path(tutorindigo.__file__).parent / "templates" / "indigo" / "env.config.jsx")
-PY
-)
-
   export MYSQL_TEMPLATE
   MYSQL_TEMPLATE=$("${PYTHON_BIN}" - <<'PY'
 from pathlib import Path

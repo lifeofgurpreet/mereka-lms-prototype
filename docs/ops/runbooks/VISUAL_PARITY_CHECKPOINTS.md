@@ -152,21 +152,20 @@ in any MFE shell page.
 
 ### How MerekaFooter Is Wired
 
-`MerekaFooter` is injected by `infrastructure/tutor/apply-patches.sh` into
-the MFE `env.config.jsx` build artefact:
+`MerekaFooter` is injected by the repo-owned Tutor MFE runtime plugin into
+the MFE `env.config.jsx` build artifact:
 
 ```jsx
-// Expected in tutor_env/env/plugins/mfe/build/mfe/indigo/env.config.jsx
+// Expected in tutor_env/env/plugins/mfe/build/mfe/mereka/env.config.jsx
 const MerekaFooter = () => { /* ... branded footer JSX ... */ };
 // ...
 { id: "mereka_footer", RenderWidget: MerekaFooter }
 ```
 
-The patch replaces the upstream `RenderWidget: <Footer />` with
-`RenderWidget: <MerekaFooter />`. Verify with:
+Verify with:
 
 ```bash
-grep -F 'const MerekaFooter' tutor_env/env/plugins/mfe/build/mfe/indigo/env.config.jsx
+grep -F 'const MerekaFooter' tutor_env/env/plugins/mfe/build/mfe/mereka/env.config.jsx
 ```
 
 ### Footer Assertion Checks

@@ -544,6 +544,18 @@ jobs:
             [registry."docker.io"]
               mirrors = ["mirror.gcr.io"]
 
+      - name: "[app-cache-cold] Wipe measured OpenEdX job BuildKit state"
+        if: env.PROOF_CLASS == 'app-cache-cold'
+        run: |
+          set -euo pipefail
+          docker buildx prune -af || true
+          rm -rf .buildx-cache/openedx-fast .buildx-cache/openedx-proof .buildx-cache/openedx-proof-nocache || true
+          mkdir -p var/ci
+          {
+            echo "MEASURED_JOB_L1_WIPE=true"
+            echo "MEASURED_JOB_L1_WIPE_UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } >> var/ci/benchmark-context-openedx.env
+
       # GHCR login only for classes that use the registry cache
       - name: Log in to GHCR (non-cold classes)
         if: env.PROOF_CLASS != 'app-cache-cold'
@@ -727,6 +739,18 @@ jobs:
           config-inline: |
             [registry."docker.io"]
               mirrors = ["mirror.gcr.io"]
+
+      - name: "[app-cache-cold] Wipe measured MFE job BuildKit state"
+        if: env.PROOF_CLASS == 'app-cache-cold'
+        run: |
+          set -euo pipefail
+          docker buildx prune -af || true
+          rm -rf .buildx-cache/mfe-fast .buildx-cache/mfe-proof .buildx-cache/mfe-proof-nocache || true
+          mkdir -p var/ci
+          {
+            echo "MEASURED_JOB_L1_WIPE=true"
+            echo "MEASURED_JOB_L1_WIPE_UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } >> var/ci/benchmark-context-mfe.env
 
       - name: Log in to GHCR (non-cold classes)
         if: env.PROOF_CLASS != 'app-cache-cold'

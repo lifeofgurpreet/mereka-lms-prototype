@@ -21,7 +21,7 @@ pip install -r requirements-tutor.txt
 source infrastructure/tutor/tutor-env.sh
 ```
 
-Installing from `requirements-tutor.txt` pulls the exact Tutor version used by this repo plus first-party plugins (MFE, Indigo, discovery, ecommerce, notes, xqueue, forum).
+Installing from `requirements-tutor.txt` pulls the exact Tutor version used by this repo plus required first-party Tutor plugins. Tutor Indigo is retired; Mereka owns theme, MFE runtime, and plugin-slot behavior through the repo-local `mereka_lms` and `mereka_lms_mfe_slots` plugins.
 The first rendered build-context refresh happens after configuration below, via `./scripts/infra/prepare-tutor-build-context.sh --target all`; do not use the low-level patch helper as the bootstrap front door.
 
 > ❗ The legacy `tutor-license` plugin does not compile against Python 3.12 (`longintrepr.h` removed). We will revisit licensing once an updated plugin is published.
@@ -49,7 +49,7 @@ The current configuration pins:
 - `CMS_HOST=studio.localhost`
 - Open edX release branch: `open-release/ulmo.1`
 - MFE branch: `master` (frontends track the latest master while Ulmo branches are published)
-- Enabled plugins: `mfe`, `discovery`, `notes`, `ecommerce`, `forum`, `xqueue`
+- Enabled repo-owned plugins: `mereka_lms`, `mereka_lms_mfe_slots`; the wrapper also preserves the Tutor service plugins required by the selected configuration.
 
 To regenerate the environment after editing configuration values:
 
@@ -80,7 +80,7 @@ source infrastructure/tutor/tutor-env.sh
   --set OPENEDX_COMMON_VERSION=open-release/ulmo.1 \
   --set OPENEDX_LMS_VERSION=open-release/ulmo.1 \
   --set OPENEDX_CMS_VERSION=open-release/ulmo.1 \
-  --set MFE_COMMON_VERSION=master
+  --set MFE_COMMON_VERSION=release/ulmo.2
 ```
 
 The wrapper enables the canonical first-party plugins and runs `./scripts/infra/prepare-tutor-build-context.sh --target all` after configuration. Local setup builds `openedx:nightly` and `openedx-mfe:nightly`, then points Tutor at those tags. The render prep applies `infrastructure/tutor/patches/dependency-image-mirrors.sh` for Tutor-emitted hardcoded Docker Hub dependency refs, selects `scripts/infra/ensure-buildx-dependency-mirror.sh` as a BuildKit fallback guard, and uses `mirror.gcr.io` image refs where Tutor exposes third-party service images. If you deliberately enable or disable plugins outside the wrapper, rerun `./scripts/infra/prepare-tutor-build-context.sh --target all` afterwards.
@@ -96,18 +96,18 @@ source infrastructure/tutor/tutor-env.sh
 ./scripts/infra/tutor-config-save.sh \
   --set THEME_DIR="$(pwd)/infrastructure/tutor/themes" \
   --set THEME_NAME=mereka
-tutor images build openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 tutor local start -d
 ```
 
-Tutor will copy everything under `infrastructure/tutor/themes/` into `tutor_env/build/openedx/themes` and compile the SCSS entrypoints located at `infrastructure/tutor/themes/mereka/{lms,cms}/static/sass/theme.scss`. Re-run `tutor images build openedx` whenever you edit the theme SCSS or add new assets (fonts, logos).
+Tutor will copy everything under `infrastructure/tutor/themes/` into `tutor_env/build/openedx/themes` and compile the SCSS entrypoints located at `infrastructure/tutor/themes/mereka/{lms,cms}/static/sass/theme.scss`. Re-run the Open edX build helper whenever you edit the theme SCSS or add new assets.
 
 ## Initial launch
 
 ```bash
 source infrastructure/tutor/tutor-env.sh
 ./scripts/infra/prepare-tutor-build-context.sh --target all
-tutor images build mfe        # rebuild if you've touched shared SCSS or MFE build inputs
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 tutor local launch -I --skip-build
 tutor local restart lms cms mfe caddy
 ```
@@ -193,7 +193,7 @@ Design work references Paragon components and tokens (`https://edx.github.io/par
    ./scripts/infra/prepare-tutor-build-context.sh --target all
    tutor local start -d
    ```
-4. Rebuild MFEs (`tutor images build mfe` or `tutor dev start mfe`) to bundle the same SCSS inside `frontend-app-*`. The plugin automatically imports `mereka/mereka.scss`.
+4. Rebuild MFEs with `./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast` to bundle the same SCSS inside `frontend-app-*`. The plugin automatically imports `theme-source/mereka.scss`.
 
 ### Backend customization & QA
 

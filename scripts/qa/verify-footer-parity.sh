@@ -85,7 +85,7 @@ PLUGIN="$PLUGIN_MAIN"
 FOOTER_PATCH="$REPO_ROOT/infrastructure/tutor/patches/sync-footer-assets.sh"
 APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 MEREKA_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
-MFE_INDIGO_RENDERED="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/indigo/env.config.jsx"
+MFE_MEREKA_RENDERED="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/mereka/env.config.jsx"
 MFE_ENV_CONFIG_RENDERED="$REPO_ROOT/tutor_env/env/plugins/mfe/build/mfe/env.config.jsx"
 MFE_FONTS_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/fonts"
 LMS_FOOTER="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/footer.html"
@@ -173,10 +173,10 @@ echo ""
 echo "[OFFLINE] SCSS import wiring"
 
 if [[ -f "$FOOTER_PATCH" ]]; then
-  if grep -q "mereka/mereka.scss" "$FOOTER_PATCH"; then
-    pass "sync-footer-assets.sh syncs mereka.scss into Indigo build context"
+  if grep -q "theme-source" "$FOOTER_PATCH"; then
+    pass "sync-footer-assets.sh syncs mereka.scss into Mereka build context"
   else
-    fail "sync-footer-assets.sh does not sync mereka.scss into Indigo build context"
+    fail "sync-footer-assets.sh does not sync mereka.scss into Mereka build context"
   fi
 fi
 
@@ -186,23 +186,23 @@ else
   fail "mereka.scss source file missing: $MEREKA_SCSS"
 fi
 
-if [[ -f "$MFE_INDIGO_RENDERED" ]]; then
-  if grep -q "mereka/mereka.scss" "$MFE_INDIGO_RENDERED"; then
-    pass "mereka.scss imported in rendered indigo/env.config.jsx"
+if [[ -f "$MFE_MEREKA_RENDERED" ]]; then
+  if grep -q "theme-source/mereka.scss" "$MFE_MEREKA_RENDERED"; then
+    pass "mereka.scss imported in rendered mereka/env.config.jsx"
   else
-    fail "mereka.scss import missing from rendered indigo/env.config.jsx"
+    fail "mereka.scss import missing from rendered mereka/env.config.jsx"
   fi
-  if grep -q "const MerekaFooter" "$MFE_INDIGO_RENDERED"; then
-    pass "MerekaFooter component present in rendered indigo/env.config.jsx"
+  if grep -q "const MerekaFooter" "$MFE_MEREKA_RENDERED"; then
+    pass "MerekaFooter component present in rendered mereka/env.config.jsx"
   else
-    fail "MerekaFooter component missing from rendered indigo/env.config.jsx"
+    fail "MerekaFooter component missing from rendered mereka/env.config.jsx"
   fi
 else
-  skip "Rendered indigo/env.config.jsx not found — run apply-patches.sh first"
+  skip "Rendered mereka/env.config.jsx not found — run apply-patches.sh first"
 fi
 
 if [[ -f "$MFE_ENV_CONFIG_RENDERED" ]]; then
-  if grep -q "mereka/mereka.scss" "$MFE_ENV_CONFIG_RENDERED"; then
+  if grep -q "theme-source/mereka.scss" "$MFE_ENV_CONFIG_RENDERED"; then
     pass "mereka.scss imported in rendered top-level env.config.jsx"
   else
     fail "mereka.scss import missing from rendered top-level env.config.jsx"

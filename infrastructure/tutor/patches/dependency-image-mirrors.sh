@@ -44,6 +44,9 @@ REPLACEMENTS = {
     "FROM docker.io/node:24.11.0-bullseye-slim AS base": (
         "FROM mirror.gcr.io/library/node:24.11.0-bullseye-slim AS base"
     ),
+    "FROM docker.io/caddy:2.7.4 AS production": (
+        "FROM mirror.gcr.io/library/caddy:2.7.4 AS production"
+    ),
 }
 
 REQUIRED_BY_SUFFIX = {
@@ -55,6 +58,7 @@ REQUIRED_BY_SUFFIX = {
     "env/plugins/mfe/build/mfe/Dockerfile": [
         "# syntax=mirror.gcr.io/docker/dockerfile:1",
         "FROM mirror.gcr.io/library/node:24.11.0-bullseye-slim AS base",
+        "FROM mirror.gcr.io/library/caddy:2.7.4 AS production",
     ],
 }
 

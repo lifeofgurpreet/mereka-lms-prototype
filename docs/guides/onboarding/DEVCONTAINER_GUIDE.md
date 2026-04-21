@@ -69,10 +69,10 @@ On first run you need to build images (30-45 minutes, requires 12 GB RAM):
 ./scripts/infra/prepare-tutor-build-context.sh --target all
 
 # Build Open edX platform image
-tutor images build openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 
 # Build micro-frontends image
-tutor images build mfe
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 ```
 
 Then start the platform:

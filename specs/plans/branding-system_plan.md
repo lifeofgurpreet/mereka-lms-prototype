@@ -43,7 +43,7 @@ The work is primarily verification and hardening, not greenfield development.
   - Confirm logos copied to `tutor_env/env/build/openedx/themes/mereka/lms/static/images/`
   - Confirm fonts copied to `tutor_env/env/build/openedx/themes/mereka/lms/static/fonts/`
   - Confirm templates synced to preserve Django template overrides
-  - Confirm MFE SCSS synced to `tutor_env/env/plugins/mfe/build/mfe/indigo/mereka/`
+  - Confirm MFE theme source synced to `tutor_env/env/plugins/mfe/build/mfe/mereka/theme-source/`
   - **Done**: Running `apply-patches.sh` and verifying destination directories contain expected files
 
 - [ ] **[M]** Harden Google Fonts stripping in SASS compilation pipeline (`infrastructure/tutor/apply-patches.sh`) | AC: #5, #6 | Depends: None
@@ -59,7 +59,7 @@ The work is primarily verification and hardening, not greenfield development.
 
 - [ ] **[S]** Verify MFE env.config.jsx patch imports mereka.scss and MerekaFooter (`infrastructure/tutor/apply-patches.sh`, `infrastructure/tutor/themes/mereka/mfe/mereka.scss`) | AC: #3, #10 | Depends: None
   - Confirm `env.config.jsx` imports `mereka.scss`
-  - Confirm MerekaFooter component replaces default Indigo footer
+  - Confirm MerekaFooter component replaces default Open edX footer
   - Confirm MerekaFooter includes required content: Mereka Academy branding, tagline, course/dashboard/help links, contactemails, partner links, copyright, Open edX credit
   - **Done**: `grep "MerekaFooter"` in env.config.jsx returnsmatch; visual inspection of running MFE confirms footer
 

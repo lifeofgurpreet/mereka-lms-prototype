@@ -181,7 +181,7 @@ if not SECRET_KEY:
     raise ValueError("CMS_SECRET_KEY environment variable is required")
 
 # Comprehensive theming is enabled via env.yml; actually activate the theme.
-# Without DEFAULT_SITE_THEME, Studio will keep serving stock Indigo styles/assets.
+# Without DEFAULT_SITE_THEME, Studio will keep serving stock upstream styles/assets.
 DEFAULT_SITE_THEME = os.environ.get("DEFAULT_SITE_THEME", "mereka")
 
 # Override database password from environment variable.

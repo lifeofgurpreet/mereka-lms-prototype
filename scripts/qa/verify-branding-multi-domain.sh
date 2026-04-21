@@ -184,7 +184,7 @@ GOOGLE_FONTS_PATTERN="fonts.googleapis.com"
 MEREKA_THEME_DIR="${REPO_ROOT}/tutor_env/env/build/openedx/themes/mereka"
 
 if [[ -d "$MEREKA_THEME_DIR" ]]; then
-  # Search for Google Fonts in Mereka theme only (not default Indigo theme)
+  # Search for Google Fonts in the repo-owned Mereka theme only.
   GOOGLE_FONTS_RESULTS=$(grep -r "$GOOGLE_FONTS_PATTERN" "$MEREKA_THEME_DIR" 2>/dev/null || true)
 
   if [[ -z "$GOOGLE_FONTS_RESULTS" ]]; then

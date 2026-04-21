@@ -75,7 +75,7 @@ This project uses:
 | EC-TCR-003 | Concurrent config saves | `flock` wrapper serializes access | integration | `tests/tutor/test_concurrent_config.sh` | `make tutor-apply` wrapper | not_implemented |
 | EC-TCR-004 | Template conflict after Tutor upgrade | String-replacement patch fails on changed template | integration | `tests/tutor/test_template_conflict.sh` | Modified template fixture | not_implemented |
 | EC-TCR-004 | Template conflict after Tutor upgrade | Verification tool catches missing patch in output | integration | `tests/tutor/test_template_conflict.sh` | Template with removed anchor text | not_implemented |
-| EC-TCR-005 | Plugin conflicts with third-party plugins | Mereka plugin + tutor-mfe + tutor-indigo produce correct output | integration | `tests/tutor/test_plugin_conflicts.sh` | All three plugins enabled | not_implemented |
+| EC-TCR-005 | Plugin conflicts with third-party plugins | Mereka plugin + tutor-mfe produce correct output and retired tutor-indigo is rejected | integration | `tests/tutor/test_plugin_conflicts.sh` | Current plugins enabled; stale Indigo plugin configured | not_implemented |
 | EC-TCR-005 | Plugin conflicts | Double-application check (idempotent hooks) | integration | `tests/tutor/test_plugin_conflicts.sh` | Plugin enabled twice | not_implemented |
 | EC-TCR-006 | Partial plugin migration | Plugin handles some patches, script handles rest, all verified | integration | `tests/tutor/test_partial_migration.sh` | Plugin with subset of hooks | not_implemented |
 | EC-TCR-006 | Partial migration | Disabling plugin still passes verification via script | integration | `tests/tutor/test_partial_migration.sh` | Plugin disabled, script only | not_implemented |

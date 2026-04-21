@@ -136,14 +136,14 @@ generated_env_config_candidates=()
 if [[ -n "$GENERATED_ENV_CONFIG" ]]; then
   generated_env_config_candidates+=("$GENERATED_ENV_CONFIG")
   generated_env_config_dir="$(dirname "$GENERATED_ENV_CONFIG")"
-  sibling_indigo_env_config="${generated_env_config_dir}/indigo/env.config.jsx"
-  if [[ -f "$sibling_indigo_env_config" ]]; then
-    generated_env_config_candidates+=("$sibling_indigo_env_config")
+  sibling_mereka_env_config="${generated_env_config_dir}/mereka/env.config.jsx"
+  if [[ -f "$sibling_mereka_env_config" ]]; then
+    generated_env_config_candidates+=("$sibling_mereka_env_config")
   fi
 elif [[ -n "$IMAGE_REF" ]]; then
   generated_env_config_candidates+=(
     "${TUTOR_ROOT:-$(pwd)/tutor_env}/env/plugins/mfe/build/mfe/env.config.jsx"
-    "${TUTOR_ROOT:-$(pwd)/tutor_env}/env/plugins/mfe/build/mfe/indigo/env.config.jsx"
+    "${TUTOR_ROOT:-$(pwd)/tutor_env}/env/plugins/mfe/build/mfe/mereka/env.config.jsx"
   )
 fi
 

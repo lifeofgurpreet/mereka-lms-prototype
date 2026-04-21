@@ -273,7 +273,7 @@ See `docs/programs/frontend/MFE_BRANDING_MIGRATION_DECISION.md` § "Plugin-First
 
 - Primary favicon: `infrastructure/tutor/themes/mereka/common/static/images/favicon.ico` (synced from `assets/branding/favicon.ico`).
 - Optional SVG: `infrastructure/tutor/themes/mereka/common/static/images/favicon.svg` if you want crisp scaling.
-- Set `INDIGO_FAVICON_URL=https://<lms-host>/static/mereka/images/favicon.ico` via `./scripts/infra/tutor-config-save.sh --set ...` so Django advertises the correct icon and MFEs reuse it from their config.
+- Set `FAVICON_URL=https://<lms-host>/static/mereka/images/favicon.ico` through the tenant/site MFE config path so Django advertises the correct icon and MFEs reuse it from their config.
 
 ---
 

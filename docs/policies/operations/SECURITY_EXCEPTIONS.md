@@ -8,7 +8,7 @@
 
 | ID | Description | Risk Level | Justification | Owner | Accepted Date | Expiry Date | Status |
 |----|-------------|------------|---------------|-------|---------------|-------------|--------|
-| SEC-001 | Tutor 18.x Redwood past community support window | Medium | RESOLVED: Upgraded to Tutor 21.0.0 (Ulmo) in 2026-03. Full image rebuild and smoke-test cycle completed. | Platform Team | 2025-12-01 | 2026-06-30 | Revoked |
+| SEC-001 | Tutor 18.x Redwood past community support window | Medium | RESOLVED: Upgraded to Tutor 21.0.3 (Ulmo) in 2026-03/04. Full image rebuild and smoke-test cycle completed. | Platform Team | 2025-12-01 | 2026-06-30 | Revoked |
 | SEC-002 | MongoDB Atlas shared cluster — no dedicated customer-managed encryption key (CMEK) | Low | Atlas shared tier does not support CMEK. Data at rest is encrypted by Atlas default keys. CMEK migration is gated on cluster tier upgrade in H2 2026. | Platform Team | 2025-12-01 | 2026-12-31 | Active |
 | SEC-003 | `.trivyignore` suppressed CVEs in base images | Low | A set of CVEs in upstream OS base images have no available upstream fix. Each entry was reviewed and determined unexploitable in our deployment context. Reviewed quarterly. | Platform Team | 2026-01-15 | 2026-04-30 | Active |
 

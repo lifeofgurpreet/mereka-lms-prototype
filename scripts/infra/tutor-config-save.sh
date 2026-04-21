@@ -86,10 +86,12 @@ echo -e "${BLUE}Step 0: Syncing Tutor plugin mirror${NC}"
 "$SYNC_SCRIPT"
 echo ""
 
-if tutor plugins disable mfe_oauth_fix >/dev/null 2>&1; then
-  echo -e "${YELLOW}Retired standalone Tutor plugin mfe_oauth_fix was enabled and has been disabled${NC}"
-  echo ""
-fi
+for retired_plugin in mfe_oauth_fix indigo; do
+  if tutor plugins disable "$retired_plugin" >/dev/null 2>&1; then
+    echo -e "${YELLOW}Retired Tutor plugin ${retired_plugin} was enabled and has been disabled${NC}"
+    echo ""
+  fi
+done
 
 for plugin in mereka_lms mereka_lms_mfe_slots; do
   if tutor plugins enable "$plugin" >/dev/null 2>&1; then

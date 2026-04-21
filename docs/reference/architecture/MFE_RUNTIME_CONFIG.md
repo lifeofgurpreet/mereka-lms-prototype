@@ -45,8 +45,8 @@ The following values are set as Docker `ARG`/`ENV` in
 | `MFE_CONFIG_API_URL` | `/api/mfe_config/v1` (relative) | Per-MFE `ENV` in Dockerfile |
 | `NODE_ENV` | `production` | Build-stage `ENV` in Dockerfile |
 | Brand package | `@edx/brand@file:./brand-mereka` | `npm install` in Dockerfile |
-| Runtime theme payload | `indigo/theme/` | Copied into `/openedx/dist/theme` in production stage |
-| Mereka SCSS | `mereka.scss` | Imported by `env.config.jsx` from `indigo/mereka/` |
+| Runtime theme payload | `mereka/theme/` | Copied into `/openedx/dist/theme` in production stage |
+| Mereka SCSS | `theme-source/mereka.scss` | Imported by `env.config.jsx` from `mereka/theme-source/` |
 
 **Key observation**: `MFE_CONFIG_API_URL` is intentionally set to a relative path
 (`/api/mfe_config/v1`) so that it resolves against whatever origin the MFE is served
@@ -58,8 +58,7 @@ currently contains:
 
 - Import of `mereka.scss` (Mereka brand CSS)
 - `MerekaFooter` React component with hardcoded social/nav links
-- `AddDarkTheme` component (reads `INDIGO_ENABLE_DARK_TOGGLE` from runtime config)
-- Per-MFE plugin slot wiring (footer, header, dark-mode toggle)
+- Per-MFE plugin slot wiring owned by the repo-local Mereka plugin
 - `SITE_VARIANTS` map keyed on hostnames (academyv2.mereka.io, academy.biji-biji.com,
   skillourfuture.academy.mereka.io) — **build-time coupling to domain list**
 
@@ -84,7 +83,7 @@ Current keys verified by `scripts/qa/verify-mfe-config-contract.sh`:
 | `ACCESS_TOKEN_COOKIE_NAME` | JWT access token cookie name |
 | `USER_INFO_COOKIE_NAME` | User identity cookie name |
 | `DISABLE_ENTERPRISE_LOGIN` | Feature flag: enterprise SSO gate |
-| `INDIGO_ENABLE_DARK_TOGGLE` | Feature flag: dark mode toggle in MFE header |
+| `PARAGON_THEME_URLS` | Runtime theme CSS URLs served from the MFE `/theme/*` path |
 
 Additional keys served by the LMS but not explicitly validated include feature flags
 for individual MFEs (e.g. `ENABLE_DISCUSSIONS_MFE`, `DISCUSSIONS_MICROFRONTEND_URL`).
@@ -143,7 +142,7 @@ prevent image reuse across environments:
 |----------|--------------|--------|
 | Cookie domain keys | Removed from the active MFE Dockerfile; LMS/runtime config owns delivery | Keep runtime-owned via `mfe_config` |
 | New Relic toggle | Removed from the active MFE Dockerfile | Keep runtime- or release-owned; do not restore build ARGs |
-| Footer nav links | Hardcoded array in `env.config.jsx` | Fetch from `INDIGO_FOOTER_NAV_LINKS` runtime key |
+| Footer nav links | Read from `MEREKA_PUBLIC_FOOTER` runtime config with code fallbacks | Keep tenant/site-owned via LMS runtime config |
 | `SITE_VARIANTS` hostname map | Hardcoded in `env.config.jsx` | LMS `SiteConfiguration` already handles per-site branding; remove from MFE |
 | `DISCUSSIONS_MICROFRONTEND_URL` default | Hardcoded string in mereka_lms.py plugin | Set via `SiteConfiguration` or Tutor config variable only |
 
@@ -168,7 +167,7 @@ correct cookie posture is present in the mfe_config API response.
 ### Phase 2 — Footer nav links (medium complexity)
 
 Replace the hardcoded `navLinks`, `corporateLinks`, etc. arrays in
-`tutor_env/env/plugins/mfe/build/mfe/indigo/env.config.jsx` with reads from
+`tutor_env/env/plugins/mfe/build/mfe/mereka/env.config.jsx` with reads from
 `getConfig().MEREKA_FOOTER_NAV_LINKS` (or similar LMS-served key).
 
 The LMS serves arbitrary keys via `mfe_config` when they are present in the
@@ -219,7 +218,7 @@ This prevents the production domain from leaking into non-production environment
 │  SESSION_COOKIE_SAMESITE, CSRF_COOKIE_SAMESITE      │
 │  SESSION_COOKIE_DOMAIN, CSRF_COOKIE_DOMAIN          │
 │  DISABLE_ENTERPRISE_LOGIN                           │
-│  INDIGO_ENABLE_DARK_TOGGLE                          │
+│  PARAGON_THEME_URLS                                 │
 │  Feature flags (ENABLE_DISCUSSIONS_MFE, etc.)       │
 │                                                     │
 └──────────────────────────┬──────────────────────────┘
@@ -257,9 +256,9 @@ extension points:
   runs at browser load time (after mfe_config is resolved)
 - `patch("mfe-env-config-runtime-definitions-{app_name}")` — per-MFE runtime logic
 
-The Indigo theme plugin (tutor-contrib-indigo) overrides the template entirely. Mereka
-uses the Indigo-rendered `env.config.jsx` stored at
-`tutor_env/env/plugins/mfe/build/mfe/indigo/env.config.jsx`.
+Tutor Indigo is retired. Mereka uses the Tutor MFE-rendered `env.config.jsx`,
+then mirrors it into the repo-owned MFE build-context path at
+`tutor_env/env/plugins/mfe/build/mfe/mereka/env.config.jsx`.
 
 After any manual `tutor config save`, run
 `./scripts/infra/prepare-tutor-build-context.sh --target mfe` before treating
@@ -277,6 +276,6 @@ authority path.
 | `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile` | MFE static file server + mfe_config proxy |
 | `deploy/k8s/base/apps/caddy/Caddyfile` | Main Caddy config; routes `apps.*` vhosts to MFE container |
 | `tutor_env/env/plugins/mfe/build/mfe/env.config.jsx` | Generated `env.config.jsx` (do not edit directly) |
-| `tutor_env/env/plugins/mfe/build/mfe/indigo/env.config.jsx` | Mereka-customized `env.config.jsx` source |
+| `tutor_env/env/plugins/mfe/build/mfe/mereka/env.config.jsx` | Mereka-customized `env.config.jsx` source |
 | `scripts/qa/verify-mfe-config-contract.sh` | Validates mfe_config API response keys |
 | `scripts/qa/verify-mfe-runtime-config.sh` | Validates runtime config structural contract |

@@ -141,19 +141,19 @@ patches:
   - id: mfe-theme-import
     name: "MFE Custom Theme Import"
     category: mfe-branding
-    description: "Imports mereka/mereka.scss in MFE env.config.jsx"
-    target_file: "tutor_env/env/plugins/mfe/build/mfe/indigo/env.config.jsx"
-    verify_command: "grep -F 'mereka/mereka.scss' tutor_env/env/plugins/mfe/build/mfe/indigo/env.config.jsx"
-    verify_pattern: "mereka/mereka.scss"
+    description: "Imports theme-source/mereka.scss in MFE env.config.jsx"
+    target_file: "tutor_env/env/plugins/mfe/build/mfe/mereka/env.config.jsx"
+    verify_command: "grep -F 'theme-source/mereka.scss' tutor_env/env/plugins/mfe/build/mfe/mereka/env.config.jsx"
+    verify_pattern: "theme-source/mereka.scss"
     severity: high
     required: false
 
   - id: mfe-custom-footer
     name: "Custom Mereka Footer Component"
     category: mfe-branding
-    description: "Replaces default Indigo footer with custom Mereka footer"
-    target_file: "tutor_env/env/plugins/mfe/build/mfe/indigo/env.config.jsx"
-    verify_command: "grep -F 'const MerekaFooter' tutor_env/env/plugins/mfe/build/mfe/indigo/env.config.jsx"
+    description: "Registers custom Mereka footer in repo-owned MFE runtime config"
+    target_file: "tutor_env/env/plugins/mfe/build/mfe/mereka/env.config.jsx"
+    verify_command: "grep -F 'const MerekaFooter' tutor_env/env/plugins/mfe/build/mfe/mereka/env.config.jsx"
     verify_pattern: "const MerekaFooter"
     severity: medium
     required: false

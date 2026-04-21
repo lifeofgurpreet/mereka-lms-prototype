@@ -137,14 +137,6 @@ if [[ "$RUNTIME_THEME_AVAILABLE" -eq 1 ]]; then
     echo "$GOOGLE_FONTS_MATCHES" | head -10 | sed 's/^/    /'
   fi
 
-  # Also check if Indigo theme has Google Fonts (informational only)
-  INDIGO_THEME_DIR="${BUILD_DIR}/themes/indigo"
-  if [[ -d "$INDIGO_THEME_DIR" ]]; then
-    INDIGO_FONTS=$(grep -r "$GOOGLE_FONTS_PATTERN" "$INDIGO_THEME_DIR" 2>/dev/null | wc -l || echo "0")
-    if [[ $INDIGO_FONTS -gt 0 ]]; then
-      echo "  Note: Default Indigo theme contains $INDIGO_FONTS Google Fonts references (not used in production)"
-    fi
-  fi
 else
   skip "AC-INT-003 (Part 1): runtime logo sync checks skipped (rendered theme artifacts unavailable)"
   skip "AC-INT-003 (Part 2): runtime Google Fonts checks skipped (rendered theme artifacts unavailable)"
@@ -165,8 +157,8 @@ if [[ "$RUNTIME_THEME_AVAILABLE" -eq 1 ]]; then
     # Check for mereka.scss or brand.scss
     MFE_SCSS_FOUND=false
 
-    if [[ -f "${MFE_BUILD_DIR}/indigo/mereka/mereka.scss" ]]; then
-      pass "MFE SCSS synced: indigo/mereka/mereka.scss"
+    if [[ -f "${MFE_BUILD_DIR}/mereka/theme-source/mereka.scss" ]]; then
+      pass "MFE SCSS synced: mereka/theme-source/mereka.scss"
       MFE_SCSS_FOUND=true
     elif [[ -f "${MFE_BUILD_DIR}/brand/mereka.scss" ]]; then
       pass "MFE SCSS synced: brand/mereka.scss"
@@ -209,7 +201,7 @@ else
   else
     fail "apply-patches missing source for brand-package.sh"
   fi
-  if grep -q 'Injected COPY indigo/theme into production stage of rendered MFE Dockerfile\|drops this COPY' "$APPLY_PATCHES"; then
+  if grep -q 'Injected COPY .*theme into production stage of rendered MFE Dockerfile\|drops this COPY' "$APPLY_PATCHES"; then
     fail "apply-patches still contains stale rendered MFE Dockerfile theme-copy surgery"
   else
     pass "apply-patches keeps MFE theme handling in build-context asset sync only"

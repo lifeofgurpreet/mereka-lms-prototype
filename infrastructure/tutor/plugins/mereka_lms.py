@@ -33,9 +33,9 @@ Architecture:
     mereka_lms_mfe_slots.py ← MFE plugin slot registrations (63 slots)
 
 Usage:
-    tutor plugins enable mereka_lms
-    tutor config save
-    tutor images build openedx mfe
+    ./scripts/infra/tutor-config-save.sh
+    ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
+    ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 """
 
 from __future__ import annotations

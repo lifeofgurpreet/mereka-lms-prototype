@@ -89,6 +89,7 @@ fi
     --set DOCKER_IMAGE_MYSQL=mirror.gcr.io/library/mysql:8.4.0 \
     --set DOCKER_IMAGE_REDIS=mirror.gcr.io/library/redis:7.4.5 \
     --set DOCKER_IMAGE_SMTP=mirror.gcr.io/devture/exim-relay:4.96-r1-0 \
+    --set MFE_COMMON_VERSION=release/ulmo.2 \
     --set MYSQL_HOST=mysql \
     --set MONGODB_HOST=mongodb \
     --set REDIS_HOST=redis \
@@ -244,7 +245,7 @@ echo "  🛠️  Next Steps:"
 echo "    • Fast Open edX rebuild: ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast"
 echo "    • Fast MFE rebuild: ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast"
 echo "    • Strict Open edX proof: BENCHMARK_CLASS=proof-class ./scripts/bench/measure-openedx-build.sh \"$PWD\" openedx-proof-noneditable"
-echo "    • Run: ./tools/comprehensive-test.sh"
+echo "    • Run: ./scripts/qa/comprehensive-test.sh"
 echo "    • Read: docs/ops/quickref/README.md"
 echo "    • Check: docs/status/readiness/README.md"
 echo ""

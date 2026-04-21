@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # @spec: cross-cutting-requirements_spec.md
 # @covers AC-ULMO-001: OPENEDX_COMMON_VERSION patch confirmed working (ensure_mfe_ulmo_source_refs)
-# @covers AC-ULMO-002: All MFE app source refs use release/ulmo.1
+# @covers AC-ULMO-002: All MFE app source refs use release/ulmo
 # @covers AC-ULMO-003: Atlas translation pulls use release/ulmo
-# @covers AC-ULMO-004: Brand package upgraded to published ulmo-compatible version (^2.4.2)
+# @covers AC-ULMO-004: Brand package uses the repo-local Ulmo-compatible package
 # @covers AC-ULMO-006: discussions webpack fix is no-op on ulmo (fixed upstream)
 #
 # Verify MFE Ulmo migration completeness.
@@ -134,7 +134,7 @@ run_offline_checks() {
   echo ""
 
   # -----------------------------------------------------------------------
-  # AC-ULMO-002: All MFE app source refs use release/ulmo.1 in snapshot
+  # AC-ULMO-002: All MFE app source refs use release/ulmo in snapshot
   # -----------------------------------------------------------------------
   echo "--- AC-ULMO-002: MFE source refs in snapshot Dockerfile ---"
 
@@ -160,7 +160,7 @@ run_offline_checks() {
     fi
 
     if [[ "$ULMO_COUNT" -ge 12 ]]; then
-      pass "All active MFE apps use release/ulmo.1 ($ULMO_COUNT refs found, expected >=12)"
+      pass "All active MFE apps use release/ulmo ($ULMO_COUNT refs found, expected >=12)"
     elif [[ "$ULMO_COUNT" -ge 1 ]]; then
       fail "Only $ULMO_COUNT ulmo refs found (expected >=12) — migration incomplete"
     else
@@ -176,7 +176,7 @@ run_offline_checks() {
   echo "--- Node version: base image must be Node 18+ ---"
 
   if [[ -f "$active_dockerfile" ]]; then
-    BASE_IMAGE=$(grep -E "^FROM (docker\.io/)?node:" "$active_dockerfile" | head -1 || true)
+    BASE_IMAGE=$(grep -E "^FROM ((docker\.io|mirror\.gcr\.io/library)/)?node:" "$active_dockerfile" | head -1 || true)
     if echo "$BASE_IMAGE" | grep -qE "node:(18|20|22|24)"; then
       pass "MFE base image uses Node 18+: $BASE_IMAGE"
     elif [[ -n "$BASE_IMAGE" ]]; then
@@ -269,7 +269,7 @@ run_offline_checks() {
   if [[ -f "$SNAPSHOT" ]]; then
     DISCUSSIONS_REDWOOD=$(grep -c "frontend-app-discussions.*redwood" "$SNAPSHOT" || true)
     if [[ "$DISCUSSIONS_REDWOOD" -eq 0 ]]; then
-      pass "discussions app uses ulmo.1 (not redwood) — webpack prompt fix not needed"
+      pass "discussions app uses release/ulmo (not redwood) — webpack prompt fix not needed"
     else
       fail "discussions still on redwood — webpack non-interactive fix needed"
     fi

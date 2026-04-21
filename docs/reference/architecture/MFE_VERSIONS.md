@@ -10,7 +10,7 @@ This section is the **authoritative reference** for all frontend tooling version
 
 | Component | Version | Source | Notes |
 |-----------|---------|--------|-------|
-| **Tutor (pip)** | 21.0.0 | `requirements-tutor.txt` | Tutor 21.0.0 (Ulmo release) |
+| **Tutor (pip)** | 21.0.3 | `requirements-tutor.txt` | Tutor 21.0.3 (Ulmo release) |
 | **Tutor MFE Plugin** | 21.0.0 | `requirements-tutor.txt` | Official plugin for MFE builds |
 | **Open edX Release** | Ulmo | Named release | Tutor v21.0.0 |
 | **Node.js** | 24.11.0 | Tutor plugin MFE Dockerfile hooks | Current supported build base |
@@ -22,8 +22,8 @@ This section is the **authoritative reference** for all frontend tooling version
 
 | Image | Registry | Current Tag | Base Image |
 |-------|----------|-------------|------------|
-| **OpenEdX** | `ghcr.io/biji-biji-initiative/mereka-lms/openedx` | `20260210-v21-mfe-only-b988d63` | `docker.io/overhangio/openedx:21.0.0-indigo` |
-| **MFE** | `ghcr.io/biji-biji-initiative/mereka-lms/mfe` | `20260208-mfe-discussions-pass4-c17df16` | `docker.io/overhangio/openedx-mfe:21.0.0-indigo` |
+| **OpenEdX** | `ghcr.io/biji-biji-initiative/mereka-lms/openedx` | `20260210-v21-mfe-only-b988d63` | `docker.io/overhangio/openedx:21.0.0` |
+| **MFE** | `ghcr.io/biji-biji-initiative/mereka-lms/mfe` | `20260208-mfe-discussions-pass4-c17df16` | `docker.io/overhangio/openedx-mfe:21.0.0` |
 
 **Verification**: Image tags are pinned in `deploy/k8s/base/kustomization.yaml` and validated by CI (`verify-mfe-version-pinning.sh`, `verify-frontend-version-truth.sh`).
 
@@ -35,7 +35,7 @@ These apps are installed via the Mereka Tutor plugin and verified by `scripts/qa
 
 ## Current MFE Versions
 
-All MFEs are built from Tutor 21.0.0 (Ulmo release) with the current plugin-first MFE build contract.
+All MFEs are built from Tutor 21.0.3 (Ulmo release) with the current plugin-first MFE build contract.
 
 | MFE | Version | Tutor Image Tag | Node Version | Notes |
 |-----|---------|-----------------|--------------|-------|
@@ -50,7 +50,7 @@ All MFEs are built from Tutor 21.0.0 (Ulmo release) with the current plugin-firs
 ## Version Pinning Strategy
 
 ### Current Approach (Tutor-managed)
-- MFE versions are pinned via Tutor release (21.0.0 / Ulmo)
+- MFE versions are pinned via Tutor release (21.0.3 / Ulmo)
 - Tutor handles MFE builds with specific git commits
 - No automatic upstream updates
 
@@ -102,13 +102,13 @@ Follow these steps to upgrade Tutor, Open edX, or MFE versions:
    export TUTOR_ROOT="$(pwd)/tutor_env"
 
    # Update Tutor version
-   pip install "tutor[full]==<new-version>" "tutor-mfe==<new-version>"
+   pip install "tutor==<new-version>" "tutor-mfe==<new-version>"
 
    # Refresh governed MFE build context
    ./scripts/infra/prepare-tutor-build-context.sh --target mfe
 
    # Validate MFEs locally
-   tutor images build mfe
+   ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 
    # Verify patches applied
    ./scripts/qa/verify-mfe-build-prereqs.sh
@@ -179,7 +179,7 @@ After upgrading Tutor/Open edX, verify these contracts:
 ### Build Command
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
-tutor images build mfe
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 ```
 
 This command is for local validation and parity checks. Production rollout of the

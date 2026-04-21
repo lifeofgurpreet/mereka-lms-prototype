@@ -126,7 +126,7 @@ infrastructure/tutor/themes/mereka/
 - The system MUST mirror source theme image directories into `tutor_env/env/build/openedx/themes/mereka/**/static/images/`
 - The system MUST mirror source font directories into `tutor_env/env/build/openedx/themes/mereka/**/static/fonts/`
 - The system MUST sync templates to preserve Django template overrides
-- The system MUST sync MFE SCSS to `tutor_env/env/plugins/mfe/build/mfe/indigo/mereka/`
+- The system MUST sync MFE theme source to `tutor_env/env/plugins/mfe/build/mfe/mereka/theme-source/`
 
 **Note**: Asset sync is handled by the low-level patch helper behind `./scripts/infra/prepare-tutor-build-context.sh --target all` (file-system operations). Configuration patches are handled by the Tutor plugin (automatic via hooks).
 
@@ -249,7 +249,7 @@ tutor images build openedx
 
 ### MFE Footer Not Rendering
 
-**Symptom**: Default Indigo footer shows instead of MerekaFooter
+**Symptom**: Default Open edX footer shows instead of MerekaFooter
 
 **Cause**: env.config.jsx patch not applied or MFE build cache stale
 

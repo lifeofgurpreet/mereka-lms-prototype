@@ -17,15 +17,15 @@ The Mereka LMS theming system uses TWO complementary mechanisms:
    - Asset syncing (logos, fonts, SCSS files)
    - Theme directory copying
    - Font file distribution
-   - Required manual step after `tutor config save`
+   - Invoked by the governed wrapper/prepare path, not by hand during normal setup
 
-**Both are required**. The plugin handles what can be expressed as Tutor hooks. The script handles what requires file-system access after template rendering.
+**Both are required**. The plugin handles what can be expressed as Tutor hooks. The script handles what requires file-system access after template rendering. Operators should enter through `./scripts/infra/tutor-config-save.sh` or `./scripts/infra/prepare-tutor-build-context.sh --target all`, which keep plugin sync, render, and patch-only file sync in the right order.
 
 ## Directory Structure
 
 ```
 infrastructure/tutor/
-├── apply-patches.sh           # Apply local patches to Tutor templates
+├── apply-patches.sh           # Low-level compatibility layer behind prepare-tutor-build-context.sh
 ├── config.example.yml         # Example Tutor configuration
 ├── multisite-sites.yml        # Multi-site configuration
 ├── themes/                    # Custom themes
@@ -55,7 +55,7 @@ infrastructure/tutor/
 - `django_db_query_duration_seconds` - Database query duration
 - `django_cache_get_total`, `django_cache_hits_total` - Cache metrics
 
-**Integration**: Automatically enabled via `apply-patches.sh`:
+**Integration**: Realized through the governed Tutor render/build-context path:
 1. Copies app to `/openedx/openedx_prometheus` in Docker image
 2. Installs django-prometheus in Open edX virtualenv
 3. Adds to INSTALLED_APPS (django_prometheus must be first)
@@ -81,7 +81,7 @@ kubectl exec -n mereka-lms deploy/lms -- curl -s localhost:8000/metrics | head -
 
 ## apply-patches.sh
 
-This script applies necessary patches to Tutor-generated templates. It must be run after every `tutor config save` command.
+This script applies remaining patch-only filesystem/build-context compatibility work after Tutor renders templates. Do not call it directly for normal local setup; use `./scripts/infra/tutor-config-save.sh` for config changes or `./scripts/infra/prepare-tutor-build-context.sh --target all` after a deliberate manual `tutor config save`.
 
 ### Why Patches Are Needed
 
@@ -97,17 +97,16 @@ Tutor generates templates from scratch on every `config save`, losing any manual
 
 ### Usage
 
-**Always run after config changes**:
+**Config changes**:
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
-tutor config save --set KEY=value
-./infrastructure/tutor/apply-patches.sh  # CRITICAL!
+./scripts/infra/tutor-config-save.sh --set KEY=value
 tutor local restart
 ```
 
-**Manual patch application**:
+**Manual render refresh, only after a deliberate raw Tutor render**:
 ```bash
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
 ```
 
 ### Patch Targets
@@ -136,7 +135,7 @@ Multi-site configuration for serving multiple domains from one LMS instance.
 
 ## Theme Development
 
-Themes are stored in `themes/mereka/` and synced to the build directory via `apply-patches.sh`.
+Themes are stored in `themes/mereka/` and synced to the build directory via `./scripts/infra/prepare-tutor-build-context.sh --target all`.
 
 **Structure**:
 ```
@@ -162,8 +161,8 @@ make branding-sync
 # Via script
 ./scripts/branding/setup-mfe-branding.sh
 
-# Automatically during patches
-./infrastructure/tutor/apply-patches.sh
+# Automatically during governed render prep
+./scripts/infra/prepare-tutor-build-context.sh --target all
 ```
 
 ## Building Images with Patches
@@ -173,24 +172,20 @@ make branding-sync
 export TUTOR_ROOT="$(pwd)/tutor_env"
 source infrastructure/tutor/tutor-env.sh
 
-# Apply patches first
-./infrastructure/tutor/apply-patches.sh
+# Refresh rendered build context first
+./scripts/infra/prepare-tutor-build-context.sh --target all
 
 # Build Open edX image (includes prometheus, oauth_fix apps)
-tutor images build openedx  # 30-45 min, needs 12GB+ RAM
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 
 # Build MFE image
-tutor images build mfe      # 15-20 min
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 ```
 
 **Production**:
 ```bash
-# Build and tag
-tutor images build openedx
-docker tag local/openedx:latest ghcr.io/biji-biji-initiative/mereka-lms/openedx:$(git rev-parse --short HEAD)
-
-# Push to Artifact Registry
-docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:$(git rev-parse --short HEAD)
+# Use the release-object-driven promotion path; do not promote ad hoc local images
+# from this README. See docs/architecture/PROMOTION_REALIZATION_AND_INCIDENT_FLOW.md.
 ```
 
 ## Prometheus Metrics Integration
@@ -201,23 +196,23 @@ docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:$(git rev-parse --sh
 
 1. **Custom app**: `custom-apps/openedx_prometheus/`
 2. **Package**: django-prometheus==2.3.1 installed in Open edX image
-3. **Configuration**: Middleware and INSTALLED_APPS configured via apply-patches.sh
+3. **Configuration**: Middleware and INSTALLED_APPS configured through the governed Tutor render path
 4. **Endpoint**: `/metrics` exposed via nginx lms.conf
 5. **Documentation**: Metrics usage documented in custom app README
 
 ### Rebuilding Images
 
-After updating `apply-patches.sh` to include prometheus integration:
+After changing prometheus integration:
 
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
 source infrastructure/tutor/tutor-env.sh
 
-# Apply patches
-./infrastructure/tutor/apply-patches.sh
+# Refresh rendered build context
+./scripts/infra/prepare-tutor-build-context.sh --target all
 
 # Rebuild Open edX image (REQUIRED - takes 30-45 min)
-tutor images build openedx
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 
 # For production deployment
 docker tag local/openedx:latest ghcr.io/biji-biji-initiative/mereka-lms/openedx:latest
@@ -276,11 +271,11 @@ kubectl port-forward -n monitoring svc/monitoring-kube-prometheus-prometheus 909
 
 **Symptom**: Services fail to start after `tutor config save`
 
-**Cause**: Forgot to run `apply-patches.sh`
+**Cause**: Rendered build context was not refreshed through the governed prepare path
 
 **Fix**:
 ```bash
-./infrastructure/tutor/apply-patches.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
 tutor local restart
 ```
 
@@ -290,7 +285,7 @@ tutor local restart
 
 **Cause**: MySQL 8 default auth plugin incompatible with some clients
 
-**Fix**: `apply-patches.sh` sets `--default-authentication-plugin=mysql_native_password`
+**Fix**: the governed Tutor render path sets `--default-authentication-plugin=mysql_native_password`
 
 ### MFE Build Fails
 
@@ -298,7 +293,7 @@ tutor local restart
 
 **Cause**: Node 24 builds of MFE dependencies require C++ toolchain
 
-**Fix**: `apply-patches.sh` adds `g++, python3, python3-distutils` to MFE Dockerfile
+**Fix**: the repo-owned MFE Dockerfile hook adds `g++, python3, python3-distutils`
 
 ### Metrics Endpoint Returns 400
 
@@ -309,7 +304,7 @@ tutor local restart
 **Fix**:
 1. Verify django-prometheus is installed: `kubectl exec -n mereka-lms deploy/lms -- pip list | grep django-prometheus`
 2. Check INSTALLED_APPS includes 'django_prometheus': `kubectl exec -n mereka-lms deploy/lms -- grep django_prometheus /openedx/edx-platform/lms/envs/production.py`
-3. Rebuild image with patches applied: `tutor images build openedx`
+3. Rebuild image with `./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast`
 
 ### Metrics Endpoint Returns 404
 
@@ -320,7 +315,7 @@ tutor local restart
 **Fix**:
 1. Check nginx config: `kubectl exec -n mereka-lms deploy/lms -- cat /etc/nginx/sites-enabled/lms.conf | grep metrics`
 2. Verify openedx_prometheus app in INSTALLED_APPS
-3. Re-run `apply-patches.sh` to update nginx template
+3. Re-run `./scripts/infra/prepare-tutor-build-context.sh --target all`
 
 ## References
 

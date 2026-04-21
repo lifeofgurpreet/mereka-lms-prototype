@@ -9,8 +9,8 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 # Canonical versions — update these when intentionally upgrading
-# Updated to Tutor 21.0.0 (Ulmo) from 18.2.2 (Redwood) — 2026-03-06
-EXPECTED_TUTOR_VERSION="21.0.0"
+# Updated to Tutor 21.0.3 (Ulmo) from broad tutor[full] install — 2026-04-21
+EXPECTED_TUTOR_VERSION="21.0.3"
 EXPECTED_MFE_VERSION="21.0.0"
 
 PASS=0
@@ -35,12 +35,12 @@ info() { printf "        %s\n" "$*"; }
 
 echo ""
 printf "${BOLD}Tutor Version Pin Verification${RESET}\n"
-printf "Expected  tutor[full]: %s\n" "$EXPECTED_TUTOR_VERSION"
+printf "Expected  tutor     : %s\n" "$EXPECTED_TUTOR_VERSION"
 printf "Expected  tutor-mfe  : %s\n" "$EXPECTED_MFE_VERSION"
 echo ""
 
 # ---------------------------------------------------------------------------
-# Collect all tutor[full]==x.y.z references
+# Collect all tutor==x.y.z and tutor[full]==x.y.z references
 # ---------------------------------------------------------------------------
 echo "Scanning .github/, docs/, infrastructure/, scripts/ ..."
 echo "(Excluding: docs/archive — deprecated historical snapshots)"
@@ -50,12 +50,12 @@ declare -A tutor_refs   # file -> version
 declare -A mfe_refs     # file -> version
 
 while IFS=: read -r file _rest; do
-  version="$(echo "$_rest" | grep -oE 'tutor\[full\]==[0-9]+\.[0-9]+\.[0-9]+' | head -1 | cut -d= -f3)"
+  version="$(echo "$_rest" | grep -oE 'tutor(\[full\])?==[0-9]+\.[0-9]+\.[0-9]+' | head -1 | sed -E 's/.*==//' || true)"
   [ -n "$version" ] && tutor_refs["$file"]="$version"
 done < <(grep -rn --include='*.yml' --include='*.yaml' --include='*.sh' --include='*.md' \
   --exclude-dir='archive' \
   --exclude-dir='deep-research' \
-  'tutor\[full\]==[0-9]' \
+  -E 'tutor(\[full\])?==[0-9]' \
   "$REPO_ROOT/.github" \
   "$REPO_ROOT/docs" \
   "$REPO_ROOT/infrastructure" \
@@ -64,7 +64,7 @@ done < <(grep -rn --include='*.yml' --include='*.yaml' --include='*.sh' --includ
   || true)
 
 while IFS=: read -r file _rest; do
-  version="$(echo "$_rest" | grep -oE 'tutor-mfe==[0-9]+\.[0-9]+\.[0-9]+' | head -1 | cut -d= -f3)"
+  version="$(echo "$_rest" | grep -oE 'tutor-mfe==[0-9]+\.[0-9]+\.[0-9]+' | head -1 | cut -d= -f3 || true)"
   [ -n "$version" ] && mfe_refs["$file"]="$version"
 done < <(grep -rn --include='*.yml' --include='*.yaml' --include='*.sh' --include='*.md' \
   --exclude-dir='archive' \
@@ -76,13 +76,13 @@ done < <(grep -rn --include='*.yml' --include='*.yaml' --include='*.sh' --includ
   "$REPO_ROOT/scripts" 2>/dev/null || true)
 
 # ---------------------------------------------------------------------------
-# Print summary table — tutor[full]
+# Print summary table — tutor
 # ---------------------------------------------------------------------------
 printf "${BOLD}%-70s  %-10s  %s${RESET}\n" "File" "Version" "Status"
 printf '%s\n' "$(printf '%.0s-' {1..95})"
 
 if [ "${#tutor_refs[@]}" -eq 0 ]; then
-  warn "No tutor[full]==x.y.z references found in scanned directories."
+  warn "No tutor==x.y.z references found in scanned directories."
 else
   for file in $(printf '%s\n' "${!tutor_refs[@]}" | sort); do
     ver="${tutor_refs[$file]}"
@@ -137,7 +137,7 @@ for ver in "${mfe_refs[@]}"; do
 done
 
 printf "${BOLD}Summary${RESET}\n"
-printf "  tutor[full]: %d/%d references match %s\n" "$tutor_ok" "$tutor_total" "$EXPECTED_TUTOR_VERSION"
+printf "  tutor     : %d/%d references match %s\n" "$tutor_ok" "$tutor_total" "$EXPECTED_TUTOR_VERSION"
 printf "  tutor-mfe  : %d/%d references match %s\n" "$mfe_ok"   "$mfe_total"   "$EXPECTED_MFE_VERSION"
 echo ""
 
@@ -145,7 +145,7 @@ if [ "$exit_code" -eq 0 ]; then
   printf "${GREEN}${BOLD}All version pins are consistent.${RESET}\n\n"
 else
   printf "${RED}${BOLD}Version pin mismatch detected. Update mismatched files to use:${RESET}\n"
-  printf "  pip install \"tutor[full]==%s\" tutor-mfe==%s\n\n" \
+  printf "  pip install tutor==%s tutor-mfe==%s\n\n" \
     "$EXPECTED_TUTOR_VERSION" "$EXPECTED_MFE_VERSION"
 fi
 
