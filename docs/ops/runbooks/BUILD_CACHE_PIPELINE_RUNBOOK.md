@@ -81,7 +81,11 @@ lint ──┬──► build-openedx ──► slsa-provenance
 ```
 
 `build-openedx` and `build-mfe` run in parallel on `mereka-k8s-heavy-builders`.
-`slsa-provenance` runs on `ubuntu-24.04` (GitHub-hosted) after both build jobs.
+`slsa-provenance` runs on `mereka-k8s-runners` after the image build jobs.
+Each heavy build job uploads a diagnostics artifact on success or failure:
+`openedx-build-diagnostics` or `mfe-build-diagnostics`. These artifacts contain
+the build log, timing env file, and emitted build metrics when those files were
+created. Use them before guessing at source-vs-runner root cause.
 
 **Triggers**:
 - `push` to `main` on governed Tutor/build paths. Push runs now resolve a
@@ -461,6 +465,7 @@ docker builder prune -af
 | DinD container does not start in time | Timing race between runner start and DinD daemon readiness | Add a readiness poll at the start of steps that need Docker: `until docker info >/dev/null 2>&1; do sleep 1; done` |
 | `loremipsum==1.0.5` build failure | `uv pip` does not provide `pkg_resources`; Tutor 21 default is `uv pip` | Use `./scripts/infra/build-openedx-image.sh`; do not bypass the helper with raw Tutor builds |
 | Swap provisioning skipped on ARC | ARC container runners lack `CAP_SYS_ADMIN`; swap step is non-fatal | Expected behavior; build continues. OOM risk is reduced by DinD having 8 Gi RAM limit and the 50 Gi cache |
+| Build job fails but sibling job keeps the run open | Parallel image jobs finish independently; GitHub may delay log access for the overall run | Download `openedx-build-diagnostics` or `mfe-build-diagnostics` once the failed job uploads artifacts; classify from the build log and metrics before rerunning |
 
 ### Detailed: LMS pods not rolling after release
 
