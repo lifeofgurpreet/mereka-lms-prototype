@@ -724,6 +724,15 @@ ci_runtime_inventory:
     - script: scripts/qa/audit-velero.sh
       category: LIVE_CLUSTER
       note: audits live Velero schedules, backups, snapshot posture, and app PVC coverage from the active cluster; runtime disaster-recovery proof, not offline static CI
+    - script: scripts/qa/audit-prometheus-phantom-metrics.py
+      category: LIVE_CLUSTER
+      args: ["--context", "rke2-prod", "--format", "check"]
+      note: >
+        audits PrometheusRule exprs against live `__name__` inventory to catch phantom
+        metric references (rules that can never fire). Runs offline in CI using the
+        checked-in snapshot at scripts/qa/phantom-audit/baseline-metric-names.json.
+        Origin: bead mereka-lms-33d8 / krco — Velero BSL alert silent for 1 week because
+        its expr referenced a non-existent metric.
     - script: scripts/qa/verify-restore-drill.sh
       category: LIVE_CLUSTER
       args: ["--strict"]
