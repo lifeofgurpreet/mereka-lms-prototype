@@ -19,14 +19,13 @@ This repository tracks the infrastructure-as-code, configuration, and runbooks f
   - `ops/` – Canonical operations runbooks and quick references
   - `operations/` – Compatibility transitional docs (canonical mirrors in `docs/ops/`)
   - `migrations/` – Migration playbooks for Kajabi and MCT
-  - `concepts/architecture/` – System architecture and design decisions
-  - `architecture/` – Compatibility transitional folder (archived to `concepts/architecture/` where canonical)
+  - `architecture/` – Current platform authority maps and stable system model
   - `archive/reports/status/` – Status trackers and backlog (see [`docs/archive/reports/status/NEXT10_TASKS.md`](docs/archive/reports/status/NEXT10_TASKS.md))
-- `infrastructure/` – Infrastructure-as-code:
+- `infrastructure/` – Tutor and support infrastructure:
   - `tutor/` – Tutor plugin source, local config examples, and the governed render-prep compatibility layer
   - `terraform/` – Terraform modules and configs
-  - `k8s/` – Kubernetes manifests
   - `themes/` – Mereka branding themes
+- `deploy/k8s/` – App-repo Kubernetes manifests and local/staging/production overlays
 - `scripts/` – Automation scripts organized by domain:
   - `infra/` – Infrastructure operations (RKE2, Cloudflare, MongoDB, etc.)
   - `migrations/` – Data migration scripts (Kajabi, MCT)
@@ -43,6 +42,7 @@ For a new local sandbox, use the one-click setup from the repo root:
 ```bash
 git clone git@github.com:Biji-Biji-Initiative/mereka-lms.git
 cd mereka-lms
+git submodule update --init --recursive
 ./scripts/qa/verify-cold-start-onboarding-contract.sh
 ./scripts/shared/setup-local.sh
 ./scripts/infra/verify-local-bootstrap-readiness.sh
@@ -56,7 +56,7 @@ make tutor-start
 ```
 
 The source-level onboarding contract is [`scripts/qa/verify-cold-start-onboarding-contract.sh`](scripts/qa/verify-cold-start-onboarding-contract.sh).
-The local setup path builds `openedx:nightly` and `openedx-mfe:nightly`, points Tutor at those exact tags, and pulls third-party service images through `mirror.gcr.io` to avoid anonymous Docker Hub quota during first-run setup.
+The local setup path initializes required submodules, builds `openedx:nightly` and `openedx-mfe:nightly`, points Tutor at those exact tags, and pulls third-party service images through `mirror.gcr.io` to avoid anonymous Docker Hub quota during first-run setup.
 The clean bootstrap proof lane is [`bootstrap-local-readiness.yml`](.github/workflows/bootstrap-local-readiness.yml), which launches a fresh repo-scoped Tutor environment and then runs [`scripts/infra/verify-local-bootstrap-readiness.sh`](scripts/infra/verify-local-bootstrap-readiness.sh). The image-build proof lane is [`build-benchmark.yml`](.github/workflows/build-benchmark.yml) with `benchmark_class=app-cache-cold` and `image_family=both`; that means app-level BuildKit cache imports are disabled, not that the persistent runner has a pristine Docker daemon or no base images.
 
 For detailed setup instructions, see [`docs/guides/onboarding/QUICK_START_LOCAL.md`](docs/guides/onboarding/QUICK_START_LOCAL.md) and [`docs/guides/onboarding/LOCAL_SETUP.md`](docs/guides/onboarding/LOCAL_SETUP.md).

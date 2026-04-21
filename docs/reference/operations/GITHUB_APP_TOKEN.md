@@ -97,7 +97,7 @@ Replace every occurrence of `secrets.GITOPS_PAT` with a two-step pattern:
 # Step 1 — generate a short-lived token
 - name: Generate GitHub App token
   id: app-token
-  uses: actions/create-github-app-token@v1
+  uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3  # v3.1.1
   with:
     app-id: ${{ secrets.GH_APP_ID }}
     private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
@@ -123,11 +123,12 @@ For inline git operations that previously used `GITOPS_PAT` as an env var:
       "https://x-access-token:${APP_TOKEN}@github.com/Biji-Biji-Initiative/infrastructure.git"
 ```
 
-Pin the action SHA before merging to main (find the current SHA at
-`https://github.com/actions/create-github-app-token/releases`):
+Pin the action SHA before merging to main and verify the pinned upstream
+`action.yml` uses the current supported Node runtime. As of 2026-04-21, v3.1.1
+declares `runs.using: node24`:
 
 ```yaml
-uses: actions/create-github-app-token@3ff1caabb62bef8dc1c6046f68f0df98d3f98b52  # v1
+uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3  # v3.1.1
 ```
 
 ---

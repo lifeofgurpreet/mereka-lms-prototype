@@ -320,6 +320,22 @@ require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'prepare-tutor-build-co
 require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'benchmark_class=app-cache-cold' "local setup guide names app-cache-cold image build proof"
 require_contains "docs/guides/onboarding/LOCAL_SETUP.md" '--set DOCKER_IMAGE_OPENEDX=openedx:nightly' "local setup guide points Tutor at the local Open edX image"
 require_contains "docs/guides/onboarding/LOCAL_SETUP.md" '--set RUN_MONGODB=true' "local setup guide enables local MongoDB"
+require_contains "docs/guides/onboarding/LOCAL_SETUP.md" '--set ASPECTS_SUPERSET_DATABASE_HOST=clickhouse' "local setup guide includes Aspects ClickHouse setting from setup-local"
+require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'build-openedx-image\.sh --local-defaults --build-profile fast' "local setup initial launch builds Open edX image"
+require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'build-mfe-image\.sh --local-defaults --build-profile fast' "local setup initial launch builds MFE image"
+require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'tutor local down -v' "local setup uses Tutor wrapper for volume cleanup"
+reject_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'docker-compose -f tutor_env' "local setup does not recommend raw docker-compose cleanup"
+require_contains "docs/guides/onboarding/DEVCONTAINER_GUIDE.md" 'After the first launch has initialized databases' "devcontainer guide separates first launch from daily start"
+reject_contains ".devcontainer/post-create.sh" 'docs/onboarding/DEVCONTAINER_GUIDE\.md' "devcontainer setup does not print stale guide path"
+require_contains ".devcontainer/post-create.sh" 'docs/guides/onboarding/DEVCONTAINER_GUIDE\.md' "devcontainer setup prints canonical guide path"
+require_contains ".env.example" '^OPENEDX_RELEASE=nightly$' ".env.example matches local Tutor release helper"
+reject_contains ".env.example" 'OPENEDX_RELEASE=open-release/ulmo\.master' ".env.example does not advertise stale Ulmo master release"
+reject_contains "docs/guides/onboarding/REPOSITORY_GUIDE.md" 'infrastructure/k8s' "repository guide does not advertise stale infrastructure/k8s path"
+reject_contains "docs/guides/onboarding/REPOSITORY_GUIDE.md" 'DELETED.*tools' "repository guide does not claim tools is deleted"
+require_contains "docs/ops/ci-cd/CACHE_AUTHORITY.md" 'app-cache-cold / registry-warm / local-hot / scan-only' "cache authority reference names current benchmark classes"
+reject_contains "docs/ops/ci-cd/CACHE_AUTHORITY.md" 'true-cold / registry-warm / local-hot' "cache authority does not use stale true-cold taxonomy summary"
+reject_contains "docs/reference/operations/GITHUB_APP_TOKEN.md" 'actions/create-github-app-token@v1' "GitHub App token runbook does not show stale v1 action"
+reject_contains "docs/guides/CI_TOKENS_FOR_DEVELOPERS.md" 'actions/create-github-app-token@v2' "CI token guide does not show stale v2 action"
 
 require_contains "docs/reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md" 'No lane may quietly become a second Dockerfile, Compose, or manifest generator' "developer environment matrix forbids second generators"
 require_contains "docs/reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md" 'Kubernetes preview' "developer environment matrix reserves k8s preview lane"
@@ -344,6 +360,8 @@ docs = [
     Path("docs/guides/onboarding/README.md"),
     Path("docs/guides/onboarding/QUICK_START_LOCAL.md"),
     Path("docs/guides/onboarding/LOCAL_SETUP.md"),
+    Path("docs/guides/onboarding/DEVCONTAINER_GUIDE.md"),
+    Path("docs/guides/onboarding/REPOSITORY_GUIDE.md"),
 ]
 pattern = re.compile(r'(?<!!)\[[^\]]+\]\(([^)]+)\)')
 broken = []

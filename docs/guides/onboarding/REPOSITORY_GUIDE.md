@@ -3,7 +3,7 @@ _Audience: Developers & AI Agents • Owner: Engineering Team • Last updated: 
 
 **Purpose**: Understand the Mereka LMS repository layout, find files quickly, and place new files in the correct location.
 
-**TL;DR**: Everything has its place. Scripts in `scripts/`, K8s manifests in `deploy/k8s/`, docs in `docs/`, specs in `specs/`. Deprecated paths (`tools/`, `ops/`) are gone. This guide is your map.
+**TL;DR**: Everything has its place. Scripts in `scripts/`, K8s manifests in `deploy/k8s/`, docs in `docs/`, specs in `specs/`, and developer utilities in `tools/`. This guide is your map.
 
 ---
 
@@ -18,9 +18,10 @@ _Audience: Developers & AI Agents • Owner: Engineering Team • Last updated: 
   - [specs/](#specs)
   - [services/](#services)
   - [assets/](#assets)
-  - [apps/](#apps)
+  - [tools/](#tools)
+  - [tmp/](#tmp)
 - [Root-Level Files](#root-level-files)
-- [Deprecated Directories](#deprecated-directories)
+- [Generated and Ignored Directories](#generated-and-ignored-directories)
 - [Common File Paths](#common-file-paths)
 - [Finding Things](#finding-things)
 - [Adding New Files](#adding-new-files)
@@ -30,7 +31,7 @@ _Audience: Developers & AI Agents • Owner: Engineering Team • Last updated: 
 
 ## Directory Overview
 
-The repository is organized into **8 top-level directories**, each with a clear purpose:
+The repository is organized into these primary top-level directories:
 
 ```
 mereka-lms/
@@ -41,12 +42,13 @@ mereka-lms/
 ├── specs/                 # Machine-checkable specifications
 ├── services/              # Microservices source code
 ├── assets/                # Static assets (logos, brand files)
-├── apps/                  # Application submodules (MFEs)
+├── tools/                 # Developer and maintenance utilities
+├── tmp/                   # Git submodules and temporary source checkouts
 ├── var/                   # Runtime artifacts (gitignored)
 └── tutor_env/             # Tutor-generated state (gitignored)
 ```
 
-**Gitignored directories**: `var/`, `tutor_env/` — these contain runtime artifacts and generated configs, never commit them.
+**Gitignored/generated directories**: `var/`, `tutor_env/`, and most of `tmp/` contain runtime artifacts, generated configs, or submodule working trees. Do not commit generated Tutor output.
 
 ---
 
@@ -334,6 +336,14 @@ assets/
 
 ---
 
+### tools/
+
+**Purpose**: Developer and maintenance utilities that are not canonical CI or ops entrypoints.
+
+Use `scripts/` for supported automation and verifiers. Use `tools/` only for helper utilities that are not the primary operator path.
+
+---
+
 ### tmp/
 
 **Purpose**: Temporary/vendor source checkouts (including upstream submodules).
@@ -392,17 +402,15 @@ git commit -m "chore: update authn MFE"
 
 ---
 
-## Deprecated Directories
+## Generated and Ignored Directories
 
-**DELETED**: `tools/`, `ops/`
+These paths are either generated, gitignored, or mostly runtime/submodule state:
 
-These directories were reorganized in February 2026:
-- `tools/` → moved to `scripts/`
-- `ops/` → moved to `infrastructure/` and `scripts/`
+- `tutor_env/` — Tutor-generated config, data, and rendered build context.
+- `var/` — local logs, exports, benchmark output, and other runtime artifacts.
+- `tmp/` — submodule/source working trees and temporary checkouts; `tmp/frontend-app-authn` is required by the authn MFE workflow.
 
-**If you see these directories**, they should contain ONLY a `README.md` redirect file. Any other files are violations.
-
-**Why deleted**: Prevented confusion about where to put new scripts and configs.
+Do not commit generated Tutor output. If a local workflow needs one of these paths, the corresponding setup or build script should recreate it from source.
 
 ---
 
@@ -600,7 +608,7 @@ This script checks:
 - ✅ All required top-level directories exist
 - ✅ Root markdown files match allowlist
 - ✅ Required subdirectories exist
-- ✅ No files in deprecated directories
+- ✅ Generated/runtime directories stay out of source control
 - ✅ Spec naming convention
 - ✅ Gitignore entries
 
@@ -609,8 +617,7 @@ This script checks:
 [PASS] Top-level directory deploy/ exists
 [PASS] Top-level directory scripts/ exists
 ...
-[PASS] Deprecated directory tools/ does not exist
-[PASS] Deprecated directory ops/ does not exist
+[PASS] Gitignored runtime paths are covered
 ...
 RESULT: PASS (all checks passed)
 ```

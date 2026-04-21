@@ -70,14 +70,16 @@ On first run you need to build images (30-45 minutes, requires 12 GB RAM):
 ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 ```
 
-Then start the platform:
+Then run the first launch:
 
 ```bash
-# Option A: full launch (initialises DB, creates admin, starts everything)
 tutor local launch -I --skip-build
 tutor local restart
+```
 
-# Option B: use Makefile wrapper
+After the first launch has initialized databases, daily starts can use the Makefile wrapper:
+
+```bash
 make tutor-start
 ```
 

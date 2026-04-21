@@ -233,8 +233,9 @@ echo "  ${BLUE}Fast local image refresh:${NC}"
 echo "    ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast"
 echo "    ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast"
 echo ""
-echo "  ${BLUE}Strict Open edX proof rebuild:${NC}"
-echo "    BENCHMARK_CLASS=proof-class ./scripts/bench/measure-openedx-build.sh \"$REPO_ROOT\" openedx-proof-noneditable"
+echo "  ${BLUE}Strict Open edX proof helper:${NC}"
+echo "    ./scripts/bench/measure-openedx-build.sh \"$REPO_ROOT\" openedx-proof-noneditable"
+echo "    For CI proof classes, use build-benchmark.yml with benchmark_class=app-cache-cold."
 echo ""
 
 if [[ -n "$BACKUP_FILE" && -f "$BACKUP_FILE" ]]; then

@@ -49,7 +49,7 @@ steps:
 steps:
   - name: Generate GitHub App token
     id: app-token
-    uses: actions/create-github-app-token@v2
+    uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3  # v3.1.1
     with:
       app-id: ${{ secrets.GITOPS_GITHUB_APP_ID }}
       private-key: ${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}
@@ -172,7 +172,7 @@ jobs:
     steps:
       - name: Mint App token
         id: app-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3  # v3.1.1
         with:
           app-id: ${{ secrets.GITOPS_GITHUB_APP_ID }}
           private-key: ${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}

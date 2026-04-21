@@ -77,6 +77,7 @@ source infrastructure/tutor/tutor-env.sh
   --set DOCKER_IMAGE_REDIS=mirror.gcr.io/library/redis:7.4.5 \
   --set DOCKER_IMAGE_SMTP=mirror.gcr.io/devture/exim-relay:4.96-r1-0 \
   --set MYSQL_ROOT_HOST=% \
+  --set ASPECTS_SUPERSET_DATABASE_HOST=clickhouse \
   --set OPENEDX_COMMON_VERSION=open-release/ulmo.1 \
   --set OPENEDX_LMS_VERSION=open-release/ulmo.1 \
   --set OPENEDX_CMS_VERSION=open-release/ulmo.1 \
@@ -107,17 +108,18 @@ Tutor will copy everything under `infrastructure/tutor/themes/` into `tutor_env/
 ```bash
 source infrastructure/tutor/tutor-env.sh
 ./scripts/infra/prepare-tutor-build-context.sh --target all
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 tutor local launch -I --skip-build
-tutor local restart lms cms mfe caddy
+tutor local restart
 ```
 
 The launch wizard will:
 
-1. Pull nightly Docker images.
+1. Use the local `openedx:nightly` and `openedx-mfe:nightly` images built above.
 2. Create MySQL and MongoDB data volumes.
 3. Run database migrations and seed demo content.
-4. Start the LMS, Studio, forum, MFEs, discovery, and Android build services.
+4. Start the LMS, Studio, forum, MFEs, discovery, and supporting Tutor services.
 
 Use `tutor local start -d` / `tutor local stop` for daily use, and `tutor local dc ps` or `tutor local logs --tail=100` to inspect health.
 
@@ -159,8 +161,8 @@ tutor local createuser --superuser --staff -p mereka_admin mereka_admin mereka@e
 ## Daily development workflow
 
 - Start/stop stack: `tutor local start -d` / `tutor local stop`.
-- Bring services back after config changes: rerun `./scripts/infra/tutor-config-save.sh`, then `tutor local restart lms cms mfe ecommerce`.
-- Keep databases clean while iterating on configuration: `docker-compose -f tutor_env/env/local/docker-compose.yml -f tutor_env/env/local/docker-compose.prod.yml down -v && rm -rf tutor_env/data`. After wiping `tutor_env/data/mysql`, re-run `tutor local launch -I --skip-build` (or at least `tutor local do init`) so the `openedx` schema and users are recreated before you hit the LMS.
+- Bring services back after config changes: rerun `./scripts/infra/tutor-config-save.sh`, then `tutor local restart`.
+- Keep databases clean while iterating on configuration: `tutor local down -v && rm -rf tutor_env/data`. After wiping Tutor data, re-run `tutor local launch -I --skip-build` (or at least `tutor local do init`) so service schemas and users are recreated before you hit the LMS.
 
 ### MFE development
 

@@ -386,7 +386,7 @@ not by intuition.
 | `docs/rfcs/BUILD-AUTHORITY-SPRINT-AGENT-BRIEF.md` | PR sequencing, lane boundaries, red lines |
 | `docs/ops/ci-cd/BUILD_FAILURE_TAXONOMY.md` | Failure bucket classification (B1–B4) |
 | `docs/ops/ci-cd/CI_METRICS.md` | Authoritative metric names and label schema (forthcoming — bead jj97.15) |
-| `docs/ops/ci-cd/BENCHMARK_CLASSES.md` | Benchmark class taxonomy: true-cold / registry-warm / local-hot (forthcoming — bead jj97.15) |
+| `docs/ops/ci-cd/BENCHMARK_CLASSES.md` | Benchmark class taxonomy: app-cache-cold / registry-warm / local-hot / scan-only; `true-cold` is a legacy alias only |
 | `docs/guides/CI_TOKENS_FOR_DEVELOPERS.md` | Developer GHCR auth setup |
 | `docs/ops/ci-cd/AUTOMATION_AUTHORSHIP_AUDIT.md` | Token identity model for CI jobs |
 | `bbi-infrastructure/docs/adr/024-build-cache-authority.md` | ADR governing the L2 GHCR decision (filed as 024 because 005 was already taken by `005-auth-canonical-branch-and-ownership.md`) |
