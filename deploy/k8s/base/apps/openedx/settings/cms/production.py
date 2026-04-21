@@ -209,6 +209,13 @@ MEREKA_SOF_STUDIO_DOMAIN = os.environ.get(
     "MEREKA_SOF_STUDIO_DOMAIN",
     "studio.skillourfuture.academy.mereka.io",
 )
+# SOF migration target (Stage 1 of tenant-domain-migration runbook).
+# Both old and new trees accepted during dual-active window.
+# See docs/status/active/TENANT_MIGRATION_SOF_2026-04.md
+MEREKA_SOF_STUDIO_V2_DOMAIN = os.environ.get(
+    "MEREKA_SOF_STUDIO_V2_DOMAIN",
+    "studio.skillourfuture.academyv2.mereka.io",
+)
 
 def _domain_from_base_url(raw_url: str) -> str:
     raw_url = (raw_url or "").strip()
@@ -597,12 +604,14 @@ ALLOWED_HOSTS = [
     MEREKA_STUDIO_DOMAIN,
     MEREKA_BIJI_STUDIO_DOMAIN,
     MEREKA_SOF_STUDIO_DOMAIN,
+    MEREKA_SOF_STUDIO_V2_DOMAIN,
     MEREKA_DEV_STUDIO_DOMAIN,
 ]
 for origin in [
     MEREKA_STUDIO_BASE_URL,
     f"{MEREKA_SCHEME}://{MEREKA_BIJI_STUDIO_DOMAIN}",
     f"{MEREKA_SCHEME}://{MEREKA_SOF_STUDIO_DOMAIN}",
+    f"{MEREKA_SCHEME}://{MEREKA_SOF_STUDIO_V2_DOMAIN}",
 ]:
     if origin not in CORS_ORIGIN_WHITELIST:
         CORS_ORIGIN_WHITELIST.append(origin)

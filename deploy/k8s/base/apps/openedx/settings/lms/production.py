@@ -264,6 +264,16 @@ MEREKA_SKILLOURFUTURE_DOMAIN = os.environ.get(
     "MEREKA_SKILLOURFUTURE_DOMAIN",
     "skillourfuture.academy.mereka.io",
 )
+# SOF migration target (Stage 1 of tenant-domain-migration runbook).
+# Both old and new trees are kept in ALLOWED_HOSTS / CORS / CSRF
+# during the dual-active window. Stage 4 will flip
+# MEREKA_SKILLOURFUTURE_DOMAIN to this value via env override.
+# Stage 6 drops the old tree entirely.
+# See docs/status/active/TENANT_MIGRATION_SOF_2026-04.md
+MEREKA_SKILLOURFUTURE_V2_DOMAIN = os.environ.get(
+    "MEREKA_SKILLOURFUTURE_V2_DOMAIN",
+    "skillourfuture.academyv2.mereka.io",
+)
 
 def _domain_from_base_url(raw_url: str) -> str:
     raw_url = (raw_url or "").strip()
@@ -803,6 +813,7 @@ ALLOWED_HOSTS = [
     MEREKA_MFE_DOMAIN,
     MEREKA_PREVIEW_DOMAIN,
     MEREKA_SKILLOURFUTURE_DOMAIN,
+    MEREKA_SKILLOURFUTURE_V2_DOMAIN,
     MEREKA_DEV_DOMAIN,
     MEREKA_DEV_STUDIO_DOMAIN,
     MEREKA_DEV_MFE_DOMAIN,
@@ -815,6 +826,10 @@ ALLOWED_HOSTS = [
     f"studio.{MEREKA_BIJI_DOMAIN}",
     f"apps.{MEREKA_SKILLOURFUTURE_DOMAIN}",
     f"studio.{MEREKA_SKILLOURFUTURE_DOMAIN}",
+    # SOF migration Stage 1 — dual-active v2 tree
+    MEREKA_SKILLOURFUTURE_V2_DOMAIN,
+    f"apps.{MEREKA_SKILLOURFUTURE_V2_DOMAIN}",
+    f"studio.{MEREKA_SKILLOURFUTURE_V2_DOMAIN}",
     # Enterprise portals
     f"admin.{MEREKA_LMS_DOMAIN}",
     f"learner.{MEREKA_LMS_DOMAIN}",
@@ -827,6 +842,10 @@ for origin in [
     f"{MEREKA_SCHEME}://apps.{MEREKA_SKILLOURFUTURE_DOMAIN}",
     f"{MEREKA_SCHEME}://{MEREKA_BIJI_DOMAIN}",
     f"{MEREKA_SCHEME}://{MEREKA_SKILLOURFUTURE_DOMAIN}",
+    # SOF migration Stage 1 — dual-active v2 tree
+    f"{MEREKA_SCHEME}://{MEREKA_SKILLOURFUTURE_V2_DOMAIN}",
+    f"{MEREKA_SCHEME}://apps.{MEREKA_SKILLOURFUTURE_V2_DOMAIN}",
+    f"{MEREKA_SCHEME}://studio.{MEREKA_SKILLOURFUTURE_V2_DOMAIN}",
     f"{MEREKA_SCHEME}://admin.{MEREKA_LMS_DOMAIN}",
     f"{MEREKA_SCHEME}://learner.{MEREKA_LMS_DOMAIN}",
 ]:
@@ -1086,6 +1105,10 @@ for origin in [
     f"{MEREKA_SCHEME}://apps.{MEREKA_SKILLOURFUTURE_DOMAIN}",
     f"{MEREKA_SCHEME}://{MEREKA_BIJI_DOMAIN}",
     f"{MEREKA_SCHEME}://{MEREKA_SKILLOURFUTURE_DOMAIN}",
+    # SOF migration Stage 1 — dual-active v2 tree
+    f"{MEREKA_SCHEME}://{MEREKA_SKILLOURFUTURE_V2_DOMAIN}",
+    f"{MEREKA_SCHEME}://apps.{MEREKA_SKILLOURFUTURE_V2_DOMAIN}",
+    f"{MEREKA_SCHEME}://studio.{MEREKA_SKILLOURFUTURE_V2_DOMAIN}",
 ]:
     if origin not in CSRF_TRUSTED_ORIGINS:
         CSRF_TRUSTED_ORIGINS.append(origin)

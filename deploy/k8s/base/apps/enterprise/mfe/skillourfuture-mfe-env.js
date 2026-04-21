@@ -4,6 +4,15 @@
 // Branding: LOGO_URL, FAVICON_URL, SITE_NAME configure @edx/frontend-platform.
 // PARAGON_THEME: points MFE shell to SkillOurFuture theme CSS served from /theme/ in the
 // same container (COPY'd into /openedx/dist/theme/ at Docker build time).
+//
+// SOF MIGRATION — Stage 1 (dual-active) status: LMS_BASE_URL still points
+// at the old academy.mereka.io tree while STUDIO_BASE_URL is already on
+// the v2 tree. This is the D-08 cookie-split pattern being worked off.
+// Stage 4 of docs/ops/runbooks/TENANT_DOMAIN_MIGRATION.md will flip all
+// URLs below to skillourfuture.academyv2.mereka.io so MFE + LMS + Studio
+// unify on one cookie parent. Do NOT partially-flip here — the Stage 4
+// PR coordinates this with the ingress cut, Authentik whitelist, and
+// SiteConfiguration promotion in one atomic change.
 window.ENV_CONFIG = {
   LMS_BASE_URL: 'https://skillourfuture.academy.mereka.io',
   STUDIO_BASE_URL: 'https://studio.skillourfuture.academyv2.mereka.io',

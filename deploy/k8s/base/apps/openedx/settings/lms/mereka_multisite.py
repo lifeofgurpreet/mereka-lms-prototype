@@ -73,8 +73,10 @@ def _candidate_site_domains(host: str) -> list[str]:
     Return candidate django_site.domain values for a request host.
 
     We keep Sites keyed on the tenant's LMS domain (e.g. academyv2.mereka.io,
-    academy.biji-biji.com, skillourfuture.academy.mereka.io). Subdomains that
-    are part of the same tenant should map back to that tenant domain.
+    academy.biji-biji.com, skillourfuture.academy.mereka.io, and during the
+    2026 SOF migration Stage 1 also skillourfuture.academyv2.mereka.io).
+    Subdomains that are part of the same tenant should map back to that
+    tenant domain.
 
     Handles environment-prefixed domains:
       staging.apps.academyv2.mereka.io  → staging.academyv2.mereka.io
@@ -127,6 +129,10 @@ def _env_site_domain_candidates() -> list[str]:
         os.environ.get("LMS_HOST", ""),
         os.environ.get("MEREKA_BIJI_DOMAIN", ""),
         os.environ.get("MEREKA_SKILLOURFUTURE_DOMAIN", ""),
+        # SOF migration Stage 1 — dual-active v2 tree (Site fallback
+        # must know about the future primary URL so post-cut rows can
+        # be resolved even before the primary env flips).
+        os.environ.get("MEREKA_SKILLOURFUTURE_V2_DOMAIN", ""),
     ]
     domains: list[str] = []
     for raw in raw_candidates:
@@ -218,6 +224,9 @@ def _cookie_policy_for_host(host: str) -> _CookiePolicy:
     # - academyv2.mereka.io (+ its subdomains) => .academyv2.mereka.io
     # - academy.biji-biji.com (+ its subdomains) => .academy.biji-biji.com
     # - skillourfuture.academy.mereka.io => .skillourfuture.academy.mereka.io
+    # - skillourfuture.academyv2.mereka.io => .skillourfuture.academyv2.mereka.io
+    #   (SOF migration Stage 1 dual-active target — Stage 4 flips this to
+    #   be the primary, Stage 6 retires the academy.mereka.io variant.)
     #
     # Staging/dev domain hierarchy fix:
     #   staging.academyv2.mereka.io (LMS) and staging.apps.academyv2.mereka.io (MFE)

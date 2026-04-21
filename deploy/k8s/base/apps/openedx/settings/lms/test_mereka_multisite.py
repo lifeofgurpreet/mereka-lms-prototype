@@ -144,6 +144,21 @@ class TestCookiePolicyForHost(unittest.TestCase):
         policy = ms._cookie_policy_for_host("staging.skillourfuture.academy.mereka.io")
         self.assertEqual(policy.domain, ".skillourfuture.academy.mereka.io")
 
+    def test_skillourfuture_v2_tree_gets_own_broadened_domain(self):
+        """SOF migration Stage 1: academyv2 tree returns its own cookie domain."""
+        policy = ms._cookie_policy_for_host("skillourfuture.academyv2.mereka.io")
+        self.assertEqual(policy.domain, ".skillourfuture.academyv2.mereka.io")
+
+    def test_skillourfuture_v2_apps_prefix_maps_to_v2_broadened_domain(self):
+        """SOF migration: MFE on v2 tree shares cookie with LMS on v2 tree."""
+        policy = ms._cookie_policy_for_host("apps.skillourfuture.academyv2.mereka.io")
+        self.assertEqual(policy.domain, ".skillourfuture.academyv2.mereka.io")
+
+    def test_skillourfuture_v2_studio_prefix_maps_to_v2_broadened_domain(self):
+        """SOF migration: Studio on v2 tree shares cookie with LMS on v2 tree."""
+        policy = ms._cookie_policy_for_host("studio.skillourfuture.academyv2.mereka.io")
+        self.assertEqual(policy.domain, ".skillourfuture.academyv2.mereka.io")
+
     def test_apps_prefix_maps_to_broadened_domain(self):
         """MFE host: apps.staging.X → strip apps. → staging.X → broaden → .X"""
         policy = ms._cookie_policy_for_host("apps.staging.academy.biji-biji.com")
@@ -178,6 +193,8 @@ class TestCookiePolicyForHost(unittest.TestCase):
             "staging.academyv2.mereka.io": ".academyv2.mereka.io",
             "staging.academy.biji-biji.com": ".academy.biji-biji.com",
             "staging.skillourfuture.academy.mereka.io": ".skillourfuture.academy.mereka.io",
+            # SOF migration Stage 1 — v2 tree must not cross-contaminate
+            "skillourfuture.academyv2.mereka.io": ".skillourfuture.academyv2.mereka.io",
         }
         for host, expected_domain in tenants.items():
             with self.subTest(host=host):
