@@ -42,17 +42,21 @@ extract_step_block() {
 }
 job_has_precheckout_tutor_cleanup() {
   local block="$1"
-  local cleanup_command cleanup_line checkout_line
+  local cleanup_command cleanup_line checkout_line fallback_command
 
   cleanup_command='sudo rm -r''f --one-file-system "$target"'
+  fallback_command=$'else\n              rm -r''f --one-file-system "$target"'
   cleanup_line="$(awk '/Pre-clean persistent Tutor workspace/ { print NR; exit }' <<<"$block")"
   checkout_line="$(awk '/actions\/checkout@/ { print NR; exit }' <<<"$block")"
 
   [[ -n "$cleanup_line" && -n "$checkout_line" ]] || return 1
   [[ "$cleanup_line" -lt "$checkout_line" ]] || return 1
+  [[ "$block" == *'cleanup_target()'* ]] || return 1
+  [[ "$block" == *'sudo -n true'* ]] || return 1
   [[ "$block" == *'for path in tutor_env var/ci .buildx-cache; do'* ]] || return 1
-  [[ "$block" == *'target="$GITHUB_WORKSPACE/$path"'* ]] || return 1
+  [[ "$block" == *'cleanup_target "$GITHUB_WORKSPACE/$path"'* ]] || return 1
   [[ "$block" == *"$cleanup_command"* ]] || return 1
+  [[ "$block" == *"$fallback_command"* ]] || return 1
 }
 
 echo "=== Build Workflow Contract ==="
@@ -339,9 +343,9 @@ else
 fi
 
 if job_has_precheckout_tutor_cleanup "$BUILD_OPENEDX_BLOCK"; then
-  pass "build-openedx pre-cleans generated Tutor state before checkout on persistent runners"
+  pass "build-openedx pre-cleans generated Tutor state before checkout with non-interactive sudo fallback"
 else
-  fail "build-openedx missing pre-checkout generated Tutor state cleanup"
+  fail "build-openedx missing pre-checkout generated Tutor state cleanup with sudo fallback"
 fi
 
 if [[ "$BUILD_MFE_BLOCK" == *"needs.resolve-build-scope.outputs.build_mfe == 'true'"* ]]; then
@@ -357,9 +361,9 @@ else
 fi
 
 if job_has_precheckout_tutor_cleanup "$BUILD_MFE_BLOCK"; then
-  pass "build-mfe pre-cleans generated Tutor state before checkout on persistent runners"
+  pass "build-mfe pre-cleans generated Tutor state before checkout with non-interactive sudo fallback"
 else
-  fail "build-mfe missing pre-checkout generated Tutor state cleanup"
+  fail "build-mfe missing pre-checkout generated Tutor state cleanup with sudo fallback"
 fi
 
 # Fastlane (PR #1518, #1524) moves lightweight orchestration jobs to

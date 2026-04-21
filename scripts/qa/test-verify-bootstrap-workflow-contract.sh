@@ -63,11 +63,19 @@ jobs:
       - name: Pre-clean persistent Tutor workspace
         run: |
           set -euo pipefail
-          for path in tutor_env var/bootstrap-readiness var/ci .buildx-cache; do
-            target="$GITHUB_WORKSPACE/$path"
-            if [[ -e "$target" ]]; then
-              sudo rm -rf --one-file-system "$target"
+          cleanup_target() {
+            local target="$1"
+            if [[ ! -e "$target" ]]; then
+              return 0
             fi
+            if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+              sudo rm -rf --one-file-system "$target"
+            else
+              rm -rf --one-file-system "$target"
+            fi
+          }
+          for path in tutor_env var/bootstrap-readiness var/ci .buildx-cache; do
+            cleanup_target "$GITHUB_WORKSPACE/$path"
           done
       - uses: actions/checkout@v4
       - name: Ensure Docker Compose CLI
@@ -244,11 +252,19 @@ text = text.replace(
     '      - name: Pre-clean persistent Tutor workspace\n'
     '        run: |\n'
     '          set -euo pipefail\n'
-    '          for path in tutor_env var/bootstrap-readiness var/ci .buildx-cache; do\n'
-    '            target="$GITHUB_WORKSPACE/$path"\n'
-    '            if [[ -e "$target" ]]; then\n'
-    '              sudo rm -rf --one-file-system "$target"\n'
+    '          cleanup_target() {\n'
+    '            local target="$1"\n'
+    '            if [[ ! -e "$target" ]]; then\n'
+    '              return 0\n'
     '            fi\n'
+    '            if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then\n'
+    '              sudo rm -rf --one-file-system "$target"\n'
+    '            else\n'
+    '              rm -rf --one-file-system "$target"\n'
+    '            fi\n'
+    '          }\n'
+    '          for path in tutor_env var/bootstrap-readiness var/ci .buildx-cache; do\n'
+    '            cleanup_target "$GITHUB_WORKSPACE/$path"\n'
     '          done\n',
     '',
     1,
@@ -256,5 +272,17 @@ text = text.replace(
 wf.write_text(text, encoding="utf-8")
 PY
 run_expect_fail "missing pre-checkout persistent Tutor workspace cleanup is rejected"
+
+write_pass_fixture
+TMP_WF="$tmpdir/.github/workflows/bootstrap-local-readiness.yml" python3 - <<'PY'
+from pathlib import Path
+import os
+
+wf = Path(os.environ["TMP_WF"])
+text = wf.read_text(encoding="utf-8")
+text = text.replace(" && sudo -n true >/dev/null 2>&1", "", 1)
+wf.write_text(text, encoding="utf-8")
+PY
+run_expect_fail "interactive sudo-only cleanup is rejected"
 
 echo "OK"

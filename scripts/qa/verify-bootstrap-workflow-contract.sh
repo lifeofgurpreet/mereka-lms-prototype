@@ -72,11 +72,13 @@ else
 fi
 
 if grep -q 'Pre-clean persistent Tutor workspace' "$BOOTSTRAP_WF" \
+  && grep -q 'sudo -n true' "$BOOTSTRAP_WF" \
   && grep -q 'sudo rm -r[f] --one-file-system "\$target"' "$BOOTSTRAP_WF" \
+  && grep -q '^[[:space:]]*rm -r[f] --one-file-system "\$target"' "$BOOTSTRAP_WF" \
   && grep -q 'tutor_env var/bootstrap-readiness var/ci .buildx-cache' "$BOOTSTRAP_WF"; then
-  pass "workflow pre-cleans root-owned Tutor state before checkout on persistent runners"
+  pass "workflow pre-cleans generated Tutor state before checkout with non-interactive sudo fallback"
 else
-  fail "workflow missing pre-checkout persistent Tutor workspace cleanup"
+  fail "workflow missing pre-checkout persistent Tutor workspace cleanup with sudo fallback"
 fi
 
 if grep -q './scripts/infra/tutor-config-save.sh' "$BOOTSTRAP_WF"; then

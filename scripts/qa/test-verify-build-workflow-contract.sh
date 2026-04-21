@@ -261,11 +261,19 @@ jobs:
       - name: Pre-clean persistent Tutor workspace
         run: |
           set -euo pipefail
-          for path in tutor_env var/ci .buildx-cache; do
-            target="$GITHUB_WORKSPACE/$path"
-            if [[ -e "$target" ]]; then
-              sudo rm -rf --one-file-system "$target"
+          cleanup_target() {
+            local target="$1"
+            if [[ ! -e "$target" ]]; then
+              return 0
             fi
+            if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+              sudo rm -rf --one-file-system "$target"
+            else
+              rm -rf --one-file-system "$target"
+            fi
+          }
+          for path in tutor_env var/ci .buildx-cache; do
+            cleanup_target "$GITHUB_WORKSPACE/$path"
           done
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
@@ -304,11 +312,19 @@ jobs:
       - name: Pre-clean persistent Tutor workspace
         run: |
           set -euo pipefail
-          for path in tutor_env var/ci .buildx-cache; do
-            target="$GITHUB_WORKSPACE/$path"
-            if [[ -e "$target" ]]; then
-              sudo rm -rf --one-file-system "$target"
+          cleanup_target() {
+            local target="$1"
+            if [[ ! -e "$target" ]]; then
+              return 0
             fi
+            if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+              sudo rm -rf --one-file-system "$target"
+            else
+              rm -rf --one-file-system "$target"
+            fi
+          }
+          for path in tutor_env var/ci .buildx-cache; do
+            cleanup_target "$GITHUB_WORKSPACE/$path"
           done
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
@@ -626,11 +642,19 @@ text = text.replace(
     '      - name: Pre-clean persistent Tutor workspace\n'
     '        run: |\n'
     '          set -euo pipefail\n'
-    '          for path in tutor_env var/ci .buildx-cache; do\n'
-    '            target="$GITHUB_WORKSPACE/$path"\n'
-    '            if [[ -e "$target" ]]; then\n'
-    '              sudo rm -rf --one-file-system "$target"\n'
+    '          cleanup_target() {\n'
+    '            local target="$1"\n'
+    '            if [[ ! -e "$target" ]]; then\n'
+    '              return 0\n'
     '            fi\n'
+    '            if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then\n'
+    '              sudo rm -rf --one-file-system "$target"\n'
+    '            else\n'
+    '              rm -rf --one-file-system "$target"\n'
+    '            fi\n'
+    '          }\n'
+    '          for path in tutor_env var/ci .buildx-cache; do\n'
+    '            cleanup_target "$GITHUB_WORKSPACE/$path"\n'
     '          done\n'
     '      - uses: actions/checkout@v4\n',
     '      - uses: actions/checkout@v4\n',
@@ -651,11 +675,19 @@ needle = (
     '      - name: Pre-clean persistent Tutor workspace\n'
     '        run: |\n'
     '          set -euo pipefail\n'
-    '          for path in tutor_env var/ci .buildx-cache; do\n'
-    '            target="$GITHUB_WORKSPACE/$path"\n'
-    '            if [[ -e "$target" ]]; then\n'
-    '              sudo rm -rf --one-file-system "$target"\n'
+    '          cleanup_target() {\n'
+    '            local target="$1"\n'
+    '            if [[ ! -e "$target" ]]; then\n'
+    '              return 0\n'
     '            fi\n'
+    '            if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then\n'
+    '              sudo rm -rf --one-file-system "$target"\n'
+    '            else\n'
+    '              rm -rf --one-file-system "$target"\n'
+    '            fi\n'
+    '          }\n'
+    '          for path in tutor_env var/ci .buildx-cache; do\n'
+    '            cleanup_target "$GITHUB_WORKSPACE/$path"\n'
     '          done\n'
     '      - uses: actions/checkout@v4\n'
 )
@@ -667,6 +699,18 @@ text = text[:second] + '      - uses: actions/checkout@v4\n' + text[second + len
 p.write_text(text)
 PY
 run_expect_fail "missing MFE pre-checkout generated-state cleanup is rejected"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(" && sudo -n true >/dev/null 2>&1", "", 1)
+p.write_text(text)
+PY
+run_expect_fail "interactive sudo-only build cleanup is rejected"
 
 write_pass_fixture
 python3 - "$tmpdir" <<'PY'
