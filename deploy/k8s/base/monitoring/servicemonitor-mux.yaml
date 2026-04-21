@@ -13,6 +13,7 @@ metadata:
     app.kubernetes.io/instance: mereka-lms
     app.kubernetes.io/part-of: mereka-lms
     app.kubernetes.io/component: monitoring
+    release: monitoring  # bead mereka-lms-33d8: required by prod Prometheus serviceMonitorSelector
     prometheus: kube-prometheus
 spec:
   selector:

@@ -191,12 +191,22 @@ for sm_file in "$MON_DIR"/servicemonitor-*.yaml; do
     continue
   fi
 
-  if grep -q 'namespaceSelector:' "$sm_file" 2>/dev/null && \
-     grep -q 'matchNames:' "$sm_file" 2>/dev/null && \
-     grep -q '  - mereka-lms' "$sm_file" 2>/dev/null; then
-    pass "AC-OVR-008: $base has namespaceSelector=matchNames[mereka-lms]"
+  # AC-OVR-008 namespaceSelector contract:
+  #   ACCEPTED: (a) namespaceSelector omitted entirely (prometheus-operator
+  #              default = "same namespace as SM"), OR
+  #             (b) namespaceSelector.matchNames references the SM's own namespace.
+  #   REJECTED: hardcoded matchNames that doesn't align with SM namespace — this
+  #             silently breaks scrape on overlays that rewrite metadata.namespace
+  #             per env (dev=mereka-lms-dev, staging=stg-mereka-lms). See bead
+  #             mereka-lms-33d8 for the failure class.
+  if ! grep -q '^  namespaceSelector:' "$sm_file" 2>/dev/null; then
+    pass "AC-OVR-008: $base omits namespaceSelector (default same-namespace, works across overlays)"
+  elif grep -q '^  namespaceSelector:' "$sm_file" 2>/dev/null && \
+       grep -q 'matchNames:' "$sm_file" 2>/dev/null && \
+       grep -q '  - mereka-lms' "$sm_file" 2>/dev/null; then
+    pass "AC-OVR-008: $base has namespaceSelector=matchNames[mereka-lms] (legacy but accepted)"
   else
-    fail "AC-OVR-008: $base missing namespaceSelector.matchNames=mereka-lms"
+    fail "AC-OVR-008: $base has namespaceSelector that does not target mereka-lms"
   fi
 
   if grep -q 'path: /metrics' "$sm_file" 2>/dev/null; then

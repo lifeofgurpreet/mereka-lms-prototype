@@ -10,14 +10,16 @@ metadata:
     app.kubernetes.io/instance: mereka-lms
     app.kubernetes.io/part-of: mereka-lms
     app.kubernetes.io/component: monitoring
+    release: monitoring  # bead mereka-lms-33d8: required by prod Prometheus serviceMonitorSelector
 spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: enterprise-catalog
       app.kubernetes.io/instance: mereka-lms
-  namespaceSelector:
-    matchNames:
-      - mereka-lms
+  # namespaceSelector intentionally omitted — default "same namespace as SM"
+  # works across all envs (prod mereka-lms / dev mereka-lms-dev / staging
+  # stg-mereka-lms). Previous hardcoded matchNames:[mereka-lms] yielded zero
+  # targets on dev+staging. See bead mereka-lms-33d8.
   endpoints:
     - port: http
       path: /metrics
@@ -47,14 +49,16 @@ metadata:
     app.kubernetes.io/instance: mereka-lms
     app.kubernetes.io/part-of: mereka-lms
     app.kubernetes.io/component: monitoring
+    release: monitoring  # bead mereka-lms-33d8: required by prod Prometheus serviceMonitorSelector
 spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: enterprise-access
       app.kubernetes.io/instance: mereka-lms
-  namespaceSelector:
-    matchNames:
-      - mereka-lms
+  # namespaceSelector intentionally omitted — default "same namespace as SM"
+  # works across all envs (prod mereka-lms / dev mereka-lms-dev / staging
+  # stg-mereka-lms). Previous hardcoded matchNames:[mereka-lms] yielded zero
+  # targets on dev+staging. See bead mereka-lms-33d8.
   endpoints:
     - port: http
       path: /metrics
@@ -84,14 +88,16 @@ metadata:
     app.kubernetes.io/instance: mereka-lms
     app.kubernetes.io/part-of: mereka-lms
     app.kubernetes.io/component: monitoring
+    release: monitoring  # bead mereka-lms-33d8: required by prod Prometheus serviceMonitorSelector
 spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: enterprise-subsidy
       app.kubernetes.io/instance: mereka-lms
-  namespaceSelector:
-    matchNames:
-      - mereka-lms
+  # namespaceSelector intentionally omitted — default "same namespace as SM"
+  # works across all envs (prod mereka-lms / dev mereka-lms-dev / staging
+  # stg-mereka-lms). Previous hardcoded matchNames:[mereka-lms] yielded zero
+  # targets on dev+staging. See bead mereka-lms-33d8.
   endpoints:
     - port: http
       path: /metrics
@@ -121,14 +127,16 @@ metadata:
     app.kubernetes.io/instance: mereka-lms
     app.kubernetes.io/part-of: mereka-lms
     app.kubernetes.io/component: monitoring
+    release: monitoring  # bead mereka-lms-33d8: required by prod Prometheus serviceMonitorSelector
 spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: license-manager
       app.kubernetes.io/instance: mereka-lms
-  namespaceSelector:
-    matchNames:
-      - mereka-lms
+  # namespaceSelector intentionally omitted — default "same namespace as SM"
+  # works across all envs (prod mereka-lms / dev mereka-lms-dev / staging
+  # stg-mereka-lms). Previous hardcoded matchNames:[mereka-lms] yielded zero
+  # targets on dev+staging. See bead mereka-lms-33d8.
   endpoints:
     - port: http
       path: /metrics

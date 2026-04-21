@@ -11582,13 +11582,14 @@
         "workflow_direct"
       ],
       "env_scope": [
-        "dev"
+        "dev",
+        "staging"
       ],
       "kind": "verify",
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-observability-validation.sh",
-      "reference_count": 12,
+      "reference_count": 13,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"

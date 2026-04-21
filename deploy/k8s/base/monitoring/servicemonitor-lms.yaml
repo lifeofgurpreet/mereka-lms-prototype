@@ -12,6 +12,7 @@ metadata:
     app.kubernetes.io/managed-by: tutor
     app.kubernetes.io/part-of: mereka-lms
     app.kubernetes.io/component: monitoring
+    release: monitoring  # bead mereka-lms-33d8: required by prod Prometheus serviceMonitorSelector
 spec:
   # Select the LMS service
   # Note: lms Service in services.yml does not carry the instance label —
@@ -20,10 +21,10 @@ spec:
     matchLabels:
       app.kubernetes.io/name: lms
 
-  # Target the mereka-lms namespace
-  namespaceSelector:
-    matchNames:
-      - mereka-lms
+  # namespaceSelector intentionally omitted — default "same namespace as SM"
+  # works across all envs (prod mereka-lms / dev mereka-lms-dev / staging
+  # stg-mereka-lms). Previous hardcoded matchNames:[mereka-lms] yielded zero
+  # targets on dev+staging. See bead mereka-lms-33d8.
 
   # Scrape configuration
   endpoints:

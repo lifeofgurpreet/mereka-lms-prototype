@@ -90,6 +90,7 @@
         "scripts/qa/verify-obs-001-mfe-sentry-phase4.sh",
         "scripts/qa/verify-oidc-provider-configs.sh",
         "scripts/qa/verify-oidc-user-password-state.sh",
+        "scripts/qa/verify-observability-validation.sh",
         "scripts/qa/verify-org-role-ownership.sh",
         "scripts/qa/verify-overlay-ownership.sh",
         "scripts/qa/verify-platform-admin-env.sh",
