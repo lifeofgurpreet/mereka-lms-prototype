@@ -127,7 +127,13 @@ tutor local launch -I --skip-build
 make tutor-start
 ```
 
-### 7. Create Local Admin User
+### 7. Local Admin Fallback
+
+`./scripts/shared/setup-local.sh` already creates or refreshes a local admin
+user. If `LOCAL_ADMIN_PASSWORD` is unset, it writes generated credentials to
+`tutor_env/local-admin-credentials.txt`. Only run the command below if that
+file is missing, or if you deliberately want to rotate the local-only password.
+
 ```bash
 export LOCAL_ADMIN_PASSWORD='<choose-a-local-only-password>'
 docker exec \
@@ -160,8 +166,10 @@ print('Local admin ready')
 Run these to confirm everything works:
 
 ```bash
-# 1. Check containers (should be 24)
+# 1. Check containers
 docker ps --filter "name=tutor_local" | wc -l
+# Expect 20+ containers on a full local stack; trust
+# ./scripts/infra/verify-local-bootstrap-readiness.sh over a magic count.
 
 # 2. Check config uses local services
 grep MYSQL_HOST tutor_env/config.yml
@@ -226,6 +234,7 @@ make tutor-restart
 tutor local restart mysql
 sleep 15
 tutor local restart lms cms
+./scripts/infra/verify-local-bootstrap-readiness.sh
 ```
 
 ## 📚 Next Steps

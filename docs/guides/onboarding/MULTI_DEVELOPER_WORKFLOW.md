@@ -9,6 +9,7 @@ This guide keeps every developer on the same local source-to-render-to-artifact 
 
 ### One-Command Setup
 ```bash
+git submodule update --init --recursive
 ./scripts/qa/verify-cold-start-onboarding-contract.sh
 ./scripts/shared/setup-local.sh
 ./scripts/infra/verify-local-bootstrap-readiness.sh
@@ -122,7 +123,9 @@ Kubernetes preview namespaces, Loft/vCluster, and devspace-style development are
 1. **Developer runs:**
    ```bash
    git clone <repo-url>
-   cd mereka.academy
+   cd mereka-lms
+   git submodule update --init --recursive
+   ./scripts/qa/verify-cold-start-onboarding-contract.sh
    ./scripts/shared/setup-local.sh
    ```
 

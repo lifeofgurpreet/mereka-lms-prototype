@@ -1,25 +1,67 @@
-# CI/CD Self-Hosted Runners — Actions Runner Controller (ARC)
+# CI/CD Self-Hosted Runners — ARC + Fastlane Build Lanes
 
 **Parent docs**: [CI optimization tracker](../../status/active/CI_OPTIMIZATION_TRACKER.md) | [CI pipeline cost analysis](../../reports/2026/learnings/CI_PIPELINE_COST_OPTIMIZATION.md)
 **Runner policy**: [../../policies/operations/CI_RUNNER_POLICY.md](../../policies/operations/CI_RUNNER_POLICY.md) — which job type uses which runner class
+**Proof matrix**: [../../reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md](../../reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md)
+**Cache taxonomy**: [CACHE_AUTHORITY.md](CACHE_AUTHORITY.md) | [BENCHMARK_CLASSES.md](BENCHMARK_CLASSES.md)
+**Last verified**: 2026-04-22
 **Tracker tasks**: Phase 1, T150 (Tasks 1.1–1.5)
-**Cluster**: rke2-nonprod (Contabo VPS, `154.26.132.35`)
+**ARC cluster**: rke2-nonprod (Contabo VPS, `154.26.132.35`)
 
 ---
 
 ## Overview
 
-ARC (Actions Runner Controller) runs ephemeral GitHub Actions runner pods on the rke2-nonprod
-Kubernetes cluster. Each workflow job that targets a self-hosted runner label spawns a fresh pod,
-runs to completion, then terminates. No runner sits idle between jobs (minRunners: 0).
+Linux CI in this repo currently has two runner substrates:
 
-This eliminates GitHub-hosted runner minutes for all workloads that can reach the cluster,
-driving costs from ~$81/month to near-zero (see cost projection in
-[../../status/active/CI_OPTIMIZATION_TRACKER.md](../../status/active/CI_OPTIMIZATION_TRACKER.md)).
+- ARC runner pods on the rke2-nonprod cluster
+- a persistent fastlane VPS build host
+
+Those substrates are acceleration and execution environments only. They do not
+own build semantics. Both must consume the same source -> render -> artifact
+chain named in the developer environment proof matrix: Tutor plugins/config,
+canonical build-context helpers, and Bake-backed image helpers.
+
+`FASTLANE_AUTOMATION.md` is the iOS/TestFlight procedure only. It is not the
+Linux build-runner lane. For fastlane host cleanup and persistent-runner
+substrate rules, use [`RUNNER_HYGIENE.md`](RUNNER_HYGIENE.md).
+
+ARC (Actions Runner Controller) runs ephemeral GitHub Actions runner pods on
+the rke2-nonprod Kubernetes cluster. Each workflow job that targets an ARC
+self-hosted runner label spawns a fresh pod, runs to completion, then
+terminates. No ARC runner sits idle between jobs (`minRunners: 0`).
+
+This eliminates GitHub-hosted runner minutes for workloads that can reach the
+cluster, while the fastlane VPS remains a persistent heavy-build substrate for
+selected proof and benchmark lanes.
 
 ---
 
-## Architecture
+## Runner Surfaces
+
+| Normalized class | Backing substrate | Primary use | Cache posture | Read next |
+|---|---|---|---|---|
+| `arc-standard` | ARC lightweight pod (`mereka-k8s-runners`) | static checks, cluster-aware audits, light CI | no Docker build cache authority | this file, [`../../policies/operations/CI_RUNNER_POLICY.md`](../../policies/operations/CI_RUNNER_POLICY.md) |
+| `arc-heavy` | ARC heavy pod + DinD (`mereka-k8s-heavy-builders`) | Tutor image builds, Playwright, heavy Docker work | ARC PVC cache plus GHCR cache where enabled | this file, [CACHE_AUTHORITY.md](CACHE_AUTHORITY.md) |
+| `fastlane` | persistent VPS build host | selected benchmark/bootstrap/build lanes where persistent host-local cache matters | fastlane host-local cache plus GHCR cache where enabled | [RUNNER_HYGIENE.md](RUNNER_HYGIENE.md), [BENCHMARK_CLASSES.md](BENCHMARK_CLASSES.md) |
+| `github-hosted` | GitHub-managed runner | macOS-only exceptions, approved temporary Linux exceptions | no durable local cache | [`../../policies/operations/CI_RUNNER_POLICY.md`](../../policies/operations/CI_RUNNER_POLICY.md) |
+
+Before comparing ARC and fastlane timings, classify the run with
+[`BENCHMARK_CLASSES.md`](BENCHMARK_CLASSES.md). Comparing different cache
+classes is not a runner comparison.
+
+## Authority Rules
+
+1. Runner choice does not create a new build path.
+2. Cache is an acceleration layer, never source authority.
+3. A fastlane or ARC failure is not automatically a source failure; classify it
+   with [`BUILD_FAILURE_TAXONOMY.md`](BUILD_FAILURE_TAXONOMY.md) first.
+4. New runner lanes must bind back to the proof matrix instead of inventing new
+   Dockerfiles, wrappers, or image semantics.
+
+---
+
+## ARC Implementation
 
 ```
 GitHub Actions ──HTTPS──► ARC Controller (arc-systems ns)
@@ -323,10 +365,15 @@ kubectl get pods -n arc-runners   # Should show runner pods during active CI run
 
 ## Related Documentation
 
+- [RUNNER_HYGIENE.md](RUNNER_HYGIENE.md) — fastlane VPS cleanup, persistent-runner hygiene, and host-owned follow-up rules
+- [CACHE_AUTHORITY.md](CACHE_AUTHORITY.md) — shared cache write/read policy and cache-level definitions
+- [BENCHMARK_CLASSES.md](BENCHMARK_CLASSES.md) — how to compare ARC and fastlane fairly
+- [../../reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md](../../reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md) — source/render/artifact contract for local and CI lanes
 - [../../policies/operations/CI_RUNNER_POLICY.md](../../policies/operations/CI_RUNNER_POLICY.md) — runner class definitions, job-type routing rules, full workflow audit table, migration checklist
 - [../../reports/2026/learnings/CI_PIPELINE_COST_OPTIMIZATION.md](../../reports/2026/learnings/CI_PIPELINE_COST_OPTIMIZATION.md) — cost analysis and rationale
 - [../../status/active/CI_OPTIMIZATION_TRACKER.md](../../status/active/CI_OPTIMIZATION_TRACKER.md) — phase-by-phase implementation tracker
 - [../../reference/operations/TUTOR_CONFIG_CI.md](../../reference/operations/TUTOR_CONFIG_CI.md) — Tutor configuration CI reference
+- [FASTLANE_AUTOMATION.md](FASTLANE_AUTOMATION.md) — iOS/TestFlight Fastlane only, not the Linux VPS build lane
 - [ALLOWED_ACTIONS_POLICY.md](../security/ALLOWED_ACTIONS_POLICY.md) — GitHub Actions security policy
 - ARC upstream docs: https://github.com/actions/actions-runner-controller
 - ARC scale set docs: https://github.com/actions/actions-runner-controller/blob/main/docs/scale-set-runner.md

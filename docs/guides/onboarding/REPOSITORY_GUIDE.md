@@ -639,7 +639,7 @@ RESULT: PASS (all checks passed)
 - **Spec**: `specs/repository-structure_spec.md` — Full specification
 - **Roadmap**: `../meta/docs-program/IMPLEMENTATION_ROADMAP.md` — Implementation progress
 - **Onboarding**: `docs/guides/onboarding/LOCAL_SETUP.md` — Complete setup guide
-- **Quick Start**: `docs/guides/onboarding/QUICK_START_LOCAL.md` — 5-minute setup
+- **Quick Start**: `docs/guides/onboarding/QUICK_START_LOCAL.md` — first local bootstrap path
 - **Agent Guide**: `AGENTS.md` — Agent-specific guidelines
 
 ---

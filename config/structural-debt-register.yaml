@@ -110,17 +110,24 @@ entries:
     status: resolved
 
   - id: DEBT-007
-    title: "test-verify-ci-cache-policy and test-verify-verification-catalog timeout (rsync)"
+    title: "verification-catalog clean-copy test used mutable worktree state"
     severity: medium
-    class: test-environment-dependency
+    class: script-bug
     owner_repo: mereka-lms
     owner_layer: proof
-    failing_gate: "scripts/qa/test-verify-ci-cache-policy.sh, scripts/qa/test-verify-verification-catalog.sh"
-    evidence: "Reclassified: pass on clean origin/main. Previous failures from dirty worktree."
-    current_risk: "None — pass on clean state"
-    decision: tolerate
-    action: "Both pass within 120s timeout on clean state"
-    review_date: "2026-04-08"
+    failing_gate: "scripts/qa/test-verify-verification-catalog.sh"
+    evidence: >
+      Resolved in PR #2037. The test now snapshots tracked files with
+      `git ls-files` + tar when running inside a git checkout and explicitly
+      proves untracked `verify-*.sh` runner noise does not enter catalog
+      authority. This was not just dirty-worktree tolerance.
+    current_risk: "None — catalog test is deterministic on clean and noisy runners"
+    decision: kill
+    action: >
+      Keep the tracked-file copy path and the untracked verification-script
+      runner-noise guard. Do not regress to mutable whole-worktree snapshots for
+      verification-catalog proof.
+    review_date: "2026-04-22"
     status: resolved
 
   - id: DEBT-008

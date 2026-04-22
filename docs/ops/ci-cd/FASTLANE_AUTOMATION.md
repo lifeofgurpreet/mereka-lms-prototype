@@ -1,7 +1,15 @@
-# Fastlane Automation
-_Audience: Operators and release owners • Owner: Platform Team • Last verified: 2026-03-10 • Status: canonical_
+# Fastlane Automation (iOS only)
+_Audience: Operators and release owners • Owner: Platform Team • Last verified: 2026-04-22 • Status: canonical_
 
 ---
+
+This document is only for Apple signing, TestFlight, and iOS release
+automation driven by Fastlane. It is not the Linux VPS build-runner lane.
+
+For ARC vs fastlane Linux runner posture, cache class, and build proof routing,
+use [`CI_CD_RUNNERS.md`](CI_CD_RUNNERS.md),
+[`RUNNER_HYGIENE.md`](RUNNER_HYGIENE.md), and
+[`../../reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md`](../../reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md).
 
 This guide covers the durable operator procedure for iOS delivery automation. Use it when you need to understand the Fastlane-driven signing flow, the one-time Apple-side prerequisites, and the safe trigger path for CI builds.
 
