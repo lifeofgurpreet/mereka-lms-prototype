@@ -2341,6 +2341,52 @@ a:hover { text-decoration: underline; }
   .lms-header__actions { gap: 4px; }
   .icon-btn { width: 32px; height: 32px; }
 }
+
+/* ============================================================
+   Settings popup — opens when profile avatar is clicked
+   ============================================================ */
+.settings-popup { position: fixed; inset: 0; z-index: 100; display: none; }
+.settings-popup.is-open { display: block; }
+.settings-popup__backdrop { position: absolute; inset: 0; background: rgba(15,15,20,0.32); }
+.settings-popup__dialog {
+  position: absolute; top: 68px; right: 16px; width: 380px;
+  max-height: calc(100vh - 92px); background: var(--white);
+  border: 1px solid var(--border); border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(15,15,20,0.18);
+  display: flex; flex-direction: column; overflow: hidden;
+  animation: settingsPopIn .18s ease-out;
+}
+@keyframes settingsPopIn {
+  from { opacity: 0; transform: translateY(-8px) scale(.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.settings-popup__head { padding: 16px 18px; display: flex; gap: 12px; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+.settings-popup__user { display: flex; gap: 10px; align-items: center; min-width: 0; }
+.settings-popup__user .avatar-lg { width: 40px; height: 40px; font-size: 14px; }
+.settings-popup__user strong { display: block; font-family: var(--font-display); font-size: 14px; color: var(--off-black); }
+.settings-popup__user span { display: block; font-size: 12px; color: var(--medium-grey); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+.settings-popup__quick { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; padding: 10px 12px; border-bottom: 1px solid var(--border); background: var(--surface); }
+.settings-popup__quick button { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 10px 6px; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; color: var(--dark-grey); font-family: var(--font-body); transition: all .15s; }
+.settings-popup__quick button:hover { border-color: var(--primary); color: var(--primary); }
+.settings-popup__quick button span.material-symbols-outlined { font-size: 20px; }
+.settings-popup__tabs { display: flex; gap: 2px; padding: 10px 14px 0; overflow-x: auto; border-bottom: 1px solid var(--border); }
+.settings-popup__tabs button { background: transparent; border: none; padding: 8px 10px; font-size: 12px; color: var(--medium-grey); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; font-family: var(--font-body); margin-bottom: -1px; }
+.settings-popup__tabs button.is-active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+.settings-popup__panes { flex: 1; overflow-y: auto; padding: 14px 18px 16px; }
+.settings-popup__pane { display: none; }
+.settings-popup__pane.is-active { display: block; }
+.settings-popup__pane .row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; gap: 12px; }
+.settings-popup__pane .row:last-child { border-bottom: 0; }
+.settings-popup__pane .row .body { min-width: 0; flex: 1; }
+.settings-popup__pane .row strong { display: block; font-family: var(--font-display); font-size: 13px; color: var(--off-black); }
+.settings-popup__pane .row .sub { display: block; font-size: 11px; color: var(--medium-grey); margin-top: 2px; line-height: 1.3; }
+.settings-popup__pane .field { margin: 10px 0; }
+.settings-popup__pane .field label { display: block; font-size: 11px; font-weight: 600; color: var(--medium-grey); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+.settings-popup__pane .field input, .settings-popup__pane .field select { width: 100%; padding: 8px 10px; font-size: 13px; border: 1px solid var(--border); border-radius: 8px; font-family: var(--font-body); background: var(--white); }
+.settings-popup__foot { padding: 12px 18px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; gap: 8px; background: var(--surface); }
+@media (max-width: 440px) {
+  .settings-popup__dialog { right: 8px; left: 8px; width: auto; top: 60px; }
+}
 </style>
 </head>
 <body>
@@ -6958,6 +7004,154 @@ window.handleCheckout = function() {
   // Initial render
   renderSwitcherList();
   renderCoursesGrid();
+})();
+</script>
+
+<!-- ============================================================
+     Settings popup — opens when profile avatar is clicked
+     ============================================================ -->
+<div class="settings-popup" id="settingsPopup" aria-hidden="true">
+  <div class="settings-popup__backdrop" onclick="closeSettingsPopup()"></div>
+  <div class="settings-popup__dialog" role="dialog" aria-label="Account settings">
+    <header class="settings-popup__head">
+      <div class="settings-popup__user">
+        <div class="avatar-lg">FF</div>
+        <div style="min-width:0;">
+          <strong>Faiz Fadhillah</strong>
+          <span>faiz.fadhillah@gmail.com</span>
+        </div>
+      </div>
+      <button class="icon-btn" onclick="closeSettingsPopup()" aria-label="Close" style="width:32px;height:32px;"><span class="material-symbols-outlined" style="font-size:20px;">close</span></button>
+    </header>
+
+    <div class="settings-popup__quick">
+      <button onclick="closeSettingsPopup(); goto('profile');"><span class="material-symbols-outlined">person</span> View profile</button>
+      <button onclick="closeSettingsPopup(); goto('mylearning');"><span class="material-symbols-outlined">school</span> My Learning</button>
+      <button onclick="closeSettingsPopup(); goto('certificates');"><span class="material-symbols-outlined">verified</span> Certificates</button>
+    </div>
+
+    <nav class="settings-popup__tabs" role="tablist">
+      <button class="is-active" data-ppane="account">Account</button>
+      <button data-ppane="notifications">Notifications</button>
+      <button data-ppane="appearance">Appearance</button>
+      <button data-ppane="privacy">Privacy</button>
+      <button data-ppane="billing">Billing</button>
+    </nav>
+
+    <div class="settings-popup__panes">
+      <!-- Account -->
+      <div class="settings-popup__pane is-active" data-ppane="account">
+        <div class="field"><label>Display name</label><input value="Faiz Fadhillah"/></div>
+        <div class="field"><label>Email</label><input value="faiz.fadhillah@gmail.com"/></div>
+        <div class="field"><label>Headline</label><input value="Founder &amp; CEO · Mereka"/></div>
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <button class="btn btn--outline btn--sm" style="flex:1;">Cancel</button>
+          <button class="btn btn--primary btn--sm" style="flex:1;">Save</button>
+        </div>
+      </div>
+
+      <!-- Notifications -->
+      <div class="settings-popup__pane" data-ppane="notifications">
+        <div class="row"><div class="body"><strong>Course progress reminders</strong><span class="sub">Weekly nudge when you haven't studied in 5+ days</span></div><div class="toggle is-on" role="switch" aria-checked="true" onclick="this.classList.toggle('is-on')"></div></div>
+        <div class="row"><div class="body"><strong>Assignment due dates</strong><span class="sub">Email + in-app, 24h before</span></div><div class="toggle is-on" role="switch" aria-checked="true" onclick="this.classList.toggle('is-on')"></div></div>
+        <div class="row"><div class="body"><strong>Discussion replies</strong><span class="sub">Replies to your threads and @mentions</span></div><div class="toggle is-on" role="switch" aria-checked="true" onclick="this.classList.toggle('is-on')"></div></div>
+        <div class="row"><div class="body"><strong>New course releases</strong><span class="sub">Monthly digest of new cohorts</span></div><div class="toggle" role="switch" aria-checked="false" onclick="this.classList.toggle('is-on')"></div></div>
+        <div class="row"><div class="body"><strong>Marketing &amp; tips</strong><span class="sub">Occasional product updates</span></div><div class="toggle" role="switch" aria-checked="false" onclick="this.classList.toggle('is-on')"></div></div>
+      </div>
+
+      <!-- Appearance -->
+      <div class="settings-popup__pane" data-ppane="appearance">
+        <div class="field">
+          <label>Theme</label>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
+            <label style="display:block;border:2px solid var(--primary);border-radius:10px;padding:10px;cursor:pointer;background:var(--white);font-size:12px;text-align:center;font-family:var(--font-display);"><input type="radio" name="ptheme" checked style="display:none;"/>Light</label>
+            <label style="display:block;border:1px solid var(--border);border-radius:10px;padding:10px;cursor:pointer;background:var(--white);font-size:12px;text-align:center;font-family:var(--font-display);"><input type="radio" name="ptheme" style="display:none;"/>Dark</label>
+            <label style="display:block;border:1px solid var(--border);border-radius:10px;padding:10px;cursor:pointer;background:var(--white);font-size:12px;text-align:center;font-family:var(--font-display);"><input type="radio" name="ptheme" style="display:none;"/>System</label>
+          </div>
+        </div>
+        <div class="row"><div class="body"><strong>Compact mode</strong><span class="sub">Tighter spacing across lists</span></div><div class="toggle" role="switch" aria-checked="false" onclick="this.classList.toggle('is-on')"></div></div>
+        <div class="row"><div class="body"><strong>Reduce motion</strong><span class="sub">Disable non-essential animations</span></div><div class="toggle" role="switch" aria-checked="false" onclick="this.classList.toggle('is-on')"></div></div>
+      </div>
+
+      <!-- Privacy -->
+      <div class="settings-popup__pane" data-ppane="privacy">
+        <div class="row"><div class="body"><strong>Two-factor authentication</strong><span class="sub">Add a second step at sign-in</span></div><button class="btn btn--outline btn--sm">Set up</button></div>
+        <div class="row"><div class="body"><strong>Profile visibility</strong><span class="sub">Peers can find you in discussions</span></div><div class="toggle is-on" role="switch" aria-checked="true" onclick="this.classList.toggle('is-on')"></div></div>
+        <div class="row"><div class="body"><strong>Public certificates</strong><span class="sub">Show on your Mereka profile URL</span></div><div class="toggle is-on" role="switch" aria-checked="true" onclick="this.classList.toggle('is-on')"></div></div>
+        <div style="margin-top:12px;"><button class="btn btn--outline btn--sm" style="width:100%;">Change password</button></div>
+      </div>
+
+      <!-- Billing -->
+      <div class="settings-popup__pane" data-ppane="billing">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--surface);border-radius:10px;margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="material-symbols-outlined" style="color:var(--primary);">credit_card</span>
+            <div>
+              <strong style="font-family:var(--font-display);font-size:13px;">Visa · 4411</strong>
+              <div style="font-size:11px;color:var(--medium-grey);">Exp. 09/2028</div>
+            </div>
+          </div>
+          <button class="btn btn--ghost btn--sm">Update</button>
+        </div>
+        <div class="row"><div class="body"><strong>Academy Pro · annual</strong><span class="sub">Renews Feb 12, 2027</span></div><span style="font-size:12px;color:var(--primary);font-weight:600;">RM 1,068/yr</span></div>
+        <div style="margin-top:10px;"><button class="btn btn--outline btn--sm" style="width:100%;" onclick="closeSettingsPopup(); goto('settings');">View billing history →</button></div>
+      </div>
+    </div>
+
+    <footer class="settings-popup__foot">
+      <button class="btn btn--ghost btn--sm" onclick="closeSettingsPopup(); goto('settings');">All settings →</button>
+      <button class="btn btn--outline btn--sm" onclick="goto('login')">Sign out</button>
+    </footer>
+  </div>
+</div>
+
+<script>
+(function(){
+  function openSettingsPopup(e){
+    if(e){e.preventDefault && e.preventDefault(); e.stopPropagation && e.stopPropagation();}
+    const el = document.getElementById('settingsPopup');
+    if(el){ el.classList.add('is-open'); el.setAttribute('aria-hidden','false'); }
+    return false;
+  }
+  function closeSettingsPopup(){
+    const el = document.getElementById('settingsPopup');
+    if(el){ el.classList.remove('is-open'); el.setAttribute('aria-hidden','true'); }
+  }
+  window.openSettingsPopup = openSettingsPopup;
+  window.closeSettingsPopup = closeSettingsPopup;
+
+  // Rewire all avatar buttons to open the popup instead of goto('profile')
+  function wireAvatars(){
+    document.querySelectorAll('.avatar[role="button"]').forEach(function(a){
+      a.setAttribute('onclick','return openSettingsPopup(event);');
+    });
+  }
+
+  // Tab switching inside popup
+  function wireTabs(){
+    document.querySelectorAll('.settings-popup__tabs button').forEach(function(b){
+      b.addEventListener('click', function(){
+        const p = b.dataset.ppane;
+        document.querySelectorAll('.settings-popup__tabs button').forEach(x => x.classList.remove('is-active'));
+        document.querySelectorAll('.settings-popup__pane').forEach(x => x.classList.remove('is-active'));
+        b.classList.add('is-active');
+        const pane = document.querySelector('.settings-popup__pane[data-ppane="'+p+'"]');
+        if(pane) pane.classList.add('is-active');
+      });
+    });
+  }
+
+  function init(){ wireAvatars(); wireTabs(); }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+  // Close on Escape
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') closeSettingsPopup();
+  });
 })();
 </script>
 </body>
