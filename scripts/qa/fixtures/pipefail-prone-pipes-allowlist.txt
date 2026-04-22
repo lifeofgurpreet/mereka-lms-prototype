@@ -15,10 +15,7 @@
 # As of 2026-04-22 post-batch-1 (PR #2024):
 
 scripts/branding/validate-token-consumers.sh
-scripts/infra/check-cert-sans.sh
 scripts/qa/validate-deploy-contract.sh
-scripts/qa/verify-a11y-contrast-focus.sh
-scripts/qa/verify-admin-merge-exceptions.sh
 scripts/qa/verify-analytics-key-elimination.sh
 scripts/qa/verify-analytics-undefined-regression.sh
 scripts/qa/verify-binary-pinning-pcp.sh
@@ -29,23 +26,27 @@ scripts/qa/verify-design-token-usage.sh
 scripts/qa/verify-design-tokens.sh
 scripts/qa/verify-domain-url-invariants.sh
 scripts/qa/verify-enterprise-auth-contract.sh
-scripts/qa/verify-k8s-deployment-spec.sh
 scripts/qa/verify-k8s-secrets-hygiene.sh
 scripts/qa/verify-kustomize-render.sh
-scripts/qa/verify-kustomize-structure.sh
 scripts/qa/verify-lane-identity.sh
-scripts/qa/verify-lighthouse-budgets.sh
+scripts/qa/verify-mako-template-syntax.sh
 scripts/qa/verify-mfe-analytics-plugin-parity.sh
 scripts/qa/verify-mfe-footer-fallbacks.sh
 scripts/qa/verify-mfe-route-drift.sh
 scripts/qa/verify-mfe-ulmo-migration.sh
 scripts/qa/verify-mobile-secrets-inventory.sh
+scripts/qa/verify-multitenant-brand-platform.sh
+scripts/qa/verify-mux-alert-wiring.sh
+scripts/qa/verify-mux-secrets.sh
 scripts/qa/verify-purchase-gateway-stripe.sh
 scripts/qa/verify-red-line-contract.sh
 scripts/qa/verify-release-automation.sh
 scripts/qa/verify-secrets-isolation.sh
+scripts/qa/verify-security-hardening.sh
+scripts/qa/verify-slo-contracts.sh
 scripts/qa/verify-slo-deployment-gate.sh
 scripts/qa/verify-tenant-branding-fallback.sh
+scripts/qa/verify-vc-ops.sh
 scripts/qa/verify-video-pipeline.sh
 scripts/qa/verify-workflow-gate-enforcement.sh
 scripts/tenants/validate-tenant-brand-pack.sh

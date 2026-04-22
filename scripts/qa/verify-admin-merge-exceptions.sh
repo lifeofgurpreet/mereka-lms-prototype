@@ -87,13 +87,13 @@ else:
     print(f'COUNT:{len(exceptions)}')
 " 2>/dev/null || echo "ERROR")
 
-if echo "$entry_check" | grep -q "^EMPTY$"; then
+if grep -q "^EMPTY$" <<<"$entry_check"; then
   pass "No exceptions logged (clean record)"
-elif echo "$entry_check" | grep -q "^MISSING:"; then
+elif grep -q "^MISSING:" <<<"$entry_check"; then
   while IFS= read -r line; do
     fail "Exception entry $line"
   done <<< "$(echo "$entry_check" | grep "^MISSING:")"
-elif echo "$entry_check" | grep -qE "^(INVALID|DUPLICATE):"; then
+elif grep -qE "^(INVALID|DUPLICATE):" <<<"$entry_check"; then
   while IFS= read -r line; do
     fail "Exception entry $line"
   done <<< "$(echo "$entry_check" | grep -E "^(INVALID|DUPLICATE):")"

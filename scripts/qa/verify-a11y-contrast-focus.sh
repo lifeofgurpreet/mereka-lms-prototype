@@ -249,7 +249,7 @@ else
         # Grab context: 3 lines before and 6 lines after the outline removal
         CONTEXT=$(sed -n "$((line_num > 3 ? line_num - 3 : 1)),$((line_num + 6))p" "$css_file" 2>/dev/null || true)
         # A paired outline removal must have box-shadow OR :focus-visible with alternative
-        if ! echo "$CONTEXT" | grep -qE 'box-shadow|:focus-visible|outline-offset|ring'; then
+        if ! grep -qE 'box-shadow|:focus-visible|outline-offset|ring' <<<"$CONTEXT"; then
           OUTLINE_NONE_BARE=$((OUTLINE_NONE_BARE + 1))
           echo -e "  ${YELLOW}  bare outline removal at${NC} $(basename "$css_file"):${line_num}"
         fi
@@ -270,7 +270,7 @@ else
     while IFS= read -r line_num; do
       # Walk up to find the containing selector — look within 8 lines before
       CONTEXT=$(sed -n "$((line_num > 8 ? line_num - 8 : 1)),$((line_num))p" "$css_file" 2>/dev/null || true)
-      if echo "$CONTEXT" | grep -qE ':focus|:focus-visible|:focus-within'; then
+      if grep -qE ':focus|:focus-visible|:focus-within' <<<"$CONTEXT"; then
         SHADOW_NONE_ON_FOCUS=$((SHADOW_NONE_ON_FOCUS + 1))
         echo -e "  ${YELLOW}  box-shadow:none inside focus context at${NC} $(basename "$css_file"):${line_num}"
       fi

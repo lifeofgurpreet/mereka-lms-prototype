@@ -628,7 +628,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-a11y-contrast-focus.sh",
-      "reference_count": 23,
+      "reference_count": 22,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -803,7 +803,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-admin-merge-exceptions.sh",
-      "reference_count": 7,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -7738,7 +7738,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-k8s-deployment-spec.sh",
-      "reference_count": 14,
+      "reference_count": 13,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -8197,7 +8197,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-kustomize-structure.sh",
-      "reference_count": 13,
+      "reference_count": 12,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -8508,7 +8508,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-lighthouse-budgets.sh",
-      "reference_count": 12,
+      "reference_count": 11,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -8748,7 +8748,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-mako-template-syntax.sh",
-      "reference_count": 5,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -10579,7 +10579,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-multitenant-brand-platform.sh",
-      "reference_count": 9,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -10634,7 +10634,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mux-alert-wiring.sh",
-      "reference_count": 8,
+      "reference_count": 9,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -10691,7 +10691,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mux-secrets.sh",
-      "reference_count": 10,
+      "reference_count": 11,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -15034,7 +15034,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-security-hardening.sh",
-      "reference_count": 9,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -15510,7 +15510,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-slo-contracts.sh",
-      "reference_count": 9,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -17991,7 +17991,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-vc-ops.sh",
-      "reference_count": 8,
+      "reference_count": 9,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"

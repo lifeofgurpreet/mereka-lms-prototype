@@ -65,20 +65,20 @@ check_host() {
   fi
 
   subject=$(echo "$cert_info" | sed -n 's/^subject=//p')
-  if echo "$subject" | grep -qi "Kubernetes Ingress Controller Fake Certificate"; then
+  if grep -qi "Kubernetes Ingress Controller Fake Certificate" <<<"$subject"; then
     echo "✗ $host: fake ingress certificate detected" >&2
     failures=$((failures + 1))
     return
   fi
 
   sans=$(echo "$cert_info" | awk '/Subject Alternative Name/{flag=1;next}/X509v3/{flag=0}flag' | tr -d ' ')
-  if echo "$sans" | grep -q "DNS:${host}"; then
+  if grep -q "DNS:${host}" <<<"$sans"; then
     echo "✓ $host: SAN OK"
     return
   fi
 
   local wildcard_suffix="${host#*.}"
-  if [[ "$host" != "$wildcard_suffix" ]] && echo "$sans" | grep -q "DNS:\\*\\.${wildcard_suffix}"; then
+  if [[ "$host" != "$wildcard_suffix" ]] && grep -q "DNS:\\*\\.${wildcard_suffix}" <<<"$sans"; then
     echo "✓ $host: SAN OK (wildcard)"
     return
   fi

@@ -135,13 +135,13 @@ echo "== Checking: INP metric present, FID absent =="
 
 RAW_CONTENT="$(python3 -c "import json,sys; print(json.dumps(json.load(open(sys.argv[1]))))" "$BUDGET_FILE")"
 
-if echo "$RAW_CONTENT" | grep -q "interaction-to-next-paint"; then
+if grep -q "interaction-to-next-paint" <<<"$RAW_CONTENT"; then
   pass "INP metric present (interaction-to-next-paint)"
 else
   fail "INP metric missing — add 'experimental-interaction-to-next-paint' timings"
 fi
 
-if echo "$RAW_CONTENT" | grep -qi '"first-input-delay"\|"fid"'; then
+if grep -qi '"first-input-delay"\|"fid"' <<<"$RAW_CONTENT"; then
   fail "FID metric found — FID was retired in March 2024, replace with INP"
 else
   pass "FID metric absent (correctly omitted)"

@@ -209,7 +209,7 @@ for overlay_name in "${overlay_names[@]}"; do
     while IFS= read -r yaml_file; do
       [[ -z "${yaml_file}" ]] && continue
       relative="patches/$(basename "${yaml_file}")"
-      if echo "${patches}" | grep -qF "${relative}"; then
+      if grep -qF "${relative}" <<<"${patches}"; then
         pass "[${ac}] Patch referenced: ${relative}"
       else
         fail "[${ac}] Orphaned patch file: ${relative} (not referenced in kustomization.yaml)"
@@ -256,7 +256,7 @@ if ! production_overlay_present; then
 else
   while IFS= read -r tag_line; do
     [[ -z "${tag_line}" ]] && continue
-    if echo "${tag_line}" | grep -qiE '^\s*newTag:\s*["'"'"']?latest["'"'"']?\s*$'; then
+    if grep -qiE '^\s*newTag:\s*["'"'"']?latest["'"'"']?\s*$' <<<"${tag_line}"; then
       latest_count=$((latest_count + 1))
     fi
   done < <(grep -E '^\s*newTag:' "${PROD_DIR}/kustomization.yaml" 2>/dev/null || true)

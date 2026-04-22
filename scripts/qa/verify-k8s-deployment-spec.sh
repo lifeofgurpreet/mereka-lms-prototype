@@ -164,7 +164,7 @@ check_envfrom() {
         secret_names=$("$YQ" eval "select(.kind == \"Deployment\" and .metadata.name == \"${deployment}\") | .spec.template.spec.containers[0].envFrom[].secretRef.name" "$deployments" 2>/dev/null || echo "")
 
         for secret in "${required_secrets[@]}"; do
-            if echo "$secret_names" | grep -q "^${secret}$"; then
+            if grep -q "^${secret}$" <<<"$secret_names"; then
                 continue
             else
                 fail "${deployment} Deployment missing envFrom secretRef: ${secret}"
@@ -311,7 +311,7 @@ check_privilege_escalation() {
         return
     fi
 
-    if echo "$deploy_priv_esc" | grep -q "true"; then
+    if grep -q "true" <<<"$deploy_priv_esc"; then
         # Caddy has allowPrivilegeEscalation: true for port binding;
         # check if ALL other Deployment containers are false.
         local true_count false_count
@@ -360,7 +360,7 @@ check_selector_match() {
         fi
 
         # Check if matching Deployment exists with same label
-        if echo "$deployment_labels" | grep -q "^${selector_app}$"; then
+        if grep -q "^${selector_app}$" <<<"$deployment_labels"; then
             continue
         else
             # mongodb service exists in base but has no Deployment (Atlas-only architecture)
