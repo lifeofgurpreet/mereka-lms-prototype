@@ -1,5 +1,5 @@
 # Onboarding Documentation
-_Audience: Developers + Agent Operators • Owner: Platform Team • Last verified: 2026-04-21 • Status: canonical_
+_Audience: Developers + Agent Operators • Owner: Platform Team • Last verified: 2026-04-22 • Status: canonical_
 
 ## Scope
 This is the canonical onboarding index for local setup and daily development workflow.
@@ -32,17 +32,18 @@ This is the canonical onboarding index for local setup and daily development wor
 
 Do not call onboarding fixed from docs-only review. The contract verifier proves source and guide consistency. The bootstrap workflow proves a clean repo-scoped Tutor launch path. The `benchmark_class=app-cache-cold` benchmark proves image-build helpers with app-level BuildKit cache imports disabled. It is not a machine-cold clean-room build: a persistent runner may still have Docker daemon/base-image state, and a local developer machine can still fail for host-resource reasons.
 
-Current proof snapshot from 2026-04-21:
+Current proof contract from 2026-04-22:
 
-- Static validation PR proof `24727872257` on `8ce05a308`: success.
-- App-cache-cold image build run `24721668598` on `39ae0fb86`: success.
-- Last accepted bootstrap baseline run `24711453019` on `e7a4472cd`: success.
-- Current-main bootstrap rerun `24730265503` on `12db1b6`: success after Buildx cleanup and fastlane hook repair. This is initialized-state proof, not MFE authn route or branded theme asset proof.
-- Earlier current-main bootstrap runner failure evidence on `9a1090657` and `4754a8cd` was fastlane Docker/containerd pull/extract failure while pulling `mirror.gcr.io/overhangio/openedx:21.0.4`, not local guide contract failure.
-- Known coverage gaps from the green rerun (current-main run `24730265503`): `http://apps.localhost/authn/login` returned HTTP 400 during a direct runner probe because Django rejected `apps.localhost`, and LMS logs reported `Theme 'mereka' not found` while using the upstream bootstrap image. This branch fixes the MFE host source contract, makes the route fail closed in local readiness, and skips SiteTheme convergence when the running image lacks the repo-owned theme directory.
-- Branch bootstrap run `24736358890` on `1506f9d90` was cancelled by the runner/control plane during active migrations. Rerun `24737898005` then exposed stale `tutor_local` Docker project state from that cancellation on the persistent runner. This branch now removes stale Tutor containers/volumes/networks before checkout and makes canonical Tutor plugin enablement idempotent when the plugin is already listed in `TUTOR_ROOT/config.yml`.
-- Branch bootstrap run `24738471266` on `878994d0c`: success on `lane_mode=fallback`. It passed pre-clean, render, image refresh, `tutor local launch -I --skip-build`, image provenance, and local readiness. Readiness proved `http://apps.localhost/authn/login` returned HTTP 302.
-- Post-merge bootstrap run `24743995049` on `2b86de8`: success on `main`. It passed the same source/render/bootstrap/readiness path and proved `http://apps.localhost/authn/login` returned HTTP 302. The launch phase stayed long, so the bootstrap workflow now emits `bootstrap-phase-timings.tsv` and `bootstrap-phase-summary.md` artifacts for operator feedback.
+- The offline onboarding contract is `./scripts/qa/verify-cold-start-onboarding-contract.sh`.
+- Local initialized-state proof is `./scripts/infra/verify-local-bootstrap-readiness.sh`.
+- Fresh first-boot CI proof is `.github/workflows/bootstrap-local-readiness.yml`.
+- App-cache-cold image proof is `.github/workflows/build-benchmark.yml` with `benchmark_class=app-cache-cold` and `image_family=both`.
+- Current GitHub state must be checked live with `gh run list` / `gh run view` or the active tracking issue; this index must not be treated as a frozen latest-run dashboard.
+
+Accepted proof history and current gaps live in
+[`../../reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md`](../../reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md).
+If a newer change touches Tutor source, render prep, build helpers, or bootstrap
+workflow behavior, re-run the matching proof before calling onboarding fixed.
 
 The local setup path must stay one source chain: Tutor source/config plus `docker-bake.hcl` build helpers. It builds `openedx:nightly` and `openedx-mfe:nightly`, renders Tutor to those local tags, applies the named dependency-image mirror patch for Tutor-emitted hardcoded Docker Hub refs, selects the repo-owned BuildKit dependency-mirror builder as a fallback guard, and uses `mirror.gcr.io` image refs where Tutor exposes them. Mirror use is dependency acquisition, not a second build strategy.
 
