@@ -138,7 +138,7 @@ Local Tutor builds remain valid for debug/dev parity through the repo helpers:
    - Fix:
      1) rerun `./scripts/infra/prepare-tutor-build-context.sh --target mfe`
      2) rerun `./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast`
-     3) validate image contract with `./scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest`
+     3) validate image contract with `./scripts/qa/verify-mfe-image-branding.sh openedx-mfe:nightly`
    - Prevention: patch script now injects
      `npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'`
      idempotently across generated MFE common stages.
@@ -163,12 +163,12 @@ Local Tutor builds remain valid for debug/dev parity through the repo helpers:
      3) rebuild/push `openedx`, bump GitOps ref/tag, rerun strict branding gates.
 
 12. **Build command appears to "finish" instantly (no real image change)**
-   - Cause: a raw `tutor images build openedx` was executed without `TUTOR_ROOT` set; Tutor exits early with
-     project-root/config error.
+   - Cause: the canonical helper was bypassed or run outside the repo-scoped
+     Tutor environment, so it did not build the image that local Tutor uses.
    - Fix:
      1) `export TUTOR_ROOT="$(pwd)/tutor_env"`
-     2) rerun build
-     3) verify local image digest changed before tagging/pushing.
+     2) rerun `./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast`
+     3) verify `openedx:nightly` digest or build-context label changed before restart.
 
 13. **Argo `ComparisonError` with `not our ref` during GitOps rollout**
 
@@ -387,7 +387,7 @@ If slot injection fails (MFE build error or runtime slot not rendering):
 3. **Full rollback**: Set `_PLUGIN_SLOTS_AVAILABLE = False` in `mereka_lms.py` (by ensuring `PLUGIN_SLOTS` import fails gracefully via the existing `try/except ImportError` block).
 4. **Production rollback**: publish the reverted SHA through `build-tutor-images.yml`, then promote it with `release-openedx-gitops.sh` using the workflow-emitted release coordinates.
 5. **Local reproduction only**: `./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast`
-6. Local image verification: `./scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest`
+6. Local image verification: `./scripts/qa/verify-mfe-image-branding.sh openedx-mfe:nightly`
 
 ## Related Documents
 

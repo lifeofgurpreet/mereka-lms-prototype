@@ -469,7 +469,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/infra/verify-local-bootstrap-readiness.sh",
-      "reference_count": 21,
+      "reference_count": 22,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -3346,6 +3346,7 @@
         "workflow_direct"
       ],
       "env_scope": [
+        "dev",
         "preview"
       ],
       "kind": "verify",
@@ -15182,7 +15183,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-setup.sh",
-      "reference_count": 10,
+      "reference_count": 12,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

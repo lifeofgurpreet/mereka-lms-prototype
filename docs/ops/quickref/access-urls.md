@@ -1,9 +1,9 @@
 # Access URLs and User Management
-_Audience: Everyone • Owner: Platform Team • Last verified: 2026-03-06 • Status: canonical_
+_Audience: Everyone • Owner: Platform Team • Last verified: 2026-04-22 • Status: canonical_
 
 ## 🌐 Environment URLs
 
-Canonical hostname registry (prod + dev + kind-local):
+Canonical hostname registry (production + dev + local):
 - `docs/reference/operations/OPENEDX_HOSTNAMES.md`
 
 ### Local Development
@@ -49,11 +49,11 @@ Canonical hostname registry (prod + dev + kind-local):
 
 **Default Credentials (Local)**
 - Use your local superuser credentials (often `admin` plus a locally set password).
-- For GKE + VPS kind, use the shared Infisical secrets below.
+- For shared dev/prod environments, use the shared Infisical secrets below.
 
 ---
 
-### GKE Environment (academyv2.mereka.io)
+### Production Environment (academyv2.mereka.io)
 
 **LMS (Learning Management System)**
 - **URL:** https://academyv2.mereka.io
@@ -111,7 +111,7 @@ Platform admins are enforced separately (see `docs/guides/admin/ADMIN_LOGIN_GUID
 # If you also need to reset passwords, do that separately via the Authentik UI.
 ```
 
-**Other Services (GKE)**
+**Other Services (Production)**
 - **Discovery:** https://discovery.academyv2.mereka.io
 - **Ecommerce:** https://ecommerce.academyv2.mereka.io
   > **Note**: The legacy Oscar-based ecommerce service is being replaced by the custom Purchase Gateway (`services/purchase-gateway/`). See `docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md` for details. This section is retained for reference during the transition period.
@@ -133,7 +133,7 @@ Platform admins are enforced separately (see `docs/guides/admin/ADMIN_LOGIN_GUID
 
 ---
 
-### VPS Kind (academyv2.mereka.dev)
+### Dev Environment (academyv2.mereka.dev)
 
 **LMS (Learning Management System)**
 - **URL:** https://academyv2.mereka.dev
@@ -178,7 +178,7 @@ Platform admins are enforced separately (see `docs/guides/admin/ADMIN_LOGIN_GUID
 
 ---
 
-### Skill Our Future (MCT Migration) - GKE
+### Skill Our Future (MCT Migration)
 
 **LMS (Learning Management System)**
 - **URL:** https://skillourfuture.academy.mereka.io
@@ -186,8 +186,8 @@ Platform admins are enforced separately (see `docs/guides/admin/ADMIN_LOGIN_GUID
 - **Purpose:** Skill Our Future learning platform (MCT migration target)
 
 **Studio (Course Authoring)**
-- **URL:** https://studio.academyv2.mereka.io (shared with main GKE LMS)
-- **Purpose:** Single Studio instance manages courses for all GKE LMS sites
+- **URL:** https://studio.academyv2.mereka.io (shared with main production LMS)
+- **Purpose:** Single Studio instance manages courses for all production LMS sites
 - **Note:** Courses are organized by Organization (e.g., "SKILLOURFUTURE" org)
 
 **Migration note:** This tenant is the MCT migration target. For current
@@ -242,7 +242,7 @@ treat this quickref as the source of truth for named operator accounts.
 
 ### Create Admin User
 
-**Via Kubernetes (GKE/Kind):**
+**Via Kubernetes:**
 ```bash
 kubectl exec -n mereka-lms deploy/lms -- python manage.py lms createsuperuser
 ```
@@ -263,11 +263,11 @@ docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -
 1. Go to: http://localhost/admin
 2. Login with the local superuser credentials created during setup
 
-**GKE (Production):**
+**Production:**
 1. Go to: https://academyv2.mereka.io/admin
 2. Login with superuser credentials
 
-**VPS Kind (Dev):**
+**Dev:**
 1. Go to: https://academyv2.mereka.dev/admin
 2. Login with superuser credentials
 
@@ -302,7 +302,7 @@ This is verified by:
 
 **Local:** Services run directly on localhost ports (no port-forwarding needed)
 
-**Kubernetes (GKE/Kind):**
+**Kubernetes:**
 ```bash
 # LMS
 kubectl port-forward -n mereka-lms svc/lms 8000:8000
@@ -324,9 +324,9 @@ kubectl port-forward -n mereka-lms svc/superset 8088:8088
 ## Notes
 
 - **Local:** All URLs use HTTP (no TLS needed)
-- **GKE/Kind:** All URLs use HTTPS (TLS certificates via Let's Encrypt)
-- **GKE environment:** `academyv2.mereka.io`
-- **VPS Kind environment:** `academyv2.mereka.dev`
+- **Shared dev/prod environments:** All URLs use HTTPS (TLS certificates via Let's Encrypt)
+- **Production environment:** `academyv2.mereka.io`
+- **Dev environment:** `academyv2.mereka.dev`
 - **Local development:** Use `*.localhost` domains (automatically resolves to 127.0.0.1)
 
 ---
@@ -370,9 +370,9 @@ VPS automation (installs cron for prod+dev checks, logs to `var/cron-public-heal
 
 ## Quick Reference
 
-### Main GKE Environment
+### Main Production Environment
 
-| Service | Local | GKE |
+| Service | Local | Production |
 |---------|-------|-----|
 | LMS | http://localhost | https://academyv2.mereka.io |
 | Studio | http://studio.localhost | https://studio.academyv2.mereka.io |
@@ -381,14 +381,14 @@ VPS automation (installs cron for prod+dev checks, logs to `var/cron-public-heal
 | Ecommerce | http://ecommerce.localhost | https://ecommerce.academyv2.mereka.io |
 | Credentials | - | https://credentials.academyv2.mereka.io |
 
-### Skill Our Future (MCT) - GKE
+### Skill Our Future (MCT)
 
 | Service | URL |
 |---------|-----|
 | LMS | https://skillourfuture.academy.mereka.io |
 | Studio | https://studio.academyv2.mereka.io (shared) |
 
-### Biji-Biji Academy - GKE
+### Biji-Biji Academy
 
 | Service | URL |
 |---------|-----|

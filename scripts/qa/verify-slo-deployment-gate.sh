@@ -141,7 +141,7 @@ fi
 OUTPUT=$("$GATE_SCRIPT" --skip-prometheus 2>&1) || {
   fail "--skip-prometheus should exit 0 but got non-zero"
 }
-if echo "$OUTPUT" | grep -qi 'skip'; then
+if grep -qi 'skip' <<<"$OUTPUT"; then
   pass "--skip-prometheus outputs SKIP message"
 else
   fail "--skip-prometheus does not output SKIP message"

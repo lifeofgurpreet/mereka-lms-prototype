@@ -846,45 +846,42 @@ kubectl delete pod memory-hog crash-test -n mereka-lms --ignore-not-found
 **Registry**: `ghcr.io/biji-biji-initiative/mereka-lms`
 
 **Images**:
-- `openedx:latest` - LMS/CMS/workers (dev builds)
-- `openedx:production` - LMS/CMS/workers (production tag)
-- `openedx:<git-sha>` - Immutable commit-tagged builds
-- `openedx-mfe:latest` - Micro-frontends (dev)
-- `openedx-mfe:production` - Micro-frontends (production)
+- `openedx:nightly` - local Tutor Open edX image built by the repo helper
+- `openedx-mfe:nightly` - local Tutor MFE image built by the repo helper
+- `ghcr.io/biji-biji-initiative/mereka-lms/openedx:<git-sha>` - immutable Open edX release image
+- `ghcr.io/biji-biji-initiative/mereka-lms/mfe:<git-sha>` - immutable MFE release image
 
 **View images**:
 ```bash
-# List all tags for openedx image
-gcloud artifacts docker tags list \
-  ghcr.io/biji-biji-initiative/mereka-lms/openedx
-
-# Get digest for specific tag
-gcloud artifacts docker images describe \
-  ghcr.io/biji-biji-initiative/mereka-lms/openedx:production
+# Inspect a release image and digest from GHCR
+docker buildx imagetools inspect \
+  ghcr.io/biji-biji-initiative/mereka-lms/openedx:<git-sha>
 ```
 
 ### Tagging Strategy
 
-**Local dev** (`overlays/local`):
-- Uses `latest` tag for rapid iteration
-- Build locally: `./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast`
-- Load to Kind: `./scripts/infra/kind-load-openedx-image.sh`
+**Local Tutor dev**:
+- Uses `openedx:nightly` and `openedx-mfe:nightly` only inside the local Tutor stack
+- Builds locally through `./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast`
+- Builds MFEs through `./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast`
+- Verifies initialized state with `./scripts/infra/verify-local-bootstrap-readiness.sh`
 
-**Production** (`overlays/production`):
-- Uses `production` tag for releases
-- Tagged by CI/CD: `.github/workflows/build-tutor-images.yml`
-- Includes git SHA in image labels for traceability
+**RKE2 GitOps environments**:
+- Use immutable workflow-built GHCR tags/digests
+- Publish through `.github/workflows/build-tutor-images.yml`
+- Promote exact release coordinates with `./scripts/infra/release-openedx-gitops.sh --require-digests`
+- Do not use local `kind load` or moving `latest` tags as the deployment authority
 
 **Kustomize image overrides**:
 ```yaml
-# deploy/k8s/overlays/production/kustomization.yaml
+# GitOps overlay image override shape
 images:
   - name: overhangio/openedx
     newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx
-    newTag: production  # Or specific git SHA for rollback
+    newTag: <git-sha>
   - name: overhangio/openedx-mfe
     newName: ghcr.io/biji-biji-initiative/mereka-lms/mfe
-    newTag: production
+    newTag: <git-sha>
 ```
 
 ### Updating Images

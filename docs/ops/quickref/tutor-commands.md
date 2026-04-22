@@ -139,11 +139,9 @@ Production releases must publish through
 # Build micro-frontends (MFEs)
 ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 
-# Raw Tutor builds for non-repo-owned optional services remain debugging-only.
-tutor images build discovery
-tutor images build forum
-tutor images build ecommerce
-tutor images build notes
+# Optional non-repo-owned Tutor service images are outside the canonical
+# onboarding path. If one must be rebuilt during an investigation, record the
+# owner layer and proof gap before teaching that command here.
 ```
 
 ### Build with Custom Args
@@ -170,9 +168,8 @@ or manual `docker push` as the normal production release path.
 tutor images push openedx
 tutor images push mfe
 
-# Tag and push manually for local/debug workflows
-docker tag openedx:latest ghcr.io/biji-biji-initiative/mereka-lms/openedx:$(date +%Y%m%d)-ulmo-$(git rev-parse --short HEAD)
-docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:$(date +%Y%m%d)-ulmo-$(git rev-parse --short HEAD)
+# Local debug images are `openedx:nightly` and `openedx-mfe:nightly`.
+# Production promotion uses workflow artifacts plus release digests.
 ```
 
 ---

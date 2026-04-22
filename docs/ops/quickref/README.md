@@ -1,6 +1,6 @@
 # Quick Reference Cards
 
-_Audience: Operators • Owner: SRE Team • Last verified: 2026-03-06 • Status: canonical_
+_Audience: Operators • Owner: SRE Team • Last verified: 2026-04-22 • Status: canonical_
 
 Use this root when you need the shortest path to an operational answer. Quick references are for commands, checklists, and compact reminders. They are not the place for deep rationale, architectural policy, or long runbooks.
 
@@ -18,7 +18,7 @@ Use this root when you need the shortest path to an operational answer. Quick re
 
 | Card | Purpose | Use When |
 |---|---|---|
-| [kubectl-cheatsheet.md](./kubectl-cheatsheet.md) | Kubernetes operations | Managing pods, services, deployments in GKE |
+| [kubectl-cheatsheet.md](./kubectl-cheatsheet.md) | Kubernetes operations | Managing pods, services, deployments on RKE2 |
 | [tutor-commands.md](./tutor-commands.md) | Tutor operations | Building images, config changes, local development |
 | [verification-scripts.md](./verification-scripts.md) | Automated testing | Running verifications, checking spec coverage |
 | [common-troubleshooting.md](./common-troubleshooting.md) | Troubleshooting | Site down, performance issues, config problems |
@@ -132,7 +132,7 @@ gh run watch "${RUN_ID}"
 kubectl get endpoints -n mereka-lms
 ```
 
-Repo build helpers, local `docker push`, and direct `kubectl apply` remain valid for local/dev workflows and debugging, not as the normal production deployment contract. Use raw `tutor images build ...` only for low-level Tutor debugging after the helper path has been ruled out.
+Repo build helpers remain valid for local workflows and debugging, but direct `docker push` and `kubectl apply` are not the normal production deployment contract. Raw `tutor images build ...` is not an onboarding path; if a low-level Tutor build is required for investigation, record the failure class and keep the canonical helper/proof lane authoritative.
 
 ### Update Configuration
 

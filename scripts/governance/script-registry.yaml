@@ -3313,7 +3313,7 @@ scripts:
 
   - path: scripts/qa/comprehensive-test.sh
     owner: platform-team
-    purpose: Comprehensive Test
+    purpose: Retired compatibility wrapper that delegates to scripts/qa/verify-setup.sh
     criticality: release-supporting
 
   - path: scripts/qa/course-data-sanity.sh

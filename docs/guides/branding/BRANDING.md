@@ -138,7 +138,7 @@ STRICT_MFE_BRANDING_REV=1 ./scripts/branding/run-branding-gates.sh prod
 To verify MFE image branding before push/deploy:
 
 ```bash
-./scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest
+./scripts/qa/verify-mfe-image-branding.sh openedx-mfe:nightly
 ```
 
 If authn index points to an unbranded CSS bundle, repair image deterministically:

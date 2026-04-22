@@ -141,7 +141,7 @@ override with `VISUAL_EXCLUDE_REGEX` in `var/branding-visual-regression.env` if 
      `npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'`
      idempotently across MFE common stages.
    - Verify by rebuilding and running:
-     `./scripts/qa/verify-mfe-image-branding.sh tutor_local/openedx-mfe:latest`
+     `./scripts/qa/verify-mfe-image-branding.sh openedx-mfe:nightly`
    - Preflight this before long builds:
      `./scripts/qa/verify-mfe-build-prereqs.sh`
 
