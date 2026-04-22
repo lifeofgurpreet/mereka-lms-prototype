@@ -46,7 +46,8 @@ TUTOR_HOOK="$REPO_ROOT/.githooks/pre-tutor-config"
 check "pre-tutor-config hook exists" test -f "$TUTOR_HOOK"
 check "pre-tutor-config hook is executable" test -x "$TUTOR_HOOK"
 check "pre-tutor-config hook warns about config.yml secrets" grep -q "config.yml" "$TUTOR_HOOK"
-check "pre-tutor-config hook prompts for canonical build-context prep" grep -Eq "apply-patches\\.sh|prepare-tutor-build-context\\.sh" "$TUTOR_HOOK"
+check "pre-tutor-config hook prompts for governed Tutor wrapper" grep -q "tutor-config-save.sh" "$TUTOR_HOOK"
+check "pre-tutor-config hook prompts for post-render verifier" grep -q "verify-tutor-config.sh" "$TUTOR_HOOK"
 echo ""
 
 # --- tutor-config-save.sh safety ---
