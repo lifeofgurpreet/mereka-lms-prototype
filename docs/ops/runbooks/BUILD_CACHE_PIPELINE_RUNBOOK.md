@@ -580,6 +580,14 @@ The helpers route through `docker-bake.hcl`, stamp the resulting images with the
 rendered build-context fingerprint, and let `scripts/shared/setup-local.sh`
 rebuild instead of silently reusing stale local tags.
 
+Local builds also select the repo-owned BuildKit dependency-mirror builder via
+`./scripts/infra/ensure-buildx-dependency-mirror.sh`. That helper may recreate
+only the `mereka-dependency-mirror` builder when its idle BuildKit container
+still has stale build executor processes from an interrupted build. It refuses
+cleanup while `docker buildx build`, `docker buildx bake`, `docker pull`, or
+`buildctl` is active. This is builder hygiene; it is not cache authority and
+does not change the Bake targets.
+
 ### When to use cache (incremental build)
 
 When only theme or static files changed and you want to skip the 20+ min pip install

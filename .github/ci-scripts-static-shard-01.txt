@@ -10,10 +10,11 @@ scripts/qa/test-verify-ci-cache-policy.sh
 scripts/qa/verify-ci-runner-policy.sh
 scripts/qa/audit-grafana-dashboard.sh
 scripts/qa/verify-runtime-proof-fixture-pack.sh
-scripts/qa/test-dependency-image-mirrors-patch.sh
-scripts/qa/test-mfe-prune-deprecated-shells.sh
-scripts/qa/test-run-scripts-parallel-timeout-metadata.sh
-scripts/qa/verify-no-pipefail-prone-pipes.sh
+scripts/qa/test-buildx-cleanup-active-guard.sh
+scripts/qa/test-mfe-npm-install-resilience-patch.sh
+scripts/qa/test-resolve-release-bundle-digests.sh
+scripts/qa/verify-deletion-wave-consumer-sweep.sh
+scripts/branding/validate-token-consumers.sh
 scripts/branding/verify-token-drift.sh
 scripts/infra/check-cert-sans.sh
 scripts/qa/audit-infra-mereka-lms-staging-references.sh

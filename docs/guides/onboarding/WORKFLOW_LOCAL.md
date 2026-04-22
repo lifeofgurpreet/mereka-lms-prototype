@@ -58,6 +58,11 @@ local routes because app workers can finish warm-up after Compose reports the
 containers as running. A route failure after that window is still actionable
 runtime evidence and should be fixed at the owning source/render path.
 
+The Buildx dependency-mirror helper is local builder hygiene, not a separate
+build lane. It checks for stale `npm`, `node`, and shell executor processes in
+the repo-owned idle BuildKit builder, recreates that builder only when safe, and
+refuses cleanup while another Docker/BuildKit build or pull is active.
+
 Whole-stack daily runtime control after bootstrap:
 
 ```bash
@@ -134,5 +139,6 @@ Store screenshots under `screenshots/` with a descriptive filename (e.g., `scree
 - **LMS/Studio return 500** → rerun `make local-first-run` or `tutor local launch -I --skip-build` (recreates MySQL users & migrations).
 - **Forum stuck restarting** → check forum v2 logs via `tutor local logs forum` (forum is Python-based, no rake commands).
 - **MySQL refuses connections** → stop stack, `rm -rf tutor_env/data/mysql`, rerun launch.
+- **Buildx/MFE build still looks stuck after an interrupted build** → run `MEREKA_RECREATE_BUILDX_MIRROR=1 ./scripts/infra/ensure-buildx-dependency-mirror.sh`; if active build evidence is printed, wait for that build or pull to finish instead of deleting Buildx containers by hand.
 
 Refer to [`LOCAL_SETUP.md`](LOCAL_SETUP.md#troubleshooting) for the full table of failure modes.

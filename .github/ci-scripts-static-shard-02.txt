@@ -12,11 +12,11 @@ scripts/qa/validate-observability-compliance.sh --mode local
 scripts/qa/verify-script-governance-orphans.sh
 scripts/qa/test-verify-siteconfig-authority.sh
 scripts/qa/verify-token-integrity-routing.sh
-scripts/qa/test-buildx-cleanup-active-guard.sh
-scripts/qa/test-mfe-npm-install-resilience-patch.sh
-scripts/qa/test-resolve-release-bundle-digests.sh
-scripts/qa/verify-deletion-wave-consumer-sweep.sh
-scripts/branding/validate-token-consumers.sh
+scripts/qa/test-buildx-builder-health.sh
+scripts/qa/test-dependency-image-mirrors-patch.sh
+scripts/qa/test-openedx-obsolete-activation-key-patch-removal.sh
+scripts/qa/test-verify-build-optimizations-render-delta-contract.sh
+scripts/qa/verify-build-optimizations-render-delta-contract.sh
 scripts/ci/preflight-check.sh
 scripts/infra/check-error-budget-gate.sh
 scripts/qa/audit-observability.sh

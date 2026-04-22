@@ -6,6 +6,10 @@ BUILDER_NAME="${MEREKA_BUILDX_BUILDER:-mereka-dependency-mirror}"
 DOCKERHUB_MIRROR="${MEREKA_DOCKERHUB_MIRROR:-mirror.gcr.io}"
 BUILDKIT_IMAGE="${MEREKA_BUILDKIT_IMAGE:-mirror.gcr.io/moby/buildkit:buildx-stable-1}"
 RECREATE="${MEREKA_RECREATE_BUILDX_MIRROR:-0}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# shellcheck source=scripts/infra/buildx-builder-health.sh
+source "$SCRIPT_DIR/buildx-builder-health.sh"
 
 if ! docker buildx version >/dev/null 2>&1; then
   echo "docker buildx is required for local image builds." >&2
@@ -21,7 +25,11 @@ cat >"$CONFIG_FILE" <<EOF
 EOF
 
 if [[ "$RECREATE" == "1" ]]; then
-  docker buildx rm "$BUILDER_NAME" >/dev/null 2>&1 || true
+  mereka_buildx_remove_builder_safely "$BUILDER_NAME" "MEREKA_RECREATE_BUILDX_MIRROR=1 requested"
+fi
+
+if docker buildx inspect "$BUILDER_NAME" >/dev/null 2>&1; then
+  mereka_buildx_recreate_if_unhealthy "$BUILDER_NAME"
 fi
 
 if docker buildx inspect "$BUILDER_NAME" >/dev/null 2>&1; then

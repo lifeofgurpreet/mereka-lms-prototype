@@ -94,7 +94,7 @@ tutor plugins disable aspects ecommerce
   --set MFE_COMMON_VERSION=release/ulmo.2
 ```
 
-The wrapper converges the canonical local plugin set and runs `./scripts/infra/prepare-tutor-build-context.sh --target all` after configuration. Local setup builds `openedx:nightly` and `openedx-mfe:nightly`, then points Tutor at those tags. The render prep applies `infrastructure/tutor/patches/dependency-image-mirrors.sh` for Tutor-emitted hardcoded Docker Hub dependency refs, selects `scripts/infra/ensure-buildx-dependency-mirror.sh` as a BuildKit fallback guard, and uses `mirror.gcr.io` image refs where Tutor exposes third-party service images. If you deliberately enable or disable plugins outside the wrapper, rerun `./scripts/infra/prepare-tutor-build-context.sh --target all` afterwards.
+The wrapper converges the canonical local plugin set and runs `./scripts/infra/prepare-tutor-build-context.sh --target all` after configuration. Local setup builds `openedx:nightly` and `openedx-mfe:nightly`, then points Tutor at those tags. The render prep applies `infrastructure/tutor/patches/dependency-image-mirrors.sh` for Tutor-emitted hardcoded Docker Hub dependency refs, selects `scripts/infra/ensure-buildx-dependency-mirror.sh` as a BuildKit fallback guard, and uses `mirror.gcr.io` image refs where Tutor exposes third-party service images. The BuildKit helper also refuses unsafe cleanup: it recreates the repo-owned dependency-mirror builder only when no active Docker/BuildKit build or pull is running. If you deliberately enable or disable plugins outside the wrapper, rerun `./scripts/infra/prepare-tutor-build-context.sh --target all` afterwards.
 
 Secrets (`config.yml`) live in `tutor_env/` which is git-ignored. For reference, `infrastructure/tutor/config.example.yml` records the non-secret overrides.
 
@@ -121,6 +121,7 @@ running the individual bootstrap commands below.
 ```bash
 source infrastructure/tutor/tutor-env.sh
 ./scripts/infra/prepare-tutor-build-context.sh --target all
+./scripts/infra/ensure-buildx-dependency-mirror.sh
 ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 tutor local launch -I --skip-build
@@ -150,6 +151,17 @@ If a previous setup attempt was interrupted, rerun `make local-first-run` or
 `tutor local launch -I --skip-build`; do not infer readiness from
 `tutor_env/data/mysql` existing. Tutor launch/init is the source of database
 truth for the local first-run lane.
+
+If the interrupted attempt happened during a local image build, refresh the
+repo-owned BuildKit dependency-mirror builder before rebuilding:
+
+```bash
+MEREKA_RECREATE_BUILDX_MIRROR=1 ./scripts/infra/ensure-buildx-dependency-mirror.sh
+```
+
+The helper will fail loudly instead of removing the builder while another
+`docker buildx build`, `docker buildx bake`, `docker pull`, or `buildctl`
+process is active.
 
 > `tutor local launch` may run for 10-60+ minutes on the first pass depending on Docker resources, image freshness, and database init time. If your terminal times out, re-run `tutor local do init` until it completes. The `openedx` MySQL user will be missing otherwise, and the LMS/Studio will 500 with "Access denied for user 'openedx'". Use the bootstrap workflow phase-timing artifact as the current CI reference point instead of assuming a fixed laptop duration.
 

@@ -15,7 +15,7 @@ This contract keeps local development, CI bootstrap, devspace, and Kubernetes pr
 
 | Lane | Status | Source authority | Render/artifact authority | Cache class | Required proof | Non-goal |
 |---|---|---|---|---|---|---|
-| Local laptop quick start | Active | `scripts/shared/setup-local.sh`, `scripts/infra/ensure-buildx-dependency-mirror.sh`, `infrastructure/tutor/**` including Discovery init source hooks, Mereka LMS theme/Mako guards, and installed `openedx_tenant_cache.runtime_urls` helpers, `docker-bake.hcl` | repo-scoped Tutor render under `tutor_env/`, local Compose, local image tags `openedx:nightly` / `openedx-mfe:nightly` | developer-local build cache; dependency-image mirror normalization; BuildKit `docker.io` registry mirror fallback; `mirror.gcr.io` dependency pulls | `./scripts/qa/verify-cold-start-onboarding-contract.sh`; `./scripts/qa/verify-mako-template-syntax.sh`; initialized state via `./scripts/infra/verify-local-bootstrap-readiness.sh` | production deployment proof |
+| Local laptop quick start | Active | `scripts/shared/setup-local.sh`, `scripts/infra/ensure-buildx-dependency-mirror.sh`, `scripts/infra/buildx-builder-health.sh`, `infrastructure/tutor/**` including Discovery init source hooks, Mereka LMS theme/Mako guards, and installed `openedx_tenant_cache.runtime_urls` helpers, `docker-bake.hcl` | repo-scoped Tutor render under `tutor_env/`, local Compose, local image tags `openedx:nightly` / `openedx-mfe:nightly` | developer-local build cache; dependency-image mirror normalization; BuildKit `docker.io` registry mirror fallback; guarded idle-builder recreation only; `mirror.gcr.io` dependency pulls | `./scripts/qa/verify-cold-start-onboarding-contract.sh`; `./scripts/qa/test-buildx-builder-health.sh`; `./scripts/qa/verify-mako-template-syntax.sh`; initialized state via `./scripts/infra/verify-local-bootstrap-readiness.sh` | production deployment proof |
 | CI local bootstrap | Active | same as local laptop quick start | `.github/workflows/bootstrap-local-readiness.yml` rendered Compose + pulled image provenance; `lane_mode=fallback` may force ARC when fastlane substrate is under investigation | `mirror.gcr.io` dependency pulls; no image-build cache claim | green bootstrap workflow with redacted artifact | machine-cold image build proof |
 | App-cache-cold image build | Active | `docker-bake.hcl`, `scripts/infra/prepare-tutor-build-context-ci.sh`, `scripts/infra/build-openedx-image.sh`, `scripts/infra/build-mfe-image.sh` | `build-benchmark.yml` no-cache bake targets and local Docker output | dependency-image mirror normalization plus `mirror.gcr.io` dependency pulls; BuildKit `docker.io` registry mirror fallback; app-level BuildKit cache imports disabled | `build-benchmark.yml` with `benchmark_class=app-cache-cold`, `image_family=both`; failed measured build outcomes fail the workflow | pristine daemon/base-image proof |
 | Registry-warm build | Active | same bake/build helpers | GHCR image + provenance artifacts | durable GHCR BuildKit registry cache, runner-local cache optional | build workflow or benchmark registry-warm artifact | new source authority |
@@ -45,6 +45,13 @@ remains a separate runner substrate truth. Fastlane or ARC failures during
 image pull/extract, job cancellation, or runner shutdown must be classified as
 runner/control-plane evidence unless logs show a source/render/build-helper
 error.
+
+Local laptop Buildx builder health is narrower than runner cleanup. The local
+dependency-mirror helper may recreate only the repo-owned
+`mereka-dependency-mirror` builder when its idle BuildKit container still has
+stale build executor processes. It must refuse mutation while another Docker or
+BuildKit build/pull is active, and it must not change bake targets, Dockerfile
+semantics, cache authority, or proof class names.
 
 Known current gaps:
 

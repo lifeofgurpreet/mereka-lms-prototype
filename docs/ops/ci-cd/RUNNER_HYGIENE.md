@@ -319,6 +319,12 @@ builder/container cleanup from this repo. The GitHub runner job-completed hook
 at `/usr/local/lib/gha-fastlane/cleanup.sh` is owned by `bbi-infrastructure`
 under `scripts/ops/fastlane/runner-cleanup/cleanup.sh`.
 
+Developer laptops use a narrower guard in
+`scripts/infra/buildx-builder-health.sh`, reached through
+`scripts/infra/ensure-buildx-dependency-mirror.sh`. That local guard owns only
+the repo-named `mereka-dependency-mirror` builder and must not be used as a
+runner cleanup substitute.
+
 If the job-completed hook logs a high-disk prune while other `Runner.Worker`,
 `docker pull`, `docker buildx build`, or `buildctl` processes are active, treat
 that as host-hook debt. Do not accommodate it by weakening LMS build verifiers.

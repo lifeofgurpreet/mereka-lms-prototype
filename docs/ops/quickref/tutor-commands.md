@@ -132,7 +132,9 @@ Refresh covers:
 
 Use the repo helpers for local development, parity checks, and debugging.
 They render through the canonical Tutor path, apply the bounded compatibility
-layer, select the dependency mirror builder, and preserve build-context labels.
+layer, select the dependency mirror builder, guard that local builder against
+stale executor processes from interrupted builds, and preserve build-context
+labels.
 Production releases must publish through
 `.github/workflows/build-tutor-images.yml` and promote with
 `./scripts/infra/release-openedx-gitops.sh --require-digests`.

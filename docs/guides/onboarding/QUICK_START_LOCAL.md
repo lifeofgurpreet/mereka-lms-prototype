@@ -119,6 +119,8 @@ requires.
 
 The local quick start builds `openedx:nightly` and `openedx-mfe:nightly`, then points Tutor at those exact tags. Render prep applies the named dependency-image mirror patch for Tutor-emitted hardcoded Docker Hub dependency refs, selects a repo-owned BuildKit builder with a `docker.io` registry mirror as a fallback guard, and uses `mirror.gcr.io` where Tutor exposes third-party service/helper image refs. That is dependency acquisition only; it does not create a second Dockerfile or image strategy.
 
+Before reusing the repo-owned local BuildKit builder, `./scripts/infra/ensure-buildx-dependency-mirror.sh` also checks whether the idle builder container still has stale build executor processes such as `npm`, `node`, or shell wrappers from an interrupted image build. If the builder is idle, the helper recreates only that repo-owned builder. If any `docker buildx build`, `docker buildx bake`, `docker pull`, or `buildctl` process is still active, it refuses to mutate the builder and prints the active process evidence. That failure means another build is in flight; wait for it to finish before rerunning setup.
+
 For whole-stack daily runtime control after first launch, use the existing
 Makefile lifecycle wrappers. Keep raw `tutor local ...` commands for first
 launch, `do init`, targeted service recovery, and low-level debugging only.
@@ -128,6 +130,14 @@ To force a local image rebuild even when `openedx:nightly` or `openedx-mfe:night
 ```bash
 FORCE_LOCAL_IMAGE_BUILD=1 ./scripts/shared/setup-local.sh
 ```
+
+To force recreation of only the local dependency-mirror BuildKit builder after an interrupted build:
+
+```bash
+MEREKA_RECREATE_BUILDX_MIRROR=1 ./scripts/infra/ensure-buildx-dependency-mirror.sh
+```
+
+The command is guarded; it will fail instead of removing the builder while another Docker/BuildKit build or pull is active.
 
 ## Verification Checklist
 
@@ -232,6 +242,13 @@ curl http://localhost/api/mfe_config/v1?mfe=authn  # Check API
 ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 tutor local restart mfe
 ```
+
+**"MFE build keeps failing after a cancelled npm/build stage"**
+```bash
+MEREKA_RECREATE_BUILDX_MIRROR=1 ./scripts/infra/ensure-buildx-dependency-mirror.sh
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
+```
+If the helper reports active build processes, do not remove Buildx containers by hand; wait for the active build or pull to finish, then rerun the command.
 
 **Config shows cloud IPs**
 ```bash

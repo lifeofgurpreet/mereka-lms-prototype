@@ -181,6 +181,8 @@ ci_static_inventory:
     - script: scripts/qa/test-verify-bootstrap-workflow-contract.sh
     - script: scripts/qa/test-install-docker-compose.sh
       estimated_seconds: 5
+    - script: scripts/qa/test-buildx-builder-health.sh
+      estimated_seconds: 3
     - script: scripts/qa/test-dependency-image-mirrors-patch.sh
       estimated_seconds: 3
     - script: scripts/qa/test-openedx-obsolete-activation-key-patch-removal.sh
@@ -2180,6 +2182,27 @@ scripts:
     proof_command: "bash -n scripts/infra/ensure-buildx-dependency-mirror.sh"
     criticality: release-supporting
 
+  - path: scripts/infra/buildx-builder-health.sh
+    owner: platform-team
+    purpose: >
+      Shared health guard for repo-owned local Buildx builders. Detects active
+      Docker/BuildKit build or pull processes before destructive builder
+      mutation, and detects stale build executor processes left in an idle
+      BuildKit container after interrupted local image builds.
+    inputs:
+      - MEREKA_BUILDX_ACTIVE_PROCESSES_FILE
+      - MEREKA_BUILDX_BUILDER_CONTAINER_NAME
+      - MEREKA_BUILDX_PROCESS_SNAPSHOT_FILE
+    outputs:
+      - stdout/stderr diagnostic summary
+      - exit code
+    side_effects:
+      - None directly; callers decide whether to recreate a builder
+    dry_run: true
+    lanes: [dev, ci]
+    proof_command: "bash scripts/qa/test-buildx-builder-health.sh"
+    criticality: release-supporting
+
   - path: scripts/ci/resolve_release_bundle_digests.py
     owner: platform-team
     purpose: >
@@ -2271,6 +2294,24 @@ scripts:
     dry_run: true
     lanes: [ci]
     proof_command: "bash scripts/qa/test-install-docker-compose.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/test-buildx-builder-health.sh
+    owner: platform-team
+    purpose: >
+      Fixture test for scripts/infra/buildx-builder-health.sh. Proves idle
+      builder snapshots stay healthy, stale npm/shell executor processes are
+      detected, destructive builder removal refuses during active builds, and
+      idle removal calls the expected repo-owned Buildx builder.
+    inputs: []
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects:
+      - Creates temporary fake command shims under /tmp
+    dry_run: true
+    lanes: [ci]
+    proof_command: "bash scripts/qa/test-buildx-builder-health.sh"
     criticality: release-blocking
 
   - path: scripts/qa/test-dependency-image-mirrors-patch.sh
