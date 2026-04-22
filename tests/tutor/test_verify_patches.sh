@@ -67,6 +67,7 @@ required_fields = {
     "required",
 }
 allowed_authority = {
+    "authority_correction",
     "temporary_compatibility_layer",
     "migration_guard",
     "filesystem_sync",

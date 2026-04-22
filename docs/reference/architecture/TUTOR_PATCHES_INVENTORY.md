@@ -3,7 +3,7 @@
 This document classifies the active Tutor post-render compatibility layer.
 It is an authority ledger, not a permission slip to keep growing bash rewrites.
 
-**Maintained as of**: 2026-04-21
+**Maintained as of**: 2026-04-22
 
 ## Classification Key
 
@@ -12,6 +12,7 @@ It is an authority ledger, not a permission slip to keep growing bash rewrites.
 | `SOURCE_OWNED` | The durable behavior lives in a Tutor plugin hook, config default, source file, or bake/HCL contract. |
 | `FILESYSTEM_SYNC` | The patch copies repo-owned files into a rendered Tutor build context. Tutor hooks cannot create those files. |
 | `TEMPORARY_COMPATIBILITY_LAYER` | The patch changes exact rendered output because Tutor 21/tutormfe does not expose a source hook for the needed line or file. Every item needs a guard and retirement trigger. |
+| `AUTHORITY_CORRECTION` | The patch removes or corrects a rendered line whose upstream assumption is now false for our supported source refs. |
 | `MIGRATION_GUARD` | The patch strips stale upstream/old-render residue so retired behavior does not become live again. |
 | `REMOVED` | Historical patch authority is gone from the active patch chain. |
 
@@ -32,6 +33,7 @@ The active chain is:
 | `mysql-root-host.sh` | 37 | local compose | `TEMPORARY_COMPATIBILITY_LAYER` | Local Tutor MySQL needs `MYSQL_ROOT_HOST: "%"`, and Tutor config does not expose the exact rendered local compose insertion. | `verify-cold-start-onboarding-contract.sh`, local bootstrap proof |
 | `webpack-memory.sh` | 101 | Open edX | `MIGRATION_GUARD` + bounded compatibility | Fresh memory/runtime settings are source-owned by plugin hooks; bash only deduplicates stale renders and keeps legacy webpack normalization. | `verify-tutor-config.sh`, render proof |
 | `dependency-image-mirrors.sh` | 89 | Open edX + MFE | `TEMPORARY_COMPATIBILITY_LAYER` | Tutor 21/tutormfe emit hardcoded Docker Hub dependency refs before source hooks can own them. The patch only changes acquisition registry, not artifact semantics. | fixture tests, render-delta contract, preflight MFE/OpenEdX checks |
+| `openedx-obsolete-activation-key-patch-removal.sh` | 45 | Open edX | `AUTHORITY_CORRECTION` | Tutor 21 still emits the activation_key `git am` layer even though upstream `release/ulmo` already contains commit `21cead238466ca398ba368518f1d3288431d68f4`. The patch removes only that obsolete replay line. | fixture tests, preflight raw-vs-patched delta, cold-start proof |
 | `build-optimizations.sh` | 230 | Open edX | `TEMPORARY_COMPATIBILITY_LAYER` + intentional build semantics | Residual cold-build compatibility and translation preflight/wrapper surgery. It must stay bounded by the mutation ledger below. | `verify-build-optimizations-render-delta-contract.sh`, fixture tests, benchmark proof |
 | `brand-package.sh` | 35 | MFE | `FILESYSTEM_SYNC` | Copies repo-owned OEP-48 `brand-mereka` package and compiled theme CSS into the rendered MFE build context. | `verify-oep48-brand-package.sh`, MFE build prereq checks |
 | `sync-footer-assets.sh` | 41 | MFE | `FILESYSTEM_SYNC` | Copies repo-owned theme SCSS/fonts into `mereka/theme-source`; JSX and slot wiring are source-owned by the plugin. | `verify-footer-parity.sh`, `verify-brand-parity.sh` |

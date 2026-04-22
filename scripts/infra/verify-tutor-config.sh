@@ -663,6 +663,7 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_not_in_file "RUN uv pip install -e /openedx/mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "No duplicate production-stage custom app reinstalls remain"
   pattern_in_file 'pip install --no-cache-dir --no-build-isolation uwsgi==2.0.24' "$OPENEDX_DOCKERFILE" "uwsgi remains on explicit pip compatibility fallback"
   regex_in_file 'RUN \$PIP_COMMAND install .*django-prometheus==2\.3\.1.*django-csp==3\.8.*platform-plugin-aspects==1\.1\.2' "$OPENEDX_DOCKERFILE" "Support dependency block uses uv-compatible production installer"
+  pattern_not_in_file '21cead238466ca398ba368518f1d3288431d68f4\.patch \| git am' "$OPENEDX_DOCKERFILE" "Obsolete activation_key git-am layer removed from rendered Open edX Dockerfile"
   if grep -Fq "RUN pip install -e /openedx/mfe_oauth_fix" <<<"$OPENEDX_PRODUCTION_STAGE_TEXT"; then
     check_fail "No legacy pip editable custom-app install remains in production stage"
   else
@@ -679,6 +680,7 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   else
     check_fail "No plain pip installs remain in rendered Open edX production stage (found $plain_pip_count)"
   fi
+  fixed_pattern_count_equals "apply_patch apply_openedx_obsolete_activation_key_patch_removal_patch" "1" "$APPLY_PATCH_SCRIPT" "apply-patches.sh invokes obsolete activation-key patch removal only in the Open edX lane"
   pattern_in_file 'ARG MEREKA_CUSTOM_APP_INSTALL_MODE=editable' "$OPENEDX_DOCKERFILE" "Custom app install mode arg defaults to editable"
   pattern_in_file 'if [ "$MEREKA_CUSTOM_APP_INSTALL_MODE" = "editable" ]; then' "$OPENEDX_DOCKERFILE" "Custom app install mode gates runtime contract"
   fixed_pattern_count_equals "apply_patch apply_build_optimizations_patch" "1" "$APPLY_PATCH_SCRIPT" "apply-patches.sh invokes build optimizations only in the Open edX lane"

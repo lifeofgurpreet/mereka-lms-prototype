@@ -388,7 +388,7 @@ tutor config printvalue MEREKA_LMS_VERSION
   - A human-readable description
   - The target file(s) affected
   - The module and function that realize the patch
-  - The authority class (`temporary_compatibility_layer`, `migration_guard`, or `filesystem_sync`)
+  - The authority class (`temporary_compatibility_layer`, `migration_guard`, `filesystem_sync`, or `authority_correction`)
   - A retirement trigger
   - Required status
 - The patch manifest MUST be the active ledger for remaining post-render patch authority.

@@ -79,6 +79,8 @@ source "$PATCHES_DIR/mfe-slot-ownership.sh"
 source "$PATCHES_DIR/mfe-prune-deprecated-shells.sh"
 # shellcheck source=infrastructure/tutor/patches/dependency-image-mirrors.sh
 source "$PATCHES_DIR/dependency-image-mirrors.sh"
+# shellcheck source=infrastructure/tutor/patches/openedx-obsolete-activation-key-patch-removal.sh
+source "$PATCHES_DIR/openedx-obsolete-activation-key-patch-removal.sh"
 # shellcheck source=infrastructure/tutor/patches/build-optimizations.sh
 source "$PATCHES_DIR/build-optimizations.sh"
 
@@ -225,6 +227,7 @@ apply_openedx_patches() {
   apply_patch apply_mysql_root_host_patch
   apply_patch apply_webpack_memory_patch
   apply_patch apply_dependency_image_mirrors_patch
+  apply_patch apply_openedx_obsolete_activation_key_patch_removal_patch
   apply_patch apply_build_optimizations_patch
   sync_openedx_theme
   sync_openedx_custom_apps

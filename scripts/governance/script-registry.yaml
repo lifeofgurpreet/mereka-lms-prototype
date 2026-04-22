@@ -183,6 +183,8 @@ ci_static_inventory:
       estimated_seconds: 5
     - script: scripts/qa/test-dependency-image-mirrors-patch.sh
       estimated_seconds: 3
+    - script: scripts/qa/test-openedx-obsolete-activation-key-patch-removal.sh
+      estimated_seconds: 3
     - script: scripts/qa/test-mfe-npm-install-resilience-patch.sh
       estimated_seconds: 3
     - script: scripts/qa/test-mfe-prune-deprecated-shells.sh
@@ -2287,6 +2289,24 @@ scripts:
     dry_run: true
     lanes: [ci]
     proof_command: "bash scripts/qa/test-dependency-image-mirrors-patch.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/test-openedx-obsolete-activation-key-patch-removal.sh
+    owner: platform-team
+    purpose: >
+      Seeded fixture test for the obsolete activation-key Open edX render
+      correction. Proves the exact Tutor-emitted git-am layer is removed,
+      repeated runs are idempotent, upstream retirement becomes a no-op, and
+      selector drift fails loudly.
+    inputs: []
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects:
+      - Creates temporary Open edX Dockerfile fixtures under /tmp
+    dry_run: true
+    lanes: [ci]
+    proof_command: "bash scripts/qa/test-openedx-obsolete-activation-key-patch-removal.sh"
     criticality: release-blocking
 
   - path: scripts/qa/test-mfe-npm-install-resilience-patch.sh

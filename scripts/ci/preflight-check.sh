@@ -188,14 +188,26 @@ check_openedx_render_delta_allowlist() {
   local raw_df="$1"
   local patched_df="$2"
   local delta_contract_verifier="$REPO_ROOT/scripts/qa/verify-build-optimizations-render-delta-contract.sh"
+  local sanitized_raw
+  local sanitized_patched
 
-  python3 - "$raw_df" "$patched_df" <<'PY'
+  sanitized_raw="$(mktemp -t preflight-openedx-sanitized-raw.XXXXXX)"
+  sanitized_patched="$(mktemp -t preflight-openedx-sanitized-patched.XXXXXX)"
+
+  python3 - "$raw_df" "$patched_df" "$sanitized_raw" "$sanitized_patched" <<'PY'
 from pathlib import Path
 import re
 import sys
 
 raw_text = Path(sys.argv[1]).read_text()
 patched_text = Path(sys.argv[2]).read_text()
+sanitized_raw = Path(sys.argv[3])
+sanitized_patched = Path(sys.argv[4])
+activation_block = (
+    "# SECURITY FIX: remove activation_key exposure from account API\n"
+    "RUN curl -fsSL https://github.com/openedx/openedx-platform/commit/"
+    "21cead238466ca398ba368518f1d3288431d68f4.patch | git am\n"
+)
 raw_match = re.search(
     r"RUN \./manage\.py lms --settings=tutor\.i18n pull_plugin_translations --verbose --repository='openedx/openedx-translations' --revision='(?P<revision>[^']+)'[ \t]*\n"
     r"RUN \./manage\.py lms --settings=tutor\.i18n pull_xblock_translations --repository='openedx/openedx-translations' --revision='(?P=revision)'[ \t]*\n"
@@ -230,6 +242,8 @@ raw_count = raw_text.count(raw_block) if raw_block else 0
 wrapped_in_raw_count = raw_text.count(wrapped_block) if wrapped_block else 0
 patched_count = patched_text.count(wrapped_block) if wrapped_block else 0
 raw_in_patched_count = patched_text.count(raw_block) if raw_block else 0
+raw_activation_count = raw_text.count(activation_block)
+patched_activation_count = patched_text.count(activation_block)
 
 if raw_count != 1:
     errors.append(
@@ -247,16 +261,35 @@ if raw_in_patched_count != 0:
     errors.append(
         f"Expected patched Open edX Dockerfile to contain zero unwrapped translation blocks; found {raw_in_patched_count}."
     )
+if raw_activation_count not in {0, 1}:
+    errors.append(
+        "Expected raw Open edX Dockerfile to contain the obsolete activation-key git-am block at most once; "
+        f"found {raw_activation_count} occurrence(s)."
+    )
+if raw_activation_count == 1 and patched_activation_count != 0:
+    errors.append(
+        "Expected patched Open edX Dockerfile to remove the obsolete activation-key git-am block."
+    )
+if raw_activation_count == 0 and patched_activation_count != 0:
+    errors.append(
+        "Expected patched Open edX Dockerfile to keep the activation-key git-am block absent when raw render already retired it."
+    )
 
 if errors:
     for error in errors:
         print(error, file=sys.stderr)
     sys.exit(1)
+
+sanitized_raw.write_text(raw_text.replace(activation_block, ""))
+sanitized_patched.write_text(patched_text.replace(activation_block, ""))
 PY
 
-  RAW_RENDER_FILE="$raw_df" \
-  PATCHED_RENDER_FILE="$patched_df" \
+  RAW_RENDER_FILE="$sanitized_raw" \
+  PATCHED_RENDER_FILE="$sanitized_patched" \
     "$delta_contract_verifier"
+  local rc=$?
+  rm -f "$sanitized_raw" "$sanitized_patched"
+  return "$rc"
 }
 
 check_mfe_dependency_image_mirror_delta() {

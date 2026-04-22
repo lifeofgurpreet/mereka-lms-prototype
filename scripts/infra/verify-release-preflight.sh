@@ -135,6 +135,7 @@ fi
 # Check the active authority ledger and rendered verifier, not obsolete patch tokens.
 REQUIRED_PATCH_IDS=(
   "mysql-root-host"
+  "openedx-obsolete-activation-key-patch-removal"
   "build-optimizations-render-delta"
   "mfe-npm-install-resilience"
 )

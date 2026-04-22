@@ -1,7 +1,7 @@
 version: "2.0"
 metadata:
   description: "Active Tutor patch authority manifest. Source hooks and bake/HCL remain canonical wherever they can express the behavior."
-  last_updated: "2026-04-21"
+  last_updated: "2026-04-22"
   inventory: "docs/reference/architecture/TUTOR_PATCHES_INVENTORY.md"
   spec: "specs/tutor-configuration-resilience_spec.md"
 
@@ -34,6 +34,16 @@ patches:
     authority_class: "temporary_compatibility_layer"
     description: "Rewrites exact upstream hardcoded Docker Hub dependency refs to mirror.gcr.io equivalents for Dockerfile frontend, Open edX Ubuntu/dockerize, MFE Node, and MFE Caddy acquisition."
     retirement_trigger: "Tutor/tutormfe exposes source-owned selectors for these refs or local/CI cold starts no longer depend on anonymous Docker Hub acquisition."
+    required: true
+
+  - id: openedx-obsolete-activation-key-patch-removal
+    module: "infrastructure/tutor/patches/openedx-obsolete-activation-key-patch-removal.sh"
+    function: "apply_openedx_obsolete_activation_key_patch_removal_patch"
+    target: "tutor_env/env/build/openedx/Dockerfile"
+    target_family: "openedx"
+    authority_class: "authority_correction"
+    description: "Removes Tutor's obsolete activation_key git-am layer for release/ulmo now that upstream edx-platform already carries commit 21cead238466ca398ba368518f1d3288431d68f4."
+    retirement_trigger: "Tutor's Open edX Dockerfile template stops emitting the obsolete activation_key git-am layer for supported refs."
     required: true
 
   - id: build-optimizations-render-delta

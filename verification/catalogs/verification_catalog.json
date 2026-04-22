@@ -312,10 +312,10 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/branding/verify-logo-setup.sh",
-      "reference_count": 13,
+      "reference_count": 14,
       "replaced_by": "",
       "runtime_dependencies": [
-        "cluster"
+        "none"
       ],
       "severity": "high",
       "spec_ids": [
