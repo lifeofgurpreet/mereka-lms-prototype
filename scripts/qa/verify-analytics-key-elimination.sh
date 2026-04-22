@@ -137,7 +137,7 @@ fi
 # Check 7: Plugin defaults SEGMENT_KEY to empty string (safe disabled-by-default)
 if [[ -f "$PLUGIN" ]]; then
   SEGMENT_LINE="$(grep 'SEGMENT_KEY.*os\.environ\.get' "$PLUGIN" || true)"
-  if echo "$SEGMENT_LINE" | grep -qF '""'; then
+  if grep -qF '""' <<<"$SEGMENT_LINE"; then
     pass_check "SEGMENT_KEY defaults to empty string (analytics disabled by default)"
   else
     fail_check "SEGMENT_KEY defaults to empty string (analytics disabled by default)"
@@ -246,7 +246,7 @@ fi
 if [[ -f "$FOOTER" ]]; then
   # Extraction lines (assignment to segment_key) should not have .lower()
   EXTRACTION_LINES="$(grep -n 'segment_key\s*=' "$FOOTER" | grep -v '% if' || true)"
-  if echo "$EXTRACTION_LINES" | grep -q '\.lower()'; then
+  if grep -q '\.lower()' <<<"$EXTRACTION_LINES"; then
     fail_check "segment_key extraction does NOT lowercase the key (no case mangling)"
     echo "    Key value is being lowercased at extraction — this mangles the write key:"
     echo "$EXTRACTION_LINES" | grep '\.lower()' | sed 's/^/    /'
@@ -337,7 +337,7 @@ if [[ "${LIVE:-0}" == "1" ]]; then
   # Admin host — Segment must not fire on /admin paths
   echo "  [live] Fetching admin login page..."
   ADMIN_BODY="$(curl -s --max-time 10 "$LMS_URL/admin/login/" 2>/dev/null || echo "")"
-  if echo "$ADMIN_BODY" | grep -qi 'undefined_license_key'; then
+  if grep -qi 'undefined_license_key' <<<"$ADMIN_BODY"; then
     fail_check "[live] Admin host: no 'undefined_license_key' in page source"
   elif [[ -z "$ADMIN_BODY" ]]; then
     warn "[live] Admin login page unreachable (cluster not running or network timeout)"
@@ -348,7 +348,7 @@ if [[ "${LIVE:-0}" == "1" ]]; then
   # authn MFE host
   echo "  [live] Fetching authn MFE login page..."
   AUTHN_BODY="$(curl -s --max-time 10 "$APPS_URL/authn/login" 2>/dev/null || echo "")"
-  if echo "$AUTHN_BODY" | grep -qi 'undefined_license_key'; then
+  if grep -qi 'undefined_license_key' <<<"$AUTHN_BODY"; then
     fail_check "[live] authn host: no 'undefined_license_key' in page source"
   elif [[ -z "$AUTHN_BODY" ]]; then
     warn "[live] authn MFE page unreachable (cluster not running or network timeout)"
@@ -359,7 +359,7 @@ if [[ "${LIVE:-0}" == "1" ]]; then
   # apps MFE host (learner-dashboard)
   echo "  [live] Fetching learner-dashboard MFE page..."
   DASHBOARD_BODY="$(curl -s --max-time 10 "$APPS_URL/learner-dashboard/" 2>/dev/null || echo "")"
-  if echo "$DASHBOARD_BODY" | grep -qi 'undefined_license_key'; then
+  if grep -qi 'undefined_license_key' <<<"$DASHBOARD_BODY"; then
     fail_check "[live] apps host: no 'undefined_license_key' in learner-dashboard"
   elif [[ -z "$DASHBOARD_BODY" ]]; then
     warn "[live] learner-dashboard page unreachable (cluster not running or network timeout)"
@@ -370,7 +370,7 @@ if [[ "${LIVE:-0}" == "1" ]]; then
   # Segment API should return no 403/405 for undefined key (key not sent at all)
   echo "  [live] Verifying Segment API is not called with undefined key on LMS homepage..."
   LMS_HOME="$(curl -s --max-time 10 "$LMS_URL/" 2>/dev/null || echo "")"
-  if echo "$LMS_HOME" | grep -qiE 'undefined_license_key|your_segment_key_here|change_me'; then
+  if grep -qiE 'undefined_license_key|your_segment_key_here|change_me' <<<"$LMS_HOME"; then
     fail_check "[live] LMS homepage: no sentinel key in page source"
   elif [[ -z "$LMS_HOME" ]]; then
     warn "[live] LMS homepage unreachable"

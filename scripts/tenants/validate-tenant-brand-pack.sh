@@ -219,7 +219,7 @@ for tenant_dir in "${TENANT_DIRS[@]}"; do
   fi
 
   # slug pattern validation
-  if echo "$config_slug" | grep -qE '^[a-z0-9-]+$'; then
+  if grep -qE '^[a-z0-9-]+$' <<<"$config_slug"; then
     if [[ ${#config_slug} -ge 2 && ${#config_slug} -le 63 ]]; then
       pass "slug matches pattern (^[a-z0-9-]+$, 2-63 chars)"
     else
@@ -233,7 +233,7 @@ for tenant_dir in "${TENANT_DIRS[@]}"; do
   for color_field in "primary" "secondary" "accent" "text_on_primary"; do
     color_value=$(echo "$CONFIG_JSON" | jq -r ".colors.${color_field} // \"\"")
     if [[ -n "$color_value" ]]; then
-      if echo "$color_value" | grep -qE '^#[0-9A-Fa-f]{6}$'; then
+      if grep -qE '^#[0-9A-Fa-f]{6}$' <<<"$color_value"; then
         pass "colors.$color_field is valid hex ($color_value)"
       else
         fail "colors.$color_field is not valid hex ($color_value)"
@@ -274,7 +274,7 @@ for tenant_dir in "${TENANT_DIRS[@]}"; do
     for i in $(seq 0 $(( footer_links - 1 ))); do
       link_url=$(echo "$CONFIG_JSON" | jq -r ".footer.links[$i].url // \"\"")
       if [[ -n "$link_url" ]]; then
-        if echo "$link_url" | grep -qE '^https://'; then
+        if grep -qE '^https://' <<<"$link_url"; then
           pass "footer.links[$i].url uses HTTPS"
         else
           fail "footer.links[$i].url does not use HTTPS ($link_url)"
@@ -286,7 +286,7 @@ for tenant_dir in "${TENANT_DIRS[@]}"; do
   # Footer text has no HTML tags
   footer_text=$(echo "$CONFIG_JSON" | jq -r '.footer.text // ""')
   if [[ -n "$footer_text" ]]; then
-    if echo "$footer_text" | grep -qE '<[^>]+>'; then
+    if grep -qE '<[^>]+>' <<<"$footer_text"; then
       fail "footer.text contains HTML tags (plaintext only)"
     else
       pass "footer.text is plaintext (no HTML)"
@@ -302,7 +302,7 @@ for tenant_dir in "${TENANT_DIRS[@]}"; do
   # Contact email matches basic email pattern
   contact_email=$(echo "$CONFIG_JSON" | jq -r '.footer.contact_email // ""')
   if [[ -n "$contact_email" ]]; then
-    if echo "$contact_email" | grep -qE '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'; then
+    if grep -qE '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' <<<"$contact_email"; then
       pass "footer.contact_email is valid email format"
     else
       fail "footer.contact_email is not valid email format ($contact_email)"
@@ -312,7 +312,7 @@ for tenant_dir in "${TENANT_DIRS[@]}"; do
   # Domain is valid FQDN pattern
   domain=$(echo "$CONFIG_JSON" | jq -r '.domain // ""')
   if [[ -n "$domain" ]]; then
-    if echo "$domain" | grep -qE '^([a-z0-9-]+\.)+[a-z]{2,}$'; then
+    if grep -qE '^([a-z0-9-]+\.)+[a-z]{2,}$' <<<"$domain"; then
       pass "domain is valid FQDN pattern"
     else
       fail "domain is not valid FQDN pattern ($domain)"

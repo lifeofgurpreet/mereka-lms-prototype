@@ -99,7 +99,7 @@ for w in c['workloads']:
   missing_from_contract=0
   while IFS= read -r dep; do
     [[ -z "$dep" ]] && continue
-    if ! echo "$contract_workloads" | grep -qx "$dep"; then
+    if ! grep -qx "$dep" <<<"$contract_workloads"; then
       fail "Deployment '$dep' in rendered base but missing from contract.json"
       missing_from_contract=$((missing_from_contract + 1))
     fi
@@ -109,7 +109,7 @@ for w in c['workloads']:
   missing_from_rendered=0
   while IFS= read -r wl; do
     [[ -z "$wl" ]] && continue
-    if ! echo "$rendered_deployments" | grep -qx "$wl"; then
+    if ! grep -qx "$wl" <<<"$rendered_deployments"; then
       fail "Workload '$wl' in contract.json but missing from rendered base"
       missing_from_rendered=$((missing_from_rendered + 1))
     fi
@@ -138,7 +138,7 @@ for s in c['required_secrets']:
   es_mismatch=0
   while IFS= read -r es; do
     [[ -z "$es" ]] && continue
-    if ! echo "$contract_es" | grep -qx "$es"; then
+    if ! grep -qx "$es" <<<"$contract_es"; then
       fail "ExternalSecret '$es' in rendered base but missing from contract.json"
       es_mismatch=$((es_mismatch + 1))
     fi
@@ -146,7 +146,7 @@ for s in c['required_secrets']:
 
   while IFS= read -r es; do
     [[ -z "$es" ]] && continue
-    if ! echo "$rendered_es" | grep -qx "$es"; then
+    if ! grep -qx "$es" <<<"$rendered_es"; then
       fail "ExternalSecret '$es' in contract.json but missing from rendered base"
       es_mismatch=$((es_mismatch + 1))
     fi
@@ -173,7 +173,7 @@ for cm in c['required_configmaps']:
 cm_mismatch=0
 while IFS= read -r cm; do
   [[ -z "$cm" ]] && continue
-  if ! echo "$contract_cms" | grep -qx "$cm"; then
+  if ! grep -qx "$cm" <<<"$contract_cms"; then
     fail "ConfigMap '$cm' in kustomization.yaml but missing from contract.json"
     cm_mismatch=$((cm_mismatch + 1))
   fi
@@ -181,7 +181,7 @@ done <<< "$kustomization_cms"
 
 while IFS= read -r cm; do
   [[ -z "$cm" ]] && continue
-  if ! echo "$kustomization_cms" | grep -qx "$cm"; then
+  if ! grep -qx "$cm" <<<"$kustomization_cms"; then
     fail "ConfigMap '$cm' in contract.json but missing from kustomization.yaml"
     cm_mismatch=$((cm_mismatch + 1))
   fi

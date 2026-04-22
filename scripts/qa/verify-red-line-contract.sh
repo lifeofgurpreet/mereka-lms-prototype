@@ -152,25 +152,25 @@ check_red_line_2() {
 
   # Check openedx-proof
   local openedx_has_gha=0 openedx_has_registry=0 openedx_gha_transitional=0
-  if echo "$openedx_cache_from_block" | grep -q 'type=gha'; then
+  if grep -q 'type=gha' <<<"$openedx_cache_from_block"; then
     openedx_has_gha=1
   fi
-  if echo "$openedx_cache_from_block" | grep -q 'type=registry'; then
+  if grep -q 'type=registry' <<<"$openedx_cache_from_block"; then
     openedx_has_registry=1
   fi
-  if echo "$openedx_cache_from_block" | grep -q '# transitional'; then
+  if grep -q '# transitional' <<<"$openedx_cache_from_block"; then
     openedx_gha_transitional=1
   fi
 
   # Check mfe-proof
   local mfe_has_gha=0 mfe_has_registry=0 mfe_gha_transitional=0
-  if echo "$mfe_cache_from_block" | grep -q 'type=gha'; then
+  if grep -q 'type=gha' <<<"$mfe_cache_from_block"; then
     mfe_has_gha=1
   fi
-  if echo "$mfe_cache_from_block" | grep -q 'type=registry'; then
+  if grep -q 'type=registry' <<<"$mfe_cache_from_block"; then
     mfe_has_registry=1
   fi
-  if echo "$mfe_cache_from_block" | grep -q '# transitional'; then
+  if grep -q '# transitional' <<<"$mfe_cache_from_block"; then
     mfe_gha_transitional=1
   fi
 
@@ -276,10 +276,10 @@ check_red_line_4() {
       # Skip workflow input definition lines (description:, type:, default:, options:, inputs:)
       [[ "$line" =~ (description:|type:[[:space:]]*(string|choice|boolean)|default:|options:|^[[:space:]]*inputs:) ]] && continue
       # Flag emission patterns
-      if echo "$line" | grep -qE '(benchmark_class|warm|cold)[[:space:]]*=[[:space:]]*(warm|cold|"warm"|"cold"|true|false)[^_a-zA-Z]'; then
+      if grep -qE '(benchmark_class|warm|cold)[[:space:]]*=[[:space:]]*(warm|cold|"warm"|"cold"|true|false)[^_a-zA-Z]' <<<"$line"; then
         # Allow: benchmark_class is used as a condition variable (not a label value)
         # Disallow: it appears in metric emission context (step name "emit", "push", "metric", label)
-        if echo "$line" | grep -qiE '(metric|label|emit|push|prometheus|pushgateway)'; then
+        if grep -qiE '(metric|label|emit|push|prometheus|pushgateway)' <<<"$line"; then
           found=1
           echo "  In $file: $line"
         fi

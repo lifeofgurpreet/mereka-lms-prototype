@@ -346,7 +346,7 @@ check_csp_no_wildcard() {
   fi
 
   # Check for overly broad wildcards
-  if echo "$block" | grep -qE '"https:"'; then
+  if grep -qE '"https:"' <<<"$block"; then
     do_fail "$label $directive contains wildcard 'https:' — use explicit domains"
   else
     do_pass "$label $directive: no wildcard https:"
@@ -378,26 +378,26 @@ if [[ -f "$MFE_CADDYFILE" ]]; then
   csp_line=$(grep -o 'Content-Security-Policy "[^"]*"' "$MFE_CADDYFILE" || true)
   if [[ -n "$csp_line" ]]; then
     # Extract img-src value
-    img_src=$(echo "$csp_line" | grep -oP 'img-src [^;]+' || true)
-    if echo "$img_src" | grep -qE '\bhttps:\b'; then
+    img_src=$(grep -oP 'img-src [^;]+' <<<"$csp_line" || true)
+    if grep -qE '\bhttps:\b' <<<"$img_src"; then
       do_fail "Caddyfile img-src contains wildcard 'https:'"
     else
       do_pass "Caddyfile img-src: no wildcard https:"
     fi
 
     # Check connect-src isn't bare wildcard https: (https://*.domain is OK)
-    connect_src=$(echo "$csp_line" | grep -oP 'connect-src [^;]+' || true)
-    if echo "$connect_src" | grep -qP '(?<!/)\bhttps:\s' 2>/dev/null || \
-       echo "$connect_src" | grep -qP "connect-src 'self' https:;" 2>/dev/null; then
+    connect_src=$(grep -oP 'connect-src [^;]+' <<<"$csp_line" || true)
+    if grep -qP '(?<!/)\bhttps:\s' 2>/dev/null <<<"$connect_src" || \
+       grep -qP "connect-src 'self' https:;" 2>/dev/null <<<"$connect_src"; then
       do_fail "Caddyfile connect-src is wildcard 'https:' — use domain patterns"
     else
       do_pass "Caddyfile connect-src: not wildcard https:"
     fi
 
     # Check frame-src isn't bare wildcard https:
-    frame_src=$(echo "$csp_line" | grep -oP 'frame-src [^;]+' || true)
-    if echo "$frame_src" | grep -qP '(?<!/)\bhttps:\s' 2>/dev/null || \
-       echo "$frame_src" | grep -qP "frame-src 'self' https:;" 2>/dev/null; then
+    frame_src=$(grep -oP 'frame-src [^;]+' <<<"$csp_line" || true)
+    if grep -qP '(?<!/)\bhttps:\s' 2>/dev/null <<<"$frame_src" || \
+       grep -qP "frame-src 'self' https:;" 2>/dev/null <<<"$frame_src"; then
       do_fail "Caddyfile frame-src is wildcard 'https:' — use domain patterns"
     else
       do_pass "Caddyfile frame-src: not wildcard https:"
@@ -414,13 +414,13 @@ if [[ -f "$PROD_PY" ]]; then
   csp_connect_block=$(sed -n '/^CSP_CONNECT_SRC/,/^)/p' "$PROD_PY")
   csp_frame_block=$(sed -n '/^CSP_FRAME_SRC/,/^)/p' "$PROD_PY")
 
-  if echo "$csp_connect_block" | grep -qF "_auth_url"; then
+  if grep -qF "_auth_url" <<<"$csp_connect_block"; then
     do_pass "CSP_CONNECT_SRC includes auth URL (production.py)"
   else
     do_fail "CSP_CONNECT_SRC missing auth URL — OIDC flows will break"
   fi
 
-  if echo "$csp_frame_block" | grep -qF "_auth_url"; then
+  if grep -qF "_auth_url" <<<"$csp_frame_block"; then
     do_pass "CSP_FRAME_SRC includes auth URL (production.py)"
   else
     do_fail "CSP_FRAME_SRC missing auth URL — OIDC iframe will break"
