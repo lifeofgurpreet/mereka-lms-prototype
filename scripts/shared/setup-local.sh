@@ -10,8 +10,6 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 MIN_DOCKER_MEMORY_BYTES="${MIN_DOCKER_MEMORY_BYTES:-12884901888}"
 MIN_FREE_DISK_KB="${MIN_FREE_DISK_KB:-41943040}"
-HTTP_ROUTE_ATTEMPTS="${HTTP_ROUTE_ATTEMPTS:-12}"
-HTTP_ROUTE_SLEEP_SECONDS="${HTTP_ROUTE_SLEEP_SECONDS:-5}"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
@@ -56,28 +54,6 @@ check_docker_resources() {
             warn "Only ${free_disk_gib} GiB free on the repo filesystem. First-run image builds are expected to need about 40 GiB."
         fi
     fi
-}
-
-wait_for_http_route() {
-    local url="$1"
-    local label="$2"
-    local allowed_statuses="$3"
-    local attempts="${4:-$HTTP_ROUTE_ATTEMPTS}"
-    local sleep_seconds="${5:-$HTTP_ROUTE_SLEEP_SECONDS}"
-    local attempt status
-
-    for ((attempt = 1; attempt <= attempts; attempt++)); do
-        status="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 "$url" 2>/dev/null || true)"
-        status="${status:-000}"
-        if [[ " ${allowed_statuses} " == *" ${status} "* ]]; then
-            echo -e "${GREEN}✅ ${label} accessible (HTTP ${status})${NC}"
-            return 0
-        fi
-        sleep "$sleep_seconds"
-    done
-
-    echo -e "${RED}❌ ${label} not accessible after ${attempts} attempts (last HTTP ${status:-000})${NC}" >&2
-    return 1
 }
 
 ensure_local_tutor_plugin_enabled() {
@@ -207,6 +183,7 @@ echo ""
 # Step 4: Build Images (if needed)
 echo -e "${BLUE}Step 4: Checking Docker images...${NC}"
 ./scripts/infra/ensure-buildx-dependency-mirror.sh
+# shellcheck disable=SC1091
 source "$REPO_ROOT/scripts/infra/build-context-fingerprint.sh"
 FORCE_LOCAL_IMAGE_BUILD="${FORCE_LOCAL_IMAGE_BUILD:-0}"
 
@@ -321,21 +298,12 @@ fi
 rm -f "$ADMIN_SETUP_LOG"
 echo ""
 
-# Step 9: Verify Setup
-echo -e "${BLUE}Step 9: Verifying setup...${NC}"
+# Step 9: Record Setup Summary
+echo -e "${BLUE}Step 9: Recording setup summary...${NC}"
 CONTAINERS=$(docker ps --filter "name=tutor_local" --format "{{.Names}}" | wc -l | tr -d ' ')
 echo -e "${BLUE}ℹ️  tutor_local containers running: $CONTAINERS${NC}"
-
-FINAL_FAILURES=0
-wait_for_http_route http://localhost "LMS" "200 302" || FINAL_FAILURES=$((FINAL_FAILURES + 1))
-wait_for_http_route http://studio.localhost "Studio" "200 302" || FINAL_FAILURES=$((FINAL_FAILURES + 1))
-wait_for_http_route http://apps.localhost/authn/login "MFE authn" "200 302" || FINAL_FAILURES=$((FINAL_FAILURES + 1))
-wait_for_http_route http://discovery.localhost "Discovery" "200 302" || FINAL_FAILURES=$((FINAL_FAILURES + 1))
+echo -e "${GREEN}✅ Runtime readiness was verified once by Step 7${NC}"
 echo ""
-
-if (( FINAL_FAILURES > 0 )); then
-    die "Local setup did not converge to a healthy runtime. Re-run ./scripts/infra/verify-local-bootstrap-readiness.sh and inspect the failed routes above."
-fi
 
 # Final Summary
 echo "╔══════════════════════════════════════════════════════════════╗"

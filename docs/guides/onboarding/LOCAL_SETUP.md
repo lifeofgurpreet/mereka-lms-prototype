@@ -1,5 +1,5 @@
 # Local Tutor Sandbox
-_Audience: Platform Eng • Owner: Infra Team • Last verified: 2026-04-22 • Status: supporting_
+_Audience: Platform Eng • Owner: Infra Team • Last verified: 2026-04-23 • Status: supporting_
 
 These instructions reproduce the nightly Open edX environment provisioned in this repository. For a day-to-day command cheat sheet, see [`WORKFLOW_LOCAL.md`](WORKFLOW_LOCAL.md). For the complete documentation index, visit [`docs/README.md`](../../README.md).
 
@@ -19,7 +19,7 @@ For the normal first run from a clean checkout, prefer the governed wrapper:
 make local-first-run
 ```
 
-It expands to `git submodule update --init --recursive`, `./scripts/qa/verify-cold-start-onboarding-contract.sh`, and `./scripts/shared/setup-local.sh`. The setup script owns the rest of the governed bootstrap, including `tutor local launch -I --skip-build`, `./scripts/infra/verify-local-bootstrap-readiness.sh`, and local admin creation. `tutor_env/data/` directory presence is not initialized database truth. Use the manual steps below only when debugging one phase of that chain.
+It expands to `git submodule update --init --recursive`, `./scripts/qa/verify-cold-start-onboarding-contract.sh`, and `./scripts/shared/setup-local.sh`. The setup script owns the rest of the governed bootstrap, including `tutor local launch -I --skip-build`, exactly one initialized-state readiness pass via `./scripts/infra/verify-local-bootstrap-readiness.sh`, and local admin creation. `tutor_env/data/` directory presence is not initialized database truth. Use the manual steps below only when debugging one phase of that chain.
 
 ## Manual bootstrap
 
@@ -138,14 +138,14 @@ The launch wizard will:
 
 Use `make tutor-start` / `make tutor-stop` for whole-stack daily use, and drop
 to `tutor local dc ps` or `tutor local logs --tail=100` only for low-level
-runtime inspection. After first launch or a full reset, run
-`./scripts/infra/verify-local-bootstrap-readiness.sh` before treating the
-sandbox as ready.
+runtime inspection. The normal first-run wrapper runs
+`./scripts/infra/verify-local-bootstrap-readiness.sh` once before treating the
+sandbox as ready; rerun it manually only when debugging or after a failed route.
 
-That verifier waits through a bounded route warm-up window for LMS, Studio,
-MFEs, and Discovery. If it still fails, inspect the failed route's container
-logs and rerun the verifier; do not mark local setup complete from container
-uptime or one healthy URL alone.
+That verifier is the local first-run route authority and waits through a bounded route warm-up window
+for LMS, Studio, MFEs, and Discovery. If it still fails, inspect the failed
+route's container logs and rerun the verifier; do not mark local setup complete
+from container uptime or one healthy URL alone.
 
 If a previous setup attempt was interrupted, rerun `make local-first-run` or
 `tutor local launch -I --skip-build`; do not infer readiness from

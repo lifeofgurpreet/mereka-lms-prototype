@@ -1,5 +1,5 @@
 # Local Workflow Cheat Sheet
-_Audience: Platform Eng • Owner: Infra Team • Last verified: 2026-04-22 • Status: supporting_
+_Audience: Platform Eng • Owner: Infra Team • Last verified: 2026-04-23 • Status: supporting_
 
 Your daily reference for working on the Tutor sandbox. For detailed setup instructions see [`LOCAL_SETUP.md`](LOCAL_SETUP.md).
 
@@ -36,7 +36,7 @@ Fast first boot from a fresh checkout:
 make local-first-run
 ```
 
-That wrapper expands to the canonical onboarding chain: `git submodule update --init --recursive`, `./scripts/qa/verify-cold-start-onboarding-contract.sh`, and `./scripts/shared/setup-local.sh`. `setup-local.sh` owns the bounded readiness proof via `./scripts/infra/verify-local-bootstrap-readiness.sh`.
+That wrapper expands to the canonical onboarding chain: `git submodule update --init --recursive`, `./scripts/qa/verify-cold-start-onboarding-contract.sh`, and `./scripts/shared/setup-local.sh`. `setup-local.sh` owns exactly one bounded initialized-state readiness proof via `./scripts/infra/verify-local-bootstrap-readiness.sh`.
 It always runs `tutor local launch -I --skip-build` after image convergence; a
 partial `tutor_env/data/mysql` directory is not initialized database truth.
 
@@ -53,10 +53,11 @@ tutor local launch -I --skip-build
 ./scripts/infra/verify-local-bootstrap-readiness.sh
 ```
 
-`verify-local-bootstrap-readiness.sh` performs bounded HTTP retries for the
-local routes because app workers can finish warm-up after Compose reports the
-containers as running. A route failure after that window is still actionable
-runtime evidence and should be fixed at the owning source/render path.
+`verify-local-bootstrap-readiness.sh` is the local first-run route authority. It
+performs bounded HTTP retries because app workers can finish warm-up after
+Compose reports the containers as running. A route failure after that window is
+still actionable runtime evidence and should be fixed at the owning source/render
+path.
 
 The Buildx dependency-mirror helper is local builder hygiene, not a separate
 build lane. It checks for stale `npm`, `node`, and shell executor processes in

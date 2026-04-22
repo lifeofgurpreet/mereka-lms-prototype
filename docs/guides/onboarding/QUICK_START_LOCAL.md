@@ -1,5 +1,5 @@
 # Quick Start: Local Development Setup
-_Audience: Developers + Agent Operators • Owner: Platform Team • Last verified: 2026-04-22 • Status: canonical_
+_Audience: Developers + Agent Operators • Owner: Platform Team • Last verified: 2026-04-23 • Status: canonical_
 
 ## Fast Setup
 
@@ -9,7 +9,7 @@ cd mereka-lms
 make local-first-run
 ```
 
-`make local-first-run` expands to the canonical three-command chain: `git submodule update --init --recursive`, `./scripts/qa/verify-cold-start-onboarding-contract.sh`, and `./scripts/shared/setup-local.sh`. The setup script owns the rest of the governed bootstrap: it builds local Open edX and MFE images when needed, runs `tutor local launch -I --skip-build` to converge Tutor data, starts the stack, runs `./scripts/infra/verify-local-bootstrap-readiness.sh`, and creates a local-only admin user. Directory presence under `tutor_env/data/` is not treated as proof of initialization. If `LOCAL_ADMIN_PASSWORD` is not set, the setup script writes generated credentials to `tutor_env/local-admin-credentials.txt`.
+`make local-first-run` expands to the canonical three-command chain: `git submodule update --init --recursive`, `./scripts/qa/verify-cold-start-onboarding-contract.sh`, and `./scripts/shared/setup-local.sh`. The setup script owns the rest of the governed bootstrap: it builds local Open edX and MFE images when needed, runs `tutor local launch -I --skip-build` to converge Tutor data, starts the stack, runs the initialized-state readiness verifier exactly once with `./scripts/infra/verify-local-bootstrap-readiness.sh`, and creates a local-only admin user. Directory presence under `tutor_env/data/` is not treated as proof of initialization. If `LOCAL_ADMIN_PASSWORD` is not set, the setup script writes generated credentials to `tutor_env/local-admin-credentials.txt`.
 
 ## Current Proof Contract
 
@@ -35,11 +35,12 @@ second Dockerfile, Compose stack, or local-only build path to work around a
 failure. Classify the failure, fix the source/render/build-helper chain, and
 update the proof matrix when the contract changes.
 
-The initialized-state verifier uses bounded HTTP retries because LMS, Studio,
-MFEs, and Discovery can warm at different speeds after `tutor local start -d`.
-A final readiness failure still means the stack did not converge; rerun
-`./scripts/infra/verify-local-bootstrap-readiness.sh` after checking the named
-route logs instead of treating one successful service as whole-stack proof.
+The initialized-state verifier is the only local first-run route authority. It
+uses bounded HTTP retries because LMS, Studio, MFEs, and Discovery can warm at
+different speeds after `tutor local start -d`. A readiness failure still means
+the stack did not converge; rerun `./scripts/infra/verify-local-bootstrap-readiness.sh`
+after checking the named route logs instead of treating one successful service
+as whole-stack proof.
 
 ## Host Requirements
 

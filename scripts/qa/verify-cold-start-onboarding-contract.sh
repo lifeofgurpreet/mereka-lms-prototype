@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC1003,SC2016
 # @covers AC-CI-ONBOARDING-001
 # @spec: ci-cd-pipeline_spec.md
 # @runtime-dependencies: none
@@ -58,6 +59,21 @@ reject_contains() {
     fail "$label"
   else
     pass "$label"
+  fi
+}
+
+require_line_count() {
+  local path="$1"
+  local pattern="$2"
+  local expected="$3"
+  local label="$4"
+  local count
+
+  count="$({ rg -n -- "$pattern" "$path" || true; } | wc -l | tr -d ' ')"
+  if [[ "$count" == "$expected" ]]; then
+    pass "$label"
+  else
+    fail "$label (expected $expected, found $count)"
   fi
 }
 
@@ -168,13 +184,14 @@ require_contains "scripts/shared/setup-local.sh" '--set DOCKER_IMAGE_OPENEDX=ope
 require_contains "scripts/shared/setup-local.sh" '--set MFE_DOCKER_IMAGE=openedx-mfe:nightly' "setup-local.sh points Tutor at the local MFE image it builds"
 require_contains "scripts/shared/setup-local.sh" '--set DOCKER_IMAGE_MYSQL=mirror.gcr.io/library/mysql:8.4.0' "setup-local.sh pins the mirrored current Tutor MySQL image for local bootstrap"
 require_contains "scripts/shared/setup-local.sh" '\./scripts/infra/verify-local-bootstrap-readiness\.sh' "setup-local.sh runs local bootstrap readiness verifier"
-require_contains "scripts/shared/setup-local.sh" "apps.localhost/authn/login" "setup-local.sh checks the canonical local MFE authn route"
+require_line_count "scripts/shared/setup-local.sh" '^[[:space:]]*\./scripts/infra/verify-local-bootstrap-readiness\.sh[[:space:]]*$' "1" "setup-local.sh executes the initialized-state readiness verifier exactly once"
+require_line_count "Makefile" '^[[:space:]]*\./scripts/infra/verify-local-bootstrap-readiness\.sh[[:space:]]*$' "0" "Makefile local-first-run does not duplicate the initialized-state readiness verifier"
+require_contains "scripts/shared/setup-local.sh" "apps.localhost/authn/login" "setup-local.sh publishes the canonical local MFE authn route"
 require_contains "scripts/shared/setup-local.sh" 'docker compose version' "setup-local.sh verifies Docker Compose v2 availability"
 require_contains "scripts/shared/setup-local.sh" 'git submodule status --recursive' "setup-local.sh checks submodule state before building"
-require_contains "scripts/shared/setup-local.sh" 'wait_for_http_route http://studio\.localhost' "setup-local.sh verifies the Studio route before declaring success"
-require_contains "scripts/shared/setup-local.sh" 'wait_for_http_route http://discovery\.localhost' "setup-local.sh verifies the Discovery route before declaring success"
-require_contains "scripts/shared/setup-local.sh" 'Local setup did not converge to a healthy runtime' "setup-local.sh fails hard when final route verification does not converge"
-require_contains "scripts/shared/setup-local.sh" "%\\{http_code\\}" "setup-local.sh checks HTTP status instead of curl connectivity only"
+reject_contains "scripts/shared/setup-local.sh" 'wait_for_http_route' "setup-local.sh does not duplicate route readiness checks outside the canonical verifier"
+reject_contains "scripts/shared/setup-local.sh" 'FINAL_FAILURES' "setup-local.sh does not maintain a second final-readiness failure counter"
+reject_contains "scripts/shared/setup-local.sh" "%\\{http_code\\}" "setup-local.sh leaves HTTP status readiness checks to verify-local-bootstrap-readiness.sh"
 require_contains "scripts/shared/setup-local.sh" 'LOCAL_ADMIN_PASSWORD' "setup-local.sh supports caller-provided/generated local admin password"
 require_contains "scripts/shared/setup-local.sh" 'FORCE_LOCAL_IMAGE_BUILD' "setup-local.sh supports forced local image rebuilds"
 require_contains "scripts/shared/setup-local.sh" 'image_matches_context openedx:nightly' "setup-local.sh checks the exact local Open edX image tag"
@@ -513,10 +530,11 @@ require_contains "docs/guides/onboarding/README.md" 'must not be treated as a fr
 require_contains "docs/guides/onboarding/README.md" 'If a newer change touches Tutor source, render prep, build helpers, or bootstrap' "onboarding index requires rerunning matching proof after relevant source changes"
 reject_contains "docs/guides/onboarding/README.md" 'Latest current-main proof' "onboarding index does not overclaim latest current-main proof as fully green"
 
-require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" '2026-04-22' "quick start carries current verification date"
+require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" '2026-04-23' "quick start carries current verification date"
 require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" 'git submodule update --init --recursive' "quick start initializes required submodules"
 require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" 'verify-cold-start-onboarding-contract\.sh' "quick start names offline contract verifier"
 require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" 'verify-local-bootstrap-readiness\.sh' "quick start names local bootstrap readiness verifier"
+require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" 'initialized-state readiness verifier exactly once' "quick start documents the single first-run readiness authority"
 require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" 'bounded HTTP retries' "quick start documents bounded route readiness retries"
 require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" 'make local-first-run' "quick start publishes the governed first-run wrapper"
 require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" 'bootstrap-local-readiness\.yml' "quick start names heavy proof workflow"
@@ -543,7 +561,7 @@ require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" 'tutor plugins di
 reject_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" 'site-down\.md' "quick start does not link missing site-down runbook"
 reject_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" 'changeme-local-only' "quick start does not publish fixed local admin password"
 
-require_contains "docs/guides/onboarding/LOCAL_SETUP.md" '2026-04-22' "local setup guide carries current verification date"
+require_contains "docs/guides/onboarding/LOCAL_SETUP.md" '2026-04-23' "local setup guide carries current verification date"
 require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'tutor-config-save\.sh' "local setup guide uses canonical Tutor config wrapper"
 require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'prepare-tutor-build-context\.sh' "local setup guide uses canonical build-context wrapper"
 reject_contains "docs/guides/onboarding" 'tutor config save --set|Tutor patch runner: `infrastructure/tutor/apply-patches\.sh`' "onboarding docs do not teach raw Tutor config render or low-level patch runner as workflow"
@@ -556,6 +574,7 @@ require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'tutor plugins disable 
 require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'build-openedx-image\.sh --local-defaults --build-profile fast' "local setup initial launch builds Open edX image"
 require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'build-mfe-image\.sh --local-defaults --build-profile fast' "local setup initial launch builds MFE image"
 require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'verify-local-bootstrap-readiness\.sh' "local setup verifies readiness after first launch"
+require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'exactly one initialized-state readiness pass' "local setup guide documents the single first-run readiness authority"
 require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'bounded route warm-up window' "local setup explains bounded route warm-up"
 require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'make local-first-run' "local setup points new developers at the governed first-run wrapper"
 require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'make tutor-start' "local setup uses Makefile wrappers for daily whole-stack start"
@@ -563,13 +582,14 @@ require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'make tutor-stop' "loca
 require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'make tutor-restart' "local setup uses Makefile wrappers for whole-stack restart after config changes"
 require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'tutor local down -v' "local setup uses Tutor wrapper for volume cleanup"
 reject_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'docker-compose -f tutor_env' "local setup does not recommend raw docker-compose cleanup"
-require_contains "docs/guides/onboarding/WORKFLOW_LOCAL.md" '2026-04-22' "local workflow guide carries current verification date"
+require_contains "docs/guides/onboarding/WORKFLOW_LOCAL.md" '2026-04-23' "local workflow guide carries current verification date"
 require_contains "docs/guides/onboarding/WORKFLOW_LOCAL.md" 'verify-cold-start-onboarding-contract\.sh' "local workflow first boot runs offline onboarding contract"
 require_contains "docs/guides/onboarding/WORKFLOW_LOCAL.md" 'setup-local\.sh' "local workflow first boot uses canonical setup wrapper"
 require_contains "docs/guides/onboarding/WORKFLOW_LOCAL.md" 'make local-first-run' "local workflow points fresh checkouts at the governed first-run wrapper"
 require_contains "docs/guides/onboarding/WORKFLOW_LOCAL.md" 'prepare-tutor-build-context\.sh --target all' "local workflow manual first boot prepares build context before image builds"
 require_contains "docs/guides/onboarding/WORKFLOW_LOCAL.md" 'ensure-buildx-dependency-mirror\.sh' "local workflow manual first boot selects canonical BuildKit dependency mirror"
 require_contains "docs/guides/onboarding/WORKFLOW_LOCAL.md" 'verify-local-bootstrap-readiness\.sh' "local workflow verifies readiness after first launch"
+require_contains "docs/guides/onboarding/WORKFLOW_LOCAL.md" 'exactly one bounded initialized-state readiness proof' "local workflow documents the single first-run readiness authority"
 require_contains "docs/guides/onboarding/WORKFLOW_LOCAL.md" 'bounded HTTP retries' "local workflow explains bounded route readiness retries"
 require_contains "docs/guides/onboarding/WORKFLOW_LOCAL.md" 'make tutor-start' "local workflow uses Makefile wrappers for daily whole-stack start"
 require_contains "docs/guides/onboarding/WORKFLOW_LOCAL.md" 'make tutor-stop' "local workflow uses Makefile wrappers for daily whole-stack stop"
