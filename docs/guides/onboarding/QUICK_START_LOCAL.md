@@ -14,24 +14,24 @@ git submodule update --init --recursive
 
 The first run builds local Open edX and MFE images, initializes Tutor data, starts the stack, and creates a local-only admin user. If `LOCAL_ADMIN_PASSWORD` is not set, the setup script writes generated credentials to `tutor_env/local-admin-credentials.txt`.
 
-## Current Proof Snapshot
+## Current Proof Contract
 
-As of 2026-04-22, the canonical local setup path is the repo-owned source ->
-Tutor render -> local image -> Tutor launch chain below. The image-build proof
-lane is green for both MFE and Open edX images after PR #2006. Main CI is green
-through the #2007 onboarding-doc guard rerun, and PR #2008 closed the staging
-MFE host derivation bug. The current-head bootstrap rerun for #2007 is still in
-progress, so do not call that specific proof closed until run `24757454326`
-finishes readiness and provenance steps.
+As of 2026-04-22, the canonical local setup path is still one chain:
+repo source -> Tutor render -> Bake-backed local images -> Tutor launch ->
+readiness verification. The proof commands below are the authority; this guide
+is not a live CI status board.
 
-| Proof | Run | Commit | Result | What it proves |
-|---|---|---|---|---|
-| Static validation after #2008 | `24757968425` | `e025d4c15` | success | PR proof for the shared E2E host helper and runbook update, including static script shards and Python coverage. |
-| MFE Build Tutor Images proof | `24756568100` | `a7d98293` | success | Re-proved generated MFE runtime verifier after the `TUTOR_ROOT` workflow portability fix in PR #2006. |
-| Open edX Build Tutor Images proof | `24756779458` | `a7d98293` | success | Proved Open edX render preflight, build-context prep, image build, imports, blocking branding verification, SBOM, and Trivy artifact upload. |
-| Main CI after #2007 | `24757454308` | `ec1ac294` | success | Rerun proved the first red attempt was runner shutdown/cancellation, not source regression. |
-| Current-head Bootstrap Local Readiness | `24757454326` | `ec1ac294` | in progress | Still running at `Launch full local Tutor bootstrap` as of this update. Not closed until readiness/provenance steps complete. |
-| PR #2008 merge | PR #2008 | `e807e515` | merged | Centralized staging/production MFE host derivation and clarified post-deploy E2E proof boundaries. |
+| Proof | Command or workflow | What it proves | What it does not prove |
+|---|---|---|---|
+| Offline onboarding contract | `./scripts/qa/verify-cold-start-onboarding-contract.sh` | Docs, setup scripts, build helpers, and workflow contracts still agree. | Docker can start the stack on this machine. |
+| Local initialized-state proof | `./scripts/infra/verify-local-bootstrap-readiness.sh` | The current `tutor_env` stack has local services, expected image refs, and LMS/MFE HTTP readiness. | A fresh first boot from an empty `TUTOR_ROOT`. |
+| CI bootstrap proof | `.github/workflows/bootstrap-local-readiness.yml` | A clean repo-scoped `TUTOR_ROOT` can render, launch, prove image provenance, and pass readiness. | Machine-cold image build timing. |
+| App-cache-cold image proof | `.github/workflows/build-benchmark.yml` with `benchmark_class=app-cache-cold` | Open edX and MFE build helpers work with app-level BuildKit cache imports disabled. | Pristine Docker daemon/base-image state. |
+
+Check current GitHub truth with `gh run list --workflow bootstrap-local-readiness.yml`
+and `gh run list --workflow "Build Tutor Images"`, or use the current tracking
+issue when one is active. Do not call onboarding fixed from an old green run if
+a newer source/render/build-helper change has not passed its required proof.
 
 These are shared proof lanes, not alternate build systems. Do not create a
 second Dockerfile, Compose stack, or local-only build path to work around a
@@ -180,7 +180,11 @@ gh workflow run bootstrap-local-readiness.yml \
 
 Do not mark cold-start onboarding fixed until the offline contract passes, the bootstrap workflow is green for the branch being merged, app-cache-cold image build proof is either green or explicitly waived with a fresh reason, and any route/theme checks required by the proof matrix are either green or explicitly listed as not covered by that lane.
 
-Current follow-up: run `24757454326` is the active current-head bootstrap proof for #2007 and is still running. If it fails, classify the failure first as source-truth bug, rendered-truth bug, workflow portability bug, runner-capacity issue, or bootstrap harness bug before changing code or verifiers.
+If a current-head bootstrap run is cancelled after a successful `tutor local
+launch` phase, rerun the proof before calling the source broken. If it fails
+with a real error, classify the failure first as source-truth bug,
+rendered-truth bug, workflow portability bug, runner-capacity issue, or
+bootstrap harness bug before changing code or verifiers.
 
 ## Daily Commands
 

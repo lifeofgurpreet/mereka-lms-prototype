@@ -3,7 +3,7 @@
 #
 # Checks:
 #   1. env.config.jsx template (generated) exists and exports a setConfig function
-#   2. Indigo env.config.jsx source exists
+#   2. Mereka env.config.jsx source exists
 #   3. Runtime config API endpoint is proxied in the MFE Caddyfile
 #   4. MFE Caddyfile routes exist for each known MFE
 #   5. Cookie domain values are not hardcoded in the MFE Dockerfile

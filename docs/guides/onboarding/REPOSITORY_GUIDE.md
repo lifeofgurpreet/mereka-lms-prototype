@@ -191,10 +191,7 @@ infrastructure/
 **Critical workflow**: After modifying Tutor config:
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
-./scripts/infra/tutor-config-save.sh --set KEY=value  # Safe wrapper
-# OR manually:
-tutor config save --set KEY=value
-./scripts/infra/prepare-tutor-build-context.sh --target all
+./scripts/infra/tutor-config-save.sh --set KEY=value
 tutor local restart
 ```
 
@@ -430,7 +427,8 @@ Quick reference for frequently accessed files:
 
 ### Configuration
 - Central script config: `scripts/shared/config.sh`
-- Tutor patch runner: `infrastructure/tutor/apply-patches.sh`
+- Tutor config wrapper: `scripts/infra/tutor-config-save.sh`
+- Tutor build-context refresh: `scripts/infra/prepare-tutor-build-context.sh`
 - Tutor config example template: `infrastructure/tutor/config.example.yml`
 - Local Tutor runtime config (gitignored): `tutor_env/config.yml`
 - Makefile targets: `Makefile`

@@ -1,6 +1,6 @@
 # Agent Setup Checklist
 
-_Audience: Agent Operators • Owner: Platform Team • Last verified: 2026-03-10 • Status: supporting_
+_Audience: Agent Operators • Owner: Platform Team • Last verified: 2026-04-22 • Status: supporting_
 
 ## ✅ Pre-Flight Checklist
 
@@ -10,12 +10,32 @@ Before starting, verify:
 - [ ] Python 3.12+ installed
 - [ ] At least 40 GB free disk space
 - [ ] Git repository cloned
+- [ ] Submodules initialized with `git submodule update --init --recursive`
 
 ## 📋 Setup Steps (In Order)
 
+### Recommended Path
+
+Use the repo-owned setup script unless you are debugging one specific phase:
+
+```bash
+cd /path/to/mereka-lms
+git submodule update --init --recursive
+./scripts/qa/verify-cold-start-onboarding-contract.sh
+./scripts/shared/setup-local.sh
+./scripts/infra/verify-local-bootstrap-readiness.sh
+```
+
+The setup script creates or reuses `.venv`, renders Tutor through the canonical
+wrapper, prepares the rendered build contexts, builds `openedx:nightly` and
+`openedx-mfe:nightly` when their build-context labels are stale, launches the
+local Tutor stack, verifies readiness, and creates a local-only admin user.
+If `LOCAL_ADMIN_PASSWORD` is unset, generated credentials are written to
+`tutor_env/local-admin-credentials.txt`.
+
 ### 1. Python Environment
 ```bash
-cd /path/to/mereka.academy
+cd /path/to/mereka-lms
 python3 -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
@@ -43,7 +63,7 @@ tutor config printroot  # Should show tutor_env path
 ```
 
 ### 4. Configure Local Services
-**CRITICAL:** Must use local Docker service names:
+**CRITICAL:** Must use the canonical wrapper and local Docker service names:
 
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
@@ -67,11 +87,13 @@ source .venv/bin/activate
   --set DOCKER_IMAGE_MYSQL=mirror.gcr.io/library/mysql:8.4.0 \
   --set DOCKER_IMAGE_REDIS=mirror.gcr.io/library/redis:7.4.5 \
   --set DOCKER_IMAGE_SMTP=mirror.gcr.io/devture/exim-relay:4.96-r1-0 \
+  --set MFE_COMMON_VERSION=release/ulmo.2 \
   --set MYSQL_HOST=mysql \
   --set MONGODB_HOST=mongodb \
   --set REDIS_HOST=redis \
   --set MONGODB_PORT=27017 \
   --set MYSQL_PORT=3306 \
+  --set MYSQL_ROOT_HOST=% \
   --set REDIS_PORT=6379
 ```
 
@@ -83,6 +105,9 @@ grep -E "MYSQL_HOST|MONGODB_HOST|REDIS_HOST" tutor_env/config.yml
 
 ### 5. Build Images
 ```bash
+./scripts/infra/prepare-tutor-build-context.sh --target all
+./scripts/infra/ensure-buildx-dependency-mirror.sh
+
 # OpenEdX image (20-30 minutes, needs 12GB+ RAM)
 ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 
@@ -102,8 +127,29 @@ tutor local restart
 ### 7. Create Local Admin User
 ```bash
 export LOCAL_ADMIN_PASSWORD='<choose-a-local-only-password>'
-docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms manage_user --superuser --staff admin admin@mereka.academy
-docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "import os; from django.contrib.auth import get_user_model; User = get_user_model(); u = User.objects.get(username='admin'); u.set_password(os.environ['LOCAL_ADMIN_PASSWORD']); u.is_staff = True; u.is_superuser = True; u.save(); print('✅ Local admin updated')"
+docker exec \
+  -e LOCAL_ADMIN_USERNAME=admin \
+  -e LOCAL_ADMIN_EMAIL=admin@mereka.academy \
+  -e LOCAL_ADMIN_PASSWORD="$LOCAL_ADMIN_PASSWORD" \
+  tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "
+import os
+from django.contrib.auth import get_user_model
+User = get_user_model()
+username = os.environ['LOCAL_ADMIN_USERNAME']
+email = os.environ['LOCAL_ADMIN_EMAIL']
+password = os.environ['LOCAL_ADMIN_PASSWORD']
+try:
+    user = User.objects.get(username=username)
+except User.DoesNotExist:
+    user = User.objects.create_user(username, email, password)
+user.email = email
+user.set_password(password)
+user.is_active = True
+user.is_staff = True
+user.is_superuser = True
+user.save()
+print('Local admin ready')
+"
 ```
 
 ## ✅ Verification Steps
@@ -128,9 +174,12 @@ curl -I http://studio.localhost
 
 # 5. Test MFE Login
 curl -I http://apps.localhost/authn/login
-# Should return: HTTP/1.1 200 OK
+# Should return: HTTP/1.1 200 OK or 302 Found
 
-# 6. Check for errors
+# 6. Run the canonical readiness verifier
+./scripts/infra/verify-local-bootstrap-readiness.sh
+
+# 7. Check for errors
 tutor local logs --tail=20 lms | grep -i error
 # Should be empty or show only warnings
 ```
@@ -182,7 +231,7 @@ Once setup is complete:
 1. Read `docs/guides/onboarding/LOCAL_SETUP.md` for the full canonical setup
 2. Bookmark `docs/guides/onboarding/QUICK_START_LOCAL.md` for fast restarts
 3. Use `docs/guides/onboarding/WORKFLOW_LOCAL.md` for day-to-day work
-3. Review `AGENTS.md` for coding guidelines
+4. Review `AGENTS.md` for coding guidelines
 
 ## 🔗 Quick Links
 
@@ -193,5 +242,5 @@ Once setup is complete:
 
 ---
 
-**Setup Time:** ~45-60 minutes (mostly waiting for image builds)  
-**Status:** Ready for development once all checks pass ✅
+**Setup Time:** ~45-60 minutes on a warm, well-resourced machine; first boot can take longer.
+**Status:** Ready for development once `verify-local-bootstrap-readiness.sh` passes.

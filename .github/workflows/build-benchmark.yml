@@ -1073,7 +1073,7 @@ jobs:
               "total_duration_seconds": openedx_duration + mfe_duration + scan_duration,
               "note": (
                   "benchmark_class/proof_class are requested proof preconditions, NOT Prometheus labels. "
-                  "Classification (observed true-cold/registry-warm/local-hot/scan-only) is always "
+                  "Classification (observed app-cache-cold/registry-warm/local-hot/scan-only) is always "
                   "DERIVED from ci_cache_source_found + ci_layer_reuse_ratio in Prometheus "
                   "recording rules (RFC-BUILD-AUTHORITY-001 red line #4)."
               ),

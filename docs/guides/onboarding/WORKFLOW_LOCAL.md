@@ -1,5 +1,5 @@
 # Local Workflow Cheat Sheet
-_Audience: Platform Eng • Owner: Infra Team • Last verified: 2026-04-21 • Status: supporting_
+_Audience: Platform Eng • Owner: Infra Team • Last verified: 2026-04-22 • Status: supporting_
 
 Your daily reference for working on the Tutor sandbox. For detailed setup instructions see [`LOCAL_SETUP.md`](LOCAL_SETUP.md).
 
@@ -20,7 +20,7 @@ source infrastructure/tutor/tutor-env.sh
 
 ## 2. Regenerate / Apply Patches
 
-After any `tutor config save` or plugin change:
+After any Tutor config or plugin change:
 
 ```bash
 ./scripts/infra/tutor-config-save.sh
@@ -30,12 +30,26 @@ After any `tutor config save` or plugin change:
 
 ## 3. Start / Stop Cycle
 
-First boot (runs migrations + init jobs):
+Fast first boot from a fresh checkout:
 
 ```bash
+git submodule update --init --recursive
+./scripts/qa/verify-cold-start-onboarding-contract.sh
+./scripts/shared/setup-local.sh
+./scripts/infra/verify-local-bootstrap-readiness.sh
+```
+
+Manual first boot when debugging the setup script step by step:
+
+```bash
+source infrastructure/tutor/tutor-env.sh
+./scripts/infra/tutor-config-save.sh
+./scripts/infra/prepare-tutor-build-context.sh --target all
+./scripts/infra/ensure-buildx-dependency-mirror.sh
 ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 tutor local launch -I --skip-build
+./scripts/infra/verify-local-bootstrap-readiness.sh
 ```
 
 Daily use:

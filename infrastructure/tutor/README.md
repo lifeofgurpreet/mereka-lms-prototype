@@ -122,11 +122,13 @@ Bake/HCL, or repo-owned source files before this compatibility layer is retired.
 
 ### config.example.yml
 
-Sanitized template for local development. Copy to `tutor_env/config.yml` and fill in secrets.
+Sanitized non-secret reference for local development. Generate the active
+`tutor_env/config.yml` through `./scripts/infra/tutor-config-save.sh`; do not
+hand-copy this file as a replacement for the governed wrapper.
 
 **Key settings**:
 - `LMS_HOST: localhost` - LMS domain
-- `OPENEDX_COMMON_VERSION: open-release/redwood.master` - Open edX version
+- `OPENEDX_COMMON_VERSION: open-release/ulmo.1` - Open edX version
 - `PLUGINS` - Enabled Tutor plugins (discovery, mfe, notes, ecommerce, forum, aspects)
 - `LMS_DEFAULT_SITE_THEME: mereka` - Default theme
 
@@ -215,12 +217,13 @@ source infrastructure/tutor/tutor-env.sh
 # Rebuild Open edX image (REQUIRED - takes 30-45 min)
 ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 
-# For production deployment
-docker tag local/openedx:latest ghcr.io/biji-biji-initiative/mereka-lms/openedx:latest
-docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:latest
-
-# Restart pods
-kubectl rollout restart deployment/lms deployment/cms -n mereka-lms
+# For production deployment, do not retag `latest` or restart pods by hand.
+# Use `.github/workflows/build-tutor-images.yml` to emit immutable tags/digests,
+# then promote with the release-object/GitOps path.
+gh workflow run build-tutor-images.yml \
+  -f build_openedx=true \
+  -f build_mfe=false \
+  -f build_profile=production
 ```
 
 ### Verification
@@ -321,6 +324,6 @@ tutor local restart
 ## References
 
 - [Tutor Documentation](https://docs.tutor.edly.io/)
-- [Open edX Redwood Release](https://docs.openedx.org/en/latest/community/release_notes/redwood.html)
+- [Open edX Ulmo Release](https://docs.openedx.org/en/latest/community/release_notes/ulmo.html)
 - [django-prometheus Documentation](https://github.com/korfuri/django-prometheus)
 - [Prometheus Operator](https://prometheus-operator.dev/)

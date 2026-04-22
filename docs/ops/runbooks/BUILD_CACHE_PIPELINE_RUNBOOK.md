@@ -142,17 +142,19 @@ docker push ghcr.io/biji-biji-initiative/mereka-lms/openedx:mereka-brand
 Note: The pull before retag is required — the image is not in the local daemon
 after a push-only workflow step.
 
-### Cache tag: `buildcache`
+### Shared app cache refs
 
-Registry-backed BuildKit cache uses a dedicated tag per image:
+Registry-backed BuildKit cache uses the app-scoped L2 refs from
+`docker-bake.hcl`:
 
 ```
-ghcr.io/biji-biji-initiative/mereka-lms/openedx:buildcache
-ghcr.io/biji-biji-initiative/mereka-lms/mfe:buildcache
+ghcr.io/biji-biji-initiative/mereka-lms/cache/openedx:main-amd64
+ghcr.io/biji-biji-initiative/mereka-lms/cache/mfe:main-amd64
 ```
 
-Configured as `type=registry,ref=...:buildcache,mode=max`. This persists across
-runner pod restarts and is used automatically by `docker buildx build`.
+Configured as `type=registry,ref=...,mode=max` for trusted `main` pushes. Branch
+and manual proof lanes read shared cache but do not write it unless the workflow
+explicitly sets the trusted export variable.
 
 ### No `mereka-brand-hotfix-full-vN` tags
 
@@ -630,8 +632,8 @@ workflow.
 | File | Purpose |
 |---|---|
 | `.github/workflows/build-tutor-images.yml` | Main build + push + SLSA workflow |
-| `scripts/infra/prepare-tutor-build-context.sh` | Canonical post-render refresh path after manual `tutor config save` |
-| `infrastructure/tutor/patches/build-optimizations.sh` | Dockerfile patches (sysconfig path, PIP_COMMAND) |
+| `scripts/infra/prepare-tutor-build-context.sh` | Canonical post-render refresh path used by the governed Tutor config wrapper |
+| `infrastructure/tutor/patches/build-optimizations.sh` | Bounded compatibility layer governed by `build-optimizations.allowed-delta.yaml` and the mutation ledger |
 | `infrastructure/tutor/plugins/mereka_lms.py` | Tutor plugin — ENV_PATCHES for all environment customizations |
 | `deploy/k8s/base/arc/runner-scale-set-heavy.yaml` | ARC runner + DinD sidecar + PVC definitions |
 | `deploy/k8s/base/arc/` | Full ARC manifests directory (namespaces, Helm values, RunnerScaleSets) |

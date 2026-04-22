@@ -131,14 +131,18 @@ Use the remaining steps in this section only for cluster bootstrap or deep recov
    ```bash
    echo "${ORG_GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USER:-biji-biji-initiative}" --password-stdin
    ```
-2. Local/bootstrap Tutor image build only:
+2. Local/bootstrap app-image reproduction only. Use the Bake-backed helper path
+   so the same cache policy, render-prep compatibility layer, and build-context
+   labels are exercised as CI:
    ```bash
    source infrastructure/tutor/tutor-env.sh
+   ./scripts/infra/tutor-config-save.sh
    ./scripts/infra/prepare-tutor-build-context.sh --target all
-   tutor images build all
-   tutor images push all --repository ghcr.io/biji-biji-initiative/mereka-lms
+   ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
+   ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
    ```
-   (Ensure `MFE_DOCKER_IMAGE` is updated before pushing.)
+   Do not publish or promote these local images. Production promotion still goes
+   through the immutable image workflow and release-object/GitOps path above.
 
 1. Generate Kubernetes config:
    ```bash

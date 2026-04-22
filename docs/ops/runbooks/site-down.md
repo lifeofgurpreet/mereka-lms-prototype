@@ -845,7 +845,11 @@ curl -sS -D - -o /dev/null https://academyv2.mereka.io/auth/login/oidc/ | rg -i 
 
 # Ensure lms/cms production settings keep cookie middleware before SessionMiddleware
 # in request order (so it runs after SessionMiddleware in response order), then
-# redeploy config and restart lms/cms.
+# commit/push the source change and let GitOps realize it.
+#
+# Emergency-only: if the fixed config is already durable in git and ArgoCD has
+# applied it, a live restart can realize the setting immediately. Record the
+# incident and verify ArgoCD/live state afterward.
 kubectl rollout restart deployment/lms deployment/cms -n mereka-lms
 ```
 
@@ -1199,7 +1203,7 @@ kubectl rollout restart deploy/lms deploy/cms -n mereka-lms
   `Module not found: Error: Can't resolve '@openedx/frontend-plugin-framework' in '/openedx/app'`
 
 **Root Cause:**
-- Indigo `env.config.jsx` imports `@openedx/frontend-plugin-framework`.
+- Generated `env.config.jsx` imports `@openedx/frontend-plugin-framework`.
 - Generated MFE Dockerfile is missing dependency install in one or more `*-common` stages.
 
 **Fix:**

@@ -88,7 +88,8 @@ Create a local admin user after first launch:
 
 ```bash
 export LOCAL_ADMIN_PASSWORD='<choose-a-local-only-password>'
-docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "
+docker exec -e LOCAL_ADMIN_PASSWORD tutor_local-lms-1 \
+  python /openedx/edx-platform/manage.py lms shell -c "
 import os
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -123,10 +124,6 @@ make tutor-stop
 
 # After Tutor config changes (preferred)
 ./scripts/infra/tutor-config-save.sh --set KEY=value
-
-# Manual advanced path
-tutor config save --set KEY=value
-./scripts/infra/prepare-tutor-build-context.sh --target all
 make tutor-restart
 ```
 

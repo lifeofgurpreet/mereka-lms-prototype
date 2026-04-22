@@ -43,7 +43,7 @@ Plugin slots are named extension points in MFE React components. Operators injec
 | **Scope** | Shared header shell (`frontend-component-header`) |
 | **Our component** | `MerekaHeaderLogo` |
 | **Wiring mechanism** | `tutormfe.hooks.PLUGIN_SLOTS` registration in `mereka_lms.py` |
-| **Forward-compat** | Keeps override stable while inheriting Indigo header structure |
+| **Forward-compat** | Keeps override stable while inheriting Open edX header structure |
 | **Operation** | `PLUGIN_OPERATIONS.Replace` |
 | **Verification** | `scripts/qa/verify-plugin-slot-wiring.sh` |
 | **Key files** | `infrastructure/tutor/plugins/mereka_lms.py` |
@@ -415,7 +415,7 @@ Two naming conventions exist in the codebase:
 | Convention | Example | Where Used |
 |-----------|---------|------------|
 | **Namespaced** (official) | `org.openedx.frontend.layout.footer.v1` | Source code `<PluginSlot id="...">`, `env.config.jsx` |
-| **Shorthand** | `footer_slot` | `tutormfe.hooks.PLUGIN_SLOTS`, Indigo `env.config.jsx` |
+| **Shorthand** | `footer_slot` | `tutormfe.hooks.PLUGIN_SLOTS`, Tutor-generated `env.config.jsx` |
 
 **Rule**: Always use the **namespaced ID** in `env.config.jsx` pluginSlots configuration. The shorthand form is only for the Python-side `PLUGIN_SLOTS` Tutor hook registration.
 
