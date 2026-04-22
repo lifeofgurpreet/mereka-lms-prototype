@@ -85,15 +85,18 @@ This script applies remaining patch-only filesystem/build-context compatibility 
 
 ### Why Patches Are Needed
 
-Tutor generates templates from scratch on every `config save`, losing any manual modifications. This script re-applies required changes:
+Tutor generates templates from scratch on every `config save`. Source hooks own
+behavior wherever Tutor can express it; the remaining script work is the bounded
+compatibility layer documented in `patch-manifest.yml` and
+`docs/reference/architecture/TUTOR_PATCHES_INVENTORY.md`.
 
-1. **Node 24 toolchain**: Upgrades MFE builds from earlier LTS defaults to Node 24.11.0 with required build tools (g++, python3)
-2. **MySQL 8 authentication**: Changes default authentication plugin to `mysql_native_password`
-3. **Multi-site domains**: Adds extra domain names (biji-biji.com, skillourfuture.academy.mereka.io)
-4. **Webpack memory**: Increases Node memory limit to 6144MB for asset compilation
-5. **Custom apps**: Copies and configures custom Django apps (prometheus, oauth_fix)
-6. **Branding**: Syncs Mereka theme assets and custom MFE footer
-7. **Prometheus metrics**: Installs django-prometheus and configures the app-level `/metrics` endpoint
+Current active classes:
+
+1. **Local MySQL compatibility**: Adds `MYSQL_ROOT_HOST: "%"` after Tutor 21 renders `mysql-native-password=ON`.
+2. **Dependency acquisition resilience**: Normalizes exact dependency image refs and wraps fragile MFE npm/translation install steps.
+3. **Build compatibility deltas**: Keeps the allowed Open edX build delta in sync with `build-optimizations.allowed-delta.yaml`.
+4. **Repo-owned filesystem sync**: Copies theme, brand package, fonts, SCSS, and custom app payloads into generated build contexts.
+5. **Migration guards**: Removes stale generated residue such as retired Tutor Indigo slot ownership and deprecated MFE shells.
 
 ### Usage
 
@@ -111,11 +114,9 @@ tutor local restart
 
 ### Patch Targets
 
-The script patches both:
-1. **Tutor plugin templates** (source files in Python site-packages)
-2. **Generated environment** (files in `tutor_env/env/`)
-
-This ensures patches persist even if templates are regenerated.
+The script only mutates generated Tutor output and generated build-context
+payloads under `tutor_env/env/`. Source behavior must live in Tutor plugins,
+Bake/HCL, or repo-owned source files before this compatibility layer is retired.
 
 ## Configuration Files
 
@@ -283,9 +284,9 @@ tutor local restart
 
 **Symptom**: `Authentication plugin 'caching_sha2_password' cannot be loaded`
 
-**Cause**: MySQL 8 default auth plugin incompatible with some clients
+**Cause**: MySQL auth mode or local root-host compatibility is missing from the rendered local compose file
 
-**Fix**: the governed Tutor render path sets `--default-authentication-plugin=mysql_native_password`
+**Fix**: rerun the governed Tutor render path. Tutor 21 renders `--mysql-native-password=ON`; the local compatibility layer adds `MYSQL_ROOT_HOST: "%"`.
 
 ### MFE Build Fails
 

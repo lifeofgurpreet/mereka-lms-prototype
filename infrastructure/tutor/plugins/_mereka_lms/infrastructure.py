@@ -1,26 +1,8 @@
-"""Infrastructure patches — MySQL auth and Caddy edge configuration."""
+"""Infrastructure patches for Caddy edge configuration and init tasks."""
 
 from tutor import hooks
 
 from _mereka_lms import _register_env_patch
-
-###############################################################################
-# MySQL Dockerfile Patches
-###############################################################################
-
-_register_env_patch(
-    "mysql-docker-compose",
-    """
-# MySQL 8 authentication plugin fix
-environment:
-  MYSQL_ROOT_HOST: "%"
-command: mysqld --default-authentication-plugin=mysql_native_password
-""",
-)
-
-###############################################################################
-# Caddy Configuration Patches
-###############################################################################
 
 # Add security header snippet and extra LMS host blocks to Caddyfile.
 _register_env_patch(

@@ -465,7 +465,7 @@ The Mereka Academy LMS serves learners across Biji-Biji Initiative and SkillOurF
 - cert-manager auto-renews certificates before expiry. If ACME challenges fail (DNS misconfiguration, rate limits), certificates expire. The `cert-verify-prod` CronJob detects this. Resolution: check `kubectl describe certificate`, verify DNS records, check Let's Encrypt rate limit status.
 
 ### MySQL Authentication Plugin Errors
-- Open edX requires `mysql_native_password` authentication. If the `--mysql-native-password=ON` flag is missing from the mysql Deployment, all database connections fail with authentication errors. Resolution: verify mysql container args include the flag.
+- Open edX requires MySQL native-password mode. If the `--mysql-native-password=ON` flag is missing from the mysql Deployment, database connections can fail with authentication errors. Resolution: verify mysql container args include the flag.
 
 ### CrashLoopBackOff
 - Containers that repeatedly crash (missing config, OOM, unresolvable dependencies) enter CrashLoopBackOff. The `OpenEdxCrashLoopingContainers` alert fires after 10 minutes. Resolution: check `kubectl logs` and `kubectl describe pod` for the crash reason.

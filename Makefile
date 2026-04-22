@@ -1,3 +1,5 @@
+SHELL := /bin/bash
+
 .PHONY: help bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify infra-sync-vendored-mfe-caddyfile infra-sync-gitops-prod-tags branding-sync migrations-prepare migrations-verify qa-smoke qa-phase7-dom-audit qa-phase7-dom-audit-dev qa-phase7-dom-audit-full qa-phase7-dom-audit-full-dev qa-phase7-dom-audit-full-strict qa-phase7-selector-coverage qa-phase2-smoke-evidence-prod qa-phase2-smoke-evidence-dev qa-phase2-smoke-evidence-contract qa-runtime-theme-mode-prod qa-runtime-theme-mode-dev qa-runtime-theme-drift-diagnose qa-paragon-theme-budget qa-frontend-extended-surfaces qa-a11y-prod qa-a11y-dev qa-a11y-prod-online qa-a11y-dev-online qa-a11y-prod-hybrid qa-a11y-dev-hybrid qa-performance-prod qa-performance-dev qa-cross-browser-prod qa-cross-browser-dev qa-frontend-runtime-qa-prod qa-frontend-runtime-qa-dev qa-frontend-runtime-blocker-sweep qa-runtime-blocker-refresh qa-runtime-blocker-handoff-md qa-runtime-blocker-handoff-bundle qa-runtime-blocker-infra-prompt qa-runtime-blocker-status qa-npm-start-smoke qa-npm-start-smoke-local qa-branding-screenshots qa-branding-before-after qa-frontend-closure qa-certificate-branding qa-email-template-branding qa-make-help-contract qa-frontend-contracts forum-smoke credentials-notes-smoke mobile-secrets-check lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check validate-deploy-contract validate-deploy-contract-strict
 
 help: ## Show this help message
@@ -32,38 +34,8 @@ tutor-verify: ## Verify Tutor config patches applied correctly
 		echo "❌ Tutor config not initialized. Run 'make tutor-apply' first."; \
 		exit 1; \
 	fi && \
-	echo "Checking AC-001: MySQL authentication patch..." && \
-	if ! grep -q "mysql_native_password" tutor_env/env/local/docker-compose.yml; then \
-		echo "❌ FAILED: MySQL native password patch not applied"; \
-		exit 1; \
-	fi && \
-	echo "✅ AC-001 PASSED: MySQL authentication patch applied" && \
-	echo "Checking AC-002: MFE Node.js memory patch..." && \
-	if ! grep -q "NODE_OPTIONS.*6144" tutor_env/env/build/openedx/Dockerfile; then \
-		echo "❌ FAILED: MFE Node.js memory patch not applied"; \
-		exit 1; \
-	fi && \
-	echo "✅ AC-002 PASSED: MFE Node.js patch applied" && \
-	echo "Checking AC-003: Multi-site domains..." && \
-	if ! grep -q "academy.biji-biji.com" tutor_env/env/apps/openedx/settings/lms/production.py; then \
-		echo "❌ FAILED: Multi-site domains not configured"; \
-		exit 1; \
-	fi && \
-	echo "✅ AC-003 PASSED: Multi-site domains configured" && \
-	echo "Checking AC-004: mfe_oauth_fix app..." && \
-	if ! grep -q "mfe_oauth_fix" tutor_env/env/apps/openedx/settings/lms/production.py; then \
-		echo "❌ FAILED: mfe_oauth_fix app not installed"; \
-		exit 1; \
-	fi && \
-	echo "✅ AC-004 PASSED: mfe_oauth_fix app installed" && \
-	echo "Checking AC-005: django_prometheus..." && \
-	if ! grep -q "django_prometheus" tutor_env/env/apps/openedx/settings/lms/production.py; then \
-		echo "❌ FAILED: django_prometheus not installed"; \
-		exit 1; \
-	fi && \
-	echo "✅ AC-005 PASSED: django_prometheus installed" && \
-	echo "" && \
-	echo "✅ All Tutor configuration verifications passed!"
+	./scripts/qa/verify-tutor-patches.sh && \
+	./scripts/infra/verify-tutor-config.sh
 
 infra-sync-vendored-mfe-caddyfile: ## Dry-run vendored MFE Caddyfile sync check against infra checkout
 	./scripts/infra/sync-vendored-mfe-caddyfile.sh

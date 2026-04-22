@@ -400,9 +400,9 @@ echo "--- OpenEdX Dockerfile Invariants ---"
 
 if [[ -f "$OPENEDX_DF" ]]; then
   if grep -q "mysql_native_password" "$OPENEDX_DF" 2>/dev/null; then
-    pass "MySQL auth plugin patch present"
+    fail "Retired mysql_native_password Dockerfile rewrite present"
   else
-    skip "MySQL auth plugin not checked (may be in settings, not Dockerfile)"
+    pass "Open edX Dockerfile is free of retired MySQL auth rewrites"
   fi
 
   if check_openedx_render_delta_allowlist "$RAW_OPENEDX_DF_SNAPSHOT" "$OPENEDX_DF"; then

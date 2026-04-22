@@ -1,5 +1,5 @@
 # Tutor Configuration Runbook
-_Audience: Platform Eng • Owner: Engineering Lead • Last updated: 2026-02-10_
+_Audience: Platform Eng | Owner: Engineering Lead | Last updated: 2026-04-22_
 
 This runbook covers manual verification procedures for Tutor configuration that require a running Docker Compose or Kubernetes environment.
 
@@ -40,12 +40,13 @@ This runbook covers manual verification procedures for Tutor configuration that 
 
 ---
 
-## MySQL Authentication Verification
+## MySQL Local Bootstrap Verification
 
 ### Procedure
-1. Verify MySQL uses `mysql_native_password` authentication plugin:
+1. Verify the rendered local compose file contains Tutor 21's MySQL native
+   password mode and the repo-owned local remote-root compatibility setting:
    ```bash
-   tutor local exec mysql mysql -u root -e "SELECT user, plugin FROM mysql.user WHERE user='openedx';"
+   grep -E -- 'mysql-native-password=ON|MYSQL_ROOT_HOST' tutor_env/env/local/docker-compose.yml
    ```
 2. Verify LMS can connect to MySQL:
    ```bash
@@ -53,7 +54,8 @@ This runbook covers manual verification procedures for Tutor configuration that 
    ```
 
 ### Acceptance
-- MySQL user `openedx` uses `mysql_native_password` plugin
+- Rendered local compose contains `--mysql-native-password=ON`
+- Rendered local compose contains `MYSQL_ROOT_HOST: "%"`
 - LMS Django process connects to MySQL without authentication errors
 - No `caching_sha2_password` related errors in logs
 

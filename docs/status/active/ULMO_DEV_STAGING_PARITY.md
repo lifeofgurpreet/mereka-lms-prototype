@@ -135,19 +135,18 @@ only live. As a result:
 
 The `infrastructure/tutor/` directory manages Tutor configuration locally. Key points:
 
-### Patch modules (`infrastructure/tutor/patches/`)
+### Current Tutor build authorities
 
-| Patch | Purpose | Required for Ulmo |
+| Authority | Purpose | Required for Ulmo |
 |-------|---------|-------------------|
-| `mysql-auth.sh` | `mysql_native_password` plugin fix | Yes (MySQL 8) |
-| `_mereka_lms/mfe_dockerfile.py` + MFE build-context sync | Node 24 toolchain, ulmo.1 MFE source refs, local brand package `@edx/brand@file:./brand-mereka` | Yes |
-| `domain-names.sh` | Extra hostnames (biji-biji.com, skillourfuture) | Yes |
-| `webpack-memory.sh` | `NODE_OPTIONS=--max-old-space-size=6144` | Yes (build only) |
-| `csrf-origins.sh` | CSRF trusted origins for both mereka.io and mereka.dev | Yes |
-| `footer-component.sh` | Custom Mereka footer for MFEs | Yes |
-| `prometheus-metrics.sh` | Prometheus scrape annotation injection | Recommended |
-| `build-optimizations.sh` | Build retry logic, cache opts | Build time only |
-| `mongodb-atlas.sh` | `pymongo[srv]` for Atlas SRV | Yes |
+| Tutor 21 render + `mysql-root-host.sh` | MySQL native-password mode (`--mysql-native-password=ON`) plus local `MYSQL_ROOT_HOST: "%"` compatibility | Yes |
+| `_mereka_lms/mfe_dockerfile.py` + MFE build-context sync | Node 24 toolchain, Ulmo MFE source refs, local brand package `@edx/brand@file:./brand-mereka` | Yes |
+| `_mereka_lms/lms_settings.py` | Extra hostnames, CSRF trusted origins, session/cookie settings, discussions, enterprise | Yes |
+| `_mereka_lms/mfe_runtime.py` + `sync-footer-assets.sh` | Custom Mereka MFE runtime, theme source, and footer assets | Yes |
+| `_mereka_lms/openedx_dockerfile.py` | Repo custom apps and Open edX build dependencies | Yes |
+| `dependency-image-mirrors.sh` | Anonymous dependency image acquisition normalization for cold/local builds | Yes |
+| `build-optimizations.sh` | Manifest-bounded residual cold-build compatibility and translation wrappers | Build time only |
+| `patch-manifest.yml` | Active post-render authority ledger and retirement triggers | Yes |
 | `security-hardening.sh` | Container security context hardening | Yes |
 
 ### `config.example.yml` observations

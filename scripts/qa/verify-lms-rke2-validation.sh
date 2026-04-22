@@ -231,11 +231,11 @@ run_offline_checks() {
   fi
 
   if [[ -f "$TUTOR_MYSQL_PATCH" ]] && grep -q "default-authentication-plugin=mysql_native_password" "$TUTOR_MYSQL_PATCH" 2>/dev/null; then
-    pass_check "Tutor infrastructure plugin contains mysql_native_password configuration"
+    fail_check "Tutor infrastructure plugin still contains retired MySQL auth syntax"
   elif [[ -f "$BASE_DIR/apps/mysql/deployment.yaml" ]] && grep -q -- "--mysql-native-password=ON" "$BASE_DIR/apps/mysql/deployment.yaml" 2>/dev/null; then
-    pass_check "Base MySQL deployment contains mysql_native_password configuration"
+    pass_check "Base MySQL deployment contains --mysql-native-password=ON"
   else
-    fail_check "mysql_native_password configuration not found in Tutor plugin or base MySQL deployment"
+    fail_check "--mysql-native-password=ON not found in base MySQL deployment"
   fi
 
   if [[ -f "$TUTOR_LMS_SETTINGS_PLUGIN" ]] && grep -q "CSRF_TRUSTED_ORIGINS" "$TUTOR_LMS_SETTINGS_PLUGIN" 2>/dev/null; then

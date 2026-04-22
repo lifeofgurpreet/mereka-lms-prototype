@@ -134,6 +134,10 @@ acceptance_criteria:
     file: scripts/qa/verify-ci-cd-pipeline.sh
     command: scripts/qa/verify-ci-cd-pipeline.sh
   - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cicd-merge-gates-and-secrets.sh
+    command: scripts/qa/verify-cicd-merge-gates-and-secrets.sh
+  - type: automated
     test_type: unit
     file: services/purchase-gateway/tests/unit/test_checkout_route.py
     command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
@@ -235,6 +239,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-ci-cd-pipeline.sh
     command: scripts/qa/verify-ci-cd-pipeline.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-openedx-image-branding.sh
+    command: scripts/qa/verify-openedx-image-branding.sh
   - type: manual
     runbook: docs/ops/runbooks/CI_CD_RUNBOOK.md
     section: Image Build Verification
@@ -560,10 +568,10 @@ acceptance_criteria:
       workflow dispatch cannot be fully automated in isolated test environment
     file: N/A
 - id: AC-031
-  description: Given the `tutor-config-verify.yml` workflow runs when changes are
-    made to `tutor_env/config.yml` or `infrastructure/tutor/**`, when all patches
-    are correctly applied, then the workflow succeeds with verification passing for
-    MySQL auth patch, MFE Node.js patch, multi-site domains, and custom apps.
+  description: Given `.github/workflows/ci.yml` selects Tutor authority, when the
+    `tutor-config-tests` job runs, then the workflow succeeds with verification passing
+    for the Tutor 21 MySQL local bootstrap contract, MFE build contract, multi-site
+    domains, and custom apps.
   verify:
   - type: manual
     runbook: docs/ops/runbooks/CI_CD_RUNBOOK.md
@@ -572,9 +580,9 @@ acceptance_criteria:
       workflow dispatch cannot be fully automated in isolated test environment
     file: N/A
 - id: AC-032
-  description: Given the Tutor config verification runs, when required patches are
-    missing, then the job fails with specific error messages identifying which patch
-    (MySQL, MFE, domains, or apps) is not applied.
+  description: Given the Tutor config verification runs, when required contracts are
+    missing, then the job fails with specific error messages identifying which contract
+    (MySQL local bootstrap, MFE, domains, apps, or patch manifest) is not satisfied.
   verify:
   - type: manual
     runbook: docs/ops/runbooks/CI_CD_RUNBOOK.md

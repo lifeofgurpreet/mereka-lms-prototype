@@ -96,8 +96,8 @@ fi
 
 echo ""
 
-# ── Gate 2: apply-patches.sh drift ────────────────────────────────────────
-echo "-- Gate 2: apply-patches.sh drift"
+# ── Gate 2: Tutor patch authority drift ───────────────────────────────────
+echo "-- Gate 2: Tutor patch authority drift"
 
 APPLY_PATCHES="${REPO_ROOT}/infrastructure/tutor/apply-patches.sh"
 if [[ -x "${APPLY_PATCHES}" ]]; then
@@ -110,7 +110,19 @@ VERIFY_CONFIG="${REPO_ROOT}/scripts/infra/verify-tutor-config.sh"
 if [[ -f "${VERIFY_CONFIG}" ]]; then
   pass "verify-tutor-config.sh exists"
 else
-  warn "verify-tutor-config.sh not found (optional verification script)"
+  fail "verify-tutor-config.sh missing: ${VERIFY_CONFIG}"
+fi
+
+PATCH_MANIFEST="${REPO_ROOT}/infrastructure/tutor/patch-manifest.yml"
+if [[ -f "${PATCH_MANIFEST}" ]]; then
+  pass "patch-manifest.yml exists"
+  if python3 -c "import yaml; yaml.safe_load(open('${PATCH_MANIFEST}'))" 2>/dev/null; then
+    pass "patch-manifest.yml is valid YAML"
+  else
+    fail "patch-manifest.yml is not valid YAML"
+  fi
+else
+  fail "patch-manifest.yml missing: ${PATCH_MANIFEST}"
 fi
 
 # Check patch script has not drifted from committed state
@@ -120,17 +132,29 @@ else
   pass "apply-patches.sh is clean (no uncommitted changes)"
 fi
 
-# Check patch script covers key required patches
-REQUIRED_PATCHES=(
-  "mysql_native_password"
-  "NODE_OPTIONS"
-  "MONGODB_USE_SSL"
+# Check the active authority ledger and rendered verifier, not obsolete patch tokens.
+REQUIRED_PATCH_IDS=(
+  "mysql-root-host"
+  "build-optimizations-render-delta"
+  "mfe-npm-install-resilience"
 )
-for patch in "${REQUIRED_PATCHES[@]}"; do
-  if grep -q "${patch}" "${APPLY_PATCHES}" 2>/dev/null; then
-    pass "apply-patches.sh contains required patch: ${patch}"
+for patch_id in "${REQUIRED_PATCH_IDS[@]}"; do
+  if grep -q "id: ${patch_id}" "${PATCH_MANIFEST}" 2>/dev/null; then
+    pass "patch manifest contains active patch: ${patch_id}"
   else
-    warn "apply-patches.sh may be missing patch token: ${patch}"
+    fail "patch manifest missing active patch: ${patch_id}"
+  fi
+done
+
+REQUIRED_RENDER_MARKERS=(
+  "mysql-native-password=ON"
+  "MYSQL_ROOT_HOST"
+)
+for marker in "${REQUIRED_RENDER_MARKERS[@]}"; do
+  if grep -q "${marker}" "${VERIFY_CONFIG}" 2>/dev/null; then
+    pass "render verifier checks required marker: ${marker}"
+  else
+    fail "render verifier missing required marker: ${marker}"
   fi
 done
 

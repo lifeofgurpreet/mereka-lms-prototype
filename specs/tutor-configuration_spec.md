@@ -129,7 +129,7 @@ The low-level patch helper used by the canonical prepare path MUST apply the fol
 - [ ] AC-004: `grep "mfe_oauth_fix" tutor_env/env/apps/openedx/settings/lms/production.py` returns results
 - [ ] AC-005: `grep "django_prometheus" tutor_env/env/apps/openedx/settings/lms/production.py` returns results
 - [ ] AC-006: MFE images build successfully with the Node 24 rendered build contract
-- [ ] AC-007: MySQL 8 connections succeed without authentication errors
+- [ ] AC-007: MySQL 8 connections succeed with Tutor 21 `--mysql-native-password=ON` and local `MYSQL_ROOT_HOST: "%"` rendered
 - [ ] AC-008: All three production domains (academyv2.mereka.io, academy.biji-biji.com, skillourfuture.academy.mereka.io) resolve and accept logins
 - [ ] AC-009: Mereka logo and custom footer render on all MFEs
 - [ ] AC-010: `tutor local dc ps` shows all services with status "Up"

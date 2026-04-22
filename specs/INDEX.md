@@ -9,9 +9,10 @@
 - **completed**: 2 items
 - **deferred**: 1 items
 - **deferred_until_2027**: 2 items
-- **draft**: 64 items
+- **draft**: 62 items
 - **in_progress**: 1 items
 - **ready**: 6 items
+- **superseded**: 2 items
 - **lane:normative**: 41 items
 - **lane:plan**: 29 items
 - **lane:proposal**: 4 items
@@ -105,7 +106,7 @@
 | 24 | [Implementation Plan: Repository Structure](plans/repository-structure_plan.md) | plan | plan | draft | None | 0 | 2026-03-09 |
 | 25 | [Implementation Plan: Secrets Management](plans/secrets-management_plan.md) | plan | plan | draft | None | 0 | 2026-02-10 |
 | 26 | [SLO/SLA Service Level Management - Implementation Plan](plans/slo-sla-service-level-management_plan.md) | plan | plan | draft | None | 0 | 2026-03-09 |
-| 27 | [Implementation Plan: Tutor Configuration Resilience and Patch Automation](plans/tutor-configuration-resilience_plan.md) | plan | plan | draft | None | 0 | 2026-02-10 |
+| 27 | [Implementation Plan: Tutor Configuration Resilience and Patch Automation](plans/tutor-configuration-resilience_plan.md) | plan | plan | superseded | None | 0 | 2026-04-22 |
 | 28 | [Implementation Plan: Tutor Configuration Lifecycle](plans/tutor-configuration_plan.md) | plan | plan | draft | None | 0 | 2026-02-10 |
 | 29 | [Video Pipeline & Delivery System - Implementation Plan](plans/video-pipeline-delivery_plan.md) | plan | plan | ready | None | 0 | 2026-02-10 |
 
@@ -141,7 +142,7 @@
 | 26 | [Test Plan: Repository Structure](plans/repository-structure_testplan.md) | testplan | plan | draft | None | 0 | 2026-03-09 |
 | 27 | [Test Plan: Secrets Management](plans/secrets-management_testplan.md) | testplan | plan | draft | None | 0 | 2026-02-10 |
 | 28 | [Test Plan: SLO/SLA Definitions & Service Level Management](plans/slo-sla-service-level-management_testplan.md) | testplan | plan | draft | None | 0 | 2026-02-10 |
-| 29 | [Test Plan: Tutor Configuration Resilience and Patch Automation](plans/tutor-configuration-resilience_testplan.md) | testplan | plan | draft | None | 0 | 2026-02-10 |
+| 29 | [Test Plan: Tutor Configuration Resilience and Patch Automation](plans/tutor-configuration-resilience_testplan.md) | testplan | plan | superseded | None | 0 | 2026-04-22 |
 | 30 | [Test Plan: Tutor Configuration Lifecycle](plans/tutor-configuration_testplan.md) | testplan | plan | draft | None | 0 | 2026-02-10 |
 | 31 | [Test Plan: Video Pipeline & Delivery System](plans/video-pipeline-delivery_testplan.md) | testplan | plan | draft | None | 0 | 2026-02-10 |
 

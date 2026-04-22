@@ -39,10 +39,6 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/qa/verify-tutor-resilience-full.sh
     command: scripts/qa/verify-tutor-resilience-full.sh
-  - type: automated
-    test_type: shell_verification
-    file: infrastructure/tutor/plugins/verify-plugin.sh
-    command: infrastructure/tutor/plugins/verify-plugin.sh
 - id: AC-TCR-004
   description: Given the Mereka plugin is enabled and `prepare-tutor-build-context.sh
     --target all` is run, when `scripts/qa/verify-tutor-patches.sh` is executed, then
@@ -52,6 +48,10 @@ acceptance_criteria:
     test_type: shell_verification
     file: scripts/infra/verify-tutor-config.sh
     command: scripts/infra/verify-tutor-config.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tutor-patches.sh
+    command: scripts/qa/verify-tutor-patches.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-tutor-resilience-full.sh
@@ -97,10 +97,6 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
-    file: scripts/qa/verify-patch-idempotency.sh
-    command: scripts/qa/verify-patch-idempotency.sh
-  - type: automated
-    test_type: shell_verification
     file: scripts/qa/verify-tutor-resilience-full.sh
     command: scripts/qa/verify-tutor-resilience-full.sh
 - id: AC-TCR-008
@@ -108,6 +104,10 @@ acceptance_criteria:
     checked by `scripts/qa/verify-tutor-patches.sh`, when the verifier is executed,
     then it emits a `[FAIL]` line and exits non-zero.
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-tutor-patches.sh
+    command: scripts/qa/verify-tutor-patches.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-tutor-resilience-full.sh
@@ -120,6 +120,10 @@ acceptance_criteria:
   description: Given the `apply-patches.sh` script is run twice consecutively, when
     the rendered templates are compared, then they are byte-identical (idempotency).
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-patch-idempotency.sh
+    command: scripts/qa/verify-patch-idempotency.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-tutor-config-safety.sh

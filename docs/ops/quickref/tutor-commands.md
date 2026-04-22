@@ -109,7 +109,7 @@ tutor config printvalue OPENEDX_COMMON_VERSION
 **CRITICAL**: `tutor config save` regenerates the rendered Tutor environment from source hooks. Always run `prepare-tutor-build-context.sh --target all` after manual changes, or use `tutor-config-save.sh`.
 
 Refresh covers:
-- MySQL 8 authentication plugin (`mysql_native_password`)
+- Tutor 21 local MySQL native-password mode plus `MYSQL_ROOT_HOST` compatibility
 - MFE rendered build contract (Node 24 toolchain, local brand package, tracked snapshot parity)
 - Extra domains (biji-biji.com, skillourfuture)
 - Webpack memory limit (`NODE_OPTIONS=--max-old-space-size=6144`)

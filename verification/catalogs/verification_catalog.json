@@ -547,7 +547,7 @@
       "mutability": "mutating",
       "owner": "platform-infra",
       "path": "scripts/infra/verify-tutor-config.sh",
-      "reference_count": 48,
+      "reference_count": 52,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -571,7 +571,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/infra/verify-tutor-patches.sh",
-      "reference_count": 12,
+      "reference_count": 11,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -3352,7 +3352,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-cold-start-onboarding-contract.sh",
-      "reference_count": 13,
+      "reference_count": 14,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -11854,7 +11854,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-openedx-image-branding.sh",
-      "reference_count": 10,
+      "reference_count": 11,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -12307,7 +12307,7 @@
       ],
       "severity": "low",
       "spec_ids": [
-        "AC-TCR-007"
+        "AC-TCR-009"
       ],
       "status": "manual_only",
       "tier": "exploratory_manual"
@@ -17635,7 +17635,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-tutor-patches.sh",
-      "reference_count": 22,
+      "reference_count": 25,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -17665,7 +17665,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-tutor-resilience-full.sh",
-      "reference_count": 6,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

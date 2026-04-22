@@ -152,7 +152,7 @@ The platform currently has workflows that evolved organically -- CI, image build
 | `dr-evidence-bundle.yml` | Monthly schedule + manual | Compliance | No |
 | `cloud-sql-backup.yml` | Tri-daily schedule (gated) | Operations | No |
 | `authenticated-sso-canary.yml` | Every 6h schedule + manual | Operations | No |
-| `tutor-config-verify.yml` | PR + push (path filter) + manual | Quality Gates | No |
+| `.github/workflows/ci.yml` `tutor-config-tests` | PR + push when Tutor authority is in scope | Quality Gates | Yes when selected |
 | `tutor-plugin-test.yml` | PR + push (path filter) + manual | Quality Gates | No |
 
 - Every workflow MUST use `actions/checkout@v4` as the first step.
@@ -280,37 +280,27 @@ The platform currently has workflows that evolved organically -- CI, image build
 - The SSO canary workflow MUST set `REQUIRE_SECRETS=1` to fail loudly if required secrets are missing.
 - The SSO canary workflow SHOULD set `REQUIRE_STUDIO_CANARY=0` to keep Studio staff checks non-blocking.
 
-#### Tutor Configuration Verification (tutor-config-verify.yml)
+#### Tutor Configuration Verification (`ci.yml` / `tutor-config-tests`)
 
-- The Tutor config verification workflow MUST trigger on push and pull requests when files change in `tutor_env/config.yml` or `infrastructure/tutor/**`.
-- The Tutor config verification workflow MUST support `workflow_dispatch` for manual runs.
-- The Tutor config verification workflow MUST install Tutor 21.0.0 for all jobs.
-- The Tutor config verification workflow MUST install Python 3.12 with pip caching for faster runs.
-- The workflow MUST include a `verify-patches` job that verifies MySQL authentication patch (`mysql_native_password`) and MFE Node.js patch (`NODE_OPTIONS=--max-old-space-size=6144`).
-- The workflow MUST include a `verify-multi-site-domains` job that verifies all production domains (`academy.biji-biji.com`, `skillourfuture.academy.mereka.io`, `academyv2.mereka.io`) are present in `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS`.
-- The workflow MUST include a `verify-enterprise-features` job that verifies custom apps (`mfe_oauth_fix`, `django_prometheus`) are installed.
-- The workflow MUST include a `verify-idempotency` job that runs patches twice and verifies checksums remain identical.
-- The workflow MUST generate a clean config from `infrastructure/tutor/config.example.yml` before running patches.
-- The workflow MUST run `./infrastructure/tutor/apply-patches.sh` after `tutor config save` in all jobs.
-- The workflow MUST upload patch failure artifacts (docker-compose.yml, Dockerfile, settings files) when verification fails.
-- The workflow MUST post a PR comment on failure with common issues and remediation steps (requires `pull-requests: write` permission).
-- All verification steps MUST use descriptive pass/fail messages (e.g., "✅ AC-001 PASSED: MySQL authentication patch applied").
+- The canonical Tutor config verification lane MUST be the `tutor-config-tests` job in `.github/workflows/ci.yml`.
+- The Tutor config lane MUST run only when the CI lane selector marks Tutor authority as in scope; unrelated PRs MAY skip the expensive render lane after workflow-control-plane checks pass.
+- The Tutor config lane MUST render through `./scripts/infra/tutor-config-save.sh`, not raw `tutor config save`.
+- The Tutor config lane MUST verify the current MySQL local bootstrap contract: Tutor 21 renders `--mysql-native-password=ON`, and the repo-owned compatibility layer renders `MYSQL_ROOT_HOST: "%"`.
+- The Tutor config lane MUST treat `./scripts/infra/verify-tutor-config.sh` as the canonical rendered verifier. `./scripts/qa/verify-tutor-patches.sh` MAY remain as a compatibility entrypoint only if it delegates to the canonical verifier.
+- The Tutor config lane MUST validate the active patch manifest and must fail if active post-render patches lack authority class, owner context, required fields, or retirement triggers.
+- The Tutor config lane MUST keep idempotency coverage for the bounded compatibility layer.
+- The Tutor config lane SHOULD upload failure artifacts for rendered compose, Dockerfile, and settings files when available.
+- Detailed operator guidance for this lane lives in `docs/reference/operations/TUTOR_CONFIG_CI.md`.
 
-#### Tutor Plugin Testing (tutor-plugin-test.yml)
+#### Tutor Plugin / Render Contract (`tutor-plugin-test.yml`)
 
-- The Tutor plugin test workflow MUST trigger on push and pull requests when files change in `infrastructure/tutor/plugins/**`.
-- The Tutor plugin test workflow MUST support `workflow_dispatch` for manual runs.
-- The Tutor plugin test workflow MUST install Tutor 21.0.0 for all jobs.
-- The workflow MUST include a `test-mfe-oauth-plugin` job that verifies plugin syntax (`py_compile`), enables the plugin, generates config, and verifies plugin patches are applied.
-- The workflow MUST include a `test-plugin-lifecycle` job that tests enable, disable, and re-enable operations.
-- The workflow MUST include a `verify-custom-app-structure` job that documents expected plugin structure and mount points.
-- The workflow MUST include a `lint-plugins` job that runs ruff and black on plugin code.
-- The workflow MUST include an `integration-test` job that verifies plugins work correctly with `apply-patches.sh` (both sets of patches present).
-- The workflow MUST verify plugin metadata (`__version__`, hook registration via `hooks.Filters.CONFIG_DEFAULTS`).
-- The workflow MUST verify plugin structure (presence of `hooks.Filters.ENV_PATCHES` and `openedx-lms-production-settings` patch target).
-- The workflow MUST copy plugin to `tutor_env/plugins/` before enabling.
-- The workflow MUST post a PR comment on failure with plugin-specific troubleshooting guidance (requires `pull-requests: write` permission).
-- The workflow MUST verify that enabled plugins appear in `tutor plugins list` output.
+- The Tutor plugin/render workflow MUST lint and compile plugin sources.
+- The workflow MUST verify the retired `mfe_oauth_fix` shim remains metadata-only.
+- The workflow MUST run render-contract preflight through `./scripts/ci/preflight-check.sh`.
+- The workflow MUST reject dead Tutor hook ownership, including retired `nginx-lms-config`, `mysql-docker-compose`, and MFE npm-install hook names.
+- The workflow MUST reject retired Indigo ownership in active rendered output and active build contexts.
+- The workflow MUST prove raw-vs-patched render deltas match the explicit allowed-delta ledger for `build-optimizations.sh`.
+- The workflow MUST treat inline post-render mutation growth as a contract change requiring manifest/inventory/test updates.
 
 #### Branch Protection and Merge Gates
 
@@ -446,8 +436,8 @@ The platform currently has workflows that evolved organically -- CI, image build
 
 ### Tutor Configuration Verification
 
-- [ ] AC-031: Given the `tutor-config-verify.yml` workflow runs when changes are made to `tutor_env/config.yml` or `infrastructure/tutor/**`, when all patches are correctly applied, then the workflow succeeds with verification passing for MySQL auth patch, MFE Node.js patch, multi-site domains, and custom apps.
-- [ ] AC-032: Given the Tutor config verification runs, when required patches are missing, then the job fails with specific error messages identifying which patch (MySQL, MFE, domains, or apps) is not applied.
+- [ ] AC-031: Given `.github/workflows/ci.yml` selects Tutor authority, when the `tutor-config-tests` job runs, then the workflow succeeds with verification passing for the Tutor 21 MySQL local bootstrap contract, MFE build contract, multi-site domains, and custom apps.
+- [ ] AC-032: Given the Tutor config verification runs, when required contracts are missing, then the job fails with specific error messages identifying which contract (MySQL local bootstrap, MFE, domains, apps, or patch manifest) is not satisfied.
 - [ ] AC-033: Given the patch idempotency check runs, when patches are applied twice, then the checksums of all generated files remain identical.
 - [ ] AC-034: Given the Tutor config verification fails on a PR, when a developer views the PR, then a comment is posted with common issues and remediation steps.
 

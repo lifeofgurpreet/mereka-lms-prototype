@@ -189,12 +189,9 @@ The `mereka_lms` Tutor integration implements ENV_PATCHES hooks plus tightly sco
   - Profile image upload size limits
   - MFE proxy configuration for profile API
 
-- **Hook:** `nginx-lms-config`
-- **Patches Applied:**
-  - Additional server names for multi-site support
-  - Health check endpoint (`/health`)
-  - Prometheus metrics endpoint (`/metrics`)
-  - MFE profile API proxy
+Retired Nginx-era hook ownership is intentionally absent. The verifier rejects
+`nginx-lms-config` and old `lms.conf` edge rewrites so Caddy remains the active
+edge authority.
 
 #### Configuration Defaults
 The plugin defines the following configuration variables via `CONFIG_DEFAULTS` hook:

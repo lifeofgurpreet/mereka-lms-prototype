@@ -2,10 +2,10 @@
 spec: tutor-configuration-resilience_spec.md
 plan: plans/tutor-configuration-resilience_plan.md
 tier: 0
-status: draft
+status: superseded
 test_framework: bash/bats (shell scripts), GitHub Actions (CI)
 owner: engineering
-last_updated: "2026-02-10"
+last_updated: "2026-04-22"
 ---
 
 # Test Plan: Tutor Configuration Resilience and Patch Automation
@@ -13,7 +13,19 @@ last_updated: "2026-02-10"
 **Source Spec**: `specs/tutor-configuration-resilience_spec.md`
 **Implementation Plan**: `specs/plans/tutor-configuration-resilience_plan.md`
 **Test Framework**: bash/bats for shell tests, GitHub Actions for CI tests
-**Status**: Draft
+**Status**: Superseded historical plan.
+
+Do not use the matrix below as current execution guidance. Current authority is:
+
+- `specs/tutor-configuration-resilience_spec.md`
+- `specs/_generated/testmaps/tutor-configuration-resilience_spec.testmap.yml`
+- `docs/reference/operations/TUTOR_CONFIG_CI.md`
+
+The active CI lane is `.github/workflows/ci.yml` job `tutor-config-tests`.
+The canonical rendered verifier is `scripts/infra/verify-tutor-config.sh`;
+`scripts/qa/verify-tutor-patches.sh` is a stable compatibility entrypoint that
+delegates to it. Tutor 21 local MySQL proof is `mysql-native-password=ON` plus
+`MYSQL_ROOT_HOST: "%"`, not plugin-owned `mysql_native_password`.
 
 ---
 
@@ -35,27 +47,22 @@ This project uses:
 | AC-TCR-001 | Plugin install fails gracefully with missing dependencies | integration | `tests/tutor/test_plugin_lifecycle.sh` | Venv without Tutor | not_implemented |
 | AC-TCR-002 | Plugin-only config save produces `academy.biji-biji.com` in ALLOWED_HOSTS | integration | `tests/tutor/test_plugin_integration.sh` | Clean tutor_env, plugin enabled, no apply-patches | not_implemented |
 | AC-TCR-002 | Plugin-only config save produces CSRF origins without apply-patches.sh | integration | `tests/tutor/test_plugin_integration.sh` | Clean tutor_env, plugin enabled | not_implemented |
-| AC-TCR-003 | Plugin-only config save produces `mysql_native_password` in docker-compose | integration | `tests/tutor/test_plugin_integration.sh` | Clean tutor_env, plugin enabled | not_implemented |
-| AC-TCR-003 | Plugin-only docker-compose includes MYSQL_ROOT_HOST | integration | `tests/tutor/test_plugin_integration.sh` | Clean tutor_env, plugin enabled | not_implemented |
-| AC-TCR-004 | All manifest patches PASS after plugin + apply-patches.sh | integration | `tests/tutor/test_verify_patches.sh` | Fully patched tutor_env fixture | not_implemented |
+| AC-TCR-003 | Canonical render path produces `mysql-native-password=ON` and `MYSQL_ROOT_HOST` | shell_verification | `scripts/qa/verify-tutor-resilience-full.sh` | Generated tutor_env when present | implemented |
+| AC-TCR-004 | Rendered verifier passes after governed wrapper/prepare path | integration | `tests/tutor/test_verify_patches.sh` | Fully patched tutor_env fixture | implemented |
 | AC-TCR-004 | Verification reports each patch individually | integration | `tests/tutor/test_verify_patches.sh` | Fully patched tutor_env fixture | not_implemented |
 | AC-TCR-005 | Pre-commit hook runs verification when `infrastructure/tutor/` files changed | integration | `tests/tutor/test_pre_commit_hook.sh` | Temporary git repo with hook installed | not_implemented |
 | AC-TCR-005 | Pre-commit hook blocks commit on verification failure | integration | `tests/tutor/test_pre_commit_hook.sh` | Temporary git repo, unpatched config | not_implemented |
 | AC-TCR-005 | Pre-commit hook completes within 15 seconds | unit | `tests/tutor/test_pre_commit_hook.sh` | Timer around hook execution | not_implemented |
 | AC-TCR-005 | Pre-commit hook skippable with `--no-verify` | integration | `tests/tutor/test_pre_commit_hook.sh` | Temporary git repo, `git commit --no-verify` | not_implemented |
-| AC-TCR-006 | CI workflow runs on PR touching `infrastructure/tutor/` | e2e | `.github/workflows/tutor-config-verify.yml` | GitHub Actions PR trigger | partially_implemented |
-| AC-TCR-006 | CI workflow reports per-patch pass/fail in PR checks | e2e | `.github/workflows/tutor-config-verify.yml` | GitHub Actions check output | partially_implemented |
-| AC-TCR-006 | CI workflow blocks merge on patch failure | e2e | `.github/workflows/tutor-config-verify.yml` | Branch protection rules | partially_implemented |
-| AC-TCR-006 | CI workflow completes within 5 minutes | e2e | `.github/workflows/tutor-config-verify.yml` | Timer around workflow | partially_implemented |
-| AC-TCR-006 | CI workflow produces verification report artifact | e2e | `.github/workflows/tutor-config-verify.yml` | Artifact upload step | partially_implemented |
-| AC-TCR-007 | `--json` output is valid JSON with required keys | unit | `tests/tutor/test_verify_patches.sh` | Patched tutor_env fixture + `jq` validation | not_implemented |
-| AC-TCR-007 | JSON contains `id`, `description`, `status`, `target_file`, `severity` per patch | unit | `tests/tutor/test_verify_patches.sh` | Patched tutor_env fixture | not_implemented |
+| AC-TCR-006 | CI workflow runs Tutor Configuration Tests for Tutor-authority PRs | e2e | `.github/workflows/ci.yml` | GitHub Actions PR trigger | implemented |
+| AC-TCR-006 | CI workflow blocks merge on rendered verifier/test failure | e2e | `.github/workflows/ci.yml` | Branch protection rules | implemented |
+| AC-TCR-007 | Manifest entries include id, module, function, target, target_family, authority_class, description, retirement_trigger, required | unit | `tests/tutor/test_verify_patches.sh` | Source manifest | implemented |
 | AC-TCR-008 | Unpatched config: all critical patches report FAIL | integration | `tests/tutor/test_unpatched_config.sh` | Clean `tutor config save` output, no plugin, no patches | not_implemented |
 | AC-TCR-008 | Unpatched config: exit code is non-zero | integration | `tests/tutor/test_unpatched_config.sh` | Clean `tutor config save` output | not_implemented |
 | AC-TCR-009 | Double apply-patches.sh produces byte-identical output | integration | `tests/tutor/test_idempotency.sh` | Tutor config + single patch application | existing_in_ci |
 | AC-TCR-009 | Idempotency holds for all file types (py, yml, Dockerfile) | integration | `tests/tutor/test_idempotency.sh` | File-type-specific checksums | existing_in_ci |
-| AC-TCR-010 | Version upgrade PR: CI reports which patches need adaptation | e2e | `.github/workflows/tutor-config-verify.yml` | PR changing Tutor version pin | not_implemented |
-| AC-TCR-010 | Version upgrade: CI blocks merge until all patches pass | e2e | `.github/workflows/tutor-config-verify.yml` | PR with broken patches | not_implemented |
+| AC-TCR-010 | Version upgrade: CI blocks merge until rendered verifier and tests pass | e2e | `.github/workflows/ci.yml` | PR with broken patches | implemented |
+| AC-TCR-010 | Version upgrade PR: CI reports a per-patch adaptation plan | manual/e2e | `.github/workflows/ci.yml` | PR changing Tutor version pin | not_implemented |
 | AC-TCR-011 | Critical patch failure shows red/bold terminal formatting | unit | `tests/tutor/test_verify_patches.sh` | ANSI color code detection | not_implemented |
 | AC-TCR-011 | Critical patch failure includes remediation steps | unit | `tests/tutor/test_verify_patches.sh` | Grep for remediation text in output | not_implemented |
 | AC-TCR-012 | `make tutor-apply` executes config save, plugin enable, patches, verify, restart | integration | `tests/tutor/test_tutor_apply.sh` | Running Tutor environment | not_implemented |
@@ -90,7 +97,7 @@ This project uses:
 |-----|-----------|------|------|-----------|
 | Verification speed | Full manifest verification completes in <30s | unit | `tests/tutor/test_nfr_performance.sh` | 30 seconds |
 | Plugin overhead | `tutor config save` duration increase <5s with plugin | unit | `tests/tutor/test_nfr_performance.sh` | 5 seconds over baseline |
-| CI duration | Full CI workflow completes in <5 minutes | e2e | `.github/workflows/tutor-config-verify.yml` | 300 seconds |
+| CI duration | Tutor Configuration Tests complete within declared budget | e2e | `.github/workflows/ci.yml` | Current CI budget |
 | Offline operation | Plugin + pre-commit hook work without network | integration | `tests/tutor/test_nfr_offline.sh` | No network calls |
 | Manifest readability | `yamllint` passes on `patch-manifest.yml` | unit | `tests/tutor/test_nfr_manifest.sh` | Zero yamllint errors |
 | Auditability | All patch changes tracked in git history | manual | N/A | Git log shows manifest changes |
@@ -121,7 +128,10 @@ bash tests/tutor/test_pre_commit_hook.sh
 
 ### CI/CD
 
-The existing CI workflows (`.github/workflows/tutor-config-verify.yml` and `.github/workflows/tutor-plugin-test.yml`) already cover many AC tests. The new manifest-driven verification will replace the inline grep checks and provide more comprehensive coverage.
+Current CI coverage lives in `.github/workflows/ci.yml` (`tutor-config-tests`)
+and `.github/workflows/tutor-plugin-test.yml`. The retired
+`.github/workflows/tutor-config-verify.yml` workflow must not be used as current
+guidance.
 
 ### Test Data / Fixtures
 

@@ -1,17 +1,33 @@
 ---
 spec: tutor-configuration-resilience_spec.md
 tier: 0
-status: draft
+status: superseded
 estimated_effort: "8-12 weeks (1-2 engineers)"
 owner: engineering
-last_updated: "2026-02-10"
+last_updated: "2026-04-22"
 ---
 
 # Implementation Plan: Tutor Configuration Resilience and Patch Automation
 
 **Source Spec**: `specs/tutor-configuration-resilience_spec.md`
 **Tier**: 0 (Foundations -- configuration integrity underpins all other specs)
-**Status**: Draft
+**Status**: Superseded historical plan.
+
+Do not use the task list below as current execution guidance. Current authority
+is `specs/tutor-configuration-resilience_spec.md`,
+`docs/reference/operations/TUTOR_CONFIG_CI.md`, and
+`docs/reference/architecture/TUTOR_PATCHES_INVENTORY.md`.
+
+Current strategy:
+
+1. Use `scripts/infra/tutor-config-save.sh` as the local/CI front door.
+2. Keep source hooks and Bake/HCL as the preferred build authority.
+3. Treat `infrastructure/tutor/apply-patches.sh` as a bounded compatibility layer
+   with every active mutation listed in `infrastructure/tutor/patch-manifest.yml`.
+4. Use `scripts/infra/verify-tutor-config.sh` as the canonical rendered verifier;
+   `scripts/qa/verify-tutor-patches.sh` only preserves the old entrypoint.
+5. Do not recreate `.github/workflows/tutor-config-verify.yml`; the active CI lane
+   is `.github/workflows/ci.yml` job `tutor-config-tests`.
 
 ---
 
@@ -35,12 +51,12 @@ Significant implementation has already been completed by prior agents. Below is 
 | Verification script | `scripts/infra/verify-tutor-config.sh` | **IMPLEMENTED** | Comprehensive 370-line script checking all patch categories |
 | Safe config wrapper | `scripts/infra/tutor-config-save.sh` | **IMPLEMENTED** | Backs up config, runs config save, applies patches, verifies |
 | Pre-tutor-config hook | `.githooks/pre-tutor-config` | **IMPLEMENTED** | Interactive hook for tutor_env file commits |
-| CI config verify | `.github/workflows/tutor-config-verify.yml` | **IMPLEMENTED** | 4-job workflow: patches, multi-site, enterprise, idempotency |
+| CI config verify | `.github/workflows/ci.yml` job `tutor-config-tests` | **IMPLEMENTED** | Renders through `tutor-config-save.sh`, then runs Tutor shell verification tests |
 | CI plugin tests | `.github/workflows/tutor-plugin-test.yml` | **IMPLEMENTED** | 5-job workflow: plugin syntax, lifecycle, structure, lint, integration |
-| apply-patches.sh | `infrastructure/tutor/apply-patches.sh` | **IMPLEMENTED** | 1066-line comprehensive patch script |
+| apply-patches.sh | `infrastructure/tutor/apply-patches.sh` | **IMPLEMENTED** | Bounded compatibility layer behind `prepare-tutor-build-context.sh` |
 | Makefile targets | `Makefile` | **IMPLEMENTED** | `tutor-apply`, `tutor-verify` targets |
-| Patch manifest | `infrastructure/tutor/patch-manifest.yml` | **NOT IMPLEMENTED** | Spec requires YAML manifest as single source of truth |
-| verify-tutor-patches.sh | `scripts/infra/verify-tutor-patches.sh` | **NOT IMPLEMENTED** | Spec requires manifest-driven verification with `--json` and `--fix` flags |
+| Patch manifest | `infrastructure/tutor/patch-manifest.yml` | **IMPLEMENTED** | Active mutation ledger with authority class and retirement trigger |
+| verify-tutor-patches.sh | `scripts/qa/verify-tutor-patches.sh` | **IMPLEMENTED** | Compatibility entrypoint that delegates to `scripts/infra/verify-tutor-config.sh` |
 | tutor-plugin-mereka package | `infrastructure/tutor/tutor-plugin-mereka/` | **NOT IMPLEMENTED** | Spec requires installable package (`pip install -e`) vs current single-file plugin |
 | Pre-commit hook (spec) | `.githooks/pre-commit` | **PARTIAL** | Existing hook does secret scanning only; spec requires Tutor config verification on `infrastructure/tutor/` changes |
 | Compatibility matrix | None | **NOT IMPLEMENTED** | Tutor 18.x vs 21.x support documentation |
@@ -70,10 +86,9 @@ Significant implementation has already been completed by prior agents. Below is 
   - **Done definition**: YAML file passes `yamllint` and contains all patches currently verified by `verify-tutor-config.sh`. Each entry has all required fields.
   - **Complexity**: L (8-12h) -- requires auditing both `apply-patches.sh` and `mereka_lms.py` to enumerate every patch and write verification commands.
 
-- [ ] **[L] Task B-2: Create manifest-driven verification tool (`scripts/infra/verify-tutor-patches.sh`)** | AC: AC-TCR-004, AC-TCR-007, AC-TCR-008, AC-TCR-011 | Depends: B-1
-  - **Description**: Write a shell script that reads `patch-manifest.yml`, executes each verification command against the rendered `tutor_env/`, and reports per-patch pass/fail status. Must support `--json` flag for machine-readable output and `--fix` flag to run `apply-patches.sh` then re-verify. Must exit 0 if all pass, non-zero otherwise. Critical failures must display red/bold formatting with remediation steps. Output must include a summary table with columns: Patch ID, Description, Status, Target File, Severity.
-  - **Done definition**: `./scripts/infra/verify-tutor-patches.sh` reports all patches from manifest. `--json` outputs valid JSON array. `--fix` re-applies patches and re-verifies. Exits non-zero on any failure.
-  - **Complexity**: L (8-12h) -- YAML parsing in shell (using `yq` or Python helper), per-patch execution, JSON output, terminal formatting.
+- [x] **Task B-2: Collapse rendered verification to one canonical authority** | AC: AC-TCR-004, AC-TCR-007, AC-TCR-008, AC-TCR-011
+  - **Description**: Keep `scripts/infra/verify-tutor-config.sh` as the canonical rendered verifier and retain `scripts/qa/verify-tutor-patches.sh` only as a compatibility entrypoint.
+  - **Done definition**: The QA entrypoint delegates to the canonical verifier, the manifest records active mutation authority, and tests assert the old entrypoint does not grow a second expectation set.
 
 - [ ] **[M] Task B-3: Package plugin as installable package (`infrastructure/tutor/tutor-plugin-mereka/`)** | AC: AC-TCR-001 | Depends: None
   - **Description**: Convert the existing `mereka_lms.py` single-file plugin into a proper pip-installable package with `setup.py`/`pyproject.toml`, so it can be installed via `pip install -e ./infrastructure/tutor/tutor-plugin-mereka`. The package should register itself as a Tutor plugin entry point. Move `mereka_lms.py` into the package as the main module. Add version number (`__version__`). Ensure `tutor plugins list` shows `mereka_lms` (or `mereka`) as available after installation.
@@ -85,10 +100,9 @@ Significant implementation has already been completed by prior agents. Below is 
   - **Done definition**: Committing a change to `infrastructure/tutor/apply-patches.sh` triggers patch verification. Verification failure blocks the commit with actionable error output. Hook completes in <15 seconds.
   - **Complexity**: M (3-5h) -- integrate with existing hook, add file-path matching, performance constraints.
 
-- [ ] **[M] Task B-5: Upgrade CI workflow to use manifest-driven verification** | AC: AC-TCR-006, AC-TCR-010 | Depends: B-1, B-2
-  - **Description**: Refactor `.github/workflows/tutor-config-verify.yml` to: (1) install the Mereka plugin package, (2) run `tutor config save`, (3) run `prepare-tutor-build-context.sh --target all`, (4) run `verify-tutor-patches.sh`, (5) report per-patch pass/fail. Must complete within 5 minutes. Must cache the Tutor venv. Must produce a downloadable verification report artifact. Must block merges to `main` on any patch failure. Add handling for Tutor version upgrade PRs that reports which patches need adaptation.
-  - **Done definition**: CI workflow uses `verify-tutor-patches.sh` instead of inline grep checks. Produces verification report artifact. Completes in <5 minutes. Blocks merge on failure.
-  - **Complexity**: M (4-6h) -- refactor existing workflow, add artifact upload, caching, plugin install step.
+- [x] **Task B-5: Keep Tutor verification in the main CI lane** | AC: AC-TCR-006, AC-TCR-010
+  - **Description**: Use `.github/workflows/ci.yml` job `tutor-config-tests`; do not recreate the retired standalone `tutor-config-verify.yml` workflow.
+  - **Done definition**: CI renders through `tutor-config-save.sh` and runs the Tutor shell tests against the canonical rendered verifier.
 
 - [ ] **[S] Task B-6: Update `make tutor-apply` to execute full pipeline** | AC: AC-TCR-012 | Depends: B-2, B-3
   - **Description**: Update the Makefile `tutor-apply` target to use the canonical `tutor-config-save.sh` wrapper so it: (1) enables the Mereka plugin, (2) runs `tutor config save`, (3) runs `prepare-tutor-build-context.sh --target all`, (4) runs `verify-tutor-patches.sh`, (5) restarts services. Fail fast on any step.

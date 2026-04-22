@@ -41,7 +41,7 @@ The main plugin that consolidates all Mereka LMS configuration customizations. H
    - Imports Mereka theme SCSS
 
 6. **Infrastructure Configuration**
-   - MySQL 8: Uses `mysql_native_password` authentication plugin
+   - MySQL 8: Tutor 21 renders `mysql-native-password=ON`; the local compatibility layer adds `MYSQL_ROOT_HOST`
    - Caddy: Adds multi-domain blocks for extra LMS hosts and owns `/profile/api`
    - `/metrics`: remains app-owned through Django/plugin URL wiring
    - `/health`: is not part of the current app-repo Caddy contract
@@ -108,13 +108,13 @@ The plugin and `apply-patches.sh` form a complementary two-layer system:
 
 | Aspect | `apply-patches.sh` (File Operations) | `mereka_lms.py` Plugin (Configuration) |
 |--------|--------------------------------------|----------------------------------------|
-| **Purpose** | Asset sync, theme directories, file copying | Django settings, Dockerfile patches, build config |
+| **Purpose** | Bounded generated-output compatibility, asset sync, theme directories, file copying | Django settings, source-owned Dockerfile hooks, build config |
 | **Execution** | Invoked by `tutor-config-save.sh` / `prepare-tutor-build-context.sh` | Automatic when plugin is enabled |
 | **Scope** | File-system operations requiring direct file access | Configuration patches via Tutor hooks |
 | **Maintenance** | Bash scripts for copy/sync operations | Structured Python hooks |
 | **Idempotency** | Script-enforced idempotency checks | Tutor handles merging |
 | **Version control** | Asset sync workflow | Native Tutor extension point |
-| **Examples** | Logo sync, font distribution, SCSS copying | Multi-site domains, MFE footer component, Google Fonts stripping |
+| **Examples** | `MYSQL_ROOT_HOST`, dependency mirror normalization, logo/font/SCSS sync, stale Indigo residue guards | Multi-site domains, MFE footer component, Google Fonts stripping |
 
 ### Migration Steps
 
@@ -135,10 +135,9 @@ The plugin and `apply-patches.sh` form a complementary two-layer system:
    ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
    ```
 
-5. **(Optional) Archive `apply-patches.sh`:**
-   ```bash
-   mv infrastructure/tutor/apply-patches.sh infrastructure/tutor/apply-patches.sh.deprecated
-   ```
+5. **Retire compatibility entries only through the manifest:**
+   Remove a patch from `apply-patches.sh` only after its `patch-manifest.yml`
+   retirement trigger is true and the generated verifier/test map is updated.
 
 ## Tutor Plugin Hooks Used
 

@@ -198,6 +198,7 @@ require_contains "infrastructure/tutor/patches/build-optimizations.sh" 'BASE_ASS
 require_contains "infrastructure/tutor/patches/build-optimizations.sh" 'UWSGI_PIP_INSTALL' "Open edX patch path keeps uwsgi plain-pip fallback"
 require_contains "infrastructure/tutor/plugins/_mereka_lms/infrastructure.py" 'caddyfile-mfe-proxy' "MFE Caddy routing extends tutor-mfe's canonical host block"
 reject_contains "infrastructure/tutor/plugins/_mereka_lms/infrastructure.py" '\{\{ MFE_HOST \}\}\{\$default_site_port\} \{' "MFE Caddy routing does not emit a duplicate MFE host block"
+reject_contains "infrastructure/tutor/plugins/_mereka_lms/infrastructure.py" 'mysql-docker-compose|default-authentication-plugin=mysql_native_password' "Mereka plugin does not claim retired local MySQL auth hook ownership"
 require_contains "infrastructure/tutor/plugins/_mereka_lms/lms_settings.py" '\["\{\{ MFE_HOST \}\}"\] \+ \{\{ MEREKA_LMS_EXTRA_HOSTS \}\}' "LMS settings allow the configured MFE host for MFE-prefixed LMS routes"
 require_contains "infrastructure/tutor/plugins/_mereka_lms/lms_settings.py" '"http://\{\{ MFE_HOST \}\}"' "LMS settings trust the local MFE origin for CSRF"
 require_contains "infrastructure/tutor/plugins/_mereka_lms/infrastructure.py" "'\{\{ MFE_HOST \}\}'" "Mereka theme init task creates a Site row for the configured MFE host"

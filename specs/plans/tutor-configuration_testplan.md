@@ -33,13 +33,13 @@ Existing patterns: `scripts/qa/verify-setup.sh`, `scripts/qa/smoke-test.sh`, `sc
 
 | AC # | Test Case | Type | File | Mocks/Fixtures | Priority|
 |------|-----------|------|------|----------------|----------|
-| AC-001 | Verify `mysql_native_password` present in docker-compose.yml after patch | shell_verification | `scripts/qa/verify-tutor-patches.sh` | Requires rendered `tutor_env/env/local/docker-compose.yml` | P1 |
+| AC-001 | Verify `mysql-native-password=ON` and `MYSQL_ROOT_HOST` are present in rendered local docker-compose.yml | shell_verification | `scripts/infra/verify-tutor-config.sh` | Requires rendered `tutor_env/env/local/docker-compose.yml` | P1 |
 | AC-002 | Verify `NODE_OPTIONS.*6144` present in openedx Dockerfile after patch | shell_verification | `scripts/qa/verify-tutor-patches.sh` | Requires rendered `tutor_env/env/build/openedx/Dockerfile` | P1 |
 | AC-003 | Verify `academy.biji-biji.com` present in LMS production.py after patch | shell_verification | `scripts/qa/verify-tutor-patches.sh` | Requires rendered `tutor_env/env/apps/openedx/settings/lms/production.py` | P1 |
 | AC-004 | Verify `mfe_oauth_fix` present in LMS production.py after patch | shell_verification | `scripts/qa/verify-tutor-patches.sh` | Requires rendered `tutor_env/env/apps/openedx/settings/lms/production.py` | P1 |
 | AC-005 | Verify `django_prometheus` present in LMS production.py after patch | shell_verification | `scripts/qa/verify-tutor-patches.sh` | Requires rendered `tutor_env/env/apps/openedx/settings/lms/production.py` | P1 |
 | AC-006 | Verify the rendered MFE Dockerfile matches the Node 24 build contract, build tools, and retry hardening | shell_verification | `scripts/qa/verify-mfe-build-contract.sh` | Requires rendered `tutor_env/env/plugins/mfe/build/mfe/Dockerfile` | P1 |
-| AC-007 | MySQL 8 connections succeed without authenticationerrors | manual_verification | `docs/operations/TUTOR_CONFIGURATION_RUNBOOK.md` | Requires running Docker stack with MySQL 8 | P1 |
+| AC-007 | MySQL 8 connections succeed with Tutor 21 native-password mode and local `MYSQL_ROOT_HOST` rendered | manual_verification | `docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md` | Requires running Docker stack with MySQL 8 | P1 |
 | AC-008 | All three production domains resolve and accept logins | shell_verification | `scripts/qa/smoke-test.sh` (existing) | Requires live production deployment | P2 |
 | AC-009 | Mereka logo and custom footer render on all MFEs |shell_verification | `scripts/qa/verify-tutor-branding-render.sh` + `scripts/branding/verify-branding-health.sh` (existing) | Requires theme assets synced to build directory | P2 |
 | AC-010 | `tutor local dc ps` shows all services with status"Up" | manual_verification | `scripts/qa/verify-tutor-services.sh` | Requires running Docker stack | P1 |
@@ -48,7 +48,7 @@ Existing patterns: `scripts/qa/verify-setup.sh`, `scripts/qa/smoke-test.sh`, `sc
 
 | EC # | Test Case | Type | File | Mocks/Fixtures | Priority|
 |------|-----------|------|------|----------------|----------|
-| EC-1 | Detect missing patches: config.yml without `mysql_native_password` fails verification | shell_verification | `scripts/qa/verify-tutor-patches.sh` | Run against unpatched `tutor_env` | P1 |
+| EC-1 | Detect missing MySQL native-password or `MYSQL_ROOT_HOST` render contract | shell_verification | `scripts/infra/verify-tutor-config.sh` | Run against incomplete rendered `tutor_env` | P1 |
 | EC-2 | Detect cloud IPs in local config: `10.97.x.x` in config.yml triggers warning | shell_verification | `scripts/qa/verify-tutor-patches.sh` | Inject cloud IP into config.yml, verify detection | P1 |
 | EC-3 | Patch idempotency: running `apply-patches.sh` twiceproduces identical output | shell_verification | `scripts/qa/test-patch-idempotency.sh` | Requires rendered `tutor_env` |P2 |
 | EC-4 | Patch execution time under 30 seconds | shell_verification | `scripts/qa/verify-tutor-patches.sh` (timing mode) |Requires rendered `tutor_env` | P2 |

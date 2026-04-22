@@ -658,6 +658,8 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_not_in_file "location = /health {" "$INFRASTRUCTURE_PATCH_MODULE" "Plugin does not retain stale nginx /health edge block"
   pattern_not_in_file "location = /metrics {" "$INFRASTRUCTURE_PATCH_MODULE" "Plugin does not retain stale nginx /metrics edge block"
   pattern_not_in_file "location ^~ /profile/api/ {" "$INFRASTRUCTURE_PATCH_MODULE" "Plugin does not retain stale nginx /profile/api edge block"
+  pattern_not_in_file '"mysql-docker-compose"' "$INFRASTRUCTURE_PATCH_MODULE" "Plugin does not retain dead MySQL docker-compose hook registration"
+  pattern_not_in_file "--default-authentication-plugin=mysql_native_password" "$INFRASTRUCTURE_PATCH_MODULE" "Plugin does not retain retired MySQL auth syntax"
   pattern_not_in_file "RUN uv pip install -e /openedx/mfe_oauth_fix" "$OPENEDX_DOCKERFILE" "No duplicate production-stage custom app reinstalls remain"
   pattern_in_file 'pip install --no-cache-dir --no-build-isolation uwsgi==2.0.24' "$OPENEDX_DOCKERFILE" "uwsgi remains on explicit pip compatibility fallback"
   regex_in_file 'RUN \$PIP_COMMAND install .*django-prometheus==2\.3\.1.*django-csp==3\.8.*platform-plugin-aspects==1\.1\.2' "$OPENEDX_DOCKERFILE" "Support dependency block uses uv-compatible production installer"

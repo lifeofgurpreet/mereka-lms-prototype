@@ -21,10 +21,6 @@ acceptance_criteria:
     file: scripts/qa/verify-mfe-image-branding.sh
     command: scripts/qa/verify-mfe-image-branding.sh
   - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-tutor-patches.sh
-    command: scripts/qa/verify-tutor-patches.sh
-  - type: automated
     test_type: unit
     file: services/purchase-gateway/tests/unit/test_checkout_route.py
     command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
@@ -32,10 +28,6 @@ acceptance_criteria:
   description: '`grep "NODE_OPTIONS.*6144" tutor_env/env/build/openedx/Dockerfile`
     returns results'
   verify:
-  - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-tutor-patches.sh
-    command: scripts/qa/verify-tutor-patches.sh
   - type: automated
     test_type: unit
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
@@ -45,10 +37,6 @@ acceptance_criteria:
     returns results'
   verify:
   - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-tutor-patches.sh
-    command: scripts/qa/verify-tutor-patches.sh
-  - type: automated
     test_type: unit
     file: services/purchase-gateway/tests/unit/test_fulfillment.py
     command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
@@ -57,10 +45,6 @@ acceptance_criteria:
     returns results'
   verify:
   - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-tutor-patches.sh
-    command: scripts/qa/verify-tutor-patches.sh
-  - type: automated
     test_type: unit
     file: services/purchase-gateway/tests/unit/test_webhook_handler.py
     command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
@@ -68,10 +52,6 @@ acceptance_criteria:
   description: '`grep "django_prometheus" tutor_env/env/apps/openedx/settings/lms/production.py`
     returns results'
   verify:
-  - type: automated
-    test_type: shell_verification
-    file: scripts/qa/verify-tutor-patches.sh
-    command: scripts/qa/verify-tutor-patches.sh
   - type: automated
     test_type: unit
     file: services/purchase-gateway/tests/unit/test_checkout_route.py
@@ -93,7 +73,8 @@ acceptance_criteria:
     justification: Full image build (15-20 min) cannot run in CI; script verifies
       Dockerfile contract
 - id: AC-007
-  description: MySQL 8 connections succeed without authentication errors
+  description: 'MySQL 8 connections succeed with Tutor 21 `--mysql-native-password=ON`
+    and local `MYSQL_ROOT_HOST: "%"` rendered'
   verify:
   - type: automated
     test_type: shell_verification

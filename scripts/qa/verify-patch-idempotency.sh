@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# @covers AC-TCR-007
+# @covers AC-TCR-009
 # @spec: tutor-configuration-resilience_spec.md
 # Verify that apply-patches.sh is idempotent: running it twice produces
 # identical output with no duplicate entries.
@@ -89,7 +89,7 @@ DUPLICATE_CHECKS=(
   "openedx/Dockerfile|pip install -e /openedx/openedx_prometheus|1|openedx_prometheus pip install"
   "openedx/Dockerfile|pip install django-prometheus|1|django-prometheus pip install"
   "openedx/Dockerfile|mereka-overrides.css|4|mereka CSS copy block"
-  "docker-compose.yml|default-authentication-plugin=mysql_native_password|1|MySQL auth plugin"
+  "docker-compose.yml|mysql-native-password=ON|1|MySQL native password mode"
   "docker-compose.yml|MYSQL_ROOT_HOST|1|MySQL root host"
   "Caddyfile|academy.biji-biji.com|1|Biji-Biji domain in Caddy"
   "lms.conf|academy.biji-biji.com|1|Biji-Biji domain in nginx"

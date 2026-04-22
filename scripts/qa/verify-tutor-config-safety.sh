@@ -79,7 +79,7 @@ check "verify-tutor-config.sh exists" test -f "$VERIFY_SCRIPT"
 check "verify-tutor-config.sh is executable" test -x "$VERIFY_SCRIPT"
 check "verify-tutor-config.sh uses set -euo pipefail" grep -q "set -euo pipefail" "$VERIFY_SCRIPT"
 check "verify-tutor-config.sh checks multi-site domains" grep -q "academy.biji-biji.com" "$VERIFY_SCRIPT"
-check "verify-tutor-config.sh checks MySQL auth fix" grep -Eq "mysql_native_password|mysql-native-password=ON" "$VERIFY_SCRIPT"
+check "verify-tutor-config.sh checks current MySQL native-password flag" grep -q "mysql-native-password=ON" "$VERIFY_SCRIPT"
 check "verify-tutor-config.sh checks MFE configuration" grep -q "MFE" "$VERIFY_SCRIPT"
 echo ""
 
