@@ -104,7 +104,7 @@ Current active classes:
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
 ./scripts/infra/tutor-config-save.sh --set KEY=value
-tutor local restart
+make tutor-restart
 ```
 
 **Manual render refresh, only after a deliberate raw Tutor render**:
@@ -128,7 +128,7 @@ hand-copy this file as a replacement for the governed wrapper.
 
 **Key settings**:
 - `LMS_HOST: localhost` - LMS domain
-- `OPENEDX_COMMON_VERSION: open-release/ulmo.1` - Open edX version
+- `OPENEDX_COMMON_VERSION: release/ulmo` - Open edX version
 - `PLUGINS` - Enabled Tutor plugins (discovery, mfe, notes, ecommerce, forum, aspects)
 - `LMS_DEFAULT_SITE_THEME: mereka` - Default theme
 
@@ -280,7 +280,7 @@ kubectl port-forward -n monitoring svc/monitoring-kube-prometheus-prometheus 909
 **Fix**:
 ```bash
 ./scripts/infra/prepare-tutor-build-context.sh --target all
-tutor local restart
+make tutor-restart
 ```
 
 ### MySQL Authentication Error

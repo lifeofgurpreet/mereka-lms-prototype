@@ -381,7 +381,7 @@ The full methodology is in `docs/adr/021-openedx-tutor-methodology.md`. Every ag
 | **Release line** | Tutor 21.x (Ulmo). No Tutor `main`/`master`. No mixed releases. |
 | **Customization** | Tutor plugin API only (`infrastructure/tutor/plugins/mereka_lms.py`). No new Dockerfile surgery. |
 | **Frontend** | Plugin slots + design tokens + `@edx/brand`. Do not edit `env.config.jsx` at Dockerfile level. |
-| **edx-platform fork** | Base on latest release tag (e.g., `open-release/ulmo.1`). Not `master`, not `release/ulmo` branch. |
+| **edx-platform fork** | Base on the current Ulmo release branch (`release/ulmo`). Not `master`, not obsolete `open-release/ulmo.*` refs. |
 | **CI** | Local preflight first (<5 min), then CI validates. One hypothesis per PR. Never debug on `main`. |
 | **Heavy builds** | CI image builds run through the Bake-backed helpers on governed runner lanes with explicit cache policy. |
 

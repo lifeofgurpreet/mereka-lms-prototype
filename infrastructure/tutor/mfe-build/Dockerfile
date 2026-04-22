@@ -84,7 +84,7 @@ RUN npm install --legacy-peer-deps 'react-redux@^8.1.3' 'redux@^4.2.1'
 COPY --from=admin-console-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.2 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 2025
 
 # Configuration needed at build time
@@ -161,7 +161,7 @@ COPY verify-authn-dashboard-fallbacks.py /openedx/verify-authn-dashboard-fallbac
 COPY --from=authn-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.2 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 1999
 
 # Configuration needed at build time
@@ -234,7 +234,7 @@ RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exe
 COPY --from=authoring-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.2 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 2001
 
 # Configuration needed at build time
@@ -306,7 +306,7 @@ RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exe
 COPY --from=account-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.2 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 1997
 
 # Configuration needed at build time
@@ -401,7 +401,7 @@ RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exe
 COPY --from=communications-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.2 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 1984
 
 # Configuration needed at build time
@@ -473,7 +473,7 @@ RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exe
 COPY --from=discussions-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.2 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 2002
 
 # Configuration needed at build time
@@ -545,7 +545,7 @@ RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exe
 COPY --from=gradebook-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.2 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 1994
 
 # Configuration needed at build time
@@ -617,7 +617,7 @@ RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exe
 COPY --from=learner-dashboard-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.2 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 1996
 
 # Configuration needed at build time
@@ -689,7 +689,7 @@ RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exe
 COPY --from=learning-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.2 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 2000
 
 # Configuration needed at build time
@@ -761,7 +761,7 @@ RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exe
 COPY --from=ora-grading-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.2 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 1993
 
 # Configuration needed at build time
@@ -833,7 +833,7 @@ RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exe
 COPY --from=profile-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.2 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 1995
 
 # Configuration needed at build time
@@ -905,7 +905,7 @@ RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx'     -exe
 COPY --from=learner-record-src / /openedx/app
 
 # pull_translations_retry_sentinel — apply-patches.sh wrap_mfe_pull_translations_retry
-RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo.2 " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
+RUN bash -o pipefail -c 'for attempt in 1 2 3; do make OPENEDX_ATLAS_PULL=true ATLAS_OPTIONS="--repository=openedx/openedx-translations --revision=release/ulmo " pull_translations && exit 0; echo "pull_translations attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 EXPOSE 1990
 
 # Configuration needed at build time

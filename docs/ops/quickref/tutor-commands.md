@@ -450,7 +450,7 @@ Use:
 ./scripts/infra/tutor-config-save.sh --set REDIS_HOST=redis
 
 # Open edX version
-./scripts/infra/tutor-config-save.sh --set OPENEDX_COMMON_VERSION=open-release/ulmo.1
+./scripts/infra/tutor-config-save.sh --set OPENEDX_COMMON_VERSION=release/ulmo
 
 # Language
 ./scripts/infra/tutor-config-save.sh --set LANGUAGE_CODE=en

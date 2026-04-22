@@ -151,12 +151,12 @@ The `infrastructure/tutor/` directory manages Tutor configuration locally. Key p
 
 ### `config.example.yml` observations
 
-The example config now references `OPENEDX_COMMON_VERSION: open-release/ulmo.1`, which
-matches the Ulmo baseline used by parity verifiers.
+The example config now references `OPENEDX_COMMON_VERSION: release/ulmo`, which
+matches the current upstream edx-platform Ulmo branch used by parity verifiers.
 
 The MFE Dockerfile at `infrastructure/tutor/mfe-build/Dockerfile` is the canonical
 Ulmo MFE build definition. It uses `release/ulmo.2` for all 12 MFE app source refs
-and `release/ulmo.2` for Atlas translation pulls — this is correct.
+and `release/ulmo` for Atlas translation pulls - this is correct.
 
 ---
 
@@ -270,7 +270,7 @@ If `ghcr-registry` is absent, all pods fail to pull images from GHCR with
 **Problem (historical)**: `infrastructure/tutor/config.example.yml` previously used a
 pre-Ulmo value that could mislead operators.
 
-**Fix implemented**: `OPENEDX_COMMON_VERSION` is set to `open-release/ulmo.1`, and
+**Fix implemented**: `OPENEDX_COMMON_VERSION` is set to `release/ulmo`, and
 `verify-ulmo-parity.sh` enforces it.
 
 ---
@@ -314,7 +314,7 @@ Items to complete before rke2-nonprod is production-equivalent for Ulmo testing.
   `generate-tokens-from-canonical.sh --check`) is active and enforced by
   `verify-ulmo-parity.sh`
 - [x] **Gap 7**: `config.example.yml` `OPENEDX_COMMON_VERSION` updated to
-  `open-release/ulmo.1` and enforced by `verify-ulmo-parity.sh`
+  `release/ulmo` and enforced by `verify-ulmo-parity.sh`
 
 ### Verification
 

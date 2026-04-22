@@ -46,7 +46,7 @@ The current configuration pins:
 
 - `LMS_HOST=localhost`
 - `CMS_HOST=studio.localhost`
-- Open edX release branch: `open-release/ulmo.1`
+- Open edX release branch: `release/ulmo`
 - MFE branch: `release/ulmo.2`
 - Enabled repo-owned plugins: `mereka_lms`, `mereka_lms_mfe_slots`; the wrapper also preserves the Tutor service plugins required by the selected configuration.
 
@@ -77,9 +77,9 @@ source infrastructure/tutor/tutor-env.sh
   --set DOCKER_IMAGE_SMTP=mirror.gcr.io/devture/exim-relay:4.96-r1-0 \
   --set MYSQL_ROOT_HOST=% \
   --set ASPECTS_SUPERSET_DATABASE_HOST=clickhouse \
-  --set OPENEDX_COMMON_VERSION=open-release/ulmo.1 \
-  --set OPENEDX_LMS_VERSION=open-release/ulmo.1 \
-  --set OPENEDX_CMS_VERSION=open-release/ulmo.1 \
+  --set OPENEDX_COMMON_VERSION=release/ulmo \
+  --set OPENEDX_LMS_VERSION=release/ulmo \
+  --set OPENEDX_CMS_VERSION=release/ulmo \
   --set MFE_COMMON_VERSION=release/ulmo.2
 ```
 

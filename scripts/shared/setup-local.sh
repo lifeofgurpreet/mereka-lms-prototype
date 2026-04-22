@@ -89,6 +89,9 @@ fi
     --set DOCKER_IMAGE_MYSQL=mirror.gcr.io/library/mysql:8.4.0 \
     --set DOCKER_IMAGE_REDIS=mirror.gcr.io/library/redis:7.4.5 \
     --set DOCKER_IMAGE_SMTP=mirror.gcr.io/devture/exim-relay:4.96-r1-0 \
+    --set OPENEDX_COMMON_VERSION=release/ulmo \
+    --set OPENEDX_LMS_VERSION=release/ulmo \
+    --set OPENEDX_CMS_VERSION=release/ulmo \
     --set MFE_COMMON_VERSION=release/ulmo.2 \
     --set MYSQL_HOST=mysql \
     --set MONGODB_HOST=mongodb \

@@ -198,7 +198,8 @@ run_offline_checks() {
   if [[ -f "$active_dockerfile" ]]; then
     ATLAS_REDWOOD=$(grep -c "revision=open-release/redwood" "$active_dockerfile" || true)
     ATLAS_OPEN_ULMO=$(grep -c "revision=open-release/ulmo" "$active_dockerfile" || true)
-    ATLAS_ULMO=$(grep -cE "revision=release/ulmo(\\.1)?" "$active_dockerfile" || true)
+    ATLAS_POINT_ULMO=$(grep -cE "revision=release/ulmo\\." "$active_dockerfile" || true)
+    ATLAS_ULMO=$(grep -cE "revision=release/ulmo[[:space:]'\"]" "$active_dockerfile" || true)
 
     if [[ "$ATLAS_REDWOOD" -eq 0 ]]; then
       pass "No redwood atlas translation revisions in ${active_label}"
@@ -210,6 +211,12 @@ run_offline_checks() {
       pass "No legacy open-release/ulmo atlas translation revisions in ${active_label}"
     else
       fail "$ATLAS_OPEN_ULMO legacy open-release/ulmo atlas revision ref(s) still in ${active_label}"
+    fi
+
+    if [[ "$ATLAS_POINT_ULMO" -eq 0 ]]; then
+      pass "No nonexistent point-release atlas translation revisions in ${active_label}"
+    else
+      fail "$ATLAS_POINT_ULMO point-release atlas translation ref(s) still in ${active_label}"
     fi
 
     if [[ "$ATLAS_ULMO" -ge 12 ]]; then

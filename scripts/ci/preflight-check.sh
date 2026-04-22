@@ -106,6 +106,9 @@ echo "Generating Dockerfiles (tutor config save + apply-patches.sh)..."
 "$TUTOR_VENV/bin/tutor" config save \
   --set LMS_HOST=preflight-check.test \
   --set CMS_HOST=studio.preflight-check.test \
+  --set OPENEDX_COMMON_VERSION=release/ulmo \
+  --set OPENEDX_LMS_VERSION=release/ulmo \
+  --set OPENEDX_CMS_VERSION=release/ulmo \
   --set MFE_COMMON_VERSION=release/ulmo.2 \
   --set ENABLE_HTTPS=true \
   >/dev/null 2>&1
