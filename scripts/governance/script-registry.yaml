@@ -176,6 +176,8 @@ ci_static_inventory:
     - script: scripts/qa/test-verify-release-workflow-invocation.sh
     - script: scripts/qa/test-verify-build-workflow-contract.sh
       estimated_seconds: 15
+    - script: scripts/qa/test-resolve-release-bundle-digests.sh
+      estimated_seconds: 3
     - script: scripts/qa/test-verify-bootstrap-workflow-contract.sh
     - script: scripts/qa/test-install-docker-compose.sh
       estimated_seconds: 5
@@ -2170,6 +2172,56 @@ scripts:
     lanes: [dev, ci]
     proof_command: "bash -n scripts/infra/ensure-buildx-dependency-mirror.sh"
     criticality: release-supporting
+
+  - path: scripts/ci/resolve_release_bundle_digests.py
+    owner: platform-team
+    purpose: >
+      Resolves the OpenEdX and MFE digests for release-bundle generation. When
+      one image build is intentionally skipped, reads the previous successful
+      release-bundle artifact and carries forward only the skipped image digest.
+      Artifact download redirects strip GitHub API authorization before following
+      signed blob URLs.
+    inputs:
+      - OPENEDX_DIGEST
+      - MFE_DIGEST
+      - BUILD_OPENEDX_RESULT
+      - BUILD_MFE_RESULT
+      - GH_TOKEN
+      - REPO
+      - CURRENT_RUN_ID
+      - GITHUB_API_BASE_URL
+      - GITHUB_OUTPUT
+    outputs:
+      - GitHub step outputs openedx_digest, mfe_digest, fallback_run_id
+      - var/ci/fallback-release-bundle.json when fallback is used
+      - stdout PASS/diagnostic summary
+      - exit code
+    side_effects:
+      - Reads GitHub Actions run/artifact metadata and downloads release-bundle artifacts
+      - Writes local var/ci fallback evidence in the workflow workspace
+    dry_run: false
+    lanes: [ci]
+    proof_command: "bash scripts/qa/test-resolve-release-bundle-digests.sh"
+    criticality: release-supporting
+
+  - path: scripts/qa/test-resolve-release-bundle-digests.sh
+    owner: platform-team
+    purpose: >
+      Fixture test for scripts/ci/resolve_release_bundle_digests.py. Proves the
+      direct digest path and the partial-build fallback path, including the
+      GitHub artifact redirect contract that must not forward Authorization to
+      signed blob URLs.
+    inputs: []
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects:
+      - Starts loopback HTTP fixture servers
+      - Creates temporary fixture files under /tmp
+    dry_run: true
+    lanes: [ci]
+    proof_command: "bash scripts/qa/test-resolve-release-bundle-digests.sh"
+    criticality: release-blocking
 
   - path: scripts/ci/install-docker-compose.sh
     owner: platform-team

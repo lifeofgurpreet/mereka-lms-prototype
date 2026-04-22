@@ -245,6 +245,7 @@ required_trigger_paths=(
   "scripts/infra/prepare-tutor-build-context-ci.sh"
   "scripts/ci/emit-build-metrics.sh"
   "scripts/ci/summarize-build-cache-health.sh"
+  "scripts/ci/resolve_release_bundle_digests.py"
   "infrastructure/tutor/apply-patches.sh"
   "infrastructure/tutor/patches/**"
   "scripts/infra/resolve-build-scope.sh"
@@ -309,6 +310,12 @@ if [[ -x "$REPO_ROOT/scripts/infra/prepare-tutor-build-context-ci.sh" ]]; then
   pass "prepare-tutor-build-context-ci helper exists"
 else
   fail "prepare-tutor-build-context-ci helper missing or not executable"
+fi
+
+if [[ -x "$REPO_ROOT/scripts/ci/resolve_release_bundle_digests.py" ]]; then
+  pass "release bundle digest resolver helper exists"
+else
+  fail "release bundle digest resolver helper missing or not executable"
 fi
 
 if [[ -x "$REPO_ROOT/scripts/qa/verify-openedx-image-branding.sh" ]]; then
@@ -714,6 +721,18 @@ if [[ "$RELEASE_BUNDLE_BLOCK" == *"needs: [build-openedx, build-mfe, slsa-proven
   pass "release bundle waits only for build digests and provenance"
 else
   fail "release bundle missing build/provenance-only dependency split"
+fi
+
+if [[ "$RELEASE_BUNDLE_BLOCK" == *'python3 scripts/ci/resolve_release_bundle_digests.py'* ]]; then
+  pass "release bundle resolves partial-build digests through canonical helper"
+else
+  fail "release bundle missing canonical partial-build digest resolver helper"
+fi
+
+if [[ "$RELEASE_BUNDLE_BLOCK" == *'download_artifact_zip'* ]]; then
+  fail "release bundle still carries inline artifact-download fallback logic"
+else
+  pass "release bundle does not carry inline artifact-download fallback logic"
 fi
 
 if [[ "$DISPATCH_DEV_PROMOTION_BLOCK" == *"needs: [release-bundle, scan-openedx-image, scan-mfe-image, slsa-provenance]"* ]]; then

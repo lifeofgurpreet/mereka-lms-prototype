@@ -13,8 +13,8 @@ scripts/qa/validate-deploy-contract.sh
 scripts/qa/verify-spec-dedupe-normalize.sh
 scripts/qa/test-install-docker-compose.sh
 scripts/qa/test-validate-registry.sh
-scripts/qa/test-run-scripts-parallel-timeout-metadata.sh
-scripts/qa/verify-build-optimizations-render-delta-contract.sh
+scripts/qa/test-resolve-release-bundle-digests.sh
+scripts/qa/verify-deletion-wave-consumer-sweep.sh
 scripts/branding/verify-logo-setup.sh
 scripts/governance/validate-registry.sh
 scripts/migrations/mct/verify_video_mapping.sh

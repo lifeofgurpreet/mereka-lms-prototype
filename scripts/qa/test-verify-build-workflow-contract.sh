@@ -32,6 +32,7 @@ should_skip_scope() {
       scripts/infra/prepare-tutor-build-context-ci.sh|\
       scripts/ci/emit-build-metrics.sh|\
       scripts/ci/summarize-build-cache-health.sh|\
+      scripts/ci/resolve_release_bundle_digests.py|\
       scripts/infra/resolve-build-scope.sh|\
       scripts/infra/install-cosign.sh|\
       scripts/infra/install-trivy.sh|\
@@ -64,7 +65,7 @@ if should_skip_scope; then
   exit 0
 fi
 
-mkdir -p "$tmpdir/.github/workflows" "$tmpdir/.github/actions/select-build-lane" "$tmpdir/scripts/infra"
+mkdir -p "$tmpdir/.github/workflows" "$tmpdir/.github/actions/select-build-lane" "$tmpdir/scripts/infra" "$tmpdir/scripts/ci"
 mkdir -p "$tmpdir/scripts/qa"
 cat >"$tmpdir/.github/actions/select-build-lane/action.yml" <<'EOF'
 name: select-build-lane
@@ -121,6 +122,11 @@ set -euo pipefail
 echo "ok"
 EOF
 chmod +x "$tmpdir/scripts/infra/prepare-tutor-build-context-ci.sh"
+cat >"$tmpdir/scripts/ci/resolve_release_bundle_digests.py" <<'EOF'
+#!/usr/bin/env python3
+print("ok")
+EOF
+chmod +x "$tmpdir/scripts/ci/resolve_release_bundle_digests.py"
 cat >"$tmpdir/scripts/qa/verify-openedx-image-branding.sh" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -166,6 +172,7 @@ on:
       - 'scripts/infra/prepare-tutor-build-context-ci.sh'
       - 'scripts/ci/emit-build-metrics.sh'
       - 'scripts/ci/summarize-build-cache-health.sh'
+      - 'scripts/ci/resolve_release_bundle_digests.py'
       - 'scripts/infra/resolve-build-scope.sh'
       - 'scripts/infra/install-cosign.sh'
       - 'scripts/infra/install-trivy.sh'
@@ -578,6 +585,7 @@ jobs:
     needs: [build-openedx, build-mfe, slsa-provenance]
     if: ${{ always() && (github.event_name != 'workflow_dispatch' || (inputs.target_environment != 'select-environment' && inputs.build_profile == 'proof')) }}
     steps:
+      - run: python3 scripts/ci/resolve_release_bundle_digests.py
       - run: ./scripts/infra/generate-release-bundle.sh --output var/ci/release-bundle.json --repo Biji-Biji-Initiative/mereka-lms --commit-sha aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa --workflow .github/workflows/build-tutor-images.yml --run-id 1 --run-attempt 1 --target-environment dev --openedx-image ghcr.io/biji-biji-initiative/mereka-lms/openedx --openedx-digest sha256:1111111111111111111111111111111111111111111111111111111111111111 --mfe-image ghcr.io/biji-biji-initiative/mereka-lms/mfe --mfe-digest sha256:2222222222222222222222222222222222222222222222222222222222222222
       - run: ./scripts/qa/verify-release-bundle.sh var/ci/release-bundle.json
       - run: python3 ./scripts/release/generate_release_object.py --release-bundle-json var/ci/release-bundle.json --output var/ci/release-object.json
