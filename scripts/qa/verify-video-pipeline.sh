@@ -327,7 +327,7 @@ check_secrets() {
     local secret_data
     secret_data=$(kubectl get secret -n "${NAMESPACE}" -o json 2>/dev/null || echo "")
     if [[ -n "${secret_data}" ]]; then
-      if echo "${secret_data}" | grep -qi "mux"; then
+      if grep -qi "mux" <<<"${secret_data}"; then
         pass "AC-020 (live): Mux-related secret found in K8s namespace ${NAMESPACE}"
       else
         skip "AC-020 (live): No Mux secret in K8s namespace (ExternalSecret may not be deployed yet)"

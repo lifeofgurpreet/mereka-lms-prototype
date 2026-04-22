@@ -232,7 +232,7 @@ NON_CONV_COUNT=0
 
 while IFS= read -r subject; do
   [[ -z "${subject}" ]] && continue
-  if echo "${subject}" | grep -qE "${CONV_PATTERN}"; then
+  if grep -qE "${CONV_PATTERN}" <<<"${subject}"; then
     CONV_COUNT=$((CONV_COUNT + 1))
   else
     NON_CONV_COUNT=$((NON_CONV_COUNT + 1))

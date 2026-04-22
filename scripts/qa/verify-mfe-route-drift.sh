@@ -68,7 +68,7 @@ CADDY_ROUTES=$(mktemp)
 # Pattern: look for path directives followed by root directives
 while IFS= read -r line; do
   # Match: root * /openedx/dist/<directory>
-  if echo "$line" | grep -qP 'root \* /openedx/dist/'; then
+  if grep -qP 'root \* /openedx/dist/' <<<"$line"; then
     dir=$(echo "$line" | grep -oP '(?<=/openedx/dist/)[a-z0-9_-]+')
     [ -n "$dir" ] && echo "$dir" >> "$CADDY_ROUTES"
   fi

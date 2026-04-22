@@ -233,7 +233,7 @@ else
   if rendered_base=$(kubectl kustomize "${REPO_ROOT}/deploy/k8s/base/" 2>/dev/null); then
     found_types=()
     for kind in "${CLUSTER_SCOPED_TYPES[@]}"; do
-      if echo "$rendered_base" | grep -qE "^kind:[[:space:]]+${kind}$"; then
+      if grep -qE "^kind:[[:space:]]+${kind}$" <<<"$rendered_base"; then
         found_types+=("$kind")
       fi
     done

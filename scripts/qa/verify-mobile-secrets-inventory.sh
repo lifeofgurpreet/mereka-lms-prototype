@@ -98,7 +98,7 @@ if command -v gh &> /dev/null; then
 
     if [[ -n "$SECRET_LIST" ]]; then
       for secret in "${IOS_SECRETS[@]}"; do
-        if echo "$SECRET_LIST" | grep -q "^${secret}"; then
+        if grep -q "^${secret}" <<<"$SECRET_LIST"; then
           pass "AC-MAS-001: GitHub secret exists: $secret"
         else
           fail "AC-MAS-001: GitHub secret missing: $secret"

@@ -58,7 +58,7 @@ fi
 # Check 2: Plugin defaults SEGMENT_KEY to empty string (safe default)
 if [[ -f "$PLUGIN" ]]; then
   SEGMENT_LINE=$(grep 'SEGMENT_KEY.*os\.environ\.get' "$PLUGIN" || true)
-  if echo "$SEGMENT_LINE" | grep -qF '""'; then
+  if grep -qF '""' <<<"$SEGMENT_LINE"; then
     pass_check "SEGMENT_KEY defaults to empty string (disabled by default)"
   else
     warn "SEGMENT_KEY default value may not be empty — review: $SEGMENT_LINE"

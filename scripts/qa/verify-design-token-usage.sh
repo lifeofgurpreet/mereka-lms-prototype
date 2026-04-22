@@ -136,7 +136,7 @@ for theme_file in "${THEME_FILES[@]}"; do
       for allowed in "${ALLOWED_HEX[@]}"; do
         lower_line=$(echo "$line" | tr '[:upper:]' '[:lower:]')
         lower_allowed=$(echo "$allowed" | tr '[:upper:]' '[:lower:]')
-        if echo "$lower_line" | grep -qiE "${lower_allowed}[^0-9a-fA-F]|${lower_allowed}$"; then
+        if grep -qiE "${lower_allowed}[^0-9a-fA-F]|${lower_allowed}$" <<<"$lower_line"; then
           SKIP=1
           break
         fi

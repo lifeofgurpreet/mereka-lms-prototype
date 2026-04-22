@@ -1,30 +1,28 @@
 # Allowlist: pipefail-prone echo|grep -q in active-gate verifier scripts.
 # This file is generated for bead mereka-lms-0z5g.6 governance gate.
 #
-# Goal: shrink this file toward empty. Entries are paths that currently
-# contain at least one `echo "$VAR" | grep -q ...` under `set -o pipefail`.
-# A follow-up batch must rewrite the pipeline (see
-# docs/status/evidence/pipefail-prone-verifier-audit-2026-04-22.md for the
-# mechanical transform) and remove the path from this allowlist.
+# STATE AS OF 2026-04-22 — ALLOWLIST IS EMPTY.
 #
-# DO NOT add new entries. The gate `verify-no-pipefail-prone-pipes.sh`
-# fails any NEW file in this class. If you need to add to the allowlist,
-# document WHY (test fixture? unreachable code?) with a comment above
-# the path.
+# Every active-gate verifier in .github/ci-scripts-static.txt has been
+# rewritten to use here-string form:
 #
-# As of 2026-04-22 post-batch-1 (PR #2024):
-
-scripts/qa/validate-deploy-contract.sh
-scripts/qa/verify-deployment-critical-coverage.sh
-scripts/qa/verify-design-token-usage.sh
-scripts/qa/verify-enterprise-auth-contract.sh
-scripts/qa/verify-k8s-secrets-hygiene.sh
-scripts/qa/verify-kustomize-render.sh
-scripts/qa/verify-lane-identity.sh
-scripts/qa/verify-mfe-analytics-plugin-parity.sh
-scripts/qa/verify-mfe-footer-fallbacks.sh
-scripts/qa/verify-mfe-route-drift.sh
-scripts/qa/verify-mobile-secrets-inventory.sh
-scripts/qa/verify-release-automation.sh
-scripts/qa/verify-tenant-branding-fallback.sh
-scripts/qa/verify-video-pipeline.sh
+#   if echo "$VAR" | grep -q 'x'; then      →   if grep -q 'x' <<<"$VAR"; then
+#   if ! echo "$VAR" | grep -q 'x'; then    →   if ! grep -q 'x' <<<"$VAR"; then
+#
+# DO NOT add new entries. The gate `verify-no-pipefail-prone-pipes.sh` fails
+# any NEW file in this class. If a genuinely exceptional case arises (test
+# fixture, unreachable code path, third-party file we don't control),
+# document WHY in a comment immediately above the path.
+#
+# Chain of PRs that drove this to zero:
+#   #2024 batch 1 — 6 files
+#   #2030 batch 2 — 2 files
+#   #2033 allowlist shrink — 7 already-rewritten entries
+#   #2034 batch 3 — 6 files
+#   #2035 batch 4 — 6 files
+#   #2036 batch 5 — 7 files
+#   #2040 reconcile rebase-induced stale entries — 22 drops
+#   THIS PR — final 14 files + empty allowlist
+#
+# Audit evidence: docs/status/evidence/pipefail-prone-verifier-audit-2026-04-22.md
+# Bead: mereka-lms-0z5g.6 (AC3 complete; AC4 governance gate live).

@@ -298,7 +298,7 @@ if not issues:
     print('OK: no full-copy duplication detected')
 " "$SITES_PROD" "$SITES_DEV")
 
-  if echo "$DUP_OUT" | grep -q "^WARN:"; then
+  if grep -q "^WARN:" <<<"$DUP_OUT"; then
     while IFS= read -r line; do
       [[ "$line" == WARN:* ]] && warn "${line#WARN: }"
     done <<< "$DUP_OUT"

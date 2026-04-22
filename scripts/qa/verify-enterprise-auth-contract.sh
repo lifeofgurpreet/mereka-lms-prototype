@@ -149,7 +149,7 @@ if [[ -f "$cms_prod" ]]; then
     pass "CMS uses SESSION_COOKIE_NAME='studio_session_id'"
   elif grep -q "SESSION_COOKIE_NAME" "$cms_prod"; then
     cookie_name=$(grep "SESSION_COOKIE_NAME" "$cms_prod" | head -1)
-    if echo "$cookie_name" | grep -q "sessionid"; then
+    if grep -q "sessionid" <<<"$cookie_name"; then
       fail "CMS uses 'sessionid' — collides with LMS session cookie"
     else
       pass "CMS uses unique SESSION_COOKIE_NAME"

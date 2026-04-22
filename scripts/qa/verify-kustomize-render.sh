@@ -153,7 +153,7 @@ verify_overlay() {
     local render_output; render_output=$(cat "${render_file}")
 
     # Check 4: No empty documents
-    if echo "${render_output}" | grep -q '^---$' && ! echo "${render_output}" | grep -qv '^---$'; then
+    if grep -q '^---$' <<<"${render_output}" && ! grep -qv '^---$' <<<"${render_output}"; then
         print_error "Output contains only empty documents"
         fail_count=$((fail_count + 1))
     else

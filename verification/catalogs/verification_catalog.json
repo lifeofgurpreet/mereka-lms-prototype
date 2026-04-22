@@ -4636,7 +4636,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-deployment-critical-coverage.sh",
-      "reference_count": 8,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -4814,7 +4814,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-design-token-usage.sh",
-      "reference_count": 8,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -5879,7 +5879,7 @@
       "mutability": "read-only",
       "owner": "identity-access",
       "path": "scripts/qa/verify-enterprise-auth-contract.sh",
-      "reference_count": 8,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -7934,7 +7934,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-k8s-secrets-hygiene.sh",
-      "reference_count": 14,
+      "reference_count": 13,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -8168,7 +8168,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-kustomize-render.sh",
-      "reference_count": 17,
+      "reference_count": 16,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -8230,7 +8230,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-lane-identity.sh",
-      "reference_count": 7,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -8946,7 +8946,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-analytics-plugin-parity.sh",
-      "reference_count": 9,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -9220,7 +9220,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-footer-fallbacks.sh",
-      "reference_count": 8,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -9485,7 +9485,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-route-drift.sh",
-      "reference_count": 11,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -10203,7 +10203,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-mobile-secrets-inventory.sh",
-      "reference_count": 9,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "vendor"
@@ -13850,7 +13850,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-release-automation.sh",
-      "reference_count": 22,
+      "reference_count": 21,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -16317,7 +16317,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-tenant-branding-fallback.sh",
-      "reference_count": 9,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -18403,7 +18403,7 @@
       "mutability": "mutating",
       "owner": "migration-platform",
       "path": "scripts/qa/verify-video-pipeline.sh",
-      "reference_count": 15,
+      "reference_count": 14,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"

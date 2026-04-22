@@ -127,7 +127,7 @@ if [[ -f "$REPO_ROOT/deploy/k8s/migrations/registry.yaml" ]]; then
   identity_services="$(grep '^\s*- name:' "$LANE_IDENTITY" | sed 's/.*name: *//' | sort)"
   # Every registry service should be in lane-identity
   while IFS= read -r svc; do
-    if echo "$identity_services" | grep -qx "$svc"; then
+    if grep -qx "$svc" <<<"$identity_services"; then
       pass "migration service '$svc' in lane-identity"
     else
       warn "migration service '$svc' not in lane-identity internal_services"

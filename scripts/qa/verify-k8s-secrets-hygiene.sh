@@ -144,7 +144,7 @@ check_sensitive_patterns() {
       while IFS= read -r match; do
         local is_exempt=false
         for exempt in "${exempt_patterns[@]}"; do
-          if echo "$match" | grep -qi "$exempt"; then
+          if grep -qi "$exempt" <<<"$match"; then
             is_exempt=true
             break
           fi

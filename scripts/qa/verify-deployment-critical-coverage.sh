@@ -59,7 +59,7 @@ for spec_slug in "${DEPLOYMENT_CRITICAL_SPECS[@]}"; do
     continue
   fi
   LINT_OUT="$(python3 scripts/qa/spec-tools/mereka_spec_lint.py --severity-filter error "$spec_file" 2>&1 || true)"
-  if echo "$LINT_OUT" | grep -q "^PASS"; then
+  if grep -q "^PASS" <<<"$LINT_OUT"; then
     pass_check "Lint PASS: $spec_file"
   else
     fail_check "Lint FAIL: $spec_file"

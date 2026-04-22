@@ -183,7 +183,7 @@ for pattern in "${FALLBACK_PATTERNS[@]}"; do
     for match in $MATCHES; do
       # Check if the match has an exception annotation
       LINE=$(grep "$pattern" "$match" || true)
-      if echo "$LINE" | grep -q "FTRX-EXC-"; then
+      if grep -q "FTRX-EXC-" <<<"$LINE"; then
         warn "Fallback rewrite in $(basename "$match") — has exception ID"
       else
         fail "Unapproved fallback rewrite in $(basename "$match"): $pattern"
