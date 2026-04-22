@@ -189,7 +189,7 @@ spec:
     # Spec: slo-sla-service-level-management_spec.md (AC-007..AC-009)
     #
     # Burn rate = error_rate / error_budget = (1 - availability) / (1 - SLO)
-    # Tier 1 SLO = 99.95% → error budget = 0.0005 (21.6 min/30 days)
+    # Tier 1 SLO = 99.9% → error budget = 0.001 (43.2 min/30 days)
     - name: slo.recording.rules
       interval: 60s
       rules:
@@ -200,7 +200,7 @@ spec:
             tier: "1"
           expr: |
             (1 - mereka:http_requests:availability_ratio_5m{service="lms"})
-            / 0.0005
+            / 0.001
 
         - record: mereka:slo:burn_rate_30m
           labels:
@@ -208,7 +208,7 @@ spec:
             tier: "1"
           expr: |
             (1 - mereka:http_requests:availability_ratio_30m{service="lms"})
-            / 0.0005
+            / 0.001
 
         - record: mereka:slo:burn_rate_1h
           labels:
@@ -216,7 +216,7 @@ spec:
             tier: "1"
           expr: |
             (1 - mereka:http_requests:availability_ratio_1h{service="lms"})
-            / 0.0005
+            / 0.001
 
         - record: mereka:slo:burn_rate_6h
           labels:
@@ -224,7 +224,7 @@ spec:
             tier: "1"
           expr: |
             (1 - mereka:http_requests:availability_ratio_6h{service="lms"})
-            / 0.0005
+            / 0.001
 
         # ── CMS Burn Rates ─────────────────────────────────────────
         - record: mereka:slo:burn_rate_5m
@@ -233,7 +233,7 @@ spec:
             tier: "1"
           expr: |
             (1 - mereka:http_requests:availability_ratio_5m{service="cms"})
-            / 0.0005
+            / 0.001
 
         - record: mereka:slo:burn_rate_30m
           labels:
@@ -241,7 +241,7 @@ spec:
             tier: "1"
           expr: |
             (1 - mereka:http_requests:availability_ratio_30m{service="cms"})
-            / 0.0005
+            / 0.001
 
         - record: mereka:slo:burn_rate_1h
           labels:
@@ -249,7 +249,7 @@ spec:
             tier: "1"
           expr: |
             (1 - mereka:http_requests:availability_ratio_1h{service="cms"})
-            / 0.0005
+            / 0.001
 
         - record: mereka:slo:burn_rate_6h
           labels:
@@ -257,7 +257,7 @@ spec:
             tier: "1"
           expr: |
             (1 - mereka:http_requests:availability_ratio_6h{service="cms"})
-            / 0.0005
+            / 0.001
 
     # ── Error Budget Remaining (30-day window) ──────────────────────
     # Uses increase() over 30d. Requires 30 days of data to produce
@@ -266,7 +266,7 @@ spec:
       interval: 5m
       rules:
         # error_budget_remaining_ratio = 1 - (error_rate_30d / error_budget)
-        # Tier 1: error_budget = 0.0005, total budget = 21.6 minutes/30d
+        # Tier 1: error_budget = 0.001, total budget = 43.2 minutes/30d
         - record: mereka:slo:error_budget_remaining_ratio
           labels:
             service: lms
@@ -276,7 +276,7 @@ spec:
               1 - (
                 sum(increase(django_http_responses_total_by_status_total{job="lms-metrics",status=~"5.."}[30d]))
                 / clamp_min(sum(increase(django_http_responses_total_by_status_total{job="lms-metrics",status!~"4.."}[30d])), 1)
-              ) / 0.0005,
+              ) / 0.001,
               0, 1
             )
 
@@ -289,24 +289,24 @@ spec:
               1 - (
                 sum(increase(django_http_responses_total_by_status_total{job="cms-metrics",status=~"5.."}[30d]))
                 / clamp_min(sum(increase(django_http_responses_total_by_status_total{job="cms-metrics",status!~"4.."}[30d])), 1)
-              ) / 0.0005,
+              ) / 0.001,
               0, 1
             )
 
-        # Error budget remaining in minutes (Tier 1: 21.6 min total)
+        # Error budget remaining in minutes (Tier 1: 43.2 min total)
         - record: mereka:slo:error_budget_remaining_minutes
           labels:
             service: lms
             tier: "1"
           expr: |
-            mereka:slo:error_budget_remaining_ratio{service="lms",tier="1"} * 21.6
+            mereka:slo:error_budget_remaining_ratio{service="lms",tier="1"} * 43.2
 
         - record: mereka:slo:error_budget_remaining_minutes
           labels:
             service: cms
             tier: "1"
           expr: |
-            mereka:slo:error_budget_remaining_ratio{service="cms",tier="1"} * 21.6
+            mereka:slo:error_budget_remaining_ratio{service="cms",tier="1"} * 43.2
 
     # ── SLO Alert Rules ──────────────────────────────────────────────
     # Multi-window burn rate alerting per Google SRE handbook.
