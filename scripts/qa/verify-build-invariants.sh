@@ -30,6 +30,7 @@ do_fail() { echo -e "${RED}FAIL${NC} $1"; FAILED=$((FAILED + 1)); }
 
 BUILD_WF="$REPO_ROOT/.github/workflows/build-tutor-images.yml"
 ENTERPRISE_WF="$REPO_ROOT/.github/workflows/build-enterprise-mfe.yml"
+BAKE_FILE="$REPO_ROOT/docker-bake.hcl"
 OPENEDX_BLOCK="$(awk '/^  build-openedx:/{flag=1} /^  build-mfe:/{flag=0} flag' "$BUILD_WF")"
 MFE_BLOCK="$(awk '/^  build-mfe:/{flag=1} /^  slsa-provenance:/{flag=0} flag' "$BUILD_WF")"
 ENTERPRISE_ADMIN_UPDATE_BLOCK="$(awk '/^  update-dev-admin-portal:/{flag=1} /^  learner-portal:/{flag=0} flag' "$ENTERPRISE_WF" 2>/dev/null || true)"
@@ -67,15 +68,15 @@ fi
 # OpenEdX and MFE both use docker-container once the OpenEdX lane stops
 # depending on a daemon-loaded image for downstream verification/push.
 if grep -q "driver: docker-container$" <<<"$OPENEDX_BLOCK"; then
-  do_pass "INV-2a: OpenEdX build uses docker-container for first-class GHA cache"
+  do_pass "INV-2a: OpenEdX build uses docker-container for first-class BuildKit cache"
 else
   do_fail "INV-2a: OpenEdX build must use docker-container after the repo-owned push-first front door lands"
 fi
 
 if grep -q "driver: docker-container$" <<<"$MFE_BLOCK"; then
-  do_pass "INV-2b: MFE build uses docker-container driver for first-class GHA cache"
+  do_pass "INV-2b: MFE build uses docker-container driver for first-class BuildKit cache"
 else
-  do_fail "INV-2b: MFE build must use docker-container driver for first-class GHA cache"
+  do_fail "INV-2b: MFE build must use docker-container driver for first-class BuildKit cache"
 fi
 
 # --- Invariant 3: Must NOT use deprecated --cache-to-registry flag ---
@@ -86,29 +87,32 @@ else
   do_pass "INV-3: No deprecated --cache-to-registry flag"
 fi
 
-# --- Invariant 4: GHA cache read/write MUST be enabled for both image builds ---
-if grep -q -- '--cache-from=type=gha' <<<"$MFE_BLOCK" && grep -q -- '--cache-to=type=gha,mode=max' <<<"$MFE_BLOCK"; then
-  do_pass "INV-4a: MFE build has GHA cache read/write flags"
+# --- Invariant 4: image builds MUST route through the canonical cache-aware helpers ---
+if grep -q -- 'type=gha' <<<"$MFE_BLOCK"; then
+  do_fail "INV-4a: MFE build still references retired GHA image cache wiring"
 elif grep -q 'build-mfe-image.sh' <<<"$MFE_BLOCK"; then
-  do_pass "INV-4a: MFE build inherits GHA cache read/write via the canonical push-first helper"
+  do_pass "INV-4a: MFE build inherits cache policy via the canonical push-first helper"
 else
-  do_fail "INV-4a: MFE build is missing GHA cache read/write flags"
+  do_fail "INV-4a: MFE build is missing the canonical cache-aware helper"
 fi
 
-if grep -q -- '--cache-from=type=gha' <<<"$OPENEDX_BLOCK" && grep -q -- '--cache-to=type=gha,mode=max' <<<"$OPENEDX_BLOCK"; then
-  do_pass "INV-4b: OpenEdX build has GHA cache read/write flags"
+if grep -q -- 'type=gha' <<<"$OPENEDX_BLOCK"; then
+  do_fail "INV-4b: OpenEdX build still references retired GHA image cache wiring"
 elif grep -q 'build-openedx-image.sh' <<<"$OPENEDX_BLOCK"; then
-  do_pass "INV-4b: OpenEdX build inherits GHA cache read/write via the canonical push-first helper"
+  do_pass "INV-4b: OpenEdX build inherits cache policy via the canonical push-first helper"
 else
-  do_fail "INV-4b: OpenEdX build is missing GHA cache read/write flags"
+  do_fail "INV-4b: OpenEdX build is missing the canonical cache-aware helper"
 fi
 
 # --- Invariant 5: Registry cache reuse MUST be wired for both image builds ---
-# Inline cache metadata in the last pushed image is the durable secondary warm path.
-if grep -q -- '--cache-from=type=registry' <<<"$OPENEDX_BLOCK"; then
-  do_pass "INV-5a: OpenEdX build has registry cache reuse wired"
+# Bake owns cache semantics; the workflow should call helpers, not carry raw
+# cache-from strings that become stale as the helper/Bake contract evolves.
+if grep -q 'build-openedx-image.sh' <<<"$OPENEDX_BLOCK" \
+  && grep -q 'ghcr.io/biji-biji-initiative/mereka-lms/cache/openedx:main-amd64' "$BAKE_FILE" \
+  && grep -q 'OPENEDX_CACHE_REF' "$BAKE_FILE"; then
+  do_pass "INV-5a: OpenEdX registry cache reuse is wired through docker-bake.hcl and the helper"
 else
-  do_fail "INV-5a: OpenEdX build is missing registry cache reuse"
+  do_fail "INV-5a: OpenEdX registry cache reuse must be owned by docker-bake.hcl and invoked through the helper"
 fi
 
 if grep -q 'build-openedx-image.sh' <<<"$OPENEDX_BLOCK" && ! grep -q 'tutor images build openedx' <<<"$OPENEDX_BLOCK"; then
@@ -123,10 +127,12 @@ else
   do_pass "INV-5d: OpenEdX build no longer depends on a local daemon image"
 fi
 
-if grep -q -- '--cache-from=type=registry' <<<"$MFE_BLOCK"; then
-  do_pass "INV-5b: MFE build has registry cache reuse wired"
+if grep -q 'build-mfe-image.sh' <<<"$MFE_BLOCK" \
+  && grep -q 'ghcr.io/biji-biji-initiative/mereka-lms/cache/mfe:main-amd64' "$BAKE_FILE" \
+  && grep -q 'MFE_CACHE_REF' "$BAKE_FILE"; then
+  do_pass "INV-5b: MFE registry cache reuse is wired through docker-bake.hcl and the helper"
 else
-  do_fail "INV-5b: MFE build is missing registry cache reuse"
+  do_fail "INV-5b: MFE registry cache reuse must be owned by docker-bake.hcl and invoked through the helper"
 fi
 
 if grep -q 'build-mfe-image.sh' <<<"$MFE_BLOCK" && ! grep -q 'tutor images build mfe' <<<"$MFE_BLOCK"; then

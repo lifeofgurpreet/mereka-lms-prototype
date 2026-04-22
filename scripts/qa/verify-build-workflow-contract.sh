@@ -737,12 +737,41 @@ else
   fail "release bundle artifact upload missing release-object.json"
 fi
 
-# OpenEdX cache-health reporting must match the canonical L2 registry strategy
-# (RFC-BUILD-AUTHORITY-001: shared GHCR registry cache, not GHA cache).
-if [[ "$OPENEDX_CACHE_HEALTH_BLOCK" == *"L2 shared GHCR registry cache ref present"* ]]; then
-  pass "OpenEdX cache health reports the canonical L2 registry strategy"
+# OpenEdX cache-health reporting must consume the same machine-readable metrics
+# artifact used by CI telemetry. It must not infer authority from stale command
+# string shapes that the Bake/helper path no longer emits.
+if [[ "$BUILD_OPENEDX_BLOCK" == *"Emit OpenEdX build metrics"* \
+   && "$BUILD_OPENEDX_BLOCK" == *"scripts/ci/summarize-build-cache-health.sh"* \
+   && "$BUILD_OPENEDX_BLOCK" == *"--metrics-file build-metrics-openedx.json"* \
+   && "$BUILD_OPENEDX_BLOCK" == *"cache/openedx:main-amd64"* ]]; then
+  pass "OpenEdX cache health is summarized from build-metrics JSON and the L2 ref"
 else
-  fail "OpenEdX cache health missing canonical L2 registry strategy messaging"
+  fail "OpenEdX cache health must use summarize-build-cache-health.sh with build-metrics-openedx.json and the L2 ref"
+fi
+
+if [[ "$BUILD_OPENEDX_BLOCK" == *"cache-from=type=registry"* \
+   || "$BUILD_OPENEDX_BLOCK" == *"--cache-from NOT found in build command"* \
+   || "$BUILD_OPENEDX_BLOCK" == *"BUILDKIT_INLINE_CACHE=1 NOT found"* ]]; then
+  fail "OpenEdX cache health still contains stale command-string cache heuristics"
+else
+  pass "OpenEdX cache health no longer uses stale command-string cache heuristics"
+fi
+
+if [[ "$BUILD_MFE_BLOCK" == *"Emit MFE build metrics"* \
+   && "$BUILD_MFE_BLOCK" == *"scripts/ci/summarize-build-cache-health.sh"* \
+   && "$BUILD_MFE_BLOCK" == *"--metrics-file build-metrics-mfe.json"* \
+   && "$BUILD_MFE_BLOCK" == *"cache/mfe:main-amd64"* ]]; then
+  pass "MFE cache health is summarized from build-metrics JSON and the L2 ref"
+else
+  fail "MFE cache health must use summarize-build-cache-health.sh with build-metrics-mfe.json and the L2 ref"
+fi
+
+if [[ "$BUILD_MFE_BLOCK" == *"cache-from=type=registry"* \
+   || "$BUILD_MFE_BLOCK" == *"--cache-from NOT found in build command"* \
+   || "$BUILD_MFE_BLOCK" == *"BUILDKIT_INLINE_CACHE=1 NOT found"* ]]; then
+  fail "MFE cache health still contains stale command-string cache heuristics"
+else
+  pass "MFE cache health no longer uses stale command-string cache heuristics"
 fi
 
 if [[ "$OPENEDX_CACHE_HEALTH_BLOCK" == *"GHA cache read/write is enabled"* ]]; then
