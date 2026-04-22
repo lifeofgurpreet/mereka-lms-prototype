@@ -239,6 +239,8 @@ ci_static_inventory:
     - script: scripts/qa/verify-no-legacy-tutor-k8s-paths.sh
     - script: scripts/qa/verify-network-policies.sh
       estimated_seconds: 13
+    - script: scripts/qa/verify-no-pipefail-prone-pipes.sh
+      estimated_seconds: 3
     - script: scripts/qa/verify-no-latest-prod-tags.sh
     - script: scripts/qa/verify-gitops-image-overrides.sh
       args: ["--skip-infra"]

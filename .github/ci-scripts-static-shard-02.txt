@@ -15,7 +15,7 @@ scripts/qa/verify-token-integrity-routing.sh
 scripts/qa/test-buildx-cleanup-active-guard.sh
 scripts/qa/test-mfe-npm-install-resilience-patch.sh
 scripts/qa/test-run-scripts-parallel-timeout-metadata.sh
-scripts/qa/verify-build-optimizations-render-delta-contract.sh
+scripts/qa/verify-no-pipefail-prone-pipes.sh
 scripts/ci/preflight-check.sh
 scripts/infra/check-error-budget-gate.sh
 scripts/qa/audit-observability.sh

@@ -162,6 +162,7 @@ scripts/qa/verify-authority-routing.sh
 scripts/qa/verify-overlay-ownership.sh
 scripts/qa/verify-no-legacy-tutor-k8s-paths.sh
 scripts/qa/verify-network-policies.sh
+scripts/qa/verify-no-pipefail-prone-pipes.sh
 scripts/qa/verify-no-latest-prod-tags.sh
 scripts/qa/verify-gitops-image-overrides.sh --skip-infra
 scripts/qa/verify-tenant-dns-inventory.sh
