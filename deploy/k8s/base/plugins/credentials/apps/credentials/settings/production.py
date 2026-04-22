@@ -57,6 +57,14 @@ MEREKA_CREDENTIALS_DOMAIN = os.environ.get(
     "MEREKA_CREDENTIALS_DOMAIN",
     f"credentials.{MEREKA_LMS_DOMAIN}",
 )
+MEREKA_BIJI_BIJI_CREDENTIALS_DOMAIN = os.environ.get(
+    "MEREKA_BIJI_BIJI_CREDENTIALS_DOMAIN",
+    "credentials.academy.biji-biji.com",
+)
+MEREKA_SOF_CREDENTIALS_DOMAIN = os.environ.get(
+    "MEREKA_SOF_CREDENTIALS_DOMAIN",
+    "credentials.skillourfuture.academyv2.mereka.io",
+)
 
 LMS_BASE_URL = os.environ.get("LMS_BASE_URL", f"{MEREKA_SCHEME}://{MEREKA_LMS_DOMAIN}")
 LMS_INTERNAL_URL = os.environ.get("LMS_INTERNAL_URL", "http://lms:8000")
@@ -64,6 +72,8 @@ LMS_INTERNAL_URL = os.environ.get("LMS_INTERNAL_URL", "http://lms:8000")
 SECRET_KEY = os.environ.get("CREDENTIALS_SECRET_KEY", "")
 ALLOWED_HOSTS = [
     MEREKA_CREDENTIALS_DOMAIN,
+    MEREKA_BIJI_BIJI_CREDENTIALS_DOMAIN,
+    MEREKA_SOF_CREDENTIALS_DOMAIN,
     "credentials",
     "CREDENTIALS",
 ]
