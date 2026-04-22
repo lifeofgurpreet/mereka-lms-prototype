@@ -118,6 +118,23 @@ http://{$LMS_HOST}, http://{$LMS_HOST_PREVIEW}, http://{$TENANT_BIJIBIJI_LMS_HOS
         }
     }
 
+    # MFE theme assets (logos, brand CSS) — served from MFE pod.
+    # The Mereka header component constructs logo URLs as {LMS_BASE_URL}/theme/…
+    # but these files live in the MFE image, not LMS. Proxy them transparently.
+    # CORS header required: apps. subdomain loads this cross-origin; Chrome ORB
+    # blocks SVG without Access-Control-Allow-Origin.
+    # Ported from bbi-infrastructure vendored Caddyfile (GitOps PR #3733) so
+    # the app-repo source of truth matches the rendered cluster config; this
+    # had drifted since the vendored base diverged. See bead mereka-lms-9o0o
+    # (three-layer duplicate writer trap).
+    handle /theme/* {
+        header Access-Control-Allow-Origin "*"
+        reverse_proxy mfe:8002 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+        }
+    }
+
     import proxy "lms:8000"
 
 
@@ -228,7 +245,14 @@ http://{$DISCOVERY_HOST} {
     # /learner-dashboard/api/... or /learner-dashboard/login_refresh).
     # Strip the MFE basename before proxying so these requests do not fall
     # through to the SPA shell and return index.html with 200 text/html.
-    @mfe_prefixed_lms_routes path_regexp mfe_prefixed_lms ^/(authn|account|communications|course-authoring|authoring|discussions|gradebook|learner-dashboard|learning|learner-record|ora-grading|profile)(/(api/mfe_config/v1.*|api/.*|login_refresh.*|csrf/.*|oauth2/.*|login))$
+    # Note: bare "|login" was removed from the alternation because it stole
+    # the SPA route for basename-relative /authn/login (Authn MFE page),
+    # rewriting it to /login and proxying to LMS — breaking sign-in. Keep
+    # login_refresh, csrf, oauth2, and the full /api/* proxy; drop the bare
+    # /login branch. Ported from bbi-infrastructure GitOps PR #3733 into
+    # the app-repo canonical source so this fix survives the next vendor
+    # sync. See bead mereka-lms-9o0o.
+    @mfe_prefixed_lms_routes path_regexp mfe_prefixed_lms ^/(authn|account|communications|course-authoring|authoring|discussions|gradebook|learner-dashboard|learning|learner-record|ora-grading|profile)(/(api/mfe_config/v1.*|api/.*|login_refresh.*|csrf/.*|oauth2/.*))$
     handle @mfe_prefixed_lms_routes {
         rewrite * {http.regexp.mfe_prefixed_lms.2}
         reverse_proxy lms:8000 {
