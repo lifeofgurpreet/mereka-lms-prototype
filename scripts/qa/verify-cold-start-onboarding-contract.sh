@@ -325,6 +325,9 @@ require_contains "README.md" 'bootstrap-local-readiness\.yml' "README names the 
 require_contains "README.md" 'benchmark_class=app-cache-cold' "README names app-cache-cold image build proof"
 reject_contains "README.md" 'README_SETUP\.md' "README does not link missing README_SETUP.md"
 reject_contains "README.md" 'DEVELOPER_ONBOARDING\.md' "README does not link missing developer onboarding doc"
+require_contains "infrastructure/README.md" 'scripts/shared/setup-local\.sh' "infrastructure README names canonical local setup wrapper"
+require_contains "infrastructure/README.md" 'scripts/infra/tutor-config-save\.sh' "infrastructure README names canonical Tutor config wrapper"
+reject_contains "infrastructure/README.md" 'Apply patches after config changes|^\./infrastructure/tutor/apply-patches\.sh$' "infrastructure README does not teach direct apply-patches operator flow"
 
 require_contains "docs/guides/onboarding/README.md" '2026-04-21' "onboarding index carries current verification date"
 require_contains "docs/guides/onboarding/README.md" 'bootstrap-local-readiness\.yml' "onboarding index names heavy proof workflow"
