@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Pre-commit hook for Tutor config changes
-# Warns users to run apply-patches.sh before committing Tutor config
+# Warns users to use the governed Tutor config wrapper before committing Tutor config
 #
 # Bypass with: git commit --no-verify (for emergencies only)
 
@@ -60,27 +60,25 @@ if [[ "$CONFIG_CHANGED" == "true" ]]; then
   echo ""
 fi
 
-# Main warning about patches
-echo -e "${YELLOW}IMPORTANT: Did you run apply-patches.sh?${NC}"
+# Main warning about governed Tutor render path
+echo -e "${YELLOW}IMPORTANT: Did you use tutor-config-save.sh?${NC}"
 echo ""
-echo "Tutor regenerates templates from scratch on 'tutor config save'."
-echo "Custom patches must be reapplied after any config change."
+echo "Tutor render output is generated state."
+echo "Use the governed wrapper so render, patch-manifest application, and verification stay together."
 echo ""
-echo "Required step:"
-echo "  ${GREEN}./infrastructure/tutor/apply-patches.sh${NC}"
+echo "Required path:"
+echo "  ${GREEN}./scripts/infra/tutor-config-save.sh --set KEY=value${NC}"
+echo "  ${GREEN}./scripts/infra/verify-tutor-config.sh${NC}"
 echo ""
-echo "Patches applied:"
-echo "  • MySQL authentication fix"
-echo "  • MFE Node 18 toolchain"
-echo "  • Multi-site domain configuration"
-echo "  • Custom Mereka footer"
-echo "  • Prometheus metrics integration"
-echo "  • MongoDB Atlas SRV support"
-echo "  • Build optimizations"
+echo "The wrapper owns:"
+echo "  - repo-scoped TUTOR_ROOT rendering"
+echo "  - Tutor plugin mirror refresh"
+echo "  - governed patch manifest application"
+echo "  - post-render contract verification"
 echo ""
 
 # Ask for confirmation
-read -rp "Have you run apply-patches.sh after 'tutor config save'? [y/N] " response
+read -rp "Have you run the governed Tutor wrapper and verifier? [y/N] " response
 
 case "$response" in
   [yY][eE][sS]|[yY])
@@ -100,9 +98,10 @@ case "$response" in
         echo ""
         echo -e "${RED}✗ Verification failed${NC}"
         echo ""
-        echo "Patches may not have been applied correctly."
+        echo "Generated Tutor state did not pass verification."
         echo "Please run:"
-        echo "  ./infrastructure/tutor/apply-patches.sh"
+        echo "  ./scripts/infra/tutor-config-save.sh --set KEY=value"
+        echo "  ./scripts/infra/verify-tutor-config.sh"
         echo ""
         read -rp "Commit anyway? [y/N] " override
         case "$override" in
@@ -127,8 +126,9 @@ case "$response" in
     echo "Please run these commands first:"
     echo ""
     echo "  1. ${GREEN}export TUTOR_ROOT=\"\$(pwd)/tutor_env\"${NC}"
-    echo "  2. ${GREEN}./infrastructure/tutor/apply-patches.sh${NC}"
-    echo "  3. ${GREEN}tutor local restart${NC}  # or 'tutor k8s restart'"
+    echo "  2. ${GREEN}./scripts/infra/tutor-config-save.sh --set KEY=value${NC}"
+    echo "  3. ${GREEN}./scripts/infra/verify-tutor-config.sh${NC}"
+    echo "  4. ${GREEN}tutor local restart${NC}"
     echo ""
     echo "Then try committing again."
     echo ""

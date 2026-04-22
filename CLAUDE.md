@@ -30,7 +30,7 @@ This is the **Mereka Academy Open edX** deployment repository. It tracks infrast
 - **Deployment Tool**: Tutor 21.0.0 (Ulmo) - wraps Open edX in Docker/K8s
 - **Databases**:
   - MySQL 8 (course data, user data)
-  - MongoDB Atlas (forum, modulestore) - **Atlas only, no local MongoDB**
+  - MongoDB Atlas for deployed environments; local bootstrap uses the repo-scoped Tutor MongoDB service
   - Redis (caching, Celery)
 - **Infrastructure**:
   - Local: Docker Compose
@@ -121,10 +121,10 @@ tutor_env/                # Generated Tutor state (gitignored)
 ### Key Architectural Patterns
 
 **Tutor Configuration Flow**:
-1. `tutor config save` regenerates templates from config.yml
-2. **ALWAYS run `./infrastructure/tutor/apply-patches.sh`** after config changes
-3. Patches fix MySQL authentication plugin, MFE Node version, service configs
-4. Restart services: `tutor local restart` or `tutor k8s restart`
+1. Source config changes go through `./scripts/infra/tutor-config-save.sh`
+2. The wrapper renders Tutor state, refreshes the plugin mirror, applies the governed patch manifest, and verifies the result
+3. Local image builds use the Bake-backed helpers, not raw Tutor image commands
+4. Restart only the relevant local services after the wrapper succeeds
 
 **Local vs Cloud Configuration**:
 - **Local**: Service names are Docker Compose service names (`mysql`, `mongodb`, `redis`)
@@ -132,10 +132,10 @@ tutor_env/                # Generated Tutor state (gitignored)
 - **Common mistake**: Config accidentally contains cloud IPs in local setup → services fail to connect
 
 **Image Build Pipeline**:
-- `tutor images build openedx` → builds LMS/CMS/workers (30+ min)
-- `tutor images build mfe` → builds micro-frontends
-- Images pushed to `ghcr.io/biji-biji-initiative/mereka-lms`
-- Local builds tag as `latest`, cloud builds tag with git SHA
+- `./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast` builds LMS/CMS/workers for local development
+- `./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast` builds micro-frontends for local development
+- CI promotion builds push immutable images to `ghcr.io/biji-biji-initiative/mereka-lms` through the release-object/GitOps path
+- App-cache-cold proof uses `.github/workflows/build-benchmark.yml` with `benchmark_class=app-cache-cold`; it is not a pristine-daemon claim
 
 **CI/CD Pipeline Architecture**:
 - `ci.yml` is the main workflow — **4 consolidated jobs** (was 74 micro-jobs)
@@ -202,10 +202,6 @@ make tutor-restart                # Restart all services
 
 # Modifying configuration (SAFE WORKFLOW)
 ./scripts/infra/tutor-config-save.sh --set KEY=value  # Saves config, applies patches, verifies
-# OR for advanced users:
-tutor config save --set KEY=value
-./infrastructure/tutor/apply-patches.sh              # CRITICAL: Must run after config save
-./scripts/infra/verify-tutor-config.sh               # Verify patches applied correctly
 tutor local restart                                  # Apply changes
 
 # Quick verification
@@ -214,15 +210,16 @@ tutor local restart                                  # Apply changes
 
 ### Building Images
 ```bash
-# Build Open edX platform (LMS/CMS/workers)
-tutor images build openedx        # Takes 30-45 min, needs 12GB+ RAM
+# Build Open edX platform locally (LMS/CMS/workers)
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 
-# Build micro-frontends
-tutor images build mfe            # Takes 15-20 min
+# Build micro-frontends locally
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 
-# Build specific service
-tutor images build discovery
-tutor images build forum
+# Strict cache-disabled proof belongs in CI, not ad hoc local commands
+gh workflow run build-benchmark.yml \
+  -f benchmark_class=app-cache-cold \
+  -f image_family=both
 ```
 
 ### Diagnostics (Local)
@@ -339,32 +336,13 @@ export TUTOR_ROOT="$(pwd)/tutor_env"
 tutor local restart
 ```
 
-**Manual workflow** (for advanced users):
-```bash
-export TUTOR_ROOT="$(pwd)/tutor_env"
-tutor config save --set KEY=value
-./infrastructure/tutor/apply-patches.sh    # CRITICAL!
-./scripts/infra/verify-tutor-config.sh     # Verify patches applied
-tutor local restart
-```
-
-**Why**: `tutor config save` regenerates templates from scratch, losing patches. The `apply-patches.sh` script re-applies:
-- MySQL 8 authentication plugin fix (`mysql_native_password`)
-- MFE build toolchain (g++, python3)
-- Extra domain names for multi-site support (biji-biji.com, skillourfuture)
-- Webpack memory limit increase (`NODE_OPTIONS=--max-old-space-size=6144`)
-- CSRF trusted origins and allowed hosts
-- Custom Mereka footer component for MFEs
-- Prometheus metrics integration
-- MongoDB Atlas SRV support
-- Build optimizations and retry logic
-
-The wrapper script (`tutor-config-save.sh`) automatically:
+**Why**: Tutor render output is generated state. The wrapper script (`tutor-config-save.sh`) automatically:
 1. Backs up existing config
-2. Runs `tutor config save`
-3. Applies all patches
-4. Verifies configuration
-5. Provides clear next steps
+2. Renders Tutor config into the repo-scoped `TUTOR_ROOT`
+3. Refreshes the Tutor plugin mirror
+4. Applies the governed patch manifest
+5. Verifies configuration
+6. Provides clear next steps
 
 ### Fixing "Cloud IPs in Local Config" Issue
 If services fail to connect and config shows `MYSQL_HOST: "10.97.0.2"`:
@@ -389,7 +367,7 @@ tutor local restart
 
 1. **Always develop locally first** before touching cloud instances
 2. **Always set `TUTOR_ROOT`** before running Tutor commands: `export TUTOR_ROOT="$(pwd)/tutor_env"`
-3. **Always run `./infrastructure/tutor/apply-patches.sh`** after `tutor config save`
+3. **Always use `./scripts/infra/tutor-config-save.sh`** for Tutor config changes
 4. **Always verify config uses local service names** (`mysql`, `mongodb`, `redis`), not cloud IPs (`10.97.x.x`)
 5. **Always check endpoints after K8s operations**: `kubectl get endpoints -n mereka-lms` (empty = site down)
 6. Test with `make qa-smoke` before committing infrastructure changes
@@ -405,7 +383,7 @@ The full methodology is in `docs/adr/021-openedx-tutor-methodology.md`. Every ag
 | **Frontend** | Plugin slots + design tokens + `@edx/brand`. Do not edit `env.config.jsx` at Dockerfile level. |
 | **edx-platform fork** | Base on latest release tag (e.g., `open-release/ulmo.1`). Not `master`, not `release/ulmo` branch. |
 | **CI** | Local preflight first (<5 min), then CI validates. One hypothesis per PR. Never debug on `main`. |
-| **Heavy builds** | `tutor images build` in CI runs on `mereka-k8s-heavy-builders` ARC runners only, with `--cache-from`. |
+| **Heavy builds** | CI image builds run through the Bake-backed helpers on governed runner lanes with explicit cache policy. |
 
 **Current debt** (do not add to; migrate away from):
 - `infrastructure/tutor/patches/mfe-node.sh` — Dockerfile surgery, migrating to plugin hooks
@@ -492,7 +470,7 @@ See `specs/secrets-management.md` for full specification.
 - **Never commit secrets**: `tutor_env/config.yml` is gitignored
 - Use `tutor_env/config.example.yml` as template
 - Run `tutor local do backup-db` before upgrades
-- Re-run `./infrastructure/tutor/apply-patches.sh` after every `tutor config save`
+- Use `./scripts/infra/tutor-config-save.sh` for Tutor config changes so generated state is rendered, patched, and verified together
 
 ### Git Hooks
 
@@ -532,7 +510,7 @@ git commit --no-verify
 **False positives**: If the hook flags something incorrectly, verify it is truly safe, then use `--no-verify`. Consider updating the hook patterns in `.githooks/pre-commit` if the false positive is common.
 
 #### 2. Tutor Config Safety (`.githooks/pre-tutor-config`)
-Warns when committing Tutor-generated files and ensures patches have been applied.
+Warns when committing Tutor-generated files and points contributors back to the governed Tutor config wrapper.
 
 **Setup** (one-time per clone):
 ```bash
@@ -542,7 +520,7 @@ git config --local include.path ../.gitconfig
 **What it does**:
 - Detects commits touching `tutor_env/` files
 - Warns if `config.yml` contains secrets
-- Prompts to confirm patches were applied
+- Prompts to confirm the governed render path was used
 - Optionally runs verification checks
 - Can be bypassed with `--no-verify`
 
@@ -556,9 +534,9 @@ $ git commit -m "feat: update LMS settings"
 The following Tutor-generated files are being committed:
   - tutor_env/env/apps/openedx/settings/lms/production.py
 
-IMPORTANT: Did you run apply-patches.sh?
+IMPORTANT: Did you use tutor-config-save.sh?
 
-Have you run apply-patches.sh after 'tutor config save'? [y/N] y
+Have you run the governed Tutor wrapper and verifier? [y/N] y
 
 Running verification checks...
 ✓ All required patches verified successfully!
@@ -574,9 +552,9 @@ Running verification checks...
 ## Key Documentation Files
 
 - **Quick Start**: `docs/guides/onboarding/QUICK_START_LOCAL.md` (5-min setup)
-- **Full Setup**: `docs/guides/onboarding/DEVELOPER_ONBOARDING.md`
+- **Full Setup**: `docs/guides/onboarding/LOCAL_SETUP.md`
 - **Troubleshooting**: `docs/ops/runbooks/TROUBLESHOOTING.md`
-- **Branding**: `docs/BRANDING.md`
+- **Branding**: `docs/guides/branding/BRANDING.md`
 - **Migrations**: `docs/migrations/` (Kajabi, MCT playbooks)
 - **Architecture**: `docs/concepts/architecture/`
 - **ADRs**: `docs/adr/` (Architecture Decision Records)
@@ -607,14 +585,14 @@ GCP_PROJECT=my-test-project source scripts/shared/config.sh
 
 ## Common Pitfalls
 
-1. **Forgetting to run `apply-patches.sh`** → MySQL auth fails, MFE build breaks
-   - **Fix**: Use `./scripts/infra/tutor-config-save.sh` (patches applied automatically)
+1. **Bypassing `tutor-config-save.sh`** → generated state can miss required patch-manifest output
+   - **Fix**: Use `./scripts/infra/tutor-config-save.sh`
    - **Verify**: Run `./scripts/infra/verify-tutor-config.sh`
 2. **Cloud IPs in local config** (`MYSQL_HOST: "10.97.0.2"`) → Services can't connect
 3. **Not setting `TUTOR_ROOT`** → Tutor creates configs in wrong directory
 4. **Insufficient Docker RAM** (<12GB) → Image builds OOM during webpack
 5. **Empty K8s endpoints** → Services can't route traffic (run `fix-service-selectors.sh`)
-6. **Editing generated files in `tutor_env/`** → Lost on next `tutor config save`
+6. **Editing generated files in `tutor_env/`** → Lost on next governed Tutor render
    - **Note**: Git hook will warn you before committing
 7. **Using old paths** (`tools/`, `ops/`) → These are deprecated, use `scripts/` and `infrastructure/`
 8. **Hardcoding secrets** → Use `os.environ.get()` and ExternalSecrets

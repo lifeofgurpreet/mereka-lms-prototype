@@ -62,6 +62,7 @@ reject_contains() {
 }
 
 required_paths=(
+  "CLAUDE.md"
   "README.md"
   "docs/guides/onboarding/README.md"
   "docs/guides/onboarding/QUICK_START_LOCAL.md"
@@ -83,6 +84,7 @@ required_paths=(
   "docker-bake.hcl"
   ".github/workflows/bootstrap-local-readiness.yml"
   ".github/workflows/build-benchmark.yml"
+  ".githooks/pre-tutor-config"
   ".devcontainer/post-create.sh"
   "scripts/ci/install-docker-compose.sh"
   "scripts/qa/test-install-docker-compose.sh"
@@ -108,6 +110,8 @@ require_contains "infrastructure/tutor/tutor-env.sh" 'TUTOR_PLUGINS_ROOT' "tutor
 require_contains "scripts/infra/sync-tutor-plugin-mirror.sh" 'TUTOR_PLUGINS_ROOT' "plugin mirror sync honors Tutor's native plugin root override"
 require_contains "scripts/infra/tutor-config-save.sh" 'TUTOR_PLUGINS_ROOT' "tutor-config-save.sh renders against the synced Tutor plugin root"
 require_contains "scripts/infra/tutor-config-save.sh" 'retired_plugin in mfe_oauth_fix indigo' "tutor-config-save.sh retires stale local Tutor plugins before render"
+require_contains ".githooks/pre-tutor-config" '\./scripts/infra/tutor-config-save\.sh --set KEY=value' "Tutor config hook points contributors to the governed wrapper"
+reject_contains ".githooks/pre-tutor-config" 'apply-patches\.sh|tutor config save' "Tutor config hook does not teach direct patch/render commands"
 require_contains ".github/workflows/ci.yml" '\./scripts/infra/tutor-config-save\.sh' "CI Tutor Configuration Tests use canonical Tutor config wrapper"
 reject_contains ".github/workflows/ci.yml" '^[[:space:]]*tutor config save$' "CI Tutor Configuration Tests do not use raw Tutor config save"
 require_contains "scripts/shared/setup-local.sh" 'dirname "\$\{BASH_SOURCE\[0\]\}"\)/\.\./\.\.' "setup-local.sh resolves repo root from scripts/shared to repo root"
@@ -240,6 +244,7 @@ reject_contains "scripts/shared/setup-local.sh" 'sync-from-production\.sh' "setu
 reject_contains "scripts/shared/setup-local.sh" 'kubectl' "setup-local.sh does not inspect or mutate live clusters"
 reject_contains "scripts/shared/setup-local.sh" 'docker images \| grep' "setup-local.sh does not use broad image grep matching"
 reject_contains "scripts/shared/setup-local.sh" 'tutor-config-save\.sh.*--quiet|tutor config save.*--quiet' "setup-local.sh does not pass unsupported --quiet to tutor config save"
+reject_contains "scripts/shared/setup-local.sh" 'measure-openedx-build\.sh' "setup-local.sh does not advertise legacy raw Tutor proof harness"
 reject_contains "scripts/shared/setup-local.sh" '-p1EebOQxu' "setup-local.sh does not hardcode Tutor MySQL root password"
 reject_contains "scripts/shared/setup-local.sh" 'changeme-local-only' "setup-local.sh does not publish a fixed admin password"
 
@@ -263,6 +268,8 @@ require_contains ".github/workflows/build-benchmark.yml" 'Wipe measured MFE job 
 require_contains ".github/workflows/build-benchmark.yml" 'MEASURED_JOB_L1_WIPE=true' "benchmark artifacts record measured-job L1 wipe evidence"
 require_contains ".github/workflows/build-benchmark.yml" 'proof_class' "benchmark workflow emits a class-safe proof_class field"
 require_contains ".github/workflows/build-benchmark.yml" 'benchmark_class=app-cache-cold' "benchmark workflow documents app-cache-cold dispatch"
+require_contains ".github/workflows/build-benchmark.yml" 'observed app-cache-cold/registry-warm/local-hot/scan-only' "benchmark metadata note uses current proof class taxonomy"
+reject_contains ".github/workflows/build-benchmark.yml" 'observed true-cold/registry-warm/local-hot/scan-only' "benchmark metadata note does not use stale true-cold taxonomy"
 require_contains ".github/workflows/build-benchmark.yml" 'machine_cold_claim' "benchmark metadata records whether machine-cold is claimed"
 require_contains ".github/workflows/build-benchmark.yml" '--output-mode docker' "benchmark build uses local Docker output instead of pushing from read-only proof"
 require_contains ".github/workflows/build-benchmark.yml" '--dockerfile "\$\{TUTOR_ROOT\}/env/plugins/mfe/build/mfe/Dockerfile"' "MFE benchmark passes the rendered Dockerfile path"
@@ -321,6 +328,14 @@ require_contains ".github/workflows/bootstrap-local-readiness.yml" 'Bootstrap ph
 require_contains ".github/workflows/bootstrap-local-readiness.yml" 'launch_full_local_tutor_bootstrap' "bootstrap-local-readiness times the long Tutor launch phase"
 
 printf '\n== Documentation contract ==\n'
+require_contains "CLAUDE.md" 'scripts/infra/tutor-config-save\.sh' "CLAUDE.md names canonical Tutor config wrapper"
+require_contains "CLAUDE.md" 'scripts/infra/build-openedx-image\.sh --local-defaults --build-profile fast' "CLAUDE.md names canonical Open edX local build helper"
+require_contains "CLAUDE.md" 'scripts/infra/build-mfe-image\.sh --local-defaults --build-profile fast' "CLAUDE.md names canonical MFE local build helper"
+require_contains "CLAUDE.md" 'benchmark_class=app-cache-cold' "CLAUDE.md names app-cache-cold image build proof"
+reject_contains "CLAUDE.md" '^[[:space:]]*tutor images build (openedx|mfe|discovery|forum)' "CLAUDE.md does not teach raw Tutor image builds"
+reject_contains "CLAUDE.md" '^[[:space:]]*tutor config save' "CLAUDE.md does not teach raw Tutor config render"
+reject_contains "CLAUDE.md" '^\./infrastructure/tutor/apply-patches\.sh|Always run `\./infrastructure/tutor/apply-patches\.sh`|ALWAYS run `\./infrastructure/tutor/apply-patches\.sh`' "CLAUDE.md does not teach direct low-level patch application"
+reject_contains "CLAUDE.md" 'DEVELOPER_ONBOARDING\.md|docs/BRANDING\.md|Atlas only, no local MongoDB' "CLAUDE.md does not link missing/stale onboarding, branding, or MongoDB local truth"
 require_contains "README.md" 'verify-cold-start-onboarding-contract\.sh' "README exposes offline cold-start contract verifier"
 require_contains "README.md" 'bootstrap-local-readiness\.yml' "README names the heavy bootstrap proof workflow"
 require_contains "README.md" 'benchmark_class=app-cache-cold' "README names app-cache-cold image build proof"
