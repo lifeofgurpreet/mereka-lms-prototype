@@ -89,10 +89,10 @@ else
   # Verify font families contain expected values
   heading_val=$(grep -oP '(?<=--font-heading:\s).*(?=;)' "$TOKENS_CSS" | head -1)
   body_val=$(grep -oP '(?<=--font-body:\s).*(?=;)' "$TOKENS_CSS" | head -1)
-  if [[ -z "$heading_val" ]] || ! echo "$heading_val" | grep -qi "lato"; then
+  if [[ -z "$heading_val" ]] || ! grep -qi "lato" <<<"$heading_val"; then
     missing="${missing} --font-heading(missing-Lato)"
   fi
-  if [[ -z "$body_val" ]] || ! echo "$body_val" | grep -qi "poppins"; then
+  if [[ -z "$body_val" ]] || ! grep -qi "poppins" <<<"$body_val"; then
     missing="${missing} --font-body(missing-Poppins)"
   fi
   if [[ -z "$missing" ]]; then
@@ -185,7 +185,7 @@ if [[ ! -f "$TOKENS_PROVENANCE" ]]; then
   fail "AC-006: $TOKENS_PROVENANCE not found"
 else
   commit=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1])).get('source_commit',''))" "$TOKENS_PROVENANCE")
-  if echo "$commit" | grep -qE '^[0-9a-f]{40}$'; then
+  if grep -qE '^[0-9a-f]{40}$' <<<"$commit"; then
     pass "AC-006: source_commit is a valid 40-char lowercase SHA ($commit)"
   else
     fail "AC-006: source_commit is not a valid 40-char lowercase SHA (got: $commit)"
@@ -199,7 +199,7 @@ if [[ ! -f "$TOKENS_PROVENANCE" ]]; then
   fail "AC-007: $TOKENS_PROVENANCE not found"
 else
   sha=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1])).get('source_sha256',''))" "$TOKENS_PROVENANCE")
-  if echo "$sha" | grep -qE '^[0-9a-f]{64}$'; then
+  if grep -qE '^[0-9a-f]{64}$' <<<"$sha"; then
     pass "AC-007: source_sha256 is a valid 64-char lowercase SHA256 ($sha)"
   else
     fail "AC-007: source_sha256 is not a valid 64-char lowercase SHA256 (got: $sha)"

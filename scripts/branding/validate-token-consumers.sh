@@ -103,7 +103,7 @@ else
   else
     # Parse the generator output and emit per-file FAILs
     while IFS= read -r line; do
-      if echo "$line" | grep -q "DRIFT:"; then
+      if grep -q "DRIFT:" <<<"$line"; then
         fail "$line"
       fi
     done <<< "$gen_output"
@@ -190,7 +190,7 @@ PY
     fi
 
     # If the override value is a raw hex, compare it directly
-    if echo "$override_val" | grep -qE '^#[0-9a-f]{3,8}$'; then
+    if grep -qE '^#[0-9a-f]{3,8}$' <<<"$override_val"; then
       if [[ "$override_val" == "$canonical_val" ]]; then
         pass "${canonical_name}=${canonical_val} matches ${mereka_name}"
       else
@@ -276,7 +276,7 @@ PY
     rogue=""
     while IFS= read -r hex; do
       [[ -z "$hex" ]] && continue
-      if ! echo "$canonical_hexes" | grep -qF "$hex"; then
+      if ! grep -qF "$hex" <<<"$canonical_hexes"; then
         rogue="${rogue} ${hex}"
       fi
     done < <(python3 - "$gen_block" <<'PY'
