@@ -423,6 +423,7 @@ jobs:
       - name: Verify generated MFE runtime contract
         run: |
           set -euo pipefail
+          export TUTOR_ROOT="${TUTOR_ROOT:-$(pwd)/tutor_env}"
           scripts/qa/verify-mfe-runtime-contract.sh \
             --generated-env-config "${TUTOR_ROOT}/env/plugins/mfe/build/mfe/env.config.jsx" \
             | tee var/ci/verify-mfe-generated-runtime-contract.log
@@ -1109,6 +1110,31 @@ text = text.replace(
 p.write_text(text)
 PY
 run_expect_fail "generated MFE runtime verifier must preserve failures through tee"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    '      - name: Verify generated MFE runtime contract\n'
+    '        run: |\n'
+    '          set -euo pipefail\n'
+    '          export TUTOR_ROOT="${TUTOR_ROOT:-$(pwd)/tutor_env}"\n'
+    '          scripts/qa/verify-mfe-runtime-contract.sh \\\n'
+    '            --generated-env-config "${TUTOR_ROOT}/env/plugins/mfe/build/mfe/env.config.jsx" \\\n'
+    '            | tee var/ci/verify-mfe-generated-runtime-contract.log\n',
+    '      - name: Verify generated MFE runtime contract\n'
+    '        run: |\n'
+    '          set -euo pipefail\n'
+    '          scripts/qa/verify-mfe-runtime-contract.sh \\\n'
+    '            --generated-env-config "${TUTOR_ROOT}/env/plugins/mfe/build/mfe/env.config.jsx" \\\n'
+    '            | tee var/ci/verify-mfe-generated-runtime-contract.log\n',
+)
+p.write_text(text)
+PY
+run_expect_fail "generated MFE runtime verifier must declare TUTOR_ROOT before use"
 
 # Reintroduce broad scripts/infra glob => must fail
 write_pass_fixture

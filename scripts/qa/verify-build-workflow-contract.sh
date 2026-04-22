@@ -665,6 +665,13 @@ else
   fail "Generated MFE runtime verifier missing set -euo pipefail before tee"
 fi
 
+if [[ "$MFE_GENERATED_RUNTIME_STEP" == *'export TUTOR_ROOT="${TUTOR_ROOT:-$(pwd)/tutor_env}"'* \
+   && "$MFE_GENERATED_RUNTIME_STEP" == *'--generated-env-config "${TUTOR_ROOT}/env/plugins/mfe/build/mfe/env.config.jsx"'* ]]; then
+  pass "Generated MFE runtime verifier declares repo-scoped TUTOR_ROOT before use"
+else
+  fail "Generated MFE runtime verifier must declare repo-scoped TUTOR_ROOT before generated-env-config path"
+fi
+
 if [[ "$BUILD_MFE_BLOCK" == *'./scripts/infra/build-mfe-image.sh'* ]]; then
   pass "MFE build uses the canonical push-first helper"
 else
