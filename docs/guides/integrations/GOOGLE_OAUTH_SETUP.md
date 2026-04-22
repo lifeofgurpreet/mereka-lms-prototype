@@ -1,5 +1,5 @@
 # Google OAuth Setup Guide for Mereka Academy
-_Audience: Platform Eng • Owner: Infra Team • Last verified: 2025-08-30_
+_Audience: Platform Eng • Owner: Infra Team • Last verified: 2026-04-22_
 
 This guide walks through setting up Google Login for OpenEdX LMS sites.
 
@@ -105,14 +105,15 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET: "YOUR_CLIENT_SECRET"
 The LMS environment file (`tutor_env/env/apps/openedx/config/lms.env.yml`) should already have:
 - `ENABLE_THIRD_PARTY_AUTH: true` ✅ (already configured)
 
-After setting the credentials, restart the LMS:
+After setting the credentials, refresh the target environment:
 
 ```bash
 # For local development
-tutor local restart lms
+make tutor-restart
 
-# For Kubernetes
-tutor k8s restart lms
+# For deployed environments
+# Commit the source change and use the sanctioned operator / GitOps path from:
+# docs/guides/admin/K8S_OPERATIONS_GUIDE.md
 ```
 
 ## Step 4: Enable Google Provider in Django Admin

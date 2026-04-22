@@ -74,7 +74,7 @@ Then run the first launch and readiness proof:
 
 ```bash
 tutor local launch -I --skip-build
-tutor local restart
+make tutor-start
 ./scripts/infra/verify-local-bootstrap-readiness.sh
 ```
 

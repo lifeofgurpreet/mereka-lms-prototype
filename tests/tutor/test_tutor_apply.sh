@@ -7,7 +7,7 @@
 # - Makefile target exists
 # - Required scripts are present and executable
 # - Plugin has valid Python syntax
-# - Scripts are chained correctly
+# - Scripts route through the governed render wrapper and lifecycle wrapper
 #
 # Usage: ./tests/tutor/test_tutor_apply.sh
 
@@ -106,12 +106,26 @@ fi
 # Check 6: Workflow orchestration - verify scripts are called in correct order
 section "Workflow Orchestration Verification"
 
-echo "Checking tutor-apply Makefile target chains commands correctly..."
-if grep -A 3 "^tutor-apply:" Makefile | grep -q "./scripts/infra/tutor-config-save.sh" && \
-   grep -A 3 "^tutor-apply:" Makefile | grep -q "tutor local restart"; then
-  pass "tutor-apply chains: tutor-config-save front door → restart"
+echo "Checking tutor-apply Makefile target routes through governed wrappers..."
+tutor_apply_block="$(
+  awk '
+    /^tutor-apply:/ { in_target = 1; next }
+    in_target && /^[[:alnum:]_.-]+:/ { in_target = 0 }
+    in_target { print }
+  ' Makefile
+)"
+
+if grep -Fq "./scripts/infra/tutor-config-save.sh" <<<"$tutor_apply_block" && \
+   grep -Fq '$(MAKE) tutor-restart' <<<"$tutor_apply_block"; then
+  pass "tutor-apply routes: tutor-config-save front door -> Makefile restart wrapper"
 else
-  fail "tutor-apply does not chain commands correctly (expected: tutor-config-save front door → restart)"
+  fail "tutor-apply does not route correctly (expected: tutor-config-save front door -> Makefile restart wrapper)"
+fi
+
+if grep -Eq '^[[:space:]]*tutor local restart' <<<"$tutor_apply_block"; then
+  fail "tutor-apply bypasses the Makefile lifecycle wrapper with raw tutor local restart"
+else
+  pass "tutor-apply does not bypass the lifecycle wrapper with raw tutor local restart"
 fi
 
 echo "Checking tutor-config-save.sh calls prepare-tutor-build-context.sh..."

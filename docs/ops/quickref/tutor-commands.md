@@ -23,22 +23,28 @@ source infrastructure/tutor/tutor-env.sh
 
 ## Service Lifecycle
 
-### Start/Stop
+### Whole-Stack Daily Control
 
 ```bash
-# Start all services (background)
-tutor local start
-
-# Start with logs (foreground)
-tutor local start -d
+# Start all services after first bootstrap
+make tutor-start
 
 # Stop all services
-tutor local stop
+make tutor-stop
 
-# Restart all services
-tutor local restart
+# Re-apply rendered config to the running stack
+make tutor-restart
+```
 
-# Restart specific service
+Use these wrappers for the normal local-development lane after the first
+successful `tutor local launch -I --skip-build`. Drop to raw `tutor local ...`
+subcommands only for low-level status/logs, service-targeted recovery, or
+bootstrap-only operations.
+
+### Low-Level Service Recovery
+
+```bash
+# Restart specific service during low-level debugging
 tutor local restart lms
 tutor local restart cms
 ```
@@ -66,7 +72,7 @@ tutor local status
 # Use wrapper script (auto-runs the governed refresh path)
 export TUTOR_ROOT="$(pwd)/tutor_env"
 ./scripts/infra/tutor-config-save.sh --set KEY=value
-tutor local restart
+make tutor-restart
 ```
 
 ### Manual Config Workflow (Advanced)
@@ -80,7 +86,7 @@ export TUTOR_ROOT="$(pwd)/tutor_env"
 ./scripts/infra/verify-tutor-config.sh
 
 # Restart services
-tutor local restart
+make tutor-restart
 ```
 
 If you are auditing raw Tutor render deltas in a disposable `TUTOR_ROOT`, `./scripts/infra/prepare-tutor-build-context.sh --target all` is the required refresh step before trusting any resulting build artifacts.
@@ -307,7 +313,7 @@ tutor plugins disable ecommerce
 
 # After plugin changes
 ./scripts/infra/tutor-config-save.sh
-tutor local restart
+make tutor-restart
 ```
 
 ---
@@ -349,7 +355,7 @@ make branding-sync
 ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 
 # Restart to apply theme changes
-tutor local restart lms cms
+make tutor-restart
 ```
 
 Production theme rollout:
@@ -365,7 +371,7 @@ Local MFE workflow:
 
 # Rebuild MFE with branding
 ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
-tutor local restart mfe
+make tutor-restart
 ```
 
 Production MFE branding rollout:
@@ -474,7 +480,7 @@ export TUTOR_ROOT="$(pwd)/tutor_env"
   --set MONGODB_HOST=mongodb \
   --set REDIS_HOST=redis \
   --set MONGODB_PORT=27017
-tutor local restart
+make tutor-restart
 ```
 
 ### Build Fails with "loremipsum" Error
@@ -494,7 +500,7 @@ tutor local restart
 
 # Fix:
 ./scripts/infra/prepare-tutor-build-context.sh --target all
-tutor local restart
+make tutor-restart
 ```
 
 ---

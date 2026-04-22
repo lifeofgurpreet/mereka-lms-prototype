@@ -16,9 +16,11 @@ surfaces:
     description: "Django LMS/CMS production settings rendered by Tutor"
     source_files:
       - "infrastructure/tutor/plugins/mereka_lms.py"
+      - "scripts/infra/tutor-config-save.sh"
+      - "scripts/infra/prepare-tutor-build-context.sh"
       - "infrastructure/tutor/apply-patches.sh"
       - "infrastructure/tutor/patches/**"
-    generator: "tutor config save + apply-patches.sh"
+    generator: "scripts/infra/tutor-config-save.sh"
     generated_output:
       - "tutor_env/env/apps/openedx/settings/**"
       - "tutor_env/env/apps/openedx/config/**"
@@ -80,9 +82,11 @@ surfaces:
     source_files:
       - "infrastructure/tutor/plugins/mereka_lms.py"
       - "assets/brand/**"
+      - "scripts/infra/build-mfe-image.sh"
+      - "scripts/infra/prepare-tutor-build-context.sh"
       - "infrastructure/tutor/patches/mfe-*"
       - "infrastructure/tutor/patches/brand-*"
-    generator: "tutor images build mfe"
+    generator: "scripts/infra/build-mfe-image.sh"
     generated_output:
       - "(container image — served via Caddy at apps.<domain>)"
     freshness_verifier: "scripts/qa/verify-mfe-build-contract.sh"
@@ -93,9 +97,10 @@ surfaces:
     description: "Caddy reverse proxy configuration rendered from Tutor + Kustomize"
     source_files:
       - "infrastructure/tutor/plugins/mereka_lms.py"
+      - "scripts/infra/tutor-config-save.sh"
       - "deploy/k8s/base/apps/caddy/**"
       - "deploy/k8s/tenancy/tenant-registry.yaml"
-    generator: "tutor config save + Kustomize overlay"
+    generator: "scripts/infra/tutor-config-save.sh + Kustomize overlay"
     generated_output:
       - "tutor_env/env/apps/caddy/Caddyfile"
       - "(K8s ConfigMap — applied by ArgoCD)"

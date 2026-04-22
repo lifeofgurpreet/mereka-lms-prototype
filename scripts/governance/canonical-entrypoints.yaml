@@ -152,9 +152,10 @@ entrypoints:
     alternatives:
       - path: scripts/branding/deploy-branded-image.sh
         reason: >
-          Deploys a pre-built branded image to the cluster via kubectl set image.
-          Does not build or publish an image; uses an already-published tag.
-          Not a substitute for the CI build+publish workflow.
+          Legacy break-glass helper that mutates a live deployment image via
+          kubectl. Does not build, publish, digest-pin, or create a durable
+          GitOps promotion object. Not a substitute for the CI build+publish
+          workflow.
       - path: .github/workflows/build-enterprise-mfe.yml
         reason: >
           Builds the enterprise micro-frontend only, not the canonical

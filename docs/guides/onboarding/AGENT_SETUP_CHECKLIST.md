@@ -120,8 +120,8 @@ grep -E "MYSQL_HOST|MONGODB_HOST|REDIS_HOST" tutor_env/config.yml
 # First-time launch (runs migrations, creates databases)
 tutor local launch -I --skip-build
 
-# Restart services
-tutor local restart
+# Bring the stack up after first-launch init
+make tutor-start
 ```
 
 ### 7. Create Local Admin User
@@ -211,7 +211,7 @@ export TUTOR_ROOT="$(pwd)/tutor_env"
   --set RUN_MONGODB=true \
   --set DOCKER_IMAGE_OPENEDX=openedx:nightly \
   --set MFE_DOCKER_IMAGE=openedx-mfe:nightly
-tutor local restart
+make tutor-restart
 ```
 
 ### Issue: Docker out of memory during build

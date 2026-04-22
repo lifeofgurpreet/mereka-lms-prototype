@@ -78,7 +78,7 @@ When you make changes to the Tutor configuration and need to re-export manifests
 ```bash
 # 1. Update Tutor configuration
 cd /home/dev/bbi-meta/mereka-lms
-tutor config save
+./scripts/infra/tutor-config-save.sh
 
 # 2. Re-export manifests to GitOps structure
 ./scripts/export-k8s-manifests.sh

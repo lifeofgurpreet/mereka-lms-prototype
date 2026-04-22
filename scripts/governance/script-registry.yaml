@@ -2366,8 +2366,9 @@ scripts:
     owner: platform-team
     purpose: >
       Validates generated MFE/OpenEdX Dockerfiles against known invariants BEFORE
-      a 30-60 minute build cycle. Renders Dockerfiles via tutor config save +
-      apply-patches.sh and checks for required markers. Runtime ~30 seconds.
+      a 30-60 minute build cycle. Renders Dockerfiles through the governed Tutor
+      wrapper and target-scoped build-context preparation path, then checks for
+      required markers. Runtime ~30 seconds.
     inputs:
       - TUTOR_VENV (path to venv; auto-created if absent)
     outputs:
@@ -2423,8 +2424,9 @@ scripts:
     owner: platform-team
     purpose: >
       Canonical front door for mutating rendered Tutor build context by target.
-      Routes to apply-patches.sh with explicit openedx, mfe, or all scope so
-      CI and local workflows prepare only the contexts they actually need.
+      Routes to the low-level compatibility layer with explicit openedx, mfe, or
+      all scope so CI and local workflows prepare only the contexts they actually
+      need.
     inputs:
       - --target all|openedx|mfe
       - TUTOR_ROOT (optional env override)
@@ -2552,8 +2554,9 @@ scripts:
   - path: scripts/branding/deploy-branded-image.sh
     owner: platform-team
     purpose: >
-      Deploys a branded OpenEdX image to GKE by setting the image tag on the
-      LMS deployment via kubectl. Defaults to tag 'mereka-brand'.
+      Legacy break-glass helper that mutates the live LMS deployment image via
+      kubectl. Not a durable GitOps promotion path and not a substitute for the
+      Build Tutor Images workflow plus release-object promotion.
     inputs:
       - "positional: TAG (default: mereka-brand)"
       - NAMESPACE (default: mereka-lms)
@@ -2565,9 +2568,9 @@ scripts:
       - Mutates live cluster (kubectl set image on LMS deployment)
       - Optionally pushes image to ghcr.io registry
     dry_run: false
-    lanes: [dev, staging, prod]
+    lanes: [dev]
     proof_command: "bash scripts/branding/deploy-branded-image.sh --help 2>&1 || true"
-    criticality: release-supporting
+    criticality: operational-dangerous
 
   - path: scripts/branding/build-tokens.sh
     owner: platform-team

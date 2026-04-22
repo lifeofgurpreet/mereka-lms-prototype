@@ -123,6 +123,45 @@ def normalize_lines(path: Path) -> list[str]:
     return sorted(set(lines))
 
 
+def list_tracked_paths(repo_root: Path) -> list[Path]:
+    try:
+        raw_paths = subprocess.run(
+            ["git", "-C", str(repo_root), "ls-files", "-z"],
+            check=True,
+            capture_output=True,
+            text=False,
+        ).stdout.split(b"\0")
+    except (OSError, subprocess.CalledProcessError):
+        return []
+
+    return [repo_root / raw_path.decode("utf-8") for raw_path in raw_paths if raw_path]
+
+
+def discover_verify_scripts(repo_root: Path) -> list[str]:
+    tracked_paths = list_tracked_paths(repo_root)
+    if tracked_paths:
+        candidates = tracked_paths
+    else:
+        candidates = list(repo_root.glob("scripts/**/verify-*.sh"))
+
+    script_paths: list[str] = []
+    for path in candidates:
+        try:
+            rel_path = path.relative_to(repo_root)
+        except ValueError:
+            continue
+        if (
+            len(rel_path.parts) >= 2
+            and rel_path.parts[0] == "scripts"
+            and rel_path.name.startswith("verify-")
+            and rel_path.suffix == ".sh"
+            and "deprecated" not in rel_path.parts
+            and path.is_file()
+        ):
+            script_paths.append(str(rel_path))
+    return sorted(set(script_paths))
+
+
 def classify_owner(script_path: str) -> str:
     name = Path(script_path).name
     joined = f"{script_path} {name}".lower()
@@ -286,23 +325,10 @@ def compute_reference_counts(repo_root: Path, scripts: list[str]) -> dict[str, i
             return False
         return path.suffix.lower() in TEXT_SUFFIXES or path.name == "Makefile"
 
-    try:
-        tracked_paths = [
-            raw_path
-            for raw_path in subprocess.run(
-            ["git", "-C", str(repo_root), "ls-files", "-z"],
-            check=True,
-            capture_output=True,
-            text=False,
-        ).stdout.split(b"\0")
-            if raw_path
-        ]
-    except (OSError, subprocess.CalledProcessError):
-        tracked_paths = []
+    tracked_paths = list_tracked_paths(repo_root)
 
     if tracked_paths:
-        for raw_path in tracked_paths:
-            path = repo_root / raw_path.decode("utf-8")
+        for path in tracked_paths:
             if should_scan(path):
                 text_files.append(path)
     else:
@@ -326,12 +352,7 @@ def compute_reference_counts(repo_root: Path, scripts: list[str]) -> dict[str, i
 
 
 def build_catalog(repo_root: Path) -> dict:
-    script_paths = sorted(
-        str(path.relative_to(repo_root))
-        for path in repo_root.glob("scripts/**/verify-*.sh")
-        if path.is_file()
-        and "deprecated" not in path.parts
-    )
+    script_paths = discover_verify_scripts(repo_root)
 
     deprecated_manifest_path = (
         repo_root / "verification/manifests/deprecated_verify_scripts.json"

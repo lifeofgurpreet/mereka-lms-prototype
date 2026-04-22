@@ -179,7 +179,7 @@ In the BBI-K8 repository:
 ```bash
 # 1. Update Tutor configuration
 cd /home/dev/bbi-meta/mereka-lms
-tutor config save
+./scripts/infra/tutor-config-save.sh
 
 # 2. Re-export manifests
 ./scripts/export-k8s-manifests.sh

@@ -16,16 +16,16 @@ Source → Build/render → Promotion → Realization → Runtime proof
 | Plugin slot configuration | `infrastructure/tutor/plugins/mereka_lms.py` | `tutor_env/` (generated, will be lost) |
 | MFE env.config | `infrastructure/tutor/plugins/mereka_lms.py` | Dockerfile-level `env.config.jsx` |
 | Brand/theme tokens | `assets/brand/` + `@edx/brand` package | Inline CSS in MFE source |
-| Footer component | Plugin slots (migrating from legacy patcher) | `infrastructure/tutor/patches/footer-component.sh` (debt) |
-| MFE Node/build config | `infrastructure/tutor/plugins/mereka_lms.py` | `infrastructure/tutor/patches/mfe-node.sh` (debt) |
+| Footer component | Plugin slots + repo-owned MFE theme source | `infrastructure/tutor/patches/footer-component.sh` |
+| MFE Node/build config | `infrastructure/tutor/plugins/mereka_lms.py` + build helpers | `infrastructure/tutor/patches/mfe-node.sh` |
 
 ## Steps
 
 1. Verify worktree is clean: `git status`
 2. Make source change in the correct location above
-3. Apply patches: `./infrastructure/tutor/apply-patches.sh`
-4. Verify rendered artifact: `./scripts/infra/verify-tutor-config.sh`
-5. Build locally: `tutor images build mfe` (needs 12GB+ RAM)
+3. Render via governed wrapper: `./scripts/infra/tutor-config-save.sh`
+4. Prepare/verify rendered artifact: `./scripts/infra/prepare-tutor-build-context.sh --target mfe && ./scripts/infra/verify-tutor-config.sh`
+5. Build locally: `./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast`
 6. Test locally: `curl -I http://apps.localhost/authn/login`
 7. Commit, push, get CI green
 8. Promote via release object (not manual SHA join)
@@ -40,7 +40,7 @@ Source → Build/render → Promotion → Realization → Runtime proof
 ./scripts/infra/verify-tutor-config.sh
 
 # Build artifact check
-tutor images build mfe 2>&1 | tail -20
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 
 # Live asset verification (after deployment)
 curl -sI https://apps.academyv2.mereka.io/authn/login | head -5
@@ -52,6 +52,7 @@ curl -sI https://apps.academyv2.mereka.io/authn/login | head -5
 ## Never Do
 
 - Edit files under `tutor_env/` directly (lost on next `tutor config save`)
+- Use raw `tutor images build` or the low-level patch runner as the normal build path
 - Trust build success as proof of served asset
 - Rerun browser canary while live asset gate is red
 - Patch generated Dockerfile without fixing generator (`mereka_lms.py`)

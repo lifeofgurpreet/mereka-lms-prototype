@@ -57,7 +57,7 @@ Use this root when you need the shortest path to an operational answer. Quick re
    ```bash
    export TUTOR_ROOT="$(pwd)/tutor_env"
    ./scripts/infra/tutor-config-save.sh --set KEY=value
-   tutor local restart
+   make tutor-restart
    ```
 
 2. **Verify patches applied**
@@ -145,7 +145,7 @@ export TUTOR_ROOT="$(pwd)/tutor_env"
 ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 
 # 3. Restart services
-tutor local restart
+make tutor-restart
 
 # 4. Verify
 curl -I http://localhost

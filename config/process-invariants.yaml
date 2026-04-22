@@ -32,7 +32,7 @@ invariants:
     rule: "Never debug on main"
     source: "EXECUTION_INVARIANTS.md Invariant 10"
   - id: INV-007
-    rule: "Always run apply-patches.sh after tutor config save"
+    rule: "Render Tutor config through the governed wrapper and prepare the build context before trusting generated artifacts"
     source: "CLAUDE.md common pitfall 1"
   - id: INV-008
     rule: "All active surfaces remain in scope until removed from authority"

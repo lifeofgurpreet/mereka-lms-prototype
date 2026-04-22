@@ -36,19 +36,15 @@ This automatically:
 ### Starting Work
 ```bash
 cd /path/to/mereka-lms
-source infrastructure/tutor/tutor-env.sh
-export TUTOR_ROOT="$(pwd)/tutor_env"
-tutor local start -d
+make tutor-start
 ```
 
 ### Making Changes
 
 **Configuration Changes:**
 ```bash
-export TUTOR_ROOT="$(pwd)/tutor_env"
-source .venv/bin/activate
 ./scripts/infra/tutor-config-save.sh --set KEY=value
-tutor local restart <affected-services>
+make tutor-restart
 ```
 
 **Code Changes:**
@@ -64,7 +60,7 @@ tutor local restart <affected-services>
 
 ### Stopping Work
 ```bash
-tutor local stop
+make tutor-stop
 ```
 
 ## 🔐 Environment Separation
@@ -142,9 +138,8 @@ Kubernetes preview namespaces, Loft/vCluster, and devspace-style development are
 
 **Local (for testing):**
 ```bash
-export TUTOR_ROOT="$(pwd)/tutor_env"
 ./scripts/infra/tutor-config-save.sh --set KEY=value
-tutor local restart
+make tutor-restart
 ```
 
 **Production (after local testing):**
@@ -190,7 +185,7 @@ tutor local restart
 ### Before Starting Work
 1. Pull latest changes: `git pull`
 2. Verify setup: `./scripts/qa/verify-cold-start-onboarding-contract.sh`
-3. Start services: `tutor local start -d`
+3. Start services: `make tutor-start`
 
 ### During Development
 1. Test locally first
@@ -225,7 +220,7 @@ tutor local restart
 ### "Database conflicts"
 ```bash
 # Reset local database
-tutor local stop
+make tutor-stop
 rm -rf tutor_env/data/*
 tutor local launch -I --skip-build
 ```

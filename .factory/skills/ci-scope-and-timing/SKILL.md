@@ -71,7 +71,8 @@ speculative fixes to main.
 
 ## Heavy Builds
 
-`tutor images build` must run on `mereka-k8s-heavy-builders` ARC runners only:
+Open edX/MFE image builds must run through the Build Tutor Images workflow or
+repo-owned build helpers on `mereka-k8s-heavy-builders` ARC runners only:
 - 4CPU/12GB + DinD sidecar
 - PVC caches: `arc-docker-cache` (50Gi), `arc-dep-cache` (10Gi)
 

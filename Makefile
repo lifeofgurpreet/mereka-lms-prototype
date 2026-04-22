@@ -24,11 +24,12 @@ tutor-stop: ## Stop Tutor local environment
 tutor-restart: ## Restart Tutor local environment
 	source infrastructure/tutor/tutor-env.sh && export TUTOR_ROOT="$(PWD)/tutor_env" && tutor local restart
 
-tutor-apply: ## Apply Tutor patches after config changes
-	source infrastructure/tutor/tutor-env.sh && export TUTOR_ROOT="$(PWD)/tutor_env" && ./scripts/infra/tutor-config-save.sh && tutor local restart
+tutor-apply: ## Render Tutor config through governed wrapper and restart local environment
+	./scripts/infra/tutor-config-save.sh
+	$(MAKE) tutor-restart
 
-tutor-verify: ## Verify Tutor config patches applied correctly
-	@echo "Verifying Tutor configuration patches..."
+tutor-verify: ## Verify Tutor config and prepared build context
+	@echo "Verifying Tutor configuration and prepared build context..."
 	@source infrastructure/tutor/tutor-env.sh && export TUTOR_ROOT="$(PWD)/tutor_env" && \
 	if [ ! -f tutor_env/env/local/docker-compose.yml ]; then \
 		echo "❌ Tutor config not initialized. Run 'make tutor-apply' first."; \

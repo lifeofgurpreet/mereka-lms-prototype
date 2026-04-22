@@ -101,11 +101,15 @@ canonical plugins with `tutor plugins enable mereka_lms` and
 ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 tutor local launch -I --skip-build
-tutor local start -d
+make tutor-start
 ./scripts/infra/verify-local-bootstrap-readiness.sh
 ```
 
 The local quick start builds `openedx:nightly` and `openedx-mfe:nightly`, then points Tutor at those exact tags. Render prep applies the named dependency-image mirror patch for Tutor-emitted hardcoded Docker Hub dependency refs, selects a repo-owned BuildKit builder with a `docker.io` registry mirror as a fallback guard, and uses `mirror.gcr.io` where Tutor exposes third-party service/helper image refs. That is dependency acquisition only; it does not create a second Dockerfile or image strategy.
+
+For whole-stack daily runtime control after first launch, use the existing
+Makefile lifecycle wrappers. Keep raw `tutor local ...` commands for first
+launch, `do init`, targeted service recovery, and low-level debugging only.
 
 To force a local image rebuild even when `openedx:nightly` or `openedx-mfe:nightly` already exists:
 
@@ -189,17 +193,15 @@ bootstrap harness bug before changing code or verifiers.
 ## Daily Commands
 
 ```bash
-# Start
-source infrastructure/tutor/tutor-env.sh
-export TUTOR_ROOT="$(pwd)/tutor_env"
-tutor local start -d
+# Whole-stack daily runtime control
+make tutor-start
 
 # Stop
-tutor local stop
+make tutor-stop
 
 # After config changes
 ./scripts/infra/tutor-config-save.sh --set KEY=value
-tutor local restart
+make tutor-restart
 ```
 
 ## Common Issues
@@ -222,7 +224,7 @@ tutor local restart mfe
 **Config shows cloud IPs**
 ```bash
 ./scripts/infra/tutor-config-save.sh --set MYSQL_HOST=mysql --set MONGODB_HOST=mongodb
-tutor local restart
+make tutor-restart
 ```
 
 ## 📚 Full Documentation

@@ -75,9 +75,9 @@ gates:
     invariant: INV-013
 
   - id: patches-before-render
-    description: "apply-patches.sh must run after tutor config save before any rendered artifact is trusted"
-    predecessor: tutor-config-save
+    description: "Tutor render must flow through tutor-config-save.sh and prepare-tutor-build-context.sh before any rendered artifact is trusted"
+    predecessor: tutor-config-save-wrapper
     successor: rendered-artifact-verification
-    required_state: "all patches applied and verified"
-    enforcement: "scripts/infra/verify-tutor-config.sh + pre-commit hook"
+    required_state: "canonical wrapper completed, build-context preparation completed, and rendered output verified"
+    enforcement: "scripts/infra/tutor-config-save.sh + scripts/infra/verify-tutor-config.sh + pre-commit hook"
     invariant: INV-007

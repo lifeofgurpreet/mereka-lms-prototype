@@ -9,7 +9,8 @@ description: Verify rendered Django settings, ConfigMaps, and Kustomize output. 
 
 ```
 Source settings (mereka_lms.py plugin)
-  → Tutor render (tutor config save + apply-patches.sh)
+  → Tutor render (scripts/infra/tutor-config-save.sh)
+    → Build-context preparation (scripts/infra/prepare-tutor-build-context.sh)
     → Kustomize build (deploy/k8s/base + overlays)
       → Argo realization (bbi-infrastructure)
         → Live ConfigMap (mounted in pods)
@@ -22,14 +23,14 @@ Source settings (mereka_lms.py plugin)
 |---|---|---|
 | LMS production settings | `infrastructure/tutor/plugins/mereka_lms.py` | `tutor_env/env/apps/openedx/settings/lms/production.py` |
 | CMS production settings | `infrastructure/tutor/plugins/mereka_lms.py` | `tutor_env/env/apps/openedx/settings/cms/production.py` |
-| CSRF/allowed hosts | `infrastructure/tutor/plugins/mereka_lms.py` + patches | rendered settings + Caddyfile |
+| CSRF/allowed hosts | `infrastructure/tutor/plugins/mereka_lms.py` + governed Tutor config | rendered settings + Caddyfile |
 | Multi-tenant domains | `deploy/k8s/tenancy/tenant-registry.yaml` | Caddyfile + settings |
 | K8s ConfigMaps | `deploy/k8s/base/apps/` | Kustomize-rendered ConfigMaps |
 
 ## Steps for Settings Change
 
 1. Edit source: `infrastructure/tutor/plugins/mereka_lms.py`
-2. Render: `tutor config save && ./infrastructure/tutor/apply-patches.sh`
+2. Render: `./scripts/infra/tutor-config-save.sh`
 3. Verify rendered output: check `tutor_env/env/apps/openedx/settings/lms/production.py`
 4. Verify Kustomize: `kubectl kustomize deploy/k8s/base/ | grep YOUR_SETTING`
 5. Commit and push
@@ -57,7 +58,7 @@ kubectl exec -n mereka-lms-dev deploy/lms -- python -c "from django.conf import 
 - Edit rendered settings in `tutor_env/` without fixing `mereka_lms.py`
 - Edit live ConfigMap via `kubectl edit` (will be overwritten by Argo)
 - Confuse local Docker service names with K8s DNS names
-- Skip `apply-patches.sh` after `tutor config save`
+- Bypass the governed Tutor wrapper or build-context preparation path
 - Assume local config matches cloud config (different DB hosts, service names)
 
 ## Common Pitfall: Cloud IPs in Local Config

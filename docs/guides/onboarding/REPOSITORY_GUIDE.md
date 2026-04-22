@@ -192,7 +192,7 @@ infrastructure/
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
 ./scripts/infra/tutor-config-save.sh --set KEY=value
-tutor local restart
+make tutor-restart
 ```
 
 **Where to add**:

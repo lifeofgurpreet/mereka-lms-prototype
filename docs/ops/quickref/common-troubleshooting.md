@@ -215,7 +215,7 @@ export TUTOR_ROOT="$(pwd)/tutor_env"
   --set MONGODB_HOST=mongodb \
   --set REDIS_HOST=redis \
   --set MONGODB_PORT=27017
-tutor local restart
+make tutor-restart
 ```
 
 ### Patches Not Applied
@@ -230,7 +230,7 @@ tutor local restart
 **Fix**:
 ```bash
 ./scripts/infra/prepare-tutor-build-context.sh --target all
-tutor local restart
+make tutor-restart
 ```
 
 ### Build Failures

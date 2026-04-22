@@ -39,7 +39,15 @@ if should_skip_scope; then
 fi
 
 mkdir -p "$tmpdir/repo"
-if command -v rsync >/dev/null 2>&1; then
+if git -C "$REPO_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  git -C "$REPO_ROOT" ls-files -z | (
+    cd "$REPO_ROOT"
+    tar --null -T - -cf -
+  ) | (
+    cd "$tmpdir/repo"
+    tar -xf -
+  )
+elif command -v rsync >/dev/null 2>&1; then
   rsync -a --delete --exclude '.git/' "$REPO_ROOT/" "$tmpdir/repo/"
 else
   (
@@ -61,6 +69,23 @@ else
   cat /tmp/test-verify-catalog-pass.log
   exit 1
 fi
+
+git init -q
+git add -f .
+cat > scripts/qa/verify-untracked-runner-noise.sh <<'EOF_NOISE'
+#!/usr/bin/env bash
+echo "runner noise"
+EOF_NOISE
+chmod +x scripts/qa/verify-untracked-runner-noise.sh
+
+if ./scripts/qa/verify-verification-catalog.sh >/tmp/test-verify-catalog-untracked-noise.log 2>&1; then
+  :
+else
+  echo "Expected untracked verify-*.sh runner noise to stay out of catalog authority."
+  cat /tmp/test-verify-catalog-untracked-noise.log
+  exit 1
+fi
+rm -f scripts/qa/verify-untracked-runner-noise.sh
 
 cat > verification/catalogs/verification_catalog.json <<'EOF_DRIFT'
 {}

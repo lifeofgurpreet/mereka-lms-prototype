@@ -24,7 +24,7 @@ fi
 # Check local containers
 if ! docker ps --format '{{.Names}}' | grep -q 'tutor_local-mongodb-1'; then
     echo -e "${RED}❌ Local MongoDB not running${NC}"
-    echo "Run: tutor local start -d"
+    echo "Run: make tutor-start"
     exit 1
 fi
 
@@ -171,5 +171,4 @@ echo "    • All current users: MCT (84,378)"
 echo "    • Kajabi users: Will be tagged when imported"
 echo ""
 echo "╚══════════════════════════════════════════════════════════════╝"
-
 

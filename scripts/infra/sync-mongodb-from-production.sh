@@ -47,7 +47,7 @@ fi
 # Check local MongoDB is running
 if ! docker ps --format '{{.Names}}' | grep -q 'tutor_local-mongodb-1'; then
     echo -e "${RED}❌ Local MongoDB container not running${NC}"
-    echo "Run: tutor local start -d"
+    echo "Run: make tutor-start"
     exit 1
 fi
 
@@ -130,5 +130,4 @@ echo ""
 echo "╔══════════════════════════════════════════════════════════════╗"
 echo "║        Sync Complete                                          ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
-
 

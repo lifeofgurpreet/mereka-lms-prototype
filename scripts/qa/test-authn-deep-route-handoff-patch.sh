@@ -112,6 +112,51 @@ assert_contains "${APP_DIR}/src/login/data/service.js" "login service uses relat
 assert_contains "${APP_DIR}/src/register/data/service.js" "register service uses relative dashboard fallback" 'redirectUrl: data.redirect_url || "/dashboard",'
 assert_contains "${APP_DIR}/src/login/LoginFailure.jsx" "login failure uses relative dashboard fallback" 'const url = `/dashboard/?tpa_hint=${context.tpaHint}`;'
 
+python3 "${SOURCE_PATCH_SCRIPT}" "${APP_DIR}" >/dev/null
+echo "[PASS] authn source fallback patch is idempotent for legacy upstream layout"
+
+MOVED_APP_DIR="${TMPDIR}/authn-app-moved"
+mkdir -p \
+  "${MOVED_APP_DIR}/src/features/login/data" \
+  "${MOVED_APP_DIR}/src/features/register/data" \
+  "${MOVED_APP_DIR}/src/features/login"
+
+cat >"${MOVED_APP_DIR}/src/features/login/data/service.js" <<'EOF'
+redirectUrl: data.redirect_url || `${getConfig().LMS_BASE_URL}/dashboard`,
+EOF
+
+cat >"${MOVED_APP_DIR}/src/features/register/data/service.js" <<'EOF'
+redirectUrl: data.redirect_url || `${getConfig().LMS_BASE_URL}/dashboard`,
+EOF
+
+cat >"${MOVED_APP_DIR}/src/features/login/LoginFailure.jsx" <<'EOF'
+const url = `${getConfig().LMS_BASE_URL}/dashboard/?tpa_hint=${context.tpaHint}`;
+EOF
+
+python3 "${SOURCE_PATCH_SCRIPT}" "${MOVED_APP_DIR}" >/dev/null
+
+assert_contains "${MOVED_APP_DIR}/src/features/login/data/service.js" "moved login service uses relative dashboard fallback" 'redirectUrl: data.redirect_url || "/dashboard",'
+assert_contains "${MOVED_APP_DIR}/src/features/register/data/service.js" "moved register service uses relative dashboard fallback" 'redirectUrl: data.redirect_url || "/dashboard",'
+assert_contains "${MOVED_APP_DIR}/src/features/login/LoginFailure.jsx" "moved login failure uses relative dashboard fallback" 'const url = `/dashboard/?tpa_hint=${context.tpaHint}`;'
+
+MISSING_FLOW_APP_DIR="${TMPDIR}/authn-app-missing-flow"
+mkdir -p "${MISSING_FLOW_APP_DIR}/src/features/login/data" "${MISSING_FLOW_APP_DIR}/src/features/login"
+
+cat >"${MISSING_FLOW_APP_DIR}/src/features/login/data/service.js" <<'EOF'
+redirectUrl: data.redirect_url || `${getConfig().LMS_BASE_URL}/dashboard`,
+EOF
+
+cat >"${MISSING_FLOW_APP_DIR}/src/features/login/LoginFailure.jsx" <<'EOF'
+const url = `${getConfig().LMS_BASE_URL}/dashboard/?tpa_hint=${context.tpaHint}`;
+EOF
+
+if python3 "${SOURCE_PATCH_SCRIPT}" "${MISSING_FLOW_APP_DIR}" >/dev/null 2>"${TMPDIR}/missing-flow.err"; then
+  echo "[FAIL] source fallback patch should fail when one expected authn flow disappears"
+  exit 1
+else
+  assert_contains "${TMPDIR}/missing-flow.err" "source fallback patch fails loud on missing register flow" "register service dashboard fallback"
+fi
+
 VERIFY_DIST="${TMPDIR}/verify-dist"
 mkdir -p "${VERIFY_DIST}"
 

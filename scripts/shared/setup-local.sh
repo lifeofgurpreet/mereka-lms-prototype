@@ -150,7 +150,7 @@ echo ""
 
 # Step 6: Start Services
 echo -e "${BLUE}Step 6: Starting services...${NC}"
-tutor local start -d
+make tutor-start
 sleep 10
 echo -e "${GREEN}✅ Services started${NC}"
 echo ""

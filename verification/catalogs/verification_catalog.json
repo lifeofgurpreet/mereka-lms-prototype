@@ -469,7 +469,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/infra/verify-local-bootstrap-readiness.sh",
-      "reference_count": 23,
+      "reference_count": 24,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

@@ -97,7 +97,7 @@ source infrastructure/tutor/tutor-env.sh
   --set THEME_DIR="$(pwd)/infrastructure/tutor/themes" \
   --set THEME_NAME=mereka
 ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
-tutor local start -d
+make tutor-start
 ```
 
 Tutor will copy everything under `infrastructure/tutor/themes/` into `tutor_env/build/openedx/themes` and compile the SCSS entrypoints located at `infrastructure/tutor/themes/mereka/{lms,cms}/static/sass/theme.scss`. Re-run the Open edX build helper whenever you edit the theme SCSS or add new assets.
@@ -110,7 +110,7 @@ source infrastructure/tutor/tutor-env.sh
 ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 tutor local launch -I --skip-build
-tutor local restart
+make tutor-start
 ./scripts/infra/verify-local-bootstrap-readiness.sh
 ```
 
@@ -121,7 +121,11 @@ The launch wizard will:
 3. Run database migrations and seed demo content.
 4. Start the LMS, Studio, forum, MFEs, discovery, and supporting Tutor services.
 
-Use `tutor local start -d` / `tutor local stop` for daily use, and `tutor local dc ps` or `tutor local logs --tail=100` to inspect health. After first launch or a full reset, run `./scripts/infra/verify-local-bootstrap-readiness.sh` before treating the sandbox as ready.
+Use `make tutor-start` / `make tutor-stop` for whole-stack daily use, and drop
+to `tutor local dc ps` or `tutor local logs --tail=100` only for low-level
+runtime inspection. After first launch or a full reset, run
+`./scripts/infra/verify-local-bootstrap-readiness.sh` before treating the
+sandbox as ready.
 
 > `tutor local launch` may run for 10-60+ minutes on the first pass depending on Docker resources, image freshness, and database init time. If your terminal times out, re-run `tutor local do init` until it completes. The `openedx` MySQL user will be missing otherwise, and the LMS/Studio will 500 with "Access denied for user 'openedx'". Use the bootstrap workflow phase-timing artifact as the current CI reference point instead of assuming a fixed laptop duration.
 
@@ -131,7 +135,7 @@ Use `tutor local start -d` / `tutor local stop` for daily use, and `tutor local 
 - To work with real Kajabi data locally, generate the CSVs/tarballs under `scripts/migrations/kajabi/output/` (see [`KAJABI_MIGRATION.md`](../../ops/runbooks/migrations/kajabi/KAJABI_MIGRATION.md)), then run the import helpers described in [`WORKFLOW_LOCAL.md`](WORKFLOW_LOCAL.md#5-data-imports-kajabi).
 - When you finish testing, you can reset the sandbox via:
   ```bash
-  tutor local stop
+  make tutor-stop
   rm -rf tutor_env/data/mysql tutor_env/data/mongodb tutor_env/data/redis
   tutor local launch -I --skip-build
   ```
@@ -160,9 +164,9 @@ tutor local createuser --superuser --staff -p mereka_admin mereka_admin mereka@e
 
 ## Daily development workflow
 
-- Start/stop stack: `tutor local start -d` / `tutor local stop`.
-- Bring services back after config changes: rerun `./scripts/infra/tutor-config-save.sh`, then `tutor local restart`.
-- Keep databases clean while iterating on configuration: `tutor local down -v && rm -rf tutor_env/data`. After wiping Tutor data, re-run `tutor local launch -I --skip-build` (or at least `tutor local do init`) so service schemas and users are recreated before you hit the LMS.
+- Start/stop stack: `make tutor-start` / `make tutor-stop`.
+- Bring services back after config changes: rerun `./scripts/infra/tutor-config-save.sh`, then `make tutor-restart`.
+- Keep databases clean while iterating on configuration: `make tutor-stop && tutor local down -v && rm -rf tutor_env/data`. After wiping Tutor data, re-run `tutor local launch -I --skip-build` (or at least `tutor local do init`) so service schemas and users are recreated before you hit the LMS.
 
 ### MFE development
 
@@ -193,7 +197,7 @@ Design work references Paragon components and tokens (`https://edx.github.io/par
 3. Re-run the canonical build-context prepare step so LMS/Studio templates and the rendered MFE build context pick up the latest SCSS, then restart your stack:
    ```bash
    ./scripts/infra/prepare-tutor-build-context.sh --target all
-   tutor local start -d
+   make tutor-start
    ```
 4. Rebuild MFEs with `./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast` to bundle the same SCSS inside `frontend-app-*`. The plugin automatically imports `theme-source/mereka.scss`.
 
@@ -208,7 +212,7 @@ Design work references Paragon components and tokens (`https://edx.github.io/par
 
 ## Maintenance
 
-- Capture backups before upgrades: `tutor local stop && tutor local do backup-db`. Store dumps outside this repo.
+- Capture backups before upgrades: `make tutor-stop && tutor local do backup-db`. Store dumps outside this repo.
 - Update packages regularly: `pip install -r requirements-tutor.txt` (version pins live in `requirements-tutor.txt`).
 - After any upgrade, rerun `./scripts/infra/prepare-tutor-build-context.sh --target all` before rebuilding MFEs.
 - Apply Tutor upgrades: `source infrastructure/tutor/tutor-env.sh && tutor local do upgrade`.

@@ -46,14 +46,18 @@ kubectl get pods -n mereka-lms -w
 2. **Document the fix**: Add a comment header explaining what the patch fixes
 3. **Verify the fix**: Include verification commands in the patch header
 
-## When to Use Patches vs Tutor Config
+## When to Use K8s Patches vs Tutor Source
 
-**Use Tutor config** (`infrastructure/tutor/apply-patches.sh`) for:
+**Use Tutor source plus the governed render/prepare path** for:
 - Django settings changes
 - Dockerfile modifications
 - Service configuration
 - Reverse proxy rules
 - MFE build fixes
+
+The normal path is `./scripts/infra/tutor-config-save.sh`, followed by the
+targeted build/deploy verifier for the surface you changed. Do not use the
+low-level patch runner as the operator entrypoint.
 
 **Use K8s patches** (this directory) for:
 - ArgoCD configuration

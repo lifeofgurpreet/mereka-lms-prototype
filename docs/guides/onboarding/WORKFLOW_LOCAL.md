@@ -52,17 +52,21 @@ tutor local launch -I --skip-build
 ./scripts/infra/verify-local-bootstrap-readiness.sh
 ```
 
-Daily use:
+Whole-stack daily runtime control after bootstrap:
 
 ```bash
-tutor local start -d     # bring the stack up
-tutor local stop         # stop all containers
+make tutor-start         # bring the stack up
+make tutor-stop          # stop all containers
+make tutor-restart       # re-apply rendered config to the whole stack
 ```
+
+Use raw `tutor local ...` subcommands below only for low-level `run`, `logs`,
+targeted service recovery, or first-launch/bootstrap operations.
 
 ## 4. Quick Service Health Checks
 
 ```bash
-tutor local status                          # docker-compose ps
+tutor local dc ps                           # rendered Docker Compose status
 curl -I http://localhost                    # LMS
 curl -I http://studio.localhost             # Studio
 curl -I http://discovery.localhost          # Discovery

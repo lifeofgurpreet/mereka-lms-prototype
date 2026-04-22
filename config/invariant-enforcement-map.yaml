@@ -64,7 +64,7 @@ invariants:
     incident_origin: null
 
   - invariant_id: "INV-007"
-    rule: "Always run apply-patches.sh after tutor config save"
+    rule: "Render Tutor config through the governed wrapper and prepare the build context before trusting generated artifacts"
     detector_script: "scripts/qa/verify-tutor-config.sh"
     ci_gate: "ci.yml / tutor-config-tests"
     kyverno_policy: null

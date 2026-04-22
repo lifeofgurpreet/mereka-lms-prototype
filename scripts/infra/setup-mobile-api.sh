@@ -56,7 +56,7 @@ if [ "$ENV_TYPE" = "local" ]; then
   
   if [ "${NEEDS_RESTART:-false}" = "true" ]; then
     echo "Restarting services..."
-    tutor local restart
+    make tutor-restart
   fi
 fi
 

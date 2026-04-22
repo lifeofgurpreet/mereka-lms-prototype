@@ -202,7 +202,7 @@ make tutor-restart                # Restart all services
 
 # Modifying configuration (SAFE WORKFLOW)
 ./scripts/infra/tutor-config-save.sh --set KEY=value  # Saves config, applies patches, verifies
-tutor local restart                                  # Apply changes
+make tutor-restart                                   # Apply rendered config to the running stack
 
 # Quick verification
 ./scripts/infra/verify-tutor-config.sh  # Check all patches are present
@@ -224,7 +224,7 @@ gh workflow run build-benchmark.yml \
 
 ### Diagnostics (Local)
 ```bash
-# Check container status
+# Low-level runtime inspection (after setup)
 docker ps --filter "name=tutor_local"
 tutor local dc ps
 
@@ -322,7 +322,7 @@ make migrations-verify            # Verify Kajabi data sync
 ### Cleaning Up
 ```bash
 make clean                        # Remove logs, exports, Python cache
-tutor local stop && docker system prune -a  # Deep clean (removes all images)
+make tutor-stop && docker system prune -a   # Deep clean (removes all images)
 ```
 
 ## Critical Workflows
@@ -333,7 +333,7 @@ tutor local stop && docker system prune -a  # Deep clean (removes all images)
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
 ./scripts/infra/tutor-config-save.sh --set KEY=value
-tutor local restart
+make tutor-restart
 ```
 
 **Why**: Tutor render output is generated state. The wrapper script (`tutor-config-save.sh`) automatically:
@@ -353,7 +353,7 @@ export TUTOR_ROOT="$(pwd)/tutor_env"
   --set MONGODB_HOST=mongodb \
   --set REDIS_HOST=redis \
   --set MONGODB_PORT=27017
-tutor local restart
+make tutor-restart
 ```
 
 ### Site Down Troubleshooting
@@ -422,7 +422,8 @@ The full methodology is in `docs/adr/021-openedx-tutor-methodology.md`. Every ag
 ## Testing
 
 - `make qa-smoke` runs smoke tests for critical paths
-- `tutor local quickstart -I` is the acceptance test for major changes
+- `./scripts/shared/setup-local.sh` is the local acceptance path for major onboarding/build changes
+- `.github/workflows/bootstrap-local-readiness.yml` is the branch proof lane for the same bootstrap contract
 - Verify all containers report `Up` via `tutor local dc ps`
 - Capture screenshots after theme changes
 
