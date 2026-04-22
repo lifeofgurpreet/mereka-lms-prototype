@@ -92,6 +92,13 @@ else
   echo "Dockerfile must live under the build context for Bake-backed execution: $DOCKERFILE" >&2
   exit 1
 fi
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+if [[ "$CONTEXT_DIR_ABS" == "$REPO_ROOT/"* ]]; then
+  RENDERED_CONTEXT_LABEL="${CONTEXT_DIR_ABS#"$REPO_ROOT"/}"
+else
+  RENDERED_CONTEXT_LABEL="$CONTEXT_DIR"
+fi
 case "$BUILD_PROFILE" in
   proof|fast) ;;
   *)
@@ -136,7 +143,6 @@ fi
 
 IMAGE_NAME="${IMAGE_REPO##*/}"
 GHA_SCOPE="tutor-${IMAGE_NAME}-${BUILD_PROFILE}"
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 BAKE_FILE="$REPO_ROOT/docker-bake.hcl"
 BAKE_TARGET="mfe-${BUILD_PROFILE}"
 if [[ "$CACHE_MODE" == "none" ]]; then
@@ -165,7 +171,7 @@ BAKE_ENV=(
   "LOCAL_CACHE_DIR=${LOCAL_CACHE_ROOT}"
   "MFE_CONTEXT=${CONTEXT_DIR}"
   "MFE_DOCKERFILE=${DOCKERFILE_RELATIVE}"
-  "MFE_RENDERED_CONTEXT=${CONTEXT_DIR}"
+  "MFE_RENDERED_CONTEXT=${RENDERED_CONTEXT_LABEL}"
   "MFE_RENDERED_DOCKERFILE=${DOCKERFILE_RELATIVE}"
   "MFE_RENDERED_DOCKERFILE_SHA256=${DOCKERFILE_SHA256}"
   "MFE_BUILD_CONTEXT_SHA256=${BUILD_CONTEXT_SHA256}"

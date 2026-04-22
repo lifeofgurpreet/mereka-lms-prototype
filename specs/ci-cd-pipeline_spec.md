@@ -82,7 +82,7 @@ The platform currently has workflows that evolved organically -- CI, image build
   - GitOps deployment automation with environment promotion (local Kind, production GKE)
   - Automated rollback mechanisms and safety checks
   - Branch protection rules and merge gate policies
-  - Artifact management and container registry operations (GCP Artifact Registry)
+  - Artifact management and container registry operations (GHCR)
   - Infrastructure-as-code validation (Kustomize, Terraform, ExternalSecrets)
   - Scheduled operational audits (observability, alert routing, DR evidence, health checks)
   - Release evidence generation and compliance artifact bundling
@@ -110,20 +110,20 @@ The platform currently has workflows that evolved organically -- CI, image build
 ## Cross-Spec Integration Criteria
 
 ### K8s Deployment Integration (Tier 2 → Tier 3)
-- [ ] AC-INT-001: Given K8s manifests pass `validate-k8s.sh`, when CI builds and pushes images to Artifact Registry, then production Kustomize overlay references the new image tags and `kubectl apply` succeeds without resource validation errors.
+- [ ] AC-INT-001: Given K8s manifests pass `validate-k8s.sh`, when CI builds and pushes images to GHCR, then production Kustomize overlay references the promoted image digests and `kubectl apply` succeeds without resource validation errors.
 - [ ] AC-INT-002: Given K8s Deployments require specific ExternalSecrets, when CI deployment workflow runs, then it verifies ExternalSecrets reach `SecretSynced` before declaring deployment success.
 
 ### Secrets Management Integration (Tier 1 → Tier 3)
 - [ ] AC-INT-003: Given `secrets-management_spec.md` defines required secret keys, when CI runs secret validation (`infisical-validate-mereka-lms.sh`), then it fails the build if any required `MEREKA_LMS_*` key is missing or contains placeholder values in the target environment.
 
 ### Branding System Integration (Tier 3 → Tier 3)
-- [ ] AC-INT-004: Given branding assets are synced via `apply-patches.sh`, when CI builds openedx image, then `branding-preflight.sh` passes and verifies Mereka logo presence and Google Fonts absence in compiled artifacts.
+- [ ] AC-INT-004: Given branding assets are carried by the canonical Tutor render/build path, when CI builds the openedx image, then the post-push branding verifier passes and verifies Mereka logo presence and Google Fonts absence in compiled artifacts.
 
 ## Assumptions
 
 - GitHub Actions is the sole CI/CD platform. No Jenkins, CircleCI, or other systems.
-- GCP Artifact Registry at `ghcr.io/biji-biji-initiative/mereka-lms` is the container image registry.
-- The GitOps target repository is `Biji-Biji-Initiative/bbi-infrastructure`, accessed via `GITOPS_PAT` secret.
+- GHCR at `ghcr.io/biji-biji-initiative/mereka-lms` is the container image registry.
+- The GitOps target repository is `Biji-Biji-Initiative/bbi-infrastructure`, accessed through the configured GitHub App token path.
 - Production runs on GKE Autopilot in `asia-southeast1-c` (project `bbi-k8`).
 - Dev/local runs on Kind cluster on the VPS (`194.233.84.55`).
 - All secrets are managed via Infisical -> GCP Secret Manager -> ExternalSecrets (per `specs/secrets-management_spec.md`).
@@ -188,22 +188,22 @@ The platform currently has workflows that evolved organically -- CI, image build
 
 #### Docker Image Build Pipeline (build-tutor-images.yml)
 
-- The build workflow MUST trigger on push to `main` when files change in `infrastructure/tutor/**`, `assets/branding/**`, or `.github/workflows/build-tutor-images.yml`.
-- The build workflow MUST support `workflow_dispatch` with the following inputs: `build_openedx` (boolean), `build_mfe` (boolean), `update_gitops` (boolean), `target_environment` (choice: select-environment/production/staging), `image_tag` (string, optional).
-- The build workflow MUST run a `lint` job before build jobs. Build jobs MUST depend on lint passing (`needs: lint`).
-- The build workflow MUST install Tutor 21.0.0 for all build jobs.
-- The build workflow MUST run `./infrastructure/tutor/apply-patches.sh` after `tutor config save` in every build job.
-- The build workflow MUST authenticate to GCP Artifact Registry using `google-github-actions/auth@v2` with `GCP_SA_KEY`.
+- The build workflow MUST trigger on push to `main` when image-bearing Tutor source, branding assets, build helper scripts, release-object helpers, or `.github/workflows/build-tutor-images.yml` change.
+- The build workflow MUST support `workflow_dispatch` with the following inputs: `lane_mode`, `build_openedx` (boolean), `build_mfe` (boolean), `update_gitops` (boolean), `target_environment` (choice: select-environment/production/staging), `image_tag` (string, optional), `build_profile` (proof/fast), and `mfe_build_profile` (proof/fast).
+- The build workflow MUST run lint/render-preflight/build-context preparation before heavy image jobs. Heavy image jobs MUST consume prepared Tutor build-context artifacts instead of running raw Tutor render or `apply-patches.sh` directly.
+- The build workflow MUST render through the canonical Tutor wrappers and patch manifest, not through ad hoc generated-artifact edits in heavy jobs.
+- The build workflow MUST authenticate to GHCR and publish under `ghcr.io/biji-biji-initiative/mereka-lms/`.
+- Docker Buildx setup steps MUST use the current `buildkitd-config-inline` input for inline BuildKit daemon configuration; the deprecated `config-inline` input MUST NOT appear as a workflow key.
 - The build workflow MUST tag images with both the full git SHA (or custom `image_tag`) and the 8-character short SHA.
-- The build workflow MUST NOT publish mutable `:latest` tags to Artifact Registry.
+- The build workflow MUST NOT publish mutable `:latest` tags to GHCR.
 - The build workflow MUST resolve and expose image digests as job outputs after push.
 - The build workflow MUST set `NODE_OPTIONS=--max-old-space-size=6144` for MFE builds.
-- The MFE build MUST run `scripts/qa/verify-mfe-image-branding.sh` before push and upload the verification log as artifact.
-- The MFE branding verification MUST fail the build if the authn `index.html` references unbranded CSS or misses the expected revision marker.
+- Post-push scan jobs MUST verify Open edX branding, MFE branding, and MFE runtime contracts against resolved pushed digests and upload verification logs as artifacts.
+- The MFE branding verification MUST fail the post-push scan gate if the authn `index.html` references unbranded CSS or misses the expected revision marker.
 
 #### Image Tag Immutability
 
-- All images pushed to Artifact Registry MUST use immutable tags (git SHA or release tag). Mutable tags (`:latest`, `:nightly`) MUST NOT be used for production.
+- All images pushed to GHCR MUST use immutable tags (git SHA or release tag). Mutable tags (`:latest`, `:nightly`) MUST NOT be used for production.
 - The `prod-tag-guard` CI job MUST verify that no production Kustomize overlay references `:latest` tags.
 - The `verify-dev-prod-image-parity.sh` script MUST verify that dev and production overlays use consistent image configurations.
 
@@ -216,7 +216,7 @@ The platform currently has workflows that evolved organically -- CI, image build
 - GitOps update MUST pass `--require-digests` and provide both `--openedx-digest` and `--mfe-digest` for production releases.
 - GitOps update MUST block `target_environment=staging` unless repository variable `ENABLE_STAGING_ENV=true` is set.
 - The `deploy_to_staging` input MUST be rejected with an error message directing users to `update_gitops`.
-- GitOps update MUST validate that `GITOPS_PAT` secret is present before attempting cross-repo operations.
+- GitOps update MUST validate that GitHub App credentials are present before attempting cross-repo operations.
 - GitOps update MUST configure git identity as `github-actions[bot]` for commits.
 
 #### iOS Build Pipeline (build-ios-app.yml)
@@ -318,7 +318,7 @@ The platform currently has workflows that evolved organically -- CI, image build
   - Operations gate artifacts: 30 days
   - DR evidence bundles: 120 days
   - Release evidence bundles: default (90 days)
-- Container images in Artifact Registry SHOULD be cleaned up via lifecycle policy after 90 days for non-production tags.
+- Container images in GHCR SHOULD be cleaned up via lifecycle policy after 90 days for non-production tags.
 - The pipeline SHOULD NOT store build artifacts larger than 500MB per workflow run.
 
 #### Rollback Mechanism
@@ -368,7 +368,7 @@ The platform currently has workflows that evolved organically -- CI, image build
 - The pipeline MUST NOT store GCP service account keys in the repository. Keys MUST be in GitHub Actions secrets only.
 - The pipeline MUST run TruffleHog secret scanning on every PR.
 - The pipeline MUST run Hadolint on any Dockerfiles present in the repository.
-- The `GITOPS_PAT` token MUST have minimum required permissions (contents:write on `bbi-infrastructure` only).
+- The GitHub App token MUST have minimum required permissions for the target repositories.
 - Workflow permissions MUST follow least-privilege: `contents: write` only for workflows that push commits.
 - The pre-commit secret scanning hook MUST detect hardcoded passwords, API keys, private keys, JWT tokens, and database connection strings with embedded credentials.
 
@@ -394,10 +394,10 @@ The platform currently has workflows that evolved organically -- CI, image build
 ### Image Build
 
 - [ ] AC-009: Given a push to `main` modifies `infrastructure/tutor/**`, when the build workflow triggers, then both openedx and MFE images are built, tagged with the git SHA and short SHA, and pushed to `ghcr.io/biji-biji-initiative/mereka-lms/`.
-- [ ] AC-010: Given the openedx image is built, when it is pushed to Artifact Registry, then the job output contains the resolved image digest (sha256:...).
+- [ ] AC-010: Given the openedx image is built, when it is pushed to GHCR, then the job output contains the resolved image digest (sha256:...).
 - [ ] AC-011: Given the MFE image is built, when the branding verification runs, then it validates that the authn index.html contains the expected branding revision marker.
 - [ ] AC-012: Given a manual dispatch with `build_openedx=true` and `image_tag=v1.2.3`, when the build completes, then the image is tagged as `openedx:v1.2.3` and `openedx:<short-sha>`.
-- [ ] AC-013: Given the build workflow, when images are pushed, then no `:latest` tag is published to Artifact Registry.
+- [ ] AC-013: Given the build workflow, when images are pushed, then no `:latest` tag is published to GHCR.
 
 ### GitOps Deployment
 
@@ -455,12 +455,12 @@ The platform currently has workflows that evolved organically -- CI, image build
 
 - **OOM during OpenEdX build**: The openedx image build requires 12GB+ RAM. GitHub-hosted runners provide 7GB. The workflow sets `DOCKER_OPTS=--memory=12g --memory-swap=16g` but this may not be effective on all runner configurations. If OOM persists, the build MUST fail clearly (not hang) and the step summary MUST suggest building locally or using self-hosted runners.
 - **OOM during MFE build**: MFE webpack builds consume 6-8GB. The workflow sets `NODE_OPTIONS=--max-old-space-size=6144`. If the build OOMs, the error MUST be distinguishable from other failures.
-- **Network failure during image push**: If `docker push` fails due to transient network issues, the workflow MUST fail (no silent partial push). Re-running the workflow MUST be safe (idempotent tag overwrite in Artifact Registry).
-- **Stale Tutor cache**: If Tutor's cached state conflicts with config changes, `--no-cache` builds MUST produce correct results. The workflow uses `--no-cache` by default for CI builds.
+- **Network failure during image push**: If `docker push` fails due to transient network issues, the workflow MUST fail (no silent partial push). Re-running the workflow MUST be safe (idempotent tag overwrite in GHCR).
+- **Stale Tutor cache**: If Tutor's cached state conflicts with config changes, app-cache-cold benchmark runs MUST suppress app-level cache imports and use the no-cache bake targets. Routine image builds may use governed GHCR BuildKit registry cache.
 
 ### Deployment Failures
 
-- **GitOps PAT expired**: If `GITOPS_PAT` is expired or invalid, the update-gitops job MUST fail before attempting git operations, with a clear error message about the PAT.
+- **GitOps App token unavailable**: If the GitHub App credentials are missing or invalid, the promotion bridge MUST fail before attempting cross-repo git operations, with a clear credential error.
 - **bbi-infrastructure merge conflict**: If the GitOps commit conflicts with concurrent changes in `bbi-infrastructure`, the push MUST fail and the operator MUST resolve manually. The workflow MUST NOT force-push.
 - **Digest mismatch**: If image digests from build outputs do not match registry-resolved digests, `release-openedx-gitops.sh` with `--require-digests` MUST fail. This indicates a registry consistency issue.
 - **Partial build success**: If openedx builds but MFE fails, the update-gitops job MUST NOT run (it depends on both build jobs via `needs`).
@@ -472,8 +472,8 @@ The platform currently has workflows that evolved organically -- CI, image build
 
 ### Concurrent Build Handling
 
-- **Concurrent pushes to same branch**: If two commits are pushed to the same branch within minutes, the build workflow MUST use `concurrency: { group: ${{ github.workflow }}-${{ github.ref }}, cancel-in-progress: true }` to cancel the older build. Only the latest commit's build should complete.
-- **Concurrent image pushes**: Two workflows pushing the same image tag simultaneously MUST NOT corrupt the registry. Artifact Registry handles this atomically (last writer wins). The GitOps update MUST use the latest digest.
+- **Concurrent pushes to same branch**: If two commits are pushed to `main` within minutes, the build workflow MUST serialize main builds and cancel superseded queued main runs. Non-main/manual proof runs MAY be superseded by workflow concurrency.
+- **Concurrent image pushes**: Two workflows pushing the same image tag simultaneously MUST NOT corrupt the registry. GHCR handles this atomically (last writer wins). The promotion path MUST use the resolved digest from the release object.
 - **Concurrent GitOps updates**: If two builds complete simultaneously and both try to update `bbi-infrastructure`, the second push MUST fail (no force-push). The operator resolves by re-running the failed workflow, which picks up the latest state.
 - **Scheduled workflow overlap**: If a scheduled workflow run overlaps with the previous run (e.g., health check takes longer than the schedule interval), the new run SHOULD be skipped via `concurrency` group to avoid resource contention.
 
@@ -485,7 +485,7 @@ The platform currently has workflows that evolved organically -- CI, image build
 
 ### Idempotency
 
-- Re-running any build workflow with the same inputs MUST be safe. Image tags are overwritten in Artifact Registry (same tag points to new digest if source changed, or same digest if unchanged).
+- Re-running any build workflow with the same inputs MUST be safe. Image tags are overwritten in GHCR (same tag points to new digest if source changed, or same digest if unchanged).
 - Re-running GitOps update with the same tags MUST be safe. The release orchestrator script MUST produce an identical commit (or no-op if tags already match).
 - Re-running release evidence generation MUST produce a new artifact bundle with a new `run_id`.
 
@@ -497,7 +497,7 @@ The platform currently has workflows that evolved organically -- CI, image build
   - Scheduled: ~5 min/run x (4 daily + 48 health checks + 4 ops gates) x 30 days = ~8,400 min
   - iOS: ~60 min/run x ~4 builds/month = 240 min (macOS minutes count 10x)
   - Total estimate: ~9,490+ min/month. This SHOULD be monitored and scheduled workflow frequency MAY be reduced if quotas are exceeded.
-- GCP Artifact Registry: No per-push limits but storage costs apply. Images SHOULD be cleaned up per retention policy.
+- GHCR: package storage and retention policy apply. Images SHOULD be cleaned up per retention policy.
 
 ### Partial Failures
 

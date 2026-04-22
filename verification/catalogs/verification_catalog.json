@@ -9321,7 +9321,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-mfe-image-branding.sh",
-      "reference_count": 30,
+      "reference_count": 29,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

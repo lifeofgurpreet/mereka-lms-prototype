@@ -540,7 +540,7 @@ jobs:
           driver-opts: |
             image=mirror.gcr.io/moby/buildkit:buildx-stable-1
           cleanup: false
-          config-inline: |
+          buildkitd-config-inline: |
             [registry."docker.io"]
               mirrors = ["mirror.gcr.io"]
 
@@ -736,7 +736,7 @@ jobs:
           driver-opts: |
             image=mirror.gcr.io/moby/buildkit:buildx-stable-1
           cleanup: false
-          config-inline: |
+          buildkitd-config-inline: |
             [registry."docker.io"]
               mirrors = ["mirror.gcr.io"]
 

@@ -120,8 +120,10 @@ fi
 
 # ── Check 8: Python lzma fallback in shellcheck install step ─────────────────
 if [[ -f "${CI_YML}" ]]; then
-  if grep -q "kubeconform-schemas" "${CI_YML}" && grep -q "error while downloading schema" "${CI_YML}"; then
-    pass "kubeconform schema cache + transient download retry present in ci.yml"
+  if grep -q "kubeconform-schemas" "${CI_YML}" \
+    && grep -q "error while" "${CI_YML}" \
+    && grep -q "failed) downloading schema" "${CI_YML}"; then
+    pass "kubeconform schema cache + transient download retry handles known transient phrasings in ci.yml"
   else
     fail "kubeconform schema cache/retry hardening missing in ci.yml"
   fi

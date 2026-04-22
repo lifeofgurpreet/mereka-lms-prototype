@@ -560,7 +560,7 @@ jobs:
           driver: docker-container
           driver-opts: |
             image=mirror.gcr.io/moby/buildkit:buildx-stable-1
-          config-inline: |
+          buildkitd-config-inline: |
             [registry."docker.io"]
               mirrors = ["mirror.gcr.io"]
           # This job runs on disposable runners, and the OpenEdX lane has
@@ -912,7 +912,7 @@ jobs:
           driver: docker-container
           driver-opts: |
             image=mirror.gcr.io/moby/buildkit:buildx-stable-1
-          config-inline: |
+          buildkitd-config-inline: |
             [registry."docker.io"]
               mirrors = ["mirror.gcr.io"]
           # Heavy image-build lanes run on ephemeral runners, so leaving the
@@ -923,8 +923,8 @@ jobs:
           # was bogus — that flag does not exist in buildkitd. Baseline builds
           # (pre-cap) ran webpack to completion without OOM on 12GB heavy
           # builders, so no cap is required. If concurrent MFE webpack starts
-          # pushing memory later, the correct lever is config-inline:
-          #   config-inline: |
+          # pushing memory later, the correct lever is buildkitd-config-inline:
+          #   buildkitd-config-inline: |
           #     [worker.oci]
           #       max-parallelism = 4
           # which writes a real buildkitd.toml the worker respects.
@@ -1107,6 +1107,7 @@ jobs:
 
       - name: Verify generated MFE runtime contract
         run: |
+          set -euo pipefail
           mkdir -p var/ci
           scripts/qa/verify-mfe-runtime-contract.sh \
             --generated-env-config "${TUTOR_ROOT}/env/plugins/mfe/build/mfe/env.config.jsx" \
@@ -1175,7 +1176,7 @@ jobs:
           driver: docker-container
           driver-opts: |
             image=mirror.gcr.io/moby/buildkit:buildx-stable-1
-          config-inline: |
+          buildkitd-config-inline: |
             [registry."docker.io"]
               mirrors = ["mirror.gcr.io"]
 
@@ -1203,8 +1204,8 @@ jobs:
       - name: Verify OpenEdX image branding contract
         # Fast path: validates staticfiles.json artifact uploaded by build-openedx.
         # No docker pull or docker run required (~5s vs ~470s previously).
-        continue-on-error: true  # Non-blocking until FE-003 (LMS SCSS entry point) is resolved
         run: |
+          set -euo pipefail
           mkdir -p var/ci
           EXPECTED_LMS_BRANDING_REV="$(sed -nE 's/.*--mereka-branding-rev:[[:space:]]*\"([^\"]+)\".*/\1/p' infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css | head -n 1)"
           scripts/qa/verify-openedx-image-branding.sh \
@@ -1396,7 +1397,7 @@ jobs:
           driver: docker-container
           driver-opts: |
             image=mirror.gcr.io/moby/buildkit:buildx-stable-1
-          config-inline: |
+          buildkitd-config-inline: |
             [registry."docker.io"]
               mirrors = ["mirror.gcr.io"]
 
@@ -1412,6 +1413,7 @@ jobs:
         env:
           MFE_IMAGE_REF: ${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs.image_digest }}
         run: |
+          set -euo pipefail
           mkdir -p var/ci
           EXPECTED_MFE_BRANDING_REV="$(sed -nE 's/.*--mereka-mfe-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' infrastructure/tutor/themes/mereka/mfe/mereka.scss | head -n 1)"
           scripts/qa/verify-mfe-image-branding.sh "${MFE_IMAGE_REF}" "${EXPECTED_MFE_BRANDING_REV}" \
@@ -1429,6 +1431,7 @@ jobs:
         env:
           MFE_IMAGE_REF: ${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs.image_digest }}
         run: |
+          set -euo pipefail
           mkdir -p var/ci
           scripts/qa/verify-mfe-runtime-contract.sh --image "${MFE_IMAGE_REF}" \
             | tee var/ci/verify-mfe-runtime-contract.log

@@ -420,6 +420,12 @@ jobs:
             var/ci/build-mfe.log
             var/ci/build-mfe-timing.env
             build-metrics-mfe.json
+      - name: Verify generated MFE runtime contract
+        run: |
+          set -euo pipefail
+          scripts/qa/verify-mfe-runtime-contract.sh \
+            --generated-env-config "${TUTOR_ROOT}/env/plugins/mfe/build/mfe/env.config.jsx" \
+            | tee var/ci/verify-mfe-generated-runtime-contract.log
       - name: Resolve pushed mfe digest
         id: digest
         run: echo "digest=sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" >> "$GITHUB_OUTPUT"
@@ -431,10 +437,16 @@ jobs:
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
+        with:
+          buildkitd-config-inline: |
+            [registry."docker.io"]
+              mirrors = ["mirror.gcr.io"]
       - name: Fix DinD network MTU
         run: echo fix mtu
       - name: Verify OpenEdX image branding contract
-        run: scripts/qa/verify-openedx-image-branding.sh "${OPENEDX_IMAGE_REF}" | tee var/ci/verify-openedx-image-branding.log
+        run: |
+          set -euo pipefail
+          scripts/qa/verify-openedx-image-branding.sh "${OPENEDX_IMAGE_REF}" | tee var/ci/verify-openedx-image-branding.log
         env:
           OPENEDX_IMAGE_REF: ${{ env.REGISTRY }}/openedx@${{ needs.build-openedx.outputs.image_digest }}
       - name: Upload OpenEdX branding verification log
@@ -472,10 +484,16 @@ jobs:
     steps:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
+        with:
+          buildkitd-config-inline: |
+            [registry."docker.io"]
+              mirrors = ["mirror.gcr.io"]
       - name: Fix DinD network MTU
         run: echo fix mtu
       - name: Verify MFE image branding contract
-        run: scripts/qa/verify-mfe-image-branding.sh "${MFE_IMAGE_REF}" | tee var/ci/verify-mfe-image-branding.log
+        run: |
+          set -euo pipefail
+          scripts/qa/verify-mfe-image-branding.sh "${MFE_IMAGE_REF}" | tee var/ci/verify-mfe-image-branding.log
         env:
           MFE_IMAGE_REF: ${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs.image_digest }}
       - name: Upload MFE branding verification log
@@ -484,7 +502,9 @@ jobs:
           name: mfe-branding-contract-log
           path: var/ci/verify-mfe-image-branding.log
       - name: Verify MFE runtime contract (image)
-        run: scripts/qa/verify-mfe-runtime-contract.sh --image "${MFE_IMAGE_REF}" | tee var/ci/verify-mfe-runtime-contract.log
+        run: |
+          set -euo pipefail
+          scripts/qa/verify-mfe-runtime-contract.sh --image "${MFE_IMAGE_REF}" | tee var/ci/verify-mfe-runtime-contract.log
         env:
           MFE_IMAGE_REF: ${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs.image_digest }}
       - name: Upload MFE runtime contract log
@@ -819,7 +839,9 @@ p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
 text = p.read_text()
 text = text.replace(
     '      - name: Verify OpenEdX image branding contract\n'
-    '        run: scripts/qa/verify-openedx-image-branding.sh "${OPENEDX_IMAGE_REF}" | tee var/ci/verify-openedx-image-branding.log\n'
+    '        run: |\n'
+    '          set -euo pipefail\n'
+    '          scripts/qa/verify-openedx-image-branding.sh "${OPENEDX_IMAGE_REF}" | tee var/ci/verify-openedx-image-branding.log\n'
     '        env:\n'
     '          OPENEDX_IMAGE_REF: ${{ env.REGISTRY }}/openedx@${{ needs.build-openedx.outputs.image_digest }}\n',
     '',
@@ -827,6 +849,23 @@ text = text.replace(
 p.write_text(text)
 PY
 run_expect_fail "missing canonical OpenEdX post-push branding verification is rejected"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    '      - name: Verify OpenEdX image branding contract\n'
+    '        run: |\n',
+    '      - name: Verify OpenEdX image branding contract\n'
+    '        continue-on-error: true\n'
+    '        run: |\n',
+)
+p.write_text(text)
+PY
+run_expect_fail "OpenEdX post-push branding verifier must block failed proof"
 
 write_pass_fixture
 python3 - "$tmpdir" <<'PY'
@@ -847,7 +886,11 @@ p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
 text = p.read_text()
 text = text.replace(
     '      - name: Set up Docker Buildx\n'
-    '        uses: docker/setup-buildx-action@v4\n',
+    '        uses: docker/setup-buildx-action@v4\n'
+    '        with:\n'
+    '          buildkitd-config-inline: |\n'
+    '            [registry."docker.io"]\n'
+    '              mirrors = ["mirror.gcr.io"]\n',
     '',
     1,
 )
@@ -970,7 +1013,9 @@ p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
 text = p.read_text()
 text = text.replace(
     '      - name: Verify MFE image branding contract\n'
-    '        run: scripts/qa/verify-mfe-image-branding.sh "${MFE_IMAGE_REF}" | tee var/ci/verify-mfe-image-branding.log\n'
+    '        run: |\n'
+    '          set -euo pipefail\n'
+    '          scripts/qa/verify-mfe-image-branding.sh "${MFE_IMAGE_REF}" | tee var/ci/verify-mfe-image-branding.log\n'
     '        env:\n'
     '          MFE_IMAGE_REF: ${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs.image_digest }}\n'
     '      - name: Upload MFE branding verification log\n'
@@ -993,6 +1038,10 @@ text = p.read_text()
 marker = (
     '      - name: Set up Docker Buildx\n'
     '        uses: docker/setup-buildx-action@v4\n'
+    '        with:\n'
+    '          buildkitd-config-inline: |\n'
+    '            [registry."docker.io"]\n'
+    '              mirrors = ["mirror.gcr.io"]\n'
     '      - name: Fix DinD network MTU\n'
     '        run: echo fix mtu\n'
 )
@@ -1009,7 +1058,9 @@ p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
 text = p.read_text()
 text = text.replace(
     '      - name: Verify MFE runtime contract (image)\n'
-    '        run: scripts/qa/verify-mfe-runtime-contract.sh --image "${MFE_IMAGE_REF}" | tee var/ci/verify-mfe-runtime-contract.log\n'
+    '        run: |\n'
+    '          set -euo pipefail\n'
+    '          scripts/qa/verify-mfe-runtime-contract.sh --image "${MFE_IMAGE_REF}" | tee var/ci/verify-mfe-runtime-contract.log\n'
     '        env:\n'
     '          MFE_IMAGE_REF: ${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs.image_digest }}\n'
     '      - name: Upload MFE runtime contract log\n'
@@ -1022,6 +1073,42 @@ text = text.replace(
 p.write_text(text)
 PY
 run_expect_fail "missing canonical MFE post-push runtime verification is rejected"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    '      - name: Verify MFE runtime contract (image)\n'
+    '        run: |\n'
+    '          set -euo pipefail\n'
+    '          scripts/qa/verify-mfe-runtime-contract.sh --image "${MFE_IMAGE_REF}" | tee var/ci/verify-mfe-runtime-contract.log\n',
+    '      - name: Verify MFE runtime contract (image)\n'
+    '        run: |\n'
+    '          scripts/qa/verify-mfe-runtime-contract.sh --image "${MFE_IMAGE_REF}" | tee var/ci/verify-mfe-runtime-contract.log\n',
+)
+p.write_text(text)
+PY
+run_expect_fail "MFE post-push runtime verifier must preserve failures through tee"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    '      - name: Verify generated MFE runtime contract\n'
+    '        run: |\n'
+    '          set -euo pipefail\n',
+    '      - name: Verify generated MFE runtime contract\n'
+    '        run: |\n',
+)
+p.write_text(text)
+PY
+run_expect_fail "generated MFE runtime verifier must preserve failures through tee"
 
 # Reintroduce broad scripts/infra glob => must fail
 write_pass_fixture

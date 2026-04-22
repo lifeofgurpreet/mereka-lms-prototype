@@ -125,18 +125,18 @@ check_build_pipeline() {
     fail "[AC-013] Image tags do not default to git SHA"
   fi
 
-  # AC-013: No :latest tags pushed to Artifact Registry
+  # AC-013: No :latest tags pushed to GHCR
   if grep -E 'docker push.*:latest([[:space:]]|$)' "$BUILD_WF" >/dev/null 2>&1; then
     fail "[AC-013] Build workflow publishes mutable :latest tags to registry"
   else
-    pass "[AC-013] No :latest tags pushed to Artifact Registry"
+    pass "[AC-013] No :latest tags pushed to GHCR"
   fi
 
-  # AC-011: Branding verification step exists in OpenEdX build
+  # AC-011: Branding verification step exists in the post-push proof path
   if grep -q 'Verify OpenEdX image branding contract' "$BUILD_WF"; then
-    pass "[AC-011] OpenEdX branding verification step exists in build"
+    pass "[AC-011] OpenEdX branding verification step exists in post-push proof"
   else
-    fail "[AC-011] OpenEdX branding verification step missing from build"
+    fail "[AC-011] OpenEdX branding verification step missing from post-push proof"
   fi
 
   # AC-011: Branding verification step exists in workflow for MFE image
@@ -208,7 +208,7 @@ check_registry() {
     return
   fi
 
-  # AC-009: Image push targets correct registry (GHCR — migrated from GCP Artifact Registry)
+  # AC-009: Image push targets the canonical GHCR registry.
   if grep -q 'ghcr.io/biji-biji-initiative/mereka-lms' "$BUILD_WF"; then
     pass "[AC-009] Images push to correct registry (ghcr.io/biji-biji-initiative/mereka-lms)"
   else

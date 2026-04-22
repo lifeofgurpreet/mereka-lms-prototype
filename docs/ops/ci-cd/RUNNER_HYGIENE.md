@@ -420,7 +420,7 @@ ssh root@"${RUNNER_IP}" docker rm -f buildx_buildkit_<name>
 - uses: docker/setup-buildx-action@v3
   with:
     driver: docker-container
-    config-inline: |
+    buildkitd-config-inline: |
       [worker.oci]
         gc = true
         gckeepstorage = 20000  # MiB

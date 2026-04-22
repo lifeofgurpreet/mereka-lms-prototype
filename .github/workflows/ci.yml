@@ -303,7 +303,7 @@ jobs:
 
           until validate_manifests "$log_file"; do
             exit_code=$?
-            if ! grep -q "error while downloading schema" "$log_file"; then
+            if ! grep -Eq "(error while|failed) downloading schema" "$log_file"; then
               exit "$exit_code"
             fi
 

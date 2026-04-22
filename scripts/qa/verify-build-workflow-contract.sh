@@ -40,6 +40,16 @@ extract_step_block() {
     capture { print }
   ' <<<"$block"
 }
+step_has_pipefail() {
+  local step_block="$1"
+  [[ "$step_block" == *'run: |'* && "$step_block" == *'set -euo pipefail'* ]]
+}
+
+MFE_GENERATED_RUNTIME_STEP="$(extract_step_block "$BUILD_MFE_BLOCK" 'Verify generated MFE runtime contract')"
+OPENEDX_IMAGE_BRANDING_STEP="$(extract_step_block "$SCAN_OPENEDX_BLOCK" 'Verify OpenEdX image branding contract')"
+MFE_IMAGE_BRANDING_STEP="$(extract_step_block "$SCAN_MFE_BLOCK" 'Verify MFE image branding contract')"
+MFE_RUNTIME_IMAGE_STEP="$(extract_step_block "$SCAN_MFE_BLOCK" 'Verify MFE runtime contract (image)')"
+
 job_has_precheckout_tutor_cleanup() {
   local block="$1"
   local cleanup_command cleanup_line checkout_line fallback_command
@@ -200,6 +210,20 @@ if grep -q "permissions:" "$BUILD_WF"; then
   pass "permissions block present"
 else
   fail "permissions block missing"
+fi
+
+if grep -Eq '^[[:space:]]*config-inline:' "$BUILD_WF"; then
+  fail "workflow uses deprecated docker/setup-buildx-action config-inline input"
+else
+  pass "workflow avoids deprecated docker/setup-buildx-action config-inline input"
+fi
+
+if grep -q 'buildkitd-config-inline:' "$BUILD_WF" \
+  && grep -q '\[registry\."docker\.io"\]' "$BUILD_WF" \
+  && grep -q 'mirrors = \["mirror\.gcr\.io"\]' "$BUILD_WF"; then
+  pass "workflow uses current Buildx inline daemon config input for registry mirror"
+else
+  fail "workflow missing current Buildx buildkitd-config-inline registry mirror contract"
 fi
 
 # Workflow path filter must include the exact image-bearing paths and helper
@@ -575,6 +599,18 @@ else
   fail "OpenEdX branding verification missing canonical post-push helper call"
 fi
 
+if step_has_pipefail "$OPENEDX_IMAGE_BRANDING_STEP"; then
+  pass "OpenEdX post-push branding verifier preserves failure status through tee"
+else
+  fail "OpenEdX post-push branding verifier missing set -euo pipefail before tee"
+fi
+
+if [[ "$OPENEDX_IMAGE_BRANDING_STEP" == *'continue-on-error: true'* ]]; then
+  fail "OpenEdX post-push branding verifier must block promotion when branding proof fails"
+else
+  pass "OpenEdX post-push branding verifier is blocking"
+fi
+
 if [[ "$BUILD_OPENEDX_BLOCK" == *'Verify OpenEdX image branding contract'* ]]; then
   fail "OpenEdX branding verification still runs inside the heavy build job"
 else
@@ -593,10 +629,22 @@ else
   fail "MFE branding verification missing canonical post-push helper call"
 fi
 
+if step_has_pipefail "$MFE_IMAGE_BRANDING_STEP"; then
+  pass "MFE post-push branding verifier preserves failure status through tee"
+else
+  fail "MFE post-push branding verifier missing set -euo pipefail before tee"
+fi
+
 if [[ "$SCAN_MFE_BLOCK" == *'Verify MFE runtime contract (image)'* && "$SCAN_MFE_BLOCK" == *'scripts/qa/verify-mfe-runtime-contract.sh --image "${MFE_IMAGE_REF}"'* ]]; then
   pass "MFE runtime verification runs post-push via canonical registry-image helper"
 else
   fail "MFE runtime verification missing canonical post-push helper call"
+fi
+
+if step_has_pipefail "$MFE_RUNTIME_IMAGE_STEP"; then
+  pass "MFE post-push runtime verifier preserves failure status through tee"
+else
+  fail "MFE post-push runtime verifier missing set -euo pipefail before tee"
 fi
 
 if [[ "$BUILD_MFE_BLOCK" == *'Verify MFE image branding contract'* ]]; then
@@ -609,6 +657,12 @@ if [[ "$BUILD_MFE_BLOCK" == *'Verify MFE runtime contract (image)'* ]]; then
   fail "MFE image runtime verification still runs inside the heavy build job"
 else
   pass "MFE heavy build job no longer performs image runtime verification"
+fi
+
+if step_has_pipefail "$MFE_GENERATED_RUNTIME_STEP"; then
+  pass "Generated MFE runtime verifier preserves failure status through tee"
+else
+  fail "Generated MFE runtime verifier missing set -euo pipefail before tee"
 fi
 
 if [[ "$BUILD_MFE_BLOCK" == *'./scripts/infra/build-mfe-image.sh'* ]]; then

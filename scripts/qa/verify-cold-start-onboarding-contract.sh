@@ -253,6 +253,8 @@ require_contains "scripts/infra/prepare-tutor-build-context-ci.sh" '--set DOCKER
 require_contains "scripts/infra/prepare-tutor-build-context-ci.sh" '--set DOCKER_IMAGE_CADDY=mirror.gcr.io/library/caddy:2.7.4' "benchmark Tutor render prep mirrors Caddy base image acquisition"
 require_contains ".github/workflows/build-benchmark.yml" '--cache-mode none' "app-cache-cold benchmark passes explicit no-cache mode"
 require_contains ".github/workflows/build-benchmark.yml" 'image=mirror.gcr.io/moby/buildkit:buildx-stable-1' "benchmark BuildKit setup avoids anonymous Docker Hub pulls for the BuildKit container"
+require_contains ".github/workflows/build-benchmark.yml" 'buildkitd-config-inline:' "benchmark uses current Buildx inline daemon config input"
+reject_contains ".github/workflows/build-benchmark.yml" '^[[:space:]]*config-inline:' "benchmark does not use deprecated Buildx config-inline input"
 require_contains ".github/workflows/build-benchmark.yml" '\[registry\."docker\.io"\]' "benchmark BuildKit builder config mirrors Docker Hub dependency acquisition"
 require_contains ".github/workflows/build-benchmark.yml" 'mirrors = \["mirror\.gcr\.io"\]' "benchmark BuildKit builder config points Docker Hub pulls at mirror.gcr.io"
 require_contains ".github/workflows/build-benchmark.yml" 'Wipe measured OpenEdX job BuildKit state' "app-cache-cold wipes Open edX BuildKit state inside the measured job"
