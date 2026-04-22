@@ -74,13 +74,13 @@ The heavy runner set uses two `local-path` PersistentVolumeClaims that survive p
 Mounted at `/cache/docker` inside the DinD sidecar. Docker daemon data root is set to
 `/cache/docker/daemon`, preserving image layers across runs.
 
-For Tutor builds, inject BuildKit cache arguments:
+For Tutor builds, use the repo-owned Bake-backed helpers. They select the
+canonical BuildKit cache policy from `docker-bake.hcl`; do not invoke raw
+`tutor images build` with ad hoc cache flags.
 
 ```bash
-export DOCKER_BUILDKIT=1
-export DOCKER_BUILD_OPTIONS="--cache-from=type=local,src=/cache/docker/buildkit \
-                              --cache-to=type=local,dest=/cache/docker/buildkit,mode=max"
-tutor images build openedx $DOCKER_BUILD_OPTIONS
+./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
+./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 ```
 
 Expected effect: Tutor build time drops from 30–45 min to ~5 min on warm cache (only changed

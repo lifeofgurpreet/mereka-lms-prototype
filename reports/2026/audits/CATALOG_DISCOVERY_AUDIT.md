@@ -13,8 +13,8 @@ Open edX Ulmo (Tutor v21, `open-release/ulmo.1`) exposes three distinct catalog 
 | Surface | URL Pattern | Renderer | Status |
 |---------|-------------|----------|--------|
 | **Legacy LMS course listing** | `/courses` | Django/Mako (server-rendered) | Active, Mereka-themed |
-| **Legacy course-about page** | `/courses/<key>/about` | Django/Mako (server-rendered), Indigo template | Active, Mereka-themed |
-| **Learner Dashboard MFE** | `apps.academyv2.mereka.io/learner-dashboard/` | React (Paragon/Indigo) | Active, partially token-bridged |
+| **Legacy course-about page** | `/courses/<key>/about` | Django/Mako (server-rendered), upstream Open edX template | Active, Mereka-themed |
+| **Learner Dashboard MFE** | `apps.academyv2.mereka.io/learner-dashboard/` | React (Paragon/Open edX) | Active, partially token-bridged |
 
 There is **no separate catalog MFE** in this deployment. Open edX's `frontend-app-learner-catalog` and `frontend-app-course-about` are not built or served. The Discovery service (`discovery.academyv2.mereka.io`) is a backend API only — it has no frontend UI.
 
@@ -117,19 +117,19 @@ Ulmo (Open edX release corresponding to Tutor v21) introduced several catalog-re
 
 ### 4.1 Course-About Page (Legacy Surface)
 
-- The Indigo theme (`tutorindigo`) ships a revised `courseware/course_about.html` with:
+- The upstream Open edX theme path ships `courseware/course_about.html` with:
   - Improved sidebar layout with SVG icons
   - Fallback course image via `onerror` handler
   - OG meta tags (`og:title`, `og:description`) in the `headextra` block
   - "Course Summary" section header
-- The Mereka theme **inherits from Indigo** — no `courseware/course_about.html` override exists in `infrastructure/tutor/themes/mereka/`. This means the Mereka theme uses the Indigo course-about template.
-- Mereka CSS overrides in `lms/static/css/mereka-overrides.css` apply ~114 selectors to `.course-about`, `.course-info`, and `.courses-listing` to apply brand styling on top of Indigo's template.
+- The Mereka theme **inherits from upstream Open edX** — no `courseware/course_about.html` override exists in `infrastructure/tutor/themes/mereka/`. This means the Mereka theme uses the upstream course-about template.
+- Mereka CSS overrides in `lms/static/css/mereka-overrides.css` apply ~114 selectors to `.course-about`, `.course-info`, and `.courses-listing` to apply brand styling on top of the upstream template.
 
 ### 4.2 Learner Dashboard MFE
 
 - `LEARNER_HOME_MFE_REDIRECT_PERCENTAGE = 100` — all learners land on the MFE dashboard, not the legacy Django dashboard
 - `LEARNER_HOME_MICROFRONTEND_URL` is set to `apps.academyv2.mereka.io/learner-dashboard/`
-- The Mereka footer plugin slot (`org.openedx.frontend.layout.footer.v1`) replaces the default Indigo footer in all MFEs including learner-dashboard
+- The Mereka footer plugin slot (`org.openedx.frontend.layout.footer.v1`) replaces the default Open edX footer in all MFEs including learner-dashboard
 
 ### 4.3 Legacy Catalog Deprecation Signal
 
@@ -148,7 +148,7 @@ Ulmo officially deprecates the legacy server-rendered course listing (`/courses`
 | Course-about (`/courses/<key>/about`) | `{course.display_name}` | Mereka override | `og:title`, `og:description`, `og:image`, `og:url`, canonical | `Course` JSON-LD | Default edX | None |
 | Learner Dashboard MFE | `Mereka Academy` (from SITE_NAME) | None | None | None | n/a (MFE) | n/a |
 
-**Course-about metadata status (updated 2026-03-28)**: Mereka now owns `lms/templates/courseware/course_about.html` directly. The override keeps Indigo's functional behavior but adds a cleaned meta description, `og:image`, `og:url`, canonical URL, and `Course` JSON-LD.
+**Course-about metadata status (updated 2026-04-22)**: Mereka does not currently ship `lms/templates/courseware/course_about.html` directly. Course-about inherits from upstream Open edX while the known SEO gap is tracked here until a safer ownership model is reinstated.
 
 **Gaps**:
 
@@ -243,7 +243,7 @@ To fully apply Design Tokens to catalog surfaces, the following work is needed:
 | `infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css` | Runtime CSS entrypoint (Layer 3, LMS) |
 | `infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css` | Runtime CSS entrypoint (Layer 3, common) |
 | `infrastructure/tutor/themes/mereka/lms/templates/head-extra.html` | CSS injection hook |
-| `.venv/lib/.../tutorindigo/.../courseware/course_about.html` | Upstream Indigo course-about template (read-only) |
+| upstream Open edX course-about template | Upstream course-about template (read-only) |
 | `deploy/k8s/base/plugins/discovery/apps/settings/tutor/production.py` | Discovery service Django settings |
 | `deploy/k8s/base/jobs/discovery-sync-cronjob.yaml` | Discovery course metadata sync job |
 | `deploy/k8s/base/monitoring/servicemonitor-discovery.yaml` | Prometheus scrape config |

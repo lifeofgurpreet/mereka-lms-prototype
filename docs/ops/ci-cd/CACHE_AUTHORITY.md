@@ -103,13 +103,12 @@ target "mfe-proof" {
 }
 ```
 
-### Current state (before PR 2)
+### Current state
 
-Today `docker-bake.hcl` uses `type=gha` as the primary cache authority for the proof
-targets, with `OPENEDX_CACHE_REF` / `MFE_CACHE_REF` as a secondary `cache-from`. The
-`type=gha` backend is per-runner and fragile. After PR 2 lands, `type=gha` will be
-removed from the heavy build targets (`openedx-proof`, `mfe-proof`) and replaced by the
-L2 GHCR registry refs above.
+`docker-bake.hcl` already uses the L2 GHCR registry refs above for the heavy
+proof targets. Legacy GHA-first cache wording is superseded; branch/manual proof
+lanes may read shared cache, while trusted `main` pushes are the write authority
+for shared app cache export.
 
 ### Workflow-level write guard (target state)
 

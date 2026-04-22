@@ -469,7 +469,7 @@ check_homepage_brand_logo() {
   fi
 
   # Brand sanity check: the homepage logo should ultimately match the theming logo redirect target.
-  # On Open edX Indigo this often ends up under /static/images/logo.<hash>.png.
+  # On stock Open edX this often ends up under /static/images/logo.<hash>.png.
   # Compare against logo.png redirect (the header logo), not logo-horizontal.png.
   theming_effective_url="$(curl -s -L --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" -o /dev/null -w "%{url_effective}" "https://${base_domain}/theming/asset/mereka/images/logo.png" 2>/dev/null || true)"
   if [[ -z "$theming_effective_url" ]]; then
@@ -764,7 +764,7 @@ check_any_follow_200 "Favicon asset (favicon.ico)" \
   "https://${BASE_DOMAIN}/static/mereka/images/favicon.ico"
 
 # Font checks (critical for brand typography)
-# The homepage must stop using stock Indigo Google fonts and include brand fonts.
+# The homepage must stop using stock Open edX Google fonts and include brand fonts.
 check_homepage_brand_fonts "${BASE_DOMAIN}" "Homepage uses local brand fonts (no Google fonts)"
 check_studio_brand_css "${STUDIO_HOST}" "Studio uses themed CSS tokens/fonts (no Google fonts)"
 check_studio_footer_whitelist "${STUDIO_HOST}" "Studio footer white-label (no 'Powered by Open edX')"

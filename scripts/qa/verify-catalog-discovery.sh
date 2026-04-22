@@ -8,7 +8,7 @@
 # Checks that:
 #   - Design tokens are applied to catalog CSS surfaces
 #   - Discovery service settings are correctly configured
-#   - Indigo course-about template OG tags are present (upstream)
+#   - upstream Open edX course-about template OG tags are present
 #   - SEO gaps are documented and tracked
 #   - No regressions in branding token wiring
 #
@@ -371,7 +371,7 @@ fi
 # a safer ownership model is reinstated.
 MEREKA_ABOUT_OVERRIDE="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/courseware/course_about.html"
 check_file_missing "$MEREKA_ABOUT_OVERRIDE" "Mereka theme does not ship a custom course_about.html override"
-check_contains "$AUDIT_DOC" "inherits from Indigo" "Audit documents that course-about currently inherits Indigo"
+check_contains "$AUDIT_DOC" "inherits from upstream Open edX" "Audit documents that course-about currently inherits upstream Open edX"
 check_contains "$AUDIT_DOC" "no \`courseware/course_about.html\` override exists" "Audit documents the intentional absence of a Mereka course-about override"
 check_contains "$AUDIT_DOC" "Course-about now emits canonical URLs" "Audit tracks the canonical gap as resolved only for course-about"
 check_contains "$AUDIT_DOC" "homepage/listing SEO" "Audit keeps homepage/listing SEO as the active discovery gap"
