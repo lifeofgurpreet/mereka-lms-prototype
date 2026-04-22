@@ -34,8 +34,7 @@ Source the helper script whenever you enter a new shell:
 source infrastructure/tutor/tutor-env.sh
 ```
 
-This sets `TUTOR_ROOT=$REPO/tutor_env`, `OPENEDX_RELEASE=nightly`, and activates the local virtualenv. After any manual `tutor config save`, run `./scripts/infra/prepare-tutor-build-context.sh --target all` so the remaining patch-only sync and rendered build-context surfaces are refreshed from current source truth.
-For normal setup, use `./scripts/infra/tutor-config-save.sh`; it wraps `tutor config save`, enables the canonical plugins, syncs the plugin mirror, and prepares build contexts.
+This sets `TUTOR_ROOT=$REPO/tutor_env`, `OPENEDX_RELEASE=nightly`, and activates the local virtualenv. For normal setup and config edits, use `./scripts/infra/tutor-config-save.sh`; it enables the canonical plugins, syncs the plugin mirror, renders Tutor state, and prepares build contexts. If you are debugging a low-level render path, `./scripts/infra/prepare-tutor-build-context.sh --target all` is the governed refresh step after render.
 
 ### Docker resources
 

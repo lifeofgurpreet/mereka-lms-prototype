@@ -20,7 +20,7 @@ source infrastructure/tutor/tutor-env.sh
 
 ## 2. Regenerate / Apply Patches
 
-After any `tutor config save` or plugin change:
+After any Tutor config or plugin change:
 
 ```bash
 ./scripts/infra/tutor-config-save.sh

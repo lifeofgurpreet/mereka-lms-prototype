@@ -124,10 +124,6 @@ make tutor-stop
 
 # After Tutor config changes (preferred)
 ./scripts/infra/tutor-config-save.sh --set KEY=value
-
-# Manual advanced path
-tutor config save --set KEY=value
-./scripts/infra/prepare-tutor-build-context.sh --target all
 make tutor-restart
 ```
 
