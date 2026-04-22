@@ -92,6 +92,11 @@ MFE_CONFIG["TERMS_OF_SERVICE_URL"] = "https://legal.mereka.io/"
 MFE_CONFIG["PRIVACY_POLICY_URL"] = "https://legal.mereka.io/privacy-policy/"
 MFE_CONFIG["ENABLE_ACCESSIBILITY_PAGE"] = False
 MFE_CONFIG["ORDER_HISTORY_URL"] = f"{_lms_url}/orders"
+# Authn MFE "Need help signing in?" link. Without this key the MFE
+# renders an empty href and the smoke-authn-mfe synthetic (OBS-003,
+# bead mereka-lms-e09t) emits WARN. Point at the shared support surface
+# — same contract as SUPPORT_EMAIL above. Bead: mereka-lms-jdsx.
+MFE_CONFIG["LOGIN_ISSUE_SUPPORT_LINK"] = "mailto:support@mereka.io"
 
 # MFE bundles bake `SESSION_COOKIE_DOMAIN:"MISSING_ENV_VAR".SESSION_COOKIE_DOMAIN`
 # at build time when the env var is absent, which evaluates to `undefined` at
