@@ -118,6 +118,7 @@ scripts/qa/test-install-docker-compose.sh
 scripts/qa/test-buildx-builder-health.sh
 scripts/qa/test-dependency-image-mirrors-patch.sh
 scripts/qa/test-openedx-obsolete-activation-key-patch-removal.sh
+scripts/qa/test-discovery-init-task-contract.sh
 scripts/qa/test-mfe-npm-install-resilience-patch.sh
 scripts/qa/test-mfe-prune-deprecated-shells.sh
 scripts/qa/verify-build-optimizations-render-delta-contract.sh

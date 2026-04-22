@@ -187,6 +187,8 @@ ci_static_inventory:
       estimated_seconds: 3
     - script: scripts/qa/test-openedx-obsolete-activation-key-patch-removal.sh
       estimated_seconds: 3
+    - script: scripts/qa/test-discovery-init-task-contract.sh
+      estimated_seconds: 3
     - script: scripts/qa/test-mfe-npm-install-resilience-patch.sh
       estimated_seconds: 3
     - script: scripts/qa/test-mfe-prune-deprecated-shells.sh
@@ -2348,6 +2350,25 @@ scripts:
     dry_run: true
     lanes: [ci]
     proof_command: "bash scripts/qa/test-openedx-obsolete-activation-key-patch-removal.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/test-discovery-init-task-contract.sh
+    owner: platform-team
+    purpose: >
+      Fixture-backed source/render contract for the Mereka Discovery init task
+      correction. Proves the Tutor init filter replaces exactly one Discovery
+      partner init task with container-DNS LMS API URLs, is idempotent, leaves
+      non-Discovery task lists untouched, and fails loudly on upstream selector
+      drift or leftover browser-facing LMS API URLs.
+    inputs: []
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects:
+      - Creates temporary Tutor hook stubs under /tmp
+    dry_run: true
+    lanes: [ci]
+    proof_command: "bash scripts/qa/test-discovery-init-task-contract.sh"
     criticality: release-blocking
 
   - path: scripts/qa/test-mfe-npm-install-resilience-patch.sh
