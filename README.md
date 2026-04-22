@@ -40,23 +40,21 @@ This repository tracks the infrastructure-as-code, configuration, and runbooks f
 
 ## Quick Start
 
-For a new local sandbox, use the one-click setup from the repo root:
+For a new local sandbox, use the governed first-run wrapper from the repo root:
 
 ```bash
 git clone git@github.com:Biji-Biji-Initiative/mereka-lms.git
 cd mereka-lms
-git submodule update --init --recursive
-./scripts/qa/verify-cold-start-onboarding-contract.sh
-./scripts/shared/setup-local.sh
-./scripts/infra/verify-local-bootstrap-readiness.sh
+make local-first-run
 ```
 
 For day-to-day work after the sandbox exists:
 
 ```bash
-make bootstrap
 make tutor-start
 ```
+
+Run `make bootstrap` only when you need to refresh the repo-local Python tooling or pre-commit hooks. `make local-first-run` expands to the canonical four-step chain: `git submodule update --init --recursive`, `./scripts/qa/verify-cold-start-onboarding-contract.sh`, `./scripts/shared/setup-local.sh`, and `./scripts/infra/verify-local-bootstrap-readiness.sh`.
 
 The source-level onboarding contract is [`scripts/qa/verify-cold-start-onboarding-contract.sh`](scripts/qa/verify-cold-start-onboarding-contract.sh).
 The local setup path initializes required submodules, builds `openedx:nightly` and `openedx-mfe:nightly`, points Tutor at those exact tags, and pulls third-party service images through `mirror.gcr.io` to avoid anonymous Docker Hub quota during first-run setup.
@@ -92,7 +90,7 @@ Remaining images (MySQL init job, Android builder, etc.) still come from the ups
 
 ## Automation
 
-- **Makefile**: Common tasks (`make tutor-start`, `make tutor-apply`, `make branding-sync`, etc.)
+- **Makefile**: Common tasks (`make local-first-run`, `make tutor-start`, `make tutor-apply`, `make branding-sync`, etc.)
 - **Pre-commit hooks**: Automatic code formatting and linting
 - **CI/CD**: `.github/workflows/public-health-check.yml` runs scheduled public checks + TLS SAN validation.
 - **Backups**: production backups are Velero-driven (see `docs/ops/runbooks/VELERO_BACKUP_AUDIT.md`). The Cloud SQL export workflow is legacy and gated via `ENABLE_CLOUD_SQL_BACKUPS=true` (see `.github/workflows/cloud-sql-backup.yml`).

@@ -20,17 +20,18 @@ Use the repo-owned setup script unless you are debugging one specific phase:
 
 ```bash
 cd /path/to/mereka-lms
-git submodule update --init --recursive
-./scripts/qa/verify-cold-start-onboarding-contract.sh
-./scripts/shared/setup-local.sh
-./scripts/infra/verify-local-bootstrap-readiness.sh
+make local-first-run
 ```
 
-The setup script creates or reuses `.venv`, renders Tutor through the canonical
-wrapper, prepares the rendered build contexts, builds `openedx:nightly` and
-`openedx-mfe:nightly` when their build-context labels are stale, launches the
-local Tutor stack, verifies readiness, and creates a local-only admin user.
-If `LOCAL_ADMIN_PASSWORD` is unset, generated credentials are written to
+`make local-first-run` expands to `git submodule update --init --recursive`,
+`./scripts/qa/verify-cold-start-onboarding-contract.sh`,
+`./scripts/shared/setup-local.sh`, and
+`./scripts/infra/verify-local-bootstrap-readiness.sh`. The setup script creates
+or reuses `.venv`, renders Tutor through the canonical wrapper, prepares the
+rendered build contexts, builds `openedx:nightly` and `openedx-mfe:nightly`
+when their build-context labels are stale, launches the local Tutor stack,
+verifies readiness, and creates a local-only admin user. If
+`LOCAL_ADMIN_PASSWORD` is unset, generated credentials are written to
 `tutor_env/local-admin-credentials.txt`.
 
 ### 1. Python Environment
@@ -166,10 +167,10 @@ print('Local admin ready')
 Run these to confirm everything works:
 
 ```bash
-# 1. Check containers
-docker ps --filter "name=tutor_local" | wc -l
-# Expect 20+ containers on a full local stack; trust
-# ./scripts/infra/verify-local-bootstrap-readiness.sh over a magic count.
+# 1. Inspect rendered Compose state
+tutor local dc ps
+# Trust ./scripts/infra/verify-local-bootstrap-readiness.sh over a magic
+# container-count threshold.
 
 # 2. Check config uses local services
 grep MYSQL_HOST tutor_env/config.yml

@@ -8,9 +8,77 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 BLUE='\033[0;34m'
 NC='\033[0m'
+MIN_DOCKER_MEMORY_BYTES="${MIN_DOCKER_MEMORY_BYTES:-12884901888}"
+MIN_FREE_DISK_KB="${MIN_FREE_DISK_KB:-41943040}"
+HTTP_ROUTE_ATTEMPTS="${HTTP_ROUTE_ATTEMPTS:-12}"
+HTTP_ROUTE_SLEEP_SECONDS="${HTTP_ROUTE_SLEEP_SECONDS:-5}"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
+
+die() {
+    echo -e "${RED}❌ $1${NC}" >&2
+    exit 1
+}
+
+warn() {
+    echo -e "${YELLOW}⚠️  $1${NC}"
+}
+
+check_submodule_state() {
+    local drift
+    drift="$(git submodule status --recursive 2>/dev/null | rg '^[^ ]' || true)"
+    if [[ -n "$drift" ]]; then
+        printf '%s\n' "$drift" >&2
+        die "Submodules are not at the repo-pinned state. Run 'git submodule update --init --recursive' and retry."
+    fi
+}
+
+check_docker_resources() {
+    local docker_memory_bytes docker_memory_gib free_disk_kb free_disk_gib
+    docker_memory_bytes="$(docker info --format '{{.MemTotal}}' 2>/dev/null || true)"
+    if [[ "$docker_memory_bytes" =~ ^[0-9]+$ ]] && (( docker_memory_bytes > 0 )); then
+        docker_memory_gib=$(( docker_memory_bytes / 1024 / 1024 / 1024 ))
+        if (( docker_memory_bytes < MIN_DOCKER_MEMORY_BYTES )); then
+            if [[ "$(uname -s)" == "Darwin" ]]; then
+                die "Docker Desktop reports ${docker_memory_gib} GiB RAM. Raise it to at least 12 GiB before the first image build."
+            fi
+            warn "Docker reports ${docker_memory_gib} GiB RAM. Open edX image builds are expected to need about 12 GiB."
+        fi
+    else
+        warn "Unable to read Docker memory limits from 'docker info'."
+    fi
+
+    free_disk_kb="$(df -Pk "$REPO_ROOT" | awk 'NR==2 {print $4}')"
+    if [[ "$free_disk_kb" =~ ^[0-9]+$ ]]; then
+        free_disk_gib=$(( free_disk_kb / 1024 / 1024 ))
+        if (( free_disk_kb < MIN_FREE_DISK_KB )); then
+            warn "Only ${free_disk_gib} GiB free on the repo filesystem. First-run image builds are expected to need about 40 GiB."
+        fi
+    fi
+}
+
+wait_for_http_route() {
+    local url="$1"
+    local label="$2"
+    local allowed_statuses="$3"
+    local attempts="${4:-$HTTP_ROUTE_ATTEMPTS}"
+    local sleep_seconds="${5:-$HTTP_ROUTE_SLEEP_SECONDS}"
+    local attempt status
+
+    for ((attempt = 1; attempt <= attempts; attempt++)); do
+        status="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 "$url" 2>/dev/null || true)"
+        status="${status:-000}"
+        if [[ " ${allowed_statuses} " == *" ${status} "* ]]; then
+            echo -e "${GREEN}✅ ${label} accessible (HTTP ${status})${NC}"
+            return 0
+        fi
+        sleep "$sleep_seconds"
+    done
+
+    echo -e "${RED}❌ ${label} not accessible after ${attempts} attempts (last HTTP ${status:-000})${NC}" >&2
+    return 1
+}
 
 echo "╔══════════════════════════════════════════════════════════════╗"
 echo "║        One-Click Local Development Setup                     ║"
@@ -20,17 +88,19 @@ echo ""
 # Step 1: Prerequisites Check
 echo -e "${BLUE}Step 1: Checking prerequisites...${NC}"
 if ! command -v docker &> /dev/null; then
-    echo -e "${RED}❌ Docker not found. Please install Docker Desktop.${NC}"
-    exit 1
+    die "Docker not found. Please install Docker Desktop."
 fi
 if ! docker info &> /dev/null; then
-    echo -e "${RED}❌ Docker not running. Please start Docker Desktop.${NC}"
-    exit 1
+    die "Docker not running. Please start Docker Desktop."
+fi
+if ! docker compose version &> /dev/null; then
+    die "Docker Compose v2 is required. Install or update Docker Desktop / Docker Compose."
 fi
 if ! command -v python3 &> /dev/null; then
-    echo -e "${RED}❌ Python 3 not found. Please install Python 3.12+.${NC}"
-    exit 1
+    die "Python 3 not found. Please install Python 3.12+."
 fi
+check_submodule_state
+check_docker_resources
 echo -e "${GREEN}✅ Prerequisites check passed${NC}"
 echo ""
 
@@ -228,26 +298,18 @@ echo ""
 # Step 9: Verify Setup
 echo -e "${BLUE}Step 9: Verifying setup...${NC}"
 CONTAINERS=$(docker ps --filter "name=tutor_local" --format "{{.Names}}" | wc -l | tr -d ' ')
-if [ "$CONTAINERS" -ge 20 ]; then
-    echo -e "${GREEN}✅ Containers running: $CONTAINERS${NC}"
-else
-    echo -e "${YELLOW}⚠️  Only $CONTAINERS containers running (expected 20+)${NC}"
-fi
+echo -e "${BLUE}ℹ️  tutor_local containers running: $CONTAINERS${NC}"
 
-LMS_STATUS="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 http://localhost 2>/dev/null || true)"
-if [[ " 200 302 " == *" ${LMS_STATUS:-000} "* ]]; then
-    echo -e "${GREEN}✅ LMS accessible (HTTP ${LMS_STATUS})${NC}"
-else
-    echo -e "${RED}❌ LMS not accessible (HTTP ${LMS_STATUS:-000})${NC}"
-fi
-
-MFE_STATUS="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 http://apps.localhost/authn/login 2>/dev/null || true)"
-if [[ " 200 302 " == *" ${MFE_STATUS:-000} "* ]]; then
-    echo -e "${GREEN}✅ MFE accessible (HTTP ${MFE_STATUS})${NC}"
-else
-    echo -e "${RED}❌ MFE not accessible (HTTP ${MFE_STATUS:-000})${NC}"
-fi
+FINAL_FAILURES=0
+wait_for_http_route http://localhost "LMS" "200 302" || FINAL_FAILURES=$((FINAL_FAILURES + 1))
+wait_for_http_route http://studio.localhost "Studio" "200 302" || FINAL_FAILURES=$((FINAL_FAILURES + 1))
+wait_for_http_route http://apps.localhost/authn/login "MFE authn" "200 302" || FINAL_FAILURES=$((FINAL_FAILURES + 1))
+wait_for_http_route http://discovery.localhost "Discovery" "200 302" || FINAL_FAILURES=$((FINAL_FAILURES + 1))
 echo ""
+
+if (( FINAL_FAILURES > 0 )); then
+    die "Local setup did not converge to a healthy runtime. Re-run ./scripts/infra/verify-local-bootstrap-readiness.sh and inspect the failed routes above."
+fi
 
 # Final Summary
 echo "╔══════════════════════════════════════════════════════════════╗"
@@ -257,6 +319,7 @@ echo "  📍 Access URLs:"
 echo "    • LMS: http://localhost"
 echo "    • Studio: http://studio.localhost"
 echo "    • MFE Login: http://apps.localhost/authn/login"
+echo "    • Discovery: http://discovery.localhost"
 echo "    • Admin: http://localhost/admin"
 echo ""
 echo "  🔐 Credentials:"
@@ -264,6 +327,7 @@ echo "    • Username: $LOCAL_ADMIN_USERNAME"
 echo "    • Password file: $LOCAL_ADMIN_CREDENTIALS_FILE"
 echo ""
 echo "  🛠️  Next Steps:"
+echo "    • Re-run the governed first-run wrapper: make local-first-run"
 echo "    • Fast Open edX rebuild: ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast"
 echo "    • Fast MFE rebuild: ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast"
 echo "    • Strict local Open edX proof rebuild: ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile proof --cache-mode none"

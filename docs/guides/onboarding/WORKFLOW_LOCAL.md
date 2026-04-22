@@ -33,11 +33,10 @@ After any Tutor config or plugin change:
 Fast first boot from a fresh checkout:
 
 ```bash
-git submodule update --init --recursive
-./scripts/qa/verify-cold-start-onboarding-contract.sh
-./scripts/shared/setup-local.sh
-./scripts/infra/verify-local-bootstrap-readiness.sh
+make local-first-run
 ```
+
+That wrapper expands to the canonical onboarding chain: `git submodule update --init --recursive`, `./scripts/qa/verify-cold-start-onboarding-contract.sh`, `./scripts/shared/setup-local.sh`, and `./scripts/infra/verify-local-bootstrap-readiness.sh`.
 
 Manual first boot when debugging the setup script step by step:
 

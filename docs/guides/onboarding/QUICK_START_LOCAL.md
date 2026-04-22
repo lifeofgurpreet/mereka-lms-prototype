@@ -6,13 +6,10 @@ _Audience: Developers + Agent Operators • Owner: Platform Team • Last verifi
 ```bash
 git clone git@github.com:Biji-Biji-Initiative/mereka-lms.git
 cd mereka-lms
-git submodule update --init --recursive
-./scripts/qa/verify-cold-start-onboarding-contract.sh
-./scripts/shared/setup-local.sh
-./scripts/infra/verify-local-bootstrap-readiness.sh
+make local-first-run
 ```
 
-The first run builds local Open edX and MFE images, initializes Tutor data, starts the stack, and creates a local-only admin user. If `LOCAL_ADMIN_PASSWORD` is not set, the setup script writes generated credentials to `tutor_env/local-admin-credentials.txt`.
+`make local-first-run` expands to the canonical four-step chain: `git submodule update --init --recursive`, `./scripts/qa/verify-cold-start-onboarding-contract.sh`, `./scripts/shared/setup-local.sh`, and `./scripts/infra/verify-local-bootstrap-readiness.sh`. The first run builds local Open edX and MFE images, initializes Tutor data, starts the stack, and creates a local-only admin user. If `LOCAL_ADMIN_PASSWORD` is not set, the setup script writes generated credentials to `tutor_env/local-admin-credentials.txt`.
 
 ## Current Proof Contract
 
@@ -128,9 +125,8 @@ Run these to verify everything works:
 # Check initialized local Tutor state after setup
 ./scripts/infra/verify-local-bootstrap-readiness.sh
 
-# Check containers
-docker ps --filter "name=tutor_local" | wc -l
-# Should show 20+ once the full Tutor stack is running
+# Optional: inspect the rendered Compose state directly
+tutor local dc ps
 
 # Check config is local (not cloud)
 grep -E "MYSQL_HOST|MONGODB_HOST" tutor_env/config.yml
@@ -140,6 +136,7 @@ grep -E "MYSQL_HOST|MONGODB_HOST" tutor_env/config.yml
 curl -I http://localhost                    # LMS
 curl -I http://studio.localhost             # Studio  
 curl -I http://apps.localhost/authn/login   # MFE Login
+curl -I http://discovery.localhost          # Discovery
 ```
 
 ## Separate CI Proof Lane

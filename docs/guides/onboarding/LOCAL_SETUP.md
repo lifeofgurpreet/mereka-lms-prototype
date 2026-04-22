@@ -13,6 +13,16 @@ These instructions reproduce the nightly Open edX environment provisioned in thi
 
 ## Bootstrap
 
+For the normal first run from a clean checkout, prefer the governed wrapper:
+
+```bash
+make local-first-run
+```
+
+It expands to `git submodule update --init --recursive`, `./scripts/qa/verify-cold-start-onboarding-contract.sh`, `./scripts/shared/setup-local.sh`, and `./scripts/infra/verify-local-bootstrap-readiness.sh`. Use the manual steps below only when debugging one phase of that chain.
+
+## Manual bootstrap
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
@@ -103,6 +113,9 @@ make tutor-start
 Tutor will copy everything under `infrastructure/tutor/themes/` into `tutor_env/build/openedx/themes` and compile the SCSS entrypoints located at `infrastructure/tutor/themes/mereka/{lms,cms}/static/sass/theme.scss`. Re-run the Open edX build helper whenever you edit the theme SCSS or add new assets.
 
 ## Initial launch
+
+If you are not debugging a specific phase, use `make local-first-run` instead of
+running the individual bootstrap commands below.
 
 ```bash
 source infrastructure/tutor/tutor-env.sh

@@ -11,6 +11,7 @@ HTTP_TIMEOUT="${HTTP_TIMEOUT:-15}"
 LMS_URL="${LMS_URL:-http://localhost}"
 STUDIO_URL="${STUDIO_URL:-http://studio.localhost}"
 MFE_AUTHN_URL="${MFE_AUTHN_URL:-http://apps.localhost/authn/login}"
+DISCOVERY_URL="${DISCOVERY_URL:-http://discovery.localhost}"
 
 if [ -f "$REPO_ROOT/infrastructure/tutor/tutor-env.sh" ]; then
   # shellcheck source=/dev/null
@@ -133,6 +134,7 @@ main() {
   check_http_route "$LMS_URL" "LMS" "200 302"
   check_http_route "$STUDIO_URL" "Studio" "200 302"
   check_http_route "$MFE_AUTHN_URL" "MFE authn" "200 302"
+  check_http_route "$DISCOVERY_URL" "Discovery" "200 302"
 
   if [ "${#FAILURES[@]}" -gt 0 ]; then
     printf '\nBootstrap readiness is not established. These are local initialized-state failures, not source/render/image proof.\n' >&2
