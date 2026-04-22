@@ -61,6 +61,24 @@ reject_contains() {
   fi
 }
 
+require_target_contains() {
+  local path="$1"
+  local target="$2"
+  local literal="$3"
+  local label="$4"
+
+  if awk -v target="$target" -v literal="$literal" '
+    $0 ~ "^target \"" target "\"[[:space:]]*\\{" { in_target = 1 }
+    in_target && index($0, literal) { found = 1; exit }
+    in_target && $0 ~ "^target \"" && $0 !~ "^target \"" target "\"[[:space:]]*\\{" { exit }
+    END { exit found ? 0 : 1 }
+  ' "$path"; then
+    pass "$label"
+  else
+    fail "$label"
+  fi
+}
+
 required_paths=(
   "CLAUDE.md"
   "README.md"
@@ -83,6 +101,7 @@ required_paths=(
   "scripts/qa/comprehensive-test.sh"
   "scripts/qa/test-build-context-fingerprint.sh"
   "scripts/qa/verify-setup.sh"
+  "scripts/qa/verify-mako-template-syntax.sh"
   "docs/ops/quickref/README.md"
   "docs/ops/quickref/access-urls.md"
   "docs/ops/quickref/tutor-commands.md"
@@ -100,6 +119,7 @@ required_paths=(
   "scripts/qa/test-install-docker-compose.sh"
   "infrastructure/tutor/patches/dependency-image-mirrors.sh"
   "infrastructure/tutor/patches/openedx-obsolete-activation-key-patch-removal.sh"
+  "infrastructure/tutor/plugins/_mereka_lms/discovery_init.py"
   "scripts/qa/test-dependency-image-mirrors-patch.sh"
   "scripts/qa/test-openedx-obsolete-activation-key-patch-removal.sh"
   "scripts/qa/test-mfe-npm-install-resilience-patch.sh"
@@ -134,6 +154,10 @@ require_contains "scripts/shared/setup-local.sh" '--set MYSQL_ROOT_HOST=%' "setu
 require_contains "scripts/shared/setup-local.sh" '--set RUN_MONGODB=true' "setup-local.sh explicitly enables local MongoDB service"
 require_contains "scripts/shared/setup-local.sh" '--set RUN_MYSQL=true' "setup-local.sh explicitly enables local MySQL service"
 require_contains "scripts/shared/setup-local.sh" '--set RUN_REDIS=true' "setup-local.sh explicitly enables local Redis service"
+require_contains "scripts/shared/setup-local.sh" 'ensure_local_tutor_plugin_enabled "\$plugin"' "setup-local.sh converges required local Tutor plugins"
+require_contains "scripts/shared/setup-local.sh" 'disable_local_optional_tutor_plugin "\$plugin"' "setup-local.sh disables optional local Tutor plugins outside canonical first-run"
+require_contains "scripts/shared/setup-local.sh" 'for plugin in mfe discovery forum notes xqueue' "setup-local.sh declares the required local service plugin set"
+require_contains "scripts/shared/setup-local.sh" 'for plugin in aspects ecommerce' "setup-local.sh excludes Aspects and legacy ecommerce from canonical local first-run"
 require_contains "scripts/shared/setup-local.sh" '--set DOCKER_REGISTRY=mirror.gcr.io/' "setup-local.sh uses public mirror registry for local dependency acquisition"
 require_contains "scripts/shared/setup-local.sh" '\./scripts/infra/ensure-buildx-dependency-mirror\.sh' "setup-local.sh selects the canonical BuildKit dependency mirror before local image builds"
 require_contains "scripts/shared/setup-local.sh" '--set DOCKER_IMAGE_OPENEDX=openedx:nightly' "setup-local.sh points Tutor at the local Open edX image it builds"
@@ -152,6 +176,8 @@ require_contains "scripts/shared/setup-local.sh" 'FORCE_LOCAL_IMAGE_BUILD' "setu
 require_contains "scripts/shared/setup-local.sh" 'image_matches_context openedx:nightly' "setup-local.sh checks the exact local Open edX image tag"
 require_contains "scripts/shared/setup-local.sh" 'image_matches_context openedx-mfe:nightly' "setup-local.sh checks the exact local MFE image tag"
 require_contains "scripts/shared/setup-local.sh" 'image_matches_context' "setup-local.sh verifies local image freshness before reuse"
+require_contains "scripts/shared/setup-local.sh" 'tutor local launch -I --skip-build' "setup-local.sh always runs Tutor launch/init for first-run database truth"
+reject_contains "scripts/shared/setup-local.sh" 'tutor_env/data/mysql' "setup-local.sh does not treat MySQL data-directory presence as initialized database truth"
 require_contains "scripts/shared/setup-local.sh" '\./scripts/infra/verify-local-bootstrap-readiness\.sh' "setup-local.sh points next steps at initialized-state readiness proof"
 require_contains "scripts/shared/setup-local.sh" '\./scripts/qa/verify-setup\.sh' "setup-local.sh points optional setup smoke at current verifier"
 require_contains "scripts/shared/setup-local.sh" 'io\.mereka\.build-context-sha256' "setup-local.sh reads build-context fingerprint labels before reusing local images"
@@ -180,6 +206,10 @@ require_contains "scripts/infra/build-context-fingerprint.sh" 'mereka_build_cont
 require_contains "scripts/infra/build-openedx-image.sh" 'OPENEDX_BUILD_CONTEXT_SHA256' "Open edX build helper labels images with rendered build-context fingerprints"
 require_contains "scripts/infra/build-mfe-image.sh" 'MFE_BUILD_CONTEXT_SHA256' "MFE build helper labels images with rendered build-context fingerprints"
 require_contains "docker-bake.hcl" 'io\.mereka\.build-context-sha256' "Bake image targets carry the build-context freshness label"
+require_contains "docker-bake.hcl" 'Local Open edX fast builds read shared/fallback caches' "openedx-fast documents local worker-cache authority instead of client cache export"
+require_contains "docker-bake.hcl" 'Local MFE fast builds read shared/fallback caches' "mfe-fast documents local worker-cache authority instead of client cache export"
+require_target_contains "docker-bake.hcl" "openedx-fast" "cache-to = []" "openedx-fast disables client-side local cache export"
+require_target_contains "docker-bake.hcl" "mfe-fast" "cache-to = []" "mfe-fast disables client-side local cache export"
 require_contains "scripts/infra/tutor-config-save.sh" 'restore_generated_state' "tutor-config-save.sh restores config/rendered env on preparation or verification failure"
 reject_contains "scripts/infra/tutor-config-save.sh" 'Continue anyway' "tutor-config-save.sh does not allow continuing with a failed render verifier"
 require_contains "scripts/infra/tutor-config-save.sh" 'make tutor-restart' "tutor-config-save.sh points local users at Makefile restart wrapper"
@@ -226,6 +256,8 @@ if [[ -n "$tutor_core_pin" ]]; then
 fi
 reject_contains ".env.example" '(^TUTOR_PLUGINS=.*indigo|21\.0\.0-indigo|tutor-indigo|tutor\[full\])' ".env.example does not advertise retired Tutor Indigo or Indigo-tagged images"
 reject_contains "infrastructure/tutor/config.example.yml" '^[[:space:]]+- indigo$' "Tutor Indigo plugin is retired from the sample local config"
+reject_contains "infrastructure/tutor/config.example.yml" '^[[:space:]]+- aspects$' "Tutor Aspects plugin is not enabled in the sample local first-run config"
+reject_contains "infrastructure/tutor/config.example.yml" '^[[:space:]]+- ecommerce' "legacy ecommerce plugin is not enabled in the sample local first-run config"
 reject_contains "infrastructure/tutor/patches/_common.sh" 'tutorindigo' "Tutor patch runtime no longer imports Tutor Indigo"
 reject_contains "infrastructure/tutor/apply-patches.sh" 'mfe/build/mfe/indigo' "canonical patch path no longer syncs assets into an Indigo build-context directory"
 reject_contains "infrastructure/tutor/patch-manifest.yml" 'mfe/build/mfe/indigo' "patch manifest no longer documents Indigo build-context targets"
@@ -255,6 +287,8 @@ require_contains "docs/reference/architecture/TUTOR_PATCHES_INVENTORY.md" 'opene
 require_contains "docs/reference/architecture/TUTOR_PATCHES_INVENTORY.md" 'AUTHORITY_CORRECTION' "Tutor patch inventory classifies the obsolete activation-key patch removal explicitly"
 require_contains "docs/reference/architecture/TUTOR_PATCHES_INVENTORY.md" 'temporary compatibility layer' "Tutor patch inventory classifies dependency image mirror normalization as temporary compatibility"
 reject_contains "docs/reference/architecture/TUTOR_PATCHES_INVENTORY.md" 'temporary waiver' "Tutor patch inventory uses the current temporary compatibility layer vocabulary"
+require_contains "docs/reference/architecture/TUTOR_PATCHES_INVENTORY.md" 'discovery_init\.py' "Tutor patch inventory records Discovery init as source-owned plugin authority"
+require_contains "docs/reference/architecture/TUTOR_PATCHES_INVENTORY.md" 'LMS runtime theme templates, Mako fallback behavior, and template-safe tenant URL helpers' "Tutor patch inventory records LMS Mako theme and template URL behavior as source-owned"
 require_contains "docs/reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md" 'dependency-image mirror normalization' "developer proof matrix names dependency image mirror normalization"
 require_contains "infrastructure/tutor/apply-patches.sh" 'apply_mysql_root_host_patch' "canonical Tutor patch path realizes MYSQL_ROOT_HOST in rendered local compose"
 require_contains "infrastructure/tutor/apply-patches.sh" 'apply_mfe_npm_install_resilience_patch' "canonical Tutor patch path realizes MFE npm fallback in rendered Dockerfile"
@@ -275,8 +309,26 @@ require_contains "infrastructure/tutor/plugins/_mereka_lms/infrastructure.py" 'C
 require_contains "infrastructure/tutor/plugins/_mereka_lms/infrastructure.py" "Path\\('/openedx/themes/mereka'\\)" "Mereka theme convergence checks runtime theme directory before writing SiteTheme rows"
 require_contains "infrastructure/tutor/plugins/_mereka_lms/infrastructure.py" 'skipping SiteTheme convergence' "Mereka theme convergence skips upstream bootstrap images without repo theme files"
 require_contains "infrastructure/tutor/plugins/_mereka_lms/infrastructure.py" "theme_dir_name='mereka'" "Mereka theme init task converges SiteTheme rows to the Mereka theme"
+require_contains "infrastructure/tutor/plugins/mereka_lms.py" 'discovery_init' "Mereka Tutor plugin loads Discovery init authority correction"
+require_contains "infrastructure/tutor/plugins/_mereka_lms/discovery_init.py" 'CLI_DO_INIT_TASKS' "Discovery init correction is source-owned by a Tutor init task filter"
+require_contains "infrastructure/tutor/plugins/_mereka_lms/discovery_init.py" 'http://lms:8000/api/courses/v1/' "Discovery init uses container DNS for course API refresh"
+require_contains "infrastructure/tutor/plugins/_mereka_lms/discovery_init.py" 'http://lms:8000/api/organizations/v1/' "Discovery init uses container DNS for organization API refresh"
+reject_contains "infrastructure/tutor/plugins/_mereka_lms/discovery_init.py" 'http://\{\{ LMS_HOST \}\}:8000/api/courses/v1/|://\{\{ LMS_HOST \}\}/api/courses/v1/' "Discovery init does not use browser-facing LMS_HOST for in-container course API calls"
+require_contains "infrastructure/tutor/themes/mereka/lms/templates/header/navbar-logo-header.html" '<%block> bodies as separate functions' "Mereka LMS navbar logo template documents Mako named-block scope authority"
+require_contains "infrastructure/tutor/themes/mereka/lms/templates/header/navbar-logo-header.html" '_navigation_logo_url' "Mereka LMS navbar logo template computes logo fallback inside the navigation_logo block"
+require_contains "infrastructure/tutor/themes/mereka/lms/templates/header/navbar-logo-header.html" '_navigation_platform_name' "Mereka LMS navbar logo template computes platform-name fallback inside the navigation_logo block"
+reject_contains "infrastructure/tutor/themes/mereka/lms/templates/header/navbar-logo-header.html" '\$\{_tenant_logo\}|\$\{_platform_name\}' "Mereka LMS navbar logo template does not render outer Mako locals from navigation_logo"
+require_contains "infrastructure/tutor/themes/mereka/lms/templates/header/navbar-not-authenticated.html" 'openedx_tenant_cache\.runtime_urls' "Mereka LMS anonymous navbar imports Authn URL helper from installed custom-app authority"
+reject_contains "infrastructure/tutor/themes/mereka/lms/templates/header/navbar-not-authenticated.html" 'lms\.envs\.tutor\.mereka_multisite' "Mereka LMS anonymous navbar does not import deployment-only settings modules"
+require_contains "infrastructure/tutor/custom-apps/openedx_tenant_cache/runtime_urls.py" 'def tenant_authn_microfrontend_url_for_host' "Tenant Authn URL helper is source-owned by the installed openedx_tenant_cache app"
+require_contains "infrastructure/tutor/custom-apps/openedx_tenant_cache/tests.py" 'test_tenant_authn_microfrontend_url_uses_tenant_base' "Tenant Authn URL helper has unit coverage for tenant-specific MFE bases"
+require_contains "scripts/qa/verify-mako-template-syntax.sh" 'navigation_logo block does not reference outer logo/platform locals' "Mako syntax verifier guards navbar named-block scope regressions"
+require_contains "scripts/qa/verify-mako-template-syntax.sh" 'imports deployment-only mereka_multisite settings module' "Mako syntax verifier rejects deployment-only settings imports in templates"
 require_contains "infrastructure/tutor/plugins/_mereka_lms/mfe_runtime.py" 'theme-source/mereka.scss' "MFE runtime imports repo-owned Mereka theme source"
 require_contains "infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py" 'COPY mereka/theme-source /openedx/app/theme-source' "MFE Dockerfile copies repo-owned Mereka theme source"
+require_contains "infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py" '/openedx/app/node_modules/@edx/brand' "MFE Dockerfile materializes the repo-owned brand package at @edx/brand"
+require_contains "infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py" 'materialized local brand package' "MFE Dockerfile emits deterministic brand materialization proof"
+reject_contains "infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py" '@edx/brand@file:\./brand-mereka' "MFE Dockerfile no longer runs post-npm brand package install"
 reject_contains "infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py" 'COPY indigo/' "MFE Dockerfile no longer depends on an Indigo build-context directory"
 require_contains "infrastructure/tutor/plugins/_mereka_lms/openedx_dockerfile.py" 'django-csp==3\.8' "repo-built Open edX image installs django-csp for CSPMiddleware"
 require_contains "infrastructure/tutor/plugins/_mereka_lms/openedx_dockerfile.py" '\.mereka-built-openedx-image' "repo-built Open edX image carries a runtime dependency sentinel"
@@ -360,6 +412,8 @@ reject_contains "scripts/qa/verify-setup.sh" 'django_site WHERE domain LIKE' "ve
 require_contains "scripts/infra/verify-local-bootstrap-readiness.sh" "apps.localhost/authn/login" "bootstrap readiness verifies the canonical local MFE authn route"
 require_contains "scripts/infra/verify-local-bootstrap-readiness.sh" "discovery.localhost" "bootstrap readiness verifies the canonical local Discovery route"
 require_contains "scripts/infra/verify-local-bootstrap-readiness.sh" "%\\{http_code\\}" "bootstrap readiness checks HTTP status instead of curl connectivity only"
+require_contains "scripts/infra/verify-local-bootstrap-readiness.sh" 'HTTP_ROUTE_ATTEMPTS' "bootstrap readiness allows bounded route warm-up retries"
+require_contains "scripts/infra/verify-local-bootstrap-readiness.sh" 'HTTP_ROUTE_SLEEP_SECONDS' "bootstrap readiness spaces route warm-up retries"
 
 printf '\n== Proof workflow contract ==\n'
 require_contains ".github/workflows/bootstrap-local-readiness.yml" 'workflow_dispatch:' "bootstrap-local-readiness can be manually dispatched"
@@ -447,6 +501,7 @@ require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" '2026-04-22' "qui
 require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" 'git submodule update --init --recursive' "quick start initializes required submodules"
 require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" 'verify-cold-start-onboarding-contract\.sh' "quick start names offline contract verifier"
 require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" 'verify-local-bootstrap-readiness\.sh' "quick start names local bootstrap readiness verifier"
+require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" 'bounded HTTP retries' "quick start documents bounded route readiness retries"
 require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" 'make local-first-run' "quick start publishes the governed first-run wrapper"
 require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" 'bootstrap-local-readiness\.yml' "quick start names heavy proof workflow"
 require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" 'lane_mode=fallback' "quick start documents ARC fallback bootstrap proof dispatch"
@@ -467,7 +522,8 @@ require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" '--set MYSQL_ROOT
 require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" '--set DOCKER_IMAGE_OPENEDX=openedx:nightly' "quick start manual path points Tutor at the local Open edX image"
 require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" '--set MFE_DOCKER_IMAGE=openedx-mfe:nightly' "quick start manual path points Tutor at the local MFE image"
 require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" '--set RUN_MONGODB=true' "quick start manual path enables local MongoDB"
-require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" '--set ASPECTS_SUPERSET_DATABASE_HOST=clickhouse' "quick start manual path includes Aspects ClickHouse setting from setup-local"
+require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" 'for plugin in mfe discovery forum notes xqueue' "quick start manual path converges required local service plugins"
+require_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" 'tutor plugins disable aspects ecommerce' "quick start manual path excludes optional Aspects and legacy ecommerce from canonical local first-run"
 reject_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" 'site-down\.md' "quick start does not link missing site-down runbook"
 reject_contains "docs/guides/onboarding/QUICK_START_LOCAL.md" 'changeme-local-only' "quick start does not publish fixed local admin password"
 
@@ -479,10 +535,12 @@ require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'benchmark_class=app-ca
 require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'lane_mode=fallback' "local setup guide documents ARC fallback bootstrap proof dispatch"
 require_contains "docs/guides/onboarding/LOCAL_SETUP.md" '--set DOCKER_IMAGE_OPENEDX=openedx:nightly' "local setup guide points Tutor at the local Open edX image"
 require_contains "docs/guides/onboarding/LOCAL_SETUP.md" '--set RUN_MONGODB=true' "local setup guide enables local MongoDB"
-require_contains "docs/guides/onboarding/LOCAL_SETUP.md" '--set ASPECTS_SUPERSET_DATABASE_HOST=clickhouse' "local setup guide includes Aspects ClickHouse setting from setup-local"
+require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'for plugin in mfe discovery forum notes xqueue' "local setup guide documents required local service plugin convergence"
+require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'tutor plugins disable aspects ecommerce' "local setup guide documents optional Aspects and legacy ecommerce exclusion"
 require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'build-openedx-image\.sh --local-defaults --build-profile fast' "local setup initial launch builds Open edX image"
 require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'build-mfe-image\.sh --local-defaults --build-profile fast' "local setup initial launch builds MFE image"
 require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'verify-local-bootstrap-readiness\.sh' "local setup verifies readiness after first launch"
+require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'bounded route warm-up window' "local setup explains bounded route warm-up"
 require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'make local-first-run' "local setup points new developers at the governed first-run wrapper"
 require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'make tutor-start' "local setup uses Makefile wrappers for daily whole-stack start"
 require_contains "docs/guides/onboarding/LOCAL_SETUP.md" 'make tutor-stop' "local setup uses Makefile wrappers for daily whole-stack stop"
@@ -496,6 +554,7 @@ require_contains "docs/guides/onboarding/WORKFLOW_LOCAL.md" 'make local-first-ru
 require_contains "docs/guides/onboarding/WORKFLOW_LOCAL.md" 'prepare-tutor-build-context\.sh --target all' "local workflow manual first boot prepares build context before image builds"
 require_contains "docs/guides/onboarding/WORKFLOW_LOCAL.md" 'ensure-buildx-dependency-mirror\.sh' "local workflow manual first boot selects canonical BuildKit dependency mirror"
 require_contains "docs/guides/onboarding/WORKFLOW_LOCAL.md" 'verify-local-bootstrap-readiness\.sh' "local workflow verifies readiness after first launch"
+require_contains "docs/guides/onboarding/WORKFLOW_LOCAL.md" 'bounded HTTP retries' "local workflow explains bounded route readiness retries"
 require_contains "docs/guides/onboarding/WORKFLOW_LOCAL.md" 'make tutor-start' "local workflow uses Makefile wrappers for daily whole-stack start"
 require_contains "docs/guides/onboarding/WORKFLOW_LOCAL.md" 'make tutor-stop' "local workflow uses Makefile wrappers for daily whole-stack stop"
 require_contains "docs/guides/onboarding/WORKFLOW_LOCAL.md" 'make tutor-restart' "local workflow uses Makefile wrappers for whole-stack restart after config changes"
@@ -537,6 +596,9 @@ require_contains "docs/reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md
 require_contains "docs/reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md" 'Devspace development' "developer environment matrix reserves devspace lane"
 require_contains "docs/reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md" 'lane_mode=fallback' "developer environment matrix keeps bootstrap runner override explicit"
 require_contains "docs/reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md" 'durable GHCR BuildKit registry cache' "developer environment matrix classifies durable registry cache"
+require_contains "docs/reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md" 'Discovery init source hooks' "developer environment matrix names Discovery init source authority"
+require_contains "docs/reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md" 'Mereka LMS theme/Mako guards' "developer environment matrix names LMS theme Mako guard source authority"
+require_contains "docs/reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md" 'verify-mako-template-syntax\.sh' "developer environment matrix names Mako template verifier for local quick start"
 require_contains "docs/reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md" 'app-level BuildKit cache imports disabled' "developer environment matrix states app-cache-cold semantics"
 require_contains "docs/reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md" 'not a live CI dashboard' "developer environment matrix refuses stale latest-run dashboard semantics"
 require_contains "docs/reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md" 'cancelled GitHub job after a successful launch phase is not a source failure' "developer environment matrix classifies cancelled launch-proof jobs correctly"

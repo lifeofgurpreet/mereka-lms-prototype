@@ -53,6 +53,8 @@ These behaviors must not migrate back into bash:
 | Source-Owned Surface | Owner |
 |---|---|
 | LMS/CMS production settings, hosts, CSRF, CSP, metrics app wiring | `infrastructure/tutor/plugins/_mereka_lms/lms_settings.py` and related plugin modules |
+| Discovery local init partner/API URL convergence | `infrastructure/tutor/plugins/_mereka_lms/discovery_init.py` |
+| LMS runtime theme templates, Mako fallback behavior, and template-safe tenant URL helpers | `infrastructure/tutor/themes/mereka/lms/templates/**`, `infrastructure/tutor/custom-apps/openedx_tenant_cache/runtime_urls.py`, plus `scripts/qa/verify-mako-template-syntax.sh` |
 | Open edX Dockerfile additive hooks for repo dependencies and runtime sentinels | `infrastructure/tutor/plugins/_mereka_lms/openedx_dockerfile.py` |
 | MFE Dockerfile source hooks, local brand package references, runtime theme copy, authn route handling | `infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py` |
 | MFE runtime theme/footer/slot config | `infrastructure/tutor/plugins/_mereka_lms/mfe_runtime.py` and `mereka_lms_mfe_slots.py` |

@@ -79,6 +79,18 @@ for tmpl in "${TEMPLATES[@]}"; do
     do_warn "$rel: uses deprecated 'ugettext' — migrate to 'gettext'"
   fi
 
+  if grep -qE 'from (lms|cms)\.envs\.tutor\.mereka_multisite import' "$tmpl" 2>/dev/null; then
+    do_fail "$rel: imports deployment-only mereka_multisite settings module from a Mako template"
+  fi
+
+  if grep -q 'tenant_authn_microfrontend_url_for_host' "$tmpl" 2>/dev/null; then
+    if grep -q 'from openedx_tenant_cache.runtime_urls import tenant_authn_microfrontend_url_for_host' <<<"$imports"; then
+      do_pass "$rel: uses installed runtime URL helper for tenant Authn links"
+    else
+      do_fail "$rel: uses tenant_authn_microfrontend_url_for_host without importing openedx_tenant_cache.runtime_urls"
+    fi
+  fi
+
   # Check for ${variable} references to common functions that need imports
   # format_html, mark_safe, reverse, etc.
   for func in format_html mark_safe reverse static; do
@@ -93,7 +105,29 @@ done
 echo ""
 
 # ---------------------------------------------------------------------------
-# 3. Check for Mako syntax errors (balanced tags)
+# 3. Verify template runtime helpers are source-materialized
+# ---------------------------------------------------------------------------
+
+echo "--- Checking template runtime helper source ---"
+echo ""
+
+runtime_urls_helper="$REPO_ROOT/infrastructure/tutor/custom-apps/openedx_tenant_cache/runtime_urls.py"
+if [[ -f "$runtime_urls_helper" ]]; then
+  do_pass "openedx_tenant_cache.runtime_urls helper source exists in installed custom app"
+  if grep -q 'def tenant_authn_microfrontend_url_for_host' "$runtime_urls_helper" \
+    && grep -q 'def candidate_site_domains' "$runtime_urls_helper"; then
+    do_pass "openedx_tenant_cache.runtime_urls exposes tenant Authn URL and host candidate helpers"
+  else
+    do_fail "openedx_tenant_cache.runtime_urls is missing required tenant URL helper functions"
+  fi
+else
+  do_fail "openedx_tenant_cache.runtime_urls helper source is missing"
+fi
+
+echo ""
+
+# ---------------------------------------------------------------------------
+# 4. Check for Mako syntax errors (balanced tags)
 # ---------------------------------------------------------------------------
 
 echo "--- Checking Mako tag balance ---"
@@ -129,7 +163,7 @@ done
 echo ""
 
 # ---------------------------------------------------------------------------
-# 4. Verify no templates use raw Python builtins that Mako marks as UNDEFINED
+# 5. Verify no templates use raw Python builtins that Mako marks as UNDEFINED
 # ---------------------------------------------------------------------------
 
 echo "--- Checking for UNDEFINED-prone patterns ---"
@@ -149,6 +183,37 @@ for tmpl in "${TEMPLATES[@]}"; do
     fi
   done
 done
+
+echo ""
+
+# ---------------------------------------------------------------------------
+# 6. Guard known Mako named-block scope hazards
+# ---------------------------------------------------------------------------
+
+echo "--- Checking named-block runtime scope hazards ---"
+echo ""
+
+navbar_template="$THEME_DIR/lms/templates/header/navbar-logo-header.html"
+if [[ -f "$navbar_template" ]]; then
+  navigation_logo_block="$(awk '
+    /<%block name="navigation_logo"/ { in_block = 1 }
+    in_block { print }
+    /<\/%block>/ { in_block = 0 }
+  ' "$navbar_template")"
+
+  if grep -qE '\$\{_tenant_logo\}|\$\{_platform_name\}' <<<"$navigation_logo_block"; then
+    do_fail "lms/templates/header/navbar-logo-header.html: navigation_logo block references outer locals that Mako may render as Undefined"
+  else
+    do_pass "lms/templates/header/navbar-logo-header.html: navigation_logo block does not reference outer logo/platform locals"
+  fi
+
+  if grep -q '_navigation_logo_url' <<<"$navigation_logo_block" \
+    && grep -q '_navigation_platform_name' <<<"$navigation_logo_block"; then
+    do_pass "lms/templates/header/navbar-logo-header.html: navigation_logo block computes its own logo/platform fallbacks"
+  else
+    do_fail "lms/templates/header/navbar-logo-header.html: navigation_logo block must compute local logo/platform fallbacks"
+  fi
+fi
 
 echo ""
 

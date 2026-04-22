@@ -9,7 +9,7 @@ cd mereka-lms
 make local-first-run
 ```
 
-`make local-first-run` expands to the canonical four-step chain: `git submodule update --init --recursive`, `./scripts/qa/verify-cold-start-onboarding-contract.sh`, `./scripts/shared/setup-local.sh`, and `./scripts/infra/verify-local-bootstrap-readiness.sh`. The first run builds local Open edX and MFE images, initializes Tutor data, starts the stack, and creates a local-only admin user. If `LOCAL_ADMIN_PASSWORD` is not set, the setup script writes generated credentials to `tutor_env/local-admin-credentials.txt`.
+`make local-first-run` expands to the canonical three-command chain: `git submodule update --init --recursive`, `./scripts/qa/verify-cold-start-onboarding-contract.sh`, and `./scripts/shared/setup-local.sh`. The setup script owns the rest of the governed bootstrap: it builds local Open edX and MFE images when needed, runs `tutor local launch -I --skip-build` to converge Tutor data, starts the stack, runs `./scripts/infra/verify-local-bootstrap-readiness.sh`, and creates a local-only admin user. Directory presence under `tutor_env/data/` is not treated as proof of initialization. If `LOCAL_ADMIN_PASSWORD` is not set, the setup script writes generated credentials to `tutor_env/local-admin-credentials.txt`.
 
 ## Current Proof Contract
 
@@ -35,6 +35,12 @@ second Dockerfile, Compose stack, or local-only build path to work around a
 failure. Classify the failure, fix the source/render/build-helper chain, and
 update the proof matrix when the contract changes.
 
+The initialized-state verifier uses bounded HTTP retries because LMS, Studio,
+MFEs, and Discovery can warm at different speeds after `tutor local start -d`.
+A final readiness failure still means the stack did not converge; rerun
+`./scripts/infra/verify-local-bootstrap-readiness.sh` after checking the named
+route logs instead of treating one successful service as whole-stack proof.
+
 ## Host Requirements
 
 - Docker Engine or Docker Desktop with Docker Compose v2.
@@ -56,13 +62,14 @@ pip install -r requirements-tutor.txt
 
 source infrastructure/tutor/tutor-env.sh
 export TUTOR_ROOT="$(pwd)/tutor_env"
+for plugin in mfe discovery forum notes xqueue; do tutor plugins enable "$plugin"; done
+tutor plugins disable aspects ecommerce
 
 ./scripts/infra/tutor-config-save.sh \
   --set LMS_HOST=localhost \
   --set CMS_HOST=studio.localhost \
   --set MFE_HOST=apps.localhost \
   --set DISCOVERY_HOST=discovery.localhost \
-  --set ECOMMERCE_HOST=ecommerce.localhost \
   --set XQUEUE_HOST=xqueue.localhost \
   --set RUN_MONGODB=true \
   --set RUN_MYSQL=true \
@@ -84,13 +91,16 @@ export TUTOR_ROOT="$(pwd)/tutor_env"
   --set MONGODB_PORT=27017 \
   --set MYSQL_PORT=3306 \
   --set MYSQL_ROOT_HOST=% \
-  --set REDIS_PORT=6379 \
-  --set ASPECTS_SUPERSET_DATABASE_HOST=clickhouse
+  --set REDIS_PORT=6379
 ```
 
 The config wrapper syncs the repo-local Tutor plugin mirror and enables the
 canonical plugins with `tutor plugins enable mereka_lms` and
 `tutor plugins enable mereka_lms_mfe_slots` before saving config.
+The local first-run wrapper also enables `mfe`, `discovery`, `forum`, `notes`,
+and `xqueue`, and disables optional `aspects`/legacy `ecommerce` for the default
+local lane. Aspects/Superset is reserved for the Kubernetes/devspace preview lane
+unless you explicitly own host port `8088`.
 
 ```bash
 ./scripts/infra/prepare-tutor-build-context.sh --target all
@@ -101,6 +111,11 @@ tutor local launch -I --skip-build
 make tutor-start
 ./scripts/infra/verify-local-bootstrap-readiness.sh
 ```
+
+Always run the launch/init step in the first-run lane, even if `tutor_env/data/mysql`
+already exists from a failed or interrupted attempt. A data directory can exist
+without the `openedx` MySQL user, migrations, or Django site rows that readiness
+requires.
 
 The local quick start builds `openedx:nightly` and `openedx-mfe:nightly`, then points Tutor at those exact tags. Render prep applies the named dependency-image mirror patch for Tutor-emitted hardcoded Docker Hub dependency refs, selects a repo-owned BuildKit builder with a `docker.io` registry mirror as a fallback guard, and uses `mirror.gcr.io` where Tutor exposes third-party service/helper image refs. That is dependency acquisition only; it does not create a second Dockerfile or image strategy.
 

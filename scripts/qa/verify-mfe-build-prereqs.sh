@@ -242,7 +242,8 @@ fi
 check_contains "plugin module defines pre-npm-install hook" "$PATCH_MODULE" "mfe-dockerfile-pre-npm-install"
 check_contains "plugin module defines post-npm-install hook" "$PATCH_MODULE" "mfe-dockerfile-post-npm-install"
 check_contains "plugin module installs frontend-plugin-framework" "$PATCH_MODULE" "frontend-plugin-framework@^1.8.0"
-check_contains "plugin module installs local brand package" "$PATCH_MODULE" "@edx/brand@file:./brand-mereka"
+check_contains "plugin module materializes local brand package" "$PATCH_MODULE" "/openedx/app/node_modules/@edx/brand"
+check_contains "plugin module emits brand materialization marker" "$PATCH_MODULE" "materialized local brand package"
 check_contains "slot ownership shell delegates to Python helper" "$SLOT_OWNERSHIP_PATCH" "mfe_slot_ownership.py"
 check_contains "slot ownership helper defines strip_slot_ownership" "$SLOT_OWNERSHIP_HELPER" "def strip_slot_ownership("
 check_contains "deprecated shell prune helper defines orders/payment app set" "$PRUNE_DEPRECATED_SHELLS_HELPER" "APPS = (\"orders\", \"payment\")"
@@ -340,10 +341,14 @@ if [[ -f "$GENERATED_MFE_DOCKERFILE" ]]; then
     echo "  ✓ generated Dockerfile has no stale base-stage apt bootstrap"
   fi
 
-  if grep -Fq -- "@edx/brand@file:./brand-mereka" "$GENERATED_MFE_DOCKERFILE"; then
-    echo "  ✓ generated Dockerfile installs local brand package"
+  if grep -Fq -- "/openedx/app/node_modules/@edx/brand" "$GENERATED_MFE_DOCKERFILE" \
+    && grep -Fq -- "materialized local brand package" "$GENERATED_MFE_DOCKERFILE"; then
+    echo "  ✓ generated Dockerfile materializes local brand package"
+  elif grep -Fq -- "@edx/brand@file:./brand-mereka" "$GENERATED_MFE_DOCKERFILE"; then
+    echo "  ✗ generated Dockerfile still runs post-npm local brand package install"
+    failures=1
   else
-    echo "  ✗ generated Dockerfile missing local brand package install"
+    echo "  ✗ generated Dockerfile missing local brand package materialization"
     failures=1
   fi
 

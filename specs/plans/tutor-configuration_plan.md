@@ -70,8 +70,8 @@ Key deliverables:
   - **Complexity**: S (<1h) -- simple grep check appended toexisting script.
 
 - [ ] **[M] Task 6: Create MFE build verification script** (`scripts/qa/verify-mfe-build-contract.sh`) | AC: #6 | Depends:None
-  - **Description**: Write a script that verifies the MFE Dockerfile contains the Node 24 base image, the required build tools, HTTPS git rewrite hardening, local brand package install, runtime theme payload copy, npm retry configuration, and the 6144MB memory limit. This proves AC-006 without requiring a full image build.
-  - **Done definition**: Script checks the rendered/tracked MFE Dockerfile contract for Node 24, build tools, git rewrite hardening, local brand package install, theme payload copy, npm retries, and NODE_OPTIONS. Exits non-zero if any check fails.
+  - **Description**: Write a script that verifies the MFE Dockerfile contains the Node 24 base image, the required build tools, HTTPS git rewrite hardening, local brand package materialization, runtime theme payload copy, npm retry configuration, and the 6144MB memory limit. This proves AC-006 without requiring a full image build.
+  - **Done definition**: Script checks the rendered/tracked MFE Dockerfile contract for Node 24, build tools, git rewrite hardening, local brand package materialization, theme payload copy, npm retries, and NODE_OPTIONS. Exits non-zero if any check fails.
   - **Complexity**: M (2-3h) -- need to parse Dockerfile patterns carefully.
 
 - [ ] **[S] Task 7: Create multi-site domain verification script** (`scripts/qa/verify-tutor-multisite-domains.sh`) | AC:#8 | Depends: None

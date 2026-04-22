@@ -80,6 +80,29 @@ wait_for_http_route() {
     return 1
 }
 
+ensure_local_tutor_plugin_enabled() {
+    local plugin="$1"
+    local output
+
+    if output="$(tutor plugins enable "$plugin" 2>&1)"; then
+        [[ -n "$output" ]] && printf '%s\n' "$output"
+        return 0
+    fi
+
+    printf '%s\n' "$output" >&2
+    die "Failed to enable required local Tutor plugin: ${plugin}"
+}
+
+disable_local_optional_tutor_plugin() {
+    local plugin="$1"
+    local output
+
+    if output="$(tutor plugins disable "$plugin" 2>&1)"; then
+        [[ -n "$output" ]] && printf '%s\n' "$output"
+        echo -e "${YELLOW}⚠️  Optional local Tutor plugin disabled for canonical first-run: ${plugin}${NC}"
+    fi
+}
+
 echo "╔══════════════════════════════════════════════════════════════╗"
 echo "║        One-Click Local Development Setup                     ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
@@ -137,13 +160,20 @@ if [ ! -f "tutor_env/config.yml" ]; then
     cp infrastructure/tutor/config.example.yml tutor_env/config.yml
 fi
 
+echo -e "${BLUE}Converging canonical local Tutor plugin set...${NC}"
+for plugin in mfe discovery forum notes xqueue; do
+    ensure_local_tutor_plugin_enabled "$plugin"
+done
+for plugin in aspects ecommerce; do
+    disable_local_optional_tutor_plugin "$plugin"
+done
+
 # Ensure local Docker services are configured
 ./scripts/infra/tutor-config-save.sh \
     --set LMS_HOST=localhost \
     --set CMS_HOST=studio.localhost \
     --set MFE_HOST=apps.localhost \
     --set DISCOVERY_HOST=discovery.localhost \
-    --set ECOMMERCE_HOST=ecommerce.localhost \
     --set XQUEUE_HOST=xqueue.localhost \
     --set RUN_MONGODB=true \
     --set RUN_MYSQL=true \
@@ -169,8 +199,7 @@ fi
     --set MONGODB_PORT=27017 \
     --set MYSQL_PORT=3306 \
     --set MYSQL_ROOT_HOST=% \
-    --set REDIS_PORT=6379 \
-    --set ASPECTS_SUPERSET_DATABASE_HOST=clickhouse
+    --set REDIS_PORT=6379
 
 echo -e "${GREEN}✅ Tutor configured${NC}"
 echo ""
@@ -211,14 +240,11 @@ else
 fi
 echo ""
 
-# Step 5: Initialize Database
-echo -e "${BLUE}Step 5: Initializing database...${NC}"
-if [ ! -d "tutor_env/data/mysql" ]; then
-    echo -e "${YELLOW}⚠️  Database not initialized. Running init (this takes 5-10 minutes)...${NC}"
-    tutor local launch -I --skip-build
-else
-    echo -e "${GREEN}✅ Database exists${NC}"
-fi
+# Step 5: Initialize Tutor runtime
+echo -e "${BLUE}Step 5: Converging initialized Tutor runtime...${NC}"
+echo -e "${YELLOW}⚠️  Running Tutor launch/init with local images. This is idempotent and repairs partial data directories.${NC}"
+tutor local launch -I --skip-build
+echo -e "${GREEN}✅ Tutor launch/init converged${NC}"
 echo ""
 
 # Step 6: Start Services

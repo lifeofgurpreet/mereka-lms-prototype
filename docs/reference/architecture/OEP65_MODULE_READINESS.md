@@ -68,13 +68,13 @@ its own React tree from scratch and includes its own copy of React and all share
 |-------|-----------|-----------------|
 | Footer replacement | `PLUGIN_SLOTS` + `mfe-env-config-runtime-definitions` ENV_PATCH | **Aligned** — slot-driven |
 | Dark theme toggle | `PLUGIN_SLOTS` insert into `footer_slot` | **Aligned** — slot-driven |
-| Mereka SCSS | `npm install @edx/brand` alias + `mereka.scss` COPY in Dockerfile | **Aligned** — brand package pattern |
+| Mereka SCSS | local `@edx/brand` materialization + `mereka.scss` COPY in Dockerfile | **Aligned** — brand package pattern |
 | `@openedx/frontend-plugin-framework` | Installed at build time per MFE | **Aligned** — FPF is OEP-65 prerequisite |
 | Build-time cookie-domain injection | Removed from the active MFE Dockerfile contract | **Improved** — no active baked cookie-domain args remain |
 | Build-time New Relic toggle | Removed from the active MFE Dockerfile contract | **Improved** — no active `ENABLE_NEW_RELIC` build arg remains |
 | `SITE_VARIANTS` hostname map | Hardcoded in `env.config.jsx` React component | **Not aligned** — tight coupling to domain list |
 | Hardcoded footer nav/social links | Arrays in `env.config.jsx` component body | **Not aligned** — should be runtime config |
-| `@edx/brand` package delivery | Local package in Dockerfile (`@edx/brand@file:./brand-mereka`) | **Aligned** — brand package pattern |
+| `@edx/brand` package delivery | Local package materialized in Dockerfile at `node_modules/@edx/brand` | **Aligned** — brand package pattern |
 | MFE Dockerfile customisation | Tutor plugin hooks in `_mereka_lms/mfe_dockerfile.py` plus limited post-render build-context sync | **Partially aligned** — hook-led authority is correct, but build-context sync is still a downstream coupling point |
 | Node/runtime/toolchain policy | Tutor plugin MFE Dockerfile hooks | **Partially aligned** — no regex surgery remains, but downstream still owns non-upstream build choices |
 | Branch/ref alignment (historical) | Previously handled by rendered Dockerfile surgery; removed with `mfe-node.sh` retirement | **No longer active** — keep as historical migration context only |
@@ -143,7 +143,7 @@ paths may still break.
 **OEP-65 target**: Dockerfile customisation stays in Tutor hooks, and any remaining filesystem sync
 is minimized to assets or helper files that genuinely cannot be expressed through hooks.
 
-**What is already aligned**: Toolchain, cookie env, brand package installation, runtime theme copy,
+**What is already aligned**: Toolchain, cookie env, brand package materialization, runtime theme copy,
 plugin-framework dependency, and other durable Dockerfile-level customisations are now hook-owned
 rather than regex-owned.
 
@@ -262,10 +262,14 @@ change to the `MerekaFooter` component.
 
 ### Brand Package (Fully Aligned)
 
-The Mereka brand is delivered as an npm package alias:
+The Mereka brand is delivered by materializing the local brand package at the
+standard `@edx/brand` module path:
 
 ```dockerfile
-RUN npm install --legacy-peer-deps '@edx/brand@file:./brand-mereka'
+COPY mereka/brand-mereka /openedx/app/brand-mereka
+RUN python3 - <<'PY'
+# Copies /openedx/app/brand-mereka to /openedx/app/node_modules/@edx/brand
+PY
 ```
 
 SCSS is imported in `env.config.jsx`:

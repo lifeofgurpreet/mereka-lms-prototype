@@ -19,7 +19,7 @@ For the normal first run from a clean checkout, prefer the governed wrapper:
 make local-first-run
 ```
 
-It expands to `git submodule update --init --recursive`, `./scripts/qa/verify-cold-start-onboarding-contract.sh`, `./scripts/shared/setup-local.sh`, and `./scripts/infra/verify-local-bootstrap-readiness.sh`. Use the manual steps below only when debugging one phase of that chain.
+It expands to `git submodule update --init --recursive`, `./scripts/qa/verify-cold-start-onboarding-contract.sh`, and `./scripts/shared/setup-local.sh`. The setup script owns the rest of the governed bootstrap, including `tutor local launch -I --skip-build`, `./scripts/infra/verify-local-bootstrap-readiness.sh`, and local admin creation. `tutor_env/data/` directory presence is not initialized database truth. Use the manual steps below only when debugging one phase of that chain.
 
 ## Manual bootstrap
 
@@ -58,17 +58,19 @@ The current configuration pins:
 - `CMS_HOST=studio.localhost`
 - Open edX release branch: `release/ulmo`
 - MFE branch: `release/ulmo.2`
-- Enabled repo-owned plugins: `mereka_lms`, `mereka_lms_mfe_slots`; the wrapper also preserves the Tutor service plugins required by the selected configuration.
+- Enabled local plugins: `mfe`, `discovery`, `forum`, `notes`, `xqueue`, `mereka_lms`, `mereka_lms_mfe_slots`.
+- Disabled by the local first-run wrapper: `aspects` and legacy `ecommerce`. Aspects/Superset currently binds host port `8088` in Tutor Aspects 3.0.3; use the Kubernetes/devspace preview lane for analytics work unless you explicitly own that local port.
 
 To regenerate the environment after editing configuration values:
 
 ```bash
 source infrastructure/tutor/tutor-env.sh
+for plugin in mfe discovery forum notes xqueue; do tutor plugins enable "$plugin"; done
+tutor plugins disable aspects ecommerce
 ./scripts/infra/tutor-config-save.sh \
   --set LMS_HOST=localhost \
   --set CMS_HOST=studio.localhost \
   --set DISCOVERY_HOST=discovery.localhost \
-  --set ECOMMERCE_HOST=ecommerce.localhost \
   --set MFE_HOST=apps.localhost \
   --set XQUEUE_HOST=xqueue.localhost \
   --set RUN_MONGODB=true \
@@ -86,14 +88,13 @@ source infrastructure/tutor/tutor-env.sh
   --set DOCKER_IMAGE_REDIS=mirror.gcr.io/library/redis:7.4.5 \
   --set DOCKER_IMAGE_SMTP=mirror.gcr.io/devture/exim-relay:4.96-r1-0 \
   --set MYSQL_ROOT_HOST=% \
-  --set ASPECTS_SUPERSET_DATABASE_HOST=clickhouse \
   --set OPENEDX_COMMON_VERSION=release/ulmo \
   --set OPENEDX_LMS_VERSION=release/ulmo \
   --set OPENEDX_CMS_VERSION=release/ulmo \
   --set MFE_COMMON_VERSION=release/ulmo.2
 ```
 
-The wrapper enables the canonical first-party plugins and runs `./scripts/infra/prepare-tutor-build-context.sh --target all` after configuration. Local setup builds `openedx:nightly` and `openedx-mfe:nightly`, then points Tutor at those tags. The render prep applies `infrastructure/tutor/patches/dependency-image-mirrors.sh` for Tutor-emitted hardcoded Docker Hub dependency refs, selects `scripts/infra/ensure-buildx-dependency-mirror.sh` as a BuildKit fallback guard, and uses `mirror.gcr.io` image refs where Tutor exposes third-party service images. If you deliberately enable or disable plugins outside the wrapper, rerun `./scripts/infra/prepare-tutor-build-context.sh --target all` afterwards.
+The wrapper converges the canonical local plugin set and runs `./scripts/infra/prepare-tutor-build-context.sh --target all` after configuration. Local setup builds `openedx:nightly` and `openedx-mfe:nightly`, then points Tutor at those tags. The render prep applies `infrastructure/tutor/patches/dependency-image-mirrors.sh` for Tutor-emitted hardcoded Docker Hub dependency refs, selects `scripts/infra/ensure-buildx-dependency-mirror.sh` as a BuildKit fallback guard, and uses `mirror.gcr.io` image refs where Tutor exposes third-party service images. If you deliberately enable or disable plugins outside the wrapper, rerun `./scripts/infra/prepare-tutor-build-context.sh --target all` afterwards.
 
 Secrets (`config.yml`) live in `tutor_env/` which is git-ignored. For reference, `infrastructure/tutor/config.example.yml` records the non-secret overrides.
 
@@ -140,6 +141,16 @@ runtime inspection. After first launch or a full reset, run
 `./scripts/infra/verify-local-bootstrap-readiness.sh` before treating the
 sandbox as ready.
 
+That verifier waits through a bounded route warm-up window for LMS, Studio,
+MFEs, and Discovery. If it still fails, inspect the failed route's container
+logs and rerun the verifier; do not mark local setup complete from container
+uptime or one healthy URL alone.
+
+If a previous setup attempt was interrupted, rerun `make local-first-run` or
+`tutor local launch -I --skip-build`; do not infer readiness from
+`tutor_env/data/mysql` existing. Tutor launch/init is the source of database
+truth for the local first-run lane.
+
 > `tutor local launch` may run for 10-60+ minutes on the first pass depending on Docker resources, image freshness, and database init time. If your terminal times out, re-run `tutor local do init` until it completes. The `openedx` MySQL user will be missing otherwise, and the LMS/Studio will 500 with "Access denied for user 'openedx'". Use the bootstrap workflow phase-timing artifact as the current CI reference point instead of assuming a fixed laptop duration.
 
 ### Local vs Production Data
@@ -162,7 +173,6 @@ Modern browsers resolve `*.localhost` to `127.0.0.1`, so no hosts-file entries a
 - http://studio.localhost (Studio)
 - http://apps.localhost (MFE shell + OAuth redirect target)
 - http://discovery.localhost (Course Discovery)
-- http://ecommerce.localhost (Otto console)
 - http://notes.localhost (Open edX Notes)
 - http://xqueue.localhost (XQueue dashboard)
 
@@ -220,8 +230,7 @@ Design work references Paragon components and tokens (`https://edx.github.io/par
 - Regression checklist after config or plugin changes:
   1. `tutor local dc ps` shows every container `Up`.
   2. LMS/Studio login with `mereka_admin` succeeds.
-  3. Commerce dashboard loads and can sync catalogs (`tutor local run ecommerce ./manage.py migrate` if queues fall behind).
-  4. `tutor local logs mfe --tail=50` stays clean after page refresh.
+  3. `tutor local logs mfe --tail=50` stays clean after page refresh.
 
 ## Maintenance
 
@@ -260,5 +269,4 @@ gh workflow run bootstrap-local-readiness.yml \
 
 - Docker image pulls are large; if `tutor local launch` fails mid-way, rerun `tutor local launch -I --skip-build` after ensuring adequate disk space (and rerun `tutor local do init` if the LMS still 500s).
 - If the forum container keeps restarting, check logs with `tutor local logs forum` — forum v2 is Python-based and uses Meilisearch (no rake commands or Elasticsearch).
-- Ecommerce returning `OperationalError: Access denied for user 'ecommerce'` means the init job didn’t finish—rerun `tutor local do init --limit=ecommerce` to recreate the database, user, and OAuth clients.
 - For plugin template changes, run `./scripts/infra/tutor-config-save.sh` to regenerate YAML manifests and rendered build contexts.

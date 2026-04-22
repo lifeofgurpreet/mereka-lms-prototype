@@ -62,6 +62,24 @@ def test_rendered_account_mfe_dockerfile_carries_null_guard_when_available() -> 
     assert content.index(copy_line) < content.index(patch_anchor)
 
 
+def test_mfe_brand_package_is_materialized_without_npm_reify() -> None:
+    plugin = PLUGIN_FILE.read_text(encoding="utf-8")
+    snapshot = SNAPSHOT_DOCKERFILE.read_text(encoding="utf-8")
+
+    for content, label in ((plugin, "plugin"), (snapshot, "tracked MFE Dockerfile snapshot")):
+        assert "COPY mereka/brand-mereka /openedx/app/brand-mereka" in content, (
+            f"{label} must stage the repo-owned brand package into the MFE build context"
+        )
+        assert 'dest = Path("/openedx/app/node_modules/@edx/brand")' in content or (
+            "/openedx/app/node_modules/@edx/brand" in content
+            and "materialized local brand package" in content
+        ), f"{label} must materialize the local package at @edx/brand"
+        assert "@edx/brand@file:./brand-mereka" not in content, (
+            f"{label} must not run npm install for the local brand package after "
+            "the main dependency layer"
+        )
+
+
 def test_rendered_mfe_snapshot_matches_generated_authority_when_available() -> None:
     snapshot = SNAPSHOT_DOCKERFILE.read_text(encoding="utf-8")
 

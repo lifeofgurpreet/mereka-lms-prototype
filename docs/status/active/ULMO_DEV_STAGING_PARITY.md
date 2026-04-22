@@ -140,7 +140,7 @@ The `infrastructure/tutor/` directory manages Tutor configuration locally. Key p
 | Authority | Purpose | Required for Ulmo |
 |-------|---------|-------------------|
 | Tutor 21 render + `mysql-root-host.sh` | MySQL native-password mode (`--mysql-native-password=ON`) plus local `MYSQL_ROOT_HOST: "%"` compatibility | Yes |
-| `_mereka_lms/mfe_dockerfile.py` + MFE build-context sync | Node 24 toolchain, Ulmo MFE source refs, local brand package `@edx/brand@file:./brand-mereka` | Yes |
+| `_mereka_lms/mfe_dockerfile.py` + MFE build-context sync | Node 24 toolchain, Ulmo MFE source refs, local brand package materialized at `node_modules/@edx/brand` | Yes |
 | `_mereka_lms/lms_settings.py` | Extra hostnames, CSRF trusted origins, session/cookie settings, discussions, enterprise | Yes |
 | `_mereka_lms/mfe_runtime.py` + `sync-footer-assets.sh` | Custom Mereka MFE runtime, theme source, and footer assets | Yes |
 | `_mereka_lms/openedx_dockerfile.py` | Repo custom apps and Open edX build dependencies | Yes |

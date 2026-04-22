@@ -9,7 +9,7 @@
 from django.conf import settings
 from django.utils.translation import gettext as _
 
-from lms.envs.tutor.mereka_multisite import tenant_authn_microfrontend_url_for_host
+from openedx_tenant_cache.runtime_urls import tenant_authn_microfrontend_url_for_host
 from openedx.core.djangoapps.site_configuration import helpers as config_helpers
 from openedx.core.djangoapps.user_authn.toggles import should_redirect_to_authn_microfrontend
 %>

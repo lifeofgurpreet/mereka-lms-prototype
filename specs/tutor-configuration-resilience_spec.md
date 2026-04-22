@@ -165,7 +165,7 @@ The `mereka_lms` Tutor integration implements ENV_PATCHES hooks plus tightly sco
 - **Hooks / patches:** `mfe-dockerfile-pre-npm-install`, `mfe-dockerfile-post-npm-install`, `patches/mfe-npm-install-resilience.sh`
 - **Patches Applied:**
   - Node 24 build toolchain installation plus HTTPS git rewrite hardening
-  - Local `@edx/brand@file:./brand-mereka` install contract
+  - Local `brand-mereka` materialization at `/openedx/app/node_modules/@edx/brand`
   - Rendered production-stage runtime theme payload copy
   - `@openedx/frontend-plugin-framework` installation with legacy peer deps
   - npm install resilience (retry/fallback logic, configurable timeouts)

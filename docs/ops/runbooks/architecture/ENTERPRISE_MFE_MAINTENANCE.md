@@ -51,7 +51,7 @@ Ulmo asset pipeline on machines with 12 GB Docker RAM.
 The repo-owned `mereka/env.config.jsx` template and rendered MFE Dockerfile now ensure:
 
 - Copy `mereka/theme-source/` theme assets into `/openedx/app/theme-source` at build time
-- Copy `mereka/brand-mereka/` into `/openedx/app/brand-mereka` and install it as `@edx/brand`
+- Copy `mereka/brand-mereka/` into `/openedx/app/brand-mereka` and materialize it as `/openedx/app/node_modules/@edx/brand`
 - Keep `theme-source/mereka.scss` available to the build via the repo-owned config path
 
 The governed prepare path still refreshes the remaining MFE build-context asset
@@ -59,10 +59,11 @@ sync, but stale ad hoc production-stage theme-copy surgery has been removed.
 
 ### 4. Local Brand Package (Ulmo)
 
-The `@edx/brand` alias now installs the local package
-`@edx/brand@file:./brand-mereka`, keeping the brand package in the repo-owned
-build context. The external Indigo npm package is retired and must not be
-reintroduced as a build dependency.
+The `@edx/brand` module path is now populated directly from the local
+`brand-mereka` package after the main npm dependency layer. This keeps the
+brand package in the repo-owned build context without forcing a second npm
+dependency-tree reify. The external Indigo npm package is retired and must not
+be reintroduced as a build dependency.
 
 ### 5. NPM Resilience and Fallback Logic
 

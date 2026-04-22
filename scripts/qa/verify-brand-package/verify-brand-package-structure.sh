@@ -493,14 +493,18 @@ BRAND_SEARCH_FILES=("$PLUGIN_FILE")
 [[ -f "$PLUGIN_DIR/_mereka_lms/mfe_dockerfile.py" ]] && BRAND_SEARCH_FILES+=("$PLUGIN_DIR/_mereka_lms/mfe_dockerfile.py")
 
 BRAND_COPY_FOUND=0
-BRAND_ALIAS_FOUND=0
+BRAND_MATERIALIZATION_FOUND=0
+BRAND_REIFY_INSTALL_FOUND=0
 for f in "${BRAND_SEARCH_FILES[@]}"; do
   [[ -f "$f" ]] || continue
   if grep -q 'brand-mereka' "$f" && grep -q 'COPY' "$f"; then
     BRAND_COPY_FOUND=1
   fi
+  if grep -q '/openedx/app/node_modules/@edx/brand' "$f" && grep -q 'materialized local brand package' "$f"; then
+    BRAND_MATERIALIZATION_FOUND=1
+  fi
   if grep -q '@edx/brand@file:./brand-mereka' "$f"; then
-    BRAND_ALIAS_FOUND=1
+    BRAND_REIFY_INSTALL_FOUND=1
   fi
 done
 
@@ -510,10 +514,16 @@ else
   fail "AC-BRAND-023 plugin/patches missing brand COPY hook"
 fi
 
-if [[ $BRAND_ALIAS_FOUND -eq 1 ]]; then
-  pass "AC-BRAND-023 build pipeline installs the local brand package via @edx/brand alias"
+if [[ $BRAND_MATERIALIZATION_FOUND -eq 1 ]]; then
+  pass "AC-BRAND-023 build pipeline materializes the local brand package as @edx/brand"
 else
-  fail "AC-BRAND-023 plugin/patches missing @edx/brand alias install command"
+  fail "AC-BRAND-023 plugin/patches missing @edx/brand materialization command"
+fi
+
+if [[ $BRAND_REIFY_INSTALL_FOUND -eq 0 ]]; then
+  pass "AC-BRAND-023 build pipeline avoids post-npm @edx/brand file install"
+else
+  fail "AC-BRAND-023 plugin/patches still run post-npm @edx/brand file install"
 fi
 
 # AC-BRAND-028 CI wiring

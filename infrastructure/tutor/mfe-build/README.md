@@ -27,7 +27,7 @@ authority path.
 
 - MFE apps: all 12 on `release/ulmo.2`
 - Atlas translations: `release/ulmo`
-- Brand package: local `@edx/brand@file:./brand-mereka`
+- Brand package: local `brand-mereka` materialized at `node_modules/@edx/brand`
 - Node base image: `mirror.gcr.io/library/node:24.11.0-bullseye-slim`
 - Caddy production base image: `mirror.gcr.io/library/caddy:2.7.4`
 - Rendered-Dockerfile exceptions: dependency image mirror normalization and

@@ -64,7 +64,34 @@ ENV PACT_SKIP_BINARY_INSTALL=true
 RUN --mount=type=cache,target=/root/.npm,sharing=shared bash -o pipefail -c 'npm config set fetch-retries 6; npm config set fetch-retry-mintimeout 20000; npm config set fetch-retry-maxtimeout 120000; npm config set fetch-timeout 300000; for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install fallback attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 COPY mereka/brand-mereka /openedx/app/brand-mereka
-RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import shutil
+
+src = Path("/openedx/app/brand-mereka")
+dest = Path("/openedx/app/node_modules/@edx/brand")
+
+if not (src / "package.json").is_file():
+    raise SystemExit(f"brand package source is missing package.json: {src}")
+
+if dest.exists() or dest.is_symlink():
+    if dest.is_dir() and not dest.is_symlink():
+        shutil.rmtree(dest)
+    else:
+        dest.unlink()
+
+dest.parent.mkdir(parents=True, exist_ok=True)
+shutil.copytree(src, dest)
+
+package_json = dest / "package.json"
+payload = json.loads(package_json.read_text(encoding="utf-8"))
+payload["name"] = "@edx/brand"
+payload.pop("devDependencies", None)
+package_json.write_text(json.dumps(payload, indent=2, sort_keys=False) + "\n", encoding="utf-8")
+
+print(f"materialized local brand package at {dest}")
+PY
 
 COPY mereka/theme-source /openedx/app/theme-source
 
@@ -137,7 +164,34 @@ ENV PACT_SKIP_BINARY_INSTALL=true
 RUN --mount=type=cache,target=/root/.npm,sharing=shared bash -o pipefail -c 'npm config set fetch-retries 6; npm config set fetch-retry-mintimeout 20000; npm config set fetch-retry-maxtimeout 120000; npm config set fetch-timeout 300000; for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install fallback attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 COPY mereka/brand-mereka /openedx/app/brand-mereka
-RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import shutil
+
+src = Path("/openedx/app/brand-mereka")
+dest = Path("/openedx/app/node_modules/@edx/brand")
+
+if not (src / "package.json").is_file():
+    raise SystemExit(f"brand package source is missing package.json: {src}")
+
+if dest.exists() or dest.is_symlink():
+    if dest.is_dir() and not dest.is_symlink():
+        shutil.rmtree(dest)
+    else:
+        dest.unlink()
+
+dest.parent.mkdir(parents=True, exist_ok=True)
+shutil.copytree(src, dest)
+
+package_json = dest / "package.json"
+payload = json.loads(package_json.read_text(encoding="utf-8"))
+payload["name"] = "@edx/brand"
+payload.pop("devDependencies", None)
+package_json.write_text(json.dumps(payload, indent=2, sort_keys=False) + "\n", encoding="utf-8")
+
+print(f"materialized local brand package at {dest}")
+PY
 
 COPY mereka/theme-source /openedx/app/theme-source
 
@@ -215,7 +269,34 @@ ENV PACT_SKIP_BINARY_INSTALL=true
 RUN --mount=type=cache,target=/root/.npm,sharing=shared bash -o pipefail -c 'npm config set fetch-retries 6; npm config set fetch-retry-mintimeout 20000; npm config set fetch-retry-maxtimeout 120000; npm config set fetch-timeout 300000; for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install fallback attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 COPY mereka/brand-mereka /openedx/app/brand-mereka
-RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import shutil
+
+src = Path("/openedx/app/brand-mereka")
+dest = Path("/openedx/app/node_modules/@edx/brand")
+
+if not (src / "package.json").is_file():
+    raise SystemExit(f"brand package source is missing package.json: {src}")
+
+if dest.exists() or dest.is_symlink():
+    if dest.is_dir() and not dest.is_symlink():
+        shutil.rmtree(dest)
+    else:
+        dest.unlink()
+
+dest.parent.mkdir(parents=True, exist_ok=True)
+shutil.copytree(src, dest)
+
+package_json = dest / "package.json"
+payload = json.loads(package_json.read_text(encoding="utf-8"))
+payload["name"] = "@edx/brand"
+payload.pop("devDependencies", None)
+package_json.write_text(json.dumps(payload, indent=2, sort_keys=False) + "\n", encoding="utf-8")
+
+print(f"materialized local brand package at {dest}")
+PY
 
 COPY mereka/theme-source /openedx/app/theme-source
 
@@ -287,7 +368,34 @@ ENV PACT_SKIP_BINARY_INSTALL=true
 RUN --mount=type=cache,target=/root/.npm,sharing=shared bash -o pipefail -c 'npm config set fetch-retries 6; npm config set fetch-retry-mintimeout 20000; npm config set fetch-retry-maxtimeout 120000; npm config set fetch-timeout 300000; for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install fallback attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 COPY mereka/brand-mereka /openedx/app/brand-mereka
-RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import shutil
+
+src = Path("/openedx/app/brand-mereka")
+dest = Path("/openedx/app/node_modules/@edx/brand")
+
+if not (src / "package.json").is_file():
+    raise SystemExit(f"brand package source is missing package.json: {src}")
+
+if dest.exists() or dest.is_symlink():
+    if dest.is_dir() and not dest.is_symlink():
+        shutil.rmtree(dest)
+    else:
+        dest.unlink()
+
+dest.parent.mkdir(parents=True, exist_ok=True)
+shutil.copytree(src, dest)
+
+package_json = dest / "package.json"
+payload = json.loads(package_json.read_text(encoding="utf-8"))
+payload["name"] = "@edx/brand"
+payload.pop("devDependencies", None)
+package_json.write_text(json.dumps(payload, indent=2, sort_keys=False) + "\n", encoding="utf-8")
+
+print(f"materialized local brand package at {dest}")
+PY
 
 COPY mereka/theme-source /openedx/app/theme-source
 
@@ -382,7 +490,34 @@ ENV PACT_SKIP_BINARY_INSTALL=true
 RUN --mount=type=cache,target=/root/.npm,sharing=shared bash -o pipefail -c 'npm config set fetch-retries 6; npm config set fetch-retry-mintimeout 20000; npm config set fetch-retry-maxtimeout 120000; npm config set fetch-timeout 300000; for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install fallback attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 COPY mereka/brand-mereka /openedx/app/brand-mereka
-RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import shutil
+
+src = Path("/openedx/app/brand-mereka")
+dest = Path("/openedx/app/node_modules/@edx/brand")
+
+if not (src / "package.json").is_file():
+    raise SystemExit(f"brand package source is missing package.json: {src}")
+
+if dest.exists() or dest.is_symlink():
+    if dest.is_dir() and not dest.is_symlink():
+        shutil.rmtree(dest)
+    else:
+        dest.unlink()
+
+dest.parent.mkdir(parents=True, exist_ok=True)
+shutil.copytree(src, dest)
+
+package_json = dest / "package.json"
+payload = json.loads(package_json.read_text(encoding="utf-8"))
+payload["name"] = "@edx/brand"
+payload.pop("devDependencies", None)
+package_json.write_text(json.dumps(payload, indent=2, sort_keys=False) + "\n", encoding="utf-8")
+
+print(f"materialized local brand package at {dest}")
+PY
 
 COPY mereka/theme-source /openedx/app/theme-source
 
@@ -454,7 +589,34 @@ ENV PACT_SKIP_BINARY_INSTALL=true
 RUN --mount=type=cache,target=/root/.npm,sharing=shared bash -o pipefail -c 'npm config set fetch-retries 6; npm config set fetch-retry-mintimeout 20000; npm config set fetch-retry-maxtimeout 120000; npm config set fetch-timeout 300000; for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install fallback attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 COPY mereka/brand-mereka /openedx/app/brand-mereka
-RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import shutil
+
+src = Path("/openedx/app/brand-mereka")
+dest = Path("/openedx/app/node_modules/@edx/brand")
+
+if not (src / "package.json").is_file():
+    raise SystemExit(f"brand package source is missing package.json: {src}")
+
+if dest.exists() or dest.is_symlink():
+    if dest.is_dir() and not dest.is_symlink():
+        shutil.rmtree(dest)
+    else:
+        dest.unlink()
+
+dest.parent.mkdir(parents=True, exist_ok=True)
+shutil.copytree(src, dest)
+
+package_json = dest / "package.json"
+payload = json.loads(package_json.read_text(encoding="utf-8"))
+payload["name"] = "@edx/brand"
+payload.pop("devDependencies", None)
+package_json.write_text(json.dumps(payload, indent=2, sort_keys=False) + "\n", encoding="utf-8")
+
+print(f"materialized local brand package at {dest}")
+PY
 
 COPY mereka/theme-source /openedx/app/theme-source
 
@@ -526,7 +688,34 @@ ENV PACT_SKIP_BINARY_INSTALL=true
 RUN --mount=type=cache,target=/root/.npm,sharing=shared bash -o pipefail -c 'npm config set fetch-retries 6; npm config set fetch-retry-mintimeout 20000; npm config set fetch-retry-maxtimeout 120000; npm config set fetch-timeout 300000; for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install fallback attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 COPY mereka/brand-mereka /openedx/app/brand-mereka
-RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import shutil
+
+src = Path("/openedx/app/brand-mereka")
+dest = Path("/openedx/app/node_modules/@edx/brand")
+
+if not (src / "package.json").is_file():
+    raise SystemExit(f"brand package source is missing package.json: {src}")
+
+if dest.exists() or dest.is_symlink():
+    if dest.is_dir() and not dest.is_symlink():
+        shutil.rmtree(dest)
+    else:
+        dest.unlink()
+
+dest.parent.mkdir(parents=True, exist_ok=True)
+shutil.copytree(src, dest)
+
+package_json = dest / "package.json"
+payload = json.loads(package_json.read_text(encoding="utf-8"))
+payload["name"] = "@edx/brand"
+payload.pop("devDependencies", None)
+package_json.write_text(json.dumps(payload, indent=2, sort_keys=False) + "\n", encoding="utf-8")
+
+print(f"materialized local brand package at {dest}")
+PY
 
 COPY mereka/theme-source /openedx/app/theme-source
 
@@ -598,7 +787,34 @@ ENV PACT_SKIP_BINARY_INSTALL=true
 RUN --mount=type=cache,target=/root/.npm,sharing=shared bash -o pipefail -c 'npm config set fetch-retries 6; npm config set fetch-retry-mintimeout 20000; npm config set fetch-retry-maxtimeout 120000; npm config set fetch-timeout 300000; for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install fallback attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 COPY mereka/brand-mereka /openedx/app/brand-mereka
-RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import shutil
+
+src = Path("/openedx/app/brand-mereka")
+dest = Path("/openedx/app/node_modules/@edx/brand")
+
+if not (src / "package.json").is_file():
+    raise SystemExit(f"brand package source is missing package.json: {src}")
+
+if dest.exists() or dest.is_symlink():
+    if dest.is_dir() and not dest.is_symlink():
+        shutil.rmtree(dest)
+    else:
+        dest.unlink()
+
+dest.parent.mkdir(parents=True, exist_ok=True)
+shutil.copytree(src, dest)
+
+package_json = dest / "package.json"
+payload = json.loads(package_json.read_text(encoding="utf-8"))
+payload["name"] = "@edx/brand"
+payload.pop("devDependencies", None)
+package_json.write_text(json.dumps(payload, indent=2, sort_keys=False) + "\n", encoding="utf-8")
+
+print(f"materialized local brand package at {dest}")
+PY
 
 COPY mereka/theme-source /openedx/app/theme-source
 
@@ -670,7 +886,34 @@ ENV PACT_SKIP_BINARY_INSTALL=true
 RUN --mount=type=cache,target=/root/.npm,sharing=shared bash -o pipefail -c 'npm config set fetch-retries 6; npm config set fetch-retry-mintimeout 20000; npm config set fetch-retry-maxtimeout 120000; npm config set fetch-timeout 300000; for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install fallback attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 COPY mereka/brand-mereka /openedx/app/brand-mereka
-RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import shutil
+
+src = Path("/openedx/app/brand-mereka")
+dest = Path("/openedx/app/node_modules/@edx/brand")
+
+if not (src / "package.json").is_file():
+    raise SystemExit(f"brand package source is missing package.json: {src}")
+
+if dest.exists() or dest.is_symlink():
+    if dest.is_dir() and not dest.is_symlink():
+        shutil.rmtree(dest)
+    else:
+        dest.unlink()
+
+dest.parent.mkdir(parents=True, exist_ok=True)
+shutil.copytree(src, dest)
+
+package_json = dest / "package.json"
+payload = json.loads(package_json.read_text(encoding="utf-8"))
+payload["name"] = "@edx/brand"
+payload.pop("devDependencies", None)
+package_json.write_text(json.dumps(payload, indent=2, sort_keys=False) + "\n", encoding="utf-8")
+
+print(f"materialized local brand package at {dest}")
+PY
 
 COPY mereka/theme-source /openedx/app/theme-source
 
@@ -742,7 +985,34 @@ ENV PACT_SKIP_BINARY_INSTALL=true
 RUN --mount=type=cache,target=/root/.npm,sharing=shared bash -o pipefail -c 'npm config set fetch-retries 6; npm config set fetch-retry-mintimeout 20000; npm config set fetch-retry-maxtimeout 120000; npm config set fetch-timeout 300000; for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install fallback attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 COPY mereka/brand-mereka /openedx/app/brand-mereka
-RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import shutil
+
+src = Path("/openedx/app/brand-mereka")
+dest = Path("/openedx/app/node_modules/@edx/brand")
+
+if not (src / "package.json").is_file():
+    raise SystemExit(f"brand package source is missing package.json: {src}")
+
+if dest.exists() or dest.is_symlink():
+    if dest.is_dir() and not dest.is_symlink():
+        shutil.rmtree(dest)
+    else:
+        dest.unlink()
+
+dest.parent.mkdir(parents=True, exist_ok=True)
+shutil.copytree(src, dest)
+
+package_json = dest / "package.json"
+payload = json.loads(package_json.read_text(encoding="utf-8"))
+payload["name"] = "@edx/brand"
+payload.pop("devDependencies", None)
+package_json.write_text(json.dumps(payload, indent=2, sort_keys=False) + "\n", encoding="utf-8")
+
+print(f"materialized local brand package at {dest}")
+PY
 
 COPY mereka/theme-source /openedx/app/theme-source
 
@@ -814,7 +1084,34 @@ ENV PACT_SKIP_BINARY_INSTALL=true
 RUN --mount=type=cache,target=/root/.npm,sharing=shared bash -o pipefail -c 'npm config set fetch-retries 6; npm config set fetch-retry-mintimeout 20000; npm config set fetch-retry-maxtimeout 120000; npm config set fetch-timeout 300000; for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install fallback attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 COPY mereka/brand-mereka /openedx/app/brand-mereka
-RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import shutil
+
+src = Path("/openedx/app/brand-mereka")
+dest = Path("/openedx/app/node_modules/@edx/brand")
+
+if not (src / "package.json").is_file():
+    raise SystemExit(f"brand package source is missing package.json: {src}")
+
+if dest.exists() or dest.is_symlink():
+    if dest.is_dir() and not dest.is_symlink():
+        shutil.rmtree(dest)
+    else:
+        dest.unlink()
+
+dest.parent.mkdir(parents=True, exist_ok=True)
+shutil.copytree(src, dest)
+
+package_json = dest / "package.json"
+payload = json.loads(package_json.read_text(encoding="utf-8"))
+payload["name"] = "@edx/brand"
+payload.pop("devDependencies", None)
+package_json.write_text(json.dumps(payload, indent=2, sort_keys=False) + "\n", encoding="utf-8")
+
+print(f"materialized local brand package at {dest}")
+PY
 
 COPY mereka/theme-source /openedx/app/theme-source
 
@@ -886,7 +1183,34 @@ ENV PACT_SKIP_BINARY_INSTALL=true
 RUN --mount=type=cache,target=/root/.npm,sharing=shared bash -o pipefail -c 'npm config set fetch-retries 6; npm config set fetch-retry-mintimeout 20000; npm config set fetch-retry-maxtimeout 120000; npm config set fetch-timeout 300000; for attempt in 1 2 3; do npm clean-install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm clean-install attempt ${attempt} failed; attempting npm install fallback" >&2; npm install --no-audit --no-fund --registry=$NPM_REGISTRY && exit 0; echo "npm install fallback attempt ${attempt} failed; retrying in 15s" >&2; sleep 15; done; exit 1'
 
 COPY mereka/brand-mereka /openedx/app/brand-mereka
-RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import shutil
+
+src = Path("/openedx/app/brand-mereka")
+dest = Path("/openedx/app/node_modules/@edx/brand")
+
+if not (src / "package.json").is_file():
+    raise SystemExit(f"brand package source is missing package.json: {src}")
+
+if dest.exists() or dest.is_symlink():
+    if dest.is_dir() and not dest.is_symlink():
+        shutil.rmtree(dest)
+    else:
+        dest.unlink()
+
+dest.parent.mkdir(parents=True, exist_ok=True)
+shutil.copytree(src, dest)
+
+package_json = dest / "package.json"
+payload = json.loads(package_json.read_text(encoding="utf-8"))
+payload["name"] = "@edx/brand"
+payload.pop("devDependencies", None)
+package_json.write_text(json.dumps(payload, indent=2, sort_keys=False) + "\n", encoding="utf-8")
+
+print(f"materialized local brand package at {dest}")
+PY
 
 COPY mereka/theme-source /openedx/app/theme-source
 

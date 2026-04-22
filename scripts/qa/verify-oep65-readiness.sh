@@ -198,10 +198,13 @@ section "4. Brand package pattern (OEP-65 endorsed customisation)"
 if [[ ! -f "$DOCKERFILE" ]]; then
   skip "Dockerfile not found — cannot check brand package"
 else
-  if grep -q "@edx/brand@file:./brand-mereka" "$DOCKERFILE"; then
-    pass "Brand package installed via local @edx/brand alias override (brand-mereka)"
+  if grep -q "/openedx/app/node_modules/@edx/brand" "$DOCKERFILE" \
+    && grep -q "materialized local brand package" "$DOCKERFILE"; then
+    pass "Brand package materialized via local brand-mereka overlay at @edx/brand"
+  elif grep -q "@edx/brand@file:./brand-mereka" "$DOCKERFILE"; then
+    fail "Brand package still uses post-npm @edx/brand file install instead of deterministic materialization"
   else
-    fail "Local @edx/brand alias override not found in Dockerfile — current brand package pattern not applied"
+    fail "Local @edx/brand materialization not found in Dockerfile — current brand package pattern not applied"
   fi
 fi
 

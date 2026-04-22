@@ -64,7 +64,7 @@ else
     ["g++ python3 toolchain extension"]="gcc g++ git libgl1 libxi6 make python3 python3-distutils"
     ["Mereka brand package copy"]="COPY mereka/brand-mereka /openedx/app/brand-mereka"
     ["Frontend plugin framework install"]="frontend-plugin-framework@^1.8.0"
-    ["Local brand alias"]="@edx/brand@file:./brand-mereka"
+    ["Local brand package materialization"]="/openedx/app/node_modules/@edx/brand"
     ["Admin console Redux deps"]="react-redux@^8.1.3"
     ["Account social_links guard"]="unguarded social_links lookup survived account build"
   )
@@ -159,10 +159,18 @@ else
     check_fail "frontend-plugin-framework not found in MFE Dockerfile"
   fi
 
-  if grep -qF '@edx/brand@file:./brand-mereka' "$TUTOR_ENV" 2>/dev/null; then
-    check_pass "Local brand alias (@edx/brand@file:./brand-mereka) present in MFE Dockerfile"
+  if grep -qF '/openedx/app/node_modules/@edx/brand' "$TUTOR_ENV" 2>/dev/null \
+    && grep -qF 'materialized local brand package' "$TUTOR_ENV" 2>/dev/null; then
+    check_pass "Local brand package materializes at node_modules/@edx/brand in MFE Dockerfile"
   else
-    check_fail "Local brand alias missing from MFE Dockerfile"
+    check_fail "Local brand package materialization missing from MFE Dockerfile"
+  fi
+
+  if grep -qF '@edx/brand@file:./brand-mereka' "$TUTOR_ENV" 2>/dev/null; then
+    BRAND_LINE=$(grep -F '@edx/brand@file:./brand-mereka' "$TUTOR_ENV" | head -1)
+    check_fail "Post-npm brand package install still present in MFE Dockerfile — found: $BRAND_LINE"
+  else
+    check_pass "Post-npm brand package install absent from default MFE Dockerfile"
   fi
 
   if grep -qF 'indigo-brand-openedx' "$TUTOR_ENV" 2>/dev/null; then

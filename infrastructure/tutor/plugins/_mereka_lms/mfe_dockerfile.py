@@ -24,22 +24,50 @@ RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@git
 """,
 )
 
-# Install local OEP-48 brand package for MFEs.
+# Materialize local OEP-48 brand package for MFEs.
 # We ship the package in tutor_env/plugins/mfe/build/mfe/mereka/brand-mereka and
-# alias it as @edx/brand for all frontend app builds.
+# overlay it at node_modules/@edx/brand for all frontend app builds.
 #
 # IMPORTANT: This MUST be post-npm-install, not pre-npm-install.
 # Pre-npm-install fires BEFORE the main `npm clean-install` layer. Since
 # brand-mereka changes on every branding PR, placing it before npm install
 # invalidates the entire dependency install cache for ALL MFE apps (~10 apps
-# × 3-5 min each = 30-50 min wasted). By moving it to post-npm-install,
-# the main dependency layer stays cached and only the brand overlay + webpack
-# rebuild are invalidated.
+# x 3-5 min each = 30-50 min wasted). Running a post-npm file-alias install
+# here also forces npm to reify the existing dependency tree in every common
+# stage. Direct materialization keeps the main dependency layer cached and
+# invalidates only the brand overlay + webpack build.
 _register_env_patch(
     "mfe-dockerfile-post-npm-install",
     """
 COPY mereka/brand-mereka /openedx/app/brand-mereka
-RUN npm install --legacy-peer-deps @edx/brand@file:./brand-mereka
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import shutil
+
+src = Path("/openedx/app/brand-mereka")
+dest = Path("/openedx/app/node_modules/@edx/brand")
+
+if not (src / "package.json").is_file():
+    raise SystemExit(f"brand package source is missing package.json: {src}")
+
+if dest.exists() or dest.is_symlink():
+    if dest.is_dir() and not dest.is_symlink():
+        shutil.rmtree(dest)
+    else:
+        dest.unlink()
+
+dest.parent.mkdir(parents=True, exist_ok=True)
+shutil.copytree(src, dest)
+
+package_json = dest / "package.json"
+payload = json.loads(package_json.read_text(encoding="utf-8"))
+payload["name"] = "@edx/brand"
+payload.pop("devDependencies", None)
+package_json.write_text(json.dumps(payload, indent=2, sort_keys=False) + "\\n", encoding="utf-8")
+
+print(f"materialized local brand package at {dest}")
+PY
 """,
 )
 

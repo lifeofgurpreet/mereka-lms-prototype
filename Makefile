@@ -14,7 +14,6 @@ local-first-run: ## Governed first-run local bootstrap
 	git submodule update --init --recursive
 	./scripts/qa/verify-cold-start-onboarding-contract.sh
 	./scripts/shared/setup-local.sh
-	./scripts/infra/verify-local-bootstrap-readiness.sh
 
 bootstrap: ## Set up Python tooling only (venv, pre-commit)
 	python3 -m venv .venv || true

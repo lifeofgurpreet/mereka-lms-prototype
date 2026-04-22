@@ -41,7 +41,7 @@ The package bundles:
 - A backward-compatible `paragon/_variables.scss` (deprecated in Ulmo but required for older MFE versions)
 - A `paragon/tokens.json` placeholder (full token pipeline defined in `design-tokens-system_spec.md`)
 
-The Tutor plugin (`infrastructure/tutor/plugins/mereka_lms.py`) will be updated to install this package during the MFE Docker build via the `mfe-dockerfile-pre-npm-install` hook, using an npm alias that maps `@edx/brand` to the local package path.
+The Tutor plugin (`infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py`) materializes this package during the MFE Docker build via the `mfe-dockerfile-post-npm-install` hook. The local package is copied into `node_modules/@edx/brand` after the main dependency layer so the brand overlay does not make npm reify every MFE dependency tree.
 
 ## Why
 
@@ -90,7 +90,7 @@ The forcing function is Ulmo (Tutor v21 / Open edX Dec 2025 release), which depr
 
 - We are NOT building a multi-brand switching system. One brand package serves all MFEs.
 - We are NOT implementing the full Paragon design token pipeline. `tokens.json` is a placeholder with minimal structure; the full token migration is a separate spec.
-- We are NOT publishing this package to any npm registry. It is consumed via file path alias only.
+- We are NOT publishing this package to any npm registry. It is consumed from the repo-owned MFE build context and materialized directly as `@edx/brand`.
 - We are NOT replacing the comprehensive theme system (Django/SASS). The brand package and the comprehensive theme are complementary: brand package covers MFEs, comprehensive theme covers LMS/Studio server-rendered pages.
 - We are NOT building automated Figma-to-package sync. Asset updates are manual (copy files, rebuild).
 
@@ -178,7 +178,7 @@ infrastructure/tutor/brand-mereka/
 - The Dockerfile patch MUST copy the `brand-mereka/` directory into the MFE build context.
 - The Dockerfile patch MUST materialize the package at `/openedx/app/node_modules/@edx/brand` after the main npm dependency layer completes.
 - The registration MUST NOT break existing MFE npm dependency resolution.
-- The installation SHOULD use `--legacy-peer-deps` if Paragon peer dependency conflicts arise.
+- The MFE Dockerfile MUST NOT run a post-npm `npm install @edx/brand@file:./brand-mereka` step.
 
 #### Asset Provenance
 
@@ -243,7 +243,7 @@ Only domain-specific NFRs are listed above.
 
 ### Tutor Plugin Integration
 
-- [ ] AC-BRAND-023: Given `infrastructure/tutor/plugins/mereka_lms.py`, when inspected, then it contains a `mfe-dockerfile-pre-npm-install` patch that copies the `brand-mereka/` directory into the MFE build context.
+- [ ] AC-BRAND-023: Given `infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py`, when inspected, then it contains a `mfe-dockerfile-post-npm-install` patch that copies the `brand-mereka/` directory into the MFE build context and materializes it at `/openedx/app/node_modules/@edx/brand`.
 - [ ] AC-BRAND-024: Given the Tutor plugin MFE Dockerfile patches, when the MFE image is built, then `require.resolve("@edx/brand/package.json")` inside the built container resolves successfully and the resolved package name is `@edx/brand`.
 - [ ] AC-BRAND-025: Given the local brand package is registered as `@edx/brand`, when `./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast` completes, then the build exits 0 and the resolved runtime package exposes `logo.js`, `logo_white.png`, and `favicon.png`.
 
@@ -275,7 +275,7 @@ Only domain-specific NFRs are listed above.
 
 - **specs/branding-system_spec.md**: Theme assets (logos, fonts) in `infrastructure/tutor/themes/mereka/` must exist. These are the source files copied into the brand package.
 - **specs/design-tokens-system_spec.md**: Token values (`#237072` teal, Poppins/Lato font families) must be defined. The brand package's `_variables.scss` and `tokens.json` must align with canonical token definitions.
-- **specs/tutor-configuration_spec.md**: The Tutor plugin hook system (`mfe-dockerfile-pre-npm-install`) must be functional. The brand package installation depends on this hook firing during MFE builds.
+- **specs/tutor-configuration_spec.md**: The Tutor plugin hook system (`mfe-dockerfile-post-npm-install`) must be functional. The brand package materialization depends on this hook firing after the main npm dependency layer during MFE builds.
 
 ### Downstream
 
@@ -284,33 +284,32 @@ Only domain-specific NFRs are listed above.
 
 ## Edge Cases
 
-### npm Peer Dependency Conflict with Paragon
+### Retired npm Reify Path
 
-**Symptom**: `npm install @edx/brand@file:./brand-mereka` fails with `ERESOLVE` error about Paragon version mismatch.
+**Symptom**: the old post-npm brand install (`npm install @edx/brand@file:./brand-mereka`) fails or hangs while reifying the MFE dependency tree.
 
-**Cause**: The brand package declares a `peerDependencies` range on `@openedx/paragon` that does not include the version used by the MFE.
+**Cause**: Running npm after the main MFE dependency layer can reify a very large existing `node_modules` tree in every common stage. The brand package is asset-only, so npm is not the right authority for this overlay.
 
 **Recovery**:
 ```bash
-# Option 1: Use --legacy-peer-deps (already in Tutor plugin)
+# Retired path. Do not reintroduce this in the MFE Dockerfile:
 npm install @edx/brand@file:./brand-mereka --legacy-peer-deps
 
-# Option 2: Widen the peerDependencies range in brand-mereka/package.json
-# e.g., "@openedx/paragon": ">=21.0.0"
-
-# Option 3: Remove peerDependencies entirely (brand packages are asset-only)
+# The supported path is source-owned materialization:
+# COPY mereka/brand-mereka /openedx/app/brand-mereka
+# copy /openedx/app/brand-mereka to /openedx/app/node_modules/@edx/brand
 ```
 
 ### Brand Package Not Found During MFE Build
 
-**Symptom**: MFE build fails with `npm ERR! Could not install from "brand-mereka" as it does not contain a package.json`.
+**Symptom**: MFE build fails with `brand package source is missing package.json`.
 
 **Cause**: The `COPY` directive in the Dockerfile patch did not copy the brand-mereka directory, or the path is wrong.
 
 **Recovery**:
 ```bash
 # Verify the Tutor plugin patch copies the directory
-grep -A5 "brand-mereka" infrastructure/tutor/plugins/mereka_lms.py
+grep -A5 "brand-mereka" infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py
 
 # Verify the directory exists in the build context
 tutor config render --extra-config "MFE_DOCKERFILE" | grep brand-mereka
@@ -390,14 +389,14 @@ tutor k8s restart mfe
 
 ### Logs
 
-- MFE build logs MUST show the npm alias installation of `@edx/brand`: look for `+ @edx/brand@file:brand-mereka` in `./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast` output.
+- MFE build logs MUST show deterministic brand materialization: look for `materialized local brand package at /openedx/app/node_modules/@edx/brand` in `./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast` output.
 - The verification script MUST output PASS/FAIL per check with the AC ID: `PASS AC-BRAND-001: Package structure valid`.
 - The sync script (`sync-brand-package.sh`) MUST log which files were copied and their sha256 checksums.
 
 ### Metrics
 
 - CI SHOULD track brand package verification pass/fail rate over time.
-- MFE build time SHOULD be monitored for regression after brand package installation is added (baseline: current build time + acceptable delta of 15 seconds).
+- MFE build time SHOULD be monitored for regression after brand package materialization changes (baseline: current build time + acceptable delta of 15 seconds).
 
 ### Alerts
 
@@ -422,8 +421,8 @@ mkdir -p infrastructure/tutor/brand-mereka/paragon infrastructure/tutor/brand-me
 # 3. Create package.json, fonts.scss, _variables.scss, tokens.json
 # (see implementation for file contents)
 
-# 4. Update Tutor plugin with mfe-dockerfile-pre-npm-install patch
-# Edit infrastructure/tutor/plugins/mereka_lms.py
+# 4. Update Tutor plugin with mfe-dockerfile-post-npm-install materialization
+# Edit infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py
 
 # 5. Verify package structure
 ./scripts/qa/verify-brand-package/verify-brand-package-structure.sh
@@ -457,7 +456,7 @@ tutor k8s restart mfe
 
 ```bash
 # Option 1: Revert the Tutor plugin patch (MFEs fall back to stock branding)
-git checkout HEAD~1 -- infrastructure/tutor/plugins/mereka_lms.py
+git checkout HEAD~1 -- infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py
 ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 tutor k8s restart mfe
 
@@ -469,16 +468,16 @@ tutor k8s restart mfe
 
 ### Feature Flag
 
-No feature flag is needed. The brand package is installed at build time. To disable, remove the npm alias patch from the Tutor plugin and rebuild.
+No feature flag is needed. The brand package is materialized at build time. To disable, revert the brand materialization hook in the Tutor plugin and rebuild.
 
 ## Risks and Mitigations
 
 | Risk | Impact | Probability | Mitigation |
 |------|--------|-------------|------------|
 | Paragon version incompatibility (brand package tokens.json schema changes) | Medium -- MFE build failure | Low (Ulmo is current release) | Pin peerDependencies range; tokens.json is a placeholder so schema mismatch is unlikely until full migration |
-| MFE build time increase from npm install of brand package | Low -- adds ~10s to 15-20 min build | High (guaranteed overhead) | Package is small (<3 MB asset-only); overhead is negligible compared to total build time |
+| MFE build time increase from brand materialization | Low -- direct file copy after the dependency layer | Low | Package is asset-only and bypasses npm dependency-tree reify |
 | Asset drift between theme directory and brand package | Medium -- visual inconsistency between LMS and MFEs | Medium | Sync script + CI verification that compares checksums; AC-BRAND-009 and AC-BRAND-012 enforce byte-identical copies |
-| npm alias resolution failure in Docker build context | High -- MFE build completely fails | Low | Tested during implementation; COPY directive ensures package is in build context before npm install |
+| Brand materialization failure in Docker build context | High -- MFE build completely fails | Low | Tested during implementation; COPY directive ensures package is in build context before overlay |
 | Future Paragon breaking change to brand package interface | High -- all MFE branding breaks | Low (OEP-48 is stable) | Monitor Paragon changelogs; tokens.json placeholder allows incremental adoption |
 
 ## Verification
@@ -514,7 +513,7 @@ Tutor plugin integration checks:
 # @spec: oep48-brand-package_spec
 
 set -euo pipefail
-# Verify mereka_lms.py contains brand-mereka COPY + npm install
+# Verify _mereka_lms/mfe_dockerfile.py contains brand-mereka COPY + materialization
 # Verify ci-scripts-static.txt includes the verification script
 ```
 
@@ -527,8 +526,8 @@ MFE build integration (manual or post-build):
 
 set -euo pipefail
 # Run inside built MFE container:
-# npm ls @edx/brand (must resolve)
-# Verify no ERESOLVE errors in build log
+# node -p 'require.resolve("@edx/brand/package.json")'
+# Verify the build log shows deterministic materialization and no post-npm brand install
 ```
 
 Run coverage report:
@@ -550,11 +549,11 @@ See `specs/plans/oep48-brand-package_test_plan.md` for comprehensive test scenar
 
 ### Environment Variables
 
-No new environment variables are required. The brand package is installed at build time via Tutor plugin patches.
+No new environment variables are required. The brand package is materialized at build time via Tutor plugin patches.
 
 ### Feature Flags
 
-No feature flags. The brand package is active once installed. To disable, revert the Tutor plugin patch.
+No feature flags. The brand package is active once materialized. To disable, revert the Tutor plugin patch.
 
 ## Open Questions
 

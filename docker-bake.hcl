@@ -221,9 +221,11 @@ target "openedx-fast" {
     MEREKA_BUILD_PROFILE           = "fast"
     MEREKA_CUSTOM_APP_INSTALL_MODE = "editable"
   }
-  cache-to = [
-    "type=local,dest=${LOCAL_CACHE_DIR}/openedx-fast,mode=max",
-  ]
+  // Local Open edX fast builds read shared/fallback caches and keep rich reuse
+  // in the persistent buildkitd worker cache. Do not add a client-side cache
+  // export here: it runs after the image is loaded and can make first-run
+  // setup look failed/noisy even when the artifact is already valid.
+  cache-to = []
   cache-from = [
     "type=registry,ref=${OPENEDX_CACHE_REF}",
     "${OPENEDX_FAST_LOCAL_CACHE_FROM}",
@@ -318,9 +320,11 @@ target "mfe-proof-nocache" {
 target "mfe-fast" {
   inherits = ["_mfe-common"]
   tags = [for tag in split(",", MFE_FAST_TAGS) : trimspace(tag) if trimspace(tag) != ""]
-  cache-to = [
-    "type=local,dest=${LOCAL_CACHE_DIR}/mfe-fast,mode=max",
-  ]
+  // Local MFE fast builds read shared/fallback caches and keep rich reuse in
+  // the persistent buildkitd worker cache. Do not add a client-side cache
+  // export here: it runs after the image is loaded and can make first-run
+  // setup look hung even when the artifact is already valid.
+  cache-to = []
   cache-from = [
     "type=registry,ref=${MFE_CACHE_REF}",
     "${MFE_FAST_LOCAL_CACHE_FROM}",

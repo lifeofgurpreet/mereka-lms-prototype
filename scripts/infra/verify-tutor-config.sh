@@ -383,7 +383,10 @@ if [[ -f "$MFE_PATCH_MODULE" ]]; then
   pattern_in_file "mfe-dockerfile-post-npm-install" "$MFE_PATCH_MODULE" "MFE plugin defines post-npm-install hook"
   pattern_in_file "mfe-dockerfile-pre-npm-build-authn" "$MFE_PATCH_MODULE" "MFE plugin defines authn pre-build dashboard fallback hook"
   pattern_in_file "mfe-dockerfile-post-npm-build-authn" "$MFE_PATCH_MODULE" "MFE plugin defines authn post-build dashboard fallback guard"
-  pattern_in_file "@edx/brand@file:./brand-mereka" "$MFE_PATCH_MODULE" "MFE plugin installs local brand package"
+  pattern_in_file "COPY mereka/brand-mereka /openedx/app/brand-mereka" "$MFE_PATCH_MODULE" "MFE plugin stages local brand package"
+  pattern_in_file "/openedx/app/node_modules/@edx/brand" "$MFE_PATCH_MODULE" "MFE plugin materializes local brand package at @edx/brand"
+  pattern_in_file "materialized local brand package" "$MFE_PATCH_MODULE" "MFE plugin emits brand materialization marker"
+  pattern_not_in_file "@edx/brand@file:./brand-mereka" "$MFE_PATCH_MODULE" "MFE plugin avoids post-npm brand package reify install"
   pattern_in_file "frontend-plugin-framework@^1.8.0" "$MFE_PATCH_MODULE" "MFE plugin installs frontend-plugin-framework"
 else
   check_fail "MFE Dockerfile patch module missing: $MFE_PATCH_MODULE"
@@ -392,7 +395,9 @@ fi
 if [[ -f "$MFE_DOCKERFILE" ]]; then
   regex_in_file "(docker.io/)?node:(18|20|24)[-a-z0-9.]*" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile uses supported Node image"
   pattern_in_file "frontend-plugin-framework@^1.8.0" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile contains frontend-plugin-framework install"
-  pattern_in_file "@edx/brand@file:./brand-mereka" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile contains local brand package install"
+  pattern_in_file "/openedx/app/node_modules/@edx/brand" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile materializes local brand package at @edx/brand"
+  pattern_in_file "materialized local brand package" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile contains local brand materialization marker"
+  pattern_not_in_file "@edx/brand@file:./brand-mereka" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile avoids post-npm brand package reify install"
   pattern_in_file "patch-authn-dashboard-fallbacks.py /openedx/app" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile patches authn source dashboard fallbacks before build"
   pattern_in_file "verify-authn-dashboard-fallbacks.py /openedx/app/dist" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile uses narrowed authn dashboard fallback guard"
   pattern_not_in_file "if 'LMS_BASE_URL}/dashboard' in content or '"/dashboard"' in content:" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile omits legacy broad authn dashboard literal guard"

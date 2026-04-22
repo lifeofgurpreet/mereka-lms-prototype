@@ -20,15 +20,8 @@ try:
 except (AttributeError, TypeError):
     enterprise_customer_link = None
 # Tenant-aware logo: SiteConfiguration logo_image overrides the global branding default.
-# Use try/except because is_secure may not be in the Mako context for all views.
-try:
-    _tenant_logo = configuration_helpers.get_value('logo_image', '') or branding_api.get_logo_url(is_secure)
-except Exception:
-    _tenant_logo = static.url('images/logo.png')
-try:
-    _platform_name = configuration_helpers.get_value('platform_name', '') or static.get_platform_name()
-except Exception:
-    _platform_name = 'Mereka Academy'
+# Keep named-block logo fallbacks inside the block itself. Mako renders
+# <%block> bodies as separate functions, so outer locals are not safe there.
 %>
 
 <h1 class="header-logo">
@@ -42,7 +35,21 @@ except Exception:
   % else:
     <a href="${branding_api.get_home_url()}">
       <%block name="navigation_logo">
-        <img  class="logo" src="${_tenant_logo}" alt="${_('{platform_name} Home Page').format(platform_name=_platform_name)}"/>
+        <%
+        try:
+            _navigation_is_secure = request.is_secure()
+        except Exception:
+            _navigation_is_secure = False
+        try:
+            _navigation_logo_url = configuration_helpers.get_value('logo_image', '') or branding_api.get_logo_url(_navigation_is_secure)
+        except Exception:
+            _navigation_logo_url = static.url('images/logo.png')
+        try:
+            _navigation_platform_name = configuration_helpers.get_value('platform_name', '') or static.get_platform_name()
+        except Exception:
+            _navigation_platform_name = 'Mereka Academy'
+        %>
+        <img  class="logo" src="${_navigation_logo_url}" alt="${_('{platform_name} Home Page').format(platform_name=_navigation_platform_name)}"/>
       </%block>
         % if settings.LOGO_IMAGE_EXTRA_TEXT == 'edge':
             <span class="font-italic"> | EDGE</span>

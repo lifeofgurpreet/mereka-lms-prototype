@@ -57,6 +57,7 @@ from _mereka_lms import __version__  # noqa: E402
 from _mereka_lms import asset_settings  # noqa: E402, F401  LMS/CMS asset build
 from _mereka_lms import cms_settings  # noqa: E402, F401  CMS settings + credentials
 from _mereka_lms import config_defaults  # noqa: E402, F401  CONFIG_DEFAULTS
+from _mereka_lms import discovery_init  # noqa: E402, F401  Discovery init task
 from _mereka_lms import infrastructure  # noqa: E402, F401  MySQL, Caddy, Nginx
 from _mereka_lms import lms_settings  # noqa: E402, F401  LMS production settings
 from _mereka_lms import mfe_dockerfile  # noqa: E402, F401  MFE Dockerfile

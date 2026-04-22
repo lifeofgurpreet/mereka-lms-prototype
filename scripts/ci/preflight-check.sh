@@ -401,15 +401,16 @@ else
   fail "MFE not using Node 20+ (found: $MFE_FIRST_LINE)"
 fi
 
-# 5. Brand-mereka local package (not npm registry)
-if grep -q "brand@file:./brand-mereka" "$MFE_DF"; then
-  pass "brand package uses local file (brand-mereka)"
+# 5. Brand-mereka local package materialization (not npm registry/reify)
+if grep -q "/openedx/app/node_modules/@edx/brand" "$MFE_DF" \
+  && grep -q "materialized local brand package" "$MFE_DF"; then
+  pass "brand package materializes local brand-mereka at node_modules/@edx/brand"
+elif grep -q "brand@file:./brand-mereka" "$MFE_DF"; then
+  fail "brand package still runs post-npm file install (must materialize local brand-mereka directly)"
+elif grep -q "indigo-brand-openedx" "$MFE_DF"; then
+  fail "brand package still points to npm registry (should be local brand-mereka)"
 else
-  if grep -q "indigo-brand-openedx" "$MFE_DF"; then
-    fail "brand package still points to npm registry (should be local brand-mereka)"
-  else
-    skip "brand package pattern not found"
-  fi
+  fail "brand package materialization pattern not found"
 fi
 
 # 6. mereka theme assets present for authn

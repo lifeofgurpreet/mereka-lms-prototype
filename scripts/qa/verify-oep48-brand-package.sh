@@ -489,11 +489,17 @@ if [[ -f "${MFE_DOCKERFILE}" ]]; then
     fi
   fi
 
-  # Brand package must be installed via the local @edx/brand alias on the active path.
-  if grep -q "@edx/brand@file:./brand-mereka" "${MFE_DOCKERFILE}"; then
-    pass "${MFE_DOCKERFILE_LABEL} installs local @edx/brand alias (brand-mereka)"
+  # Brand package must be materialized as @edx/brand on the active path.
+  if grep -q "/openedx/app/node_modules/@edx/brand" "${MFE_DOCKERFILE}" \
+    && grep -q "materialized local brand package" "${MFE_DOCKERFILE}"; then
+    pass "${MFE_DOCKERFILE_LABEL} materializes local brand package at @edx/brand"
   else
-    fail "${MFE_DOCKERFILE_LABEL} missing local @edx/brand alias — active MFE brand package not wired"
+    fail "${MFE_DOCKERFILE_LABEL} missing local @edx/brand materialization — active MFE brand package not wired"
+  fi
+  if grep -q "@edx/brand@file:./brand-mereka" "${MFE_DOCKERFILE}"; then
+    fail "${MFE_DOCKERFILE_LABEL} still runs post-npm @edx/brand file install"
+  else
+    pass "${MFE_DOCKERFILE_LABEL} avoids post-npm @edx/brand file install"
   fi
   if grep -q "indigo-brand-openedx" "${MFE_DOCKERFILE}"; then
     fail "${MFE_DOCKERFILE_LABEL} still references legacy indigo-brand-openedx package"
@@ -514,10 +520,11 @@ if [[ -f "${MFE_DOCKERFILE}" ]]; then
   fi
 
   if [[ -f "${MFE_PLUGIN_HOOK_MODULE}" ]]; then
-    if grep -q "@edx/brand@file:./brand-mereka" "${MFE_PLUGIN_HOOK_MODULE}"; then
-      pass "plugin hook module stages local @edx/brand alias into the rendered Dockerfile"
+    if grep -q "/openedx/app/node_modules/@edx/brand" "${MFE_PLUGIN_HOOK_MODULE}" \
+      && grep -q "materialized local brand package" "${MFE_PLUGIN_HOOK_MODULE}"; then
+      pass "plugin hook module materializes local brand package as @edx/brand"
     else
-      fail "plugin hook module missing local @edx/brand alias wiring"
+      fail "plugin hook module missing local @edx/brand materialization wiring"
     fi
   else
     fail "plugin hook module missing: ${MFE_PLUGIN_HOOK_MODULE}"

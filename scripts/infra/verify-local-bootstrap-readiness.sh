@@ -8,6 +8,8 @@ LMS_CONTAINER="${LMS_CONTAINER:-tutor_local-lms-1}"
 CADDY_CONTAINER="${CADDY_CONTAINER:-tutor_local-caddy-1}"
 TARGET_THEME="${TARGET_THEME:-mereka}"
 HTTP_TIMEOUT="${HTTP_TIMEOUT:-15}"
+HTTP_ROUTE_ATTEMPTS="${HTTP_ROUTE_ATTEMPTS:-12}"
+HTTP_ROUTE_SLEEP_SECONDS="${HTTP_ROUTE_SLEEP_SECONDS:-5}"
 LMS_URL="${LMS_URL:-http://localhost}"
 STUDIO_URL="${STUDIO_URL:-http://studio.localhost}"
 MFE_AUTHN_URL="${MFE_AUTHN_URL:-http://apps.localhost/authn/login}"
@@ -59,14 +61,21 @@ check_http_route() {
   local url="$1"
   local label="$2"
   local allowed="$3"
-  local status
-  status="$(curl -sS -o /dev/null -w '%{http_code}' --max-time "$HTTP_TIMEOUT" "$url" 2>/dev/null || true)"
-  status="${status:-000}"
-  if [[ " $allowed " == *" $status "* ]]; then
-    pass "$label route returns HTTP $status ($url)"
-  else
-    fail "$label route returned HTTP $status; expected one of: $allowed ($url)"
-  fi
+  local attempt status
+
+  for ((attempt = 1; attempt <= HTTP_ROUTE_ATTEMPTS; attempt++)); do
+    status="$(curl -sS -o /dev/null -w '%{http_code}' --max-time "$HTTP_TIMEOUT" "$url" 2>/dev/null || true)"
+    status="${status:-000}"
+    if [[ " $allowed " == *" $status "* ]]; then
+      pass "$label route returns HTTP $status ($url)"
+      return 0
+    fi
+    if (( attempt < HTTP_ROUTE_ATTEMPTS )); then
+      sleep "$HTTP_ROUTE_SLEEP_SECONDS"
+    fi
+  done
+
+  fail "$label route returned HTTP ${status:-000} after ${HTTP_ROUTE_ATTEMPTS} attempts; expected one of: $allowed ($url)"
 }
 
 check_mysql_ready() {

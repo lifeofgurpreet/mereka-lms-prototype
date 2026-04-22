@@ -44,7 +44,7 @@ The following values are set as Docker `ARG`/`ENV` in
 | `PUBLIC_PATH` | e.g. `/authn/`, `/learning/` | Per-MFE `ENV` in Dockerfile |
 | `MFE_CONFIG_API_URL` | `/api/mfe_config/v1` (relative) | Per-MFE `ENV` in Dockerfile |
 | `NODE_ENV` | `production` | Build-stage `ENV` in Dockerfile |
-| Brand package | `@edx/brand@file:./brand-mereka` | `npm install` in Dockerfile |
+| Brand package | local `brand-mereka` materialized at `node_modules/@edx/brand` | post-`npm clean-install` Dockerfile hook |
 | Runtime theme payload | `mereka/theme/` | Copied into `/openedx/dist/theme` in production stage |
 | Mereka SCSS | `theme-source/mereka.scss` | Imported by `env.config.jsx` from `mereka/theme-source/` |
 
@@ -129,7 +129,7 @@ These values are intrinsic to the image and cannot be changed without rebuilding
 | `APP_ID` | Determines which plugin slot branches execute in `env.config.jsx` |
 | `PUBLIC_PATH` | Webpack base path, embedded in all asset URL references |
 | `NODE_ENV` | Affects React production optimizations (dead code elimination) |
-| Brand package (npm) | npm-installed library; must be present at webpack compile time |
+| Brand package | materialized library; must be present at webpack compile time |
 | Mereka SCSS | Compiled into CSS bundle at webpack time |
 | `MFE_CONFIG_API_URL` | Already relative — correct as-is |
 
@@ -203,7 +203,7 @@ This prevents the production domain from leaking into non-production environment
 │  BUILD-TIME (requires image rebuild to change)      │
 │                                                     │
 │  APP_ID, PUBLIC_PATH, NODE_ENV                      │
-│  Brand npm package (@edx/brand@file:./brand-mereka) │
+│  Brand package materialized at node_modules/@edx/brand │
 │  mereka.scss (compiled into CSS bundle)             │
 │  env.config.jsx plugin slot structure               │
 │                                                     │

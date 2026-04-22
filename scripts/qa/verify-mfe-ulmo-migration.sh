@@ -239,7 +239,8 @@ run_offline_checks() {
 
   if [[ -f "$RENDERED_DOCKERFILE" ]]; then
     OLD_BRAND=$(grep -c "indigo-brand-openedx@" "$RENDERED_DOCKERFILE" || true)
-    LOCAL_BRAND=$(grep -c "@edx/brand@file:./brand-mereka" "$RENDERED_DOCKERFILE" || true)
+    LOCAL_BRAND=$(grep -c "/openedx/app/node_modules/@edx/brand" "$RENDERED_DOCKERFILE" || true)
+    OLD_LOCAL_INSTALL=$(grep -c "@edx/brand@file:./brand-mereka" "$RENDERED_DOCKERFILE" || true)
 
     if [[ "$OLD_BRAND" -eq 0 ]]; then
       pass "No published indigo brand pin remains in rendered MFE Dockerfile"
@@ -247,22 +248,29 @@ run_offline_checks() {
       fail "$OLD_BRAND published indigo brand pin occurrence(s) still in rendered MFE Dockerfile"
     fi
 
-    if [[ "$LOCAL_BRAND" -ge 1 ]]; then
-      pass "Rendered Dockerfile installs the local brand package alias (@edx/brand@file:./brand-mereka)"
+    if [[ "$LOCAL_BRAND" -ge 1 ]] && grep -q "materialized local brand package" "$RENDERED_DOCKERFILE"; then
+      pass "Rendered Dockerfile materializes the local brand package at @edx/brand"
     else
-      fail "Rendered Dockerfile missing local brand package alias install"
+      fail "Rendered Dockerfile missing local brand package materialization"
+    fi
+
+    if [[ "$OLD_LOCAL_INSTALL" -eq 0 ]]; then
+      pass "Rendered Dockerfile does not run post-npm local brand package install"
+    else
+      fail "$OLD_LOCAL_INSTALL post-npm local brand package install occurrence(s) still in rendered MFE Dockerfile"
     fi
   else
-    skip "Rendered MFE Dockerfile unavailable — brand install contract checked against source plugin module only"
+    skip "Rendered MFE Dockerfile unavailable — brand materialization contract checked against source plugin module only"
   fi
 
   # mfe-node.sh removed in tracker #32; the plugin now installs the staged local
-  # brand package via the @edx/brand alias after npm finishes.
+  # brand package by materializing it at @edx/brand after npm finishes.
   if [[ -f "$MFE_PATCH" ]]; then
-    if grep -q '@edx/brand@file:\./brand-mereka' "$MFE_PATCH"; then
-      pass "Plugin module installs the local brand package alias"
+    if grep -q '/openedx/app/node_modules/@edx/brand' "$MFE_PATCH" \
+      && grep -q 'materialized local brand package' "$MFE_PATCH"; then
+      pass "Plugin module materializes the local brand package"
     else
-      fail "Plugin module missing local brand package hook"
+      fail "Plugin module missing local brand package materialization hook"
     fi
   fi
 

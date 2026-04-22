@@ -2,7 +2,6 @@
 LMS_HOST: localhost
 CMS_HOST: studio.localhost
 DISCOVERY_HOST: discovery.localhost
-ECOMMERCE_HOST: ecommerce.localhost
 MFE_HOST: apps.localhost
 XQUEUE_HOST: xqueue.localhost
 DOCKER_REGISTRY: mirror.gcr.io/
@@ -25,10 +24,13 @@ PLUGINS:
   - discovery
   - mfe
   - notes
-  - ecommerce  # DEPRECATED — legacy Oscar ecommerce. Do NOT enable for new deployments. Replaced by Purchase Gateway (services/purchase-gateway/).
   - xqueue
   - forum
-  - aspects
+# Optional plugins are intentionally absent from the canonical local first-run.
+# - aspects/Superset binds host port 8088 in Tutor Aspects 3.0.3; use the
+#   Kubernetes/devspace preview lane for analytics work unless you explicitly
+#   own that local port.
+# - ecommerce is legacy Oscar ecommerce and is replaced by Purchase Gateway.
 RUN_MONGODB: true   # Local/dev bootstrap default. Production uses Atlas and must set this false in env-specific config.
 MONGODB_URI: ""
 MONGODB_HOST: mongodb

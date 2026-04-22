@@ -176,6 +176,9 @@ class TestModuleImports(unittest.TestCase):
     def test_import_metrics(self):
         self._assert_importable('openedx_tenant_cache.metrics')
 
+    def test_import_runtime_urls(self):
+        self._assert_importable('openedx_tenant_cache.runtime_urls')
+
     def test_import_rls(self):
         self._assert_importable('openedx_tenant_cache.rls')
 
@@ -204,6 +207,64 @@ class TestAppConfig(unittest.TestCase):
     def test_verbose_name(self):
         from openedx_tenant_cache.apps import OpenedxTenantCacheConfig
         self.assertEqual(OpenedxTenantCacheConfig.verbose_name, 'Tenant Cache & Foundation')
+
+
+class TestRuntimeUrls(unittest.TestCase):
+    def test_candidate_site_domains_strips_service_prefix(self):
+        from openedx_tenant_cache.runtime_urls import candidate_site_domains
+
+        self.assertEqual(
+            candidate_site_domains('apps.academyv2.mereka.io'),
+            ['apps.academyv2.mereka.io', 'academyv2.mereka.io'],
+        )
+
+    def test_candidate_site_domains_strips_environment_service_prefix(self):
+        from openedx_tenant_cache.runtime_urls import candidate_site_domains
+
+        self.assertEqual(
+            candidate_site_domains('staging.apps.academyv2.mereka.io'),
+            ['staging.apps.academyv2.mereka.io', 'staging.academyv2.mereka.io'],
+        )
+
+    def test_tenant_authn_microfrontend_url_uses_tenant_base(self):
+        from openedx_tenant_cache import runtime_urls
+
+        with patch.object(runtime_urls, 'mfe_base_url_for_host', return_value='https://apps.tenant.example'):
+            self.assertEqual(
+                runtime_urls.tenant_authn_microfrontend_url_for_host(
+                    'tenant.example',
+                    'https://apps.default.example/authn',
+                ),
+                'https://apps.tenant.example/authn',
+            )
+
+    def test_tenant_authn_microfrontend_url_falls_back_to_default(self):
+        from openedx_tenant_cache import runtime_urls
+
+        with patch.object(runtime_urls, 'mfe_base_url_for_host', return_value=None):
+            self.assertEqual(
+                runtime_urls.tenant_authn_microfrontend_url_for_host(
+                    'tenant.example',
+                    'https://apps.default.example/authn/',
+                ),
+                'https://apps.default.example/authn',
+            )
+
+    def test_tenant_authn_microfrontend_url_falls_back_without_traceback(self):
+        from openedx_tenant_cache import runtime_urls
+
+        with patch.object(runtime_urls, 'tenant_mfe_url', side_effect=RuntimeError('django not ready')):
+            with self.assertLogs('openedx_tenant_cache.runtime_urls', level='WARNING') as logs:
+                self.assertEqual(
+                    runtime_urls.tenant_authn_microfrontend_url_for_host(
+                        'tenant.example',
+                        'https://apps.default.example/authn/',
+                    ),
+                    'https://apps.default.example/authn',
+                )
+        self.assertEqual(len(logs.output), 1)
+        self.assertIn('Falling back to default authn MFE URL for host tenant.example', logs.output[0])
+        self.assertNotIn('Traceback', logs.output[0])
 
 
 # ===========================================================================

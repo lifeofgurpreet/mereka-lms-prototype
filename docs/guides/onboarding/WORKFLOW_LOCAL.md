@@ -36,7 +36,9 @@ Fast first boot from a fresh checkout:
 make local-first-run
 ```
 
-That wrapper expands to the canonical onboarding chain: `git submodule update --init --recursive`, `./scripts/qa/verify-cold-start-onboarding-contract.sh`, `./scripts/shared/setup-local.sh`, and `./scripts/infra/verify-local-bootstrap-readiness.sh`.
+That wrapper expands to the canonical onboarding chain: `git submodule update --init --recursive`, `./scripts/qa/verify-cold-start-onboarding-contract.sh`, and `./scripts/shared/setup-local.sh`. `setup-local.sh` owns the bounded readiness proof via `./scripts/infra/verify-local-bootstrap-readiness.sh`.
+It always runs `tutor local launch -I --skip-build` after image convergence; a
+partial `tutor_env/data/mysql` directory is not initialized database truth.
 
 Manual first boot when debugging the setup script step by step:
 
@@ -50,6 +52,11 @@ source infrastructure/tutor/tutor-env.sh
 tutor local launch -I --skip-build
 ./scripts/infra/verify-local-bootstrap-readiness.sh
 ```
+
+`verify-local-bootstrap-readiness.sh` performs bounded HTTP retries for the
+local routes because app workers can finish warm-up after Compose reports the
+containers as running. A route failure after that window is still actionable
+runtime evidence and should be fixed at the owning source/render path.
 
 Whole-stack daily runtime control after bootstrap:
 
@@ -69,10 +76,9 @@ tutor local dc ps                           # rendered Docker Compose status
 curl -I http://localhost                    # LMS
 curl -I http://studio.localhost             # Studio
 curl -I http://discovery.localhost          # Discovery
-curl -I http://ecommerce.localhost          # expect 302→/dashboard/login
 ```
 
-If ecommerce or forum restart repeatedly, run the troubleshooting commands documented in [`LOCAL_SETUP.md`](LOCAL_SETUP.md#troubleshooting).
+If forum restarts repeatedly, run the troubleshooting commands documented in [`LOCAL_SETUP.md`](LOCAL_SETUP.md#troubleshooting).
 
 ## 5. Data Imports (Kajabi)
 
@@ -120,15 +126,13 @@ Use the Playwright helper bundled in the repo or your browser DevTools to captur
 - `http://localhost` (LMS)
 - `http://studio.localhost`
 - `http://discovery.localhost`
-- `http://ecommerce.localhost` (after logging in via LMS)
 
 Store screenshots under `screenshots/` with a descriptive filename (e.g., `screenshots/lms-home.png`) and attach them to the current evidence or status surface rather than a guide-root tracker.
 
 ## 9. Troubleshooting Highlights
 
-- **LMS/Studio return 500** → rerun `tutor local do init` (recreates MySQL users & migrations).
+- **LMS/Studio return 500** → rerun `make local-first-run` or `tutor local launch -I --skip-build` (recreates MySQL users & migrations).
 - **Forum stuck restarting** → check forum v2 logs via `tutor local logs forum` (forum is Python-based, no rake commands).
-- **Ecommerce “Access denied”** → `tutor local do init --limit=ecommerce`.
 - **MySQL refuses connections** → stop stack, `rm -rf tutor_env/data/mysql`, rerun launch.
 
 Refer to [`LOCAL_SETUP.md`](LOCAL_SETUP.md#troubleshooting) for the full table of failure modes.

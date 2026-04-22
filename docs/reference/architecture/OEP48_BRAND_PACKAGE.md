@@ -29,7 +29,7 @@ MFE builds install the brand package via:
 npm install --legacy-peer-deps '@edx/brand@npm:<your-package>'
 ```
 
-Mereka currently installs: `@edx/brand@file:./brand-mereka` during MFE image builds.
+Mereka currently materializes the local brand package at `/openedx/app/node_modules/@edx/brand` during MFE image builds.
 
 ---
 
@@ -121,12 +121,17 @@ The SCSS layer injected into every MFE build.
 
 ### 4. MFE Brand Package (npm) — `@edx/brand`
 
-Installed in the MFE Dockerfile as:
+Materialized in the MFE Dockerfile as:
 ```
-npm install --legacy-peer-deps '@edx/brand@file:./brand-mereka'
+COPY mereka/brand-mereka /openedx/app/brand-mereka
+RUN python3 - <<'PY'
+# Copies /openedx/app/brand-mereka to /openedx/app/node_modules/@edx/brand
+PY
 ```
 
-This installs the local `infrastructure/tutor/brand-mereka/` package as `@edx/brand`.
+This overlays the local `infrastructure/tutor/brand-mereka/` package as `@edx/brand`
+after the main npm dependency layer. The MFE Dockerfile must not run a second
+post-npm `npm install @edx/brand@file:./brand-mereka` step.
 The package includes canonical OEP-48 aliases (`logo_white.png`, `favicon.png`) and `logo.js`
 exports for direct brand-package consumers.
 
@@ -170,7 +175,7 @@ CI enforces no drift between layers via the `design-token-validation` job.
 
 | OEP-48 requirement | Mereka delivery | Status |
 |--------------------|----------------|--------|
-| Single brand package installed as `@edx/brand` | Local package `infrastructure/tutor/brand-mereka` via `@edx/brand@file:./brand-mereka` | YES |
+| Single brand package installed as `@edx/brand` | Local package `infrastructure/tutor/brand-mereka` materialized at `node_modules/@edx/brand` | YES |
 | `logo.png` (primary logo) | `mfe/images/logo.png`, `lms/static/images/logo.png`, `cms/static/images/logo.png` | YES — all surfaces |
 | `logo.svg` | Same paths, `.svg` variant | YES |
 | `logo_white.png` (dark bg) | `logo-white.png` plus package alias `logo_white.png` | YES |
@@ -193,7 +198,7 @@ CI enforces no drift between layers via the `design-token-validation` job.
 
 **What OEP-48 expects**: A `package.json` at the root of a brand directory so the package can be published to npm and installed as `@edx/brand`.
 
-**Current state**: Resolved on 2026-02-28 for local/runtime use. `infrastructure/tutor/brand-mereka/package.json` exists and is installed as `@edx/brand` in MFE builds via file alias.
+**Current state**: Resolved on 2026-02-28 for local/runtime use. `infrastructure/tutor/brand-mereka/package.json` exists and is materialized as `@edx/brand` in MFE builds without invoking npm after the main dependency layer.
 
 **Impact**: Runtime gap closed. Remaining optional work is publishing/versioning the package as an external npm artifact.
 

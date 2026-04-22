@@ -191,9 +191,9 @@ acceptance_criteria:
     file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
     command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
 - id: AC-BRAND-023
-  description: Given `infrastructure/tutor/plugins/mereka_lms.py`, when inspected,
-    then it contains a `mfe-dockerfile-pre-npm-install` patch that copies the `brand-mereka/`
-    directory into the MFE build context.
+  description: Given `infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py`, when inspected,
+    then it contains a `mfe-dockerfile-post-npm-install` patch that copies the `brand-mereka/`
+    directory into the MFE build context and materializes it at `/openedx/app/node_modules/@edx/brand`.
   verify:
   - type: automated
     test_type: shell_verification

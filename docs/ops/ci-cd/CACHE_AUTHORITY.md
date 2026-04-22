@@ -17,6 +17,9 @@ Three cache levels exist for Mereka LMS image builds. L2 — shared GHCR registr
 shared cache. Only trusted main-branch push builds write to L2; all other contexts
 (PRs, forks, developer laptops, ARC runners) read from it. L1 (runner-local buildx
 daemon cache) is an ephemeral best-effort accelerator and is never authoritative.
+Local fast targets do not export client-side `type=local` cache after image load;
+they read shared/fallback refs and reuse the persistent BuildKit worker cache on
+that machine.
 L3 (the `OPENEDX_CACHE_REF` / `MFE_CACHE_REF` final-image fallback, currently pointing
 at the `mereka-brand` tag) is a transitional fallback during the migration period and
 will be retired in Phase 5 after 30 consecutive days of stable L2 imports. When cache
@@ -31,7 +34,7 @@ trusted-main build log for `importing cache manifest` and `exporting cache manif
 
 | Level | Name | Ref | Write | Read | Notes |
 |-------|------|-----|-------|------|-------|
-| **L1** | Runner-local | `type=local,src=.buildx-cache/...` | Per-runner job | Same runner only | Ephemeral; wiped on ARC pod recycle or fastlane daemon reset. Best-effort only. |
+| **L1** | Runner-local | BuildKit worker cache; optional imported local dirs where configured | Per-runner job | Same runner only | Ephemeral; wiped on ARC pod recycle or fastlane daemon reset. Best-effort only. Local fast targets must not export client-side cache after image load. |
 | **L2** | Shared GHCR — OpenEdX | `ghcr.io/biji-biji-initiative/mereka-lms/cache/openedx:main-amd64` | Trusted main push only | All contexts | **Authoritative.** Written with `mode=max`. Primary import for all builds. |
 | **L2** | Shared GHCR — MFE | `ghcr.io/biji-biji-initiative/mereka-lms/cache/mfe:main-amd64` | Trusted main push only | All contexts | **Authoritative.** Written with `mode=max`. Primary import for MFE builds. |
 | **L3** | Final-image fallback — OpenEdX | `${OPENEDX_CACHE_REF}` (currently `docker.io/overhangio/openedx:21.0.0-cache`) | CI only | All contexts | **Transitional.** Secondary `cache-from` source. Mark for retirement at Phase 5. |
