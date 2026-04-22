@@ -1,7 +1,6 @@
 # Mereka Academy Open edX
 
 [![CI](https://github.com/Biji-Biji-Initiative/mereka-lms/actions/workflows/ci.yml/badge.svg)](https://github.com/Biji-Biji-Initiative/mereka-lms/actions/workflows/ci.yml)
-[![Tutor Config Verification](https://github.com/Biji-Biji-Initiative/mereka-lms/actions/workflows/tutor-config-verify.yml/badge.svg)](https://github.com/Biji-Biji-Initiative/mereka-lms/actions/workflows/tutor-config-verify.yml)
 [![Tutor Plugin Tests](https://github.com/Biji-Biji-Initiative/mereka-lms/actions/workflows/tutor-plugin-test.yml/badge.svg)](https://github.com/Biji-Biji-Initiative/mereka-lms/actions/workflows/tutor-plugin-test.yml)
 
 This repository tracks the infrastructure-as-code, configuration, and runbooks for the Mereka Academy Open edX deployment. The goals are:

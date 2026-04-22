@@ -170,8 +170,8 @@ Deliverables (in `~/projects/vps/infrastructure/` — NOT this repo):
 
 Deliverables:
 - [ ] `.github/workflows/build-benchmark.yml` — manual `workflow_dispatch` + weekly schedule
-- [ ] Inputs: `runner_class` (fastlane|arc-heavy), `benchmark_class` (true-cold|registry-warm|local-hot|scan-only)
-- [ ] Sets up conditions explicitly (wipes local cache for true-cold, uses shared cache for registry-warm, etc.)
+- [ ] Inputs: `runner_class` (fastlane|arc-heavy), `benchmark_class` (app-cache-cold|registry-warm|local-hot|scan-only)
+- [ ] Sets up conditions explicitly (disables app-level BuildKit cache imports for app-cache-cold, uses shared cache for registry-warm, etc.)
 - [ ] Emits metrics with explicit `benchmark_class` label
 - [ ] Produces evidence artifact comparing runs across classes
 
