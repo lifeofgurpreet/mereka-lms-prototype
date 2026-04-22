@@ -218,7 +218,7 @@ else
       "mereka:http_requests:availability_ratio_5m" \
       "mereka:slo:burn_rate_1h" \
       "mereka:slo:error_budget_remaining_ratio"; do
-      if echo "$RULES_JSON" | grep -q "$rule"; then
+      if grep -q "$rule" <<<"$RULES_JSON"; then
         pass "Recording rule active in Prometheus: $rule"
       else
         fail "Recording rule not found in Prometheus: $rule"
@@ -227,7 +227,7 @@ else
 
     # Check for alert rules
     for alert in SLOBudgetFastBurn SLOBudgetSlowBurn SLIMeasurementDown; do
-      if echo "$RULES_JSON" | grep -q "$alert"; then
+      if grep -q "$alert" <<<"$RULES_JSON"; then
         pass "Alert rule active in Prometheus: $alert"
       else
         fail "Alert rule not found in Prometheus: $alert"

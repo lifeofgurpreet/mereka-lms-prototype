@@ -498,9 +498,9 @@ if [[ "$LIVE_MODE" == "1" ]]; then
     if [[ -n "$mfe_resp" ]]; then
       logo_url=$(echo "$mfe_resp" | grep -o '"LOGO_URL"[[:space:]]*:[[:space:]]*"[^"]*"' \
         | sed 's/.*"LOGO_URL"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || echo "")
-      if [[ -n "$logo_url" ]] && ! echo "$logo_url" | grep -qi "openedx"; then
+      if [[ -n "$logo_url" ]] && ! grep -qi "openedx" <<<"$logo_url"; then
         pass "[LIVE] AC-MB-004: $domain LOGO_URL is tenant-specific (no global brand leakage)"
-      elif echo "$logo_url" | grep -qi "openedx"; then
+      elif grep -qi "openedx" <<<"$logo_url"; then
         fail "[LIVE] AC-MB-004: $domain LOGO_URL contains default 'openedx' (global brand leakage)"
       else
         warn "[LIVE] AC-MB-004: $domain LOGO_URL empty in MFE config"

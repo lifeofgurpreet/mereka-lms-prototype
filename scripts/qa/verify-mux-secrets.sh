@@ -123,12 +123,12 @@ check_k8s_secrets() {
     keys=$(kubectl get "${secret_name}" -n "${NAMESPACE}" -o jsonpath='{.data}' 2>/dev/null | jq -r 'keys[]' 2>/dev/null || echo "")
 
     # Check for MUX keys
-    if echo "${keys}" | grep -q "MUX_TOKEN_ID"; then
+    if grep -q "MUX_TOKEN_ID" <<<"${keys}"; then
       info "  ✓ Found MUX_TOKEN_ID in ${secret_name}"
       found_mux_token_id=1
     fi
 
-    if echo "${keys}" | grep -q "MUX_TOKEN_SECRET"; then
+    if grep -q "MUX_TOKEN_SECRET" <<<"${keys}"; then
       info "  ✓ Found MUX_TOKEN_SECRET in ${secret_name}"
       found_mux_token_secret=1
     fi

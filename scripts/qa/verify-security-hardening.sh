@@ -165,7 +165,7 @@ if [[ -f "$PROD_PY" ]]; then
   # IMG_SRC must not use wildcard https: (tightened to explicit domains)
   if grep -q 'CSP_IMG_SRC' "$PROD_PY"; then
     _img_src_block=$(sed -n '/^CSP_IMG_SRC/,/^)/p' "$PROD_PY")
-    if echo "$_img_src_block" | grep -qF '"https:"'; then
+    if grep -qF '"https:"' <<<"$_img_src_block"; then
       do_fail "CSP_IMG_SRC contains wildcard 'https:' — should use explicit domains"
     else
       do_pass "CSP_IMG_SRC uses explicit domains (no wildcard https:)"
@@ -175,7 +175,7 @@ if [[ -f "$PROD_PY" ]]; then
   # MEDIA_SRC must not use wildcard https: (tightened to 'self' + blob:)
   if grep -q 'CSP_MEDIA_SRC' "$PROD_PY"; then
     _media_src_block=$(sed -n '/^CSP_MEDIA_SRC/,/^)/p' "$PROD_PY")
-    if echo "$_media_src_block" | grep -qF '"https:"'; then
+    if grep -qF '"https:"' <<<"$_media_src_block"; then
       do_fail "CSP_MEDIA_SRC contains wildcard 'https:' — should use explicit sources"
     else
       do_pass "CSP_MEDIA_SRC uses explicit sources (no wildcard https:)"

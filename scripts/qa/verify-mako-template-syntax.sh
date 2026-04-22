@@ -67,7 +67,7 @@ for tmpl in "${TEMPLATES[@]}"; do
 
   # Check for _() usage (gettext) without corresponding import
   if grep -q '\${_(' "$tmpl" 2>/dev/null; then
-    if echo "$imports" | grep -qE 'import.*gettext.*as _|from.*import.*_'; then
+    if grep -qE 'import.*gettext.*as _|from.*import.*_' <<<"$imports"; then
       do_pass "$rel: uses \${_()} with gettext import present"
     else
       do_fail "$rel: uses \${_()} but missing 'from django.utils.translation import gettext as _' in <%! %> block"
@@ -83,7 +83,7 @@ for tmpl in "${TEMPLATES[@]}"; do
   # format_html, mark_safe, reverse, etc.
   for func in format_html mark_safe reverse static; do
     if grep -qE "\\\$\{${func}\(" "$tmpl" 2>/dev/null; then
-      if ! echo "$imports" | grep -q "$func"; then
+      if ! grep -q "$func" <<<"$imports"; then
         do_fail "$rel: uses \${${func}()} but '${func}' not found in <%! %> imports"
       fi
     fi

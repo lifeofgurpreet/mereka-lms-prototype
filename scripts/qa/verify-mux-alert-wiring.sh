@@ -374,7 +374,7 @@ check_live_prometheusrule() {
   rule_yaml=$(kubectl get prometheusrule video-alerts -n "${NAMESPACE}" -o yaml 2>/dev/null)
 
   for alert in "MuxDeliveryMinutesWarning" "MuxDeliveryMinutesCritical" "MuxTranscodeSuccessRateLow"; do
-    if echo "${rule_yaml}" | grep -q "${alert}" 2>/dev/null; then
+    if grep -q "${alert}" <<<"${rule_yaml}" 2>/dev/null; then
       pass "Live PrometheusRule has alert: ${alert}"
     else
       fail "Live PrometheusRule missing alert: ${alert}"
@@ -475,7 +475,7 @@ check_live_alertmanager_route() {
     return
   fi
 
-  if echo "${am_config}" | grep -qiE 'video|mux|component' 2>/dev/null; then
+  if grep -qiE 'video|mux|component' <<<"${am_config}" 2>/dev/null; then
     pass "Alertmanager live config contains video/Mux routing"
   else
     skip "Alertmanager live config has no explicit video/Mux route (alerts may fall through to catch-all)"

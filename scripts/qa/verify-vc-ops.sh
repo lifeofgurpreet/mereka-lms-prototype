@@ -53,13 +53,13 @@ try:
 except:
     print('')" 2>/dev/null)
 
-    if echo "$METRICS" | grep -q "credentials_vc_issued_total"; then
+    if grep -q "credentials_vc_issued_total" <<<"$METRICS"; then
       pass "AC-CRED-040: credentials_vc_issued_total metric exists"
     else
       skip "AC-CRED-040: credentials_vc_issued_total metric not found"
     fi
 
-    if echo "$METRICS" | grep -q "credentials_vc_issuance_duration_seconds"; then
+    if grep -q "credentials_vc_issuance_duration_seconds" <<<"$METRICS"; then
       pass "AC-CRED-040: credentials_vc_issuance_duration_seconds metric exists"
     else
       skip "AC-CRED-040: credentials_vc_issuance_duration_seconds metric not found"
