@@ -30,6 +30,7 @@ scripts/qa/test-verify-release-object.sh  # CI_ARTIFACT
 scripts/qa/verify-release-readiness.sh --dry-run  # CI_ARTIFACT
 scripts/infra/verify-release-preflight.sh  # CI_ARTIFACT
 scripts/ci/emit-build-metrics.sh  # CI_ARTIFACT (parses buildx metadata JSON and build log for cache-source facts, export success, layer reuse counts, and build duration; writes build-metrics-<image-family>.json artifact (bead jj97.5))
+scripts/ci/summarize-build-cache-health.sh  # CI_ARTIFACT (summarizes build-metrics-<image-family>.json into truthful Build Tutor Images cache-health output; avoids stale command-string heuristics)
 scripts/ops/generate-sla-report.sh  # CI_ARTIFACT (generates a monthly Markdown SLA report from Prometheus metrics; requires Prometheus access)
 
 # ── Built image required ─────────────────────────────────────────────────────

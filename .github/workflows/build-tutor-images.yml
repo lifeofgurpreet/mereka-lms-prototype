@@ -636,88 +636,6 @@ jobs:
           echo "BUILD_START=${BUILD_START}" >> var/ci/build-openedx-timing.env
           echo "BUILD_END=${BUILD_END}" >> var/ci/build-openedx-timing.env
 
-      - name: Verify OpenEdX build cache health
-        if: always()
-        run: |
-          set -euo pipefail
-          LOG="var/ci/build-openedx.log"
-          SUMMARY=""
-          FAILURES=0
-
-          if [[ ! -f "$LOG" ]]; then
-            echo "::warning::No build log found — cache verification skipped"
-            exit 0
-          fi
-
-          # 1. Check cache-from was in the buildx command
-          if grep -q 'cache-from=type=registry' "$LOG"; then
-            SUMMARY="${SUMMARY}\n✅ --cache-from=type=registry present in build command"
-          else
-            SUMMARY="${SUMMARY}\n❌ --cache-from NOT found in build command"
-            FAILURES=$((FAILURES + 1))
-          fi
-
-          # Check L2 shared registry cache is present in build command
-          if grep -q 'cache/openedx:main-amd64' "$LOG"; then
-            SUMMARY="${SUMMARY}\n✅ L2 shared GHCR registry cache ref present in build"
-          else
-            SUMMARY="${SUMMARY}\n⚠️  L2 shared registry cache ref not found (may be first build or cache not yet populated)"
-          fi
-
-          # 2. Check cache manifest was imported
-          if grep -q 'importing cache manifest from' "$LOG"; then
-            CACHE_REF_USED=$(grep 'importing cache manifest from' "$LOG" | head -1 | sed 's/.*from //')
-            SUMMARY="${SUMMARY}\n✅ Cache manifest imported from: ${CACHE_REF_USED}"
-          else
-            SUMMARY="${SUMMARY}\n⚠️  No cache manifest import found (bootstrap or auth failure)"
-          fi
-
-          # 3. Check inline cache was exported
-          if grep -q 'preparing layers for inline cache' "$LOG"; then
-            EXPORT_TIME=$(grep 'preparing layers for inline cache.*done' "$LOG" | head -1 | sed 's/.*cache //')
-            SUMMARY="${SUMMARY}\n✅ Inline cache exported (${EXPORT_TIME})"
-          else
-            SUMMARY="${SUMMARY}\n❌ Inline cache export NOT found — next build will be cold"
-            FAILURES=$((FAILURES + 1))
-          fi
-
-          # 4. Check BUILDKIT_INLINE_CACHE=1 was in the command
-          if grep -q 'BUILDKIT_INLINE_CACHE=1' "$LOG"; then
-            SUMMARY="${SUMMARY}\n✅ BUILDKIT_INLINE_CACHE=1 present"
-          else
-            SUMMARY="${SUMMARY}\n❌ BUILDKIT_INLINE_CACHE=1 NOT found"
-            FAILURES=$((FAILURES + 1))
-          fi
-
-          # 5. Count CACHED vs rebuilt layers
-          CACHED_LAYERS=$(grep -c 'CACHED' "$LOG" 2>/dev/null || echo 0)
-          TOTAL_LAYERS=$(grep -cE '^\#[0-9]+ \[' "$LOG" 2>/dev/null || echo 0)
-          SUMMARY="${SUMMARY}\n📊 Layers: ${CACHED_LAYERS} cached / ${TOTAL_LAYERS} total"
-
-          # 6. Build timing
-          if [[ -f var/ci/build-openedx-timing.env ]]; then
-            source var/ci/build-openedx-timing.env
-            SUMMARY="${SUMMARY}\n⏱️  Build: ${BUILD_START} → ${BUILD_END}"
-          fi
-
-          # Emit summary
-          echo -e "\n=== OpenEdX Build Cache Health ==="
-          echo -e "$SUMMARY"
-
-          # Write to GitHub step summary
-          {
-            echo "### OpenEdX Build Cache Health"
-            echo -e "$SUMMARY"
-            if [[ $FAILURES -gt 0 ]]; then
-              echo ""
-              echo "**⚠️ ${FAILURES} cache health check(s) failed**"
-            fi
-          } >> "$GITHUB_STEP_SUMMARY"
-
-          if [[ $FAILURES -gt 0 ]]; then
-            echo "::warning::${FAILURES} cache health check(s) failed for OpenEdX build"
-          fi
-
       - name: Emit OpenEdX build metrics
         if: always()
         uses: ./.github/actions/emit-build-metrics
@@ -726,6 +644,18 @@ jobs:
           log-file: var/ci/build-openedx.log
           image-family: openedx
           release-unit-id: ${{ github.sha }}
+
+      - name: Verify OpenEdX build cache health
+        if: always()
+        env:
+          CACHE_EXPORT_EXPECTED: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' && 'true' || 'false' }}
+        run: |
+          scripts/ci/summarize-build-cache-health.sh \
+            --image-family openedx \
+            --metrics-file build-metrics-openedx.json \
+            --timing-env var/ci/build-openedx-timing.env \
+            --l2-cache-ref ghcr.io/biji-biji-initiative/mereka-lms/cache/openedx:main-amd64 \
+            --cache-export-expected "${CACHE_EXPORT_EXPECTED}"
 
       - name: Push OpenEdX build metrics to ci-metrics-receiver
         # ADR-025 §5 (metrics bridge, trailing push). Populates the cache/layer
@@ -993,88 +923,6 @@ jobs:
           echo "BUILD_START=${BUILD_START}" >> var/ci/build-mfe-timing.env
           echo "BUILD_END=${BUILD_END}" >> var/ci/build-mfe-timing.env
 
-      - name: Verify MFE build cache health
-        if: always()
-        run: |
-          set -euo pipefail
-          LOG="var/ci/build-mfe.log"
-          SUMMARY=""
-          FAILURES=0
-
-          if [[ ! -f "$LOG" ]]; then
-            echo "::warning::No build log found — cache verification skipped"
-            exit 0
-          fi
-
-          # 1. Check cache-from was in the buildx command
-          if grep -q 'cache-from=type=registry' "$LOG"; then
-            SUMMARY="${SUMMARY}\n✅ --cache-from=type=registry present in build command"
-          else
-            SUMMARY="${SUMMARY}\n❌ --cache-from NOT found in build command"
-            FAILURES=$((FAILURES + 1))
-          fi
-
-          # Check L2 shared registry cache is present in build command
-          if grep -q 'cache/mfe:main-amd64' "$LOG"; then
-            SUMMARY="${SUMMARY}\n✅ L2 shared GHCR registry cache ref present in build"
-          else
-            SUMMARY="${SUMMARY}\n⚠️  L2 shared registry cache ref not found (may be first build or cache not yet populated)"
-          fi
-
-          # 2. Check cache manifest was imported
-          if grep -q 'importing cache manifest from' "$LOG"; then
-            CACHE_REF_USED=$(grep 'importing cache manifest from' "$LOG" | head -1 | sed 's/.*from //')
-            SUMMARY="${SUMMARY}\n✅ Cache manifest imported from: ${CACHE_REF_USED}"
-          else
-            SUMMARY="${SUMMARY}\n⚠️  No cache manifest import found (bootstrap or auth failure)"
-          fi
-
-          # 3. Check inline cache was exported
-          if grep -q 'preparing layers for inline cache' "$LOG"; then
-            EXPORT_TIME=$(grep 'preparing layers for inline cache.*done' "$LOG" | head -1 | sed 's/.*cache //')
-            SUMMARY="${SUMMARY}\n✅ Inline cache exported (${EXPORT_TIME})"
-          else
-            SUMMARY="${SUMMARY}\n❌ Inline cache export NOT found — next build will be cold"
-            FAILURES=$((FAILURES + 1))
-          fi
-
-          # 4. Check BUILDKIT_INLINE_CACHE=1 was in the command
-          if grep -q 'BUILDKIT_INLINE_CACHE=1' "$LOG"; then
-            SUMMARY="${SUMMARY}\n✅ BUILDKIT_INLINE_CACHE=1 present"
-          else
-            SUMMARY="${SUMMARY}\n❌ BUILDKIT_INLINE_CACHE=1 NOT found"
-            FAILURES=$((FAILURES + 1))
-          fi
-
-          # 5. Count CACHED vs rebuilt layers
-          CACHED_LAYERS=$(grep -c 'CACHED' "$LOG" 2>/dev/null || echo 0)
-          TOTAL_LAYERS=$(grep -cE '^\#[0-9]+ \[' "$LOG" 2>/dev/null || echo 0)
-          SUMMARY="${SUMMARY}\n📊 Layers: ${CACHED_LAYERS} cached / ${TOTAL_LAYERS} total"
-
-          # 6. Build timing
-          if [[ -f var/ci/build-mfe-timing.env ]]; then
-            source var/ci/build-mfe-timing.env
-            SUMMARY="${SUMMARY}\n⏱️  Build: ${BUILD_START} → ${BUILD_END}"
-          fi
-
-          # Emit summary
-          echo -e "\n=== MFE Build Cache Health ==="
-          echo -e "$SUMMARY"
-
-          # Write to GitHub step summary
-          {
-            echo "### MFE Build Cache Health"
-            echo -e "$SUMMARY"
-            if [[ $FAILURES -gt 0 ]]; then
-              echo ""
-              echo "**⚠️ ${FAILURES} cache health check(s) failed**"
-            fi
-          } >> "$GITHUB_STEP_SUMMARY"
-
-          if [[ $FAILURES -gt 0 ]]; then
-            echo "::warning::${FAILURES} cache health check(s) failed for MFE build"
-          fi
-
       - name: Emit MFE build metrics
         if: always()
         uses: ./.github/actions/emit-build-metrics
@@ -1083,6 +931,18 @@ jobs:
           log-file: var/ci/build-mfe.log
           image-family: mfe
           release-unit-id: ${{ github.sha }}
+
+      - name: Verify MFE build cache health
+        if: always()
+        env:
+          CACHE_EXPORT_EXPECTED: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' && 'true' || 'false' }}
+        run: |
+          scripts/ci/summarize-build-cache-health.sh \
+            --image-family mfe \
+            --metrics-file build-metrics-mfe.json \
+            --timing-env var/ci/build-mfe-timing.env \
+            --l2-cache-ref ghcr.io/biji-biji-initiative/mereka-lms/cache/mfe:main-amd64 \
+            --cache-export-expected "${CACHE_EXPORT_EXPECTED}"
 
       - name: Push MFE build metrics to ci-metrics-receiver
         # ADR-025 §5 (metrics bridge, trailing push).

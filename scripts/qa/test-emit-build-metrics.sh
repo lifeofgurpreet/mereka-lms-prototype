@@ -262,6 +262,98 @@ else
   _fail "fixture 4: expected flag name in warning message; got: $(cat "$FIX4_DIR/stderr.txt")"
 fi
 
+# ── Fixture 5: cache-health summary consumes metrics JSON, not command strings ─
+# Tests: the summary script reports L2 imports from build-metrics JSON and does
+# not require stale `cache-from=...` or BUILDKIT_INLINE_CACHE command-log text.
+echo ""
+echo "--- Fixture 5: cache-health summary from metrics JSON ---"
+
+SUMMARY_SCRIPT="$REPO_ROOT/scripts/ci/summarize-build-cache-health.sh"
+FIX5_DIR="$TMP_DIR/fix5"
+mkdir -p "$FIX5_DIR"
+cat > "$FIX5_DIR/build-metrics-openedx.json" <<'JSON'
+{
+  "release_unit_id": "abc123",
+  "workflow_run_id": "9000",
+  "image_family": "openedx",
+  "cache_sources": [
+    {
+      "type": "registry",
+      "ref": "ghcr.io/biji-biji-initiative/mereka-lms/cache/openedx:main-amd64",
+      "found": true,
+      "digest": "sha256:1111222233334444555566667777888899990000aaaabbbbccccddddeeeeffff"
+    },
+    {
+      "type": "image",
+      "ref": "ghcr.io/biji-biji-initiative/mereka-lms/openedx:mereka-brand",
+      "found": true,
+      "digest": null
+    }
+  ],
+  "cache_export": {"success": false, "digest": null},
+  "layer_reuse_count": 94,
+  "layer_total_count": 113,
+  "build_duration_seconds": 1234,
+  "collected_at": "2026-04-22T00:00:00Z"
+}
+JSON
+
+set +e
+(
+  cd "$FIX5_DIR"
+  bash "$SUMMARY_SCRIPT" \
+    --image-family openedx \
+    --metrics-file "$FIX5_DIR/build-metrics-openedx.json" \
+    --l2-cache-ref ghcr.io/biji-biji-initiative/mereka-lms/cache/openedx:main-amd64 \
+    --cache-export-expected false \
+    > "$FIX5_DIR/stdout.txt" 2> "$FIX5_DIR/stderr.txt"
+)
+EXIT5=$?
+set -e
+
+if [[ $EXIT5 -eq 0 ]]; then
+  _pass "fixture 5: summary exits 0"
+else
+  _fail "fixture 5: expected exit 0, got $EXIT5"
+fi
+
+if grep -q "OK: L2 registry cache import observed" "$FIX5_DIR/stdout.txt"; then
+  _pass "fixture 5: L2 registry import is reported from metrics JSON"
+else
+  _fail "fixture 5: expected L2 registry import summary; got: $(cat "$FIX5_DIR/stdout.txt")"
+fi
+
+if grep -q "OK: shared cache export not expected for this event" "$FIX5_DIR/stdout.txt"; then
+  _pass "fixture 5: non-main cache export is not treated as failure"
+else
+  _fail "fixture 5: expected non-main cache export classification; got: $(cat "$FIX5_DIR/stdout.txt")"
+fi
+
+set +e
+(
+  cd "$FIX5_DIR"
+  bash "$SUMMARY_SCRIPT" \
+    --image-family openedx \
+    --metrics-file "$FIX5_DIR/build-metrics-openedx.json" \
+    --l2-cache-ref ghcr.io/biji-biji-initiative/mereka-lms/cache/openedx:main-amd64 \
+    --cache-export-expected true \
+    > "$FIX5_DIR/stdout-export-expected.txt" 2> "$FIX5_DIR/stderr-export-expected.txt"
+)
+EXIT5B=$?
+set -e
+
+if [[ $EXIT5B -eq 0 ]]; then
+  _pass "fixture 5b: expected-export mismatch remains non-blocking"
+else
+  _fail "fixture 5b: expected non-blocking exit 0, got $EXIT5B"
+fi
+
+if grep -q "FAIL: shared cache export was expected" "$FIX5_DIR/stdout-export-expected.txt"; then
+  _pass "fixture 5b: trusted-main cache export miss is classified explicitly"
+else
+  _fail "fixture 5b: expected cache export miss classification; got: $(cat "$FIX5_DIR/stdout-export-expected.txt")"
+fi
+
 # ── summary ───────────────────────────────────────────────────────────────────
 echo ""
 echo "Summary: PASS=${PASS_COUNT} FAIL=${FAIL_COUNT}"

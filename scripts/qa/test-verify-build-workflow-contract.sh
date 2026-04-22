@@ -310,9 +310,6 @@ jobs:
       - run: |
           mkdir -p tutor_env/env/build
           tar -C tutor_env/env/build -xzf var/ci/openedx-build-context.tgz
-      - name: Verify OpenEdX build cache health
-        run: |
-          SUMMARY="${SUMMARY}\n✅ L2 shared GHCR registry cache ref present in build"
       - name: Build OpenEdX image
         run: |
           BUILD_PROFILE="proof"
@@ -325,6 +322,21 @@ jobs:
             --cache-ref ghcr.io/biji-biji-initiative/mereka-lms/openedx:mereka-brand \
             --build-profile "${BUILD_PROFILE}" \
             --mutable-tag mereka-brand
+      - name: Emit OpenEdX build metrics
+        uses: ./.github/actions/emit-build-metrics
+        with:
+          metadata-file: ''
+          log-file: var/ci/build-openedx.log
+          image-family: openedx
+          release-unit-id: ${{ github.sha }}
+      - name: Verify OpenEdX build cache health
+        run: |
+          scripts/ci/summarize-build-cache-health.sh \
+            --image-family openedx \
+            --metrics-file build-metrics-openedx.json \
+            --timing-env var/ci/build-openedx-timing.env \
+            --l2-cache-ref ghcr.io/biji-biji-initiative/mereka-lms/cache/openedx:main-amd64 \
+            --cache-export-expected false
       - name: Upload OpenEdX build diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -397,8 +409,6 @@ jobs:
       - run: |
           mkdir -p tutor_env/env/plugins/mfe/build
           tar -C tutor_env/env/plugins/mfe/build -xzf var/ci/mfe-build-context.tgz
-      - name: Verify MFE build cache health
-        run: echo ok
       - name: Build MFE image
         run: |
           BUILD_PROFILE="proof"
@@ -411,6 +421,21 @@ jobs:
             --cache-ref ghcr.io/biji-biji-initiative/mereka-lms/mfe:mereka-brand \
             --build-profile "${BUILD_PROFILE}" \
             --mutable-tag mereka-brand
+      - name: Emit MFE build metrics
+        uses: ./.github/actions/emit-build-metrics
+        with:
+          metadata-file: ''
+          log-file: var/ci/build-mfe.log
+          image-family: mfe
+          release-unit-id: ${{ github.sha }}
+      - name: Verify MFE build cache health
+        run: |
+          scripts/ci/summarize-build-cache-health.sh \
+            --image-family mfe \
+            --metrics-file build-metrics-mfe.json \
+            --timing-env var/ci/build-mfe-timing.env \
+            --l2-cache-ref ghcr.io/biji-biji-initiative/mereka-lms/cache/mfe:main-amd64 \
+            --cache-export-expected false
       - name: Upload MFE build diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -1213,14 +1238,23 @@ text = p.read_text()
 text = text.replace(
     '      - name: Verify OpenEdX build cache health\n'
     '        run: |\n'
-    '          SUMMARY="${SUMMARY}\\n✅ L2 shared GHCR registry cache ref present in build"\n',
+    '          scripts/ci/summarize-build-cache-health.sh \\\n'
+    '            --image-family openedx \\\n'
+    '            --metrics-file build-metrics-openedx.json \\\n'
+    '            --timing-env var/ci/build-openedx-timing.env \\\n'
+    '            --l2-cache-ref ghcr.io/biji-biji-initiative/mereka-lms/cache/openedx:main-amd64 \\\n'
+    '            --cache-export-expected false\n',
     '      - name: Verify OpenEdX build cache health\n'
     '        run: |\n'
-    '          SUMMARY="${SUMMARY}\\n✅ GHA cache read/write is enabled for OpenEdX build"\n',
+    '          if grep -q cache-from=type=registry var/ci/build-openedx.log; then\n'
+    '            echo ok\n'
+    '          else\n'
+    '            echo "--cache-from NOT found in build command"\n'
+    '          fi\n',
 )
 p.write_text(text)
 PY
-run_expect_fail "stale OpenEdX cache-health messaging is rejected"
+run_expect_fail "stale OpenEdX cache-health command heuristics are rejected"
 
 write_pass_fixture
 python3 - "$tmpdir" <<'PY'
