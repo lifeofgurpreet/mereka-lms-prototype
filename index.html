@@ -2549,7 +2549,7 @@ a:hover { text-decoration: underline; }
 
     <div class="dash__grid">
       <div>
-        <div class="section-head"><h2>Continue learning</h2><a href="#" onclick="goto('discover'); return false;">View all →</a></div>
+        <div class="section-head"><h2>Continue learning</h2><a href="#" onclick="goto('continue-learning'); return false;">View all →</a></div>
         <div class="card continue-card">
           <div class="continue-card__img"><span class="material-symbols-outlined" style="font-size:40px;">play_circle</span></div>
           <div class="continue-card__body">
@@ -2578,13 +2578,13 @@ a:hover { text-decoration: underline; }
         </div>
       </div>
       <div>
-        <div class="section-head"><h3>Upcoming deadlines</h3><a href="#" onclick="goto('unit'); return false;">All →</a></div>
+        <div class="section-head"><h3>Upcoming deadlines</h3><a href="#" onclick="goto('deadlines'); return false;">All →</a></div>
         <div class="card deadlines">
           <div class="deadline"><div class="deadline__dot is-warn"></div><div class="deadline__body"><div class="deadline__title">Quiz — Market sizing</div><div class="deadline__meta">Due Apr 23 · 15 min</div></div></div>
           <div class="deadline"><div class="deadline__dot"></div><div class="deadline__body"><div class="deadline__title">Reading — OKR principles</div><div class="deadline__meta">Due Apr 25 · 20 min</div></div></div>
           <div class="deadline"><div class="deadline__dot is-err"></div><div class="deadline__body"><div class="deadline__title">Peer review — case study</div><div class="deadline__meta">Due tomorrow</div></div></div>
         </div>
-        <div class="section-head" style="margin-top:20px;"><h3>Recent certificates</h3><a href="#" onclick="goto('profile'); return false;">All →</a></div>
+        <div class="section-head" style="margin-top:20px;"><h3>Recent certificates</h3><a href="#" onclick="goto('certificates'); return false;">All →</a></div>
         <div class="card" style="padding:0;">
           <div style="display:flex; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid var(--border);">
             <div style="width:36px; height:36px; border-radius:50%; background:var(--brand-gradient); color:var(--white); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:20px;">workspace_premium</span></div>
@@ -2594,7 +2594,7 @@ a:hover { text-decoration: underline; }
           <div style="display:flex; align-items:center; gap:12px; padding:14px 16px;">
             <div style="width:36px; height:36px; border-radius:50%; background:var(--brand-gradient); color:var(--white); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><span class="material-symbols-outlined" style="font-size:20px;">workspace_premium</span></div>
             <div style="flex:1; min-width:0;"><div style="font-family:var(--font-display); font-weight:600; font-size:13px; line-height:1.2;">Analytics for non-analysts</div><div style="font-size:11px; color:var(--medium-grey); margin-top:2px;">Mar 04, 2026</div></div>
-            <button class="btn btn--ghost btn--sm" onclick="goto('profile')">View</button>
+            <button class="btn btn--ghost btn--sm" onclick="goto('certificate')">View</button>
           </div>
         </div>
       </div>
@@ -4016,6 +4016,551 @@ a:hover { text-decoration: underline; }
           </div>
         </div>
       </article>
+    </div>
+  </main>
+  <footer class="lms-footer"><strong>mereka.</strong> © 2026 · Academy v2</footer>
+</section>
+
+<!-- ========================================================
+     SCREEN: Continue Learning — all in-progress courses
+     ======================================================== -->
+<section class="screen" id="screen-continue-learning">
+  <header class="lms-header">
+    <a class="lms-logo" href="#" onclick="goto('dashboard'); return false;" aria-label="Mereka"><img src="logo-horizontal-black-Mereka.svg" alt="Mereka" style="height:26px; width:auto; display:block;" /></a>
+    <nav class="lms-nav">
+      <a class="is-active" href="#" onclick="goto('dashboard'); return false;">Dashboard</a>
+      <a href="#" onclick="goto('discover'); return false;">Discover</a>
+      <a href="#" onclick="goto('mylearning'); return false;">My Learning</a>
+    </nav>
+    <div class="lms-header__spacer"></div>
+    <div class="lms-header__actions">
+      <button class="btn btn--ghost btn--sm" onclick="goto('studio')"><span class="material-symbols-outlined" style="font-size:16px;">edit_note</span> Studio</button>
+      <button class="icon-btn" onclick="goto('wishlist')" aria-label="Wishlist"><span class="material-symbols-outlined">favorite</span><span class="badge js-wishlist-count"></span></button>
+      <button class="icon-btn" onclick="goto('settings')" aria-label="Settings"><span class="material-symbols-outlined">settings</span></button>
+      <button class="icon-btn js-notif-toggle" aria-label="Notifications"><span class="material-symbols-outlined">notifications</span><span class="badge">3</span></button>
+      <a href="#" onclick="goto('profile'); return false;" class="avatar" role="button" aria-label="Profile" style="text-decoration:none;">FF</a>
+    </div>
+  </header>
+
+  <main class="mylearning">
+    <div style="font-size:12px; color:var(--medium-grey); margin-bottom:14px;">
+      <a href="#" onclick="goto('dashboard'); return false;" style="color:var(--medium-grey); text-decoration:none;">Dashboard</a>
+      <span style="margin:0 8px;">/</span>
+      <span style="color:var(--off-black); font-weight:500;">Continue learning</span>
+    </div>
+
+    <div class="mylearning__head">
+      <div>
+        <h1>Continue where you left off</h1>
+        <p>Jump back into everything you're actively learning.</p>
+      </div>
+      <button class="btn btn--outline" onclick="goto('mylearning')"><span class="material-symbols-outlined" style="font-size:16px;">list</span> View all courses</button>
+    </div>
+
+    <div class="mylearning__summary">
+      <div class="mylearning__stat"><span>Active courses</span><strong>3</strong><em>Avg. 35% complete</em></div>
+      <div class="mylearning__stat"><span>Hours this week</span><strong>4.5</strong><em>↑ 18% vs last week</em></div>
+      <div class="mylearning__stat"><span>Current streak</span><strong>7</strong><em>days learning</em></div>
+      <div class="mylearning__stat"><span>Next milestone</span><strong>2</strong><em>units to next certificate</em></div>
+    </div>
+
+    <div class="mylearning__filters" role="tablist" aria-label="Filter">
+      <button class="mylearning__chip is-active">All <span class="count">(3)</span></button>
+      <button class="mylearning__chip">Strategy <span class="count">(1)</span></button>
+      <button class="mylearning__chip">Data <span class="count">(1)</span></button>
+      <button class="mylearning__chip">Design <span class="count">(1)</span></button>
+      <button class="mylearning__chip">Recent activity</button>
+    </div>
+
+    <div class="mylearning__grid">
+      <article class="ml-card">
+        <div class="ml-card__thumb">
+          <span class="material-symbols-outlined" style="font-size:40px;">play_circle</span>
+          <span class="ml-card__status">Active today</span>
+        </div>
+        <div class="ml-card__body">
+          <span class="ml-card__cat">Strategy</span>
+          <h3>Strategic thinking for modern leaders</h3>
+          <p class="ml-card__meta">Mei Lin Tan · Module 3 of 5 · Last opened 2h ago</p>
+          <div style="margin-top:auto;">
+            <div class="ml-card__progress-row"><span>60% complete</span><span>Next: Frameworks for ambiguity</span></div>
+            <div class="progress"><div class="progress__fill" style="width:60%;"></div></div>
+            <div class="ml-card__foot">
+              <span style="font-size:12px; color:var(--medium-grey);">Est. 3h remaining</span>
+              <button class="btn btn--primary btn--sm" onclick="goto('unit')">Continue →</button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="ml-card">
+        <div class="ml-card__thumb t-data">
+          <span class="material-symbols-outlined" style="font-size:40px;">bar_chart</span>
+          <span class="ml-card__status">Active yesterday</span>
+        </div>
+        <div class="ml-card__body">
+          <span class="ml-card__cat">Data</span>
+          <h3>Analytics for non-analysts</h3>
+          <p class="ml-card__meta">Priya Menon · Module 2 of 6 · Last opened Apr 21</p>
+          <div style="margin-top:auto;">
+            <div class="ml-card__progress-row"><span>30% complete</span><span>Next: Metrics that matter</span></div>
+            <div class="progress"><div class="progress__fill" style="width:30%;"></div></div>
+            <div class="ml-card__foot">
+              <span style="font-size:12px; color:var(--medium-grey);">Est. 5h remaining</span>
+              <button class="btn btn--primary btn--sm" onclick="goto('unit')">Continue →</button>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="ml-card">
+        <div class="ml-card__thumb t-design">
+          <span class="material-symbols-outlined" style="font-size:40px;">design_services</span>
+          <span class="ml-card__status">Started Apr 10</span>
+        </div>
+        <div class="ml-card__body">
+          <span class="ml-card__cat">Design</span>
+          <h3>Design thinking fundamentals</h3>
+          <p class="ml-card__meta">Amira Yusof · Module 1 of 8 · Last opened Apr 19</p>
+          <div style="margin-top:auto;">
+            <div class="ml-card__progress-row"><span>15% complete</span><span>Next: Empathy interviews</span></div>
+            <div class="progress"><div class="progress__fill" style="width:15%;"></div></div>
+            <div class="ml-card__foot">
+              <span style="font-size:12px; color:var(--medium-grey);">Est. 8h remaining</span>
+              <button class="btn btn--primary btn--sm" onclick="goto('unit')">Continue →</button>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div class="card" style="margin-top:28px; padding:22px; display:flex; align-items:center; gap:16px; background:linear-gradient(135deg, rgba(171,59,120,0.06), rgba(41,92,173,0.06)); border:1px solid var(--border);">
+      <div style="width:52px; height:52px; border-radius:12px; background:var(--brand-gradient); color:var(--white); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><span class="material-symbols-outlined">auto_awesome</span></div>
+      <div style="flex:1;">
+        <h3 style="margin:0 0 4px; font-size:16px;">Ready for something new?</h3>
+        <p style="margin:0; color:var(--medium-grey); font-size:13px;">Browse 150+ hands-on modules across strategy, data, design, and more.</p>
+      </div>
+      <button class="btn btn--primary" onclick="goto('discover')">Discover courses →</button>
+    </div>
+  </main>
+  <footer class="lms-footer"><strong>mereka.</strong> © 2026 · Academy v2</footer>
+</section>
+
+<!-- ========================================================
+     SCREEN: Deadlines — all upcoming work
+     ======================================================== -->
+<section class="screen" id="screen-deadlines">
+  <header class="lms-header">
+    <a class="lms-logo" href="#" onclick="goto('dashboard'); return false;" aria-label="Mereka"><img src="logo-horizontal-black-Mereka.svg" alt="Mereka" style="height:26px; width:auto; display:block;" /></a>
+    <nav class="lms-nav">
+      <a class="is-active" href="#" onclick="goto('dashboard'); return false;">Dashboard</a>
+      <a href="#" onclick="goto('discover'); return false;">Discover</a>
+      <a href="#" onclick="goto('mylearning'); return false;">My Learning</a>
+    </nav>
+    <div class="lms-header__spacer"></div>
+    <div class="lms-header__actions">
+      <button class="btn btn--ghost btn--sm" onclick="goto('studio')"><span class="material-symbols-outlined" style="font-size:16px;">edit_note</span> Studio</button>
+      <button class="icon-btn" onclick="goto('wishlist')" aria-label="Wishlist"><span class="material-symbols-outlined">favorite</span><span class="badge js-wishlist-count"></span></button>
+      <button class="icon-btn" onclick="goto('settings')" aria-label="Settings"><span class="material-symbols-outlined">settings</span></button>
+      <button class="icon-btn js-notif-toggle" aria-label="Notifications"><span class="material-symbols-outlined">notifications</span><span class="badge">3</span></button>
+      <a href="#" onclick="goto('profile'); return false;" class="avatar" role="button" aria-label="Profile" style="text-decoration:none;">FF</a>
+    </div>
+  </header>
+
+  <main class="mylearning">
+    <div style="font-size:12px; color:var(--medium-grey); margin-bottom:14px;">
+      <a href="#" onclick="goto('dashboard'); return false;" style="color:var(--medium-grey); text-decoration:none;">Dashboard</a>
+      <span style="margin:0 8px;">/</span>
+      <span style="color:var(--off-black); font-weight:500;">Deadlines</span>
+    </div>
+
+    <div class="mylearning__head">
+      <div>
+        <h1>Upcoming deadlines</h1>
+        <p>Quizzes, assignments, readings, and peer reviews — all in one place.</p>
+      </div>
+      <button class="btn btn--outline"><span class="material-symbols-outlined" style="font-size:16px;">calendar_month</span> Sync to calendar</button>
+    </div>
+
+    <div class="mylearning__summary">
+      <div class="mylearning__stat"><span>Due this week</span><strong>5</strong><em>2 high priority</em></div>
+      <div class="mylearning__stat"><span>Overdue</span><strong>1</strong><em style="color:#B04636;">Peer review — case study</em></div>
+      <div class="mylearning__stat"><span>Due today</span><strong>0</strong><em>Plan ahead</em></div>
+      <div class="mylearning__stat"><span>On-time rate</span><strong>92%</strong><em>Last 3 months</em></div>
+    </div>
+
+    <div class="mylearning__filters" role="tablist" aria-label="Filter">
+      <button class="mylearning__chip is-active">All <span class="count">(6)</span></button>
+      <button class="mylearning__chip">Overdue <span class="count">(1)</span></button>
+      <button class="mylearning__chip">This week <span class="count">(5)</span></button>
+      <button class="mylearning__chip">Quizzes <span class="count">(2)</span></button>
+      <button class="mylearning__chip">Assignments <span class="count">(2)</span></button>
+      <button class="mylearning__chip">Readings <span class="count">(1)</span></button>
+      <button class="mylearning__chip">Peer reviews <span class="count">(1)</span></button>
+    </div>
+
+    <div class="card" style="padding:0;">
+      <!-- Overdue row -->
+      <div style="display:flex; align-items:center; gap:16px; padding:18px 20px; border-bottom:1px solid var(--border); background:#FFF5F3;">
+        <div style="flex:0 0 56px; text-align:center;">
+          <div style="font-family:var(--font-display); font-weight:700; font-size:22px; color:#B04636; line-height:1;">21</div>
+          <div style="font-size:10px; color:#B04636; text-transform:uppercase; letter-spacing:0.5px; margin-top:2px; font-weight:600;">Apr · Late</div>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+            <span class="chip chip--tag" style="background:#FDECE8; color:#B04636; font-size:10px;">Peer review</span>
+            <span style="font-size:11px; color:var(--medium-grey);">Strategic thinking for modern leaders</span>
+          </div>
+          <div style="font-family:var(--font-display); font-weight:600; font-size:15px; line-height:1.3;">Peer review — Market-entry case study</div>
+          <div style="font-size:12px; color:var(--medium-grey); margin-top:4px;">Review 2 submissions · Est. 30 min · 1 day overdue</div>
+        </div>
+        <button class="btn btn--primary btn--sm" onclick="goto('unit')">Start now →</button>
+      </div>
+
+      <!-- Today/tomorrow -->
+      <div style="display:flex; align-items:center; gap:16px; padding:18px 20px; border-bottom:1px solid var(--border);">
+        <div style="flex:0 0 56px; text-align:center;">
+          <div style="font-family:var(--font-display); font-weight:700; font-size:22px; color:#C87700; line-height:1;">23</div>
+          <div style="font-size:10px; color:#C87700; text-transform:uppercase; letter-spacing:0.5px; margin-top:2px; font-weight:600;">Apr · Tomorrow</div>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+            <span class="chip chip--tag is-strategy" style="font-size:10px;">Quiz</span>
+            <span style="font-size:11px; color:var(--medium-grey);">Strategic thinking for modern leaders</span>
+          </div>
+          <div style="font-family:var(--font-display); font-weight:600; font-size:15px; line-height:1.3;">Quiz — Market sizing frameworks</div>
+          <div style="font-size:12px; color:var(--medium-grey); margin-top:4px;">10 questions · Est. 15 min · 2 attempts allowed</div>
+        </div>
+        <button class="btn btn--primary btn--sm" onclick="goto('unit')">Start quiz →</button>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:16px; padding:18px 20px; border-bottom:1px solid var(--border);">
+        <div style="flex:0 0 56px; text-align:center;">
+          <div style="font-family:var(--font-display); font-weight:700; font-size:22px; color:var(--primary); line-height:1;">25</div>
+          <div style="font-size:10px; color:var(--medium-grey); text-transform:uppercase; letter-spacing:0.5px; margin-top:2px; font-weight:600;">Apr · Sat</div>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+            <span class="chip chip--tag" style="font-size:10px;">Reading</span>
+            <span style="font-size:11px; color:var(--medium-grey);">Strategic thinking for modern leaders</span>
+          </div>
+          <div style="font-family:var(--font-display); font-weight:600; font-size:15px; line-height:1.3;">Reading — OKR principles &amp; anti-patterns</div>
+          <div style="font-size:12px; color:var(--medium-grey); margin-top:4px;">4 chapters · Est. 20 min · Prepares you for Mod 4</div>
+        </div>
+        <button class="btn btn--outline btn--sm" onclick="goto('unit')">Open reading</button>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:16px; padding:18px 20px; border-bottom:1px solid var(--border);">
+        <div style="flex:0 0 56px; text-align:center;">
+          <div style="font-family:var(--font-display); font-weight:700; font-size:22px; color:var(--primary); line-height:1;">27</div>
+          <div style="font-size:10px; color:var(--medium-grey); text-transform:uppercase; letter-spacing:0.5px; margin-top:2px; font-weight:600;">Apr · Mon</div>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+            <span class="chip chip--tag is-data" style="font-size:10px;">Assignment</span>
+            <span style="font-size:11px; color:var(--medium-grey);">Analytics for non-analysts</span>
+          </div>
+          <div style="font-family:var(--font-display); font-weight:600; font-size:15px; line-height:1.3;">Assignment — Build a weekly metrics dashboard</div>
+          <div style="font-size:12px; color:var(--medium-grey); margin-top:4px;">Submit a link or file · Est. 1.5h · Counts toward certificate</div>
+        </div>
+        <button class="btn btn--outline btn--sm" onclick="goto('unit')">Open brief</button>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:16px; padding:18px 20px; border-bottom:1px solid var(--border);">
+        <div style="flex:0 0 56px; text-align:center;">
+          <div style="font-family:var(--font-display); font-weight:700; font-size:22px; color:var(--primary); line-height:1;">29</div>
+          <div style="font-size:10px; color:var(--medium-grey); text-transform:uppercase; letter-spacing:0.5px; margin-top:2px; font-weight:600;">Apr · Wed</div>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+            <span class="chip chip--tag is-design" style="font-size:10px;">Assignment</span>
+            <span style="font-size:11px; color:var(--medium-grey);">Design thinking fundamentals</span>
+          </div>
+          <div style="font-family:var(--font-display); font-weight:600; font-size:15px; line-height:1.3;">Assignment — Run 3 empathy interviews</div>
+          <div style="font-size:12px; color:var(--medium-grey); margin-top:4px;">Upload notes + audio · Est. 2.5h · Peer-reviewed</div>
+        </div>
+        <button class="btn btn--outline btn--sm" onclick="goto('unit')">Open brief</button>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:16px; padding:18px 20px;">
+        <div style="flex:0 0 56px; text-align:center;">
+          <div style="font-family:var(--font-display); font-weight:700; font-size:22px; color:var(--primary); line-height:1;">03</div>
+          <div style="font-size:10px; color:var(--medium-grey); text-transform:uppercase; letter-spacing:0.5px; margin-top:2px; font-weight:600;">May · Sun</div>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+            <span class="chip chip--tag is-data" style="font-size:10px;">Quiz</span>
+            <span style="font-size:11px; color:var(--medium-grey);">Analytics for non-analysts</span>
+          </div>
+          <div style="font-family:var(--font-display); font-weight:600; font-size:15px; line-height:1.3;">Quiz — Spotting misleading charts</div>
+          <div style="font-size:12px; color:var(--medium-grey); margin-top:4px;">8 questions · Est. 12 min · Unlimited attempts</div>
+        </div>
+        <button class="btn btn--outline btn--sm" onclick="goto('unit')">Preview</button>
+      </div>
+    </div>
+
+    <p style="margin-top:20px; font-size:12px; color:var(--medium-grey); text-align:center;">Need to change a deadline? Reach out to your instructor from the course page.</p>
+  </main>
+  <footer class="lms-footer"><strong>mereka.</strong> © 2026 · Academy v2</footer>
+</section>
+
+<!-- ========================================================
+     SCREEN: Certificates — verified credentials
+     ======================================================== -->
+<section class="screen" id="screen-certificates">
+  <header class="lms-header">
+    <a class="lms-logo" href="#" onclick="goto('dashboard'); return false;" aria-label="Mereka"><img src="logo-horizontal-black-Mereka.svg" alt="Mereka" style="height:26px; width:auto; display:block;" /></a>
+    <nav class="lms-nav">
+      <a href="#" onclick="goto('dashboard'); return false;">Dashboard</a>
+      <a href="#" onclick="goto('discover'); return false;">Discover</a>
+      <a class="is-active" href="#" onclick="goto('mylearning'); return false;">My Learning</a>
+    </nav>
+    <div class="lms-header__spacer"></div>
+    <div class="lms-header__actions">
+      <button class="btn btn--ghost btn--sm" onclick="goto('studio')"><span class="material-symbols-outlined" style="font-size:16px;">edit_note</span> Studio</button>
+      <button class="icon-btn" onclick="goto('wishlist')" aria-label="Wishlist"><span class="material-symbols-outlined">favorite</span><span class="badge js-wishlist-count"></span></button>
+      <button class="icon-btn" onclick="goto('settings')" aria-label="Settings"><span class="material-symbols-outlined">settings</span></button>
+      <button class="icon-btn js-notif-toggle" aria-label="Notifications"><span class="material-symbols-outlined">notifications</span><span class="badge">3</span></button>
+      <a href="#" onclick="goto('profile'); return false;" class="avatar" role="button" aria-label="Profile" style="text-decoration:none;">FF</a>
+    </div>
+  </header>
+
+  <main class="mylearning">
+    <div style="font-size:12px; color:var(--medium-grey); margin-bottom:14px;">
+      <a href="#" onclick="goto('dashboard'); return false;" style="color:var(--medium-grey); text-decoration:none;">Dashboard</a>
+      <span style="margin:0 8px;">/</span>
+      <span style="color:var(--off-black); font-weight:500;">Certificates</span>
+    </div>
+
+    <div class="mylearning__head">
+      <div>
+        <h1>Your certificates</h1>
+        <p>Verified credentials for every course you've completed on Mereka.</p>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn--outline"><span class="material-symbols-outlined" style="font-size:16px;">verified</span> Public profile</button>
+        <button class="btn btn--primary"><span class="material-symbols-outlined" style="font-size:16px;">download</span> Download all</button>
+      </div>
+    </div>
+
+    <div class="mylearning__summary">
+      <div class="mylearning__stat"><span>Total earned</span><strong>8</strong><em>since Jan 2025</em></div>
+      <div class="mylearning__stat"><span>This year</span><strong>3</strong><em>2 in the last 60 days</em></div>
+      <div class="mylearning__stat"><span>Average score</span><strong>89%</strong><em>Top 12% of learners</em></div>
+      <div class="mylearning__stat"><span>Verified by</span><strong style="font-size:18px; padding-top:6px;">Mereka</strong><em>Blockchain-backed</em></div>
+    </div>
+
+    <div class="mylearning__filters" role="tablist" aria-label="Filter">
+      <button class="mylearning__chip is-active">All <span class="count">(8)</span></button>
+      <button class="mylearning__chip">2026 <span class="count">(3)</span></button>
+      <button class="mylearning__chip">2025 <span class="count">(5)</span></button>
+      <button class="mylearning__chip">Strategy <span class="count">(3)</span></button>
+      <button class="mylearning__chip">Data <span class="count">(2)</span></button>
+      <button class="mylearning__chip">People ops <span class="count">(2)</span></button>
+      <button class="mylearning__chip">Design <span class="count">(1)</span></button>
+    </div>
+
+    <div class="mylearning__grid">
+      <!-- Cert 1 -->
+      <article class="ml-card">
+        <div class="ml-card__thumb" style="background:var(--brand-gradient); min-height:160px; flex-direction:column; gap:8px;">
+          <span class="material-symbols-outlined" style="font-size:48px;">workspace_premium</span>
+          <div style="font-family:var(--font-display); font-weight:600; font-size:12px; letter-spacing:1px; text-transform:uppercase;">Certificate of Completion</div>
+        </div>
+        <div class="ml-card__body">
+          <span class="ml-card__cat">Strategy</span>
+          <h3>Strategic thinking for modern leaders</h3>
+          <p class="ml-card__meta">Mei Lin Tan · Issued Apr 18, 2026</p>
+          <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--dark-grey); margin-top:6px; padding:8px 0; border-top:1px dashed var(--border); border-bottom:1px dashed var(--border);">
+            <span>Credential</span><span style="font-family:var(--font-mono, monospace); font-size:11px;">MRK-2026-48291</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--dark-grey); margin-top:8px;">
+            <span style="color:var(--primary); font-weight:600;">Score 92%</span>
+            <span>12 modules</span>
+          </div>
+          <div class="ml-card__foot">
+            <button class="btn btn--ghost btn--sm"><span class="material-symbols-outlined" style="font-size:16px;">share</span> Share</button>
+            <button class="btn btn--primary btn--sm" onclick="goto('certificate')">View →</button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Cert 2 -->
+      <article class="ml-card">
+        <div class="ml-card__thumb t-people" style="min-height:160px; flex-direction:column; gap:8px;">
+          <span class="material-symbols-outlined" style="font-size:48px;">workspace_premium</span>
+          <div style="font-family:var(--font-display); font-weight:600; font-size:12px; letter-spacing:1px; text-transform:uppercase;">Certificate of Completion</div>
+        </div>
+        <div class="ml-card__body">
+          <span class="ml-card__cat">People ops</span>
+          <h3>High-performing remote teams</h3>
+          <p class="ml-card__meta">Daniel Wong · Issued Apr 18, 2026</p>
+          <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--dark-grey); margin-top:6px; padding:8px 0; border-top:1px dashed var(--border); border-bottom:1px dashed var(--border);">
+            <span>Credential</span><span style="font-family:var(--font-mono, monospace); font-size:11px;">MRK-2026-48290</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--dark-grey); margin-top:8px;">
+            <span style="color:var(--primary); font-weight:600;">Score 92%</span>
+            <span>10 modules</span>
+          </div>
+          <div class="ml-card__foot">
+            <button class="btn btn--ghost btn--sm"><span class="material-symbols-outlined" style="font-size:16px;">share</span> Share</button>
+            <button class="btn btn--outline btn--sm" onclick="goto('certificate')">View →</button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Cert 3 -->
+      <article class="ml-card">
+        <div class="ml-card__thumb t-data" style="min-height:160px; flex-direction:column; gap:8px;">
+          <span class="material-symbols-outlined" style="font-size:48px;">workspace_premium</span>
+          <div style="font-family:var(--font-display); font-weight:600; font-size:12px; letter-spacing:1px; text-transform:uppercase;">Certificate of Completion</div>
+        </div>
+        <div class="ml-card__body">
+          <span class="ml-card__cat">Data</span>
+          <h3>Analytics for non-analysts</h3>
+          <p class="ml-card__meta">Priya Menon · Issued Mar 04, 2026</p>
+          <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--dark-grey); margin-top:6px; padding:8px 0; border-top:1px dashed var(--border); border-bottom:1px dashed var(--border);">
+            <span>Credential</span><span style="font-family:var(--font-mono, monospace); font-size:11px;">MRK-2026-39814</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--dark-grey); margin-top:8px;">
+            <span style="color:var(--primary); font-weight:600;">Score 88%</span>
+            <span>6 modules</span>
+          </div>
+          <div class="ml-card__foot">
+            <button class="btn btn--ghost btn--sm"><span class="material-symbols-outlined" style="font-size:16px;">share</span> Share</button>
+            <button class="btn btn--outline btn--sm" onclick="goto('certificate')">View →</button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Cert 4 -->
+      <article class="ml-card">
+        <div class="ml-card__thumb" style="background:var(--brand-gradient); min-height:160px; flex-direction:column; gap:8px;">
+          <span class="material-symbols-outlined" style="font-size:48px;">workspace_premium</span>
+          <div style="font-family:var(--font-display); font-weight:600; font-size:12px; letter-spacing:1px; text-transform:uppercase;">Certificate of Completion</div>
+        </div>
+        <div class="ml-card__body">
+          <span class="ml-card__cat">Strategy</span>
+          <h3>OKRs that actually work</h3>
+          <p class="ml-card__meta">Raj Patel · Issued Mar 04, 2026</p>
+          <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--dark-grey); margin-top:6px; padding:8px 0; border-top:1px dashed var(--border); border-bottom:1px dashed var(--border);">
+            <span>Credential</span><span style="font-family:var(--font-mono, monospace); font-size:11px;">MRK-2026-39795</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--dark-grey); margin-top:8px;">
+            <span style="color:var(--primary); font-weight:600;">Score 88%</span>
+            <span>5 modules</span>
+          </div>
+          <div class="ml-card__foot">
+            <button class="btn btn--ghost btn--sm"><span class="material-symbols-outlined" style="font-size:16px;">share</span> Share</button>
+            <button class="btn btn--outline btn--sm" onclick="goto('certificate')">View →</button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Cert 5 -->
+      <article class="ml-card">
+        <div class="ml-card__thumb t-design" style="min-height:160px; flex-direction:column; gap:8px;">
+          <span class="material-symbols-outlined" style="font-size:48px;">workspace_premium</span>
+          <div style="font-family:var(--font-display); font-weight:600; font-size:12px; letter-spacing:1px; text-transform:uppercase;">Certificate of Completion</div>
+        </div>
+        <div class="ml-card__body">
+          <span class="ml-card__cat">Design</span>
+          <h3>Facilitation for creative teams</h3>
+          <p class="ml-card__meta">Shu Lin · Issued Feb 12, 2026</p>
+          <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--dark-grey); margin-top:6px; padding:8px 0; border-top:1px dashed var(--border); border-bottom:1px dashed var(--border);">
+            <span>Credential</span><span style="font-family:var(--font-mono, monospace); font-size:11px;">MRK-2026-31208</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--dark-grey); margin-top:8px;">
+            <span style="color:var(--primary); font-weight:600;">Score 86%</span>
+            <span>4 modules</span>
+          </div>
+          <div class="ml-card__foot">
+            <button class="btn btn--ghost btn--sm"><span class="material-symbols-outlined" style="font-size:16px;">share</span> Share</button>
+            <button class="btn btn--outline btn--sm" onclick="goto('certificate')">View →</button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Cert 6 -->
+      <article class="ml-card">
+        <div class="ml-card__thumb t-people" style="min-height:160px; flex-direction:column; gap:8px;">
+          <span class="material-symbols-outlined" style="font-size:48px;">workspace_premium</span>
+          <div style="font-family:var(--font-display); font-weight:600; font-size:12px; letter-spacing:1px; text-transform:uppercase;">Certificate of Completion</div>
+        </div>
+        <div class="ml-card__body">
+          <span class="ml-card__cat">People ops</span>
+          <h3>Giving effective feedback</h3>
+          <p class="ml-card__meta">Daniel Wong · Issued Dec 08, 2025</p>
+          <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--dark-grey); margin-top:6px; padding:8px 0; border-top:1px dashed var(--border); border-bottom:1px dashed var(--border);">
+            <span>Credential</span><span style="font-family:var(--font-mono, monospace); font-size:11px;">MRK-2025-87104</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--dark-grey); margin-top:8px;">
+            <span style="color:var(--primary); font-weight:600;">Score 91%</span>
+            <span>5 modules</span>
+          </div>
+          <div class="ml-card__foot">
+            <button class="btn btn--ghost btn--sm"><span class="material-symbols-outlined" style="font-size:16px;">share</span> Share</button>
+            <button class="btn btn--outline btn--sm" onclick="goto('certificate')">View →</button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Cert 7 -->
+      <article class="ml-card">
+        <div class="ml-card__thumb t-data" style="min-height:160px; flex-direction:column; gap:8px;">
+          <span class="material-symbols-outlined" style="font-size:48px;">workspace_premium</span>
+          <div style="font-family:var(--font-display); font-weight:600; font-size:12px; letter-spacing:1px; text-transform:uppercase;">Certificate of Completion</div>
+        </div>
+        <div class="ml-card__body">
+          <span class="ml-card__cat">Data</span>
+          <h3>Intro to SQL for operators</h3>
+          <p class="ml-card__meta">Priya Menon · Issued Oct 21, 2025</p>
+          <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--dark-grey); margin-top:6px; padding:8px 0; border-top:1px dashed var(--border); border-bottom:1px dashed var(--border);">
+            <span>Credential</span><span style="font-family:var(--font-mono, monospace); font-size:11px;">MRK-2025-74562</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--dark-grey); margin-top:8px;">
+            <span style="color:var(--primary); font-weight:600;">Score 84%</span>
+            <span>8 modules</span>
+          </div>
+          <div class="ml-card__foot">
+            <button class="btn btn--ghost btn--sm"><span class="material-symbols-outlined" style="font-size:16px;">share</span> Share</button>
+            <button class="btn btn--outline btn--sm" onclick="goto('certificate')">View →</button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Cert 8 -->
+      <article class="ml-card">
+        <div class="ml-card__thumb" style="background:var(--brand-gradient); min-height:160px; flex-direction:column; gap:8px;">
+          <span class="material-symbols-outlined" style="font-size:48px;">workspace_premium</span>
+          <div style="font-family:var(--font-display); font-weight:600; font-size:12px; letter-spacing:1px; text-transform:uppercase;">Certificate of Completion</div>
+        </div>
+        <div class="ml-card__body">
+          <span class="ml-card__cat">Strategy</span>
+          <h3>Business model canvas workshop</h3>
+          <p class="ml-card__meta">Mei Lin Tan · Issued Aug 14, 2025</p>
+          <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--dark-grey); margin-top:6px; padding:8px 0; border-top:1px dashed var(--border); border-bottom:1px dashed var(--border);">
+            <span>Credential</span><span style="font-family:var(--font-mono, monospace); font-size:11px;">MRK-2025-62038</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--dark-grey); margin-top:8px;">
+            <span style="color:var(--primary); font-weight:600;">Score 90%</span>
+            <span>6 modules</span>
+          </div>
+          <div class="ml-card__foot">
+            <button class="btn btn--ghost btn--sm"><span class="material-symbols-outlined" style="font-size:16px;">share</span> Share</button>
+            <button class="btn btn--outline btn--sm" onclick="goto('certificate')">View →</button>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div class="card" style="margin-top:28px; padding:22px; display:flex; align-items:center; gap:16px; background:linear-gradient(135deg, rgba(35,112,114,0.06), rgba(41,92,173,0.06)); border:1px solid var(--border);">
+      <div style="width:52px; height:52px; border-radius:12px; background:var(--brand-gradient); color:var(--white); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><span class="material-symbols-outlined">verified</span></div>
+      <div style="flex:1;">
+        <h3 style="margin:0 0 4px; font-size:16px;">Every Mereka certificate is verifiable</h3>
+        <p style="margin:0; color:var(--medium-grey); font-size:13px;">Share the link on LinkedIn or send the credential ID — employers can verify instantly at verify.mereka.my.</p>
+      </div>
+      <button class="btn btn--outline">Learn more</button>
     </div>
   </main>
   <footer class="lms-footer"><strong>mereka.</strong> © 2026 · Academy v2</footer>
