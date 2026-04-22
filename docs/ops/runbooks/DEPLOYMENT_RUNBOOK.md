@@ -69,8 +69,8 @@ Modules:
    - `MONGODB_URI`: Atlas connection string (for forum and the Atlas-only target state).
    - Configure external service endpoints (GCS buckets, etc). For DB/cache, prefer in-cluster service DNS.
   - For additional LMS domains (microsites), use `docs/guides/admin/MULTI_SITE_GUIDE.md`, `docs/policies/operations/MULTISITE_GOVERNANCE.md`, and `docs/reference/operations/OPENEDX_HOSTNAMES.md` as the current operator references, then re-run `./scripts/infra/prepare-tutor-build-context.sh --target openedx` if you are doing local/bootstrap rendered-config verification.
-2. Store sensitive values in Secret Manager and inject at runtime via Tutor environment overrides (e.g. `tutor config save --set MYSQL_HOST=...`).
-3. Prepare Kubernetes overrides, e.g. `tutor config save --set K8S_NAMESPACE=mereka-lms` and `tutor config save --set REGISTRY_URL=ghcr.io/biji-biji-initiative/mereka-lms`.
+2. Store sensitive values in Secret Manager and inject at runtime via governed Tutor environment overrides, e.g. `./scripts/infra/tutor-config-save.sh --set MYSQL_HOST=...`.
+3. Prepare Kubernetes overrides through the same governed wrapper, e.g. `./scripts/infra/tutor-config-save.sh --set K8S_NAMESPACE=mereka-lms` and `./scripts/infra/tutor-config-save.sh --set REGISTRY_URL=ghcr.io/biji-biji-initiative/mereka-lms`.
 
 ## 4. Build & publish images for ongoing releases
 
@@ -137,7 +137,6 @@ Use the remaining steps in this section only for cluster bootstrap or deep recov
    ```bash
    source infrastructure/tutor/tutor-env.sh
    ./scripts/infra/tutor-config-save.sh
-   ./scripts/infra/prepare-tutor-build-context.sh --target all
    ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
    ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
    ```
@@ -174,7 +173,7 @@ Use the remaining steps in this section only for cluster bootstrap or deep recov
   - Pre-op backup before risky operations:
     `velero backup create pre-op-mereka-lms-$(date +%Y%m%d-%H%M) --include-namespaces mereka-lms --wait`
   - Docs: `docs/ops/runbooks/VELERO_BACKUP_AUDIT.md`, `docs/ops/runbooks/DISASTER_RECOVERY.md`
-- Store long-lived secrets in Google Secret Manager so CI and operators pull values without editing `tutor_env/config.yml` directly. Minimum list: Django secret key, JWT private key, LMS superuser password, SMTP password, and Atlas host/user/password inputs for `FORUM_MONGODB_SRV`. Add new values with `gcloud secrets versions add NAME --data-file=-` and reference them via `tutor config save --set KEY="$(gcloud secrets versions access ...)"`.
+- Store long-lived secrets in Google Secret Manager so CI and operators pull values without editing `tutor_env/config.yml` directly. Minimum list: Django secret key, JWT private key, LMS superuser password, SMTP password, and Atlas host/user/password inputs for `FORUM_MONGODB_SRV`. Add new values with `gcloud secrets versions add NAME --data-file=-` and reference them via `./scripts/infra/tutor-config-save.sh --set KEY="$(gcloud secrets versions access ...)"`.
 - Verify the middleware/custom-app lane after any deployment that could affect
   rendered LMS settings, auth/cookie behavior, or `/metrics` exposure:
   ```bash

@@ -46,7 +46,7 @@ Use the codified init script:
 # Prerequisites
 pip install tutor-contrib-aspects==3.0.3
 tutor plugins enable aspects
-tutor config save  # renders .aspects-tutor-workspace/
+./scripts/infra/tutor-config-save.sh  # renders .aspects-tutor-workspace/ through the governed path
 
 # Init
 ./scripts/aspects/init-aspects-env.sh --env dev

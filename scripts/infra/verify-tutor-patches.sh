@@ -55,7 +55,7 @@ fi
 # Check if tutor_env exists
 if [[ ! -d "$TUTOR_ENV" ]]; then
   echo "ERROR: Tutor environment not found at $TUTOR_ENV"
-  echo "Run 'tutor config save' first to initialize the environment."
+  echo "Run './scripts/infra/tutor-config-save.sh' first to initialize the environment."
   exit 1
 fi
 

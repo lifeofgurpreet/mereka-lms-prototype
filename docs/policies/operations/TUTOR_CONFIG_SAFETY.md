@@ -109,14 +109,15 @@ git add tutor_env/
 git commit -m "feat: update config"
 ```
 
-### Manual Workflow
+### Manual Verification Workflow
 
-Use this only when you intentionally need the lower-level sequence:
+Use this only when you intentionally want to re-run the verification steps after
+the governed wrapper. Raw Tutor renders belong in disposable `TUTOR_ROOT`
+authority audits, not in normal local development.
 
 ```bash
 export TUTOR_ROOT="$(pwd)/tutor_env"
-tutor config save --set KEY=value
-./scripts/infra/prepare-tutor-build-context.sh --target all
+./scripts/infra/tutor-config-save.sh --set KEY=value
 ./scripts/infra/verify-tutor-config.sh
 tutor local restart
 git add tutor_env/

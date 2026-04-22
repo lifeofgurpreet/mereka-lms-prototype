@@ -3,7 +3,7 @@
 # Usage: ./scripts/infra/setup-google-oauth.sh [--client-id CLIENT_ID] [--client-secret SECRET]
 set -euo pipefail
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$REPO_ROOT/infrastructure/tutor/tutor-env.sh"
 
 CLIENT_ID=""
@@ -48,7 +48,7 @@ fi
 
 # Configure Tutor
 echo "Configuring Google OAuth in Tutor..."
-tutor config save \
+"$REPO_ROOT/scripts/infra/tutor-config-save.sh" \
   --set SOCIAL_AUTH_GOOGLE_OAUTH2_KEY="$CLIENT_ID" \
   --set SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET="$CLIENT_SECRET"
 
@@ -71,8 +71,6 @@ echo "     * Site: Select your site"
 echo ""
 echo "3. Test Google login on your LMS login page"
 echo ""
-echo "For detailed instructions, see: docs/GOOGLE_OAUTH_SETUP.md"
-
-
+echo "For detailed instructions, see: docs/guides/integrations/GOOGLE_OAUTH_SETUP.md"
 
 

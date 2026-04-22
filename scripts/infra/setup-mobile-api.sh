@@ -42,7 +42,7 @@ if [ "$ENV_TYPE" = "local" ]; then
     echo "✓ Mobile REST API already enabled"
   else
     echo "Enabling mobile REST API..."
-    tutor config save --set ENABLE_MOBILE_REST_API=true
+    ./scripts/infra/tutor-config-save.sh --set ENABLE_MOBILE_REST_API=true
     NEEDS_RESTART=true
   fi
   
@@ -50,13 +50,11 @@ if [ "$ENV_TYPE" = "local" ]; then
     echo "✓ OAuth2 provider already enabled"
   else
     echo "Enabling OAuth2 provider..."
-    tutor config save --set ENABLE_OAUTH2_PROVIDER=true
+    ./scripts/infra/tutor-config-save.sh --set ENABLE_OAUTH2_PROVIDER=true
     NEEDS_RESTART=true
   fi
   
   if [ "${NEEDS_RESTART:-false}" = "true" ]; then
-    echo "Preparing Tutor build context..."
-    ./scripts/infra/prepare-tutor-build-context.sh --target all
     echo "Restarting services..."
     tutor local restart
   fi
@@ -119,5 +117,5 @@ echo "  OAUTH_CLIENT_ID: \"${OAUTH_CLIENT_ID}\""
 echo ""
 echo "Next steps:"
 echo "1. Clone the iOS app: git clone https://github.com/openedx/openedx-app-ios.git"
-echo "2. Configure using: docs/MOBILE_IOS_APP_SETUP.md"
+echo "2. Configure using: docs/ops/runbooks/MOBILE_OAUTH_PROVISIONING.md"
 echo "3. Build in Xcode and deploy via TestFlight"

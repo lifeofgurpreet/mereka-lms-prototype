@@ -72,19 +72,18 @@ tutor local restart
 ### Manual Config Workflow (Advanced)
 
 ```bash
-# 1. Save config changes
+# Save config changes through the governed wrapper
 export TUTOR_ROOT="$(pwd)/tutor_env"
-tutor config save --set KEY=value
+./scripts/infra/tutor-config-save.sh --set KEY=value
 
-# 2. CRITICAL: Refresh rendered build context (NEVER skip this)
-./scripts/infra/prepare-tutor-build-context.sh --target all
-
-# 3. Verify refresh applied correctly
+# Optional: verify the rendered context explicitly
 ./scripts/infra/verify-tutor-config.sh
 
-# 4. Restart services
+# Restart services
 tutor local restart
 ```
+
+If you are auditing raw Tutor render deltas in a disposable `TUTOR_ROOT`, `./scripts/infra/prepare-tutor-build-context.sh --target all` is the required refresh step before trusting any resulting build artifacts.
 
 ### View Config
 
@@ -106,7 +105,7 @@ tutor config printvalue OPENEDX_COMMON_VERSION
 
 ## What the Governed Refresh Path Realizes
 
-**CRITICAL**: `tutor config save` regenerates the rendered Tutor environment from source hooks. Always run `prepare-tutor-build-context.sh --target all` after manual changes, or use `tutor-config-save.sh`.
+**CRITICAL**: `./scripts/infra/tutor-config-save.sh` is the normal local render path. It invokes Tutor, syncs the plugin mirror, refreshes the rendered build context, and runs the verifier. If you intentionally audit raw Tutor render output in a disposable `TUTOR_ROOT`, run `prepare-tutor-build-context.sh --target all` before trusting any resulting build artifacts.
 
 Refresh covers:
 - Tutor 21 local MySQL native-password mode plus `MYSQL_ROOT_HOST` compatibility
@@ -307,8 +306,7 @@ tutor plugins enable discovery
 tutor plugins disable ecommerce
 
 # After plugin changes
-tutor config save
-./scripts/infra/prepare-tutor-build-context.sh --target all
+./scripts/infra/tutor-config-save.sh
 tutor local restart
 ```
 
@@ -379,18 +377,10 @@ Production MFE branding rollout:
 ## Initial Setup (First Time)
 
 ```bash
-# Full interactive setup (1+ hour)
-export TUTOR_ROOT="$(pwd)/tutor_env"
-tutor local launch -I
-
-# This runs:
-# 1. tutor config save --interactive
-# 2. tutor local do init (migrations, static assets, superuser)
-# 3. tutor local start -d
-
-# Then refresh the rendered build context (CRITICAL)
-./scripts/infra/prepare-tutor-build-context.sh --target all
-tutor local restart
+# Full repo-governed setup path
+./scripts/qa/verify-cold-start-onboarding-contract.sh
+./scripts/shared/setup-local.sh
+./scripts/infra/verify-local-bootstrap-readiness.sh
 ```
 
 ---
@@ -419,23 +409,13 @@ tutor local dc ps
 
 ### Deploy to K8s
 
-```bash
-# Initialize (first time)
-tutor k8s init
+Runtime deployments are GitOps-owned on RKE2. Do not use raw `tutor k8s apply`,
+`tutor k8s start`, or ad hoc `kubectl scale` as a normal release path.
 
-# Apply manifests
-tutor k8s apply
-
-# Start/stop (doesn't exist in k8s - use kubectl)
-kubectl scale deployment/lms --replicas=0 -n mereka-lms  # Stop
-kubectl scale deployment/lms --replicas=2 -n mereka-lms  # Start
-
-# Run migrations
-tutor k8s do migrate
-
-# Create superuser
-tutor k8s do createuser --staff --superuser admin admin@example.com
-```
+Use:
+- `docs/guides/admin/K8S_OPERATIONS_GUIDE.md` for operator procedures
+- `docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md` for release truth
+- `./scripts/infra/release-openedx-gitops.sh --require-digests` for image promotion
 
 ---
 
@@ -443,10 +423,10 @@ tutor k8s do createuser --staff --superuser admin admin@example.com
 
 | Environment | Command Prefix | Service Names | Image Tags |
 |-------------|----------------|---------------|------------|
-| **Local** | `tutor local` | mysql, mongodb, redis | latest |
-| **Kubernetes** | `tutor k8s` | Cloud SQL proxy, Atlas | production/staging |
+| **Local** | `tutor local` | mysql, mongodb, redis | `openedx:nightly`, `openedx-mfe:nightly` |
+| **Kubernetes** | GitOps/ArgoCD | RKE2 Services/ESO-managed secrets | GHCR release digests |
 
-**Critical**: Local uses Docker Compose service names. K8s uses Cloud SQL/Atlas.
+**Critical**: Local uses Docker Compose service names. Kubernetes runtime truth is source/GitOps plus ArgoCD realization; do not back-port live cluster edits into local Tutor docs.
 
 ---
 
@@ -454,26 +434,26 @@ tutor k8s do createuser --staff --superuser admin admin@example.com
 
 ```bash
 # Domains
-tutor config save --set LMS_HOST=localhost
-tutor config save --set CMS_HOST=studio.localhost
-tutor config save --set PREVIEW_LMS_HOST=preview.localhost
+./scripts/infra/tutor-config-save.sh --set LMS_HOST=localhost
+./scripts/infra/tutor-config-save.sh --set CMS_HOST=studio.localhost
+./scripts/infra/tutor-config-save.sh --set PREVIEW_LMS_HOST=preview.localhost
 
 # Databases
-tutor config save --set MYSQL_HOST=mysql
-tutor config save --set MONGODB_HOST=mongodb
-tutor config save --set REDIS_HOST=redis
+./scripts/infra/tutor-config-save.sh --set MYSQL_HOST=mysql
+./scripts/infra/tutor-config-save.sh --set MONGODB_HOST=mongodb
+./scripts/infra/tutor-config-save.sh --set REDIS_HOST=redis
 
 # Open edX version
-tutor config save --set OPENEDX_COMMON_VERSION=open-release/ulmo.master
+./scripts/infra/tutor-config-save.sh --set OPENEDX_COMMON_VERSION=open-release/ulmo.1
 
 # Language
-tutor config save --set LANGUAGE_CODE=en
+./scripts/infra/tutor-config-save.sh --set LANGUAGE_CODE=en
 
 # Contact email
-tutor config save --set CONTACT_EMAIL=admin@example.com
+./scripts/infra/tutor-config-save.sh --set CONTACT_EMAIL=admin@example.com
 ```
 
-**REMEMBER**: Always run `./scripts/infra/prepare-tutor-build-context.sh --target all` after manual `tutor config save`, or use `./scripts/infra/tutor-config-save.sh` instead.
+**REMEMBER**: Use `./scripts/infra/tutor-config-save.sh` for normal config edits. It owns render, build-context refresh, and verification as one path.
 
 ---
 

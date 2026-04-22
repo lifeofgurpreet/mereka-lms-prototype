@@ -36,7 +36,7 @@ echo ""
 # Check if tutor_env exists
 if [ ! -d "$REPO_ROOT/tutor_env/env/k8s" ]; then
   echo "❌ ERROR: tutor_env/env/k8s directory not found"
-  echo "   Please run 'tutor config save' first to initialize Tutor environment"
+  echo "   Please run './scripts/infra/tutor-config-save.sh' first to initialize Tutor environment"
   exit 1
 fi
 
@@ -45,7 +45,7 @@ echo "Creating override.yml with 512Mi memory requests..."
 cat > "$OVERRIDE_FILE" <<'EOF'
 ---
 # Tutor k8s-override: Set memory requests to 512Mi for core deployments
-# This file persists resource configurations across `tutor config save` operations
+# This file persists resource configurations across governed Tutor render operations
 # Created: 2025-11-21
 # Reference: https://docs.tutor.edly.io/k8s.html
 

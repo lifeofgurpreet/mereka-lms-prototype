@@ -331,8 +331,8 @@ Use the branding screenshot script:
 1. **Develop**: Modify templates in `tutor_env/plugins/ecommerce/`
 2. **Test Locally**: `tutor local restart ecommerce`
 3. **Capture Screenshots**: `./scripts/qa/capture-branding-screenshots.sh --target ecommerce`
-4. **Build Image**: `tutor images build ecommerce`
-5. **Deploy**: Follow `docs/ops/runbooks/THEME_DEPLOYMENT.md`
+4. **Build Image**: no current onboarding-grade repo helper owns legacy Oscar ecommerce image builds. If a legacy ecommerce image must be rebuilt for transition work, classify it as a legacy/debug operation and record the proof gap before use.
+5. **Deploy**: Follow `docs/ops/runbooks/THEME_DEPLOYMENT.md`; production promotion must remain GitOps/release-object driven.
 
 ## Verification
 

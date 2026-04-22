@@ -275,7 +275,7 @@ print_section "Checking Tutor Environment Structure"
 
 if [[ ! -d "$TUTOR_ENV" ]]; then
   echo -e "${RED}ERROR: Tutor environment not found at $TUTOR_ENV${NC}"
-  echo "Run 'tutor config save' first to initialize the environment."
+  echo "Run './scripts/infra/tutor-config-save.sh' first to initialize the environment."
   exit 1
 fi
 

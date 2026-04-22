@@ -217,7 +217,7 @@ PYEOF
    ```bash
    # Update Tutor config
    source infrastructure/tutor/tutor-env.sh
-   tutor config save \
+   ./scripts/infra/tutor-config-save.sh \
      --set EMAIL_BACKEND=django_ses.SESBackend \
      --set AWS_SES_REGION_NAME=us-east-1 \
      --set AWS_ACCESS_KEY_ID="<smtp-username>" \
@@ -237,7 +237,7 @@ echo -n "<smtp-username>" | gcloud secrets create ses-smtp-username --data-file=
 echo -n "<smtp-password>" | gcloud secrets create ses-smtp-password --data-file=-
 
 # Update Tutor to use secrets
-tutor config save \
+./scripts/infra/tutor-config-save.sh \
   --set AWS_ACCESS_KEY_ID="$(gcloud secrets versions access latest --secret=ses-smtp-username)" \
   --set AWS_SECRET_ACCESS_KEY="$(gcloud secrets versions access latest --secret=ses-smtp-password)"
 ```
@@ -378,4 +378,3 @@ kubectl exec -n mereka-lms deploy/lms -- \
 
 **Last Updated:** 2025-11-12
 **Status:** ⛔ Blocked - Awaiting domain verification and AWS support
-

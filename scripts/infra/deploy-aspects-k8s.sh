@@ -3,7 +3,7 @@
 # in this script's description is historical; Aspects now runs on RKE2. The script is
 # also disabled by default (ALLOW_LEGACY_TUTOR_K8S guard below) — do not re-enable.
 #
-# Deploy Aspects Analytics to GKE Autopilot with appropriate resource limits
+# Deploy Aspects Analytics through the deprecated Tutor-generated Kubernetes path.
 set -euo pipefail
 
 # DEPRECATED: this script applies Tutor-generated k8s manifests directly.
@@ -20,17 +20,17 @@ fi
 
 echo "WARNING: running deprecated legacy path (ALLOW_LEGACY_TUTOR_K8S=1)." >&2
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
 source infrastructure/tutor/tutor-env.sh
 
-echo "=== Configuring Aspects for GKE Autopilot ==="
+echo "=== Configuring Aspects for legacy Tutor Kubernetes manifests ==="
 echo ""
 
-# Configure Aspects with conservative resource limits for Autopilot
+# Configure Aspects with conservative resource limits for the legacy path.
 echo "Setting Aspects resource limits..."
-tutor config save \
+./scripts/infra/tutor-config-save.sh \
   --set ASPECTS_CLICKHOUSE_MEMORY_LIMIT=4Gi \
   --set ASPECTS_CLICKHOUSE_CPU_LIMIT=2 \
   --set ASPECTS_SUPERSET_MEMORY_LIMIT=2Gi \
@@ -48,7 +48,7 @@ if find tutor_env/env/k8s -name "*clickhouse*" -o -name "*superset*" 2>/dev/null
   echo "Found Aspects manifests"
 else
   echo "⚠️  No Aspects manifests found. Aspects may not be enabled for Kubernetes."
-  echo "   Run: tutor plugins enable aspects && tutor config save"
+  echo "   Run: tutor plugins enable aspects && ./scripts/infra/tutor-config-save.sh"
   exit 1
 fi
 
@@ -113,7 +113,6 @@ echo "  Username: admin"
 echo "  Password: Check with: tutor config printvalue SUPERSET_ADMIN_PASSWORD"
 echo ""
 echo "=== Done ==="
-
 
 
 

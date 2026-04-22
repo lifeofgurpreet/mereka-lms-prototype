@@ -332,9 +332,8 @@ For each tenant domain:
 
 4. **Update LMS settings**:
    ```bash
-   tutor config save --set "ALLOWED_HOSTS=['academyv2.mereka.io', 'acme.academyv2.mereka.io']"
-   tutor config save --set "CSRF_TRUSTED_ORIGINS=['https://academyv2.mereka.io', 'https://acme.academyv2.mereka.io']"
-   ./scripts/infra/prepare-tutor-build-context.sh --target all
+   ./scripts/infra/tutor-config-save.sh --set "ALLOWED_HOSTS=['academyv2.mereka.io', 'acme.academyv2.mereka.io']"
+   ./scripts/infra/tutor-config-save.sh --set "CSRF_TRUSTED_ORIGINS=['https://academyv2.mereka.io', 'https://acme.academyv2.mereka.io']"
    tutor k8s restart
    ```
 

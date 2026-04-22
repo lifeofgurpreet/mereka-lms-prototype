@@ -78,18 +78,22 @@ This guide walks through setting up Google Login for OpenEdX LMS sites.
 
 ## Step 2: Configure OpenEdX
 
-The configuration is done via Tutor environment variables. Update `tutor_env/config.yml` or use `tutor config save`:
+The configuration is done via Tutor environment variables. Use the governed
+wrapper so plugin sync, render, build-context refresh, and verification stay in
+one path:
 
 ```bash
 source infrastructure/tutor/tutor-env.sh
 
 # Set Google OAuth credentials
-tutor config save \
+./scripts/infra/tutor-config-save.sh \
   --set SOCIAL_AUTH_GOOGLE_OAUTH2_KEY="YOUR_CLIENT_ID.apps.googleusercontent.com" \
   --set SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET="YOUR_CLIENT_SECRET"
 ```
 
-Alternatively, add these to `tutor_env/config.yml`:
+Do not commit these values. If you add them to `tutor_env/config.yml` during a
+local investigation, keep that file out of git and re-run the wrapper before
+trusting rendered artifacts:
 
 ```yaml
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY: "YOUR_CLIENT_ID.apps.googleusercontent.com"
