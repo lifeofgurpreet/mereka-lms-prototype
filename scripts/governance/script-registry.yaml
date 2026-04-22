@@ -668,6 +668,9 @@ ci_runtime_inventory:
       category: EXTERNAL_REPO
       args: ["var/ci/release-bundle.json"]
       note: checks the truthful PCP projection for the app-local release bundle against a sibling platform-control-plane checkout
+    - script: scripts/qa/verify-caddyfile-source-parity.sh
+      category: EXTERNAL_REPO
+      note: "bead mereka-lms-9o0o — asserts app-repo Caddyfile canonical-parses identical to the vendored copy in bbi-infrastructure. Fetches via sibling checkout, BBI_INFRA_REPO env, or gh api (requires GITHUB_TOKEN). Skips in CI without cross-repo token; canonical run is in the scheduled lane."
     - script: scripts/qa/test-verify-control-plane-release-bundle-projection.sh
       category: CI_ARTIFACT
     - script: scripts/qa/verify-release-object.sh

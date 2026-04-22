@@ -164,4 +164,5 @@ scripts/qa/verify-branch-protection-contract.sh --live  # LIVE_GITHUB (audits li
 
 # ── External repo checkout required ─────────────────────────────────────────────────────
 scripts/qa/verify-control-plane-release-bundle-projection.sh var/ci/release-bundle.json  # EXTERNAL_REPO (checks the truthful PCP projection for the app-local release bundle against a sibling platform-control-plane checkout)
+scripts/qa/verify-caddyfile-source-parity.sh  # EXTERNAL_REPO (bead mereka-lms-9o0o — asserts app-repo Caddyfile canonical-parses identical to the vendored copy in bbi-infrastructure. Fetches via sibling checkout, BBI_INFRA_REPO env, or gh api (requires GITHUB_TOKEN). Skips in CI without cross-repo token; canonical run is in the scheduled lane.)
 scripts/qa/verify-skill-frontmatter-integrity.sh --profile shared  # EXTERNAL_REPO (audits shared team-skills roots in addition to repo-local .factory/skills)
