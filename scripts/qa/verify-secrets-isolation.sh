@@ -205,7 +205,7 @@ else
   patch_stores=$(stores_in_file "$RKE2_PATCH")
 
   # Must NOT use the prod Infisical store
-  if echo "$patch_stores" | grep -qx "${RKE2_PROD_STORE}"; then
+  if grep -qx "${RKE2_PROD_STORE}" <<<"$patch_stores"; then
     fail "rke2-nonprod patch uses '${RKE2_PROD_STORE}' (prod Infisical environment)"
     echo "  Data isolation violation: nonprod is reading production secrets."
     echo "  Fix: change secretStoreRef.name to '${RKE2_DEV_STORE}' in:"
@@ -219,7 +219,7 @@ else
   fi
 
   # Must use the dev store
-  if echo "$patch_stores" | grep -qx "${RKE2_DEV_STORE}"; then
+  if grep -qx "${RKE2_DEV_STORE}" <<<"$patch_stores"; then
     pass "rke2-nonprod patch references dev store ('${RKE2_DEV_STORE}')"
   else
     fail "rke2-nonprod patch does not reference '${RKE2_DEV_STORE}'"
@@ -251,7 +251,7 @@ else
       if [[ -z "$rke2_stores" ]]; then
         skip "No ExternalSecret stores found in rendered rke2-nonprod output"
       else
-        if echo "$rke2_stores" | grep -qx "${RKE2_PROD_STORE}"; then
+        if grep -qx "${RKE2_PROD_STORE}" <<<"$rke2_stores"; then
           # Known gap: purchase-gateway ExternalSecret still references gcp-secret-manager.
           # The rke2-nonprod overlay is transitional and will move to GitOps repo.
           warn "Rendered rke2-nonprod contains base store ('${RKE2_PROD_STORE}') — patch coverage gap"
@@ -259,7 +259,7 @@ else
         else
           pass "Rendered rke2-nonprod: no prod Infisical store ('${RKE2_PROD_STORE}')"
         fi
-        if echo "$rke2_stores" | grep -qx "${RKE2_DEV_STORE}"; then
+        if grep -qx "${RKE2_DEV_STORE}" <<<"$rke2_stores"; then
           pass "Rendered rke2-nonprod: dev store ('${RKE2_DEV_STORE}') present"
         else
           fail "Rendered rke2-nonprod: dev store ('${RKE2_DEV_STORE}') not found"
@@ -287,7 +287,7 @@ else
         else
           pass "Rendered production: no Infisical store in output"
         fi
-        if echo "$prod_stores" | grep -qx "${PROD_STORE}"; then
+        if grep -qx "${PROD_STORE}" <<<"$prod_stores"; then
           pass "Rendered production: '${PROD_STORE}' present"
         else
           fail "Rendered production: '${PROD_STORE}' not found in ExternalSecret stores"

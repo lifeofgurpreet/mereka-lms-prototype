@@ -373,25 +373,25 @@ if [[ "$ONLINE" = true && "$SKIP_CLUSTER" = false ]]; then
     # /health/ endpoint
     HEALTH_RESP=$(kubectl exec -n "$NAMESPACE" "$GW_POD" -- \
       curl -s http://localhost:8080/health/ 2>/dev/null || true)
-    if echo "$HEALTH_RESP" | grep -q '"status"'; then
+    if grep -q '"status"' <<<"$HEALTH_RESP"; then
       pass "/health/ responds with status field"
     else
       fail "/health/ did not return expected JSON"
     fi
 
-    if echo "$HEALTH_RESP" | grep -q '"database".*"ok"'; then
+    if grep -q '"database".*"ok"' <<<"$HEALTH_RESP"; then
       pass "/health/ database check is ok"
     else
       fail "/health/ database check is not ok (response: $HEALTH_RESP)"
     fi
 
-    if echo "$HEALTH_RESP" | grep -q '"redis".*"ok"'; then
+    if grep -q '"redis".*"ok"' <<<"$HEALTH_RESP"; then
       pass "/health/ Redis check is ok"
     else
       fail "/health/ Redis check is not ok (response: $HEALTH_RESP)"
     fi
 
-    if echo "$HEALTH_RESP" | grep -q '"stripe".*"ok"'; then
+    if grep -q '"stripe".*"ok"' <<<"$HEALTH_RESP"; then
       pass "/health/ Stripe key is configured"
     else
       skip "/health/ Stripe key not configured (dark launch: acceptable if sk_live not yet set)"
@@ -400,7 +400,7 @@ if [[ "$ONLINE" = true && "$SKIP_CLUSTER" = false ]]; then
     # /ready/ endpoint
     READY_RESP=$(kubectl exec -n "$NAMESPACE" "$GW_POD" -- \
       curl -s http://localhost:8080/ready/ 2>/dev/null || true)
-    if echo "$READY_RESP" | grep -q '"status".*"ready"'; then
+    if grep -q '"status".*"ready"' <<<"$READY_RESP"; then
       pass "/ready/ returns ready"
     else
       fail "/ready/ did not return ready (response: $READY_RESP)"

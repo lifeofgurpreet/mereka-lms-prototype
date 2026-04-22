@@ -132,7 +132,7 @@ fi
 # Check 7: Plugin defaults SEGMENT_KEY to empty string
 if [[ -f "$PLUGIN" ]]; then
   SEGMENT_LINE=$(grep 'SEGMENT_KEY.*os\.environ\.get' "$PLUGIN" || true)
-  if echo "$SEGMENT_LINE" | grep -qF '""'; then
+  if grep -qF '""' <<<"$SEGMENT_LINE"; then
     pass_check "SEGMENT_KEY defaults to empty string (disabled by default)"
   else
     fail_check "SEGMENT_KEY defaults to empty string (disabled by default)"
@@ -271,7 +271,7 @@ if [[ "${ANALYTICS_SMOKE_LIVE:-0}" == "1" ]]; then
   # Check admin host — analytics should not fire on /admin paths
   echo "  [live] Fetching admin login page..."
   ADMIN_BODY=$(curl -s --max-time 10 "$LMS_URL/admin/login/" 2>/dev/null || echo "")
-  if echo "$ADMIN_BODY" | grep -qi 'undefined_license_key'; then
+  if grep -qi 'undefined_license_key' <<<"$ADMIN_BODY"; then
     fail_check "[live] Admin host has no 'undefined_license_key' in page source"
   elif [[ -z "$ADMIN_BODY" ]]; then
     warn "[live] Admin login page unreachable (network issue or cluster not running)"
@@ -282,7 +282,7 @@ if [[ "${ANALYTICS_SMOKE_LIVE:-0}" == "1" ]]; then
   # Check authn MFE host
   echo "  [live] Fetching authn MFE page..."
   AUTHN_BODY=$(curl -s --max-time 10 "$APPS_URL/authn/login" 2>/dev/null || echo "")
-  if echo "$AUTHN_BODY" | grep -qi 'undefined_license_key'; then
+  if grep -qi 'undefined_license_key' <<<"$AUTHN_BODY"; then
     fail_check "[live] authn MFE host has no 'undefined_license_key' in page source"
   elif [[ -z "$AUTHN_BODY" ]]; then
     warn "[live] authn MFE page unreachable (network issue or cluster not running)"
@@ -293,7 +293,7 @@ if [[ "${ANALYTICS_SMOKE_LIVE:-0}" == "1" ]]; then
   # Check apps host for undefined analytics
   echo "  [live] Fetching learner-dashboard MFE page..."
   DASHBOARD_BODY=$(curl -s --max-time 10 "$APPS_URL/learner-dashboard/" 2>/dev/null || echo "")
-  if echo "$DASHBOARD_BODY" | grep -qi 'undefined_license_key'; then
+  if grep -qi 'undefined_license_key' <<<"$DASHBOARD_BODY"; then
     fail_check "[live] apps host learner-dashboard has no 'undefined_license_key'"
   elif [[ -z "$DASHBOARD_BODY" ]]; then
     warn "[live] learner-dashboard page unreachable (network issue or cluster not running)"

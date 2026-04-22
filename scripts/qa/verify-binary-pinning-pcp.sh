@@ -133,14 +133,14 @@ for wf in "${workflow_files[@]}"; do
     # Skip lines that are clearly not binary downloads:
     #   - curl used for API calls (json content-type, -d '{', etc.)
     #   - curl -f or --fail used for health probes without a file output
-    if echo "${line_content}" | grep -qE '(-H.*application/json|--data.*\{|-d.*\{|Content-Type|/health|/healthz)'; then
+    if grep -qE '(-H.*application/json|--data.*\{|-d.*\{|Content-Type|/health|/healthz)' <<<"${line_content}"; then
       continue
     fi
 
     # Only flag lines that download to a file (-o, -O, --output, -L followed by pipe to file)
-    if ! echo "${line_content}" | grep -qE '(-o[[:space:]]|-O[[:space:]]|--output[[:space:]]|-O$|-O[[:space:]]|> [a-zA-Z]|\| (tar|sh|bash|install))'; then
+    if ! grep -qE '(-o[[:space:]]|-O[[:space:]]|--output[[:space:]]|-O$|-O[[:space:]]|> [a-zA-Z]|\| (tar|sh|bash|install))' <<<"${line_content}"; then
       # Also flag pipe-to-shell: curl ... | bash (always unpinned)
-      if ! echo "${line_content}" | grep -qE '\| *(ba)?sh'; then
+      if ! grep -qE '\| *(ba)?sh' <<<"${line_content}"; then
         continue
       fi
     fi
@@ -150,7 +150,7 @@ for wf in "${workflow_files[@]}"; do
     context_end=$(( lineno + 10 ))
     context_block="$(sed -n "${context_start},${context_end}p" "${wf}")"
 
-    if echo "${context_block}" | grep -qiE '(sha256sum|shasum|sha512sum|md5sum|cosign verify|EXPECTED_SHA|CHECKSUM|verify.*hash)'; then
+    if grep -qiE '(sha256sum|shasum|sha512sum|md5sum|cosign verify|EXPECTED_SHA|CHECKSUM|verify.*hash)' <<<"${context_block}"; then
       : # checksum present in context — ok
     else
       if [[ ${wf_violations} -eq 0 ]]; then

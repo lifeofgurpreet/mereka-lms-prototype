@@ -90,9 +90,9 @@ run_offline_checks() {
     TUTOR_CONFIG="$REPO_ROOT/tutor_env/config.yml"
     if [[ -f "$TUTOR_CONFIG" ]]; then
       CONFIG_VER=$(grep "OPENEDX_COMMON_VERSION" "$TUTOR_CONFIG" | head -1 || true)
-      if echo "$CONFIG_VER" | grep -q "redwood"; then
+      if grep -q "redwood" <<<"$CONFIG_VER"; then
         pass "OPENEDX_COMMON_VERSION=redwood.3 (snapshot approach active)"
-      elif echo "$CONFIG_VER" | grep -q "ulmo"; then
+      elif grep -q "ulmo" <<<"$CONFIG_VER"; then
         pass "OPENEDX_COMMON_VERSION=ulmo (native Tutor v21 behavior)"
       else
         skip "OPENEDX_COMMON_VERSION not determinable from config.yml"
@@ -177,7 +177,7 @@ run_offline_checks() {
 
   if [[ -f "$active_dockerfile" ]]; then
     BASE_IMAGE=$(grep -E "^FROM ((docker\.io|mirror\.gcr\.io/library)/)?node:" "$active_dockerfile" | head -1 || true)
-    if echo "$BASE_IMAGE" | grep -qE "node:(18|20|22|24)"; then
+    if grep -qE "node:(18|20|22|24)" <<<"$BASE_IMAGE"; then
       pass "MFE base image uses Node 18+: $BASE_IMAGE"
     elif [[ -n "$BASE_IMAGE" ]]; then
       fail "MFE base image may be pre-Node 18: $BASE_IMAGE"
@@ -396,7 +396,7 @@ run_online_checks() {
       -o jsonpath='{.spec.containers[0].image}' 2>/dev/null || true)
 
     if [[ -n "$MFE_IMAGE" ]]; then
-      if echo "$MFE_IMAGE" | grep -qE "nightly|latest"; then
+      if grep -qE "nightly|latest" <<<"$MFE_IMAGE"; then
         fail "MFE pod is running a non-pinned image: $MFE_IMAGE"
       else
         pass "MFE pod running pinned image: $MFE_IMAGE"

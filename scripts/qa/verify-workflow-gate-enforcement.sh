@@ -98,14 +98,14 @@ if [[ ! -f "$BUILD" ]]; then
 else
   BUNDLE_NEEDS=$(grep -A5 '^\s*release-bundle:' "$BUILD" | grep 'needs:' || true)
   for dep in build-openedx build-mfe slsa-provenance; do
-    if echo "$BUNDLE_NEEDS" | grep -q "$dep"; then
+    if grep -q "$dep" <<<"$BUNDLE_NEEDS"; then
       pass "release-bundle depends on $dep"
     else
       fail "release-bundle does NOT depend on $dep"
     fi
   done
 
-  if echo "$BUNDLE_NEEDS" | grep -q 'scan-openedx-image\|scan-mfe-image'; then
+  if grep -q 'scan-openedx-image\|scan-mfe-image' <<<"$BUNDLE_NEEDS"; then
     fail "release-bundle still waits on post-push scan jobs"
   else
     pass "release-bundle no longer waits on post-push scan jobs"
@@ -113,7 +113,7 @@ else
 
   DISPATCH_NEEDS=$(grep -A5 '^\s*dispatch-dev-promotion:' "$BUILD" | grep 'needs:' || true)
   for dep in release-bundle scan-openedx-image scan-mfe-image slsa-provenance; do
-    if echo "$DISPATCH_NEEDS" | grep -q "$dep"; then
+    if grep -q "$dep" <<<"$DISPATCH_NEEDS"; then
       pass "dispatch-dev-promotion depends on $dep"
     else
       fail "dispatch-dev-promotion does NOT depend on $dep"
@@ -131,7 +131,7 @@ for wf in ci.yml build-tutor-images.yml; do
     # Check the line itself or the line before for a comment
     prev_line=$((line_num - 1))
     context=$(sed -n "${prev_line},${line_num}p" "$WORKFLOWS/$wf")
-    if echo "$context" | grep -qi 'non-blocking\|informational\|tracked\|debt\|optional\|desirable\|may not exist\|failed\|fallback'; then
+    if grep -qi 'non-blocking\|informational\|tracked\|debt\|optional\|desirable\|may not exist\|failed\|fallback' <<<"$context"; then
       : # classified
     else
       fail "$wf:$line_num: continue-on-error without classification comment"
