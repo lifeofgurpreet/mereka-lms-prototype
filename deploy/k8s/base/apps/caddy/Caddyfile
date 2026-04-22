@@ -2,6 +2,15 @@
 {
     auto_https off
     admin 0.0.0.0:2019
+    # Enable per-server HTTP metrics (caddy_http_requests_total,
+    # caddy_http_request_duration_seconds, caddy_http_requests_in_flight).
+    # Required to compute SLO burn-rate rules at the edge-proxy layer —
+    # prior admin-only /metrics emitted caddy_admin_http_requests_total
+    # (dev-probe counter), caddy_reverse_proxy_upstreams_healthy (gauge),
+    # and go runtime metrics — none usable as request-rate denominators.
+    # See bead mereka-lms-lpig (phantom SLO rewrite) and bead
+    # mereka-lms-33d8 (phantom audit).
+    metrics
 }
 
 # proxy directive snippet (with logging) to be used as follows:
