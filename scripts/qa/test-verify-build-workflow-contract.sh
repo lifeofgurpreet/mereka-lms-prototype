@@ -30,6 +30,8 @@ should_skip_scope() {
       scripts/infra/build-mfe-image.sh|\
       scripts/infra/prepare-tutor-build-context.sh|\
       scripts/infra/prepare-tutor-build-context-ci.sh|\
+      scripts/ci/emit-build-metrics.sh|\
+      scripts/ci/summarize-build-cache-health.sh|\
       scripts/infra/resolve-build-scope.sh|\
       scripts/infra/install-cosign.sh|\
       scripts/infra/install-trivy.sh|\
@@ -47,7 +49,8 @@ should_skip_scope() {
       scripts/qa/verify-mfe-image-branding.sh|\
       scripts/qa/verify-mfe-runtime-contract.sh|\
       scripts/qa/verify-release-bundle.sh|\
-      scripts/qa/verify-release-object.sh)
+      scripts/qa/verify-release-object.sh|\
+      .github/actions/emit-build-metrics/*)
         return 1
         ;;
     esac
@@ -161,6 +164,8 @@ on:
       - 'assets/branding/**'
       - 'scripts/infra/prepare-tutor-build-context.sh'
       - 'scripts/infra/prepare-tutor-build-context-ci.sh'
+      - 'scripts/ci/emit-build-metrics.sh'
+      - 'scripts/ci/summarize-build-cache-health.sh'
       - 'scripts/infra/resolve-build-scope.sh'
       - 'scripts/infra/install-cosign.sh'
       - 'scripts/infra/install-trivy.sh'
@@ -175,6 +180,7 @@ on:
       - 'scripts/lib/lane-normalize.sh'
       - 'scripts/qa/verify-build-provenance.sh'
       - 'scripts/qa/verify-openedx-image-branding.sh'
+      - '.github/actions/emit-build-metrics/**'
       - 'scripts/qa/verify-release-bundle.sh'
       - 'scripts/qa/verify-release-object.sh'
       - 'scripts/qa/verify-mfe-image-branding.sh'
@@ -336,7 +342,8 @@ jobs:
             --metrics-file build-metrics-openedx.json \
             --timing-env var/ci/build-openedx-timing.env \
             --l2-cache-ref ghcr.io/biji-biji-initiative/mereka-lms/cache/openedx:main-amd64 \
-            --cache-export-expected false
+            --cache-export-expected false \
+            --fail-on-failures false
       - name: Upload OpenEdX build diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -435,7 +442,8 @@ jobs:
             --metrics-file build-metrics-mfe.json \
             --timing-env var/ci/build-mfe-timing.env \
             --l2-cache-ref ghcr.io/biji-biji-initiative/mereka-lms/cache/mfe:main-amd64 \
-            --cache-export-expected false
+            --cache-export-expected false \
+            --fail-on-failures false
       - name: Upload MFE build diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -1243,7 +1251,8 @@ text = text.replace(
     '            --metrics-file build-metrics-openedx.json \\\n'
     '            --timing-env var/ci/build-openedx-timing.env \\\n'
     '            --l2-cache-ref ghcr.io/biji-biji-initiative/mereka-lms/cache/openedx:main-amd64 \\\n'
-    '            --cache-export-expected false\n',
+    '            --cache-export-expected false \\\n'
+    '            --fail-on-failures false\n',
     '      - name: Verify OpenEdX build cache health\n'
     '        run: |\n'
     '          if grep -q cache-from=type=registry var/ci/build-openedx.log; then\n'

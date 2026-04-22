@@ -11,7 +11,8 @@ Usage:
     --metrics-file <path> \
     --l2-cache-ref <ref> \
     [--timing-env <path>] \
-    [--cache-export-expected true|false]
+    [--cache-export-expected true|false] \
+    [--fail-on-failures true|false]
 EOF
 }
 
@@ -20,6 +21,7 @@ METRICS_FILE=""
 TIMING_ENV=""
 L2_CACHE_REF=""
 CACHE_EXPORT_EXPECTED="false"
+FAIL_ON_FAILURES="false"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -28,6 +30,7 @@ while [[ $# -gt 0 ]]; do
     --timing-env) TIMING_ENV="${2:-}"; shift 2 ;;
     --l2-cache-ref) L2_CACHE_REF="${2:-}"; shift 2 ;;
     --cache-export-expected) CACHE_EXPORT_EXPECTED="${2:-}"; shift 2 ;;
+    --fail-on-failures) FAIL_ON_FAILURES="${2:-}"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
     *) echo "::warning::summarize-build-cache-health: unknown argument: $1" >&2; shift ;;
   esac
@@ -43,6 +46,14 @@ case "$CACHE_EXPORT_EXPECTED" in
   *)
     echo "::warning::summarize-build-cache-health: invalid --cache-export-expected=${CACHE_EXPORT_EXPECTED}; using false" >&2
     CACHE_EXPORT_EXPECTED="false"
+    ;;
+esac
+
+case "$FAIL_ON_FAILURES" in
+  true|false) ;;
+  *)
+    echo "::warning::summarize-build-cache-health: invalid --fail-on-failures=${FAIL_ON_FAILURES}; using false" >&2
+    FAIL_ON_FAILURES="false"
     ;;
 esac
 
@@ -109,8 +120,9 @@ if ! jq empty "$METRICS_FILE" >/dev/null 2>&1; then
   exit 0
 fi
 
-registry_ref="$(jq -r 'first(.cache_sources[]? | select(.type == "registry" and (.found == true)) | .ref) // ""' "$METRICS_FILE")"
-registry_digest="$(jq -r 'first(.cache_sources[]? | select(.type == "registry" and (.found == true)) | .digest) // ""' "$METRICS_FILE")"
+registry_ref="$(jq -r --arg expected "$L2_CACHE_REF" 'first(.cache_sources[]? | select(.type == "registry" and (.found == true) and (.ref | startswith($expected))) | .ref) // ""' "$METRICS_FILE")"
+registry_digest="$(jq -r --arg expected "$L2_CACHE_REF" 'first(.cache_sources[]? | select(.type == "registry" and (.found == true) and (.ref | startswith($expected))) | .digest) // ""' "$METRICS_FILE")"
+registry_refs="$(jq -r '[.cache_sources[]? | select(.type == "registry" and (.found == true)) | .ref] | join(", ")' "$METRICS_FILE")"
 image_ref="$(jq -r 'first(.cache_sources[]? | select(.type == "image" and (.found == true)) | .ref) // ""' "$METRICS_FILE")"
 export_success="$(jq -r '.cache_export.success // "null"' "$METRICS_FILE")"
 export_digest="$(jq -r '.cache_export.digest // ""' "$METRICS_FILE")"
@@ -129,7 +141,11 @@ if [[ -n "$registry_ref" ]]; then
     warn "registry cache import observed, but not from expected L2 ref: ${registry_ref}; expected ${L2_CACHE_REF}"
   fi
 else
-  warn "no L2 registry cache import observed in ${METRICS_FILE}; this can be a first build, auth miss, or cache miss"
+  if [[ -n "$registry_refs" ]]; then
+    warn "no expected L2 registry cache import observed in ${METRICS_FILE}; expected ${L2_CACHE_REF}; observed registry refs: ${registry_refs}"
+  else
+    warn "no L2 registry cache import observed in ${METRICS_FILE}; this can be a first build, auth miss, or cache miss"
+  fi
 fi
 
 if [[ -n "$image_ref" ]]; then
@@ -177,4 +193,7 @@ else
 fi
 
 write_summary "${IMAGE_FAMILY} Build Cache Health"
+if [[ "$FAIL_ON_FAILURES" == "true" && "$FAILURES" -gt 0 ]]; then
+  exit 1
+fi
 exit 0

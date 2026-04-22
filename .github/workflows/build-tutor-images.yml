@@ -24,6 +24,8 @@ on:
       - 'scripts/infra/prepare-tutor-build-context.sh'
       - 'scripts/infra/prepare-tutor-build-context-ci.sh'
       - 'scripts/ci/preflight-check.sh'
+      - 'scripts/ci/emit-build-metrics.sh'
+      - 'scripts/ci/summarize-build-cache-health.sh'
       - 'scripts/infra/sync-tutor-plugin-mirror.sh'
       - 'scripts/infra/resolve-build-scope.sh'
       - 'scripts/infra/build-openedx-image.sh'
@@ -56,6 +58,7 @@ on:
       - 'scripts/qa/verify-mfe-runtime-contract.sh'
       # --- Workflow and CI infrastructure ---
       - '.github/workflows/build-tutor-images.yml'
+      - '.github/actions/emit-build-metrics/**'
       - '.github/actions/setup-python-env/**'
       - '.github/actions/select-build-lane/**'
       # --- Exclusions ---
@@ -655,7 +658,8 @@ jobs:
             --metrics-file build-metrics-openedx.json \
             --timing-env var/ci/build-openedx-timing.env \
             --l2-cache-ref ghcr.io/biji-biji-initiative/mereka-lms/cache/openedx:main-amd64 \
-            --cache-export-expected "${CACHE_EXPORT_EXPECTED}"
+            --cache-export-expected "${CACHE_EXPORT_EXPECTED}" \
+            --fail-on-failures "${CACHE_EXPORT_EXPECTED}"
 
       - name: Push OpenEdX build metrics to ci-metrics-receiver
         # ADR-025 §5 (metrics bridge, trailing push). Populates the cache/layer
@@ -942,7 +946,8 @@ jobs:
             --metrics-file build-metrics-mfe.json \
             --timing-env var/ci/build-mfe-timing.env \
             --l2-cache-ref ghcr.io/biji-biji-initiative/mereka-lms/cache/mfe:main-amd64 \
-            --cache-export-expected "${CACHE_EXPORT_EXPECTED}"
+            --cache-export-expected "${CACHE_EXPORT_EXPECTED}" \
+            --fail-on-failures "${CACHE_EXPORT_EXPECTED}"
 
       - name: Push MFE build metrics to ci-metrics-receiver
         # ADR-025 §5 (metrics bridge, trailing push).

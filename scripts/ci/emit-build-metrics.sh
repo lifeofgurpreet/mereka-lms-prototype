@@ -138,12 +138,11 @@ fi
 # Recognized source types: registry, image, gha, local
 # A line may appear multiple times (multiple cache sources are tried in order).
 
-declare -A SOURCE_FOUND=()
-declare -A SOURCE_DIGEST=()
-declare -A SOURCE_REF=()
-
-# Track order of appearance for the JSON array
-SOURCES_ORDERED=()
+# Track every cache source in order. Multiple registry cache imports are
+# meaningful: Bake imports L0 platform caches before the app L2 cache.
+SOURCE_TYPES=()
+SOURCE_REFS=()
+SOURCE_DIGESTS=()
 
 if [[ "$HAS_LOG" -eq 1 ]]; then
   # Each "importing cache manifest from" line is one source import attempt.
@@ -177,13 +176,9 @@ if [[ "$HAS_LOG" -eq 1 ]]; then
       digest_part="$(echo "$digest_part" | grep -oE 'sha256:[0-9a-f]{64}' || true)"
     fi
 
-    # Build a stable key: src_type + first-seen ref (multiple imports of same type pick first)
-    if [[ -z "${SOURCE_FOUND[$src_type]+_}" ]]; then
-      SOURCE_FOUND[$src_type]=1
-      SOURCE_DIGEST[$src_type]="${digest_part:-}"
-      SOURCE_REF[$src_type]="${ref_full%%@*}"
-      SOURCES_ORDERED+=("$src_type")
-    fi
+    SOURCE_TYPES+=("$src_type")
+    SOURCE_REFS+=("${ref_full%%@*}")
+    SOURCE_DIGESTS+=("${digest_part:-}")
   done < <(grep 'importing cache manifest from' "$LOG_FILE" 2>/dev/null || true)
 
   # Cache export success — look for "exporting cache" and "writing manifest" without error
@@ -209,20 +204,21 @@ fi
 # ── Build JSON cache_sources array ───────────────────────────────────────────
 build_cache_sources_json() {
   local first=1
+  local idx
   echo "["
-  for src_type in "${SOURCES_ORDERED[@]}"; do
-    [[ -z "$src_type" ]] && continue
-    local found="${SOURCE_FOUND[$src_type]:-0}"
-    local digest="${SOURCE_DIGEST[$src_type]:-}"
-    local ref="${SOURCE_REF[$src_type]:-}"
+  for idx in "${!SOURCE_TYPES[@]}"; do
+    local src_type="${SOURCE_TYPES[$idx]:-}"
+    local digest="${SOURCE_DIGESTS[$idx]:-}"
+    local ref="${SOURCE_REFS[$idx]:-}"
+    [[ -z "$src_type" || -z "$ref" ]] && continue
     [[ "$first" -eq 0 ]] && echo ","
     first=0
     if [[ -n "$digest" ]]; then
       printf '    {"type": "%s", "ref": "%s", "found": %s, "digest": "%s"}' \
-        "$src_type" "$ref" "$([ "$found" -eq 1 ] && echo true || echo false)" "$digest"
+        "$src_type" "$ref" true "$digest"
     else
       printf '    {"type": "%s", "ref": "%s", "found": %s, "digest": null}' \
-        "$src_type" "$ref" "$([ "$found" -eq 1 ] && echo true || echo false)"
+        "$src_type" "$ref" true
     fi
   done
   echo ""
@@ -251,7 +247,7 @@ build_cache_export_json() {
   printf '  "workflow_run_id": "%s",\n' "$WORKFLOW_RUN_ID"
   printf '  "image_family": "%s",\n' "$IMAGE_FAMILY"
   printf '  "cache_sources": '
-  _n_sources="${#SOURCES_ORDERED[@]}"
+  _n_sources="${#SOURCE_TYPES[@]}"
   if [[ "${_n_sources}" -gt 0 ]] || [[ "$HAS_LOG" -eq 1 ]]; then
     build_cache_sources_json
   else
@@ -296,11 +292,11 @@ if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
     echo "|--------|-------|"
 
     # Cache sources
-    for src_type in "${SOURCES_ORDERED[@]}"; do
+    for idx in "${!SOURCE_TYPES[@]}"; do
+      src_type="${SOURCE_TYPES[$idx]:-}"
       [[ -z "$src_type" ]] && continue
-      found="${SOURCE_FOUND[$src_type]:-0}"
-      digest="${SOURCE_DIGEST[$src_type]:-}"
-      icon="$([ "$found" -eq 1 ] && echo "✅" || echo "❌")"
+      digest="${SOURCE_DIGESTS[$idx]:-}"
+      icon="✅"
       if [[ -n "$digest" ]]; then
         echo "| cache_source_found (${src_type}) | ${icon} \`${digest}\` |"
       else

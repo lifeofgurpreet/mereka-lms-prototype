@@ -52,6 +52,7 @@ cat > "$FIX1_DIR/buildx.log" <<'LOG'
 #4 [stage1 1/3] FROM ghcr.io/example/base:latest
 #4 CACHED
 #5 [stage1 2/3] RUN apt-get update
+#6 importing cache manifest from ghcr.io/biji-biji-initiative/platform/cache/debian-bookworm-base:latest@sha256:0000111122223333444455556666777788889999aaaabbbbccccddddeeeeffff
 #7 importing cache manifest from ghcr.io/example/cache/openedx:main@sha256:1111222233334444555566667777888899990000aaaabbbbccccddddeeeeffff
 #8 exporting cache
 #9 writing manifest sha256:aaaa1111bbbb2222cccc3333dddd4444eeee5555ffff6666aaaa1111bbbb2222
@@ -117,6 +118,13 @@ if command -v jq &>/dev/null && [[ -f "$OUTPUT1" ]]; then
     _pass "fixture 1: layer_reuse_count parsed (2 CACHED lines)"
   else
     _fail "fixture 1: expected layer_reuse_count=2, got '$layer_reuse'"
+  fi
+
+  registry_sources="$(jq '[.cache_sources[] | select(.type == "registry")] | length' "$OUTPUT1" 2>/dev/null || true)"
+  if [[ "$registry_sources" == "2" ]]; then
+    _pass "fixture 1: multiple registry cache imports are preserved"
+  else
+    _fail "fixture 1: expected 2 registry cache imports, got '$registry_sources' from $(cat "$OUTPUT1")"
   fi
 fi
 
@@ -279,6 +287,12 @@ cat > "$FIX5_DIR/build-metrics-openedx.json" <<'JSON'
   "cache_sources": [
     {
       "type": "registry",
+      "ref": "ghcr.io/biji-biji-initiative/platform/cache/debian-bookworm-base:latest",
+      "found": true,
+      "digest": "sha256:0000111122223333444455556666777788889999aaaabbbbccccddddeeeeffff"
+    },
+    {
+      "type": "registry",
       "ref": "ghcr.io/biji-biji-initiative/mereka-lms/cache/openedx:main-amd64",
       "found": true,
       "digest": "sha256:1111222233334444555566667777888899990000aaaabbbbccccddddeeeeffff"
@@ -337,15 +351,16 @@ set +e
     --metrics-file "$FIX5_DIR/build-metrics-openedx.json" \
     --l2-cache-ref ghcr.io/biji-biji-initiative/mereka-lms/cache/openedx:main-amd64 \
     --cache-export-expected true \
+    --fail-on-failures true \
     > "$FIX5_DIR/stdout-export-expected.txt" 2> "$FIX5_DIR/stderr-export-expected.txt"
 )
 EXIT5B=$?
 set -e
 
-if [[ $EXIT5B -eq 0 ]]; then
-  _pass "fixture 5b: expected-export mismatch remains non-blocking"
+if [[ $EXIT5B -eq 1 ]]; then
+  _pass "fixture 5b: expected-export mismatch fails loudly in strict mode"
 else
-  _fail "fixture 5b: expected non-blocking exit 0, got $EXIT5B"
+  _fail "fixture 5b: expected strict exit 1, got $EXIT5B"
 fi
 
 if grep -q "FAIL: shared cache export was expected" "$FIX5_DIR/stdout-export-expected.txt"; then

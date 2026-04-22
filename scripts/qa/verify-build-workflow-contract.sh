@@ -243,6 +243,8 @@ required_trigger_paths=(
   "assets/branding/**"
   "scripts/infra/prepare-tutor-build-context.sh"
   "scripts/infra/prepare-tutor-build-context-ci.sh"
+  "scripts/ci/emit-build-metrics.sh"
+  "scripts/ci/summarize-build-cache-health.sh"
   "infrastructure/tutor/apply-patches.sh"
   "infrastructure/tutor/patches/**"
   "scripts/infra/resolve-build-scope.sh"
@@ -263,6 +265,7 @@ required_trigger_paths=(
   "scripts/qa/verify-release-object.sh"
   "scripts/qa/verify-mfe-image-branding.sh"
   "scripts/qa/verify-mfe-runtime-contract.sh"
+  ".github/actions/emit-build-metrics/**"
 )
 for trigger_path in "${required_trigger_paths[@]}"; do
   if path_filter_has_entry "$trigger_path"; then
@@ -743,10 +746,11 @@ fi
 if [[ "$BUILD_OPENEDX_BLOCK" == *"Emit OpenEdX build metrics"* \
    && "$BUILD_OPENEDX_BLOCK" == *"scripts/ci/summarize-build-cache-health.sh"* \
    && "$BUILD_OPENEDX_BLOCK" == *"--metrics-file build-metrics-openedx.json"* \
-   && "$BUILD_OPENEDX_BLOCK" == *"cache/openedx:main-amd64"* ]]; then
+   && "$BUILD_OPENEDX_BLOCK" == *"cache/openedx:main-amd64"* \
+   && "$BUILD_OPENEDX_BLOCK" == *"--fail-on-failures"* ]]; then
   pass "OpenEdX cache health is summarized from build-metrics JSON and the L2 ref"
 else
-  fail "OpenEdX cache health must use summarize-build-cache-health.sh with build-metrics-openedx.json and the L2 ref"
+  fail "OpenEdX cache health must use summarize-build-cache-health.sh with build-metrics-openedx.json, the L2 ref, and trusted-main fail-loud mode"
 fi
 
 if [[ "$BUILD_OPENEDX_BLOCK" == *"cache-from=type=registry"* \
@@ -760,10 +764,11 @@ fi
 if [[ "$BUILD_MFE_BLOCK" == *"Emit MFE build metrics"* \
    && "$BUILD_MFE_BLOCK" == *"scripts/ci/summarize-build-cache-health.sh"* \
    && "$BUILD_MFE_BLOCK" == *"--metrics-file build-metrics-mfe.json"* \
-   && "$BUILD_MFE_BLOCK" == *"cache/mfe:main-amd64"* ]]; then
+   && "$BUILD_MFE_BLOCK" == *"cache/mfe:main-amd64"* \
+   && "$BUILD_MFE_BLOCK" == *"--fail-on-failures"* ]]; then
   pass "MFE cache health is summarized from build-metrics JSON and the L2 ref"
 else
-  fail "MFE cache health must use summarize-build-cache-health.sh with build-metrics-mfe.json and the L2 ref"
+  fail "MFE cache health must use summarize-build-cache-health.sh with build-metrics-mfe.json, the L2 ref, and trusted-main fail-loud mode"
 fi
 
 if [[ "$BUILD_MFE_BLOCK" == *"cache-from=type=registry"* \
