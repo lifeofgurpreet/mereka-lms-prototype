@@ -1,5 +1,5 @@
 # Local Tutor Sandbox
-_Audience: Platform Eng • Owner: Infra Team • Last verified: 2026-04-21 • Status: supporting_
+_Audience: Platform Eng • Owner: Infra Team • Last verified: 2026-04-22 • Status: supporting_
 
 These instructions reproduce the nightly Open edX environment provisioned in this repository. For a day-to-day command cheat sheet, see [`WORKFLOW_LOCAL.md`](WORKFLOW_LOCAL.md). For the complete documentation index, visit [`docs/README.md`](../../README.md).
 
@@ -112,6 +112,7 @@ source infrastructure/tutor/tutor-env.sh
 ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 tutor local launch -I --skip-build
 tutor local restart
+./scripts/infra/verify-local-bootstrap-readiness.sh
 ```
 
 The launch wizard will:
@@ -121,7 +122,7 @@ The launch wizard will:
 3. Run database migrations and seed demo content.
 4. Start the LMS, Studio, forum, MFEs, discovery, and supporting Tutor services.
 
-Use `tutor local start -d` / `tutor local stop` for daily use, and `tutor local dc ps` or `tutor local logs --tail=100` to inspect health.
+Use `tutor local start -d` / `tutor local stop` for daily use, and `tutor local dc ps` or `tutor local logs --tail=100` to inspect health. After first launch or a full reset, run `./scripts/infra/verify-local-bootstrap-readiness.sh` before treating the sandbox as ready.
 
 > `tutor local launch` may run for 10-60+ minutes on the first pass depending on Docker resources, image freshness, and database init time. If your terminal times out, re-run `tutor local do init` until it completes. The `openedx` MySQL user will be missing otherwise, and the LMS/Studio will 500 with "Access denied for user 'openedx'". Use the bootstrap workflow phase-timing artifact as the current CI reference point instead of assuming a fixed laptop duration.
 

@@ -25,6 +25,8 @@ This repository tracks the infrastructure-as-code, configuration, and runbooks f
   - `terraform/` – Terraform modules and configs
   - `themes/` – Mereka branding themes
 - `deploy/k8s/` – App-repo Kubernetes manifests and local/staging/production overlays
+- `tests/` – Playwright, Tutor, and regression tests
+- `specs/` – Machine-checkable specs and generated spec graph inputs
 - `scripts/` – Automation scripts organized by domain:
   - `infra/` – Infrastructure operations (RKE2, Cloudflare, MongoDB, etc.)
   - `migrations/` – Data migration scripts (Kajabi, MCT)
@@ -32,6 +34,8 @@ This repository tracks the infrastructure-as-code, configuration, and runbooks f
   - `analytics/` – Analytics exports and reconciliation
   - `qa/` – Quality assurance and testing
 - `services/` – Standalone microservices and webhooks
+- `assets/` – Static brand assets and design-token exports
+- `tools/` – Developer, docs, spec, and governance utilities
 - `var/` – Runtime artifacts (gitignored): logs, exports, migration outputs
 
 ## Quick Start
