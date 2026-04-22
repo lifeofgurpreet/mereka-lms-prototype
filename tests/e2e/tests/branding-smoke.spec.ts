@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { getMfeBaseUrl } from '../support/urls';
 
 type RouteConfig = {
   label: string;
@@ -39,13 +40,6 @@ function isAuthnRouteUrl(urlValue: string): boolean {
   } catch {
     return urlValue.includes('/authn/');
   }
-}
-
-function getMfeBaseUrl(lmsBaseUrl: string): string {
-  const parsed = new URL(lmsBaseUrl);
-  const host = parsed.hostname.startsWith('apps.') ? parsed.hostname : `apps.${parsed.hostname}`;
-  const port = parsed.port ? `:${parsed.port}` : '';
-  return `${parsed.protocol}//${host}${port}`;
 }
 
 function normalizeHostname(hostname: string): string {

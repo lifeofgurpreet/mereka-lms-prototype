@@ -29,35 +29,11 @@
 //   E2E_USERNAME=user E2E_PASSWORD=pass npx playwright test
 //   BASE_URL=https://academyv2.mereka.dev E2E_USERNAME=... npx playwright test
 import { test, expect, type Page, type BrowserContext } from '@playwright/test';
+import { getMfeBaseUrl } from '../support/urls';
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-/**
- * Derive the MFE base URL from the LMS base URL configured in playwright.config.ts
- *
- * Tenant MFE hostname rule:
- *   prod:     academyv2.mereka.io           → apps.academyv2.mereka.io
- *   dev:      academyv2.mereka.dev          → apps.academyv2.mereka.dev
- *   staging:  staging.academyv2.mereka.io   → staging.apps.academyv2.mereka.io
- *                                             (NOT apps.staging.* — Cloudflare Free
- *                                             *.academyv2.mereka.io wildcard cert
- *                                             only covers 3-level subdomains)
- */
-function getMfeBaseUrl(lmsBaseUrl: string): string {
-  const parsed = new URL(lmsBaseUrl);
-  let host: string;
-  if (parsed.hostname.startsWith('apps.')) {
-    host = parsed.hostname;
-  } else if (parsed.hostname.startsWith('staging.')) {
-    host = parsed.hostname.replace(/^staging\./, 'staging.apps.');
-  } else {
-    host = `apps.${parsed.hostname}`;
-  }
-  const port = parsed.port ? `:${parsed.port}` : '';
-  return `${parsed.protocol}//${host}${port}`;
-}
 
 /**
  * Perform Authentik SSO login.

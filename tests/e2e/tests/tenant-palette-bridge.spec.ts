@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { getMfeBaseUrl } from '../support/urls';
 
 type TenantPalette = {
   primary: string;
@@ -45,29 +46,6 @@ function normalizePaletteValue(value: unknown): string {
   return typeof value === 'string' ? value.trim() : '';
 }
 
-function getMfeBaseUrl(lmsBaseUrl: string): string {
-  const parsed = new URL(lmsBaseUrl);
-  // Tenant MFE hostname rule:
-  //   prod:     academyv2.mereka.io           → apps.academyv2.mereka.io
-  //   dev:      academyv2.mereka.dev          → apps.academyv2.mereka.dev
-  //   staging:  staging.academyv2.mereka.io   → staging.apps.academyv2.mereka.io
-  //                                             (NOT apps.staging.* — that 4-level
-  //                                             subdomain is not covered by the
-  //                                             Cloudflare Free *.academyv2.mereka.io
-  //                                             wildcard cert, so no DNS record exists.)
-  // So for staging we insert `apps.` AFTER the first label instead of prepending.
-  let host: string;
-  if (parsed.hostname.startsWith('apps.')) {
-    host = parsed.hostname;
-  } else if (parsed.hostname.startsWith('staging.')) {
-    host = parsed.hostname.replace(/^staging\./, 'staging.apps.');
-  } else {
-    host = `apps.${parsed.hostname}`;
-  }
-  const port = parsed.port ? `:${parsed.port}` : '';
-  return `${parsed.protocol}//${host}${port}`;
-}
-
 test('tenant palette bridge applies runtime config values on non-default tenant shell', async ({ page, baseURL }) => {
   const expectedSiteName = (process.env.EXPECTED_SITE_NAME ?? '').trim();
   const mfeBaseUrl = getMfeBaseUrl(baseURL!);
@@ -100,20 +78,28 @@ test('tenant palette bridge applies runtime config values on non-default tenant 
   expect(response?.status() ?? 500).toBeLessThan(500);
   await page.waitForLoadState('networkidle').catch(() => {});
 
-  const actualPalette = await page.evaluate((cssVariables) => {
-    const rootStyle = getComputedStyle(document.documentElement);
-    return Object.fromEntries(
-      Object.entries(cssVariables).map(([key, cssVariable]) => [key, rootStyle.getPropertyValue(cssVariable).trim()]),
-    );
-  }, TENANT_PALETTE_CSS_VARIABLES);
+  const expectedCssPalette = Object.fromEntries(
+    Object.keys(TENANT_PALETTE_CSS_VARIABLES).map((key) => {
+      const typedKey = key as keyof typeof TENANT_PALETTE_CSS_VARIABLES;
+      return [typedKey, expectedPalette[TENANT_PALETTE_ALIAS_SOURCE[typedKey]]];
+    }),
+  );
 
-  for (const [key, cssVariable] of Object.entries(TENANT_PALETTE_CSS_VARIABLES) as Array<
-    [keyof typeof TENANT_PALETTE_CSS_VARIABLES, string]
-  >) {
-    const expectedValue = expectedPalette[TENANT_PALETTE_ALIAS_SOURCE[key]];
-    expect(
-      actualPalette[key],
-      `Expected ${key} (${cssVariable}) on ${mfeBaseUrl} to equal ${expectedValue}; got ${actualPalette[key]}`,
-    ).toBe(expectedValue);
-  }
+  await expect
+    .poll(
+      async () => page.evaluate((cssVariables) => {
+        const rootStyle = getComputedStyle(document.documentElement);
+        return Object.fromEntries(
+          Object.entries(cssVariables).map(([key, cssVariable]) => [
+            key,
+            rootStyle.getPropertyValue(cssVariable).trim(),
+          ]),
+        );
+      }, TENANT_PALETTE_CSS_VARIABLES),
+      {
+        timeout: 15_000,
+        message: `Expected tenant palette CSS variables to converge on ${mfeBaseUrl}`,
+      },
+    )
+    .toEqual(expectedCssPalette);
 });

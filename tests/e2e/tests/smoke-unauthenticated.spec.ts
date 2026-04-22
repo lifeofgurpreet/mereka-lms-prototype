@@ -15,15 +15,7 @@
 //   npx playwright test smoke-unauthenticated
 //   BASE_URL=https://academyv2.mereka.dev npx playwright test smoke-unauthenticated
 import { test, expect } from '@playwright/test';
-
-function getMfeBaseUrl(lmsBaseUrl: string): string {
-  const parsed = new URL(lmsBaseUrl);
-  const host = parsed.hostname.startsWith('apps.')
-    ? parsed.hostname
-    : `apps.${parsed.hostname}`;
-  const port = parsed.port ? `:${parsed.port}` : '';
-  return `${parsed.protocol}//${host}${port}`;
-}
+import { getMfeBaseUrl } from '../support/urls';
 
 function normalizeHostname(hostname: string): string {
   return hostname.toLowerCase().replace(/^www\./, '');

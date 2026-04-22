@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { getMfeBaseUrl } from '../support/urls';
 
 const REQUIRE_BRANDING_MARKERS = process.env.REQUIRE_BRANDING_MARKERS !== '0';
 const MIN_TRACKED_SELECTOR_HITS = Number.parseInt(process.env.MIN_TRACKED_SELECTOR_HITS ?? '3', 10);
@@ -43,13 +44,6 @@ const ROUTE_SPECIFIC_BRANDING_SELECTORS: Array<{ pattern: RegExp; selectors: str
     ],
   },
 ];
-
-function getMfeBaseUrl(lmsBaseUrl: string): string {
-  const parsed = new URL(lmsBaseUrl);
-  const host = parsed.hostname.startsWith('apps.') ? parsed.hostname : `apps.${parsed.hostname}`;
-  const port = parsed.port ? `:${parsed.port}` : '';
-  return `${parsed.protocol}//${host}${port}`;
-}
 
 function parseCsv(value: string): string[] {
   return value
