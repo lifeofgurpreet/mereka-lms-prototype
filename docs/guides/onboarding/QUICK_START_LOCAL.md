@@ -1,5 +1,5 @@
 # Quick Start: Local Development Setup
-_Audience: Developers + Agent Operators • Owner: Platform Team • Last verified: 2026-04-21 • Status: canonical_
+_Audience: Developers + Agent Operators • Owner: Platform Team • Last verified: 2026-04-22 • Status: canonical_
 
 ## Fast Setup
 
@@ -16,27 +16,22 @@ The first run builds local Open edX and MFE images, initializes Tutor data, star
 
 ## Current Proof Snapshot
 
-As of 2026-04-21, the onboarding source/docs contract and post-merge
-repo-scoped bootstrap proof are green. Current `main` includes the Bootstrap
-Local Readiness timing artifact follow-up from PR #1998; the accepted
-post-merge bootstrap proof ran on `2b86de83` after PR #1991. The heavy
-image-build workflow is still being monitored and must not be reported as
-closed. The clean bootstrap proof is an initialized-state proof only; it does
-not yet prove browser-rendered Learning MFE branding or GitOps/live-cluster
-realization.
+As of 2026-04-22, the canonical local setup path is the repo-owned source ->
+Tutor render -> local image -> Tutor launch chain below. The image-build proof
+lane is green for both MFE and Open edX images after PR #2006. Main CI is green
+through the #2007 onboarding-doc guard rerun, and PR #2008 closed the staging
+MFE host derivation bug. The current-head bootstrap rerun for #2007 is still in
+progress, so do not call that specific proof closed until run `24757454326`
+finishes readiness and provenance steps.
 
 | Proof | Run | Commit | Result | What it proves |
 |---|---|---|---|---|
-| Static validation PR proof | `24727872257` | `8ce05a308` | success | Current source/docs/verifier contracts are green, including the static script shards. |
-| App-cache-cold image build | `24721668598` | `39ae0fb86` | success | Open edX and MFE image helpers build with app-level BuildKit cache imports disabled. |
-| Last accepted bootstrap baseline | `24711453019` | `e7a4472cd` | success | A clean repo-scoped `TUTOR_ROOT` launched and passed readiness checks before the current runner incident. |
-| Current-main bootstrap rerun | `24730265503` | `12db1b6` | success | Rerun after repo Buildx cleanup and fastlane hook repair. This proves the clean repo-scoped Tutor bootstrap readiness lane, not the MFE authn browser route or branded runtime image content. |
-| PR #1991 branch bootstrap | `24738471266` | `878994d0c` | success | Proved fallback-lane repo-scoped bootstrap, image provenance, LMS/Studio readiness, and `http://apps.localhost/authn/login` returning HTTP 302. |
-| Post-merge render contract | `24743995056` | `2b86de83` | success | Tutor plugin/render contract remains green on merged `main`. |
-| Post-merge Authn smoke | `24745579089` | `2b86de83` | success | Scheduled Authn MFE config smoke remains green on merged `main`. |
-| Post-merge Build Tutor Images | `24743995019` | `2b86de83` | in progress / mixed | OpenEdX image job is marked failed while its build step remains log-unavailable; MFE image job is still running. Do not classify root cause until logs or rerun evidence exist. |
-| Post-merge Bootstrap Local Readiness | `24743995049` | `2b86de83` | success | Clean repo-scoped Tutor bootstrap passed on merged `main` after launch, image provenance, readiness, and artifact capture. |
-| Local manual Tutor render | local worktree | this branch | success | `python3 -m venv .venv`, `pip install -r requirements-tutor.txt`, and `./scripts/infra/tutor-config-save.sh ...` completed through render, build-context prep, and `verify-tutor-config`. |
+| Static validation after #2008 | `24757968425` | `e025d4c15` | success | PR proof for the shared E2E host helper and runbook update, including static script shards and Python coverage. |
+| MFE Build Tutor Images proof | `24756568100` | `a7d98293` | success | Re-proved generated MFE runtime verifier after the `TUTOR_ROOT` workflow portability fix in PR #2006. |
+| Open edX Build Tutor Images proof | `24756779458` | `a7d98293` | success | Proved Open edX render preflight, build-context prep, image build, imports, blocking branding verification, SBOM, and Trivy artifact upload. |
+| Main CI after #2007 | `24757454308` | `ec1ac294` | success | Rerun proved the first red attempt was runner shutdown/cancellation, not source regression. |
+| Current-head Bootstrap Local Readiness | `24757454326` | `ec1ac294` | in progress | Still running at `Launch full local Tutor bootstrap` as of this update. Not closed until readiness/provenance steps complete. |
+| PR #2008 merge | PR #2008 | `e807e515` | merged | Centralized staging/production MFE host derivation and clarified post-deploy E2E proof boundaries. |
 
 These are shared proof lanes, not alternate build systems. Do not create a
 second Dockerfile, Compose stack, or local-only build path to work around a
@@ -185,7 +180,7 @@ gh workflow run bootstrap-local-readiness.yml \
 
 Do not mark cold-start onboarding fixed until the offline contract passes, the bootstrap workflow is green for the branch being merged, app-cache-cold image build proof is either green or explicitly waived with a fresh reason, and any route/theme checks required by the proof matrix are either green or explicitly listed as not covered by that lane.
 
-Current follow-up from run `24730265503`: during the successful bootstrap, a direct runner probe saw `http://apps.localhost/authn/login` return HTTP 400 because Django rejected `apps.localhost` as an `ALLOWED_HOSTS` value, and LMS logs showed `Theme 'mereka' not found` for the upstream bootstrap image. PR #1991 fixed the MFE host source contract, makes the MFE authn route fail closed in local readiness, and skips SiteTheme convergence when the running image does not contain the repo-owned theme directory. Branch run `24736358890` was cancelled during active migrations, and rerun `24737898005` exposed stale `tutor_local` Docker state left by that cancellation; the workflow now cleans that state before checkout. Post-merge run `24743995049` on `2b86de8` passed on `main`, including the MFE authn route with HTTP 302. The workflow now records phase timing artifacts so long first-run bootstraps are easier to diagnose.
+Current follow-up: run `24757454326` is the active current-head bootstrap proof for #2007 and is still running. If it fails, classify the failure first as source-truth bug, rendered-truth bug, workflow portability bug, runner-capacity issue, or bootstrap harness bug before changing code or verifiers.
 
 ## Daily Commands
 

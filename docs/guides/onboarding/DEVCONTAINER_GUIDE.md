@@ -70,11 +70,12 @@ On first run you need to build images (30-45 minutes, requires 12 GB RAM):
 ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 ```
 
-Then run the first launch:
+Then run the first launch and readiness proof:
 
 ```bash
 tutor local launch -I --skip-build
 tutor local restart
+./scripts/infra/verify-local-bootstrap-readiness.sh
 ```
 
 After the first launch has initialized databases, daily starts can use the Makefile wrapper. Do not use `make tutor-start` as a replacement for the first launch on a fresh `tutor_env`.

@@ -130,7 +130,7 @@ Every verifier or patch change in this lane must be classified before merge:
 |---|---|
 | authority correction | The verifier was wrong about the declared source of truth. |
 | obsolete expectation removal | A previous expectation described retired behavior and the docs/spec already say so. |
-| temporary waiver | The system is not at target state; the waiver must include owner, expiry, and proof gap. |
+| temporary compatibility layer | The system is not fully source-owned yet; the exception must stay ledgered with owner, retirement trigger, and proof guard. |
 | intentional architecture change | The desired architecture changed and docs/specs/tests were updated together. |
 
 If a change cannot be classified, stop and re-evaluate the authority boundary.
