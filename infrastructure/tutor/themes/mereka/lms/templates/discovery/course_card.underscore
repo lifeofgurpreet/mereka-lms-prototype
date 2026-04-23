@@ -1,4 +1,7 @@
-<article class="course course-card-premium" role="region" aria-label="<%- content.display_name %>">
+<a href="/courses/<%- course %>/about" class="course course-card-premium" aria-label="<%- interpolate(
+        gettext("Explore %(course_name)s course details"),
+        { course_name: content.display_name }, true
+      ) %>">
         <header class="course-image">
             <div class="cover-image">
                 <img src="<%- image_url %>" onerror="this.onerror=null;this.dataset.broken='1';this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 400 225%22%3E%3Crect width=%22400%22 height=%22225%22 fill=%22%23237072%22 rx=%2212%22/%3E%3Ctext x=%22200%22 y=%22120%22 text-anchor=%22middle%22 fill=%22rgba(255,255,255,0.7)%22 font-family=%22Poppins,sans-serif%22 font-size=%2218%22%3ECourse Image%3C/text%3E%3C/svg%3E';" alt="" loading="lazy" decoding="async" fetchpriority="low" />
@@ -51,14 +54,13 @@
                           { start_date: start }, true
                         ) %>
                 </div>
-                <a href="/courses/<%- course %>/about" class="learn-more">
+                <span class="learn-more" aria-hidden="true">
                   <span><%- gettext("Explore Course") %></span>
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                     <path d="M3.33334 8H12.6667" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                     <path d="M8.66666 4L12.6667 8L8.66666 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
-                  <span class="sr-only">about <%- content.display_name %></span>
-                </a>
+                </span>
             </div>
         </section>
         <div class="sr">
@@ -69,4 +71,4 @@
                 <li><%- gettext("Starts") %><time itemprop="startDate" datetime="<%- start %>"><%- start %></time></li>
             </ul>
         </div>
-</article>
+</a>

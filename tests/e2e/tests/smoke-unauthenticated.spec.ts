@@ -147,6 +147,12 @@ test.describe('Unauthenticated smoke — LMS', () => {
     await expect(firstCard.locator('.course-decision-grid')).toHaveCount(1);
     await expect(firstCard.locator('.course-footer-copy')).toHaveCount(1);
     await expect(firstCard.locator('.learn-more')).toContainText(/Explore Course/i);
+    await expect(firstCard).toHaveAttribute('href', /\/courses\/[^/]+\/about$/);
+    await expect(firstCard.locator('a')).toHaveCount(0);
+    await firstCard.focus();
+    await expect(firstCard).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/\/courses\/[^/]+\/about/);
   });
 
   test('LMS heartbeat returns 200', async ({ request, baseURL }) => {
