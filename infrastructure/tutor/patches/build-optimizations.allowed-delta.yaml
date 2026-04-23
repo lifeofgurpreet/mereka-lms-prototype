@@ -11,6 +11,10 @@ notes: >
 allowed_deltas:
   - id: dependency-image-mirror-normalization
     authority_class: temporary_compatibility_layer
+    owner: platform build authority lane
+    reason: >
+      Tutor 21/tutormfe emit Docker Hub dependency refs before source hooks can
+      select Dockerfile frontend/base/helper image acquisition refs.
     source_script: infrastructure/tutor/patches/dependency-image-mirrors.sh
     source_markers:
       - REPLACEMENTS
@@ -33,6 +37,10 @@ allowed_deltas:
       - 'FROM docker\.io/caddy:2\.7\.4 AS production'
   - id: base-assets-no-build-isolation
     authority_class: temporary_compatibility_layer
+    owner: platform build authority lane
+    reason: >
+      Tutor emits the Open edX requirements install line as rendered Dockerfile
+      shell text, and no current source hook owns the no-build-isolation flag.
     source_markers:
       - BASE_ASSETS_INSTALL
       - BASE_ASSETS_NO_BUILD_ISOLATION_INSTALL
@@ -45,6 +53,10 @@ allowed_deltas:
       - '\$PIP_COMMAND install -r /openedx/edx-platform/requirements/edx/base\.txt'
   - id: uwsgi-plain-pip-fallback
     authority_class: temporary_compatibility_layer
+    owner: platform build authority lane
+    reason: >
+      The rendered production stage installs uwsgi through the shared pip command,
+      but the proven build path requires a plain pip fallback for this package.
     source_markers:
       - UWSGI_UV_INSTALL
       - UWSGI_PIP_INSTALL
@@ -57,6 +69,10 @@ allowed_deltas:
       - '\$PIP_COMMAND install --no-cache-dir --compile uwsgi==2\.0\.24'
   - id: production-build-profile-arg
     authority_class: intentional_architecture_change
+    owner: platform build authority lane
+    reason: >
+      The source-owned Bake profile needs a rendered Dockerfile arg/env bridge
+      until proof-vs-fast build profile semantics move fully into Bake/HCL.
     source_markers:
       - PRODUCTION_BUILD_PROFILE_ARG
     retirement_trigger: >
@@ -70,6 +86,10 @@ allowed_deltas:
     removed_patterns: []
   - id: translation-settings-preflight
     authority_class: intentional_architecture_change
+    owner: platform build authority lane
+    reason: >
+      Translation discovery fails too late without a production settings import
+      preflight, and Tutor exposes no source hook at this exact build point.
     source_markers:
       - TRANSLATION_SETTINGS_PREFLIGHT
     retirement_trigger: >
@@ -82,6 +102,10 @@ allowed_deltas:
     removed_patterns: []
   - id: advanced-xblocks-production-copy
     authority_class: intentional_architecture_change
+    owner: platform build authority lane
+    reason: >
+      XBlock entry-point discovery needs repo-owned advanced XBlock source in
+      the production stage before translation commands run.
     source_markers:
       - ADVANCED_XBLOCKS_PRODUCTION_COPY
     retirement_trigger: >
@@ -96,6 +120,10 @@ allowed_deltas:
     removed_patterns: []
   - id: fast-profile-translation-wrappers
     authority_class: temporary_compatibility_layer
+    owner: platform build authority lane
+    reason: >
+      Tutor emits translation refresh/compile commands as rendered shell lines,
+      and the fast/proof profile switch cannot yet be expressed as source config.
     source_markers:
       - TRANSLATION_REFRESH
       - wrap_translation_step
