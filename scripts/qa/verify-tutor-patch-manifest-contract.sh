@@ -52,16 +52,6 @@ allowed_authority_classes = {
     "filesystem_sync",
 }
 
-required_delta_ids = {
-    "dependency-image-mirror-normalization",
-    "base-assets-no-build-isolation",
-    "uwsgi-plain-pip-fallback",
-    "production-build-profile-arg",
-    "translation-settings-preflight",
-    "advanced-xblocks-production-copy",
-    "fast-profile-translation-wrappers",
-}
-
 historical_modules = {
     "mysql-auth.sh",
     "mfe-node.sh",
@@ -292,6 +282,22 @@ if active_has_build_delta:
         deltas = []
 
     delta_ids: set[str] = set()
+    delta_source_text_cache: dict[Path, str] = {}
+
+    def delta_source_text(source_value: str | None) -> str:
+        effective_source = source_value or source_script
+        if not isinstance(effective_source, str) or not effective_source.strip():
+            failures.append("build-optimizations allowed-delta contract missing source_script")
+            return ""
+        source_path = repo_path(effective_source)
+        if source_path not in delta_source_text_cache:
+            if not source_path.is_file():
+                failures.append(f"missing allowed-delta source script: {source_path}")
+                delta_source_text_cache[source_path] = ""
+            else:
+                delta_source_text_cache[source_path] = source_path.read_text(encoding="utf-8")
+        return delta_source_text_cache[source_path]
+
     for index, delta in enumerate(deltas, start=1):
         if not isinstance(delta, dict):
             failures.append(f"allowed_deltas[{index}] must be a mapping")
@@ -313,15 +319,13 @@ if active_has_build_delta:
         markers = delta.get("source_markers")
         if not isinstance(markers, list) or not markers:
             failures.append(f"{label}: missing source_markers")
+        else:
+            source_text = delta_source_text(delta.get("source_script") if isinstance(delta.get("source_script"), str) else None)
+            for marker in markers:
+                if not isinstance(marker, str) or marker not in source_text:
+                    failures.append(f"{label}: source marker missing from allowed-delta source: {marker!r}")
         if inventory_text and delta_id and not contains_token(inventory_text, delta_id):
             failures.append(f"{label}: missing exact id token from inventory ledger")
-
-    missing_delta_ids = sorted(required_delta_ids - delta_ids)
-    if missing_delta_ids:
-        failures.append(
-            "build-optimizations allowed-delta contract missing required id(s): "
-            + ", ".join(missing_delta_ids)
-        )
 
 if active_has_dependency_mirror and delta_contract:
     delta_ids = {

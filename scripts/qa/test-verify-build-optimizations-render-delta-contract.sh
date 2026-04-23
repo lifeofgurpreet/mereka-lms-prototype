@@ -17,7 +17,13 @@ contract="$TMP_DIR/contract.yaml"
 patch_script="$TMP_DIR/build-optimizations.sh"
 inventory_doc="$TMP_DIR/TUTOR_PATCHES_INVENTORY.md"
 
-cat >"$contract" <<'EOF'
+write_contract() {
+  local source_script="$1"
+  local inventory_path="$2"
+
+  cat >"$contract" <<EOF
+source_script: "$source_script"
+inventory_doc: "$inventory_path"
 default_policy: fail_closed
 review_date: "2026-04-27"
 allowed_deltas:
@@ -31,6 +37,9 @@ allowed_deltas:
     removed_patterns:
       - 'allowed removed line'
 EOF
+}
+
+write_contract "$patch_script" "$inventory_doc"
 
 cat >"$patch_script" <<'EOF'
 #!/usr/bin/env bash
@@ -56,8 +65,6 @@ allowed added line
 EOF
 
 if BUILD_OPTIMIZATIONS_DELTA_CONTRACT="$contract" \
-  BUILD_OPTIMIZATIONS_SCRIPT="$patch_script" \
-  PATCH_INVENTORY_DOC="$inventory_doc" \
   RAW_RENDER_FILE="$raw" \
   PATCHED_RENDER_FILE="$patched" \
   "$VERIFY" >/tmp/build-delta-good.out 2>/tmp/build-delta-good.err; then
@@ -74,8 +81,6 @@ EOF
 
 set +e
 BUILD_OPTIMIZATIONS_DELTA_CONTRACT="$contract" \
-  BUILD_OPTIMIZATIONS_SCRIPT="$patch_script" \
-  PATCH_INVENTORY_DOC="$inventory_doc" \
   RAW_RENDER_FILE="$raw" \
   PATCHED_RENDER_FILE="$patched" \
   "$VERIFY" >/tmp/build-delta-bad.out 2>/tmp/build-delta-bad.err
@@ -90,10 +95,10 @@ else
   fail "unexpected render delta fails closed"
 fi
 
+write_contract "$patch_script" "$TMP_DIR/missing.md"
+
 set +e
 BUILD_OPTIMIZATIONS_DELTA_CONTRACT="$contract" \
-  BUILD_OPTIMIZATIONS_SCRIPT="$patch_script" \
-  PATCH_INVENTORY_DOC="$TMP_DIR/missing.md" \
   "$VERIFY" >/tmp/build-delta-missing.out 2>/tmp/build-delta-missing.err
 rc=$?
 set -e
@@ -106,6 +111,36 @@ else
   fail "missing inventory doc fails closed"
 fi
 
+write_contract "$patch_script" "$inventory_doc"
+
+python3 - "$contract" <<'PY'
+import sys
+from pathlib import Path
+
+contract = Path(sys.argv[1])
+lines = [
+    line for line in contract.read_text(encoding="utf-8").splitlines()
+    if not line.startswith("source_script:")
+]
+contract.write_text("\n".join(lines) + "\n", encoding="utf-8")
+PY
+
+set +e
+BUILD_OPTIMIZATIONS_DELTA_CONTRACT="$contract" \
+  "$VERIFY" >/tmp/build-delta-missing-source.out 2>/tmp/build-delta-missing-source.err
+rc=$?
+set -e
+
+if [[ "$rc" -ne 0 ]] && grep -q "contract top-level source_script" /tmp/build-delta-missing-source.err; then
+  pass "missing contract source script fails closed"
+else
+  cat /tmp/build-delta-missing-source.out >&2 || true
+  cat /tmp/build-delta-missing-source.err >&2 || true
+  fail "missing contract source script fails closed"
+fi
+
+write_contract "$patch_script" "$inventory_doc"
+
 cat >"$inventory_doc" <<'EOF'
 # Inventory
 
@@ -115,8 +150,6 @@ EOF
 
 set +e
 BUILD_OPTIMIZATIONS_DELTA_CONTRACT="$contract" \
-  BUILD_OPTIMIZATIONS_SCRIPT="$patch_script" \
-  PATCH_INVENTORY_DOC="$inventory_doc" \
   "$VERIFY" >/tmp/build-delta-substring.out 2>/tmp/build-delta-substring.err
 rc=$?
 set -e
@@ -137,8 +170,6 @@ EOF
 
 set +e
 BUILD_OPTIMIZATIONS_DELTA_CONTRACT="$contract" \
-  BUILD_OPTIMIZATIONS_SCRIPT="$patch_script" \
-  PATCH_INVENTORY_DOC="$inventory_doc" \
   "$VERIFY" >/tmp/build-delta-class.out 2>/tmp/build-delta-class.err
 rc=$?
 set -e
@@ -170,8 +201,6 @@ PY
 
 set +e
 BUILD_OPTIMIZATIONS_DELTA_CONTRACT="$contract" \
-  BUILD_OPTIMIZATIONS_SCRIPT="$patch_script" \
-  PATCH_INVENTORY_DOC="$inventory_doc" \
   "$VERIFY" >/tmp/build-delta-broad.out 2>/tmp/build-delta-broad.err
 rc=$?
 set -e

@@ -77,18 +77,24 @@ raw Tutor render -> explicit allowed delta -> artifact
 
 Do not add another post-render mutation unless the change is classified as
 `authority correction`, `obsolete expectation removal`, `temporary compatibility layer`,
-or `intentional architecture change`, and this ledger plus
-`infrastructure/tutor/patches/build-optimizations.allowed-delta.yaml` are updated in
-the same PR.
+or `intentional architecture change`.
 
-| Mutation | Authority Class | Why It Remains Post-Render | Retirement Trigger | Guard |
-|---|---|---|---|---|
-| `base-assets-no-build-isolation` | temporary compatibility layer | Tutor 21 emits the base/assets install line before a local hook can replace it. | Tutor/upstream exposes a source hook or bake-owned dependency install stage. | render-delta contract |
-| `uwsgi-plain-pip-fallback` | temporary compatibility layer | The rendered `uv pip` path still fails this dependency under cold-build conditions. | Dependency install semantics move to a source hook, upstream image, or bake stage with equivalent proof. | render-delta contract |
-| `production-build-profile-arg` | intentional architecture change | Repo-owned proof/fast build profile behavior is needed in the production translation stage. | Bake/HCL owns the profile contract directly and render no longer needs Dockerfile arg injection. | cold-start contract, benchmark proof |
-| `translation-settings-preflight` | intentional architecture change | Translation discovery fails late without preflight validation of repo-owned settings. | Translation preflight becomes source-owned through a Tutor hook or upstream-supported build step. | cold-start contract, benchmark proof |
-| `advanced-xblocks-production-copy` | intentional architecture change | Translation discovery needs the advanced XBlock source tree before rendered production translation commands. | XBlock source placement becomes bake/source-hook owned before translation discovery. | cold-start contract, benchmark proof |
-| `fast-profile-translation-wrappers` | temporary compatibility layer | The wrapper replaces existing rendered translation command behavior; current Tutor hooks cannot replace those lines cleanly. | Bake/HCL or a source hook owns fast/proof translation semantics without command-line text rewrites. | render-delta contract, benchmark proof |
+The machine-readable source of truth for allowed ids, authority classes, source
+markers, retirement triggers, and raw-vs-patched regexes is
+`infrastructure/tutor/patches/build-optimizations.allowed-delta.yaml`. This
+inventory intentionally does not repeat those fields. `verify-build-optimizations-render-delta-contract.sh`
+loads that YAML directly, and `verify-tutor-patch-manifest-contract.sh` derives
+the active delta id set from the same YAML instead of maintaining a parallel
+hardcoded list.
+
+Current `build-optimizations.sh` delta ids from that contract:
+
+- `base-assets-no-build-isolation`
+- `uwsgi-plain-pip-fallback`
+- `production-build-profile-arg`
+- `translation-settings-preflight`
+- `advanced-xblocks-production-copy`
+- `fast-profile-translation-wrappers`
 
 Owner: platform build authority lane. Review date: 2026-04-27 or before any PR
 that changes `build-optimizations.sh`.

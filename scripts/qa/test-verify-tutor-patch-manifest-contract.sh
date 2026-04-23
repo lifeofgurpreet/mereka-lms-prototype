@@ -161,6 +161,7 @@ default_policy: fail_closed
 allowed_deltas:
   - id: dependency-image-mirror-normalization
     authority_class: temporary_compatibility_layer
+    source_script: infrastructure/tutor/patches/dependency-image-mirrors.sh
     source_markers: [REPLACEMENTS, REQUIRED_BY_SUFFIX]
     retirement_trigger: Retire when source-owned.
   - id: base-assets-no-build-isolation
@@ -273,6 +274,11 @@ mutate_inventory_missing_delta() {
     "$1/docs/reference/architecture/TUTOR_PATCHES_INVENTORY.md"
 }
 
+mutate_delta_source_marker_missing() {
+  sed -i 's/BASE_ASSETS_NO_BUILD_ISOLATION_INSTALL/BASE_ASSETS_NO_BUILD_ISOLATION_INSTALL_MISSING/g' \
+    "$1/infrastructure/tutor/patches/build-optimizations.allowed-delta.yaml"
+}
+
 mutate_inline_wrapper_call_missing() {
   sed -i '/^wrap_mfe_pull_translations_retry$/d' \
     "$1/infrastructure/tutor/apply-patches.sh"
@@ -297,6 +303,9 @@ expect_fail "historical module cannot be active" \
 expect_fail "inventory missing delta id fails" \
   "base-assets-no-build-isolation: missing exact id token from inventory ledger" \
   mutate_inventory_missing_delta
+expect_fail "allowed delta source marker missing fails" \
+  "base-assets-no-build-isolation: source marker missing from allowed-delta source" \
+  mutate_delta_source_marker_missing
 expect_fail "inline wrapper definition without invocation fails" \
   "mfe-pull-translations-retry: function is not invoked by apply-patches.sh: wrap_mfe_pull_translations_retry" \
   mutate_inline_wrapper_call_missing

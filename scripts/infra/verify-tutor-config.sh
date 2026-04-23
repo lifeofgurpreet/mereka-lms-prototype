@@ -551,6 +551,13 @@ fi
 
 print_section "Checking Build Optimizations"
 
+if build_delta_output="$("$REPO_ROOT/scripts/qa/verify-build-optimizations-render-delta-contract.sh" 2>&1)"; then
+  check_pass "Build optimization delta contract is valid"
+else
+  printf '%s\n' "$build_delta_output" >&2
+  check_fail "Build optimization delta contract is invalid"
+fi
+
 if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_in_file "ENV NODE_OPTIONS=\"--max-old-space-size=6144\"" "$OPENEDX_DOCKERFILE" "Node memory limit increased"
   pattern_in_file "ENV PYTHONPATH=/openedx/edx-platform" "$OPENEDX_DOCKERFILE" "PYTHONPATH set"
@@ -600,9 +607,6 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_not_in_file "theme_marker = '\\n# Set default theme for all sites\\nDEFAULT_SITE_THEME = \"mereka\"\\n'" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain DEFAULT_SITE_THEME dedupe shim"
   pattern_not_in_file "legacy_translation_preflight_block = (" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain legacy translation preflight heredoc scrubber"
   pattern_not_in_file "escaped_translation_preflight_block = (" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain escaped translation preflight scrubber"
-  pattern_in_file "TRANSLATION_SETTINGS_PREFLIGHT" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script keeps the scoped production translation preflight"
-  pattern_in_file "PRODUCTION_BUILD_PROFILE_ARG" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script declares build profile in the production translation stage"
-  pattern_in_file 'Skipping translation refresh (fast build profile)' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script keeps production translation refresh wrapper"
   pattern_not_in_file "# Re-install local requirements, otherwise egg-info folders are missing" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain local requirements reinstall scrubber"
   pattern_not_in_file 'base_txt = Path("/openedx/edx-platform/requirements/edx/base.txt")' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain legacy base requirements pin heredoc scrubber"
   pattern_not_in_file "s/django-cors-headers==4.9.0/django-cors-headers==4.3.1/g" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain sed-based base requirements pin scrubber"
@@ -610,11 +614,9 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_not_in_file "ARG OPENEDX_I18N_VERSION=open-release/redwood.master" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain Redwood i18n version rewrite"
   pattern_not_in_file 'ARG OPENEDX_I18N_VERSION={{ OPENEDX_COMMON_VERSION }}' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain templated i18n version rewrite"
   pattern_not_in_file "RUN pip install setuptools==44.1.0 pip==20.0.2 wheel==0.34.2" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain ancient pip bootstrap rewrite"
-  pattern_in_file 'BASE_ASSETS_NO_BUILD_ISOLATION_INSTALL' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script keeps base/assets uv no-build-isolation normalization"
   pattern_not_in_file '([ -s /tmp/base-filtered.txt ] && pip install --no-build-isolation -r /tmp/base-filtered.txt -r /tmp/assets.txt || pip install --no-build-isolation -r /tmp/assets.txt)' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain filtered requirements uv no-build-isolation rewrite"
   pattern_not_in_file '$PIP_COMMAND install -r requirements/edx/development.txt' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain development requirements uv no-build-isolation rewrite"
   pattern_not_in_file 'setuptools==69.1.1 setuptools-scm==8.1.0 pip==24.0 wheel==0.43.0' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain pkgconfig seed rewrite"
-  pattern_in_file 'UWSGI_PIP_INSTALL' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script keeps plain-pip uwsgi compatibility fallback"
   pattern_not_in_file 'RUN pip install "ora2==7.0.0"' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain plain-pip ora2 rewrite"
   pattern_not_in_file 'RUN cd /openedx/locale/user && \\' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain legacy compilemessages admin rewrites"
   pattern_not_in_file 'django-admin.py compilemessages -v1' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain django-admin compilemessages rewrite signatures"
@@ -622,11 +624,7 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_not_in_file "base_req_marker = \"bash -o pipefail -c 'for attempt in 1 2 3; do pip install -r /openedx/edx-platform/requirements/edx/base.txt && exit 0; echo \\\"pip install attempt \${attempt} failed; retrying in 10s\\\" >&2; sleep 10; done; exit 1'\"" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain dead django-prometheus insertion marker"
   pattern_not_in_file '\\n\\n\\n# Identify tutor user to apply patches using git' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain legacy triple-newline tutor-user cleanup"
   pattern_not_in_file '# edx-proctoring security fix https://github.com/edx/edx-platform/pull/29347/' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain obsolete edx-platform cherry-pick scrubber"
-  pattern_in_file 'Skipping compilejsi18n (fast build profile)' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script keeps compilejsi18n fast-profile wrapper"
   pattern_not_in_file '# Redwood skips manual compilejsi18n while content libraries mature.' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain Redwood compilejsi18n comment rewrite"
-  pattern_in_file 'Skipping XBlock translation compile (fast build profile)' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script keeps XBlock translation compile wrapper"
-  pattern_in_file 'Skipping compile_plugin_translations (fast build profile)' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script keeps plugin translation compile wrapper"
-  pattern_in_file 'Skipping compilemessages (fast build profile)' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script keeps compilemessages wrapper"
   pattern_not_in_file 'if [ "$MEREKA_BUILD_PROFILE" = "fast" ]; then echo "Skipping rdfind static dedupe (fast build profile)"; else rdfind -makesymlinks true -followsymlinks true /openedx/staticfiles/; fi' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain fast rdfind skip rewrite"
   pattern_not_in_file "# Mereka adjustments keep Redwood optional apps enabled" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain dead optional-app compatibility rewrite"
   pattern_not_in_file "# Force MFE-only discussions (greenfield - no legacy views needed)" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain dead MFE discussions compatibility rewrite"
@@ -642,7 +640,6 @@ if [[ -f "$OPENEDX_DOCKERFILE" ]]; then
   pattern_not_in_file 'reverse_proxy /profile/api/* lms:8000 {' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain render-owned Caddy /profile/api rewrite"
   pattern_not_in_file 'if path.name == "lms.conf":' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain dead nginx-era edge rewrites"
   pattern_not_in_file "apps.academyv2.mereka.io" "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain stale academyv2 .io host rewrites"
-  pattern_in_file 'ADVANCED_XBLOCKS_PRODUCTION_COPY' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script keeps scoped openedx_advanced_xblocks production-stage carry"
   pattern_not_in_file '# Ensure mereka theme CSS + logo images are baked into staticfiles.' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain render-owned staticfile bake shim"
   pattern_not_in_file 'RUN rm -rf /openedx/staticfiles/stylelint-config-edx' "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain render-owned static payload trim shim"
   pattern_not_in_file "Syncing logo files from theme source to build directory..." "$BUILD_OPTIMIZATIONS_SCRIPT" "Owner patch script does not retain Open edX theme sync ownership"

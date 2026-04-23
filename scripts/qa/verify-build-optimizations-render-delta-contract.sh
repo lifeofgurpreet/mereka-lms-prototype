@@ -9,10 +9,10 @@ set -euo pipefail
 
 REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 CONTRACT="${BUILD_OPTIMIZATIONS_DELTA_CONTRACT:-$REPO_ROOT/infrastructure/tutor/patches/build-optimizations.allowed-delta.yaml}"
-PATCH_SCRIPT="${BUILD_OPTIMIZATIONS_SCRIPT:-$REPO_ROOT/infrastructure/tutor/patches/build-optimizations.sh}"
-INVENTORY_DOC="${PATCH_INVENTORY_DOC:-$REPO_ROOT/docs/reference/architecture/TUTOR_PATCHES_INVENTORY.md}"
+PATCH_SCRIPT_OVERRIDE="${BUILD_OPTIMIZATIONS_SCRIPT:-}"
+INVENTORY_DOC_OVERRIDE="${PATCH_INVENTORY_DOC:-}"
 
-python3 - <<'PY' "$CONTRACT" "$PATCH_SCRIPT" "$INVENTORY_DOC" "${RAW_RENDER_FILE:-}" "${PATCHED_RENDER_FILE:-}"
+python3 - <<'PY' "$REPO_ROOT" "$CONTRACT" "$PATCH_SCRIPT_OVERRIDE" "$INVENTORY_DOC_OVERRIDE" "${RAW_RENDER_FILE:-}" "${PATCHED_RENDER_FILE:-}"
 from __future__ import annotations
 
 import difflib
@@ -25,11 +25,12 @@ try:
 except ImportError as exc:
     raise SystemExit("PyYAML is required for build optimization delta contract verification") from exc
 
-contract_path = Path(sys.argv[1])
-patch_script_path = Path(sys.argv[2])
-inventory_doc_path = Path(sys.argv[3])
-raw_render = Path(sys.argv[4]) if sys.argv[4] else None
-patched_render = Path(sys.argv[5]) if sys.argv[5] else None
+repo_root = Path(sys.argv[1]).resolve()
+contract_path = Path(sys.argv[2])
+patch_script_override = sys.argv[3]
+inventory_doc_override = sys.argv[4]
+raw_render = Path(sys.argv[5]) if sys.argv[5] else None
+patched_render = Path(sys.argv[6]) if sys.argv[6] else None
 
 allowed_classes = {
     "authority_correction",
@@ -42,14 +43,34 @@ failures: list[str] = []
 
 if not contract_path.is_file():
     raise SystemExit(f"missing delta contract: {contract_path}")
-if not patch_script_path.is_file():
-    raise SystemExit(f"missing build optimization patch script: {patch_script_path}")
-if not inventory_doc_path.is_file():
-    raise SystemExit(f"missing patch inventory doc: {inventory_doc_path}")
-
 payload = yaml.safe_load(contract_path.read_text(encoding="utf-8")) or {}
 if not isinstance(payload, dict):
     raise SystemExit(f"{contract_path} must load as a mapping")
+
+
+def contract_path_value(field_name: str, override: str = "") -> Path | None:
+    value = override or payload.get(field_name)
+    if not isinstance(value, str) or not value.strip():
+        failures.append(f"contract top-level {field_name} must be a non-empty path")
+        return None
+    path = Path(value)
+    if not path.is_absolute():
+        path = repo_root / path
+    return path
+
+
+patch_script_path = contract_path_value("source_script", patch_script_override)
+inventory_doc_path = contract_path_value("inventory_doc", inventory_doc_override)
+
+if patch_script_path is None:
+    patch_script_path = repo_root / "__missing_build_optimizations_source_script__"
+if inventory_doc_path is None:
+    inventory_doc_path = repo_root / "__missing_patch_inventory_doc__"
+
+if not patch_script_path.is_file():
+    failures.append(f"missing build optimization patch script: {patch_script_path}")
+if not inventory_doc_path.is_file():
+    failures.append(f"missing patch inventory doc: {inventory_doc_path}")
 
 if payload.get("default_policy") != "fail_closed":
     failures.append("contract default_policy must be fail_closed")
@@ -61,7 +82,7 @@ if not isinstance(deltas, list) or not deltas:
     failures.append("contract must contain non-empty allowed_deltas")
     deltas = []
 
-inventory_text = inventory_doc_path.read_text(encoding="utf-8")
+inventory_text = inventory_doc_path.read_text(encoding="utf-8") if inventory_doc_path.is_file() else ""
 ids: set[str] = set()
 added_patterns: list[re.Pattern[str]] = []
 removed_patterns: list[re.Pattern[str]] = []
@@ -124,7 +145,7 @@ for index, delta in enumerate(deltas, start=1):
     elif isinstance(delta_source_value, str) and delta_source_value.strip():
         delta_source_path = Path(delta_source_value)
         if not delta_source_path.is_absolute():
-            delta_source_path = Path.cwd() / delta_source_path
+            delta_source_path = repo_root / delta_source_path
     else:
         failures.append(f"{delta_id}: source_script must be a non-empty string when present")
         delta_source_path = patch_script_path
