@@ -2941,7 +2941,6 @@ a:hover { text-decoration: underline; }
         <div class="course__hero-actions" style="margin-top:18px; display:flex; gap:10px; flex-wrap:wrap;">
           <button class="btn btn--primary btn--sm js-course-preview"><span class="material-symbols-outlined" style="font-size:18px;">play_circle</span> Preview first lesson</button>
           <button class="btn btn--outline btn--sm js-course-share" style="color:white; border-color:rgba(255,255,255,0.6);"><span class="material-symbols-outlined" style="font-size:18px;">share</span> Share</button>
-          <button class="btn btn--ghost btn--sm js-course-sample-cert" style="color:white;"><span class="material-symbols-outlined" style="font-size:18px;">workspace_premium</span> View sample certificate</button>
         </div>
       </div>
     </div>
@@ -6116,11 +6115,6 @@ function applySuccessSelection() {
     const url = 'mereka.com/academy/strategic-thinking';
     if (navigator.clipboard) { navigator.clipboard.writeText(url).catch(() => {}); }
     toast('Link copied · ' + url, 'success');
-  }));
-
-  // View sample certificate → goto certificate screen
-  courseScreen.querySelectorAll('.js-course-sample-cert').forEach(b => b.addEventListener('click', () => {
-    goto('certificate');
   }));
 
   // Smooth scroll to reviews
