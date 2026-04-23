@@ -1,0 +1,49 @@
+# Third-party container images allowed in deploy/k8s/base/** without the pin-required sentinel.
+# Each listed image MUST have a digest pin in the bbi-infrastructure prod overlay.
+# Format: fully-qualified <registry>/<path>/<name>  (no tag, no digest)
+# Bare names (no registry, no slash) are normalized to docker.io/library/<name>
+# by verify-base-images-pin-contract.sh before lookup — use that canonical form here.
+# See: scripts/qa/verify-base-images-pin-contract.sh, docs/reference/architecture/DEPLOYMENT_CONTRACT.md
+# Cross-repo pin authority: bbi-infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml
+
+# xqueue — pinned in bbi-infrastructure#3820 (mereka-lms-rq9k audit, 2026-04-22)
+docker.io/overhangio/openedx-xqueue
+
+# Upstream Open edX images (Ulmo 21.x release line) — pinned in bbi-infrastructure prod overlay
+# Note: docker.io/overhangio/openedx (untagged) is handled via kustomization images: block (B2).
+# The tagged variants (openedx-credentials, openedx-discovery, etc.) are third-party allowlisted.
+docker.io/overhangio/openedx-credentials
+docker.io/overhangio/openedx-discovery
+docker.io/overhangio/openedx-mfe
+docker.io/overhangio/openedx-notes
+
+# Infrastructure / supporting images — pinned in bbi-infrastructure prod overlay
+docker.io/busybox
+docker.io/caddy
+docker.io/clickhouse/clickhouse-server
+docker.io/devture/exim-relay
+docker.io/edunext/aspects-superset
+docker.io/elasticsearch
+docker.io/fundocker/ralph
+docker.io/getmeili/meilisearch
+docker.io/mysql
+docker.io/postgres
+docker.io/redis
+# docker:dind, nginx:*, python:* are bare names normalized to docker.io/library/* by the verifier
+docker.io/library/docker
+docker.io/library/nginx
+docker.io/library/python
+grafana/promtail
+
+# quay.io images — pinned in bbi-infrastructure prod overlay
+quay.io/oliver006/redis_exporter
+quay.io/prometheus/mysqld-exporter
+
+# ARC (Actions Runner Controller) runner images — pinned in bbi-infrastructure prod overlay
+ghcr.io/actions/actions-runner
+
+# First-party images pending migration to pin-required sentinel (TODO: rq9k follow-up)
+# purchase-gateway uses a version tag instead of pin-required; overlay must pin by digest
+ghcr.io/biji-biji-initiative/purchase-gateway
+# hubspot-webhook uses not-yet-built placeholder; image not yet published
+ghcr.io/biji-biji-initiative/mereka-lms/hubspot-webhook

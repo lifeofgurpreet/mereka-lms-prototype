@@ -1926,6 +1926,37 @@
         "ci_static"
       ],
       "env_scope": [
+        "dev",
+        "prod"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-base-images-pin-contract.sh",
+      "reference_count": 6,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "high",
+      "spec_ids": [
+        "AC-IMG-001",
+        "AC-IMG-002",
+        "AC-IMG-003"
+      ],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
+      "env_scope": [
         "dev"
       ],
       "kind": "verify",
@@ -19021,27 +19052,27 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 25,
-    "ci_static_bound": 388,
+    "ci_static_bound": 389,
     "kinds": {
-      "verify": 638
+      "verify": 639
     },
     "mutability": {
       "destructive": 9,
       "mutating": 22,
-      "read-only": 607
+      "read-only": 608
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 443,
+      "active": 444,
       "deprecated_candidate": 1,
       "manual_only": 194
     },
     "tiers": {
       "exploratory_manual": 198,
       "periodic_runtime": 21,
-      "release_blocking": 419
+      "release_blocking": 420
     },
-    "total_verify_scripts": 638,
+    "total_verify_scripts": 639,
     "workflow_direct_bound": 73
   },
   "version": "1"

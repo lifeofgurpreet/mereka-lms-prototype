@@ -37,6 +37,9 @@ scripts/
 # Verify K8s images (no :latest tags)
 ./scripts/qa/verify-k8s-images.sh
 
+# Verify base image pin contract (sentinel + allowlist — guards against rq9k regression)
+./scripts/qa/verify-base-images-pin-contract.sh
+
 # Verify ExternalSecret config
 ./scripts/qa/verify-externalsecret-config.sh
 
