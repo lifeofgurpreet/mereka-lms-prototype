@@ -26,7 +26,7 @@ spec:
         # a real image is built and pushed to:
         #   ghcr.io/biji-biji-initiative/mereka-lms/hubspot-webhook:<tag>
         # See docs/migrations/ for the containerisation timeline.
-        image: ghcr.io/biji-biji-initiative/mereka-lms/hubspot-webhook:not-yet-built
+        image: ghcr.io/biji-biji-initiative/mereka-lms/hubspot-webhook:pin-required
         imagePullPolicy: IfNotPresent
         ports:
         - name: http

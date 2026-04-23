@@ -54,6 +54,12 @@ images:
 - name: docker.io/overhangio/openedx-mfe
   newName: ghcr.io/biji-biji-initiative/mereka-lms/mfe
   newTag: pin-required
+# First-party migrated from third-party allowlist (rq9k follow-up).
+# Overlay must pin to digest for prod via images: in the overlay kustomization.
+- name: ghcr.io/biji-biji-initiative/purchase-gateway
+  newTag: pin-required
+- name: ghcr.io/biji-biji-initiative/mereka-lms/hubspot-webhook
+  newTag: pin-required
 
 # namespace to deploy all Resources to
 namespace: mereka-lms

@@ -49,8 +49,8 @@ ghcr.io/actions/actions-runner
 # Cross-repo pin obligation: bbi-infrastructure prod overlay MUST digest-pin this image.
 curlimages/curl
 
-# First-party images pending migration to pin-required sentinel (TODO: rq9k follow-up)
-# purchase-gateway uses a version tag instead of pin-required; overlay must pin by digest
-ghcr.io/biji-biji-initiative/purchase-gateway
-# hubspot-webhook uses not-yet-built placeholder; image not yet published
-ghcr.io/biji-biji-initiative/mereka-lms/hubspot-webhook
+# Note: purchase-gateway + hubspot-webhook were previously listed here as a
+# transitional measure. Both migrated to the :pin-required sentinel pattern in
+# the rq9k follow-up (deploy/k8s/base/kustomization.yaml images: block + their
+# deployment.yaml tags). They are now first-party-namespace-allowlisted via
+# the verifier's ghcr.io/biji-biji-initiative/* rule.
