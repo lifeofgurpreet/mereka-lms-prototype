@@ -4,6 +4,9 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+export TUTOR_ROOT="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
+export TUTOR_PLUGINS_ROOT="${TUTOR_PLUGINS_ROOT:-${TUTOR_PLUGINS_DIR:-$TUTOR_ROOT/plugins}}"
+export TUTOR_PLUGINS_DIR="$TUTOR_PLUGINS_ROOT"
 
 echo "========================================="
 echo "Mereka Academy Logo Static Files Fix"
@@ -12,10 +15,10 @@ echo ""
 
 # Step 1: Sync logo files to build directory
 echo "1. Syncing logo files to build directory..."
-THEME_BUILD_DIR="$REPO_ROOT/tutor_env/env/build/openedx/themes/mereka"
+THEME_BUILD_DIR="$TUTOR_ROOT/env/build/openedx/themes/mereka"
 if [ ! -d "$THEME_BUILD_DIR" ]; then
   echo "  ✗ Error: Theme build directory not found at $THEME_BUILD_DIR"
-  echo "  Run 'tutor config save' first to generate the build directory."
+  echo "  Run './scripts/infra/tutor-config-save.sh' first to generate the build directory."
   exit 1
 fi
 
@@ -60,9 +63,8 @@ cd "$REPO_ROOT"
 # Check if running locally or on K8s
 if command -v tutor &> /dev/null; then
   # Check if local environment is running
-  if docker ps --filter "name=tutor_local-lms-1" --format "{{.Names}}" | grep -q "tutor_local-lms-1"; then
+  if tutor local dc ps --services --filter status=running 2>/dev/null | grep -qx "lms"; then
     echo "  Running collectstatic in local environment..."
-    export TUTOR_ROOT="$REPO_ROOT/tutor_env"
     tutor local run lms ./manage.py lms collectstatic --noinput 2>&1 | tail -10
     echo "  ✓ Collectstatic completed for local environment"
   else
@@ -102,5 +104,5 @@ echo "   curl -I https://academyv2.mereka.io/static/images/logo.png"
 echo ""
 echo "3. If issues persist, rebuild and redeploy:"
 echo "   ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast"
-echo "   tutor local restart (or kubectl rollout restart)"
+echo "   make tutor-restart (or use the GitOps promotion path for Kubernetes)"
 echo ""

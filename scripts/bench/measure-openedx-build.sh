@@ -58,9 +58,12 @@ validate_build_contract() {
     exit 2
   fi
 }
-TUTOR_ROOT_PATH="$ROOT/tutor_env"
+TUTOR_ROOT_PATH="${TUTOR_ROOT:-$ROOT/tutor_env}"
 OPENEDX_DOCKERFILE="$TUTOR_ROOT_PATH/env/build/openedx/Dockerfile"
-PLUGIN_DIR="${TUTOR_PLUGINS_DIR:-$HOME/.local/share/tutor-plugins}"
+PLUGIN_DIR="${TUTOR_PLUGINS_ROOT:-${TUTOR_PLUGINS_DIR:-$TUTOR_ROOT_PATH/plugins}}"
+export TUTOR_ROOT="$TUTOR_ROOT_PATH"
+export TUTOR_PLUGINS_ROOT="$PLUGIN_DIR"
+export TUTOR_PLUGINS_DIR="$PLUGIN_DIR"
 mkdir -p "$OUTDIR"
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 LOG="$OUTDIR/${STAMP}-${LABEL}.log"

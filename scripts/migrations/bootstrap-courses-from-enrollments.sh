@@ -7,6 +7,16 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
 
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$REPO_ROOT"
+export TUTOR_ROOT="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
+export TUTOR_PLUGINS_ROOT="${TUTOR_PLUGINS_ROOT:-${TUTOR_PLUGINS_DIR:-$TUTOR_ROOT/plugins}}"
+export TUTOR_PLUGINS_DIR="$TUTOR_PLUGINS_ROOT"
+if [[ -f .venv/bin/activate ]]; then
+  # shellcheck source=/dev/null
+  source .venv/bin/activate
+fi
+
 LIMIT="10"
 MODE="top"  # top | all
 
@@ -29,17 +39,22 @@ echo "╚═══════════════════════�
 echo ""
 
 # Ensure MySQL and CMS are reachable
-if ! docker ps --format '{{.Names}}' | grep -q 'tutor_local-mysql-1'; then
-  echo -e "${RED}❌ MySQL container not running (tutor_local-mysql-1)${NC}"
-  exit 1
-fi
-if ! docker ps --format '{{.Names}}' | grep -q 'tutor_local-cms-1'; then
-  echo -e "${RED}❌ CMS container not running (tutor_local-cms-1)${NC}"
-  exit 1
-fi
+RUNNING_SERVICES="$(tutor local dc ps --services --filter status=running 2>/dev/null || true)"
+for required_service in mysql cms; do
+  if ! grep -qx "$required_service" <<<"$RUNNING_SERVICES"; then
+    echo -e "${RED}❌ Tutor service not running: ${required_service}${NC}"
+    echo "Run: make tutor-start"
+    exit 1
+  fi
+done
+
+mysql_scalar() {
+  local sql="$1"
+  tutor local exec mysql env MYSQL_QUERY="$sql" sh -lc 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -N -e "$MYSQL_QUERY"'
+}
 
 # Find admin user id (fallback to 1 if not found)
-ADMIN_ID=$(docker exec tutor_local-mysql-1 mysql -uroot -p1EebOQxu -N -e "SELECT id FROM openedx.auth_user WHERE username='admin' ORDER BY id DESC LIMIT 1;" 2>/dev/null | tr -d ' ' || true)
+ADMIN_ID=$(mysql_scalar "SELECT id FROM openedx.auth_user WHERE username='admin' ORDER BY id DESC LIMIT 1;" 2>/dev/null | tr -d ' ' || true)
 if [[ -z "${ADMIN_ID:-}" ]]; then
   echo -e "${YELLOW}⚠️  Admin user not found, using ID 1 as fallback${NC}"
   ADMIN_ID="1"
@@ -60,7 +75,7 @@ while IFS=$'\n' read -r line; do
   if [[ -n "$cid" ]]; then
     COURSE_IDS+=("$cid")
   fi
-done < <(docker exec tutor_local-mysql-1 mysql -uroot -p1EebOQxu -N -e "$COURSE_QUERY" 2>/dev/null)
+done < <(mysql_scalar "$COURSE_QUERY" 2>/dev/null)
 
 if [[ ${#COURSE_IDS[@]} -eq 0 ]]; then
   echo -e "${YELLOW}⚠️  No course_ids found in enrollments${NC}"
@@ -83,7 +98,7 @@ create_course() {
 
     # Check if overview already exists
     local EXISTS
-    EXISTS=$(docker exec tutor_local-mysql-1 mysql -uroot -p1EebOQxu -N -e "SELECT COUNT(*) FROM openedx.course_overviews_courseoverview WHERE id='${course_id}';" 2>/dev/null | tr -d ' ' || echo "0")
+    EXISTS=$(mysql_scalar "SELECT COUNT(*) FROM openedx.course_overviews_courseoverview WHERE id='${course_id}';" 2>/dev/null | tr -d ' ' || echo "0")
     if [[ "$EXISTS" == "1" ]]; then
       echo -e "${YELLOW}⏭  Exists:${NC} ${course_id}"
       ((SKIPPED++))
@@ -91,7 +106,7 @@ create_course() {
     fi
 
     echo "→ Creating ${course_id}"
-    if docker exec tutor_local-cms-1 python /openedx/edx-platform/manage.py cms create_course split "$ADMIN_ID" "$ORG" "$NUMBER" "$RUN" "$NAME" 2025-01-01 >/dev/null 2>&1; then
+    if tutor local exec cms python /openedx/edx-platform/manage.py cms create_course split "$ADMIN_ID" "$ORG" "$NUMBER" "$RUN" "$NAME" 2025-01-01 >/dev/null 2>&1; then
       ((CREATED++))
     else
       echo -e "${RED}❌ Failed to create:${NC} ${course_id}"

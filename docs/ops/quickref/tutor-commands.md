@@ -329,7 +329,7 @@ make tutor-restart
 tutor local run cms ./manage.py cms import /openedx/data course-export.tar.gz
 
 # Copy course archive to container first
-docker cp course-export.tar.gz $(docker ps --filter "name=tutor_local-cms" --format "{{.ID}}"):/openedx/data/
+tutor local dc cp course-export.tar.gz cms:/openedx/data/
 ```
 
 ### User Data

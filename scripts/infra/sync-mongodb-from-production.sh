@@ -22,6 +22,17 @@ RED='\033[0;31m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$REPO_ROOT"
+export TUTOR_ROOT="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
+export TUTOR_PLUGINS_ROOT="${TUTOR_PLUGINS_ROOT:-${TUTOR_PLUGINS_DIR:-$TUTOR_ROOT/plugins}}"
+export TUTOR_PLUGINS_DIR="$TUTOR_PLUGINS_ROOT"
+MONGO_TOOLS_IMAGE="${MONGO_TOOLS_IMAGE:-mirror.gcr.io/library/mongo:7.0.28}"
+if [[ -f .venv/bin/activate ]]; then
+    # shellcheck source=/dev/null
+    source .venv/bin/activate
+fi
+
 echo "╔══════════════════════════════════════════════════════════════╗"
 echo "║        Sync MongoDB from Production Atlas                    ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
@@ -45,8 +56,8 @@ if [ -z "${ATLAS_URI:-}" ]; then
 fi
 
 # Check local MongoDB is running
-if ! docker ps --format '{{.Names}}' | grep -q 'tutor_local-mongodb-1'; then
-    echo -e "${RED}❌ Local MongoDB container not running${NC}"
+if ! tutor local dc ps --services --filter status=running 2>/dev/null | grep -qx 'mongodb'; then
+    echo -e "${RED}❌ Local MongoDB service not running${NC}"
     echo "Run: make tutor-start"
     exit 1
 fi
@@ -54,18 +65,21 @@ fi
 DUMP_DIR="/tmp/mongodb-production-dump-$(date +%s)"
 mkdir -p "$DUMP_DIR"
 
+cleanup_sync() {
+    rm -rf "$DUMP_DIR"
+    tutor local dc exec -T mongodb rm -rf /tmp/mongodb-restore >/dev/null 2>&1 || true
+}
+trap cleanup_sync EXIT
+
 echo -e "${BLUE}Step 1: Dumping from production Atlas...${NC}"
-docker run --rm \
+if ! docker run --rm \
     -v "$DUMP_DIR:/dump" \
-    mongo:5.0 \
+    "$MONGO_TOOLS_IMAGE" \
     mongodump \
     --uri="$ATLAS_URI" \
     --out=/dump \
-    --gzip
-
-if [ $? -ne 0 ]; then
+    --gzip; then
     echo -e "${RED}❌ Failed to dump from Atlas${NC}"
-    rm -rf "$DUMP_DIR"
     exit 1
 fi
 
@@ -79,41 +93,45 @@ echo ""
 
 echo -e "${BLUE}Step 2: Restoring to local MongoDB...${NC}"
 
+restore_database_dump() {
+    local database_name="$1"
+    local description="$2"
+    local ns_include="${3:-}"
+    local source_dir="$DUMP_DIR/$database_name"
+    local restore_args=(--gzip --drop)
+
+    if [ ! -d "$source_dir" ]; then
+        echo -e "  ${YELLOW}⚠️  No ${database_name} database in dump${NC}"
+        return 0
+    fi
+
+    echo "  → Restoring ${database_name} database (${description})..."
+    tutor local dc exec -T mongodb sh -lc "rm -rf /tmp/mongodb-restore && mkdir -p /tmp/mongodb-restore"
+    tutor local dc cp "$source_dir" "mongodb:/tmp/mongodb-restore/$database_name"
+
+    if [ -n "$ns_include" ]; then
+        restore_args+=(--nsInclude="$ns_include")
+    fi
+    restore_args+=(/tmp/mongodb-restore)
+
+    tutor local dc exec -T mongodb mongorestore "${restore_args[@]}"
+    tutor local dc exec -T mongodb rm -rf /tmp/mongodb-restore
+    echo -e "  ${GREEN}✅ ${database_name} database restored${NC}"
+}
+
 # Restore openedx database (course content)
-if [ -d "$DUMP_DIR/openedx" ]; then
-    echo "  → Restoring openedx database (course content)..."
-    docker exec -i tutor_local-mongodb-1 mongorestore \
-        --gzip \
-        --drop \
-        --nsInclude="openedx.modulestore.*" \
-        --archive < <(cd "$DUMP_DIR" && tar czf - openedx/modulestore.*)
-    echo -e "  ${GREEN}✅ openedx database restored${NC}"
-else
-    echo -e "  ${YELLOW}⚠️  No openedx database in dump${NC}"
-fi
+restore_database_dump openedx "course content" "openedx.modulestore.*"
 
 # Restore cs_comments_service (forums) - optional
-if [ -d "$DUMP_DIR/cs_comments_service" ]; then
-    echo "  → Restoring cs_comments_service (forums)..."
-    docker exec -i tutor_local-mongodb-1 mongorestore \
-        --gzip \
-        --drop \
-        --archive < <(cd "$DUMP_DIR" && tar czf - cs_comments_service/)
-    echo -e "  ${GREEN}✅ cs_comments_service restored${NC}"
-else
-    echo -e "  ${YELLOW}⚠️  No cs_comments_service in dump${NC}"
-fi
+restore_database_dump cs_comments_service "forums"
 
 echo ""
 echo -e "${GREEN}✅ Restore complete!${NC}"
 echo ""
 
-# Cleanup
-rm -rf "$DUMP_DIR"
-
 # Verify
 echo -e "${BLUE}Step 3: Verifying...${NC}"
-COURSE_COUNT=$(docker exec tutor_local-mongodb-1 mongosh openedx --quiet --eval "db['modulestore.active_versions'].countDocuments({})")
+COURSE_COUNT=$(tutor local dc exec -T mongodb mongosh openedx --quiet --eval "db['modulestore.active_versions'].countDocuments({})")
 echo "  Courses in modulestore: $COURSE_COUNT"
 
 if [ "$COURSE_COUNT" -gt 0 ]; then
@@ -130,4 +148,3 @@ echo ""
 echo "╔══════════════════════════════════════════════════════════════╗"
 echo "║        Sync Complete                                          ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
-

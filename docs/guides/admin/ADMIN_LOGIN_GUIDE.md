@@ -151,14 +151,14 @@ If you see "Failed login too many attempts" error:
 
 ```bash
 # 1. Clear Django cache
-docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "from django.core.cache import cache; cache.clear(); print('Cache cleared')"
+tutor local exec lms python /openedx/edx-platform/manage.py lms shell -c "from django.core.cache import cache; cache.clear(); print('Cache cleared')"
 
 # 2. Clear all sessions
-docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "from django.contrib.sessions.models import Session; Session.objects.all().delete(); print('Sessions cleared')"
+tutor local exec lms python /openedx/edx-platform/manage.py lms shell -c "from django.contrib.sessions.models import Session; Session.objects.all().delete(); print('Sessions cleared')"
 
 # 3. Reset the local admin password using a local-only value
 export LOCAL_ADMIN_PASSWORD='<choose-a-local-only-password>'
-docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "import os; from django.contrib.auth import get_user_model; u = get_user_model().objects.get(username='admin'); u.set_password(os.environ['LOCAL_ADMIN_PASSWORD']); u.is_active = True; u.is_staff = True; u.is_superuser = True; u.save(); print('Admin reset')"
+tutor local exec lms env LOCAL_ADMIN_PASSWORD="$LOCAL_ADMIN_PASSWORD" python /openedx/edx-platform/manage.py lms shell -c "import os; from django.contrib.auth import get_user_model; u = get_user_model().objects.get(username='admin'); u.set_password(os.environ['LOCAL_ADMIN_PASSWORD']); u.is_active = True; u.is_staff = True; u.is_superuser = True; u.save(); print('Admin reset')"
 ```
 
 ### Automated Fix Script
@@ -172,7 +172,7 @@ docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -
 Check if admin user exists and is configured correctly:
 
 ```bash
-docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "
+tutor local exec lms python /openedx/edx-platform/manage.py lms shell -c "
 from django.contrib.auth import get_user_model
 u = get_user_model().objects.filter(username='admin').first()
 if u:

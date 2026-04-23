@@ -8,6 +8,16 @@ RED='\033[0;31m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$REPO_ROOT"
+export TUTOR_ROOT="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
+export TUTOR_PLUGINS_ROOT="${TUTOR_PLUGINS_ROOT:-${TUTOR_PLUGINS_DIR:-$TUTOR_ROOT/plugins}}"
+export TUTOR_PLUGINS_DIR="$TUTOR_PLUGINS_ROOT"
+if [[ -f .venv/bin/activate ]]; then
+    # shellcheck source=/dev/null
+    source .venv/bin/activate
+fi
+
 echo "╔══════════════════════════════════════════════════════════════╗"
 echo "║        Import Production Courses                             ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
@@ -45,7 +55,7 @@ if [ ! -d "$TARBALL_DIR" ]; then
 fi
 
 # Find all tarballs
-TARBALLS=($(find "$TARBALL_DIR" -name "*.tar.gz" -o -name "*.tar"))
+mapfile -t TARBALLS < <(find "$TARBALL_DIR" \( -name "*.tar.gz" -o -name "*.tar" \) -print)
 if [ ${#TARBALLS[@]} -eq 0 ]; then
     echo -e "${RED}❌ No course tarballs found in ${TARBALL_DIR}${NC}"
     exit 1
@@ -54,10 +64,10 @@ fi
 echo -e "${GREEN}Found ${#TARBALLS[@]} course tarball(s)${NC}"
 echo ""
 
-# Ensure CMS container is running
-if ! docker ps --format '{{.Names}}' | grep -q 'tutor_local-cms-1'; then
-    echo -e "${RED}❌ CMS container not running${NC}"
-    echo "Run: tutor local start -d"
+# Ensure CMS service is running
+if ! tutor local dc ps --services --filter status=running 2>/dev/null | grep -qx 'cms'; then
+    echo -e "${RED}❌ CMS service not running${NC}"
+    echo "Run: make tutor-start"
     exit 1
 fi
 
@@ -76,8 +86,8 @@ for tarball in "${TARBALLS[@]}"; do
     
     # Copy tarball into CMS container
     TEMP_PATH="/tmp/${BASENAME}"
-    if docker cp "$tarball" "tutor_local-cms-1:${TEMP_PATH}"; then
-        echo "  ✅ Copied to container"
+    if tutor local dc cp "$tarball" "cms:${TEMP_PATH}"; then
+        echo "  ✅ Copied to CMS service"
     else
         echo -e "  ${RED}❌ Failed to copy${NC}"
         ((FAILED++))
@@ -86,7 +96,7 @@ for tarball in "${TARBALLS[@]}"; do
     
     # Extract tarball
     EXTRACT_DIR="/tmp/$(basename "$BASENAME" .tar.gz)"
-    if docker exec tutor_local-cms-1 bash -c "mkdir -p ${EXTRACT_DIR} && tar -xzf ${TEMP_PATH} -C ${EXTRACT_DIR}"; then
+    if tutor local dc exec -T cms bash -c "mkdir -p ${EXTRACT_DIR} && tar -xzf ${TEMP_PATH} -C ${EXTRACT_DIR}"; then
         echo "  ✅ Extracted"
     else
         echo -e "  ${RED}❌ Failed to extract${NC}"
@@ -96,7 +106,7 @@ for tarball in "${TARBALLS[@]}"; do
     
     # Import course
     # The extracted directory should contain the course data
-    if docker exec tutor_local-cms-1 python /openedx/edx-platform/manage.py cms import /tmp ${EXTRACT_DIR}; then
+    if tutor local dc exec -T cms python /openedx/edx-platform/manage.py cms import /tmp "${EXTRACT_DIR}"; then
         echo -e "  ${GREEN}✅ Imported successfully${NC}"
         ((IMPORTED++))
     else
@@ -105,7 +115,7 @@ for tarball in "${TARBALLS[@]}"; do
     fi
     
     # Cleanup
-    docker exec tutor_local-cms-1 rm -rf "${TEMP_PATH}" "${EXTRACT_DIR}" || true
+    tutor local dc exec -T cms rm -rf "${TEMP_PATH}" "${EXTRACT_DIR}" || true
     echo ""
 done
 
@@ -122,6 +132,3 @@ if [ $IMPORTED -gt 0 ]; then
     echo "  Studio: http://studio.localhost"
     echo "  LMS: http://localhost"
 fi
-
-
-

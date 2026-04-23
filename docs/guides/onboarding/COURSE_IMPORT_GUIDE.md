@@ -65,19 +65,18 @@ done
 ./scripts/migrations/import-production-courses.sh course_tarballs
 
 # Or manually import one course
-tutor local exec cms -- python manage.py cms import /tmp /path/to/course
+tutor local exec cms python /openedx/edx-platform/manage.py cms import /tmp /path/to/course
 ```
 
 ## 🔍 Verify Import
 
 ```bash
 # Check course count in modulestore
-docker exec tutor_local-mongodb-1 mongosh openedx --quiet --eval \
+tutor local exec mongodb mongosh openedx --quiet --eval \
   "db['modulestore.structures'].countDocuments({})"
 
 # Check course overviews
-docker exec -it tutor_local-mysql-1 mysql -uroot -p openedx -e \
-  "SELECT id, display_name FROM course_overviews_courseoverview;"
+tutor local exec mysql sh -lc 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" openedx -e "SELECT id, display_name FROM course_overviews_courseoverview;"'
 
 # View in browser
 open http://studio.localhost
@@ -140,7 +139,7 @@ If you can't access production:
 
 ```bash
 # Create demo course
-docker exec tutor_local-cms-1 python manage.py cms create_course \
+tutor local exec cms python /openedx/edx-platform/manage.py cms create_course \
   split 42045 edX DemoX Demo_2024 "Demo Course" 2024-01-01
 
 # Access Studio and add content manually
@@ -150,4 +149,3 @@ open http://studio.localhost
 ---
 
 **Once imported:** Courses will have full content, videos, assessments, and can be tested end-to-end locally!
-

@@ -90,7 +90,7 @@ Until all four surfaces are consistent, repo-only proof must remain weaker than
 **Check available MFEs:**
 ```bash
 # Local
-docker exec tutor_local-mfe-1 ls -la /openedx/dist/ | grep "^d"
+tutor local exec mfe sh -lc 'for path in /openedx/dist/*; do [ -d "$path" ] && basename "$path"; done'
 
 # Production
 kubectl exec -n mereka-lms deploy/mfe -- ls -la /openedx/dist/ | grep "^d"

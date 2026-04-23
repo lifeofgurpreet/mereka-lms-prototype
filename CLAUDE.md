@@ -225,7 +225,6 @@ gh workflow run build-benchmark.yml \
 ### Diagnostics (Local)
 ```bash
 # Low-level runtime inspection (after setup)
-docker ps --filter "name=tutor_local"
 tutor local dc ps
 
 # View logs
