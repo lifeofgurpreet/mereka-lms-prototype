@@ -48,9 +48,11 @@ for module in "${MODULES[@]}"; do
       continue
     fi
 
-    if ! diff -q "${canonical}" "${overlay}" >/dev/null 2>&1; then
+    # Historical overlay copies may be CRLF-normalized by local tooling; that
+    # is not Python middleware drift. Real content differences still fail.
+    if ! diff --strip-trailing-cr -q "${canonical}" "${overlay}" >/dev/null 2>&1; then
       echo "FAIL: ${module} diverged in ${env} overlay"
-      diff --unified=3 "${canonical}" "${overlay}" | head -20
+      diff --strip-trailing-cr --unified=3 "${canonical}" "${overlay}" | head -20
       failures=$((failures + 1))
     fi
   done

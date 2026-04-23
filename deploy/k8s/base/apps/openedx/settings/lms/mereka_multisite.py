@@ -23,7 +23,9 @@ import json
 import logging
 import os
 from typing import Any, Optional
-from urllib.parse import parse_qsl, quote, urlencode, urlsplit
+from urllib.parse import parse_qsl, quote, urlsplit
+
+from openedx_tenant_cache import runtime_urls as tenant_runtime_urls
 
 _log = logging.getLogger(__name__)
 
@@ -68,48 +70,7 @@ def _strip_port(host: str) -> str:
     return host.split(":", 1)[0]
 
 
-def _candidate_site_domains(host: str) -> list[str]:
-    """
-    Return candidate django_site.domain values for a request host.
-
-    We keep Sites keyed on the tenant's LMS domain (e.g. academyv2.mereka.io,
-    academy.biji-biji.com, skillourfuture.academy.mereka.io, and during the
-    2026 SOF migration Stage 1 also skillourfuture.academyv2.mereka.io).
-    Subdomains that are part of the same tenant should map back to that
-    tenant domain.
-
-    Handles environment-prefixed domains:
-      staging.apps.academyv2.mereka.io  → staging.academyv2.mereka.io
-      studio.staging.academy.biji-biji.com → staging.academy.biji-biji.com
-    """
-    host = _strip_port(host.lower())
-    candidates = [host]
-    _service_prefixes = ("apps.", "studio.", "preview.", "admin.")
-
-    # Direct service prefix (e.g. apps.academyv2.mereka.io → academyv2.mereka.io)
-    for prefix in _service_prefixes:
-        if host.startswith(prefix):
-            candidates.append(host[len(prefix):])
-            break
-    else:
-        # Environment prefix + service (e.g. staging.apps.X → staging.X)
-        for env_prefix in ("staging.", "dev."):
-            if host.startswith(env_prefix):
-                remainder = host[len(env_prefix):]
-                for svc_prefix in _service_prefixes:
-                    if remainder.startswith(svc_prefix):
-                        candidates.append(env_prefix + remainder[len(svc_prefix):])
-                        break
-                break
-
-    # De-dupe while preserving order.
-    seen = set()
-    out: list[str] = []
-    for c in candidates:
-        if c and c not in seen:
-            out.append(c)
-            seen.add(c)
-    return out
+_candidate_site_domains = tenant_runtime_urls.candidate_site_domains
 
 
 def _domain_from_env_value(value: str) -> str:
@@ -274,60 +235,11 @@ class MerekaCookieDomainMiddleware:
         return response
 
 
-def _mfe_base_url_for_host(host: str) -> Optional[str]:
-    """
-    Resolve the tenant's MFE base URL from SiteConfiguration.
-
-    Returns the full MFE_BASE_URL (e.g. https://apps.staging.academy.biji-biji.com)
-    or None if no SiteConfiguration override exists.
-    """
-    from django.contrib.sites.models import Site
-
-    for candidate in _candidate_site_domains(host):
-        site = Site.objects.filter(domain__iexact=candidate).first()
-        if not site:
-            continue
-        cfg = getattr(site, "configuration", None)
-        values = (getattr(cfg, "site_values", None) or {}) if cfg else {}
-        mfe_base = (values.get("MFE_BASE_URL") or "").strip().rstrip("/")
-        if mfe_base:
-            return mfe_base
-    return None
-
-
-def _tenant_mfe_url(host: str, path: str, query: Optional[dict[str, str]] = None) -> Optional[str]:
-    """
-    Build a tenant-local MFE URL for the given path.
-    """
-    mfe_base = _mfe_base_url_for_host(host)
-    if not mfe_base:
-        return None
-
-    normalized_path = path if path.startswith("/") else f"/{path}"
-    url = f"{mfe_base.rstrip('/')}{normalized_path}"
-    if query:
-        url = f"{url}?{urlencode(query)}"
-    return url
-
-
-def tenant_authn_microfrontend_url_for_host(host: str, default_url: str) -> str:
-    """
-    Resolve the authn MFE base URL for the request host.
-
-    Anonymous LMS shell pages render outside the /api/mfe_config/v1 contract and
-    can fall back to the global settings.AUTHN_MICROFRONTEND_URL even when the
-    tenant's SiteConfiguration still has the correct MFE_BASE_URL. Prefer the
-    host-derived tenant apps origin when available, and only then fall back to
-    the caller-provided default URL.
-    """
-    try:
-        tenant_authn_url = _tenant_mfe_url(host, "/authn")
-    except Exception:
-        _log.exception("Failed to resolve tenant authn MFE URL for host %s", host)
-        tenant_authn_url = None
-    if tenant_authn_url:
-        return tenant_authn_url.rstrip("/")
-    return (default_url or "").strip().rstrip("/")
+_mfe_base_url_for_host = tenant_runtime_urls.mfe_base_url_for_host
+_tenant_mfe_url = tenant_runtime_urls.tenant_mfe_url
+tenant_authn_microfrontend_url_for_host = (
+    tenant_runtime_urls.tenant_authn_microfrontend_url_for_host
+)
 
 
 def _dashboard_auth_redirect_url(host: str) -> Optional[str]:

@@ -18,6 +18,11 @@ MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
 if MODULE_DIR not in sys.path:
     sys.path.insert(0, MODULE_DIR)
 
+REPO_ROOT = os.path.abspath(os.path.join(MODULE_DIR, "../../../../../../../"))
+CUSTOM_APPS_DIR = os.path.join(REPO_ROOT, "infrastructure", "tutor", "custom-apps")
+if CUSTOM_APPS_DIR not in sys.path:
+    sys.path.insert(0, CUSTOM_APPS_DIR)
+
 # Stub Django settings before importing the module
 sys.modules.setdefault("django", MagicMock())
 sys.modules.setdefault("django.conf", MagicMock())
@@ -26,6 +31,18 @@ sys.modules.setdefault("django.contrib.sites", MagicMock())
 sys.modules.setdefault("django.contrib.sites.models", MagicMock())
 
 import mereka_multisite as ms
+from openedx_tenant_cache import runtime_urls as tenant_runtime_urls
+
+
+class TestRuntimeUrlAuthority(unittest.TestCase):
+    def test_deployed_multisite_uses_installed_runtime_url_helpers(self):
+        self.assertIs(ms._candidate_site_domains, tenant_runtime_urls.candidate_site_domains)
+        self.assertIs(ms._mfe_base_url_for_host, tenant_runtime_urls.mfe_base_url_for_host)
+        self.assertIs(ms._tenant_mfe_url, tenant_runtime_urls.tenant_mfe_url)
+        self.assertIs(
+            ms.tenant_authn_microfrontend_url_for_host,
+            tenant_runtime_urls.tenant_authn_microfrontend_url_for_host,
+        )
 
 
 class TestStripPort(unittest.TestCase):
@@ -763,7 +780,7 @@ class TestDomainFromEnvValue(unittest.TestCase):
 
 
 class TestTenantAuthnMicrofrontendUrlForHost(unittest.TestCase):
-    @patch.object(ms, "_mfe_base_url_for_host")
+    @patch.object(tenant_runtime_urls, "mfe_base_url_for_host")
     def test_uses_tenant_apps_host_when_available(self, mock_mfe_base):
         mock_mfe_base.return_value = "https://apps.biji-biji.academyv2.mereka.dev"
 
@@ -777,7 +794,7 @@ class TestTenantAuthnMicrofrontendUrlForHost(unittest.TestCase):
             "https://apps.biji-biji.academyv2.mereka.dev/authn",
         )
 
-    @patch.object(ms, "_mfe_base_url_for_host")
+    @patch.object(tenant_runtime_urls, "mfe_base_url_for_host")
     def test_falls_back_to_default_authn_url(self, mock_mfe_base):
         mock_mfe_base.return_value = None
 
@@ -791,7 +808,7 @@ class TestTenantAuthnMicrofrontendUrlForHost(unittest.TestCase):
             "https://apps.academyv2.mereka.dev/authn",
         )
 
-    @patch.object(ms, "_tenant_mfe_url")
+    @patch.object(tenant_runtime_urls, "tenant_mfe_url")
     def test_falls_back_to_default_authn_url_when_lookup_raises(self, mock_tenant_mfe_url):
         mock_tenant_mfe_url.side_effect = RuntimeError("db unavailable")
 
