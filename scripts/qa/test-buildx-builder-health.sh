@@ -4,6 +4,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 HEALTH="$REPO_ROOT/scripts/infra/buildx-builder-health.sh"
+LOCAL_BUILDER="$REPO_ROOT/scripts/infra/buildx-local-builder.sh"
 TMP_DIR="$(mktemp -d -t buildx-builder-health-test.XXXXXX)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
@@ -15,6 +16,8 @@ fail() { echo "FAIL $1" >&2; FAIL=$((FAIL + 1)); }
 
 # shellcheck source=scripts/infra/buildx-builder-health.sh
 source "$HEALTH"
+# shellcheck source=scripts/infra/buildx-local-builder.sh
+source "$LOCAL_BUILDER"
 
 idle_snapshot="$TMP_DIR/idle.txt"
 cat >"$idle_snapshot" <<'EOF'
@@ -108,6 +111,28 @@ if grep -q "buildx_buildkit_mereka-dependency-mirror0" <<<"$reason" \
 else
   printf '%s\n' "$reason" >&2
   fail "unhealthy reason names builder container and stale process"
+fi
+
+BAKE_ENV=()
+append_local_cache_from TEST_LOCAL_CACHE_FROM "$TMP_DIR/missing-cache"
+if [[ "${#BAKE_ENV[@]}" -eq 0 ]]; then
+  pass "missing local cache index is not exposed to Bake"
+else
+  printf '%s\n' "${BAKE_ENV[@]}" >&2
+  fail "missing local cache index is not exposed to Bake"
+fi
+
+valid_cache="$TMP_DIR/valid-cache"
+mkdir -p "$valid_cache"
+: >"$valid_cache/index.json"
+BAKE_ENV=()
+append_local_cache_from TEST_LOCAL_CACHE_FROM "$valid_cache"
+if [[ "${#BAKE_ENV[@]}" -eq 1 ]] \
+  && [[ "${BAKE_ENV[0]}" == "TEST_LOCAL_CACHE_FROM=type=local,src=$valid_cache" ]]; then
+  pass "valid local cache index is exposed to Bake"
+else
+  printf '%s\n' "${BAKE_ENV[@]}" >&2
+  fail "valid local cache index is exposed to Bake"
 fi
 
 echo "Summary: PASS=$PASS FAIL=$FAIL"

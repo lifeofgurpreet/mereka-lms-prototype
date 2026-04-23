@@ -235,6 +235,8 @@ require_contains "docker-bake.hcl" 'Local Open edX fast builds read shared/fallb
 require_contains "docker-bake.hcl" 'Local MFE fast builds read shared/fallback caches' "mfe-fast documents local worker-cache authority instead of client cache export"
 require_target_contains "docker-bake.hcl" "openedx-fast" "cache-to = []" "openedx-fast disables client-side local cache export"
 require_target_contains "docker-bake.hcl" "mfe-fast" "cache-to = []" "mfe-fast disables client-side local cache export"
+require_contains "scripts/qa/test-buildx-builder-health.sh" 'missing local cache index is not exposed to Bake' "Buildx helper fixture guards missing local cache imports"
+require_contains "scripts/qa/test-buildx-builder-health.sh" 'valid local cache index is exposed to Bake' "Buildx helper fixture proves valid local cache imports"
 require_contains "scripts/infra/tutor-config-save.sh" 'restore_generated_state' "tutor-config-save.sh restores config/rendered env on preparation or verification failure"
 reject_contains "scripts/infra/tutor-config-save.sh" 'Continue anyway' "tutor-config-save.sh does not allow continuing with a failed render verifier"
 require_contains "scripts/infra/tutor-config-save.sh" 'make tutor-restart' "tutor-config-save.sh points local users at Makefile restart wrapper"
