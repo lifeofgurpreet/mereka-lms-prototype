@@ -169,6 +169,11 @@ done
 
 ## Adding New Verification Scripts
 
+> **CRITICAL — 6 guards required.** Adding a script without all six registration surfaces causes
+> CI to fail at a drift gate rather than pointing at the real gap. See the canonical matrix:
+> [`docs/ops/quickref/6-guard-verifier-registration.md`](./6-guard-verifier-registration.md)
+> (updated 2026-04-23, bead `crre`; supersedes the older "5-guard" / "5 coordinated changes" guidance).
+
 ### File Location
 
 ```bash

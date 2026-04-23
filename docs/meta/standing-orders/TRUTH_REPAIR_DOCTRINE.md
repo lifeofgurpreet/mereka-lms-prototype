@@ -90,7 +90,7 @@ A change that affects what CI considers a passing build must coherently update *
 
 If any one of the five lags, the system lies: CI can pass while the artifact is wrong, or fail while the artifact is right.
 
-**Defect this prevents.** PR #1492 (adding a manual-only verify script) required **five coordinated changes** to land cleanly — reachability-allowlist + catalog regen + sprawl-budget bump + staging-vocabulary-allowlist + rebase-catalog regen — and each guard was discovered sequentially over 5 iterations. The cost was paid because the five layers were not treated as an atomic shape.
+**Defect this prevents.** PR #1492 (adding a manual-only verify script) required **five coordinated changes** to land cleanly — reachability-allowlist + catalog regen + sprawl-budget bump + staging-vocabulary-allowlist + rebase-catalog regen — and each guard was discovered sequentially over 5 iterations. The cost was paid because the five layers were not treated as an atomic shape. As of 2026-04-23 (PR #2104, bead `rq9k`) the verified count is **six guards**; the canonical matrix is [`docs/ops/quickref/6-guard-verifier-registration.md`](../../../docs/ops/quickref/6-guard-verifier-registration.md).
 
 **How to comply.**
 

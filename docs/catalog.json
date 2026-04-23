@@ -4565,7 +4565,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-04-22",
+    "last_verified_or_updated": "2026-04-23",
     "owner": "Platform Team",
     "path": "guides/onboarding/AGENT_SETUP_CHECKLIST.md",
     "status": "supporting",
@@ -4592,7 +4592,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-04-22",
+    "last_verified_or_updated": "2026-04-23",
     "owner": "Infra Team",
     "path": "guides/onboarding/LOCAL_SETUP.md",
     "status": "supporting",
@@ -4610,7 +4610,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-04-22",
+    "last_verified_or_updated": "2026-04-23",
     "owner": "Platform Team",
     "path": "guides/onboarding/QUICK_START_LOCAL.md",
     "status": "canonical",
@@ -4637,7 +4637,7 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
-    "last_verified_or_updated": "2026-04-22",
+    "last_verified_or_updated": "2026-04-23",
     "owner": "Infra Team",
     "path": "guides/onboarding/WORKFLOW_LOCAL.md",
     "status": "supporting",
@@ -6914,6 +6914,15 @@
   {
     "canonical_conflict_group": null,
     "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/quickref/6-guard-verifier-registration.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
     "last_verified_or_updated": "2026-04-22",
     "owner": "SRE Team",
     "path": "ops/quickref/README.md",
@@ -7322,6 +7331,15 @@
     "last_verified_or_updated": "2026-02-24",
     "owner": "Engineering Lead \u00b7 Last updated: 2026-02-24",
     "path": "ops/runbooks/DR_DRILL_SCHEDULE.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/DR_RESTORE_DRILL_2026-04-22.md",
     "status": "supporting",
     "type": "runbook"
   },
@@ -7853,6 +7871,15 @@
     "last_verified_or_updated": "2026-04-10",
     "owner": "Platform Team",
     "path": "ops/runbooks/STRIPE_WEBHOOKS_SETUP.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/STUCK_CRONJOB_WITH_FORBID_CONCURRENCY.md",
     "status": "supporting",
     "type": "runbook"
   },
@@ -8467,6 +8494,51 @@
     "path": "ops/security/SECRET_SCANNING.md",
     "status": "superseded",
     "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "plans/BEAD_GRAPH_ZY7K_EXPANSION.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "plans/BEAD_SINGLETON_AUDIT_2026-04-23.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "plans/INVESTIGATION_CELERY_PROBES.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "plans/INVESTIGATION_HPA_RESTORATION.md",
+    "status": "supporting",
+    "type": "other"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "plans/MFE_CONVERGENCE_PLAN.md",
+    "status": "supporting",
+    "type": "other"
   },
   {
     "canonical_conflict_group": null,
@@ -11165,6 +11237,15 @@
     "last_verified_or_updated": null,
     "owner": null,
     "path": "status/active/BROWSER_PROOF_MATRIX_2026-04-09.md",
+    "status": "supporting",
+    "type": "status"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "status/active/BUILD_AUTHORITY_CLOSURE_TRACKER_2026-04-23.md",
     "status": "supporting",
     "type": "status"
   },
