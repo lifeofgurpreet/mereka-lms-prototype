@@ -42,6 +42,13 @@ quay.io/prometheus/mysqld-exporter
 # ARC (Actions Runner Controller) runner images — pinned in bbi-infrastructure prod overlay
 ghcr.io/actions/actions-runner
 
+# OBS-003 synthetic probe image (bead mereka-lms-e09t).
+# Lightweight curl image — no shell, no Django, no browser.
+# The verifier normalizes curlimages/curl (has slash, no registry prefix) to exactly
+# "curlimages/curl" before allowlist lookup — so that is the key used here.
+# Cross-repo pin obligation: bbi-infrastructure prod overlay MUST digest-pin this image.
+curlimages/curl
+
 # First-party images pending migration to pin-required sentinel (TODO: rq9k follow-up)
 # purchase-gateway uses a version tag instead of pin-required; overlay must pin by digest
 ghcr.io/biji-biji-initiative/purchase-gateway

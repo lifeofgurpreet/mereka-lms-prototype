@@ -1,0 +1,100 @@
+---
+# OBS-003: Authn MFE browser synthetic — 5-minute cron
+# @bead: mereka-lms-e09t
+# @covers: AC-OBS-003 — external-view login-flow availability
+#
+# Two read-only HTTP probes every 5 minutes:
+#   1. GET /authn/login         → 200 + MFE shell markers present
+#   2. GET /api/mfe_config/v1/  → 200 + LMS_BASE_URL in JSON
+#
+# No credentials submitted. No Pushgateway required.
+# Alert fires via kube_job_status_failed (see prometheusrule-authn-synthetic.yaml).
+#
+# Cross-repo TODO (bbi-infrastructure):
+#   - Add overlay patch for MEREKA_AUTHN_SYNTHETIC_TARGETS in rke2-nonprod/staging
+#   - Add overlay patch for prod with all three tenant apps hosts:
+#       apps.academyv2.mereka.io,apps.skillourfuture.academy.mereka.io,apps.academy.biji-biji.com
+#   - The base ships prod primary as default; overlay overrides for per-env precision
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: obs-003-authn-synthetic
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: authn-synthetic
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: mereka-lms
+spec:
+  schedule: "*/5 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    metadata:
+      labels:
+        app.kubernetes.io/name: authn-synthetic
+        app.kubernetes.io/component: job
+    spec:
+      # Must complete before the next 5-min tick. curlimages/curl with two
+      # sequential HTTP checks completes in well under 60s under normal conditions.
+      activeDeadlineSeconds: 120
+      # Do not retry within the same 5-min window — next run will cover it.
+      backoffLimit: 0
+      ttlSecondsAfterFinished: 3600
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: authn-synthetic
+            app.kubernetes.io/component: pod
+        spec:
+          restartPolicy: OnFailure
+          # Kyverno policy compliance:
+          #   require-non-root-security-context — runAsNonRoot + uid/gid
+          #   require-seccomp — seccompProfile.type: RuntimeDefault (pod level)
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: probe
+              # curlimages/curl: minimal image (~8 MB). No Django, no browser.
+              # Sufficient for structural HTTP + JSON checks on the login page.
+              # Pin digest in overlay for supply-chain integrity.
+              image: curlimages/curl:8.9.1
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                # Kyverno restrict-capabilities: drop ALL (required by restrict-capabilities.yaml:47-58)
+                capabilities:
+                  drop: [ALL]
+              command:
+                - /bin/sh
+                - /scripts/probe.sh
+              env:
+                # Primary tenant — override in bbi-infrastructure overlay per env.
+                # Format: comma-separated apps host names (no scheme, no trailing slash).
+                # Follow-up bead: expand to SOF + Biji-Biji tenant apps hosts.
+                - name: MEREKA_AUTHN_SYNTHETIC_TARGETS
+                  value: "apps.academyv2.mereka.io"
+              resources:
+                requests:
+                  memory: "32Mi"
+                  cpu: "10m"
+                limits:
+                  memory: "64Mi"
+                  cpu: "50m"
+              volumeMounts:
+                - name: probe-script
+                  mountPath: /scripts
+                  readOnly: true
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: probe-script
+              configMap:
+                name: obs-003-probe-script
+                defaultMode: 0755
+            - name: tmp
+              emptyDir: {}

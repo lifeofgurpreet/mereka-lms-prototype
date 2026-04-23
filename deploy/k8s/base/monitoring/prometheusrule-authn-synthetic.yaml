@@ -1,0 +1,116 @@
+---
+# OBS-003: PrometheusRules for Authn MFE synthetic CronJob
+# @bead: mereka-lms-e09t
+# @covers: AC-OBS-003 — external-view login-flow availability
+#
+# Alert strategy: kube_job_status_failed is incremented by kube-state-metrics
+# when a Job's .status.failed > 0. Since backoffLimit=0, a single probe failure
+# = job failed. Three consecutive failures (15 minutes at 5-min cadence) fires
+# the critical alert. This is burn-rate tolerant: a single flaky DNS / TLS
+# hiccup does not page.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: authn-synthetic-alerts
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: authn-synthetic
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/component: monitoring
+    prometheus: kube-prometheus
+spec:
+  groups:
+    - name: authn.synthetic.rules
+      rules:
+        # ── MerekaAuthnSyntheticDown (Critical) ──────────────────────────────
+        # Three or more probe job failures in the last 15 minutes means the
+        # Authn MFE login page has been unreachable for at least 15 minutes
+        # without a single clean run in between.
+        #
+        # kube_job_status_failed is a counter that increments each time a Job
+        # transitions to a failed state. increase() over 15m captures ≥3 failed
+        # Jobs from the obs-003-authn-synthetic CronJob in that window.
+        - alert: MerekaAuthnSyntheticDown
+          expr: |
+            sum(
+              increase(
+                kube_job_status_failed{
+                  namespace="mereka-lms",
+                  job_name=~"obs-003-authn-synthetic-.*"
+                }[15m]
+              )
+            ) >= 3
+          for: 0m
+          labels:
+            severity: critical
+            component: authn
+            team: platform
+          annotations:
+            summary: "Authn MFE login page unreachable for 15+ minutes"
+            description: >-
+              The OBS-003 synthetic probe has recorded {{ $value | printf "%.0f" }}
+              failed probe Jobs in the last 15 minutes. The Authn MFE login page
+              at apps.academyv2.mereka.io/authn/login is returning non-200 or
+              missing MFE shell markers. Learners cannot log in.
+
+              Runbook: https://github.com/biji-biji-initiative/mereka-lms/blob/main/docs/ops/runbooks/TROUBLESHOOTING.md
+              Probe logs: kubectl logs -n mereka-lms -l app.kubernetes.io/name=authn-synthetic --tail=100
+
+        # ── MerekaAuthnSyntheticMissing (Warning) ────────────────────────────
+        # No successful probe in 20 minutes — could mean the CronJob itself is
+        # not firing (schedule drift, resource pressure, controller issue).
+        #
+        # Uses absent_over_time() instead of sum(...)==0 to avoid the absent-
+        # metric trap: when no Jobs have ever succeeded the kube_job_status_succeeded
+        # series does not exist, so sum()==0 returns an empty vector (not 0),
+        # which silences the alert in exactly the "CronJob wedged" scenario we
+        # need to catch.
+        - alert: MerekaAuthnSyntheticMissing
+          expr: |
+            absent_over_time(
+              kube_job_status_succeeded{
+                namespace="mereka-lms",
+                job_name=~"obs-003-authn-synthetic-.*"
+              }[20m]
+            )
+            and on()
+            (
+              sum(
+                kube_cronjob_info{
+                  namespace="mereka-lms",
+                  cronjob="obs-003-authn-synthetic"
+                }
+              ) > 0
+            )
+          for: 5m
+          labels:
+            severity: warning
+            component: authn
+            team: platform
+          annotations:
+            summary: "Authn MFE synthetic probe not running"
+            description: >-
+              No successful OBS-003 synthetic probe in the last 20 minutes.
+              The CronJob obs-003-authn-synthetic may be stuck, suspended,
+              or experiencing scheduling failures.
+
+              Diagnose: kubectl get cronjob obs-003-authn-synthetic -n mereka-lms
+              Runbook: https://github.com/biji-biji-initiative/mereka-lms/blob/main/docs/ops/runbooks/TROUBLESHOOTING.md
+
+        # ── MerekaAuthnMfeConfigMissing (Warning) ─────────────────────────────
+        # The probe checks /api/mfe_config/v1/?mfe=authn for LMS_BASE_URL.
+        # This alert fires when the probe fails specifically on the mfe_config
+        # endpoint — logged in probe STDOUT as "FAIL ... mfe_config".
+        # This catches the "login page loads but MFE config API is broken" case
+        # which would cause silent MFE bootstrap failures.
+        #
+        # Implementation note: since we rely on job exit code (not per-check metrics),
+        # this alert is a synonym for MerekaAuthnSyntheticDown but tagged differently
+        # for runbook routing. Separate per-check metrics can be added in a follow-up
+        # bead if a Pushgateway is deployed.
+        #
+        # QUARANTINED: Kept as documentation of intent. Activate by deploying
+        # Pushgateway and emitting per-check counters from the probe script.
+        # - alert: MerekaAuthnMfeConfigMissing
+        #   (pending Pushgateway deployment — see prometheusrule-tenant-isolation.yaml pattern)

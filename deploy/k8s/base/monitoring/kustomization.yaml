@@ -58,3 +58,7 @@ resources:
   - cronjob-course-reindex.yaml
   - cronjob-library-export.yaml
   - cronjob-tenant-isolation.yaml
+  # ── OBS-003: Authn MFE synthetic (5-min cron) ────────────────────────────
+  - configmap-obs-003-probe-script.yaml
+  - cronjob-obs-003-authn-synthetic.yaml
+  - prometheusrule-authn-synthetic.yaml
