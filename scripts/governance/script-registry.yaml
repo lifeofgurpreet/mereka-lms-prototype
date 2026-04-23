@@ -193,6 +193,10 @@ ci_static_inventory:
       estimated_seconds: 3
     - script: scripts/qa/test-mfe-prune-deprecated-shells.sh
       estimated_seconds: 3
+    - script: scripts/qa/verify-tutor-patch-manifest-contract.sh
+      estimated_seconds: 2
+    - script: scripts/qa/test-verify-tutor-patch-manifest-contract.sh
+      estimated_seconds: 3
     - script: scripts/qa/verify-build-optimizations-render-delta-contract.sh
       estimated_seconds: 2
     - script: scripts/qa/test-verify-build-optimizations-render-delta-contract.sh
@@ -2442,6 +2446,47 @@ scripts:
     dry_run: true
     lanes: [ci]
     proof_command: "bash scripts/qa/test-verify-build-optimizations-render-delta-contract.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/verify-tutor-patch-manifest-contract.sh
+    owner: platform-team
+    purpose: >
+      Static authority verifier for the remaining Tutor post-render patch layer.
+      Validates that patch-manifest.yml, apply-patches.sh, sourced patch modules,
+      the patch inventory ledger, and build-optimizations.allowed-delta.yaml stay
+      aligned.
+    inputs:
+      - REPO_ROOT_OVERRIDE
+      - PATCH_MANIFEST
+      - APPLY_PATCHES_SCRIPT
+      - PATCH_INVENTORY_DOC
+      - BUILD_OPTIMIZATIONS_DELTA_CONTRACT
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects: none
+    dry_run: true
+    lanes: [ci]
+    proof_command: "bash scripts/qa/verify-tutor-patch-manifest-contract.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/test-verify-tutor-patch-manifest-contract.sh
+    owner: platform-team
+    purpose: >
+      Seeded fixture test for verify-tutor-patch-manifest-contract.sh. Proves
+      manifest/apply-patches/delta-ledger alignment passes for the valid fixture
+      and fails closed on missing modules, missing functions, inactive sourcing,
+      bad delta policy, historical module activation, inventory drift, and
+      inline-wrapper definitions without invocation.
+    inputs: []
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects:
+      - Creates temporary patch manifest fixtures under /tmp
+    dry_run: true
+    lanes: [ci]
+    proof_command: "bash scripts/qa/test-verify-tutor-patch-manifest-contract.sh"
     criticality: release-blocking
 
   - path: scripts/ci/preflight-check.sh

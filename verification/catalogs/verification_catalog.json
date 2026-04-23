@@ -547,7 +547,7 @@
       "mutability": "mutating",
       "owner": "platform-infra",
       "path": "scripts/infra/verify-tutor-config.sh",
-      "reference_count": 52,
+      "reference_count": 53,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -578,7 +578,7 @@
       ],
       "severity": "low",
       "spec_ids": [
-        "AC-001"
+        "AC-TCR-004"
       ],
       "status": "manual_only",
       "tier": "exploratory_manual"
@@ -17673,6 +17673,36 @@
     },
     {
       "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
+      "env_scope": [
+        "global"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "platform-infra",
+      "path": "scripts/qa/verify-tutor-patch-manifest-contract.sh",
+      "reference_count": 12,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "high",
+      "spec_ids": [
+        "AC-TCR-004",
+        "AC-TCR-007",
+        "AC-TCR-011"
+      ],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
+      "cadence": "per_pr_and_push",
       "canonical": false,
       "ci_binding": [
         "workflow_direct"
@@ -17687,7 +17717,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-tutor-patches.sh",
-      "reference_count": 26,
+      "reference_count": 27,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -18973,27 +19003,27 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 25,
-    "ci_static_bound": 387,
+    "ci_static_bound": 388,
     "kinds": {
-      "verify": 637
+      "verify": 638
     },
     "mutability": {
       "destructive": 9,
       "mutating": 22,
-      "read-only": 606
+      "read-only": 607
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 442,
+      "active": 443,
       "deprecated_candidate": 1,
       "manual_only": 194
     },
     "tiers": {
       "exploratory_manual": 198,
       "periodic_runtime": 21,
-      "release_blocking": 418
+      "release_blocking": 419
     },
-    "total_verify_scripts": 637,
+    "total_verify_scripts": 638,
     "workflow_direct_bound": 72
   },
   "version": "1"

@@ -42,6 +42,11 @@ The active chain is:
 | `mfe-npm-install-resilience.sh` | 71 | MFE | `TEMPORARY_COMPATIBILITY_LAYER` | Wraps the exact rendered npm install layer with retry/fallback behavior until tutormfe exposes this line as source-owned config. | golden/idempotence/fail-loud fixture tests |
 | `apply-patches.sh` inline `wrap_mfe_pull_translations_retry` | inline | MFE | `TEMPORARY_COMPATIBILITY_LAYER` | Rewrites rendered Atlas translation pull lines with retry loops to avoid late cold-build failure on transient GitHub/DNS errors. | preflight, Build Tutor Images proof |
 
+`scripts/qa/verify-tutor-patch-manifest-contract.sh` enforces that this manifest,
+`apply-patches.sh`, sourced patch modules, this inventory, and
+`build-optimizations.allowed-delta.yaml` stay aligned. Do not edit one of those
+surfaces without updating the others and the seeded contract test.
+
 `enterprise-template-guard.sh` exists in `patches/` but is not sourced by
 `apply-patches.sh`; it is not active authority until a future PR wires it with
 docs, tests, and a retirement trigger.

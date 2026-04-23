@@ -13,6 +13,7 @@ NC='\033[0m'
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 VERIFY_SCRIPT="$REPO_ROOT/scripts/qa/verify-tutor-patches.sh"
 CANONICAL_VERIFY_SCRIPT="$REPO_ROOT/scripts/infra/verify-tutor-config.sh"
+MANIFEST_CONTRACT_SCRIPT="$REPO_ROOT/scripts/qa/verify-tutor-patch-manifest-contract.sh"
 MANIFEST_FILE="$REPO_ROOT/infrastructure/tutor/patch-manifest.yml"
 APPLY_PATCHES="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
 
@@ -37,83 +38,10 @@ test_fail() {
 }
 
 run_manifest_check() {
-  python3 - "$REPO_ROOT" "$MANIFEST_FILE" "$APPLY_PATCHES" <<'PY'
-import sys
-from pathlib import Path
-
-try:
-    import yaml
-except ImportError as exc:
-    raise SystemExit(f"PyYAML is required for patch manifest validation: {exc}")
-
-repo_root = Path(sys.argv[1])
-manifest_path = Path(sys.argv[2])
-apply_patches_path = Path(sys.argv[3])
-
-payload = yaml.safe_load(manifest_path.read_text(encoding="utf-8")) or {}
-patches = payload.get("patches") or []
-inactive = payload.get("inactive_modules") or []
-apply_text = apply_patches_path.read_text(encoding="utf-8")
-
-required_fields = {
-    "id",
-    "module",
-    "function",
-    "target",
-    "target_family",
-    "authority_class",
-    "description",
-    "retirement_trigger",
-    "required",
-}
-allowed_authority = {
-    "authority_correction",
-    "temporary_compatibility_layer",
-    "migration_guard",
-    "filesystem_sync",
-}
-errors = []
-
-if not patches:
-    errors.append("manifest has no active patches")
-
-for patch in patches:
-    patch_id = patch.get("id", "<missing id>")
-    missing = sorted(field for field in required_fields if field not in patch)
-    if missing:
-        errors.append(f"{patch_id}: missing fields: {', '.join(missing)}")
-        continue
-
-    if patch["authority_class"] not in allowed_authority:
-        errors.append(f"{patch_id}: unsupported authority_class {patch['authority_class']!r}")
-
-    module_path = repo_root / patch["module"]
-    if not module_path.exists():
-        errors.append(f"{patch_id}: module does not exist: {patch['module']}")
-        continue
-
-    module_text = module_path.read_text(encoding="utf-8")
-    function_name = patch["function"]
-    if function_name not in module_text:
-        errors.append(f"{patch_id}: function {function_name} not found in {patch['module']}")
-    if function_name not in apply_text:
-        errors.append(f"{patch_id}: function {function_name} not wired by apply-patches.sh")
-
-for item in inactive:
-    module = item.get("module")
-    if not module:
-        errors.append("inactive_modules entry missing module")
-        continue
-    source_line = f'source "$PATCHES_DIR/{Path(module).name}"'
-    if source_line in apply_text:
-        errors.append(f"inactive module is still sourced by apply-patches.sh: {module}")
-
-if errors:
-    print("\n".join(errors))
-    raise SystemExit(1)
-
-print(len(patches))
-PY
+  REPO_ROOT_OVERRIDE="$REPO_ROOT" \
+    PATCH_MANIFEST="$MANIFEST_FILE" \
+    APPLY_PATCHES_SCRIPT="$APPLY_PATCHES" \
+    "$MANIFEST_CONTRACT_SCRIPT"
 }
 
 echo "=== Test Suite: Tutor Patch Authority ==="
@@ -140,12 +68,12 @@ else
   test_fail "Manifest file not found: $MANIFEST_FILE"
 fi
 
-test_start "Patch manifest schema and apply-patches wiring are valid"
-if MANIFEST_PATCH_COUNT="$(run_manifest_check 2>&1)"; then
+test_start "Patch manifest schema, apply-patches wiring, and delta ledger are valid"
+if MANIFEST_CONTRACT_OUTPUT="$(run_manifest_check 2>&1)"; then
   test_pass
-  echo -e "  ${GREEN}  Active manifest patches: ${MANIFEST_PATCH_COUNT}${NC}"
+  echo -e "  ${GREEN}  ${MANIFEST_CONTRACT_OUTPUT}${NC}"
 else
-  test_fail "$MANIFEST_PATCH_COUNT"
+  test_fail "$MANIFEST_CONTRACT_OUTPUT"
 fi
 
 test_start "QA verifier delegates to canonical rendered verifier"

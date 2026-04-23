@@ -146,6 +146,8 @@ required_paths=(
   "infrastructure/tutor/patches/build-optimizations.allowed-delta.yaml"
   "scripts/qa/verify-build-optimizations-render-delta-contract.sh"
   "scripts/qa/test-verify-build-optimizations-render-delta-contract.sh"
+  "scripts/qa/verify-tutor-patch-manifest-contract.sh"
+  "scripts/qa/test-verify-tutor-patch-manifest-contract.sh"
 )
 
 for path in "${required_paths[@]}"; do
@@ -206,6 +208,8 @@ require_contains "scripts/shared/ci-skip-guards.sh" '\./scripts/infra/tutor-conf
 require_contains "scripts/infra/verify-tutor-config.sh" '\./scripts/infra/tutor-config-save\.sh' "rendered Tutor verifier points missing env users at the governed wrapper"
 require_contains "scripts/infra/verify-tutor-patches.sh" '\./scripts/infra/tutor-config-save\.sh' "legacy patch verifier points missing env users at the governed wrapper"
 require_contains "scripts/qa/verify-tutor-patches.sh" '\./scripts/infra/tutor-config-save\.sh' "stable QA Tutor verifier points missing env users at the governed wrapper"
+require_contains "scripts/qa/verify-tutor-patches.sh" 'verify-tutor-patch-manifest-contract\.sh' "stable QA Tutor verifier runs the static patch manifest contract first"
+require_contains "scripts/infra/verify-tutor-patches.sh" 'verify-tutor-patch-manifest-contract\.sh' "legacy patch verifier delegates static manifest authority to the canonical contract"
 require_contains "scripts/infra/setup-k8s-overrides.sh" '\./scripts/infra/tutor-config-save\.sh' "legacy k8s override helper points missing env users at the governed wrapper"
 require_contains "scripts/infra/setup-mobile-api.sh" '\./scripts/infra/tutor-config-save\.sh --set ENABLE_MOBILE_REST_API=true' "mobile API setup uses governed Tutor config wrapper"
 require_contains "scripts/infra/setup-mobile-api.sh" '\./scripts/infra/tutor-config-save\.sh --set ENABLE_OAUTH2_PROVIDER=true' "mobile OAuth setup uses governed Tutor config wrapper"

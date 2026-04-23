@@ -11,6 +11,7 @@ NC='\033[0m'
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 VERIFY_SCRIPT="$REPO_ROOT/scripts/qa/verify-tutor-patches.sh"
+MANIFEST_CONTRACT_SCRIPT="$REPO_ROOT/scripts/qa/verify-tutor-patch-manifest-contract.sh"
 MANIFEST_FILE="$REPO_ROOT/infrastructure/tutor/patch-manifest.yml"
 
 TESTS_RUN=0
@@ -82,51 +83,13 @@ fi
 # NFR-004: Active manifest has authority metadata for every remaining patch
 test_start "Manifest documents active patch authority and retirement metadata"
 set +e
-MANIFEST_CHECK_OUTPUT=$(
-  python3 - "$MANIFEST_FILE" <<'PY'
-import sys
-from pathlib import Path
-
-try:
-    import yaml
-except ImportError as exc:
-    raise SystemExit(f"PyYAML unavailable: {exc}")
-
-payload = yaml.safe_load(Path(sys.argv[1]).read_text(encoding="utf-8")) or {}
-patches = payload.get("patches") or []
-required_fields = {
-    "id",
-    "module",
-    "function",
-    "authority_class",
-    "description",
-    "retirement_trigger",
-    "required",
-}
-errors = []
-
-if not patches:
-    errors.append("no active patches listed")
-
-for patch in patches:
-    patch_id = patch.get("id", "<missing id>")
-    missing = sorted(field for field in required_fields if not patch.get(field))
-    if missing:
-        errors.append(f"{patch_id}: missing {', '.join(missing)}")
-
-if errors:
-    print("; ".join(errors))
-    raise SystemExit(1)
-
-print(len(patches))
-PY
-)
+MANIFEST_CHECK_OUTPUT=$("$MANIFEST_CONTRACT_SCRIPT" 2>&1)
 MANIFEST_CHECK_RC=$?
 set -e
 
 if [[ "$MANIFEST_CHECK_RC" -eq 0 ]]; then
   test_pass
-  echo -e "  ${GREEN}  Active patches with authority metadata: $MANIFEST_CHECK_OUTPUT${NC}"
+  echo -e "  ${GREEN}  $MANIFEST_CHECK_OUTPUT${NC}"
 else
   test_fail "$MANIFEST_CHECK_OUTPUT"
 fi

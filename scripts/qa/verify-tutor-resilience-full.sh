@@ -234,6 +234,7 @@ echo "--- AC-TCR-004: Patch Manifest & Verification ---"
 MANIFEST="$REPO_ROOT/infrastructure/tutor/patch-manifest.yml"
 VERIFY_SCRIPT="$REPO_ROOT/scripts/qa/verify-tutor-patches.sh"
 CANONICAL_VERIFY_SCRIPT="$REPO_ROOT/scripts/infra/verify-tutor-config.sh"
+MANIFEST_CONTRACT_SCRIPT="$REPO_ROOT/scripts/qa/verify-tutor-patch-manifest-contract.sh"
 
 if [[ -f "$MANIFEST" ]]; then
   check "AC-TCR-004" "Patch manifest exists at infrastructure/tutor/patch-manifest.yml" \
@@ -244,6 +245,9 @@ if [[ -f "$MANIFEST" ]]; then
 
   check "AC-TCR-004" "Patch manifest active entries have required authority fields" \
     manifest_active_entries_have_fields "$MANIFEST"
+
+  check "AC-TCR-004" "Patch manifest/apply-patches/delta-ledger contract passes" \
+    "$MANIFEST_CONTRACT_SCRIPT"
 
   check "AC-TCR-004" "Patch manifest contains mysql-root-host active patch" \
     manifest_has_patch_id "$MANIFEST" "mysql-root-host"
@@ -286,8 +290,11 @@ if [[ -f "$TUTOR_HOOK" ]]; then
   check "AC-TCR-005" "Hook warns about config.yml secrets" \
     grep -q "secret" "$TUTOR_HOOK"
 
-  check "AC-TCR-005" "Hook prompts for apply-patches.sh confirmation" \
-    grep -q "apply-patches" "$TUTOR_HOOK"
+  check "AC-TCR-005" "Hook prompts for governed Tutor wrapper confirmation" \
+    grep -q "governed Tutor wrapper" "$TUTOR_HOOK"
+
+  check "AC-TCR-005" "Hook points contributors at tutor-config-save.sh" \
+    grep -q "tutor-config-save.sh" "$TUTOR_HOOK"
 
   check "AC-TCR-005" "Hook can optionally run verification" \
     grep -q "verify.*tutor" "$TUTOR_HOOK"

@@ -18,6 +18,8 @@ cd "$ROOT_DIR"
 TUTOR_ROOT="${TUTOR_ROOT:-$ROOT_DIR/tutor_env}"
 export TUTOR_ROOT
 
+"$ROOT_DIR/scripts/qa/verify-tutor-patch-manifest-contract.sh"
+
 if [[ ! -d "$TUTOR_ROOT/env" ]]; then
   echo "SKIP: Tutor env not found at $TUTOR_ROOT (set TUTOR_ROOT or run ./scripts/infra/tutor-config-save.sh)"
   exit 0
