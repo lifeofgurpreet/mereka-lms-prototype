@@ -38,5 +38,10 @@ hooks.Filters.CONFIG_DEFAULTS.add_items(
         ("MEREKA_PREVIEW_LMS_BASE", "preview.academyv2.mereka.dev"),
         ("MEREKA_SESSION_COOKIE_DOMAIN", ".academyv2.mereka.io"),
         ("MEREKA_CSRF_COOKIE_DOMAIN", ".academyv2.mereka.io"),
-    ]
+    ],
+    # Tutor loads plugins alphabetically; `mereka_lms` can register defaults
+    # before `mfe`, whose own `MFE_COMMON_VERSION` default follows
+    # OPENEDX_COMMON_VERSION. Run this callback late so the repo-owned Ulmo MFE
+    # tag remains the rendered Dockerfile source ref unless explicitly set.
+    priority=hooks.priorities.LOW,
 )

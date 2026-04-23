@@ -155,7 +155,7 @@ The example config now references `OPENEDX_COMMON_VERSION: release/ulmo`, which
 matches the current upstream edx-platform Ulmo branch used by parity verifiers.
 
 The MFE Dockerfile at `infrastructure/tutor/mfe-build/Dockerfile` is the canonical
-Ulmo MFE build definition. It uses `release/ulmo.2` for all 12 MFE app source refs
+Ulmo MFE build definition. It uses `release/ulmo.2` tags for all 12 MFE app source refs
 and `release/ulmo` for Atlas translation pulls - this is correct.
 
 ---

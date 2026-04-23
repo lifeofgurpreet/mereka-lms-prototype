@@ -25,7 +25,7 @@ authority path.
 
 ## Current state
 
-- MFE apps: all 12 on `release/ulmo.2`
+- MFE apps: all 12 on the `release/ulmo.2` source tag/ref
 - Atlas translations: `release/ulmo`
 - Brand package: local `brand-mereka` materialized at `node_modules/@edx/brand`
 - Node base image: `mirror.gcr.io/library/node:24.11.0-bullseye-slim`

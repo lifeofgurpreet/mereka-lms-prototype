@@ -57,7 +57,7 @@ The current configuration pins:
 - `LMS_HOST=localhost`
 - `CMS_HOST=studio.localhost`
 - Open edX release branch: `release/ulmo`
-- MFE branch: `release/ulmo.2`
+- MFE source tag/ref: `release/ulmo.2`
 - Enabled local plugins: `mfe`, `discovery`, `forum`, `notes`, `xqueue`, `mereka_lms`, `mereka_lms_mfe_slots`.
 - Disabled by the local first-run wrapper: `aspects` and legacy `ecommerce`. Aspects/Superset currently binds host port `8088` in Tutor Aspects 3.0.3; use the Kubernetes/devspace preview lane for analytics work unless you explicitly own that local port.
 

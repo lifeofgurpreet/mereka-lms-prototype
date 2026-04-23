@@ -134,7 +134,7 @@ run_offline_checks() {
   echo ""
 
   # -----------------------------------------------------------------------
-  # AC-ULMO-002: All MFE app source refs use release/ulmo in snapshot
+  # AC-ULMO-002: All MFE app source refs use the current Ulmo source tag
   # -----------------------------------------------------------------------
   echo "--- AC-ULMO-002: MFE source refs in snapshot Dockerfile ---"
 
@@ -145,7 +145,8 @@ run_offline_checks() {
 
     REDWOOD_COUNT=$(grep -c "frontend-app.*\.git#open-release/redwood" "$active_dockerfile" || true)
     MASTER_COUNT=$(grep -c "frontend-app.*\.git#master" "$active_dockerfile" || true)
-    ULMO_COUNT=$(grep -c "frontend-app.*\.git#release/ulmo" "$active_dockerfile" || true)
+    ULMO2_COUNT=$(grep -Ec "frontend-app.*\.git#release/ulmo\.2([[:space:]]|$)" "$active_dockerfile" || true)
+    PLAIN_ULMO_COUNT=$(grep -Ec "frontend-app.*\.git#release/ulmo([[:space:]]|$)" "$active_dockerfile" || true)
 
     if [[ "$REDWOOD_COUNT" -eq 0 ]]; then
       pass "No redwood-era ADD refs in ${active_label} (0 found)"
@@ -159,12 +160,18 @@ run_offline_checks() {
       fail "$MASTER_COUNT master-tracking frontend refs remain in ${active_label}"
     fi
 
-    if [[ "$ULMO_COUNT" -ge 12 ]]; then
-      pass "All active MFE apps use release/ulmo ($ULMO_COUNT refs found, expected >=12)"
-    elif [[ "$ULMO_COUNT" -ge 1 ]]; then
-      fail "Only $ULMO_COUNT ulmo refs found (expected >=12) — migration incomplete"
+    if [[ "$PLAIN_ULMO_COUNT" -eq 0 ]]; then
+      pass "No plain release/ulmo MFE source refs remain in ${active_label}"
     else
-      fail "No ulmo ADD refs in snapshot"
+      fail "$PLAIN_ULMO_COUNT plain release/ulmo MFE source refs remain in ${active_label}"
+    fi
+
+    if [[ "$ULMO2_COUNT" -ge 12 ]]; then
+      pass "All active MFE apps use release/ulmo.2 ($ULMO2_COUNT refs found, expected >=12)"
+    elif [[ "$ULMO2_COUNT" -ge 1 ]]; then
+      fail "Only $ULMO2_COUNT release/ulmo.2 refs found (expected >=12) — migration incomplete"
+    else
+      fail "No release/ulmo.2 ADD refs in snapshot"
     fi
   fi
 

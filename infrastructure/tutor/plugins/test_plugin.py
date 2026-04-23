@@ -41,6 +41,27 @@ def test_hooks():
         return False
 
 
+def test_mfe_common_version_default_wins_after_tutormfe():
+    """Mereka owns the default MFE source tag, even if tutormfe loads later."""
+    try:
+        import mereka_lms  # noqa: F401
+        import tutormfe.plugin  # noqa: F401
+        from tutor import hooks
+
+        defaults = dict(hooks.Filters.CONFIG_DEFAULTS.iterate())
+        actual = defaults.get("MFE_COMMON_VERSION")
+        expected = "release/ulmo.2"
+        if actual != expected:
+            message = f"✗ MFE_COMMON_VERSION default drifted: expected {expected}, got {actual}"
+            print(message)
+            return False
+        print(f"✓ MFE_COMMON_VERSION defaults to {expected}")
+        return True
+    except Exception as e:
+        print(f"✗ Failed to verify MFE_COMMON_VERSION default priority: {e}")
+        return False
+
+
 def test_syntax():
     """Test Python syntax is valid."""
     try:
@@ -61,6 +82,7 @@ if __name__ == "__main__":
         test_syntax(),
         test_import(),
         test_hooks(),
+        test_mfe_common_version_default_wins_after_tutormfe(),
     ]
 
     print("=" * 50)
