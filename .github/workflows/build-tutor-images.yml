@@ -51,6 +51,7 @@ on:
       - 'bin/lms-ops'
       # --- Post-build verification ---
       - 'scripts/qa/verify-build-provenance.sh'
+      - 'scripts/qa/verify-build-optimizations-render-delta-contract.sh'
       - 'scripts/qa/verify-control-plane-release-bundle-projection.sh'
       - 'scripts/qa/verify-openedx-image-branding.sh'
       - 'scripts/qa/verify-release-bundle.sh'
@@ -349,7 +350,17 @@ jobs:
       - name: Run rendered Dockerfile preflight tripwire
         env:
           TUTOR_VENV: ${{ github.workspace }}/.cache/venvs/tutor-preflight-py312
+          PREFLIGHT_RENDER_DELTA_ARTIFACT_DIR: ${{ github.workspace }}/var/ci/render-delta
         run: ./scripts/ci/preflight-check.sh
+
+      - name: Upload render preflight delta artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: render-preflight-render-delta-${{ github.run_id }}-${{ github.run_attempt }}
+          path: var/ci/render-delta/
+          if-no-files-found: warn
+          retention-days: 14
 
   prepare-build-context:
     name: Prepare Tutor Build Context

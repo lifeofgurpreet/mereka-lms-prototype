@@ -21,6 +21,7 @@ TUTOR_VENV="${TUTOR_VENV:-$REPO_ROOT/.ci-venv}"
 SYNC_SCRIPT="$REPO_ROOT/scripts/infra/sync-tutor-plugin-mirror.sh"
 SCOPE_MODE="${PREFLIGHT_CHECK_SCOPE:-}"
 CHANGED_FILES_RAW="${PREFLIGHT_CHECK_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
+RENDER_DELTA_ARTIFACT_DIR="${PREFLIGHT_RENDER_DELTA_ARTIFACT_DIR:-}"
 
 should_skip_scope() {
   local changed_path
@@ -66,6 +67,91 @@ export TUTOR_VENV
 pass() { PASS=$((PASS + 1)); echo "  PASS: $1"; }
 fail() { FAIL=$((FAIL + 1)); echo "  FAIL: $1" >&2; }
 skip() { SKIP=$((SKIP + 1)); echo "  SKIP: $1"; }
+
+capture_render_delta_pair() {
+  local name="$1"
+  local raw_file="$2"
+  local patched_file="$3"
+  local pair_dir
+
+  [[ -n "$RENDER_DELTA_ARTIFACT_DIR" ]] || return 0
+  pair_dir="$RENDER_DELTA_ARTIFACT_DIR/$name"
+  mkdir -p "$pair_dir"
+
+  if [[ -f "$raw_file" ]]; then
+    cp "$raw_file" "$pair_dir/raw.Dockerfile"
+  else
+    printf 'missing raw render file: %s\n' "$raw_file" > "$pair_dir/raw.missing.txt"
+  fi
+
+  if [[ -f "$patched_file" ]]; then
+    cp "$patched_file" "$pair_dir/patched.Dockerfile"
+  else
+    printf 'missing patched render file: %s\n' "$patched_file" > "$pair_dir/patched.missing.txt"
+  fi
+
+  if [[ -f "$raw_file" && -f "$patched_file" ]]; then
+    diff -u "$raw_file" "$patched_file" > "$pair_dir/raw-vs-patched.diff" || true
+  fi
+}
+
+write_render_delta_manifest() {
+  [[ -n "$RENDER_DELTA_ARTIFACT_DIR" ]] || return 0
+  mkdir -p "$RENDER_DELTA_ARTIFACT_DIR"
+  python3 - "$RENDER_DELTA_ARTIFACT_DIR" "$REPO_ROOT" "$PASS" "$FAIL" "$SKIP" <<'PY'
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+artifact_dir = Path(sys.argv[1]).resolve()
+repo_root = Path(sys.argv[2]).resolve()
+pass_count = int(sys.argv[3])
+fail_count = int(sys.argv[4])
+skip_count = int(sys.argv[5])
+
+files = []
+for path in sorted(artifact_dir.rglob("*")):
+    if not path.is_file() or path.name == "render-delta-manifest.json":
+        continue
+    data = path.read_bytes()
+    files.append(
+        {
+            "path": path.relative_to(artifact_dir).as_posix(),
+            "bytes": len(data),
+            "sha256": hashlib.sha256(data).hexdigest(),
+        }
+    )
+
+manifest = {
+    "schema": "mereka/render-delta-preflight/v1",
+    "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    "repo_root": str(repo_root),
+    "github": {
+        "repository": os.environ.get("GITHUB_REPOSITORY", ""),
+        "workflow": os.environ.get("GITHUB_WORKFLOW", ""),
+        "run_id": os.environ.get("GITHUB_RUN_ID", ""),
+        "run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT", ""),
+        "ref": os.environ.get("GITHUB_REF", ""),
+        "sha": os.environ.get("GITHUB_SHA", ""),
+    },
+    "source": "scripts/ci/preflight-check.sh",
+    "contract": "infrastructure/tutor/patches/build-optimizations.allowed-delta.yaml",
+    "verifier": "scripts/qa/verify-build-optimizations-render-delta-contract.sh",
+    "counts": {"pass": pass_count, "fail": fail_count, "skip": skip_count},
+    "pairs": ["openedx", "openedx-contract-input", "mfe"],
+    "files": files,
+}
+(artifact_dir / "render-delta-manifest.json").write_text(
+    json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+    encoding="utf-8",
+)
+PY
+}
 
 # ── Setup CI-matching Tutor environment ──────────────────────────
 echo "=== Preflight Check: MFE/OpenEdX Dockerfile Invariants ==="
@@ -284,6 +370,8 @@ sanitized_raw.write_text(raw_text.replace(activation_block, ""))
 sanitized_patched.write_text(patched_text.replace(activation_block, ""))
 PY
 
+  capture_render_delta_pair "openedx-contract-input" "$sanitized_raw" "$sanitized_patched"
+
   RAW_RENDER_FILE="$sanitized_raw" \
   PATCHED_RENDER_FILE="$sanitized_patched" \
     "$delta_contract_verifier"
@@ -454,6 +542,10 @@ fi
 # ── Summary ──────────────────────────────────────────────────────
 echo ""
 echo "=== Preflight Summary: $PASS PASS, $FAIL FAIL, $SKIP SKIP ==="
+
+capture_render_delta_pair "openedx" "$RAW_OPENEDX_DF_SNAPSHOT" "$OPENEDX_DF"
+capture_render_delta_pair "mfe" "$RAW_MFE_DF_SNAPSHOT" "$MFE_DF"
+write_render_delta_manifest
 
 # Cleanup
 rm -f "$RAW_OPENEDX_DF_SNAPSHOT" "$RAW_MFE_DF_SNAPSHOT"

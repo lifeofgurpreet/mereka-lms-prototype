@@ -2608,10 +2608,12 @@
       "cadence": "per_pr_and_push",
       "canonical": true,
       "ci_binding": [
-        "ci_static"
+        "ci_static",
+        "workflow_direct"
       ],
       "ci_entrypoints": [
-        "ci_static"
+        "ci_static",
+        "workflow_direct"
       ],
       "env_scope": [
         "global"
@@ -2620,7 +2622,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-build-optimizations-render-delta-contract.sh",
-      "reference_count": 9,
+      "reference_count": 12,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -19024,7 +19026,7 @@
       "release_blocking": 419
     },
     "total_verify_scripts": 638,
-    "workflow_direct_bound": 72
+    "workflow_direct_bound": 73
   },
   "version": "1"
 }

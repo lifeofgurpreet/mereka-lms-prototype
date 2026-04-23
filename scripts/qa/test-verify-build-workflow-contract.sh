@@ -170,6 +170,7 @@ on:
       - 'assets/branding/**'
       - 'scripts/infra/prepare-tutor-build-context.sh'
       - 'scripts/infra/prepare-tutor-build-context-ci.sh'
+      - 'scripts/ci/preflight-check.sh'
       - 'scripts/ci/emit-build-metrics.sh'
       - 'scripts/ci/summarize-build-cache-health.sh'
       - 'scripts/ci/resolve_release_bundle_digests.py'
@@ -186,6 +187,7 @@ on:
       - 'scripts/infra/resolve-image-digest.sh'
       - 'scripts/lib/lane-normalize.sh'
       - 'scripts/qa/verify-build-provenance.sh'
+      - 'scripts/qa/verify-build-optimizations-render-delta-contract.sh'
       - 'scripts/qa/verify-openedx-image-branding.sh'
       - '.github/actions/emit-build-metrics/**'
       - 'scripts/qa/verify-release-bundle.sh'
@@ -233,9 +235,30 @@ jobs:
       - uses: actions/checkout@v4
       - id: select
         uses: ./.github/actions/select-build-lane
+  render-preflight:
+    runs-on: ubuntu-latest
+    needs: [resolve-build-scope, lint]
+    if: ${{ needs.resolve-build-scope.outputs.build_openedx == 'true' || needs.resolve-build-scope.outputs.build_mfe == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-python-env
+      - name: Run rendered Dockerfile preflight tripwire
+        env:
+          TUTOR_VENV: ${{ github.workspace }}/.cache/venvs/tutor-preflight-py312
+          PREFLIGHT_RENDER_DELTA_ARTIFACT_DIR: ${{ github.workspace }}/var/ci/render-delta
+        run: ./scripts/ci/preflight-check.sh
+      - name: Upload render preflight delta artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: render-preflight-render-delta-${{ github.run_id }}-${{ github.run_attempt }}
+          path: var/ci/render-delta/
+          if-no-files-found: warn
+          retention-days: 14
   prepare-build-context:
     runs-on: mereka-k8s-runners
-    needs: [resolve-build-scope, lint]
+    needs: [resolve-build-scope, lint, render-preflight]
     if: ${{ needs.resolve-build-scope.outputs.build_openedx == 'true' || needs.resolve-build-scope.outputs.build_mfe == 'true' }}
     steps:
       - name: Set up Python environment
@@ -764,6 +787,69 @@ run_expect_fail() {
 
 write_pass_fixture
 run_expect_pass "build workflow contract passes with scope-aware routing and post-push scan jobs"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    "          PREFLIGHT_RENDER_DELTA_ARTIFACT_DIR: ${{ github.workspace }}/var/ci/render-delta\n",
+    "",
+)
+p.write_text(text)
+PY
+run_expect_fail "missing render-preflight render-delta artifact export env is rejected"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    "      - name: Upload render preflight delta artifacts\n"
+    "        if: ${{ always() }}\n"
+    "        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1\n"
+    "        with:\n"
+    "          name: render-preflight-render-delta-${{ github.run_id }}-${{ github.run_attempt }}\n"
+    "          path: var/ci/render-delta/\n"
+    "          if-no-files-found: warn\n"
+    "          retention-days: 14\n",
+    "",
+)
+p.write_text(text)
+PY
+run_expect_fail "missing render-preflight render-delta artifact upload is rejected"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    "        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1\n",
+    "        uses: actions/upload-artifact@v4\n",
+)
+p.write_text(text)
+PY
+run_expect_fail "unpinned render-preflight render-delta artifact upload is rejected"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    "    needs: [resolve-build-scope, lint, render-preflight]\n",
+    "    needs: [resolve-build-scope, lint]\n",
+)
+p.write_text(text)
+PY
+run_expect_fail "prepare-build-context without render-preflight dependency is rejected"
 
 write_pass_fixture
 python3 - "$tmpdir" <<'PY'

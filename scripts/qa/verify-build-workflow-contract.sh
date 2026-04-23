@@ -17,6 +17,7 @@ UPDATE_GITOPS_BLOCK="$(sed -n '/^  update-gitops:/,$p' "$BUILD_WF")"
 OPENEDX_CACHE_HEALTH_BLOCK="$(sed -n '/Verify OpenEdX build cache health/,/Generate image metadata/p' "$BUILD_WF")"
 RESOLVE_SCOPE_BLOCK="$(sed -n '/^  resolve-build-scope:/,/^  lint:/p' "$BUILD_WF")"
 SELECT_BUILD_LANE_BLOCK="$(sed -n '/^  select-build-lane:/,/^  prepare-build-context:/p' "$BUILD_WF")"
+RENDER_PREFLIGHT_BLOCK="$(sed -n '/^  render-preflight:/,/^  prepare-build-context:/p' "$BUILD_WF")"
 PREP_BLOCK="$(sed -n '/^  prepare-build-context:/,/^  build-openedx:/p' "$BUILD_WF")"
 BUILD_OPENEDX_BLOCK="$(sed -n '/^  build-openedx:/,/^  build-mfe:/p' "$BUILD_WF")"
 BUILD_MFE_BLOCK="$(sed -n '/^  build-mfe:/,/^  scan-openedx-image:/p' "$BUILD_WF")"
@@ -243,6 +244,7 @@ required_trigger_paths=(
   "assets/branding/**"
   "scripts/infra/prepare-tutor-build-context.sh"
   "scripts/infra/prepare-tutor-build-context-ci.sh"
+  "scripts/ci/preflight-check.sh"
   "scripts/ci/emit-build-metrics.sh"
   "scripts/ci/summarize-build-cache-health.sh"
   "scripts/ci/resolve_release_bundle_digests.py"
@@ -261,6 +263,7 @@ required_trigger_paths=(
   "scripts/infra/resolve-image-digest.sh"
   "scripts/lib/lane-normalize.sh"
   "scripts/qa/verify-build-provenance.sh"
+  "scripts/qa/verify-build-optimizations-render-delta-contract.sh"
   "scripts/qa/verify-openedx-image-branding.sh"
   "scripts/qa/verify-release-bundle.sh"
   "scripts/qa/verify-release-object.sh"
@@ -425,6 +428,33 @@ if [[ "$PREP_BLOCK" == *'openedx-build-context.tgz'* && "$PREP_BLOCK" == *'mfe-b
   pass "prepare-build-context job packages target-specific artifacts into one shared bundle"
 else
   fail "prepare-build-context job missing shared build-context bundle contract"
+fi
+
+if [[ "$RENDER_PREFLIGHT_BLOCK" == *'Run rendered Dockerfile preflight tripwire'* \
+   && "$RENDER_PREFLIGHT_BLOCK" == *'PREFLIGHT_RENDER_DELTA_ARTIFACT_DIR:'* \
+   && "$RENDER_PREFLIGHT_BLOCK" == *'var/ci/render-delta'* \
+   && "$RENDER_PREFLIGHT_BLOCK" == *'./scripts/ci/preflight-check.sh'* ]]; then
+  pass "render-preflight exports raw-vs-patched render-delta evidence from preflight"
+else
+  fail "render-preflight must set PREFLIGHT_RENDER_DELTA_ARTIFACT_DIR=var/ci/render-delta when running preflight-check.sh"
+fi
+
+if [[ "$RENDER_PREFLIGHT_BLOCK" == *'Upload render preflight delta artifacts'* \
+   && "$RENDER_PREFLIGHT_BLOCK" == *'if: ${{ always() }}'* \
+   && "$RENDER_PREFLIGHT_BLOCK" == *'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a'* \
+   && "$RENDER_PREFLIGHT_BLOCK" == *'render-preflight-render-delta-${{ github.run_id }}-${{ github.run_attempt }}'* \
+   && "$RENDER_PREFLIGHT_BLOCK" == *'path: var/ci/render-delta/'* \
+   && "$RENDER_PREFLIGHT_BLOCK" == *'if-no-files-found: warn'* \
+   && "$RENDER_PREFLIGHT_BLOCK" == *'retention-days: 14'* ]]; then
+  pass "render-preflight uploads render-delta artifacts on success or failure"
+else
+  fail "render-preflight missing always-on render-delta artifact upload pinned to actions/upload-artifact v7.0.1"
+fi
+
+if [[ "$PREP_BLOCK" == *'needs:'* && "$PREP_BLOCK" == *'render-preflight'* ]]; then
+  pass "prepare-build-context waits for render-preflight contract proof"
+else
+  fail "prepare-build-context must depend on render-preflight before packaging build contexts"
 fi
 
 if [[ "$BUILD_OPENEDX_BLOCK" == *'prepare-build-context'* ]]; then
