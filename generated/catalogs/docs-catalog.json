@@ -6871,6 +6871,15 @@
     "freshness_risk": "low",
     "last_verified_or_updated": null,
     "owner": null,
+    "path": "ops/monitoring/upptime-probe-inventory.yaml",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
     "path": "ops/playbooks/CADDY_DOMAIN_ROUTING_CHANGE.md",
     "status": "supporting",
     "type": "runbook"
@@ -8006,6 +8015,15 @@
     "last_verified_or_updated": "2026-03-12",
     "owner": "Platform Team",
     "path": "ops/runbooks/UI_UX_POSTDEPLOY_SMOKE.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/UPTIME_MONITORING.md",
     "status": "supporting",
     "type": "runbook"
   },
