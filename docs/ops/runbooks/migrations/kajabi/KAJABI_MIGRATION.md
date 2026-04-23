@@ -54,7 +54,7 @@ This creates `scripts/migrations/kajabi/output/openedx/users_import.csv` and `en
 
 ```bash
 source infrastructure/tutor/tutor-env.sh
-tutor local start -d
+make tutor-start
 
 # Users
 tutor local run --volume="$(pwd)/scripts/migrations/kajabi/openedx_bulk_import.py:/tmp/openedx_bulk_import.py:ro" \

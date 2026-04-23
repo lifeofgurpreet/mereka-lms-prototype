@@ -154,7 +154,8 @@ echo
 echo "Next Steps:"
 echo "  1. Prepare build context: ./scripts/infra/prepare-tutor-build-context.sh --target openedx"
 echo "  2. Rebuild image: ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast"
-echo "  3. Restart services: tutor local restart (or kubectl rollout restart)"
+echo "  3. Restart locally: make tutor-restart"
+echo "     Kubernetes rollout remains release-object GitOps authority."
 echo "  4. Test endpoint: curl http://localhost/metrics"
 echo
 echo "Documentation:"
