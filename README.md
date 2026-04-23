@@ -54,7 +54,7 @@ For day-to-day work after the sandbox exists:
 make tutor-start
 ```
 
-Run `make bootstrap` only when you need to refresh the repo-local Python tooling or pre-commit hooks. `make local-first-run` expands to the canonical four-step chain: `git submodule update --init --recursive`, `./scripts/qa/verify-cold-start-onboarding-contract.sh`, `./scripts/shared/setup-local.sh`, and `./scripts/infra/verify-local-bootstrap-readiness.sh`.
+Run `make bootstrap` only when you need to refresh the repo-local Python tooling or pre-commit hooks. `make local-first-run` expands to the canonical three-command chain: `git submodule update --init --recursive`, `./scripts/qa/verify-cold-start-onboarding-contract.sh`, and `./scripts/shared/setup-local.sh`. The setup script owns the rest of bootstrap, including the single initialized-state readiness pass via `./scripts/infra/verify-local-bootstrap-readiness.sh`.
 
 The source-level onboarding contract is [`scripts/qa/verify-cold-start-onboarding-contract.sh`](scripts/qa/verify-cold-start-onboarding-contract.sh).
 The local setup path initializes required submodules, builds `openedx:nightly` and `openedx-mfe:nightly`, points Tutor at those exact tags, and pulls third-party service images through `mirror.gcr.io` to avoid anonymous Docker Hub quota during first-run setup.

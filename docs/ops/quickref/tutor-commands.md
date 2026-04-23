@@ -386,10 +386,21 @@ Production MFE branding rollout:
 
 ```bash
 # Full repo-governed setup path
+make local-first-run
+```
+
+Manual equivalent when debugging the setup wrapper:
+
+```bash
+git submodule update --init --recursive
 ./scripts/qa/verify-cold-start-onboarding-contract.sh
 ./scripts/shared/setup-local.sh
-./scripts/infra/verify-local-bootstrap-readiness.sh
 ```
+
+`setup-local.sh` runs `./scripts/infra/verify-local-bootstrap-readiness.sh`
+exactly once after Tutor launch/start. Do not run it as a separate fourth
+`make local-first-run` step unless you are rechecking an already-initialized
+stack after a failure.
 
 ---
 

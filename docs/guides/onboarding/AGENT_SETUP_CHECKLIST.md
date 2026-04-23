@@ -1,6 +1,6 @@
 # Agent Setup Checklist
 
-_Audience: Agent Operators • Owner: Platform Team • Last verified: 2026-04-22 • Status: supporting_
+_Audience: Agent Operators • Owner: Platform Team • Last verified: 2026-04-23 • Status: supporting_
 
 ## ✅ Pre-Flight Checklist
 
@@ -23,14 +23,13 @@ cd /path/to/mereka-lms
 make local-first-run
 ```
 
-`make local-first-run` expands to `git submodule update --init --recursive`,
-`./scripts/qa/verify-cold-start-onboarding-contract.sh`,
-`./scripts/shared/setup-local.sh`, and
-`./scripts/infra/verify-local-bootstrap-readiness.sh`. The setup script creates
-or reuses `.venv`, renders Tutor through the canonical wrapper, prepares the
-rendered build contexts, builds `openedx:nightly` and `openedx-mfe:nightly`
-when their build-context labels are stale, launches the local Tutor stack,
-verifies readiness, and creates a local-only admin user. If
+`make local-first-run` expands to the canonical three-command chain:
+`git submodule update --init --recursive`,
+`./scripts/qa/verify-cold-start-onboarding-contract.sh`, and
+`./scripts/shared/setup-local.sh`. The setup script creates or reuses `.venv`,
+renders Tutor through the canonical wrapper, prepares the rendered build
+contexts, builds `openedx:nightly` and `openedx-mfe:nightly` when their
+build-context labels are stale, launches the local Tutor stack, runs the single initialized-state readiness pass via `./scripts/infra/verify-local-bootstrap-readiness.sh`, and creates a local-only admin user. If
 `LOCAL_ADMIN_PASSWORD` is unset, generated credentials are written to
 `tutor_env/local-admin-credentials.txt`.
 
