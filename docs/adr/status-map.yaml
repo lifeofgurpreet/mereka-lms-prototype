@@ -176,6 +176,11 @@ entries:
     bucket: rfc
     decision_status: proposed
     rollout_state: planned
+  ADR-042:
+    path: docs/adr/rfc/042-production-py-writer-authority.md
+    bucket: rfc
+    decision_status: proposed
+    rollout_state: planned
   RFC-claim-based-role-sync:
     path: docs/adr/rfc/RFC-claim-based-role-sync.md
     bucket: rfc

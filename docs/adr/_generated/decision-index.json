@@ -8,7 +8,7 @@
   "counts": {
     "accepted": 14,
     "historical": 12,
-    "rfc": 11
+    "rfc": 12
   },
   "entries": [
     {
@@ -537,6 +537,23 @@
       "amends": [
         "ADR-029",
         "ADR-033"
+      ]
+    },
+    {
+      "id": "ADR-042",
+      "title": "Django production.py Writer Authority — Resolving the Three-Layer Duplicate Trap",
+      "path": "docs/adr/rfc/042-production-py-writer-authority.md",
+      "bucket": "rfc",
+      "decision_status": "proposed",
+      "decision_type": "foundation",
+      "rollout_state": "planned",
+      "owner": "platform-team",
+      "read_next": [
+        "ADR-027"
+      ],
+      "supersedes": [],
+      "amends": [
+        "ADR-006"
       ]
     },
     {

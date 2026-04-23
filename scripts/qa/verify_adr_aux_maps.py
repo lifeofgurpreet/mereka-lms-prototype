@@ -18,7 +18,7 @@ def main():
     status_map = load_yaml(STATUS_MAP)
 
     errors = []
-    adrs = manifest.get("adrs", [])
+    adrs = manifest.get("entries", manifest.get("adrs", []))
     expected_ids = [adr["id"] for adr in adrs]
     expected_by_id = {adr["id"]: adr for adr in adrs}
 

@@ -141,6 +141,10 @@ entries:
     path: docs/adr/rfc/041-authorization-and-role-boundary-model.md
     bucket: rfc
     decision_type: domain
+  ADR-042:
+    path: docs/adr/rfc/042-production-py-writer-authority.md
+    bucket: rfc
+    decision_type: foundation
   RFC-claim-based-role-sync:
     path: docs/adr/rfc/RFC-claim-based-role-sync.md
     bucket: rfc

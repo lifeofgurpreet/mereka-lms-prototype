@@ -281,6 +281,15 @@ entries:
   decision_type: domain
   rollout_state: planned
   owner: auth-platform
+- id: ADR-042
+  path: docs/adr/rfc/042-production-py-writer-authority.md
+  title: Django production.py Writer Authority — Resolving the Three-Layer Duplicate
+    Trap
+  bucket: rfc
+  decision_status: proposed
+  decision_type: foundation
+  rollout_state: planned
+  owner: platform-team
 - id: RFC-claim-based-role-sync
   path: docs/adr/rfc/RFC-claim-based-role-sync.md
   title: Claim-Based Role Sync

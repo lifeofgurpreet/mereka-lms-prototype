@@ -64,6 +64,7 @@ Proposals stay out of the accepted ADR hot path until accepted.
 | ADR-039 | Translations and Internationalization Strategy | [rfc/039-translations-and-internationalization-strategy.md](rfc/039-translations-and-internationalization-strategy.md) |
 | ADR-040 | Internal Packages, Plugins, and Versioning Policy | [rfc/040-internal-packages-plugins-and-versioning-policy.md](rfc/040-internal-packages-plugins-and-versioning-policy.md) |
 | ADR-041 | Authorization and Role-Boundary Model | [rfc/041-authorization-and-role-boundary-model.md](rfc/041-authorization-and-role-boundary-model.md) |
+| ADR-042 | Django production.py Writer Authority — Resolving the Three-Layer Duplicate Trap | [rfc/042-production-py-writer-authority.md](rfc/042-production-py-writer-authority.md) |
 | RFC-claim-based-role-sync | Claim-Based Role Sync | [rfc/RFC-claim-based-role-sync.md](rfc/RFC-claim-based-role-sync.md) |
 | RFC-learning-slot-expansion-proposal | Learning Slot Expansion Proposal | [rfc/RFC-learning-slot-expansion-proposal.md](rfc/RFC-learning-slot-expansion-proposal.md) |
 

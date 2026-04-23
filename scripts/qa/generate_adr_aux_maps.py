@@ -18,7 +18,7 @@ def _write_generated_yaml(path: Path, payload: dict) -> None:
 
 def main() -> int:
     data = yaml.safe_load(MANIFEST.read_text(encoding="utf-8"))
-    adrs = sorted(data.get("adrs", []), key=lambda adr: adr.get("id", ""))
+    adrs = sorted(data.get("entries", data.get("adrs", [])), key=lambda adr: adr.get("id", ""))
     generated_on = data.get("generated_on")
 
     classification = {

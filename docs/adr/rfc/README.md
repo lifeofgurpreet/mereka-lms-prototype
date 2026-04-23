@@ -15,5 +15,6 @@ This queue contains proposals only. Files here are not current law.
 | ADR-039 | Translations and Internationalization Strategy | planned | [039-translations-and-internationalization-strategy.md](039-translations-and-internationalization-strategy.md) |
 | ADR-040 | Internal Packages, Plugins, and Versioning Policy | planned | [040-internal-packages-plugins-and-versioning-policy.md](040-internal-packages-plugins-and-versioning-policy.md) |
 | ADR-041 | Authorization and Role-Boundary Model | planned | [041-authorization-and-role-boundary-model.md](041-authorization-and-role-boundary-model.md) |
+| ADR-042 | Django production.py Writer Authority — Resolving the Three-Layer Duplicate Trap | planned | [042-production-py-writer-authority.md](042-production-py-writer-authority.md) |
 | RFC-claim-based-role-sync | Claim-Based Role Sync | planned | [RFC-claim-based-role-sync.md](RFC-claim-based-role-sync.md) |
 | RFC-learning-slot-expansion-proposal | Learning Slot Expansion Proposal | planned | [RFC-learning-slot-expansion-proposal.md](RFC-learning-slot-expansion-proposal.md) |
