@@ -1,7 +1,7 @@
 version: "2.0"
 metadata:
   description: "Active Tutor patch authority manifest. Source hooks and bake/HCL remain canonical wherever they can express the behavior."
-  last_updated: "2026-04-22"
+  last_updated: "2026-04-23"
   inventory: "docs/reference/architecture/TUTOR_PATCHES_INVENTORY.md"
   spec: "specs/tutor-configuration-resilience_spec.md"
 
@@ -104,6 +104,16 @@ patches:
     authority_class: "temporary_compatibility_layer"
     description: "Wraps the rendered MFE npm clean-install layer with retry/fallback behavior and explicit selector-drift failure."
     retirement_trigger: "tutormfe exposes npm install resilience as source-owned config or upstream render includes equivalent behavior."
+    required: true
+
+  - id: mfe-authn-helper-sync
+    module: "infrastructure/tutor/apply-patches.sh"
+    function: "sync_mfe_patch_helpers"
+    target: "tutor_env/env/plugins/mfe/build/mfe/patch-authn-*.py"
+    target_family: "mfe"
+    authority_class: "filesystem_sync"
+    description: "Copies repo-owned Authn dashboard/deep-route patch and verification helpers into the rendered MFE build context because the source-owned Dockerfile hook COPY/RUN instructions need those files inside the context."
+    retirement_trigger: "tutormfe or the repo-owned MFE Dockerfile source hook can declare these helper files as build-context payloads without apply-patches.sh copying them after render."
     required: true
 
   - id: mfe-pull-translations-retry

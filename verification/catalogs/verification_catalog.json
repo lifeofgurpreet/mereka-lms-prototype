@@ -2622,7 +2622,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-build-optimizations-render-delta-contract.sh",
-      "reference_count": 14,
+      "reference_count": 15,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -12367,7 +12367,7 @@
       "mutability": "mutating",
       "owner": "platform-core",
       "path": "scripts/qa/verify-patch-idempotency.sh",
-      "reference_count": 6,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -17705,7 +17705,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/qa/verify-tutor-patch-manifest-contract.sh",
-      "reference_count": 12,
+      "reference_count": 13,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

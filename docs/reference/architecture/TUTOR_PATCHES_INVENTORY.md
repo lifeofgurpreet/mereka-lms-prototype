@@ -40,6 +40,7 @@ The active chain is:
 | `mfe-slot-ownership.sh` | 15 | MFE | `MIGRATION_GUARD` | Strips stale Tutor Indigo slot ownership from generated `env.config.jsx` so retired external ownership cannot become active. | `verify-mfe-build-prereqs.sh`, footer slot contracts |
 | `mfe-prune-deprecated-shells.sh` | 17 | MFE | `MIGRATION_GUARD` | Removes generated legacy MFE shell/Caddy residue outside the active estate. | `test-mfe-prune-deprecated-shells.sh` |
 | `mfe-npm-install-resilience.sh` | 71 | MFE | `TEMPORARY_COMPATIBILITY_LAYER` | Wraps the exact rendered npm install layer with retry/fallback behavior until tutormfe exposes this line as source-owned config. | golden/idempotence/fail-loud fixture tests |
+| `apply-patches.sh` inline `sync_mfe_patch_helpers` | inline | MFE | `FILESYSTEM_SYNC` | Copies repo-owned Authn source/dist patch helpers into the rendered MFE build context because the source-owned MFE Dockerfile hook references those files with `COPY` and `RUN`. | `test-authn-deep-route-handoff-patch.sh`, `verify-tutor-patch-manifest-contract.sh`, render verifier |
 | `apply-patches.sh` inline `wrap_mfe_pull_translations_retry` | inline | MFE | `TEMPORARY_COMPATIBILITY_LAYER` | Rewrites rendered Atlas translation pull lines with retry loops to avoid late cold-build failure on transient GitHub/DNS errors. | preflight, Build Tutor Images proof |
 
 `scripts/qa/verify-tutor-patch-manifest-contract.sh` enforces that this manifest,
@@ -99,6 +100,33 @@ Current `build-optimizations.sh` delta ids from that contract:
 Owner: platform build authority lane. Review date: 2026-04-27 or before any PR
 that changes `build-optimizations.sh`.
 
+## Remaining MFE Post-Render Exception Ledger
+
+The repo still has a controlled MFE post-render layer. It is not a second MFE
+generator: the MFE source refs, runtime configuration, brand package materialization,
+Authn Dockerfile instructions, theme import, and slot config are source-owned in
+the Tutor plugins. The rows below are the remaining exceptions that either copy
+repo-owned payloads into the rendered build context or normalize exact upstream
+rendered lines that tutormfe 21 does not expose as source hooks.
+
+The patch manifest is the source of truth for exact functions, targets, authority
+classes, and retirement triggers. This ledger names the current owner and proof
+guard so the exception surface cannot grow silently.
+
+| Manifest Id | Current Owner | Exception Type | Why It Remains Outside Source Hooks | Retirement Trigger | Guard |
+|---|---|---|---|---|---|
+| `dependency-image-mirror-normalization` | platform build authority lane | temporary compatibility layer | tutormfe emits Dockerfile frontend, Node base, and Caddy base acquisition refs before a source hook can select mirrored images. | tutormfe exposes source-owned selectors for these refs, or local/CI cold starts no longer depend on anonymous Docker Hub acquisition. | `test-dependency-image-mirrors-patch.sh`, render preflight |
+| `oep48-brand-package-sync` | frontend platform lane | filesystem sync | The plugin owns the Dockerfile install/materialization instructions, but the local OEP-48 package tree still has to exist inside the rendered MFE build context. | tutormfe supports declaring local file package payloads without post-render filesystem sync. | `verify-mfe-build-prereqs.sh`, `verify-oep48-brand-package.sh` |
+| `mfe-theme-source-sync` | frontend platform lane | filesystem sync | The plugin owns the theme import/COPY instructions, but the SCSS/font source tree still has to be materialized under the rendered MFE context. | tutormfe supports declaring local theme-source payloads without post-render filesystem sync. | `verify-footer-parity.sh`, `verify-brand-parity.sh`, `verify-mfe-build-prereqs.sh` |
+| `mfe-slot-ownership-guard` | frontend platform lane | migration guard | Removes stale Tutor Indigo slot ownership from generated `env.config.jsx`; the active slot config is source-owned by `mereka_lms_mfe_slots.py`. | Fresh tutormfe renders no longer emit retired Indigo slot residue and absence is guarded in CI. | `verify-mfe-build-prereqs.sh` |
+| `mfe-prune-deprecated-shells` | platform build authority lane | migration guard | Prunes generated legacy MFE shell/Caddy residue that is outside the active MFE estate. | Upstream render stops emitting deprecated shells/routes and the fixture proves the patch is a no-op. | `test-mfe-prune-deprecated-shells.sh` |
+| `mfe-npm-install-resilience` | platform build authority lane | temporary compatibility layer | tutormfe emits the npm clean-install layer as rendered shell text; retry/fallback behavior cannot yet be expressed as source config. | tutormfe exposes npm install resilience as source-owned config or upstream render includes equivalent behavior. | `test-mfe-npm-install-resilience-patch.sh`, `verify-mfe-build-prereqs.sh` |
+| `mfe-authn-helper-sync` | frontend platform lane | filesystem sync | Source-owned MFE Dockerfile hooks reference repo-owned Authn patch/verify helpers; those helper files still need to be copied into the rendered build context. | tutormfe or the repo-owned MFE Dockerfile hook can declare helper files as build-context payloads without `apply-patches.sh` copying them after render. | `test-authn-deep-route-handoff-patch.sh`, `verify-tutor-patch-manifest-contract.sh`, `verify-tutor-config.sh` |
+| `mfe-pull-translations-retry` | platform build authority lane | temporary compatibility layer | tutormfe emits Atlas translation pulls as rendered RUN lines; cold builds need retry semantics for transient GitHub/DNS failures. | tutormfe exposes translation pull retry behavior as source-owned config or upstream includes equivalent retry semantics. | render preflight, Build Tutor Images proof |
+
+Review date: 2026-04-27 or before any PR changes MFE entries in
+`apply-patches.sh`, `patch-manifest.yml`, or `infrastructure/tutor/plugins/_mereka_lms/mfe_dockerfile.py`.
+
 ## Remaining `dependency-image-mirrors.sh` Mutation Ledger
 
 Allowed render-delta id: `dependency-image-mirror-normalization`.
@@ -149,3 +177,6 @@ Every verifier or patch change in this lane must be classified before merge:
 | intentional architecture change | The desired architecture changed and docs/specs/tests were updated together. |
 
 If a change cannot be classified, stop and re-evaluate the authority boundary.
+MFE `apply-patches.sh` functions must be represented in `patch-manifest.yml` and
+the remaining MFE post-render exception ledger unless they are purely local shell
+harness code with no rendered artifact effect.

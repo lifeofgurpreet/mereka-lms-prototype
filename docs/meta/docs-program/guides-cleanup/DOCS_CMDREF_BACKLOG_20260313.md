@@ -49,7 +49,6 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/status/active/FRONTEND_CI_CEREMONY_REDUCTION_2026-03-02.md | 6 | Operations Lead | fix inline path references and missing commands |
 | docs/ops/runbooks/MOBILE_DEPLOYMENT.md | 6 | Operations Lead | fix inline path references and missing commands |
 | docs/concepts/analytics/CURRENT_ANALYTICS_STATE.md | 5 | Platform Architecture | fix inline path references and missing commands |
-| docs/meta/docs-program/openedx-repo-audit/BUILD_OPTIMIZATIONS_REFACTOR.md | 5 | Platform Architecture | fix inline path references and missing commands |
 | reports/2025/closures/MONGODB_ATLAS_MIGRATION.md | 5 | Platform Architecture | fix inline path references and missing commands |
 | docs/guides/onboarding/DEVELOPER_ONBOARDING.md | 5 | Docs Lead | fix inline path references and missing commands |
 | docs/ops/runbooks/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md | 5 | Unassigned (determine domain owner) | fix inline path references and missing commands |
@@ -190,11 +189,6 @@ _Generated: 2026-03-13 · Source: /tmp/cmdref-full-summary.json_
 | docs/reference/architecture/ASPECTS_DEPLOYMENT_READINESS.md | 263 | deploy/k8s/base/plugins/aspects/prometheusrule.yml |
 | reports/2026/closures/ASSESSMENT_EPIC_CLOSURE.md | 104 | docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md |
 | reports/2026/closures/ASSESSMENT_EPIC_CLOSURE.md | 68 | docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md |
-| docs/meta/docs-program/openedx-repo-audit/BUILD_OPTIMIZATIONS_REFACTOR.md | 274 | infrastructure/tutor/patches/build-opt-dockerfile.sh |
-| docs/meta/docs-program/openedx-repo-audit/BUILD_OPTIMIZATIONS_REFACTOR.md | 275 | infrastructure/tutor/patches/build-opt-settings.sh |
-| docs/meta/docs-program/openedx-repo-audit/BUILD_OPTIMIZATIONS_REFACTOR.md | 276 | infrastructure/tutor/patches/build-opt-routing.sh |
-| docs/meta/docs-program/openedx-repo-audit/BUILD_OPTIMIZATIONS_REFACTOR.md | 277 | infrastructure/tutor/patches/build-opt-theme-sync.sh |
-| docs/meta/docs-program/openedx-repo-audit/BUILD_OPTIMIZATIONS_REFACTOR.md | 280 | scripts/qa/verify-patch-modularity.sh |
 | docs/policies/architecture/COPY_TERMINOLOGY_CONTRACT.md | 142 | docs/concepts/architecture/MFE_FOOTER_V2_DESIGN.md |
 | docs/policies/architecture/COPY_TERMINOLOGY_CONTRACT.md | 262 | docs/concepts/architecture/MFE_FOOTER_V2_DESIGN.md |
 | docs/policies/architecture/COPY_TERMINOLOGY_CONTRACT.md | 263 | docs/concepts/architecture/TENANT_BRANDING_CONTRACT.md |

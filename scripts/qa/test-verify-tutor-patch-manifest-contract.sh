@@ -89,6 +89,8 @@ EOF
 
 Remaining `build-optimizations.sh` Mutation Ledger
 
+Remaining MFE Post-Render Exception Ledger
+
 build-optimizations-render-delta temporary compatibility layer build-optimizations.sh apply_build_optimizations_patch
 dependency-image-mirror-normalization temporary compatibility layer dependency-image-mirrors.sh apply_dependency_image_mirrors_patch
 mysql-root-host temporary compatibility layer mysql-root-host.sh apply_mysql_root_host_patch

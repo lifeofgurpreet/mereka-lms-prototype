@@ -255,6 +255,8 @@ for item in inactive_modules:
 
 if "Remaining `build-optimizations.sh` Mutation Ledger" not in inventory_text:
     failures.append("inventory doc missing Remaining build-optimizations.sh Mutation Ledger")
+if "Remaining MFE Post-Render Exception Ledger" not in inventory_text:
+    failures.append("inventory doc missing Remaining MFE Post-Render Exception Ledger")
 if "Review Rule" not in inventory_text:
     failures.append("inventory doc missing verifier/patch Review Rule")
 
