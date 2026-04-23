@@ -192,17 +192,12 @@ spec:
             limits:
               cpu: 250m
               memory: 512Mi
-          livenessProbe:
-            exec:
-              command:
-                - "celery"
-                - "--app=enterprise_access"
-                - "inspect"
-                - "ping"
-                - "--timeout=10"
-            initialDelaySeconds: 60
-            periodSeconds: 120
-            timeoutSeconds: 15
+          # Liveness probe removed per mereka-lms-9pnu.1 (2026-04-23).
+          # `celery inspect ping` as a liveness probe caused 31 restarts in dev
+          # on enterprise-access-worker. Same fork-cost + Redis broadcast
+          # failure mode as enterprise-catalog-worker. See sibling deployment
+          # for full rationale. OOMKill safety net unchanged. Readiness kept
+          # per bead scope. Investigation: docs/plans/INVESTIGATION_CELERY_PROBES.md.
           readinessProbe:
             exec:
               command:

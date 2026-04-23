@@ -187,18 +187,14 @@ spec:
             limits:
               cpu: 250m
               memory: 512Mi
-          livenessProbe:
-            exec:
-              command:
-                - "/venv/bin/celery"
-                - "-A"
-                - "enterprise_catalog"
-                - "inspect"
-                - "ping"
-                - "--timeout=10"
-            initialDelaySeconds: 60
-            periodSeconds: 120
-            timeoutSeconds: 15
+          # Liveness probe removed per mereka-lms-9pnu.1 (2026-04-23).
+          # `celery inspect ping` as a liveness probe caused 71 restarts in 13d
+          # on prod enterprise-catalog-worker. Fork cost + Redis broadcast
+          # latency exceeds any practical probe timeout; bumping to 30s did not
+          # help (see prod override catalog-worker-probe-fix.yaml in
+          # bbi-infrastructure — becomes obsolete for the liveness block).
+          # OOMKill safety net unchanged. Readiness kept per bead scope.
+          # Investigation: docs/plans/INVESTIGATION_CELERY_PROBES.md.
           readinessProbe:
             exec:
               command:
