@@ -104,7 +104,6 @@ the same ownership role.
    - `lms/static/sass/partials/_discovery.scss` owns `/courses` and `/courses/<id>/about`
    - `lms/templates/discovery/course_card.underscore` owns the course-card markup contract
    - `common/static/css/mereka-overrides.css` must not carry discovery/course-about presentation
-<<<<<<< HEAD
 7. Learner LMS dashboard ownership is route-specific:
    - `lms/static/sass/partials/_custom.scss` owns learner dashboard card/list/CTA presentation
    - `scss/theme.scss` must not carry learner dashboard card/list selectors
@@ -113,15 +112,10 @@ the same ownership role.
    - `lms/templates/certificates/accomplishment-base.html` owns the printable LMS certificate presentation
    - `infrastructure/tutor/themes/mereka/mfe/mereka.scss` owns authored styling for MFE progress/profile certificate surfaces
    - `scss/theme.scss` only owns the Studio `.view-certificates` empty-state CTA and must not become a second printable-certificate authority
-
-For the logged-out LMS landing experience, ownership is intentionally split by
-surface rather than by convenience:
-
-5. `lms/templates/index_overlay.html` owns the homepage shell structure and copy.
-6. `lms/static/sass/partials/_homepage.scss` owns the logged-out LMS homepage and
-   discovery-card presentation.
-7. `scss/theme.scss` should stay shared and generic; it must not become a second
-   authority for LMS-only homepage/card selectors.
+9. Logged-out LMS landing ownership is route-specific:
+   - `lms/templates/index_overlay.html` owns the homepage shell structure and copy.
+   - `lms/static/sass/partials/_homepage.scss` owns the logged-out LMS homepage and discovery-card presentation.
+   - `scss/theme.scss` should stay shared and generic; it must not become a second authority for LMS-only homepage/card selectors.
 
 If you need to change token values, start in `tokens.css`. If you need to change
 runtime override selectors, change the curated parts of
@@ -138,7 +132,7 @@ source infrastructure/tutor/tutor-env.sh
 ./scripts/infra/tutor-config-save.sh --set THEME_DIR="$(pwd)/infrastructure/tutor/themes" --set THEME_NAME=mereka
 ./scripts/infra/prepare-tutor-build-context.sh --target openedx
 ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
-tutor local start -d
+make tutor-start
 ```
 
 Tutor copies everything under `infrastructure/tutor/themes/` into `tutor_env/build/openedx/themes`, so the LMS/Studio entry points simply include the shared `scss/theme.scss`. Use `tutor local run lms ./manage.py lms collectstatic` if you need to force asset rebuilds during local development.
