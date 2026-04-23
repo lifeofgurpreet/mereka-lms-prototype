@@ -163,8 +163,9 @@ if [[ ! -f "$BAKE_FILE" ]]; then
 fi
 
 BUILD_CONTEXT_SHA256="$(mereka_build_context_fingerprint "$CONTEXT_DIR_ABS")"
-if [[ "$SKIP_IF_CURRENT" == "1" ]] && mereka_image_matches_build_context_label "${IMAGE_REPO}:${PRIMARY_TAG}" "$BUILD_CONTEXT_SHA256"; then
-  echo "Current local Open edX image found: ${IMAGE_REPO}:${PRIMARY_TAG} matches rendered build context ${BUILD_CONTEXT_SHA256}; skipping build."
+if [[ "$SKIP_IF_CURRENT" == "1" ]] && \
+  mereka_image_matches_build_contract_labels "${IMAGE_REPO}:${PRIMARY_TAG}" "$BUILD_CONTEXT_SHA256" "$BUILD_PROFILE" "openedx"; then
+  echo "Current local Open edX image found: ${IMAGE_REPO}:${PRIMARY_TAG} matches rendered build context ${BUILD_CONTEXT_SHA256}, build profile ${BUILD_PROFILE}, and build scope openedx; skipping build."
   exit 0
 fi
 

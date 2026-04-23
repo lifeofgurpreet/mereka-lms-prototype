@@ -185,13 +185,13 @@ echo ""
 # Step 4: Build Images (if needed)
 echo -e "${BLUE}Step 4: Checking Docker images...${NC}"
 ./scripts/infra/ensure-buildx-dependency-mirror.sh
+# shellcheck source=scripts/infra/build-image-freshness.sh
+source scripts/infra/build-image-freshness.sh
 FORCE_LOCAL_IMAGE_BUILD="${FORCE_LOCAL_IMAGE_BUILD:-0}"
-local_build_freshness_args=()
+mapfile -t local_build_freshness_args < <(mereka_local_image_freshness_args)
 
 if [[ "$FORCE_LOCAL_IMAGE_BUILD" == "1" ]]; then
     echo -e "${YELLOW}⚠️  FORCE_LOCAL_IMAGE_BUILD=1 set; rebuilding local images through canonical helpers.${NC}"
-else
-    local_build_freshness_args=(--skip-if-current)
 fi
 
 ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast "${local_build_freshness_args[@]}"

@@ -577,8 +577,10 @@ docker image inspect openedx:nightly openedx-mfe:nightly >/dev/null
 ```
 
 The helpers route through `docker-bake.hcl`, stamp the resulting images with the
-rendered build-context fingerprint, and let `scripts/shared/setup-local.sh`
-rebuild instead of silently reusing stale local tags.
+rendered build-context fingerprint, build profile, and build scope, and let
+`scripts/shared/setup-local.sh` rebuild instead of silently reusing stale or
+wrong-class local tags. A local image is current only when all three labels match
+the requested helper invocation.
 
 Local builds also select the repo-owned BuildKit dependency-mirror builder via
 `./scripts/infra/ensure-buildx-dependency-mirror.sh`. That helper may recreate

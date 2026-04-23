@@ -118,9 +118,10 @@ run_expect_skip_if_current_rejected_for_push() {
 
 run_expect_skip_current_without_bake() {
   local label="$1"
-  shift
+  local expected_scope="$2"
+  shift 2
 
-  if ! EXPECTED_CONTEXT_SHA="$current_context_sha" PATH="$tmpdir/current-fakebin:$PATH" "$@" >/tmp/test-build-image-profile-guards-skip-current.out 2>&1; then
+  if ! EXPECTED_CONTEXT_SHA="$current_context_sha" EXPECTED_BUILD_PROFILE="fast" EXPECTED_BUILD_SCOPE="$expected_scope" PATH="$tmpdir/current-fakebin:$PATH" "$@" >/tmp/test-build-image-profile-guards-skip-current.out 2>&1; then
     echo "FAIL ${label}: expected current-image skip to succeed" >&2
     cat /tmp/test-build-image-profile-guards-skip-current.out >&2 || true
     exit 1
@@ -148,7 +149,21 @@ set -euo pipefail
 
 if [[ "${1:-}" == "image" && "${2:-}" == "inspect" ]]; then
   if [[ "${3:-}" == "--format" ]]; then
-    printf '%s\n' "${EXPECTED_CONTEXT_SHA:?}"
+    case "${4:-}" in
+      *'io.mereka.build-context-sha256'*)
+        printf '%s\n' "${EXPECTED_CONTEXT_SHA:?}"
+        ;;
+      *'io.mereka.build-profile'*)
+        printf '%s\n' "${EXPECTED_BUILD_PROFILE:?}"
+        ;;
+      *'io.mereka.build-scope'*)
+        printf '%s\n' "${EXPECTED_BUILD_SCOPE:?}"
+        ;;
+      *)
+        echo "unexpected docker label format: ${4:-}" >&2
+        exit 1
+        ;;
+    esac
     exit 0
   fi
   exit 0
@@ -164,7 +179,7 @@ exit 1
 EOF
 chmod +x "$tmpdir/current-fakebin/docker"
 
-# shellcheck source=../infra/build-context-fingerprint.sh
+# shellcheck source=scripts/infra/build-context-fingerprint.sh
 source "$ROOT_DIR/scripts/infra/build-context-fingerprint.sh"
 current_context_sha="$(mereka_build_context_fingerprint "$tmpdir/current-context")"
 
@@ -192,23 +207,27 @@ run_expect_skip_if_current_rejected_for_push \
 
 run_expect_skip_current_without_bake \
   "build-openedx-image skips Bake when local primary tag is current" \
+  "openedx" \
   bash "$ROOT_DIR/scripts/infra/build-openedx-image.sh" \
     --context-dir "$tmpdir/current-context" \
     --dockerfile "$tmpdir/current-context/Dockerfile" \
     --image-repo example/openedx \
     --primary-tag test \
     --secondary-tag test2 \
+    --build-profile fast \
     --output-mode docker \
     --skip-if-current
 
 run_expect_skip_current_without_bake \
   "build-mfe-image skips Bake when local primary tag is current" \
+  "mfe" \
   bash "$ROOT_DIR/scripts/infra/build-mfe-image.sh" \
     --context-dir "$tmpdir/current-context" \
     --dockerfile "$tmpdir/current-context/Dockerfile" \
     --image-repo example/mfe \
     --primary-tag test \
     --secondary-tag test2 \
+    --build-profile fast \
     --output-mode docker \
     --skip-if-current
 
