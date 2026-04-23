@@ -164,29 +164,72 @@ fi
 
 TUTOR_ROOT=$(mktemp -d)
 export TUTOR_ROOT
+TUTOR_PLUGINS_ROOT="${TUTOR_PLUGINS_ROOT:-${TUTOR_PLUGINS_DIR:-$TUTOR_ROOT/plugins}}"
+export TUTOR_PLUGINS_ROOT
+export TUTOR_PLUGINS_DIR="$TUTOR_PLUGINS_ROOT"
 export REPO_ROOT
 PREP_SCRIPT="$REPO_ROOT/scripts/infra/prepare-tutor-build-context.sh"
 RAW_OPENEDX_DF_SNAPSHOT="$(mktemp -t preflight-openedx-raw.XXXXXX)"
 RAW_MFE_DF_SNAPSHOT="$(mktemp -t preflight-mfe-raw.XXXXXX)"
 
-if [[ ! -x "$SYNC_SCRIPT" ]]; then
-  echo "ERROR: Tutor plugin sync script not found or not executable at $SYNC_SCRIPT" >&2
+cleanup_preflight_state() {
   rm -f "$RAW_OPENEDX_DF_SNAPSHOT" "$RAW_MFE_DF_SNAPSHOT"
   rm -rf "$TUTOR_ROOT"
+}
+
+enable_required_tutor_plugin() {
+  local plugin="$1"
+  local enable_output
+
+  if ! enable_output="$("$TUTOR_VENV/bin/tutor" plugins enable "$plugin" 2>&1)"; then
+    echo "ERROR: Failed to enable required Tutor plugin: $plugin" >&2
+    printf '%s\n' "$enable_output" >&2
+    cleanup_preflight_state
+    exit 1
+  fi
+}
+
+require_enabled_plugin_from_mirror() {
+  local plugin="$1"
+  local expected_path="$TUTOR_PLUGINS_ROOT/$plugin.py"
+  local plugin_list
+
+  if ! plugin_list="$("$TUTOR_VENV/bin/tutor" plugins list 2>&1)"; then
+    echo "ERROR: Failed to list Tutor plugins after enabling $plugin" >&2
+    printf '%s\n' "$plugin_list" >&2
+    cleanup_preflight_state
+    exit 1
+  fi
+
+  if ! grep -Fq "$expected_path" <<< "$plugin_list"; then
+    echo "ERROR: Tutor plugin $plugin was not loaded from the preflight plugin mirror" >&2
+    echo "Expected plugin path: $expected_path" >&2
+    echo "Tutor plugin list:" >&2
+    printf '%s\n' "$plugin_list" >&2
+    cleanup_preflight_state
+    exit 1
+  fi
+}
+
+if [[ ! -x "$SYNC_SCRIPT" ]]; then
+  echo "ERROR: Tutor plugin sync script not found or not executable at $SYNC_SCRIPT" >&2
+  cleanup_preflight_state
   exit 1
 fi
 
 if [[ ! -x "$PREP_SCRIPT" ]]; then
   echo "ERROR: Canonical build-context script not found or not executable at $PREP_SCRIPT" >&2
-  rm -f "$RAW_OPENEDX_DF_SNAPSHOT" "$RAW_MFE_DF_SNAPSHOT"
-  rm -rf "$TUTOR_ROOT"
+  cleanup_preflight_state
   exit 1
 fi
 
+echo "Using Tutor plugin mirror: $TUTOR_PLUGINS_ROOT"
 "$SYNC_SCRIPT" >/dev/null
 "$TUTOR_VENV/bin/tutor" plugins disable mfe_oauth_fix >/dev/null 2>&1 || true
-"$TUTOR_VENV/bin/tutor" plugins enable mereka_lms >/dev/null 2>&1 || true
-"$TUTOR_VENV/bin/tutor" plugins enable mereka_lms_mfe_slots >/dev/null 2>&1 || true
+enable_required_tutor_plugin mereka_lms
+enable_required_tutor_plugin mereka_lms_mfe_slots
+require_enabled_plugin_from_mirror mereka_lms
+require_enabled_plugin_from_mirror mereka_lms_mfe_slots
 
 echo "Generating Dockerfiles (tutor config save + apply-patches.sh)..."
 "$TUTOR_VENV/bin/tutor" config save \
