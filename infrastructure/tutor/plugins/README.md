@@ -162,7 +162,11 @@ The plugin and `apply-patches.sh` form a complementary two-layer system:
 
 ```bash
 # Test locally
-tutor local launch
+make local-first-run
+
+# After the first local launch, re-apply config/runtime changes through wrappers
+make tutor-restart
+make local-proof
 
 # Check logs for errors
 tutor local logs -f lms
@@ -176,7 +180,7 @@ tutor local run lms ./manage.py lms check
 Enable Tutor debug mode:
 ```bash
 ./scripts/infra/tutor-config-save.sh --set DEBUG=true
-tutor local restart lms
+make tutor-restart
 ```
 
 Check plugin is loaded:

@@ -2,7 +2,8 @@
 # @covers AC-TCR-005, AC-TCR-012
 # @spec: tutor-configuration-resilience_spec.md
 # Restore Tutor config.yml from a timestamped backup created by tutor-config-save.sh,
-# then re-apply patches to bring the environment into a consistent state.
+# then rerun the governed render/prepare wrapper to bring the environment into a
+# consistent state.
 #
 # Usage:
 #   ./scripts/infra/tutor-config-rollback.sh              # List available backups
@@ -120,57 +121,29 @@ restore_backup() {
   echo -e "${GREEN}✓ config.yml restored from backup ($ts)${NC}"
   echo ""
 
-  # Re-run tutor config save to regenerate templates from restored config
-  echo -e "${BLUE}Step 1: Regenerating templates from restored config...${NC}"
-  local tutor_env_helper="$REPO_ROOT/infrastructure/tutor/tutor-env.sh"
-  if ! command -v tutor &>/dev/null && [[ -f "$tutor_env_helper" ]]; then
-    # shellcheck source=../../infrastructure/tutor/tutor-env.sh
-    source "$tutor_env_helper"
+  # Regenerate rendered templates, prepare build context, and verify through the
+  # same governed wrapper used by normal Tutor config changes.
+  echo -e "${BLUE}Step 1: Regenerating templates through governed Tutor wrapper...${NC}"
+  CONFIG_SAVE_SCRIPT="$REPO_ROOT/scripts/infra/tutor-config-save.sh"
+  if [[ ! -x "$CONFIG_SAVE_SCRIPT" ]]; then
+    echo -e "${RED}ERROR: tutor-config-save.sh not found or not executable${NC}" >&2
+    echo "  Expected: $CONFIG_SAVE_SCRIPT" >&2
+    exit 1
   fi
-  if command -v tutor &>/dev/null; then
-    tutor config save
-    echo -e "${GREEN}✓ Templates regenerated${NC}"
-  else
-    echo -e "${YELLOW}⚠ tutor not found — skipping template regeneration${NC}"
-    echo "  Expected repo-local Tutor virtualenv: $REPO_ROOT/.venv"
-  fi
-  echo ""
 
-  # Re-prepare Tutor build context
-  echo -e "${BLUE}Step 2: Re-preparing Tutor build context...${NC}"
-  PREP_SCRIPT="$REPO_ROOT/scripts/infra/prepare-tutor-build-context.sh"
-  if [[ -x "$PREP_SCRIPT" ]]; then
-    if "$PREP_SCRIPT" --target all; then
-      echo -e "${GREEN}✓ Tutor build context prepared${NC}"
-    else
-      echo -e "${RED}✗ Tutor build context preparation failed — check output above${NC}" >&2
-      exit 1
-    fi
+  if TUTOR_ROOT="$TUTOR_ENV" "$CONFIG_SAVE_SCRIPT"; then
+    echo -e "${GREEN}✓ Restored config rendered, prepared, and verified${NC}"
   else
-    echo -e "${YELLOW}⚠ prepare-tutor-build-context.sh not found or not executable${NC}"
-    echo "  Expected: $PREP_SCRIPT"
-  fi
-  echo ""
-
-  # Verify
-  echo -e "${BLUE}Step 3: Verifying configuration...${NC}"
-  VERIFY_SCRIPT="$REPO_ROOT/scripts/infra/verify-tutor-config.sh"
-  if [[ -x "$VERIFY_SCRIPT" ]]; then
-    if "$VERIFY_SCRIPT"; then
-      echo -e "${GREEN}✓ Verification passed${NC}"
-    else
-      echo -e "${YELLOW}⚠ Verification had issues — review output above${NC}"
-    fi
-  else
-    echo -e "${YELLOW}⚠ verify-tutor-config.sh not found — skipping verification${NC}"
+    echo -e "${RED}✗ Governed Tutor config wrapper failed — check output above${NC}" >&2
+    exit 1
   fi
   echo ""
 
   echo -e "${GREEN}=== Rollback Complete ===${NC}"
   echo ""
   echo "Next steps:"
-  echo "  tutor local restart    # Apply changes locally"
-  echo "  tutor k8s restart      # Apply changes on K8s"
+  echo "  make tutor-restart     # Apply restored config locally"
+  echo "  release-object GitOps promotion owns Kubernetes rollout"
 }
 
 # --- Main ---
