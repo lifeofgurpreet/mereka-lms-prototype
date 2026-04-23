@@ -15,6 +15,7 @@ Usage:
     [--build-profile <proof|fast>] \
     [--output-mode <push|docker>] \
     [--local-defaults] \
+    [--skip-if-current] \
     [--mutable-tag <tag>]
 
 Examples:
@@ -34,6 +35,7 @@ MUTABLE_TAG=""
 BUILD_PROFILE="proof"
 OUTPUT_MODE="push"
 LOCAL_DEFAULTS=0
+SKIP_IF_CURRENT=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -47,6 +49,7 @@ while [[ $# -gt 0 ]]; do
     --build-profile) BUILD_PROFILE="${2:-}"; shift 2 ;;
     --output-mode) OUTPUT_MODE="${2:-}"; shift 2 ;;
     --local-defaults) LOCAL_DEFAULTS=1; OUTPUT_MODE="docker"; shift ;;
+    --skip-if-current) SKIP_IF_CURRENT=1; shift ;;
     --mutable-tag) MUTABLE_TAG="${2:-}"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown argument: $1" >&2; usage >&2; exit 1 ;;
@@ -133,6 +136,11 @@ if [[ "$BUILD_PROFILE" != "proof" && -n "$MUTABLE_TAG" ]]; then
   exit 1
 fi
 
+if [[ "$SKIP_IF_CURRENT" == "1" && "$OUTPUT_MODE" != "docker" ]]; then
+  echo "--skip-if-current is only supported for local Docker output builds." >&2
+  exit 1
+fi
+
 IMAGE_TAGS=(
   "${IMAGE_REPO}:${PRIMARY_TAG}"
   "${IMAGE_REPO}:${SECONDARY_TAG}"
@@ -151,8 +159,8 @@ fi
 TAGS_CSV="$(IFS=,; printf '%s' "${IMAGE_TAGS[*]}")"
 LOCAL_CACHE_ROOT="$REPO_ROOT/.buildx-cache"
 BUILDX_BAKE_ARGS=()
-source "$REPO_ROOT/scripts/infra/buildx-local-builder.sh"
 source "$REPO_ROOT/scripts/infra/build-context-fingerprint.sh"
+source "$REPO_ROOT/scripts/infra/build-image-freshness.sh"
 
 # BUILDKIT_MAX_PARALLELISM — if exported by caller, buildkitd reads it directly.
 # docker buildx bake has no --opt flag; the env var is the correct mechanism.
@@ -162,10 +170,16 @@ if [[ ! -f "$BAKE_FILE" ]]; then
   exit 1
 fi
 
+BUILD_CONTEXT_SHA256="$(mereka_build_context_fingerprint "$CONTEXT_DIR_ABS")"
+if [[ "$SKIP_IF_CURRENT" == "1" ]] && mereka_image_matches_build_context_label "${IMAGE_REPO}:${PRIMARY_TAG}" "$BUILD_CONTEXT_SHA256"; then
+  echo "Current local MFE image found: ${IMAGE_REPO}:${PRIMARY_TAG} matches rendered build context ${BUILD_CONTEXT_SHA256}; skipping build."
+  exit 0
+fi
+
 mkdir -p "$LOCAL_CACHE_ROOT/mfe" "$LOCAL_CACHE_ROOT/mfe-${BUILD_PROFILE}"
+source "$REPO_ROOT/scripts/infra/buildx-local-builder.sh"
 ensure_local_buildx_builder
 DOCKERFILE_SHA256="$(mereka_file_sha256 "$DOCKERFILE_ABS")"
-BUILD_CONTEXT_SHA256="$(mereka_build_context_fingerprint "$CONTEXT_DIR_ABS")"
 
 BAKE_ENV=(
   "LOCAL_CACHE_DIR=${LOCAL_CACHE_ROOT}"
