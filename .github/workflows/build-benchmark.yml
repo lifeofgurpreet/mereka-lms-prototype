@@ -549,7 +549,7 @@ jobs:
         run: |
           set -euo pipefail
           docker buildx prune -af || true
-          rm -rf .buildx-cache/openedx-fast .buildx-cache/openedx-proof .buildx-cache/openedx-proof-nocache || true
+          rm -rf .buildx-cache || true
           mkdir -p var/ci
           {
             echo "MEASURED_JOB_L1_WIPE=true"
@@ -745,7 +745,7 @@ jobs:
         run: |
           set -euo pipefail
           docker buildx prune -af || true
-          rm -rf .buildx-cache/mfe-fast .buildx-cache/mfe-proof .buildx-cache/mfe-proof-nocache || true
+          rm -rf .buildx-cache || true
           mkdir -p var/ci
           {
             echo "MEASURED_JOB_L1_WIPE=true"

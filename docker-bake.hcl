@@ -112,26 +112,6 @@ variable "CACHE_TO_MFE" {
   default = ""  // Empty = no cache export; set by workflow on trusted main only
 }
 
-variable "OPENEDX_LOCAL_CACHE_FROM" {
-  default = ""
-}
-
-variable "OPENEDX_FAST_LOCAL_CACHE_FROM" {
-  default = ""
-}
-
-variable "MFE_LOCAL_CACHE_FROM" {
-  default = ""
-}
-
-variable "MFE_FAST_LOCAL_CACHE_FROM" {
-  default = ""
-}
-
-variable "LOCAL_CACHE_DIR" {
-  default = ".buildx-cache"
-}
-
 group "default" {
   targets = ["openedx-proof"]
 }
@@ -159,10 +139,6 @@ target "_openedx-common" {
   output = ["type=docker"]
   cache-from = [
     "type=registry,ref=${OPENEDX_CACHE_REF}",
-    "${OPENEDX_LOCAL_CACHE_FROM}",
-  ]
-  cache-to = [
-    "type=local,dest=${LOCAL_CACHE_DIR}/openedx,mode=max",
   ]
 }
 
@@ -221,15 +197,14 @@ target "openedx-fast" {
     MEREKA_BUILD_PROFILE           = "fast"
     MEREKA_CUSTOM_APP_INSTALL_MODE = "editable"
   }
-  // Local Open edX fast builds read shared/fallback caches and keep rich reuse
-  // in the persistent buildkitd worker cache. Do not add a client-side cache
-  // export here: it runs after the image is loaded and can make first-run
-  // setup look failed/noisy even when the artifact is already valid.
+  // Local Open edX fast builds read registry fallback caches and keep rich reuse
+  // in the persistent buildkitd worker cache. Do not add client-side local cache
+  // imports or exports here: that creates stale .buildx-cache lanes after image
+  // load and can make first-run setup look failed/noisy even when the artifact
+  // is already valid.
   cache-to = []
   cache-from = [
     "type=registry,ref=${OPENEDX_CACHE_REF}",
-    "${OPENEDX_FAST_LOCAL_CACHE_FROM}",
-    "${OPENEDX_LOCAL_CACHE_FROM}",
   ]
   labels = {
     "io.mereka.build-profile"              = "fast"
@@ -264,10 +239,6 @@ target "_mfe-common" {
   output = ["type=docker"]
   cache-from = [
     "type=registry,ref=${MFE_CACHE_REF}",
-    "${MFE_LOCAL_CACHE_FROM}",
-  ]
-  cache-to = [
-    "type=local,dest=${LOCAL_CACHE_DIR}/mfe,mode=max",
   ]
 }
 
@@ -320,15 +291,14 @@ target "mfe-proof-nocache" {
 target "mfe-fast" {
   inherits = ["_mfe-common"]
   tags = [for tag in split(",", MFE_FAST_TAGS) : trimspace(tag) if trimspace(tag) != ""]
-  // Local MFE fast builds read shared/fallback caches and keep rich reuse in
-  // the persistent buildkitd worker cache. Do not add a client-side cache
-  // export here: it runs after the image is loaded and can make first-run
-  // setup look hung even when the artifact is already valid.
+  // Local MFE fast builds read registry fallback caches and keep rich reuse in
+  // the persistent buildkitd worker cache. Do not add client-side local cache
+  // imports or exports here: that creates stale .buildx-cache lanes after image
+  // load and can make first-run setup look hung even when the artifact is already
+  // valid.
   cache-to = []
   cache-from = [
     "type=registry,ref=${MFE_CACHE_REF}",
-    "${MFE_FAST_LOCAL_CACHE_FROM}",
-    "${MFE_LOCAL_CACHE_FROM}",
   ]
   labels = {
     "io.mereka.build-profile"              = "fast"

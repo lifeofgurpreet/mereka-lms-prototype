@@ -157,7 +157,6 @@ if [[ "$CACHE_MODE" == "none" ]]; then
   BAKE_TARGET="${BAKE_TARGET}-nocache"
 fi
 TAGS_CSV="$(IFS=,; printf '%s' "${IMAGE_TAGS[*]}")"
-LOCAL_CACHE_ROOT="$REPO_ROOT/.buildx-cache"
 BUILDX_BAKE_ARGS=()
 source "$REPO_ROOT/scripts/infra/build-context-fingerprint.sh"
 source "$REPO_ROOT/scripts/infra/build-image-freshness.sh"
@@ -177,13 +176,11 @@ if [[ "$SKIP_IF_CURRENT" == "1" ]] && \
   exit 0
 fi
 
-mkdir -p "$LOCAL_CACHE_ROOT/mfe" "$LOCAL_CACHE_ROOT/mfe-${BUILD_PROFILE}"
 source "$REPO_ROOT/scripts/infra/buildx-local-builder.sh"
 ensure_local_buildx_builder
 DOCKERFILE_SHA256="$(mereka_file_sha256 "$DOCKERFILE_ABS")"
 
 BAKE_ENV=(
-  "LOCAL_CACHE_DIR=${LOCAL_CACHE_ROOT}"
   "MFE_CONTEXT=${CONTEXT_DIR}"
   "MFE_DOCKERFILE=${DOCKERFILE_RELATIVE}"
   "MFE_RENDERED_CONTEXT=${RENDERED_CONTEXT_LABEL}"
@@ -192,10 +189,6 @@ BAKE_ENV=(
   "MFE_BUILD_CONTEXT_SHA256=${BUILD_CONTEXT_SHA256}"
   "MFE_${BUILD_PROFILE^^}_TAGS=${TAGS_CSV}"
 )
-append_local_cache_from MFE_LOCAL_CACHE_FROM "$LOCAL_CACHE_ROOT/mfe"
-if [[ "$BUILD_PROFILE" == "fast" ]]; then
-  append_local_cache_from MFE_FAST_LOCAL_CACHE_FROM "$LOCAL_CACHE_ROOT/mfe-fast"
-fi
 if [[ -n "$CACHE_REF" && "$CACHE_MODE" != "none" ]]; then
   BAKE_ENV+=("MFE_CACHE_REF=${CACHE_REF}")
 fi

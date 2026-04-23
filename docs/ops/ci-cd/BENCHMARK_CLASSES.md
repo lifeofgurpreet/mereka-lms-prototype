@@ -238,7 +238,7 @@ docker buildx du   # Should show significant GiB of cached layers
 | image_family | P50 | P95 | Notes |
 |---|---|---|---|
 | openedx | ~71s observed | TBD | Single observed data point, run 24226842382, full cache hit |
-| mfe | 5–8 min observed | TBD | Warm path with local cache; still slower than openedx because of per-MFE npm overhead |
+| mfe | 5–8 min observed | TBD | Warm path with local BuildKit worker cache; still slower than openedx because of per-MFE npm overhead |
 
 #### Anti-uses
 

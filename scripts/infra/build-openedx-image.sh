@@ -152,7 +152,6 @@ if [[ "$CACHE_MODE" == "none" ]]; then
   BAKE_TARGET="${BAKE_TARGET}-nocache"
 fi
 TAGS_CSV="$(IFS=,; printf '%s' "${IMAGE_TAGS[*]}")"
-LOCAL_CACHE_ROOT="$REPO_ROOT/.buildx-cache"
 BUILDX_BAKE_ARGS=()
 source "$REPO_ROOT/scripts/infra/build-context-fingerprint.sh"
 source "$REPO_ROOT/scripts/infra/build-image-freshness.sh"
@@ -169,23 +168,17 @@ if [[ "$SKIP_IF_CURRENT" == "1" ]] && \
   exit 0
 fi
 
-mkdir -p "$LOCAL_CACHE_ROOT/openedx" "$LOCAL_CACHE_ROOT/openedx-${BUILD_PROFILE}"
 source "$REPO_ROOT/scripts/infra/buildx-local-builder.sh"
 ensure_local_buildx_builder
 DOCKERFILE_SHA256="$(mereka_file_sha256 "$DOCKERFILE_ABS")"
 
 BAKE_ENV=(
-  "LOCAL_CACHE_DIR=${LOCAL_CACHE_ROOT}"
   "OPENEDX_CONTEXT=${CONTEXT_DIR}"
   "OPENEDX_DOCKERFILE=${DOCKERFILE_RELATIVE}"
   "OPENEDX_RENDERED_DOCKERFILE_SHA256=${DOCKERFILE_SHA256}"
   "OPENEDX_BUILD_CONTEXT_SHA256=${BUILD_CONTEXT_SHA256}"
   "OPENEDX_${BUILD_PROFILE^^}_TAGS=${TAGS_CSV}"
 )
-append_local_cache_from OPENEDX_LOCAL_CACHE_FROM "$LOCAL_CACHE_ROOT/openedx"
-if [[ "$BUILD_PROFILE" == "fast" ]]; then
-  append_local_cache_from OPENEDX_FAST_LOCAL_CACHE_FROM "$LOCAL_CACHE_ROOT/openedx-fast"
-fi
 if [[ -n "$CACHE_REF" && "$CACHE_MODE" != "none" ]]; then
   BAKE_ENV+=("OPENEDX_CACHE_REF=${CACHE_REF}")
 fi

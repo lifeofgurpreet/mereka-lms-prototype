@@ -192,6 +192,56 @@ PY
   fi
 }
 
+check_bake_no_type_local() {
+  local json="$1"
+  local target="$2"
+  local field="$3"
+  local label="$4"
+  if JSON_DOC="$json" TARGET_NAME="$target" FIELD_NAME="$field" python3 - <<'PY'
+import json
+import os
+
+document = json.loads(os.environ["JSON_DOC"])
+target = document["target"][os.environ["TARGET_NAME"]]
+entries = target.get(os.environ["FIELD_NAME"]) or []
+for entry in entries:
+    if isinstance(entry, str):
+        parts = dict(
+            item.split("=", 1)
+            for item in entry.split(",")
+            if "=" in item
+        )
+        entry = parts
+    if isinstance(entry, dict) and entry.get("type") == "local":
+        raise SystemExit(1)
+PY
+  then
+    pass "$label"
+  else
+    fail "$label"
+  fi
+}
+
+check_bake_no_cache_to() {
+  local json="$1"
+  local target="$2"
+  local label="$3"
+  if JSON_DOC="$json" TARGET_NAME="$target" python3 - <<'PY'
+import json
+import os
+
+document = json.loads(os.environ["JSON_DOC"])
+value = document["target"][os.environ["TARGET_NAME"]].get("cache-to")
+if value not in (None, []):
+    raise SystemExit(1)
+PY
+  then
+    pass "$label"
+  else
+    fail "$label"
+  fi
+}
+
 bake_print() {
   local target="$1"
   shift
@@ -262,10 +312,20 @@ OPENEDX_PROOF_NOCACHE_JSON="$(bake_print openedx-proof-nocache \
   "OPENEDX_PROOF_TAGS=example.invalid/openedx:one,example.invalid/openedx:two" \
   "OPENEDX_CACHE_REF=example.invalid/openedx:cache" \
   "OPENEDX_PROOF_GHA_SCOPE=verify-openedx-proof")"
+OPENEDX_FAST_JSON="$(bake_print openedx-fast \
+  "OPENEDX_FAST_TAGS=example.invalid/openedx:fast" \
+  "OPENEDX_CACHE_REF=example.invalid/openedx:cache" \
+  "OPENEDX_LOCAL_CACHE_FROM=type=local,src=/tmp/stale-openedx" \
+  "OPENEDX_FAST_LOCAL_CACHE_FROM=type=local,src=/tmp/stale-openedx-fast")"
 MFE_PROOF_NOCACHE_JSON="$(bake_print mfe-proof-nocache \
   "MFE_PROOF_TAGS=example.invalid/mfe:one,example.invalid/mfe:two" \
   "MFE_CACHE_REF=example.invalid/mfe:cache" \
   "MFE_PROOF_GHA_SCOPE=verify-mfe-proof")"
+MFE_FAST_JSON="$(bake_print mfe-fast \
+  "MFE_FAST_TAGS=example.invalid/mfe:fast" \
+  "MFE_CACHE_REF=example.invalid/mfe:cache" \
+  "MFE_LOCAL_CACHE_FROM=type=local,src=/tmp/stale-mfe" \
+  "MFE_FAST_LOCAL_CACHE_FROM=type=local,src=/tmp/stale-mfe-fast")"
 
 check_bake_scalar "$OPENEDX_PROOF_JSON" "target.openedx-proof.context" "tutor_env/env/build/openedx" "openedx-proof resolves expected context"
 check_bake_scalar "$OPENEDX_PROOF_JSON" "target.openedx-proof.dockerfile" "Dockerfile" "openedx-proof resolves expected dockerfile"
@@ -291,6 +351,9 @@ if echo "$OPENEDX_PROOF_NOCACHE_JSON" | python3 -c "import json,sys; d=json.load
 else
   fail "openedx-proof-nocache must omit cache-from/cache-to for app-cache-cold proof"
 fi
+check_bake_object_array_contains "$OPENEDX_FAST_JSON" "target.openedx-fast.cache-from" "type=registry,ref=example.invalid/openedx:cache" "openedx-fast resolves registry fallback cache"
+check_bake_no_type_local "$OPENEDX_FAST_JSON" "openedx-fast" "cache-from" "openedx-fast ignores stale client-side type=local cache imports"
+check_bake_no_cache_to "$OPENEDX_FAST_JSON" "openedx-fast" "openedx-fast has no client-side cache export"
 
 check_bake_scalar "$MFE_PROOF_JSON" "target.mfe-proof.context" "tutor_env/env/plugins/mfe/build/mfe" "mfe-proof resolves expected context"
 check_bake_scalar "$MFE_PROOF_JSON" "target.mfe-proof.dockerfile" "Dockerfile" "mfe-proof resolves expected dockerfile"
@@ -317,6 +380,9 @@ if echo "$MFE_PROOF_NOCACHE_JSON" | python3 -c "import json,sys; d=json.load(sys
 else
   fail "mfe-proof-nocache must omit cache-from/cache-to for app-cache-cold proof"
 fi
+check_bake_object_array_contains "$MFE_FAST_JSON" "target.mfe-fast.cache-from" "type=registry,ref=example.invalid/mfe:cache" "mfe-fast resolves registry fallback cache"
+check_bake_no_type_local "$MFE_FAST_JSON" "mfe-fast" "cache-from" "mfe-fast ignores stale client-side type=local cache imports"
+check_bake_no_cache_to "$MFE_FAST_JSON" "mfe-fast" "mfe-fast has no client-side cache export"
 
 check_contains "$BUILD_WORKFLOW" "uses: docker/setup-buildx-action" "build-tutor-images uses buildx"
 check_contains "$BUILD_WORKFLOW" "./scripts/infra/build-openedx-image.sh" "build-tutor-images routes OpenEdX through the cache-aware helper"

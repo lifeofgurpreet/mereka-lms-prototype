@@ -113,27 +113,5 @@ else
   fail "unhealthy reason names builder container and stale process"
 fi
 
-BAKE_ENV=()
-append_local_cache_from TEST_LOCAL_CACHE_FROM "$TMP_DIR/missing-cache"
-if [[ "${#BAKE_ENV[@]}" -eq 0 ]]; then
-  pass "missing local cache index is not exposed to Bake"
-else
-  printf '%s\n' "${BAKE_ENV[@]}" >&2
-  fail "missing local cache index is not exposed to Bake"
-fi
-
-valid_cache="$TMP_DIR/valid-cache"
-mkdir -p "$valid_cache"
-: >"$valid_cache/index.json"
-BAKE_ENV=()
-append_local_cache_from TEST_LOCAL_CACHE_FROM "$valid_cache"
-if [[ "${#BAKE_ENV[@]}" -eq 1 ]] \
-  && [[ "${BAKE_ENV[0]}" == "TEST_LOCAL_CACHE_FROM=type=local,src=$valid_cache" ]]; then
-  pass "valid local cache index is exposed to Bake"
-else
-  printf '%s\n' "${BAKE_ENV[@]}" >&2
-  fail "valid local cache index is exposed to Bake"
-fi
-
 echo "Summary: PASS=$PASS FAIL=$FAIL"
 [[ "$FAIL" -eq 0 ]]

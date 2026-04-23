@@ -18,8 +18,9 @@ shared cache. Only trusted main-branch push builds write to L2; all other contex
 (PRs, forks, developer laptops, ARC runners) read from it. L1 (runner-local buildx
 daemon cache) is an ephemeral best-effort accelerator and is never authoritative.
 Local fast targets do not export client-side `type=local` cache after image load;
-they read shared/fallback refs and reuse the persistent BuildKit worker cache on
-that machine.
+they also do not import stale client-side `.buildx-cache/*-fast` dirs. They read
+registry fallback refs and reuse the persistent BuildKit worker cache on that
+machine.
 L3 (the `OPENEDX_CACHE_REF` / `MFE_CACHE_REF` final-image fallback, currently pointing
 at the `mereka-brand` tag) is a transitional fallback during the migration period and
 will be retired in Phase 5 after 30 consecutive days of stable L2 imports. When cache
@@ -34,7 +35,7 @@ trusted-main build log for `importing cache manifest` and `exporting cache manif
 
 | Level | Name | Ref | Write | Read | Notes |
 |-------|------|-----|-------|------|-------|
-| **L1** | Runner-local | BuildKit worker cache; optional imported local dirs where configured | Per-runner job | Same runner only | Ephemeral; wiped on ARC pod recycle or fastlane daemon reset. Best-effort only. Local fast targets must not export client-side cache after image load. |
+| **L1** | Runner-local | BuildKit worker cache | Per-runner job | Same runner only | Ephemeral; wiped on ARC pod recycle or fastlane daemon reset. Best-effort only. Local fast targets must not import/export client-side `type=local` cache dirs after image load. |
 | **L2** | Shared GHCR — OpenEdX | `ghcr.io/biji-biji-initiative/mereka-lms/cache/openedx:main-amd64` | Trusted main push only | All contexts | **Authoritative.** Written with `mode=max`. Primary import for all builds. |
 | **L2** | Shared GHCR — MFE | `ghcr.io/biji-biji-initiative/mereka-lms/cache/mfe:main-amd64` | Trusted main push only | All contexts | **Authoritative.** Written with `mode=max`. Primary import for MFE builds. |
 | **L3** | Final-image fallback — OpenEdX | `${OPENEDX_CACHE_REF}` (currently `docker.io/overhangio/openedx:21.0.0-cache`) | CI only | All contexts | **Transitional.** Secondary `cache-from` source. Mark for retirement at Phase 5. |
@@ -76,7 +77,7 @@ github.ref == 'refs/heads/main'
 | `workflow_dispatch` on main | L2 + L3 (both) | None | `event_name` is `workflow_dispatch`, not `push`. Reads only. If you need to force a cache refresh, use an empty commit to main instead. |
 | `workflow_dispatch` on branch | L2 + L3 (both) | None | Branch is not `refs/heads/main`. Reads only. |
 | ARC runner (any event) | L2 + L3 (both) | Depends on triggering event | ARC runners have no special trust. The guard is in the workflow, not in the runner identity. |
-| Developer laptop | L2 (read via `docker login`) | None | Local builds should never set `cache-to` against a shared ref. |
+| Developer laptop | L2/L3 registry refs plus local BuildKit worker cache | None | Local builds should never set `cache-to` against a shared ref or use client-side `type=local` cache dirs. |
 | Branch caches (future) | L2 main + branch-scoped | Branch ref only | PR-scoped `pr-<n>-amd64` refs are isolated; TTL-cleaned after 30 days. Not implemented in PR 1. |
 
 ### Intended bake config shape (target state — not yet in `docker-bake.hcl`)

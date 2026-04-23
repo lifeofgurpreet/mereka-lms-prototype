@@ -1323,7 +1323,7 @@ scripts:
       - exit code
     side_effects:
       - Pushes image tags to GHCR
-      - Writes local Docker images/cache when --output-mode docker or --local-defaults is used
+      - Writes local Docker images and reuses the BuildKit worker cache when --output-mode docker or --local-defaults is used
     dry_run: false
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/infra/build-openedx-image.sh --help"
@@ -1352,7 +1352,7 @@ scripts:
       - exit code
     side_effects:
       - Pushes image tags to GHCR
-      - Writes local Docker images/cache when --output-mode docker or --local-defaults is used
+      - Writes local Docker images and reuses the BuildKit worker cache when --output-mode docker or --local-defaults is used
     dry_run: false
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/infra/build-mfe-image.sh --help"
@@ -1362,15 +1362,16 @@ scripts:
     owner: platform-team
     purpose: >
       Shared helper sourced by Tutor image build entrypoints to select or
-      create a docker-container buildx builder for local Docker output, and to
-      expose local cache imports only when a valid cache index exists.
+      create a docker-container buildx builder for local Docker output so
+      local builds reuse the persistent BuildKit worker cache without
+      client-side type=local cache dirs.
     inputs:
       - OUTPUT_MODE
       - BUILDX_BUILDER (optional override)
       - MEREKA_LOCAL_BUILDX_BUILDER (optional builder name)
     outputs:
       - appends --builder argument to BUILDX_BAKE_ARGS for local docker builds
-      - appends cache import variables to BAKE_ENV when cache indexes exist
+      - prints the selected local BuildKit worker-cache builder
     side_effects:
       - may create or bootstrap a local docker-container buildx builder
     dry_run: false

@@ -42,13 +42,5 @@ for line in sys.stdin:
 
   docker buildx inspect --bootstrap "$builder_name" >/dev/null
   BUILDX_BAKE_ARGS+=(--builder "$builder_name")
-  echo "Using buildx builder '$builder_name' for local cache export"
-}
-
-append_local_cache_from() {
-  local env_name="$1"
-  local cache_dir="$2"
-
-  [[ -f "$cache_dir/index.json" ]] || return 0
-  BAKE_ENV+=("${env_name}=type=local,src=${cache_dir}")
+  echo "Using buildx builder '$builder_name' for local BuildKit worker cache"
 }
