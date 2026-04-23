@@ -137,6 +137,10 @@ for index, delta in enumerate(deltas, start=1):
         failures.append(
             f"{delta_id}: authority_class {authority_class!r} missing from {inventory_doc_path}"
         )
+    if not str(delta.get("owner") or "").strip():
+        failures.append(f"{delta_id}: missing owner")
+    if not str(delta.get("reason") or "").strip():
+        failures.append(f"{delta_id}: missing reason")
     if not str(delta.get("retirement_trigger") or "").strip():
         failures.append(f"{delta_id}: missing retirement_trigger")
     delta_source_value = delta.get("source_script")

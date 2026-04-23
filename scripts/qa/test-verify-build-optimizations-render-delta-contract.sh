@@ -29,6 +29,8 @@ review_date: "2026-04-27"
 allowed_deltas:
   - id: fixture-delta
     authority_class: temporary_compatibility_layer
+    owner: fixture owner
+    reason: Fixture reason for remaining post-render mutation.
     source_markers:
       - FIXTURE_MARKER
     retirement_trigger: Move fixture behavior to source hook.
@@ -181,6 +183,38 @@ else
   cat /tmp/build-delta-class.err >&2 || true
   fail "inventory authority class omission fails closed"
 fi
+
+write_contract "$patch_script" "$inventory_doc"
+
+python3 - "$contract" <<'PY'
+import sys
+from pathlib import Path
+
+contract = Path(sys.argv[1])
+lines = [
+    line for line in contract.read_text(encoding="utf-8").splitlines()
+    if not line.strip().startswith(("owner:", "reason:"))
+]
+contract.write_text("\n".join(lines) + "\n", encoding="utf-8")
+PY
+
+set +e
+BUILD_OPTIMIZATIONS_DELTA_CONTRACT="$contract" \
+  "$VERIFY" >/tmp/build-delta-owner-reason.out 2>/tmp/build-delta-owner-reason.err
+rc=$?
+set -e
+
+if [[ "$rc" -ne 0 ]] \
+  && grep -q "fixture-delta: missing owner" /tmp/build-delta-owner-reason.err \
+  && grep -q "fixture-delta: missing reason" /tmp/build-delta-owner-reason.err; then
+  pass "missing delta owner/reason fails closed"
+else
+  cat /tmp/build-delta-owner-reason.out >&2 || true
+  cat /tmp/build-delta-owner-reason.err >&2 || true
+  fail "missing delta owner/reason fails closed"
+fi
+
+write_contract "$patch_script" "$inventory_doc"
 
 cat >"$inventory_doc" <<'EOF'
 # Inventory

@@ -80,8 +80,8 @@ Do not add another post-render mutation unless the change is classified as
 `authority correction`, `obsolete expectation removal`, `temporary compatibility layer`,
 or `intentional architecture change`.
 
-The machine-readable source of truth for allowed ids, authority classes, source
-markers, retirement triggers, and raw-vs-patched regexes is
+The machine-readable source of truth for allowed ids, owners, reasons, authority
+classes, source markers, retirement triggers, and raw-vs-patched regexes is
 `infrastructure/tutor/patches/build-optimizations.allowed-delta.yaml`. This
 inventory intentionally does not repeat those fields. `verify-build-optimizations-render-delta-contract.sh`
 loads that YAML directly, and `verify-tutor-patch-manifest-contract.sh` derives
@@ -97,8 +97,8 @@ Current `build-optimizations.sh` delta ids from that contract:
 - `advanced-xblocks-production-copy`
 - `fast-profile-translation-wrappers`
 
-Owner: platform build authority lane. Review date: 2026-04-27 or before any PR
-that changes `build-optimizations.sh`.
+Every delta entry must carry a current owner and reason. Review date:
+2026-04-27 or before any PR that changes `build-optimizations.sh`.
 
 ## Remaining MFE Post-Render Exception Ledger
 

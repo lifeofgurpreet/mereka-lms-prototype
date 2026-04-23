@@ -163,31 +163,45 @@ default_policy: fail_closed
 allowed_deltas:
   - id: dependency-image-mirror-normalization
     authority_class: temporary_compatibility_layer
+    owner: fixture owner
+    reason: Fixture dependency image mirror reason.
     source_script: infrastructure/tutor/patches/dependency-image-mirrors.sh
     source_markers: [REPLACEMENTS, REQUIRED_BY_SUFFIX]
     retirement_trigger: Retire when source-owned.
   - id: base-assets-no-build-isolation
     authority_class: temporary_compatibility_layer
+    owner: fixture owner
+    reason: Fixture base assets reason.
     source_markers: [BASE_ASSETS_NO_BUILD_ISOLATION_INSTALL]
     retirement_trigger: Retire when source-owned.
   - id: uwsgi-plain-pip-fallback
     authority_class: temporary_compatibility_layer
+    owner: fixture owner
+    reason: Fixture uwsgi reason.
     source_markers: [UWSGI_PIP_INSTALL]
     retirement_trigger: Retire when source-owned.
   - id: production-build-profile-arg
     authority_class: intentional_architecture_change
+    owner: fixture owner
+    reason: Fixture build profile reason.
     source_markers: [PRODUCTION_BUILD_PROFILE_ARG]
     retirement_trigger: Retire when bake owns it.
   - id: translation-settings-preflight
     authority_class: intentional_architecture_change
+    owner: fixture owner
+    reason: Fixture translation preflight reason.
     source_markers: [TRANSLATION_SETTINGS_PREFLIGHT]
     retirement_trigger: Retire when source-owned.
   - id: advanced-xblocks-production-copy
     authority_class: intentional_architecture_change
+    owner: fixture owner
+    reason: Fixture advanced XBlock reason.
     source_markers: [ADVANCED_XBLOCKS_PRODUCTION_COPY]
     retirement_trigger: Retire when source-owned.
   - id: fast-profile-translation-wrappers
     authority_class: temporary_compatibility_layer
+    owner: fixture owner
+    reason: Fixture translation wrapper reason.
     source_markers: [TRANSLATION_REFRESH, wrap_translation_step]
     retirement_trigger: Retire when source-owned.
 EOF
@@ -281,6 +295,11 @@ mutate_delta_source_marker_missing() {
     "$1/infrastructure/tutor/patches/build-optimizations.allowed-delta.yaml"
 }
 
+mutate_delta_owner_reason_missing() {
+  sed -i '/^[[:space:]]*owner: fixture owner$/d;/^[[:space:]]*reason: /d' \
+    "$1/infrastructure/tutor/patches/build-optimizations.allowed-delta.yaml"
+}
+
 mutate_inline_wrapper_call_missing() {
   sed -i '/^wrap_mfe_pull_translations_retry$/d' \
     "$1/infrastructure/tutor/apply-patches.sh"
@@ -308,6 +327,9 @@ expect_fail "inventory missing delta id fails" \
 expect_fail "allowed delta source marker missing fails" \
   "base-assets-no-build-isolation: source marker missing from allowed-delta source" \
   mutate_delta_source_marker_missing
+expect_fail "allowed delta owner reason missing fails" \
+  "base-assets-no-build-isolation: missing owner" \
+  mutate_delta_owner_reason_missing
 expect_fail "inline wrapper definition without invocation fails" \
   "mfe-pull-translations-retry: function is not invoked by apply-patches.sh: wrap_mfe_pull_translations_retry" \
   mutate_inline_wrapper_call_missing

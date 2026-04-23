@@ -316,6 +316,10 @@ if active_has_build_delta:
         authority_class = str(delta.get("authority_class") or "")
         if authority_class not in allowed_authority_classes:
             failures.append(f"{label}: unsupported allowed-delta authority_class {authority_class!r}")
+        if not str(delta.get("owner") or "").strip():
+            failures.append(f"{label}: missing owner")
+        if not str(delta.get("reason") or "").strip():
+            failures.append(f"{label}: missing reason")
         if not str(delta.get("retirement_trigger") or "").strip():
             failures.append(f"{label}: missing retirement_trigger")
         markers = delta.get("source_markers")
