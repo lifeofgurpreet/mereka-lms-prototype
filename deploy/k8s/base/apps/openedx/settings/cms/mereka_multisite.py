@@ -9,9 +9,12 @@ package so it can be referenced from CMS middleware paths.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import logging
 import os
 from typing import Optional
 from urllib.parse import urlsplit, urlunsplit
+
+_log = logging.getLogger(__name__)
 
 
 _PATCHED = False
@@ -181,17 +184,31 @@ def _lms_root_url_for_host(host: str) -> Optional[str]:
     """
     from django.contrib.sites.models import Site
 
-    for candidate in _candidate_site_domains(host):
+    candidates = _candidate_site_domains(host)
+    for candidate in candidates:
         site = Site.objects.filter(domain__iexact=candidate).first()
         if not site:
             continue
         cfg = getattr(site, "configuration", None)
         values = (getattr(cfg, "site_values", None) or {}) if cfg else {}
-        lms_root = (values.get("LMS_ROOT_URL") or "").strip()
+        # CANONICAL_LMS_ROOT_URL is set on bridge rows where LMS_ROOT_URL must be
+        # the bridge domain itself (to satisfy the seeder's uniqueness guard) but the
+        # middleware needs to redirect to the real tenant LMS host. See bead cm9c.
+        lms_root = (
+            (values.get("CANONICAL_LMS_ROOT_URL") or "").strip()
+            or (values.get("LMS_ROOT_URL") or "").strip()
+        )
         if lms_root:
             return lms_root.rstrip("/")
         # Fallback: if we have a Site row but no SiteConfiguration override.
         return f"https://{candidate}".rstrip("/")
+    _log.warning(
+        "MerekaStudioSigninRedirectMiddleware: no Site row for host=%s, candidates=%s; "
+        "signin redirect will not be rewritten to the correct tenant LMS domain. "
+        "Ensure a django_site row exists for this host or one of its candidate domains.",
+        host,
+        candidates,
+    )
     return None
 
 

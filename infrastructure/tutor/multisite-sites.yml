@@ -79,3 +79,61 @@ sites:
       primary_color: "#450B7F"
       secondary_color: "#82C3C7"
       accent_color: "#9BCFD2"
+
+  # Bridge site row for SOF (bead mereka-lms-cm9c).
+  #
+  # Problem: Studio runs on studio.skillourfuture.academyv2.mereka.io, but the
+  # primary SOF Site row uses domain skillourfuture.academy.mereka.io (different
+  # base domain: academy vs academyv2). MerekaStudioSigninRedirectMiddleware strips
+  # the "studio." prefix and looks up the candidate
+  # "skillourfuture.academyv2.mereka.io" — which never matches the primary row.
+  # Result: _lms_root_url_for_host returns None, redirect is not rewritten, user
+  # lands on the primary Mereka authn page instead of the SOF authn page.
+  #
+  # Fix: this bridge row gives Django Sites a row for the candidate domain that
+  # the middleware resolves. LMS_ROOT_URL points to the canonical SOF LMS root so
+  # the middleware rewrites the redirect correctly.
+  #
+  # IMPORTANT — CMS_ROOT_URL and MFE_BASE_URL on this row are PER-ROW UNIQUENESS
+  # PLACEHOLDERS, not real routing endpoints. The audit-tenant-config-safety.sh
+  # gate requires both fields to be present and to have UNIQUE hosts across rows.
+  # The seeder's validate_site_host_ownership has the same uniqueness rule.
+  # The primary SOF row owns the academyv2.mereka.io variants of these hosts;
+  # the bridge therefore claims the academy.mereka.io variants (the opposite
+  # base — also unique to this row). Neither URL actually serves traffic for
+  # this bridge row — Studio runs on the academyv2 host (owned by primary).
+  # The middleware only reads LMS_ROOT_URL/CANONICAL_LMS_ROOT_URL; CMS/MFE here
+  # are schema-required placeholders only.
+  #
+  # Prune note (cm9c.1): apply-multisite-config.sh has no prune path. If this
+  # row is removed from YAML later, the DB row must be deleted manually via
+  # Django shell: Site.objects.filter(domain="skillourfuture.academyv2.mereka.io").delete()
+  - domain: skillourfuture.academyv2.mereka.io
+    name: Skill Our Future (studio bridge)
+    orgs:
+      - SKILLOURFUTURE
+    site_values:
+      domain: skillourfuture.academyv2.mereka.io
+      site_name: Skill Our Future
+      platform_name: Skill Our Future
+      # LMS_ROOT_URL must be the bridge domain itself (unique host) so the seeder's
+      # validate_site_host_ownership guard does not flag a collision with the primary
+      # SOF row (which owns skillourfuture.academy.mereka.io). The middleware reads
+      # CANONICAL_LMS_ROOT_URL preferentially when present; fall-through to LMS_ROOT_URL
+      # would point Studio back to the bridge domain, which is correct only for the
+      # middleware's purposes if CANONICAL_LMS_ROOT_URL is set.
+      LMS_ROOT_URL: https://skillourfuture.academyv2.mereka.io
+      CANONICAL_LMS_ROOT_URL: https://skillourfuture.academy.mereka.io
+      # Placeholder per-row-uniqueness values — see comment block above.
+      CMS_ROOT_URL: https://studio.skillourfuture.academy.mereka.io
+      MFE_BASE_URL: https://apps.skillourfuture.academy.mereka.io
+      THEME_NAME: mereka
+      ENABLE_COMPREHENSIVE_THEMING: true
+      course_org_filter:
+        - SKILLOURFUTURE
+      logo_image: https://academyv2.mereka.io/static/mereka/images/logo-horizontal.svg
+      logo_url: /
+      favicon_path: mereka/images/favicon.ico
+      primary_color: "#450B7F"
+      secondary_color: "#82C3C7"
+      accent_color: "#9BCFD2"

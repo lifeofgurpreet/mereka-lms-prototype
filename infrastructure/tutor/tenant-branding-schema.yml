@@ -60,6 +60,12 @@ keys:
     description: "Absolute HTTPS URL for the LMS root"
     base_default: null
 
+  CANONICAL_LMS_ROOT_URL:
+    type: url
+    required: false
+    description: "Optional override read by MerekaStudioSigninRedirectMiddleware._lms_root_url_for_host. When set, the middleware redirects users to this URL instead of LMS_ROOT_URL. Used by bridge Site rows whose LMS_ROOT_URL must be the bridge domain itself for per-row uniqueness, but whose Studio users should land on the canonical tenant LMS (cm9c bridge pattern). See docs/ops/runbooks/TENANT_SITE_CONFIGURATION_SEED.md."
+    base_default: null
+
   CMS_ROOT_URL:
     type: url
     required: true

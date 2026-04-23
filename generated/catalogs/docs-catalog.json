@@ -6564,6 +6564,15 @@
     "canonical_conflict_group": null,
     "freshness_risk": "low",
     "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/evidence/cm9c-seeder-dry-run-20260424.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
     "owner": "platform-release",
     "path": "ops/evidence/enterprise-21-upstream-archived-2026-04-19.md",
     "status": "supporting",
@@ -7961,6 +7970,15 @@
     "last_verified_or_updated": "2026-03-12",
     "owner": "Platform Team",
     "path": "ops/runbooks/TENANT_PROVISIONING.md",
+    "status": "supporting",
+    "type": "runbook"
+  },
+  {
+    "canonical_conflict_group": null,
+    "freshness_risk": "low",
+    "last_verified_or_updated": null,
+    "owner": null,
+    "path": "ops/runbooks/TENANT_SITE_CONFIGURATION_SEED.md",
     "status": "supporting",
     "type": "runbook"
   },
