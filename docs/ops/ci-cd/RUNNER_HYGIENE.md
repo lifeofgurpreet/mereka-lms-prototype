@@ -333,6 +333,13 @@ accommodate it by weakening LMS build verifiers. The hook must skip
 Docker/containerd prune while runner workers are active and ask operators to
 drain or clean the host during maintenance.
 
+If CI annotates a shared prune-lock fallback for
+`/tmp/fastlane-docker-prune.lock`, treat that the same way: the host-wide prune
+lock belongs to the runner provisioning layer. A per-job fallback lock may keep
+one job moving, but it does not prove cross-runner prune serialization. Track
+and fix that in the runner provisioning source, not in LMS build or verifier
+code.
+
 **Triage**:
 
 ```bash
@@ -340,6 +347,8 @@ ssh root@"${RUNNER_IP}" df -h / /srv
 ssh root@"${RUNNER_IP}" 'pgrep -af "Runner.Worker|docker pull|docker build|docker buildx (build|bake)|buildctl build" | sed -n "1,120p"'
 ssh root@"${RUNNER_IP}" /opt/runner/buildx-cleanup.sh --dry-run
 ssh root@"${RUNNER_IP}" 'grep -n "forcing prune\\|skipping prune to avoid containerd race" /usr/local/lib/gha-fastlane/cleanup.sh || true'
+ssh root@"${RUNNER_IP}" 'ls -ld /tmp /var/lock && \
+  ls -l /tmp/fastlane-docker-prune.lock /var/lock/fastlane-docker-prune.lock 2>/dev/null || true'
 ```
 
 **Fix path**:
