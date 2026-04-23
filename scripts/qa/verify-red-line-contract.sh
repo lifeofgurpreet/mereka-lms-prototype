@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # @covers AC-BUILD-RL-001
+# @covers AC-BAUTH-007, AC-BAUTH-009, AC-BAUTH-010
 # @spec: build-authority-deterministic-builds_spec.md
 #
 # verify-red-line-contract.sh — machine-checkable red lines from RFC-BUILD-AUTHORITY-001
@@ -296,7 +297,7 @@ check_red_line_4() {
       violations+=("$tmp_violations")
       verdict=1
     fi
-  done < <(find "$REPO_ROOT/.github/workflows" -name "*.yml" -o -name "*.yaml" -print0 2>/dev/null || true)
+  done < <(find "$REPO_ROOT/.github/workflows" \( -name "*.yml" -o -name "*.yaml" \) -print0 2>/dev/null || true)
 
   # Scan CI scripts
   while IFS= read -r -d '' f; do
@@ -512,12 +513,12 @@ echo "=== Red-Line Contract Verification (RFC-BUILD-AUTHORITY-001) ==="
 echo "    Bead: mereka-lms-jj97.21"
 echo ""
 
-rl1_result=0; check_red_line_1 || rl1_result=$?
-rl2_result=0; check_red_line_2 || rl2_result=$?
-rl3_result=0; check_red_line_3 || rl3_result=$?
-rl4_result=0; check_red_line_4 || rl4_result=$?
-rl5_result=0; check_red_line_5 || rl5_result=$?
-rl6_result=0; check_red_line_6 || rl6_result=$?
+check_red_line_1 || true
+check_red_line_2 || true
+check_red_line_3 || true
+check_red_line_4 || true
+check_red_line_5 || true
+check_red_line_6 || true
 
 echo ""
 echo "=== Summary ==="

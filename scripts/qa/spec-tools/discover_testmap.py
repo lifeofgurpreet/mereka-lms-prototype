@@ -24,6 +24,7 @@ except ImportError as exc:
 COVERS_RE = re.compile(r"(?://|#)\s*@covers\s+((?:AC-[A-Z]*-?\d+(?:\s*,\s*)*)+)")
 SPEC_RE = re.compile(r"(?://|#)\s*@spec:\s*(\S+)")
 AC_ID_RE = re.compile(r"\b(AC-(?:[A-Z]+-)?(\d{3,}))\b")
+CHECKBOX_AC_RE = re.compile(r"^\s*[-*]\s+\[[ xX]\]")
 SCAN_EXTENSIONS = {".sh", ".py", ".ts", ".js", ".tsx", ".jsx", ".yaml", ".yml"}
 
 
@@ -33,7 +34,7 @@ def parse_spec_acs(spec_path: Path) -> list[tuple[str, str]]:
     acs = []
     for line in content.splitlines():
         stripped = line.strip()
-        if stripped.startswith(("- [ ]", "* [ ]")):
+        if CHECKBOX_AC_RE.match(stripped):
             m = AC_ID_RE.search(line)
             if m:
                 ac_id = m.group(1)
@@ -78,7 +79,13 @@ def scan_dirs(
                 continue
             covers = scan_file(f)
             for ac_id, spec_name in covers.items():
-                if spec_filter and spec_name and spec_filter not in spec_name:
+                has_prefix = bool(re.match(r"AC-[A-Z]+-\d+", ac_id))
+                if (
+                    spec_filter
+                    and spec_name
+                    and spec_filter not in spec_name
+                    and not has_prefix
+                ):
                     continue
                 result.setdefault(ac_id, []).append(f)
     return result

@@ -30,6 +30,7 @@ except ImportError as exc:
 COVERS_RE = re.compile(r"(?://|#)\s*@covers\s+((?:AC-[A-Z]*-?\d+(?:\s*,\s*)*)+)")
 SPEC_RE = re.compile(r"(?://|#)\s*@spec:\s*(\S+)")
 AC_ID_RE = re.compile(r"\b(AC-(?:[A-Z]+-)?(\d{3,}))\b")
+CHECKBOX_AC_RE = re.compile(r"^\s*[-*]\s+\[[ xX]\]")
 SCAN_EXTENSIONS = {".sh", ".py", ".ts", ".js", ".tsx", ".jsx", ".yaml", ".yml"}
 
 
@@ -43,7 +44,7 @@ def parse_acceptance_criteria(md: str) -> list[tuple[str, str]]:
     """Extract AC IDs + line text from checkbox lines."""
     out: list[tuple[str, str]] = []
     for line in md.splitlines():
-        if line.strip().startswith(("- [ ]", "* [ ]")):
+        if CHECKBOX_AC_RE.match(line.strip()):
             m = AC_ID_RE.search(line)
             if m:
                 out.append((m.group(1), line.strip()))

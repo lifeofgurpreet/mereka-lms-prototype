@@ -207,6 +207,26 @@ This spec is satisfied when ALL of:
 - [ ] AC-BAUTH-009: `verify-build-workflow-contract.sh` and `verify-red-line-contract.sh` pass on `main`
 - [ ] AC-BAUTH-010: Heavy image builds use shared registry cache as primary authority
 
+### Verification Status
+
+This table classifies the current proof mapping. "Mapped" means the AC has a
+real verifier, workflow proof, monitoring source, or manual procedure in
+`specs/_generated/testmaps/build-authority-deterministic-builds_spec.testmap.yml`.
+It does not convert an unchecked AC into a completed one.
+
+| AC | Status | Current proof mapping |
+|---|---|---|
+| AC-BAUTH-001 | Partial | `verify-build-workflow-contract.sh` enforces the known build path set; comprehensive image-affecting file discovery remains deferred to the trigger-completeness verifier planned in RFC Phase 1. |
+| AC-BAUTH-002 | Mapped | `verify-build-workflow-contract.sh` rejects duplicate `build-tutor-images.yml` push path entries. |
+| AC-BAUTH-003 | Partial | `verify-build-workflow-contract.sh` proves GitHub App token wiring; live downstream PR authorship remains a manual proof in `AUTOMATION_AUTHORSHIP_AUDIT.md`. |
+| AC-BAUTH-004 | Manual | `BUILD_FAILURE_TAXONOMY.md` is the operator procedure; time-to-classification is proved during real failed-build triage. |
+| AC-BAUTH-005 | Mapped | `verify-ci-cache-policy.sh` and `verify-cold-start-onboarding-contract.sh` prove the implemented proof-class slice. |
+| AC-BAUTH-006 | Partial | `verify-build-workflow-contract.sh` proves timing artifacts are emitted; telemetry ingestion/dashboard closure remains tracked separately. |
+| AC-BAUTH-007 | Mapped | `verify-build-workflow-contract.sh`, `verify-red-line-contract.sh`, and `verify-build-optimizations-render-delta-contract.sh` guard owner boundaries. |
+| AC-BAUTH-008 | Partial | `verify-cold-start-onboarding-contract.sh`, the render-delta contract, and `CACHE_AUTHORITY.md` keep the explanation path current; onboarding feedback remains the human proof. |
+| AC-BAUTH-009 | Mapped | `verify-build-workflow-contract.sh` and `verify-red-line-contract.sh` are both explicit verifier entries. |
+| AC-BAUTH-010 | Mapped | `verify-ci-cache-policy.sh` and `verify-red-line-contract.sh` prove shared registry cache is the primary heavy-build authority. |
+
 ## Edge Cases
 
 - **Workflow_dispatch on main with no source changes**: must still produce a release object that is byte-identical to the prior push-driven build for the same SHA.

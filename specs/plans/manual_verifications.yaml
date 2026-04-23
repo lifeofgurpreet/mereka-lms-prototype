@@ -4275,3 +4275,43 @@ entries:
     runbook: docs/ops/runbooks/MFE_PLUGIN_SLOTS_RUNBOOK.md
     section: Cross-Spec Checks
     justification: Requires runtime network inspection
+- id: AC-BAUTH-001
+  spec: build-authority-deterministic-builds_spec.md
+  description: Every image-affecting file has an explicit conveyor trigger
+  verify:
+  - type: manual
+    runbook: docs/rfcs/RFC-BUILD-AUTHORITY-001.md
+    section: Phase 1
+    procedure: Reconcile any new image-affecting path class against build-tutor-images.yml on.push.paths and the build workflow contract verifier before merge.
+    justification: The current automated verifier enforces the known required path set; a comprehensive image-affecting file discovery verifier remains an explicit follow-up, not implied complete coverage.
+    file: scripts/qa/verify-build-workflow-contract.sh
+- id: AC-BAUTH-003
+  spec: build-authority-deterministic-builds_spec.md
+  description: Automation PR authorship is consistent and trusted
+  verify:
+  - type: manual
+    runbook: docs/ops/ci-cd/AUTOMATION_AUTHORSHIP_AUDIT.md
+    section: Next Verification Steps
+    procedure: After a graduation/promotion dispatch, confirm the resulting bbi-infrastructure PR author is the GitHub App identity and not github-actions[bot].
+    justification: Static workflow checks prove App-token wiring; final authorship truth requires a live downstream PR produced by GitHub.
+    file: docs/ops/ci-cd/AUTOMATION_AUTHORSHIP_AUDIT.md
+- id: AC-BAUTH-004
+  spec: build-authority-deterministic-builds_spec.md
+  description: Build failures can be classified in under 5 minutes
+  verify:
+  - type: manual
+    runbook: docs/ops/ci-cd/BUILD_FAILURE_TAXONOMY.md
+    section: Quick Classification Decision Tree
+    procedure: For each failed build, record the one bucket, evidence signal, and first owner action before rerun or code change.
+    justification: Time-to-classification is an operator workflow property that needs a real failure context; the taxonomy is the canonical procedure.
+    file: docs/ops/ci-cd/BUILD_FAILURE_TAXONOMY.md
+- id: AC-BAUTH-008
+  spec: build-authority-deterministic-builds_spec.md
+  description: The team can explain the build system without branch archaeology
+  verify:
+  - type: manual
+    runbook: docs/ops/ci-cd/CACHE_AUTHORITY.md
+    section: TL;DR
+    procedure: New developers should be able to explain the source-render-build-cache proof path from the cache authority runbook and developer proof matrix without reading branch history.
+    justification: Explainability is validated through onboarding/review use, while automated guards keep the linked docs and contract surfaces in place.
+    file: docs/ops/ci-cd/CACHE_AUTHORITY.md

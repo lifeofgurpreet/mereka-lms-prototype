@@ -1,6 +1,6 @@
 {
   "catalog": "specs/catalog.json",
-  "edge_count": 233,
+  "edge_count": 234,
   "edges": [
     {
       "edge_type": "generated_testmap",
@@ -81,6 +81,11 @@
       "edge_type": "testplan",
       "source": "specs/branding-system_spec.md",
       "target": "specs/plans/branding-system_testplan.md"
+    },
+    {
+      "edge_type": "generated_testmap",
+      "source": "specs/build-authority-deterministic-builds_spec.md",
+      "target": "specs/_generated/testmaps/build-authority-deterministic-builds_spec.testmap.yml"
     },
     {
       "edge_type": "generated_testmap",
@@ -1169,7 +1174,7 @@
     }
   ],
   "generated_by": "tools/specs/build_spec_graph.py",
-  "node_count": 195,
+  "node_count": 196,
   "nodes": [
     {
       "id": "specs/_generated/testmaps/advanced-assessment-xqueue_spec.testmap.yml",
@@ -1194,6 +1199,12 @@
       "node_type": "generated_testmap",
       "path": "specs/_generated/testmaps/branding-system_spec.testmap.yml",
       "title": "branding-system_spec.testmap.yml"
+    },
+    {
+      "id": "specs/_generated/testmaps/build-authority-deterministic-builds_spec.testmap.yml",
+      "node_type": "generated_testmap",
+      "path": "specs/_generated/testmaps/build-authority-deterministic-builds_spec.testmap.yml",
+      "title": "build-authority-deterministic-builds_spec.testmap.yml"
     },
     {
       "id": "specs/_generated/testmaps/ci-cd-pipeline_spec.testmap.yml",

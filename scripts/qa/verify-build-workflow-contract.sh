@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # @covers AC-CI-BUILD-001
+# @covers AC-BAUTH-001, AC-BAUTH-002, AC-BAUTH-003, AC-BAUTH-006, AC-BAUTH-007, AC-BAUTH-009
 # @spec: ci-cd-pipeline_spec.md
 #
 # Verify build-tutor-images.yml contract:
@@ -156,6 +157,15 @@ else
   fail "workflow must dispatch infra promotion via workflow_dispatch API"
 fi
 
+if [[ "$DISPATCH_DEV_PROMOTION_BLOCK" == *"actions/create-github-app-token@"* \
+   && "$DISPATCH_DEV_PROMOTION_BLOCK" == *'APP_TOKEN: ${{ steps.app-token.outputs.token }}'* \
+   && "$DISPATCH_DEV_PROMOTION_BLOCK" == *'token = os.environ["APP_TOKEN"]'* \
+   && "$DISPATCH_DEV_PROMOTION_BLOCK" == *"actions/workflows/promote-dev-image.yml/dispatches"* ]]; then
+  pass "dispatch-dev-promotion uses GitHub App token for cross-repo promotion dispatch"
+else
+  fail "dispatch-dev-promotion must use a GitHub App token for cross-repo promotion dispatch"
+fi
+
 if grep -Fq '"release_evidence": json.dumps(evidence, separators=(",", ":"))' "$BUILD_WF"; then
   pass "workflow sends canonical release_evidence JSON as workflow_dispatch input"
 else
@@ -185,6 +195,15 @@ if [[ "$UPDATE_GITOPS_BLOCK" == *"github.event_name == 'workflow_dispatch' && in
   pass "update-gitops job is gated on explicit proof-profile manual dispatch inputs"
 else
   fail "update-gitops job missing explicit proof-profile manual-dispatch gating"
+fi
+
+if [[ "$UPDATE_GITOPS_BLOCK" == *"actions/create-github-app-token@"* \
+   && "$UPDATE_GITOPS_BLOCK" == *'APP_TOKEN: ${{ steps.gitops-app-token.outputs.token }}'* \
+   && "$UPDATE_GITOPS_BLOCK" == *'repository: Biji-Biji-Initiative/bbi-infrastructure'* \
+   && "$UPDATE_GITOPS_BLOCK" == *'token: ${{ steps.gitops-app-token.outputs.token }}'* ]]; then
+  pass "manual update-gitops bridge uses GitHub App token for bbi-infrastructure checkout"
+else
+  fail "manual update-gitops bridge must use a GitHub App token for bbi-infrastructure checkout"
 fi
 
 if [[ "$UPDATE_GITOPS_BLOCK" == *"github.event_name == 'push' && github.ref == 'refs/heads/main'"* ]]; then
@@ -248,8 +267,6 @@ required_trigger_paths=(
   "scripts/ci/emit-build-metrics.sh"
   "scripts/ci/summarize-build-cache-health.sh"
   "scripts/ci/resolve_release_bundle_digests.py"
-  "infrastructure/tutor/apply-patches.sh"
-  "infrastructure/tutor/patches/**"
   "scripts/infra/resolve-build-scope.sh"
   "scripts/infra/install-cosign.sh"
   "scripts/infra/install-trivy.sh"
@@ -271,6 +288,35 @@ required_trigger_paths=(
   "scripts/qa/verify-mfe-runtime-contract.sh"
   ".github/actions/emit-build-metrics/**"
 )
+
+if python3 - "$BUILD_WF" <<'PY'
+import sys
+from collections import Counter
+from pathlib import Path
+
+try:
+    import yaml
+except ImportError as exc:
+    raise SystemExit(f"PyYAML required to inspect workflow paths: {exc}") from exc
+
+workflow_path = Path(sys.argv[1])
+payload = yaml.safe_load(workflow_path.read_text(encoding="utf-8")) or {}
+on_block = payload.get("on") or payload.get(True) or {}
+push_block = on_block.get("push") or {}
+paths = push_block.get("paths") or []
+duplicates = sorted(path for path, count in Counter(paths).items() if count > 1)
+if duplicates:
+    print("duplicate build workflow on.push.paths entries:", file=sys.stderr)
+    for item in duplicates:
+        print(f"  - {item}", file=sys.stderr)
+    raise SystemExit(1)
+PY
+then
+  pass "workflow push path filter has no duplicate entries"
+else
+  fail "workflow push path filter contains duplicate entries"
+fi
+
 for trigger_path in "${required_trigger_paths[@]}"; do
   if path_filter_has_entry "$trigger_path"; then
     pass "workflow path filter includes $trigger_path"
