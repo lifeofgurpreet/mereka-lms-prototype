@@ -3,6 +3,15 @@
 Status: active
 Last verified: 2026-04-21
 
+## Supersession Note - 2026-04-23
+
+This file remains a historical baseline for the cold-start/onboarding proof
+lane. It is no longer the current build-authority closure board. Use
+[`BUILD_AUTHORITY_CLOSURE_TRACKER_2026-04-23.md`](./BUILD_AUTHORITY_CLOSURE_TRACKER_2026-04-23.md)
+for the active closure plan and
+[`DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md`](../../reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md)
+for current proof-class definitions and accepted evidence snapshots.
+
 ## Current Verified State
 
 - `repo_truth`: current `main` is `48dc97927` after PR #2000. The local quick-start source contract, bounded build-optimization delta contract, repo-owned runner Buildx cleanup, Bootstrap Local Readiness timing artifact contract, k8s/onboarding truth-alignment contracts, and Build Tutor Images diagnostics coverage remain the app-repo truth surfaces.

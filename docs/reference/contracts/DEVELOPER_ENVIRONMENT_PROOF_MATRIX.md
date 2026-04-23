@@ -29,7 +29,9 @@ This contract keeps local development, CI bootstrap, devspace, and Kubernetes pr
 
 This matrix records proof classes and accepted evidence. It is not a live CI dashboard.
 For current-head status, query GitHub Actions with `gh run list`,
-`gh run view`, and the active tracking issue before calling a lane closed.
+`gh run view`, and the active tracking issue before calling a lane closed. Current
+closure work is tracked in
+[`BUILD_AUTHORITY_CLOSURE_TRACKER_2026-04-23.md`](../../status/active/BUILD_AUTHORITY_CLOSURE_TRACKER_2026-04-23.md).
 
 | Proof class | Latest accepted evidence | Status meaning | Current gap discipline |
 |---|---|---|---|
@@ -37,6 +39,20 @@ For current-head status, query GitHub Actions with `gh run list`,
 | Bootstrap Local Readiness | Latest green `bootstrap-local-readiness.yml` run for the commit being claimed | A clean repo-scoped `TUTOR_ROOT` rendered, launched, proved image provenance, and passed readiness. | A cancelled GitHub job after a successful launch phase is not a source failure; rerun before changing source or verifiers. |
 | App-cache-cold image build | Latest green `build-benchmark.yml` with `benchmark_class=app-cache-cold` and `image_family=both` | Open edX and MFE build helpers work with app-level BuildKit cache imports disabled. | Do not market this as pristine machine-cold proof; persistent runner daemon/base-image state may exist. |
 | Registry-warm Build Tutor Images | Latest green build workflow for the commit being claimed | GHCR image build, cache, provenance, and post-build checks passed for that commit. | Cache-health summaries must inspect the expected L2 app cache ref, not just any registry import. |
+
+## Latest Reconciled Evidence
+
+The rows below are the 2026-04-23 reconciliation snapshot, not a substitute for
+checking current GitHub Actions state before closing a change.
+
+| Date | Evidence | Commit | Result | Interpretation |
+|---|---|---|---|---|
+| 2026-04-23 | Build Tutor Images run `24855960086` | `9ff1073b8468248e5499876f94892ca1d2faa193` | success | Latest observed green image build lane after recent build-authority fixes. It is not promotion or live runtime proof. |
+| 2026-04-23 | Build Tutor Images run `24835465611` | `41c431e434e8705eba6cf9ca12f573183d9ba791` | success | Promotion-proven image build commit used for the dev promotion evidence chain. |
+| 2026-04-23 | Bootstrap Local Readiness run `24855960102` | `9ff1073b8468248e5499876f94892ca1d2faa193` | success | Recent local/bootstrap initialized-state proof. It does not prove browser-level or GitOps runtime behavior. |
+| 2026-04-23 | Bootstrap Local Readiness run `24835465623` | `41c431e434e8705eba6cf9ca12f573183d9ba791` | success | Local/bootstrap proof for the promotion-proven build commit. |
+| 2026-04-23 | bbi-infrastructure Post-Merge Cluster Validation run `24857292026` | `737321b3d8da77d4807da1e39d9ef846b43b1773` | success | Dev/staging Argo hard-refresh and LMS runtime-realization proof after infra false-green hardening. This is realization/runtime evidence, not local developer environment evidence. |
+| 2026-04-21 | Build Benchmark run `24721668598` | `39ae0fb868a9769b1fa557406152b37d73765035` | success | Latest accepted app-cache-cold benchmark proof, but stale for post-#2099 closure. It is not machine-pristine proof. |
 
 The proof set covers repo-owned pre-checkout generated workspace cleanup,
 Docker-level stale Tutor project cleanup, Buildx orphan cleanup, redacted
@@ -58,6 +74,9 @@ Known current gaps:
 - Bootstrap proof is initialized-state and image-provenance proof. It is not a
   branded runtime visual proof, browser login proof, promotion proof, or
   machine-cold image timing proof.
+- The latest reconciled Build Benchmark proof predates the benchmark hardening
+  closure work. Use `mereka-lms-0z5g.22` / #2045 for current benchmark
+  evidence before making new cache-class claims.
 - `app-cache-cold` disables app-level BuildKit cache imports and records the
   measured-job wipe state, but it can still run on a persistent runner with
   existing Docker daemon/base-image state.
@@ -90,5 +109,6 @@ Before a new devspace, preview namespace, or local workflow is called supported,
 
 - [VERIFIER_CONTRACT_CATALOG.md](VERIFIER_CONTRACT_CATALOG.md)
 - [PLATFORM_AUTHORITY_MAP.md](../../architecture/PLATFORM_AUTHORITY_MAP.md)
+- [BUILD_AUTHORITY_CLOSURE_TRACKER_2026-04-23.md](../../status/active/BUILD_AUTHORITY_CLOSURE_TRACKER_2026-04-23.md)
 - [QUICK_START_LOCAL.md](../../guides/onboarding/QUICK_START_LOCAL.md)
 - [RKE2_DEV_READINESS.md](../../ops/runbooks/RKE2_DEV_READINESS.md)

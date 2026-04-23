@@ -8,6 +8,16 @@
 
 ---
 
+## Current Authority Note - 2026-04-23
+
+This brief remains draft/non-authoritative. Current LMS build-authority closure
+tracking lives in
+[`BUILD_AUTHORITY_CLOSURE_TRACKER_2026-04-23.md`](./BUILD_AUTHORITY_CLOSURE_TRACKER_2026-04-23.md).
+Use this file only as historical Phase 2 context unless and until an infra-owned
+ADR/RFC supersedes it.
+
+---
+
 ## Why this brief exists
 
 Phase 1 (RFC-BUILD-AUTHORITY-001 + ADR-024) delivered shared GHCR cache + webhook receiver
