@@ -31,7 +31,10 @@ spec:
       rules:
 
         # ── MFE / Caddy Availability (Tier 2) ──────────────────────────
-        # Caddy exposes caddy_http_requests_total{code="..."} via /metrics.
+        # Caddy emits caddy_http_request_duration_seconds{code,handler,method,server}
+        # as a histogram; the _count suffix gives per-status-code request counts.
+        # caddy_http_requests_total has no `code` label (only handler+server) and
+        # cannot be used for error-rate computation. Verified live: 2026-04-23.
         # 5xx = server errors; exclude 4xx from denominator (client errors).
         - record: mereka:http_requests:availability_ratio_5m
           labels:
@@ -40,9 +43,9 @@ spec:
           expr: |
             clamp_min(
               1 - (
-                sum(rate(caddy_http_requests_total{job="caddy-metrics",code=~"5.."}[5m]))
+                sum(rate(caddy_http_request_duration_seconds_count{job="caddy-metrics",code=~"5.."}[5m]))
                 /
-                clamp_min(sum(rate(caddy_http_requests_total{job="caddy-metrics",code!~"4.."}[5m])), 1e-10)
+                clamp_min(sum(rate(caddy_http_request_duration_seconds_count{job="caddy-metrics",code!~"4.."}[5m])), 1e-10)
               ),
               0
             )
@@ -54,9 +57,9 @@ spec:
           expr: |
             clamp_min(
               1 - (
-                sum(rate(caddy_http_requests_total{job="caddy-metrics",code=~"5.."}[30m]))
+                sum(rate(caddy_http_request_duration_seconds_count{job="caddy-metrics",code=~"5.."}[30m]))
                 /
-                clamp_min(sum(rate(caddy_http_requests_total{job="caddy-metrics",code!~"4.."}[30m])), 1e-10)
+                clamp_min(sum(rate(caddy_http_request_duration_seconds_count{job="caddy-metrics",code!~"4.."}[30m])), 1e-10)
               ),
               0
             )
@@ -68,9 +71,9 @@ spec:
           expr: |
             clamp_min(
               1 - (
-                sum(rate(caddy_http_requests_total{job="caddy-metrics",code=~"5.."}[1h]))
+                sum(rate(caddy_http_request_duration_seconds_count{job="caddy-metrics",code=~"5.."}[1h]))
                 /
-                clamp_min(sum(rate(caddy_http_requests_total{job="caddy-metrics",code!~"4.."}[1h])), 1e-10)
+                clamp_min(sum(rate(caddy_http_request_duration_seconds_count{job="caddy-metrics",code!~"4.."}[1h])), 1e-10)
               ),
               0
             )
@@ -82,9 +85,9 @@ spec:
           expr: |
             clamp_min(
               1 - (
-                sum(rate(caddy_http_requests_total{job="caddy-metrics",code=~"5.."}[6h]))
+                sum(rate(caddy_http_request_duration_seconds_count{job="caddy-metrics",code=~"5.."}[6h]))
                 /
-                clamp_min(sum(rate(caddy_http_requests_total{job="caddy-metrics",code!~"4.."}[6h])), 1e-10)
+                clamp_min(sum(rate(caddy_http_request_duration_seconds_count{job="caddy-metrics",code!~"4.."}[6h])), 1e-10)
               ),
               0
             )
@@ -857,8 +860,8 @@ spec:
           expr: |
             clamp(
               1 - (
-                sum(increase(caddy_http_requests_total{job="caddy-metrics",code=~"5.."}[30d]))
-                / clamp_min(sum(increase(caddy_http_requests_total{job="caddy-metrics",code!~"4.."}[30d])), 1)
+                sum(increase(caddy_http_request_duration_seconds_count{job="caddy-metrics",code=~"5.."}[30d]))
+                / clamp_min(sum(increase(caddy_http_request_duration_seconds_count{job="caddy-metrics",code!~"4.."}[30d])), 1)
               ) / 0.005,
               0, 1
             )

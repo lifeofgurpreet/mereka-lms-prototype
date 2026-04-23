@@ -28,8 +28,8 @@ spec:
         - alert: CaddyHighErrorRate
           expr: |
             (
-              sum(rate(caddy_http_requests_total{job="caddy-metrics", code=~"5.."}[5m]))
-              / clamp_min(sum(rate(caddy_http_requests_total{job="caddy-metrics"}[5m])), 1e-10)
+              sum(rate(caddy_http_request_duration_seconds_count{job="caddy-metrics", code=~"5.."}[5m]))
+              / clamp_min(sum(rate(caddy_http_request_duration_seconds_count{job="caddy-metrics"}[5m])), 1e-10)
             ) > 0.01
           for: 5m
           labels:
