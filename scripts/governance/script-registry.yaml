@@ -1488,6 +1488,31 @@ scripts:
     proof_command: "bash -n scripts/infra/install-trivy.sh"
     criticality: release-supporting
 
+  - path: scripts/infra/install-syft.sh
+    owner: platform-team
+    purpose: >
+      Canonical Syft bootstrap for CI SBOM workflows. Installs the pinned
+      Syft release through a checksum-verified tagged installer and passes the
+      requested release tag explicitly so scan/SBOM jobs do not drift to latest.
+    inputs:
+      - SYFT_VERSION (optional; defaults to pinned release)
+      - SYFT_INSTALL_SHA (optional; defaults to pinned installer checksum)
+      - SYFT_INSTALL_URL (optional; defaults to the tagged upstream installer)
+      - INSTALL_DIR PATH (optional)
+      - CURL_CONNECT_TIMEOUT SECONDS (optional)
+      - CURL_MAX_TIME SECONDS (optional)
+      - CURL_RETRIES COUNT (optional)
+    outputs:
+      - installed syft binary in the resolved writable install directory
+      - stdout (resolved version output)
+    side_effects:
+      - downloads the pinned Syft installer and release artifact
+      - appends the install directory to GITHUB_PATH when available
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash -n scripts/infra/install-syft.sh"
+    criticality: release-supporting
+
   - path: scripts/qa/test-install-envsubst-fallback.sh
     owner: platform-team
     purpose: >
@@ -1518,6 +1543,23 @@ scripts:
     dry_run: false
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/qa/test-install-trivy-fallback.sh"
+    criticality: release-supporting
+
+  - path: scripts/qa/test-install-syft-helper.sh
+    owner: platform-team
+    purpose: >
+      Proves install-syft.sh passes the requested Syft release tag into the
+      checksum-verified installer instead of allowing the upstream script to
+      resolve latest.
+    inputs:
+      - none; uses isolated temp directories and fake curl/install stubs
+    outputs:
+      - stdout confirmation that the requested release tag was installed
+    side_effects:
+      - creates and removes temporary test fixtures under mktemp directories
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/test-install-syft-helper.sh"
     criticality: release-supporting
 
   - path: scripts/qa/test-verify-post-deploy-smoke.sh

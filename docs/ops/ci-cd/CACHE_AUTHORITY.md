@@ -21,9 +21,12 @@ Local fast targets do not export client-side `type=local` cache after image load
 they also do not import stale client-side `.buildx-cache/*-fast` dirs. They read
 registry fallback refs and reuse the persistent BuildKit worker cache on that
 machine.
-L3 (the `OPENEDX_CACHE_REF` / `MFE_CACHE_REF` final-image fallback, currently pointing
-at the `mereka-brand` tag) is a transitional fallback during the migration period and
-will be retired in Phase 5 after 30 consecutive days of stable L2 imports. When cache
+L3 (the `OPENEDX_CACHE_REF` / `MFE_CACHE_REF` final-image fallback) is a transitional
+fallback during the migration period. `docker-bake.hcl` carries upstream default cache
+refs, while CI overrides them to the current GHCR `mereka-brand` / `mereka-brand-fast`
+image refs through the canonical build helpers. L3 will be retired in Phase 5 after
+30 consecutive days of stable L2 imports; the active retirement/proof tracker is #2096.
+When cache
 breaks: (1) run `crane manifest <ref>` to check the manifest exists; (2) grep the latest
 trusted-main build log for `importing cache manifest` and `exporting cache manifest`;
 (3) if neither has run on main within 24 hours, trigger a refresh with
@@ -38,8 +41,8 @@ trusted-main build log for `importing cache manifest` and `exporting cache manif
 | **L1** | Runner-local | BuildKit worker cache | Per-runner job | Same runner only | Ephemeral; wiped on ARC pod recycle or fastlane daemon reset. Best-effort only. Local fast targets must not import/export client-side `type=local` cache dirs after image load. |
 | **L2** | Shared GHCR — OpenEdX | `ghcr.io/biji-biji-initiative/mereka-lms/cache/openedx:main-amd64` | Trusted main push only | All contexts | **Authoritative.** Written with `mode=max`. Primary import for all builds. |
 | **L2** | Shared GHCR — MFE | `ghcr.io/biji-biji-initiative/mereka-lms/cache/mfe:main-amd64` | Trusted main push only | All contexts | **Authoritative.** Written with `mode=max`. Primary import for MFE builds. |
-| **L3** | Final-image fallback — OpenEdX | `${OPENEDX_CACHE_REF}` (currently `docker.io/overhangio/openedx:21.0.0-cache`) | CI only | All contexts | **Transitional.** Secondary `cache-from` source. Mark for retirement at Phase 5. |
-| **L3** | Final-image fallback — MFE | `${MFE_CACHE_REF}` (currently `docker.io/overhangio/openedx-mfe:21.0.0-cache`) | CI only | All contexts | **Transitional.** Secondary `cache-from` source. Mark for retirement at Phase 5. |
+| **L3** | Final-image fallback — OpenEdX | `${OPENEDX_CACHE_REF}` (bake default: `docker.io/overhangio/openedx:21.0.0-cache`; CI override: current GHCR Open edX image ref) | CI only | All contexts | **Transitional.** Secondary `cache-from` source. Retirement tracked in #2096. |
+| **L3** | Final-image fallback — MFE | `${MFE_CACHE_REF}` (bake default: `docker.io/overhangio/openedx-mfe:21.0.0-cache`; CI override: current GHCR MFE image ref) | CI only | All contexts | **Transitional.** Secondary `cache-from` source. Retirement tracked in #2096. |
 
 ### Optional future refs (not in scope for PR 1)
 
@@ -357,6 +360,8 @@ is merged.
 
 L3 (`OPENEDX_CACHE_REF` / `MFE_CACHE_REF`) is a bridge from the current `type=gha`
 state to the target L2 GHCR registry state. It is not permanent.
+
+**Tracking issue**: #2096.
 
 **Retirement trigger**: 30 consecutive calendar days of successful L2 cache imports on
 trusted-main builds, with a layer-reuse ratio consistently above 20% (verified from

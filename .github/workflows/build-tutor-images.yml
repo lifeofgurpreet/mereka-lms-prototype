@@ -33,6 +33,7 @@ on:
       - 'scripts/infra/build-mfe-image.sh'
       # --- Scan and install helpers ---
       - 'scripts/infra/install-cosign.sh'
+      - 'scripts/infra/install-syft.sh'
       - 'scripts/infra/install-trivy.sh'
       - 'scripts/infra/install-envsubst.sh'
       # --- Release artifact generation ---
@@ -1105,14 +1106,7 @@ jobs:
           OPENEDX_IMAGE_REF: ${{ env.REGISTRY }}/openedx@${{ needs.build-openedx.outputs.image_digest }}
         run: |
           mkdir -p var/ci
-          # Install syft v1.42.1 — checksum computed 2026-03-05
-          SYFT_VERSION="v1.42.1"
-          SYFT_INSTALL_SHA="01d0d15aff461f1bc54d1716feb4824341918c4f37e1b6a5a0c0caee2251be67"
-          curl -sSfL "https://raw.githubusercontent.com/anchore/syft/${SYFT_VERSION}/install.sh" \
-            -o /tmp/syft-install.sh
-          echo "${SYFT_INSTALL_SHA}  /tmp/syft-install.sh" | sha256sum -c -
-          sh /tmp/syft-install.sh -b "$HOME/.local/bin"
-          rm /tmp/syft-install.sh
+          ./scripts/infra/install-syft.sh
           set +e
           # Use docker: source so syft reuses the image pulled by the explicit
           # "Pull OpenEdX image" step above, avoiding a redundant ~5 GB
@@ -1328,14 +1322,7 @@ jobs:
           MFE_IMAGE_REF: ${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs.image_digest }}
         run: |
           mkdir -p var/ci
-          # Install syft v1.42.1 — checksum computed 2026-03-05
-          SYFT_VERSION="v1.42.1"
-          SYFT_INSTALL_SHA="01d0d15aff461f1bc54d1716feb4824341918c4f37e1b6a5a0c0caee2251be67"
-          curl -sSfL "https://raw.githubusercontent.com/anchore/syft/${SYFT_VERSION}/install.sh" \
-            -o /tmp/syft-install.sh
-          echo "${SYFT_INSTALL_SHA}  /tmp/syft-install.sh" | sha256sum -c -
-          sh /tmp/syft-install.sh -b "$HOME/.local/bin"
-          rm /tmp/syft-install.sh
+          ./scripts/infra/install-syft.sh
           set +e
           # Use docker: source to reuse the locally-pulled MFE image.
           timeout 20m "$HOME/.local/bin/syft" scan "docker:${MFE_IMAGE_REF}" \
