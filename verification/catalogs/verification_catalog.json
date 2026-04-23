@@ -5133,7 +5133,7 @@
       "mutability": "read-only",
       "owner": "identity-access",
       "path": "scripts/qa/verify-docs-authority-invariants.sh",
-      "reference_count": 9,
+      "reference_count": 10,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
