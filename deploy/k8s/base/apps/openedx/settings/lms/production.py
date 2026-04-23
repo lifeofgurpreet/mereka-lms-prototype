@@ -140,6 +140,61 @@ if _oidc_secret:
     SOCIAL_AUTH_OAUTH_SECRETS = dict(globals().get("SOCIAL_AUTH_OAUTH_SECRETS", {}))
     SOCIAL_AUTH_OAUTH_SECRETS.setdefault("oidc", _oidc_secret)
 
+# -- Authentik OIDC resilience ------------------------------------------------
+# Issue: Biji-Biji-Initiative/mereka-lms#2090
+# Upstream capacity work: bbi-infrastructure beads authentik-1iz.3.8 /
+#   authentik-k1a.11 / authentik-b9y.
+#
+# python-social-auth's OpenIdConnectAuth.request() is called without a timeout
+# kwarg, so when Authentik token/userinfo endpoints are slow (p99 >= 8s during
+# capacity flaps), LMS gunicorn workers block for up to the k8s service timeout
+# (~60s). Workers never free up, queues fill, and the MFE renders the generic
+# AuthCanceled banner with no context in logs.
+#
+# We cannot fix Authentik from here, but we CAN:
+#   1. Bound OIDC HTTP requests so workers fail fast and recycle.
+#   2. Surface the social_core logger so AuthCanceled tracebacks land in
+#      stdout (and structured JSON logs when MEREKA_JSON_LOGGING is on).
+#
+# Both behaviors are env-var gated and no-op on happy-path OIDC logins.
+_mereka_oidc_timeout = int(
+    os.environ.get("MEREKA_OIDC_REQUEST_TIMEOUT_SECONDS", "10")
+)
+if _mereka_oidc_timeout > 0:
+    try:
+        import social_core.backends.oauth as _mereka_social_oauth  # noqa: WPS433
+    except Exception:  # pragma: no cover - social_core always present in LMS
+        _mereka_social_oauth = None
+
+    if _mereka_social_oauth is not None and not getattr(
+        _mereka_social_oauth, "_mereka_timeout_patched", False
+    ):
+        _mereka_orig_request = _mereka_social_oauth.BaseOAuth2.request
+
+        def _mereka_oauth_request(self, url, method="GET", *args, **kwargs):
+            # Only inject a default timeout; callers passing an explicit
+            # timeout (e.g. SAML metadata refresh) are respected.
+            kwargs.setdefault("timeout", _mereka_oidc_timeout)
+            return _mereka_orig_request(self, url, method, *args, **kwargs)
+
+        _mereka_social_oauth.BaseOAuth2.request = _mereka_oauth_request
+        _mereka_social_oauth._mereka_timeout_patched = True
+
+# Promote social_core/social_django loggers so AuthCanceled and other OIDC
+# failures carry backend + request context into stdout. DEBUG is opt-in to
+# keep happy-path logs quiet.
+import logging as _mereka_oidc_logging
+_mereka_oidc_log_level = (
+    _mereka_oidc_logging.DEBUG
+    if os.environ.get("MEREKA_OIDC_DEBUG", "false").lower() in ("true", "1", "yes")
+    else _mereka_oidc_logging.INFO
+)
+for _social_logger_name in ("social", "social_core", "social_django"):
+    _mereka_oidc_logger = _mereka_oidc_logging.getLogger(_social_logger_name)
+    if _mereka_oidc_logger.level == _mereka_oidc_logging.NOTSET or \
+            _mereka_oidc_logger.level > _mereka_oidc_log_level:
+        _mereka_oidc_logger.setLevel(_mereka_oidc_log_level)
+
 # Forum v2 (Python) - integrated into LMS as of Tutor v19+/Sumac.
 # Forum runs in-process; no separate COMMENTS_SERVICE_URL needed.
 FORUM_SEARCH_BACKEND = "forum.search.meilisearch.MeilisearchBackend"
