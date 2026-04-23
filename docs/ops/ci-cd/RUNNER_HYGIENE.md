@@ -43,7 +43,7 @@ Install path on the runner: `/opt/runner/` (see [Manual Install](#manual-install
 
 | Code | Meaning |
 |------|---------|
-| `0` | All requested removals succeeded, dry-run completed, or destructive cleanup was deferred because an active Docker/Buildx build process was present |
+| `0` | All requested removals succeeded, dry-run completed, or destructive cleanup was deferred because active Docker/BuildKit substrate work was present |
 | `1` | Docker daemon unavailable |
 | `2` | Partial failure — some removed, some failed |
 
@@ -201,8 +201,9 @@ ssh root@"${RUNNER_IP}" crontab -l | grep buildx
 ssh root@"${RUNNER_IP}" /opt/runner/buildx-cleanup.sh
 ```
 
-If a Docker/Buildx/buildctl build is still active, the cleanup script exits 0
-without removing builders or orphan containers. Wait for the active build to
+If `docker build`, `docker buildx build`, `docker buildx bake`, `docker pull`,
+or `buildctl build` is still active, the cleanup script exits 0 without
+removing builders or orphan containers. Wait for the active substrate work to
 finish, then rerun cleanup.
 
 ### Preview what would be removed
@@ -326,16 +327,17 @@ the repo-named `mereka-dependency-mirror` builder and must not be used as a
 runner cleanup substitute.
 
 If the job-completed hook logs a high-disk prune while other `Runner.Worker`,
-`docker pull`, `docker buildx build`, or `buildctl` processes are active, treat
-that as host-hook debt. Do not accommodate it by weakening LMS build verifiers.
-The hook must skip Docker/containerd prune while runner workers are active and
-ask operators to drain or clean the host during maintenance.
+`docker pull`, `docker build`, `docker buildx build`, `docker buildx bake`, or
+`buildctl build` processes are active, treat that as host-hook debt. Do not
+accommodate it by weakening LMS build verifiers. The hook must skip
+Docker/containerd prune while runner workers are active and ask operators to
+drain or clean the host during maintenance.
 
 **Triage**:
 
 ```bash
 ssh root@"${RUNNER_IP}" df -h / /srv
-ssh root@"${RUNNER_IP}" 'pgrep -af "Runner.Worker|docker pull|docker buildx build|buildctl" | sed -n "1,120p"'
+ssh root@"${RUNNER_IP}" 'pgrep -af "Runner.Worker|docker pull|docker build|docker buildx (build|bake)|buildctl build" | sed -n "1,120p"'
 ssh root@"${RUNNER_IP}" /opt/runner/buildx-cleanup.sh --dry-run
 ssh root@"${RUNNER_IP}" 'grep -n "forcing prune\\|skipping prune to avoid containerd race" /usr/local/lib/gha-fastlane/cleanup.sh || true'
 ```

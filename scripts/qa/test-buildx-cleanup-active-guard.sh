@@ -64,20 +64,57 @@ cat >"${FAKE_BIN}/pgrep" <<'SH'
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ "${FAKE_ACTIVE_BUILD:-0}" == "1" ]]; then
-  printf '12345 docker buildx build --builder oldbuilder .\n'
-  exit 0
-fi
+case "${FAKE_ACTIVE_BUILD_KIND:-none}" in
+  docker-buildx-build)
+    printf '12345 docker buildx build --builder oldbuilder .\n'
+    exit 0
+    ;;
+  docker-buildx-bake)
+    printf '12346 docker buildx bake --file docker-bake.hcl openedx-fast\n'
+    exit 0
+    ;;
+  docker-build)
+    printf '12347 docker build --tag local/test .\n'
+    exit 0
+    ;;
+  docker-pull)
+    printf '12348 docker pull mirror.gcr.io/overhangio/openedx:21.0.4\n'
+    exit 0
+    ;;
+  buildctl-build)
+    printf '12349 buildctl build --frontend dockerfile.v0 --local context=.\n'
+    exit 0
+    ;;
+  absolute-docker-buildx-bake)
+    printf '12351 /usr/bin/docker buildx bake --file docker-bake.hcl mfe-fast\n'
+    exit 0
+    ;;
+  absolute-buildctl-build)
+    printf '12352 /usr/local/bin/buildctl build --frontend dockerfile.v0\n'
+    exit 0
+    ;;
+  unrelated)
+    printf '12350 docker ps -a\n'
+    exit 0
+    ;;
+  none)
+    exit 1
+    ;;
+  *)
+    printf 'unexpected FAKE_ACTIVE_BUILD_KIND=%s\n' "${FAKE_ACTIVE_BUILD_KIND}" >&2
+    exit 2
+    ;;
+esac
 
 exit 1
 SH
 chmod +x "${FAKE_BIN}/pgrep"
 
 run_cleanup() {
-  local active="$1"
+  local active_kind="$1"
   local log_file="$2"
   rm -f "${STATE_DIR}/removed-oldbuilder" "${STATE_DIR}/removed-container" "${log_file}"
-  FAKE_ACTIVE_BUILD="${active}" \
+  FAKE_ACTIVE_BUILD_KIND="${active_kind}" \
     FAKE_DOCKER_LOG="${log_file}" \
     FAKE_STATE_DIR="${STATE_DIR}" \
     PATH="${FAKE_BIN}:${PATH}" \
@@ -85,30 +122,48 @@ run_cleanup() {
     "${SCRIPT_UNDER_TEST}" --max-keep 0
 }
 
-active_log="${TMP_DIR}/active.log"
-run_cleanup 1 "${active_log}" >"${TMP_DIR}/active.out"
+for active_kind in \
+  docker-buildx-build \
+  docker-buildx-bake \
+  docker-build \
+  docker-pull \
+  buildctl-build \
+  absolute-docker-buildx-bake \
+  absolute-buildctl-build; do
+  active_log="${TMP_DIR}/${active_kind}.log"
+  active_out="${TMP_DIR}/${active_kind}.out"
+  run_cleanup "${active_kind}" "${active_log}" >"${active_out}"
 
-if [[ -e "${STATE_DIR}/removed-oldbuilder" || -e "${STATE_DIR}/removed-container" ]]; then
-  echo "FAIL: active build cleanup removed a builder/container" >&2
-  exit 1
-fi
+  if [[ -e "${STATE_DIR}/removed-oldbuilder" || -e "${STATE_DIR}/removed-container" ]]; then
+    echo "FAIL: ${active_kind} cleanup removed a builder/container" >&2
+    exit 1
+  fi
 
-if ! grep -q 'Active Docker/Buildx build process detected' "${TMP_DIR}/active.out"; then
-  echo "FAIL: active build cleanup did not report active-build deferral" >&2
-  exit 1
-fi
+  if ! grep -q 'Active Docker/BuildKit substrate process detected' "${active_out}"; then
+    echo "FAIL: ${active_kind} cleanup did not report active-substrate deferral" >&2
+    exit 1
+  fi
+done
 
 inactive_log="${TMP_DIR}/inactive.log"
-run_cleanup 0 "${inactive_log}" >"${TMP_DIR}/inactive.out"
+run_cleanup none "${inactive_log}" >"${TMP_DIR}/inactive.out"
 
 if [[ ! -e "${STATE_DIR}/removed-oldbuilder" ]]; then
   echo "FAIL: inactive cleanup did not remove stale builder" >&2
   exit 1
 fi
 
-if grep -q 'Active Docker/Buildx build process detected' "${TMP_DIR}/inactive.out"; then
+if grep -q 'Active Docker/BuildKit substrate process detected' "${TMP_DIR}/inactive.out"; then
   echo "FAIL: inactive cleanup incorrectly reported active-build deferral" >&2
   exit 1
 fi
 
-echo "PASS: buildx-cleanup defers destructive cleanup while builds are active"
+unrelated_log="${TMP_DIR}/unrelated.log"
+run_cleanup unrelated "${unrelated_log}" >"${TMP_DIR}/unrelated.out"
+
+if grep -q 'Active Docker/BuildKit substrate process detected' "${TMP_DIR}/unrelated.out"; then
+  echo "FAIL: unrelated docker commands incorrectly reported active-build deferral" >&2
+  exit 1
+fi
+
+echo "PASS: buildx-cleanup defers destructive cleanup while Docker/BuildKit substrate work is active"

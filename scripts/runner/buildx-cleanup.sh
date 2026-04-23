@@ -3,8 +3,8 @@
 #
 # Behavior:
 #   - Lists all buildx builders via `docker buildx ls`
-#   - Identifies stale ones (containers older than MAX_AGE_HOURS hours and not
-#     currently building)
+#   - Identifies stale ones (containers older than MAX_AGE_HOURS hours)
+#   - Defers destructive cleanup while Docker/BuildKit substrate work is active
 #   - Removes them via `docker buildx rm` (for buildx-managed builders) or
 #     `docker rm -f` (for orphaned buildkit containers not tracked by buildx)
 #   - Reports counts: before / removed / after
@@ -148,32 +148,28 @@ builder_container_age_seconds() {
   echo $((now_epoch - created_epoch))
 }
 
-# ── Check whether a builder's container is actively building ─────────────────
-# Heuristic: if the container's CPU usage is non-zero in the last sample, it
-# is considered active.  We use a simpler proxy: check if the container is
-# in 'running' state.  Builders that finish their job stay in 'running' state
-# but idle — so we combine with the age check.
-builder_container_is_running() {
-  local builder="$1"
-  local container_name="${BUILDX_CONTAINER_PREFIX}_${builder}"
-  local status
-  status="$(docker inspect --format '{{.State.Status}}' "${container_name}" 2>/dev/null || true)"
-  [[ "${status}" == "running" ]]
-}
-
-# ── Check for active build commands before destructive cleanup ───────────────
+# ── Check for active Docker/BuildKit commands before destructive cleanup ─────
 # BuildKit containers are long-running daemons, so container state alone cannot
 # distinguish an idle stale builder from a live build.  The post-job/cron path
-# must therefore defer destructive cleanup when an actual build command is still
-# present on the shared runner.
+# must therefore defer destructive cleanup when active build, bake, pull, or
+# buildctl work is still present on the shared runner.
 active_build_processes() {
   if ! command -v pgrep >/dev/null 2>&1; then
     return 1
   fi
 
-  pgrep -af '(^|[[:space:]])(docker|buildctl)([[:space:]].*)?(buildx[[:space:]]+build|build)([[:space:]]|$)' 2>/dev/null \
-    | grep -v -F "${SCRIPT_NAME}" \
-    || true
+  local proc_line
+  while IFS= read -r proc_line; do
+    [[ -n "${proc_line}" ]] || continue
+    [[ "${proc_line}" == *"${SCRIPT_NAME}"* ]] && continue
+
+    if [[ "${proc_line}" =~ (^|[[:space:]/])docker[[:space:]]+buildx[[:space:]]+(build|bake)([[:space:]]|$) ]] \
+      || [[ "${proc_line}" =~ (^|[[:space:]/])docker[[:space:]]+build([[:space:]]|$) ]] \
+      || [[ "${proc_line}" =~ (^|[[:space:]/])docker[[:space:]]+pull([[:space:]]|$) ]] \
+      || [[ "${proc_line}" =~ (^|[[:space:]/])buildctl[[:space:]]+build([[:space:]]|$) ]]; then
+      printf '%s\n' "${proc_line}"
+    fi
+  done < <(pgrep -af '(^|[[:space:]/])(docker|buildctl)([[:space:]]|$)' 2>/dev/null || true)
 }
 
 # ── Main logic ───────────────────────────────────────────────────────────────
@@ -279,7 +275,7 @@ fi
 
 active_processes="$(active_build_processes || true)"
 if [[ -n "${active_processes}" ]]; then
-  log "Active Docker/Buildx build process detected; deferring destructive cleanup"
+  log "Active Docker/BuildKit substrate process detected; deferring destructive cleanup"
   while IFS= read -r proc_line; do
     [[ -n "${proc_line}" ]] || continue
     log "  active: ${proc_line}"
