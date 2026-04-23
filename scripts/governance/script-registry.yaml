@@ -876,6 +876,9 @@ ci_runtime_inventory:
     - script: scripts/infra/verify-tutor-config.sh
       category: TUTOR_ENV
       note: canonical rendered Tutor verifier for source-to-render patch authority
+    - script: scripts/qa/verify-local-runtime-readiness.sh
+      category: TUTOR_ENV
+      note: initialized local Tutor runtime verifier for LMS, Discovery, proof identity, and optional catalog data
     - script: scripts/qa/verify-deployment-lanes.sh
       category: LIVE_CLUSTER
     - script: scripts/qa/verify-service-endpoints.sh
@@ -2617,6 +2620,34 @@ scripts:
     owner: platform-team
     purpose: Verify Local Bootstrap Readiness
     criticality: release-blocking
+
+  - path: scripts/qa/verify-local-runtime-readiness.sh
+    owner: platform-team
+    purpose: >
+      Read-only initialized local Tutor runtime verifier. Confirms Tutor
+      Compose reports LMS, Discovery, and MySQL as running, verifies LMS and
+      Discovery shell reachability, validates the local proof identity, and can
+      optionally require catalog data. This is a runtime proof and must not run
+      in the offline static CI lane.
+    inputs:
+      - TUTOR_ROOT
+      - TUTOR_PLUGINS_ROOT or TUTOR_PLUGINS_DIR
+      - TUTOR_BIN
+      - PROOF_USERNAME
+      - READINESS_TIMEOUT
+      - --username
+      - --check-catalog-data
+    outputs:
+      - stdout PASS/WARN/FAIL summary
+      - temporary readiness logs under /tmp
+      - exit code
+    side_effects:
+      - Reads local Tutor/Docker runtime state
+      - Executes read-only Django shell checks inside local Tutor services
+    dry_run: true
+    lanes: [local]
+    proof_command: "bash scripts/qa/verify-local-runtime-readiness.sh --help"
+    criticality: release-supporting
 
   - path: scripts/qa/verify-setup.sh
     owner: platform-team

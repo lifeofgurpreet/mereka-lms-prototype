@@ -145,6 +145,7 @@ scripts/qa/verify-selector-to-slot-migration.sh  # STALE_EXPECT
 scripts/qa/verify-tutor-multisite-domains.sh  # TUTOR_ENV
 scripts/qa/verify-tutor-patches.sh  # TUTOR_ENV (stable QA/CI entrypoint that delegates to scripts/infra/verify-tutor-config.sh)
 scripts/infra/verify-tutor-config.sh  # TUTOR_ENV (canonical rendered Tutor verifier for source-to-render patch authority)
+scripts/qa/verify-local-runtime-readiness.sh  # TUTOR_ENV (initialized local Tutor runtime verifier for LMS, Discovery, proof identity, and optional catalog data)
 
 # ── Documentation gap checks ─────────────────────────────────────────────────────
 scripts/qa/verify-pii-inventory.sh  # DOC_GAP

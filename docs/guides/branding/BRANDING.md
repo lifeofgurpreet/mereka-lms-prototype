@@ -91,7 +91,7 @@ source infrastructure/tutor/tutor-env.sh
 tutor plugins enable mereka_lms
 ./scripts/branding/sync-brand-assets.sh
 ./scripts/infra/tutor-config-save.sh --set THEME_DIR="$(pwd)/infrastructure/tutor/themes" --set THEME_NAME=mereka
-tutor local start -d
+make tutor-restart
 tutor local run lms ./manage.py lms collectstatic --noinput
 ```
 
@@ -346,7 +346,7 @@ cp new-font.woff2 assets/branding/fonts/
 2. **Theme not configured**:
    ```bash
    ./scripts/infra/tutor-config-save.sh --set THEME_NAME=mereka --set THEME_DIR="$(pwd)/infrastructure/tutor/themes"
-   tutor local restart
+   make tutor-restart
    ```
 
 3. **Cached static files**:
@@ -431,7 +431,7 @@ find infrastructure/tutor/themes/mereka -name "*.scss"
 2. **Collectstatic not run**:
    ```bash
    tutor local run lms ./manage.py lms collectstatic --noinput
-   tutor local restart
+   make tutor-restart
    ```
 
 ---

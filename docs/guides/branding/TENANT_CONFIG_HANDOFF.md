@@ -192,7 +192,7 @@ Local reproduction only:
 export TUTOR_ROOT="$(pwd)/tutor_env"
 ./scripts/infra/prepare-tutor-build-context.sh --target all
 ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
-tutor local restart
+make tutor-restart
 ```
 
 ### Step 8 — Verify domain mapping
@@ -301,7 +301,7 @@ git revert <commit-sha>
 export TUTOR_ROOT="$(pwd)/tutor_env"
 ./scripts/infra/prepare-tutor-build-context.sh --target all
 ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
-tutor local restart
+make tutor-restart
 ```
 
 ### Recovery: broken branding (fallback brand)
@@ -341,7 +341,7 @@ git revert <commit-sha>
 
 # Refresh rendered build context and restart
 ./scripts/infra/prepare-tutor-build-context.sh --target all
-tutor local restart
+make tutor-restart
 ```
 
 The `try/except ImportError` guard in `mereka_lms.py` ensures the plugin degrades safely

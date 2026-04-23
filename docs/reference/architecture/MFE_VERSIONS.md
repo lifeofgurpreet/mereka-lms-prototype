@@ -64,7 +64,7 @@ The current MFE build path is no longer driven by broad post-render Dockerfile s
 
 2. **Governed build-context refresh** (`./scripts/infra/prepare-tutor-build-context.sh --target mfe`)
    - Refreshes the rendered MFE build context and then runs the bounded patch helper path required for asset sync, helper file copy, and other filesystem-only operations.
-   - This is the sanctioned operator entrypoint after `tutor config save`.
+   - This is the sanctioned operator entrypoint after `./scripts/infra/tutor-config-save.sh`.
 
 3. **Single documented rendered-Dockerfile exception** (`infrastructure/tutor/apply-patches.sh`)
    - Retains the `wrap_mfe_pull_translations_retry` rewrite so Atlas translation pulls are retried inside the rendered MFE Dockerfile.
@@ -115,7 +115,7 @@ Follow these steps to upgrade Tutor, Open edX, or MFE versions:
    ./scripts/infra/verify-tutor-config.sh
 
    # Test locally
-   tutor local restart
+   make tutor-restart
    ./scripts/qa/verify-mfe-branding.sh --env local
    ./scripts/qa/visual-regression-test.sh --env local
    ```

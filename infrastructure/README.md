@@ -25,9 +25,11 @@ infrastructure/
 For a new local sandbox, use the repository wrapper from the repo root:
 
 ```bash
-./scripts/shared/setup-local.sh
-./scripts/infra/verify-local-bootstrap-readiness.sh
+make local-first-run
 ```
+
+That Make target owns the cold-start contract check, submodule bootstrap,
+`scripts/shared/setup-local.sh`, and the initialized-state readiness proof.
 
 For manual Tutor config changes, use the governed wrapper:
 
@@ -48,14 +50,16 @@ it is an implementation detail behind `tutor-config-save.sh` and
 To rebuild local images explicitly:
 
 ```bash
-./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
-./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
+make local-build-openedx
+make local-build-mfe
 ```
 
 Then start or restart Tutor:
 
 ```bash
-tutor local start -d
+make tutor-start
+# or after config/image changes:
+make tutor-restart
 ```
 
 ### Terraform

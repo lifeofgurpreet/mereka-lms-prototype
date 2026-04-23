@@ -469,7 +469,7 @@
       "mutability": "read-only",
       "owner": "platform-infra",
       "path": "scripts/infra/verify-local-bootstrap-readiness.sh",
-      "reference_count": 24,
+      "reference_count": 23,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -547,7 +547,7 @@
       "mutability": "mutating",
       "owner": "platform-infra",
       "path": "scripts/infra/verify-tutor-config.sh",
-      "reference_count": 53,
+      "reference_count": 54,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -8611,7 +8611,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-local-runtime-readiness.sh",
-      "reference_count": 1,
+      "reference_count": 3,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

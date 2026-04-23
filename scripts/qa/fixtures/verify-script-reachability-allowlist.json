@@ -92,7 +92,6 @@
         "scripts/qa/verify-libraries-core.sh",
         "scripts/qa/verify-libraries-foundation.sh",
         "scripts/qa/verify-lms-rke2-validation.sh",
-        "scripts/qa/verify-local-runtime-readiness.sh",
         "scripts/qa/verify-lti-saml-config.sh",
         "scripts/qa/verify-lti-store.sh",
         "scripts/qa/verify-mereka-tenancy.sh",

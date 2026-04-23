@@ -11,6 +11,9 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TUTOR_ROOT="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
+TUTOR_PLUGINS_ROOT="${TUTOR_PLUGINS_ROOT:-${TUTOR_PLUGINS_DIR:-$TUTOR_ROOT/plugins}}"
+TUTOR_PLUGINS_DIR="$TUTOR_PLUGINS_ROOT"
+export TUTOR_ROOT TUTOR_PLUGINS_ROOT TUTOR_PLUGINS_DIR
 TUTOR_BIN="${TUTOR_BIN:-$REPO_ROOT/.venv/bin/tutor}"
 PROOF_USERNAME="${PROOF_USERNAME:-smoke-test}"
 CHECK_CATALOG_DATA=0
@@ -85,28 +88,43 @@ if [[ ! -x "$TUTOR_BIN" ]]; then
   exit 1
 fi
 
+tutor_cmd() {
+  env \
+    TUTOR_ROOT="$TUTOR_ROOT" \
+    TUTOR_PLUGINS_ROOT="$TUTOR_PLUGINS_ROOT" \
+    TUTOR_PLUGINS_DIR="$TUTOR_PLUGINS_ROOT" \
+    "$TUTOR_BIN" "$@"
+}
+
 run_lms_shell() {
   local code="$1"
   timeout "$READINESS_TIMEOUT" \
-    env TUTOR_ROOT="$TUTOR_ROOT" "$TUTOR_BIN" local exec lms \
+    env \
+      TUTOR_ROOT="$TUTOR_ROOT" \
+      TUTOR_PLUGINS_ROOT="$TUTOR_PLUGINS_ROOT" \
+      TUTOR_PLUGINS_DIR="$TUTOR_PLUGINS_ROOT" \
+      "$TUTOR_BIN" local exec lms \
     ./manage.py lms shell -c "$code"
 }
 
 run_discovery_shell() {
   local code="$1"
   timeout "$READINESS_TIMEOUT" \
-    env TUTOR_ROOT="$TUTOR_ROOT" "$TUTOR_BIN" local exec discovery \
+    env \
+      TUTOR_ROOT="$TUTOR_ROOT" \
+      TUTOR_PLUGINS_ROOT="$TUTOR_PLUGINS_ROOT" \
+      TUTOR_PLUGINS_DIR="$TUTOR_PLUGINS_ROOT" \
+      "$TUTOR_BIN" local exec discovery \
     ./manage.py shell -c "$code"
 }
 
 refresh_local_status() {
-  TUTOR_ROOT="$TUTOR_ROOT" "$TUTOR_BIN" local status >"$STATUS_FILE" 2>&1
+  tutor_cmd local dc ps --services --filter status=running >"$STATUS_FILE" 2>&1
 }
 
 service_status_is_healthy() {
   local service="$1"
-  grep -Eq "tutor_local-${service}-1[[:space:]].*[[:space:]]Up[[:space:]]" "$STATUS_FILE" \
-    && ! grep -Eq "tutor_local-${service}-1[[:space:]].*(Restarting|Exited|Created)" "$STATUS_FILE"
+  grep -qx -- "$service" "$STATUS_FILE"
 }
 
 diagnose_mysql_datadir() {
@@ -124,23 +142,24 @@ echo "========================================================================"
 echo "Local Runtime Readiness"
 echo "Repo root: $REPO_ROOT"
 echo "Tutor root: $TUTOR_ROOT"
+echo "Tutor plugins root: $TUTOR_PLUGINS_ROOT"
 echo "Proof username: $PROOF_USERNAME"
 echo "========================================================================"
 echo ""
 
 echo "--- Section 0: Core local service health ---"
 if refresh_local_status; then
-  pass "Tutor local status is readable"
+  pass "Tutor Compose running service list is readable"
 else
-  fail "Could not read tutor local status"
+  fail "Could not read Tutor Compose running service list"
   show_tail "$STATUS_FILE" 80
 fi
 
 for service in lms discovery mysql; do
   if service_status_is_healthy "$service"; then
-    pass "Service is up: $service"
+    pass "Service is running: $service"
   else
-    fail "Service is not healthy: $service"
+    fail "Service is not running: $service"
     CORE_RUNTIME_HEALTHY=0
     if [[ "$service" == "mysql" ]]; then
       diagnose_mysql_datadir
