@@ -44,7 +44,7 @@ Source the helper script whenever you enter a new shell:
 source infrastructure/tutor/tutor-env.sh
 ```
 
-This sets `TUTOR_ROOT=$REPO/tutor_env`, `OPENEDX_RELEASE=nightly`, and activates the local virtualenv. For normal setup and config edits, use `./scripts/infra/tutor-config-save.sh`; it enables the canonical plugins, syncs the plugin mirror, renders Tutor state, and prepares build contexts. If you are debugging a low-level render path, `./scripts/infra/prepare-tutor-build-context.sh --target all` is the governed refresh step after render.
+This defaults `TUTOR_ROOT` to `$REPO/tutor_env`, preserves an explicit `TUTOR_ROOT` override, sets `OPENEDX_RELEASE=nightly`, and activates the local virtualenv. The Tutor plugin mirror defaults to `$TUTOR_ROOT/plugins` so separate worktrees and future devspaces do not collide through a global plugin mirror. For normal setup and config edits, use `./scripts/infra/tutor-config-save.sh`; it enables the canonical plugins, syncs the plugin mirror, renders Tutor state, and prepares build contexts. If you are debugging a low-level render path, `./scripts/infra/prepare-tutor-build-context.sh --target all` is the governed refresh step after render.
 
 ### Docker resources
 
@@ -201,6 +201,8 @@ tutor local createuser --superuser --staff -p mereka_admin mereka_admin mereka@e
 
 - Start/stop stack: `make tutor-start` / `make tutor-stop`.
 - Bring services back after config changes: rerun `./scripts/infra/tutor-config-save.sh`, then `make tutor-restart`.
+- Rebuild local images through wrappers: `make local-build-openedx`, `make local-build-mfe`, or `make local-build`.
+- Recheck initialized runtime readiness: `make local-proof`.
 - Keep databases clean while iterating on configuration: `make tutor-stop && tutor local down -v && rm -rf tutor_env/data`. After wiping Tutor data, re-run `tutor local launch -I --skip-build` (or at least `tutor local do init`) so service schemas and users are recreated before you hit the LMS.
 
 ### MFE development

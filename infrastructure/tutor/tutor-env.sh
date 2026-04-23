@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # Helper to load the local Tutor environment variables. Source this file from the repo root.
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-export TUTOR_ROOT="$REPO_ROOT/tutor_env"
+export TUTOR_ROOT="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
 export OPENEDX_RELEASE="nightly"
 
 # Keep the active Tutor plugins in sync with repo source to avoid config-render drift.
 # The primary authority is the consolidated mereka_lms plugin stack plus the
 # retired standalone mfe_oauth_fix compatibility shim.
 PLUGIN_SRC_DIR="$REPO_ROOT/infrastructure/tutor/plugins"
-PLUGIN_DIR="${TUTOR_PLUGINS_ROOT:-${TUTOR_PLUGINS_DIR:-$HOME/.local/share/tutor-plugins}}"
+PLUGIN_DIR="${TUTOR_PLUGINS_ROOT:-${TUTOR_PLUGINS_DIR:-$TUTOR_ROOT/plugins}}"
 export TUTOR_PLUGINS_ROOT="$PLUGIN_DIR"
 export TUTOR_PLUGINS_DIR="$PLUGIN_DIR"
 

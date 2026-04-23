@@ -126,14 +126,16 @@ echo ""
 
 # Step 3: Tutor Environment
 echo -e "${BLUE}Step 3: Configuring Tutor environment...${NC}"
+export TUTOR_ROOT="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
+export TUTOR_PLUGINS_ROOT="${TUTOR_PLUGINS_ROOT:-${TUTOR_PLUGINS_DIR:-$TUTOR_ROOT/plugins}}"
+export TUTOR_PLUGINS_DIR="$TUTOR_PLUGINS_ROOT"
 # shellcheck source=/dev/null
 source infrastructure/tutor/tutor-env.sh
-export TUTOR_ROOT="$REPO_ROOT/tutor_env"
 
-if [ ! -f "tutor_env/config.yml" ]; then
+if [ ! -f "$TUTOR_ROOT/config.yml" ]; then
     echo -e "${YELLOW}⚠️  Config file not found, creating from example...${NC}"
-    mkdir -p tutor_env
-    cp infrastructure/tutor/config.example.yml tutor_env/config.yml
+    mkdir -p "$TUTOR_ROOT"
+    cp infrastructure/tutor/config.example.yml "$TUTOR_ROOT/config.yml"
 fi
 
 echo -e "${BLUE}Converging canonical local Tutor plugin set...${NC}"
@@ -202,14 +204,14 @@ image_matches_context() {
     [[ -n "$actual_sha" && "$actual_sha" == "$expected_sha" ]]
 }
 
-if [[ "$FORCE_LOCAL_IMAGE_BUILD" == "1" ]] || ! image_matches_context openedx:nightly tutor_env/env/build/openedx; then
+if [[ "$FORCE_LOCAL_IMAGE_BUILD" == "1" ]] || ! image_matches_context openedx:nightly "$TUTOR_ROOT/env/build/openedx"; then
     echo -e "${YELLOW}⚠️  OpenEdX image missing or stale. Building fast local image (this still takes time)...${NC}"
     ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 else
     echo -e "${GREEN}✅ OpenEdX image matches current rendered build context${NC}"
 fi
 
-if [[ "$FORCE_LOCAL_IMAGE_BUILD" == "1" ]] || ! image_matches_context openedx-mfe:nightly tutor_env/env/plugins/mfe/build/mfe; then
+if [[ "$FORCE_LOCAL_IMAGE_BUILD" == "1" ]] || ! image_matches_context openedx-mfe:nightly "$TUTOR_ROOT/env/plugins/mfe/build/mfe"; then
     echo -e "${YELLOW}⚠️  MFE image missing or stale. Building fast local image (this still takes time)...${NC}"
     ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 else
@@ -241,7 +243,7 @@ echo ""
 echo -e "${BLUE}Step 8: Setting up admin user...${NC}"
 LOCAL_ADMIN_USERNAME="${LOCAL_ADMIN_USERNAME:-admin}"
 LOCAL_ADMIN_EMAIL="${LOCAL_ADMIN_EMAIL:-admin@mereka.academy}"
-LOCAL_ADMIN_CREDENTIALS_FILE="${LOCAL_ADMIN_CREDENTIALS_FILE:-tutor_env/local-admin-credentials.txt}"
+LOCAL_ADMIN_CREDENTIALS_FILE="${LOCAL_ADMIN_CREDENTIALS_FILE:-$TUTOR_ROOT/local-admin-credentials.txt}"
 if [[ -z "${LOCAL_ADMIN_PASSWORD:-}" ]]; then
     LOCAL_ADMIN_PASSWORD="$(python3 - <<'PY'
 import secrets
@@ -266,11 +268,11 @@ else
     } > "$LOCAL_ADMIN_CREDENTIALS_FILE"
 fi
 ADMIN_SETUP_LOG="$(mktemp)"
-if docker exec \
-  -e LOCAL_ADMIN_USERNAME="$LOCAL_ADMIN_USERNAME" \
-  -e LOCAL_ADMIN_EMAIL="$LOCAL_ADMIN_EMAIL" \
-  -e LOCAL_ADMIN_PASSWORD="$LOCAL_ADMIN_PASSWORD" \
-  tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "
+if tutor local exec lms env \
+  LOCAL_ADMIN_USERNAME="$LOCAL_ADMIN_USERNAME" \
+  LOCAL_ADMIN_EMAIL="$LOCAL_ADMIN_EMAIL" \
+  LOCAL_ADMIN_PASSWORD="$LOCAL_ADMIN_PASSWORD" \
+  python /openedx/edx-platform/manage.py lms shell -c "
 import os
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -300,8 +302,11 @@ echo ""
 
 # Step 9: Record Setup Summary
 echo -e "${BLUE}Step 9: Recording setup summary...${NC}"
-CONTAINERS=$(docker ps --filter "name=tutor_local" --format "{{.Names}}" | wc -l | tr -d ' ')
-echo -e "${BLUE}ℹ️  tutor_local containers running: $CONTAINERS${NC}"
+if CONTAINERS="$(tutor local dc ps --services --filter status=running 2>/dev/null | wc -l | tr -d ' ')"; then
+    echo -e "${BLUE}ℹ️  Tutor local services running: $CONTAINERS${NC}"
+else
+    echo -e "${YELLOW}⚠️  Unable to count Tutor local services; run 'tutor local dc ps' for details.${NC}"
+fi
 echo -e "${GREEN}✅ Runtime readiness was verified once by Step 7${NC}"
 echo ""
 
@@ -322,12 +327,12 @@ echo "    • Password file: $LOCAL_ADMIN_CREDENTIALS_FILE"
 echo ""
 echo "  🛠️  Next Steps:"
 echo "    • Re-run the governed first-run wrapper: make local-first-run"
-echo "    • Fast Open edX rebuild: ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast"
-echo "    • Fast MFE rebuild: ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast"
-echo "    • Strict local Open edX proof rebuild: ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile proof --cache-mode none"
-echo "    • Strict local MFE proof rebuild: ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile proof --cache-mode none"
+echo "    • Fast Open edX rebuild: make local-build-openedx"
+echo "    • Fast MFE rebuild: make local-build-mfe"
+echo "    • Strict local Open edX proof rebuild: LOCAL_BUILD_PROFILE=proof LOCAL_CACHE_MODE=none make local-build-openedx"
+echo "    • Strict local MFE proof rebuild: LOCAL_BUILD_PROFILE=proof LOCAL_CACHE_MODE=none make local-build-mfe"
 echo "      (CI proof class: build-benchmark.yml with benchmark_class=app-cache-cold)"
-echo "    • Verify initialized stack: ./scripts/infra/verify-local-bootstrap-readiness.sh"
+echo "    • Verify initialized stack: make local-proof"
 echo "    • Optional setup smoke: ./scripts/qa/verify-setup.sh"
 echo "    • Read: docs/guides/onboarding/QUICK_START_LOCAL.md"
 echo "    • Check: docs/status/readiness/README.md"

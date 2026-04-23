@@ -5,6 +5,14 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
+TUTOR_ROOT="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
+TUTOR_PLUGINS_ROOT="${TUTOR_PLUGINS_ROOT:-${TUTOR_PLUGINS_DIR:-$TUTOR_ROOT/plugins}}"
+export TUTOR_ROOT TUTOR_PLUGINS_ROOT
+export TUTOR_PLUGINS_DIR="$TUTOR_PLUGINS_ROOT"
+if [[ -f ".venv/bin/activate" ]]; then
+    # shellcheck source=/dev/null
+    source .venv/bin/activate
+fi
 
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -35,15 +43,13 @@ mysql_query() {
     local query="$2"
 
     if [[ -n "$database" ]]; then
-        docker exec \
-            -e MYSQL_DATABASE="$database" \
-            -e MYSQL_QUERY="$query" \
-            tutor_local-mysql-1 \
+        tutor local exec mysql env \
+            MYSQL_DATABASE="$database" \
+            MYSQL_QUERY="$query" \
             sh -lc 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE" -Nse "$MYSQL_QUERY"'
     else
-        docker exec \
-            -e MYSQL_QUERY="$query" \
-            tutor_local-mysql-1 \
+        tutor local exec mysql env \
+            MYSQL_QUERY="$query" \
             sh -lc 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -Nse "$MYSQL_QUERY"'
     fi
 }
@@ -54,8 +60,8 @@ if ! command -v docker >/dev/null 2>&1; then
   echo "SKIP: Docker not available (this script requires a local Tutor dev environment)"
   exit 0
 fi
-if [[ ! -f "tutor_env/config.yml" ]] && [[ ! -d ".venv" ]]; then
-  echo "SKIP: No local Tutor environment detected (missing tutor_env/config.yml and .venv)"
+if [[ ! -f "$TUTOR_ROOT/config.yml" ]] && [[ ! -d ".venv" ]]; then
+  echo "SKIP: No local Tutor environment detected (missing $TUTOR_ROOT/config.yml and .venv)"
   exit 0
 fi
 
@@ -72,24 +78,24 @@ else
 fi
 
 # Check Tutor config
-if [ -f "tutor_env/config.yml" ]; then
+if [ -f "$TUTOR_ROOT/config.yml" ]; then
     check_pass "Tutor config exists"
     
     # Check for local Docker services
-    if grep -q "MYSQL_HOST: mysql" tutor_env/config.yml; then
+    if grep -q "MYSQL_HOST: mysql" "$TUTOR_ROOT/config.yml"; then
         check_pass "MySQL host configured for local"
     else
         check_fail "MySQL host not configured for local"
     fi
     
-    if grep -q "MONGODB_HOST: mongodb" tutor_env/config.yml; then
+    if grep -q "MONGODB_HOST: mongodb" "$TUTOR_ROOT/config.yml"; then
         check_pass "MongoDB host configured for local"
     else
         check_fail "MongoDB host not configured for local"
     fi
     
     # Check for cloud IPs
-    if grep -q "10\.97\.0\." tutor_env/config.yml; then
+    if grep -q "10\.97\.0\." "$TUTOR_ROOT/config.yml"; then
         check_fail "Cloud IPs found in config (should use local Docker services)"
     else
         check_pass "No cloud IPs in config"
@@ -99,29 +105,30 @@ else
 fi
 
 # Check Docker images
-if docker images | grep -q "openedx.*nightly"; then
+if docker image inspect openedx:nightly >/dev/null 2>&1; then
     check_pass "OpenEdX image exists"
 else
-    check_fail "OpenEdX image missing (run: ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast)"
+    check_fail "OpenEdX image missing (run: make local-build-openedx)"
 fi
 
-if docker images | grep -q "openedx-mfe.*nightly"; then
+if docker image inspect openedx-mfe:nightly >/dev/null 2>&1; then
     check_pass "MFE image exists"
 else
-    check_fail "MFE image missing (run: ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast)"
+    check_fail "MFE image missing (run: make local-build-mfe)"
 fi
 
 # Check containers
-CONTAINERS=$(docker ps --filter "name=tutor_local" --format "{{.Names}}" | wc -l | tr -d ' ')
-if [ "$CONTAINERS" -ge 20 ]; then
-    check_pass "Containers running: $CONTAINERS"
+RUNNING_SERVICES="$(tutor local dc ps --services --filter status=running 2>/dev/null || true)"
+SERVICE_COUNT="$(printf '%s\n' "$RUNNING_SERVICES" | sed '/^$/d' | wc -l | tr -d ' ')"
+if [ "$SERVICE_COUNT" -gt 0 ]; then
+    check_pass "Tutor services running: $SERVICE_COUNT"
 else
-    check_warn "Only $CONTAINERS containers running (expected 20+)"
+    check_warn "No Tutor services reported running"
 fi
 
 # Check services
 for service in lms cms mfe mysql mongodb redis; do
-    if docker ps --filter "name=tutor_local-${service}" --format "{{.Status}}" | grep -q "Up"; then
+    if grep -qx "$service" <<<"$RUNNING_SERVICES"; then
         check_pass "$service running"
     else
         check_fail "$service not running"
@@ -166,7 +173,7 @@ fi
 rm -f "$BOOTSTRAP_READINESS_LOG"
 
 # Check admin user
-ADMIN_EXISTS=$(docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "from django.contrib.auth import get_user_model; print('True' if get_user_model().objects.filter(username='admin').exists() else 'False')" 2>/dev/null | tail -1)
+ADMIN_EXISTS="$(tutor local exec lms python /openedx/edx-platform/manage.py lms shell -c "from django.contrib.auth import get_user_model; print('True' if get_user_model().objects.filter(username='admin').exists() else 'False')" 2>/dev/null | tail -1 || true)"
 if [ "$ADMIN_EXISTS" = "True" ]; then
     check_pass "Admin user exists"
 else

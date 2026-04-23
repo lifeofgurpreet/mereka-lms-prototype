@@ -55,9 +55,6 @@ tutor local restart cms
 # Check running containers
 tutor local dc ps
 
-# Docker native (shows all tutor_local containers)
-docker ps --filter "name=tutor_local"
-
 # Quick health check
 tutor local status
 ```
@@ -141,9 +138,13 @@ Production releases must publish through
 
 ```bash
 # Build Open edX platform (LMS/CMS/workers)
+make local-build-openedx
+# Equivalent low-level helper:
 ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
 
 # Build micro-frontends (MFEs)
+make local-build-mfe
+# Equivalent low-level helper:
 ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
 
 # Optional non-repo-owned Tutor service images are outside the canonical
@@ -161,8 +162,7 @@ Production releases must publish through
 ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile proof --cache-mode none
 
 # Build Open edX and MFE sequentially; do not run parallel local image builds.
-./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
-./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
+make local-build
 ```
 
 ### Push to Registry
@@ -409,11 +409,13 @@ stack after a failure.
 ```bash
 # Set environment
 export TUTOR_ROOT="$(pwd)/tutor_env"
+export TUTOR_PLUGINS_ROOT="${TUTOR_ROOT}/plugins"
 
 # Start services
 make tutor-start
 
 # Check status
+make local-proof
 tutor local dc ps
 
 # Access:

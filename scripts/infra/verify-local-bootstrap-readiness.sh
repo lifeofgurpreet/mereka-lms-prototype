@@ -3,9 +3,6 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TUTOR_ROOT="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
-MYSQL_CONTAINER="${MYSQL_CONTAINER:-tutor_local-mysql-1}"
-LMS_CONTAINER="${LMS_CONTAINER:-tutor_local-lms-1}"
-CADDY_CONTAINER="${CADDY_CONTAINER:-tutor_local-caddy-1}"
 TARGET_THEME="${TARGET_THEME:-mereka}"
 HTTP_TIMEOUT="${HTTP_TIMEOUT:-15}"
 HTTP_ROUTE_ATTEMPTS="${HTTP_ROUTE_ATTEMPTS:-12}"
@@ -31,15 +28,15 @@ fail() {
   FAILURES+=("$1")
 }
 
-require_running_container() {
-  local name="$1"
+require_running_service() {
+  local service="$1"
   local label="$2"
-  local running
-  running="$(docker inspect -f '{{.State.Running}}' "$name" 2>/dev/null || true)"
-  if [ "$running" = "true" ]; then
-    pass "$label container is running ($name)"
+  local running_services
+  running_services="$(tutor local dc ps --services --filter status=running 2>/dev/null || true)"
+  if grep -qx "$service" <<<"$running_services"; then
+    pass "$label service is running ($service)"
   else
-    fail "$label container is not running ($name)"
+    fail "$label service is not running ($service)"
   fi
 }
 
@@ -47,14 +44,14 @@ mysql_scalar() {
   local sql="$1"
   local escaped
   escaped="$(printf '%q' "$sql")"
-  docker exec "$MYSQL_CONTAINER" sh -lc "mysql -uroot -p\"\$MYSQL_ROOT_PASSWORD\" -Nse $escaped"
+  tutor local exec mysql sh -lc "mysql -uroot -p\"\$MYSQL_ROOT_PASSWORD\" -Nse $escaped"
 }
 
 lms_shell() {
   local code="$1"
   local escaped
   escaped="$(printf '%q' "$code")"
-  docker exec "$LMS_CONTAINER" sh -lc "cd /openedx/edx-platform && python manage.py lms shell -c $escaped"
+  tutor local exec lms sh -lc "cd /openedx/edx-platform && python manage.py lms shell -c $escaped"
 }
 
 check_http_route() {
@@ -131,9 +128,9 @@ WHERE s.domain IN ('localhost','localhost:8000','studio.localhost','studio.local
 }
 
 main() {
-  require_running_container "$MYSQL_CONTAINER" "mysql"
-  require_running_container "$LMS_CONTAINER" "lms"
-  require_running_container "$CADDY_CONTAINER" "caddy"
+  require_running_service "mysql" "mysql"
+  require_running_service "lms" "lms"
+  require_running_service "caddy" "caddy"
 
   check_mysql_ready
   check_openedx_user

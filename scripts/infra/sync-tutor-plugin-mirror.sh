@@ -2,8 +2,10 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+TUTOR_ROOT="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
 PLUGIN_SRC_DIR="$REPO_ROOT/infrastructure/tutor/plugins"
-PLUGIN_DIR="${TUTOR_PLUGINS_ROOT:-${TUTOR_PLUGINS_DIR:-$HOME/.local/share/tutor-plugins}}"
+PLUGIN_DIR="${TUTOR_PLUGINS_ROOT:-${TUTOR_PLUGINS_DIR:-$TUTOR_ROOT/plugins}}"
+export TUTOR_ROOT
 export TUTOR_PLUGINS_ROOT="$PLUGIN_DIR"
 export TUTOR_PLUGINS_DIR="$PLUGIN_DIR"
 

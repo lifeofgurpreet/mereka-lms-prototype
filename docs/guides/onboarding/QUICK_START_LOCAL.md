@@ -9,7 +9,9 @@ cd mereka-lms
 make local-first-run
 ```
 
-`make local-first-run` expands to the canonical three-command chain: `git submodule update --init --recursive`, `./scripts/qa/verify-cold-start-onboarding-contract.sh`, and `./scripts/shared/setup-local.sh`. The setup script owns the rest of the governed bootstrap: it builds local Open edX and MFE images when needed, runs `tutor local launch -I --skip-build` to converge Tutor data, starts the stack, runs the initialized-state readiness verifier exactly once with `./scripts/infra/verify-local-bootstrap-readiness.sh`, and creates a local-only admin user. Directory presence under `tutor_env/data/` is not treated as proof of initialization. If `LOCAL_ADMIN_PASSWORD` is not set, the setup script writes generated credentials to `tutor_env/local-admin-credentials.txt`.
+`make local-first-run` expands to the canonical three-command chain: `git submodule update --init --recursive`, `./scripts/qa/verify-cold-start-onboarding-contract.sh`, and `./scripts/shared/setup-local.sh`. The setup script owns the rest of the governed bootstrap: it builds local Open edX and MFE images when needed, runs `tutor local launch -I --skip-build` to converge Tutor data, starts the stack, runs the initialized-state readiness verifier exactly once with `./scripts/infra/verify-local-bootstrap-readiness.sh`, and creates a local-only admin user. Directory presence under `tutor_env/data/` is not treated as proof of initialization. If `LOCAL_ADMIN_PASSWORD` is not set, the setup script writes generated credentials under `TUTOR_ROOT` at `local-admin-credentials.txt`.
+
+For isolated worktrees, devspaces, or CI repros, set `TUTOR_ROOT=/path/to/tutor_env` before running the Make targets. The Tutor plugin mirror defaults to `$TUTOR_ROOT/plugins`; use `TUTOR_PLUGINS_ROOT` only when you deliberately need another mirror.
 
 ## Current Proof Contract
 
@@ -225,6 +227,13 @@ make tutor-stop
 # After config changes
 ./scripts/infra/tutor-config-save.sh --set KEY=value
 make tutor-restart
+
+# Fast local image rebuilds through the canonical helpers
+make local-build-openedx
+make local-build-mfe
+
+# Initialized-state readiness proof after setup
+make local-proof
 ```
 
 ## Common Issues

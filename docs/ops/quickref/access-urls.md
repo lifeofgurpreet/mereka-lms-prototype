@@ -253,8 +253,8 @@ kubectl exec -n mereka-lms deploy/lms -- python manage.py lms createsuperuser
 tutor local createuser --superuser --staff -p <password> <username> <email>
 
 # Method 2: Direct Django command
-docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms manage_user --superuser --staff <username> <email>
-docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "from django.contrib.auth import get_user_model; u = get_user_model().objects.get(username='<username>'); u.set_password('<password>'); u.is_staff = True; u.is_superuser = True; u.save()"
+tutor local exec lms python /openedx/edx-platform/manage.py lms manage_user --superuser --staff <username> <email>
+tutor local exec lms python /openedx/edx-platform/manage.py lms shell -c "from django.contrib.auth import get_user_model; u = get_user_model().objects.get(username='<username>'); u.set_password('<password>'); u.is_staff = True; u.is_superuser = True; u.save()"
 ```
 
 ### Access Admin Panel

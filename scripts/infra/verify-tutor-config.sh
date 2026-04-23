@@ -23,7 +23,7 @@ MFE_PATCH_MODULE="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/mfe_docker
 BUILD_OPTIMIZATIONS_SCRIPT="$REPO_ROOT/infrastructure/tutor/patches/build-optimizations.sh"
 INFRASTRUCTURE_PATCH_MODULE="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms/infrastructure.py"
 PLUGIN_SRC_DIR="$REPO_ROOT/infrastructure/tutor/plugins"
-PLUGIN_DIR="${TUTOR_PLUGINS_DIR:-$HOME/.local/share/tutor-plugins}"
+PLUGIN_DIR="${TUTOR_PLUGINS_ROOT:-${TUTOR_PLUGINS_DIR:-$TUTOR_ENV/plugins}}"
 
 # Track failures
 FAILURES=()
@@ -400,7 +400,7 @@ if [[ -f "$MFE_DOCKERFILE" ]]; then
   pattern_not_in_file "@edx/brand@file:./brand-mereka" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile avoids post-npm brand package reify install"
   pattern_in_file "patch-authn-dashboard-fallbacks.py /openedx/app" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile patches authn source dashboard fallbacks before build"
   pattern_in_file "verify-authn-dashboard-fallbacks.py /openedx/app/dist" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile uses narrowed authn dashboard fallback guard"
-  pattern_not_in_file "if 'LMS_BASE_URL}/dashboard' in content or '"/dashboard"' in content:" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile omits legacy broad authn dashboard literal guard"
+  pattern_not_in_file "if 'LMS_BASE_URL}/dashboard' in content or '\"/dashboard\"' in content:" "$MFE_DOCKERFILE" "Rendered MFE Dockerfile omits legacy broad authn dashboard literal guard"
 fi
 
 if [[ -f "$MFE_ENV_CONFIG" ]]; then

@@ -70,6 +70,9 @@ Whole-stack daily runtime control after bootstrap:
 make tutor-start         # bring the stack up
 make tutor-stop          # stop all containers
 make tutor-restart       # re-apply rendered config to the whole stack
+make local-proof         # recheck initialized-state readiness
+make local-build-openedx # rebuild Open edX through the canonical helper
+make local-build-mfe     # rebuild MFEs through the canonical helper
 ```
 
 Use raw `tutor local ...` subcommands below only for low-level `run`, `logs`,

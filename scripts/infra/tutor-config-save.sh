@@ -66,7 +66,7 @@ echo "Repository:  $REPO_ROOT"
 echo "Tutor Root:  $TUTOR_ROOT"
 echo ""
 
-PLUGIN_DIR="${TUTOR_PLUGINS_ROOT:-${TUTOR_PLUGINS_DIR:-$HOME/.local/share/tutor-plugins}}"
+PLUGIN_DIR="${TUTOR_PLUGINS_ROOT:-${TUTOR_PLUGINS_DIR:-$TUTOR_ROOT/plugins}}"
 export TUTOR_PLUGINS_ROOT="$PLUGIN_DIR"
 export TUTOR_PLUGINS_DIR="$PLUGIN_DIR"
 

@@ -66,8 +66,8 @@ VS Code extensions installed automatically:
 On first run you need to build images (30-45 minutes, requires 12 GB RAM):
 
 ```bash
-./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
-./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
+make local-build-openedx
+make local-build-mfe
 ```
 
 Then run the first launch and readiness proof:
@@ -75,7 +75,7 @@ Then run the first launch and readiness proof:
 ```bash
 tutor local launch -I --skip-build
 make tutor-start
-./scripts/infra/verify-local-bootstrap-readiness.sh
+make local-proof
 ```
 
 After the first launch has initialized databases, daily starts can use the Makefile wrapper. Do not use `make tutor-start` as a replacement for the first launch on a fresh `tutor_env`.
@@ -88,7 +88,7 @@ Create a local admin user after first launch:
 
 ```bash
 export LOCAL_ADMIN_PASSWORD='<choose-a-local-only-password>'
-docker exec -e LOCAL_ADMIN_PASSWORD tutor_local-lms-1 \
+tutor local exec lms env LOCAL_ADMIN_PASSWORD="$LOCAL_ADMIN_PASSWORD" \
   python /openedx/edx-platform/manage.py lms shell -c "
 import os
 from django.contrib.auth import get_user_model

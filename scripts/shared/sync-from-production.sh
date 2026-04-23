@@ -4,10 +4,19 @@
 set -euo pipefail
 
 GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
 RED='\033[0;31m'
 BLUE='\033[0;34m'
 NC='\033[0m'
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$REPO_ROOT"
+export TUTOR_ROOT="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
+export TUTOR_PLUGINS_ROOT="${TUTOR_PLUGINS_ROOT:-${TUTOR_PLUGINS_DIR:-$TUTOR_ROOT/plugins}}"
+export TUTOR_PLUGINS_DIR="$TUTOR_PLUGINS_ROOT"
+if [[ -f .venv/bin/activate ]]; then
+    # shellcheck source=/dev/null
+    source .venv/bin/activate
+fi
 
 echo "╔══════════════════════════════════════════════════════════════╗"
 echo "║        Sync from Production to Local                         ║"
@@ -22,7 +31,7 @@ if ! kubectl cluster-info &> /dev/null; then
 fi
 
 # Check local containers
-if ! docker ps --format '{{.Names}}' | grep -q 'tutor_local-mongodb-1'; then
+if ! tutor local dc ps --services --filter status=running 2>/dev/null | grep -qx 'mongodb'; then
     echo -e "${RED}❌ Local MongoDB not running${NC}"
     echo "Run: make tutor-start"
     exit 1
@@ -52,7 +61,7 @@ echo ""
 echo -e "${BLUE}Step 2: Restoring to local MongoDB...${NC}"
 
 # Restore to local
-docker exec -i tutor_local-mongodb-1 mongorestore \
+tutor local dc exec -T mongodb mongorestore \
     --gzip \
     --drop \
     --archive < "$DUMP_DIR/openedx.archive.gz"
@@ -71,12 +80,12 @@ rm -rf "$DUMP_DIR"
 echo ""
 echo -e "${BLUE}Step 3: Verifying courses...${NC}"
 
-COURSE_COUNT=$(docker exec tutor_local-mongodb-1 mongosh openedx --quiet --eval "db['modulestore.active_versions'].countDocuments({})")
+COURSE_COUNT=$(tutor local exec mongodb mongosh openedx --quiet --eval "db['modulestore.active_versions'].countDocuments({})")
 echo "  Courses in modulestore: $COURSE_COUNT"
 
 if [ "$COURSE_COUNT" -gt 0 ]; then
     echo ""
-    docker exec tutor_local-mongodb-1 mongosh openedx --quiet --eval \
+    tutor local exec mongodb mongosh openedx --quiet --eval \
         "db['modulestore.active_versions'].find({}, {_id:0, org:1, course:1, run:1}).toArray()" | \
         sed 's/^/  /'
 fi
@@ -85,7 +94,7 @@ echo ""
 echo -e "${BLUE}Step 4: Tagging users by source...${NC}"
 
 # Tag users based on meta field
-docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell <<'PYTHON'
+tutor local dc exec -T lms python /openedx/edx-platform/manage.py lms shell <<'PYTHON'
 from django.contrib.auth import get_user_model
 from auth_userprofile.models import UserProfile
 import json
@@ -117,7 +126,7 @@ echo ""
 echo -e "${BLUE}Step 5: Updating course-domain mappings...${NC}"
 
 # Ensure SKILLOURFUTURE courses map to skillourfuture site
-docker exec tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell <<'PYTHON'
+tutor local dc exec -T lms python /openedx/edx-platform/manage.py lms shell <<'PYTHON'
 from django.contrib.sites.models import Site
 from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
 from organizations.models import Organization
@@ -171,4 +180,3 @@ echo "    • All current users: MCT (84,378)"
 echo "    • Kajabi users: Will be tagged when imported"
 echo ""
 echo "╚══════════════════════════════════════════════════════════════╝"
-

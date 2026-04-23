@@ -1,6 +1,11 @@
 SHELL := /bin/bash
 
-.PHONY: help local-first-run bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify infra-sync-vendored-mfe-caddyfile infra-sync-gitops-prod-tags branding-sync migrations-prepare migrations-verify qa-smoke qa-phase7-dom-audit qa-phase7-dom-audit-dev qa-phase7-dom-audit-full qa-phase7-dom-audit-full-dev qa-phase7-dom-audit-full-strict qa-phase7-selector-coverage qa-phase2-smoke-evidence-prod qa-phase2-smoke-evidence-dev qa-phase2-smoke-evidence-contract qa-runtime-theme-mode-prod qa-runtime-theme-mode-dev qa-runtime-theme-drift-diagnose qa-paragon-theme-budget qa-frontend-extended-surfaces qa-a11y-prod qa-a11y-dev qa-a11y-prod-online qa-a11y-dev-online qa-a11y-prod-hybrid qa-a11y-dev-hybrid qa-performance-prod qa-performance-dev qa-cross-browser-prod qa-cross-browser-dev qa-frontend-runtime-qa-prod qa-frontend-runtime-qa-dev qa-frontend-runtime-blocker-sweep qa-runtime-blocker-refresh qa-runtime-blocker-handoff-md qa-runtime-blocker-handoff-bundle qa-runtime-blocker-infra-prompt qa-runtime-blocker-status qa-npm-start-smoke qa-npm-start-smoke-local qa-branding-screenshots qa-branding-before-after qa-frontend-closure qa-certificate-branding qa-email-template-branding qa-make-help-contract qa-frontend-contracts forum-smoke credentials-notes-smoke mobile-secrets-check lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check validate-deploy-contract validate-deploy-contract-strict
+TUTOR_ROOT ?= $(CURDIR)/tutor_env
+TUTOR_PLUGINS_ROOT ?= $(TUTOR_ROOT)/plugins
+LOCAL_BUILD_PROFILE ?= fast
+LOCAL_CACHE_MODE ?= default
+
+.PHONY: help local-first-run local-setup local-doctor local-proof local-build local-build-openedx local-build-mfe bootstrap tutor-start tutor-stop tutor-restart tutor-apply tutor-verify infra-sync-vendored-mfe-caddyfile infra-sync-gitops-prod-tags branding-sync migrations-prepare migrations-verify qa-smoke qa-phase7-dom-audit qa-phase7-dom-audit-dev qa-phase7-dom-audit-full qa-phase7-dom-audit-full-dev qa-phase7-dom-audit-full-strict qa-phase7-selector-coverage qa-phase2-smoke-evidence-prod qa-phase2-smoke-evidence-dev qa-phase2-smoke-evidence-contract qa-runtime-theme-mode-prod qa-runtime-theme-mode-dev qa-runtime-theme-drift-diagnose qa-paragon-theme-budget qa-frontend-extended-surfaces qa-a11y-prod qa-a11y-dev qa-a11y-prod-online qa-a11y-dev-online qa-a11y-prod-hybrid qa-a11y-dev-hybrid qa-performance-prod qa-performance-dev qa-cross-browser-prod qa-cross-browser-dev qa-frontend-runtime-qa-prod qa-frontend-runtime-qa-dev qa-frontend-runtime-blocker-sweep qa-runtime-blocker-refresh qa-runtime-blocker-handoff-md qa-runtime-blocker-handoff-bundle qa-runtime-blocker-infra-prompt qa-runtime-blocker-status qa-npm-start-smoke qa-npm-start-smoke-local qa-branding-screenshots qa-branding-before-after qa-frontend-closure qa-certificate-branding qa-email-template-branding qa-make-help-contract qa-frontend-contracts forum-smoke credentials-notes-smoke mobile-secrets-check lint format test clean mobile-setup spec-lint spec-coverage spec-compliance lint-specs verify-specs validate-testmaps generate-testmaps lint-conventions spec-dashboard check-fast check validate-deploy-contract validate-deploy-contract-strict
 
 help: ## Show this help message
 	@echo "Mereka Academy Open edX - Common Tasks"
@@ -13,7 +18,25 @@ help: ## Show this help message
 local-first-run: ## Governed first-run local bootstrap
 	git submodule update --init --recursive
 	./scripts/qa/verify-cold-start-onboarding-contract.sh
-	./scripts/shared/setup-local.sh
+	TUTOR_ROOT="$(TUTOR_ROOT)" TUTOR_PLUGINS_ROOT="$(TUTOR_PLUGINS_ROOT)" ./scripts/shared/setup-local.sh
+
+local-setup: ## Run governed local setup without the offline contract precheck
+	TUTOR_ROOT="$(TUTOR_ROOT)" TUTOR_PLUGINS_ROOT="$(TUTOR_PLUGINS_ROOT)" ./scripts/shared/setup-local.sh
+
+local-doctor: ## Verify local source contract and initialized Tutor readiness
+	./scripts/qa/verify-cold-start-onboarding-contract.sh
+	TUTOR_ROOT="$(TUTOR_ROOT)" TUTOR_PLUGINS_ROOT="$(TUTOR_PLUGINS_ROOT)" ./scripts/infra/verify-local-bootstrap-readiness.sh
+
+local-proof: ## Verify initialized Tutor local readiness
+	TUTOR_ROOT="$(TUTOR_ROOT)" TUTOR_PLUGINS_ROOT="$(TUTOR_PLUGINS_ROOT)" ./scripts/infra/verify-local-bootstrap-readiness.sh
+
+local-build: local-build-openedx local-build-mfe ## Build both local images through canonical helpers
+
+local-build-openedx: ## Build local Open edX image through canonical helper
+	TUTOR_ROOT="$(TUTOR_ROOT)" TUTOR_PLUGINS_ROOT="$(TUTOR_PLUGINS_ROOT)" ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile "$(LOCAL_BUILD_PROFILE)" --cache-mode "$(LOCAL_CACHE_MODE)"
+
+local-build-mfe: ## Build local MFE image through canonical helper
+	TUTOR_ROOT="$(TUTOR_ROOT)" TUTOR_PLUGINS_ROOT="$(TUTOR_PLUGINS_ROOT)" ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile "$(LOCAL_BUILD_PROFILE)" --cache-mode "$(LOCAL_CACHE_MODE)"
 
 bootstrap: ## Set up Python tooling only (venv, pre-commit)
 	python3 -m venv .venv || true
@@ -21,13 +44,13 @@ bootstrap: ## Set up Python tooling only (venv, pre-commit)
 	pre-commit install || echo "pre-commit not installed, skipping"
 
 tutor-start: ## Start Tutor local environment
-	source infrastructure/tutor/tutor-env.sh && export TUTOR_ROOT="$(PWD)/tutor_env" && tutor local start -d
+	export TUTOR_ROOT="$(TUTOR_ROOT)" TUTOR_PLUGINS_ROOT="$(TUTOR_PLUGINS_ROOT)" && source infrastructure/tutor/tutor-env.sh && tutor local start -d
 
 tutor-stop: ## Stop Tutor local environment
-	source infrastructure/tutor/tutor-env.sh && export TUTOR_ROOT="$(PWD)/tutor_env" && tutor local stop
+	export TUTOR_ROOT="$(TUTOR_ROOT)" TUTOR_PLUGINS_ROOT="$(TUTOR_PLUGINS_ROOT)" && source infrastructure/tutor/tutor-env.sh && tutor local stop
 
 tutor-restart: ## Restart Tutor local environment
-	source infrastructure/tutor/tutor-env.sh && export TUTOR_ROOT="$(PWD)/tutor_env" && tutor local restart
+	export TUTOR_ROOT="$(TUTOR_ROOT)" TUTOR_PLUGINS_ROOT="$(TUTOR_PLUGINS_ROOT)" && source infrastructure/tutor/tutor-env.sh && tutor local restart
 
 tutor-apply: ## Render Tutor config through governed wrapper and restart local environment
 	./scripts/infra/tutor-config-save.sh
@@ -35,8 +58,8 @@ tutor-apply: ## Render Tutor config through governed wrapper and restart local e
 
 tutor-verify: ## Verify Tutor config and prepared build context
 	@echo "Verifying Tutor configuration and prepared build context..."
-	@source infrastructure/tutor/tutor-env.sh && export TUTOR_ROOT="$(PWD)/tutor_env" && \
-	if [ ! -f tutor_env/env/local/docker-compose.yml ]; then \
+	@export TUTOR_ROOT="$(TUTOR_ROOT)" TUTOR_PLUGINS_ROOT="$(TUTOR_PLUGINS_ROOT)" && source infrastructure/tutor/tutor-env.sh && \
+	if [ ! -f "$$TUTOR_ROOT/env/local/docker-compose.yml" ]; then \
 		echo "❌ Tutor config not initialized. Run 'make tutor-apply' first."; \
 		exit 1; \
 	fi && \

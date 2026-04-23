@@ -31,7 +31,7 @@ renders Tutor through the canonical wrapper, prepares the rendered build
 contexts, builds `openedx:nightly` and `openedx-mfe:nightly` when their
 build-context labels are stale, launches the local Tutor stack, runs the single initialized-state readiness pass via `./scripts/infra/verify-local-bootstrap-readiness.sh`, and creates a local-only admin user. If
 `LOCAL_ADMIN_PASSWORD` is unset, generated credentials are written to
-`tutor_env/local-admin-credentials.txt`.
+`$TUTOR_ROOT/local-admin-credentials.txt`.
 
 ### 1. Python Environment
 ```bash
@@ -57,8 +57,9 @@ docker info | grep "Total Memory"
 
 ### 3. Tutor Environment Setup
 ```bash
-source infrastructure/tutor/tutor-env.sh
 export TUTOR_ROOT="$(pwd)/tutor_env"
+export TUTOR_PLUGINS_ROOT="${TUTOR_ROOT}/plugins"
+source infrastructure/tutor/tutor-env.sh
 tutor config printroot  # Should show tutor_env path
 ```
 
@@ -108,14 +109,11 @@ grep -E "MYSQL_HOST|MONGODB_HOST|REDIS_HOST" tutor_env/config.yml
 
 ### 5. Build Images
 ```bash
-./scripts/infra/prepare-tutor-build-context.sh --target all
-./scripts/infra/ensure-buildx-dependency-mirror.sh
-
 # OpenEdX image (20-30 minutes, needs 12GB+ RAM)
-./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast
+make local-build-openedx
 
 # MFE image (15-20 minutes)
-./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast
+make local-build-mfe
 ```
 
 ### 6. Initialize and Launch
@@ -131,16 +129,16 @@ make tutor-start
 
 `./scripts/shared/setup-local.sh` already creates or refreshes a local admin
 user. If `LOCAL_ADMIN_PASSWORD` is unset, it writes generated credentials to
-`tutor_env/local-admin-credentials.txt`. Only run the command below if that
+`$TUTOR_ROOT/local-admin-credentials.txt`. Only run the command below if that
 file is missing, or if you deliberately want to rotate the local-only password.
 
 ```bash
 export LOCAL_ADMIN_PASSWORD='<choose-a-local-only-password>'
-docker exec \
-  -e LOCAL_ADMIN_USERNAME=admin \
-  -e LOCAL_ADMIN_EMAIL=admin@mereka.academy \
-  -e LOCAL_ADMIN_PASSWORD="$LOCAL_ADMIN_PASSWORD" \
-  tutor_local-lms-1 python /openedx/edx-platform/manage.py lms shell -c "
+tutor local exec lms env \
+  LOCAL_ADMIN_USERNAME=admin \
+  LOCAL_ADMIN_EMAIL=admin@mereka.academy \
+  LOCAL_ADMIN_PASSWORD="$LOCAL_ADMIN_PASSWORD" \
+  python /openedx/edx-platform/manage.py lms shell -c "
 import os
 from django.contrib.auth import get_user_model
 User = get_user_model()

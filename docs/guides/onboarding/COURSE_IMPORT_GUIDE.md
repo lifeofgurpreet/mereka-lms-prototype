@@ -101,7 +101,7 @@ Based on enrollment data:
 ### "Course already exists"
 ```bash
 # Delete skeleton course first
-docker exec tutor_local-lms-1 python manage.py lms shell -c \
+tutor local exec lms python /openedx/edx-platform/manage.py lms shell -c \
   "from xmodule.modulestore.django import modulestore; \
    from opaque_keys.edx.keys import CourseKey; \
    key = CourseKey.from_string('course-v1:MEREKA+MEKA-2148875088+RUN-2148875088'); \
@@ -150,6 +150,4 @@ open http://studio.localhost
 ---
 
 **Once imported:** Courses will have full content, videos, assessments, and can be tested end-to-end locally!
-
-
 
