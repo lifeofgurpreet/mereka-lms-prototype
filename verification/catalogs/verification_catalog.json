@@ -6816,7 +6816,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-footer-parity.sh",
-      "reference_count": 25,
+      "reference_count": 26,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
