@@ -121,15 +121,10 @@ on:
           - both
 
   schedule:
-    # Weekly trend baseline — representative subset only (see §Schedule).
-    # Full matrix (16 combos) is never run automatically; legacy true-cold
-    # input / app-cache-cold setup is on-demand.
-    # Four runs: ~registry-warm × fastlane × openedx, registry-warm × arc-heavy × openedx,
-    #            registry-warm × fastlane × mfe, scan-only × fastlane × openedx
-    # Estimated weekly cost: 4 runs × ~10 min avg ≈ 40 runner-minutes.
-    #
-    # The schedule always picks one fixed set of parameters per cron entry below.
-    # Manual workflow_dispatch can run any combination on demand.
+    # Weekly trend baseline — one representative registry-warm smoke only.
+    # The full class × runner × family matrix is manual/on-demand because
+    # app-cache-cold and scan-only proofs are expensive and should be named
+    # explicitly when collected.
     - cron: '0 6 * * 1'   # Monday 06:00 UTC — low-traffic window
 
 concurrency:
@@ -643,6 +638,17 @@ jobs:
             CACHE_EVIDENCE="suppressed (app-cache-cold proof)"
           fi
 
+          if [[ "$PROOF_CLASS" == "local-hot" ]]; then
+            if [[ "$TOTAL_LAYERS" -le 0 ]]; then
+              echo "::error::local-hot proof cannot classify OpenEdX layer reuse because total layer count is 0."
+              exit 1
+            fi
+            if (( CACHED_LAYERS * 100 <= TOTAL_LAYERS * 90 )); then
+              echo "::error::local-hot OpenEdX proof requires >90% cached layers; observed ${CACHED_LAYERS}/${TOTAL_LAYERS}."
+              exit 1
+            fi
+          fi
+
           {
             echo "build_start_utc=${BUILD_START}"
             echo "build_end_utc=${BUILD_END}"
@@ -833,6 +839,17 @@ jobs:
             CACHE_EVIDENCE="suppressed (app-cache-cold proof)"
           fi
 
+          if [[ "$PROOF_CLASS" == "local-hot" ]]; then
+            if [[ "$TOTAL_LAYERS" -le 0 ]]; then
+              echo "::error::local-hot proof cannot classify MFE layer reuse because total layer count is 0."
+              exit 1
+            fi
+            if (( CACHED_LAYERS * 100 <= TOTAL_LAYERS * 90 )); then
+              echo "::error::local-hot MFE proof requires >90% cached layers; observed ${CACHED_LAYERS}/${TOTAL_LAYERS}."
+              exit 1
+            fi
+          fi
+
           {
             echo "build_start_utc=${BUILD_START}"
             echo "build_end_utc=${BUILD_END}"
@@ -905,6 +922,9 @@ jobs:
       - name: Install Trivy
         run: ./scripts/infra/install-trivy.sh
 
+      - name: Install Syft
+        run: ./scripts/infra/install-syft.sh
+
       - name: Benchmark OpenEdX scan
         id: scan
         env:
@@ -927,7 +947,7 @@ jobs:
 
           echo "=== Pulling image for scan ==="
           docker pull "${IMAGE_REF}" 2>&1 | tee var/ci/scan-openedx-pull.log || {
-            echo "::warning::Failed to pull OpenEdX image for scan-only benchmark."
+            echo "::error::Failed to pull OpenEdX image for scan-only benchmark."
             SCAN_OUTCOME="failure"
           }
 
@@ -942,20 +962,17 @@ jobs:
             echo "Trivy duration: $((TRIVY_END - TRIVY_START))s"
             echo "TRIVY_SECONDS=$((TRIVY_END - TRIVY_START))" >> var/ci/benchmark-context-scan-openedx.env
 
-            # SBOM with syft if available
-            SYFT_SECONDS=0
-            if command -v syft >/dev/null 2>&1; then
-              echo "=== Running syft SBOM ==="
-              SYFT_START=$(date -u +%s)
-              syft "docker:${IMAGE_REF}" -o json > var/ci/scan-openedx-sbom.json 2>&1 | \
-                tee var/ci/scan-openedx-syft.log || true
-              SYFT_END=$(date -u +%s)
-              SYFT_SECONDS=$((SYFT_END - SYFT_START))
-              echo "Syft duration: ${SYFT_SECONDS}s"
-            else
-              echo "syft not available on this runner — skipping SBOM step."
-              echo "Install syft to benchmark scan_duration_seconds{tool=syft}."
-            fi
+            echo "=== Running syft SBOM ==="
+            SYFT_START=$(date -u +%s)
+            timeout 20m "$HOME/.local/bin/syft" scan "docker:${IMAGE_REF}" \
+              -o cyclonedx-json=var/ci/scan-openedx-sbom.cdx.json \
+              2>&1 | tee var/ci/scan-openedx-syft.log || {
+              echo "::error::Syft SBOM failed for OpenEdX scan-only benchmark."
+              SCAN_OUTCOME="failure"
+            }
+            SYFT_END=$(date -u +%s)
+            SYFT_SECONDS=$((SYFT_END - SYFT_START))
+            echo "Syft duration: ${SYFT_SECONDS}s"
             echo "SYFT_SECONDS=${SYFT_SECONDS}" >> var/ci/benchmark-context-scan-openedx.env
           fi
 
@@ -978,6 +995,9 @@ jobs:
           } >> var/ci/benchmark-context-scan-openedx.env
 
           echo "OpenEdX scan: ${SCAN_DURATION}s, outcome=${SCAN_OUTCOME}"
+          if [[ "$SCAN_OUTCOME" != "success" ]]; then
+            exit 1
+          fi
 
       - name: Upload scan artifacts
         if: always()
@@ -987,8 +1007,131 @@ jobs:
           path: |
             var/ci/scan-openedx-trivy.log
             var/ci/scan-openedx-syft.log
-            var/ci/scan-openedx-sbom.json
+            var/ci/scan-openedx-sbom.cdx.json
             var/ci/benchmark-context-scan-openedx.env
+          retention-days: 14
+
+  scan-mfe:
+    name: Scan MFE (scan-only)
+    runs-on: ${{ needs.select-runner.outputs.runner_label }}
+    timeout-minutes: 45
+    needs:
+      - resolve-benchmark-inputs
+      - select-runner
+      - prepare-conditions
+    if: >-
+      needs.resolve-benchmark-inputs.outputs.is_scan_only == 'true' &&
+      needs.resolve-benchmark-inputs.outputs.build_mfe == 'true'
+    permissions:
+      contents: read
+      packages: read
+    env:
+      BENCHMARK_CLASS: ${{ needs.resolve-benchmark-inputs.outputs.benchmark_class }}
+      PROOF_CLASS: ${{ needs.resolve-benchmark-inputs.outputs.proof_class }}
+      RUNNER_CLASS: ${{ needs.resolve-benchmark-inputs.outputs.runner_class }}
+    outputs:
+      scan_start_utc: ${{ steps.scan.outputs.scan_start_utc }}
+      scan_end_utc: ${{ steps.scan.outputs.scan_end_utc }}
+      scan_duration_seconds: ${{ steps.scan.outputs.scan_duration_seconds }}
+      outcome: ${{ steps.scan.outputs.outcome }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Log in to GHCR (pull existing image)
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Install Trivy
+        run: ./scripts/infra/install-trivy.sh
+
+      - name: Install Syft
+        run: ./scripts/infra/install-syft.sh
+
+      - name: Benchmark MFE scan
+        id: scan
+        env:
+          IMAGE_REF: ${{ needs.prepare-conditions.outputs.scan_image_ref_mfe || format('{0}/mfe:mereka-brand', env.REGISTRY) }}
+        run: |
+          set -euo pipefail
+          mkdir -p var/ci
+
+          SCAN_START=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          SCAN_START_EPOCH=$(date -u +%s)
+          SCAN_OUTCOME="success"
+
+          {
+            echo "REQUESTED_BENCHMARK_CLASS=${BENCHMARK_CLASS}"
+            echo "PROOF_CLASS=${PROOF_CLASS}"
+            echo "RUNNER_CLASS=${RUNNER_CLASS}"
+            echo "IMAGE_FAMILY=mfe"
+            echo "WORKFLOW_RUN_ID=${{ github.run_id }}"
+          } >> var/ci/benchmark-context-scan-mfe.env
+
+          echo "=== Pulling image for scan ==="
+          docker pull "${IMAGE_REF}" 2>&1 | tee var/ci/scan-mfe-pull.log || {
+            echo "::error::Failed to pull MFE image for scan-only benchmark."
+            SCAN_OUTCOME="failure"
+          }
+
+          if [[ "$SCAN_OUTCOME" == "success" ]]; then
+            echo "=== Running Trivy scan ==="
+            TRIVY_START=$(date -u +%s)
+            trivy image --exit-code 0 --format sarif --output var/ci/scan-mfe-trivy.sarif \
+              "${IMAGE_REF}" 2>&1 | tee var/ci/scan-mfe-trivy.log || {
+              echo "::warning::Trivy scan returned non-zero (may be high severity CVEs — scan timing still recorded)."
+            }
+            TRIVY_END=$(date -u +%s)
+            echo "Trivy duration: $((TRIVY_END - TRIVY_START))s"
+            echo "TRIVY_SECONDS=$((TRIVY_END - TRIVY_START))" >> var/ci/benchmark-context-scan-mfe.env
+
+            echo "=== Running syft SBOM ==="
+            SYFT_START=$(date -u +%s)
+            timeout 20m "$HOME/.local/bin/syft" scan "docker:${IMAGE_REF}" \
+              -o cyclonedx-json=var/ci/scan-mfe-sbom.cdx.json \
+              2>&1 | tee var/ci/scan-mfe-syft.log || {
+              echo "::error::Syft SBOM failed for MFE scan-only benchmark."
+              SCAN_OUTCOME="failure"
+            }
+            SYFT_END=$(date -u +%s)
+            SYFT_SECONDS=$((SYFT_END - SYFT_START))
+            echo "Syft duration: ${SYFT_SECONDS}s"
+            echo "SYFT_SECONDS=${SYFT_SECONDS}" >> var/ci/benchmark-context-scan-mfe.env
+          fi
+
+          SCAN_END=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          SCAN_END_EPOCH=$(date -u +%s)
+          SCAN_DURATION=$((SCAN_END_EPOCH - SCAN_START_EPOCH))
+
+          {
+            echo "scan_start_utc=${SCAN_START}"
+            echo "scan_end_utc=${SCAN_END}"
+            echo "scan_duration_seconds=${SCAN_DURATION}"
+            echo "outcome=${SCAN_OUTCOME}"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "SCAN_START=${SCAN_START}"
+            echo "SCAN_END=${SCAN_END}"
+            echo "SCAN_DURATION=${SCAN_DURATION}"
+            echo "OUTCOME=${SCAN_OUTCOME}"
+          } >> var/ci/benchmark-context-scan-mfe.env
+
+          echo "MFE scan: ${SCAN_DURATION}s, outcome=${SCAN_OUTCOME}"
+          if [[ "$SCAN_OUTCOME" != "success" ]]; then
+            exit 1
+          fi
+
+      - name: Upload scan artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: benchmark-scan-mfe-${{ needs.resolve-benchmark-inputs.outputs.runner_class }}
+          path: |
+            var/ci/scan-mfe-trivy.log
+            var/ci/scan-mfe-syft.log
+            var/ci/scan-mfe-sbom.cdx.json
+            var/ci/benchmark-context-scan-mfe.env
           retention-days: 14
 
   # --------------------------------------------------------------------------
@@ -1006,6 +1149,7 @@ jobs:
       - measured-build-openedx
       - measured-build-mfe
       - scan-openedx
+      - scan-mfe
     permissions:
       contents: read
     env:
@@ -1029,7 +1173,13 @@ jobs:
           proof_class = os.environ["PROOF_CLASS"]
           openedx_duration = int(os.environ.get("BUILD_DURATION_OPENEDX", 0))
           mfe_duration = int(os.environ.get("BUILD_DURATION_MFE", 0))
-          scan_duration = int(os.environ.get("SCAN_DURATION", 0))
+          scan_openedx_duration = int(os.environ.get("SCAN_DURATION_OPENEDX", 0))
+          scan_mfe_duration = int(os.environ.get("SCAN_DURATION_MFE", 0))
+          scan_duration = scan_openedx_duration + scan_mfe_duration
+          openedx_cached = int("${{ needs.measured-build-openedx.outputs.cached_layers || '0' }}".strip() or 0)
+          openedx_total = int("${{ needs.measured-build-openedx.outputs.total_layers || '0' }}".strip() or 0)
+          mfe_cached = int("${{ needs.measured-build-mfe.outputs.cached_layers || '0' }}".strip() or 0)
+          mfe_total = int("${{ needs.measured-build-mfe.outputs.total_layers || '0' }}".strip() or 0)
           meta = {
               "schema_version": "benchmark-metadata/v1",
               "run_id": os.environ["GITHUB_RUN_ID"],
@@ -1055,20 +1205,29 @@ jobs:
                   "build_end_utc": os.environ.get("BUILD_END_OPENEDX", ""),
                   "build_duration_seconds": openedx_duration,
                   "outcome": os.environ.get("BUILD_OUTCOME_OPENEDX", "skipped"),
-                  "cached_layers": int("${{ needs.measured-build-openedx.outputs.cached_layers || '0' }}".strip() or 0),
-                  "total_layers": int("${{ needs.measured-build-openedx.outputs.total_layers || '0' }}".strip() or 0),
+                  "cached_layers": openedx_cached,
+                  "total_layers": openedx_total,
+                  "layer_reuse_ratio": (openedx_cached / openedx_total) if openedx_total else None,
               },
               "mfe": {
                   "build_start_utc": os.environ.get("BUILD_START_MFE", ""),
                   "build_end_utc": os.environ.get("BUILD_END_MFE", ""),
                   "build_duration_seconds": mfe_duration,
                   "outcome": os.environ.get("BUILD_OUTCOME_MFE", "skipped"),
-                  "cached_layers": int("${{ needs.measured-build-mfe.outputs.cached_layers || '0' }}".strip() or 0),
-                  "total_layers": int("${{ needs.measured-build-mfe.outputs.total_layers || '0' }}".strip() or 0),
+                  "cached_layers": mfe_cached,
+                  "total_layers": mfe_total,
+                  "layer_reuse_ratio": (mfe_cached / mfe_total) if mfe_total else None,
               },
               "scan": {
                   "duration_seconds": scan_duration,
-                  "outcome": os.environ.get("SCAN_OUTCOME", "skipped"),
+                  "openedx": {
+                      "duration_seconds": scan_openedx_duration,
+                      "outcome": os.environ.get("SCAN_OUTCOME_OPENEDX", "skipped"),
+                  },
+                  "mfe": {
+                      "duration_seconds": scan_mfe_duration,
+                      "outcome": os.environ.get("SCAN_OUTCOME_MFE", "skipped"),
+                  },
               },
               "total_duration_seconds": openedx_duration + mfe_duration + scan_duration,
               "note": (
@@ -1086,10 +1245,12 @@ jobs:
           RELEASE_UNIT_ID: ${{ github.sha }}
           BUILD_DURATION_OPENEDX: ${{ needs.measured-build-openedx.outputs.build_duration_seconds || '0' }}
           BUILD_DURATION_MFE: ${{ needs.measured-build-mfe.outputs.build_duration_seconds || '0' }}
-          SCAN_DURATION: ${{ needs.scan-openedx.outputs.scan_duration_seconds || '0' }}
+          SCAN_DURATION_OPENEDX: ${{ needs.scan-openedx.outputs.scan_duration_seconds || '0' }}
+          SCAN_DURATION_MFE: ${{ needs.scan-mfe.outputs.scan_duration_seconds || '0' }}
           BUILD_OUTCOME_OPENEDX: ${{ needs.measured-build-openedx.outputs.outcome || 'skipped' }}
           BUILD_OUTCOME_MFE: ${{ needs.measured-build-mfe.outputs.outcome || 'skipped' }}
-          SCAN_OUTCOME: ${{ needs.scan-openedx.outputs.outcome || 'skipped' }}
+          SCAN_OUTCOME_OPENEDX: ${{ needs.scan-openedx.outputs.outcome || 'skipped' }}
+          SCAN_OUTCOME_MFE: ${{ needs.scan-mfe.outputs.outcome || 'skipped' }}
           BUILD_START_OPENEDX: ${{ needs.measured-build-openedx.outputs.build_start_utc || '' }}
           BUILD_END_OPENEDX: ${{ needs.measured-build-openedx.outputs.build_end_utc || '' }}
           BUILD_START_MFE: ${{ needs.measured-build-mfe.outputs.build_start_utc || '' }}
@@ -1115,11 +1276,13 @@ jobs:
 
           OPENEDX_SECS="${{ needs.measured-build-openedx.outputs.build_duration_seconds || '—' }}"
           MFE_SECS="${{ needs.measured-build-mfe.outputs.build_duration_seconds || '—' }}"
-          SCAN_SECS="${{ needs.scan-openedx.outputs.scan_duration_seconds || '—' }}"
+          SCAN_OPENEDX_SECS="${{ needs.scan-openedx.outputs.scan_duration_seconds || '—' }}"
+          SCAN_MFE_SECS="${{ needs.scan-mfe.outputs.scan_duration_seconds || '—' }}"
 
           BAND_OPENEDX="${BANDS["${PROOF_CLASS}:openedx"]:-N/A}"
           BAND_MFE="${BANDS["${PROOF_CLASS}:mfe"]:-N/A}"
-          BAND_SCAN="${BANDS["${PROOF_CLASS}:openedx"]:-N/A}"
+          BAND_SCAN_OPENEDX="${BANDS["${PROOF_CLASS}:openedx"]:-N/A}"
+          BAND_SCAN_MFE="${BANDS["${PROOF_CLASS}:mfe"]:-N/A}"
 
           {
             echo "## Benchmark Results"
@@ -1130,7 +1293,8 @@ jobs:
               echo "| openedx build (${PROOF_CLASS} / ${RUNNER_CLASS}) | ${OPENEDX_SECS}s | ${BAND_OPENEDX} |"
               echo "| mfe build (${PROOF_CLASS} / ${RUNNER_CLASS}) | ${MFE_SECS}s | ${BAND_MFE} |"
             else
-              echo "| openedx scan (scan-only / ${RUNNER_CLASS}) | ${SCAN_SECS}s | ${BAND_SCAN} |"
+              echo "| openedx scan (scan-only / ${RUNNER_CLASS}) | ${SCAN_OPENEDX_SECS}s | ${BAND_SCAN_OPENEDX} |"
+              echo "| mfe scan (scan-only / ${RUNNER_CLASS}) | ${SCAN_MFE_SECS}s | ${BAND_SCAN_MFE} |"
             fi
             echo ""
             if [[ "${BENCHMARK_CLASS}" != "${PROOF_CLASS}" ]]; then

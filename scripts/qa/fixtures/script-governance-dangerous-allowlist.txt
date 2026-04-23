@@ -20,6 +20,7 @@ scripts/infra/create-release.sh
 scripts/infra/data-retention-jobs.sh
 scripts/infra/decommission-legacy-ecommerce.sh
 scripts/infra/fix-mfe-refresh-endpoint-site-config.sh
+scripts/infra/install-syft.sh
 scripts/infra/install-trivy.sh
 scripts/infra/mongodb-atlas-cutover.sh
 scripts/infra/normalize-mysql-secrets.sh

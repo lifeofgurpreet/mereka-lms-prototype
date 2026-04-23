@@ -252,7 +252,7 @@ docker buildx du   # Should show significant GiB of cached layers
 
 #### Definition
 
-The image was already built and pushed in a prior step. The job that runs is exclusively: SBOM generation (syft), vulnerability scan (Trivy), and/or branding verification — no Docker build step executed. Signal: `job_name =~ ".*scan.*"` AND `ci_build_duration_seconds == 0` (or absent). The `ci_scan_duration_seconds{tool="syft|trivy"}` metrics are non-zero.
+The image was already built and pushed in a prior step. The job that runs is exclusively: SBOM generation (Syft) and vulnerability scan (Trivy) for the requested image family; no Docker build step executed. Signal: `job_name =~ ".*scan.*"` AND `ci_build_duration_seconds == 0` (or absent). The `ci_scan_duration_seconds{tool="syft|trivy"}` metrics are non-zero. The benchmark workflow installs Syft and Trivy before scan timing; missing Syft is a failed scan-only proof, not a skipped optional step.
 
 This class exists to isolate scan optimization work (bead `jj97.8`) from the build path. It is the only class where `ci_build_duration_seconds == 0` is expected and correct, not a pipeline error.
 
@@ -264,10 +264,11 @@ This class exists to isolate scan optimization work (bead `jj97.8`) from the bui
 # build-tutor-images.yml are always scan-only.
 
 # To benchmark scan-only in isolation:
-# 1. Trigger build-tutor-images.yml on a branch where the image digest
-#    is already known (skip-build or use existing image input).
-# 2. OR trigger only the scan jobs via workflow_dispatch if the workflow
-#    supports an image-already-pushed mode.
+# 1. Trigger build-benchmark.yml with:
+#      benchmark_class=scan-only
+#      image_family=openedx | mfe | both
+# 2. The workflow pulls the existing GHCR image, installs Syft/Trivy,
+#    and records scan duration for each requested image family.
 # 3. Measure ci_scan_duration_seconds{tool="syft"} and
 #    ci_scan_duration_seconds{tool="trivy"} independently.
 
@@ -364,15 +365,15 @@ Bead `jj97.14` delivers `.github/workflows/build-benchmark.yml`. This workflow e
 |---|---|---|
 | `runner_class` | `fastlane` \| `arc-heavy` | Which runner pool to use |
 | `benchmark_class` | `app-cache-cold` \| `true-cold` \| `registry-warm` \| `local-hot` \| `scan-only` | Requested cache precondition before the build; `true-cold` is a legacy alias for `app-cache-cold` |
-| `image_family` | `openedx` \| `mfe` | Which image to build |
+| `image_family` | `openedx` \| `mfe` \| `both` | Which image family or families to build/scan |
 
 **How the workflow enforces conditions per class** (before invoking the actual build step):
 
 - `app-cache-cold`: executes `docker buildx prune -af`, drops `CACHE_FROM_ARG` to empty string, renders Tutor build context with mirrored dependency pulls plus the explicit dependency-image mirror patch, configures the measured BuildKit builder with a Docker Hub registry mirror fallback, invokes no-cache bake targets through the canonical helpers, and fails the job if the measured build records `OUTCOME=failure`
 - `true-cold`: legacy alias normalized to `proof_class=app-cache-cold` in artifacts and metadata
 - `registry-warm`: executes `docker buildx prune -af` to remove L1, leaves `CACHE_FROM_ARG` pointing at the shared GHCR registry ref
-- `local-hot`: no cache wipe; relies on persistent runner state; asserts `ci_layer_reuse_ratio > 0.90` post-build as a guard
-- `scan-only`: skips build steps entirely; uses an already-pushed image digest as input
+- `local-hot`: no cache wipe; relies on persistent runner state; the workflow fails if parsed cached-layer reuse is not greater than 90%
+- `scan-only`: skips build steps entirely, pulls the existing GHCR image for each requested family, installs Syft/Trivy, and emits per-family scan artifacts
 
 **Outputs** per run: a structured artifact containing
 `requested_benchmark_class`, normalized `proof_class`, normalized
@@ -416,7 +417,7 @@ on:
     - cron: '0 6 * * 1'   # Monday 06:00 UTC — low-traffic window, before business hours
 ```
 
-**Matrix**: `runner_class` × `benchmark_class` × `image_family`
+**Manual/on-demand matrix**: `runner_class` × `benchmark_class` × `image_family`
 
 | runner_class | benchmark_class | image_family | Est. duration |
 |---|---|---|---|
@@ -431,7 +432,7 @@ on:
 | arc-heavy | registry-warm | openedx | ~10 min |
 | arc-heavy | registry-warm | mfe | ~5–8 min |
 
-**Budget estimate**: if run sequentially, the full matrix is approximately **5–7 hours** of wall-clock runner time per week. In practice, the app-cache-cold runs will not be scheduled weekly (too expensive) — they are run on demand when the cache-disabled helper baseline needs refreshing. The weekly cron runs only `registry-warm` and `scan-only` per image_family and runner_class, bringing the weekly budget to approximately **60–90 minutes**.
+**Budget estimate**: if run sequentially, the full matrix is approximately **5–7 hours** of wall-clock runner time. In practice, the app-cache-cold and scan-only runs are manual/on-demand because they are expensive and should be attached to a named proof request. The current weekly cron runs one representative smoke only: `registry-warm / fastlane / openedx`.
 
 ---
 

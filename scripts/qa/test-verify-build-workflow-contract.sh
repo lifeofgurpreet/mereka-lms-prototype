@@ -35,6 +35,7 @@ should_skip_scope() {
       scripts/ci/resolve_release_bundle_digests.py|\
       scripts/infra/resolve-build-scope.sh|\
       scripts/infra/install-cosign.sh|\
+      scripts/infra/install-syft.sh|\
       scripts/infra/install-trivy.sh|\
       scripts/infra/generate-build-provenance.sh|\
       scripts/infra/generate-release-bundle.sh|\
@@ -176,6 +177,7 @@ on:
       - 'scripts/ci/resolve_release_bundle_digests.py'
       - 'scripts/infra/resolve-build-scope.sh'
       - 'scripts/infra/install-cosign.sh'
+      - 'scripts/infra/install-syft.sh'
       - 'scripts/infra/install-trivy.sh'
       - 'scripts/infra/generate-build-provenance.sh'
       - 'scripts/infra/generate-release-bundle.sh'
