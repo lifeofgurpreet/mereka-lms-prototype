@@ -11260,7 +11260,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-obs-001-mfe-sentry-phase4.sh",
-      "reference_count": 4,
+      "reference_count": 5,
       "replaced_by": "",
       "runtime_dependencies": [
         "vendor"

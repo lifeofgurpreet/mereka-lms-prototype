@@ -52,6 +52,21 @@ spec:
               value: "0.1"
             - name: MEREKA_PLATFORM_ADMIN_EMAILS
               value: ""
+            # MFE client-side Sentry DSN (OBS-001, bead mereka-lms-9ib2).
+            # Matches LMS declaration; CMS also serves the MFE config API on
+            # some request paths. Empty default: SDK stays dormant.
+            - name: MEREKA_MFE_SENTRY_DSN
+              valueFrom:
+                secretKeyRef:
+                  name: openedx-secrets
+                  key: MEREKA_MFE_SENTRY_DSN
+                  optional: true
+            - name: MEREKA_MFE_SENTRY_ENVIRONMENT
+              valueFrom:
+                secretKeyRef:
+                  name: openedx-secrets
+                  key: MEREKA_MFE_SENTRY_ENVIRONMENT
+                  optional: true
             - name: UWSGI_WORKERS
               value: "2"
             - name: MONGODB_HOST

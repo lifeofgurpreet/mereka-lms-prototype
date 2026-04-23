@@ -114,7 +114,10 @@ MFE_CONFIG["SESSION_COOKIE_DOMAIN"] = SESSION_COOKIE_DOMAIN
 # Per-env DSN provisioning:
 # - A DSN MUST be a CLIENT-SIDE (browser-exposed) Sentry key, scoped to
 #   the MFE project only. DO NOT reuse MEREKA_LMS_SENTRY_DSN (backend).
-# - Expected Sentry project naming: mereka-lms-mfe-{dev,staging,prod}.
+# - Expected Sentry project: `mereka-lms-web` (single project; env tag
+#   segments via MEREKA_MFE_SENTRY_ENVIRONMENT). Matches the Phase 4
+#   canary verifier (scripts/qa/verify-obs-001-mfe-sentry-phase4.sh)
+#   which queries that exact project slug.
 # - Infisical key: MEREKA_MFE_SENTRY_DSN (populated per env); empty on
 #   envs where the Sentry project doesn't exist yet — the SDK stays
 #   dormant.

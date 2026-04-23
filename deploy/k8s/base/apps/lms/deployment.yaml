@@ -52,6 +52,22 @@ spec:
             value: "0.1"
           - name: MEREKA_PLATFORM_ADMIN_EMAILS
             value: ""
+          # MFE client-side Sentry DSN (OBS-001, bead mereka-lms-9ib2).
+          # Read by lms_settings.py → MFE_CONFIG["SENTRY_DSN"].
+          # Empty default is safe: SDK stays dormant until populated.
+          # bbi-infrastructure must populate via Infisical ExternalSecret overlay patch.
+          - name: MEREKA_MFE_SENTRY_DSN
+            valueFrom:
+              secretKeyRef:
+                name: openedx-secrets
+                key: MEREKA_MFE_SENTRY_DSN
+                optional: true
+          - name: MEREKA_MFE_SENTRY_ENVIRONMENT
+            valueFrom:
+              secretKeyRef:
+                name: openedx-secrets
+                key: MEREKA_MFE_SENTRY_ENVIRONMENT
+                optional: true
           - name: UWSGI_WORKERS
             value: "4"
           - name: MONGODB_HOST
