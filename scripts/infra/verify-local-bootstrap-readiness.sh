@@ -12,11 +12,6 @@ STUDIO_URL="${STUDIO_URL:-http://studio.localhost}"
 MFE_AUTHN_URL="${MFE_AUTHN_URL:-http://apps.localhost/authn/login}"
 DISCOVERY_URL="${DISCOVERY_URL:-http://discovery.localhost}"
 
-if [ -f "$REPO_ROOT/infrastructure/tutor/tutor-env.sh" ]; then
-  # shellcheck source=/dev/null
-  source "$REPO_ROOT/infrastructure/tutor/tutor-env.sh" >/dev/null 2>&1 || true
-fi
-
 FAILURES=()
 
 pass() {
@@ -44,7 +39,23 @@ mysql_scalar() {
   local sql="$1"
   local escaped
   escaped="$(printf '%q' "$sql")"
-  tutor local exec mysql sh -lc "mysql -uroot -p\"\$MYSQL_ROOT_PASSWORD\" -Nse $escaped"
+  tutor local exec mysql sh -lc "mysql -uroot -p\"\$MYSQL_ROOT_PASSWORD\" -Nse $escaped" \
+    | filter_tutor_exec_noise
+}
+
+filter_tutor_exec_noise() {
+  awk '
+    /^Mereka LMS plugin v[0-9.]+ loaded$/ { next }
+    /^docker compose -f / { next }
+    { print }
+  '
+}
+
+load_tutor_env() {
+  if [ -f "$REPO_ROOT/infrastructure/tutor/tutor-env.sh" ]; then
+    # shellcheck source=/dev/null
+    source "$REPO_ROOT/infrastructure/tutor/tutor-env.sh" >/dev/null 2>&1 || true
+  fi
 }
 
 lms_shell() {
@@ -128,6 +139,8 @@ WHERE s.domain IN ('localhost','localhost:8000','studio.localhost','studio.local
 }
 
 main() {
+  load_tutor_env
+
   require_running_service "mysql" "mysql"
   require_running_service "lms" "lms"
   require_running_service "caddy" "caddy"
@@ -150,4 +163,6 @@ main() {
   printf '\nPASS: local bootstrap readiness baseline is established under %s\n' "$TUTOR_ROOT"
 }
 
-main "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi

@@ -15,8 +15,8 @@ scripts/qa/test-install-docker-compose.sh
 scripts/qa/test-validate-registry.sh
 scripts/qa/test-mfe-npm-install-resilience-patch.sh
 scripts/qa/test-resolve-release-bundle-digests.sh
-scripts/qa/test-verify-tutor-patch-manifest-contract.sh
-scripts/qa/verify-build-optimizations-render-delta-contract.sh
+scripts/qa/test-verify-local-bootstrap-readiness.sh
+scripts/qa/verify-no-pipefail-prone-pipes.sh
 scripts/branding/validate-token-consumers.sh
 scripts/branding/verify-token-drift.sh
 scripts/infra/check-cert-sans.sh
