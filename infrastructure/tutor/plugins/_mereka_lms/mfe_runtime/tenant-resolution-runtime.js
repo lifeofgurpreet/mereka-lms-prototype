@@ -249,18 +249,21 @@ const applyMerekaTenantPaletteBridge = () => {
   }
 };
 
-(function _deferPaletteBridge() {
-  const _tryApply = () => {
-    if (typeof getConfig !== 'function') return false;
-    const cfg = getConfig() || {};
-    if (!cfg.PRIMARY_COLOR) return false;
-    applyMerekaTenantIdentity();
-    applyMerekaTenantPaletteBridge();
-    return true;
-  };
-  if (_tryApply()) return;
-  let attempts = 0;
-  const _interval = setInterval(() => {
-    if (_tryApply() || ++attempts > 50) clearInterval(_interval);
-  }, 200);
-})();
+const applyMerekaTenantPaletteBridgeIfReady = () => {
+  if (typeof getConfig !== 'function') return false;
+  const cfg = getConfig() || {};
+  if (!cfg.PRIMARY_COLOR) return false;
+  applyMerekaTenantIdentity();
+  applyMerekaTenantPaletteBridge();
+  return true;
+};
+
+// APP_READY fires after @edx/frontend-platform merges the runtime config API
+// payload into getConfig(), so it is the first authoritative moment for
+// tenant-specific palette values. Keep the immediate attempt for preloaded
+// config, then subscribe instead of polling.
+if (!applyMerekaTenantPaletteBridgeIfReady() && typeof subscribe === 'function') {
+  subscribe(APP_READY, () => {
+    applyMerekaTenantPaletteBridgeIfReady();
+  });
+}
