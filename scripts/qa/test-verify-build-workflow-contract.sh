@@ -639,9 +639,20 @@ jobs:
     needs: [release-bundle, scan-openedx-image, scan-mfe-image, slsa-provenance]
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     steps:
-      - run: |
+      - id: app-token
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3
+        with:
+          app-id: ${{ secrets.GITOPS_GITHUB_APP_ID }}
+          private-key: ${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}
+          owner: Biji-Biji-Initiative
+          repositories: bbi-infrastructure,platform-control-plane
+      - env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
           python3 - <<'PY'
           import json
+          import os
+          token = os.environ["APP_TOKEN"]
           bundle_id = "rb-aaaaaaaa-20260410T120000Z"
           contract_family = "promotion_dispatch_envelope_schema"
           contract_version = "1.0"
@@ -701,6 +712,21 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment' && inputs.build_profile == 'proof' }}
     steps:
+      - id: gitops-app-token
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3
+        with:
+          app-id: ${{ secrets.GITOPS_GITHUB_APP_ID }}
+          private-key: ${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}
+          owner: Biji-Biji-Initiative
+          repositories: bbi-infrastructure
+      - env:
+          APP_TOKEN: ${{ steps.gitops-app-token.outputs.token }}
+        run: test -n "$APP_TOKEN"
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          repository: Biji-Biji-Initiative/bbi-infrastructure
+          path: bbi-infrastructure
+          token: ${{ steps.gitops-app-token.outputs.token }}
       - run: |
           source ./scripts/lib/lane-normalize.sh
           TARGET_ENV_RAW="${{ inputs.target_environment }}"
@@ -787,6 +813,51 @@ run_expect_fail() {
 
 write_pass_fixture
 run_expect_pass "build workflow contract passes with scope-aware routing and post-push scan jobs"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    "      - 'requirements-tutor.txt'\n",
+    "      - 'requirements-tutor.txt'\n      - 'requirements-tutor.txt'\n",
+    1,
+)
+p.write_text(text)
+PY
+run_expect_fail "duplicate build workflow path entries are rejected"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    '          APP_TOKEN: ${{ steps.app-token.outputs.token }}\n',
+    '          APP_TOKEN: ${{ github.token }}\n',
+    1,
+)
+p.write_text(text)
+PY
+run_expect_fail "dispatch-dev-promotion must use the GitHub App token"
+
+write_pass_fixture
+python3 - "$tmpdir" <<'PY'
+from pathlib import Path
+import sys
+p = Path(sys.argv[1]) / ".github/workflows/build-tutor-images.yml"
+text = p.read_text()
+text = text.replace(
+    '          token: ${{ steps.gitops-app-token.outputs.token }}\n',
+    '          token: ${{ github.token }}\n',
+    1,
+)
+p.write_text(text)
+PY
+run_expect_fail "manual update-gitops must use the GitHub App token for infra checkout"
 
 write_pass_fixture
 python3 - "$tmpdir" <<'PY'

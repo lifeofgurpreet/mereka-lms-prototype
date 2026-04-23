@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-BAUTH-005, AC-BAUTH-010
+# @spec: build-authority-deterministic-builds_spec.md
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"

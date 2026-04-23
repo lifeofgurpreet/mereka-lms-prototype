@@ -30,6 +30,7 @@ except ImportError as exc:
 COVERS_RE = re.compile(r"(?://|#)\s*@covers\s+((?:AC-[A-Z]*-?\d+(?:\s*,\s*)*)+)")
 SPEC_RE = re.compile(r"(?://|#)\s*@spec:\s*(\S+)")
 AC_ID_RE = re.compile(r"\b(AC-(?:[A-Z]+-)?(\d{3,}))\b")
+CHECKBOX_AC_RE = re.compile(r"^\s*[-*]\s+\[[ xX]\]")
 SCAN_EXTENSIONS = {".sh", ".py", ".ts", ".js", ".tsx", ".jsx", ".yaml", ".yml"}
 
 
@@ -49,7 +50,7 @@ def extract_ac_ids(md: str) -> list[str]:
     ids = []
     for line in md.splitlines():
         stripped = line.strip()
-        if stripped.startswith(("- [ ]", "* [ ]")):
+        if CHECKBOX_AC_RE.match(stripped):
             m = AC_ID_RE.search(line)
             if m:
                 ids.append(m.group(1))

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC1003,SC2016
 # @covers AC-CI-ONBOARDING-001
+# @covers AC-BAUTH-005, AC-BAUTH-008
 # @spec: ci-cd-pipeline_spec.md
 # @runtime-dependencies: none
 #

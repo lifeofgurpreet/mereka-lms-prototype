@@ -2622,13 +2622,15 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-build-optimizations-render-delta-contract.sh",
-      "reference_count": 12,
+      "reference_count": 13,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
       ],
       "severity": "high",
       "spec_ids": [
+        "AC-BAUTH-007",
+        "AC-BAUTH-008",
         "AC-CI-ONBOARDING-001"
       ],
       "status": "active",
@@ -2681,13 +2683,19 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-build-workflow-contract.sh",
-      "reference_count": 22,
+      "reference_count": 24,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
       ],
       "severity": "high",
       "spec_ids": [
+        "AC-BAUTH-001",
+        "AC-BAUTH-002",
+        "AC-BAUTH-003",
+        "AC-BAUTH-006",
+        "AC-BAUTH-007",
+        "AC-BAUTH-009",
         "AC-CI-BUILD-001"
       ],
       "status": "active",
@@ -2983,13 +2991,16 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-ci-cache-policy.sh",
-      "reference_count": 7,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
       ],
       "severity": "high",
-      "spec_ids": [],
+      "spec_ids": [
+        "AC-BAUTH-005",
+        "AC-BAUTH-010"
+      ],
       "status": "active",
       "tier": "release_blocking"
     },
@@ -3380,13 +3391,15 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-cold-start-onboarding-contract.sh",
-      "reference_count": 18,
+      "reference_count": 19,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
       ],
       "severity": "high",
       "spec_ids": [
+        "AC-BAUTH-005",
+        "AC-BAUTH-008",
         "AC-CI-ONBOARDING-001"
       ],
       "status": "active",
@@ -13767,13 +13780,16 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-red-line-contract.sh",
-      "reference_count": 6,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
       ],
       "severity": "high",
       "spec_ids": [
+        "AC-BAUTH-007",
+        "AC-BAUTH-009",
+        "AC-BAUTH-010",
         "AC-BUILD-RL-001"
       ],
       "status": "active",

@@ -131,7 +131,7 @@
       "lane": "normative",
       "last_reviewed": "2026-04-21",
       "links": {
-        "generated_testmap": null,
+        "generated_testmap": "specs/_generated/testmaps/build-authority-deterministic-builds_spec.testmap.yml",
         "legacy_testmap": null,
         "plan": null,
         "source_plan": null,

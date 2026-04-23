@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # @covers AC-CI-ONBOARDING-001
+# @covers AC-BAUTH-007, AC-BAUTH-008
 # @spec: ci-cd-pipeline_spec.md
 #
 # Verify that post-render Tutor Dockerfile mutations remain bounded:
