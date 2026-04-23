@@ -24,6 +24,7 @@
 9. **Any fix not deployed through GitOps is temporary state.** Live `kubectl` mutations are emergency-only and must be source-committed within 5 minutes.
 10. **Report three states separately**: live (cluster), git (source), deployed (ArgoCD). Never collapse them.
 11. **Durable ≠ realized.** A fix must survive pod restart, ArgoCD resync, AND fresh bootstrap to be called done.
+12. **Use the lane-aware kube wrapper for live cluster work.** For interactive agent/operator reads or emergency mutations, use the infrastructure repo's `./scripts/kube <dev|staging|prod> ...` wrapper instead of raw `kubectl`, including `kubectl --context ...`. Direct `kubectl --context ...` belongs only inside committed scripts/CI when the wrapper is unavailable or would recurse, and that exception must be explicit.
 
 ## Quick Reference
 
@@ -54,5 +55,6 @@
 - OIDC endpoint ownership is infra-overlay territory; do not assume app-repo edits win.
 - Caddy + ingress + settings interactions are multi-layer; collect runtime evidence before patching.
 - Treat CI queue stalls as infra class after bounded wait; do not loop indefinitely.
+- For live Kubernetes evidence, use the lane-aware kube wrapper from `bbi-infrastructure` (`./scripts/kube dev ...`, `./scripts/kube staging ...`, `./scripts/kube prod ...`) so dev/staging/prod routing is explicit and not dependent on ambient kubeconfig state.
 
 </coding_guidelines>
