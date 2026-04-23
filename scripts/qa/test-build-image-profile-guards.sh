@@ -97,6 +97,121 @@ run_expect_cache_none_fast_rejected \
     --cache-mode none \
     --build-profile fast
 
+run_expect_skip_if_current_rejected_for_push() {
+  local label="$1"
+  shift
+
+  if "$@" >/tmp/test-build-image-profile-guards-skip-push.out 2>&1; then
+    echo "FAIL ${label}: expected push-mode skip-if-current guard to reject the invocation" >&2
+    cat /tmp/test-build-image-profile-guards-skip-push.out >&2 || true
+    exit 1
+  fi
+
+  if ! rg -q -- "--skip-if-current is only supported for local Docker output builds." /tmp/test-build-image-profile-guards-skip-push.out; then
+    echo "FAIL ${label}: expected explicit skip-if-current output-mode rejection" >&2
+    cat /tmp/test-build-image-profile-guards-skip-push.out >&2 || true
+    exit 1
+  fi
+
+  echo "PASS ${label}"
+}
+
+run_expect_skip_current_without_bake() {
+  local label="$1"
+  shift
+
+  if ! EXPECTED_CONTEXT_SHA="$current_context_sha" PATH="$tmpdir/current-fakebin:$PATH" "$@" >/tmp/test-build-image-profile-guards-skip-current.out 2>&1; then
+    echo "FAIL ${label}: expected current-image skip to succeed" >&2
+    cat /tmp/test-build-image-profile-guards-skip-current.out >&2 || true
+    exit 1
+  fi
+
+  if ! rg -q "skipping build" /tmp/test-build-image-profile-guards-skip-current.out; then
+    echo "FAIL ${label}: expected current-image skip message" >&2
+    cat /tmp/test-build-image-profile-guards-skip-current.out >&2 || true
+    exit 1
+  fi
+
+  echo "PASS ${label}"
+}
+
+mkdir -p "$tmpdir/current-context" "$tmpdir/current-fakebin"
+cat >"$tmpdir/current-context/Dockerfile" <<'EOF'
+FROM scratch
+EOF
+cat >"$tmpdir/current-context/app.txt" <<'EOF'
+current
+EOF
+cat >"$tmpdir/current-fakebin/docker" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ "${1:-}" == "image" && "${2:-}" == "inspect" ]]; then
+  if [[ "${3:-}" == "--format" ]]; then
+    printf '%s\n' "${EXPECTED_CONTEXT_SHA:?}"
+    exit 0
+  fi
+  exit 0
+fi
+
+if [[ "${1:-}" == "buildx" && "${2:-}" == "bake" ]]; then
+  echo "buildx bake should not run when the primary local image is current" >&2
+  exit 1
+fi
+
+echo "unexpected docker invocation: $*" >&2
+exit 1
+EOF
+chmod +x "$tmpdir/current-fakebin/docker"
+
+# shellcheck source=../infra/build-context-fingerprint.sh
+source "$ROOT_DIR/scripts/infra/build-context-fingerprint.sh"
+current_context_sha="$(mereka_build_context_fingerprint "$tmpdir/current-context")"
+
+run_expect_skip_if_current_rejected_for_push \
+  "build-openedx-image rejects skip-if-current outside local Docker output" \
+  bash "$ROOT_DIR/scripts/infra/build-openedx-image.sh" \
+    --context-dir "$tmpdir/current-context" \
+    --dockerfile "$tmpdir/current-context/Dockerfile" \
+    --image-repo example/openedx \
+    --primary-tag test \
+    --secondary-tag test2 \
+    --cache-ref example/openedx:cache \
+    --skip-if-current
+
+run_expect_skip_if_current_rejected_for_push \
+  "build-mfe-image rejects skip-if-current outside local Docker output" \
+  bash "$ROOT_DIR/scripts/infra/build-mfe-image.sh" \
+    --context-dir "$tmpdir/current-context" \
+    --dockerfile "$tmpdir/current-context/Dockerfile" \
+    --image-repo example/mfe \
+    --primary-tag test \
+    --secondary-tag test2 \
+    --cache-ref example/mfe:cache \
+    --skip-if-current
+
+run_expect_skip_current_without_bake \
+  "build-openedx-image skips Bake when local primary tag is current" \
+  bash "$ROOT_DIR/scripts/infra/build-openedx-image.sh" \
+    --context-dir "$tmpdir/current-context" \
+    --dockerfile "$tmpdir/current-context/Dockerfile" \
+    --image-repo example/openedx \
+    --primary-tag test \
+    --secondary-tag test2 \
+    --output-mode docker \
+    --skip-if-current
+
+run_expect_skip_current_without_bake \
+  "build-mfe-image skips Bake when local primary tag is current" \
+  bash "$ROOT_DIR/scripts/infra/build-mfe-image.sh" \
+    --context-dir "$tmpdir/current-context" \
+    --dockerfile "$tmpdir/current-context/Dockerfile" \
+    --image-repo example/mfe \
+    --primary-tag test \
+    --secondary-tag test2 \
+    --output-mode docker \
+    --skip-if-current
+
 mkdir -p "$repo_tmpdir/mfe-context" "$tmpdir/fakebin"
 cat >"$repo_tmpdir/mfe-context/Dockerfile" <<'EOF'
 FROM scratch

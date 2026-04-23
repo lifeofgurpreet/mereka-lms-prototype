@@ -298,6 +298,8 @@ ci_static_inventory:
       estimated_seconds: 8
     - script: scripts/qa/test-build-context-fingerprint.sh
       estimated_seconds: 1
+    - script: scripts/qa/test-build-image-freshness.sh
+      estimated_seconds: 1
     - script: scripts/qa/verify-benchmark-artifact-contract.sh
     - script: scripts/qa/verify-verification-catalog.sh
     - script: scripts/qa/test-verify-verification-catalog.sh
@@ -1313,12 +1315,15 @@ scripts:
       - --secondary-tag TAG
       - --cache-ref IMAGE:TAG
       - --mutable-tag TAG (optional)
+      - --skip-if-current (optional; local Docker output only)
     outputs:
       - pushed image tags in remote registry
+      - local Docker image tags when --output-mode docker or --local-defaults is used
       - stdout/stderr build log
       - exit code
     side_effects:
       - Pushes image tags to GHCR
+      - Writes local Docker images/cache when --output-mode docker or --local-defaults is used
     dry_run: false
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/infra/build-openedx-image.sh --help"
@@ -1339,12 +1344,15 @@ scripts:
       - --secondary-tag TAG
       - --cache-ref IMAGE:TAG
       - --mutable-tag TAG (optional)
+      - --skip-if-current (optional; local Docker output only)
     outputs:
       - pushed image tags in remote registry
+      - local Docker image tags when --output-mode docker or --local-defaults is used
       - stdout/stderr build log
       - exit code
     side_effects:
       - Pushes image tags to GHCR
+      - Writes local Docker images/cache when --output-mode docker or --local-defaults is used
     dry_run: false
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/infra/build-mfe-image.sh --help"
@@ -1386,6 +1394,23 @@ scripts:
     dry_run: true
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/qa/test-build-context-fingerprint.sh"
+    criticality: release-blocking
+
+  - path: scripts/infra/build-image-freshness.sh
+    owner: platform-team
+    purpose: >
+      Shared helper sourced by local Tutor image build entrypoints to inspect
+      Docker image build-context labels before deciding whether a local image
+      rebuild is required.
+    inputs:
+      - image reference
+      - expected build-context sha256
+    outputs:
+      - exit code
+    side_effects: none
+    dry_run: true
+    lanes: [dev]
+    proof_command: "bash scripts/qa/test-build-image-freshness.sh"
     criticality: release-blocking
 
   - path: scripts/infra/install-cosign.sh
@@ -2146,6 +2171,23 @@ scripts:
     dry_run: true
     lanes: [dev, staging, prod]
     proof_command: "bash scripts/qa/test-build-context-fingerprint.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/test-build-image-freshness.sh
+    owner: platform-team
+    purpose: >
+      Regression harness for the local image freshness helper. Uses a fake
+      Docker CLI to prove missing images, missing labels, and mismatched labels
+      are stale while matching build-context labels are reusable.
+    inputs: []
+    outputs:
+      - stdout (PASS/FAIL summary)
+      - exit code
+    side_effects:
+      - Creates fake Docker CLI fixtures under /tmp
+    dry_run: true
+    lanes: [dev]
+    proof_command: "bash scripts/qa/test-build-image-freshness.sh"
     criticality: release-blocking
 
   - path: scripts/qa/test-buildx-cleanup-active-guard.sh
