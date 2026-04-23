@@ -14,8 +14,8 @@ scripts/qa/test-buildx-cleanup-active-guard.sh
 scripts/qa/test-discovery-init-task-contract.sh
 scripts/qa/test-openedx-obsolete-activation-key-patch-removal.sh
 scripts/qa/test-verify-build-optimizations-render-delta-contract.sh
-scripts/qa/verify-no-pipefail-prone-pipes.sh
-scripts/branding/verify-logo-setup.sh
+scripts/qa/verify-deletion-wave-consumer-sweep.sh
+scripts/qa/verify-tutor-patch-manifest-contract.sh
 scripts/ci/preflight-check.sh
 scripts/infra/check-error-budget-gate.sh
 scripts/qa/audit-observability.sh

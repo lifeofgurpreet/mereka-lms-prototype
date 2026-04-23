@@ -179,6 +179,8 @@ ci_static_inventory:
     - script: scripts/qa/test-resolve-release-bundle-digests.sh
       estimated_seconds: 3
     - script: scripts/qa/test-verify-bootstrap-workflow-contract.sh
+    - script: scripts/qa/test-verify-local-bootstrap-readiness.sh
+      estimated_seconds: 3
     - script: scripts/qa/test-install-docker-compose.sh
       estimated_seconds: 5
     - script: scripts/qa/test-buildx-builder-health.sh
@@ -2662,6 +2664,22 @@ scripts:
   - path: scripts/infra/verify-local-bootstrap-readiness.sh
     owner: platform-team
     purpose: Verify Local Bootstrap Readiness
+    criticality: release-blocking
+
+  - path: scripts/qa/test-verify-local-bootstrap-readiness.sh
+    owner: platform-team
+    purpose: >
+      Fixture test for the local bootstrap readiness verifier. Proves Tutor
+      wrapper noise is stripped from MySQL scalar output before initialized
+      state checks compare numeric SQL results.
+    inputs: []
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects: none
+    dry_run: true
+    lanes: [dev]
+    proof_command: "bash scripts/qa/test-verify-local-bootstrap-readiness.sh"
     criticality: release-blocking
 
   - path: scripts/qa/verify-local-runtime-readiness.sh
