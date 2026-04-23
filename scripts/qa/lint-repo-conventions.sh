@@ -213,7 +213,6 @@ check_glob_ability() {
   fi
 
   # Check verify scripts: must start with verify- or end in -verify.sh and live in scripts/qa/
-  local verify_violations=0
   if [[ -d scripts/qa ]] && scope_touches_prefix "scripts/qa/"; then
     while IFS= read -r -d '' file; do
       if ! path_selected "$file"; then
@@ -291,6 +290,37 @@ check_glob_ability() {
 check_grep_ability() {
   echo ""
   echo "=== Category 2: Grep-ability (consistent naming) ==="
+
+  local conflict_marker_violations=0
+  if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    while IFS= read -r -d '' file; do
+      if ! path_selected "$file"; then
+        continue
+      fi
+      case "$file" in
+        docs/archive/*|docs/status/archive/*|tutor_env/*|var/*|node_modules/*)
+          continue
+          ;;
+      esac
+      if ! grep -Iq . "$file" 2>/dev/null; then
+        continue
+      fi
+
+      local marker_hits
+      marker_hits="$(grep -n -E '^(<<<<<<<|>>>>>>>|\|\|\|\|\|\|\|)([[:space:]]|$)' "$file" 2>/dev/null || true)"
+      if [[ -n "$marker_hits" ]]; then
+        fail "Grep-ability: Unresolved merge-conflict marker in tracked file: $file"
+        echo "$marker_hits" | sed 's/^/    /'
+        conflict_marker_violations=$((conflict_marker_violations + 1))
+      fi
+    done < <(git ls-files -z)
+  else
+    warn "Grep-ability: skipping conflict-marker scan outside git worktree"
+  fi
+
+  if [[ $conflict_marker_violations -eq 0 ]]; then
+    pass "Grep-ability: No unresolved merge-conflict markers in tracked active files"
+  fi
 
   # Check K8s manifests have app.kubernetes.io/name label
   local k8s_label_violations=0
