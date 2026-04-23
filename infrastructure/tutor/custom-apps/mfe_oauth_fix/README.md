@@ -23,18 +23,20 @@ Additionally, when the provider is returned with the default name (e.g., `Authen
 
 ## Solution
 
-This app provides a middleware (`MFEOAuthFixMiddleware`) that:
-1. Intercepts responses from `/api/mfe_context`
-2. If providers are empty, queries the database directly for OAuth providers for the current site
-3. Injects the providers into the response
-4. Normalizes Authentik provider names to **“Mereka”** when present
+This app now has a split ownership model:
+1. `MFEContextView` is the primary owner for the `/api/mfe_context` URL override
+2. The view queries OAuth providers for the current site and returns the final JSON payload
+3. The view marks its response with `X-MFE-OAuth-Fix-Source: view`
+4. `MFEOAuthFixMiddleware` acts only as a fallback for responses that were not produced by the view override
+5. The middleware still normalizes Authentik provider names to **“Mereka”** and can repopulate an empty providers array when the stock endpoint is still in play
 
 ## Components
 
-- `middleware.py` - Django middleware that fixes the response
-- `views.py` - Alternative view implementation (not currently used, middleware is simpler)
+- `constants.py` - Shared response ownership markers
+- `middleware.py` - Fallback response fixer for non-view-owned `/api/mfe_context` responses
+- `views.py` - Canonical `/api/mfe_context` URL override implementation
 - `apps.py` - Django app configuration
-- `urls.py` - URL patterns (not currently used, middleware is simpler)
+- `urls.py` - URL override that routes `/api/mfe_context` to `MFEContextView`
 - `setup.py` - Package configuration
 
 ## Installation
@@ -43,7 +45,8 @@ The app is automatically installed and configured via the `apply-patches.sh` scr
 
 1. Custom app code is copied to `/openedx/mfe_oauth_fix` in the Docker image
 2. App is added to `INSTALLED_APPS` in LMS production settings
-3. Middleware is added to `MIDDLEWARE` stack
+3. URL override is added to `ROOT_URLCONF_OVERRIDES`
+4. Middleware is added to `MIDDLEWARE` as a fallback path
 
 For the Kubernetes deployment, make sure the LMS production settings configmap includes the same additions in `deploy/k8s/base/apps/openedx/settings/lms/production.py`. The configmap mounts into `/openedx/edx-platform/lms/envs/tutor/production.py`.
 
@@ -73,11 +76,16 @@ Expected output:
 
 ## Logging
 
-The middleware logs to the Django logger at INFO level:
-- When it detects an empty providers array
-- Current site information
-- Number of providers found
-- Each provider added to the response
+The view logs:
+- the current site
+- the number of providers returned
+- each provider added to the response
+
+The middleware logs:
+- when it detects an empty providers array on a non-view-owned response
+- current site information for the fallback path
+- number of providers found in the fallback path
+- each provider added to the fallback response
 
 Check logs with:
 ```bash
@@ -86,6 +94,6 @@ kubectl logs -n mereka-lms -l app.kubernetes.io/name=lms --tail=100 | grep mfe_o
 
 ## Future Improvements
 
-1. Once the root cause in the Open edX platform is identified, this middleware can be removed
-2. The alternative `views.py` implementation can be used if a full endpoint replacement is preferred
+1. Once the root cause in the Open edX platform is identified, the fallback middleware can be removed
+2. If URL override ownership is ever retired, keep an explicit contract describing whether the stock endpoint or this app owns provider population
 3. Consider contributing the fix upstream to Open edX if it's a platform bug
