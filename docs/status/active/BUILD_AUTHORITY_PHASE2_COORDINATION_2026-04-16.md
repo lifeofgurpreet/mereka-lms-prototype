@@ -190,6 +190,12 @@ Agent-mail notification to infra lane is attached to the PR that introduces this
 
 ## Appendix — verified Phase 1 state snapshot (2026-04-16)
 
+Historical snapshot only. This appendix records what was proved on
+2026-04-16; it is not the current live-health authority for
+`ci-metrics-receiver`, Prometheus scrape status, or Grafana data freshness.
+Use [`CURRENT-OPERATOR-STATE.md`](./CURRENT-OPERATOR-STATE.md) plus live infra
+checks for present-tense status.
+
 - PR mereka-lms#1779 merged (Build Authority foundation)
 - PR mereka-lms#1782 merged (emit-build-metrics path fix — post-merge blocker)
 - PR vps-infrastructure#107 merged (ci-metrics-receiver + Prometheus rules + Grafana)

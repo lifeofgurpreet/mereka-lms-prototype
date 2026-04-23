@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# test-emit-build-metrics.sh — self-contained test suite for scripts/ci/emit-build-metrics.sh
+# test-emit-build-metrics.sh — self-contained test suite for the repo-owned
+# build-metrics artifact producer.
 #
-# Four fixtures covering happy path, graceful-degradation fallback, log parsing,
-# and unknown-argument handling. Exits 0 only when all fixtures pass.
+# Five fixtures covering happy path, graceful-degradation fallback, log parsing,
+# unknown-argument handling, and downstream-consumer compatibility. Exits 0
+# only when all fixtures pass.
 #
 # Usage:
 #   bash scripts/qa/test-emit-build-metrics.sh
@@ -29,8 +31,9 @@ _fail() {
 }
 
 # ── Fixture 1: happy path — metadata JSON + log file → valid JSON output ─────
-# Tests: both inputs present, jq validates output, required top-level keys present,
-#        image_family and release_unit_id round-trip correctly.
+# Tests: both inputs present, jq validates output, exact producer-owned top-level
+#        keys present, downstream-enriched keys absent, and identity fields
+#        round-trip correctly.
 echo ""
 echo "--- Fixture 1: happy path (metadata + log → valid JSON artifact) ---"
 
@@ -58,6 +61,8 @@ cat > "$FIX1_DIR/buildx.log" <<'LOG'
 #9 writing manifest sha256:aaaa1111bbbb2222cccc3333dddd4444eeee5555ffff6666aaaa1111bbbb2222
 LOG
 
+FIX1_RELEASE_ID="0123456789abcdef0123456789abcdef01234567"
+
 set +e
 (
   cd "$FIX1_DIR"
@@ -65,7 +70,7 @@ set +e
     --metadata-file "$FIX1_DIR/metadata.json" \
     --log-file "$FIX1_DIR/buildx.log" \
     --image-family openedx \
-    --release-unit-id abc123 \
+    --release-unit-id "$FIX1_RELEASE_ID" \
     --workflow-run-id 9000 \
     > "$FIX1_DIR/stdout.txt" 2> "$FIX1_DIR/stderr.txt"
 )
@@ -92,11 +97,25 @@ if command -v jq &>/dev/null && [[ -f "$OUTPUT1" ]]; then
     _fail "fixture 1: output is not valid JSON — contents: $(cat "$OUTPUT1")"
   fi
 
+  top_level_keys="$(jq -c 'keys | sort' "$OUTPUT1" 2>/dev/null || true)"
+  if [[ "$top_level_keys" == '["build_duration_seconds","cache_export","cache_sources","collected_at","image_family","layer_reuse_count","layer_total_count","release_unit_id","workflow_run_id"]' ]]; then
+    _pass "fixture 1: exact producer-owned top-level keys emitted"
+  else
+    _fail "fixture 1: unexpected top-level keys '$top_level_keys'"
+  fi
+
+  if jq -e 'has("runner_class") | not' "$OUTPUT1" >/dev/null 2>&1 && \
+     jq -e 'has("build_target") | not' "$OUTPUT1" >/dev/null 2>&1; then
+    _pass "fixture 1: downstream-enriched keys remain absent from producer artifact"
+  else
+    _fail "fixture 1: producer artifact unexpectedly includes downstream-enriched keys: $(cat "$OUTPUT1")"
+  fi
+
   release_id="$(jq -r '.release_unit_id' "$OUTPUT1" 2>/dev/null || true)"
-  if [[ "$release_id" == "abc123" ]]; then
+  if [[ "$release_id" == "$FIX1_RELEASE_ID" ]]; then
     _pass "fixture 1: release_unit_id round-trips correctly"
   else
-    _fail "fixture 1: expected release_unit_id=abc123, got '$release_id'"
+    _fail "fixture 1: expected release_unit_id=$FIX1_RELEASE_ID, got '$release_id'"
   fi
 
   image_family="$(jq -r '.image_family' "$OUTPUT1" 2>/dev/null || true)"
@@ -104,6 +123,13 @@ if command -v jq &>/dev/null && [[ -f "$OUTPUT1" ]]; then
     _pass "fixture 1: image_family round-trips correctly"
   else
     _fail "fixture 1: expected image_family=openedx, got '$image_family'"
+  fi
+
+  workflow_run_id="$(jq -r '.workflow_run_id' "$OUTPUT1" 2>/dev/null || true)"
+  if [[ "$workflow_run_id" == "9000" ]]; then
+    _pass "fixture 1: workflow_run_id round-trips correctly"
+  else
+    _fail "fixture 1: expected workflow_run_id=9000, got '$workflow_run_id'"
   fi
 
   duration="$(jq '.build_duration_seconds' "$OUTPUT1" 2>/dev/null || true)"
@@ -142,13 +168,14 @@ echo "--- Fixture 2: graceful degradation (no metadata, no log → exit 0 + _war
 
 FIX2_DIR="$TMP_DIR/fix2"
 mkdir -p "$FIX2_DIR"
+FIX2_RELEASE_ID="fedcba9876543210fedcba9876543210fedcba98"
 
 set +e
 (
   cd "$FIX2_DIR"
   bash "$SCRIPT" \
     --image-family mfe \
-    --release-unit-id deadbeef \
+    --release-unit-id "$FIX2_RELEASE_ID" \
     > "$FIX2_DIR/stdout.txt" 2> "$FIX2_DIR/stderr.txt"
 )
 EXIT2=$?
@@ -168,6 +195,13 @@ else
 fi
 
 if command -v jq &>/dev/null && [[ -f "$OUTPUT2" ]]; then
+  top_level_keys="$(jq -c 'keys | sort' "$OUTPUT2" 2>/dev/null || true)"
+  if [[ "$top_level_keys" == '["_warning","build_duration_seconds","cache_export","cache_sources","collected_at","image_family","layer_reuse_count","layer_total_count","release_unit_id","workflow_run_id"]' ]]; then
+    _pass "fixture 2: graceful-degradation artifact keeps the documented key set"
+  else
+    _fail "fixture 2: unexpected top-level keys '$top_level_keys'"
+  fi
+
   warning_key="$(jq -r '._warning // empty' "$OUTPUT2" 2>/dev/null || true)"
   if [[ -n "$warning_key" ]]; then
     _pass "fixture 2: _warning key present in empty artifact"
@@ -187,6 +221,13 @@ if command -v jq &>/dev/null && [[ -f "$OUTPUT2" ]]; then
     _pass "fixture 2: layer_reuse_count is null (no log)"
   else
     _fail "fixture 2: expected layer_reuse_count=null, got '$layer_reuse'"
+  fi
+
+  release_id="$(jq -r '.release_unit_id' "$OUTPUT2" 2>/dev/null || true)"
+  if [[ "$release_id" == "$FIX2_RELEASE_ID" ]]; then
+    _pass "fixture 2: release_unit_id still round-trips under graceful degradation"
+  else
+    _fail "fixture 2: expected release_unit_id=$FIX2_RELEASE_ID, got '$release_id'"
   fi
 fi
 

@@ -128,7 +128,8 @@ aliasing is sufficient.
 | Surface | Current field | Required alias / action | Reference |
 |---------|---------------|------------------------|-----------|
 | `build-tutor-images.yml` workflow | `github.sha` env var; set as `RELEASE_UNIT_ID=${{ github.sha }}` in build step env | Set `release_unit_id` label on every emitted metric | RFC-BUILD-AUTHORITY-001 §Release-Unit Data Model |
-| `ci-metrics-receiver` webhook service | `release_unit_id` JSON field on every ingested event | Already correct field name; enforce full 40-char SHA (current examples show 9-char short SHA — must upgrade to full SHA) | CI_METRICS.md §4.2 |
+| `build-metrics-<image-family>.json` artifact (`emit-build-metrics.sh`) | `release_unit_id`, `workflow_run_id`, `image_family` | Repo-owned raw build-fact artifact. Keep `release_unit_id` full 40-char SHA; receiver enriches later. | `scripts/ci/emit-build-metrics.sh`, `docs/ops/ci-cd/CI_METRICS.md` |
+| `ci-metrics-receiver` webhook service | `release_unit_id` JSON field on every ingested event | Already correct field name; enforce full 40-char SHA in receiver-side storage, labels, and examples | CI_METRICS.md §5.2 |
 | `release_object` envelope (`generate_release_object.py`) | `app_commit_sha` | No rename required; add `"release_unit_id": app_commit_sha` as an alias field in Phase 3 | `scripts/release/generate_release_object.py` line 72 |
 | `build_provenance` block in dispatch envelope | `build_commit_sha` (inside `build_provenance` dict) | No rename required; receiver already validates this field. Document mapping: `release_unit_id == build_provenance.build_commit_sha` | memory: `reference-dispatch-envelope-contract.md` |
 | ArgoCD Application | `spec.source.targetRevision` (the deployed git SHA) | Read-only surface; no change. Query by matching `targetRevision` to `release_unit_id` in Grafana | ArgoCD application CR |
@@ -360,9 +361,9 @@ Each emitting surface must satisfy the following to be considered conformant:
 
 - `build-tutor-images.yml`: set `RELEASE_UNIT_ID=${{ github.sha }}` in build
   step env block; pass as label to emitted metrics.
-- `ci-metrics-receiver`: upgrade `release_unit_id` value from short SHA
-  (current example: `"74a1998d6"`) to full 40-char SHA. This is a breaking
-  change for any consumer expecting the short form — update together.
+- `ci-metrics-receiver` and any downstream dashboards/alerts: keep
+  `release_unit_id` as a full 40-char SHA in storage, labels, and examples.
+  Any short-form display must remain an alias only.
 - Deliverable: every `ci_*` metric has `release_unit_id` label with full SHA.
 
 ### Phase 2 — Dashboards and alerts query by it
@@ -401,7 +402,7 @@ yet available. These are not blockers for Phase 1.
 |---|-----|---------|
 | OG-1 | `ci_realization_duration_seconds` source is undefined. The exact Argo webhook endpoint or conveyor metric that would emit this with a `release_unit_id` label is not documented in bbi-infrastructure. The join query in Section 7 assumes this metric exists; until it does, the "Did it reach runtime?" chain query is incomplete at the realization step. | Blocks Phase 2 `CIRealizationStuck` alert PromQL. |
 | OG-2 | Runtime proof (`emit-proof-envelope.sh`) currently emits `commit_sha` set from `git rev-parse HEAD` at proof execution time. If the proof runs from a worktree or detached HEAD that does not match the originally-built SHA, `commit_sha != release_unit_id`. The Phase 3 alias must verify the value equals the build SHA, not just the current HEAD. | Phase 3 aliasing work. |
-| OG-3 | `ci-metrics-receiver` example in `CI_METRICS.md` §4.3 shows `"release_unit_id": "74a1998d6"` (9-char short SHA). The Phase 1 upgrade to full SHA is a breaking change for any dashboard panel or alert that used the short form. An inventory of existing consumers must be taken before the upgrade ships. | Phase 1 upgrade coordination. |
+| OG-3 | Historical short-SHA examples have been corrected in the app-repo docs, but any downstream dashboard, alert, or receiver consumer still assuming short-form `release_unit_id` must be inventoried before a receiver-side rollout is called complete. | Phase 1 upgrade coordination. |
 
 ---
 

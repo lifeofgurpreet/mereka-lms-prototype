@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# emit-build-metrics.sh — Parse buildx metadata + log for cache and layer metrics.
+# emit-build-metrics.sh — Build the repo-owned raw CI metrics artifact.
 #
 # Reads buildx metadata JSON and/or a buildx build log and extracts:
 #   - Cache source facts (which types were found, what digests were imported)
@@ -10,6 +10,10 @@
 # Outputs:
 #   - Appends a markdown table to $GITHUB_STEP_SUMMARY (when set)
 #   - Writes build-metrics-<image-family>.json in the working directory
+#
+# This script does not emit Prometheus metrics directly. Downstream receiver
+# infrastructure may enrich this artifact later with workflow/webhook context
+# such as runner classification or job/build-target labels.
 #
 # Usage:
 #   emit-build-metrics.sh \
@@ -22,7 +26,7 @@
 # All inputs are optional; graceful degradation on missing files.
 #
 # Bead: mereka-lms-jj97.5
-# See: docs/ops/ci-cd/CI_METRICS.md for metric naming contract
+# See: docs/ops/ci-cd/CI_METRICS.md for producer-artifact vs receiver contract
 # Wire-in comment for build-tutor-images.yml (do not uncomment here — jj97.6 PR):
 #   - uses: ./.github/actions/emit-build-metrics
 #     with:
