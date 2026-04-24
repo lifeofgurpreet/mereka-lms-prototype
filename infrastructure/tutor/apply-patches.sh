@@ -144,6 +144,15 @@ sync_openedx_multi_tenancy_plugin() {
   mirror_tree "$multi_tenancy_src" "$multi_tenancy_dest" "Open edX multi-tenancy plugin"
 }
 
+remove_retired_indigo_theme() {
+  local indigo_theme_dir="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}/env/build/openedx/themes/indigo"
+
+  if [[ -d "$indigo_theme_dir" ]]; then
+    rm -rf "$indigo_theme_dir"
+    echo "Removed retired Indigo theme from generated Open edX build context: $indigo_theme_dir"
+  fi
+}
+
 sync_mfe_patch_helpers() {
   local tutor_mfe_build_dir="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}/env/plugins/mfe/build/mfe"
   mkdir -p "$tutor_mfe_build_dir"
@@ -232,6 +241,7 @@ apply_openedx_patches() {
   sync_openedx_theme
   sync_openedx_custom_apps
   sync_openedx_multi_tenancy_plugin
+  remove_retired_indigo_theme
 }
 
 apply_mfe_patches() {
