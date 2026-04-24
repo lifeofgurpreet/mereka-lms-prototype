@@ -55,7 +55,8 @@ Current workflow contract:
   job (`docker buildx prune -af` after that job's Buildx builder is created).
   The prepare job may run on a different machine, so measured-job wipe evidence
   is the proof signal.
-- skips GHCR login for the class
+- authenticates to GHCR only for dependency image pulls; this is dependency
+  registry access, not app-level cache authority
 - clears `CACHE_FROM_ARG`, so the canonical build helpers use no shared
   app-level registry cache import
 - renders Tutor build contexts with the same dependency-acquisition contract
@@ -70,6 +71,9 @@ Current workflow contract:
   registry cache
 - fails the measured build job if the benchmark artifact records
   `OUTCOME=failure`; uploaded artifacts are diagnostics, not a waiver
+- records the GitHub job result in `benchmark_metadata.json` so a runner abort
+  or failed measured job with missing step outputs is classified as `failure`,
+  not quietly reported as `skipped`
 
 Limitations:
 

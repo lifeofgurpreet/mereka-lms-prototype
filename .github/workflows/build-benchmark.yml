@@ -1169,7 +1169,7 @@ jobs:
           # requested proof precondition. Classification is still DERIVED from
           # ci_cache_source_found + ci_layer_reuse_ratio in recording rules.
           python3 - <<PYEOF
-          import json, os
+          import json, os, sys
           proof_class = os.environ["PROOF_CLASS"]
           openedx_duration = int(os.environ.get("BUILD_DURATION_OPENEDX", 0))
           mfe_duration = int(os.environ.get("BUILD_DURATION_MFE", 0))
@@ -1180,6 +1180,25 @@ jobs:
           openedx_total = int("${{ needs.measured-build-openedx.outputs.total_layers || '0' }}".strip() or 0)
           mfe_cached = int("${{ needs.measured-build-mfe.outputs.cached_layers || '0' }}".strip() or 0)
           mfe_total = int("${{ needs.measured-build-mfe.outputs.total_layers || '0' }}".strip() or 0)
+          def outcome_from_job(output_outcome, job_result):
+              output_outcome = (output_outcome or "").strip()
+              job_result = (job_result or "").strip()
+              if output_outcome and output_outcome != "skipped":
+                  return output_outcome
+              if job_result in {"failure", "cancelled"}:
+                  return job_result
+              if job_result == "success":
+                  return "missing-output"
+              return "skipped"
+
+          openedx_build_result = os.environ.get("MEASURED_BUILD_OPENEDX_RESULT", "")
+          mfe_build_result = os.environ.get("MEASURED_BUILD_MFE_RESULT", "")
+          scan_openedx_result = os.environ.get("SCAN_OPENEDX_RESULT", "")
+          scan_mfe_result = os.environ.get("SCAN_MFE_RESULT", "")
+          openedx_outcome = outcome_from_job(os.environ.get("BUILD_OUTCOME_OPENEDX", "skipped"), openedx_build_result)
+          mfe_outcome = outcome_from_job(os.environ.get("BUILD_OUTCOME_MFE", "skipped"), mfe_build_result)
+          scan_openedx_outcome = outcome_from_job(os.environ.get("SCAN_OUTCOME_OPENEDX", "skipped"), scan_openedx_result)
+          scan_mfe_outcome = outcome_from_job(os.environ.get("SCAN_OUTCOME_MFE", "skipped"), scan_mfe_result)
           meta = {
               "schema_version": "benchmark-metadata/v1",
               "run_id": os.environ["GITHUB_RUN_ID"],
@@ -1201,19 +1220,21 @@ jobs:
                   f"/actions/runs/{os.environ['GITHUB_RUN_ID']}"
               ),
               "openedx": {
+                  "job_result": openedx_build_result,
                   "build_start_utc": os.environ.get("BUILD_START_OPENEDX", ""),
                   "build_end_utc": os.environ.get("BUILD_END_OPENEDX", ""),
                   "build_duration_seconds": openedx_duration,
-                  "outcome": os.environ.get("BUILD_OUTCOME_OPENEDX", "skipped"),
+                  "outcome": openedx_outcome,
                   "cached_layers": openedx_cached,
                   "total_layers": openedx_total,
                   "layer_reuse_ratio": (openedx_cached / openedx_total) if openedx_total else None,
               },
               "mfe": {
+                  "job_result": mfe_build_result,
                   "build_start_utc": os.environ.get("BUILD_START_MFE", ""),
                   "build_end_utc": os.environ.get("BUILD_END_MFE", ""),
                   "build_duration_seconds": mfe_duration,
-                  "outcome": os.environ.get("BUILD_OUTCOME_MFE", "skipped"),
+                  "outcome": mfe_outcome,
                   "cached_layers": mfe_cached,
                   "total_layers": mfe_total,
                   "layer_reuse_ratio": (mfe_cached / mfe_total) if mfe_total else None,
@@ -1221,12 +1242,14 @@ jobs:
               "scan": {
                   "duration_seconds": scan_duration,
                   "openedx": {
+                      "job_result": scan_openedx_result,
                       "duration_seconds": scan_openedx_duration,
-                      "outcome": os.environ.get("SCAN_OUTCOME_OPENEDX", "skipped"),
+                      "outcome": scan_openedx_outcome,
                   },
                   "mfe": {
+                      "job_result": scan_mfe_result,
                       "duration_seconds": scan_mfe_duration,
-                      "outcome": os.environ.get("SCAN_OUTCOME_MFE", "skipped"),
+                      "outcome": scan_mfe_outcome,
                   },
               },
               "total_duration_seconds": openedx_duration + mfe_duration + scan_duration,
@@ -1240,6 +1263,22 @@ jobs:
           with open("benchmark-results/benchmark_metadata.json", "w") as f:
               json.dump(meta, f, indent=2)
           print(json.dumps(meta, indent=2))
+          missing_output_sections = []
+          if openedx_outcome == "missing-output":
+              missing_output_sections.append("openedx")
+          if mfe_outcome == "missing-output":
+              missing_output_sections.append("mfe")
+          if scan_openedx_outcome == "missing-output":
+              missing_output_sections.append("scan.openedx")
+          if scan_mfe_outcome == "missing-output":
+              missing_output_sections.append("scan.mfe")
+          if missing_output_sections:
+              print(
+                  "::error::Benchmark metadata cannot classify successful job(s) with missing outputs: "
+                  + ", ".join(missing_output_sections),
+                  file=sys.stderr,
+              )
+              sys.exit(1)
           PYEOF
         env:
           RELEASE_UNIT_ID: ${{ github.sha }}
@@ -1255,6 +1294,10 @@ jobs:
           BUILD_END_OPENEDX: ${{ needs.measured-build-openedx.outputs.build_end_utc || '' }}
           BUILD_START_MFE: ${{ needs.measured-build-mfe.outputs.build_start_utc || '' }}
           BUILD_END_MFE: ${{ needs.measured-build-mfe.outputs.build_end_utc || '' }}
+          MEASURED_BUILD_OPENEDX_RESULT: ${{ needs.measured-build-openedx.result }}
+          MEASURED_BUILD_MFE_RESULT: ${{ needs.measured-build-mfe.result }}
+          SCAN_OPENEDX_RESULT: ${{ needs.scan-openedx.result }}
+          SCAN_MFE_RESULT: ${{ needs.scan-mfe.result }}
 
       - name: Write workflow step summary table
         run: |
