@@ -1,6 +1,14 @@
-[submodule "hubspot-webhook-mct"]
-	path = hubspot-webhook-mct
-	url = https://github.com/Biji-Biji-Initiative/hubspot-webhook-mct.git
-[submodule "tmp/frontend-app-authn"]
-	path = tmp/frontend-app-authn
-	url = https://github.com/openedx/frontend-app-authn
+# Submodule declarations intentionally left empty for this fork.
+#
+# The upstream Biji-Biji-Initiative/mereka-lms repo registers:
+#   - hubspot-webhook-mct → private Biji-Biji repo Netlify cannot access
+#   - tmp/frontend-app-authn → Open edX MFE (only used for local reference)
+#
+# For this prototype fork, we deploy a static UX prototype via Netlify, so
+# no submodules are needed. Removing these entries unblocks Netlify builds
+# that were failing at the "preparing repo" stage due to the private
+# hubspot-webhook-mct submodule.
+#
+# If you ever need to sync upstream changes that rely on these submodules,
+# re-add them here and make sure Netlify has access (or use
+# `GIT_CLONE_OPTIONS="--no-recurse-submodules"` in Netlify env vars).
