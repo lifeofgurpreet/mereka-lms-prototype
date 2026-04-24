@@ -12774,7 +12774,8 @@
         "workflow_direct"
       ],
       "env_scope": [
-        "dev"
+        "dev",
+        "prod"
       ],
       "kind": "verify",
       "mutability": "read-only",
