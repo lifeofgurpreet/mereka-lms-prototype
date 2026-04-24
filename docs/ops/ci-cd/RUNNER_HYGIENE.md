@@ -27,6 +27,15 @@ state volumes, consuming memory and disk before application build code runs.
 Each idle BuildKit worker uses ~100–200 MB, and orphan state volumes have caused
 fastlane root disk exhaustion during app-cache-cold benchmark proofs.
 
+The benchmark workflow also pre-cleans repo-scoped Tutor/build directories
+before `actions/checkout` on persistent self-hosted jobs. That cleanup is
+intentionally separate from `buildx-cleanup.sh`: Buildx cleanup owns Docker
+builders, orphan BuildKit containers, and orphan BuildKit state volumes; the
+workflow pre-checkout cleanup owns stale workspace paths such as `tutor_env`,
+`var/ci`, `var/bootstrap-readiness`, and `.buildx-cache`. This avoids checkout
+failures when previous Tutor or containerized build steps left root-owned files
+inside the worktree.
+
 ---
 
 ## Scripts

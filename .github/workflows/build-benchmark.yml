@@ -312,6 +312,54 @@ jobs:
       scan_image_ref_mfe: ${{ steps.conditions.outputs.scan_image_ref_mfe }}
       warmup_done: ${{ steps.warmup.outputs.done }}
     steps:
+      - name: Pre-clean persistent Tutor workspace
+        run: |
+          set -euo pipefail
+          cleanup_workspace_paths() {
+            local path target
+            local existing=()
+            for path in "$@"; do
+              case "$path" in
+                tutor_env|var/bootstrap-readiness|var/ci|.buildx-cache) ;;
+                *) echo "Refusing to cleanup unexpected workspace path: $path" >&2; exit 64 ;;
+              esac
+              target="$GITHUB_WORKSPACE/$path"
+              [[ -e "$target" ]] && existing+=("$path")
+            done
+            [[ "${#existing[@]}" -eq 0 ]] && return 0
+
+            if command -v docker >/dev/null 2>&1 && timeout 30s docker info >/dev/null 2>&1; then
+              # shellcheck disable=SC2016
+              if timeout 2m docker run --rm \
+                --network none \
+                -v "$GITHUB_WORKSPACE:/workspace" \
+                mirror.gcr.io/library/alpine:3.20 \
+                sh -eu -c '
+                  for rel in "$@"; do
+                    case "$rel" in
+                      tutor_env|var/bootstrap-readiness|var/ci|.buildx-cache) ;;
+                      *) echo "Refusing to cleanup unexpected workspace path: $rel" >&2; exit 64 ;;
+                    esac
+                    rm -rf "/workspace/$rel"
+                  done
+                ' sh "${existing[@]}"; then
+                return 0
+              fi
+              echo "Docker-owned cleanup failed; falling back to sudo/user cleanup." >&2
+            fi
+
+            for path in "${existing[@]}"; do
+              target="$GITHUB_WORKSPACE/$path"
+              [[ -e "$target" ]] || continue
+              if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+                sudo rm -rf --one-file-system "$target"
+              else
+                rm -rf --one-file-system "$target"
+              fi
+            done
+          }
+          cleanup_workspace_paths tutor_env var/bootstrap-readiness var/ci .buildx-cache
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       # ── Log in to GHCR for registry-warm and local-hot (read-only pull) ───
@@ -507,6 +555,54 @@ jobs:
       total_layers: ${{ steps.build.outputs.total_layers }}
       outcome: ${{ steps.build.outputs.outcome }}
     steps:
+      - name: Pre-clean persistent Tutor workspace
+        run: |
+          set -euo pipefail
+          cleanup_workspace_paths() {
+            local path target
+            local existing=()
+            for path in "$@"; do
+              case "$path" in
+                tutor_env|var/bootstrap-readiness|var/ci|.buildx-cache) ;;
+                *) echo "Refusing to cleanup unexpected workspace path: $path" >&2; exit 64 ;;
+              esac
+              target="$GITHUB_WORKSPACE/$path"
+              [[ -e "$target" ]] && existing+=("$path")
+            done
+            [[ "${#existing[@]}" -eq 0 ]] && return 0
+
+            if command -v docker >/dev/null 2>&1 && timeout 30s docker info >/dev/null 2>&1; then
+              # shellcheck disable=SC2016
+              if timeout 2m docker run --rm \
+                --network none \
+                -v "$GITHUB_WORKSPACE:/workspace" \
+                mirror.gcr.io/library/alpine:3.20 \
+                sh -eu -c '
+                  for rel in "$@"; do
+                    case "$rel" in
+                      tutor_env|var/bootstrap-readiness|var/ci|.buildx-cache) ;;
+                      *) echo "Refusing to cleanup unexpected workspace path: $rel" >&2; exit 64 ;;
+                    esac
+                    rm -rf "/workspace/$rel"
+                  done
+                ' sh "${existing[@]}"; then
+                return 0
+              fi
+              echo "Docker-owned cleanup failed; falling back to sudo/user cleanup." >&2
+            fi
+
+            for path in "${existing[@]}"; do
+              target="$GITHUB_WORKSPACE/$path"
+              [[ -e "$target" ]] || continue
+              if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+                sudo rm -rf --one-file-system "$target"
+              else
+                rm -rf --one-file-system "$target"
+              fi
+            done
+          }
+          cleanup_workspace_paths tutor_env var/ci .buildx-cache
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       - name: Set up Python environment
@@ -715,6 +811,54 @@ jobs:
       total_layers: ${{ steps.build.outputs.total_layers }}
       outcome: ${{ steps.build.outputs.outcome }}
     steps:
+      - name: Pre-clean persistent Tutor workspace
+        run: |
+          set -euo pipefail
+          cleanup_workspace_paths() {
+            local path target
+            local existing=()
+            for path in "$@"; do
+              case "$path" in
+                tutor_env|var/bootstrap-readiness|var/ci|.buildx-cache) ;;
+                *) echo "Refusing to cleanup unexpected workspace path: $path" >&2; exit 64 ;;
+              esac
+              target="$GITHUB_WORKSPACE/$path"
+              [[ -e "$target" ]] && existing+=("$path")
+            done
+            [[ "${#existing[@]}" -eq 0 ]] && return 0
+
+            if command -v docker >/dev/null 2>&1 && timeout 30s docker info >/dev/null 2>&1; then
+              # shellcheck disable=SC2016
+              if timeout 2m docker run --rm \
+                --network none \
+                -v "$GITHUB_WORKSPACE:/workspace" \
+                mirror.gcr.io/library/alpine:3.20 \
+                sh -eu -c '
+                  for rel in "$@"; do
+                    case "$rel" in
+                      tutor_env|var/bootstrap-readiness|var/ci|.buildx-cache) ;;
+                      *) echo "Refusing to cleanup unexpected workspace path: $rel" >&2; exit 64 ;;
+                    esac
+                    rm -rf "/workspace/$rel"
+                  done
+                ' sh "${existing[@]}"; then
+                return 0
+              fi
+              echo "Docker-owned cleanup failed; falling back to sudo/user cleanup." >&2
+            fi
+
+            for path in "${existing[@]}"; do
+              target="$GITHUB_WORKSPACE/$path"
+              [[ -e "$target" ]] || continue
+              if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+                sudo rm -rf --one-file-system "$target"
+              else
+                rm -rf --one-file-system "$target"
+              fi
+            done
+          }
+          cleanup_workspace_paths tutor_env var/ci .buildx-cache
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       - name: Set up Python environment
@@ -912,6 +1056,54 @@ jobs:
       scan_duration_seconds: ${{ steps.scan.outputs.scan_duration_seconds }}
       outcome: ${{ steps.scan.outputs.outcome }}
     steps:
+      - name: Pre-clean persistent Tutor workspace
+        run: |
+          set -euo pipefail
+          cleanup_workspace_paths() {
+            local path target
+            local existing=()
+            for path in "$@"; do
+              case "$path" in
+                tutor_env|var/bootstrap-readiness|var/ci|.buildx-cache) ;;
+                *) echo "Refusing to cleanup unexpected workspace path: $path" >&2; exit 64 ;;
+              esac
+              target="$GITHUB_WORKSPACE/$path"
+              [[ -e "$target" ]] && existing+=("$path")
+            done
+            [[ "${#existing[@]}" -eq 0 ]] && return 0
+
+            if command -v docker >/dev/null 2>&1 && timeout 30s docker info >/dev/null 2>&1; then
+              # shellcheck disable=SC2016
+              if timeout 2m docker run --rm \
+                --network none \
+                -v "$GITHUB_WORKSPACE:/workspace" \
+                mirror.gcr.io/library/alpine:3.20 \
+                sh -eu -c '
+                  for rel in "$@"; do
+                    case "$rel" in
+                      tutor_env|var/bootstrap-readiness|var/ci|.buildx-cache) ;;
+                      *) echo "Refusing to cleanup unexpected workspace path: $rel" >&2; exit 64 ;;
+                    esac
+                    rm -rf "/workspace/$rel"
+                  done
+                ' sh "${existing[@]}"; then
+                return 0
+              fi
+              echo "Docker-owned cleanup failed; falling back to sudo/user cleanup." >&2
+            fi
+
+            for path in "${existing[@]}"; do
+              target="$GITHUB_WORKSPACE/$path"
+              [[ -e "$target" ]] || continue
+              if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+                sudo rm -rf --one-file-system "$target"
+              else
+                rm -rf --one-file-system "$target"
+              fi
+            done
+          }
+          cleanup_workspace_paths tutor_env var/ci .buildx-cache
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       - name: Log in to GHCR (pull existing image)
@@ -1035,6 +1227,54 @@ jobs:
       scan_duration_seconds: ${{ steps.scan.outputs.scan_duration_seconds }}
       outcome: ${{ steps.scan.outputs.outcome }}
     steps:
+      - name: Pre-clean persistent Tutor workspace
+        run: |
+          set -euo pipefail
+          cleanup_workspace_paths() {
+            local path target
+            local existing=()
+            for path in "$@"; do
+              case "$path" in
+                tutor_env|var/bootstrap-readiness|var/ci|.buildx-cache) ;;
+                *) echo "Refusing to cleanup unexpected workspace path: $path" >&2; exit 64 ;;
+              esac
+              target="$GITHUB_WORKSPACE/$path"
+              [[ -e "$target" ]] && existing+=("$path")
+            done
+            [[ "${#existing[@]}" -eq 0 ]] && return 0
+
+            if command -v docker >/dev/null 2>&1 && timeout 30s docker info >/dev/null 2>&1; then
+              # shellcheck disable=SC2016
+              if timeout 2m docker run --rm \
+                --network none \
+                -v "$GITHUB_WORKSPACE:/workspace" \
+                mirror.gcr.io/library/alpine:3.20 \
+                sh -eu -c '
+                  for rel in "$@"; do
+                    case "$rel" in
+                      tutor_env|var/bootstrap-readiness|var/ci|.buildx-cache) ;;
+                      *) echo "Refusing to cleanup unexpected workspace path: $rel" >&2; exit 64 ;;
+                    esac
+                    rm -rf "/workspace/$rel"
+                  done
+                ' sh "${existing[@]}"; then
+                return 0
+              fi
+              echo "Docker-owned cleanup failed; falling back to sudo/user cleanup." >&2
+            fi
+
+            for path in "${existing[@]}"; do
+              target="$GITHUB_WORKSPACE/$path"
+              [[ -e "$target" ]] || continue
+              if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+                sudo rm -rf --one-file-system "$target"
+              else
+                rm -rf --one-file-system "$target"
+              fi
+            done
+          }
+          cleanup_workspace_paths tutor_env var/ci .buildx-cache
+
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       - name: Log in to GHCR (pull existing image)
