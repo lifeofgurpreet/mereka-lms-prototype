@@ -17,12 +17,15 @@ The fastlane runner is a long-lived VPS (not ephemeral like ARC pods).  Every
 - BuildKit containers are not removed automatically when a job exits.
 - Interrupted or timed-out CI runs can leave containers in a running-but-idle
   state indefinitely.
+- Interrupted cleanup can also leave `buildx_buildkit_*_state` Docker volumes
+  behind after the matching BuildKit container is gone.
 - Repeated `docker/setup-buildx-action` calls create a new named builder per
   run when the previous one was not torn down.
 
-Left unattended, the runner can accumulate 20–30 containers, consuming memory
-(each idle BuildKit worker uses ~100–200 MB) and occasionally causing socket
-permission drift as the Docker daemon restarts.
+Left unattended, the runner can accumulate 20–30 containers and tens of stale
+state volumes, consuming memory and disk before application build code runs.
+Each idle BuildKit worker uses ~100–200 MB, and orphan state volumes have caused
+fastlane root disk exhaustion during app-cache-cold benchmark proofs.
 
 ---
 
@@ -167,7 +170,7 @@ Expected output:
 ```
 [2026-...] [buildx-cleanup] Starting buildx cleanup (dry_run=1, max_keep=2, ...)
 [2026-...] [buildx-cleanup] Found 5 buildx builder(s): ...
-[2026-...] [buildx-cleanup] DRY RUN — would remove 3 builder(s) and 0 orphan container(s)
+[2026-...] [buildx-cleanup] DRY RUN — would remove 3 builder(s), 0 orphan container(s), and 4 orphan state volume(s)
 ```
 
 ### Step 3 — Install crontab entries
@@ -203,8 +206,8 @@ ssh root@"${RUNNER_IP}" /opt/runner/buildx-cleanup.sh
 
 If `docker build`, `docker buildx build`, `docker buildx bake`, `docker pull`,
 or `buildctl build` is still active, the cleanup script exits 0 without
-removing builders or orphan containers. Wait for the active substrate work to
-finish, then rerun cleanup.
+removing builders, orphan containers, or orphan state volumes. Wait for the
+active substrate work to finish, then rerun cleanup.
 
 ### Preview what would be removed
 
@@ -316,9 +319,11 @@ no such file or directory
 render, verifier, or local-guide authority.
 
 **Important boundary**: `scripts/runner/buildx-cleanup.sh` owns stale Buildx
-builder/container cleanup from this repo. The GitHub runner job-completed hook
-at `/usr/local/lib/gha-fastlane/cleanup.sh` is owned by `bbi-infrastructure`
-under `scripts/ops/fastlane/runner-cleanup/cleanup.sh`.
+builder/container cleanup and unused orphan `buildx_buildkit_*_state` volume
+cleanup from this repo. It must never remove mounted volumes or non-Buildx
+volumes. The GitHub runner job-completed hook at
+`/usr/local/lib/gha-fastlane/cleanup.sh` is owned by `bbi-infrastructure` under
+`scripts/ops/fastlane/runner-cleanup/cleanup.sh`.
 
 Developer laptops use a narrower guard in
 `scripts/infra/buildx-builder-health.sh`, reached through
@@ -346,6 +351,7 @@ code.
 ssh root@"${RUNNER_IP}" df -h / /srv
 ssh root@"${RUNNER_IP}" 'pgrep -af "Runner.Worker|docker pull|docker build|docker buildx (build|bake)|buildctl build" | sed -n "1,120p"'
 ssh root@"${RUNNER_IP}" /opt/runner/buildx-cleanup.sh --dry-run
+ssh root@"${RUNNER_IP}" 'docker volume ls --format "{{.Name}}" | grep "^buildx_buildkit_.*_state$" | wc -l'
 ssh root@"${RUNNER_IP}" 'grep -n "forcing prune\\|skipping prune to avoid containerd race" /usr/local/lib/gha-fastlane/cleanup.sh || true'
 ssh root@"${RUNNER_IP}" 'ls -ld /tmp /var/lock && \
   ls -l /tmp/fastlane-docker-prune.lock /var/lock/fastlane-docker-prune.lock 2>/dev/null || true'
@@ -354,7 +360,8 @@ ssh root@"${RUNNER_IP}" 'ls -ld /tmp /var/lock && \
 **Fix path**:
 
 1. Run the repo-owned Buildx cleanup first; it should defer if an active Docker
-   or Buildx build is detected.
+   or Buildx build is detected, and it should remove only unused orphan Buildx
+   state volumes.
 2. If disk pressure remains high, drain/idle the fastlane host before any broad
    Docker/containerd prune.
 3. Patch and deploy the infra-owned fastlane cleanup hook from

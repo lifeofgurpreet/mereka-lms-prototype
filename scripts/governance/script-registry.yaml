@@ -947,7 +947,7 @@ ci_runtime_inventory:
       note: derives the canonical release object from the signed release bundle
     - script: scripts/runner/buildx-cleanup.sh
       category: LIVE_CLUSTER
-      note: prunes stale buildx_buildkit containers from the fastlane VPS runner; supports --dry-run and --max-keep; defers while docker build/buildx build/bake/pull or buildctl build is active; never removes the default builder; install at /opt/runner/ on the fastlane host
+      note: prunes stale buildx_buildkit containers and unused orphan buildx_buildkit_*_state volumes from the fastlane VPS runner; supports --dry-run and --max-keep; defers while docker build/buildx build/bake/pull or buildctl build is active; never removes the default builder or mounted volumes; install at /opt/runner/ on the fastlane host
     - script: scripts/runner/buildx-monitor.sh
       category: LIVE_CLUSTER
       note: health check for the fastlane VPS runner buildx estate; checks docker daemon, socket permissions, and builder container count; exits 0/1/2

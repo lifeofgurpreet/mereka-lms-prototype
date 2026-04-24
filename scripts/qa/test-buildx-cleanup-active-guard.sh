@@ -35,6 +35,10 @@ case "$*" in
     printf '2020-01-01T00:00:00Z\n'
     exit 0
     ;;
+  "inspect --format {{range .Mounts}}{{if eq .Type \"volume\"}}{{.Name}}{{\"\\n\"}}{{end}}{{end}} existing-container")
+    printf 'buildx_buildkit_inuse_state\n'
+    exit 0
+    ;;
   "inspect --format {{.State.Status}} buildx_buildkit_oldbuilder")
     printf 'running\n'
     exit 0
@@ -45,6 +49,11 @@ case "$*" in
     ;;
 esac
 
+if [[ "$1" == "ps" && "${2:-}" == "-aq" ]]; then
+  printf 'existing-container\n'
+  exit 0
+fi
+
 if [[ "$1" == "ps" ]]; then
   printf 'buildx_buildkit_default\nbuildx_buildkit_oldbuilder\n'
   exit 0
@@ -52,6 +61,19 @@ fi
 
 if [[ "$1" == "rm" ]]; then
   printf 'removed-container\n' >"${STATE_DIR}/removed-container"
+  exit 0
+fi
+
+if [[ "$1" == "volume" && "${2:-}" == "ls" ]]; then
+  printf 'buildx_buildkit_default_state\n'
+  printf 'buildx_buildkit_oldbuilder_state\n'
+  printf 'buildx_buildkit_inuse_state\n'
+  printf 'buildx_buildkit_orphan_state\n'
+  exit 0
+fi
+
+if [[ "$1" == "volume" && "${2:-}" == "rm" && "${3:-}" == "buildx_buildkit_orphan_state" ]]; then
+  printf 'removed-volume\n' >"${STATE_DIR}/removed-orphan-volume"
   exit 0
 fi
 
@@ -113,7 +135,7 @@ chmod +x "${FAKE_BIN}/pgrep"
 run_cleanup() {
   local active_kind="$1"
   local log_file="$2"
-  rm -f "${STATE_DIR}/removed-oldbuilder" "${STATE_DIR}/removed-container" "${log_file}"
+  rm -f "${STATE_DIR}/removed-oldbuilder" "${STATE_DIR}/removed-container" "${STATE_DIR}/removed-orphan-volume" "${log_file}"
   FAKE_ACTIVE_BUILD_KIND="${active_kind}" \
     FAKE_DOCKER_LOG="${log_file}" \
     FAKE_STATE_DIR="${STATE_DIR}" \
@@ -134,8 +156,8 @@ for active_kind in \
   active_out="${TMP_DIR}/${active_kind}.out"
   run_cleanup "${active_kind}" "${active_log}" >"${active_out}"
 
-  if [[ -e "${STATE_DIR}/removed-oldbuilder" || -e "${STATE_DIR}/removed-container" ]]; then
-    echo "FAIL: ${active_kind} cleanup removed a builder/container" >&2
+  if [[ -e "${STATE_DIR}/removed-oldbuilder" || -e "${STATE_DIR}/removed-container" || -e "${STATE_DIR}/removed-orphan-volume" ]]; then
+    echo "FAIL: ${active_kind} cleanup removed a builder/container/volume" >&2
     exit 1
   fi
 
@@ -150,6 +172,11 @@ run_cleanup none "${inactive_log}" >"${TMP_DIR}/inactive.out"
 
 if [[ ! -e "${STATE_DIR}/removed-oldbuilder" ]]; then
   echo "FAIL: inactive cleanup did not remove stale builder" >&2
+  exit 1
+fi
+
+if [[ ! -e "${STATE_DIR}/removed-orphan-volume" ]]; then
+  echo "FAIL: inactive cleanup did not remove unused orphan state volume" >&2
   exit 1
 fi
 

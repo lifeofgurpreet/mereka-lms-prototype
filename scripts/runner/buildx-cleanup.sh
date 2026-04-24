@@ -7,9 +7,12 @@
 #   - Defers destructive cleanup while Docker/BuildKit substrate work is active
 #   - Removes them via `docker buildx rm` (for buildx-managed builders) or
 #     `docker rm -f` (for orphaned buildkit containers not tracked by buildx)
+#   - Removes unused orphan buildx_buildkit_*_state volumes after confirming
+#     they are not mounted by any existing container
 #   - Reports counts: before / removed / after
 #   - Never removes the `default` buildx builder
 #   - Never touches non-buildx containers
+#   - Never removes a mounted Docker volume
 #
 # Exit codes:
 #   0  all requested removals succeeded (or dry-run)
@@ -33,6 +36,7 @@ readonly SCRIPT_NAME="buildx-cleanup"
 readonly DEFAULT_MAX_KEEP=2
 readonly DEFAULT_MAX_AGE_HOURS=1
 readonly BUILDX_CONTAINER_PREFIX="buildx_buildkit"
+readonly BUILDX_STATE_VOLUME_SUFFIX="_state"
 readonly PROTECTED_BUILDER="default"
 
 # ── Defaults ────────────────────────────────────────────────────────────────
@@ -126,6 +130,36 @@ list_orphan_buildkit_containers() {
     --filter "name=${BUILDX_CONTAINER_PREFIX}" \
     --format '{{.Names}}' 2>/dev/null \
     | grep -v '^$' \
+    || true
+}
+
+# ── List buildkit state volumes ──────────────────────────────────────────────
+# Buildx uses per-builder Docker volumes named buildx_buildkit_*_state.  If a
+# builder/container disappears without deleting its volume, that orphaned state
+# can consume enough disk to make future benchmarks fail before app code runs.
+list_buildkit_state_volumes() {
+  docker volume ls --format '{{.Name}}' 2>/dev/null \
+    | grep -E "^${BUILDX_CONTAINER_PREFIX}.*${BUILDX_STATE_VOLUME_SUFFIX}$" \
+    || true
+}
+
+# ── List Docker volumes mounted by any existing container ────────────────────
+# A volume is safe to remove only if it is both buildx-named and not mounted by
+# any current container, including stopped containers that may be restarted.
+list_mounted_docker_volumes() {
+  local containers=()
+  while IFS= read -r container_id; do
+    [[ -n "${container_id}" ]] || continue
+    containers+=("${container_id}")
+  done < <(docker ps -aq 2>/dev/null || true)
+
+  if [[ "${#containers[@]}" -eq 0 ]]; then
+    return 0
+  fi
+
+  docker inspect --format '{{range .Mounts}}{{if eq .Type "volume"}}{{.Name}}{{"\n"}}{{end}}{{end}}' "${containers[@]}" 2>/dev/null \
+    | grep -v '^$' \
+    | sort -u \
     || true
 }
 
@@ -246,8 +280,10 @@ done
 
 # Also find orphan buildkit containers (not tracked by any buildx builder).
 known_containers=()
+known_state_volumes=()
 for b in "${all_builders[@]}"; do
   known_containers+=("${BUILDX_CONTAINER_PREFIX}_${b}")
+  known_state_volumes+=("${BUILDX_CONTAINER_PREFIX}_${b}${BUILDX_STATE_VOLUME_SUFFIX}")
 done
 
 orphan_containers=()
@@ -266,10 +302,47 @@ while IFS= read -r cname; do
   fi
 done < <(list_orphan_buildkit_containers)
 
-total_to_remove=$(( ${#to_remove[@]} + ${#orphan_containers[@]} ))
+mounted_volumes=()
+while IFS= read -r volume_name; do
+  [[ -n "${volume_name}" ]] || continue
+  mounted_volumes+=("${volume_name}")
+done < <(list_mounted_docker_volumes)
+
+orphan_state_volumes=()
+while IFS= read -r vname; do
+  [[ -n "${vname}" ]] || continue
+
+  volume_is_known=0
+  for kv in "${known_state_volumes[@]:-}"; do
+    if [[ "${vname}" == "${kv}" ]]; then
+      volume_is_known=1
+      break
+    fi
+  done
+  if [[ "${volume_is_known}" -eq 1 ]]; then
+    continue
+  fi
+
+  volume_is_mounted=0
+  for mv in "${mounted_volumes[@]:-}"; do
+    if [[ "${vname}" == "${mv}" ]]; then
+      volume_is_mounted=1
+      break
+    fi
+  done
+  if [[ "${volume_is_mounted}" -eq 1 ]]; then
+    log "KEEP  orphan-like state volume ${vname} (mounted by an existing container)"
+    continue
+  fi
+
+  orphan_state_volumes+=("${vname}")
+  log "QUEUE orphan state volume ${vname} for removal"
+done < <(list_buildkit_state_volumes)
+
+total_to_remove=$(( ${#to_remove[@]} + ${#orphan_containers[@]} + ${#orphan_state_volumes[@]} ))
 
 if [[ "${total_to_remove}" -eq 0 ]]; then
-  log "Nothing to remove. builders=${count_before}, kept=${#to_keep[@]}, orphans=0"
+  log "Nothing to remove. builders=${count_before}, kept=${#to_keep[@]}, orphan_containers=0, orphan_state_volumes=0"
   exit 0
 fi
 
@@ -281,18 +354,21 @@ if [[ -n "${active_processes}" ]]; then
     log "  active: ${proc_line}"
   done <<<"${active_processes}"
   if [[ "${DRY_RUN}" -eq 0 ]]; then
-    log "Deferred cleanup. candidates=${#to_remove[@]}, orphans=${#orphan_containers[@]}"
+    log "Deferred cleanup. candidates=${#to_remove[@]}, orphan_containers=${#orphan_containers[@]}, orphan_state_volumes=${#orphan_state_volumes[@]}"
     exit 0
   fi
 fi
 
 if [[ "${DRY_RUN}" -eq 1 ]]; then
-  log "DRY RUN — would remove ${#to_remove[@]} builder(s) and ${#orphan_containers[@]} orphan container(s)"
+  log "DRY RUN — would remove ${#to_remove[@]} builder(s), ${#orphan_containers[@]} orphan container(s), and ${#orphan_state_volumes[@]} orphan state volume(s)"
   for b in "${to_remove[@]}"; do
     log "  would remove builder: ${b}"
   done
   for c in "${orphan_containers[@]}"; do
     log "  would remove orphan container: ${c}"
+  done
+  for v in "${orphan_state_volumes[@]}"; do
+    log "  would remove orphan state volume: ${v}"
   done
   exit 0
 fi
@@ -326,6 +402,17 @@ for c in "${orphan_containers[@]}"; do
     removed_count=$((removed_count + 1))
   else
     log "  ERROR: could not remove orphan container '${c}'" >&2
+    failed_count=$((failed_count + 1))
+  fi
+done
+
+for v in "${orphan_state_volumes[@]}"; do
+  log "Removing orphan state volume: ${v}"
+  if docker volume rm "${v}" 2>/dev/null; then
+    log "  removed orphan state volume: ${v}"
+    removed_count=$((removed_count + 1))
+  else
+    log "  ERROR: could not remove orphan state volume '${v}'" >&2
     failed_count=$((failed_count + 1))
   fi
 done
