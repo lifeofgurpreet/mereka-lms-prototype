@@ -21,7 +21,14 @@ Faiz forked it into `faizmereka/mereka-lms-prototype` to:
 
 - **Added** `docs/design-reference/mereka-ux-prototype/` — the single-file HTML prototype that drives the UX roadmap.
 - **Added** this `INTEGRATION_NOTES.md`.
-- **No other changes** yet — this is a clean mirror as of commit `139627c7` (2026-04-24).
+- **Added (2026-04-24)** live wiring on the prototype Discover page — it
+  now fetches real courses from `https://academyv2.mereka.dev/api/courses/v1/courses/`
+  (public API, no OAuth app required). Sign-in / Register / Log-out
+  redirect to `https://apps.academyv2.mereka.dev/authn/*`. Bypass
+  strategy: `docs/design-reference/mereka-ux-prototype/AUTH_STRATEGY.md`.
+- **Added (2026-04-24)** a `/frontend/` Vite SPA scaffold on branch
+  `phase-0/spa-foundation` — OAuth2-PKCE + router + per-domain API client —
+  for when we outgrow the single-file prototype.
 
 ## Recommended workflow for this fork
 
