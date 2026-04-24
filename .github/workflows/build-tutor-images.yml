@@ -421,6 +421,7 @@ jobs:
   select-build-lane:
     name: Select Build Lane
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [resolve-build-scope]
     if: ${{ needs.resolve-build-scope.outputs.build_openedx == 'true' || needs.resolve-build-scope.outputs.build_mfe == 'true' }}
     permissions:
@@ -2361,6 +2362,7 @@ jobs:
   update-gitops:
     name: Manual GitOps Bridge
     runs-on: mereka-k8s-runners
+    timeout-minutes: 45
     needs: [build-openedx, build-mfe, release-bundle]
     # Push to main builds images and proof only.
     # Any GitOps mutation here is an explicit/manual bridge. The standard

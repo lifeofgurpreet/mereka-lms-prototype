@@ -25,6 +25,7 @@ jobs:
   tenant-config-audit:
     name: Tenant Config Safety Audit (prod + dev)
     runs-on: mereka-k8s-runners
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:
@@ -129,6 +130,7 @@ jobs:
   tenant-branding-audit:
     name: Tenant Branding Fallback Audit
     runs-on: mereka-k8s-runners
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:

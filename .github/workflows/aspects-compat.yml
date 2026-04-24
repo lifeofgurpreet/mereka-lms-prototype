@@ -16,6 +16,7 @@ jobs:
   aspects-compat:
     name: Aspects Version Compatibility Check
     runs-on: mereka-k8s-runners
+    timeout-minutes: 30
     continue-on-error: true
     permissions:
       contents: read

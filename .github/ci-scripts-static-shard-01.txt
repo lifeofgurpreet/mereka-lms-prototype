@@ -174,3 +174,4 @@ scripts/qa/verify-video-pipeline.sh
 scripts/qa/verify-visual-regression.sh
 scripts/qa/verify-wif-readiness.sh
 scripts/qa/verify-workflow-script-references.sh
+scripts/tenants/validate-tenant-brand-pack.sh

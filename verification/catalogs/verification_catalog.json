@@ -759,7 +759,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-actions-pinned.sh",
-      "reference_count": 10,
+      "reference_count": 11,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -2722,7 +2722,7 @@
       "mutability": "read-only",
       "owner": "frontend-platform",
       "path": "scripts/qa/verify-build-workflow-contract.sh",
-      "reference_count": 24,
+      "reference_count": 25,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -3056,7 +3056,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-ci-cd-pipeline.sh",
-      "reference_count": 12,
+      "reference_count": 13,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -3121,7 +3121,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-ci-runner-policy.sh",
-      "reference_count": 10,
+      "reference_count": 11,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -14496,7 +14496,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-runner-class-taxonomy-upstream.sh",
-      "reference_count": 5,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -18861,6 +18861,34 @@
       "tier": "release_blocking"
     },
     {
+      "cadence": "per_pr_and_push",
+      "canonical": true,
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
+      "env_scope": [
+        "dev"
+      ],
+      "kind": "verify",
+      "mutability": "read-only",
+      "owner": "platform-core",
+      "path": "scripts/qa/verify-workflow-timeouts.sh",
+      "reference_count": 4,
+      "replaced_by": "",
+      "runtime_dependencies": [
+        "none"
+      ],
+      "severity": "high",
+      "spec_ids": [
+        "AC-014"
+      ],
+      "status": "active",
+      "tier": "release_blocking"
+    },
+    {
       "cadence": "on_demand",
       "canonical": true,
       "ci_binding": [],
@@ -19061,27 +19089,27 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 25,
-    "ci_static_bound": 390,
+    "ci_static_bound": 391,
     "kinds": {
-      "verify": 639
+      "verify": 640
     },
     "mutability": {
       "destructive": 9,
       "mutating": 22,
-      "read-only": 608
+      "read-only": 609
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 445,
+      "active": 446,
       "deprecated_candidate": 1,
       "manual_only": 193
     },
     "tiers": {
       "exploratory_manual": 197,
       "periodic_runtime": 21,
-      "release_blocking": 421
+      "release_blocking": 422
     },
-    "total_verify_scripts": 639,
+    "total_verify_scripts": 640,
     "workflow_direct_bound": 73
   },
   "version": "1"

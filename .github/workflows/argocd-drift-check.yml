@@ -27,6 +27,7 @@ jobs:
   offline-drift-check:
     name: Offline Drift Check (git manifests)
     runs-on: mereka-k8s-runners
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:
@@ -72,6 +73,7 @@ jobs:
   online-drift-check:
     name: Online Drift Check (live cluster)
     runs-on: mereka-k8s-runners
+    timeout-minutes: 30
     permissions:
       contents: read
       id-token: write
@@ -116,6 +118,7 @@ jobs:
     needs: [offline-drift-check, online-drift-check]
     if: failure()
     runs-on: mereka-k8s-runners
+    timeout-minutes: 30
     permissions:
       issues: write
     steps:

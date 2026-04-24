@@ -14,6 +14,7 @@ jobs:
   create-github-release:
     name: Create GitHub Release
     runs-on: mereka-k8s-runners
+    timeout-minutes: 45
     permissions:
       contents: write
     steps:
@@ -211,6 +212,7 @@ jobs:
   promote-to-production:
     name: Promote to Production
     runs-on: mereka-k8s-runners
+    timeout-minutes: 45
     needs: create-github-release
     # Manual approval is enforced by the 'production' GitHub environment protection rules.
     # Configure required reviewers at: Settings → Environments → production

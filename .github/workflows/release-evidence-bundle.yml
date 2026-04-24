@@ -17,6 +17,7 @@ jobs:
   assemble:
     name: Assemble Release Evidence Bundle
     runs-on: mereka-k8s-runners
+    timeout-minutes: 45
     permissions:
       contents: read
     steps:

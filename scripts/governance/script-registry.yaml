@@ -73,6 +73,7 @@ ci_static_inventory:
     - script: scripts/qa/verify-workflow-script-references.sh
     - script: scripts/qa/test-verify-workflow-script-references.sh
     - script: scripts/qa/verify-actions-pinned.sh
+    - script: scripts/qa/verify-workflow-timeouts.sh
     - script: scripts/governance/verify-runbook-executable.sh
     - script: scripts/qa/test-verify-runbook-executable.sh
       estimated_seconds: 2

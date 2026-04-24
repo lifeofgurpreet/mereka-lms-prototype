@@ -175,4 +175,4 @@ scripts/qa/verify-video-phase3.sh
 scripts/qa/verify-visual-parity-checkpoints.sh
 scripts/qa/verify-wcag-contrast-v2.sh
 scripts/qa/verify-workflow-gate-enforcement.sh
-scripts/tenants/validate-tenant-brand-pack.sh
+scripts/release/release-gate.sh --skip-cluster

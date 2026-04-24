@@ -64,6 +64,7 @@ jobs:
   docs-compliance:
     name: Run docs compliance gates
     runs-on: mereka-k8s-runners
+    timeout-minutes: 45
     steps:
       - name: Checkout PR head
         if: github.event_name == 'pull_request'

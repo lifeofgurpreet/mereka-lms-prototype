@@ -26,6 +26,7 @@ jobs:
   trivy-k8s-manifests:
     name: Trivy — K8s Manifests
     runs-on: ${{ vars.CI_FASTLANE_CI_LABEL || 'mereka-k8s-runners' }}
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:
@@ -55,6 +56,7 @@ jobs:
   trivy-terraform:
     name: Trivy — Terraform
     runs-on: ${{ vars.CI_FASTLANE_CI_LABEL || 'mereka-k8s-runners' }}
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:

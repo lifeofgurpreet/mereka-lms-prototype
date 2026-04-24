@@ -29,18 +29,15 @@ UPSTREAM_PATH="${UPSTREAM_PATH:-config/runner-class-taxonomy.yaml}"
 UPSTREAM_REF="${UPSTREAM_REF:-main}"
 CACHE_DIR="${CACHE_DIR:-var/ci}"
 WORKFLOWS_DIR=".github/workflows"
+LOCAL_TAXONOMY_FALLBACK="${LOCAL_TAXONOMY_FALLBACK:-config/runner-class-taxonomy.snapshot.yaml}"
 
 mkdir -p "$CACHE_DIR"
 TAXONOMY_FILE="$CACHE_DIR/runner-class-taxonomy.yaml"
 
-# Fetch via gh api. Locally, gh uses the operator's auth and cross-repo
-# reads work. In CI the default GITHUB_TOKEN is scoped to the calling repo
-# and cannot read bbi-infrastructure; this script degrades to a WARN-PASS
-# rather than failing the build.
-#
-# To opt in to strict mode (fail on unreachable upstream), set
-# REQUIRE_UPSTREAM=1 in the environment — useful once an App token wiring
-# (GITOPS_GITHUB_APP_*) is added to the static-validation job.
+# Fetch via gh api. Locally, gh uses the operator's auth and cross-repo reads
+# work. In CI the default GITHUB_TOKEN can be scoped to this repo only. When
+# upstream cannot be read, the verifier falls back to the source-controlled
+# taxonomy snapshot instead of silently skipping the gate.
 echo "Fetching upstream taxonomy: $UPSTREAM_REPO:$UPSTREAM_PATH@$UPSTREAM_REF"
 fetch_ok=0
 if gh api "repos/$UPSTREAM_REPO/contents/$UPSTREAM_PATH?ref=$UPSTREAM_REF" \
@@ -49,17 +46,20 @@ if gh api "repos/$UPSTREAM_REPO/contents/$UPSTREAM_PATH?ref=$UPSTREAM_REF" \
 fi
 
 if [[ "$fetch_ok" -ne 1 ]]; then
-  if [[ "${REQUIRE_UPSTREAM:-0}" == "1" ]]; then
-    echo "FAIL: could not fetch upstream taxonomy via gh api (REQUIRE_UPSTREAM=1)" >&2
-    echo "  Expected: $UPSTREAM_REPO / $UPSTREAM_PATH @ $UPSTREAM_REF" >&2
-    echo "  Check: GITHUB_TOKEN has contents:read on $UPSTREAM_REPO" >&2
+  if [[ -f "$LOCAL_TAXONOMY_FALLBACK" ]]; then
+    echo "WARN: could not fetch upstream taxonomy from $UPSTREAM_REPO; using source-controlled fallback $LOCAL_TAXONOMY_FALLBACK" >&2
+    cp "$LOCAL_TAXONOMY_FALLBACK" "$TAXONOMY_FILE"
+  elif [[ "${ALLOW_DEGRADED_TAXONOMY:-0}" == "1" ]]; then
+    echo "WARN: could not fetch upstream taxonomy from $UPSTREAM_REPO." >&2
+    echo "      ALLOW_DEGRADED_TAXONOMY=1 set; skipping check." >&2
+    echo "PASS (degraded): upstream taxonomy unreachable; drift check skipped."
+    exit 0
+  else
+    echo "FAIL: could not fetch upstream taxonomy and no local fallback exists." >&2
+    echo "  Expected upstream: $UPSTREAM_REPO / $UPSTREAM_PATH @ $UPSTREAM_REF" >&2
+    echo "  Expected fallback: $LOCAL_TAXONOMY_FALLBACK" >&2
     exit 1
   fi
-  echo "WARN: could not fetch upstream taxonomy from $UPSTREAM_REPO." >&2
-  echo "      Default CI GITHUB_TOKEN lacks cross-repo read; skipping check." >&2
-  echo "      (Wire GITOPS_GITHUB_APP token + REQUIRE_UPSTREAM=1 to enforce.)" >&2
-  echo "PASS (degraded): upstream taxonomy unreachable; drift check skipped."
-  exit 0
 fi
 
 python3 - "$TAXONOMY_FILE" "$WORKFLOWS_DIR" <<'PY'

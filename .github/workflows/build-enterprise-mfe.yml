@@ -38,6 +38,7 @@ permissions: {}  # Deny-all at workflow level; each job grants only what it need
 jobs:
   resolve-source:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       packages: read
     outputs:
@@ -90,6 +91,7 @@ jobs:
 
   select-build-lane:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: resolve-source
     permissions:
       contents: read

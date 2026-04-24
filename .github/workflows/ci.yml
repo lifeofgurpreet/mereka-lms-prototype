@@ -26,6 +26,7 @@ jobs:
   change-scope:
     name: Detect docs-only control-plane scope
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     permissions:
       contents: read
       pull-requests: read
@@ -105,6 +106,7 @@ jobs:
     name: Select CI lane
     needs: change-scope
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     permissions:
       contents: read
     outputs:
@@ -179,6 +181,7 @@ jobs:
       - change-scope
       - select-ci-lane
     runs-on: ${{ needs.select-ci-lane.outputs.runner_label }}
+    timeout-minutes: 45
     permissions:
       contents: read
 
@@ -380,6 +383,7 @@ jobs:
       - change-scope
       - select-ci-lane
     runs-on: ${{ needs.select-ci-lane.outputs.runner_label }}
+    timeout-minutes: 45
     permissions:
       contents: read
 
@@ -496,6 +500,7 @@ jobs:
       - change-scope
       - select-ci-lane
     runs-on: ${{ needs.select-ci-lane.outputs.runner_label }}
+    timeout-minutes: 45
     permissions:
       contents: read
     strategy:
@@ -662,6 +667,7 @@ jobs:
       - change-scope
       - select-ci-lane
     runs-on: ${{ needs.select-ci-lane.outputs.runner_label }}
+    timeout-minutes: 45
     permissions:
       contents: read
 
@@ -833,6 +839,7 @@ jobs:
       - static-validation-postchecks
     if: ${{ always() }}
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     permissions:
       contents: read
       pull-requests: write
@@ -980,6 +987,7 @@ jobs:
       - change-scope
       - select-ci-lane
     runs-on: ${{ github.event_name == 'pull_request' && needs.change-scope.outputs.tutor_required != 'true' && 'ubuntu-latest' || needs.select-ci-lane.outputs.runner_label }}
+    timeout-minutes: 45
     permissions:
       contents: read
 
@@ -1050,6 +1058,7 @@ jobs:
       - change-scope
       - select-ci-lane
     runs-on: ${{ needs.select-ci-lane.outputs.runner_label }}
+    timeout-minutes: 45
     permissions:
       contents: read
 
@@ -1213,6 +1222,7 @@ jobs:
       - change-scope
       - select-ci-lane
     runs-on: ${{ needs.select-ci-lane.outputs.runner_label }}
+    timeout-minutes: 45
     permissions:
       contents: read
 

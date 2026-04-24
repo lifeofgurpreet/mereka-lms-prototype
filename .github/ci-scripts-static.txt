@@ -20,6 +20,7 @@ scripts/qa/test-verify-script-basename-governance.sh
 scripts/qa/verify-workflow-script-references.sh
 scripts/qa/test-verify-workflow-script-references.sh
 scripts/qa/verify-actions-pinned.sh
+scripts/qa/verify-workflow-timeouts.sh
 scripts/governance/verify-runbook-executable.sh
 scripts/qa/test-verify-runbook-executable.sh
 scripts/qa/test-verify-retraction-sweep.sh

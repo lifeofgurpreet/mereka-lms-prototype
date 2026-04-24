@@ -26,6 +26,7 @@ jobs:
   validate-multisite:
     name: Validate SITE_VARIANTS and multisite config
     runs-on: mereka-k8s-runners
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:

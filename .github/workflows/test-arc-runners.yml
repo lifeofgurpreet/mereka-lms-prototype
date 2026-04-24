@@ -1,6 +1,4 @@
-# Temporary workflow to verify ARC self-hosted runners
-# DELETE after confirming runners work
-name: Test ARC Runners
+name: ARC Runner Capability Probe
 
 permissions: {}  # Deny-all at workflow level; each job grants only what it needs
 
@@ -10,6 +8,7 @@ on:
 jobs:
   test-standard:
     runs-on: mereka-k8s-runners
+    timeout-minutes: 10
     permissions: {}  # No code checkout or GitHub API calls — no permissions needed
     steps:
       - name: Runner info
@@ -23,6 +22,7 @@ jobs:
 
   test-heavy:
     runs-on: mereka-k8s-heavy-builders
+    timeout-minutes: 10
     permissions: {}  # No code checkout or GitHub API calls — no permissions needed
     steps:
       - name: Runner info

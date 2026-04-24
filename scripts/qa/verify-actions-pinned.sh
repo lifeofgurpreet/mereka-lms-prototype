@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # verify-actions-pinned.sh
 #
-# Scans all .github/workflows/*.yml and *.yaml files and verifies that every
+# Scans .github/workflows and .github/actions files and verifies that every
 # external third-party `uses:` line references an action pinned to a full
-# 40-character SHA-1 commit hash. Local actions and first-party
-# Biji-Biji-Initiative workflow/action refs are allowed by repo policy.
+# 40-character SHA-1 commit hash. Local actions and docker:// refs are exempt.
+# First-party Biji-Biji-Initiative workflow/action refs must be classified in
+# config/first-party-action-authority.yaml before they are allowed to float.
 #
 # Exit 0  — all actions are properly pinned
 # Exit 1  — one or more actions are not SHA-pinned
@@ -24,6 +25,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 WORKFLOWS_DIR="${REPO_ROOT}/.github/workflows"
+LOCAL_ACTIONS_DIR="${REPO_ROOT}/.github/actions"
+FIRST_PARTY_AUTHORITY_FILE="${REPO_ROOT}/config/first-party-action-authority.yaml"
 
 # Allow override for testing
 if [[ "${1:-}" == "--workflows-dir" && -n "${2:-}" ]]; then
@@ -49,9 +52,13 @@ is_policy_exempt_ref() {
 
   [[ "$action_ref" == ./* ]] && return 0
   [[ "$action_ref" == docker://* ]] && return 0
-  [[ "$action_ref" == Biji-Biji-Initiative/* ]] && return 0
 
   return 1
+}
+
+is_first_party_ref() {
+  local action_ref="$1"
+  [[ "$action_ref" == Biji-Biji-Initiative/* ]]
 }
 
 # ---------------------------------------------------------------------------
@@ -69,11 +76,44 @@ if [[ ! -d "${WORKFLOWS_DIR}" ]]; then
   exit 1
 fi
 
+if [[ ! -f "${FIRST_PARTY_AUTHORITY_FILE}" ]]; then
+  echo -e "${RED}ERROR${RESET}: first-party authority manifest not found: ${FIRST_PARTY_AUTHORITY_FILE}"
+  exit 1
+fi
+
+declare -A first_party_classifications
+while IFS=$'\t' read -r ref classification; do
+  [[ -n "${ref}" ]] || continue
+  first_party_classifications["${ref}"]="${classification}"
+done < <(
+  python3 - "${FIRST_PARTY_AUTHORITY_FILE}" <<'PY'
+import sys
+import yaml
+
+with open(sys.argv[1]) as fh:
+    data = yaml.safe_load(fh) or {}
+
+for item in data.get("first_party_refs", []):
+    ref = item.get("ref", "")
+    classification = item.get("classification", "")
+    if ref:
+        print(f"{ref}\t{classification}")
+PY
+)
+
 mapfile -t workflow_files < <(
   find "${WORKFLOWS_DIR}" -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) | sort
 )
 
-if [[ ${#workflow_files[@]} -eq 0 ]]; then
+mapfile -t local_action_files < <(
+  if [[ -d "${LOCAL_ACTIONS_DIR}" ]]; then
+    find "${LOCAL_ACTIONS_DIR}" -type f \( -name '*.yml' -o -name '*.yaml' \) | sort
+  fi
+)
+
+scan_files=("${workflow_files[@]}" "${local_action_files[@]}")
+
+if [[ ${#scan_files[@]} -eq 0 ]]; then
   echo -e "${YELLOW}WARN${RESET}  No workflow files found in ${WORKFLOWS_DIR}"
   exit 0
 fi
@@ -81,10 +121,11 @@ fi
 total_actions=0
 violations=0
 policy_exemptions=0
+first_party_refs=0
 declare -A seen_actions  # track unique action@sha pairs for the summary
 
-for file in "${workflow_files[@]}"; do
-  filename="$(basename "${file}")"
+for file in "${scan_files[@]}"; do
+  filename="${file#${REPO_ROOT}/}"
   file_violations=0
 
   # Extract actual `uses:` keys only. Do not match permissions like
@@ -98,6 +139,37 @@ for file in "${workflow_files[@]}"; do
     seen_actions["${action_ref}"]=1
 
     if is_policy_exempt_ref "$action_ref"; then
+      policy_exemptions=$(( policy_exemptions + 1 ))
+      continue
+    fi
+
+    if is_first_party_ref "$action_ref"; then
+      first_party_refs=$(( first_party_refs + 1 ))
+      classification="${first_party_classifications[$action_ref]:-}"
+      if [[ -z "${classification}" ]]; then
+        if [[ ${file_violations} -eq 0 ]]; then
+          fail "${filename}"
+        fi
+        info "  line ${lineno}: ${action_ref}"
+        info "        First-party mutable action/workflow ref is missing from config/first-party-action-authority.yaml"
+        file_violations=$(( file_violations + 1 ))
+        violations=$(( violations + 1 ))
+        continue
+      fi
+      case "${classification}" in
+        pinned|protected-and-verified|temporary-waiver)
+          ;;
+        *)
+          if [[ ${file_violations} -eq 0 ]]; then
+            fail "${filename}"
+          fi
+          info "  line ${lineno}: ${action_ref}"
+          info "        Invalid first-party classification '${classification}'"
+          file_violations=$(( file_violations + 1 ))
+          violations=$(( violations + 1 ))
+          continue
+          ;;
+      esac
       policy_exemptions=$(( policy_exemptions + 1 ))
       continue
     fi
@@ -142,10 +214,11 @@ done
 
 echo
 echo -e "${BOLD}--- Summary ---${RESET}"
-echo -e "  Workflow files checked : ${#workflow_files[@]}"
+echo -e "  Files checked          : ${#scan_files[@]}"
 echo -e "  Total uses: lines      : ${total_actions}"
 echo -e "  Unique actions         : ${#seen_actions[@]}"
 echo -e "  Policy exemptions      : ${policy_exemptions} local/first-party/docker refs"
+echo -e "  First-party refs       : ${first_party_refs} classified refs"
 echo
 
 echo -e "${BOLD}Unique actions found:${RESET}"
@@ -153,6 +226,13 @@ for action in $(printf '%s\n' "${!seen_actions[@]}" | sort); do
   sha_part="${action##*@}"
   if is_policy_exempt_ref "$action"; then
     echo -e "  ${YELLOW}skip${RESET} ${action}"
+  elif is_first_party_ref "$action"; then
+    classification="${first_party_classifications[$action]:-missing}"
+    if [[ "${classification}" == "missing" ]]; then
+      echo -e "  ${RED}!!${RESET}  ${action} (first-party: missing authority manifest entry)"
+    else
+      echo -e "  ${YELLOW}skip${RESET} ${action} (first-party: ${classification})"
+    fi
   elif [[ "${sha_part}" =~ ^[0-9a-f]{40}$ ]]; then
     echo -e "  ${GREEN}ok${RESET}  ${action}"
   else

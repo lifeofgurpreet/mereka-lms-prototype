@@ -12,6 +12,7 @@ jobs:
   analysis:
     name: Scorecard analysis
     runs-on: mereka-k8s-runners
+    timeout-minutes: 30
     permissions:
       security-events: write
       id-token: write

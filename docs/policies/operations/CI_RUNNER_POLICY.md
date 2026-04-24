@@ -10,9 +10,11 @@
 This document defines which runner class each workflow job type must use. It is the authoritative
 policy for `runs-on` label selection in `.github/workflows/*.yml`.
 
-The policy is enforced by `scripts/qa/verify-ci-runner-policy.sh`. Static CI execution authority
-lives in `scripts/governance/script-registry.yaml` under `ci_static_inventory`; `.github/ci-scripts-static.txt`
-is the generated derivative consumed by the offline static-validation runner.
+The policy is enforced by `scripts/qa/verify-ci-runner-policy.sh` and
+`scripts/qa/verify-runner-class-taxonomy-upstream.sh`. Static CI execution
+authority lives in `scripts/governance/script-registry.yaml` under
+`ci_static_inventory`; `.github/ci-scripts-static.txt` is the generated derivative
+consumed by the offline static-validation runner.
 
 ---
 
@@ -117,7 +119,19 @@ runs-on: mereka-k8s-heavy-builders  # Class B — Docker builds, Playwright
 
 ---
 
-## Current Audit — All Workflows (updated 2026-03-27)
+## Taxonomy Snapshot And Actionlint
+
+`bbi-infrastructure/config/runner-class-taxonomy.yaml` remains the upstream
+taxonomy authority. This repository carries
+[`config/runner-class-taxonomy.snapshot.yaml`](../../../config/runner-class-taxonomy.snapshot.yaml)
+as a source-controlled fallback so CI does not silently skip runner-label
+validation when the pull-request token cannot read the infrastructure repo.
+
+Actionlint uses [`.github/actionlint.yaml`](../../../.github/actionlint.yaml)
+to recognize the ARC self-hosted labels. This keeps runner-label lint useful
+without hiding labels behind broad ignores.
+
+## Current Audit — All Workflows (updated 2026-04-24)
 
 All Linux workflows are ARC-first. `codeql.yml` now routes back to ARC heavy because the heavy
 runner image carries the pre-bundled CodeQL archive and exports `CODEQL_BUNDLE_PATH`.
@@ -181,7 +195,7 @@ Legend:
 | `smoke-unauthenticated.yml` | all | `mereka-k8s-runners` | A | CONFORM |
 | `tenant-isolation-check.yml` | all | `mereka-k8s-runners` | A | CONFORM |
 | `tenant-safety-audit.yml` | all (2 jobs) | `mereka-k8s-runners` | A | CONFORM |
-| `test-arc-runners.yml` | standard / heavy | `mereka-k8s-runners` / `mereka-k8s-heavy-builders` | A/B | CONFORM |
+| `test-arc-runners.yml` | standard / heavy | `mereka-k8s-runners` / `mereka-k8s-heavy-builders` | A/B | CONFORM — named ARC Runner Capability Probe |
 | `translation-check.yml` | all | `mereka-k8s-runners` | A | CONFORM |
 | `ttfs-onboarding.yml` | all | `mereka-k8s-runners` | A | CONFORM |
 | `tutor-plugin-test.yml` | all (6 jobs) | `mereka-k8s-runners` | A | CONFORM |
@@ -209,8 +223,9 @@ When adding a new workflow:
 2. Use `runs-on: mereka-k8s-heavy-builders` (Class B) for Docker builds, Playwright E2E, or workloads that depend on heavy-runner-only runtime assets such as the pre-bundled CodeQL archive
 3. Do not use `ubuntu-*` or `windows-*` runners unless the workflow is explicitly allowlisted as a temporary policy exception with a tracked issue
 4. Use `macos-*` only for Apple platform workflows (`build-ios-app.yml`, `ios-testflight.yml`)
-5. Run `scripts/qa/verify-ci-runner-policy.sh` to confirm compliance
-6. Update the audit table in this document
+5. Set `timeout-minutes` on every direct job. Reusable-workflow proxy jobs inherit the called workflow contract.
+6. Run `scripts/qa/verify-ci-runner-policy.sh`, `scripts/qa/verify-runner-class-taxonomy-upstream.sh`, and `scripts/qa/verify-workflow-timeouts.sh` to confirm compliance
+7. Update the audit table in this document
 
 ---
 
@@ -229,5 +244,13 @@ The script runs as part of the `static-validation` job in `ci.yml` through the g
 `scripts/governance/script-registry.yaml` under `ci_static_inventory`, and inventory drift is
 blocked by `python3 scripts/governance/generate-ci-static-inventory.py --check`.
 It exits non-zero on violations so CI blocks merges.
+
+`scripts/qa/verify-runner-class-taxonomy-upstream.sh` also runs in static CI.
+If the upstream taxonomy cannot be read, it uses the versioned local snapshot
+instead of returning a degraded pass. `ALLOW_DEGRADED_TAXONOMY=1` is reserved
+for explicit local troubleshooting only.
+
+`scripts/qa/verify-workflow-timeouts.sh` fails any direct workflow job without
+an explicit positive integer `timeout-minutes` value.
 
 See [CI_CD_RUNNERS.md](../../ops/ci-cd/CI_CD_RUNNERS.md) for ARC infrastructure setup and troubleshooting.

@@ -19,6 +19,7 @@ jobs:
   dr-evidence:
     name: Build DR Evidence Bundle
     runs-on: mereka-k8s-runners
+    timeout-minutes: 45
     permissions:
       contents: read
       id-token: write

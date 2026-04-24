@@ -26,6 +26,7 @@ jobs:
   tenant-isolation-offline:
     name: Tenant Isolation Gates (offline)
     runs-on: mereka-k8s-runners
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:

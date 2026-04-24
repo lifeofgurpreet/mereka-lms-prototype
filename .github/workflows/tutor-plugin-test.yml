@@ -28,6 +28,7 @@ jobs:
   lint-plugins:
     name: Lint Plugin Sources
     runs-on: ${{ vars.CI_FASTLANE_CI_LABEL || 'mereka-k8s-runners' }}
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:
@@ -52,6 +53,7 @@ jobs:
   verify-retired-legacy-shim:
     name: Verify Retired Legacy Shim Contract
     runs-on: ${{ vars.CI_FASTLANE_CI_LABEL || 'mereka-k8s-runners' }}
+    timeout-minutes: 30
     needs: lint-plugins
     permissions:
       contents: read
@@ -73,6 +75,7 @@ jobs:
   render-contract-preflight:
     name: Render Contract Preflight
     runs-on: ${{ vars.CI_FASTLANE_CI_LABEL || 'mereka-k8s-runners' }}
+    timeout-minutes: 30
     needs: [lint-plugins, verify-retired-legacy-shim]
     permissions:
       contents: read

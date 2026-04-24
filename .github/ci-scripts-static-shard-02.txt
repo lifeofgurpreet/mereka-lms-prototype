@@ -175,4 +175,4 @@ scripts/qa/verify-video-phase2.sh
 scripts/qa/verify-visual-baselines.sh
 scripts/qa/verify-visual-smoke-baseline.sh
 scripts/qa/verify-workflow-contract-map.sh
-scripts/release/release-gate.sh --skip-cluster
+scripts/qa/verify-workflow-timeouts.sh

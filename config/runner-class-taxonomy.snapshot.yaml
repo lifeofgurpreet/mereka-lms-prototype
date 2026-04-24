@@ -1,0 +1,196 @@
+# Runner-class taxonomy — canonical contract
+#
+# Per ADR-025 (Build Authority Phase 2 §1). Single source of truth for every
+# `runs-on:` label used in any workflow in any BBI repo.
+#
+# Consumers:
+#   - vps-infrastructure/ci-metrics-receiver (loads this file at startup, retires the
+#     hardcoded regex; re-reads on SIGHUP)
+#   - scripts/qa/verify-runner-class-taxonomy.sh (CI gate: every runs-on: label in
+#     .github/workflows/ must match at least one label_glob here OR carry a
+#     `# ci:allow-github-hosted` / `# ci:runner-exempt <reason>` inline comment)
+#   - docs/ops/ci-cd/BENCHMARK_CLASSES.md (references the `tier` field instead of
+#     re-stating the taxonomy)
+#   - Prometheus alert rules keying off runner tier
+#
+# Rules:
+#   - `tier` values are a closed set: fastlane | arc-standard | arc-heavy |
+#     github-hosted | other. Adding a new tier requires ADR amendment.
+#   - `cluster` distinguishes rke2-nonprod | rke2-prod | vps | github.
+#   - `label_globs` are matched in order; first match wins if multiple classes
+#     would match. List the most-specific first.
+#   - `expected_concurrency` is the nominal in-flight job count the class can
+#     sustain with current resources. Prometheus `ci_queue_saturation` SLI
+#     compares live busy-count against this.
+#
+# Last reviewed: 2026-04-19
+#
+# Current deployment map (ASCII source of truth):
+#
+#                      ┌───────────────────────────────────────────┐
+#                      │                GitHub Actions             │
+#                      │        (workflow runs-on: <label>)        │
+#                      └───────────────────────────────────────────┘
+#                                         │
+#              ┌──────────────────────────┼──────────────────────────┐
+#              │                          │                          │
+#              ▼                          ▼                          ▼
+#        ┌──────────────┐          ┌────────────────┐        ┌────────────────┐
+#        │   fastlane   │          │       arc      │        │ github-hosted  │
+#        │ (VPS, persist)│          │  (K8s, ephem.) │        │   (ubuntu-*)   │
+#        └──────────────┘          └────────────────┘        └────────────────┘
+#              │                          │
+#              │                          ├─► arc-standard  (mereka-k8s-runners)
+#              │                          │     • cluster: rke2-nonprod
+#              │                          │     • elastic 0..24, CPU 2 / RAM 4Gi
+#              │                          │
+#              │                          └─► arc-heavy     (mereka-k8s-heavy-builders)
+#              │                                • cluster: rke2-nonprod
+#              │                                • elastic 1..4, CPU 4+2 / RAM 12+4Gi
+#              │
+#              ├─► mereka-vps-fastlane-ci        (vmi3220759, shared)
+#              │     • 15 runners across 5 per-repo groups
+#              │     • cie, lms, zoom-rtms, agent-e, bbi-infrastructure
+#              │
+#              └─► mereka-vps-fastlane-build     (vmi3220759, shared)
+#                    • heavy-build persistent runners (BuildKit cache warm)
+#                    • same per-repo runner-groups as CI tier
+#
+# Per-repo fastlane allocation (2026-04-19):
+#
+#   repo                    │ CI slots │ build slots │ runner-group id (CI / build)
+#   ────────────────────────┼──────────┼─────────────┼─────────────────────────────
+#   cie                     │    2     │      1      │  9 /  8
+#   mereka-lms              │    2     │      1      │ 11 / 10
+#   zoom-rtms               │    2     │      1      │ 13 / 12
+#   mereka-agent-e          │    2     │      1      │ 15 / 14
+#   bbi-infrastructure      │    3     │      1      │ 16 / 17
+#
+# Routing-policy keys are defined in `routing_policies:` below; workflows
+# reference them via the select-ci-lane / select-build-lane dispatchers.
+
+version: 1
+
+runner_classes:
+  - name: arc-heavy
+    label_globs:
+      - "mereka-k8s-heavy-builders"
+      - "mereka-k8s-heavy*"
+    cluster: rke2-nonprod
+    tier: arc-heavy
+    expected_concurrency: 4
+    runbook_url: https://github.com/Biji-Biji-Initiative/bbi-infrastructure/blob/main/docs/runbooks/arc-heavy.md
+    description: >-
+      Self-hosted runners backed by ARC heavy-builder ScaleSet. 4 CPU / 12 Gi
+      pod + DinD sidecar 2 CPU / 4 Gi. minRunners=1, maxRunners=4. Scratch
+      volumes are emptyDir (node-local); persistence via registry-backed
+      BuildKit cache. Used for OpenEdX and MFE image builds.
+
+  - name: arc-standard
+    label_globs:
+      - "mereka-k8s-runners"
+    cluster: rke2-nonprod
+    tier: arc-standard
+    expected_concurrency: 5
+    runbook_url: https://github.com/Biji-Biji-Initiative/bbi-infrastructure/blob/main/docs/runbooks/arc-standard.md
+    description: >-
+      Self-hosted runners backed by ARC standard ScaleSet on RKE2-nonprod.
+      2 CPU / 4 Gi. runAsUser 1001. minRunners=0, maxRunners=5. Used for
+      policy-guards, validate, auth-verify, and general CI jobs.
+
+  - name: arc-prod
+    label_globs:
+      - "mereka-k8s-prod-runners"
+    cluster: rke2-prod
+    tier: arc-standard
+    expected_concurrency: 3
+    runbook_url: https://github.com/Biji-Biji-Initiative/bbi-infrastructure/blob/main/docs/runbooks/arc-prod.md
+    description: >-
+      Self-hosted runners backed by ARC standard ScaleSet on RKE2-prod.
+      Production-only pool; used for prod promotion gates, post-merge prod
+      validation, and on-cluster prod change guards. Separate from nonprod
+      ARC pool so prod runner health is independently observable.
+
+  - name: fastlane
+    label_globs:
+      - "*fastlane*"
+      - "mereka-fastlane-*"
+    cluster: vps
+    tier: fastlane
+    expected_concurrency: 4
+    runbook_url: https://github.com/Biji-Biji-Initiative/bbi-infrastructure/blob/main/docs/runbooks/fastlane.md
+    description: >-
+      Fastlane runners on VPS (vmi3220759). 15 runners total across CI + build
+      cgroups. Preferred for small fast CI jobs to avoid ARC cold-start cost.
+      Falls back to arc-standard if fastlane queue is saturated (see
+      select-ci-lane composite action).
+
+  - name: github-hosted
+    label_globs:
+      - "ubuntu-latest"
+      - "ubuntu-22.04"
+      - "ubuntu-24.04"
+      - "windows-latest"
+      - "windows-2022"
+      - "macos-latest"
+      - "macos-13"
+      - "macos-14"
+    cluster: github
+    tier: github-hosted
+    runbook_url: https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
+    description: >-
+      GitHub-hosted runners. Allowed only for workflows that have an explicit
+      `# ci:allow-github-hosted` marker OR are enumerated in the
+      verify-runner-class-taxonomy.sh allowlist. Default policy is to prefer
+      self-hosted; github-hosted is the fallback for jobs that cannot run on
+      self-hosted (e.g. certain integration tests or security scans).
+
+# Labels that should NEVER appear unclassified. Used by
+# verify-runner-class-taxonomy.sh as the close-world check: any runs-on value
+# in any workflow must match a label_glob above OR carry an inline exemption
+# comment, else CI fails. Patterns here do not need to be in use today;
+# including them protects against typos like "mereka-k8s-runner" (no trailing s)
+# mapping silently to `other`.
+known_typos_to_reject:
+  - "mereka-k8s-runner"       # missing trailing s
+  - "mereka-k8s-prod-runner"  # missing trailing s on prod variant
+  - "mereka-fastlane"         # missing suffix
+  - "arc-runner"              # wrong prefix
+  - "k8s-runners"             # missing mereka- prefix
+
+# Known routing_policy values accepted by .github/actions/select-ci-lane and
+# .github/actions/select-runner-lane. Consumed by scripts/qa/verify-routing-policies.sh
+# (CI gate) and by select-ci-lane's typo-warning annotation. Any `routing_policy:`
+# value in any workflow must appear in this list or CI fails.
+#
+# Adding a new policy: append here, teach select-runner-lane's JS logic about it
+# (office_hours_gated flag controls whether the weekday 17:00–22:30 KL window
+# applies), update docs/ci/RUNNER_LANE_LABELS.md, then open a PR.
+routing_policies:
+  - name: standard
+    office_hours_gated: true
+    description: >-
+      Default policy. Routes to fastlane during the office-hours window
+      (Mon–Fri 17:00–22:30 Asia/Kuala_Lumpur) and falls back to ARC outside it.
+  - name: lms_ci_prefer_fastlane
+    office_hours_gated: false
+    description: >-
+      mereka-lms CI jobs. Bypasses the office-hours gate so lint/typecheck/unit
+      tests hit the fastlane at any hour when the runner is idle.
+  - name: lms_build_prefer_fastlane
+    office_hours_gated: false
+    description: >-
+      mereka-lms Docker image builds. Bypasses the office-hours gate so long
+      builds benefit from the warm BuildKit cache at any time.
+  - name: bbi_infra_ci_prefer_fastlane
+    office_hours_gated: false
+    description: >-
+      bbi-infrastructure CI jobs (policy guards, kustomize validate, auth-verify).
+      Bypasses the office-hours gate — infra PRs commonly land outside office
+      hours and should not be penalised by cold ARC starts.
+  - name: bbi_infra_build_prefer_fastlane
+    office_hours_gated: false
+    description: >-
+      bbi-infrastructure image builds (fastlane-runner image, pg-backup image,
+      etc.). Bypasses the office-hours gate; keeps the warm BuildKit cache hot
+      for the in-repo image build pipeline.

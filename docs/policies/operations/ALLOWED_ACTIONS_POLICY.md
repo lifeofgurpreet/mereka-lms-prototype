@@ -4,7 +4,10 @@
 
 This document defines the policy for GitHub Actions used in this repository.
 External third-party actions must be pinned to a full 40-character commit SHA to
-reduce tag-mutation risk.
+reduce tag-mutation risk. First-party BBI-owned action and reusable-workflow
+references must be classified in
+[`config/first-party-action-authority.yaml`](../../../config/first-party-action-authority.yaml)
+when they rely on a mutable protected branch such as `@main`.
 
 This policy is enforced automatically by `scripts/qa/verify-actions-pinned.sh`,
 which is run as part of CI (`ci.yml`).
@@ -29,10 +32,26 @@ SHOULD be included as a trailing comment for reviewability:
 Policy exemptions:
 
 - Local actions such as `./.github/actions/setup-python-env`.
-- First-party `Biji-Biji-Initiative/*` actions and reusable workflows governed
-  by the organization’s own branch protection and review policy.
+- First-party `Biji-Biji-Initiative/*` actions and reusable workflows only
+  when the exact `uses:` ref is declared in
+  `config/first-party-action-authority.yaml` as `pinned`,
+  `protected-and-verified`, or `temporary-waiver`.
 - `docker://` action references, which are governed by image pinning policy
   instead of GitHub action ref pinning.
+
+## First-Party Mutable Authority
+
+BBI-owned `@main` refs are mutable build authority. They are allowed only when
+the consumer repository records:
+
+- the exact `uses:` ref,
+- owner and upstream path,
+- expected branch protection,
+- consumer-side local contract checks, and
+- every workflow/action file that consumes the ref.
+
+`scripts/qa/verify-actions-pinned.sh` scans both `.github/workflows/**` and
+`.github/actions/**`; any undeclared first-party ref fails CI.
 
 ---
 

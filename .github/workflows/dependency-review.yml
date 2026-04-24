@@ -14,6 +14,7 @@ jobs:
   dependency-review:
     name: Review dependencies
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read         # checkout
       pull-requests: write   # post dependency review comment on PR

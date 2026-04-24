@@ -30,6 +30,7 @@ jobs:
   mfe-slot-runtime-gates:
     name: Run MFE Slot Runtime Gates
     runs-on: mereka-k8s-runners
+    timeout-minutes: 30
     permissions:
       contents: read
       id-token: write

@@ -65,6 +65,7 @@ jobs:
   observability-audits:
     name: Observability Audits (Local + Runtime + Alert Routing)
     runs-on: mereka-k8s-runners
+    timeout-minutes: 45
     permissions:
       contents: read
       id-token: write
@@ -201,6 +202,7 @@ jobs:
   image-freshness:
     name: Image Freshness Check
     runs-on: mereka-k8s-runners
+    timeout-minutes: 45
     permissions:
       contents: read
       packages: read
@@ -246,6 +248,7 @@ jobs:
     name: Runtime parity (${{ matrix.env_label }})
     if: ${{ github.event_name == 'schedule' || github.event.inputs.target_environment == 'all' || github.event.inputs.target_environment == matrix.env_label || github.event.inputs.target_environment == '' }}
     runs-on: mereka-k8s-runners
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -429,6 +432,7 @@ jobs:
   parity-rollup:
     name: Parity rollup summary
     runs-on: mereka-k8s-runners
+    timeout-minutes: 45
     needs: [parity-check]
     env:
       OBS_PARITY_REQUIRED_STREAK: "3"
@@ -492,6 +496,7 @@ jobs:
     name: GitOps integrity checks
     needs: []
     runs-on: mereka-k8s-runners
+    timeout-minutes: 45
     continue-on-error: false
     permissions:
       contents: read
@@ -565,6 +570,7 @@ jobs:
     name: "Code Quality Scorecard (Tier-A)"
     needs: []
     runs-on: mereka-k8s-runners
+    timeout-minutes: 45
     permissions:
       contents: read
     steps:
