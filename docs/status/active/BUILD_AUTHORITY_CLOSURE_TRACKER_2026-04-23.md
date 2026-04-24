@@ -3,7 +3,7 @@
 Status: active
 Owner: Platform/build authority lane
 Scope: local build, CI image build, benchmark/cache proof, promotion evidence, and tracker governance
-Last reconciled: 2026-04-23
+Last reconciled: 2026-04-24
 
 This tracker is the current closure board for the build/local proof work. It
 does not replace the stable contracts in
@@ -32,16 +32,16 @@ owned by GitOps source.
 
 ## Current Verified Facts
 
-Snapshot taken with GitHub Actions and Beads queries on 2026-04-23.
+Snapshot taken with GitHub Actions and Beads queries on 2026-04-24.
 
 | Surface | Evidence | Truth level | Current interpretation |
 |---|---|---|---|
-| Current app `main` source | `baca28e076371ba33020bde0474b06e303fd0508` | source | Latest fetched `origin/main`; this local proof branch is rebased onto it for PR. |
+| Current app `main` source | `799b8d52dfba1f1ae307b1b45aba4339c93012e8` | source | Latest fetched `origin/main`; this source includes the benchmark maintenance-window guard merged in #2125. |
 | Latest green Build Tutor Images | Run `24855960086`, commit `9ff1073b8468248e5499876f94892ca1d2faa193` | CI artifact | Image build path was green after the recent build-authority fixes. This is not a promotion/runtime claim. |
 | Promotion-proven build commit | Build Tutor Images run `24835465611`, commit `41c431e434e8705eba6cf9ca12f573183d9ba791` | CI artifact plus promotion | This is the commit that was promoted to dev through infra PR #3877 and later proved live. |
 | Bootstrap local readiness | Run `24855960102`, commit `9ff1073b8468248e5499876f94892ca1d2faa193`; run `24835465623`, commit `41c431e434e8705eba6cf9ca12f573183d9ba791` | CI local/bootstrap | Recent bootstrap proof is green for those commits. The latest observed run `24858570926` on `49b7200740a676edd9528c7d6f665f269845452c` was still in progress when queried. |
 | Local current-head proof branch | `fix/local-proof-2042` reran `setup-local.sh`, `make local-proof`, and `verify-local-runtime-readiness.sh` on 2026-04-23 against external `TUTOR_ROOT=/tmp/mereka-local-first-run-proof-20260422/tutor_env` | source/render/artifact/local runtime | This proves the current source changes honor external Tutor roots, build both local images from the resolved Tutor render contexts, create the local proof identity, pass initialized bootstrap readiness, and pass authenticated local runtime readiness. It is not browser-flow, GitOps, or machine-pristine proof. |
-| Benchmark/cache class proof | Latest green Build Benchmark run `24721668598`, commit `39ae0fb868a9769b1fa557406152b37d73765035` | CI benchmark | Stale for current closure. It proves the older app-cache-cold class only; it is not post-#2099 runtime evidence and not machine-pristine proof. |
+| Benchmark/cache class proof | Build Benchmark run `24872620974`, commit `799b8d52dfba1f1ae307b1b45aba4339c93012e8`; earlier supporting runs `24865486499`, `24865940897`, `24865999510` | CI benchmark | Post-hardening proof is current: scan-only/both fastlane, registry-warm/both fastlane, registry-warm/both ARC heavy, and app-cache-cold/both fastlane all passed. App-cache-cold proved OpenEdX `1511s` with `0/130` cached layers and MFE `1536s` with `0/579` cached layers, both with measured-job L1 wipe evidence and `machine_cold_claim=false`. |
 | Dev/staging GitOps realization proof | Infra Post-Merge Cluster Validation run `24857292026`, infra commit `737321b3d8da77d4807da1e39d9ef846b43b1773` | realization/runtime | Final manual proof lane succeeded after the infra false-green fix; dev and staging LMS app proof should now be workflow-owned, not manual folklore. |
 | Infra false-green gap | bbi-infrastructure #3878 | governance | Closed after fail-closed refresh/runtime proof and manual app-list recovery path landed. |
 
@@ -52,7 +52,7 @@ Snapshot taken with GitHub Actions and Beads queries on 2026-04-23.
 | P0 | `mereka-lms-0z5g` | #1780 | open | Umbrella stays open until local proof, benchmark proof, runner/cache governance, and release-bundle authority have current evidence. |
 | P0 | `mereka-lms-0z5g.20` | #1780 | open | This tracker, proof matrix, stale active docs, and Beads/GitHub mapping are merged and accepted as the canonical execution board. |
 | P0 | `mereka-lms-0z5g.21` | #2042 | in progress | Branch-local proof now has current-head source/render/artifact and authenticated local runtime evidence. Close only after the source fix is merged, PR/CI proof is clean, and #2042 is updated without claiming browser or machine-pristine semantics. |
-| P0 | `mereka-lms-0z5g.22` | #2045 | open | Post-hardening benchmark class evidence is rerun and published with cache source, runner class, measured outcome, and stale/machine-pristine boundaries. |
+| P0 | `mereka-lms-0z5g.22` | #2045 | closing | Post-hardening benchmark class evidence was rerun and published. Run `24872620974` closes app-cache-cold/both fastlane on current head; machine-pristine remains intentionally out of scope and separately tracked by `mereka-lms-0z5g.2`. |
 | P0 | `mereka-lms-0z5g.5` | #1777, #1778 | in progress | Fastlane/containerd/Buildx hygiene is durable, current-main bootstrap reruns are green or reclassified, and host lock ownership is not a per-job fallback. |
 | P1 | `mereka-lms-0z5g.5.1` | #1778 | open | `/tmp/fastlane-docker-prune.lock` ownership is versioned in infra/runner provisioning and proven under concurrent fastlane jobs. |
 | P1 | `mereka-lms-0z5g.3` | #1780 | open | Fastlane and ARC heavy lanes prove one cache-aware strategy without divergent bake/build semantics. |
@@ -74,9 +74,10 @@ IDs from old worktrees; create new beads with auto IDs and link them here.
 2. Close `mereka-lms-0z5g.21` / #2042: merge the current-head local proof fix,
    then update #2042 with setup, `local-proof`, and authenticated runtime
    readiness evidence.
-3. Close `mereka-lms-0z5g.22` / #2045: collect post-hardening benchmark
-   evidence and separate `app-cache-cold`, registry-warm, runner-local cache,
-   and machine-pristine semantics.
+3. Close `mereka-lms-0z5g.22` / #2045 after publishing run `24872620974`:
+   post-hardening benchmark evidence now separates `app-cache-cold`,
+   registry-warm, runner-local cache, ARC/fastlane runner class, and
+   machine-pristine semantics.
 4. Advance `mereka-lms-0z5g.5` and `.5.1`: prove fastlane cleanup and prune-lock
    ownership are durable substrate truth, not app-source behavior.
 5. Reconcile observability/spec/governance: `.23`, `.24`, `.25`.
@@ -89,7 +90,9 @@ IDs from old worktrees; create new beads with auto IDs and link them here.
 
 - Do not close #2042 from bootstrap proof alone; it needs the beyond-bootstrap
   local proof boundary to be explicit.
-- Do not close #2045 from old run `24721668598`; it is pre-hardening evidence.
+- Do not use old run `24721668598` as closure evidence; #2045 closure is based
+  on post-hardening run `24872620974` plus the supporting scan/registry-warm
+  runs listed above.
 - Do not call `app-cache-cold` machine-pristine proof.
 - Do not close runner issues from app-repo source changes without host/runner
   substrate evidence.
@@ -103,7 +106,8 @@ IDs from old worktrees; create new beads with auto IDs and link them here.
 The next week should end with:
 
 - #2042 closed or blocked by a named substrate/runtime issue with fresh proof.
-- #2045 closed or reduced to the explicitly deferred machine-pristine question.
+- #2045 closed, with the explicitly deferred machine-pristine question still
+  tracked outside the app-cache-cold proof claim.
 - #1777/#1778 moved out of ambiguous runner folklore into versioned infra/runner
   ownership.
 - #2043/#2046/#2047 updated with current receiver/spec/taxonomy truth.
