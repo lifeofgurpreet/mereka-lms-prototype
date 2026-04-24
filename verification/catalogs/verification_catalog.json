@@ -14709,7 +14709,7 @@
       "mutability": "mutating",
       "owner": "platform-core",
       "path": "scripts/qa/verify-script-governance-orphans.sh",
-      "reference_count": 7,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -15344,7 +15344,7 @@
       "mutability": "mutating",
       "owner": "identity-access",
       "path": "scripts/qa/verify-siteconfig-authority.sh",
-      "reference_count": 7,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -16038,7 +16038,7 @@
       "mutability": "read-only",
       "owner": "sre-security",
       "path": "scripts/qa/verify-staging-vocabulary-drift.sh",
-      "reference_count": 7,
+      "reference_count": 8,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -18240,7 +18240,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-verification-sprawl-budget.sh",
-      "reference_count": 5,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -18268,7 +18268,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-verify-script-reachability.sh",
-      "reference_count": 5,
+      "reference_count": 6,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

@@ -50,6 +50,7 @@
         "scripts/qa/load-test-libraries.sh",
         "scripts/qa/load-test-tenants.sh",
         "scripts/qa/run-multisite-governance-gates.sh",
+        "scripts/qa/run-new-verify-script-preflight.sh",
         "scripts/qa/run-operations-gates.sh",
         "scripts/qa/smoke-authenticated.sh",
         "scripts/qa/verify-argocd-drift.sh",
