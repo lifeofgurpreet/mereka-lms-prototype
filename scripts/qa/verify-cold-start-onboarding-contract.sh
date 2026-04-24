@@ -563,6 +563,8 @@ require_contains ".github/workflows/build-benchmark.yml" 'Scan MFE \(scan-only\)
 require_contains ".github/workflows/build-benchmark.yml" 'needs\.scan-mfe\.outputs\.scan_duration_seconds' "benchmark metadata records MFE scan-only duration"
 require_contains ".github/workflows/build-benchmark.yml" 'layer_reuse_ratio' "benchmark metadata records per-family layer reuse ratio"
 require_contains ".github/workflows/build-benchmark.yml" './scripts/infra/install-syft.sh' "benchmark scan-only lane uses the governed Syft installer before claiming SBOM proof"
+require_contains ".github/workflows/build-benchmark.yml" 'GHCR auth is dependency registry access, not cache authority' "benchmark app-cache-cold keeps dependency registry auth distinct from cache authority"
+require_contains ".github/workflows/build-benchmark.yml" 'Log in to GHCR \(dependency image pulls\)' "benchmark measured builds can authenticate to GHCR dependency images even for app-cache-cold"
 require_contains ".github/workflows/build-tutor-images.yml" './scripts/infra/install-syft.sh' "Build Tutor Images uses the governed Syft installer for SBOM generation"
 require_contains "scripts/infra/install-syft.sh" 'SYFT_INSTALL_SHA=' "Syft installer verifies the tagged installer checksum"
 require_contains "scripts/infra/install-syft.sh" 'DOWNLOAD_TAG_INSTALL_SCRIPT=false sh "\$\{installer_path\}" -b "\$\{install_dir\}" "\$\{SYFT_VERSION\}"' "Syft installer passes the pinned release tag instead of resolving latest"

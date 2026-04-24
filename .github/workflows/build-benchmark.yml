@@ -551,9 +551,10 @@ jobs:
             echo "MEASURED_JOB_L1_WIPE_UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           } >> var/ci/benchmark-context-openedx.env
 
-      # GHCR login only for classes that use the registry cache
-      - name: Log in to GHCR (non-cold classes)
-        if: env.PROOF_CLASS != 'app-cache-cold'
+      # GHCR auth is dependency registry access, not cache authority. App-cache-cold
+      # still keeps CACHE_FROM_ARG empty and --cache-mode none, but OpenEdX needs
+      # authenticated access to dependency images such as ghcr.io/astral-sh/uv.
+      - name: Log in to GHCR (dependency image pulls)
         env:
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
@@ -758,8 +759,7 @@ jobs:
             echo "MEASURED_JOB_L1_WIPE_UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           } >> var/ci/benchmark-context-mfe.env
 
-      - name: Log in to GHCR (non-cold classes)
-        if: env.PROOF_CLASS != 'app-cache-cold'
+      - name: Log in to GHCR (dependency image pulls)
         env:
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin

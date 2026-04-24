@@ -369,7 +369,7 @@ Bead `jj97.14` delivers `.github/workflows/build-benchmark.yml`. This workflow e
 
 **How the workflow enforces conditions per class** (before invoking the actual build step):
 
-- `app-cache-cold`: executes `docker buildx prune -af`, drops `CACHE_FROM_ARG` to empty string, renders Tutor build context with mirrored dependency pulls plus the explicit dependency-image mirror patch, configures the measured BuildKit builder with a Docker Hub registry mirror fallback, invokes no-cache bake targets through the canonical helpers, and fails the job if the measured build records `OUTCOME=failure`
+- `app-cache-cold`: executes `docker buildx prune -af`, drops `CACHE_FROM_ARG` to empty string, renders Tutor build context with mirrored dependency pulls plus the explicit dependency-image mirror patch, authenticates to GHCR only for dependency image pulls, configures the measured BuildKit builder with a Docker Hub registry mirror fallback, invokes no-cache bake targets through the canonical helpers, and fails the job if the measured build records `OUTCOME=failure`
 - `true-cold`: legacy alias normalized to `proof_class=app-cache-cold` in artifacts and metadata
 - `registry-warm`: executes `docker buildx prune -af` to remove L1, leaves `CACHE_FROM_ARG` pointing at the shared GHCR registry ref
 - `local-hot`: no cache wipe; relies on persistent runner state; the workflow fails if parsed cached-layer reuse is not greater than 90%
