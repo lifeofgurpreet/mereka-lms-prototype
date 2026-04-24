@@ -17,7 +17,10 @@ export TUTOR_ROOT TUTOR_PLUGINS_ROOT TUTOR_PLUGINS_DIR
 TUTOR_BIN="${TUTOR_BIN:-$REPO_ROOT/.venv/bin/tutor}"
 PROOF_USERNAME="${PROOF_USERNAME:-smoke-test}"
 CHECK_CATALOG_DATA=0
-READINESS_TIMEOUT="${READINESS_TIMEOUT:-45}"
+READINESS_TIMEOUT="${READINESS_TIMEOUT:-150}"
+DISCOVERY_ROUTE_ATTEMPTS="${DISCOVERY_ROUTE_ATTEMPTS:-6}"
+DISCOVERY_ROUTE_SLEEP_SECONDS="${DISCOVERY_ROUTE_SLEEP_SECONDS:-3}"
+DISCOVERY_HTTP_TIMEOUT="${DISCOVERY_HTTP_TIMEOUT:-15}"
 STATUS_FILE="/tmp/mereka-local-readiness-status.txt"
 MYSQL_DATA_DIR="$TUTOR_ROOT/data/mysql"
 
@@ -34,6 +37,12 @@ Usage:
 Options:
   --username USERNAME      Local proof username to validate (default: smoke-test)
   --check-catalog-data     Also require LMS + Discovery to have at least one course
+
+Environment:
+  READINESS_TIMEOUT              Tutor Django shell timeout in seconds (default: 150)
+  DISCOVERY_ROUTE_ATTEMPTS       Discovery route warm-up attempts (default: 6)
+  DISCOVERY_ROUTE_SLEEP_SECONDS  Delay between Discovery attempts (default: 3)
+  DISCOVERY_HTTP_TIMEOUT         Per-request Discovery HTTP timeout (default: 15)
 EOF
 }
 
@@ -104,7 +113,7 @@ run_lms_shell() {
       TUTOR_PLUGINS_ROOT="$TUTOR_PLUGINS_ROOT" \
       TUTOR_PLUGINS_DIR="$TUTOR_PLUGINS_ROOT" \
       "$TUTOR_BIN" local exec lms \
-    ./manage.py lms shell -c "$code"
+    ./manage.py lms shell --no-imports -c "$code"
 }
 
 run_discovery_shell() {
@@ -115,7 +124,23 @@ run_discovery_shell() {
       TUTOR_PLUGINS_ROOT="$TUTOR_PLUGINS_ROOT" \
       TUTOR_PLUGINS_DIR="$TUTOR_PLUGINS_ROOT" \
       "$TUTOR_BIN" local exec discovery \
-    ./manage.py shell -c "$code"
+    ./manage.py shell --no-imports -c "$code"
+}
+
+check_discovery_root() {
+  local attempt
+  for ((attempt = 1; attempt <= DISCOVERY_ROUTE_ATTEMPTS; attempt++)); do
+    if curl -fsSI --max-time "$DISCOVERY_HTTP_TIMEOUT" http://discovery.localhost >/tmp/mereka-discovery-head.txt 2>/tmp/mereka-discovery-head.err; then
+      pass "Discovery root responds on documented local surface"
+      return 0
+    fi
+    if (( attempt < DISCOVERY_ROUTE_ATTEMPTS )); then
+      sleep "$DISCOVERY_ROUTE_SLEEP_SECONDS"
+    fi
+  done
+
+  fail "Discovery root is not responding on http://discovery.localhost after ${DISCOVERY_ROUTE_ATTEMPTS} attempts"
+  show_tail /tmp/mereka-discovery-head.err 20
 }
 
 refresh_local_status() {
@@ -226,14 +251,9 @@ fi
 echo ""
 
 echo "--- Section 3: Discovery readiness surface ---"
-if curl -fsSI http://discovery.localhost >/tmp/mereka-discovery-head.txt 2>/tmp/mereka-discovery-head.err; then
-  pass "Discovery root responds on documented local surface"
-else
-  fail "Discovery root is not responding on http://discovery.localhost"
-  show_tail /tmp/mereka-discovery-head.err 20
-fi
+check_discovery_root
 
-if curl -fsS http://discovery.localhost/health/ >/tmp/mereka-discovery-health.txt 2>/tmp/mereka-discovery-health.err; then
+if curl -fsS --max-time "$DISCOVERY_HTTP_TIMEOUT" http://discovery.localhost/health/ >/tmp/mereka-discovery-health.txt 2>/tmp/mereka-discovery-health.err; then
   pass "Discovery /health/ responds"
 else
   warn "Discovery /health/ is not available locally"

@@ -36,6 +36,24 @@ BUILD_PROFILE="proof"
 OUTPUT_MODE="push"
 LOCAL_DEFAULTS=0
 SKIP_IF_CURRENT=0
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+LOCAL_TUTOR_ROOT="${TUTOR_ROOT:-$REPO_ROOT/tutor_env}"
+PLUGIN_SOURCE_ROOT="$REPO_ROOT/infrastructure/tutor/plugins/_mereka_lms"
+PREPARE_TUTOR_BUILD_CONTEXT_SCRIPT="$REPO_ROOT/scripts/infra/prepare-tutor-build-context.sh"
+TUTOR_CONFIG_SAVE_SCRIPT="$REPO_ROOT/scripts/infra/tutor-config-save.sh"
+
+refresh_local_tutor_render_if_stale() {
+  local rendered_file="${1:?rendered file required}"
+  local label="${2:?label required}"
+
+  if [[ ! -f "$rendered_file" ]] || find "$PLUGIN_SOURCE_ROOT" -type f -newer "$rendered_file" | grep -q .; then
+    echo "Rendered ${label} is missing or stale; refreshing local Tutor env through ${TUTOR_CONFIG_SAVE_SCRIPT} --env-only."
+    TUTOR_ROOT="$LOCAL_TUTOR_ROOT" "$TUTOR_CONFIG_SAVE_SCRIPT" --env-only
+    return 0
+  fi
+
+  return 1
+}
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -57,8 +75,11 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ "$LOCAL_DEFAULTS" == "1" ]]; then
-  CONTEXT_DIR="${CONTEXT_DIR:-tutor_env/env/build/openedx}"
-  DOCKERFILE="${DOCKERFILE:-tutor_env/env/build/openedx/Dockerfile}"
+  if ! refresh_local_tutor_render_if_stale "$LOCAL_TUTOR_ROOT/env/build/openedx/Dockerfile" "Open edX Dockerfile"; then
+    TUTOR_ROOT="$LOCAL_TUTOR_ROOT" "$PREPARE_TUTOR_BUILD_CONTEXT_SCRIPT" --target openedx
+  fi
+  CONTEXT_DIR="${CONTEXT_DIR:-$LOCAL_TUTOR_ROOT/env/build/openedx}"
+  DOCKERFILE="${DOCKERFILE:-$LOCAL_TUTOR_ROOT/env/build/openedx/Dockerfile}"
   IMAGE_REPO="${IMAGE_REPO:-openedx}"
   PRIMARY_TAG="${PRIMARY_TAG:-nightly}"
   SECONDARY_TAG="${SECONDARY_TAG:-nightly-${BUILD_PROFILE}}"
@@ -145,7 +166,6 @@ fi
 
 IMAGE_NAME="${IMAGE_REPO##*/}"
 GHA_SCOPE="tutor-${IMAGE_NAME}-${BUILD_PROFILE}"
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 BAKE_FILE="$REPO_ROOT/docker-bake.hcl"
 BAKE_TARGET="openedx-${BUILD_PROFILE}"
 if [[ "$CACHE_MODE" == "none" ]]; then
@@ -153,6 +173,9 @@ if [[ "$CACHE_MODE" == "none" ]]; then
 fi
 TAGS_CSV="$(IFS=,; printf '%s' "${IMAGE_TAGS[*]}")"
 BUILDX_BAKE_ARGS=()
+if [[ "$CONTEXT_DIR_ABS" != "$REPO_ROOT/"* ]]; then
+  BUILDX_BAKE_ARGS+=("--allow=fs.read=${CONTEXT_DIR_ABS}")
+fi
 source "$REPO_ROOT/scripts/infra/build-context-fingerprint.sh"
 source "$REPO_ROOT/scripts/infra/build-image-freshness.sh"
 
@@ -173,7 +196,7 @@ ensure_local_buildx_builder
 DOCKERFILE_SHA256="$(mereka_file_sha256 "$DOCKERFILE_ABS")"
 
 BAKE_ENV=(
-  "OPENEDX_CONTEXT=${CONTEXT_DIR}"
+  "OPENEDX_CONTEXT=${CONTEXT_DIR_ABS}"
   "OPENEDX_DOCKERFILE=${DOCKERFILE_RELATIVE}"
   "OPENEDX_RENDERED_DOCKERFILE_SHA256=${DOCKERFILE_SHA256}"
   "OPENEDX_BUILD_CONTEXT_SHA256=${BUILD_CONTEXT_SHA256}"

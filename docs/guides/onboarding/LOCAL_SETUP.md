@@ -19,7 +19,7 @@ For the normal first run from a clean checkout, prefer the governed wrapper:
 make local-first-run
 ```
 
-It expands to `git submodule update --init --recursive`, `./scripts/qa/verify-cold-start-onboarding-contract.sh`, and `./scripts/shared/setup-local.sh`. The setup script owns the rest of the governed bootstrap, including `tutor local launch -I --skip-build`, exactly one initialized-state readiness pass via `./scripts/infra/verify-local-bootstrap-readiness.sh`, and local admin creation. `tutor_env/data/` directory presence is not initialized database truth. Use the manual steps below only when debugging one phase of that chain.
+It expands to `git submodule update --init --recursive`, `./scripts/qa/verify-cold-start-onboarding-contract.sh`, and `./scripts/shared/setup-local.sh`. The setup script owns the rest of the governed bootstrap, including `tutor local launch -I --skip-build`, exactly one initialized-state readiness pass via `./scripts/infra/verify-local-bootstrap-readiness.sh`, local admin creation, and the local `smoke-test` proof identity used by `./scripts/qa/verify-local-runtime-readiness.sh`. `tutor_env/data/` directory presence is not initialized database truth. Use the manual steps below only when debugging one phase of that chain.
 
 ## Manual bootstrap
 
@@ -202,7 +202,8 @@ tutor local createuser --superuser --staff -p mereka_admin mereka_admin mereka@e
 - Start/stop stack: `make tutor-start` / `make tutor-stop`.
 - Bring services back after config changes: rerun `./scripts/infra/tutor-config-save.sh`, then `make tutor-restart`.
 - Rebuild local images through wrappers: `make local-build-openedx`, `make local-build-mfe`, or `make local-build`.
-- Recheck initialized runtime readiness: `make local-proof`.
+- Recheck initialized bootstrap readiness: `make local-proof`.
+- Recheck authenticated initialized runtime readiness: `./scripts/qa/verify-local-runtime-readiness.sh`.
 - Keep databases clean while iterating on configuration: `make tutor-stop && tutor local down -v && rm -rf tutor_env/data`. After wiping Tutor data, re-run `tutor local launch -I --skip-build` (or at least `tutor local do init`) so service schemas and users are recreated before you hit the LMS.
 
 ### MFE development

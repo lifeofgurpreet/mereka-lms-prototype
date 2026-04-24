@@ -8655,7 +8655,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-local-runtime-readiness.sh",
-      "reference_count": 3,
+      "reference_count": 7,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"

@@ -251,9 +251,11 @@ if tutor local exec lms env \
   LOCAL_ADMIN_USERNAME="$LOCAL_ADMIN_USERNAME" \
   LOCAL_ADMIN_EMAIL="$LOCAL_ADMIN_EMAIL" \
   LOCAL_ADMIN_PASSWORD="$LOCAL_ADMIN_PASSWORD" \
-  python /openedx/edx-platform/manage.py lms shell -c "
+  python /openedx/edx-platform/manage.py lms shell --no-imports -c "
 import os
+import uuid
 from django.contrib.auth import get_user_model
+from common.djangoapps.student.models import Registration, UserProfile
 User = get_user_model()
 username = os.environ['LOCAL_ADMIN_USERNAME']
 email = os.environ['LOCAL_ADMIN_EMAIL']
@@ -268,6 +270,10 @@ u.is_active = True
 u.is_staff = True
 u.is_superuser = True
 u.save()
+if not Registration.objects.filter(user=u).exists():
+    Registration.objects.create(user=u, activation_key=uuid.uuid4().hex[:32])
+if not UserProfile.objects.filter(user=u).exists():
+    UserProfile.objects.create(user=u, name=username)
 print('✅ Admin user ready')
 " >"$ADMIN_SETUP_LOG" 2>&1; then
     grep -E "(Admin|✅)" "$ADMIN_SETUP_LOG" || cat "$ADMIN_SETUP_LOG"
@@ -279,8 +285,66 @@ fi
 rm -f "$ADMIN_SETUP_LOG"
 echo ""
 
-# Step 9: Record Setup Summary
-echo -e "${BLUE}Step 9: Recording setup summary...${NC}"
+# Step 9: Create authenticated runtime proof identity
+echo -e "${BLUE}Step 9: Setting up runtime proof user...${NC}"
+LOCAL_PROOF_USERNAME="${LOCAL_PROOF_USERNAME:-smoke-test}"
+LOCAL_PROOF_EMAIL="${LOCAL_PROOF_EMAIL:-smoke-test@mereka.local}"
+LOCAL_PROOF_CREDENTIALS_FILE="${LOCAL_PROOF_CREDENTIALS_FILE:-$TUTOR_ROOT/local-proof-credentials.txt}"
+if [[ -z "${LOCAL_PROOF_PASSWORD:-}" ]]; then
+    LOCAL_PROOF_PASSWORD="$(python3 - <<'PY'
+import secrets
+print(secrets.token_urlsafe(24))
+PY
+)"
+fi
+mkdir -p "$(dirname "$LOCAL_PROOF_CREDENTIALS_FILE")"
+umask 077
+{
+    printf 'username=%s\n' "$LOCAL_PROOF_USERNAME"
+    printf 'email=%s\n' "$LOCAL_PROOF_EMAIL"
+    printf 'password=%s\n' "$LOCAL_PROOF_PASSWORD"
+} > "$LOCAL_PROOF_CREDENTIALS_FILE"
+
+PROOF_SETUP_LOG="$(mktemp)"
+if tutor local exec lms env \
+  LOCAL_PROOF_USERNAME="$LOCAL_PROOF_USERNAME" \
+  LOCAL_PROOF_EMAIL="$LOCAL_PROOF_EMAIL" \
+  LOCAL_PROOF_PASSWORD="$LOCAL_PROOF_PASSWORD" \
+  python /openedx/edx-platform/manage.py lms shell --no-imports -c "
+import os
+import uuid
+from django.contrib.auth import get_user_model
+from common.djangoapps.student.models import Registration, UserProfile
+User = get_user_model()
+username = os.environ['LOCAL_PROOF_USERNAME']
+email = os.environ['LOCAL_PROOF_EMAIL']
+password = os.environ['LOCAL_PROOF_PASSWORD']
+try:
+    u = User.objects.get(username=username)
+except User.DoesNotExist:
+    u = User.objects.create_user(username=username, email=email, password=password)
+u.email = email
+u.set_password(password)
+u.is_active = True
+u.save()
+if not Registration.objects.filter(user=u).exists():
+    Registration.objects.create(user=u, activation_key=uuid.uuid4().hex[:32])
+if not UserProfile.objects.filter(user=u).exists():
+    UserProfile.objects.create(user=u, name=username)
+print('✅ Runtime proof user ready')
+" >"$PROOF_SETUP_LOG" 2>&1; then
+    grep -E "(Runtime proof|✅)" "$PROOF_SETUP_LOG" || cat "$PROOF_SETUP_LOG"
+else
+    cat "$PROOF_SETUP_LOG" >&2
+    rm -f "$PROOF_SETUP_LOG"
+    exit 1
+fi
+rm -f "$PROOF_SETUP_LOG"
+echo -e "${YELLOW}⚠️  Runtime proof credentials stored in $LOCAL_PROOF_CREDENTIALS_FILE${NC}"
+echo ""
+
+# Step 10: Record Setup Summary
+echo -e "${BLUE}Step 10: Recording setup summary...${NC}"
 if CONTAINERS="$(tutor local dc ps --services --filter status=running 2>/dev/null | wc -l | tr -d ' ')"; then
     echo -e "${BLUE}ℹ️  Tutor local services running: $CONTAINERS${NC}"
 else
@@ -303,6 +367,8 @@ echo ""
 echo "  🔐 Credentials:"
 echo "    • Username: $LOCAL_ADMIN_USERNAME"
 echo "    • Password file: $LOCAL_ADMIN_CREDENTIALS_FILE"
+echo "    • Runtime proof username: $LOCAL_PROOF_USERNAME"
+echo "    • Runtime proof password file: $LOCAL_PROOF_CREDENTIALS_FILE"
 echo ""
 echo "  🛠️  Next Steps:"
 echo "    • Re-run the governed first-run wrapper: make local-first-run"
@@ -312,6 +378,7 @@ echo "    • Strict local Open edX proof rebuild: LOCAL_BUILD_PROFILE=proof LOC
 echo "    • Strict local MFE proof rebuild: LOCAL_BUILD_PROFILE=proof LOCAL_CACHE_MODE=none make local-build-mfe"
 echo "      (CI proof class: build-benchmark.yml with benchmark_class=app-cache-cold)"
 echo "    • Verify initialized stack: make local-proof"
+echo "    • Verify authenticated runtime readiness: ./scripts/qa/verify-local-runtime-readiness.sh"
 echo "    • Optional setup smoke: ./scripts/qa/verify-setup.sh"
 echo "    • Read: docs/guides/onboarding/QUICK_START_LOCAL.md"
 echo "    • Check: docs/status/readiness/README.md"

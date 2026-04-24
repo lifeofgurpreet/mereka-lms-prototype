@@ -9,13 +9,13 @@ cd mereka-lms
 make local-first-run
 ```
 
-`make local-first-run` expands to the canonical three-command chain: `git submodule update --init --recursive`, `./scripts/qa/verify-cold-start-onboarding-contract.sh`, and `./scripts/shared/setup-local.sh`. The setup script owns the rest of the governed bootstrap: it builds local Open edX and MFE images when needed, runs `tutor local launch -I --skip-build` to converge Tutor data, starts the stack, runs the initialized-state readiness verifier exactly once with `./scripts/infra/verify-local-bootstrap-readiness.sh`, and creates a local-only admin user. Directory presence under `tutor_env/data/` is not treated as proof of initialization. If `LOCAL_ADMIN_PASSWORD` is not set, the setup script writes generated credentials under `TUTOR_ROOT` at `local-admin-credentials.txt`.
+`make local-first-run` expands to the canonical three-command chain: `git submodule update --init --recursive`, `./scripts/qa/verify-cold-start-onboarding-contract.sh`, and `./scripts/shared/setup-local.sh`. The setup script owns the rest of the governed bootstrap: it builds local Open edX and MFE images when needed, runs `tutor local launch -I --skip-build` to converge Tutor data, starts the stack, runs the initialized-state readiness verifier exactly once with `./scripts/infra/verify-local-bootstrap-readiness.sh`, creates a local-only admin user, and creates the `smoke-test` runtime proof user with Registration and UserProfile rows. Directory presence under `tutor_env/data/` is not treated as proof of initialization. If `LOCAL_ADMIN_PASSWORD` or `LOCAL_PROOF_PASSWORD` is not set, the setup script writes generated credentials under `TUTOR_ROOT` at `local-admin-credentials.txt` and `local-proof-credentials.txt`.
 
 For isolated worktrees, devspaces, or CI repros, set `TUTOR_ROOT=/path/to/tutor_env` before running the Make targets. The Tutor plugin mirror defaults to `$TUTOR_ROOT/plugins`; use `TUTOR_PLUGINS_ROOT` only when you deliberately need another mirror.
 
 ## Current Proof Contract
 
-As of 2026-04-22, the canonical local setup path is still one chain:
+As of 2026-04-23, the canonical local setup path is still one chain:
 repo source -> Tutor render -> Bake-backed local images -> Tutor launch ->
 readiness verification. The proof commands below are the authority; this guide
 is not a live CI status board.
@@ -24,6 +24,7 @@ is not a live CI status board.
 |---|---|---|---|
 | Offline onboarding contract | `./scripts/qa/verify-cold-start-onboarding-contract.sh` | Docs, setup scripts, build helpers, and workflow contracts still agree. | Docker can start the stack on this machine. |
 | Local initialized-state proof | `./scripts/infra/verify-local-bootstrap-readiness.sh` | The current `tutor_env` stack has local services, expected image refs, and LMS/MFE HTTP readiness. | A fresh first boot from an empty `TUTOR_ROOT`. |
+| Local authenticated runtime proof | `./scripts/qa/verify-local-runtime-readiness.sh` | The current initialized stack can answer LMS/Discovery shell checks and has the local proof identity, Registration, and UserProfile rows needed for authenticated smoke work. | Fresh image build, first-boot timing, or production identity proof. |
 | CI bootstrap proof | `.github/workflows/bootstrap-local-readiness.yml` | A clean repo-scoped `TUTOR_ROOT` can render, launch, prove image provenance, and pass readiness. | Machine-cold image build timing. |
 | App-cache-cold image proof | `.github/workflows/build-benchmark.yml` with `benchmark_class=app-cache-cold` | Open edX and MFE build helpers work with app-level BuildKit cache imports disabled. | Pristine Docker daemon/base-image state. |
 
