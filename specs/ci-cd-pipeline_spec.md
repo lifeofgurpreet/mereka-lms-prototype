@@ -7,12 +7,12 @@ spec_class: "system"
 owner: "engineering"
 vehicle: "talent_platform"
 created: "2026-02-12"
-last_reviewed: "2026-02-12"
-review_due: "2026-06-12"
-version: "1.0.0"
+last_reviewed: "2026-04-24"
+review_due: "2026-07-24"
+version: "1.1.0"
 domain: "platform"
 normativity: "normative"
-implementation_note: "GitOps image tag sync improvements ongoing - see docs/ops/runbooks/GITOPS_WORKFLOW.md"
+implementation_note: "Current build authority is release-object-driven GHCR promotion with Argo/GitOps realization; see the authority docs and active build tracker."
 depends_on:
   - "specs/repository-structure_spec.md"
   - "specs/k8s-deployment_spec.md"
@@ -21,9 +21,11 @@ supersedes: []
 superseded_by: null
 verification_sources:
   - "scripts/qa/run-spec-integrity-gates.sh"
+  - "scripts/qa/verify-ci-cd-pipeline.sh"
   - ".github/workflows/ci.yml"
 interfaces:
   - ".github/workflows/ci.yml"
+  - ".github/workflows/build-tutor-images.yml"
   - "deploy/k8s/"
 tags:
   - "build.gitops-promotion"
@@ -33,6 +35,10 @@ summary: "Defines the CI/CD contract for building, validating, and promoting pla
 links:
   related_docs:
     - "docs/reference/operations/CI_CD_SETUP.md"
+    - "docs/architecture/PLATFORM_AUTHORITY_MAP.md"
+    - "docs/architecture/PROMOTION_REALIZATION_AND_INCIDENT_FLOW.md"
+    - "docs/reference/contracts/DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md"
+    - "docs/status/active/BUILD_AUTHORITY_CLOSURE_TRACKER_2026-04-23.md"
     - "docs/ops/runbooks/K8S_DEPLOYMENT_RUNBOOK.md"
     - "docs/ops/runbooks/GITOPS_WORKFLOW.md"
     - "docs/ops/runbooks/TROUBLESHOOTING.md"
@@ -52,7 +58,7 @@ links:
 
 ## What we're building
 
-A comprehensive, formally specified CI/CD pipeline for the Mereka Academy Open edX platform. The pipeline covers the complete development lifecycle from code commit to production deployment across three workflow tiers: (1) commit-time quality gates that run on every PR and push to main, (2) image build and artifact management for Open edX platform components (openedx, MFE, iOS), and (3) environment promotion with GitOps-driven deployment to production GKE. The pipeline consolidates and standardizes the 11 existing GitHub Actions workflows into a cohesive, auditable system with clear contracts for each stage.
+A comprehensive, formally specified CI/CD pipeline for the Mereka Academy Open edX platform. The pipeline covers the complete development lifecycle from code commit to runtime realization across three workflow tiers: (1) commit-time quality gates that run on every PR and push to main, (2) image build and artifact management for Open edX platform components (openedx, MFE, iOS), and (3) release-object-driven promotion into the GitOps source of truth, followed by ArgoCD and runtime proof. The pipeline consolidates the current GitHub Actions workflows into a cohesive, auditable system with clear contracts for each stage.
 
 ## Why it matters
 
@@ -61,8 +67,8 @@ The platform currently has workflows that evolved organically -- CI, image build
 ## Success looks like
 
 - Every merge to main passes all required quality gates (lint, validate-k8s, security-scan, spec-lint, branding-preflight) with zero manual intervention.
-- Image builds produce immutable, digest-pinned artifacts that are traceable from source commit to production pod.
-- Production deployments are always preceded by policy checks and release evidence bundles.
+- Image builds produce immutable, digest-pinned artifacts that are traceable from source commit to release object, GitOps commit, ArgoCD revision, and runtime pod.
+- Production deployments are always preceded by policy checks, release evidence bundles, and runtime realization checks appropriate to the lane.
 - Mean time from merge-to-main to production deployment is under 60 minutes for standard releases.
 - Rollback to a prior known-good release completes within 10 minutes.
 - All CI/CD workflow failures produce actionable notifications with clear remediation steps.
@@ -79,7 +85,7 @@ The platform currently has workflows that evolved organically -- CI, image build
   - Multi-stage quality gates (linting, K8s validation, security scanning, spec linting, branding)
   - Automated security scanning (TruffleHog, Hadolint, pre-commit secret detection)
   - Code quality gates and formatting enforcement (ruff, yamllint, shellcheck, kubeconform)
-  - GitOps deployment automation with environment promotion (local Kind, production GKE)
+  - GitOps deployment automation with environment promotion through the `bbi-infrastructure` repository and ArgoCD realization
   - Automated rollback mechanisms and safety checks
   - Branch protection rules and merge gate policies
   - Artifact management and container registry operations (GHCR)
@@ -92,7 +98,7 @@ The platform currently has workflows that evolved organically -- CI, image build
 - Out of scope:
   - Internal implementation of individual QA scripts (those are tested by their own contracts)
   - Tutor plugin development or Open edX core code changes
-  - GKE cluster provisioning (covered by `specs/k8s-deployment_spec.md`)
+  - Kubernetes cluster provisioning (covered by `specs/k8s-deployment_spec.md`)
   - Secret creation or rotation procedures (covered by `specs/secrets-management_spec.md`)
   - Observability stack deployment (covered by `specs/observability-stack_spec.md`)
   - MongoDB Atlas cluster management
@@ -101,7 +107,7 @@ The platform currently has workflows that evolved organically -- CI, image build
 ## Non-goals
 
 - The pipeline will NOT support blue/green or canary deployment strategies in this iteration. Rollout is rolling update via GitOps.
-- The pipeline will NOT include a dedicated staging environment. The operating model is local/dev (Kind on VPS) to production (GKE). Staging is gated behind `ENABLE_STAGING_ENV=true` for future use.
+- The pipeline will NOT treat local developer bootstrap as deployment truth. Local Tutor bootstrap, dev, staging, and production are separate lanes with separate proof expectations.
 - The pipeline will NOT run Open edX application-level integration tests (Django test suite). Open edX's test suite is upstream-maintained and impractical to run in CI for a deployment repo.
 - The pipeline will NOT manage Terraform apply in CI. Terraform plan may be validated; apply remains a manual operator action.
 - The pipeline will NOT build custom Open edX plugins or XBlocks as separate artifacts.
@@ -110,8 +116,8 @@ The platform currently has workflows that evolved organically -- CI, image build
 ## Cross-Spec Integration Criteria
 
 ### K8s Deployment Integration (Tier 2 → Tier 3)
-- [ ] AC-INT-001: Given K8s manifests pass `validate-k8s.sh`, when CI builds and pushes images to GHCR, then production Kustomize overlay references the promoted image digests and `kubectl apply` succeeds without resource validation errors.
-- [ ] AC-INT-002: Given K8s Deployments require specific ExternalSecrets, when CI deployment workflow runs, then it verifies ExternalSecrets reach `SecretSynced` before declaring deployment success.
+- [ ] AC-INT-001: Given K8s manifests pass static validation, when CI builds and pushes images to GHCR, then the release object records the image tags and digests, the GitOps overlay references the promoted digests, and ArgoCD/runtime proof confirms realization before the change is called deployed.
+- [ ] AC-INT-002: Given K8s Deployments require specific ExternalSecrets, when runtime validation runs for an environment, then it verifies ExternalSecrets reach `SecretSynced` before declaring that environment healthy.
 
 ### Secrets Management Integration (Tier 1 → Tier 3)
 - [ ] AC-INT-003: Given `secrets-management_spec.md` defines required secret keys, when CI runs secret validation (`infisical-validate-mereka-lms.sh`), then it fails the build if any required `MEREKA_LMS_*` key is missing or contains placeholder values in the target environment.
@@ -124,10 +130,10 @@ The platform currently has workflows that evolved organically -- CI, image build
 - GitHub Actions is the sole CI/CD platform. No Jenkins, CircleCI, or other systems.
 - GHCR at `ghcr.io/biji-biji-initiative/mereka-lms` is the container image registry.
 - The GitOps target repository is `Biji-Biji-Initiative/bbi-infrastructure`, accessed through the configured GitHub App token path.
-- Production runs on GKE Autopilot in `asia-southeast1-c` (project `bbi-k8`).
-- Dev/local runs on Kind cluster on the VPS (`194.233.84.55`).
-- All secrets are managed via Infisical -> GCP Secret Manager -> ExternalSecrets (per `specs/secrets-management_spec.md`).
-- GitHub-hosted runners provide 2-core, 7GB RAM machines. OpenEdX image builds may require 12GB+ (handled by Docker memory config or may need self-hosted runners).
+- Runtime Kubernetes source of truth lives in `Biji-Biji-Initiative/bbi-infrastructure` and is realized by ArgoCD into the environment-specific clusters/namespaces.
+- Local developer bootstrap uses repo-owned Tutor/Compose wrappers and proves local readiness only; it is not cluster realization proof.
+- All secrets are managed via Infisical -> ExternalSecrets -> Kubernetes Secrets unless a narrower environment contract explicitly states otherwise.
+- Lightweight control-plane jobs may run on standard hosted runners, but heavy OpenEdX/MFE image jobs MUST use the repo's lane selector and governed fastlane/ARC capacity rather than assuming hosted-runner memory.
 - Tutor 21.0.0 (Ulmo) is the deployment toolchain.
 
 ## Requirements
@@ -259,7 +265,7 @@ The platform currently has workflows that evolved organically -- CI, image build
 #### Scheduled Operations Workflows
 
 - The `operations-gates-runtime.yml` workflow MUST run every 6 hours and MUST support `workflow_dispatch`.
-- The `operations-gates-runtime.yml` workflow MUST authenticate to GKE and run `run-operations-gates.sh` with configurable environment scope (`prod`/`dev`/`both`).
+- The `operations-gates-runtime.yml` workflow MUST authenticate to the appropriate live Kubernetes lane and run `run-operations-gates.sh` with configurable environment scope (`prod`/`dev`/`both`).
 - The `operations-gates-runtime.yml` workflow MUST upload gate artifacts with 30-day retention.
 - The `observability-audit.yml` workflow MUST run daily and MUST produce JSON artifacts for both local and runtime audits.
 - The `public-health-check.yml` workflow MUST run every 30 minutes and MUST verify branding gates (prod strict + dev) and auth surfaces (prod + dev).
@@ -338,7 +344,7 @@ The platform currently has workflows that evolved organically -- CI, image build
 
 #### Cost Optimization
 
-- CI workflows MUST use GitHub-hosted `ubuntu-latest` runners for all Linux jobs.
+- CI workflows MUST route jobs through the runner class that matches their resource profile: lightweight control-plane checks may use standard hosted or ARC runners, while heavy image builds MUST use the governed fastlane/ARC build lanes selected by workflow policy.
 - iOS builds MUST use `macos-latest` runners (required for Xcode) with aggressive caching (gems, CocoaPods).
 - The CI workflow SHOULD minimize redundant installs by caching pip dependencies where feasible.
 - Build workflows SHOULD use `--no-cache` only when necessary (forced by config changes); incremental builds SHOULD be preferred for iteration speed.
@@ -351,21 +357,21 @@ The platform currently has workflows that evolved organically -- CI, image build
 
 - CI quality gate jobs (lint, validate-k8s, spec-lint, security-scan) MUST complete within 10 minutes each.
 - The full CI workflow (all parallel jobs) SHOULD complete within 15 minutes for a typical PR.
-- OpenEdX image build SHOULD complete within 45 minutes on GitHub-hosted runners.
-- MFE image build SHOULD complete within 20 minutes on GitHub-hosted runners.
+- OpenEdX image build duration SHOULD be evaluated through the Build Benchmark proof lanes and tracked in the active build-authority tracker rather than assumed from a generic hosted runner profile.
+- MFE image build duration SHOULD be evaluated through the Build Benchmark proof lanes and tracked in the active build-authority tracker rather than assumed from a generic hosted runner profile.
 - iOS build SHOULD complete within 90 minutes (timeout enforced).
 - GitOps update (excluding image build) SHOULD complete within 5 minutes.
 
 #### Reliability
 
 - CI workflow pass rate on the `main` branch SHOULD be >= 95% (failures should be real issues, not flaky infrastructure).
-- Scheduled workflows MUST handle transient GCP/GKE authentication failures gracefully (conditional steps with `|| true` for non-critical paths).
+- Scheduled workflows MUST handle transient live-cluster authentication failures gracefully in non-strict mode and fail closed in strict proof mode.
 - Build workflows MUST produce deterministic outputs: same source commit MUST produce functionally identical images.
 
 #### Security
 
 - The pipeline MUST NOT expose secrets in workflow logs. All secret values MUST be masked by GitHub Actions.
-- The pipeline MUST NOT store GCP service account keys in the repository. Keys MUST be in GitHub Actions secrets only.
+- The pipeline MUST NOT store cloud or cluster service account keys in the repository. Runtime credentials MUST come from the configured identity/secret authority for the workflow lane.
 - The pipeline MUST run TruffleHog secret scanning on every PR.
 - The pipeline MUST run Hadolint on any Dockerfiles present in the repository.
 - The GitHub App token MUST have minimum required permissions for the target repositories.
@@ -416,8 +422,8 @@ The platform currently has workflows that evolved organically -- CI, image build
 ### Scheduled Operations
 
 - [ ] AC-022: Given the `public-health-check.yml` runs on schedule, when branding is correct on prod and dev, then no failures are reported and logs are uploaded as artifacts.
-- [ ] AC-023: Given the `operations-gates-runtime.yml` runs on schedule, when GKE authentication succeeds, then operations gates execute against the live cluster and artifacts are uploaded with 30-day retention.
-- [ ] AC-024: Given the `dr-evidence-bundle.yml` runs on the 1st of the month, when GKE access is available, then a DR evidence bundle is generated and uploaded with 120-day retention.
+- [ ] AC-023: Given the `operations-gates-runtime.yml` runs on schedule, when live-cluster authentication succeeds for the selected lane, then operations gates execute against that live cluster and artifacts are uploaded with 30-day retention.
+- [ ] AC-024: Given the `dr-evidence-bundle.yml` runs on the 1st of the month, when live-cluster access is available for the selected lane, then a DR evidence bundle is generated and uploaded with 120-day retention.
 
 ### iOS Build
 
@@ -446,14 +452,14 @@ The platform currently has workflows that evolved organically -- CI, image build
 - [ ] AC-035: Given the `tutor-plugin-test.yml` workflow runs when changes are made to `infrastructure/tutor/plugins/**`, when the plugin code is valid, then the workflow succeeds with plugin syntax verification, enable/disable lifecycle tests, and integration tests passing.
 - [ ] AC-036: Given the plugin tests run, when the plugin patches are correctly applied, then the LMS settings file contains the expected plugin configuration (mfe_oauth_fix installed).
 - [ ] AC-037: Given the plugin lifecycle test runs, when the plugin is enabled, disabled, and re-enabled, then all state transitions succeed without errors.
-- [ ] AC-038: Given the integration test runs, when both plugin and apply-patches.sh are used together, then both sets of patches are present in the generated configuration.
+- [ ] AC-038: Given the integration test runs, when the canonical Tutor plugin/render path and approved post-render compatibility layer are applied, then rendered deltas match the allowed-delta ledger and no unowned generated-artifact mutation is introduced.
 - [ ] AC-039: Given plugin tests fail on a PR, when a developer views the PR, then a comment is posted with plugin-specific troubleshooting guidance.
 
 ## Edge Cases
 
 ### Build Failures
 
-- **OOM during OpenEdX build**: The openedx image build requires 12GB+ RAM. GitHub-hosted runners provide 7GB. The workflow sets `DOCKER_OPTS=--memory=12g --memory-swap=16g` but this may not be effective on all runner configurations. If OOM persists, the build MUST fail clearly (not hang) and the step summary MUST suggest building locally or using self-hosted runners.
+- **OOM during OpenEdX build**: The openedx image build is memory-heavy. The workflow MUST route through governed fastlane/ARC build capacity, fail clearly on runner-capacity or memory pressure, and record whether the failure belongs to source, build harness, or runner health.
 - **OOM during MFE build**: MFE webpack builds consume 6-8GB. The workflow sets `NODE_OPTIONS=--max-old-space-size=6144`. If the build OOMs, the error MUST be distinguishable from other failures.
 - **Network failure during image push**: If `docker push` fails due to transient network issues, the workflow MUST fail (no silent partial push). Re-running the workflow MUST be safe (idempotent tag overwrite in GHCR).
 - **Stale Tutor cache**: If Tutor's cached state conflicts with config changes, app-cache-cold benchmark runs MUST suppress app-level cache imports and use the no-cache bake targets. Routine image builds may use governed GHCR BuildKit registry cache.
@@ -467,7 +473,7 @@ The platform currently has workflows that evolved organically -- CI, image build
 
 ### Scheduled Workflow Failures
 
-- **GKE auth failure in scheduled workflows**: Runtime workflows (`operations-gates-runtime`, `observability-audit`, `alert-routing-audit`) MUST handle GKE authentication failures gracefully. Non-strict mode (`strict_runtime=false`) SHOULD skip GKE-dependent checks and report them as warnings. Strict mode MUST fail the workflow.
+- **Live-cluster auth failure in scheduled workflows**: Runtime workflows (`operations-gates-runtime`, `observability-audit`, `alert-routing-audit`) MUST handle live-cluster authentication failures gracefully in non-strict mode. Non-strict mode (`strict_runtime=false`) SHOULD skip live-cluster-dependent checks and report them as warnings. Strict mode MUST fail the workflow.
 - **Rate limiting**: If GitHub API rate limits are hit during scheduled workflows (every 30 min health checks), the workflow SHOULD fail gracefully without cascading failures.
 
 ### Concurrent Build Handling
@@ -543,14 +549,14 @@ The platform currently has workflows that evolved organically -- CI, image build
 2. **Phase 2**: Add explicit `timeout-minutes` to all jobs that lack them. Add branch protection rules requiring CI status checks.
 3. **Phase 3**: Add CI minute usage monitoring. Evaluate scheduled workflow frequency against quota.
 4. **Phase 4**: Implement deployment frequency and MTTR tracking as DORA metrics.
-5. **Phase 5**: Evaluate self-hosted runners for OpenEdX builds if OOM issues persist on GitHub-hosted runners.
+5. **Phase 5**: Keep fastlane/ARC build capacity, cache semantics, and prune-lock hygiene under active proof in the build-authority tracker.
 
 ### Feature Flags
 
 - `ENABLE_STAGING_ENV` repository variable gates staging deployments.
 - `ENABLE_CLOUD_SQL_BACKUPS` repository variable gates legacy backup workflow.
 - `RUN_AUTHENTICATED_SSO_CANARY` repository variable gates credentialed SSO canary tests.
-- Runtime workflows support `strict_runtime` input to toggle hard vs soft failure on GKE auth issues.
+- Runtime workflows support `strict_runtime` input to toggle hard vs soft failure on live-cluster auth issues.
 
 ### Backward Compatibility
 
@@ -577,10 +583,10 @@ The platform currently has workflows that evolved organically -- CI, image build
 
 ## Open Questions
 
-- **Self-hosted runners**: Should we provision a self-hosted runner (on the VPS or a dedicated GCE instance) for OpenEdX image builds to guarantee 12GB+ RAM? Current GitHub-hosted runners may OOM. Cost vs reliability tradeoff needs evaluation.
+- **Build-lane capacity**: What fastlane/ARC capacity and queue policy gives the right balance of cost, cold-cache proof quality, and developer feedback time?
 - **GitHub Actions minutes budget**: Current scheduled workflows consume significant minutes. Should health check frequency be reduced from every 30 minutes to every hour? Should operations gates frequency be reduced from every 6 hours to every 12 hours?
 - **Notification channel**: What is the preferred notification mechanism for CI/CD failures? Options: GitHub email notifications (default), Slack webhook (requires new secret), PagerDuty (overkill for current team size).
-- **Terraform plan in CI**: Should CI run `terraform plan` on infrastructure changes to detect drift? This would require Terraform state access and GCP credentials with broader permissions.
+- **Terraform plan in CI**: Should CI run `terraform plan` on infrastructure changes to detect drift? This would require Terraform state access and appropriately scoped credentials.
 - **Container image signing**: Should images be signed with cosign/Sigstore for supply chain security? This adds complexity but provides tamper-evidence for production images.
 - **Dependency scanning**: Should we add Dependabot or Renovate for automated dependency updates on GitHub Actions, Python packages, and Tutor plugins?
 - **Performance regression testing**: Should we add automated performance benchmarking (e.g., response time assertions against production endpoints) as a post-deploy gate? Current health checks verify availability but not performance.

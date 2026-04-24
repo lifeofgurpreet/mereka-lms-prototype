@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # @spec: ci-cd-pipeline_spec.md
 # @covers AC-001, AC-005, AC-006, AC-009, AC-010, AC-011, AC-013, AC-014, AC-019, AC-020, AC-027, AC-028
+# @runtime-dependencies: none
 #
 # Comprehensive CI/CD pipeline verification script.
 # Validates the build pipeline, registry configuration, GitOps deployment,
@@ -12,6 +13,7 @@
 #   ./scripts/qa/verify-ci-cd-pipeline.sh --section registry
 #   ./scripts/qa/verify-ci-cd-pipeline.sh --section gitops
 #   ./scripts/qa/verify-ci-cd-pipeline.sh --section security
+#   ./scripts/qa/verify-ci-cd-pipeline.sh --section authority
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
@@ -29,6 +31,7 @@ RELEASE_SCRIPT="scripts/infra/release-openedx-gitops.sh"
 DIGEST_HELPER="scripts/infra/resolve-image-digest.sh"
 WORKFLOWS_DIR=".github/workflows"
 CI_STATIC_LIST=".github/ci-scripts-static.txt"
+SPEC_FILE="specs/ci-cd-pipeline_spec.md"
 
 # --- Colours ---
 GREEN='\033[0;32m'
@@ -45,7 +48,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --section) SECTION_FILTER="$2"; shift 2 ;;
     -h|--help)
-      echo "Usage: $0 [--section build|registry|gitops|security]"
+      echo "Usage: $0 [--section build|registry|gitops|security|authority]"
       exit 0
       ;;
     *) echo "Unknown arg: $1" >&2; exit 1 ;;
@@ -55,6 +58,77 @@ done
 pass() { echo -e "  ${GREEN}PASS${NC}  $1"; PASSED=$((PASSED + 1)); }
 fail() { echo -e "  ${RED}FAIL${NC}  $1"; FAILED=$((FAILED + 1)); }
 skip() { echo -e "  ${YELLOW}SKIP${NC}  $1"; SKIPPED=$((SKIPPED + 1)); }
+
+# ============================================================================
+# SECTION: Spec Authority Alignment
+# ============================================================================
+check_authority_alignment() {
+  echo ""
+  echo "══════════════════════════════════════════════════════════════"
+  echo "  Spec Authority Alignment"
+  echo "══════════════════════════════════════════════════════════════"
+
+  if [[ ! -f "$SPEC_FILE" ]]; then
+    fail "[AC-014] CI/CD pipeline spec missing: $SPEC_FILE"
+    return
+  fi
+
+  local kubectl_apply_stale_pattern
+  kubectl_apply_stale_pattern="$(printf 'kubectl %s succeeds' 'apply')"
+
+  local forbidden_patterns=(
+    "deployment to production GKE"
+    "local Kind, production GKE"
+    "Kind on VPS"
+    "Production runs on GKE Autopilot"
+    "GCP Secret Manager -> ExternalSecrets"
+    "GitHub-hosted runners provide 2-core, 7GB RAM"
+    "CI workflows MUST use GitHub-hosted \`ubuntu-latest\` runners for all Linux jobs"
+    "OpenEdX image build SHOULD complete within 45 minutes on GitHub-hosted runners"
+    "MFE image build SHOULD complete within 20 minutes on GitHub-hosted runners"
+    "DOCKER_OPTS=--memory=12g --memory-swap=16g"
+    "both plugin and apply-patches.sh are used together"
+    "$kubectl_apply_stale_pattern"
+    "GKE authentication succeeds"
+    "GKE access is available"
+    "GKE auth failure"
+  )
+
+  local stale_count=0
+  local pattern
+  for pattern in "${forbidden_patterns[@]}"; do
+    if grep -Fq "$pattern" "$SPEC_FILE"; then
+      fail "[AC-014] Stale CI/CD authority language remains in $SPEC_FILE: $pattern"
+      stale_count=$((stale_count + 1))
+    fi
+  done
+  if [[ "$stale_count" -eq 0 ]]; then
+    pass "[AC-014] CI/CD spec rejects stale GKE/Kind/hosted-runner/apply-patches authority language"
+  fi
+
+  local required_patterns=(
+    "PROMOTION_REALIZATION_AND_INCIDENT_FLOW.md"
+    "DEVELOPER_ENVIRONMENT_PROOF_MATRIX.md"
+    "BUILD_AUTHORITY_CLOSURE_TRACKER_2026-04-23.md"
+    "release object"
+    "ArgoCD"
+    "fastlane/ARC"
+    "Infisical -> ExternalSecrets -> Kubernetes Secrets"
+    "buildkitd-config-inline"
+    "allowed-delta ledger"
+  )
+
+  local missing_count=0
+  for pattern in "${required_patterns[@]}"; do
+    if ! grep -Fq "$pattern" "$SPEC_FILE"; then
+      fail "[AC-014] CI/CD spec missing current authority language: $pattern"
+      missing_count=$((missing_count + 1))
+    fi
+  done
+  if [[ "$missing_count" -eq 0 ]]; then
+    pass "[AC-014] CI/CD spec references current release, GitOps, runtime, runner, and secret authority"
+  fi
+}
 
 # ============================================================================
 # SECTION: Build Pipeline
@@ -260,8 +334,8 @@ check_registry() {
   fi
 
   # AC-009: Registry authentication configured
-  # After GHCR migration: uses GITHUB_TOKEN (docker login ghcr.io) instead of GCP auth.
-  # GCP auth (gcp-gke-auth) is only needed for GKE deployments, not image pushes to GHCR.
+  # After GHCR migration: uses GITHUB_TOKEN (docker login ghcr.io). Live-cluster
+  # auth belongs to runtime/promotion lanes, not image pushes to GHCR.
   if grep -qE 'google-github-actions/auth@(v2|[0-9a-f]{40})(\s*#\s*v2)?' "$BUILD_WF" \
     || grep -q '\./\.github/actions/gcp-gke-auth' "$BUILD_WF"; then
     pass "[AC-009] GCP authentication configured (direct action or gcp-gke-auth composite)"
@@ -664,6 +738,10 @@ echo "║  @spec: ci-cd-pipeline_spec.md                             ║"
 echo "║  Covers: AC-001, AC-005, AC-006, AC-009, AC-010, AC-011,  ║"
 echo "║          AC-013, AC-014, AC-019, AC-020, AC-027, AC-028    ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
+
+if [[ -z "$SECTION_FILTER" || "$SECTION_FILTER" == "authority" ]]; then
+  check_authority_alignment
+fi
 
 if [[ -z "$SECTION_FILTER" || "$SECTION_FILTER" == "build" ]]; then
   check_build_pipeline

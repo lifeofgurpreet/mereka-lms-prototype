@@ -135,8 +135,8 @@ entries:
     file: N/A
 - id: AC-010
   spec: ci-cd-pipeline_spec.md
-  description: Given the openedx image is built, when it is pushed to Artifact Registry, then the job output contains the
-    resolved image digest (sha256:...)
+  description: Given the openedx image is built, when it is pushed to GHCR, then the job output contains the resolved image
+    digest (sha256:...)
   verify:
   - type: manual
     runbook: docs/ops/runbooks/CI_CD_RUNBOOK.md
@@ -245,8 +245,8 @@ entries:
     file: N/A
 - id: AC-023
   spec: ci-cd-pipeline_spec.md
-  description: Given the operations-gates-runtime.yml runs on schedule, when GKE authentication succeeds, then operations
-    gates execute against the live cluster and artifacts are uploaded with 30-day retention
+  description: Given the operations-gates-runtime.yml runs on schedule, when live-cluster authentication succeeds for the
+    selected lane, then operations gates execute against that live cluster and artifacts are uploaded with 30-day retention
   verify:
   - type: manual
     runbook: docs/ops/runbooks/CI_CD_RUNBOOK.md
@@ -256,8 +256,8 @@ entries:
     file: N/A
 - id: AC-024
   spec: ci-cd-pipeline_spec.md
-  description: Given the dr-evidence-bundle.yml runs on the 1st of the month, when GKE access is available, then a DR evidence
-    bundle is generated and uploaded with 120-day retention
+  description: Given the dr-evidence-bundle.yml runs on the 1st of the month, when live-cluster access is available for the
+    selected lane, then a DR evidence bundle is generated and uploaded with 120-day retention
   verify:
   - type: manual
     runbook: docs/ops/runbooks/CI_CD_RUNBOOK.md
@@ -452,8 +452,9 @@ entries:
     file: N/A
 - id: AC-038
   spec: ci-cd-pipeline_spec.md
-  description: Given the integration test runs, when both plugin and apply-patches.sh are used together, then both sets of
-    patches are present in the generated configuration
+  description: Given the integration test runs, when the canonical Tutor plugin/render path and approved post-render
+    compatibility layer are applied, then rendered deltas match the allowed-delta ledger and no unowned generated-artifact
+    mutation is introduced
   verify:
   - type: manual
     runbook: docs/ops/runbooks/CI_CD_RUNBOOK.md
@@ -3677,7 +3678,9 @@ entries:
     justification: Grafana dashboard provisioning for GitHub Actions cost not yet deployed
 - id: AC-INT-001
   spec: ci-cd-pipeline_spec.md
-  description: K8s manifests pass validate-k8s.sh, CI builds and pushes images, production Kustomize overlay references new tags, kubectl apply succeeds without resource validation errors
+  description: K8s manifests pass static validation, CI builds and pushes images to GHCR, the release object records image
+    tags and digests, the GitOps overlay references the promoted digests, and ArgoCD/runtime proof confirms realization
+    before the change is called deployed
   verify:
   - type: manual
     runbook: docs/ops/runbooks/CI_CD_RUNBOOK.md

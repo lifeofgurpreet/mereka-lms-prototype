@@ -161,7 +161,7 @@
       "domain": "platform",
       "id": "SPEC-CICD-PIPELINE",
       "lane": "normative",
-      "last_reviewed": "2026-02-12",
+      "last_reviewed": "2026-04-24",
       "links": {
         "generated_testmap": "specs/_generated/testmaps/ci-cd-pipeline_spec.testmap.yml",
         "legacy_testmap": "specs/testmaps/ci-cd-pipeline_spec.testmap.yml",
@@ -173,7 +173,7 @@
       "normativity": "normative",
       "owner": "engineering",
       "path": "specs/ci-cd-pipeline_spec.md",
-      "review_due": "2026-06-12",
+      "review_due": "2026-07-24",
       "spec_class": "system",
       "status": "approved",
       "summary": "Defines the CI/CD contract for building, validating, and promoting platform artifacts through the canonical GitOps release flow.",
@@ -183,7 +183,7 @@
         "platform.control-plane"
       ],
       "title": "CI/CD Pipeline Specification",
-      "version": "1.0.0"
+      "version": "1.1.0"
     },
     {
       "acceptance_criteria_count": 33,

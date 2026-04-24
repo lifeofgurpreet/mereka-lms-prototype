@@ -30,7 +30,7 @@
 | 3 | [Authentication & SSO Enterprise Integration](auth-sso-enterprise_spec.md) | normative | domain | approved | 1.0.0 | 45 | 2026-03-09 |
 | 4 | [Branding System](branding-system_spec.md) | normative | domain | approved | 1.1.0 | 13 | 2026-03-09 |
 | 5 | [Build Authority and Deterministic Build Truth](build-authority-deterministic-builds_spec.md) | normative | domain | draft | None | 9 | 2026-04-21 |
-| 6 | [CI/CD Pipeline Specification](ci-cd-pipeline_spec.md) | normative | system | approved | 1.0.0 | 43 | 2026-02-12 |
+| 6 | [CI/CD Pipeline Specification](ci-cd-pipeline_spec.md) | normative | system | approved | 1.1.0 | 43 | 2026-04-24 |
 | 7 | [Content Libraries v2 Management & Enterprise Usage](content-libraries-v2_spec.md) | normative | domain | draft | 1.0.0 | 33 | 2026-03-09 |
 | 8 | [Cross-Cutting Requirements](cross-cutting-requirements_spec.md) | normative | system | approved | 1.0.0 | 12 | 2026-03-09 |
 | 9 | [Data Migrations: Kajabi & MCT Legacy Systems](data-migrations-kajabi-mct_spec.md) | normative | domain | approved | 1.0.0 | 44 | 2026-02-10 |

@@ -1,20 +1,33 @@
 spec: ci-cd-pipeline_spec.md
 acceptance_criteria:
 - id: AC-INT-001
-  description: Given K8s manifests pass `validate-k8s.sh`, when CI builds and pushes
-    images to Artifact Registry, then production Kustomize overlay references the
-    new image tags and `kubectl apply` succeeds without resource validation errors.
+  description: Given K8s manifests pass static validation, when CI builds and pushes
+    images to GHCR, then the release object records the image tags and digests, the
+    GitOps overlay references the promoted digests, and ArgoCD/runtime proof confirms
+    realization before the change is called deployed.
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-branding-multi-domain.sh
+    command: scripts/qa/verify-branding-multi-domain.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-configmap-hash-suffixes.sh
+    command: scripts/qa/verify-configmap-hash-suffixes.sh
   - type: manual
     runbook: docs/ops/runbooks/CI_CD_RUNBOOK.md
     section: Integration Tests
     justification: Requires live CI pipeline run with new image build; validated each
       release via release-openedx-gitops.sh dry-run + ArgoCD sync
 - id: AC-INT-002
-  description: Given K8s Deployments require specific ExternalSecrets, when CI deployment
-    workflow runs, then it verifies ExternalSecrets reach `SecretSynced` before declaring
-    deployment success.
+  description: Given K8s Deployments require specific ExternalSecrets, when runtime
+    validation runs for an environment, then it verifies ExternalSecrets reach `SecretSynced`
+    before declaring that environment healthy.
   verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-branding-multi-domain.sh
+    command: scripts/qa/verify-branding-multi-domain.sh
   - type: automated
     test_type: shell_verification
     file: scripts/qa/verify-migration-init-contract.sh
@@ -32,6 +45,10 @@ acceptance_criteria:
   verify:
   - type: automated
     test_type: shell_verification
+    file: scripts/qa/verify-branding-asset-sync.sh
+    command: scripts/qa/verify-branding-asset-sync.sh
+  - type: automated
+    test_type: shell_verification
     file: scripts/qa/verify-infisical-env-validation-coverage.sh
     command: scripts/qa/verify-infisical-env-validation-coverage.sh
   - type: manual
@@ -40,9 +57,9 @@ acceptance_criteria:
     justification: infisical-validate CI step not yet wired into GitHub Actions workflow;
       runs manually pre-deploy
 - id: AC-INT-004
-  description: Given branding assets are synced via `apply-patches.sh`, when CI builds
-    openedx image, then `branding-preflight.sh` passes and verifies Mereka logo presence
-    and Google Fonts absence in compiled artifacts.
+  description: Given branding assets are carried by the canonical Tutor render/build
+    path, when CI builds the openedx image, then the post-push branding verifier passes
+    and verifies Mereka logo presence and Google Fonts absence in compiled artifacts.
   verify:
   - type: manual
     runbook: docs/ops/runbooks/CI_CD_RUNBOOK.md
@@ -213,8 +230,8 @@ acceptance_criteria:
       workflow dispatch cannot be fully automated in isolated test environment
     file: N/A
 - id: AC-010
-  description: Given the openedx image is built, when it is pushed to Artifact Registry,
-    then the job output contains the resolved image digest (sha256:...).
+  description: Given the openedx image is built, when it is pushed to GHCR, then the
+    job output contains the resolved image digest (sha256:...).
   verify:
   - type: automated
     test_type: shell_verification
@@ -265,7 +282,7 @@ acceptance_criteria:
     file: N/A
 - id: AC-013
   description: Given the build workflow, when images are pushed, then no `:latest`
-    tag is published to Artifact Registry.
+    tag is published to GHCR.
   verify:
   - type: automated
     test_type: shell_verification
@@ -460,9 +477,9 @@ acceptance_criteria:
       workflow dispatch cannot be fully automated in isolated test environment
     file: N/A
 - id: AC-023
-  description: Given the `operations-gates-runtime.yml` runs on schedule, when GKE
-    authentication succeeds, then operations gates execute against the live cluster
-    and artifacts are uploaded with 30-day retention.
+  description: Given the `operations-gates-runtime.yml` runs on schedule, when live-cluster
+    authentication succeeds for the selected lane, then operations gates execute against
+    that live cluster and artifacts are uploaded with 30-day retention.
   verify:
   - type: automated
     test_type: shell_verification
@@ -476,8 +493,8 @@ acceptance_criteria:
     file: N/A
 - id: AC-024
   description: Given the `dr-evidence-bundle.yml` runs on the 1st of the month, when
-    GKE access is available, then a DR evidence bundle is generated and uploaded with
-    120-day retention.
+    live-cluster access is available for the selected lane, then a DR evidence bundle
+    is generated and uploaded with 120-day retention.
   verify:
   - type: automated
     test_type: shell_verification
@@ -656,8 +673,9 @@ acceptance_criteria:
       workflow dispatch cannot be fully automated in isolated test environment
     file: N/A
 - id: AC-038
-  description: Given the integration test runs, when both plugin and apply-patches.sh
-    are used together, then both sets of patches are present in the generated configuration.
+  description: Given the integration test runs, when the canonical Tutor plugin/render
+    path and approved post-render compatibility layer are applied, then rendered deltas
+    match the allowed-delta ledger and no unowned generated-artifact mutation is introduced.
   verify:
   - type: automated
     test_type: shell_verification
