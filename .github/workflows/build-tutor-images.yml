@@ -1111,7 +1111,18 @@ jobs:
           # Use docker: source so syft reuses the image pulled by the explicit
           # "Pull OpenEdX image" step above, avoiding a redundant ~5 GB
           # GHCR re-fetch.  The docker: scheme reads from the local daemon cache.
-          timeout 20m "$HOME/.local/bin/syft" scan "docker:${OPENEDX_IMAGE_REF}" \
+          #
+          # lb4c.7 wire-in: wrap syft with run-with-retry.sh to retry timeout-
+          # only failures up to 3 attempts (max 30 min total). Matches the
+          # Trivy pattern below. --retry-on-exit-codes "124" only — any other
+          # non-zero exit (parse error, network failure with explicit code)
+          # must propagate immediately, not get hidden behind a retry loop.
+          scripts/ci/run-with-retry.sh \
+            --max-attempts 3 \
+            --delay-seconds 30 \
+            --max-total-seconds 1800 \
+            --retry-on-exit-codes "124" \
+            -- timeout 20m "$HOME/.local/bin/syft" scan "docker:${OPENEDX_IMAGE_REF}" \
             -o cyclonedx-json=var/ci/sbom-openedx.cdx.json
           sbom_status=$?
           set -e
@@ -1325,7 +1336,16 @@ jobs:
           ./scripts/infra/install-syft.sh
           set +e
           # Use docker: source to reuse the locally-pulled MFE image.
-          timeout 20m "$HOME/.local/bin/syft" scan "docker:${MFE_IMAGE_REF}" \
+          #
+          # lb4c.7 wire-in: wrap syft with run-with-retry.sh to retry timeout-
+          # only failures up to 3 attempts (max 30 min total). Matches the
+          # OpenEdX SBOM + Trivy pattern. --retry-on-exit-codes "124" only.
+          scripts/ci/run-with-retry.sh \
+            --max-attempts 3 \
+            --delay-seconds 30 \
+            --max-total-seconds 1800 \
+            --retry-on-exit-codes "124" \
+            -- timeout 20m "$HOME/.local/bin/syft" scan "docker:${MFE_IMAGE_REF}" \
             -o cyclonedx-json=var/ci/sbom-mfe.cdx.json
           sbom_status=$?
           set -e
