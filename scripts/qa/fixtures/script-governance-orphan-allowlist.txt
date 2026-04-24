@@ -32,6 +32,7 @@ scripts/qa/build-video-evidence-bundle.sh
 scripts/qa/experience-proof.py
 scripts/qa/gate-timing-tracker.sh
 scripts/qa/generate_adr_aux_maps.py
+scripts/qa/spec-tools/check_pipefail_grep_pipelines.py
 scripts/qa/validate_monitor_selectors.sh
 scripts/qa/validate_service_selectors.sh
 scripts/qa/verify_adr_aux_maps.py
