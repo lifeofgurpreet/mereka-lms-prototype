@@ -1,117 +1,163 @@
-// OAuth2 Authorization Code + PKCE flow against Open edX.
+// ---------------------------------------------------------------------------
+// Auth module — cookie-first, OAuth2-PKCE-capable.
 //
-// Uses `oauth4webapi` for spec-compliant PKCE generation. Open edX's
-// OAuth2 provider (django-oauth-toolkit) supports PKCE when the
-// OAuth app is registered with `PKCE required = true`.
+// Strategy (see docs/AUTH_STRATEGY.md for the full write-up):
 //
-// Flow:
-//   1. login() — redirect to {baseUrl}/oauth2/authorize with code_challenge
-//   2. Open edX logs the user in, redirects back to {redirectUri}?code=XXX
-//   3. handleCallback() — exchange code for tokens at /oauth2/access_token
-//   4. setSession(tokens) — access token in sessionStorage
+//   Tier A  PUBLIC              No auth at all. Discover, course detail
+//                               preview, outline for public blocks.
 //
-// Refresh tokens: handled by a Netlify Edge Function that sets an
-// httpOnly cookie. Not yet wired — STUB for now. See infra/netlify-edge/.
+//   Tier B  COOKIE (preferred)  When the SPA is hosted under *.mereka.dev
+//                               we reuse the JWT cookies that Open edX's
+//                               MFEs already set after signing in at
+//                               apps.academyv2.mereka.dev/authn/login.
+//                               No OAuth app registration is needed.
+//
+//   Tier C  PKCE (optional)     Once Gurpreet registers a public OAuth2
+//                               client for this SPA, flip the flag on and
+//                               we run a standard PKCE auth-code flow.
+//
+// This file exposes one public API: { login, handleCallback, logout,
+// isAuthenticated, fetchCurrentUser }. The router calls login() / logout();
+// pages call fetchCurrentUser() when they need to personalize content.
+// ---------------------------------------------------------------------------
 
-import * as oauth from 'oauth4webapi';
 import { config } from '../config.js';
-import { setSession, clearSession, getSession } from './session.js';
+import { apiGet, ApiError } from '../api/client.js';
+import { getSession, setSession, clearSession, isAuthenticated } from './session.js';
 
-const PKCE_KEY = 'mereka.pkce.v1';
+export { isAuthenticated };
 
-function openedxAuthServer() {
-  return {
-    issuer: config.openedx.baseUrl,
-    authorization_endpoint: config.openedx.baseUrl + config.oauth.authorizeEndpoint,
-    token_endpoint: config.openedx.baseUrl + config.oauth.tokenEndpoint,
-    revocation_endpoint: config.openedx.baseUrl + config.oauth.revokeEndpoint,
-  };
+/** Is the current hostname under *.mereka.dev? Controls cookie-mode eligibility. */
+function canUseCookieAuth() {
+  try {
+    const host = window.location.hostname || '';
+    return host === 'mereka.dev' || host.endsWith('.mereka.dev');
+  } catch {
+    return false;
+  }
 }
 
-function client() {
-  return { client_id: config.oauth.clientId, token_endpoint_auth_method: 'none' };
+/** Fetch /api/user/v1/me — the canonical "who am I" probe for Open edX. */
+export async function fetchCurrentUser() {
+  try {
+    const me = await apiGet('/api/user/v1/me', { auth: true });
+    return me;
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 401) return null;
+    throw err;
+  }
 }
 
-/**
- * Kick off the login redirect. Stores PKCE verifier + state in sessionStorage
- * so handleCallback() can verify the round-trip.
- */
-export async function login() {
-  const verifier = oauth.generateRandomCodeVerifier();
-  const challenge = await oauth.calculatePKCECodeChallengeFromVerifier(verifier);
-  const state = oauth.generateRandomState();
+/** Kick off login. */
+export async function login({ returnTo } = {}) {
+  const target = returnTo || window.location.pathname + window.location.search;
 
-  sessionStorage.setItem(PKCE_KEY, JSON.stringify({ verifier, state }));
-
-  const url = new URL(openedxAuthServer().authorization_endpoint);
-  url.searchParams.set('response_type', 'code');
-  url.searchParams.set('client_id', config.oauth.clientId);
-  url.searchParams.set('redirect_uri', config.oauth.redirectUri);
-  url.searchParams.set('scope', config.oauth.scopes);
-  url.searchParams.set('state', state);
-  url.searchParams.set('code_challenge', challenge);
-  url.searchParams.set('code_challenge_method', 'S256');
-
-  window.location.assign(url.toString());
-}
-
-/**
- * Called on /auth/callback — exchanges ?code= for access token.
- * Returns true on success, throws on failure.
- */
-export async function handleCallback() {
-  const stored = JSON.parse(sessionStorage.getItem(PKCE_KEY) || '{}');
-  sessionStorage.removeItem(PKCE_KEY);
-
-  const params = oauth.validateAuthResponse(
-    openedxAuthServer(),
-    client(),
-    new URL(window.location.href),
-    stored.state,
-  );
-  if (oauth.isOAuth2Error(params)) {
-    throw new Error(`OAuth error: ${params.error} ${params.error_description}`);
+  // If cookie auth is available, do the MFE redirect dance — no PKCE needed.
+  if (canUseCookieAuth() || !config.oauth.clientId) {
+    const next = encodeURIComponent(window.location.origin + target);
+    const url = `${config.openedx.authnUrl}/authn/login?next=${next}`;
+    window.location.assign(url);
+    return;
   }
 
-  const response = await oauth.authorizationCodeGrantRequest(
-    openedxAuthServer(),
-    client(),
-    params,
-    config.oauth.redirectUri,
-    stored.verifier,
-  );
-  const result = await oauth.processAuthorizationCodeOAuth2Response(
-    openedxAuthServer(),
-    client(),
-    response,
-  );
-  if (oauth.isOAuth2Error(result)) {
-    throw new Error(`Token exchange failed: ${result.error}`);
-  }
+  // PKCE flow — only when a client id is configured.
+  const { codeVerifier, codeChallenge } = await makePkcePair();
+  const stateToken = crypto.randomUUID();
+  sessionStorage.setItem('mereka.oauth.verifier', codeVerifier);
+  sessionStorage.setItem('mereka.oauth.state', stateToken);
+  sessionStorage.setItem('mereka.oauth.return_to', target);
 
-  setSession({
-    accessToken: result.access_token,
-    expiresAt: Date.now() + (result.expires_in ?? 3600) * 1000,
-    tokenType: result.token_type ?? 'Bearer',
+  const params = new URLSearchParams({
+    response_type: 'code',
+    client_id: config.oauth.clientId,
+    redirect_uri: config.oauth.redirectUri,
+    scope: 'read write profile email',
+    state: stateToken,
+    code_challenge: codeChallenge,
+    code_challenge_method: 'S256',
   });
-  return true;
+  window.location.assign(`${config.openedx.baseUrl}/oauth2/authorize/?${params.toString()}`);
 }
 
+/** Handle the /auth/callback round-trip. */
+export async function handleCallback() {
+  const url = new URL(window.location.href);
+  const code = url.searchParams.get('code');
+  const stateParam = url.searchParams.get('state');
+  const savedState = sessionStorage.getItem('mereka.oauth.state');
+  const verifier = sessionStorage.getItem('mereka.oauth.verifier');
+  const returnTo = sessionStorage.getItem('mereka.oauth.return_to') || '/';
+
+  sessionStorage.removeItem('mereka.oauth.state');
+  sessionStorage.removeItem('mereka.oauth.verifier');
+  sessionStorage.removeItem('mereka.oauth.return_to');
+
+  if (!code || !stateParam || stateParam !== savedState) {
+    throw new Error('OAuth callback: invalid state or missing code.');
+  }
+
+  const body = new URLSearchParams({
+    grant_type: 'authorization_code',
+    code,
+    redirect_uri: config.oauth.redirectUri,
+    client_id: config.oauth.clientId,
+    code_verifier: verifier,
+  });
+
+  const res = await fetch(`${config.openedx.baseUrl}/oauth2/access_token/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Token exchange failed: ${res.status} ${text.slice(0, 160)}`);
+  }
+  const tok = await res.json();
+  setSession({
+    accessToken: tok.access_token,
+    refreshToken: tok.refresh_token || null,
+    expiresAt: Date.now() + (tok.expires_in || 3600) * 1000,
+    scope: tok.scope || '',
+  });
+  return returnTo;
+}
+
+/** Clear local state + best-effort revoke. */
 export async function logout() {
-  const s = getSession();
-  if (s) {
-    // Best-effort revoke; ignore errors.
+  const session = getSession();
+  clearSession();
+  if (canUseCookieAuth()) {
+    // Hop through the LMS logout so the shared cookies on .mereka.dev clear.
+    window.location.assign(`${config.openedx.baseUrl}/logout?next=${encodeURIComponent(window.location.origin)}`);
+    return;
+  }
+  if (session?.accessToken && config.oauth.clientId) {
     try {
-      await fetch(openedxAuthServer().revocation_endpoint, {
+      await fetch(`${config.openedx.baseUrl}/oauth2/revoke_token/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
-          token: s.accessToken,
+          token: session.accessToken,
           client_id: config.oauth.clientId,
         }),
       });
-    } catch {}
+    } catch { /* best-effort */ }
   }
-  clearSession();
-  window.location.assign('/');
+}
+
+// ---------------------------------------------------------------------------
+// PKCE helpers
+// ---------------------------------------------------------------------------
+async function makePkcePair() {
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  const codeVerifier = base64url(bytes);
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(codeVerifier));
+  const codeChallenge = base64url(new Uint8Array(digest));
+  return { codeVerifier, codeChallenge };
+}
+
+function base64url(bytes) {
+  let s = btoa(String.fromCharCode(...bytes));
+  return s.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }

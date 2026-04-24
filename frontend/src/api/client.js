@@ -1,72 +1,92 @@
-// Thin fetch() wrapper — handles base URL, auth headers, 401 retry, errors.
+// ---------------------------------------------------------------------------
+// Thin fetch wrapper around the Open edX REST API.
 //
-// Usage:
-//   import { apiGet, apiPost } from './client.js';
-//   const courses = await apiGet('/api/courses/v1/courses/');
+// Two key changes from the Phase-0 stub:
+//   1. `auth: false` skips the Authorization header AND the
+//      `credentials: 'include'` — useful for public endpoints where sending
+//      cookies can trigger CORS preflights unnecessarily.
+//   2. On 401, we emit `mereka:auth-expired` so the router can bounce the
+//      user to the MFE login screen.
+// ---------------------------------------------------------------------------
 
 import { config } from '../config.js';
 import { getSession, clearSession } from '../auth/session.js';
 
-class ApiError extends Error {
-  constructor(status, body, url) {
-    super(`API ${status} ${url}`);
+export class ApiError extends Error {
+  constructor(message, { status, statusText, body, url } = {}) {
+    super(message);
+    this.name = 'ApiError';
     this.status = status;
+    this.statusText = statusText;
     this.body = body;
     this.url = url;
   }
 }
 
-async function request(method, path, { body, query, skipAuth } = {}) {
-  const url = new URL(path, config.openedx.baseUrl);
-  if (query) {
-    for (const [k, v] of Object.entries(query)) {
-      if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, v);
-    }
+function buildUrl(path) {
+  if (/^https?:\/\//i.test(path)) return path;
+  const base = config.openedx.baseUrl.replace(/\/+$/, '');
+  return base + (path.startsWith('/') ? path : '/' + path);
+}
+
+async function parseBody(res) {
+  const ct = res.headers.get('content-type') || '';
+  if (ct.includes('application/json')) {
+    try { return await res.json(); } catch { return null; }
+  }
+  try { return await res.text(); } catch { return null; }
+}
+
+async function request(method, path, { body, auth = true, headers = {} } = {}) {
+  const url = buildUrl(path);
+  const finalHeaders = new Headers(headers);
+  finalHeaders.set('Accept', 'application/json');
+  if (body !== undefined && !(body instanceof FormData)) {
+    finalHeaders.set('Content-Type', 'application/json');
   }
 
-  const headers = {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json',
-  };
-
-  if (!skipAuth) {
-    const session = getSession();
-    if (session) {
-      headers.Authorization = `${session.tokenType} ${session.accessToken}`;
-    }
+  const session = getSession();
+  if (auth && session?.accessToken) {
+    finalHeaders.set('Authorization', `Bearer ${session.accessToken}`);
   }
 
-  const res = await fetch(url.toString(), {
+  const init = {
     method,
-    headers,
-    body: body ? JSON.stringify(body) : undefined,
-    credentials: 'include', // cookies for CSRF
-  });
-
-  // 401 → session is stale; clear it and force re-login.
-  if (res.status === 401 && !skipAuth) {
-    clearSession();
-    window.dispatchEvent(new CustomEvent('mereka:auth-expired'));
-    throw new ApiError(401, null, url.toString());
+    headers: finalHeaders,
+    credentials: auth ? 'include' : 'omit',
+    mode: 'cors',
+  };
+  if (body !== undefined) {
+    init.body = body instanceof FormData ? body : JSON.stringify(body);
   }
 
-  const text = await res.text();
-  const data = text ? safeParseJson(text) : null;
+  let res;
+  try {
+    res = await fetch(url, init);
+  } catch (err) {
+    throw new ApiError(`Network error calling ${url}`, { url, body: String(err) });
+  }
+
+  if (res.status === 401 && auth) {
+    clearSession();
+    window.dispatchEvent(new CustomEvent('mereka:auth-expired', { detail: { url } }));
+  }
 
   if (!res.ok) {
-    throw new ApiError(res.status, data, url.toString());
+    const payload = await parseBody(res);
+    throw new ApiError(`API ${res.status} on ${path}`, {
+      status: res.status,
+      statusText: res.statusText,
+      body: payload,
+      url,
+    });
   }
-  return data;
+
+  return parseBody(res);
 }
 
-function safeParseJson(text) {
-  try { return JSON.parse(text); } catch { return text; }
-}
-
-export const apiGet    = (path, opts = {}) => request('GET',    path, opts);
-export const apiPost   = (path, opts = {}) => request('POST',   path, opts);
-export const apiPatch  = (path, opts = {}) => request('PATCH',  path, opts);
-export const apiPut    = (path, opts = {}) => request('PUT',    path, opts);
-export const apiDelete = (path, opts = {}) => request('DELETE', path, opts);
-
-export { ApiError };
+export const apiGet    = (path, opts)       => request('GET',    path, opts);
+export const apiPost   = (path, body, opts) => request('POST',   path, { ...opts, body });
+export const apiPatch  = (path, body, opts) => request('PATCH',  path, { ...opts, body });
+export const apiPut    = (path, body, opts) => request('PUT',    path, { ...opts, body });
+export const apiDelete = (path, opts)       => request('DELETE', path, opts);
