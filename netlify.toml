@@ -1,0 +1,22 @@
+# Netlify config for mereka-lms-proto
+#
+# This repo is the Mereka LMS fork: Open edX backend + Mereka UX prototype.
+# Netlify serves ONLY the static UX prototype as a design reference.
+# The Open edX backend is deployed separately (RKE2 + GitOps, not here).
+#
+# If the prototype moves, update `publish` below.
+
+[build]
+  publish = "docs/design-reference/mereka-ux-prototype"
+  # No build step — index.html is a single-file static prototype.
+  command = ""
+
+[build.environment]
+  # Skip Netlify's default Node/Python detection — we're not building anything.
+  NETLIFY_SKIP_PYTHON_REQUIREMENTS = "true"
+
+# Pretty URL — / serves the prototype index.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
