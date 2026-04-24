@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-Y69T.1
+# @spec: truth-repair-doctrine_spec.md
 # verify-runbook-executable.sh
 # -----------------------------------------------------------------------------
 # Enforces Truth Repair Doctrine Rule 3: "A runbook is not executable until it
@@ -90,7 +92,9 @@ check_runbook() {
   fi
 
   # Normalize: status: executable (or Status: executable, etc.)
-  if ! echo "$status_line" | grep -iq 'executable'; then
+  # Use here-string to avoid echo|grep -q under set -o pipefail (SIGPIPE
+  # race — bead mereka-lms-0z5g.6 / pipefail-prone-verifier audit).
+  if ! grep -iq 'executable' <<<"$status_line"; then
     return 0  # status is something else (draft, active, canonical...); not in scope
   fi
 

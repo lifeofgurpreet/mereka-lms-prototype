@@ -15,8 +15,9 @@ scripts/qa/test-discovery-init-task-contract.sh
 scripts/qa/test-openedx-obsolete-activation-key-patch-removal.sh
 scripts/qa/test-verify-build-optimizations-render-delta-contract.sh
 scripts/qa/verify-deletion-wave-consumer-sweep.sh
-scripts/qa/verify-tutor-patch-manifest-contract.sh
-scripts/ci/preflight-check.sh
+scripts/qa/verify-build-optimizations-render-delta-contract.sh
+scripts/branding/verify-logo-setup.sh
+scripts/governance/validate-registry.sh
 scripts/infra/check-error-budget-gate.sh
 scripts/qa/audit-observability.sh
 scripts/qa/check-axe-journey-coverage.sh

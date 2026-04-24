@@ -383,10 +383,14 @@
       "tier": "exploratory_manual"
     },
     {
-      "cadence": "on_demand",
+      "cadence": "per_pr_and_push",
       "canonical": true,
-      "ci_binding": [],
-      "ci_entrypoints": [],
+      "ci_binding": [
+        "ci_static"
+      ],
+      "ci_entrypoints": [
+        "ci_static"
+      ],
       "env_scope": [
         "dev"
       ],
@@ -394,15 +398,17 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/governance/verify-runbook-executable.sh",
-      "reference_count": 6,
+      "reference_count": 9,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
       ],
-      "severity": "low",
-      "spec_ids": [],
-      "status": "manual_only",
-      "tier": "exploratory_manual"
+      "severity": "high",
+      "spec_ids": [
+        "AC-Y69T"
+      ],
+      "status": "active",
+      "tier": "release_blocking"
     },
     {
       "cadence": "on_demand",
@@ -19053,7 +19059,7 @@
   ],
   "summary": {
     "archived_deprecated_scripts": 25,
-    "ci_static_bound": 389,
+    "ci_static_bound": 390,
     "kinds": {
       "verify": 639
     },
@@ -19064,14 +19070,14 @@
     },
     "status_overrides_applied": 8,
     "statuses": {
-      "active": 444,
+      "active": 445,
       "deprecated_candidate": 1,
-      "manual_only": 194
+      "manual_only": 193
     },
     "tiers": {
-      "exploratory_manual": 198,
+      "exploratory_manual": 197,
       "periodic_runtime": 21,
-      "release_blocking": 420
+      "release_blocking": 421
     },
     "total_verify_scripts": 639,
     "workflow_direct_bound": 73
