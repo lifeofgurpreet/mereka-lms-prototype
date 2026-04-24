@@ -253,7 +253,7 @@ jobs:
   select-runner:
     name: Select Runner Lane
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 90
     needs: resolve-benchmark-inputs
     permissions:
       contents: read
@@ -263,6 +263,30 @@ jobs:
       reason: ${{ steps.lane.outputs.reason }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Wait outside fastlane daily restart window
+        if: >-
+          needs.resolve-benchmark-inputs.outputs.runner_class == 'fastlane' &&
+          needs.resolve-benchmark-inputs.outputs.is_scan_only != 'true'
+        run: |
+          set -euo pipefail
+
+          # The persistent fastlane host has a daily runner restart backstop at
+          # 04:00 UTC. Do not start expensive measured builds close enough to
+          # that boundary that GitHub cancels an otherwise healthy cold build.
+          window_start_min=$((3 * 60 + 15))
+          window_end_min=$((4 * 60 + 15))
+          hour="$(date -u +%H)"
+          minute="$(date -u +%M)"
+          now_min=$((10#$hour * 60 + 10#$minute))
+
+          if (( now_min >= window_start_min && now_min < window_end_min )); then
+            wait_seconds=$(((window_end_min - now_min) * 60 + 120))
+            echo "::notice::Fastlane benchmark is inside the daily runner restart collision window (03:15-04:15 UTC); waiting ${wait_seconds}s on ubuntu-latest before selecting a self-hosted runner."
+            sleep "$wait_seconds"
+          else
+            echo "Fastlane benchmark is outside the daily runner restart collision window."
+          fi
 
       - name: Select runner lane
         id: lane
@@ -792,9 +816,15 @@ jobs:
       - resolve-benchmark-inputs
       - select-runner
       - prepare-conditions
+      - measured-build-openedx
     if: >-
+      always() &&
       needs.resolve-benchmark-inputs.outputs.build_mfe == 'true' &&
-      needs.resolve-benchmark-inputs.outputs.is_scan_only == 'false'
+      needs.resolve-benchmark-inputs.outputs.is_scan_only == 'false' &&
+      (
+        needs.resolve-benchmark-inputs.outputs.build_openedx != 'true' ||
+        needs.measured-build-openedx.result == 'success'
+      )
     permissions:
       contents: read
       packages: read

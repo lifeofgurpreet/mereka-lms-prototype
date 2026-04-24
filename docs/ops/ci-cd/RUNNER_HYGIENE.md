@@ -36,6 +36,14 @@ workflow pre-checkout cleanup owns stale workspace paths such as `tutor_env`,
 failures when previous Tutor or containerized build steps left root-owned files
 inside the worktree.
 
+The same fastlane host also has a daily runner restart backstop at 04:00 UTC.
+The Build Benchmark workflow waits on GitHub-hosted capacity when a fastlane
+measured-build dispatch lands inside the 03:15-04:15 UTC collision window, so an
+expensive app-cache-cold Open edX build is not started moments before runner
+maintenance terminates the worker. That wait gate belongs in the workflow
+because it is proof scheduling; the host restart remains an operational backstop
+for stale runner listeners.
+
 ---
 
 ## Scripts
