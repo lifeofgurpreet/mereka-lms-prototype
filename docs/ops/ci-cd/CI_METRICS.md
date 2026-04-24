@@ -33,6 +33,16 @@ rfc: docs/rfcs/RFC-BUILD-AUTHORITY-001.md
 When repo docs and downstream observability docs disagree, this repo is authoritative only for
 the producer artifact schema and the trailing push call site.
 
+### 1.1 Current Runtime Truth (2026-04-24)
+
+| Plane | Current fact | Evidence / owner |
+|---|---|---|
+| App producer schema | `build-metrics-<image-family>.json` remains the repo-owned artifact. It does not emit `runner_class`, `build_target`, or `job_name`. | `scripts/ci/emit-build-metrics.sh`, `.github/actions/emit-build-metrics`, `scripts/qa/test-emit-build-metrics.sh` |
+| Trailing push call site | Build Tutor Images pushes each family artifact to the downstream receiver through `Biji-Biji-Initiative/bbi-infrastructure/.github/actions/push-build-metrics@main`. The push is non-blocking by design. | `.github/workflows/build-tutor-images.yml` |
+| Receiver live health | `ci-metrics-receiver` is a VPS PM2 service, not a Kubernetes workload. On 2026-04-24 it had dropped out of PM2 and `https://ci-metrics.mereka.dev/health` returned Cloudflare `502`; it was re-registered from the existing PM2 ecosystem config and now returns local/external `/health` 200 and `/ready` 200 with taxonomy version `1`, `taxonomy_entries=5`. Prometheus target `ci-metrics-receiver` is `up=1`. | Runtime owner: `Biji-Biji-Initiative/vps-infrastructure`, service path `ci-metrics-receiver/` |
+| Receiver schema drift | Receiver source repair merged in `vps-infrastructure` PR #116 and was applied to the live PM2 service on 2026-04-24. The receiver now caches `workflow_job` runner context and uses it to enrich build-metrics payloads that correctly omit `runner_class`. Remaining proof gap: cache/layer Prometheus series need a post-restart build-metrics push before dashboard freshness can be claimed. | Runtime owner: `Biji-Biji-Initiative/vps-infrastructure`, PR #116 |
+| Dashboard truth | The Grafana dashboard exists in `bbi-infrastructure`, but dashboard freshness is only valid when receiver health and the relevant Prometheus series are current. Do not cite dashboard presence alone as ingestion proof. | `bbi-infrastructure/platform/monitoring/overlays/rke2-baseline/dashboards/ci-build-overview.json`; runbook correction merged in bbi-infrastructure PR #3950 |
+
 ---
 
 ## 2. Naming Convention
