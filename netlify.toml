@@ -1,21 +1,50 @@
 # Netlify config for mereka-lms-proto
 #
-# This repo is the Mereka LMS fork: Open edX backend + Mereka UX prototype.
-# Netlify serves ONLY the static UX prototype as a design reference.
-# The Open edX backend is deployed separately (RKE2 + GitOps, not here).
+# This repo is the Mereka LMS fork: Open edX backend + Mereka UX prototype + SPA.
 #
-# If the prototype moves, update `publish` below.
+# Deploy strategy:
+#   - `main` branch → publishes the STATIC prototype at docs/design-reference/...
+#     (so mereka-lms-proto.netlify.app stays live as the UX design reference).
+#   - `phase-0/*` and `phase-1/*` branches → builds the Vite SPA from /frontend/
+#     (branch deploys preview the real SPA at <branch>--mereka-lms-proto.netlify.app).
+#
+# When Phase 0 is ready to become the primary, swap the [build] block to the
+# frontend/ configuration and remove this note.
 
 [build]
   publish = "docs/design-reference/mereka-ux-prototype"
-  # No build step — index.html is a single-file static prototype.
   command = ""
 
 [build.environment]
-  # Skip Netlify's default Node/Python detection — we're not building anything.
   NETLIFY_SKIP_PYTHON_REQUIREMENTS = "true"
 
-# Pretty URL — / serves the prototype index.
+# -- Branch-level overrides: build the SPA on Phase 0/1 branches --
+[context."phase-0/spa-foundation"]
+  base = "frontend"
+  publish = "frontend/dist"
+  command = "npm install && npm run build"
+
+[context."phase-0/spa-foundation".environment]
+  NODE_VERSION = "20"
+
+[context.branch-deploy]
+  base = "frontend"
+  publish = "frontend/dist"
+  command = "npm install && npm run build"
+
+[context.branch-deploy.environment]
+  NODE_VERSION = "20"
+
+# Deploy previews (PRs against main) — also build the SPA.
+[context.deploy-preview]
+  base = "frontend"
+  publish = "frontend/dist"
+  command = "npm install && npm run build"
+
+[context.deploy-preview.environment]
+  NODE_VERSION = "20"
+
+# SPA-style catch-all — /any-path serves index.html so the client router can handle it.
 [[redirects]]
   from = "/*"
   to = "/index.html"
