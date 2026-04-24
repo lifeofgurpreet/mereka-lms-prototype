@@ -1,0 +1,6 @@
+/*
+ * OEP-48 brand overrides entrypoint.
+ *
+ * Paragon v22 consumes _variables.scss. This file exists so downstream imports
+ * targeting @edx/brand/paragon/_overrides.scss resolve safely under all builds.
+ */

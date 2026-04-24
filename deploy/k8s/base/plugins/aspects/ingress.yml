@@ -1,0 +1,31 @@
+---
+# Superset Ingress - Access analytics dashboard
+# Note: This is optional - you can also use port-forward for internal access
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: superset
+  labels:
+    app.kubernetes.io/name: superset
+    app.kubernetes.io/part-of: aspects
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: 50m
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: analytics.localhost
+      http:
+        paths:
+          - backend:
+              service:
+                name: superset
+                port:
+                  number: 8088
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - analytics.localhost
+      secretName: superset-tls

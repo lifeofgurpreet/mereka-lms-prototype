@@ -1,0 +1,30 @@
+# Tenant DNS records for multi-tenant deployment
+# Applied via Cloudflare API or Terraform
+# DNS-only (gray cloud) + Let's Encrypt for multi-level subdomains
+#
+# IMPORTANT: Cloudflare Free SSL only covers *.mereka.io, NOT *.*.mereka.io
+# Multi-level subdomains like *.academyv2.mereka.io need DNS-only + Let's Encrypt
+#
+# @spec: multi-tenancy-architecture_spec.md
+
+records:
+  # Mereka Academy (self-tenant) — already configured
+  - name: academyv2.mereka.io
+    type: A
+    content: "${GKE_LOAD_BALANCER_IP}"
+    proxied: true  # Cloudflare proxy for *.mereka.io (single level)
+    comment: "Mereka Academy LMS — primary tenant"
+
+  # Acme Corp (pilot external tenant)
+  - name: acme.academyv2.mereka.io
+    type: A
+    content: "${GKE_LOAD_BALANCER_IP}"
+    proxied: false  # DNS-only — multi-level subdomain needs Let's Encrypt
+    comment: "Acme Corp pilot tenant — DNS-only + Let's Encrypt"
+
+# Studio for Acme (optional, if per-tenant studio needed)
+# - name: studio.acme.academyv2.mereka.io
+#   type: A
+#   content: "${GKE_LOAD_BALANCER_IP}"
+#   proxied: false
+#   comment: "Acme Corp Studio — DNS-only + Let's Encrypt"

@@ -1,0 +1,51 @@
+# Skills Dependency Graph — machine-readable skill ordering
+#
+# Defines which skills must run before others (requires)
+# and which are recommended but not mandatory (recommended).
+#
+# layer-triage is the universal root — every other skill
+# depends on having an owner-layer identified first.
+#
+# Consumers:
+#   - Agent execution workflows (skill ordering)
+#   - config/skills-index.yaml (metadata)
+#   - config/change-surface-contracts.yaml (required_skills routing)
+---
+schema_version: "1.0"
+
+dependencies:
+  - skill: layer-triage
+    requires: []
+    recommended: []
+
+  - skill: frontend-mfe-change
+    requires: [layer-triage, runtime-proof]
+    recommended: [gitops-promotion, cross-repo-authority]
+
+  - skill: settings-configmap
+    requires: [layer-triage, cross-repo-authority]
+    recommended: [runtime-proof]
+
+  - skill: gitops-promotion
+    requires: [layer-triage, cross-repo-authority]
+    recommended: [runtime-proof]
+
+  - skill: runtime-proof
+    requires: [layer-triage]
+    recommended: [smoke-identity]
+
+  - skill: smoke-identity
+    requires: [layer-triage]
+    recommended: [runtime-proof]
+
+  - skill: docs-governance
+    requires: [layer-triage]
+    recommended: []
+
+  - skill: cross-repo-authority
+    requires: [layer-triage]
+    recommended: []
+
+  - skill: ci-scope-and-timing
+    requires: [layer-triage]
+    recommended: []

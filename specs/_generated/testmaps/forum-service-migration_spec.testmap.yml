@@ -1,0 +1,391 @@
+spec: forum-service-migration_spec.md
+acceptance_criteria:
+- id: AC-INT-001
+  description: Given `mongodb-atlas-integration_spec.md` is deployed with `cs_comments_service`
+    database on Atlas, when Python forum service starts, then it connects to Atlas
+    without local MongoDB dependency and logs show successful SRV connection.
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/FORUM_RUNBOOK.md
+    section: Integration Tests
+    justification: Validated on live cluster — Forum v2 (Python) running as part of
+      LMS process, connects to Atlas SRV; kubectl logs lms confirms forum startup
+- id: AC-INT-002
+  description: Given forum data exists in Atlas `cs_comments_service`, when Python
+    forum reads threads/posts, then data integrity checks (row counts, content hashes)
+    match Ruby forum baseline with zero data loss.
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/FORUM_RUNBOOK.md
+    section: Data Integrity
+    justification: Migration from Ruby to Python forum was done; full data integrity
+      comparison requires Ruby baseline snapshot which was not captured pre-migration
+- id: AC-INT-003
+  description: Given K8s Deployment for forum is updated to Python image, when forum
+    Service selector matches pod labels, then `kubectl get endpoints forum` shows
+    non-empty endpoints and forum API responds on configured port.
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/FORUM_RUNBOOK.md
+    section: Integration Tests
+    justification: Forum v2 runs in-process within LMS — no separate forum K8s service/endpoint;
+      forum routes served via LMS caddy proxy on forum.academyv2.mereka.io
+- id: AC-001
+  description: Given the existing MongoDB Atlas `cs_comments_service` database, when
+    the Python forum service starts, then it reads all collections (threads, posts,
+    comments, votes, subscriptions, abuse_flags) without errors
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-service.sh
+    command: scripts/qa/verify-forum-service.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-smoke.sh
+    command: scripts/qa/verify-forum-smoke.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
+- id: AC-002
+  description: 'Given N threads in MongoDB before migration, when migration completes,
+    then `db.contents.count({_type: "CommentThread"})` returns exactly N'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-migration-contracts.sh
+    command: scripts/qa/verify-forum-migration-contracts.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+  - type: manual
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
+    section: Thread Count Verification
+    justification: Requires access to MongoDB Atlas dashboard and comparison between
+      production snapshots before/after migration
+    file: docs/operations/FORUM_DATA_VERIFICATION.md
+- id: AC-003
+  description: Given a random sample of 1000 posts, when comparing SHA-256 hashes
+    of `body` + `author_id` + `created_at` between pre-migration and post-migration,
+    then 100% match
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-migration-contracts.sh
+    command: scripts/qa/verify-forum-migration-contracts.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+  - type: manual
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
+    section: Content Hash Verification
+    justification: Requires MongoDB Atlas access for random sampling and custom script
+      to compute stable content hashes across 1000 posts
+    file: docs/operations/FORUM_DATA_VERIFICATION.md
+- id: AC-004
+  description: Given existing vote records, when querying through the Python API,
+    then vote counts for every thread and comment match the Ruby API responses exactly
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-migration-contracts.sh
+    command: scripts/qa/verify-forum-migration-contracts.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+  - type: manual
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
+    section: Vote Count Verification
+    justification: Requires running both Python and Ruby forum instances against production
+      data to compare API responses
+    file: docs/operations/FORUM_DATA_VERIFICATION.md
+- id: AC-005
+  description: Given the discussions MFE loading a course discussion page, when backed
+    by the Python forum service, then all threads render with correct titles, authors,
+    timestamps, and vote counts
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-service.sh
+    command: scripts/qa/verify-forum-service.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-smoke.sh
+    command: scripts/qa/verify-forum-smoke.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
+- id: AC-006
+  description: Given a learner creating a new thread via the discussions MFE, when
+    the Python forum service processes the request, then the thread appears in the
+    thread listing within 5 seconds
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-moderation.sh
+    command: scripts/qa/verify-forum-moderation.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+  - type: manual
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
+    section: Thread CRUD Operations
+    justification: Requires running LMS instance with authenticated user session and
+      populated course data to test end-to-end MFE functionality
+    file: docs/operations/FORUM_MFE_TESTING.md
+- id: AC-007
+  description: Given a learner voting on a post, when the vote is processed by the
+    Python forum service, then the vote count increments and persists across page
+    refreshes
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-moderation.sh
+    command: scripts/qa/verify-forum-moderation.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+  - type: manual
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
+    section: Vote Persistence Testing
+    justification: Requires running LMS instance with authenticated user session to
+      test vote interactions and persistence across browser refreshes
+    file: docs/operations/FORUM_MFE_TESTING.md
+- id: AC-008
+  description: Given a moderator flagging a post for abuse, when processed by the
+    Python forum service, then the flag is recorded and the post appears in the moderation
+    queue
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-moderation.sh
+    command: scripts/qa/verify-forum-moderation.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+  - type: manual
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
+    section: Moderation Queue Verification
+    justification: Requires running LMS instance with both regular user and moderator
+      accounts to test abuse flagging workflow
+    file: docs/operations/FORUM_MFE_TESTING.md
+- id: AC-009
+  description: Given a search query for "assignment help" in a course, when processed
+    by the Python forum service, then results include threads with matching titles
+    and post bodies, ordered by relevance
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-service.sh
+    command: scripts/qa/verify-forum-service.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-smoke.sh
+    command: scripts/qa/verify-forum-smoke.sh
+  - type: manual
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
+    section: Meilisearch Index Verification
+    justification: Requires running LMS instance with populated course forum data
+      indexed in Meilisearch to test search relevance
+    file: docs/operations/FORUM_MFE_TESTING.md
+- id: AC-010
+  description: Given the LMS backend requesting user activity for a learner, when
+    the Python forum service responds, then the activity list matches the Ruby service
+    response format
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-service.sh
+    command: scripts/qa/verify-forum-service.sh
+- id: AC-011
+  description: Given the updated K8s manifests applied to the Kind cluster, when `kubectl
+    get pods -n mereka-lms -l app.kubernetes.io/name=forum` runs, then the forum pod
+    is Running with Ready status using the Python image
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-service.sh
+    command: scripts/qa/verify-forum-service.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-smoke.sh
+    command: scripts/qa/verify-forum-smoke.sh
+- id: AC-012
+  description: Given the Python forum pod is running, when `curl http://forum:4567/heartbeat`
+    (or the configured port) is executed from within the cluster, then the response
+    is HTTP 200
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-service.sh
+    command: scripts/qa/verify-forum-service.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-smoke.sh
+    command: scripts/qa/verify-forum-smoke.sh
+- id: AC-013
+  description: Given the production GKE cluster, when the Python forum Deployment
+    is applied, then the pod starts and passes health checks within 60 seconds
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-service.sh
+    command: scripts/qa/verify-forum-service.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-smoke.sh
+    command: scripts/qa/verify-forum-smoke.sh
+  - type: manual
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
+    section: Production Health Check
+    justification: Requires production Kubernetes cluster with LMS deployment to verify
+      startup timing and health check behavior
+    file: docs/operations/DEPLOYMENT_RUNBOOK.md
+- id: AC-014
+  description: Given the `apply-patches.sh` script is run after `tutor config save`,
+    then no Ruby-specific forum patches are applied and Python-specific configuration
+    is correctly injected
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-service.sh
+    command: scripts/qa/verify-forum-service.sh
+- id: AC-015
+  description: Given 50 concurrent requests to the thread listing endpoint, when served
+    by the Python forum, then p95 latency is <= 300ms
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-moderation.sh
+    command: scripts/qa/verify-forum-moderation.sh
+  - type: manual
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
+    section: Performance Testing
+    justification: Requires sustained concurrent load generation against live forum
+      endpoints with realistic thread volumes
+    file: docs/operations/FORUM_PERFORMANCE_TESTING.md
+- id: AC-016
+  description: Given 20 concurrent search requests, when served by the Python forum,
+    then p95 latency is <= 500ms
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-moderation.sh
+    command: scripts/qa/verify-forum-moderation.sh
+  - type: manual
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
+    section: Performance Testing
+    justification: Requires sustained concurrent load generation against live forum
+      endpoints with realistic thread volumes
+    file: docs/operations/FORUM_PERFORMANCE_TESTING.md
+- id: AC-017
+  description: Given the Python forum pod running under normal load (10 req/s), when
+    monitoring memory usage, then RSS stays below 512Mi
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-moderation.sh
+    command: scripts/qa/verify-forum-moderation.sh
+  - type: manual
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
+    section: Performance Testing
+    justification: Requires sustained concurrent load generation against live forum
+      endpoints with realistic thread volumes
+    file: docs/operations/FORUM_PERFORMANCE_TESTING.md
+- id: AC-018
+  description: Given the Python forum service is deployed and the feature flag is
+    enabled, when the flag `FORUM_USE_PYTHON_BACKEND` is set to `false`, then traffic
+    routes back to the Ruby forum service within 2 minutes
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-migration-contracts.sh
+    command: scripts/qa/verify-forum-migration-contracts.sh
+  - type: manual
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
+    section: Rollback Procedure
+    justification: Requires documentation review and validation against production
+      deployment architecture for rollback feasibility
+    file: docs/operations/FORUM_ROLLBACK.md
+- id: AC-019
+  description: Given a rollback to the Ruby service, when querying forum data, then
+    all posts created during the Python service period are visible (because both services
+    read the same MongoDB database)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-migration-contracts.sh
+    command: scripts/qa/verify-forum-migration-contracts.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+  - type: manual
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
+    section: Rollback Data Integrity
+    justification: Requires rollback scenario testing with production-like data to
+      verify data accessibility across forum service versions
+    file: docs/operations/FORUM_ROLLBACK.md
+- id: AC-020
+  description: Given the Python forum service is running in production, when a forum
+    auth failure occurs, then the `log-auth-failures-forum` alert fires within 60
+    seconds
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-migration-contracts.sh
+    command: scripts/qa/verify-forum-migration-contracts.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+  - type: manual
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
+    section: Observability Verification
+    justification: Requires access to Grafana dashboard with accumulated forum metrics
+      data
+    file: docs/operations/OBSERVABILITY_VERIFICATION.md
+- id: AC-021
+  description: Given the Python forum service is running, when Prometheus scrapes
+    the `/metrics` endpoint (or the configured metrics path), then forum-specific
+    metrics (request count, latency histogram, error rate) are present
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-migration-contracts.sh
+    command: scripts/qa/verify-forum-migration-contracts.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-smoke.sh
+    command: scripts/qa/verify-forum-smoke.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+  - type: manual
+    runbook: docs/ops/runbooks/FORUM_SERVICE_RUNBOOK.md
+    section: Observability Verification
+    justification: Requires access to Grafana dashboard with accumulated forum metrics
+      data
+    file: docs/operations/OBSERVABILITY_VERIFICATION.md
+- id: AC-022
+  description: Given a developer running `tutor local launch` with the Python forum
+    plugin, when the forum container starts, then it connects to the local MongoDB
+    instance and serves the API on the expected port
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-service.sh
+    command: scripts/qa/verify-forum-service.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-forum-smoke.sh
+    command: scripts/qa/verify-forum-smoke.sh
+

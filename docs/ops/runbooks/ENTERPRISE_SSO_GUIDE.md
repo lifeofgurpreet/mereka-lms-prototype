@@ -1,0 +1,350 @@
+# Enterprise SSO Guide
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
+
+> **Spec**: `specs/auth-sso-enterprise_spec.md`
+> **Status**: Runtime-ready baseline with deterministic tenant onboarding + readiness gates
+> **Last updated**: 2026-02-27
+
+---
+
+## Overview
+
+This guide documents the Enterprise SSO posture for Mereka Academy. It covers:
+
+- Current runtime baseline and prerequisites
+- Deterministic onboarding flow for new enterprise tenants
+- Operator runbook for adding a new enterprise IdP
+
+**Current auth architecture:**
+
+```
+Non-enterprise users  →  Lane-specific Authentik OIDC  →  LMS
+Enterprise users      →  Per-tenant SAML/OIDC via third_party_auth → LMS
+Platform admins       →  Authentik OIDC + MerekaPlatformAdminMiddleware
+```
+
+**Current topology truth (March 27, 2026):**
+
+- `dev` and `staging` are separate environment lanes that currently share the `rke2-nonprod` cluster.
+- `prod` remains the parked GKE lane for now and is not the default runtime-proof target.
+- Verifiers must keep environment identity separate from current cluster placement so the later move to dedicated `staging` and `prod` RKE2 clusters is a context change, not a workflow rewrite.
+
+---
+
+## Current Runtime Baseline
+
+The following controls are implemented in repo automation and runtime verification:
+
+### Django App — `third_party_auth`
+
+Open edX's native `third_party_auth` app handles SAML/OIDC federation. It is present in the LMS image by default in Open edX Ulmo (v21).
+
+The `ENABLE_ENTERPRISE_INTEGRATION = True` flag is set in `infrastructure/tutor/plugins/mereka_lms.py`, which activates enterprise-related features in the LMS.
+
+### SAML SP Key Pair Generation
+
+```bash
+# Generate a new SAML SP certificate and private key
+./scripts/tenants/generate-saml-keypair.sh
+
+# Write to files instead of stdout
+./scripts/tenants/generate-saml-keypair.sh --output-dir /tmp/saml-keys
+
+# Then store in Infisical:
+# MEREKA_LMS_SAML_SP_PUBLIC_CERT
+# MEREKA_LMS_SAML_SP_PRIVATE_KEY
+```
+
+Keys are RSA-2048, self-signed, 5-year validity. Enterprise IdPs typically prefer long-lived SP certs to avoid frequent metadata re-exchange.
+
+### ExternalSecret — `enterprise-sso-secrets`
+
+Defined in `deploy/k8s/base/secrets/external-secrets.yaml`. Syncs four secrets from GCP Secret Manager into K8s:
+
+| K8s Secret Key | GCP Secret Manager Key | Purpose |
+|---|---|---|
+| `SAML_SP_PUBLIC_CERT` | `MEREKA_LMS_SAML_SP_PUBLIC_CERT` | SAML SP signing/encryption cert |
+| `SAML_SP_PRIVATE_KEY` | `MEREKA_LMS_SAML_SP_PRIVATE_KEY` | SAML SP private key |
+| `OIDC_ENTERPRISE_CLIENT_SECRET` | `MEREKA_LMS_OIDC_ENTERPRISE_CLIENT_SECRET` | Template OIDC client secret |
+| `SCIM_BEARER_TOKEN` | `MEREKA_LMS_SCIM_BEARER_TOKEN` | SCIM provisioning bearer token |
+
+**Status**: ExternalSecret definition is present and enforced by readiness checks (`verify-enterprise-sso-readiness.sh`).
+
+### Feature Flag — `DISABLE_ENTERPRISE_LOGIN`
+
+The authn MFE respects `MFE_CONFIG["DISABLE_ENTERPRISE_LOGIN"]`. This is currently `True` (enterprise login buttons hidden) in `mereka_lms.py`. Set to `False` when the first enterprise tenant is live.
+
+### Tenant Tooling Scripts
+
+| Script | Status | Purpose |
+|---|---|---|
+| `scripts/tenants/generate-saml-keypair.sh` | Ready | Generate SAML SP keypair |
+| `scripts/tenants/configure-tenant-idp.sh` | Implemented | Configures SAML/OIDC provider and links EnterpriseCustomer via relation model or legacy field |
+| `scripts/tenants/provision-tenant.sh` | Ready | Provision enterprise tenant |
+| `scripts/tenants/onboard-enterprise-tenant.sh` | Implemented | Deterministic end-to-end onboarding workflow with verification gates |
+
+---
+
+## Deterministic Onboarding Workflow (Staging-first, then Production)
+
+Use `scripts/tenants/onboard-enterprise-tenant.sh` as the canonical path for onboarding enterprise tenants.
+Run it against `staging` first on `rke2-nonprod`, reuse the same flow for `dev` when iterating quickly, and reserve `prod` hostnames for a later promotion pass after production is intentionally reactivated.
+
+### 1. Populate SAML Secrets (Operator Action)
+
+Before any enterprise SSO can work, generate and store the SP keypair:
+
+```bash
+# 1. Generate
+./scripts/tenants/generate-saml-keypair.sh --output-dir /tmp/saml-keys
+
+# 2. Store in GCP Secret Manager (bbi-k8 project)
+printf '%s' "$(cat /tmp/saml-keys/saml-sp-cert.pem)" | \
+  gcloud secrets create MEREKA_LMS_SAML_SP_PUBLIC_CERT \
+    --project bbi-k8 --data-file=-
+
+printf '%s' "$(cat /tmp/saml-keys/saml-sp-key.pem)" | \
+  gcloud secrets create MEREKA_LMS_SAML_SP_PRIVATE_KEY \
+    --project bbi-k8 --data-file=-
+
+# 3. ExternalSecrets will auto-sync to K8s within 1 hour, or force a sync in the target lane:
+kubectl annotate externalsecret enterprise-sso-secrets \
+  -n stg-mereka-lms force-sync=$(date +%s) --overwrite
+
+# 4. Confirm the K8s secret exists in the target namespace
+kubectl get secret enterprise-sso-secrets -n stg-mereka-lms
+```
+
+### 2. Configure SAMLProviderConfig in Django Admin
+
+For each enterprise tenant:
+
+1. Log in to Django Admin: `https://staging.academyv2.mereka.io/admin/`
+2. Navigate to: **Third Party Auth > SAML Provider Configs > Add**
+3. Fields to set:
+   - **Site**: `staging.academyv2.mereka.io`
+   - **Backend name**: `tpa-saml`
+   - **Enabled**: Yes
+   - **Slug**: `{tenant-slug}` (e.g. `acme-corp`)
+   - **Entity ID**: IdP entity ID from the enterprise IT team's metadata
+   - **Metadata source**: URL or XML from the enterprise IT team
+   - **Attribute mappings**: map `email`, `first_name`, `last_name` from IdP SAML attributes
+   - **Automatic account linking**: Yes (for JIT provisioning)
+
+4. Navigate to **Enterprise > Enterprise Customers**
+5. Set `identity_provider` to the slug configured above
+
+### 3. Link IdP to EnterpriseCustomer
+
+```python
+# Via Django shell (kubectl exec into LMS pod)
+from enterprise.models import EnterpriseCustomer
+ec = EnterpriseCustomer.objects.get(slug="acme-corp")
+ec.identity_provider = "tpa-saml-acme-corp"  # third_party_auth slug
+ec.save()
+```
+
+### 4. Reconcile tenant enterprise mapping first
+
+Before configuring the IdP directly, ensure the tenant's `SiteConfiguration`
+enterprise mapping is already aligned:
+
+```bash
+./scripts/tenants/sync-tenant-enterprise-mapping.sh --env prod --dry-run
+```
+
+The full onboarding workflow already does this as step `2/6`.
+
+### 5. Use `configure-tenant-idp.sh`
+
+Use `scripts/tenants/configure-tenant-idp.sh` to create/update tenant SAML/OIDC
+provider config and link `EnterpriseCustomer.identity_provider`. This script no
+longer mutates `SiteConfiguration` enterprise linkage on its own.
+
+### 5. SP Metadata Endpoint
+
+Once a `SAMLProviderConfig` exists, the LMS automatically serves SP metadata at:
+
+```
+https://staging.academyv2.mereka.io/auth/saml/metadata.xml
+```
+
+Share this URL with the enterprise IT team. They configure it as the "Service Provider" in their IdP.
+
+### 6. SCIM Provisioning Endpoint (Phase 3)
+
+The SCIM bearer token is already in ExternalSecrets (`SCIM_BEARER_TOKEN`). However, the SCIM endpoint itself (`/scim/v2/`) requires either:
+- The `openedx-scim` package (not yet installed)
+- Or a custom FastAPI service similar to Purchase Gateway
+
+This is gated behind `ENABLE_SCIM_PROVISIONING` feature flag.
+
+---
+
+## Operator Runbook: Adding a New Enterprise IdP
+
+### Prerequisites
+
+- [ ] Enterprise IT team has provided: IdP type (SAML or OIDC), metadata URL (SAML) or discovery endpoint (OIDC), configured Mereka SP entity ID in their IdP
+- [ ] `enterprise-sso-secrets` K8s secret exists (SAML keypair is populated)
+- [ ] `EnterpriseCustomer` record for the tenant exists in LMS (created by `./scripts/tenants/provision-tenant.sh`)
+- [ ] Platform operator has Django admin access
+
+### Step 1: Exchange Metadata (SAML)
+
+**From the enterprise IT team, obtain:**
+- IdP entity ID
+- IdP SSO endpoint URL
+- IdP signing certificate (or metadata URL)
+
+**Provide to the enterprise IT team:**
+- SP Entity ID: `https://staging.academyv2.mereka.io/auth/saml/sp-metadata/{tenant-slug}` (or the global `/auth/saml/metadata.xml`)
+- SP ACS URL: `https://staging.academyv2.mereka.io/auth/complete/tpa-saml/?next=/`
+- SP Certificate: contents of `SAML_SP_PUBLIC_CERT` from `enterprise-sso-secrets`
+
+### Step 2: Create SAMLProviderConfig (SAML) or OAuth2ProviderConfig (OIDC)
+
+Via Django Admin at `https://staging.academyv2.mereka.io/admin/third_party_auth/`.
+
+**For SAML:**
+```
+Backend name: tpa-saml
+Slug: {tenant-slug}
+Entity ID: {IdP entity ID from step 1}
+Metadata source: {metadata URL or XML}
+```
+
+**For OIDC:**
+```
+Backend name: oidc-{tenant-slug}
+Client ID: {from IdP OIDC app registration}
+Client Secret: {store in GCP SM as MEREKA_LMS_OIDC_{TENANT_SLUG}_CLIENT_SECRET}
+Authorization URL, Token URL, User Info URL: from IdP discovery endpoint
+```
+
+### Step 3: Link to EnterpriseCustomer
+
+First reconcile `SiteConfiguration.site_values["ENTERPRISE_CUSTOMER_UUID"]` via
+`sync-tenant-enterprise-mapping.sh` (or the onboarding workflow step `2/6`).
+Then use `configure-tenant-idp.sh` to create the IdP linkage. Runtime uses
+`EnterpriseCustomerIdentityProvider` when available, with legacy
+`identity_provider` compatibility.
+
+### Step 4: Enable per-tenant Feature Flag
+
+In LMS settings (via `infrastructure` overlay):
+```python
+ENABLE_ENTERPRISE_SSO_ACME_CORP = True
+```
+
+Or via Waffle flag if implemented.
+
+### Step 5: Verify
+
+```bash
+# Run the verification script in staging first
+./scripts/qa/verify-enterprise-sso-readiness.sh --tenant acme-corp --env staging
+
+# Manually test the login URL
+curl -L https://staging.academyv2.mereka.io/enterprise/login/acme-corp
+# Should redirect to the enterprise IdP login page
+```
+
+### Step 6: Enable Enterprise Login Buttons in MFE
+
+Once the first enterprise tenant is confirmed working, toggle the feature flag:
+
+```python
+# In mereka_lms.py or infrastructure overlay
+MFE_CONFIG["DISABLE_ENTERPRISE_LOGIN"] = False
+```
+
+---
+
+## Non-Prod Runtime Lanes (current shared `rke2-nonprod`)
+
+Today, `dev` and `staging` share the `rke2-nonprod` cluster, but they remain distinct lanes with different namespaces, domains, overlays, and verification intent. Build and proof workflows should preserve that separation so each lane can move to its own cluster later without semantic drift.
+
+| Lane | Current cluster | Namespace | LMS URL | Primary use |
+|---|---|---|---|---|
+| `staging` | `rke2-nonprod` | `stg-mereka-lms` | `https://staging.academyv2.mereka.io` | Main runtime-proof lane for enterprise/auth changes |
+| `dev` | `rke2-nonprod` | `mereka-lms-dev` | `https://academyv2.mereka.dev` | Fast iteration before staging proof |
+| `prod` | GKE (parked) | `mereka-lms` | `https://academyv2.mereka.io` | Explicit opt-in only |
+
+Common non-prod reference points:
+
+- Staging SP metadata: `https://staging.academyv2.mereka.io/auth/saml/metadata.xml`
+- Dev SP metadata: `https://academyv2.mereka.dev/auth/saml/metadata.xml`
+- Both non-prod lanes currently use the same `gcp-secret-manager` ClusterSecretStore and `bbi-k8` GCP project.
+
+For testing without a real enterprise IdP, use a free SAML IdP simulator such as:
+- [samltool.com](https://www.samltool.com/idp.php) (browser-based)
+- [MockSAML](https://mocksaml.com/) (hosted test IdP)
+- Authentik itself configured as a SAML IdP (Authentik supports SAML IdP mode)
+
+---
+
+## Security Notes
+
+- **Do not reuse SP signing keys across tenants.** Each tenant should have a dedicated keypair. The current ExternalSecret stores one shared keypair; for production multi-tenant use, extend the ExternalSecret with per-tenant keys (e.g., `MEREKA_LMS_SAML_SP_KEY_ACME_CORP`).
+- **SAML assertions with SHA-1 signatures MUST be rejected.** Open edX's `python-social-auth` rejects SHA-1 by default; do not override this.
+- **Assertion replay prevention** is handled by `python-social-auth`'s Redis-backed assertion ID cache (TTL = assertion validity window). Confirm Redis is healthy before enabling enterprise SSO.
+- **Cross-tenant isolation**: Enterprise IdP linkage (preferred: `EnterpriseCustomerIdentityProvider`, legacy: `identity_provider`) enforces which IdP can authenticate to which tenant. Never configure a shared IdP slug for multiple tenants.
+- **SCIM bearer tokens** should be rotated annually per `docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md`.
+
+---
+
+## Troubleshooting
+
+### "Can't fetch setting of a disabled backend/provider"
+
+The `OAuth2ProviderConfig` or `SAMLProviderConfig` for the site is disabled. In Django Admin, ensure `enabled=True` and `visible=True` on the latest config row.
+
+### SAML ACS returns 500
+
+Check LMS pod logs for SAML assertion errors:
+```bash
+kubectl logs -n <lane-namespace> -l app.kubernetes.io/name=lms --tail=100 | grep -i saml
+```
+
+Common causes:
+- Clock skew > 120s between IdP and LMS server
+- Missing or wrong SP entity ID in IdP configuration
+- Assertion signed with SHA-1 (rejected)
+
+### Enterprise login URL returns 404
+
+The enterprise routing requires `openedx-enterprise` package and `ENABLE_ENTERPRISE_INTEGRATION=True`. Both are set. If 404 persists, confirm the URL path:
+- Correct: `/enterprise/login/{slug}` (not `/auth/login/tpa-saml/{slug}`)
+
+### JIT provisioning creates no user
+
+Check that `ENABLE_THIRD_PARTY_AUTH=True` in LMS settings and that the `SAMLProviderConfig` has "Enable automatic account linking" checked. Also verify the SAML attribute mapping includes `email`.
+
+### `enterprise-sso-secrets` K8s secret is missing
+
+Enterprise SSO runtime checks require populated SAML/OIDC secrets. Verify status and sync:
+```bash
+kubectl get externalsecret enterprise-sso-secrets -n <lane-namespace> -o yaml | grep -A5 "status:"
+```
+
+A `SecretSyncedError` condition indicates the GCP secret does not exist.
+
+---
+
+## Related Files
+
+| File | Purpose |
+|---|---|
+| `specs/auth-sso-enterprise_spec.md` | Machine-checkable spec with 45 ACs |
+| `infrastructure/tutor/plugins/mereka_lms.py` | Plugin: `ENABLE_ENTERPRISE_INTEGRATION`, `DISABLE_ENTERPRISE_LOGIN` |
+| `deploy/k8s/base/secrets/external-secrets.yaml` | `enterprise-sso-secrets` ExternalSecret definition |
+| `scripts/tenants/generate-saml-keypair.sh` | SAML SP keypair generator |
+| `scripts/tenants/configure-tenant-idp.sh` | IdP configuration helper (implemented) |
+| `scripts/tenants/provision-tenant.sh` | Create EnterpriseCustomer + TenantConfig |
+| `scripts/qa/verify-enterprise-sso-readiness.sh` | Enterprise SSO readiness verification (auth-sso-enterprise_spec.md AC-043) |
+| `scripts/qa/verify-enterprise-sso.sh` | Enterprise integrated channels verification (enterprise-microservices_spec.md Phase 4) |
+| `scripts/qa/verify-auth-hardening.sh` | Full auth hardening suite runner |
+| `../../policies/operations/AUTH_HARDENING_SPEC.md` | Auth hardening decisions and implementation |
+| `docs/reference/operations/AUTH_AND_PERMISSIONS.md` | Permissions model documentation |
+| `docs/adr/rfc/RFC-claim-based-role-sync.md` | RFC for IdP claim → role mapping |

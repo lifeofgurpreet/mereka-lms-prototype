@@ -1,0 +1,44 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    commit-message:
+      prefix: "ci"
+    labels:
+      - "dependencies"
+      - "ci"
+
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    commit-message:
+      prefix: "chore"
+    labels:
+      - "dependencies"
+      - "python"
+
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+    commit-message:
+      prefix: "chore"
+    labels:
+      - "dependencies"
+      - "javascript"
+
+  - package-ecosystem: "terraform"
+    directory: "/infrastructure/terraform/"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "infra"
+    labels:
+      - "dependencies"
+      - "terraform"

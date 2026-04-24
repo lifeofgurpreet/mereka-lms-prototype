@@ -1,0 +1,104 @@
+name: Frontend Runtime QA
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: "Target environment"
+        required: true
+        default: "prod"
+        type: choice
+        options:
+          - prod
+          - dev
+      capture_screenshots:
+        description: "Capture MFE-only screenshots after runtime QA tranche"
+        required: true
+        default: false
+        type: boolean
+
+permissions: {}
+
+jobs:
+  frontend-runtime-qa:
+    name: Run Runtime Frontend QA Tranche
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run runtime frontend QA tranche
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p var/qa
+
+          TARGET_ENV="${{ inputs.target_environment || 'prod' }}"
+          CAPTURE_SCREENSHOTS="${{ inputs.capture_screenshots || 'false' }}"
+
+          case "$TARGET_ENV" in
+            prod)
+              make qa-frontend-runtime-qa-prod | tee var/qa/frontend-runtime-qa.log
+              ;;
+            dev)
+              make qa-frontend-runtime-qa-dev | tee var/qa/frontend-runtime-qa.log
+              ;;
+            *)
+              echo "ERROR: target_environment must be prod or dev (got: $TARGET_ENV)" >&2
+              exit 2
+              ;;
+          esac
+
+          # Canonical blocker refresh lane (sweep + prompt/status artifacts, then preserve sweep exit code).
+          set +e
+          make qa-runtime-blocker-refresh \
+            | tee -a var/qa/frontend-runtime-qa.log
+          blocker_sweep_exit="${PIPESTATUS[0]}"
+          set -e
+          if [[ "$blocker_sweep_exit" -ne 0 ]]; then
+            echo "WARN: blocker sweep reported active blockers (exit=$blocker_sweep_exit); continuing to emit prompt/status artifacts." \
+              | tee -a var/qa/frontend-runtime-qa.log
+          fi
+
+          if [[ "$CAPTURE_SCREENSHOTS" == "true" ]]; then
+            ./scripts/qa/capture-branding-screenshots.sh --env "$TARGET_ENV" --mfe-only \
+              | tee -a var/qa/frontend-runtime-qa.log
+          fi
+
+          # Preserve blocker sweep failure semantics after artifacts are emitted.
+          if [[ "$blocker_sweep_exit" -ne 0 ]]; then
+            exit "$blocker_sweep_exit"
+          fi
+
+      - name: Upload runtime frontend QA artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: frontend-runtime-qa-${{ github.run_number }}
+          path: |
+            var/qa/frontend-runtime-qa.log
+            var/qa/cross-browser-branding-smoke-*.log
+            var/qa/frontend-performance-spotcheck-*.log
+            var/qa/frontend-runtime-blocker-sweep-*.summary.log
+            var/qa/frontend-runtime-blocker-sweep-*.summary.json
+            var/qa/frontend-runtime-blocker-sweep-*.records.tsv
+            var/qa/frontend-runtime-blocker-sweep-*.diagnostics.tsv
+            var/qa/frontend-runtime-blocker-sweep-latest-*.summary.log
+            var/qa/frontend-runtime-blocker-sweep-latest-*.summary.json
+            var/qa/frontend-runtime-blocker-sweep-latest-*.records.tsv
+            var/qa/frontend-runtime-blocker-sweep-latest-*.diagnostics.tsv
+            var/qa/frontend-runtime-blocker-auth-surfaces-*.log
+            var/qa/frontend-runtime-blocker-credentials-*.log
+            var/qa/frontend-runtime-blocker-auth-surfaces-*-latest.log
+            var/qa/frontend-runtime-blocker-credentials-dev-latest.log
+            var/qa/frontend-runtime-blocker-infra-prompt.txt
+            var/qa/frontend-runtime-blocker-infra-prompt.md
+            var/qa/frontend-runtime-blocker-status.txt
+            var/qa/frontend-runtime-blocker-status.md
+            var/qa/frontend-runtime-blocker-handoff.md
+            var/qa/frontend-runtime-blocker-handoff-bundle.tar.gz
+            var/branding-screenshots/**
+          if-no-files-found: warn

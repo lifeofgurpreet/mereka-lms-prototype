@@ -1,0 +1,219 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-access-worker
+  labels:
+    app.kubernetes.io/name: enterprise-access-worker
+    app.kubernetes.io/component: enterprise
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/name: enterprise-access-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: enterprise-access-worker
+        app.kubernetes.io/component: enterprise
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/part-of: mereka-lms
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+      initContainers:
+        - name: config-gen
+          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-access:pin-required
+          command: ["python3", "-c"]
+          args:
+            - |
+              import os, yaml, json as _json
+              lms_root = os.environ.get('LMS_ROOT_URL', 'http://localhost')
+              jwt_secret = os.environ.get('JWT_SECRET_KEY', os.environ.get('DJANGO_SECRET_KEY', 'SET-ME-PLEASE'))
+              jwt_jwks = None
+              _priv_jwk = os.environ.get('JWT_PRIVATE_SIGNING_JWK', '')
+              if _priv_jwk:
+                  try:
+                      _priv = _json.loads(_priv_jwk)
+                      _pub = {k: _priv[k] for k in ('kid', 'kty', 'e', 'n') if k in _priv}
+                      _pub['alg'] = 'RS512'
+                      jwt_jwks = _json.dumps({'keys': [_pub]})
+                  except Exception as e:
+                      print(f'Warning: could not derive public JWK: {e}')
+              config = {
+                  'SECRET_KEY': os.environ['DJANGO_SECRET_KEY'],
+                  'ALLOWED_HOSTS': ['*'],
+                  'DATABASES': {
+                      'default': {
+                          'ENGINE': 'django.db.backends.mysql',
+                          'NAME': os.environ.get('DB_NAME', 'enterprise_access'),
+                          'USER': os.environ.get('DB_USER', 'enterprise_access'),
+                          'PASSWORD': os.environ['DB_PASSWORD'],
+                          'HOST': os.environ.get('DB_HOST', 'mysql'),
+                          'PORT': 3306,
+                          'ATOMIC_REQUESTS': False,
+                          'CONN_MAX_AGE': 60,
+                      }
+                  },
+                  'CACHES': {
+                      'default': {
+                          'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+                          'LOCATION': os.environ.get('CACHE_LOCATION', 'redis://redis:6379/12'),
+                          'KEY_PREFIX': 'enterprise_access',
+                      }
+                  },
+                  'CELERY_BROKER_TRANSPORT': 'redis',
+                  'CELERY_BROKER_USER': '',
+                  'CELERY_BROKER_PASSWORD': '',
+                  'CELERY_BROKER_HOSTNAME': os.environ.get('CELERY_BROKER_HOSTNAME', 'redis:6379'),
+                  'CELERY_BROKER_VHOST': os.environ.get('CELERY_BROKER_VHOST', '13'),
+                  'SOCIAL_AUTH_EDX_OAUTH2_KEY': os.environ.get('SOCIAL_AUTH_EDX_OAUTH2_KEY', 'enterprise-access-key'),
+                  'SOCIAL_AUTH_EDX_OAUTH2_SECRET': os.environ.get('SOCIAL_AUTH_EDX_OAUTH2_SECRET', ''),
+                  'SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT': 'http://lms:8000',
+                  'SOCIAL_AUTH_EDX_OAUTH2_PUBLIC_URL_ROOT': os.environ.get('LMS_ROOT_URL', 'http://localhost'),
+                  'BACKEND_SERVICE_EDX_OAUTH2_KEY': os.environ.get('BACKEND_SERVICE_EDX_OAUTH2_KEY', 'enterprise-access-key'),
+                  'BACKEND_SERVICE_EDX_OAUTH2_SECRET': os.environ.get('BACKEND_SERVICE_EDX_OAUTH2_SECRET', ''),
+                  'LMS_BASE_URL': 'http://lms:8000',
+                  'LMS_ROOT_URL': os.environ.get('LMS_ROOT_URL', 'http://localhost'),
+                  'ENTERPRISE_CATALOG_URL': 'http://enterprise-catalog:8000',
+                  'ENTERPRISE_SUBSIDY_URL': 'http://enterprise-subsidy:8000',
+                  'JWT_AUTH': {
+                      'JWT_ISSUER': lms_root + '/oauth2',
+                      'JWT_AUDIENCE': 'openedx',
+                      'JWT_SECRET_KEY': jwt_secret,
+                      'JWT_ALGORITHM': 'HS256',
+                      'JWT_SIGNING_ALGORITHM': 'RS512',
+                      'JWT_PUBLIC_SIGNING_JWK_SET': jwt_jwks if jwt_jwks else None,
+                      'JWT_ISSUERS': [
+                          {
+                              'ISSUER': lms_root + '/oauth2',
+                              'AUDIENCE': 'openedx',
+                              'SECRET_KEY': jwt_secret,
+                          }
+                      ],
+                  },
+              }
+              with open('/config/enterprise_access.yml', 'w') as f:
+                  yaml.dump(config, f, default_flow_style=False)
+              print('Config generated successfully')
+          env:
+            - name: DJANGO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: enterprise-secrets
+                  key: ENTERPRISE_ACCESS_SECRET_KEY
+            - name: DB_NAME
+              value: enterprise_access
+            - name: DB_USER
+              value: enterprise_access
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: enterprise-secrets
+                  key: MYSQL_ENTERPRISE_ACCESS_PASSWORD
+            - name: DB_HOST
+              value: mysql
+            - name: CACHE_LOCATION
+              value: redis://redis:6379/12
+            - name: CELERY_BROKER_HOSTNAME
+              value: "redis:6379"
+            - name: CELERY_BROKER_VHOST
+              value: "13"
+            - name: SOCIAL_AUTH_EDX_OAUTH2_KEY
+              value: enterprise-access-key
+            - name: SOCIAL_AUTH_EDX_OAUTH2_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: enterprise-secrets
+                  key: ENTERPRISE_ACCESS_OAUTH2_SECRET
+            - name: BACKEND_SERVICE_EDX_OAUTH2_KEY
+              value: enterprise-access-key
+            - name: BACKEND_SERVICE_EDX_OAUTH2_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: enterprise-secrets
+                  key: ENTERPRISE_ACCESS_OAUTH2_SECRET
+            # Overlays override LMS_ROOT_URL with the environment-specific public URL.
+            - name: LMS_ROOT_URL
+              value: "http://localhost"
+            - name: JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openedx-secrets
+                  key: JWT_SECRET_KEY_LMS
+            - name: JWT_PRIVATE_SIGNING_JWK
+              valueFrom:
+                secretKeyRef:
+                  name: openedx-secrets
+                  key: JWT_PRIVATE_SIGNING_JWK
+          resources:
+            requests:
+              cpu: 10m
+              memory: 128Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: config
+              mountPath: /config
+      containers:
+        - name: enterprise-access-worker
+          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-access:pin-required
+          args:
+            - celery
+            - --app=enterprise_access
+            - worker
+            - --loglevel=info
+            - --hostname=enterprise-access.worker.%h
+            - --queues=enterprise_access.default
+            - --max-tasks-per-child=100
+            - --prefetch-multiplier=1
+            # Keep worker memory stable on single-node RKE2/nonprod footprints.
+            - --concurrency=2
+            - --without-gossip
+            - --without-mingle
+          env:
+            - name: DJANGO_SETTINGS_MODULE
+              value: enterprise_access.settings.production
+            - name: ENTERPRISE_ACCESS_CFG
+              value: /config/enterprise_access.yml
+            - name: C_FORCE_ROOT
+              value: "1"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              cpu: 250m
+              memory: 512Mi
+          # Liveness probe removed per mereka-lms-9pnu.1 (2026-04-23).
+          # `celery inspect ping` as a liveness probe caused 31 restarts in dev
+          # on enterprise-access-worker. Same fork-cost + Redis broadcast
+          # failure mode as enterprise-catalog-worker. See sibling deployment
+          # for full rationale. OOMKill safety net unchanged. Readiness kept
+          # per bead scope. Investigation: docs/plans/INVESTIGATION_CELERY_PROBES.md.
+          readinessProbe:
+            exec:
+              command:
+                - "celery"
+                - "--app=enterprise_access"
+                - "inspect"
+                - "ping"
+                - "--timeout=5"
+            initialDelaySeconds: 30
+            periodSeconds: 60
+            timeoutSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: config
+              mountPath: /config
+      volumes:
+        - name: config
+          emptyDir: {}

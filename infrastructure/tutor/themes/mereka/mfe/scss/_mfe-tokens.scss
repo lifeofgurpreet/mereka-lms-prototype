@@ -1,0 +1,13 @@
+// MFE surface tokens — scoped CSS custom properties.
+// RISK: LOW — CSS custom properties, no structural dependency.
+
+:root {
+  --mereka-mfe-branding-rev: "2026-03-28-logged-in-shell";
+  --mereka-mfe-gradient: linear-gradient(120deg, var(--mereka-color-magenta) 0%, var(--mereka-color-teal) 60%, var(--mereka-color-blue) 100%);
+  --mereka-mfe-card-shadow: 0 25px 60px rgba(26, 22, 35, 0.08);
+  --mereka-mfe-surface: var(--pgn-color-white);
+  --mereka-mfe-surface-muted: rgba(26, 22, 35, 0.04);
+  --mereka-mfe-border: rgba(26, 22, 35, 0.10);
+  --mereka-mfe-focus: rgba(35, 112, 114, 0.18);
+  --mereka-mfe-accent: var(--mereka-color-sky);
+}

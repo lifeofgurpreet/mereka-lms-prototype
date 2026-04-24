@@ -1,0 +1,767 @@
+@import "fonts";
+@import "tokens";
+@import "base";
+
+.bg-mereka-gradient {
+  background-image: var(--mereka-gradient-primary);
+  color: var(--pgn-color-white);
+}
+
+.badge-mereka {
+  background: rgba(35, 112, 114, 0.12);
+  color: var(--mereka-color-teal);
+  border-radius: 999px;
+  padding: 0.35rem 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.shadow-mereka-card {
+  box-shadow: var(--mereka-shadow-card);
+  border-radius: var(--mereka-radius-xl);
+  border: 1px solid rgba(26, 22, 35, 0.08);
+}
+
+.textbox-mereka {
+  border-radius: 16px;
+  border: 1px solid rgba(26, 22, 35, 0.1);
+  padding: 1rem 1.25rem;
+  background-color: var(--pgn-color-white);
+}
+
+// ---- Global header shell ----
+// The compiled lms-main-v1.scss only imports Mereka tokens; it does not pull in
+// the edx-platform base header partials.  Supply the missing layout rules here
+// so they are baked into the next image build.  The same rules live in
+// mereka-overrides.css as a runtime hotfix (no rebuild needed).
+.global-header,
+.wrapper-header,
+.nav-wrapper {
+  background: var(--pgn-color-white);
+  border-bottom: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: 0 10px 30px rgba(26, 22, 35, 0.05);
+}
+
+.global-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+}
+
+// ---- Inner header row ----
+.main-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 1.5rem;
+  height: 64px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+// ---- Logo ----
+.header-logo {
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+  flex-shrink: 0;
+
+  .logo {
+    display: block;
+    height: 36px;
+    width: auto;
+  }
+}
+
+// ---- Nav links ----
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  justify-content: flex-end;
+
+  .main {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-right: auto;
+  }
+
+  .secondary {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    > div {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  }
+}
+
+// ---- Individual nav items ----
+.nav-item,
+.mobile-nav-item {
+  display: flex;
+  align-items: center;
+}
+
+.nav-links .nav-item a {
+  display: inline-block;
+  padding: 0.5rem 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--mereka-color-ink-700);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: color 150ms ease, background 150ms ease;
+  white-space: nowrap;
+
+  &:hover,
+  &:focus {
+    color: var(--mereka-color-teal);
+    background: rgba(35, 112, 114, 0.06);
+    text-decoration: none;
+  }
+}
+
+// ---- CTA buttons in nav ----
+.nav-links .register-btn,
+.nav-links a.register-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--pgn-color-white);
+  background: var(--mereka-color-magenta);
+  border: none;
+  border-radius: 999px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 150ms ease, box-shadow 150ms ease;
+  box-shadow: 0 8px 20px rgba(171, 59, 120, 0.25);
+
+  &:hover,
+  &:focus {
+    background: var(--mereka-color-magenta-dark);
+    color: var(--pgn-color-white);
+    text-decoration: none;
+    box-shadow: 0 10px 24px rgba(171, 59, 120, 0.35);
+  }
+}
+
+.nav-links .sign-in-btn,
+.nav-links a.sign-in-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1.1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--mereka-color-teal);
+  background: transparent;
+  border: 1.5px solid var(--mereka-color-teal);
+  border-radius: 999px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 150ms ease, background 150ms ease, border-color 150ms ease;
+
+  &:hover,
+  &:focus {
+    background: var(--mereka-color-teal);
+    color: var(--pgn-color-white);
+    text-decoration: none;
+  }
+}
+
+// ---- Hamburger (mobile only) ----
+.hamburger-menu {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 4px;
+  transition: background 150ms ease;
+  flex-shrink: 0;
+
+  &:hover {
+    background: rgba(26, 22, 35, 0.06);
+  }
+
+  .line {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--mereka-color-ink-700);
+    border-radius: 2px;
+    transition: transform 200ms ease, opacity 200ms ease;
+  }
+
+  &[aria-expanded="true"] {
+    .line:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .line:nth-child(2) { opacity: 0; }
+    .line:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .line:nth-child(4) { opacity: 0; }
+  }
+}
+
+// ---- Mobile menu drawer ----
+.mobile-menu {
+  background: var(--pgn-color-white);
+  border-top: 1px solid rgba(26, 22, 35, 0.08);
+  padding: 0.75rem 1.5rem 1rem;
+
+  &.hidden {
+    display: none;
+  }
+}
+
+// ---- Responsive breakpoints ----
+@media (max-width: 768px) {
+  .main-header {
+    padding: 0 1rem;
+    height: 56px;
+  }
+
+  .hamburger-menu {
+    display: flex;
+  }
+
+  .hidden-mobile {
+    display: none !important;
+  }
+
+  .nav-links {
+    display: none;
+  }
+}
+
+.mereka-navbar-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mereka-navbar-brand .logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.mereka-navbar-brand .logo-image {
+  height: 40px;
+  width: auto;
+}
+
+.mereka-navbar-brand .logo-tagline {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--mereka-color-ink-500);
+}
+
+.mereka-course-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.25rem 0.85rem;
+  background-color: rgba(35, 112, 114, 0.12);
+  color: var(--mereka-color-teal);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-right: 0.75rem;
+}
+
+/* Learner dashboard card/listing shell is LMS-route-specific. Keep shared
+   theme.scss limited to cross-surface primitives; the canonical shell lives in
+   lms/static/sass/partials/_custom.scss. */
+
+.dashboard .course .course-info {
+  border-top: 1px solid rgba(26, 22, 35, 0.08);
+  padding: 0.75rem 1.5rem 1rem;
+  color: var(--mereka-color-ink-500);
+  font-size: 0.9rem;
+}
+
+/* Courseware */
+.courseware {
+  background: var(--mereka-color-surface-primary);
+}
+
+.courseware .course-content,
+.courseware .course-outline,
+.courseware .course-index {
+  background: var(--pgn-color-white);
+  border-radius: 24px;
+  box-shadow: var(--mereka-shadow-card);
+  padding: 1.5rem;
+}
+
+.courseware .unit-title,
+.courseware .sequence-nav-title {
+  font-family: var(--mereka-font-heading);
+  color: var(--mereka-color-ink-900);
+}
+
+.courseware .sequence-nav {
+  background: var(--pgn-color-white);
+  border-radius: 18px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+}
+
+.courseware .sequence-nav-button {
+  border-radius: 999px;
+}
+
+.courseware .sequence-nav-button:hover,
+.courseware .sequence-nav-button:focus {
+  background: rgba(35, 112, 114, 0.12);
+  color: var(--mereka-color-ink-900);
+}
+
+.courseware .xblock {
+  background: var(--pgn-color-white);
+  border-radius: 18px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+/* Footer v2 — dark background, 5-zone layout */
+.mereka-footer--v2 {
+  background: rgb(26, 22, 35);
+  color: var(--pgn-color-white);
+  margin-top: 4rem;
+  font-family: var(--mereka-font-body, "Poppins", "Lato", sans-serif);
+}
+
+.mereka-footer--v2 a {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.mereka-footer--v2 a:hover,
+.mereka-footer--v2 a:focus {
+  color: var(--pgn-color-white);
+}
+
+.footer-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* Zone 1: Social Row */
+.footer-social {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem 0;
+}
+.footer-social .footer-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.footer-logo-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--pgn-color-white);
+}
+.footer-logo-img {
+  height: 2rem;
+  width: auto;
+  max-width: 8rem;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+.footer-brand-name {
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+.footer-social-icons {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+.footer-social-link {
+  color: var(--pgn-color-white);
+  transition: opacity 0.15s, transform 0.15s;
+}
+.footer-social-link:hover {
+  opacity: 0.8;
+  transform: scale(1.1);
+}
+
+/* Zone 2: Nav Strip */
+.footer-nav {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem 0;
+}
+.footer-nav .footer-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.footer-nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2rem;
+  font-size: 0.875rem;
+}
+.footer-whatsapp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border: 1px solid var(--pgn-color-white);
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--pgn-color-white);
+  transition: background 0.15s;
+}
+.footer-whatsapp-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Zone 3: 4-Column Body */
+.footer-body {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 3rem 0;
+}
+.footer-columns {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr 1fr;
+  gap: 2rem 3rem;
+}
+.mereka-footer--v2 .footer-column-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+.footer-column ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.footer-column li {
+  margin-bottom: 1rem;
+}
+.footer-column a {
+  font-size: 0.875rem;
+}
+.footer-column--wide .footer-marketplace-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+.footer-sub-heading {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+}
+.footer-app-label {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+.footer-app-badges {
+  display: flex;
+  gap: 0.5rem;
+}
+.footer-badge {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--pgn-color-white);
+  text-decoration: none;
+}
+.footer-badge:hover {
+  border-color: var(--pgn-color-white);
+}
+.footer-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2rem;
+  padding: 0.75rem 2rem;
+  border: 1px solid var(--pgn-color-white);
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--pgn-color-white);
+  white-space: nowrap;
+}
+.footer-cta-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Zone 4: Legal Bottom */
+.footer-legal {
+  padding: 1.5rem 0;
+}
+.footer-legal-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.5rem;
+  font-size: 0.875rem;
+}
+.footer-copyright {
+  color: rgba(255, 255, 255, 0.6);
+}
+.footer-legal a {
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.75rem;
+}
+.footer-legal a:hover {
+  color: var(--pgn-color-white);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .footer-columns {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 576px) {
+  .footer-columns {
+    grid-template-columns: 1fr;
+  }
+  .footer-social .footer-container {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .footer-nav .footer-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .footer-legal-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* Legacy .mereka-footer without --v2 modifier: keep old white-bg styles */
+.mereka-footer:not(.mereka-footer--v2) {
+  background: var(--pgn-color-white);
+  border-top: 1px solid rgba(26, 22, 35, 0.08);
+  padding: 3rem 0 2rem;
+  margin-top: 4rem;
+}
+
+.mereka-footer:not(.mereka-footer--v2) .footer-primary {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 992px) {
+  .mereka-footer:not(.mereka-footer--v2) .footer-primary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.mereka-footer:not(.mereka-footer--v2) .footer-brand img {
+  width: 120px;
+  height: auto;
+  margin-bottom: 1rem;
+  opacity: 0.9;
+}
+
+.mereka-footer:not(.mereka-footer--v2) .footer-brand p {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--mereka-color-ink-500);
+  margin-bottom: 1rem;
+}
+
+.mereka-footer:not(.mereka-footer--v2) .footer-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.mereka-footer:not(.mereka-footer--v2) .footer-tags span {
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(26, 22, 35, 0.08);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.mereka-footer:not(.mereka-footer--v2) h6 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--mereka-color-ink-500);
+  margin-bottom: 0.75rem;
+}
+
+.mereka-footer:not(.mereka-footer--v2) ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.mereka-footer:not(.mereka-footer--v2) a {
+  color: var(--mereka-color-ink-700);
+}
+
+.mereka-footer:not(.mereka-footer--v2) a:hover,
+.mereka-footer:not(.mereka-footer--v2) a:focus {
+  color: var(--mereka-color-info);
+}
+
+.mereka-footer:not(.mereka-footer--v2) .footer-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  color: var(--mereka-color-ink-500);
+  padding-top: 1.5rem;
+  margin-top: 1.5rem;
+  border-top: 1px solid rgba(26, 22, 35, 0.06);
+}
+
+@media (max-width: 768px) {
+  .mereka-footer {
+    padding: 2rem 0 1.5rem;
+  }
+
+  .mereka-footer .footer-primary {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .mereka-footer .footer-brand img {
+    width: 100px;
+  }
+
+  .mereka-footer .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
+/* -------------------------------- */
+/* Studio designer (CMS) polish      */
+/* -------------------------------- */
+
+/* Studio output varies by view. We scope to Studio's wrapper to avoid surprising LMS. */
+.wrapper-view .wrapper-content,
+body[class*="view-"] .wrapper-content {
+  background: var(--mereka-color-surface-primary);
+}
+
+.wrapper-view .wrapper-content .content-primary,
+.wrapper-view .wrapper-content .content-supplementary,
+.wrapper-view .wrapper-content .content,
+body[class*="view-"] .wrapper-content .content-primary,
+body[class*="view-"] .wrapper-content .content-supplementary,
+body[class*="view-"] .wrapper-content .content {
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+}
+
+/* Course outline cards */
+.view-outline .outline-complex .outline-section,
+.view-outline .outline-complex .outline-subsection,
+.view-outline .outline-complex .outline-unit,
+.view-container .wrapper-xblock,
+.view-container .xblock-render,
+.view-container .xblock-render .xblock {
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+}
+
+.view-outline .outline-complex .outline-section:hover,
+.view-outline .outline-complex .outline-subsection:hover,
+.view-outline .outline-complex .outline-unit:hover {
+  box-shadow: 0 26px 70px rgba(26, 22, 35, 0.12);
+}
+
+/* Studio action buttons */
+.wrapper-mast .mast.has-actions .nav-actions .button,
+.view-dashboard .content .notice-incontext.has-actions .list-actions .action-create-course,
+.view-dashboard .content .notice-incontext.has-actions .list-actions .action-create-library,
+.view-dashboard .content .notice-incontext.list-notices .notice-item.has-actions .list-actions .action-create-course,
+.view-dashboard .content .notice-incontext.list-notices .notice-item.has-actions .list-actions .action-create-library,
+.view-outline .content-primary .no-content .button,
+.view-static-pages .content-primary .add-pages .button,
+.view-container .content-primary .no-container-content .button,
+.view-textbooks .content-primary .no-textbook-content .button,
+.view-group-configurations .content-primary .no-content .button,
+.view-certificates .content-primary .no-content .button {
+  border-radius: 999px;
+  border: 0;
+  background: var(--mereka-gradient-primary);
+  color: var(--pgn-color-white);
+  font-weight: 800;
+  text-transform: none;
+  box-shadow: 0 12px 25px rgba(35, 112, 114, 0.18);
+}
+
+.wrapper-mast .mast.has-actions .nav-actions .button:hover,
+.wrapper-mast .mast.has-actions .nav-actions .button:focus {
+  box-shadow: 0 18px 32px rgba(35, 112, 114, 0.25);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .wrapper-mast .mast.has-actions .nav-actions .button:hover,
+  .wrapper-mast .mast.has-actions .nav-actions .button:focus {
+    transform: translateY(-1px);
+  }
+}
+
+/* Secondary buttons */
+.wrapper-content .action-secondary,
+.wrapper-content a.action-secondary,
+.wrapper-content button.action-secondary,
+.btn-default {
+  border-radius: 999px;
+  border: 1px solid rgba(26, 22, 35, 0.18);
+  background: var(--pgn-color-white);
+  color: var(--mereka-color-ink-900);
+  font-weight: 700;
+}
+
+.btn-default:hover,
+.btn-default:focus {
+  border-color: rgba(35, 112, 114, 0.35);
+  box-shadow: 0 0 0 4px rgba(35, 112, 114, 0.12);
+}

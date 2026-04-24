@@ -1,0 +1,78 @@
+{
+  "generated_at": "2026-02-25T10:29:54Z",
+  "environment": "dev",
+  "expected_profile": "nonprod",
+  "identity": {
+    "env": "dev",
+    "profile": "nonprod",
+    "context": "fixture-dev",
+    "project": "fixture-project"
+  },
+  "summary": {
+    "pass": 10,
+    "fail": 2,
+    "total": 12
+  },
+  "checks": [
+    {
+      "id": "PARITY-001",
+      "status": "pass",
+      "message": "Evidence directory exists: scripts/qa/fixtures/observability-parity/malformed/delta-missing-correlation/dev"
+    },
+    {
+      "id": "PARITY-002",
+      "status": "pass",
+      "message": "Required artifact present: observability-compliance-runtime.json"
+    },
+    {
+      "id": "PARITY-002",
+      "status": "pass",
+      "message": "Required artifact present: observability-runtime-verify-runtime.md"
+    },
+    {
+      "id": "PARITY-002",
+      "status": "fail",
+      "message": "Required artifact missing: observability-correlation-headers-runtime.txt"
+    },
+    {
+      "id": "PARITY-002",
+      "status": "pass",
+      "message": "Required artifact present: observability-first-class-runtime-evidence-index.json"
+    },
+    {
+      "id": "PARITY-009",
+      "status": "fail",
+      "message": "Correlation header evidence file missing"
+    },
+    {
+      "id": "PARITY-003",
+      "status": "pass",
+      "message": "Evidence index is valid JSON"
+    },
+    {
+      "id": "PARITY-004",
+      "status": "pass",
+      "message": "Evidence index contains identity"
+    },
+    {
+      "id": "PARITY-007",
+      "status": "pass",
+      "message": "Identity context present"
+    },
+    {
+      "id": "PARITY-008",
+      "status": "pass",
+      "message": "Identity project present"
+    },
+    {
+      "id": "PARITY-005",
+      "status": "pass",
+      "message": "Identity env matches expected env (dev)"
+    },
+    {
+      "id": "PARITY-006",
+      "status": "pass",
+      "message": "Identity profile matches expected profile (nonprod)"
+    }
+  ]
+}

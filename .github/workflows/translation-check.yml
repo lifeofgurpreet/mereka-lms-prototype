@@ -1,0 +1,87 @@
+# @covers AC-CCR-010
+# @spec: cross-cutting-requirements_spec.md
+name: Translation Completeness Check
+
+on:
+  push:
+    paths:
+      - 'infrastructure/tutor/themes/mereka/mfe/**'
+      - 'tutor_env/env/build/openedx/locale/**'
+      - 'scripts/infra/sync-translations.sh'
+      - 'scripts/qa/verify-translations.sh'
+  pull_request:
+    paths:
+      - 'infrastructure/tutor/themes/mereka/mfe/**'
+      - 'tutor_env/env/build/openedx/locale/**'
+      - 'scripts/infra/sync-translations.sh'
+      - 'scripts/qa/verify-translations.sh'
+  merge_group:
+  schedule:
+    # Weekly on Mondays at 06:00 UTC (14:00 MYT)
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  translation-check:
+    name: Verify Translation Completeness (EN/MS)
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: '3.12'
+
+      - name: Run offline translation verification
+        run: |
+          set -euo pipefail
+          mkdir -p var/ci
+          ./scripts/qa/verify-translations.sh --offline | tee var/ci/translation-check.log
+        continue-on-error: true
+
+      - name: Publish run summary
+        if: always()
+        run: |
+          {
+            echo "## Translation Completeness Check (EN/MS)"
+            echo ""
+            echo "### What was checked"
+            echo "- MFE locale directories exist for \`en\` and \`ms\` (Malay)"
+            echo "- Malay locale files have ≥ 80% key coverage vs English"
+            echo "- Platform (LMS/CMS) locale directory contains \`ms\` .po files"
+            echo "- Theme templates scanned for potential hardcoded English strings (warning only)"
+            echo ""
+            echo "### Languages"
+            echo "| Code | Language |"
+            echo "|------|----------|"
+            echo "| \`en\` | English (source) |"
+            echo "| \`ms\` | Malay / Bahasa Malaysia |"
+            echo ""
+            echo "### Next steps"
+            echo "- To pull fresh translations: \`./scripts/infra/sync-translations.sh\`"
+            echo "- To preview what would sync: \`./scripts/infra/sync-translations.sh --dry-run\`"
+            echo "- To check coverage locally: \`./scripts/qa/verify-translations.sh --offline\`"
+            echo ""
+            if [[ -f var/ci/translation-check.log ]]; then
+              echo "### Output"
+              echo "\`\`\`"
+              cat var/ci/translation-check.log
+              echo "\`\`\`"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload CI logs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: translation-check-logs
+          path: var/ci/translation-check.log
+          retention-days: 3
+          if-no-files-found: warn

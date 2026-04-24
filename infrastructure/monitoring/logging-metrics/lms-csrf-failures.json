@@ -1,0 +1,6 @@
+{
+  "name": "lms-csrf-failures",
+  "description": "Count CSRF verification failures in LMS logs (often indicates cookie/CSRF trusted origins drift).",
+  "filter": "resource.type=\"k8s_container\" AND resource.labels.namespace_name=\"mereka-lms\" AND resource.labels.container_name=\"lms\" AND (textPayload=~\"CSRF verification failed\" OR textPayload=~\"Forbidden \\(CSRF\" OR jsonPayload.message=~\"CSRF verification failed\")"
+}
+

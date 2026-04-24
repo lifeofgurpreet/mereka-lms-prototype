@@ -1,0 +1,200 @@
+name: ArgoCD Sync Chain Watcher
+
+# Wires the argo_sync_started and argo_sync_finished stages of the S6.1
+# promotion-chain metrics (bead mereka-lms-lb4c.6).
+#
+# Design: emit on TRANSITION, not on sampling.
+#   - argo_sync_started fires when .status.operationState.phase first becomes
+#     Running (or sync.status first moves away from Synced). Captures the
+#     moment Argo began reconciling, not just that it eventually did.
+#   - argo_sync_finished fires when .status.operationState.phase is Succeeded
+#     AND .status.sync.status is Synced. Captures the moment reconciliation
+#     completed.
+# Both emits use continue-on-error: true — metric loss never blocks work.
+#
+# Companion PRs:
+#   #1828 — app_merge stage (build-tutor-images.yml)
+#   #1832 — bbi_pr_opened stage (build-tutor-images.yml)
+#
+# Bead: mereka-lms-lb4c.6 (S6.1 instrument promotion chain timing)
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_unit_id:
+        description: "Release unit ID (commit SHA or promotion tag) to correlate metrics"
+        required: true
+        type: string
+      app_name:
+        description: "ArgoCD application name to watch"
+        required: false
+        default: "mereka-lms-dev"
+        type: string
+  schedule:
+    # Poll every 10 minutes so the watcher opportunistically catches sync
+    # events even when a manual dispatch was not fired for a promotion.
+    - cron: "*/10 * * * *"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  watch-sync:
+    name: Watch ArgoCD sync transitions (${{ inputs.app_name || 'mereka-lms-dev' }})
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      # ── Poll ArgoCD application state and emit on observed transitions ────────
+      #
+      # Polling loop (max 30 min, 10-s interval):
+      #   1. Sample .status.operationState.phase and .status.sync.status via
+      #      kubectl --context rke2-nonprod (explicit context — ambient drifts to prod).
+      #   2. First transition: phase becomes Running OR sync.status flips away
+      #      from its initial value → emit argo_sync_started.
+      #   3. Second transition: phase is Succeeded AND sync.status is Synced
+      #      → emit argo_sync_finished.
+      #   4. Timeout after 30 min → warn and upload whatever was captured.
+      #
+      # The loop writes structured state to var/ci/promotion-metrics/ so the
+      # upload-artifact step always has something to preserve even on timeout.
+      - name: Poll ArgoCD sync state and emit on transitions
+        env:
+          APP_NAME: ${{ inputs.app_name || 'mereka-lms-dev' }}
+          RELEASE_UNIT_ID: ${{ inputs.release_unit_id || github.run_id }}
+          PROMOTION_METRICS_OUT_DIR: var/ci/promotion-metrics
+        run: |
+          set -euo pipefail
+
+          APP="${APP_NAME}"
+          RELEASE="${RELEASE_UNIT_ID}"
+          METRICS_DIR="${PROMOTION_METRICS_OUT_DIR}"
+          mkdir -p "${METRICS_DIR}"
+
+          MAX_SECONDS=1800   # 30 minutes
+          POLL_INTERVAL=10   # seconds
+          ELAPSED=0
+
+          STARTED_EMITTED=0
+          FINISHED_EMITTED=0
+
+          # Capture initial sync.status so we can detect the first flip.
+          INITIAL_SYNC_STATUS=""
+          INITIAL_SYNC_STATUS=$(
+            kubectl --context rke2-nonprod -n argocd \
+              get application "${APP}" -o jsonpath='{.status.sync.status}' 2>/dev/null \
+            || echo "unknown"
+          )
+          echo "[argo-sync-watcher] start: app=${APP} release=${RELEASE} initial_sync_status=${INITIAL_SYNC_STATUS}"
+
+          while [[ "${ELAPSED}" -lt "${MAX_SECONDS}" ]]; do
+            APP_JSON=$(
+              kubectl --context rke2-nonprod -n argocd \
+                get application "${APP}" -o json 2>/dev/null \
+              || echo "{}"
+            )
+
+            PHASE=$(echo "${APP_JSON}" | python3 -c \
+              "import json,sys; d=json.load(sys.stdin); print(d.get('status',{}).get('operationState',{}).get('phase',''))" \
+              2>/dev/null || echo "")
+
+            SYNC_STATUS=$(echo "${APP_JSON}" | python3 -c \
+              "import json,sys; d=json.load(sys.stdin); print(d.get('status',{}).get('sync',{}).get('status',''))" \
+              2>/dev/null || echo "")
+
+            FINISHED_AT=$(echo "${APP_JSON}" | python3 -c \
+              "import json,sys; d=json.load(sys.stdin); print(d.get('status',{}).get('operationState',{}).get('finishedAt',''))" \
+              2>/dev/null || echo "")
+
+            echo "[argo-sync-watcher] elapsed=${ELAPSED}s phase=${PHASE} sync_status=${SYNC_STATUS}"
+
+            # Detect argo_sync_started: phase Running OR sync status flipped.
+            if [[ "${STARTED_EMITTED}" -eq 0 ]]; then
+              TRANSITION_DETECTED=0
+              if [[ "${PHASE}" == "Running" ]]; then
+                TRANSITION_DETECTED=1
+              fi
+              if [[ -n "${INITIAL_SYNC_STATUS}" \
+                    && "${SYNC_STATUS}" != "${INITIAL_SYNC_STATUS}" \
+                    && "${SYNC_STATUS}" != "unknown" \
+                    && "${SYNC_STATUS}" != "" ]]; then
+                TRANSITION_DETECTED=1
+              fi
+              if [[ "${TRANSITION_DETECTED}" -eq 1 ]]; then
+                echo "[argo-sync-watcher] TRANSITION: argo_sync_started detected"
+                STARTED_EMITTED=1
+                echo "argo_sync_started_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+                  >> "${METRICS_DIR}/watcher-state.txt"
+              fi
+            fi
+
+            # Detect argo_sync_finished: phase Succeeded AND sync Synced.
+            if [[ "${STARTED_EMITTED}" -eq 1 && "${FINISHED_EMITTED}" -eq 0 ]]; then
+              if [[ "${PHASE}" == "Succeeded" && "${SYNC_STATUS}" == "Synced" ]]; then
+                echo "[argo-sync-watcher] TRANSITION: argo_sync_finished detected (finishedAt=${FINISHED_AT})"
+                FINISHED_EMITTED=1
+                echo "argo_sync_finished_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+                  >> "${METRICS_DIR}/watcher-state.txt"
+              fi
+            fi
+
+            # Once both transitions are captured we can exit the loop.
+            if [[ "${STARTED_EMITTED}" -eq 1 && "${FINISHED_EMITTED}" -eq 1 ]]; then
+              echo "[argo-sync-watcher] both transitions captured — exiting poll loop"
+              break
+            fi
+
+            sleep "${POLL_INTERVAL}"
+            ELAPSED=$(( ELAPSED + POLL_INTERVAL ))
+          done
+
+          if [[ "${ELAPSED}" -ge "${MAX_SECONDS}" && "${FINISHED_EMITTED}" -eq 0 ]]; then
+            echo "[argo-sync-watcher] WARN: poll loop timed out after ${MAX_SECONDS}s without observing both transitions"
+            echo "timeout=true elapsed=${ELAPSED}s" >> "${METRICS_DIR}/watcher-state.txt"
+          fi
+
+          # Export captured state for the emit steps below.
+          echo "STARTED_EMITTED=${STARTED_EMITTED}" >> "$GITHUB_ENV"
+          echo "FINISHED_EMITTED=${FINISHED_EMITTED}" >> "$GITHUB_ENV"
+
+      # ── Emit argo_sync_started ────────────────────────────────────────────────
+      # continue-on-error: true — metric loss never gates actual work.
+      - name: Emit argo_sync_started metric
+        if: ${{ env.STARTED_EMITTED == '1' }}
+        continue-on-error: true
+        env:
+          RELEASE_UNIT_ID: ${{ inputs.release_unit_id || github.run_id }}
+          PROMOTION_METRICS_OUT_DIR: var/ci/promotion-metrics
+        run: |
+          bash scripts/ci/emit-promotion-chain-metrics.sh \
+            --stage argo_sync_started \
+            --release-unit-id "${RELEASE_UNIT_ID}" \
+            --out-dir "${PROMOTION_METRICS_OUT_DIR}"
+
+      # ── Emit argo_sync_finished ───────────────────────────────────────────────
+      - name: Emit argo_sync_finished metric
+        if: ${{ env.FINISHED_EMITTED == '1' }}
+        continue-on-error: true
+        env:
+          RELEASE_UNIT_ID: ${{ inputs.release_unit_id || github.run_id }}
+          PROMOTION_METRICS_OUT_DIR: var/ci/promotion-metrics
+        run: |
+          bash scripts/ci/emit-promotion-chain-metrics.sh \
+            --stage argo_sync_finished \
+            --release-unit-id "${RELEASE_UNIT_ID}" \
+            --out-dir "${PROMOTION_METRICS_OUT_DIR}"
+
+      # ── Upload whatever was captured ──────────────────────────────────────────
+      - name: Upload promotion-chain metrics artifact
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: promotion-chain-metrics-argo-sync-${{ github.run_id }}
+          path: var/ci/promotion-metrics/
+          retention-days: 30
+          if-no-files-found: warn

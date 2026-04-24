@@ -1,0 +1,251 @@
+name: Operations Gates Runtime
+
+permissions: {}
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      env_scope:
+        description: "Environment scope for auth/multisite checks"
+        required: false
+        default: "staging"
+        type: choice
+        options:
+          - prod
+          - dev
+          - staging
+          - both
+          - all
+      strict_runtime:
+        description: "Fail when runtime dependencies are unavailable"
+        required: false
+        default: true
+        type: boolean
+      run_alert_routing_audit:
+        description: "Run alert routing verification inside operations gate"
+        required: false
+        default: true
+        type: boolean
+      run_authenticated_sso_canary:
+        description: "Run credentialed browser SSO canary (requires canary secrets)"
+        required: false
+        default: false
+        type: boolean
+      run_enterprise_runtime_audit:
+        description: "Run enterprise service, runtime wiring, and SSO gates for the selected lane(s)"
+        required: false
+        default: true
+        type: boolean
+      enterprise_readiness_tenant:
+        description: "Tenant slug for enterprise SSO readiness gate"
+        required: false
+        default: "mereka"
+        type: string
+      alert_noise_runtime_source:
+        description: "Optional prebuilt alert-noise runtime sample JSON path"
+        required: false
+        default: ""
+        type: string
+
+jobs:
+  operations-gates:
+    name: Run Operations Gates (Runtime)
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Public auth surface checks (no cluster access)
+        env:
+          INPUT_ENV_SCOPE: ${{ github.event.inputs.env_scope || vars.OPERATIONS_GATES_RUNTIME_ENV_SCOPE || 'staging' }}
+        run: |
+          ./scripts/qa/verify-auth-surfaces.sh "$INPUT_ENV_SCOPE"
+
+      - name: Set up Python Playwright (SSO canary)
+        if: ${{ (github.event.inputs.run_authenticated_sso_canary == 'true') || (vars.RUN_AUTHENTICATED_SSO_CANARY == 'true') }}
+        uses: ./.github/actions/setup-python-playwright
+        with:
+          python-version: '3.11'
+          playwright-version: '1.50.0'
+          install-system-deps: 'true'
+
+      - name: Optional credentialed SSO canary (no cluster access) - run
+        if: ${{ (github.event.inputs.run_authenticated_sso_canary == 'true') || (vars.RUN_AUTHENTICATED_SSO_CANARY == 'true') }}
+        env:
+          INPUT_ENV_SCOPE: ${{ github.event.inputs.env_scope || vars.OPERATIONS_GATES_RUNTIME_ENV_SCOPE || 'staging' }}
+          SSO_CANARY_EMAIL_PROD: ${{ secrets.SSO_CANARY_EMAIL_PROD }}
+          SSO_CANARY_PASSWORD_PROD: ${{ secrets.SSO_CANARY_PASSWORD_PROD }}
+          SSO_CANARY_EMAIL_DEV: ${{ secrets.SSO_CANARY_EMAIL_DEV }}
+          SSO_CANARY_PASSWORD_DEV: ${{ secrets.SSO_CANARY_PASSWORD_DEV }}
+          SSO_CANARY_EMAIL_STAGING: ${{ secrets.SSO_CANARY_EMAIL_STAGING }}
+          SSO_CANARY_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_PASSWORD_STAGING }}
+          SSO_CANARY_STUDIO_EMAIL_PROD: ${{ secrets.SSO_CANARY_STUDIO_EMAIL_PROD }}
+          SSO_CANARY_STUDIO_PASSWORD_PROD: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_PROD }}
+          SSO_CANARY_STUDIO_EMAIL_DEV: ${{ secrets.SSO_CANARY_STUDIO_EMAIL_DEV }}
+          SSO_CANARY_STUDIO_PASSWORD_DEV: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_DEV }}
+          SSO_CANARY_STUDIO_EMAIL_STAGING: ${{ secrets.SSO_CANARY_STUDIO_EMAIL_STAGING }}
+          SSO_CANARY_STUDIO_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_STAGING }}
+          REQUIRE_SECRETS: "1"
+          REQUIRE_STUDIO_CANARY: "0"
+          SSO_CANARY_TIMEOUT_SECONDS: "180"
+        run: |
+          ./scripts/qa/verify-authenticated-sso-canary.sh --env "$INPUT_ENV_SCOPE"
+
+      # LEGACY ACTION NAME: "gcp-gke-auth" dates from the GKE era.
+      # GKE is decommissioned; RKE2 is the cluster substrate.
+      # This step is retained only because the composite action still provides
+      # valid GCP workload-identity auth for Secret Manager / Cloud SQL backup access.
+      # See: docs/status/active/15-ACTIVE-CONTROL-PLANE-SURFACE-CLASSIFICATION-2026-04-18.md (Bucket C)
+      - name: Authenticate to GCP Secret Manager (legacy action name, RKE2 substrate)
+        if: ${{ vars.GCP_WIF_PROVIDER != '' && vars.GCP_WIF_SA != '' }}
+        uses: ./.github/actions/gcp-gke-auth
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          wif_service_account: ${{ vars.GCP_WIF_SA }}
+          auth_mode: auto
+          gcloud_project: mereka-lms
+          gke_project: ${{ vars.GKE_CLUSTER_PROJECT || 'bbi-k8' }}
+          gke_location: ${{ vars.GKE_CLUSTER_LOCATION || '' }}
+          gke_cluster: ${{ vars.GKE_CLUSTER_NAME || '' }}
+          strict_runtime: ${{ github.event.inputs.strict_runtime || 'true' }}
+
+      - name: Build alert-noise runtime sample
+        if: ${{ env.CAN_RUN_RUNTIME == 'true' }}
+        env:
+          INPUT_ALERT_NOISE_RUNTIME_SOURCE: ${{ github.event.inputs.alert_noise_runtime_source || vars.ALERT_NOISE_RUNTIME_SOURCE || '' }}
+          INPUT_ALERT_NOISE_FP_CLASSIFICATION_FEED: ${{ vars.ALERT_NOISE_FP_CLASSIFICATION_FEED || '' }}
+          INPUT_STRICT_RUNTIME: ${{ github.event.inputs.strict_runtime || 'true' }}
+        run: |
+          out="var/operations-gates/alert-noise-runtime-sample.json"
+          mkdir -p "$(dirname "$out")"
+
+          if [[ -n "$INPUT_ALERT_NOISE_RUNTIME_SOURCE" ]]; then
+            if [[ -f "$INPUT_ALERT_NOISE_RUNTIME_SOURCE" ]]; then
+              echo "Using explicit alert-noise runtime source: $INPUT_ALERT_NOISE_RUNTIME_SOURCE"
+              echo "ALERT_NOISE_RUNTIME_SOURCE=$INPUT_ALERT_NOISE_RUNTIME_SOURCE" >> "$GITHUB_ENV"
+              exit 0
+            fi
+
+            echo "WARN: provided alert-noise source is not readable: $INPUT_ALERT_NOISE_RUNTIME_SOURCE" >&2
+          fi
+
+          if [[ "$INPUT_STRICT_RUNTIME" == "true" ]]; then
+            STRICT_RUNTIME=1 ./scripts/qa/build-alert-noise-runtime-sample.sh --out "$out"
+          else
+            ./scripts/qa/build-alert-noise-runtime-sample.sh --out "$out"
+          fi
+
+          echo "ALERT_NOISE_RUNTIME_SOURCE=$out" >> "$GITHUB_ENV"
+
+      - name: Run consolidated operations gate
+        if: ${{ env.CAN_RUN_RUNTIME == 'true' }}
+        env:
+          INPUT_ENV_SCOPE: ${{ github.event.inputs.env_scope || vars.OPERATIONS_GATES_RUNTIME_ENV_SCOPE || 'staging' }}
+          INPUT_STRICT_RUNTIME: ${{ github.event.inputs.strict_runtime || 'true' }}
+          INPUT_RUN_ALERT_ROUTING_AUDIT: ${{ github.event.inputs.run_alert_routing_audit || 'true' }}
+          INPUT_RUN_AUTHENTICATED_SSO_CANARY: ${{ github.event.inputs.run_authenticated_sso_canary || vars.RUN_AUTHENTICATED_SSO_CANARY || 'false' }}
+          INPUT_RUN_ENTERPRISE_RUNTIME_AUDIT: ${{ github.event.inputs.run_enterprise_runtime_audit || 'true' }}
+          INPUT_ENTERPRISE_READINESS_TENANT: ${{ github.event.inputs.enterprise_readiness_tenant || vars.ENTERPRISE_READINESS_TENANT || 'mereka' }}
+          ALERT_NOISE_RUNTIME_SOURCE: ${{ env.ALERT_NOISE_RUNTIME_SOURCE }}
+          ALERT_NOISE_FP_CLASSIFICATION_FEED: ${{ vars.ALERT_NOISE_FP_CLASSIFICATION_FEED || '' }}
+          SSO_CANARY_EMAIL_PROD: ${{ secrets.SSO_CANARY_EMAIL_PROD }}
+          SSO_CANARY_PASSWORD_PROD: ${{ secrets.SSO_CANARY_PASSWORD_PROD }}
+          SSO_CANARY_EMAIL_DEV: ${{ secrets.SSO_CANARY_EMAIL_DEV }}
+          SSO_CANARY_PASSWORD_DEV: ${{ secrets.SSO_CANARY_PASSWORD_DEV }}
+          SSO_CANARY_EMAIL_STAGING: ${{ secrets.SSO_CANARY_EMAIL_STAGING }}
+          SSO_CANARY_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_PASSWORD_STAGING }}
+          SSO_CANARY_STUDIO_EMAIL_PROD: ${{ secrets.SSO_CANARY_STUDIO_EMAIL_PROD }}
+          SSO_CANARY_STUDIO_PASSWORD_PROD: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_PROD }}
+          SSO_CANARY_STUDIO_EMAIL_DEV: ${{ secrets.SSO_CANARY_STUDIO_EMAIL_DEV }}
+          SSO_CANARY_STUDIO_PASSWORD_DEV: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_DEV }}
+          SSO_CANARY_STUDIO_EMAIL_STAGING: ${{ secrets.SSO_CANARY_STUDIO_EMAIL_STAGING }}
+          SSO_CANARY_STUDIO_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_STAGING }}
+          SSO_CANARY_EMAIL: ${{ secrets.SSO_CANARY_EMAIL }}
+          SSO_CANARY_PASSWORD: ${{ secrets.SSO_CANARY_PASSWORD }}
+        run: |
+          if [[ "$INPUT_STRICT_RUNTIME" == "true" ]]; then
+            export STRICT_RUNTIME=1
+            export ALERT_NOISE_REQUIRE_RUNTIME_SOURCE=1
+          else
+            export STRICT_RUNTIME=0
+            export ALERT_NOISE_REQUIRE_RUNTIME_SOURCE=0
+          fi
+
+          if [[ "$INPUT_RUN_ALERT_ROUTING_AUDIT" == "true" ]]; then
+            export RUN_ALERT_ROUTING_AUDIT=1
+          else
+            export RUN_ALERT_ROUTING_AUDIT=0
+          fi
+
+          # VPS atlas monitor cron/status checks are host-local and not available in GH runner.
+          export ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT=0
+          export RUN_ATLAS_ALLOWLIST_AUDIT=0
+          # Runtime workflow must validate live exporter telemetry, not just local contracts.
+          export RUN_DB_EXPORTER_TELEMETRY_AUDIT=1
+          export DB_EXPORTER_AUDIT_MODE=runtime
+
+          if [[ "$INPUT_RUN_AUTHENTICATED_SSO_CANARY" == "true" ]]; then
+            export RUN_AUTHENTICATED_SSO_CANARY=1
+            export AUTHENTICATED_SSO_CANARY_REQUIRE_SECRETS=1
+            export REQUIRE_STUDIO_CANARY=0
+            export REQUIRE_STUDIO_CANARY_PROD=0
+            export REQUIRE_STUDIO_CANARY_DEV=0
+            export REQUIRE_STUDIO_CANARY_STAGING=0
+            if [[ -n "${SSO_CANARY_STUDIO_EMAIL_PROD:-}" && -n "${SSO_CANARY_STUDIO_PASSWORD_PROD:-}" ]]; then
+              export REQUIRE_STUDIO_CANARY_PROD=1
+            fi
+            if [[ -n "${SSO_CANARY_STUDIO_EMAIL_DEV:-}" && -n "${SSO_CANARY_STUDIO_PASSWORD_DEV:-}" ]]; then
+              export REQUIRE_STUDIO_CANARY_DEV=1
+            fi
+            if [[ -n "${SSO_CANARY_STUDIO_EMAIL_STAGING:-}" && -n "${SSO_CANARY_STUDIO_PASSWORD_STAGING:-}" ]]; then
+              export REQUIRE_STUDIO_CANARY_STAGING=1
+            fi
+          else
+            export RUN_AUTHENTICATED_SSO_CANARY=0
+          fi
+
+          if [[ "$INPUT_RUN_ENTERPRISE_RUNTIME_AUDIT" == "true" ]]; then
+            export RUN_ENTERPRISE_RUNTIME_AUDIT=1
+          else
+            export RUN_ENTERPRISE_RUNTIME_AUDIT=0
+          fi
+          export ENTERPRISE_READINESS_TENANT="$INPUT_ENTERPRISE_READINESS_TENANT"
+
+          ./scripts/qa/run-operations-gates.sh --env "$INPUT_ENV_SCOPE"
+
+      - name: Sanitize operations gate artifacts
+        if: ${{ always() && env.CAN_RUN_RUNTIME == 'true' }}
+        env:
+          SSO_CANARY_PASSWORD_PROD: ${{ secrets.SSO_CANARY_PASSWORD_PROD }}
+          SSO_CANARY_PASSWORD_DEV: ${{ secrets.SSO_CANARY_PASSWORD_DEV }}
+          SSO_CANARY_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_PASSWORD_STAGING }}
+          SSO_CANARY_STUDIO_PASSWORD_PROD: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_PROD }}
+          SSO_CANARY_STUDIO_PASSWORD_DEV: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_DEV }}
+          SSO_CANARY_STUDIO_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_STAGING }}
+          SSO_CANARY_PASSWORD: ${{ secrets.SSO_CANARY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          ARTIFACT_DIR="var/operations-gates"
+          [[ -d "$ARTIFACT_DIR" ]] || exit 0
+          # Remove Playwright traces (contain full network payloads with credentials)
+          find "$ARTIFACT_DIR" -type f -name "*.trace.zip" -delete 2>/dev/null || true
+          # Redact known passwords from text logs using perl (safe with special chars)
+          for secret_var in SSO_CANARY_PASSWORD_PROD SSO_CANARY_PASSWORD_DEV SSO_CANARY_PASSWORD_STAGING SSO_CANARY_STUDIO_PASSWORD_PROD SSO_CANARY_STUDIO_PASSWORD_DEV SSO_CANARY_STUDIO_PASSWORD_STAGING SSO_CANARY_PASSWORD; do
+            secret_val="${!secret_var:-}"
+            if [[ -n "$secret_val" ]]; then
+              find "$ARTIFACT_DIR" -type f \( -name "*.txt" -o -name "*.log" -o -name "*.json" \) \
+                -exec perl -pi -e "s/\Q${secret_val}\E/***REDACTED***/g" {} + 2>/dev/null || true
+            fi
+          done
+
+      - name: Upload operations gate artifacts
+        if: ${{ always() && env.CAN_RUN_RUNTIME == 'true' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: operations-gates-${{ github.run_id }}-${{ github.run_attempt }}
+          path: var/operations-gates/
+          retention-days: 3

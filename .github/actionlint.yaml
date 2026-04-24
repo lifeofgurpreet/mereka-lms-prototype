@@ -1,0 +1,15 @@
+self-hosted-runner:
+  labels:
+    - mereka-k8s-runners
+    - mereka-k8s-heavy-builders
+    - mereka-k8s-prod-runners
+
+config-variables: null
+
+paths:
+  .github/workflows/**/*.yml:
+    ignore:
+      # Existing workflow shell snippets are governed by repository static
+      # validation scripts. This config is introduced to make runner-label lint
+      # useful without expanding this tranche into repo-wide shellcheck cleanup.
+      - "shellcheck reported issue"

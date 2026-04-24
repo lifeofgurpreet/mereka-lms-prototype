@@ -1,0 +1,212 @@
+name: Frontend Branding Closure
+
+permissions: {}  # Deny-all at workflow level; each job grants only what it needs
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: "Target environment"
+        required: true
+        default: "prod"
+        type: choice
+        options:
+          - prod
+          - dev
+      cross_browser_matrix:
+        description: "Run cross-browser matrix (chromium/firefox/mobile, plus webkit probe fallback)"
+        required: true
+        default: true
+        type: boolean
+      require_runtime_theme:
+        description: "Require runtime theme mode (/theme/*.min.css) for smoke and performance checks"
+        required: true
+        default: false
+        type: boolean
+      require_branding_markers:
+        description: "Require slot-rendered Mereka marker classes in runtime DOM smoke checks"
+        required: true
+        default: true
+        type: boolean
+      require_webkit:
+        description: "Fail closure run if WebKit cannot install/launch in cross-browser gate"
+        required: true
+        default: false
+        type: boolean
+      run_performance_gate:
+        description: "Run frontend performance spot-check gate"
+        required: true
+        default: true
+        type: boolean
+      run_live_dom_audit_gate:
+        description: "Run runtime DOM selector audit gate for authn surface"
+        required: true
+        default: false
+        type: boolean
+      run_npm_start_smoke_gate:
+        description: "Run npm-start smoke + screenshot gate (requires reachable base URL)"
+        required: true
+        default: true
+        type: boolean
+      run_screenshot_gate:
+        description: "Capture public branding screenshots as closure evidence"
+        required: true
+        default: false
+        type: boolean
+      options_json:
+        description: "Advanced options JSON for lower-frequency knobs such as runtime_theme_url, live_dom_audit_profile (standard/phase7_strict/phase7_full), screenshot_scope (full/mfe-only), selector_audit_path, and a11y settings"
+        required: false
+        default: "{}"
+        type: string
+
+jobs:
+  frontend-closure:
+    runs-on: ${{ vars.CI_FASTLANE_BUILD_LABEL || 'mereka-k8s-heavy-builders' }}
+    timeout-minutes: 90
+    permissions:
+      contents: read  # checkout
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Setup Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0
+        with:
+          node-version: "20"
+
+      - name: Run frontend closure pipeline
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TARGET_ENV="${{ inputs.target_environment || 'prod' }}"
+          CROSS_BROWSER_MATRIX="${{ inputs.cross_browser_matrix || 'true' }}"
+          REQUIRE_RUNTIME_THEME="${{ inputs.require_runtime_theme || 'false' }}"
+          REQUIRE_BRANDING_MARKERS="${{ inputs.require_branding_markers || 'true' }}"
+          REQUIRE_WEBKIT="${{ inputs.require_webkit || 'false' }}"
+          RUN_PERF="${{ inputs.run_performance_gate || 'true' }}"
+          RUN_PARAGON_BUDGET="${{ fromJSON(inputs.options_json || '{}').run_paragon_budget_gate != false && fromJSON(inputs.options_json || '{}').run_paragon_budget_gate != 'false' }}"
+          RUN_CERTIFICATE_BRANDING="${{ fromJSON(inputs.options_json || '{}').run_certificate_branding_gate != false && fromJSON(inputs.options_json || '{}').run_certificate_branding_gate != 'false' }}"
+          RUN_EMAIL_TEMPLATE="${{ fromJSON(inputs.options_json || '{}').run_email_template_gate != false && fromJSON(inputs.options_json || '{}').run_email_template_gate != 'false' }}"
+          RUN_SELECTOR_HARDENING="${{ fromJSON(inputs.options_json || '{}').run_selector_hardening_gate != false && fromJSON(inputs.options_json || '{}').run_selector_hardening_gate != 'false' }}"
+          RUN_RUNTIME_THEME_CONTRACT="${{ fromJSON(inputs.options_json || '{}').run_runtime_theme_contract_gate != false && fromJSON(inputs.options_json || '{}').run_runtime_theme_contract_gate != 'false' }}"
+          RUN_LIVE_DOM_AUDIT="${{ inputs.run_live_dom_audit_gate || 'false' }}"
+          LIVE_DOM_AUDIT_PROFILE="${{ fromJSON(inputs.options_json || '{}').live_dom_audit_profile || 'standard' }}"
+          RUN_NPM_START_SMOKE="${{ inputs.run_npm_start_smoke_gate || 'false' }}"
+          RUN_SCREENSHOTS="${{ inputs.run_screenshot_gate || 'false' }}"
+          SCREENSHOT_SCOPE="${{ fromJSON(inputs.options_json || '{}').screenshot_scope || 'full' }}"
+          STRICT_WEBKIT=$([[ "$REQUIRE_WEBKIT" == "true" ]] && echo 1 || echo 0)
+          NPM_START_BASE_URL="${{ fromJSON(inputs.options_json || '{}').npm_start_base_url || '' }}"
+          NPM_START_PROJECT="${{ fromJSON(inputs.options_json || '{}').npm_start_project || 'chromium' }}"
+          LIVE_DOM_AUDIT_PROJECT="${{ fromJSON(inputs.options_json || '{}').live_dom_audit_project || 'chromium' }}"
+          LIVE_DOM_AUDIT_MIN_HITS="${{ fromJSON(inputs.options_json || '{}').live_dom_audit_min_hits || '3' }}"
+          LIVE_DOM_AUDIT_ROUTES="${{ fromJSON(inputs.options_json || '{}').live_dom_audit_routes || '' }}"
+          LIVE_DOM_AUDIT_SELECTORS="${{ fromJSON(inputs.options_json || '{}').live_dom_audit_selectors || '' }}"
+          LIVE_DOM_AUDIT_MIN_CUSTOM_HITS="${{ fromJSON(inputs.options_json || '{}').live_dom_audit_min_custom_hits || '0' }}"
+          SELECTOR_AUDIT_PATH="${{ fromJSON(inputs.options_json || '{}').selector_audit_path || '/authn/login' }}"
+          RUNTIME_THEME_URL="${{ fromJSON(inputs.options_json || '{}').runtime_theme_url || '' }}"
+          RUNTIME_THEME_TIMEOUT_SECONDS="${{ fromJSON(inputs.options_json || '{}').runtime_theme_timeout_seconds || '300' }}"
+          LEARNING_PATH="${{ fromJSON(inputs.options_json || '{}').learning_path || '/learning' }}"
+          A11Y_MODE="${{ fromJSON(inputs.options_json || '{}').a11y_mode || 'hybrid' }}"
+          A11Y_TARGET_URL="${{ fromJSON(inputs.options_json || '{}').a11y_target_url || '' }}"
+          A11Y_ROUTES="${{ fromJSON(inputs.options_json || '{}').a11y_routes || '' }}"
+          A11Y_ALLOW_MISSING_REPORTS="${{ fromJSON(inputs.options_json || '{}').a11y_allow_missing_reports || 'false' }}"
+
+          args=(--env "$TARGET_ENV" --frontend-only)
+          if [[ "$CROSS_BROWSER_MATRIX" == "true" ]]; then
+            args+=(--cross-browser)
+          fi
+          if [[ "$REQUIRE_RUNTIME_THEME" == "true" ]]; then
+            args+=(--require-runtime-theme)
+          fi
+
+          RUN_BASELINE_GATES=0 \
+          RUN_CROSS_BROWSER=1 \
+          RUN_A11Y=1 \
+          RUN_SCREENSHOTS=0 \
+          RUN_PERFORMANCE=$([[ "$RUN_PERF" == "true" ]] && echo 1 || echo 0) \
+          RUN_PARAGON_THEME_BUDGET=$([[ "$RUN_PARAGON_BUDGET" == "true" ]] && echo 1 || echo 0) \
+          RUN_CERTIFICATE_BRANDING=$([[ "$RUN_CERTIFICATE_BRANDING" == "true" ]] && echo 1 || echo 0) \
+          RUN_EMAIL_TEMPLATE_BRANDING=$([[ "$RUN_EMAIL_TEMPLATE" == "true" ]] && echo 1 || echo 0) \
+          RUN_SELECTOR_HARDENING=$([[ "$RUN_SELECTOR_HARDENING" == "true" ]] && echo 1 || echo 0) \
+          RUN_RUNTIME_THEME_CONTRACT=$([[ "$RUN_RUNTIME_THEME_CONTRACT" == "true" ]] && echo 1 || echo 0) \
+          RUN_MFE_LIVE_DOM_AUDIT=$([[ "$RUN_LIVE_DOM_AUDIT" == "true" ]] && echo 1 || echo 0) \
+          RUN_NPM_START_SMOKE=$([[ "$RUN_NPM_START_SMOKE" == "true" ]] && echo 1 || echo 0) \
+          STRICT_WEBKIT="$STRICT_WEBKIT" \
+          REQUIRE_BRANDING_MARKERS=$([[ "$REQUIRE_BRANDING_MARKERS" == "true" ]] && echo 1 || echo 0) \
+          RUN_SCREENSHOTS=$([[ "$RUN_SCREENSHOTS" == "true" ]] && echo 1 || echo 0) \
+          SCREENSHOT_SCOPE="$SCREENSHOT_SCOPE" \
+          NPM_START_BASE_URL="$NPM_START_BASE_URL" \
+          NPM_START_PROJECT="$NPM_START_PROJECT" \
+          LIVE_DOM_AUDIT_PROFILE="$LIVE_DOM_AUDIT_PROFILE" \
+          LIVE_DOM_AUDIT_PROJECT="$LIVE_DOM_AUDIT_PROJECT" \
+          LIVE_DOM_AUDIT_MIN_HITS="$LIVE_DOM_AUDIT_MIN_HITS" \
+          LIVE_DOM_AUDIT_ROUTES="$LIVE_DOM_AUDIT_ROUTES" \
+          LIVE_DOM_AUDIT_SELECTORS="$LIVE_DOM_AUDIT_SELECTORS" \
+          LIVE_DOM_AUDIT_MIN_CUSTOM_HITS="$LIVE_DOM_AUDIT_MIN_CUSTOM_HITS" \
+          SELECTOR_AUDIT_PATH="$SELECTOR_AUDIT_PATH" \
+          RUNTIME_THEME_URL="$RUNTIME_THEME_URL" \
+          RUNTIME_THEME_TIMEOUT_SECONDS="$RUNTIME_THEME_TIMEOUT_SECONDS" \
+          LEARNING_PATH="$LEARNING_PATH" \
+          A11Y_MODE="$A11Y_MODE" \
+          A11Y_TARGET="$A11Y_TARGET_URL" \
+          A11Y_ROUTES="$A11Y_ROUTES" \
+          A11Y_ALLOW_MISSING_REPORTS=$([[ "$A11Y_ALLOW_MISSING_REPORTS" == "true" ]] && echo 1 || echo 0) \
+          ./scripts/qa/run-branding-evidence-pipeline.sh "${args[@]}"
+
+      - name: Summarize closure results
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          LATEST="$(ls -1dt var/evidence/branding/* 2>/dev/null | head -1 || true)"
+          {
+            echo "## Frontend Branding Closure"
+            echo
+            echo "- Environment: \`${{ inputs.target_environment || 'prod' }}\`"
+            echo "- Cross-browser matrix: \`${{ inputs.cross_browser_matrix || 'true' }}\`"
+            echo "- Require runtime theme mode: \`${{ inputs.require_runtime_theme || 'false' }}\`"
+            echo "- Require branding markers: \`${{ inputs.require_branding_markers || 'true' }}\`"
+            echo "- Require WebKit availability: \`${{ inputs.require_webkit || 'false' }}\`"
+            echo "- Performance gate: \`${{ inputs.run_performance_gate || 'true' }}\`"
+            echo "- Paragon budget gate: \`${{ fromJSON(inputs.options_json || '{}').run_paragon_budget_gate != false && fromJSON(inputs.options_json || '{}').run_paragon_budget_gate != 'false' }}\`"
+            echo "- Certificate branding gate: \`${{ fromJSON(inputs.options_json || '{}').run_certificate_branding_gate != false && fromJSON(inputs.options_json || '{}').run_certificate_branding_gate != 'false' }}\`"
+            echo "- Email template gate: \`${{ fromJSON(inputs.options_json || '{}').run_email_template_gate != false && fromJSON(inputs.options_json || '{}').run_email_template_gate != 'false' }}\`"
+            echo "- Selector hardening gate: \`${{ fromJSON(inputs.options_json || '{}').run_selector_hardening_gate != false && fromJSON(inputs.options_json || '{}').run_selector_hardening_gate != 'false' }}\`"
+            echo "- Runtime theme contract gate: \`${{ fromJSON(inputs.options_json || '{}').run_runtime_theme_contract_gate != false && fromJSON(inputs.options_json || '{}').run_runtime_theme_contract_gate != 'false' }}\`"
+            echo "- Live DOM selector audit gate: \`${{ inputs.run_live_dom_audit_gate || 'false' }}\`"
+            echo "- Live DOM audit profile: \`${{ fromJSON(inputs.options_json || '{}').live_dom_audit_profile || 'standard' }}\`"
+            echo "- npm-start smoke gate: \`${{ inputs.run_npm_start_smoke_gate || 'false' }}\`"
+            echo "- Screenshot gate: \`${{ inputs.run_screenshot_gate || 'false' }}\`"
+            echo "- Screenshot scope: \`${{ fromJSON(inputs.options_json || '{}').screenshot_scope || 'full' }}\`"
+            echo "- npm-start base URL: \`${{ fromJSON(inputs.options_json || '{}').npm_start_base_url || '(auto by env)' }}\`"
+            echo "- npm-start project: \`${{ fromJSON(inputs.options_json || '{}').npm_start_project || 'chromium' }}\`"
+            echo "- Live DOM audit project: \`${{ fromJSON(inputs.options_json || '{}').live_dom_audit_project || 'chromium' }}\`"
+            echo "- Live DOM minimum selector hits: \`${{ fromJSON(inputs.options_json || '{}').live_dom_audit_min_hits || '3' }}\`"
+            echo "- Live DOM audit routes: \`${{ fromJSON(inputs.options_json || '{}').live_dom_audit_routes || '(selector_audit_path only)' }}\`"
+            echo "- Live DOM custom selectors: \`${{ fromJSON(inputs.options_json || '{}').live_dom_audit_selectors || '(none)' }}\`"
+            echo "- Live DOM minimum custom selector hits: \`${{ fromJSON(inputs.options_json || '{}').live_dom_audit_min_custom_hits || '0' }}\`"
+            echo "- Live DOM audit path: \`${{ fromJSON(inputs.options_json || '{}').selector_audit_path || '/authn/login' }}\`"
+            echo "- Runtime theme URL: \`${{ fromJSON(inputs.options_json || '{}').runtime_theme_url || '(auto by env)' }}\`"
+            echo "- Runtime theme timeout: \`${{ fromJSON(inputs.options_json || '{}').runtime_theme_timeout_seconds || '300' }}\`"
+            echo "- Learning path: \`${{ fromJSON(inputs.options_json || '{}').learning_path || '/learning' }}\`"
+            echo "- A11y mode: \`${{ fromJSON(inputs.options_json || '{}').a11y_mode || 'hybrid' }}\`"
+            echo "- A11y target URL: \`${{ fromJSON(inputs.options_json || '{}').a11y_target_url || '(auto apps by env)' }}\`"
+            echo "- A11y routes: \`${{ fromJSON(inputs.options_json || '{}').a11y_routes || '(verifier defaults)' }}\`"
+            echo "- A11y allow missing reports: \`${{ fromJSON(inputs.options_json || '{}').a11y_allow_missing_reports || 'false' }}\`"
+            if [[ -n "$LATEST" ]]; then
+              echo "- Evidence directory: \`$LATEST\`"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload closure artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: frontend-branding-closure-artifacts
+          path: |
+            var/evidence/branding/**
+            var/qa/cross-browser-branding-smoke-*.log
+            var/e2e-report/**
+            var/e2e-artifacts/**
+          if-no-files-found: warn

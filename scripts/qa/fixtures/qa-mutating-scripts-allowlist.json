@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "mutating_prefixes": [
+    "fix-",
+    "repair-",
+    "cleanup-",
+    "prune-",
+    "retire-",
+    "park-",
+    "unpark-",
+    "sync-",
+    "apply-",
+    "create-",
+    "provision-",
+    "bootstrap-",
+    "rollback-",
+    "load-"
+  ],
+  "allowed_scripts": [
+    {
+      "path": "scripts/qa/build-validator-drift-evidence-bundle.sh",
+      "reason": "Evidence builder uses kubectl to collect drift evidence."
+    },
+    {
+      "path": "scripts/qa/fix-admin-login.sh",
+      "reason": "Remediation helper script intentionally mutates LMS user state."
+    },
+    {
+      "path": "scripts/qa/fix-parity.sh",
+      "reason": "Remediation helper script intentionally applies parity fixes."
+    },
+    {
+      "path": "scripts/qa/load-test-libraries.sh",
+      "reason": "Fixture loader script intentionally creates test library entities."
+    },
+    {
+      "path": "scripts/qa/load-test-tenants.sh",
+      "reason": "Fixture loader script intentionally creates tenant test data."
+    },
+    {
+      "path": "scripts/qa/sync-openedx-audit-pr-status.sh",
+      "reason": "Synchronization script intentionally writes PR status back to tracker artifacts."
+    },
+    {
+      "path": "scripts/qa/verify-aspects-wiring.sh",
+      "reason": "Live-cluster verifier uses kubectl to check aspect wiring."
+    },
+    {
+      "path": "scripts/qa/verify-deployment-lanes.sh",
+      "reason": "Live-cluster verifier uses kubectl to check deployment lanes."
+    },
+    {
+      "path": "scripts/qa/verify-disaster-recovery.sh",
+      "reason": "Live-cluster verifier uses kubectl/velero for DR checks."
+    },
+    {
+      "path": "scripts/qa/verify-ecommerce-worker-health.sh",
+      "reason": "Live-cluster verifier uses kubectl for ecommerce workers."
+    },
+    {
+      "path": "scripts/qa/verify-enterprise-mfe-nreum-clean.sh",
+      "reason": "Live-cluster verifier uses kubectl for enterprise MFE pods."
+    },
+    {
+      "path": "scripts/qa/verify-ora2-operations.sh",
+      "reason": "Live-cluster verifier uses kubectl for ORA2 state."
+    },
+    {
+      "path": "scripts/qa/verify-overlay-ownership.sh",
+      "reason": "Verifier uses kubectl kustomize to render overlays."
+    },
+    {
+      "path": "scripts/qa/verify-tenant-hardening.sh",
+      "reason": "Live-cluster verifier uses kubectl for tenant hardening."
+    },
+    {
+      "path": "scripts/qa/verify-xqueue-graders.sh",
+      "reason": "Live-cluster verifier uses kubectl for xqueue graders."
+    }
+  ],
+  "notes": "Explicit allowlist for scripts/qa entries that are intentionally mutating under the QA namespace."
+}

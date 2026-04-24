@@ -1,0 +1,17 @@
+Route Matrix — 10/10 PASS — 2026-02-19T22:20 UTC
+Branch: feat/23ry2-spec-dedupe-normalize
+
+RESULT | CODE | SURFACE    | URL
+-------|------|------------|----------------------------------------------------
+PASS   | 200  | academy    | https://academyv2.mereka.io/
+PASS   | 200  | admin      | https://admin.academyv2.mereka.io/
+PASS   | 200  | studio     | https://studio.academyv2.mereka.io/
+PASS   | 200  | authn      | https://apps.academyv2.mereka.io/authn/login
+PASS   | 200  | ecommerce  | https://ecommerce.academyv2.mereka.io/dashboard/
+PASS   | 200  | credentials| https://credentials.academyv2.mereka.io/admin/login/
+PASS   | 200  | skillourfuture | https://skillourfuture.academy.mereka.io/
+PASS   | 200  | biji-biji  | https://academy.biji-biji.com/
+PASS   | 200  | preview    | https://preview.academyv2.mereka.io/
+PASS   | 200  | forum      | https://forum.academyv2.mereka.io/heartbeat
+
+10 PASS / 0 WARN / 0 FAIL

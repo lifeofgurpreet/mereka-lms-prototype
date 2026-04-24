@@ -1,0 +1,260 @@
+spec: branding-system_spec.md
+acceptance_criteria:
+- id: AC-INT-001
+  description: Given `multi-site-domains_spec.md` configures three production domains
+    (academyv2.mereka.io, academy.biji-biji.com, skillourfuture.academy.mereka.io),
+    when branding assets are deployed, then Mereka logo and custom footer render correctly
+    on all three domains with zero Open edX default branding leakage.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-branding-multi-domain.sh
+    command: scripts/qa/verify-branding-multi-domain.sh
+- id: AC-INT-002
+  description: Given multi-site domains are configured, when `scripts/branding/verify-branding-health.sh`
+    runs in production, then it passes for all configured domains without domain-specific
+    branding regressions.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-branding-multi-domain.sh
+    command: scripts/qa/verify-branding-multi-domain.sh
+- id: AC-INT-003
+  description: Given `tutor-configuration_spec.md` apply-patches workflow syncs theme
+    assets, when `tutor images build openedx` completes, then Mereka logo variants
+    exist in compiled static files and `grep -r "fonts.googleapis.com" tutor_env/env/build/openedx/`
+    returns zero results.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-branding-asset-sync.sh
+    command: scripts/qa/verify-branding-asset-sync.sh
+- id: AC-001
+  description: Mereka logo visible on LMS homepage
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/verify-logo-setup.sh
+    command: scripts/branding/verify-logo-setup.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-parity.sh
+    command: scripts/qa/verify-brand-parity.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-public-branding.sh
+    command: scripts/qa/verify-public-branding.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
+- id: AC-002
+  description: Mereka logo visible on Studio homepage
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/verify-branding-health.sh
+    command: scripts/branding/verify-branding-health.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-parity.sh
+    command: scripts/qa/verify-brand-parity.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-public-branding.sh
+    command: scripts/qa/verify-public-branding.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-studio-branding.sh
+    command: scripts/qa/verify-studio-branding.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+- id: AC-003
+  description: Custom Mereka footer renders on all MFEs (authn, account, profile,
+    learning)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-parity.sh
+    command: scripts/qa/verify-brand-parity.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-footer-parity.sh
+    command: scripts/qa/verify-footer-parity.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-public-branding.sh
+    command: scripts/qa/verify-public-branding.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+  - type: manual
+    runbook: docs/BRANDING_VERIFICATION_CHECKLIST.md
+    section: MFE Footer Verification
+    justification: Account, profile, and learning MFE surfaces require interactive
+      navigation to verify footer rendering; no headless script covers all four surfaces
+      currently
+- id: AC-004
+  description: Favicon loads correctly (mereka icon, not Open edX default)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/verify-branding-health.sh
+    command: scripts/branding/verify-branding-health.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-parity.sh
+    command: scripts/qa/verify-brand-parity.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-public-branding.sh
+    command: scripts/qa/verify-public-branding.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+- id: AC-005
+  description: Custom fonts load without Google Fonts fallback
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/verify-branding-health.sh
+    command: scripts/branding/verify-branding-health.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-parity.sh
+    command: scripts/qa/verify-brand-parity.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-public-branding.sh
+    command: scripts/qa/verify-public-branding.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
+- id: AC-006
+  description: '`grep "fonts.googleapis.com" tutor_env/env/build/openedx/lms/static/css/*.css`
+    returns 0 results'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/verify-branding-health.sh
+    command: scripts/branding/verify-branding-health.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-parity.sh
+    command: scripts/qa/verify-brand-parity.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-public-branding.sh
+    command: scripts/qa/verify-public-branding.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-studio-authoring-branding.sh
+    command: scripts/qa/verify-studio-authoring-branding.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+- id: AC-007
+  description: '`scripts/branding/verify-branding-health.sh` exits 0'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/deploy-branded-image.sh
+    command: scripts/branding/deploy-branded-image.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/run-branding-gates.sh
+    command: scripts/branding/run-branding-gates.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/setup-mfe-branding.sh
+    command: scripts/branding/setup-mfe-branding.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/sync-brand-assets.sh
+    command: scripts/branding/sync-brand-assets.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/update-token-provenance.sh
+    command: scripts/branding/update-token-provenance.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/verify-branding-css.sh
+    command: scripts/branding/verify-branding-css.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/verify-branding-health.sh
+    command: scripts/branding/verify-branding-health.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-parity.sh
+    command: scripts/qa/verify-brand-parity.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-branding-health.sh
+    command: scripts/qa/verify-branding-health.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-footer-parity.sh
+    command: scripts/qa/verify-footer-parity.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+- id: AC-008
+  description: Theme applies consistently across all domains (academyv2.mereka.io,
+    academy.biji-biji.com)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-parity.sh
+    command: scripts/qa/verify-brand-parity.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-footer-parity.sh
+    command: scripts/qa/verify-footer-parity.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-public-branding.sh
+    command: scripts/qa/verify-public-branding.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+- id: AC-009
+  description: Studio preview shows Mereka branding
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/verify-branding-health.sh
+    command: scripts/branding/verify-branding-health.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-parity.sh
+    command: scripts/qa/verify-brand-parity.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-public-branding.sh
+    command: scripts/qa/verify-public-branding.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-studio-authoring-branding.sh
+    command: scripts/qa/verify-studio-authoring-branding.sh
+- id: AC-010
+  description: Login page shows Mereka branding (not default Open edX)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-public-branding.sh
+    command: scripts/qa/verify-public-branding.sh
+  - type: manual
+    runbook: docs/BRANDING_VERIFICATION_CHECKLIST.md
+    section: Login Page Visual Verification
+    justification: Visual confirmation that gradient, logo placement, and font rendering
+      match brand guidelines requires human judgment
+

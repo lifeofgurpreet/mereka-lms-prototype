@@ -1,0 +1,31 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>{{ campaign_subject }}</title></head>
+<body style="margin: 0; background-color: #f6f8fb; padding: 24px 0;">
+  <div style="max-width: 640px; margin: 0 auto; border: 1px solid #e6e8ee; border-radius: 16px; overflow: hidden; background: #ffffff;">
+    <div style="padding: 24px; text-align: center; background: linear-gradient(120deg, {{ org_primary_color|default:'#ab3b78' }} 0%, {{ org_accent_color|default:'#237072' }} 100%);">
+      {% if org_logo_url %}
+      <img src="{{ org_logo_url }}" alt="{{ org_display_name|default:'Mereka Academy' }}" style="max-height: 56px; width: auto;">
+      {% else %}
+      <p style="margin: 0; font-family: 'Lato', Arial, sans-serif; font-size: 20px; font-weight: 700; color: #ffffff;">{{ org_display_name|default:"Mereka Academy" }}</p>
+      {% endif %}
+    </div>
+    <div style="padding: 30px 32px; font-family: 'Poppins', Arial, sans-serif; color: #1f2937; line-height: 1.6;">
+      <div style="margin: 0 0 22px 0;">
+        {{ campaign_body }}
+      </div>
+      {% if campaign_cta_url %}
+      <div style="text-align: center; margin: 0 0 24px 0;">
+        <a href="{{ campaign_cta_url }}" style="display: inline-block; padding: 12px 28px; border-radius: 9999px; text-decoration: none; background-color: {{ org_primary_color|default:'#ab3b78' }}; color: #ffffff; font-weight: 600;">{{ campaign_cta_text|default:"Learn More" }}</a>
+      </div>
+      {% endif %}
+      <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 28px 0 16px 0;">
+      <p style="margin: 0; font-size: 12px; color: #6b7280;">
+        {{ org_display_name|default:"Mereka Academy" }}
+        {% if unsubscribe_url %} · <a href="{{ unsubscribe_url }}" style="color: {{ org_accent_color|default:'#237072' }}; text-decoration: none;">{% trans "Unsubscribe" %}</a>{% endif %}
+      </p>
+    </div>
+  </div>
+</body>
+</html>

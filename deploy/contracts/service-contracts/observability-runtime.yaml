@@ -1,0 +1,39 @@
+version: 1
+service: observability-runtime
+service_family: observability_runtime
+service_type: platform_support_runtime
+owning_repo: mereka-lms
+deployment_repo: bbi-infrastructure
+high_risk_surface: observability_release
+deployment_surfaces:
+  - gitops_overlay
+  - secret_source
+  - runbook_surface
+  - evidence_surface
+environment_surfaces:
+  - dev
+  - prod
+image_source:
+  repo_owner: bbi-infrastructure
+  source_surfaces:
+    - docs/policies/operations/OBSERVABILITY_OWNERSHIP.md
+    - specs/observability-stack_spec.md
+secret_surfaces:
+  - specs/secrets-management_spec.md
+runbook_surfaces:
+  - docs/ops/runbooks/OBSERVABILITY_QUICKSTART.md
+  - docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md
+  - docs/ops/runbooks/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md
+evidence_surfaces:
+  - docs/status/readiness/OBSERVABILITY_FIRST_CLASS_READINESS_REPORT.md
+review_groups:
+  - platform
+  - release
+review_groups_optional:
+  - architecture
+infra_counterpart_expectation: true
+change_classes:
+  - deployment_affecting_change
+  - secret_surface_change
+unknowns:
+  - Monitoring stack application paths, dashboards-as-code ownership boundaries, and alert-route realization live outside this repo and are not yet crosswalked.

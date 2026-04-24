@@ -1,0 +1,43 @@
+version: 1
+owner: Docs Lead
+last_updated: "2026-04-14"
+scope: extracted merge-back review branches for docs/rebased-intake-20260413
+allowed_statuses:
+  - planned
+  - extracted
+  - extracted_validated
+  - pr_open_draft
+  - merged
+  - superseded
+  - handed_off
+executions:
+  - wave_id: wave-0a-concepts-root-authority
+    branch: docs/wave-0a-concepts-root-authority-20260414-v2
+    tip_commit: 7c39f2377
+    status: superseded
+    pr_url: https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1727
+    superseded_by_wave: wave-0b-architecture-root-authority
+  - wave_id: wave-0b-architecture-root-authority
+    branch: docs/wave-0b-architecture-root-authority-20260414-v2
+    tip_commit: dc5db65dd
+    status: merged
+    pr_url: https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1731
+    merged_commit: 2279cfb8b19fe5aaaa28d824d3ad59de2f5bc0e9
+  - wave_id: wave-1-control-plane
+    branch: docs/wave-1-control-plane-20260414-v2
+    tip_commit: 0c2697bed
+    status: merged
+    pr_url: https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1730
+    merged_commit: 39b1127426aff886648ae11742d5db2c97c5b9e4
+  - wave_id: wave-2a-packet-normalization
+    branch: docs/wave-2a-packet-normalization-20260414-v2
+    tip_commit: f8ad4ef64
+    status: merged
+    pr_url: https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1728
+    merged_commit: 62233a7893e39a48f6f03e80685fd8ab2cf9d907
+  - wave_id: wave-2b-reset-wave-normalization
+    branch: docs/wave-2b-reset-wave-normalization-20260414-v2
+    tip_commit: 52d5dfb9c
+    status: merged
+    pr_url: https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1729
+    merged_commit: 7e5bdf410a463f50652089ad408115bff94940a1

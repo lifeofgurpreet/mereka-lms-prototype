@@ -1,0 +1,86 @@
+version: 1
+owner: Platform Team
+status: canonical
+last_reviewed: 2026-04-14
+tokens:
+- token: auth.authorization.roles
+  domain: auth
+  description: Role ownership, authorization, and access boundary rules.
+- token: auth.cookie-boundary
+  domain: auth
+  description: Session, CSRF, and cookie boundary rules.
+- token: auth.oidc
+  domain: auth
+  description: OIDC, SSO, and identity provider integration.
+- token: build.gitops-promotion
+  domain: build
+  description: GitOps release promotion and deployment lane rules.
+- token: build.image.registry
+  domain: build
+  description: Image registries and image distribution rules.
+- token: build.version-pin
+  domain: build
+  description: Version pinning, upgrade floors, and reproducibility rules.
+- token: commerce.reconciliation
+  domain: commerce
+  description: Commerce system-of-record and reconciliation rules.
+- token: commerce.system-of-record
+  description: System-of-record ownership for commerce data and fulfillment state.
+- token: data.deletion
+  description: Deletion workflows and destructive data lifecycle controls.
+- token: data.pii
+  domain: data
+  description: PII handling and data classification.
+- token: data.retention
+  domain: data
+  description: Retention, deletion, and evidence retention policy.
+- token: docs.catalog
+  domain: docs
+  description: Catalog generation, metadata indexing, and navigation surfaces.
+- token: docs.evidence
+  domain: docs
+  description: Evidence-pack structure and proof-surface rules.
+- token: docs.policy
+  domain: docs
+  description: Documentation policy and governance rules.
+- token: docs.status
+  domain: docs
+  description: Active reporting, readiness, and status-surface rules.
+- token: events.schema
+  domain: events
+  description: Event envelope or schema contract rules.
+- token: events.transport
+  domain: events
+  description: Event transport neutrality and delivery rules.
+- token: frontend.brand.tokens
+  domain: frontend
+  description: Branding token, theming, and generated styling contracts.
+- token: frontend.composition
+  domain: frontend
+  description: Frontend composition, runtime wiring, and dependency alignment.
+- token: frontend.i18n
+  description: Frontend translation, locale, and message delivery rules.
+- token: platform.change-policy
+  description: Platform-level rollout, deprecation, and change lifecycle rules.
+- token: platform.control-plane
+  domain: platform
+  description: Control-plane boundaries and system ownership layers.
+- token: platform.extension-model
+  description: Internal extension/plugin/versioning rules for platform packages.
+- token: platform.repo-boundary
+  domain: platform
+  description: Cross-repo or contract ownership boundaries.
+- token: runtime.async-task
+  domain: runtime
+  description: User-facing async task or background processing contracts.
+- token: runtime.cache
+  domain: runtime
+  description: Cache topology, invalidation, and consistency rules.
+- token: tenant.domain-boundary
+  description: Tenant/domain boundary contract and cross-domain scoping.
+- token: tenant.isolation
+  domain: tenant
+  description: Multi-tenant isolation, tenant boundaries, and ownership.
+- token: tenant.lifecycle
+  domain: tenant
+  description: Tenant creation, activation, retirement, and change lifecycle.

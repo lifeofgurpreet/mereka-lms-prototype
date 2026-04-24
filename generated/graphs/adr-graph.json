@@ -1,0 +1,511 @@
+{
+  "nodes": [
+    {
+      "id": "ADR-001",
+      "type": "domain",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-002",
+      "type": "domain",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-003",
+      "type": "domain",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-004",
+      "type": "domain",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-005",
+      "type": "migration",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-006",
+      "type": "domain",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-007",
+      "type": "migration",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-008",
+      "type": "domain",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-009",
+      "type": "domain",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-010",
+      "type": "domain",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-011",
+      "type": "domain",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-012",
+      "type": "migration",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-013",
+      "type": "exception",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-014",
+      "type": "domain",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-015",
+      "type": "domain",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-016",
+      "type": "domain",
+      "status": "deferred"
+    },
+    {
+      "id": "ADR-017",
+      "type": "migration",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-018",
+      "type": "migration",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-019",
+      "type": "foundation",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-020",
+      "type": "domain",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-021",
+      "type": "foundation",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-022",
+      "type": "exception",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-023",
+      "type": "domain",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-024",
+      "type": "foundation",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-025",
+      "type": "domain",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-026",
+      "type": "domain",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-027",
+      "type": "foundation",
+      "status": "proposed"
+    },
+    {
+      "id": "ADR-028",
+      "type": "foundation",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-029",
+      "type": "foundation",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-030",
+      "type": "foundation",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-031",
+      "type": "foundation",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-032",
+      "type": "foundation",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-033",
+      "type": "foundation",
+      "status": "accepted"
+    },
+    {
+      "id": "ADR-034",
+      "type": "domain",
+      "status": "proposed"
+    },
+    {
+      "id": "ADR-035",
+      "type": "domain",
+      "status": "proposed"
+    },
+    {
+      "id": "ADR-036",
+      "type": "domain",
+      "status": "proposed"
+    },
+    {
+      "id": "ADR-037",
+      "type": "domain",
+      "status": "proposed"
+    },
+    {
+      "id": "ADR-038",
+      "type": "domain",
+      "status": "proposed"
+    },
+    {
+      "id": "ADR-039",
+      "type": "domain",
+      "status": "proposed"
+    },
+    {
+      "id": "ADR-040",
+      "type": "domain",
+      "status": "proposed"
+    },
+    {
+      "id": "ADR-041",
+      "type": "domain",
+      "status": "proposed"
+    }
+  ],
+  "links": [
+    {
+      "source": "ADR-013",
+      "target": "ADR-029",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-013",
+      "target": "ADR-031",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-013",
+      "target": "ADR-022",
+      "kind": "read_next"
+    },
+    {
+      "source": "ADR-018",
+      "target": "ADR-028",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-018",
+      "target": "ADR-033",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-022",
+      "target": "ADR-029",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-022",
+      "target": "ADR-031",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-022",
+      "target": "ADR-002",
+      "kind": "amends"
+    },
+    {
+      "source": "ADR-022",
+      "target": "ADR-013",
+      "kind": "amends"
+    },
+    {
+      "source": "ADR-028",
+      "target": "ADR-003",
+      "kind": "amends"
+    },
+    {
+      "source": "ADR-028",
+      "target": "ADR-019",
+      "kind": "amends"
+    },
+    {
+      "source": "ADR-028",
+      "target": "ADR-021",
+      "kind": "amends"
+    },
+    {
+      "source": "ADR-028",
+      "target": "ADR-026",
+      "kind": "amends"
+    },
+    {
+      "source": "ADR-028",
+      "target": "ADR-027",
+      "kind": "amends"
+    },
+    {
+      "source": "ADR-028",
+      "target": "ADR-029",
+      "kind": "read_next"
+    },
+    {
+      "source": "ADR-028",
+      "target": "ADR-030",
+      "kind": "read_next"
+    },
+    {
+      "source": "ADR-028",
+      "target": "ADR-031",
+      "kind": "read_next"
+    },
+    {
+      "source": "ADR-028",
+      "target": "ADR-032",
+      "kind": "read_next"
+    },
+    {
+      "source": "ADR-028",
+      "target": "ADR-033",
+      "kind": "read_next"
+    },
+    {
+      "source": "ADR-029",
+      "target": "ADR-028",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-029",
+      "target": "ADR-002",
+      "kind": "amends"
+    },
+    {
+      "source": "ADR-029",
+      "target": "ADR-005",
+      "kind": "amends"
+    },
+    {
+      "source": "ADR-029",
+      "target": "ADR-022",
+      "kind": "amends"
+    },
+    {
+      "source": "ADR-029",
+      "target": "ADR-024",
+      "kind": "amends"
+    },
+    {
+      "source": "ADR-029",
+      "target": "ADR-033",
+      "kind": "read_next"
+    },
+    {
+      "source": "ADR-030",
+      "target": "ADR-028",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-030",
+      "target": "ADR-031",
+      "kind": "read_next"
+    },
+    {
+      "source": "ADR-031",
+      "target": "ADR-028",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-031",
+      "target": "ADR-030",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-031",
+      "target": "ADR-013",
+      "kind": "amends"
+    },
+    {
+      "source": "ADR-031",
+      "target": "ADR-022",
+      "kind": "amends"
+    },
+    {
+      "source": "ADR-032",
+      "target": "ADR-028",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-032",
+      "target": "ADR-031",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-032",
+      "target": "ADR-033",
+      "kind": "read_next"
+    },
+    {
+      "source": "ADR-033",
+      "target": "ADR-028",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-033",
+      "target": "ADR-029",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-033",
+      "target": "ADR-032",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-033",
+      "target": "ADR-024",
+      "kind": "amends"
+    },
+    {
+      "source": "ADR-034",
+      "target": "ADR-028",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-034",
+      "target": "ADR-008",
+      "kind": "amends"
+    },
+    {
+      "source": "ADR-034",
+      "target": "ADR-037",
+      "kind": "read_next"
+    },
+    {
+      "source": "ADR-035",
+      "target": "ADR-028",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-035",
+      "target": "ADR-029",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-035",
+      "target": "ADR-014",
+      "kind": "amends"
+    },
+    {
+      "source": "ADR-035",
+      "target": "ADR-021",
+      "kind": "amends"
+    },
+    {
+      "source": "ADR-036",
+      "target": "ADR-028",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-036",
+      "target": "ADR-033",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-037",
+      "target": "ADR-034",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-038",
+      "target": "ADR-028",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-038",
+      "target": "ADR-033",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-038",
+      "target": "ADR-018",
+      "kind": "amends"
+    },
+    {
+      "source": "ADR-039",
+      "target": "ADR-035",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-040",
+      "target": "ADR-028",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-040",
+      "target": "ADR-030",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-040",
+      "target": "ADR-006",
+      "kind": "amends"
+    },
+    {
+      "source": "ADR-040",
+      "target": "ADR-021",
+      "kind": "amends"
+    },
+    {
+      "source": "ADR-041",
+      "target": "ADR-029",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-041",
+      "target": "ADR-033",
+      "kind": "depends_on"
+    },
+    {
+      "source": "ADR-041",
+      "target": "ADR-029",
+      "kind": "amends"
+    },
+    {
+      "source": "ADR-041",
+      "target": "ADR-033",
+      "kind": "amends"
+    }
+  ]
+}

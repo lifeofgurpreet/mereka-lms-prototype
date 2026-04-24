@@ -1,0 +1,155 @@
+version: 2
+generated_from: adr-frontmatter
+entries:
+  ADR-001:
+    path: docs/adr/historical/001-mongodb-atlas.md
+    bucket: historical
+    decision_type: domain
+  ADR-002:
+    path: docs/adr/historical/002-multisite-architecture.md
+    bucket: historical
+    decision_type: domain
+  ADR-003:
+    path: docs/adr/historical/003-image-build-pipeline.md
+    bucket: historical
+    decision_type: domain
+  ADR-004:
+    path: docs/adr/historical/004-secrets-management.md
+    bucket: historical
+    decision_type: domain
+  ADR-005:
+    path: docs/adr/historical/005-domain-migration.md
+    bucket: historical
+    decision_type: migration
+  ADR-006:
+    path: docs/adr/006-tutor-plugin-based-configuration.md
+    bucket: accepted
+    decision_type: domain
+  ADR-007:
+    path: docs/adr/historical/007-forum-migration-ruby-to-python.md
+    bucket: historical
+    decision_type: migration
+  ADR-008:
+    path: docs/adr/historical/008-redis-streams-event-bus.md
+    bucket: historical
+    decision_type: domain
+  ADR-009:
+    path: docs/adr/historical/009-in-cluster-storage.md
+    bucket: historical
+    decision_type: domain
+  ADR-010:
+    path: docs/adr/historical/010-monorepo-architecture.md
+    bucket: historical
+    decision_type: domain
+  ADR-012:
+    path: docs/adr/historical/012-no-runtime-css-overlay.md
+    bucket: historical
+    decision_type: migration
+  ADR-013:
+    path: docs/adr/013-studio-sso-bypass-middleware.md
+    bucket: accepted
+    decision_type: exception
+  ADR-018:
+    path: docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md
+    bucket: accepted
+    decision_type: migration
+  ADR-019:
+    path: docs/adr/019-tutor-upgrade-policy.md
+    bucket: accepted
+    decision_type: foundation
+  ADR-021:
+    path: docs/adr/021-openedx-tutor-methodology.md
+    bucket: accepted
+    decision_type: foundation
+  ADR-022:
+    path: docs/adr/022-session-cookie-samesite-policy.md
+    bucket: accepted
+    decision_type: exception
+  ADR-023:
+    path: docs/adr/historical/023-enterprise-images-ghcr-migration.md
+    bucket: historical
+    decision_type: domain
+  ADR-024:
+    path: docs/adr/024-multi-tenancy-true-tenants.md
+    bucket: accepted
+    decision_type: foundation
+  ADR-025:
+    path: docs/adr/025-csp-nonce-migration.md
+    bucket: accepted
+    decision_type: domain
+  ADR-026:
+    path: docs/adr/historical/026-cicd-build-pipeline-lessons.md
+    bucket: historical
+    decision_type: domain
+  ADR-027:
+    path: docs/adr/rfc/027-deployment-contract-ownership-lanes.md
+    bucket: rfc
+    decision_type: foundation
+  ADR-028:
+    path: docs/adr/028-platform-sources-of-truth-and-control-planes.md
+    bucket: accepted
+    decision_type: foundation
+  ADR-029:
+    path: docs/adr/029-identity-session-and-domain-boundary-strategy.md
+    bucket: accepted
+    decision_type: foundation
+  ADR-030:
+    path: docs/adr/030-feature-flag-and-rollout-lifecycle.md
+    bucket: accepted
+    decision_type: foundation
+  ADR-031:
+    path: docs/adr/031-deprecation-and-removal-policy.md
+    bucket: accepted
+    decision_type: foundation
+  ADR-032:
+    path: docs/adr/032-data-governance-pii-retention-and-deletion.md
+    bucket: accepted
+    decision_type: foundation
+  ADR-033:
+    path: docs/adr/033-tenant-lifecycle-contract.md
+    bucket: accepted
+    decision_type: foundation
+  ADR-034:
+    path: docs/adr/rfc/034-event-contract-and-transport-independence.md
+    bucket: rfc
+    decision_type: domain
+  ADR-035:
+    path: docs/adr/rfc/035-frontend-runtime-composition-and-dependency-alignment.md
+    bucket: rfc
+    decision_type: domain
+  ADR-036:
+    path: docs/adr/rfc/036-cache-topology-and-invalidation-strategy.md
+    bucket: rfc
+    decision_type: domain
+  ADR-037:
+    path: docs/adr/rfc/037-async-task-user-facing-contract.md
+    bucket: rfc
+    decision_type: domain
+  ADR-038:
+    path: docs/adr/rfc/038-commerce-system-of-record-and-reconciliation.md
+    bucket: rfc
+    decision_type: domain
+  ADR-039:
+    path: docs/adr/rfc/039-translations-and-internationalization-strategy.md
+    bucket: rfc
+    decision_type: domain
+  ADR-040:
+    path: docs/adr/rfc/040-internal-packages-plugins-and-versioning-policy.md
+    bucket: rfc
+    decision_type: domain
+  ADR-041:
+    path: docs/adr/rfc/041-authorization-and-role-boundary-model.md
+    bucket: rfc
+    decision_type: domain
+  ADR-042:
+    path: docs/adr/rfc/042-production-py-writer-authority.md
+    bucket: rfc
+    decision_type: foundation
+  RFC-claim-based-role-sync:
+    path: docs/adr/rfc/RFC-claim-based-role-sync.md
+    bucket: rfc
+    decision_type: domain
+  RFC-learning-slot-expansion-proposal:
+    path: docs/adr/rfc/RFC-learning-slot-expansion-proposal.md
+    bucket: rfc
+    decision_type: domain

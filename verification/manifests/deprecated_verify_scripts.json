@@ -1,0 +1,155 @@
+{
+  "version": "1",
+  "scripts": [
+    {
+      "path": "scripts/qa/deprecated/verify-api-contracts.sh",
+      "archived_at": "2026-03-05",
+      "reason": "Unreferenced legacy point-check; consolidated under canonical release gate entrypoint.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-build-optimizations.sh",
+      "archived_at": "2026-03-05",
+      "reason": "Unreferenced legacy point-check; consolidated under canonical release gate entrypoint.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-capacity-planning.sh",
+      "archived_at": "2026-03-05",
+      "reason": "Unreferenced legacy point-check; consolidated under canonical release gate entrypoint.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-data-retention.sh",
+      "archived_at": "2026-03-05",
+      "reason": "Unreferenced legacy point-check; consolidated under canonical release gate entrypoint.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-devcontainer.sh",
+      "archived_at": "2026-03-05",
+      "reason": "Unreferenced legacy point-check; consolidated under canonical release gate entrypoint.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-bash-strict-mode.sh",
+      "archived_at": "2026-03-06",
+      "reason": "Unbound exploratory check with zero references; strict-mode posture is already enforced by release-gate scripts and repo lint contracts.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-ux-audit-coverage.sh",
+      "archived_at": "2026-03-06",
+      "reason": "Unbound exploratory check with zero references and stale section contracts that no longer match the active UI/UX audit report.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-k8s-validation-job.sh",
+      "archived_at": "2026-03-06",
+      "reason": "Unbound exploratory check with stale kubeconform bootstrap assumptions and broken pass/fail counters under strict-mode shell semantics.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-lint-job.sh",
+      "archived_at": "2026-03-06",
+      "reason": "Unbound exploratory check with broken pass/fail counters under strict-mode shell semantics and no CI/workflow binding.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-gh-actions-budget-config.sh",
+      "archived_at": "2026-03-06",
+      "reason": "Unbound exploratory check for non-existent GitHub Actions budget config with strict-mode counter semantics that terminate on first warning.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-gh-actions-cost-dashboard.sh",
+      "archived_at": "2026-03-06",
+      "reason": "Unbound exploratory check for non-existent GitHub Actions cost dashboard with strict-mode counter semantics that terminate on first warning.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-gh-actions-cost-tracking.sh",
+      "archived_at": "2026-03-06",
+      "reason": "Unbound exploratory check for non-existent GitHub Actions cost tracking script with strict-mode counter semantics that terminate on first warning.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-cicd-image-build.sh",
+      "archived_at": "2026-03-06",
+      "reason": "Unbound exploratory check with stale CI contract assumptions (deprecated build inputs) no longer matching the active build workflow.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-cicd-scheduled-ops.sh",
+      "archived_at": "2026-03-06",
+      "reason": "Unbound exploratory check with stale scheduled-ops workflow assumptions no longer matching active runtime gate workflows.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-patch-modularity.sh",
+      "archived_at": "2026-03-06",
+      "reason": "Unbound exploratory check with stale assumptions about direct patch-function invocation in apply-patches.sh after plugin-driven patch orchestration changes.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-tutor-patches-inventory.sh",
+      "archived_at": "2026-03-06",
+      "reason": "Unbound exploratory check with stale inventory/parser assumptions (including non-Python plugin companion files) that no longer match current Tutor plugin contract layout.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-email-ace-channels.sh",
+      "archived_at": "2026-03-06",
+      "reason": "Unbound exploratory check that reports warning-only posture when email plugin/config surfaces are absent, providing low signal for current architecture.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-email-bulk-campaigns.sh",
+      "archived_at": "2026-03-06",
+      "reason": "Unbound exploratory check against optional bulk-email plugin paths that are absent in the active stack and currently emit warning-only results.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-email-digests-code.sh",
+      "archived_at": "2026-03-06",
+      "reason": "Unbound exploratory check against optional email-digests plugin paths that are absent in the active stack and currently emit warning-only results.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-email-inapp-code.sh",
+      "archived_at": "2026-03-06",
+      "reason": "Unbound exploratory check against optional in-app notifications plugin paths that are absent in the active stack and currently emit warning-only results.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-email-push-code.sh",
+      "archived_at": "2026-03-06",
+      "reason": "Unbound exploratory check against optional push-notifications plugin paths that are absent in the active stack and currently emit warning-only results.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-footer-slot-only.sh",
+      "archived_at": "2026-04-19",
+      "reason": "Overlapping scope superseded by verify-footer-parity.sh (canonical gate). AC-FTR-301/302/304 checks are fully covered by the parity gate. Bead: mereka-lms-1kwf.1 PR-B.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-footer-slot-migration.sh",
+      "archived_at": "2026-04-19",
+      "reason": "Transient migration-phase verifier; migration complete. Coverage subsumed by verify-footer-parity.sh canonical gate. Bead: mereka-lms-1kwf.1 PR-B.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-mfe-footer-slot-migration.sh",
+      "archived_at": "2026-04-19",
+      "reason": "Transient MFE slot migration verifier; migration complete. MFE footer slot coverage subsumed by verify-footer-parity.sh canonical gate. Bead: mereka-lms-1kwf.1 PR-B.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    },
+    {
+      "path": "scripts/qa/deprecated/verify-footer-slot-evidence-rollback.sh",
+      "archived_at": "2026-04-19",
+      "reason": "Rollback-guard verifier for a one-time migration; migration complete and stable. Evidence-rollback risk now monitored by verify-footer-parity.sh. Bead: mereka-lms-1kwf.1 PR-B.",
+      "replacement_entrypoint": "scripts/qa/run-release-verification-gates.sh"
+    }
+  ]
+}

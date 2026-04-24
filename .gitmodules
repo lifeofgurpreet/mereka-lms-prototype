@@ -1,0 +1,6 @@
+[submodule "hubspot-webhook-mct"]
+	path = hubspot-webhook-mct
+	url = https://github.com/Biji-Biji-Initiative/hubspot-webhook-mct.git
+[submodule "tmp/frontend-app-authn"]
+	path = tmp/frontend-app-authn
+	url = https://github.com/openedx/frontend-app-authn

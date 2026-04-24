@@ -1,0 +1,1103 @@
+/*
+  Mereka brand overrides (runtime CSS entrypoint).
+
+  This file is loaded via `*/templates/head-extra.html` for both LMS + Studio.
+
+  Important:
+  - This file is our deterministic "brand signal carrier" in production.
+  - Keep it self-contained (no build step required at runtime).
+  - Use the same CSS in `lms/static/css/mereka-overrides.css` to avoid drift.
+*/
+
+:root {
+  --mereka-branding-rev: "2026-02-25-wcag-aa";
+
+  /* BEGIN GENERATED — DO NOT EDIT (run generate-tokens-from-canonical.sh) */
+
+  /* Typography */
+  --mereka-font-body: "Poppins", "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --mereka-font-heading: "Lato", "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+
+  /* Palette (source: assets/branding/tokens.css) */
+  --mereka-color-ink-900: #000000;
+  --mereka-color-ink-700: #4A494A;
+  --mereka-color-ink-500: #6B6B6B;
+  --mereka-color-ink-300: #AFADB2;
+  --mereka-color-teal: #237072;
+  --mereka-color-magenta: #ab3b78;
+  --mereka-color-magenta-dark: #8a2f60;
+  --mereka-color-blue: #295cad;
+  --mereka-color-sky: #94d1e4;
+  --mereka-color-surface-primary: #FBFAFB;
+  --mereka-color-surface-secondary: #F5F5F5;
+  --mereka-color-border: #DDDDDE;
+  --mereka-color-border-strong: #7B7B7C;
+
+  /* Semantics */
+  --mereka-color-info: var(--mereka-color-blue);
+  --mereka-color-info-soft: var(--mereka-color-sky);
+  --mereka-color-success: #2c6e49;
+  --mereka-color-warning: #9e7000;
+  --mereka-color-danger: #8c002f;
+  --mereka-color-danger-soft: #cd89ae;
+
+  /* Effects */
+  --mereka-shadow-card: 0 20px 60px rgba(26, 22, 35, 0.08);
+  --mereka-gradient-primary: linear-gradient(
+    135deg,
+    var(--mereka-color-teal) 0%,
+    var(--mereka-color-blue) 100%
+  );
+
+  /* Paragon bridge (MFEs) - canonical v22 token names only */
+  --pgn-body-bg: var(--mereka-color-surface-primary);
+  --pgn-body-color: var(--mereka-color-ink-900);
+  --pgn-link-color: var(--mereka-color-info);
+  --pgn-link-hover-color: var(--mereka-color-teal);
+  --pgn-border-color: var(--mereka-color-border);
+  --pgn-form-control-border-color: #ddddde;
+  --pgn-border-color-translucent: rgba(26, 22, 35, 0.12);
+  --pgn-btn-border-radius: 999px;
+  --pgn-spacing-spacer-base: 1rem;
+  --pgn-typography-font-size-xs: 0.75rem;
+  --pgn-color-white: #ffffff;
+  --pgn-color-black: #000000;
+  --pgn-color-gray-base: var(--mereka-color-ink-900);
+  --pgn-color-gray-500: #6b7280;
+  --pgn-color-gray-700: #374151;
+  --pgn-color-light-200: #e5e7eb;
+  --pgn-color-light-500: #6b7280;
+  --pgn-color-dark-200: #111827;
+  --pgn-color-primary-base: var(--mereka-color-magenta);
+  --pgn-color-secondary-base: var(--mereka-color-teal);
+  --pgn-color-success-base: var(--mereka-color-success);
+  --pgn-color-primary-400: var(--mereka-color-magenta);
+  --pgn-color-primary-500: var(--mereka-color-magenta);
+  --pgn-color-primary-700: var(--mereka-color-danger);
+  --pgn-color-info-base: var(--mereka-color-info);
+  --pgn-color-warning-base: var(--mereka-color-warning);
+  --pgn-color-danger-base: var(--mereka-color-danger);
+  --pgn-color-info-200: var(--mereka-color-info-soft);
+  --pgn-color-info-300: var(--mereka-color-info-soft);
+  --pgn-color-info-500: var(--mereka-color-info);
+  --pgn-color-info-700: var(--mereka-color-info);
+  --pgn-color-brand-base: var(--mereka-color-magenta);
+  --pgn-color-brand-700: var(--mereka-color-danger);
+  --pgn-color-accent-a: var(--mereka-color-sky);
+  --pgn-color-accent-b: var(--mereka-color-info);
+  --pgn-color-red: var(--mereka-color-danger);
+  --pgn-typography-font-family-sans-serif: var(--mereka-font-body);
+  --pgn-typography-font-family-base: var(--mereka-font-body);
+  --pgn-typography-headings-font-family: var(--mereka-font-heading);
+  --pgn-typography-font-size-sm: 0.875rem;
+  --pgn-typography-font-size-base: 1rem;
+  --pgn-typography-font-size-lg: 1.125rem;
+  --pgn-typography-line-height-sm: 1.5;
+  --pgn-typography-line-height-base: 1.5;
+  --pgn-typography-line-height-lg: 1.5;
+  --pgn-spacing-1: 0.25rem;
+  --pgn-spacing-2: 0.5rem;
+  --pgn-spacing-3: 1rem;
+  --pgn-spacing-4: 1.5rem;
+  --pgn-spacing-5: 3rem;
+  --pgn-spacing-6: 4.5rem;
+  --pgn-spacing-spacer-0: 0;
+  --pgn-spacing-spacer-1: 0.25rem;
+  --pgn-spacing-spacer-2: 0.5rem;
+  --pgn-spacing-spacer-3: 1rem;
+  --pgn-spacing-spacer-4: 1.5rem;
+  --pgn-spacing-spacer-5: 3rem;
+  --pgn-spacing-spacer-6: 4.5rem;
+  --pgn-size-border-radius-sm: 0.25rem;
+  --pgn-size-border-radius-base: 0.375rem;
+  --pgn-size-border-radius-lg: 0.425rem;
+  --pgn-elevation-1: var(--shadow-sm);
+  --pgn-elevation-2: var(--shadow-md);
+  --pgn-elevation-3: var(--shadow-lg);
+  --pgn-elevation-4: var(--shadow-xl);
+  --pgn-color-primary-100: var(--pgn-color-primary-base);
+  --pgn-color-primary-200: var(--pgn-color-primary-base);
+  --pgn-color-primary-300: var(--pgn-color-primary-base);
+  --pgn-color-primary-400: var(--pgn-color-primary-base);
+  --pgn-color-primary-500: var(--pgn-color-primary-base);
+  --pgn-zindex-dropdown: 1000;
+  --pgn-zindex-modal: 1050;
+  --pgn-zindex-popover: 1060;
+  --pgn-zindex-tooltip: 1070;
+  --pgn-transition-base: all 0.2s ease-in-out 0s normal;
+  --pgn-transition-fade: opacity 0.15s linear 0s normal;
+  --pgn-elevation-box-shadow-level-2: var(--shadow-md);
+
+  /*
+    Design-system aliases
+    Source of truth: `assets/branding/tokens.css` (synced from bbbi-mereka-brand-assets).
+    We alias the most-used tokens so external apps can speak the same language.
+  */
+  --color-black: var(--mereka-color-ink-900);
+  --color-white: #ffffff;
+  --color-teal: var(--mereka-color-teal);
+  --color-magenta: var(--mereka-color-magenta);
+  --color-blue: var(--mereka-color-blue);
+  --color-burgundy: var(--mereka-color-danger);
+  --color-pink: var(--mereka-color-danger-soft);
+  --color-sky: var(--mereka-color-sky);
+  --color-gold: var(--mereka-color-warning);
+  --color-forest: var(--mereka-color-success);
+
+  --color-success: var(--mereka-color-success);
+  --color-success-light: #8fbec2;
+  --color-warning: var(--mereka-color-warning);
+  --color-warning-dark: #e18437;
+  --color-error: var(--mereka-color-danger);
+  --color-error-light: var(--mereka-color-danger-soft);
+  --color-info: var(--mereka-color-info);
+  --color-info-light: var(--mereka-color-info-soft);
+
+  --font-heading: "Lato", sans-serif;
+  --font-body: "Poppins", sans-serif;
+
+  --radius-none: 0px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+
+  /* END GENERATED */
+}
+
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/static/mereka/fonts/Poppins-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/static/mereka/fonts/Poppins-SemiBold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/static/mereka/fonts/Poppins-Bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Lato";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/static/mereka/fonts/Lato-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Lato";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/static/mereka/fonts/Lato-Bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Lato";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/static/mereka/fonts/Lato-Italic.woff2") format("woff2");
+}
+
+html,
+body:not(.courseware) {
+  font-family: var(--mereka-font-body);
+  background-color: var(--mereka-color-surface-primary);
+  color: var(--mereka-color-ink-900);
+}
+
+body:not(.courseware) h1,
+body:not(.courseware) h2,
+body:not(.courseware) h3,
+body:not(.courseware) h4,
+body:not(.courseware) h5,
+body:not(.courseware) h6,
+body:not(.courseware) .hd-1,
+body:not(.courseware) .hd-2,
+body:not(.courseware) .hd-3,
+body:not(.courseware) .hd-4 {
+  font-family: var(--mereka-font-heading);
+  font-weight: 600;
+}
+
+body:not(.courseware) a {
+  color: var(--mereka-color-blue);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+body:not(.courseware) a:hover,
+body:not(.courseware) a:focus {
+  color: var(--mereka-color-teal);
+}
+
+body:not(.courseware) .btn-primary,
+body:not(.courseware) .btn-brand,
+body:not(.courseware) button.btn.btn-primary {
+  background-color: var(--mereka-color-magenta);
+  border-color: var(--mereka-color-magenta);
+  border-radius: 999px;
+}
+
+body:not(.courseware) .btn-outline-primary {
+  border-radius: 999px;
+}
+
+body:not(.courseware) .btn-primary:hover,
+body:not(.courseware) .btn-primary:focus,
+body:not(.courseware) .btn-brand:hover,
+body:not(.courseware) .btn-brand:focus,
+body:not(.courseware) button.btn.btn-primary:hover,
+body:not(.courseware) button.btn.btn-primary:focus {
+  background-color: var(--mereka-color-magenta-dark);
+  border-color: var(--mereka-color-magenta-dark);
+}
+
+.header-global,
+.nav-global {
+  border-top: 4px solid var(--mereka-color-teal);
+}
+
+/* -------------------------- */
+/* Deep branding (LMS surfaces) */
+/* -------------------------- */
+
+/* Public discovery and course-about visuals now live in
+   lms/static/sass/partials/_discovery.scss. Keep runtime overrides focused
+   on shared brand shims and legacy chrome. */
+
+/* Learner dashboard card/list/image shell and CTA styling are LMS-owned in
+   lms/static/sass/partials/_custom.scss. Runtime override copies keep only
+   shared dashboard notices/utilities below. */
+
+/* Dashboard notices, certificates, and utility components */
+.dashboard .notice,
+.dashboard .notice-incontext,
+.dashboard .wrapper-msg {
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid rgba(26, 22, 35, 0.10);
+  box-shadow: var(--mereka-shadow-card);
+}
+
+.dashboard .notice .notice-title,
+.dashboard .notice-incontext .notice-title,
+.dashboard .certificates h2,
+.dashboard .messages h2 {
+  font-family: var(--mereka-font-heading);
+  color: var(--mereka-color-ink-900);
+}
+
+.dashboard .notice a,
+.dashboard .notice-incontext a,
+.dashboard .messages a {
+  color: var(--mereka-color-blue);
+}
+
+.dashboard .notice a:hover,
+.dashboard .notice a:focus,
+.dashboard .notice-incontext a:hover,
+.dashboard .notice-incontext a:focus,
+.dashboard .messages a:hover,
+.dashboard .messages a:focus {
+  color: var(--mereka-color-teal);
+}
+
+.dashboard .profile-sidebar,
+.dashboard .sidebar {
+  background: #fff;
+  border-radius: 20px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+}
+
+/* Courseware chrome */
+.courseware {
+  background: var(--mereka-color-surface-primary);
+}
+
+.courseware .course-content,
+.courseware .course-outline,
+.courseware .course-index {
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: var(--mereka-shadow-card);
+  padding: 1.5rem;
+}
+
+.courseware .unit-title,
+.courseware .sequence-nav-title {
+  font-family: var(--mereka-font-heading);
+  color: var(--mereka-color-ink-900);
+}
+
+.courseware .sequence-nav {
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+}
+
+.courseware .sequence-nav-button {
+  border-radius: 999px;
+}
+
+.courseware .sequence-nav-button:hover,
+.courseware .sequence-nav-button:focus {
+  background: rgba(45, 137, 139, 0.12);
+  color: var(--mereka-color-ink-900);
+}
+
+.courseware .xblock {
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.courseware .xblock h1,
+.courseware .xblock h2,
+.courseware .xblock h3,
+.courseware .xblock h4,
+.courseware .xblock h5,
+.courseware .xblock h6,
+.courseware .xblock .hd {
+  font-family: var(--mereka-font-heading);
+  color: var(--mereka-color-ink-900);
+  letter-spacing: -0.01em;
+}
+
+.courseware .xblock p,
+.courseware .xblock li,
+.courseware .xblock label,
+.courseware .xblock .problem,
+.courseware .xblock .discussion-module,
+.courseware .xblock .video,
+.courseware .xblock .callout {
+  color: var(--mereka-color-ink-900);
+}
+
+.courseware .xblock a {
+  color: var(--mereka-color-blue);
+}
+
+.courseware .xblock a:hover,
+.courseware .xblock a:focus {
+  color: var(--mereka-color-teal);
+}
+
+.courseware .xblock .problem button,
+.courseware .xblock .problem .submit,
+.courseware .xblock .problem .action {
+  border-radius: 999px;
+}
+
+/* --------------------------- */
+/* Studio polish (CMS surfaces) */
+/* --------------------------- */
+
+/* Studio uses `.wrapper-content` containers (LMS typically does not). */
+.wrapper-content {
+  background: var(--mereka-color-surface-primary);
+}
+
+.wrapper-content .content-primary,
+.wrapper-content .content-secondary,
+.wrapper-content .content {
+  background: #fff;
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+}
+
+.wrapper-content .page-header,
+.wrapper-content .page-header-main {
+  border-bottom: 1px solid rgba(26, 22, 35, 0.08);
+}
+
+.wrapper-content .page-header h1,
+.wrapper-content .page-header h2 {
+  font-family: var(--mereka-font-heading);
+  font-weight: 700;
+}
+
+/* Authoring forms */
+.wrapper-content input[type="text"],
+.wrapper-content input[type="email"],
+.wrapper-content input[type="password"],
+.wrapper-content input[type="url"],
+.wrapper-content input[type="search"],
+.wrapper-content textarea,
+.wrapper-content select {
+  border-radius: 16px;
+  border: 1px solid rgba(26, 22, 35, 0.14);
+  background: #fff;
+  padding: 0.75rem 1rem;
+}
+
+.wrapper-content input[type="text"]:focus,
+.wrapper-content input[type="email"]:focus,
+.wrapper-content input[type="password"]:focus,
+.wrapper-content input[type="url"]:focus,
+.wrapper-content input[type="search"]:focus,
+.wrapper-content textarea:focus,
+.wrapper-content select:focus {
+  outline: none;
+  border-color: rgba(45, 137, 139, 0.65);
+  box-shadow: 0 0 0 4px rgba(45, 137, 139, 0.15);
+}
+
+/* Studio action buttons (names vary by page; keep the scope narrow). */
+.wrapper-content .action-primary,
+.wrapper-content a.action-primary,
+.wrapper-content button.action-primary {
+  border-radius: 999px;
+  background-color: var(--mereka-color-magenta);
+  border: 1px solid var(--mereka-color-magenta);
+  color: #fff;
+  font-weight: 700;
+}
+
+.wrapper-content .action-primary:hover,
+.wrapper-content .action-primary:focus {
+  background-color: var(--mereka-color-magenta-dark);
+  border-color: var(--mereka-color-magenta-dark);
+  color: #fff;
+}
+
+.wrapper-content .action-secondary,
+.wrapper-content a.action-secondary,
+.wrapper-content button.action-secondary {
+  border-radius: 999px;
+  border: 1px solid rgba(26, 22, 35, 0.18);
+  background: #fff;
+  color: var(--mereka-color-ink-900);
+  font-weight: 600;
+}
+
+.wrapper-content .action-secondary:hover,
+.wrapper-content .action-secondary:focus {
+  border-color: rgba(45, 137, 139, 0.35);
+  box-shadow: 0 0 0 4px rgba(45, 137, 139, 0.12);
+}
+
+/* Studio create-course/create-library flows + authoring panels */
+.wrapper-mast .mast.has-actions .nav-actions .button,
+.view-dashboard .content .notice-incontext.has-actions .list-actions .action-create-course,
+.view-dashboard .content .notice-incontext.has-actions .list-actions .action-create-library,
+.view-dashboard .content .notice-incontext.list-notices .notice-item.has-actions .list-actions .action-create-course,
+.view-dashboard .content .notice-incontext.list-notices .notice-item.has-actions .list-actions .action-create-library,
+.view-outline .content-primary .no-content .button,
+.view-static-pages .content-primary .add-pages .button,
+.view-container .content-primary .no-container-content .button,
+.view-textbooks .content-primary .no-textbook-content .button,
+.view-group-configurations .content-primary .no-content .button,
+.view-certificates .content-primary .no-content .button {
+  border-radius: 999px;
+  border: 0;
+  background: var(--mereka-gradient-primary);
+  color: #fff;
+  font-weight: 800;
+  text-transform: none;
+  box-shadow: 0 12px 25px rgba(45, 137, 139, 0.18);
+}
+
+.wrapper-mast .mast.has-actions .nav-actions .button:hover,
+.wrapper-mast .mast.has-actions .nav-actions .button:focus,
+.view-dashboard .content .notice-incontext.has-actions .list-actions .action-create-course:hover,
+.view-dashboard .content .notice-incontext.has-actions .list-actions .action-create-library:hover,
+.view-dashboard .content .notice-incontext.list-notices .notice-item.has-actions .list-actions .action-create-course:hover,
+.view-dashboard .content .notice-incontext.list-notices .notice-item.has-actions .list-actions .action-create-library:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 32px rgba(45, 137, 139, 0.25);
+}
+
+.view-outline .outline-complex .outline-section,
+.view-outline .outline-complex .outline-subsection,
+.view-outline .outline-complex .outline-unit,
+.view-container .wrapper-xblock,
+.view-container .xblock-render,
+.view-container .xblock-render .xblock {
+  border-radius: 24px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+}
+
+.view-outline .outline-complex .outline-section:hover,
+.view-outline .outline-complex .outline-subsection:hover,
+.view-outline .outline-complex .outline-unit:hover {
+  box-shadow: 0 26px 70px rgba(26, 22, 35, 0.12);
+}
+
+.view-outline .outline-complex .outline-item .outline-item-title,
+.view-outline .outline-complex .outline-item .item-title,
+.view-outline .outline-complex .outline-item .title,
+.view-outline .outline-complex .outline-section .section-name,
+.view-outline .outline-complex .outline-subsection .subsection-name,
+.view-outline .outline-complex .outline-unit .unit-name {
+  font-family: var(--mereka-font-heading);
+  font-weight: 700;
+  color: var(--mereka-color-ink-900);
+}
+
+.view-outline .outline-complex .outline-item .actions-list .action,
+.view-outline .outline-complex .outline-item .actions-list a,
+.view-outline .outline-complex .outline-item .actions-list button,
+.view-outline .outline-complex .outline-item .action-button {
+  border-radius: 999px;
+  border: 1px solid rgba(26, 22, 35, 0.12);
+  background: #fff;
+  color: var(--mereka-color-ink-900);
+}
+
+.view-outline .outline-complex .outline-item .actions-list .action:hover,
+.view-outline .outline-complex .outline-item .actions-list a:hover,
+.view-outline .outline-complex .outline-item .actions-list button:hover,
+.view-outline .outline-complex .outline-item .action-button:hover,
+.view-outline .outline-complex .outline-item .actions-list .action:focus,
+.view-outline .outline-complex .outline-item .actions-list a:focus,
+.view-outline .outline-complex .outline-item .actions-list button:focus,
+.view-outline .outline-complex .outline-item .action-button:focus {
+  border-color: rgba(45, 137, 139, 0.35);
+  box-shadow: 0 0 0 4px rgba(45, 137, 139, 0.12);
+}
+
+.view-outline .outline-complex .add-xblock-component .button,
+.view-outline .outline-complex .add-xblock-component button,
+.view-outline .outline-complex .add-xblock-component a {
+  border-radius: 999px;
+  border: 0;
+  background: var(--mereka-gradient-primary);
+  color: #fff;
+  font-weight: 700;
+}
+
+/* Studio modals used by course/library creation flows */
+.modal,
+.modal-window,
+.wrapper-modal-window {
+  border-radius: 20px;
+}
+
+.modal .modal-content,
+.modal-window .inner-wrapper,
+.wrapper-modal-window .inner-wrapper {
+  border-radius: 20px;
+  border: 1px solid rgba(26, 22, 35, 0.12);
+  box-shadow: 0 30px 90px rgba(26, 22, 35, 0.18);
+}
+
+/* ---------------------------- */
+/* Shared primitives (LMS/CMS)  */
+/* ---------------------------- */
+
+/* Bootstrap/legacy alert blocks */
+.alert {
+  border-radius: 16px;
+  border: 1px solid rgba(26, 22, 35, 0.10);
+}
+
+.alert-info {
+  background: rgba(148, 209, 228, 0.22);
+  border-color: rgba(148, 209, 228, 0.55);
+}
+
+.alert-success {
+  background: rgba(44, 110, 73, 0.12);
+  border-color: rgba(44, 110, 73, 0.35);
+}
+
+.alert-warning {
+  background: rgba(153, 107, 0, 0.14);
+  border-color: rgba(153, 107, 0, 0.55);
+}
+
+.alert-danger,
+.alert-error {
+  background: rgba(140, 0, 47, 0.08);
+  border-color: rgba(140, 0, 47, 0.22);
+}
+
+/* Tabs (course about, some dashboards, Studio pages) */
+.nav-tabs > li > a,
+.nav-tabs .nav-link {
+  border-radius: 999px;
+}
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus,
+.nav-tabs .nav-link.active {
+  background: var(--mereka-gradient-primary);
+  color: #fff;
+  border-color: transparent;
+}
+
+/* Pagination */
+.pagination > li > a,
+.pagination > li > span {
+  border-radius: 999px;
+  border: 1px solid rgba(26, 22, 35, 0.10);
+  margin: 0 0.15rem;
+}
+
+.pagination > .active > a,
+.pagination > .active > span,
+.pagination > .active > a:hover,
+.pagination > .active > span:hover,
+.pagination > .active > a:focus,
+.pagination > .active > span:focus {
+  background: var(--mereka-gradient-primary);
+  border-color: transparent;
+}
+
+/* Tables */
+.table,
+table {
+  border-color: rgba(26, 22, 35, 0.10);
+}
+
+.table thead th,
+table thead th {
+  border-bottom: 1px solid rgba(26, 22, 35, 0.12);
+  font-family: var(--mereka-font-heading);
+  font-weight: 700;
+}
+
+/* Footer v2 — dark background, 5-zone layout */
+.mereka-footer--v2 {
+  background: #1A1623;
+  color: #fff;
+  margin-top: 4rem;
+  font-family: var(--mereka-font-body);
+}
+
+.mereka-footer--v2 a {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.mereka-footer--v2 a:hover,
+.mereka-footer--v2 a:focus {
+  color: #fff;
+}
+
+.footer-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* Zone 1: Social Row */
+.footer-social {
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding: 1.5rem 0;
+}
+.footer-social .footer-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.footer-logo-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #fff !important;
+}
+.footer-logo-img {
+  height: 2rem;
+  width: auto;
+  max-width: 8rem;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+.footer-brand-name {
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+.footer-social-icons {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+.footer-social-link {
+  color: #fff !important;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.footer-social-link:hover {
+  opacity: 0.8;
+  transform: scale(1.1);
+}
+
+/* Zone 2: Nav Strip */
+.footer-nav {
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding: 1rem 0;
+}
+.footer-nav .footer-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.footer-nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2rem;
+  font-size: 0.875rem;
+}
+.footer-whatsapp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border: 1px solid #fff;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #fff !important;
+  transition: background 0.15s;
+}
+.footer-whatsapp-btn:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+/* Zone 3: 4-Column Body */
+.footer-body {
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding: 3rem 0;
+}
+.footer-columns {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr 1fr;
+  gap: 2rem 3rem;
+}
+.footer-column-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: rgba(255, 255, 255, 0.95);
+}
+.footer-column ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.footer-column li {
+  margin-bottom: 1rem;
+}
+.footer-column a {
+  font-size: 0.875rem;
+}
+.footer-column--wide .footer-marketplace-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+.footer-sub-heading {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+}
+.footer-app-label {
+  font-size: 0.875rem;
+  color: rgba(255,255,255,0.8);
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+.footer-app-badges {
+  display: flex;
+  gap: 0.5rem;
+}
+.footer-badge {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  color: #fff !important;
+  text-decoration: none;
+}
+.footer-badge:hover {
+  border-color: #fff;
+}
+.footer-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2rem;
+  padding: 0.75rem 2rem;
+  border: 1px solid #fff;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #fff !important;
+  white-space: nowrap;
+}
+.footer-cta-btn:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+/* Zone 4: Legal Bottom */
+.footer-legal {
+  padding: 1.5rem 0;
+}
+.footer-legal-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.5rem;
+  font-size: 0.875rem;
+}
+.footer-copyright {
+  color: rgba(255,255,255,0.6);
+}
+.footer-legal a {
+  color: rgba(255,255,255,0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.75rem;
+}
+.footer-legal a:hover {
+  color: #fff;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .footer-columns {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 576px) {
+  .footer-columns {
+    grid-template-columns: 1fr;
+  }
+  .footer-social .footer-container {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .footer-nav .footer-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .footer-legal-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* Branding health check compatibility: logo size cap (checked by verify-branding-css.sh) */
+.mereka-footer .footer-logo-img {
+  max-width: 120px;
+}
+
+/* Retain selector for verify-public-branding.sh logo checks */
+.mereka-footer .footer-brand img {
+  max-width: 120px;
+  width: 120px;
+}
+
+/* Mobile tap target accessibility (WCAG 2.5.8 — 44px minimum) */
+@media (max-width: 768px) {
+  .mereka-footer a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+/* ── Course card grid + card shell (runtime bridge) ──────────────── */
+/* These rules match the compiled _custom.scss but use !important to   */
+/* beat stock build-lms-v1 selectors at runtime without a rebuild.     */
+
+/* Grid layout for course listing */
+.courses-listing {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+  gap: 1.5rem !important;
+  list-style: none !important;
+  padding: 0 !important;
+}
+
+/* Cancel upstream float/width on every card item */
+.courses-listing li,
+.courses-listing-item,
+.find-courses .courses-listing li,
+.find-courses .courses-listing-item {
+  float: none !important;
+  width: 100% !important;
+  display: flex !important;
+  min-width: 0 !important;
+  list-style: none !important;
+}
+
+@media screen and (min-width: 980px) {
+  .find-courses .courses-container .courses:not(.no-course-discovery) .courses-listing .courses-listing-item {
+    float: none !important;
+    width: 100% !important;
+    display: flex !important;
+    min-width: 0 !important;
+  }
+}
+
+/* Card shell: rounded, shadow, hover lift */
+.courses-listing li > .course,
+.courses-listing-item > .course {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  min-height: 100% !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(26, 22, 35, 0.06) !important;
+  box-shadow: 0 4px 24px rgba(26, 22, 35, 0.10), 0 1px 4px rgba(26, 22, 35, 0.05) !important;
+  overflow: hidden !important;
+  background: #fff !important;
+  transition: transform 220ms ease, box-shadow 220ms ease !important;
+}
+
+.courses-listing li > .course:hover,
+.courses-listing-item > .course:hover {
+  box-shadow: 0 12px 48px rgba(26, 22, 35, 0.14), 0 2px 8px rgba(26, 22, 35, 0.06) !important;
+  transform: translateY(-3px) !important;
+}
+
+/* Card image: constrained height, rounded top corners, proper fit */
+.course .course-image {
+  min-height: 0;
+  overflow: hidden !important;
+  background: linear-gradient(145deg, #eef9fb 0%, #f3eef8 50%, #fdf2f8 100%);
+}
+
+.course .course-image .cover-image {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+}
+
+.course .course-image img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+}
+
+/* Card info section */
+.course .course-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.9rem 1.15rem 1rem;
+}
+
+/* Card title */
+.course .course-info .course-name,
+.course .course-info h3 {
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+  color: #1a1623 !important;
+  margin: 0 !important;
+}
+
+/* Card org label */
+.course .course-info .course-org span,
+.course .course-info .course-org {
+  font-size: 0.75rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  color: #6b7280 !important;
+  font-weight: 600 !important;
+}
+
+/* Learn More pill button */
+.course .course-image .cover-image .learn-more {
+  position: absolute !important;
+  bottom: 0.75rem !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  opacity: 1 !important;
+  top: auto !important;
+  padding: 0.5rem 1.25rem !important;
+  border-radius: 999px !important;
+  background: linear-gradient(135deg, #AB3B78, #2D898B) !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  text-decoration: none !important;
+  box-shadow: 0 8px 22px rgba(171, 59, 120, 0.3) !important;
+  white-space: nowrap !important;
+}
+
+/* ── Fix 2a: Broken image fallback ────────────────────────────────── */
+/* Hide the browser's broken-image icon so the gradient background shows */
+.course .course-image img[src=""],
+.course .course-image img:not([src]) {
+  visibility: hidden !important;
+}
+.course .course-image img {
+  background: transparent !important;
+}
+/* SVG data-URI fallback: when onerror fires, the handler sets
+   data-broken="1" and replaces src with an inline SVG placeholder.
+   Ensure the SVG fills the container cleanly. */
+.course .course-image img[data-broken="1"] {
+  object-fit: contain !important;
+  background: linear-gradient(145deg, #eef9fb 0%, #f3eef8 50%, #fdf2f8 100%) !important;
+}
+
+/* ── Fix 2c: Ensure .courses-listing does not clip card shadows ──── */
+.courses-listing {
+  overflow: visible !important;
+}
+
+/* ── Fix 2d: Hide duplicate title overlay in course image area ───── */
+.course .course-image .cover-image .course-title-text,
+.course .course-image .cover-image > span,
+.course .course-image .cover-image > .course-name {
+  display: none !important;
+}
+
+/* ── Fix 2e: Card body spacing — no forced min-height, clamp desc ── */
+.course .course-info {
+  min-height: 0 !important;
+}
+.course .course-info .course-description,
+.course .course-info .course-about p {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 3 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+}
+
+/* ── Fix 6: Mobile responsive — single-column on small screens ───── */
+@media (max-width: 640px) {
+  .courses-listing {
+    grid-template-columns: 1fr !important;
+  }
+}

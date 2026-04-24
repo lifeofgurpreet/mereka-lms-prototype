@@ -1,0 +1,19 @@
+---
+# NOTE: MongoDB is provided by Atlas (cluster-mereka-lms.2pjex4s.mongodb.net).
+# There are no in-cluster mongodb pods — this Service has no backing Endpoints.
+# Production removes it via patches/remove-legacy-mongodb-service.yaml.
+# Kept here so local/dev overlays that don't apply that patch don't break
+# references; Atlas connection strings are set via environment variables.
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+  labels:
+    app.kubernetes.io/name: mongodb
+spec:
+  type: ClusterIP
+  ports:
+    - port: 27017
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: mongodb

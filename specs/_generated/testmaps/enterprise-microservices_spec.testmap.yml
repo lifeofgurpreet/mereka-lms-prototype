@@ -1,0 +1,518 @@
+spec: enterprise-microservices_spec.md
+acceptance_criteria:
+- id: AC-001
+  description: Given the K8s manifests are applied, when `kubectl get deployments -n mereka-lms -l app.kubernetes.io/component=enterprise`
+    is run, then deployments for enterprise-catalog, license-manager, enterprise-access, and enterprise-subsidy are listed
+    and each deployment has `READY == DESIRED` (steady-state full readiness)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-deployment.sh
+    command: scripts/qa/verify-enterprise-deployment.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-readiness-integrity.sh
+    command: scripts/qa/verify-enterprise-readiness-integrity.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-service-deployment.sh
+    command: scripts/qa/verify-enterprise-service-deployment.sh
+- id: AC-002
+  description: Given all enterprise services are deployed, when `kubectl get endpoints -n mereka-lms` is run, then each enterprise
+    service has non-empty endpoints
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-deployment.sh
+    command: scripts/qa/verify-enterprise-deployment.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-service-deployment.sh
+    command: scripts/qa/verify-enterprise-service-deployment.sh
+- id: AC-003
+  description: 'Given the enterprise-catalog service is running, when `curl http://enterprise-catalog:8160/health/` is called
+    from within the cluster, then the response is HTTP 200 with `{"status": "ok"}`'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-deployment.sh
+    command: scripts/qa/verify-enterprise-deployment.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-readiness-integrity.sh
+    command: scripts/qa/verify-enterprise-readiness-integrity.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-service-deployment.sh
+    command: scripts/qa/verify-enterprise-service-deployment.sh
+- id: AC-004
+  description: Given the license-manager service is running, when `curl http://license-manager:18170/health/` is called from
+    within the cluster, then the response is HTTP 200
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-deployment.sh
+    command: scripts/qa/verify-enterprise-deployment.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-readiness-integrity.sh
+    command: scripts/qa/verify-enterprise-readiness-integrity.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-service-deployment.sh
+    command: scripts/qa/verify-enterprise-service-deployment.sh
+- id: AC-005
+  description: Given the enterprise-access service is running, when `curl http://enterprise-access:18270/health/` is called
+    from within the cluster, then the response is HTTP 200
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-deployment.sh
+    command: scripts/qa/verify-enterprise-deployment.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-readiness-integrity.sh
+    command: scripts/qa/verify-enterprise-readiness-integrity.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-service-deployment.sh
+    command: scripts/qa/verify-enterprise-service-deployment.sh
+- id: AC-006
+  description: Given the enterprise-subsidy service is running, when `curl http://enterprise-subsidy:18280/health/` is called
+    from within the cluster, then the response is HTTP 200
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-deployment.sh
+    command: scripts/qa/verify-enterprise-deployment.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-readiness-integrity.sh
+    command: scripts/qa/verify-enterprise-readiness-integrity.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-service-deployment.sh
+    command: scripts/qa/verify-enterprise-service-deployment.sh
+- id: AC-007
+  description: Given enterprise MFEs are deployed, when `curl https://admin.academyv2.mereka.io/` is called, then the admin
+    portal HTML is returned with HTTP 200
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-deployment.sh
+    command: scripts/qa/verify-enterprise-deployment.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-service-deployment.sh
+    command: scripts/qa/verify-enterprise-service-deployment.sh
+- id: AC-008
+  description: Given enterprise MFEs are deployed, when `curl https://learner.academyv2.mereka.io/` is called, then the learner
+    portal HTML is returned with HTTP 200
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-deployment.sh
+    command: scripts/qa/verify-enterprise-deployment.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-service-deployment.sh
+    command: scripts/qa/verify-enterprise-service-deployment.sh
+- id: AC-009
+  description: Given the service is deployed, its domain MUST use DNS-only Cloudflare mode with Let's Encrypt SSL (not Cloudflare
+    proxy)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-tenant-isolation.sh
+    command: scripts/qa/verify-enterprise-tenant-isolation.sh
+- id: AC-010
+  description: Given enterprise customer A and enterprise customer B exist, when admin A calls `GET /api/v1/enterprise-catalogs/`,
+    then only catalogs belonging to customer A are returned
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-tenant-isolation.sh
+    command: scripts/qa/verify-enterprise-tenant-isolation.sh
+- id: AC-011
+  description: Given enterprise customer A with a subscription plan, when admin B calls `GET /api/v1/subscriptions/{plan_uuid_of_A}/`,
+    then the response is HTTP 403 Forbidden
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-tenant-isolation.sh
+    command: scripts/qa/verify-enterprise-tenant-isolation.sh
+- id: AC-012
+  description: Given enterprise customer A with enrolled learners, when admin B calls the enterprise-access API for customer
+    A's UUID, then the response is HTTP 403 Forbidden
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-tenant-isolation.sh
+    command: scripts/qa/verify-enterprise-tenant-isolation.sh
+- id: AC-013
+  description: Given a learner linked to enterprise customer A, when they browse the enterprise learner portal, then they
+    see only courses from customer A's catalogs
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-tenant-isolation.sh
+    command: scripts/qa/verify-enterprise-tenant-isolation.sh
+- id: AC-014
+  description: Given a user belonging to both enterprise customer A and B, when they select customer A in the learner portal,
+    then no data or catalog from customer B is visible until they switch context
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-license-management.sh
+    command: scripts/qa/verify-enterprise-license-management.sh
+- id: AC-015
+  description: Given a subscription plan with 100 licenses and 50 assigned, when an admin assigns 51 more licenses, then the
+    request fails with HTTP 422 and an error indicating insufficient seats
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-license-management.sh
+    command: scripts/qa/verify-enterprise-license-management.sh
+- id: AC-016
+  description: Given a subscription plan with `should_auto_apply_licenses=true`, when an enterprise learner requests enrollment,
+    then a license is automatically assigned and activated
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-license-management.sh
+    command: scripts/qa/verify-enterprise-license-management.sh
+- id: AC-017
+  description: Given a license in `activated` state, when an admin revokes it, then the license state transitions to `revoked`
+    and an enrollment revocation event is published
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-license-management.sh
+    command: scripts/qa/verify-enterprise-license-management.sh
+- id: AC-018
+  description: Given a subscription plan with `is_revocation_cap_enabled=true` and `revoke_max_percentage=10` and 100 licenses,
+    when an admin attempts to revoke the 11th license, then the request fails with HTTP 422 indicating revocation cap reached
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-license-management.sh
+    command: scripts/qa/verify-enterprise-license-management.sh
+- id: AC-019
+  description: Given an email address already assigned a license in a plan, when the admin assigns a license to the same email
+    again, then no duplicate license is created and the response indicates the existing assignment
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-catalog.sh
+    command: scripts/qa/verify-enterprise-catalog.sh
+- id: AC-020
+  description: Given an enterprise catalog with a content filter for subject "Technology", when `GET /api/v1/enterprise-catalogs/{uuid}/get_content_metadata/`
+    is called, then only courses tagged with "Technology" subject are returned
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-catalog.sh
+    command: scripts/qa/verify-enterprise-catalog.sh
+- id: AC-021
+  description: Given the catalog sync task has not run in 6 hours, when the Celery beat scheduler fires, then the sync task
+    executes and updates content metadata from the LMS discovery service
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-catalog.sh
+    command: scripts/qa/verify-enterprise-catalog.sh
+- id: AC-022
+  description: Given a course key "course-v1:Mereka+ENT101+2026", when `GET /api/v1/enterprise-catalogs/{uuid}/contains_content_items/?course_run_ids=course-v1:Mereka+ENT101+2026`
+    is called, then the response indicates whether the course is in the catalog within 100ms
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-access-subsidy.sh
+    command: scripts/qa/verify-enterprise-access-subsidy.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+- id: AC-023
+  description: Given a learner with a PerLearnerEnrollmentCreditAccessPolicy limiting to 5 enrollments and already 5 enrollments,
+    when the learner requests a 6th enrollment, then the `can-redeem` endpoint returns `false` with reason "per-learner enrollment
+    limit reached"
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-access-subsidy.sh
+    command: scripts/qa/verify-enterprise-access-subsidy.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+- id: AC-024
+  description: Given a subsidy with a starting balance of 10000 (cents) and 3000 already spent, when a transaction for 8000
+    is attempted, then it fails with insufficient balance error and the balance remains 7000
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-access-subsidy.sh
+    command: scripts/qa/verify-enterprise-access-subsidy.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+- id: AC-025
+  description: Given a committed transaction for enrollment in course X, when the admin revokes the enrollment and a reversal
+    is requested, then the subsidy balance is restored by the transaction amount
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-access-subsidy.sh
+    command: scripts/qa/verify-enterprise-access-subsidy.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+- id: AC-026
+  description: Given a reversal is requested on an already-reversed transaction, when the API processes it, then the response
+    is HTTP 200 (idempotent) and no balance change occurs
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-sso-saml.sh
+    command: scripts/qa/verify-enterprise-sso-saml.sh
+- id: AC-027
+  description: Given enterprise customer "Acme Corp" with SAML IdP configured and `enable_slug_login=true`, when a user navigates
+    to `https://academyv2.mereka.io/enterprise/login/acme-corp`, then they are redirected to the Acme Corp SAML IdP login
+    page
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-sso-saml.sh
+    command: scripts/qa/verify-enterprise-sso-saml.sh
+- id: AC-028
+  description: Given a successful SAML assertion from the Acme Corp IdP for a user not yet in the LMS, when the assertion
+    is processed, then a new LMS user is created and linked to the Acme Corp enterprise customer
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-sso-saml.sh
+    command: scripts/qa/verify-enterprise-sso-saml.sh
+- id: AC-029
+  description: Given a SAML assertion with `NotOnOrAfter` in the past, when the LMS processes the assertion, then the authentication
+    is rejected and the user sees an error message
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-sso-saml.sh
+    command: scripts/qa/verify-enterprise-sso-saml.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/tenants/repair-enterprise-schema.sh
+    command: scripts/tenants/repair-enterprise-schema.sh
+- id: AC-030
+  description: Given enterprise customer A with SAML IdP "IdP-A" and enterprise customer B with SAML IdP "IdP-B", when a user
+    authenticates via IdP-A, then they are linked to customer A only (no cross-tenant linking)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-integrated-channels.sh
+    command: scripts/qa/verify-enterprise-integrated-channels.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-readiness-integrity.sh
+    command: scripts/qa/verify-enterprise-readiness-integrity.sh
+- id: AC-031
+  description: Given a Degreed integration configured for enterprise customer A with valid credentials, when the sync task
+    runs, then course completion data for consenting learners of customer A is transmitted to the Degreed API
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-integrated-channels.sh
+    command: scripts/qa/verify-enterprise-integrated-channels.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-readiness-integrity.sh
+    command: scripts/qa/verify-enterprise-readiness-integrity.sh
+- id: AC-032
+  description: Given a channel sync in dry-run mode, when the sync task runs, then no data is transmitted to the external
+    system and the sync log indicates "dry-run"
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-integrated-channels.sh
+    command: scripts/qa/verify-enterprise-integrated-channels.sh
+- id: AC-033
+  description: Given a channel sync that encounters a transient API error (HTTP 503), when the task retries, then it retries
+    up to 5 times with exponential backoff before marking the sync as failed
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-deployment.sh
+    command: scripts/qa/verify-enterprise-deployment.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-secrets.sh
+    command: scripts/qa/verify-enterprise-secrets.sh
+- id: AC-034
+  description: Given all enterprise secrets are provisioned in Infisical at `/k8s/mereka-lms`, when ExternalSecrets syncs,
+    then the `enterprise-secrets` K8s Secret contains all expected keys
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-deployment.sh
+    command: scripts/qa/verify-enterprise-deployment.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-secrets.sh
+    command: scripts/qa/verify-enterprise-secrets.sh
+- id: AC-035
+  description: Given the enterprise-catalog service starts, when it reads its Django SECRET_KEY from the environment, then
+    the value matches the Infisical secret `MEREKA_LMS_ENTERPRISE_CATALOG_SECRET_KEY`
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-observability.sh
+    command: scripts/qa/verify-enterprise-observability.sh
+- id: AC-036
+  description: Given enterprise services are running, when `/metrics` is scraped by Prometheus, then enterprise-specific metrics
+    (request count, latency histogram) are present
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-all-acs.sh
+    command: scripts/qa/verify-enterprise-all-acs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enterprise-observability.sh
+    command: scripts/qa/verify-enterprise-observability.sh
+- id: AC-037
+  description: Given a license assignment fails, when the error is logged, then the log entry includes `enterprise_customer_uuid`,
+    `subscription_plan_uuid`, `error_type`, and `user_email_hash` (not the raw email)
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md
+    section: License Assignment Error Logging
+    justification: Requires running enterprise-subsidy service with a simulated license assignment failure; not available
+      without live enterprise data

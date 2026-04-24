@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "wave11/pack-registry",
+  "type": "object",
+  "required": ["pack_id", "schema_version", "generated_by", "source_range", "canonical_inputs", "packs"],
+  "properties": {
+    "pack_id": { "const": "pack-registry" },
+    "schema_version": { "type": "integer", "const": 1 },
+    "generated_by": { "type": "string", "minLength": 1 },
+    "source_range": { "type": ["string", "null"] },
+    "canonical_inputs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "packs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "pack_id", "title", "canonical_path", "schema_path", "schema_version",
+          "projection_paths", "source_generators", "canonical_inputs",
+          "primary_repo", "secondary_repos", "owner", "stability", "depends_on"
+        ],
+        "properties": {
+          "pack_id": { "type": "string", "minLength": 1 },
+          "title": { "type": "string", "minLength": 1 },
+          "canonical_path": { "type": "string", "minLength": 1 },
+          "schema_path": { "type": "string", "minLength": 1 },
+          "schema_version": { "type": "integer", "const": 1 },
+          "projection_paths": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "source_generators": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+          "canonical_inputs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "primary_repo": { "type": "string", "minLength": 1 },
+          "secondary_repos": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "owner": { "type": "string", "minLength": 1 },
+          "stability": { "type": "string", "enum": ["stable", "evolving", "experimental"] },
+          "depends_on": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+        }
+      }
+    }
+  }
+}

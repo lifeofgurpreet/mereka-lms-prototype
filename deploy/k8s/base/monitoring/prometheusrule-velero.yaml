@@ -1,0 +1,35 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: velero-alerts
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: velero
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/component: monitoring
+    prometheus: kube-prometheus
+spec:
+  groups:
+    - name: velero.rules
+      rules:
+        - alert: VeleroBackupFailed
+          expr: increase(velero_backup_failure_total[1h]) > 0
+          for: 5m
+          labels:
+            severity: critical
+            component: velero
+          annotations:
+            summary: "Velero backup failed"
+            description: "A Velero backup has failed in the last hour. Check velero backup logs."
+
+        - alert: VeleroBackupMissing
+          expr: time() - velero_backup_last_successful_timestamp > 86400
+          for: 10m
+          labels:
+            severity: warning
+            component: velero
+          annotations:
+            summary: "No successful Velero backup in 24h"
+            description: "Last successful Velero backup was more than 24 hours ago."

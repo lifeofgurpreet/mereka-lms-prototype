@@ -1,0 +1,338 @@
+#!/usr/bin/env bash
+# @covers AC-014
+# @spec: ci-cd-pipeline_spec.md
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
+
+APP_BASE="${APP_BASE:-$REPO_ROOT/deploy/k8s/base/kustomization.yaml}"
+APP_PROD_OVERLAY="${APP_PROD_OVERLAY:-$REPO_ROOT/deploy/k8s/overlays/production/kustomization.yaml}"
+APP_STAGING_OVERLAY="${APP_STAGING_OVERLAY:-$REPO_ROOT/deploy/k8s/overlays/staging/kustomization.yaml}"
+APP_MFE_CADDYFILE="${APP_MFE_CADDYFILE:-$REPO_ROOT/deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile}"
+INFRA_PROD_OVERLAY="${INFRA_PROD_OVERLAY:-}"
+CHECK_INFRA="${CHECK_INFRA:-auto}" # auto|1|0
+
+# Auto-detect infra repo prod overlay.
+# Supports BBI_INFRA_ROOT override for any checkout layout.
+if [[ -z "$INFRA_PROD_OVERLAY" ]]; then
+  _BBI_ROOT="${BBI_INFRA_ROOT:-}"
+  if [[ -z "$_BBI_ROOT" ]]; then
+    for candidate in \
+      "${WORKSPACE_ROOT}/bbi-infrastructure" \
+      "${WORKSPACE_ROOT}/infrastructure/bbi-infrastructure" \
+      "${HOME}/projects/k8s/bbi-infrastructure" \
+      "${HOME}/projects/infrastructure/bbi-infrastructure" \
+      "${HOME}/bbi-infrastructure"; do
+      if [[ -d "$candidate/apps/mereka-lms" ]]; then
+        _BBI_ROOT="$candidate"
+        break
+      fi
+    done
+  fi
+  if [[ -n "$_BBI_ROOT" ]]; then
+    INFRA_PROD_OVERLAY="${_BBI_ROOT}/apps/mereka-lms/overlays/prod/kustomization.yaml"
+  fi
+fi
+
+if [[ -z "$INFRA_PROD_OVERLAY" ]]; then
+  INFRA_PROD_OVERLAY="${WORKSPACE_ROOT}/bbi-infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml"
+fi
+
+usage() {
+  cat <<'EOF'
+Usage: scripts/qa/verify-gitops-image-overrides.sh [--check-infra|--skip-infra] [--infra-file PATH]
+
+Purpose:
+  Enforce image override contract to avoid silent tag drift after Kustomize image transforms.
+
+Checks:
+  1) Base kustomization pins canonical docker.io names to Artifact Registry.
+  2) Production overlay uses canonical names.
+  3) Production overlay includes transformed-name override parity for openedx-mfe.
+  4) Staging overlay uses canonical docker.io names (no bare openedx/openedx-mfe names).
+  5) Optional infra overlay parity check in active GitOps checkout (when available),
+     matching the real overlay shape for that lane.
+  6) Optional tag/digest parity check between this repo's production overlay and infra production overlay.
+  7) Optional vendored MFE Caddyfile parity check in infra checkout (when vendored base exists).
+
+Options:
+  --check-infra        Require and validate infra overlay file.
+  --skip-infra         Skip infra overlay validation.
+  --infra-file PATH    Override infra overlay file path.
+                       (default auto-detect: infrastructure -> bbi-infrastructure)
+  -h, --help           Show this help.
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --check-infra)
+      CHECK_INFRA="1"
+      shift
+      ;;
+    --skip-infra)
+      CHECK_INFRA="0"
+      shift
+      ;;
+    --infra-file)
+      INFRA_PROD_OVERLAY="${2:-}"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown arg: $1" >&2
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+python3 - "$APP_BASE" "$APP_PROD_OVERLAY" "$APP_STAGING_OVERLAY" "$APP_MFE_CADDYFILE" "$INFRA_PROD_OVERLAY" "$CHECK_INFRA" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+APP_BASE = Path(sys.argv[1])
+APP_PROD = Path(sys.argv[2])
+APP_STAGING = Path(sys.argv[3])
+APP_MFE_CADDYFILE = Path(sys.argv[4])
+INFRA_PROD = Path(sys.argv[5])
+CHECK_INFRA = sys.argv[6]
+
+TARGET_OPENEDX = "ghcr.io/biji-biji-initiative/mereka-lms/openedx"
+TARGET_MFE = "ghcr.io/biji-biji-initiative/mereka-lms/mfe"
+SOURCE_OPENEDX = "docker.io/overhangio/openedx"
+SOURCE_MFE = "docker.io/overhangio/openedx-mfe"
+
+
+def parse_images(path: Path):
+    if not path.exists():
+        return None
+    images = []
+    current = None
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.rstrip()
+        m_name = re.match(r"^\s*-\s*name:\s*(\S+)\s*$", line)
+        if m_name:
+            if current:
+                images.append(current)
+            current = {"name": m_name.group(1), "newName": None, "newTag": None, "digest": None}
+            continue
+        if current is None:
+            continue
+        m_new_name = re.match(r"^\s*newName:\s*(\S+)\s*$", line)
+        if m_new_name:
+            current["newName"] = m_new_name.group(1)
+            continue
+        m_new_tag = re.match(r"^\s*newTag:\s*(\S+)\s*$", line)
+        if m_new_tag:
+            current["newTag"] = m_new_tag.group(1)
+            continue
+        m_digest = re.match(r"^\s*digest:\s*(\S+)\s*$", line)
+        if m_digest:
+            current["digest"] = m_digest.group(1)
+            continue
+    if current:
+        images.append(current)
+    return images
+
+
+def find_by_name(images, name):
+    return [image for image in images if image["name"] == name]
+
+
+def ensure_mapping(images, name, expected_new_name, context, errors):
+    matches = find_by_name(images, name)
+    if not matches:
+        errors.append(f"{context}: missing image override for '{name}'")
+        return None
+    mapping = matches[0]
+    if mapping["newName"] != expected_new_name:
+        errors.append(
+            f"{context}: '{name}' newName mismatch (got '{mapping['newName']}', expected '{expected_new_name}')"
+        )
+    return mapping
+
+
+CRITICAL_MFE_CADDY_MARKERS = (
+    "path /api/mfe_config/v1* /login_refresh*",
+    "path /theme/*",
+    "try_files /theme{path}",
+    "reverse_proxy /login_refresh* lms:8000 {",
+    "header_up Host {http.request.host}",
+)
+
+
+def missing_caddy_markers(path: Path):
+    text = path.read_text(encoding="utf-8")
+    return [marker for marker in CRITICAL_MFE_CADDY_MARKERS if marker not in text]
+
+
+errors = []
+notes = []
+
+# Resolve check_infra early (original resolution lives at line 251+ below,
+# but we need it before the Wave 9 overlay-absent branch).
+check_infra = CHECK_INFRA
+if check_infra == "auto":
+    check_infra = "1" if INFRA_PROD.exists() else "0"
+
+# Wave 9 (bead mereka-lms-m0u5.9): the app-repo OVERLAYS (APP_PROD,
+# APP_STAGING) are DEPRECATED per ADR-025 and deleted by Wave 9.
+# APP_BASE and APP_MFE_CADDYFILE live in deploy/k8s/base/ and are NOT
+# part of Wave 9 — they stay.
+#
+# Expected post-Wave-9 state: overlays absent, base + caddyfile present.
+# When BOTH overlays are absent (Wave 9 deletion complete), skip the
+# overlay-specific cross-checks and continue with whatever base+caddyfile
+# + bbi-infra checks remain.
+overlays_absent = (not APP_PROD.exists()) and (not APP_STAGING.exists())
+if overlays_absent:
+    print("⏭  Wave 9: app-repo overlays absent (deletion complete); skipping overlay-specific checks.")
+    print("   Authority: bbi-infrastructure/apps/mereka-lms/overlays/{prod,staging}/kustomization.yaml")
+    # Validate base and MFE caddyfile still exist (they are NOT Wave 9 targets).
+    for required in (APP_BASE, APP_MFE_CADDYFILE):
+        if not required.exists():
+            errors.append(f"missing required base file (not a Wave 9 target): {required}")
+    if check_infra == "1" and not INFRA_PROD.exists():
+        errors.append(f"--check-infra requested but INFRA_PROD_OVERLAY missing: {INFRA_PROD}")
+    if errors:
+        for error in errors:
+            print(f"✗ {error}")
+        sys.exit(1)
+    print("✓ Post-Wave-9 GitOps image override baseline checks passed")
+    sys.exit(0)
+
+# Partial absence (one overlay present, the other absent) IS still a
+# drift error — Wave 9 should delete both atomically.
+for required in (APP_BASE, APP_PROD, APP_STAGING, APP_MFE_CADDYFILE):
+    if not required.exists():
+        errors.append(f"missing required file: {required}")
+
+if errors:
+    for error in errors:
+        print(f"✗ {error}")
+    sys.exit(1)
+
+base_images = parse_images(APP_BASE)
+prod_images = parse_images(APP_PROD)
+staging_images = parse_images(APP_STAGING)
+
+ensure_mapping(base_images, SOURCE_OPENEDX, TARGET_OPENEDX, str(APP_BASE), errors)
+ensure_mapping(base_images, SOURCE_MFE, TARGET_MFE, str(APP_BASE), errors)
+
+prod_openedx = ensure_mapping(prod_images, SOURCE_OPENEDX, TARGET_OPENEDX, str(APP_PROD), errors)
+prod_mfe_source = ensure_mapping(prod_images, SOURCE_MFE, TARGET_MFE, str(APP_PROD), errors)
+prod_mfe_transformed = ensure_mapping(prod_images, TARGET_MFE, TARGET_MFE, str(APP_PROD), errors)
+
+if prod_mfe_source and prod_mfe_transformed:
+    if not prod_mfe_source["newTag"] or not prod_mfe_transformed["newTag"]:
+        errors.append(f"{APP_PROD}: missing newTag for openedx-mfe dual-name overrides")
+    elif prod_mfe_source["newTag"] != prod_mfe_transformed["newTag"]:
+        errors.append(
+            f"{APP_PROD}: openedx-mfe tag mismatch between canonical and transformed entries "
+            f"('{prod_mfe_source['newTag']}' vs '{prod_mfe_transformed['newTag']}')"
+        )
+    if (prod_mfe_source["digest"] or prod_mfe_transformed["digest"]) and (
+        prod_mfe_source["digest"] != prod_mfe_transformed["digest"]
+    ):
+        errors.append(
+            f"{APP_PROD}: openedx-mfe digest mismatch between canonical and transformed entries "
+            f"('{prod_mfe_source['digest']}' vs '{prod_mfe_transformed['digest']}')"
+        )
+
+for bare_name in ("openedx", "openedx-mfe"):
+    if find_by_name(prod_images, bare_name):
+        errors.append(f"{APP_PROD}: bare image name '{bare_name}' is not allowed; use canonical docker.io name")
+    if find_by_name(staging_images, bare_name):
+        errors.append(f"{APP_STAGING}: bare image name '{bare_name}' is not allowed; use canonical docker.io name")
+
+ensure_mapping(staging_images, SOURCE_OPENEDX, TARGET_OPENEDX, str(APP_STAGING), errors)
+ensure_mapping(staging_images, SOURCE_MFE, TARGET_MFE, str(APP_STAGING), errors)
+
+check_infra = CHECK_INFRA
+if check_infra == "auto":
+    check_infra = "1" if INFRA_PROD.exists() else "0"
+
+if check_infra == "1":
+    if not INFRA_PROD.exists():
+        errors.append(f"infra check requested but file missing: {INFRA_PROD}")
+    else:
+        infra_images = parse_images(INFRA_PROD)
+        # Infra prod overlays now pin the realized GHCR image names directly.
+        # They do not carry the app repo's canonical docker.io source names, nor
+        # the app repo's extra transformed-name parity entry for openedx-mfe.
+        infra_openedx = ensure_mapping(infra_images, TARGET_OPENEDX, None, str(INFRA_PROD), errors)
+        infra_mfe_source = ensure_mapping(infra_images, TARGET_MFE, None, str(INFRA_PROD), errors)
+        if prod_openedx and infra_openedx and prod_openedx["newTag"] and infra_openedx["newTag"]:
+            if prod_openedx["newTag"] != infra_openedx["newTag"]:
+                errors.append(
+                    f"prod openedx tag drift: app overlay '{prod_openedx['newTag']}' "
+                    f"!= infra overlay '{infra_openedx['newTag']}'"
+                )
+        if prod_openedx and infra_openedx and (prod_openedx["digest"] or infra_openedx["digest"]):
+            if prod_openedx["digest"] != infra_openedx["digest"]:
+                errors.append(
+                    f"prod openedx digest drift: app overlay '{prod_openedx['digest']}' "
+                    f"!= infra overlay '{infra_openedx['digest']}'"
+                )
+        if prod_mfe_source and infra_mfe_source and prod_mfe_source["newTag"] and infra_mfe_source["newTag"]:
+            if prod_mfe_source["newTag"] != infra_mfe_source["newTag"]:
+                errors.append(
+                    f"prod openedx-mfe tag drift: app overlay '{prod_mfe_source['newTag']}' "
+                    f"!= infra overlay '{infra_mfe_source['newTag']}'"
+                )
+        if prod_mfe_source and infra_mfe_source and (prod_mfe_source["digest"] or infra_mfe_source["digest"]):
+            if prod_mfe_source["digest"] != infra_mfe_source["digest"]:
+                errors.append(
+                    f"prod openedx-mfe digest drift: app overlay '{prod_mfe_source['digest']}' "
+                    f"!= infra overlay '{infra_mfe_source['digest']}'"
+                )
+
+        # If infra uses vendored base resources, enforce parity only for the
+        # runtime-theme-critical MFE Caddy markers. The runtime drift lane should
+        # not block on unrelated route churn such as deprecated payment passthroughs.
+        infra_base_dir = INFRA_PROD.parents[2] / "base"
+        infra_vendored_caddy = infra_base_dir / "deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile"
+        if infra_vendored_caddy.exists():
+            app_missing = missing_caddy_markers(APP_MFE_CADDYFILE)
+            infra_missing = missing_caddy_markers(infra_vendored_caddy)
+            if app_missing:
+                errors.append(
+                    f"app MFE Caddyfile missing runtime-theme markers: {', '.join(app_missing)}"
+                )
+            elif infra_missing:
+                errors.append(
+                    "vendored MFE Caddyfile missing runtime-theme markers: "
+                    f"{', '.join(infra_missing)}; sync infra vendored base before release"
+                )
+            elif APP_MFE_CADDYFILE.read_text(encoding="utf-8") != infra_vendored_caddy.read_text(encoding="utf-8"):
+                notes.append(
+                    "vendored MFE Caddyfile has non-blocking drift outside runtime-theme markers: "
+                    f"{infra_vendored_caddy} differs from {APP_MFE_CADDYFILE}"
+                )
+        else:
+            notes.append(f"vendored MFE Caddyfile not found under infra base: {infra_vendored_caddy}")
+else:
+    notes.append("infra overlay check skipped")
+
+if errors:
+    for error in errors:
+        print(f"✗ {error}")
+    for note in notes:
+        print(f"- {note}")
+    sys.exit(1)
+
+print("✓ GitOps image override contract checks passed")
+print(f"  base: {APP_BASE}")
+print(f"  prod overlay: {APP_PROD}")
+print(f"  staging overlay: {APP_STAGING}")
+if check_infra == "1":
+    print(f"  infra overlay: {INFRA_PROD}")
+else:
+    print("  infra overlay: skipped")
+PY

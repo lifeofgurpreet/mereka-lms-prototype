@@ -1,0 +1,489 @@
+spec: auth-sso-enterprise_spec.md
+acceptance_criteria:
+- id: AC-001
+  description: Given an enterprise tenant "Acme Corp" with an Okta SAML IdP configured,
+    when a user navigates to `https://academyv2.mereka.io/enterprise/login/acme-corp`,
+    then they are redirected to Acme's Okta IdP login page
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-002
+  description: Given an enterprise tenant "Beta Inc" with an Azure AD OIDC provider
+    configured, when a user navigates to `https://academyv2.mereka.io/enterprise/login/beta-inc`,
+    then they are redirected to Beta's Azure AD authorization endpoint with PKCE parameters
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-oidc-cookie-middleware-order.sh
+    command: scripts/qa/verify-oidc-cookie-middleware-order.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-oidc-user-password-state.sh
+    command: scripts/qa/verify-oidc-user-password-state.sh
+- id: AC-003
+  description: Given two enterprise tenants with different IdPs, when a user authenticates
+    via Acme's IdP, then the resulting `EnterpriseCustomerUser` record links to Acme
+    only; no link to Beta is created
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-004
+  description: Given Authentik is configured as the default OIDC provider, when a
+    non-enterprise user navigates to `/auth/login/oidc/`, then they are redirected
+    to Authentik's authorize endpoint (existing behavior preserved)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-005
+  description: Given a tenant with SAML IdP configured, when the LMS SP metadata is
+    requested at `/auth/saml/metadata.xml`, then valid SP metadata is returned containing
+    the ACS URL, entity ID, and signing certificate
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/tenants/generate-saml-keypair.sh
+    command: scripts/tenants/generate-saml-keypair.sh
+- id: AC-006
+  description: Given a valid SAML assertion from Acme's IdP, when the assertion signature
+    is verified and time window is valid, then the user is authenticated and a session
+    is created
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-007
+  description: Given a SAML assertion with an expired `NotOnOrAfter` timestamp (beyond
+    clock skew tolerance), when processed, then the assertion is rejected and a security
+    event is logged
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-008
+  description: Given a SAML assertion that has already been processed (replay), when
+    the same assertion ID is submitted again, then the assertion is rejected with
+    "Assertion replay detected" and a security event is logged
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-009
+  description: Given a SAML assertion signed with SHA-1, when processed, then the
+    assertion is rejected and a security event is logged indicating weak signature
+    algorithm
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-010
+  description: Given a SAML assertion with an `Issuer` that does not match any configured
+    tenant IdP entity ID, when processed, then the assertion is rejected and a security
+    event is logged
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-011
+  description: Given an OIDC authorization code from Beta's Azure AD, when the token
+    exchange is performed, then the ID token `iss` claim matches Beta's configured
+    issuer URL and the `aud` claim matches the configured client ID
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-012
+  description: Given an OIDC ID token with an expired `exp` claim, when validated,
+    then the token is rejected and authentication fails with a clear error message
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-013
+  description: Given an OIDC flow, when the authorization request is sent, then it
+    includes `code_challenge` and `code_challenge_method=S256` parameters (PKCE)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-014
+  description: Given a user with `is_staff=True`, when they attempt to access `/admin/`
+    on the LMS, then they are prompted for MFA before gaining access
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-015
+  description: Given a user with `is_superuser=True`, when they attempt to access
+    `/admin/` on any service (LMS, CMS, Discovery, Credentials, Ecommerce), then they
+    are prompted for MFA before gaining access
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-016
+  description: Given an Authentik admin, when they attempt to access the Authentik
+    admin UI, then they are required to complete MFA (verified by `scripts/infra/ensure-authentik-admin-mfa.sh
+    --verify`)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/configure-github-authenticated-sso-canary.sh
+    command: scripts/infra/configure-github-authenticated-sso-canary.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/ensure-authentik-admin.sh
+    command: scripts/infra/ensure-authentik-admin.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/ensure-authentik-hardening.sh
+    command: scripts/infra/ensure-authentik-hardening.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/ensure-authentik-oidc-redirect-uris.sh
+    command: scripts/infra/ensure-authentik-oidc-redirect-uris.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+  - type: manual
+    runbook: docs/reference/operations/AUTH_AND_PERMISSIONS.md
+    section: Authentik Admin (Separate)
+    justification: Authentik admin MFA enforcement is validated against the live Authentik
+      instance; this cannot be fully verified in CI without cluster credentials.
+    file: scripts/infra/ensure-authentik-admin-mfa.sh
+- id: AC-017
+  description: Given a newly elevated staff user, when they next log in, then they
+    are forced to enroll in MFA before accessing any staff-only functionality
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-018
+  description: Given an MFA challenge, when the user submits a correct TOTP code,
+    then access is granted and the MFA event is logged with method=TOTP, outcome=success
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-019
+  description: Given a staff user session, when the session has been idle for more
+    than 30 minutes (configurable), then the next request returns HTTP 302 to the
+    login page
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-020
+  description: Given a learner session, when the session has been idle for more than
+    120 minutes (configurable), then the next request returns HTTP 302 to the login
+    page
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-021
+  description: Given a staff user session, when the session has been active for more
+    than 8 hours (configurable) regardless of activity, then the next request returns
+    HTTP 302 to the login page
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-022
+  description: 'Given a user clicks "Sign Out", when the logout completes, then: (a)
+    the server-side session is destroyed, (b) session cookies are cleared, (c) the
+    user is redirected to the IdP''s logout endpoint if SLO/RP-initiated logout is
+    supported'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-023
+  description: Given a user with 5 active sessions, when they log in a 6th time, then
+    the oldest session is invalidated
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-024
+  description: Given a successful authentication, when the session is created, then
+    the session ID is regenerated (different from any pre-authentication session ID)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-025
+  description: 'Given a first-time user authenticating via Acme''s SAML IdP with email
+    `alice@acme.com`, when the assertion is processed, then: (a) an LMS user account
+    is created with email=`alice@acme.com`, (b) an `EnterpriseCustomerUser` record
+    links the user to Acme''s `EnterpriseCustomer`, (c) no manual admin action is
+    required'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-026
+  description: Given an existing LMS user `bob@acme.com` (registered previously),
+    when Bob authenticates via Acme's IdP for the first time, then the existing account
+    is linked to Acme via a new `EnterpriseCustomerUser` record (no duplicate account
+    created)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-027
+  description: Given a `PendingEnterpriseCustomerUser` for `carol@acme.com` in Acme's
+    tenant, when Carol authenticates via Acme's IdP and her LMS account is created,
+    then the pending record is resolved and she is linked to Acme
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-028
+  description: Given JIT provisioning of a user via Acme's IdP, when the `EnterpriseCustomerUser`
+    record is created, then the user is NOT granted `is_staff` or `is_superuser` regardless
+    of IdP assertion content
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-platform-admin-sso-isolation.sh
+    command: scripts/qa/verify-platform-admin-sso-isolation.sh
+- id: AC-029
+  description: 'Given an active user `alice@acme.com` linked to Acme, when a SCIM
+    `DELETE /Users/{alice_id}` request is received from Acme''s IdP, then: (a) `alice.is_active`
+    is set to `False`, (b) all of Alice''s active sessions are invalidated, (c) the
+    `EnterpriseCustomerUser` record is removed'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-030
+  description: Given Alice has been deactivated, when Alice attempts to authenticate
+    via Acme's IdP, then authentication fails with "Your account has been deactivated.
+    Contact your organization administrator."
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-031
+  description: Given a daily deprovisioning sync job runs for Acme, when Alice is
+    no longer in Acme's active user list, then Alice is deactivated within 24 hours
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-032
+  description: Given Acme's IdP is configured to map SAML attribute `groups=["academy-admin"]`
+    to `enterprise_admin`, when a user authenticates with that attribute, then they
+    are granted `enterprise_admin` role for Acme's tenant
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-033
+  description: Given a user previously had `enterprise_admin` role via IdP claim,
+    when they next authenticate without the admin claim (auto-revocation enabled for
+    Acme), then they are downgraded to `enterprise_learner` and the role change is
+    logged
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-034
+  description: Given any IdP assertion, when it includes claims that would map to
+    `enterprise_openedx_operator`, then the claim is ignored and the user is NOT elevated
+    to operator (operator role is platform-only)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-035
+  description: Given the platform admin allowlist includes `gurpreet@biji-biji.com`,
+    when Gurpreet authenticates via any IdP, then `is_staff` and `is_superuser` are
+    enforced by the `MerekaPlatformAdminMiddleware` regardless of IdP claims
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-platform-admin-sso-isolation.sh
+    command: scripts/qa/verify-platform-admin-sso-isolation.sh
+- id: AC-036
+  description: Given a JIT-provisioned user whose IdP assertion does not include `email_verified=true`,
+    when they first access the platform, then they are prompted to verify their email
+    before accessing enterprise-subsidized content
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-037
+  description: 'Given any authentication event (login, logout, failed attempt, MFA
+    challenge, JIT provisioning, deprovisioning), when it occurs, then an audit log
+    entry is written with: event_type, user_id_hash, enterprise_customer_uuid (if
+    applicable), ip_address_hash, user_agent_hash, timestamp, outcome, idp_slug'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-038
+  description: Given a cross-tenant access attempt (user from tenant A's IdP attempting
+    to link to tenant B), when the attempt is blocked, then a security audit event
+    is logged with severity=CRITICAL
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-039
+  description: Given 20 failed login attempts from the same IP within 5 minutes, when
+    the 21st attempt is made, then it is rejected with HTTP 429 and the IP is locked
+    out for 5 minutes
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-040
+  description: Given a login redirect URL (`next` parameter) pointing to an external
+    domain not in `ALLOWED_HOSTS`, when the login completes, then the redirect is
+    blocked and the user is sent to the default dashboard instead
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-041
+  description: Given authentication endpoints, when accessed over HTTP (non-TLS),
+    then the request is redirected to HTTPS (HTTP 301)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/audit-authentik-policy-exceptions.sh
+    command: scripts/qa/audit-authentik-policy-exceptions.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-042
+  description: Given all enterprise IdPs are configured, when `./scripts/qa/verify-auth-surfaces.sh
+    prod` runs, then all existing checks pass plus new checks for enterprise SAML/OIDC
+    endpoints
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/audit-auth-access.sh
+    command: scripts/qa/audit-auth-access.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-hardening.sh
+    command: scripts/qa/verify-auth-hardening.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-surfaces.sh
+    command: scripts/qa/verify-auth-surfaces.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-authenticated-sso-canary.sh
+    command: scripts/qa/verify-authenticated-sso-canary.sh
+- id: AC-043
+  description: 'Given enterprise SSO is configured for a tenant, when `./scripts/qa/verify-enterprise-sso.sh
+    --tenant=acme-corp --env=prod` runs, then: (a) the tenant''s IdP metadata is reachable,
+    (b) the enterprise login URL redirects correctly, (c) SP metadata is valid'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+  - type: manual
+    runbook: docs/reference/operations/AUTH_AND_PERMISSIONS.md
+    section: How Login Works
+    justification: Enterprise tenant SSO flows depend on tenant-specific IdP configuration
+      and cannot be verified generically without tenant credentials and live runtime.
+    file: scripts/qa/verify-enterprise-sso.sh
+- id: AC-044
+  description: Given Authentik is the default OIDC provider, when Authentik policies
+    execute during `/application/o/authorize` for `client_id=mereka-lms`, then there
+    are **zero** `policy_exception` events in the last 6 hours (verified by `./scripts/qa/audit-authentik-policy-exceptions.sh
+    --since 6h`)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/audit-authentik-policy-exceptions.sh
+    command: scripts/qa/audit-authentik-policy-exceptions.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+- id: AC-045
+  description: 'Given valid canary credentials exist for both a learner user and a
+    Studio-access staff user, when the credentialed canary runs, then: (a) LMS session
+    validates (`/api/user/v1/me=200`), (b) MFEs do not loop back to `/authn/login`,
+    and (c) Studio `/home/` loads without `500` or error page (verified by `./scripts/qa/verify-authenticated-sso-canary.sh
+    --env prod` and workflow `authenticated-sso-canary.yml`)'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/audit-authenticated-sso-canary-wiring.sh
+    command: scripts/qa/audit-authenticated-sso-canary-wiring.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-auth-sso-enterprise.sh
+    command: scripts/qa/verify-auth-sso-enterprise.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-authenticated-sso-canary.sh
+    command: scripts/qa/verify-authenticated-sso-canary.sh
+

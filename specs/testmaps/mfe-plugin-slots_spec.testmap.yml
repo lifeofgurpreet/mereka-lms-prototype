@@ -1,0 +1,217 @@
+spec: mfe-plugin-slots_spec.md
+acceptance_criteria:
+- id: AC-SLOT-001
+  description: Desktop header uses Mereka logo instead of default Open edX logo.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+- id: AC-SLOT-002
+  description: Mobile header uses Mereka square logo instead of default Open edX mobile logo.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+- id: AC-SLOT-003
+  description: Header logo click navigates to /dashboard.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+- id: AC-SLOT-004
+  description: academy.biji-biji.com renders tenant-specific Biji-Biji header variant.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+- id: AC-SLOT-005
+  description: Desktop main menu contains Mereka links (Dashboard, Discover Courses, Support).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+- id: AC-SLOT-006
+  description: Mobile menu exposes same navigation items as desktop.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+- id: AC-SLOT-007
+  description: Phase 1 slot registrations exist and MFE build wiring is present in env.config.jsx.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-plugin-slot-wiring.sh
+    command: scripts/qa/verify-plugin-slot-wiring.sh
+- id: AC-SLOT-008
+  description: Learning course outline sidebar renders Mereka branding via slot.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+- id: AC-SLOT-009
+  description: Learning sequence/progress area renders with Mereka-branded styling via slot path.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+- id: AC-SLOT-010
+  description: Course outline placeholder for missing image uses Mereka brand colors.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+- id: AC-SLOT-011
+  description: Learning Phase 2 slot registrations are present and build wiring is intact.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-plugin-slot-wiring.sh
+    command: scripts/qa/verify-plugin-slot-wiring.sh
+- id: AC-SLOT-012
+  description: Account MFE renders additional enterprise profile fields via slot.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+- id: AC-SLOT-013
+  description: Profile MFE renders branded profile header/fields via slot.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+- id: AC-SLOT-014
+  description: Enterprise profile field values persist through profile API/save cycle.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-slot-profile-persistence.sh
+    command: scripts/qa/verify-mfe-slot-profile-persistence.sh
+- id: AC-SLOT-015
+  description: Phase 3 account/profile slot registrations are present and build wiring is intact.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-plugin-slot-wiring.sh
+    command: scripts/qa/verify-plugin-slot-wiring.sh
+- id: AC-SLOT-016
+  description: Slot registration follows PLUGIN_SLOTS.add_items pattern with supported operations.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-plugin-slot-wiring.sh
+    command: scripts/qa/verify-plugin-slot-wiring.sh
+- id: AC-SLOT-017
+  description: Slot custom components are defined via runtime definitions patch in plugin.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-plugin-slot-wiring.sh
+    command: scripts/qa/verify-plugin-slot-wiring.sh
+- id: AC-SLOT-018
+  description: Multi-site slot components use hostname-aware SITE_VARIANTS logic.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-plugin-slot-wiring.sh
+    command: scripts/qa/verify-plugin-slot-wiring.sh
+- id: AC-SLOT-019
+  description: Shared slot targeting applies consistently across MFEs that expose the slot.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-plugin-slot-wiring.sh
+    command: scripts/qa/verify-plugin-slot-wiring.sh
+- id: AC-SLOT-020
+  description: Missing slot IDs in a given MFE degrade gracefully (no build/runtime crash).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-plugin-slot-wiring.sh
+    command: scripts/qa/verify-plugin-slot-wiring.sh
+- id: AC-SLOT-021
+  description: Visual regression suite captures and compares pages containing activated slots.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/visual-regression-branding.sh
+    command: scripts/qa/visual-regression-branding.sh prod --allow-bootstrap
+- id: AC-SLOT-022
+  description: CI verification script confirms expected slot IDs in generated env.config.jsx.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+- id: AC-SLOT-023
+  description: Smoke pages do not render default Open edX header logo after slot activation.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-branding.sh
+    command: scripts/qa/verify-mfe-branding.sh
+- id: AC-SLOT-024
+  description: Build failures identify failing slot ID/component for quick debugging.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-plugin-slots.sh
+    command: scripts/qa/verify-mfe-plugin-slots.sh
+- id: AC-SLOT-025
+  description: Slot component render latency stays within 100ms from slot mount.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-slot-nfr.sh
+    command: scripts/qa/verify-mfe-slot-nfr.sh
+- id: AC-SLOT-026
+  description: Incremental slot component JS bundle overhead remains under 15KB gzipped.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-slot-nfr.sh
+    command: scripts/qa/verify-mfe-slot-nfr.sh
+- id: AC-SLOT-027
+  description: Slot components are responsive from 320px to 1920px without overflow.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mfe-slot-nfr.sh
+    command: scripts/qa/verify-mfe-slot-nfr.sh
+- id: AC-SLOT-028
+  description: Header slot asset paths align with branding-system logo asset contract.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-oep48-brand-package.sh
+    command: scripts/qa/verify-oep48-brand-package.sh
+- id: AC-SLOT-029
+  description: Slot component path does not introduce Google Fonts requests.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-branding-asset-sync.sh
+    command: scripts/qa/verify-branding-asset-sync.sh

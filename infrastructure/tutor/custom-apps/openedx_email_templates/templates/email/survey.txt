@@ -1,0 +1,12 @@
+We'd Love Your Feedback
+
+Hi {{ user_name }},
+
+Please take a moment to share your experience with {{ course_name }}.
+
+Take survey: {{ survey_url }}
+
+This survey takes approximately 5 minutes.
+
+---
+{{ org_display_name }}

@@ -1,0 +1,15 @@
+# Default deny all ingress and egress traffic for the mereka-lms namespace.
+# All allowed traffic must be explicitly whitelisted via other NetworkPolicies.
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  labels:
+    app.kubernetes.io/name: network-policy
+    app.kubernetes.io/component: network-policy
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress

@@ -1,0 +1,948 @@
+version: 1
+root: docs/operations
+entries:
+- old_path: docs/operations/ADMIN_CONSOLE_SETUP.md
+  destination_path: docs/reference/operations/ADMIN_CONSOLE_SETUP.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/ALERT_NOISE_CLASSIFICATION_FEED.md
+  destination_path: docs/reference/operations/ALERT_NOISE_CLASSIFICATION_FEED.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/ALERT_TUNING_SOP.md
+  destination_path: docs/reference/operations/ALERT_TUNING_SOP.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/ALTERNATIVE_DOMAIN_BRANDING_FIX.md
+  destination_path: docs/reference/operations/ALTERNATIVE_DOMAIN_BRANDING_FIX.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/ANALYTICS_DATA_RETENTION.md
+  destination_path: docs/policies/operations/ANALYTICS_DATA_RETENTION.md
+  destination_root: docs/policies
+  classification: policy
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/ARGOCD_DRIFT.md
+  destination_path: docs/reference/operations/ARGOCD_DRIFT.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/ARGOCD_HEALTH_TROUBLESHOOTING.md
+  destination_path: docs/ops/runbooks/ARGOCD_HEALTH_TROUBLESHOOTING.md
+  destination_root: docs/ops
+  classification: ops.procedure
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/ASPECTS_ANALYTICS_SETUP.md
+  destination_path: docs/reference/operations/ASPECTS_ANALYTICS_SETUP.md
+  destination_root: docs/reference
+  classification: reference.operations
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations reference
+- old_path: docs/operations/ASPECTS_WIRING_CHECKLIST.md
+  destination_path: docs/ops/runbooks/ASPECTS_WIRING_CHECKLIST.md
+  destination_root: docs/ops
+  classification: ops.runbook
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations runbook
+- old_path: docs/operations/ATLAS_HEALTH.md
+  destination_path: docs/reference/operations/ATLAS_HEALTH.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/AUTHENTICATED_SMOKE_CREDENTIALS.md
+  destination_path: docs/reference/operations/AUTHENTICATED_SMOKE_CREDENTIALS.md
+  destination_root: docs/reference
+  classification: reference.operations
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations reference
+- old_path: docs/operations/BACKUP_COVERAGE_MATRIX.md
+  destination_path: docs/reference/operations/BACKUP_COVERAGE_MATRIX.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/CANONICAL_DEPLOY_CONTRACT.md
+  destination_path: docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/CAPACITY_PLANNING.md
+  destination_path: docs/reference/operations/CAPACITY_PLANNING.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/CLOUD_SQL_RESTORE_DRILL.md
+  destination_path: docs/ops/runbooks/CLOUD_SQL_RESTORE_DRILL.md
+  destination_root: docs/ops
+  classification: ops.procedure
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/COMMIT_SIGNING.md
+  destination_path: docs/reference/operations/COMMIT_SIGNING.md
+  destination_root: docs/reference
+  classification: reference.operations
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations reference
+- old_path: docs/operations/CONTENT_LIBRARIES_V2_MIGRATION.md
+  destination_path: docs/ops/runbooks/CONTENT_LIBRARIES_V2_MIGRATION.md
+  destination_root: docs/ops
+  classification: ops.runbook
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical migration runbook
+- old_path: docs/operations/COURSE_CERTIFICATES_UI.md
+  destination_path: docs/guides/admin/COURSE_CERTIFICATES_UI.md
+  destination_root: docs/guides
+  classification: guides.admin
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: admin guidance
+- old_path: docs/operations/COURSE_DATA_RECOVERY.md
+  destination_path: docs/ops/runbooks/COURSE_DATA_RECOVERY.md
+  destination_root: docs/ops
+  classification: ops.runbook
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations runbook
+- old_path: docs/operations/DEPLOYMENT_LANES.md
+  destination_path: docs/reference/operations/DEPLOYMENT_LANES.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/DEPLOYMENT_VERIFICATION.md
+  destination_path: docs/reference/operations/DEPLOYMENT_VERIFICATION.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/DEPLOY_EVIDENCE_GATES.md
+  destination_path: docs/ops/runbooks/DEPLOY_EVIDENCE_GATES.md
+  destination_root: docs/ops
+  classification: ops.runbook
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations runbook
+- old_path: docs/operations/DEPLOY_TENANCY_EPIC.md
+  destination_path: docs/meta/docs-program/DEPLOY_TENANCY_EPIC.md
+  destination_root: docs/meta
+  classification: meta.docs-program
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: docs-program internal planning
+- old_path: docs/operations/DOMAIN_MANAGEMENT.md
+  destination_path: docs/reference/operations/DOMAIN_MANAGEMENT.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/DR_DRILL_SCHEDULE.md
+  destination_path: docs/ops/runbooks/DR_DRILL_SCHEDULE.md
+  destination_root: docs/ops
+  classification: ops.procedure
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/ECOMMERCE_DEPRECATION_INVENTORY.md
+  destination_path: docs/reference/operations/ECOMMERCE_DEPRECATION_INVENTORY.md
+  destination_root: docs/reference
+  classification: reference.operations
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations reference
+- old_path: docs/operations/ECOMMERCE_OAUTH_TROUBLESHOOTING.md
+  destination_path: docs/ops/runbooks/ECOMMERCE_OAUTH_TROUBLESHOOTING.md
+  destination_root: docs/ops
+  classification: ops.runbook
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations runbook
+- old_path: docs/operations/ECOMMERCE_THEMING.md
+  destination_path: docs/reference/operations/ECOMMERCE_THEMING.md
+  destination_root: docs/reference
+  classification: reference.operations
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations reference
+- old_path: docs/operations/ECOMMERCE_WORKER_TROUBLESHOOTING.md
+  destination_path: docs/ops/runbooks/ECOMMERCE_WORKER_TROUBLESHOOTING.md
+  destination_root: docs/ops
+  classification: ops.runbook
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations runbook
+- old_path: docs/operations/EMAIL_DNS_RECORDS.md
+  destination_path: docs/reference/operations/EMAIL_DNS_RECORDS.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/EMAIL_PIPELINE.md
+  destination_path: docs/reference/operations/EMAIL_PIPELINE.md
+  destination_root: docs/reference
+  classification: reference.operations
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations reference
+- old_path: docs/operations/ENTERPRISE_MFE_MAINTENANCE.md
+  destination_path: docs/ops/runbooks/architecture/ENTERPRISE_MFE_MAINTENANCE.md
+  destination_root: docs/ops
+  classification: ops.runbook.architecture
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical architecture runbook
+- old_path: docs/operations/ENTERPRISE_MULTI_TENANCY_NAVIGATION.md
+  destination_path: docs/reference/operations/ENTERPRISE_MULTI_TENANCY_NAVIGATION.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/ESO_ALERTING.md
+  destination_path: docs/ops/runbooks/ESO_ALERTING.md
+  destination_root: docs/ops
+  classification: ops.procedure
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/EVIDENCE_SCHEMA.md
+  destination_path: docs/meta/templates/EVIDENCE_SCHEMA.md
+  destination_root: docs/meta
+  classification: meta.program
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/FOLLOW_UPS_2026-01-20.md
+  destination_path: docs/status/active/FOLLOW_UPS_2026-01-20.md
+  destination_root: docs/status
+  classification: status.active
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/FOOTER_SLOT_ONLY_POLICY.md
+  destination_path: docs/policies/operations/FOOTER_SLOT_ONLY_POLICY.md
+  destination_root: docs/policies
+  classification: policy
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/FOOTER_VARIANT_MATRIX.md
+  destination_path: docs/reference/operations/FOOTER_VARIANT_MATRIX.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/FORUM_AUTH_E2E.md
+  destination_path: docs/reference/operations/FORUM_AUTH_E2E.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/FORUM_MEILISEARCH.md
+  destination_path: docs/reference/operations/FORUM_MEILISEARCH.md
+  destination_root: docs/reference
+  classification: reference.operations
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations reference
+- old_path: docs/operations/FORUM_UI_THEMING.md
+  destination_path: docs/reference/architecture/FORUM_UI_THEMING.md
+  destination_root: docs/reference
+  classification: reference.architecture
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical architecture reference
+- old_path: docs/operations/FRONTEND_BRANDING_METHOD.md
+  destination_path: docs/reference/operations/FRONTEND_BRANDING_METHOD.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/GDPR_COMPLIANCE.md
+  destination_path: docs/policies/architecture/GDPR_COMPLIANCE.md
+  destination_root: docs/policies
+  classification: policies.architecture
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: durable architecture policy
+- old_path: docs/operations/GITHUB_APP_TOKEN.md
+  destination_path: docs/reference/operations/GITHUB_APP_TOKEN.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/GKE_LOKI_FORWARDING.md
+  destination_path: docs/reference/operations/GKE_LOKI_FORWARDING.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md
+  destination_path: docs/ops/runbooks/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md
+  destination_root: docs/ops
+  classification: ops.runbook
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations runbook
+- old_path: docs/operations/INCIDENT_RESPONSE.md
+  destination_path: docs/ops/runbooks/INCIDENT_RESPONSE.md
+  destination_root: docs/ops
+  classification: ops.procedure
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/INCIDENT_TEMPLATES.md
+  destination_path: docs/ops/runbooks/INCIDENT_TEMPLATES.md
+  destination_root: docs/ops
+  classification: ops.procedure
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/INFRA_TEAM_ACTION_ITEMS.md
+  destination_path: docs/status/active/INFRA_TEAM_ACTION_ITEMS.md
+  destination_root: docs/status
+  classification: status.active
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/INFRA_TEAM_PROMPT_2026-03-02.md
+  destination_path: docs/reference/operations/INFRA_TEAM_PROMPT_2026-03-02.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md
+  destination_path: docs/ops/runbooks/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md
+  destination_root: docs/ops
+  classification: ops.runbook
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations runbook
+- old_path: docs/operations/LEGACY_FOOTER_REMOVAL.md
+  destination_path: docs/ops/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md
+  destination_root: docs/ops
+  classification: ops.runbook.architecture
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical architecture runbook
+- old_path: docs/operations/LIBRARIES_GCS_SETUP.md
+  destination_path: docs/reference/operations/LIBRARIES_GCS_SETUP.md
+  destination_root: docs/reference
+  classification: reference.operations
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations reference
+- old_path: docs/operations/LIGHTHOUSE_BUDGETS.md
+  destination_path: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
+  destination_root: docs/policies
+  classification: policies.architecture
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: durable architecture policy
+- old_path: docs/operations/LMS_RKE2_VALIDATION.md
+  destination_path: docs/reference/operations/LMS_RKE2_VALIDATION.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/MAINTENANCE_WINDOWS.md
+  destination_path: docs/policies/operations/MAINTENANCE_WINDOWS.md
+  destination_root: docs/policies
+  classification: policy
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/MERGE_FIRST_DEPLOYMENT_PROTOCOL.md
+  destination_path: docs/policies/operations/MERGE_FIRST_DEPLOYMENT_PROTOCOL.md
+  destination_root: docs/policies
+  classification: policy
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/MFE_ANALYTICS_PLUGIN_PARITY.md
+  destination_path: docs/reference/operations/MFE_ANALYTICS_PLUGIN_PARITY.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/MFE_FOOTER_SLOT_MIGRATION.md
+  destination_path: docs/ops/runbooks/architecture/MFE_FOOTER_SLOT_MIGRATION.md
+  destination_root: docs/ops
+  classification: ops.runbook.architecture
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical architecture runbook
+- old_path: docs/operations/MFE_OAUTH_FIX_DEPLOYMENT.md
+  destination_path: docs/ops/runbooks/architecture/MFE_OAUTH_FIX_DEPLOYMENT.md
+  destination_root: docs/ops
+  classification: ops.runbook.architecture
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical architecture runbook
+- old_path: docs/operations/MFE_PLUGIN_SLOT_MATRIX.md
+  destination_path: docs/reference/operations/MFE_PLUGIN_SLOT_MATRIX.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md
+  destination_path: docs/reference/architecture/MFE_PLUGIN_SLOT_MIGRATION_REGISTER.md
+  destination_root: docs/reference
+  classification: reference.architecture
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical architecture reference
+- old_path: docs/operations/MFE_ROUTING_PARITY.md
+  destination_path: docs/ops/runbooks/architecture/MFE_ROUTING_PARITY.md
+  destination_root: docs/ops
+  classification: ops.runbook.architecture
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical architecture runbook
+- old_path: docs/operations/MFE_SELECTOR_EXCEPTIONS.md
+  destination_path: docs/policies/architecture/MFE_SELECTOR_EXCEPTIONS.md
+  destination_root: docs/policies
+  classification: policies.architecture
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: durable architecture policy
+- old_path: docs/operations/MFE_SELECTOR_HARDENING_AUDIT.md
+  destination_path: docs/reference/architecture/MFE_SELECTOR_AUDIT.md
+  destination_root: docs/reference
+  classification: reference.architecture
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: legacy hardening audit is superseded by the canonical selector audit
+- old_path: docs/operations/MOBILE_DEPLOYMENT.md
+  destination_path: docs/ops/runbooks/MOBILE_DEPLOYMENT.md
+  destination_root: docs/ops
+  classification: ops.runbook
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations runbook
+- old_path: docs/operations/MOBILE_OAUTH_PREPARATION.md
+  destination_path: docs/meta/docs-program/MOBILE_OAUTH_PREPARATION.md
+  destination_root: docs/meta
+  classification: meta.docs-program
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: docs-program internal planning
+- old_path: docs/operations/MOBILE_OAUTH_PROVISIONING.md
+  destination_path: docs/ops/runbooks/MOBILE_OAUTH_PROVISIONING.md
+  destination_root: docs/ops
+  classification: ops.runbook
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations runbook
+- old_path: docs/operations/MONGODB_DEV_SEED.md
+  destination_path: docs/ops/runbooks/MONGODB_DEV_SEED.md
+  destination_root: docs/ops
+  classification: ops.runbook
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations runbook
+- old_path: docs/operations/MULTISITE_GOVERNANCE.md
+  destination_path: docs/policies/operations/MULTISITE_GOVERNANCE.md
+  destination_root: docs/policies
+  classification: policies.operations
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: durable operations policy
+- old_path: docs/operations/MULTITENANT_BRAND_PLATFORM.md
+  destination_path: docs/reference/operations/MULTITENANT_BRAND_PLATFORM.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/OBSERVABILITY_GA_READINESS_GATE.md
+  destination_path: docs/policies/operations/OBSERVABILITY_GA_READINESS_GATE.md
+  destination_root: docs/policies
+  classification: policy
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md
+  destination_path: docs/status/active/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md
+  destination_root: docs/status
+  classification: status.active
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/OBSERVABILITY_TRACING_PILOT_CONTRACT.md
+  destination_path: docs/reference/operations/OBSERVABILITY_TRACING_PILOT_CONTRACT.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/ONCALL_OBSERVABILITY_PLAYBOOK.md
+  destination_path: docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md
+  destination_root: docs/ops
+  classification: ops.procedure
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/ONCALL_ROTATION.md
+  destination_path: docs/policies/operations/ONCALL_ROTATION.md
+  destination_root: docs/policies
+  classification: policy
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/ON_CALL.md
+  destination_path: docs/reference/operations/ON_CALL.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/OTEL_NAMING_CONVENTIONS.md
+  destination_path: docs/policies/operations/OTEL_NAMING_CONVENTIONS.md
+  destination_root: docs/policies
+  classification: policy
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/PATCH_IDEMPOTENCY.md
+  destination_path: docs/ops/runbooks/PATCH_IDEMPOTENCY.md
+  destination_root: docs/ops
+  classification: ops.runbook
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations runbook
+- old_path: docs/operations/PII_DATA_INVENTORY.md
+  destination_path: docs/policies/operations/PII_DATA_INVENTORY.md
+  destination_root: docs/policies
+  classification: policies.operations
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: durable operations policy
+- old_path: docs/operations/POSTDEPLOY_SMOKE_AND_INCIDENT.md
+  destination_path: docs/ops/runbooks/POSTDEPLOY_SMOKE_AND_INCIDENT.md
+  destination_root: docs/ops
+  classification: ops.procedure
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/POSTMERGE_GOVERNANCE_CLOSURE.md
+  destination_path: docs/policies/operations/POSTMERGE_GOVERNANCE_CLOSURE.md
+  destination_root: docs/policies
+  classification: policy
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/POST_DEPLOY_GATE.md
+  destination_path: docs/reference/operations/POST_DEPLOY_GATE.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/POST_MORTEM_TEMPLATE.md
+  destination_path: docs/meta/templates/POST_MORTEM_TEMPLATE.md
+  destination_root: docs/meta
+  classification: meta.program
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/PREVIEW_REDIRECT.md
+  destination_path: docs/reference/operations/PREVIEW_REDIRECT.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md
+  destination_path: docs/reference/operations/PRODUCTION_INFRASTRUCTURE_PLAN.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/PURCHASE_GATEWAY_FULFILLMENT_RECOVERY.md
+  destination_path: docs/ops/runbooks/PURCHASE_GATEWAY_FULFILLMENT_RECOVERY.md
+  destination_root: docs/ops
+  classification: ops.runbook
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations runbook
+- old_path: docs/operations/PURCHASE_GATEWAY_K8S.md
+  destination_path: docs/ops/runbooks/PURCHASE_GATEWAY_K8S.md
+  destination_root: docs/ops
+  classification: ops.runbook
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations runbook
+- old_path: docs/operations/RELEASE_BUNDLE.md
+  destination_path: docs/reference/operations/RELEASE_BUNDLE.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/RELEASE_CHECKLIST.md
+  destination_path: docs/ops/runbooks/RELEASE_CHECKLIST.md
+  destination_root: docs/ops
+  classification: ops.procedure
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/RELEASE_DEPLOYMENT_TEMPLATE.md
+  destination_path: docs/meta/templates/RELEASE_DEPLOYMENT_TEMPLATE.md
+  destination_root: docs/meta
+  classification: meta.program
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/RELEASE_EVIDENCE.md
+  destination_path: docs/reference/operations/RELEASE_EVIDENCE.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/RELEASE_PROCESS.md
+  destination_path: docs/reference/operations/RELEASE_PROCESS.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/REPO_BOUNDARIES.md
+  destination_path: docs/policies/operations/REPO_BOUNDARIES.md
+  destination_root: docs/policies
+  classification: policy
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/RKE2_DEV_READINESS.md
+  destination_path: docs/ops/runbooks/RKE2_DEV_READINESS.md
+  destination_root: docs/ops
+  classification: ops.runbook
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations runbook
+- old_path: docs/operations/RKE2_MIGRATION_PLAN.md
+  destination_path: docs/status/migrations/RKE2_MIGRATION_PLAN.md
+  destination_root: docs/status
+  classification: status.migrations
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: active migration status
+- old_path: docs/operations/RKE2_NONPROD_THEME_AND_CONVERGENCE_FIX.md
+  destination_path: docs/status/migrations/RKE2_NONPROD_THEME_AND_CONVERGENCE_FIX.md
+  destination_root: docs/status
+  classification: status.migrations
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: active migration status
+- old_path: docs/operations/RKE2_ROLLOUT_CHECKLIST.md
+  destination_path: docs/ops/runbooks/RKE2_ROLLOUT_CHECKLIST.md
+  destination_root: docs/ops
+  classification: ops.runbook
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations runbook
+- old_path: docs/operations/RKE2_ROLLOUT_MATRIX.md
+  destination_path: docs/status/migrations/RKE2_ROLLOUT_MATRIX.md
+  destination_root: docs/status
+  classification: status.migrations
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: active migration status
+- old_path: docs/operations/RKE2_TENANT_ROUTES.md
+  destination_path: docs/ops/runbooks/RKE2_TENANT_ROUTES.md
+  destination_root: docs/ops
+  classification: ops.runbook
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations runbook
+- old_path: docs/operations/SLA_REPORTING.md
+  destination_path: docs/policies/operations/SLA_REPORTING.md
+  destination_root: docs/policies
+  classification: policy
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/SLO_DASHBOARDS_SETUP.md
+  destination_path: docs/reference/operations/SLO_DASHBOARDS_SETUP.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/SLO_JOURNEY_SLI_MAPPING.md
+  destination_path: docs/reference/operations/SLO_JOURNEY_SLI_MAPPING.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/SLSA_PROVENANCE.md
+  destination_path: docs/reference/operations/SLSA_PROVENANCE.md
+  destination_root: docs/reference
+  classification: reference.operations
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations reference
+- old_path: docs/operations/SPEC_COVERAGE.md
+  destination_path: docs/reference/operations/SPEC_COVERAGE.md
+  destination_root: docs/reference
+  classification: reference.operations
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: canonical operations reference
+- old_path: docs/operations/STAGING_ACTIVATION.md
+  destination_path: docs/ops/runbooks/STAGING_ACTIVATION.md
+  destination_root: docs/ops
+  classification: ops.runbook
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations runbook
+- old_path: docs/operations/STAGING_PROMOTION_PLAYBOOK_110.md
+  destination_path: docs/status/migrations/STAGING_PROMOTION_PLAYBOOK_110.md
+  destination_root: docs/status
+  classification: status.active
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/STRIPE_WEBHOOKS_SETUP.md
+  destination_path: docs/ops/runbooks/STRIPE_WEBHOOKS_SETUP.md
+  destination_root: docs/ops
+  classification: ops.runbook
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations runbook
+- old_path: docs/operations/TENANT_BRANDING_SURFACE_MATRIX.md
+  destination_path: docs/reference/operations/TENANT_BRANDING_SURFACE_MATRIX.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/TENANT_BRANDING_TROUBLESHOOTING.md
+  destination_path: docs/ops/runbooks/TENANT_BRANDING_TROUBLESHOOTING.md
+  destination_root: docs/ops
+  classification: ops.procedure
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/TENANT_BRAND_ONBOARDING_GUIDE.md
+  destination_path: docs/reference/operations/TENANT_BRAND_ONBOARDING_GUIDE.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/TENANT_DRIFT_INVESTIGATION.md
+  destination_path: docs/reference/operations/TENANT_DRIFT_INVESTIGATION.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/TENANT_FOOTER_VARIANT_LANE.md
+  destination_path: docs/reference/operations/TENANT_FOOTER_VARIANT_LANE.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/TENANT_ONBOARDING_PLAYBOOK.md
+  destination_path: docs/guides/branding/TENANT_ONBOARDING_PLAYBOOK.md
+  destination_root: docs/guides
+  classification: guidance
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/TENANT_PROVISIONING.md
+  destination_path: docs/reference/operations/TENANT_PROVISIONING.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/THEME_DEPLOYMENT.md
+  destination_path: docs/reference/operations/THEME_DEPLOYMENT.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/TOKEN_DRIFT_REMEDIATION.md
+  destination_path: docs/ops/runbooks/architecture/TOKEN_DRIFT_REMEDIATION.md
+  destination_root: docs/ops
+  classification: ops.runbook.architecture
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical architecture runbook
+- old_path: docs/operations/TOKEN_INTEGRITY_REMEDIATION.md
+  destination_path: docs/ops/runbooks/architecture/TOKEN_INTEGRITY_REMEDIATION.md
+  destination_root: docs/ops
+  classification: ops.runbook.architecture
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical architecture runbook
+- old_path: docs/operations/TOKEN_INTEGRITY_ROUTING.md
+  destination_path: docs/evidence/operations/TOKEN_INTEGRITY_ROUTING.md
+  destination_root: docs/evidence
+  classification: evidence.operations
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: active evidence pack
+- old_path: docs/operations/TRANSLATION_WORKFLOW.md
+  destination_path: docs/ops/runbooks/TRANSLATION_WORKFLOW.md
+  destination_root: docs/ops
+  classification: ops.runbook
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations runbook
+- old_path: docs/operations/TROUBLESHOOTING.md
+  destination_path: docs/ops/runbooks/TROUBLESHOOTING.md
+  destination_root: docs/ops
+  classification: ops.runbook
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations runbook
+- old_path: docs/operations/TTFS_ONBOARDING.md
+  destination_path: docs/reference/operations/TTFS_ONBOARDING.md
+  destination_root: docs/reference
+  classification: reference.operations
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations reference
+- old_path: docs/operations/TUTOR_CONFIG_SAFETY.md
+  destination_path: docs/policies/operations/TUTOR_CONFIG_SAFETY.md
+  destination_root: docs/policies
+  classification: policy
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/UI_UX_HARDENING_BUNDLE.md
+  destination_path: docs/reference/operations/UI_UX_HARDENING_BUNDLE.md
+  destination_root: docs/reference
+  classification: reference.operations
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations reference
+- old_path: docs/operations/ULMO_DEV_STAGING_PARITY.md
+  destination_path: docs/status/active/ULMO_DEV_STAGING_PARITY.md
+  destination_root: docs/status
+  classification: status.active
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/USER_FACING_URLS.md
+  destination_path: docs/reference/operations/USER_FACING_URLS.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/VELERO_BACKUP_AUDIT.md
+  destination_path: docs/reference/operations/VELERO_BACKUP_AUDIT.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/WINDOWS_SSH_SETUP.md
+  destination_path: docs/ops/runbooks/WINDOWS_SSH_SETUP.md
+  destination_root: docs/ops
+  classification: ops.runbook
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: canonical operations runbook
+- old_path: docs/operations/WORKLOAD_IDENTITY_FEDERATION.md
+  destination_path: docs/reference/operations/WORKLOAD_IDENTITY_FEDERATION.md
+  destination_root: docs/reference
+  classification: reference
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/blocked-epics.md
+  destination_path: docs/status/active/blocked-epics.md
+  destination_root: docs/status
+  classification: status.active
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/boundary-debt-manifest.md
+  destination_path: docs/meta/docs-program/boundary-debt-manifest.md
+  destination_root: docs/meta
+  classification: meta.program
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/footer-slot-exceptions.md
+  destination_path: docs/policies/architecture/footer-slot-exceptions.md
+  destination_root: docs/policies
+  classification: policies.architecture
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: durable architecture policy
+- old_path: docs/operations/ops-evidence/2026-02-19.md
+  destination_path: docs/archive/evidence/2026-Q1/2026-02-19.md
+  destination_root: docs/archive
+  classification: archive.or.other
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/postmortems/README.md
+  destination_path: docs/ops/README.md
+  destination_root: docs/ops
+  classification: ops.procedure
+  action: move_and_stub
+  owner: agent-ops-collapse
+  notes: auto-mapped from current canonical surfaces
+- old_path: docs/operations/tenant-hosting-readiness.md
+  destination_path: docs/status/readiness/tenant-hosting-readiness.md
+  destination_root: docs/status
+  classification: status.readiness
+  action: stub_to_existing
+  owner: agent-ops-collapse
+  notes: active readiness status

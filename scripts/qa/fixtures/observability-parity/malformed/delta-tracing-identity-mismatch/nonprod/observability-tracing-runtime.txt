@@ -1,0 +1,4 @@
+- evidence_identity: env=nonprod;profile=nonprod;context=wrong-context;project=fixture-project
+evidence_identity: env=nonprod;profile=nonprod;context=wrong-context;project=fixture-project
+PASS: tracing probe route reachable
+FAIL: no active Tempo query response

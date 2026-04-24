@@ -1,0 +1,21 @@
+{
+  "slug": "acme",
+  "name": "Acme Corp Academy",
+  "domain": "acme.academyv2.mereka.io",
+  "colors": {
+    "primary": "#E63946",
+    "secondary": "#457B9D",
+    "accent": "#1D3557",
+    "text_on_primary": "#FFFFFF"
+  },
+  "logos": {
+    "logo_url": "/static/tenants/acme/logos/logo.png",
+    "logo_square_url": "/static/tenants/acme/logos/logo.png",
+    "logo_white_url": "/static/tenants/acme/logos/logo-white.png",
+    "favicon_url": "/static/tenants/acme/favicons/favicon.ico"
+  },
+  "footer": {
+    "text": "© Acme Corp",
+    "contact_email": "support@acme.example"
+  }
+}

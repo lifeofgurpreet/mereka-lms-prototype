@@ -1,0 +1,31 @@
+{
+  "tenants_processed": 2,
+  "mode": "DRY_RUN",
+  "results": [
+    {
+      "slug": "acme",
+      "actions": [
+        "CREATE Site domain=test.localhost",
+        "CREATE EnterpriseCustomer slug=acme name=Acme Corp",
+        "CREATE Catalog title='Acme Full Catalog'",
+        "CREATE CatalogQuery org_filter=['ACME']",
+        "CREATE EnterpriseCustomerUser email=admin@acme.com role=admin",
+        "ENSURE Waffle Switch enterprise.enable_learner_portal.acme = on",
+        "ENSURE Waffle Switch enterprise.enable_analytics_screen.acme = on"
+      ],
+      "errors": []
+    },
+    {
+      "slug": "partner",
+      "actions": [
+        "CREATE Site domain=partner.test.localhost",
+        "CREATE EnterpriseCustomer slug=partner name=Partner Inc",
+        "CREATE Catalog title='Partner Catalog'",
+        "CREATE CatalogQuery org_filter=['PARTNER', 'ACME']",
+        "CREATE EnterpriseCustomerUser email=admin@partner.com role=admin",
+        "ENSURE Waffle Switch enterprise.enable_learner_portal.partner = on"
+      ],
+      "errors": []
+    }
+  ]
+}

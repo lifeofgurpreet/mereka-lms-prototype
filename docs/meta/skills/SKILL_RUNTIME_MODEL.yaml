@@ -1,0 +1,91 @@
+schema_version: 1
+runtime_id: wave11-skill-runtime
+owner: platform-team
+purpose: >
+  Neutral machine-consumable skill runtime compiled from canonical repo truth
+  across mereka-lms, bbi-infrastructure, and platform-control-plane.
+repo_discovery:
+  environment_overrides:
+    mereka_lms: MEREKA_LMS_ROOT
+    bbi_infrastructure: BBI_INFRASTRUCTURE_ROOT
+    platform_control_plane: PLATFORM_CONTROL_PLANE_ROOT
+  preferred_relative_candidates:
+    mereka_lms:
+      - .
+    bbi_infrastructure:
+      - ../bbi-infrastructure
+      - ../bbi-infrastructure-wt-wave11-skill-exports
+      - ../bbi-infrastructure-wt-wave10-contract-compiled-front-doors
+    platform_control_plane:
+      - ../../platform-control-plane
+      - ../../platform-control-plane-wt-wave11-skill-exports
+      - ../../platform-control-plane-wt-wave10-contract-docsync
+authoritative_policy:
+  - docs/README.md
+  - docs/architecture/PLATFORM_AUTHORITY_MAP.md
+  - docs/meta/standing-orders/README.md
+  - docs/meta/skills/SKILL_TAXONOMY.yaml
+repos:
+  mereka_lms:
+    repo_label: mereka-lms
+    canonical_roots:
+      - docs/
+      - specs/
+      - tools/
+      - scripts/
+      - generated/
+  bbi_infrastructure:
+    repo_label: bbi-infrastructure
+    canonical_roots:
+      - config/
+      - docs/
+      - scripts/
+      - .github/workflows/
+  platform_control_plane:
+    repo_label: platform-control-plane
+    canonical_roots:
+      - contracts/
+      - specs/
+      - scripts/
+stability_levels:
+  - stable
+  - evolving
+  - experimental
+forbidden_canonical_prefixes:
+  - docs/archive/
+  - docs/operations/
+  - reports/
+  - evidence/
+  - specs/archive/
+required_skill_fields:
+  - id
+  - title
+  - purpose
+  - scope
+  - authoritative_sources
+  - generated_dependencies
+  - primary_repo
+  - secondary_repos
+  - allowed_commands
+  - forbidden_or_destructive_commands
+  - canonical_entrypoints
+  - required_reviewers
+  - required_evidence_classes
+  - escalation_triggers
+  - preconditions
+  - expected_outputs
+  - failure_modes
+  - read_first_paths
+  - historical_or_archive_dependencies
+  - stability_level
+compiler_contract:
+  output: generated/skills/skill-registry.json
+  deterministic_sort_keys:
+    - id
+    - title
+    - primary_repo
+  check_mode_must_fail_on:
+    - missing_source_path
+    - missing_command
+    - forbidden_canonical_prefix
+    - duplicate_skill_id

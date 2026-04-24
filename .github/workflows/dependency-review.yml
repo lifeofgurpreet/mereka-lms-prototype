@@ -1,0 +1,31 @@
+name: Dependency Review
+on:
+  pull_request:
+    branches: [main]
+  merge_group:
+
+permissions: {}  # Deny-all at workflow level; each job grants only what it needs
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dependency-review:
+    name: Review dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read         # checkout
+      pull-requests: write   # post dependency review comment on PR
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@f5b971718edcbb31275a1db40004592335c0e031  # v4.9.0+3; full-SHA tarball works
+        continue-on-error: true  # Requires Dependency Graph (GitHub Advanced Security)
+        with:
+          fail-on-severity: critical
+          deny-licenses: AGPL-3.0, GPL-3.0
+          comment-summary-in-pr: always

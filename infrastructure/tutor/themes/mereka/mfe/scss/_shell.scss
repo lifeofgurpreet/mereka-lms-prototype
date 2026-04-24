@@ -1,0 +1,380 @@
+// Shared shell primitives — body, typography, navbar, buttons, forms, cards,
+// alerts, modals, dropdowns, tabs, and Mereka badge/shell utilities.
+
+/* RISK: LOW — html element selector, cannot be renamed */
+body {
+  min-height: 100vh;
+  font-family: var(--mereka-font-body, "Poppins", var(--pgn-font-family-base, sans-serif));
+  background-color: var(--mereka-color-surface-primary);
+  background-image:
+    radial-gradient(circle at top right, rgba(41, 92, 173, 0.08), transparent 45%),
+    radial-gradient(circle at 10% 20%, rgba(171, 59, 120, 0.06), transparent 35%);
+}
+
+:root[data-mereka-tenant="biji-biji"] body {
+  background-image:
+    radial-gradient(circle at top right, rgba(82, 183, 136, 0.14), transparent 42%),
+    radial-gradient(circle at 12% 18%, rgba(45, 106, 79, 0.10), transparent 34%);
+}
+
+:root[data-mereka-tenant="skillourfuture"] body {
+  background-image:
+    radial-gradient(circle at top right, rgba(247, 205, 86, 0.16), transparent 42%),
+    radial-gradient(circle at 8% 18%, rgba(69, 11, 127, 0.10), transparent 36%);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
+  font-family: var(--mereka-font-heading, "Lato", var(--mereka-font-body, sans-serif));
+}
+
+/* RISK: HIGH — .navbar is a structural layout class; breaks on Bootstrap or Paragon rename */
+// BRITTLE: .navbar shell selector remains until header shell is fully slot-scoped across MFEs (target: 2026-Q3).
+.navbar {
+  background: var(--pgn-color-white);
+  border-bottom: 1px solid var(--mereka-mfe-navbar-divider, rgba(26, 22, 35, 0.08));
+  box-shadow: var(--mereka-mfe-navbar-shadow);
+  padding: var(--mereka-mfe-navbar-padding);
+  backdrop-filter: saturate(140%) blur(14px);
+}
+
+/* RISK: MEDIUM — header logo slot override class from runtime plugin component.
+ * Aligns sizing and layout to avoid regression if the default MFE brand markup changes.
+ */
+// BRITTLE: .mereka-header-logo sizing is tied to current header container constraints (target: 2026-Q3).
+.mereka-header-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.875rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.mereka-header-logo img {
+  display: block;
+  height: var(--mereka-mfe-navbar-logo-height);
+  width: auto;
+  flex-shrink: 0;
+}
+
+.mereka-header-logo__lockup {
+  display: inline-flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.1;
+}
+
+.mereka-header-logo__brand {
+  color: var(--mereka-color-ink-900);
+  font-family: var(--mereka-font-heading, "Lato", sans-serif);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.mereka-header-logo__meta {
+  color: var(--mereka-color-ink-500);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* RISK: MEDIUM — Bootstrap nav-link / dropdown-toggle; degrades visually on rename */
+// BRITTLE: .navbar child selectors depend on upstream header DOM shape (target: 2026-Q3).
+.navbar .nav-link,
+.navbar .dropdown-toggle {
+  font-weight: var(--mereka-mfe-nav-item-font-weight);
+  color: var(--mereka-color-ink-700);
+  transition: color var(--mereka-mfe-nav-link-transition);
+}
+
+/* RISK: LOW — hover/focus color only; graceful degradation */
+.navbar .nav-link:hover,
+.navbar .dropdown-toggle:hover,
+.navbar .nav-link:focus,
+.navbar .dropdown-toggle:focus {
+  color: var(--mereka-color-ink-900);
+}
+
+/* RISK: LOW — Bootstrap .btn-primary; color-only override, degrades to default blue */
+.btn-primary {
+  background-image: var(--mereka-mfe-gradient);
+  border: none;
+  box-shadow: var(--mereka-mfe-btn-shadow);
+}
+
+/* RISK: LOW — hover/focus color only; graceful degradation */
+.btn-primary:hover,
+.btn-primary:focus {
+  box-shadow: var(--mereka-mfe-btn-shadow-hover);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .btn-primary:hover,
+  .btn-primary:focus {
+    transform: translateY(-1px);
+  }
+}
+
+/* RISK: LOW — .btn-outline-primary; color-only override */
+.btn-outline-primary {
+  color: var(--mereka-color-ink-900);
+  border-color: var(--mereka-mfe-btn-outline-border, rgba(26, 22, 35, 0.25));
+}
+
+/* RISK: LOW — hover/focus color only; graceful degradation */
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+  color: var(--pgn-color-white);
+  border-color: transparent;
+  background-image: var(--mereka-mfe-gradient);
+}
+
+/* RISK: LOW — Bootstrap secondary/link buttons; color-only override */
+.btn-secondary,
+.btn-link {
+  color: var(--pgn-btn-color);
+}
+
+/* RISK: LOW — global button shape tokenization; degrades to framework defaults if class changes */
+.btn {
+  border-radius: var(--mereka-mfe-pill-radius);
+}
+
+/* RISK: LOW — hover/focus color only; graceful degradation */
+.btn-secondary:hover,
+.btn-secondary:focus,
+.btn-link:hover,
+.btn-link:focus {
+  color: var(--pgn-btn-hover-color);
+}
+
+/* RISK: MEDIUM — Bootstrap form controls; border-radius/color degrade visually */
+.form-control {
+  border-radius: var(--mereka-mfe-form-control-radius);
+  border-color: var(--pgn-form-control-border-color);
+  background: var(--pgn-color-white);
+  box-shadow: none;
+}
+
+/* RISK: LOW — focus ring color only; graceful degradation */
+.form-control:focus {
+  border-color: var(--mereka-mfe-form-control-focus-border);
+  box-shadow: 0 0 0 4px var(--mereka-mfe-focus);
+}
+
+/* RISK: LOW — label typography; font/color only */
+label {
+  font-weight: var(--mereka-mfe-brand-font-weight);
+  color: var(--mereka-color-ink-700);
+}
+
+/* RISK: MEDIUM — Paragon card BEM + Bootstrap .card; border-radius/shadow degrade visually */
+.card,
+.pgn__card {
+  border-radius: var(--mereka-mfe-card-radius);
+  border: var(--mereka-mfe-card-border);
+  box-shadow: var(--mereka-mfe-card-shadow);
+}
+
+/* RISK: LOW — Paragon/Bootstrap card header; background/border color only */
+.pgn__card-header,
+.card-header {
+  background: var(--mereka-mfe-surface);
+  border-bottom: 1px solid var(--mereka-mfe-border);
+}
+
+/* RISK: LOW — Paragon/Bootstrap card footer; background/border color only */
+.pgn__card-footer,
+.card-footer {
+  background: var(--mereka-mfe-surface);
+  border-top: 1px solid var(--mereka-mfe-border);
+}
+
+/* RISK: LOW — Bootstrap alert shell; border-radius/border color only */
+.alert {
+  border-radius: var(--mereka-mfe-alert-radius);
+  background: var(--pgn-alert-bg);
+  border: 1px solid var(--pgn-alert-border-color);
+}
+
+/* RISK: LOW — alert variant colors; background/border color only */
+.alert-info {
+  background: var(--mereka-mfe-alert-info-bg, rgba(148, 209, 228, 0.22));
+  border-color: var(--mereka-mfe-alert-info-border, rgba(148, 209, 228, 0.55));
+}
+
+/* RISK: LOW — alert variant colors; background/border color only */
+.alert-success {
+  background: var(--mereka-mfe-alert-success-bg, rgba(44, 110, 73, 0.12));
+  border-color: var(--mereka-mfe-alert-success-border, rgba(44, 110, 73, 0.35));
+}
+
+/* RISK: LOW — alert variant colors; background/border color only */
+.alert-warning {
+  background: var(--mereka-mfe-alert-warning-bg, rgba(158, 112, 0, 0.14));
+  border-color: var(--mereka-mfe-alert-warning-border, rgba(158, 112, 0, 0.55));
+}
+
+/* RISK: LOW — alert variant colors; background/border color only */
+.alert-danger {
+  background: var(--mereka-mfe-alert-danger-bg, rgba(140, 0, 47, 0.08));
+  border-color: var(--mereka-mfe-alert-danger-border, rgba(140, 0, 47, 0.22));
+}
+
+/* RISK: MEDIUM — modal content shell; border-radius degrade visually on rename */
+.modal-content {
+  border-radius: var(--mereka-mfe-modal-radius);
+  border: var(--mereka-mfe-modal-border);
+  box-shadow: var(--mereka-mfe-modal-shadow);
+}
+
+/* RISK: LOW — dropdown shell; border-radius/shadow color only */
+.dropdown-menu {
+  border-radius: var(--mereka-mfe-dropdown-radius);
+  border: var(--mereka-mfe-dropdown-border);
+  box-shadow: var(--mereka-mfe-dropdown-shadow);
+}
+
+/* RISK: LOW — dropdown toggle shape/border color only */
+.dropdown-toggle {
+  border-radius: var(--mereka-mfe-pill-radius);
+  border-color: var(--mereka-mfe-dropdown-toggle-border, rgba(26, 22, 35, 0.2));
+}
+
+/* RISK: LOW — Bootstrap/Paragon tabs; border-radius shape only */
+.nav-tabs .nav-link,
+.pgn__tabs .nav-link {
+  border-radius: var(--mereka-mfe-tab-radius);
+}
+
+/* RISK: LOW — active tab gradient; color/background only */
+.nav-tabs .nav-link.active,
+.pgn__tabs .nav-link.active {
+  background-image: var(--mereka-mfe-gradient);
+  color: var(--pgn-color-white);
+  border-color: transparent;
+}
+
+/* RISK: LOW — mereka-badge is our own class, not upstream; cannot break on upstream rename */
+.mereka-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mereka-mfe-badge-gap);
+  background-color: var(--mereka-mfe-badge-bg, rgba(35, 112, 114, 0.12));
+  color: var(--mereka-color-teal);
+  padding: var(--mereka-mfe-badge-padding);
+  border-radius: var(--mereka-mfe-pill-radius);
+  font-size: var(--pgn-typography-font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--mereka-mfe-badge-letter-spacing);
+}
+
+.mereka-shell-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 0.85rem;
+  color: var(--mereka-color-teal);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.mereka-shell-panel {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(148, 209, 228, 0.2), transparent 42%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.94));
+  box-shadow: 0 24px 64px rgba(26, 22, 35, 0.08);
+}
+
+.mereka-shell-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, rgba(171, 59, 120, 0.14), transparent 72%);
+  pointer-events: none;
+}
+
+:root[data-mereka-tenant="biji-biji"] .mereka-shell-panel {
+  border-color: rgba(45, 106, 79, 0.14);
+  background:
+    radial-gradient(circle at top right, rgba(82, 183, 136, 0.22), transparent 40%),
+    linear-gradient(180deg, rgba(250, 255, 251, 0.98), rgba(244, 252, 247, 0.94));
+}
+
+:root[data-mereka-tenant="biji-biji"] .mereka-shell-panel::before {
+  background: radial-gradient(circle, rgba(45, 106, 79, 0.18), transparent 72%);
+}
+
+:root[data-mereka-tenant="skillourfuture"] .mereka-shell-panel {
+  border-color: rgba(69, 11, 127, 0.14);
+  background:
+    radial-gradient(circle at top right, rgba(247, 205, 86, 0.22), transparent 40%),
+    linear-gradient(180deg, rgba(252, 248, 255, 0.98), rgba(248, 243, 255, 0.94));
+}
+
+:root[data-mereka-tenant="skillourfuture"] .mereka-shell-panel::before {
+  background: radial-gradient(circle, rgba(69, 11, 127, 0.18), transparent 72%);
+}
+
+.mereka-shell-panel__content {
+  position: relative;
+  z-index: 1;
+}
+
+.mereka-shell-panel__lead {
+  color: var(--mereka-color-ink-700);
+  font-size: 0.96rem;
+  line-height: 1.7;
+}
+
+.mereka-shell-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0.7rem 1.1rem;
+  border-radius: 999px;
+  background-image: var(--mereka-mfe-gradient);
+  color: var(--pgn-color-white);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 14px 30px rgba(41, 92, 173, 0.18);
+}
+
+.mereka-shell-link:hover,
+.mereka-shell-link:focus {
+  color: var(--pgn-color-white);
+  text-decoration: none;
+  box-shadow: 0 18px 36px rgba(35, 112, 114, 0.24);
+}
+
+.mereka-shell-link--quiet {
+  background: rgba(26, 22, 35, 0.04);
+  color: var(--mereka-color-ink-900);
+  box-shadow: none;
+}
+
+.mereka-shell-link--quiet:hover,
+.mereka-shell-link--quiet:focus {
+  background: rgba(26, 22, 35, 0.08);
+  color: var(--mereka-color-ink-900);
+}

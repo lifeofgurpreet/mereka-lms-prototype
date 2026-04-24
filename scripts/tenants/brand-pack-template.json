@@ -1,0 +1,35 @@
+{
+  "slug": "acme-corp",
+  "name": "Acme Corporation",
+  "domain": "acme.academyv2.mereka.io",
+  "colors": {
+    "primary": "#FF5733",
+    "secondary": "#FFC300",
+    "accent": "#C70039",
+    "text_on_primary": "#FFFFFF"
+  },
+  "logos": {
+    "logo_url": "/static/themes/mereka/tenants/acme-corp/logos/logo.png",
+    "logo_square_url": "/static/themes/mereka/tenants/acme-corp/logos/logo-square.png",
+    "logo_white_url": "/static/themes/mereka/tenants/acme-corp/logos/logo-white.png",
+    "favicon_url": "/static/themes/mereka/tenants/acme-corp/favicons/favicon.ico"
+  },
+  "footer": {
+    "text": "© 2026 Acme Corp. All rights reserved.",
+    "links": [
+      {
+        "title": "Privacy Policy",
+        "url": "https://acme.com/privacy"
+      },
+      {
+        "title": "Terms of Service",
+        "url": "https://acme.com/terms"
+      },
+      {
+        "title": "Contact Us",
+        "url": "https://acme.com/contact"
+      }
+    ],
+    "contact_email": "support@acme.com"
+  }
+}

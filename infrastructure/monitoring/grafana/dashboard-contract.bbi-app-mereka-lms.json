@@ -1,0 +1,83 @@
+{
+  "name": "Mereka LMS Public Endpoints Dashboard Coverage Contract",
+  "dashboard_uid": "bbi-app-mereka-lms",
+  "required": {
+    "datasources": [
+      "prometheus"
+    ],
+    "panel_titles": [
+      "Service Availability (30-day Rolling)",
+      "LMS Availability",
+      "CMS Availability",
+      "Deployment Policy",
+      "Ownership & Escalation",
+      "Error Budget Status",
+      "Error Budget Remaining (30d)",
+      "Error Budget Remaining (minutes)",
+      "Burn Rate Trend",
+      "Burn Rate - 1h Window (Tier 1)",
+      "Burn Rate - 6h Window (Tier 1)",
+      "Latency Percentiles",
+      "LMS Latency (p50 / p95 / p99)",
+      "CMS Latency (p50 / p95 / p99)",
+      "Tier-1 Journey SLOs",
+      "Journey SLO (Login) 30-day Error Budget",
+      "Journey SLO (Course Access) 30-day Error Budget",
+      "Journey SLO (CMS Authoring) 30-day Error Budget",
+      "Journey SLO (Purchase Checkout) 30-day Error Budget",
+      "Journey SLO (Purchase Webhook) 30-day Error Budget",
+      "Alert Delivery Drills",
+      "Alert Delivery Drills - Last 30 Days"
+    ],
+    "query_fragments": [
+      "mereka:http_requests:availability_ratio_5m",
+      "mereka:slo:error_budget_remaining_ratio",
+      "mereka:slo:error_budget_remaining_minutes",
+      "mereka:slo:burn_rate_1h",
+      "mereka:slo:burn_rate_6h",
+      "mereka:slo:journey_error_budget_remaining_ratio",
+      "journey_lms_login",
+      "journey_lms_course_access",
+      "journey_cms_authoring",
+      "journey_purchase_checkout",
+      "journey_purchase_webhook",
+      "mereka:http_request_duration:p50_5m",
+      "mereka:http_request_duration:p95_5m",
+      "mereka:http_request_duration:p99_5m"
+    ],
+    "panels": [
+      {"title": "Service Availability (30-day Rolling)","owner": "platform-observability"},
+      {"title": "LMS Availability","owner": "team-lms","max_staleness_minutes": 10},
+      {"title": "CMS Availability","owner": "team-cms","max_staleness_minutes": 10},
+      {"title": "Deployment Policy","owner": "platform-sre"},
+      {"title": "Ownership & Escalation","owner": "platform-observability"},
+      {"title": "Error Budget Status","owner": "team-slo","max_staleness_minutes": 60},
+      {"title": "Error Budget Remaining (30d)","owner": "team-slo","max_staleness_minutes": 43200},
+      {"title": "Error Budget Remaining (minutes)","owner": "team-slo","max_staleness_minutes": 43200},
+      {"title": "Burn Rate Trend","owner": "team-slo","max_staleness_minutes": 60},
+      {"title": "Burn Rate - 1h Window (Tier 1)","owner": "team-slo","max_staleness_minutes": 120},
+      {"title": "Burn Rate - 6h Window (Tier 1)","owner": "team-slo","max_staleness_minutes": 360},
+      {"title": "LMS Latency (p50 / p95 / p99)","owner": "team-lms","max_staleness_minutes": 10},
+      {"title": "CMS Latency (p50 / p95 / p99)","owner": "team-cms","max_staleness_minutes": 10},
+      {"title": "Journey SLO (Login) 30-day Error Budget","owner": "team-slo","max_staleness_minutes": 120},
+      {"title": "Journey SLO (Course Access) 30-day Error Budget","owner": "team-slo","max_staleness_minutes": 120},
+      {"title": "Journey SLO (CMS Authoring) 30-day Error Budget","owner": "team-slo","max_staleness_minutes": 120},
+      {"title": "Journey SLO (Purchase Checkout) 30-day Error Budget","owner": "team-slo","max_staleness_minutes": 120},
+      {"title": "Journey SLO (Purchase Webhook) 30-day Error Budget","owner": "team-slo","max_staleness_minutes": 120},
+      {"title": "Alert Delivery Drills","owner": "platform-oncall"},
+      {"title": "Alert Delivery Drills - Last 30 Days","owner": "platform-oncall"}
+    ]
+  },
+  "recommended": {
+    "datasources": [],
+    "panel_titles": [
+      "Latency Percentiles",
+      "Error Budget Status"
+    ],
+    "query_fragments": [
+      "mereka:http_requests:availability_ratio_5m",
+      "mereka:slo:error_budget_remaining_ratio",
+      "mereka:slo:burn_rate_1h"
+    ]
+  }
+}

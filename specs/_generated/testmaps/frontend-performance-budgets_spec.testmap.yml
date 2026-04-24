@@ -1,0 +1,221 @@
+spec: frontend-performance-budgets_spec.md
+acceptance_criteria:
+- id: AC-PERF-001
+  description: Given the Lighthouse budget file at `infrastructure/monitoring/lighthouse-budgets.json`,
+    when parsed, then every entry MUST include `largest-contentful-paint` with budget
+    <= 2500ms.
+  verify:
+  - type: manual
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
+    section: Budget Thresholds
+    justification: Verified by periodic operator review of budget JSON plus CI budget
+      script output
+- id: AC-PERF-002
+  description: Given the Lighthouse budget file, when parsed, then every entry MUST
+    include `experimental-interaction-to-next-paint` with budget <= 200ms and MUST
+    NOT include `first-input-delay`.
+  verify:
+  - type: manual
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
+    section: Budget Thresholds
+    justification: Verified by periodic operator review of budget JSON plus CI budget
+      script output
+- id: AC-PERF-003
+  description: Given the Lighthouse budget file, when parsed, then every entry MUST
+    include `cumulative-layout-shift` with budget <= 100 (Lighthouse units, equivalent
+    to 0.10).
+  verify:
+  - type: manual
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
+    section: Budget Thresholds
+    justification: Verified by periodic operator review of budget JSON plus CI budget
+      script output
+- id: AC-PERF-004
+  description: 'Given the Lighthouse budget file, when parsed, then it MUST contain
+    entries for at minimum these paths: `/authn/login`, `/dashboard`, `/learning/course`,
+    `/profile`, `/account`, `/discussions`.'
+  verify:
+  - type: manual
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
+    section: Path Coverage
+    justification: Required path list is checked as part of release checklist review
+- id: AC-PERF-005
+  description: Given the Lighthouse budget file, when parsed, then every entry's `resourceSizes`
+    for `script` MUST be <= 2048 KB.
+  verify:
+  - type: manual
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
+    section: Bundle Limits
+    justification: Current CI script validates absolute bundle ceilings; operator
+      reviews warnings for per-MFE drift
+- id: AC-PERF-006
+  description: Given the Lighthouse budget file, when parsed, then every entry's `resourceSizes`
+    for `stylesheet` MUST be <= 500 KB.
+  verify:
+  - type: manual
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
+    section: Bundle Limits
+    justification: Current CI script validates absolute bundle ceilings; operator
+      reviews warnings for per-MFE drift
+- id: AC-PERF-007
+  description: Given per-MFE JS ceilings defined in this spec, when a CI build produces
+    an MFE bundle exceeding its ceiling, then the CI pipeline MUST report a warning.
+    The absolute ceiling (2048 KB) MUST cause a failure.
+  verify:
+  - type: manual
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
+    section: CI Gate Behavior
+    justification: Growth-warning behavior is reviewed in CI logs during release checks
+- id: AC-PERF-008
+  description: Given any MFE build, when the initial CSS bundle is measured, then
+    it MUST be <= 100 KB gzipped.
+  verify:
+  - type: manual
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
+    section: Bundle Limits
+    justification: Verified during release review from Lighthouse artifacts and bundle
+      reports
+- id: AC-PERF-009
+  description: Given the MFE Caddy-served HTML, when the source is inspected, then
+    `Poppins-Regular.woff2` and `Poppins-SemiBold.woff2` MUST be referenced via `<link
+    rel="preload" as="font" type="font/woff2" crossorigin>`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-font-loading.sh
+    command: scripts/qa/verify-font-loading.sh
+- id: AC-PERF-010
+  description: 'Given all `@font-face` declarations in compiled CSS, when inspected,
+    then every declaration MUST include `font-display: swap`.'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-font-loading.sh
+    command: scripts/qa/verify-font-loading.sh
+- id: AC-PERF-011
+  description: Given the font directory (`infrastructure/tutor/themes/mereka/lms/static/fonts/`),
+    when listing files, then only `.woff2` files MUST be present (no `.woff`, `.ttf`,
+    `.otf`).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-font-loading.sh
+    command: scripts/qa/verify-font-loading.sh
+- id: AC-PERF-012
+  description: Given the branding image directory, when listing logo files, then SVG
+    variants MUST exist for `logo-horizontal`, `logo-horizontal-white`, and `logo-square`.
+    PNG variants MAY exist alongside.
+  verify:
+  - type: manual
+    runbook: docs/guides/branding/BRANDING.md
+    section: Asset Inventory
+    justification: Asset existence is validated during branding release checklist
+- id: AC-PERF-013
+  description: Given any MFE page, when inspecting images below the initial viewport,
+    then they MUST have `loading="lazy"` or be loaded via Intersection Observer.
+  verify:
+  - type: manual
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
+    section: Runtime Verification
+    justification: Requires browser inspection of rendered pages and network waterfall
+- id: AC-PERF-014
+  description: Given the compiled Mereka MFE CSS and the stock Paragon CSS, when the
+    gzipped sizes are compared, then the delta MUST be <= 5 KB.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-css-branding-overhead.sh
+    command: scripts/qa/verify-css-branding-overhead.sh
+- id: AC-PERF-015
+  description: Given the `scripts/qa/verify-lighthouse-budgets.sh` script, when run
+    in CI, then it MUST exit 0 only if all budget thresholds in the JSON file are
+    within the limits defined in this spec.
+  verify:
+  - type: manual
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
+    section: CI Gate Behavior
+    justification: Script behavior is validated in CI run logs on budget changes
+- id: AC-PERF-016
+  description: Given a Lighthouse CI run against production MFE URLs, when scores
+    are collected, then the Performance score MUST be >= 50 and the Accessibility
+    score MUST be >= 90.
+  verify:
+  - type: manual
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
+    section: Score Thresholds
+    justification: Requires live Lighthouse runs against production endpoints
+- id: AC-PERF-017
+  description: Given the `.github/workflows/lighthouse-ci.yml` workflow, when triggered,
+    then it MUST validate the budget file structure and all threshold ranges.
+  verify:
+  - type: manual
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
+    section: Workflow Validation
+    justification: Verified via GitHub Actions workflow execution history
+- id: AC-PERF-018
+  description: Given a request for a hashed static asset (e.g., `main.abc123.js`)
+    from Caddy, when the response headers are inspected, then `Cache-Control` MUST
+    be `public, max-age=31536000, immutable`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-caddy-cache-headers.sh
+    command: scripts/qa/verify-caddy-cache-headers.sh
+- id: AC-PERF-019
+  description: Given a request for `index.html` from Caddy, when the response headers
+    are inspected, then `Cache-Control` MUST be `no-cache, must-revalidate`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-caddy-cache-headers.sh
+    command: scripts/qa/verify-caddy-cache-headers.sh
+- id: AC-PERF-020
+  description: Given a request for an API endpoint via Caddy reverse proxy, when the
+    response headers are inspected, then `Cache-Control` MUST include `no-store`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-caddy-cache-headers.sh
+    command: scripts/qa/verify-caddy-cache-headers.sh
+- id: AC-PERF-021
+  description: Given a CI runner with 4 CPU cores and 12 GB RAM, when building any
+    single MFE Docker image, then the build MUST complete in under 10 minutes.
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/CI_CD_RUNBOOK.md
+    section: Image Build Verification
+    justification: Build timing is observed from CI job duration metrics
+- id: AC-PERF-022
+  description: Given a CI runner with 4 CPU cores and 12 GB RAM, when building the
+    openedx Docker image, then the build MUST complete in under 45 minutes.
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/CI_CD_RUNBOOK.md
+    section: Image Build Verification
+    justification: Build timing is observed from CI job duration metrics
+- id: AC-PERF-023
+  description: Given the MFE webpack configuration, when inspected, then `NODE_OPTIONS`
+    MUST include `--max-old-space-size=6144` or higher.
+  verify:
+  - type: manual
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
+    section: Build Preconditions
+    justification: Validated by source/config inspection and CI environment logging
+- id: AC-PERF-024
+  description: Given the MFE JavaScript bundle in production, when loaded in a browser,
+    then it MUST collect and report LCP, INP, CLS, FCP, and TTFB metrics via the `web-vitals`
+    library or Sentry Performance SDK.
+  verify:
+  - type: manual
+    runbook: docs/policies/architecture/LIGHTHOUSE_BUDGETS.md
+    section: RUM Verification
+    justification: Requires live browser and telemetry backend validation
+- id: AC-PERF-025
+  description: Given RUM data collected over 24 hours, when p75 LCP exceeds 3000ms
+    for any SEA country segment (MY, ID, PH, VN), then an alert MUST fire to `#ops-warnings`.
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/ANALYTICS_RUNBOOK.md
+    section: Alert Verification
+    justification: Requires live telemetry windows and alert routing checks
+

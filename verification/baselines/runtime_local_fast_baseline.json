@@ -1,0 +1,73 @@
+{
+  "$schema": "runtime_baseline_v1",
+  "description": "Baseline timing expectations for local fast verification (make check-specs, lint, etc.)",
+  "last_updated": "2026-02-13",
+  "environment": {
+    "platform": "Linux 6.17.0",
+    "node": ">=18",
+    "python": ">=3.10",
+    "tutor": "21.0.0"
+  },
+  "gates": {
+    "spec_lint": {
+      "description": "Run spec linter against all 34 specs",
+      "command": "make check-specs",
+      "p50_seconds": 5,
+      "p95_seconds": 15,
+      "timeout_seconds": 30,
+      "expected_exit_code": 0
+    },
+    "shellcheck": {
+      "description": "Lint all shell scripts",
+      "command": "make lint-shell",
+      "p50_seconds": 3,
+      "p95_seconds": 10,
+      "timeout_seconds": 20,
+      "expected_exit_code": 0
+    },
+    "secret_scan": {
+      "description": "Scan for hardcoded secrets",
+      "command": "scripts/qa/scan-secrets-fast.sh",
+      "p50_seconds": 2,
+      "p95_seconds": 8,
+      "timeout_seconds": 15,
+      "expected_exit_code": 0
+    },
+    "spec_integrity": {
+      "description": "Run spec integrity gates (frontmatter, cross-refs, AC format)",
+      "command": "scripts/qa/run-spec-integrity-gates.sh",
+      "p50_seconds": 8,
+      "p95_seconds": 20,
+      "timeout_seconds": 45,
+      "expected_exit_code": 0
+    },
+    "index_generation": {
+      "description": "Regenerate specs/INDEX.md and verify no diff",
+      "command": "python3 scripts/qa/spec-tools/render_index.py --dry-run",
+      "p50_seconds": 1,
+      "p95_seconds": 3,
+      "timeout_seconds": 10,
+      "expected_exit_code": 0
+    },
+    "beads_health": {
+      "description": "Verify beads database health",
+      "command": "br health",
+      "p50_seconds": 1,
+      "p95_seconds": 3,
+      "timeout_seconds": 10,
+      "expected_exit_code": 0
+    }
+  },
+  "aggregate": {
+    "total_p50_seconds": 20,
+    "total_p95_seconds": 59,
+    "budget_seconds": 90,
+    "note": "Total must stay under 90s for developer fast-feedback loop"
+  },
+  "regression_policy": {
+    "alert_on": "any gate exceeds p95 on 3 consecutive runs",
+    "block_on": "any gate exceeds timeout",
+    "review_cadence": "monthly",
+    "owner": "platform-team"
+  }
+}

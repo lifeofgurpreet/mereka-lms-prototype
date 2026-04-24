@@ -1,0 +1,11 @@
+{
+  "generated_at": "2026-02-25T01:00:00Z",
+  "status": "pass",
+  "environment": "prod",
+  "summary": {
+    "pass": 4,
+    "fail": 0,
+    "total": 4
+  },
+  "checks": []
+}

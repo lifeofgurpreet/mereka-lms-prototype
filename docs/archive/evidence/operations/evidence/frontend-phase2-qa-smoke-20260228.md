@@ -1,0 +1,563 @@
+# Frontend Phase 2/QA Smoke Evidence (2026-02-28)
+
+## Scope
+
+This evidence run captures frontend branding smoke artifacts and QA gate outputs after slot expansion + email branding updates.
+
+## Commands Run
+
+```bash
+./scripts/qa/capture-branding-screenshots.sh prod
+./scripts/qa/verify-mfe-route-smoke.sh --env prod
+./scripts/qa/verify-a11y-contrast-focus.sh
+./scripts/qa/verify-lighthouse-budgets.sh
+./scripts/qa/verify-email-template-multilang.sh
+```
+
+## Artifacts
+
+- Screenshot bundle: `var/screenshots/prod/20260228T144430Z`
+- Screenshot count: `21` PNG files
+- MFE route smoke artifacts: `/tmp/mfe-route-smoke-20260228-145946` (`results.json` included)
+
+## Results
+
+### Branding Screenshots
+
+- `capture-branding-screenshots.sh prod` completed successfully.
+- Public LMS/Studio/MFE/ecommerce/credentials/forum/notes surfaces were captured into the bundle above.
+
+### MFE Route Smoke
+
+- `verify-mfe-route-smoke.sh --env prod` completed successfully.
+- Summary: `PASS=33`, `WARN=0`, `FAIL=0`
+- Route mapping, HTTP shell response checks, and lightweight route-level a11y checks all passed.
+
+### Accessibility Gate
+
+- `verify-a11y-contrast-focus.sh`: `PASS=28`, `WARN=3`, `FAIL=0`
+- Notable warnings:
+  - Placeholder/caption contrast (`ink-300` on surface) below 4.5:1 (documented non-blocking warning)
+  - One focus-context `box-shadow:none` warning in minified core CSS
+  - CI wiring warning for the a11y gate script
+- Resolved in follow-up hardening:
+  - Added canonical `--pgn-focus-ring-color` token bridge through `tokens.css` → generator → `_tokens.scss`.
+
+### Lighthouse Budget Gate
+
+- `verify-lighthouse-budgets.sh`: `PASSED=14`, `FAILED=0`
+- Required paths, JS/CSS ceilings, INP/FID policy, CLS, and LCP budgets all passed.
+
+### Email Template Branding Gate
+
+- `verify-email-template-multilang.sh`: `PASS=11`, `FAIL=0`, `WARN=5`
+- New branding checks passed for:
+  - `password_reset.html` branded gradient shell + primary fallback color
+  - `enrollment.html` accent fallback
+  - `welcome.html` support footer link
+  - `certificate.html` branded shell + primary/accent fallbacks + pill CTA styling
+  - `campaign.html` unsubscribe footer
+  - `marketing_promo.html` pill CTA styling
+- Existing warnings remain on untranslated (`ms`, `zh`) template variants and ACE config visibility from local config files.
+
+## Remaining Work
+
+- Cross-browser live UI verification (Chrome/Firefox/Safari + mobile viewport) remains a separate runtime/manual tranche.
+- MFE image rebuild + deployment verification remains required for production runtime confirmation.
+
+## Addendum — Slot Expansion + Selector Exception Retirement
+
+### Additional Commands Run
+
+```bash
+AGENT_BROWSER_TIMEOUT_SECONDS=20 ./scripts/qa/capture-branding-screenshots.sh prod
+./scripts/qa/verify-mfe-plugin-slots.sh
+./scripts/qa/verify-selector-to-slot-migration.sh
+./scripts/qa/verify-mfe-footer-slot-migration.sh
+./scripts/qa/verify-mfe-selector-hardening.sh
+./scripts/qa/verify-no-dom-overrides.sh
+./scripts/qa/verify-migration-lock.sh
+./scripts/qa/verify-css-scoping.sh
+```
+
+### Additional Artifacts
+
+- Screenshot bundle: `var/screenshots/prod/20260228T150928Z`
+- Screenshot count: `20` PNG files
+
+### Additional Results
+
+- `verify-mfe-plugin-slots.sh`: `PASS=50`, `WARN=0`, `FAIL=0`
+  - Slot registry now verifies 23 namespaced slot IDs, including:
+    - `learner_dashboard.course_card_action.v1`
+    - `catalog.catalog_card.v1`
+    - `catalog.catalog_filters.v1`
+    - `account.account_settings_field.v1`
+- `verify-selector-to-slot-migration.sh`: `PASS=32`, `FAIL=0`
+- `verify-mfe-footer-slot-migration.sh`: `PASS=42`, `FAIL=0`
+- `verify-mfe-selector-hardening.sh`: `PASS=25`, `WARN=0`, `FAIL=0`
+- `verify-no-dom-overrides.sh`: `PASS=14`, `FAIL=0`
+- `verify-migration-lock.sh`: `PASS=9`, `FAIL=0`
+- `verify-css-scoping.sh`: `PASS=59`, `WARN=0`, `FAIL=0`
+
+## Addendum — Cross-Browser Re-Run After Slot Source Alignment
+
+### Command Run
+
+```bash
+./scripts/qa/verify-cross-browser-branding-smoke.sh --env prod --cross-browser
+```
+
+### Runtime Results
+
+- Total: `9 passed`, `0 failed` in `2.8m`
+- Projects passed:
+  - `chromium` (authn-login, learner-dashboard, account-settings)
+  - `firefox` (authn-login, learner-dashboard, account-settings)
+  - `mobile-chrome` (authn-login, learner-dashboard, account-settings)
+- WebKit/mobile-Safari:
+  - Auto-disabled by launcher probe because host dependencies are not installed on this runner.
+  - This remains a host-environment prerequisite, not an app-level regression.
+- Log:
+  - `var/qa/cross-browser-branding-smoke-prod-20260228T163310Z.log`
+
+## Addendum — Lighthouse Budget Re-Run
+
+### Command Run
+
+```bash
+./scripts/qa/verify-lighthouse-budgets.sh
+```
+
+### Result
+
+- `PASSED=14`, `FAILED=0`
+- Coverage + thresholds still pass for:
+  - required MFE routes (`/authn/login`, `/dashboard`, `/learning/course`, `/profile`, `/account`, `/discussions`)
+  - resource ceilings (JS/CSS)
+  - INP/FID policy
+  - CLS and LCP budget constraints
+
+## Addendum — Unified Performance Spot-Check Wrapper
+
+### Command Run
+
+```bash
+./scripts/qa/verify-frontend-performance-spotcheck.sh
+```
+
+### Result
+
+- Wrapper summary: `PASS=2`, `FAIL=0`
+- Includes:
+  - `verify-lighthouse-budgets.sh` (`PASSED=14`, `FAILED=0`)
+  - `verify-paragon-runtime.sh` (artifact/budget checks pass; runtime URL checks remain warning-only unless `--runtime-url` is supplied)
+
+## Addendum — Transactional Email Branding Expansion
+
+### Commands Run
+
+```bash
+./scripts/qa/verify-email-template-multilang.sh
+```
+
+### Result
+
+- `PASS=15`, `FAIL=0`, `WARN=5`
+- Added branded-shell marker coverage and template updates for:
+  - `account_activation.html`
+  - `course_announcement.html`
+  - `deadline.html`
+- Existing warnings remain unchanged (missing `ms`/`zh` localized variants + ACE config visibility from local config files).
+
+### Policy Outcome
+
+- Legacy `.page__account-settings` wrapper selector is removed from active CSS.
+- Account styling path is now slot-owned through:
+  - `org.openedx.frontend.account.account_settings_tab.v1`
+  - `org.openedx.frontend.account.account_settings_field.v1`
+
+## Addendum — Cross-Browser Branding Smoke Automation
+
+### New Automation
+
+- Added `tests/e2e/tests/branding-smoke.spec.ts`
+  - Verifies authn + learner-dashboard + account-settings routes expose `PARAGON_THEME` runtime manifest.
+  - Verifies hashed core theme assets are present in the HTML contract (`paragon-theme-core.*.css`, `brand-theme-core.*.css`).
+  - Captures route screenshots per project.
+- Added `scripts/qa/verify-cross-browser-branding-smoke.sh`
+  - Supports `--env prod|dev`.
+  - Supports `--cross-browser` mode (chromium, firefox, mobile-chrome, and webkit/mobile-safari when host deps are available).
+  - Includes WebKit launch probe with explicit fallback (`webkit_enabled=0`) when host dependencies are missing.
+
+### Runtime Results
+
+- `./scripts/qa/verify-cross-browser-branding-smoke.sh --env prod`
+  - `PASS=3`, `FAIL=0` (Chromium)
+  - Log: `var/qa/cross-browser-branding-smoke-prod-20260228T155501Z.log`
+- `./scripts/qa/verify-cross-browser-branding-smoke.sh --env prod --cross-browser`
+  - `PASS=9`, `FAIL=0` (Chromium + Firefox + mobile Chrome)
+  - WebKit/Safari projects were auto-disabled due missing host runtime deps.
+  - Log: `var/qa/cross-browser-branding-smoke-prod-20260228T160129Z.log`
+
+## Addendum — Confirmed Ulmo Slot Expansion
+
+### Additional Commands Run
+
+```bash
+python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
+./scripts/qa/verify-mfe-plugin-slots.sh
+./scripts/qa/verify-selector-to-slot-migration.sh
+./scripts/qa/verify-mfe-footer-slot-migration.sh
+./scripts/qa/verify-mfe-slot-source-alignment.sh
+./scripts/qa/verify-mfe-selector-hardening.sh
+./scripts/qa/verify-css-scoping.sh
+```
+
+### Additional Results
+
+- `verify-mfe-plugin-slots.sh`: `PASS=48`, `WARN=0`, `FAIL=0`
+  - Plugin now declares 22 namespaced slot IDs.
+  - Newly wired confirmed Ulmo slot IDs:
+    - `org.openedx.frontend.authoring.course_unit_sidebar.v1`
+    - `org.openedx.frontend.layout.header_learning.v1`
+    - `org.openedx.frontend.learning.course_tab_links.v1`
+    - `org.openedx.frontend.account.id_verification_page.v1`
+  - Retired unconfirmed slot IDs from active wiring:
+    - `org.openedx.frontend.learning.course_header.v1`
+    - `org.openedx.frontend.learning.course_tabs.v1`
+    - `org.openedx.frontend.account.account_settings_tab.v1`
+    - `org.openedx.frontend.account.account_settings_field.v1`
+    - `org.openedx.frontend.authoring.course_outline_header.v1`
+- `verify-selector-to-slot-migration.sh`: `PASS=31`, `FAIL=0`
+- `verify-mfe-footer-slot-migration.sh`: `PASS=41`, `FAIL=0`
+- `verify-mfe-slot-source-alignment.sh`: `PASS=10`, `WARN=13`, `FAIL=0`
+  - All slots tied to locally available MFE source checkouts (`authn`, `account`, `profile`, `learning`, `authoring`) are source-confirmed.
+  - Remaining warnings are expected for slot families without local source checkouts in this workspace (`learner_dashboard`, `catalog`, and non-learning `layout.*` surfaces).
+- `verify-mfe-selector-hardening.sh`: `PASS=25`, `WARN=0`, `FAIL=0`
+- `verify-css-scoping.sh`: `PASS=59`, `WARN=0`, `FAIL=0`
+
+## Addendum — Learning Slot Coverage Expansion (47 Active Slots)
+
+### Commands Run
+
+```bash
+python3 -m py_compile infrastructure/tutor/plugins/mereka_lms.py
+./scripts/qa/verify-mfe-plugin-slots.sh
+./scripts/qa/verify-mfe-slot-source-alignment.sh
+./scripts/qa/verify-email-template-multilang.sh
+```
+
+### Results
+
+- `verify-mfe-plugin-slots.sh`: `PASS=98`, `WARN=0`, `FAIL=0`
+  - Plugin now declares **47 namespaced slot IDs**.
+  - QA checker now asserts marker coverage for all 47 expected slot bindings.
+  - Local-learning slot coverage is now complete (`28/28` available slot IDs wired in plugin).
+  - Final added learning slot IDs:
+    - `org.openedx.frontend.learning.content_iframe_loader.v1`
+    - `org.openedx.frontend.learning.content_iframe_error.v1`
+    - `org.openedx.frontend.learning.sequence_container.v1`
+    - `org.openedx.frontend.learning.gated_unit_content_message.v1`
+    - `org.openedx.frontend.learning.next_unit_top_nav_trigger.v1`
+    - `org.openedx.frontend.learning.course_outline_tab_notifications.v1`
+    - `org.openedx.frontend.learning.notification_widget.v1`
+    - `org.openedx.frontend.learning.notification_tray.v1`
+    - `org.openedx.frontend.learning.notifications_discussions_sidebar_trigger.v1`
+    - `org.openedx.frontend.learning.notifications_discussions_sidebar.v1`
+    - `org.openedx.frontend.learning.course_exit_view_courses.v1`
+    - `org.openedx.frontend.learning.course_exit_dashboard_footnote_link.v1`
+- `verify-mfe-slot-source-alignment.sh`: `PASS=35`, `WARN=13`, `FAIL=0`
+  - All wired learning slot IDs are confirmed in the local Ulmo learning MFE source checkout.
+  - Remaining warnings are expected for slot families without local source checkouts in this workspace (`learner_dashboard`, `catalog`, non-learning `layout.*`).
+- `verify-mfe-slot-source-alignment.sh` (after checker hardening): `PASS=36`, `WARN=13`, `FAIL=0`
+  - Adds explicit local-learning completeness assertion.
+  - Confirms `28/28` discovered learning slot IDs in `frontend-app-learning` are wired in the plugin.
+- `verify-email-template-multilang.sh`: `PASS=21`, `FAIL=0`, `WARN=5`
+  - Branded marker checks now cover 15 HTML templates including `feedback`, `forum`, `grade`, `maintenance_notice`, `re_engagement`, and `survey`.
+
+## Addendum — Post-47-Slot Runtime Smoke
+
+### Commands Run
+
+```bash
+./scripts/qa/verify-mfe-route-smoke.sh --env prod
+./scripts/qa/verify-cross-browser-branding-smoke.sh --env prod --cross-browser
+./scripts/qa/verify-frontend-performance-spotcheck.sh
+```
+
+### Results
+
+- `verify-mfe-route-smoke.sh --env prod`: `PASS=33`, `WARN=0`, `FAIL=0`
+  - Route-artifact directory: `/tmp/mfe-route-smoke-20260228-170527`
+  - Covers authn/account/learner-dashboard/learning/profile/discussions/authoring route shell and lightweight HTML a11y contracts.
+- `verify-cross-browser-branding-smoke.sh --env prod --cross-browser`:
+  - `9 passed`, `0 failed` (`chromium`, `firefox`, `mobile-chrome`)
+  - WebKit/mobile-Safari auto-disabled by runtime dependency probe on this host (expected non-blocking behavior).
+  - Log: `var/qa/cross-browser-branding-smoke-prod-20260228T170601Z.log`
+- `verify-frontend-performance-spotcheck.sh`: `PASS=2`, `FAIL=0`
+  - Includes:
+    - `verify-lighthouse-budgets.sh` (`PASSED=14`, `FAILED=0`)
+    - `verify-paragon-runtime.sh` (`PASS=9`, `WARN=3`, `FAIL=0`)
+  - Runtime URL-dependent Paragon header/cache checks remain warning-only unless `PARAGON_RUNTIME_URL` (or `--runtime-url`) is provided.
+
+## Addendum — Screenshot Capture Refresh (Post-Slot Expansion)
+
+### Command Run
+
+```bash
+./scripts/qa/capture-branding-screenshots.sh prod
+```
+
+### Result
+
+- Capture completed successfully (`OK`).
+- Screenshot bundle: `var/screenshots/prod/20260228T171016Z`
+- PNG count: `22`
+- Covered surfaces include:
+  - `academyv2.mereka.io` LMS + Studio + MFE routes
+  - `ecommerce.academyv2.mereka.io` root/dashboard/basket/checkout
+  - `credentials.academyv2.mereka.io/admin/login`
+  - `forum.academyv2.mereka.io` root/heartbeat
+  - `notes.academyv2.mereka.io`
+  - `academy.biji-biji.com` + associated Studio/MFE routes
+  - `skillourfuture.academy.mereka.io`
+
+## Addendum — Accessibility Gate Refresh
+
+### Command Run
+
+```bash
+./scripts/qa/verify-a11y-contrast-focus.sh
+```
+
+### Result
+
+- Gate summary: `PASS=29`, `WARN=2`, `FAIL=0` (non-blocking warnings only)
+- Current non-blocking warnings:
+  - placeholder/caption contrast pair (`ink-300` on surface) below 4.5:1, documented as decorative-only exception
+  - one `box-shadow:none` occurrence inside minified core CSS focus context (review note retained)
+- Artifact updated: `var/a11y-contrast-focus-gate.txt`
+
+## Addendum — Selector + Scoping Gate Refresh
+
+### Commands Run
+
+```bash
+./scripts/qa/verify-mfe-selector-hardening.sh
+./scripts/qa/verify-css-scoping.sh
+```
+
+### Results
+
+- `verify-mfe-selector-hardening.sh`: `PASS=25`, `WARN=0`, `FAIL=0`
+  - Non-comment `[class*=]` selector lines remain at `0`.
+  - `SELECTOR-EXCEPTION` annotations remain at `0` (slot-only hardening state).
+- `verify-css-scoping.sh`: `PASS=59`, `WARN=0`, `FAIL=0`
+  - Confirms dead wildcard MFE scopes remain absent (`authn`, `learner-dashboard`, `learning`, `discussions`).
+  - Confirms token bridge + revision marker contracts remain intact.
+- Artifact updated: `var/css-scoping-gate.txt`
+
+## Addendum — Email Branding Gate Hardening
+
+### Command Run
+
+```bash
+./scripts/qa/verify-email-template-multilang.sh
+```
+
+### Result
+
+- Gate summary: `PASS=66`, `FAIL=0`, `WARN=5`
+- Verifier now enforces shell markers across **all 15** HTML templates under:
+  - `infrastructure/tutor/custom-apps/openedx_email_templates/templates/email/*.html`
+- New global assertions per template:
+  - gradient header marker (`linear-gradient(120deg`)
+  - primary fallback token (`org_primary_color|default:'#ab3b78'`)
+  - accent fallback token (`org_accent_color|default:'#237072'`)
+- Existing warnings remain unchanged for missing `ms`/`zh` localized variants and ACE config visibility from local config files.
+
+## Addendum — Paragon Runtime Gate Warning Reduction
+
+### Commands Run
+
+```bash
+./scripts/qa/verify-paragon-runtime.sh
+./scripts/qa/verify-frontend-performance-spotcheck.sh
+```
+
+### Result
+
+- `verify-paragon-runtime.sh`: `PASS=10`, `WARN=2`, `FAIL=0`
+  - `AC-TKN-027` now passes:
+    - `mereka.scss` active rule lines reduced to `295` (target `<300`)
+    - raw lines reduced to `418`
+- `verify-frontend-performance-spotcheck.sh`: `PASS=2`, `FAIL=0`
+  - `verify-lighthouse-budgets.sh`: `PASSED=14`, `FAILED=0`
+  - `verify-paragon-runtime.sh`: now `WARN=2` (down from prior `WARN=3`)
+
+## Addendum — Footer Parity Verifier Realignment
+
+### Command Run
+
+```bash
+./scripts/qa/verify-footer-parity.sh
+```
+
+### Result
+
+- Gate summary: `PASS=77`, `FAIL=0`, `WARN=1`, `SKIP=1`
+- Verifier was realigned to current architecture:
+  - Enforces plugin-slot footer path (`MEREKA_SITE_VARIANTS` + `getMerekaVariant`) instead of legacy `SITE_VARIANTS` checks.
+  - Treats `footer-component.sh` as asset-sync only (fails if legacy JSX injection is reintroduced).
+  - Validates legal/support URLs from plugin runtime definitions (not patch script literals).
+- Remaining warning is expected backlog:
+  - enterprise MFE env config not yet wired to `MerekaFooter` (tracked as non-blocking warning).
+
+## Addendum — Footer Live Verification (Runtime Drift)
+
+### Command Run
+
+```bash
+./scripts/qa/verify-footer-parity.sh --live
+```
+
+### Result
+
+- Verifier logic fix applied first:
+  - Replaced `echo "$html" | grep -q` checks with here-strings (`grep -q ... <<<"$html"`) to avoid `pipefail`/SIGPIPE false negatives on large pages.
+  - Restored `--source-only` flag as an explicit alias of offline mode for doc/runbook compatibility.
+- Current live status after fix:
+  - `PASS=88`, `FAIL=3`, `WARN=1`, `SKIP=0`
+  - Remaining failures are all real and consistent across domains:
+    - `academyv2.mereka.io`: contains `Powered by Open edX`
+    - `academy.biji-biji.com`: contains `Powered by Open edX`
+    - `skillourfuture.academy.mereka.io`: contains `Powered by Open edX`
+- Interpretation:
+  - Source footer template is clean (no non-comment powered-by string), but runtime HTML still renders it.
+  - This is a deployment/runtime parity gap (stale image or stale rendered theme), not a source-verifier bug.
+- Runtime confirmation (cluster):
+  - Deployed `lms`/`cms` image tag: `asia-southeast1-docker.pkg.dev/mereka-lms/openedx/openedx:mereka-brand-hotfix-full-v3`
+  - Pod file probe shows old footer template string still present:
+    - `grep -n 'Powered by Open edX' /openedx/themes/mereka/lms/templates/footer.html` → `<span>${_('Powered by Open edX and Tutor')}</span>`
+
+## Addendum — Brand Parity Verifier Realignment
+
+### Commands Run
+
+```bash
+./scripts/qa/verify-brand-parity.sh
+./scripts/qa/verify-brand-parity.sh --live
+```
+
+### Result
+
+- Source mode now returns `PASS=86`, `FAIL=0`, `WARN=1`, `SKIP=3`.
+- Gate updates applied:
+  - Replaced live `echo "$html" | grep -q` probes with here-strings to remove `pipefail`/SIGPIPE false negatives.
+  - Updated AC-BRAND-008 expectation to Ulmo-final architecture:
+    - `mereka.scss` must **avoid** monolithic `theme.scss` import.
+    - `mereka.scss` must import focused partials (`./scss/fonts`, `./scss/tokens`).
+  - Updated AC-BRAND-009 plugin check to ignore comment-only references when scanning for Google Fonts URLs.
+  - Updated AC-BRAND-014 MFE injection detection to accept the current `footer-component.sh` asset-sync path.
+  - MFE live branding probe now degrades to WARN (not FAIL) when explicit brand text is absent from initial HTML but theme CSS assets are present (client-rendered shell path).
+- Live mode now isolates runtime issues:
+  - `PASS=98`, `FAIL=4`, `WARN=5`, `SKIP=0`
+  - Remaining FAILs are all `Powered by Open edX` exposures on LMS/Studio domains (deployment/runtime drift).
+
+## Addendum — Fresh Runtime QA Sweep (2026-02-28T18:03Z)
+
+### Commands Run
+
+```bash
+./scripts/qa/capture-branding-screenshots.sh prod
+./scripts/qa/verify-cross-browser-branding-smoke.sh --env prod --cross-browser
+./scripts/qa/verify-mfe-route-smoke.sh --env prod
+./scripts/qa/verify-a11y-contrast-focus.sh --env prod
+./scripts/qa/verify-frontend-performance-spotcheck.sh
+./scripts/qa/verify-css-branding-overhead.sh
+./scripts/qa/verify-email-template-multilang.sh
+```
+
+### Artifacts
+
+- Screenshot bundle: `var/screenshots/prod/20260228T175849Z`
+- Cross-browser smoke log: `var/qa/cross-browser-branding-smoke-prod-20260228T180303Z.log`
+- Route smoke JSON: `/tmp/mfe-route-smoke-20260228-180630/results.json`
+
+### Results
+
+- `capture-branding-screenshots.sh prod`: completed, full URL matrix captured.
+- `verify-cross-browser-branding-smoke.sh --env prod --cross-browser`:
+  - `9 passed`, `0 failed` in `2.9m`
+  - Projects passed: Chromium, Firefox, mobile Chrome
+  - WebKit/mobile Safari auto-disabled by host dependency probe (`playwright install-deps` prerequisite on runner)
+- `verify-mfe-route-smoke.sh --env prod`: `PASS=33`, `FAIL=0`, `WARN=0`
+- `verify-a11y-contrast-focus.sh --env prod`: `PASS=29`, `FAIL=0`, `WARN=2`
+- `verify-frontend-performance-spotcheck.sh`: `PASS=2`, `FAIL=0`
+- `verify-css-branding-overhead.sh`: pass (`3236B` gzip vs `5120B` budget)
+- `verify-email-template-multilang.sh`: `PASS=71`, `FAIL=0`, `WARN=0`
+  - Includes locale wrapper coverage for all 15 ACE message types (`ms`, `zh-hans`)
+  - Verifier now checks runtime ACE settings path (prod overlay patch) in addition to local Tutor config files.
+
+## Addendum — Performance Spot-Check Runtime Contract Behavior
+
+### Commands Run
+
+```bash
+./scripts/qa/verify-frontend-performance-spotcheck.sh --env prod --require-runtime
+./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.io/authn/login --require-runtime
+```
+
+### Result
+
+- Wrapper/runtime URL ergonomics were hardened:
+  - `verify-frontend-performance-spotcheck.sh` now supports `--env prod|dev` and auto-resolves the runtime origin from shared domain config.
+  - `verify-paragon-runtime.sh` now normalizes route-style URLs to origin (for example `/authn/login` → host root) and reports explicit HTTP status failures.
+- Current runtime contract status in prod:
+  - `AC-TKN-018/019` fails with `HTTP 404` on `https://apps.academyv2.mereka.io/theme/mereka-brand.min.css`.
+  - This is an environment/runtime drift signal (theme endpoint unavailable), not a verifier false-negative.
+
+## Addendum — `/theme` Runtime 404 Root-Cause + Source Fix
+
+### Root Cause (source analysis)
+
+- MFE Caddy `@mfe_theme_assets` was rooted at `/openedx/dist` but `try_files` skipped `/theme{path}`.
+- Runtime minified bundles are copied to `/openedx/dist/theme/*.min.css`, so requests like `/theme/mereka-brand.min.css` missed and fell through to 404.
+
+### Source Fix Applied
+
+- Updated MFE Caddy theme handler:
+  - `deploy/k8s/base/plugins/mfe/apps/mfe/Caddyfile`
+  - Added `try_files /theme{path} ...` as the first-hop lookup before per-MFE fallbacks.
+- Added regression checks:
+  - `scripts/qa/verify-paragon-theme-urls.sh` now requires `/theme{path}` first-hop in `@mfe_theme_assets`.
+  - `scripts/qa/verify-caddy-cache-policy.sh` now asserts the same contract.
+
+### Verification
+
+```bash
+./scripts/qa/verify-paragon-theme-urls.sh
+./scripts/qa/verify-caddy-cache-policy.sh
+```
+
+- Both pass in source mode after patch.
+- Runtime remains pending until next MFE/Caddy deployment rolls out this Caddyfile update.
+
+## Addendum — Legacy Email Notification Verifier Realignment
+
+### Command Run
+
+```bash
+./scripts/qa/verify-email-notifications.sh
+```
+
+### Result
+
+- Summary improved to: `PASS=32`, `FAIL=0`, `SKIP=4` (previously large stale-skip surface).
+- Verifier now targets current implementation paths:
+  - template root: `infrastructure/tutor/custom-apps/openedx_email_templates/templates/email`
+  - modern settings candidates (overlay + base LMS production settings)
+  - SES SMTP wiring in `deploy/k8s/patches/smtp-ses-relay.yaml` and related manifests
+  - List-Unsubscribe middleware path in `infrastructure/tutor/plugins/email-preferences/.../middleware.py`
+- AC-110 and AC-026 now validate all 15 message-type template pairs and `ms`/`zh-hans` locale variants directly.

@@ -1,0 +1,40 @@
+version: 1
+
+status:
+  - draft
+  - active
+  - review
+  - approved
+  - in_progress
+  - completed
+  - deferred
+  - ready
+  - deprecated
+  - superseded
+  - deferred_until_2027
+
+spec_class:
+  - system
+  - domain
+  - integration
+  - security
+  - proposal
+  - plan
+  - generated
+
+normativity:
+  - normative
+  - proposed
+  - planning
+  - generated
+
+domain:
+  - auth
+  - tenancy
+  - commerce
+  - frontend
+  - data
+  - events
+  - runtime
+  - platform
+  - docs

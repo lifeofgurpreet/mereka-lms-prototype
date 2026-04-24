@@ -1,0 +1,29 @@
+{
+  "displayName": "Auth verify CronJob failures (logs)",
+  "combiner": "OR",
+  "enabled": true,
+  "severity": "ERROR",
+  "conditions": [
+    {
+      "displayName": "Auth verify failures > 0/15m",
+      "conditionThreshold": {
+        "filter": "resource.type=\"k8s_container\" AND metric.type=\"logging.googleapis.com/user/auth-verify-cronjob-failures\"",
+        "aggregations": [
+          {
+            "alignmentPeriod": "900s",
+            "perSeriesAligner": "ALIGN_SUM"
+          }
+        ],
+        "comparison": "COMPARISON_GT",
+        "thresholdValue": 0,
+        "duration": "0s",
+        "trigger": { "count": 1 }
+      }
+    }
+  ],
+  "notificationChannels": [
+    "projects/mereka-lms/notificationChannels/2534209833330971119",
+    "projects/mereka-lms/notificationChannels/1104353389109200281"
+  ]
+}
+

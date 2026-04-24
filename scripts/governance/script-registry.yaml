@@ -1,0 +1,4387 @@
+# Script Governance Registry — Mereka LMS
+# Release-critical scripts must be registered here.
+# CI blocks new critical scripts that are not in this registry.
+# ci_static_inventory below is the authoritative execution inventory for the
+# offline static-validation CI runner.
+# ci_runtime_inventory below is the authoritative generated inventory for
+# manual/runtime validation paths; it is not itself an execution contract.
+#
+# Fields:
+#   path          - Repo-relative path (from repo root)
+#   owner         - Team responsible for this script
+#   purpose       - One-line description
+#   inputs        - Named env vars or args the script consumes
+#   outputs       - What the script produces (files, stdout, exit code only)
+#   side_effects  - Mutations outside the repo (cluster, registry, secrets, git)
+#   dry_run       - Whether a safe dry-run mode is available (flag or env var)
+#   lanes         - Which environments the script applies to
+#   proof_command - Command to verify the script is functional (read-only)
+#   criticality   - release-blocking | release-supporting | informational
+#   ci_static_inventory.entries[].script  - Repo-relative static CI execution entry
+#   ci_static_inventory.shard_files[]    - Repo-relative generated shard manifests
+#   ci_static_inventory.precheck_files[] - Repo-relative static scripts that must run serially before shard fan-out
+#   ci_runtime_inventory.entries[].script - Repo-relative manual/runtime inventory entry
+
+version: "1.2.4"
+
+canonical_entrypoints:
+  # Top-level release automation
+  release_canonical: scripts/infra/canonical-release.sh
+  release_gitops: scripts/infra/release-openedx-gitops.sh
+  # Static release gate (read-only preflight)
+  release_readiness: scripts/qa/verify-release-readiness.sh
+  # Image tag promotion into gitops overlays
+  image_tag_promotion: scripts/infra/bump-image-tags.sh
+  # Secrets sync source-of-truth → GCP SM
+  secrets_sync: scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh
+  # Deployment contract verification
+  deploy_contract: scripts/qa/verify-deployment-contract.sh
+  # Release gate (canonical release verification entrypoint)
+  release_gate: scripts/release/release-gate.sh
+  # Migration preflight (pre-migration safety gate)
+  migration_preflight: scripts/release/migration-preflight.sh
+
+ci_static_inventory:
+  generated_file: .github/ci-scripts-static.txt
+  shard_files:
+    - .github/ci-scripts-static-shard-01.txt
+    - .github/ci-scripts-static-shard-02.txt
+    - .github/ci-scripts-static-shard-03.txt
+  precheck_files:
+    - scripts/qa/verify-generated-surfaces.sh
+    - scripts/qa/verify-ci-cache-policy.sh
+    - scripts/qa/verify-new-ci-static-entries.sh
+  generator: scripts/governance/generate-ci-static-inventory.py
+  owner: platform-team
+  entries:
+    - script: scripts/qa/verify-repo-structure.sh
+    - script: scripts/qa/verify-repo-hygiene-artifacts.sh
+    - script: scripts/qa/test-verify-repo-hygiene-artifacts.sh
+    - script: scripts/qa/verify-no-hardcoded-dev-paths.sh
+    - script: scripts/qa/test-verify-no-hardcoded-dev-paths.sh
+    - script: scripts/qa/verify-no-hardcoded-user-paths.sh
+    - script: scripts/qa/test-verify-no-hardcoded-user-paths.sh
+    - script: scripts/qa/verify-qa-mutation-surface.sh
+    - script: scripts/qa/test-verify-qa-mutation-surface.sh
+    - script: scripts/qa/verify-staging-vocabulary-drift.sh
+    - script: scripts/qa/test-verify-staging-vocabulary-drift.sh
+    - script: scripts/qa/verify-script-portability.sh
+    - script: scripts/qa/verify-script-basename-overlap.sh
+    - script: scripts/qa/verify-script-basename-governance.sh
+    - script: scripts/qa/test-verify-script-basename-governance.sh
+      estimated_seconds: 10
+    - script: scripts/qa/verify-workflow-script-references.sh
+    - script: scripts/qa/test-verify-workflow-script-references.sh
+    - script: scripts/qa/verify-actions-pinned.sh
+    - script: scripts/qa/verify-workflow-timeouts.sh
+    - script: scripts/governance/verify-runbook-executable.sh
+    - script: scripts/qa/test-verify-runbook-executable.sh
+      estimated_seconds: 2
+    # verify-retraction-sweep.sh itself is NOT in the static inventory —
+    # it's a retraction-PR-invoked tool that exits 2 on no-arg usage (per
+    # scripts/qa/test-verify-retraction-sweep.sh fixture 1 contract).
+    # Registering it as static would fail every build at the no-arg call.
+    # The test script IS registered — it validates the verifier's contract
+    # including the usage-error exit code.
+    - script: scripts/qa/test-verify-retraction-sweep.sh
+      estimated_seconds: 2
+    - script: scripts/qa/verify-script-governance-census.sh
+    - script: scripts/qa/verify-script-governance-dangerous.sh
+    - script: scripts/qa/verify-script-governance-orphans.sh
+      estimated_seconds: 8
+    - script: scripts/qa/verify-siteconfig-authority.sh
+    - script: scripts/qa/test-verify-script-governance-dangerous.sh
+      estimated_seconds: 19
+    - script: scripts/qa/test-verify-script-governance-orphans.sh
+      estimated_seconds: 18
+    - script: scripts/qa/test-verify-siteconfig-authority.sh
+      estimated_seconds: 7
+    - script: scripts/qa/test-generate-script-governance-catalog.sh
+    - script: scripts/qa/test-validate-registry.sh
+      estimated_seconds: 5
+    - script: scripts/qa/test-build-script-governance-review-packet.sh
+    - script: scripts/qa/test-verify-authn-submodule-path-contract.sh
+    - script: scripts/qa/test-verify-theming-generated-artifacts.sh
+    - script: scripts/qa/test-verify-branding-asset-sync.sh
+    - script: scripts/qa/test-verify-branding-script-portability.sh
+    - script: scripts/qa/test-verify-critical-testmap-scope.sh
+    - script: scripts/qa/test-verify-deprecated-verification-hygiene.sh
+    - script: scripts/qa/test-verify-verification-sprawl-budget.sh
+    - script: scripts/qa/test-verify-spec-coverage.sh
+    - script: scripts/qa/test-verify-deprecation-discipline.sh
+    - script: scripts/qa/test-verify-spec-dedupe-normalize.sh
+    - script: scripts/qa/test-verify-openedx-audit-tracker-sync.sh
+    - script: scripts/qa/test-verify-csp-report-pipeline.sh
+    - script: scripts/qa/test-verify-k8s-repo-boundaries.sh
+    - script: scripts/qa/test-verify-documentation-links.sh
+    - script: scripts/qa/test-verify-documentation-standards.sh
+    - script: scripts/qa/test-verify-evidence-tracking-policy.sh
+    - script: scripts/qa/test-verify-tutor-config-path-contract.sh
+    - script: scripts/qa/test-verify-no-hardcoded-secrets.sh
+    - script: scripts/qa/test-verify-secrets-naming-convention.sh
+    - script: scripts/qa/test-verify-secret-classification.sh
+    - script: scripts/qa/test-verify-secrets-inventory.sh
+    - script: scripts/qa/test-verify-dev-prod-secret-separation.sh
+    - script: scripts/qa/verify-custom-apps-hygiene.sh
+    - script: scripts/qa/verify-custom-app-install-contract.sh
+    - script: scripts/qa/test-verify-custom-app-install-contract.sh
+    - script: scripts/qa/verify-authn-submodule-path-contract.sh
+    - script: scripts/qa/verify-qa-readonly-contract.sh
+    - script: scripts/qa/verify-evidence-tracking-policy.sh
+    - script: scripts/qa/verify-evidence-sprawl-budget.sh
+    - script: scripts/qa/test-verify-evidence-sprawl-budget.sh
+    - script: scripts/qa/verify-architecture-doc-path-drift.sh
+    - script: scripts/qa/verify-deprecation-discipline.sh
+    - script: scripts/qa/verify-docs-authority-invariants.sh
+    - script: scripts/qa/verify-process-invariants.sh
+    - script: scripts/qa/verify-machine-truth-freshness.sh
+    - script: scripts/qa/verify-change-surface-contract.sh
+    - script: scripts/qa/verify-admin-merge-exceptions.sh
+    - script: scripts/qa/verify-skill-graph-coverage.sh
+    - script: scripts/qa/verify-generated-surface-lineage.sh
+    - script: scripts/qa/verify-cross-repo-boundaries.sh
+    - script: scripts/qa/verify-proof-gate-contract.sh
+    - script: scripts/qa/verify-ci-scope-contract.sh
+    - script: scripts/qa/verify-blind-agent-acceptance.sh
+    - script: scripts/qa/verify-skill-evals-schema.sh
+    - script: scripts/qa/verify-domain-proof-matrix.sh
+    - script: scripts/qa/verify-workflow-contract-map.sh
+    - script: scripts/qa/verify-ghost-truth-surfaces.sh
+    - script: scripts/qa/verify-source-of-truth-matrix.sh
+    - script: scripts/qa/verify-structural-debt-register.sh
+    - script: scripts/qa/verify-skill-eval-runner.sh
+    - script: scripts/qa/verify-skill-routing-contract.sh
+    - script: scripts/qa/test-hardening-negative.sh
+    - script: scripts/qa/verify-workflow-gate-enforcement.sh
+    - script: scripts/qa/verify-proof-lineage-chain.sh
+    - script: scripts/qa/verify-openedx-audit-tracker-sync.sh
+    - script: scripts/qa/verify-tutor-config-path-contract.sh
+    - script: scripts/qa/test-build-validator-drift-evidence-bundle.sh
+    - script: scripts/qa/test-build-validator-drift-review-packet.sh
+      estimated_seconds: 13
+    - script: scripts/qa/test-authn-deep-route-handoff-patch.sh
+    - script: scripts/qa/test-verify-no-mux-asset-ids.sh
+    - script: scripts/qa/test-verify-kustomize-no-deprecated-keys.sh
+    - script: scripts/qa/test-verify-secret-inventory.sh
+    - script: scripts/qa/test-verify-script-portability.sh
+    - script: scripts/qa/test-verify-qa-readonly-contract.sh
+    - script: scripts/qa/test-verify-lms-ops-migrate-contract.sh
+    - script: scripts/qa/lint-repo-conventions.sh
+      estimated_seconds: 58
+      timeout_seconds: 420
+    - script: scripts/qa/test-run-scripts-parallel-timeout-metadata.sh
+      estimated_seconds: 3
+    - script: scripts/qa/test-buildx-cleanup-active-guard.sh
+      estimated_seconds: 3
+    - script: scripts/qa/test-verify-secrets-isolation.sh
+    - script: scripts/qa/test-verify-infisical-env-validation-coverage.sh
+    - script: scripts/qa/test-verify-secrets-management.sh
+    - script: scripts/qa/test-verify-enterprise-secrets.sh
+    - script: scripts/qa/test-verify-security-hardening.sh
+    - script: scripts/qa/test-verify-csp-headers.sh
+    - script: scripts/qa/test-verify-evidence-redaction.sh
+    - script: scripts/qa/test-verify-authority-routing.sh
+    - script: scripts/qa/test-verify-post-deploy-health-gate-wiring.sh
+    - script: scripts/qa/test-verify-release-invocation-guardrail-wiring.sh
+    - script: scripts/qa/test-verify-release-gitops-guardrails.sh
+    - script: scripts/qa/test-verify-release-promotion-wiring.sh
+    - script: scripts/qa/test-verify-release-workflow-invocation.sh
+    - script: scripts/qa/test-verify-build-workflow-contract.sh
+      estimated_seconds: 15
+    - script: scripts/qa/test-resolve-release-bundle-digests.sh
+      estimated_seconds: 3
+    - script: scripts/qa/test-verify-bootstrap-workflow-contract.sh
+    - script: scripts/qa/test-verify-local-bootstrap-readiness.sh
+      estimated_seconds: 3
+    - script: scripts/qa/test-install-docker-compose.sh
+      estimated_seconds: 5
+    - script: scripts/qa/test-buildx-builder-health.sh
+      estimated_seconds: 3
+    - script: scripts/qa/test-dependency-image-mirrors-patch.sh
+      estimated_seconds: 3
+    - script: scripts/qa/test-openedx-obsolete-activation-key-patch-removal.sh
+      estimated_seconds: 3
+    - script: scripts/qa/test-discovery-init-task-contract.sh
+      estimated_seconds: 3
+    - script: scripts/qa/test-mfe-npm-install-resilience-patch.sh
+      estimated_seconds: 3
+    - script: scripts/qa/test-mfe-prune-deprecated-shells.sh
+      estimated_seconds: 3
+    - script: scripts/qa/verify-tutor-patch-manifest-contract.sh
+      estimated_seconds: 2
+    - script: scripts/qa/test-verify-tutor-patch-manifest-contract.sh
+      estimated_seconds: 3
+    - script: scripts/qa/verify-build-optimizations-render-delta-contract.sh
+      estimated_seconds: 2
+    - script: scripts/qa/test-verify-build-optimizations-render-delta-contract.sh
+      estimated_seconds: 3
+    - script: scripts/qa/test-verify-rollback-dry-run.sh
+    - script: scripts/qa/test-verify-post-deploy-gate.sh
+    - script: scripts/qa/test-verify-wif-readiness.sh
+    - script: scripts/qa/test-verify-slsa-provenance.sh
+    - script: scripts/qa/test-verify-migration-rollback.sh
+    - script: scripts/qa/test-verify-cross-system-identity.sh
+    - script: scripts/qa/test-verify-zero-pending-migrations-service-filter.sh
+    - script: scripts/qa/test-lms-ops-migrate-unknown-service-guardrails.sh
+    - script: scripts/qa/verify-no-hardcoded-secrets.sh
+    - script: scripts/qa/verify-secrets-naming-convention.sh
+    - script: scripts/qa/verify-dev-prod-secret-separation.sh
+    - script: scripts/qa/verify-secrets-management.sh
+    - script: scripts/qa/verify-secret-classification.sh
+    - script: scripts/qa/verify-deletion-wave-consumer-sweep.sh
+      estimated_seconds: 3
+    - script: scripts/qa/verify-secrets-inventory.sh
+    - script: scripts/qa/verify-infisical-env-validation-coverage.sh
+    - script: scripts/qa/verify-secrets-isolation.sh
+      estimated_seconds: 18
+    - script: scripts/qa/verify-security-hardening.sh
+    - script: scripts/qa/verify-csp-headers.sh
+    - script: scripts/qa/verify-csp-report-pipeline.sh
+    - script: scripts/qa/verify-domain-url-invariants.sh
+      estimated_seconds: 13
+    - script: scripts/qa/verify-evidence-redaction.sh
+    - script: scripts/qa/validate-deploy-contract.sh
+      estimated_seconds: 8
+    - script: scripts/qa/verify-k8s-deployment-spec.sh
+    - script: scripts/qa/verify-migration-init-contract.sh
+    - script: scripts/qa/verify-dev-db-rebuild-contract.sh
+    - script: scripts/qa/verify-destructive-ops-guardrails.sh
+    - script: scripts/qa/verify-credentials-zoneinfo-contract.sh
+    - script: scripts/qa/verify-no-manual-migration-state-hacks.sh
+    - script: scripts/qa/verify-enterprise-schema-repair-guardrails.sh
+    - script: scripts/qa/verify-k8s-externalsecrets.sh
+    - script: scripts/qa/verify-k8s-images.sh
+    - script: scripts/qa/verify-k8s-secrets-hygiene.sh
+    - script: scripts/qa/verify-k8s-repo-boundaries.sh
+    - script: scripts/qa/verify-kustomize-no-deprecated-keys.sh
+    - script: scripts/qa/verify-kustomize-render.sh
+    - script: scripts/qa/verify-lane-identity.sh
+    - script: scripts/qa/verify-topology-selectors.sh
+      args: ["--offline"]
+    - script: scripts/qa/verify-authority-routing.sh
+    - script: scripts/qa/verify-overlay-ownership.sh
+    - script: scripts/qa/verify-no-legacy-tutor-k8s-paths.sh
+    - script: scripts/qa/verify-network-policies.sh
+      estimated_seconds: 13
+    - script: scripts/qa/verify-no-pipefail-prone-pipes.sh
+      estimated_seconds: 3
+    - script: scripts/qa/verify-no-latest-prod-tags.sh
+    - script: scripts/qa/verify-gitops-image-overrides.sh
+      args: ["--skip-infra"]
+    - script: scripts/qa/verify-tenant-dns-inventory.sh
+    - script: scripts/qa/verify-tenant-lifecycle-guardrails.sh
+    - script: scripts/qa/verify-multisite-apply-guardrails.sh
+    - script: scripts/qa/verify-tenant-enterprise-mutation-guardrails.sh
+    - script: scripts/qa/verify-csrf-multisite.sh
+    - script: scripts/qa/verify-favicon-multisite.sh
+    - script: scripts/qa/verify-site-id-hardening.sh
+    - script: scripts/qa/verify-critical-testmap-scope.sh
+    - script: scripts/qa/audit-tenant-config-safety.sh
+    - script: scripts/qa/validate-observability-compliance.sh
+      args: ["--mode", "local"]
+      estimated_seconds: 9
+    - script: scripts/qa/verify-observability-stack.sh
+    - script: scripts/qa/verify-sentry-wiring.sh
+    - script: scripts/qa/verify-sentry-cli-contract.sh
+    - script: scripts/qa/verify-sli-foundation.sh
+    - script: scripts/qa/verify-error-budget.sh
+    - script: scripts/qa/lint-active-docs-env-model.sh
+    - script: scripts/qa/verify-cicd-merge-gates-and-secrets.sh
+    - script: scripts/qa/verify-cicd-lessons-compliance.sh
+    - script: scripts/qa/verify-cicd-ios-build.sh
+    - script: scripts/qa/verify-cicd-tutor-plugin-test.sh
+    - script: scripts/qa/verify-ci-runner-policy.sh
+      estimated_seconds: 8
+    - script: scripts/qa/test-verify-ci-runner-policy.sh
+    - script: scripts/qa/verify-execution-invariants-pack.sh
+    - script: scripts/qa/verify-stabilization-control-board.sh
+    - script: scripts/qa/verify-convergence-evidence-bundle.sh
+    - script: scripts/qa/verify-provision-mysql-app-dbs-guardrails.sh
+    - script: scripts/qa/verify-mysql-user-repair-guardrails.sh
+    - script: scripts/qa/verify-prune-gcp-snapshots-guardrails.sh
+    - script: scripts/qa/verify-data-retention-jobs-guardrails.sh
+    - script: scripts/qa/verify-purge-frontend-cache-guardrails.sh
+    - script: scripts/qa/verify-authentik-apply-guardrails.sh
+    - script: scripts/qa/verify-studio-sso-canary-guardrails.sh
+    - script: scripts/qa/verify-new-ci-static-entries.sh
+    - script: scripts/qa/verify-generated-surfaces.sh
+    - script: scripts/qa/test-verify-generated-surfaces.sh
+      estimated_seconds: 21
+    - script: scripts/qa/verify-ci-cache-policy.sh
+    - script: scripts/qa/test-verify-ci-cache-policy.sh
+      estimated_seconds: 8
+    - script: scripts/qa/test-build-context-fingerprint.sh
+      estimated_seconds: 1
+    - script: scripts/qa/test-build-image-freshness.sh
+      estimated_seconds: 1
+    - script: scripts/qa/verify-benchmark-artifact-contract.sh
+    - script: scripts/qa/verify-verification-catalog.sh
+    - script: scripts/qa/test-verify-verification-catalog.sh
+      estimated_seconds: 13
+    - script: scripts/qa/verify-verification-sprawl-budget.sh
+    - script: scripts/qa/verify-verify-script-reachability.sh
+    - script: scripts/qa/verify-deprecated-verification-hygiene.sh
+    - script: scripts/qa/verify-post-deploy-health-gate-wiring.sh
+    - script: scripts/qa/verify-release-automation.sh
+    - script: scripts/qa/verify-release-dry-run-contract.sh
+    - script: scripts/qa/verify-release-gitops-guardrails.sh
+    - script: scripts/qa/verify-release-deployment-choreography.sh
+    - script: scripts/qa/verify-release-invocation-guardrail-wiring.sh
+    - script: scripts/qa/verify-mfe-build-prereqs.sh
+    - script: scripts/qa/verify-mfe-runtime-helper-contract.sh
+    - script: scripts/qa/test-resolve-build-scope.sh
+    - script: scripts/qa/verify-mfe-footer-slot.sh
+    - script: scripts/qa/verify-mfe-header-branding.sh
+    - script: scripts/qa/verify-plugin-slot-wiring.sh
+    - script: scripts/qa/verify-mfe-route-drift.sh
+    - script: scripts/qa/verify-mfe-selector-hardening.sh
+    - script: scripts/qa/verify-mfe-css-architecture.sh
+    - script: scripts/qa/verify-mfe-reduced-motion.sh
+    - script: scripts/qa/verify-mfe-routing-parity.sh
+    - script: scripts/qa/verify-mfe-analytics-plugin-parity.sh
+    - script: scripts/qa/verify-mfe-slot-source-alignment.sh
+    - script: scripts/qa/verify-enterprise-frontend-route-contract.sh
+    - script: scripts/qa/verify-enterprise-frontend-config-contract.sh
+    - script: scripts/qa/test-verify-enterprise-frontend-live-contract.sh
+    - script: scripts/qa/test-verify-enterprise-catalog.sh
+    - script: scripts/qa/test-enterprise-mfe-optional-endpoint-hardening.sh
+    - script: scripts/qa/test-enterprise-mfe-patch-contract.sh
+    - script: scripts/qa/test-verify-enterprise-service-deployment.sh
+    - script: scripts/qa/test-mfe-slot-operation-compat.sh
+    - script: scripts/qa/verify-oidc-cookie-middleware-order.sh
+    - script: scripts/qa/verify-jwt-uniqueness.sh
+    - script: scripts/qa/verify-design-tokens.sh
+    - script: scripts/qa/verify-catalog-discovery.sh
+    - script: scripts/qa/verify-design-token-ci.sh
+    - script: scripts/qa/verify-design-token-usage.sh
+    - script: scripts/qa/verify-token-definitions.sh
+    - script: scripts/qa/verify-token-reference-integrity.sh
+    - script: scripts/qa/verify-token-generation-pipeline.sh
+    - script: scripts/qa/verify-theming-generated-artifacts.sh
+    - script: scripts/qa/verify-branding-token-integrity.sh
+    - script: scripts/qa/verify-branding-evidence-a11y-contract.sh
+    - script: scripts/qa/verify-branding-evidence-screenshot-contract.sh
+    - script: scripts/qa/verify-paragon-tokens.sh
+    - script: scripts/qa/verify-paragon-token-coverage.sh
+    - script: scripts/qa/verify-paragon-json-token-hierarchy.sh
+    - script: scripts/qa/verify-font-loading.sh
+    - script: scripts/qa/verify-branding-asset-sync.sh
+    - script: scripts/qa/verify-branding-script-portability.sh
+    - script: scripts/qa/verify-brand-asset-drift.sh
+    - script: scripts/qa/verify-branding-token-sync-contract.sh
+    - script: scripts/qa/verify-css-branding-overhead.sh
+    - script: scripts/qa/verify-caddy-cache-headers.sh
+    - script: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    - script: scripts/qa/verify-brand-package-runtime.sh
+      args: ["--allow-missing-image"]
+    - script: scripts/qa/verify-token-integrity-routing.sh
+      estimated_seconds: 6
+    - script: scripts/qa/verify-token-contrast.sh
+    - script: scripts/branding/verify-token-drift.sh
+    - script: scripts/branding/validate-token-consumers.sh
+    - script: scripts/qa/verify-contrast-compliance.sh
+    - script: scripts/qa/verify-a11y-contrast-focus.sh
+    - script: scripts/qa/verify-a11y-tenant-branding.sh
+    - script: scripts/qa/verify-data-migration-contracts.sh
+    - script: scripts/qa/verify-tenant-branding-contract.sh
+    - script: scripts/qa/verify-tenant-branding-fallback.sh
+    - script: scripts/qa/verify-brand-pack-schema.sh
+    - script: scripts/tenants/validate-tenant-brand-pack.sh
+    - script: scripts/qa/verify-tenant-token-switching.sh
+    - script: scripts/qa/verify-tenant-branding-matrix.sh
+    - script: scripts/qa/verify-tenant-ui-smoke.sh
+    - script: scripts/qa/verify-tenant-footer-variant-lane.sh
+    - script: scripts/qa/verify-tenant-config-handoff.sh
+    - script: scripts/qa/verify-multitenant-brand-platform.sh
+    - script: scripts/qa/verify-multi-tenant-branding-ops.sh
+    - script: scripts/qa/verify-studio-customization.sh
+    - script: scripts/qa/verify-footer-parity.sh
+    - script: scripts/qa/verify-no-dom-overrides.sh
+    - script: scripts/qa/verify-migration-lock.sh
+    - script: scripts/qa/verify-visual-smoke-baseline.sh
+    - script: scripts/qa/verify-visual-parity-checkpoints.sh
+    - script: scripts/qa/verify-ui-ux-hardening-bundle.sh
+    - script: scripts/qa/verify-performance-budget.sh
+    - script: scripts/qa/verify-plugin-slot-migration-register.sh
+    - script: scripts/qa/verify-custom-app-drift.sh
+    - script: scripts/qa/verify-legacy-ecommerce-ui-refs.sh
+    - script: scripts/qa/verify-slot-matrix.sh
+    - script: scripts/qa/verify-analytics-key.sh
+    - script: scripts/qa/verify-analytics-undefined-regression.sh
+    - script: scripts/qa/verify-analytics-key-elimination.sh
+    - script: scripts/qa/verify-idempotency.sh
+    - script: scripts/qa/verify-tutor-branding-render.sh
+    - script: scripts/qa/verify-openedx-image-branding.sh
+    - script: scripts/qa/verify-mfe-image-branding.sh
+    - script: scripts/qa/verify-airtable-readiness.sh
+    - script: scripts/qa/verify-kajabi-export.sh
+    - script: scripts/qa/verify-kajabi-transform.sh
+    - script: scripts/qa/verify-kajabi-olx-packages.sh
+    - script: scripts/qa/verify-kajabi-thumbnails.sh
+    - script: scripts/qa/verify-kajabi-completions-export.sh
+    - script: scripts/qa/verify-mct-export.sh
+    - script: scripts/qa/verify-mct-transform.sh
+    - script: scripts/qa/verify-mct-olx-packages.sh
+    - script: scripts/qa/verify-mct-video-urls.sh
+    - script: scripts/qa/verify-caddy-cache-policy.sh
+    - script: scripts/qa/verify-build-invariants.sh
+    - script: scripts/qa/verify-ci-script-list.sh
+      estimated_seconds: 10
+    - script: scripts/qa/verify-externalsecret-config.sh
+    - script: scripts/qa/verify-k8s-secret-scan.sh
+    - script: scripts/qa/verify-mobile-secrets-inventory.sh
+    - script: scripts/qa/verify-mux-secrets.sh
+    - script: scripts/qa/verify-pod-security-policies.sh
+    - script: scripts/qa/verify-precommit-secret-scan.sh
+    - script: scripts/qa/verify-purchase-gateway-resilience.sh
+    - script: scripts/qa/verify-purchase-gateway-security.sh
+    - script: scripts/qa/verify-security-exceptions.sh
+    - script: scripts/qa/verify-sla-report-security.sh
+    - script: scripts/infra/check-cert-sans.sh
+    - script: scripts/qa/check-atlas-translation-infra.sh
+    - script: scripts/qa/verify-kustomize-structure.sh
+    - script: scripts/qa/verify-operational-hardening.sh
+    - script: scripts/qa/verify-purchase-gateway-k8s.sh
+    - script: scripts/qa/verify-slo-deployment-gate.sh
+    - script: scripts/qa/verify-libraries-tenant.sh
+    - script: scripts/qa/verify-tenant-auth-analytics.sh
+    - script: scripts/qa/verify-tenant-branding.sh
+    - script: scripts/qa/verify-tenant-configmap.sh
+    - script: scripts/qa/verify-tenant-foundation.sh
+    - script: scripts/qa/verify-tenant-hardening.sh
+    - script: scripts/qa/verify-tenant-isolation-evidence.sh
+    - script: scripts/qa/verify-tenant-isolation-gates.sh
+    - script: scripts/qa/verify-tenant-isolation-patterns.sh
+    - script: scripts/qa/verify-tenant-model.sh
+    - script: scripts/qa/verify-tenant-pilot.sh
+    - script: scripts/qa/verify-tenant-provisioning-enhanced.sh
+    - script: scripts/qa/verify-tenant-provisioning.sh
+    - script: scripts/qa/audit-grafana-dashboard.sh
+      estimated_seconds: 7
+    - script: scripts/qa/audit-observability.sh
+    - script: scripts/qa/verify-mux-alert-wiring.sh
+    - script: scripts/qa/verify-observability-loki-log-sources.sh
+    - script: scripts/qa/verify-observability-validation.sh
+    - script: scripts/qa/verify-otel-naming.sh
+    - script: scripts/qa/verify-observability-structured-logging.sh
+    - script: scripts/infra/check-error-budget-gate.sh
+    - script: scripts/qa/check-error-budget-gate.sh
+    - script: scripts/qa/verify-slo-contracts.sh
+    - script: scripts/qa/verify-slo-dashboards.sh
+    - script: scripts/qa/verify-slo-definitions.sh
+    - script: scripts/qa/check-enterprise-mfe-no-workaround.sh
+    - script: scripts/qa/verify-mfe-customizations.sh
+    - script: scripts/qa/verify-mfe-footer-fallbacks.sh
+    - script: scripts/qa/verify-mfe-footer-plugin-slot.sh
+    - script: scripts/qa/verify-mfe-route-smoke.sh
+      estimated_seconds: 11
+    - script: scripts/qa/verify-mfe-runtime-config.sh
+    - script: scripts/qa/verify-mfe-selectors.sh
+    - script: scripts/qa/verify-mfe-slot-nfr.sh
+    - script: scripts/qa/verify-mfe-ulmo-migration.sh
+    - script: scripts/qa/verify-phase7-dom-audit-contract.sh
+    - script: scripts/qa/verify-mfe-selector-coverage.sh
+    - script: scripts/qa/verify-slot-migration-readiness.sh
+    - script: scripts/branding/verify-logo-setup.sh
+    - script: scripts/qa/check-visual-regression-page-count.sh
+    - script: scripts/qa/verify-oep48-brand-package.sh
+    - script: scripts/qa/verify-rtl-theme-assets.sh
+    - script: scripts/qa/verify-runtime-theme-drift-lane.sh
+    - script: scripts/qa/verify-theme-consistency.sh
+    - script: scripts/qa/verify-token-drift.sh
+    - script: scripts/qa/verify-visual-baselines.sh
+    - script: scripts/qa/verify-visual-regression.sh
+    - script: scripts/qa/check-axe-journey-coverage.sh
+    - script: scripts/qa/verify-ui-accessibility.sh
+    - script: scripts/qa/verify-wcag-contrast-v2.sh
+    - script: scripts/qa/verify-kajabi-sso.sh
+    - script: scripts/qa/verify-platform-admin-sso-isolation.sh
+    - script: scripts/qa/verify-session-persistence.sh
+    - script: scripts/ci/preflight-check.sh
+    - script: scripts/qa/verify-migration-rollback.sh
+    - script: scripts/qa/verify-mobile-release.sh
+    - script: scripts/qa/verify-post-deploy-gate.sh
+    - script: scripts/qa/verify-release-promotion-wiring.sh
+    - script: scripts/qa/verify-release-workflow-invocation.sh
+    - script: scripts/qa/verify-rke2-rollout-readiness.sh
+    - script: scripts/qa/verify-rollback-dry-run.sh
+    - script: scripts/qa/verify-slsa-provenance.sh
+    - script: scripts/qa/verify-wif-readiness.sh
+    - script: scripts/migrations/mct/verify_video_mapping.sh
+    - script: scripts/qa/verify-no-mux-asset-ids.sh
+    - script: scripts/qa/verify-mux-video-upload.sh
+    - script: scripts/qa/verify-video-content-protection.sh
+    - script: scripts/qa/verify-video-mct-migration.sh
+    - script: scripts/qa/verify-video-phase2.sh
+    - script: scripts/qa/verify-video-phase3.sh
+    - script: scripts/qa/verify-video-pipeline.sh
+    - script: scripts/qa/verify-purchase-gateway.sh
+    - script: scripts/qa/verify-purchase-gateway-models.sh
+    - script: scripts/qa/verify-purchase-gateway-metrics-contract.sh
+    - script: scripts/qa/verify-purchase-gateway-stripe.sh
+    - script: scripts/qa/verify-proctoring-environment.sh
+    - script: scripts/qa/verify-proctoring-integration.sh
+    - script: scripts/qa/verify-proctoring.sh
+    - script: scripts/qa/verify-timed-exams.sh
+    - script: scripts/qa/verify-vc-issuance.sh
+    - script: scripts/qa/verify-vc-issuer.sh
+    - script: scripts/qa/verify-vc-ops.sh
+    - script: scripts/qa/verify-vc-types.sh
+    - script: scripts/qa/verify-vc-verification.sh
+    - script: scripts/qa/verify-libraries-hardening.sh
+    - script: scripts/qa/verify-libraries-scale.sh
+    - script: scripts/qa/verify-incremental-sync.sh
+    - script: scripts/qa/verify-olx-packages.sh
+    - script: scripts/qa/audit-infra-mereka-lms-staging-references.sh
+    - script: scripts/qa/verify-lighthouse-budgets.sh
+    - script: scripts/qa/verify-no-broken-paths.sh
+    - script: scripts/qa/verify-no-latest-tags.sh
+    - script: scripts/qa/verify-operator-dashboards.sh
+    - script: scripts/qa/verify-oscar-deprecation.sh
+    - script: scripts/qa/verify-phase2-smoke-evidence-contract.sh
+    - script: scripts/qa/verify-product-kpi.sh
+    - script: scripts/qa/verify-push-notifications.sh
+    - script: scripts/qa/verify-email-digests.sh
+    - script: scripts/qa/verify-email-gdpr-code.sh
+    - script: scripts/qa/verify-spec-coverage.sh
+    - script: scripts/qa/verify-translations.sh
+    - script: scripts/qa/verify-ttfs-onboarding.sh
+    - script: scripts/qa/verify-tutor-config-safety.sh
+    - script: scripts/qa/verify-tutor-services.sh
+    - script: scripts/qa/verify-tutor-version-pin.sh
+    - script: scripts/qa/verify-build-workflow-contract.sh
+    - script: scripts/qa/verify-red-line-contract.sh
+    - script: scripts/qa/verify-runner-class-taxonomy-upstream.sh
+    - script: scripts/qa/verify-bootstrap-workflow-contract.sh
+    - script: scripts/qa/verify-cold-start-onboarding-contract.sh
+    - script: scripts/qa/test-install-envsubst-fallback.sh
+    - script: scripts/qa/test-install-trivy-fallback.sh
+    - script: scripts/qa/test-verify-post-deploy-smoke.sh
+    - script: scripts/qa/verify-cicd-release-rollback.sh
+    - script: scripts/qa/verify-deployment-critical-coverage.sh
+    - script: scripts/qa/verify-spec-dedupe-normalize.sh
+      estimated_seconds: 8
+    - script: scripts/qa/verify-manifest-integrity.sh
+      estimated_seconds: 17
+    - script: scripts/qa/verify-commit-signing.sh
+    - script: scripts/qa/verify-body-limits.sh
+    - script: scripts/qa/verify-binary-pinning-pcp.sh
+    - script: scripts/qa/verify-analytics-pipeline.sh
+    - script: scripts/qa/verify-analytics-retention.sh
+    - script: scripts/qa/verify-aspects-analytics.sh
+    - script: scripts/qa/verify-aspects-compat.sh
+    - script: scripts/qa/verify-email-notifications.sh
+    - script: scripts/qa/verify-email-notifications-pipeline.sh
+    - script: scripts/qa/verify-email-templates.sh
+    - script: scripts/qa/verify-email-template-multilang.sh
+    - script: scripts/qa/verify-content-libraries-v2.sh
+    - script: scripts/qa/verify-content-libraries-advanced.sh
+    - script: scripts/qa/verify-enterprise-sso.sh
+    - script: scripts/qa/verify-logging-pipeline.sh
+    - script: scripts/qa/verify-correlation-header-propagation.sh
+    - script: scripts/qa/verify-branding-health.sh
+    - script: scripts/qa/verify-mako-template-syntax.sh
+    - script: scripts/qa/verify-brand-parity.sh
+    - script: scripts/qa/verify-certificate-branding.sh
+    - script: scripts/qa/verify-mfe-plugin-slots.sh
+    - script: scripts/qa/test-verify-mfe-plugin-slots.sh
+    - script: scripts/qa/verify-mfe-slot-profile-persistence.sh
+    - script: scripts/qa/verify-e2e-framework.sh
+    - script: scripts/qa/verify-authenticated-ui-smoke.sh
+    - script: scripts/qa/verify-admin-console.sh
+    - script: scripts/qa/verify-credentials-issuance.sh
+    - script: scripts/qa/verify-credentials-types.sh
+    - script: scripts/qa/verify-credentials-verification.sh
+    - script: scripts/qa/verify-credentials-ops.sh
+    - script: scripts/qa/verify-data-privacy-gdpr.sh
+    - script: scripts/qa/verify-advanced-xblocks.sh
+    - script: scripts/qa/verify-purchase-gateway-scaffold.sh
+    - script: scripts/qa/verify-mobile-backend-api.sh
+    - script: scripts/qa/verify-dr-drill-schedule.sh
+    - script: scripts/qa/no_runtime_release_side_effects.sh
+    - script: scripts/qa/verify-deployment-contract.sh
+    - script: scripts/qa/verify-base-images-pin-contract.sh
+    - script: scripts/qa/verify-baseline-truth-control.sh
+    - script: scripts/qa/verify-gitops-sync-drift.sh
+    - script: scripts/qa/verify-truth-state-matrix.sh
+    - script: scripts/qa/verify-incident-guardrails.sh
+    - script: scripts/qa/verify-live-mutation-ledger.sh
+    - script: scripts/release/release-gate.sh
+      args: ["--skip-cluster"]
+    - script: scripts/governance/validate-registry.sh
+    - script: scripts/qa/scan-secrets-fast.sh
+    - script: scripts/qa/verify-script-registry-completeness.sh
+    - script: scripts/qa/test-verify-script-registry-completeness.sh
+    - script: scripts/qa/verify-canonical-entrypoints.sh
+    - script: scripts/qa/test-verify-canonical-entrypoints.sh
+    - script: scripts/qa/verify-tenant-specs.sh
+    - script: scripts/qa/verify-configmap-hash-suffixes.sh
+    - script: scripts/qa/verify-enterprise-auth-contract.sh
+    - script: scripts/qa/verify-redis-db-allocation.sh
+    - script: scripts/qa/verify-mfe-env-config-url-guard.sh
+    - script: scripts/qa/verify-enterprise-mfe-build-contract.sh
+    - script: scripts/qa/verify-agent-context-lock.sh
+      args: ["--allow-main"]
+    - script: scripts/qa/verify-arc-runner-contract.sh
+    - script: scripts/qa/verify-ci-execution-contract.sh
+    - script: scripts/qa/verify-runtime-proof-fixture-pack.sh
+      estimated_seconds: 7
+    - script: scripts/qa/verify-course-catalog-durability.sh
+    - script: scripts/qa/verify-vendored-settings-drift.sh
+    - script: scripts/qa/verify-env-auth-parity.sh
+    - script: scripts/qa/verify-domain-authority-chain.sh
+    - script: scripts/qa/verify-domain-generated-surfaces.sh
+    - script: scripts/qa/test-verify-enterprise-sso-readiness.sh
+    - script: scripts/qa/test-verify-deployment-lanes.sh
+    - script: scripts/qa/test-verify-enterprise-observability.sh
+
+ci_runtime_inventory:
+  generated_file: .github/ci-scripts-runtime.txt
+  generator: scripts/governance/generate-ci-runtime-inventory.py
+  owner: platform-team
+  categories:
+    - key: CI_ARTIFACT
+      title: CI artifact required
+      description: needs var/ci files generated by preceding CI steps
+    - key: BUILT_IMAGE
+      title: Built image required
+      description: needs a locally built or pulled OCI image rather than repo-only source state
+    - key: WORKTREE_CONTEXT
+      title: Worktree or branch context required
+      description: needs a live worktree or branch context instead of detached CI state
+    - key: LIVE_CLUSTER
+      title: Live infrastructure required
+      description: needs live cluster, cloud control-plane, or network-edge access rather than repo-only state
+    - key: LIVE_APP
+      title: Live app required
+      description: needs running HTTP endpoints or browser-visible app behavior
+    - key: DATA_FILE
+      title: Data file dependent
+      description: needs export or audit files that are not committed to the repo
+    - key: STALE_EXPECT
+      title: Stale expectation or missing dependency
+      description: expects docs or files that do not currently exist
+    - key: TUTOR_ENV
+      title: Tutor environment required
+      description: needs a populated Tutor environment
+    - key: DOC_GAP
+      title: Documentation gap checks
+      description: depends on incomplete runbook or audit-document coverage
+    - key: CONFIG_DRIFT
+      title: Runtime or tenant config drift
+      description: detects runtime-versus-source tenant or config drift
+    - key: LIVE_GITHUB
+      title: Live GitHub settings required
+      description: needs GitHub API access to branch protection or other repo settings outside the worktree
+    - key: EXTERNAL_REPO
+      title: External repo checkout required
+      description: needs a sibling checkout or temporary clone of a shared repo outside this worktree
+  entries:
+    - script: scripts/qa/verify-build-provenance.sh
+      category: CI_ARTIFACT
+    - script: scripts/qa/test-verify-build-provenance.sh
+      category: CI_ARTIFACT
+    - script: scripts/qa/verify-openedx-custom-app-imports.sh
+      category: BUILT_IMAGE
+      note: "Validates every Open edX custom app package imports from the built OCI image before promotion proceeds."
+    - script: scripts/qa/verify-ops-reliability-streak.sh
+      category: CI_ARTIFACT
+      note: "B-027: reads latest ops-reliability-streak artifact and reports streak count vs threshold (informational)"
+    - script: scripts/qa/verify-release-bundle.sh
+      category: CI_ARTIFACT
+    - script: scripts/qa/test-verify-release-bundle.sh
+      category: CI_ARTIFACT
+    - script: scripts/qa/verify-control-plane-release-bundle-projection.sh
+      category: EXTERNAL_REPO
+      args: ["var/ci/release-bundle.json"]
+      note: checks the truthful PCP projection for the app-local release bundle against a sibling platform-control-plane checkout
+    - script: scripts/qa/verify-caddyfile-source-parity.sh
+      category: EXTERNAL_REPO
+      note: "bead mereka-lms-9o0o — asserts app-repo Caddyfile canonical-parses identical to the vendored copy in bbi-infrastructure. Fetches via sibling checkout, BBI_INFRA_REPO env, or gh api (requires GITHUB_TOKEN). Skips in CI without cross-repo token; canonical run is in the scheduled lane."
+    - script: scripts/qa/test-verify-control-plane-release-bundle-projection.sh
+      category: CI_ARTIFACT
+    - script: scripts/qa/verify-release-object.sh
+      category: CI_ARTIFACT
+    - script: scripts/qa/test-verify-release-object.sh
+      category: CI_ARTIFACT
+    - script: scripts/qa/verify-release-readiness.sh
+      category: CI_ARTIFACT
+      args: ["--dry-run"]
+    - script: scripts/qa/verify-mfe-runtime-contract.sh
+      category: BUILT_IMAGE
+      note: verifies compiled MFE bundles and tenant assets from a built image or deployed MFE base URL
+    - script: scripts/infra/verify-release-preflight.sh
+      category: CI_ARTIFACT
+    - script: scripts/infra/check-worktree-freshness.sh
+      category: WORKTREE_CONTEXT
+    - script: scripts/infra/check-pr-handoff-discipline.sh
+      category: WORKTREE_CONTEXT
+      note: local pre-handoff git discipline guard; run before switching tasks or requesting review
+    - script: scripts/infra/cleanup-stale-branches.sh
+      category: WORKTREE_CONTEXT
+      note: local branch/worktree cleanup; start with --dry-run before using --remote
+    - script: scripts/infra/recover-stale-build-tutor-images.sh
+      category: WORKTREE_CONTEXT
+      note: manual GitHub Actions recovery for stale build-tutor workflow_dispatch runs
+    - script: scripts/qa/ops-preflight.sh
+      category: WORKTREE_CONTEXT
+      note: operator preflight for br+tutor+gitops before combined manual ops
+    - script: scripts/qa/verify-branch-protection-contract.sh
+      category: LIVE_GITHUB
+      args: ["--live"]
+      note: audits live GitHub main-branch protection across mereka-lms, bbi-infrastructure, and platform-control-plane
+    - script: scripts/qa/verify-skill-frontmatter-integrity.sh
+      category: EXTERNAL_REPO
+      args: ["--profile", "shared"]
+      note: audits shared team-skills roots in addition to repo-local .factory/skills
+    - script: scripts/qa/verify-enterprise-sso-readiness.sh
+      category: LIVE_CLUSTER
+      args: ["--mode", "repo"]
+    - script: scripts/qa/verify-enterprise-observability.sh
+      category: LIVE_CLUSTER
+      note: checks live enterprise service metrics, logs, and ServiceMonitor deployment state from the active cluster; not a repo-only static contract
+    - script: scripts/qa/audit-authentik-policy-exceptions.sh
+      category: LIVE_CLUSTER
+      note: reads live Authentik deployment logs for policy_exception events during OIDC authorize flows; not a repo-only static contract
+    - script: scripts/qa/audit-db-exporter-telemetry.sh
+      category: LIVE_CLUSTER
+    - script: scripts/qa/audit-velero-alert-pipeline.sh
+      category: LIVE_CLUSTER
+    - script: scripts/infra/check-atlas-allowlist.sh
+      category: LIVE_CLUSTER
+    - script: scripts/infra/check-atlas-allowlist-vps.sh
+      category: LIVE_CLUSTER
+      note: checks Atlas allowlist against current VPS egress IP; can refresh Atlas profile first
+    - script: scripts/infra/check-cluster-status.sh
+      category: LIVE_CLUSTER
+      note: direct kubectl and local curl cluster probe for current namespace/services; runtime operator check, not offline static proof
+    - script: scripts/qa/audit-velero.sh
+      category: LIVE_CLUSTER
+      note: audits live Velero schedules, backups, snapshot posture, and app PVC coverage from the active cluster; runtime disaster-recovery proof, not offline static CI
+    - script: scripts/qa/audit-prometheus-phantom-metrics.py
+      category: LIVE_CLUSTER
+      args: ["--context", "rke2-prod", "--format", "check"]
+      note: >
+        audits PrometheusRule exprs against live `__name__` inventory to catch phantom
+        metric references (rules that can never fire). Runs offline in CI using the
+        checked-in snapshot at scripts/qa/phantom-audit/baseline-metric-names.json.
+        Origin: bead mereka-lms-33d8 / krco — Velero BSL alert silent for 1 week because
+        its expr referenced a non-existent metric.
+    - script: scripts/qa/verify-restore-drill.sh
+      category: LIVE_CLUSTER
+      args: ["--strict"]
+      note: verifies live Velero restore-drill PVC/MySQL proof and writes local DR evidence; runtime disaster-recovery proof, not offline static CI
+    - script: scripts/qa/verify-secrets-live-cluster.sh
+      category: LIVE_CLUSTER
+      note: validates ExternalSecrets, deployment envFrom wiring, and pod secret env vars against the active cluster; runtime secrets proof, not offline static CI
+    - script: scripts/infra/monitor-atlas-allowlist-vps.sh
+      category: LIVE_CLUSTER
+      note: cron-friendly drift monitor; writes status file and optionally sends webhook alert
+    - script: scripts/infra/setup-vps-atlas-allowlist-cron.sh
+      category: LIVE_CLUSTER
+      note: installs the VPS cron entry for the Atlas allowlist drift monitor and replaces legacy Atlas cron lines
+    - script: scripts/qa/audit-atlas-allowlist-monitor.sh
+      category: LIVE_CLUSTER
+      note: audits VPS Atlas allowlist monitor wiring, freshness, and optional webhook posture
+    - script: scripts/infra/ensure-atlas-allowlist-vps.sh
+      category: LIVE_CLUSTER
+      note: mutates Atlas allowlist for current VPS egress IP and refreshes Atlas profile from Infisical by default; no dry-run support
+    - script: scripts/infra/ensure-atlas-allowlist-gke-nodes.sh
+      category: LIVE_CLUSTER
+      note: mutates Atlas allowlist for current GKE node external IPs; supports --dry-run for planned changes
+    - script: scripts/infra/validate-telemetry-connectivity.sh
+      category: LIVE_CLUSTER
+    - script: scripts/qa/verify-grafana-runtime-readiness.sh
+      category: LIVE_CLUSTER
+    - script: scripts/qa/verify-observability-loki-deployment.sh
+      category: LIVE_CLUSTER
+      note: verifies live Promtail DaemonSet health and scrape posture from the active cluster; not a repo-only static contract
+    - script: scripts/qa/verify-observability-loki-labels.sh
+      category: LIVE_CLUSTER
+      note: inspects live Promtail configuration and cluster discovery to validate Loki label posture; not a repo-only static contract
+    - script: scripts/qa/verify-observability-retention.sh
+      category: LIVE_CLUSTER
+      note: reads live Loki, Tempo, and Prometheus runtime retention settings from the active cluster; not a repo-only static contract
+    - script: scripts/qa/verify-observability-prometheusrules.sh
+      category: LIVE_CLUSTER
+      note: checks PrometheusRule CRDs, deployed rule objects, and live Prometheus rule loading from the active cluster
+    - script: scripts/qa/verify-observability-servicemonitors.sh
+      category: LIVE_CLUSTER
+      note: checks ServiceMonitor CRDs, deployed ServiceMonitor objects, and live Prometheus target discovery from the active cluster
+    - script: scripts/qa/verify-observability-tracing.sh
+      category: LIVE_CLUSTER
+      note: mixes repo tracing manifests with live Tempo and cluster readiness checks; runtime contract, not offline static proof
+    - script: scripts/qa/verify-enterprise-service-deployment.sh
+      category: LIVE_CLUSTER
+    - script: scripts/qa/verify-enterprise-frontend-live-contract.sh
+      category: LIVE_CLUSTER
+    - script: scripts/qa/verify-tenant-visual-contract.sh
+      category: LIVE_APP
+    - script: scripts/qa/verify-platform-middleware.sh
+      category: LIVE_APP
+    - script: scripts/qa/verify-studio-sso-flow.sh
+      category: LIVE_APP
+    - script: scripts/qa/verify-studio-isolation.sh
+      category: LIVE_APP
+    - script: scripts/qa/verify-preview-redirect.sh
+      category: LIVE_APP
+    - script: scripts/qa/verify-certificate-issuance.sh
+      category: DATA_FILE
+    - script: scripts/qa/verify-cross-system-identity.sh
+      category: DATA_FILE
+    - script: scripts/qa/verify-mux-upload-completeness.sh
+      category: DATA_FILE
+    - script: scripts/qa/verify-migration-completion-plan.sh
+      category: DATA_FILE
+    - script: scripts/qa/verify-superset-runbook.sh
+      category: STALE_EXPECT
+    - script: scripts/qa/verify-selector-hardening.sh
+      category: STALE_EXPECT
+    - script: scripts/qa/verify-selector-to-slot-migration.sh
+      category: STALE_EXPECT
+    - script: scripts/qa/verify-org-role-ownership.sh
+      category: LIVE_CLUSTER
+    - script: scripts/qa/verify-enterprise-secrets.sh
+      category: LIVE_CLUSTER
+    - script: scripts/qa/verify-enterprise-tenant-isolation.sh
+      category: LIVE_CLUSTER
+    - script: scripts/qa/verify-enterprise-access-subsidy.sh
+      category: LIVE_CLUSTER
+    - script: scripts/qa/verify-enterprise-catalog.sh
+      category: LIVE_CLUSTER
+    - script: scripts/qa/verify-enterprise-license-management.sh
+      category: LIVE_CLUSTER
+    - script: scripts/qa/verify-content-libraries-v2-enterprise.sh
+      category: LIVE_CLUSTER
+    - script: scripts/tenants/verify-prod-runtime-proof.sh
+      category: LIVE_CLUSTER
+      note: active-production runtime proof; successor verifier for the parked-state prod gate
+    - script: scripts/tenants/bootstrap-enterprise-service-deps.sh
+      category: LIVE_CLUSTER
+      note: idempotent manual bootstrap; use --dry-run first
+    - script: scripts/qa/verify-oidc-provider-configs.sh
+      category: LIVE_CLUSTER
+    - script: scripts/qa/verify-oidc-user-password-state.sh
+      category: LIVE_CLUSTER
+    - script: scripts/qa/audit-enterprise-capacity-pressure.sh
+      category: LIVE_CLUSTER
+    - script: scripts/qa/verify-public-branding.sh
+      category: LIVE_APP
+    - script: scripts/qa/audit-branding-surfaces.sh
+      category: LIVE_APP
+      note: probes live LMS, MFE, Studio, forum, ecommerce, and credentials branding surfaces over HTTPS
+    - script: scripts/qa/verify-studio-authoring-branding.sh
+      category: LIVE_APP
+    - script: scripts/qa/smoke-authenticated.sh
+      category: LIVE_APP
+      note: requires SSO_USERNAME and SSO_PASSWORD for live authenticated smoke
+    - script: scripts/qa/public-health-check.sh
+      category: LIVE_APP
+      note: public endpoint smoke; optional kubectl diagnostics for dev forum failures
+    - script: scripts/qa/verify-dev-visual-correctness.sh
+      category: LIVE_CLUSTER
+      note: optional browser layer
+    - script: scripts/qa/run-mfe-slot-gates.sh
+      category: LIVE_APP
+    - script: scripts/qa/run-tenant-branding-qa.sh
+      category: LIVE_APP
+    - script: scripts/qa/verify-tutor-multisite-domains.sh
+      category: TUTOR_ENV
+    - script: scripts/qa/verify-tutor-patches.sh
+      category: TUTOR_ENV
+      note: stable QA/CI entrypoint that delegates to scripts/infra/verify-tutor-config.sh
+    - script: scripts/infra/verify-tutor-config.sh
+      category: TUTOR_ENV
+      note: canonical rendered Tutor verifier for source-to-render patch authority
+    - script: scripts/qa/verify-local-runtime-readiness.sh
+      category: TUTOR_ENV
+      note: initialized local Tutor runtime verifier for LMS, Discovery, proof identity, and optional catalog data
+    - script: scripts/qa/verify-deployment-lanes.sh
+      category: LIVE_CLUSTER
+    - script: scripts/qa/verify-service-endpoints.sh
+      category: LIVE_CLUSTER
+      note: live kubectl endpoint probe; belongs in runtime inventory, not offline static CI
+    - script: scripts/qa/verify-prod-parked-state.sh
+      category: LIVE_CLUSTER
+      note: validates the parked production zero-replica profile against the live cluster
+    - script: scripts/qa/verify-pii-inventory.sh
+      category: DOC_GAP
+    - script: scripts/qa/verify-pr-handoff-guardrails.sh
+      category: DOC_GAP
+    - script: scripts/qa/verify-paragon-runtime.sh
+      category: LIVE_APP
+      note: visual-regression prereqs
+    - script: scripts/qa/verify-secret-inventory.sh
+      category: LIVE_CLUSTER
+      note: needs gcloud
+    - script: scripts/qa/verify-observability-pii-filtering.sh
+      category: LIVE_CLUSTER
+      note: uses kubectl logs to sample pod output for PII; moved from static inventory
+    - script: scripts/qa/verify-realized-image-identity.sh
+      category: LIVE_CLUSTER
+      note: compares live pod image digests against release object (INV-002 gate)
+    - script: scripts/qa/verify-tenant-contract-alignment.sh
+      category: CONFIG_DRIFT
+    - script: scripts/qa/verify-tenant-branding-runtime.sh
+      category: CONFIG_DRIFT
+      note: live tenant-domain branding probe; detects runtime-versus-source branding drift on active public LMS surfaces
+    - script: scripts/qa/verify-tenant-override-schema.sh
+      category: CONFIG_DRIFT
+    - script: scripts/qa/verify-a11y-authenticated-routes.sh
+      category: DOC_GAP
+      note: runbook sections
+    - script: scripts/qa/verify-documentation-standards.sh
+      category: DOC_GAP
+      note: runbook metadata
+    - script: scripts/qa/verify-footer-variant-matrix.sh
+      category: DOC_GAP
+      note: variant guard
+    - script: scripts/qa/verify-paragon-theme-urls.sh
+      category: DOC_GAP
+      note: CSS content-type
+    - script: scripts/acceptance/runtime-routing.sh
+      category: LIVE_APP
+      note: canonical lane wrapper for tenant LMS/apps/studio/footer runtime acceptance
+    - script: scripts/acceptance/identity-session.sh
+      category: LIVE_APP
+      note: canonical lane wrapper for tenant auth redirect, cookie domain, and Studio SSO acceptance
+    - script: scripts/acceptance/tenant-branding.sh
+      category: LIVE_APP
+      note: canonical lane wrapper for tenant visual identity and branding acceptance
+    - script: scripts/acceptance/generate_runtime_routing_matrix.py
+      category: WORKTREE_CONTEXT
+      note: generates the runtime-routing contract from tenant-registry.yaml
+    - script: scripts/release/generate_truth_ledger.py
+      category: WORKTREE_CONTEXT
+      note: joins runtime-routing proof with repo, release, infra, Argo, and runtime truths
+    - script: scripts/release/generate_release_object.py
+      category: WORKTREE_CONTEXT
+      note: derives the canonical release object from the signed release bundle
+    - script: scripts/runner/buildx-cleanup.sh
+      category: LIVE_CLUSTER
+      note: prunes stale buildx_buildkit containers and unused orphan buildx_buildkit_*_state volumes from the fastlane VPS runner; supports --dry-run and --max-keep; defers while docker build/buildx build/bake/pull or buildctl build is active; never removes the default builder or mounted volumes; install at /opt/runner/ on the fastlane host
+    - script: scripts/runner/buildx-monitor.sh
+      category: LIVE_CLUSTER
+      note: health check for the fastlane VPS runner buildx estate; checks docker daemon, socket permissions, and builder container count; exits 0/1/2
+    - script: scripts/ci/emit-build-metrics.sh
+      category: CI_ARTIFACT
+      note: parses buildx metadata JSON and build log for cache-source facts, export success, layer reuse counts, and build duration; writes build-metrics-<image-family>.json artifact (bead jj97.5)
+    - script: scripts/ci/summarize-build-cache-health.sh
+      category: CI_ARTIFACT
+      note: summarizes build-metrics-<image-family>.json into truthful Build Tutor Images cache-health output; avoids stale command-string heuristics
+    - script: scripts/ops/rc-check.sh
+      category: LIVE_CLUSTER
+      note: "checks all 9 ✅-auto rows from RC_CHECKLIST.md: Build Tutor Images, bbi-infra promo PR, Argo sync, pod digests, bundle hash, MEREKA_PLATFORM_ADMIN_EMAILS, Post-Deploy E2E, br doctor, admin-parity.sh; gracefully SKIPs rows that need kubectl/GITHUB_TOKEN when running offline"
+
+    # ── Bead mereka-lms-fyu6: orphan operational scripts (registered 2026-04-20) ─
+    - script: scripts/ops/park-prod.sh
+      category: LIVE_CLUSTER
+      note: scales GKE prod stateless workloads to 0 (warm-park mode); supports --dry-run and Velero backup validation
+    - script: scripts/ops/unpark-prod.sh
+      category: LIVE_CLUSTER
+      note: reverses warm-park mode via GitOps commit to bbi-infrastructure + ArgoCD reconcile; supports --dry-run
+    - script: scripts/ops/generate-sla-report.sh
+      category: CI_ARTIFACT
+      note: generates a monthly Markdown SLA report from Prometheus metrics; requires Prometheus access
+    - script: scripts/analytics/delete-user-events.sh
+      category: LIVE_CLUSTER
+      note: deletes ClickHouse analytics events for a user (GDPR right to erasure); supports --dry-run
+    - script: scripts/analytics/openedx-export-enrollments.sh
+      category: LIVE_CLUSTER
+      note: exports enrollment CSV from Open edX via tutor local run lms
+    - script: scripts/analytics/verify-user-deletion.sh
+      category: LIVE_CLUSTER
+      note: verifies that a user's analytics data has been deleted from ClickHouse after GDPR erasure
+    - script: scripts/migrations/kajabi/export.sh
+      category: DATA_FILE
+      note: verifies Kajabi export infrastructure and readiness (read-only); requires export data files
+    - script: scripts/migrations/kajabi/resilient_import.sh
+      category: DATA_FILE
+      note: batch-imports Kajabi data into Open edX with retry logic and progress state
+    - script: scripts/migrations/mct/export.sh
+      category: DATA_FILE
+      note: verifies MCT export infrastructure and readiness (read-only)
+    - script: scripts/migrations/mct/run_full_user_import.sh
+      category: LIVE_CLUSTER
+      note: runs MCT user import in batches with state tracking; requires live LMS pod
+    - script: scripts/migrations/mct/run_program_setup.sh
+      category: LIVE_CLUSTER
+      note: sets up MCT programs in Open edX Discovery service
+    - script: scripts/migrations/mct/run_validation.sh
+      category: DATA_FILE
+      note: validates MCT import results against export data
+    - script: scripts/migrations/mct/verify_mux_upload.sh
+      category: DATA_FILE
+      note: verifies Mux video upload completeness against MCT video mapping
+    - script: scripts/mobile/setup-ios-app.sh
+      category: LIVE_CLUSTER
+      note: one-time setup for the iOS mobile app (certificates, provisioning profiles)
+    - script: scripts/gen/update-openedx-hostnames-doc.sh
+      category: WORKTREE_CONTEXT
+      note: regenerates the Open edX hostnames documentation file from tenant-registry.yaml
+
+scripts:
+
+  # ── Release Orchestration ────────────────────────────────────────────────────
+
+  - path: scripts/infra/canonical-release.sh
+    owner: platform-team
+    purpose: >
+      Top-level release wrapper — enforces canonical path/branch/worktree,
+      checks image hash cache, and delegates to release-openedx-gitops.sh.
+      Double-confirmation tokens required for --apply and --push.
+    inputs:
+      - CONFIRM_CANONICAL_RELEASE=CANONICAL_RELEASE
+      - CONFIRM_PUSH_CANONICAL_RELEASE=PUSH_CANONICAL_RELEASE
+      - ALLOW_PROD_APPLY=1
+      - --openedx-tag TAG
+      - --mfe-tag TAG
+    outputs:
+      - stdout (release summary)
+    side_effects:
+      - Delegates git commit + push to release-openedx-gitops.sh
+      - Updates production kustomization.yaml image tags (via delegate)
+    dry_run: true  # --check-only and --dry-run flags available
+    lanes: [prod]
+    proof_command: "bash scripts/infra/canonical-release.sh --check-only"
+    criticality: release-blocking
+    entrypoint_role: release  # canonical-entrypoints.yaml workflow: release
+
+  - path: scripts/infra/release-openedx-gitops.sh
+    owner: platform-team
+    purpose: >
+      Core gitops release orchestrator — writes image tags into the
+      authoritative bbi-infrastructure production overlay (and, while the
+      DEPRECATED app-repo shadow overlay still exists, also to that overlay
+      for parity — Wave 9 pending retirement per bead mereka-lms-m0u5.9),
+      commits, pushes, triggers ArgoCD sync, runs runtime verification
+      guards, and optionally purges the frontend cache.
+    inputs:
+      - CONFIRM_RELEASE_OPENEDX_GITOPS=RELEASE_OPENEDX_GITOPS
+      - CONFIRM_PUSH_RELEASE_OPENEDX_GITOPS=PUSH_RELEASE_OPENEDX_GITOPS
+      - ALLOW_PROD_APPLY=1
+      - --openedx-tag TAG
+      - --mfe-tag TAG
+      - --openedx-digest sha256:...
+      - --mfe-digest sha256:...
+    outputs:
+      - bbi-infrastructure/apps/mereka-lms/overlays/prod/kustomization.yaml (authoritative, modified every release)
+      - deploy/k8s/overlays/production/kustomization.yaml (modified while present; absence-tolerant per PR #1897)
+      - stdout (ArgoCD sync status)
+    side_effects:
+      - Writes and git-commits production overlay image tags to bbi-infra (authoritative)
+      - Writes and git-commits to app-repo shadow overlay while present (skipped post-Wave-9)
+      - Pushes to origin main in both repos (with --push; app-repo push skipped if shadow absent)
+      - Triggers ArgoCD sync (live cluster mutation)
+      - Purges Cloudflare frontend cache (with --purge-frontend-cache)
+    dry_run: true  # --dry-run flag supported
+    lanes: [prod, staging]
+    proof_command: "bash scripts/infra/release-openedx-gitops.sh --dry-run --openedx-tag latest --mfe-tag latest 2>&1 | head -5"
+    criticality: release-blocking
+    entrypoint_role: promote  # canonical-entrypoints.yaml workflow: promote
+
+  - path: scripts/infra/create-release.sh
+    owner: platform-team
+    purpose: >
+      Creates a semver annotated git tag, generates a changelog from conventional
+      commits, and pushes the tag to origin (triggering the release.yml workflow).
+    inputs:
+      - "positional: VERSION (e.g. v1.2.0)"
+    outputs:
+      - stdout (tag + changelog summary)
+    side_effects:
+      - Creates annotated git tag
+      - Pushes tag to origin (triggers GitHub Actions release.yml)
+    dry_run: false
+    lanes: [prod]
+    proof_command: "bash scripts/infra/create-release.sh --help 2>&1 | head -3 || true"
+    criticality: release-blocking
+
+  # ── Lane Acceptance ────────────────────────────────────────────────────────
+
+  - path: scripts/acceptance/runtime-routing.sh
+    owner: platform-team
+    purpose: >
+      Canonical runtime-routing lane wrapper. Generates the tenant browser matrix,
+      runs the env runtime-proof script, and wraps the existing browser/runtime
+      oracles into one proof bundle.
+    inputs:
+      - --env production|staging|dev|profiles-dev|local
+      - --tenant slug (optional)
+      - --output-dir PATH (optional)
+      - --dry-run (optional)
+      - --skip-runtime-proof (optional)
+      - --skip-playwright (optional)
+      - --skip-studio-sso (optional)
+      - --with-footer (optional)
+      - --skip-footer (legacy compatibility alias; optional)
+    outputs:
+      - var/acceptance/runtime-routing/<env>/<timestamp>/summary.json
+      - var/acceptance/runtime-routing/<env>/<timestamp>/truth-ledger.json
+      - var/acceptance/runtime-routing/<env>/<timestamp>/browser-matrix.json
+      - per-tenant log files under the same proof bundle
+    side_effects:
+      - none in --dry-run
+      - reads live app endpoints and may read live cluster state via delegated runtime-proof scripts
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bin/accept runtime-routing --env dev --tenant biji-biji --dry-run"
+    criticality: release-supporting
+
+  - path: scripts/acceptance/identity-session.sh
+    owner: platform-team
+    purpose: >
+      Canonical identity-session lane wrapper. Verifies tenant cookie-domain,
+      LMS to authn redirect, and Studio SSO contract surfaces for one environment.
+    inputs:
+      - --env production|staging|dev
+      - --tenant slug (optional)
+      - --output-dir PATH (optional)
+      - --dry-run (optional)
+      - --skip-cookie-proof (optional)
+      - --skip-auth-redirect (optional)
+      - --skip-studio-sso (optional)
+    outputs:
+      - var/acceptance/identity-session/<env>/<timestamp>/summary.json
+      - var/acceptance/identity-session/<env>/<timestamp>/checks.tsv
+      - per-tenant log files under the same proof bundle
+    side_effects:
+      - none in --dry-run
+      - reads live LMS/authn endpoints and delegated SSO probes in execute mode
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bin/accept identity-session --env dev --tenant biji-biji --dry-run"
+    criticality: release-supporting
+
+  - path: scripts/acceptance/tenant-branding.sh
+    owner: platform-team
+    purpose: >
+      Canonical tenant-branding lane wrapper. Verifies the tenant visual contract
+      via verify-tenant-visual-contract.sh and emits a schema-valid proof bundle.
+    inputs:
+      - --env production|staging|dev
+      - --tenant slug (optional)
+      - --output-dir PATH (optional)
+      - --dry-run (optional)
+    outputs:
+      - var/acceptance/tenant-branding/<env>/<timestamp>/summary.json
+      - var/acceptance/tenant-branding/<env>/<timestamp>/checks.tsv
+      - var/acceptance/tenant-branding/<env>/<timestamp>/evidence/
+    side_effects:
+      - none in --dry-run
+      - reads live tenant LMS/authn/MFE surfaces in execute mode
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bin/accept tenant-branding --env dev --tenant biji-biji --dry-run"
+    criticality: release-supporting
+
+  - path: scripts/tenants/seed-prod-sites.sh
+    owner: platform-team
+    purpose: Idempotent seed/repair for Django Site + SiteConfiguration rows in production.
+    inputs: [--namespace, --dry-run]
+    outputs: [stdout JSON per tenant]
+    side_effects: [creates/updates Site and SiteConfiguration rows in production Django DB]
+    dry_run: true
+    lanes: [prod]
+    criticality: operational-dangerous
+  - path: scripts/acceptance/generate_runtime_routing_matrix.py
+    owner: platform-team
+    purpose: >
+      Generates the canonical runtime-routing browser contract from
+      deploy/k8s/tenancy/tenant-registry.yaml for one environment at a time.
+    inputs:
+      - --env production|staging|dev|profiles-dev|local
+      - --tenant slug (optional)
+      - --output PATH (optional)
+      - --stdout (optional)
+      - --check (optional)
+    outputs:
+      - generated/tenant-runtime/browser-matrix-<env>.json
+      - stdout path or JSON when requested
+    side_effects:
+      - writes generated tenant-runtime contract files in the repo
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "python3 scripts/acceptance/generate_runtime_routing_matrix.py --env dev --check"
+    criticality: informational
+
+  - path: scripts/release/generate_truth_ledger.py
+    owner: platform-team
+    purpose: >
+      Joins the runtime-routing proof bundle with app, release, infra, Argo,
+      and live runtime facts into one machine-readable truth ledger.
+    inputs:
+      - --summary-json PATH
+      - --output PATH (optional)
+      - --app-sha SHA (optional)
+      - --infra-commit-sha SHA (optional)
+      - --argo-app NAME (optional)
+      - --namespace NAME (optional)
+      - --release-object-json PATH (optional)
+      - --release-openedx-image IMAGE@DIGEST (optional)
+      - --release-mfe-image IMAGE@DIGEST (optional)
+      - --image-repo REPOSITORY (optional, repeatable)
+    outputs:
+      - var/acceptance/runtime-routing/<env>/<timestamp>/truth-ledger.json
+      - generated/truth-ledger/<lane>/<env>/<tenant-or-all>.json
+      - stdout path to the emitted ledger
+    side_effects:
+      - reads kubectl/Argo live state when the relevant options are provided or inferred
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "python3 scripts/release/generate_truth_ledger.py --summary-json /tmp/runtime-routing-summary.json --output /tmp/runtime-truth-ledger.json"
+    criticality: release-supporting
+
+  - path: scripts/release/generate_release_object.py
+    owner: platform-team
+    purpose: >
+      Derives the canonical release object from the signed release bundle and optional
+      build-provenance linkage. This is the app-repo promotion unit that later proof
+      and GitOps consumers should reference instead of hand-joining SHA, digest, and
+      contract facts.
+    inputs:
+      - --release-bundle-json PATH
+      - --output PATH
+      - --tenant-contract-path PATH (optional)
+      - --build-provenance-json PATH (optional)
+      - --proof-ref PATH (optional, repeatable)
+      - --release-id ID (optional)
+    outputs:
+      - JSON file at --output path
+    side_effects: none
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "python3 scripts/release/generate_release_object.py --release-bundle-json /tmp/release-bundle.json --output /tmp/release-object.json"
+    criticality: release-supporting
+
+  # ── Image Tag Management ─────────────────────────────────────────────────────
+
+  - path: scripts/infra/bump-image-tags.sh
+    owner: platform-team
+    status: DEPRECATED  # GCR/GKE relic — hard-fails unless ALLOW_DEPRECATED_BUMP_IMAGE_TAGS=1 (PR #1893)
+    deprecated_by: scripts/infra/release-openedx-gitops.sh
+    purpose: >
+      DEPRECATED — queried GCR Artifact Registry for latest tags and wrote
+      into the app-repo production Kustomize overlay. Both the registry
+      (now ghcr.io) and the overlay (Wave 9 pending retirement) have been
+      superseded. Use release-openedx-gitops.sh instead.
+    inputs:
+      - ALLOW_DEPRECATED_BUMP_IMAGE_TAGS=1  # required to run
+      - --apply (flag; default dry-run)
+      - --overlay PATH (optional)
+    outputs:
+      - stderr (deprecation notice + usage guidance)
+      - stdout (diff of current vs latest tags, only with override)
+      - deploy/k8s/overlays/production/kustomization.yaml (when --apply + override)
+    side_effects:
+      - Prints DEPRECATED error and exits 2 unless override set
+      - Modifies production overlay kustomization.yaml (only with --apply + override)
+    dry_run: true  # default mode is dry-run
+    lanes: [prod]
+    proof_command: "bash scripts/infra/bump-image-tags.sh 2>&1 | head -1"  # prints deprecation notice
+    criticality: release-blocking  # still in registry because canonical-entrypoints.yaml references it
+
+  - path: scripts/infra/resolve-image-digest.sh
+    owner: platform-team
+    purpose: >
+      Resolves an image tag to its sha256 digest via crane/skopeo. Used in CI
+      to pin mutable tags to immutable digests before writing to overlays.
+    inputs:
+      - --image-ref IMAGE[:TAG|@DIGEST]
+      - --output-key KEY (optional; writes to $GITHUB_OUTPUT)
+    outputs:
+      - stdout (sha256 digest)
+      - GITHUB_OUTPUT (when --output-key provided)
+    side_effects: none
+    dry_run: true  # read-only by nature
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/resolve-image-digest.sh --help"
+    criticality: release-blocking
+
+  - path: scripts/infra/sync-tutor-plugin-mirror.sh
+    owner: platform-team
+    purpose: >
+      Syncs the repo-owned Tutor plugin sources into the local Tutor plugin
+      mirror so render/build flows consume the current `_mereka_lms`,
+      `mereka_lms`, `mereka_lms_mfe_slots`, and legacy shim surfaces.
+    inputs:
+      - TUTOR_PLUGINS_DIR (optional override)
+    outputs:
+      - synced Tutor plugin mirror under the resolved plugin directory
+      - stdout summary
+    side_effects:
+      - mutates the local Tutor plugin mirror under the resolved plugin directory
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/sync-tutor-plugin-mirror.sh"
+    criticality: release-supporting
+
+  - path: scripts/infra/build-openedx-image.sh
+    owner: platform-team
+    purpose: >
+      Builds and pushes the rendered Tutor Open edX image directly from the
+      generated build context using buildx, preserving immutable tags plus the
+      governed cache strategy without depending on a daemon-loaded image.
+    inputs:
+      - --context-dir PATH
+      - --dockerfile PATH
+      - --image-repo REPO
+      - --primary-tag TAG
+      - --secondary-tag TAG
+      - --cache-ref IMAGE:TAG
+      - --mutable-tag TAG (optional)
+      - --local-defaults (optional; local rendered Tutor context authority)
+      - --skip-if-current (optional; local Docker output only)
+    outputs:
+      - pushed image tags in remote registry
+      - local Docker image tags when --output-mode docker or --local-defaults is used
+      - stdout/stderr build log
+      - exit code
+    side_effects:
+      - Pushes image tags to GHCR
+      - Regenerates stale local Tutor env with tutor-config-save.sh --env-only when --local-defaults is used
+      - Refreshes the local Open edX Tutor build context when --local-defaults is used
+      - Writes local Docker images and reuses the BuildKit worker cache when --output-mode docker or --local-defaults is used
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/build-openedx-image.sh --help"
+    criticality: release-blocking
+
+  - path: scripts/infra/build-mfe-image.sh
+    owner: platform-team
+    purpose: >
+      Builds and pushes the rendered Tutor MFE image directly from the
+      generated Tutor build context using buildx, preserving immutable tags
+      plus the governed cache strategy without depending on a daemon-loaded
+      image.
+    inputs:
+      - --context-dir PATH
+      - --dockerfile PATH
+      - --image-repo REPO
+      - --primary-tag TAG
+      - --secondary-tag TAG
+      - --cache-ref IMAGE:TAG
+      - --mutable-tag TAG (optional)
+      - --local-defaults (optional; local rendered Tutor context authority)
+      - --skip-if-current (optional; local Docker output only)
+    outputs:
+      - pushed image tags in remote registry
+      - local Docker image tags when --output-mode docker or --local-defaults is used
+      - stdout/stderr build log
+      - exit code
+    side_effects:
+      - Pushes image tags to GHCR
+      - Regenerates stale local Tutor env with tutor-config-save.sh --env-only when --local-defaults is used
+      - Refreshes the local MFE Tutor build context when --local-defaults is used
+      - Writes local Docker images and reuses the BuildKit worker cache when --output-mode docker or --local-defaults is used
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/build-mfe-image.sh --help"
+    criticality: release-blocking
+
+  - path: scripts/infra/buildx-local-builder.sh
+    owner: platform-team
+    purpose: >
+      Shared helper sourced by Tutor image build entrypoints to select or
+      create a docker-container buildx builder for local Docker output so
+      local builds reuse the persistent BuildKit worker cache without
+      client-side type=local cache dirs.
+    inputs:
+      - OUTPUT_MODE
+      - BUILDX_BUILDER (optional override)
+      - MEREKA_LOCAL_BUILDX_BUILDER (optional builder name)
+    outputs:
+      - appends --builder argument to BUILDX_BAKE_ARGS for local docker builds
+      - prints the selected local BuildKit worker-cache builder
+    side_effects:
+      - may create or bootstrap a local docker-container buildx builder
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash -n scripts/infra/buildx-local-builder.sh"
+    criticality: release-blocking
+
+  - path: scripts/infra/build-context-fingerprint.sh
+    owner: platform-team
+    purpose: >
+      Shared helper sourced by local Tutor image build and setup entrypoints to
+      compute deterministic rendered build-context fingerprints for image
+      freshness labels.
+    inputs:
+      - context directory path
+      - file path
+    outputs:
+      - sha256 fingerprint on stdout
+      - exit code
+    side_effects: none
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/test-build-context-fingerprint.sh"
+    criticality: release-blocking
+
+  - path: scripts/infra/build-image-freshness.sh
+    owner: platform-team
+    purpose: >
+      Shared helper sourced by local Tutor image build entrypoints to inspect
+      Docker image build-context labels before deciding whether a local image
+      rebuild is required.
+    inputs:
+      - image reference
+      - expected build-context sha256
+    outputs:
+      - exit code
+    side_effects: none
+    dry_run: true
+    lanes: [dev]
+    proof_command: "bash scripts/qa/test-build-image-freshness.sh"
+    criticality: release-blocking
+
+  - path: scripts/infra/install-cosign.sh
+    owner: platform-team
+    purpose: >
+      Canonical cosign bootstrap for CI and release workflows. Installs the
+      pinned cosign binary with checksum verification so workflows do not
+      duplicate ad hoc installer logic.
+    inputs:
+      - COSIGN_VERSION (optional; defaults to pinned release)
+      - COSIGN_SHA256 (optional; defaults to pinned checksum)
+      - INSTALL_DIR PATH (optional)
+      - DOWNLOAD_TIMEOUT SECONDS (optional)
+    outputs:
+      - installed cosign binary in the resolved writable install directory
+      - stdout (resolved version output)
+    side_effects:
+      - downloads the pinned cosign release artifact
+      - writes a cosign binary into the resolved install directory
+      - appends the install directory to GITHUB_PATH when available
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash -n scripts/infra/install-cosign.sh"
+    criticality: release-blocking
+
+  - path: scripts/infra/install-envsubst.sh
+    owner: platform-team
+    purpose: >
+      Canonical envsubst bootstrap for CI and release workflows. Reuses a real
+      envsubst binary when present and otherwise installs a deterministic local
+      wrapper so release-critical jobs do not depend on GitHub-hosted binaries.
+    inputs:
+      - INSTALL_DIR PATH (optional)
+    outputs:
+      - installed envsubst-compatible command in the resolved writable install directory
+    side_effects:
+      - writes an envsubst wrapper into the resolved install directory when envsubst is absent
+      - appends the install directory to GITHUB_PATH when available
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash -n scripts/infra/install-envsubst.sh"
+    criticality: release-supporting
+
+  - path: scripts/infra/install-trivy.sh
+    owner: platform-team
+    purpose: >
+      Canonical Trivy bootstrap for CI scan workflows. Installs the pinned
+      Trivy binary with checksum verification, preferring authenticated GitHub
+      release downloads before bounded curl fallback and a pinned container
+      wrapper fallback when release assets are unavailable.
+    inputs:
+      - TRIVY_VERSION (optional; defaults to pinned release)
+      - TRIVY_SHA256 (optional; defaults to pinned checksum)
+      - TRIVY_GITHUB_REPO owner/repo (optional)
+      - TRIVY_CONTAINER_IMAGE reference (optional)
+      - INSTALL_DIR PATH (optional)
+      - DOWNLOAD_TIMEOUT SECONDS (optional)
+      - DOWNLOAD_ATTEMPT_TIMEOUT SECONDS (optional)
+      - CURL_CONNECT_TIMEOUT SECONDS (optional)
+      - CURL_MAX_TIME SECONDS (optional)
+      - CURL_RETRIES COUNT (optional)
+      - GH_TOKEN or GITHUB_TOKEN (optional; enables authenticated download path)
+    outputs:
+      - installed trivy binary or container-backed wrapper in the resolved writable install directory
+      - stdout (resolved version output)
+    side_effects:
+      - downloads the pinned Trivy release artifact when available
+      - or writes a container-backed trivy wrapper into the resolved install directory
+      - appends the install directory to GITHUB_PATH when available
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash -n scripts/infra/install-trivy.sh"
+    criticality: release-supporting
+
+  - path: scripts/infra/install-syft.sh
+    owner: platform-team
+    purpose: >
+      Canonical Syft bootstrap for CI SBOM workflows. Installs the pinned
+      Syft release through a checksum-verified tagged installer and passes the
+      requested release tag explicitly so scan/SBOM jobs do not drift to latest.
+    inputs:
+      - SYFT_VERSION (optional; defaults to pinned release)
+      - SYFT_INSTALL_SHA (optional; defaults to pinned installer checksum)
+      - SYFT_INSTALL_URL (optional; defaults to the tagged upstream installer)
+      - INSTALL_DIR PATH (optional)
+      - CURL_CONNECT_TIMEOUT SECONDS (optional)
+      - CURL_MAX_TIME SECONDS (optional)
+      - CURL_RETRIES COUNT (optional)
+    outputs:
+      - installed syft binary in the resolved writable install directory
+      - stdout (resolved version output)
+    side_effects:
+      - downloads the pinned Syft installer and release artifact
+      - appends the install directory to GITHUB_PATH when available
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash -n scripts/infra/install-syft.sh"
+    criticality: release-supporting
+
+  - path: scripts/qa/test-install-envsubst-fallback.sh
+    owner: platform-team
+    purpose: >
+      Proves install-envsubst.sh can install a deterministic local wrapper when
+      no envsubst binary is present on the runner.
+    inputs:
+      - none; uses isolated temp directories and a fake PATH
+    outputs:
+      - stdout confirmation that the fallback wrapper installed successfully
+    side_effects:
+      - creates and removes temporary test fixtures under mktemp directories
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/test-install-envsubst-fallback.sh"
+    criticality: release-supporting
+
+  - path: scripts/qa/test-install-trivy-fallback.sh
+    owner: platform-team
+    purpose: >
+      Proves install-trivy.sh can fall back to a pinned container-backed wrapper
+      when GitHub release asset downloads are unavailable.
+    inputs:
+      - none; uses isolated temp directories and fake gh/curl/docker stubs
+    outputs:
+      - stdout confirmation that the fallback wrapper installed successfully
+    side_effects:
+      - creates and removes temporary test fixtures under mktemp directories
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/test-install-trivy-fallback.sh"
+    criticality: release-supporting
+
+  - path: scripts/qa/test-install-syft-helper.sh
+    owner: platform-team
+    purpose: >
+      Proves install-syft.sh passes the requested Syft release tag into the
+      checksum-verified installer instead of allowing the upstream script to
+      resolve latest.
+    inputs:
+      - none; uses isolated temp directories and fake curl/install stubs
+    outputs:
+      - stdout confirmation that the requested release tag was installed
+    side_effects:
+      - creates and removes temporary test fixtures under mktemp directories
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/test-install-syft-helper.sh"
+    criticality: release-supporting
+
+  - path: scripts/qa/test-verify-post-deploy-smoke.sh
+    owner: platform-team
+    purpose: >
+      Proves verify-post-deploy-smoke.sh accepts the current anonymous Studio
+      redirect contract while still requiring the rest of the prod smoke matrix
+      to stay green.
+    inputs:
+      - none; uses isolated temp directories and fake curl/kubectl stubs
+    outputs:
+      - stdout confirmation that the prod smoke verifier accepts Studio HTTP 302
+    side_effects:
+      - creates and removes temporary test fixtures under mktemp directories
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/test-verify-post-deploy-smoke.sh"
+    criticality: release-supporting
+
+  - path: scripts/infra/sync-gitops-prod-image-tags.sh
+    owner: platform-team
+    purpose: >
+      Syncs production image tags from the app-repo overlay to the infra-repo
+      overlay. Dry-run by default; exits non-zero when drift exists.
+    inputs:
+      - --infra-repo PATH (optional; auto-detect)
+      - --source-overlay PATH
+      - --dest-overlay PATH
+      - --apply (flag; default dry-run)
+    outputs:
+      - stdout (drift report)
+      - infra overlay kustomization.yaml (when --apply)
+    side_effects:
+      - Modifies infra-repo overlay kustomization.yaml (only with --apply)
+    dry_run: true  # default mode is dry-run
+    lanes: [prod]
+    proof_command: "bash scripts/infra/sync-gitops-prod-image-tags.sh --help"
+    criticality: release-blocking
+
+  # ── Release Evidence & Promotion ─────────────────────────────────────────────
+
+  - path: scripts/infra/generate-release-bundle.sh
+    owner: platform-team
+    purpose: >
+      Generates a structured JSON release bundle recording commit SHA, image
+      digests, workflow run ID, and target environment. Consumed by promotion
+      record and evidence pack.
+    inputs:
+      - --output PATH
+      - --repo owner/repo
+      - --commit-sha 40-hex
+      - --workflow PATH
+      - --run-id ID
+      - --run-attempt N
+      - --target-environment dev|nonprod|staging|production
+      - --openedx-image IMAGE
+      - --openedx-digest sha256:...
+      - --mfe-image IMAGE
+      - --mfe-digest sha256:...
+    outputs:
+      - JSON file at --output path
+    side_effects: none
+    dry_run: true  # generates a file only; no cluster/registry mutation
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/generate-release-bundle.sh --help"
+    criticality: release-supporting
+
+  - path: scripts/release/render_control_plane_release_bundle_projection.py
+    owner: platform-team
+    purpose: >
+      Renders a truthful, partial PCP-facing projection from the app-local
+      release bundle without claiming full canonical release-bundle contract
+      satisfaction. Used to show which PCP fields are already derivable at build
+      time and which remain unresolved until promotion/realization.
+    inputs:
+      - --release-bundle-json PATH
+      - --output PATH
+      - --platform-control-plane-root PATH (optional; otherwise discovers sibling checkout)
+    outputs:
+      - JSON file at --output path
+    side_effects: none
+    dry_run: true  # generates a file only
+    lanes: [dev, staging, prod]
+    proof_command: "python3 scripts/release/render_control_plane_release_bundle_projection.py --help"
+    criticality: release-supporting
+
+  - path: scripts/infra/generate-build-provenance.sh
+    owner: platform-team
+    purpose: >
+      Generates a structured JSON build provenance record linking a release bundle to
+      a gitops commit. Used to create an auditable promotion chain.
+    inputs:
+      - --output PATH
+      - --repository owner/repo
+      - --commit-sha 40-hex
+      - --target-environment dev|nonprod|staging|production
+      - --openedx-digest sha256:...
+      - --mfe-digest sha256:...
+      - --release-bundle-id ID
+      - --gitops-repo owner/repo
+      - --gitops-commit 40-hex
+    outputs:
+      - JSON file at --output path
+    side_effects: none
+    dry_run: true  # generates a file only
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/generate-build-provenance.sh --help"
+    criticality: release-supporting
+
+  - path: scripts/infra/assemble-release-evidence.sh
+    owner: platform-team
+    purpose: >
+      Assembles a release evidence bundle for a given git SHA or tag into
+      var/release-evidence/<sha>/. Captures image tags, ArgoCD status, and
+      branding gate outputs.
+    inputs:
+      - "positional: SHA or tag (default: HEAD)"
+    outputs:
+      - var/release-evidence/<sha>/ directory
+    side_effects: none
+    dry_run: true  # read-only; writes to var/ (gitignored)
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/assemble-release-evidence.sh --help 2>&1 || true"
+    criticality: release-supporting
+
+  # ── Deployment & Kustomize ───────────────────────────────────────────────────
+
+  - path: scripts/infra/apply-kind-overlay.sh
+    owner: platform-team
+    purpose: >
+      Loads the Open edX image into kind nodes and applies the local Kustomize
+      overlay to the dev cluster (kind-dev context).
+    inputs:
+      - KUBE_CONTEXT (default: kind-dev)
+      - CLUSTER (default: dev)
+      - NAMESPACE (default: mereka-lms)
+    outputs:
+      - stdout (kubectl apply output)
+    side_effects:
+      - Mutates kind cluster (kubectl apply)
+    dry_run: false
+    lanes: [dev]
+    proof_command: "bash scripts/infra/apply-kind-overlay.sh --help 2>&1 || true"
+    criticality: release-supporting
+    entrypoint_role: deploy-local-kind  # canonical-entrypoints.yaml workflow: deploy-local-kind
+
+  - path: scripts/infra/post-k8s-apply-hook.sh
+    owner: platform-team
+    purpose: >
+      Post-apply hook that runs verify-deployment.sh after kubectl apply.
+      Called automatically by release orchestration.
+    inputs:
+      - NAMESPACE (default: mereka-lms)
+    outputs:
+      - stdout (deployment verification result)
+    side_effects: none  # read-only verification
+    dry_run: true  # read-only by nature
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/post-k8s-apply-hook.sh 2>&1 || true"
+    criticality: release-supporting
+
+  # ── Secrets Management ───────────────────────────────────────────────────────
+
+  - path: scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh
+    owner: platform-team
+    purpose: >
+      Syncs Infisical secrets to GCP Secret Manager so ExternalSecrets can
+      pull them. Create-if-missing by default; overwrites only Stripe keys
+      unless OVERWRITE_ALLOWED_REGEX is extended. Never prints secret values.
+    inputs:
+      - GCP_PROJECT_ID (default: bbi-k8)
+      - INFISICAL_DOMAIN
+      - INFISICAL_PATH
+      - ALLOW_OVERWRITE_MONGODB_KEYS=1 (opt-in)
+      - OVERWRITE_ALLOWED_REGEX (extend allowlist)
+    outputs:
+      - stdout (created/updated secret names)
+    side_effects:
+      - Creates or updates GCP Secret Manager secret versions
+      - Must NOT be run without confirmed Infisical → GCP SM drift
+    dry_run: false
+    lanes: [prod]
+    proof_command: "bash scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh --help 2>&1 || true"
+    criticality: release-blocking
+
+  - path: scripts/infra/infisical-sync-mereka-lms.sh
+    owner: platform-team
+    purpose: >
+      Syncs Infisical secrets from source path to destination path within
+      the same Infisical project. Used to establish per-app secret namespacing.
+    inputs:
+      - "positional: ENVIRONMENT (default: prod)"
+      - SRC_PATH (default: /)
+      - DEST_PATH (default: /k8s/mereka-lms)
+      - INFISICAL_DOMAIN
+      - INFISICAL_PROJECT_ID
+    outputs:
+      - stdout (sync result)
+    side_effects:
+      - Writes secrets to Infisical (source of truth)
+    dry_run: false
+    lanes: [prod, staging]
+    proof_command: "bash scripts/infra/infisical-sync-mereka-lms.sh --help 2>&1 || true"
+    criticality: release-blocking
+
+  - path: scripts/infra/infisical-validate-mereka-lms.sh
+    owner: platform-team
+    purpose: >
+      Validates that all secrets listed in external-secrets.yaml exist in
+      Infisical with non-empty values. Read-only; exits non-zero on any gap.
+    inputs:
+      - INFISICAL_DOMAIN
+      - INFISICAL_ENV (default: prod)
+      - INFISICAL_PATH (default: /k8s/mereka-lms)
+      - STRICT=1 (promote warnings to errors)
+    outputs:
+      - stdout (pass/fail per secret key)
+    side_effects: none
+    dry_run: true  # read-only by nature
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/infisical-validate-mereka-lms.sh --help 2>&1 || true"
+    criticality: release-blocking
+
+  - path: scripts/infra/infisical-audit-mereka-lms.sh
+    owner: platform-team
+    purpose: >
+      Audits Infisical secrets for stale, orphaned, or misconfigured entries
+      relative to what external-secrets.yaml expects. Informational only.
+    inputs:
+      - INFISICAL_DOMAIN
+      - INFISICAL_ENV
+    outputs:
+      - stdout (audit findings)
+    side_effects: none
+    dry_run: true  # read-only
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/infisical-audit-mereka-lms.sh --help 2>&1 || true"
+    criticality: informational
+
+  - path: scripts/infra/preflight-checkouts.sh
+    owner: platform-team
+    purpose: >
+      Prints live branch/HEAD/origin-main/dirty/fetch-age state for the
+      canonical VPS checkouts (mereka-lms, bbi-infrastructure). Observability
+      helper so operators and agents can see which truth they are looking at
+      at session start (bead mereka-lms-p74m).
+    inputs:
+      - CHECKOUT_ROOT (default: $HOME/projects/k8s)
+    outputs:
+      - stdout (per-checkout state report)
+    side_effects: none
+    dry_run: true  # read-only always
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/preflight-checkouts.sh --quiet 2>&1 | head -4"
+    criticality: informational
+
+  - path: scripts/infra/bootstrap-kind-secrets.sh
+    owner: platform-team
+    purpose: >
+      Creates the GCP service account key K8s secret in the kind dev cluster
+      so ExternalSecrets can authenticate to GCP Secret Manager.
+    inputs:
+      - KUBE_CONTEXT (default: kind-dev)
+      - SECRET_NAMESPACE (default: external-secrets)
+      - PROJECT_ID (default: bbi-k8)
+      - SA_EMAIL
+      - GCP_SA_KEY_FILE (optional; auto-generated if absent)
+    outputs:
+      - stdout (secret creation result)
+    side_effects:
+      - Creates K8s secret in kind cluster
+      - Optionally generates a GCP service account key (IAM mutation)
+    dry_run: false
+    lanes: [dev]
+    proof_command: "bash scripts/infra/bootstrap-kind-secrets.sh --help 2>&1 || true"
+    criticality: release-supporting
+
+  # ── Release Gate ─────────────────────────────────────────────────────────────
+
+  - path: scripts/release/release-gate.sh
+    owner: platform-team
+    purpose: >
+      Canonical release verification entrypoint. Validates release structure,
+      optional release identity binding, and optional severity-aware CI baseline
+      debt alongside the deployment contract gates.
+    inputs:
+      - --overlay PATH (default: deploy/k8s/base)
+      - --skip-cluster (skip live cluster checks)
+      - --release-object-json PATH (optional)
+      - --ci-failure-baseline-json PATH (optional)
+    outputs:
+      - stdout (PASS/SKIP/FAIL per gate)
+    side_effects: none
+    dry_run: true  # read-only by nature
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/release/release-gate.sh --skip-cluster 2>&1 | tail -10"
+    criticality: release-blocking
+    entrypoint_role: deploy  # canonical-entrypoints.yaml workflow: deploy
+
+  # ── Benchmark & Build Proof Inventory ──────────────────────────────────────
+
+  - path: scripts/bench/measure-bake-target.sh
+    owner: platform-team
+    purpose: >
+      Local benchmark harness for Bake targets. Emits log and metadata artifacts
+      under `.benchmarks/bake/` with benchmark-class, rendered-owner lineage,
+      and output-mode fields for target-level build analysis.
+    inputs:
+      - repo root
+      - bake target
+      - optional label
+      - BENCHMARK_CLASS (optional override)
+      - TUTOR_PLUGINS_DIR (optional override)
+    outputs:
+      - ".benchmarks/bake/*.log"
+      - ".benchmarks/bake/*.meta"
+      - stdout summary
+      - exit code
+    side_effects:
+      - local Docker/Buildx build activity
+      - writes benchmark artifacts under `.benchmarks/bake`
+    dry_run: false
+    lanes: [dev]
+    proof_command: "bash scripts/bench/measure-bake-target.sh --help 2>&1 || true"
+    criticality: informational
+
+  # ── Quality Gates & Verification ─────────────────────────────────────────────
+
+  - path: scripts/qa/verify-baseline-truth-control.sh
+    owner: platform-team
+    purpose: >
+      CI gate for baseline debt severity. Verifies zero high-severity
+      active failures, all entries have required fields, and summary
+      counts match actual entries.
+    inputs: []
+    outputs:
+      - stdout (PASS/FAIL per check)
+    side_effects: none
+    dry_run: true  # read-only by nature
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/verify-baseline-truth-control.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/verify-deployment-contract.sh
+    owner: platform-team
+    purpose: >
+      Validates contract.json against the actual base kustomization output.
+      Ensures the deployment contract bundle (contract.json, VERSION, CONTRACTS.md)
+      is present and consistent with the rendered manifests.
+    inputs: []
+    outputs:
+      - stdout (PASS/FAIL per check)
+    side_effects: none
+    dry_run: true  # read-only by nature
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/verify-deployment-contract.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/verify-k8s-images.sh
+    owner: platform-team
+    purpose: >
+      Verifies that production Kustomize overlays use deterministic immutable
+      image tags (SHA-based or digest-pinned). Rejects :latest and other mutable
+      tags in the production overlay. RELAXED_MODE=1 disables strict mode.
+    inputs:
+      - RELAXED_MODE=1 (temporary escape hatch; never set in CI)
+      - PROD_KUSTOMIZATION (override path)
+      - BASE_KUSTOMIZATION (override path)
+      - --check no-latest|registry-path (run specific check only)
+    outputs:
+      - stdout (PASS/FAIL per image)
+    side_effects: none
+    dry_run: true  # read-only by nature
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/verify-k8s-images.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/verify-kustomize-render.sh
+    owner: platform-team
+    purpose: >
+      Renders all Kustomize overlays and verifies that resources are in the
+      mereka-lms namespace and expected resource types are present.
+    inputs:
+      - --overlay local|production (optional; default: both)
+    outputs:
+      - stdout (PASS/FAIL per overlay)
+    side_effects: none
+    dry_run: true  # read-only by nature
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/verify-kustomize-render.sh 2>&1 | head -20"
+    criticality: release-blocking
+
+  - path: scripts/qa/no_private_key_material.sh
+    owner: platform-team
+    purpose: >
+      Standalone deploy-tree hygiene gate that rejects committed private-key
+      material under the supplied deploy package scope.
+    inputs:
+      - SCOPE_DIR path (optional positional; defaults to deploy/k8s)
+    outputs:
+      - stdout (matching file:line findings or PASS summary)
+    side_effects: none
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/no_private_key_material.sh deploy/k8s"
+    criticality: release-supporting
+
+  - path: scripts/qa/no_generated_python_artifacts.sh
+    owner: platform-team
+    purpose: >
+      Standalone deploy-tree hygiene gate that rejects committed Python build
+      artifacts such as __pycache__ directories and .pyc files.
+    inputs:
+      - SCOPE_DIR path (optional positional; defaults to deploy/k8s)
+    outputs:
+      - stdout (matching artifact paths or PASS summary)
+    side_effects: none
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/no_generated_python_artifacts.sh deploy/k8s"
+    criticality: release-supporting
+
+  - path: scripts/qa/no_mutable_or_placeholder_images.sh
+    owner: platform-team
+    purpose: >
+      Standalone deploy-tree hygiene gate that rejects mutable image tags and
+      placeholder image references inside the deploy package.
+    inputs:
+      - SCOPE_DIR path (optional positional; defaults to deploy/k8s)
+    outputs:
+      - stdout (matching image references or PASS summary)
+    side_effects: none
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/no_mutable_or_placeholder_images.sh deploy/k8s"
+    criticality: release-supporting
+
+  - path: scripts/qa/no_environment_domains_in_base.sh
+    owner: platform-team
+    purpose: >
+      Standalone base-package hygiene gate that rejects environment-specific
+      tenant domains in deploy/k8s/base except for the documented exceptions.
+    inputs: []
+    outputs:
+      - stdout (matching file:line findings or PASS summary)
+    side_effects: none
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/no_environment_domains_in_base.sh"
+    criticality: release-supporting
+
+  - path: scripts/qa/no_upward_relative_paths_in_kustomize.sh
+    owner: platform-team
+    purpose: >
+      Standalone deploy-tree hygiene gate that rejects upward relative path
+      traversal in Kustomize manifests so the deploy package stays portable.
+    inputs:
+      - SCOPE_DIR path (optional positional; defaults to deploy/k8s)
+    outputs:
+      - stdout (matching file:line findings or PASS summary)
+    side_effects: none
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/no_upward_relative_paths_in_kustomize.sh deploy/k8s"
+    criticality: release-supporting
+
+  - path: scripts/qa/scan-secrets-fast.sh
+    owner: platform-team
+    purpose: >
+      Fast local secret hygiene scan. Catches obvious committed secrets quickly.
+      Complement to CI's TruffleHog scan. STRICT=1 promotes warnings to errors.
+    inputs:
+      - STRICT=1 (optional; promote warnings to errors)
+    outputs:
+      - stdout (file:line context for any findings)
+    side_effects: none
+    dry_run: true  # read-only by nature
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/scan-secrets-fast.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/verify-release-readiness.sh
+    owner: platform-team
+    purpose: >
+      Pre-release gating script. Blocks deploy when config or patch drift is
+      detected. Produces an evidence package with image tags, commit SHAs,
+      ArgoCD status, and branding gate outputs.
+    inputs:
+      - --env prod|dev (default: prod)
+      - --evidence-dir DIR (default: var/evidence/release-YYYYMMDD)
+      - --dry-run (skip live cluster checks)
+    outputs:
+      - var/evidence/release-<date>/ evidence directory
+      - stdout (gate pass/fail summary)
+    side_effects: none
+    dry_run: true  # --dry-run flag supported
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/verify-release-readiness.sh --dry-run 2>&1 | head -10"
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-mfe-runtime-contract.sh
+    owner: platform-team
+    purpose: >
+      Verifies that the built or deployed MFE still ships the compiled runtime
+      markers and tenant theme assets that the source tree promises. This is the
+      guard against dead plugin code or silently incomplete MFE images.
+    inputs:
+      - --image IMAGE_REF (optional; built or pulled MFE image)
+      - --url MFE_BASE_URL (optional; deployed MFE base URL)
+    outputs:
+      - stdout (PASS/FAIL/SKIP per runtime contract check)
+    side_effects: none
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/verify-mfe-runtime-contract.sh --help"
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-cicd-merge-gates-and-secrets.sh
+    owner: platform-team
+    purpose: >
+      Verifies that CI/CD merge gates (branch protection, required status checks)
+      and secret masking are configured correctly. Checks ci.yml structure and
+      absence of unsafe secret echoing.
+    inputs:
+      - --ac 007|008|028 (optional; run specific AC check only)
+    outputs:
+      - stdout (PASS/FAIL per AC)
+    side_effects: none
+    dry_run: true  # read-only by nature
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/verify-cicd-merge-gates-and-secrets.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/verify-no-latest-prod-tags.sh
+    owner: platform-team
+    purpose: >
+      Checks that no production Kustomize overlay uses mutable :latest tags.
+      Fast, explicit check complementing verify-k8s-images.sh.
+    inputs: []
+    outputs:
+      - stdout (violations or pass)
+    side_effects: none
+    dry_run: true  # read-only by nature
+    lanes: [prod]
+    proof_command: "bash scripts/qa/verify-no-latest-prod-tags.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/verify-no-hardcoded-secrets.sh
+    owner: platform-team
+    purpose: >
+      Scans the repository for hardcoded secrets using pattern matching.
+      Exits non-zero on any finding.
+    inputs: []
+    outputs:
+      - stdout (findings or pass)
+    side_effects: none
+    dry_run: true  # read-only by nature
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/verify-no-hardcoded-secrets.sh 2>&1 | tail -5"
+    criticality: release-blocking
+
+  - path: scripts/qa/verify-generated-surfaces.sh
+    owner: platform-team
+    purpose: >
+      Canonical front door for deterministic generated-surface drift checks used by
+      CI precheck. Verifies static inventory, verification catalog, runtime inventory,
+      and tracked runtime-routing matrices in one read-only pass.
+    inputs: []
+    outputs:
+      - stdout (PASS/FAIL summary)
+      - exit code
+    side_effects: none
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/verify-generated-surfaces.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/verify-verification-catalog.sh
+    owner: platform-team
+    purpose: >
+      Validates that the generated verification catalog matches the authoritative
+      registry and remains current without mutating tracked outputs.
+    inputs: []
+    outputs:
+      - stdout (PASS/FAIL summary)
+      - exit code
+    side_effects: none
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/verify-verification-catalog.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/test-verify-generated-surfaces.sh
+    owner: platform-team
+    purpose: >
+      Regression harness for verify-generated-surfaces.sh. Seeds generated-surface
+      drift in a temporary repo copy and proves the gate remains read-only.
+    inputs: []
+    outputs:
+      - stdout (PASS/FAIL summary)
+      - exit code
+    side_effects:
+      - Creates a temporary repo copy under /tmp
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/test-verify-generated-surfaces.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/verify-ci-cache-policy.sh
+    owner: platform-team
+    purpose: >
+      Verifies that CI workflows route Playwright browser setup through the
+      shared cached setup actions and that image builds retain the required
+      BuildKit cache restore/write-back policy.
+    inputs: []
+    outputs:
+      - stdout (PASS/FAIL summary)
+      - exit code
+    side_effects: none
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/verify-ci-cache-policy.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/test-verify-ci-cache-policy.sh
+    owner: platform-team
+    purpose: >
+      Regression harness for verify-ci-cache-policy.sh. Seeds workflow and build
+      cache drift in a temporary repo copy and proves the verifier remains
+      read-only while pinpointing the missing cache contracts.
+    inputs: []
+    outputs:
+      - stdout (PASS/FAIL summary)
+      - exit code
+    side_effects:
+      - Creates a temporary repo copy under /tmp
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/test-verify-ci-cache-policy.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/test-build-context-fingerprint.sh
+    owner: platform-team
+    purpose: >
+      Regression harness for the rendered build-context fingerprint helper.
+      Proves fingerprints are stable, ignore `.git`, and change when context
+      file content changes.
+    inputs: []
+    outputs:
+      - stdout (PASS/FAIL summary)
+      - exit code
+    side_effects:
+      - Creates a temporary context under /tmp
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/qa/test-build-context-fingerprint.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/test-build-image-freshness.sh
+    owner: platform-team
+    purpose: >
+      Regression harness for the local image freshness helper. Uses a fake
+      Docker CLI to prove missing images, missing labels, and mismatched labels
+      are stale while matching build-context labels are reusable.
+    inputs: []
+    outputs:
+      - stdout (PASS/FAIL summary)
+      - exit code
+    side_effects:
+      - Creates fake Docker CLI fixtures under /tmp
+    dry_run: true
+    lanes: [dev]
+    proof_command: "bash scripts/qa/test-build-image-freshness.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/test-buildx-cleanup-active-guard.sh
+    owner: platform-team
+    purpose: >
+      Regression harness for the fastlane Buildx cleanup active-build guard.
+      Uses fake docker/pgrep commands to prove destructive cleanup defers when
+      a Docker/Buildx build command is active and still removes a stale builder
+      when no build is active.
+    inputs: []
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects:
+      - Creates temporary fake command shims under /tmp
+    dry_run: true
+    lanes: [ci]
+    proof_command: "bash scripts/qa/test-buildx-cleanup-active-guard.sh"
+    criticality: release-blocking
+
+  # ── CI Preflight & Build ─────────────────────────────────────────────────────
+
+  - path: scripts/infra/ensure-buildx-dependency-mirror.sh
+    owner: platform-team
+    purpose: >
+      Selects or creates the local Buildx builder that routes Docker Hub
+      dependency pulls through the configured dependency mirror before local
+      Tutor image builds. This is dependency acquisition support only; it does
+      not own build semantics or rendered artifact shape.
+    inputs:
+      - MEREKA_BUILDX_BUILDER
+      - MEREKA_DOCKERHUB_MIRROR
+      - MEREKA_BUILDKIT_IMAGE
+      - MEREKA_RECREATE_BUILDX_MIRROR
+    outputs:
+      - stdout builder readiness summary
+      - exit code
+    side_effects:
+      - Creates or selects a Docker Buildx builder in the local Docker daemon
+      - Boots a BuildKit container for that builder
+    dry_run: false
+    lanes: [dev, ci]
+    proof_command: "bash -n scripts/infra/ensure-buildx-dependency-mirror.sh"
+    criticality: release-supporting
+
+  - path: scripts/infra/buildx-builder-health.sh
+    owner: platform-team
+    purpose: >
+      Shared health guard for repo-owned local Buildx builders. Detects active
+      Docker/BuildKit build or pull processes before destructive builder
+      mutation, and detects stale build executor processes left in an idle
+      BuildKit container after interrupted local image builds.
+    inputs:
+      - MEREKA_BUILDX_ACTIVE_PROCESSES_FILE
+      - MEREKA_BUILDX_BUILDER_CONTAINER_NAME
+      - MEREKA_BUILDX_PROCESS_SNAPSHOT_FILE
+    outputs:
+      - stdout/stderr diagnostic summary
+      - exit code
+    side_effects:
+      - None directly; callers decide whether to recreate a builder
+    dry_run: true
+    lanes: [dev, ci]
+    proof_command: "bash scripts/qa/test-buildx-builder-health.sh"
+    criticality: release-supporting
+
+  - path: scripts/ci/resolve_release_bundle_digests.py
+    owner: platform-team
+    purpose: >
+      Resolves the OpenEdX and MFE digests for release-bundle generation. When
+      one image build is intentionally skipped, reads the previous successful
+      release-bundle artifact and carries forward only the skipped image digest.
+      Artifact download redirects strip GitHub API authorization before following
+      signed blob URLs.
+    inputs:
+      - OPENEDX_DIGEST
+      - MFE_DIGEST
+      - BUILD_OPENEDX_RESULT
+      - BUILD_MFE_RESULT
+      - GH_TOKEN
+      - REPO
+      - CURRENT_RUN_ID
+      - GITHUB_API_BASE_URL
+      - GITHUB_OUTPUT
+    outputs:
+      - GitHub step outputs openedx_digest, mfe_digest, fallback_run_id
+      - var/ci/fallback-release-bundle.json when fallback is used
+      - stdout PASS/diagnostic summary
+      - exit code
+    side_effects:
+      - Reads GitHub Actions run/artifact metadata and downloads release-bundle artifacts
+      - Writes local var/ci fallback evidence in the workflow workspace
+    dry_run: false
+    lanes: [ci]
+    proof_command: "bash scripts/qa/test-resolve-release-bundle-digests.sh"
+    criticality: release-supporting
+
+  - path: scripts/qa/test-resolve-release-bundle-digests.sh
+    owner: platform-team
+    purpose: >
+      Fixture test for scripts/ci/resolve_release_bundle_digests.py. Proves the
+      direct digest path and the partial-build fallback path, including the
+      GitHub artifact redirect contract that must not forward Authorization to
+      signed blob URLs.
+    inputs: []
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects:
+      - Starts loopback HTTP fixture servers
+      - Creates temporary fixture files under /tmp
+    dry_run: true
+    lanes: [ci]
+    proof_command: "bash scripts/qa/test-resolve-release-bundle-digests.sh"
+    criticality: release-blocking
+
+  - path: scripts/ci/install-docker-compose.sh
+    owner: platform-team
+    purpose: >
+      Installs the pinned Docker Compose v2 CLI plugin for bootstrap proof
+      runners when the runner image lacks a compose plugin. Downloads the
+      platform-specific release asset and verifies the upstream checksum before
+      installing into the Docker CLI plugin directory.
+    inputs:
+      - DOCKER_COMPOSE_VERSION
+      - DOCKER_CONFIG
+      - DOCKER_COMPOSE_PLUGIN_DIR
+      - DOCKER_COMPOSE_BASE_URL
+      - DOCKER_COMPOSE_FORCE_INSTALL
+      - DOCKER_COMPOSE_UNAME_M
+    outputs:
+      - Docker Compose plugin under Docker CLI plugin directory
+      - stdout version confirmation
+      - exit code
+    side_effects:
+      - Downloads Docker Compose release assets
+      - Writes Docker CLI plugin file under the selected Docker config root
+    dry_run: false
+    lanes: [ci]
+    proof_command: "bash scripts/qa/test-install-docker-compose.sh"
+    criticality: release-supporting
+
+  - path: scripts/qa/test-install-docker-compose.sh
+    owner: platform-team
+    purpose: >
+      Fixture test for scripts/ci/install-docker-compose.sh. Proves x86_64
+      architecture mapping, checksum verification, checksum-failure behavior,
+      and unsupported-architecture failure without reaching the network.
+    inputs: []
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects:
+      - Creates temporary fixture directories under /tmp
+    dry_run: true
+    lanes: [ci]
+    proof_command: "bash scripts/qa/test-install-docker-compose.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/test-buildx-builder-health.sh
+    owner: platform-team
+    purpose: >
+      Fixture test for scripts/infra/buildx-builder-health.sh. Proves idle
+      builder snapshots stay healthy, stale npm/shell executor processes are
+      detected, destructive builder removal refuses during active builds, and
+      idle removal calls the expected repo-owned Buildx builder.
+    inputs: []
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects:
+      - Creates temporary fake command shims under /tmp
+    dry_run: true
+    lanes: [ci]
+    proof_command: "bash scripts/qa/test-buildx-builder-health.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/test-dependency-image-mirrors-patch.sh
+    owner: platform-team
+    purpose: >
+      Fixture test for infrastructure/tutor/patches/dependency-image-mirrors.sh.
+      Proves the dependency-acquisition mirror normalization is idempotent,
+      target-scoped, and fail-loud when upstream Dockerfile dependency selectors
+      drift.
+    inputs: []
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects:
+      - Creates temporary rendered-Dockerfile fixtures under /tmp
+    dry_run: true
+    lanes: [ci]
+    proof_command: "bash scripts/qa/test-dependency-image-mirrors-patch.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/test-openedx-obsolete-activation-key-patch-removal.sh
+    owner: platform-team
+    purpose: >
+      Seeded fixture test for the obsolete activation-key Open edX render
+      correction. Proves the exact Tutor-emitted git-am layer is removed,
+      repeated runs are idempotent, upstream retirement becomes a no-op, and
+      selector drift fails loudly.
+    inputs: []
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects:
+      - Creates temporary Open edX Dockerfile fixtures under /tmp
+    dry_run: true
+    lanes: [ci]
+    proof_command: "bash scripts/qa/test-openedx-obsolete-activation-key-patch-removal.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/test-discovery-init-task-contract.sh
+    owner: platform-team
+    purpose: >
+      Fixture-backed source/render contract for the Mereka Discovery init task
+      correction. Proves the Tutor init filter replaces exactly one Discovery
+      partner init task with container-DNS LMS API URLs, is idempotent, leaves
+      non-Discovery task lists untouched, and fails loudly on upstream selector
+      drift or leftover browser-facing LMS API URLs.
+    inputs: []
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects:
+      - Creates temporary Tutor hook stubs under /tmp
+    dry_run: true
+    lanes: [ci]
+    proof_command: "bash scripts/qa/test-discovery-init-task-contract.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/test-mfe-npm-install-resilience-patch.sh
+    owner: platform-team
+    purpose: >
+      Fixture test for the rendered MFE npm install resilience patch. Proves
+      golden Dockerfile transformation, idempotence, and fail-loud behavior when
+      upstream MFE Dockerfile install selector shape changes.
+    inputs: []
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects:
+      - Creates temporary rendered-Dockerfile fixtures under /tmp
+    dry_run: true
+    lanes: [ci]
+    proof_command: "bash scripts/qa/test-mfe-npm-install-resilience-patch.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/test-mfe-prune-deprecated-shells.sh
+    owner: platform-team
+    purpose: >
+      Fixture test for mfe_prune_deprecated_shells.py. Proves the helper
+      hardens upstream apt install residue, prunes deprecated MFE/New Relic
+      fragments, preserves unrelated MFE sections, and is idempotent.
+    inputs: []
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects:
+      - Creates temporary rendered Dockerfile and Caddyfile fixtures under /tmp
+    dry_run: true
+    lanes: [ci]
+    proof_command: "bash scripts/qa/test-mfe-prune-deprecated-shells.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/verify-build-optimizations-render-delta-contract.sh
+    owner: platform-team
+    purpose: >
+      Static and optional raw-vs-patched-render verifier for the
+      build-optimizations.sh J-exit contract. Validates the machine-readable
+      allowed-delta ledger, source markers, retirement triggers, and fail-closed
+      diff behavior when raw/patched render files are provided.
+    inputs:
+      - BUILD_OPTIMIZATIONS_DELTA_CONTRACT
+      - BUILD_OPTIMIZATIONS_SCRIPT
+      - PATCH_INVENTORY_DOC
+      - RAW_RENDER_FILE
+      - PATCHED_RENDER_FILE
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects: none
+    dry_run: true
+    lanes: [ci]
+    proof_command: "bash scripts/qa/verify-build-optimizations-render-delta-contract.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/test-verify-build-optimizations-render-delta-contract.sh
+    owner: platform-team
+    purpose: >
+      Seeded fixture test for verify-build-optimizations-render-delta-contract.sh.
+      Proves allowed raw-vs-patched deltas pass and unexpected render deltas fail
+      closed with a clear diagnostic.
+    inputs: []
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects:
+      - Creates temporary contract and render fixtures under /tmp
+    dry_run: true
+    lanes: [ci]
+    proof_command: "bash scripts/qa/test-verify-build-optimizations-render-delta-contract.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/verify-tutor-patch-manifest-contract.sh
+    owner: platform-team
+    purpose: >
+      Static authority verifier for the remaining Tutor post-render patch layer.
+      Validates that patch-manifest.yml, apply-patches.sh, sourced patch modules,
+      the patch inventory ledger, and build-optimizations.allowed-delta.yaml stay
+      aligned.
+    inputs:
+      - REPO_ROOT_OVERRIDE
+      - PATCH_MANIFEST
+      - APPLY_PATCHES_SCRIPT
+      - PATCH_INVENTORY_DOC
+      - BUILD_OPTIMIZATIONS_DELTA_CONTRACT
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects: none
+    dry_run: true
+    lanes: [ci]
+    proof_command: "bash scripts/qa/verify-tutor-patch-manifest-contract.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/test-verify-tutor-patch-manifest-contract.sh
+    owner: platform-team
+    purpose: >
+      Seeded fixture test for verify-tutor-patch-manifest-contract.sh. Proves
+      manifest/apply-patches/delta-ledger alignment passes for the valid fixture
+      and fails closed on missing modules, missing functions, inactive sourcing,
+      bad delta policy, historical module activation, inventory drift, and
+      inline-wrapper definitions without invocation.
+    inputs: []
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects:
+      - Creates temporary patch manifest fixtures under /tmp
+    dry_run: true
+    lanes: [ci]
+    proof_command: "bash scripts/qa/test-verify-tutor-patch-manifest-contract.sh"
+    criticality: release-blocking
+
+  - path: scripts/ci/preflight-check.sh
+    owner: platform-team
+    purpose: >
+      Validates generated MFE/OpenEdX Dockerfiles against known invariants BEFORE
+      a 30-60 minute build cycle. Renders Dockerfiles through the governed Tutor
+      wrapper and target-scoped build-context preparation path, then checks for
+      required markers. Runtime ~30 seconds.
+    inputs:
+      - TUTOR_VENV (path to venv; auto-created if absent)
+    outputs:
+      - stdout (PASS/FAIL/SKIP per invariant)
+    side_effects:
+      - Creates a temporary Tutor root (cleaned up after run)
+    dry_run: true  # safe to run locally
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/ci/preflight-check.sh 2>&1 | head -20"
+    criticality: release-blocking
+
+  - path: scripts/ci/generate_ci_failure_baseline.py
+    owner: platform-team
+    purpose: >
+      Generates a machine-readable branch-vs-main CI failure diff so operators can
+      distinguish branch regressions from inherited baseline debt.
+    inputs:
+      - --repo <owner/repo> (optional; autodetects origin remote)
+      - --branch-run-id / --branch-log-dir
+      - --baseline-run-id / --baseline-log-dir
+      - --policy-file <path> (optional; defaults to verification/manifests/ci_failure_severity_policy.json)
+      - GITHUB_TOKEN (required for run-id mode)
+    outputs:
+      - stdout JSON or --output file containing ci-failure-baseline/v2 payload
+    side_effects:
+      - Downloads GitHub Actions log archives in run-id mode
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "python3 scripts/ci/generate_ci_failure_baseline.py --help | head -20"
+    criticality: release-supporting
+
+  - path: scripts/infra/resolve-build-scope.sh
+    owner: platform-team
+    purpose: >
+      Conservatively classifies changed paths into Open edX-only, MFE-only, or
+      shared build scope so the Tutor image workflow skips unnecessary image
+      builds without silently dropping required ones.
+    inputs:
+      - file paths via argv or stdin
+      - --github-output <path> (optional)
+      - --summary-file <path> (optional)
+    outputs:
+      - stdout (scope summary markdown)
+      - optional GitHub output file (build_openedx, build_mfe, scope_label)
+      - optional summary markdown file
+    side_effects: none
+    dry_run: true  # read-only classifier
+    lanes: [dev, staging, prod]
+    proof_command: "printf 'infrastructure/tutor/themes/mereka/mfe/mereka.scss\n' | bash scripts/infra/resolve-build-scope.sh | head -5"
+    criticality: release-blocking
+
+  - path: scripts/infra/prepare-tutor-build-context.sh
+    owner: platform-team
+    purpose: >
+      Canonical front door for mutating rendered Tutor build context by target.
+      Routes to the low-level compatibility layer with explicit openedx, mfe, or
+      all scope so CI and local workflows prepare only the contexts they actually
+      need.
+    inputs:
+      - --target all|openedx|mfe
+      - TUTOR_ROOT (optional env override)
+    outputs:
+      - rendered Tutor build context under tutor_env/
+      - stdout (patch application summary)
+    side_effects:
+      - Mutates rendered Tutor build context under tutor_env/
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/prepare-tutor-build-context.sh --help 2>&1 | head -5"
+    criticality: release-supporting
+
+  - path: scripts/infra/prepare-tutor-build-context-ci.sh
+    owner: platform-team
+    purpose: >
+      Renders Tutor config on standard CI runners, enables the Mereka LMS plugin,
+      applies target-scoped Tutor build-context mutations, and leaves packaged
+      Open edX or MFE build context ready for heavy image jobs to consume.
+    inputs:
+      - --target all|openedx|mfe
+      - TUTOR_ROOT (optional env override)
+    outputs:
+      - rendered Tutor build context under tutor_env/
+      - stdout (prepared target summary)
+    side_effects:
+      - Regenerates tutor_env/ and mutates target-specific build context
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/prepare-tutor-build-context-ci.sh --help 2>&1 | head -5"
+    criticality: release-supporting
+
+  # ── Tutor Configuration ──────────────────────────────────────────────────────
+
+  - path: scripts/infra/tutor-config-save.sh
+    owner: platform-team
+    purpose: >
+      Canonical wrapper for 'tutor config save'. Syncs the repo-owned Tutor
+      plugin mirror, disables retired local plugins, enables canonical plugins,
+      regenerates the Tutor build context, verifies configuration, and restores
+      the previous rendered Tutor state if save, prepare, or verify fails. Use
+      this instead of bare 'tutor config save'.
+    inputs:
+      - TUTOR_ROOT (required env var)
+      - tutor config save args (passed through)
+    outputs:
+      - tutor_env/ directory (regenerated)
+      - stdout (configuration, build-context, and verification summary)
+    side_effects:
+      - Syncs the repo-owned Tutor plugin mirror under TUTOR_PLUGINS_ROOT
+      - Disables retired local Tutor plugins if present
+      - Enables canonical Tutor plugins
+      - Regenerates tutor_env/ and rendered build context
+      - On failure, removes and restores TUTOR_ROOT/env from a temporary backup
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/tutor-config-save.sh --help 2>&1 | head -5"
+    criticality: operational-dangerous
+
+  - path: scripts/infra/verify-local-bootstrap-readiness.sh
+    owner: platform-team
+    purpose: Verify Local Bootstrap Readiness
+    criticality: release-blocking
+
+  - path: scripts/qa/test-verify-local-bootstrap-readiness.sh
+    owner: platform-team
+    purpose: >
+      Fixture test for the local bootstrap readiness verifier. Proves Tutor
+      wrapper noise is stripped from MySQL scalar output before initialized
+      state checks compare numeric SQL results.
+    inputs: []
+    outputs:
+      - stdout PASS/FAIL summary
+      - exit code
+    side_effects: none
+    dry_run: true
+    lanes: [dev]
+    proof_command: "bash scripts/qa/test-verify-local-bootstrap-readiness.sh"
+    criticality: release-blocking
+
+  - path: scripts/qa/verify-local-runtime-readiness.sh
+    owner: platform-team
+    purpose: >
+      Read-only initialized local Tutor runtime verifier. Confirms Tutor
+      Compose reports LMS, Discovery, and MySQL as running, verifies LMS and
+      Discovery shell reachability, validates the local proof identity, and can
+      optionally require catalog data. This is a runtime proof and must not run
+      in the offline static CI lane.
+    inputs:
+      - TUTOR_ROOT
+      - TUTOR_PLUGINS_ROOT or TUTOR_PLUGINS_DIR
+      - TUTOR_BIN
+      - PROOF_USERNAME
+      - READINESS_TIMEOUT
+      - DISCOVERY_ROUTE_ATTEMPTS
+      - DISCOVERY_ROUTE_SLEEP_SECONDS
+      - DISCOVERY_HTTP_TIMEOUT
+      - --username
+      - --check-catalog-data
+    outputs:
+      - stdout PASS/WARN/FAIL summary
+      - temporary readiness logs under /tmp
+      - exit code
+    side_effects:
+      - Reads local Tutor/Docker runtime state
+      - Executes read-only Django shell checks inside local Tutor services
+    dry_run: true
+    lanes: [local]
+    proof_command: "bash scripts/qa/verify-local-runtime-readiness.sh --help"
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-setup.sh
+    owner: platform-team
+    purpose: >
+      Local developer setup verifier. Checks the repo-local Tutor environment,
+      local Docker images and containers, local service URLs, MySQL access, the
+      canonical local bootstrap readiness contract, and the local admin user.
+      It skips when Docker or a local Tutor environment is absent.
+    inputs:
+      - Local Docker daemon
+      - tutor_env/config.yml
+      - .venv
+    outputs:
+      - stdout PASS/WARN/FAIL summary
+      - exit code
+    side_effects:
+      - Creates temporary log files
+      - Reads local Docker and Tutor runtime state
+    dry_run: true
+    lanes: [local]
+    proof_command: "bash scripts/qa/verify-setup.sh"
+    criticality: release-supporting
+
+  # ── Database & Migrations ────────────────────────────────────────────────────
+
+  - path: scripts/infra/provision-mysql-app-dbs.sh
+    owner: platform-team
+    purpose: >
+      Provisions MySQL databases and users for all Open edX satellite services
+      (discovery, ecommerce, credentials, notes, xqueue). Run once per
+      environment; idempotent.
+    inputs:
+      - MYSQL_HOST
+      - MYSQL_ROOT_PASSWORD
+      - target env flags
+    outputs:
+      - stdout (created databases + users)
+    side_effects:
+      - Mutates MySQL (creates databases and users)
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/provision-mysql-app-dbs.sh --help 2>&1 || true"
+    criticality: release-supporting
+
+  - path: scripts/migrations/run-verification-pipeline.sh
+    owner: platform-team
+    purpose: >
+      Orchestrates all migration verification scripts in workflow order and
+      produces a summary report. Continues even if individual scripts fail.
+    inputs: []
+    outputs:
+      - scripts/migrations/output/verification/summary.txt
+      - stdout (summary)
+    side_effects: none
+    dry_run: true  # read-only verification
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/migrations/run-verification-pipeline.sh 2>&1 | tail -10"
+    criticality: release-supporting
+
+  # ── Branding ─────────────────────────────────────────────────────────────────
+
+  - path: scripts/branding/deploy-branded-image.sh
+    owner: platform-team
+    purpose: >
+      Legacy break-glass helper that mutates the live LMS deployment image via
+      kubectl. Not a durable GitOps promotion path and not a substitute for the
+      Build Tutor Images workflow plus release-object promotion.
+    inputs:
+      - "positional: TAG (default: mereka-brand)"
+      - NAMESPACE (default: mereka-lms)
+      - KUBECTL_CONTEXT (optional)
+      - SOURCE_IMAGE (optional; overrides pull source)
+    outputs:
+      - stdout (kubectl rollout status)
+    side_effects:
+      - Mutates live cluster (kubectl set image on LMS deployment)
+      - Optionally pushes image to ghcr.io registry
+    dry_run: false
+    lanes: [dev]
+    proof_command: "bash scripts/branding/deploy-branded-image.sh --help 2>&1 || true"
+    criticality: operational-dangerous
+
+  - path: scripts/branding/build-tokens.sh
+    owner: platform-team
+    purpose: Build design token SCSS/CSS from canonical JSON source
+    criticality: release-supporting
+
+  - path: scripts/branding/deploy-logo-fix.sh
+    owner: platform-team
+    purpose: Deploy logo fix to live cluster (kubectl patch)
+    criticality: release-supporting
+
+  - path: scripts/branding/fix-logo-static-files.sh
+    owner: platform-team
+    purpose: Repair logo static file paths in live cluster
+    criticality: release-supporting
+
+  - path: scripts/branding/generate-tokens-from-canonical.sh
+    owner: platform-team
+    purpose: Generate design tokens from canonical brand JSON
+    criticality: release-supporting
+
+  - path: scripts/branding/repair-mfe-authn-branding.sh
+    owner: platform-team
+    purpose: Repair MFE authn branding configuration
+    criticality: release-supporting
+
+  - path: scripts/branding/run-branding-gates.sh
+    owner: platform-team
+    purpose: Run all branding verification gates as a batch
+    criticality: release-supporting
+
+  - path: scripts/branding/setup-mfe-branding.sh
+    owner: platform-team
+    purpose: Configure MFE branding for dev mode
+    criticality: release-supporting
+
+  - path: scripts/branding/sync-brand-assets.sh
+    owner: platform-team
+    purpose: Sync brand assets to Tutor themes directory
+    criticality: release-supporting
+
+  - path: scripts/branding/sync-brand-package.sh
+    owner: platform-team
+    purpose: Sync brand package to MFE build context
+    criticality: release-supporting
+
+  - path: scripts/branding/sync-tokens-to-json.sh
+    owner: platform-team
+    purpose: Sync design tokens to JSON output
+    criticality: release-supporting
+
+  - path: scripts/branding/update-token-provenance.sh
+    owner: platform-team
+    purpose: Update token provenance metadata
+    criticality: release-supporting
+
+  - path: scripts/branding/verify-branding-css.sh
+    owner: platform-team
+    purpose: Verify branding CSS compilation and content
+    criticality: release-supporting
+
+  - path: scripts/branding/verify-branding-health.sh
+    owner: platform-team
+    purpose: Verify branding health across LMS/MFE/Studio
+    criticality: release-supporting
+
+  - path: scripts/release/release-gate.sh
+    owner: platform-team
+    purpose: >
+      Canonical release verification entrypoint. Validates kustomize renders,
+      contract bundle, migration registry, deploy contract, boundary audit,
+      optional release identity binding, and optional CI baseline debt policy.
+    inputs:
+      - "--overlay PATH (default: deploy/k8s/base)"
+      - "--skip-cluster (skip live cluster checks)"
+      - "--release-object-json PATH (optional)"
+      - "--ci-failure-baseline-json PATH (optional)"
+    outputs:
+      - stdout (gate results)
+      - var/proof/release-gate.json (proof artifact)
+    side_effects: []
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/release/release-gate.sh --skip-cluster"
+    criticality: release-blocking
+    entrypoint_role: deploy  # canonical-entrypoints.yaml workflow: deploy
+
+  - path: scripts/release/migration-preflight.sh
+    owner: platform-team
+    purpose: >
+      Pre-migration safety gate. Verifies cluster access, deployment readiness,
+      image parity, database reachability (including Atlas vs in-cluster FM-001),
+      settings modules, and pending migration counts.
+    inputs:
+      - "--namespace NS (default: mereka-lms)"
+      - "--skip-atlas-check"
+    outputs:
+      - stdout (preflight results)
+    side_effects: []
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/release/migration-preflight.sh --help 2>&1 || true"
+    criticality: release-blocking
+    entrypoint_role: migrate  # canonical-entrypoints.yaml workflow: migrate
+
+  - path: scripts/release/verify-zero-pending-migrations.sh
+    owner: platform-team
+    purpose: >
+      Post-migration proof. Reads migration registry and verifies each
+      schema-owning service reports zero pending migrations.
+    inputs:
+      - "--namespace NS (default: mereka-lms)"
+      - "--json (structured output)"
+    outputs:
+      - stdout (pass/fail per service)
+      - JSON proof artifact (with --json flag)
+    side_effects: []
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/release/verify-zero-pending-migrations.sh --help 2>&1 || true"
+    criticality: release-blocking
+    entrypoint_role: migrate-post-verify  # canonical-entrypoints.yaml workflow: migrate-post-verify
+
+  - path: scripts/release/smoke-after-migrate.sh
+    owner: platform-team
+    purpose: >
+      Post-migration smoke verification. Checks health endpoints from
+      contract.json and optional external domain checks.
+    inputs:
+      - "--namespace NS (default: mereka-lms)"
+      - "--domain DOMAIN (optional external checks)"
+      - "--json (structured output)"
+    outputs:
+      - stdout (smoke results)
+      - JSON proof artifact (with --json flag)
+    side_effects: []
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/release/smoke-after-migrate.sh --help 2>&1 || true"
+    criticality: release-blocking
+    entrypoint_role: runtime-validation-post-migrate  # canonical-entrypoints.yaml workflow: runtime-validation-post-migrate
+
+  - path: scripts/release/emit-proof-envelope.sh
+    owner: platform-team
+    purpose: >
+      Emit a proof envelope artifact for release evidence tracking.
+    inputs:
+      - --concern release-gate|migration-proof|runtime-smoke|aggregate
+      - --lane dev|staging|prod (optional)
+      - --dry-run (optional)
+      - --ci-run-id ID (optional)
+      - --release-object-json PATH (optional)
+      - --ci-failure-baseline-json PATH (optional)
+      - --output-dir DIR (optional)
+      - --skip-cluster (optional)
+      - --namespace NS (optional)
+      - --domain HOST (optional)
+    outputs:
+      - stdout (proof envelope)
+    side_effects: []
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/release/emit-proof-envelope.sh --help 2>&1 || true"
+    criticality: release-supporting
+
+  - path: scripts/release/smoke-by-service-wave.sh
+    owner: platform-team
+    purpose: >
+      Smoke-test services in deployment wave order after release.
+    inputs:
+      - "--namespace NS (default: mereka-lms)"
+    outputs:
+      - stdout (smoke results per wave)
+    side_effects: []
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/release/smoke-by-service-wave.sh --help 2>&1 || true"
+    criticality: release-supporting
+
+  # ── Runtime Validation ───────────────────────────────────────────────────────
+
+  - path: scripts/infra/verify-deployment.sh
+    owner: platform-team
+    purpose: >
+      Post-deployment verification wrapper. Checks pod + deployment readiness,
+      rollout status for core deployments (lms/cms/caddy), and public auth
+      surface checks. Canonical runtime-validation entrypoint for operators
+      after ArgoCD sync or kind apply.
+    inputs:
+      - --env prod|dev (default: prod)
+      - --namespace NAMESPACE
+      - --context CONTEXT
+      - NAMESPACE (env var)
+      - K8S_CONTEXT (env var)
+    outputs:
+      - stdout (PASS/FAIL per check)
+    side_effects: none  # read-only verification
+    dry_run: true  # read-only by nature
+    lanes: [dev, staging, prod]
+    proof_command: "bash scripts/infra/verify-deployment.sh --help 2>&1 | head -5"
+    criticality: release-blocking
+    entrypoint_role: runtime-validation  # canonical-entrypoints.yaml workflow: runtime-validation
+
+  # ── Tenant Lifecycle ────────────────────────────────────────────────────────
+
+  - path: scripts/tenants/configure-tenant-idp.sh
+    owner: platform-team
+    purpose: Configure identity provider for a tenant
+    criticality: release-supporting
+
+  - path: scripts/tenants/generate-saml-keypair.sh
+    owner: platform-team
+    purpose: Generate SAML keypair for tenant SSO integration
+    criticality: release-supporting
+
+  - path: scripts/tenants/offboard-tenant.sh
+    owner: platform-team
+    purpose: Remove tenant configuration and data
+    criticality: release-supporting
+
+  - path: scripts/tenants/onboard-enterprise-tenant.sh
+    owner: platform-team
+    purpose: Full onboarding flow for a new enterprise tenant
+    criticality: release-supporting
+
+  - path: scripts/tenants/provision-all-tenants.sh
+    owner: platform-team
+    purpose: Provision all tenants from declarative config
+    criticality: release-supporting
+
+  - path: scripts/tenants/provision-mfe-config.sh
+    owner: platform-team
+    purpose: Compatibility shim for retired per-tenant MFE config repair path
+    criticality: release-supporting
+
+  - path: scripts/tenants/provision-tenant.sh
+    owner: platform-team
+    purpose: Provision a single tenant from declarative config
+    criticality: release-supporting
+
+  - path: scripts/tenants/repair-enterprise-schema.sh
+    owner: platform-team
+    purpose: Repair enterprise tenant database schema
+    criticality: release-supporting
+
+  - path: scripts/tenants/sync-tenant-branding.sh
+    owner: platform-team
+    purpose: Sync tenant branding assets to the theme
+    criticality: release-supporting
+
+  - path: scripts/tenants/sync-tenant-enterprise-mapping.sh
+    owner: platform-team
+    purpose: Sync tenant-to-enterprise-customer mappings
+    criticality: release-supporting
+
+  - path: scripts/tenants/sync-tenant-registry-configmap.sh
+    owner: platform-team
+    purpose: Sync tenant registry to Kubernetes ConfigMap
+    criticality: release-supporting
+
+  - path: scripts/tenants/verify-prod-runtime-proof.sh
+    owner: platform-team
+    purpose: Verify post-deploy runtime proof for active production tenants
+    criticality: release-supporting
+
+  # ── Migrations ──────────────────────────────────────────────────────────────
+
+  - path: scripts/migrations/bootstrap-courses-from-enrollments.sh
+    owner: platform-team
+    purpose: Bootstrap course structures from enrollment data
+    criticality: release-supporting
+
+  - path: scripts/migrations/import-production-courses.sh
+    owner: platform-team
+    purpose: Import courses from production environment
+    criticality: release-supporting
+
+  - path: scripts/migrations/run-dry-run.sh
+    owner: platform-team
+    purpose: Execute migration dry-run for validation
+    criticality: release-supporting
+
+  - path: scripts/migrations/run_full_import.sh
+    owner: platform-team
+    purpose: Execute the full staged migration pipeline across verify, courses, users, and enrollments
+    criticality: release-supporting
+
+  - path: scripts/infra/additional-cost-optimizations.sh
+    owner: platform-team
+    purpose: Additional Cost Optimizations
+    criticality: release-supporting
+
+  - path: scripts/infra/apply-monitoring-configs.sh
+    owner: platform-team
+    purpose: Apply Monitoring Configs
+    criticality: release-supporting
+
+  - path: scripts/infra/apply-multisite-config.sh
+    owner: platform-team
+    purpose: Apply Multisite Config
+    criticality: release-supporting
+
+  - path: scripts/infra/argocd-refresh.sh
+    owner: platform-team
+    purpose: Argocd Refresh
+    criticality: release-supporting
+
+  - path: scripts/infra/atlas-config-from-infisical.sh
+    owner: platform-team
+    purpose: Atlas Config From Infisical
+    criticality: release-supporting
+
+  - path: scripts/infra/backup-db.sh
+    owner: platform-team
+    purpose: Backup Db
+    criticality: release-supporting
+
+  - path: scripts/infra/build-credentials-image.sh
+    owner: platform-team
+    purpose: Build Credentials Image
+    criticality: release-supporting
+
+  - path: scripts/infra/build-enterprise-mfe-clean.sh
+    owner: platform-team
+    purpose: Build Enterprise Mfe Clean
+    criticality: release-supporting
+
+  - path: scripts/infra/cloudflare-harden-zone.sh
+    owner: platform-team
+    purpose: Cloudflare Harden Zone
+    criticality: release-supporting
+
+  - path: scripts/infra/cloudflare-sync.sh
+    owner: platform-team
+    purpose: Cloudflare Sync
+    criticality: release-supporting
+
+  - path: scripts/infra/configure-github-authenticated-sso-canary.sh
+    owner: platform-team
+    purpose: Configure Github Authenticated Sso Canary
+    criticality: release-supporting
+
+  - path: scripts/infra/create-atlas-m10-cluster.sh
+    owner: platform-team
+    purpose: Create Atlas M10 Cluster
+    criticality: release-supporting
+
+  - path: scripts/infra/cron-branding-visual-regression.sh
+    owner: platform-team
+    purpose: Cron Branding Visual Regression
+    criticality: release-supporting
+
+  - path: scripts/infra/cron-public-health-check.sh
+    owner: platform-team
+    purpose: Cron Public Health Check
+    criticality: release-supporting
+
+  - path: scripts/infra/data-retention-jobs.sh
+    owner: platform-team
+    purpose: Data Retention Jobs
+    criticality: release-supporting
+
+  - path: scripts/infra/decommission-legacy-ecommerce.sh
+    owner: platform-team
+    purpose: Decommission Legacy Ecommerce
+    criticality: release-supporting
+
+  - path: scripts/infra/deploy-aspects-k8s.sh
+    owner: platform-team
+    purpose: Deploy Aspects K8S
+    criticality: release-supporting
+
+  - path: scripts/infra/docker-cleanup.sh
+    owner: platform-team
+    purpose: Docker Cleanup
+    criticality: release-supporting
+
+  - path: scripts/infra/downgrade-mongodb-to-m0.sh
+    owner: platform-team
+    purpose: Downgrade Mongodb To M0
+    criticality: release-supporting
+
+  - path: scripts/infra/ensure-authentik-admin-mfa.sh
+    owner: platform-team
+    purpose: Ensure Authentik Admin Mfa
+    criticality: release-supporting
+
+  - path: scripts/infra/ensure-authentik-admin.sh
+    owner: platform-team
+    purpose: Ensure Authentik Admin
+    criticality: release-supporting
+
+  - path: scripts/infra/ensure-authentik-hardening.sh
+    owner: platform-team
+    purpose: Ensure Authentik Hardening
+    criticality: release-supporting
+
+  - path: scripts/infra/ensure-authentik-oidc-redirect-uris.sh
+    owner: platform-team
+    purpose: Ensure Authentik Oidc Redirect Uris
+    criticality: release-supporting
+
+  - path: scripts/infra/ensure-platform-admins.sh
+    owner: platform-team
+    purpose: Ensure Platform Admins
+    criticality: release-supporting
+
+  - path: scripts/infra/ensure-studio-sso-canary.sh
+    owner: platform-team
+    purpose: Ensure Studio Sso Canary
+    criticality: release-supporting
+
+  - path: scripts/infra/fix-mfe-refresh-endpoint-site-config.sh
+    owner: platform-team
+    purpose: Compatibility shim for retired refresh-endpoint SiteConfiguration patch path
+    criticality: release-supporting
+
+  - path: scripts/infra/fix-service-selectors.sh
+    owner: platform-team
+    purpose: Fix Service Selectors
+    criticality: release-supporting
+
+  - path: scripts/infra/increase-gke-quota.sh
+    owner: platform-team
+    purpose: Increase Gke Quota
+    criticality: release-supporting
+
+  - path: scripts/infra/kind-load-openedx-image.sh
+    owner: platform-team
+    purpose: Kind Load Openedx Image
+    criticality: release-supporting
+
+  - path: scripts/infra/mongodb-atlas-cutover.sh
+    owner: platform-team
+    purpose: Mongodb Atlas Cutover
+    criticality: release-supporting
+
+  - path: scripts/infra/mongodb-to-atlas.sh
+    owner: platform-team
+    purpose: Mongodb To Atlas
+    criticality: release-supporting
+
+  - path: scripts/infra/normalize-mysql-secrets.sh
+    owner: platform-team
+    purpose: Normalize Mysql Secrets
+    criticality: release-supporting
+
+  - path: scripts/infra/optimize-dev-costs.sh
+    owner: platform-team
+    purpose: Optimize Dev Costs
+    criticality: release-supporting
+
+  - path: scripts/infra/optimize-pod-resources.sh
+    owner: platform-team
+    purpose: Optimize Pod Resources
+    criticality: release-supporting
+
+  - path: scripts/infra/prepare-bbi-infra-ref-bump.sh
+    owner: platform-team
+    purpose: Prepare Bbi Infra Ref Bump
+    criticality: release-supporting
+
+  - path: scripts/infra/provision-admin-api-key.sh
+    owner: platform-team
+    purpose: Provision Admin Api Key
+    criticality: release-supporting
+
+  - path: scripts/infra/provision-atlas-cluster.sh
+    owner: platform-team
+    purpose: Provision Atlas Cluster
+    criticality: release-supporting
+
+  - path: scripts/infra/prune-gcp-snapshots.sh
+    owner: platform-team
+    purpose: Prune Gcp Snapshots
+    criticality: release-supporting
+
+  - path: scripts/infra/purge-frontend-theme-cache.sh
+    owner: platform-team
+    purpose: Purge Frontend Theme Cache
+    criticality: release-supporting
+
+  - path: scripts/infra/rebuild-dev-openedx-db.sh
+    owner: platform-team
+    purpose: Rebuild Dev Openedx Db
+    criticality: release-supporting
+
+  - path: scripts/infra/refresh-i18n-static.sh
+    owner: platform-team
+    purpose: Refresh I18N Static
+    criticality: release-supporting
+
+  - path: scripts/infra/repair-gke-mysql-users.sh
+    owner: platform-team
+    purpose: Repair Gke Mysql Users
+    criticality: release-supporting
+
+  - path: scripts/infra/repair-kind-mysql-users.sh
+    owner: platform-team
+    purpose: Repair Kind Mysql Users
+    criticality: release-supporting
+
+  - path: scripts/infra/repair-routing.sh
+    owner: platform-team
+    purpose: Repair Routing
+    criticality: release-supporting
+
+  - path: scripts/infra/repair-staging-routing.sh
+    owner: platform-team
+    purpose: Repair Staging Routing
+    criticality: release-supporting
+
+  - path: scripts/infra/retire-legacy-mongodb.sh
+    owner: platform-team
+    purpose: Retire Legacy Mongodb
+    criticality: release-supporting
+
+  - path: scripts/infra/run-authenticated-sso-canary-from-infisical.sh
+    owner: platform-team
+    purpose: Run Authenticated Sso Canary From Infisical
+    criticality: release-supporting
+
+  - path: scripts/infra/seed-mongo-dev.sh
+    owner: platform-team
+    purpose: Seed Mongo Dev
+    criticality: release-supporting
+
+  - path: scripts/infra/setup-github-repo-vars.sh
+    owner: platform-team
+    purpose: Setup Github Repo Vars
+    criticality: release-supporting
+
+  - path: scripts/infra/setup-google-oauth.sh
+    owner: platform-team
+    purpose: Setup Google Oauth
+    criticality: release-supporting
+
+  - path: scripts/infra/setup-k8s-overrides.sh
+    owner: platform-team
+    purpose: Setup K8S Overrides
+    criticality: release-supporting
+
+  - path: scripts/infra/setup-mobile-api.sh
+    owner: platform-team
+    purpose: Setup Mobile Api
+    criticality: release-supporting
+
+  - path: scripts/infra/setup-vps-branding-visual-regression-cron.sh
+    owner: platform-team
+    purpose: Setup Vps Branding Visual Regression Cron
+    criticality: release-supporting
+
+  - path: scripts/infra/setup-vps-health-cron.sh
+    owner: platform-team
+    purpose: Setup Vps Health Cron
+    criticality: release-supporting
+
+  - path: scripts/infra/sync-github-authenticated-sso-canary-from-infisical.sh
+    owner: platform-team
+    purpose: Sync Github Authenticated Sso Canary From Infisical
+    criticality: release-supporting
+
+  - path: scripts/infra/sync-grafana-oidc-secret.sh
+    owner: platform-team
+    purpose: Sync Grafana Oidc Secret
+    criticality: release-supporting
+
+  - path: scripts/infra/sync-mongodb-from-production.sh
+    owner: platform-team
+    purpose: Sync Mongodb From Production
+    criticality: release-supporting
+
+  - path: scripts/infra/sync-production-config.sh
+    owner: platform-team
+    purpose: Sync Production Config
+    criticality: release-supporting
+
+  - path: scripts/infra/sync-vendored-openedx-settings.sh
+    owner: platform-team
+    purpose: Sync Vendored Openedx Settings
+    criticality: release-supporting
+
+  - path: scripts/infra/sync-translations.sh
+    owner: platform-team
+    purpose: Sync Translations
+    criticality: release-supporting
+
+  - path: scripts/infra/sync-vendored-mfe-caddyfile.sh
+    owner: platform-team
+    purpose: Sync Vendored Mfe Caddyfile
+    criticality: release-supporting
+
+  - path: scripts/infra/tutor-config-rollback.sh
+    owner: platform-team
+    purpose: Tutor Config Rollback
+    criticality: release-supporting
+
+  - path: scripts/infra/user-data-export.sh
+    owner: platform-team
+    purpose: User Data Export
+    criticality: release-supporting
+
+  - path: scripts/infra/verify-k8s-overrides.sh
+    owner: platform-team
+    purpose: Verify K8S Overrides
+    criticality: release-supporting
+
+  - path: scripts/infra/verify-prometheus-integration.sh
+    owner: platform-team
+    purpose: Verify Prometheus Integration
+    criticality: release-supporting
+
+  - path: scripts/infra/verify-tutor-patches.sh
+    owner: platform-team
+    purpose: Verify Tutor Patches
+    criticality: release-supporting
+
+  - path: scripts/qa/analyze-local-data.sh
+    owner: platform-team
+    purpose: Analyze Local Data
+    criticality: release-supporting
+
+  - path: scripts/qa/audit-alert-noise-baseline.sh
+    owner: platform-team
+    purpose: Audit Alert Noise Baseline
+    criticality: release-supporting
+
+  - path: scripts/qa/audit-analytics-pii.sh
+    owner: platform-team
+    purpose: Audit Analytics Pii
+    criticality: release-supporting
+
+  - path: scripts/qa/audit-auth-access.sh
+    owner: platform-team
+    purpose: Audit Auth Access
+    criticality: release-supporting
+
+  - path: scripts/qa/audit-authenticated-sso-canary-wiring.sh
+    owner: platform-team
+    purpose: Audit Authenticated Sso Canary Wiring
+    criticality: release-supporting
+
+  - path: scripts/qa/build-alert-noise-runtime-sample.sh
+    owner: platform-team
+    purpose: Build Alert Noise Runtime Sample
+    criticality: release-supporting
+
+  - path: scripts/qa/build-branding-before-after-report.sh
+    owner: platform-team
+    purpose: Build Branding Before After Report
+    criticality: release-supporting
+
+  - path: scripts/qa/build-dr-evidence-bundle.sh
+    owner: platform-team
+    purpose: Build Dr Evidence Bundle
+    criticality: release-supporting
+
+  - path: scripts/qa/build-observability-coverage-matrix.sh
+    owner: platform-team
+    purpose: Build Observability Coverage Matrix
+    criticality: release-supporting
+
+  - path: scripts/qa/build-observability-parity-delta.sh
+    owner: platform-team
+    purpose: Build Observability Parity Delta
+    criticality: release-supporting
+
+  - path: scripts/qa/build-observability-parity-review.sh
+    owner: platform-team
+    purpose: Build Observability Parity Review
+    criticality: release-supporting
+
+  - path: scripts/qa/build-observability-parity-rollup.sh
+    owner: platform-team
+    purpose: Build Observability Parity Rollup
+    criticality: release-supporting
+
+  - path: scripts/qa/build-runtime-blocker-handoff-bundle.sh
+    owner: platform-team
+    purpose: Build Runtime Blocker Handoff Bundle
+    criticality: release-supporting
+
+  - path: scripts/qa/build-script-governance-review-packet.sh
+    owner: platform-team
+    purpose: Build Script Governance Review Packet
+    criticality: release-supporting
+
+  - path: scripts/qa/build-validator-drift-evidence-bundle.sh
+    owner: platform-team
+    purpose: Build Validator Drift Evidence Bundle
+    criticality: release-supporting
+
+  - path: scripts/qa/build-validator-drift-review-packet.sh
+    owner: platform-team
+    purpose: Build Validator Drift Review Packet
+    criticality: release-supporting
+
+  - path: scripts/qa/capture-branding-screenshots.sh
+    owner: platform-team
+    purpose: Capture Branding Screenshots
+    criticality: release-supporting
+
+  - path: scripts/qa/check-forbidden-overrides.sh
+    owner: platform-team
+    purpose: Check Forbidden Overrides
+    criticality: release-supporting
+
+  - path: scripts/qa/check-parity.sh
+    owner: platform-team
+    purpose: Check Parity
+    criticality: release-supporting
+
+  - path: scripts/qa/clean-python-caches.sh
+    owner: platform-team
+    purpose: Clean Python Caches
+    criticality: release-supporting
+
+  - path: scripts/qa/collect-velero-evidence.sh
+    owner: platform-team
+    purpose: Collect Velero Evidence
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-restore-drill.sh
+    owner: platform-team
+    purpose: >
+      Verifies live Velero restore-drill recovery evidence in the throwaway
+      restore namespace, including PVC bound state and MySQL probe checks.
+      Strict mode currently fails until checksum verification is implemented,
+      so this remains a runtime DR proof gate rather than an offline static CI
+      check.
+    inputs:
+      - VELERO_RESTORE_NAMESPACE
+      - BACKUP_NAME
+      - DR_EVIDENCE_DIR
+      - STRICT / --strict
+      - kubectl context
+    outputs:
+      - stdout PASS/FAIL summary
+      - var/dr-evidence/restore-drills/*.json
+      - exit code
+    side_effects:
+      - Reads live cluster restore namespace state
+      - Writes local DR evidence JSON under DR_EVIDENCE_DIR
+    dry_run: false
+    lanes: [dev, staging, prod]
+    proof_command: "STRICT=1 bash scripts/qa/verify-restore-drill.sh --namespace velero-restore-test"
+    criticality: release-supporting
+
+  - path: scripts/qa/comprehensive-test.sh
+    owner: platform-team
+    purpose: Retired compatibility wrapper that delegates to scripts/qa/verify-setup.sh
+    criticality: release-supporting
+
+  - path: scripts/qa/course-data-sanity.sh
+    owner: platform-team
+    purpose: Course Data Sanity
+    criticality: release-supporting
+
+  - path: scripts/qa/diagnose-runtime-theme-drift.sh
+    owner: platform-team
+    purpose: Diagnose Runtime Theme Drift
+    criticality: release-supporting
+
+  - path: scripts/qa/fix-admin-login.sh
+    owner: platform-team
+    purpose: Fix Admin Login
+    criticality: release-supporting
+
+  - path: scripts/qa/fix-parity.sh
+    owner: platform-team
+    purpose: Fix Parity
+    criticality: release-supporting
+
+  - path: scripts/qa/generate-evidence-pack.sh
+    owner: platform-team
+    purpose: Generate Evidence Pack
+    criticality: release-supporting
+
+  - path: scripts/qa/generate-runtime-blocker-infra-prompt.sh
+    owner: platform-team
+    purpose: Generate Runtime Blocker Infra Prompt
+    criticality: release-supporting
+
+  - path: scripts/qa/generate-sla-report.sh
+    owner: platform-team
+    purpose: Generate Sla Report
+    criticality: release-supporting
+
+  - path: scripts/qa/generate-synthetic-libraries.sh
+    owner: platform-team
+    purpose: Generate Synthetic Libraries
+    criticality: release-supporting
+
+  - path: scripts/qa/list-critical-backup-pvcs.sh
+    owner: platform-team
+    purpose: List Critical Backup Pvcs
+    criticality: release-supporting
+
+  - path: scripts/qa/list-openedx-hostnames.sh
+    owner: platform-team
+    purpose: List Openedx Hostnames
+    criticality: release-supporting
+
+  - path: scripts/qa/load-test-libraries.sh
+    owner: platform-team
+    purpose: Load Test Libraries
+    criticality: release-supporting
+
+  - path: scripts/qa/load-test-tenants.sh
+    owner: platform-team
+    purpose: Load Test Tenants
+    criticality: release-supporting
+
+  - path: scripts/qa/ops-confidence.sh
+    owner: platform-team
+    purpose: Ops Confidence
+    criticality: release-supporting
+
+  - path: scripts/qa/print-runtime-blocker-status.sh
+    owner: platform-team
+    purpose: Print Runtime Blocker Status
+    criticality: release-supporting
+
+  - path: scripts/qa/run-a11y-runtime-lane.sh
+    owner: platform-team
+    purpose: Run A11Y Runtime Lane
+    criticality: release-supporting
+
+  - path: scripts/qa/run-adr-gates.sh
+    owner: platform-team
+    purpose: Run Adr Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-agent-pack-runtime-gates.sh
+    owner: platform-team
+    purpose: Run Agent Pack Runtime Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-agent-readiness-gates.sh
+    owner: platform-team
+    purpose: Run Agent Readiness Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-branding-evidence-pipeline.sh
+    owner: platform-team
+    purpose: Run Branding Evidence Pipeline
+    criticality: release-supporting
+
+  - path: scripts/qa/run-cross-repo-agent-gates.sh
+    owner: platform-team
+    purpose: Run Cross Repo Agent Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-cross-repo-contract-gates.sh
+    owner: platform-team
+    purpose: Run Cross Repo Contract Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-decision-runtime-gates.sh
+    owner: platform-team
+    purpose: Run Decision Runtime Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-execution-proof-runtime-gates.sh
+    owner: platform-team
+    purpose: Run Execution Proof Runtime Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-frontend-runtime-blocker-sweep.sh
+    owner: platform-team
+    purpose: Run Frontend Runtime Blocker Sweep
+    criticality: release-supporting
+
+  - path: scripts/qa/run-knowledge-integrity-gates.sh
+    owner: platform-team
+    purpose: Run Knowledge Integrity Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-knowledge-runtime-gates.sh
+    owner: platform-team
+    purpose: Run Knowledge Runtime Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-multisite-governance-gates.sh
+    owner: platform-team
+    purpose: Run Multisite Governance Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-observability-first-class.sh
+    owner: platform-team
+    purpose: Run Observability First Class
+    criticality: release-supporting
+
+  - path: scripts/qa/run-operations-gates.sh
+    owner: platform-team
+    purpose: Run Operations Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-phase7-dom-audit-full.sh
+    owner: platform-team
+    purpose: Run Phase7 Dom Audit Full
+    criticality: release-supporting
+
+  - path: scripts/qa/run-phase7-dom-audit.sh
+    owner: platform-team
+    purpose: Run Phase7 Dom Audit
+    criticality: release-supporting
+
+  - path: scripts/qa/run-release-verification-gates.sh
+    owner: platform-team
+    purpose: Run Release Verification Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-review-runtime-gates.sh
+    owner: platform-team
+    purpose: Run Review Runtime Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-skill-runtime-gates.sh
+    owner: platform-team
+    purpose: Run Skill Runtime Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-spec-integrity-gates.sh
+    owner: platform-team
+    purpose: Run Spec Integrity Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-task-runtime-gates.sh
+    owner: platform-team
+    purpose: Run Task Runtime Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/run-team-handbook-gates.sh
+    owner: platform-team
+    purpose: Run Team Handbook Gates
+    criticality: release-supporting
+
+  - path: scripts/qa/smoke-authn-mfe.sh
+    owner: platform-team
+    purpose: Smoke Authn Mfe
+    criticality: release-supporting
+
+  - path: scripts/qa/smoke-test-analytics.sh
+    owner: platform-team
+    purpose: Smoke Test Analytics
+    criticality: release-supporting
+
+  - path: scripts/qa/smoke-test.sh
+    owner: platform-team
+    purpose: Smoke Test
+    criticality: release-supporting
+
+  - path: scripts/qa/sync-openedx-audit-pr-status.sh
+    owner: platform-team
+    purpose: Sync Openedx Audit Pr Status
+    criticality: release-supporting
+
+  - path: scripts/qa/synthetic-alert-drill.sh
+    owner: platform-team
+    purpose: Synthetic Alert Drill
+    criticality: release-supporting
+
+  - path: scripts/qa/tenant-onboarding-dryrun.sh
+    owner: platform-team
+    purpose: Tenant Onboarding Dryrun
+    criticality: release-supporting
+
+  - path: scripts/qa/tenant-onboarding-evidence.sh
+    owner: platform-team
+    purpose: Tenant Onboarding Evidence
+    criticality: release-supporting
+
+  - path: scripts/qa/test-mfe-oauth-fix.sh
+    owner: platform-team
+    purpose: Test Mfe Oauth Fix
+    criticality: release-supporting
+
+  - path: scripts/qa/test-stripe-webhook-delivery.sh
+    owner: platform-team
+    purpose: Test Stripe Webhook Delivery
+    criticality: release-supporting
+
+  - path: scripts/qa/test-verify-script-basename-overlap.sh
+    owner: platform-team
+    purpose: Test Verify Script Basename Overlap
+    criticality: release-supporting
+
+  - path: scripts/qa/test-verify-verify-script-reachability.sh
+    owner: platform-team
+    purpose: Test Verify Verify Script Reachability
+    criticality: release-supporting
+
+  - path: scripts/qa/validate-multisite-config.sh
+    owner: platform-team
+    purpose: Validate Multisite Config
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-mako-template-syntax.sh
+    owner: platform-team
+    purpose: Static syntax check for Mako templates — catches undefined _() and missing imports
+    inputs: []
+    outputs: [exit code]
+    side_effects: none
+    dry_run: n/a
+    lanes: [dev, staging, prod]
+    proof_command: bash scripts/qa/verify-mako-template-syntax.sh
+    criticality: release-blocking
+
+  - path: scripts/qa/verify-a11y-regression-lane.sh
+    owner: platform-team
+    purpose: Verify A11Y Regression Lane
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-accessibility.sh
+    owner: platform-team
+    purpose: Verify Accessibility
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-alert-routing.sh
+    owner: platform-team
+    purpose: Verify Alert Routing
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-argocd-drift.sh
+    owner: platform-team
+    purpose: Verify Argocd Drift
+    criticality: release-supporting
+
+  - path: scripts/qa/verify_adr_governs_vocabulary.py
+    owner: platform-team
+    purpose: Verify ADR governs vocabulary against the declared taxonomy and manifest
+    inputs: []
+    outputs: [stdout, exit code]
+    side_effects: none
+    dry_run: true
+    lanes: [dev, staging, prod]
+    proof_command: python3 scripts/qa/verify_adr_governs_vocabulary.py
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-assessment-audit.sh
+    owner: platform-team
+    purpose: Verify Assessment Audit
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-assessment-bulk.sh
+    owner: platform-team
+    purpose: Verify Assessment Bulk
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-atlas-health.sh
+    owner: platform-team
+    purpose: Verify Atlas Health
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-atlas-modulestore-path.sh
+    owner: platform-team
+    purpose: Verify Atlas Modulestore Path
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-auth-hardening.sh
+    owner: platform-team
+    purpose: Verify Auth Hardening
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-auth-sso-enterprise.sh
+    owner: platform-team
+    purpose: Verify Auth Sso Enterprise
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-auth-surfaces.sh
+    owner: platform-team
+    purpose: Verify Auth Surfaces
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-authenticated-smoke-a11y.sh
+    owner: platform-team
+    purpose: Verify Authenticated Smoke A11Y
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-authenticated-sso-canary.sh
+    owner: platform-team
+    purpose: Verify Authenticated Sso Canary
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-cert-manager-readiness.sh
+    owner: platform-team
+    purpose: Verify Cert Manager Readiness
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-cms-oauth2-secret-present.sh
+    owner: platform-team
+    purpose: Verify Cms Oauth2 Secret Present
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-content-libraries-v2-baseline.sh
+    owner: platform-team
+    purpose: Verify Content Libraries V2 Baseline
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-credentials-notes-smoke.sh
+    owner: platform-team
+    purpose: Verify Credentials Notes Smoke
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-credentials-readiness.sh
+    owner: platform-team
+    purpose: Verify Credentials Readiness
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-cross-browser-branding-smoke.sh
+    owner: platform-team
+    purpose: Verify Cross Browser Branding Smoke
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-documentation-links.sh
+    owner: platform-team
+    purpose: Verify Documentation Links
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-enterprise-mfe-nreum-clean.sh
+    owner: platform-team
+    purpose: Verify Enterprise Mfe Nreum Clean
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-enterprise-readiness-integrity.sh
+    owner: platform-team
+    purpose: Verify Enterprise Readiness Integrity
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-enterprise-runtime-app-wiring.sh
+    owner: platform-team
+    purpose: Verify Enterprise Runtime App Wiring
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-footer-parity.sh
+    owner: platform-team
+    purpose: Verify Footer Parity — canonical gate for Mereka v2 footer across LMS and MFEs
+    criticality: release-blocking
+
+  - path: scripts/qa/deprecated/verify-footer-slot-migration.sh
+    owner: platform-team
+    purpose: Verify Footer Slot Migration
+    criticality: release-supporting
+    status: deprecated
+    deprecated_by: verify-footer-parity.sh
+    deprecated_at: "2026-04-19"
+
+  - path: scripts/qa/deprecated/verify-footer-slot-only.sh
+    owner: platform-team
+    purpose: Verify Footer Slot Only
+    criticality: release-supporting
+    status: deprecated
+    deprecated_by: verify-footer-parity.sh
+    deprecated_at: "2026-04-19"
+
+  - path: scripts/qa/deprecated/verify-footer-slot-evidence-rollback.sh
+    owner: platform-team
+    purpose: Verify Footer Slot Evidence Rollback
+    criticality: release-supporting
+    status: deprecated
+    deprecated_by: verify-footer-parity.sh
+    deprecated_at: "2026-04-19"
+
+  - path: scripts/qa/deprecated/verify-mfe-footer-slot-migration.sh
+    owner: platform-team
+    purpose: Verify Mfe Footer Slot Migration
+    criticality: release-supporting
+    status: deprecated
+    deprecated_by: verify-footer-parity.sh
+    deprecated_at: "2026-04-19"
+
+  - path: scripts/qa/verify-forum-smoke.sh
+    owner: platform-team
+    purpose: Verify Forum Smoke
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-fpf-slot-coverage.sh
+    owner: platform-team
+    purpose: Verify Fpf Slot Coverage
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-frontend-performance-spotcheck.sh
+    owner: platform-team
+    purpose: Verify Frontend Performance Spotcheck
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-gitops-drift.sh
+    owner: platform-team
+    purpose: Verify Gitops Drift
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-image-freshness.sh
+    owner: platform-team
+    purpose: Verify Image Freshness
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-libraries-core.sh
+    owner: platform-team
+    purpose: Verify Libraries Core
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-libraries-foundation.sh
+    owner: platform-team
+    purpose: Verify Libraries Foundation
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-mfe-branding.sh
+    owner: platform-team
+    purpose: Verify Mfe Branding
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-mfe-config-api.sh
+    owner: platform-team
+    purpose: Verify Mfe Config Api
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-mfe-config-contract.sh
+    owner: platform-team
+    purpose: Verify Mfe Config Contract
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-mfe-live-dom-audit.sh
+    owner: platform-team
+    purpose: Verify Mfe Live Dom Audit
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-mfe-route-contract.sh
+    owner: platform-team
+    purpose: Verify Mfe Route Contract
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-mobile-secrets-runtime.sh
+    owner: platform-team
+    purpose: Verify Mobile Secrets Runtime
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-multisite-config.sh
+    owner: platform-team
+    purpose: Verify Multisite Config
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-multisite-ux-consistency.sh
+    owner: platform-team
+    purpose: Verify Multisite Ux Consistency
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-mux-alerts.sh
+    owner: platform-team
+    purpose: Verify Mux Alerts
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-npm-start-mfe-smoke.sh
+    owner: platform-team
+    purpose: Verify Npm Start Mfe Smoke
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-observability-evidence-identity.sh
+    owner: platform-team
+    purpose: Verify Observability Evidence Identity
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-observability-parity-lane-contract.sh
+    owner: platform-team
+    purpose: Verify Observability Parity Lane Contract
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-observability-runtime.sh
+    owner: platform-team
+    purpose: Verify Observability Runtime
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-ora2-operations.sh
+    owner: platform-team
+    purpose: Verify Ora2 Operations
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-parity-rollup-stability.sh
+    owner: platform-team
+    purpose: Verify Parity Rollup Stability
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-platform-admin-env.sh
+    owner: platform-team
+    purpose: Verify Platform Admin Env
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-post-deploy-smoke.sh
+    owner: platform-team
+    purpose: Verify Post Deploy Smoke
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-proctoring-advanced.sh
+    owner: platform-team
+    purpose: Verify Proctoring Advanced
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-rke2-dev-readiness.sh
+    owner: platform-team
+    purpose: Verify Rke2 Dev Readiness
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-runtime-authority-map.sh
+    owner: platform-team
+    purpose: Verify Runtime Authority Map
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-siteconfig-authority.sh
+    owner: platform-team
+    purpose: Verify Siteconfig Authority
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-tenant-isolation.sh
+    owner: platform-team
+    purpose: Verify Tenant Isolation
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-tenant-middleware.sh
+    owner: platform-team
+    purpose: Verify Tenant Middleware
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-tenant-offboarding.sh
+    owner: platform-team
+    purpose: Verify Tenant Offboarding
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-video-analytics.sh
+    owner: platform-team
+    purpose: Verify Video Analytics
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-video-observability.sh
+    owner: platform-team
+    purpose: Verify Video Observability
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-video-upload.sh
+    owner: platform-team
+    purpose: Verify Video Upload
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-xqueue-deployment.sh
+    owner: platform-team
+    purpose: Verify Xqueue Deployment
+    criticality: release-supporting
+
+  - path: scripts/qa/verify-xqueue-graders.sh
+    owner: platform-team
+    purpose: Verify Xqueue Graders
+    criticality: release-supporting
+
+  - path: scripts/qa/verify_adr_suite.sh
+    owner: platform-team
+    purpose: Verify Adr Suite
+    criticality: release-supporting
+
+  - path: scripts/qa/visual-regression-auth.sh
+    owner: platform-team
+    purpose: Visual Regression Auth
+    criticality: release-supporting
+
+  - path: scripts/qa/visual-regression-branding.sh
+    owner: platform-team
+    purpose: Visual Regression Branding
+    criticality: release-supporting
+
+  - path: scripts/qa/visual-regression-test.sh
+    owner: platform-team
+    purpose: Visual Regression Test
+    criticality: release-supporting
+
+  # ── Bead mereka-lms-fyu6: orphan operational scripts (2026-04-20) ────────────
+
+  - path: scripts/ops/park-prod.sh
+    owner: platform-team
+    purpose: Scales GKE prod stateless workloads to 0 (warm-park mode). Includes Velero backup validation.
+    inputs: [--dry-run, CONFIRM_PARK=PARK_PROD]
+    outputs: [stdout (scale status)]
+    side_effects: [scales production Deployments to 0 via kubectl]
+    dry_run: true
+    lanes: [prod]
+    criticality: operational-dangerous
+
+  - path: scripts/ops/unpark-prod.sh
+    owner: platform-team
+    purpose: Reverses warm-park mode via GitOps commit to bbi-infrastructure + ArgoCD reconcile.
+    inputs: [--dry-run, CONFIRM_UNPARK=UNPARK_PROD]
+    outputs: [stdout (ArgoCD sync status)]
+    side_effects: [commits to bbi-infrastructure, triggers ArgoCD sync]
+    dry_run: true
+    lanes: [prod]
+    criticality: operational-dangerous
+
+  - path: scripts/ops/generate-sla-report.sh
+    owner: platform-team
+    purpose: Generates a monthly Markdown SLA report from Prometheus metrics.
+    inputs: [--month YYYY-MM, --output PATH]
+    outputs: [Markdown SLA report file]
+    side_effects: none
+    dry_run: true
+    lanes: [prod]
+    criticality: informational
+
+  - path: scripts/analytics/delete-user-events.sh
+    owner: platform-team
+    purpose: >
+      Deletes ClickHouse analytics events for a user (GDPR right to erasure).
+      Dry-run by default; requires double-token confirmation for --apply.
+    inputs: [--username USER, --dry-run, CONFIRM_DELETE=DELETE_USER_EVENTS]
+    outputs: [stdout (deletion summary)]
+    side_effects: [deletes rows from ClickHouse analytics tables]
+    dry_run: true
+    lanes: [prod]
+    criticality: operational-dangerous
+
+  - path: scripts/analytics/openedx-export-enrollments.sh
+    owner: platform-team
+    purpose: Exports enrollment CSV from Open edX via tutor local run lms management command.
+    inputs: [--output PATH, --course-id COURSE_ID]
+    outputs: [CSV file of enrollment data]
+    side_effects: none
+    dry_run: true
+    lanes: [dev, staging, prod]
+    criticality: operational
+
+  - path: scripts/analytics/verify-user-deletion.sh
+    owner: platform-team
+    purpose: Verifies that a user's analytics data has been deleted from ClickHouse (post-GDPR erasure check).
+    inputs: [--username USER]
+    outputs: [stdout (verification result)]
+    side_effects: none
+    dry_run: true
+    lanes: [prod]
+    criticality: operational
+
+  - path: scripts/migrations/kajabi/export.sh
+    owner: platform-team
+    purpose: Verifies Kajabi export infrastructure readiness (read-only preflight check).
+    inputs: [KAJABI_EXPORT_DIR]
+    outputs: [stdout (readiness report)]
+    side_effects: none
+    dry_run: true
+    lanes: [prod]
+    criticality: operational
+
+  - path: scripts/migrations/kajabi/resilient_import.sh
+    owner: platform-team
+    purpose: >
+      Batch-imports Kajabi data into Open edX with retry logic, progress state,
+      and checkpoint resumption. Reads from KAJABI_EXPORT_DIR.
+    inputs: [KAJABI_EXPORT_DIR, --batch-size N, --resume]
+    outputs: [stdout (import progress), var/migrations/kajabi/state.json]
+    side_effects: [creates Open edX users and course enrollments]
+    dry_run: false
+    lanes: [prod]
+    criticality: operational-dangerous
+
+  - path: scripts/migrations/mct/export.sh
+    owner: platform-team
+    purpose: Verifies MCT export infrastructure readiness (read-only preflight check).
+    inputs: [MCT_EXPORT_DIR]
+    outputs: [stdout (readiness report)]
+    side_effects: none
+    dry_run: true
+    lanes: [prod]
+    criticality: operational
+
+  - path: scripts/migrations/mct/run_full_user_import.sh
+    owner: platform-team
+    purpose: >
+      Runs the full MCT user import pipeline in batches with progress state tracking.
+      Canonical user importer (not run_user_import_k8s.sh which has a hardcoded pod name).
+    inputs: [MCT_EXPORT_DIR, --batch-size N, --resume, --namespace NS]
+    outputs: [stdout (import progress), var/migrations/mct/import-state.json]
+    side_effects: [creates Open edX users via management command in LMS pod]
+    dry_run: false
+    lanes: [prod]
+    criticality: operational-dangerous
+
+  - path: scripts/migrations/mct/run_program_setup.sh
+    owner: platform-team
+    purpose: Sets up MCT programs in Open edX Discovery service from program definitions.
+    inputs: [--namespace NS, --dry-run]
+    outputs: [stdout (program creation status)]
+    side_effects: [creates programs in Discovery service via management command]
+    dry_run: true
+    lanes: [prod]
+    criticality: operational
+
+  - path: scripts/migrations/mct/run_validation.sh
+    owner: platform-team
+    purpose: Validates MCT import results — checks enrollment counts, program linkage, and completion data.
+    inputs: [MCT_EXPORT_DIR, --namespace NS]
+    outputs: [stdout (validation report)]
+    side_effects: none
+    dry_run: true
+    lanes: [prod]
+    criticality: operational
+
+  - path: scripts/migrations/mct/verify_mux_upload.sh
+    owner: platform-team
+    purpose: Verifies Mux video upload completeness against the MCT video mapping JSON.
+    inputs: [VIDEO_MAPPING_JSON, MUX_TOKEN_ID, MUX_TOKEN_SECRET]
+    outputs: [stdout (upload completeness report)]
+    side_effects: none
+    dry_run: true
+    lanes: [prod]
+    criticality: operational
+
+  - path: scripts/mobile/setup-ios-app.sh
+    owner: platform-team
+    purpose: One-time setup for the iOS mobile app — certificates, provisioning profiles, and App Store Connect config.
+    inputs: [APPLE_TEAM_ID, --dry-run]
+    outputs: [stdout (setup status)]
+    side_effects: [registers app in App Store Connect, creates signing certificates]
+    dry_run: true
+    lanes: [prod]
+    criticality: operational
+
+  - path: scripts/gen/update-openedx-hostnames-doc.sh
+    owner: platform-team
+    purpose: Regenerates the Open edX hostnames documentation file from tenant-registry.yaml. Idempotent.
+    inputs: [--check (diff-only mode)]
+    outputs: [docs/reference/openedx-hostnames.md]
+    side_effects: [writes docs/reference/openedx-hostnames.md]
+    dry_run: true
+    lanes: [dev, staging, prod]
+    criticality: informational
+
+# 150 scripts registered

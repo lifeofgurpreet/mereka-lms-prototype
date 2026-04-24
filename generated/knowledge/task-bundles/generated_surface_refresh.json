@@ -1,0 +1,121 @@
+{
+  "affected_truth_surfaces": [
+    "docs/catalog.json",
+    "generated/catalogs/docs-catalog.json",
+    "generated/catalogs/knowledge-catalog.json",
+    "generated/contracts/cross-repo-manifest.json",
+    "generated/contracts/deployment-impact-report.json",
+    "generated/contracts/release-obligations.md",
+    "generated/graphs/knowledge-graph.json",
+    "generated/knowledge/agent-entrypoints.json",
+    "generated/knowledge/agent-task-bundles/cross-repo-contract-change.md",
+    "generated/knowledge/agent-task-bundles/docs-architecture-change.md",
+    "generated/knowledge/agent-task-bundles/evidence-status-update.md",
+    "generated/knowledge/agent-task-bundles/incident-debug.md",
+    "generated/knowledge/agent-task-bundles/migration-change.md",
+    "generated/knowledge/agent-task-bundles/normative-spec-change.md",
+    "generated/knowledge/agent-task-bundles/proposal-change.md",
+    "generated/knowledge/agent-task-bundles/release-change.md",
+    "generated/knowledge/agent-task-bundles/reviewer-pass.md",
+    "generated/knowledge/agent-task-bundles/wrapper-retirement.md",
+    "generated/knowledge/change-manifest.json",
+    "generated/knowledge/review-bundle.md",
+    "generated/knowledge/task-bundles/architecture_or_adr_change.json",
+    "generated/knowledge/task-bundles/architecture_or_adr_change.md",
+    "generated/knowledge/task-bundles/compatibility_or_wrapper_cleanup.json",
+    "generated/knowledge/task-bundles/compatibility_or_wrapper_cleanup.md",
+    "generated/knowledge/task-bundles/cross_repo_contract_change.json",
+    "generated/knowledge/task-bundles/cross_repo_contract_change.md",
+    "generated/knowledge/task-bundles/evidence_or_status_change.json",
+    "generated/knowledge/task-bundles/evidence_or_status_change.md",
+    "generated/knowledge/task-bundles/generated_surface_refresh.json",
+    "generated/knowledge/task-bundles/generated_surface_refresh.md",
+    "generated/knowledge/task-bundles/normative_spec_change.json",
+    "generated/knowledge/task-bundles/normative_spec_change.md",
+    "generated/knowledge/task-bundles/proposal_or_rfc_change.json",
+    "generated/knowledge/task-bundles/proposal_or_rfc_change.md",
+    "generated/knowledge/task-bundles/release_or_runtime_change.json",
+    "generated/knowledge/task-bundles/release_or_runtime_change.md",
+    "generated/knowledge/task-bundles/reviewer_handoff_or_policy_change.json",
+    "generated/knowledge/task-bundles/reviewer_handoff_or_policy_change.md",
+    "generated/knowledge/task-bundles/runbook_or_ops_change.json",
+    "generated/knowledge/task-bundles/runbook_or_ops_change.md",
+    "generated/knowledge/task-context-report.json",
+    "generated/knowledge/truth-impact-report.json",
+    "generated/knowledge/wave10-source-map.json"
+  ],
+  "authority_order": [
+    "explicit Wave 4/5/6 resolver and contract docs",
+    "canonical specs / contracts / runbooks / architecture docs for the affected task type",
+    "generated runtime outputs derived from those surfaces",
+    "status/evidence surfaces",
+    "archive only when explicitly named as historical context"
+  ],
+  "bundle_json_path": "generated/knowledge/task-bundles/generated_surface_refresh.json",
+  "bundle_markdown_path": "generated/knowledge/task-bundles/generated_surface_refresh.md",
+  "bundle_version": 1,
+  "escalation_conditions": [
+    "generated output drifts after source updates"
+  ],
+  "generated_by": "tools/knowledge/build_task_bundle.py",
+  "intent": "Refresh generated catalogs, graphs, manifests, bundles, and indexes without changing governing policy.",
+  "likely_cross_repo_dependencies": [],
+  "out_of_scope": [
+    "docs/archive/**",
+    "specs/archive/**"
+  ],
+  "primary_roots": [
+    "generated",
+    "docs",
+    "specs"
+  ],
+  "read_first": [
+    {
+      "path": "docs/meta/docs-program/WAVE4_REVIEW_FRONT_DOOR.md",
+      "priority": 1,
+      "reason": "Generated surfaces still derive from Wave 4 topology."
+    }
+  ],
+  "related_contracts": [],
+  "related_generated_surfaces": [
+    "generated/knowledge/change-manifest.json",
+    "generated/knowledge/task-context-report.json",
+    "generated/knowledge/skill-index.json"
+  ],
+  "related_runbooks": [
+    "generated/knowledge/task-bundles/runbook_or_ops_change.json",
+    "generated/knowledge/task-bundles/runbook_or_ops_change.md"
+  ],
+  "related_specs": [],
+  "required_commands": [
+    "bash scripts/qa/run-knowledge-runtime-gates.sh",
+    "bash scripts/qa/run-cross-repo-contract-gates.sh",
+    "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD",
+    "python3 tools/knowledge/resolve_task_context.py --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+    "python3 tools/knowledge/resolve_task_context.py --check --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+    "python3 tools/knowledge/build_task_bundle.py --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+    "python3 tools/knowledge/build_task_bundle.py --check --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+    "python3 tools/knowledge/build_skill_index.py --repo-root .",
+    "python3 tools/knowledge/build_skill_index.py --check --repo-root .",
+    "python3 tools/knowledge/verify_task_runtime.py --repo-root . --range origin/main...HEAD",
+    "bash scripts/qa/run-task-runtime-gates.sh"
+  ],
+  "required_evidence": [
+    "require_adr_update",
+    "require_runbook_update",
+    "require_status_update"
+  ],
+  "required_reviewers": [
+    "docs"
+  ],
+  "source_runtime_artifacts": [
+    "generated/knowledge/change-manifest.json",
+    "generated/knowledge/review-bundle.md",
+    "generated/knowledge/truth-impact-report.json",
+    "generated/knowledge/wrapper-retirement-report.json",
+    "generated/contracts/cross-repo-manifest.json",
+    "generated/contracts/deployment-impact-report.json",
+    "generated/contracts/release-obligations.md"
+  ],
+  "task_type": "generated_surface_refresh"
+}

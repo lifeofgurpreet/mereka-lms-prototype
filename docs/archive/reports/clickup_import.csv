@@ -1,0 +1,103 @@
+Task Name,Description,Status,Priority,Due Date,Folder,Tags
+Core LMS Platform Setup,"Built the main learning platform where students take courses. Enables online learning for all users.",Complete,Urgent,2024-11-30,2024 (Completed),Learner-Facing
+Database Setup (MySQL + MongoDB),"Set up data storage for courses and user information. All course and user data is safely stored.",Complete,Urgent,2024-11-30,2024 (Completed),Infrastructure
+Redis Cache Setup,"Makes the platform faster by storing frequently used data. Faster page loads, better user experience.",Complete,High,2024-11-30,2024 (Completed),Infrastructure
+Kajabi Data Migration,"Moved 84000 users and 107 courses from old Kajabi system. No data lost during platform switch.",Complete,Urgent,2024-11-30,2024 (Completed),Data
+Production Deployment,"Launched the platform live at academyv2.mereka.io. Platform is now accessible to users.",Complete,Urgent,2024-11-30,2024 (Completed),Infrastructure
+Multi-Tenant Architecture,"Platform can host multiple brands on one system. Cost savings, easier management.",Complete,High,2025-02-28,2025 (Completed),Infrastructure
+Mereka Branding Theme,"Custom look and feel matching Mereka brand. Professional appearance, brand consistency.",Complete,High,2025-02-28,2025 (Completed),Learner-Facing
+Enterprise Microservices,"Added 4 services: access control, catalog, subsidies, licenses. Ready for enterprise customers.",Complete,High,2025-03-31,2025 (Completed),Infrastructure
+Video Pipeline (Mux),"Integrated video hosting and streaming. Smooth video playback for all courses.",Complete,High,2025-04-30,2025 (Completed),Learner-Facing
+Forum Migration (Ruby to Python),"Upgraded discussion forum to modern technology. Better performance, easier maintenance.",Complete,High,2025-05-31,2025 (Completed),Learner-Facing
+Monitoring and Alerts,"Set up dashboards and automatic alerts. Problems detected and fixed quickly.",Complete,High,2025-06-30,2025 (Completed),Infrastructure
+MCT Data Migration,"Moved 68000 users and 503 videos from MCT platform. Consolidated all learners to one platform.",Complete,Urgent,2025-08-31,2025 (Completed),Data
+Purchase Gateway Scaffold,"Started building payment processing system. Foundation for selling courses.",Complete,High,2025-09-30,2025 (Completed),Revenue
+HubSpot Integration,"Connected marketing system to platform. Better lead tracking and follow-up.",Complete,High,2025-09-30,2025 (Completed),Infrastructure
+13 Learning Programs,"Created structured learning pathways. Clearer learning journey for users.",Complete,High,2025-12-31,2025 (Completed),Learner-Facing
+Design System,"Standardized colors, fonts, and UI elements. Consistent look across all pages.",Complete,Medium,2025-12-31,2025 (Completed),Learner-Facing
+Service Level Agreements,"Defined uptime and performance targets. Clear expectations for platform reliability.",Complete,Medium,2025-12-31,2025 (Completed),Compliance
+Security Policy Document,"Created guidelines for reporting security issues. Clear process for handling vulnerabilities.",Complete,Urgent,2026-01-31,January 2026,Security
+Automated Security Scanning,"Tools that automatically check for security problems. Faster detection of security risks.",Complete,Urgent,2026-01-31,January 2026,Security
+Dependency Monitoring,"Tracks third-party software for known vulnerabilities. Prevents security issues from external code.",Complete,High,2026-01-31,January 2026,Security
+Code Quality Analysis,"Automated code review for security and bugs. Higher quality, more secure code.",Complete,High,2026-01-31,January 2026,Security
+Developer Tool Setup,"Standardized development environment. Faster onboarding of new developers.",Complete,Medium,2026-01-31,January 2026,Infrastructure
+Pull Request Template,"Checklist for code changes. Consistent review process.",Complete,Medium,2026-01-31,January 2026,Infrastructure
+Code Ownership Rules,"Defines who is responsible for each part of code. Clear accountability.",Complete,Medium,2026-01-31,January 2026,Infrastructure
+Software Bill of Materials,"List of all components used in the platform. Transparency for audits and compliance.",Complete,Urgent,2026-02-28,February 2026,Compliance
+Vulnerability Scanning,"Checks all software for known security issues. Proactive security protection.",Complete,Urgent,2026-02-28,February 2026,Security
+CI Pipeline Fix,"Fixed automated testing system. Faster, more reliable deployments.",Complete,High,2026-02-28,February 2026,Infrastructure
+Website Caching,"Set up proper caching for faster loading. Better user experience.",Complete,High,2026-02-28,February 2026,Learner-Facing
+Test Coverage Reporting,"Tracks how much code is tested. Confidence in code quality.",Complete,High,2026-02-28,February 2026,Infrastructure
+Purchase Gateway Tests,"Added tests for payment system. Reliable payment processing.",Complete,High,2026-02-28,February 2026,Revenue
+Image Tag Automation,"Automated container versioning. Safer deployments.",Complete,High,2026-02-28,February 2026,Infrastructure
+Multi-Site Configuration Check,"Validates all tenant settings. Prevents configuration errors.",Complete,High,2026-02-28,February 2026,Admin-Facing
+Secret Scanning,"Detects accidentally committed passwords. Prevents credential leaks.",Complete,High,2026-02-28,February 2026,Security
+Branch Protection,"Requires review before code changes. Prevents accidental breaks.",Complete,High,2026-02-28,February 2026,Security
+Upgrade Policy,"Documented how and when to upgrade platform. Planned, safe upgrades.",Complete,Medium,2026-02-28,February 2026,Infrastructure
+Incident Response Guide,"Playbook for security incidents. Faster response to issues.",Complete,High,2026-02-28,February 2026,Security
+Server Connectivity Fix,"Fixed connection issues between systems. Platform stability restored.",Complete,Urgent,2026-02-19,February 2026,Infrastructure
+Secret Management Fix,"Fixed how secrets are synced to servers. Secure credential handling.",Complete,Urgent,2026-02-19,February 2026,Security
+Image Pull Credentials,"Fixed server ability to download containers. Deployments work correctly.",Complete,Urgent,2026-02-19,February 2026,Infrastructure
+Full System Health Check,"Verified all 10 core services working. Platform fully operational.",Complete,Urgent,2026-02-21,February 2026,Infrastructure
+Footer Data Contract,"Standardized footer content across sites. Consistent branding.",Complete,High,2026-02-28,February 2026,Learner-Facing
+Frontend Upgrade,"Updated micro-frontends to latest version. Better features, bug fixes.",Complete,High,2026-02-28,February 2026,Learner-Facing
+SSO Login Verification,"Testing single sign-on with corporate accounts. Enterprise customers can use company login.",In Progress,High,2026-03-07,March 2026 (In Progress),Admin-Facing
+Forum Moderation Check,"Verifying forum management tools work. Admins can manage discussions.",In Progress,Medium,2026-03-07,March 2026 (In Progress),Admin-Facing
+Payment System Check,"Testing Stripe payment integration. Reliable course purchases.",In Progress,High,2026-03-07,March 2026 (In Progress),Revenue
+Server Hardening,"Making servers more reliable and secure. Less downtime, better security.",In Progress,Urgent,2026-03-15,March 2026 (In Progress),Infrastructure
+Frontend Ulmo Upgrade,"Updating all frontend apps to new version. Better user interface.",In Progress,High,2026-03-15,March 2026 (In Progress),Learner-Facing
+Server Validation,"Testing LMS on new server infrastructure. Smooth migration to better servers.",In Progress,High,2026-03-15,March 2026 (In Progress),Infrastructure
+Footer Consistency,"Making footer match across all pages. Consistent brand experience.",In Progress,High,2026-03-21,March 2026 (In Progress),Learner-Facing
+Code Cleanup,"Reorganizing patch scripts for maintainability. Easier future updates.",In Progress,Medium,2026-03-21,March 2026 (In Progress),Infrastructure
+Video System Completion,"Finish video upload and playback system. Full video course capability.",In Progress,High,2026-03-31,March 2026 (In Progress),Learner-Facing
+SSO Configuration Page,"Admin screen to set up corporate login. Self-service SSO setup.",Planned,High,2026-03-07,March 2026,Admin-Facing
+Identity Provider Setup,"Accept login from corporate systems (Okta, Azure). Employees use existing credentials.",Planned,High,2026-03-07,March 2026,Admin-Facing
+SSO Phase 1 Complete,"Enterprise customers can use corporate login. Ready for enterprise sales.",Planned,Urgent,2026-04-01,April 2026,Revenue
+Stripe Integration Complete,"Full payment processing with credit cards. Accept payments for courses.",Planned,Urgent,2026-04-15,April 2026,Revenue
+Payment Server Setup,"Deploy payment system to production. Live payment processing.",Planned,High,2026-04-15,April 2026,Infrastructure
+Remove Old Payment Code,"Clean up legacy ecommerce code. Less technical debt.",Planned,Medium,2026-04-30,April 2026,Infrastructure
+Footer Consistency Complete,"All pages have correct branding. Professional appearance.",Planned,High,2026-04-15,April 2026,Learner-Facing
+Studio Branding,"Course authoring tool matches brand. Consistent experience for authors.",Planned,High,2026-04-30,April 2026,Admin-Facing
+Server Migration Plan,"Plan for switching to new infrastructure. Smooth transition.",Planned,High,2026-04-30,April 2026,Infrastructure
+New Server Production Ready,"Servers fully tested and hardened. Reliable infrastructure.",Planned,Urgent,2026-05-15,May 2026,Infrastructure
+Forum Search Fix,"Improve discussion search functionality. Find answers faster.",Planned,Medium,2026-05-15,May 2026,Learner-Facing
+Forum Testing,"Verify posting, replying, searching works. Reliable discussions.",Planned,Medium,2026-05-15,May 2026,Learner-Facing
+Production Server Switch,"Move live traffic to new servers. Better infrastructure.",Planned,Urgent,2026-06-15,June 2026,Infrastructure
+85% Test Coverage,"Most code is automatically tested. Fewer bugs in production.",Planned,High,2026-06-30,June 2026,Infrastructure
+External Tool Integration Guide,"How to connect third-party tools. Easier integrations.",Planned,Medium,2026-06-15,June 2026,Infrastructure
+Cookie Consent Banner,"Ask users about tracking cookies. GDPR compliance.",Planned,High,2026-06-30,June 2026,Compliance
+User Data Cleanup,"Remove user data when requested. Privacy compliance.",Planned,High,2026-06-30,June 2026,Compliance
+iOS App Beta,"TestFlight release for iPhone users. Mobile learning option.",Planned,High,2026-07-15,July 2026,Learner-Facing
+Mobile Backend,"Server support for mobile app features. Push notifications, sync.",Planned,High,2026-07-31,July 2026,Infrastructure
+External Tool Store,"Library of approved integrations. Easy tool installation.",Planned,Medium,2026-07-31,July 2026,Admin-Facing
+Security Policy Enforcement,"Automatic security rules. Consistent security.",Planned,High,2026-07-31,July 2026,Security
+Automated UI Testing,"Tests that click through the website. Catch UI bugs early.",Planned,Medium,2026-07-31,July 2026,Infrastructure
+Payment System Live,"Accept real payments for courses. Revenue from course sales.",Planned,Urgent,2026-08-15,August 2026,Revenue
+Subscription Support,"Recurring monthly/yearly payments. Predictable revenue.",Planned,High,2026-08-31,August 2026,Revenue
+Android App Beta,"Early release for Android users. Mobile learning for Android.",Planned,High,2026-08-31,August 2026,Learner-Facing
+Post-Deploy Testing,"Automatic tests after each release. Catch issues immediately.",Planned,Medium,2026-08-31,August 2026,Infrastructure
+Visual Change Detection,"Detect unintended UI changes. Consistent user experience.",Planned,Medium,2026-08-31,August 2026,Learner-Facing
+Accessibility Compliance,"Platform works with screen readers. Accessible to all users.",Planned,High,2026-08-31,August 2026,Compliance
+92% Test Coverage,"Almost all code automatically tested. High code quality.",Planned,High,2026-09-30,September 2026,Infrastructure
+Translation Support,"Framework for multiple languages. Reach non-English speakers.",Planned,High,2026-09-15,September 2026,Learner-Facing
+Onboarding Success Metrics,"Track how quickly users succeed. Measure learning effectiveness.",Planned,Medium,2026-09-30,September 2026,Infrastructure
+Tenant Data Isolation Tests,"Verify brands can't see each other's data. Data privacy for clients.",Planned,High,2026-09-30,September 2026,Compliance
+Release Documentation,"Automated evidence for each release. Audit compliance.",Planned,Medium,2026-10-15,October 2026,Compliance
+Monitoring Standardization,"Consistent metric naming. Easier troubleshooting.",Planned,Medium,2026-10-31,October 2026,Infrastructure
+Dashboard Validation,"Verify dashboards show correct data. Accurate reporting.",Planned,Medium,2026-10-31,October 2026,Infrastructure
+Performance Testing,"Automated website speed checks. Fast page loads.",Planned,Medium,2026-10-31,October 2026,Learner-Facing
+App Size Limits,"Prevent apps from getting too large. Faster downloads.",Planned,Medium,2026-10-31,October 2026,Learner-Facing
+Interaction Speed Metric,"Measure how fast buttons respond. Smooth user experience.",Planned,Medium,2026-10-31,October 2026,Learner-Facing
+Disaster Recovery Drills,"Monthly practice restoring from backup. Prepared for emergencies.",Planned,High,2026-11-15,November 2026,Infrastructure
+Container Security Hardening,"Additional security for application containers. Better protection.",Planned,High,2026-11-30,November 2026,Security
+Security Exception Tracking,"Document approved security exceptions. Audit compliance.",Planned,Medium,2026-11-30,November 2026,Compliance
+Code Signing,"Verify code hasn't been tampered with. Supply chain security.",Planned,Medium,2026-11-30,November 2026,Security
+Configuration Drift Detection,"Alert when settings change unexpectedly. Prevent configuration issues.",Planned,Medium,2026-11-30,November 2026,Infrastructure
+100% Feature Complete,"All planned features delivered. Full platform capability.",Planned,Urgent,2026-12-31,December 2026,Infrastructure
+Exam Proctoring,"Monitor learners during exams. Certification integrity.",Planned,Medium,2026-12-31,December 2026,Compliance
+Analytics Data Retention,"Automatically delete old analytics data. Privacy compliance.",Planned,High,2026-12-15,December 2026,Compliance
+Staging Environment,"Test environment matching production. Safe testing before release.",Planned,High,2026-12-31,December 2026,Infrastructure
+GDPR Compliance Complete,"Full data privacy compliance. Legal compliance.",Planned,Urgent,2026-12-31,December 2026,Compliance
+Course Data Recovery,"Restore additional course content from old systems. Cannot find original export files.",Blocked,Low,,Blocked,Data
+Full Data Restore,"Import recovered data to platform. Waiting for export files.",Blocked,Low,,Blocked,Data
+Kajabi Test Import,"Practice migration before real one. Waiting for data restore.",Blocked,Low,,Blocked,Data

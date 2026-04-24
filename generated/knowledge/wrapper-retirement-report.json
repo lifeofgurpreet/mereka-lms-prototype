@@ -1,0 +1,11 @@
+{
+  "entries": [],
+  "generated_by": "tools/knowledge/build_wrapper_retirement_report.py",
+  "status_counts": {
+    "active_and_justified": 0,
+    "active_but_suspicious": 0,
+    "safe_to_retire": 0,
+    "suspicious": 0
+  },
+  "wrapper_count": 0
+}

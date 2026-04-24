@@ -1,0 +1,29 @@
+retention_policy:
+  version: "1.0"
+  last_reviewed: "2026-02-24"
+  doc: "docs/policies/operations/ANALYTICS_DATA_RETENTION.md"
+  tiers:
+    raw_events:
+      target_table: "tracking.events"
+      retention_days: 365
+      enforcement: "clickhouse_ttl"
+      ttl_expression: "event_time + INTERVAL 365 DAY"
+      rationale: "Supports year-over-year learning analytics comparisons"
+    pii_events:
+      target_table: "tracking.pii_events"
+      retention_days: 90
+      enforcement: "scheduled_anonymize"
+      anonymize_job: "python manage.py anonymize_analytics_pii --older-than 90"
+      rationale: "PDPA requires minimal PII retention; anonymized record preserved for analytics"
+    debug_traces:
+      target_table: "tracking.debug"
+      retention_days: 30
+      enforcement: "clickhouse_ttl"
+      ttl_expression: "event_time + INTERVAL 30 DAY"
+      rationale: "Debug traces cover incident investigation windows; high volume, low analytical value"
+    aggregated_reports:
+      target_table: null
+      retention: "indefinite"
+      retention_days: null
+      enforcement: "none"
+      rationale: "De-identified dbt model output; small footprint; needed for long-term reporting"

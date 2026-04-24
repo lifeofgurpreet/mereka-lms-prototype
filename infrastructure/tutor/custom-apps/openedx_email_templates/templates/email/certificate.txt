@@ -1,0 +1,10 @@
+Congratulations!
+
+Hi {{ user_name }},
+
+You have earned a certificate for completing: {{ course_name }}
+
+View certificate: {{ certificate_url }}
+
+---
+{{ org_display_name }}

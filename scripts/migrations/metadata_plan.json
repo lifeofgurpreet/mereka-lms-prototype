@@ -1,0 +1,338 @@
+{
+  "generated_at": "2026-04-02T01:08:54.547901+00:00",
+  "statistics": {
+    "total": 41,
+    "with_description": 23,
+    "with_thumbnail": 9
+  },
+  "courses": [
+    {
+      "course_key": "course-v1:MEREKA+F101-MS+course",
+      "course_number": "F101-MS",
+      "title": "Freelancing 101",
+      "short_description": "Starting a new path in your life can be difficult, and if that path is freelancing, you might find yourself being lost and not knowing where to even start. In this course, you'll be provided with everything that you need to know about the freelancing economy, how to navigate freelancing platforms, and how to start your freelancing career.",
+      "overview": "Starting a new path in your life can be difficult, and if that path is freelancing, you might find yourself being lost and not knowing where to even start. In this course, you'll be provided with everything that you need to know about the freelancing economy, how to navigate freelancing platforms, and how to start your freelancing career.",
+      "thumbnail_url": "https://image.mux.com/TMyPb7efPMBkIKf53J02cHFe2wTUeH4QkO300u00YXuZBw/thumbnail.jpg?time=5"
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT1-EN+course",
+      "course_number": "MCT1-EN",
+      "title": "Soft Skills",
+      "short_description": "This online course will guide you, step-by-step, to become a Movers Facilitator!\n\n\"For the feeling of trust to develop, we have to feel safe expressing ourselves first. \" - Simon Sinek\n\nWe all need a place where we can express ourselves freely knowing that we are not judged and we are accepted as who we are.\n\n\nMovers Programme has been able to try its best to keep this space safe, judgement-free and full of kindness. As we are expanding, we trust you are on the mission of protecting our beloved ",
+      "overview": "This online course will guide you, step-by-step, to become a Movers Facilitator!\n\n\"For the feeling of trust to develop, we have to feel safe expressing ourselves first. \" - Simon Sinek\n\nWe all need a place where we can express ourselves freely knowing that we are not judged and we are accepted as who we are.\n\n\nMovers Programme has been able to try its best to keep this space safe, judgement-free and full of kindness. As we are expanding, we trust you are on the mission of protecting our beloved people and this community.",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT14-EN+course",
+      "course_number": "MCT14-EN",
+      "title": "Employability [EN]",
+      "short_description": "The Movers Workshop on Digital Branding & Employability is a 2-hour interactive workshop on the importance of digital branding and professional networks, using LinkedIn, how to apply for jobs and job selection from a recruiter’s perspective. After attending the Movers Workshop, participants will be able to understand the importance of personal digital branding for employability and how they can define it, and navigate the main functionalities of LinkedIn (improving their profile, creating their ",
+      "overview": "The Movers Workshop on Digital Branding & Employability is a 2-hour interactive workshop on the importance of digital branding and professional networks, using LinkedIn, how to apply for jobs and job selection from a recruiter’s perspective. After attending the Movers Workshop, participants will be able to understand the importance of personal digital branding for employability and how they can define it, and navigate the main functionalities of LinkedIn (improving their profile, creating their network, searching for opportunities).",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT14-VI+course",
+      "course_number": "MCT14-VI",
+      "title": "Employability [VI]",
+      "short_description": "",
+      "overview": "",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT15-EN+course",
+      "course_number": "MCT15-EN",
+      "title": "Mobile Literacy",
+      "short_description": "",
+      "overview": "",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT16-EN+course",
+      "course_number": "MCT16-EN",
+      "title": "Basic Microsoft [EN]",
+      "short_description": "Khóa học này sẽ giới thiệu cho bạn các bộ phận và các loại máy tính khác nhau và chức năng của chúng. Bạn cũng sẽ tìm hiểu sự khác nhau giữa các hệ điều hành và các ứng dụng cũng như các chức năng của chúng. Khóa học cũng sẽ trình bày về các thiết bị ngoại vi và các thiết bị lưu trữ di động.",
+      "overview": "Khóa học này sẽ giới thiệu cho bạn các bộ phận và các loại máy tính khác nhau và chức năng của chúng. Bạn cũng sẽ tìm hiểu sự khác nhau giữa các hệ điều hành và các ứng dụng cũng như các chức năng của chúng. Khóa học cũng sẽ trình bày về các thiết bị ngoại vi và các thiết bị lưu trữ di động.",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT16-VI+course",
+      "course_number": "MCT16-VI",
+      "title": "Basic Microsoft [VI]",
+      "short_description": "",
+      "overview": "",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT17-EN+course",
+      "course_number": "MCT17-EN",
+      "title": "Pursuing a career in Project Management",
+      "short_description": "",
+      "overview": "",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT19-EN+course",
+      "course_number": "MCT19-EN",
+      "title": "Pursuing a career in the field of Data Analytics",
+      "short_description": "",
+      "overview": "",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT20-EN+course",
+      "course_number": "MCT20-EN",
+      "title": "Developer",
+      "short_description": "Practice the beginning steps of web development by creating a simple web project in Visual Studio Code that contains a web page, a CSS file, and a JavaScript file. Learn how to use developer tools in your browser to check your work.",
+      "overview": "Practice the beginning steps of web development by creating a simple web project in Visual Studio Code that contains a web page, a CSS file, and a JavaScript file. Learn how to use developer tools in your browser to check your work.",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT21-EN+course",
+      "course_number": "MCT21-EN",
+      "title": "Digital Marketing: \"Digital Marketing Strategies for Your Business\" [EN]",
+      "short_description": "Setelah mengikuti pembelajaran Kamu dapat mengingat kembali hasil pembelajaranmu melalui Quiz berikut!",
+      "overview": "Setelah mengikuti pembelajaran Kamu dapat mengingat kembali hasil pembelajaranmu melalui Quiz berikut!",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT21-ID+course",
+      "course_number": "MCT21-ID",
+      "title": "Digital Marketing: \"Digital Marketing Strategies for Your Business\" [ID]",
+      "short_description": "",
+      "overview": "",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT22-EN+course",
+      "course_number": "MCT22-EN",
+      "title": "Careering as an Administrative Professional [EN]",
+      "short_description": "Selanjutnya, kami telah menyediakan studi kasus yang akan membantu kamu menerapkan konsep-konsep yang telah kamu pelajari pada modul-modul sebelumnya. Selamat mengerjakan!",
+      "overview": "Selanjutnya, kami telah menyediakan studi kasus yang akan membantu kamu menerapkan konsep-konsep yang telah kamu pelajari pada modul-modul sebelumnya. Selamat mengerjakan!",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT22-ID+course",
+      "course_number": "MCT22-ID",
+      "title": "Careering as an Administrative Professional [ID]",
+      "short_description": "",
+      "overview": "",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT24-EN+course",
+      "course_number": "MCT24-EN",
+      "title": "AI Fluency [EN]",
+      "short_description": "This course provides foundational knowledge about the principles of artificial intelligence (AI) and how it is used in educational settings. It includes a comprehensive exploration into AI principles, an introductory module on leveraging the potential of AI for trainers, a practical exploration of AI applications, and activities for incorporating AI into teaching and learning. By taking this course, you will develop an understanding of various types of AI systems and their practical applications",
+      "overview": "This course provides foundational knowledge about the principles of artificial intelligence (AI) and how it is used in educational settings. It includes a comprehensive exploration into AI principles, an introductory module on leveraging the potential of AI for trainers, a practical exploration of AI applications, and activities for incorporating AI into teaching and learning. By taking this course, you will develop an understanding of various types of AI systems and their practical applications. You will also learn how to enhance your training programs with AI. Additionally, you will gain valuable insights from real-world examples of AI in action and examine how AI can enhance educational processes.",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT24-VI+course",
+      "course_number": "MCT24-VI",
+      "title": "AI Fluency [VI]",
+      "short_description": "",
+      "overview": "",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT24-ZH+course",
+      "course_number": "MCT24-ZH",
+      "title": "AI Fluency [ZH]",
+      "short_description": "",
+      "overview": "",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT27-EN+course",
+      "course_number": "MCT27-EN",
+      "title": "Digital Literacy",
+      "short_description": "The future isn’t random. It’s the result of the choices that we make now. We’ll be talking about technologies and industries that will define the next decade and beyond.\n\nJoin our host Cristina Quinn, a science and technology reporter, as she dives into everything from Minecraft to cyber warfare.\n\nYou can wait for the future to happen to you or engage with it right now and ahead of the curve on .future– a podcast from Microsoft Story Labs, produced in partnership with Gimlet Creative.",
+      "overview": "The future isn’t random. It’s the result of the choices that we make now. We’ll be talking about technologies and industries that will define the next decade and beyond.\n\nJoin our host Cristina Quinn, a science and technology reporter, as she dives into everything from Minecraft to cyber warfare.\n\nYou can wait for the future to happen to you or engage with it right now and ahead of the curve on .future– a podcast from Microsoft Story Labs, produced in partnership with Gimlet Creative.",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT28-VI+course",
+      "course_number": "MCT28-VI",
+      "title": "Mastering Digital Tools - Thu hẹp khoảng cách số",
+      "short_description": "",
+      "overview": "",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT30-EN+course",
+      "course_number": "MCT30-EN",
+      "title": "Climate Education",
+      "short_description": "An online course for local youth-led CSOs, networks and communities to enhance their climate advocacy and support young climate advocates, especially those left behind. \n\nThe course will focus on community mobilization, resources mobilization, team building, communications, LNOB and gender equality, and equip CSOs leaders with tools and curriculums to expand their climate advocacy.",
+      "overview": "An online course for local youth-led CSOs, networks and communities to enhance their climate advocacy and support young climate advocates, especially those left behind. \n\nThe course will focus on community mobilization, resources mobilization, team building, communications, LNOB and gender equality, and equip CSOs leaders with tools and curriculums to expand their climate advocacy.",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT31-EN+course",
+      "course_number": "MCT31-EN",
+      "title": "Your Future in Green Jobs [EN]",
+      "short_description": "In this module, you will be introduced to key concepts related to climate change and green jobs. This module will help you \"spot the challenge\" of climate change and understand how you can act on your climate concerns through your career decisions. By the end of this module, you will be ready to move onto Module 2: Listen to Yourself.",
+      "overview": "In this module, you will be introduced to key concepts related to climate change and green jobs. This module will help you \"spot the challenge\" of climate change and understand how you can act on your climate concerns through your career decisions. By the end of this module, you will be ready to move onto Module 2: Listen to Yourself.",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT32-EN+course",
+      "course_number": "MCT32-EN",
+      "title": "Personal Branding",
+      "short_description": "",
+      "overview": "",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT33-ID+course",
+      "course_number": "MCT33-ID",
+      "title": "Personal Branding",
+      "short_description": "",
+      "overview": "",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT34-EN+course",
+      "course_number": "MCT34-EN",
+      "title": "Personal Well-being",
+      "short_description": "",
+      "overview": "",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT35-EN+course",
+      "course_number": "MCT35-EN",
+      "title": "Personal Finance",
+      "short_description": "",
+      "overview": "",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT4-EN+course",
+      "course_number": "MCT4-EN",
+      "title": "Productivity with Microsoft 365 (Bahasa) [EN]",
+      "short_description": "Belajar teknik dan trik mendesain dokumen profesional di Microsoft Word dalam kursus interaktif ini.",
+      "overview": "Belajar teknik dan trik mendesain dokumen profesional di Microsoft Word dalam kursus interaktif ini.",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT4-ID+course",
+      "course_number": "MCT4-ID",
+      "title": "Productivity with Microsoft 365 (Bahasa) [ID]",
+      "short_description": "",
+      "overview": "",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT44-EN+course",
+      "course_number": "MCT44-EN",
+      "title": "Content Creation",
+      "short_description": "This Content Creation for Green Skills course aims to empower young individuals with the skills and knowledge to explore the fundamentals of content creation with a focus on green skills. The course emphasizes creating and distributing impactful content as an essential green skill, highlighting how eco-conscious storytelling and digital media can inspire sustainable action and address environmental challenges effectively. \n\nThis online course was developed by Ms. Sochenda Aok, a 5-year experienc",
+      "overview": "This Content Creation for Green Skills course aims to empower young individuals with the skills and knowledge to explore the fundamentals of content creation with a focus on green skills. The course emphasizes creating and distributing impactful content as an essential green skill, highlighting how eco-conscious storytelling and digital media can inspire sustainable action and address environmental challenges effectively. \n\nThis online course was developed by Ms. Sochenda Aok, a 5-year experienced environmental content creator from Cambodia who founded ZEROW, a green media platform to empower youth to adopt a sustainable lifestyle. Sochenda is a Forbes 30 Under 30 and an ASEAN Youth Eco-Champions Awardee.",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT45-EN+course",
+      "course_number": "MCT45-EN",
+      "title": "Become an Entrepreneur",
+      "short_description": "In Module 1, you’ll shift your focus from chasing big ideas to deeply understanding real problems—starting with empathy, curiosity, and your own lived experiences. You’ll learn how to define a meaningful problem, reflect on your personal values and strengths, and lay a strong foundation for building a venture that’s not only innovative, but deeply rooted in what matters most.",
+      "overview": "In Module 1, you’ll shift your focus from chasing big ideas to deeply understanding real problems—starting with empathy, curiosity, and your own lived experiences. You’ll learn how to define a meaningful problem, reflect on your personal values and strengths, and lay a strong foundation for building a venture that’s not only innovative, but deeply rooted in what matters most.",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT46-EN+course",
+      "course_number": "MCT46-EN",
+      "title": "Speak with Impact",
+      "short_description": "Module 0 sets the stage for your confident speaking journey by exploring why communication is the #1 skill for career and personal growth. You’ll meet Rae, your instructor, and discover how owning your voice is about aligning your inner confidence with your outer expression. The module also outlines what to expect from the course, introduces key mindsets for success, and helps you set clear intentions to track your growth.",
+      "overview": "Module 0 sets the stage for your confident speaking journey by exploring why communication is the #1 skill for career and personal growth. You’ll meet Rae, your instructor, and discover how owning your voice is about aligning your inner confidence with your outer expression. The module also outlines what to expect from the course, introduces key mindsets for success, and helps you set clear intentions to track your growth.",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MCT47-ID+course",
+      "course_number": "MCT47-ID",
+      "title": "Gaming Garage with HP",
+      "short_description": "",
+      "overview": "",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+MYFC-MS+course",
+      "course_number": "MYFC-MS",
+      "title": "Managing Your First Client",
+      "short_description": "Managing clients can be challenging at times, and knowing how to manage the client will benefit the client and you. We will explore different strategies and perspectives on good business practices, how to nurture client relationships, manage conflicts and clients, legal tips to protect you, and steps to close a job that will lead you to better client management.",
+      "overview": "Managing clients can be challenging at times, and knowing how to manage the client will benefit the client and you. We will explore different strategies and perspectives on good business practices, how to nurture client relationships, manage conflicts and clients, legal tips to protect you, and steps to close a job that will lead you to better client management.",
+      "thumbnail_url": "https://image.mux.com/aFgnBwR9KDodPlWYfMXO2D8UqNAAiEGumFhx7Hcn7V00/thumbnail.jpg?time=5"
+    },
+    {
+      "course_key": "course-v1:MEREKA+PF-ID+course",
+      "course_number": "PF-ID",
+      "title": "Personal Finance",
+      "short_description": "Becoming financially independent is a goal that everyone wants to achieve, but the path to gaining this independence can often be complicated. Through understanding your personal financial habits, you will be able to create a plan to  manage your finances and budget accordingly in order to lead a more financially sustainable lifestyle.",
+      "overview": "Becoming financially independent is a goal that everyone wants to achieve, but the path to gaining this independence can often be complicated. Through understanding your personal financial habits, you will be able to create a plan to  manage your finances and budget accordingly in order to lead a more financially sustainable lifestyle.",
+      "thumbnail_url": "https://image.mux.com/uMAZmfLedwVMO46O6ht01liPitUjUtVfpB2InfpqQAcI/thumbnail.jpg?time=5"
+    },
+    {
+      "course_key": "course-v1:MEREKA+PW-EN+course",
+      "course_number": "PW-EN",
+      "title": "Professional Writing",
+      "short_description": "",
+      "overview": "",
+      "thumbnail_url": "https://image.mux.com/N4KHgZxSCvRiVGaFtBcIDZBLI00fRHMGKrWPYu8CC238/thumbnail.jpg?time=5"
+    },
+    {
+      "course_key": "course-v1:MEREKA+SP-MS+course",
+      "course_number": "SP-MS",
+      "title": "Skills Profiling",
+      "short_description": "Having the right skill sets could take your career to the next level. However, profiling skills can be tedious and confusing. For this course, you will learn how to choose career pathways based on your skills, identify your unique skill sets as well as areas that would need some sharpening.",
+      "overview": "Having the right skill sets could take your career to the next level. However, profiling skills can be tedious and confusing. For this course, you will learn how to choose career pathways based on your skills, identify your unique skill sets as well as areas that would need some sharpening.",
+      "thumbnail_url": "https://image.mux.com/gYZ3PcHIkGrklGBcMEOs2YHwp7EHtzMC8z0200UB9egYc/thumbnail.jpg?time=5"
+    },
+    {
+      "course_key": "course-v1:MEREKA+SYFC-MS+course",
+      "course_number": "SYFC-MS",
+      "title": "Securing Your First Client",
+      "short_description": "Finding your first client can be the most challenging part of your freelancing journey. We will explore the different methods and channels for sourcing clients, employ your resources to secure clients, utilize an entrepreneurial mindset, and learn strategies to calculate the rate for your freelancing service. \r\n\r\nA large part of being an entrepreneur is being resourceful and staying resilient in the face of adversity. We’ll show you how to tap into available networks you have at your disposal to",
+      "overview": "Finding your first client can be the most challenging part of your freelancing journey. We will explore the different methods and channels for sourcing clients, employ your resources to secure clients, utilize an entrepreneurial mindset, and learn strategies to calculate the rate for your freelancing service. \r\n\r\nA large part of being an entrepreneur is being resourceful and staying resilient in the face of adversity. We’ll show you how to tap into available networks you have at your disposal today and we’ll help you build your first client relationship.",
+      "thumbnail_url": "https://image.mux.com/Or02TxCKqLd01LuOvR00MHrFSg4Qp2kPPPVkYwrpbp9xHs/thumbnail.jpg?time=5"
+    },
+    {
+      "course_key": "course-v1:MEREKA+SYFJ-ID+course",
+      "course_number": "SYFJ-ID",
+      "title": "Securing Your First Job",
+      "short_description": "Finding a job that matches with your career and life aspirations is a goal for many. To find a job that fits you best, you need to know yourself first. In this course, you will explore your aspirations and then, learn ways to find and secure employment. Finding and securing a job is a skill in itself.",
+      "overview": "Finding a job that matches with your career and life aspirations is a goal for many. To find a job that fits you best, you need to know yourself first. In this course, you will explore your aspirations and then, learn ways to find and secure employment. Finding and securing a job is a skill in itself.",
+      "thumbnail_url": "https://image.mux.com/9vmZ8RLm5JqESQtNVnbgDupcDw0062WqMoV7TVejWEU00/thumbnail.jpg?time=5"
+    },
+    {
+      "course_key": "course-v1:MEREKA+TYJ-EN+course",
+      "course_number": "TYJ-EN",
+      "title": "Thriving In Your Job",
+      "short_description": "",
+      "overview": "",
+      "thumbnail_url": "https://image.mux.com/FHMOAgs02VbyjBFpdamcPkVl02TxIjpi024uTt4mB3YJzg/thumbnail.jpg?time=5"
+    },
+    {
+      "course_key": "course-v1:MEREKA+UPAI1-EN+course",
+      "course_number": "UPAI1-EN",
+      "title": "Getting Started to Unlocking the Power of ChatGPT: Beginner Edition",
+      "short_description": "Ready to future-proof your career with Artificial Intelligence (AI)? ChatGPT is a powerful AI generative tool that can help you revolutionize the way you work. In this course, you will learn the importance of generative and possible implications AI, the capabilities of ChatGPT, as well as the importance and ethical implications of AI, so that you can use ChatGPT efficiently and responsibly, and ultimately, can be future-ready.",
+      "overview": "Ready to future-proof your career with Artificial Intelligence (AI)? ChatGPT is a powerful AI generative tool that can help you revolutionize the way you work. In this course, you will learn the importance of generative and possible implications AI, the capabilities of ChatGPT, as well as the importance and ethical implications of AI, so that you can use ChatGPT efficiently and responsibly, and ultimately, can be future-ready.",
+      "thumbnail_url": ""
+    },
+    {
+      "course_key": "course-v1:MEREKA+UPAI2-EN+course",
+      "course_number": "UPAI2-EN",
+      "title": "Boosting Sales and Productivity with ChatGPT",
+      "short_description": "Unlock the full potential of Chat GPT and skyrocket your sales and productivity in this dynamic course! Discover powerful techniques to leverage Chat GPT and seize sales opportunities like never before. Dive deep into the art of idea generation, thought organisation, database modelling, market research, and crafting compelling business proposals using the unmatched capabilities of Chat GPT. Gain the edge you need to excel in the fast-paced world of business. Join us and revolutionise the way you",
+      "overview": "Unlock the full potential of Chat GPT and skyrocket your sales and productivity in this dynamic course! Discover powerful techniques to leverage Chat GPT and seize sales opportunities like never before. Dive deep into the art of idea generation, thought organisation, database modelling, market research, and crafting compelling business proposals using the unmatched capabilities of Chat GPT. Gain the edge you need to excel in the fast-paced world of business. Join us and revolutionise the way you create sales opportunities, boost productivity, and take your success to new heights!",
+      "thumbnail_url": "https://image.mux.com/00mR8TSlLyMdYh3pHoePjXCPjDGdLmOru527vhv7j7Lg/thumbnail.jpg?time=5"
+    },
+    {
+      "course_key": "course-v1:MEREKA+UPAI3-EN+course",
+      "course_number": "UPAI3-EN",
+      "title": "ChatGPT for Job Search and Career Development",
+      "short_description": "Learn how to use Chat GPT to your advantage in your job search and beyond with the help of this course. You will learn how to network successfully, produce compelling cover letters, resumes, and LinkedIn profiles, and negotiate a higher salary using Chat GPT.",
+      "overview": "Learn how to use Chat GPT to your advantage in your job search and beyond with the help of this course. You will learn how to network successfully, produce compelling cover letters, resumes, and LinkedIn profiles, and negotiate a higher salary using Chat GPT.",
+      "thumbnail_url": ""
+    }
+  ]
+}

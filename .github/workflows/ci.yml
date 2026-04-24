@@ -1,0 +1,1252 @@
+# @covers AC-RS-001, AC-RS-002, AC-RS-003, AC-RS-004
+# @spec: repository-structure_spec.md
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+      # Keep CI attached for docs-only and control-plane-only PRs so the
+      # required branch-protection contexts still report. The jobs themselves
+      # already no-op cleanly via the docs_only scope gate when repo-static
+      # validation is not needed.
+  merge_group:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # Keep only the newest run per ref, including main, so stale pushes do not
+  # consume runner capacity while the latest head waits in queue.
+  cancel-in-progress: true
+
+jobs:
+  change-scope:
+    name: Detect docs-only control-plane scope
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      docs_only: ${{ steps.scope.outputs.docs_only }}
+      tutor_required: ${{ steps.scope.outputs.tutor_required }}
+      changed_files: ${{ steps.scope.outputs.changed_files }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Detect docs-only control-plane diff
+        id: scope
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${GITHUB_EVENT_NAME}" != "pull_request" ]]; then
+            echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            echo "tutor_required=true" >> "$GITHUB_OUTPUT"
+            {
+              echo "changed_files<<EOF"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          mapfile -t CHANGED < <(git diff --name-only "${BASE_SHA}...${HEAD_SHA}")
+
+          if [[ "${#CHANGED[@]}" -eq 0 ]]; then
+            echo "docs_only=false" >> "$GITHUB_OUTPUT"
+            echo "tutor_required=true" >> "$GITHUB_OUTPUT"
+            {
+              echo "changed_files<<EOF"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          {
+            echo "changed_files<<EOF"
+            printf '%s\n' "${CHANGED[@]}"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+          docs_only=true
+          tutor_required=false
+          for path in "${CHANGED[@]}"; do
+            case "$path" in
+              docs/*|tools/docs/*|generated/catalogs/*|generated/adr-bundles/*|generated/decision-maps/*|generated/graphs/*|specs/testmaps/README.md|specs/_generated/testmaps/README.md|scripts/qa/build_decision_graph.py|scripts/qa/generate_adr_readme.py|scripts/qa/sync-openedx-audit-pr-status.sh|.github/workflows/docs-compliance.yml|.github/workflows/docs-policy.yml|.github/workflows/codeql.yml|*.md|CLAUDE.md|AGENTS.md|CONTRIBUTING.md|SECURITY.md|LICENSE)
+                ;;
+              *)
+                docs_only=false
+                ;;
+            esac
+
+            case "$path" in
+              .github/actions/setup-python-env/*|\
+              .githooks/pre-commit|\
+              requirements-tutor.txt|\
+              infrastructure/tutor/*|\
+              tests/tutor/*|\
+              scripts/qa/check-config-example-yaml.py|\
+              scripts/qa/verify-tutor-patches.sh)
+                tutor_required=true
+                ;;
+            esac
+          done
+
+          echo "docs_only=${docs_only}" >> "$GITHUB_OUTPUT"
+          echo "tutor_required=${tutor_required}" >> "$GITHUB_OUTPUT"
+
+  select-ci-lane:
+    name: Select CI lane
+    needs: change-scope
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    outputs:
+      runner_label: ${{ steps.select.outputs.runner_label }}
+      decision: ${{ steps.select.outputs.decision }}
+      reason: ${{ steps.select.outputs.reason }}
+    steps:
+      - name: Select runner label
+        id: select
+        uses: Biji-Biji-Initiative/bbi-infrastructure/.github/actions/select-runner-lane@main
+        with:
+          # Prefer fastlane for CI by default. The selector still falls back to
+          # mereka-k8s-runners when fastlane is unavailable or the event is not
+          # trusted, so this keeps merge tails short without hard-blocking CI.
+          enabled: ${{ vars.CI_FASTLANE_CI_ENABLED || 'true' }}
+          # Force trusted CI events onto the dedicated fastlane. The selector's
+          # auto status probe is currently falling back even when the fastlane
+          # runner exists and is idle, which leaves required Tutor checks stuck
+          # behind the generic ARC queue.
+          lane_mode: fastlane
+          fastlane_label: ${{ vars.CI_FASTLANE_CI_LABEL || 'mereka-lms-vps-fastlane-ci' }}
+          routing_policy: lms_ci_prefer_fastlane
+          fallback_label: mereka-k8s-runners
+          runner_status_token: ${{ secrets.FASTLANE_RUNNER_STATUS_TOKEN }}
+          github_app_id: ${{ secrets.GITOPS_GITHUB_APP_ID }}
+          github_app_installation_id: ${{ secrets.GITOPS_GITHUB_APP_INSTALLATION_ID }}
+          github_app_private_key: ${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}
+          allow_push_main: true
+          allow_workflow_dispatch: true
+          allow_pull_request: true
+          allow_merge_group: true
+
+  # ============================================================================
+  # Job 1a-1e: static-validation split graph
+  # Runs on every PR and push. Keeps the same overall contracts as the old
+  # consolidated Static Validation job, but splits the opaque Phase C script
+  # batch into generated shards:
+  #   1a. precheck   — setup, manifests, spec/inventory gates
+  #   1b. lint       — shellcheck + markdown advisory lint on hosted runners
+  #   1c. shards     — generated ci_static_inventory shard manifests in parallel
+  #   1d. postchecks — sequential static follow-up checks that do not depend on shards
+  #   1e. aggregate  — final branch-protection surface named "Static Validation"
+  #
+  # The overall surface still replaces 65+ micro-jobs:
+  #   spec-lint, generated-docs, design-token-validation, branding-preflight,
+  #   monitoring-guardrails, atlas-modulestore-guardrails, tenant-branding-contract,
+  #   brand-pack-schema, gitops-image-contract, prod-tag-guard, lint, validate-k8s,
+  #   validate-tutor-config, validate-infisical, verify-static, security-scan,
+  #   pip-audit, mfe-footer-slot, mfe-route-drift, token-definitions,
+  #   plugin-slot-wiring, mfe-footer-slot-migration, mfe-selector-hardening,
+  #   mfe-selector-hardening-pr, plugin-slot-migration, contrast-compliance,
+  #   custom-app-drift, design-token-usage, frontend-version-truth,
+  #   token-integrity-routing, legacy-ecommerce-guard, accessibility-gates,
+  #   mfe-first-policy, analytics-key-guard, branding-token-integrity,
+  #   token-drift, footer-variant-matrix, no-dom-overrides, migration-lock,
+  #   tenant-branding-qa, enterprise-ui-review, tenant-branding-matrix,
+  #   footer-parity, mfe-routing-parity, a11y-contrast-focus,
+  #   a11y-authenticated-routes, performance-budget, copy-terminology,
+  #   visual-smoke-baseline, tenant-ui-smoke, footer-slot-only,
+  #   tenant-isolation-evidence, a11y-tenant-branding, visual-parity-checkpoints,
+  #   ui-ux-hardening-bundle, multitenant-brand-platform,
+  #   tenant-footer-variant-lane, mfe-analytics-plugin-parity,
+  #   module-surface-validation, release-deployment-choreography,
+  #   postmerge-governance-closure, analytics-undefined-regression,
+  #   analytics-key-elimination, legacy-footer-removal, selector-to-slot-migration,
+  #   multi-tenant-branding-ops, analytics-hardening, tenant-config-handoff,
+  #   translation-validation, and verify-specs.yml fast-verification.
+  # ============================================================================
+  static-validation-precheck:
+    name: Static Validation Precheck
+    needs:
+      - change-scope
+      - select-ci-lane
+    runs-on: ${{ needs.select-ci-lane.outputs.runner_label }}
+    timeout-minutes: 45
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-python-env
+        with:
+          python-version: '3.12'
+
+      - name: Prepare local tool cache
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/.cache/bin"
+          mkdir -p "$GITHUB_WORKSPACE/.cache/kubeconform-schemas"
+          echo "$GITHUB_WORKSPACE/.cache/bin" >> "$GITHUB_PATH"
+
+      - name: Cache kubeconform
+        id: cache-kubeconform
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7  # v5.0.4
+        with:
+          path: .cache/bin/kubeconform
+          key: kubeconform-v0.6.4-linux-amd64
+
+      - name: Cache kubeconform schemas
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7  # v5.0.4
+        with:
+          path: .cache/kubeconform-schemas
+          key: kubeconform-schemas-v1-${{ hashFiles('deploy/k8s/**/*.yml', 'deploy/k8s/**/*.yaml') }}
+          restore-keys: |
+            kubeconform-schemas-v1-
+
+      - name: Install kubeconform
+        if: steps.cache-kubeconform.outputs.cache-hit != 'true'
+        run: |
+          EXPECTED_SHA="2b4ebeaa4d5ac4843cf8f7b7e66a8874252b6b71bc7cbfc4ef1cbf85acec7c07"
+          TARBALL="kubeconform-linux-amd64.tar.gz"
+          KUBECONFORM_URL="https://github.com/yannh/kubeconform/releases/download/v0.6.4/${TARBALL}"
+          curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+            --output "${TARBALL}" "${KUBECONFORM_URL}"
+          echo "${EXPECTED_SHA}  ${TARBALL}" | sha256sum -c -
+          tar xzf "${TARBALL}"
+          install -m 0755 kubeconform "$GITHUB_WORKSPACE/.cache/bin/kubeconform"
+          rm "${TARBALL}"
+          kubeconform -v
+
+      - name: Install kubectl
+        run: |
+          if ! command -v kubectl &>/dev/null; then
+            KUBECTL_VERSION="v1.32.5"
+            curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+              --output kubectl "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+            install -m 0755 kubectl "$GITHUB_WORKSPACE/.cache/bin/kubectl"
+            rm kubectl
+          fi
+          kubectl version --client
+
+      - name: Install ripgrep
+        run: |
+          if ! command -v rg &>/dev/null; then
+            RG_VERSION="15.1.0"
+            RG_TARBALL="ripgrep-${RG_VERSION}-x86_64-unknown-linux-musl.tar.gz"
+            RG_BASE_URL="https://github.com/BurntSushi/ripgrep/releases/download/${RG_VERSION}"
+            curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+              --output "${RG_TARBALL}" "${RG_BASE_URL}/${RG_TARBALL}"
+            curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+              --output "${RG_TARBALL}.sha256" "${RG_BASE_URL}/${RG_TARBALL}.sha256"
+            sha256sum -c "${RG_TARBALL}.sha256"
+            tar xzf "${RG_TARBALL}"
+            install -m 0755 "ripgrep-${RG_VERSION}-x86_64-unknown-linux-musl/rg" \
+              "$GITHUB_WORKSPACE/.cache/bin/rg"
+            rm -rf "${RG_TARBALL}" "${RG_TARBALL}.sha256" "ripgrep-${RG_VERSION}-x86_64-unknown-linux-musl"
+          fi
+
+      - name: Syntax check all shell scripts
+        run: |
+          find scripts/ -name '*.sh' -type f | xargs -P8 bash -n
+          bash -n scripts/qa/verify-multisite-ux-consistency.sh
+          bash -n infrastructure/tutor/apply-patches.sh
+          echo "All shell script syntax checks passed"
+
+      - name: Lint Python files
+        run: ruff check scripts/ services/
+
+      - name: Lint YAML files
+        run: yamllint -c .yamllint.yml infrastructure/ deploy/
+
+      - name: Validate Kubernetes manifests
+        run: |
+          set -euo pipefail
+
+          mapfile -t manifests < <(
+            find deploy/k8s \( -name '*.yml' -o -name '*.yaml' \) | \
+              grep -v '/patches/' | \
+              grep -v '/config/' | \
+              grep -v '/settings/' | \
+              grep -v 'helm-values' | \
+              grep -v 'registry\.yaml' | \
+              grep -v 'SECRET_CLASSIFICATION'
+          )
+
+          if [[ ${#manifests[@]} -eq 0 ]]; then
+            echo "No Kubernetes manifests found for kubeconform validation"
+            exit 0
+          fi
+
+          validate_manifests() {
+            local log_file="$1"
+            kubeconform \
+              -strict \
+              -ignore-missing-schemas \
+              -cache "$GITHUB_WORKSPACE/.cache/kubeconform-schemas" \
+              "${manifests[@]}" 2>&1 | tee "$log_file"
+            return "${PIPESTATUS[0]}"
+          }
+
+          log_file="$(mktemp)"
+          attempt=1
+          max_attempts=3
+
+          until validate_manifests "$log_file"; do
+            exit_code=$?
+            if ! grep -Eq "(error while|failed) downloading schema" "$log_file"; then
+              exit "$exit_code"
+            fi
+
+            if (( attempt >= max_attempts )); then
+              echo "kubeconform schema download kept failing after ${attempt} attempts"
+              exit "$exit_code"
+            fi
+
+            sleep_seconds=$(( attempt * 15 ))
+            echo "Transient kubeconform schema download failure detected; retrying in ${sleep_seconds}s (attempt $(( attempt + 1 ))/${max_attempts})"
+            rm -f "$log_file"
+            log_file="$(mktemp)"
+            sleep "$sleep_seconds"
+            ((attempt++))
+          done
+
+      - name: Run spec integrity gates
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            RUN_INFO_CHECKS=0 bash scripts/qa/run-spec-integrity-gates.sh
+          else
+            bash scripts/qa/run-spec-integrity-gates.sh
+          fi
+
+      - name: Spec coverage report
+        if: github.event_name != 'pull_request'
+        run: |
+          mkdir -p var
+          python3 scripts/qa/spec-tools/spec_coverage_report.py \
+            --specs-dir specs/ \
+            --scan-dirs scripts/ tests/ deploy/ infrastructure/ services/ \
+            --manual-file specs/plans/manual_verifications.yaml \
+            --repo-root . \
+            --format markdown --output var/spec-coverage.md --fail-under 80
+
+      - name: Upload spec coverage artifact
+        if: always() && github.event_name != 'pull_request'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: spec-coverage
+          path: var/spec-coverage.md
+          retention-days: 3
+
+      - name: Spec coverage report for PR
+        if: github.event_name == 'pull_request'
+        run: |
+          mkdir -p var
+          python3 scripts/qa/spec-tools/spec_coverage_report.py \
+            --specs-dir specs/ \
+            --scan-dirs scripts/ tests/ deploy/ infrastructure/ services/ \
+            --manual-file specs/plans/manual_verifications.yaml \
+            --repo-root . \
+            --format markdown \
+            --output var/spec-coverage-pr.md \
+            --fail-under 80
+
+      - name: Upload PR coverage artifact
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: spec-coverage-pr
+          path: var/spec-coverage-pr.md
+          retention-days: 3
+
+      - name: Verify generated surfaces are current
+        run: bash scripts/qa/verify-generated-surfaces.sh
+
+      - name: Verify CI cache policy
+        run: bash scripts/qa/verify-ci-cache-policy.sh
+
+  static-validation-lint:
+    name: Static Validation Lint
+    needs:
+      - change-scope
+      - select-ci-lane
+    runs-on: ${{ needs.select-ci-lane.outputs.runner_label }}
+    timeout-minutes: 45
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Prepare local tool path
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Lint shell scripts (shellcheck)
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.local/bin:$PATH"
+          if ! command -v shellcheck &>/dev/null; then
+            SC_VERSION="v0.10.0"
+            SC_TARBALL="shellcheck-${SC_VERSION}.linux.x86_64.tar.xz"
+            SC_URL="https://github.com/koalaman/shellcheck/releases/download/${SC_VERSION}/${SC_TARBALL}"
+            curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+              --output "${SC_TARBALL}" "${SC_URL}"
+            if command -v xz &>/dev/null; then
+              tar xJf "${SC_TARBALL}"
+            else
+              python3 -c "
+          import lzma, tarfile, io, sys
+          with open('${SC_TARBALL}', 'rb') as f:
+              decompressed = lzma.decompress(f.read())
+          with tarfile.open(fileobj=io.BytesIO(decompressed)) as t:
+              t.extractall()
+          "
+            fi
+            install -m 0755 "shellcheck-${SC_VERSION}/shellcheck" "$HOME/.local/bin/shellcheck"
+            rm -rf "${SC_TARBALL}" "shellcheck-${SC_VERSION}"
+          fi
+
+          # On pull requests, lint only the changed shell scripts under
+          # scripts/. Keep full-tree shellcheck on mainline pushes, merge groups,
+          # and manual runs so the authoritative rails still cover the entire
+          # shell surface.
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+            git fetch --no-tags --depth=1 origin "${BASE_SHA}"
+            mapfile -t shell_files < <(
+              git diff --name-only "${BASE_SHA}...${HEAD_SHA}" \
+                | awk '/^scripts\/.*\.sh$/ { print }' \
+                | while read -r f; do [ -f "$f" ] && echo "$f"; done
+            )
+
+            if [[ "${#shell_files[@]}" -eq 0 ]]; then
+              echo "No shell script changes under scripts/ in PR; skipping shellcheck"
+              exit 0
+            fi
+
+            printf 'Linting changed shell scripts:\n'
+            printf ' - %s\n' "${shell_files[@]}"
+            shellcheck --severity=error "${shell_files[@]}"
+            exit 0
+          fi
+
+          mapfile -d '' -t shell_files < <(find scripts/ -name '*.sh' -type f -print0)
+          if [[ "${#shell_files[@]}" -eq 0 ]]; then
+            echo "No shell scripts found under scripts/; skipping shellcheck"
+            exit 0
+          fi
+
+          shellcheck_jobs="$(
+            getconf _NPROCESSORS_ONLN 2>/dev/null \
+              || nproc 2>/dev/null \
+              || echo 4
+          )"
+          printf 'Running shellcheck across %s files with %s parallel workers\n' "${#shell_files[@]}" "$shellcheck_jobs"
+          printf '%s\0' "${shell_files[@]}" \
+            | xargs -0 -n 32 -P "$shellcheck_jobs" shellcheck --severity=error
+
+      - name: Markdown linting
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Markdown lint remains advisory in this lane. For pull requests, lint
+          # only the changed docs/spec markdown files so mixed code PRs do not
+          # pay full-tree docs lint cost. Keep full-tree coverage on mainline
+          # pushes, merge groups, and manual runs.
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+            git fetch --no-tags --depth=1 origin "${BASE_SHA}"
+            mapfile -t markdown_files < <(
+              git diff --name-only "${BASE_SHA}...${HEAD_SHA}" \
+                | awk '/^(docs|specs)\/.*\.md$/ && $0 !~ /^docs\/archive\// { print }'
+            )
+
+            if [[ "${#markdown_files[@]}" -eq 0 ]]; then
+              echo "No docs/spec markdown changes in PR; skipping advisory markdown lint"
+              exit 0
+            fi
+
+            printf 'Linting changed markdown files:\n'
+            printf ' - %s\n' "${markdown_files[@]}"
+            npx --yes markdownlint-cli "${markdown_files[@]}" || true
+            exit 0
+          fi
+
+          npx --yes markdownlint-cli docs/ specs/ --ignore docs/archive/ || true
+
+  static-validation-shards:
+    name: Static Validation Scripts (${{ matrix.shard.key }})
+    needs:
+      - change-scope
+      - select-ci-lane
+    runs-on: ${{ needs.select-ci-lane.outputs.runner_label }}
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        shard:
+          - key: shard-01
+            file: .github/ci-scripts-static-shard-01.txt
+          - key: shard-02
+            file: .github/ci-scripts-static-shard-02.txt
+          - key: shard-03
+            file: .github/ci-scripts-static-shard-03.txt
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-python-env
+        with:
+          python-version: '3.12'
+
+      - name: Prepare local tool cache
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/.cache/bin"
+          echo "$GITHUB_WORKSPACE/.cache/bin" >> "$GITHUB_PATH"
+
+      - name: Install kubectl
+        run: |
+          if ! command -v kubectl &>/dev/null; then
+            KUBECTL_VERSION="v1.32.5"
+            curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+              --output kubectl "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+            install -m 0755 kubectl "$GITHUB_WORKSPACE/.cache/bin/kubectl"
+            rm kubectl
+          fi
+          kubectl version --client
+
+      - name: Install ripgrep
+        run: |
+          if ! command -v rg &>/dev/null; then
+            RG_VERSION="15.1.0"
+            RG_TARBALL="ripgrep-${RG_VERSION}-x86_64-unknown-linux-musl.tar.gz"
+            RG_BASE_URL="https://github.com/BurntSushi/ripgrep/releases/download/${RG_VERSION}"
+            curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+              --output "${RG_TARBALL}" "${RG_BASE_URL}/${RG_TARBALL}"
+            curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+              --output "${RG_TARBALL}.sha256" "${RG_BASE_URL}/${RG_TARBALL}.sha256"
+            sha256sum -c "${RG_TARBALL}.sha256"
+            tar xzf "${RG_TARBALL}"
+            install -m 0755 "ripgrep-${RG_VERSION}-x86_64-unknown-linux-musl/rg" \
+              "$GITHUB_WORKSPACE/.cache/bin/rg"
+            rm -rf "${RG_TARBALL}" "${RG_TARBALL}.sha256" "ripgrep-${RG_VERSION}-x86_64-unknown-linux-musl"
+          fi
+
+      - name: Run static verification scripts
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            export LINT_REPO_CONVENTIONS_SCOPE=changed
+            export LINT_REPO_CONVENTIONS_BASE_SHA="$(jq -r '.pull_request.base.sha' "$GITHUB_EVENT_PATH")"
+            export LINT_REPO_CONVENTIONS_HEAD_SHA="$(jq -r '.pull_request.head.sha' "$GITHUB_EVENT_PATH")"
+            export CI_CHANGED_FILES="$(git diff --name-only "$LINT_REPO_CONVENTIONS_BASE_SHA" "$LINT_REPO_CONVENTIONS_HEAD_SHA")"
+            export VERIFY_SECRETS_ISOLATION_SCOPE=changed
+            export VERIFY_SECRETS_ISOLATION_CHANGED_FILES="$CI_CHANGED_FILES"
+            export TEST_BUILD_VALIDATOR_DRIFT_REVIEW_PACKET_SCOPE=changed
+            export TEST_BUILD_VALIDATOR_DRIFT_REVIEW_PACKET_CHANGED_FILES="$CI_CHANGED_FILES"
+            export TEST_VERIFY_BUILD_WORKFLOW_CONTRACT_SCOPE=changed
+            export TEST_VERIFY_BUILD_WORKFLOW_CONTRACT_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VALIDATE_REGISTRY_SCOPE=changed
+            export VALIDATE_REGISTRY_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_NETWORK_POLICIES_SCOPE=changed
+            export VERIFY_NETWORK_POLICIES_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_MANIFEST_INTEGRITY_SCOPE=changed
+            export VERIFY_MANIFEST_INTEGRITY_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_CI_SCRIPT_LIST_SCOPE=changed
+            export VERIFY_CI_SCRIPT_LIST_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_VERIFICATION_CATALOG_SCOPE=changed
+            export VERIFY_VERIFICATION_CATALOG_CHANGED_FILES="$CI_CHANGED_FILES"
+            export TEST_VERIFY_GENERATED_SURFACES_SCOPE=changed
+            export TEST_VERIFY_GENERATED_SURFACES_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_MFE_ROUTE_SMOKE_SCOPE=changed
+            export VERIFY_MFE_ROUTE_SMOKE_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VALIDATE_OBSERVABILITY_COMPLIANCE_SCOPE=changed
+            export VALIDATE_OBSERVABILITY_COMPLIANCE_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_CI_RUNNER_POLICY_SCOPE=changed
+            export VERIFY_CI_RUNNER_POLICY_CHANGED_FILES="$CI_CHANGED_FILES"
+            export TEST_VERIFY_CI_CACHE_POLICY_SCOPE=changed
+            export TEST_VERIFY_CI_CACHE_POLICY_CHANGED_FILES="$CI_CHANGED_FILES"
+            export TEST_VERIFY_SITECONFIG_AUTHORITY_SCOPE=changed
+            export TEST_VERIFY_SITECONFIG_AUTHORITY_CHANGED_FILES="$CI_CHANGED_FILES"
+            export AUDIT_GRAFANA_DASHBOARD_SCOPE=changed
+            export AUDIT_GRAFANA_DASHBOARD_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_TOKEN_INTEGRITY_ROUTING_SCOPE=changed
+            export VERIFY_TOKEN_INTEGRITY_ROUTING_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_MFE_ROUTE_DRIFT_SCOPE=changed
+            export VERIFY_MFE_ROUTE_DRIFT_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_SPEC_DEDUPE_NORMALIZE_SCOPE=changed
+            export VERIFY_SPEC_DEDUPE_NORMALIZE_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_LIBRARIES_HARDENING_SCOPE=changed
+            export VERIFY_LIBRARIES_HARDENING_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_RUNTIME_PROOF_FIXTURE_PACK_SCOPE=changed
+            export VERIFY_RUNTIME_PROOF_FIXTURE_PACK_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_OBSERVABILITY_STACK_SCOPE=changed
+            export VERIFY_OBSERVABILITY_STACK_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_DOMAIN_URL_INVARIANTS_SCOPE=changed
+            export VERIFY_DOMAIN_URL_INVARIANTS_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_OPERATIONAL_HARDENING_SCOPE=changed
+            export VERIFY_OPERATIONAL_HARDENING_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_OBSERVABILITY_VALIDATION_SCOPE=changed
+            export VERIFY_OBSERVABILITY_VALIDATION_CHANGED_FILES="$CI_CHANGED_FILES"
+            export TEST_VERIFY_SCRIPT_BASENAME_GOVERNANCE_SCOPE=changed
+            export TEST_VERIFY_SCRIPT_BASENAME_GOVERNANCE_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_SCRIPT_BASENAME_GOVERNANCE_SCOPE=changed
+            export VERIFY_SCRIPT_BASENAME_GOVERNANCE_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_KUSTOMIZE_RENDER_SCOPE=changed
+            export VERIFY_KUSTOMIZE_RENDER_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_K8S_IMAGES_SCOPE=changed
+            export VERIFY_K8S_IMAGES_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_KUSTOMIZE_STRUCTURE_SCOPE=changed
+            export VERIFY_KUSTOMIZE_STRUCTURE_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_KUSTOMIZE_NO_DEPRECATED_KEYS_SCOPE=changed
+            export VERIFY_KUSTOMIZE_NO_DEPRECATED_KEYS_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VALIDATE_DEPLOY_CONTRACT_SCOPE=changed
+            export VALIDATE_DEPLOY_CONTRACT_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_SECRET_CLASSIFICATION_SCOPE=changed
+            export VERIFY_SECRET_CLASSIFICATION_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_DESIGN_TOKEN_CI_SCOPE=changed
+            export VERIFY_DESIGN_TOKEN_CI_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VALIDATE_TOKEN_CONSUMERS_SCOPE=changed
+            export VALIDATE_TOKEN_CONSUMERS_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_TOKEN_DRIFT_BRANDING_SCOPE=changed
+            export VERIFY_TOKEN_DRIFT_BRANDING_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_LOGO_SETUP_SCOPE=changed
+            export VERIFY_LOGO_SETUP_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_DESIGN_TOKEN_USAGE_SCOPE=changed
+            export VERIFY_DESIGN_TOKEN_USAGE_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_DESIGN_TOKENS_SCOPE=changed
+            export VERIFY_DESIGN_TOKENS_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_TOKEN_GENERATION_PIPELINE_SCOPE=changed
+            export VERIFY_TOKEN_GENERATION_PIPELINE_CHANGED_FILES="$CI_CHANGED_FILES"
+            export VERIFY_BRANDING_TOKEN_INTEGRITY_SCOPE=changed
+            export VERIFY_BRANDING_TOKEN_INTEGRITY_CHANGED_FILES="$CI_CHANGED_FILES"
+            export PREFLIGHT_CHECK_SCOPE=changed
+            export PREFLIGHT_CHECK_CHANGED_FILES="$CI_CHANGED_FILES"
+            export RELEASE_GATE_SCOPE=changed
+            export RELEASE_GATE_CHANGED_FILES="$CI_CHANGED_FILES"
+          fi
+          SCRIPT_LIST="${{ matrix.shard.file }}" PARALLELISM=4 TIMEOUT_SECS=300 \
+            ./scripts/qa/run-release-verification-gates.sh
+
+      - name: Upload CI results artifact
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: ci-results-${{ matrix.shard.key }}
+          path: var/ci-results/
+          retention-days: 3
+
+  static-validation-postchecks:
+    name: Static Validation Postchecks
+    needs:
+      - change-scope
+      - select-ci-lane
+    runs-on: ${{ needs.select-ci-lane.outputs.runner_label }}
+    timeout-minutes: 45
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-python-env
+        with:
+          python-version: '3.12'
+
+      - name: Prepare local tool cache
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/.cache/bin"
+          echo "$GITHUB_WORKSPACE/.cache/bin" >> "$GITHUB_PATH"
+
+      - name: Install ripgrep
+        run: |
+          if ! command -v rg &>/dev/null; then
+            RG_VERSION="15.1.0"
+            RG_TARBALL="ripgrep-${RG_VERSION}-x86_64-unknown-linux-musl.tar.gz"
+            RG_BASE_URL="https://github.com/BurntSushi/ripgrep/releases/download/${RG_VERSION}"
+            curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+              --output "${RG_TARBALL}" "${RG_BASE_URL}/${RG_TARBALL}"
+            curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+              --output "${RG_TARBALL}.sha256" "${RG_BASE_URL}/${RG_TARBALL}.sha256"
+            sha256sum -c "${RG_TARBALL}.sha256"
+            tar xzf "${RG_TARBALL}"
+            install -m 0755 "ripgrep-${RG_VERSION}-x86_64-unknown-linux-musl/rg" \
+              "$GITHUB_WORKSPACE/.cache/bin/rg"
+            rm -rf "${RG_TARBALL}" "${RG_TARBALL}.sha256" "ripgrep-${RG_VERSION}-x86_64-unknown-linux-musl"
+          fi
+
+      - name: Verify authenticated smoke + WCAG AA contrast gates
+        run: |
+          bash -n scripts/qa/verify-authenticated-smoke-a11y.sh
+          ./scripts/qa/verify-authenticated-smoke-a11y.sh
+
+      - name: Verify a11y regression lane (depends on smoke-a11y above)
+        run: |
+          bash -n scripts/qa/verify-a11y-regression-lane.sh
+          ./scripts/qa/verify-a11y-regression-lane.sh
+
+      - name: Validate design token syntax
+        run: python3 scripts/qa/check-design-token-syntax.py
+
+      - name: Validate tokens.provenance.json
+        run: python3 scripts/qa/check-tokens-provenance.py
+
+      - name: Validate token values in theme files
+        run: python3 scripts/qa/check-token-values-in-theme.py
+
+      - name: Syntax check token drift verifier
+        run: bash -n scripts/qa/verify-token-drift.sh
+
+      - name: Verify token drift
+        run: ./scripts/qa/verify-token-drift.sh
+
+      - name: Validate config.example.yml
+        run: python3 scripts/qa/check-config-example-yaml.py
+
+      - name: Verify OPENEDX_HOSTNAMES.md is generated and current
+        run: |
+          ./scripts/gen/update-openedx-hostnames-doc.sh
+          git diff --exit-code -- docs/reference/operations/OPENEDX
+
+      - name: Verify axe journey coverage
+        run: bash scripts/qa/check-axe-journey-coverage.sh
+
+      - name: Verify visual regression page count
+        run: bash scripts/qa/check-visual-regression-page-count.sh
+
+      - name: Verify visual smoke baseline
+        run: ./scripts/qa/verify-visual-smoke-baseline.sh
+
+      - name: Verify visual parity checkpoints
+        run: ./scripts/qa/verify-visual-parity-checkpoints.sh
+
+      - name: Verify generated token layers are in sync
+        run: ./scripts/branding/generate-tokens-from-canonical.sh --check
+
+      - name: Run source-only branding gate
+        run: |
+          RUN_LIVE_GATE=0 BRANDING_LEVEL=deep ./scripts/branding/run-branding-gates.sh prod
+
+      - name: Verify certificate branding surfaces
+        run: ./scripts/qa/verify-certificate-branding.sh
+
+      - name: Verify FPF slot coverage truth
+        run: ./scripts/qa/verify-fpf-slot-coverage.sh
+
+      - name: Run frontend performance spot-check
+        run: ./scripts/qa/verify-frontend-performance-spotcheck.sh
+
+      - name: Run local observability audit
+        run: ./scripts/qa/audit-observability.sh --mode local
+
+      - name: Generate offline monitoring plan
+        run: |
+          OFFLINE_PLAN=1 ./scripts/infra/apply-monitoring-configs.sh plan | tee monitoring-plan.txt
+          grep -q "Offline plan complete" monitoring-plan.txt
+          grep -q "gcloud monitoring" monitoring-plan.txt
+
+      - name: Upload monitoring plan artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: monitoring-offline-plan-static
+          path: monitoring-plan.txt
+          retention-days: 3
+
+      - name: Run Atlas modulestore contract check
+        run: ./scripts/qa/verify-atlas-modulestore-path.sh --mode local
+
+      - name: Validate Infisical secrets
+        if: ${{ vars.HAS_INFISICAL == 'true' }}
+        env:
+          INFISICAL_DOMAIN: https://secrets.mereka.io/api
+          INFISICAL_TOKEN: ${{ secrets.INFISICAL_TOKEN }}
+          INFISICAL_PROJECT_ID: ${{ secrets.INFISICAL_PROJECT_ID }}
+          ENABLE_STAGING_ENV: ${{ vars.ENABLE_STAGING_ENV }}
+        run: |
+          npm i -g @infisical/cli
+          STRICT=1 INFISICAL_ENV=prod ./scripts/infra/infisical-validate-mereka-lms.sh
+          STRICT=1 INFISICAL_ENV=dev  ./scripts/infra/infisical-validate-mereka-lms.sh
+          if [[ "${ENABLE_STAGING_ENV:-false}" == "true" ]]; then
+            STRICT=1 INFISICAL_ENV=staging ./scripts/infra/infisical-validate-mereka-lms.sh
+          else
+            echo "Staging Infisical validation skipped (ENABLE_STAGING_ENV != true)"
+          fi
+
+      - name: Verify atlas.yml and translation infrastructure
+        run: bash scripts/qa/check-atlas-translation-infra.sh
+
+      - name: Validate .po file syntax (if present)
+        run: python3 scripts/qa/check-po-file-syntax.py
+
+      - name: Validate MFE messages.json syntax (if present)
+        run: python3 scripts/qa/check-messages-json-syntax.py
+
+      - name: Run offline translation verification
+        run: |
+          set -euo pipefail
+          mkdir -p var/ci
+          bash -n scripts/qa/verify-translations.sh
+          ./scripts/qa/verify-translations.sh --offline | tee var/ci/translation-validation.log || true
+          grep -q "^FAIL\b\|✗ FAIL" var/ci/translation-validation.log && {
+            echo "::error::Translation verification found failures — see log above"
+            exit 1
+          } || echo "Translation verification passed (SKIP/WARN are acceptable)"
+
+      - name: Upload translation validation log
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: translation-validation-log
+          path: var/ci/translation-validation.log
+          if-no-files-found: warn
+          retention-days: 3
+
+  static-validation:
+    name: Static Validation
+    needs:
+      - change-scope
+      - static-validation-precheck
+      - static-validation-lint
+      - static-validation-shards
+      - static-validation-postchecks
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Download PR coverage artifact
+        if: ${{ github.event_name == 'pull_request' && needs.static-validation-precheck.result == 'success' }}
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: spec-coverage-pr
+          path: var/spec-coverage-pr
+
+      - name: Generate aggregate summary report
+        if: always()
+        run: |
+          mkdir -p var
+          SUMMARY_FILE="var/verification-summary.md"
+          cat > "$SUMMARY_FILE" <<EOF
+          # Verification Summary
+
+          **Date**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Commit**: ${{ github.sha }}
+          **Branch**: ${{ github.ref_name }}
+
+          ## Job Results
+
+          | Lane | Result |
+          |------|--------|
+          | Static Validation Precheck | ${{ needs.static-validation-precheck.result }} |
+          | Static Validation Lint | ${{ needs.static-validation-lint.result }} |
+          | Static Validation Scripts | ${{ needs.static-validation-shards.result }} |
+          | Static Validation Postchecks | ${{ needs.static-validation-postchecks.result }} |
+
+          ## Execution Model
+
+          - Static script inventory is still authoritative via \`script-registry.yaml#ci_static_inventory\`.
+          - Phase C now runs as three generated shards instead of one opaque monolith.
+          - Branch protection still keys off this final \`Static Validation\` aggregate.
+
+          ---
+          *Generated by ci.yml static-validation aggregate job*
+          EOF
+          cat "$SUMMARY_FILE"
+
+      - name: Upload verification summary artifact
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: verification-summary
+          path: var/verification-summary.md
+          retention-days: 90
+
+      - name: Post PR comment with spec verification summary
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
+        with:
+          script: |
+            const fs = require('fs');
+            let coverageContent = '';
+            try {
+              coverageContent = fs.readFileSync('var/spec-coverage-pr/spec-coverage-pr.md', 'utf8');
+            } catch (error) {
+              coverageContent = '_Coverage report not available_';
+            }
+            if (coverageContent.length > 5000) {
+              coverageContent = coverageContent.substring(0, 5000) + '\n\n..._[Truncated to 5000 chars]_';
+            }
+            coverageContent = coverageContent.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const dependencyResults = {
+              precheck: '${{ needs.static-validation-precheck.result }}',
+              lint: '${{ needs.static-validation-lint.result }}',
+              shards: '${{ needs.static-validation-shards.result }}',
+              postchecks: '${{ needs.static-validation-postchecks.result }}',
+            };
+            const dependencyFailure = Object.values(dependencyResults).some(result => result !== 'success');
+            const jobResult = dependencyFailure ? 'failure' : 'success';
+            const statusEmoji = jobResult === 'success' ? '✅' : '❌';
+            const body = `## ${statusEmoji} CI Static Validation
+
+            **Aggregate result**: ${jobResult}
+
+            ### Lane Results
+
+            - Static Validation Precheck: ${dependencyResults.precheck}
+            - Static Validation Lint: ${dependencyResults.lint}
+            - Static Validation Scripts: ${dependencyResults.shards}
+            - Static Validation Postchecks: ${dependencyResults.postchecks}
+
+            ### Spec Coverage
+
+            <details>
+            <summary>View coverage report</summary>
+
+            ${coverageContent}
+
+            </details>
+
+            ### Next Steps
+
+            ${jobResult === 'success'
+              ? '- ✅ Static validation passed\n- Full verification will run on merge to main'
+              : '- ❌ One or more static validation lanes failed\n- Review the failing lane instead of one monolithic job'}
+
+            ---
+            *Automated by ci.yml static-validation aggregate job*
+            `;
+            const { data: comments } = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            const botComment = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('CI Static Validation')
+            );
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                comment_id: botComment.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body
+              });
+            }
+
+      - name: Fail if any static validation dependency failed
+        if: ${{ needs.static-validation-precheck.result != 'success' || needs.static-validation-lint.result != 'success' || needs.static-validation-shards.result != 'success' || needs.static-validation-postchecks.result != 'success' }}
+        run: |
+          echo "::error::Static validation aggregate failed because one or more lanes failed"
+          exit 1
+
+  # ============================================================================
+  # Job 2: tutor-config-tests
+  # Renders a full Tutor environment + applies patches + runs test suite.
+  # Replaces: tutor-config-tests, validate-tutor-config from old ci.yml.
+  # ============================================================================
+  tutor-config-tests:
+    name: Tutor Configuration Tests
+    needs:
+      - change-scope
+      - select-ci-lane
+    runs-on: ${{ github.event_name == 'pull_request' && needs.change-scope.outputs.tutor_required != 'true' && 'ubuntu-latest' || needs.select-ci-lane.outputs.runner_label }}
+    timeout-minutes: 45
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Set up Python environment
+        if: needs.change-scope.outputs.tutor_required == 'true'
+        uses: ./.github/actions/setup-python-env
+        with:
+          python-version: '3.12'
+          requirements-file: 'requirements-tutor.txt'
+          isolated-venv: 'true'
+          cache-isolated-venv: 'true'
+          isolated-venv-name: 'tutor-ci-py312'
+
+      - name: Skip tutor lane for unrelated PR diff
+        if: needs.change-scope.outputs.tutor_required != 'true'
+        run: |
+          echo "Tutor Configuration Tests skipped: no tutor-authority changes in this PR."
+          echo "Workflow-only CI control-plane changes are enforced by the"
+          echo "workflow contract verifiers, not by a full Tutor render."
+
+      - name: Render Tutor environment through canonical wrapper
+        if: needs.change-scope.outputs.tutor_required == 'true'
+        env:
+          TUTOR_ROOT: ${{ github.workspace }}/tutor_env
+        run: |
+          export TUTOR_ROOT="${{ github.workspace }}/tutor_env"
+          ./scripts/infra/tutor-config-save.sh
+
+      - name: Run tutor apply patches test
+        if: needs.change-scope.outputs.tutor_required == 'true'
+        run: bash tests/tutor/test_tutor_apply.sh
+
+      - name: Run tutor verify patches test
+        if: needs.change-scope.outputs.tutor_required == 'true'
+        run: bash tests/tutor/test_verify_patches.sh
+
+      - name: Run tutor pre-commit hook test
+        if: needs.change-scope.outputs.tutor_required == 'true'
+        run: bash tests/tutor/test_pre_commit_hook.sh
+
+      - name: Run tutor idempotency test
+        if: needs.change-scope.outputs.tutor_required == 'true'
+        env:
+          TUTOR_TEST_ASSUME_PATCHED_BASELINE: '1'
+        run: bash tests/tutor/test_idempotency.sh
+
+      - name: Run tutor edge cases test
+        if: needs.change-scope.outputs.tutor_required == 'true'
+        env:
+          TUTOR_TEST_ASSUME_PATCHED_BASELINE: '1'
+        run: bash tests/tutor/test_edge_cases.sh
+
+      - name: Validate config.example.yml structure
+        if: needs.change-scope.outputs.tutor_required == 'true'
+        run: python3 scripts/qa/check-config-example-yaml.py
+
+  # ============================================================================
+  # Job 3: security-scans
+  # TruffleHog (HEAD only), Hadolint on all Dockerfiles, pip-audit.
+  # Replaces: security-scan, pip-audit from old ci.yml.
+  # ============================================================================
+  security-scans:
+    name: Security Scans
+    needs:
+      - change-scope
+      - select-ci-lane
+    runs-on: ${{ needs.select-ci-lane.outputs.runner_label }}
+    timeout-minutes: 45
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 0  # PR merge refs need full ancestry for TruffleHog merge-base resolution
+
+      - name: Prepare local tool cache
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/.cache/bin"
+          echo "$GITHUB_WORKSPACE/.cache/bin" >> "$GITHUB_PATH"
+
+      - name: Install TruffleHog
+        run: |
+          TH_VERSION="3.93.7"
+          TH_TARBALL="trufflehog_${TH_VERSION}_linux_amd64.tar.gz"
+          TH_BASE_URL="https://github.com/trufflesecurity/trufflehog/releases/download/v${TH_VERSION}"
+          curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+            --output "${TH_TARBALL}" "${TH_BASE_URL}/${TH_TARBALL}"
+          curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+            --output "trufflehog_checksums.txt" "${TH_BASE_URL}/trufflehog_${TH_VERSION}_checksums.txt"
+          grep " ${TH_TARBALL}\$" trufflehog_checksums.txt | sha256sum -c -
+          tar xzf "${TH_TARBALL}"
+          install -m 0755 trufflehog "$GITHUB_WORKSPACE/.cache/bin/trufflehog"
+          rm -f "${TH_TARBALL}" trufflehog trufflehog_checksums.txt
+          trufflehog --version
+
+      - name: TruffleHog secret scan (HEAD only, verified only)
+        run: |
+          BASE_SHA=""
+          HEAD_SHA=""
+          case "${{ github.event_name }}" in
+            pull_request)
+              BASE_SHA="${{ github.event.pull_request.base.sha }}"
+              HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+              ;;
+            push)
+              if [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ]; then
+                BASE_SHA="${{ github.event.before }}"
+              fi
+              HEAD_SHA="${{ github.sha }}"
+              ;;
+            workflow_dispatch)
+              git fetch --no-tags --prune origin main
+              BASE_SHA="$(git merge-base HEAD origin/main || true)"
+              HEAD_SHA="$(git rev-parse HEAD)"
+              ;;
+          esac
+
+          if [ -n "$BASE_SHA" ] && [ -n "$HEAD_SHA" ]; then
+            trufflehog git "file://$PWD" \
+              --since-commit "$BASE_SHA" \
+              --branch "$HEAD_SHA" \
+              --fail \
+              --no-update \
+              --github-actions \
+              --only-verified
+          else
+            printf '^\\.git/' > "$RUNNER_TEMP/trufflehog-exclude-paths.txt"
+            trufflehog filesystem . \
+              --exclude-paths "$RUNNER_TEMP/trufflehog-exclude-paths.txt" \
+              --fail \
+              --no-update \
+              --github-actions \
+              --only-verified
+          fi
+
+      - name: Install hadolint
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          HADOLINT_VERSION="2.14.0"
+          HADOLINT_BINARY="hadolint-linux-x86_64"
+          HADOLINT_REPO="hadolint/hadolint"
+          HADOLINT_URL="https://github.com/hadolint/hadolint/releases/download/v${HADOLINT_VERSION}/${HADOLINT_BINARY}"
+          HADOLINT_SHA_URL="${HADOLINT_URL}.sha256"
+          HADOLINT_DOWNLOAD_TIMEOUT="${HADOLINT_DOWNLOAD_TIMEOUT:-120}"
+          HADOLINT_CONNECT_TIMEOUT="${HADOLINT_CONNECT_TIMEOUT:-15}"
+          HADOLINT_MAX_TIME="${HADOLINT_MAX_TIME:-90}"
+          download_hadolint_via_curl() {
+            timeout "${HADOLINT_DOWNLOAD_TIMEOUT}" curl --fail --location \
+              --retry 5 --retry-all-errors --retry-connrefused \
+              --connect-timeout "${HADOLINT_CONNECT_TIMEOUT}" \
+              --max-time "${HADOLINT_MAX_TIME}" \
+              --silent --show-error \
+              --output "${HADOLINT_BINARY}" "${HADOLINT_URL}"
+            timeout "${HADOLINT_DOWNLOAD_TIMEOUT}" curl --fail --location \
+              --retry 5 --retry-all-errors --retry-connrefused \
+              --connect-timeout "${HADOLINT_CONNECT_TIMEOUT}" \
+              --max-time "${HADOLINT_MAX_TIME}" \
+              --silent --show-error \
+              --output "${HADOLINT_BINARY}.sha256" "${HADOLINT_SHA_URL}"
+          }
+          if [ -n "${GH_TOKEN:-${GITHUB_TOKEN:-}}" ]; then
+            if ! GH_TOKEN="${GH_TOKEN:-${GITHUB_TOKEN:-}}" gh release download "v${HADOLINT_VERSION}" \
+              --repo "${HADOLINT_REPO}" \
+              --pattern "${HADOLINT_BINARY}" \
+              --output "${HADOLINT_BINARY}" \
+              --clobber; then
+              echo "gh release download failed; falling back to curl"
+              rm -f "${HADOLINT_BINARY}" "${HADOLINT_BINARY}.sha256"
+              download_hadolint_via_curl
+            elif ! GH_TOKEN="${GH_TOKEN:-${GITHUB_TOKEN:-}}" gh release download "v${HADOLINT_VERSION}" \
+              --repo "${HADOLINT_REPO}" \
+              --pattern "${HADOLINT_BINARY}.sha256" \
+              --output "${HADOLINT_BINARY}.sha256" \
+              --clobber; then
+              echo "gh checksum download failed; falling back to curl"
+              rm -f "${HADOLINT_BINARY}" "${HADOLINT_BINARY}.sha256"
+              download_hadolint_via_curl
+            fi
+          else
+            download_hadolint_via_curl
+          fi
+          sha256sum -c "${HADOLINT_BINARY}.sha256"
+          install -m 0755 "${HADOLINT_BINARY}" "$GITHUB_WORKSPACE/.cache/bin/hadolint"
+          rm -f "${HADOLINT_BINARY}" "${HADOLINT_BINARY}.sha256"
+          hadolint --version
+
+      - name: Hadolint Dockerfile lint
+        run: |
+          mapfile -t dockerfiles < <(find . -type f \( -name 'Dockerfile' -o -name '*.Dockerfile' \) | sort)
+          if [ "${#dockerfiles[@]}" -eq 0 ]; then
+            echo "No Dockerfiles found"
+            exit 0
+          fi
+          for dockerfile in "${dockerfiles[@]}"; do
+            echo "Linting ${dockerfile}"
+            hadolint "${dockerfile}" || true
+          done
+
+      - name: Set up Python for pip-audit
+        uses: ./.github/actions/setup-python-env
+        with:
+          python-version: '3.12'
+          install-base-deps: 'false'
+          isolated-venv: 'true'
+          extra-deps: 'pip-audit'
+
+      - name: Install project deps (optional)
+        run: pip install -e ".[dev]" 2>/dev/null || pip install -r requirements.txt 2>/dev/null || true
+
+      - name: Run pip-audit (dry-run, informational)
+        run: pip-audit --desc --fix --dry-run 2>&1 || true
+
+      - name: Run pip-audit (strict)
+        run: |
+          # CVE-2026-4539: Pygments ≤2.19.2 ReDoS in AdlLexer (local-only, no fix released).
+          # Suppress until upstream releases a patched version.
+          pip-audit --desc --ignore-vuln CVE-2026-4539
+
+  # ============================================================================
+  # Job 4: test-coverage
+  # Python test suite with coverage enforcement. Non-blocking (continue-on-error).
+  # Kept exactly as-is from original ci.yml.
+  # ============================================================================
+  test-coverage:
+    name: Python test coverage
+    needs:
+      - change-scope
+      - select-ci-lane
+    runs-on: ${{ needs.select-ci-lane.outputs.runner_label }}
+    timeout-minutes: 45
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-python-env
+        with:
+          python-version: '3.12'
+          install-base-deps: 'false'
+          extra-deps: 'pytest pytest-cov'
+
+      - name: Install project deps (optional)
+        run: pip install -e ".[dev]" 2>/dev/null || pip install -r requirements.txt 2>/dev/null || true
+
+      - name: Run tests with coverage
+        run: pytest --cov=. --cov-report=term-missing --cov-fail-under=40 -q
+        continue-on-error: true  # Non-blocking until coverage improves
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        if: always()
+        with:
+          name: coverage-report
+          path: .coverage
+          retention-days: 3

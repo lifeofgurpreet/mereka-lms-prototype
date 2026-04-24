@@ -1,0 +1,23 @@
+// Mereka Academy brand overrides for Paragon v23+
+// These SCSS variables reference CSS custom properties for runtime theming.
+// Token values defined in tokens/src/ and compiled via `npm run build-tokens`.
+//
+// Compatibility: Paragon v23+ (uses var() references)
+// Legacy: Paragon v22 consumers should pin brand-mereka@1.x
+
+$font-family-sans-serif: var(--pgn-typography-font-family-sans-serif) !default;
+$headings-font-family: var(--pgn-typography-headings-font-family) !default;
+
+$primary: var(--pgn-color-primary-base) !default;
+$secondary: var(--pgn-color-secondary-base) !default;
+$success: var(--pgn-color-success-base) !default;
+$info: var(--pgn-color-info-base) !default;
+$warning: var(--pgn-color-warning-base) !default;
+$danger: var(--pgn-color-danger-base) !default;
+
+$link-color: var(--pgn-color-info-base) !default;
+$link-hover-color: var(--pgn-color-secondary-base) !default;
+
+$btn-border-radius: 9999px !default;
+$btn-border-radius-sm: 9999px !default;
+$btn-border-radius-lg: 9999px !default;

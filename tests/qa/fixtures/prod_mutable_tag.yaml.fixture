@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# Test fixture: production kustomization with mutable tag (no digest).
+# verify-k8s-images.sh must reject this in strict mode.
+images:
+  - name: docker.io/overhangio/openedx
+    newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx
+    newTag: mereka-brand

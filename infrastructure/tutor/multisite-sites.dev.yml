@@ -1,0 +1,90 @@
+organizations:
+  - short_name: MEREKA
+    name: Mereka Academy
+    description: Mereka Academy main site catalog.
+  - short_name: BIJIBIJI
+    name: Biji-Biji Academy
+    description: Biji-Biji Academy microsite catalog.
+  - short_name: SKILLOURFUTURE
+    name: Skill Our Future
+    description: Skill Our Future microsite catalog.
+
+sites:
+  - domain: academyv2.mereka.dev
+    name: Mereka Academy
+    orgs:
+      - MEREKA
+    site_values:
+      domain: academyv2.mereka.dev
+      site_name: Mereka Academy
+      platform_name: Mereka Academy
+      LMS_ROOT_URL: https://academyv2.mereka.dev
+      CMS_ROOT_URL: https://studio.academyv2.mereka.dev
+      MFE_BASE_URL: https://apps.academyv2.mereka.dev
+      THEME_NAME: mereka
+      ENABLE_COMPREHENSIVE_THEMING: true
+      course_org_filter:
+        - MEREKA
+      logo_image: https://academyv2.mereka.dev/static/mereka/images/logo-horizontal.svg
+      logo_url: /
+      favicon_path: mereka/images/favicon.ico
+      homepage_banner_enabled: false
+  - domain: preview.academyv2.mereka.dev
+    name: Mereka Academy Preview
+    orgs:
+      - MEREKA
+    site_values:
+      domain: preview.academyv2.mereka.dev
+      site_name: Mereka Academy Preview
+      platform_name: Mereka Academy
+      LMS_ROOT_URL: https://preview.academyv2.mereka.dev
+      CMS_ROOT_URL: https://studio.academyv2.mereka.dev
+      MFE_BASE_URL: https://apps.academyv2.mereka.dev
+      THEME_NAME: mereka
+      ENABLE_COMPREHENSIVE_THEMING: true
+      course_org_filter:
+        - MEREKA
+      logo_image: https://preview.academyv2.mereka.dev/static/mereka/images/logo-horizontal.svg
+      logo_url: /
+      favicon_path: mereka/images/favicon.ico
+      homepage_banner_enabled: false
+
+  - domain: biji-biji.academyv2.mereka.dev
+    name: Biji-Biji Academy
+    orgs:
+      - BIJIBIJI
+    site_values:
+      domain: biji-biji.academyv2.mereka.dev
+      site_name: Biji-Biji Academy
+      platform_name: Biji-Biji Academy
+      LMS_ROOT_URL: https://biji-biji.academyv2.mereka.dev
+      CMS_ROOT_URL: https://studio.biji-biji.academyv2.mereka.dev
+      MFE_BASE_URL: https://apps.biji-biji.academyv2.mereka.dev
+      THEME_NAME: mereka
+      ENABLE_COMPREHENSIVE_THEMING: true
+      course_org_filter:
+        - BIJIBIJI
+      logo_image: https://biji-biji.academyv2.mereka.dev/static/mereka/images/biji-biji/logo-horizontal.svg
+      logo_url: /
+      favicon_path: mereka/images/favicon.ico
+      homepage_banner_enabled: false
+
+  - domain: skillourfuture.academyv2.mereka.dev
+    name: Skill Our Future
+    orgs:
+      - SKILLOURFUTURE
+    site_values:
+      domain: skillourfuture.academyv2.mereka.dev
+      site_name: Skill Our Future
+      platform_name: Skill Our Future
+      LMS_ROOT_URL: https://skillourfuture.academyv2.mereka.dev
+      CMS_ROOT_URL: https://studio.skillourfuture.academyv2.mereka.dev
+      MFE_BASE_URL: https://apps.skillourfuture.academyv2.mereka.dev
+      THEME_NAME: mereka
+      ENABLE_COMPREHENSIVE_THEMING: true
+      course_org_filter:
+        - SKILLOURFUTURE
+      logo_image: https://skillourfuture.academyv2.mereka.dev/static/mereka/images/skillourfuture/logo-horizontal.svg
+      logo_url: /
+      favicon_path: mereka/images/favicon.ico
+      homepage_banner_enabled: false

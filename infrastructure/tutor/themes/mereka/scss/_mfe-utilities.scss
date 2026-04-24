@@ -1,0 +1,27 @@
+.bg-mereka-gradient {
+  background-image: var(--mereka-gradient-primary);
+  color: var(--pgn-color-white);
+}
+
+.badge-mereka {
+  background: rgba(35, 112, 114, 0.12);
+  color: var(--mereka-color-teal);
+  border-radius: 999px;
+  padding: 0.35rem 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.shadow-mereka-card {
+  box-shadow: var(--mereka-shadow-card);
+  border-radius: var(--mereka-radius-xl);
+  border: 1px solid rgba(26, 22, 35, 0.08);
+}
+
+.textbox-mereka {
+  border-radius: 16px;
+  border: 1px solid rgba(26, 22, 35, 0.1);
+  padding: 1rem 1.25rem;
+  background-color: var(--pgn-color-white);
+}

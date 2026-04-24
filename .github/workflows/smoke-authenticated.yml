@@ -1,0 +1,353 @@
+name: Authenticated Smoke Tests
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours — SSO canary + smoke
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Optional target URL override; leave empty to use the env default'
+        required: false
+        default: ''
+      env_scope:
+        description: 'Authenticated proof environment scope'
+        required: false
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - dev
+          - prod
+          - both
+          - all
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.inputs.env_scope || 'staging' }}
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  smoke-authenticated:
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Set up Playwright
+        uses: ./.github/actions/setup-playwright
+        with:
+          node-version: '18'
+
+      - name: Resolve authenticated smoke target and credentials
+        id: resolve-smoke
+        env:
+          INPUT_ENV_SCOPE: ${{ github.event.inputs.env_scope || 'staging' }}
+          INPUT_TARGET: ${{ github.event.inputs.target || '' }}
+          SMOKE_SSO_USERNAME: ${{ secrets.SMOKE_SSO_USERNAME }}
+          SMOKE_SSO_PASSWORD: ${{ secrets.SMOKE_SSO_PASSWORD }}
+          SSO_CANARY_EMAIL_PROD: ${{ secrets.SSO_CANARY_EMAIL_PROD }}
+          SSO_CANARY_PASSWORD_PROD: ${{ secrets.SSO_CANARY_PASSWORD_PROD }}
+          SSO_CANARY_EMAIL_DEV: ${{ secrets.SSO_CANARY_EMAIL_DEV }}
+          SSO_CANARY_PASSWORD_DEV: ${{ secrets.SSO_CANARY_PASSWORD_DEV }}
+          SSO_CANARY_EMAIL_STAGING: ${{ secrets.SSO_CANARY_EMAIL_STAGING }}
+          SSO_CANARY_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_PASSWORD_STAGING }}
+        run: |
+          set -euo pipefail
+
+          scope="${INPUT_ENV_SCOPE:-staging}"
+          requested_target="${INPUT_TARGET:-}"
+          run_smoke=1
+
+          case "$scope" in
+            ""|staging)
+              default_target="https://staging.academyv2.mereka.io"
+              username="${SSO_CANARY_EMAIL_STAGING:-}"
+              password="${SSO_CANARY_PASSWORD_STAGING:-}"
+              lms_domain="staging.academyv2.mereka.io"
+              studio_domain="staging.studio.academyv2.mereka.io"
+              mfe_domain="staging.apps.academyv2.mereka.io"
+              ;;
+            prod)
+              default_target="https://academyv2.mereka.io"
+              username="${SMOKE_SSO_USERNAME:-${SSO_CANARY_EMAIL_PROD:-}}"
+              password="${SMOKE_SSO_PASSWORD:-${SSO_CANARY_PASSWORD_PROD:-}}"
+              lms_domain="academyv2.mereka.io"
+              studio_domain="studio.academyv2.mereka.io"
+              mfe_domain="apps.academyv2.mereka.io"
+              ;;
+            dev)
+              default_target="https://academyv2.mereka.dev"
+              username="${SSO_CANARY_EMAIL_DEV:-}"
+              password="${SSO_CANARY_PASSWORD_DEV:-}"
+              lms_domain="academyv2.mereka.dev"
+              studio_domain="studio.academyv2.mereka.dev"
+              mfe_domain="apps.academyv2.mereka.dev"
+              ;;
+            both|all)
+              run_smoke=0
+              target=""
+              username=""
+              password=""
+              lms_domain=""
+              studio_domain=""
+              mfe_domain=""
+              ;;
+            *)
+              echo "::error::Unsupported env_scope=${scope}"
+              exit 1
+              ;;
+          esac
+
+          target="${requested_target:-${default_target:-}}"
+
+          {
+            echo "run_smoke=$run_smoke"
+            echo "resolved_scope=$scope"
+            echo "smoke_target=$target"
+            echo "lms_domain=$lms_domain"
+            echo "studio_domain=$studio_domain"
+            echo "mfe_domain=$mfe_domain"
+          } >> "$GITHUB_OUTPUT"
+
+          if [[ "$run_smoke" != "1" ]]; then
+            echo "skip_reason=env_scope=${scope} is covered by the multi-environment sso-canary job" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ -z "$username" || -z "$password" ]]; then
+            echo "::error::No authenticated smoke credentials resolved for env_scope=${scope}"
+            exit 1
+          fi
+
+          {
+            echo "sso_username<<EOF"
+            echo "$username"
+            echo "EOF"
+            echo "sso_password<<EOF"
+            echo "$password"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Live-asset gate (INV-013 — must pass before canary)
+        if: ${{ steps.resolve-smoke.outputs.run_smoke == '1' }}
+        env:
+          LMS_DOMAIN: ${{ steps.resolve-smoke.outputs.lms_domain }}
+          MFE_DOMAIN: ${{ steps.resolve-smoke.outputs.mfe_domain }}
+        run: |
+          set -euo pipefail
+          echo "=== Live-Asset Gate (INV-013) ==="
+          echo "Rule: Never run browser canary while live asset gate is red."
+          echo ""
+
+          gate_ok=true
+
+          # Check LMS responds with 200
+          lms_status=$(curl -sI -o /dev/null -w '%{http_code}' "https://${LMS_DOMAIN}/" --max-time 15 || echo "000")
+          if [[ "$lms_status" =~ ^(200|301|302)$ ]]; then
+            echo "PASS: LMS https://${LMS_DOMAIN}/ returned $lms_status"
+          else
+            echo "FAIL: LMS https://${LMS_DOMAIN}/ returned $lms_status — asset gate RED"
+            gate_ok=false
+          fi
+
+          # Check MFE serves actual content (not error page)
+          mfe_status=$(curl -sI -o /dev/null -w '%{http_code}' "https://${MFE_DOMAIN}/authn/login" --max-time 15 || echo "000")
+          if [[ "$mfe_status" =~ ^(200|301|302)$ ]]; then
+            echo "PASS: MFE https://${MFE_DOMAIN}/authn/login returned $mfe_status"
+          else
+            echo "FAIL: MFE https://${MFE_DOMAIN}/authn/login returned $mfe_status — asset gate RED"
+            gate_ok=false
+          fi
+
+          if [[ "$gate_ok" != "true" ]]; then
+            echo ""
+            echo "BLOCKED: Live-asset gate is RED. Browser canary will not proceed."
+            echo "Fix the asset/route issue first, then rerun this workflow."
+            exit 1
+          fi
+
+          echo ""
+          echo "Live-asset gate is GREEN. Proceeding to browser canary."
+
+      - name: Run authenticated smoke tests
+        if: ${{ steps.resolve-smoke.outputs.run_smoke == '1' }}
+        env:
+          SMOKE_TARGET: ${{ steps.resolve-smoke.outputs.smoke_target }}
+          SMOKE_MFE_BASE_URL: https://${{ steps.resolve-smoke.outputs.mfe_domain }}
+          SSO_USERNAME: ${{ steps.resolve-smoke.outputs.sso_username }}
+          SSO_PASSWORD: ${{ steps.resolve-smoke.outputs.sso_password }}
+        run: ./scripts/qa/smoke-authenticated.sh --target "$SMOKE_TARGET" --mfe-base-url "$SMOKE_MFE_BASE_URL"
+
+      - name: Skip multi-environment authenticated smoke
+        if: ${{ steps.resolve-smoke.outputs.run_smoke != '1' }}
+        run: echo "Skipping smoke-authenticated job because ${{ steps.resolve-smoke.outputs.skip_reason }}"
+
+      - name: Run visual regression tests (authenticated)
+        if: ${{ !cancelled() && steps.resolve-smoke.outputs.run_smoke == '1' }}
+        env:
+          SSO_USERNAME: ${{ steps.resolve-smoke.outputs.sso_username }}
+          SSO_PASSWORD: ${{ steps.resolve-smoke.outputs.sso_password }}
+          LMS_DOMAIN: ${{ steps.resolve-smoke.outputs.lms_domain }}
+          STUDIO_DOMAIN: ${{ steps.resolve-smoke.outputs.studio_domain }}
+          MFE_DOMAIN: ${{ steps.resolve-smoke.outputs.mfe_domain }}
+          DEV_LMS_DOMAIN: ${{ steps.resolve-smoke.outputs.lms_domain }}
+          DEV_STUDIO_DOMAIN: ${{ steps.resolve-smoke.outputs.studio_domain }}
+          DEV_MFE_DOMAIN: ${{ steps.resolve-smoke.outputs.mfe_domain }}
+          STAGING_LMS_DOMAIN: ${{ steps.resolve-smoke.outputs.lms_domain }}
+          STAGING_STUDIO_DOMAIN: ${{ steps.resolve-smoke.outputs.studio_domain }}
+          STAGING_MFE_DOMAIN: ${{ steps.resolve-smoke.outputs.mfe_domain }}
+          ENV_SCOPE: ${{ steps.resolve-smoke.outputs.resolved_scope }}
+        run: ./scripts/qa/visual-regression-test.sh --env "${ENV_SCOPE}" --authenticated
+
+      - name: Sanitize smoke test artifacts
+        if: always()
+        env:
+          SMOKE_SSO_PASSWORD: ${{ secrets.SMOKE_SSO_PASSWORD }}
+          SSO_CANARY_PASSWORD_PROD: ${{ secrets.SSO_CANARY_PASSWORD_PROD }}
+          SSO_CANARY_PASSWORD_DEV: ${{ secrets.SSO_CANARY_PASSWORD_DEV }}
+          SSO_CANARY_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_PASSWORD_STAGING }}
+        run: |
+          set -euo pipefail
+          for ARTIFACT_DIR in var/screenshots; do
+            [[ -d "$ARTIFACT_DIR" ]] || continue
+            # Remove Playwright traces (contain full network payloads with credentials)
+            find "$ARTIFACT_DIR" -type f -name "*.trace.zip" -delete 2>/dev/null || true
+            # Redact known passwords from text logs using perl (safe with special chars)
+            for secret_var in SMOKE_SSO_PASSWORD SSO_CANARY_PASSWORD_PROD SSO_CANARY_PASSWORD_DEV SSO_CANARY_PASSWORD_STAGING; do
+              secret_val="${!secret_var:-}"
+              if [[ -n "$secret_val" ]]; then
+                find "$ARTIFACT_DIR" -type f \( -name "*.txt" -o -name "*.log" -o -name "*.json" \) \
+                  -exec perl -pi -e "s/\Q${secret_val}\E/***REDACTED***/g" {} + 2>/dev/null || true
+              fi
+            done
+          done
+          # Redact from loose log files in workspace root
+          for secret_var in SMOKE_SSO_PASSWORD SSO_CANARY_PASSWORD_PROD SSO_CANARY_PASSWORD_DEV SSO_CANARY_PASSWORD_STAGING; do
+            secret_val="${!secret_var:-}"
+            if [[ -n "$secret_val" ]]; then
+              find . -maxdepth 1 -type f -name "*.log" \
+                -exec perl -pi -e "s/\Q${secret_val}\E/***REDACTED***/g" {} + 2>/dev/null || true
+            fi
+          done
+
+      - name: Upload screenshots and logs
+        if: ${{ always() && steps.resolve-smoke.outputs.run_smoke == '1' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: smoke-authenticated-artifacts
+          path: |
+            var/screenshots/
+            *.log
+          retention-days: 3
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # SSO Canary — previously authenticated-sso-canary.yml (merged here).
+  # Uses Python Playwright to test the full OIDC/Authentik SSO roundtrip
+  # against LMS + Studio on staging by default, with dev/prod only when explicitly requested.
+  # ──────────────────────────────────────────────────────────────────────────
+  sso-canary:
+    name: SSO Canary
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Set up Python Playwright
+        uses: ./.github/actions/setup-python-playwright
+        with:
+          python-version: '3.11'
+          playwright-version: '1.50.0'
+
+      - name: Resolve Studio canary requirements
+        id: resolve-studio-canary
+        env:
+          INPUT_ENV_SCOPE: ${{ github.event.inputs.env_scope || 'staging' }}
+          SSO_CANARY_STUDIO_EMAIL_PROD: ${{ secrets.SSO_CANARY_STUDIO_EMAIL_PROD }}
+          SSO_CANARY_STUDIO_PASSWORD_PROD: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_PROD }}
+          SSO_CANARY_STUDIO_EMAIL_DEV: ${{ secrets.SSO_CANARY_STUDIO_EMAIL_DEV }}
+          SSO_CANARY_STUDIO_PASSWORD_DEV: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_DEV }}
+          SSO_CANARY_STUDIO_EMAIL_STAGING: ${{ secrets.SSO_CANARY_STUDIO_EMAIL_STAGING }}
+          SSO_CANARY_STUDIO_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_STAGING }}
+        run: |
+          set -euo pipefail
+
+          require_prod=0
+          require_dev=0
+          require_staging=0
+
+          if [[ -n "${SSO_CANARY_STUDIO_EMAIL_PROD:-}" && -n "${SSO_CANARY_STUDIO_PASSWORD_PROD:-}" ]]; then
+            require_prod=1
+          fi
+          if [[ -n "${SSO_CANARY_STUDIO_EMAIL_DEV:-}" && -n "${SSO_CANARY_STUDIO_PASSWORD_DEV:-}" ]]; then
+            require_dev=1
+          fi
+          if [[ -n "${SSO_CANARY_STUDIO_EMAIL_STAGING:-}" && -n "${SSO_CANARY_STUDIO_PASSWORD_STAGING:-}" ]]; then
+            require_staging=1
+          fi
+
+          echo "require_prod=$require_prod" >> "$GITHUB_OUTPUT"
+          echo "require_dev=$require_dev" >> "$GITHUB_OUTPUT"
+          echo "require_staging=$require_staging" >> "$GITHUB_OUTPUT"
+
+      - name: Run SSO canary
+        env:
+          INPUT_ENV_SCOPE: ${{ github.event.inputs.env_scope || 'staging' }}
+          SSO_CANARY_EMAIL_PROD: ${{ secrets.SSO_CANARY_EMAIL_PROD }}
+          SSO_CANARY_PASSWORD_PROD: ${{ secrets.SSO_CANARY_PASSWORD_PROD }}
+          SSO_CANARY_EMAIL_DEV: ${{ secrets.SSO_CANARY_EMAIL_DEV }}
+          SSO_CANARY_PASSWORD_DEV: ${{ secrets.SSO_CANARY_PASSWORD_DEV }}
+          SSO_CANARY_EMAIL_STAGING: ${{ secrets.SSO_CANARY_EMAIL_STAGING }}
+          SSO_CANARY_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_PASSWORD_STAGING }}
+          SSO_CANARY_STUDIO_EMAIL_PROD: ${{ secrets.SSO_CANARY_STUDIO_EMAIL_PROD }}
+          SSO_CANARY_STUDIO_PASSWORD_PROD: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_PROD }}
+          SSO_CANARY_STUDIO_EMAIL_DEV: ${{ secrets.SSO_CANARY_STUDIO_EMAIL_DEV }}
+          SSO_CANARY_STUDIO_PASSWORD_DEV: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_DEV }}
+          SSO_CANARY_STUDIO_EMAIL_STAGING: ${{ secrets.SSO_CANARY_STUDIO_EMAIL_STAGING }}
+          SSO_CANARY_STUDIO_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_STAGING }}
+          SSO_CANARY_EMAIL: ${{ secrets.SSO_CANARY_EMAIL }}
+          SSO_CANARY_PASSWORD: ${{ secrets.SSO_CANARY_PASSWORD }}
+          REQUIRE_SECRETS: '1'
+          REQUIRE_STUDIO_CANARY: '0'
+          REQUIRE_STUDIO_CANARY_PROD: ${{ steps.resolve-studio-canary.outputs.require_prod }}
+          REQUIRE_STUDIO_CANARY_DEV: ${{ steps.resolve-studio-canary.outputs.require_dev }}
+          REQUIRE_STUDIO_CANARY_STAGING: ${{ steps.resolve-studio-canary.outputs.require_staging }}
+          SSO_CANARY_TIMEOUT_SECONDS: '180'
+        run: ./scripts/qa/verify-authenticated-sso-canary.sh --env "$INPUT_ENV_SCOPE"
+
+      - name: Sanitize canary artifacts
+        if: always()
+        env:
+          SSO_CANARY_PASSWORD_PROD: ${{ secrets.SSO_CANARY_PASSWORD_PROD }}
+          SSO_CANARY_PASSWORD_DEV: ${{ secrets.SSO_CANARY_PASSWORD_DEV }}
+          SSO_CANARY_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_PASSWORD_STAGING }}
+          SSO_CANARY_STUDIO_PASSWORD_PROD: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_PROD }}
+          SSO_CANARY_STUDIO_PASSWORD_DEV: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_DEV }}
+          SSO_CANARY_STUDIO_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_STUDIO_PASSWORD_STAGING }}
+          SSO_CANARY_PASSWORD: ${{ secrets.SSO_CANARY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          ARTIFACT_DIR="var/auth-sso-canary"
+          [[ -d "$ARTIFACT_DIR" ]] || exit 0
+          # Remove Playwright traces (contain full network payloads with credentials)
+          find "$ARTIFACT_DIR" -type f -name "*.trace.zip" -delete 2>/dev/null || true
+          # Redact known passwords from text logs using perl (safe with special chars)
+          for secret_var in SSO_CANARY_PASSWORD_PROD SSO_CANARY_PASSWORD_DEV SSO_CANARY_PASSWORD_STAGING SSO_CANARY_STUDIO_PASSWORD_PROD SSO_CANARY_STUDIO_PASSWORD_DEV SSO_CANARY_STUDIO_PASSWORD_STAGING SSO_CANARY_PASSWORD; do
+            secret_val="${!secret_var:-}"
+            if [[ -n "$secret_val" ]]; then
+              find "$ARTIFACT_DIR" -type f \( -name "*.txt" -o -name "*.log" -o -name "*.json" \) \
+                -exec perl -pi -e "s/\Q${secret_val}\E/***REDACTED***/g" {} + 2>/dev/null || true
+            fi
+          done
+
+      - name: Upload canary artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: sso-canary-${{ github.run_id }}-${{ github.run_attempt }}
+          path: var/auth-sso-canary/
+          retention-days: 30

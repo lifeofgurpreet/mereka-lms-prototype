@@ -1,0 +1,453 @@
+#!/usr/bin/env bash
+# Audit branding coverage across public surfaces (does not fail by default).
+#
+# This is a gap-finder: it helps answer "which surface is still default?"
+# without turning the whole CI red while prod/dev deployments are catching up.
+#
+# Usage:
+#   ./scripts/qa/audit-branding-surfaces.sh prod
+#   ./scripts/qa/audit-branding-surfaces.sh dev
+#   ./scripts/qa/audit-branding-surfaces.sh prod --strict
+#
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../shared/config.sh"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+COMMON_OVERRIDE_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css"
+MFE_THEME_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
+MFE_TOKEN_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/scss/_mfe-tokens.scss"
+EXPECTED_BRANDING_REV="$(sed -nE 's/.*--mereka-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' "$COMMON_OVERRIDE_CSS" | head -n 1)"
+EXPECTED_MFE_BRANDING_REV="$(sed -nE 's/.*--mereka-mfe-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' "$MFE_TOKEN_SCSS" | head -n 1)"
+CURL_TIMEOUT_SECONDS="${CURL_TIMEOUT_SECONDS:-20}"
+
+ENVIRONMENT="${1:-prod}"
+STRICT=0
+STRICT_PROXY_AUTHN_BRANDING="${STRICT_PROXY_AUTHN_BRANDING:-0}"
+
+shift || true
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --strict) STRICT=1; shift ;;
+    -h|--help)
+      echo "Usage: $0 [prod|dev] [--strict]" >&2
+      exit 0
+      ;;
+    *) echo "Unknown arg: $1" >&2; exit 1 ;;
+  esac
+done
+
+if [[ "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" ]]; then
+  echo "Usage: $0 [prod|dev] [--strict]" >&2
+  exit 1
+fi
+
+gaps=0
+
+ok() { printf "✓ %s\n" "$1"; }
+gap() { printf "✗ %s\n" "$1" >&2; gaps=$((gaps + 1)); }
+
+expected_mfe_site_name() {
+  local host="${1,,}"
+  case "$host" in
+    *academy.biji-biji.com|*biji-biji.academyv2.mereka.dev)
+      printf "Biji-Biji Academy"
+      ;;
+    *skillourfuture.academy.mereka.io|*skillourfuture.academyv2.mereka.io|*skillourfuture.academyv2.mereka.dev)
+      printf "Skill Our Future Academy"
+      ;;
+    *)
+      printf "Mereka Academy"
+      ;;
+  esac
+}
+
+expected_mfe_brand_slug() {
+  local host="${1,,}"
+  case "$host" in
+    *academy.biji-biji.com|*biji-biji.academyv2.mereka.dev)
+      printf "biji-biji"
+      ;;
+    *skillourfuture.academy.mereka.io|*skillourfuture.academyv2.mereka.io|*skillourfuture.academyv2.mereka.dev)
+      printf "skillourfuture"
+      ;;
+    *)
+      printf ""
+      ;;
+  esac
+}
+
+expected_mfe_brand_css_path() {
+  local host=$1
+  local slug
+  slug="$(expected_mfe_brand_slug "$host")"
+  if [[ -n "$slug" ]]; then
+    printf "/theme/%s-brand.min.css" "$slug"
+  else
+    printf "/theme/mereka-brand.min.css"
+  fi
+}
+
+expected_mfe_logo_path_regex() {
+  local host=$1
+  local slug
+  slug="$(expected_mfe_brand_slug "$host")"
+  if [[ -n "$slug" ]]; then
+    printf 'theme/%s/logo-horizontal' "$slug"
+  else
+    printf 'theme/logo-horizontal'
+  fi
+}
+
+fetch() {
+  local url=$1
+  curl -sS -L --connect-timeout 10 --max-time 30 "$url" 2>/dev/null || true
+}
+
+extract_first() {
+  local re=$1
+  rg -o "$re" | head -n 1 || true
+}
+
+check_lms_overrides() {
+  local host=$1
+  local label=$2
+  local html css_path css
+
+  html="$(fetch "https://${host}/?nocache=$(date +%s)")"
+  if [[ -z "${html:-}" ]]; then
+    gap "${label}: host unreachable or returned empty response"
+    return
+  fi
+  # Two URL formats:
+  #  - Old (whitenoise hashed): /static/mereka/css/mereka-overrides.<hash>.css
+  #  - New (comprehensive theming, theme-name stripped): /static/css/mereka-overrides.css
+  css_path="$(extract_first '/static/mereka/css/mereka-overrides[^"]*\.css' <<<"$html")"
+  if [[ -z "${css_path:-}" ]]; then
+    css_path="$(extract_first '/static/css/mereka-overrides[^"]*\.css' <<<"$html")"
+  fi
+  if [[ -z "${css_path:-}" ]]; then
+    gap "${label}: missing mereka-overrides.css link"
+    return
+  fi
+
+  css="$(fetch "https://${host}${css_path}")"
+  # Fallback: if inline path 404s (whitenoise strips theme-prefix), try theming URL
+  # Also guard against HTML 404 pages being returned as CSS content
+  _looks_like_html() { grep -qi '<!doctype html\|<html' <<<"$1"; }
+  if [[ -z "${css:-}" ]] || _looks_like_html "${css}"; then
+    css="$(fetch "https://${host}/theming/asset/mereka/css/mereka-overrides.css")"
+  fi
+  if [[ -z "${css:-}" ]] || _looks_like_html "${css}"; then
+    gap "${label}: override CSS unreachable (inline path 404, theming URL also 404 — pod may have static file regression)"
+    return
+  fi
+  if [[ -n "$EXPECTED_BRANDING_REV" ]]; then
+    if grep -F -q "$EXPECTED_BRANDING_REV" <<<"$css"; then
+      ok "${label}: branding revision marker ${EXPECTED_BRANDING_REV} present"
+    else
+      gap "${label}: branding revision marker ${EXPECTED_BRANDING_REV} missing (older openedx image likely)"
+    fi
+  fi
+  if grep -Eq 'font-family:[[:space:]]*"Poppins"' <<<"$css" \
+    && grep -Eq 'font-family:[[:space:]]*"Lato"' <<<"$css"; then
+    ok "${label}: override CSS includes local fonts"
+  else
+    gap "${label}: override CSS missing local font-face wiring"
+  fi
+
+  if grep -Eq '\.courses-listing' <<<"$css" \
+    && grep -Eq '\.courseware' <<<"$css" \
+    && grep -Eq '\.sequence-nav' <<<"$css" \
+    && grep -Eq '\.xblock' <<<"$css"; then
+    ok "${label}: deep selectors present in override CSS"
+  else
+    gap "${label}: deep selectors missing (likely older openedx image deployed)"
+  fi
+}
+
+check_studio_css() {
+  local host=$1
+  local label=$2
+  local html css_path css
+
+  html="$(fetch "https://${host}/?nocache=$(date +%s)")"
+  if [[ -z "${html:-}" ]]; then
+    gap "${label}: host unreachable or returned empty response"
+    return
+  fi
+  css_path="$(extract_first '/static/studio/mereka/css/studio-main-v1\.[a-z0-9]+\.css' <<<"$html")"
+  if [[ -z "${css_path:-}" ]]; then
+    gap "${label}: could not locate studio-main-v1 CSS link"
+    return
+  fi
+  css="$(fetch "https://${host}${css_path}")"
+  if [[ -z "${css:-}" ]]; then
+    gap "${label}: could not fetch studio CSS (${css_path})"
+    return
+  fi
+
+  if grep -Eq 'action-create-course' <<<"$css" \
+    && grep -Eq 'action-create-library' <<<"$css" \
+    && grep -Eq 'outline-complex' <<<"$css" \
+    && grep -Eq 'add-xblock-component' <<<"$css"; then
+    ok "${label}: studio CSS includes deep Studio selectors"
+  else
+    gap "${label}: studio CSS missing deep Studio selectors (likely older openedx image deployed)"
+  fi
+
+  # The built Studio bundle can inline values, so do not require token/font names here.
+  if [[ -n "$EXPECTED_BRANDING_REV" ]] && grep -F -q "$EXPECTED_BRANDING_REV" <<<"$css"; then
+    ok "${label}: studio CSS includes branding revision marker ${EXPECTED_BRANDING_REV}"
+  fi
+
+  if grep -Eq 'fonts\.googleapis\.com' <<<"$css"; then
+    gap "${label}: studio CSS still imports Google fonts (override planned)"
+  else
+    ok "${label}: studio CSS has no Google font imports"
+  fi
+}
+
+check_mfe_authn_surface() {
+  local host=$1
+  local authn_url="https://${host}/authn/login"
+  local config_url="https://${host}/api/mfe_config/v1"
+  local html config css_path css ts
+  local theme_css_url theme_css_headers theme_css_content_type theme_css_body
+  local expected_site_name expected_brand_css_path expected_logo_path_regex
+  expected_site_name="$(expected_mfe_site_name "$host")"
+  expected_brand_css_path="$(expected_mfe_brand_css_path "$host")"
+  expected_logo_path_regex="$(expected_mfe_logo_path_regex "$host")"
+  ts="$(date +%s)"
+
+  html="$(fetch "${authn_url}?nocache=${ts}")"
+  if [[ -z "${html:-}" ]]; then
+    gap "MFE authn (${host}): login page unreachable"
+    return
+  fi
+
+  if rg -F -q '<div id="root"></div>' <<<"$html" \
+    && rg -q '/authn/app\.[^"]+\.js' <<<"$html" \
+    && rg -q '/authn/app\.[^"]+\.css' <<<"$html"; then
+    ok "MFE authn (${host}): authn bundle shell present"
+  else
+    gap "MFE authn (${host}): authn bundle shell missing"
+  fi
+
+  css_path="$(rg -o '/authn/app\.[^"]+\.css' <<<"$html" | head -n 1 || true)"
+  if [[ -z "${css_path:-}" ]]; then
+    gap "MFE authn (${host}): authn CSS link missing"
+  else
+    css="$(fetch "https://${host}${css_path}?nocache=${ts}")"
+    if [[ -z "${css:-}" ]]; then
+      gap "MFE authn (${host}): could not fetch authn CSS"
+    elif grep -Eq -- '--mereka-mfe-gradient|--mereka-gradient-primary|--mereka-font-body|font-family:Poppins' <<<"$css"; then
+      if [[ -n "$EXPECTED_MFE_BRANDING_REV" ]] && ! grep -F -q "$EXPECTED_MFE_BRANDING_REV" <<<"$css"; then
+        # Show deployed revision so operators know exact image version gap (rebuild MFE image to fix)
+        _deployed_rev="$(sed -nE 's/.*--mereka-mfe-branding-rev:"([^"]+)".*/\1/p' <<<"$css" | head -n 1)"
+        gap "MFE authn (${host}): branding revision marker ${EXPECTED_MFE_BRANDING_REV} missing (deployed: ${_deployed_rev:-unknown}; rebuild MFE image)"
+      else
+        ok "MFE authn (${host}): authn CSS branding markers present"
+      fi
+    else
+      gap "MFE authn (${host}): authn CSS missing Mereka gradient marker"
+    fi
+  fi
+
+  if rg -q '\.\./theme/[^"]+\.css' <<<"$html"; then
+    gap "MFE authn (${host}): PARAGON_THEME still uses relative ../theme CSS references"
+  elif rg -q '/theme/core.min.css' <<<"$html" \
+    && rg -F -q "$expected_brand_css_path" <<<"$html"; then
+    ok "MFE authn (${host}): authn shell uses absolute /theme CSS references"
+  else
+    gap "MFE authn (${host}): authn shell missing absolute /theme CSS references"
+  fi
+
+  theme_css_url="https://${host}${expected_brand_css_path}?nocache=${ts}"
+  theme_css_headers="$(curl -sSI --connect-timeout 10 --max-time "$CURL_TIMEOUT_SECONDS" "$theme_css_url" 2>/dev/null || true)"
+  theme_css_content_type="$(printf '%s' "$theme_css_headers" | awk -F': ' 'tolower($1)=="content-type"{print tolower($2)}' | tr -d '\r' | tail -n 1)"
+  theme_css_body="$(fetch "$theme_css_url")"
+  if [[ "$theme_css_content_type" == text/css* ]] \
+    && grep -Eq -- '--pgn-color-primary-base|--mereka-color-magenta|--mereka-mfe-gradient' <<<"$theme_css_body"; then
+    ok "MFE authn (${host}): runtime /theme CSS resolves as branded CSS"
+  else
+    gap "MFE authn (${host}): runtime /theme CSS does not resolve as branded CSS (content-type=${theme_css_content_type:-<missing>})"
+  fi
+
+  config="$(fetch "$config_url")"
+  if [[ -z "${config:-}" ]]; then
+    gap "MFE authn (${host}): mfe_config endpoint unreachable"
+    return
+  fi
+
+  if rg -F -q "\"SITE_NAME\": \"${expected_site_name}\"" <<<"$config" \
+    && rg -q "\"LOGO_URL\":[[:space:]]*\"https://[^\"]+/${expected_logo_path_regex}\\.(svg|png)\"" <<<"$config" \
+    && rg -F -q '"MEREKA_PUBLIC_FOOTER": {' <<<"$config"; then
+    ok "MFE authn (${host}): mfe_config branding fields present"
+  else
+    gap "MFE authn (${host}): mfe_config branding fields missing"
+  fi
+}
+
+check_forum() {
+  local host=$1
+  local code root_code root_body
+  code="$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 --max-time 20 "https://${host}/heartbeat" || echo "000")"
+  if [[ "$code" == "200" ]]; then
+    ok "Forum heartbeat reachable (200)"
+  else
+    gap "Forum heartbeat not OK (${code})"
+  fi
+  root_body="$(fetch "https://${host}/")"
+  root_code="$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 --max-time 20 "https://${host}/" || echo "000")"
+  if rg -F -q "Mereka Forum Service" <<<"$root_body"; then
+    ok "Forum root landing has branded content"
+  elif [[ "$root_code" == "401" ]]; then
+    ok "Forum root enforces authenticated access (401)"
+  elif [[ "$root_code" == "200" ]]; then
+    ok "Forum root reachable without auth (200)"
+  else
+    gap "Forum root returned unexpected status (${root_code})"
+  fi
+}
+
+check_ecommerce_landing() {
+  local host=$1
+  local root root_body root_effective
+  root="https://${host}/"
+  root_body="$(fetch "$root")"
+  root_effective="$(curl -s -L -o /dev/null -w "%{url_effective}" --connect-timeout 10 --max-time 20 "$root" 2>/dev/null || true)"
+
+  if rg -F -q "Mereka Ecommerce Service" <<<"$root_body"; then
+    ok "Ecommerce root landing has branded content"
+  elif [[ "${root_effective:-}" == *"/dashboard/" ]] || [[ "${root_effective:-}" == *"/login" ]]; then
+    ok "Ecommerce root redirects to dashboard/login"
+  else
+    gap "Ecommerce root missing branded landing and redirect contract"
+  fi
+}
+
+check_credentials() {
+  local host=$1
+  local root health root_body body admin_code root_effective
+  root="https://${host}/"
+  health="https://${host}/health/"
+  root_body="$(fetch "$root")"
+
+  root_effective="$(curl -s -L -o /dev/null -w "%{url_effective}" --connect-timeout 10 --max-time 20 "$root" 2>/dev/null || true)"
+
+  if [[ -z "${root_body:-}" ]]; then
+    gap "Credentials root page empty/unreachable"
+  elif rg -F -q "Mereka Credentials Service" <<<"$root_body"; then
+    ok "Credentials root page has branded landing content"
+  elif [[ "${root_effective:-}" == *"/health/" ]]; then
+    ok "Credentials root is API-first (redirects to /health/)"
+  else
+    gap "Credentials root is neither branded landing nor API-first health redirect"
+  fi
+
+  admin_code="$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 10 --max-time 20 "https://${host}/admin/login/" || echo "000")"
+  if [[ "$admin_code" =~ ^[23][0-9][0-9]$ ]]; then
+    ok "Credentials admin login reachable (${admin_code})"
+  else
+    gap "Credentials admin login not reachable (${admin_code})"
+  fi
+
+  body="$(fetch "$health")"
+  if [[ -z "${body:-}" ]]; then
+    gap "Credentials health endpoint empty/unreachable"
+    return
+  fi
+  if rg -F -q '"overall_status"' <<<"$body" \
+    && rg -F -q '"database_status"' <<<"$body"; then
+    ok "Credentials health payload shape OK"
+  else
+    gap "Credentials health payload missing expected status fields"
+  fi
+}
+
+check_authn_proxy_surface() {
+  local url=$1
+  local label=$2
+  local html css_path css host ts
+  local url_no_scheme="${url#https://}"
+
+  host="${url_no_scheme%%/*}"
+  ts="$(date +%s)"
+  html="$(fetch "${url}?nocache=${ts}")"
+  if [[ -z "${html:-}" ]]; then
+    gap "${label}: endpoint unavailable"
+    return
+  fi
+
+  if rg -F -q '<div id="root"></div>' <<<"$html" \
+    && rg -q '/authn/app\.[^"]+\.js' <<<"$html" \
+    && rg -q '/authn/app\.[^"]+\.css' <<<"$html"; then
+    ok "${label}: authn bundle shell present"
+  else
+    gap "${label}: missing authn bundle shell"
+    return
+  fi
+
+  css_path="$(extract_first '/authn/app\.[^"]+\.css' <<<"$html")"
+  if [[ -z "${css_path:-}" ]]; then
+    gap "${label}: missing authn css link"
+    return
+  fi
+
+  css="$(fetch "https://${host}${css_path}?nocache=${ts}")"
+  if [[ -z "${css:-}" ]]; then
+    gap "${label}: could not fetch authn css (${css_path})"
+    return
+  fi
+
+  if grep -Eq -- '--mereka-mfe-gradient|--mereka-gradient-primary|--mereka-font-body|font-family:Poppins' <<<"$css"; then
+    if [[ -n "$EXPECTED_MFE_BRANDING_REV" ]] && ! grep -F -q "$EXPECTED_MFE_BRANDING_REV" <<<"$css"; then
+      # Show deployed revision so operators know exact image version gap (rebuild MFE image to fix)
+      _deployed_rev="$(sed -nE 's/.*--mereka-mfe-branding-rev:"([^"]+)".*/\1/p' <<<"$css" | head -n 1)"
+      gap "${label}: authn css branding revision differs from source (source=${EXPECTED_MFE_BRANDING_REV}, deployed=${_deployed_rev:-unknown}; rebuild MFE image)"
+    else
+      ok "${label}: authn css branding markers present"
+    fi
+  else
+    if [[ "$STRICT_PROXY_AUTHN_BRANDING" == "1" ]]; then
+      gap "${label}: authn css branding markers missing"
+    else
+      ok "${label}: authn css branding markers not enforced (set STRICT_PROXY_AUTHN_BRANDING=1)"
+    fi
+  fi
+}
+
+if [[ "$ENVIRONMENT" == "prod" ]]; then
+  check_lms_overrides "$LMS_DOMAIN" "LMS (${LMS_DOMAIN})"
+  check_mfe_authn_surface "$MFE_DOMAIN"
+  check_studio_css "$BIJI_STUDIO_DOMAIN" "Biji Studio (${BIJI_STUDIO_DOMAIN})"
+  check_mfe_authn_surface "$BIJI_MFE_DOMAIN"
+  check_lms_overrides "$BIJI_DOMAIN" "Microsite (${BIJI_DOMAIN})"
+  check_lms_overrides "$SKILLOURFUTURE_DOMAIN" "Microsite (${SKILLOURFUTURE_DOMAIN})"
+  check_studio_css "$STUDIO_DOMAIN" "Studio (${STUDIO_DOMAIN})"
+  check_ecommerce_landing "$ECOMMERCE_DOMAIN"
+  check_authn_proxy_surface "https://${ECOMMERCE_DOMAIN}/dashboard/" "Ecommerce dashboard (${ECOMMERCE_DOMAIN})"
+  check_authn_proxy_surface "https://credentials.${LMS_DOMAIN}/admin/login/" "Credentials admin (${LMS_DOMAIN})"
+  check_credentials "credentials.${LMS_DOMAIN}"
+  check_forum "$FORUM_DOMAIN"
+else
+  check_lms_overrides "$DEV_LMS_DOMAIN" "LMS (${DEV_LMS_DOMAIN})"
+  check_mfe_authn_surface "$DEV_MFE_DOMAIN"
+  check_studio_css "$DEV_STUDIO_DOMAIN" "Studio (${DEV_STUDIO_DOMAIN})"
+  check_ecommerce_landing "$DEV_ECOMMERCE_DOMAIN"
+  check_authn_proxy_surface "https://${DEV_ECOMMERCE_DOMAIN}/dashboard/" "Ecommerce dashboard (${DEV_ECOMMERCE_DOMAIN})"
+  check_authn_proxy_surface "https://credentials.${DEV_LMS_DOMAIN}/admin/login/" "Credentials admin (${DEV_LMS_DOMAIN})"
+  check_credentials "credentials.${DEV_LMS_DOMAIN}"
+  check_forum "$DEV_FORUM_DOMAIN"
+fi
+
+echo ""
+echo "Branding surface audit: gaps=${gaps} strict=${STRICT}"
+
+if [[ "$STRICT" == "1" && "$gaps" -gt 0 ]]; then
+  exit 1
+fi
+
+exit 0

@@ -1,0 +1,37 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: redis-metrics
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/component: monitoring
+    # Required for Prometheus in prod (selector: release=monitoring). On dev/staging
+    # the Prometheus selector is {} so the label is a no-op. See bead mereka-lms-33d8.
+    release: monitoring
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: redis
+  # namespaceSelector omitted on purpose — default "same namespace as SM" is correct
+  # across all envs (mereka-lms / mereka-lms-dev / stg-mereka-lms). Previous hardcoded
+  # `matchNames: [mereka-lms]` caused zero targets on dev/staging.
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+      relabelings:
+        - action: replace
+          sourceLabels: [__meta_kubernetes_pod_name]
+          targetLabel: pod
+        - action: replace
+          sourceLabels: [__meta_kubernetes_pod_node_name]
+          targetLabel: node
+        - action: replace
+          sourceLabels: [__meta_kubernetes_namespace]
+          targetLabel: namespace
+      scheme: http

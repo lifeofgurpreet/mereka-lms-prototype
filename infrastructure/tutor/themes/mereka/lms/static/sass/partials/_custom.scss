@@ -1,0 +1,516 @@
+// Custom LMS-only style overrides should remain minimal.
+// Keep additional overrides in theming files as needed.
+
+@import "homepage";
+
+// ──────────────────────────────────────────────────────────────────────
+// Global header: cancel build-lms-v1 border-bottom separator line
+//
+// build-lms-v1 sets border-bottom:1px solid #a0a0a0 !important on .global-header.
+// Must match with !important to override.
+// ──────────────────────────────────────────────────────────────────────
+
+.global-header {
+  border-bottom: none !important;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Nav header buttons: cancel build-lms-v1 inversion
+//
+// build-lms-v1 (_header-global.scss) defines at specificity 0,4,1:
+//   .global-header .nav-links .secondary a.sign-in-btn  → filled #ab3b78 (wrong)
+//   .global-header .nav-links .secondary a.register-btn → white bg, magenta text (wrong)
+//   .global-header .nav-links .secondary .btn           → border: 1px solid #ab3b78
+//
+// Intent: Register for free = primary (filled magenta pill),
+//         Sign in = secondary (outlined teal pill).
+//
+// Fix: use the same .global-header .nav-links .secondary prefix (0,4,1).
+// _custom.scss compiles LAST (after build-lms-v1) so wins at equal specificity.
+// ──────────────────────────────────────────────────────────────────────
+
+.global-header .nav-links .secondary a.register-btn {
+  background: var(--mereka-color-magenta, #ab3b78);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  font-weight: 600;
+  padding: 0.55rem 1.1rem;
+  box-shadow: 0 8px 20px rgba(171, 59, 120, 0.25);
+  text-decoration: none;
+}
+
+.global-header .nav-links .secondary a.register-btn:hover,
+.global-header .nav-links .secondary a.register-btn:focus {
+  background: var(--mereka-color-magenta-dark, #8a2f60);
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 10px 24px rgba(171, 59, 120, 0.35);
+}
+
+.global-header .nav-links .secondary a.sign-in-btn {
+  background: transparent;
+  color: var(--mereka-color-teal, #237072);
+  border: 1.5px solid var(--mereka-color-teal, #237072);
+  border-radius: 999px;
+  font-weight: 600;
+  padding: 0.5rem 1.1rem;
+  text-decoration: none;
+}
+
+.global-header .nav-links .secondary a.sign-in-btn:hover,
+.global-header .nav-links .secondary a.sign-in-btn:focus {
+  background: var(--mereka-color-teal, #237072);
+  color: #fff;
+  text-decoration: none;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Nav .main flex layout: cancel build-lms-v1 float/margin override
+//
+// build-lms-v1 at @media (min-width: 992px) sets specificity 0,3,0:
+//   .global-header .nav-links .main     { float:left;  margin:20px 0 0 20px }
+//   .global-header .nav-links .secondary{ float:right; margin:15px 40px 0 0 }
+//
+// This removes margin-right:auto from .main so "Explore courses" is
+// pushed RIGHT against the auth buttons instead of LEFT after the logo.
+//
+// Fix: at the same breakpoint, restore float:none + margin-right:auto.
+// _custom.scss compiles LAST → wins at equal specificity 0,3,0.
+// ──────────────────────────────────────────────────────────────────────
+
+@media (min-width: 992px) {
+  .global-header .nav-links .main {
+    float: none;
+    margin: 0;
+    margin-right: auto;
+  }
+
+  .global-header .nav-links .secondary {
+    float: none;
+    margin: 0;
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// User dropdown: raise z-index above page content
+//
+// .dropdown-user-menu is position:absolute; z-index:10 in compiled theme.
+// With overflow:visible restored on .global-header, it will show.
+// Raise z-index above any page content that might sit at z-index:100+.
+// ──────────────────────────────────────────────────────────────────────
+
+.global-header .nav-links .secondary .dropdown-user-menu {
+  z-index: 1001;
+  position: absolute;
+  top: 55px;
+  right: 30px;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Block 1: Course listing flex layout + course image sizing
+//
+// Stock Open edX (via head-extra.html <style id="mereka-course-card-hotfix">)
+// applies flex/grid to .courses-listing li items and the dashboard listing.
+// This is the durable SCSS home for those rules; the head-extra bridge
+// sections become removable once the image is rebuilt with these compiled in.
+//
+// Covers:
+//  - .courses-listing li / .courses-listing-item flex container
+//  - .dashboard .listing-courses grid layout
+//  - .dashboard .my-courses flex-column card list with spacing
+//  - .dashboard .my-courses .course-item horizontal card shell
+//  - .dashboard .my-courses .wrapper-course-image image column
+//  - .course .course-image + .cover-image sizing and placeholder gradient
+//  - .course .course-info flex column
+//  - .cover-image position:relative (needed for .learn-more absolute child)
+// ──────────────────────────────────────────────────────────────────────
+
+// Course listing: each li / item is a flex container so the inner .course card
+// can stretch to fill the grid cell.
+.courses-listing li,
+.courses-listing-item,
+.dashboard .listing-courses li {
+  display: flex;
+  list-style: none;
+  min-width: 0;
+  list-style: none;
+  content-visibility: auto;
+  contain-intrinsic-size: 24rem;
+}
+
+.courses-listing li > .course,
+.courses-listing-item > .course,
+.dashboard .listing-courses li .course {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100%;
+}
+
+// Learner dashboard: consistent spacing + non-squashed list cards.
+.dashboard .listing-courses {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+}
+
+// .my-courses overrides to a single-column flex list (narrower reading path).
+// Avoid relying on flex-gap (inconsistent on older Safari builds).
+.dashboard .my-courses .listing-courses {
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard .my-courses .listing-courses > * + * {
+  margin-top: 1.25rem;
+}
+
+.dashboard .my-courses .course-item,
+.dashboard .listing-courses .course-item {
+  margin: 0;
+  width: 100%;
+  content-visibility: auto;
+  contain-intrinsic-size: 24rem;
+}
+
+.dashboard .my-courses .course-item .course-container {
+  border: none;
+}
+
+.dashboard .my-courses .course-item .course,
+.dashboard .listing-courses .course-item .course {
+  display: flex;
+  align-items: stretch;
+  min-height: 200px;
+  border-radius: 28px;
+  border: 1px solid rgba(26, 22, 35, 0.08);
+  box-shadow: var(--mereka-shadow-card);
+  overflow: hidden;
+  background: var(--pgn-color-white);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.dashboard .my-courses .course-item .course:hover {
+  box-shadow: 0 26px 70px rgba(26, 22, 35, 0.12);
+}
+
+.dashboard .my-courses .course-item .wrapper-course-image,
+.dashboard .listing-courses .course-item .wrapper-course-image,
+.dashboard .my-courses .course-item .course-image,
+.dashboard .listing-courses .course-item .course-image {
+  flex: 0 0 clamp(220px, 34%, 360px);
+  width: clamp(220px, 34%, 360px);
+  min-width: 220px;
+  max-width: 360px;
+  margin: 0;
+  min-height: 0;
+}
+
+.dashboard .my-courses .course-item .wrapper-course-image a,
+.dashboard .listing-courses .course-item .wrapper-course-image a,
+.dashboard .my-courses .course-item .course-image,
+.dashboard .listing-courses .course-item .course-image,
+.dashboard .my-courses .course-item .course-image .cover-image,
+.dashboard .listing-courses .course-item .course-image .cover-image {
+  display: block;
+  height: 100%;
+}
+
+.dashboard .my-courses .course-item .wrapper-course-image img,
+.dashboard .listing-courses .course-item .wrapper-course-image img,
+.dashboard .my-courses .course-item .course-image img,
+.dashboard .listing-courses .course-item .course-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.dashboard .my-courses .course-item .course:hover,
+.dashboard .listing-courses .course-item .course:hover {
+  box-shadow: 0 26px 70px rgba(26, 22, 35, 0.12);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dashboard .my-courses .course-item .course:hover,
+  .dashboard .listing-courses .course-item .course:hover {
+    transform: translateY(-4px);
+  }
+}
+
+.dashboard .my-courses .course-item .details,
+.dashboard .listing-courses .course-item .details {
+  display: flex;
+  align-items: stretch;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
+.dashboard .my-courses .course-item .wrapper-course-details,
+.dashboard .listing-courses .course-item .wrapper-course-details {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-width: 0;
+  padding: 1.25rem 1.5rem;
+}
+
+.dashboard .course .wrapper-course-details {
+  padding: 1.25rem 1.5rem 0;
+}
+
+.dashboard .course .course-title {
+  color: var(--mereka-color-ink-900);
+  font-size: 1.1rem;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.dashboard .course .info-university {
+  color: var(--mereka-color-ink-500);
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.dashboard .course .enter-course {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--mereka-gradient-primary);
+  color: var(--pgn-color-white);
+  padding: 0.6rem 1.2rem;
+  font-weight: 600;
+  box-shadow: 0 12px 25px rgba(171, 59, 120, 0.25);
+  text-decoration: none;
+  margin-bottom: 1.5rem;
+}
+
+.dashboard .course .enter-course:hover,
+.dashboard .course .enter-course:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 32px rgba(45, 137, 139, 0.25);
+}
+
+@media (max-width: 992px) {
+  .dashboard .my-courses .course-item .course,
+  .dashboard .listing-courses .course-item .course {
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .dashboard .my-courses .course-item .wrapper-course-image,
+  .dashboard .listing-courses .course-item .wrapper-course-image,
+  .dashboard .my-courses .course-item .course-image,
+  .dashboard .listing-courses .course-item .course-image {
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
+
+  .dashboard .my-courses .course-item .course-image,
+  .dashboard .listing-courses .course-item .course-image,
+  .dashboard .my-courses .course-item .course-image .cover-image,
+  .dashboard .listing-courses .course-item .course-image .cover-image,
+  .dashboard .my-courses .course-item .wrapper-course-image img,
+  .dashboard .listing-courses .course-item .wrapper-course-image img {
+    height: 200px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dashboard .my-courses .course-item .course:hover {
+    transform: translateY(-4px);
+  }
+}
+
+// Course image: minimum height + placeholder gradient so empty-thumbnail cards
+// don't collapse. Applies to both listing cards and dashboard cards.
+.course .course-image,
+.dashboard .course .course-image {
+  min-height: 180px;
+  background: linear-gradient(135deg, rgba(45, 137, 139, 0.22), rgba(41, 92, 173, 0.25));
+}
+
+.course .course-image .cover-image,
+.dashboard .course .course-image .cover-image {
+  height: 180px;
+  min-height: 180px;
+  background: inherit;
+}
+
+.course .course-image img,
+.dashboard .course .course-image img {
+  display: block;
+  height: 180px;
+  width: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.course .course-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+// .cover-image must be position:relative so the absolutely-positioned
+// .learn-more pill child renders correctly inside it.
+.course .course-image .cover-image {
+  position: relative;
+}
+
+// ──────────────────────────────────────────────────────────────────────
+// Block 9: Dashboard logged-in shell — course image show + card layout
+//
+// build-lms-v1 hides .wrapper-course-image at specificity 0,6,0:
+//   .dashboard .main-container .my-courses .course .details .wrapper-course-image
+//     { display:none }
+//
+// The selectors below match that specificity (0,6,0). _custom.scss compiles
+// LAST in lms-main-v1.css (after build-lms-v1), so equal-specificity rules
+// here win by cascade order — no !important needed.
+//
+// Once the image is rebuilt with this file, the corresponding head-extra
+// bridge block (lines 289-359) becomes safe to remove.
+// ──────────────────────────────────────────────────────────────────────
+
+// Show the course image column (overrides display:none from build-lms-v1).
+.dashboard .main-container .my-courses .course .details .wrapper-course-image {
+  display: block;
+  float: none;
+  width: clamp(200px, 30%, 320px);
+  max-width: 320px;
+  max-height: none;
+  overflow: hidden;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+// Horizontal card layout: image left, details right.
+.dashboard .main-container .my-courses .course .details {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+// Course image fills its container.
+.dashboard .main-container .my-courses .course .details .wrapper-course-image a.fade-cover,
+.dashboard .main-container .my-courses .course .details .wrapper-course-image .cover {
+  display: block;
+  float: none;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.dashboard .main-container .my-courses .course .details .wrapper-course-image a.fade-cover .course-image,
+.dashboard .main-container .my-courses .course .details .wrapper-course-image .cover .course-image {
+  width: 100%;
+  height: 100%;
+  min-height: 160px;
+  padding: 0;
+}
+
+.dashboard .main-container .my-courses .course .details .wrapper-course-image a.fade-cover .course-image img,
+.dashboard .main-container .my-courses .course .details .wrapper-course-image .cover .course-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 160px;
+  object-fit: cover;
+  object-position: center;
+}
+
+// Details text panel: flex-grow to fill remaining space.
+.dashboard .main-container .my-courses .course .details .wrapper-course-details {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 1.25rem;
+  min-width: 0;
+}
+
+.dashboard .course .wrapper-course-details {
+  padding: 1.25rem 1.5rem 0;
+}
+
+.dashboard .course .course-title {
+  color: var(--mereka-color-ink-900);
+  font-size: 1.1rem;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.dashboard .course .info-university {
+  color: var(--mereka-color-ink-500);
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.dashboard .course .enter-course {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--mereka-gradient-primary);
+  color: var(--pgn-color-white);
+  padding: 0.6rem 1.2rem;
+  font-weight: 600;
+  box-shadow: 0 12px 25px rgba(171, 59, 120, 0.25);
+  text-decoration: none;
+  margin-bottom: 1.5rem;
+}
+
+.dashboard .course .enter-course:hover,
+.dashboard .course .enter-course:focus {
+  box-shadow: 0 18px 32px rgba(35, 112, 114, 0.25);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .dashboard .course .enter-course:hover,
+  .dashboard .course .enter-course:focus {
+    transform: translateY(-1px);
+  }
+}
+
+.dashboard .course .course-info {
+  border-top: 1px solid rgba(26, 22, 35, 0.08);
+  padding: 0.75rem 1.5rem 1rem;
+  color: var(--mereka-color-ink-500);
+  font-size: 0.9rem;
+}
+
+// On mobile: stack vertically.
+@media (max-width: 768px) {
+  .dashboard .main-container .my-courses .course .details {
+    flex-direction: column;
+  }
+
+  .dashboard .main-container .my-courses .course .details .wrapper-course-image {
+    width: 100%;
+    max-width: none;
+  }
+}

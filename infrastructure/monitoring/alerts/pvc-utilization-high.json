@@ -1,0 +1,34 @@
+{
+  "displayName": "PVC utilization high (mereka-lms)",
+  "combiner": "OR",
+  "enabled": true,
+  "severity": "WARNING",
+  "conditions": [
+    {
+      "displayName": "Pod volume utilization > 85% for 10m",
+      "conditionThreshold": {
+        "filter": "metric.type=\"kubernetes.io/pod/volume/utilization\" resource.type=\"k8s_pod\" resource.label.\"namespace_name\"=\"mereka-lms\"",
+        "aggregations": [
+          {
+            "alignmentPeriod": "300s",
+            "perSeriesAligner": "ALIGN_MAX",
+            "groupByFields": [
+              "resource.label.\"pod_name\"",
+              "metric.label.\"volume_name\""
+            ]
+          }
+        ],
+        "comparison": "COMPARISON_GT",
+        "thresholdValue": 0.85,
+        "duration": "600s",
+        "trigger": {
+          "count": 1
+        }
+      }
+    }
+  ],
+  "notificationChannels": [
+    "projects/mereka-lms/notificationChannels/2534209833330971119",
+    "projects/mereka-lms/notificationChannels/1104353389109200281"
+  ]
+}

@@ -1,0 +1,134 @@
+# @spec: video-pipeline-delivery_spec.md
+# @covers AC-VPD-019, AC-VPD-030
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: video-alerts
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: video
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/component: monitoring
+    prometheus: kube-prometheus
+spec:
+  groups:
+    # ── Cost & Quota Alerts ─────────────────────────────────────
+    - name: video-cost
+      interval: 300s
+      rules:
+        # AC-VPD-019: Alert when delivery minutes exceed 80K (80% of free tier)
+        - alert: MuxDeliveryMinutesWarning
+          expr: video_delivery_minutes_monthly > 80000
+          for: 5m
+          labels:
+            severity: warning
+            component: video
+          annotations:
+            summary: "Mux delivery minutes at {{ $value | humanize }} (80% of free tier)"
+            description: >-
+              Monthly delivery minutes have exceeded 80,000 (80% of the 100K free
+              tier). Review usage trends and prepare GCS+CDN migration if growth
+              continues. See specs/video-pipeline-delivery_spec.md.
+
+        # AC-VPD-019: Critical alert at 95K (approaching free tier limit)
+        - alert: MuxDeliveryMinutesCritical
+          expr: video_delivery_minutes_monthly > 95000
+          for: 5m
+          labels:
+            severity: critical
+            component: video
+          annotations:
+            summary: "Mux delivery minutes at {{ $value | humanize }} — approaching 100K free tier limit"
+            description: >-
+              Monthly delivery minutes have exceeded 95,000. Mux will begin charging
+              $0.00055/min above 100K. Take immediate action: evaluate
+              GCS+CDN migration or contact Mux for enterprise pricing.
+
+        # Storage cost exceeds threshold
+        - alert: MuxStorageCostHigh
+          expr: mux_storage_cost_usd_monthly > 3.0
+          for: 1h
+          labels:
+            severity: warning
+            component: video
+          annotations:
+            summary: "Mux monthly storage cost is ${{ $value | humanize }}"
+            description: >-
+              Estimated Mux storage cost exceeds $3/month, indicating unexpected
+              content growth. Review cold storage discounts and archive policy.
+
+    # ── Asset Health Alerts ─────────────────────────────────────
+    - name: video-health
+      interval: 300s
+      rules:
+        # AC-VPD-030: Transcode success rate below 95%
+        - alert: MuxTranscodeSuccessRateLow
+          expr: video_transcode_success_rate < 95
+          for: 6h
+          labels:
+            severity: warning
+            component: video
+          annotations:
+            summary: "Mux transcode success rate is {{ $value }}%"
+            description: >-
+              Video transcode success rate has been below 95% for 6 hours.
+              Check for systemic upload failures or unsupported codecs.
+
+        # Processing queue backlog
+        - alert: MuxProcessingQueueBacklog
+          expr: mux_asset_processing_queue_depth > 50
+          for: 30m
+          labels:
+            severity: warning
+            component: video
+          annotations:
+            summary: "{{ $value }} Mux assets stuck in preparing state"
+            description: >-
+              More than 50 Mux assets have been in "preparing" state for over
+              30 minutes. This indicates a processing backlog. Check Mux status page.
+
+        # Errored assets growing
+        - alert: MuxErroredAssetsGrowing
+          expr: increase(mux_asset_total{status="errored"}[24h]) > 5
+          for: 1h
+          labels:
+            severity: warning
+            component: video
+          annotations:
+            summary: "{{ $value }} new errored Mux assets in the last 24h"
+            description: >-
+              Multiple Mux assets transitioned to errored state. Review upload
+              formats and check Mux API logs.
+
+    # ── Infrastructure Alerts ───────────────────────────────────
+    - name: video-infrastructure
+      interval: 60s
+      rules:
+        # Mux exporter pod down
+        - alert: MuxExporterDown
+          expr: up{job="mux-delivery-monitor"} == 0
+          for: 10m
+          labels:
+            severity: warning
+            component: video
+          annotations:
+            summary: "Mux delivery monitor is down"
+            description: >-
+              The mux-delivery-monitor exporter has been unreachable for 10 minutes.
+              Video cost and delivery metrics are stale.
+
+        # Poll staleness (no successful poll in 12 hours = 2x interval)
+        - alert: MuxPollStale
+          expr: (time() - mux_poll_last_success_timestamp) > 43200
+          for: 5m
+          labels:
+            severity: warning
+            component: video
+          annotations:
+            summary: "Mux API poll is stale (last success {{ $value | humanizeDuration }} ago)"
+            description: >-
+              The Mux delivery monitor has not successfully polled the Mux API
+              in over 12 hours. Check MUX_TOKEN_ID/MUX_TOKEN_SECRET credentials
+              and Mux API status.

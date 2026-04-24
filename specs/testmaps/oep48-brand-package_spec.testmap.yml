@@ -1,0 +1,224 @@
+spec: oep48-brand-package_spec.md
+acceptance_criteria:
+- id: AC-BRAND-001
+  description: 'Given the directory `infrastructure/tutor/brand-mereka/` exists, when its contents are listed, then it contains
+    exactly these files: `package.json`, `logo.svg`, `logo-white.svg`, `logo.png`, `logo-white.png`, `favicon.ico`, `paragon/fonts.scss`,
+    `paragon/_variables.scss`, `paragon/tokens.json`, and a `fonts/` directory with 9 woff2 files.'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-002
+  description: Given `infrastructure/tutor/brand-mereka/package.json`, when parsed as JSON, then `name` is `"@edx/brand-mereka"`,
+    `version` matches semver pattern `\d+\.\d+\.\d+`, and `dependencies` is either absent or an empty object.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-003
+  description: Given `infrastructure/tutor/brand-mereka/package.json`, when inspected, then `description` is non-empty and
+    contains "Mereka" or "OEP-48".
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-004
+  description: Given `infrastructure/tutor/brand-mereka/logo.svg`, when opened, then it is a valid SVG file containing a `viewBox`
+    attribute and no embedded `<image>` elements with base64 data.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-005
+  description: Given `infrastructure/tutor/brand-mereka/logo-white.svg`, when opened, then it is a valid SVG file containing
+    a `viewBox` attribute.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-006
+  description: Given `infrastructure/tutor/brand-mereka/logo.png`, when inspected with `file` or `identify`, then it is a
+    valid PNG image with width >= 200 pixels.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-007
+  description: Given `infrastructure/tutor/brand-mereka/logo-white.png`, when inspected, then it is a valid PNG image.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-008
+  description: Given `infrastructure/tutor/brand-mereka/favicon.ico`, when inspected, then it is a valid ICO file containing
+    at least one icon layer.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-009
+  description: Given the logo files in the brand package, when compared byte-for-byte with `infrastructure/tutor/themes/mereka/lms/static/images/logo.svg`,
+    `logo-white.svg`, `logo.png`, `logo-white.png`, and `favicon.ico`, then they are identical (sha256 match).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-010
+  description: 'Given `infrastructure/tutor/brand-mereka/fonts/`, when listed, then it contains exactly: `Poppins-Regular.woff2`,
+    `Poppins-SemiBold.woff2`, `Poppins-Bold.woff2`, `Lato-Regular.woff2`, `Lato-Bold.woff2`, `Lato-Italic.woff2`, `Lato-BoldItalic.woff2`,
+    `Lato-Black.woff2`, `Lato-BlackItalic.woff2`.'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-011
+  description: Given each woff2 file in `infrastructure/tutor/brand-mereka/fonts/`, when inspected with `file`, then it is
+    identified as a Web Open Font Format (Version 2) file.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-012
+  description: Given the font files in the brand package, when compared byte-for-byte with the corresponding files in `infrastructure/tutor/themes/mereka/lms/static/fonts/`,
+    then they are identical (sha256 match).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-013
+  description: Given `infrastructure/tutor/brand-mereka/paragon/fonts.scss`, when parsed, then it contains at least 9 `@font-face`
+    declarations (one per font file).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-014
+  description: 'Given each `@font-face` declaration in `fonts.scss`, when inspected, then it includes `font-display: swap`.'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-015
+  description: Given each `@font-face` declaration in `fonts.scss`, when inspected, then the `src` URL references a relative
+    path starting with `../fonts/` pointing to a file that exists in the `fonts/` directory.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-016
+  description: Given `fonts.scss`, when searched for external URLs, then it contains zero references to `googleapis.com`,
+    `gstatic.com`, `typekit.net`, or any other external font CDN.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-017
+  description: Given `infrastructure/tutor/brand-mereka/paragon/_variables.scss`, when parsed, then it defines `$font-family-sans-serif`
+    containing "Poppins".
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-018
+  description: Given `_variables.scss`, when parsed, then it defines `$primary` with value `#ab3b78` (case-insensitive match).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-019
+  description: Given `_variables.scss`, when inspected, then it contains a comment indicating SCSS variables are deprecated
+    in favor of `tokens.json`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-020
+  description: Given `infrastructure/tutor/brand-mereka/paragon/tokens.json`, when parsed as JSON, then it is valid JSON containing
+    at minimum a `"colors"` key with a `"primary"` value.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-021
+  description: Given `tokens.json`, when parsed, then `colors.primary` equals `"#ab3b78"` (Mereka magenta).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-022
+  description: Given `tokens.json`, when parsed, then it contains a `"typography"` key with `"font-family-sans-serif"` containing
+    "Poppins".
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-023
+  description: Given `infrastructure/tutor/plugins/mereka_lms.py`, when inspected, then it contains a `mfe-dockerfile-pre-npm-install`
+    patch that copies the `brand-mereka/` directory into the MFE build context.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-024
+  description: Given the Tutor plugin MFE Dockerfile patches, when the MFE image is built, then `npm ls @edx/brand` inside
+    the built container resolves to the brand-mereka package (exit 0, shows `@edx/brand-mereka`).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package-runtime.sh
+    command: scripts/qa/verify-brand-package-runtime.sh --allow-missing-image
+- id: AC-BRAND-025
+  description: Given the brand package is installed via npm alias, when `tutor images build mfe` completes, then the build
+    exits 0 without npm peer dependency errors related to `@edx/brand`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package-runtime.sh
+    command: scripts/qa/verify-brand-package-runtime.sh --allow-missing-image
+- id: AC-BRAND-026
+  description: Given `scripts/qa/verify-brand-package/verify-brand-package-structure.sh` exists, when executed, then it validates
+    all structural requirements (directory layout, file existence, package.json fields, fonts.scss declarations, SVG viewBox,
+    logo pixel width, font file types) and exits 0.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-027
+  description: Given `scripts/qa/verify-brand-package/verify-brand-package-structure.sh`, when a required file is missing
+    from the brand package, then the script exits non-zero with a message identifying the missing file.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+- id: AC-BRAND-028
+  description: Given `.github/ci-scripts-static.txt`, when inspected, then it contains the path `scripts/qa/verify-brand-package/verify-brand-package-structure.sh`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-brand-package/verify-brand-package-structure.sh
+    command: scripts/qa/verify-brand-package/verify-brand-package-structure.sh

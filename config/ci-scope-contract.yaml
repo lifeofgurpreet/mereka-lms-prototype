@@ -1,0 +1,135 @@
+# CI Scope Contract — machine-readable change-to-workflow mapping
+#
+# Maps file change globs to required and skippable CI workflows,
+# with timing budgets. Prevents narrow fixes from paying broad CI tax.
+#
+# Consumers:
+#   - CI workflow path filters
+#   - Agent execution workflows (CI timing expectations)
+#   - ci-scope-and-timing skill
+---
+schema_version: "1.0"
+
+scopes:
+  - id: docs-only
+    description: "Documentation and AGENTS.md changes only"
+    trigger_globs:
+      - "docs/**"
+      - "AGENTS.md"
+      - "CLAUDE.md"
+      - "*.md"
+    required_workflows:
+      - process-invariants
+    skippable_workflows:
+      - build-tutor-images
+      - test-coverage
+      - security-scans
+      - tutor-config-tests
+    timing_budget_seconds: 120
+
+  - id: ci-scripts
+    description: "CI verification scripts and governance inventory"
+    trigger_globs:
+      - "scripts/qa/**"
+      - "scripts/governance/**"
+      - ".github/ci-scripts-*.txt"
+    required_workflows:
+      - ci
+      - process-invariants
+    skippable_workflows:
+      - build-tutor-images
+      - tutor-config-tests
+    timing_budget_seconds: 300
+
+  - id: frontend-build
+    description: "MFE, branding, or Tutor plugin changes requiring image rebuild"
+    trigger_globs:
+      - "infrastructure/tutor/plugins/**"
+      - "assets/brand/**"
+      - "infrastructure/tutor/patches/mfe-*"
+      - "infrastructure/tutor/patches/brand-*"
+      - "infrastructure/tutor/patches/footer-*"
+    required_workflows:
+      - ci
+      - process-invariants
+      - build-tutor-images
+      - tutor-config-tests
+    skippable_workflows: []
+    timing_budget_seconds: 2400
+
+  - id: k8s-manifests
+    description: "Kubernetes base manifests and overlay changes"
+    trigger_globs:
+      - "deploy/k8s/**"
+    required_workflows:
+      - ci
+      - process-invariants
+    skippable_workflows:
+      - build-tutor-images
+    timing_budget_seconds: 300
+
+  - id: release-tooling
+    description: "Release scripts and promotion tooling"
+    trigger_globs:
+      - "scripts/release/**"
+      - "scripts/infra/canonical-release.sh"
+      - "scripts/infra/release-openedx-gitops.sh"
+      - "scripts/infra/bump-image-tags.sh"
+    required_workflows:
+      - ci
+      - process-invariants
+    skippable_workflows:
+      - build-tutor-images
+      - tutor-config-tests
+    timing_budget_seconds: 300
+
+  - id: tutor-config
+    description: "Tutor configuration, patches, and apply-patches.sh"
+    trigger_globs:
+      - "infrastructure/tutor/**"
+    required_workflows:
+      - ci
+      - process-invariants
+      - tutor-config-tests
+    skippable_workflows: []
+    timing_budget_seconds: 600
+
+  - id: github-workflows
+    description: "CI workflow definitions and composite actions"
+    trigger_globs:
+      - ".github/workflows/**"
+      - ".github/actions/**"
+      - ".github/run-scripts-parallel.sh"
+    required_workflows:
+      - ci
+      - process-invariants
+    skippable_workflows:
+      - build-tutor-images
+    timing_budget_seconds: 300
+
+  - id: security-sensitive
+    description: "Secrets, ExternalSecrets, and security-related changes"
+    trigger_globs:
+      - "deploy/k8s/base/secrets/**"
+      - "specs/secrets-management.md"
+    required_workflows:
+      - ci
+      - process-invariants
+      - security-scans
+    skippable_workflows:
+      - build-tutor-images
+    timing_budget_seconds: 300
+
+  - id: python-code
+    description: "Python source code changes requiring test coverage"
+    trigger_globs:
+      - "**/*.py"
+      - "requirements*.txt"
+    required_workflows:
+      - ci
+      - process-invariants
+      - test-coverage
+      - security-scans
+    skippable_workflows:
+      - build-tutor-images
+    timing_budget_seconds: 600

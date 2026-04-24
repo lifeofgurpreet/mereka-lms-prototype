@@ -1,0 +1,132 @@
+version: "2.0"
+metadata:
+  description: "Active Tutor patch authority manifest. Source hooks and bake/HCL remain canonical wherever they can express the behavior."
+  last_updated: "2026-04-23"
+  inventory: "docs/reference/architecture/TUTOR_PATCHES_INVENTORY.md"
+  spec: "specs/tutor-configuration-resilience_spec.md"
+
+patches:
+  - id: mysql-root-host
+    module: "infrastructure/tutor/patches/mysql-root-host.sh"
+    function: "apply_mysql_root_host_patch"
+    target: "tutor_env/env/local/docker-compose.yml"
+    target_family: "openedx"
+    authority_class: "temporary_compatibility_layer"
+    description: "Adds MYSQL_ROOT_HOST: \"%\" to the rendered local MySQL service so sibling Tutor containers can connect during local bootstrap."
+    retirement_trigger: "Tutor exposes this local compose setting directly or the local bootstrap no longer needs remote root access."
+    required: true
+
+  - id: webpack-memory-legacy-cleanup
+    module: "infrastructure/tutor/patches/webpack-memory.sh"
+    function: "apply_webpack_memory_patch"
+    target: "tutor_env/env/build/openedx/Dockerfile"
+    target_family: "openedx"
+    authority_class: "migration_guard"
+    description: "Deduplicates stale rendered memory/runtime ENV blocks and normalizes legacy webpack build settings. Fresh render authority lives in Tutor plugin hooks."
+    retirement_trigger: "Fresh-render proof plus stale-render cleanup retirement plan shows no older rendered Dockerfiles remain in supported workflows."
+    required: true
+
+  - id: dependency-image-mirror-normalization
+    module: "infrastructure/tutor/patches/dependency-image-mirrors.sh"
+    function: "apply_dependency_image_mirrors_patch"
+    target: "tutor_env/env/build/openedx/Dockerfile and tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
+    target_family: "openedx,mfe"
+    authority_class: "temporary_compatibility_layer"
+    description: "Rewrites exact upstream hardcoded Docker Hub dependency refs to mirror.gcr.io equivalents for Dockerfile frontend, Open edX Ubuntu/dockerize, MFE Node, and MFE Caddy acquisition."
+    retirement_trigger: "Tutor/tutormfe exposes source-owned selectors for these refs or local/CI cold starts no longer depend on anonymous Docker Hub acquisition."
+    required: true
+
+  - id: openedx-obsolete-activation-key-patch-removal
+    module: "infrastructure/tutor/patches/openedx-obsolete-activation-key-patch-removal.sh"
+    function: "apply_openedx_obsolete_activation_key_patch_removal_patch"
+    target: "tutor_env/env/build/openedx/Dockerfile"
+    target_family: "openedx"
+    authority_class: "authority_correction"
+    description: "Removes Tutor's obsolete activation_key git-am layer for release/ulmo now that upstream edx-platform already carries commit 21cead238466ca398ba368518f1d3288431d68f4."
+    retirement_trigger: "Tutor's Open edX Dockerfile template stops emitting the obsolete activation_key git-am layer for supported refs."
+    required: true
+
+  - id: build-optimizations-render-delta
+    module: "infrastructure/tutor/patches/build-optimizations.sh"
+    function: "apply_build_optimizations_patch"
+    target: "tutor_env/env/build/openedx/Dockerfile"
+    target_family: "openedx"
+    authority_class: "temporary_compatibility_layer"
+    description: "Residual cold-build compatibility and translation preflight/wrapper surgery, bounded by build-optimizations.allowed-delta.yaml and the inventory mutation ledger."
+    retirement_trigger: "Bake/HCL, Tutor hooks, or upstream templates own the base/assets, uwsgi, build-profile, translation, and XBlock placement semantics without rendered-line rewrites."
+    required: true
+
+  - id: oep48-brand-package-sync
+    module: "infrastructure/tutor/patches/brand-package.sh"
+    function: "apply_brand_package_patch"
+    target: "tutor_env/env/plugins/mfe/build/mfe/mereka/brand-mereka"
+    target_family: "mfe"
+    authority_class: "filesystem_sync"
+    description: "Copies the repo-owned OEP-48 brand package and compiled theme CSS into the rendered MFE build context."
+    retirement_trigger: "Tutor/tutormfe supports declaring local file package payloads without post-render filesystem sync."
+    required: true
+
+  - id: mfe-theme-source-sync
+    module: "infrastructure/tutor/patches/sync-footer-assets.sh"
+    function: "sync_footer_assets"
+    target: "tutor_env/env/plugins/mfe/build/mfe/mereka/theme-source"
+    target_family: "mfe"
+    authority_class: "filesystem_sync"
+    description: "Copies repo-owned MFE theme SCSS and font assets into the rendered MFE build context. Footer JSX and slot wiring are source-owned by the Tutor plugin."
+    retirement_trigger: "Tutor/tutormfe supports declaring the repo-owned theme-source tree without post-render filesystem sync."
+    required: true
+
+  - id: mfe-slot-ownership-guard
+    module: "infrastructure/tutor/patches/mfe-slot-ownership.sh"
+    function: "apply_mfe_slot_ownership_patch"
+    target: "tutor_env/env/plugins/mfe/build/mfe/env.config.jsx"
+    target_family: "mfe"
+    authority_class: "migration_guard"
+    description: "Removes stale Tutor Indigo slot ownership from generated env.config artifacts so retired external ownership cannot become live."
+    retirement_trigger: "Fresh tutormfe renders no longer emit the retired external Indigo slot residue and CI keeps an absence guard."
+    required: true
+
+  - id: mfe-prune-deprecated-shells
+    module: "infrastructure/tutor/patches/mfe-prune-deprecated-shells.sh"
+    function: "apply_mfe_prune_deprecated_shells_patch"
+    target: "tutor_env/env/plugins/mfe/build/mfe/Dockerfile and tutor_env/env/plugins/mfe/apps/mfe/Caddyfile"
+    target_family: "mfe"
+    authority_class: "migration_guard"
+    description: "Removes generated legacy MFE shell and Caddy residue outside the active MFE estate."
+    retirement_trigger: "Upstream render no longer emits deprecated shells/routes, and fixture tests prove the patch is a no-op."
+    required: true
+
+  - id: mfe-npm-install-resilience
+    module: "infrastructure/tutor/patches/mfe-npm-install-resilience.sh"
+    function: "apply_mfe_npm_install_resilience_patch"
+    target: "tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
+    target_family: "mfe"
+    authority_class: "temporary_compatibility_layer"
+    description: "Wraps the rendered MFE npm clean-install layer with retry/fallback behavior and explicit selector-drift failure."
+    retirement_trigger: "tutormfe exposes npm install resilience as source-owned config or upstream render includes equivalent behavior."
+    required: true
+
+  - id: mfe-authn-helper-sync
+    module: "infrastructure/tutor/apply-patches.sh"
+    function: "sync_mfe_patch_helpers"
+    target: "tutor_env/env/plugins/mfe/build/mfe/patch-authn-*.py"
+    target_family: "mfe"
+    authority_class: "filesystem_sync"
+    description: "Copies repo-owned Authn dashboard/deep-route patch and verification helpers into the rendered MFE build context because the source-owned Dockerfile hook COPY/RUN instructions need those files inside the context."
+    retirement_trigger: "tutormfe or the repo-owned MFE Dockerfile source hook can declare these helper files as build-context payloads without apply-patches.sh copying them after render."
+    required: true
+
+  - id: mfe-pull-translations-retry
+    module: "infrastructure/tutor/apply-patches.sh"
+    function: "wrap_mfe_pull_translations_retry"
+    target: "tutor_env/env/plugins/mfe/build/mfe/Dockerfile"
+    target_family: "mfe"
+    authority_class: "temporary_compatibility_layer"
+    description: "Wraps rendered Atlas pull_translations RUN lines with retry loops to protect long builds from transient GitHub/DNS failures."
+    retirement_trigger: "tutormfe exposes the translation pull step as source-owned config or upstream includes equivalent retry semantics."
+    required: true
+
+inactive_modules:
+  - module: "infrastructure/tutor/patches/enterprise-template-guard.sh"
+    status: "not_sourced"
+    note: "Not active authority until wired through apply-patches.sh with docs, tests, and a retirement trigger."

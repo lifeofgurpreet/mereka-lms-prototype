@@ -1,0 +1,105 @@
+name: Promotion Chain Collector
+
+# Aggregates S6.1 promotion-chain artifacts from both app and infra repos,
+# computes end-to-end conveyor latency, and surfaces the result in the
+# workflow step summary for operator visibility.
+#
+# This is a pure observability workflow — it NEVER gates real work.
+# All steps use continue-on-error: true.
+#
+# Companion wire-in PRs (stages emitted by each):
+#   #1828 — app_merge           (build-tutor-images.yml)
+#   #1832 — bbi_pr_opened       (build-tutor-images.yml)
+#   #3279 — bbi_pr_merged       (bbi-infrastructure listener)
+#   #1834 — argo_sync_started / argo_sync_finished (argo-sync-chain-watcher.yml)
+#   #1833 — pod_image_realized  (pod-image-verify.yml)
+#
+# Design: each step is continue-on-error: true — metric loss never blocks work.
+# Doctrine: docs/meta/standing-orders/ Rule 1 — surface truth, do not approximate.
+# Bead: mereka-lms-lb4c.6 (S6.1 — collect promotion chain timing)
+
+on:
+  schedule:
+    # Daily at 02:37 UTC — off-peak minute to avoid contention with other nightly jobs.
+    - cron: "37 2 * * *"
+  workflow_dispatch:
+    inputs:
+      since_days:
+        description: "How many days back to search for artifacts"
+        required: false
+        default: "7"
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  collect:
+    name: Collect Promotion-Chain Metrics
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
+    # This is an observability job — it must never gate real work.
+    continue-on-error: true
+    steps:
+      - name: Checkout (minimal — scripts only)
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        continue-on-error: true
+
+      - name: Ensure output directory exists
+        continue-on-error: true
+        run: mkdir -p var/ci
+
+      # ── Collect and render markdown summary ───────────────────────────────
+      - name: Collect metrics (markdown)
+        continue-on-error: true
+        env:
+          SINCE_DAYS: ${{ inputs.since_days || '7' }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/ci/collect-promotion-chain-metrics.py \
+            --since-days "${SINCE_DAYS}" \
+            --repo Biji-Biji-Initiative/mereka-lms \
+            --infra-repo Biji-Biji-Initiative/bbi-infrastructure \
+            --output var/ci/promotion-chain-summary.md \
+            --format markdown
+
+      # ── Also emit JSON for downstream consumers ───────────────────────────
+      - name: Collect metrics (JSON)
+        continue-on-error: true
+        env:
+          SINCE_DAYS: ${{ inputs.since_days || '7' }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/ci/collect-promotion-chain-metrics.py \
+            --since-days "${SINCE_DAYS}" \
+            --repo Biji-Biji-Initiative/mereka-lms \
+            --infra-repo Biji-Biji-Initiative/bbi-infrastructure \
+            --output var/ci/promotion-chain-summary.json \
+            --format json
+
+      # ── Append markdown to step summary for operator visibility ───────────
+      - name: Append to step summary
+        continue-on-error: true
+        run: |
+          if [ -f var/ci/promotion-chain-summary.md ]; then
+            cat var/ci/promotion-chain-summary.md >> "${GITHUB_STEP_SUMMARY}"
+          else
+            echo "_(no promotion-chain summary generated)_" >> "${GITHUB_STEP_SUMMARY}"
+          fi
+
+      # ── Upload both artifacts for archival (30-day retention) ────────────
+      - name: Upload promotion-chain summary artifacts
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: promotion-chain-summary-${{ github.run_id }}
+          path: |
+            var/ci/promotion-chain-summary.md
+            var/ci/promotion-chain-summary.json
+          retention-days: 30
+          if-no-files-found: warn

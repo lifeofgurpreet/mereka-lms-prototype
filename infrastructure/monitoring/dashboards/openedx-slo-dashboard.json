@@ -1,0 +1,578 @@
+{
+  "displayName": "Open edX SLO Dashboard - Service Level Objectives",
+  "mosaicLayout": {
+    "columns": 12,
+    "tiles": [
+      {
+        "width": 12,
+        "height": 2,
+        "widget": {
+          "title": "Dashboard Overview",
+          "text": {
+            "content": "**Open edX Service Level Objectives Dashboard**\n\nThis dashboard displays Tier 1 SLO metrics for LMS and CMS services, error budget status, and ownership information. All metrics are calculated over a 30-day rolling window.\n\n**Service Ownership:** Engineering Team | **Escalation:** engineering-lead \u2192 VP/CTO\n\n**Alert Rules:** [PrometheusRules](/monitoring/prometheusrule-slo.yaml) | **Runbook:** [SLO Playbook](/docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md)",
+            "format": "MARKDOWN"
+          }
+        },
+        "xPos": 0,
+        "yPos": 0
+      },
+      {
+        "width": 6,
+        "height": 4,
+        "widget": {
+          "title": "LMS Availability (30-day SLI)",
+          "scorecard": {
+            "timeSeriesQuery": {
+              "timeSeriesFilter": {
+                "filter": "metric.type=\"prometheus.googleapis.com/mereka_slo_availability_ratio/gauge\" resource.type=\"prometheus_target\" metric.label.\"service\"=\"lms\"",
+                "aggregation": {
+                  "alignmentPeriod": "300s",
+                  "perSeriesAligner": "ALIGN_MEAN"
+                }
+              }
+            },
+            "sparkChartView": {
+              "sparkChartType": "SPARK_LINE"
+            },
+            "thresholds": [
+              {
+                "value": 0.999,
+                "color": "RED",
+                "direction": "BELOW"
+              },
+              {
+                "value": 0.9995,
+                "color": "YELLOW",
+                "direction": "BELOW"
+              }
+            ]
+          }
+        },
+        "xPos": 0,
+        "yPos": 2
+      },
+      {
+        "xPos": 6,
+        "width": 6,
+        "height": 4,
+        "widget": {
+          "title": "CMS Availability (30-day SLI)",
+          "scorecard": {
+            "timeSeriesQuery": {
+              "timeSeriesFilter": {
+                "filter": "metric.type=\"prometheus.googleapis.com/mereka_slo_availability_ratio/gauge\" resource.type=\"prometheus_target\" metric.label.\"service\"=\"cms\"",
+                "aggregation": {
+                  "alignmentPeriod": "300s",
+                  "perSeriesAligner": "ALIGN_MEAN"
+                }
+              }
+            },
+            "sparkChartView": {
+              "sparkChartType": "SPARK_LINE"
+            },
+            "thresholds": [
+              {
+                "value": 0.999,
+                "color": "RED",
+                "direction": "BELOW"
+              },
+              {
+                "value": 0.9995,
+                "color": "YELLOW",
+                "direction": "BELOW"
+              }
+            ]
+          }
+        },
+        "yPos": 2
+      },
+      {
+        "yPos": 6,
+        "width": 4,
+        "height": 4,
+        "widget": {
+          "title": "LMS Request Latency (P99)",
+          "xyChart": {
+            "dataSets": [
+              {
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "filter": "metric.type=\"prometheus.googleapis.com/mereka_slo_latency_p99_seconds/gauge\" resource.type=\"prometheus_target\" metric.label.\"service\"=\"lms\"",
+                    "aggregation": {
+                      "alignmentPeriod": "60s",
+                      "perSeriesAligner": "ALIGN_MEAN"
+                    }
+                  }
+                },
+                "plotType": "LINE",
+                "targetAxis": "Y1"
+              }
+            ],
+            "thresholds": [
+              {
+                "value": 5.0,
+                "targetAxis": "Y1",
+                "label": "P99 Target (5s)"
+              }
+            ],
+            "yAxis": {
+              "label": "Latency (seconds)",
+              "scale": "LINEAR"
+            }
+          }
+        },
+        "xPos": 0
+      },
+      {
+        "xPos": 4,
+        "yPos": 6,
+        "width": 4,
+        "height": 4,
+        "widget": {
+          "title": "LMS Request Latency (P95)",
+          "xyChart": {
+            "dataSets": [
+              {
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "filter": "metric.type=\"prometheus.googleapis.com/mereka_slo_latency_p95_seconds/gauge\" resource.type=\"prometheus_target\" metric.label.\"service\"=\"lms\"",
+                    "aggregation": {
+                      "alignmentPeriod": "60s",
+                      "perSeriesAligner": "ALIGN_MEAN"
+                    }
+                  }
+                },
+                "plotType": "LINE",
+                "targetAxis": "Y1"
+              }
+            ],
+            "thresholds": [
+              {
+                "value": 2.0,
+                "targetAxis": "Y1",
+                "label": "P95 Target (2s)"
+              }
+            ],
+            "yAxis": {
+              "label": "Latency (seconds)",
+              "scale": "LINEAR"
+            }
+          }
+        }
+      },
+      {
+        "xPos": 8,
+        "yPos": 6,
+        "width": 4,
+        "height": 4,
+        "widget": {
+          "title": "LMS Request Latency (P50)",
+          "xyChart": {
+            "dataSets": [
+              {
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "filter": "metric.type=\"prometheus.googleapis.com/mereka_slo_latency_p50_seconds/gauge\" resource.type=\"prometheus_target\" metric.label.\"service\"=\"lms\"",
+                    "aggregation": {
+                      "alignmentPeriod": "60s",
+                      "perSeriesAligner": "ALIGN_MEAN"
+                    }
+                  }
+                },
+                "plotType": "LINE",
+                "targetAxis": "Y1"
+              }
+            ],
+            "thresholds": [
+              {
+                "value": 0.5,
+                "targetAxis": "Y1",
+                "label": "P50 Target (500ms)"
+              }
+            ],
+            "yAxis": {
+              "label": "Latency (seconds)",
+              "scale": "LINEAR"
+            }
+          }
+        }
+      },
+      {
+        "yPos": 10,
+        "width": 4,
+        "height": 4,
+        "widget": {
+          "title": "CMS Request Latency (P99)",
+          "xyChart": {
+            "dataSets": [
+              {
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "filter": "metric.type=\"prometheus.googleapis.com/mereka_slo_latency_p99_seconds/gauge\" resource.type=\"prometheus_target\" metric.label.\"service\"=\"cms\"",
+                    "aggregation": {
+                      "alignmentPeriod": "60s",
+                      "perSeriesAligner": "ALIGN_MEAN"
+                    }
+                  }
+                },
+                "plotType": "LINE",
+                "targetAxis": "Y1"
+              }
+            ],
+            "thresholds": [
+              {
+                "value": 8.0,
+                "targetAxis": "Y1",
+                "label": "P99 Target (8s)"
+              }
+            ],
+            "yAxis": {
+              "label": "Latency (seconds)",
+              "scale": "LINEAR"
+            }
+          }
+        },
+        "xPos": 0
+      },
+      {
+        "xPos": 4,
+        "yPos": 10,
+        "width": 4,
+        "height": 4,
+        "widget": {
+          "title": "CMS Request Latency (P95)",
+          "xyChart": {
+            "dataSets": [
+              {
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "filter": "metric.type=\"prometheus.googleapis.com/mereka_slo_latency_p95_seconds/gauge\" resource.type=\"prometheus_target\" metric.label.\"service\"=\"cms\"",
+                    "aggregation": {
+                      "alignmentPeriod": "60s",
+                      "perSeriesAligner": "ALIGN_MEAN"
+                    }
+                  }
+                },
+                "plotType": "LINE",
+                "targetAxis": "Y1"
+              }
+            ],
+            "thresholds": [
+              {
+                "value": 3.0,
+                "targetAxis": "Y1",
+                "label": "P95 Target (3s)"
+              }
+            ],
+            "yAxis": {
+              "label": "Latency (seconds)",
+              "scale": "LINEAR"
+            }
+          }
+        }
+      },
+      {
+        "xPos": 8,
+        "yPos": 10,
+        "width": 4,
+        "height": 4,
+        "widget": {
+          "title": "CMS Request Latency (P50)",
+          "xyChart": {
+            "dataSets": [
+              {
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "filter": "metric.type=\"prometheus.googleapis.com/mereka_slo_latency_p50_seconds/gauge\" resource.type=\"prometheus_target\" metric.label.\"service\"=\"cms\"",
+                    "aggregation": {
+                      "alignmentPeriod": "60s",
+                      "perSeriesAligner": "ALIGN_MEAN"
+                    }
+                  }
+                },
+                "plotType": "LINE",
+                "targetAxis": "Y1"
+              }
+            ],
+            "thresholds": [
+              {
+                "value": 0.8,
+                "targetAxis": "Y1",
+                "label": "P50 Target (800ms)"
+              }
+            ],
+            "yAxis": {
+              "label": "Latency (seconds)",
+              "scale": "LINEAR"
+            }
+          }
+        }
+      },
+      {
+        "yPos": 14,
+        "width": 6,
+        "height": 4,
+        "widget": {
+          "title": "LMS Error Rate (5xx/total)",
+          "xyChart": {
+            "dataSets": [
+              {
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "filter": "metric.type=\"prometheus.googleapis.com/http_requests_total/counter\" resource.type=\"prometheus_target\" metric.label.\"service\"=\"lms\" metric.label.\"status\"=monitoring.regex.full_match(\"5..\") ",
+                    "aggregation": {
+                      "alignmentPeriod": "300s",
+                      "perSeriesAligner": "ALIGN_RATE",
+                      "crossSeriesReducer": "REDUCE_SUM"
+                    }
+                  },
+                  "unitOverride": "1"
+                },
+                "plotType": "LINE",
+                "targetAxis": "Y1"
+              }
+            ],
+            "thresholds": [
+              {
+                "value": 0.001,
+                "targetAxis": "Y1",
+                "label": "Warning (0.1%)"
+              },
+              {
+                "value": 0.01,
+                "targetAxis": "Y1",
+                "label": "Critical (1.0%)"
+              }
+            ],
+            "yAxis": {
+              "label": "Error Rate (ratio)",
+              "scale": "LINEAR"
+            }
+          }
+        },
+        "xPos": 0
+      },
+      {
+        "xPos": 6,
+        "yPos": 14,
+        "width": 6,
+        "height": 4,
+        "widget": {
+          "title": "CMS Error Rate (5xx/total)",
+          "xyChart": {
+            "dataSets": [
+              {
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "filter": "metric.type=\"prometheus.googleapis.com/http_requests_total/counter\" resource.type=\"prometheus_target\" metric.label.\"service\"=\"cms\" metric.label.\"status\"=monitoring.regex.full_match(\"5..\") ",
+                    "aggregation": {
+                      "alignmentPeriod": "300s",
+                      "perSeriesAligner": "ALIGN_RATE",
+                      "crossSeriesReducer": "REDUCE_SUM"
+                    }
+                  },
+                  "unitOverride": "1"
+                },
+                "plotType": "LINE",
+                "targetAxis": "Y1"
+              }
+            ],
+            "thresholds": [
+              {
+                "value": 0.001,
+                "targetAxis": "Y1",
+                "label": "Warning (0.1%)"
+              },
+              {
+                "value": 0.01,
+                "targetAxis": "Y1",
+                "label": "Critical (1.0%)"
+              }
+            ],
+            "yAxis": {
+              "label": "Error Rate (ratio)",
+              "scale": "LINEAR"
+            }
+          }
+        }
+      },
+      {
+        "yPos": 18,
+        "width": 6,
+        "height": 4,
+        "widget": {
+          "title": "LMS Availability SLI (Uptime %)",
+          "xyChart": {
+            "dataSets": [
+              {
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "filter": "metric.type=\"monitoring.googleapis.com/uptime_check/check_passed\" resource.type=\"uptime_url\" resource.label.\"host\"=\"academyv2.mereka.io\"",
+                    "aggregation": {
+                      "alignmentPeriod": "300s",
+                      "perSeriesAligner": "ALIGN_FRACTION_TRUE"
+                    }
+                  }
+                },
+                "plotType": "LINE",
+                "targetAxis": "Y1"
+              }
+            ],
+            "thresholds": [
+              {
+                "value": 0.999,
+                "targetAxis": "Y1",
+                "label": "SLA Target (99.9%)"
+              },
+              {
+                "value": 0.9995,
+                "targetAxis": "Y1",
+                "label": "SLO Target (99.95%)"
+              }
+            ],
+            "yAxis": {
+              "label": "Availability (ratio)",
+              "scale": "LINEAR"
+            }
+          }
+        },
+        "xPos": 0
+      },
+      {
+        "xPos": 6,
+        "yPos": 18,
+        "width": 6,
+        "height": 4,
+        "widget": {
+          "title": "CMS Availability SLI (Uptime %)",
+          "xyChart": {
+            "dataSets": [
+              {
+                "timeSeriesQuery": {
+                  "timeSeriesFilter": {
+                    "filter": "metric.type=\"monitoring.googleapis.com/uptime_check/check_passed\" resource.type=\"uptime_url\" resource.label.\"host\"=\"studio.academyv2.mereka.io\"",
+                    "aggregation": {
+                      "alignmentPeriod": "300s",
+                      "perSeriesAligner": "ALIGN_FRACTION_TRUE"
+                    }
+                  }
+                },
+                "plotType": "LINE",
+                "targetAxis": "Y1"
+              }
+            ],
+            "thresholds": [
+              {
+                "value": 0.999,
+                "targetAxis": "Y1",
+                "label": "SLA Target (99.9%)"
+              },
+              {
+                "value": 0.9995,
+                "targetAxis": "Y1",
+                "label": "SLO Target (99.95%)"
+              }
+            ],
+            "yAxis": {
+              "label": "Availability (ratio)",
+              "scale": "LINEAR"
+            }
+          }
+        }
+      },
+      {
+        "yPos": 22,
+        "width": 6,
+        "height": 4,
+        "widget": {
+          "title": "LMS Error Budget Remaining",
+          "scorecard": {
+            "timeSeriesQuery": {
+              "timeSeriesFilter": {
+                "filter": "metric.type=\"prometheus.googleapis.com/mereka_slo_error_budget_remaining_minutes/gauge\" resource.type=\"prometheus_target\" metric.label.\"service\"=\"lms\"",
+                "aggregation": {
+                  "alignmentPeriod": "300s",
+                  "perSeriesAligner": "ALIGN_MEAN"
+                }
+              }
+            },
+            "sparkChartView": {
+              "sparkChartType": "SPARK_BAR"
+            },
+            "thresholds": [
+              {
+                "value": 0,
+                "color": "RED",
+                "direction": "BELOW"
+              },
+              {
+                "value": 2.16,
+                "color": "RED",
+                "direction": "BELOW"
+              },
+              {
+                "value": 5.4,
+                "color": "YELLOW",
+                "direction": "BELOW"
+              }
+            ]
+          }
+        },
+        "xPos": 0
+      },
+      {
+        "xPos": 6,
+        "yPos": 22,
+        "width": 6,
+        "height": 4,
+        "widget": {
+          "title": "CMS Error Budget Remaining",
+          "scorecard": {
+            "timeSeriesQuery": {
+              "timeSeriesFilter": {
+                "filter": "metric.type=\"prometheus.googleapis.com/mereka_slo_error_budget_remaining_minutes/gauge\" resource.type=\"prometheus_target\" metric.label.\"service\"=\"cms\"",
+                "aggregation": {
+                  "alignmentPeriod": "300s",
+                  "perSeriesAligner": "ALIGN_MEAN"
+                }
+              }
+            },
+            "sparkChartView": {
+              "sparkChartType": "SPARK_BAR"
+            },
+            "thresholds": [
+              {
+                "value": 0,
+                "color": "RED",
+                "direction": "BELOW"
+              },
+              {
+                "value": 2.16,
+                "color": "RED",
+                "direction": "BELOW"
+              },
+              {
+                "value": 5.4,
+                "color": "YELLOW",
+                "direction": "BELOW"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "yPos": 26,
+        "width": 12,
+        "height": 3,
+        "widget": {
+          "title": "Service Ownership & Escalation",
+          "text": {
+            "content": "## Service Ownership\n\n**Primary Owner:** Engineering Team  \n**Service Tier:** Tier 1 (Critical)  \n**On-Call Rotation:** Weekly rotation (primary + secondary)\n\n## Escalation Contacts\n\n- **L1 (Alert fires):** Primary on-call (15-min response SLA)\n- **L2 (Primary unavailable or >30min):** Secondary on-call\n- **L3 (Issue persists >1h):** Engineering Lead\n- **L4 (Issue persists >2h or data loss):** VP/CTO\n\n## Alert Rules\n\n**SLO Burn Rate Alerts:**\n- `SLOBudgetFastBurn` (P1): 1h burn rate > 14.4x AND 5m burn rate > 14.4x\n- `SLOBudgetSlowBurn` (P2): 6h burn rate > 6x AND 30m burn rate > 6x\n- `SLOBudgetExhausted` (P1): Error budget < 0%\n- `SLOBudgetCritical` (P1): Error budget < 10%\n\n**Performance Regression Alerts:**\n- `LatencyRegressionSpike` (P2): p95 latency > 2x 7-day baseline for 15 minutes\n- `ErrorRateSpike` (P1): 5xx error rate > 3x 7-day average for 10 minutes\n\n**Alert Definitions:** [deploy/k8s/base/monitoring/prometheusrule-slo.yaml](/deploy/k8s/base/monitoring/prometheusrule-slo.yaml)\n\n## Runbooks\n\n- [On-Call Observability Playbook](/docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md)\n- [SLO/SLA Service Level Management Spec](/specs/slo-sla-service-level-management_spec.md)\n- [Deployment Runbook](/docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md)\n- [Troubleshooting Guide](/docs/ops/runbooks/TROUBLESHOOTING.md)",
+            "format": "MARKDOWN"
+          }
+        },
+        "xPos": 0
+      }
+    ]
+  }
+}

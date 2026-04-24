@@ -1,0 +1,65 @@
+name: Public Health Checks
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  branding-and-public-checks:
+    name: Branding + Public Endpoint Checks
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Run canonical branding gate (prod, strict MFE revision)
+        run: |
+          mkdir -p var/ci
+          STRICT_MFE_BRANDING_REV=1 \
+          AUDIT_STRICT=1 \
+          CHECK_CERTS=1 \
+          RUN_SCREENSHOTS=0 \
+          ./scripts/branding/run-branding-gates.sh prod | tee var/ci/branding-gates-prod.log
+
+      - name: Run canonical branding gate (dev)
+        run: |
+          AUDIT_STRICT=1 \
+          RUN_SCREENSHOTS=0 \
+          ./scripts/branding/run-branding-gates.sh dev | tee var/ci/branding-gates-dev.log
+
+      - name: Verify auth surfaces (prod)
+        run: |
+          STRICT_ADMIN_LOGIN_REDIRECT=1 \
+          ./scripts/qa/verify-auth-surfaces.sh prod | tee var/ci/auth-surfaces-prod.log
+
+      - name: Verify auth surfaces (dev)
+        run: |
+          STRICT_ADMIN_LOGIN_REDIRECT=1 \
+          ./scripts/qa/verify-auth-surfaces.sh dev | tee var/ci/auth-surfaces-dev.log
+
+      - name: Publish run summary
+        if: always()
+        run: |
+          {
+            echo "## Public Health Workflow Summary"
+            echo ""
+            echo "- Prod strict branding gate: \`STRICT_MFE_BRANDING_REV=1 ./scripts/branding/run-branding-gates.sh prod\`"
+            echo "- Dev branding gate: \`./scripts/branding/run-branding-gates.sh dev\`"
+            echo "- Auth checks: \`./scripts/qa/verify-auth-surfaces.sh\` (prod/dev)"
+            echo ""
+            echo "Log artifacts uploaded from \`var/ci/*.log\`."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload CI logs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: public-health-and-branding-logs
+          path: var/ci/*.log
+          retention-days: 3
+          if-no-files-found: warn

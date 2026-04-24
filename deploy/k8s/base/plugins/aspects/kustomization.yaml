@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: mereka-lms
+
+resources:
+  - configmaps.yml
+  - volumes.yml
+  - services.yml
+  - deployments.yml
+  - jobs.yml
+  - sync-job.yml
+  - cronjob-event-sink-sync.yml
+  - cronjob-event-sink-course-overviews-sync.yml
+  - ingress.yml
+  - prometheusrule.yml
+  - network-policy.yaml
+
+labels:
+  - includeSelectors: true
+    includeTemplates: true
+    pairs:
+      app.kubernetes.io/part-of: aspects
+      app.kubernetes.io/managed-by: kustomize

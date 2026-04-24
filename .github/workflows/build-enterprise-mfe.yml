@@ -1,0 +1,206 @@
+name: Build Enterprise MFEs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "infrastructure/docker/enterprise-mfe-clean/**"
+      - "infrastructure/tutor/brand-mereka/**"
+      - "infrastructure/tutor/brand-biji-biji/**"
+      - "infrastructure/tutor/brand-skillourfuture/**"
+      - "infrastructure/tutor/themes/mereka/mfe/theme/**"
+      - "assets/branding/tenants/**"
+      - ".github/workflows/build-enterprise-mfe.yml"
+  workflow_dispatch:
+    inputs:
+      lane_mode:
+        description: "Routing override for build jobs"
+        type: choice
+        required: false
+        options:
+          - auto
+          - fastlane
+          - fastlane-required
+          - fallback
+        default: auto
+      source_tag:
+        description: "Explicit source image tag to build from (default: auto-resolve latest from GHCR)"
+        type: string
+        required: false
+        default: ""
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions: {}  # Deny-all at workflow level; each job grants only what it needs
+
+jobs:
+  resolve-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      packages: read
+    outputs:
+      admin_source_tag: ${{ steps.resolve.outputs.admin_tag }}
+      learner_source_tag: ${{ steps.resolve.outputs.learner_tag }}
+    steps:
+      - name: Resolve source image tags
+        id: resolve
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPLICIT_TAG: ${{ inputs.source_tag }}
+        run: |
+          set -euo pipefail
+
+          resolve_tag() {
+            local pkg_name="$1"
+            local explicit="$2"
+
+            # If an explicit tag was provided via workflow_dispatch, use it
+            if [[ -n "${explicit}" ]]; then
+              echo "${explicit}"
+              return 0
+            fi
+
+            # Auto-resolve: find the latest mereka-branded-* tag from GHCR
+            # Uses the GitHub API (no docker pull needed)
+            local tag
+            tag=$(gh api \
+              --paginate \
+              -H "Accept: application/vnd.github+json" \
+              "/orgs/biji-biji-initiative/packages/container/${pkg_name}/versions?per_page=100" \
+              --jq '.[] | select(.metadata.container.tags | length > 0) | .metadata.container.tags[] | select(startswith("mereka-branded-"))' \
+              2>/dev/null | awk 'NR==1 { print; exit }') || true
+
+            if [[ -z "${tag}" ]]; then
+              echo "::error::No mereka-branded-* tag found for ${pkg_name}. Pass source_tag manually via workflow_dispatch."
+              return 1
+            fi
+
+            echo "${tag}"
+          }
+
+          ADMIN_TAG=$(resolve_tag "mereka-lms%2Fenterprise-admin-portal" "${EXPLICIT_TAG}")
+          LEARNER_TAG=$(resolve_tag "mereka-lms%2Fenterprise-learner-portal" "${EXPLICIT_TAG}")
+
+          echo "admin_tag=${ADMIN_TAG}" >> $GITHUB_OUTPUT
+          echo "learner_tag=${LEARNER_TAG}" >> $GITHUB_OUTPUT
+          echo "Resolved admin source: ${ADMIN_TAG}"
+          echo "Resolved learner source: ${LEARNER_TAG}"
+
+  select-build-lane:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: resolve-source
+    permissions:
+      contents: read
+    outputs:
+      runner_label: ${{ steps.select.outputs.runner_label }}
+      decision: ${{ steps.select.outputs.decision }}
+      reason: ${{ steps.select.outputs.reason }}
+    steps:
+      - name: Select runner lane
+        id: select
+        uses: Biji-Biji-Initiative/bbi-infrastructure/.github/actions/select-runner-lane@main
+        with:
+          enabled: ${{ vars.CI_FASTLANE_BUILD_ENABLED }}
+          lane_mode: ${{ github.event_name == 'workflow_dispatch' && inputs.lane_mode || 'auto' }}
+          fastlane_label: ${{ vars.CI_FASTLANE_BUILD_LABEL || 'mereka-lms-vps-fastlane-build' }}
+          routing_policy: lms_build_prefer_fastlane
+          fallback_label: mereka-k8s-heavy-builders
+          timezone: ${{ vars.CI_FASTLANE_BUILD_TIMEZONE }}
+          office_hours_start: ${{ vars.CI_FASTLANE_BUILD_WINDOW_START }}
+          office_hours_end: ${{ vars.CI_FASTLANE_BUILD_WINDOW_END }}
+          runner_status_token: ${{ secrets.FASTLANE_RUNNER_STATUS_TOKEN }}
+          github_app_id: ${{ secrets.GITOPS_GITHUB_APP_ID }}
+          github_app_installation_id: ${{ secrets.GITOPS_GITHUB_APP_INSTALLATION_ID }}
+          github_app_private_key: ${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}
+          allow_push_main: 'true'
+          allow_workflow_dispatch: 'true'
+
+  admin-portal:
+    needs: [resolve-source, select-build-lane]
+    # contents: read — checkout in reusable workflow
+    # packages: write — push image to GHCR
+    # id-token: write — OIDC for Workload Identity Federation (GCP auth)
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@main
+    secrets: inherit
+    with:
+      app_name: mereka-lms/enterprise-admin-portal
+      dockerfile: infrastructure/docker/enterprise-mfe-clean/Dockerfile.admin-portal
+      context: .
+      runner_label: ${{ needs.select-build-lane.outputs.runner_label }}
+      concurrency_group: ${{ format('build-enterprise-admin-{0}', github.ref) }}
+      cancel_in_progress: ${{ github.ref != 'refs/heads/main' }}
+      build_args: |
+        SOURCE_TAG=${{ needs.resolve-source.outputs.admin_source_tag }}
+
+  update-dev-admin-portal:
+    needs: admin-portal
+    if: github.ref == 'refs/heads/main'
+    # contents: write — reusable workflow commits the updated dev image ref back to infra
+    # id-token: write — OIDC for Workload Identity Federation used by reusable workflow
+    permissions:
+      contents: write
+      id-token: write
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-update-dev-tag.yml@main
+    with:
+      app_name: mereka-lms
+      image_tag: ${{ needs.admin-portal.outputs.image_tag }}
+      image_digest: ${{ needs.admin-portal.outputs.image_digest }}
+      image_repository: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-admin-portal
+      kustomization_file: apps/mereka-lms/overlays/profiles/dev/kustomization.yaml
+      kustomize_image_name: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-admin-portal
+    secrets:
+      GITHUB_APP_ID: ${{ secrets.GITOPS_GITHUB_APP_ID }}
+      GITHUB_APP_INSTALLATION_ID: ${{ secrets.GITOPS_GITHUB_APP_INSTALLATION_ID }}
+      GITHUB_APP_PRIVATE_KEY: ${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}
+
+  learner-portal:
+    needs: [resolve-source, select-build-lane]
+    # contents: read — checkout in reusable workflow
+    # packages: write — push image to GHCR
+    # id-token: write — OIDC for Workload Identity Federation (GCP auth)
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@main
+    secrets: inherit
+    with:
+      app_name: mereka-lms/enterprise-learner-portal
+      dockerfile: infrastructure/docker/enterprise-mfe-clean/Dockerfile.learner-portal
+      context: .
+      runner_label: ${{ needs.select-build-lane.outputs.runner_label }}
+      concurrency_group: ${{ format('build-enterprise-learner-{0}', github.ref) }}
+      cancel_in_progress: ${{ github.ref != 'refs/heads/main' }}
+      build_args: |
+        SOURCE_TAG=${{ needs.resolve-source.outputs.learner_source_tag }}
+
+  update-dev-learner-portal:
+    needs:
+      - learner-portal
+      - update-dev-admin-portal
+    if: github.ref == 'refs/heads/main'
+    # contents: write — reusable workflow commits the updated dev image ref back to infra
+    # id-token: write — OIDC for Workload Identity Federation used by reusable workflow
+    permissions:
+      contents: write
+      id-token: write
+    uses: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-update-dev-tag.yml@main
+    with:
+      app_name: mereka-lms
+      image_tag: ${{ needs.learner-portal.outputs.image_tag }}
+      image_digest: ${{ needs.learner-portal.outputs.image_digest }}
+      image_repository: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-learner-portal
+      kustomization_file: apps/mereka-lms/overlays/profiles/dev/kustomization.yaml
+      kustomize_image_name: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-learner-portal
+    secrets:
+      GITHUB_APP_ID: ${{ secrets.GITOPS_GITHUB_APP_ID }}
+      GITHUB_APP_INSTALLATION_ID: ${{ secrets.GITOPS_GITHUB_APP_INSTALLATION_ID }}
+      GITHUB_APP_PRIVATE_KEY: ${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}

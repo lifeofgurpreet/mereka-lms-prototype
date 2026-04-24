@@ -1,0 +1,499 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: slo-recording-rules
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: slo
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/component: monitoring
+    prometheus: kube-prometheus
+spec:
+  groups:
+    # ── SLI Recording Rules ──────────────────────────────────────────
+    # Spec: slo-sla-service-level-management_spec.md (AC-003..AC-005)
+    #
+    # Availability SLI = (total - 5xx) / (total - 4xx)
+    # 4xx excluded from denominator per spec (client errors are not platform failures).
+    # Raw metrics come from django-prometheus (ServiceMonitors: lms-metrics, cms-metrics).
+    - name: sli.recording.rules
+      interval: 30s
+      rules:
+        # ── LMS Availability (Tier 1) ──────────────────────────────
+        - record: mereka:http_requests:availability_ratio_5m
+          labels:
+            service: lms
+            tier: "1"
+          expr: |
+            clamp_min(
+              1 - (
+                sum(rate(django_http_responses_total_by_status_total{job="lms-metrics",status=~"5.."}[5m]))
+                /
+                clamp_min(sum(rate(django_http_responses_total_by_status_total{job="lms-metrics",status!~"4.."}[5m])), 1e-10)
+              ),
+              0
+            )
+
+        - record: mereka:http_requests:availability_ratio_30m
+          labels:
+            service: lms
+            tier: "1"
+          expr: |
+            clamp_min(
+              1 - (
+                sum(rate(django_http_responses_total_by_status_total{job="lms-metrics",status=~"5.."}[30m]))
+                /
+                clamp_min(sum(rate(django_http_responses_total_by_status_total{job="lms-metrics",status!~"4.."}[30m])), 1e-10)
+              ),
+              0
+            )
+
+        - record: mereka:http_requests:availability_ratio_1h
+          labels:
+            service: lms
+            tier: "1"
+          expr: |
+            clamp_min(
+              1 - (
+                sum(rate(django_http_responses_total_by_status_total{job="lms-metrics",status=~"5.."}[1h]))
+                /
+                clamp_min(sum(rate(django_http_responses_total_by_status_total{job="lms-metrics",status!~"4.."}[1h])), 1e-10)
+              ),
+              0
+            )
+
+        - record: mereka:http_requests:availability_ratio_6h
+          labels:
+            service: lms
+            tier: "1"
+          expr: |
+            clamp_min(
+              1 - (
+                sum(rate(django_http_responses_total_by_status_total{job="lms-metrics",status=~"5.."}[6h]))
+                /
+                clamp_min(sum(rate(django_http_responses_total_by_status_total{job="lms-metrics",status!~"4.."}[6h])), 1e-10)
+              ),
+              0
+            )
+
+        # ── CMS Availability (Tier 1) ──────────────────────────────
+        - record: mereka:http_requests:availability_ratio_5m
+          labels:
+            service: cms
+            tier: "1"
+          expr: |
+            clamp_min(
+              1 - (
+                sum(rate(django_http_responses_total_by_status_total{job="cms-metrics",status=~"5.."}[5m]))
+                /
+                clamp_min(sum(rate(django_http_responses_total_by_status_total{job="cms-metrics",status!~"4.."}[5m])), 1e-10)
+              ),
+              0
+            )
+
+        - record: mereka:http_requests:availability_ratio_30m
+          labels:
+            service: cms
+            tier: "1"
+          expr: |
+            clamp_min(
+              1 - (
+                sum(rate(django_http_responses_total_by_status_total{job="cms-metrics",status=~"5.."}[30m]))
+                /
+                clamp_min(sum(rate(django_http_responses_total_by_status_total{job="cms-metrics",status!~"4.."}[30m])), 1e-10)
+              ),
+              0
+            )
+
+        - record: mereka:http_requests:availability_ratio_1h
+          labels:
+            service: cms
+            tier: "1"
+          expr: |
+            clamp_min(
+              1 - (
+                sum(rate(django_http_responses_total_by_status_total{job="cms-metrics",status=~"5.."}[1h]))
+                /
+                clamp_min(sum(rate(django_http_responses_total_by_status_total{job="cms-metrics",status!~"4.."}[1h])), 1e-10)
+              ),
+              0
+            )
+
+        - record: mereka:http_requests:availability_ratio_6h
+          labels:
+            service: cms
+            tier: "1"
+          expr: |
+            clamp_min(
+              1 - (
+                sum(rate(django_http_responses_total_by_status_total{job="cms-metrics",status=~"5.."}[6h]))
+                /
+                clamp_min(sum(rate(django_http_responses_total_by_status_total{job="cms-metrics",status!~"4.."}[6h])), 1e-10)
+              ),
+              0
+            )
+
+        # ── LMS Latency Percentiles ────────────────────────────────
+        - record: mereka:http_request_duration:p50_5m
+          labels:
+            service: lms
+          expr: |
+            histogram_quantile(0.50,
+              sum(rate(django_http_requests_latency_including_middlewares_seconds_bucket{job="lms-metrics"}[5m])) by (le)
+            )
+
+        - record: mereka:http_request_duration:p95_5m
+          labels:
+            service: lms
+          expr: |
+            histogram_quantile(0.95,
+              sum(rate(django_http_requests_latency_including_middlewares_seconds_bucket{job="lms-metrics"}[5m])) by (le)
+            )
+
+        - record: mereka:http_request_duration:p99_5m
+          labels:
+            service: lms
+          expr: |
+            histogram_quantile(0.99,
+              sum(rate(django_http_requests_latency_including_middlewares_seconds_bucket{job="lms-metrics"}[5m])) by (le)
+            )
+
+        # ── CMS Latency Percentiles ────────────────────────────────
+        - record: mereka:http_request_duration:p50_5m
+          labels:
+            service: cms
+          expr: |
+            histogram_quantile(0.50,
+              sum(rate(django_http_requests_latency_including_middlewares_seconds_bucket{job="cms-metrics"}[5m])) by (le)
+            )
+
+        - record: mereka:http_request_duration:p95_5m
+          labels:
+            service: cms
+          expr: |
+            histogram_quantile(0.95,
+              sum(rate(django_http_requests_latency_including_middlewares_seconds_bucket{job="cms-metrics"}[5m])) by (le)
+            )
+
+        - record: mereka:http_request_duration:p99_5m
+          labels:
+            service: cms
+          expr: |
+            histogram_quantile(0.99,
+              sum(rate(django_http_requests_latency_including_middlewares_seconds_bucket{job="cms-metrics"}[5m])) by (le)
+            )
+
+    # ── SLO / Error Budget Recording Rules ───────────────────────────
+    # Spec: slo-sla-service-level-management_spec.md (AC-007..AC-009)
+    #
+    # Burn rate = error_rate / error_budget = (1 - availability) / (1 - SLO)
+    # Tier 1 SLO = 99.9% → error budget = 0.001 (43.2 min/30 days)
+    - name: slo.recording.rules
+      interval: 60s
+      rules:
+        # ── LMS Burn Rates ─────────────────────────────────────────
+        - record: mereka:slo:burn_rate_5m
+          labels:
+            service: lms
+            tier: "1"
+          expr: |
+            (1 - mereka:http_requests:availability_ratio_5m{service="lms"})
+            / 0.001
+
+        - record: mereka:slo:burn_rate_30m
+          labels:
+            service: lms
+            tier: "1"
+          expr: |
+            (1 - mereka:http_requests:availability_ratio_30m{service="lms"})
+            / 0.001
+
+        - record: mereka:slo:burn_rate_1h
+          labels:
+            service: lms
+            tier: "1"
+          expr: |
+            (1 - mereka:http_requests:availability_ratio_1h{service="lms"})
+            / 0.001
+
+        - record: mereka:slo:burn_rate_6h
+          labels:
+            service: lms
+            tier: "1"
+          expr: |
+            (1 - mereka:http_requests:availability_ratio_6h{service="lms"})
+            / 0.001
+
+        # ── CMS Burn Rates ─────────────────────────────────────────
+        - record: mereka:slo:burn_rate_5m
+          labels:
+            service: cms
+            tier: "1"
+          expr: |
+            (1 - mereka:http_requests:availability_ratio_5m{service="cms"})
+            / 0.001
+
+        - record: mereka:slo:burn_rate_30m
+          labels:
+            service: cms
+            tier: "1"
+          expr: |
+            (1 - mereka:http_requests:availability_ratio_30m{service="cms"})
+            / 0.001
+
+        - record: mereka:slo:burn_rate_1h
+          labels:
+            service: cms
+            tier: "1"
+          expr: |
+            (1 - mereka:http_requests:availability_ratio_1h{service="cms"})
+            / 0.001
+
+        - record: mereka:slo:burn_rate_6h
+          labels:
+            service: cms
+            tier: "1"
+          expr: |
+            (1 - mereka:http_requests:availability_ratio_6h{service="cms"})
+            / 0.001
+
+    # ── Error Budget Remaining (30-day window) ──────────────────────
+    # Uses increase() over 30d. Requires 30 days of data to produce
+    # meaningful results. Evaluation at 5m interval to reduce load.
+    - name: slo.error-budget.rules
+      interval: 5m
+      rules:
+        # error_budget_remaining_ratio = 1 - (error_rate_30d / error_budget)
+        # Tier 1: error_budget = 0.001, total budget = 43.2 minutes/30d
+        - record: mereka:slo:error_budget_remaining_ratio
+          labels:
+            service: lms
+            tier: "1"
+          expr: |
+            clamp(
+              1 - (
+                sum(increase(django_http_responses_total_by_status_total{job="lms-metrics",status=~"5.."}[30d]))
+                / clamp_min(sum(increase(django_http_responses_total_by_status_total{job="lms-metrics",status!~"4.."}[30d])), 1)
+              ) / 0.001,
+              0, 1
+            )
+
+        - record: mereka:slo:error_budget_remaining_ratio
+          labels:
+            service: cms
+            tier: "1"
+          expr: |
+            clamp(
+              1 - (
+                sum(increase(django_http_responses_total_by_status_total{job="cms-metrics",status=~"5.."}[30d]))
+                / clamp_min(sum(increase(django_http_responses_total_by_status_total{job="cms-metrics",status!~"4.."}[30d])), 1)
+              ) / 0.001,
+              0, 1
+            )
+
+        # Error budget remaining in minutes (Tier 1: 43.2 min total)
+        - record: mereka:slo:error_budget_remaining_minutes
+          labels:
+            service: lms
+            tier: "1"
+          expr: |
+            mereka:slo:error_budget_remaining_ratio{service="lms",tier="1"} * 43.2
+
+        - record: mereka:slo:error_budget_remaining_minutes
+          labels:
+            service: cms
+            tier: "1"
+          expr: |
+            mereka:slo:error_budget_remaining_ratio{service="cms",tier="1"} * 43.2
+
+    # ── SLO Alert Rules ──────────────────────────────────────────────
+    # Multi-window burn rate alerting per Google SRE handbook.
+    # Spec: slo-sla-service-level-management_spec.md (AC-009, AC-021)
+    - name: slo.alert.rules
+      rules:
+        # Fast burn (P1): 1h burn > 14.4x AND 5m burn > 14.4x
+        # At 14.4x, the 30-day budget is exhausted in ~2 hours.
+        - alert: SLOBudgetFastBurn
+          expr: |
+            mereka:slo:burn_rate_1h{tier="1"} > 14.4
+            and
+            mereka:slo:burn_rate_5m{tier="1"} > 14.4
+          for: 2m
+          labels:
+            severity: critical
+            slo: availability
+          annotations:
+            summary: "{{ $labels.service }} SLO fast burn rate exceeded (P1)"
+            description: >-
+              {{ $labels.service | toUpper }} is consuming error budget at
+              {{ $value | printf "%.1f" }}x the sustainable rate over the last hour.
+              At this rate, the 30-day error budget will be exhausted within hours.
+            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md"
+
+        # Slow burn (P2): 6h burn > 6x AND 30m burn > 6x
+        # At 6x, the 30-day budget is exhausted in ~5 days.
+        - alert: SLOBudgetSlowBurn
+          expr: |
+            mereka:slo:burn_rate_6h{tier="1"} > 6
+            and
+            mereka:slo:burn_rate_30m{tier="1"} > 6
+          for: 5m
+          labels:
+            severity: warning
+            slo: availability
+          annotations:
+            summary: "{{ $labels.service }} SLO slow burn rate exceeded (P2)"
+            description: >-
+              {{ $labels.service | toUpper }} is consuming error budget at
+              {{ $value | printf "%.1f" }}x the sustainable rate over the last 6 hours.
+              Create incident ticket and investigate.
+            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/policies/operations/SLO_POLICY.md"
+
+        # Budget warning (P3): 6h burn > 3x for any tier
+        - alert: SLOBudgetWarning
+          expr: |
+            mereka:slo:burn_rate_6h > 3
+          for: 30m
+          labels:
+            severity: warning
+            slo: availability
+          annotations:
+            summary: "{{ $labels.service }} SLO budget warning (P3)"
+            description: >-
+              {{ $labels.service | toUpper }} (tier {{ $labels.tier }}) is consuming
+              error budget at {{ $value | printf "%.1f" }}x the sustainable rate.
+              Investigate within business hours.
+            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/policies/operations/SLO_POLICY.md"
+
+        # Latency regression spike (P2): sustained p95 increase above 2x 1-hour baseline
+        # This catches sudden latency degradation that can affect learner/composer flows.
+        - alert: LatencyRegressionSpike
+          expr: |
+            (
+              (mereka:http_request_duration:p95_5m{service="lms",tier="1"} > 0 and
+               mereka:http_request_duration:p95_5m{service="lms",tier="1"} >
+               2 * avg_over_time(mereka:http_request_duration:p95_5m{service="lms",tier="1"}[1h])) and
+              avg_over_time(mereka:http_request_duration:p95_5m{service="lms",tier="1"}[1h]) > 0
+            )
+            or
+            (
+              (mereka:http_request_duration:p95_5m{service="cms",tier="1"} > 0 and
+               mereka:http_request_duration:p95_5m{service="cms",tier="1"} >
+               2 * avg_over_time(mereka:http_request_duration:p95_5m{service="cms",tier="1"}[1h])) and
+              avg_over_time(mereka:http_request_duration:p95_5m{service="cms",tier="1"}[1h]) > 0
+            )
+          for: 15m
+          labels:
+            severity: warning
+            slo: latency_regression
+          annotations:
+            summary: "{{ $labels.service | toUpper }} latency regression spike"
+            description: >-
+              p95 latency for {{ $labels.service }} is greater than 2x the prior 1-hour
+              baseline and has persisted for 15 minutes.
+            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/policies/operations/SLO_POLICY.md"
+
+        # Latency regression drift (P2): sustained latency elevation over 24h window
+        - alert: LatencyRegressionDrift
+          expr: |
+            (
+              (mereka:http_request_duration:p95_5m{service="lms",tier="1"} > 0 and
+               mereka:http_request_duration:p95_5m{service="lms",tier="1"} >
+               3 * avg_over_time(mereka:http_request_duration:p95_5m{service="lms",tier="1"}[24h])) and
+              avg_over_time(mereka:http_request_duration:p95_5m{service="lms",tier="1"}[24h]) > 0
+            )
+            or
+            (
+              (mereka:http_request_duration:p95_5m{service="cms",tier="1"} > 0 and
+               mereka:http_request_duration:p95_5m{service="cms",tier="1"} >
+               3 * avg_over_time(mereka:http_request_duration:p95_5m{service="cms",tier="1"}[24h])) and
+              avg_over_time(mereka:http_request_duration:p95_5m{service="cms",tier="1"}[24h]) > 0
+            )
+          for: 1h
+          labels:
+            severity: warning
+            slo: latency_regression
+          annotations:
+            summary: "{{ $labels.service | toUpper }} latency drift detected"
+            description: >-
+              p95 latency for {{ $labels.service }} remains >3x its 24h baseline,
+              suggesting sustained performance regression.
+            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/policies/operations/SLO_POLICY.md"
+
+        # Error rate spike (P1): sustained error-rate increase beyond 1% for 10m
+        - alert: ErrorRateSpike
+          expr: |
+            (
+              (1 - mereka:http_requests:availability_ratio_5m{service="lms",tier="1"} > 0.01)
+              and
+              avg_over_time(mereka:http_requests:availability_ratio_5m{service="lms",tier="1"}[30m]) > 0.0
+            )
+            or
+            (
+              (1 - mereka:http_requests:availability_ratio_5m{service="cms",tier="1"} > 0.01)
+              and
+              avg_over_time(mereka:http_requests:availability_ratio_5m{service="cms",tier="1"}[30m]) > 0.0
+            )
+          for: 5m
+          labels:
+            severity: critical
+            slo: availability
+          annotations:
+            summary: "{{ $labels.service | toUpper }} error rate spike"
+            description: >-
+              5m availability-based error rate for {{ $labels.service }} exceeds 1%
+              for 10 minutes. Investigate dependency or release-related faults now.
+            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md"
+
+        # Budget exhausted (P1): remaining ratio <= 0
+        - alert: SLOBudgetExhausted
+          expr: |
+            mereka:slo:error_budget_remaining_ratio{tier="1"} <= 0
+          for: 5m
+          labels:
+            severity: critical
+            slo: error_budget
+          annotations:
+            summary: "{{ $labels.service }} error budget exhausted (P1)"
+            description: >-
+              {{ $labels.service | toUpper }} has consumed its entire 30-day error budget.
+              Only incident remediation deployments are allowed. Enter reliability sprint mode.
+            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md"
+
+        # Budget low (P2): remaining ratio < 25%
+        - alert: SLOBudgetLow
+          expr: |
+            mereka:slo:error_budget_remaining_ratio{tier="1"} < 0.25
+            and
+            mereka:slo:error_budget_remaining_ratio{tier="1"} > 0
+          for: 10m
+          labels:
+            severity: warning
+            slo: error_budget
+          annotations:
+            summary: "{{ $labels.service }} error budget below 25% (P2)"
+            description: >-
+              {{ $labels.service | toUpper }} has only
+              {{ $value | humanizePercentage }} of its 30-day error budget remaining.
+              Deployment policy: restricted to critical fixes only.
+            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/policies/operations/SLO_POLICY.md"
+
+        # SLI measurement gap (P2): no availability data for 10 min
+        - alert: SLIMeasurementDown
+          expr: |
+            absent_over_time(mereka:http_requests:availability_ratio_5m{service="lms",tier="1"}[10m])
+            or
+            absent_over_time(mereka:http_requests:availability_ratio_5m{service="cms",tier="1"}[10m])
+          for: 1m
+          labels:
+            severity: warning
+            slo: measurement
+          annotations:
+            summary: "SLI measurement data missing for Tier 1 service"
+            description: >-
+              No SLI availability data has been recorded for a Tier 1 service
+              in the last 10 minutes. Verify django-prometheus metrics are
+              being scraped and ServiceMonitor targets are healthy.
+            runbook_url: "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/docs/policies/operations/SLO_POLICY.md"

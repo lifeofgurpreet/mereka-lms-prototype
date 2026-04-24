@@ -1,0 +1,111 @@
+repos:
+  - repo: local
+    hooks:
+      - id: adr-governance-suite
+        name: ADR governance suite
+        entry: scripts/qa/verify_adr_precommit.sh
+        language: system
+        pass_filenames: false
+        files: ^(docs/adr/|docs/architecture/|docs/evidence/|docs/runbooks/|scripts/qa/verify_adr_|scripts/qa/build_decision_graph\.py|scripts/qa/resolve_adr_impact\.py)
+
+      - id: verification-catalog-regen
+        name: Regenerate verification catalog
+        entry: scripts/qa/regen-verification-catalog.sh
+        language: system
+        pass_filenames: false
+        files: >-
+          (?x)^(
+            scripts/.*/verify-[^/]+\.sh|
+            \.github/ci-scripts-static\.txt|
+            \.github/workflows/[^/]+\.ya?ml|
+            scripts/qa/run-release-verification-gates\.sh|
+            scripts/qa/run-operations-gates\.sh|
+            scripts/qa/run-multisite-governance-gates\.sh|
+            verification/manifests/deprecated_verify_scripts\.json|
+            verification/catalogs/verification_status_overrides\.json|
+            scripts/qa/fixtures/script-basename-overlap-allowlist\.json
+          )$
+
+      - id: ci-inventory-regen
+        name: Regenerate CI static + runtime inventories
+        entry: bash -c 'python3 scripts/governance/generate-ci-static-inventory.py --write && python3 scripts/governance/generate-ci-runtime-inventory.py --write && git add .github/ci-scripts-static.txt .github/ci-scripts-static-shard-*.txt .github/ci-scripts-runtime.txt'
+        language: system
+        pass_filenames: false
+        files: ^scripts/governance/script-registry\.yaml$
+
+      - id: runtime-routing-regen
+        name: Regenerate runtime-routing matrices
+        entry: bash -c 'for env in dev staging production profiles-dev local; do python3 scripts/acceptance/generate_runtime_routing_matrix.py --env "$env"; done && git add generated/tenant-runtime/browser-matrix-*.json'
+        language: system
+        pass_filenames: false
+        files: ^deploy/k8s/tenancy/tenant-registry\.yaml$
+
+      - id: design-tokens-regen
+        name: Regenerate design tokens from canonical source
+        entry: bash -c 'bash scripts/branding/generate-tokens-from-canonical.sh && git add infrastructure/tutor/themes/mereka/scss/_tokens.scss infrastructure/tutor/themes/mereka/common/static/css/mereka-*.css infrastructure/tutor/themes/mereka/lms/static/css/mereka-*.css infrastructure/tutor/themes/mereka/cms/static/css/mereka-*.css tokens/src/core/global.json 2>/dev/null; true'
+        language: system
+        pass_filenames: false
+        files: ^assets/branding/tokens\.css$
+
+  # Python formatting and linting
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.0
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  # Shell linting
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+        args: [-e, SC1090, SC1091]  # Allow source commands
+
+  # Shell formatting
+  - repo: https://github.com/mvdan/sh
+    rev: v3.7.0
+    hooks:
+      - id: shfmt
+        args: [-w, -s, -i, 2]
+
+  # JavaScript/TypeScript formatting
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.3.2
+    hooks:
+      - id: prettier
+        types: [javascript, json, yaml, markdown]
+
+  # YAML linting
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        args: [-d, relaxed]
+
+  # Markdown linting
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.42.0
+    hooks:
+      - id: markdownlint
+        args: [--fix]
+
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+        args: [--maxkb=10000]
+      - id: check-merge-conflict
+      - id: check-case-conflict
+
+  # Secrets detection
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.22.0
+    hooks:
+      - id: gitleaks
+

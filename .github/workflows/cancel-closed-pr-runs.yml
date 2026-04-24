@@ -1,0 +1,99 @@
+name: Cancel Closed PR Runs
+
+on:
+  pull_request:
+    types:
+      - closed
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  cancel-closed-pr-runs:
+    name: Cancel Closed PR Runs
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      actions: write
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Cancel queued and in-progress runs for the closed PR head
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const branch = context.payload.pull_request.head.ref;
+            const prNumber = context.payload.pull_request.number;
+            const currentRunId = context.runId;
+            const seen = new Set();
+            const cancelled = [];
+
+            for (const status of ['queued', 'in_progress']) {
+              const runs = await github.paginate(
+                github.rest.actions.listWorkflowRunsForRepo,
+                {
+                  owner,
+                  repo,
+                  branch,
+                  event: 'pull_request',
+                  status,
+                  per_page: 100,
+                }
+              );
+
+              for (const run of runs) {
+                if (run.id === currentRunId || seen.has(run.id)) {
+                  continue;
+                }
+
+                const linkedToPr = (run.pull_requests || []).some(
+                  (pr) => pr.number === prNumber
+                );
+                if (!linkedToPr) {
+                  continue;
+                }
+
+                seen.add(run.id);
+                await github.rest.actions.cancelWorkflowRun({
+                  owner,
+                  repo,
+                  run_id: run.id,
+                });
+                cancelled.push({
+                  id: run.id,
+                  name: run.name,
+                  status: run.status,
+                  url: run.html_url,
+                });
+              }
+            }
+
+            if (cancelled.length === 0) {
+              core.notice(
+                `No queued or in-progress pull_request workflow runs found for closed PR #${prNumber} (${branch}).`
+              );
+              return;
+            }
+
+            core.summary
+              .addHeading(`Cancelled stale pull_request runs for PR #${prNumber}`)
+              .addTable([
+                [
+                  { data: 'Workflow', header: true },
+                  { data: 'Run ID', header: true },
+                  { data: 'Status', header: true },
+                  { data: 'URL', header: true },
+                ],
+                ...cancelled.map((run) => [
+                  run.name,
+                  String(run.id),
+                  run.status,
+                  run.url,
+                ]),
+              ]);
+            await core.summary.write();

@@ -1,0 +1,10 @@
+How Was Your Experience?
+
+Hi {{ user_name }},
+
+We'd love to hear your thoughts about {{ course_name }}.
+
+Share feedback: {{ feedback_url }}
+
+---
+{{ org_display_name }}

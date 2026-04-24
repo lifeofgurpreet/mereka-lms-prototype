@@ -1,0 +1,68 @@
+# @covers AC-010
+# @spec: disaster-recovery-business-continuity_spec.md
+name: DR Evidence Bundle
+
+on:
+  schedule:
+    - cron: '30 2 1 * *'
+  workflow_dispatch:
+    inputs:
+      strict_runtime:
+        description: "Fail when runtime dependencies are unavailable"
+        required: false
+        default: true
+        type: boolean
+
+permissions: {}
+
+jobs:
+  dr-evidence:
+    name: Build DR Evidence Bundle
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Authenticate to GCP and get GKE credentials
+        if: ${{ vars.GCP_WIF_PROVIDER != '' && vars.GCP_WIF_SA != '' }}
+        uses: ./.github/actions/gcp-gke-auth
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          wif_service_account: ${{ vars.GCP_WIF_SA }}
+          auth_mode: auto
+          gcloud_project: mereka-lms
+          gke_project: ${{ vars.GKE_CLUSTER_PROJECT || 'bbi-k8' }}
+          gke_location: ${{ vars.GKE_CLUSTER_LOCATION || '' }}
+          gke_cluster: ${{ vars.GKE_CLUSTER_NAME || '' }}
+          strict_runtime: ${{ github.event.inputs.strict_runtime || 'true' }}
+
+      - name: Prepare output path
+        if: ${{ env.CAN_RUN_RUNTIME == 'true' }}
+        run: |
+          echo "EVIDENCE_DIR=var/dr-evidence/github-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_ENV"
+
+      - name: Build DR evidence bundle
+        if: ${{ env.CAN_RUN_RUNTIME == 'true' }}
+        env:
+          INPUT_STRICT_RUNTIME: ${{ github.event.inputs.strict_runtime || 'true' }}
+        run: |
+          if [[ "$INPUT_STRICT_RUNTIME" == "true" ]]; then
+            export STRICT_RUNTIME=1
+          else
+            export STRICT_RUNTIME=0
+          fi
+
+          ./scripts/qa/build-dr-evidence-bundle.sh --out-dir "$EVIDENCE_DIR" --tar
+
+      - name: Upload DR evidence artifacts
+        if: ${{ env.CAN_RUN_RUNTIME == 'true' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: dr-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ env.EVIDENCE_DIR }}
+            ${{ env.EVIDENCE_DIR }}.tar.gz
+          retention-days: 90

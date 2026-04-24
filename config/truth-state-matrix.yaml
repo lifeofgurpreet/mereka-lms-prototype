@@ -1,0 +1,20 @@
+# Truth State Matrix
+# Tracks every active fix across the five truth levels.
+# Producer: scripts/qa/generate-truth-state-matrix.sh
+# Consumer: scripts/qa/verify-truth-state-matrix.sh (AC-GIS-003)
+# Spec: specs/gitops-integrity-system_spec.md
+---
+schema_version: "1.0"
+
+levels:
+  - branch
+  - merged
+  - realized
+  - proved
+  - durable
+
+realized_ttl_hours: 48
+
+entries: []
+
+archived: []

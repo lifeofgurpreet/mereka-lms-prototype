@@ -1,0 +1,1905 @@
+# QA Script Catalog
+# Maps every verification script to its method class, tier, and target spec ACs.
+#
+# Last updated: 2026-02-13
+
+version: "1.0.0"
+
+method_taxonomy:
+  static:
+    description: "File existence, config format, syntax checks"
+    examples: ["shellcheck", "spec frontmatter lint", "secret scan"]
+    typical_tier: "P0"
+  contract:
+    description: "API schema validation, health endpoint checks"
+    examples: ["endpoint health", "k8s resource validation"]
+    typical_tier: "P0"
+  behavioral:
+    description: "Functional testing — unit, integration, e2e"
+    examples: ["migration verification", "auth flow tests"]
+    typical_tier: "P1"
+  resilience:
+    description: "Failure injection, recovery validation"
+    examples: ["pod restart recovery", "backup restore drill"]
+    typical_tier: "P1"
+  monitoring:
+    description: "Alert rule validation, metric scraping checks"
+    examples: ["alert routing verify", "grafana dashboard audit"]
+    typical_tier: "P2"
+
+scripts:
+  # ============================
+  # scripts/qa/ - Quality Assurance
+  # ============================
+
+  - path: "scripts/qa/scan-secrets-fast.sh"
+    method: static
+    tier: P0
+    description: "Fast local secret hygiene scan (deterministic, repo-safe output)"
+    covers_specs: ["secrets-management_spec.md"]
+    covers_acs: ["AC-012"]
+    makefile_target: null
+
+  - path: "scripts/qa/scan-hubspot-credentials.sh"
+    method: static
+    tier: P0
+    description: "Scan for hardcoded HubSpot API keys and tokens"
+    covers_specs: ["external-registration-hubspot_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/scan-mux-credentials.sh"
+    method: static
+    tier: P0
+    description: "Scan for hardcoded Mux asset IDs and access tokens"
+    covers_specs: ["video-pipeline-delivery_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/smoke-test.sh"
+    method: contract
+    tier: P0
+    description: "Simple smoke test against GKE URLs"
+    covers_specs: ["multi-site-domains_spec.md"]
+    covers_acs: ["AC-001", "AC-006", "AC-008"]
+    makefile_target: "qa-smoke"
+
+  - path: "scripts/qa/smoke-test-analytics.sh"
+    method: contract
+    tier: P1
+    description: "Smoke test for analytics pipeline endpoints"
+    covers_specs: ["analytics-pipeline_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/public-health-check.sh"
+    method: contract
+    tier: P0
+    description: "Check public endpoints health"
+    covers_specs: ["multi-site-domains_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/comprehensive-test.sh"
+    method: behavioral
+    tier: P1
+    description: "Comprehensive test suite covering core workflows"
+    covers_specs: ["cross-cutting-requirements_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-k8s-deployment-spec.sh"
+    method: static
+    tier: P0
+    description: "Static analysis of K8s manifests to verify k8s-deployment spec compliance"
+    covers_specs: ["k8s-deployment_spec.md"]
+    covers_acs: ["AC-004", "AC-005", "AC-006", "AC-007", "AC-008", "AC-009", "AC-010", "AC-011", "AC-014", "AC-015", "AC-016", "AC-017", "AC-018", "AC-019", "AC-024", "AC-027", "AC-028", "AC-029", "AC-030", "AC-032", "AC-CCR-002", "AC-CCR-008", "AC-CCR-009"]
+    makefile_target: null
+
+  - path: "scripts/qa/verify-k8s-live-cluster.sh"
+    method: contract
+    tier: P0
+    description: "Live cluster validation (runtime checks)"
+    covers_specs: ["k8s-deployment_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-alert-routing.sh"
+    method: monitoring
+    tier: P2
+    description: "Verify alert routing end-to-end (repo contracts + runtime policies/channels)"
+    covers_specs: ["observability-stack_spec.md"]
+    covers_acs: ["AC-006"]
+    makefile_target: null
+
+  - path: "scripts/qa/verify-secrets-management.sh"
+    method: static
+    tier: P0
+    description: "Verify secrets management practices"
+    covers_specs: ["secrets-management_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-secrets-inventory.sh"
+    method: static
+    tier: P0
+    description: "Verify secrets inventory completeness"
+    covers_specs: ["secrets-management_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-secrets-naming-convention.sh"
+    method: static
+    tier: P0
+    description: "Verify secrets follow naming conventions"
+    covers_specs: ["secrets-management_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-no-hardcoded-secrets.sh"
+    method: static
+    tier: P0
+    description: "Verify no hardcoded secrets in codebase"
+    covers_specs: ["secrets-management_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-precommit-secret-scan.sh"
+    method: static
+    tier: P0
+    description: "Verify pre-commit hooks for secret scanning"
+    covers_specs: ["secrets-management_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-repo-structure.sh"
+    method: static
+    tier: P0
+    description: "Verify repository structure compliance"
+    covers_specs: ["repository-structure_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-auth-surfaces.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify authentication surfaces (login, SSO, OAuth)"
+    covers_specs: ["auth-sso-enterprise_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-auth-sso-enterprise.sh"
+    method: behavioral
+    tier: P1
+    description: "Comprehensive enterprise SSO verification"
+    covers_specs: ["auth-sso-enterprise_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-auth-hardening.sh"
+    method: static
+    tier: P0
+    description: "Verify authentication hardening measures"
+    covers_specs: ["auth-sso-enterprise_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-authenticated-sso-canary.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify authenticated SSO canary endpoint"
+    covers_specs: ["auth-sso-enterprise_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-oidc-provider-configs.sh"
+    method: static
+    tier: P0
+    description: "Verify OIDC provider configurations"
+    covers_specs: ["auth-sso-enterprise_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-oidc-cookie-middleware-order.sh"
+    method: static
+    tier: P0
+    description: "Verify OIDC cookie middleware ordering"
+    covers_specs: ["auth-sso-enterprise_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-oidc-user-password-state.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify OIDC user password state handling"
+    covers_specs: ["auth-sso-enterprise_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-studio-sso-flow.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify Studio SSO authentication flow"
+    covers_specs: ["auth-sso-enterprise_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-platform-admin-sso-isolation.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify platform admin SSO isolation"
+    covers_specs: ["auth-sso-enterprise_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-cross-system-identity.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify cross-system identity propagation"
+    covers_specs: ["auth-sso-enterprise_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-jwt-uniqueness.sh"
+    method: static
+    tier: P0
+    description: "Verify JWT signing keys are unique per environment"
+    covers_specs: ["auth-sso-enterprise_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-session-persistence.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify session persistence across pod restarts"
+    covers_specs: ["auth-sso-enterprise_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-platform-admin-env.sh"
+    method: static
+    tier: P0
+    description: "Verify platform admin environment configuration"
+    covers_specs: ["auth-sso-enterprise_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-cms-oauth2-secret-present.sh"
+    method: static
+    tier: P0
+    description: "Verify CMS OAuth2 secret is present"
+    covers_specs: ["auth-sso-enterprise_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-branding-health.sh"
+    method: contract
+    tier: P0
+    description: "Verify branding asset health"
+    covers_specs: ["branding-system_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/branding/verify-logo-setup.sh"
+    method: static
+    tier: P0
+    description: "Verify logo assets are properly set up"
+    covers_specs: ["branding-system_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-token-drift.sh"
+    method: static
+    tier: P0
+    description: "Verify design token drift detection"
+    covers_specs: ["design-tokens-system_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-public-branding.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify public-facing branding consistency"
+    covers_specs: ["branding-system_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-studio-branding.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify Studio branding assets"
+    covers_specs: ["branding-system_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-studio-authoring-branding.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify Studio authoring interface branding"
+    covers_specs: ["branding-system_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-mfe-image-branding.sh"
+    method: static
+    tier: P0
+    description: "Verify MFE image branding configuration"
+    covers_specs: ["branding-system_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-tutor-branding-render.sh"
+    method: static
+    tier: P0
+    description: "Verify Tutor branding template rendering"
+    covers_specs: ["branding-system_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-favicon-multisite.sh"
+    method: static
+    tier: P0
+    description: "Verify favicon configuration for multi-site"
+    covers_specs: ["multi-site-domains_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/capture-branding-screenshots.sh"
+    method: behavioral
+    tier: P2
+    description: "Capture branding screenshots for visual regression"
+    covers_specs: ["branding-system_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/visual-regression-branding.sh"
+    method: behavioral
+    tier: P2
+    description: "Visual regression testing for branding"
+    covers_specs: ["branding-system_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/audit-branding-surfaces.sh"
+    method: monitoring
+    tier: P2
+    description: "Audit branding surface consistency across environments"
+    covers_specs: ["branding-system_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-design-tokens.sh"
+    method: static
+    tier: P0
+    description: "Verify design token files and structure"
+    covers_specs: ["design-tokens-system_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-design-token-ci.sh"
+    method: static
+    tier: P0
+    description: "Verify design token CI integration"
+    covers_specs: ["design-tokens-system_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-disaster-recovery.sh"
+    method: resilience
+    tier: P1
+    description: "Verify disaster recovery capabilities"
+    covers_specs: ["disaster-recovery-business-continuity_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/audit-velero.sh"
+    method: monitoring
+    tier: P2
+    description: "End-to-end Velero backup posture audit (read-only)"
+    covers_specs: ["disaster-recovery-business-continuity_spec.md"]
+    covers_acs: ["AC-001", "AC-002", "AC-003", "AC-004"]
+    makefile_target: null
+
+  - path: "scripts/qa/audit-velero-alert-pipeline.sh"
+    method: monitoring
+    tier: P2
+    description: "Audit Velero alert pipeline configuration"
+    covers_specs: ["disaster-recovery-business-continuity_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/list-critical-backup-pvcs.sh"
+    method: static
+    tier: P0
+    description: "List critical PVCs requiring backup"
+    covers_specs: ["disaster-recovery-business-continuity_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/collect-velero-evidence.sh"
+    method: monitoring
+    tier: P2
+    description: "Collect Velero backup evidence for auditing"
+    covers_specs: ["disaster-recovery-business-continuity_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/build-dr-evidence-bundle.sh"
+    method: monitoring
+    tier: P2
+    description: "Build disaster recovery evidence bundle"
+    covers_specs: ["disaster-recovery-business-continuity_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-mongodb-atlas-integration.sh"
+    method: contract
+    tier: P0
+    description: "Verify MongoDB Atlas integration"
+    covers_specs: ["mongodb-atlas-integration_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-atlas-data-persistence.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify Atlas data persistence across restarts"
+    covers_specs: ["mongodb-atlas-integration_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-atlas-modulestore-path.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify Atlas modulestore path configuration"
+    covers_specs: ["mongodb-atlas-integration_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/audit-atlas-allowlist-monitor.sh"
+    method: monitoring
+    tier: P2
+    description: "Audit Atlas IP allowlist monitoring"
+    covers_specs: ["mongodb-atlas-integration_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-multisite-config.sh"
+    method: static
+    tier: P0
+    description: "Verify multi-site configuration"
+    covers_specs: ["multi-site-domains_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-csrf-multisite.sh"
+    method: static
+    tier: P0
+    description: "Verify CSRF protection for multi-site"
+    covers_specs: ["multi-site-domains_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-tutor-multisite-domains.sh"
+    method: static
+    tier: P0
+    description: "Verify Tutor multi-site domain configuration"
+    covers_specs: ["multi-site-domains_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/microsite-onboarding-checklist.sh"
+    method: static
+    tier: P0
+    description: "Microsite onboarding checklist verification"
+    covers_specs: ["multi-site-domains_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/run-multisite-governance-gates.sh"
+    method: static
+    tier: P0
+    description: "Run multi-site governance gates"
+    covers_specs: ["multi-site-domains_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/list-openedx-hostnames.sh"
+    method: static
+    tier: P0
+    description: "List Open edX hostnames configuration"
+    covers_specs: ["multi-site-domains_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/map-openedx-host-routing.sh"
+    method: static
+    tier: P0
+    description: "Map Open edX host routing configuration"
+    covers_specs: ["multi-site-domains_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-multi-tenancy-foundation.sh"
+    method: static
+    tier: P0
+    description: "Verify multi-tenancy foundation"
+    covers_specs: ["multi-tenancy-architecture_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-tenant-model.sh"
+    method: static
+    tier: P0
+    description: "Verify tenant data model"
+    covers_specs: ["multi-tenancy-architecture_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-tenant-middleware.sh"
+    method: static
+    tier: P0
+    description: "Verify tenant middleware configuration"
+    covers_specs: ["multi-tenancy-architecture_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-tenant-isolation-patterns.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify tenant isolation patterns"
+    covers_specs: ["multi-tenancy-architecture_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-tenant-configmap.sh"
+    method: static
+    tier: P0
+    description: "Verify tenant ConfigMap configuration"
+    covers_specs: ["multi-tenancy-architecture_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-tenant-provisioning.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify tenant provisioning workflow"
+    covers_specs: ["multi-tenancy-architecture_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-site-id-hardening.sh"
+    method: static
+    tier: P0
+    description: "Verify site ID hardening measures"
+    covers_specs: ["multi-tenancy-architecture_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-org-role-ownership.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify organization role ownership"
+    covers_specs: ["multi-tenancy-architecture_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-observability-stack.sh"
+    method: contract
+    tier: P0
+    description: "Verify observability stack deployment"
+    covers_specs: ["observability-stack_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-observability-contracts.sh"
+    method: static
+    tier: P0
+    description: "Verify observability contracts compliance"
+    covers_specs: ["observability-stack_spec.md", "observability-validation-requirements_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/audit-observability.sh"
+    method: monitoring
+    tier: P2
+    description: "Comprehensive observability audit"
+    covers_specs: ["observability-stack_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/audit-grafana-dashboard.sh"
+    method: monitoring
+    tier: P2
+    description: "Audit Grafana dashboard configuration"
+    covers_specs: ["observability-stack_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/audit-db-exporter-telemetry.sh"
+    method: monitoring
+    tier: P2
+    description: "Audit database exporter telemetry"
+    covers_specs: ["observability-stack_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-sli-foundation.sh"
+    method: static
+    tier: P0
+    description: "Verify SLI foundation configuration"
+    covers_specs: ["slo-sla-service-level-management_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-slo-contracts.sh"
+    method: static
+    tier: P0
+    description: "Verify SLO contracts"
+    covers_specs: ["slo-sla-service-level-management_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-error-budget.sh"
+    method: monitoring
+    tier: P2
+    description: "Verify error budget tracking"
+    covers_specs: ["slo-sla-service-level-management_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/generate-sla-report.sh"
+    method: monitoring
+    tier: P2
+    description: "Generate SLA compliance report"
+    covers_specs: ["slo-sla-service-level-management_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-sla-report-security.sh"
+    method: static
+    tier: P0
+    description: "Verify SLA report security measures"
+    covers_specs: ["slo-sla-service-level-management_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-analytics-pipeline.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify analytics pipeline functionality"
+    covers_specs: ["analytics-pipeline_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-analytics-retention.sh"
+    method: static
+    tier: P0
+    description: "Verify analytics data retention policies"
+    covers_specs: ["analytics-pipeline_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/audit-analytics-pii.sh"
+    method: static
+    tier: P0
+    description: "Audit analytics for PII exposure"
+    covers_specs: ["analytics-pipeline_spec.md", "data-privacy-gdpr-compliance_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-data-migration-contracts.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify data migration contracts"
+    covers_specs: ["data-migrations-kajabi-mct_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-kajabi-export.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify Kajabi data export"
+    covers_specs: ["data-migrations-kajabi-mct_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-kajabi-transform.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify Kajabi data transformation"
+    covers_specs: ["data-migrations-kajabi-mct_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-kajabi-olx-packages.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify Kajabi OLX package generation"
+    covers_specs: ["data-migrations-kajabi-mct_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-kajabi-thumbnails.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify Kajabi thumbnail migration"
+    covers_specs: ["data-migrations-kajabi-mct_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-kajabi-completions-export.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify Kajabi completions export"
+    covers_specs: ["data-migrations-kajabi-mct_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-mct-export.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify MCT data export"
+    covers_specs: ["data-migrations-kajabi-mct_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-mct-transform.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify MCT data transformation"
+    covers_specs: ["data-migrations-kajabi-mct_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-mct-olx-packages.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify MCT OLX package generation"
+    covers_specs: ["data-migrations-kajabi-mct_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-mct-video-urls.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify MCT video URL migration"
+    covers_specs: ["data-migrations-kajabi-mct_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-course-import-counts.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify course import record counts"
+    covers_specs: ["data-migrations-kajabi-mct_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-enrollment-import-counts.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify enrollment import record counts"
+    covers_specs: ["data-migrations-kajabi-mct_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-user-import-counts.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify user import record counts"
+    covers_specs: ["data-migrations-kajabi-mct_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-enrollment-skip-handling.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify enrollment skip handling logic"
+    covers_specs: ["data-migrations-kajabi-mct_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-course-structure-sample.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify course structure sample integrity"
+    covers_specs: ["data-migrations-kajabi-mct_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-migration-rollback.sh"
+    method: resilience
+    tier: P1
+    description: "Verify migration rollback procedures"
+    covers_specs: ["data-migrations-kajabi-mct_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-idempotency.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify migration idempotency"
+    covers_specs: ["data-migrations-kajabi-mct_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-incremental-sync.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify incremental sync functionality"
+    covers_specs: ["data-migrations-kajabi-mct_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/course-data-sanity.sh"
+    method: behavioral
+    tier: P1
+    description: "Course data sanity checks"
+    covers_specs: ["data-migrations-kajabi-mct_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-hubspot-registration.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify HubSpot registration webhook"
+    covers_specs: ["external-registration-hubspot_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-hubspot-secrets.sh"
+    method: static
+    tier: P0
+    description: "Verify HubSpot secrets management"
+    covers_specs: ["external-registration-hubspot_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-hubspot-alerts.sh"
+    method: monitoring
+    tier: P2
+    description: "Verify HubSpot alert configuration"
+    covers_specs: ["external-registration-hubspot_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-hubspot-k8s-security.sh"
+    method: static
+    tier: P0
+    description: "Verify HubSpot K8s security measures"
+    covers_specs: ["external-registration-hubspot_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-forum-service.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify forum service functionality"
+    covers_specs: ["forum-service-migration_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-forum-moderation.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify forum moderation features"
+    covers_specs: ["forum-service-migration_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-forum-migration-contracts.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify forum migration contracts"
+    covers_specs: ["forum-service-migration_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-video-pipeline.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify video delivery pipeline"
+    covers_specs: ["video-pipeline-delivery_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-mux-video-upload.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify Mux video upload functionality"
+    covers_specs: ["video-pipeline-delivery_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-mux-upload-completeness.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify Mux upload completeness checks"
+    covers_specs: ["video-pipeline-delivery_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-mux-asset-status.py"
+    method: behavioral
+    tier: P1
+    description: "Verify Mux asset status tracking"
+    covers_specs: ["video-pipeline-delivery_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-mux-secrets.sh"
+    method: static
+    tier: P0
+    description: "Verify Mux secrets management"
+    covers_specs: ["video-pipeline-delivery_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-mux-alerts.sh"
+    method: monitoring
+    tier: P2
+    description: "Verify Mux alert configuration"
+    covers_specs: ["video-pipeline-delivery_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-no-mux-asset-ids.sh"
+    method: static
+    tier: P0
+    description: "Verify no hardcoded Mux asset IDs"
+    covers_specs: ["video-pipeline-delivery_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-purchase-gateway.sh"
+    method: behavioral
+    tier: P1
+    description: "Comprehensive purchase gateway verification"
+    covers_specs: ["ecommerce-purchase-gateway_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-purchase-gateway-scaffold.sh"
+    method: static
+    tier: P0
+    description: "Verify purchase gateway scaffold structure"
+    covers_specs: ["ecommerce-purchase-gateway_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-purchase-gateway-models.sh"
+    method: static
+    tier: P0
+    description: "Verify purchase gateway data models"
+    covers_specs: ["ecommerce-purchase-gateway_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-purchase-gateway-k8s.sh"
+    method: static
+    tier: P0
+    description: "Verify purchase gateway K8s configuration"
+    covers_specs: ["ecommerce-purchase-gateway_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-purchase-gateway-security.sh"
+    method: static
+    tier: P0
+    description: "Verify purchase gateway security measures"
+    covers_specs: ["ecommerce-purchase-gateway_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-ecommerce-config.sh"
+    method: static
+    tier: P0
+    description: "Verify ecommerce configuration"
+    covers_specs: ["ecommerce-purchase-gateway_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/test-stripe-webhook-delivery.sh"
+    method: behavioral
+    tier: P1
+    description: "Test Stripe webhook delivery"
+    covers_specs: ["ecommerce-purchase-gateway_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-enterprise-deployment.sh"
+    method: contract
+    tier: P0
+    description: "Verify Enterprise microservices deployment"
+    covers_specs: ["enterprise-microservices_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-enterprise-service-deployment.sh"
+    method: contract
+    tier: P0
+    description: "Verify Enterprise service deployment status"
+    covers_specs: ["enterprise-microservices_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-enterprise-secrets.sh"
+    method: static
+    tier: P0
+    description: "Verify Enterprise secrets management"
+    covers_specs: ["enterprise-microservices_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-enterprise-observability.sh"
+    method: monitoring
+    tier: P2
+    description: "Verify Enterprise observability integration"
+    covers_specs: ["enterprise-microservices_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-enterprise-sso.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify Enterprise SSO integration"
+    covers_specs: ["enterprise-microservices_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-enterprise-sso-saml.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify Enterprise SAML SSO"
+    covers_specs: ["enterprise-microservices_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-enterprise-catalog.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify Enterprise catalog service"
+    covers_specs: ["enterprise-microservices_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-enterprise-access-subsidy.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify Enterprise access and subsidy management"
+    covers_specs: ["enterprise-microservices_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-enterprise-license-management.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify Enterprise license management"
+    covers_specs: ["enterprise-microservices_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-enterprise-integrated-channels.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify Enterprise integrated channels"
+    covers_specs: ["enterprise-microservices_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-enterprise-tenant-isolation.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify Enterprise tenant isolation"
+    covers_specs: ["enterprise-microservices_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-enterprise-all-acs.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify all Enterprise acceptance criteria"
+    covers_specs: ["enterprise-microservices_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-ci-cd-pipeline.sh"
+    method: contract
+    tier: P0
+    description: "Verify CI/CD pipeline configuration"
+    covers_specs: ["ci-cd-pipeline_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-build-workflow-contract.sh"
+    method: static
+    tier: P0
+    description: "Verify build workflow contract"
+    covers_specs: ["ci-cd-pipeline_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-release-automation.sh"
+    method: static
+    tier: P0
+    description: "Verify release automation"
+    covers_specs: ["ci-cd-pipeline_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-release-dry-run-contract.sh"
+    method: static
+    tier: P0
+    description: "Verify release dry-run contract"
+    covers_specs: ["ci-cd-pipeline_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-release-workflow-invocation.sh"
+    method: static
+    tier: P0
+    description: "Verify release workflow invocation"
+    covers_specs: ["ci-cd-pipeline_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-rollback-dry-run.sh"
+    method: resilience
+    tier: P1
+    description: "Verify rollback dry-run functionality"
+    covers_specs: ["ci-cd-pipeline_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-regression-detection.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify regression detection mechanisms"
+    covers_specs: ["ci-cd-pipeline_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-deployment-gate.sh"
+    method: static
+    tier: P0
+    description: "Verify deployment gate configuration"
+    covers_specs: ["ci-cd-pipeline_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-cicd-merge-gates-and-secrets.sh"
+    method: static
+    tier: P0
+    description: "Verify CI/CD merge gates and secrets"
+    covers_specs: ["ci-cd-pipeline_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-k8s-images.sh"
+    method: static
+    tier: P0
+    description: "Verify K8s image references"
+    covers_specs: ["k8s-deployment_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-no-latest-prod-tags.sh"
+    method: static
+    tier: P0
+    description: "Verify no :latest tags in production"
+    covers_specs: ["k8s-deployment_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-dev-prod-image-parity.sh"
+    method: static
+    tier: P0
+    description: "Verify dev/prod image parity"
+    covers_specs: ["k8s-deployment_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-gitops-image-overrides.sh"
+    method: static
+    tier: P0
+    description: "Verify GitOps image override structure"
+    covers_specs: ["k8s-deployment_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-gitops-mereka-lms-pin.sh"
+    method: static
+    tier: P0
+    description: "Verify GitOps mereka-lms image pinning"
+    covers_specs: ["k8s-deployment_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-k8s-externalsecrets.sh"
+    method: static
+    tier: P0
+    description: "Verify K8s ExternalSecrets configuration"
+    covers_specs: ["k8s-deployment_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-k8s-secrets-hygiene.sh"
+    method: static
+    tier: P0
+    description: "Verify K8s secrets hygiene"
+    covers_specs: ["k8s-deployment_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-k8s-secret-scan.sh"
+    method: static
+    tier: P0
+    description: "Scan K8s manifests for hardcoded secrets"
+    covers_specs: ["k8s-deployment_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-dev-prod-secret-separation.sh"
+    method: static
+    tier: P0
+    description: "Verify dev/prod secret separation"
+    covers_specs: ["k8s-deployment_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-externalsecret-config.sh"
+    method: static
+    tier: P0
+    description: "Verify ExternalSecret configuration"
+    covers_specs: ["k8s-deployment_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-kustomize-render.sh"
+    method: static
+    tier: P0
+    description: "Verify Kustomize render output"
+    covers_specs: ["k8s-deployment_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-kustomize-structure.sh"
+    method: static
+    tier: P0
+    description: "Verify Kustomize directory structure"
+    covers_specs: ["k8s-deployment_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-kustomize-no-deprecated-keys.sh"
+    method: static
+    tier: P0
+    description: "Verify no deprecated Kustomize keys"
+    covers_specs: ["k8s-deployment_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-service-endpoints.sh"
+    method: contract
+    tier: P0
+    description: "Verify service endpoint availability"
+    covers_specs: ["k8s-deployment_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-certificate-issuance.sh"
+    method: contract
+    tier: P0
+    description: "Verify TLS certificate issuance"
+    covers_specs: ["k8s-deployment_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-cert-manager-readiness.sh"
+    method: contract
+    tier: P0
+    description: "Verify cert-manager readiness"
+    covers_specs: ["k8s-deployment_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-body-limits.sh"
+    method: static
+    tier: P0
+    description: "Verify HTTP body size limits"
+    covers_specs: ["k8s-deployment_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-tutor-patches.sh"
+    method: static
+    tier: P0
+    description: "Verify Tutor patches are applied"
+    covers_specs: ["tutor-configuration_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-tutor-services.sh"
+    method: contract
+    tier: P0
+    description: "Verify Tutor services are running"
+    covers_specs: ["tutor-configuration_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-tutor-config-safety.sh"
+    method: static
+    tier: P0
+    description: "Verify Tutor config safety measures"
+    covers_specs: ["tutor-configuration-resilience_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-tutor-resilience-full.sh"
+    method: resilience
+    tier: P1
+    description: "Comprehensive Tutor resilience verification"
+    covers_specs: ["tutor-configuration-resilience_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-mfe-build-contract.sh"
+    method: static
+    tier: P0
+    description: "Verify MFE build contract"
+    covers_specs: ["branding-system_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-mfe-build-prereqs.sh"
+    method: static
+    tier: P0
+    description: "Verify MFE build prerequisites"
+    covers_specs: ["branding-system_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-mfe-config-contract.sh"
+    method: static
+    tier: P0
+    description: "Verify MFE configuration contract"
+    covers_specs: ["branding-system_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/test-mfe-oauth-fix.sh"
+    method: behavioral
+    tier: P1
+    description: "Test MFE OAuth fix"
+    covers_specs: ["auth-sso-enterprise_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-platform-middleware.sh"
+    method: static
+    tier: P0
+    description: "Verify platform middleware configuration"
+    covers_specs: ["platform-middleware-custom-apps_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-cross-cutting-requirements.sh"
+    method: static
+    tier: P0
+    description: "Verify cross-cutting requirements"
+    covers_specs: ["cross-cutting-requirements_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-documentation-standards.sh"
+    method: static
+    tier: P0
+    description: "Verify documentation standards compliance"
+    covers_specs: ["cross-cutting-requirements_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-documentation-links.sh"
+    method: static
+    tier: P0
+    description: "Verify documentation links are valid"
+    covers_specs: ["cross-cutting-requirements_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-sentry-wiring.sh"
+    method: contract
+    tier: P0
+    description: "Verify Sentry error tracking integration"
+    covers_specs: ["observability-stack_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-sentry-cli-contract.sh"
+    method: static
+    tier: P0
+    description: "Verify Sentry CLI contract"
+    covers_specs: ["observability-stack_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-studio-isolation.sh"
+    method: behavioral
+    tier: P1
+    description: "Verify Studio isolation from LMS"
+    covers_specs: ["auth-sso-enterprise_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/verify-setup.sh"
+    method: contract
+    tier: P0
+    description: "Verify local setup completion"
+    covers_specs: ["repository-structure_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/test-verify-repo-structure.sh"
+    method: behavioral
+    tier: P1
+    description: "Test repo structure verification script"
+    covers_specs: ["repository-structure_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/check-parity.sh"
+    method: behavioral
+    tier: P1
+    description: "Check parity between environments"
+    covers_specs: ["k8s-deployment_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/fix-parity.sh"
+    method: behavioral
+    tier: P1
+    description: "Fix parity issues between environments"
+    covers_specs: ["k8s-deployment_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/fix-admin-login.sh"
+    method: behavioral
+    tier: P1
+    description: "Fix admin login issues"
+    covers_specs: ["auth-sso-enterprise_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/analyze-local-data.sh"
+    method: behavioral
+    tier: P2
+    description: "Analyze local data for debugging"
+    covers_specs: []
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/run-operations-gates.sh"
+    method: contract
+    tier: P0
+    description: "Run operations quality gates"
+    covers_specs: ["cross-cutting-requirements_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/run-spec-integrity-gates.sh"
+    method: static
+    tier: P0
+    description: "Run spec integrity quality gates"
+    covers_specs: ["cross-cutting-requirements_spec.md"]
+    covers_acs: []
+    makefile_target: "spec-lint"
+
+  - path: "scripts/qa/lint-active-docs-env-model.sh"
+    method: static
+    tier: P0
+    description: "Lint active docs environment model"
+    covers_specs: ["cross-cutting-requirements_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/lint-beads-v2.sh"
+    method: static
+    tier: P0
+    description: "Lint beads repository structure"
+    covers_specs: ["repository-structure_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/audit-auth-access.sh"
+    method: monitoring
+    tier: P2
+    description: "Audit authentication access patterns"
+    covers_specs: ["auth-sso-enterprise_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/audit-authenticated-sso-canary-wiring.sh"
+    method: monitoring
+    tier: P2
+    description: "Audit authenticated SSO canary wiring"
+    covers_specs: ["auth-sso-enterprise_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/audit-authentik-policy-exceptions.sh"
+    method: monitoring
+    tier: P2
+    description: "Audit Authentik policy exceptions"
+    covers_specs: ["auth-sso-enterprise_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/audit-infra-mereka-lms-staging-references.sh"
+    method: static
+    tier: P0
+    description: "Audit infrastructure for staging references"
+    covers_specs: ["k8s-deployment_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  # ============================
+  # scripts/infra/ - Infrastructure Operations
+  # ============================
+
+  - path: "scripts/infra/verify-deployment.sh"
+    method: contract
+    tier: P0
+    description: "Post-deployment verification wrapper"
+    covers_specs: ["k8s-deployment_spec.md"]
+    covers_acs: ["AC-003"]
+    makefile_target: null
+
+  - path: "scripts/infra/verify-tutor-config.sh"
+    method: static
+    tier: P0
+    description: "Verify all required Tutor patches are present"
+    covers_specs: ["tutor-configuration-resilience_spec.md"]
+    covers_acs: ["AC-TCR-004"]
+    makefile_target: "tutor-verify"
+
+  - path: "scripts/infra/verify-tutor-patches.sh"
+    method: static
+    tier: P0
+    description: "Verify Tutor patches applied to generated files"
+    covers_specs: ["tutor-configuration_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/infra/verify-k8s-overrides.sh"
+    method: static
+    tier: P0
+    description: "Verify K8s overrides configuration"
+    covers_specs: ["k8s-deployment_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/infra/verify-prometheus-integration.sh"
+    method: contract
+    tier: P0
+    description: "Verify Prometheus metrics integration"
+    covers_specs: ["observability-stack_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/infra/validate-telemetry-connectivity.sh"
+    method: contract
+    tier: P0
+    description: "Validate telemetry connectivity (Prometheus, Tempo, Loki)"
+    covers_specs: ["observability-stack_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/infra/tutor-config-save.sh"
+    method: behavioral
+    tier: P1
+    description: "Safe Tutor config save wrapper (backs up, saves, patches)"
+    covers_specs: ["tutor-configuration-resilience_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/infra/tutor-config-rollback.sh"
+    method: resilience
+    tier: P1
+    description: "Rollback Tutor configuration to previous backup"
+    covers_specs: ["tutor-configuration-resilience_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/infra/check-atlas-allowlist.sh"
+    method: contract
+    tier: P0
+    description: "Check MongoDB Atlas IP allowlist"
+    covers_specs: ["mongodb-atlas-integration_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/infra/check-atlas-allowlist-vps.sh"
+    method: contract
+    tier: P0
+    description: "Check VPS IP in Atlas allowlist"
+    covers_specs: ["mongodb-atlas-integration_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/infra/ensure-atlas-allowlist-vps.sh"
+    method: behavioral
+    tier: P1
+    description: "Ensure VPS IP is in Atlas allowlist"
+    covers_specs: ["mongodb-atlas-integration_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/infra/monitor-atlas-allowlist-vps.sh"
+    method: monitoring
+    tier: P2
+    description: "Monitor VPS IP in Atlas allowlist (cron)"
+    covers_specs: ["mongodb-atlas-integration_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/infra/infisical-validate-mereka-lms.sh"
+    method: contract
+    tier: P0
+    description: "Validate Infisical secrets for mereka-lms"
+    covers_specs: ["secrets-management_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/infra/infisical-sync-mereka-lms.sh"
+    method: behavioral
+    tier: P1
+    description: "Sync Infisical secrets to K8s"
+    covers_specs: ["secrets-management_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/infra/infisical-audit-mereka-lms.sh"
+    method: monitoring
+    tier: P2
+    description: "Audit Infisical secrets inventory"
+    covers_specs: ["secrets-management_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh"
+    method: behavioral
+    tier: P1
+    description: "Sync mereka-lms secrets from Infisical to GCP Secret Manager"
+    covers_specs: ["secrets-management_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/infra/check-cert-sans.sh"
+    method: contract
+    tier: P0
+    description: "Check certificate SANs for multi-site domains"
+    covers_specs: ["multi-site-domains_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/infra/cloudflare-sync.sh"
+    method: behavioral
+    tier: P1
+    description: "Sync DNS records to Cloudflare"
+    covers_specs: ["multi-site-domains_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/infra/backup-db.sh"
+    method: behavioral
+    tier: P1
+    description: "Backup database (MySQL/MongoDB)"
+    covers_specs: ["disaster-recovery-business-continuity_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/infra/release-openedx-gitops.sh"
+    method: behavioral
+    tier: P1
+    description: "Release Open edX via GitOps"
+    covers_specs: ["ci-cd-pipeline_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  # ============================
+  # scripts/qa/spec-tools/ - Spec Verification Tools
+  # ============================
+
+  - path: "scripts/qa/spec-tools/mereka_spec_lint.py"
+    method: static
+    tier: P0
+    description: "Lint spec files for Mereka rules"
+    covers_specs: ["cross-cutting-requirements_spec.md"]
+    covers_acs: []
+    makefile_target: "lint-specs"
+
+  - path: "scripts/qa/spec-tools/mereka_spec_verify.py"
+    method: static
+    tier: P0
+    description: "Verify @covers annotations match spec ACs"
+    covers_specs: ["cross-cutting-requirements_spec.md"]
+    covers_acs: []
+    makefile_target: "verify-specs"
+
+  - path: "scripts/qa/spec-tools/spec_coverage_report.py"
+    method: static
+    tier: P0
+    description: "Generate spec coverage report"
+    covers_specs: ["cross-cutting-requirements_spec.md"]
+    covers_acs: []
+    makefile_target: "spec-coverage"
+
+  - path: "scripts/qa/spec-tools/spec_coverage_dashboard.py"
+    method: static
+    tier: P0
+    description: "Generate per-spec coverage dashboard"
+    covers_specs: ["cross-cutting-requirements_spec.md"]
+    covers_acs: []
+    makefile_target: "spec-dashboard"
+
+  - path: "scripts/qa/spec-tools/validate_testmap_format.py"
+    method: static
+    tier: P0
+    description: "Validate testmap YAML format"
+    covers_specs: ["cross-cutting-requirements_spec.md"]
+    covers_acs: []
+    makefile_target: "validate-testmaps"
+
+  - path: "scripts/qa/spec-tools/discover_testmap.py"
+    method: static
+    tier: P0
+    description: "Generate testmaps from @covers annotations"
+    covers_specs: ["cross-cutting-requirements_spec.md"]
+    covers_acs: []
+    makefile_target: "generate-testmaps"
+
+  - path: "scripts/qa/spec-tools/run_spec_compliance.py"
+    method: behavioral
+    tier: P1
+    description: "Run automated tests and report spec compliance"
+    covers_specs: ["cross-cutting-requirements_spec.md"]
+    covers_acs: []
+    makefile_target: "spec-compliance"
+
+  - path: "scripts/qa/spec-tools/lint_core.py"
+    method: static
+    tier: P0
+    description: "Core spec linting (repo-local only)"
+    covers_specs: ["cross-cutting-requirements_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/spec-tools/spec_lint.py"
+    method: static
+    tier: P0
+    description: "Legacy spec linting tool"
+    covers_specs: ["cross-cutting-requirements_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/spec-tools/spec_verify.py"
+    method: static
+    tier: P0
+    description: "Legacy spec verification tool"
+    covers_specs: ["cross-cutting-requirements_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/spec-tools/annotate_scripts.py"
+    method: static
+    tier: P0
+    description: "Annotate scripts with @covers tags"
+    covers_specs: ["cross-cutting-requirements_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/spec-tools/check_test_coverage.py"
+    method: static
+    tier: P0
+    description: "Check test coverage for specs"
+    covers_specs: ["cross-cutting-requirements_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/spec-tools/compute_dependency_graph.py"
+    method: static
+    tier: P0
+    description: "Compute spec dependency graph"
+    covers_specs: ["cross-cutting-requirements_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/spec-tools/extract_manual_entries.py"
+    method: static
+    tier: P0
+    description: "Extract manual test entries from specs"
+    covers_specs: ["cross-cutting-requirements_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+  - path: "scripts/qa/spec-tools/render_index.py"
+    method: static
+    tier: P0
+    description: "Render spec index"
+    covers_specs: ["cross-cutting-requirements_spec.md"]
+    covers_acs: []
+    makefile_target: null
+
+# Coverage summary
+coverage:
+  total_scripts: 221
+  by_method:
+    static: 112
+    contract: 29
+    behavioral: 66
+    resilience: 5
+    monitoring: 29
+  by_tier:
+    P0: 141
+    P1: 66
+    P2: 14
+
+  # Specs with comprehensive coverage (5+ scripts)
+  high_coverage_specs:
+    - "auth-sso-enterprise_spec.md (17 scripts)"
+    - "k8s-deployment_spec.md (24 scripts)"
+    - "branding-system_spec.md (13 scripts)"
+    - "observability-stack_spec.md (11 scripts)"
+    - "data-migrations-kajabi-mct_spec.md (18 scripts)"
+    - "enterprise-microservices_spec.md (13 scripts)"
+    - "cross-cutting-requirements_spec.md (14 scripts)"
+
+  # Specs with minimal coverage (0-2 scripts)
+  specs_with_no_scripts:
+    - "badges-credentials-enterprise_spec.md"
+    - "content-libraries-v2_spec.md"
+    - "data-privacy-gdpr-compliance_spec.md (1 script - audit-analytics-pii.sh)"
+    - "email-notifications-pipeline_spec.md"
+    - "proposals/mobile-apps-enterprise_spec.md"
+    - "proposals/mobile-apps-secrets-management_spec.md"
+    - "proctoring-integration_spec.md"
+    - "advanced-assessment-xqueue_spec.md"
+
+  # Method distribution insights
+  method_insights:
+    static_dominates: "Static analysis covers 50.7% of scripts (config validation, secret scanning, structure checks)"
+    behavioral_second: "Behavioral testing covers 29.9% (functional testing, integration tests)"
+    contract_third: "Contract validation covers 13.1% (API health, endpoint checks)"
+    resilience_gap: "Only 2.3% resilience testing (failure injection, recovery validation) - opportunity for improvement"
+    monitoring_decent: "13.6% monitoring scripts (alert validation, metric checks, audit trails)"
+
+  # Tier distribution insights
+  tier_insights:
+    p0_majority: "63.8% P0 scripts (critical path, must pass before deployment)"
+    p1_solid: "29.9% P1 scripts (important but non-blocking)"
+    p2_minimal: "6.3% P2 scripts (monitoring, auditing, nice-to-have)"
+
+  # Top verification areas
+  top_verification_areas:
+    - "Kubernetes deployment and configuration (24 scripts)"
+    - "Data migrations (18 scripts)"
+    - "Authentication and SSO (17 scripts)"
+    - "Secrets management (14 scripts)"
+    - "Branding and design tokens (13 scripts)"
+    - "Enterprise microservices (13 scripts)"
+    - "Spec integrity tooling (14 scripts)"
+
+  # Makefile integration
+  makefile_targets:
+    - "qa-smoke → smoke-test.sh"
+    - "tutor-verify → verify-tutor-config.sh"
+    - "spec-lint → run-spec-integrity-gates.sh"
+    - "lint-specs → mereka_spec_lint.py"
+    - "verify-specs → mereka_spec_verify.py"
+    - "spec-coverage → spec_coverage_report.py"
+    - "spec-dashboard → spec_coverage_dashboard.py"
+    - "validate-testmaps → validate_testmap_format.py"
+    - "generate-testmaps → discover_testmap.py"
+    - "spec-compliance → run_spec_compliance.py"

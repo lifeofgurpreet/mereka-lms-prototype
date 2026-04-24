@@ -1,0 +1,65 @@
+{
+  "name": "Mereka LMS Operations Signals Dashboard Coverage Contract",
+  "dashboard_uid": "mereka-lms-operations-signals",
+  "required": {
+    "datasources": [
+      "prometheus"
+    ],
+    "panel_titles": [
+      "Contracts and Intent",
+      "Dev MySQL Connection Utilisation",
+      "Staging MySQL Connection Utilisation",
+      "Velero Last Success Age",
+      "Highest LMS PVC Used %",
+      "MySQL Connection Utilisation",
+      "Redis Connection Pressure Events",
+      "Top LMS PVC Utilisation",
+      "Critical Deployments With Unavailable Replicas",
+      "Recent Velero Backup Failures (1h)",
+      "Dev Pending Pods",
+      "Staging Pending Pods",
+      "CrashLooping LMS Containers"
+    ],
+    "query_fragments": [
+      "mysql_global_status_threads_connected",
+      "mysql_global_variables_max_connections",
+      "velero_backup_last_successful_timestamp",
+      "kubelet_volume_stats_used_bytes",
+      "kubelet_volume_stats_capacity_bytes",
+      "redis_rejected_connections_total",
+      "redis_evicted_keys_total",
+      "kube_deployment_status_replicas_unavailable",
+      "velero_backup_failure_total",
+      "kube_pod_status_phase",
+      "kube_pod_container_status_waiting_reason"
+    ],
+    "panels": [
+      {"title": "Contracts and Intent","owner": "platform-observability"},
+      {"title": "Dev MySQL Connection Utilisation","owner": "team-lms"},
+      {"title": "Staging MySQL Connection Utilisation","owner": "team-lms"},
+      {"title": "Velero Last Success Age","owner": "platform-sre"},
+      {"title": "Highest LMS PVC Used %","owner": "platform-sre"},
+      {"title": "MySQL Connection Utilisation","owner": "team-lms"},
+      {"title": "Redis Connection Pressure Events","owner": "team-lms","max_staleness_minutes": 30},
+      {"title": "Top LMS PVC Utilisation","owner": "platform-sre"},
+      {"title": "Critical Deployments With Unavailable Replicas","owner": "platform-sre"},
+      {"title": "Recent Velero Backup Failures (1h)","owner": "platform-sre","max_staleness_minutes": 120},
+      {"title": "Dev Pending Pods","owner": "platform-sre"},
+      {"title": "Staging Pending Pods","owner": "platform-sre"},
+      {"title": "CrashLooping LMS Containers","owner": "platform-sre"}
+    ]
+  },
+  "recommended": {
+    "datasources": [],
+    "panel_titles": [
+      "Velero Last Success Age",
+      "Highest LMS PVC Used %",
+      "CrashLooping LMS Containers"
+    ],
+    "query_fragments": [
+      "velero_backup_last_successful_timestamp",
+      "kubelet_volume_stats_used_bytes",
+      "kube_pod_container_status_waiting_reason"
+    ]
+  }
+}

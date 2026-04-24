@@ -1,0 +1,419 @@
+#!/usr/bin/env bash
+# @covers AC-TKN-018, AC-TKN-019, AC-TKN-024, AC-TKN-025, AC-TKN-026
+# @covers AC-TKN-027, AC-TKN-028, AC-TKN-032, AC-008
+# @spec: plans/paragon-design-tokens-migration_spec.md
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+
+SPEC_FILE="$REPO_ROOT/specs/plans/paragon-design-tokens-migration_spec.md"
+PROMPT_FILE="$REPO_ROOT/docs/FRONTEND_PHASE_C_PROMPT.md"
+AUDIT_DOC="$REPO_ROOT/docs/reference/architecture/PARAGON_V22_TOKEN_AUDIT.md"
+BRANDING_CHECKLIST="$REPO_ROOT/docs/guides/branding/BRANDING_VERIFICATION_CHECKLIST.md"
+MFE_SCSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
+THEME_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/mereka-brand.min.css"
+BRAND_LIGHT_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/mereka-brand-light.min.css"
+CORE_THEME_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/core.min.css"
+LIGHT_THEME_CSS="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/theme/light.min.css"
+RUNTIME_URL="${PARAGON_RUNTIME_URL:-}"
+REQUIRE_RUNTIME=0
+SLOT_MARKER_POLICY="${SLOT_MARKER_POLICY:-auto}"
+THEME_DEFAULT_ENABLED=1
+RUNTIME_CURL_INSECURE="${PARAGON_RUNTIME_CURL_INSECURE:-auto}"
+MAX_CORE_THEME_BYTES="${MAX_CORE_THEME_BYTES:-614400}"
+MAX_BRAND_THEME_BYTES="${MAX_BRAND_THEME_BYTES:-51200}"
+MAX_LIGHT_THEME_BYTES="${MAX_LIGHT_THEME_BYTES:-262144}"
+CURL_FLAGS=()
+
+PASS=0
+FAIL=0
+WARN=0
+
+pass() { PASS=$((PASS + 1)); echo "PASS: $*"; }
+warn() { WARN=$((WARN + 1)); echo "WARN: $*"; }
+fail() { FAIL=$((FAIL + 1)); echo "FAIL: $*"; }
+
+usage() {
+  cat <<'EOF'
+Usage: verify-paragon-runtime.sh [--runtime-url <url>] [--require-runtime]
+
+Options:
+  --runtime-url <url>  Base URL to validate runtime theme endpoint. Example:
+                       https://apps.academyv2.mereka.io
+  --require-runtime    Fail when runtime URL is unavailable/reachable checks cannot run.
+  --require-slot-markers
+                       Require branded slot markers in runtime authn bundles.
+  --allow-missing-slot-markers
+                       Allow missing branded slot markers (warn-only mode).
+  -h, --help           Show this help.
+EOF
+}
+
+normalize_runtime_url() {
+  local raw="$1"
+  [[ -z "$raw" ]] && { echo ""; return 0; }
+  python3 - "$raw" <<'PY'
+import sys
+from urllib.parse import urlparse
+
+raw = (sys.argv[1] or "").strip()
+if not raw:
+    print("")
+    raise SystemExit(0)
+if "://" not in raw:
+    raw = f"https://{raw}"
+parsed = urlparse(raw)
+if not parsed.netloc:
+    print("")
+    raise SystemExit(0)
+scheme = parsed.scheme or "https"
+print(f"{scheme}://{parsed.netloc}")
+PY
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --runtime-url)
+      if [[ $# -lt 2 ]]; then
+        echo "ERROR: --runtime-url requires a value" >&2
+        exit 2
+      fi
+      RUNTIME_URL="$2"
+      shift 2
+      ;;
+    --require-runtime)
+      REQUIRE_RUNTIME=1
+      shift
+      ;;
+    --require-slot-markers)
+      SLOT_MARKER_POLICY="required"
+      shift
+      ;;
+    --allow-missing-slot-markers)
+      SLOT_MARKER_POLICY="allow"
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "ERROR: unknown argument: $1" >&2
+      usage >&2
+      exit 2
+      ;;
+  esac
+done
+
+if [[ "$SLOT_MARKER_POLICY" != "auto" && "$SLOT_MARKER_POLICY" != "required" && "$SLOT_MARKER_POLICY" != "allow" ]]; then
+  echo "ERROR: SLOT_MARKER_POLICY must be one of: auto, required, allow (got: $SLOT_MARKER_POLICY)" >&2
+  exit 2
+fi
+
+SLOT_MARKERS_REQUIRED=0
+case "$SLOT_MARKER_POLICY" in
+  required)
+    SLOT_MARKERS_REQUIRED=1
+    ;;
+  allow)
+    SLOT_MARKERS_REQUIRED=0
+    ;;
+  auto)
+    if [[ "$REQUIRE_RUNTIME" -eq 1 ]]; then
+      SLOT_MARKERS_REQUIRED=1
+    fi
+    ;;
+esac
+
+if [[ -n "${RUNTIME_URL:-}" ]]; then
+  original_runtime_url="$RUNTIME_URL"
+  normalized_runtime_url="$(normalize_runtime_url "$RUNTIME_URL")"
+  if [[ -z "$normalized_runtime_url" ]]; then
+    fail "Invalid --runtime-url/PARAGON_RUNTIME_URL value: ${original_runtime_url}"
+    echo ""
+    echo "=== Summary: PASS=${PASS} WARN=${WARN} FAIL=${FAIL} ==="
+    exit 1
+  fi
+  RUNTIME_URL="$normalized_runtime_url"
+  if [[ "$RUNTIME_URL" != "$original_runtime_url" ]]; then
+    warn "Normalized runtime URL to origin for contract checks: ${RUNTIME_URL} (from ${original_runtime_url})"
+  fi
+fi
+
+if [[ "$RUNTIME_CURL_INSECURE" == "auto" ]]; then
+  if [[ "$RUNTIME_URL" == *".dev"* ]]; then
+    RUNTIME_CURL_INSECURE=1
+  else
+    RUNTIME_CURL_INSECURE=0
+  fi
+fi
+if [[ "$RUNTIME_CURL_INSECURE" == "1" || "$RUNTIME_CURL_INSECURE" == "true" ]]; then
+  CURL_FLAGS=(-k)
+fi
+
+if mereka_plugin_has_any "$REPO_ROOT"; then
+  if mereka_plugin_has_regex "$REPO_ROOT" '\("MEREKA_PARAGON_THEME_ENABLED",[[:space:]]*False\)'; then
+    THEME_DEFAULT_ENABLED=0
+  elif mereka_plugin_has_regex "$REPO_ROOT" '\("MEREKA_PARAGON_THEME_ENABLED",[[:space:]]*True\)'; then
+    THEME_DEFAULT_ENABLED=1
+  fi
+fi
+
+echo "=== Paragon Runtime Contract Verification ==="
+
+# Final-pattern contract: runtime PARAGON_THEME_URLS must be enabled by default.
+if [[ "$THEME_DEFAULT_ENABLED" -eq 1 ]]; then
+  pass "Runtime PARAGON_THEME_URLS is enabled by default in plugin config"
+else
+  fail "Runtime PARAGON_THEME_URLS is disabled by default (set MEREKA_PARAGON_THEME_ENABLED=True)"
+fi
+
+# AC-008 parser-compatibility: ensure cross-spec text reference exists
+if [[ -f "$SPEC_FILE" ]] && grep -q "AC-008 through AC-010" "$SPEC_FILE"; then
+  pass "AC-008 cross-spec compatibility reference is present in spec text"
+else
+  fail "AC-008 compatibility reference missing from spec text"
+fi
+
+# AC-TKN-018 / AC-TKN-019 runtime validation is environment-dependent.
+if [[ -n "${RUNTIME_URL:-}" ]]; then
+  runtime_url="${RUNTIME_URL%/}/theme/mereka-brand.min.css"
+  runtime_status="$(curl "${CURL_FLAGS[@]}" -sSIL -o /tmp/paragon-theme-head.$$ -w "%{http_code}" "$runtime_url" || true)"
+  if [[ "$runtime_status" =~ ^[0-9]+$ ]] && [[ "$runtime_status" -ge 200 ]] && [[ "$runtime_status" -lt 400 ]]; then
+    content_type_ok=0
+    cache_header_ok=0
+    body_fetch_ok=0
+    body_size_ok=0
+    marker_ok=0
+
+    if grep -qi "^content-type:.*text/css" /tmp/paragon-theme-head.$$; then
+      content_type_ok=1
+    fi
+    if grep -qi "^cache-control:" /tmp/paragon-theme-head.$$; then
+      cache_header_ok=1
+    fi
+
+    if curl "${CURL_FLAGS[@]}" -sSL "$runtime_url" >/tmp/paragon-theme-body.$$ 2>/dev/null; then
+      body_fetch_ok=1
+      body_bytes="$(wc -c </tmp/paragon-theme-body.$$ | tr -d ' ')"
+      if [[ "$body_bytes" -gt 100 ]]; then
+        body_size_ok=1
+      fi
+      if grep -q -- "--pgn-color-primary-base" /tmp/paragon-theme-body.$$; then
+        marker_ok=1
+      fi
+    else
+      body_bytes=0
+    fi
+
+    if [[ "$content_type_ok" -eq 1 && "$cache_header_ok" -eq 1 && "$body_fetch_ok" -eq 1 && "$body_size_ok" -eq 1 && "$marker_ok" -eq 1 ]]; then
+      pass "AC-TKN-019 runtime theme endpoint returns text/css (${runtime_url})"
+      pass "AC-TKN-019 runtime theme endpoint includes cache-control"
+      pass "AC-TKN-019 runtime theme endpoint returns non-empty CSS body (${body_bytes} bytes)"
+      pass "AC-TKN-019 runtime theme CSS body contains Paragon primary-color marker"
+    else
+      if [[ "$REQUIRE_RUNTIME" -eq 0 && "$THEME_DEFAULT_ENABLED" -eq 0 ]]; then
+        warn "AC-TKN-019 runtime theme endpoint not active (${runtime_url}); default MEREKA_PARAGON_THEME_ENABLED=False in plugin config"
+      else
+        [[ "$content_type_ok" -eq 1 ]] && pass "AC-TKN-019 runtime theme endpoint returns text/css (${runtime_url})" || fail "AC-TKN-019 runtime theme endpoint missing text/css content-type (${runtime_url})"
+        [[ "$cache_header_ok" -eq 1 ]] && pass "AC-TKN-019 runtime theme endpoint includes cache-control" || fail "AC-TKN-019 runtime theme endpoint missing cache-control header"
+        [[ "$body_fetch_ok" -eq 1 ]] && pass "AC-TKN-019 runtime theme endpoint body fetch succeeded" || fail "AC-TKN-019 runtime theme endpoint body fetch failed (${runtime_url})"
+        [[ "$body_size_ok" -eq 1 ]] && pass "AC-TKN-019 runtime theme endpoint returns non-empty CSS body (${body_bytes} bytes)" || fail "AC-TKN-019 runtime theme endpoint body too small (${body_bytes} bytes)"
+        [[ "$marker_ok" -eq 1 ]] && pass "AC-TKN-019 runtime theme CSS body contains Paragon primary-color marker" || fail "AC-TKN-019 runtime theme CSS body missing Paragon primary-color marker"
+      fi
+    fi
+
+    pass "AC-TKN-018 runtime URL is reachable for cache-clear verification workflow"
+  else
+    fail "AC-TKN-018/019 runtime URL check failed: ${runtime_url} (HTTP ${runtime_status:-unknown}); likely runtime-theme rollout drift (rebuild/push MFE image and update GitOps tags/ref)"
+  fi
+
+  for authn_shell_url in "${RUNTIME_URL%/}/authn/login" "${RUNTIME_URL%/}/authn/register"; do
+    authn_shell_status="$(curl "${CURL_FLAGS[@]}" -sSL -o /tmp/paragon-authn-shell.$$ -w "%{http_code}" "$authn_shell_url" || true)"
+    if [[ "$authn_shell_status" =~ ^[0-9]+$ ]] && [[ "$authn_shell_status" -ge 200 ]] && [[ "$authn_shell_status" -lt 400 ]]; then
+      has_runtime_theme_urls=0
+      has_relative_theme_urls=0
+      has_embedded_theme_files=0
+
+      if grep -q '/theme/core.min.css' /tmp/paragon-authn-shell.$$ \
+        && grep -q '/theme/mereka-brand.min.css' /tmp/paragon-authn-shell.$$; then
+        has_runtime_theme_urls=1
+      fi
+      if grep -q '\.\./theme/' /tmp/paragon-authn-shell.$$; then
+        has_relative_theme_urls=1
+      fi
+
+      if grep -Eq 'paragon-theme-core\.[A-Za-z0-9]+\.css' /tmp/paragon-authn-shell.$$ \
+        && grep -Eq 'brand-theme-core\.[A-Za-z0-9]+\.css' /tmp/paragon-authn-shell.$$; then
+        has_embedded_theme_files=1
+      fi
+
+      if [[ "$has_relative_theme_urls" -eq 1 ]]; then
+        if [[ "$REQUIRE_RUNTIME" -eq 1 ]]; then
+          fail "Runtime authn shell still uses relative ../theme URLs (${authn_shell_url})"
+        else
+          warn "Runtime authn shell still uses relative ../theme URLs (${authn_shell_url})"
+        fi
+      elif [[ "$has_runtime_theme_urls" -eq 1 ]]; then
+        pass "Runtime authn shell references /theme/core.min.css + /theme/mereka-brand.min.css (${authn_shell_url})"
+      elif [[ "$has_embedded_theme_files" -eq 1 ]]; then
+        if [[ "$REQUIRE_RUNTIME" -eq 1 ]]; then
+          fail "Runtime authn shell still uses embedded paragon/brand hash files (${authn_shell_url})"
+        else
+          warn "Runtime authn shell currently uses embedded paragon/brand hash files (${authn_shell_url})"
+        fi
+      else
+        if [[ "$REQUIRE_RUNTIME" -eq 1 ]]; then
+          fail "Runtime authn shell theme markers are inconclusive (${authn_shell_url})"
+        else
+          warn "Runtime authn shell theme markers are inconclusive (${authn_shell_url})"
+        fi
+      fi
+
+      bundle_marker_hits=""
+      while IFS= read -r bundle_path; do
+        [[ -z "$bundle_path" ]] && continue
+        bundle_url="${RUNTIME_URL%/}${bundle_path}"
+        bundle_tmp="$(mktemp -t paragon-authn-bundle.XXXXXX)"
+        if curl "${CURL_FLAGS[@]}" -fsSL "$bundle_url" -o "$bundle_tmp" 2>/dev/null; then
+          for marker in \
+            "mereka-authn-login-branding" \
+            "mereka-header-logo" \
+            "mereka-footer" \
+            "MerekaAuthnLoginBranding"; do
+            if grep -q "$marker" "$bundle_tmp"; then
+              bundle_marker_hits+="${marker}@${bundle_path}"$'\n'
+            fi
+          done
+        fi
+        rm -f "$bundle_tmp"
+      done < <(grep -Eo 'src="/authn/[^"]+\.js"' /tmp/paragon-authn-shell.$$ | sed -E 's/src="([^"]+)"/\1/' | sort -u)
+
+      if [[ -n "$bundle_marker_hits" ]]; then
+        hit_count="$(printf '%s' "$bundle_marker_hits" | sed '/^$/d' | wc -l | tr -d ' ')"
+        pass "Runtime authn bundles expose branded slot markers (${hit_count} hit(s)) for ${authn_shell_url}"
+      else
+        if [[ "$SLOT_MARKERS_REQUIRED" -eq 1 ]]; then
+          fail "Runtime authn bundles do not expose branded slot markers (${authn_shell_url})"
+        else
+          warn "Runtime authn bundles do not expose branded slot markers (${authn_shell_url})"
+        fi
+      fi
+    else
+      if [[ "$REQUIRE_RUNTIME" -eq 1 ]]; then
+        fail "Runtime authn shell check failed: ${authn_shell_url} (HTTP ${authn_shell_status:-unknown})"
+      else
+        warn "Runtime authn shell check unavailable: ${authn_shell_url} (HTTP ${authn_shell_status:-unknown})"
+      fi
+    fi
+  done
+
+  rm -f /tmp/paragon-theme-head.$$
+  rm -f /tmp/paragon-theme-body.$$
+  rm -f /tmp/paragon-authn-shell.$$
+else
+  if [[ "$REQUIRE_RUNTIME" -eq 1 ]]; then
+    fail "AC-TKN-018/019 runtime checks required but no runtime URL was provided (use --runtime-url or PARAGON_RUNTIME_URL)"
+  else
+    warn "AC-TKN-018 runtime cache-clear behavior requires PARAGON_RUNTIME_URL or --runtime-url (not set)"
+    warn "AC-TKN-019 runtime header contract requires PARAGON_RUNTIME_URL or --runtime-url (not set)"
+  fi
+fi
+
+# AC-TKN-024/025/026: v22 tokenization boundary documented in audit + prompt.
+if [[ -f "$AUDIT_DOC" ]] && [[ -f "$PROMPT_FILE" ]]; then
+  if grep -qi "does not consume" "$AUDIT_DOC" && grep -qi "must remain as CSS rules" "$PROMPT_FILE"; then
+    pass "AC-TKN-024/025/026 migration boundary is explicitly documented for Paragon v22"
+  else
+    warn "AC-TKN-024/025/026 migration boundary docs not in expected exact phrasing; treat as deferred/manual"
+  fi
+else
+  warn "AC-TKN-024/025/026 required docs missing; treat as deferred/manual"
+fi
+
+# AC-TKN-027 / AC-TKN-028: deferred contraction check with explicit evidence.
+if [[ -f "$MFE_SCSS" ]]; then
+  line_count="$(wc -l < "$MFE_SCSS" | tr -d ' ')"
+  active_line_count="$(python3 - "$MFE_SCSS" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+text = Path(sys.argv[1]).read_text(encoding="utf-8")
+text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+lines = [line for line in text.splitlines() if line.strip() and not line.strip().startswith("//")]
+print(len(lines))
+PY
+)"
+  rgba_count="$(grep -c "rgba(" "$MFE_SCSS" || true)"
+  if [[ "$active_line_count" -lt 300 ]]; then
+    pass "AC-TKN-027 active mereka.scss rule line count is ${active_line_count} (<300); raw lines=${line_count}"
+  else
+    warn "AC-TKN-027 deferred: active mereka.scss rule line count currently ${active_line_count} (target <300); raw lines=${line_count}"
+  fi
+  if [[ "$rgba_count" -lt 5 ]]; then
+    pass "AC-TKN-028 rgba() count is ${rgba_count} (<5)"
+  else
+    warn "AC-TKN-028 deferred: rgba() count currently ${rgba_count} (target <5)"
+  fi
+else
+  fail "AC-TKN-027/028 missing file: infrastructure/tutor/themes/mereka/mfe/mereka.scss"
+fi
+
+# AC-TKN-032 visual regression contract readiness.
+if [[ -f "$BRANDING_CHECKLIST" ]] && [[ -f "$THEME_CSS" ]]; then
+  pass "AC-TKN-032 visual regression runbook + compiled theme asset are present"
+else
+  fail "AC-TKN-032 missing visual-regression prerequisites"
+fi
+
+# Runtime theme artifact budgets and light-variant parity checks.
+if [[ -f "$CORE_THEME_CSS" ]]; then
+  core_size="$(wc -c < "$CORE_THEME_CSS" | tr -d ' ')"
+  if [[ "$core_size" -le "$MAX_CORE_THEME_BYTES" ]]; then
+    pass "Theme core CSS size ${core_size}B is within budget (${MAX_CORE_THEME_BYTES}B)"
+  else
+    fail "Theme core CSS size ${core_size}B exceeds budget (${MAX_CORE_THEME_BYTES}B)"
+  fi
+else
+  fail "Theme core CSS missing: ${CORE_THEME_CSS#$REPO_ROOT/}"
+fi
+
+if [[ -f "$THEME_CSS" ]]; then
+  brand_size="$(wc -c < "$THEME_CSS" | tr -d ' ')"
+  if [[ "$brand_size" -le "$MAX_BRAND_THEME_BYTES" ]]; then
+    pass "Brand theme CSS size ${brand_size}B is within budget (${MAX_BRAND_THEME_BYTES}B)"
+  else
+    fail "Brand theme CSS size ${brand_size}B exceeds budget (${MAX_BRAND_THEME_BYTES}B)"
+  fi
+else
+  fail "Brand theme CSS missing: ${THEME_CSS#$REPO_ROOT/}"
+fi
+
+if [[ -f "$LIGHT_THEME_CSS" ]]; then
+  light_size="$(wc -c < "$LIGHT_THEME_CSS" | tr -d ' ')"
+  if [[ "$light_size" -le "$MAX_LIGHT_THEME_BYTES" ]]; then
+    pass "Light theme CSS size ${light_size}B is within baseline budget (${MAX_LIGHT_THEME_BYTES}B)"
+  else
+    fail "Light theme CSS size ${light_size}B exceeds baseline budget (${MAX_LIGHT_THEME_BYTES}B)"
+  fi
+else
+  fail "Light theme CSS missing: ${LIGHT_THEME_CSS#$REPO_ROOT/}"
+fi
+
+if [[ -f "$THEME_CSS" && -f "$BRAND_LIGHT_CSS" ]]; then
+  if cmp -s "$THEME_CSS" "$BRAND_LIGHT_CSS"; then
+    pass "Brand light theme CSS is byte-identical to base brand theme CSS"
+  else
+    fail "Brand light theme CSS differs from base brand theme CSS (unexpected drift)"
+  fi
+else
+  fail "Brand theme parity check prerequisites missing"
+fi
+
+echo ""
+echo "=== Summary: PASS=${PASS} WARN=${WARN} FAIL=${FAIL} ==="
+if [[ "$FAIL" -gt 0 ]]; then
+  exit 1
+fi

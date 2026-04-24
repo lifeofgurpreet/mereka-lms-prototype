@@ -1,0 +1,127 @@
+spec: build-authority-deterministic-builds_spec.md
+acceptance_criteria:
+- id: AC-BAUTH-001
+  description: Every image-affecting file has an explicit conveyor trigger (R1)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-build-workflow-contract.sh
+    command: scripts/qa/verify-build-workflow-contract.sh
+  - type: manual
+    runbook: docs/rfcs/RFC-BUILD-AUTHORITY-001.md
+    section: Phase 1
+    procedure: Reconcile any new image-affecting path class against build-tutor-images.yml
+      on.push.paths and the build workflow contract verifier before merge.
+    justification: The current automated verifier enforces the known required path
+      set; a comprehensive image-affecting file discovery verifier remains an explicit
+      follow-up, not implied complete coverage.
+    file: scripts/qa/verify-build-workflow-contract.sh
+- id: AC-BAUTH-002
+  description: No duplicate trigger entries exist (R2)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-build-workflow-contract.sh
+    command: scripts/qa/verify-build-workflow-contract.sh
+- id: AC-BAUTH-003
+  description: Automation PR authorship is consistent and trusted (R3)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-build-workflow-contract.sh
+    command: scripts/qa/verify-build-workflow-contract.sh
+  - type: manual
+    runbook: docs/ops/ci-cd/AUTOMATION_AUTHORSHIP_AUDIT.md
+    section: Next Verification Steps
+    procedure: After a graduation/promotion dispatch, confirm the resulting bbi-infrastructure
+      PR author is the GitHub App identity and not github-actions[bot].
+    justification: Static workflow checks prove App-token wiring; final authorship
+      truth requires a live downstream PR produced by GitHub.
+    file: docs/ops/ci-cd/AUTOMATION_AUTHORSHIP_AUDIT.md
+- id: AC-BAUTH-004
+  description: Build failures can be classified in under 5 minutes (R4)
+  verify:
+  - type: manual
+    runbook: docs/ops/ci-cd/BUILD_FAILURE_TAXONOMY.md
+    section: Quick Classification Decision Tree
+    procedure: For each failed build, record the one bucket, evidence signal, and
+      first owner action before rerun or code change.
+    justification: Time-to-classification is an operator workflow property that needs
+      a real failure context; the taxonomy is the canonical procedure.
+    file: docs/ops/ci-cd/BUILD_FAILURE_TAXONOMY.md
+- id: AC-BAUTH-005
+  description: Cold-proof work has a design stub or first implemented slice (R5)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-ci-cache-policy.sh
+    command: scripts/qa/verify-ci-cache-policy.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cold-start-onboarding-contract.sh
+    command: scripts/qa/verify-cold-start-onboarding-contract.sh
+- id: AC-BAUTH-006
+  description: Timing baselines are measured and documented (R6)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-build-workflow-contract.sh
+    command: scripts/qa/verify-build-workflow-contract.sh
+- id: AC-BAUTH-007
+  description: Build ownership is single-source for each behavior (R7)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-build-optimizations-render-delta-contract.sh
+    command: scripts/qa/verify-build-optimizations-render-delta-contract.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-build-workflow-contract.sh
+    command: scripts/qa/verify-build-workflow-contract.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-red-line-contract.sh
+    command: scripts/qa/verify-red-line-contract.sh
+- id: AC-BAUTH-008
+  description: The team can explain the build system without branch archaeology
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-build-optimizations-render-delta-contract.sh
+    command: scripts/qa/verify-build-optimizations-render-delta-contract.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cold-start-onboarding-contract.sh
+    command: scripts/qa/verify-cold-start-onboarding-contract.sh
+  - type: manual
+    runbook: docs/ops/ci-cd/CACHE_AUTHORITY.md
+    section: TL;DR
+    procedure: New developers should be able to explain the source-render-build-cache
+      proof path from the cache authority runbook and developer proof matrix without
+      reading branch history.
+    justification: Explainability is validated through onboarding/review use, while
+      automated guards keep the linked docs and contract surfaces in place.
+    file: docs/ops/ci-cd/CACHE_AUTHORITY.md
+- id: AC-BAUTH-009
+  description: '`verify-build-workflow-contract.sh` and `verify-red-line-contract.sh`
+    pass on `main`'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-build-workflow-contract.sh
+    command: scripts/qa/verify-build-workflow-contract.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-red-line-contract.sh
+    command: scripts/qa/verify-red-line-contract.sh
+- id: AC-BAUTH-010
+  description: Heavy image builds use shared registry cache as primary authority
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-ci-cache-policy.sh
+    command: scripts/qa/verify-ci-cache-policy.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-red-line-contract.sh
+    command: scripts/qa/verify-red-line-contract.sh

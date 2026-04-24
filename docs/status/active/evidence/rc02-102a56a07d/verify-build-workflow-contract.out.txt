@@ -1,0 +1,131 @@
+=== Build Workflow Contract ===
+  PASS  build-tutor-images.yml exists
+  PASS  target_environment input defined
+  PASS  update_gitops input defined
+  PASS  build_profile input defined
+  PASS  release bundle job skips placeholder manual environment and non-proof manual profiles
+  PASS  release bundle job no longer hard-fails on placeholder manual environment
+  PASS  workflow fetches PCP promotion-dispatch-envelope schema
+  PASS  workflow fetches PCP evidence-pack schema
+  PASS  dispatch envelope generator records canonical dispatch_event_type
+  PASS  dispatch envelope generator records canonical lane/service identity
+  PASS  dispatch envelope generator carries PCP contract handshake provenance
+  PASS  workflow dispatches infra promotion via workflow_dispatch API
+  PASS  workflow sends canonical release_evidence JSON as workflow_dispatch input
+  PASS  dispatch envelope generator emits structured_evidence checks
+  PASS  release bundle artifact carries canonical promotion-dispatch envelope
+  PASS  workflow normalizes target_environment to canonical lane
+  PASS  update-gitops job is gated on explicit proof-profile manual dispatch inputs
+  PASS  update-gitops job no longer auto-runs on push to main
+  PASS  Container registry push target is GHCR
+  PASS  No legacy GAR push targets remain
+  PASS  permissions block present
+  PASS  workflow path filter includes docker-bake.hcl
+  PASS  workflow path filter includes requirements-tutor.txt
+  PASS  workflow path filter includes .github/actions/setup-python-env/**
+  PASS  workflow path filter includes infrastructure/tutor/config.example.yml
+  PASS  workflow path filter includes infrastructure/tutor/apply-patches.sh
+  PASS  workflow path filter includes infrastructure/tutor/patches/**
+  PASS  workflow path filter includes infrastructure/tutor/custom-apps/**
+  PASS  workflow path filter includes infrastructure/tutor/plugins/**
+  PASS  workflow path filter includes infrastructure/tutor/themes/**
+  PASS  workflow path filter includes infrastructure/tutor/brand-*/**
+  PASS  workflow path filter includes assets/branding/**
+  PASS  workflow path filter includes scripts/infra/prepare-tutor-build-context.sh
+  PASS  workflow path filter includes scripts/infra/prepare-tutor-build-context-ci.sh
+  PASS  workflow path filter includes infrastructure/tutor/apply-patches.sh
+  PASS  workflow path filter includes infrastructure/tutor/patches/**
+  PASS  workflow path filter includes scripts/infra/resolve-build-scope.sh
+  PASS  workflow path filter includes scripts/infra/install-cosign.sh
+  PASS  workflow path filter includes scripts/infra/install-trivy.sh
+  PASS  workflow path filter includes scripts/infra/generate-build-provenance.sh
+  PASS  workflow path filter includes scripts/infra/generate-release-bundle.sh
+  PASS  workflow path filter includes scripts/release/generate_release_object.py
+  PASS  workflow path filter includes scripts/release/release_object_bindings.py
+  PASS  workflow path filter includes scripts/infra/build-openedx-image.sh
+  PASS  workflow path filter includes scripts/infra/build-mfe-image.sh
+  PASS  workflow path filter includes scripts/infra/release-openedx-gitops.sh
+  PASS  workflow path filter includes scripts/infra/resolve-image-digest.sh
+  PASS  workflow path filter includes scripts/lib/lane-normalize.sh
+  PASS  workflow path filter includes scripts/qa/verify-build-provenance.sh
+  PASS  workflow path filter includes scripts/qa/verify-openedx-image-branding.sh
+  PASS  workflow path filter includes scripts/qa/verify-release-bundle.sh
+  PASS  workflow path filter includes scripts/qa/verify-release-object.sh
+  PASS  workflow path filter includes scripts/qa/verify-mfe-image-branding.sh
+  PASS  workflow path filter includes scripts/qa/verify-mfe-runtime-contract.sh
+  PASS  resolve-build-scope helper exists
+  PASS  select-build-lane action exists
+  PASS  build-openedx-image helper exists
+  PASS  build-mfe-image helper exists
+  PASS  prepare-tutor-build-context helper exists
+  PASS  prepare-tutor-build-context-ci helper exists
+  PASS  verify-openedx-image-branding helper exists
+  PASS  verify-openedx-image-branding helper bounds docker pull/run with timeouts
+  PASS  verify-mfe-image-branding helper exists
+  PASS  verify-mfe-image-branding helper bounds docker pull/run with timeouts
+  PASS  workflow resolves push build scope via canonical helper
+  PASS  build-scope resolver uses full git history for diff safety
+  PASS  workflow selects heavy-build lane via repo-local action
+  PASS  build-openedx job is gated by resolved build scope
+  PASS  build-openedx job consumes select-build-lane runner output
+  PASS  build-mfe job is gated by resolved build scope
+  PASS  build-mfe job consumes select-build-lane runner output
+  PASS  prepare-build-context job runs canonical prep (ARC or hosted — fastlane-compatible)
+  PASS  prepare-build-context job resolves all/openedx/mfe prep targets
+  PASS  prepare-build-context job packages target-specific artifacts into one shared bundle
+  PASS  build-openedx job depends on prepared build context
+  PASS  build-mfe job depends on prepared build context
+  PASS  build-openedx job downloads shared prepared build-context artifact
+  PASS  build-mfe job downloads shared prepared build-context artifact
+  PASS  build-openedx heavy builder no longer performs Tutor prep
+  PASS  build-mfe heavy builder no longer performs Tutor prep
+  PASS  heavy build jobs no longer call apply-patches.sh directly
+  PASS  workflow path filter excludes !infrastructure/tutor/**/*.md
+  PASS  workflow path filter excludes !infrastructure/tutor/mfe-build/**
+  PASS  workflow path filter avoids broad trigger glob deploy/k8s/base/apps/openedx/**
+  PASS  workflow path filter avoids broad trigger glob infrastructure/tutor/**
+  PASS  workflow path filter avoids broad trigger glob scripts/infra/**
+  PASS  workflow path filter avoids broad trigger glob scripts/lib/**
+  PASS  build workflow emits app proof via bin/lms-ops
+  PASS  build workflow uploads build provenance and release-gate envelope artifacts
+  PASS  update-gitops job re-validates the downloaded release object before promotion
+  PASS  update-gitops job binds release object into promotion step
+  PASS  update-gitops job binds release object into proof step
+  PASS  update-gitops job verifies release-gate envelope binding against release object
+  PASS  OpenEdX heavy build job no longer performs SBOM/Trivy scanning
+  PASS  MFE heavy build job no longer performs SBOM/Trivy scanning
+  PASS  OpenEdX post-push scan pinned to heavy-builders (DinD) after build-openedx
+  PASS  MFE post-push scan pinned to heavy-builders (DinD) after build-mfe
+  PASS  OpenEdX post-push scan establishes canonical Docker runtime
+  PASS  MFE post-push scan establishes canonical Docker runtime
+  PASS  OpenEdX post-push SBOM uses local docker cache with timeout guard
+  PASS  OpenEdX post-push Trivy scan has a timeout guard
+  PASS  MFE post-push SBOM uses local docker cache with timeout guard
+  PASS  MFE post-push Trivy scan has a timeout guard
+  PASS  OpenEdX post-push scan uses resolved pushed digest
+  PASS  OpenEdX branding verification runs post-push via canonical helper
+  PASS  OpenEdX heavy build job no longer performs branding verification
+  PASS  MFE post-push scan uses resolved pushed digest
+  PASS  MFE branding verification runs post-push via canonical registry-image helper
+  PASS  MFE runtime verification runs post-push via canonical registry-image helper
+  PASS  MFE heavy build job no longer performs branding verification
+  PASS  MFE heavy build job no longer performs image runtime verification
+  PASS  MFE build uses the canonical push-first helper
+  PASS  MFE build passes explicit build profile to the helper
+  PASS  MFE build no longer calls tutor images build mfe directly
+  PASS  MFE build no longer depends on a local daemon image
+  PASS  release bundle waits only for build digests and provenance
+  PASS  dispatch-dev-promotion waits for post-push scan gates plus release bundle
+  PASS  release bundle job emits the canonical release object
+  PASS  release bundle job verifies the canonical release object
+  PASS  release bundle artifact upload includes release-object.json
+  PASS  OpenEdX cache health reports the canonical L2 registry strategy
+  PASS  OpenEdX cache health no longer reports GHA-first strategy
+  PASS  OpenEdX build uses the canonical push-first helper
+  PASS  OpenEdX build passes explicit build profile to the helper
+  PASS  OpenEdX build no longer calls tutor images build openedx directly
+  PASS  OpenEdX build no longer depends on a local daemon image
+  PASS  build workflow no longer claims mutable-tag dev auto-deploy semantics
+
+=== Results: 127 PASS / 0 FAIL ===
+EXIT: 0

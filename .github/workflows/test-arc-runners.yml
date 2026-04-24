@@ -1,0 +1,42 @@
+name: ARC Runner Capability Probe
+
+permissions: {}  # Deny-all at workflow level; each job grants only what it needs
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-standard:
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 10
+    permissions: {}  # No code checkout or GitHub API calls — no permissions needed
+    steps:
+      - name: Runner info
+        run: |
+          echo "Runner: $RUNNER_NAME"
+          echo "OS: $(uname -a)"
+          echo "CPU: $(nproc)"
+          echo "Memory: $(free -h | grep Mem | awk '{print $2}')"
+          echo "Disk: $(df -h / | tail -1 | awk '{print $4}')"
+          echo "SUCCESS: Standard runner works!"
+
+  test-heavy:
+    runs-on: mereka-k8s-heavy-builders
+    timeout-minutes: 10
+    permissions: {}  # No code checkout or GitHub API calls — no permissions needed
+    steps:
+      - name: Runner info
+        run: |
+          echo "Runner: $RUNNER_NAME"
+          echo "OS: $(uname -a)"
+          echo "CPU: $(nproc)"
+          echo "Memory: $(free -h | grep Mem | awk '{print $2}')"
+          echo "Disk: $(df -h / | tail -1 | awk '{print $4}')"
+          echo "SUCCESS: Heavy builder runner works!"
+      - name: Verify CodeQL bundle contract
+        run: |
+          bundle_path="${CODEQL_BUNDLE_PATH:-/opt/codeql/codeql-bundle-linux64.tar.zst}"
+          echo "Bundle path: ${bundle_path}"
+          test -r "${bundle_path}"
+          ls -lh "${bundle_path}"
+          echo "SUCCESS: Heavy runner exposes CodeQL bundle path"

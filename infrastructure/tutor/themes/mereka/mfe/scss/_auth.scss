@@ -1,0 +1,192 @@
+// Auth surface — login/register branding slot component styles.
+// RISK: LOW — plugin-slot class names owned by this repo; not coupled to upstream DOM internals.
+// Minimal brand mark: logo + brand name above the login form (inside login_component.v1 slot).
+
+// ── Upstream authn layout: brand color + logo alignment ─────────────────────
+.bg-primary-400 {
+  background-color: var(--pgn-color-primary-400, var(--mereka-color-magenta, #AB3B78)) !important;
+}
+
+.text-accent-a {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.large-screen-svg-primary rect {
+  fill: var(--pgn-color-primary-400, var(--mereka-color-magenta, #AB3B78));
+}
+
+// Fix top-left logo clipping — upstream uses position:absolute with no top offset
+.logo.position-absolute {
+  top: 1.5rem !important;
+  left: 1.5rem !important;
+  max-height: 3rem;
+  width: auto;
+  object-fit: contain;
+}
+
+// Small-screen logo also needs spacing
+.logo-small {
+  margin: 1rem auto;
+  max-height: 2.5rem;
+  width: auto;
+  object-fit: contain;
+}
+
+.mereka-authn-login-branding {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.mereka-authn-login-branding__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+  text-decoration: none;
+  color: var(--mereka-color-ink-900);
+}
+
+.mereka-authn-login-branding__logo:hover,
+.mereka-authn-login-branding__logo:focus {
+  text-decoration: none;
+  color: var(--mereka-color-ink-900);
+}
+
+.mereka-authn-login-branding__logo-img {
+  max-height: 36px;
+  width: auto;
+  object-fit: contain;
+}
+
+.mereka-authn-login-branding__copy {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.mereka-authn-login-branding__eyebrow {
+  color: var(--mereka-color-ink-500);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.mereka-authn-login-branding__brand {
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.mereka-authn-login-branding__subtitle {
+  color: var(--mereka-color-ink-700);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  max-width: 26rem;
+}
+
+:root[data-mereka-tenant="biji-biji"] .mereka-authn-login-branding__logo {
+  align-items: flex-start;
+}
+
+:root[data-mereka-tenant="biji-biji"] .mereka-authn-login-branding__brand {
+  color: #1f4f39;
+}
+
+:root[data-mereka-tenant="biji-biji"] .mereka-authn-login-branding__subtitle {
+  color: #2f6b4f;
+}
+
+:root[data-mereka-tenant="skillourfuture"] .mereka-authn-login-branding__brand {
+  color: #450b7f;
+}
+
+:root[data-mereka-tenant="skillourfuture"] .mereka-authn-login-branding__eyebrow {
+  color: #7b2a5a;
+}
+
+:root[data-mereka-tenant="skillourfuture"] .mereka-authn-login-branding__subtitle {
+  color: #4f3a68;
+}
+
+// Account / settings surfaces.
+// .page__account-settings is intentionally slot-owned here;
+// dead-selector audit notes live in git history.
+
+.mereka-account-id-verification-hint {
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--mereka-mfe-border);
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(35, 112, 114, 0.08), rgba(255, 255, 255, 0.96));
+  color: var(--mereka-color-ink-700);
+  font-size: var(--pgn-typography-font-size-sm);
+}
+
+.mereka-account-id-verification-hint__title {
+  color: var(--mereka-color-ink-900);
+  font-weight: 700;
+}
+
+.mereka-account-id-verification-hint__body {
+  color: var(--mereka-color-ink-700);
+  line-height: 1.65;
+}
+
+.mereka-additional-profile-fields {
+  position: relative;
+  overflow: hidden;
+  padding: 1.15rem 1.2rem;
+  border: 1px solid var(--mereka-mfe-border);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(171, 59, 120, 0.12), transparent 34%),
+    linear-gradient(180deg, rgba(35, 112, 114, 0.08), rgba(255, 255, 255, 0.96));
+  box-shadow: var(--mereka-mfe-card-shadow);
+}
+
+.mereka-additional-profile-fields__title {
+  color: var(--mereka-color-ink-900);
+}
+
+.mereka-additional-profile-fields__body {
+  color: var(--mereka-color-ink-700);
+  line-height: 1.65;
+}
+
+.mereka-additional-profile-fields__list {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.mereka-additional-profile-fields__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 0.8rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 18px;
+  border: 1px solid rgba(35, 112, 114, 0.12);
+  background: rgba(255, 255, 255, 0.74);
+}
+
+.mereka-additional-profile-fields__label {
+  color: var(--mereka-color-ink-700);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.mereka-additional-profile-fields__value {
+  color: var(--mereka-color-ink-900);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+.mereka-additional-profile-fields__hint {
+  margin-top: 0.9rem;
+  color: var(--mereka-color-ink-700);
+  font-size: 0.82rem;
+  line-height: 1.6;
+}

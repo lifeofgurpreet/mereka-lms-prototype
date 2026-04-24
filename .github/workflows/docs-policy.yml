@@ -1,0 +1,258 @@
+name: Docs Policy Gates
+
+on:
+  pull_request:
+    paths:
+      - "docs/**"
+      - "docs/meta/knowledge/**"
+      - "docs/meta/contracts/**"
+      - "docs/meta/skills/**"
+      - "deploy/contracts/**"
+      - "specs/**"
+      - "generated/agent/**"
+      - "generated/platform/**"
+      - "generated/skills/**"
+      - "generated/knowledge/**"
+      - "tools/knowledge/**"
+      - "tools/contracts/**"
+      - "generated/graphs/**"
+      - "generated/catalogs/knowledge-catalog.json"
+      - "generated/knowledge/**"
+      - "generated/contracts/**"
+      - "scripts/qa/run-task-runtime-gates.sh"
+      - "scripts/qa/run-knowledge-integrity-gates.sh"
+      - "scripts/qa/run-knowledge-runtime-gates.sh"
+      - "scripts/qa/run-cross-repo-contract-gates.sh"
+      - "scripts/qa/run-agent-readiness-gates.sh"
+      - ".github/workflows/docs-policy.yml"
+      - ".github/CODEOWNERS"
+      - ".github/PULL_REQUEST_TEMPLATE.md"
+      - "tools/docs/verify/verify-docs-policy.sh"
+      - "tools/docs/verify/verify_legacy_ci_cd_root.py"
+      - "tools/docs/verify/verify_legacy_architecture_root.py"
+      - "tools/docs/verify/verify_legacy_branding_root.py"
+      - "tools/docs/verify/verify_legacy_migrations_root.py"
+      - "tools/docs/build_domain_access_reference.py"
+      - "tools/docs/build_team_topology_reference.py"
+      - "tools/docs/verify/verify_team_handbook.py"
+      - "tools/skills/**"
+      - "tools/knowledge/**"
+      - "tools/docs/verify/verify_temporal_integrity.py"
+      - "tools/docs/verify/verify_generated_navigation.py"
+      - "tools/knowledge/verify_review_runtime.py"
+      - "tools/knowledge/build_wave9_findings_ledger.py"
+      - "scripts/qa/run-review-runtime-gates.sh"
+      - "scripts/qa/build_decision_graph.py"
+      - "scripts/qa/spec-tools/**"
+      - "scripts/qa/run-team-handbook-gates.sh"
+      - "scripts/qa/run-cross-repo-agent-gates.sh"
+      - "scripts/qa/run-skill-runtime-gates.sh"
+      - "scripts/qa/run-agent-pack-runtime-gates.sh"
+      - "scripts/qa/run-decision-runtime-gates.sh"
+      - "scripts/qa/run-execution-proof-runtime-gates.sh"
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/**"
+      - "docs/meta/knowledge/**"
+      - "docs/meta/contracts/**"
+      - "docs/meta/skills/**"
+      - "deploy/contracts/**"
+      - "specs/**"
+      - "generated/agent/**"
+      - "generated/platform/**"
+      - "generated/skills/**"
+      - "generated/knowledge/**"
+      - "tools/knowledge/**"
+      - "tools/contracts/**"
+      - "generated/graphs/**"
+      - "generated/catalogs/knowledge-catalog.json"
+      - "generated/knowledge/**"
+      - "generated/contracts/**"
+      - "scripts/qa/run-task-runtime-gates.sh"
+      - "scripts/qa/run-knowledge-integrity-gates.sh"
+      - "scripts/qa/run-knowledge-runtime-gates.sh"
+      - "scripts/qa/run-cross-repo-contract-gates.sh"
+      - "scripts/qa/run-agent-readiness-gates.sh"
+      - ".github/workflows/docs-policy.yml"
+      - ".github/CODEOWNERS"
+      - ".github/PULL_REQUEST_TEMPLATE.md"
+      - "tools/docs/verify/verify-docs-policy.sh"
+      - "tools/docs/verify/verify_legacy_ci_cd_root.py"
+      - "tools/docs/verify/verify_legacy_architecture_root.py"
+      - "tools/docs/verify/verify_legacy_branding_root.py"
+      - "tools/docs/verify/verify_legacy_migrations_root.py"
+      - "tools/docs/build_domain_access_reference.py"
+      - "tools/docs/build_team_topology_reference.py"
+      - "tools/docs/verify/verify_team_handbook.py"
+      - "tools/skills/**"
+      - "tools/knowledge/**"
+      - "tools/docs/verify/verify_temporal_integrity.py"
+      - "tools/docs/verify/verify_generated_navigation.py"
+      - "tools/knowledge/verify_review_runtime.py"
+      - "tools/knowledge/build_wave9_findings_ledger.py"
+      - "scripts/qa/run-review-runtime-gates.sh"
+      - "scripts/qa/build_decision_graph.py"
+      - "scripts/qa/spec-tools/**"
+      - "scripts/qa/run-team-handbook-gates.sh"
+      - "scripts/qa/run-cross-repo-agent-gates.sh"
+      - "scripts/qa/run-skill-runtime-gates.sh"
+      - "scripts/qa/run-agent-pack-runtime-gates.sh"
+      - "scripts/qa/run-decision-runtime-gates.sh"
+      - "scripts/qa/run-execution-proof-runtime-gates.sh"
+
+permissions: {}
+
+jobs:
+  docs-policy:
+    name: Enforce docs anti-regression gates
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.12"
+
+      - name: Install docs policy Python deps
+        run: python3 -m pip install --user pyyaml jsonschema
+
+      - name: Verify docs policy
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
+          else
+            export DOCS_POLICY_RANGE="${{ github.event.before }}...${{ github.sha }}"
+          fi
+          chmod +x tools/docs/verify/verify-docs-policy.sh
+          ./tools/docs/verify/verify-docs-policy.sh
+
+      - name: Verify cross-repo agent packs
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
+          else
+            export DOCS_POLICY_RANGE="${{ github.event.before }}...${{ github.sha }}"
+          fi
+          chmod +x scripts/qa/run-cross-repo-agent-gates.sh
+          ./scripts/qa/run-cross-repo-agent-gates.sh
+
+      - name: Verify skill runtime
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
+          else
+            export DOCS_POLICY_RANGE="${{ github.event.before }}...${{ github.sha }}"
+          fi
+          chmod +x scripts/qa/run-skill-runtime-gates.sh
+          ./scripts/qa/run-skill-runtime-gates.sh
+
+      - name: Verify agent pack runtime
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
+          else
+            export DOCS_POLICY_RANGE="${{ github.event.before }}...${{ github.sha }}"
+          fi
+          chmod +x scripts/qa/run-agent-pack-runtime-gates.sh
+          ./scripts/qa/run-agent-pack-runtime-gates.sh
+
+      - name: Verify decision runtime
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
+          else
+            export DOCS_POLICY_RANGE="${{ github.event.before }}...${{ github.sha }}"
+          fi
+          chmod +x scripts/qa/run-decision-runtime-gates.sh
+          ./scripts/qa/run-decision-runtime-gates.sh
+
+      - name: Verify execution proof runtime
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
+          else
+            export DOCS_POLICY_RANGE="${{ github.event.before }}...${{ github.sha }}"
+          fi
+          chmod +x scripts/qa/run-execution-proof-runtime-gates.sh
+          ./scripts/qa/run-execution-proof-runtime-gates.sh
+
+      - name: Verify team handbook
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
+          else
+            export DOCS_POLICY_RANGE="${{ github.event.before }}...${{ github.sha }}"
+          fi
+          chmod +x scripts/qa/run-team-handbook-gates.sh
+          ./scripts/qa/run-team-handbook-gates.sh
+
+      - name: Verify unified knowledge control plane
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            export DOCS_POLICY_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
+          else
+            export DOCS_POLICY_RANGE="${{ github.event.before }}...${{ github.sha }}"
+          fi
+          chmod +x scripts/qa/run-knowledge-integrity-gates.sh
+          ./scripts/qa/run-knowledge-integrity-gates.sh
+
+      - name: Verify change intelligence runtime
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            export KNOWLEDGE_RUNTIME_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
+          else
+            export KNOWLEDGE_RUNTIME_RANGE="${{ github.event.before }}...${{ github.sha }}"
+          fi
+          chmod +x scripts/qa/run-knowledge-runtime-gates.sh
+          ./scripts/qa/run-knowledge-runtime-gates.sh
+
+      - name: Verify task runtime
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            export TASK_RUNTIME_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
+          else
+            export TASK_RUNTIME_RANGE="${{ github.event.before }}...${{ github.sha }}"
+          fi
+          chmod +x scripts/qa/run-task-runtime-gates.sh
+          ./scripts/qa/run-task-runtime-gates.sh
+
+      - name: Verify cross-repo contract runtime
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            export CONTRACT_RUNTIME_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
+          else
+            export CONTRACT_RUNTIME_RANGE="${{ github.event.before }}...${{ github.sha }}"
+          fi
+          chmod +x scripts/qa/run-cross-repo-contract-gates.sh
+          ./scripts/qa/run-cross-repo-contract-gates.sh
+
+      - name: Verify agent consumption runtime
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            export AGENT_READINESS_RANGE="${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
+          else
+            export AGENT_READINESS_RANGE="${{ github.event.before }}...${{ github.sha }}"
+          fi
+          chmod +x scripts/qa/run-agent-readiness-gates.sh
+          ./scripts/qa/run-agent-readiness-gates.sh
+
+      - name: Verify temporal integrity
+        run: python3 tools/docs/verify/verify_temporal_integrity.py
+
+      - name: Verify generated navigation
+        run: python3 tools/docs/verify/verify_generated_navigation.py
+
+      - name: Verify review/runtime semantics
+        run: |
+          export REVIEW_RUNTIME_RANGE="${DOCS_POLICY_RANGE}"
+          chmod +x scripts/qa/run-review-runtime-gates.sh
+          ./scripts/qa/run-review-runtime-gates.sh

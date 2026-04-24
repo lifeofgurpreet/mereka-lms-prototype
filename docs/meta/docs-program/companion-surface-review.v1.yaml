@@ -1,0 +1,87 @@
+version: 1
+owner: Docs Lead
+last_updated: "2026-04-14"
+allowed_classifications:
+  - KEEP
+  - MERGE
+  - DOWNGRADE
+  - RETIRE
+entries:
+  - doc_path: docs/ops/runbooks/CONTENT_LIBRARIES_V2_RUNBOOK.md
+    topic: content library bulk operations
+    classification: KEEP
+    live_consumers:
+      - docs/guides/platform/CONTENT_LIBRARIES_AUTHORING_GUIDE.md
+      - docs/guides/admin/CONTENT_LIBRARIES_ENTERPRISE_ONBOARDING.md
+    front_doors:
+      - docs/ops/runbooks/TROUBLESHOOTING.md
+    rationale: This remains the stable operator surface for library bulk operations and recovery-adjacent execution boundaries, with the generic troubleshooting router acting as the maintained front door.
+  - doc_path: docs/guides/platform/CONTENT_LIBRARIES_AUTHORING_GUIDE.md
+    topic: content library author workflow
+    classification: KEEP
+    live_consumers:
+      - docs/guides/INDEX_BY_AUDIENCE.md
+      - docs/guides/platform/PLATFORM_START_HERE.md
+    front_doors:
+      - docs/guides/platform/COURSE_AUTHORING_QUICKSTART.md
+    rationale: Course-team author flow remains distinct from operator bulk operations, with Course Authoring Quickstart as the primary front door and broader handbook pages acting as maintained consumers.
+  - doc_path: docs/guides/admin/CONTENT_LIBRARIES_ENTERPRISE_ONBOARDING.md
+    topic: enterprise content-library onboarding
+    classification: DOWNGRADE
+    live_consumers:
+      - docs/guides/platform/PLATFORM_START_HERE.md
+    front_doors:
+      - docs/guides/INDEX_BY_AUDIENCE.md
+    rationale: Useful bounded admin decision aid with maintained handbook routing, but its primary entry point should stay the audience index rather than multiple competing handbook front doors.
+  - doc_path: docs/guides/platform/ADVANCED_ASSESSMENT_AUTHORING_GUIDE.md
+    topic: advanced assessment authoring
+    classification: KEEP
+    live_consumers:
+      - docs/architecture/assessment-audit-report.md
+      - docs/ops/runbooks/ASSESSMENT_OPERATIONS_RUNBOOK.md
+    front_doors:
+      - docs/guides/platform/COURSE_AUTHORING_QUICKSTART.md
+    rationale: Course-team authoring decisions are distinct from runtime operations and are actively routed from current platform guides and assessment architecture review surfaces.
+  - doc_path: docs/ops/runbooks/ASSESSMENT_OPERATIONS_RUNBOOK.md
+    topic: assessment operations
+    classification: KEEP
+    live_consumers:
+      - docs/architecture/assessment-audit-report.md
+      - docs/ops/runbooks/PROCTORING_RUNBOOK.md
+      - docs/ops/runbooks/XQUEUE_HEALTH_RUNBOOK.md
+    front_doors:
+      - docs/ops/runbooks/TROUBLESHOOTING.md
+    rationale: This is the current operator surface that binds ORA2, timed exams, XQueue, and deferred proctoring boundaries without splitting incident routing across multiple thin docs.
+  - doc_path: docs/architecture/mobile-apps-overview.md
+    topic: mobile architecture
+    classification: KEEP
+    live_consumers:
+      - docs/ops/runbooks/MOBILE_APPS_RUNBOOK.md
+    front_doors:
+      - docs/architecture/README.md
+    rationale: Mobile still needs a stable architecture-root owner to prevent paused-lane docs from drifting into runbook-only truth.
+  - doc_path: docs/architecture/purchase-gateway-overview.md
+    topic: purchase gateway system model
+    classification: KEEP
+    live_consumers:
+      - docs/ops/runbooks/PURCHASE_GATEWAY_K8S.md
+      - docs/ops/runbooks/STRIPE_WEBHOOKS_SETUP.md
+    front_doors:
+      - docs/architecture/README.md
+    rationale: Current commerce architecture should not live only in transition runbooks.
+  - doc_path: docs/ops/runbooks/MIDDLEWARE_VERIFICATION.md
+    topic: middleware verification
+    classification: DOWNGRADE
+    live_consumers:
+      - docs/ops/runbooks/MIDDLEWARE_TROUBLESHOOTING.md
+    front_doors:
+      - docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md
+    rationale: This remains a maintained deployment-verification companion with real consumers, but its stable entry point is the deployment runbook rather than a standalone primary front door.
+  - doc_path: docs/ops/runbooks/MIDDLEWARE_TROUBLESHOOTING.md
+    topic: middleware troubleshooting
+    classification: KEEP
+    live_consumers:
+      - docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md
+    front_doors:
+      - docs/ops/runbooks/TROUBLESHOOTING.md
+    rationale: This has a distinct incident-routing role with the generic troubleshooting router as its primary front door, while deployment remains a maintained consumer rather than a competing front door.

@@ -1,0 +1,5 @@
+{
+  "name": "velero-restore-test-success",
+  "description": "Successful runs from velero restore-test CronJob in velero namespace.",
+  "filter": "resource.type=\"k8s_container\" AND resource.labels.namespace_name=\"velero\" AND resource.labels.pod_name=~\"^restore-test-\" AND textPayload:\"Restore Test PASSED\""
+}

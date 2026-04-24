@@ -1,0 +1,3 @@
+Correlation header propagation checks: pass
+- X-Request-ID: present
+- traceparent: present

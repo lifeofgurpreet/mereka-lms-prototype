@@ -1,0 +1,18 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: license-manager
+  labels:
+    app.kubernetes.io/name: license-manager
+    app.kubernetes.io/component: enterprise
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+spec:
+  type: ClusterIP
+  ports:
+    - port: 18170
+      name: http
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: license-manager

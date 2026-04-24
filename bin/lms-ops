@@ -1,0 +1,475 @@
+#!/usr/bin/env bash
+# lms-ops — App-owned control-plane surface for Mereka LMS concerns.
+#
+# Public lane entrypoints live under bin/accept. bin/lms-ops remains the
+# backend control-plane surface for app-owned operational concerns and
+# compatibility routing.
+#
+# Usage:
+#   bin/lms-ops <concern> [options]
+#
+# Concerns:
+#   migrate plan     Show pending migrations per service (read-only)
+#   migrate apply    Run migration Jobs via kubectl apply (requires --lane)
+#   migrate verify   Verify zero pending migrations post-apply
+#   accept runtime-routing   Run the canonical tenant runtime-routing acceptance lane
+#   accept identity-session  Run the canonical tenant identity/session acceptance lane
+#   accept tenant-branding   Run the canonical tenant branding acceptance lane
+#   inventory ci-static   Show authoritative CI static-validation inventory
+#   inventory ci-runtime  Show authoritative CI runtime-validation inventory
+#   proof            Emit GitOps-conformant evidence envelopes
+#   release-gate     Run the release gate (structural integrity checks)
+#   smoke [basic]     Post-migration/post-deploy runtime smoke
+#   smoke wave        Service-wave grouped smoke (5 waves: core→workers→services→enterprise→platform)
+#   preflight        Pre-migration safety gate
+#   rc-check         Check all ✅-auto rows from RC_CHECKLIST.md (exits 0 only if all PASS)
+#
+# Global options:
+#   --lane <lane>    Canonical lane: dev|staging|prod
+#   --namespace <ns> Override Kubernetes namespace
+#   --service <id>   Service id from deploy/k8s/migrations/registry.yaml (for migrate concerns)
+#   --format json    JSON output (where supported)
+#   --dry-run        Dry-run mode (where supported)
+#   -h, --help       Show this help
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Source lane normalization
+# shellcheck source=../scripts/lib/lane-normalize.sh
+source "$REPO_ROOT/scripts/lib/lane-normalize.sh"
+
+LANE=""
+NAMESPACE=""
+FORMAT="text"
+DRY_RUN=false
+SERVICE_FILTER=""
+CONCERN=""
+SUBCONCERN=""
+PASSTHROUGH_ARGS=()
+
+usage() {
+  sed -n '2,/^set -euo/p' "$0" | head -n -1 | sed 's/^# \?//'
+}
+
+# Parse global options, extract concern
+parse_args() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --concern)
+        SUBCONCERN="${2:?--concern requires a value}"
+        shift 2 ;;
+      --lane)
+        LANE="$(normalize_lane_to_canonical "${2:?--lane requires a value}")"
+        shift 2 ;;
+      --namespace)
+        NAMESPACE="${2:?--namespace requires a value}"
+        shift 2 ;;
+      --service)
+        if [[ -n "$SERVICE_FILTER" ]]; then
+          SERVICE_FILTER="${SERVICE_FILTER},${2:?--service requires a value}"
+        else
+          SERVICE_FILTER="${2:?--service requires a value}"
+        fi
+        shift 2 ;;
+      --format)
+        FORMAT="${2:?--format requires a value}"
+        shift 2 ;;
+      --dry-run)
+        DRY_RUN=true
+        shift ;;
+      --skip-cluster)
+        PASSTHROUGH_ARGS+=("$1")
+        shift ;;
+      --release-object-json|--ci-failure-baseline-json|--output-dir|--ci-run-id|--domain|--overlay)
+        PASSTHROUGH_ARGS+=("$1" "${2:?$1 requires a value}")
+        shift 2 ;;
+      -h|--help)
+        usage
+        exit 0 ;;
+      -*)
+        # Unknown flag — pass through to the underlying script
+        PASSTHROUGH_ARGS+=("$1")
+        shift ;;
+      *)
+        if [[ -z "$CONCERN" ]]; then
+          CONCERN="$1"
+        elif [[ -z "$SUBCONCERN" ]]; then
+          SUBCONCERN="$1"
+        else
+          PASSTHROUGH_ARGS+=("$1")
+        fi
+        shift ;;
+    esac
+  done
+}
+
+parse_args "$@"
+
+if [[ -z "$CONCERN" ]]; then
+  usage
+  exit 1
+fi
+
+# Default lane to dev if not set
+[[ -z "$LANE" ]] && LANE="dev"
+
+# Resolve namespace from lane if not explicitly set
+if [[ -z "$NAMESPACE" ]]; then
+  NAMESPACE="$(normalize_lane_to_namespace "$LANE")"
+fi
+
+# Resolve overlay
+OVERLAY_DIR="$(normalize_lane_to_overlay "$LANE")"
+OVERLAY="deploy/k8s/overlays/$OVERLAY_DIR"
+
+# ── Concern: migrate ──────────────────────────────────────────────────────
+do_migrate() {
+  local sub="${SUBCONCERN:-plan}"
+  case "$sub" in
+    plan)
+      echo "Migration plan (lane: $LANE, namespace: $NAMESPACE)"
+      echo "=================================================="
+      echo ""
+      # Show pending migrations by exec into each service pod
+      python3 - "$REPO_ROOT" "$NAMESPACE" "$SERVICE_FILTER" <<'PYEOF'
+import yaml, subprocess, sys
+
+repo_root = sys.argv[1]
+namespace = sys.argv[2]
+service_filter_raw = sys.argv[3]
+registry_path = f"{repo_root}/deploy/k8s/migrations/registry.yaml"
+
+with open(registry_path) as f:
+    registry = yaml.safe_load(f)
+
+requested = {s.strip() for s in service_filter_raw.split(",") if s.strip()}
+known = {svc.get("name") for svc in registry.get("services", [])}
+
+unknown = sorted(requested - known)
+for svc_name in unknown:
+    print(f"  ERR   {svc_name} — not found in migration registry")
+if unknown:
+    sys.exit(1)
+
+for svc in registry.get("services", []):
+    name = svc["name"]
+    if requested and name not in requested:
+        continue
+
+    disabled = svc.get("disabled", False)
+    if disabled:
+        print(f"  SKIP  {name} (disabled)")
+        continue
+
+    pending_check = svc.get("pending_check", "")
+    if not pending_check:
+        print(f"  SKIP  {name} (no pending_check command)")
+        continue
+
+    # Check if deployment exists and has ready replicas
+    try:
+        result = subprocess.run(
+            ["kubectl", "get", "deploy", name, "-n", namespace,
+             "-o", "jsonpath={.status.readyReplicas}"],
+            capture_output=True, text=True, timeout=10
+        )
+        ready = result.stdout.strip() or "0"
+        if ready == "0":
+            print(f"  SKIP  {name} (0 ready replicas)")
+            continue
+    except Exception:
+        print(f"  SKIP  {name} (kubectl check failed)")
+        continue
+
+    # Run pending check
+    try:
+        result = subprocess.run(
+            ["kubectl", "exec", f"deploy/{name}", "-n", namespace, "--",
+             "sh", "-c", pending_check],
+            capture_output=True, text=True, timeout=30
+        )
+        count = result.stdout.strip()
+        if count == "0":
+            print(f"  OK    {name} — 0 pending")
+        else:
+            print(f"  PEND  {name} — {count} pending migrations")
+    except Exception as e:
+        print(f"  ERR   {name} — {e}")
+PYEOF
+      ;;
+
+    apply)
+      echo "Migration apply (lane: $LANE, namespace: $NAMESPACE)"
+      echo "===================================================="
+      echo ""
+      if [[ "$DRY_RUN" == "true" ]]; then
+        echo "[DRY RUN] Would apply migration Jobs for lane: $LANE"
+        echo ""
+      fi
+
+      # Build apply plan from migration registry.
+      local registry="$REPO_ROOT/deploy/k8s/migrations/registry.yaml"
+      if [[ ! -f "$registry" ]]; then
+        echo "Migration registry not found: $registry" >&2
+        exit 1
+      fi
+
+      local apply_plan
+      apply_plan="$(python3 - "$registry" "$SERVICE_FILTER" <<'PYEOF'
+import sys
+import yaml
+
+registry_path, service_filter_raw = sys.argv[1], sys.argv[2]
+with open(registry_path) as f:
+    registry = yaml.safe_load(f) or {}
+
+services = registry.get("services", [])
+requested = [s.strip() for s in service_filter_raw.split(",") if s.strip()]
+requested_set = set(requested)
+known = {svc.get("name") for svc in services}
+
+for svc_name in sorted(requested_set - known):
+    print(f"ERR_UNKNOWN\t{svc_name}\t")
+
+for svc in services:
+    name = str(svc.get("name", "")).strip()
+    if not name:
+        continue
+    if requested_set and name not in requested_set:
+        continue
+    if bool(svc.get("disabled", False)):
+        print(f"SKIP_DISABLED\t{name}\t")
+        continue
+    manifest = str(svc.get("job_manifest", "")).strip()
+    if not manifest:
+        print(f"MISSING_JOB\t{name}\t")
+        continue
+    print(f"APPLY\t{name}\t{manifest}")
+PYEOF
+)"
+
+      if [[ -z "$apply_plan" ]]; then
+        echo "No migration services selected from registry." >&2
+        exit 1
+      fi
+
+      local selected_service_mode="false"
+      [[ -n "$SERVICE_FILTER" ]] && selected_service_mode="true"
+
+      local applied=0
+      local missing=0
+      local skipped=0
+      local errored=0
+      while IFS=$'\t' read -r status service_name manifest_path; do
+        [[ -z "${status:-}" ]] && continue
+        case "$status" in
+          ERR_UNKNOWN)
+            echo "  FAIL: unknown service '$service_name' (not found in migration registry)" >&2
+            errored=$((errored + 1))
+            ;;
+          SKIP_DISABLED)
+            echo "  SKIP: $service_name (disabled in migration registry)"
+            skipped=$((skipped + 1))
+            ;;
+          MISSING_JOB)
+            if [[ "$selected_service_mode" == "true" ]]; then
+              echo "  FAIL: $service_name has no job_manifest in migration registry" >&2
+              errored=$((errored + 1))
+            else
+              echo "  WARN: $service_name has no job_manifest in migration registry (skipping)"
+              missing=$((missing + 1))
+            fi
+            ;;
+          APPLY)
+            local job_file="$REPO_ROOT/$manifest_path"
+            if [[ ! -f "$job_file" ]]; then
+              echo "  FAIL: $service_name job manifest not found: $manifest_path" >&2
+              errored=$((errored + 1))
+              continue
+            fi
+            if [[ "$DRY_RUN" == "true" ]]; then
+              echo "  [DRY RUN] $service_name: kubectl apply -f $manifest_path -n $NAMESPACE"
+            else
+              echo "  Applying: $service_name ($manifest_path)"
+              if ! kubectl apply -f "$job_file" -n "$NAMESPACE" "${PASSTHROUGH_ARGS[@]}"; then
+                echo "  FAIL: $service_name failed to apply" >&2
+                errored=$((errored + 1))
+                continue
+              fi
+            fi
+            applied=$((applied + 1))
+            ;;
+          *)
+            echo "  FAIL: unknown apply-plan status '$status' for service '$service_name'" >&2
+            errored=$((errored + 1))
+            ;;
+        esac
+      done <<< "$apply_plan"
+
+      echo ""
+      echo "Applied $applied migration Job(s) to namespace $NAMESPACE"
+      echo "Skipped $skipped disabled service(s), $missing service(s) missing job_manifest"
+      if [[ "$errored" -gt 0 ]]; then
+        echo "Encountered $errored migration apply error(s)" >&2
+        exit 1
+      fi
+      if [[ "$DRY_RUN" != "true" ]]; then
+        echo ""
+        echo "Monitor with: kubectl get jobs -n $NAMESPACE -w"
+        echo "Verify with:  bin/lms-ops migrate verify --lane $LANE"
+      fi
+      ;;
+
+    verify)
+      if [[ "$FORMAT" != "json" ]]; then
+        echo "Migration verify (lane: $LANE, namespace: $NAMESPACE)"
+        echo "======================================================"
+      fi
+      local args=("--namespace" "$NAMESPACE")
+      [[ -n "$SERVICE_FILTER" ]] && args+=("--service" "$SERVICE_FILTER")
+      [[ "$FORMAT" == "json" ]] && args+=("--json")
+      args+=("${PASSTHROUGH_ARGS[@]}")
+      exec "$REPO_ROOT/scripts/release/verify-zero-pending-migrations.sh" "${args[@]}"
+      ;;
+
+    *)
+      echo "Unknown migrate subconcern: $sub (expected: plan|apply|verify)" >&2
+      exit 1 ;;
+  esac
+}
+
+# ── Concern: inventory ─────────────────────────────────────────────────────
+do_inventory() {
+  local sub="${SUBCONCERN:-ci-static}"
+  case "$sub" in
+    ci-static)
+      local args=()
+      [[ "$FORMAT" == "json" ]] && args+=("--format" "json")
+      args+=("${PASSTHROUGH_ARGS[@]}")
+      exec python3 "$REPO_ROOT/scripts/governance/generate-ci-static-inventory.py" "${args[@]}"
+      ;;
+    ci-runtime)
+      local args=()
+      [[ "$FORMAT" == "json" ]] && args+=("--format" "json")
+      args+=("${PASSTHROUGH_ARGS[@]}")
+      exec python3 "$REPO_ROOT/scripts/governance/generate-ci-runtime-inventory.py" "${args[@]}"
+      ;;
+    *)
+      echo "Unknown inventory subconcern: $sub (expected: ci-static|ci-runtime)" >&2
+      exit 1
+      ;;
+  esac
+}
+
+# ── Concern: proof ────────────────────────────────────────────────────────
+do_proof() {
+  local concern="${SUBCONCERN:-aggregate}"
+  local args=("--concern" "$concern" "--lane" "$LANE")
+  [[ "$DRY_RUN" == "true" ]] && args+=("--dry-run")
+  [[ "$FORMAT" == "json" ]] && args+=("--format" "json")
+  [[ -n "${NAMESPACE:-}" ]] && args+=("--namespace" "$NAMESPACE")
+  args+=("${PASSTHROUGH_ARGS[@]}")
+  exec "$REPO_ROOT/scripts/release/emit-proof-envelope.sh" "${args[@]}"
+}
+
+# ── Concern: release-gate ─────────────────────────────────────────────────
+do_release_gate() {
+  local args=("--overlay" "$OVERLAY")
+  # If no cluster access, pass --skip-cluster
+  for arg in "${PASSTHROUGH_ARGS[@]}"; do
+    args+=("$arg")
+  done
+  exec "$REPO_ROOT/scripts/release/release-gate.sh" "${args[@]}"
+}
+
+# ── Concern: smoke ────────────────────────────────────────────────────────
+do_smoke() {
+  case "${SUBCONCERN:-basic}" in
+    basic|"")
+      local args=("--namespace" "$NAMESPACE")
+      [[ "$FORMAT" == "json" ]] && args+=("--json")
+      args+=("${PASSTHROUGH_ARGS[@]}")
+      exec "$REPO_ROOT/scripts/release/smoke-after-migrate.sh" "${args[@]}"
+      ;;
+    wave)
+      local args=("--lane" "$LANE")
+      [[ "$FORMAT" == "json" ]] && args+=("--json")
+      args+=("${PASSTHROUGH_ARGS[@]}")
+      exec "$REPO_ROOT/scripts/release/smoke-by-service-wave.sh" "${args[@]}"
+      ;;
+    *)
+      echo "Unknown smoke subconcern: $SUBCONCERN (expected: basic, wave)" >&2
+      exit 1
+      ;;
+  esac
+}
+
+# ── Concern: preflight ────────────────────────────────────────────────────
+do_preflight() {
+  local args=("--namespace" "$NAMESPACE")
+  args+=("${PASSTHROUGH_ARGS[@]}")
+  exec "$REPO_ROOT/scripts/release/migration-preflight.sh" "${args[@]}"
+}
+
+# ── Concern: rc-check ─────────────────────────────────────────────────────
+do_rc_check() {
+  local args=("--lane" "$LANE")
+  [[ "$FORMAT" == "json" ]] && args+=("--format" "json")
+  args+=("${PASSTHROUGH_ARGS[@]}")
+  exec "$REPO_ROOT/scripts/ops/rc-check.sh" "${args[@]}"
+}
+
+# ── Concern: topology ─────────────────────────────────────────────────
+do_topology() {
+  local args=("--lane" "$LANE")
+  [[ -n "${NAMESPACE:-}" ]] && args+=("--namespace" "$NAMESPACE")
+  args+=("${PASSTHROUGH_ARGS[@]}")
+  exec "$REPO_ROOT/scripts/qa/verify-topology-selectors.sh" "${args[@]}"
+}
+
+# ── Concern: accept ────────────────────────────────────────────────────────
+do_accept() {
+  local sub="${SUBCONCERN:-runtime-routing}"
+  local env_scope="$LANE"
+  local script=""
+  case "$sub" in
+    runtime-routing)
+      [[ "$env_scope" == "prod" ]] && env_scope="production"
+      script="$REPO_ROOT/scripts/acceptance/runtime-routing.sh"
+      ;;
+    identity-session)
+      script="$REPO_ROOT/scripts/acceptance/identity-session.sh"
+      ;;
+    tenant-branding)
+      script="$REPO_ROOT/scripts/acceptance/tenant-branding.sh"
+      ;;
+    *)
+      echo "Unknown accept subconcern: $sub (expected: runtime-routing, identity-session, tenant-branding)" >&2
+      exit 1
+      ;;
+  esac
+
+  local args=("--env" "$env_scope")
+  [[ "$DRY_RUN" == "true" ]] && args+=("--dry-run")
+  args+=("${PASSTHROUGH_ARGS[@]}")
+  exec "$script" "${args[@]}"
+}
+
+# ── Dispatch ──────────────────────────────────────────────────────────────
+case "$CONCERN" in
+  migrate)      do_migrate ;;
+  accept)       do_accept ;;
+  inventory)    do_inventory ;;
+  proof)        do_proof ;;
+  release-gate) do_release_gate ;;
+  smoke)        do_smoke ;;
+  preflight)    do_preflight ;;
+  topology)     do_topology ;;
+  rc-check)     do_rc_check ;;
+  *)
+    echo "Unknown concern: $CONCERN" >&2
+    echo "Valid concerns: migrate, accept, inventory, proof, release-gate, smoke, preflight, topology, rc-check" >&2
+    exit 1 ;;
+esac

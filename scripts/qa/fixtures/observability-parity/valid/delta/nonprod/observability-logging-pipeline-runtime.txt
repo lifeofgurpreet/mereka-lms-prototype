@@ -1,0 +1,4 @@
+- Logging pipeline runtime evidence
+- evidence_identity: env=nonprod;profile=nonprod;context=fixture-nonprod;project=fixture-project
+- generated_at: 1999-12-31T23:59:59Z
+Logging pipeline health: PASS

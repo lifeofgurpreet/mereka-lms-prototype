@@ -1,0 +1,34 @@
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>{% trans "Deadline Reminder" %}</title></head>
+<body style="margin: 0; background-color: #f6f8fb; padding: 24px 0;">
+  <div style="max-width: 640px; margin: 0 auto; border: 1px solid #e6e8ee; border-radius: 16px; overflow: hidden; background: #ffffff;">
+    <div style="padding: 24px; text-align: center; background: linear-gradient(120deg, {{ org_primary_color|default:'#ab3b78' }} 0%, {{ org_accent_color|default:'#237072' }} 100%);">
+      {% if org_logo_url %}
+      <img src="{{ org_logo_url }}" alt="{{ org_display_name|default:'Mereka Academy' }}" style="max-height: 56px; width: auto;">
+      {% else %}
+      <p style="margin: 0; font-family: 'Lato', Arial, sans-serif; font-size: 20px; font-weight: 700; color: #ffffff;">{{ org_display_name|default:"Mereka Academy" }}</p>
+      {% endif %}
+    </div>
+    <div style="padding: 30px 32px; font-family: 'Poppins', Arial, sans-serif; color: #1f2937; line-height: 1.6;">
+      <h1 style="margin: 0 0 16px 0; font-family: 'Lato', Arial, sans-serif; font-size: 28px; color: #111827;">{% trans "Deadline Approaching" %}</h1>
+      <p style="margin: 0 0 14px 0;">{% trans "Hi" %} {{ user_name }},</p>
+      <p style="margin: 0 0 18px 0;">{% trans "A deadline is approaching for:" %}</p>
+      <div style="background: #f9fafb; padding: 16px; border-radius: 12px; margin: 0 0 22px 0; border-left: 4px solid {{ org_accent_color|default:'#237072' }};">
+        <h2 style="margin: 0; font-family: 'Lato', Arial, sans-serif; font-size: 22px; color: {{ org_primary_color|default:'#ab3b78' }};">{{ course_name }}</h2>
+        <p style="margin: 8px 0 0 0; color: #6b7280;">{% trans "Due:" %} {{ deadline_date }}</p>
+        {% if assignment_name %}<p style="margin: 8px 0 0 0;">{{ assignment_name }}</p>{% endif %}
+      </div>
+      <div style="text-align: center; margin: 0 0 24px 0;">
+        <a href="{{ course_url }}" style="display: inline-block; padding: 12px 28px; border-radius: 9999px; text-decoration: none; background-color: {{ org_primary_color|default:'#ab3b78' }}; color: #ffffff; font-weight: 600;">{% trans "Go to Course" %}</a>
+      </div>
+      <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 28px 0 16px 0;">
+      <p style="margin: 0; font-size: 12px; color: #6b7280;">
+        {{ org_display_name|default:"Mereka Academy" }}
+        {% if org_support_email %} · <a href="mailto:{{ org_support_email }}" style="color: {{ org_accent_color|default:'#237072' }}; text-decoration: none;">{{ org_support_email }}</a>{% endif %}
+      </p>
+    </div>
+  </div>
+</body>
+</html>

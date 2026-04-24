@@ -1,0 +1,29 @@
+{
+  "displayName": "Ingress 5xx spike",
+  "alertStrategy": {},
+  "combiner": "OR",
+  "enabled": true,
+  "severity": "ERROR",
+  "conditions": [
+    {
+      "displayName": "5xx rate > 5 req/min",
+      "conditionThreshold": {
+        "filter": "metric.type=\"loadbalancing.googleapis.com/https/request_count\" resource.type=\"https_lb_rule\" resource.label.\"url_map_name\"=\"k8s2-um-asia-southeast1-mereka-lms-mereka-lms\" metric.label.\"response_code_class\"=\"500\"",
+        "aggregations": [
+          {
+            "alignmentPeriod": "60s",
+            "perSeriesAligner": "ALIGN_RATE"
+          }
+        ],
+        "comparison": "COMPARISON_GT",
+        "thresholdValue": 5,
+        "duration": "0s",
+        "trigger": { "count": 1 }
+      }
+    }
+  ],
+  "notificationChannels": [
+    "projects/mereka-lms/notificationChannels/2534209833330971119",
+    "projects/mereka-lms/notificationChannels/1104353389109200281"
+  ]
+}

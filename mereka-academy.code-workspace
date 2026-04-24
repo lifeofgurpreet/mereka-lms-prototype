@@ -1,0 +1,14 @@
+{
+  "folders": [
+    {
+      "name": "mereka.academy",
+      "path": "."
+    },
+    {
+      "name": "hubspot-webhook-mct",
+      "path": "./hubspot-webhook-mct"
+    }
+  ],
+  "settings": {}
+}
+

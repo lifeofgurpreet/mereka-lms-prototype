@@ -1,0 +1,77 @@
+name: Unauthenticated Smoke Tests
+
+permissions: {}
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # Daily 6am UTC
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: "Target environment"
+        required: true
+        default: "prod"
+        type: choice
+        options:
+          - prod
+          - dev
+
+jobs:
+  smoke:
+    name: Smoke (${{ inputs.target_environment || 'prod' }})
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Set up Playwright
+        uses: ./.github/actions/setup-playwright
+        with:
+          node-version: '20'
+          npm-cache-dependency-path: tests/e2e/package-lock.json
+
+      - name: Install npm dependencies
+        working-directory: tests/e2e
+        run: npm ci
+
+      - name: Resolve base URL
+        id: resolve
+        run: |
+          TARGET="${{ inputs.target_environment || 'prod' }}"
+          if [[ "$TARGET" == "dev" ]]; then
+            echo "base_url=https://academyv2.mereka.dev" >> "$GITHUB_OUTPUT"
+          else
+            echo "base_url=https://academyv2.mereka.io" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run unauthenticated smoke tests
+        working-directory: tests/e2e
+        env:
+          BASE_URL: ${{ steps.resolve.outputs.base_url }}
+        run: |
+          npx playwright test smoke-unauthenticated --project chromium
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: smoke-unauthenticated-results
+          path: |
+            var/e2e-report/**
+            var/e2e-artifacts/**
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: Publish summary
+        if: always()
+        run: |
+          {
+            echo "## Unauthenticated Smoke Tests"
+            echo ""
+            echo "- Environment: \`${{ inputs.target_environment || 'prod' }}\`"
+            echo "- Base URL: \`${{ steps.resolve.outputs.base_url }}\`"
+            echo "- Status: ${{ job.status }}"
+          } >> "$GITHUB_STEP_SUMMARY"

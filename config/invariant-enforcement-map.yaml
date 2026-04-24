@@ -1,0 +1,197 @@
+# Invariant Enforcement Map
+#
+# Links every invariant (from process-invariants.yaml and EXECUTION_INVARIANTS.md)
+# to its enforcement artifacts: detector script, CI gate, Kyverno policy, and
+# the incident that created it.
+#
+# Schema reference: specs/gitops-integrity-system_spec.md (AC-GIS-007)
+# Verification: scripts/qa/verify-gitops-sync-drift.sh (cross-reference check)
+#
+# Every invariant MUST have at least detector_script and ci_gate populated.
+# kyverno_policy and incident_origin may be null where not applicable.
+---
+schema_version: "1.0"
+
+# Source registries that this map covers.
+source_registries:
+  - path: "config/process-invariants.yaml"
+    id_prefix: "INV-"
+  - path: "docs/stabilization/EXECUTION_INVARIANTS.md"
+    id_prefix: "Invariant "
+
+# Enforcement entries for process-invariants.yaml (INV-001 through INV-016).
+invariants:
+  - invariant_id: "INV-001"
+    rule: "Never patch a generated artifact without fixing the generator/build path"
+    detector_script: "scripts/qa/verify-generated-surface-lineage.sh"
+    ci_gate: "ci.yml / static-validation-shards"
+    kyverno_policy: null
+    incident_origin: "#1327"
+
+  - invariant_id: "INV-002"
+    rule: "Never rerun browser canary while live asset gate is red"
+    detector_script: "scripts/qa/verify-proof-gate-contract.sh"
+    ci_gate: "ci.yml / static-validation-shards"
+    kyverno_policy: null
+    incident_origin: null
+
+  - invariant_id: "INV-003"
+    rule: "Never promote from a dirty worktree"
+    detector_script: "scripts/qa/verify-agent-context-lock.sh"
+    ci_gate: "ci.yml / static-validation-precheck"
+    kyverno_policy: null
+    incident_origin: null
+
+  - invariant_id: "INV-004"
+    rule: "Use release-object-driven promotion"
+    detector_script: "scripts/qa/verify-release-bundle.sh"
+    ci_gate: "ci.yml / static-validation-shards"
+    kyverno_policy: null
+    incident_origin: null
+
+  - invariant_id: "INV-005"
+    rule: "Every incident leaves a stronger regression guard"
+    detector_script: "scripts/qa/verify-incident-guardrails.sh"
+    ci_gate: "ci.yml / static-validation-shards"
+    kyverno_policy: null
+    incident_origin: null
+
+  - invariant_id: "INV-006"
+    rule: "Never debug on main"
+    detector_script: null
+    ci_gate: "branch protection rules (GitHub)"
+    kyverno_policy: null
+    incident_origin: null
+
+  - invariant_id: "INV-007"
+    rule: "Render Tutor config through the governed wrapper and prepare the build context before trusting generated artifacts"
+    detector_script: "scripts/qa/verify-tutor-config.sh"
+    ci_gate: "ci.yml / tutor-config-tests"
+    kyverno_policy: null
+    incident_origin: null
+
+  - invariant_id: "INV-008"
+    rule: "Never use real operator identities for browser proof"
+    detector_script: "scripts/qa/verify-smoke-account-registry.sh"
+    ci_gate: "ci.yml / static-validation-shards"
+    kyverno_policy: null
+    incident_origin: null
+
+  - invariant_id: "INV-009"
+    rule: "Never mix proof and repair in one claim"
+    detector_script: null
+    ci_gate: "PR review checklist"
+    kyverno_policy: null
+    incident_origin: null
+
+  - invariant_id: "INV-010"
+    rule: "Infisical is secret authority"
+    detector_script: "scripts/qa/verify-secrets-management.sh"
+    ci_gate: "ci.yml / security-scans (TruffleHog)"
+    kyverno_policy: null
+    incident_origin: null
+
+  - invariant_id: "INV-011"
+    rule: "Layer first, tool second"
+    detector_script: null
+    ci_gate: "PR review checklist"
+    kyverno_policy: null
+    incident_origin: null
+
+  - invariant_id: "INV-012"
+    rule: "CI must pass on main before any PR evaluation"
+    detector_script: null
+    ci_gate: "branch protection / required status checks"
+    kyverno_policy: null
+    incident_origin: null
+
+  - invariant_id: "INV-013"
+    rule: "Never trust build success as proof of served asset"
+    detector_script: "scripts/qa/verify-proof-gate-contract.sh"
+    ci_gate: "ci.yml / static-validation-shards"
+    kyverno_policy: null
+    incident_origin: "#1329"
+
+  - invariant_id: "INV-014"
+    rule: "Admin merge to main must be logged as an exception"
+    detector_script: "scripts/qa/verify-admin-merge-exceptions.sh"
+    ci_gate: "ci.yml / static-validation-shards"
+    kyverno_policy: null
+    incident_origin: null
+
+  - invariant_id: "INV-015"
+    rule: "Infra render-guard and app build-path guard are separate lanes"
+    detector_script: null
+    ci_gate: "ci.yml / separate jobs per lane"
+    kyverno_policy: null
+    incident_origin: "#1330"
+
+  - invariant_id: "INV-016"
+    rule: "Release bundle must be verifiable"
+    detector_script: "scripts/qa/verify-release-bundle.sh"
+    ci_gate: "ci.yml / static-validation-shards"
+    kyverno_policy: null
+    incident_origin: "#1332"
+
+# Enforcement entries for EXECUTION_INVARIANTS.md (Invariants 1-10).
+# These overlap with INV-* entries above; the map connects both registries.
+execution_invariants:
+  - invariant_id: "Invariant 1"
+    rule: "Always work on a feature branch"
+    maps_to: "INV-006"
+    detector_script: null
+    ci_gate: "branch protection rules (GitHub)"
+
+  - invariant_id: "Invariant 2"
+    rule: "Verify clean tree before mutation"
+    maps_to: "INV-003"
+    detector_script: "scripts/qa/verify-agent-context-lock.sh"
+    ci_gate: "ci.yml / static-validation-precheck"
+
+  - invariant_id: "Invariant 3"
+    rule: "Run shellcheck before committing shell scripts"
+    maps_to: null
+    detector_script: "scripts/qa/verify-shellcheck.sh"
+    ci_gate: "ci.yml / static-validation-shards"
+
+  - invariant_id: "Invariant 4"
+    rule: "Run yamllint before committing YAML"
+    maps_to: null
+    detector_script: "scripts/qa/verify-yamllint.sh"
+    ci_gate: "ci.yml / static-validation-shards"
+
+  - invariant_id: "Invariant 5"
+    rule: "kubeconform only runs on K8s manifests"
+    maps_to: null
+    detector_script: "scripts/qa/verify-k8s-manifests.sh"
+    ci_gate: "ci.yml / static-validation-shards"
+
+  - invariant_id: "Invariant 6"
+    rule: "ARC lightweight runners have known gaps"
+    maps_to: null
+    detector_script: null
+    ci_gate: "ARC_RUNNER_CAPABILITY_CONTRACT.md"
+
+  - invariant_id: "Invariant 7"
+    rule: "Never use third-party actions that download .tar.xz"
+    maps_to: null
+    detector_script: "scripts/qa/verify-actions-pinned.sh"
+    ci_gate: "ci.yml / static-validation-shards"
+
+  - invariant_id: "Invariant 8"
+    rule: "CI must pass on main before PR evaluation"
+    maps_to: "INV-012"
+    detector_script: null
+    ci_gate: "branch protection / required status checks"
+
+  - invariant_id: "Invariant 9"
+    rule: "One hypothesis per PR"
+    maps_to: "INV-006"
+    detector_script: null
+    ci_gate: "PR review checklist"
+
+  - invariant_id: "Invariant 10"
+    rule: "Never debug on main"
+    maps_to: "INV-006"
+    detector_script: null
+    ci_gate: "branch protection rules (GitHub)"

@@ -1,0 +1,1279 @@
+{
+  "affected_truth_surfaces": [
+    "docs/catalog.json",
+    "generated/catalogs/docs-catalog.json",
+    "generated/catalogs/knowledge-catalog.json",
+    "generated/contracts/cross-repo-manifest.json",
+    "generated/contracts/deployment-impact-report.json",
+    "generated/contracts/release-obligations.md",
+    "generated/graphs/knowledge-graph.json",
+    "generated/knowledge/agent-entrypoints.json",
+    "generated/knowledge/agent-task-bundles/cross-repo-contract-change.md",
+    "generated/knowledge/agent-task-bundles/docs-architecture-change.md",
+    "generated/knowledge/agent-task-bundles/evidence-status-update.md",
+    "generated/knowledge/agent-task-bundles/incident-debug.md",
+    "generated/knowledge/agent-task-bundles/migration-change.md",
+    "generated/knowledge/agent-task-bundles/normative-spec-change.md",
+    "generated/knowledge/agent-task-bundles/proposal-change.md",
+    "generated/knowledge/agent-task-bundles/release-change.md",
+    "generated/knowledge/agent-task-bundles/reviewer-pass.md",
+    "generated/knowledge/agent-task-bundles/wrapper-retirement.md",
+    "generated/knowledge/change-manifest.json",
+    "generated/knowledge/review-bundle.md",
+    "generated/knowledge/task-bundles/architecture_or_adr_change.json",
+    "generated/knowledge/task-bundles/architecture_or_adr_change.md",
+    "generated/knowledge/task-bundles/compatibility_or_wrapper_cleanup.json",
+    "generated/knowledge/task-bundles/compatibility_or_wrapper_cleanup.md",
+    "generated/knowledge/task-bundles/cross_repo_contract_change.json",
+    "generated/knowledge/task-bundles/cross_repo_contract_change.md",
+    "generated/knowledge/task-bundles/evidence_or_status_change.json",
+    "generated/knowledge/task-bundles/evidence_or_status_change.md",
+    "generated/knowledge/task-bundles/generated_surface_refresh.json",
+    "generated/knowledge/task-bundles/generated_surface_refresh.md",
+    "generated/knowledge/task-bundles/normative_spec_change.json",
+    "generated/knowledge/task-bundles/normative_spec_change.md",
+    "generated/knowledge/task-bundles/proposal_or_rfc_change.json",
+    "generated/knowledge/task-bundles/proposal_or_rfc_change.md",
+    "generated/knowledge/task-bundles/release_or_runtime_change.json",
+    "generated/knowledge/task-bundles/release_or_runtime_change.md",
+    "generated/knowledge/task-bundles/reviewer_handoff_or_policy_change.json",
+    "generated/knowledge/task-bundles/reviewer_handoff_or_policy_change.md",
+    "generated/knowledge/task-bundles/runbook_or_ops_change.json",
+    "generated/knowledge/task-bundles/runbook_or_ops_change.md",
+    "generated/knowledge/task-context-report.json",
+    "generated/knowledge/truth-impact-report.json",
+    "generated/knowledge/wave10-source-map.json"
+  ],
+  "canonical_roots_touched": [
+    "docs"
+  ],
+  "commands_required": [
+    "bash scripts/qa/run-knowledge-runtime-gates.sh",
+    "bash scripts/qa/run-cross-repo-contract-gates.sh",
+    "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD",
+    "python3 tools/knowledge/resolve_task_context.py --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+    "python3 tools/knowledge/resolve_task_context.py --check --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+    "python3 tools/knowledge/build_task_bundle.py --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+    "python3 tools/knowledge/build_task_bundle.py --check --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+    "python3 tools/knowledge/build_skill_index.py --repo-root .",
+    "python3 tools/knowledge/build_skill_index.py --check --repo-root .",
+    "python3 tools/knowledge/verify_task_runtime.py --repo-root . --range origin/main...HEAD",
+    "bash scripts/qa/run-task-runtime-gates.sh"
+  ],
+  "confidence": "high",
+  "cross_repo_dependencies": [],
+  "cross_repo_surfaces_touched": [],
+  "evidence_required": [
+    "require_adr_update",
+    "require_runbook_update",
+    "require_status_update"
+  ],
+  "generated_by": "tools/knowledge/resolve_task_context.py",
+  "generated_surfaces_implicated": [
+    "generated/knowledge/change-manifest.json",
+    "generated/knowledge/task-context-report.json",
+    "generated/knowledge/skill-index.json"
+  ],
+  "matched_files": [
+    "docs/catalog.json",
+    "generated/catalogs/docs-catalog.json",
+    "generated/catalogs/knowledge-catalog.json",
+    "generated/contracts/cross-repo-manifest.json",
+    "generated/contracts/deployment-impact-report.json",
+    "generated/contracts/release-obligations.md",
+    "generated/graphs/knowledge-graph.json",
+    "generated/knowledge/agent-entrypoints.json",
+    "generated/knowledge/agent-task-bundles/cross-repo-contract-change.md",
+    "generated/knowledge/agent-task-bundles/docs-architecture-change.md",
+    "generated/knowledge/agent-task-bundles/evidence-status-update.md",
+    "generated/knowledge/agent-task-bundles/incident-debug.md",
+    "generated/knowledge/agent-task-bundles/migration-change.md",
+    "generated/knowledge/agent-task-bundles/normative-spec-change.md",
+    "generated/knowledge/agent-task-bundles/proposal-change.md",
+    "generated/knowledge/agent-task-bundles/release-change.md",
+    "generated/knowledge/agent-task-bundles/reviewer-pass.md",
+    "generated/knowledge/agent-task-bundles/wrapper-retirement.md",
+    "generated/knowledge/change-manifest.json",
+    "generated/knowledge/review-bundle.md",
+    "generated/knowledge/task-bundles/architecture_or_adr_change.json",
+    "generated/knowledge/task-bundles/architecture_or_adr_change.md",
+    "generated/knowledge/task-bundles/compatibility_or_wrapper_cleanup.json",
+    "generated/knowledge/task-bundles/compatibility_or_wrapper_cleanup.md",
+    "generated/knowledge/task-bundles/cross_repo_contract_change.json",
+    "generated/knowledge/task-bundles/cross_repo_contract_change.md",
+    "generated/knowledge/task-bundles/evidence_or_status_change.json",
+    "generated/knowledge/task-bundles/evidence_or_status_change.md",
+    "generated/knowledge/task-bundles/generated_surface_refresh.json",
+    "generated/knowledge/task-bundles/generated_surface_refresh.md",
+    "generated/knowledge/task-bundles/normative_spec_change.json",
+    "generated/knowledge/task-bundles/normative_spec_change.md",
+    "generated/knowledge/task-bundles/proposal_or_rfc_change.json",
+    "generated/knowledge/task-bundles/proposal_or_rfc_change.md",
+    "generated/knowledge/task-bundles/release_or_runtime_change.json",
+    "generated/knowledge/task-bundles/release_or_runtime_change.md",
+    "generated/knowledge/task-bundles/reviewer_handoff_or_policy_change.json",
+    "generated/knowledge/task-bundles/reviewer_handoff_or_policy_change.md",
+    "generated/knowledge/task-bundles/runbook_or_ops_change.json",
+    "generated/knowledge/task-bundles/runbook_or_ops_change.md",
+    "generated/knowledge/task-context-report.json",
+    "generated/knowledge/truth-impact-report.json",
+    "generated/knowledge/wave10-source-map.json"
+  ],
+  "per_file_candidates": [
+    {
+      "candidates": [
+        {
+          "score": 4,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "cross_repo_contract_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "release_or_runtime_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "architecture_or_adr_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "runbook_or_ops_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "reviewer_handoff_or_policy_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        }
+      ],
+      "path": "docs/catalog.json"
+    },
+    {
+      "candidates": [
+        {
+          "score": 7,
+          "task_type": "evidence_or_status_change",
+          "why": [
+            "trigger pattern match",
+            "lane match docs:review"
+          ]
+        },
+        {
+          "score": 7,
+          "task_type": "compatibility_or_wrapper_cleanup",
+          "why": [
+            "trigger pattern match",
+            "lane match docs:review"
+          ]
+        },
+        {
+          "score": 5,
+          "task_type": "reviewer_handoff_or_policy_change",
+          "why": [
+            "lane match docs:review",
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 3,
+          "task_type": "proposal_or_rfc_change",
+          "why": [
+            "lane match docs:review"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "cross_repo_contract_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "release_or_runtime_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "architecture_or_adr_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "runbook_or_ops_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        }
+      ],
+      "path": "docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "reviewer_handoff_or_policy_change",
+          "why": [
+            "trigger pattern match",
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 4,
+          "task_type": "evidence_or_status_change",
+          "why": [
+            "trigger pattern match"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "cross_repo_contract_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "release_or_runtime_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "architecture_or_adr_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "runbook_or_ops_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        }
+      ],
+      "path": "docs/meta/knowledge/AGENT_REVIEW_HANDOFF.md"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "reviewer_handoff_or_policy_change",
+          "why": [
+            "trigger pattern match",
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 4,
+          "task_type": "evidence_or_status_change",
+          "why": [
+            "trigger pattern match"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "cross_repo_contract_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "release_or_runtime_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "architecture_or_adr_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "runbook_or_ops_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        }
+      ],
+      "path": "docs/meta/knowledge/WAVE10_CLOSEOUT.md"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/catalogs/docs-catalog.json"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/catalogs/knowledge-catalog.json"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        },
+        {
+          "score": 4,
+          "task_type": "cross_repo_contract_change",
+          "why": [
+            "trigger pattern match"
+          ]
+        }
+      ],
+      "path": "generated/contracts/cross-repo-manifest.json"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        },
+        {
+          "score": 4,
+          "task_type": "cross_repo_contract_change",
+          "why": [
+            "trigger pattern match"
+          ]
+        }
+      ],
+      "path": "generated/contracts/deployment-impact-report.json"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        },
+        {
+          "score": 4,
+          "task_type": "cross_repo_contract_change",
+          "why": [
+            "trigger pattern match"
+          ]
+        }
+      ],
+      "path": "generated/contracts/release-obligations.md"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/graphs/knowledge-graph.json"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/agent-entrypoints.json"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/agent-task-bundles/cross-repo-contract-change.md"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/agent-task-bundles/docs-architecture-change.md"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/agent-task-bundles/evidence-status-update.md"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/agent-task-bundles/incident-debug.md"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/agent-task-bundles/migration-change.md"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/agent-task-bundles/normative-spec-change.md"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/agent-task-bundles/proposal-change.md"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/agent-task-bundles/release-change.md"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/agent-task-bundles/reviewer-pass.md"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/agent-task-bundles/wrapper-retirement.md"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/change-manifest.json"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/review-bundle.md"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/task-bundles/architecture_or_adr_change.json"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/task-bundles/architecture_or_adr_change.md"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/task-bundles/compatibility_or_wrapper_cleanup.json"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/task-bundles/compatibility_or_wrapper_cleanup.md"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/task-bundles/cross_repo_contract_change.json"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/task-bundles/cross_repo_contract_change.md"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/task-bundles/evidence_or_status_change.json"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/task-bundles/evidence_or_status_change.md"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/task-bundles/generated_surface_refresh.json"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/task-bundles/generated_surface_refresh.md"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/task-bundles/normative_spec_change.json"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/task-bundles/normative_spec_change.md"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/task-bundles/proposal_or_rfc_change.json"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/task-bundles/proposal_or_rfc_change.md"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/task-bundles/release_or_runtime_change.json"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/task-bundles/release_or_runtime_change.md"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/task-bundles/reviewer_handoff_or_policy_change.json"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/task-bundles/reviewer_handoff_or_policy_change.md"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/task-bundles/runbook_or_ops_change.json"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/task-bundles/runbook_or_ops_change.md"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/task-context-report.json"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/truth-impact-report.json"
+    },
+    {
+      "candidates": [
+        {
+          "score": 6,
+          "task_type": "generated_surface_refresh",
+          "why": [
+            "trigger pattern match",
+            "change class generated_surface_refresh"
+          ]
+        }
+      ],
+      "path": "generated/knowledge/wave10-source-map.json"
+    },
+    {
+      "candidates": [
+        {
+          "score": 2,
+          "task_type": "cross_repo_contract_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "release_or_runtime_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "architecture_or_adr_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "runbook_or_ops_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "reviewer_handoff_or_policy_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        }
+      ],
+      "path": "tools/knowledge/build_agent_readiness_report.py"
+    },
+    {
+      "candidates": [
+        {
+          "score": 2,
+          "task_type": "cross_repo_contract_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "release_or_runtime_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "architecture_or_adr_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "runbook_or_ops_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "reviewer_handoff_or_policy_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        }
+      ],
+      "path": "tools/knowledge/build_agent_task_bundles.py"
+    },
+    {
+      "candidates": [
+        {
+          "score": 2,
+          "task_type": "cross_repo_contract_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "release_or_runtime_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "architecture_or_adr_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "runbook_or_ops_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "reviewer_handoff_or_policy_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        }
+      ],
+      "path": "tools/knowledge/build_cross_repo_agent_packs.py"
+    },
+    {
+      "candidates": [
+        {
+          "score": 2,
+          "task_type": "cross_repo_contract_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "release_or_runtime_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "architecture_or_adr_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "runbook_or_ops_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "reviewer_handoff_or_policy_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        }
+      ],
+      "path": "tools/knowledge/build_task_bundle.py"
+    },
+    {
+      "candidates": [
+        {
+          "score": 2,
+          "task_type": "cross_repo_contract_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "release_or_runtime_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "architecture_or_adr_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "runbook_or_ops_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "reviewer_handoff_or_policy_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        }
+      ],
+      "path": "tools/knowledge/build_wave10_source_map.py"
+    },
+    {
+      "candidates": [
+        {
+          "score": 2,
+          "task_type": "cross_repo_contract_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "release_or_runtime_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "architecture_or_adr_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "runbook_or_ops_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "reviewer_handoff_or_policy_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        }
+      ],
+      "path": "tools/knowledge/change_runtime.py"
+    },
+    {
+      "candidates": [
+        {
+          "score": 2,
+          "task_type": "cross_repo_contract_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "release_or_runtime_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "architecture_or_adr_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "runbook_or_ops_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "reviewer_handoff_or_policy_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        }
+      ],
+      "path": "tools/knowledge/skill_runtime.py"
+    },
+    {
+      "candidates": [
+        {
+          "score": 2,
+          "task_type": "cross_repo_contract_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "release_or_runtime_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "architecture_or_adr_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "runbook_or_ops_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        },
+        {
+          "score": 2,
+          "task_type": "reviewer_handoff_or_policy_change",
+          "why": [
+            "change class docs_support_change"
+          ]
+        }
+      ],
+      "path": "tools/knowledge/verify_agent_consumption_runtime.py"
+    }
+  ],
+  "primary_task_type": "generated_surface_refresh",
+  "range": "origin/main...HEAD",
+  "read_first": [
+    {
+      "path": "docs/meta/docs-program/WAVE4_REVIEW_FRONT_DOOR.md",
+      "priority": 1,
+      "reason": "Generated surfaces still derive from Wave 4 topology."
+    }
+  ],
+  "reviewers_required": [
+    "docs"
+  ],
+  "secondary_task_types": [
+    "cross_repo_contract_change",
+    "reviewer_handoff_or_policy_change",
+    "release_or_runtime_change"
+  ],
+  "task_type_candidates": [
+    {
+      "score": 256,
+      "task_type": "generated_surface_refresh"
+    },
+    {
+      "score": 36,
+      "task_type": "cross_repo_contract_change"
+    },
+    {
+      "score": 35,
+      "task_type": "reviewer_handoff_or_policy_change"
+    },
+    {
+      "score": 24,
+      "task_type": "release_or_runtime_change"
+    },
+    {
+      "score": 24,
+      "task_type": "architecture_or_adr_change"
+    },
+    {
+      "score": 24,
+      "task_type": "runbook_or_ops_change"
+    },
+    {
+      "score": 15,
+      "task_type": "evidence_or_status_change"
+    },
+    {
+      "score": 7,
+      "task_type": "compatibility_or_wrapper_cleanup"
+    },
+    {
+      "score": 3,
+      "task_type": "proposal_or_rfc_change"
+    }
+  ],
+  "truth_impact_lane_counts": {
+    "docs:index": 1,
+    "docs:other": 2,
+    "docs:review": 1
+  },
+  "why": "generated_surface_refresh leads by score gap 220"
+}

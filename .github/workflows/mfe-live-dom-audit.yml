@@ -1,0 +1,162 @@
+name: MFE Live DOM Audit
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: "Target environment"
+        required: true
+        default: "prod"
+        type: choice
+        options:
+          - prod
+          - dev
+      base_url:
+        description: "Override LMS base URL (empty = auto by environment)"
+        required: false
+        default: ""
+        type: string
+      require_runtime_theme:
+        description: "Require runtime /theme/*.css mode"
+        required: true
+        default: false
+        type: boolean
+      require_branding_markers:
+        description: "Require branded markers in runtime DOM"
+        required: true
+        default: true
+        type: boolean
+      authenticated:
+        description: "Mint a safe-session cookie and audit authenticated learner-dashboard surfaces"
+        required: true
+        default: false
+        type: boolean
+      audit_profile:
+        description: "Preset profile for route/selector defaults"
+        required: true
+        default: "standard"
+        type: choice
+        options:
+          - standard
+          - phase7_strict
+          - phase7_full
+      project:
+        description: "Playwright project"
+        required: true
+        default: "chromium"
+        type: choice
+        options:
+          - chromium
+          - firefox
+      options_json:
+        description: "Advanced options JSON for kube_context, namespace, selector_audit_path, selector_audit_routes, selector_audit_selectors, and selector hit thresholds"
+        required: false
+        default: "{}"
+        type: string
+
+permissions: {}  # Deny-all at workflow level; each job grants only what it needs
+
+jobs:
+  live-dom-audit:
+    runs-on: ${{ vars.CI_FASTLANE_BUILD_LABEL || 'mereka-k8s-heavy-builders' }}
+    timeout-minutes: 45
+    permissions:
+      contents: read  # checkout
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Setup Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0
+        with:
+          node-version: "20"
+
+      - name: Run live DOM selector audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET_ENV="${{ inputs.target_environment || 'prod' }}"
+          BASE_URL_INPUT="${{ inputs.base_url || '' }}"
+          REQUIRE_RUNTIME_THEME="${{ inputs.require_runtime_theme || 'false' }}"
+          REQUIRE_BRANDING_MARKERS="${{ inputs.require_branding_markers || 'true' }}"
+          AUTHENTICATED="${{ inputs.authenticated || 'false' }}"
+          KUBE_CONTEXT_INPUT="${{ fromJSON(inputs.options_json || '{}').kube_context || '' }}"
+          NAMESPACE_INPUT="${{ fromJSON(inputs.options_json || '{}').namespace || '' }}"
+          AUDIT_PROFILE="${{ inputs.audit_profile || 'standard' }}"
+          SELECTOR_AUDIT_PATH="${{ fromJSON(inputs.options_json || '{}').selector_audit_path || '/authn/login' }}"
+          SELECTOR_AUDIT_ROUTES="${{ fromJSON(inputs.options_json || '{}').selector_audit_routes || '' }}"
+          SELECTOR_AUDIT_SELECTORS="${{ fromJSON(inputs.options_json || '{}').selector_audit_selectors || '' }}"
+          MIN_SELECTOR_HITS="${{ fromJSON(inputs.options_json || '{}').min_selector_hits || '3' }}"
+          MIN_CUSTOM_SELECTOR_HITS="${{ fromJSON(inputs.options_json || '{}').min_custom_selector_hits || '0' }}"
+          PROJECT="${{ inputs.project || 'chromium' }}"
+
+          args=(--env "$TARGET_ENV" --audit-profile "$AUDIT_PROFILE" --selector-audit-path "$SELECTOR_AUDIT_PATH" --min-selector-hits "$MIN_SELECTOR_HITS" --min-custom-selector-hits "$MIN_CUSTOM_SELECTOR_HITS" --project "$PROJECT")
+          if [[ -n "$SELECTOR_AUDIT_ROUTES" ]]; then
+            args+=(--selector-audit-routes "$SELECTOR_AUDIT_ROUTES")
+          fi
+          if [[ -n "$SELECTOR_AUDIT_SELECTORS" ]]; then
+            args+=(--selector-audit-selectors "$SELECTOR_AUDIT_SELECTORS")
+          fi
+          if [[ -n "$BASE_URL_INPUT" ]]; then
+            args+=(--base-url "$BASE_URL_INPUT")
+          fi
+          if [[ "$REQUIRE_RUNTIME_THEME" == "true" ]]; then
+            args+=(--require-runtime-theme)
+          fi
+          if [[ "$REQUIRE_BRANDING_MARKERS" == "true" ]]; then
+            args+=(--require-branding-markers)
+          else
+            args+=(--allow-unbranded-shell)
+          fi
+          if [[ "$AUTHENTICATED" == "true" ]]; then
+            args+=(--authenticated)
+          fi
+          if [[ -n "$KUBE_CONTEXT_INPUT" ]]; then
+            args+=(--context "$KUBE_CONTEXT_INPUT")
+          fi
+          if [[ -n "$NAMESPACE_INPUT" ]]; then
+            args+=(--namespace "$NAMESPACE_INPUT")
+          fi
+
+          ./scripts/qa/verify-mfe-live-dom-audit.sh "${args[@]}"
+
+      - name: Upload live DOM audit artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: mfe-live-dom-audit-${{ inputs.target_environment || 'prod' }}-${{ github.run_number }}
+          path: |
+            var/qa/mfe-live-dom-audit-*.log
+            var/e2e-artifacts/**
+            var/e2e-report/**
+          if-no-files-found: warn
+
+      - name: Summarize live DOM audit
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          LOG_FILE="$(ls -1t var/qa/mfe-live-dom-audit-*.log 2>/dev/null | head -1 || true)"
+          {
+            echo "## MFE Live DOM Audit"
+            echo
+            echo "- Target environment: \`${{ inputs.target_environment || 'prod' }}\`"
+            echo "- Audit profile: \`${{ inputs.audit_profile || 'standard' }}\`"
+            echo "- Base URL override: \`${{ inputs.base_url || '(auto by env)' }}\`"
+            echo "- Require runtime theme mode: \`${{ inputs.require_runtime_theme || 'false' }}\`"
+            echo "- Require branding markers: \`${{ inputs.require_branding_markers || 'true' }}\`"
+            echo "- Authenticated learner mode: \`${{ inputs.authenticated || 'false' }}\`"
+            echo "- kubectl context: \`${{ fromJSON(inputs.options_json || '{}').kube_context || '(none)' }}\`"
+            echo "- namespace: \`${{ fromJSON(inputs.options_json || '{}').namespace || '(none)' }}\`"
+            echo "- Selector audit path: \`${{ fromJSON(inputs.options_json || '{}').selector_audit_path || '/authn/login' }}\`"
+            echo "- Selector audit routes: \`${{ fromJSON(inputs.options_json || '{}').selector_audit_routes || '(selector_audit_path only)' }}\`"
+            echo "- Selector audit selectors: \`${{ fromJSON(inputs.options_json || '{}').selector_audit_selectors || '(none)' }}\`"
+            echo "- Min tracked selector hits: \`${{ fromJSON(inputs.options_json || '{}').min_selector_hits || '3' }}\`"
+            echo "- Min custom selector hits: \`${{ fromJSON(inputs.options_json || '{}').min_custom_selector_hits || '0' }}\`"
+            echo "- Playwright project: \`${{ inputs.project || 'chromium' }}\`"
+            if [[ -n "$LOG_FILE" ]]; then
+              echo "- Log file: \`$LOG_FILE\`"
+            else
+              echo "- Log file: not found"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

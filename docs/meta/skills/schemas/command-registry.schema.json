@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "wave11/command-registry",
+  "type": "object",
+  "required": ["pack_id", "schema_version", "generated_by", "source_range", "canonical_inputs", "repo_discovery_model", "source_skill_registry", "commands"],
+  "properties": {
+    "pack_id": { "const": "command-registry" },
+    "schema_version": { "type": "integer", "const": 1 },
+    "generated_by": { "type": "string", "minLength": 1 },
+    "source_range": { "type": ["string", "null"] },
+    "canonical_inputs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "repo_discovery_model": { "type": "string", "minLength": 1 },
+    "source_skill_registry": { "type": "string", "minLength": 1 },
+    "commands": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "command_id", "canonical_command", "repo", "owner", "purpose",
+          "safe_contexts", "forbidden_contexts", "required_flags",
+          "source_of_truth", "validator", "replacement_if_deprecated",
+          "execution_kind", "referenced_by_skills", "registry_status"
+        ],
+        "properties": {
+          "command_id": { "type": "string", "minLength": 1 },
+          "canonical_command": { "type": "string", "minLength": 1 },
+          "repo": { "type": "string", "minLength": 1 },
+          "owner": { "type": "string", "minLength": 1 },
+          "purpose": { "type": "string", "minLength": 1 },
+          "safe_contexts": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "forbidden_contexts": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "required_flags": { "type": "array", "items": { "type": "string" } },
+          "source_of_truth": { "type": "string", "minLength": 1 },
+          "validator": { "type": "string", "minLength": 1 },
+          "replacement_if_deprecated": { "type": ["string", "null"] },
+          "execution_kind": { "type": "string", "minLength": 1 },
+          "referenced_by_skills": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+          "registry_status": { "type": "string", "enum": ["active", "supporting"] }
+        }
+      }
+    }
+  }
+}

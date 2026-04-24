@@ -1,0 +1,72 @@
+==> https://academyv2.mereka.io/
+HTTP_CODE=200
+HTTP/2 200 
+TOKENS=none
+ROOT_DIV=absent
+
+==> https://academyv2.mereka.io/dashboard
+HTTP_CODE=302
+HTTP/2 302 
+TOKENS=none
+ROOT_DIV=absent
+
+==> https://academyv2.mereka.io/dashboard/learner-dashboard/
+HTTP_CODE=404
+HTTP/2 404 
+TOKENS=none
+ROOT_DIV=absent
+
+==> https://admin.academyv2.mereka.io/
+HTTP_CODE=200
+HTTP/2 200 
+TOKENS=none
+ROOT_DIV=present
+
+==> https://studio.academyv2.mereka.io/
+HTTP_CODE=200
+HTTP/2 200 
+TOKENS=none
+ROOT_DIV=absent
+
+==> https://apps.academyv2.mereka.io/
+HTTP_CODE=302
+HTTP/2 302 
+TOKENS=none
+ROOT_DIV=absent
+
+==> https://ecommerce.academyv2.mereka.io/dashboard
+HTTP_CODE=200
+HTTP/2 200 
+TOKENS=none
+ROOT_DIV=absent
+
+==> https://credentials.academyv2.mereka.io/admin/login
+HTTP_CODE=200
+HTTP/2 200 
+TOKENS=none
+ROOT_DIV=present
+
+==> https://ecommerce.academyv2.mereka.io/dashboard/
+HTTP_CODE=200
+HTTP/2 200 
+TOKENS=none
+ROOT_DIV=present
+
+==> https://credentials.academyv2.mereka.io/admin/login/
+HTTP_CODE=200
+HTTP/2 200 
+TOKENS=none
+ROOT_DIV=present
+
+==> https://skillourfuture.academy.mereka.io/
+HTTP_CODE=200
+HTTP/2 200 
+TOKENS=none
+ROOT_DIV=absent
+
+==> https://academy.biji-biji.com/
+HTTP_CODE=200
+HTTP/2 200 
+TOKENS=none
+ROOT_DIV=absent
+

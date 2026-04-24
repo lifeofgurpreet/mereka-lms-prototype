@@ -1,0 +1,681 @@
+# Backstage catalog for mereka-lms.
+#
+# Hierarchy (4 Systems grouped under the `mereka-platform` tag):
+#   System: mereka-lms-core       - Open edX IDAs, MFE bundle, routing, notes, xqueue, preview-redirect
+#   System: mereka-lms-enterprise - B2B stack (enterprise-access/catalog/subsidy, license-manager, portal MFEs)
+#   System: mereka-lms-commerce   - purchase-gateway (Stripe) + HubSpot/Kajabi webhooks
+#   System: mereka-lms-data       - MySQL, Redis, MongoDB Atlas, Elasticsearch, Meilisearch, SMTP
+#
+# Ownership teams (`platform-eng`, `enterprise-eng`, `commerce-eng`) are placeholders.
+# Rename the `owner:` values + the Group entities at the bottom to match real teams.
+
+---
+# =============================================================================
+# SYSTEMS
+# =============================================================================
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: mereka-lms-core
+  description: Open edX IDAs, MFE bundle, reverse proxy, discovery, credentials, notes, xqueue, preview-redirect, and tenant resolver.
+  annotations:
+    github.com/project-slug: Biji-Biji-Initiative/mereka-lms
+  tags: [openedx, python, django, tutor, kubernetes, mereka-platform]
+  links:
+    - url: https://academyv2.mereka.io
+      title: LMS (Prod)
+    - url: https://studio.academyv2.mereka.io
+      title: Studio (Prod)
+    - url: https://apps.academyv2.mereka.io
+      title: MFE (Prod)
+    - url: https://academyv2.mereka.dev
+      title: LMS (Dev)
+spec:
+  owner: platform-eng
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: mereka-lms-enterprise
+  description: Enterprise B2B stack - access, catalog, subsidy, license-manager, plus admin-portal and learner-portal MFEs.
+  tags: [enterprise, b2b, django, python, mereka-platform]
+spec:
+  owner: enterprise-eng
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: mereka-lms-commerce
+  description: Payments and external integrations - custom FastAPI purchase gateway (Stripe), plus HubSpot and Kajabi webhook receivers.
+  tags: [commerce, stripe, fastapi, webhooks, mereka-platform]
+spec:
+  owner: commerce-eng
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: mereka-lms-data
+  description: Shared data plane - MySQL 8, Redis, MongoDB Atlas, Elasticsearch, Meilisearch, SMTP relay.
+  tags: [database, cache, search, data, mereka-platform]
+spec:
+  owner: platform-eng
+
+# =============================================================================
+# CORE - Open edX IDAs + MFEs + routing + ancillary services
+# =============================================================================
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-app
+  description: Open edX LMS - core learner-facing learning management service (edx-platform). Includes integrated forum (openedx-forum Python v0.3.8).
+  annotations:
+    github.com/project-slug: Biji-Biji-Initiative/mereka-lms
+    backstage.io/techdocs-ref: dir:.
+    backstage.io/kubernetes-id: mereka-lms
+  tags: [openedx, python, django, tutor, forum]
+  links:
+    - url: https://academyv2.mereka.io
+      title: LMS (Prod)
+    - url: https://academyv2.mereka.dev
+      title: LMS (Dev)
+    - url: https://academy.biji-biji.com
+      title: LMS (Alt brand)
+spec:
+  type: service
+  lifecycle: production
+  owner: platform-eng
+  system: mereka-lms-core
+  providesApis: [mereka-lms-api]
+  dependsOn:
+    - resource:mereka-lms-mysql
+    - resource:mereka-lms-redis
+    - resource:mereka-lms-elasticsearch
+    - resource:mereka-lms-mongodb
+    - resource:mereka-lms-meilisearch
+    - resource:mereka-lms-smtp
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-app-worker
+  description: Celery workers and beat scheduler for the LMS (grading, emails, cohort tasks, certificates).
+  tags: [celery, worker, openedx, python]
+spec:
+  type: service
+  lifecycle: production
+  owner: platform-eng
+  system: mereka-lms-core
+  subcomponentOf: mereka-lms-app
+  dependsOn:
+    - resource:mereka-lms-redis
+    - resource:mereka-lms-mysql
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-cms
+  description: Open edX Studio - course authoring and content management.
+  annotations:
+    github.com/project-slug: Biji-Biji-Initiative/mereka-lms
+  tags: [openedx, python, django, studio]
+  links:
+    - url: https://studio.academyv2.mereka.io
+      title: Studio (Prod)
+spec:
+  type: service
+  lifecycle: production
+  owner: platform-eng
+  system: mereka-lms-core
+  dependsOn:
+    - resource:mereka-lms-mysql
+    - resource:mereka-lms-redis
+    - resource:mereka-lms-mongodb
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-cms-worker
+  description: Celery workers for Studio (course imports/exports, asset processing).
+  tags: [celery, worker, studio, python]
+spec:
+  type: service
+  lifecycle: production
+  owner: platform-eng
+  system: mereka-lms-core
+  subcomponentOf: mereka-lms-cms
+  dependsOn:
+    - resource:mereka-lms-redis
+    - resource:mereka-lms-mysql
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-mfe
+  description: Caddy bundle serving every Open edX micro-frontend (learning, profile, account, authoring, authn, discussions, gradebook, communications, library, etc.).
+  annotations:
+    github.com/project-slug: Biji-Biji-Initiative/mereka-lms
+  tags: [react, typescript, mfe, caddy, openedx]
+  links:
+    - url: https://apps.academyv2.mereka.io
+      title: MFE (Prod)
+spec:
+  type: website
+  lifecycle: production
+  owner: platform-eng
+  system: mereka-lms-core
+  consumesApis: [mereka-lms-api, mereka-lms-discovery-api]
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-caddy
+  description: Front-door Caddy reverse proxy - routes LMS, Studio, MFE, and enterprise-portal traffic per tenant.
+  tags: [caddy, proxy, routing]
+spec:
+  type: service
+  lifecycle: production
+  owner: platform-eng
+  system: mereka-lms-core
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-discovery
+  description: Course Discovery service - canonical catalog of courses and programs.
+  tags: [python, django, openedx]
+spec:
+  type: service
+  lifecycle: production
+  owner: platform-eng
+  system: mereka-lms-core
+  providesApis: [mereka-lms-discovery-api]
+  dependsOn:
+    - resource:mereka-lms-mysql
+    - resource:mereka-lms-elasticsearch
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-credentials
+  description: Certificate and credential issuance service.
+  tags: [python, django, openedx, credentials]
+spec:
+  type: service
+  lifecycle: production
+  owner: platform-eng
+  system: mereka-lms-core
+  dependsOn:
+    - resource:mereka-lms-mysql
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-notes
+  description: Student Notes service - in-course annotations and highlights.
+  tags: [python, django, openedx, notes]
+spec:
+  type: service
+  lifecycle: production
+  owner: platform-eng
+  system: mereka-lms-core
+  dependsOn:
+    - resource:mereka-lms-elasticsearch
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-xqueue
+  description: External grader queue - broker for submission-grading exchanges between LMS and graders.
+  tags: [python, django, openedx, xqueue]
+spec:
+  type: service
+  lifecycle: production
+  owner: platform-eng
+  system: mereka-lms-core
+  dependsOn:
+    - resource:mereka-lms-mysql
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-xqueue-graders
+  description: External grader workers consuming from xqueue (code/problem graders).
+  tags: [python, worker, xqueue]
+spec:
+  type: service
+  lifecycle: production
+  owner: platform-eng
+  system: mereka-lms-core
+  subcomponentOf: mereka-lms-xqueue
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-preview-redirect
+  description: Legacy-preview URL shim - rewrites deprecated preview hostnames onto current LMS routes.
+  tags: [redirect, caddy]
+spec:
+  type: service
+  lifecycle: production
+  owner: platform-eng
+  system: mereka-lms-core
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-multi-tenancy
+  description: Tenant resolver middleware and configmap - maps hostnames to per-tenant LMS configuration (bijibiji, Skill Our Future, etc.).
+  tags: [multi-tenant, config]
+spec:
+  type: library
+  lifecycle: production
+  owner: platform-eng
+  system: mereka-lms-core
+
+# =============================================================================
+# ENTERPRISE - B2B stack
+# =============================================================================
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-enterprise-access
+  description: Enterprise B2B access control service - enrolment policies, subsidy requests, learner entitlements.
+  tags: [python, django, enterprise, b2b]
+spec:
+  type: service
+  lifecycle: production
+  owner: enterprise-eng
+  system: mereka-lms-enterprise
+  dependsOn:
+    - resource:mereka-lms-mysql
+    - resource:mereka-lms-redis
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-enterprise-access-worker
+  description: Celery workers for enterprise-access (subsidy request processing, reminders).
+  tags: [celery, worker, enterprise]
+spec:
+  type: service
+  lifecycle: production
+  owner: enterprise-eng
+  system: mereka-lms-enterprise
+  subcomponentOf: mereka-lms-enterprise-access
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-enterprise-catalog
+  description: Enterprise course-catalog projection and curation service.
+  tags: [python, django, enterprise, catalog]
+spec:
+  type: service
+  lifecycle: production
+  owner: enterprise-eng
+  system: mereka-lms-enterprise
+  dependsOn:
+    - resource:mereka-lms-mysql
+    - resource:mereka-lms-redis
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-enterprise-catalog-worker
+  description: Celery workers for enterprise-catalog (discovery refreshes, content metadata syncs).
+  tags: [celery, worker, enterprise]
+spec:
+  type: service
+  lifecycle: production
+  owner: enterprise-eng
+  system: mereka-lms-enterprise
+  subcomponentOf: mereka-lms-enterprise-catalog
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-enterprise-subsidy
+  description: Enterprise subsidy ledger and budget service.
+  tags: [python, django, enterprise, ledger]
+spec:
+  type: service
+  lifecycle: production
+  owner: enterprise-eng
+  system: mereka-lms-enterprise
+  dependsOn:
+    - resource:mereka-lms-mysql
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-license-manager
+  description: Enterprise license management - seat assignment, activation, revocation.
+  tags: [python, django, enterprise, licensing]
+spec:
+  type: service
+  lifecycle: production
+  owner: enterprise-eng
+  system: mereka-lms-enterprise
+  dependsOn:
+    - resource:mereka-lms-mysql
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-admin-portal
+  description: Enterprise admin-portal MFE - administrator-facing dashboard for enterprise customers.
+  tags: [react, mfe, enterprise, admin]
+spec:
+  type: website
+  lifecycle: production
+  owner: enterprise-eng
+  system: mereka-lms-enterprise
+  consumesApis: [mereka-lms-api]
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-learner-portal
+  description: Enterprise learner-portal MFE - branded learner dashboard for enterprise tenants (bijibiji, Skill Our Future, etc.).
+  tags: [react, mfe, enterprise, learner]
+spec:
+  type: website
+  lifecycle: production
+  owner: enterprise-eng
+  system: mereka-lms-enterprise
+  consumesApis: [mereka-lms-api]
+
+# =============================================================================
+# COMMERCE - payments and external webhooks
+# =============================================================================
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-purchase-gateway
+  description: Custom FastAPI ecommerce service - Stripe checkout, receipts, enrolment fulfilment. Canonical replacement for legacy Open edX Oscar ecommerce.
+  annotations:
+    github.com/project-slug: Biji-Biji-Initiative/mereka-lms
+  tags: [python, fastapi, stripe, commerce]
+spec:
+  type: service
+  lifecycle: production
+  owner: commerce-eng
+  system: mereka-lms-commerce
+  providesApis: [mereka-lms-purchase-api]
+  dependsOn:
+    - resource:mereka-lms-mysql
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-hubspot-webhook
+  description: HubSpot webhook receiver - ingests contact and deal updates from HubSpot into the LMS.
+  tags: [python, webhook, hubspot, commerce]
+spec:
+  type: service
+  lifecycle: production
+  owner: commerce-eng
+  system: mereka-lms-commerce
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mereka-lms-kajabi-webhook
+  description: Kajabi webhook receiver - processes Kajabi purchase and membership events for enrolment sync.
+  tags: [python, webhook, kajabi, commerce]
+spec:
+  type: service
+  lifecycle: production
+  owner: commerce-eng
+  system: mereka-lms-commerce
+
+# =============================================================================
+# DATA - shared stateful resources
+# =============================================================================
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: mereka-lms-mysql
+  description: MySQL 8 - primary relational store for LMS, Studio, and enterprise services.
+  tags: [mysql, database]
+spec:
+  type: database
+  lifecycle: production
+  owner: platform-eng
+  system: mereka-lms-data
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: mereka-lms-redis
+  description: Redis - cache and Celery broker for all Open edX IDAs.
+  tags: [redis, cache, broker]
+spec:
+  type: cache
+  lifecycle: production
+  owner: platform-eng
+  system: mereka-lms-data
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: mereka-lms-mongodb
+  description: MongoDB Atlas (cluster-mereka-lms.2pjex4s.mongodb.net) - course modulestore + cs_comments_service forum store. External managed service, no self-hosted MongoDB.
+  tags: [mongodb, atlas, database, external]
+spec:
+  type: database
+  lifecycle: production
+  owner: platform-eng
+  system: mereka-lms-data
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: mereka-lms-elasticsearch
+  description: Elasticsearch - course, content, and notes search index.
+  tags: [elasticsearch, search]
+spec:
+  type: search-index
+  lifecycle: production
+  owner: platform-eng
+  system: mereka-lms-data
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: mereka-lms-meilisearch
+  description: Meilisearch - forum search engine (cs_comments_service).
+  tags: [meilisearch, search, forum]
+spec:
+  type: search-index
+  lifecycle: production
+  owner: platform-eng
+  system: mereka-lms-data
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: mereka-lms-smtp
+  description: Outbound SMTP relay for transactional email (enrolment, password reset, certificates, enterprise invites).
+  tags: [smtp, email]
+spec:
+  type: relay
+  lifecycle: production
+  owner: platform-eng
+  system: mereka-lms-data
+
+# =============================================================================
+# APIs
+# =============================================================================
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: mereka-lms-api
+  description: Core Open edX LMS REST API (users, enrolments, courses, OAuth2).
+  tags: [rest, openedx]
+spec:
+  type: openapi
+  lifecycle: production
+  owner: platform-eng
+  system: mereka-lms-core
+  definition: |
+    openapi: "3.0.0"
+    info:
+      title: Mereka LMS API
+      version: "1.0"
+    servers:
+      - url: https://academyv2.mereka.dev
+        description: Dev
+      - url: https://academyv2.mereka.io
+        description: Production
+    paths:
+      /api/user/v1/me:
+        get:
+          summary: Current user info
+      /api/enrollment/v1/enrollment:
+        get:
+          summary: User enrollments
+      /oauth2/access_token:
+        post:
+          summary: OAuth2 token endpoint
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: mereka-lms-discovery-api
+  description: Course Discovery and Catalog API.
+  tags: [rest, openedx, discovery]
+spec:
+  type: openapi
+  lifecycle: production
+  owner: platform-eng
+  system: mereka-lms-core
+  definition: |
+    openapi: "3.0.0"
+    info:
+      title: Course Discovery API
+      version: "1.0"
+    paths:
+      /api/v1/catalogs:
+        get:
+          summary: List course catalogs
+      /api/v1/courses:
+        get:
+          summary: List courses
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: mereka-lms-purchase-api
+  description: Purchase Gateway ecommerce API (Stripe).
+  tags: [rest, fastapi, stripe]
+spec:
+  type: openapi
+  lifecycle: production
+  owner: commerce-eng
+  system: mereka-lms-commerce
+  definition: |
+    openapi: "3.0.0"
+    info:
+      title: Purchase Gateway API
+      version: "1.0"
+    paths:
+      /api/v1/checkout:
+        post:
+          summary: Create checkout session
+      /api/v1/webhooks/stripe:
+        post:
+          summary: Stripe webhook handler
+
+# =============================================================================
+# GROUPS - best-guess placeholders; rename to match real teams
+# =============================================================================
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: mereka-lms-team
+  description: Umbrella group for everyone working on mereka-lms.
+spec:
+  type: team
+  profile:
+    displayName: Mereka LMS
+  children:
+    - platform-eng
+    - enterprise-eng
+    - commerce-eng
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: platform-eng
+  description: LMS core + data platform - Open edX IDAs, MFE bundle, routing, databases.
+spec:
+  type: team
+  profile:
+    displayName: Platform Engineering
+  parent: mereka-lms-team
+  children: []
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: enterprise-eng
+  description: Enterprise B2B stack - access, catalog, subsidy, license-manager, portal MFEs.
+spec:
+  type: team
+  profile:
+    displayName: Enterprise Engineering
+  parent: mereka-lms-team
+  children: []
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: commerce-eng
+  description: Payments and upstream integrations - purchase gateway, HubSpot, Kajabi webhooks.
+spec:
+  type: team
+  profile:
+    displayName: Commerce Engineering
+  parent: mereka-lms-team
+  children: []

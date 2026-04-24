@@ -1,0 +1,121 @@
+# TESTMAP: Testmap schema validation rules
+# Implemented by validate_testmap_format.py
+
+rules:
+  - id: "TESTMAP-ROOT-001"
+    severity: "error"
+    description: "Root element must be a dict"
+    autofix: false
+
+  - id: "TESTMAP-ROOT-002"
+    severity: "error"
+    description: "Missing required top-level field: 'spec'"
+    autofix: false
+
+  - id: "TESTMAP-ROOT-003"
+    severity: "error"
+    description: "Missing required top-level field: 'acceptance_criteria'"
+    autofix: false
+
+  - id: "TESTMAP-ROOT-004"
+    severity: "error"
+    description: "'acceptance_criteria' must be a list"
+    autofix: false
+
+  - id: "TESTMAP-ROOT-005"
+    severity: "error"
+    description: "'_unmapped' must be a list"
+    autofix: false
+
+  - id: "TESTMAP-ROOT-006"
+    severity: "warn"
+    description: "Invalid AC ID in _unmapped list"
+    autofix: false
+
+  - id: "TESTMAP-YAML-001"
+    severity: "error"
+    description: "Invalid YAML syntax"
+    autofix: false
+
+  - id: "TESTMAP-YAML-002"
+    severity: "error"
+    description: "Empty YAML file"
+    autofix: false
+
+  - id: "TESTMAP-AC-001"
+    severity: "error"
+    description: "AC entry must be a dict"
+    autofix: false
+
+  - id: "TESTMAP-AC-002"
+    severity: "error"
+    description: "AC entry missing required 'id' field"
+    autofix: false
+
+  - id: "TESTMAP-AC-003"
+    severity: "error"
+    description: "AC ID must match AC-XXX or AC-PREFIX-XXX format (3+ digits)"
+    autofix: false
+
+  - id: "TESTMAP-AC-004"
+    severity: "error"
+    description: "Duplicate AC ID within testmap"
+    autofix: false
+
+  - id: "TESTMAP-AC-005"
+    severity: "error"
+    description: "AC entry missing required 'description' field"
+    autofix: false
+
+  - id: "TESTMAP-AC-006"
+    severity: "error"
+    description: "AC entry missing required 'verify' field"
+    autofix: false
+
+  - id: "TESTMAP-AC-007"
+    severity: "error"
+    description: "'verify' must be a list"
+    autofix: false
+
+  - id: "TESTMAP-AC-008"
+    severity: "warn"
+    description: "verify list is empty (unmapped AC)"
+    autofix: false
+
+  - id: "TESTMAP-VE-001"
+    severity: "error"
+    description: "Verify entry must be a dict"
+    autofix: false
+
+  - id: "TESTMAP-VE-002"
+    severity: "error"
+    description: "Verify entry missing required 'type' field"
+    autofix: false
+
+  - id: "TESTMAP-VE-003"
+    severity: "error"
+    description: "Invalid verify type"
+    autofix: false
+    valid_types:
+      - "automated"
+      - "manual"
+      - "monitoring"
+      - "shell_verification"
+      - "unit"
+      - "integration"
+      - "contract"
+
+  - id: "TESTMAP-VE-004"
+    severity: "error"
+    description: "'automated' verify entry must have 'file' field"
+    autofix: false
+
+  - id: "TESTMAP-VE-005"
+    severity: "warn"
+    description: "Manual/monitoring entry should have 'procedure' or 'check' field"
+    autofix: false
+
+  - id: "TESTMAP-IO-001"
+    severity: "error"
+    description: "Failed to read testmap file"
+    autofix: false

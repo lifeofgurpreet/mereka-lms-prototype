@@ -1,0 +1,115 @@
+# OTel Metric Registry — Mereka LMS
+# Naming convention: mereka.lms.<service>.<metric_name>
+# Full spec: docs/policies/operations/OTEL_NAMING_CONVENTIONS.md
+# Verified by: scripts/qa/verify-otel-naming.sh
+#
+# Fields
+#   name        - fully qualified metric name (must start with mereka.lms.)
+#   type        - counter | gauge | histogram
+#   unit        - seconds | bytes | ratio | requests | connections | tasks | queries | none
+#   description - human-readable description (max ~120 chars)
+#   service     - short service identifier matching the namespace segment
+
+metrics:
+
+  # ---------------------------------------------------------------------------
+  # caddy — reverse proxy
+  # ---------------------------------------------------------------------------
+  - name: mereka.lms.caddy.request_duration_seconds
+    type: histogram
+    unit: seconds
+    description: "HTTP request processing time measured at the Caddy reverse proxy."
+    service: caddy
+
+  - name: mereka.lms.caddy.request_total
+    type: counter
+    unit: requests
+    description: "Total number of HTTP requests handled by Caddy, labelled by status code and upstream."
+    service: caddy
+
+  - name: mereka.lms.caddy.active_connections
+    type: gauge
+    unit: connections
+    description: "Number of currently active inbound connections at the Caddy reverse proxy."
+    service: caddy
+
+  # ---------------------------------------------------------------------------
+  # openedx — LMS / CMS / Celery workers
+  # ---------------------------------------------------------------------------
+  - name: mereka.lms.openedx.request_duration_seconds
+    type: histogram
+    unit: seconds
+    description: "End-to-end HTTP request duration served by the Open edX LMS application."
+    service: openedx
+
+  - name: mereka.lms.openedx.error_rate
+    type: gauge
+    unit: ratio
+    description: "Fraction of LMS HTTP responses in the 5xx class over the last scrape window."
+    service: openedx
+
+  - name: mereka.lms.openedx.active_users
+    type: gauge
+    unit: none
+    description: "Approximate number of authenticated learner sessions active at a given instant."
+    service: openedx
+
+  - name: mereka.lms.openedx.celery_task_duration_seconds
+    type: histogram
+    unit: seconds
+    description: "Wall-clock time from Celery task receipt to completion, by task name."
+    service: openedx
+
+  # ---------------------------------------------------------------------------
+  # forum — openedx-forum service
+  # ---------------------------------------------------------------------------
+  - name: mereka.lms.forum.request_duration_seconds
+    type: histogram
+    unit: seconds
+    description: "HTTP request latency for the openedx-forum API service."
+    service: forum
+
+  - name: mereka.lms.forum.error_rate
+    type: gauge
+    unit: ratio
+    description: "Fraction of forum API responses in the 5xx class over the last scrape window."
+    service: forum
+
+  # ---------------------------------------------------------------------------
+  # meilisearch — full-text search
+  # ---------------------------------------------------------------------------
+  - name: mereka.lms.meilisearch.query_duration_seconds
+    type: histogram
+    unit: seconds
+    description: "Time taken by Meilisearch to execute a search query, from receipt to response."
+    service: meilisearch
+
+  # ---------------------------------------------------------------------------
+  # mysql — Cloud SQL / MySQL exporter
+  # ---------------------------------------------------------------------------
+  - name: mereka.lms.mysql.query_duration_seconds
+    type: histogram
+    unit: seconds
+    description: "Execution time of SQL statements against the MySQL (Cloud SQL) instance."
+    service: mysql
+
+  - name: mereka.lms.mysql.connection_pool_active
+    type: gauge
+    unit: connections
+    description: "Number of active connections held by Open edX against the MySQL instance."
+    service: mysql
+
+  # ---------------------------------------------------------------------------
+  # redis — caching + Celery broker
+  # ---------------------------------------------------------------------------
+  - name: mereka.lms.redis.cache_hit_ratio
+    type: gauge
+    unit: ratio
+    description: "Ratio of Redis GET hits to total GET operations over the last scrape window."
+    service: redis
+
+  - name: mereka.lms.redis.connected_clients
+    type: gauge
+    unit: connections
+    description: "Number of client connections currently open against the Redis instance."
+    service: redis

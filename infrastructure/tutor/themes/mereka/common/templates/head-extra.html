@@ -1,0 +1,40 @@
+## mako
+<%namespace name="static" file="static_content.html"/>
+<%!
+"""
+Theme hook injected by `lms/templates/main.html` via:
+  <%static:optional_include_mako file="head-extra.html" is_theming_enabled="True" />
+
+Important: this file is looked up through the mako engine's default namespace
+resolution, which may not always include `lms/templates/` in the lookup order.
+Keeping a copy under `common/templates/` makes the include reliable.
+
+This file is a runtime shim only. It preloads fonts and loads the already-built
+runtime override CSS. It is not the source of truth for token values or brand
+rules. Functional loader changes here must be mirrored deliberately to the LMS
+and CMS copies, while documented surface-specific preload differences are
+allowed.
+"""
+%>
+
+<link
+  rel="preload"
+  as="font"
+  type="font/woff2"
+  crossorigin
+  href="${static.url('mereka/fonts/Poppins-Regular.woff2')}"
+/>
+<link
+  rel="preload"
+  as="font"
+  type="font/woff2"
+  crossorigin
+  href="${static.url('mereka/fonts/Poppins-SemiBold.woff2')}"
+/>
+
+<link
+  rel="stylesheet"
+  href="${static.url('mereka/css/mereka-overrides.css')}"
+  type="text/css"
+  media="all"
+/>

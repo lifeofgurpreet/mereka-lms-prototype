@@ -1,0 +1,308 @@
+version: 3
+generated_from: adr-frontmatter
+entries:
+- id: ADR-001
+  path: docs/adr/historical/001-mongodb-atlas.md
+  title: MongoDB Atlas vs Local MongoDB
+  bucket: historical
+  decision_status: accepted
+  decision_type: domain
+  rollout_state: historical
+  owner: platform-team
+- id: ADR-002
+  path: docs/adr/historical/002-multisite-architecture.md
+  title: Multisite Architecture
+  bucket: historical
+  decision_status: accepted
+  decision_type: domain
+  rollout_state: historical
+  owner: platform-team
+- id: ADR-003
+  path: docs/adr/historical/003-image-build-pipeline.md
+  title: Image Build Pipeline
+  bucket: historical
+  decision_status: accepted
+  decision_type: domain
+  rollout_state: historical
+  owner: platform-team
+- id: ADR-004
+  path: docs/adr/historical/004-secrets-management.md
+  title: Secrets Management
+  bucket: historical
+  decision_status: accepted
+  decision_type: domain
+  rollout_state: historical
+  owner: platform-team
+- id: ADR-005
+  path: docs/adr/historical/005-domain-migration.md
+  title: Domain Migration (legacy environment → academyV2)
+  bucket: historical
+  decision_status: accepted
+  decision_type: migration
+  rollout_state: historical
+  owner: platform-team
+- id: ADR-006
+  path: docs/adr/006-tutor-plugin-based-configuration.md
+  title: Tutor Plugin-Based Configuration Resilience
+  bucket: accepted
+  decision_status: accepted
+  decision_type: domain
+  rollout_state: active
+  owner: engineering
+- id: ADR-007
+  path: docs/adr/historical/007-forum-migration-ruby-to-python.md
+  title: Forum Service Migration from Ruby to Python
+  bucket: historical
+  decision_status: accepted
+  decision_type: migration
+  rollout_state: historical
+  owner: platform-team
+- id: ADR-008
+  path: docs/adr/historical/008-redis-streams-event-bus.md
+  title: Redis Streams as Event Bus
+  bucket: historical
+  decision_status: accepted
+  decision_type: domain
+  rollout_state: historical
+  owner: platform-team
+- id: ADR-009
+  path: docs/adr/historical/009-in-cluster-storage.md
+  title: In-Cluster MySQL/Redis vs Cloud SQL/Memorystore
+  bucket: historical
+  decision_status: accepted
+  decision_type: domain
+  rollout_state: historical
+  owner: platform-team
+- id: ADR-010
+  path: docs/adr/historical/010-monorepo-architecture.md
+  title: Monorepo Architecture
+  bucket: historical
+  decision_status: accepted
+  decision_type: domain
+  rollout_state: historical
+  owner: platform-team
+- id: ADR-012
+  path: docs/adr/historical/012-no-runtime-css-overlay.md
+  title: Eliminate Runtime CSS ConfigMap Overlay
+  bucket: historical
+  decision_status: accepted
+  decision_type: migration
+  rollout_state: historical
+  owner: platform-team
+- id: ADR-013
+  path: docs/adr/013-studio-sso-bypass-middleware.md
+  title: Studio SSO Bypass Middleware
+  bucket: accepted
+  decision_status: accepted
+  decision_type: exception
+  rollout_state: temporary
+  owner: auth-platform
+- id: ADR-018
+  path: docs/adr/018-purchase-gateway-replaces-oscar-ecommerce.md
+  title: Purchase Gateway Replaces Legacy Oscar Ecommerce
+  bucket: accepted
+  decision_status: accepted
+  decision_type: migration
+  rollout_state: active
+  owner: commerce-platform
+- id: ADR-019
+  path: docs/adr/019-tutor-upgrade-policy.md
+  title: Tutor Upgrade Cadence and EOL Policy
+  bucket: accepted
+  decision_status: accepted
+  decision_type: foundation
+  rollout_state: active
+  owner: platform-team
+- id: ADR-021
+  path: docs/adr/021-openedx-tutor-methodology.md
+  title: Open edX / Tutor Deployment Methodology
+  bucket: accepted
+  decision_status: accepted
+  decision_type: foundation
+  rollout_state: active
+  owner: engineering
+- id: ADR-022
+  path: docs/adr/022-session-cookie-samesite-policy.md
+  title: Session Cookie SameSite Policy and Stale Cookie Mitigation
+  bucket: accepted
+  decision_status: accepted
+  decision_type: exception
+  rollout_state: temporary
+  owner: auth-platform
+- id: ADR-023
+  path: docs/adr/historical/023-enterprise-images-ghcr-migration.md
+  title: Enterprise Images GHCR Migration
+  bucket: historical
+  decision_status: accepted
+  decision_type: domain
+  rollout_state: historical
+  owner: engineering
+- id: ADR-024
+  path: docs/adr/024-multi-tenancy-true-tenants.md
+  title: True Multi-Tenancy for Subsites (Biji-Biji, SkillOurFuture)
+  bucket: accepted
+  decision_status: accepted
+  decision_type: foundation
+  rollout_state: active
+  owner: engineering
+- id: ADR-025
+  path: docs/adr/025-csp-nonce-migration.md
+  title: CSP Nonce Migration — Removing unsafe-eval / unsafe-inline
+  bucket: accepted
+  decision_status: accepted
+  decision_type: domain
+  rollout_state: active
+  owner: engineering
+- id: ADR-026
+  path: docs/adr/historical/026-cicd-build-pipeline-lessons.md
+  title: CI/CD Build Pipeline Lessons Learned (ARC Migration, March 2026)
+  bucket: historical
+  decision_status: accepted
+  decision_type: domain
+  rollout_state: historical
+  owner: engineering
+- id: ADR-027
+  path: docs/adr/rfc/027-deployment-contract-ownership-lanes.md
+  title: Deployment Contract — Ownership Lanes Between App and GitOps Repos
+  bucket: rfc
+  decision_status: proposed
+  decision_type: foundation
+  rollout_state: planned
+  owner: engineering
+- id: ADR-028
+  path: docs/adr/028-platform-sources-of-truth-and-control-planes.md
+  title: Platform Sources of Truth and Control Planes
+  bucket: accepted
+  decision_status: accepted
+  decision_type: foundation
+  rollout_state: active
+  owner: platform-team
+- id: ADR-029
+  path: docs/adr/029-identity-session-and-domain-boundary-strategy.md
+  title: Identity, Session, and Domain-Boundary Strategy
+  bucket: accepted
+  decision_status: accepted
+  decision_type: foundation
+  rollout_state: active
+  owner: auth-platform
+- id: ADR-030
+  path: docs/adr/030-feature-flag-and-rollout-lifecycle.md
+  title: Feature Flag and Rollout Lifecycle
+  bucket: accepted
+  decision_status: accepted
+  decision_type: foundation
+  rollout_state: active
+  owner: platform-team
+- id: ADR-031
+  path: docs/adr/031-deprecation-and-removal-policy.md
+  title: Deprecation and Removal Policy
+  bucket: accepted
+  decision_status: accepted
+  decision_type: foundation
+  rollout_state: active
+  owner: platform-team
+- id: ADR-032
+  path: docs/adr/032-data-governance-pii-retention-and-deletion.md
+  title: Data Governance, PII, Retention, and Deletion
+  bucket: accepted
+  decision_status: accepted
+  decision_type: foundation
+  rollout_state: active
+  owner: platform-security
+- id: ADR-033
+  path: docs/adr/033-tenant-lifecycle-contract.md
+  title: Tenant Lifecycle Contract
+  bucket: accepted
+  decision_status: accepted
+  decision_type: foundation
+  rollout_state: active
+  owner: multisite-platform
+- id: ADR-034
+  path: docs/adr/rfc/034-event-contract-and-transport-independence.md
+  title: Event Contract and Transport Independence
+  bucket: rfc
+  decision_status: proposed
+  decision_type: domain
+  rollout_state: planned
+  owner: platform-events
+- id: ADR-035
+  path: docs/adr/rfc/035-frontend-runtime-composition-and-dependency-alignment.md
+  title: Frontend Runtime Composition and Dependency Alignment
+  bucket: rfc
+  decision_status: proposed
+  decision_type: domain
+  rollout_state: planned
+  owner: frontend-platform
+- id: ADR-036
+  path: docs/adr/rfc/036-cache-topology-and-invalidation-strategy.md
+  title: Cache Topology and Invalidation Strategy
+  bucket: rfc
+  decision_status: proposed
+  decision_type: domain
+  rollout_state: planned
+  owner: platform-runtime
+- id: ADR-037
+  path: docs/adr/rfc/037-async-task-user-facing-contract.md
+  title: Async Task User-Facing Contract
+  bucket: rfc
+  decision_status: proposed
+  decision_type: domain
+  rollout_state: planned
+  owner: platform-runtime
+- id: ADR-038
+  path: docs/adr/rfc/038-commerce-system-of-record-and-reconciliation.md
+  title: Commerce System of Record and Reconciliation
+  bucket: rfc
+  decision_status: proposed
+  decision_type: domain
+  rollout_state: planned
+  owner: commerce-platform
+- id: ADR-039
+  path: docs/adr/rfc/039-translations-and-internationalization-strategy.md
+  title: Translations and Internationalization Strategy
+  bucket: rfc
+  decision_status: proposed
+  decision_type: domain
+  rollout_state: planned
+  owner: frontend-platform
+- id: ADR-040
+  path: docs/adr/rfc/040-internal-packages-plugins-and-versioning-policy.md
+  title: Internal Packages, Plugins, and Versioning Policy
+  bucket: rfc
+  decision_status: proposed
+  decision_type: domain
+  rollout_state: planned
+  owner: platform-team
+- id: ADR-041
+  path: docs/adr/rfc/041-authorization-and-role-boundary-model.md
+  title: Authorization and Role-Boundary Model
+  bucket: rfc
+  decision_status: proposed
+  decision_type: domain
+  rollout_state: planned
+  owner: auth-platform
+- id: ADR-042
+  path: docs/adr/rfc/042-production-py-writer-authority.md
+  title: Django production.py Writer Authority — Resolving the Three-Layer Duplicate
+    Trap
+  bucket: rfc
+  decision_status: proposed
+  decision_type: foundation
+  rollout_state: planned
+  owner: platform-team
+- id: RFC-claim-based-role-sync
+  path: docs/adr/rfc/RFC-claim-based-role-sync.md
+  title: Claim-Based Role Sync
+  bucket: rfc
+  decision_status: proposed
+  decision_type: domain
+  rollout_state: planned
+  owner: platform-team
+- id: RFC-learning-slot-expansion-proposal
+  path: docs/adr/rfc/RFC-learning-slot-expansion-proposal.md
+  title: Learning Slot Expansion Proposal
+  bucket: rfc
+  decision_status: proposed
+  decision_type: domain
+  rollout_state: planned
+  owner: platform-team

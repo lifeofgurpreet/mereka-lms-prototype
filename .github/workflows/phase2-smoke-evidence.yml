@@ -1,0 +1,90 @@
+name: Phase 2 Smoke Evidence
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: "Target environment"
+        required: true
+        default: "prod"
+        type: choice
+        options:
+          - prod
+          - dev
+      capture_screenshots:
+        description: "Capture MFE-only screenshots after smoke gate"
+        required: true
+        default: false
+        type: boolean
+
+permissions: {}
+
+jobs:
+  phase2-smoke-evidence:
+    name: Run Phase 2 Smoke Evidence Gates
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run Phase 2 smoke evidence lane
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p var/qa
+
+          TARGET_ENV="${{ inputs.target_environment || 'prod' }}"
+          CAPTURE_SCREENSHOTS="${{ inputs.capture_screenshots || 'false' }}"
+
+          case "$TARGET_ENV" in
+            prod)
+              ./scripts/qa/verify-paragon-runtime.sh \
+                --runtime-url https://apps.academyv2.mereka.io \
+                --require-runtime \
+                --require-slot-markers \
+                | tee var/qa/phase2-smoke-evidence.log
+              ./scripts/qa/verify-npm-start-mfe-smoke.sh \
+                --base-url https://academyv2.mereka.io \
+                --require-runtime-theme \
+                --require-branding-markers \
+                | tee -a var/qa/phase2-smoke-evidence.log
+              if [[ "$CAPTURE_SCREENSHOTS" == "true" ]]; then
+                ./scripts/qa/capture-branding-screenshots.sh --env prod --mfe-only \
+                  | tee -a var/qa/phase2-smoke-evidence.log
+              fi
+              ;;
+            dev)
+              ./scripts/qa/verify-paragon-runtime.sh \
+                --runtime-url https://apps.academyv2.mereka.dev \
+                --require-slot-markers \
+                | tee var/qa/phase2-smoke-evidence.log
+              ./scripts/qa/verify-npm-start-mfe-smoke.sh \
+                --base-url https://academyv2.mereka.dev \
+                --require-branding-markers \
+                | tee -a var/qa/phase2-smoke-evidence.log
+              if [[ "$CAPTURE_SCREENSHOTS" == "true" ]]; then
+                ./scripts/qa/capture-branding-screenshots.sh --env dev --mfe-only \
+                  | tee -a var/qa/phase2-smoke-evidence.log
+              fi
+              ;;
+            *)
+              echo "ERROR: target_environment must be prod or dev (got: $TARGET_ENV)" >&2
+              exit 2
+              ;;
+          esac
+
+      - name: Upload phase2 smoke evidence artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: phase2-smoke-evidence-${{ github.run_number }}
+          path: |
+            var/qa/phase2-smoke-evidence.log
+            var/qa/npm-start-mfe-smoke-*.log
+            var/e2e-artifacts/**
+            var/e2e-report/**
+            var/branding-screenshots/**
+          if-no-files-found: warn

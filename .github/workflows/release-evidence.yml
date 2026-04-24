@@ -1,0 +1,381 @@
+name: Release Evidence
+
+permissions: {}
+on:
+  workflow_dispatch:
+    inputs:
+      openedx_tag:
+        description: "Open edX image tag"
+        required: true
+        type: string
+      mfe_tag:
+        description: "MFE image tag"
+        required: true
+        type: string
+      target_environment:
+        description: "Target environment for dry-run evidence"
+        required: true
+        type: choice
+        options:
+          - production
+          - staging
+      require_runtime_theme:
+        description: "Fail evidence run unless runtime /theme/*.min.css mode is active"
+        required: true
+        default: false
+        type: boolean
+      require_branding_markers:
+        description: "Fail evidence run unless runtime authn bundles expose branded slot markers"
+        required: true
+        default: true
+        type: boolean
+      run_npm_start_smoke:
+        description: "Run npm-start MFE smoke lane and capture screenshots in evidence artifact"
+        required: true
+        default: false
+        type: boolean
+      run_live_dom_audit:
+        description: "Run runtime DOM selector audit lane"
+        required: true
+        default: false
+        type: boolean
+      run_accessibility_scan:
+        description: "Run accessibility verification lane"
+        required: true
+        default: true
+        type: boolean
+      options_json:
+        description: "Advanced options JSON for runtime_theme_url, certificate branding, npm-start, live DOM audit including live_dom_audit_profile (standard/phase7_strict/phase7_full), and accessibility scan settings"
+        required: false
+        default: "{}"
+        type: string
+
+jobs:
+  release-evidence:
+    name: Build Release Evidence Bundle
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      id-token: write
+      packages: read
+    env:
+      REGISTRY: ghcr.io/biji-biji-initiative/mereka-lms
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Log in to GHCR
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Setup Node for frontend QA lanes
+        if: ${{ inputs.run_npm_start_smoke == true || inputs.run_live_dom_audit == true || inputs.run_accessibility_scan == true }}
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0
+        with:
+          node-version: "20"
+
+      - name: Create evidence directory
+        run: |
+          mkdir -p var/release-evidence
+
+      - name: Emit app proof envelopes via lms-ops front door
+        run: |
+          set -euo pipefail
+          ./bin/lms-ops proof \
+            --concern aggregate \
+            --lane "${{ inputs.target_environment }}" \
+            --skip-cluster
+          cp var/proof/release-gate.json var/release-evidence/release-gate-envelope.json
+          cp var/proof/migration-proof.json var/release-evidence/migration-proof-envelope.json
+          cp var/proof/runtime-smoke.json var/release-evidence/runtime-smoke-envelope.json
+          cp var/proof/aggregate.json var/release-evidence/aggregate-proof-envelope.json
+
+      - name: Resolve image digests from registry tags
+        id: digests
+        run: |
+          set -euo pipefail
+          ./scripts/infra/resolve-image-digest.sh \
+            --image-ref "${{ env.REGISTRY }}/openedx:${{ inputs.openedx_tag }}" \
+            --output-key openedx_digest >/dev/null
+          ./scripts/infra/resolve-image-digest.sh \
+            --image-ref "${{ env.REGISTRY }}/mfe:${{ inputs.mfe_tag }}" \
+            --output-key mfe_digest >/dev/null
+
+      - name: Run policy checks
+        run: |
+          set -euo pipefail
+          bash ./scripts/qa/verify-release-automation.sh | tee var/release-evidence/policy-release-automation.log
+          bash ./scripts/qa/verify-build-workflow-contract.sh | tee var/release-evidence/policy-build-workflow-contract.log
+          bash ./scripts/qa/verify-release-workflow-invocation.sh | tee var/release-evidence/policy-release-invocation.log
+          bash ./scripts/qa/verify-no-latest-prod-tags.sh | tee var/release-evidence/policy-prod-tag-guard.log
+          bash ./scripts/qa/lint-active-docs-env-model.sh | tee var/release-evidence/policy-docs-env-model.log
+
+      - name: Capture release dry-run plan
+        run: |
+          set -euo pipefail
+          # release-invocation-exception: evidence workflow runs dry-run only (no apply/commit/push)
+          ./scripts/infra/release-openedx-gitops.sh \
+            --target-env "${{ inputs.target_environment }}" \
+            --openedx-tag "${{ inputs.openedx_tag }}" \
+            --mfe-tag "${{ inputs.mfe_tag }}" \
+            --openedx-digest "${{ steps.digests.outputs.openedx_digest }}" \
+            --mfe-digest "${{ steps.digests.outputs.mfe_digest }}" \
+            --require-digests \
+            --purge-frontend-cache \
+            --frontend-cache-env auto \
+            | tee var/release-evidence/release-dry-run.log
+
+      - name: Verify frontend runtime theme contract
+        run: |
+          set -euo pipefail
+          TARGET_ENV="${{ inputs.target_environment }}"
+          RUNTIME_THEME_URL_INPUT="${{ fromJSON(inputs.options_json || '{}').runtime_theme_url || '' }}"
+          REQUIRE_RUNTIME_THEME="${{ inputs.require_runtime_theme || 'false' }}"
+          REQUIRE_BRANDING_MARKERS="${{ inputs.require_branding_markers || 'true' }}"
+
+          args=()
+          if [[ -n "$RUNTIME_THEME_URL_INPUT" ]]; then
+            args+=(--runtime-url "$RUNTIME_THEME_URL_INPUT")
+          elif [[ "$REQUIRE_RUNTIME_THEME" == "true" ]]; then
+            if [[ "$TARGET_ENV" == "production" ]]; then
+              args+=(--runtime-url "https://apps.academyv2.mereka.io")
+            else
+              args+=(--runtime-url "https://apps.academyv2.mereka.dev")
+            fi
+          fi
+
+          if [[ "$REQUIRE_RUNTIME_THEME" == "true" ]]; then
+            args+=(--require-runtime)
+          fi
+          if [[ "$REQUIRE_BRANDING_MARKERS" == "true" ]]; then
+            args+=(--require-slot-markers)
+          else
+            args+=(--allow-missing-slot-markers)
+          fi
+
+          ./scripts/qa/verify-paragon-runtime.sh "${args[@]}" \
+            | tee var/release-evidence/runtime-theme-contract.log
+
+      - name: Run npm-start MFE smoke lane
+        if: ${{ inputs.run_npm_start_smoke == true }}
+        run: |
+          set -euo pipefail
+          TARGET_ENV="${{ inputs.target_environment }}"
+          RUNTIME_THEME_URL_INPUT="${{ fromJSON(inputs.options_json || '{}').runtime_theme_url || '' }}"
+          REQUIRE_RUNTIME_THEME="${{ inputs.require_runtime_theme || 'false' }}"
+          REQUIRE_BRANDING_MARKERS="${{ inputs.require_branding_markers || 'true' }}"
+          LEARNING_PATH="${{ fromJSON(inputs.options_json || '{}').learning_path || '/learning' }}"
+          PROJECT="${{ fromJSON(inputs.options_json || '{}').npm_start_project || 'chromium' }}"
+
+          if [[ -n "$RUNTIME_THEME_URL_INPUT" ]]; then
+            BASE_URL="$RUNTIME_THEME_URL_INPUT"
+            BASE_URL="${BASE_URL/apps./}"
+          elif [[ "$TARGET_ENV" == "production" ]]; then
+            BASE_URL="https://academyv2.mereka.io"
+          else
+            BASE_URL="https://academyv2.mereka.dev"
+          fi
+
+          args=(--base-url "$BASE_URL" --learning-path "$LEARNING_PATH" --project "$PROJECT")
+          if [[ "$REQUIRE_RUNTIME_THEME" == "true" ]]; then
+            args+=(--require-runtime-theme)
+          fi
+          if [[ "$REQUIRE_BRANDING_MARKERS" == "true" ]]; then
+            args+=(--require-branding-markers)
+          else
+            args+=(--allow-unbranded-shell)
+          fi
+
+          ./scripts/qa/verify-npm-start-mfe-smoke.sh "${args[@]}" \
+            | tee var/release-evidence/npm-start-mfe-smoke.log
+
+      - name: Run accessibility lane
+        if: ${{ inputs.run_accessibility_scan == true }}
+        run: |
+          set -euo pipefail
+          TARGET_ENV="${{ inputs.target_environment }}"
+          A11Y_MODE="${{ fromJSON(inputs.options_json || '{}').a11y_mode || 'offline' }}"
+          A11Y_TARGET_URL="${{ fromJSON(inputs.options_json || '{}').a11y_target_url || '' }}"
+          A11Y_ROUTES="${{ fromJSON(inputs.options_json || '{}').a11y_routes || '' }}"
+          A11Y_ALLOW_MISSING="${{ fromJSON(inputs.options_json || '{}').a11y_allow_missing_reports || 'false' }}"
+
+          if [[ "$TARGET_ENV" == "production" ]]; then
+            ENV_FLAG="prod"
+          else
+            ENV_FLAG="dev"
+          fi
+
+          args=(--env "$ENV_FLAG" --mode "$A11Y_MODE")
+          if [[ -n "$A11Y_TARGET_URL" ]]; then
+            args+=(--target-url "$A11Y_TARGET_URL")
+          fi
+
+          if [[ -n "$A11Y_ROUTES" ]]; then
+            args+=(--routes "$A11Y_ROUTES")
+          fi
+          if [[ "$A11Y_ALLOW_MISSING" == "true" ]]; then
+            args+=(--allow-missing-reports)
+          fi
+
+          ./scripts/qa/run-a11y-runtime-lane.sh "${args[@]}" \
+            | tee var/release-evidence/accessibility.log
+
+      - name: Run certificate branding lane
+        if: ${{ fromJSON(inputs.options_json || '{}').run_certificate_branding != false && fromJSON(inputs.options_json || '{}').run_certificate_branding != 'false' }}
+        run: |
+          set -euo pipefail
+          ./scripts/qa/verify-certificate-branding.sh \
+            | tee var/release-evidence/certificate-branding.log
+
+      - name: Run live DOM selector audit lane
+        if: ${{ inputs.run_live_dom_audit == true }}
+        run: |
+          set -euo pipefail
+          TARGET_ENV="${{ inputs.target_environment }}"
+          RUNTIME_THEME_URL_INPUT="${{ fromJSON(inputs.options_json || '{}').runtime_theme_url || '' }}"
+          REQUIRE_RUNTIME_THEME="${{ inputs.require_runtime_theme || 'false' }}"
+          REQUIRE_BRANDING_MARKERS="${{ inputs.require_branding_markers || 'true' }}"
+          AUDIT_PROFILE="${{ fromJSON(inputs.options_json || '{}').live_dom_audit_profile || 'standard' }}"
+          SELECTOR_AUDIT_PATH="${{ fromJSON(inputs.options_json || '{}').selector_audit_path || '/authn/login' }}"
+          SELECTOR_AUDIT_ROUTES="${{ fromJSON(inputs.options_json || '{}').live_dom_audit_routes || '' }}"
+          SELECTOR_AUDIT_SELECTORS="${{ fromJSON(inputs.options_json || '{}').live_dom_audit_selectors || '' }}"
+          PROJECT="${{ fromJSON(inputs.options_json || '{}').live_dom_audit_project || 'chromium' }}"
+          MIN_HITS="${{ fromJSON(inputs.options_json || '{}').live_dom_audit_min_hits || '3' }}"
+          MIN_CUSTOM_HITS="${{ fromJSON(inputs.options_json || '{}').live_dom_audit_min_custom_hits || '0' }}"
+
+          if [[ -n "$RUNTIME_THEME_URL_INPUT" ]]; then
+            BASE_URL="$RUNTIME_THEME_URL_INPUT"
+            BASE_URL="${BASE_URL/apps./}"
+          elif [[ "$TARGET_ENV" == "production" ]]; then
+            BASE_URL="https://academyv2.mereka.io"
+          else
+            BASE_URL="https://academyv2.mereka.dev"
+          fi
+
+          args=(--base-url "$BASE_URL" --audit-profile "$AUDIT_PROFILE" --selector-audit-path "$SELECTOR_AUDIT_PATH" --project "$PROJECT" --min-selector-hits "$MIN_HITS" --min-custom-selector-hits "$MIN_CUSTOM_HITS")
+          if [[ -n "$SELECTOR_AUDIT_ROUTES" ]]; then
+            args+=(--selector-audit-routes "$SELECTOR_AUDIT_ROUTES")
+          fi
+          if [[ -n "$SELECTOR_AUDIT_SELECTORS" ]]; then
+            args+=(--selector-audit-selectors "$SELECTOR_AUDIT_SELECTORS")
+          fi
+          if [[ "$REQUIRE_RUNTIME_THEME" == "true" ]]; then
+            args+=(--require-runtime-theme)
+          fi
+          if [[ "$REQUIRE_BRANDING_MARKERS" == "true" ]]; then
+            args+=(--require-branding-markers)
+          else
+            args+=(--allow-unbranded-shell)
+          fi
+
+          ./scripts/qa/verify-mfe-live-dom-audit.sh "${args[@]}" \
+            | tee var/release-evidence/live-dom-selector-audit.log
+
+      - name: Write release metadata
+        env:
+          OPENEDX_TAG: ${{ inputs.openedx_tag }}
+          MFE_TAG: ${{ inputs.mfe_tag }}
+          OPENEDX_DIGEST: ${{ steps.digests.outputs.openedx_digest }}
+          MFE_DIGEST: ${{ steps.digests.outputs.mfe_digest }}
+          TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
+          REQUIRE_RUNTIME_THEME: ${{ inputs.require_runtime_theme || 'false' }}
+          REQUIRE_BRANDING_MARKERS: ${{ inputs.require_branding_markers || 'true' }}
+          RUNTIME_THEME_URL: ${{ fromJSON(inputs.options_json || '{}').runtime_theme_url || '' }}
+          RUN_NPM_START_SMOKE: ${{ inputs.run_npm_start_smoke || 'false' }}
+          RUN_ACCESSIBILITY_SCAN: ${{ inputs.run_accessibility_scan || 'true' }}
+          A11Y_MODE: ${{ fromJSON(inputs.options_json || '{}').a11y_mode || 'offline' }}
+          A11Y_TARGET_URL: ${{ fromJSON(inputs.options_json || '{}').a11y_target_url || '' }}
+          A11Y_ROUTES: ${{ fromJSON(inputs.options_json || '{}').a11y_routes || '' }}
+          A11Y_ALLOW_MISSING_REPORTS: ${{ fromJSON(inputs.options_json || '{}').a11y_allow_missing_reports || 'false' }}
+          RUN_CERTIFICATE_BRANDING: ${{ fromJSON(inputs.options_json || '{}').run_certificate_branding != false && fromJSON(inputs.options_json || '{}').run_certificate_branding != 'false' }}
+          RUN_LIVE_DOM_AUDIT: ${{ inputs.run_live_dom_audit || 'false' }}
+          LEARNING_PATH: ${{ fromJSON(inputs.options_json || '{}').learning_path || '/learning' }}
+          NPM_START_PROJECT: ${{ fromJSON(inputs.options_json || '{}').npm_start_project || 'chromium' }}
+          LIVE_DOM_AUDIT_PROJECT: ${{ fromJSON(inputs.options_json || '{}').live_dom_audit_project || 'chromium' }}
+          LIVE_DOM_AUDIT_MIN_HITS: ${{ fromJSON(inputs.options_json || '{}').live_dom_audit_min_hits || '3' }}
+          LIVE_DOM_AUDIT_PROFILE: ${{ fromJSON(inputs.options_json || '{}').live_dom_audit_profile || 'standard' }}
+          LIVE_DOM_AUDIT_ROUTES: ${{ fromJSON(inputs.options_json || '{}').live_dom_audit_routes || '' }}
+          LIVE_DOM_AUDIT_SELECTORS: ${{ fromJSON(inputs.options_json || '{}').live_dom_audit_selectors || '' }}
+          LIVE_DOM_AUDIT_MIN_CUSTOM_HITS: ${{ fromJSON(inputs.options_json || '{}').live_dom_audit_min_custom_hits || '0' }}
+          SELECTOR_AUDIT_PATH: ${{ fromJSON(inputs.options_json || '{}').selector_audit_path || '/authn/login' }}
+        run: |
+          set -euo pipefail
+          jq -n '{
+            generated_at_utc: (now | todate),
+            repo: $ENV.GITHUB_REPOSITORY,
+            run_id: $ENV.GITHUB_RUN_ID,
+            run_number: $ENV.GITHUB_RUN_NUMBER,
+            sha: $ENV.GITHUB_SHA,
+            actor: $ENV.GITHUB_ACTOR,
+            ref: $ENV.GITHUB_REF,
+            openedx_tag: $ENV.OPENEDX_TAG,
+            mfe_tag: $ENV.MFE_TAG,
+            openedx_digest: $ENV.OPENEDX_DIGEST,
+            mfe_digest: $ENV.MFE_DIGEST,
+            target_environment: $ENV.TARGET_ENVIRONMENT,
+            require_runtime_theme: $ENV.REQUIRE_RUNTIME_THEME,
+            require_branding_markers: $ENV.REQUIRE_BRANDING_MARKERS,
+            runtime_theme_url: $ENV.RUNTIME_THEME_URL,
+            run_npm_start_smoke: $ENV.RUN_NPM_START_SMOKE,
+            run_accessibility_scan: $ENV.RUN_ACCESSIBILITY_SCAN,
+            a11y_mode: $ENV.A11Y_MODE,
+            a11y_target_url: $ENV.A11Y_TARGET_URL,
+            a11y_routes: $ENV.A11Y_ROUTES,
+            a11y_allow_missing_reports: $ENV.A11Y_ALLOW_MISSING_REPORTS,
+            run_certificate_branding: $ENV.RUN_CERTIFICATE_BRANDING,
+            run_live_dom_audit: $ENV.RUN_LIVE_DOM_AUDIT,
+            learning_path: $ENV.LEARNING_PATH,
+            npm_start_project: $ENV.NPM_START_PROJECT,
+            live_dom_audit_project: $ENV.LIVE_DOM_AUDIT_PROJECT,
+            live_dom_audit_min_hits: $ENV.LIVE_DOM_AUDIT_MIN_HITS,
+            live_dom_audit_profile: $ENV.LIVE_DOM_AUDIT_PROFILE,
+            live_dom_audit_routes: $ENV.LIVE_DOM_AUDIT_ROUTES,
+            live_dom_audit_selectors: $ENV.LIVE_DOM_AUDIT_SELECTORS,
+            live_dom_audit_min_custom_hits: $ENV.LIVE_DOM_AUDIT_MIN_CUSTOM_HITS,
+            selector_audit_path: $ENV.SELECTOR_AUDIT_PATH
+          }' > var/release-evidence/release-metadata.json
+          echo "var/release-evidence/release-metadata.json"
+
+      - name: Summarize release evidence
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "## Release Evidence Summary"
+            echo
+            echo "- Target environment: \`${{ inputs.target_environment }}\`"
+            echo "- Open edX tag: \`${{ inputs.openedx_tag }}\`"
+            echo "- MFE tag: \`${{ inputs.mfe_tag }}\`"
+            echo "- Require runtime theme: \`${{ inputs.require_runtime_theme || 'false' }}\`"
+            echo "- Require branding markers: \`${{ inputs.require_branding_markers || 'true' }}\`"
+            echo "- Runtime theme URL override: \`${{ fromJSON(inputs.options_json || '{}').runtime_theme_url || '(auto by env)' }}\`"
+            echo "- Run npm-start smoke lane: \`${{ inputs.run_npm_start_smoke || 'false' }}\`"
+            echo "- Run accessibility lane: \`${{ inputs.run_accessibility_scan || 'true' }}\`"
+            echo "- Accessibility mode: \`${{ fromJSON(inputs.options_json || '{}').a11y_mode || 'offline' }}\`"
+            echo "- Accessibility target URL: \`${{ fromJSON(inputs.options_json || '{}').a11y_target_url || '(auto apps by env)' }}\`"
+            echo "- Accessibility routes: \`${{ fromJSON(inputs.options_json || '{}').a11y_routes || '(verifier defaults)' }}\`"
+            echo "- Accessibility allow missing reports: \`${{ fromJSON(inputs.options_json || '{}').a11y_allow_missing_reports || 'false' }}\`"
+            echo "- Run certificate branding lane: \`${{ fromJSON(inputs.options_json || '{}').run_certificate_branding != false && fromJSON(inputs.options_json || '{}').run_certificate_branding != 'false' }}\`"
+            echo "- Run live DOM audit lane: \`${{ inputs.run_live_dom_audit || 'false' }}\`"
+            echo "- Live DOM audit profile: \`${{ fromJSON(inputs.options_json || '{}').live_dom_audit_profile || 'standard' }}\`"
+            echo "- Live DOM audit project: \`${{ fromJSON(inputs.options_json || '{}').live_dom_audit_project || 'chromium' }}\`"
+            echo "- Live DOM min tracked hits: \`${{ fromJSON(inputs.options_json || '{}').live_dom_audit_min_hits || '3' }}\`"
+            echo "- Live DOM routes: \`${{ fromJSON(inputs.options_json || '{}').live_dom_audit_routes || '(profile/default)' }}\`"
+            echo "- Live DOM selectors: \`${{ fromJSON(inputs.options_json || '{}').live_dom_audit_selectors || '(profile/default)' }}\`"
+            echo "- Live DOM min custom hits: \`${{ fromJSON(inputs.options_json || '{}').live_dom_audit_min_custom_hits || '0' }}\`"
+            echo "- Selector audit path: \`${{ fromJSON(inputs.options_json || '{}').selector_audit_path || '/authn/login' }}\`"
+            echo "- Learning path: \`${{ fromJSON(inputs.options_json || '{}').learning_path || '/learning' }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload release evidence artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: release-evidence-${{ inputs.target_environment }}-${{ github.run_number }}
+          path: |
+            var/release-evidence/
+            var/e2e-artifacts/**
+            var/e2e-report/**
+          retention-days: 30

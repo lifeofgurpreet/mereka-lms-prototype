@@ -1,0 +1,682 @@
+version: 1
+root: docs/runbooks
+entries:
+- old_path: docs/ops/runbooks/LMS_RUNTIME_CLOSURE_RUNBOOK.md
+  destination_path: docs/ops/runbooks/LMS_RUNTIME_CLOSURE_RUNBOOK.md
+  destination_root: docs/ops
+  classification: ops.runbooks
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/README.md
+  destination_path: docs/ops/runbooks/README.md
+  destination_root: docs/ops
+  classification: ops.runbooks.index
+  action: stub_to_existing
+  owner: agent-transitional-collapse
+  notes: legacy runbooks root should redirect to canonical ops runbooks root
+- old_path: docs/ops/runbooks/architecture/ENTERPRISE_MFE_MAINTENANCE.md
+  destination_path: docs/ops/runbooks/architecture/ENTERPRISE_MFE_MAINTENANCE.md
+  destination_root: docs/ops
+  classification: ops.runbooks.architecture
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/architecture/FOOTER_SLOT_MIGRATION.md
+  destination_path: docs/ops/runbooks/architecture/FOOTER_SLOT_MIGRATION.md
+  destination_root: docs/ops
+  classification: ops.runbooks.architecture
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md
+  destination_path: docs/ops/runbooks/architecture/LEGACY_FOOTER_REMOVAL.md
+  destination_root: docs/ops
+  classification: ops.runbooks.architecture
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/architecture/MFE_FOOTER_SLOT_MIGRATION.md
+  destination_path: docs/ops/runbooks/architecture/MFE_FOOTER_SLOT_MIGRATION.md
+  destination_root: docs/ops
+  classification: ops.runbooks.architecture
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/architecture/MFE_OAUTH_FIX_DEPLOYMENT.md
+  destination_path: docs/ops/runbooks/architecture/MFE_OAUTH_FIX_DEPLOYMENT.md
+  destination_root: docs/ops
+  classification: ops.runbooks.architecture
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/architecture/MFE_ROUTING_PARITY.md
+  destination_path: docs/ops/runbooks/architecture/MFE_ROUTING_PARITY.md
+  destination_root: docs/ops
+  classification: ops.runbooks.architecture
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/architecture/SUPERSET_DEPLOYMENT_RUNBOOK.md
+  destination_path: docs/ops/runbooks/architecture/SUPERSET_DEPLOYMENT_RUNBOOK.md
+  destination_root: docs/ops
+  classification: ops.runbooks.architecture
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/architecture/TOKEN_DRIFT_REMEDIATION.md
+  destination_path: docs/ops/runbooks/architecture/TOKEN_DRIFT_REMEDIATION.md
+  destination_root: docs/ops
+  classification: ops.runbooks.architecture
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/architecture/TOKEN_INTEGRITY_REMEDIATION.md
+  destination_path: docs/ops/runbooks/architecture/TOKEN_INTEGRITY_REMEDIATION.md
+  destination_root: docs/ops
+  classification: ops.runbooks.architecture
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/migrations/VERIFICATION_CHECKLIST.md
+  destination_path: docs/ops/runbooks/migrations/VERIFICATION_CHECKLIST.md
+  destination_root: docs/ops
+  classification: ops.runbooks.migrations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/migrations/kajabi/EXECUTION_PLAN_VERIFICATION.md
+  destination_path: docs/ops/runbooks/migrations/kajabi/EXECUTION_PLAN_VERIFICATION.md
+  destination_root: docs/ops
+  classification: ops.runbooks.migrations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/migrations/kajabi/KAJABI_REMIGRATION_RUNBOOK.md
+  destination_path: docs/ops/runbooks/migrations/kajabi/KAJABI_REMIGRATION_RUNBOOK.md
+  destination_root: docs/ops
+  classification: ops.runbooks.migrations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/migrations/kajabi/VERIFY_AND_SYNC_KAJABI.md
+  destination_path: docs/ops/runbooks/migrations/kajabi/VERIFY_AND_SYNC_KAJABI.md
+  destination_root: docs/ops
+  classification: ops.runbooks.migrations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/migrations/kajabi/VERIFY_WHEN_SITE_BACK_UP.md
+  destination_path: docs/ops/runbooks/migrations/kajabi/VERIFY_WHEN_SITE_BACK_UP.md
+  destination_root: docs/ops
+  classification: ops.runbooks.migrations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md
+  destination_path: docs/ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/A11Y_REGRESSION_LANE.md
+  destination_path: docs/ops/runbooks/A11Y_REGRESSION_LANE.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/A11Y_TENANT_BRANDING_GATE.md
+  destination_path: docs/ops/runbooks/A11Y_TENANT_BRANDING_GATE.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md
+  destination_path: docs/ops/runbooks/ACCESSIBILITY_CONFORMANCE_RUNBOOK.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/ALERT_TUNING_SOP.md
+  destination_path: docs/ops/runbooks/ALERT_TUNING_SOP.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/ALTERNATIVE_DOMAIN_BRANDING_FIX.md
+  destination_path: docs/ops/runbooks/ALTERNATIVE_DOMAIN_BRANDING_FIX.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/ARGOCD_DRIFT.md
+  destination_path: docs/ops/runbooks/ARGOCD_DRIFT.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/ARGOCD_HEALTH_TROUBLESHOOTING.md
+  destination_path: docs/ops/runbooks/ARGOCD_HEALTH_TROUBLESHOOTING.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/ASPECTS_WIRING_CHECKLIST.md
+  destination_path: docs/ops/runbooks/ASPECTS_WIRING_CHECKLIST.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/ATLAS_HEALTH.md
+  destination_path: docs/ops/runbooks/ATLAS_HEALTH.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/AUTHENTICATED_SMOKE_A11Y.md
+  destination_path: docs/ops/runbooks/AUTHENTICATED_SMOKE_A11Y.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/AUTH_CHANGE_CHECKLIST.md
+  destination_path: docs/ops/runbooks/AUTH_CHANGE_CHECKLIST.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md
+  destination_path: docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/BUILD_PIPELINE_RUNBOOK.md
+  destination_path: docs/ops/runbooks/BUILD_PIPELINE_RUNBOOK.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/CLOUD_SQL_RESTORE_DRILL.md
+  destination_path: docs/ops/runbooks/CLOUD_SQL_RESTORE_DRILL.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/CONTENT_LIBRARIES_V2_MIGRATION.md
+  destination_path: docs/ops/runbooks/CONTENT_LIBRARIES_V2_MIGRATION.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/COURSE_DATA_RECOVERY.md
+  destination_path: docs/ops/runbooks/COURSE_DATA_RECOVERY.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/CSP_REPORTING_RUNBOOK.md
+  destination_path: docs/ops/runbooks/CSP_REPORTING_RUNBOOK.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/DATA_ERASURE_RUNBOOK.md
+  destination_path: docs/ops/runbooks/DATA_ERASURE_RUNBOOK.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/DEPLOYMENT_VERIFICATION.md
+  destination_path: docs/ops/runbooks/DEPLOYMENT_VERIFICATION.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/DEPLOY_EVIDENCE_GATES.md
+  destination_path: docs/ops/runbooks/DEPLOY_EVIDENCE_GATES.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/DOMAIN_CHANGE_RUNBOOK.md
+  destination_path: docs/ops/runbooks/DOMAIN_CHANGE_RUNBOOK.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/DOMAIN_MANAGEMENT.md
+  destination_path: docs/ops/runbooks/DOMAIN_MANAGEMENT.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/DR_DRILL_SCHEDULE.md
+  destination_path: docs/ops/runbooks/DR_DRILL_SCHEDULE.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/ECOMMERCE_OAUTH_TROUBLESHOOTING.md
+  destination_path: docs/ops/runbooks/ECOMMERCE_OAUTH_TROUBLESHOOTING.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/ECOMMERCE_WORKER_TROUBLESHOOTING.md
+  destination_path: docs/ops/runbooks/ECOMMERCE_WORKER_TROUBLESHOOTING.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md
+  destination_path: docs/ops/runbooks/ENTERPRISE_SERVICES_RUNBOOK.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/ENTERPRISE_SSO_GUIDE.md
+  destination_path: docs/ops/runbooks/ENTERPRISE_SSO_GUIDE.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/ESO_ALERTING.md
+  destination_path: docs/ops/runbooks/ESO_ALERTING.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/FORUM_AUTH_E2E.md
+  destination_path: docs/ops/runbooks/FORUM_AUTH_E2E.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/FRONTEND_REGRESSION_CHECKLIST.md
+  destination_path: docs/ops/runbooks/FRONTEND_REGRESSION_CHECKLIST.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/GDPR_COMPLIANCE.md
+  destination_path: docs/ops/runbooks/GDPR_COMPLIANCE.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/GKE_LOKI_FORWARDING.md
+  destination_path: docs/ops/runbooks/GKE_LOKI_FORWARDING.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md
+  destination_path: docs/ops/runbooks/HUBSPOT_MUX_DEPLOYMENT_GUIDE.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/INCIDENT_RESPONSE.md
+  destination_path: docs/ops/runbooks/INCIDENT_RESPONSE.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/INCIDENT_TEMPLATES.md
+  destination_path: docs/ops/runbooks/INCIDENT_TEMPLATES.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/IN_CLUSTER_AUTH_VERIFICATION.md
+  destination_path: docs/ops/runbooks/IN_CLUSTER_AUTH_VERIFICATION.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md
+  destination_path: docs/ops/runbooks/LEGACY_ECOMMERCE_REMOVAL_CHECKLIST.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/LMS_RKE2_VALIDATION.md
+  destination_path: docs/ops/runbooks/LMS_RKE2_VALIDATION.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/MOBILE_DEPLOYMENT.md
+  destination_path: docs/ops/runbooks/MOBILE_DEPLOYMENT.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/MOBILE_OAUTH_PROVISIONING.md
+  destination_path: docs/ops/runbooks/MOBILE_OAUTH_PROVISIONING.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/MODULE_SURFACE_VALIDATION_RUNBOOK.md
+  destination_path: docs/ops/runbooks/MODULE_SURFACE_VALIDATION_RUNBOOK.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/MONGODB_DEV_SEED.md
+  destination_path: docs/ops/runbooks/MONGODB_DEV_SEED.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md
+  destination_path: docs/ops/runbooks/OBSERVABILITY_PARITY_WORKFLOW_SETUP.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/OBSERVABILITY_QUICKSTART.md
+  destination_path: docs/ops/runbooks/OBSERVABILITY_QUICKSTART.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md
+  destination_path: docs/ops/runbooks/ONCALL_OBSERVABILITY_PLAYBOOK.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/ON_CALL.md
+  destination_path: docs/ops/runbooks/ON_CALL.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/PATCH_IDEMPOTENCY.md
+  destination_path: docs/ops/runbooks/PATCH_IDEMPOTENCY.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/POSTDEPLOY_SMOKE_AND_INCIDENT.md
+  destination_path: docs/ops/runbooks/POSTDEPLOY_SMOKE_AND_INCIDENT.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/POST_DEPLOY_GATE.md
+  destination_path: docs/ops/runbooks/POST_DEPLOY_GATE.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/PREVIEW_REDIRECT.md
+  destination_path: docs/ops/runbooks/PREVIEW_REDIRECT.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/PRIVACY_RUNBOOK.md
+  destination_path: docs/ops/runbooks/PRIVACY_RUNBOOK.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/PURCHASE_GATEWAY_FULFILLMENT_RECOVERY.md
+  destination_path: docs/ops/runbooks/PURCHASE_GATEWAY_FULFILLMENT_RECOVERY.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/PURCHASE_GATEWAY_K8S.md
+  destination_path: docs/ops/runbooks/PURCHASE_GATEWAY_K8S.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/RELEASE_CHECKLIST.md
+  destination_path: docs/ops/runbooks/RELEASE_CHECKLIST.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/RELEASE_CHECKLIST_DOMAIN_SECRETS.md
+  destination_path: docs/ops/runbooks/RELEASE_CHECKLIST_DOMAIN_SECRETS.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/RELEASE_EXECUTE_RUNBOOK.md
+  destination_path: docs/ops/runbooks/RELEASE_EXECUTE_RUNBOOK.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/RKE2_DEV_READINESS.md
+  destination_path: docs/ops/runbooks/RKE2_DEV_READINESS.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/RKE2_ROLLOUT_CHECKLIST.md
+  destination_path: docs/ops/runbooks/RKE2_ROLLOUT_CHECKLIST.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/RKE2_TENANT_ROUTES.md
+  destination_path: docs/ops/runbooks/RKE2_TENANT_ROUTES.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md
+  destination_path: docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/SECURITY_INCIDENT_SUPPLY_CHAIN.md
+  destination_path: docs/ops/runbooks/SECURITY_INCIDENT_SUPPLY_CHAIN.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/SLO_DASHBOARDS_SETUP.md
+  destination_path: docs/ops/runbooks/SLO_DASHBOARDS_SETUP.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/STAGING_ACTIVATION.md
+  destination_path: docs/ops/runbooks/STAGING_ACTIVATION.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/STRIPE_WEBHOOKS_SETUP.md
+  destination_path: docs/ops/runbooks/STRIPE_WEBHOOKS_SETUP.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/TENANT_BRANDING_QA_RUNBOOK.md
+  destination_path: docs/ops/runbooks/TENANT_BRANDING_QA_RUNBOOK.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/TENANT_BRANDING_TROUBLESHOOTING.md
+  destination_path: docs/ops/runbooks/TENANT_BRANDING_TROUBLESHOOTING.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/TENANT_BRAND_ONBOARDING_GUIDE.md
+  destination_path: docs/ops/runbooks/TENANT_BRAND_ONBOARDING_GUIDE.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/TENANT_DRIFT_INVESTIGATION.md
+  destination_path: docs/ops/runbooks/TENANT_DRIFT_INVESTIGATION.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/TENANT_FOOTER_VARIANT_LANE.md
+  destination_path: docs/ops/runbooks/TENANT_FOOTER_VARIANT_LANE.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/TENANT_ONBOARDING_PLAYBOOK.md
+  destination_path: docs/ops/runbooks/TENANT_ONBOARDING_PLAYBOOK.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/TENANT_PROVISIONING.md
+  destination_path: docs/ops/runbooks/TENANT_PROVISIONING.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/THEME_DEPLOYMENT.md
+  destination_path: docs/ops/runbooks/THEME_DEPLOYMENT.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/TRANSLATION_WORKFLOW.md
+  destination_path: docs/ops/runbooks/TRANSLATION_WORKFLOW.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/TROUBLESHOOTING.md
+  destination_path: docs/ops/runbooks/TROUBLESHOOTING.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/UI_UX_POSTDEPLOY_SMOKE.md
+  destination_path: docs/ops/runbooks/UI_UX_POSTDEPLOY_SMOKE.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/VELERO_BACKUP_AUDIT.md
+  destination_path: docs/ops/runbooks/VELERO_BACKUP_AUDIT.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md
+  destination_path: docs/ops/runbooks/VISUAL_REGRESSION_RUNBOOK.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/VISUAL_SMOKE_BASELINE.md
+  destination_path: docs/ops/runbooks/VISUAL_SMOKE_BASELINE.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/WINDOWS_SSH_SETUP.md
+  destination_path: docs/ops/runbooks/WINDOWS_SSH_SETUP.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root
+- old_path: docs/ops/runbooks/WORKLOAD_IDENTITY_FEDERATION.md
+  destination_path: docs/ops/runbooks/WORKLOAD_IDENTITY_FEDERATION.md
+  destination_root: docs/ops
+  classification: ops.runbooks.operations
+  action: move_and_stub
+  owner: agent-transitional-collapse
+  notes: runbook content belongs under the canonical operator runbooks root

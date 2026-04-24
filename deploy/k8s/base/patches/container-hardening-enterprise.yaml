@@ -1,0 +1,215 @@
+# Container hardening patch for enterprise services, portal MFEs, and ancillary services.
+# Applied via patches in kustomization.yaml alongside container-hardening.yaml.
+#
+# Design notes:
+# - Pod-level securityContext: runAsNonRoot + seccompProfile (RuntimeDefault)
+# - Container-level on ALL containers (init + main): allowPrivilegeEscalation: false,
+#   capabilities.drop: ["ALL"]
+# - readOnlyRootFilesystem is NOT set: enterprise services write config YAML to an
+#   emptyDir volume at runtime (config-gen init container), and portal MFEs (Caddy)
+#   need filesystem write access for socket/tmp paths.
+# - No new volumeMounts or volumes: all services already have /config emptyDir volumes.
+#
+# T087 — Container hardening (non-root, read-only FS, seccomp) — enterprise extension
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-catalog
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: config-gen
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+      containers:
+        - name: enterprise-catalog
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-access
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: config-gen
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+      containers:
+        - name: enterprise-access
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-subsidy
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: config-gen
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+      containers:
+        - name: enterprise-subsidy
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: license-manager
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: config-gen
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+      containers:
+        - name: license-manager
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-catalog-worker
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: config-gen
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+      containers:
+        - name: enterprise-catalog-worker
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-access-worker
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: config-gen
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+      containers:
+        - name: enterprise-access-worker
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+---
+# enterprise-admin-portal: Caddy-based MFE. readOnlyRootFilesystem not set —
+# Caddy creates sockets and temp files on the image filesystem at startup.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-admin-portal
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: enterprise-admin-portal
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+---
+# enterprise-learner-portal: Caddy-based MFE. readOnlyRootFilesystem not set —
+# same reasoning as enterprise-admin-portal above.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-learner-portal
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: enterprise-learner-portal
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: preview-redirect
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: preview-redirect
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]

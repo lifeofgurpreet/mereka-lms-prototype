@@ -1,0 +1,159 @@
+{
+  "domains": [
+    {
+      "authoritative_files": [
+        "platform-control-plane:contracts/release-contracts.yaml",
+        "platform-control-plane:contracts/service-identity-contract.yaml"
+      ],
+      "authoritative_repo": "platform-control-plane",
+      "derived_human_surfaces": [
+        "bbi-infrastructure:docs/guides/PROMOTION-WORKFLOW.md",
+        "mereka-lms:docs/reference/operations/RELEASE_PROCESS.md"
+      ],
+      "domain": "release_lanes",
+      "drift_risk": "high",
+      "reviewers_owners": [
+        "@platform",
+        "@applications"
+      ],
+      "validation_command": "bash scripts/qa/verify-release-automation.sh"
+    },
+    {
+      "authoritative_files": [
+        "platform-control-plane:contracts/service-identity-contract.yaml"
+      ],
+      "authoritative_repo": "platform-control-plane",
+      "derived_human_surfaces": [
+        "bbi-infrastructure:CLAUDE.md",
+        "bbi-infrastructure:docs/reference/SERVICE_IDENTITY_REFERENCE.md"
+      ],
+      "domain": "service_identity_aliases",
+      "drift_risk": "high",
+      "reviewers_owners": [
+        "@platform"
+      ],
+      "validation_command": "platform-control-plane:scripts/plan-all.sh --validate-only"
+    },
+    {
+      "authoritative_files": [
+        "bbi-infrastructure:config/domain-registry.yaml"
+      ],
+      "authoritative_repo": "bbi-infrastructure",
+      "derived_human_surfaces": [
+        "bbi-infrastructure:docs/reference/CANONICAL_TOPOLOGY.md",
+        "bbi-infrastructure:ENVIRONMENTS.md"
+      ],
+      "domain": "domain_registry_hostnames",
+      "drift_risk": "medium",
+      "reviewers_owners": [
+        "@platform"
+      ],
+      "validation_command": "make verify"
+    },
+    {
+      "authoritative_files": [
+        "bbi-infrastructure:config/bootstrap-lane-topology.yaml"
+      ],
+      "authoritative_repo": "bbi-infrastructure",
+      "derived_human_surfaces": [
+        "bbi-infrastructure:docs/reference/CANONICAL_TOPOLOGY.md",
+        "mereka-lms:docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md"
+      ],
+      "domain": "bootstrap_lane_topology",
+      "drift_risk": "high",
+      "reviewers_owners": [
+        "@platform"
+      ],
+      "validation_command": "make verify"
+    },
+    {
+      "authoritative_files": [
+        "bbi-infrastructure:scripts/promote.sh",
+        "bbi-infrastructure:.github/workflows/promote-image.yml",
+        "platform-control-plane:contracts/release-contracts.yaml"
+      ],
+      "authoritative_repo": "bbi-infrastructure",
+      "derived_human_surfaces": [
+        "bbi-infrastructure:docs/guides/PROMOTION-WORKFLOW.md",
+        "bbi-infrastructure:CLAUDE.md"
+      ],
+      "domain": "promotion_workflow_semantics",
+      "drift_risk": "high",
+      "reviewers_owners": [
+        "@platform",
+        "@applications"
+      ],
+      "validation_command": "bash scripts/qa/verify-release-workflow-invocation.sh"
+    },
+    {
+      "authoritative_files": [
+        "mereka-lms:docs/ops/runbooks/DEPLOY_EVIDENCE_GATES.md",
+        "mereka-lms:docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md",
+        "mereka-lms:tools/knowledge/verify_review_runtime.py"
+      ],
+      "authoritative_repo": "mereka-lms",
+      "derived_human_surfaces": [
+        "mereka-lms:docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md"
+      ],
+      "domain": "runtime_review_evidence_rules",
+      "drift_risk": "high",
+      "reviewers_owners": [
+        "@platform",
+        "@docs"
+      ],
+      "validation_command": "bash scripts/qa/run-review-runtime-gates.sh"
+    },
+    {
+      "authoritative_files": [
+        "platform-control-plane:specs/SPEC-CP-002-state-and-workspace-model.md",
+        "platform-control-plane:scripts/plan-all.sh"
+      ],
+      "authoritative_repo": "platform-control-plane",
+      "derived_human_surfaces": [
+        "platform-control-plane:docs/RELEASE-CONTROL-IMPLEMENTER-PLAYBOOK.md"
+      ],
+      "domain": "opentofu_backend_workspace_rules",
+      "drift_risk": "medium",
+      "reviewers_owners": [
+        "@platform"
+      ],
+      "validation_command": "platform-control-plane:scripts/plan-all.sh --validate-only"
+    },
+    {
+      "authoritative_files": [
+        "mereka-lms:deploy/k8s/contract.json",
+        "mereka-lms:config/lane-identity.yaml"
+      ],
+      "authoritative_repo": "mereka-lms",
+      "derived_human_surfaces": [
+        "mereka-lms:docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md"
+      ],
+      "domain": "app_deployment_contracts",
+      "drift_risk": "high",
+      "reviewers_owners": [
+        "@platform",
+        "@applications"
+      ],
+      "validation_command": "python3 tools/knowledge/verify_review_runtime.py --repo-root . --range origin/main...HEAD"
+    },
+    {
+      "authoritative_files": [
+        "mereka-lms:scripts/governance/canonical-entrypoints.yaml"
+      ],
+      "authoritative_repo": "mereka-lms",
+      "derived_human_surfaces": [
+        "mereka-lms:docs/README.md",
+        "bbi-infrastructure:docs/README.md"
+      ],
+      "domain": "canonical_entrypoints",
+      "drift_risk": "medium",
+      "reviewers_owners": [
+        "@platform",
+        "@docs"
+      ],
+      "validation_command": "bash scripts/qa/verify-authority-routing.sh"
+    }
+  ],
+  "generated_by": "tools/knowledge/build_wave10_source_map.py",
+  "version": 1
+}

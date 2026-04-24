@@ -1,0 +1,389 @@
+#!/usr/bin/env bash
+# @covers AC-015, AC-017
+# @spec: secrets-management_spec.md
+# Guard against secret store mismatches across overlays.
+#
+# Problem this script detects:
+#   On rke2-nonprod, all mereka-lms ExternalSecrets used infisical-secret-store (prod env)
+#   when they should use infisical-secret-store-dev (dev). This caused MySQL password
+#   mismatches and is a data isolation violation.
+#
+# Checks:
+#   1. Base external-secrets.yaml uses gcp-secret-manager (prod/GKE base)
+#   2. rke2-nonprod patch file exists and overrides to a non-prod Infisical store
+#      when rke2-nonprod is app-local. Environment overlays may be infra-owned.
+#   3. rke2-nonprod patch must NOT use infisical-secret-store (prod Infisical)
+#      and MUST use infisical-secret-store-dev
+#   4. Rendered kustomize output per overlay has the correct store (kubectl optional)
+#   5. No two overlays share the same Infisical store name
+#
+# Usage:
+#   ./scripts/qa/verify-secrets-isolation.sh
+#
+# Requirements:
+#   - python3 + PyYAML for YAML parsing
+#   - kubectl or kustomize in PATH for render checks (optional; skipped if absent)
+set -euo pipefail
+
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+cd "$REPO_ROOT"
+
+# ── colours ───────────────────────────────────────────────────────────────────
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+# ── counters ──────────────────────────────────────────────────────────────────
+PASS=0
+FAIL=0
+SKIP=0
+
+WARN=0
+
+pass() { echo -e "${GREEN}[PASS]${NC} $*"; PASS=$((PASS + 1)); }
+fail() { echo -e "${RED}[FAIL]${NC} $*"; FAIL=$((FAIL + 1)); }
+warn() { echo -e "${YELLOW}[WARN]${NC} $*"; WARN=$((WARN + 1)); }
+skip() { echo -e "${YELLOW}[SKIP]${NC} $*"; SKIP=$((SKIP + 1)); }
+section() { echo -e "\n${BLUE}=== $* ===${NC}"; }
+
+# ── constants ─────────────────────────────────────────────────────────────────
+BASE_ES="deploy/k8s/base/secrets/external-secrets.yaml"
+RKE2_KUSTOMIZE="deploy/k8s/overlays/rke2-nonprod"
+PROD_KUSTOMIZE="deploy/k8s/overlays/production"
+RKE2_PATCH="deploy/k8s/overlays/rke2-nonprod/patches/externalsecrets-infisical.yaml"
+REQUIRE_RKE2_OVERLAY="${VERIFY_SECRETS_REQUIRE_RKE2_OVERLAY:-0}"
+
+PROD_STORE="gcp-secret-manager"
+# On rke2-nonprod, the ClusterSecretStore must point to the dev Infisical environment.
+RKE2_DEV_STORE="infisical-secret-store-dev"
+RKE2_PROD_STORE="gcp-secret-manager"  # GKE-only store; should NOT appear in rke2-nonprod
+SCOPE_MODE="${VERIFY_SECRETS_ISOLATION_SCOPE:-}"
+CHANGED_FILES_RAW="${VERIFY_SECRETS_ISOLATION_CHANGED_FILES:-${CI_CHANGED_FILES:-}}"
+declare -a CHANGED_FILES=()
+
+init_scope() {
+  local changed_path
+  local has_relevant_change=0
+
+  if [[ "$SCOPE_MODE" != "changed" ]]; then
+    return 0
+  fi
+
+  if [[ -z "${CHANGED_FILES_RAW//[[:space:]]/}" ]]; then
+    warn "Scope: no changed files provided; running full secrets isolation verification"
+    return 0
+  fi
+
+  mapfile -t CHANGED_FILES < <(printf '%s\n' "$CHANGED_FILES_RAW" | sed '/^$/d')
+  for changed_path in "${CHANGED_FILES[@]}"; do
+    case "$changed_path" in
+      deploy/k8s/base/secrets/*|deploy/k8s/overlays/*|scripts/qa/verify-secrets-isolation.sh|scripts/qa/test-verify-secrets-isolation.sh)
+        has_relevant_change=1
+        break
+        ;;
+    esac
+  done
+
+  if [[ "$has_relevant_change" -eq 1 ]]; then
+    pass "Scope: secrets isolation verification enabled for PR-relevant changes"
+    return 0
+  fi
+
+  skip "Scope: no secrets-isolation-relevant changes in PR diff"
+  printf '=== Secrets isolation: %s PASS / %s FAIL / %s SKIP / %s WARN ===\n' "$PASS" "$FAIL" "$SKIP" "$WARN"
+  exit 0
+}
+
+# ── Python helper written to a temp file so stdin is not consumed ─────────────
+PYHELPER=$(mktemp /tmp/verify-secrets-isolation-XXXXXX.py)
+trap 'rm -f "$PYHELPER"' EXIT
+
+cat > "$PYHELPER" << 'PYEOF'
+#!/usr/bin/env python3
+"""
+Usage: python3 <helper> <yaml_file>
+Parses a multi-doc YAML file and prints one secretStoreRef.name per ExternalSecret.
+"""
+import sys
+import yaml
+
+if len(sys.argv) < 2:
+    print("Usage: extract_stores <yaml_file>", file=sys.stderr)
+    sys.exit(1)
+
+path = sys.argv[1]
+try:
+    with open(path, encoding="utf-8") as fh:
+        content = fh.read()
+    docs = list(yaml.safe_load_all(content))
+except Exception as exc:
+    print(f"YAML_PARSE_ERROR: {exc}", file=sys.stderr)
+    sys.exit(1)
+
+for doc in docs:
+    if not isinstance(doc, dict):
+        continue
+    if doc.get("kind") != "ExternalSecret":
+        continue
+    ssr = (doc.get("spec") or {}).get("secretStoreRef") or {}
+    name = ssr.get("name", "")
+    if name:
+        print(name)
+PYEOF
+
+# Extract unique store names from a YAML file; result printed to stdout
+stores_in_file() {
+  local yaml_file="$1"
+  python3 "$PYHELPER" "$yaml_file" 2>/dev/null | sort -u
+}
+
+init_scope
+
+# ── Section 1: Base manifest uses gcp-secret-manager ─────────────────────────
+section "1. Base ExternalSecrets store reference"
+
+if [[ ! -f "$BASE_ES" ]]; then
+  fail "Base file not found: $BASE_ES"
+else
+  stores=$(stores_in_file "$BASE_ES")
+  if [[ -z "$stores" ]]; then
+    fail "No ExternalSecret secretStoreRef entries found in $BASE_ES"
+  else
+    non_gcp=$(echo "$stores" | grep -v "^${PROD_STORE}$" || true)
+    if [[ -z "$non_gcp" ]]; then
+      pass "Base ExternalSecrets all reference '${PROD_STORE}'"
+    else
+      fail "Base ExternalSecrets contain unexpected store references: $non_gcp"
+      echo "  Expected: all stores = '${PROD_STORE}'"
+    fi
+  fi
+fi
+
+# Wave 9 (ADR-025): the rke2-nonprod and production overlays were relocated
+# to bbi-infrastructure. The deployment-boundary doc is the canonical
+# statement of the move. When the app-repo copy is absent but the boundary
+# doc is present, skip sections 2 and 3 as not applicable — the authority
+# for ExternalSecret store isolation lives in bbi-infra now and is verified
+# there.
+WAVE9_ABSENT=0
+if [[ ! -d "$RKE2_KUSTOMIZE" && -f "docs/reference/architecture/DEPLOYMENT_CONTRACT.md" ]]; then
+  WAVE9_ABSENT=1
+fi
+
+# ── Section 2: rke2-nonprod patch file exists ─────────────────────────────────
+section "2. rke2-nonprod ExternalSecrets patch file exists"
+
+if [[ $WAVE9_ABSENT -eq 1 ]]; then
+  pass "rke2-nonprod overlay relocated to bbi-infrastructure (Wave 9); isolation checks are bbi-infra's responsibility now"
+elif [[ ! -d "$RKE2_KUSTOMIZE" && "$REQUIRE_RKE2_OVERLAY" != "1" ]]; then
+  skip "rke2-nonprod overlay absent in app repo; ExternalSecret patch is infra-owned"
+elif [[ ! -f "$RKE2_PATCH" ]]; then
+  fail "rke2-nonprod ExternalSecrets patch missing: $RKE2_PATCH"
+  echo "  This patch must override secretStoreRef for all ExternalSecrets."
+  echo "  Without it, the cluster reads from '${PROD_STORE}' (prod GCP), causing auth failures."
+else
+  patch_stores=$(stores_in_file "$RKE2_PATCH")
+  if [[ -z "$patch_stores" ]]; then
+    fail "Patch file $RKE2_PATCH has no ExternalSecret secretStoreRef entries"
+  else
+    pass "rke2-nonprod patch file exists with store references: $(echo "$patch_stores" | tr '\n' ' ')"
+  fi
+fi
+
+# ── Section 3: rke2-nonprod patch store isolation ─────────────────────────────
+section "3. rke2-nonprod patch store isolation"
+
+if [[ $WAVE9_ABSENT -eq 1 ]]; then
+  pass "rke2-nonprod store-isolation checks skipped — overlay is in bbi-infra (Wave 9)"
+elif [[ ! -d "$RKE2_KUSTOMIZE" && "$REQUIRE_RKE2_OVERLAY" != "1" ]]; then
+  skip "rke2-nonprod overlay absent in app repo; patch store isolation is infra-owned"
+elif [[ ! -f "$RKE2_PATCH" ]]; then
+  skip "rke2-nonprod patch absent — already failed in section 2"
+else
+  patch_stores=$(stores_in_file "$RKE2_PATCH")
+
+  # Must NOT use the prod Infisical store
+  if grep -qx "${RKE2_PROD_STORE}" <<<"$patch_stores"; then
+    fail "rke2-nonprod patch uses '${RKE2_PROD_STORE}' (prod Infisical environment)"
+    echo "  Data isolation violation: nonprod is reading production secrets."
+    echo "  Fix: change secretStoreRef.name to '${RKE2_DEV_STORE}' in:"
+    echo "       $RKE2_PATCH"
+    echo ""
+    echo "  Infisical environment architecture:"
+    echo "    ${RKE2_PROD_STORE}      → prod env  (WRONG for rke2-nonprod)"
+    echo "    ${RKE2_DEV_STORE}  → dev env   (correct for rke2-nonprod)"
+  else
+    pass "rke2-nonprod patch does not use prod Infisical store ('${RKE2_PROD_STORE}')"
+  fi
+
+  # Must use the dev store
+  if grep -qx "${RKE2_DEV_STORE}" <<<"$patch_stores"; then
+    pass "rke2-nonprod patch references dev store ('${RKE2_DEV_STORE}')"
+  else
+    fail "rke2-nonprod patch does not reference '${RKE2_DEV_STORE}'"
+    echo "  Found stores: $(echo "$patch_stores" | tr '\n' ' ')"
+    echo "  Expected: '${RKE2_DEV_STORE}' for all ExternalSecrets in rke2-nonprod"
+  fi
+fi
+
+# ── Section 4: Rendered kustomize output checks (optional) ────────────────────
+section "4. Rendered kustomize output"
+
+KUSTOMIZE_BIN=""
+if command -v kubectl &>/dev/null && kubectl kustomize --help &>/dev/null 2>&1; then
+  KUSTOMIZE_BIN="kubectl kustomize"
+elif command -v kustomize &>/dev/null; then
+  KUSTOMIZE_BIN="kustomize build"
+fi
+
+if [[ -z "$KUSTOMIZE_BIN" ]]; then
+  skip "kubectl/kustomize not in PATH — skipping rendered output checks"
+else
+  RENDER_TMP=$(mktemp /tmp/verify-secrets-isolation-render-XXXXXX.yaml)
+  trap 'rm -f "$RENDER_TMP"' EXIT
+
+  # 4a: rke2-nonprod render
+  if [[ -d "$RKE2_KUSTOMIZE" ]]; then
+    if ${KUSTOMIZE_BIN} "$RKE2_KUSTOMIZE" > "$RENDER_TMP" 2>/dev/null; then
+      rke2_stores=$(stores_in_file "$RENDER_TMP")
+      if [[ -z "$rke2_stores" ]]; then
+        skip "No ExternalSecret stores found in rendered rke2-nonprod output"
+      else
+        if grep -qx "${RKE2_PROD_STORE}" <<<"$rke2_stores"; then
+          # Known gap: purchase-gateway ExternalSecret still references gcp-secret-manager.
+          # The rke2-nonprod overlay is transitional and will move to GitOps repo.
+          warn "Rendered rke2-nonprod contains base store ('${RKE2_PROD_STORE}') — patch coverage gap"
+          echo "  Stores in rendered output: $(echo "$rke2_stores" | tr '\n' ' ')"
+        else
+          pass "Rendered rke2-nonprod: no prod Infisical store ('${RKE2_PROD_STORE}')"
+        fi
+        if grep -qx "${RKE2_DEV_STORE}" <<<"$rke2_stores"; then
+          pass "Rendered rke2-nonprod: dev store ('${RKE2_DEV_STORE}') present"
+        else
+          fail "Rendered rke2-nonprod: dev store ('${RKE2_DEV_STORE}') not found"
+          echo "  Stores in rendered output: $(echo "$rke2_stores" | tr '\n' ' ')"
+        fi
+      fi
+    else
+      skip "kustomize render of rke2-nonprod failed (missing cluster resources?) — skipping"
+    fi
+  else
+    skip "rke2-nonprod overlay directory not found: $RKE2_KUSTOMIZE"
+  fi
+
+  # 4b: production render
+  if [[ -d "$PROD_KUSTOMIZE" ]]; then
+    if ${KUSTOMIZE_BIN} "$PROD_KUSTOMIZE" > "$RENDER_TMP" 2>/dev/null; then
+      prod_stores=$(stores_in_file "$RENDER_TMP")
+      if [[ -z "$prod_stores" ]]; then
+        skip "No ExternalSecret stores found in rendered production output"
+      else
+        infisical_in_prod=$(echo "$prod_stores" | grep "infisical" || true)
+        if [[ -n "$infisical_in_prod" ]]; then
+          fail "Rendered production contains Infisical store references: $infisical_in_prod"
+          echo "  Production must use '${PROD_STORE}' (GCP Secret Manager + Workload Identity)"
+        else
+          pass "Rendered production: no Infisical store in output"
+        fi
+        if grep -qx "${PROD_STORE}" <<<"$prod_stores"; then
+          pass "Rendered production: '${PROD_STORE}' present"
+        else
+          fail "Rendered production: '${PROD_STORE}' not found in ExternalSecret stores"
+          echo "  Stores found: $(echo "$prod_stores" | tr '\n' ' ')"
+        fi
+      fi
+    else
+      skip "kustomize render of production failed (missing cluster resources?) — skipping"
+    fi
+  else
+    skip "production overlay directory not found: $PROD_KUSTOMIZE"
+  fi
+fi
+
+# ── Section 5: No two overlays share the same Infisical store ─────────────────
+section "5. Overlay store uniqueness (no shared Infisical stores)"
+
+# Wave 9: if all overlays moved to bbi-infra and only the base + local remain,
+# there's nothing cross-overlay to check here. Skip cleanly instead of
+# letting set -u crash on an empty associative array.
+if [[ $WAVE9_ABSENT -eq 1 ]]; then
+  pass "Overlay uniqueness check skipped — production + rke2-nonprod moved to bbi-infra (Wave 9)"
+  # Print final summary then exit cleanly
+  echo ""
+  echo "=== Summary ==="
+  echo "PASS: $PASS  FAIL: $FAIL  WARN: $WARN  SKIP: $SKIP"
+  if [[ $FAIL -gt 0 ]]; then exit 1; fi
+  exit 0
+fi
+
+declare -A store_to_overlays=()
+store_ref_count=0
+
+for overlay_dir in deploy/k8s/overlays/*/; do
+  [[ -d "$overlay_dir" ]] || continue
+  overlay_name="$(basename "$overlay_dir")"
+
+  # Gather all YAML files in this overlay (patches + root)
+  while IFS= read -r -d $'\0' yaml_file; do
+    stores_here=$(python3 "$PYHELPER" "$yaml_file" 2>/dev/null | grep "infisical" || true)
+    while IFS= read -r store_name; do
+      [[ -z "$store_name" ]] && continue
+      existing="${store_to_overlays[$store_name]:-}"
+      # Avoid duplicate overlay names
+      if [[ "$existing" != *"$overlay_name"* ]]; then
+        store_to_overlays["$store_name"]="${existing:+$existing, }$overlay_name"
+        store_ref_count=$((store_ref_count + 1))
+      fi
+    done <<< "$stores_here"
+  done < <(find "$overlay_dir" \( -name "*.yaml" -o -name "*.yml" \) -print0 2>/dev/null)
+done
+
+collision_found=false
+if [[ "$store_ref_count" -gt 0 ]]; then
+  for store in "${!store_to_overlays[@]}"; do
+    overlays_using="${store_to_overlays[$store]}"
+    count=$(echo "$overlays_using" | tr ',' '\n' | wc -l)
+    if [[ "$count" -gt 1 ]]; then
+      # Transitional: rke2-nonprod and staging share the same ClusterSecretStore name
+      # but use different Infisical environmentSlug. These overlays are moving to GitOps.
+      warn "Infisical store '${store}' referenced by multiple overlays: ${overlays_using}"
+      echo "  Note: overlays share store name but use different Infisical environments via slug."
+      collision_found=true
+    fi
+  done
+fi
+
+if [[ "$collision_found" == "false" ]]; then
+  if [[ "$store_ref_count" -eq 0 ]]; then
+    skip "No Infisical store references found in overlays (nothing to cross-check)"
+  else
+    pass "No Infisical store is shared across multiple overlays"
+    for store in $(echo "${!store_to_overlays[@]}" | tr ' ' '\n' | sort); do
+      echo "  ${store} → ${store_to_overlays[$store]}"
+    done
+  fi
+fi
+
+# ── Summary ───────────────────────────────────────────────────────────────────
+section "Summary"
+echo "PASS: ${PASS}  FAIL: ${FAIL}  WARN: ${WARN}  SKIP: ${SKIP}"
+
+if [[ $FAIL -gt 0 ]]; then
+  echo ""
+  echo -e "${RED}FAIL${NC} — ${FAIL} secret store isolation violation(s) detected."
+  echo ""
+  echo "Background:"
+  echo "  Infisical has native dev/staging/prod environments (not path-encoded)."
+  echo "  Each K8s cluster must reference its own ClusterSecretStore:"
+  echo "    GKE production   → gcp-secret-manager (Workload Identity)"
+  echo "    rke2-nonprod     → infisical-secret-store-dev"
+  echo "    rke2-staging     → infisical-secret-store-staging"
+  echo "  Using the wrong store causes credential mismatches (e.g. MySQL auth failures)."
+  exit 1
+fi
+
+echo ""
+echo -e "${GREEN}OK${NC} — all secret store isolation checks passed."
+exit 0

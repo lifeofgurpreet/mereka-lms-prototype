@@ -1,0 +1,347 @@
+{
+  "change_count": 56,
+  "classification_counts": {},
+  "entries": [
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/catalog.json",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/meta/knowledge/AGENT_REVIEW_HANDOFF.md",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "docs/meta/knowledge/WAVE10_CLOSEOUT.md",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/catalogs/docs-catalog.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/catalogs/knowledge-catalog.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/contracts/cross-repo-manifest.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/contracts/deployment-impact-report.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/contracts/release-obligations.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/graphs/knowledge-graph.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/agent-entrypoints.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/agent-task-bundles/cross-repo-contract-change.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/agent-task-bundles/docs-architecture-change.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/agent-task-bundles/evidence-status-update.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/agent-task-bundles/incident-debug.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/agent-task-bundles/migration-change.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/agent-task-bundles/normative-spec-change.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/agent-task-bundles/proposal-change.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/agent-task-bundles/release-change.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/agent-task-bundles/reviewer-pass.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/agent-task-bundles/wrapper-retirement.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/change-manifest.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/review-bundle.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/task-bundles/architecture_or_adr_change.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/task-bundles/architecture_or_adr_change.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/task-bundles/compatibility_or_wrapper_cleanup.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/task-bundles/compatibility_or_wrapper_cleanup.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/task-bundles/cross_repo_contract_change.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/task-bundles/cross_repo_contract_change.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/task-bundles/evidence_or_status_change.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/task-bundles/evidence_or_status_change.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/task-bundles/generated_surface_refresh.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/task-bundles/generated_surface_refresh.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/task-bundles/normative_spec_change.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/task-bundles/normative_spec_change.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/task-bundles/proposal_or_rfc_change.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/task-bundles/proposal_or_rfc_change.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/task-bundles/release_or_runtime_change.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/task-bundles/release_or_runtime_change.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/task-bundles/reviewer_handoff_or_policy_change.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/task-bundles/reviewer_handoff_or_policy_change.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/task-bundles/runbook_or_ops_change.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/task-bundles/runbook_or_ops_change.md",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/task-context-report.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/truth-impact-report.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "generated/knowledge/wave10-source-map.json",
+      "path_class": "generated_surface_refresh",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "scripts/governance/script-registry.yaml",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "tools/knowledge/build_agent_readiness_report.py",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "tools/knowledge/build_agent_task_bundles.py",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "tools/knowledge/build_cross_repo_agent_packs.py",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "tools/knowledge/build_task_bundle.py",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "tools/knowledge/build_wave10_source_map.py",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "tools/knowledge/change_runtime.py",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "tools/knowledge/skill_runtime.py",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "tools/knowledge/verify_agent_consumption_runtime.py",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    },
+    {
+      "cross_repo_verdict": "infra_counterpart_not_required",
+      "path": "verification/catalogs/verification_catalog.json",
+      "path_class": "repo_support_change",
+      "touched_services": []
+    }
+  ],
+  "generated_by": "tools/contracts/build_cross_repo_manifest.py",
+  "overall_verdict": "infra_counterpart_not_required",
+  "range": "origin/main...HEAD",
+  "services": [],
+  "touched_service_count": 0
+}

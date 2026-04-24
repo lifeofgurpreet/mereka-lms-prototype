@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  gateway:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: "postgresql+asyncpg://payments:payments@db:5432/payments_gateway"
+      REDIS_URL: "redis://redis:6379/14"
+      STRIPE_SECRET_KEY: "${STRIPE_SECRET_KEY}"
+      STRIPE_WEBHOOK_SECRET: "${STRIPE_WEBHOOK_SECRET}"
+      LMS_BASE_URL: "http://lms:8000"
+      LMS_OAUTH_CLIENT_ID: "payments-gateway"
+      LMS_OAUTH_CLIENT_SECRET: "${LMS_OAUTH_CLIENT_SECRET}"
+      SECRET_KEY: "${SECRET_KEY}"
+      ENABLE_GATEWAY_FULFILLMENT: "false"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: payments
+      POSTGRES_PASSWORD: payments
+      POSTGRES_DB: payments_gateway
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U payments"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+volumes:
+  pgdata:

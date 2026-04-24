@@ -1,0 +1,34 @@
+schema_version: 1
+abi_id: wave11-agent-pack-abi
+purpose: >
+  Canonical ABI for generated machine-consumable agent pack payloads and their
+  human-readable projections.
+required_common_fields:
+  - pack_id
+  - schema_version
+  - generated_by
+  - source_range
+  - canonical_inputs
+pack_policy:
+  canonical_machine_form_required: true
+  markdown_is_projection_only: true
+  sort_keys_required: true
+  no_wall_clock_timestamps: true
+  no_machine_local_absolute_paths: true
+  canonical_inputs_must_be_repo_relative: true
+stability_levels:
+  - stable
+  - evolving
+  - experimental
+canonical_packs:
+  - skill-registry
+  - command-registry
+  - scenario-packs
+  - skill-dependency-graph
+  - read-first
+  - pack-registry
+  - runtime-convergence-report
+  - evidence-sufficiency-map
+  - mixed-diff-arbitration
+schema_root: docs/meta/skills/schemas
+verifier: tools/skills/verify_agent_pack_schemas.py

@@ -1,0 +1,48 @@
+version: 1
+bundles:
+  - id: 00-foundations
+    title: Foundations
+    include_tokens:
+      - platform.control-plane
+      - platform.repo-boundary
+      - platform.extension-model
+      - platform.change-policy
+      - tenant.lifecycle
+      - data.retention
+  - id: 10-auth-and-tenancy
+    title: Auth and Tenancy
+    include_tokens:
+      - auth.oidc
+      - auth.cookie-boundary
+      - auth.authorization.roles
+      - tenant.lifecycle
+      - tenant.isolation
+      - tenant.domain-boundary
+  - id: 20-build-and-release
+    title: Build and Release
+    include_tokens:
+      - build.image.registry
+      - build.version-pin
+      - build.gitops-promotion
+      - platform.control-plane
+  - id: 30-frontend
+    title: Frontend
+    include_tokens:
+      - frontend.composition
+      - frontend.brand.tokens
+      - frontend.i18n
+  - id: 40-data-and-events
+    title: Data and Events
+    include_tokens:
+      - data.retention
+      - data.pii
+      - data.deletion
+      - events.schema
+      - events.transport
+      - runtime.cache
+      - runtime.async-task
+  - id: 50-commerce
+    title: Commerce
+    include_tokens:
+      - commerce.system-of-record
+      - commerce.reconciliation

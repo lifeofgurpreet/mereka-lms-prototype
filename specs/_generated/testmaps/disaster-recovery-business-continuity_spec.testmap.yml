@@ -1,0 +1,440 @@
+spec: disaster-recovery-business-continuity_spec.md
+acceptance_criteria:
+- id: AC-001
+  description: Given production is running, when `./scripts/qa/audit-velero.sh --json`
+    executes, then it reports all three schedules (hourly-critical, daily-all-apps,
+    weekly-full) as active with recent Completed backups
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/audit-velero.sh
+    command: scripts/qa/audit-velero.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-disaster-recovery.sh
+    command: scripts/qa/verify-disaster-recovery.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
+- id: AC-002
+  description: Given the hourly-critical schedule runs, when the backup completes,
+    then `volumeSnapshotsCompleted` equals the number of Bound PVCs reported by `./scripts/qa/list-critical-backup-pvcs.sh`
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/audit-velero.sh
+    command: scripts/qa/audit-velero.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/list-critical-backup-pvcs.sh
+    command: scripts/qa/list-critical-backup-pvcs.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-disaster-recovery.sh
+    command: scripts/qa/verify-disaster-recovery.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+- id: AC-003
+  description: Given a Velero backup exists, when `BackupStorageLocation` is queried,
+    then its phase is `Available`
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/audit-velero.sh
+    command: scripts/qa/audit-velero.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-disaster-recovery.sh
+    command: scripts/qa/verify-disaster-recovery.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+- id: AC-004
+  description: Given production namespaces, when all Deployments/StatefulSets are
+    inspected, then no critical stateful service uses `emptyDir` for persistent data
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/audit-velero.sh
+    command: scripts/qa/audit-velero.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-disaster-recovery.sh
+    command: scripts/qa/verify-disaster-recovery.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+- id: AC-005
+  description: Given the monthly restore-test CronJob runs, when it completes, then
+    a throwaway namespace is created, PVCs are restored to Bound state, and a MySQL
+    `SELECT 1` probe succeeds
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-disaster-recovery.sh
+    command: scripts/qa/verify-disaster-recovery.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-dr-drill-schedule.sh
+    command: scripts/qa/verify-dr-drill-schedule.sh
+  - type: automated
+    test_type: shell_verification
+    file: infrastructure/k8s/velero/restore-test-script.sh
+    command: infrastructure/k8s/velero/restore-test-script.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
+- id: AC-006
+  description: Given a restore drill completes, when the throwaway namespace is inspected,
+    then at least 1 PVC is in Bound state matching the source backup
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-disaster-recovery.sh
+    command: scripts/qa/verify-disaster-recovery.sh
+  - type: automated
+    test_type: shell_verification
+    file: infrastructure/k8s/velero/restore-test-script.sh
+    command: infrastructure/k8s/velero/restore-test-script.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+- id: AC-007
+  description: Given a restore drill, when the infra-owned restore-test CronJob completes
+    and `STRICT=1 ./scripts/qa/verify-restore-drill.sh --namespace velero-restore-test`
+    executes, then the drill passes end-to-end including PV validation and MySQL probe
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-disaster-recovery.sh
+    command: scripts/qa/verify-disaster-recovery.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-restore-drill.sh
+    command: scripts/qa/verify-restore-drill.sh
+  - type: automated
+    test_type: shell_verification
+    file: infrastructure/k8s/velero/restore-test-script.sh
+    command: infrastructure/k8s/velero/restore-test-script.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+- id: AC-008
+  description: Given the backup-verification CronJob, when it runs daily, then it
+    confirms backup freshness within the last 2 hours for hourly schedule and 26 hours
+    for daily schedule
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/audit-velero-alert-pipeline.sh
+    command: scripts/qa/audit-velero-alert-pipeline.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-disaster-recovery.sh
+    command: scripts/qa/verify-disaster-recovery.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-dr-drill-schedule.sh
+    command: scripts/qa/verify-dr-drill-schedule.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+- id: AC-009
+  description: Given the DR evidence bundle workflow runs, when `STRICT_RUNTIME=1
+    ./scripts/qa/build-dr-evidence-bundle.sh --tar` executes, then it produces a tarball
+    containing audit-velero.json, audit-velero-alert-pipeline.json, audit-observability-runtime.json,
+    restore-test logs, and PVC summary
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/backup-db.sh
+    command: scripts/infra/backup-db.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/build-dr-evidence-bundle.sh
+    command: scripts/qa/build-dr-evidence-bundle.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/collect-velero-evidence.sh
+    command: scripts/qa/collect-velero-evidence.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-disaster-recovery.sh
+    command: scripts/qa/verify-disaster-recovery.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-dr-drill-schedule.sh
+    command: scripts/qa/verify-dr-drill-schedule.sh
+- id: AC-010
+  description: Given GitHub Actions DR Evidence Bundle workflow, when it runs monthly
+    (1st of month at 02:30 UTC), then artifacts are uploaded with 120-day retention
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-disaster-recovery.sh
+    command: scripts/qa/verify-disaster-recovery.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-dr-drill-schedule.sh
+    command: scripts/qa/verify-dr-drill-schedule.sh
+- id: AC-011
+  description: Given an enterprise audit request, when DR evidence is requested, then
+    a complete evidence bundle can be generated within 1 business day
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-disaster-recovery.sh
+    command: scripts/qa/verify-disaster-recovery.sh
+  - type: manual
+    runbook: docs/ops/runbooks/DISASTER_RECOVERY.md
+    section: DR Evidence Generation
+    justification: Requires human to initiate enterprise audit request and verify
+      completeness against client requirements
+- id: AC-012
+  description: Given Velero backup fails, when the failure is detected, then an alert
+    fires within 1 hour
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/audit-velero-alert-pipeline.sh
+    command: scripts/qa/audit-velero-alert-pipeline.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-disaster-recovery.sh
+    command: scripts/qa/verify-disaster-recovery.sh
+  - type: monitoring
+    metric: velero_backup_failure_total
+    dashboard: GCP Cloud Monitoring > Velero Alerts
+- id: AC-013
+  description: Given restore-test has not succeeded in 45+ days, when `STRICT_RUNTIME=1
+    ./scripts/qa/audit-velero-alert-pipeline.sh` runs, then it reports a stale-restore-test
+    failure
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/audit-velero-alert-pipeline.sh
+    command: scripts/qa/audit-velero-alert-pipeline.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-disaster-recovery.sh
+    command: scripts/qa/verify-disaster-recovery.sh
+  - type: monitoring
+    metric: dr_restore_drill_age_days
+    dashboard: GCP Cloud Monitoring > Velero Alerts
+- id: AC-014
+  description: Given `./scripts/qa/audit-velero-alert-pipeline.sh` runs, then it validates
+    both backup-verification and restore-test freshness signals
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/audit-velero-alert-pipeline.sh
+    command: scripts/qa/audit-velero-alert-pipeline.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-disaster-recovery.sh
+    command: scripts/qa/verify-disaster-recovery.sh
+- id: AC-015
+  description: Given a single PVC failure (DR-002), when the documented restore procedure
+    is followed, then the PVC is restored from the latest hourly backup within 30
+    minutes
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-disaster-recovery.sh
+    command: scripts/qa/verify-disaster-recovery.sh
+  - type: manual
+    runbook: docs/ops/runbooks/DISASTER_RECOVERY.md
+    section: 'DR-002: Single PVC Data Corruption'
+    justification: Requires live cluster with simulated PVC failure; destructive test
+      cannot be fully automated against production
+- id: AC-016
+  description: Given a full namespace loss (DR-003), when `velero restore create`
+    is executed with `--namespace-mappings`, then all resources including PVCs are
+    restored within 1 hour
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-disaster-recovery.sh
+    command: scripts/qa/verify-disaster-recovery.sh
+  - type: manual
+    runbook: docs/ops/runbooks/DISASTER_RECOVERY.md
+    section: 'DR-003: Namespace Deletion/Corruption'
+    justification: Full namespace restore requires human approval gate and coordination;
+      tested during quarterly drills
+- id: AC-017
+  description: Given a secret compromise (DR-006), when the secret rotation checklist
+    is followed, then all affected secrets are rotated in Infisical, synced to GCP
+    SM, and pods restarted within 1 hour
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-disaster-recovery.sh
+    command: scripts/qa/verify-disaster-recovery.sh
+  - type: manual
+    runbook: docs/ops/runbooks/SECRET_ROTATION_CHECKLIST.md
+    section: Full Rotation Procedure
+    justification: Secret rotation touches Infisical, GCP SM, and K8s in sequence;
+      requires human verification of non-disruption
+- id: AC-018
+  description: Given complete cluster loss (DR-007), when the cluster rebuild procedure
+    is followed, then platform availability is restored within 4 hours with data loss
+    not exceeding 1 hour (Tier 1 RPO)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-disaster-recovery.sh
+    command: scripts/qa/verify-disaster-recovery.sh
+  - type: manual
+    runbook: docs/ops/runbooks/DISASTER_RECOVERY.md
+    section: 'DR-007: Full Cluster Loss'
+    justification: Full cluster rebuild cannot be automated as a test; verified via
+      semi-annual tabletop exercise
+- id: AC-019
+  description: Given a restore completes, when `kubectl exec mysql-pod -- mysql -e
+    "SELECT COUNT(*) FROM openedx.auth_user"` is run, then the count is within 5%
+    of the pre-incident count
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-disaster-recovery.sh
+    command: scripts/qa/verify-disaster-recovery.sh
+  - type: automated
+    test_type: shell_verification
+    file: infrastructure/k8s/velero/restore-test-script.sh
+    command: infrastructure/k8s/velero/restore-test-script.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+  - type: manual
+    runbook: docs/ops/runbooks/DISASTER_RECOVERY.md
+    section: Data Integrity Verification
+    justification: 5% tolerance comparison requires baseline count from production
+      which varies over time
+- id: AC-020
+  description: Given a restore completes, when `./scripts/qa/public-health-check.sh
+    prod` runs, then LMS homepage, Studio login, Discovery, and Ecommerce health endpoints
+    all return 200/302
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/public-health-check.sh
+    command: scripts/qa/public-health-check.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-disaster-recovery.sh
+    command: scripts/qa/verify-disaster-recovery.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+- id: AC-021
+  description: Given a restore drill runs, when PVCs are restored, then the restore-test
+    job MUST verify PV data integrity by comparing checksums of critical PVs (MySQL
+    data directory) pre-backup and post-restore
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cloud-sql-snapshots.sh
+    command: scripts/qa/verify-cloud-sql-snapshots.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-disaster-recovery.sh
+    command: scripts/qa/verify-disaster-recovery.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-restore-drill.sh
+    command: scripts/qa/verify-restore-drill.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+- id: AC-022
+  description: Given a PV checksum verification, when comparing pre-backup and post-restore
+    checksums, then they MUST match exactly for MySQL data files (ibdata1, ib_logfile*,
+    *.ibd)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cloud-sql-snapshots.sh
+    command: scripts/qa/verify-cloud-sql-snapshots.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-disaster-recovery.sh
+    command: scripts/qa/verify-disaster-recovery.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-restore-drill.sh
+    command: scripts/qa/verify-restore-drill.sh
+  - type: manual
+    runbook: docs/ops/runbooks/DISASTER_RECOVERY.md
+    section: Cross-Region Readiness Verification
+    justification: GCS bucket configuration requires gcloud auth and varies by environment;
+      verified during Phase 3 implementation
+- id: AC-023
+  description: 'Given a restore drill completes, when drill evidence is archived,
+    then it MUST include: timestamp (ISO8601), PV checksum comparison results, pass/fail
+    status, and drill execution logs'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cloud-sql-snapshots.sh
+    command: scripts/qa/verify-cloud-sql-snapshots.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-dr-drill-schedule.sh
+    command: scripts/qa/verify-dr-drill-schedule.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-restore-drill.sh
+    command: scripts/qa/verify-restore-drill.sh
+- id: AC-024
+  description: 'Given quarterly restore drill schedule, when the schedule is documented,
+    then it MUST specify: drill cadence (quarterly), responsible team, notification
+    window (1 week advance), and success criteria (all PVs verified, checksums match,
+    MySQL probe succeeds)'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-dr-drill-schedule.sh
+    command: scripts/qa/verify-dr-drill-schedule.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-restore-drill.sh
+    command: scripts/qa/verify-restore-drill.sh
+  - type: manual
+    runbook: docs/ops/runbooks/DISASTER_RECOVERY.md
+    section: Quarterly Restore Drill Schedule
+    justification: Requires documented drill schedule with all required fields; verified
+      during quarterly DR planning cycle
+- id: AC-025
+  description: Given Terraform/Kustomize configs exist, when `kubectl kustomize deploy/k8s/overlays/production`
+    is run, then it produces valid manifests deployable to any supported production
+    cluster
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/DISASTER_RECOVERY.md
+    section: Cluster Rebuild from Config
+    justification: Full cluster rebuild validation requires a target GKE cluster;
+      kustomize build validates structure but not full deployability without a live
+      cluster
+    file: scripts/infra/fix-service-selectors.sh
+- id: AC-026
+  description: Given Velero backups are stored in GCS, when the backup bucket is inspected,
+    then it is configured for multi-region storage or cross-region replication
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/DISASTER_RECOVERY.md
+    section: Cross-Region Readiness Verification
+    justification: GCS bucket multi-region verification requires gcloud auth; verified
+      during Phase 3 implementation and quarterly DR review
+

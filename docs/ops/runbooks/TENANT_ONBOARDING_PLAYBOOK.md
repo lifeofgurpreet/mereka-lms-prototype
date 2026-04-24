@@ -1,0 +1,787 @@
+# Tenant Onboarding Playbook
+_Audience: Operators and developers • Owner: Platform Team • Last verified: 2026-03-12 • Status: active_
+
+**Status**: Active
+**Last Updated**: 2026-03-26
+
+## Overview
+
+This playbook covers adding a new tenant subsite to Mereka Academy. A tenant gets its own domain, organization, course catalog filter, and footer branding variant while sharing the same Open edX LMS instance. The canonical source of truth for runtime Site + SiteConfiguration state is the multisite registry in `infrastructure/tutor/multisite-sites*.yml`, reconciled via `./scripts/infra/apply-multisite-config.sh`.
+
+## Prerequisites
+
+- kubectl access to `mereka-lms` namespace
+- Push access to `mereka-lms` and `infrastructure` repos
+- DNS control for the new domain (Cloudflare or external)
+
+## Current Tenants
+
+| Domain | Slug | Org | MFE Subdomain | CMS |
+|--------|------|-----|---------------|-----|
+| `academyv2.mereka.io` | mereka | MEREKA | `apps.academyv2.mereka.io` | `studio.academyv2.mereka.io` |
+| `academy.biji-biji.com` | bijibiji | BIJIBIJI | `apps.academy.biji-biji.com` | Shared (studio.academyv2.mereka.io) |
+| `skillourfuture.academy.mereka.io` | skillourfuture | SKILLOURFUTURE | Shared (`apps.academyv2.mereka.io`) | Shared (studio.academyv2.mereka.io) |
+
+---
+
+## Step 1: Plan Domain Mapping
+
+Decide the domain structure for the new tenant:
+
+```
+# Option A: Subdomain of primary (recommended for internal tenants)
+newclient.academy.mereka.io
+apps.newclient.academy.mereka.io  # Only if dedicated MFE subdomain needed
+
+# Option B: Custom domain (for partner-branded tenants)
+academy.newclient.com
+apps.academy.newclient.com        # Only if dedicated MFE subdomain needed
+```
+
+**Decision checklist**:
+- [ ] Does the tenant need its own MFE subdomain? (Most share `apps.academyv2.mereka.io`)
+- [ ] Does the tenant need a custom CMS/Studio URL? (Most share `studio.academyv2.mereka.io`)
+- [ ] Is the domain a subdomain of `mereka.io` (Cloudflare managed) or external?
+
+## Step 2: DNS Setup
+
+### Mereka subdomain (Cloudflare-managed)
+
+```bash
+# Add CNAME pointing to the GKE ingress
+# Cloudflare dashboard → mereka.io → DNS Records
+# Type: CNAME, Name: newclient.academy, Content: academyv2.mereka.io
+# Proxy: DNS-only (gray cloud) — required for Let's Encrypt cert
+```
+
+### External domain
+
+The partner must add a CNAME record pointing to `academyv2.mereka.io` and set it to DNS-only mode.
+
+## Step 3: Add to Site Registry
+
+Edit `infrastructure/tutor/multisite-sites.yml`:
+
+```yaml
+# Add organization
+organizations:
+  # ... existing orgs ...
+  - short_name: NEWCLIENT
+    name: New Client Academy
+    description: New Client microsite catalog.
+
+# Add site
+sites:
+  # ... existing sites ...
+  - domain: newclient.academy.mereka.io
+    name: New Client Academy
+    orgs:
+      - NEWCLIENT
+    site_values:
+      domain: newclient.academy.mereka.io
+      site_name: New Client Academy
+      platform_name: New Client Academy
+      LMS_ROOT_URL: https://newclient.academy.mereka.io
+      CMS_ROOT_URL: https://studio.academyv2.mereka.io      # Shared Studio
+      MFE_BASE_URL: https://apps.academyv2.mereka.io         # Shared MFE
+      THEME_NAME: mereka
+      ENABLE_COMPREHENSIVE_THEMING: true
+      course_org_filter:
+        - NEWCLIENT
+      logo_image: https://newclient.academy.mereka.io/static/mereka/images/logo-horizontal.png
+      logo_url: /
+      favicon_path: mereka/images/favicon.ico
+      homepage_banner_enabled: false
+```
+
+## Step 4: Add To Django Settings Source Patch
+
+Edit the host/CSRF source patch in `infrastructure/tutor/apply-patches.sh`:
+
+```python
+# Add to extra_lms_hosts list
+extra_lms_hosts = [
+    "academy.biji-biji.com",
+    "skillourfuture.academy.mereka.io",
+    "newclient.academy.mereka.io",         # <-- ADD
+]
+
+# Add to extra_csrf_origins list
+extra_csrf_origins = [
+    "https://academy.biji-biji.com",
+    "https://apps.academy.biji-biji.com",
+    "https://skillourfuture.academy.mereka.io",
+    "https://newclient.academy.mereka.io",  # <-- ADD
+]
+```
+
+If the tenant has a dedicated MFE subdomain, also add it to `extra_csrf_origins`:
+```python
+    "https://apps.newclient.academy.mereka.io",  # Only if dedicated MFE
+```
+
+## Step 5: Add Footer Variant
+
+Edit `infrastructure/tutor/plugins/mereka_lms.py`, find the `SITE_VARIANTS` object in MerekaFooter:
+
+```javascript
+const SITE_VARIANTS = {
+  'academyv2.mereka.io': { brand: 'Mereka Academy', copyrightHolder: 'MEREKA', whatsapp: '601135271981' },
+  'academy.biji-biji.com': { brand: 'Biji-Biji Academy', copyrightHolder: 'Biji-Biji Initiative', whatsapp: '601135271981' },
+  'skillourfuture.academy.mereka.io': { brand: 'Skill Our Future Academy', copyrightHolder: 'MEREKA', whatsapp: '601135271981' },
+  'newclient.academy.mereka.io': { brand: 'New Client Academy', copyrightHolder: 'New Client', whatsapp: '601135271981' },  // <-- ADD
+};
+```
+
+## Step 6: Bootstrap tenant records and reconcile multisite config
+
+Preview the tenant bootstrap first:
+
+```bash
+./scripts/tenants/provision-tenant.sh \
+  --slug newclient \
+  --name "New Client Academy" \
+  --domain newclient.academy.mereka.io \
+  --contact-email admin@newclient.com \
+  --country MY \
+  --dry-run
+```
+
+Preview the canonical multisite reconciliation:
+
+```bash
+./scripts/infra/apply-multisite-config.sh --env prod --dry-run
+```
+
+Apply the tenant bootstrap when ready:
+
+```bash
+CONFIRM_PROVISION_TENANT=PROVISION_TENANT \
+./scripts/tenants/provision-tenant.sh \
+  --slug newclient \
+  --name "New Client Academy" \
+  --domain newclient.academy.mereka.io \
+  --contact-email admin@newclient.com \
+  --country MY
+```
+
+Then reconcile the authoritative Site + SiteConfiguration state from the multisite registry:
+
+```bash
+CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG \
+ALLOW_PROD_APPLY=1 \
+./scripts/infra/apply-multisite-config.sh --env prod --apply
+```
+
+If this tenant needs enterprise SSO, reconcile the enterprise mapping before configuring the IdP:
+
+```bash
+./scripts/tenants/sync-tenant-enterprise-mapping.sh --env prod --dry-run
+CONFIRM_SYNC_TENANT_ENTERPRISE_MAPPING=SYNC_TENANT_ENTERPRISE_MAPPING \
+ALLOW_PROD_APPLY=1 \
+./scripts/tenants/sync-tenant-enterprise-mapping.sh --env prod --apply
+```
+
+Then configure the tenant IdP with the canonical helper:
+
+```bash
+./scripts/tenants/configure-tenant-idp.sh \
+  --tenant-slug newclient \
+  --idp-type saml \
+  --metadata-url https://idp.newclient.com/metadata \
+  --dry-run
+```
+
+This flow gives you:
+- Tenant/enterprise bootstrap records from `provision-tenant.sh`
+- Canonical Site + SiteConfiguration reconciliation from `apply-multisite-config.sh`
+- EnterpriseCustomer linkage into SiteConfiguration from `sync-tenant-enterprise-mapping.sh`
+- IdP setup from `configure-tenant-idp.sh`
+
+## Pre-Deploy Checklist (AC-EG-003)
+
+> Run this checklist BEFORE committing. Every box must be checked or explicitly N/A'd.
+
+### Brand policy
+
+- [ ] Brand pack validated: `./scripts/tenants/validate-tenant-brand-pack.sh --slug <slug>`
+- [ ] Logo/favicon placed in `infrastructure/tutor/themes/mereka/tenants/<slug>/logos/`
+- [ ] `tokens.css` color values pass WCAG AA contrast (4.5:1 min)
+- [ ] Exception policy reviewed — no new non-plugin overrides (or exception filed)
+
+### Cookie & session domains
+
+- [ ] `SESSION_COOKIE_DOMAIN` is `None` (host-only) — do NOT set to a wildcard
+- [ ] `SESSION_COOKIE_NAME` for CMS is `studio_session_id` (not `sessionid`)
+- [ ] New domain does NOT share cookies with existing tenants (different host)
+- [ ] If custom domain: verify Cloudflare SSL mode is DNS-only (gray cloud) for Let's Encrypt
+
+### CSRF trusted origins
+
+- [ ] Domain added to the `extra_csrf_origins` source patch in `apply-patches.sh`
+- [ ] Domain added to `mereka_lms.py` CSRF patch (dual-path)
+- [ ] `https://` prefix included (Django requires scheme)
+
+### Payment / ecommerce routing
+
+- [ ] If tenant needs payments: Stripe connected account or direct key configured
+- [ ] `ENABLE_GATEWAY_FULFILLMENT` scope reviewed (currently `false` — no action unless activating)
+- [ ] If tenant does NOT need payments: confirm no ecommerce routes exposed for this domain
+- [ ] Caddy block does NOT proxy `/payment/` path for non-payment tenants
+
+### OIDC / SSO callbacks
+
+- [ ] Authentik: new domain added as allowed redirect URI in the OAuth2 provider
+  ```bash
+  # Verify in Authentik admin: Application → Providers → openedx-lms → Redirect URIs
+  # Add: https://<new-domain>/auth/complete/authentik-oidc/
+  ```
+- [ ] If enterprise SSO (SAML/OIDC): `sync-tenant-enterprise-mapping.sh` has been applied before IdP setup
+- [ ] If enterprise SSO (SAML/OIDC): tenant IdP configured via `configure-tenant-idp.sh` or `onboard-enterprise-tenant.sh`
+- [ ] If no SSO: confirm `DISABLE_ENTERPRISE_LOGIN` is `true` for this tenant's SiteConfiguration
+
+### K8s / infrastructure
+
+- [ ] `ALLOWED_HOSTS` includes new domain (both script and plugin paths)
+- [ ] Caddy block added for new domain (LMS proxy + health check)
+- [ ] Ingress annotation includes new domain (if using Nginx ingress)
+- [ ] Tenant registry ConfigMap updated (`deploy/k8s/base/apps/multi-tenancy/configmap-tenants.yaml`)
+
+### Validation command
+
+```bash
+# One-command pre-flight — runs brand pack validation + config checks
+./scripts/tenants/validate-tenant-brand-pack.sh --slug <slug> --strict
+./scripts/qa/check-forbidden-overrides.sh
+./scripts/qa/ops-preflight.sh
+```
+
+---
+
+## Step 7: Commit and Deploy
+
+Follow the merge-first protocol (full details: `docs/policies/operations/MERGE_FIRST_DEPLOYMENT_PROTOCOL.md`).
+Summary: all changes merge to `main` FIRST — ArgoCD auto-syncs within 3 minutes:
+
+```bash
+# 1. Create feature branch
+git checkout -b feat/tenant-newclient
+
+# 2. Commit changes
+git add infrastructure/tutor/multisite-sites.yml \
+       infrastructure/tutor/apply-patches.sh \
+       infrastructure/tutor/plugins/mereka_lms.py
+git commit -m "feat(tenancy): onboard newclient tenant"
+
+# 3. Push and create PR
+git push -u origin feat/tenant-newclient
+gh pr create --title "feat(tenancy): onboard newclient" --body "..."
+
+# 4. Merge to main
+gh pr merge --merge --delete-branch
+
+# 5. If image rebuild needed (theme/MFE changes):
+#    Follow `docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md` steps 1-3
+```
+
+## Step 8: Verify
+
+```bash
+# Runtime branding check (all domains including new one)
+./scripts/qa/verify-tenant-branding-runtime.sh
+
+# MFE config for new domain
+curl -s https://newclient.academy.mereka.io/api/mfe_config/v1 | python3 -m json.tool
+
+# Expected output includes:
+# "SITE_NAME": "New Client Academy"
+# "LMS_BASE_URL": "https://newclient.academy.mereka.io"
+
+# Full multisite governance (prod only)
+./scripts/qa/run-multisite-governance-gates.sh --env prod
+
+# Tenant isolation verification
+./scripts/qa/verify-tenant-isolation.sh
+```
+
+---
+
+## Rollback
+
+If the new tenant breaks existing domains:
+
+### Canonical rollback
+
+Do not normalize direct Django shell or Django admin edits here. The safe rollback path is:
+
+```bash
+# 1. Create a rollback branch from current main
+git checkout -b rollback/tenant-newclient
+
+# 2. Revert the tenant source-of-truth change
+git revert <tenant-onboarding-commit> --no-edit
+git push -u origin HEAD
+
+# 3. Open and merge the rollback PR under the merge-first protocol
+gh pr create --title "rollback(tenancy): remove newclient" --body "Rollback tenant onboarding source-of-truth"
+
+# 4. Reconcile runtime Site + SiteConfiguration from source of truth after merge
+CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG \
+ALLOW_PROD_APPLY=1 \
+./scripts/infra/apply-multisite-config.sh --env prod --apply
+
+# 5. Verify existing domains still work
+for domain in academyv2.mereka.io academy.biji-biji.com skillourfuture.academy.mereka.io; do
+  echo "$domain: $(curl -so /dev/null -w '%{http_code}' https://$domain/api/mfe_config/v1)"
+done
+```
+
+If you need faster emergency containment than source reconciliation provides, escalate to the incident runbook rather than teaching ad-hoc DB mutation here.
+
+### Full rollback (revert code changes)
+
+```bash
+# 1. Revert the relevant tenant source-of-truth commits on a rollback branch
+git checkout -b rollback/tenant-newclient-full
+git revert <tenant-onboarding-commit> --no-edit
+git push -u origin HEAD
+
+# 2. Merge the rollback PR, then reconcile runtime Site + SiteConfiguration
+CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG \
+ALLOW_PROD_APPLY=1 \
+./scripts/infra/apply-multisite-config.sh --env prod --apply
+
+# 3. Verify all domains
+./scripts/qa/verify-tenant-branding-runtime.sh
+```
+
+---
+
+## Domain Governance Rules
+
+1. **One domain per tenant**: Each tenant gets exactly one primary LMS domain
+2. **Shared infrastructure**: All tenants share Studio (`studio.academyv2.mereka.io`), Redis, MySQL, MongoDB
+3. **Course isolation**: Use `course_org_filter` in SiteConfiguration to restrict visible courses per domain
+4. **Cookie isolation**: `SESSION_COOKIE_DOMAIN = None` (host-only) — no cross-domain cookie leakage
+5. **CSRF isolation**: Each domain's HTTPS origin must be in `CSRF_TRUSTED_ORIGINS`
+6. **Footer branding**: MerekaFooter SITE_VARIANTS map provides per-domain brand text at runtime
+7. **Logo/theme**: All tenants currently share the `mereka` theme. Custom themes are Phase 2 scope.
+
+---
+
+## Verification Command Matrix (AC-US7-102)
+
+Run these commands after onboarding a new tenant. Each command must PASS before rollout.
+
+| # | Command | Scope | Expected | Fixture |
+|---|---------|-------|----------|---------|
+| 1 | `./scripts/qa/verify-tenant-branding-runtime.sh` | All domains | PASS 13+ / FAIL 0 | Checks SITE_NAME, LOGO_URL, LMS_BASE_URL, footer variant per domain |
+| 2 | `./scripts/qa/verify-mfe-branding.sh` | MFE pod + dist | PASS 47+ / FAIL 0 | Checks theme CSS, favicon, logo, brand color absence, asset integrity |
+| 3 | `./scripts/qa/verify-multisite-ux-consistency.sh` | Repo + pod | PASS 18+ / FAIL 0 | Checks for hardcoded domains, dynamic config, CI gates |
+| 4 | `./scripts/qa/verify-tenant-isolation.sh` | K8s cluster | PASS 42+ / FAIL 0 | Checks SiteConfiguration, org ownership, course filter |
+| 5 | `./scripts/qa/verify-mfe-route-smoke.sh` | All MFE routes | PASS 24+ / FAIL 0 | HTTP smoke for all Caddyfile routes + a11y checks |
+| 6 | Domain route smoke (inline) | 3 tenant hosts | HTTP 200 each | See below |
+
+### Domain route smoke (one-liner)
+
+```bash
+for domain in academyv2.mereka.io academy.biji-biji.com skillourfuture.academy.mereka.io; do
+  code=$(curl -so /dev/null -w "%{http_code}" "https://$domain/" 2>/dev/null)
+  mfe=$(curl -so /dev/null -w "%{http_code}" "https://$domain/api/mfe_config/v1" 2>/dev/null)
+  echo "$domain: LMS=$code MFE_CONFIG=$mfe"
+done
+```
+
+Expected: `LMS=200 MFE_CONFIG=200` for each domain.
+
+### Per-tenant MFE config fixture
+
+```bash
+# Extract key fields for evidence
+curl -s "https://<domain>/api/mfe_config/v1" | python3 -c "
+import json, sys
+d = json.load(sys.stdin)
+for k in ['SITE_NAME', 'LMS_BASE_URL', 'LOGO_URL', 'FAVICON_URL']:
+    print(f'  {k}: {d.get(k, \"MISSING\")}')
+"
+```
+
+---
+
+## Drift Repair Commands (AC-US7-103)
+
+### SiteConfiguration drift
+
+**Symptom**: Domain returns wrong SITE_NAME or default Open edX branding.
+
+```bash
+# Check current SiteConfiguration
+kubectl exec -n mereka-lms deploy/lms -- \
+  python manage.py lms shell -c "
+from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
+for sc in SiteConfiguration.objects.filter(enabled=True):
+    print(f'{sc.site.domain}: {sc.site_values.get(\"SITE_NAME\", \"UNSET\")}')
+"
+
+# Repair: reconcile source-of-truth and re-apply canonical multisite config
+CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG \
+ALLOW_PROD_APPLY=1 \
+./scripts/infra/apply-multisite-config.sh --env prod --apply
+```
+
+**Owner**: Platform team. **Evidence**: Before/after output of SiteConfiguration query.
+
+### ALLOWED_HOSTS / CSRF drift
+
+**Symptom**: 400 Bad Request or 403 CSRF Forbidden on new domain.
+
+```bash
+# Check if domain is in ALLOWED_HOSTS
+kubectl exec -n mereka-lms deploy/lms -- \
+  python manage.py lms shell -c "
+from django.conf import settings
+print([h for h in settings.ALLOWED_HOSTS if 'newclient' in h])
+print([o for o in settings.CSRF_TRUSTED_ORIGINS if 'newclient' in o])
+"
+
+# Repair: refresh through the governed prepare path, then rebuild
+./scripts/infra/prepare-tutor-build-context.sh --target all
+# Then follow `docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md` for image rebuild + deploy
+```
+
+**Owner**: Infrastructure team. **Evidence**: grep output from production.py settings.
+
+### Footer variant missing
+
+**Symptom**: Footer shows "Mereka Academy" instead of tenant-specific brand.
+
+```bash
+# Check SITE_VARIANTS in MFE pod
+kubectl exec -n mereka-lms deploy/mfe -- \
+  grep -o "'[a-z.]*.mereka.io'" /openedx/env.config.js 2>/dev/null | sort -u
+
+# Repair: add domain to SITE_VARIANTS in mereka_lms.py, rebuild MFE image
+```
+
+**Owner**: Frontend team. **Evidence**: grep output showing domain presence/absence.
+
+---
+
+## CI / Manual Gate Checklist (AC-US7-104)
+
+Before rolling out a new tenant to production, ALL gates must pass:
+
+### Pre-merge gates (CI)
+
+- [ ] `bash -n scripts/qa/verify-tenant-branding-runtime.sh` — syntax valid
+- [ ] `bash -n scripts/qa/verify-mfe-branding.sh` — syntax valid
+- [ ] `bash -n scripts/qa/verify-tenant-isolation.sh` — syntax valid
+- [ ] PR approved by at least 1 reviewer
+
+### Post-merge gates (manual)
+
+- [ ] `verify-tenant-branding-runtime.sh` — PASS (all domains)
+- [ ] `verify-mfe-branding.sh` — PASS (MFE pod checks)
+- [ ] `verify-tenant-isolation.sh` — PASS (SiteConfiguration + org checks)
+- [ ] Domain route smoke — HTTP 200 for all tenant domains
+- [ ] MFE config fixture — correct SITE_NAME, LMS_BASE_URL, LOGO_URL per domain
+- [ ] `verify-gitops-drift.sh` — no drift between source and GitOps overlay
+
+### Artifact naming rules
+
+Evidence artifacts MUST follow this naming convention:
+
+```
+var/evidence/tenant-onboarding/<slug>-<YYYYMMDD>/
+├── tenant-branding-runtime.log
+├── mfe-branding.log
+├── tenant-isolation.log
+├── domain-smoke.log
+├── mfe-config-<domain>.json
+└── summary.md
+```
+
+---
+
+## Evidence Template (AC-US7-105)
+
+Copy this template for each tenant onboarding. Fill in results and attach to the PR or release notes.
+
+```markdown
+# Tenant Onboarding Evidence: <Tenant Name>
+
+**Date**: YYYY-MM-DD
+**Operator**: <name>
+**Domain**: <domain>
+**Slug**: <slug>
+**PR**: #<number>
+
+## Pre-Rollout Checklist
+
+| Gate | Result | Notes |
+|------|--------|-------|
+| DNS resolves | PASS/FAIL | `dig +short <domain>` |
+| SiteConfiguration reconciled | PASS/FAIL | apply-multisite-config.sh output |
+| ALLOWED_HOSTS includes domain | PASS/FAIL | grep from production.py |
+| CSRF_TRUSTED_ORIGINS includes domain | PASS/FAIL | grep from production.py |
+| SITE_VARIANTS includes domain | PASS/FAIL | grep from env.config.js |
+
+## Post-Rollout Verification
+
+| Script | Result | Summary |
+|--------|--------|---------|
+| verify-tenant-branding-runtime.sh | PASS X / FAIL Y | |
+| verify-mfe-branding.sh | PASS X / FAIL Y | |
+| verify-tenant-isolation.sh | PASS X / FAIL Y | |
+| Domain route smoke | HTTP <code> | |
+
+## MFE Config Snapshot
+
+| Key | Value |
+|-----|-------|
+| SITE_NAME | |
+| LMS_BASE_URL | |
+| LOGO_URL | |
+| FAVICON_URL | |
+
+## Rollback Plan
+
+- [ ] Quick rollback tested (source-of-truth revert + apply-multisite-config)
+- [ ] Full rollback path documented (git revert)
+
+## Sign-off
+
+- [ ] Platform team: <name>
+- [ ] Verified by: <name>
+```
+
+### Automated evidence (AC-EG-004, AC-EG-007)
+
+Instead of filling the template manually, generate machine-readable evidence:
+
+```bash
+# Produces JSON + Markdown summary under var/evidence/tenant-onboarding/<slug>-<date>/
+./scripts/qa/tenant-onboarding-evidence.sh \
+  --slug skillourfuture \
+  --domain skillourfuture.academy.mereka.io \
+  --env prod
+```
+
+Output includes `evidence-summary.json` (machine-readable) and `evidence-summary.md` (human-readable).
+Attach the JSON to the PR for automated verification.
+
+---
+
+## One-Command Dry-Run Matrix (AC-ONB-201, AC-ONB-202)
+
+Run all verification gates for all 3 tenant domains with a single command:
+
+```bash
+# Full dry-run with evidence capture
+./scripts/qa/tenant-onboarding-dryrun.sh --env prod \
+  --evidence-dir "var/evidence/tenant-onboarding/dryrun-$(date +%Y%m%d)"
+
+# Quick dry-run (no evidence artifacts)
+./scripts/qa/tenant-onboarding-dryrun.sh --env prod
+```
+
+This runs in sequence:
+
+| Gate | Script | Artifact Name |
+|------|--------|---------------|
+| Tenant branding runtime | `verify-tenant-branding-runtime.sh` | `verify-tenant-branding-runtime.log` |
+| MFE branding | `verify-mfe-branding.sh --env prod` | `verify-mfe-branding.log` |
+| Multisite UX consistency | `verify-multisite-ux-consistency.sh --env prod` | `verify-multisite-ux-consistency.log` |
+| Post-deploy smoke | `verify-post-deploy-smoke.sh --env prod` | `post-deploy-smoke.log` |
+| MFE config fixture | curl + python3 per domain | `mfe-config-<domain>.json` |
+
+All artifacts are written to the `--evidence-dir` directory.
+
+---
+
+## Failure Triage Map (AC-ONB-203)
+
+When a verification gate fails, use this triage map to identify root cause and repair action.
+
+### Class 1: Branding Drift
+
+**Symptom**: `verify-tenant-branding-runtime.sh` reports wrong SITE_NAME or LOGO_URL for a domain.
+
+| Check | Command | Expected |
+|-------|---------|----------|
+| SiteConfiguration values | `kubectl exec -n mereka-lms deploy/lms -- python manage.py lms shell -c "from openedx.core.djangoapps.site_configuration.models import SiteConfiguration; [print(f'{sc.site.domain}: {sc.site_values.get(\"SITE_NAME\", \"UNSET\")}') for sc in SiteConfiguration.objects.filter(enabled=True)]"` | Correct SITE_NAME per domain |
+| MerekaFooter SITE_VARIANTS | `kubectl exec -n mereka-lms deploy/mfe -- grep -o "'[a-z.]*.mereka.io'" /openedx/env.config.js` | All tenant domains listed |
+| multisite-sites.yml | `grep "domain:" infrastructure/tutor/multisite-sites.yml` | All tenant domains present |
+
+**Repair**: Fix the tenant source definitions, rerun `apply-multisite-config.sh --env prod --apply`, and rebuild the MFE image only if `SITE_VARIANTS` is missing from the runtime bundle.
+
+### Class 2: Route Drift
+
+**Symptom**: `verify-mfe-route-smoke.sh` or `verify-post-deploy-smoke.sh` reports HTTP 404/502 for MFE routes.
+
+| Check | Command | Expected |
+|-------|---------|----------|
+| Caddy routes | `kubectl exec -n mereka-lms deploy/caddy -- cat /etc/caddy/Caddyfile \| grep -c "handle_path"` | All MFE routes mapped |
+| MFE pod running | `kubectl get deploy mfe -n mereka-lms -o jsonpath='{.status.readyReplicas}'` | ≥ 1 |
+| Endpoints populated | `kubectl get endpoints mfe -n mereka-lms` | Non-empty addresses |
+
+**Repair**: If Caddy routes missing → rebuild MFE image. If endpoints empty → fix service selectors (`scripts/infra/fix-service-selectors.sh`).
+
+### Class 3: Authn Route Mismatch
+
+**Symptom**: Login page returns 404, redirect loop, or CSRF error on tenant domain.
+
+| Check | Command | Expected |
+|-------|---------|----------|
+| ALLOWED_HOSTS | `kubectl exec -n mereka-lms deploy/lms -- python manage.py lms shell -c "from django.conf import settings; print([h for h in settings.ALLOWED_HOSTS])"` | All tenant domains present |
+| CSRF_TRUSTED_ORIGINS | `kubectl exec -n mereka-lms deploy/lms -- python manage.py lms shell -c "from django.conf import settings; print([o for o in settings.CSRF_TRUSTED_ORIGINS])"` | All tenant HTTPS origins present |
+| SESSION_COOKIE_DOMAIN | `kubectl exec -n mereka-lms deploy/lms -- python manage.py lms shell -c "from django.conf import settings; print(settings.SESSION_COOKIE_DOMAIN)"` | `None` (host-only) |
+| OIDC provider active | `./scripts/qa/verify-oidc-provider-configs.sh --env prod` | PASS |
+
+**Repair**: If domain missing from ALLOWED_HOSTS/CSRF → update the source patch in
+`apply-patches.sh`, run `./scripts/infra/prepare-tutor-build-context.sh --target all`,
+then rebuild the affected image. If cookie domain wrong → update settings, restart pods.
+
+---
+
+## Canonical Rollback Procedure (AC-ONB-204)
+
+### Rollback: Reconcile runtime state from reverted source
+
+```bash
+# 1. Revert the tenant source-of-truth change on a rollback branch
+git checkout -b rollback/tenant-newclient
+git revert <tenant-onboarding-commit> --no-edit
+git push -u origin HEAD
+gh pr create --title "rollback(tenancy): remove newclient" --body "Rollback tenant onboarding source-of-truth"
+
+# 2. After merge, reconcile runtime Site + SiteConfiguration
+CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG \
+ALLOW_PROD_APPLY=1 \
+./scripts/infra/apply-multisite-config.sh --env prod --apply
+```
+
+### Post-rollback verification (one command)
+
+```bash
+# Verify all remaining tenants still work
+./scripts/qa/verify-post-deploy-smoke.sh --env prod \
+  --evidence-dir "var/evidence/rollback-$(date +%Y%m%d)"
+```
+
+### Full rollback: Revert code changes
+
+```bash
+# Revert the relevant source-of-truth commit(s) on a rollback branch and merge the PR
+git checkout -b rollback/tenant-newclient-full
+git revert <tenant-onboarding-commit> --no-edit
+git push -u origin HEAD
+```
+
+### Rollback checklist output
+
+After every rollback, verify:
+
+- [ ] `verify-post-deploy-smoke.sh --env prod` → PASS (existing tenants unaffected)
+- [ ] `verify-tenant-branding-runtime.sh` → PASS (branding correct on remaining domains)
+- [ ] Domain route smoke → HTTP 200 for all non-rolled-back domains
+- [ ] Evidence captured in `var/evidence/rollback-<YYYYMMDD>/`
+
+---
+
+## Plugin-First Customization Steps (AC-WC-011)
+
+> For new tenants (e.g. `skillourfuture.academy.mereka.io`), all customizations MUST
+> follow plugin/theme-first architecture. No direct DOM manipulation or new template
+> overrides.
+
+### Step 1: Create tenant brand pack
+
+```bash
+# Copy the tenant brand pack template
+cp -r infrastructure/tutor/themes/mereka/tenants/_template \
+      infrastructure/tutor/themes/mereka/tenants/skillourfuture
+
+# Populate brand assets
+# - logos/ (logo.svg, logo-dark.svg, favicon.ico)
+# - tokens.css (CSS custom properties for brand colors)
+# - config.json (SITE_NAME, copyrightHolder, whatsapp, etc.)
+```
+
+### Step 2: Register tenant in multisite config
+
+```bash
+# Add to multisite-sites.yml
+vim infrastructure/tutor/multisite-sites.yml
+# Add entry with domain, slug, brand, MFE config
+
+# Add to ALLOWED_HOSTS and CSRF_TRUSTED_ORIGINS
+# This is handled by mereka_lms.py plugin — add domain to the tenant registry
+vim deploy/k8s/base/apps/multi-tenancy/configmap-tenants.yaml
+```
+
+### Step 3: Reconcile canonical SiteConfiguration (plugin-first)
+
+```bash
+# First bootstrap tenant records if needed
+CONFIRM_PROVISION_TENANT=PROVISION_TENANT \
+./scripts/tenants/provision-tenant.sh \
+  --slug skillourfuture \
+  --name "Skill Our Future Academy" \
+  --domain "skillourfuture.academy.mereka.io"
+
+# Then reconcile Site + SiteConfiguration from the multisite registry
+CONFIRM_APPLY_MULTISITE_CONFIG=APPLY_MULTISITE_CONFIG \
+ALLOW_PROD_APPLY=1 \
+./scripts/infra/apply-multisite-config.sh --env prod --apply
+```
+
+The canonical multisite apply flow sets:
+- `SITE_NAME` and `PLATFORM_NAME` from `multisite-sites.yml`
+- `LMS_BASE_URL`, `LOGO_URL`, `FAVICON_URL` from the tenant domain + brand pack
+- footer/runtime branding inputs consumed by `MerekaFooter` and related plugin surfaces
+
+### Step 4: Customization rules for new tenants
+
+| Customization | Approved Method | Forbidden Method |
+|---------------|-----------------|------------------|
+| Logo/favicon | Brand pack `logos/` dir + `SiteConfiguration` | Direct template edit |
+| Colors | `tokens.css` custom properties | Inline CSS in templates |
+| Footer content | `TenantConfig` model + `MerekaFooter` variant | New Mako footer template |
+| Homepage hero | `SiteConfiguration` values | New `index_overlay.html` |
+| MFE styling | Tenant-scoped CSS variables in `mereka.scss` | `document.querySelector` |
+| Header tagline | `configuration_helpers.get_value('tagline')` | Hardcoded in `brand.html` |
+| Email templates | Open edX `MKTG_URL_OVERRIDES` + theming | Direct Mako edits |
+
+### Step 5: Verify with plugin-first gate
+
+```bash
+# Run the forbidden override check — should pass with no new overrides
+./scripts/qa/check-forbidden-overrides.sh
+
+# Run tenant-specific branding verification
+./scripts/qa/verify-tenant-branding-runtime.sh
+
+# Run full dry-run matrix
+./scripts/qa/tenant-onboarding-dryrun.sh --env prod
+```
+
+### Step 6: Document in migration survey
+
+After onboarding, update `docs/reference/architecture/PLUGIN_MIGRATION_SURVEY.md` if any
+new exceptions were needed. All exceptions must have an expiry date per the
+Non-Plugin Customization Exception Policy in `BRANDING_OPERATING_MODEL.md`.
+
+---
+
+## Related Documents
+
+- `infrastructure/tutor/multisite-sites.yml` — Canonical site registry
+- `docs/reference/operations/TENANT_BRANDING_SURFACE_MATRIX.md` — Per-domain verification matrix
+- `docs/policies/operations/MERGE_FIRST_DEPLOYMENT_PROTOCOL.md` — Deployment protocol
+- `docs/ops/runbooks/BRANDING_RELEASE_RUNBOOK.md` — Image build + deploy steps
+- `scripts/tenants/provision-tenant.sh` — Provisioning script
+- `specs/multi-site-domains_spec.md` — Domain configuration spec
+- `specs/multi-tenancy-architecture_spec.md` — Multi-tenancy architecture spec
+- `docs/reference/architecture/PLUGIN_MIGRATION_SURVEY.md` — Override inventory + migration status
+- `docs/guides/branding/BRANDING_OPERATING_MODEL.md` — Exception policy for non-plugin overrides

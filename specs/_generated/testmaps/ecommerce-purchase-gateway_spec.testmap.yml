@@ -1,0 +1,1038 @@
+spec: ecommerce-purchase-gateway_spec.md
+acceptance_criteria:
+- id: AC-001
+  description: Given a valid offering UUID and buyer email, when `POST /api/v1/checkout/`
+    is called, then a Stripe Checkout Session is created and the response includes
+    a `checkout_url` that redirects to Stripe
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-scaffold.sh
+    command: scripts/qa/verify-purchase-gateway-scaffold.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/checkout.py
+    command: pytest services/purchase-gateway/app/routers/checkout.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_checkout_flow.py
+    command: pytest services/purchase-gateway/tests/integration/test_checkout_flow.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
+- id: AC-002
+  description: Given a buyer with an existing LMS account completes Stripe Checkout,
+    when the `checkout.session.completed` webhook fires, then the buyer is enrolled
+    in the course within 30 seconds
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/services/fulfillment.py
+    command: pytest services/purchase-gateway/app/services/fulfillment.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/services/lms_client.py
+    command: pytest services/purchase-gateway/app/services/lms_client.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_lms_client.py
+    command: pytest services/purchase-gateway/tests/unit/test_lms_client.py
+- id: AC-003
+  description: Given a buyer without an LMS account completes Stripe Checkout, when
+    the `checkout.session.completed` webhook fires, then an entitlement is created
+    and an invitation email is sent to the buyer
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/services/fulfillment.py
+    command: pytest services/purchase-gateway/app/services/fulfillment.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+- id: AC-004
+  description: Given an expired Stripe Checkout Session, when the `checkout.session.expired`
+    webhook fires, then the order status transitions to `expired` and no fulfillment
+    occurs
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/webhooks.py
+    command: pytest services/purchase-gateway/app/routers/webhooks.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_webhook_processing.py
+    command: pytest services/purchase-gateway/tests/integration/test_webhook_processing.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_stripe_service.py
+    command: pytest services/purchase-gateway/tests/unit/test_stripe_service.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+- id: AC-005
+  description: Given a buyer cancels at Stripe Checkout, when they return to the cancel
+    URL, then the order status remains `pending` (Stripe may expire it later) and
+    no fulfillment occurs
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-security.sh
+    command: scripts/qa/verify-purchase-gateway-security.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/checkout.py
+    command: pytest services/purchase-gateway/app/routers/checkout.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_checkout_flow.py
+    command: pytest services/purchase-gateway/tests/integration/test_checkout_flow.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
+- id: AC-006
+  description: Given a webhook request with a valid Stripe signature, when the gateway
+    receives it, then HTTP 200 is returned within 500ms and the event is logged in
+    `stripe_events`
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-security.sh
+    command: scripts/qa/verify-purchase-gateway-security.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/webhooks.py
+    command: pytest services/purchase-gateway/app/routers/webhooks.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_webhook_processing.py
+    command: pytest services/purchase-gateway/tests/integration/test_webhook_processing.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+- id: AC-007
+  description: Given a webhook request with an invalid signature, when the gateway
+    receives it, then HTTP 400 is returned and the event is NOT logged
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/webhooks.py
+    command: pytest services/purchase-gateway/app/routers/webhooks.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_webhook_processing.py
+    command: pytest services/purchase-gateway/tests/integration/test_webhook_processing.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+- id: AC-008
+  description: Given the same Stripe event ID is received twice (retry), when the
+    gateway processes it, then the second processing is a no-op and no duplicate order
+    or enrollment is created
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-models.sh
+    command: scripts/qa/verify-purchase-gateway-models.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-resilience.sh
+    command: scripts/qa/verify-purchase-gateway-resilience.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/webhooks.py
+    command: pytest services/purchase-gateway/app/routers/webhooks.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_webhook_processing.py
+    command: pytest services/purchase-gateway/tests/integration/test_webhook_processing.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+- id: AC-009
+  description: Given a `checkout.session.completed` event for a multi-tenant order
+    (Stripe Connect), when the gateway processes it, then the order is associated
+    with the correct tenant
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-models.sh
+    command: scripts/qa/verify-purchase-gateway-models.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/services/stripe_service.py
+    command: pytest services/purchase-gateway/app/services/stripe_service.py
+- id: AC-010
+  description: Given an unclaimed entitlement with a valid claim token, when an authenticated
+    user visits `/api/v1/claim/{token}`, then the entitlement is fulfilled (enrollment
+    created) and status is set to `claimed`
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-models.sh
+    command: scripts/qa/verify-purchase-gateway-models.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+- id: AC-011
+  description: Given an unclaimed entitlement with a valid claim token, when an unauthenticated
+    user visits `/api/v1/claim/{token}`, then they are redirected to the LMS login/registration
+    page with a return URL to the claim endpoint
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-models.sh
+    command: scripts/qa/verify-purchase-gateway-models.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+- id: AC-012
+  description: Given a claim token that has expired (past `expires_at`), when a user
+    visits the claim URL, then a clear error message is returned indicating the entitlement
+    has expired
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-scaffold.sh
+    command: scripts/qa/verify-purchase-gateway-scaffold.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+- id: AC-013
+  description: Given a claimed entitlement, when the same claim token is visited again,
+    then the response indicates the entitlement has already been claimed (no duplicate
+    enrollment)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-scaffold.sh
+    command: scripts/qa/verify-purchase-gateway-scaffold.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+- id: AC-014
+  description: Given an enterprise admin with 100 seat pack entitlements, when `POST
+    /admin/api/v1/entitlements/assign/` is called with 50 email addresses, then 50
+    entitlements are assigned and invitation emails are sent
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-scaffold.sh
+    command: scripts/qa/verify-purchase-gateway-scaffold.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+- id: AC-015
+  description: Given a fulfilled order, when a full refund is processed in Stripe
+    and the `charge.refunded` webhook fires, then the order status transitions to
+    `refunded` and the enrollment is deactivated in the LMS within 5 minutes
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/admin_refunds.py
+    command: pytest services/purchase-gateway/app/routers/admin_refunds.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/webhooks.py
+    command: pytest services/purchase-gateway/app/routers/webhooks.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/services/refund.py
+    command: pytest services/purchase-gateway/app/services/refund.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_admin_refund_endpoints.py
+    command: pytest services/purchase-gateway/tests/integration/test_admin_refund_endpoints.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_webhook_processing.py
+    command: pytest services/purchase-gateway/tests/integration/test_webhook_processing.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_admin_refunds.py
+    command: pytest services/purchase-gateway/tests/unit/test_admin_refunds.py
+- id: AC-016
+  description: Given a fulfilled order, when a partial refund is processed in Stripe,
+    then the order status transitions to `partially_refunded` and no enrollment is
+    automatically revoked
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/webhooks.py
+    command: pytest services/purchase-gateway/app/routers/webhooks.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/services/refund.py
+    command: pytest services/purchase-gateway/app/services/refund.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_webhook_processing.py
+    command: pytest services/purchase-gateway/tests/integration/test_webhook_processing.py
+- id: AC-017
+  description: Given a fulfilled order, when a `charge.dispute.created` webhook fires,
+    then the order status transitions to `disputed` and an alert is fired to the finance
+    channel
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/webhooks.py
+    command: pytest services/purchase-gateway/app/routers/webhooks.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/services/dispute.py
+    command: pytest services/purchase-gateway/app/services/dispute.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_webhook_processing.py
+    command: pytest services/purchase-gateway/tests/integration/test_webhook_processing.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_dispute.py
+    command: pytest services/purchase-gateway/tests/unit/test_dispute.py
+- id: AC-018
+  description: Given a disputed order where the merchant wins (`charge.dispute.closed`
+    with `status=won`), then the order status is restored to its pre-dispute state
+    and no enrollments are revoked
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/webhooks.py
+    command: pytest services/purchase-gateway/app/routers/webhooks.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/services/dispute.py
+    command: pytest services/purchase-gateway/app/services/dispute.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_webhook_processing.py
+    command: pytest services/purchase-gateway/tests/integration/test_webhook_processing.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_dispute.py
+    command: pytest services/purchase-gateway/tests/unit/test_dispute.py
+- id: AC-019
+  description: Given a fulfillment job that fails due to LMS API returning HTTP 503,
+    when the worker retries, then it retries up to 10 times with exponential backoff
+    (5s, 10s, 20s, 40s, ...)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-resilience.sh
+    command: scripts/qa/verify-purchase-gateway-resilience.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/auth.py
+    command: pytest services/purchase-gateway/app/auth.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/admin.py
+    command: pytest services/purchase-gateway/app/routers/admin.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/admin_entitlement_actions.py
+    command: pytest services/purchase-gateway/app/routers/admin_entitlement_actions.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/admin_entitlement_invitations.py
+    command: pytest services/purchase-gateway/app/routers/admin_entitlement_invitations.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/admin_entitlements.py
+    command: pytest services/purchase-gateway/app/routers/admin_entitlements.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/admin_events.py
+    command: pytest services/purchase-gateway/app/routers/admin_events.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/admin_offerings.py
+    command: pytest services/purchase-gateway/app/routers/admin_offerings.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/admin_orders.py
+    command: pytest services/purchase-gateway/app/routers/admin_orders.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/admin_refunds.py
+    command: pytest services/purchase-gateway/app/routers/admin_refunds.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/admin_reports.py
+    command: pytest services/purchase-gateway/app/routers/admin_reports.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/services/fulfillment.py
+    command: pytest services/purchase-gateway/app/services/fulfillment.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_admin_endpoints.py
+    command: pytest services/purchase-gateway/tests/integration/test_admin_endpoints.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_admin_entitlement_action_endpoints.py
+    command: pytest services/purchase-gateway/tests/integration/test_admin_entitlement_action_endpoints.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_admin_entitlement_invitation_endpoints.py
+    command: pytest services/purchase-gateway/tests/integration/test_admin_entitlement_invitation_endpoints.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_admin_entitlements_endpoints.py
+    command: pytest services/purchase-gateway/tests/integration/test_admin_entitlements_endpoints.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_admin_offerings_endpoints.py
+    command: pytest services/purchase-gateway/tests/integration/test_admin_offerings_endpoints.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_admin_order_detail_endpoints.py
+    command: pytest services/purchase-gateway/tests/integration/test_admin_order_detail_endpoints.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_admin_refund_endpoints.py
+    command: pytest services/purchase-gateway/tests/integration/test_admin_refund_endpoints.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_admin_reports_endpoints.py
+    command: pytest services/purchase-gateway/tests/integration/test_admin_reports_endpoints.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_admin_stripe_events_endpoints.py
+    command: pytest services/purchase-gateway/tests/integration/test_admin_stripe_events_endpoints.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_admin.py
+    command: pytest services/purchase-gateway/tests/unit/test_admin.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_admin_entitlement_actions.py
+    command: pytest services/purchase-gateway/tests/unit/test_admin_entitlement_actions.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_admin_entitlement_invitations.py
+    command: pytest services/purchase-gateway/tests/unit/test_admin_entitlement_invitations.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_admin_entitlements.py
+    command: pytest services/purchase-gateway/tests/unit/test_admin_entitlements.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_admin_events.py
+    command: pytest services/purchase-gateway/tests/unit/test_admin_events.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_admin_offerings.py
+    command: pytest services/purchase-gateway/tests/unit/test_admin_offerings.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_admin_orders.py
+    command: pytest services/purchase-gateway/tests/unit/test_admin_orders.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_admin_refunds.py
+    command: pytest services/purchase-gateway/tests/unit/test_admin_refunds.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_admin_reports.py
+    command: pytest services/purchase-gateway/tests/unit/test_admin_reports.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_auth.py
+    command: pytest services/purchase-gateway/tests/unit/test_auth.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+- id: AC-020
+  description: Given a fulfillment job that fails all 10 retries, when the max retries
+    are exhausted, then the order transitions to `fulfillment_failed`, the job is
+    moved to the dead letter queue, and a Critical alert is fired
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-resilience.sh
+    command: scripts/qa/verify-purchase-gateway-resilience.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/auth.py
+    command: pytest services/purchase-gateway/app/auth.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/admin.py
+    command: pytest services/purchase-gateway/app/routers/admin.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/services/fulfillment.py
+    command: pytest services/purchase-gateway/app/services/fulfillment.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_admin_endpoints.py
+    command: pytest services/purchase-gateway/tests/integration/test_admin_endpoints.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_admin.py
+    command: pytest services/purchase-gateway/tests/unit/test_admin.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_auth.py
+    command: pytest services/purchase-gateway/tests/unit/test_auth.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+- id: AC-021
+  description: Given a fulfillment job for a user already enrolled in the course (LMS
+    returns 409), when the worker processes it, then the line item is marked as `fulfilled`
+    (idempotent) and no error is logged
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-resilience.sh
+    command: scripts/qa/verify-purchase-gateway-resilience.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/services/fulfillment.py
+    command: pytest services/purchase-gateway/app/services/fulfillment.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/services/lms_client.py
+    command: pytest services/purchase-gateway/app/services/lms_client.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_lms_client.py
+    command: pytest services/purchase-gateway/tests/unit/test_lms_client.py
+- id: AC-022
+  description: Given an enterprise tenant with a subscription, when `invoice.paid`
+    fires for a renewal, then seat pack entitlements are replenished for the new billing
+    period
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/models/offering.py
+    command: pytest services/purchase-gateway/app/models/offering.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/models/subscription.py
+    command: pytest services/purchase-gateway/app/models/subscription.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/admin.py
+    command: pytest services/purchase-gateway/app/routers/admin.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/admin_entitlement_actions.py
+    command: pytest services/purchase-gateway/app/routers/admin_entitlement_actions.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/admin_entitlement_invitations.py
+    command: pytest services/purchase-gateway/app/routers/admin_entitlement_invitations.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/admin_entitlements.py
+    command: pytest services/purchase-gateway/app/routers/admin_entitlements.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/admin_events.py
+    command: pytest services/purchase-gateway/app/routers/admin_events.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/admin_offerings.py
+    command: pytest services/purchase-gateway/app/routers/admin_offerings.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/admin_orders.py
+    command: pytest services/purchase-gateway/app/routers/admin_orders.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/admin_refunds.py
+    command: pytest services/purchase-gateway/app/routers/admin_refunds.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/admin_reports.py
+    command: pytest services/purchase-gateway/app/routers/admin_reports.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/subscriptions.py
+    command: pytest services/purchase-gateway/app/routers/subscriptions.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/services/subscription.py
+    command: pytest services/purchase-gateway/app/services/subscription.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_admin_endpoints.py
+    command: pytest services/purchase-gateway/tests/integration/test_admin_endpoints.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_admin_entitlement_action_endpoints.py
+    command: pytest services/purchase-gateway/tests/integration/test_admin_entitlement_action_endpoints.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_admin_entitlement_invitation_endpoints.py
+    command: pytest services/purchase-gateway/tests/integration/test_admin_entitlement_invitation_endpoints.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_admin_entitlements_endpoints.py
+    command: pytest services/purchase-gateway/tests/integration/test_admin_entitlements_endpoints.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_admin_offerings_endpoints.py
+    command: pytest services/purchase-gateway/tests/integration/test_admin_offerings_endpoints.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_admin_order_detail_endpoints.py
+    command: pytest services/purchase-gateway/tests/integration/test_admin_order_detail_endpoints.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_admin_refund_endpoints.py
+    command: pytest services/purchase-gateway/tests/integration/test_admin_refund_endpoints.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_admin_reports_endpoints.py
+    command: pytest services/purchase-gateway/tests/integration/test_admin_reports_endpoints.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/integration/test_admin_stripe_events_endpoints.py
+    command: pytest services/purchase-gateway/tests/integration/test_admin_stripe_events_endpoints.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_admin.py
+    command: pytest services/purchase-gateway/tests/unit/test_admin.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_admin_entitlement_actions.py
+    command: pytest services/purchase-gateway/tests/unit/test_admin_entitlement_actions.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_admin_entitlement_invitations.py
+    command: pytest services/purchase-gateway/tests/unit/test_admin_entitlement_invitations.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_admin_entitlements.py
+    command: pytest services/purchase-gateway/tests/unit/test_admin_entitlements.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_admin_events.py
+    command: pytest services/purchase-gateway/tests/unit/test_admin_events.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_admin_offerings.py
+    command: pytest services/purchase-gateway/tests/unit/test_admin_offerings.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_admin_orders.py
+    command: pytest services/purchase-gateway/tests/unit/test_admin_orders.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_admin_refunds.py
+    command: pytest services/purchase-gateway/tests/unit/test_admin_refunds.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_admin_reports.py
+    command: pytest services/purchase-gateway/tests/unit/test_admin_reports.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_subscriptions_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_subscriptions_route.py
+- id: AC-023
+  description: Given an enterprise tenant whose subscription payment fails, when `invoice.payment_failed`
+    fires, then a grace period begins and the admin is notified. No access is revoked
+    during the grace period
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/models/subscription.py
+    command: pytest services/purchase-gateway/app/models/subscription.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/subscriptions.py
+    command: pytest services/purchase-gateway/app/routers/subscriptions.py
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/services/subscription.py
+    command: pytest services/purchase-gateway/app/services/subscription.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_subscriptions_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_subscriptions_route.py
+- id: AC-024
+  description: Given an enterprise admin for tenant A, when they call `GET /admin/api/v1/orders/`,
+    then only orders for tenant A are returned (zero orders from tenant B)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-caddy-payments-route.sh
+    command: scripts/qa/verify-caddy-payments-route.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-k8s.sh
+    command: scripts/qa/verify-purchase-gateway-k8s.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/middleware/tenant.py
+    command: pytest services/purchase-gateway/app/middleware/tenant.py
+- id: AC-025
+  description: Given tenants A and B, when admin A calls any admin API endpoint, then
+    zero records from tenant B are returned
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-caddy-payments-route.sh
+    command: scripts/qa/verify-caddy-payments-route.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-k8s.sh
+    command: scripts/qa/verify-purchase-gateway-k8s.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/middleware/tenant.py
+    command: pytest services/purchase-gateway/app/middleware/tenant.py
+- id: AC-026
+  description: Given tenants A and B using Stripe Connect, when a webhook fires for
+    tenant A's connected account, then the event is processed in tenant A's context
+    only
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-k8s.sh
+    command: scripts/qa/verify-purchase-gateway-k8s.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-scaffold.sh
+    command: scripts/qa/verify-purchase-gateway-scaffold.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+- id: AC-027
+  description: Given the Purchase Gateway is deployed alongside the legacy ecommerce
+    service, when a new purchase is initiated, then it routes to the Purchase Gateway
+    (not the legacy service)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-oscar-deprecation.sh
+    command: scripts/qa/verify-oscar-deprecation.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-k8s.sh
+    command: scripts/qa/verify-purchase-gateway-k8s.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-scaffold.sh
+    command: scripts/qa/verify-purchase-gateway-scaffold.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/middleware/migration.py
+    command: pytest services/purchase-gateway/app/middleware/migration.py
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_migration_middleware.py
+    command: pytest services/purchase-gateway/tests/unit/test_migration_middleware.py
+- id: AC-028
+  description: Given all in-flight orders in the legacy ecommerce system have completed,
+    when the decommission script runs, then the legacy ecommerce Deployment, Service,
+    DNS records, and OAuth2 clients are removed
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/infra/decommission-legacy-ecommerce.sh
+    command: scripts/infra/decommission-legacy-ecommerce.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-oscar-deprecation.sh
+    command: scripts/qa/verify-oscar-deprecation.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-security.sh
+    command: scripts/qa/verify-purchase-gateway-security.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+- id: AC-029
+  description: Given the gateway is running, when `/metrics/` is scraped by Prometheus,
+    then purchase-specific metrics (checkout count, fulfillment duration, webhook
+    processing time) are present
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/deprecated/verify-api-contracts.sh
+    command: scripts/qa/deprecated/verify-api-contracts.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-k8s.sh
+    command: scripts/qa/verify-purchase-gateway-k8s.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-metrics-contract.sh
+    command: scripts/qa/verify-purchase-gateway-metrics-contract.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-security.sh
+    command: scripts/qa/verify-purchase-gateway-security.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/main.py
+    command: pytest services/purchase-gateway/app/main.py
+- id: AC-030
+  description: Given a fulfillment failure occurs, when the error is logged, then
+    the log entry includes `order_uuid`, `tenant_id`, `offering_type`, `lms_resource_id`,
+    `error_type`, and `buyer_email_hash` (not raw email)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-security.sh
+    command: scripts/qa/verify-purchase-gateway-security.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+- id: AC-031
+  description: Given the gateway Deployment is applied, when `kubectl get deployments
+    -n mereka-lms -l app.kubernetes.io/name=payments-gateway` is run, then the deployment
+    shows READY replicas >= 1
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/test-stripe-webhook-delivery.sh
+    command: scripts/qa/test-stripe-webhook-delivery.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-ecommerce-config.sh
+    command: scripts/qa/verify-ecommerce-config.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-ecommerce-worker-health.sh
+    command: scripts/qa/verify-ecommerce-worker-health.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-oscar-deprecation.sh
+    command: scripts/qa/verify-oscar-deprecation.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-k8s.sh
+    command: scripts/qa/verify-purchase-gateway-k8s.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+- id: AC-032
+  description: Given the gateway worker Deployment is applied, when `kubectl get deployments
+    -n mereka-lms -l app.kubernetes.io/name=payments-worker` is run, then the deployment
+    shows READY replicas >= 1
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/deprecated/verify-api-contracts.sh
+    command: scripts/qa/deprecated/verify-api-contracts.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/main.py
+    command: pytest services/purchase-gateway/app/main.py
+- id: AC-033
+  description: 'Given the gateway is running, when `curl http://payments-gateway:8000/health/`
+    is called from within the cluster, then the response is HTTP 200 with `{"status":
+    "ok", "database": "ok", "redis": "ok", "stripe": "ok"}`'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/deprecated/verify-api-contracts.sh
+    command: scripts/qa/deprecated/verify-api-contracts.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-k8s.sh
+    command: scripts/qa/verify-purchase-gateway-k8s.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway-stripe.sh
+    command: scripts/qa/verify-purchase-gateway-stripe.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-purchase-gateway.sh
+    command: scripts/qa/verify-purchase-gateway.sh
+  - type: automated
+    test_type: automated
+    file: services/purchase-gateway/app/routers/health.py
+    command: pytest services/purchase-gateway/app/routers/health.py
+- id: AC-034
+  description: Given the service is deployed, its domain MUST use DNS-only Cloudflare
+    mode with Let's Encrypt SSL (not Cloudflare proxy)
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/DEPLOYMENT_RUNBOOK.md
+    section: SSL Configuration Verification
+    justification: SSL mode is configured at DNS level (Cloudflare dashboard); not
+      inspectable via Kubernetes manifests alone
+

@@ -1,0 +1,63 @@
+# Process Invariants Registry
+#
+# Canonical list of process invariants enforced across this repository.
+# Each invariant has an ID (INV-NNN), a rule statement, and a source reference.
+#
+# Consumed by:
+#   - config/invariant-enforcement-map.yaml (links each to detector/CI/policy)
+#   - scripts/qa/verify-gitops-sync-drift.sh (validates coverage)
+#
+# Source: distilled from AGENTS.md hard rules, EXECUTION_INVARIANTS.md,
+# and PROMOTION_REALIZATION_AND_INCIDENT_FLOW.md.
+---
+schema_version: "1.0"
+
+invariants:
+  - id: INV-001
+    rule: "Never patch a generated artifact without fixing the generator/build path"
+    source: "AGENTS.md rule 4"
+  - id: INV-002
+    rule: "Never rerun browser canary while live asset gate is red"
+    source: "AGENTS.md rule 5"
+  - id: INV-003
+    rule: "Never promote from a dirty worktree"
+    source: "AGENTS.md rule 2"
+  - id: INV-004
+    rule: "Use release-object-driven promotion"
+    source: "AGENTS.md rule 3"
+  - id: INV-005
+    rule: "Every incident leaves a stronger regression guard"
+    source: "AGENTS.md rule 6"
+  - id: INV-006
+    rule: "Never debug on main"
+    source: "EXECUTION_INVARIANTS.md Invariant 10"
+  - id: INV-007
+    rule: "Render Tutor config through the governed wrapper and prepare the build context before trusting generated artifacts"
+    source: "CLAUDE.md common pitfall 1"
+  - id: INV-008
+    rule: "All active surfaces remain in scope until removed from authority"
+    source: "AGENTS.md rule 7"
+  - id: INV-009
+    rule: "Layer first, tool second"
+    source: "AGENTS.md rule 1"
+  - id: INV-010
+    rule: "Infisical is secret authority; identity systems own identities"
+    source: "AGENTS.md rule 8"
+  - id: INV-011
+    rule: "Any fix not deployed through GitOps is temporary state"
+    source: "EXECUTION_INVARIANTS.md Invariant 11"
+  - id: INV-012
+    rule: "Report three states separately: live, git, deployed"
+    source: "AGENTS.md rule 10"
+  - id: INV-013
+    rule: "Durable != realized — must survive restart, resync, bootstrap"
+    source: "AGENTS.md rule 11"
+  - id: INV-014
+    rule: "Extract guardrails from every incident"
+    source: "EXECUTION_INVARIANTS.md Invariant 12"
+  - id: INV-015
+    rule: "One hypothesis per PR"
+    source: "EXECUTION_INVARIANTS.md Invariant 9"
+  - id: INV-016
+    rule: "CI must pass on main before any PR can be evaluated"
+    source: "EXECUTION_INVARIANTS.md Invariant 8"

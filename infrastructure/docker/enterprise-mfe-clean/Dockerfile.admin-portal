@@ -1,0 +1,81 @@
+# Dockerfile.admin-portal
+# Build-time NREUM strip + Mereka branding for enterprise-admin-portal.
+#
+# The upstream frontend-app-admin-portal image is built with ENABLE_NEW_RELIC=true
+# (Open edX CI default), which injects a New Relic browser agent snippet with
+# undefined_license_key placeholders into /openedx/dist/index.html.
+#
+# This Dockerfile creates a clean derivative image by:
+#   1. Stripping the NREUM <script> block at build time.
+#   2. Patching unresolved env var placeholders.
+#   3. Overlaying Mereka theme CSS files (loaded at runtime via PARAGON_THEME in env.config.js).
+#   4. Replacing upstream logos and favicon with Mereka brand assets.
+#
+# Build context: repo root (so Dockerfile can COPY brand assets from their canonical location).
+#
+# SOURCE_TAG is REQUIRED — must be a pinned tag (e.g. mereka-branded-6578c105) or digest.
+# "latest" is NOT a valid source — builds must use an explicit, existing tag.
+# The workflow resolves the latest available tag and passes it as a build-arg.
+#
+# Build (CI uses reusable workflow; local wrapper: scripts/infra/build-enterprise-mfe-clean.sh):
+#   docker build -f infrastructure/docker/enterprise-mfe-clean/Dockerfile.admin-portal \
+#     --build-arg SOURCE_TAG=mereka-branded-6578c105 \
+#     -t $REGISTRY/enterprise-admin-portal:mereka-branded-$(git rev-parse --short HEAD) .
+
+ARG REGISTRY=ghcr.io/biji-biji-initiative/mereka-lms
+# No default — SOURCE_TAG must be provided explicitly via --build-arg.
+# If omitted, Docker fails with "invalid reference format" on the empty tag.
+# The workflow's resolve-source job provides this automatically.
+ARG SOURCE_TAG
+FROM caddy:2.11.2-builder AS caddy_builder
+# Official Caddy 2.11.2 currently embeds google.golang.org/grpc v1.79.1, which
+# fails our CRITICAL Trivy gate. Rebuild the same Caddy release with the patched
+# grpc dependency in an isolated stage so buildx can cache it independently of
+# the tenant asset overlay layers.
+RUN xcaddy build v2.11.2 \
+    --output /usr/bin/caddy-patched \
+    --replace google.golang.org/grpc=google.golang.org/grpc@v1.79.3
+
+FROM ${REGISTRY}/enterprise-admin-portal:${SOURCE_TAG}
+
+# Copy and run cleanup/patch scripts at build time
+COPY infrastructure/docker/enterprise-mfe-clean/strip-nreum.sh /tmp/strip-nreum.sh
+COPY infrastructure/docker/enterprise-mfe-clean/patch-missing-env.sh /tmp/patch-missing-env.sh
+COPY infrastructure/docker/enterprise-mfe-clean/verify-no-baked-urls.sh /tmp/verify-no-baked-urls.sh
+RUN chmod +x /tmp/strip-nreum.sh \
+    && chmod +x /tmp/patch-missing-env.sh \
+    && chmod +x /tmp/verify-no-baked-urls.sh \
+    && /tmp/strip-nreum.sh /openedx/dist/index.html \
+    && /tmp/patch-missing-env.sh /openedx/dist admin \
+    && /tmp/verify-no-baked-urls.sh /openedx/dist \
+    && rm /tmp/strip-nreum.sh /tmp/patch-missing-env.sh /tmp/verify-no-baked-urls.sh
+
+# --- Mereka branding overlay ---
+# Copy Paragon theme CSS (served at /theme/* by the MFE Caddy/nginx).
+COPY infrastructure/tutor/themes/mereka/mfe/theme /openedx/dist/theme
+COPY --from=caddy_builder /usr/bin/caddy-patched /usr/bin/caddy
+COPY --from=caddy_builder /usr/bin/caddy-patched /openedx/dist/usr/bin/caddy
+
+# Ship all tenant asset bundles inside the shared portal image so env.config.js
+# can point each tenant at its own immutable /brands/<slug>/ path.
+COPY infrastructure/tutor/brand-mereka /openedx/dist/brands/mereka
+COPY infrastructure/tutor/brand-biji-biji /openedx/dist/brands/biji-biji
+COPY infrastructure/tutor/brand-skillourfuture /openedx/dist/brands/skillourfuture
+
+# Replace upstream brand assets (logos, favicon) with Mereka equivalents.
+COPY infrastructure/tutor/brand-mereka/logo.svg /openedx/dist/logo.svg
+COPY infrastructure/tutor/brand-mereka/logo.png /openedx/dist/logo.png
+COPY infrastructure/tutor/brand-mereka/logo-white.svg /openedx/dist/logo-white.svg
+COPY infrastructure/tutor/brand-mereka/logo-white.png /openedx/dist/logo-white.png
+COPY infrastructure/tutor/brand-mereka/logo_white.svg /openedx/dist/logo_white.svg
+COPY infrastructure/tutor/brand-mereka/logo_white.png /openedx/dist/logo_white.png
+COPY infrastructure/tutor/brand-mereka/logo-trademark.svg /openedx/dist/logo-trademark.svg
+COPY infrastructure/tutor/brand-mereka/logo-trademark.png /openedx/dist/logo-trademark.png
+COPY infrastructure/tutor/brand-mereka/favicon.ico /openedx/dist/favicon.ico
+COPY infrastructure/tutor/brand-mereka/favicon.png /openedx/dist/favicon.png
+
+# Inject env.config.js <script> tag into index.html so runtime config is loaded
+# before the app bundle. The env.config.js file itself is mounted via K8s ConfigMap
+# (see deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js).
+# This sets window.PARAGON_THEME and window.ENV_CONFIG at load time.
+RUN sed -i 's|<head>|<head><script src="/env.config.js"></script>|' /openedx/dist/index.html

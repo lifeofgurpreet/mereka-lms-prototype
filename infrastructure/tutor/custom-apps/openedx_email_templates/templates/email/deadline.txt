@@ -1,0 +1,12 @@
+Deadline Approaching
+
+Hi {{ user_name }},
+
+A deadline is approaching for: {{ course_name }}
+Due: {{ deadline_date }}
+{% if assignment_name %}Assignment: {{ assignment_name }}{% endif %}
+
+Go to course: {{ course_url }}
+
+---
+{{ org_display_name }}

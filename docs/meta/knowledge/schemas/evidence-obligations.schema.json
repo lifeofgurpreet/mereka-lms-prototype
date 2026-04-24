@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pack_id",
+    "schema_version",
+    "generated_by",
+    "source_range",
+    "canonical_inputs",
+    "diff_range",
+    "required_status_updates",
+    "required_evidence_packs",
+    "required_runbook_updates",
+    "required_adr_updates",
+    "required_plan_testplan_refreshes",
+    "obligations"
+  ],
+  "properties": {
+    "pack_id": { "const": "evidence-obligations" },
+    "schema_version": { "type": "integer", "const": 1 },
+    "generated_by": { "type": "string", "minLength": 1 },
+    "source_range": { "type": ["string", "null"] },
+    "canonical_inputs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "diff_range": { "type": "string", "minLength": 1 },
+    "required_status_updates": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "required_evidence_packs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "required_runbook_updates": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "required_adr_updates": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "required_plan_testplan_refreshes": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "obligations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "obligation_type",
+          "evidence_class",
+          "blocking",
+          "source_rule",
+          "triggered_by_skills"
+        ],
+        "properties": {
+          "obligation_type": { "type": "string", "minLength": 1 },
+          "evidence_class": { "type": "string", "minLength": 1 },
+          "blocking": { "type": "boolean" },
+          "source_rule": { "type": "string", "minLength": 1 },
+          "triggered_by_skills": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "minItems": 1
+          },
+          "advisory_note": { "type": "string" }
+        }
+      },
+      "minItems": 1
+    }
+  }
+}

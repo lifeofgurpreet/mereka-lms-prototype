@@ -1,0 +1,290 @@
+#!/usr/bin/env bash
+# @covers AC-001
+# @spec: tutor-configuration_spec.md
+# Safe wrapper for 'tutor config save'
+# Automatically prepares Tutor build context and verifies configuration
+#
+# Usage: ./scripts/infra/tutor-config-save.sh [tutor config save args]
+#
+# Examples:
+#   ./scripts/infra/tutor-config-save.sh --set LMS_HOST=academyv2.mereka.io
+#   ./scripts/infra/tutor-config-save.sh --unset MYSQL_ROOT_PASSWORD
+#   ./scripts/infra/tutor-config-save.sh  # Interactive mode
+
+set -euo pipefail
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Get repository root
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+
+# Source shared config
+# shellcheck source=../shared/config.sh
+source "$REPO_ROOT/scripts/shared/config.sh"
+
+TUTOR_ENV_HELPER="$REPO_ROOT/infrastructure/tutor/tutor-env.sh"
+if [[ -z "${TUTOR_ROOT:-}" || ! $(command -v tutor >/dev/null 2>&1; echo $?) -eq 0 ]]; then
+  if [[ -f "$TUTOR_ENV_HELPER" ]]; then
+    # shellcheck source=../../infrastructure/tutor/tutor-env.sh
+    source "$TUTOR_ENV_HELPER"
+  fi
+fi
+
+# Ensure TUTOR_ROOT is set
+if [[ -z "${TUTOR_ROOT:-}" ]]; then
+  echo -e "${RED}ERROR: TUTOR_ROOT not set${NC}"
+  echo ""
+  echo "Expected repo-local Tutor root:"
+  echo "  $REPO_ROOT/tutor_env"
+  echo ""
+  echo "Fallback helper: $TUTOR_ENV_HELPER"
+  echo ""
+  exit 1
+fi
+
+# Check if Tutor is available
+if ! command -v tutor &>/dev/null; then
+  echo -e "${RED}ERROR: tutor command not found${NC}"
+  echo ""
+  echo "Expected repo-local Tutor virtualenv:"
+  echo "  $REPO_ROOT/.venv"
+  echo ""
+  echo "Fallback helper: $TUTOR_ENV_HELPER"
+  echo ""
+  exit 1
+fi
+
+# Print current configuration
+echo -e "${BLUE}=== Tutor Configuration Manager ===${NC}"
+echo ""
+echo "Repository:  $REPO_ROOT"
+echo "Tutor Root:  $TUTOR_ROOT"
+echo ""
+
+PLUGIN_DIR="${TUTOR_PLUGINS_ROOT:-${TUTOR_PLUGINS_DIR:-$TUTOR_ROOT/plugins}}"
+export TUTOR_PLUGINS_ROOT="$PLUGIN_DIR"
+export TUTOR_PLUGINS_DIR="$PLUGIN_DIR"
+
+SYNC_SCRIPT="$REPO_ROOT/scripts/infra/sync-tutor-plugin-mirror.sh"
+if [[ ! -x "$SYNC_SCRIPT" ]]; then
+  echo -e "${RED}ERROR: Tutor plugin sync script not found or not executable${NC}"
+  echo "  Expected: $SYNC_SCRIPT"
+  echo ""
+  exit 1
+fi
+
+echo -e "${BLUE}Step 0: Syncing Tutor plugin mirror${NC}"
+"$SYNC_SCRIPT"
+echo ""
+
+for retired_plugin in mfe_oauth_fix indigo; do
+  if tutor plugins disable "$retired_plugin" >/dev/null 2>&1; then
+    echo -e "${YELLOW}Retired Tutor plugin ${retired_plugin} was enabled and has been disabled${NC}"
+    echo ""
+  fi
+done
+
+plugin_enabled_in_config() {
+  local plugin="$1"
+  [[ -f "$TUTOR_ROOT/config.yml" ]] || return 1
+  python3 - "$TUTOR_ROOT/config.yml" "$plugin" <<'PY'
+from pathlib import Path
+import sys
+
+config = Path(sys.argv[1])
+plugin = sys.argv[2]
+in_plugins = False
+for line in config.read_text(encoding="utf-8").splitlines():
+    if line.startswith("PLUGINS:"):
+        in_plugins = True
+        continue
+    if not in_plugins:
+        continue
+    if line.startswith((" ", "-")):
+        if line.strip() == f"- {plugin}":
+            raise SystemExit(0)
+        continue
+    break
+raise SystemExit(1)
+PY
+}
+
+enable_canonical_plugin() {
+  local plugin="$1"
+  local enable_output
+  local enable_status
+
+  if enable_output="$(tutor plugins enable "$plugin" 2>&1)"; then
+    [[ -n "$enable_output" ]] && printf '%s\n' "$enable_output"
+    echo -e "${GREEN}Canonical Tutor plugin enabled: ${plugin}${NC}"
+    return 0
+  fi
+
+  enable_status=$?
+  if plugin_enabled_in_config "$plugin"; then
+    [[ -n "$enable_output" ]] && printf '%s\n' "$enable_output"
+    echo -e "${YELLOW}Canonical Tutor plugin already enabled in config: ${plugin}${NC}"
+    return 0
+  fi
+
+  echo -e "${RED}ERROR: Failed to enable canonical Tutor plugin: ${plugin}${NC}" >&2
+  [[ -n "$enable_output" ]] && printf '%s\n' "$enable_output" >&2
+  exit "$enable_status"
+}
+
+for plugin in mereka_lms mereka_lms_mfe_slots; do
+  enable_canonical_plugin "$plugin"
+done
+echo ""
+
+# Backup config if it exists
+BACKUP_FILE=""
+ENV_BACKUP_DIR=""
+ENV_BACKUP_PARENT=""
+if [[ -f "$TUTOR_ROOT/config.yml" ]]; then
+  BACKUP_FILE="$TUTOR_ROOT/config.yml.backup.$(date +%Y%m%d_%H%M%S)"
+  echo -e "${YELLOW}Backing up existing config...${NC}"
+  cp "$TUTOR_ROOT/config.yml" "$BACKUP_FILE"
+  echo "  → $BACKUP_FILE"
+  echo ""
+fi
+
+if [[ -d "$TUTOR_ROOT/env" ]]; then
+  ENV_BACKUP_PARENT="$(mktemp -d -t tutor-env-backup.XXXXXX)"
+  ENV_BACKUP_DIR="$ENV_BACKUP_PARENT/env"
+  cp -a "$TUTOR_ROOT/env" "$ENV_BACKUP_DIR"
+  trap '[[ -n "${ENV_BACKUP_PARENT:-}" ]] && rm -rf "$ENV_BACKUP_PARENT"' EXIT
+fi
+
+restore_generated_state() {
+  local restored=0
+
+  if [[ -n "$BACKUP_FILE" && -f "$BACKUP_FILE" ]]; then
+    echo "Restoring backup config..."
+    cp "$BACKUP_FILE" "$TUTOR_ROOT/config.yml"
+    restored=1
+  fi
+
+  if [[ -n "$ENV_BACKUP_DIR" && -d "$ENV_BACKUP_DIR" ]]; then
+    if [[ -z "$TUTOR_ROOT" || "$TUTOR_ROOT" == "/" ]]; then
+      echo -e "${RED}Refusing to restore generated env because TUTOR_ROOT is unsafe: ${TUTOR_ROOT:-<empty>}${NC}" >&2
+      exit 1
+    fi
+    echo "Restoring generated Tutor env backup..."
+    rm -rf "$TUTOR_ROOT/env"
+    cp -a "$ENV_BACKUP_DIR" "$TUTOR_ROOT/env"
+    restored=1
+  fi
+
+  if [[ "$restored" == "1" ]]; then
+    echo -e "${GREEN}✓ Backup state restored${NC}"
+  fi
+}
+
+# Run tutor config save
+echo -e "${BLUE}Step 1: Running 'tutor config save'${NC}"
+echo ""
+
+if [[ $# -eq 0 ]]; then
+  echo "No arguments provided - running in interactive mode"
+  echo "Press Ctrl+C to cancel"
+  echo ""
+  sleep 2
+fi
+
+# Pass all arguments to tutor config save
+if tutor config save "$@"; then
+  echo ""
+  echo -e "${GREEN}✓ Config saved successfully${NC}"
+else
+  EXIT_CODE=$?
+  echo ""
+  echo -e "${RED}✗ Config save failed (exit code: $EXIT_CODE)${NC}"
+  echo ""
+  restore_generated_state
+  exit $EXIT_CODE
+fi
+
+# Prepare Tutor build context
+echo ""
+echo -e "${BLUE}Step 2: Preparing Tutor build context${NC}"
+echo ""
+
+PREP_SCRIPT="$REPO_ROOT/scripts/infra/prepare-tutor-build-context.sh"
+if [[ ! -x "$PREP_SCRIPT" ]]; then
+  echo -e "${RED}ERROR: Canonical build-context script not found or not executable${NC}"
+  echo "  Expected: $PREP_SCRIPT"
+  echo ""
+  exit 1
+fi
+
+if "$PREP_SCRIPT" --target all; then
+  echo ""
+  echo -e "${GREEN}✓ Tutor build context prepared successfully${NC}"
+else
+  EXIT_CODE=$?
+  echo ""
+  echo -e "${RED}✗ Tutor build context preparation failed (exit code: $EXIT_CODE)${NC}"
+  echo ""
+  restore_generated_state
+  exit $EXIT_CODE
+fi
+
+# Verify configuration
+echo ""
+echo -e "${BLUE}Step 3: Verifying configuration${NC}"
+echo ""
+
+VERIFY_SCRIPT="$REPO_ROOT/scripts/infra/verify-tutor-config.sh"
+if [[ -x "$VERIFY_SCRIPT" ]]; then
+  if "$VERIFY_SCRIPT"; then
+    echo ""
+    echo -e "${GREEN}✓ Verification passed${NC}"
+  else
+    EXIT_CODE=$?
+    echo ""
+    echo -e "${RED}✗ Verification failed (exit code: $EXIT_CODE)${NC}"
+    echo ""
+    echo "Some build-context mutations may not have been applied correctly."
+    echo ""
+    restore_generated_state
+    echo -e "${RED}Aborted after verification failure${NC}"
+    exit $EXIT_CODE
+  fi
+else
+  echo -e "${YELLOW}⚠ Verification script not found, skipping verification${NC}"
+fi
+
+# Success summary
+echo ""
+echo -e "${GREEN}=== Configuration Complete ===${NC}"
+echo ""
+echo "Next steps:"
+echo ""
+echo "  ${BLUE}Local development:${NC}"
+echo "    make tutor-restart"
+echo ""
+echo "  ${BLUE}Kubernetes:${NC}"
+echo "    ./scripts/infra/release-openedx-gitops.sh --require-digests"
+echo ""
+echo "  ${BLUE}Fast local image refresh:${NC}"
+echo "    ./scripts/infra/build-openedx-image.sh --local-defaults --build-profile fast"
+echo "    ./scripts/infra/build-mfe-image.sh --local-defaults --build-profile fast"
+echo ""
+echo "  ${BLUE}Strict Open edX proof helper:${NC}"
+echo "    ./scripts/bench/measure-openedx-build.sh \"$REPO_ROOT\" openedx-proof-noneditable"
+echo "    For CI proof classes, use build-benchmark.yml with benchmark_class=app-cache-cold."
+echo ""
+
+if [[ -n "$BACKUP_FILE" && -f "$BACKUP_FILE" ]]; then
+  echo "Backup preserved at:"
+  echo "  $BACKUP_FILE"
+  echo ""
+fi
+
+exit 0

@@ -1,0 +1,14 @@
+Scheduled Maintenance
+
+Hi {{ user_name }},
+
+We will be performing scheduled maintenance on the platform:
+
+Start: {{ maintenance_start }}
+End: {{ maintenance_end }}
+{% if maintenance_impact %}Impact: {{ maintenance_impact }}{% endif %}
+
+We apologize for any inconvenience.
+
+---
+{{ org_display_name }}

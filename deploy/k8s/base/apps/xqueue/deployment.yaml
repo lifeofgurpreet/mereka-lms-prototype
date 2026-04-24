@@ -1,0 +1,96 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: xqueue
+  labels:
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/managed-by: tutor
+    app.kubernetes.io/name: xqueue
+    app.kubernetes.io/part-of: mereka-lms
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/managed-by: tutor
+      app.kubernetes.io/name: xqueue
+      app.kubernetes.io/part-of: mereka-lms
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/managed-by: tutor
+        app.kubernetes.io/name: xqueue
+        app.kubernetes.io/part-of: mereka-lms
+    spec:
+      containers:
+        - name: xqueue
+          image: docker.io/overhangio/openedx-xqueue:21.0.0
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DJANGO_SETTINGS_MODULE
+              value: xqueue.tutor
+          envFrom:
+            - secretRef:
+                name: openedx-secrets
+            - secretRef:
+                name: database-secrets
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          livenessProbe:
+            httpGet:
+              path: /status/
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            failureThreshold: 3
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /status/
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            failureThreshold: 3
+            timeoutSeconds: 5
+          securityContext:
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - mountPath: /openedx/xqueue/xqueue/tutor.py
+              name: settings
+              subPath: tutor.py
+        - name: xqueue-consumer
+          image: docker.io/overhangio/openedx-xqueue:21.0.0
+          command: ["sh", "-e", "-c"]
+          args: ["while true; do echo 'running consumers'; ./manage.py run_consumer; sleep 10; done"]
+          env:
+            - name: DJANGO_SETTINGS_MODULE
+              value: xqueue.tutor
+          envFrom:
+            - secretRef:
+                name: openedx-secrets
+            - secretRef:
+                name: database-secrets
+          resources:
+            requests:
+              cpu: 150m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - mountPath: /openedx/xqueue/xqueue/tutor.py
+              name: settings
+              subPath: tutor.py
+      volumes:
+        - name: settings
+          configMap:
+            name: xqueue-settings

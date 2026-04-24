@@ -1,0 +1,281 @@
+#!/usr/bin/env bash
+# @covers AC-RS-001, AC-RS-002, AC-RS-003
+# @spec: repository-structure_spec.md
+set -euo pipefail
+
+# verify-documentation-standards.sh
+# Validates documentation files against DOCUMENTATION_STANDARDS.md
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+# Counters
+PASS_COUNT=0
+FAIL_COUNT=0
+WARN_COUNT=0
+
+# Repo root
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+cd "$REPO_ROOT"
+
+pass() {
+    echo -e "${GREEN}✓ PASS${NC}: $1"
+    PASS_COUNT=$((PASS_COUNT + 1))
+}
+
+fail() {
+    echo -e "${RED}✗ FAIL${NC}: $1"
+    FAIL_COUNT=$((FAIL_COUNT + 1))
+}
+
+warn() {
+    echo -e "${YELLOW}⚠ WARN${NC}: $1"
+    WARN_COUNT=$((WARN_COUNT + 1))
+}
+
+# Check runbook metadata format
+check_runbook_metadata() {
+    echo ""
+    echo "=== Checking Runbook Metadata ==="
+
+    local runbooks_dir="docs/ops/runbooks"
+    local header10=""
+    local header5=""
+    if [[ ! -d "$runbooks_dir" ]]; then
+        warn "Runbooks directory not found: $runbooks_dir"
+        return
+    fi
+
+    local missing_metadata=()
+    while IFS= read -r -d '' file; do
+        header10="$(head -10 "$file")"
+        header5="$(head -5 "$file")"
+        # Skip superseded stubs (YAML frontmatter with status: superseded)
+        if grep -qE '^status:\s*superseded' <<< "$header10"; then
+            continue
+        fi
+        # Check for metadata line (starts with underscore)
+        if ! grep -qE "^_.*Audience.*•.*Owner.*•.*Last (verified|updated):" <<< "$header5"; then
+            missing_metadata+=("$(basename "$file")")
+        fi
+    done < <(find "$runbooks_dir" -name "*.md" -print0)
+
+    if [[ ${#missing_metadata[@]} -eq 0 ]]; then
+        pass "All runbooks have metadata"
+    else
+        fail "Runbooks missing metadata: ${missing_metadata[*]}"
+    fi
+}
+
+# Check spec frontmatter
+check_spec_frontmatter() {
+    echo ""
+    echo "=== Checking Spec Frontmatter ==="
+
+    local specs_dir="specs"
+    local header5=""
+    if [[ ! -d "$specs_dir" ]]; then
+        warn "Specs directory not found: $specs_dir"
+        return
+    fi
+
+    local missing_frontmatter=()
+    while IFS= read -r -d '' file; do
+        # Skip IMPLEMENTATION_ORDER.md and manual_verifications.yaml
+        if [[ "$(basename "$file")" == "IMPLEMENTATION_ORDER.md" ]] || \
+           [[ "$(basename "$file")" == "manual_verifications.yaml" ]]; then
+            continue
+        fi
+
+        # Check for YAML frontmatter
+        header5="$(head -5 "$file")"
+        if ! grep -q "^---$" <<< "$header5"; then
+            missing_frontmatter+=("$(basename "$file")")
+        fi
+    done < <(find "$specs_dir" -maxdepth 1 -name "*_spec.md" -print0)
+
+    if [[ ${#missing_frontmatter[@]} -eq 0 ]]; then
+        pass "All specs have YAML frontmatter"
+    else
+        fail "Specs missing frontmatter: ${missing_frontmatter[*]}"
+    fi
+}
+
+# Check ADR format
+check_adr_format() {
+    echo ""
+    echo "=== Checking ADR Format ==="
+
+    local adr_dir="docs/adr"
+    if [[ ! -d "$adr_dir" ]]; then
+        warn "ADR directory not found: $adr_dir"
+        return
+    fi
+
+    local invalid_adr=()
+    while IFS= read -r -d '' file; do
+        # Skip generated indices, RFC proposals, templates, and README files
+        # These are not decision records and follow different formats
+        local rel_path="${file#"${REPO_ROOT}/"}"
+        if [[ "$rel_path" == */rfc/* ]] || \
+           [[ "$rel_path" == */_generated/* ]] || \
+           [[ "$rel_path" == */templates/* ]] || \
+           [[ "$(basename "$file")" == "README.md" ]]; then
+            continue
+        fi
+        # Check for required sections
+        if ! grep -q "^## Context" "$file" || \
+           ! grep -q "^## Decision" "$file" || \
+           ! grep -q "^## Consequences" "$file"; then
+            invalid_adr+=("$(basename "$file")")
+        fi
+    done < <(find "$adr_dir" -name "*.md" -print0 2>/dev/null || true)
+
+    if [[ ${#invalid_adr[@]} -eq 0 ]]; then
+        pass "All ADRs have required sections"
+    else
+        fail "ADRs missing required sections: ${invalid_adr[*]}"
+    fi
+}
+
+# Check verification scripts
+check_verification_scripts() {
+    echo ""
+    echo "=== Checking Verification Scripts ==="
+
+    local scripts_dir="scripts/qa"
+    local header10=""
+    if [[ ! -d "$scripts_dir" ]]; then
+        warn "QA scripts directory not found: $scripts_dir"
+        return
+    fi
+
+    local missing_annotations=()
+    while IFS= read -r -d '' file; do
+        # Check for @covers annotation
+        header10="$(head -10 "$file")"
+        if ! grep -qE "^# @covers" <<< "$header10"; then
+            missing_annotations+=("$(basename "$file")")
+        fi
+    done < <(find "$scripts_dir" -name "verify-*.sh" -print0)
+
+    if [[ ${#missing_annotations[@]} -eq 0 ]]; then
+        pass "All verification scripts have @covers annotations"
+    else
+        warn "Scripts missing @covers: ${#missing_annotations[@]} files"
+    fi
+}
+
+# Check for deprecated paths
+check_deprecated_paths() {
+    echo ""
+    echo "=== Checking for Deprecated Paths ==="
+
+    local deprecated_refs=()
+
+    # Check for tools/ references (should be scripts/)
+    if grep -r "tools/" docs/ specs/ --include="*.md" >/dev/null 2>&1; then
+        deprecated_refs+=("Found 'tools/' references (should use 'scripts/')")
+    fi
+
+    # Check for ops/ references (should be infrastructure/ or scripts/)
+    if grep -r "ops/" docs/ specs/ --include="*.md" >/dev/null 2>&1; then
+        deprecated_refs+=("Found 'ops/' references (should use 'infrastructure/' or 'scripts/')")
+    fi
+
+    if [[ ${#deprecated_refs[@]} -eq 0 ]]; then
+        pass "No deprecated path references found"
+    else
+        warn "${deprecated_refs[*]}"
+    fi
+}
+
+# Check for hardcoded secrets in docs
+check_hardcoded_secrets() {
+    echo ""
+    echo "=== Checking for Hardcoded Secrets ==="
+
+    local secret_patterns=(
+        'PASSWORD.*=.*"[^"]+'
+        'API_KEY.*=.*"[^"]+'
+        'SECRET.*=.*"[^"]+'
+        'PRIVATE_KEY.*=.*"[^"]+'
+    )
+
+    local files_with_secrets=()
+    for pattern in "${secret_patterns[@]}"; do
+        while IFS= read -r file; do
+            local pattern_hits=""
+            # Ignore:
+            # - Example values (example, placeholder, changeme, CHANGE_ME)
+            # - Environment variable references (os.environ, process.env, ${})
+            # - Empty strings ("")
+            # - Documentation examples (migration guides, setup guides)
+            # - Archive directory (historical docs)
+            pattern_hits="$(grep -E "$pattern" "$file" || true)"
+            if [[ -n "$pattern_hits" ]] && \
+               grep -qvE '(os\.environ|process\.env|\$\{|\"\"|changeme|CHANGE_ME|example|placeholder|Example|EXAMPLE|your-|<your|DOCUMENTATION_STANDARDS)' <<< "$pattern_hits" && \
+               [[ ! "$file" =~ (archive|migrations|integrations|TASK3) ]]; then
+                files_with_secrets+=("$file")
+            fi
+        done < <(find docs/ specs/ -name "*.md" -exec grep -l -E "$pattern" {} \; 2>/dev/null || true)
+    done
+
+    if [[ ${#files_with_secrets[@]} -eq 0 ]]; then
+        pass "No hardcoded secrets in documentation"
+    else
+        warn "Files with potential hardcoded secrets (may be false positives): ${#files_with_secrets[@]} files"
+    fi
+}
+
+# Check DOCUMENTATION_STANDARDS.md exists
+check_standards_exist() {
+    echo ""
+    echo "=== Checking Standards Document ==="
+
+    # Check both canonical and legacy paths (docs were reorganized)
+    if [[ -f "docs/guides/standards/DOCUMENTATION_STANDARDS.md" ]]; then
+        pass "DOCUMENTATION_STANDARDS.md exists (docs/guides/standards/)"
+    elif [[ -f "docs/DOCUMENTATION_STANDARDS.md" ]]; then
+        pass "DOCUMENTATION_STANDARDS.md exists (legacy path)"
+    else
+        fail "DOCUMENTATION_STANDARDS.md not found in docs/guides/standards/ or docs/"
+    fi
+}
+
+# Run all checks
+main() {
+    echo "Verifying documentation standards compliance..."
+    echo "Repository: $REPO_ROOT"
+
+    check_standards_exist
+    check_runbook_metadata
+    check_spec_frontmatter
+    check_adr_format
+    check_verification_scripts
+    check_deprecated_paths
+    check_hardcoded_secrets
+
+    # Summary
+    echo ""
+    echo "================================================"
+    echo "Documentation Standards Verification Summary"
+    echo "================================================"
+    echo -e "${GREEN}Passed:${NC} $PASS_COUNT"
+    echo -e "${YELLOW}Warnings:${NC} $WARN_COUNT"
+    echo -e "${RED}Failed:${NC} $FAIL_COUNT"
+    echo ""
+
+    if [[ $FAIL_COUNT -eq 0 ]]; then
+        echo -e "${GREEN}✓ All checks passed${NC}"
+        exit 0
+    else
+        echo -e "${RED}✗ Some checks failed${NC}"
+        exit 1
+    fi
+}
+
+main "$@"

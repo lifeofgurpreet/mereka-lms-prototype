@@ -1,0 +1,260 @@
+spec: studio-customization_spec.md
+acceptance_criteria:
+- id: AC-STUDIO-001
+  description: Given an educator navigates to `studio.academyv2.mereka.io`, when the
+    Studio homepage loads, then the page MUST display a Mereka-branded welcome section
+    with the platform name "Mereka Academy" and a tagline describing its purpose for
+    enterprise education.
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Theme Verification
+    justification: Requires Studio UI inspection in a live environment
+- id: AC-STUDIO-002
+  description: Given the Studio homepage is displayed, when the educator's browser
+    language preference is set to `ms` (Bahasa Malaysia) or `id` (Bahasa Indonesia),
+    then the welcome message and quick-start guide headings MUST render in the corresponding
+    language using Django i18n.
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Theme Verification
+    justification: Requires browser-side style inspection
+- id: AC-STUDIO-003
+  description: 'Given the Studio homepage is displayed, when the educator views the
+    page, then a quick-start guide section MUST be visible with links to at least:
+    (a) creating a new course, (b) importing existing content, (c) managing course
+    settings, and (d) inviting course team members.'
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Theme Verification
+    justification: Requires visual validation across Studio surfaces
+- id: AC-STUDIO-004
+  description: Given the Studio homepage loads, when the page renders, then the Mereka
+    logo MUST appear in the Studio header and the logo file MUST be sourced from the
+    `mereka/cms/static/images/` theme directory (not the default Open edX logo).
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-studio-customization.sh
+    command: scripts/qa/verify-studio-customization.sh
+- id: AC-STUDIO-005
+  description: Given the Studio SCSS is compiled, when `studio-main-v1.scss` is processed,
+    then the compiled CSS MUST include Mereka design token values (font families Poppins
+    and Lato, brand colors `--mereka-color-teal`, `--mereka-color-magenta`) and MUST
+    NOT contain Google Fonts `@import` rules.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-studio-customization.sh
+    command: scripts/qa/verify-studio-customization.sh
+- id: AC-STUDIO-006
+  description: Given any page in Studio, when the page renders, then the favicon MUST
+    be the Mereka favicon from `mereka/cms/static/images/favicon.ico` (not the default
+    Open edX icon).
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Studio Authoring Checks
+    justification: Requires interactive authoring workflow execution
+- id: AC-STUDIO-007
+  description: 'Given any page in Studio, when the footer renders, then it MUST display:
+    (a) copyright notice with "Mereka Academy" and current year, (b) a link to the
+    LMS at the configured `LMS_ROOT_URL`, and (c) a support email link (`support@mereka.io`).'
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Studio Authoring Checks
+    justification: Requires interactive authoring workflow execution
+- id: AC-STUDIO-008
+  description: Given the Studio footer templates `footer.html` and `widgets/footer.html`,
+    when reviewed, then both MUST use `settings.PLATFORM_NAME` and `settings.LMS_ROOT_URL`
+    (not hardcoded values) to support multi-tenant override.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-studio-customization.sh
+    command: scripts/qa/verify-studio-customization.sh
+- id: AC-STUDIO-009
+  description: Given a Studio page with a "Help" or documentation link, when the educator
+    clicks it, then the link MUST navigate to a Mereka-specific help URL (configurable
+    via `STUDIO_HELP_URL` Django setting) and MUST NOT point to `docs.openedx.org`
+    or any upstream Open edX documentation site.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-studio-customization.sh
+    command: scripts/qa/verify-studio-customization.sh
+- id: AC-STUDIO-010
+  description: Given the Studio navigation bar, when the educator views available
+    links, then a "Support" link MUST be present that navigates to the Mereka support
+    portal (configurable via `MEREKA_STUDIO_SUPPORT_URL` environment variable).
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Studio Authoring Checks
+    justification: Requires UI-level verification in Studio
+- id: AC-STUDIO-011
+  description: Given the Studio "About" or help dropdown, when the educator views
+    it, then a "Mereka Educator Guide" link MUST be present pointing to Mereka's own
+    documentation for course authors.
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Studio Authoring Checks
+    justification: Requires UI-level verification in Studio
+- id: AC-STUDIO-012
+  description: Given the `frontend-app-course-authoring` MFE loads within Studio,
+    when the MFE renders, then the MFE MUST display the Mereka logo in its header
+    area via FPF slot configuration in `mereka_lms.py`, not the default Open edX logo.
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Rollout Verification
+    justification: Requires post-deploy runtime verification in Studio
+- id: AC-STUDIO-013
+  description: Given the `frontend-app-course-authoring` MFE, when help or documentation
+    links are rendered, then they MUST point to Mereka-specific URLs consistent with
+    AC-STUDIO-009, configured via MFE runtime configuration (`env.config.jsx`).
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Regression Checks
+    justification: Visual regression check requires human review
+- id: AC-STUDIO-014
+  description: Given the `frontend-app-course-authoring` MFE, when the footer renders,
+    then it MUST display the MerekaFooter component (already activated in `branding-system_spec.md`),
+    ensuring visual consistency between Studio server-rendered pages and MFE-rendered
+    pages.
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Patch Verification
+    justification: Verified during regeneration/apply-patches runbook steps
+- id: AC-STUDIO-015
+  description: Given a course team invitation is sent from Studio, when the invitation
+    email is composed, then the email MUST include Mereka Academy branding (logo,
+    platform name) and MUST NOT display default Open edX branding or generic "edX"
+    references.
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Rollout Verification
+    justification: Verified through post-build runtime checks
+- id: AC-STUDIO-016
+  description: Given Studio email templates for course team notifications (invitation,
+    access granted, access revoked), when the templates are reviewed, then they MUST
+    use configurable `PLATFORM_NAME` and `LMS_ROOT_URL` settings (not hardcoded values).
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Rollout Verification
+    justification: Verified through post-build runtime checks
+- id: AC-STUDIO-017
+  description: Given an educator creates a new course in Studio, when the course creation
+    wizard completes, then the default course language MUST be set to `en` (English)
+    with `ms` (Bahasa Malaysia) and `id` (Bahasa Indonesia) available as selectable
+    alternatives.
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Operator Notes
+    justification: Documentation quality is manually reviewed
+- id: AC-STUDIO-018
+  description: 'Given an educator creates a new course in Studio, when no explicit
+    enrollment configuration is set, then the course MUST default to `invitation_only:
+    true` enrollment mode (appropriate for B2B enterprise training where learners
+    are enrolled by administrators).'
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Rollback
+    justification: Rollback testing requires controlled runtime exercise
+- id: AC-STUDIO-019
+  description: 'Given an educator creates a new course in Studio, when the course
+    advanced settings are viewed, then Mereka-specific defaults MUST be pre-configured
+    for: (a) `cert_html_view_enabled: true`, (b) `certificates_display_behavior: "end"`,
+    and (c) `course_visibility: "private"`.'
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Health Checks
+    justification: Runtime health checks are reviewed by operators
+- id: AC-STUDIO-020
+  description: Given the Studio Django settings (CMS `production.py`), when the settings
+    are loaded, then `STUDIO_NAME` MUST be set to "Mereka Academy Studio" and `STUDIO_SHORT_NAME`
+    MUST be set to "Studio".
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Governance
+    justification: Governance controls are assessed via runbook procedures
+- id: AC-STUDIO-021
+  description: Given the Studio Django settings, when `STUDIO_HELP_URL`, `MEREKA_STUDIO_SUPPORT_URL`,
+    and `MEREKA_EDUCATOR_GUIDE_URL` are configured, then these values MUST be sourced
+    from environment variables (via Tutor config or ExternalSecrets) and MUST NOT
+    be hardcoded in source code.
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Observability
+    justification: Requires live telemetry and UI checks
+- id: AC-STUDIO-022
+  description: 'Given a CI run, when `scripts/qa/verify-studio-customization.sh` executes,
+    then it MUST verify: (a) Mereka logo exists in CMS theme images, (b) Studio SCSS
+    compiles without error, (c) footer templates reference `settings.PLATFORM_NAME`,
+    (d) no Google Fonts imports in compiled CSS, and (e) Studio help URL is not `docs.openedx.org`.'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-studio-customization.sh
+    command: scripts/qa/verify-studio-customization.sh
+- id: AC-STUDIO-023
+  description: Given a production deployment, when `curl -s https://studio.academyv2.mereka.io/
+    | grep -i "mereka"` is run, then it MUST return at least one match confirming
+    Mereka branding is present in the Studio homepage HTML.
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Multisite Checks
+    justification: Requires environment-aware runtime verification
+- id: AC-STUDIO-024
+  description: Given the Studio homepage with all customizations applied, when loaded
+    on a 4G connection, then the page MUST load in under 3 seconds (p95), consistent
+    with the platform-wide NFR in `cross-cutting-requirements_spec.md`.
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Auth Surface Checks
+    justification: Requires runtime auth flow verification in Studio
+- id: AC-STUDIO-025
+  description: Given the Studio comprehensive theme, when all theme assets (images,
+    fonts, CSS) are measured, then the total CMS theme asset size MUST remain under
+    3 MB.
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/TUTOR_CONFIGURATION_RUNBOOK.md
+    section: Handoff
+    justification: Handoff artifacts are operator-reviewed, not CI-verifiable
+- id: AC-INT-001
+  description: Given `branding-system_spec.md` asset sync runs via the canonical Tutor
+    prepare flow, when the sync completes, then all CMS theme assets (logos, fonts,
+    SCSS, templates) MUST be present in `tutor_env/env/build/openedx/themes/mereka/cms/`.
+  verify: []
+- id: AC-INT-002
+  description: Given `branding-system_spec.md` MerekaFooter component is deployed,
+    when the `frontend-app-course-authoring` MFE renders its footer, then the MerekaFooter
+    MUST render identically to other MFEs (authn, account, learning).
+  verify: []
+- id: AC-INT-003
+  description: Given `mfe-plugin-slots_spec.md` Phase 1 header branding slots are
+    activated, when the `frontend-app-course-authoring` MFE loads, then the Mereka
+    logo MUST render in the MFE header via the same slot mechanism used for other
+    MFEs.
+  verify: []
+_unmapped:
+- AC-INT-001
+- AC-INT-002
+- AC-INT-003
+

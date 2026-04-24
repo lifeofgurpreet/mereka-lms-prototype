@@ -1,0 +1,125 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: xqueue-graders
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: xqueue-graders
+    app.kubernetes.io/component: alerting
+spec:
+  groups:
+    - name: xqueue-graders-queue
+      interval: 1m
+      rules:
+        # AC-ASS-018: Queue depth > 100 for 10 minutes triggers PagerDuty
+        - alert: XQueueHighQueueDepth
+          expr: |
+            xqueue_queue_depth{status="pending"} > 100
+          for: 10m
+          labels:
+            severity: warning
+            component: xqueue-graders
+            pagerduty: "true"  # Trigger PagerDuty notification
+          annotations:
+            summary: "XQueue grader queue depth exceeded 100 submissions"
+            description: |
+              XQueue grader queue has {{ $value }} pending submissions for more than 10 minutes.
+              This may indicate insufficient grader workers or processing bottleneck.
+              Current queue depth: {{ $value }}
+              Consider scaling up grader workers or investigating grading performance.
+
+        - alert: XQueueCriticalQueueDepth
+          expr: |
+            xqueue_queue_depth{status="pending"} > 200
+          for: 5m
+          labels:
+            severity: critical
+            component: xqueue-graders
+            pagerduty: "true"
+          annotations:
+            summary: "XQueue grader queue depth exceeded 200 submissions (CRITICAL)"
+            description: |
+              CRITICAL: XQueue grader queue has {{ $value }} pending submissions.
+              Immediate action required to prevent student submission delays.
+              Current queue depth: {{ $value }}
+              Active workers: {{ query "xqueue_active_workers" }}
+
+    - name: xqueue-graders-performance
+      interval: 1m
+      rules:
+        - alert: XQueueSlowGrading
+          expr: |
+            histogram_quantile(0.95, rate(xqueue_grading_duration_seconds_bucket[5m])) > 30
+          for: 15m
+          labels:
+            severity: warning
+            component: xqueue-graders
+          annotations:
+            summary: "XQueue grading p95 duration exceeded 30 seconds"
+            description: |
+              95th percentile grading duration is {{ $value | humanizeDuration }}.
+              This exceeds the 30-second target (AC-ASS-015).
+              Review grader performance and consider optimizations.
+
+        - alert: XQueueHighFailureRate
+          expr: |
+            rate(xqueue_grading_total{status=~"failure|timeout|sandbox_error"}[5m]) /
+            rate(xqueue_grading_total[5m]) > 0.1
+          for: 10m
+          labels:
+            severity: warning
+            component: xqueue-graders
+          annotations:
+            summary: "XQueue grading failure rate exceeded 10%"
+            description: |
+              Grading failure rate is {{ $value | humanizePercentage }}.
+              Check grader logs for errors and sandbox violations.
+
+    - name: xqueue-graders-sandbox
+      interval: 1m
+      rules:
+        - alert: XQueueSandboxViolations
+          expr: |
+            rate(xqueue_sandbox_violations_total[5m]) > 1
+          for: 5m
+          labels:
+            severity: warning
+            component: xqueue-graders
+          annotations:
+            summary: "XQueue sandbox violations detected"
+            description: |
+              Sandbox violations detected at {{ $value }} violations/second.
+              Violation type: {{ $labels.violation_type }}
+              Review student submissions for malicious code attempts.
+
+    - name: xqueue-graders-workers
+      interval: 1m
+      rules:
+        - alert: XQueueNoActiveWorkers
+          expr: |
+            xqueue_active_workers == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: xqueue-graders
+            pagerduty: "true"
+          annotations:
+            summary: "No active XQueue grader workers detected (CRITICAL)"
+            description: |
+              All XQueue grader workers are inactive or down.
+              Immediate action required - students cannot submit code assignments.
+              Check worker pod status and logs.
+
+        - alert: XQueueWorkerRestarts
+          expr: |
+            rate(kube_pod_container_status_restarts_total{namespace="mereka-lms",container="grader"}[15m]) > 0.1
+          for: 5m
+          labels:
+            severity: warning
+            component: xqueue-graders
+          annotations:
+            summary: "XQueue grader workers restarting frequently"
+            description: |
+              Grader workers are restarting at {{ $value }} restarts/second.
+              This may indicate memory leaks, crashes, or configuration issues.
+              Check worker logs for errors.

@@ -1,0 +1,10 @@
+=== UI finality route matrix 2026-02-19T19:32:39Z ===
+200 (final:200) https://academyv2.mereka.io/
+302 (final:405) https://academyv2.mereka.io/dashboard
+200 (final:200) https://admin.academyv2.mereka.io/
+200 (final:200) https://studio.academyv2.mereka.io/
+200 (final:200) https://apps.academyv2.mereka.io/authn/login
+200 (final:200) https://ecommerce.academyv2.mereka.io/dashboard/
+200 (final:200) https://credentials.academyv2.mereka.io/admin/login/
+200 (final:200) https://skillourfuture.academy.mereka.io/
+200 (final:200) https://academy.biji-biji.com/

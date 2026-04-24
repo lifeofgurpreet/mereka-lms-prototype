@@ -1,0 +1,87 @@
+# Upptime probe inventory — Mereka LMS prod domains
+#
+# Canonical source of truth for which prod-facing URLs are probed by the
+# external Upptime instance at https://status.mereka.dev.
+#
+# USAGE: When modifying probes, edit this file, then copy the `sites` block
+# into ~/infrastructure/upptime/.upptimerc.yml on the VPS and commit the
+# config to the acfs-status GitHub repo.
+#
+# Schema: https://upptime.js.org/docs/configuration#sites
+# Owner: mereka-lms-mx78
+
+sites:
+  # ── Mereka (primary tenant) ────────────────────────────────────────────
+  - name: "LMS — Mereka"
+    url: https://academyv2.mereka.io/
+    method: HEAD
+    expectedStatusCodes:
+      - 200
+      - 302
+    maxRedirects: 5
+
+  - name: "Studio — Mereka"
+    url: https://studio.academyv2.mereka.io/
+    method: HEAD
+    expectedStatusCodes:
+      - 200
+      - 302
+    maxRedirects: 5
+
+  - name: "Authn MFE — Mereka"
+    url: https://apps.academyv2.mereka.io/authn/login
+    method: GET
+    expectedStatusCodes:
+      - 200
+      - 302
+    maxRedirects: 5
+
+  - name: "Learner Dashboard MFE — Mereka"
+    url: https://apps.academyv2.mereka.io/learner-dashboard/
+    method: GET
+    expectedStatusCodes:
+      - 200
+      - 302
+    maxRedirects: 5
+
+  # ── SOF (SkillOurFuture tenant) ────────────────────────────────────────
+  - name: "LMS — SkillOurFuture"
+    url: https://skillourfuture.academy.mereka.io/
+    method: HEAD
+    expectedStatusCodes:
+      - 200
+      - 302
+    maxRedirects: 5
+
+  - name: "Authn MFE — SkillOurFuture"
+    url: https://apps.skillourfuture.academy.mereka.io/authn/login
+    method: GET
+    expectedStatusCodes:
+      - 200
+      - 302
+    maxRedirects: 5
+
+  # ── Biji-Biji tenant ───────────────────────────────────────────────────
+  - name: "LMS — Biji-Biji"
+    url: https://academy.biji-biji.com/
+    method: HEAD
+    expectedStatusCodes:
+      - 200
+      - 302
+    maxRedirects: 5
+
+  - name: "Authn MFE — Biji-Biji"
+    url: https://apps.academy.biji-biji.com/authn/login
+    method: GET
+    expectedStatusCodes:
+      - 200
+      - 302
+    maxRedirects: 5
+
+  # ── Service health endpoints ───────────────────────────────────────────
+  - name: "Discovery API — health"
+    url: https://discovery.academyv2.mereka.io/health/
+    method: GET
+    expectedStatusCodes:
+      - 200
+    maxRedirects: 3

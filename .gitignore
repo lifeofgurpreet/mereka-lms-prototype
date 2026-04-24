@@ -1,0 +1,155 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+.hypothesis/
+htmlcov/
+
+# Virtual environments
+.venv
+.venv/
+.env/
+venv/
+ENV/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Tutor generated artefacts (keep at root for compatibility)
+tutor_env/
+data/
+tutor_env/dev/frontend-app-*/
+
+# Local upstream MFE clones (allow only canonical authn submodule path)
+tmp/frontend-app-*/
+!tmp/frontend-app-authn/
+
+# Brand package generated outputs (keep placeholders only)
+infrastructure/tutor/brand-*/dist/**/*
+!infrastructure/tutor/brand-*/dist/**/.gitkeep
+
+# Runtime artifacts (new var/ structure)
+var/*
+!var/proofs/
+var/proofs/*
+!var/proofs/retired-root-remediation.md
+build_*.log
+*.log
+*.pid
+*.sock
+*.sqlite
+*.sqlite3
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite-journal
+*.sqlite3-wal
+*.sqlite3-shm
+*.sqlite3-journal
+*.db
+*.db-wal
+*.db-shm
+*.db-journal
+# Migration outputs (moved to var/)
+ops/migrations/**/output/
+ops/migrations/**/logs/
+
+# Custom Tutor app runtime/state files
+infrastructure/tutor/custom-apps/**/db.sqlite3
+infrastructure/tutor/custom-apps/**/*.log
+infrastructure/tutor/custom-apps/**/__pycache__/
+
+# Migration outputs (may contain PII or logs)
+scripts/migrations/*/output/
+scripts/migrations/*/logs/
+scripts/migrations/output/
+migrations/*/output/
+migrations/*/logs/
+# Exports (moved to var/)
+exports/
+
+# Generated archival report drops (keep out of git history)
+docs/archive/reports/
+
+# IDE configs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Node modules
+node_modules/
+.pnp/
+.pnp.js
+
+# Webhook outbox
+ops/migrations/kajabi/webhook_app/outbox/
+
+# Misc
+*.bak
+*.tmp
+.gcloud/
+
+# Terraform
+ops/terraform/.terraform/
+infrastructure/terraform/.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+terraform.tfvars
+.terraform/
+
+# Secrets (never commit)
+*.pem
+*.key
+*.crt
+secrets/
+!deploy/k8s/base/secrets/
+!deploy/k8s/base/secrets/**
+.env.local
+.env.*.local
+.env
+.env.*
+!.env.example
+
+# HubSpot webhook MCT variant credentials
+hubspot-webhook-mct/.env
+
+# Backup files
+*.bak
+*.backup
+
+# bv (beads viewer) local config and caches
+.bv/
+
+# Claude/Codex local state
+.claude/
+
+# Local build evidence and cache state
+.benchmarks/
+.buildx-cache/
+
+# Infisical CLI local config (never commit)
+.infisical.json
+
+# Agent Mail discovery files
+.agent-mail-project-id
+.agent-mail.yaml
+
+# Domain runtime audit outputs (runtime-dependent, not deterministic)
+generated/domain/domain-runtime-audit.json
+generated/truth-ledger/
+docs/reference/generated/domain-runtime-audit.md
+
+# Stray CLI artifacts
+--url
+.docs-world-class-sync-state
+.aspects-tutor-workspace/

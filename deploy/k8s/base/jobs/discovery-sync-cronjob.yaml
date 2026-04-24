@@ -1,0 +1,174 @@
+---
+# CronJob to sync course metadata to Discovery service
+# Runs every 6 hours to ensure course catalog is up-to-date
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: discovery-sync
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: discovery-sync
+    app.kubernetes.io/component: cronjob
+    app.kubernetes.io/part-of: mereka-lms
+spec:
+  # Run every 6 hours
+  schedule: "0 */6 * * *"
+
+  # Keep last 3 successful and 1 failed job for debugging
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+
+  # Allow concurrent runs to be skipped if previous job still running
+  concurrencyPolicy: Forbid
+
+  jobTemplate:
+    metadata:
+      labels:
+        app.kubernetes.io/name: discovery-sync
+        app.kubernetes.io/component: job
+    spec:
+      # Retry once if job fails
+      backoffLimit: 1
+
+      # Clean up completed jobs after 24 hours
+      ttlSecondsAfterFinished: 86400
+
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: discovery-sync
+            app.kubernetes.io/component: pod
+        spec:
+          restartPolicy: Never
+
+          # Use Discovery service account if exists
+          serviceAccountName: default
+
+          # Kyverno require-non-root-security-context compliance
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+
+          containers:
+          - name: sync
+            # Discovery management commands must run in the Discovery image, not the
+            # LMS/CMS openedx image. The openedx image does not contain
+            # /openedx/discovery and causes the sync job to fail before Django boots.
+            image: docker.io/overhangio/openedx-discovery:21.0.1
+            imagePullPolicy: IfNotPresent
+            securityContext:
+              allowPrivilegeEscalation: false
+
+            command:
+            - /bin/bash
+            - -c
+            - |
+              set -euo pipefail
+
+              echo "=== Discovery Catalog Sync - $(date) ==="
+
+              # Change to Discovery working directory
+              cd /openedx/discovery
+
+              echo "[1/3] Refreshing course and program metadata..."
+              if python manage.py refresh_course_metadata >/tmp/discovery-refresh.log 2>&1; then
+                grep -v "UserWarning: The 'django-fsm'" /tmp/discovery-refresh.log || true
+              else
+                grep -v "UserWarning: The 'django-fsm'" /tmp/discovery-refresh.log || true
+                echo "Discovery metadata refresh failed"
+                exit 1
+              fi
+
+              echo "[2/3] Updating search index..."
+              if python manage.py update_index --disable-change-limit >/tmp/discovery-update-index.log 2>&1; then
+                grep -v "UserWarning: The 'django-fsm'" /tmp/discovery-update-index.log || true
+              elif rg -q "index_not_found_exception|no such index" /tmp/discovery-update-index.log; then
+                echo "Discovery indexes are missing; rebuilding from scratch..."
+                python manage.py search_index --rebuild -f --disable-change-limit >/tmp/discovery-search-index.log 2>&1
+                grep -v "UserWarning: The 'django-fsm'" /tmp/discovery-search-index.log || true
+              else
+                grep -v "UserWarning: The 'django-fsm'" /tmp/discovery-update-index.log || true
+                echo "Discovery index update failed"
+                exit 1
+              fi
+
+              echo "[3/3] Verifying catalog counts..."
+              python manage.py shell -c "
+              from course_discovery.apps.course_metadata.models import Course, Program
+              print(f'Courses: {Course.objects.count()}, Programs: {Program.objects.count()}')
+              " 2>/dev/null || echo "Could not verify counts"
+
+              echo "✓ Sync complete."
+
+            # Environment variables
+            env:
+            # Service type
+            - name: SERVICE_VARIANT
+              value: discovery
+
+            # Django settings
+            - name: DJANGO_SETTINGS_MODULE
+              value: course_discovery.settings.tutor.production
+
+            # Database connection (from database-secrets)
+            - name: DB_HOST
+              value: "mysql"
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_NAME
+              value: discovery
+            - name: DB_USER
+              value: discovery
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-secrets
+                  key: MYSQL_DISCOVERY_PASSWORD
+
+            # Overlays override with environment-specific public URLs
+            - name: LMS_URL
+              value: "http://lms:8000"
+            - name: DISCOVERY_URL
+              value: "http://discovery:8000"
+            - name: MEREKA_SCHEME
+              value: "https"
+
+            # Import secrets
+            envFrom:
+            - secretRef:
+                name: openedx-secrets
+
+            volumeMounts:
+            - mountPath: /openedx/discovery/course_discovery/settings/tutor/production.py
+              name: settings
+              subPath: production.py
+            - mountPath: /openedx/discovery/course_discovery/settings/tutor/mereka_platform_admin.py
+              name: settings
+              subPath: mereka_platform_admin.py
+
+            # Resource limits
+            resources:
+              requests:
+                memory: "512Mi"
+                cpu: "250m"
+              limits:
+                memory: "1Gi"
+                cpu: "500m"
+
+            # Health check (fail fast if container unhealthy)
+            livenessProbe:
+              exec:
+                command:
+                - /bin/bash
+                - -c
+                - "ps aux | grep -v grep | grep python"
+              initialDelaySeconds: 10
+              periodSeconds: 30
+              timeoutSeconds: 5
+              failureThreshold: 3
+
+          volumes:
+          - name: settings
+            configMap:
+              name: discovery-settings

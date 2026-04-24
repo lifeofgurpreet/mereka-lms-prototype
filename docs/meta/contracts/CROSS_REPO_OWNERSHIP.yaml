@@ -1,0 +1,105 @@
+version: 1
+repos:
+  mereka-lms:
+    role: app_repo
+    responsibility:
+      - application runtime truth
+      - specs, proposals, plans, and testplans
+      - repo-local change intelligence
+      - service contract intent
+  bbi-infrastructure:
+    role: deployment_repo
+    responsibility:
+      - environment realization
+      - gitops overlays and appsets
+      - cluster-facing secrets wiring
+      - ingress, dns, and release promotion surfaces
+
+reviewer_groups:
+  architecture:
+    description: Cross-cutting architecture and contract review
+  docs:
+    description: Knowledge-system and reviewer-facing surface review
+  platform:
+    description: Deployment, runtime, and GitOps review
+  security:
+    description: Secret, identity, and trust-boundary review
+  tenancy_auth:
+    description: Auth, tenancy, and identity-surface review
+  release:
+    description: Promotion, evidence, and release-readiness review
+
+lane_ownership:
+  specs:normative:
+    owning_repo: mereka-lms
+    mandatory_reviewers:
+      - architecture
+      - docs
+  specs:proposal:
+    owning_repo: mereka-lms
+    mandatory_reviewers:
+      - architecture
+      - docs
+  specs:plan:
+    owning_repo: mereka-lms
+    mandatory_reviewers:
+      - docs
+      - platform
+  specs:testplan:
+    owning_repo: mereka-lms
+    mandatory_reviewers:
+      - docs
+      - platform
+  docs:runbook:
+    owning_repo: mereka-lms
+    mandatory_reviewers:
+      - docs
+      - platform
+  docs:adr:
+    owning_repo: mereka-lms
+    mandatory_reviewers:
+      - architecture
+      - docs
+  deploy:service_contract:
+    owning_repo: mereka-lms
+    mandatory_reviewers:
+      - architecture
+      - platform
+      - release
+  deploy:infra_crosswalk:
+    owning_repo: mereka-lms
+    mandatory_reviewers:
+      - platform
+      - architecture
+      - release
+
+high_risk_surfaces:
+  openedx_runtime:
+    description: LMS, Studio, Tutor, or runtime contract changes affecting Open edX services
+    mandatory_reviewers:
+      - architecture
+      - platform
+      - release
+  mfe_runtime:
+    description: Frontend delivery, branding, asset, or routing changes affecting MFE deploys
+    mandatory_reviewers:
+      - architecture
+      - platform
+      - release
+  secrets_identity:
+    description: Secret sourcing, auth, identity, or trust-boundary changes
+    mandatory_reviewers:
+      - security
+      - platform
+      - tenancy_auth
+  purchase_flows:
+    description: Commerce and payment deployment-affecting changes
+    mandatory_reviewers:
+      - architecture
+      - platform
+      - release
+  observability_release:
+    description: Monitoring, alerting, runner, or release-pipeline changes
+    mandatory_reviewers:
+      - platform
+      - release

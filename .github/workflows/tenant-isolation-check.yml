@@ -1,0 +1,45 @@
+name: Tenant Isolation Check
+
+on:
+  push:
+    paths:
+      - "infrastructure/tutor/plugins/multi-tenancy/**"
+      - "deploy/k8s/base/apps/multi-tenancy/**"
+      - "deploy/k8s/base/monitoring/cronjob-tenant-isolation.yaml"
+      - "deploy/k8s/base/monitoring/prometheusrule-tenant-isolation.yaml"
+      - "scripts/qa/verify-tenant-isolation-gates.sh"
+      - "scripts/tenants/**"
+  pull_request:
+    paths:
+      - "infrastructure/tutor/plugins/multi-tenancy/**"
+      - "deploy/k8s/base/apps/multi-tenancy/**"
+      - "deploy/k8s/base/monitoring/cronjob-tenant-isolation.yaml"
+      - "deploy/k8s/base/monitoring/prometheusrule-tenant-isolation.yaml"
+      - "scripts/qa/verify-tenant-isolation-gates.sh"
+      - "scripts/tenants/**"
+  merge_group:
+  workflow_dispatch: {}
+
+permissions: {}  # Deny-all at workflow level; each job grants only what it needs
+
+jobs:
+  tenant-isolation-offline:
+    name: Tenant Isolation Gates (offline)
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Run tenant isolation checks (offline)
+        run: bash scripts/qa/verify-tenant-isolation-gates.sh --offline
+
+      - name: Upload verification log
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: tenant-isolation-log
+          path: var/tenant-isolation-*.log
+          retention-days: 3
+          if-no-files-found: ignore

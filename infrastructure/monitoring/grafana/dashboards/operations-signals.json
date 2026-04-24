@@ -1,0 +1,688 @@
+{
+  "uid": "mereka-lms-operations-signals",
+  "title": "Mereka LMS - Operations Signals",
+  "description": "Canonical LMS operator board for nonprod dependency pressure, backup freshness, PVC saturation, and critical workload availability.",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "tags": [
+    "mereka-lms",
+    "operations",
+    "applications",
+    "openedx",
+    "nonprod"
+  ],
+  "links": [
+    {
+      "icon": "doc",
+      "targetBlank": true,
+      "title": "LMS Monitoring Rules",
+      "type": "link",
+      "url": "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/deploy/k8s/base/monitoring/prometheusrule-lms.yaml"
+    },
+    {
+      "icon": "doc",
+      "targetBlank": true,
+      "title": "Velero Monitoring Rules",
+      "type": "link",
+      "url": "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/deploy/k8s/base/monitoring/prometheusrule-velero.yaml"
+    },
+    {
+      "icon": "doc",
+      "targetBlank": true,
+      "title": "Wave 1 Design",
+      "type": "link",
+      "url": "https://github.com/Biji-Biji-Initiative/infrastructure/blob/main/docs/reports/lms-operations-signals-wave-1-design-2026-04-11.md"
+    }
+  ],
+  "panels": [
+    {
+      "id": 1,
+      "type": "text",
+      "title": "Contracts and Intent",
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "# Mereka LMS operations signals\n\nUse this board for operator-facing dependency and reliability signals that sit between the broad nonprod overview and the LMS SLO board.\n\n| Scope | Signals |\n|---|---|\n| Dependencies | MySQL connection pressure, Redis rejection/eviction pressure |\n| Reliability | Velero freshness, critical deployment availability |\n| Storage | Highest PVC utilisation in dev/staging |\n\nThis board is intentionally nonprod-only and targets `mereka-lms-dev` plus `stg-mereka-lms`."
+      },
+      "transparent": true
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Dev MySQL Connection Utilisation",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Threads connected divided by max connections for the dev MySQL service.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.7
+              },
+              {
+                "color": "red",
+                "value": 0.85
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 5
+      },
+      "targets": [
+        {
+          "expr": "mysql_global_status_threads_connected{namespace=\"mereka-lms-dev\",service=\"mysql\"} / clamp_min(mysql_global_variables_max_connections{namespace=\"mereka-lms-dev\",service=\"mysql\"}, 1)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Staging MySQL Connection Utilisation",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Threads connected divided by max connections for the staging MySQL service.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.7
+              },
+              {
+                "color": "red",
+                "value": 0.85
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 5
+      },
+      "targets": [
+        {
+          "expr": "mysql_global_status_threads_connected{namespace=\"stg-mereka-lms\",service=\"mysql\"} / clamp_min(mysql_global_variables_max_connections{namespace=\"stg-mereka-lms\",service=\"mysql\"}, 1)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Velero Last Success Age",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Age of the most recent successful Velero backup across the nonprod cluster.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 43200
+              },
+              {
+                "color": "red",
+                "value": 86400
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 5
+      },
+      "targets": [
+        {
+          "expr": "time() - max(velero_backup_last_successful_timestamp)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Highest LMS PVC Used %",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Highest PVC utilisation across LMS dev and staging namespaces.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 5
+      },
+      "targets": [
+        {
+          "expr": "max(100 * (kubelet_volume_stats_used_bytes{namespace=~\"mereka-lms-dev|stg-mereka-lms\"} / kubelet_volume_stats_capacity_bytes{namespace=~\"mereka-lms-dev|stg-mereka-lms\"}))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "MySQL Connection Utilisation",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 10
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "mysql_global_status_threads_connected{namespace=\"mereka-lms-dev\",service=\"mysql\"} / clamp_min(mysql_global_variables_max_connections{namespace=\"mereka-lms-dev\",service=\"mysql\"}, 1)",
+          "legendFormat": "dev",
+          "refId": "A"
+        },
+        {
+          "expr": "mysql_global_status_threads_connected{namespace=\"stg-mereka-lms\",service=\"mysql\"} / clamp_min(mysql_global_variables_max_connections{namespace=\"stg-mereka-lms\",service=\"mysql\"}, 1)",
+          "legendFormat": "staging",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Redis Connection Pressure Events",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 10
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "increase(redis_rejected_connections_total{namespace=\"mereka-lms-dev\",service=\"redis\"}[15m])",
+          "legendFormat": "dev rejected",
+          "refId": "A"
+        },
+        {
+          "expr": "increase(redis_rejected_connections_total{namespace=\"stg-mereka-lms\",service=\"redis\"}[15m])",
+          "legendFormat": "staging rejected",
+          "refId": "B"
+        },
+        {
+          "expr": "increase(redis_evicted_keys_total{namespace=\"mereka-lms-dev\",service=\"redis\"}[15m])",
+          "legendFormat": "dev evicted",
+          "refId": "C"
+        },
+        {
+          "expr": "increase(redis_evicted_keys_total{namespace=\"stg-mereka-lms\",service=\"redis\"}[15m])",
+          "legendFormat": "staging evicted",
+          "refId": "D"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "bargauge",
+      "title": "Top LMS PVC Utilisation",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 18
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": false
+      },
+      "targets": [
+        {
+          "expr": "topk(10, 100 * (kubelet_volume_stats_used_bytes{namespace=~\"mereka-lms-dev|stg-mereka-lms\"} / kubelet_volume_stats_capacity_bytes{namespace=~\"mereka-lms-dev|stg-mereka-lms\"}))",
+          "legendFormat": "{{namespace}} / {{persistentvolumeclaim}}",
+          "instant": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Critical Deployments With Unavailable Replicas",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 18
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum by (deployment) (kube_deployment_status_replicas_unavailable{namespace=\"mereka-lms-dev\",deployment=~\"lms|cms|caddy|mfe|forum|discovery|credentials|notes|xqueue\"})",
+          "legendFormat": "dev {{deployment}}",
+          "refId": "A"
+        },
+        {
+          "expr": "sum by (deployment) (kube_deployment_status_replicas_unavailable{namespace=\"stg-mereka-lms\",deployment=~\"lms|cms|caddy|mfe|forum|discovery|credentials|notes|xqueue\"})",
+          "legendFormat": "staging {{deployment}}",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "stat",
+      "title": "Recent Velero Backup Failures (1h)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 26
+      },
+      "targets": [
+        {
+          "expr": "increase(velero_backup_failure_total[1h])",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "type": "stat",
+      "title": "Dev Pending Pods",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 6,
+        "y": 26
+      },
+      "targets": [
+        {
+          "expr": "sum(kube_pod_status_phase{namespace=\"mereka-lms-dev\",phase=\"Pending\"}) or vector(0)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "stat",
+      "title": "Staging Pending Pods",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 26
+      },
+      "targets": [
+        {
+          "expr": "sum(kube_pod_status_phase{namespace=\"stg-mereka-lms\",phase=\"Pending\"}) or vector(0)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "type": "stat",
+      "title": "CrashLooping LMS Containers",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        }
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 26
+      },
+      "targets": [
+        {
+          "expr": "sum(kube_pod_container_status_waiting_reason{namespace=~\"mereka-lms-dev|stg-mereka-lms\",reason=\"CrashLoopBackOff\"}) or vector(0)",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+# Process Invariant Gates — fast, dedicated, required checks
+#
+# These run as their own visible status checks, not buried in
+# the long static-validation aggregate. They are lightweight
+# (seconds, not minutes) and catch process/docs/truth violations
+# before the full CI suite runs.
+name: Process Invariants
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  merge_group:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docs-authority:
+    name: Docs Authority Invariants
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - name: Verify docs authority invariants
+        run: bash scripts/qa/verify-docs-authority-invariants.sh
+
+  process-rules:
+    name: Process Rules
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - name: Verify process invariants
+        run: bash scripts/qa/verify-process-invariants.sh
+
+  machine-truth:
+    name: Machine Truth Freshness
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - name: Verify machine-readable truth freshness
+        run: bash scripts/qa/verify-machine-truth-freshness.sh
+
+  change-surface:
+    name: Change Surface Contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 2
+      - name: Verify change-surface contracts
+        run: bash scripts/qa/verify-change-surface-contract.sh

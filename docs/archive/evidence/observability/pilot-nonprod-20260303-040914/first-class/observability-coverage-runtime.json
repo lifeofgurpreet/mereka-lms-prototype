@@ -1,0 +1,506 @@
+{
+  "generated_at": "2026-03-03T04:11:40Z",
+  "mode": "runtime",
+  "strict": true,
+  "identity": {
+    "env": "nonprod",
+    "profile": "nonprod",
+    "context": "rke2-nonprod",
+    "app_namespace": "mereka-lms",
+    "monitoring_namespace": "monitoring"
+  },
+  "summary": {
+    "pass": 74,
+    "fail": 7,
+    "skip": 0,
+    "total": 81
+  },
+  "coverage": [
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-file",
+      "detail": "servicemonitor-lms.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-in-kustomization",
+      "detail": "servicemonitor-lms.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-file",
+      "detail": "servicemonitor-cms.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-in-kustomization",
+      "detail": "servicemonitor-cms.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-file",
+      "detail": "servicemonitor-mysql.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-in-kustomization",
+      "detail": "servicemonitor-mysql.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-file",
+      "detail": "servicemonitor-redis.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-in-kustomization",
+      "detail": "servicemonitor-redis.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-file",
+      "detail": "servicemonitor-enterprise.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-in-kustomization",
+      "detail": "servicemonitor-enterprise.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-file",
+      "detail": "servicemonitor-xqueue.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-in-kustomization",
+      "detail": "servicemonitor-xqueue.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-file",
+      "detail": "servicemonitor-mux.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-in-kustomization",
+      "detail": "servicemonitor-mux.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-file",
+      "detail": "servicemonitor-caddy.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-in-kustomization",
+      "detail": "servicemonitor-caddy.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-file",
+      "detail": "servicemonitor-mfe.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-in-kustomization",
+      "detail": "servicemonitor-mfe.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-file",
+      "detail": "servicemonitor-forum.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-in-kustomization",
+      "detail": "servicemonitor-forum.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-file",
+      "detail": "servicemonitor-discovery.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-in-kustomization",
+      "detail": "servicemonitor-discovery.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-file",
+      "detail": "servicemonitor-ecommerce.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-in-kustomization",
+      "detail": "servicemonitor-ecommerce.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-file",
+      "detail": "servicemonitor-credentials.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-in-kustomization",
+      "detail": "servicemonitor-credentials.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-file",
+      "detail": "servicemonitor-purchase-gateway.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "service-monitor-in-kustomization",
+      "detail": "servicemonitor-purchase-gateway.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-file",
+      "detail": "prometheusrule-lms.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-in-kustomization",
+      "detail": "prometheusrule-lms.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-file",
+      "detail": "prometheusrule-enterprise.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-in-kustomization",
+      "detail": "prometheusrule-enterprise.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-file",
+      "detail": "prometheusrule-velero.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-in-kustomization",
+      "detail": "prometheusrule-velero.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-file",
+      "detail": "prometheusrule-slo.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-in-kustomization",
+      "detail": "prometheusrule-slo.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-file",
+      "detail": "prometheusrule-auth.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-in-kustomization",
+      "detail": "prometheusrule-auth.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-file",
+      "detail": "prometheusrule-caddy.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-in-kustomization",
+      "detail": "prometheusrule-caddy.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-file",
+      "detail": "prometheusrule-services.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-in-kustomization",
+      "detail": "prometheusrule-services.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-file",
+      "detail": "prometheusrule-video.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-in-kustomization",
+      "detail": "prometheusrule-video.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-file",
+      "detail": "prometheusrule-email.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-in-kustomization",
+      "detail": "prometheusrule-email.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-file",
+      "detail": "prometheusrule-libraries.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-in-kustomization",
+      "detail": "prometheusrule-libraries.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-file",
+      "detail": "prometheusrule-ora2.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-in-kustomization",
+      "detail": "prometheusrule-ora2.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-file",
+      "detail": "prometheusrule-credentials.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-in-kustomization",
+      "detail": "prometheusrule-credentials.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-extra",
+      "detail": "prometheusrule-externalsecrets.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-extra",
+      "detail": "prometheusrule-tenant-isolation.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "repo",
+      "id": "prometheusrule-extra",
+      "detail": "prometheusrule-xqueue.yaml"
+    },
+    {
+      "status": "pass",
+      "category": "runtime",
+      "id": "service-monitor-live",
+      "detail": "lms-metrics"
+    },
+    {
+      "status": "pass",
+      "category": "runtime",
+      "id": "service-monitor-live",
+      "detail": "cms-metrics"
+    },
+    {
+      "status": "pass",
+      "category": "runtime",
+      "id": "service-monitor-live",
+      "detail": "mysql-metrics"
+    },
+    {
+      "status": "pass",
+      "category": "runtime",
+      "id": "service-monitor-live",
+      "detail": "redis-metrics"
+    },
+    {
+      "status": "pass",
+      "category": "runtime",
+      "id": "service-monitor-live",
+      "detail": "enterprise-catalog-metrics"
+    },
+    {
+      "status": "pass",
+      "category": "runtime",
+      "id": "service-monitor-live",
+      "detail": "xqueue-metrics"
+    },
+    {
+      "status": "pass",
+      "category": "runtime",
+      "id": "service-monitor-live",
+      "detail": "mux-delivery-monitor"
+    },
+    {
+      "status": "fail",
+      "category": "runtime",
+      "id": "service-monitor-live",
+      "detail": "caddy-metrics"
+    },
+    {
+      "status": "fail",
+      "category": "runtime",
+      "id": "service-monitor-live",
+      "detail": "mfe-metrics"
+    },
+    {
+      "status": "fail",
+      "category": "runtime",
+      "id": "service-monitor-live",
+      "detail": "forum-metrics"
+    },
+    {
+      "status": "fail",
+      "category": "runtime",
+      "id": "service-monitor-live",
+      "detail": "discovery-metrics"
+    },
+    {
+      "status": "fail",
+      "category": "runtime",
+      "id": "service-monitor-live",
+      "detail": "ecommerce-metrics"
+    },
+    {
+      "status": "fail",
+      "category": "runtime",
+      "id": "service-monitor-live",
+      "detail": "credentials-metrics"
+    },
+    {
+      "status": "fail",
+      "category": "runtime",
+      "id": "service-monitor-live",
+      "detail": "purchase-gateway-metrics"
+    },
+    {
+      "status": "pass",
+      "category": "runtime",
+      "id": "prometheusrule-live",
+      "detail": "lms-alerts"
+    },
+    {
+      "status": "pass",
+      "category": "runtime",
+      "id": "prometheusrule-live",
+      "detail": "enterprise-alerts"
+    },
+    {
+      "status": "pass",
+      "category": "runtime",
+      "id": "prometheusrule-live",
+      "detail": "velero-alerts"
+    },
+    {
+      "status": "pass",
+      "category": "runtime",
+      "id": "prometheusrule-live",
+      "detail": "slo-recording-rules"
+    },
+    {
+      "status": "pass",
+      "category": "runtime",
+      "id": "prometheusrule-live",
+      "detail": "auth-alerts"
+    },
+    {
+      "status": "pass",
+      "category": "runtime",
+      "id": "prometheusrule-live",
+      "detail": "caddy-alerts"
+    },
+    {
+      "status": "pass",
+      "category": "runtime",
+      "id": "prometheusrule-live",
+      "detail": "services-alerts"
+    },
+    {
+      "status": "pass",
+      "category": "runtime",
+      "id": "prometheusrule-live",
+      "detail": "video-alerts"
+    },
+    {
+      "status": "pass",
+      "category": "runtime",
+      "id": "prometheusrule-live",
+      "detail": "email-alerts"
+    },
+    {
+      "status": "pass",
+      "category": "runtime",
+      "id": "prometheusrule-live",
+      "detail": "library-alerts"
+    },
+    {
+      "status": "pass",
+      "category": "runtime",
+      "id": "prometheusrule-live",
+      "detail": "ora2-operations"
+    },
+    {
+      "status": "pass",
+      "category": "runtime",
+      "id": "prometheusrule-live",
+      "detail": "credentials-alerts"
+    }
+  ]
+}

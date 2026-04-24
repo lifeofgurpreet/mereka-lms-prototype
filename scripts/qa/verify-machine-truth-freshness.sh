@@ -1,0 +1,164 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# verify-machine-truth-freshness.sh — Verify machine-readable truth files
+# are structurally valid and not stale.
+#
+# Checks:
+#   1. Required truth files exist
+#   2. Required machine-readable files are parseable
+#   3. Schema version fields are present
+#   4. smoke-account-registry references real tenant names from tenant-registry
+#   5. process-invariants has at least 12 rules
+#   6. release-object JSON schema projection has required fields
+#
+# No network calls. No destructive operations.
+
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+cd "$REPO_ROOT"
+
+failures=0
+passes=0
+
+pass() { echo "  [PASS] $*"; passes=$((passes + 1)); }
+fail() { echo "  [FAIL] $*"; failures=$((failures + 1)); }
+has_pattern() {
+  local pattern="$1"
+  local path="$2"
+  grep -Eq "$pattern" "$path"
+}
+
+echo "=== Machine-Readable Truth Freshness Verification ==="
+echo "Repo root: ${REPO_ROOT}"
+
+# ---------------------------------------------------------------------------
+# 1. Required truth files exist
+# ---------------------------------------------------------------------------
+echo "--- Check 1: Required truth files exist ---"
+required_files=(
+  "config/process-invariants.yaml"
+  "config/active-surface-inventory.yaml"
+  "config/proof-lane-status.yaml"
+  "config/source-of-truth-matrix.yaml"
+  "deploy/k8s/tenancy/smoke-account-registry.yaml"
+)
+for f in "${required_files[@]}"; do
+  if [[ -f "$f" ]]; then
+    pass "$f exists"
+  else
+    fail "$f missing"
+  fi
+done
+
+# ---------------------------------------------------------------------------
+# 2. Machine-readable files are parseable
+# ---------------------------------------------------------------------------
+echo "--- Check 2: Machine-readable files are parseable ---"
+if python3 -c "import yaml" 2>/dev/null; then
+  for f in "${required_files[@]}"; do
+    if [[ -f "$f" ]]; then
+      if python3 - <<'PY' "$f" 2>/dev/null
+import json
+import sys
+import yaml
+from pathlib import Path
+
+path = Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+if path.suffix == ".json":
+    json.loads(text)
+else:
+    yaml.safe_load(text)
+PY
+      then
+        pass "$f is parseable"
+      else
+        fail "$f is not parseable"
+      fi
+    fi
+  done
+else
+  echo "  [SKIP] python3 yaml module not available; skipping parse check"
+fi
+
+# ---------------------------------------------------------------------------
+# 3. Schema version fields present
+# ---------------------------------------------------------------------------
+echo "--- Check 3: Schema version fields present ---"
+for f in "${required_files[@]}"; do
+  if [[ -f "$f" ]]; then
+    if has_pattern 'schema_version("|:)' "$f"; then
+      pass "$f has schema_version"
+    else
+      fail "$f missing schema_version field"
+    fi
+  fi
+done
+
+# ---------------------------------------------------------------------------
+# 4. Smoke registry references real tenants
+# ---------------------------------------------------------------------------
+echo "--- Check 4: Smoke registry references real tenants ---"
+smoke_reg="deploy/k8s/tenancy/smoke-account-registry.yaml"
+tenant_reg="deploy/k8s/tenancy/tenant-registry.yaml"
+if [[ -f "$smoke_reg" && -f "$tenant_reg" ]]; then
+  smoke_tenants=$(grep 'tenant:' "$smoke_reg" | sed 's/.*tenant: *//' | tr -d '"' | sort -u)
+  for t in $smoke_tenants; do
+    if [[ "$t" == "platform" || "$t" == "shared" || "$t" == "shared/tenant" ]]; then
+      pass "smoke tenant '$t' is a platform-scoped identity (OK)"
+    elif grep -qi "$t" "$tenant_reg"; then
+      pass "smoke tenant '$t' found in tenant-registry"
+    else
+      fail "smoke tenant '$t' NOT found in tenant-registry"
+    fi
+  done
+else
+  echo "  [SKIP] smoke or tenant registry file missing"
+fi
+
+# ---------------------------------------------------------------------------
+# 5. Process invariants has at least 12 rules
+# ---------------------------------------------------------------------------
+echo "--- Check 5: Process invariants minimum rule count ---"
+inv_file="config/process-invariants.yaml"
+if [[ -f "$inv_file" ]]; then
+  count=$(grep -c '^  - id: INV-' "$inv_file" || echo 0)
+  if [[ "$count" -ge 12 ]]; then
+    pass "process-invariants has $count rules (>= 12 minimum)"
+  else
+    fail "process-invariants has only $count rules (need >= 12)"
+  fi
+fi
+
+# ---------------------------------------------------------------------------
+# 6. Release-object consumer points at PCP projection authority
+# ---------------------------------------------------------------------------
+echo "--- Check 6: Release-object control-plane projection consumer ---"
+if has_pattern 'release-object-projection-schema\.yaml' "scripts/qa/verify-release-object.sh"; then
+  pass "verify-release-object.sh references PCP release-object projection schema"
+else
+  fail "verify-release-object.sh does not reference PCP release-object projection schema"
+fi
+
+if has_pattern 'PLATFORM_CONTROL_PLANE_ROOT|WAVE10_PCP_ROOT' "scripts/qa/verify-release-object.sh"; then
+  pass "verify-release-object.sh resolves PCP root dynamically"
+else
+  fail "verify-release-object.sh missing PCP root resolution"
+fi
+
+if has_pattern 'contracts/release-object-projection-schema\.yaml' "config/source-of-truth-matrix.yaml"; then
+  pass "source-of-truth matrix points release-object at PCP projection schema"
+else
+  fail "source-of-truth matrix still points release-object at local schema authority"
+fi
+
+echo ""
+echo "=== Summary ==="
+echo "PASS: $passes | FAIL: $failures"
+if [[ "$failures" -gt 0 ]]; then
+  echo ""
+  echo "Machine-readable truth freshness violations detected."
+  exit 1
+fi
+echo ""
+echo "All machine-readable truth files are valid and fresh."

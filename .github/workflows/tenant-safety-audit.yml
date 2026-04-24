@@ -1,0 +1,153 @@
+name: Tenant Safety Drift Audit
+
+permissions: {}
+
+on:
+  schedule:
+    # Daily at 02:00 UTC (offset from daily-infrastructure-audit @ 01:00)
+    - cron: '0 2 * * *'
+  push:
+    branches:
+      - main
+    paths:
+      - "infrastructure/tutor/multisite-sites*.yml"
+      - "infrastructure/tutor/multisite-shared-host-allowlist.txt"
+      - "scripts/qa/audit-tenant-config-safety.sh"
+      - "scripts/qa/verify-tenant-branding-fallback.sh"
+      - "scripts/shared/multisite_bootstrap_django.py"
+  workflow_dispatch: {}
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Job 1: tenant-config-audit — static JSON audit of prod + dev config sets
+  # No cluster access required. Pure file-based analysis.
+  # ─────────────────────────────────────────────────────────────────────────────
+  tenant-config-audit:
+    name: Tenant Config Safety Audit (prod + dev)
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Install PyYAML
+        run: pip install --quiet pyyaml
+
+      # ── Prod config set ──────────────────────────────────────────────────────
+      # Run with STRICT=0 so JSON is always written; gate step enforces failure count.
+      - name: Audit prod tenant config (JSON)
+        run: |
+          OUTPUT_FORMAT=json STRICT=0 \
+            ./scripts/qa/audit-tenant-config-safety.sh \
+            --file infrastructure/tutor/multisite-sites.yml \
+            | tee tenant-safety-audit-prod.json
+
+      # ── Dev config set ───────────────────────────────────────────────────────
+      - name: Audit dev tenant config (JSON)
+        run: |
+          OUTPUT_FORMAT=json STRICT=0 \
+            ./scripts/qa/audit-tenant-config-safety.sh \
+            --file infrastructure/tutor/multisite-sites.dev.yml \
+            | tee tenant-safety-audit-dev.json
+
+      # ── Staging config set (optional, may not exist) ─────────────────────────
+      - name: Audit staging tenant config (JSON, if present)
+        run: |
+          if [[ -f infrastructure/tutor/multisite-sites.staging.yml ]]; then
+            OUTPUT_FORMAT=json STRICT=0 \
+              ./scripts/qa/audit-tenant-config-safety.sh \
+              --file infrastructure/tutor/multisite-sites.staging.yml \
+              | tee tenant-safety-audit-staging.json
+          else
+            echo '{"note":"staging config not present","failures_count":0,"warnings_count":0,"pass_checks":0}' \
+              > tenant-safety-audit-staging.json
+          fi
+
+      # ── Host collision check via multisite_bootstrap_django.py ───────────────
+      - name: Run host collision check (--check mode, no Django required)
+        run: |
+          python3 scripts/shared/multisite_bootstrap_django.py \
+            --check \
+            infrastructure/tutor/multisite-sites.yml \
+            2>&1 | tee tenant-safety-collision-check.txt
+
+      # ── Step summary with failure breakdown ──────────────────────────────────
+      - name: Emit step summary
+        if: always()
+        run: |
+          echo "## Tenant Safety Drift Audit" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          for config_set in prod dev staging; do
+            file="tenant-safety-audit-${config_set}.json"
+            if [[ -f "$file" ]]; then
+              echo "### Config set: ${config_set}" >> "$GITHUB_STEP_SUMMARY"
+              jq -r '"- Pass checks: **\(.pass_checks // 0)**\n- Warnings: **\(.warnings_count // 0)**\n- Failures: **\(.failures_count // 0)**"' "$file" >> "$GITHUB_STEP_SUMMARY"
+              cats=$(jq -r '(.failure_categories // []) | select(length > 0) | "- Failure categories: " + join(", ")' "$file")
+              [[ -n "$cats" ]] && echo "$cats" >> "$GITHUB_STEP_SUMMARY"
+              echo "" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+
+      # ── Gate on failure counts (separate from audit steps so artifacts are always written) ──
+      - name: Gate on prod audit result
+        run: |
+          FAILURES=$(jq '.failures_count // 0' tenant-safety-audit-prod.json)
+          if [[ "$FAILURES" -gt 0 ]]; then
+            echo "ERROR: prod tenant config audit found $FAILURES blocking failure(s)." >&2
+            echo "See tenant-safety-audit-prod.json artifact for details." >&2
+            echo "Runbook: docs/ops/runbooks/TENANT_DRIFT_INVESTIGATION.md" >&2
+            exit 1
+          fi
+
+      - name: Gate on dev audit result
+        run: |
+          FAILURES=$(jq '.failures_count // 0' tenant-safety-audit-dev.json)
+          if [[ "$FAILURES" -gt 0 ]]; then
+            echo "ERROR: dev tenant config audit found $FAILURES blocking failure(s)." >&2
+            echo "See tenant-safety-audit-dev.json artifact for details." >&2
+            echo "Runbook: docs/ops/runbooks/TENANT_DRIFT_INVESTIGATION.md" >&2
+            exit 1
+          fi
+
+      # ── Upload JSON artifacts (retained 30 days per AC-004) ─────────────────
+      - name: Upload audit artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: tenant-safety-audit-${{ github.run_id }}
+          retention-days: 30
+          path: |
+            tenant-safety-audit-prod.json
+            tenant-safety-audit-dev.json
+            tenant-safety-audit-staging.json
+            tenant-safety-collision-check.txt
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Job 2: tenant-branding-audit — branding fallback contract verification
+  # Verifies base-default + tenant-override merge order for every tenant.
+  # ─────────────────────────────────────────────────────────────────────────────
+  tenant-branding-audit:
+    name: Tenant Branding Fallback Audit
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Install PyYAML
+        run: pip install --quiet pyyaml
+
+      - name: Run tenant branding fallback verification
+        run: |
+          ./scripts/qa/verify-tenant-branding-fallback.sh --strict \
+            2>&1 | tee tenant-branding-fallback.txt
+
+      - name: Upload branding audit artifact
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: tenant-branding-audit-${{ github.run_id }}
+          retention-days: 30
+          path: tenant-branding-fallback.txt

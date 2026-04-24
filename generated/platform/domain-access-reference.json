@@ -1,0 +1,181 @@
+{
+  "canonical_inputs": [
+    "bbi-infrastructure/config/domain-registry.yaml",
+    "docs/reference/operations/DOMAIN_MATRIX.md",
+    "docs/reference/operations/USER_FACING_URLS.md"
+  ],
+  "entries": [
+    {
+      "admin_url": "https://academyv2.mereka.dev/admin",
+      "canonical_source": "bbi-infrastructure/config/domain-registry.yaml",
+      "extra_urls": {
+        "admin": "https://admin.academyv2.mereka.dev",
+        "authentik": "https://auth0.mereka.dev",
+        "credentials": "https://credentials.academyv2.mereka.dev",
+        "discovery": "https://discovery.academyv2.mereka.dev",
+        "ecommerce": "https://ecommerce.academyv2.mereka.dev",
+        "mfe": "https://apps.academyv2.mereka.dev",
+        "notes": "https://notes.academyv2.mereka.dev",
+        "preview": "https://preview.academyv2.mereka.dev"
+      },
+      "generated_from_registry_contract_input": true,
+      "lane": "dev",
+      "learner_url": "https://academyv2.mereka.dev",
+      "notes": [
+        "Main tenant entry is generated directly from the canonical domain registry."
+      ],
+      "owner": "Platform Team",
+      "status": "resolved",
+      "studio_url": "https://studio.academyv2.mereka.dev",
+      "support_ops_url": "https://argocd.mereka.dev",
+      "tenant_display_name": "Mereka Academy",
+      "tenant_site": "main"
+    },
+    {
+      "admin_url": "https://staging.academyv2.mereka.io/admin",
+      "canonical_source": "bbi-infrastructure/config/domain-registry.yaml",
+      "extra_urls": {
+        "authentik": "https://staging.auth0.mereka.io",
+        "credentials": "https://staging.credentials.mereka.io",
+        "discovery": "https://staging.discovery.mereka.io",
+        "ecommerce": "https://staging.ecommerce.mereka.io",
+        "mfe": "https://staging.apps.academyv2.mereka.io",
+        "notes": "https://staging.notes.mereka.io",
+        "preview": "https://staging.preview.academyv2.mereka.io"
+      },
+      "generated_from_registry_contract_input": true,
+      "lane": "staging",
+      "learner_url": "https://staging.academyv2.mereka.io",
+      "notes": [
+        "Main tenant entry is generated directly from the canonical domain registry."
+      ],
+      "owner": "Platform Team",
+      "status": "resolved",
+      "studio_url": "https://staging.studio.academyv2.mereka.io",
+      "support_ops_url": "https://staging.argocd.mereka.io",
+      "tenant_display_name": "Mereka Academy",
+      "tenant_site": "main"
+    },
+    {
+      "admin_url": "https://academy.biji-biji.com/admin",
+      "canonical_source": "docs/reference/operations/DOMAIN_MATRIX.md",
+      "extra_urls": {
+        "mfe": "https://apps.academy.biji-biji.com"
+      },
+      "generated_from_registry_contract_input": false,
+      "lane": "prod",
+      "learner_url": "https://academy.biji-biji.com",
+      "notes": [
+        "Production-only tenant alias entry is compiled from current operations references."
+      ],
+      "owner": "Platform Team",
+      "source_observations": {
+        "docs/reference/operations/DOMAIN_MATRIX.md": {
+          "learner_url": "https://academy.biji-biji.com",
+          "mfe_url": "https://apps.academy.biji-biji.com",
+          "studio_url": "https://studio.academy.biji-biji.com"
+        },
+        "docs/reference/operations/USER_FACING_URLS.md": {
+          "admin_url": "https://academy.biji-biji.com/admin",
+          "learner_url": "https://academy.biji-biji.com",
+          "mfe_url": "https://apps.academy.biji-biji.com",
+          "studio_url": "https://studio.academy.biji-biji.com"
+        }
+      },
+      "status": "resolved",
+      "studio_url": "https://studio.academy.biji-biji.com",
+      "support_ops_url": "https://argocd.mereka.io",
+      "tenant_display_name": "Biji-Biji",
+      "tenant_site": "bijibiji"
+    },
+    {
+      "admin_url": "https://academyv2.mereka.io/admin",
+      "canonical_source": "bbi-infrastructure/config/domain-registry.yaml",
+      "extra_urls": {
+        "authentik": "https://auth0.mereka.io"
+      },
+      "generated_from_registry_contract_input": true,
+      "lane": "prod",
+      "learner_url": "https://academyv2.mereka.io",
+      "notes": [
+        "Main tenant entry is generated directly from the canonical domain registry."
+      ],
+      "owner": "Platform Team",
+      "status": "resolved",
+      "studio_url": "https://studio.academyv2.mereka.io",
+      "support_ops_url": "https://argocd.mereka.io",
+      "tenant_display_name": "Mereka Academy",
+      "tenant_site": "main"
+    },
+    {
+      "admin_url": "https://skillourfuture.academy.mereka.io/admin",
+      "canonical_source": "docs/reference/operations/DOMAIN_MATRIX.md",
+      "extra_urls": {
+        "mfe": null
+      },
+      "generated_from_registry_contract_input": false,
+      "lane": "prod",
+      "learner_url": "https://skillourfuture.academy.mereka.io",
+      "notes": [
+        "Production-only tenant alias entry is compiled from current operations references."
+      ],
+      "owner": "Platform Team",
+      "source_observations": {
+        "docs/reference/operations/DOMAIN_MATRIX.md": {
+          "learner_url": "https://skillourfuture.academy.mereka.io",
+          "mfe_url": "https://apps.skillourfuture.academy.mereka.io",
+          "studio_url": "https://studio.skillourfuture.academy.mereka.io"
+        },
+        "docs/reference/operations/USER_FACING_URLS.md": {
+          "admin_url": "https://skillourfuture.academy.mereka.io/admin",
+          "learner_url": "https://skillourfuture.academy.mereka.io",
+          "mfe_url": "shared-main-mfe-hub",
+          "studio_url": "shared-with-main-tenant"
+        }
+      },
+      "status": "conflict",
+      "studio_url": null,
+      "support_ops_url": "https://argocd.mereka.io",
+      "tenant_display_name": "SkillOurFuture",
+      "tenant_site": "skillourfuture"
+    }
+  ],
+  "entry_count": 5,
+  "generated_by": "tools/docs/build_domain_access_reference.py",
+  "pack_id": "domain-access-reference",
+  "schema_version": 1,
+  "unresolved_conflicts": [
+    {
+      "field": "studio_url",
+      "lane": "prod",
+      "observed_values": [
+        {
+          "source": "docs/reference/operations/DOMAIN_MATRIX.md",
+          "value": "https://studio.skillourfuture.academy.mereka.io"
+        },
+        {
+          "source": "docs/reference/operations/USER_FACING_URLS.md",
+          "value": "shared-with-main-tenant"
+        }
+      ],
+      "resolution": "left-null-in-domain-access-reference-until-canonical-source-converges",
+      "tenant_site": "skillourfuture"
+    },
+    {
+      "field": "mfe_url",
+      "lane": "prod",
+      "observed_values": [
+        {
+          "source": "docs/reference/operations/DOMAIN_MATRIX.md",
+          "value": "https://apps.skillourfuture.academy.mereka.io"
+        },
+        {
+          "source": "docs/reference/operations/USER_FACING_URLS.md",
+          "value": "shared-main-mfe-hub"
+        }
+      ],
+      "resolution": "left-null-in-domain-access-reference-until-canonical-source-converges",
+      "tenant_site": "skillourfuture"
+    }
+  ]
+}

@@ -1,0 +1,461 @@
+spec: data-migrations-kajabi-mct_spec.md
+acceptance_criteria:
+- id: AC-001
+  description: Given valid Kajabi API credentials in Infisical, when `kajabi-export.mjs`
+    runs, then all 17 resource types are exported to `exports/kajabi/` as NDJSON files
+    with row counts matching the Kajabi API total headers (within 5% tolerance for
+    pagination duplicates)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/migrations/kajabi/export.sh
+    command: scripts/migrations/kajabi/export.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-kajabi-export.sh
+    command: scripts/qa/verify-kajabi-export.sh
+- id: AC-002
+  description: Given valid MCT Azure AD credentials, when `mct-export.mjs` runs, then
+    users, categories, courses, and enrollment data are exported to `exports/mct/`
+    with row counts matching MCT platform statistics (within 1% tolerance)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/migrations/mct/export.sh
+    command: scripts/migrations/mct/export.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mct-export.sh
+    command: scripts/qa/verify-mct-export.sh
+- id: AC-003
+  description: Given Kajabi completion tags exist, when `kajabi-export-completions.mjs`
+    runs with `filter[has_tag_id]`, then completion records are exported with correct
+    `tag_type` classification (course_completed, quiz_completed, started, onboarded,
+    certificate)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/migrations/kajabi/export.sh
+    command: scripts/migrations/kajabi/export.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-kajabi-completions-export.sh
+    command: scripts/qa/verify-kajabi-completions-export.sh
+- id: AC-004
+  description: Given MCT video content with Azure SAS tokens, when `mct-export.mjs
+    --resources courses --force` runs, then fresh video URLs are exported that are
+    valid for at least 6 hours
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/migrations/mct/export.sh
+    command: scripts/migrations/mct/export.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mct-video-urls.sh
+    command: scripts/qa/verify-mct-video-urls.sh
+- id: AC-005
+  description: Given Kajabi NDJSON exports, when `transform_data.py` runs, then `users_import.csv`
+    contains only users with at least one enrollment (approximately 73K, not 326K
+    contacts)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-kajabi-transform.sh
+    command: scripts/qa/verify-kajabi-transform.sh
+- id: AC-006
+  description: Given Kajabi NDJSON exports, when `prepare_openedx_imports.py` runs,
+    then `enrollments_import.csv` contains deduplicated (email, course_id) pairs
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-kajabi-transform.sh
+    command: scripts/qa/verify-kajabi-transform.sh
+- id: AC-007
+  description: Given MCT NDJSON exports, when `transform_data.py` runs with category-level
+    mapping, then exactly 30 course packages are generated (not 81 or 178)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mct-transform.sh
+    command: scripts/qa/verify-mct-transform.sh
+- id: AC-008
+  description: Given MCT enrollment data (2.3M raw records), when deduplication runs,
+    then unique (user, category) pairs total approximately 441K records
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mct-transform.sh
+    command: scripts/qa/verify-mct-transform.sh
+- id: AC-009
+  description: Given Kajabi course structure data, when `build_course_packages.py`
+    runs, then 109 OLX tarballs are generated with correct course keys in `course-v1:MEREKA+MEKA-{id}+RUN-{id}`
+    format
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-kajabi-olx-packages.sh
+    command: scripts/qa/verify-kajabi-olx-packages.sh
+- id: AC-010
+  description: Given MCT category/course/lesson hierarchy, when OLX packages are built,
+    then each package has MCT Category as Course, MCT "Course" as Chapter/Section,
+    and MCT Lesson as Unit/Vertical
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mct-olx-packages.sh
+    command: scripts/qa/verify-mct-olx-packages.sh
+- id: AC-011
+  description: Given `users_import.csv` from Kajabi (73K rows), when batched import
+    runs, then Open edX user count increases by at least 72K (allowing for email collisions)
+    and each user has a `UserProfile` record
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-user-import-counts.sh
+    command: scripts/qa/verify-user-import-counts.sh
+- id: AC-012
+  description: Given `users.csv` from MCT (69K rows), when batched import runs, then
+    Open edX user count increases by at least 68K (allowing for email collisions with
+    existing users)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-user-import-counts.sh
+    command: scripts/qa/verify-user-import-counts.sh
+- id: AC-013
+  description: Given a user email exists in both Kajabi and MCT exports, when both
+    imports run, then exactly one Open edX user account exists for that email with
+    enrollments from both source systems
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-cross-system-identity.sh
+    command: scripts/qa/verify-cross-system-identity.sh
+- id: AC-014
+  description: Given a batch import is interrupted by a pod restart, when the import
+    is re-executed, then it resumes from the last successful offset without duplicating
+    previously imported users
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-migration-contracts.sh
+    command: scripts/qa/verify-data-migration-contracts.sh
+  - type: manual
+    runbook: docs/ops/runbooks/migrations/VERIFICATION_CHECKLIST.md
+    section: Pod Restart Recovery
+    justification: Requires intentional pod kill during active import; cannot be safely
+      automated in production GKE cluster
+- id: AC-015
+  description: Given 109 Kajabi OLX tarballs, when `import_courses.py` runs against
+    CMS, then MongoDB `modulestore.active_versions` increases by 109 and all courses
+    are visible in Studio
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-course-import-counts.sh
+    command: scripts/qa/verify-course-import-counts.sh
+- id: AC-016
+  description: Given 30 MCT OLX tarballs with Mux Video XBlocks, when imported to
+    CMS, then all courses contain properly structured Sections (from MCT "Courses")
+    and Units (from MCT Lessons) with video playback URLs
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-course-import-counts.sh
+    command: scripts/qa/verify-course-import-counts.sh
+- id: AC-017
+  description: Given a specific imported Kajabi course, when queried via modulestore,
+    then it contains the expected number of modules and lessons matching the source
+    `course_structure.json`
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-course-structure-sample.sh
+    command: scripts/qa/verify-course-structure-sample.sh
+- id: AC-018
+  description: Given a specific imported MCT course (e.g., Basic Microsoft), when
+    inspected in Studio, then it contains 12 sections matching the 12 MCT "Courses"
+    under that category
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-course-structure-sample.sh
+    command: scripts/qa/verify-course-structure-sample.sh
+- id: AC-019
+  description: Given Kajabi enrollment CSV (~147K unique pairs after dedup), when
+    batched import runs, then Open edX enrollment count increases by at least 146K
+    (allowing for skips where user or course not found)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enrollment-import-counts.sh
+    command: scripts/qa/verify-enrollment-import-counts.sh
+- id: AC-020
+  description: Given MCT enrollment CSV (~441K unique pairs), when batched import
+    runs, then Open edX enrollment count increases by at least 440K (allowing for
+    profile-related failures <1%)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enrollment-import-counts.sh
+    command: scripts/qa/verify-enrollment-import-counts.sh
+- id: AC-021
+  description: Given an enrollment record where the user email is not found in Open
+    edX, when the import processes that record, then it is skipped with a log entry
+    and the batch continues without failure
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enrollment-skip-handling.sh
+    command: scripts/qa/verify-enrollment-skip-handling.sh
+- id: AC-022
+  description: Given an enrollment record where the course key is not found in Open
+    edX, when the import processes that record, then it is skipped with a log entry
+    and the batch continues without failure
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-enrollment-skip-handling.sh
+    command: scripts/qa/verify-enrollment-skip-handling.sh
+- id: AC-023
+  description: Given Kajabi `completions.ndjson` with `course_completed` tags and
+    `tag_prefix_to_course_mapping.json`, when `issue_certificates.py` runs, then `GeneratedCertificate`
+    records are created for all mappable (email, course_key) pairs with `CertificateStatuses.downloadable`
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-certificate-issuance.sh
+    command: scripts/qa/verify-certificate-issuance.sh
+- id: AC-024
+  description: Given 3,268 Kajabi completion records, when certificate issuance runs,
+    then at least 3,265 certificates are issued (allowing for 3 unfound emails)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-certificate-issuance.sh
+    command: scripts/qa/verify-certificate-issuance.sh
+- id: AC-025
+  description: Given MCT Programs configured in Discovery with ProgramCertificate
+    records, when a user completes all courses in a program, then the Credentials
+    service can issue a program certificate
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/migrations/VERIFICATION_CHECKLIST.md
+    section: MCT Program Certificates
+    justification: ProgramCertificate verification requires Discovery admin UI navigation
+      and Credentials service API inspection; not scriptable without admin session
+      tokens
+- id: AC-026
+  description: Given 503 MCT videos with fresh Azure SAS URLs, when `upload_videos_to_mux.py`
+    runs, then all 503 assets are created in Mux with proper titles and playback IDs
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/migrations/mct/verify_mux_upload.sh
+    command: scripts/migrations/mct/verify_mux_upload.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/migrations/mct/verify_video_mapping.sh
+    command: scripts/migrations/mct/verify_video_mapping.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mux-video-upload.sh
+    command: scripts/qa/verify-mux-video-upload.sh
+- id: AC-027
+  description: Given 34 videos with VTT caption tracks, when uploaded to Mux, then
+    caption tracks are associated with the corresponding Mux assets
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/migrations/mct/verify_mux_upload.sh
+    command: scripts/migrations/mct/verify_mux_upload.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mux-video-upload.sh
+    command: scripts/qa/verify-mux-video-upload.sh
+- id: AC-028
+  description: Given Mux upload results, when OLX packages are rebuilt with `build_courses_with_mux.py`,
+    then Video XBlocks contain `https://stream.mux.com/{PLAYBACK_ID}.m3u8` source
+    URLs
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/migrations/mct/verify_mux_upload.sh
+    command: scripts/migrations/mct/verify_mux_upload.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/migrations/mct/verify_video_mapping.sh
+    command: scripts/migrations/mct/verify_video_mapping.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-mct-olx-packages.sh
+    command: scripts/qa/verify-mct-olx-packages.sh
+- id: AC-029
+  description: Given 109 Kajabi courses with thumbnail URLs, when `upload_thumbnails.py`
+    runs, then `course_image` field is updated in modulestore for each course
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-kajabi-thumbnails.sh
+    command: scripts/qa/verify-kajabi-thumbnails.sh
+- id: AC-030
+  description: Given migration complete, when count verification runs via Django shell,
+    then reported counts for Users, Enrollments, and Courses are within 0.5% of source
+    export counts
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/migrations/run-verification-pipeline.sh
+    command: scripts/migrations/run-verification-pipeline.sh
+- id: AC-031
+  description: Given migration complete, when `verify-and-sync-kajabi-to-openedx.py`
+    runs, then a comparison report is produced showing discrepancies per course with
+    explanations
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/migrations/run-verification-pipeline.sh
+    command: scripts/migrations/run-verification-pipeline.sh
+- id: AC-032
+  description: Given migration complete, when a sample of 10 courses is inspected
+    via Studio UI, then course structure (sections, units, content) renders correctly
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/migrations/VERIFICATION_CHECKLIST.md
+    section: Studio Course Spot-Check
+    justification: Visual rendering verification requires human inspection of Studio
+      UI for 10 sample courses to confirm section/unit/content display
+- id: AC-033
+  description: Given migration complete, when a sample of 5 users logs into the LMS,
+    then their enrolled courses are visible in the dashboard
+  verify:
+  - type: manual
+    runbook: docs/ops/runbooks/migrations/VERIFICATION_CHECKLIST.md
+    section: User Login Spot-Check
+    justification: User login and dashboard verification requires browser-based interaction
+      with the LMS as specific users
+- id: AC-034
+  description: Given a database backup taken before import, when `tutor local do restore-db`
+    runs, then Open edX reverts to pre-migration state
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-migration-rollback.sh
+    command: scripts/qa/verify-migration-rollback.sh
+  - type: manual
+    runbook: docs/ops/runbooks/migrations/VERIFICATION_CHECKLIST.md
+    section: Full Rollback Test
+    justification: Full database restore is a destructive operation that must be tested
+      manually in a staging environment with operator oversight
+- id: AC-035
+  description: Given the rollback script `rollback-openedx-imports.py`, when run with
+    `--action unenroll --dry-run`, then it reports the number of enrollments that
+    would be removed without modifying data
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-rollback-dry-run.sh
+    command: scripts/qa/verify-rollback-dry-run.sh
+- id: AC-036
+  description: Given a failed import, when re-executing the import pipeline from the
+    beginning, then no duplicate records are created (idempotency)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-idempotency.sh
+    command: scripts/qa/verify-idempotency.sh
+- id: AC-037
+  description: Given the full pipeline has already been run once, when the entire
+    pipeline is re-executed with the same export data, then entity counts remain unchanged
+    (no duplicates, no data loss)
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-idempotency.sh
+    command: scripts/qa/verify-idempotency.sh
+- id: AC-038
+  description: Given new users/enrollments have appeared in Kajabi since last export,
+    when a fresh export and import runs, then only net-new records are created and
+    existing records are updated
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-incremental-sync.sh
+    command: scripts/qa/verify-incremental-sync.sh
+- id: AC-039
+  description: 'Given the Kajabi webhook receiver is running, when a `GET /healthz`
+    request is made, then the service MUST return `{"status": "ok"}` with HTTP 200
+    if `KAJABI_WEBHOOK_SECRET` is configured'
+  verify:
+  - type: automated
+    test_type: automated
+    file: services/kajabi-webhook/main.py
+    command: pytest services/kajabi-webhook/main.py
+  - type: manual
+    runbook: docs/ops/runbooks/migrations/VERIFICATION_CHECKLIST.md
+    section: Kajabi Webhook Health Check
+    justification: Requires running webhook service with KAJABI_WEBHOOK_SECRET set;
+      not deployable in stateless CI
+- id: AC-040
+  description: Given a valid Kajabi webhook with correct HMAC signature, when `POST
+    /webhooks/kajabi` is called, then the event MUST be appended to the correct NDJSON
+    outbox file and HTTP 202 returned
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-migration-contracts.sh
+    command: scripts/qa/verify-data-migration-contracts.sh
+  - type: manual
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
+    section: Kajabi Webhook Testing
+    justification: Requires running webhook service and valid HMAC signature computation
+- id: AC-041
+  description: Given a Kajabi webhook with an invalid or missing `X-Kajabi-Signature`,
+    when `POST /webhooks/kajabi` is called, then the service MUST return HTTP 401
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-migration-contracts.sh
+    command: scripts/qa/verify-data-migration-contracts.sh
+  - type: manual
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
+    section: Kajabi Webhook Testing
+    justification: Requires running webhook service with crafted invalid signature
+- id: AC-042
+  description: Given a Kajabi webhook payload missing the `event` key, when `POST
+    /webhooks/kajabi` is called, then the service MUST return HTTP 400
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-migration-contracts.sh
+    command: scripts/qa/verify-data-migration-contracts.sh
+  - type: manual
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
+    section: Kajabi Webhook Testing
+    justification: Requires running webhook service with crafted payload
+- id: AC-043
+  description: Given a Kajabi webhook with an unknown event type, when `POST /webhooks/kajabi`
+    is called, then the event MUST be written to `unknown__{type}.ndjson` and HTTP
+    202 returned
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-migration-contracts.sh
+    command: scripts/qa/verify-data-migration-contracts.sh
+  - type: manual
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
+    section: Kajabi Webhook Testing
+    justification: Requires running webhook service with non-standard event type
+- id: AC-044
+  description: Given the Kajabi webhook receiver is running without `KAJABI_WEBHOOK_SECRET`,
+    when `GET /healthz` is called, then the service MUST return HTTP 500
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-data-migration-contracts.sh
+    command: scripts/qa/verify-data-migration-contracts.sh
+  - type: manual
+    runbook: docs/ops/runbooks/TROUBLESHOOTING.md
+    section: Kajabi Webhook Testing
+    justification: Requires running webhook service without secret env var

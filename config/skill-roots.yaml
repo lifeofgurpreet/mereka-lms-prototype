@@ -1,0 +1,75 @@
+# Skill Roots — machine-readable loader contract
+#
+# Canonical skill roots live in repo `.factory/skills/` plus shared team-skills
+# plugin roots. Local home-directory copies are never canonical.
+---
+schema_version: "1.0"
+
+repositories:
+  self:
+    local_path: "."
+  team-skills:
+    local_path: "/home/gurpreet/projects/team-skills"
+    git_url: "https://github.com/Biji-Biji-Initiative/team-skills.git"
+    ref: "main"
+
+scan_profiles:
+  repo_only:
+    - repo-local
+  shared:
+    - repo-local
+    - team-core
+    - team-web
+    - team-infra
+    - team-project-mereka
+
+roots:
+  - id: repo-local
+    repository: self
+    subpath: ".factory/skills"
+    priority: 100
+    required: true
+    canonical: true
+    allow_alias_shadow: false
+  - id: team-project-mereka
+    repository: team-skills
+    subpath: "plugins/projects/mereka-lms/skills"
+    priority: 90
+    required: true
+    canonical: true
+    allow_alias_shadow: false
+  - id: team-infra
+    repository: team-skills
+    subpath: "plugins/infra/skills"
+    priority: 80
+    required: true
+    canonical: true
+    allow_alias_shadow: true
+  - id: team-web
+    repository: team-skills
+    subpath: "plugins/web/skills"
+    priority: 70
+    required: true
+    canonical: true
+    allow_alias_shadow: false
+  - id: team-core
+    repository: team-skills
+    subpath: "plugins/core/skills"
+    priority: 60
+    required: true
+    canonical: true
+    allow_alias_shadow: false
+
+frontmatter:
+  required_fields: [name, description]
+  nonempty_fields: [name, description]
+  string_or_list_fields: [allowed-tools]
+  require_frontmatter: true
+  require_name_matches_directory: true
+  allowed_name_mismatch_directories:
+    - agent-mail-upstream
+    - beads-viewer-upstream
+
+forbidden_canonical_roots:
+  - "~/.factory/skills"
+  - "~/.claude/skills"

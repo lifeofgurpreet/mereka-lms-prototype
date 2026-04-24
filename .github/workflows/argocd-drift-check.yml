@@ -1,0 +1,174 @@
+name: ArgoCD Drift Check
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_run:
+    workflows:
+      - "Build Tutor Images"
+    types:
+      - completed
+  workflow_dispatch:
+    inputs:
+      app:
+        description: "ArgoCD Application to check"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - all
+          - mereka-lms-dev
+          - mereka-lms-staging
+          - mereka-lms-prod
+
+permissions: {}
+
+jobs:
+  offline-drift-check:
+    name: Offline Drift Check (git manifests)
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Checkout bbi-infrastructure
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          repository: Biji-Biji-Initiative/bbi-infrastructure
+          path: bbi-infrastructure
+          token: ${{ secrets.BBI_INFRA_TOKEN }}
+
+      - name: Run offline drift check (dev)
+        if: ${{ github.event.inputs.app == 'all' || github.event.inputs.app == 'mereka-lms-dev' || github.event_name == 'schedule' }}
+        env:
+          BBI_INFRA: ${{ github.workspace }}/bbi-infrastructure
+        run: |
+          ./scripts/qa/verify-argocd-drift.sh --app mereka-lms-dev --offline | tee var-drift-dev-offline.log
+
+      - name: Run offline drift check (staging)
+        if: ${{ github.event.inputs.app == 'all' || github.event.inputs.app == 'mereka-lms-staging' || github.event_name == 'schedule' }}
+        env:
+          BBI_INFRA: ${{ github.workspace }}/bbi-infrastructure
+        run: |
+          ./scripts/qa/verify-argocd-drift.sh --app mereka-lms-staging --offline | tee var-drift-staging-offline.log
+
+      - name: Run offline drift check (prod)
+        if: ${{ github.event.inputs.app == 'all' || github.event.inputs.app == 'mereka-lms-prod' || github.event_name == 'schedule' }}
+        env:
+          BBI_INFRA: ${{ github.workspace }}/bbi-infrastructure
+        run: |
+          ./scripts/qa/verify-argocd-drift.sh --app mereka-lms-prod --offline | tee var-drift-prod-offline.log
+
+      - name: Upload offline logs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: argocd-drift-offline-logs
+          path: var-drift-*.log
+          retention-days: 3
+          if-no-files-found: warn
+
+  online-drift-check:
+    name: Online Drift Check (live cluster)
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      # LEGACY ACTION NAME: "gcp-gke-auth" dates from the GKE era.
+      # GKE is decommissioned; RKE2 is the cluster substrate.
+      # This step is retained only because the composite action still provides
+      # valid GCP workload-identity auth needed to reach Secret Manager.
+      # See: docs/status/active/15-ACTIVE-CONTROL-PLANE-SURFACE-CLASSIFICATION-2026-04-18.md (Bucket C)
+      - name: Authenticate to GCP Secret Manager (legacy action name, RKE2 substrate)
+        id: gke-auth
+        if: ${{ vars.GCP_WIF_PROVIDER != '' && vars.GCP_WIF_SA != '' }}
+        uses: ./.github/actions/gcp-gke-auth
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          wif_service_account: ${{ vars.GCP_WIF_SA }}
+          auth_mode: auto
+          gcloud_project: bbi-k8
+          gke_project: ${{ vars.GKE_CLUSTER_PROJECT || 'bbi-k8' }}
+          gke_location: ${{ vars.GKE_CLUSTER_LOCATION || '' }}
+          gke_cluster: ${{ vars.GKE_CLUSTER_NAME || '' }}
+          strict_runtime: 'false'
+
+      - name: Run online drift check (prod)
+        if: ${{ steps.gke-auth.outputs.has_cluster == 'true' && (github.event.inputs.app == 'all' || github.event.inputs.app == 'mereka-lms-prod' || github.event_name == 'schedule') }}
+        run: |
+          ./scripts/qa/verify-argocd-drift.sh --app mereka-lms-prod --online | tee var-drift-prod-online.log
+
+      - name: Upload online logs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: argocd-drift-online-logs
+          path: var-drift-*.log
+          retention-days: 3
+          if-no-files-found: warn
+
+  alert-on-drift:
+    name: Alert on Drift
+    needs: [offline-drift-check, online-drift-check]
+    if: failure()
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 30
+    permissions:
+      issues: write
+    steps:
+      - name: Create drift alert issue
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
+        with:
+          script: |
+            const title = `ArgoCD drift detected (${new Date().toISOString().slice(0,10)})`;
+
+            // Check for existing open issue to avoid duplicates
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'argocd-drift',
+              per_page: 1,
+            });
+
+            if (existing.data.length > 0) {
+              // Comment on existing issue instead
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.data[0].number,
+                body: `Drift re-detected at ${new Date().toISOString()}.\nWorkflow run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              });
+              return;
+            }
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              labels: ['argocd-drift', 'ops'],
+              body: [
+                '## ArgoCD Drift Detected',
+                '',
+                `**Workflow run**: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+                '',
+                '### What to check',
+                '1. Download the log artifacts from the workflow run above',
+                '2. Look for `FAIL` lines indicating drift',
+                '3. Follow the runbook: `docs/ops/runbooks/ARGOCD_DRIFT.md`',
+                '',
+                '### Common causes',
+                '- Manual `kubectl patch` on ArgoCD-managed Application or ApplicationSet',
+                '- Automated sync disabled by someone debugging',
+                '- bbi-infrastructure overlay path changed without updating ApplicationSet',
+                '',
+                '### Resolution',
+                '**Never patch in-cluster.** Fix in git (bbi-infrastructure repo) and let ArgoCD reconcile.',
+              ].join('\n'),
+            });

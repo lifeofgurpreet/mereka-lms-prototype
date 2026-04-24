@@ -1,0 +1,121 @@
+version: "1"
+status: canonical
+contract_doc: docs/runtime-proof/ENTERPRISE_MFE_RUNTIME_CONFIG_TRUTH_CONTRACT.md
+
+result_classes:
+  - PASS
+  - FAIL
+  - INDETERMINATE_INFRA_OWNED
+  - INDETERMINATE_RUNTIME_ONLY
+
+truth_sources:
+  base_env_defaults:
+    path: deploy/k8s/base/apps/enterprise/mfe/enterprise-mfe-env.js
+    owner: mereka-lms
+    repo_only_provable: true
+    authoritative_for:
+      - local
+    not_authoritative_for:
+      - dev
+      - staging
+      - prod
+  lane_env_realization:
+    path_template: bbi-infrastructure/apps/mereka-lms/overlays/{lane}/.../enterprise-mfe-env.js
+    owner: bbi-infrastructure
+    repo_only_provable: false
+    authoritative_for:
+      - dev
+      - staging
+      - prod
+  legacy_reference_overlay:
+    path_glob:
+      - deploy/k8s/overlays/rke2-nonprod/enterprise-mfe-env.js
+      - deploy/k8s/overlays/staging/enterprise-mfe-env.js
+    owner: mereka-lms
+    repo_only_provable: true
+    reference_only: true
+  lms_global_mfe_config:
+    path: infrastructure/tutor/plugins/_mereka_lms/lms_settings.py
+    owner: mereka-lms
+    repo_only_provable: true
+  site_configuration_mfe_config:
+    source: SiteConfiguration.site_values["MFE_CONFIG"]
+    owner: live-runtime
+    repo_only_provable: false
+  live_mfe_config_api:
+    endpoint: /api/mfe_config/v1
+    owner: live-runtime
+    repo_only_provable: false
+
+config_classes:
+  shell_bootstrap:
+    required_keys:
+      - LMS_BASE_URL
+      - STUDIO_BASE_URL
+      - LOGIN_URL
+      - LOGOUT_URL
+      - REFRESH_ACCESS_TOKEN_ENDPOINT
+      - ACCESS_TOKEN_COOKIE_NAME
+      - CSRF_TOKEN_API_PATH
+      - ENTERPRISE_CATALOG_API_BASE_URL
+      - ENTERPRISE_ACCESS_BASE_URL
+      - LICENSE_MANAGER_URL
+      - ENTERPRISE_SUBSIDY_BASE_URL
+    precedence:
+      - lane_env_realization
+      - base_env_defaults
+    repo_only_result_by_lane:
+      local: PASS
+      dev: INDETERMINATE_INFRA_OWNED
+      staging: INDETERMINATE_INFRA_OWNED
+      prod: INDETERMINATE_INFRA_OWNED
+
+  branding_runtime_visible:
+    required_keys:
+      - SITE_NAME
+      - LOGO_URL
+      - FAVICON_URL
+      - SUPPORT_EMAIL
+    optional_keys:
+      - LOGO_WHITE_URL
+      - LOGO_TRADEMARK_URL
+      - MARKETING_SITE_BASE_URL
+      - TERMS_OF_SERVICE_URL
+      - PRIVACY_POLICY_URL
+      - ENABLE_ACCESSIBILITY_PAGE
+    precedence:
+      - site_configuration_mfe_config
+      - lms_global_mfe_config
+      - lane_env_realization
+      - base_env_defaults
+    repo_only_result_by_lane:
+      local: PASS
+      dev: INDETERMINATE_RUNTIME_ONLY
+      staging: INDETERMINATE_RUNTIME_ONLY
+      prod: INDETERMINATE_RUNTIME_ONLY
+
+  theme:
+    required_any_of:
+      - window.PARAGON_THEME
+      - MFE_CONFIG.PARAGON_THEME_URLS
+    precedence:
+      - site_configuration_mfe_config
+      - lms_global_mfe_config
+      - lane_env_realization
+      - base_env_defaults
+    repo_only_result_by_lane:
+      local: PASS
+      dev: INDETERMINATE_RUNTIME_ONLY
+      staging: INDETERMINATE_RUNTIME_ONLY
+      prod: INDETERMINATE_RUNTIME_ONLY
+
+verifier_rules:
+  forbid_base_only_pass_for_nonlocal_lanes: true
+  fail_closed_on_missing_required_app_owned_keys: true
+  emit_indeterminate_for_infra_owned_lane_truth: true
+  emit_indeterminate_for_runtime_only_truth: true
+
+dependent_issues:
+  - 837
+  - 838
+  - 839

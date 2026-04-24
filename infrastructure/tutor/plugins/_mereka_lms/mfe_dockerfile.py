@@ -1,0 +1,391 @@
+"""MFE Docker image patches — build toolchain, branding, plugin framework."""
+
+from _mereka_lms import _register_env_patch
+
+###############################################################################
+# MFE Dockerfile Patches
+###############################################################################
+
+# Node 24 build toolchain + git HTTPS override.
+_register_env_patch(
+    "mfe-dockerfile-pre-npm-install",
+    """
+# Update package list and install build toolchain for Node 24
+RUN apt-get update && apt-get install -y \\
+    ca-certificates gcc g++ git libgl1 libxi6 make python3 python3-distutils \\
+    && update-ca-certificates \\
+    && rm -rf /var/lib/apt/lists/*
+# Force git to use HTTPS instead of SSH for github.com — Docker builds
+# have no SSH keys, so github: protocol (which resolves to SSH) fails.
+# This protects any git-based npm dependency resolution in upstream MFE sources.
+RUN git config --global --add url."https://github.com/".insteadOf "ssh://git@github.com/" \\
+    && git config --global --add url."https://github.com/".insteadOf "git@github.com:" \\
+    && git config --global http.sslCAInfo /etc/ssl/certs/ca-certificates.crt
+""",
+)
+
+# Materialize local OEP-48 brand package for MFEs.
+# We ship the package in tutor_env/plugins/mfe/build/mfe/mereka/brand-mereka and
+# overlay it at node_modules/@edx/brand for all frontend app builds.
+#
+# IMPORTANT: This MUST be post-npm-install, not pre-npm-install.
+# Pre-npm-install fires BEFORE the main `npm clean-install` layer. Since
+# brand-mereka changes on every branding PR, placing it before npm install
+# invalidates the entire dependency install cache for ALL MFE apps (~10 apps
+# x 3-5 min each = 30-50 min wasted). Running a post-npm file-alias install
+# here also forces npm to reify the existing dependency tree in every common
+# stage. Direct materialization keeps the main dependency layer cached and
+# invalidates only the brand overlay + webpack build.
+_register_env_patch(
+    "mfe-dockerfile-post-npm-install",
+    """
+COPY mereka/brand-mereka /openedx/app/brand-mereka
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import shutil
+
+src = Path("/openedx/app/brand-mereka")
+dest = Path("/openedx/app/node_modules/@edx/brand")
+
+if not (src / "package.json").is_file():
+    raise SystemExit(f"brand package source is missing package.json: {src}")
+
+if dest.exists() or dest.is_symlink():
+    if dest.is_dir() and not dest.is_symlink():
+        shutil.rmtree(dest)
+    else:
+        dest.unlink()
+
+dest.parent.mkdir(parents=True, exist_ok=True)
+shutil.copytree(src, dest)
+
+package_json = dest / "package.json"
+payload = json.loads(package_json.read_text(encoding="utf-8"))
+payload["name"] = "@edx/brand"
+payload.pop("devDependencies", None)
+package_json.write_text(json.dumps(payload, indent=2, sort_keys=False) + "\\n", encoding="utf-8")
+
+print(f"materialized local brand package at {dest}")
+PY
+""",
+)
+
+# Copy Mereka SCSS theme into the MFE container so that
+# `import './theme-source/mereka.scss'` in env.config.jsx resolves.
+# The theme-source/ directory is populated by sync-footer-assets.sh during apply-patches.
+_register_env_patch(
+    "mfe-dockerfile-post-npm-install",
+    """
+COPY mereka/theme-source /openedx/app/theme-source
+""",
+)
+
+# Copy generated runtime theme assets into the MFE container.
+# PARAGON_THEME_URLS points to /theme/* on the MFE origin.
+_register_env_patch(
+    "mfe-dockerfile-post-npm-install",
+    """
+COPY mereka/theme /openedx/dist/theme
+""",
+)
+
+# The final production stage serves /theme/* at runtime.
+# Keep the compiled theme assets in the production image, not only in build stages.
+_register_env_patch(
+    "mfe-dockerfile-production-final",
+    """
+COPY mereka/theme /openedx/dist/theme
+""",
+)
+
+# Install frontend-plugin-framework with legacy peer deps
+_register_env_patch(
+    "mfe-dockerfile-post-npm-install",
+    """
+# Install frontend-plugin-framework with legacy peer deps
+RUN npm install --legacy-peer-deps '@openedx/frontend-plugin-framework@^1.8.0'
+""",
+)
+
+# Install @sentry/browser for MFE client-side error telemetry (OBS-001).
+# The SDK is initialized at APP_READY from env.config.jsx — see
+# mfe-env-config-buildtime-imports in mfe_runtime.py. Pin the major so the
+# init code's API assumptions stay stable; bump deliberately.
+_register_env_patch(
+    "mfe-dockerfile-post-npm-install",
+    """
+# Sentry Browser SDK — client-side error telemetry (OBS-001, bead mereka-lms-m88z).
+# Init gated on getConfig().SENTRY_DSN at runtime; empty DSN → no-op.
+RUN npm install --legacy-peer-deps '@sentry/browser@^8.0.0'
+""",
+)
+
+# Patch the account MFE source BEFORE webpack builds.
+# The upstream open-release/redwood.3 source has a null-unsafe lookup:
+#   data.social_links.find(...)
+# which crashes when social_links is null/undefined. Apply the defensive
+# check to the source BEFORE npm run build. The hook fires in account-common
+# after COPY --from=account-src but before the account-prod stage builds,
+# so the source change is compiled in.
+_register_env_patch(
+    "mfe-dockerfile-pre-npm-build-account",
+    """
+RUN python3 - <<'PY'
+from pathlib import Path
+
+service_path = Path("/openedx/app/src/account-settings/data/service.js")
+if not service_path.exists():
+    raise SystemExit(0)
+
+original = "const platformData = data.social_links.find(({ platform }) => platform === id);"
+patched = (
+    "const socialLinks = Array.isArray(data.social_links) ? data.social_links : [];\\n"
+    "      const platformData = socialLinks.find(({ platform }) => platform === id);"
+)
+
+content = service_path.read_text(encoding="utf-8")
+if patched in content:
+    raise SystemExit(0)  # already patched — idempotent
+if original not in content:
+    raise SystemExit("account social_links patch anchor missing — upstream may have changed")
+
+updated = content.replace(original, patched)
+service_path.write_text(updated, encoding="utf-8")
+print("account social_links null-safety patch applied")
+PY
+""",
+)
+
+# Patch the authn MFE source BEFORE webpack builds.
+# Upstream authn still falls back to `${getConfig().LMS_BASE_URL}/dashboard`
+# in login/register/LoginFailure flows, which rebuilds apps-host authn handoffs
+# onto the LMS host. Replace those with relative dashboard routes so the authn
+# shell stays on the current apps origin through the build.
+_register_env_patch(
+    "mfe-dockerfile-pre-npm-build-authn",
+    """
+RUN python3 /openedx/patch-authn-dashboard-fallbacks.py /openedx/app
+""",
+)
+
+# Fail the account build if a stale compiled bundle or source map still contains the
+# unguarded social_links lookup after webpack finishes.
+# v2: check fix presence in SOURCE (pre-minification) not in compiled dist where
+# webpack renames variables and the exact string is never found.
+# The pre-npm-build-account hook above applies the patch, so source will have the fix.
+_register_env_patch(
+    "mfe-dockerfile-post-npm-build",
+    """
+RUN python3 - <<'PY'
+from pathlib import Path
+
+guard_revision = "account-social-links-guard-2026-04-04-cacheproof-v2"
+source_path = Path("/openedx/app/src/account-settings/data/service.js")
+if not source_path.exists():
+    raise SystemExit(0)
+
+# 1. Confirm the fix is present in the SOURCE file before minification renames variables.
+required_in_source = "const socialLinks = Array.isArray(data.social_links) ? data.social_links : [];"
+source_content = source_path.read_text(encoding="utf-8")
+if required_in_source not in source_content:
+    raise SystemExit(
+        f"{guard_revision}: guarded social_links fix missing from {source_path} — patch not applied"
+    )
+
+# 2. Confirm the OLD buggy pattern is absent from compiled assets and source maps.
+#    The original string is long enough to survive in .map files if the old code was compiled in.
+dist_dir = Path("/openedx/app/dist")
+if not dist_dir.exists():
+    raise SystemExit(f"{guard_revision}: frontend-app-account dist missing after build")
+
+forbidden = "const platformData = data.social_links.find(({ platform }) => platform === id);"
+offenders = []
+
+for asset in sorted(dist_dir.rglob("*")):
+    if asset.suffix != ".js":
+        continue
+    try:
+        content = asset.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        continue
+    if forbidden in content:
+        offenders.append(str(asset))
+
+if offenders:
+    raise SystemExit(
+        f"{guard_revision}: unguarded social_links lookup survived account build in {', '.join(offenders)}"
+    )
+PY
+""",
+)
+
+# Admin console requires react-redux and redux (not bundled by default)
+_register_env_patch(
+    "mfe-dockerfile-post-npm-install-admin-console",
+    """
+RUN npm install --legacy-peer-deps 'react-redux@^8.1.3' 'redux@^4.2.1'
+""",
+)
+
+_register_env_patch(
+    "mfe-dockerfile-post-npm-install-authn",
+    """
+RUN npm install --legacy-peer-deps 'react-redux@^8.1.3' 'redux@^4.2.1'
+""",
+)
+
+_register_env_patch(
+    "mfe-dockerfile-post-npm-install-authn",
+    """
+COPY patch-authn-deep-route-handoff.py /openedx/patch-authn-deep-route-handoff.py
+COPY patch-authn-dashboard-fallbacks.py /openedx/patch-authn-dashboard-fallbacks.py
+COPY verify-authn-dashboard-fallbacks.py /openedx/verify-authn-dashboard-fallbacks.py
+""",
+)
+
+# Enforce runtime Paragon theme URLs in built MFE shells.
+# Use absolute /theme/* paths so authn/account/profile routes do not resolve the
+# brand contract under route-local prefixes such as /authn/theme/*.
+_register_env_patch(
+    "mfe-dockerfile-post-npm-build",
+    """
+RUN python3 - <<'PY'
+from pathlib import Path
+import json
+import re
+
+index_path = Path("/openedx/app/dist/index.html")
+if not index_path.exists():
+    raise SystemExit(0)
+
+content = index_path.read_text(encoding="utf-8")
+
+paragon_theme_expr = None
+replacement_start = None
+replacement_end = None
+
+object_match = re.search(r"var PARAGON_THEME = (\\{.*?\\});", content, re.DOTALL)
+if object_match:
+    paragon_theme_expr = object_match.group(1)
+    replacement_start = object_match.start(1)
+    replacement_end = object_match.end(1)
+else:
+    iife_match = re.search(
+        r"var PARAGON_THEME = (?P<expr>\\(\\(\\) => \\{.*?\\}\\)\\(\\));",
+        content,
+        re.DOTALL,
+    )
+    if iife_match:
+        theme_object_match = re.search(
+            r"const theme = (\\{.*?\\});",
+            iife_match.group("expr"),
+            re.DOTALL,
+        )
+        if theme_object_match:
+            paragon_theme_expr = theme_object_match.group(1)
+            replacement_start = iife_match.start("expr")
+            replacement_end = iife_match.end("expr")
+
+if paragon_theme_expr is None:
+    raise SystemExit(0)
+
+theme = json.loads(paragon_theme_expr)
+
+theme.setdefault("paragon", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/core.min.css"
+theme["paragon"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/light.min.css"
+theme.setdefault("brand", {}).setdefault("themeUrls", {}).setdefault("core", {})["fileName"] = "/theme/mereka-brand.min.css"
+theme["brand"]["themeUrls"].setdefault("variants", {}).setdefault("light", {})["fileName"] = "/theme/mereka-brand-light.min.css"
+theme["brand"]["themeUrls"]["variants"].pop("dark", None)
+theme["brand"]["themeUrls"].setdefault("defaults", {})["light"] = "light"
+
+variant_theme_map = {
+    "academy.biji-biji.com": {
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
+    },
+    "biji-biji.academyv2.mereka.dev": {
+        "core": "/theme/biji-biji-brand.min.css",
+        "light": "/theme/biji-biji-brand-light.min.css",
+    },
+    "skillourfuture.academy.mereka.io": {
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.io": {
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
+    },
+    "skillourfuture.academyv2.mereka.dev": {
+        "core": "/theme/sof-brand.min.css",
+        "light": "/theme/sof-brand-light.min.css",
+    },
+}
+
+runtime_theme = '''(() => {
+  const theme = __THEME_JSON__;
+  const normalizeHostname = (value) => (typeof value === "string" ? value.toLowerCase() : "").replace(/^www\\./, "");
+  const deriveVariantCandidates = (hostname) => {
+    const normalizedHostname = normalizeHostname(hostname);
+    if (!normalizedHostname) {
+      return [];
+    }
+    const candidates = [];
+    const queue = [normalizedHostname];
+    const enqueue = (candidate) => {
+      if (candidate && !candidates.includes(candidate)) {
+        candidates.push(candidate);
+        queue.push(candidate);
+      }
+    };
+    while (queue.length > 0) {
+      const candidate = queue.shift();
+      if (!candidate) {
+        continue;
+      }
+      enqueue(candidate.replace(/^(?:staging\\.)?apps\\./, ""));
+      enqueue(candidate.replace(/^apps\\./, ""));
+      enqueue(candidate.replace(/^staging\\./, ""));
+      enqueue(candidate.replace(/\\.mereka\\.dev$/, ".mereka.io"));
+    }
+    return candidates;
+  };
+  const hostname = typeof window !== "undefined" && window.location ? normalizeHostname(window.location.hostname) : "";
+  const variantThemeMap = __VARIANT_THEME_MAP__;
+  const candidates = deriveVariantCandidates(hostname);
+  const selected = candidates.map((candidate) => variantThemeMap[candidate]).find(Boolean);
+  if (selected) {
+    theme.brand.themeUrls.core.fileName = selected.core;
+    theme.brand.themeUrls.variants.light.fileName = selected.light;
+  }
+  return theme;
+})()'''
+runtime_theme = runtime_theme.replace("__THEME_JSON__", json.dumps(theme, separators=(", ", ": ")))
+runtime_theme = runtime_theme.replace("__VARIANT_THEME_MAP__", json.dumps(variant_theme_map, separators=(", ", ": ")))
+
+updated = content[:replacement_start] + runtime_theme + content[replacement_end:]
+index_path.write_text(updated, encoding="utf-8")
+PY
+""",
+)
+
+# Fix moment.js "Invalid time value" crash in Course Authoring MFE (#1385).
+# StatusBar.tsx passes endDate (which may be null/empty) directly to moment.utc(),
+# causing a crash when courses have no end date set. Guard with null check.
+_register_env_patch(
+    "mfe-dockerfile-post-npm-install",
+    """
+# Fix #1385: guard null endDate in StatusBar to prevent moment.js crash
+RUN find /openedx/app -path '*/course-outline/status-bar/StatusBar.tsx' \
+    -exec sed -i 's/const endDateObj = moment\\.utc(endDate);/const endDateObj = endDate ? moment.utc(endDate) : moment.invalid();/' {} + \
+    || true
+""",
+)
+
+_register_env_patch(
+    "mfe-dockerfile-post-npm-build-authn",
+    """
+RUN python3 /openedx/patch-authn-deep-route-handoff.py /openedx/app/dist \\
+ && python3 /openedx/verify-authn-dashboard-fallbacks.py /openedx/app/dist
+""",
+)

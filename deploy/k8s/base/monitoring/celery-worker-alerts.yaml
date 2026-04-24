@@ -1,0 +1,54 @@
+---
+# Celery worker restart-rate regression alerts (mereka-lms-9pnu.2).
+#
+# Companion to mereka-lms-9pnu.1, which removed the `celery inspect ping`
+# liveness probes that caused 71 restarts in 13d on prod enterprise-catalog-worker.
+# Without a regression alert, reintroducing an unfit liveness probe in a future
+# PR could land silently — prod only surfaces the symptom over days.
+#
+# CeleryWorkerRestartRateHigh fires on a 24h baseline (> 5 restarts/day per
+# container), deliberately looser than the existing *PodRestarting alerts
+# (which fire on any restart in 15m). The two are complementary:
+#   - *PodRestarting     → "something is wrong right now"
+#   - CeleryWorkerRestartRateHigh → "we are silently regressing"
+#
+# Scope: pods whose name contains "-worker-" in the mereka-lms namespace.
+# Matches enterprise-catalog-worker, enterprise-access-worker, lms-worker,
+# cms-worker, and any future celery-pattern workers.
+#
+# Investigation: docs/plans/INVESTIGATION_CELERY_PROBES.md
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: celery-worker-alerts
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: celery-workers
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/component: monitoring
+    prometheus: kube-prometheus
+spec:
+  groups:
+    - name: celery.worker.restart.regression
+      rules:
+        - alert: CeleryWorkerRestartRateHigh
+          expr: |
+            increase(kube_pod_container_status_restarts_total{
+              namespace="mereka-lms",
+              pod=~".*-worker-.*"
+            }[24h]) > 5
+          for: 10m
+          labels:
+            severity: warning
+            component: celery-workers
+          annotations:
+            summary: "Celery worker {{ $labels.pod }} restarted >5 times in 24h"
+            description: >-
+              Celery worker pod {{ $labels.pod }} has restarted {{ $value }}
+              times in the last 24 hours. Threshold: 5/24h. This detects
+              silent regression of the probe-stability fix (9pnu.1) — if
+              someone reintroduces a celery-inspect-ping liveness probe,
+              the 71-restart failure mode from prod (13d baseline) will
+              appear here within a day instead of weeks.
+              Runbook: docs/plans/INVESTIGATION_CELERY_PROBES.md.

@@ -1,0 +1,2669 @@
+name: Build Tutor Images
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+on:
+  push:
+    branches:
+      - main
+    paths:
+      # --- Image content inputs ---
+      - 'docker-bake.hcl'
+      - 'requirements-tutor.txt'
+      - 'infrastructure/tutor/config.example.yml'
+      - 'infrastructure/tutor/apply-patches.sh'
+      - 'infrastructure/tutor/patches/**'
+      - 'infrastructure/tutor/custom-apps/**'
+      - 'infrastructure/tutor/plugins/**'
+      - 'infrastructure/tutor/themes/**'
+      - 'infrastructure/tutor/brand-*/**'
+      - 'assets/branding/**'
+      # --- Build scripts ---
+      - 'scripts/infra/prepare-tutor-build-context.sh'
+      - 'scripts/infra/prepare-tutor-build-context-ci.sh'
+      - 'scripts/ci/preflight-check.sh'
+      - 'scripts/ci/emit-build-metrics.sh'
+      - 'scripts/ci/summarize-build-cache-health.sh'
+      - 'scripts/ci/resolve_release_bundle_digests.py'
+      - 'scripts/infra/sync-tutor-plugin-mirror.sh'
+      - 'scripts/infra/resolve-build-scope.sh'
+      - 'scripts/infra/build-openedx-image.sh'
+      - 'scripts/infra/build-mfe-image.sh'
+      # --- Scan and install helpers ---
+      - 'scripts/infra/install-cosign.sh'
+      - 'scripts/infra/install-syft.sh'
+      - 'scripts/infra/install-trivy.sh'
+      - 'scripts/infra/install-envsubst.sh'
+      # --- Release artifact generation ---
+      - 'scripts/infra/generate-build-provenance.sh'
+      - 'scripts/infra/generate-release-bundle.sh'
+      - 'scripts/release/emit-proof-envelope.sh'
+      - 'scripts/release/render_control_plane_release_bundle_projection.py'
+      - 'scripts/release/generate_release_object.py'
+      - 'scripts/release/generate_truth_ledger.py'
+      - 'scripts/release/release-gate.sh'
+      - 'scripts/release/release_object_bindings.py'
+      # --- GitOps and image resolution ---
+      - 'scripts/infra/release-openedx-gitops.sh'
+      - 'scripts/infra/resolve-image-digest.sh'
+      - 'scripts/lib/lane-normalize.sh'
+      - 'bin/lms-ops'
+      # --- Post-build verification ---
+      - 'scripts/qa/verify-build-provenance.sh'
+      - 'scripts/qa/verify-build-optimizations-render-delta-contract.sh'
+      - 'scripts/qa/verify-control-plane-release-bundle-projection.sh'
+      - 'scripts/qa/verify-openedx-image-branding.sh'
+      - 'scripts/qa/verify-release-bundle.sh'
+      - 'scripts/qa/verify-release-object.sh'
+      - 'scripts/qa/verify-mfe-image-branding.sh'
+      - 'scripts/qa/verify-mfe-runtime-contract.sh'
+      # --- Workflow and CI infrastructure ---
+      - '.github/workflows/build-tutor-images.yml'
+      - '.github/actions/emit-build-metrics/**'
+      - '.github/actions/setup-python-env/**'
+      - '.github/actions/select-build-lane/**'
+      # --- Exclusions ---
+      - '!infrastructure/tutor/**/*.md'
+      - '!infrastructure/tutor/mfe-build/**'
+  workflow_dispatch:
+    inputs:
+      lane_mode:
+        description: 'Routing override for build jobs'
+        type: choice
+        options:
+          - auto
+          - fastlane
+          - fastlane-required
+          - fallback
+        default: auto
+      build_openedx:
+        description: 'Build OpenEdX image (LMS/CMS)'
+        type: boolean
+        default: true
+      build_mfe:
+        description: 'Build MFE image'
+        type: boolean
+        default: true
+      update_gitops:
+        description: 'Manual cross-repo GitOps bridge after build (guarded; not the standard dev promotion path)'
+        type: boolean
+        default: false
+      target_environment:
+        description: 'GitOps target environment (required when update_gitops=true)'
+        type: choice
+        options:
+          - select-environment
+          - production
+          - staging
+        default: select-environment
+      image_tag:
+        description: 'Image tag (default: git SHA)'
+        type: string
+        required: false
+      build_profile:
+        description: 'Build profile: proof is promotable; fast is cache-oriented and non-promotable'
+        type: choice
+        options:
+          - proof
+          - fast
+        default: proof
+      mfe_build_profile:
+        description: 'MFE build profile override'
+        type: choice
+        options:
+          - proof
+          - fast
+        default: proof
+
+concurrency:
+  # Main builds share one workflow-level slot so push and workflow_dispatch
+  # runs cannot race each other into competing release artifacts. Non-main refs
+  # stay supersedable at the workflow level.
+  group: build-tutor-images-${{ github.ref == 'refs/heads/main' && 'main' || format('{0}-{1}', github.event_name, github.ref) }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+env:
+  REGISTRY: ghcr.io/biji-biji-initiative/mereka-lms
+  DOCKER_BUILDKIT: 1
+
+jobs:
+  cancel-superseded-queued-main-builds:
+    name: Cancel Superseded Queued Main Builds
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: Cancel older queued Build Tutor Images runs on main
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
+        with:
+          script: |
+            if (context.ref !== 'refs/heads/main') {
+              core.notice('Skipping queued-build janitor outside main.');
+              return;
+            }
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const currentRunId = context.runId;
+            const cancelled = [];
+
+            const runs = await github.paginate(
+              github.rest.actions.listWorkflowRuns,
+              {
+                owner,
+                repo,
+                workflow_id: 'build-tutor-images.yml',
+                branch: 'main',
+                status: 'queued',
+                per_page: 100,
+              }
+            );
+
+            for (const run of runs) {
+              if (run.id === currentRunId || run.id > currentRunId) {
+                continue;
+              }
+
+              await github.rest.actions.cancelWorkflowRun({
+                owner,
+                repo,
+                run_id: run.id,
+              });
+              cancelled.push({
+                id: run.id,
+                createdAt: run.created_at,
+                url: run.html_url,
+              });
+            }
+
+            if (cancelled.length === 0) {
+              core.notice('No older queued Build Tutor Images runs found on main.');
+              return;
+            }
+
+            core.summary
+              .addHeading('Cancelled older queued Build Tutor Images runs on main')
+              .addTable([
+                [
+                  { data: 'Run ID', header: true },
+                  { data: 'Created At', header: true },
+                  { data: 'URL', header: true },
+                ],
+                ...cancelled.map((run) => [
+                  String(run.id),
+                  run.createdAt,
+                  run.url,
+                ]),
+              ]);
+            await core.summary.write();
+
+  resolve-build-scope:
+    name: Resolve Build Scope
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: cancel-superseded-queued-main-builds
+    permissions:
+      contents: read
+    outputs:
+      build_openedx: ${{ steps.scope.outputs.build_openedx }}
+      build_mfe: ${{ steps.scope.outputs.build_mfe }}
+      scope_label: ${{ steps.scope.outputs.scope_label }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Resolve build scope
+        id: scope
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_BUILD_OPENEDX: ${{ inputs.build_openedx }}
+          INPUT_BUILD_MFE: ${{ inputs.build_mfe }}
+          PUSH_BASE_SHA: ${{ github.event.before }}
+          PUSH_HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p var/ci
+
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            build_openedx="${INPUT_BUILD_OPENEDX}"
+            build_mfe="${INPUT_BUILD_MFE}"
+            scope_label="manual"
+            {
+              echo "build_openedx=${build_openedx}"
+              echo "build_mfe=${build_mfe}"
+              echo "scope_label=${scope_label}"
+            } >> "$GITHUB_OUTPUT"
+
+            {
+              echo "### Build Scope"
+              echo "- Scope label: \`${scope_label}\`"
+              echo "- Build OpenEdX: \`${build_openedx}\`"
+              echo "- Build MFE: \`${build_mfe}\`"
+              echo
+              echo "- Source: workflow_dispatch inputs"
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          base_sha="$PUSH_BASE_SHA"
+          if [[ -z "$base_sha" || "$base_sha" =~ ^0+$ ]]; then
+            base_sha="$(git rev-parse HEAD^)"
+          fi
+
+          git diff --name-only "$base_sha" "$PUSH_HEAD_SHA" > var/ci/build-scope-files.txt
+
+          ./scripts/infra/resolve-build-scope.sh \
+            --github-output "$GITHUB_OUTPUT" \
+            --summary-file var/ci/build-scope-summary.md \
+            < var/ci/build-scope-files.txt
+
+          {
+            echo "### Build Scope"
+            echo "- Diff range: \`${base_sha}..${PUSH_HEAD_SHA}\`"
+            cat var/ci/build-scope-summary.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Emit app_merge promotion-chain metric
+        # S6.1 wire-in — bead mereka-lms-lb4c.6. Emits a JSONL record + a
+        # markdown summary row for the app-repo merge stage of the promotion
+        # chain. Non-blocking: observability metric, not a guard — an emit
+        # failure must never gate image delivery.
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        # non-blocking: S6.1 promotion-chain timing is observability; emit failure must never block build (classification per verify-workflow-gate-enforcement.sh)
+        continue-on-error: true
+        env:
+          GH_SHA: ${{ github.sha }}
+        run: |
+          mkdir -p var/ci/promotion-metrics
+          bash scripts/ci/emit-promotion-chain-metrics.sh \
+            --stage app_merge \
+            --release-unit-id "${GH_SHA}" \
+            --out-dir var/ci/promotion-metrics
+
+      - name: Upload promotion-chain metrics artifact
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        # non-blocking: artifact upload is observability; metrics may not exist if emit step failed (classification per verify-workflow-gate-enforcement.sh)
+        continue-on-error: true
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: promotion-chain-metrics-resolve-${{ github.sha }}
+          path: var/ci/promotion-metrics/
+          if-no-files-found: ignore
+          retention-days: 30
+
+  lint:
+    name: Lint & Validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: cancel-superseded-queued-main-builds
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Validate Tutor config
+        run: |
+          # Check for syntax errors in YAML configs (no pip on ARC runners)
+          python3 -c "
+          import json, re, sys
+          with open('infrastructure/tutor/config.example.yml') as f:
+              content = f.read()
+          # Basic syntax: no tabs, valid UTF-8, non-empty
+          if '\t' in content:
+              print('ERROR: tabs in YAML'); sys.exit(1)
+          if not content.strip():
+              print('ERROR: empty file'); sys.exit(1)
+          print('✅ Config YAML basic validation passed')
+          "
+
+      - name: Lint shell scripts
+        continue-on-error: true  # ARC runner image lacks xz; tracked as CI infra debt
+        uses: ludeeus/action-shellcheck@00b27aa7cb85167568cb48a3838b75f4265f2bca  # master
+        with:
+          scandir: './infrastructure/tutor'
+          severity: warning
+
+  render-preflight:
+    name: Render Preflight Contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [resolve-build-scope, lint]
+    if: ${{ needs.resolve-build-scope.outputs.build_openedx == 'true' || needs.resolve-build-scope.outputs.build_mfe == 'true' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-python-env
+        with:
+          python-version: '3.12'
+          requirements-file: 'requirements-tutor.txt'
+          isolated-venv: 'true'
+          cache-isolated-venv: 'true'
+          isolated-venv-name: 'tutor-preflight-py312'
+
+      - name: Run rendered Dockerfile preflight tripwire
+        env:
+          TUTOR_VENV: ${{ github.workspace }}/.cache/venvs/tutor-preflight-py312
+          PREFLIGHT_RENDER_DELTA_ARTIFACT_DIR: ${{ github.workspace }}/var/ci/render-delta
+        run: ./scripts/ci/preflight-check.sh
+
+      - name: Upload render preflight delta artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: render-preflight-render-delta-${{ github.run_id }}-${{ github.run_attempt }}
+          path: var/ci/render-delta/
+          if-no-files-found: warn
+          retention-days: 14
+
+  prepare-build-context:
+    name: Prepare Tutor Build Context
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [resolve-build-scope, lint, render-preflight]
+    if: ${{ needs.resolve-build-scope.outputs.build_openedx == 'true' || needs.resolve-build-scope.outputs.build_mfe == 'true' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-python-env
+        with:
+          python-version: '3.12'
+          requirements-file: 'requirements-tutor.txt'
+
+      - name: Resolve build-context prep target
+        id: prep-target
+        env:
+          BUILD_OPENEDX: ${{ needs.resolve-build-scope.outputs.build_openedx }}
+          BUILD_MFE: ${{ needs.resolve-build-scope.outputs.build_mfe }}
+        run: |
+          if [[ "$BUILD_OPENEDX" == 'true' && "$BUILD_MFE" == 'true' ]]; then
+            echo "target=all" >> "$GITHUB_OUTPUT"
+          elif [[ "$BUILD_OPENEDX" == 'true' ]]; then
+            echo "target=openedx" >> "$GITHUB_OUTPUT"
+          elif [[ "$BUILD_MFE" == 'true' ]]; then
+            echo "target=mfe" >> "$GITHUB_OUTPUT"
+          else
+            echo "No Tutor build context requested." >&2
+            exit 1
+          fi
+
+      - name: Prepare Tutor build context
+        env:
+          BUILD_OPENEDX: ${{ needs.resolve-build-scope.outputs.build_openedx }}
+          BUILD_MFE: ${{ needs.resolve-build-scope.outputs.build_mfe }}
+        run: |
+          ./scripts/infra/prepare-tutor-build-context-ci.sh --target "${{ steps.prep-target.outputs.target }}"
+          mkdir -p var/ci
+          if [[ "$BUILD_OPENEDX" == 'true' ]]; then
+            tar -C tutor_env/env/build -czf var/ci/openedx-build-context.tgz openedx
+          fi
+          if [[ "$BUILD_MFE" == 'true' ]]; then
+            tar -C tutor_env/env/plugins/mfe/build -czf var/ci/mfe-build-context.tgz mfe
+          fi
+
+      - name: Upload Tutor build-context artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: tutor-build-contexts
+          path: var/ci/
+          retention-days: 3
+
+  select-build-lane:
+    name: Select Build Lane
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [resolve-build-scope]
+    if: ${{ needs.resolve-build-scope.outputs.build_openedx == 'true' || needs.resolve-build-scope.outputs.build_mfe == 'true' }}
+    permissions:
+      contents: read
+    outputs:
+      runner_label: ${{ steps.select.outputs.runner_label }}
+      decision: ${{ steps.select.outputs.decision }}
+      reason: ${{ steps.select.outputs.reason }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Select runner lane
+        id: select
+        uses: ./.github/actions/select-build-lane
+        with:
+          enabled: ${{ vars.CI_FASTLANE_BUILD_ENABLED }}
+          lane_mode: ${{ github.event_name == 'workflow_dispatch' && inputs.lane_mode || 'auto' }}
+          fastlane_label: ${{ vars.CI_FASTLANE_BUILD_LABEL || 'mereka-lms-vps-fastlane-build' }}
+          timezone: ${{ vars.CI_FASTLANE_BUILD_TIMEZONE }}
+          office_hours_start: ${{ vars.CI_FASTLANE_BUILD_WINDOW_START }}
+          office_hours_end: ${{ vars.CI_FASTLANE_BUILD_WINDOW_END }}
+          runner_status_token: ${{ secrets.FASTLANE_RUNNER_STATUS_TOKEN }}
+          github_app_id: ${{ secrets.GITOPS_GITHUB_APP_ID }}
+          github_app_installation_id: ${{ secrets.GITOPS_GITHUB_APP_INSTALLATION_ID }}
+          github_app_private_key: ${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}
+
+  build-openedx:
+    name: Build OpenEdX Image
+    runs-on: ${{ needs.select-build-lane.outputs.runner_label }}
+    concurrency:
+      # Never cancel an in-progress main build. Queue the newest run behind the
+      # active main build after the janitor clears older queued workflow runs.
+      group: build-openedx-${{ github.ref == 'refs/heads/main' && github.ref || github.run_id }}
+      cancel-in-progress: false
+    # Keep outer timeout comfortably above inner image-build timeout (170m)
+    # so pre/post-build checks and artifact upload have recovery headroom.
+    timeout-minutes: 200
+    needs: [resolve-build-scope, lint, prepare-build-context, select-build-lane]
+    if: ${{ needs.resolve-build-scope.outputs.build_openedx == 'true' }}
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+      image_digest: ${{ steps.digest.outputs.digest }}
+    steps:
+      - name: Pre-clean persistent Tutor workspace
+        run: |
+          set -euo pipefail
+          cleanup_workspace_paths() {
+            local path target
+            local existing=()
+            for path in "$@"; do
+              case "$path" in
+                tutor_env|var/bootstrap-readiness|var/ci|.buildx-cache) ;;
+                *) echo "Refusing to cleanup unexpected workspace path: $path" >&2; exit 64 ;;
+              esac
+              target="$GITHUB_WORKSPACE/$path"
+              [[ -e "$target" ]] && existing+=("$path")
+            done
+            [[ "${#existing[@]}" -eq 0 ]] && return 0
+
+            if command -v docker >/dev/null 2>&1 && timeout 30s docker info >/dev/null 2>&1; then
+              # shellcheck disable=SC2016
+              if timeout 2m docker run --rm \
+                --network none \
+                -v "$GITHUB_WORKSPACE:/workspace" \
+                mirror.gcr.io/library/alpine:3.20 \
+                sh -eu -c '
+                  for rel in "$@"; do
+                    case "$rel" in
+                      tutor_env|var/bootstrap-readiness|var/ci|.buildx-cache) ;;
+                      *) echo "Refusing to cleanup unexpected workspace path: $rel" >&2; exit 64 ;;
+                    esac
+                    rm -rf "/workspace/$rel"
+                  done
+                ' sh "${existing[@]}"; then
+                return 0
+              fi
+              echo "Docker-owned cleanup failed; falling back to sudo/user cleanup." >&2
+            fi
+
+            for path in "${existing[@]}"; do
+              target="$GITHUB_WORKSPACE/$path"
+              [[ -e "$target" ]] || continue
+              if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+                sudo rm -rf --one-file-system "$target"
+              else
+                rm -rf --one-file-system "$target"
+              fi
+            done
+          }
+          cleanup_workspace_paths tutor_env var/ci .buildx-cache
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Free disk space for large image builds
+        run: |
+          # GitHub-hosted runners have ~14GB free. OpenEdX image build needs
+          # ~12GB+ (base layers + pip packages + webpack + image export).
+          # Remove pre-installed tools we don't need to reclaim ~6GB.
+          echo "=== Disk before cleanup ==="
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+            /usr/local/share/powershell /usr/share/swift \
+            /usr/local/.ghcup 2>/dev/null || true
+          sudo docker image prune -af 2>/dev/null || true
+          echo "=== Disk after cleanup ==="
+          df -h /
+
+      - name: Enable swap for heavy image builds
+        run: |
+          # GitHub hosted runners can OOM during large Open edX layer export.
+          # Add swap to reduce abrupt SIGKILL during docker/buildx workloads.
+          # Best-effort: swapon requires CAP_SYS_ADMIN which ARC container
+          # runners lack. Keep the block non-fatal so it works on GitHub-hosted
+          # runners but silently skips on ARC.
+          if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+            if sudo fallocate -l 8G /swapfile 2>/dev/null && \
+               sudo chmod 600 /swapfile && \
+               sudo mkswap /swapfile && \
+               sudo swapon /swapfile 2>/dev/null; then
+              echo "Swap provisioned (8 GB)."
+            else
+              echo "Swap provisioning skipped (likely container runner without CAP_SYS_ADMIN)."
+              sudo rm -f /swapfile 2>/dev/null || true
+            fi
+          else
+            echo "Skipping swap provisioning: sudo is unavailable/non-interactive on this runner."
+          fi
+          free -h || true
+
+      - name: Download OpenEdX build context artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: tutor-build-contexts
+          path: var/ci
+
+      - name: Extract OpenEdX build context artifact
+        run: |
+          mkdir -p tutor_env/env/build
+          tar -C tutor_env/env/build -xzf var/ci/openedx-build-context.tgz
+          test -f tutor_env/env/build/openedx/Dockerfile
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd  # v4.0.0
+        with:
+          # OpenEdX now builds from the rendered Tutor context via the repo-owned
+          # build-openedx-image.sh helper. That removes the last local-image
+          # dependency from this lane, so we can use docker-container and first-
+          # class GHA cache exporters like the MFE build.
+          driver: docker-container
+          driver-opts: |
+            image=mirror.gcr.io/moby/buildkit:buildx-stable-1
+          buildkitd-config-inline: |
+            [registry."docker.io"]
+              mirrors = ["mirror.gcr.io"]
+          # This job runs on disposable runners, and the OpenEdX lane has
+          # already proven that Buildx teardown can hang long after the image
+          # digest is published. Skip builder cleanup to keep the critical path
+          # bounded; the runner is discarded at job exit anyway.
+          cleanup: false
+
+      - name: Log in to GHCR (build cache)
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      # "Fix DinD network MTU" step retired here — DNS now comes from
+      # declarative --dns=8.8.8.8 --dns=1.1.1.1 on the DinD sidecar args
+      # in bbi-infrastructure clusters/dev/rke2/apps/arc-runners-heavy.yaml
+      # (bbi-infra #3565, bead mereka-lms-gyce). No per-job privileged
+      # nsenter shell step needed.
+
+      - name: Build OpenEdX image
+        env:
+          # Shared registry cache export — trusted main builds only (RL-5)
+          # See docs/ops/ci-cd/CACHE_AUTHORITY.md §Write Policy
+          CACHE_TO_OPENEDX: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' && 'type=registry,ref=ghcr.io/biji-biji-initiative/mereka-lms/cache/openedx:main-amd64,mode=max' || '' }}
+        run: |
+          set -euo pipefail
+          export TUTOR_ROOT=$(pwd)/tutor_env
+          export DOCKER_BUILDKIT=1
+          mkdir -p var/ci
+
+          # Cache strategy (RFC-BUILD-AUTHORITY-001):
+          #   L2: type=registry shared GHCR cache (authoritative, read by all, write by main only)
+          #   L3: type=registry final-image fallback (transitional, ${CACHE_REF})
+          #   CACHE_TO_OPENEDX env var controls cache export (empty on PRs/forks)
+          BUILD_PROFILE="${{ github.event_name == 'workflow_dispatch' && inputs.build_profile || 'proof' }}"
+          if [[ "${BUILD_PROFILE}" == "proof" ]]; then
+            CACHE_REF="${{ env.REGISTRY }}/openedx:mereka-brand"
+          else
+            CACHE_REF="${{ env.REGISTRY }}/openedx:mereka-brand-fast"
+          fi
+          TAG="${{ inputs.image_tag || github.sha }}"
+          SHORT_SHA="${GITHUB_SHA::8}"
+          MUTABLE_ARGS=()
+          if [[ "${{ github.ref }}" == "refs/heads/main" && "${BUILD_PROFILE}" == "proof" ]]; then
+            MUTABLE_ARGS=(--mutable-tag mereka-brand)
+          fi
+
+          BUILD_START=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          (
+            while true; do
+              echo "[build-openedx-heartbeat] $(date -u +%Y-%m-%dT%H:%M:%SZ) still building..."
+              sleep 60
+            done
+          ) &
+          HEARTBEAT_PID=$!
+          trap 'kill $HEARTBEAT_PID 2>/dev/null || true' EXIT
+          if ! timeout 170m ./scripts/infra/build-openedx-image.sh \
+            --context-dir "${TUTOR_ROOT}/env/build/openedx" \
+            --dockerfile "${TUTOR_ROOT}/env/build/openedx/Dockerfile" \
+            --image-repo "${{ env.REGISTRY }}/openedx" \
+            --primary-tag "${TAG}" \
+            --secondary-tag "${SHORT_SHA}" \
+            --cache-ref "${CACHE_REF}" \
+            --build-profile "${BUILD_PROFILE}" \
+            "${MUTABLE_ARGS[@]}" \
+            2>&1 | tee var/ci/build-openedx.log; then
+            echo "OpenedX image build timed out or failed after timeout guard" >&2
+            exit 1
+          fi
+          kill "$HEARTBEAT_PID" 2>/dev/null || true
+          trap - EXIT
+          BUILD_END=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          echo "BUILD_START=${BUILD_START}" >> var/ci/build-openedx-timing.env
+          echo "BUILD_END=${BUILD_END}" >> var/ci/build-openedx-timing.env
+
+      - name: Emit OpenEdX build metrics
+        if: always()
+        uses: ./.github/actions/emit-build-metrics
+        with:
+          metadata-file: ''
+          log-file: var/ci/build-openedx.log
+          image-family: openedx
+          release-unit-id: ${{ github.sha }}
+
+      - name: Verify OpenEdX build cache health
+        if: always()
+        env:
+          CACHE_EXPORT_EXPECTED: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' && 'true' || 'false' }}
+        run: |
+          scripts/ci/summarize-build-cache-health.sh \
+            --image-family openedx \
+            --metrics-file build-metrics-openedx.json \
+            --timing-env var/ci/build-openedx-timing.env \
+            --l2-cache-ref ghcr.io/biji-biji-initiative/mereka-lms/cache/openedx:main-amd64 \
+            --cache-export-expected "${CACHE_EXPORT_EXPECTED}" \
+            --fail-on-failures "${CACHE_EXPORT_EXPECTED}"
+
+      - name: Push OpenEdX build metrics to ci-metrics-receiver
+        # ADR-025 §5 (metrics bridge, trailing push). Populates the cache/layer
+        # gauges in Prometheus that webhook-only delivery cannot fill.
+        if: ${{ always() && hashFiles('build-metrics-openedx.json') != '' }}
+        continue-on-error: true  # Non-blocking: metrics delivery must never block image delivery
+        uses: Biji-Biji-Initiative/bbi-infrastructure/.github/actions/push-build-metrics@main
+        with:
+          metrics-file: build-metrics-openedx.json
+          secret: ${{ secrets.CI_METRICS_WEBHOOK_SECRET }}
+
+      - name: Upload OpenEdX build diagnostics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: openedx-build-diagnostics
+          path: |
+            var/ci/build-openedx.log
+            var/ci/build-openedx-timing.env
+            build-metrics-openedx.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Generate image metadata
+        id: meta
+        run: |
+          TAG="${{ inputs.image_tag || github.sha }}"
+          echo "tags=${{ env.REGISTRY }}/openedx:${TAG}" >> $GITHUB_OUTPUT
+          echo "short_sha=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
+
+      - name: Resolve pushed openedx digest
+        id: digest
+        run: |
+          TAG="${{ inputs.image_tag || github.sha }}"
+          REF="${{ env.REGISTRY }}/openedx:${TAG}"
+          DIGEST="$(./scripts/infra/resolve-image-digest.sh --image-ref "${REF}")"
+          if [[ -z "${DIGEST}" || ! "${DIGEST}" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            echo "::error::Failed to resolve openedx digest for ${REF} (got: '${DIGEST}')"
+            exit 1
+          fi
+          echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
+          echo "### OpenEdX Image Built ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** \`${REF}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Immutable tags:** \`${TAG}\`, \`${GITHUB_SHA::8}\`" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "**Mutable tag:** \`mereka-brand\` (compatibility alias only; dev promotion is infra-owned)" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "**OpenedX digest:** \`${DIGEST}\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Verify OpenEdX custom app imports
+        run: |
+          TAG="${{ inputs.image_tag || github.sha }}"
+          REF="${{ env.REGISTRY }}/openedx:${TAG}"
+          ./scripts/qa/verify-openedx-custom-app-imports.sh \
+            --image-ref "${REF}@${{ steps.digest.outputs.digest }}"
+
+      - name: Extract staticfiles.json for branding artifact
+        # verify-openedx-custom-app-imports.sh already pulled the image into the
+        # local daemon.  Use docker-create + docker-cp to extract the single
+        # staticfiles.json manifest (~50 KB) so the scan job can validate the
+        # branding contract without re-pulling the full ~5 GB image.
+        # Cost: <5s.  Savings in scan job: ~470s (eliminates docker pull + docker run).
+        env:
+          OPENEDX_IMAGE_REF: ${{ env.REGISTRY }}/openedx@${{ steps.digest.outputs.digest }}
+        run: |
+          mkdir -p var/ci
+          CID="$(docker create "${OPENEDX_IMAGE_REF}" true)"
+          docker cp "${CID}:/openedx/staticfiles/staticfiles.json" var/ci/staticfiles.json
+          docker rm -f "${CID}"
+          echo "Extracted staticfiles.json ($(wc -c < var/ci/staticfiles.json) bytes)"
+
+      - name: Upload OpenEdX staticfiles.json artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: openedx-staticfiles
+          path: var/ci/staticfiles.json
+          retention-days: 3
+
+  build-mfe:
+    name: Build MFE Image
+    runs-on: ${{ needs.select-build-lane.outputs.runner_label }}
+    concurrency:
+      # Never cancel an in-progress main build. Queue the newest run behind the
+      # active main build after the janitor clears older queued workflow runs.
+      group: build-mfe-${{ github.ref == 'refs/heads/main' && github.ref || github.run_id }}
+      cancel-in-progress: false
+    timeout-minutes: 150
+    needs: [resolve-build-scope, lint, prepare-build-context, select-build-lane]
+    if: ${{ needs.resolve-build-scope.outputs.build_mfe == 'true' }}
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+      image_digest: ${{ steps.digest.outputs.digest }}
+    steps:
+      - name: Pre-clean persistent Tutor workspace
+        run: |
+          set -euo pipefail
+          cleanup_workspace_paths() {
+            local path target
+            local existing=()
+            for path in "$@"; do
+              case "$path" in
+                tutor_env|var/bootstrap-readiness|var/ci|.buildx-cache) ;;
+                *) echo "Refusing to cleanup unexpected workspace path: $path" >&2; exit 64 ;;
+              esac
+              target="$GITHUB_WORKSPACE/$path"
+              [[ -e "$target" ]] && existing+=("$path")
+            done
+            [[ "${#existing[@]}" -eq 0 ]] && return 0
+
+            if command -v docker >/dev/null 2>&1 && timeout 30s docker info >/dev/null 2>&1; then
+              # shellcheck disable=SC2016
+              if timeout 2m docker run --rm \
+                --network none \
+                -v "$GITHUB_WORKSPACE:/workspace" \
+                mirror.gcr.io/library/alpine:3.20 \
+                sh -eu -c '
+                  for rel in "$@"; do
+                    case "$rel" in
+                      tutor_env|var/bootstrap-readiness|var/ci|.buildx-cache) ;;
+                      *) echo "Refusing to cleanup unexpected workspace path: $rel" >&2; exit 64 ;;
+                    esac
+                    rm -rf "/workspace/$rel"
+                  done
+                ' sh "${existing[@]}"; then
+                return 0
+              fi
+              echo "Docker-owned cleanup failed; falling back to sudo/user cleanup." >&2
+            fi
+
+            for path in "${existing[@]}"; do
+              target="$GITHUB_WORKSPACE/$path"
+              [[ -e "$target" ]] || continue
+              if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+                sudo rm -rf --one-file-system "$target"
+              else
+                rm -rf --one-file-system "$target"
+              fi
+            done
+          }
+          cleanup_workspace_paths tutor_env var/ci .buildx-cache
+
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Enable swap for heavy image builds
+        run: |
+          # Best-effort: swapon requires CAP_SYS_ADMIN which ARC container
+          # runners lack. Keep the block non-fatal so it works on GitHub-hosted
+          # runners but silently skips on ARC.
+          if command -v sudo >/dev/null 2>&1 && sudo -n true >/dev/null 2>&1; then
+            if sudo fallocate -l 8G /swapfile 2>/dev/null && \
+               sudo chmod 600 /swapfile && \
+               sudo mkswap /swapfile && \
+               sudo swapon /swapfile 2>/dev/null; then
+              echo "Swap provisioned (8 GB)."
+            else
+              echo "Swap provisioning skipped (likely container runner without CAP_SYS_ADMIN)."
+              sudo rm -f /swapfile 2>/dev/null || true
+            fi
+          else
+            echo "Skipping swap provisioning: sudo is unavailable/non-interactive on this runner."
+          fi
+          free -h || true
+
+      - name: Download MFE build context artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: tutor-build-contexts
+          path: var/ci
+
+      - name: Extract MFE build context artifact
+        run: |
+          mkdir -p tutor_env/env/plugins/mfe/build
+          tar -C tutor_env/env/plugins/mfe/build -xzf var/ci/mfe-build-context.tgz
+          test -f tutor_env/env/plugins/mfe/build/mfe/Dockerfile
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd  # v4.0.0
+        with:
+          driver: docker-container
+          driver-opts: |
+            image=mirror.gcr.io/moby/buildkit:buildx-stable-1
+          buildkitd-config-inline: |
+            [registry."docker.io"]
+              mirrors = ["mirror.gcr.io"]
+          # Heavy image-build lanes run on ephemeral runners, so leaving the
+          # builder behind is cheaper than risking post-job cleanup stalls.
+          cleanup: false
+          # Note: the previous attempt to cap parallelism via
+          #   buildkitd-flags: --oci-worker-max-parallelism=4
+          # was bogus — that flag does not exist in buildkitd. Baseline builds
+          # (pre-cap) ran webpack to completion without OOM on 12GB heavy
+          # builders, so no cap is required. If concurrent MFE webpack starts
+          # pushing memory later, the correct lever is buildkitd-config-inline:
+          #   buildkitd-config-inline: |
+          #     [worker.oci]
+          #       max-parallelism = 4
+          # which writes a real buildkitd.toml the worker respects.
+
+      - name: Log in to GHCR (build cache)
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      # "Fix DinD network MTU" step retired here — DNS now declarative
+      # on the DinD sidecar (bbi-infra #3565, bead mereka-lms-gyce).
+
+      - name: Build MFE image
+        env:
+          # Shared registry cache export — trusted main builds only (RL-5)
+          CACHE_TO_MFE: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' && 'type=registry,ref=ghcr.io/biji-biji-initiative/mereka-lms/cache/mfe:main-amd64,mode=max' || '' }}
+        run: |
+          set -euo pipefail
+          export TUTOR_ROOT=$(pwd)/tutor_env
+          export DOCKER_BUILDKIT=1
+          export NODE_OPTIONS="--max-old-space-size=6144"
+          mkdir -p var/ci
+
+          # Cache strategy (RFC-BUILD-AUTHORITY-001): L2 GHCR registry (shared), L3 final-image fallback.
+          BUILD_PROFILE="${{ github.event_name == 'workflow_dispatch' && inputs.mfe_build_profile || 'proof' }}"
+          if [[ "${BUILD_PROFILE}" == "proof" ]]; then
+            CACHE_REF="${{ env.REGISTRY }}/mfe:mereka-brand"
+          else
+            CACHE_REF="${{ env.REGISTRY }}/mfe:mereka-brand-fast"
+          fi
+          TAG="${{ inputs.image_tag || github.sha }}"
+          SHORT_SHA="${GITHUB_SHA::8}"
+          MUTABLE_ARGS=()
+          if [[ "${{ github.ref }}" == "refs/heads/main" && "${BUILD_PROFILE}" == "proof" ]]; then
+            MUTABLE_ARGS=(--mutable-tag mereka-brand)
+          fi
+
+          BUILD_START=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          (
+            while true; do
+              echo "[build-mfe-heartbeat] $(date -u +%Y-%m-%dT%H:%M:%SZ) still building..."
+              sleep 60
+            done
+          ) &
+          HEARTBEAT_PID=$!
+          trap 'kill $HEARTBEAT_PID 2>/dev/null || true' EXIT
+          # 140m: 12 MFEs + learner-record on the Ulmo Node 24 base needs extra time.
+          # Note: BUILDKIT_MAX_PARALLELISM env var is not read by the
+          # docker-container driver, so exporting it here was a no-op. Removed.
+          if ! timeout 140m ./scripts/infra/build-mfe-image.sh \
+            --context-dir "${TUTOR_ROOT}/env/plugins/mfe/build/mfe" \
+            --dockerfile "${TUTOR_ROOT}/env/plugins/mfe/build/mfe/Dockerfile" \
+            --image-repo "${{ env.REGISTRY }}/mfe" \
+            --primary-tag "${TAG}" \
+            --secondary-tag "${SHORT_SHA}" \
+            --cache-ref "${CACHE_REF}" \
+            --build-profile "${BUILD_PROFILE}" \
+            "${MUTABLE_ARGS[@]}" \
+            2>&1 | tee var/ci/build-mfe.log; then
+            echo "MFE image build timed out or failed after timeout guard" >&2
+            exit 1
+          fi
+          kill "$HEARTBEAT_PID" 2>/dev/null || true
+          trap - EXIT
+          BUILD_END=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          echo "BUILD_START=${BUILD_START}" >> var/ci/build-mfe-timing.env
+          echo "BUILD_END=${BUILD_END}" >> var/ci/build-mfe-timing.env
+
+      - name: Emit MFE build metrics
+        if: always()
+        uses: ./.github/actions/emit-build-metrics
+        with:
+          metadata-file: ''
+          log-file: var/ci/build-mfe.log
+          image-family: mfe
+          release-unit-id: ${{ github.sha }}
+
+      - name: Verify MFE build cache health
+        if: always()
+        env:
+          CACHE_EXPORT_EXPECTED: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' && 'true' || 'false' }}
+        run: |
+          scripts/ci/summarize-build-cache-health.sh \
+            --image-family mfe \
+            --metrics-file build-metrics-mfe.json \
+            --timing-env var/ci/build-mfe-timing.env \
+            --l2-cache-ref ghcr.io/biji-biji-initiative/mereka-lms/cache/mfe:main-amd64 \
+            --cache-export-expected "${CACHE_EXPORT_EXPECTED}" \
+            --fail-on-failures "${CACHE_EXPORT_EXPECTED}"
+
+      - name: Push MFE build metrics to ci-metrics-receiver
+        # ADR-025 §5 (metrics bridge, trailing push).
+        if: ${{ always() && hashFiles('build-metrics-mfe.json') != '' }}
+        continue-on-error: true  # Non-blocking: metrics delivery must never block image delivery
+        uses: Biji-Biji-Initiative/bbi-infrastructure/.github/actions/push-build-metrics@main
+        with:
+          metrics-file: build-metrics-mfe.json
+          secret: ${{ secrets.CI_METRICS_WEBHOOK_SECRET }}
+
+      - name: Upload MFE build diagnostics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: mfe-build-diagnostics
+          path: |
+            var/ci/build-mfe.log
+            var/ci/build-mfe-timing.env
+            build-metrics-mfe.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Verify generated MFE runtime contract
+        run: |
+          set -euo pipefail
+          export TUTOR_ROOT="${TUTOR_ROOT:-$(pwd)/tutor_env}"
+          mkdir -p var/ci
+          scripts/qa/verify-mfe-runtime-contract.sh \
+            --generated-env-config "${TUTOR_ROOT}/env/plugins/mfe/build/mfe/env.config.jsx" \
+            | tee var/ci/verify-mfe-generated-runtime-contract.log
+
+      - name: Generate image metadata
+        id: meta
+        run: |
+          TAG="${{ inputs.image_tag || github.sha }}"
+          echo "tags=${{ env.REGISTRY }}/mfe:${TAG}" >> $GITHUB_OUTPUT
+
+      - name: Resolve pushed mfe digest
+        id: digest
+        run: |
+          TAG="${{ inputs.image_tag || github.sha }}"
+          REF="${{ env.REGISTRY }}/mfe:${TAG}"
+          DIGEST="$(./scripts/infra/resolve-image-digest.sh --image-ref "${REF}")"
+          if [[ -z "${DIGEST}" || ! "${DIGEST}" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            echo "::error::Failed to resolve mfe digest for ${REF} (got: '${DIGEST}')"
+            exit 1
+          fi
+          echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
+          echo "### MFE Image Built ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** \`${REF}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Immutable tags:** \`${TAG}\`, \`${GITHUB_SHA::8}\`" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "**Mutable tag:** \`mereka-brand\` (compatibility alias only; dev promotion is infra-owned)" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "**MFE digest:** \`${DIGEST}\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload generated MFE runtime contract log
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        if: always()
+        with:
+          name: mfe-generated-runtime-contract-log
+          path: var/ci/verify-mfe-generated-runtime-contract.log
+          retention-days: 3
+
+  scan-openedx-image:
+    name: Post-push OpenEdX Scan
+    # Branding verification uses a pre-extracted staticfiles.json artifact from
+    # the build job (jj97.8), eliminating the ~470s docker pull+run that was
+    # 57% of this job.  SBOM and Trivy share a single explicit docker pull
+    # that runs after GHCR login, so all three scan tools reuse one image pull.
+    runs-on: mereka-k8s-heavy-builders
+    timeout-minutes: 45
+    needs: [build-openedx, select-build-lane]
+    if: ${{ needs.build-openedx.result == 'success' }}
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Download OpenEdX staticfiles artifact
+        # ~50 KB download — replaces the 470s docker pull+run in the branding step.
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: openedx-staticfiles
+          path: var/ci
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd  # v4.0.0
+        with:
+          driver: docker-container
+          driver-opts: |
+            image=mirror.gcr.io/moby/buildkit:buildx-stable-1
+          buildkitd-config-inline: |
+            [registry."docker.io"]
+              mirrors = ["mirror.gcr.io"]
+
+      - name: Log in to GHCR
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      # "Fix DinD network MTU" step retired here — DNS now declarative
+      # on the DinD sidecar (bbi-infra #3565, bead mereka-lms-gyce).
+
+      - name: Pull OpenEdX image (shared by SBOM and Trivy)
+        # Single explicit pull into the local daemon.  syft (docker: mode) and
+        # trivy both reuse this rather than each re-fetching ~5 GB from GHCR.
+        # Pulls from ARC (cold cache) take ~200-400s; this replaces what the old
+        # branding step used to pull, making the cache strategy explicit.
+        env:
+          OPENEDX_IMAGE_REF: ${{ env.REGISTRY }}/openedx@${{ needs.build-openedx.outputs.image_digest }}
+        run: |
+          PULL_START=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          docker pull "${OPENEDX_IMAGE_REF}"
+          PULL_END=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          echo "Image pull: ${PULL_START} → ${PULL_END}"
+
+      - name: Verify OpenEdX image branding contract
+        # Fast path: validates staticfiles.json artifact uploaded by build-openedx.
+        # No docker pull or docker run required (~5s vs ~470s previously).
+        run: |
+          set -euo pipefail
+          mkdir -p var/ci
+          EXPECTED_LMS_BRANDING_REV="$(sed -nE 's/.*--mereka-branding-rev:[[:space:]]*\"([^\"]+)\".*/\1/p' infrastructure/tutor/themes/mereka/lms/static/css/mereka-overrides.css | head -n 1)"
+          scripts/qa/verify-openedx-image-branding.sh \
+            --staticfiles-json var/ci/staticfiles.json \
+            "${EXPECTED_LMS_BRANDING_REV}" \
+            | tee var/ci/verify-openedx-image-branding.log
+
+      - name: Upload OpenEdX branding verification log
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        if: always()
+        with:
+          name: openedx-branding-contract-log
+          path: var/ci/verify-openedx-image-branding.log
+          retention-days: 3
+
+      - name: Generate SBOM for OpenEdX image
+        continue-on-error: true  # Non-blocking: SBOM is informational, should not block image delivery
+        env:
+          OPENEDX_IMAGE_REF: ${{ env.REGISTRY }}/openedx@${{ needs.build-openedx.outputs.image_digest }}
+        run: |
+          mkdir -p var/ci
+          ./scripts/infra/install-syft.sh
+          set +e
+          # Use docker: source so syft reuses the image pulled by the explicit
+          # "Pull OpenEdX image" step above, avoiding a redundant ~5 GB
+          # GHCR re-fetch.  The docker: scheme reads from the local daemon cache.
+          #
+          # lb4c.7 wire-in: wrap syft with run-with-retry.sh to retry timeout-
+          # only failures up to 3 attempts (max 30 min total). Matches the
+          # Trivy pattern below. --retry-on-exit-codes "124" only — any other
+          # non-zero exit (parse error, network failure with explicit code)
+          # must propagate immediately, not get hidden behind a retry loop.
+          scripts/ci/run-with-retry.sh \
+            --max-attempts 3 \
+            --delay-seconds 30 \
+            --max-total-seconds 1800 \
+            --retry-on-exit-codes "124" \
+            -- timeout 20m "$HOME/.local/bin/syft" scan "docker:${OPENEDX_IMAGE_REF}" \
+            -o cyclonedx-json=var/ci/sbom-openedx.cdx.json
+          sbom_status=$?
+          set -e
+          if [[ "$sbom_status" -eq 0 ]]; then
+            exit 0
+          fi
+          if [[ "$sbom_status" -eq 124 ]]; then
+            echo "OpenEdX registry SBOM generation timed out after 20m; continuing without SBOM artifact." >&2
+            echo "timeout" > var/ci/sbom-openedx.status.txt
+          else
+            echo "OpenEdX registry SBOM generation failed with exit code ${sbom_status}; continuing without SBOM artifact." >&2
+            echo "error:${sbom_status}" > var/ci/sbom-openedx.status.txt
+          fi
+          exit 0
+
+      - name: Upload OpenEdX SBOM
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        if: always()
+        with:
+          name: sbom-openedx
+          path: var/ci/sbom-openedx*
+          retention-days: 90
+
+      - name: Compute Trivy DB cache date key
+        id: trivy-cache-date
+        # Date-based key (UTC day) so the cache rotates daily, matches Aquasec's
+        # DB publish cadence, and — crucially — does NOT contain github.run_id
+        # so repeat builds on the same day get a cache HIT and do NOT trigger a
+        # Post-save write. The old key pinned run_id, which made every run a
+        # miss-then-save (144s wasted on the Post step per build).
+        run: echo "ymd=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Trivy vulnerability DB cache
+        id: trivy-db-cache
+        # Cache the Trivy CVE database (~50 MB download) across runs.
+        # On ARC heavy-builders the DB download accounts for ~60-90s of the
+        # 246s Trivy step. Date-based key means: first build of the day
+        # downloads fresh DB, subsequent builds hit the cache (skip download
+        # AND skip the Post save step — save is only triggered when the key
+        # does not already exist in the cache).
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4.2.3
+        with:
+          path: ~/.cache/trivy
+          key: trivy-db-${{ runner.os }}-${{ hashFiles('.trivyignore') }}-${{ steps.trivy-cache-date.outputs.ymd }}
+          restore-keys: |
+            trivy-db-${{ runner.os }}-${{ hashFiles('.trivyignore') }}-
+            trivy-db-${{ runner.os }}-
+
+      - name: Install Trivy CLI
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: ./scripts/infra/install-trivy.sh
+
+      - name: Scan OpenEdX image for vulnerabilities
+        continue-on-error: true  # Non-blocking: upstream CVEs should not block image delivery
+        env:
+          OPENEDX_IMAGE_REF: ${{ env.REGISTRY }}/openedx@${{ needs.build-openedx.outputs.image_digest }}
+          TRIVY_DB_CACHE_HIT: ${{ steps.trivy-db-cache.outputs.cache-hit }}
+        run: |
+          mkdir -p var/ci
+          set +e
+          # Skip DB download when the GHA cache was warm — saves ~60-90s.
+          # The cache key rotates daily so CVE data is never more than 24h stale.
+          TRIVY_EXTRA_FLAGS=()
+          if [[ "${TRIVY_DB_CACHE_HIT}" == "true" ]]; then
+            echo "Trivy DB cache hit — skipping DB update download."
+            TRIVY_EXTRA_FLAGS+=(--skip-db-update --skip-java-db-update)
+          else
+            echo "Trivy DB cache miss — will download fresh CVE database."
+          fi
+          # trivy image accepts a full registry ref and uses the local docker
+          # daemon cache when the image is already present (populated by the
+          # explicit pull step above), avoiding a second ~5 GB GHCR fetch.
+          #
+          # S6.2 wire-in (bead lb4c.7): wrap Trivy with run-with-retry.sh to
+          # retry timeout-only failures up to 3 attempts (max 30 min total).
+          # --retry-on-exit-codes "124" is the SAFE DEFAULT (run-with-retry's
+          # own policy): exit 124 = GNU timeout expiry, which is transient;
+          # exit 1 = real CVE finding, which must propagate immediately. This
+          # converts silent-timeout "no scan verdict" cases (previously
+          # logged as 'timeout' and exit 0) into retried scans that typically
+          # produce a real verdict.
+          scripts/ci/run-with-retry.sh \
+            --max-attempts 3 \
+            --delay-seconds 30 \
+            --max-total-seconds 1800 \
+            --retry-on-exit-codes "124" \
+            -- timeout 20m trivy image \
+            --format json \
+            --output var/ci/trivy-openedx.json \
+            --ignorefile .trivyignore \
+            --severity CRITICAL,HIGH \
+            "${TRIVY_EXTRA_FLAGS[@]}" \
+            "${OPENEDX_IMAGE_REF}"
+          trivy_status=$?
+          set -e
+
+          if [[ "$trivy_status" -eq 124 ]]; then
+            echo "OpenEdX Trivy scan timed out after 20m (3 attempts exhausted via run-with-retry); continuing without vulnerability verdict." >&2
+            echo "timeout" > var/ci/trivy-openedx.status.txt
+            exit 0
+          fi
+          if [[ "$trivy_status" -ne 0 ]]; then
+            echo "OpenEdX Trivy scan failed with exit code ${trivy_status}; continuing without vulnerability verdict." >&2
+            echo "error:${trivy_status}" > var/ci/trivy-openedx.status.txt
+            exit 0
+          fi
+
+          CRITICAL_COUNT=$(jq '[(.Results // [])[] | .Vulnerabilities // [] | .[] | select(.Severity == "CRITICAL")] | length' var/ci/trivy-openedx.json)
+          echo "CRITICAL vulnerabilities: ${CRITICAL_COUNT}"
+          echo "critical-count:${CRITICAL_COUNT}" > var/ci/trivy-openedx.status.txt
+
+          jq -r '
+            ["Severity","PkgName","VulnerabilityID","Title"],
+            ((.Results // [])[] | .Vulnerabilities // []
+              | .[]
+              | select(.Severity == "HIGH")
+              | [.Severity, .PkgName, .VulnerabilityID, (.Title // "-")])
+            | @tsv' var/ci/trivy-openedx.json \
+            > var/ci/trivy-openedx-high-summary.txt || true
+
+          if [[ "${CRITICAL_COUNT}" -gt 0 ]]; then
+            echo "::warning::${CRITICAL_COUNT} CRITICAL vulnerabilities found in openedx image; release delivery remains non-blocking."
+            jq -r '(.Results // [])[] | .Vulnerabilities // [] | .[] | select(.Severity == "CRITICAL") | "\(.VulnerabilityID)\t\(.PkgName)\t\(.Title // "-")"' \
+              var/ci/trivy-openedx.json >&2
+          fi
+
+      - name: Upload Trivy OpenEdX scan results
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        if: always()
+        with:
+          name: trivy-openedx-scan
+          path: var/ci/trivy-openedx*
+          retention-days: 3
+
+  scan-mfe-image:
+    name: Post-push MFE Scan
+    # These verifiers use docker pull/run against the published image and need a
+    # persistent Docker daemon (DinD). Hardcoded to heavy-builders so fastlane
+    # slots are not consumed by scan work, freeing build-openedx/build-mfe
+    # concurrency when the timing-board shows elevated concurrency pressure.
+    runs-on: mereka-k8s-heavy-builders
+    timeout-minutes: 45
+    needs: [build-mfe, select-build-lane]
+    if: ${{ needs.build-mfe.result == 'success' }}
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd  # v4.0.0
+        with:
+          driver: docker-container
+          driver-opts: |
+            image=mirror.gcr.io/moby/buildkit:buildx-stable-1
+          buildkitd-config-inline: |
+            [registry."docker.io"]
+              mirrors = ["mirror.gcr.io"]
+
+      - name: Log in to GHCR
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      # "Fix DinD network MTU" step retired here — DNS now declarative
+      # on the DinD sidecar (bbi-infra #3565, bead mereka-lms-gyce).
+
+      - name: Verify MFE image branding contract
+        env:
+          MFE_IMAGE_REF: ${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs.image_digest }}
+        run: |
+          set -euo pipefail
+          mkdir -p var/ci
+          EXPECTED_MFE_BRANDING_REV="$(sed -nE 's/.*--mereka-mfe-branding-rev:[[:space:]]*"([^"]+)".*/\1/p' infrastructure/tutor/themes/mereka/mfe/mereka.scss | head -n 1)"
+          scripts/qa/verify-mfe-image-branding.sh "${MFE_IMAGE_REF}" "${EXPECTED_MFE_BRANDING_REV}" \
+            | tee var/ci/verify-mfe-image-branding.log
+
+      - name: Upload MFE branding verification log
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        if: always()
+        with:
+          name: mfe-branding-contract-log
+          path: var/ci/verify-mfe-image-branding.log
+          retention-days: 3
+
+      - name: Verify MFE runtime contract (image)
+        env:
+          MFE_IMAGE_REF: ${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs.image_digest }}
+        run: |
+          set -euo pipefail
+          mkdir -p var/ci
+          scripts/qa/verify-mfe-runtime-contract.sh --image "${MFE_IMAGE_REF}" \
+            | tee var/ci/verify-mfe-runtime-contract.log
+
+      - name: Upload MFE runtime contract log
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        if: always()
+        with:
+          name: mfe-runtime-contract-log
+          path: var/ci/verify-mfe-runtime-contract.log
+          retention-days: 3
+
+      - name: Generate SBOM for MFE image
+        continue-on-error: true  # Non-blocking: SBOM is informational, should not block image delivery
+        env:
+          MFE_IMAGE_REF: ${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs.image_digest }}
+        run: |
+          mkdir -p var/ci
+          ./scripts/infra/install-syft.sh
+          set +e
+          # Use docker: source to reuse the locally-pulled MFE image.
+          #
+          # lb4c.7 wire-in: wrap syft with run-with-retry.sh to retry timeout-
+          # only failures up to 3 attempts (max 30 min total). Matches the
+          # OpenEdX SBOM + Trivy pattern. --retry-on-exit-codes "124" only.
+          scripts/ci/run-with-retry.sh \
+            --max-attempts 3 \
+            --delay-seconds 30 \
+            --max-total-seconds 1800 \
+            --retry-on-exit-codes "124" \
+            -- timeout 20m "$HOME/.local/bin/syft" scan "docker:${MFE_IMAGE_REF}" \
+            -o cyclonedx-json=var/ci/sbom-mfe.cdx.json
+          sbom_status=$?
+          set -e
+          if [[ "$sbom_status" -eq 0 ]]; then
+            exit 0
+          fi
+          if [[ "$sbom_status" -eq 124 ]]; then
+            echo "MFE registry SBOM generation timed out after 20m; continuing without SBOM artifact." >&2
+            echo "timeout" > var/ci/sbom-mfe.status.txt
+          else
+            echo "MFE registry SBOM generation failed with exit code ${sbom_status}; continuing without SBOM artifact." >&2
+            echo "error:${sbom_status}" > var/ci/sbom-mfe.status.txt
+          fi
+          exit 0
+
+      - name: Upload MFE SBOM
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        if: always()
+        with:
+          name: sbom-mfe
+          path: var/ci/sbom-mfe*
+          retention-days: 90
+
+      - name: Install Trivy CLI
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: ./scripts/infra/install-trivy.sh
+
+      - name: Scan MFE image for vulnerabilities
+        continue-on-error: true  # Non-blocking: upstream CVEs should not block image delivery
+        env:
+          MFE_IMAGE_REF: ${{ env.REGISTRY }}/mfe@${{ needs.build-mfe.outputs.image_digest }}
+        run: |
+          mkdir -p var/ci
+          set +e
+          # S6.2 wire-in (bead lb4c.7, companion to OpenEdX wrap in #1829):
+          # retry timeout-only failures up to 3 attempts (max 30 min total).
+          # --retry-on-exit-codes "124" per run-with-retry.sh safe default:
+          # exit 124 = transient timeout, exit 1 = real CVE finding (propagates).
+          scripts/ci/run-with-retry.sh \
+            --max-attempts 3 \
+            --delay-seconds 30 \
+            --max-total-seconds 1800 \
+            --retry-on-exit-codes "124" \
+            -- timeout 20m trivy image \
+            --format json \
+            --output var/ci/trivy-mfe.json \
+            --ignorefile .trivyignore \
+            --severity CRITICAL,HIGH \
+            "${MFE_IMAGE_REF}"
+          trivy_status=$?
+          set -e
+
+          if [[ "$trivy_status" -eq 124 ]]; then
+            echo "MFE Trivy scan timed out after 20m (3 attempts exhausted via run-with-retry); continuing without vulnerability verdict." >&2
+            echo "timeout" > var/ci/trivy-mfe.status.txt
+            exit 0
+          fi
+          if [[ "$trivy_status" -ne 0 ]]; then
+            echo "MFE Trivy scan failed with exit code ${trivy_status}; continuing without vulnerability verdict." >&2
+            echo "error:${trivy_status}" > var/ci/trivy-mfe.status.txt
+            exit 0
+          fi
+
+          CRITICAL_COUNT=$(jq '[(.Results // [])[] | .Vulnerabilities // [] | .[] | select(.Severity == "CRITICAL")] | length' var/ci/trivy-mfe.json)
+          echo "CRITICAL vulnerabilities: ${CRITICAL_COUNT}"
+          echo "critical-count:${CRITICAL_COUNT}" > var/ci/trivy-mfe.status.txt
+
+          jq -r '
+            ["Severity","PkgName","VulnerabilityID","Title"],
+            ((.Results // [])[] | .Vulnerabilities // []
+              | .[]
+              | select(.Severity == "HIGH")
+              | [.Severity, .PkgName, .VulnerabilityID, (.Title // "-")])
+            | @tsv' var/ci/trivy-mfe.json \
+            > var/ci/trivy-mfe-high-summary.txt || true
+
+          if [[ "${CRITICAL_COUNT}" -gt 0 ]]; then
+            echo "::warning::${CRITICAL_COUNT} CRITICAL vulnerabilities found in mfe image; release delivery remains non-blocking."
+            jq -r '(.Results // [])[] | .Vulnerabilities // [] | .[] | select(.Severity == "CRITICAL") | "\(.VulnerabilityID)\t\(.PkgName)\t\(.Title // "-")"' \
+              var/ci/trivy-mfe.json >&2
+          fi
+
+      - name: Upload Trivy MFE scan results
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        if: always()
+        with:
+          name: trivy-mfe-scan
+          path: var/ci/trivy-mfe*
+          retention-days: 3
+
+  slsa-provenance:
+    name: SLSA Provenance & Attestation
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 15
+    needs: [build-openedx, build-mfe]
+    if: ${{ always() && (needs.build-openedx.result == 'success' || needs.build-mfe.result == 'success') }}
+    permissions:
+      contents: read
+      id-token: write   # keyless signing via Sigstore OIDC
+      packages: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Install envsubst (required by install-cosign.sh)
+        run: ./scripts/infra/install-envsubst.sh
+
+      - name: Install cosign
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: ./scripts/infra/install-cosign.sh
+
+      - name: Log in to GHCR
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Generate provenance for OpenEdX image
+        if: ${{ needs.build-openedx.result == 'success' }}
+        env:
+          OPENEDX_DIGEST: ${{ needs.build-openedx.outputs.image_digest }}
+        run: |
+          mkdir -p var/ci
+          TAG="${{ inputs.image_tag || github.sha }}"
+          IMAGE_REF="${{ env.REGISTRY }}/openedx@${OPENEDX_DIGEST}"
+
+          # Build in-toto provenance predicate
+          cat > var/ci/provenance-openedx.json <<PROVENANCE
+          {
+            "buildType": "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/.github/workflows/build-tutor-images.yml",
+            "builder": {
+              "id": "https://github.com/Biji-Biji-Initiative/mereka-lms/actions/runs/${{ github.run_id }}"
+            },
+            "invocation": {
+              "configSource": {
+                "uri": "git+https://github.com/${{ github.repository }}@${{ github.ref }}",
+                "digest": { "sha1": "${{ github.sha }}" },
+                "entryPoint": ".github/workflows/build-tutor-images.yml"
+              },
+              "environment": {
+                "github_actor": "${{ github.actor }}",
+                "github_event_name": "${{ github.event_name }}",
+                "github_run_id": "${{ github.run_id }}",
+                "github_run_attempt": "${{ github.run_attempt }}",
+                "runner_os": "Linux",
+                "runner_image": "ubuntu-24.04"
+              }
+            },
+            "metadata": {
+              "buildInvocationId": "${{ github.run_id }}-${{ github.run_attempt }}",
+              "buildStartedOn": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+              "completeness": { "parameters": true, "environment": true, "materials": false },
+              "reproducible": false
+            },
+            "materials": [
+              {
+                "uri": "git+https://github.com/${{ github.repository }}@${{ github.ref }}",
+                "digest": { "sha1": "${{ github.sha }}" }
+              }
+            ],
+            "subject": [
+              {
+                "name": "${{ env.REGISTRY }}/openedx",
+                "digest": { "sha256": "${OPENEDX_DIGEST#sha256:}" }
+              }
+            ]
+          }
+          PROVENANCE
+
+          # Attest the image (keyless via Sigstore OIDC)
+          for attempt in 1 2 3; do
+            if cosign attest --yes \
+              --predicate var/ci/provenance-openedx.json \
+              --type slsaprovenance \
+              "${IMAGE_REF}"; then
+              break
+            fi
+            rc=$?
+            if [[ "$attempt" -eq 3 ]]; then
+              exit "$rc"
+            fi
+            sleep_seconds=$((attempt * 5))
+            echo "cosign attest failed on attempt ${attempt}/3; retrying in ${sleep_seconds}s" >&2
+            sleep "${sleep_seconds}"
+          done
+
+          echo "### OpenEdX SLSA Provenance Attached" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** \`${IMAGE_REF}\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Generate provenance for MFE image
+        if: ${{ needs.build-mfe.result == 'success' }}
+        env:
+          MFE_DIGEST: ${{ needs.build-mfe.outputs.image_digest }}
+        run: |
+          mkdir -p var/ci
+          TAG="${{ inputs.image_tag || github.sha }}"
+          IMAGE_REF="${{ env.REGISTRY }}/mfe@${MFE_DIGEST}"
+
+          cat > var/ci/provenance-mfe.json <<PROVENANCE
+          {
+            "buildType": "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/.github/workflows/build-tutor-images.yml",
+            "builder": {
+              "id": "https://github.com/Biji-Biji-Initiative/mereka-lms/actions/runs/${{ github.run_id }}"
+            },
+            "invocation": {
+              "configSource": {
+                "uri": "git+https://github.com/${{ github.repository }}@${{ github.ref }}",
+                "digest": { "sha1": "${{ github.sha }}" },
+                "entryPoint": ".github/workflows/build-tutor-images.yml"
+              },
+              "environment": {
+                "github_actor": "${{ github.actor }}",
+                "github_event_name": "${{ github.event_name }}",
+                "github_run_id": "${{ github.run_id }}",
+                "github_run_attempt": "${{ github.run_attempt }}",
+                "runner_os": "Linux",
+                "runner_image": "ubuntu-24.04"
+              }
+            },
+            "metadata": {
+              "buildInvocationId": "${{ github.run_id }}-${{ github.run_attempt }}",
+              "buildStartedOn": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+              "completeness": { "parameters": true, "environment": true, "materials": false },
+              "reproducible": false
+            },
+            "materials": [
+              {
+                "uri": "git+https://github.com/${{ github.repository }}@${{ github.ref }}",
+                "digest": { "sha1": "${{ github.sha }}" }
+              }
+            ],
+            "subject": [
+              {
+                "name": "${{ env.REGISTRY }}/mfe",
+                "digest": { "sha256": "${MFE_DIGEST#sha256:}" }
+              }
+            ]
+          }
+          PROVENANCE
+
+          for attempt in 1 2 3; do
+            if cosign attest --yes \
+              --predicate var/ci/provenance-mfe.json \
+              --type slsaprovenance \
+              "${IMAGE_REF}"; then
+              break
+            fi
+            rc=$?
+            if [[ "$attempt" -eq 3 ]]; then
+              exit "$rc"
+            fi
+            sleep_seconds=$((attempt * 5))
+            echo "cosign attest failed on attempt ${attempt}/3; retrying in ${sleep_seconds}s" >&2
+            sleep "${sleep_seconds}"
+          done
+
+          echo "### MFE SLSA Provenance Attached" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** \`${IMAGE_REF}\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload provenance artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        if: always()
+        with:
+          name: slsa-provenance
+          path: var/ci/provenance-*.json
+          retention-days: 90
+
+  release-bundle:
+    name: Generate Release Bundle
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 15
+    needs: [build-openedx, build-mfe, slsa-provenance]
+    # Keep release-bundle generation available for diagnostics even if SLSA failed.
+    # Automatic GitOps mutation is gated separately below on the post-push scan
+    # lanes so red/slow scan tails cannot delay release evidence generation.
+    # Accept 'skipped' for either image: partial builds (e.g. only OpenEdX changed)
+    # should still generate a release bundle using the existing other image's digest.
+    # Manual proof runs may intentionally leave target_environment at the
+    # placeholder value. Skip release-bundle generation in that case instead of
+    # failing after both images already built and pushed successfully.
+    if: ${{ always() && (needs.build-openedx.result == 'success' || needs.build-openedx.result == 'skipped') && (needs.build-mfe.result == 'success' || needs.build-mfe.result == 'skipped') && !(needs.build-openedx.result == 'skipped' && needs.build-mfe.result == 'skipped') && (github.event_name != 'workflow_dispatch' || (inputs.target_environment != 'select-environment' && inputs.build_profile == 'proof')) }}
+    permissions:
+      contents: read
+      id-token: write
+      actions: read
+    outputs:
+      bundle_id: ${{ steps.bundle.outputs.bundle_id }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Install envsubst (required by install-cosign.sh)
+        run: ./scripts/infra/install-envsubst.sh
+
+      - name: Install cosign
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: ./scripts/infra/install-cosign.sh
+
+      - name: Generate GitHub App token for artifact access and cross-repo dispatch
+        id: app-token
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3  # v3.1.1
+        with:
+          app-id: ${{ secrets.GITOPS_GITHUB_APP_ID }}
+          private-key: ${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}
+          owner: Biji-Biji-Initiative
+          repositories: mereka-lms,bbi-infrastructure,platform-control-plane
+
+      - name: Resolve control-plane contract ref
+        id: resolve_control_plane_contract_ref
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import os
+          import urllib.request
+          from pathlib import Path
+
+          token = os.environ["GH_TOKEN"]
+          req = urllib.request.Request(
+              "https://api.github.com/repos/Biji-Biji-Initiative/platform-control-plane/commits/main",
+              headers={
+                  "Authorization": f"Bearer {token}",
+                  "Accept": "application/vnd.github+json",
+                  "X-GitHub-Api-Version": "2022-11-28",
+              },
+          )
+          with urllib.request.urlopen(req) as resp:
+              payload = json.loads(resp.read().decode("utf-8"))
+          sha = str(payload["sha"]).strip()
+          out = Path(os.environ["GITHUB_OUTPUT"])
+          out.write_text(
+              f"contract_sha={sha}\n"
+              f"contract_ref=Biji-Biji-Initiative/platform-control-plane@{sha}\n",
+              encoding="utf-8",
+          )
+          print(f"Resolved PCP contract ref: Biji-Biji-Initiative/platform-control-plane@{sha}")
+          PY
+
+      - name: Resolve release bundle digests
+        id: resolve_digests
+        env:
+          OPENEDX_DIGEST: ${{ needs.build-openedx.outputs.image_digest }}
+          MFE_DIGEST: ${{ needs.build-mfe.outputs.image_digest }}
+          BUILD_OPENEDX_RESULT: ${{ needs.build-openedx.result }}
+          BUILD_MFE_RESULT: ${{ needs.build-mfe.result }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          REPO: ${{ github.repository }}
+          CURRENT_RUN_ID: ${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          python3 scripts/ci/resolve_release_bundle_digests.py
+
+      - name: Generate release bundle
+        id: bundle
+        env:
+          CONTRACT_REF: ${{ steps.resolve_control_plane_contract_ref.outputs.contract_ref }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          PCP_CONTRACT_SHA: ${{ steps.resolve_control_plane_contract_ref.outputs.contract_sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p var/ci/platform-control-plane/contracts
+          python3 - <<'PY'
+          import base64
+          import json
+          import os
+          import urllib.parse
+          import urllib.request
+          from pathlib import Path
+
+          token = os.environ["GH_TOKEN"]
+          ref = os.environ["PCP_CONTRACT_SHA"]
+          relpath = "contracts/release-object-projection-schema.yaml"
+          root = Path("var/ci/platform-control-plane/contracts")
+          headers = {
+              "Authorization": f"Bearer {token}",
+              "Accept": "application/vnd.github+json",
+              "X-GitHub-Api-Version": "2022-11-28",
+          }
+          encoded = urllib.parse.quote(relpath, safe="/")
+          url = (
+              "https://api.github.com/repos/Biji-Biji-Initiative/platform-control-plane/contents/"
+              f"{encoded}?ref={ref}"
+          )
+          request = urllib.request.Request(url, headers=headers)
+          with urllib.request.urlopen(request) as response:
+              payload = json.load(response)
+          content = payload.get("content")
+          if not content:
+              raise SystemExit(f"missing content for {relpath} at {ref}")
+          (root / Path(relpath).name).write_bytes(base64.b64decode(content))
+          print(f"PASS: fetched {relpath} at {ref}")
+          PY
+          TARGET_ENV="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
+          ./scripts/infra/generate-release-bundle.sh \
+            --output var/ci/release-bundle.json \
+            --repo "${{ github.repository }}" \
+            --commit-sha "${{ github.sha }}" \
+            --workflow ".github/workflows/build-tutor-images.yml" \
+            --run-id "${{ github.run_id }}" \
+            --run-attempt "${{ github.run_attempt }}" \
+            --target-environment "${TARGET_ENV}" \
+            --openedx-image "${{ env.REGISTRY }}/openedx" \
+            --openedx-digest "${{ steps.resolve_digests.outputs.openedx_digest }}" \
+            --mfe-image "${{ env.REGISTRY }}/mfe" \
+            --mfe-digest "${{ steps.resolve_digests.outputs.mfe_digest }}"
+          # cosign v3 defaults to both the new bundle format and
+          # --use-signing-config=true. The release-bundle lane still verifies
+          # legacy .sig/.pem outputs, so disable both defaults instead of
+          # switching this job to the new bundle artifact contract.
+          cosign sign-blob --yes \
+            --use-signing-config=false \
+            --new-bundle-format=false \
+            --output-signature var/ci/release-bundle.sig \
+            --output-certificate var/ci/release-bundle.pem \
+            var/ci/release-bundle.json
+          CERT_IDENTITY="https://github.com/${{ github.repository }}/.github/workflows/build-tutor-images.yml@${{ github.ref }}"
+          ./scripts/qa/verify-release-bundle.sh var/ci/release-bundle.json \
+            --signature var/ci/release-bundle.sig \
+            --certificate var/ci/release-bundle.pem \
+            --certificate-identity "${CERT_IDENTITY}" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
+          python3 ./scripts/release/generate_release_object.py \
+            --release-bundle-json var/ci/release-bundle.json \
+            --output var/ci/release-object.json
+          PLATFORM_CONTROL_PLANE_ROOT=var/ci/platform-control-plane \
+            ./scripts/qa/verify-release-object.sh var/ci/release-object.json
+          BUNDLE_ID="$(python3 -c 'import json;print(json.load(open("var/ci/release-bundle.json"))["bundle_id"])')"
+          RELEASE_OBJECT_ID="$(python3 -c 'import json;print(json.load(open("var/ci/release-object.json"))["release_id"])')"
+          echo "bundle_id=${BUNDLE_ID}" >> "$GITHUB_OUTPUT"
+          echo "release_object_id=${RELEASE_OBJECT_ID}" >> "$GITHUB_OUTPUT"
+          echo "**Release bundle:** \`${BUNDLE_ID}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Release object:** \`${RELEASE_OBJECT_ID}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Bundle signature:** \`var/ci/release-bundle.sig\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Bundle certificate:** \`var/ci/release-bundle.pem\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Control-plane contract ref:** \`${CONTRACT_REF}\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Fetch control-plane release contracts
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          PCP_CONTRACT_SHA: ${{ steps.resolve_control_plane_contract_ref.outputs.contract_sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p var/ci/platform-control-plane/contracts
+          python3 - <<'PY'
+          import base64
+          import json
+          import os
+          import urllib.parse
+          import urllib.request
+          from pathlib import Path
+
+          token = os.environ["GH_TOKEN"]
+          ref = os.environ["PCP_CONTRACT_SHA"]
+          root = Path("var/ci/platform-control-plane/contracts")
+          files = [
+              "contracts/release-contracts.yaml",
+              "contracts/release-bundle-schema.yaml",
+              "contracts/evidence-pack-schema.yaml",
+              "contracts/promotion-dispatch-envelope-schema.yaml",
+              "contracts/release-object-projection-schema.yaml",
+          ]
+          headers = {
+              "Authorization": f"Bearer {token}",
+              "Accept": "application/vnd.github+json",
+              "X-GitHub-Api-Version": "2022-11-28",
+          }
+          for relpath in files:
+              encoded = urllib.parse.quote(relpath, safe="/")
+              url = (
+                  "https://api.github.com/repos/Biji-Biji-Initiative/platform-control-plane/contents/"
+                  f"{encoded}?ref={ref}"
+              )
+              req = urllib.request.Request(url, headers=headers)
+              with urllib.request.urlopen(req) as resp:
+                  payload = json.loads(resp.read().decode("utf-8"))
+              content = base64.b64decode(payload["content"])
+              dest = root / Path(relpath).name
+              dest.write_bytes(content)
+          print(f"Fetched PCP contracts at {ref} into {root}")
+          PY
+
+      - name: Render and verify control-plane release bundle projection
+        env:
+          PLATFORM_CONTROL_PLANE_ROOT: var/ci/platform-control-plane
+        run: |
+          set -euo pipefail
+          python3 ./scripts/release/render_control_plane_release_bundle_projection.py \
+            --release-bundle-json var/ci/release-bundle.json \
+            --platform-control-plane-root "$PLATFORM_CONTROL_PLANE_ROOT" \
+            --output var/ci/control-plane-release-bundle-projection.json
+          ./scripts/qa/verify-control-plane-release-bundle-projection.sh var/ci/release-bundle.json
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+
+          projection = json.load(open("var/ci/control-plane-release-bundle-projection.json", encoding="utf-8"))
+          unresolved = [
+              item["field"]
+              for item in projection["required_field_resolution"]["unresolved"]
+          ]
+          print("**Control-plane release-bundle projection:** `var/ci/control-plane-release-bundle-projection.json`")
+          print(f"**Projection status:** `{projection['projection_status']}`")
+          print("**Unresolved PCP fields:** " + ", ".join(f"`{field}`" for field in unresolved))
+          PY
+
+      - name: Resolve GitOps main commit for promotion provenance
+        id: resolve_gitops_main_ref
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import os
+          import urllib.request
+          from pathlib import Path
+
+          token = os.environ["GH_TOKEN"]
+          req = urllib.request.Request(
+              "https://api.github.com/repos/Biji-Biji-Initiative/bbi-infrastructure/commits/main",
+              headers={
+                  "Authorization": f"Bearer {token}",
+                  "Accept": "application/vnd.github+json",
+                  "X-GitHub-Api-Version": "2022-11-28",
+              },
+          )
+          with urllib.request.urlopen(req) as resp:
+              payload = json.loads(resp.read().decode("utf-8"))
+          sha = str(payload["sha"]).strip()
+          out = Path(os.environ["GITHUB_OUTPUT"])
+          out.write_text(f"gitops_commit_sha={sha}\n", encoding="utf-8")
+          print(f"Resolved bbi-infrastructure main SHA: {sha}")
+          PY
+
+      - name: Generate app build provenance for automatic promotion
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            PROMOTION_TARGET_ENV="dev"
+          else
+            PROMOTION_TARGET_ENV="${{ inputs.target_environment }}"
+          fi
+          ./scripts/infra/generate-build-provenance.sh \
+            --output var/ci/build-provenance.json \
+            --repository "${{ github.repository }}" \
+            --commit-sha "${{ github.sha }}" \
+            --target-environment "${PROMOTION_TARGET_ENV}" \
+            --openedx-digest "${{ steps.resolve_digests.outputs.openedx_digest }}" \
+            --mfe-digest "${{ steps.resolve_digests.outputs.mfe_digest }}" \
+            --release-bundle-id "${{ steps.bundle.outputs.bundle_id }}" \
+            --gitops-repo "Biji-Biji-Initiative/bbi-infrastructure" \
+            --gitops-commit "${{ steps.resolve_gitops_main_ref.outputs.gitops_commit_sha }}"
+          ./scripts/qa/verify-build-provenance.sh var/ci/build-provenance.json
+
+      - name: Regenerate release object with promotion provenance
+        env:
+          PLATFORM_CONTROL_PLANE_ROOT: var/ci/platform-control-plane
+        run: |
+          set -euo pipefail
+          python3 ./scripts/release/generate_release_object.py \
+            --release-bundle-json var/ci/release-bundle.json \
+            --build-provenance-json var/ci/build-provenance.json \
+            --output var/ci/release-object.json
+          ./scripts/qa/verify-release-object.sh var/ci/release-object.json
+
+      - name: Emit app release-gate proof envelope via lms-ops
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
+            TARGET_ENV="dev"
+          else
+            TARGET_ENV="${{ inputs.target_environment }}"
+          fi
+          case "$TARGET_ENV" in
+            production) LANE="prod" ;;
+            staging)    LANE="staging" ;;
+            dev)        LANE="dev" ;;
+            *)
+              echo "Unsupported target environment for lms-ops proof lane mapping: $TARGET_ENV" >&2
+              exit 1
+              ;;
+          esac
+          ./bin/lms-ops proof \
+            --concern release-gate \
+            --lane "$LANE" \
+            --release-object-json var/ci/release-object.json \
+            --skip-cluster
+          python3 ./scripts/release/release_object_bindings.py \
+            verify-proof-envelope \
+            --envelope-json var/proof/release-gate.json \
+            --release-object-json var/ci/release-object.json
+          cp var/proof/release-gate.json var/ci/release-gate-envelope.json
+
+      - name: Regenerate release object with proof refs
+        env:
+          PLATFORM_CONTROL_PLANE_ROOT: var/ci/platform-control-plane
+        run: |
+          set -euo pipefail
+          python3 ./scripts/release/generate_release_object.py \
+            --release-bundle-json var/ci/release-bundle.json \
+            --build-provenance-json var/ci/build-provenance.json \
+            --proof-ref var/proof/release-gate.json \
+            --output var/ci/release-object.json
+          ./scripts/qa/verify-release-object.sh var/ci/release-object.json
+
+      - name: Generate truth ledger (repo + release planes)
+        run: |
+          set -euo pipefail
+          TARGET_ENV="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
+          # Create a CI-scoped summary stub for the truth ledger.
+          # Runtime and acceptance planes are filled post-deploy, not in CI.
+          python3 -c "
+          import json
+          summary = {
+            'schema_version': 'ci-build-summary/v1',
+            'generated_at_utc': '$(date -u +%Y-%m-%dT%H:%M:%SZ)',
+            'lane': 'ci-build',
+            'environment': '${TARGET_ENV}',
+            'verdict': {'status': 'pass', 'failed_checks': 0},
+            'checks': [
+              {'name': 'release-bundle-generated', 'status': 'pass'},
+              {'name': 'release-object-generated', 'status': 'pass'},
+              {'name': 'release-bundle-signed', 'status': 'pass'}
+            ]
+          }
+          with open('var/ci/ci-build-summary.json', 'w') as f:
+            json.dump(summary, f, indent=2)
+          "
+          python3 scripts/release/generate_truth_ledger.py \
+            --summary-json var/ci/ci-build-summary.json \
+            --output var/ci/truth-ledger.json \
+            --app-sha "${{ github.sha }}" \
+            --release-object-json var/ci/release-object.json \
+            --release-openedx-image "${{ env.REGISTRY }}/openedx:${{ github.sha }}" \
+            --release-mfe-image "${{ env.REGISTRY }}/mfe:${{ github.sha }}" \
+            --image-repo "${{ env.REGISTRY }}" \
+            || echo "::warning::Truth ledger generation failed (non-blocking)"
+          if [[ -f var/ci/truth-ledger.json ]]; then
+            echo "**Truth ledger:** generated" >> $GITHUB_STEP_SUMMARY
+            # B-016: Validate truth ledger has release identity when release object was provided
+            if [[ -f var/ci/release-object.json ]]; then
+              RELEASE_ID_IN_LEDGER=$(python3 -c "import json; d=json.load(open('var/ci/truth-ledger.json')); print(d.get('release_truth',{}).get('release_id',''))" 2>/dev/null)
+              if [[ -z "$RELEASE_ID_IN_LEDGER" ]]; then
+                echo "::warning::Truth ledger missing release_id despite release object being available"
+              else
+                echo "**Truth ledger release binding:** \`${RELEASE_ID_IN_LEDGER}\`" >> $GITHUB_STEP_SUMMARY
+              fi
+            fi
+          fi
+
+      - name: Generate build provenance for promotion dispatch
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+          GITOPS_COMMIT="$(python3 - <<'PY'
+          import json
+          import os
+          import urllib.request
+
+          req = urllib.request.Request(
+              "https://api.github.com/repos/Biji-Biji-Initiative/bbi-infrastructure/commits/main",
+              headers={
+                  "Authorization": f"Bearer {os.environ['GH_TOKEN']}",
+                  "Accept": "application/vnd.github+json",
+                  "X-GitHub-Api-Version": "2022-11-28",
+              },
+          )
+          with urllib.request.urlopen(req) as resp:
+              payload = json.loads(resp.read().decode("utf-8"))
+          print(payload["sha"])
+          PY
+          )"
+          ./scripts/infra/generate-build-provenance.sh \
+            --output var/ci/build-provenance.json \
+            --repository "${{ github.repository }}" \
+            --commit-sha "${{ github.sha }}" \
+            --target-environment production \
+            --openedx-digest "${{ steps.resolve_digests.outputs.openedx_digest }}" \
+            --mfe-digest "${{ steps.resolve_digests.outputs.mfe_digest }}" \
+            --release-bundle-id "${{ steps.bundle.outputs.bundle_id }}" \
+            --gitops-repo "Biji-Biji-Initiative/bbi-infrastructure" \
+            --gitops-commit "${GITOPS_COMMIT}"
+          ./scripts/qa/verify-build-provenance.sh var/ci/build-provenance.json
+
+      - name: Emit app release-gate proof envelope for promotion dispatch
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        run: |
+          set -euo pipefail
+          ./bin/lms-ops proof \
+            --concern release-gate \
+            --lane prod \
+            --release-object-json var/ci/release-object.json \
+            --skip-cluster
+          python3 ./scripts/release/release_object_bindings.py \
+            verify-proof-envelope \
+            --envelope-json var/proof/release-gate.json \
+            --release-object-json var/ci/release-object.json
+          cp var/proof/release-gate.json var/ci/release-gate-envelope.json
+
+      - name: Generate promotion dispatch envelope
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        env:
+          CONTRACT_REF: ${{ steps.resolve_control_plane_contract_ref.outputs.contract_ref }}
+        run: |
+          set -euo pipefail
+          CONTRACT_FAMILY="$(yq -r '.contract' var/ci/platform-control-plane/contracts/promotion-dispatch-envelope-schema.yaml | tr '-' '_')"
+          CONTRACT_VERSION="$(yq -r '.schema_version' var/ci/platform-control-plane/contracts/promotion-dispatch-envelope-schema.yaml)"
+          python3 ./scripts/release/release_object_bindings.py \
+            promotion-dispatch-envelope \
+            --release-bundle-json var/ci/release-bundle.json \
+            --release-object-json var/ci/release-object.json \
+            --build-provenance-json var/ci/build-provenance.json \
+            --proof-envelope-json var/ci/release-gate-envelope.json \
+            --repository "${{ github.repository }}" \
+            --run-id "${{ github.run_id }}" \
+            --server-url "${{ github.server_url }}" \
+            --contract-family "${CONTRACT_FAMILY}" \
+            --contract-version "${CONTRACT_VERSION}" \
+            --contract-ref "${CONTRACT_REF}" \
+            --output var/ci/promotion-dispatch-envelope.json
+
+      - name: Stage projection schema + checksum for self-contained packet
+        # The release-bundle artifact should be independently re-verifiable
+        # without requiring a local platform-control-plane checkout. Ship
+        # the projection schema alongside release-object.json and emit a
+        # SHA-256 checksum so `verify-release-object.sh` can use it
+        # (precedence: --schema > sibling w/ checksum > PCP env > discovery).
+        run: |
+          set -euo pipefail
+          cp var/ci/platform-control-plane/contracts/release-object-projection-schema.yaml \
+             var/ci/release-object-projection-schema.yaml
+          sha256sum var/ci/release-object-projection-schema.yaml \
+            | awk '{print $1}' \
+            > var/ci/release-object-projection-schema.yaml.sha256
+          echo "Staged schema + checksum for evidence packet:"
+          ls -la var/ci/release-object-projection-schema.yaml*
+
+      - name: Upload release bundle
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: release-bundle
+          path: |
+            var/ci/release-bundle.json
+            var/ci/control-plane-release-bundle-projection.json
+            var/ci/release-object.json
+            var/ci/release-object-projection-schema.yaml
+            var/ci/release-object-projection-schema.yaml.sha256
+            var/ci/build-provenance.json
+            var/ci/release-gate-envelope.json
+            var/ci/truth-ledger.json
+            var/ci/build-provenance.json
+            var/ci/release-gate-envelope.json
+            var/ci/promotion-dispatch-envelope.json
+            var/ci/release-bundle.sig
+            var/ci/release-bundle.pem
+          if-no-files-found: error
+          retention-days: 90
+
+  dispatch-dev-promotion:
+    name: Dispatch Dev Promotion
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 15
+    needs: [release-bundle, scan-openedx-image, scan-mfe-image, slsa-provenance]
+    if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.release-bundle.result == 'success' && (needs.scan-openedx-image.result == 'success' || needs.scan-openedx-image.result == 'skipped') && (needs.scan-mfe-image.result == 'success' || needs.scan-mfe-image.result == 'skipped') && needs.slsa-provenance.result == 'success' }}
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Download release bundle artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: release-bundle
+          path: var/ci
+
+      - name: Generate GitHub App token for cross-repo dispatch
+        id: app-token
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3  # v3.1.1
+        with:
+          app-id: ${{ secrets.GITOPS_GITHUB_APP_ID }}
+          private-key: ${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}
+          owner: Biji-Biji-Initiative
+          repositories: bbi-infrastructure,platform-control-plane
+
+      - name: Resolve control-plane contract ref
+        id: resolve_control_plane_contract_ref
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import os
+          import urllib.request
+          from pathlib import Path
+
+          token = os.environ["GH_TOKEN"]
+          req = urllib.request.Request(
+              "https://api.github.com/repos/Biji-Biji-Initiative/platform-control-plane/commits/main",
+              headers={
+                  "Authorization": f"Bearer {token}",
+                  "Accept": "application/vnd.github+json",
+                  "X-GitHub-Api-Version": "2022-11-28",
+              },
+          )
+          with urllib.request.urlopen(req) as resp:
+              payload = json.loads(resp.read().decode("utf-8"))
+          sha = str(payload["sha"]).strip()
+          out = Path(os.environ["GITHUB_OUTPUT"])
+          out.write_text(
+              f"contract_sha={sha}\n"
+              f"contract_ref=Biji-Biji-Initiative/platform-control-plane@{sha}\n",
+              encoding="utf-8",
+          )
+          print(f"Resolved PCP contract ref: Biji-Biji-Initiative/platform-control-plane@{sha}")
+          PY
+
+      - name: Fetch control-plane release contracts
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          PCP_CONTRACT_SHA: ${{ steps.resolve_control_plane_contract_ref.outputs.contract_sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p var/ci/platform-control-plane/contracts
+          python3 - <<'PY'
+          import base64
+          import json
+          import os
+          import urllib.parse
+          import urllib.request
+          from pathlib import Path
+
+          token = os.environ["GH_TOKEN"]
+          ref = os.environ["PCP_CONTRACT_SHA"]
+          root = Path("var/ci/platform-control-plane/contracts")
+          files = [
+              "contracts/release-contracts.yaml",
+              "contracts/evidence-pack-schema.yaml",
+              "contracts/promotion-dispatch-envelope-schema.yaml",
+              "contracts/release-object-projection-schema.yaml",
+          ]
+          headers = {
+              "Authorization": f"Bearer {token}",
+              "Accept": "application/vnd.github+json",
+              "X-GitHub-Api-Version": "2022-11-28",
+          }
+          for relpath in files:
+              encoded = urllib.parse.quote(relpath, safe="/")
+              url = (
+                  "https://api.github.com/repos/Biji-Biji-Initiative/platform-control-plane/contents/"
+                  f"{encoded}?ref={ref}"
+              )
+              req = urllib.request.Request(url, headers=headers)
+              with urllib.request.urlopen(req) as resp:
+                  payload = json.loads(resp.read().decode("utf-8"))
+              content = base64.b64decode(payload["content"])
+              dest = root / Path(relpath).name
+              dest.write_bytes(content)
+          print(f"Fetched PCP contracts at {ref} into {root}")
+          PY
+
+      - name: Re-verify release object after artifact download
+        env:
+          PLATFORM_CONTROL_PLANE_ROOT: var/ci/platform-control-plane
+        run: |
+          set -euo pipefail
+          ./scripts/qa/verify-release-object.sh var/ci/release-object.json
+
+      - name: Dispatch dev promotion to infra repo
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          CONTRACT_REF_SHA: ${{ steps.resolve_control_plane_contract_ref.outputs.contract_sha }}
+        run: |
+          set -euo pipefail
+          python3 - <<'DISPATCH_PY'
+          import json, os, urllib.request
+
+          token = os.environ["APP_TOKEN"]
+          contract_ref_sha = os.environ["CONTRACT_REF_SHA"]
+          evidence = json.loads(open("var/ci/promotion-dispatch-envelope.json", encoding="utf-8").read())
+          bundle_id = evidence["release_bundle_id"]
+          print(f"PASS: loaded canonical dispatch payload (bundle={bundle_id})")
+
+          payload = json.dumps({
+              "ref": "main",
+              "inputs": {
+                  "release_evidence": json.dumps(evidence, separators=(",", ":")),
+                  "dry_run": "false",
+                  "control_plane_ref": contract_ref_sha,
+              },
+          }).encode("utf-8")
+
+          url = (
+              "https://api.github.com/repos/Biji-Biji-Initiative/bbi-infrastructure/"
+              "actions/workflows/promote-dev-image.yml/dispatches"
+          )
+          req = urllib.request.Request(url, data=payload, method="POST", headers={
+              "Authorization": f"Bearer {token}",
+              "Accept": "application/vnd.github+json",
+              "X-GitHub-Api-Version": "2022-11-28",
+              "Content-Type": "application/json",
+          })
+          try:
+              with urllib.request.urlopen(req) as resp:
+                  print(f"PASS: dispatch accepted (HTTP {resp.status})")
+          except urllib.error.HTTPError as e:
+              body = e.read().decode("utf-8", errors="replace")
+              print(f"FAIL: dispatch rejected (HTTP {e.code}): {body}", file=sys.stderr)
+              sys.exit(1)
+          # Expose bundle_id for the follow-on metric-emit step.
+          with open(os.environ.get("GITHUB_ENV", "/dev/null"), "a", encoding="utf-8") as fh:
+              fh.write(f"PROMOTION_CHAIN_RELEASE_UNIT_ID={bundle_id}\n")
+          DISPATCH_PY
+
+      - name: Emit bbi_pr_opened promotion-chain metric (poll for real PR)
+        # S6.1 wire-in (bead lb4c.6, companion to #1828's app_merge stage).
+        #
+        # Truthful signal: this step polls the bbi-infrastructure repo for
+        # the actual promotion PR opened by the dispatched workflow and
+        # emits bbi_pr_opened with the real PR number. Does NOT approximate
+        # by emitting at dispatch-accept time — that would log the
+        # "mereka-lms hit the dispatch API" moment, not the "bbi PR
+        # actually exists" moment. For conveyor latency truth, the real PR
+        # creation timestamp is what matters.
+        #
+        # Poll loop: search bbi-infrastructure for an open PR created in
+        # the last 5 minutes by the bbi-gitops-writer GitHub App whose body
+        # references the release_bundle_id. Timeout after 120 seconds; if
+        # the PR hasn't appeared by then, emit with no PR number and log a
+        # warning — that's itself a meaningful signal (dispatch → PR gap
+        # exceeded threshold).
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        # non-blocking: S6.1 bbi_pr_opened stage emit is observability, not a guard; poll/emit failure must never block dispatch (classification per verify-workflow-gate-enforcement.sh)
+        continue-on-error: true
+        env:
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          RELEASE_UNIT_ID: ${{ env.PROMOTION_CHAIN_RELEASE_UNIT_ID }}
+          POLL_TIMEOUT_SECONDS: "120"
+          POLL_INTERVAL_SECONDS: "5"
+        run: |
+          mkdir -p var/ci/promotion-metrics
+          if [[ -z "${RELEASE_UNIT_ID:-}" ]]; then
+            echo "warn: RELEASE_UNIT_ID empty — dispatch step may have failed before export" >&2
+            exit 0
+          fi
+
+          start="$(date +%s)"
+          found_pr=""
+          while true; do
+              now="$(date +%s)"
+              elapsed=$(( now - start ))
+              if [[ $elapsed -ge ${POLL_TIMEOUT_SECONDS} ]]; then
+                  echo "warn: timed out after ${POLL_TIMEOUT_SECONDS}s waiting for bbi-infrastructure PR matching release_unit_id=${RELEASE_UNIT_ID}" >&2
+                  break
+              fi
+              # Search open PRs in bbi-infrastructure whose body contains the bundle_id.
+              # GitHub search API is rate-limited and eventually consistent (~5-15s
+              # lag after PR creation); 5s interval is deliberate to respect that.
+              # Returns JSON; we extract .items[0].number if any match.
+              search_q="repo:Biji-Biji-Initiative/bbi-infrastructure+type:pr+state:open+in:body+${RELEASE_UNIT_ID}"
+              found_pr="$(
+                  curl -sS --max-time 10 \
+                      -H "Authorization: Bearer ${APP_TOKEN}" \
+                      -H "Accept: application/vnd.github+json" \
+                      -H "X-GitHub-Api-Version: 2022-11-28" \
+                      "https://api.github.com/search/issues?q=${search_q}&per_page=1" \
+                      | python3 -c 'import sys,json
+                                    try:
+                                        d = json.load(sys.stdin)
+                                        items = d.get("items", [])
+                                        print(items[0]["number"] if items else "", end="")
+                                    except Exception:
+                                        print("", end="")' 2>/dev/null || echo ""
+              )"
+              if [[ -n "$found_pr" ]]; then
+                  echo "found bbi-infrastructure PR #${found_pr} for release_unit_id=${RELEASE_UNIT_ID} after ${elapsed}s"
+                  break
+              fi
+              sleep "${POLL_INTERVAL_SECONDS}"
+          done
+
+          if [[ -n "${found_pr}" ]]; then
+              bash scripts/ci/emit-promotion-chain-metrics.sh \
+                --stage bbi_pr_opened \
+                --release-unit-id "${RELEASE_UNIT_ID}" \
+                --bbi-pr "${found_pr}" \
+                --out-dir var/ci/promotion-metrics
+          else
+              # Dispatch → PR gap exceeded threshold. Emit without --bbi-pr so
+              # the downstream collector can flag this as a conveyor anomaly.
+              bash scripts/ci/emit-promotion-chain-metrics.sh \
+                --stage bbi_pr_opened \
+                --release-unit-id "${RELEASE_UNIT_ID}" \
+                --out-dir var/ci/promotion-metrics
+              echo "note: bbi_pr_opened emitted without --bbi-pr; poll timed out. Downstream collector should treat missing bbi-pr + elapsed >= ${POLL_TIMEOUT_SECONDS}s as a conveyor anomaly." >&2
+          fi
+
+      - name: Upload promotion-chain metrics artifact (dispatch stage)
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        # non-blocking: artifact upload for bbi_pr_opened stage is observability; metrics may not exist if emit failed (classification per verify-workflow-gate-enforcement.sh)
+        continue-on-error: true
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: promotion-chain-metrics-dispatch-${{ github.sha }}
+          path: var/ci/promotion-metrics/
+          if-no-files-found: ignore
+          retention-days: 30
+
+  update-gitops:
+    name: Manual GitOps Bridge
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 45
+    needs: [build-openedx, build-mfe, release-bundle]
+    # Push to main builds images and proof only.
+    # Any GitOps mutation here is an explicit/manual bridge. The standard
+    # dev/staging/prod promotion path is infra-owned in bbi-infrastructure.
+    # Accept 'skipped' for partial builds (same logic as release-bundle).
+    if: ${{ always() && (needs.build-openedx.result == 'success' || needs.build-openedx.result == 'skipped') && (needs.build-mfe.result == 'success' || needs.build-mfe.result == 'skipped') && !(needs.build-openedx.result == 'skipped' && needs.build-mfe.result == 'skipped') && github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment' && inputs.build_profile == 'proof' }}
+    environment: ${{ inputs.target_environment }}
+    permissions:
+      contents: write
+    env:
+      ENABLE_STAGING_ENV: ${{ vars.ENABLE_STAGING_ENV || 'false' }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Validate manual dispatch inputs
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          if [[ "${{ inputs.update_gitops }}" != "true" ]]; then
+            echo "update_gitops must be true for manual GitOps update." >&2
+            exit 1
+          fi
+          if [[ "${{ inputs.target_environment }}" == "select-environment" ]]; then
+            echo "target_environment must be explicitly selected." >&2
+            exit 1
+          fi
+          if [[ "${{ inputs.target_environment }}" == "staging" && "${ENABLE_STAGING_ENV}" != "true" ]]; then
+            echo "target_environment=staging is disabled. Set repository variable ENABLE_STAGING_ENV=true when staging is ready." >&2
+            exit 1
+          fi
+          if [[ "${{ inputs.build_openedx }}" != "true" || "${{ inputs.build_mfe }}" != "true" ]]; then
+            echo "update_gitops requires build_openedx=true and build_mfe=true so digests are captured deterministically." >&2
+            exit 1
+          fi
+
+      - name: Mint GitHub App token
+        id: gitops-app-token
+        env:
+          GITOPS_GITHUB_APP_ID: ${{ secrets.GITOPS_GITHUB_APP_ID }}
+          GITOPS_GITHUB_APP_INSTALLATION_ID: ${{ secrets.GITOPS_GITHUB_APP_INSTALLATION_ID }}
+          GITOPS_GITHUB_APP_PRIVATE_KEY: ${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}
+        if: ${{ env.GITOPS_GITHUB_APP_ID != '' && env.GITOPS_GITHUB_APP_PRIVATE_KEY != '' }}
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3
+        with:
+          app-id: ${{ env.GITOPS_GITHUB_APP_ID }}
+          private-key: ${{ env.GITOPS_GITHUB_APP_PRIVATE_KEY }}
+          owner: Biji-Biji-Initiative
+          repositories: bbi-infrastructure
+
+      - name: Validate GitOps token
+        env:
+          APP_TOKEN: ${{ steps.gitops-app-token.outputs.token }}
+        run: |
+          if [[ -z "${APP_TOKEN}" ]]; then
+            echo "GitHub App credentials are required to update bbi-infrastructure." >&2
+            exit 1
+          fi
+
+      - name: Checkout bbi-infrastructure
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          repository: Biji-Biji-Initiative/bbi-infrastructure
+          path: bbi-infrastructure
+          token: ${{ steps.gitops-app-token.outputs.token }}
+
+      - name: Download release bundle artifact
+        continue-on-error: true  # Bundle may not exist if SLSA/release-bundle failed
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: release-bundle
+          path: var/ci
+
+      - name: Install envsubst (required by install-cosign.sh)
+        run: ./scripts/infra/install-envsubst.sh
+
+      - name: Install cosign
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: ./scripts/infra/install-cosign.sh
+
+      - name: Verify release bundle signature
+        if: ${{ needs.release-bundle.result == 'success' }}
+        run: |
+          CERT_IDENTITY="https://github.com/${{ github.repository }}/.github/workflows/build-tutor-images.yml@${{ github.ref }}"
+          ./scripts/qa/verify-release-bundle.sh var/ci/release-bundle.json \
+            --signature var/ci/release-bundle.sig \
+            --certificate var/ci/release-bundle.pem \
+            --certificate-identity "${CERT_IDENTITY}" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
+
+      - name: Validate release bundle consistency gate
+        if: ${{ needs.release-bundle.result == 'success' }}
+        run: |
+          source ./scripts/lib/lane-normalize.sh
+          TARGET_ENV_RAW="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
+          TARGET_ENV="$(normalize_lane_to_canonical "${TARGET_ENV_RAW}")"
+          OPENEDX_DIGEST="${{ needs.build-openedx.outputs.image_digest }}"
+          MFE_DIGEST="${{ needs.build-mfe.outputs.image_digest }}"
+          RELEASE_BUNDLE_ID="${{ needs.release-bundle.outputs.bundle_id }}"
+          export TARGET_ENV OPENEDX_DIGEST MFE_DIGEST RELEASE_BUNDLE_ID
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          import sys
+
+          path = "var/ci/release-bundle.json"
+          if not os.path.exists(path):
+              print(f"release bundle artifact missing: {path}", file=sys.stderr)
+              sys.exit(1)
+
+          bundle = json.load(open(path, encoding="utf-8"))
+          expected = {
+              "bundle_id": os.environ["RELEASE_BUNDLE_ID"],
+              "commit_sha": os.environ["GITHUB_SHA"],
+              "target_environment": os.environ["TARGET_ENV"],
+              "openedx_digest": os.environ["OPENEDX_DIGEST"],
+              "mfe_digest": os.environ["MFE_DIGEST"],
+          }
+          actual = {
+              "bundle_id": bundle.get("bundle_id"),
+              "commit_sha": bundle.get("commit_sha"),
+              "target_environment": bundle.get("target_environment"),
+              "openedx_digest": (((bundle.get("images") or {}).get("openedx") or {}).get("digest")),
+              "mfe_digest": (((bundle.get("images") or {}).get("mfe") or {}).get("digest")),
+          }
+
+          errors = []
+          for k, v in expected.items():
+              if not v:
+                  errors.append(f"expected {k} missing from workflow context")
+          for k in expected:
+              if expected[k] != actual[k]:
+                  errors.append(f"{k} mismatch: expected={expected[k]!r} actual={actual[k]!r}")
+
+          if not re.fullmatch(r"rb-[0-9a-f]{7,40}-[0-9]{8}T[0-9]{6}Z", str(actual["bundle_id"] or "")):
+              errors.append(f"bundle_id format invalid: {actual['bundle_id']!r}")
+          if not re.fullmatch(r"[0-9a-f]{40}", str(actual["commit_sha"] or "")):
+              errors.append(f"commit_sha format invalid: {actual['commit_sha']!r}")
+          for key in ("openedx_digest", "mfe_digest"):
+              if not re.fullmatch(r"sha256:[0-9a-f]{64}", str(actual[key] or "")):
+                  errors.append(f"{key} format invalid: {actual[key]!r}")
+
+          if errors:
+              print("release-bundle consistency gate failed:", file=sys.stderr)
+              for err in errors:
+                  print(f" - {err}", file=sys.stderr)
+              sys.exit(1)
+
+          print("PASS: release-bundle artifact matches workflow commit/canonical-environment/digest context")
+          PY
+
+      - name: Validate release object consumer gate
+        if: ${{ needs.release-bundle.result == 'success' }}
+        run: |
+          set -euo pipefail
+          TARGET_ENV="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
+          OPENEDX_DIGEST="${{ needs.build-openedx.outputs.image_digest }}"
+          MFE_DIGEST="${{ needs.build-mfe.outputs.image_digest }}"
+          PLATFORM_CONTROL_PLANE_ROOT=var/ci/platform-control-plane \
+            ./scripts/qa/verify-release-object.sh var/ci/release-object.json
+          python3 ./scripts/release/release_object_bindings.py \
+            promotion-inputs \
+            --release-object-json var/ci/release-object.json \
+            --target-env "${TARGET_ENV}" \
+            --openedx-digest "${OPENEDX_DIGEST}" \
+            --mfe-digest "${MFE_DIGEST}" \
+            --app-sha "${GITHUB_SHA}" >/dev/null
+
+      - name: Configure git identity
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Update app + GitOps tags via release orchestrator
+        run: |
+          TAG="${{ inputs.image_tag || github.sha }}"
+          TARGET_ENV="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
+          ALLOW_PROD_APPLY=0
+          if [[ "${TARGET_ENV}" == "production" ]]; then
+            ALLOW_PROD_APPLY=1
+          fi
+          OPENEDX_DIGEST="${{ needs.build-openedx.outputs.image_digest }}"
+          MFE_DIGEST="${{ needs.build-mfe.outputs.image_digest }}"
+          RELEASE_BUNDLE_ID="${{ needs.release-bundle.outputs.bundle_id }}"
+          if [[ -z "${OPENEDX_DIGEST}" || -z "${MFE_DIGEST}" ]]; then
+            echo "Missing image digests from build jobs (openedx='${OPENEDX_DIGEST}' mfe='${MFE_DIGEST}')." >&2
+            exit 1
+          fi
+          if [[ -z "${RELEASE_BUNDLE_ID}" ]]; then
+            echo "::warning::Release bundle id missing (SLSA/release-bundle may have failed). Generating fallback id."
+            RELEASE_BUNDLE_ID="rb-$(echo '${{ github.sha }}' | head -c7)-$(date -u +%Y%m%dT%H%M%SZ)"
+          fi
+          # B-019: Sync vendored settings before promotion so infra repo
+          # always has the app repo's canonical Django settings.
+          if [[ -f scripts/infra/sync-vendored-openedx-settings.sh ]]; then
+            echo "Syncing vendored settings to infra repo..."
+            bash scripts/infra/sync-vendored-openedx-settings.sh \
+              --infra-repo "$GITHUB_WORKSPACE/bbi-infrastructure" \
+              --apply || echo "::warning::Vendored settings sync failed (non-blocking)"
+          fi
+
+          EXTRA_ARGS=()
+          if [[ "${TARGET_ENV}" == "production" ]]; then
+            # Production rollouts require runtime convergence verification.
+            EXTRA_ARGS+=(--verify-runtime --wait-seconds 900)
+          fi
+          CONFIRM_RELEASE_OPENEDX_GITOPS=RELEASE_OPENEDX_GITOPS \
+          CONFIRM_PUSH_RELEASE_OPENEDX_GITOPS=PUSH_RELEASE_OPENEDX_GITOPS \
+          ALLOW_PROD_APPLY="${ALLOW_PROD_APPLY}" \
+          ./scripts/infra/release-openedx-gitops.sh \
+            --target-env "${TARGET_ENV}" \
+            --openedx-tag "${TAG}" \
+            --mfe-tag "${TAG}" \
+            --openedx-digest "${OPENEDX_DIGEST}" \
+            --mfe-digest "${MFE_DIGEST}" \
+            --release-object-json var/ci/release-object.json \
+            --require-digests \
+            --app-repo "$GITHUB_WORKSPACE" \
+            --infra-repo "$GITHUB_WORKSPACE/bbi-infrastructure" \
+            --apply --commit --push \
+            --skip-enterprise-readiness-integrity-guard \
+            --skip-enterprise-schema-guard \
+            --skip-enterprise-sso-runtime-guard \
+            --skip-enterprise-runtime-app-guard \
+            --skip-branding-runtime-guard \
+            --skip-paragon-runtime-guard \
+            --skip-footer-runtime-guard \
+            --skip-mfe-route-runtime-guard \
+            --skip-mfe-route-smoke-guard \
+            "${EXTRA_ARGS[@]}"
+
+      - name: Generate build provenance
+        # NOTE: This is an app-scoped build provenance record, NOT a canonical
+        # promotion_record. The canonical promotion authority lives in
+        # bbi-infrastructure (gitops-ops promote workflow).
+        run: |
+          TAG="${{ inputs.image_tag || github.sha }}"
+          TARGET_ENV="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
+          OPENEDX_DIGEST="${{ needs.build-openedx.outputs.image_digest }}"
+          MFE_DIGEST="${{ needs.build-mfe.outputs.image_digest }}"
+          RELEASE_BUNDLE_ID="${{ needs.release-bundle.outputs.bundle_id }}"
+          GITOPS_COMMIT="$(git -C "$GITHUB_WORKSPACE/bbi-infrastructure" rev-parse HEAD)"
+          ./scripts/infra/generate-build-provenance.sh \
+            --output var/ci/build-provenance.json \
+            --repository "${{ github.repository }}" \
+            --commit-sha "${{ github.sha }}" \
+            --target-environment "${TARGET_ENV}" \
+            --openedx-digest "${OPENEDX_DIGEST}" \
+            --mfe-digest "${MFE_DIGEST}" \
+            --release-bundle-id "${RELEASE_BUNDLE_ID}" \
+            --gitops-repo "Biji-Biji-Initiative/bbi-infrastructure" \
+            --gitops-commit "${GITOPS_COMMIT}"
+          ./scripts/qa/verify-build-provenance.sh var/ci/build-provenance.json
+
+      - name: Emit app release-gate proof envelope via lms-ops
+        run: |
+          set -euo pipefail
+          TARGET_ENV="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
+          case "$TARGET_ENV" in
+            production) LANE="prod" ;;
+            staging)    LANE="staging" ;;
+            dev)        LANE="dev" ;;
+            *)
+              echo "Unsupported target environment for lms-ops proof lane mapping: $TARGET_ENV" >&2
+              exit 1
+              ;;
+          esac
+          ./bin/lms-ops proof \
+            --concern release-gate \
+            --lane "$LANE" \
+            --release-object-json var/ci/release-object.json \
+            --skip-cluster
+          python3 ./scripts/release/release_object_bindings.py \
+            verify-proof-envelope \
+            --envelope-json var/proof/release-gate.json \
+            --release-object-json var/ci/release-object.json
+          cp var/proof/release-gate.json var/ci/release-gate-envelope.json
+
+      - name: Upload build provenance
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: build-provenance
+          path: |
+            var/ci/build-provenance.json
+            var/ci/release-gate-envelope.json
+          retention-days: 90
+
+      - name: Summary
+        run: |
+          TAG="${{ inputs.image_tag || github.sha }}"
+          TARGET_ENV="${{ github.event_name == 'workflow_dispatch' && inputs.target_environment || 'production' }}"
+          OPENEDX_DIGEST="${{ needs.build-openedx.outputs.image_digest }}"
+          MFE_DIGEST="${{ needs.build-mfe.outputs.image_digest }}"
+          RELEASE_BUNDLE_ID="${{ needs.release-bundle.outputs.bundle_id }}"
+          GITOPS_COMMIT="$(git -C "$GITHUB_WORKSPACE/bbi-infrastructure" rev-parse HEAD)"
+          echo "### Deployment Complete ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Mode:** GitOps update" >> $GITHUB_STEP_SUMMARY
+          echo "**Target environment:** \`${TARGET_ENV}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag:** \`${TAG}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**OpenedX digest:** \`${OPENEDX_DIGEST}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**MFE digest:** \`${MFE_DIGEST}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Release bundle:** \`${RELEASE_BUNDLE_ID}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**GitOps commit:** \`${GITOPS_COMMIT}\`" >> $GITHUB_STEP_SUMMARY

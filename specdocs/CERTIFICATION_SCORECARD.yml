@@ -1,0 +1,92 @@
+# Certification Scorecard — Mereka LMS
+# Defines minimum coverage requirements by priority tier.
+#
+# Tiers are based on IMPLEMENTATION_ORDER.md:
+#   Tier 1: Foundation (already deployed, must maintain)
+#   Tier 2: Core services (deployed or in progress)
+#   Tier 3: Extended platform
+#   Tier 4: Enterprise features
+#   Tier 5: Future features
+#
+# Coverage = (ACs with at least one automated|manual|monitoring verification) / total ACs
+
+version: 1
+
+tiers:
+  P0:
+    description: "Production-critical, deployed specs (Tiers 1-2)"
+    min_coverage: 80
+    require_testmap: true
+    require_all_acs_mapped: false  # Aspirational
+    specs:
+      - "repository-structure_spec.md"
+      - "secrets-management_spec.md"
+      - "k8s-deployment_spec.md"
+      - "tutor-configuration_spec.md"
+      - "mongodb-atlas-integration_spec.md"
+      - "multi-site-domains_spec.md"
+      - "branding-system_spec.md"
+      - "forum-service-migration_spec.md"
+      - "observability-stack_spec.md"
+      - "ci-cd-pipeline_spec.md"
+      - "cross-cutting-requirements_spec.md"
+      - "tutor-configuration-resilience_spec.md"
+
+  P1:
+    description: "Active development specs (Tiers 3-4)"
+    min_coverage: 50
+    require_testmap: true
+    require_all_acs_mapped: false
+    specs:
+      - "auth-sso-enterprise_spec.md"
+      - "ecommerce-purchase-gateway_spec.md"
+      - "enterprise-microservices_spec.md"
+      - "multi-tenancy-architecture_spec.md"
+      - "platform-middleware-custom-apps_spec.md"
+      - "slo-sla-service-level-management_spec.md"
+      - "disaster-recovery-business-continuity_spec.md"
+      - "data-migrations-kajabi-mct_spec.md"
+      - "design-tokens-system_spec.md"
+      - "external-registration-hubspot_spec.md"
+      - "analytics-pipeline_spec.md"
+
+  P2:
+    description: "Future/planned specs (Tier 5)"
+    min_coverage: 0
+    require_testmap: true
+    require_all_acs_mapped: false
+    specs:
+      - "email-notifications-pipeline_spec.md"
+      - "content-libraries-v2_spec.md"
+      - "video-pipeline-delivery_spec.md"
+      - "proposals/mobile-apps-enterprise_spec.md"
+      - "proposals/mobile-apps-secrets-management_spec.md"
+      - "data-privacy-gdpr-compliance_spec.md"
+      - "proctoring-integration_spec.md"
+      - "badges-credentials-enterprise_spec.md"
+      - "advanced-assessment-xqueue_spec.md"
+      - "observability-validation-requirements_spec.md"
+      - "github-actions-cost-monitoring_spec.md"
+
+release_gates:
+  pr_merge:
+    checks:
+      - "lint-specs"         # SPEC-FM, SPEC-SEC, MEREKA-* rules
+      - "validate-testmaps"  # TESTMAP-* rules
+    blocking: true
+
+  main_merge:
+    checks:
+      - "lint-specs"
+      - "validate-testmaps"
+      - "spec-coverage"      # P0 specs must meet 80% threshold
+      - "spec-verify"        # @covers annotations must resolve
+    blocking: true
+
+  release:
+    checks:
+      - "all main_merge checks"
+      - "P0 specs at ≥80% coverage"
+      - "P1 specs at ≥50% coverage"
+      - "No P0 specs with unmapped critical ACs"
+    blocking: false  # Advisory for now, will become blocking

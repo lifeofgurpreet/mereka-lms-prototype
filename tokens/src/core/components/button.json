@@ -1,0 +1,16 @@
+{
+  "button": {
+    "border-radius": {
+      "value": "{global.radius.full}"
+    },
+    "bg-primary": {
+      "value": "{alias.color.primary}"
+    },
+    "text-primary": {
+      "value": "{global.color.white}"
+    },
+    "shadow-primary": {
+      "value": "{global.shadow.md}"
+    }
+  }
+}

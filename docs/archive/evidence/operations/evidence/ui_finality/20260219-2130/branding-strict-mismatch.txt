@@ -1,0 +1,348 @@
+rke2 block confirmed and branding strict mismatch recheck
+
+Timestamp: 2026-02-19T21:30:00Z
+Commands: BRANDING_LEVEL=deep ./scripts/branding/run-branding-gates.sh prod; STRICT_MFE_BRANDING_REV=1 ./scripts/branding/run-branding-gates.sh prod; ./scripts/qa/verify-public-branding.sh prod; ./scripts/qa/audit-branding-surfaces.sh prod
+
+--- strict_mfe ---
+==> Source gate: verify-branding-health (deep)
+Verifying Mereka branding health...
+
+1. Logo + template checks...
+Verifying Mereka Academy logo setup...
+
+1. Checking source logo files in assets/branding/...
+  ✓ logo-horizontal.png exists
+  ✓ logo-horizontal-white.png exists
+  ✓ logo-square.png exists
+
+2. Checking logo files in theme directories...
+  Checking common/static/images...
+    ✓ logo-horizontal.png
+    ✓ logo-horizontal-white.png
+    ✓ logo-square.png
+  Checking mfe/images...
+    ✓ logo-horizontal.png
+    ✓ logo-horizontal-white.png
+    ✓ logo-square.png
+  Checking lms/static/images...
+    ✓ logo-horizontal.png
+    ✓ logo-horizontal-white.png
+    ✓ logo-square.png
+  Checking cms/static/images...
+    ✓ logo-horizontal.png
+    ✓ logo-horizontal-white.png
+    ✓ logo-square.png
+
+3. Checking MFE_CONFIG logo URLs in LMS settings...
+  ✓ LOGO_URL points to logo-horizontal.png
+  ✓ LOGO_WHITE_URL points to logo-horizontal-white.png
+
+4. Checking footer template references...
+  ✓ Footer template references logo.png
+  ✓ Header brand template references logo.png
+
+✓ All logo files and configurations are in place!
+
+Next steps:
+  1. Apply Tutor patches: ./infrastructure/tutor/apply-patches.sh
+  2. Rebuild images: tutor images build openedx && tutor images build mfe
+  3. Restart services: tutor local restart (or kubectl rollout restart)
+  4. Run collectstatic: tutor local run lms ./manage.py lms collectstatic --noinput
+
+2. Font assets...
+  ✓ Source font Poppins-Regular.woff2
+  ✓ Theme font Poppins-Regular.woff2
+  ✓ LMS font Poppins-Regular.woff2
+  ✓ CMS font Poppins-Regular.woff2
+  ✓ MFE font Poppins-Regular.woff2
+  ✓ Source font Poppins-SemiBold.woff2
+  ✓ Theme font Poppins-SemiBold.woff2
+  ✓ LMS font Poppins-SemiBold.woff2
+  ✓ CMS font Poppins-SemiBold.woff2
+  ✓ MFE font Poppins-SemiBold.woff2
+  ✓ Source font Poppins-Bold.woff2
+  ✓ Theme font Poppins-Bold.woff2
+  ✓ LMS font Poppins-Bold.woff2
+  ✓ CMS font Poppins-Bold.woff2
+  ✓ MFE font Poppins-Bold.woff2
+  ✓ Source font Lato-Regular.woff2
+  ✓ Theme font Lato-Regular.woff2
+  ✓ LMS font Lato-Regular.woff2
+  ✓ CMS font Lato-Regular.woff2
+  ✓ MFE font Lato-Regular.woff2
+  ✓ Source font Lato-Italic.woff2
+  ✓ Theme font Lato-Italic.woff2
+  ✓ LMS font Lato-Italic.woff2
+  ✓ CMS font Lato-Italic.woff2
+  ✓ MFE font Lato-Italic.woff2
+  ✓ Source font Lato-Bold.woff2
+  ✓ Theme font Lato-Bold.woff2
+  ✓ LMS font Lato-Bold.woff2
+  ✓ CMS font Lato-Bold.woff2
+  ✓ MFE font Lato-Bold.woff2
+  ✓ Source font Lato-BoldItalic.woff2
+  ✓ Theme font Lato-BoldItalic.woff2
+  ✓ LMS font Lato-BoldItalic.woff2
+  ✓ CMS font Lato-BoldItalic.woff2
+  ✓ MFE font Lato-BoldItalic.woff2
+  ✓ Source font Lato-Black.woff2
+  ✓ Theme font Lato-Black.woff2
+  ✓ LMS font Lato-Black.woff2
+  ✓ CMS font Lato-Black.woff2
+  ✓ MFE font Lato-Black.woff2
+  ✓ Source font Lato-BlackItalic.woff2
+  ✓ Theme font Lato-BlackItalic.woff2
+  ✓ LMS font Lato-BlackItalic.woff2
+  ✓ CMS font Lato-BlackItalic.woff2
+  ✓ MFE font Lato-BlackItalic.woff2
+
+3. Core SCSS wiring...
+  ✓ Shared tokens
+  ✓ Shared fonts
+  ✓ Theme imports fonts
+  ✓ Theme imports tokens
+  ✓ LMS theme imports shared tokens
+  ✓ CMS theme imports shared tokens
+  ✓ CMS runtime overrides CSS
+  ✓ CMS head-extra links runtime overrides
+  ✓ MFE theme sets font path
+  ✓ MFE theme imports shared tokens
+  ✓ MFE theme exports branding revision marker
+  ✓ MFE theme styles Paragon card
+  ✓ MFE theme styles Paragon alert
+  ✓ MFE theme styles Paragon modal
+  ✓ MFE theme targets authn surfaces
+  ✓ MFE theme styles auth card header gradient
+  ✓ MFE theme targets account/settings surfaces
+  ✓ MFE theme targets learner dashboard surfaces
+  ✓ MFE learner dashboard status pill styling
+  ✓ MFE theme targets discussions surfaces
+  ✓ MFE discussions links styled to brand tokens
+  ✓ Caddy ecommerce root landing is branded
+
+3.25 Token drift (design system)...
+✓ Token drift + provenance checks passed.
+
+3.5 Runtime override CSS...
+Verifying runtime override CSS...
+Branding level: deep
+
+  ✓ Common overrides CSS
+  ✓ LMS overrides CSS
+  ✓ CMS overrides CSS
+  ✓ Common/LMS overrides are identical
+  ✓ Common/CMS overrides are identical
+
+Required brand signals...
+  ✓ Has font-face Poppins
+  ✓ Has font-face Lato
+  ✓ Exports branding revision marker
+  ✓ Exports token --mereka-color-teal
+  ✓ Exports token --mereka-color-magenta
+  ✓ Exports token --mereka-font-body
+  ✓ Exports Paragon token --pgn-color-primary
+  ✓ Footer styles present
+  ✓ Footer logo size cap present
+  ✓ Footer logo width is constrained
+
+Deep surface signals...
+  ✓ Course listing styling present
+  ✓ Courseware styling present
+  ✓ Sequence nav styling present
+  ✓ XBlock styling present
+  ✓ XBlock discussion styling present
+  ✓ XBlock video styling present
+  ✓ Dashboard notice styling present
+  ✓ Studio wrapper styling present
+  ✓ Studio create-course CTA styling present
+  ✓ Studio create-library CTA styling present
+  ✓ Studio outline card styling present
+  ✓ Studio outline title typography present
+  ✓ Studio outline action pill styling present
+  ✓ Studio add-component CTA styling present
+
+✓ Runtime override CSS checks passed.
+
+4. Required branding assets...
+  ✓ Canonical logo.png
+  ✓ Canonical favicon.ico
+  ✓ Canonical favicon.svg
+  ✓ Favicon 16x16
+  ✓ Favicon 32x32
+  ✓ Favicon 256x256
+  ✓ Design tokens (tokens.css)
+  ✓ Theme design tokens copy
+  ✓ LMS logo.png
+
+✓ Branding health check passed.
+==> Source gate: verify-mfe-build-prereqs
+Verifying MFE build prerequisites...
+
+1. Patch source contract...
+  ✓ apply-patches has plugin dependency function
+  ✓ apply-patches injects plugin dependency line
+  ✓ apply-patches normalizes legacy plugin line
+  ✓ apply-patches invokes plugin dependency function
+
+2. Generated Dockerfile contract...
+  ✓ generated Dockerfile uses Node 18 image
+  ✓ generated Dockerfile contains plugin install line
+  ✓ generated Dockerfile plugin install occurrences: 12
+  ✓ generated Dockerfile has no legacy plugin install line
+
+✓ MFE build prerequisites check passed.
+==> Source gate: verify-studio-authoring-branding (source-only)
+Verifying Studio authoring branding (prod)...
+✓ Source has create-course CTA selectors
+✓ Source has create-library CTA selectors
+✓ Source has outline panel selectors
+✓ Source has add-component CTA selectors
+✓ Source exports Mereka tokens for Studio
+Skipping live checks (--source-only).
+Studio authoring branding verification complete: failures=0
+==> Live gate: public-health-check (prod)
+Running 18 checks for prod...
+✓ https://academyv2.mereka.io/ (200)
+✓ https://preview.academyv2.mereka.io/ (200)
+✓ https://studio.academyv2.mereka.io/ (200)
+✓ https://apps.academyv2.mereka.io/authn/login (200)
+✓ https://apps.academyv2.mereka.io/account/ (200)
+✓ https://apps.academyv2.mereka.io/account/settings (302)
+✓ https://apps.academyv2.mereka.io/learner-dashboard/ (200)
+✓ https://discovery.academyv2.mereka.io/health/ (200)
+✓ https://ecommerce.academyv2.mereka.io/dashboard/ (200)
+✓ https://ecommerce.academyv2.mereka.io/api/v2/webhooks/stripe/ (405)
+✓ https://credentials.academyv2.mereka.io/health/ (200)
+✓ https://notes.academyv2.mereka.io/ (200)
+✓ https://forum.academyv2.mereka.io/heartbeat (200)
+✓ https://skillourfuture.academy.mereka.io/ (200)
+✓ https://academy.biji-biji.com/ (200)
+✓ https://studio.academy.biji-biji.com/ (200)
+✓ https://apps.academy.biji-biji.com/authn/login (200)
+✓ https://apps.academy.biji-biji.com/api/mfe_config/v1 (200)
+Running certificate SAN checks...
+✓ academyv2.mereka.io: SAN OK
+✓ preview.academyv2.mereka.io: SAN OK
+✓ studio.academyv2.mereka.io: SAN OK
+✓ apps.academyv2.mereka.io: SAN OK
+✓ admin.academyv2.mereka.io: SAN OK
+✓ enterprise.academyv2.mereka.io: SAN OK
+✓ discovery.academyv2.mereka.io: SAN OK
+✓ ecommerce.academyv2.mereka.io: SAN OK
+✓ notes.academyv2.mereka.io: SAN OK
+✓ credentials.academyv2.mereka.io: SAN OK
+✓ forum.academyv2.mereka.io: SAN OK
+✓ skillourfuture.academy.mereka.io: SAN OK
+✓ academy.biji-biji.com: SAN OK (wildcard)
+All certificate checks passed.
+Running branding checks...
+Branding verification (prod) for academyv2.mereka.io...
+Branding level: core
+
+✓ LMS homepage includes 'Mereka Academy'
+✓ Studio page includes 'Mereka'
+✓ MFE login reachable (200)
+✓ MFE auth page serves authn bundle shell
+✓ MFE config exposes Mereka site + logo branding
+✓ Logo asset (logo.png) (200 via https://academyv2.mereka.io/theming/asset/mereka/images/logo.png, 50285 bytes)
+✓ Logo asset (logo-horizontal.png) (200 via https://academyv2.mereka.io/theming/asset/mereka/images/logo-horizontal.png, 25753 bytes)
+✓ Favicon asset (favicon.ico) (200 via https://academyv2.mereka.io/theming/asset/mereka/images/favicon.ico, 31842 bytes)
+✓ Homepage uses local brand fonts (no Google fonts) (override CSS wiring)
+✓ Studio uses themed CSS tokens/fonts (no Google fonts)
+✓ Studio uses themed CSS tokens/fonts (no Google fonts) (studio-main-v1 has no Google fonts)
+✓ Homepage logo matches brand assets
+✓ Forum heartbeat (200)
+✓ Forum root reachable without auth (200)
+✓ Ecommerce root landing is branded
+✓ Ecommerce dashboard reachable (200)
+✓ Ecommerce dashboard uses authn shell
+✓ Credentials root landing is branded
+✓ Credentials admin login reachable (200)
+✓ Credentials health payload includes status fields
+✓ Credentials admin login reachable (200)
+✓ Credentials admin login uses authn shell
+✓ Microsite academy.biji-biji.com reachable (200)
+✓ Microsite academy.biji-biji.com uses local brand fonts (no Google fonts) (override CSS wiring)
+✓ Microsite academy.biji-biji.com logo matches brand assets
+✓ Microsite skillourfuture.academy.mereka.io reachable (200)
+✓ Microsite skillourfuture.academy.mereka.io uses local brand fonts (no Google fonts) (override CSS wiring)
+✓ Microsite skillourfuture.academy.mereka.io logo matches brand assets
+✓ MFE login reachable (200)
+✓ MFE auth page serves authn bundle shell
+✓ MFE config exposes Mereka site + logo branding
+✓ Biji Studio uses themed CSS tokens/fonts (no Google fonts)
+✓ Biji Studio uses themed CSS tokens/fonts (no Google fonts) (studio-main-v1 has no Google fonts)
+
+
+--- verify_public ---
+Branding verification (prod) for academyv2.mereka.io...
+Branding level: core
+
+✓ LMS homepage includes 'Mereka Academy'
+✓ Studio page includes 'Mereka'
+✓ MFE login reachable (200)
+✓ MFE auth page serves authn bundle shell
+✓ MFE auth CSS includes Mereka branding markers (revision differs from local source)
+✓ MFE config exposes Mereka site + logo branding
+✓ Logo asset (logo.png) (200 via https://academyv2.mereka.io/theming/asset/mereka/images/logo.png, 50285 bytes)
+✓ Logo asset (logo-horizontal.png) (200 via https://academyv2.mereka.io/theming/asset/mereka/images/logo-horizontal.png, 25753 bytes)
+✓ Favicon asset (favicon.ico) (200 via https://academyv2.mereka.io/theming/asset/mereka/images/favicon.ico, 31842 bytes)
+✓ Homepage uses local brand fonts (no Google fonts) (override CSS wiring)
+✓ Studio uses themed CSS tokens/fonts (no Google fonts)
+✓ Studio uses themed CSS tokens/fonts (no Google fonts) (studio-main-v1 has no Google fonts)
+✓ Homepage logo matches brand assets
+✓ Forum heartbeat (200)
+✓ Forum root reachable without auth (200)
+✓ Ecommerce root landing is branded
+✓ Ecommerce dashboard reachable (200)
+✓ Ecommerce dashboard uses authn shell
+✓ Ecommerce dashboard authn CSS includes Mereka branding markers (revision differs from local source)
+✓ Credentials root landing is branded
+✓ Credentials admin login reachable (200)
+✓ Credentials health payload includes status fields
+✓ Credentials admin login reachable (200)
+✓ Credentials admin login uses authn shell
+✓ Credentials admin login authn CSS includes Mereka branding markers (revision differs from local source)
+✓ Microsite academy.biji-biji.com reachable (200)
+✓ Microsite academy.biji-biji.com uses local brand fonts (no Google fonts) (override CSS wiring)
+✓ Microsite academy.biji-biji.com logo matches brand assets
+✓ Microsite skillourfuture.academy.mereka.io reachable (200)
+✓ Microsite skillourfuture.academy.mereka.io uses local brand fonts (no Google fonts) (override CSS wiring)
+✓ Microsite skillourfuture.academy.mereka.io logo matches brand assets
+✓ MFE login reachable (200)
+✓ MFE auth page serves authn bundle shell
+✓ MFE auth CSS includes Mereka branding markers (revision differs from local source)
+✓ MFE config exposes Mereka site + logo branding
+✓ Biji Studio uses themed CSS tokens/fonts (no Google fonts)
+✓ Biji Studio uses themed CSS tokens/fonts (no Google fonts) (studio-main-v1 has no Google fonts)
+
+All branding checks passed.
+
+--- audit_surfaces ---
+✓ LMS (academyv2.mereka.io): branding revision marker 2026-02-10-pass1 present
+✓ LMS (academyv2.mereka.io): override CSS includes local fonts
+✓ LMS (academyv2.mereka.io): deep selectors present in override CSS
+✓ MFE authn (apps.academyv2.mereka.io): authn bundle shell present
+✓ MFE authn (apps.academyv2.mereka.io): mfe_config branding fields present
+✓ Biji Studio (studio.academy.biji-biji.com): studio CSS includes deep Studio selectors
+✓ Biji Studio (studio.academy.biji-biji.com): studio CSS has no Google font imports
+✓ MFE authn (apps.academy.biji-biji.com): authn bundle shell present
+✓ MFE authn (apps.academy.biji-biji.com): mfe_config branding fields present
+✓ Microsite (academy.biji-biji.com): branding revision marker 2026-02-10-pass1 present
+✓ Microsite (academy.biji-biji.com): override CSS includes local fonts
+✓ Microsite (academy.biji-biji.com): deep selectors present in override CSS
+✓ Microsite (skillourfuture.academy.mereka.io): branding revision marker 2026-02-10-pass1 present
+✓ Microsite (skillourfuture.academy.mereka.io): override CSS includes local fonts
+✓ Microsite (skillourfuture.academy.mereka.io): deep selectors present in override CSS
+✓ Studio (studio.academyv2.mereka.io): studio CSS includes deep Studio selectors
+✓ Studio (studio.academyv2.mereka.io): studio CSS has no Google font imports
+✓ Ecommerce root landing has branded content
+✓ Ecommerce dashboard (ecommerce.academyv2.mereka.io): authn bundle shell present
+✓ Credentials admin (academyv2.mereka.io): authn bundle shell present
+✓ Credentials root page has branded landing content
+✓ Credentials admin login reachable (200)
+✓ Credentials health payload shape OK
+✓ Forum heartbeat reachable (200)
+✓ Forum root reachable without auth (200)
+
+Branding surface audit: gaps=4 strict=0

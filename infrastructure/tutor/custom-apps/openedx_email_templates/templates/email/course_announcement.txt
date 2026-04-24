@@ -1,0 +1,14 @@
+Course Announcement
+
+Hi {{ user_name }},
+
+There is a new announcement for: {{ course_name }}
+
+{{ announcement_title }}
+
+{{ announcement_body }}
+
+View course: {{ course_url }}
+
+---
+{{ org_display_name }}

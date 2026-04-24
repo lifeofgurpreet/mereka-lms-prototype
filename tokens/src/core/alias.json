@@ -1,0 +1,68 @@
+{
+  "color": {
+    "primary": {
+      "value": "{global.color.magenta}"
+    },
+    "secondary": {
+      "value": "{global.color.teal}"
+    },
+    "success": {
+      "value": "{global.color.success}"
+    },
+    "info": {
+      "value": "{global.color.info}"
+    },
+    "warning": {
+      "value": "{global.color.warning}"
+    },
+    "danger": {
+      "value": "{global.color.error}"
+    },
+    "surface": {
+      "value": "{global.color.surfacePrimary}"
+    },
+    "surfaceMuted": {
+      "value": "{global.color.surfaceSecondary}"
+    },
+    "border": {
+      "value": "{global.color.border}"
+    },
+    "borderStrong": {
+      "value": "{global.color.borderStrong}"
+    },
+    "textPrimary": {
+      "value": "{global.color.ink900}"
+    },
+    "textSecondary": {
+      "value": "{global.color.ink700}"
+    },
+    "textMuted": {
+      "value": "{global.color.ink500}"
+    }
+  },
+  "typography": {
+    "fontFamilySansSerif": {
+      "value": "{global.typography.fontFamilyBody}"
+    },
+    "fontFamilyHeading": {
+      "value": "{global.typography.fontFamilyHeading}"
+    },
+    "fontSizeBase": {
+      "value": "{global.typography.fontSizeBody}"
+    },
+    "lineHeightBase": {
+      "value": "{global.typography.lineHeightBody}"
+    }
+  },
+  "radius": {
+    "interactive": {
+      "value": "{global.radius.full}"
+    },
+    "panel": {
+      "value": "{global.radius.xl}"
+    },
+    "input": {
+      "value": "{global.radius.lg}"
+    }
+  }
+}

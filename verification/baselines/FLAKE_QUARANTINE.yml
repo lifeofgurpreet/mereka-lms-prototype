@@ -1,0 +1,58 @@
+# Flake Quarantine Registry
+# Tests that are temporarily excluded from CI gating due to intermittent failures.
+#
+# Rules:
+# - P0/P1 tests MUST NOT be quarantined (fix immediately or escalate)
+# - Maximum quarantine TTL: 14 days (review weekly)
+# - Every entry MUST have an owner who is responsible for fixing
+# - Entries exceeding TTL are auto-escalated to platform team
+#
+# Required fields: id, test_file, tier, owner, reason, opened_at, expires_at, mitigation
+#
+# Last updated: 2026-02-13
+
+version: "1.0.0"
+
+# Schema definition for validation
+schema:
+  required_fields:
+    - id           # Unique identifier (FLAKE-001, FLAKE-002, ...)
+    - test_file    # Path to the flaky test
+    - tier         # P2, P3, P4 only (P0/P1 not allowed)
+    - owner        # Person responsible for fixing
+    - reason       # Root cause or symptom description
+    - opened_at    # ISO date when quarantined
+    - expires_at   # ISO date when quarantine expires (max 14 days from opened_at)
+    - mitigation   # What was done to reduce impact
+
+  tier_policy:
+    P0: "MUST NOT quarantine. Fix immediately or revert."
+    P1: "MUST NOT quarantine. Fix within 24 hours."
+    P2: "May quarantine for max 14 days with owner and mitigation."
+    P3: "May quarantine for max 14 days."
+    P4: "May quarantine for max 14 days. Consider removing test if chronically flaky."
+
+  ttl_max_days: 14
+  review_cadence: "weekly"
+  auto_unquarantine_after_passes: 7
+
+# Current quarantined tests
+quarantined: []
+# Example entry:
+# - id: FLAKE-001
+#   test_file: "scripts/qa/verify-auth-surfaces.sh"
+#   tier: P2
+#   owner: platform-team
+#   reason: "Intermittent timeout on OIDC redirect check when Authentik is under load"
+#   opened_at: "2026-02-13"
+#   expires_at: "2026-02-27"
+#   mitigation: "Increased CHECK_TIMEOUT_SECONDS to 300, added retry with backoff"
+#   consecutive_passes: 0
+#   related_bead: ""
+
+# Resolved quarantines (for historical tracking)
+resolved: []
+# Example:
+# - id: FLAKE-001
+#   resolved_at: "2026-02-20"
+#   resolution: "Fixed root cause: Authentik policy evaluation timeout increased"

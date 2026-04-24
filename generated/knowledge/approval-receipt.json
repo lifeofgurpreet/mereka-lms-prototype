@@ -1,0 +1,34 @@
+{
+  "approval_state": {
+    "blocking_missing_live_inputs": true,
+    "modeled_only": true
+  },
+  "canonical_inputs": [
+    "docs/meta/knowledge/EXECUTION_PROOF_RUNTIME_MODEL.md",
+    "generated/knowledge/release-readiness.json",
+    "generated/knowledge/reviewer-obligations.json"
+  ],
+  "escalation_reviewers": [
+    "docs",
+    "governance",
+    "platform"
+  ],
+  "generated_by": "tools/knowledge/build_approval_receipt.py",
+  "receipt_id": "approval-receipt",
+  "release_status_reference": {
+    "missing_reviewer_inputs": [
+      "live reviewer approvals are unresolved input"
+    ],
+    "release_status": "advisory"
+  },
+  "required_reviewers": [
+    "docs",
+    "governance",
+    "platform"
+  ],
+  "schema_version": 1,
+  "source_range": "origin/main...HEAD",
+  "unresolved_live_inputs": [
+    "live reviewer approvals are unresolved input"
+  ]
+}

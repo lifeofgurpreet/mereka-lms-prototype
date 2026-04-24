@@ -1,0 +1,151 @@
+# Migration Registry — Mereka LMS
+# Every schema-owning service must declare its migration contract.
+# The release gate (scripts/release/release-gate.sh) uses this to verify.
+#
+# Fields:
+#   name              - Kubernetes workload name (matches contract.json workloads[].name)
+#   schema_owner      - true if this service owns one or more DB schemas
+#   database          - Database engine: mysql | postgresql
+#   migration_command - Command to run migrations (idempotent)
+#   pending_check     - Command to count pending migrations (outputs integer; 0 = clean)
+#   health_endpoint   - HTTP path for post-migration readiness check
+#   health_port       - Port for post-migration readiness check
+#   release_critical  - true if failures block production release
+#   dependencies      - Services that must be reachable before migration runs
+#   disabled          - true if the service is currently scaled to 0 / not deployed
+#
+version: "1.0.0"
+
+services:
+  - name: lms
+    schema_owner: true
+    database: mysql
+    migration_command: "python manage.py lms migrate --noinput"
+    pending_check: "python manage.py lms showmigrations --plan | grep '\\[ \\]' | wc -l"
+    job_manifest: "deploy/k8s/base/jobs/lms-migrate.yaml"
+    health_endpoint: "/heartbeat"
+    health_port: 8000
+    release_critical: true
+    dependencies:
+      - mysql
+      - redis
+
+  - name: cms
+    schema_owner: true
+    database: mysql
+    migration_command: "python manage.py cms migrate --noinput"
+    pending_check: "python manage.py cms showmigrations --plan | grep '\\[ \\]' | wc -l"
+    job_manifest: "deploy/k8s/base/jobs/cms-migrate.yaml"
+    health_endpoint: "/heartbeat"
+    health_port: 8000
+    release_critical: true
+    dependencies:
+      - mysql
+      - redis
+
+  - name: discovery
+    schema_owner: true
+    database: mysql
+    migration_command: "python manage.py migrate --noinput"
+    pending_check: "python manage.py showmigrations --plan | grep '\\[ \\]' | wc -l"
+    health_endpoint: "/health/"
+    health_port: 8000
+    release_critical: true
+    dependencies:
+      - mysql
+      - redis
+
+  - name: credentials
+    schema_owner: true
+    database: mysql
+    migration_command: "python manage.py migrate --noinput"
+    pending_check: "python manage.py showmigrations --plan | grep '\\[ \\]' | wc -l"
+    health_endpoint: "/health/"
+    health_port: 8000
+    release_critical: false
+    dependencies:
+      - mysql
+      - redis
+
+  - name: notes
+    schema_owner: true
+    database: mysql
+    migration_command: "python manage.py migrate --noinput"
+    pending_check: "python manage.py showmigrations --plan | grep '\\[ \\]' | wc -l"
+    health_endpoint: "/heartbeat"
+    health_port: 8000
+    release_critical: false
+    dependencies:
+      - mysql
+
+  - name: xqueue
+    schema_owner: true
+    database: mysql
+    migration_command: "python manage.py migrate --noinput"
+    pending_check: "python manage.py showmigrations --plan | grep '\\[ \\]' | wc -l"
+    health_endpoint: "/status/"
+    health_port: 8000
+    release_critical: false
+    disabled: true
+    dependencies:
+      - mysql
+
+  - name: enterprise-catalog
+    schema_owner: true
+    database: mysql
+    migration_command: "python manage.py migrate --noinput"
+    pending_check: "python manage.py showmigrations --plan | grep '\\[ \\]' | wc -l"
+    health_endpoint: "/health/"
+    health_port: 8160
+    release_critical: false
+    dependencies:
+      - mysql
+      - redis
+
+  - name: enterprise-access
+    schema_owner: true
+    database: mysql
+    migration_command: "python manage.py migrate --noinput"
+    pending_check: "python manage.py showmigrations --plan | grep '\\[ \\]' | wc -l"
+    health_endpoint: "/health/"
+    health_port: 18270
+    release_critical: false
+    dependencies:
+      - mysql
+      - redis
+
+  - name: enterprise-subsidy
+    schema_owner: true
+    database: mysql
+    migration_command: "python manage.py migrate --noinput"
+    pending_check: "python manage.py showmigrations --plan | grep '\\[ \\]' | wc -l"
+    health_endpoint: "/health/"
+    health_port: 18280
+    release_critical: false
+    dependencies:
+      - mysql
+      - redis
+
+  - name: license-manager
+    schema_owner: true
+    database: mysql
+    migration_command: "python manage.py migrate --noinput"
+    pending_check: "python manage.py showmigrations --plan | grep '\\[ \\]' | wc -l"
+    health_endpoint: "/health/"
+    health_port: 18170
+    release_critical: false
+    dependencies:
+      - mysql
+      - redis
+
+  - name: payments-gateway
+    schema_owner: true
+    database: postgresql
+    migration_command: "python -m alembic upgrade head"
+    pending_check: "cd /app && PYTHONPATH=/app python -m alembic current 2>/dev/null | grep -q '(head)' && echo 0 || echo 1"
+    health_endpoint: "/health/"
+    health_port: 8080
+    release_critical: true
+    dependencies:
+      - postgresql-payments
+      - redis

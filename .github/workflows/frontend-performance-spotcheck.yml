@@ -1,0 +1,65 @@
+name: Frontend Performance Spot-Check
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: "Target environment"
+        required: true
+        default: "prod"
+        type: choice
+        options:
+          - prod
+          - dev
+      runtime_url:
+        description: "Override runtime apps URL (empty = auto by environment when strict runtime enabled)"
+        required: false
+        default: ""
+        type: string
+      require_runtime_theme:
+        description: "Require runtime /theme/*.css checks"
+        required: true
+        default: false
+        type: boolean
+
+permissions: {}
+
+jobs:
+  performance-spotcheck:
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 30
+    permissions:
+      contents: read  # checkout
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Run frontend performance spot-check
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p var/qa
+
+          TARGET_ENV="${{ inputs.target_environment || 'prod' }}"
+          RUNTIME_URL="${{ inputs.runtime_url || '' }}"
+          REQUIRE_RUNTIME_THEME="${{ inputs.require_runtime_theme || 'false' }}"
+
+          args=(--env "$TARGET_ENV")
+          if [[ -n "$RUNTIME_URL" ]]; then
+            args+=(--runtime-url "$RUNTIME_URL")
+          fi
+          if [[ "$REQUIRE_RUNTIME_THEME" == "true" ]]; then
+            args+=(--require-runtime)
+          fi
+
+          ./scripts/qa/verify-frontend-performance-spotcheck.sh "${args[@]}" \
+            | tee "var/qa/frontend-performance-spotcheck-${TARGET_ENV}.log"
+
+      - name: Upload performance spot-check artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: frontend-performance-spotcheck-${{ inputs.target_environment || 'prod' }}-${{ github.run_number }}
+          path: |
+            var/qa/frontend-performance-spotcheck-*.log
+          if-no-files-found: warn

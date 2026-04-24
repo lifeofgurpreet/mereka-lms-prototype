@@ -1,0 +1,322 @@
+(mfe_security_headers) {
+	header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+	header X-Content-Type-Options "nosniff"
+	header X-Frame-Options "DENY"
+	# CSP: tenant domains added via TENANT_*_HOST env vars (set by overlay patches).
+	# Base defaults to localhost — overlays MUST override with real hostnames.
+	header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https://{$LMS_HOST:localhost} https://{$TENANT_BIJIBIJI_HOST:localhost} https://{$TENANT_SOF_HOST:localhost} https://fonts.gstatic.com https://cdn.jsdelivr.net https://www.google-analytics.com https://www.googletagmanager.com https://storage.googleapis.com https://i.ytimg.com https://img.youtube.com https://www.gravatar.com https://stream.mux.com https://image.mux.com; connect-src 'self' https://{$LMS_HOST:localhost} https://{$CMS_HOST:localhost} https://{$AUTH_HOST:localhost} https://{$TENANT_BIJIBIJI_HOST:localhost} https://{$TENANT_SOF_HOST:localhost} https://www.google-analytics.com https://sentry.io; font-src 'self' data: https://fonts.gstatic.com; media-src 'self' blob:; frame-src 'self' https://{$LMS_HOST:localhost} https://{$CMS_HOST:localhost} https://{$AUTH_HOST:localhost} https://{$TENANT_BIJIBIJI_HOST:localhost} https://{$TENANT_SOF_HOST:localhost} https://www.youtube.com https://player.vimeo.com; object-src 'none'; base-uri 'self'; frame-ancestors 'self'; form-action 'self';"
+	header Referrer-Policy "strict-origin-when-cross-origin"
+	header Permissions-Policy "camera=(), microphone=(), geolocation=()"
+}
+
+:8002 {
+	import mfe_security_headers
+
+	log {
+		output stdout
+		format filter {
+			wrap json
+			fields {
+				common_log delete
+				request>headers delete
+				resp_headers delete
+				tls delete
+			}
+		}
+	}
+
+	# Default: all responses must revalidate. This covers SPA routes served via try_files
+	# (e.g. /authn/login → index.html) where the request path never matches *.html.
+	header Cache-Control "no-cache"
+
+	# Hashed static assets (webpack fingerprinted): safe to cache forever.
+	# Overrides the default no-cache set above.
+	@hashed {
+		path *.js *.css *.woff *.woff2 *.ttf *.map *.png *.jpg *.jpeg *.gif *.svg *.ico *.webp
+	}
+	header @hashed Cache-Control "public, max-age=31536000, immutable"
+
+	# API proxy routes: never cache dynamic responses.
+	# Overrides the default no-cache set above.
+	@api_proxy {
+		path /api/mfe_config/v1* /login_refresh*
+	}
+	header @api_proxy Cache-Control "no-store"
+
+	# Route theme CSS requested at root path by MFE runtime injection to the matching
+	# mounted MFE directory. Each application serves its own hashed theme assets under
+	# /openedx/dist/<mfe-name>, but the generated PARAGON_THEME filenames are
+	# relative. Without this mapping, root requests resolve to empty responses.
+	@mfe_theme_css {
+		path_regexp theme_css ^/(?:brand|paragon)-theme-[^/]+\.css$
+	}
+	handle @mfe_theme_css {
+		root * /openedx/dist
+		try_files /account{path} /authn{path} /communications{path} /authoring{path} /discussions{path} /gradebook{path} /learner-dashboard{path} /learner-record{path} /learning{path} /ora-grading{path} /profile{path} /u{path}
+		file_server
+	}
+
+	# Runtime PARAGON theme assets are served from /theme/* in the MFE image.
+	# This path serves two categories of files:
+	#   1. CSS bundles: core.min.css, mereka-brand.min.css, light.min.css, etc.
+	#      (copied from mereka/theme/ at Docker build time)
+	#   2. Brand logo images: logo-horizontal.png, logo-horizontal-white.png, logo.png,
+	#      favicon.ico, and their SVG variants.
+	#      (copied from mereka/brand-mereka/ at Docker build time via `cp -f` in Dockerfile)
+	# Do NOT force Content-Type here — file_server auto-detects the correct MIME type
+	# for each file (text/css for .css, image/png for .png, image/svg+xml for .svg,
+	# image/x-icon for .ico). Overriding it breaks logos: browsers reject a PNG served
+	# as text/css and fall back to the alt text ("Mereka Academy logo").
+	@mfe_theme_assets {
+		path /theme/*
+	}
+	handle @mfe_theme_assets {
+		root * /openedx/dist
+		# Theme bundles are emitted per-MFE under /openedx/dist/<mfe>/theme/*.min.css.
+		# Runtime minified bundles are copied to /openedx/dist/theme/*.min.css.
+		# Check /theme first, then fall back to per-MFE paths for compatibility.
+		try_files /theme{path} /account{path} /authn{path} /communications{path} /authoring{path} /discussions{path} /gradebook{path} /learner-dashboard{path} /learner-record{path} /learning{path} /ora-grading{path} /profile{path} /u{path}
+		header Cache-Control "public, max-age=300"
+		file_server
+	}
+
+	# Some basename-routed MFEs request env.config.js relative to their own prefix
+	# (for example /learner-dashboard/env.config.js). Serve the shared runtime
+	# config file from /openedx/dist/env.config.js before SPA try_files falls back
+	# to index.html with a misleading 200 text/html response.
+	@mfe_prefixed_env_config {
+		path_regexp prefixed_env_config ^/(admin-console|authn|account|communications|course-authoring|authoring|discussions|gradebook|learner-dashboard|learning|learner-record|ora-grading|profile)/env\.config\.js$
+	}
+	handle @mfe_prefixed_env_config {
+		rewrite * /env.config.js
+		root * /openedx/dist
+		file_server
+	}
+
+	# Profile API calls from the Profile MFE route through LMS domain routing.
+	# MUST be a handle block placed BEFORE handle @mfe_profile so Caddy's
+	# mutually-exclusive handle evaluation matches /profile/api/* first,
+	# instead of the SPA catch-all serving index.html for API requests.
+	@mfe_profile_api {
+		path /profile/api/*
+	}
+	handle @mfe_profile_api {
+		reverse_proxy lms:8000 {
+			header_up Host {http.request.host}
+		}
+	}
+
+	reverse_proxy /api/mfe_config/v1* lms:8000 {
+		# Preserve the original Host so LMS can resolve the correct SiteConfiguration
+		# (required for multisite MFE config).
+		header_up Host {http.request.host}
+	}
+
+	# MFEs use this endpoint to refresh the JWT cookie. Some frontends do not send cross-origin
+	# cookies by default, so we expose /login_refresh on the MFE origin and reverse-proxy to LMS.
+	reverse_proxy /login_refresh* lms:8000 {
+		header_up Host {http.request.host}
+	}
+
+	# LMS API/auth proxy: ingress sends ALL MFE traffic through Caddy (not
+	# directly to LMS) because hostNetwork ingress pods cannot reach pods on
+	# control-plane nodes.  Caddy, as a regular pod, has full pod-CIDR routing.
+	reverse_proxy /api/* lms:8000 {
+		header_up Host {http.request.host}
+	}
+	reverse_proxy /csrf/* lms:8000 {
+		header_up Host {http.request.host}
+	}
+	reverse_proxy /oauth2/* lms:8000 {
+		header_up Host {http.request.host}
+	}
+	reverse_proxy /login lms:8000 {
+		header_up Host {http.request.host}
+	}
+
+	# Some MFEs issue basename-relative LMS/auth requests such as
+	# /learner-dashboard/api/... or /learner-dashboard/login_refresh.
+	# Strip the MFE basename before proxying so these requests hit LMS instead
+	# of falling through to the SPA handlers below.
+	# Proxy API/auth paths under MFE prefixes to LMS.
+	# IMPORTANT: Do NOT include bare "login" here — it matches /authn/login which is
+	# the MFE login page (should be served by Caddy SPA handler, not proxied to LMS).
+	# The standalone /login route handles non-prefixed login.
+	@mfe_prefixed_lms_routes path_regexp mfe_prefixed_lms ^/(admin-console|authn|account|communications|course-authoring|authoring|discussions|gradebook|learner-dashboard|learning|learner-record|ora-grading|profile)(/(api/mfe_config/v1.*|api/.*|login_refresh.*|csrf/.*|oauth2/.*))$
+	handle @mfe_prefixed_lms_routes {
+		rewrite * {http.regexp.mfe_prefixed_lms.2}
+		reverse_proxy lms:8000 {
+			header_up Host {http.request.host}
+		}
+	}
+
+	# Account MFE does not implement /settings as a standalone SPA route.
+	# Redirect it to the canonical account root so users don't hit a "page unavailable" screen.
+	@account_settings_compat {
+		path /account/settings /account/settings/
+	}
+	redir @account_settings_compat /account/ 302
+
+	# Root apps host contract: stay on the tenant apps host and land on the authn shell.
+	# Without this, requests to apps.<tenant>/ fall through and leak to the shared LMS host.
+	@mfe_root_entry {
+		path /
+	}
+	redir @mfe_root_entry /authn/login?next=%2Fdashboard 302
+
+	# Learner-home alias: human entry traffic expects /dashboard on the apps host,
+	# but the shipped learner-home MFE lives at /learner-dashboard/.
+	@mfe_dashboard_alias {
+		path /dashboard /dashboard/
+	}
+	redir @mfe_dashboard_alias /learner-dashboard/ 302
+
+	@mfe_authn {
+		path /authn /authn/*
+	}
+	handle @mfe_authn {
+		uri strip_prefix /authn
+		root * /openedx/dist/authn
+		try_files /{path} /index.html
+		file_server
+	}
+
+	@mfe_account {
+		path /account /account/*
+	}
+	handle @mfe_account {
+		uri strip_prefix /account
+		root * /openedx/dist/account
+		try_files /{path} /index.html
+		file_server
+	}
+
+	@mfe_communications {
+		path /communications /communications/*
+	}
+	handle @mfe_communications {
+		uri strip_prefix /communications
+		root * /openedx/dist/communications
+		try_files /{path} /index.html
+		file_server
+	}
+
+	# Course Authoring MFE: build output is "authoring" in the MFE image.
+	# Both /authoring/ and /course-authoring/ paths must work (mereka-lms-18ik).
+	@mfe_course-authoring {
+		path /course-authoring /course-authoring/*
+	}
+	handle @mfe_course-authoring {
+		uri strip_prefix /course-authoring
+		root * /openedx/dist/authoring
+		try_files /{path} /index.html
+		file_server
+	}
+
+	@mfe_authoring {
+		path /authoring /authoring/*
+	}
+	handle @mfe_authoring {
+		uri strip_prefix /authoring
+		root * /openedx/dist/authoring
+		try_files /{path} /index.html
+		file_server
+	}
+
+	@mfe_discussions {
+		path /discussions /discussions/*
+	}
+	handle @mfe_discussions {
+		uri strip_prefix /discussions
+		root * /openedx/dist/discussions
+		try_files /{path} /index.html
+		file_server
+	}
+
+	@mfe_gradebook {
+		path /gradebook /gradebook/*
+	}
+	handle @mfe_gradebook {
+		uri strip_prefix /gradebook
+		root * /openedx/dist/gradebook
+		try_files /{path} /index.html
+		file_server
+	}
+
+	@mfe_learner-dashboard {
+		path /learner-dashboard /learner-dashboard/*
+	}
+	handle @mfe_learner-dashboard {
+		uri strip_prefix /learner-dashboard
+		root * /openedx/dist/learner-dashboard
+		try_files /{path} /index.html
+		file_server
+	}
+
+	@mfe_learning {
+		path /learning /learning/*
+	}
+	handle @mfe_learning {
+		uri strip_prefix /learning
+		root * /openedx/dist/learning
+		try_files /{path} /index.html
+		file_server
+	}
+
+	@mfe_learner-record {
+		path /learner-record /learner-record/*
+	}
+	handle @mfe_learner-record {
+		uri strip_prefix /learner-record
+		root * /openedx/dist/learner-record
+		try_files /{path} /index.html
+		file_server
+	}
+
+	@mfe_ora-grading {
+		path /ora-grading /ora-grading/*
+	}
+	handle @mfe_ora-grading {
+		uri strip_prefix /ora-grading
+		root * /openedx/dist/ora-grading
+		try_files /{path} /index.html
+		file_server
+	}
+
+	@mfe_profile {
+		path /profile /profile/*
+	}
+	handle @mfe_profile {
+		uri strip_prefix /profile
+		root * /openedx/dist/profile
+		try_files /{path} /index.html
+		file_server
+	}
+
+	# Profile MFE routes are mounted at /u/:username (no /profile basename).
+	# Serve the same profile SPA for /u/* while keeping /profile/* for its static assets.
+	@mfe_profile_u {
+		path /u /u/*
+	}
+	handle @mfe_profile_u {
+		root * /openedx/dist/profile
+		try_files /index.html
+		file_server
+	}
+
+	@mfe_admin-console {
+		path /admin-console /admin-console/*
+	}
+	handle @mfe_admin-console {
+		uri strip_prefix /admin-console
+		root * /openedx/dist/admin-console
+		try_files /{path} /index.html
+		file_server
+	}
+
+	# Stripe webhook endpoint — must be externally reachable for Stripe event delivery.
+	# Stripe verifies webhook signatures server-side; no auth header needed here.
+	reverse_proxy /webhooks/stripe* payments-gateway:8080 {
+		header_up Host {http.request.host}
+	}
+}

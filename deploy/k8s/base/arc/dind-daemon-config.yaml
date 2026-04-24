@@ -1,0 +1,24 @@
+---
+# ConfigMap: DinD daemon.json for ARC heavy builders
+#
+# rke2-nonprod pod network uses MTU 1280 (Calico with WireGuard).
+# Docker's default bridge MTU is 1500, causing silent packet drops
+# on large transfers (TLS handshakes, tarballs, git clones) during
+# Docker builds. This is read by dockerd at startup.
+#
+# REMOVAL CONDITION: If the cluster network changes to MTU 1500+,
+# or if ARC moves to a cluster without WireGuard, this can be removed.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dind-daemon-config
+  namespace: arc-runners
+  labels:
+    app.kubernetes.io/name: dind-daemon-config
+    app.kubernetes.io/component: runner-config
+    app.kubernetes.io/part-of: mereka-ci
+data:
+  daemon.json: |
+    {
+      "mtu": 1280
+    }

@@ -1,0 +1,19 @@
+{
+  "alert": {
+    "border-radius": {
+      "value": "{global.radius.lg}"
+    },
+    "info-bg": {
+      "value": "{global.color.infoLight}"
+    },
+    "success-bg": {
+      "value": "{global.color.successLight}"
+    },
+    "warning-bg": {
+      "value": "{global.color.warning}"
+    },
+    "danger-bg": {
+      "value": "{global.color.errorLight}"
+    }
+  }
+}

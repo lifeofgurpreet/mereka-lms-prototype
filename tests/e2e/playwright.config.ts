@@ -1,0 +1,111 @@
+// @covers AC-T049-001, AC-T049-002, AC-T049-003, AC-T049-004, AC-T049-005
+// @spec: e2e-critical-path_spec.md
+//
+// Playwright configuration for Mereka Academy E2E tests.
+//
+// Target environments:
+//   prod: https://academyv2.mereka.io  (MFEs at apps.academyv2.mereka.io)
+//   dev:  https://academyv2.mereka.dev (MFEs at apps.academyv2.mereka.dev)
+//   staging: https://staging.academyv2.mereka.io
+//            (MFEs at staging.apps.academyv2.mereka.io)
+//
+// Authentication: Open edX session-based auth via Authentik SSO.
+// Credentials supplied via environment variables (never hardcoded).
+//
+// Usage:
+//   BASE_URL=https://academyv2.mereka.io npx playwright test
+//   BASE_URL=https://academyv2.mereka.dev npx playwright test
+//   CI=true npx playwright test
+import { defineConfig, devices } from '@playwright/test';
+import { getMfeBaseUrl } from './support/urls';
+
+const BASE_URL = process.env.BASE_URL ?? 'https://academyv2.mereka.io';
+const ENABLE_CROSS_BROWSER = process.env.PW_CROSS_BROWSER === '1';
+const ENABLE_WEBKIT = process.env.PW_ENABLE_WEBKIT !== '0';
+
+const MFE_BASE_URL = getMfeBaseUrl(BASE_URL);
+
+export default defineConfig({
+  testDir: './tests',
+  // Global timeout for each test (network-dependent — SSO redirects can be slow)
+  timeout: 90_000,
+  expect: {
+    timeout: 15_000,
+  },
+  // Retry once on CI to absorb transient network hiccups
+  retries: process.env.CI ? 1 : 0,
+  // Run tests serially to avoid session conflicts during login flows
+  workers: 1,
+  // Reporter: GitHub Actions summary + HTML report
+  reporter: process.env.CI
+    ? [['github'], ['html', { outputFolder: '../../var/e2e-report', open: 'never' }]]
+    : [['list'], ['html', { outputFolder: '../../var/e2e-report', open: 'on-failure' }]],
+  use: {
+    baseURL: BASE_URL,
+    // Persist auth state across tests within a worker
+    storageState: process.env.E2E_AUTH_STATE ?? undefined,
+    // Accept self-signed certs on dev environments
+    ignoreHTTPSErrors: true,
+    // Capture screenshots and traces only on failure
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+    trace: 'retain-on-failure',
+    // Headless by default; override with HEADED=1
+    headless: process.env.HEADED !== '1',
+    // Generous navigation timeout for SSO redirect chains (6+ hops)
+    navigationTimeout: 60_000,
+    actionTimeout: 15_000,
+    extraHTTPHeaders: {
+      'Accept-Language': 'en-US,en;q=0.9',
+    },
+  },
+  // Pass derived URLs to tests as custom config
+  projects: [
+    {
+      name: 'chromium',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: BASE_URL,
+      },
+    },
+    ...(ENABLE_CROSS_BROWSER ? [
+      {
+        name: 'firefox',
+        use: {
+          ...devices['Desktop Firefox'],
+          baseURL: BASE_URL,
+        },
+      },
+      {
+        name: 'mobile-chrome',
+        use: {
+          ...devices['Pixel 7'],
+          baseURL: BASE_URL,
+        },
+      },
+      ...(ENABLE_WEBKIT ? [
+        {
+          name: 'webkit',
+          use: {
+            ...devices['Desktop Safari'],
+            baseURL: BASE_URL,
+          },
+        },
+        {
+          name: 'mobile-safari',
+          use: {
+            ...devices['iPhone 14'],
+            baseURL: BASE_URL,
+          },
+        },
+      ] : []),
+    ] : []),
+  ],
+  // Output dir for test artifacts (traces, screenshots, videos)
+  outputDir: '../../var/e2e-artifacts',
+  // Custom env-based config accessible from tests
+  metadata: {
+    baseUrl: BASE_URL,
+    mfeBaseUrl: MFE_BASE_URL,
+  },
+});

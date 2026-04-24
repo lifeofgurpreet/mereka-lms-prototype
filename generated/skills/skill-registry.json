@@ -1,0 +1,1475 @@
+{
+  "canonical_inputs": [
+    "docs/meta/skills/SKILL_RUNTIME_MODEL.yaml",
+    "docs/meta/skills/REPO_DISCOVERY_MODEL.yaml",
+    "docs/meta/skills/SKILL_TAXONOMY.yaml"
+  ],
+  "generated_by": "tools/skills/build_skill_registry.py",
+  "pack_id": "skill-registry",
+  "repo_discovery_model": "docs/meta/skills/REPO_DISCOVERY_MODEL.yaml",
+  "runtime_model": "docs/meta/skills/SKILL_RUNTIME_MODEL.yaml",
+  "schema_version": 1,
+  "skills": [
+    {
+      "allowed_commands": [
+        {
+          "command": "bash tools/docs/verify/verify-docs-policy.sh --range origin/main...HEAD",
+          "repo": "mereka-lms"
+        },
+        {
+          "command": "./scripts/plan-all.sh --validate-only",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "applies_to_repos": [
+        "mereka-lms",
+        "bbi-infrastructure",
+        "platform-control-plane"
+      ],
+      "authoritative_sources": [
+        {
+          "path": "docs/architecture/PLATFORM_AUTHORITY_MAP.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "config/bootstrap-lane-topology.yaml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "contracts/release-contracts.yaml",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "canonical_entrypoints": [
+        {
+          "command": "bash tools/docs/verify/verify-docs-policy.sh --range origin/main...HEAD",
+          "repo": "mereka-lms"
+        },
+        {
+          "command": "./scripts/plan-all.sh --validate-only",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "category": "cross-repo-impact",
+      "command_dependencies": [
+        "docs-policy-gate",
+        "platform-plan-validate"
+      ],
+      "escalation_rules": {
+        "manual_review_required": true,
+        "triggers": [
+          "canonical source missing or contradictory",
+          "cross-repo contract unknown",
+          "validation command fails"
+        ]
+      },
+      "escalation_triggers": [
+        "canonical source missing or contradictory",
+        "cross-repo contract unknown",
+        "validation command fails"
+      ],
+      "evidence_rules": {
+        "required_evidence_classes": [
+          "source_of_truth_map"
+        ],
+        "sufficiency_policy": "all-required-evidence-classes-must-be-present"
+      },
+      "expected_outputs": [
+        "deterministic answer from canonical sources",
+        "reviewer/evidence path identified"
+      ],
+      "failure_modes": [
+        "missing command or source path",
+        "archive/transitional path presented as canonical",
+        "cross-repo disagreement requiring human escalation"
+      ],
+      "forbidden_or_destructive_commands": [
+        "git reset --hard",
+        "git checkout -- <path>",
+        "kubectl apply -f <managed-resource>",
+        "kubectl delete <managed-resource>"
+      ],
+      "generated_dependencies": [],
+      "historical_or_archive_dependencies": [],
+      "id": "change-impact-triage",
+      "pack_dependencies": [
+        "pack-registry",
+        "runtime-convergence-report",
+        "mixed-diff-arbitration"
+      ],
+      "preconditions": [
+        "3 canonical source paths resolve",
+        "all allowed commands exist"
+      ],
+      "primary_repo": "mereka-lms",
+      "purpose": "Determine which repos and truth surfaces a change affects.",
+      "read_first_paths": [
+        {
+          "path": "docs/architecture/PLATFORM_AUTHORITY_MAP.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "config/bootstrap-lane-topology.yaml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "contracts/release-contracts.yaml",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "required_evidence_classes": [
+        "source_of_truth_map"
+      ],
+      "required_reviewers": [
+        "docs",
+        "platform"
+      ],
+      "reviewer_rules": {
+        "merge_strategy": "union-then-prioritize-primary-repo-owner",
+        "required_reviewers": [
+          "docs",
+          "platform"
+        ]
+      },
+      "scope": "cross-repo source map and agent aggregation packs",
+      "secondary_repos": [
+        "bbi-infrastructure",
+        "platform-control-plane"
+      ],
+      "skill_id": "change-impact-triage",
+      "stability_level": "evolving",
+      "stable_inputs": [
+        {
+          "path": "docs/architecture/PLATFORM_AUTHORITY_MAP.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "config/bootstrap-lane-topology.yaml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "contracts/release-contracts.yaml",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "title": "Change Impact Triage"
+    },
+    {
+      "allowed_commands": [
+        {
+          "command": "bash tools/docs/verify/run-docs-world-class-gates.sh",
+          "repo": "mereka-lms"
+        },
+        {
+          "command": "./scripts/plan-all.sh --validate-only",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "applies_to_repos": [
+        "mereka-lms",
+        "bbi-infrastructure",
+        "platform-control-plane"
+      ],
+      "authoritative_sources": [
+        {
+          "path": "tools/docs/verify/run-docs-world-class-gates.sh",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "scripts/promote.sh",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "scripts/plan-all.sh",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "canonical_entrypoints": [
+        {
+          "command": "bash tools/docs/verify/run-docs-world-class-gates.sh",
+          "repo": "mereka-lms"
+        },
+        {
+          "command": "./scripts/plan-all.sh --validate-only",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "category": "review",
+      "command_dependencies": [
+        "docs-world-class-gates",
+        "platform-plan-validate"
+      ],
+      "escalation_rules": {
+        "manual_review_required": true,
+        "triggers": [
+          "canonical source missing or contradictory",
+          "cross-repo contract unknown",
+          "validation command fails"
+        ]
+      },
+      "escalation_triggers": [
+        "canonical source missing or contradictory",
+        "cross-repo contract unknown",
+        "validation command fails"
+      ],
+      "evidence_rules": {
+        "required_evidence_classes": [
+          "validation_run"
+        ],
+        "sufficiency_policy": "all-required-evidence-classes-must-be-present"
+      },
+      "expected_outputs": [
+        "deterministic answer from canonical sources",
+        "reviewer/evidence path identified"
+      ],
+      "failure_modes": [
+        "missing command or source path",
+        "archive/transitional path presented as canonical",
+        "cross-repo disagreement requiring human escalation"
+      ],
+      "forbidden_or_destructive_commands": [
+        "git reset --hard",
+        "git checkout -- <path>",
+        "kubectl apply -f <managed-resource>",
+        "kubectl delete <managed-resource>"
+      ],
+      "generated_dependencies": [],
+      "historical_or_archive_dependencies": [],
+      "id": "control-plane-validation",
+      "pack_dependencies": [
+        "pack-registry",
+        "read-first",
+        "runtime-convergence-report"
+      ],
+      "preconditions": [
+        "3 canonical source paths resolve",
+        "all allowed commands exist"
+      ],
+      "primary_repo": "mereka-lms",
+      "purpose": "Run the canonical docs and cross-repo validation entrypoints.",
+      "read_first_paths": [
+        {
+          "path": "tools/docs/verify/run-docs-world-class-gates.sh",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "scripts/promote.sh",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "scripts/plan-all.sh",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "required_evidence_classes": [
+        "validation_run"
+      ],
+      "required_reviewers": [
+        "docs",
+        "platform"
+      ],
+      "reviewer_rules": {
+        "merge_strategy": "union-then-prioritize-primary-repo-owner",
+        "required_reviewers": [
+          "docs",
+          "platform"
+        ]
+      },
+      "scope": "repo governance, contract front doors, and platform validation",
+      "secondary_repos": [
+        "bbi-infrastructure",
+        "platform-control-plane"
+      ],
+      "skill_id": "control-plane-validation",
+      "stability_level": "stable",
+      "stable_inputs": [
+        {
+          "path": "tools/docs/verify/run-docs-world-class-gates.sh",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "scripts/promote.sh",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "scripts/plan-all.sh",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "title": "Control Plane Validation"
+    },
+    {
+      "allowed_commands": [
+        {
+          "command": "./scripts/plan-all.sh --validate-only",
+          "repo": "platform-control-plane"
+        },
+        {
+          "command": "bash tools/docs/verify/run-docs-world-class-gates.sh",
+          "repo": "mereka-lms"
+        }
+      ],
+      "applies_to_repos": [
+        "platform-control-plane",
+        "bbi-infrastructure",
+        "mereka-lms"
+      ],
+      "authoritative_sources": [
+        {
+          "path": "contracts/release-contracts.yaml",
+          "repo": "platform-control-plane"
+        },
+        {
+          "path": "contracts/service-identity-contract.yaml",
+          "repo": "platform-control-plane"
+        },
+        {
+          "path": ".github/workflows/promote-image.yml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "docs/meta/standing-orders/GOVERNANCE_AGENT.md",
+          "repo": "mereka-lms"
+        }
+      ],
+      "canonical_entrypoints": [
+        {
+          "command": "./scripts/plan-all.sh --validate-only",
+          "repo": "platform-control-plane"
+        },
+        {
+          "command": "bash tools/docs/verify/run-docs-world-class-gates.sh",
+          "repo": "mereka-lms"
+        }
+      ],
+      "category": "contracts",
+      "command_dependencies": [
+        "platform-plan-validate",
+        "docs-world-class-gates"
+      ],
+      "escalation_rules": {
+        "manual_review_required": true,
+        "triggers": [
+          "canonical source missing or contradictory",
+          "cross-repo contract unknown",
+          "validation command fails"
+        ]
+      },
+      "escalation_triggers": [
+        "canonical source missing or contradictory",
+        "cross-repo contract unknown",
+        "validation command fails"
+      ],
+      "evidence_rules": {
+        "required_evidence_classes": [
+          "release_obligations",
+          "cross_repo_alignment"
+        ],
+        "sufficiency_policy": "all-required-evidence-classes-must-be-present"
+      },
+      "expected_outputs": [
+        "deterministic answer from canonical sources",
+        "reviewer/evidence path identified"
+      ],
+      "failure_modes": [
+        "missing command or source path",
+        "archive/transitional path presented as canonical",
+        "cross-repo disagreement requiring human escalation"
+      ],
+      "forbidden_or_destructive_commands": [
+        "git reset --hard",
+        "git checkout -- <path>",
+        "kubectl apply -f <managed-resource>",
+        "kubectl delete <managed-resource>"
+      ],
+      "generated_dependencies": [],
+      "historical_or_archive_dependencies": [],
+      "id": "cross-repo-release-contract-review",
+      "pack_dependencies": [
+        "pack-registry",
+        "runtime-convergence-report",
+        "mixed-diff-arbitration"
+      ],
+      "preconditions": [
+        "4 canonical source paths resolve",
+        "all allowed commands exist"
+      ],
+      "primary_repo": "platform-control-plane",
+      "purpose": "Validate release-lane obligations across platform-control-plane and GitOps consumption.",
+      "read_first_paths": [
+        {
+          "path": "contracts/release-contracts.yaml",
+          "repo": "platform-control-plane"
+        },
+        {
+          "path": "contracts/service-identity-contract.yaml",
+          "repo": "platform-control-plane"
+        },
+        {
+          "path": ".github/workflows/promote-image.yml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "docs/meta/standing-orders/GOVERNANCE_AGENT.md",
+          "repo": "mereka-lms"
+        }
+      ],
+      "required_evidence_classes": [
+        "release_obligations",
+        "cross_repo_alignment"
+      ],
+      "required_reviewers": [
+        "platform",
+        "docs"
+      ],
+      "reviewer_rules": {
+        "merge_strategy": "union-then-prioritize-primary-repo-owner",
+        "required_reviewers": [
+          "platform",
+          "docs"
+        ]
+      },
+      "scope": "release contract registry and compiled promotion references",
+      "secondary_repos": [
+        "bbi-infrastructure",
+        "mereka-lms"
+      ],
+      "skill_id": "cross-repo-release-contract-review",
+      "stability_level": "evolving",
+      "stable_inputs": [
+        {
+          "path": "contracts/release-contracts.yaml",
+          "repo": "platform-control-plane"
+        },
+        {
+          "path": "contracts/service-identity-contract.yaml",
+          "repo": "platform-control-plane"
+        },
+        {
+          "path": ".github/workflows/promote-image.yml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "docs/meta/standing-orders/GOVERNANCE_AGENT.md",
+          "repo": "mereka-lms"
+        }
+      ],
+      "title": "Cross-Repo Release Contract Review"
+    },
+    {
+      "allowed_commands": [
+        {
+          "command": "bash tools/docs/verify/verify-docs-policy.sh --range origin/main...HEAD",
+          "repo": "mereka-lms"
+        },
+        {
+          "command": "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD",
+          "repo": "mereka-lms"
+        }
+      ],
+      "applies_to_repos": [
+        "mereka-lms"
+      ],
+      "authoritative_sources": [
+        {
+          "path": "docs/README.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "docs/architecture/PLATFORM_AUTHORITY_MAP.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "docs/meta/standing-orders/README.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "tools/docs/verify/verify-docs-policy.sh",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "tools/docs/verify/verify-doc-catalog-governance.py",
+          "repo": "mereka-lms"
+        }
+      ],
+      "canonical_entrypoints": [
+        {
+          "command": "bash tools/docs/verify/verify-docs-policy.sh --range origin/main...HEAD",
+          "repo": "mereka-lms"
+        },
+        {
+          "command": "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD",
+          "repo": "mereka-lms"
+        }
+      ],
+      "category": "documentation-truth",
+      "command_dependencies": [
+        "docs-policy-gate",
+        "docs-catalog-governance"
+      ],
+      "escalation_rules": {
+        "manual_review_required": true,
+        "triggers": [
+          "canonical source missing or contradictory",
+          "cross-repo contract unknown",
+          "validation command fails"
+        ]
+      },
+      "escalation_triggers": [
+        "canonical source missing or contradictory",
+        "cross-repo contract unknown",
+        "validation command fails"
+      ],
+      "evidence_rules": {
+        "required_evidence_classes": [
+          "docs_policy",
+          "catalog_governance"
+        ],
+        "sufficiency_policy": "all-required-evidence-classes-must-be-present"
+      },
+      "expected_outputs": [
+        "deterministic answer from canonical sources",
+        "reviewer/evidence path identified"
+      ],
+      "failure_modes": [
+        "missing command or source path",
+        "archive/transitional path presented as canonical",
+        "cross-repo disagreement requiring human escalation"
+      ],
+      "forbidden_or_destructive_commands": [
+        "git reset --hard",
+        "git checkout -- <path>",
+        "kubectl apply -f <managed-resource>",
+        "kubectl delete <managed-resource>"
+      ],
+      "generated_dependencies": [],
+      "historical_or_archive_dependencies": [],
+      "id": "docs-truth-review",
+      "pack_dependencies": [
+        "pack-registry",
+        "read-first"
+      ],
+      "preconditions": [
+        "5 canonical source paths resolve",
+        "all allowed commands exist"
+      ],
+      "primary_repo": "mereka-lms",
+      "purpose": "Determine canonical documentation truth and validate docs-policy compliance.",
+      "read_first_paths": [
+        {
+          "path": "docs/README.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "docs/architecture/PLATFORM_AUTHORITY_MAP.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "docs/meta/standing-orders/README.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "tools/docs/verify/verify-docs-policy.sh",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "tools/docs/verify/verify-doc-catalog-governance.py",
+          "repo": "mereka-lms"
+        }
+      ],
+      "required_evidence_classes": [
+        "docs_policy",
+        "catalog_governance"
+      ],
+      "required_reviewers": [
+        "docs",
+        "governance"
+      ],
+      "reviewer_rules": {
+        "merge_strategy": "union-then-prioritize-primary-repo-owner",
+        "required_reviewers": [
+          "docs",
+          "governance"
+        ]
+      },
+      "scope": "canonical docs roots and generated doc governance surfaces",
+      "secondary_repos": [],
+      "skill_id": "docs-truth-review",
+      "stability_level": "stable",
+      "stable_inputs": [
+        {
+          "path": "docs/README.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "docs/architecture/PLATFORM_AUTHORITY_MAP.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "docs/meta/standing-orders/README.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "tools/docs/verify/verify-docs-policy.sh",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "tools/docs/verify/verify-doc-catalog-governance.py",
+          "repo": "mereka-lms"
+        }
+      ],
+      "title": "Docs Truth Review"
+    },
+    {
+      "allowed_commands": [
+        {
+          "command": "bash scripts/promote.sh --help",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "command": "bash scripts/promote.sh --dry-run",
+          "repo": "bbi-infrastructure"
+        }
+      ],
+      "applies_to_repos": [
+        "bbi-infrastructure",
+        "platform-control-plane"
+      ],
+      "authoritative_sources": [
+        {
+          "path": "scripts/promote.sh",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": ".github/workflows/promote-image.yml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "config/domain-registry.yaml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "contracts/release-contracts.yaml",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "canonical_entrypoints": [
+        {
+          "command": "bash scripts/promote.sh --help",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "command": "bash scripts/promote.sh --dry-run",
+          "repo": "bbi-infrastructure"
+        }
+      ],
+      "category": "release",
+      "command_dependencies": [
+        "promote-help",
+        "promote-dry-run"
+      ],
+      "escalation_rules": {
+        "manual_review_required": true,
+        "triggers": [
+          "canonical source missing or contradictory",
+          "cross-repo contract unknown",
+          "validation command fails"
+        ]
+      },
+      "escalation_triggers": [
+        "canonical source missing or contradictory",
+        "cross-repo contract unknown",
+        "validation command fails"
+      ],
+      "evidence_rules": {
+        "required_evidence_classes": [
+          "release_contract",
+          "workflow_dispatch"
+        ],
+        "sufficiency_policy": "all-required-evidence-classes-must-be-present"
+      },
+      "expected_outputs": [
+        "deterministic answer from canonical sources",
+        "reviewer/evidence path identified"
+      ],
+      "failure_modes": [
+        "missing command or source path",
+        "archive/transitional path presented as canonical",
+        "cross-repo disagreement requiring human escalation"
+      ],
+      "forbidden_or_destructive_commands": [
+        "git reset --hard",
+        "git checkout -- <path>",
+        "kubectl apply -f <managed-resource>",
+        "kubectl delete <managed-resource>"
+      ],
+      "generated_dependencies": [],
+      "historical_or_archive_dependencies": [],
+      "id": "promotion-workflow-review",
+      "pack_dependencies": [
+        "pack-registry",
+        "runtime-convergence-report",
+        "evidence-sufficiency-map"
+      ],
+      "preconditions": [
+        "4 canonical source paths resolve",
+        "all allowed commands exist"
+      ],
+      "primary_repo": "bbi-infrastructure",
+      "purpose": "Review release/promotion semantics against canonical scripts and workflow inputs.",
+      "read_first_paths": [
+        {
+          "path": "scripts/promote.sh",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": ".github/workflows/promote-image.yml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "config/domain-registry.yaml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "contracts/release-contracts.yaml",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "required_evidence_classes": [
+        "release_contract",
+        "workflow_dispatch"
+      ],
+      "required_reviewers": [
+        "platform",
+        "release"
+      ],
+      "reviewer_rules": {
+        "merge_strategy": "union-then-prioritize-primary-repo-owner",
+        "required_reviewers": [
+          "platform",
+          "release"
+        ]
+      },
+      "scope": "promotion workflow docs, promote.sh semantics, workflow dispatch inputs",
+      "secondary_repos": [
+        "platform-control-plane"
+      ],
+      "skill_id": "promotion-workflow-review",
+      "stability_level": "stable",
+      "stable_inputs": [
+        {
+          "path": "scripts/promote.sh",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": ".github/workflows/promote-image.yml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "config/domain-registry.yaml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "contracts/release-contracts.yaml",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "title": "Promotion Workflow Review"
+    },
+    {
+      "allowed_commands": [
+        {
+          "command": "./scripts/plan-all.sh --validate-only",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "applies_to_repos": [
+        "mereka-lms",
+        "bbi-infrastructure",
+        "platform-control-plane"
+      ],
+      "authoritative_sources": [
+        {
+          "path": "docs/meta/standing-orders/GOVERNANCE_AGENT.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "scripts/promote.sh",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "contracts/release-contracts.yaml",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "canonical_entrypoints": [
+        {
+          "command": "./scripts/plan-all.sh --validate-only",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "category": "release",
+      "command_dependencies": [
+        "platform-plan-validate"
+      ],
+      "escalation_rules": {
+        "manual_review_required": true,
+        "triggers": [
+          "canonical source missing or contradictory",
+          "cross-repo contract unknown",
+          "validation command fails"
+        ]
+      },
+      "escalation_triggers": [
+        "canonical source missing or contradictory",
+        "cross-repo contract unknown",
+        "validation command fails"
+      ],
+      "evidence_rules": {
+        "required_evidence_classes": [
+          "release_notes_diff",
+          "smoke_test_result",
+          "rollback_target_reference"
+        ],
+        "sufficiency_policy": "all-required-evidence-classes-must-be-present"
+      },
+      "expected_outputs": [
+        "deterministic answer from canonical sources",
+        "reviewer/evidence path identified"
+      ],
+      "failure_modes": [
+        "missing command or source path",
+        "archive/transitional path presented as canonical",
+        "cross-repo disagreement requiring human escalation"
+      ],
+      "forbidden_or_destructive_commands": [
+        "git reset --hard",
+        "git checkout -- <path>",
+        "kubectl apply -f <managed-resource>",
+        "kubectl delete <managed-resource>"
+      ],
+      "generated_dependencies": [],
+      "historical_or_archive_dependencies": [],
+      "id": "release-obligations-review",
+      "pack_dependencies": [
+        "pack-registry",
+        "runtime-convergence-report",
+        "evidence-sufficiency-map"
+      ],
+      "preconditions": [
+        "3 canonical source paths resolve",
+        "all allowed commands exist"
+      ],
+      "primary_repo": "mereka-lms",
+      "purpose": "Review required evidence and rollback expectations before promotion.",
+      "read_first_paths": [
+        {
+          "path": "docs/meta/standing-orders/GOVERNANCE_AGENT.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "scripts/promote.sh",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "contracts/release-contracts.yaml",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "required_evidence_classes": [
+        "release_notes_diff",
+        "smoke_test_result",
+        "rollback_target_reference"
+      ],
+      "required_reviewers": [
+        "release",
+        "platform"
+      ],
+      "reviewer_rules": {
+        "merge_strategy": "union-then-prioritize-primary-repo-owner",
+        "required_reviewers": [
+          "release",
+          "platform"
+        ]
+      },
+      "scope": "release obligations and compiled promotion references",
+      "secondary_repos": [
+        "bbi-infrastructure",
+        "platform-control-plane"
+      ],
+      "skill_id": "release-obligations-review",
+      "stability_level": "stable",
+      "stable_inputs": [
+        {
+          "path": "docs/meta/standing-orders/GOVERNANCE_AGENT.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "scripts/promote.sh",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "contracts/release-contracts.yaml",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "title": "Release Obligations Review"
+    },
+    {
+      "allowed_commands": [
+        {
+          "command": "bash tools/docs/verify/verify-docs-policy.sh --range origin/main...HEAD",
+          "repo": "mereka-lms"
+        }
+      ],
+      "applies_to_repos": [
+        "mereka-lms",
+        "bbi-infrastructure"
+      ],
+      "authoritative_sources": [
+        {
+          "path": "docs/meta/standing-orders/README.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "docs/ops/quickref/README.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "scripts/promote.sh",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "docs/meta/templates/EVIDENCE_SCHEMA.md",
+          "repo": "mereka-lms"
+        }
+      ],
+      "canonical_entrypoints": [
+        {
+          "command": "bash tools/docs/verify/verify-docs-policy.sh --range origin/main...HEAD",
+          "repo": "mereka-lms"
+        }
+      ],
+      "category": "operations",
+      "command_dependencies": [
+        "docs-policy-gate"
+      ],
+      "escalation_rules": {
+        "manual_review_required": true,
+        "triggers": [
+          "canonical source missing or contradictory",
+          "cross-repo contract unknown",
+          "validation command fails"
+        ]
+      },
+      "escalation_triggers": [
+        "canonical source missing or contradictory",
+        "cross-repo contract unknown",
+        "validation command fails"
+      ],
+      "evidence_rules": {
+        "required_evidence_classes": [
+          "runbook_reference"
+        ],
+        "sufficiency_policy": "all-required-evidence-classes-must-be-present"
+      },
+      "expected_outputs": [
+        "deterministic answer from canonical sources",
+        "reviewer/evidence path identified"
+      ],
+      "failure_modes": [
+        "missing command or source path",
+        "archive/transitional path presented as canonical",
+        "cross-repo disagreement requiring human escalation"
+      ],
+      "forbidden_or_destructive_commands": [
+        "git reset --hard",
+        "git checkout -- <path>",
+        "kubectl apply -f <managed-resource>",
+        "kubectl delete <managed-resource>"
+      ],
+      "generated_dependencies": [],
+      "historical_or_archive_dependencies": [],
+      "id": "runbook-evidence-triage",
+      "pack_dependencies": [
+        "pack-registry",
+        "read-first",
+        "evidence-sufficiency-map"
+      ],
+      "preconditions": [
+        "4 canonical source paths resolve",
+        "all allowed commands exist"
+      ],
+      "primary_repo": "mereka-lms",
+      "purpose": "Determine the canonical runbook and evidence path for operator work.",
+      "read_first_paths": [
+        {
+          "path": "docs/meta/standing-orders/README.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "docs/ops/quickref/README.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "scripts/promote.sh",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "docs/meta/templates/EVIDENCE_SCHEMA.md",
+          "repo": "mereka-lms"
+        }
+      ],
+      "required_evidence_classes": [
+        "runbook_reference"
+      ],
+      "required_reviewers": [
+        "ops",
+        "docs"
+      ],
+      "reviewer_rules": {
+        "merge_strategy": "union-then-prioritize-primary-repo-owner",
+        "required_reviewers": [
+          "ops",
+          "docs"
+        ]
+      },
+      "scope": "runbooks, standing orders, and release/runtime evidence entrypoints",
+      "secondary_repos": [
+        "bbi-infrastructure"
+      ],
+      "skill_id": "runbook-evidence-triage",
+      "stability_level": "evolving",
+      "stable_inputs": [
+        {
+          "path": "docs/meta/standing-orders/README.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "docs/ops/quickref/README.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "scripts/promote.sh",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "docs/meta/templates/EVIDENCE_SCHEMA.md",
+          "repo": "mereka-lms"
+        }
+      ],
+      "title": "Runbook Evidence Triage"
+    },
+    {
+      "allowed_commands": [
+        {
+          "command": "./scripts/plan-all.sh --validate-only",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "applies_to_repos": [
+        "platform-control-plane",
+        "bbi-infrastructure",
+        "mereka-lms"
+      ],
+      "authoritative_sources": [
+        {
+          "path": "contracts/service-identity-contract.yaml",
+          "repo": "platform-control-plane"
+        },
+        {
+          "path": "config/domain-registry.yaml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "config/domain-registry.yaml",
+          "repo": "bbi-infrastructure"
+        }
+      ],
+      "canonical_entrypoints": [
+        {
+          "command": "./scripts/plan-all.sh --validate-only",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "category": "contracts",
+      "command_dependencies": [
+        "platform-plan-validate"
+      ],
+      "escalation_rules": {
+        "manual_review_required": true,
+        "triggers": [
+          "canonical source missing or contradictory",
+          "cross-repo contract unknown",
+          "validation command fails"
+        ]
+      },
+      "escalation_triggers": [
+        "canonical source missing or contradictory",
+        "cross-repo contract unknown",
+        "validation command fails"
+      ],
+      "evidence_rules": {
+        "required_evidence_classes": [
+          "service_identity"
+        ],
+        "sufficiency_policy": "all-required-evidence-classes-must-be-present"
+      },
+      "expected_outputs": [
+        "deterministic answer from canonical sources",
+        "reviewer/evidence path identified"
+      ],
+      "failure_modes": [
+        "missing command or source path",
+        "archive/transitional path presented as canonical",
+        "cross-repo disagreement requiring human escalation"
+      ],
+      "forbidden_or_destructive_commands": [
+        "git reset --hard",
+        "git checkout -- <path>",
+        "kubectl apply -f <managed-resource>",
+        "kubectl delete <managed-resource>"
+      ],
+      "generated_dependencies": [],
+      "historical_or_archive_dependencies": [],
+      "id": "service-identity-lookup",
+      "pack_dependencies": [
+        "pack-registry",
+        "runtime-convergence-report",
+        "mixed-diff-arbitration"
+      ],
+      "preconditions": [
+        "3 canonical source paths resolve",
+        "all allowed commands exist"
+      ],
+      "primary_repo": "platform-control-plane",
+      "purpose": "Resolve canonical service ids, aliases, and owning repos.",
+      "read_first_paths": [
+        {
+          "path": "contracts/service-identity-contract.yaml",
+          "repo": "platform-control-plane"
+        },
+        {
+          "path": "config/domain-registry.yaml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "config/domain-registry.yaml",
+          "repo": "bbi-infrastructure"
+        }
+      ],
+      "required_evidence_classes": [
+        "service_identity"
+      ],
+      "required_reviewers": [
+        "platform"
+      ],
+      "reviewer_rules": {
+        "merge_strategy": "union-then-prioritize-primary-repo-owner",
+        "required_reviewers": [
+          "platform"
+        ]
+      },
+      "scope": "service identity and alias mapping",
+      "secondary_repos": [
+        "bbi-infrastructure",
+        "mereka-lms"
+      ],
+      "skill_id": "service-identity-lookup",
+      "stability_level": "stable",
+      "stable_inputs": [
+        {
+          "path": "contracts/service-identity-contract.yaml",
+          "repo": "platform-control-plane"
+        },
+        {
+          "path": "config/domain-registry.yaml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "config/domain-registry.yaml",
+          "repo": "bbi-infrastructure"
+        }
+      ],
+      "title": "Service Identity Lookup"
+    },
+    {
+      "allowed_commands": [
+        {
+          "command": "bash scripts/promote.sh --help",
+          "repo": "bbi-infrastructure"
+        }
+      ],
+      "applies_to_repos": [
+        "bbi-infrastructure",
+        "mereka-lms"
+      ],
+      "authoritative_sources": [
+        {
+          "path": "config/domain-registry.yaml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "config/bootstrap-lane-topology.yaml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "scripts/promote.sh",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "contracts/service-identity-contract.yaml",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "canonical_entrypoints": [
+        {
+          "command": "bash scripts/promote.sh --help",
+          "repo": "bbi-infrastructure"
+        }
+      ],
+      "category": "topology",
+      "command_dependencies": [
+        "promote-help"
+      ],
+      "escalation_rules": {
+        "manual_review_required": true,
+        "triggers": [
+          "canonical source missing or contradictory",
+          "cross-repo contract unknown",
+          "validation command fails"
+        ]
+      },
+      "escalation_triggers": [
+        "canonical source missing or contradictory",
+        "cross-repo contract unknown",
+        "validation command fails"
+      ],
+      "evidence_rules": {
+        "required_evidence_classes": [
+          "topology_contract"
+        ],
+        "sufficiency_policy": "all-required-evidence-classes-must-be-present"
+      },
+      "expected_outputs": [
+        "deterministic answer from canonical sources",
+        "reviewer/evidence path identified"
+      ],
+      "failure_modes": [
+        "missing command or source path",
+        "archive/transitional path presented as canonical",
+        "cross-repo disagreement requiring human escalation"
+      ],
+      "forbidden_or_destructive_commands": [
+        "git reset --hard",
+        "git checkout -- <path>",
+        "kubectl apply -f <managed-resource>",
+        "kubectl delete <managed-resource>"
+      ],
+      "generated_dependencies": [],
+      "historical_or_archive_dependencies": [],
+      "id": "topology-lookup",
+      "pack_dependencies": [
+        "pack-registry",
+        "runtime-convergence-report"
+      ],
+      "preconditions": [
+        "4 canonical source paths resolve",
+        "all allowed commands exist"
+      ],
+      "primary_repo": "bbi-infrastructure",
+      "purpose": "Resolve canonical lane, hostname, and bootstrap topology.",
+      "read_first_paths": [
+        {
+          "path": "config/domain-registry.yaml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "config/bootstrap-lane-topology.yaml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "scripts/promote.sh",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "contracts/service-identity-contract.yaml",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "required_evidence_classes": [
+        "topology_contract"
+      ],
+      "required_reviewers": [
+        "platform"
+      ],
+      "reviewer_rules": {
+        "merge_strategy": "union-then-prioritize-primary-repo-owner",
+        "required_reviewers": [
+          "platform"
+        ]
+      },
+      "scope": "domain registry, bootstrap lane topology, compiled topology references",
+      "secondary_repos": [
+        "mereka-lms"
+      ],
+      "skill_id": "topology-lookup",
+      "stability_level": "stable",
+      "stable_inputs": [
+        {
+          "path": "config/domain-registry.yaml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "config/bootstrap-lane-topology.yaml",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "scripts/promote.sh",
+          "repo": "bbi-infrastructure"
+        },
+        {
+          "path": "contracts/service-identity-contract.yaml",
+          "repo": "platform-control-plane"
+        }
+      ],
+      "title": "Topology Lookup"
+    },
+    {
+      "allowed_commands": [
+        {
+          "command": "python3 tools/docs/verify/scan-doc-catalog-residue.py --fail-on-residue",
+          "repo": "mereka-lms"
+        },
+        {
+          "command": "python3 tools/docs/verify/report-nonstub-transitional-files.py",
+          "repo": "mereka-lms"
+        }
+      ],
+      "applies_to_repos": [
+        "mereka-lms"
+      ],
+      "authoritative_sources": [
+        {
+          "path": "docs/reference/governance/DEPRECATION_LEDGER.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "tools/docs/verify/scan-doc-catalog-residue.py",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "tools/docs/verify/report-nonstub-transitional-files.py",
+          "repo": "mereka-lms"
+        }
+      ],
+      "canonical_entrypoints": [
+        {
+          "command": "python3 tools/docs/verify/scan-doc-catalog-residue.py --fail-on-residue",
+          "repo": "mereka-lms"
+        },
+        {
+          "command": "python3 tools/docs/verify/report-nonstub-transitional-files.py",
+          "repo": "mereka-lms"
+        }
+      ],
+      "category": "wrapper-retirement",
+      "command_dependencies": [
+        "wrapper-residue-scan"
+      ],
+      "escalation_rules": {
+        "manual_review_required": true,
+        "triggers": [
+          "canonical source missing or contradictory",
+          "cross-repo contract unknown",
+          "validation command fails"
+        ]
+      },
+      "escalation_triggers": [
+        "canonical source missing or contradictory",
+        "cross-repo contract unknown",
+        "validation command fails"
+      ],
+      "evidence_rules": {
+        "required_evidence_classes": [
+          "transitional_residue"
+        ],
+        "sufficiency_policy": "all-required-evidence-classes-must-be-present"
+      },
+      "expected_outputs": [
+        "deterministic answer from canonical sources",
+        "reviewer/evidence path identified"
+      ],
+      "failure_modes": [
+        "missing command or source path",
+        "archive/transitional path presented as canonical",
+        "cross-repo disagreement requiring human escalation"
+      ],
+      "forbidden_or_destructive_commands": [
+        "git reset --hard",
+        "git checkout -- <path>",
+        "kubectl apply -f <managed-resource>",
+        "kubectl delete <managed-resource>"
+      ],
+      "generated_dependencies": [],
+      "historical_or_archive_dependencies": [],
+      "id": "wrapper-retirement-assessment",
+      "pack_dependencies": [
+        "pack-registry"
+      ],
+      "preconditions": [
+        "3 canonical source paths resolve",
+        "all allowed commands exist"
+      ],
+      "primary_repo": "mereka-lms",
+      "purpose": "Assess whether transitional docs paths can be retired safely.",
+      "read_first_paths": [
+        {
+          "path": "docs/reference/governance/DEPRECATION_LEDGER.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "tools/docs/verify/scan-doc-catalog-residue.py",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "tools/docs/verify/report-nonstub-transitional-files.py",
+          "repo": "mereka-lms"
+        }
+      ],
+      "required_evidence_classes": [
+        "transitional_residue"
+      ],
+      "required_reviewers": [
+        "docs"
+      ],
+      "reviewer_rules": {
+        "merge_strategy": "union-then-prioritize-primary-repo-owner",
+        "required_reviewers": [
+          "docs"
+        ]
+      },
+      "scope": "transitional root stubs and residue scans",
+      "secondary_repos": [],
+      "skill_id": "wrapper-retirement-assessment",
+      "stability_level": "evolving",
+      "stable_inputs": [
+        {
+          "path": "docs/reference/governance/DEPRECATION_LEDGER.md",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "tools/docs/verify/scan-doc-catalog-residue.py",
+          "repo": "mereka-lms"
+        },
+        {
+          "path": "tools/docs/verify/report-nonstub-transitional-files.py",
+          "repo": "mereka-lms"
+        }
+      ],
+      "title": "Wrapper Retirement Assessment"
+    }
+  ],
+  "source_range": null,
+  "taxonomy": "docs/meta/skills/SKILL_TAXONOMY.yaml"
+}

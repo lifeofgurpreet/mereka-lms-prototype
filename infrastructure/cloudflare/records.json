@@ -1,0 +1,167 @@
+[
+  {
+    "comment": "=== mereka.io DNS Records ===",
+    "description": "Primary LMS ingress (GKE)",
+    "type": "A",
+    "name": "academyv2.mereka.io",
+    "content": "34.177.83.168",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Studio hostname",
+    "type": "CNAME",
+    "name": "studio.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Microfrontends",
+    "type": "CNAME",
+    "name": "apps.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Discovery service",
+    "type": "CNAME",
+    "name": "discovery.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Ecommerce service",
+    "type": "CNAME",
+    "name": "ecommerce.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Notes service host",
+    "type": "CNAME",
+    "name": "notes.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Analytics/Superset dashboard",
+    "type": "CNAME",
+    "name": "analytics.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Credentials service",
+    "type": "CNAME",
+    "name": "credentials.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Forum service",
+    "type": "CNAME",
+    "name": "forum.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Studio preview host (needed for Caddy TLS)",
+    "type": "CNAME",
+    "name": "preview.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Enterprise Admin Portal MFE (DNS-only for Let's Encrypt)",
+    "type": "CNAME",
+    "name": "admin.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Enterprise Learner Portal MFE (DNS-only for Let's Encrypt)",
+    "type": "CNAME",
+    "name": "learner.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "SkillOurFuture microsite (multi-level host stays DNS-only)",
+    "type": "CNAME",
+    "name": "skillourfuture.academy.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Mail HELO host for SES",
+    "type": "CNAME",
+    "name": "mail.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "SOF tenant preview (target root, DNS-only)",
+    "type": "CNAME",
+    "name": "preview.skillourfuture.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "SOF tenant enterprise admin (target root, DNS-only)",
+    "type": "CNAME",
+    "name": "admin.skillourfuture.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "SOF tenant enterprise learner (target root, DNS-only)",
+    "type": "CNAME",
+    "name": "learner.skillourfuture.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "SOF tenant credentials (target root, DNS-only)",
+    "type": "CNAME",
+    "name": "credentials.skillourfuture.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "SOF tenant analytics (target root, DNS-only)",
+    "type": "CNAME",
+    "name": "analytics.skillourfuture.academyv2.mereka.io",
+    "content": "academyv2.mereka.io",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "CAA: allow Let's Encrypt to issue for academyv2.mereka.io",
+    "type": "CAA",
+    "name": "academyv2.mereka.io",
+    "ttl": 3600,
+    "proxied": false,
+    "data": {
+      "flags": 0,
+      "tag": "issue",
+      "value": "letsencrypt.org"
+    }
+  }
+]

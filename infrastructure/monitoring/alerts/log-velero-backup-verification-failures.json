@@ -1,0 +1,30 @@
+{
+  "displayName": "Velero backup verification failures (logs)",
+  "combiner": "OR",
+  "enabled": true,
+  "severity": "ERROR",
+  "conditions": [
+    {
+      "displayName": "backup-verification failures > 0/1h",
+      "conditionThreshold": {
+        "filter": "resource.type=\"k8s_container\" AND metric.type=\"logging.googleapis.com/user/velero-backup-verification-failures\"",
+        "aggregations": [
+          {
+            "alignmentPeriod": "3600s",
+            "perSeriesAligner": "ALIGN_SUM"
+          }
+        ],
+        "comparison": "COMPARISON_GT",
+        "thresholdValue": 0,
+        "duration": "0s",
+        "trigger": {
+          "count": 1
+        }
+      }
+    }
+  ],
+  "notificationChannels": [
+    "projects/mereka-lms/notificationChannels/2534209833330971119",
+    "projects/mereka-lms/notificationChannels/1104353389109200281"
+  ]
+}

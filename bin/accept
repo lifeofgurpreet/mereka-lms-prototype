@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+usage() {
+  cat <<'EOF'
+Usage: bin/accept <lane> [options]
+
+Lanes:
+  runtime-routing   Tenant LMS/apps/studio/footer runtime acceptance
+  identity-session  Tenant cookie/session/SSO/auth-redirect acceptance
+  tenant-branding   Tenant visual/branding/theme/authn-shell acceptance
+EOF
+}
+
+if [[ $# -lt 1 ]]; then
+  usage
+  exit 1
+fi
+
+LANE="$1"
+shift
+
+case "$LANE" in
+  runtime-routing)
+    exec "$REPO_ROOT/scripts/acceptance/runtime-routing.sh" "$@"
+    ;;
+  identity-session)
+    exec "$REPO_ROOT/scripts/acceptance/identity-session.sh" "$@"
+    ;;
+  tenant-branding)
+    exec "$REPO_ROOT/scripts/acceptance/tenant-branding.sh" "$@"
+    ;;
+  -h|--help)
+    usage
+    ;;
+  *)
+    echo "Unknown lane: $LANE" >&2
+    usage >&2
+    exit 2
+    ;;
+esac

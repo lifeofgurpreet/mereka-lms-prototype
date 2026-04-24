@@ -1,0 +1,212 @@
+spec: design-tokens-system_spec.md
+acceptance_criteria:
+- id: AC-001
+  description: Given `assets/branding/tokens.css`, when parsed, then all primary color
+    tokens (`--color-black`, `--color-white`, `--color-teal`, `--color-magenta`, `--color-blue`)
+    are defined with valid hex values.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/verify-token-drift.sh
+    command: scripts/branding/verify-token-drift.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-tokens.sh
+    command: scripts/qa/verify-design-tokens.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
+- id: AC-002
+  description: Given `assets/branding/tokens.css`, when parsed, then all typography
+    tokens (`--font-heading`, `--font-body`, `--text-h1`, etc.) are defined with valid
+    CSS values.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/verify-token-drift.sh
+    command: scripts/branding/verify-token-drift.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-tokens.sh
+    command: scripts/qa/verify-design-tokens.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+- id: AC-003
+  description: Given `assets/branding/tokens.css`, when parsed, then all spacing tokens
+    (`--space-0` through `--space-24`) are defined with pixel values following the
+    4px base unit scale.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-tokens.sh
+    command: scripts/qa/verify-design-tokens.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_fulfillment.py
+    command: pytest services/purchase-gateway/tests/unit/test_fulfillment.py
+- id: AC-004
+  description: Given `assets/branding/tokens.css`, when inspected, then all tokens
+    are defined within a single `:root` selector, use kebab-case naming, and include
+    section header comments grouping tokens by category.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-token-ci.sh
+    command: scripts/qa/verify-design-token-ci.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-tokens.sh
+    command: scripts/qa/verify-design-tokens.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+- id: AC-005
+  description: Given `assets/branding/tokens.provenance.json`, when loaded, then all
+    required fields (`source_repo`, `source_path`, `source_branch`, `source_commit`,
+    `source_sha256`, `synced_at_utc`) are present and non-empty.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/verify-token-drift.sh
+    command: scripts/branding/verify-token-drift.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-token-ci.sh
+    command: scripts/qa/verify-design-token-ci.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-tokens.sh
+    command: scripts/qa/verify-design-tokens.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_checkout_route.py
+    command: pytest services/purchase-gateway/tests/unit/test_checkout_route.py
+- id: AC-006
+  description: Given `assets/branding/tokens.provenance.json["source_commit"]`, when
+    validated, then it matches the 40-character lowercase git SHA pattern `[0-9a-f]{40}`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/verify-token-drift.sh
+    command: scripts/branding/verify-token-drift.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-token-ci.sh
+    command: scripts/qa/verify-design-token-ci.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-tokens.sh
+    command: scripts/qa/verify-design-tokens.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+- id: AC-007
+  description: Given `assets/branding/tokens.provenance.json["source_sha256"]`, when
+    validated, then it matches the 64-character lowercase SHA256 pattern `[0-9a-f]{64}`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/verify-token-drift.sh
+    command: scripts/branding/verify-token-drift.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-token-ci.sh
+    command: scripts/qa/verify-design-token-ci.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-tokens.sh
+    command: scripts/qa/verify-design-tokens.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+- id: AC-008
+  description: Given `verify-token-drift.sh` is run, when `tokens.css` and `mereka-overrides.css`
+    are in sync, then the script exits 0 with message "✓ Token drift + provenance
+    checks passed."
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/verify-token-drift.sh
+    command: scripts/branding/verify-token-drift.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-token-ci.sh
+    command: scripts/qa/verify-design-token-ci.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-tokens.sh
+    command: scripts/qa/verify-design-tokens.sh
+  - type: automated
+    test_type: unit
+    file: services/purchase-gateway/tests/unit/test_webhook_handler.py
+    command: pytest services/purchase-gateway/tests/unit/test_webhook_handler.py
+- id: AC-009
+  description: 'Given `tokens.css` defines `--color-teal: #237072` and `mereka-overrides.css`
+    defines `--mereka-color-teal: #FFFFFF`, when `verify-token-drift.sh` is run, then
+    the script exits non-zero with error "drift: --color-teal=#237072 != --mereka-color-teal=#FFFFFF".'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/verify-token-drift.sh
+    command: scripts/branding/verify-token-drift.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-tokens.sh
+    command: scripts/qa/verify-design-tokens.sh
+- id: AC-010
+  description: 'Given `tokens.css` content is modified but `tokens.provenance.json["source_sha256"]`
+    is stale, when `verify-token-drift.sh` is run, then the script exits non-zero
+    with error "tokens.css sha256 drift: provenance=<old> actual=<new>".'
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/verify-token-drift.sh
+    command: scripts/branding/verify-token-drift.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-token-ci.sh
+    command: scripts/qa/verify-design-token-ci.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-tokens.sh
+    command: scripts/qa/verify-design-tokens.sh
+- id: AC-011
+  description: Given the upstream repository at `/home/gurpreet/projects/bbbi-mereka-brand-assets`
+    with updated tokens, when `SYNC_FILE=1 ./scripts/branding/update-token-provenance.sh`
+    is run, then `assets/branding/tokens.css` is overwritten with the upstream file
+    and `tokens.provenance.json` is updated with the new commit SHA and file hash.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-tokens.sh
+    command: scripts/qa/verify-design-tokens.sh
+  - type: manual
+    runbook: specs/design-tokens-system_spec.md
+    section: Rollout & Rollback > Syncing New Tokens from Figma
+    justification: Full sync workflow requires access to upstream bbbi-mereka-brand-assets
+      repository
+- id: AC-012
+  description: Given `infrastructure/tutor/themes/mereka/common/static/css/mereka-overrides.css`,
+    when parsed, then it contains `--mereka-color-teal` defined as a value (direct
+    assignment or CSS variable reference), and the value matches `--color-teal` from
+    `tokens.css`.
+  verify:
+  - type: automated
+    test_type: shell_verification
+    file: scripts/branding/verify-token-drift.sh
+    command: scripts/branding/verify-token-drift.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-token-ci.sh
+    command: scripts/qa/verify-design-token-ci.sh
+  - type: automated
+    test_type: shell_verification
+    file: scripts/qa/verify-design-tokens.sh
+    command: scripts/qa/verify-design-tokens.sh
+

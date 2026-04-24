@@ -1,0 +1,12 @@
+Your {{ frequency }} Digest
+
+Hi {{ user_name }},
+
+You have {{ total_notifications }} notification(s) since your last digest:
+
+{% for item in digest_items %}- {{ item.title }}{% if item.count > 1 %} ({{ item.count }} new){% endif %}
+{% endfor %}
+
+---
+{{ org_display_name }}
+Manage digest preferences: {{ preferences_url }}

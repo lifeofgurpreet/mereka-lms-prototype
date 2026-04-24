@@ -1,0 +1,6 @@
+{
+  "fontFamily": {
+    "sans-serif": { "$value": "'Poppins', 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", "$type": "fontFamily" },
+    "heading": { "$value": "'Lato', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", "$type": "fontFamily" }
+  }
+}

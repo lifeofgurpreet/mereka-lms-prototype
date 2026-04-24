@@ -1,0 +1,51 @@
+name: ADR Governance
+
+on:
+  pull_request:
+    paths:
+      - "docs/adr/**"
+      - "docs/concepts/architecture/**"
+      - "evidence/**"
+      - "docs/ops/runbooks/**"
+      - "scripts/qa/run-adr-gates.sh"
+      - "scripts/qa/generate_adr_readme.py"
+      - "tools/docs/adr_ledger.py"
+      - "tools/docs/build_adr_ledger.py"
+      - "tools/docs/verify/verify_adr_*"
+  push:
+    branches: ["main"]
+    paths:
+      - "docs/adr/**"
+      - "docs/concepts/architecture/**"
+      - "evidence/**"
+      - "docs/ops/runbooks/**"
+      - "scripts/qa/run-adr-gates.sh"
+      - "scripts/qa/generate_adr_readme.py"
+      - "tools/docs/adr_ledger.py"
+      - "tools/docs/build_adr_ledger.py"
+      - "tools/docs/verify/verify_adr_*"
+
+jobs:
+  adr-suite:
+    name: ADR Suite
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyyaml
+
+      - name: Run ADR suite
+        run: |
+          make adr-governance

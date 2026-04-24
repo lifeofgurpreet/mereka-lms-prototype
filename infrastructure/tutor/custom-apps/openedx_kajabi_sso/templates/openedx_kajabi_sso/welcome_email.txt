@@ -1,0 +1,31 @@
+Welcome to {{ platform_name|default:"Mereka Academy" }}!
+
+Hello {{ user.first_name|default:first_name|default:user.username }},
+
+Your Kajabi account has been successfully migrated with Single Sign-On (SSO) enabled.
+You can continue your learning journey with a seamless login experience.
+
+YOUR ACCOUNT DETAILS
+--------------------
+Email: {{ user.email|default:email }}
+Login Method: Single Sign-On (SSO)
+
+GETTING STARTED
+---------------
+1. Visit {{ lms_url }}/login
+2. Use the "Sign in with SSO" option on the login page
+3. Enter your email address ({{ user.email|default:email }})
+4. You'll be automatically logged in using your Kajabi credentials
+
+NEED HELP?
+----------
+If you have any questions or need assistance with logging in, please contact our support team at {{ support_email }}.
+
+We're here to support your learning success!
+
+Best regards,
+The {{ platform_name|default:"Mereka Academy" }} Team
+
+---
+This is an automated message from {{ platform_name|default:"Mereka Academy" }}. Please do not reply to this email.
+If you believe you received this email in error, please contact {{ support_email }}.

@@ -1,0 +1,469 @@
+# Global configuration
+{
+    auto_https off
+    admin 0.0.0.0:2019
+    # Enable per-server HTTP metrics. Key metrics emitted:
+    #   caddy_http_request_duration_seconds{code,handler,method,server} (histogram)
+    #   caddy_http_requests_total{handler,server} (counter — no code label)
+    #   caddy_http_requests_in_flight{handler,server} (gauge)
+    # SLO burn-rate rules use caddy_http_request_duration_seconds_count to
+    # filter by status code; caddy_http_requests_total has no code label.
+    # Verified live against mereka-lms-dev pod 2026-04-23.
+    # See bead mereka-lms-lpig (phantom SLO rewrite) and bead
+    # mereka-lms-33d8 (phantom audit).
+    metrics
+}
+
+# proxy directive snippet (with logging) to be used as follows:
+#
+#     import proxy "containername:port"
+(proxy) {
+    log {
+        output stdout
+        format filter {
+            wrap json
+            fields {
+                common_log delete
+                request>headers delete
+                resp_headers delete
+                tls delete
+            }
+        }
+    }
+
+    # This will compress requests that matches the default criteria set by Caddy.
+    # see https://caddyserver.com/docs/caddyfile/directives/encode
+    # for information about the defaults; i.e. how/when this will be applied.
+    encode gzip
+
+    reverse_proxy {args[0]} {
+        header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+        header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+        header_up X-Request-ID {http.request.header.X-Request-ID}
+        header_up traceparent {http.request.header.traceparent}
+    }
+
+    # Default: require revalidation on every request. This covers HTML pages and
+    # API responses while still allowing conditional 304s via ETag/Last-Modified.
+    header Cache-Control "no-cache"
+
+    # Hashed static assets (Django ManifestStaticFilesStorage): safe to cache long-term.
+    @static_hashed {
+        path /static/* /theming/asset/*
+    }
+    header @static_hashed Cache-Control "public, max-age=31536000, immutable"
+
+    # Media uploads (profile images, course assets): cache with short revalidation.
+    @media_assets {
+        path /media/*
+    }
+    header @media_assets Cache-Control "public, max-age=3600"
+
+    # Sensitive API endpoints: never cache.
+    @api_no_store {
+        path /api/* /oauth2/* /login* /logout* /admin/*
+    }
+    header @api_no_store Cache-Control "no-store"
+
+}
+
+# LMS - local development (HTTP only)
+localhost{$default_site_port}, preview.localhost{$default_site_port} {
+    @favicon_matcher {
+        path_regexp ^/favicon.ico$
+    }
+    rewrite @favicon_matcher /theming/asset/images/favicon.ico
+
+    # Limit profile image upload size
+    handle_path /api/profile_images/*/*/upload {
+        request_body {
+            max_size 1MB
+        }
+    }
+
+    import proxy "lms:8000"
+
+    handle_path /* {
+        request_body {
+            max_size 4MB
+        }
+    }
+}
+
+# LMS - environment-specific domains (TLS via NGINX Ingress)
+# Domains are injected via environment variables; overlays must set:
+#   LMS_HOST        — primary LMS hostname (e.g. academyv2.mereka.io)
+#   LMS_HOST_PREVIEW — preview hostname    (e.g. preview.academyv2.mereka.io)
+#   TENANT_*_LMS_HOST — non-primary LMS tenant roots (when this base Caddyfile is authoritative)
+http://{$LMS_HOST}, http://{$LMS_HOST_PREVIEW}, http://{$TENANT_BIJIBIJI_LMS_HOST:bijibiji.invalid}, http://{$TENANT_SOF_LMS_HOST:sof.invalid} {
+    @favicon_matcher {
+        path_regexp ^/favicon.ico$
+    }
+    rewrite @favicon_matcher /theming/asset/images/favicon.ico
+
+    # Limit profile image upload size
+    handle_path /api/profile_images/*/*/upload {
+        request_body {
+            max_size 1MB
+        }
+    }
+
+    # Purchase Gateway — Stripe webhooks + checkout API
+    handle /payments/* {
+        uri strip_prefix /payments
+        reverse_proxy payments-gateway:8080 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
+        }
+    }
+
+    # MFE theme assets (logos, brand CSS) — served from MFE pod.
+    # The Mereka header component constructs logo URLs as {LMS_BASE_URL}/theme/…
+    # but these files live in the MFE image, not LMS. Proxy them transparently.
+    # CORS header required: apps. subdomain loads this cross-origin; Chrome ORB
+    # blocks SVG without Access-Control-Allow-Origin.
+    # Ported from bbi-infrastructure vendored Caddyfile (GitOps PR #3733) so
+    # the app-repo source of truth matches the rendered cluster config; this
+    # had drifted since the vendored base diverged. See bead mereka-lms-9o0o
+    # (three-layer duplicate writer trap).
+    handle /theme/* {
+        header Access-Control-Allow-Origin "*"
+        reverse_proxy mfe:8002 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+        }
+    }
+
+    import proxy "lms:8000"
+
+
+
+    handle_path /* {
+        request_body {
+            max_size 4MB
+        }
+    }
+}
+
+# Studio/CMS - local development (HTTP only)
+studio.localhost{$default_site_port} {
+    @favicon_matcher {
+        path_regexp ^/favicon.ico$
+    }
+    rewrite @favicon_matcher /theming/asset/images/favicon.ico
+
+    import proxy "cms:8000"
+
+
+
+    handle_path /* {
+        request_body {
+            max_size 250MB
+        }
+    }
+}
+
+# Studio/CMS - environment-specific domains (TLS via NGINX Ingress)
+# STUDIO_HOST is injected by the overlay (e.g. studio.academyv2.mereka.io).
+# TENANT_*_STUDIO_HOST carry tenant-pattern Studio roots when active.
+http://{$STUDIO_HOST}, http://{$TENANT_BIJIBIJI_STUDIO_HOST:studio-bijibiji.invalid}, http://{$TENANT_SOF_STUDIO_HOST:studio-sof.invalid} {
+    @favicon_matcher {
+        path_regexp ^/favicon.ico$
+    }
+    rewrite @favicon_matcher /theming/asset/images/favicon.ico
+
+    import proxy "cms:8000"
+
+    handle_path /* {
+        request_body {
+            max_size 250MB
+        }
+    }
+}
+
+# Discovery Service (Course Catalog API)
+discovery.localhost{$default_site_port} {
+    request_body {
+        max_size 10MB
+    }
+
+    # Discovery root is legacy operator plumbing; do not expose the old
+    # Query Preview UI as if it were the learner browse surface.
+    @discovery_root path /
+    redir @discovery_root /health/
+
+    import proxy "discovery:8000"
+}
+
+# Discovery Service (TLS via NGINX Ingress)
+# DISCOVERY_HOST is injected by the overlay (e.g. discovery.academyv2.mereka.io).
+http://{$DISCOVERY_HOST} {
+    request_body {
+        max_size 10MB
+    }
+
+    # Keep API and health routes public where required, but make "/" behave
+    # like a health landing page rather than the legacy Query Preview demo.
+    @discovery_root path /
+    redir @discovery_root /health/
+
+    import proxy "discovery:8000"
+}
+# MFE (Micro-Frontends) - localhost and production/dev
+# - apps.localhost: local development
+# MFE_HOST is injected by the overlay (e.g. apps.academyv2.mereka.io).
+# Non-primary tenant apps hosts must be bound explicitly; a comma-joined host
+# list in one env var is not a trustworthy Caddy authority surface.
+(mfe_apps_proxy) {
+    # Root apps host contract: stay on the tenant apps host and land on the authn shell.
+    # Without this, requests to apps.<tenant>/ fall through and leak to the shared LMS host.
+    @mfe_root_entry {
+        path /
+    }
+    redir @mfe_root_entry /authn/login?next=%2Fdashboard 302
+
+    # Learner-home alias: human entry traffic expects /dashboard on the apps host,
+    # but the shipped learner-home MFE lives at /learner-dashboard/.
+    @mfe_dashboard_alias {
+        path /dashboard /dashboard/
+    }
+    redir @mfe_dashboard_alias /learner-dashboard/ 302
+
+    # Account MFE requires trailing slash: React Router basename=/account/ won't
+    # match /account (no slash), rendering a blank page. Redirect silently.
+    @account_no_slash {
+        path /account
+    }
+    redir @account_no_slash /account/ 302
+
+    request_body {
+        max_size 2MB
+    }
+
+    # Some MFEs issue basename-relative LMS/auth requests (for example
+    # /learner-dashboard/api/... or /learner-dashboard/login_refresh).
+    # Strip the MFE basename before proxying so these requests do not fall
+    # through to the SPA shell and return index.html with 200 text/html.
+    # Note: bare "|login" was removed from the alternation because it stole
+    # the SPA route for basename-relative /authn/login (Authn MFE page),
+    # rewriting it to /login and proxying to LMS — breaking sign-in. Keep
+    # login_refresh, csrf, oauth2, and the full /api/* proxy; drop the bare
+    # /login branch. Ported from bbi-infrastructure GitOps PR #3733 into
+    # the app-repo canonical source so this fix survives the next vendor
+    # sync. See bead mereka-lms-9o0o.
+    @mfe_prefixed_lms_routes path_regexp mfe_prefixed_lms ^/(authn|account|communications|course-authoring|authoring|discussions|gradebook|learner-dashboard|learning|learner-record|ora-grading|profile)(/(api/mfe_config/v1.*|api/.*|login_refresh.*|csrf/.*|oauth2/.*))$
+    handle @mfe_prefixed_lms_routes {
+        rewrite * {http.regexp.mfe_prefixed_lms.2}
+        reverse_proxy lms:8000 {
+            header_up Host {http.request.host}
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Forwarded-Host {http.request.host}
+        }
+    }
+
+    # MFE basename-prefixed theme assets: PARAGON_THEME references /theme/*
+    # relative to document base, so an MFE at /{basename}/ causes the browser
+    # to request /{basename}/theme/core.min.css. Without this handler the SPA
+    # fallback returns index.html (text/html) instead of the CSS file.
+    @mfe_prefixed_theme path_regexp mfe_theme ^/(authn|account|communications|course-authoring|authoring|discussions|gradebook|learner-dashboard|learning|learner-record|ora-grading|profile)/theme/(.+)$
+    handle @mfe_prefixed_theme {
+        rewrite * /theme/{http.regexp.mfe_theme.2}
+        reverse_proxy mfe:8002 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
+        }
+    }
+
+    # Route all apps.* traffic through the MFE service. The MFE pod owns the
+    # LMS-facing API/auth proxy logic and has the live network path to LMS.
+
+    import proxy "mfe:8002"
+}
+
+apps.localhost{$default_site_port} {
+    request_body {
+        max_size 2MB
+    }
+    import proxy "mfe:8002"
+}
+
+# MFE (TLS via NGINX Ingress)
+http://{$MFE_HOST} {
+    import mfe_apps_proxy
+}
+
+# Non-primary tenant apps hosts must bind through the same authoritative edge
+# block as the primary apps host. Do not rely on a comma-joined MFE_HOST env.
+http://{$TENANT_BIJIBIJI_MFE_HOST:apps-bijibiji.invalid} {
+    import mfe_apps_proxy
+}
+
+http://{$TENANT_SOF_MFE_HOST:apps-sof.invalid} {
+    import mfe_apps_proxy
+}
+# Notes API
+notes.localhost{$default_site_port} {
+    import proxy "notes:8000"
+}
+
+# Notes API (TLS via NGINX Ingress)
+# NOTES_HOST is injected by the overlay (e.g. notes.academyv2.mereka.io).
+http://{$NOTES_HOST} {
+    import proxy "notes:8000"
+}
+
+# Credentials Service
+# CREDENTIALS_HOST is injected by the overlay (e.g. credentials.academyv2.mereka.io).
+http://{$CREDENTIALS_HOST} {
+    # Authn assets are served by MFE; keep service-domain admin/login pages branded/functional.
+    handle /authn/* {
+        reverse_proxy mfe:8002 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
+        }
+    }
+
+    # Keep service-domain admin login route aligned to the shared authn shell.
+    handle /admin/login {
+        rewrite * /authn/login
+        reverse_proxy mfe:8002 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
+        }
+    }
+    handle /admin/login/* {
+        rewrite * /authn/login
+        reverse_proxy mfe:8002 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
+        }
+    }
+
+    @credentials_root path /
+    header @credentials_root Content-Type "text/html; charset=utf-8"
+    respond @credentials_root "<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Credentials</title></head><body style='margin:0;padding:40px;background:#f5f7fb;color:#1a1623;font-family:Poppins,Lato,sans-serif'><main style='max-width:760px;margin:0 auto;background:#fff;padding:32px;border-radius:20px;border:1px solid rgba(26,22,35,.08);box-shadow:0 16px 50px rgba(26,22,35,.1)'><h1 style='margin:0 0 12px;color:#2d898b;font-size:2rem;line-height:1.2'>Credentials Service</h1><p style='margin:0 0 16px;font-size:1rem;line-height:1.6'>Credential issuance APIs are online. Use the admin route for operator actions and the health route for service checks.</p><p style='margin:0'><a href='/admin/login/' style='color:#295cad;font-weight:600;text-decoration:none'>Open admin login</a><span style='opacity:.5'> · </span><a href='/health/' style='color:#295cad;font-weight:600;text-decoration:none'>Health endpoint</a></p></main></body></html>" 200
+    import proxy "credentials:8000"
+}
+
+# Forum v2 (Python) is now integrated into LMS - no standalone forum service.
+# Discussion APIs are served by the LMS at /api/discussion/ and /forum_form_discussion/.
+# The Discussions MFE handles the learner-facing UI.
+
+# Enterprise Admin Portal MFE (TLS via NGINX Ingress)
+# ENTERPRISE_ADMIN_HOST is injected by the overlay (e.g. admin.academyv2.mereka.io).
+http://{$ENTERPRISE_ADMIN_HOST} {
+    request_body {
+        max_size 2MB
+    }
+        reverse_proxy /api/mfe_config/v1* lms:8000 {
+            header_up Host {$LMS_HOST}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
+        }
+        reverse_proxy /login_refresh* lms:8000 {
+            header_up Host {$LMS_HOST}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
+        }
+    # Enterprise service APIs — routed to internal K8s services via path prefix.
+    # Same-origin (admin subdomain) so no CORS complications.
+    handle /api/enterprise-catalog/* {
+        uri strip_prefix /api/enterprise-catalog
+        reverse_proxy enterprise-catalog:8160 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
+        }
+    }
+    handle /api/enterprise-access/* {
+        uri strip_prefix /api/enterprise-access
+        reverse_proxy enterprise-access:18270 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
+        }
+    }
+    handle /api/license-manager/* {
+        uri strip_prefix /api/license-manager
+        reverse_proxy license-manager:18170 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
+        }
+    }
+    handle /api/enterprise-subsidy/* {
+        uri strip_prefix /api/enterprise-subsidy
+        reverse_proxy enterprise-subsidy:18280 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
+        }
+    }
+    import proxy "enterprise-admin-portal:8002"
+}
+
+# Enterprise Learner Portal MFE (TLS via NGINX Ingress)
+# ENTERPRISE_LEARNER_HOST is injected by the overlay (e.g. learner.academyv2.mereka.io).
+http://{$ENTERPRISE_LEARNER_HOST} {
+    request_body {
+        max_size 2MB
+    }
+    reverse_proxy /api/mfe_config/v1* lms:8000 {
+        header_up Host {$LMS_HOST}
+        header_up X-Request-ID {http.request.header.X-Request-ID}
+        header_up traceparent {http.request.header.traceparent}
+    }
+    reverse_proxy /login_refresh* lms:8000 {
+        header_up Host {$LMS_HOST}
+        header_up X-Request-ID {http.request.header.X-Request-ID}
+        header_up traceparent {http.request.header.traceparent}
+    }
+    # Enterprise learner BFF — served by enterprise-access
+    reverse_proxy /api/v1/bffs/* enterprise-access:18270 {
+        header_up Host {http.request.host}
+        header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+        header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+        header_up X-Request-ID {http.request.header.X-Request-ID}
+        header_up traceparent {http.request.header.traceparent}
+    }
+    # Enterprise service APIs (same pattern as admin portal)
+    handle /api/enterprise-catalog/* {
+        uri strip_prefix /api/enterprise-catalog
+        reverse_proxy enterprise-catalog:8160 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
+        }
+    }
+    handle /api/enterprise-access/* {
+        uri strip_prefix /api/enterprise-access
+        reverse_proxy enterprise-access:18270 {
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Request-ID {http.request.header.X-Request-ID}
+            header_up traceparent {http.request.header.traceparent}
+        }
+    }
+    import proxy "enterprise-learner-portal:8002"
+}
+
+# Xqueue (external graders, local only)
+xqueue.localhost{$default_site_port} {
+    import proxy "xqueue:8000"
+}

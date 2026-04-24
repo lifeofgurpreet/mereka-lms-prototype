@@ -1,0 +1,25 @@
+## mako
+<%page expression_filter="h"/>
+<%!
+  from datetime import datetime
+  from django.conf import settings
+%>
+<%namespace name='static' file='static_content.html'/>
+
+<%
+  lms_root = getattr(settings, 'LMS_ROOT_URL', 'https://academyv2.mereka.io')
+  platform_name = getattr(settings, 'PLATFORM_NAME', 'Mereka Academy')
+%>
+
+<footer class="mereka-studio-footer mereka-footer--v2" role="contentinfo">
+  <div class="footer-legal">
+    <div class="footer-container footer-legal-row">
+      <span class="footer-copyright">&copy; ${datetime.now().year} ${platform_name}</span>
+      <a href="${lms_root}">LMS</a>
+      <a href="mailto:support@mereka.io">support@mereka.io</a>
+    </div>
+  </div>
+</footer>
+
+## footer-content-secondary intentionally omitted (white-label deployment).
+## Open edX trademark attribution is handled in platform documentation.

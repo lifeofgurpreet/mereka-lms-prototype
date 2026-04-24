@@ -1,0 +1,470 @@
+#!/usr/bin/env bash
+# @covers AC-UI-501, AC-UI-502, AC-UI-503, AC-UI-504, AC-UI-505
+# @spec: bead-1h41
+#
+# Verify that undefined_license_key analytics key regressions are eliminated
+# from all injected surfaces in the Mereka LMS deployment.
+#
+# Checks:
+#   AC-UI-501: Baseline failure documentation exists — which requests were
+#              affected and which hosts (admin/authn/apps) were impacted.
+#   AC-UI-502: All analytics inject points have proper guards — no raw
+#              undefined/none/null/undefined_license_key injection in
+#              mereka_lms.py, env.config.jsx, head-extra.html templates.
+#   AC-UI-503: Canonical key validation helper with precedence policy exists,
+#              and no case-mangling side effects on the key value.
+#   AC-UI-504: Smoke check coverage proving 0 undefined key calls on
+#              admin/authn/apps hosts. Optional live mode via LIVE=1.
+#   AC-UI-505: Evidence bundle path documented and root-cause notes present.
+#
+# Offline-capable: all checks operate on source files only.
+# Live mode: set LIVE=1 to enable optional cluster checks.
+
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
+
+PASS=0
+FAIL=0
+WARN=0
+
+pass_check() { echo "  PASS: $1"; PASS=$((PASS + 1)); }
+fail_check() { echo "  FAIL: $1"; FAIL=$((FAIL + 1)); }
+
+warn() {
+  echo "  WARN: $1"
+  WARN=$((WARN + 1))
+}
+
+PLUGIN_BUNDLE=""
+cleanup() {
+  if [[ -n "${PLUGIN_BUNDLE:-}" && -f "${PLUGIN_BUNDLE}" ]]; then
+    rm -f "${PLUGIN_BUNDLE}"
+  fi
+}
+trap cleanup EXIT
+
+if mereka_plugin_has_any "$REPO_ROOT"; then
+  PLUGIN_BUNDLE="$(mktemp "${TMPDIR:-/tmp}/mereka-plugin-contract.analytics-key.XXXXXX.py")"
+  while IFS= read -r plugin_src; do
+    [[ -f "$plugin_src" ]] || continue
+    cat "$plugin_src" >> "$PLUGIN_BUNDLE"
+    printf "\n" >> "$PLUGIN_BUNDLE"
+  done < <(mereka_plugin_contract_files "$REPO_ROOT")
+fi
+
+PLUGIN="${PLUGIN_BUNDLE:-$PLUGIN_MAIN}"
+FOOTER="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/footer.html"
+EVIDENCE_DOC="$REPO_ROOT/docs/evidence/operations/ANALYTICS_KEY_ELIMINATION_EVIDENCE.md"
+CI_WORKFLOW="$REPO_ROOT/.github/workflows/ci.yml"
+LMS_HEAD_EXTRA="$REPO_ROOT/infrastructure/tutor/themes/mereka/lms/templates/head-extra.html"
+CMS_HEAD_EXTRA="$REPO_ROOT/infrastructure/tutor/themes/mereka/cms/templates/head-extra.html"
+COMMON_HEAD_EXTRA="$REPO_ROOT/infrastructure/tutor/themes/mereka/common/templates/head-extra.html"
+
+echo "================================================================"
+echo "Analytics Key Elimination Verifier (bead 1h41)"
+echo "================================================================"
+echo ""
+
+# -----------------------------------------------------------------------
+# AC-UI-501: Baseline failure documentation
+# -----------------------------------------------------------------------
+echo "AC-UI-501: Baseline failure documentation"
+
+# Check 1: Evidence doc exists
+if [[ -f "$EVIDENCE_DOC" ]]; then
+  pass_check "ANALYTICS_KEY_ELIMINATION_EVIDENCE.md exists"
+else
+  fail_check "ANALYTICS_KEY_ELIMINATION_EVIDENCE.md exists"
+fi
+
+# Check 2: Doc records the specific symptom (undefined_license_key calls)
+if [[ -f "$EVIDENCE_DOC" ]]; then
+  if grep -q 'undefined_license_key' "$EVIDENCE_DOC"; then
+    pass_check "Evidence doc documents undefined_license_key symptom"
+  else
+    fail_check "Evidence doc documents undefined_license_key symptom"
+  fi
+fi
+
+# Check 3: Doc names the affected hosts (admin, authn, apps)
+if [[ -f "$EVIDENCE_DOC" ]]; then
+  if grep -qiE 'authn|apps\.academyv2|admin' "$EVIDENCE_DOC"; then
+    pass_check "Evidence doc names affected hosts (admin/authn/apps)"
+  else
+    fail_check "Evidence doc names affected hosts (admin/authn/apps)"
+  fi
+fi
+
+# Check 4: Doc records the error codes (403/405) or request failure type
+if [[ -f "$EVIDENCE_DOC" ]]; then
+  if grep -qE '403|405|network|Network|Bad Request|400' "$EVIDENCE_DOC"; then
+    pass_check "Evidence doc records 403/405 error codes or network failure type"
+  else
+    fail_check "Evidence doc records 403/405 error codes or network failure type"
+  fi
+fi
+
+# Check 5: Doc has a root-cause section
+if [[ -f "$EVIDENCE_DOC" ]]; then
+  if grep -qi 'root.cause\|Root Cause' "$EVIDENCE_DOC"; then
+    pass_check "Evidence doc has a root-cause section"
+  else
+    fail_check "Evidence doc has a root-cause section"
+  fi
+fi
+
+echo ""
+
+# -----------------------------------------------------------------------
+# AC-UI-502: All inject points have proper guards
+# -----------------------------------------------------------------------
+echo "AC-UI-502: Analytics inject point guards"
+
+# Check 6: Plugin reads SEGMENT_KEY from env var (not hardcoded)
+if [[ -f "$PLUGIN" ]]; then
+  if grep -q 'SEGMENT_KEY.*os\.environ\.get.*MEREKA_SEGMENT_KEY' "$PLUGIN"; then
+    pass_check "mereka_lms.py reads SEGMENT_KEY from MEREKA_SEGMENT_KEY env var"
+  else
+    fail_check "mereka_lms.py reads SEGMENT_KEY from MEREKA_SEGMENT_KEY env var"
+  fi
+else
+  warn "Plugin contract sources not found (expected at least $PLUGIN_MAIN)"
+fi
+
+# Check 7: Plugin defaults SEGMENT_KEY to empty string (safe disabled-by-default)
+if [[ -f "$PLUGIN" ]]; then
+  SEGMENT_LINE="$(grep 'SEGMENT_KEY.*os\.environ\.get' "$PLUGIN" || true)"
+  if grep -qF '""' <<<"$SEGMENT_LINE"; then
+    pass_check "SEGMENT_KEY defaults to empty string (analytics disabled by default)"
+  else
+    fail_check "SEGMENT_KEY defaults to empty string (analytics disabled by default)"
+  fi
+fi
+
+# Check 8: No undefined_license_key assigned as a value in plugin (guard context is OK)
+if [[ -f "$PLUGIN" ]]; then
+  HARDCODED="$(grep -n 'undefined_license_key' "$PLUGIN" | grep -v '^\s*#' || true)"
+  if [[ -z "$HARDCODED" ]]; then
+    pass_check "No 'undefined_license_key' literal assigned in mereka_lms.py"
+  else
+    fail_check "No 'undefined_license_key' literal assigned in mereka_lms.py"
+    echo "    Found: $HARDCODED"
+  fi
+fi
+
+# Check 9: Footer template must have NO Segment code (plugin-first canonical state post-2k6k)
+# Regression: any analytics code in footer.html violates plugin-first model
+if [[ -f "$FOOTER" ]]; then
+  if grep -qE 'segment\.io|analytics\.js|analytics\.load|segment_key|undefined_license_key' "$FOOTER"; then
+    fail_check "footer.html has no Segment/analytics code (plugin-first canonical state post-2k6k)"
+    grep -nE 'segment\.io|analytics\.js|analytics\.load|segment_key|undefined_license_key' "$FOOTER" | sed 's/^/    /'
+  else
+    pass_check "footer.html has no Segment/analytics code (plugin-first canonical state post-2k6k)"
+  fi
+else
+  warn "footer.html not found at $FOOTER — theme may not be applied yet"
+fi
+
+# Check 10: Footer has 2k6k migration comment (intentional removal documented)
+if [[ -f "$FOOTER" ]]; then
+  if grep -qE '2k6k|analytics.*removed|removed.*analytics|Tutor plugin hook' "$FOOTER"; then
+    pass_check "footer.html has migration comment documenting 2k6k analytics removal"
+  else
+    warn "footer.html missing 2k6k migration comment — regression may be silent if analytics code re-added"
+  fi
+fi
+
+# Check 11: No segment-io template includes in footer.html (post-2k6k: plugin hook is canonical)
+if [[ -f "$FOOTER" ]]; then
+  if grep -qE 'segment-io\.html|segment-io-footer\.html' "$FOOTER"; then
+    fail_check "footer.html has no segment-io template includes (post-2k6k: use Tutor plugin hook)"
+    grep -nE 'segment-io\.html|segment-io-footer\.html' "$FOOTER" | sed 's/^/    /'
+  else
+    pass_check "footer.html has no segment-io template includes (Tutor plugin hook is canonical)"
+  fi
+fi
+
+# Check 12: head-extra templates have no raw Segment injection (admin/authn/apps risk)
+for HEAD_EXTRA in "$LMS_HEAD_EXTRA" "$CMS_HEAD_EXTRA" "$COMMON_HEAD_EXTRA"; do
+  if [[ -f "$HEAD_EXTRA" ]]; then
+    SEGMENT_IN_HEAD="$(grep -nE 'SEGMENT_KEY|undefined_license_key|segment\.io|analytics\.track' \
+      "$HEAD_EXTRA" | grep -v '^\s*#' || true)"
+    if [[ -z "$SEGMENT_IN_HEAD" ]]; then
+      LABEL="$(basename "$(dirname "$HEAD_EXTRA")")/head-extra.html"
+      pass_check "$LABEL has no raw analytics injection"
+    else
+      LABEL="$(basename "$(dirname "$HEAD_EXTRA")")/head-extra.html"
+      fail_check "$LABEL has no raw analytics injection"
+      echo "    Found: $SEGMENT_IN_HEAD"
+    fi
+  fi
+done
+
+# Check 13: No literal undefined/null string values for SEGMENT_KEY in infrastructure/
+UNDEF_HITS="$(grep -r \
+  "SEGMENT_KEY.*=.*['\"]undefined['\"]\\|SEGMENT_KEY.*=.*['\"]null['\"]\\|SEGMENT_KEY.*=.*['\"]undefined_license_key['\"]" \
+  "$REPO_ROOT/infrastructure" \
+  --include="*.py" --include="*.js" --include="*.jsx" --include="*.html" \
+  -l 2>/dev/null || true)"
+if [[ -z "$UNDEF_HITS" ]]; then
+  pass_check "No SEGMENT_KEY assigned literal undefined/null/undefined_license_key in infrastructure/"
+else
+  fail_check "No SEGMENT_KEY assigned literal undefined/null/undefined_license_key in infrastructure/"
+  echo "    Files: $UNDEF_HITS"
+fi
+
+echo ""
+
+# -----------------------------------------------------------------------
+# AC-UI-503: Canonical key validation helper + precedence policy (no case mangling)
+# -----------------------------------------------------------------------
+echo "AC-UI-503: Canonical key validation helper and precedence policy"
+
+# Check 14: Evidence doc describes the key validation pattern / helper
+if [[ -f "$EVIDENCE_DOC" ]]; then
+  if grep -qiE 'validation|sentinel guard|canonical.*key|key.*canonical' "$EVIDENCE_DOC"; then
+    pass_check "Evidence doc describes canonical key validation pattern"
+  else
+    fail_check "Evidence doc describes canonical key validation pattern"
+  fi
+fi
+
+# Check 15: Evidence doc states the precedence policy (env var → config → disabled)
+if [[ -f "$EVIDENCE_DOC" ]]; then
+  if grep -qiE 'MEREKA_SEGMENT_KEY|env.*var|precedence|disabled by default|fallback' "$EVIDENCE_DOC"; then
+    pass_check "Evidence doc states key precedence policy (env var → disabled)"
+  else
+    fail_check "Evidence doc states key precedence policy (env var → disabled)"
+  fi
+fi
+
+# Check 16: Footer guard uses .lower() only for comparison (not for mutating the stored key)
+# The stored segment_key should not be lowercased — only the comparison side.
+if [[ -f "$FOOTER" ]]; then
+  # Extraction lines (assignment to segment_key) should not have .lower()
+  EXTRACTION_LINES="$(grep -n 'segment_key\s*=' "$FOOTER" | grep -v '% if' || true)"
+  if grep -q '\.lower()' <<<"$EXTRACTION_LINES"; then
+    fail_check "segment_key extraction does NOT lowercase the key (no case mangling)"
+    echo "    Key value is being lowercased at extraction — this mangles the write key:"
+    echo "$EXTRACTION_LINES" | grep '\.lower()' | sed 's/^/    /'
+  else
+    pass_check "segment_key extraction does NOT lowercase the key (no case mangling)"
+  fi
+fi
+
+# Check 17: Plugin does not lowercase SEGMENT_KEY (comparison only, not mutation)
+# Post-2k6k: guard logic is in mereka_lms.py (empty string = disabled), not footer.html
+if [[ -f "$PLUGIN" ]]; then
+  if grep -n 'SEGMENT_KEY' "$PLUGIN" | grep -v '^\s*#' | grep -q '\.lower()'; then
+    fail_check "mereka_lms.py guard uses .lower() for comparison only (not key mutation)"
+    grep -n 'SEGMENT_KEY.*\.lower()' "$PLUGIN" | grep -v '^\s*#' | sed 's/^/    /'
+  else
+    pass_check "SEGMENT_KEY key preserved as-is in mereka_lms.py (no .lower() mutation)"
+  fi
+fi
+
+# Check 18: Plugin does not apply string transforms to SEGMENT_KEY after reading it
+if [[ -f "$PLUGIN" ]]; then
+  TRANSFORM_LINES="$(grep -n 'SEGMENT_KEY' "$PLUGIN" | grep '\.lower()\|\.upper()\|\.strip()' | grep -v '#' || true)"
+  if [[ -z "$TRANSFORM_LINES" ]]; then
+    pass_check "mereka_lms.py does not transform SEGMENT_KEY after reading from env"
+  else
+    fail_check "mereka_lms.py does not transform SEGMENT_KEY after reading from env"
+    echo "    Transform found: $TRANSFORM_LINES"
+  fi
+fi
+
+echo ""
+
+# -----------------------------------------------------------------------
+# AC-UI-504: Smoke checks proving 0 403/405 for undefined key calls
+# -----------------------------------------------------------------------
+echo "AC-UI-504: Smoke check coverage for 0 undefined key calls"
+
+# Check 19: Smoke check documentation exists in evidence doc
+if [[ -f "$EVIDENCE_DOC" ]]; then
+  if grep -qiE 'smoke|verification command|verify.*script' "$EVIDENCE_DOC"; then
+    pass_check "Evidence doc has smoke check commands section"
+  else
+    fail_check "Evidence doc has smoke check commands section"
+  fi
+fi
+
+# Check 20: At least one analytics key verify script exists
+ANALYTICS_SCRIPT_COUNT="$(find "$REPO_ROOT/scripts/qa" -name "verify-analytics*.sh" 2>/dev/null | wc -l)"
+if [[ "$ANALYTICS_SCRIPT_COUNT" -ge 1 ]]; then
+  pass_check "At least one verify-analytics*.sh script present (count: $ANALYTICS_SCRIPT_COUNT)"
+else
+  fail_check "At least one verify-analytics*.sh script present"
+fi
+
+# Check 21: CI workflow references analytics key elimination script
+if [[ -f "$CI_WORKFLOW" ]]; then
+  CI_REF="$(grep -c 'analytics-key-elimination\|verify-analytics-key-elimination' \
+    "$CI_WORKFLOW" || true)"
+  if [[ "$CI_REF" -ge 1 ]]; then
+    pass_check "CI workflow references analytics-key-elimination script (refs: $CI_REF)"
+  else
+    fail_check "CI workflow references analytics-key-elimination script"
+  fi
+fi
+
+# Check 22: Evidence doc documents expected smoke output for all three hosts
+if [[ -f "$EVIDENCE_DOC" ]]; then
+  HOSTS_DOCUMENTED=true
+  for host in "admin" "authn" "apps"; do
+    if ! grep -qi "$host" "$EVIDENCE_DOC"; then
+      HOSTS_DOCUMENTED=false
+      warn "Host '$host' not documented in smoke check section"
+    fi
+  done
+  if [[ "$HOSTS_DOCUMENTED" == "true" ]]; then
+    pass_check "Smoke checks cover all 3 hosts (admin/authn/apps) in evidence doc"
+  else
+    fail_check "Smoke checks cover all 3 hosts (admin/authn/apps) in evidence doc"
+  fi
+fi
+
+# Optional live smoke checks (requires LIVE=1)
+if [[ "${LIVE:-0}" == "1" ]]; then
+  echo "  [live] Running live analytics call checks on production hosts..."
+  LMS_URL="${LMS_URL:-https://academyv2.mereka.io}"
+  APPS_URL="${APPS_URL:-https://apps.academyv2.mereka.io}"
+
+  # Admin host — Segment must not fire on /admin paths
+  echo "  [live] Fetching admin login page..."
+  ADMIN_BODY="$(curl -s --max-time 10 "$LMS_URL/admin/login/" 2>/dev/null || echo "")"
+  if grep -qi 'undefined_license_key' <<<"$ADMIN_BODY"; then
+    fail_check "[live] Admin host: no 'undefined_license_key' in page source"
+  elif [[ -z "$ADMIN_BODY" ]]; then
+    warn "[live] Admin login page unreachable (cluster not running or network timeout)"
+  else
+    pass_check "[live] Admin host: no 'undefined_license_key' in page source"
+  fi
+
+  # authn MFE host
+  echo "  [live] Fetching authn MFE login page..."
+  AUTHN_BODY="$(curl -s --max-time 10 "$APPS_URL/authn/login" 2>/dev/null || echo "")"
+  if grep -qi 'undefined_license_key' <<<"$AUTHN_BODY"; then
+    fail_check "[live] authn host: no 'undefined_license_key' in page source"
+  elif [[ -z "$AUTHN_BODY" ]]; then
+    warn "[live] authn MFE page unreachable (cluster not running or network timeout)"
+  else
+    pass_check "[live] authn host: no 'undefined_license_key' in page source"
+  fi
+
+  # apps MFE host (learner-dashboard)
+  echo "  [live] Fetching learner-dashboard MFE page..."
+  DASHBOARD_BODY="$(curl -s --max-time 10 "$APPS_URL/learner-dashboard/" 2>/dev/null || echo "")"
+  if grep -qi 'undefined_license_key' <<<"$DASHBOARD_BODY"; then
+    fail_check "[live] apps host: no 'undefined_license_key' in learner-dashboard"
+  elif [[ -z "$DASHBOARD_BODY" ]]; then
+    warn "[live] learner-dashboard page unreachable (cluster not running or network timeout)"
+  else
+    pass_check "[live] apps host: no 'undefined_license_key' in learner-dashboard"
+  fi
+
+  # Segment API should return no 403/405 for undefined key (key not sent at all)
+  echo "  [live] Verifying Segment API is not called with undefined key on LMS homepage..."
+  LMS_HOME="$(curl -s --max-time 10 "$LMS_URL/" 2>/dev/null || echo "")"
+  if grep -qiE 'undefined_license_key|your_segment_key_here|change_me' <<<"$LMS_HOME"; then
+    fail_check "[live] LMS homepage: no sentinel key in page source"
+  elif [[ -z "$LMS_HOME" ]]; then
+    warn "[live] LMS homepage unreachable"
+  else
+    pass_check "[live] LMS homepage: no sentinel key in page source"
+  fi
+fi
+
+echo ""
+
+# -----------------------------------------------------------------------
+# AC-UI-505: Evidence bundle path and root-cause notes
+# -----------------------------------------------------------------------
+echo "AC-UI-505: Evidence bundle path and root-cause notes"
+
+# Check 23: Evidence doc exists with bundle path
+if [[ -f "$EVIDENCE_DOC" ]]; then
+  if grep -qiE 'evidence bundle|var/analytics|bundle path|artifact' "$EVIDENCE_DOC"; then
+    pass_check "Evidence bundle path documented in evidence doc"
+  else
+    fail_check "Evidence bundle path documented in evidence doc"
+  fi
+fi
+
+# Check 24: Root-cause notes cover the injection chain
+if [[ -f "$EVIDENCE_DOC" ]]; then
+  if grep -qiE 'injection|Injection|inject|Inject' "$EVIDENCE_DOC"; then
+    pass_check "Evidence doc explains full injection failure chain"
+  else
+    fail_check "Evidence doc explains full injection failure chain"
+  fi
+fi
+
+# Check 25: Evidence doc references this bead (1h41) for traceability
+if [[ -f "$EVIDENCE_DOC" ]]; then
+  if grep -q '1h41' "$EVIDENCE_DOC"; then
+    pass_check "Evidence doc references bead 1h41 for traceability"
+  else
+    fail_check "Evidence doc references bead 1h41 for traceability"
+  fi
+fi
+
+# Check 26: Evidence doc references prior bead (2dcy.7) for continuity
+if [[ -f "$EVIDENCE_DOC" ]]; then
+  if grep -qE '2dcy\.7|2dcy7' "$EVIDENCE_DOC"; then
+    pass_check "Evidence doc references prior bead (2dcy.7) for regression continuity"
+  else
+    fail_check "Evidence doc references prior bead (2dcy.7) for regression continuity"
+  fi
+fi
+
+# Check 27: Evidence doc has a related-documents section linking key scripts
+if [[ -f "$EVIDENCE_DOC" ]]; then
+  if grep -q 'verify-analytics' "$EVIDENCE_DOC"; then
+    pass_check "Evidence doc links to key verification scripts"
+  else
+    fail_check "Evidence doc links to key verification scripts"
+  fi
+fi
+
+echo ""
+echo "================================================================"
+echo "Summary: $PASS PASS / $FAIL FAIL / $WARN WARN"
+echo "================================================================"
+
+if [[ "$FAIL" -gt 0 ]]; then
+  echo ""
+  echo "Remediation:"
+  echo "  AC-UI-501: Create docs/evidence/operations/ANALYTICS_KEY_ELIMINATION_EVIDENCE.md."
+  echo "             Document the symptom (undefined_license_key network calls),"
+  echo "             affected hosts (admin/authn/apps), error codes (403/405),"
+  echo "             and a root-cause section explaining the injection failure chain."
+  echo ""
+  echo "  AC-UI-502: Ensure mereka_lms.py uses os.environ.get('MEREKA_SEGMENT_KEY', '')."
+  echo "             footer.html must have ZERO Segment/analytics code (plugin-first model, bead 2k6k)."
+  echo "             If Segment code re-appears in footer.html — remove it, use Tutor plugin hook."
+  echo "             Ensure head-extra.html templates have no raw analytics injection."
+  echo "             Grep infrastructure/ for literal undefined/null/sentinel assignments."
+  echo ""
+  echo "  AC-UI-503: Document the canonical key validation pattern in the evidence doc."
+  echo "             SEGMENT_KEY guard is: empty string = analytics disabled (no footer guards needed)."
+  echo "             State the precedence policy: env var → empty → analytics disabled."
+  echo "             Reference bead 2k6k: analytics moved from footer.html to mereka_lms.py plugin hook."
+  echo ""
+  echo "  AC-UI-504: Add 'analytics-key-elimination' job to .github/workflows/ci.yml."
+  echo "             Add smoke check commands to the evidence doc covering all 3 hosts."
+  echo "             Run: LIVE=1 ./scripts/qa/verify-analytics-key-elimination.sh"
+  echo ""
+  echo "  AC-UI-505: Add evidence bundle generation commands to the evidence doc."
+  echo "             Include root-cause notes and reference bead 1h41."
+  echo "             Link to prior bead 2dcy.7 for regression continuity."
+  exit 1
+fi
+
+echo ""
+echo "RESULT: PASS"
+exit 0

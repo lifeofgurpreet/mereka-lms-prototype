@@ -1,0 +1,42 @@
+name: Validate Multisite Config
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'infrastructure/tutor/multisite-sites.yml'
+      - 'infrastructure/tutor/multisite-sites.dev.yml'
+      - 'infrastructure/tutor/plugins/mereka_lms.py'
+      - 'scripts/qa/validate-multisite-config.sh'
+      - '.github/workflows/validate-multisite.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'infrastructure/tutor/multisite-sites.yml'
+      - 'infrastructure/tutor/multisite-sites.dev.yml'
+      - 'infrastructure/tutor/plugins/mereka_lms.py'
+      - 'scripts/qa/validate-multisite-config.sh'
+      - '.github/workflows/validate-multisite.yml'
+  merge_group:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  validate-multisite:
+    name: Validate SITE_VARIANTS and multisite config
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-python-env
+        with:
+          python-version: '3.12'
+
+      - name: Run multisite config validation
+        run: bash scripts/qa/validate-multisite-config.sh

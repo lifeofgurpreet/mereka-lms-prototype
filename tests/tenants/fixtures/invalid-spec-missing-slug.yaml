@@ -1,0 +1,11 @@
+---
+version: "1.0"
+environment: test
+lms_domain: test.localhost
+
+tenants:
+  - name: Missing Slug Corp
+    org_code: NOSLUGS
+    active: true
+    site:
+      domain: noslugs.localhost

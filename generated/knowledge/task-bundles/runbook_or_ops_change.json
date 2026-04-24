@@ -1,0 +1,92 @@
+{
+  "affected_truth_surfaces": [
+    "docs/catalog.json",
+    "docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md",
+    "docs/meta/knowledge/AGENT_REVIEW_HANDOFF.md",
+    "docs/meta/knowledge/WAVE10_CLOSEOUT.md",
+    "generated/catalogs/knowledge-catalog.json",
+    "generated/graphs/knowledge-graph.json",
+    "generated/knowledge/change-manifest.json",
+    "generated/knowledge/review-bundle.md",
+    "generated/knowledge/truth-impact-report.json",
+    "generated/knowledge/wrapper-retirement-report.json",
+    "tools/knowledge/build_agent_readiness_report.py",
+    "tools/knowledge/build_agent_task_bundles.py",
+    "tools/knowledge/build_cross_repo_agent_packs.py",
+    "tools/knowledge/build_task_bundle.py",
+    "tools/knowledge/build_wave10_source_map.py",
+    "tools/knowledge/change_runtime.py",
+    "tools/knowledge/skill_runtime.py",
+    "tools/knowledge/verify_agent_consumption_runtime.py"
+  ],
+  "authority_order": [
+    "explicit Wave 4/5/6 resolver and contract docs",
+    "canonical specs / contracts / runbooks / architecture docs for the affected task type",
+    "generated runtime outputs derived from those surfaces",
+    "status/evidence surfaces",
+    "archive only when explicitly named as historical context"
+  ],
+  "bundle_json_path": "generated/knowledge/task-bundles/runbook_or_ops_change.json",
+  "bundle_markdown_path": "generated/knowledge/task-bundles/runbook_or_ops_change.md",
+  "bundle_version": 1,
+  "escalation_conditions": [
+    "ops guidance diverges from normative or contract surfaces"
+  ],
+  "generated_by": "tools/knowledge/build_task_bundle.py",
+  "intent": "Change operational guidance, incident response, or maintenance instructions.",
+  "likely_cross_repo_dependencies": [],
+  "out_of_scope": [
+    "docs/archive/**"
+  ],
+  "primary_roots": [
+    "docs",
+    "specs"
+  ],
+  "read_first": [
+    {
+      "path": "docs/meta/knowledge/REVIEW_HANDOFF_MODEL.md",
+      "priority": 1,
+      "reason": "Existing review runtime still governs ops-facing updates."
+    }
+  ],
+  "related_contracts": [],
+  "related_generated_surfaces": [
+    "generated/knowledge/change-manifest.json",
+    "generated/knowledge/task-context-report.json",
+    "generated/knowledge/skill-index.json"
+  ],
+  "related_runbooks": [],
+  "related_specs": [],
+  "required_commands": [
+    "bash scripts/qa/run-knowledge-runtime-gates.sh",
+    "bash scripts/qa/run-cross-repo-contract-gates.sh",
+    "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD",
+    "python3 tools/knowledge/resolve_task_context.py --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+    "python3 tools/knowledge/resolve_task_context.py --check --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+    "python3 tools/knowledge/build_task_bundle.py --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+    "python3 tools/knowledge/build_task_bundle.py --check --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+    "python3 tools/knowledge/build_skill_index.py --repo-root .",
+    "python3 tools/knowledge/build_skill_index.py --check --repo-root .",
+    "python3 tools/knowledge/verify_task_runtime.py --repo-root . --range origin/main...HEAD",
+    "bash scripts/qa/run-task-runtime-gates.sh"
+  ],
+  "required_evidence": [
+    "require_adr_update",
+    "require_runbook_update",
+    "require_status_update"
+  ],
+  "required_reviewers": [
+    "architecture",
+    "docs"
+  ],
+  "source_runtime_artifacts": [
+    "generated/knowledge/change-manifest.json",
+    "generated/knowledge/review-bundle.md",
+    "generated/knowledge/truth-impact-report.json",
+    "generated/knowledge/wrapper-retirement-report.json",
+    "generated/contracts/cross-repo-manifest.json",
+    "generated/contracts/deployment-impact-report.json",
+    "generated/contracts/release-obligations.md"
+  ],
+  "task_type": "runbook_or_ops_change"
+}

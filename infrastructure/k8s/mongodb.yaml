@@ -1,0 +1,73 @@
+# =============================================================================
+# DEPRECATED: In-cluster MongoDB
+# =============================================================================
+# This file is NO LONGER USED. MongoDB has been migrated to MongoDB Atlas.
+#
+# MongoDB Atlas Cluster: cluster-mereka-lms.2pjex4s.mongodb.net
+# Migration Date: 2025-12-17
+# Reason: MCT content migration preparation
+#
+# The Atlas cluster stores:
+# - openedx database (LMS/CMS modulestore, contentstore)
+# - cs_comments_service database (Forum)
+#
+# Configuration is now in:
+# - deploy/k8s/base/apps/openedx/settings/lms/production.py
+# - deploy/k8s/base/apps/openedx/settings/cms/production.py
+# - deploy/k8s/base/deployments.yml (forum env vars)
+# =============================================================================
+#
+# Original in-cluster MongoDB configuration (commented for reference):
+#
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: mongodb
+#   namespace: mereka-lms
+#   labels:
+#     app: mongodb
+# spec:
+#   clusterIP: None
+#   selector:
+#     app: mongodb
+#   ports:
+#     - name: mongo
+#       port: 27017
+#       targetPort: 27017
+# ---
+# apiVersion: apps/v1
+# kind: StatefulSet
+# metadata:
+#   name: mongodb
+#   namespace: mereka-lms
+# spec:
+#   serviceName: mongodb
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: mongodb
+#   template:
+#     metadata:
+#       labels:
+#         app: mongodb
+#     spec:
+#       containers:
+#         - name: mongo
+#           image: mongo:4.2
+#           args: []
+#           ports:
+#             - containerPort: 27017
+#               name: mongo
+#           volumeMounts:
+#             - name: data
+#               mountPath: /data/db
+#       terminationGracePeriodSeconds: 30
+#   volumeClaimTemplates:
+#     - metadata:
+#         name: data
+#       spec:
+#         accessModes: [ "ReadWriteOnce" ]
+#         resources:
+#           requests:
+#             storage: 10Gi
+#         storageClassName: premium-rwo

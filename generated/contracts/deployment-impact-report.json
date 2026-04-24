@@ -1,0 +1,16 @@
+{
+  "cross_repo_manifest_overall_verdict": "infra_counterpart_not_required",
+  "deployment_impacts": [],
+  "generated_by": "tools/contracts/build_deployment_impact_report.py",
+  "overall_verdict": "infra_counterpart_not_required",
+  "range": "origin/main...HEAD",
+  "required_repositories": [],
+  "required_reviewers": [],
+  "service_count": 0,
+  "summary": {
+    "infra_counterpart_not_required": [],
+    "infra_counterpart_required": [],
+    "manual_review_required": [],
+    "unknown_mapping": []
+  }
+}

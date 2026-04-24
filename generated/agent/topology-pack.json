@@ -1,0 +1,96 @@
+{
+  "canonical_services": [
+    {
+      "canonical_lane_id": "authentik",
+      "owning_repo": "Biji-Biji-Initiative/bbi-infrastructure",
+      "service_class": "trust-plane",
+      "service_id": "authentik",
+      "source_provenance_class": "S4"
+    },
+    {
+      "canonical_lane_id": "cal.com",
+      "owning_repo": "Biji-Biji-Initiative/bbi-infrastructure",
+      "service_class": "application-runtime",
+      "service_id": "cal.com",
+      "source_provenance_class": "S3"
+    },
+    {
+      "canonical_lane_id": "listmonk",
+      "owning_repo": "Biji-Biji-Initiative/bbi-infrastructure",
+      "service_class": "application-runtime",
+      "service_id": "listmonk",
+      "source_provenance_class": "S2"
+    },
+    {
+      "canonical_lane_id": "mereka-lms",
+      "owning_repo": "Biji-Biji-Initiative/bbi-infrastructure",
+      "service_class": "application-runtime",
+      "service_id": "mereka-lms",
+      "source_provenance_class": "S1"
+    },
+    {
+      "canonical_lane_id": "reka-slackbot",
+      "owning_repo": "Biji-Biji-Initiative/bbi-infrastructure",
+      "service_class": "application-runtime",
+      "service_id": "reka-slackbot",
+      "source_provenance_class": "S1"
+    },
+    {
+      "canonical_lane_id": "temporal",
+      "owning_repo": "Biji-Biji-Initiative/bbi-infrastructure",
+      "service_class": "stateful-platform-runtime",
+      "service_id": "temporal",
+      "source_provenance_class": "S4"
+    },
+    {
+      "canonical_lane_id": "weaviate",
+      "owning_repo": "Biji-Biji-Initiative/bbi-infrastructure",
+      "service_class": "stateful-data-runtime",
+      "service_id": "weaviate",
+      "source_provenance_class": "S4"
+    },
+    {
+      "canonical_lane_id": "zoom-rtms",
+      "owning_repo": "Biji-Biji-Initiative/bbi-infrastructure",
+      "service_class": "application-runtime",
+      "service_id": "zoom-rtms",
+      "source_provenance_class": "S1"
+    }
+  ],
+  "domains": {
+    "dev": {
+      "caddy_ip": "194.233.84.55",
+      "description": "Development endpoints (RKE2 on VPS via Caddy + VPS standalone PM2 services)",
+      "domain": "mereka.dev",
+      "ingress_ip": "154.26.132.35"
+    },
+    "prod": {
+      "description": "Production endpoints (RKE2 prod, 6 nodes, Contabo VPS, Singapore)",
+      "domain": "mereka.io",
+      "worker_ips": [
+        "185.227.134.230",
+        "185.227.135.166",
+        "185.250.38.89"
+      ]
+    },
+    "staging": {
+      "description": "Staging endpoints on RKE2 (active as of 2026-02-28)",
+      "domain": "mereka.io",
+      "ingress_ip": "154.26.132.35"
+    }
+  },
+  "generated_by": "tools/knowledge/build_cross_repo_agent_packs.py",
+  "lanes": [
+    "dev",
+    "nonprod_platform",
+    "preview",
+    "prod",
+    "staging"
+  ],
+  "service_aliases": {
+    "calcom": "cal.com",
+    "reka_slackbot": "reka-slackbot",
+    "zoom_rtms": "zoom-rtms"
+  },
+  "version": 1
+}

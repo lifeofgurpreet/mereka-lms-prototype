@@ -1,0 +1,61 @@
+{
+  "version": "1",
+  "overrides": [
+    {
+      "path": "scripts/qa/verify-credentials-issuer.sh",
+      "tier": "periodic_runtime",
+      "cadence": "scheduled_or_post_deploy",
+      "severity": "medium",
+      "status": "active"
+    },
+    {
+      "path": "scripts/qa/verify-email-preferences.sh",
+      "tier": "periodic_runtime",
+      "cadence": "scheduled_or_post_deploy",
+      "severity": "medium",
+      "status": "active"
+    },
+    {
+      "path": "scripts/qa/verify-notifications-inapp.sh",
+      "tier": "periodic_runtime",
+      "cadence": "scheduled_or_post_deploy",
+      "severity": "medium",
+      "status": "active"
+    },
+    {
+      "path": "scripts/qa/verify-video-protection.sh",
+      "tier": "periodic_runtime",
+      "cadence": "scheduled_or_post_deploy",
+      "severity": "medium",
+      "status": "active"
+    },
+    {
+      "path": "scripts/qa/verify-restore-drill.sh",
+      "tier": "periodic_runtime",
+      "cadence": "scheduled_or_post_deploy",
+      "severity": "medium",
+      "status": "active"
+    },
+    {
+      "path": "scripts/qa/verify-libraries-core.sh",
+      "tier": "exploratory_manual",
+      "cadence": "on_demand",
+      "severity": "low",
+      "status": "active"
+    },
+    {
+      "path": "scripts/qa/verify-mobile-backend-api.sh",
+      "tier": "exploratory_manual",
+      "cadence": "on_demand",
+      "severity": "low",
+      "status": "active"
+    },
+    {
+      "path": "scripts/qa/verify-spec-dedupe-normalize.sh",
+      "tier": "exploratory_manual",
+      "cadence": "on_demand",
+      "severity": "low",
+      "status": "active"
+    }
+  ]
+}

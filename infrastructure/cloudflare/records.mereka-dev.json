@@ -1,0 +1,163 @@
+[
+  {
+    "comment": "=== mereka.dev DNS Records ===",
+    "description": "Primary LMS ingress (VPS kind)",
+    "type": "A",
+    "name": "academyv2.mereka.dev",
+    "content": "194.233.84.55",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Studio hostname",
+    "type": "CNAME",
+    "name": "studio.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Microfrontends",
+    "type": "CNAME",
+    "name": "apps.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Discovery service",
+    "type": "CNAME",
+    "name": "discovery.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Ecommerce service",
+    "type": "CNAME",
+    "name": "ecommerce.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Notes service host",
+    "type": "CNAME",
+    "name": "notes.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Analytics/Superset dashboard",
+    "type": "CNAME",
+    "name": "analytics.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Credentials service",
+    "type": "CNAME",
+    "name": "credentials.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Forum service",
+    "type": "CNAME",
+    "name": "forum.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Studio preview host (needed for Caddy TLS)",
+    "type": "CNAME",
+    "name": "preview.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Biji-Biji tenant preview (DNS-only for Let's Encrypt)",
+    "type": "CNAME",
+    "name": "preview.biji-biji.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Biji-Biji tenant enterprise admin (DNS-only for Let's Encrypt)",
+    "type": "CNAME",
+    "name": "admin.biji-biji.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Biji-Biji tenant enterprise learner (DNS-only for Let's Encrypt)",
+    "type": "CNAME",
+    "name": "learner.biji-biji.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Biji-Biji tenant credentials (DNS-only for Let's Encrypt)",
+    "type": "CNAME",
+    "name": "credentials.biji-biji.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "Biji-Biji tenant analytics (DNS-only for Let's Encrypt)",
+    "type": "CNAME",
+    "name": "analytics.biji-biji.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "SOF tenant preview (DNS-only for Let's Encrypt)",
+    "type": "CNAME",
+    "name": "preview.skillourfuture.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "SOF tenant enterprise admin (DNS-only for Let's Encrypt)",
+    "type": "CNAME",
+    "name": "admin.skillourfuture.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "SOF tenant enterprise learner (DNS-only for Let's Encrypt)",
+    "type": "CNAME",
+    "name": "learner.skillourfuture.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "SOF tenant credentials (DNS-only for Let's Encrypt)",
+    "type": "CNAME",
+    "name": "credentials.skillourfuture.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  },
+  {
+    "description": "SOF tenant analytics (DNS-only for Let's Encrypt)",
+    "type": "CNAME",
+    "name": "analytics.skillourfuture.academyv2.mereka.dev",
+    "content": "academyv2.mereka.dev",
+    "ttl": 1,
+    "proxied": false
+  }
+]

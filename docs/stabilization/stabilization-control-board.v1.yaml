@@ -1,0 +1,77 @@
+version: v1
+current_phase: Stabilization
+next_allowed_phase: Convergence
+phase_gate_status:
+  stabilization_to_convergence: BLOCKED
+  convergence_to_architecture_hardening: PARKED
+lanes:
+  - id: lane-a-runtime-proof
+    name: Lane A runtime/build/runtime proof
+    status: ACTIVE
+    truth: PROVISIONAL
+    state_class: MANUAL_STATE
+    notes: Runtime and browser closure are not yet durable merged repo truth.
+  - id: lane-f-repo-ci-stabilization
+    name: Lane F repo-only CI stabilization
+    status: COMPLETE
+    truth: CONFIRMED
+    state_class: DURABLE
+    notes: Repo-only CI false-red prevention and runner-capability contracts are merged.
+  - id: lane-g-retired-root-remediation
+    name: Lane G retired-root docs-governance closure
+    status: COMPLETE
+    truth: CONFIRMED
+    state_class: DURABLE
+    notes: Canonical docs roots and retired-root remediation are merged.
+  - id: lane-h-control-board
+    name: Lane H stabilization control board
+    status: ACTIVE
+    truth: CONFIRMED
+    state_class: DURABLE
+    notes: Control board and phase-gate pack define program truth and anti-false-closure rules.
+  - id: enterprise-mfe-build-contract
+    name: Enterprise MFE build contract
+    status: COMPLETE
+    truth: CONFIRMED
+    state_class: DURABLE
+    notes: Build truth is pinned at the contract layer.
+  - id: architecture-hardening-wave
+    name: Architecture hardening wave
+    status: PARKED
+    truth: PARKED
+    state_class: TEMPORARY_RUNTIME_MITIGATION
+    notes: Not allowed to expand before convergence.
+open_blockers:
+  - id: runtime-browser-closure-not-durable
+    owner: Lane A
+    blocker_type: runtime-proof
+    truth: PROVISIONAL
+    state_class: MANUAL_STATE
+    summary: Learner portal and enterprise learner secondary path closure are not yet durable merged repo truth.
+  - id: manual-runtime-state-not-converged
+    owner: Lane A
+    blocker_type: convergence
+    truth: CONTRADICTED
+    state_class: TEMPORARY_RUNTIME_MITIGATION
+    summary: Manual runtime mitigations and desired durable release truth are not yet the same thing.
+  - id: runner-saturation-and-queue-effects
+    owner: External platform capacity
+    blocker_type: external-throughput
+    truth: EXTERNAL_BLOCKER
+    state_class: EXTERNAL_BLOCKER
+    summary: ARC queue pressure can delay proof and build throughput, but it is not semantic closure.
+  - id: staging-proof-not-authoritative
+    owner: Future convergence lane
+    blocker_type: staged-proof
+    truth: PARKED
+    state_class: MANUAL_STATE
+    summary: Staging proof is not the next irreversible step and is not used to claim closure here.
+gate_owners:
+  stabilization_to_convergence: Lane A + release-truth owner
+  convergence_to_architecture_hardening: Future hardening owner
+local_proof_policy:
+  var_proofs_status: non_canonical_input_only
+  required_labels:
+    - external lane evidence
+    - local proof input
+    - not independently reverified by this lane

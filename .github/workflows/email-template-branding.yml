@@ -1,0 +1,33 @@
+name: Email Template Branding
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  email-template-branding:
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 30
+    permissions:
+      contents: read  # checkout
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Run email template branding gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p var/qa
+          ./scripts/qa/verify-email-template-multilang.sh \
+            | tee var/qa/email-template-branding.log
+
+      - name: Upload email template branding artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: email-template-branding-${{ github.run_number }}
+          path: |
+            var/qa/email-template-branding.log
+          if-no-files-found: warn

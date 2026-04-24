@@ -1,0 +1,5 @@
+{
+  "name": "velero-backup-verification-success",
+  "description": "Successful runs from velero backup-verification CronJob in velero namespace.",
+  "filter": "resource.type=\"k8s_container\" AND resource.labels.namespace_name=\"velero\" AND resource.labels.pod_name=~\"^backup-verification-\" AND textPayload:\"All backup verification checks passed successfully\""
+}

@@ -1,0 +1,30 @@
+{
+  "displayName": "Redis connection errors (logs)",
+  "combiner": "OR",
+  "enabled": true,
+  "severity": "WARNING",
+  "conditions": [
+    {
+      "displayName": "Redis connection errors > 10/5m",
+      "conditionThreshold": {
+        "filter": "resource.type=\"k8s_container\" AND metric.type=\"logging.googleapis.com/user/redis-connection-errors\"",
+        "aggregations": [
+          {
+            "alignmentPeriod": "300s",
+            "perSeriesAligner": "ALIGN_SUM"
+          }
+        ],
+        "comparison": "COMPARISON_GT",
+        "thresholdValue": 10,
+        "duration": "0s",
+        "trigger": {
+          "count": 1
+        }
+      }
+    }
+  ],
+  "notificationChannels": [
+    "projects/mereka-lms/notificationChannels/2534209833330971119",
+    "projects/mereka-lms/notificationChannels/1104353389109200281"
+  ]
+}

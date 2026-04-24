@@ -1,0 +1,46 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: promtail
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: promtail
+    app.kubernetes.io/component: log-forwarder
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: promtail-mereka-lms
+  labels:
+    app.kubernetes.io/name: promtail
+    app.kubernetes.io/component: log-forwarder
+rules:
+  - apiGroups: [""]
+    resources:
+      - nodes
+      - nodes/proxy
+      - services
+      - endpoints
+      - pods
+    verbs: ["get", "watch", "list"]
+  - apiGroups: [""]
+    resources:
+      - configmaps
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: promtail-mereka-lms
+  labels:
+    app.kubernetes.io/name: promtail
+    app.kubernetes.io/component: log-forwarder
+subjects:
+  - kind: ServiceAccount
+    name: promtail
+    namespace: mereka-lms
+roleRef:
+  kind: ClusterRole
+  name: promtail-mereka-lms
+  apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,17 @@
+# Tutor build dependencies — used by build-tutor-images.yml
+# MUST match local dev environment (see .venv)
+# Release: Ulmo (Open edX release name for this version line)
+tutor==21.0.4
+tutor-mfe==21.0.0
+tutor-discovery==21.0.1
+tutor-forum==21.0.0
+tutor-notes==21.0.0
+tutor-xqueue==21.0.0
+tutor-credentials==21.0.2
+tutor-cairn==21.0.0
+tutor-android==21.0.0
+tutor-deck==21.0.0
+tutor-jupyter==21.0.0
+tutor-livedeps==21.0.0
+tutor-minio==21.0.0
+tutor-contrib-aspects==3.0.3

@@ -1,0 +1,115 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: promtail
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: promtail
+    app.kubernetes.io/component: log-forwarder
+    app.kubernetes.io/version: 2.9.6
+spec:
+  selector:
+    matchLabels:
+      # IMPORTANT: selectors are immutable. Keep these aligned with the labels
+      # used by the Tutor/Open edX stack in production so ArgoCD can self-heal
+      # without attempting an invalid selector patch.
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/managed-by: tutor
+      app.kubernetes.io/name: promtail
+      app.kubernetes.io/part-of: mereka-lms
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/managed-by: tutor
+        app.kubernetes.io/name: promtail
+        app.kubernetes.io/part-of: mereka-lms
+        app.kubernetes.io/component: log-forwarder
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9080"
+    spec:
+      serviceAccountName: promtail
+      securityContext:
+        runAsUser: 0  # Required to read container logs
+        runAsGroup: 0
+        fsGroup: 0
+      containers:
+        - name: promtail
+          image: grafana/promtail:2.9.6
+          imagePullPolicy: IfNotPresent
+          args:
+            - -config.file=/etc/promtail/promtail.yaml
+          ports:
+            - name: http-metrics
+              containerPort: 9080
+              protocol: TCP
+          env:
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          volumeMounts:
+            - name: config
+              mountPath: /etc/promtail
+              readOnly: true
+            - name: positions
+              mountPath: /tmp
+            - name: varlog
+              mountPath: /var/log
+              readOnly: true
+            - name: varlibdockercontainers
+              mountPath: /var/lib/docker/containers
+              readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: http-metrics
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http-metrics
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 5
+      volumes:
+        - name: config
+          configMap:
+            name: promtail-config
+        - name: positions
+          emptyDir: {}
+        - name: varlog
+          hostPath:
+            path: /var/log
+            type: Directory
+        - name: varlibdockercontainers
+          hostPath:
+            path: /var/lib/docker/containers
+            # RKE2/containerd nodes may not have Docker paths; keep the mount
+            # non-fatal so Promtail can still run and scrape available logs.
+            type: DirectoryOrCreate
+      tolerations:
+        # Run on all nodes including master/control-plane
+        - effect: NoSchedule
+          operator: Exists
+        - effect: NoExecute
+          operator: Exists

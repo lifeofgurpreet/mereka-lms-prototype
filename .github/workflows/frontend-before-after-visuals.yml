@@ -1,0 +1,117 @@
+name: Frontend Before After Visuals
+
+permissions: {}
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: "Target environment"
+        required: true
+        default: "prod"
+        type: choice
+        options:
+          - prod
+          - dev
+      capture_screenshots:
+        description: "Capture fresh screenshots before generating before/after report"
+        required: true
+        default: false
+        type: boolean
+      screenshot_scope:
+        description: "Screenshot/report scope"
+        required: true
+        default: "mfe-only"
+        type: choice
+        options:
+          - full
+          - mfe-only
+      threshold:
+        description: "Visual regression RMSE threshold"
+        required: false
+        default: "0.06"
+        type: string
+      strict_file_set:
+        description: "Fail if baseline/candidate file sets differ"
+        required: true
+        default: false
+        type: boolean
+      allow_bootstrap:
+        description: "Allow success when fewer than two screenshot runs exist"
+        required: true
+        default: true
+        type: boolean
+      require_runtime_theme:
+        description: "Require runtime theme mode preflight when capture_screenshots=true"
+        required: true
+        default: true
+        type: boolean
+
+jobs:
+  frontend-before-after-visuals:
+    name: Build Before/After Visual Evidence
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Capture screenshots (optional) + build report
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p var/qa
+
+          TARGET_ENV="${{ inputs.target_environment || 'prod' }}"
+          CAPTURE_SCREENSHOTS="${{ inputs.capture_screenshots || 'false' }}"
+          SCOPE="${{ inputs.screenshot_scope || 'mfe-only' }}"
+          THRESHOLD="${{ inputs.threshold || '0.06' }}"
+          STRICT_FILE_SET="${{ inputs.strict_file_set || 'false' }}"
+          ALLOW_BOOTSTRAP="${{ inputs.allow_bootstrap || 'true' }}"
+          REQUIRE_RUNTIME_THEME="${{ inputs.require_runtime_theme || 'true' }}"
+
+          if [[ "$CAPTURE_SCREENSHOTS" == "true" ]]; then
+            if [[ "$REQUIRE_RUNTIME_THEME" == "true" ]]; then
+              if [[ "$TARGET_ENV" == "prod" ]]; then
+                ./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.io --require-runtime --require-slot-markers \
+                  | tee var/qa/frontend-before-after-visuals.log
+              else
+                ./scripts/qa/verify-paragon-runtime.sh --runtime-url https://apps.academyv2.mereka.dev --require-slot-markers \
+                  | tee var/qa/frontend-before-after-visuals.log
+              fi
+            fi
+
+            screenshot_args=(--env "$TARGET_ENV")
+            if [[ "$SCOPE" == "mfe-only" ]]; then
+              screenshot_args+=(--mfe-only)
+            fi
+            ./scripts/qa/capture-branding-screenshots.sh "${screenshot_args[@]}" \
+              | tee -a var/qa/frontend-before-after-visuals.log
+          fi
+
+          report_args=(--env "$TARGET_ENV" --threshold "$THRESHOLD")
+          if [[ "$SCOPE" == "mfe-only" ]]; then
+            report_args+=(--mfe-only)
+          fi
+          if [[ "$STRICT_FILE_SET" == "true" ]]; then
+            report_args+=(--strict)
+          fi
+          if [[ "$ALLOW_BOOTSTRAP" == "true" ]]; then
+            report_args+=(--allow-bootstrap)
+          fi
+
+          ./scripts/qa/build-branding-before-after-report.sh "${report_args[@]}" \
+            | tee -a var/qa/frontend-before-after-visuals.log
+
+      - name: Upload before/after artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: frontend-before-after-visuals-${{ github.run_number }}
+          path: |
+            var/qa/frontend-before-after-visuals.log
+            var/evidence/branding-before-after/**
+            var/screenshots-diff/**
+            var/screenshots/**
+          if-no-files-found: warn

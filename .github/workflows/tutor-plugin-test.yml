@@ -1,0 +1,94 @@
+name: Tutor Plugin / Render Contract
+
+on:
+  push:
+    paths:
+      - 'infrastructure/tutor/plugins/**'
+      - 'infrastructure/tutor/config.example.yml'
+      - 'requirements-tutor.txt'
+      - '.github/actions/setup-python-env/**'
+      - 'scripts/ci/preflight-check.sh'
+      - 'scripts/infra/sync-tutor-plugin-mirror.sh'
+      - 'scripts/infra/verify-tutor-config.sh'
+  pull_request:
+    paths:
+      - 'infrastructure/tutor/plugins/**'
+      - 'infrastructure/tutor/config.example.yml'
+      - 'requirements-tutor.txt'
+      - '.github/actions/setup-python-env/**'
+      - 'scripts/ci/preflight-check.sh'
+      - 'scripts/infra/sync-tutor-plugin-mirror.sh'
+      - 'scripts/infra/verify-tutor-config.sh'
+  merge_group:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  lint-plugins:
+    name: Lint Plugin Sources
+    runs-on: ${{ vars.CI_FASTLANE_CI_LABEL || 'mereka-k8s-runners' }}
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-python-env
+        with:
+          python-version: '3.12'
+          install-base-deps: 'false'
+          extra-deps: 'ruff black'
+
+      - name: Compile plugin sources
+        run: python3 -m compileall infrastructure/tutor/plugins
+
+      - name: Lint with ruff
+        run: ruff check infrastructure/tutor/plugins/
+
+      - name: Check formatting with black
+        run: black --check infrastructure/tutor/plugins/
+
+  verify-retired-legacy-shim:
+    name: Verify Retired Legacy Shim Contract
+    runs-on: ${{ vars.CI_FASTLANE_CI_LABEL || 'mereka-k8s-runners' }}
+    timeout-minutes: 30
+    needs: lint-plugins
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Verify standalone shim is metadata-only
+        run: |
+          grep -Fq "Legacy compatibility shim for the retired standalone mfe_oauth_fix Tutor plugin." infrastructure/tutor/plugins/mfe_oauth_fix.py
+          if grep -Eq "hooks\\.Filters\\.ENV_PATCHES" infrastructure/tutor/plugins/mfe_oauth_fix.py; then
+            echo "Legacy shim must not emit ENV_PATCHES" >&2
+            exit 1
+          fi
+          if grep -En "^\\s*- mfe_oauth_fix$" infrastructure/tutor/config.example.yml; then
+            echo "Legacy standalone plugin must remain disabled in config.example.yml" >&2
+            exit 1
+          fi
+
+  render-contract-preflight:
+    name: Render Contract Preflight
+    runs-on: ${{ vars.CI_FASTLANE_CI_LABEL || 'mereka-k8s-runners' }}
+    timeout-minutes: 30
+    needs: [lint-plugins, verify-retired-legacy-shim]
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Set up Python environment
+        uses: ./.github/actions/setup-python-env
+        with:
+          python-version: '3.12'
+          requirements-file: 'requirements-tutor.txt'
+          isolated-venv: 'true'
+          isolated-venv-name: 'tutor-render-contract'
+
+      - name: Run rendered Dockerfile preflight
+        run: TUTOR_VENV="$VIRTUAL_ENV" ./scripts/ci/preflight-check.sh

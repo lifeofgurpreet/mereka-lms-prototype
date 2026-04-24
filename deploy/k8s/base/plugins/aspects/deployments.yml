@@ -1,0 +1,374 @@
+---
+# ClickHouse - Analytics Data Warehouse
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clickhouse
+  labels:
+    app.kubernetes.io/name: clickhouse
+    app.kubernetes.io/part-of: aspects
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate  # ClickHouse uses persistent storage
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: clickhouse
+      app.kubernetes.io/part-of: aspects
+      app.kubernetes.io/managed-by: kustomize
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: clickhouse
+        app.kubernetes.io/part-of: aspects
+        app.kubernetes.io/managed-by: kustomize
+    spec:
+      securityContext:
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
+      containers:
+        - name: clickhouse
+          image: docker.io/clickhouse/clickhouse-server:25.8-alpine
+          ports:
+            - containerPort: 8123  # HTTP interface
+              name: http
+            - containerPort: 9000  # Native interface
+              name: native
+          env:
+            - name: CLICKHOUSE_DB
+              value: openedx
+            - name: CLICKHOUSE_USER
+              value: openedx
+            - name: CLICKHOUSE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: aspects-secrets
+                  key: clickhouse-password
+            - name: CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT
+              value: "1"
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/clickhouse
+            - name: config
+              mountPath: /etc/clickhouse-server/config.d/logging.xml
+              subPath: logging.xml
+            - name: config
+              mountPath: /etc/clickhouse-server/config.d/network.xml
+              subPath: network.xml
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "500m"
+            limits:
+              memory: "4Gi"
+              cpu: "2"
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 8123
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 8123
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: clickhouse-data
+        - name: config
+          configMap:
+            name: clickhouse-config
+---
+# Superset - Analytics Visualization
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: superset
+  labels:
+    app.kubernetes.io/name: superset
+    app.kubernetes.io/part-of: aspects
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: superset
+      app.kubernetes.io/part-of: aspects
+      app.kubernetes.io/managed-by: kustomize
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: superset
+        app.kubernetes.io/part-of: aspects
+        app.kubernetes.io/managed-by: kustomize
+    spec:
+      # Disable automatic service environment variables to avoid conflicts
+      enableServiceLinks: false
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      initContainers:
+        - name: wait-for-db
+          image: docker.io/busybox:1.36
+          command: ['sh', '-c', 'until nc -z mysql 3306; do echo "Waiting for MySQL..."; sleep 2; done']
+      containers:
+        - name: superset
+          image: docker.io/edunext/aspects-superset:3.0.3
+          ports:
+            - containerPort: 8088
+              name: http
+          env:
+            - name: PYTHONPATH
+              value: "/app/pythonpath"
+            - name: SUPERSET_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aspects-secrets
+                  key: superset-secret-key
+            - name: DATABASE_HOST
+              value: mysql
+            - name: SUPERSET_DB_PORT
+              value: "3306"
+            - name: DATABASE_DB
+              value: superset
+            - name: DATABASE_USER
+              value: superset
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: aspects-secrets
+                  key: superset-db-password
+            - name: REDIS_HOST
+              value: redis
+            - name: SUPERSET_REDIS_PORT
+              value: "6379"
+            - name: CLICKHOUSE_HOST
+              value: clickhouse
+            - name: CLICKHOUSE_PORT
+              value: "8123"
+            - name: CLICKHOUSE_USER
+              value: openedx
+            - name: CLICKHOUSE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: aspects-secrets
+                  key: clickhouse-password
+            # OAuth2 with Authentik (optional - comment out if not using SSO)
+            - name: OAUTH_CLIENT_ID
+              value: "superset-analytics"
+            - name: OAUTH_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: aspects-secrets
+                  key: oauth-client-secret
+                  optional: true
+          volumeMounts:
+            - name: config
+              mountPath: /app/pythonpath/
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "250m"
+            limits:
+              memory: "2Gi"
+              cpu: "1"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8088
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8088
+            initialDelaySeconds: 30
+            periodSeconds: 10
+      volumes:
+        - name: config
+          configMap:
+            name: superset-config
+---
+# Superset Worker - Background Tasks
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: superset-worker
+  labels:
+    app.kubernetes.io/name: superset-worker
+    app.kubernetes.io/part-of: aspects
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: superset-worker
+      app.kubernetes.io/part-of: aspects
+      app.kubernetes.io/managed-by: kustomize
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: superset-worker
+        app.kubernetes.io/part-of: aspects
+        app.kubernetes.io/managed-by: kustomize
+    spec:
+      # Disable automatic service environment variables to avoid conflicts
+      enableServiceLinks: false
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: worker
+          image: docker.io/edunext/aspects-superset:3.0.3
+          command: ["celery", "--app=superset.tasks.celery_app:app", "worker", "--pool=prefork", "-O", "fair", "-c", "2"]
+          env:
+            - name: PYTHONPATH
+              value: "/app/pythonpath"
+            - name: SUPERSET_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aspects-secrets
+                  key: superset-secret-key
+            - name: DATABASE_HOST
+              value: mysql
+            - name: SUPERSET_DB_PORT
+              value: "3306"
+            - name: DATABASE_DB
+              value: superset
+            - name: DATABASE_USER
+              value: superset
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: aspects-secrets
+                  key: superset-db-password
+            - name: REDIS_HOST
+              value: redis
+            - name: SUPERSET_REDIS_PORT
+              value: "6379"
+          volumeMounts:
+            - name: config
+              mountPath: /app/pythonpath/
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "200m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+      volumes:
+        - name: config
+          configMap:
+            name: superset-config
+---
+# Ralph - xAPI Learning Record Store
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ralph
+  labels:
+    app.kubernetes.io/name: ralph
+    app.kubernetes.io/part-of: aspects
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ralph
+      app.kubernetes.io/part-of: aspects
+      app.kubernetes.io/managed-by: kustomize
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ralph
+        app.kubernetes.io/part-of: aspects
+        app.kubernetes.io/managed-by: kustomize
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: ralph
+          image: docker.io/fundocker/ralph:4.1.0
+          args:
+            - "uvicorn"
+            - "ralph.api:app"
+            - "--proxy-headers"
+            - "--log-config"
+            - "/etc/ralph/logging.yaml"
+            - "--port"
+            - "8100"
+            - "--host"
+            - "0.0.0.0"
+          ports:
+            - containerPort: 8100
+              name: http
+          env:
+            - name: RALPH_APP_DIR
+              value: "/app/.ralph"
+            - name: RALPH_BACKENDS__LRS__CLICKHOUSE__HOST
+              value: clickhouse
+            - name: RALPH_BACKENDS__LRS__CLICKHOUSE__PORT
+              value: "8123"
+            - name: RALPH_BACKENDS__LRS__CLICKHOUSE__DATABASE
+              value: xapi
+            - name: RALPH_BACKENDS__LRS__CLICKHOUSE__EVENT_TABLE_NAME
+              value: xapi_events_all
+            - name: RALPH_BACKENDS__LRS__CLICKHOUSE__USERNAME
+              value: openedx
+            - name: RALPH_BACKENDS__LRS__CLICKHOUSE__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: aspects-secrets
+                  key: clickhouse-password
+            - name: RALPH_RUNSERVER_BACKEND
+              value: clickhouse
+            - name: RALPH_RUNSERVER_HOST
+              value: "0.0.0.0"
+            - name: RALPH_RUNSERVER_PORT
+              value: "8100"
+            - name: RALPH_RUNSERVER_MAX_SEARCH_HITS_COUNT
+              value: "100"
+            - name: RALPH_RUNSERVER_POINT_IN_TIME_KEEP_ALIVE
+              value: "1m"
+          volumeMounts:
+            - name: auth
+              mountPath: /app/.ralph
+            - name: logging
+              mountPath: /etc/ralph
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /__lbheartbeat__
+              port: 8100
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /__lbheartbeat__
+              port: 8100
+            initialDelaySeconds: 15
+            periodSeconds: 10
+      volumes:
+        - name: auth
+          configMap:
+            name: ralph-auth
+        - name: logging
+          configMap:
+            name: ralph-logging

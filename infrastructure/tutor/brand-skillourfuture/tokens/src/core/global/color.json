@@ -1,0 +1,11 @@
+{
+  "color": {
+    "primary": { "$value": "#450B7F", "$type": "color", "$description": "SOF purple — primary CTA and wordmark" },
+    "secondary": { "$value": "#82C3C7", "$type": "color", "$description": "SOF teal — secondary accent" },
+    "brand": { "$value": "#450B7F", "$type": "color", "$description": "Primary brand color" },
+    "success": { "$value": "#237072", "$type": "color", "$description": "Success states" },
+    "info": { "$value": "#0063AC", "$type": "color", "$description": "UNDP blue — informational links" },
+    "warning": { "$value": "#F7CD56", "$type": "color", "$description": "SOF gold — warning/highlight" },
+    "danger": { "$value": "#7B2A5A", "$type": "color", "$description": "Deep plum — danger" }
+  }
+}

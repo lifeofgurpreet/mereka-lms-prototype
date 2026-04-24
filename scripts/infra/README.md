@@ -1,0 +1,223 @@
+# Infrastructure Scripts
+
+Scripts for managing infrastructure: GKE clusters, Cloudflare, MongoDB Atlas, backups, etc.
+
+## Key Scripts
+
+- `ensure-platform-admins.sh` - Ensure Gurpreet + Malasari have full admin permissions across LMS/CMS/Discovery/Credentials/Ecommerce (prod + dev)
+- `ensure-authentik-admin.sh` - Ensure Gurpreet is the only Authentik admin (superuser) (prod)
+- `backup-db.sh` - Database backup automation
+- `check-cluster-status.sh` - GKE cluster health check
+- `fix-service-selectors.sh` - **🚨 SITE DOWN?** Quick fix for service selector mismatches
+- `repair-routing.sh` - Fix selector drift **and** add HTTPS (443) to caddy service (wrapper)
+- `repair-staging-routing.sh` - Legacy routing entrypoint (kept for backwards compatibility)
+- `check-cert-sans.sh` - Verify TLS SANs and detect fake ingress certs
+- `check-atlas-allowlist.sh` - Validate Atlas IP allowlist matches cluster egress
+- `check-atlas-allowlist-vps.sh` - Validate Atlas allowlist for VPS egress IP
+- `ensure-atlas-allowlist-vps.sh` - Add VPS egress IP to Atlas allowlist if missing
+- `monitor-atlas-allowlist-vps.sh` - Drift monitor + webhook alert wrapper for VPS Atlas allowlist
+- `atlas-config-from-infisical.sh` - Configure Atlas CLI profile from Infisical API keys
+- `retire-legacy-mongodb.sh` - Velero-first guarded retirement flow for legacy in-cluster MongoDB
+- `release-openedx-gitops.sh` - Canonical one-command Open edX release orchestrator (app tags + GitOps ref/tags + optional push/runtime verify)
+- `prepare-bbi-infra-ref-bump.sh` - Prepare/apply GitOps pinned ref bump (active repo is typically `BBI-K8`) to current `mereka-lms` commit
+- `configure-github-authenticated-sso-canary.sh` - Set GitHub canary secrets/variable for credentialed SSO runtime gate enforcement
+- `../qa/verify-oidc-user-password-state.sh` - Verify/fix OIDC-linked active users with unusable LMS passwords (`Your account is disabled` regression guardrail)
+- `../qa/audit-atlas-allowlist-monitor.sh` - Validate Atlas allowlist monitor posture (cron wiring, status freshness, webhook config)
+- `../qa/verify-atlas-modulestore-path.sh` - Verify Atlas modulestore contracts (repo + runtime)
+- `../qa/verify-alert-routing.sh` - One-command alert-routing verification (repo + runtime + optional VPS webhook check)
+- `../qa/build-dr-evidence-bundle.sh` - Build DR evidence bundle (Velero audits + artifacts + optional tarball)
+- `cron-public-health-check.sh` - Cron entrypoint for public health + branding checks
+- `setup-vps-health-cron.sh` - Install VPS cron entry for public health checks
+- `setup-vps-atlas-allowlist-cron.sh` - Install VPS cron entry to keep Atlas allowlist updated
+- `refresh-i18n-static.sh` - Rebuild LMS/CMS i18n JS bundles (fixes missing gettext)
+- `infisical-validate-mereka-lms.sh` - Verify Infisical has all MEREKA_LMS secrets
+- `infisical-sync-mereka-lms.sh` - Sync MEREKA_LMS secrets into `/k8s/mereka-lms`
+- `normalize-mysql-secrets.sh` - Strip trailing CR/LF for MySQL password secrets (Infisical + GCP SM + K8s ESO target)
+- `provision-mysql-app-dbs.sh` - Create Notes/XQueue MySQL DBs + users (idempotent, non-destructive)
+- `repair-gke-mysql-users.sh` - Align prod MySQL users/passwords to K8s secrets (non-destructive)
+- `argocd-refresh.sh` - Force ArgoCD refresh for remote base updates
+- `apply-monitoring-configs.sh` - Apply uptime checks, log metrics, and alert policies
+- `validate-telemetry-connectivity.sh` - **📊 MONITORING** Validate Grafana datasource connectivity to GKE and VPS Prometheus
+- `../qa/audit-grafana-dashboard.sh` - **📊 MONITORING** Validate Grafana panel/query coverage against contract
+- `cloudflare-sync.sh` - Cloudflare DNS sync
+- `mongodb-to-atlas.sh` - MongoDB migration to Atlas
+- `deploy-aspects-k8s.sh` - **Deprecated legacy path** (disabled by default; requires `ALLOW_LEGACY_TUTOR_K8S=1`)
+
+## Usage
+
+```bash
+# Check cluster status
+./scripts/infra/check-cluster-status.sh
+
+# Backup database
+./scripts/infra/backup-db.sh
+
+# Fix service selectors (if site is down)
+./scripts/infra/fix-service-selectors.sh
+
+# Full routing repair (selectors + HTTPS port 443)
+./scripts/infra/repair-routing.sh
+
+# Force ArgoCD refresh for remote bases
+ARGO_APPS="mereka-lms-production mereka-lms-local" ./scripts/infra/argocd-refresh.sh
+
+# Apply monitoring configs
+./scripts/infra/apply-monitoring-configs.sh plan
+
+# Include legacy Cloud SQL templates only when intentionally needed
+INCLUDE_LEGACY_MONITORING=1 ./scripts/infra/apply-monitoring-configs.sh apply
+
+# Generate an offline dry-run plan (no cloud discovery/API calls)
+OFFLINE_PLAN=1 ./scripts/infra/apply-monitoring-configs.sh plan
+
+# Validate Atlas allowlist for VPS egress (dev forum)
+./scripts/infra/check-atlas-allowlist-vps.sh
+
+# Add VPS egress IP to Atlas allowlist if missing
+./scripts/infra/ensure-atlas-allowlist-vps.sh
+
+# Monitor Atlas allowlist drift (alerts when webhook configured)
+./scripts/infra/monitor-atlas-allowlist-vps.sh
+
+# Configure Atlas CLI from Infisical (API keys)
+./scripts/infra/atlas-config-from-infisical.sh
+
+# Run public health checks (prod + dev) with branding + certs
+./scripts/infra/cron-public-health-check.sh
+
+# Install VPS cron (optional, local logs)
+./scripts/infra/setup-vps-health-cron.sh
+
+# Install VPS cron for Atlas allowlist auto-updates
+./scripts/infra/setup-vps-atlas-allowlist-cron.sh
+
+# Audit Atlas allowlist monitor posture (strict webhook mode for prod-readiness)
+./scripts/qa/audit-atlas-allowlist-monitor.sh
+STRICT_WEBHOOK=1 ./scripts/qa/audit-atlas-allowlist-monitor.sh
+
+# Verify Velero restore-test evidence. Repair CronJob/image drift through GitOps.
+STRICT_RUNTIME=1 ./scripts/qa/audit-velero-alert-pipeline.sh
+STRICT=1 ./scripts/qa/verify-restore-drill.sh --namespace velero-restore-test
+
+# Verify Atlas modulestore contracts (repo + runtime)
+./scripts/qa/verify-atlas-modulestore-path.sh --mode all
+
+# Build DR evidence bundle and tarball
+STRICT_RUNTIME=1 ./scripts/qa/build-dr-evidence-bundle.sh --tar
+
+# Verify alert routing end-to-end (runtime + notification channels)
+./scripts/qa/verify-alert-routing.sh
+
+# Prepare legacy MongoDB retirement (non-destructive by default)
+./scripts/infra/retire-legacy-mongodb.sh
+
+# Prepare/apply pinned-ref bump in active GitOps repo (typically BBI-K8, path under /home/gurpreet/projects/k8s/infrastructure)
+./scripts/infra/prepare-bbi-infra-ref-bump.sh
+./scripts/infra/prepare-bbi-infra-ref-bump.sh --apply
+
+# Canonical one-command image rollout (recommended)
+CONFIRM_RELEASE_OPENEDX_GITOPS=RELEASE_OPENEDX_GITOPS \
+CONFIRM_PUSH_RELEASE_OPENEDX_GITOPS=PUSH_RELEASE_OPENEDX_GITOPS \
+ALLOW_PROD_APPLY=1 \
+./scripts/infra/release-openedx-gitops.sh --openedx-tag <OPENEDX_TAG> --mfe-tag <MFE_TAG> --apply --commit --push --verify-runtime
+
+# Production rollout with post-verify frontend cache purge (recommended for branding/theme releases)
+CONFIRM_RELEASE_OPENEDX_GITOPS=RELEASE_OPENEDX_GITOPS \
+CONFIRM_PUSH_RELEASE_OPENEDX_GITOPS=PUSH_RELEASE_OPENEDX_GITOPS \
+ALLOW_PROD_APPLY=1 \
+./scripts/infra/release-openedx-gitops.sh \
+  --openedx-tag <OPENEDX_TAG> --mfe-tag <MFE_TAG> \
+  --apply --commit --push --verify-runtime \
+  --purge-frontend-cache
+
+# Current default operations model is local/dev + prod (no dedicated staging cluster).
+# Use production target for live rollout and local/dev for pre-prod testing.
+
+# Staging-only GitOps update (skips base-ref bump by default)
+CONFIRM_RELEASE_OPENEDX_GITOPS=RELEASE_OPENEDX_GITOPS \
+CONFIRM_PUSH_RELEASE_OPENEDX_GITOPS=PUSH_RELEASE_OPENEDX_GITOPS \
+./scripts/infra/release-openedx-gitops.sh --target-env staging --openedx-tag <OPENEDX_TAG> --mfe-tag <MFE_TAG> --apply --commit --push
+
+# Rebuild LMS/CMS gettext bundles (account settings/profile blank)
+./scripts/infra/refresh-i18n-static.sh
+
+# Ensure platform admins have full permissions (prod + dev)
+./scripts/infra/ensure-platform-admins.sh
+
+# Validate Infisical secrets for Mereka LMS
+./scripts/infra/infisical-validate-mereka-lms.sh
+
+# Sync MEREKA_LMS secrets into /k8s/mereka-lms (fixes sprawl)
+./scripts/infra/infisical-sync-mereka-lms.sh prod
+./scripts/infra/infisical-sync-mereka-lms.sh dev
+
+# Normalize MySQL password secrets (strip trailing CR/LF in Infisical + GCP SM + K8s)
+./scripts/infra/normalize-mysql-secrets.sh
+APPLY=1 ./scripts/infra/normalize-mysql-secrets.sh
+
+# Provision Notes/XQueue MySQL DBs/users (idempotent)
+CONFIRM_PROVISION_MYSQL_APP_DBS=PROVISION_MYSQL_APP_DBS ALLOW_PROD_APPLY=1 \
+  ./scripts/infra/provision-mysql-app-dbs.sh
+
+# Sync Infisical -> GCP Secret Manager (ExternalSecrets source of truth)
+# NOTE: By default this is create-if-missing for safety. If you are fixing a bad
+# MongoDB Atlas secret already present in GCP SM (e.g. trailing newline), opt-in:
+ALLOW_OVERWRITE_MONGODB_KEYS=1 ./scripts/infra/sync-mereka-lms-secrets-to-gcpsm.sh
+
+# Validate telemetry connectivity (Grafana → Prometheus)
+./scripts/infra/validate-telemetry-connectivity.sh
+./scripts/infra/validate-telemetry-connectivity.sh --json
+./scripts/infra/validate-telemetry-connectivity.sh --strict
+REQUIRE_VPS_PROM_DS=1 REQUIRE_GRAFANA_RECOMMENDED=1 ./scripts/infra/validate-telemetry-connectivity.sh --strict
+
+# Audit Grafana dashboard coverage contract
+./scripts/qa/audit-grafana-dashboard.sh --strict-required
+./scripts/qa/audit-grafana-dashboard.sh --strict-required --strict-recommended
+
+# Audit monitoring coverage (repo + runtime, canonical)
+OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod \
+  ./scripts/qa/run-observability-first-class.sh --mode all --strict
+
+# Strict runtime audit (fails on stale Velero freshness checks)
+OBSERVABILITY_ENV_LABEL=prod OBSERVABILITY_DISPATCH_PROFILE=prod \
+  ./scripts/qa/run-observability-first-class.sh --mode runtime --strict
+
+# Consolidated operator release gate (auth + observability + Velero + Grafana)
+./scripts/qa/run-operations-gates.sh --env both
+
+# Run gate + alert-routing audit in CI-safe mode (skip VPS-only atlas monitor checks)
+RUN_ALERT_ROUTING_AUDIT=1 ALERT_ROUTING_RUN_ATLAS_VPS_AUDIT=0 ./scripts/qa/run-operations-gates.sh --env both
+
+# Audit credentialed SSO canary wiring (workflow contract + GH secrets/variable presence)
+./scripts/qa/audit-authenticated-sso-canary-wiring.sh
+STRICT=1 ./scripts/qa/audit-authenticated-sso-canary-wiring.sh
+
+# Configure GitHub canary secrets and enable runtime gate toggle
+SSO_CANARY_EMAIL_PROD='sso-canary@example.com' \
+SSO_CANARY_PASSWORD_PROD='***' \
+./scripts/infra/configure-github-authenticated-sso-canary.sh --enable-runtime-gate
+
+# Detect/fix OIDC disabled-account regression (active OIDC users with unusable LMS passwords)
+./scripts/qa/verify-oidc-user-password-state.sh --env prod
+./scripts/qa/verify-oidc-user-password-state.sh --env prod --fix
+```
+
+## Scheduled Checks
+
+Primary automation lives in CI (`.github/workflows/public-health-check.yml`).
+Run these locally only when you need extra signal or on-demand logs:
+
+```
+./scripts/infra/check-atlas-allowlist.sh
+./scripts/infra/check-atlas-allowlist-vps.sh
+./scripts/infra/ensure-atlas-allowlist-vps.sh
+./scripts/infra/cron-public-health-check.sh
+```
+
+If you *explicitly* want VPS cron logs, you can still wire them up, but CI
+is the default source of truth for health checks.
+
+To install the cron entry with logs under `var/`, run:
+```
+./scripts/infra/setup-vps-health-cron.sh
+```

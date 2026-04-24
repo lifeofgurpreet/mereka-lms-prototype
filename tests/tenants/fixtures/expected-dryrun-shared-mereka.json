@@ -1,0 +1,53 @@
+{
+  "results": [
+    {
+      "actions": [
+        "CREATE Site domain=academyv2.mereka.dev",
+        "CREATE EnterpriseCustomer slug=mereka name=Mereka Academy",
+        "CREATE Catalog title='Mereka Academy Full Catalog'",
+        "CREATE CatalogQuery org_filter=['MEREKA']",
+        "CREATE EnterpriseCustomerUser email=team@mereka.io role=admin",
+        "ENSURE Waffle Switch enterprise.enable_learner_portal.mereka = on",
+        "ENSURE Waffle Switch enterprise.enable_analytics_screen.mereka = on",
+        "ENSURE Waffle Switch enterprise.enable_audit_enrollment.mereka = off",
+        "ENSURE Waffle Switch enterprise.enable_portal_code_management.mereka = off",
+        "ENSURE Waffle Switch enterprise.enable_integrated_learner_portal_search.mereka = on"
+      ],
+      "errors": [],
+      "slug": "mereka"
+    },
+    {
+      "actions": [
+        "CREATE Site domain=biji-biji.academyv2.mereka.dev",
+        "CREATE EnterpriseCustomer slug=biji-biji name=Biji-Biji Academy",
+        "CREATE Catalog title='Biji-Biji Academy Catalog'",
+        "CREATE CatalogQuery org_filter=['BIJIBIJI', 'MEREKA']",
+        "CREATE EnterpriseCustomerUser email=admin@biji-biji.com role=admin",
+        "ENSURE Waffle Switch enterprise.enable_learner_portal.biji-biji = on",
+        "ENSURE Waffle Switch enterprise.enable_analytics_screen.biji-biji = on",
+        "ENSURE Waffle Switch enterprise.enable_audit_enrollment.biji-biji = off",
+        "ENSURE Waffle Switch enterprise.enable_portal_code_management.biji-biji = off",
+        "ENSURE Waffle Switch enterprise.enable_integrated_learner_portal_search.biji-biji = on"
+      ],
+      "errors": [],
+      "slug": "biji-biji"
+    },
+    {
+      "actions": [
+        "CREATE Site domain=skillourfuture.academyv2.mereka.dev",
+        "CREATE EnterpriseCustomer slug=skillourfuture name=Skill Our Future",
+        "CREATE Catalog title='Skill Our Future Catalog'",
+        "CREATE CatalogQuery org_filter=['SKILLOURFUTURE', 'MEREKA']",
+        "CREATE EnterpriseCustomerUser email=admin@mereka.io role=admin",
+        "ENSURE Waffle Switch enterprise.enable_learner_portal.skillourfuture = on",
+        "ENSURE Waffle Switch enterprise.enable_analytics_screen.skillourfuture = on",
+        "ENSURE Waffle Switch enterprise.enable_audit_enrollment.skillourfuture = off",
+        "ENSURE Waffle Switch enterprise.enable_portal_code_management.skillourfuture = off",
+        "ENSURE Waffle Switch enterprise.enable_integrated_learner_portal_search.skillourfuture = on"
+      ],
+      "errors": [],
+      "slug": "skillourfuture"
+    }
+  ],
+  "tenants_processed": 3
+}

@@ -1,0 +1,75 @@
+name: Select Build Lane
+description: Repo-side fastlane selector contract for heavy build workflows
+
+inputs:
+  enabled:
+    description: Whether fastlane routing is enabled
+    required: true
+  lane_mode:
+    description: Routing override for build workflows
+    required: false
+    default: auto
+  fastlane_label:
+    description: Preferred fastlane runner label
+    required: true
+  timezone:
+    description: Fastlane office-hours timezone
+    required: false
+    default: ''
+  office_hours_start:
+    description: Fastlane office-hours start
+    required: false
+    default: ''
+  office_hours_end:
+    description: Fastlane office-hours end
+    required: false
+    default: ''
+  runner_status_token:
+    description: Token for runner status lookup
+    required: false
+    default: ''
+  github_app_id:
+    description: GitHub App ID for fastlane checks
+    required: false
+    default: ''
+  github_app_installation_id:
+    description: GitHub App installation ID for fastlane checks
+    required: false
+    default: ''
+  github_app_private_key:
+    description: GitHub App private key for fastlane checks
+    required: false
+    default: ''
+
+outputs:
+  runner_label:
+    description: Selected runner label
+    value: ${{ steps.select.outputs.runner_label }}
+  decision:
+    description: Fastlane routing decision
+    value: ${{ steps.select.outputs.decision }}
+  reason:
+    description: Reason for the selected lane
+    value: ${{ steps.select.outputs.reason }}
+
+runs:
+  using: composite
+  steps:
+    - name: Select runner lane
+      id: select
+      uses: Biji-Biji-Initiative/bbi-infrastructure/.github/actions/select-runner-lane@main
+      with:
+        enabled: ${{ inputs.enabled }}
+        lane_mode: ${{ inputs.lane_mode }}
+        fastlane_label: ${{ inputs.fastlane_label }}
+        routing_policy: lms_build_prefer_fastlane
+        fallback_label: mereka-k8s-heavy-builders
+        timezone: ${{ inputs.timezone }}
+        office_hours_start: ${{ inputs.office_hours_start }}
+        office_hours_end: ${{ inputs.office_hours_end }}
+        runner_status_token: ${{ inputs.runner_status_token }}
+        github_app_id: ${{ inputs.github_app_id }}
+        github_app_installation_id: ${{ inputs.github_app_installation_id }}
+        github_app_private_key: ${{ inputs.github_app_private_key }}
+        allow_push_main: 'true'
+        allow_workflow_dispatch: 'true'

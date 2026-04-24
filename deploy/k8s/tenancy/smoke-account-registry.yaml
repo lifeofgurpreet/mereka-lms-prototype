@@ -1,0 +1,164 @@
+# Smoke Account Registry — legacy tenancy mirror
+#
+# Canonical smoke-account contract now lives at:
+#   config/smoke-account-registry.yaml
+#
+# Keep this file only as a compatibility mirror for tenancy-adjacent consumers
+# until they are migrated. Do not treat this path as the authority surface.
+#
+# Identity authority: Authentik + Open edX (NOT GitHub secrets, NOT Infisical)
+# Secret authority: Infisical
+# CI consumers: GitHub Actions secrets (mirrors only — never the source of truth)
+#
+# Governing rules:
+#   1. Create identity in real identity authority first (Authentik + Open edX).
+#   2. Store secret material/metadata in Infisical.
+#   3. Mirror to CI consumers only as needed.
+#   4. Never store passwords in this file or any repo file.
+#
+# Consumers:
+#   - scripts/qa/verify-*.sh (smoke tests)
+#   - .github/workflows/ (CI release gates)
+#   - docs/status/active/SMOKE_ACCOUNT_REGISTRY_2026-04-04.md (human-readable companion)
+#
+# Related:
+#   - docs/reference/operations/AUTHENTICATED_SMOKE_CREDENTIALS.md
+#   - docs/reference/contracts/VERIFIER_CONTRACT_CATALOG.md
+#   - docs/reference/operations/REAL_ACCOUNT_AND_CREDENTIAL_BOUNDARY.md
+---
+schema_version: "1.0"
+
+accounts:
+  # ============================================================================
+  # Per-tenant learner accounts (3 tenants × 1 learner = 3 accounts)
+  # ============================================================================
+  - id: smoke-learner-mereka
+    tenant: mereka
+    role: learner
+    identity_authority: authentik+openedx
+    identity_type: learner_record
+    secret_authority: infisical
+    infisical_key_pattern: "SMOKE_LEARNER_MEREKA_{ENV}_*"
+    target_envs: [dev, staging, production]
+    state: not-provisioned
+    notes: "Primary tenant learner smoke identity"
+
+  - id: smoke-learner-biji-biji
+    tenant: biji-biji
+    role: learner
+    identity_authority: authentik+openedx
+    identity_type: learner_record
+    secret_authority: infisical
+    infisical_key_pattern: "SMOKE_LEARNER_BIJI_BIJI_{ENV}_*"
+    target_envs: [dev, staging, production]
+    state: not-provisioned
+    notes: "Biji-Biji tenant learner smoke identity"
+
+  - id: smoke-learner-skillourfuture
+    tenant: skillourfuture
+    role: learner
+    identity_authority: authentik+openedx
+    identity_type: learner_record
+    secret_authority: infisical
+    infisical_key_pattern: "SMOKE_LEARNER_SOF_{ENV}_*"
+    target_envs: [dev, staging, production]
+    state: not-provisioned
+    notes: "Skill Our Future tenant learner smoke identity"
+
+  # ============================================================================
+  # Per-tenant operator accounts (3 tenants × 1 operator = 3 accounts)
+  # ============================================================================
+  - id: smoke-operator-mereka
+    tenant: mereka
+    role: operator
+    identity_authority: authentik+openedx
+    identity_type: staff_record
+    secret_authority: infisical
+    infisical_key_pattern: "SMOKE_OPERATOR_MEREKA_{ENV}_*"
+    target_envs: [dev, staging, production]
+    state: not-provisioned
+    notes: "Primary tenant operator/staff smoke identity"
+
+  - id: smoke-operator-biji-biji
+    tenant: biji-biji
+    role: operator
+    identity_authority: authentik+openedx
+    identity_type: staff_record
+    secret_authority: infisical
+    infisical_key_pattern: "SMOKE_OPERATOR_BIJI_BIJI_{ENV}_*"
+    target_envs: [dev, staging, production]
+    state: not-provisioned
+    notes: "Biji-Biji tenant operator/staff smoke identity"
+
+  - id: smoke-operator-skillourfuture
+    tenant: skillourfuture
+    role: operator
+    identity_authority: authentik+openedx
+    identity_type: staff_record
+    secret_authority: infisical
+    infisical_key_pattern: "SMOKE_OPERATOR_SOF_{ENV}_*"
+    target_envs: [dev, staging, production]
+    state: not-provisioned
+    notes: "Skill Our Future tenant operator/staff smoke identity"
+
+  # ============================================================================
+  # Platform-wide accounts (not tenant-scoped)
+  # ============================================================================
+  - id: smoke-platform-superuser
+    tenant: platform
+    role: superuser
+    identity_authority: openedx
+    identity_type: admin_authority
+    secret_authority: infisical
+    infisical_key_pattern: "SMOKE_PLATFORM_SUPERUSER_{ENV}_*"
+    target_envs: [dev, staging, production]
+    state: not-provisioned
+    notes: "Platform-wide Django superuser for admin smoke tests"
+
+  - id: smoke-enterprise-admin
+    tenant: shared
+    role: enterprise-admin
+    identity_authority: authentik+openedx
+    identity_type: enterprise_admin_record
+    secret_authority: infisical
+    infisical_key_pattern: "SMOKE_ENTERPRISE_ADMIN_{ENV}_*"
+    target_envs: [dev, staging, production]
+    state: not-provisioned
+    notes: "Enterprise admin portal smoke identity (shared across tenants with enterprise)"
+
+  - id: smoke-analytics-support
+    tenant: shared
+    role: analytics-support
+    identity_authority: authentik+openedx
+    identity_type: analytics_support_record
+    secret_authority: infisical
+    infisical_key_pattern: "SMOKE_ANALYTICS_SUPPORT_{ENV}_*"
+    target_envs: [dev, staging, production]
+    state: not-provisioned
+    notes: "Analytics/Superset support identity for observability smoke tests"
+
+# ============================================================================
+# Transitional consumer key mapping (compatibility)
+# ============================================================================
+# Current CI consumers still read legacy keys. These MUST be mapped from
+# canonical Infisical-backed identities above.
+transitional_consumer_keys:
+  - legacy_key: "SSO_CANARY_EMAIL_*"
+    maps_to: smoke-learner-mereka
+    field: email
+    deprecation_target: "migrate to canonical infisical_key_pattern"
+
+  - legacy_key: "SSO_CANARY_PASSWORD_*"
+    maps_to: smoke-learner-mereka
+    field: password
+    deprecation_target: "migrate to canonical infisical_key_pattern"
+
+  - legacy_key: "SSO_CANARY_STUDIO_EMAIL_*"
+    maps_to: smoke-operator-mereka
+    field: email
+    deprecation_target: "migrate to canonical infisical_key_pattern"
+
+  - legacy_key: "SSO_CANARY_STUDIO_PASSWORD_*"
+    maps_to: smoke-operator-mereka
+    field: password
+    deprecation_target: "migrate to canonical infisical_key_pattern"

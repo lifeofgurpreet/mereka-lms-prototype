@@ -1,0 +1,24 @@
+# GENERATED — do not hand-edit. Source: deploy/k8s/tenancy/tenant-registry.yaml
+# Regenerate: python scripts/domains/generate_domain_env.py
+# Patch MFE Deployment env vars for academyv2.mereka.io domain.
+# The MFE Caddyfile uses {$VAR:localhost} placeholders in CSP headers;
+# these env vars set the actual hostnames so CSP connect-src, frame-src
+# etc. reference real hosts instead of falling back to 'localhost'.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mfe
+spec:
+  template:
+    spec:
+      containers:
+        - name: mfe
+          env:
+            - name: LMS_HOST
+              value: "academyv2.mereka.io"
+            - name: MFE_HOST
+              value: "apps.academyv2.mereka.io"
+            - name: CMS_HOST
+              value: "studio.academyv2.mereka.io"
+            - name: AUTH_HOST
+              value: "auth0.mereka.io"

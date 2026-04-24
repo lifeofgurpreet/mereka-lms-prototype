@@ -1,0 +1,144 @@
+name: 'Set up Playwright'
+description: 'Install Node.js, Playwright Chromium, and cache browser binaries'
+
+inputs:
+  node-version:
+    description: 'Node.js version'
+    required: false
+    default: '18'
+  playwright-version:
+    description: 'Playwright version to install. Empty string means resolve the version from the local package manifest/lockfile.'
+    required: false
+    default: ''
+  npm-cache-dependency-path:
+    description: 'Path to package.json (or package-lock.json) used to key the npm dependency cache. Leave empty to skip npm caching.'
+    required: false
+    default: ''
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Node.js ${{ inputs.node-version }}
+      uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: ${{ inputs.npm-cache-dependency-path != '' && 'npm' || '' }}
+        cache-dependency-path: ${{ inputs.npm-cache-dependency-path }}
+
+    - name: Resolve Playwright version
+      shell: bash
+      run: |
+        set -euo pipefail
+        INPUT_VERSION="${{ inputs.playwright-version }}"
+        INPUT_PATH="${{ inputs.npm-cache-dependency-path }}"
+
+        resolve_from_manifest() {
+          local path="$1"
+          python3 - "$path" <<'PY'
+        from pathlib import Path
+        import json
+        import sys
+
+        path = Path(sys.argv[1])
+        data = json.loads(path.read_text(encoding="utf-8"))
+
+        if path.name == "package-lock.json":
+            packages = data.get("packages", {})
+            root = packages.get("", {})
+            deps = {}
+            deps.update(root.get("dependencies", {}))
+            deps.update(root.get("devDependencies", {}))
+            version = deps.get("@playwright/test") or deps.get("playwright")
+        else:
+            deps = {}
+            deps.update(data.get("dependencies", {}))
+            deps.update(data.get("devDependencies", {}))
+            version = deps.get("@playwright/test") or deps.get("playwright")
+
+        if not version:
+            raise SystemExit(1)
+
+        print(version)
+        PY
+        }
+
+        version="${INPUT_VERSION:-}"
+        if [[ -z "$version" ]]; then
+          candidates=()
+          if [[ -n "$INPUT_PATH" ]]; then
+            candidates+=("$INPUT_PATH")
+            if [[ "$INPUT_PATH" == */package.json ]]; then
+              candidates+=("${INPUT_PATH%package.json}package-lock.json")
+            fi
+          fi
+          candidates+=("tests/e2e/package-lock.json" "tests/e2e/package.json")
+
+          for candidate in "${candidates[@]}"; do
+            if [[ -f "$candidate" ]] && version="$(resolve_from_manifest "$candidate" 2>/dev/null)"; then
+              echo "Resolved Playwright version from $candidate: $version"
+              break
+            fi
+          done
+        fi
+
+        if [[ -z "$version" ]]; then
+          echo "ERROR: Could not resolve Playwright version from input or local manifests." >&2
+          exit 1
+        fi
+
+        echo "PLAYWRIGHT_VERSION=$version" >> "$GITHUB_ENV"
+
+    - name: Install Playwright runtime package
+      shell: bash
+      run: |
+        set -euo pipefail
+        PLAYWRIGHT_NODE_DIR="${RUNNER_TEMP}/playwright-node"
+        rm -rf "$PLAYWRIGHT_NODE_DIR"
+        mkdir -p "$PLAYWRIGHT_NODE_DIR"
+        cd "$PLAYWRIGHT_NODE_DIR"
+        npm init -y >/dev/null 2>&1
+        npm install --no-save "playwright@${PLAYWRIGHT_VERSION}"
+        echo "PLAYWRIGHT_NODE_PATH=$PLAYWRIGHT_NODE_DIR/node_modules" >> "$GITHUB_ENV"
+        echo "PLAYWRIGHT_IMPORT_SPEC=file://$PLAYWRIGHT_NODE_DIR/node_modules/playwright/index.mjs" >> "$GITHUB_ENV"
+
+    - name: Cache Playwright browsers
+      id: playwright-cache
+      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684  # v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ env.PLAYWRIGHT_VERSION }}-${{ runner.os }}
+
+    - name: Install or repair Playwright Chromium
+      shell: bash
+      run: |
+        set -euo pipefail
+        cd "${RUNNER_TEMP}/playwright-node"
+        executable_path="$(node - <<'NODE'
+        const { chromium } = require('playwright');
+        process.stdout.write(chromium.executablePath());
+        NODE
+        )"
+
+        if [[ "${{ steps.playwright-cache.outputs.cache-hit }}" == "true" && -x "$executable_path" ]]; then
+          echo "Using cached Playwright Chromium at $executable_path"
+          exit 0
+        fi
+
+        if [[ "${{ steps.playwright-cache.outputs.cache-hit }}" == "true" ]]; then
+          echo "Cached Playwright browser bundle is stale or incomplete; reinstalling Chromium."
+        else
+          echo "No Playwright browser cache found; installing Chromium."
+        fi
+
+        npx playwright install chromium
+
+        repaired_executable_path="$(node - <<'NODE'
+        const { chromium } = require('playwright');
+        process.stdout.write(chromium.executablePath());
+        NODE
+        )"
+
+        if [[ ! -x "$repaired_executable_path" ]]; then
+          echo "ERROR: Playwright Chromium executable not found after install: $repaired_executable_path" >&2
+          exit 1
+        fi

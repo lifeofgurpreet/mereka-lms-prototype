@@ -1,0 +1,52 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: xqueue-graders-sandbox
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: xqueue-graders
+    app.kubernetes.io/component: grader-worker
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: xqueue-graders
+      app.kubernetes.io/component: grader-worker
+
+  policyTypes:
+  - Ingress
+  - Egress
+
+  # Ingress: No incoming connections needed (graders pull from XQueue)
+  ingress: []
+
+  # Egress: AC-ASS-016: Deny network access except essential services
+  egress:
+  # Allow DNS lookups (required for database connection)
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+    ports:
+    - protocol: UDP
+      port: 53
+
+  # Allow MySQL database access (Cloud SQL proxy or in-cluster MySQL)
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: mysql
+    ports:
+    - protocol: TCP
+      port: 3306
+
+  # Allow XQueue service access (to pull submissions)
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: xqueue
+    ports:
+    - protocol: TCP
+      port: 8000
+
+  # Block all other outbound traffic (AC-ASS-016: deny network access)
+  # Any HTTP/HTTPS requests from student code will be denied

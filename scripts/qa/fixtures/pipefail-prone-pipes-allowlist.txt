@@ -1,0 +1,28 @@
+# Allowlist: pipefail-prone echo|grep -q in active-gate verifier scripts.
+# This file is generated for bead mereka-lms-0z5g.6 governance gate.
+#
+# STATE AS OF 2026-04-22 — ALLOWLIST IS EMPTY.
+#
+# Every active-gate verifier in .github/ci-scripts-static.txt has been
+# rewritten to use here-string form:
+#
+#   if echo "$VAR" | grep -q 'x'; then      →   if grep -q 'x' <<<"$VAR"; then
+#   if ! echo "$VAR" | grep -q 'x'; then    →   if ! grep -q 'x' <<<"$VAR"; then
+#
+# DO NOT add new entries. The gate `verify-no-pipefail-prone-pipes.sh` fails
+# any NEW file in this class. If a genuinely exceptional case arises (test
+# fixture, unreachable code path, third-party file we don't control),
+# document WHY in a comment immediately above the path.
+#
+# Chain of PRs that drove this to zero:
+#   #2024 batch 1 — 6 files
+#   #2030 batch 2 — 2 files
+#   #2033 allowlist shrink — 7 already-rewritten entries
+#   #2034 batch 3 — 6 files
+#   #2035 batch 4 — 6 files
+#   #2036 batch 5 — 7 files
+#   #2040 reconcile rebase-induced stale entries — 22 drops
+#   THIS PR — final 14 files + empty allowlist
+#
+# Audit evidence: docs/status/evidence/pipefail-prone-verifier-audit-2026-04-22.md
+# Bead: mereka-lms-0z5g.6 (AC3 complete; AC4 governance gate live).

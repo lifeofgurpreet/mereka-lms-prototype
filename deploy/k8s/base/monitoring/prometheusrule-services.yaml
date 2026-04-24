@@ -1,0 +1,83 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: services-alerts
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: openedx-services
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/component: monitoring
+    prometheus: kube-prometheus
+spec:
+  groups:
+    - name: openedx-shared-services
+      interval: 30s
+      rules:
+        - alert: ForumPodDown
+          expr: up{job="forum-metrics", namespace="mereka-lms"} == 0
+          for: 5m
+          labels:
+            severity: warning
+            component: forum
+          annotations:
+            summary: "Forum service is not exposing metrics"
+            description: "Forum targets are down for at least 5 minutes."
+
+        - alert: DiscoveryPodDown
+          expr: up{job="discovery-metrics", namespace="mereka-lms"} == 0
+          for: 5m
+          labels:
+            severity: warning
+            component: discovery
+          annotations:
+            summary: "Discovery service is down"
+            description: "Discovery pod {{ $labels.pod }} has been down for more than 5 minutes."
+
+        - alert: CredentialsPodDown
+          expr: up{job="credentials-metrics", namespace="mereka-lms"} == 0
+          for: 5m
+          labels:
+            severity: warning
+            component: credentials
+          annotations:
+            summary: "Credentials service is down"
+            description: "Credentials pod {{ $labels.pod }} has been down for more than 5 minutes."
+
+        - alert: MFEPodDown
+          expr: up{job="mfe-metrics", namespace="mereka-lms"} == 0
+          for: 5m
+          labels:
+            severity: warning
+            component: mfe
+          annotations:
+            summary: "MFE service is down"
+            description: "MFE pod {{ $labels.pod }} has been down for more than 5 minutes."
+
+        - alert: PurchaseGatewayPodDown
+          expr: up{job="purchase-gateway-metrics", namespace="mereka-lms"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: purchase-gateway
+          annotations:
+            summary: "Purchase gateway service is down"
+            description: "Purchase Gateway pod {{ $labels.pod }} has been down for more than 5 minutes."
+
+        - alert: PurchaseGatewayHighErrorRate
+          expr: |
+            (
+              sum(rate(http_requests_total{job="purchase-gateway-metrics", status_code=~"5.."}[5m]))
+              /
+              clamp_min(sum(rate(http_requests_total{job="purchase-gateway-metrics", status_code!~"4.."}[5m])), 1e-10)
+            ) > 0.005
+          for: 5m
+          labels:
+            speculative: "true"
+            severity: critical
+            component: purchase-gateway
+          annotations:
+            speculative_reason: "Awaiting app-level instrumentation — see bead mereka-lms-zuv1"
+            summary: "Purchase Gateway 5xx error rate is high"
+            description: "Purchase gateway 5xx ratio is {{ $value | humanizePercentage }} in the last 5 minutes, above 0.5%."

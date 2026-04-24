@@ -1,0 +1,307 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: lms-alerts
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: lms
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/component: monitoring
+    prometheus: kube-prometheus
+spec:
+  groups:
+    - name: openedx-lms
+      interval: 30s
+      rules:
+        # Pod availability alerts
+        - alert: LMSPodDown
+          expr: up{job="lms-metrics", namespace="mereka-lms"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: lms
+          annotations:
+            summary: "LMS pod is down"
+            description: "LMS pod {{ $labels.pod }} has been down for more than 5 minutes."
+
+        - alert: LMSPodRestarting
+          expr: rate(kube_pod_container_status_restarts_total{namespace="mereka-lms", pod=~"lms-.*"}[15m]) > 0
+          for: 5m
+          labels:
+            severity: warning
+            component: lms
+          annotations:
+            summary: "LMS pod is restarting frequently"
+            description: "LMS pod {{ $labels.pod }} has restarted {{ $value }} times in the last 15 minutes."
+
+        # Memory alerts
+        - alert: LMSPodMemoryHigh
+          expr: |
+            (
+              container_memory_working_set_bytes{namespace="mereka-lms", pod=~"lms-.*", container="lms"}
+              / on(pod, namespace) kube_pod_container_resource_limits{resource="memory", namespace="mereka-lms", pod=~"lms-.*", container="lms"}
+            ) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+            component: lms
+          annotations:
+            summary: "LMS pod memory usage is high"
+            description: "LMS pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of memory limit."
+
+        - alert: LMSPodMemoryCritical
+          expr: |
+            (
+              container_memory_working_set_bytes{namespace="mereka-lms", pod=~"lms-.*", container="lms"}
+              / on(pod, namespace) kube_pod_container_resource_limits{resource="memory", namespace="mereka-lms", pod=~"lms-.*", container="lms"}
+            ) > 0.95
+          for: 5m
+          labels:
+            severity: critical
+            component: lms
+          annotations:
+            summary: "LMS pod memory usage is critical"
+            description: "LMS pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of memory limit and may be OOM killed."
+
+        # CPU alerts
+        - alert: LMSPodCPUHigh
+          expr: |
+            (
+              rate(container_cpu_usage_seconds_total{namespace="mereka-lms", pod=~"lms-.*", container="lms"}[5m])
+              / on(pod, namespace) kube_pod_container_resource_limits{resource="cpu", namespace="mereka-lms", pod=~"lms-.*", container="lms"}
+            ) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+            component: lms
+          annotations:
+            summary: "LMS pod CPU usage is high"
+            description: "LMS pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of CPU limit."
+
+        # Disk alerts
+        - alert: LMSPodDiskSpaceHigh
+          expr: |
+            (
+              kubelet_volume_stats_used_bytes{namespace="mereka-lms", persistentvolumeclaim=~"lms-.*"}
+              / kubelet_volume_stats_capacity_bytes{namespace="mereka-lms", persistentvolumeclaim=~"lms-.*"}
+            ) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+            component: lms
+          annotations:
+            summary: "LMS persistent volume disk space is high"
+            description: "LMS volume {{ $labels.persistentvolumeclaim }} is using {{ $value | humanizePercentage }} of capacity."
+
+        # PVC utilization for all production PVCs in namespace
+        - alert: HighPVCUtilization
+          expr: |
+            kubelet_volume_stats_used_bytes{namespace="mereka-lms"}
+            /
+            kubelet_volume_stats_capacity_bytes{namespace="mereka-lms"} > 0.80
+          for: 10m
+          labels:
+            severity: warning
+            component: storage
+          annotations:
+            summary: "Persistent volume storage utilization is high"
+            description: "PVC {{ $labels.persistentvolumeclaim }} is using {{ $value | humanizePercentage }} of capacity in {{ $labels.namespace }}."
+
+    - name: openedx-cms
+      interval: 30s
+      rules:
+        # Pod availability alerts for CMS
+        - alert: CMSPodDown
+          expr: up{job="cms-metrics", namespace="mereka-lms"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: cms
+          annotations:
+            summary: "CMS (Studio) pod is down"
+            description: "CMS pod {{ $labels.pod }} has been down for more than 5 minutes."
+
+        - alert: CMSPodMemoryHigh
+          expr: |
+            (
+              container_memory_working_set_bytes{namespace="mereka-lms", pod=~"cms-.*", container="cms"}
+              / on(pod, namespace) kube_pod_container_resource_limits{resource="memory", namespace="mereka-lms", pod=~"cms-.*", container="cms"}
+            ) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+            component: cms
+          annotations:
+            summary: "CMS pod memory usage is high"
+            description: "CMS pod {{ $labels.pod }} is using {{ $value | humanizePercentage }} of memory limit."
+
+    - name: openedx-infrastructure
+      interval: 30s
+      rules:
+        # MySQL alerts
+        - alert: MySQLPodDown
+          expr: up{namespace="mereka-lms", pod=~"mysql-.*"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: mysql
+          annotations:
+            summary: "MySQL database is down"
+            description: "MySQL pod {{ $labels.pod }} has been down for more than 5 minutes. Open edX is non-functional."
+
+        - alert: MySQLExporterDown
+          expr: up{namespace="mereka-lms", service="mysql", endpoint="metrics"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: mysql
+          annotations:
+            summary: "MySQL exporter is down"
+            description: "MySQL exporter target {{ $labels.instance }} is down for over 5 minutes."
+
+        - alert: MySQLHighConnectionUtilization
+          expr: |
+            (
+              mysql_global_status_threads_connected{namespace="mereka-lms", service="mysql"}
+              /
+              clamp_min(mysql_global_variables_max_connections{namespace="mereka-lms", service="mysql"}, 1)
+            ) > 0.85
+          for: 10m
+          labels:
+            severity: warning
+            component: mysql
+          annotations:
+            summary: "MySQL connection utilization is high"
+            description: "MySQL is using more than 85% of max connections for at least 10 minutes."
+
+        - alert: MySQLSlowQueriesSpike
+          expr: increase(mysql_global_status_slow_queries{namespace="mereka-lms", service="mysql"}[10m]) > 20
+          for: 10m
+          labels:
+            severity: warning
+            component: mysql
+          annotations:
+            summary: "MySQL slow queries are spiking"
+            description: "MySQL slow query count increased by more than 20 in the last 10 minutes."
+
+        # Redis alerts
+        - alert: RedisPodDown
+          expr: up{namespace="mereka-lms", pod=~"redis-.*"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: redis
+          annotations:
+            summary: "Redis cache is down"
+            description: "Redis pod {{ $labels.pod }} has been down for more than 5 minutes. Open edX performance degraded."
+
+        - alert: RedisExporterDown
+          expr: up{namespace="mereka-lms", service="redis", endpoint="metrics"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            component: redis
+          annotations:
+            summary: "Redis exporter is down"
+            description: "Redis exporter target {{ $labels.instance }} is down for over 5 minutes."
+
+        - alert: RedisRejectedConnectionsSpike
+          expr: increase(redis_rejected_connections_total{namespace="mereka-lms", service="redis"}[10m]) > 0
+          for: 10m
+          labels:
+            severity: warning
+            component: redis
+          annotations:
+            summary: "Redis rejected connections detected"
+            description: "Redis rejected one or more client connections in the last 10 minutes."
+
+        - alert: RedisEvictionsSpike
+          expr: increase(redis_evicted_keys_total{namespace="mereka-lms", service="redis"}[15m]) > 0
+          for: 10m
+          labels:
+            severity: warning
+            component: redis
+          annotations:
+            summary: "Redis key evictions detected"
+            description: "Redis evicted keys in the last 15 minutes. Check memory pressure and maxmemory policy."
+
+        # MongoDB: Atlas-managed — no in-cluster pod to monitor.
+        # MongoDB Atlas connectivity is monitored via application-level metrics
+        # (django_http_responses, Celery task failures). No pod-based alert needed.
+
+        # QUARANTINE: Elasticsearch is not deployed in the standard stack.
+        # Meilisearch replaced Elasticsearch for forum search in Tutor v19+.
+        # Re-enable if Elasticsearch is explicitly deployed for a future use case.
+        # - alert: ElasticsearchPodDown
+        #   expr: up{namespace="mereka-lms", pod=~"elasticsearch-.*"} == 0
+        #   for: 5m
+        #   labels:
+        #     severity: warning
+        #     component: elasticsearch
+        #   annotations:
+        #     summary: "Elasticsearch is down"
+        #     description: "Elasticsearch pod {{ $labels.pod }} has been down for more than 5 minutes. Search functionality unavailable."
+
+        # Workload stability alerts
+        - alert: OpenEdxCriticalDeploymentUnavailable
+          expr: |
+            sum by (deployment) (
+              kube_deployment_status_replicas_unavailable{
+                namespace="mereka-lms",
+                deployment=~"lms|cms|caddy|mfe|forum|discovery|credentials|notes|xqueue"
+              }
+            ) > 0
+          for: 5m
+          labels:
+            severity: critical
+            component: platform
+          annotations:
+            summary: "Critical deployment has unavailable replicas"
+            description: "Deployment {{ $labels.deployment }} has unavailable replicas for more than 10 minutes."
+
+        - alert: OpenEdxPodsPendingTooLong
+          expr: sum(kube_pod_status_phase{namespace="mereka-lms", phase="Pending"}) > 0
+          for: 15m
+          labels:
+            severity: warning
+            component: platform
+          annotations:
+            summary: "Pods stuck in Pending state"
+            description: "One or more pods in namespace mereka-lms have been Pending for over 15 minutes."
+
+        - alert: OpenEdxCrashLoopingContainers
+          expr: |
+            sum by (pod, container) (
+              kube_pod_container_status_waiting_reason{
+                namespace="mereka-lms",
+                reason="CrashLoopBackOff"
+              }
+            ) > 0
+          for: 5m
+          labels:
+            severity: critical
+            component: platform
+          annotations:
+            summary: "CrashLoopBackOff detected"
+            description: "Container {{ $labels.container }} in pod {{ $labels.pod }} is crash looping."
+
+        # Synthetic and backup workflow alerts
+        - alert: OpenEdxSyntheticOrBackupJobFailures
+          expr: |
+            sum by (namespace, job_name) (
+              increase(
+                kube_job_status_failed{
+                  namespace=~"mereka-lms|velero",
+                  job_name=~"(auth-verify-prod|cert-verify-prod|backup-verification|restore-test).*"
+                }[6h]
+              )
+            ) > 0
+          for: 5m
+          labels:
+            severity: warning
+            component: reliability
+          annotations:
+            summary: "Synthetic/backup job failures detected"
+            description: "Job {{ $labels.namespace }}/{{ $labels.job_name }} has failed at least once in the last 6 hours."

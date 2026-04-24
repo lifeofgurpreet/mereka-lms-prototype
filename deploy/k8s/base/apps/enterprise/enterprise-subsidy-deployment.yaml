@@ -1,0 +1,196 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-subsidy
+  labels:
+    app.kubernetes.io/name: enterprise-subsidy
+    app.kubernetes.io/component: enterprise
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: mereka-lms
+      app.kubernetes.io/name: enterprise-subsidy
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: enterprise-subsidy
+        app.kubernetes.io/component: enterprise
+        app.kubernetes.io/instance: mereka-lms
+        app.kubernetes.io/part-of: mereka-lms
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+      initContainers:
+        - name: config-gen
+          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-subsidy:pin-required
+          command: ["python3", "-c"]
+          args:
+            - |
+              import os, yaml, json as _json
+              lms_root = os.environ.get('LMS_ROOT_URL', 'http://localhost')
+              jwt_secret = os.environ.get('JWT_SECRET_KEY', os.environ.get('DJANGO_SECRET_KEY', 'SET-ME-PLEASE'))
+              jwt_jwks = None
+              _priv_jwk = os.environ.get('JWT_PRIVATE_SIGNING_JWK', '')
+              if _priv_jwk:
+                  try:
+                      _priv = _json.loads(_priv_jwk)
+                      _pub = {k: _priv[k] for k in ('kid', 'kty', 'e', 'n') if k in _priv}
+                      _pub['alg'] = 'RS512'
+                      jwt_jwks = _json.dumps({'keys': [_pub]})
+                  except Exception as e:
+                      print(f'Warning: could not derive public JWK: {e}')
+              config = {
+                  'SECRET_KEY': os.environ['DJANGO_SECRET_KEY'],
+                  'ALLOWED_HOSTS': ['*'],
+                  'DATABASES': {
+                      'default': {
+                          'ENGINE': 'django.db.backends.mysql',
+                          'NAME': os.environ.get('DB_NAME', 'enterprise_subsidy'),
+                          'USER': os.environ.get('DB_USER', 'enterprise_subsidy'),
+                          'PASSWORD': os.environ['DB_PASSWORD'],
+                          'HOST': os.environ.get('DB_HOST', 'mysql'),
+                          'PORT': 3306,
+                          'ATOMIC_REQUESTS': False,
+                          'CONN_MAX_AGE': 60,
+                      }
+                  },
+                  'CACHES': {
+                      'default': {
+                          'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+                          'LOCATION': os.environ.get('CACHE_LOCATION', 'redis://redis:6379/10'),
+                          'KEY_PREFIX': 'enterprise_subsidy',
+                      }
+                  },
+                  'SOCIAL_AUTH_EDX_OAUTH2_KEY': os.environ.get('SOCIAL_AUTH_EDX_OAUTH2_KEY', 'enterprise-subsidy-key'),
+                  'SOCIAL_AUTH_EDX_OAUTH2_SECRET': os.environ.get('SOCIAL_AUTH_EDX_OAUTH2_SECRET', ''),
+                  'SOCIAL_AUTH_EDX_OAUTH2_URL_ROOT': 'http://lms:8000',
+                  'SOCIAL_AUTH_EDX_OAUTH2_PUBLIC_URL_ROOT': os.environ.get('LMS_ROOT_URL', 'http://localhost'),
+                  'BACKEND_SERVICE_EDX_OAUTH2_KEY': os.environ.get('BACKEND_SERVICE_EDX_OAUTH2_KEY', 'enterprise-subsidy-key'),
+                  'BACKEND_SERVICE_EDX_OAUTH2_SECRET': os.environ.get('BACKEND_SERVICE_EDX_OAUTH2_SECRET', ''),
+                  'LMS_BASE_URL': 'http://lms:8000',
+                  'LMS_ROOT_URL': os.environ.get('LMS_ROOT_URL', 'http://localhost'),
+                  'ENTERPRISE_CATALOG_URL': 'http://enterprise-catalog:8000',
+                  'ENTERPRISE_SUBSIDY_URL': 'http://enterprise-subsidy:8000',
+                  'JWT_AUTH': {
+                      'JWT_ISSUER': lms_root + '/oauth2',
+                      'JWT_AUDIENCE': 'openedx',
+                      'JWT_SECRET_KEY': jwt_secret,
+                      'JWT_ALGORITHM': 'HS256',
+                      'JWT_SIGNING_ALGORITHM': 'RS512',
+                      'JWT_PUBLIC_SIGNING_JWK_SET': jwt_jwks if jwt_jwks else None,
+                      'JWT_ISSUERS': [
+                          {
+                              'ISSUER': lms_root + '/oauth2',
+                              'AUDIENCE': 'openedx',
+                              'SECRET_KEY': jwt_secret,
+                          }
+                      ],
+                  },
+              }
+              with open('/config/enterprise_subsidy.yml', 'w') as f:
+                  yaml.dump(config, f, default_flow_style=False)
+              print('Config generated successfully')
+          env:
+            - name: DJANGO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: enterprise-secrets
+                  key: ENTERPRISE_SUBSIDY_SECRET_KEY
+            - name: DB_NAME
+              value: enterprise_subsidy
+            - name: DB_USER
+              value: enterprise_subsidy
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: enterprise-secrets
+                  key: MYSQL_ENTERPRISE_SUBSIDY_PASSWORD
+            - name: DB_HOST
+              value: mysql
+            - name: CACHE_LOCATION
+              value: redis://redis:6379/10
+            - name: SOCIAL_AUTH_EDX_OAUTH2_KEY
+              value: enterprise-subsidy-key
+            - name: SOCIAL_AUTH_EDX_OAUTH2_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: enterprise-secrets
+                  key: ENTERPRISE_SUBSIDY_OAUTH2_SECRET
+            - name: BACKEND_SERVICE_EDX_OAUTH2_KEY
+              value: enterprise-subsidy-key
+            - name: BACKEND_SERVICE_EDX_OAUTH2_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: enterprise-secrets
+                  key: ENTERPRISE_SUBSIDY_OAUTH2_SECRET
+            # Overlays override LMS_ROOT_URL with the environment-specific public URL.
+            - name: LMS_ROOT_URL
+              value: "http://localhost"
+            - name: JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openedx-secrets
+                  key: JWT_SECRET_KEY_LMS
+            - name: JWT_PRIVATE_SIGNING_JWK
+              valueFrom:
+                secretKeyRef:
+                  name: openedx-secrets
+                  key: JWT_PRIVATE_SIGNING_JWK
+          resources:
+            requests:
+              cpu: 10m
+              memory: 128Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: config
+              mountPath: /config
+      containers:
+        - name: enterprise-subsidy
+          image: ghcr.io/biji-biji-initiative/mereka-lms/enterprise-subsidy:pin-required
+          ports:
+            - containerPort: 18280
+          env:
+            - name: DJANGO_SETTINGS_MODULE
+              value: enterprise_subsidy.settings.production
+            - name: EDX_ENTERPRISE_SUBSIDY_CFG
+              value: /config/enterprise_subsidy.yml
+          readinessProbe:
+            httpGet:
+              path: /health/
+              port: 18280
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health/
+              port: 18280
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 256Mi
+            limits:
+              cpu: 250m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: config
+              mountPath: /config
+      volumes:
+        - name: config
+          emptyDir: {}

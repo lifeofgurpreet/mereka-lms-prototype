@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Biji-Biji-Initiative/mereka-lms/blob/main/infrastructure/ci/release-bundle.schema.json",
+  "title": "Mereka LMS Release Bundle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "bundle_id",
+    "created_at",
+    "repository",
+    "commit_sha",
+    "target_environment",
+    "build",
+    "images",
+    "artifacts",
+    "service_id",
+    "contract_family",
+    "contract_version",
+    "contract_ref"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.1"
+    },
+    "bundle_id": {
+      "type": "string",
+      "pattern": "^rb-[0-9a-f]{7,40}-[0-9]{8}T[0-9]{6}Z$"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "repository": {
+      "type": "string",
+      "minLength": 3
+    },
+    "commit_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "target_environment": {
+      "type": "string",
+      "enum": ["dev", "nonprod", "staging", "production", "prod"]
+    },
+    "service_id": {
+      "type": "string",
+      "const": "mereka-lms"
+    },
+    "contract_family": {
+      "type": "string",
+      "const": "release_bundle_schema"
+    },
+    "contract_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$"
+    },
+    "contract_ref": {
+      "type": "string",
+      "pattern": "^.+@[0-9a-f]{7,40}$"
+    },
+    "build": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workflow", "run_id", "run_attempt"],
+      "properties": {
+        "workflow": {
+          "type": "string",
+          "minLength": 1
+        },
+        "run_id": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "run_attempt": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        }
+      }
+    },
+    "images": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["openedx", "mfe"],
+      "properties": {
+        "openedx": {
+          "$ref": "#/$defs/imageRef"
+        },
+        "mfe": {
+          "$ref": "#/$defs/imageRef"
+        }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sbom", "provenance", "vulnerability_scan"],
+      "properties": {
+        "sbom": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["openedx", "mfe"],
+          "properties": {
+            "openedx": { "type": "string", "minLength": 1 },
+            "mfe": { "type": "string", "minLength": 1 }
+          }
+        },
+        "provenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["artifact_name", "openedx_predicate", "mfe_predicate"],
+          "properties": {
+            "artifact_name": { "type": "string", "minLength": 1 },
+            "openedx_predicate": { "type": "string", "minLength": 1 },
+            "mfe_predicate": { "type": "string", "minLength": 1 }
+          }
+        },
+        "vulnerability_scan": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["openedx", "mfe"],
+          "properties": {
+            "openedx": { "type": "string", "minLength": 1 },
+            "mfe": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "imageRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "digest"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    }
+  }
+}

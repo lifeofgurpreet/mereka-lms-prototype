@@ -1,0 +1,78 @@
+:8002 {
+    log {
+        output stdout
+        format filter {
+            wrap json
+            fields {
+                common_log delete
+                request>headers delete
+                resp_headers delete
+                tls delete
+            }
+        }
+    }
+
+    # Default: all responses must revalidate (SPA routes via try_files).
+    header Cache-Control "no-cache"
+
+    # Hashed static assets: safe to cache forever.
+    @hashed {
+        path *.js *.css *.woff *.woff2 *.ttf *.map *.png *.jpg *.jpeg *.gif *.svg *.ico *.webp
+    }
+    header @hashed Cache-Control "public, max-age=31536000, immutable"
+
+    # LMS API proxy: the enterprise learner portal makes relative API calls
+    # against its own origin. Handle blocks run BEFORE try_files.
+    handle /enterprise/* {
+        reverse_proxy lms:8000 {
+            header_up Host {$LMS_HOST:localhost}
+        }
+    }
+    # Enterprise-access API — all /api/v1/* endpoints are served by
+    # enterprise-access (BFFs, subsidy policies, license/coupon/credit requests,
+    # customer configurations, curations, academies).
+    handle /api/v1/* {
+        reverse_proxy enterprise-access:18270 {
+            header_up Host {$LMS_HOST:localhost}
+            header_up X-Forwarded-Proto {http.request.header.X-Forwarded-Proto}
+            header_up X-Forwarded-Port {http.request.header.X-Forwarded-Port}
+        }
+    }
+    handle /api/* {
+        reverse_proxy lms:8000 {
+            header_up Host {$LMS_HOST:localhost}
+        }
+    }
+    handle /login_refresh* {
+        reverse_proxy lms:8000 {
+            header_up Host {$LMS_HOST:localhost}
+        }
+    }
+    handle /csrf/* {
+        reverse_proxy lms:8000 {
+            header_up Host {$LMS_HOST:localhost}
+        }
+    }
+    handle /oauth2/* {
+        reverse_proxy lms:8000 {
+            header_up Host {$LMS_HOST:localhost}
+        }
+    }
+    handle /login {
+        reverse_proxy lms:8000 {
+            header_up Host {$LMS_HOST:localhost}
+        }
+    }
+    handle /consent/* {
+        reverse_proxy lms:8000 {
+            header_up Host {$LMS_HOST:localhost}
+        }
+    }
+
+    # Static file serving (SPA fallback) — must be last.
+    handle {
+        root * /openedx/dist
+        try_files {path} /index.html
+        file_server
+    }
+}

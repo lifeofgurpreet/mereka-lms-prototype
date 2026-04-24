@@ -1,0 +1,87 @@
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-privileged-mereka-lms
+  labels:
+    app.kubernetes.io/name: disallow-privileged-mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/component: security
+  annotations:
+    policies.kyverno.io/title: Disallow Privileged Containers
+    policies.kyverno.io/category: Pod Security
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/description: >-
+      Prevents containers in the mereka-lms namespace from running in
+      privileged mode or with allowPrivilegeEscalation: true. Privileged
+      containers have full access to the host kernel and are a critical
+      security risk.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: disallow-privileged-containers
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - mereka-lms
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - cert-manager
+                - ingress-nginx
+                - argocd
+                - external-secrets
+                - kyverno
+                - velero
+                - monitoring
+      validate:
+        message: >-
+          Privileged containers are not allowed in namespace mereka-lms.
+          Set securityContext.privileged: false or remove the field.
+        pattern:
+          spec:
+            =(initContainers):
+              - =(securityContext):
+                  =(privileged): false
+            containers:
+              - =(securityContext):
+                  =(privileged): false
+    - name: disallow-privilege-escalation
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - mereka-lms
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                - kube-system
+                - cert-manager
+                - ingress-nginx
+                - argocd
+                - external-secrets
+                - kyverno
+                - velero
+                - monitoring
+      validate:
+        message: >-
+          Containers must set allowPrivilegeEscalation: false in namespace
+          mereka-lms. This prevents processes from gaining additional
+          privileges via setuid/setgid binaries.
+        pattern:
+          spec:
+            =(initContainers):
+              - securityContext:
+                  allowPrivilegeEscalation: false
+            containers:
+              - securityContext:
+                  allowPrivilegeEscalation: false

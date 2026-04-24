@@ -1,0 +1,143 @@
+# iOS TestFlight CI/CD Pipeline
+#
+# @spec: Mobile Phase 2 - iOS Stabilization (mereka-lms-36f7)
+# @covers: AC-MOB-013 - TestFlight within 30 minutes of main branch push
+#
+# Builds iOS app and uploads to TestFlight on main branch pushes
+name: iOS TestFlight Deployment
+
+on:
+  push:
+    tags:
+      - 'v*-ios'
+  workflow_dispatch:
+
+env:
+  XCODE_VERSION: '15.2'
+  IOS_SCHEME: MerekaAcademy
+  IOS_WORKSPACE: ios/MerekaAcademy.xcworkspace
+  BUILD_CONFIGURATION: Release
+
+permissions: {}
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy to TestFlight
+    runs-on: macos-14  # Latest GitHub-hosted macOS runner
+    timeout-minutes: 30  # AC-MOB-013 - Within 30 minutes
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
+
+      - name: Cache CocoaPods
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7  # v5.0.4
+        with:
+          path: ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: Install CocoaPods dependencies
+        working-directory: ios
+        run: pod install --repo-update
+
+      - name: Import Apple certificates
+        env:
+          CERTIFICATE_BASE64: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE }}
+          P12_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          # Create keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security set-keychain-settings -t 3600 -u build.keychain
+
+          # Import certificate
+          echo "$CERTIFICATE_BASE64" | base64 --decode > certificate.p12
+          security import certificate.p12 -k build.keychain -P "$P12_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+
+          # Clean up
+          rm certificate.p12
+
+      - name: Import provisioning profile
+        env:
+          PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE }}
+        run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          echo "$PROVISIONING_PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+
+      - name: Increment build number
+        working-directory: ios
+        run: |
+          BUILD_NUMBER=$(($(date +%s) / 60))
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" MerekaAcademy/Info.plist
+
+      - name: Build archive
+        working-directory: ios
+        run: |
+          xcodebuild archive \
+            -workspace "${{ env.IOS_WORKSPACE }}" \
+            -scheme "${{ env.IOS_SCHEME }}" \
+            -configuration "${{ env.BUILD_CONFIGURATION }}" \
+            -archivePath build/MerekaAcademy.xcarchive \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM="${{ secrets.APPLE_TEAM_ID }}" \
+            PROVISIONING_PROFILE_SPECIFIER="${{ secrets.PROVISIONING_PROFILE_SPECIFIER }}" \
+            | xcpretty
+
+      - name: Export IPA
+        working-directory: ios
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath build/MerekaAcademy.xcarchive \
+            -exportPath build \
+            -exportOptionsPlist ExportOptions.plist \
+            | xcpretty
+
+      - name: Upload to TestFlight
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+        run: |
+          xcrun altool --upload-app \
+            -t ios \
+            -f ios/build/MerekaAcademy.ipa \
+            --apiKey "$APP_STORE_CONNECT_API_KEY_ID" \
+            --apiIssuer "$APP_STORE_CONNECT_API_KEY_ISSUER_ID" \
+            --apiKeyFile <(echo "$APP_STORE_CONNECT_API_KEY")
+
+      - name: Clean up keychain
+        if: always()
+        run: security delete-keychain build.keychain
+
+      - name: Upload build artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: ios-build-${{ github.sha }}
+          path: |
+            ios/build/*.ipa
+            ios/build/*.xcarchive/dSYMs
+          retention-days: 3
+
+      - name: Notify on success
+        if: success()
+        run: |
+          echo "✅ TestFlight deployment completed successfully"
+          echo "Build uploaded in $(($SECONDS / 60))m $(($SECONDS % 60))s"
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ TestFlight deployment failed"
+          echo "Check logs for details"

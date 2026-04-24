@@ -1,0 +1,181 @@
+#!/usr/bin/env bash
+# @covers AC-DEP-204
+# @spec: repository-structure_spec.md
+#
+# Detect drift between app-repo Open edX deploy surfaces (canonical source)
+# and the vendored copies in bbi-infrastructure.
+#
+# The app repo (mereka-lms) owns these Open edX application surfaces.
+# The infra repo (bbi-infrastructure) vendors a copy at:
+#   apps/mereka-lms/base/deploy/k8s/base/
+#
+# This script fails if the vendored copy has diverged from the
+# app-repo source, indicating the vendor sync is stale.
+#
+# Usage:
+#   ./scripts/qa/verify-vendored-settings-drift.sh
+#   INFRA_REPO=/path/to/bbi-infrastructure ./scripts/qa/verify-vendored-settings-drift.sh
+#
+# The infra file is read via `git show` against a stable ref (default:
+# refs/remotes/origin/main) so results are deterministic regardless of
+# which branch happens to be checked out in the sibling repo.
+set -euo pipefail
+
+REPO_ROOT="${REPO_ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+
+# Auto-detect infra repo location only when the caller did not pin a target.
+INFRA_REPO_EXPLICIT=0
+if [[ -n "${INFRA_REPO+x}" ]]; then
+  INFRA_REPO_EXPLICIT=1
+fi
+INFRA_REPO="${INFRA_REPO:-}"
+if [[ -z "$INFRA_REPO" ]] && [[ "${GITHUB_ACTIONS:-false}" != "true" ]]; then
+  for candidate in \
+    "$HOME/projects/k8s/bbi-infrastructure" \
+    "$REPO_ROOT/../bbi-infrastructure" \
+    "$HOME/bbi-infrastructure"; do
+    if [[ -d "$candidate/apps/mereka-lms" ]]; then
+      INFRA_REPO="$candidate"
+      break
+    fi
+  done
+fi
+
+if [[ -n "$INFRA_REPO" ]] && [[ ! -d "$INFRA_REPO/apps/mereka-lms" ]]; then
+  if [[ "$INFRA_REPO_EXPLICIT" -eq 1 ]]; then
+    echo "ERROR: explicit INFRA_REPO is invalid: $INFRA_REPO" >&2
+    exit 2
+  fi
+fi
+
+if [[ -z "$INFRA_REPO" ]] || [[ ! -e "$INFRA_REPO/.git" ]]; then
+  echo "SKIP: bbi-infrastructure repo not found — set INFRA_REPO"
+  exit 0
+fi
+
+# Pin comparison to a stable git ref, not the mutable checkout.
+# Default: origin/main. Override with INFRA_REF for testing.
+INFRA_REF="${INFRA_REF_OVERRIDE:-refs/remotes/origin/main}"
+
+if ! git -C "$INFRA_REPO" rev-parse --verify "$INFRA_REF" >/dev/null 2>&1; then
+  echo "FAIL: missing infra ref: $INFRA_REF (run 'git -C $INFRA_REPO fetch origin main')"
+  exit 1
+fi
+
+INFRA_REF_SHORT=$(git -C "$INFRA_REPO" rev-parse --short "$INFRA_REF")
+
+PASS=0
+FAIL=0
+SKIP=0
+
+# Files that must be identical between app repo and vendored copy
+VENDORED_BASE="apps/mereka-lms/base/deploy/k8s/base"
+TRACKED_FILES=(
+  "apps/lms/deployment.yaml"
+  "apps/cms/deployment.yaml"
+  "apps/lms/worker-deployment.yaml"
+  "apps/cms/worker-deployment.yaml"
+  "apps/openedx/settings/lms/production.py"
+  "apps/openedx/settings/cms/production.py"
+  "apps/openedx/settings/lms/mereka_multisite.py"
+  "apps/openedx/settings/cms/mereka_multisite.py"
+  "apps/openedx/settings/lms/mereka_forwarded_headers.py"
+  "apps/openedx/settings/cms/mereka_forwarded_headers.py"
+  "apps/openedx/settings/lms/mereka_enterprise_channels.py"
+  "apps/openedx/settings/lms/mereka_platform_admin.py"
+  "apps/openedx/settings/cms/mereka_platform_admin.py"
+)
+
+should_skip_for_unchanged_ci_surface() {
+  [[ "${VENDORED_SETTINGS_FORCE_FULL_SCAN:-0}" == "1" ]] && return 1
+  [[ -n "${INFRA_REPO:-}" && ! -d "${INFRA_REPO}/apps/mereka-lms" ]] && return 1
+
+  case "${GITHUB_EVENT_NAME:-}" in
+    pull_request|push) ;;
+    *)
+      return 1
+      ;;
+  esac
+
+  local -a changed_paths=()
+  if ! mapfile -t changed_paths < <(git -C "$REPO_ROOT" show --pretty='' --name-only --first-parent HEAD 2>/dev/null | sed '/^$/d'); then
+    return 1
+  fi
+
+  [[ ${#changed_paths[@]} -eq 0 ]] && return 1
+
+  local rel_path=""
+  local app_path=""
+  local changed=""
+  for rel_path in "${TRACKED_FILES[@]}"; do
+    app_path="deploy/k8s/base/${rel_path}"
+    for changed in "${changed_paths[@]}"; do
+      if [[ "$changed" == "$app_path" || "$changed" == "scripts/qa/verify-vendored-settings-drift.sh" ]]; then
+        return 1
+      fi
+      if [[ "$changed" == "scripts/infra/sync-vendored-openedx-settings.sh" || "$changed" == "tests/test_vendored_settings_drift.py" ]]; then
+        return 1
+      fi
+    done
+  done
+
+  echo "SKIP: no vendored Open edX surfaces changed in current CI diff"
+  return 0
+}
+
+echo "=== Vendored Open edX Drift Check ==="
+echo "App repo: $REPO_ROOT"
+echo "Infra repo: $INFRA_REPO"
+echo "Infra ref: $INFRA_REF ($INFRA_REF_SHORT)"
+echo ""
+
+if should_skip_for_unchanged_ci_surface; then
+  exit 0
+fi
+
+for rel_path in "${TRACKED_FILES[@]}"; do
+  APP_FILE="$REPO_ROOT/deploy/k8s/base/$rel_path"
+  INFRA_REL_PATH="$VENDORED_BASE/$rel_path"
+
+  if [[ ! -f "$APP_FILE" ]]; then
+    echo "SKIP $(basename "$rel_path"): not in app repo"
+    SKIP=$((SKIP + 1))
+    continue
+  fi
+
+  # Check infra file exists at pinned ref
+  if ! git -C "$INFRA_REPO" cat-file -e "${INFRA_REF}:${INFRA_REL_PATH}" 2>/dev/null; then
+    echo "SKIP $(basename "$rel_path"): not in infra repo at $INFRA_REF"
+    SKIP=$((SKIP + 1))
+    continue
+  fi
+
+  # Compare directly via process substitution — no variable capture
+  # to avoid bash stripping trailing newlines.
+  # Normalize CRLF before comparing.
+  DIFF_LINES=$(diff \
+    <(tr -d '\r' < "$APP_FILE") \
+    <(git -C "$INFRA_REPO" show "${INFRA_REF}:${INFRA_REL_PATH}" | tr -d '\r') \
+    2>/dev/null | wc -l || true)
+  if [[ "$DIFF_LINES" -eq 0 ]]; then
+    echo "OK   $(basename "$rel_path"): in sync"
+    PASS=$((PASS + 1))
+  else
+    echo "FAIL $(basename "$rel_path"): diverged ($DIFF_LINES diff lines)"
+    FAIL=$((FAIL + 1))
+  fi
+done
+
+echo ""
+echo "=== Summary: PASS=$PASS FAIL=$FAIL SKIP=$SKIP ==="
+
+if [[ $FAIL -gt 0 ]]; then
+  echo ""
+  echo "FAIL: $FAIL file(s) diverged between app repo and infra vendored copy."
+  echo "The app repo is the canonical source. Run:"
+  echo "  scripts/infra/sync-vendored-openedx-settings.sh --infra-repo \"$INFRA_REPO\" --apply"
+  exit 1
+fi
+
+echo "OK: all tracked vendored Open edX surfaces are in sync"
+exit 0

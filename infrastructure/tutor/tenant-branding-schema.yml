@@ -1,0 +1,162 @@
+# Tenant Branding Schema
+# Defines allowed override keys, value types, validation rules, and base defaults.
+#
+# Merge contract (AC-002):
+#   merged_config = base_defaults | tenant_site_values
+#   - tenant can override any key listed here
+#   - unknown keys are rejected (AC-003)
+#   - missing keys always resolve to base_defaults (AC-004)
+#
+# Types: string | bool | url | hex_color | list_of_strings | any
+# required: true means the key must be present AFTER merge (base_defaults must provide it)
+
+version: "1"
+
+base_defaults:
+  # ── Identity (must be overridden per tenant) ──────────────────────────────
+  platform_name: "Mereka Academy"
+  site_name: "Mereka Academy"
+
+  # ── Theme ─────────────────────────────────────────────────────────────────
+  THEME_NAME: "mereka"
+  ENABLE_COMPREHENSIVE_THEMING: true
+
+  # ── Branding assets ───────────────────────────────────────────────────────
+  logo_image: "https://academyv2.mereka.io/static/mereka/images/logo-horizontal.png"
+  logo_url: "/"
+  favicon_path: "mereka/images/favicon.ico"
+
+  # ── UI flags ──────────────────────────────────────────────────────────────
+  homepage_banner_enabled: false
+
+  # ── Colors (optional; null means inherits theme CSS) ─────────────────────
+  primary_color: null
+  secondary_color: null
+  accent_color: null
+
+keys:
+  # ── Required identity keys (every tenant must supply these) ──────────────
+  domain:
+    type: string
+    required: true
+    description: "Canonical domain for this tenant (e.g. academyv2.mereka.io)"
+    base_default: null
+
+  site_name:
+    type: string
+    required: true
+    description: "Display name shown in browser tab and admin"
+    base_default: "Mereka Academy"
+
+  platform_name:
+    type: string
+    required: true
+    description: "Platform name shown in emails and UI headings"
+    base_default: "Mereka Academy"
+
+  LMS_ROOT_URL:
+    type: url
+    required: true
+    description: "Absolute HTTPS URL for the LMS root"
+    base_default: null
+
+  CANONICAL_LMS_ROOT_URL:
+    type: url
+    required: false
+    description: "Optional override read by MerekaStudioSigninRedirectMiddleware._lms_root_url_for_host. When set, the middleware redirects users to this URL instead of LMS_ROOT_URL. Used by bridge Site rows whose LMS_ROOT_URL must be the bridge domain itself for per-row uniqueness, but whose Studio users should land on the canonical tenant LMS (cm9c bridge pattern). See docs/ops/runbooks/TENANT_SITE_CONFIGURATION_SEED.md."
+    base_default: null
+
+  CMS_ROOT_URL:
+    type: url
+    required: true
+    description: "Absolute HTTPS URL for Studio"
+    base_default: null
+
+  MFE_BASE_URL:
+    type: url
+    required: true
+    description: "Absolute HTTPS URL for the MFE host"
+    base_default: null
+
+  course_org_filter:
+    type: list_of_strings
+    required: true
+    description: "List of org short names whose courses appear on this tenant"
+    base_default: null
+
+  # ── Theme keys ────────────────────────────────────────────────────────────
+  THEME_NAME:
+    type: string
+    required: false
+    description: "Tutor theme name applied to this tenant"
+    base_default: "mereka"
+
+  ENABLE_COMPREHENSIVE_THEMING:
+    type: bool
+    required: false
+    description: "Enables per-tenant comprehensive theming in LMS"
+    base_default: true
+
+  DEFAULT_SITE_THEME:
+    type: string
+    required: false
+    description: "Fallback theme name if THEME_NAME is not set"
+    base_default: null
+
+  # ── Branding assets ───────────────────────────────────────────────────────
+  logo_image:
+    type: url
+    required: false
+    description: "Absolute URL to tenant logo image (PNG/SVG)"
+    base_default: "https://academyv2.mereka.io/static/mereka/images/logo-horizontal.png"
+
+  logo_url:
+    type: string
+    required: false
+    description: "URL the logo links to (usually /)"
+    base_default: "/"
+
+  favicon_path:
+    type: string
+    required: false
+    description: "Relative path to favicon inside the theme's static directory"
+    base_default: "mereka/images/favicon.ico"
+
+  # ── Colors (optional overrides) ───────────────────────────────────────────
+  primary_color:
+    type: hex_color
+    required: false
+    description: "Primary brand color as a CSS hex value (e.g. #1A73E8)"
+    base_default: null
+
+  secondary_color:
+    type: hex_color
+    required: false
+    description: "Secondary brand color as a CSS hex value"
+    base_default: null
+
+  accent_color:
+    type: hex_color
+    required: false
+    description: "Accent brand color as a CSS hex value (Paragon accent-a)"
+    base_default: null
+
+  # ── UI flags ──────────────────────────────────────────────────────────────
+  homepage_banner_enabled:
+    type: bool
+    required: false
+    description: "Show the homepage hero banner on this tenant"
+    base_default: false
+
+  # ── Enterprise / advanced ─────────────────────────────────────────────────
+  ENTERPRISE_CUSTOMER_UUID:
+    type: string
+    required: false
+    description: "UUID of the Open edX EnterpriseCustomer linked to this tenant"
+    base_default: null
+
+  MFE_CONFIG:
+    type: any
+    required: false
+    description: "Per-tenant MFE runtime config overrides (nested dict; set by bootstrap, not by hand)"
+    base_default: null

@@ -1,0 +1,576 @@
+{
+  "version": "1.5.0",
+  "contract_schema_version": "1",
+  "base_path": "deploy/k8s/base",
+  "local_overlay": "deploy/k8s/overlays/local",
+  "namespace": "mereka-lms",
+  "min_kustomize_version": "5.0.0",
+
+  "gitops_identity": {
+    "service_id": "mereka-lms",
+    "lane_identity": "config/lane-identity.yaml",
+    "canonical_lanes": ["dev", "staging", "prod"],
+    "overlay_ownership": {
+      "app_owned": ["deploy/k8s/overlays/local"],
+      "infra_owned": ["dev", "staging", "prod"],
+      "infra_repo": "bbi-infrastructure",
+      "infra_path_template": "apps/mereka-lms/overlays/{lane}/"
+    },
+    "boundary_note": "ArgoCD deploys from bbi-infrastructure, not this repo. Non-local overlays here are deprecated."
+  },
+
+  "workloads": [
+    {
+      "name": "caddy",
+      "kind": "Deployment",
+      "ports": [80, 443, 2019],
+      "has_hpa": false,
+      "health": null
+    },
+    {
+      "name": "cms",
+      "kind": "Deployment",
+      "ports": [8000],
+      "has_hpa": true,
+      "health": { "path": "/heartbeat", "port": 8000 }
+    },
+    {
+      "name": "cms-worker",
+      "kind": "Deployment",
+      "ports": [],
+      "has_hpa": true,
+      "health": null
+    },
+    {
+      "name": "credentials",
+      "kind": "Deployment",
+      "ports": [8000],
+      "has_hpa": false,
+      "health": { "path": "/health/", "port": 8000 }
+    },
+    {
+      "name": "discovery",
+      "kind": "Deployment",
+      "ports": [8000],
+      "has_hpa": false,
+      "health": { "path": "/health/", "port": 8000 }
+    },
+    {
+      "name": "elasticsearch",
+      "kind": "Deployment",
+      "ports": [9200],
+      "has_hpa": false,
+      "health": null
+    },
+    {
+      "name": "enterprise-access",
+      "kind": "Deployment",
+      "ports": [18270],
+      "has_hpa": true,
+      "health": { "path": "/health/", "port": 18270 }
+    },
+    {
+      "name": "enterprise-access-worker",
+      "kind": "Deployment",
+      "ports": [],
+      "has_hpa": false,
+      "health": null
+    },
+    {
+      "name": "enterprise-admin-portal",
+      "kind": "Deployment",
+      "ports": [8002],
+      "has_hpa": false,
+      "health": { "path": "/", "port": 8002 }
+    },
+    {
+      "name": "enterprise-catalog",
+      "kind": "Deployment",
+      "ports": [8160],
+      "has_hpa": true,
+      "health": { "path": "/health/", "port": 8160 }
+    },
+    {
+      "name": "enterprise-catalog-worker",
+      "kind": "Deployment",
+      "ports": [],
+      "has_hpa": false,
+      "health": null
+    },
+    {
+      "name": "enterprise-learner-portal",
+      "kind": "Deployment",
+      "ports": [8002],
+      "has_hpa": false,
+      "health": { "path": "/", "port": 8002 }
+    },
+    {
+      "name": "enterprise-subsidy",
+      "kind": "Deployment",
+      "ports": [18280],
+      "has_hpa": true,
+      "health": { "path": "/health/", "port": 18280 }
+    },
+    {
+      "name": "license-manager",
+      "kind": "Deployment",
+      "ports": [18170],
+      "has_hpa": true,
+      "health": { "path": "/health/", "port": 18170 }
+    },
+    {
+      "name": "lms",
+      "kind": "Deployment",
+      "ports": [8000],
+      "has_hpa": true,
+      "health": { "path": "/heartbeat", "port": 8000 }
+    },
+    {
+      "name": "lms-worker",
+      "kind": "Deployment",
+      "ports": [],
+      "has_hpa": true,
+      "health": null
+    },
+    {
+      "name": "meilisearch",
+      "kind": "Deployment",
+      "ports": [7700],
+      "has_hpa": false,
+      "health": { "path": "/health", "port": 7700 }
+    },
+    {
+      "name": "mfe",
+      "kind": "Deployment",
+      "ports": [8002],
+      "has_hpa": false,
+      "health": null
+    },
+    {
+      "name": "mux-delivery-monitor",
+      "kind": "Deployment",
+      "ports": [8000],
+      "has_hpa": false,
+      "health": { "path": "/healthz", "port": 8000 }
+    },
+    {
+      "name": "mysql",
+      "kind": "Deployment",
+      "ports": [3306],
+      "has_hpa": false,
+      "health": null
+    },
+    {
+      "name": "notes",
+      "kind": "Deployment",
+      "ports": [8000],
+      "has_hpa": false,
+      "health": { "path": "/heartbeat", "port": 8000 }
+    },
+    {
+      "name": "payments-gateway",
+      "kind": "Deployment",
+      "ports": [8080],
+      "has_hpa": true,
+      "health": { "path": "/health/", "port": 8080 }
+    },
+    {
+      "name": "postgresql-payments",
+      "kind": "Deployment",
+      "ports": [5432],
+      "has_hpa": false,
+      "health": null
+    },
+    {
+      "name": "preview-redirect",
+      "kind": "Deployment",
+      "ports": [80],
+      "has_hpa": false,
+      "health": null
+    },
+    {
+      "name": "redis",
+      "kind": "Deployment",
+      "ports": [6379],
+      "has_hpa": false,
+      "health": null
+    },
+    {
+      "name": "smtp",
+      "kind": "Deployment",
+      "ports": [8025],
+      "has_hpa": false,
+      "health": null
+    },
+    {
+      "name": "xqueue",
+      "kind": "Deployment",
+      "ports": [8000],
+      "has_hpa": false,
+      "health": { "path": "/status/", "port": 8000 },
+      "_note": "Disabled by default (replicas: 0). No courses use it."
+    }
+  ],
+
+  "required_secrets": [
+    {
+      "name": "openedx-secrets",
+      "source": "ExternalSecret",
+      "key_count": 43,
+      "keys": [
+        "OPENEDX_SECRET_KEY", "SECRET_KEY", "CMS_SECRET_KEY",
+        "MONGODB_USERNAME", "MONGODB_PASSWORD",
+        "FORUM_MONGODB_HOST", "FORUM_MONGODB_PASSWORD",
+        "MEILISEARCH_MASTER_KEY", "MEILISEARCH_API_KEY",
+        "JWT_SECRET_KEY_LMS", "JWT_SECRET_KEY_CMS",
+        "JWT_SECRET_KEY_DISCOVERY", "JWT_SECRET_KEY_NOTES",
+        "JWT_SECRET_KEY_XQUEUE", "JWT_PRIVATE_SIGNING_JWK",
+        "EDX_API_KEY",
+        "DISCOVERY_SECRET_KEY", "DISCOVERY_SOCIAL_AUTH_EDX_OAUTH2_SECRET",
+        "DISCOVERY_BACKEND_OAUTH2_SECRET",
+        "NOTES_SECRET_KEY", "NOTES_CLIENT_SECRET",
+        "XQUEUE_SECRET_KEY", "XQUEUE_LMS_PASSWORD",
+        "CMS_SOCIAL_AUTH_EDX_OAUTH2_SECRET", "OIDC_CLIENT_SECRET",
+        "CREDENTIALS_SECRET_KEY", "CREDENTIALS_BACKEND_OAUTH2_SECRET",
+        "CREDENTIALS_SSO_OAUTH2_SECRET", "JWT_SECRET_KEY_CREDENTIALS",
+        "STRIPE_SECRET_KEY", "STRIPE_PUBLISHABLE_KEY", "STRIPE_WEBHOOK_SECRET",
+        "SENTRY_DSN", "SENTRY_ENVIRONMENT",
+        "SENTRY_TRACES_SAMPLE_RATE", "SENTRY_PROFILES_SAMPLE_RATE",
+        "MUX_TOKEN_ID", "MUX_TOKEN_SECRET",
+        "EMAIL_HOST_USER", "EMAIL_HOST_PASSWORD",
+        "SES_SNS_WEBHOOK_SECRET", "UNSUBSCRIBE_HMAC_SECRET",
+        "VC_SIGNING_PRIVATE_KEY"
+      ]
+    },
+    {
+      "name": "database-secrets",
+      "source": "ExternalSecret",
+      "key_count": 6,
+      "keys": [
+        "MYSQL_ROOT_PASSWORD", "OPENEDX_MYSQL_PASSWORD",
+        "MYSQL_DISCOVERY_PASSWORD", "MYSQL_NOTES_PASSWORD",
+        "MYSQL_XQUEUE_PASSWORD", "MYSQL_CREDENTIALS_PASSWORD"
+      ]
+    },
+    {
+      "name": "enterprise-secrets",
+      "source": "ExternalSecret",
+      "key_count": 12,
+      "keys": [
+        "ENTERPRISE_CATALOG_SECRET_KEY", "ENTERPRISE_CATALOG_OAUTH2_SECRET",
+        "MYSQL_ENTERPRISE_CATALOG_PASSWORD",
+        "ENTERPRISE_SUBSIDY_SECRET_KEY", "ENTERPRISE_SUBSIDY_OAUTH2_SECRET",
+        "MYSQL_ENTERPRISE_SUBSIDY_PASSWORD",
+        "ENTERPRISE_ACCESS_SECRET_KEY", "ENTERPRISE_ACCESS_OAUTH2_SECRET",
+        "MYSQL_ENTERPRISE_ACCESS_PASSWORD",
+        "LICENSE_MANAGER_SECRET_KEY", "LICENSE_MANAGER_OAUTH2_SECRET",
+        "MYSQL_LICENSE_MANAGER_PASSWORD"
+      ]
+    },
+    {
+      "name": "enterprise-sso-secrets",
+      "source": "ExternalSecret",
+      "key_count": 4,
+      "keys": [
+        "SAML_SP_PUBLIC_CERT", "SAML_SP_PRIVATE_KEY",
+        "OIDC_ENTERPRISE_CLIENT_SECRET", "SCIM_BEARER_TOKEN"
+      ]
+    },
+    {
+      "name": "aspects-secrets",
+      "source": "ExternalSecret",
+      "key_count": 4,
+      "keys": [
+        "clickhouse-password", "superset-secret-key",
+        "superset-db-password", "oauth-client-secret"
+      ]
+    },
+    {
+      "name": "payments-gateway-secrets",
+      "source": "ExternalSecret",
+      "key_count": 7,
+      "keys": [
+        "SECRET_KEY", "DATABASE_URL", "STRIPE_SECRET_KEY",
+        "STRIPE_WEBHOOK_SECRET", "LMS_OAUTH_CLIENT_SECRET",
+        "ADMIN_API_KEY", "POSTGRESQL_PASSWORD"
+      ]
+    },
+    {
+      "name": "ses-smtp-credentials",
+      "source": "ExternalSecret",
+      "key_count": 2,
+      "keys": ["RELAY_USERNAME", "RELAY_PASSWORD"]
+    }
+  ],
+
+  "required_configmaps": [
+    "caddy-config",
+    "openedx-settings-lms",
+    "openedx-settings-cms",
+    "openedx-config",
+    "openedx-uwsgi-config",
+    "openedx-theme-head-extra",
+    "redis-config",
+    "discovery-settings",
+    "credentials-settings",
+    "mfe-caddy-config",
+    "notes-settings",
+    "xqueue-settings",
+    "enterprise-access-settings"
+  ],
+  "_required_configmaps_note": "ConfigMaps generated by sub-kustomizations (e.g. mux-delivery-monitor-script in monitoring/) are not listed here — they are verified by the sub-kustomization's own tests.",
+
+  "cluster_secret_store": {
+    "default": "gcp-secret-manager",
+    "_note": "Overlays may patch to infisical-secret-store or other backends"
+  },
+
+  "images": {
+    "openedx": {
+      "default_registry": "ghcr.io/biji-biji-initiative/mereka-lms/openedx",
+      "default_tag": "pin-required",
+      "_note": "Sentinel tag — does not exist. Every overlay MUST override with a real pinned tag."
+    },
+    "mfe": {
+      "default_registry": "ghcr.io/biji-biji-initiative/mereka-lms/mfe",
+      "default_tag": "pin-required",
+      "_note": "Sentinel tag — does not exist. Every overlay MUST override with a real pinned tag."
+    }
+  },
+
+  "jobs": [
+    "jobs/discovery-sync-cronjob.yaml"
+  ],
+  "_jobs_note": "Only recurring CronJobs are listed here and included in the kustomize render graph. One-shot migration Jobs (lms-migrate, cms-migrate, enterprise-catalog-migrate, enterprise-access-migrate, enterprise-subsidy-migrate, license-manager-migrate) live in deploy/k8s/base/jobs/ but are applied manually during releases. See deploy/k8s/base/jobs/README.md.",
+
+  "migrations": {
+    "registry": "migrations/registry.yaml",
+    "services": [
+      {
+        "name": "lms",
+        "database": "mysql",
+        "migration_command": "python manage.py lms migrate --noinput",
+        "health_endpoint": "/heartbeat",
+        "health_port": 8000,
+        "release_critical": true
+      },
+      {
+        "name": "cms",
+        "database": "mysql",
+        "migration_command": "python manage.py cms migrate --noinput",
+        "health_endpoint": "/heartbeat",
+        "health_port": 8000,
+        "release_critical": true
+      },
+      {
+        "name": "discovery",
+        "database": "mysql",
+        "migration_command": "python manage.py migrate --noinput",
+        "health_endpoint": "/health/",
+        "health_port": 8000,
+        "release_critical": true
+      },
+      {
+        "name": "credentials",
+        "database": "mysql",
+        "migration_command": "python manage.py migrate --noinput",
+        "health_endpoint": "/health/",
+        "health_port": 8000,
+        "release_critical": false
+      },
+      {
+        "name": "notes",
+        "database": "mysql",
+        "migration_command": "python manage.py migrate --noinput",
+        "health_endpoint": "/heartbeat",
+        "health_port": 8000,
+        "release_critical": false
+      },
+      {
+        "name": "xqueue",
+        "database": "mysql",
+        "migration_command": "python manage.py migrate --noinput",
+        "health_endpoint": "/status/",
+        "health_port": 8000,
+        "release_critical": false,
+        "disabled": true
+      },
+      {
+        "name": "enterprise-catalog",
+        "database": "mysql",
+        "migration_command": "python manage.py migrate --noinput",
+        "health_endpoint": "/health/",
+        "health_port": 8160,
+        "release_critical": false
+      },
+      {
+        "name": "enterprise-access",
+        "database": "mysql",
+        "migration_command": "python manage.py migrate --noinput",
+        "health_endpoint": "/health/",
+        "health_port": 18270,
+        "release_critical": false
+      },
+      {
+        "name": "enterprise-subsidy",
+        "database": "mysql",
+        "migration_command": "python manage.py migrate --noinput",
+        "health_endpoint": "/health/",
+        "health_port": 18280,
+        "release_critical": false
+      },
+      {
+        "name": "license-manager",
+        "database": "mysql",
+        "migration_command": "python manage.py migrate --noinput",
+        "health_endpoint": "/health/",
+        "health_port": 18170,
+        "release_critical": false
+      },
+      {
+        "name": "payments-gateway",
+        "database": "postgresql",
+        "migration_command": "python -m alembic upgrade head",
+        "health_endpoint": "/health/",
+        "health_port": 8080,
+        "release_critical": true
+      }
+    ]
+  },
+
+  "allowedGitOpsOverrides": [
+    {
+      "type": "namespace",
+      "description": "Set namespace for entire app",
+      "example": "namespace: mereka-lms-dev"
+    },
+    {
+      "type": "image_pin",
+      "description": "Override image tag/digest per environment",
+      "example": "newTag: sha-abc123"
+    },
+    {
+      "type": "ingress_host",
+      "description": "Domain names per environment",
+      "example": "host: academyv2.mereka.io"
+    },
+    {
+      "type": "tls_certificate",
+      "description": "TLS cert and issuer per environment"
+    },
+    {
+      "type": "secret_store_ref",
+      "description": "ClusterSecretStore backend per cluster",
+      "example": "name: infisical-secret-store-dev"
+    },
+    {
+      "type": "env_var_injection",
+      "description": "Environment-specific values via env vars",
+      "allowed_vars": [
+        "LMS_ROOT_URL", "CMS_ROOT_URL", "MFE_HOST",
+        "MYSQL_HOST", "REDIS_HOST", "MONGODB_HOST",
+        "SENTRY_DSN", "SENTRY_ENVIRONMENT",
+        "ENABLE_GATEWAY_FULFILLMENT",
+        "MEREKA_LMS_DOMAIN", "MEREKA_CREDENTIALS_DOMAIN"
+      ]
+    },
+    {
+      "type": "resource_sizing",
+      "description": "CPU/memory requests and limits per environment"
+    },
+    {
+      "type": "replica_count",
+      "description": "Scale per environment capacity"
+    },
+    {
+      "type": "argocd_application",
+      "description": "ArgoCD Application/ApplicationSet definitions"
+    },
+    {
+      "type": "sync_policy",
+      "description": "ArgoCD sync policy and health checks"
+    },
+    {
+      "type": "storage_class",
+      "description": "PVC storageClassName per cluster"
+    }
+  ],
+
+  "forbiddenGitOpsMutations": [
+    {
+      "type": "python_settings_logic",
+      "description": "Django production.py variants or FEATURES/INSTALLED_APPS in overlay YAML",
+      "fix": "Add env var read in production.py, set env var in overlay"
+    },
+    {
+      "type": "configmap_hash_hardcoding",
+      "description": "Hardcoded Kustomize content-hash names (e.g. openedx-settings-lms-45kb8hh58m)",
+      "fix": "Use patchesStrategicMerge with name-based matching"
+    },
+    {
+      "type": "full_caddyfile_override",
+      "description": "Replacing entire Caddyfile with app routing logic",
+      "fix": "App repo owns Caddyfile, overlay patches only hosts/TLS"
+    },
+    {
+      "type": "mutable_base_image_tag",
+      "description": ":latest, :main, or branch tags in production overlay",
+      "fix": "Always use SHA-pinned tags from build pipeline"
+    },
+    {
+      "type": "cluster_scoped_resource",
+      "description": "ClusterPolicy, ClusterRole, ClusterSecretStore in app overlay",
+      "fix": "Cluster-scoped resources go in platform-control-plane repo"
+    },
+    {
+      "type": "positional_array_patch",
+      "description": "JSON6902 patches using array indices (e.g. /spec/template/spec/volumes/0)",
+      "fix": "Use strategic merge or named patch targets"
+    },
+    {
+      "type": "app_middleware_sequencing",
+      "description": "Django middleware or auth configuration in overlay",
+      "fix": "Middleware config belongs in app repo production.py"
+    }
+  ],
+
+  "domain_registry": {
+    "canonical_source": "deploy/k8s/tenancy/tenant-registry.yaml",
+    "version": "1.5.0",
+    "summary": {
+      "total_domains": 100,
+      "active_domains": 97,
+      "deprecated_domains": 3,
+      "environments": ["production", "dev", "profiles-dev", "staging"],
+      "tenants": ["mereka", "biji-biji", "skillourfuture"],
+      "roles": [
+        "primary", "studio", "mfe", "preview", "discovery", "notes",
+        "credentials", "forum", "enterprise-admin", "enterprise-learner",
+        "analytics", "ecommerce", "auth"
+      ],
+      "statuses": ["active", "deprecated", "planned"]
+    },
+    "_note": "Domain counts are a summary projection. Do NOT duplicate the full domain list here — read tenant-registry.yaml directly. Update counts when domains are added/removed."
+  },
+
+  "stableResourceNames": {
+    "configMaps": [
+      "caddy-config", "openedx-settings-lms", "openedx-settings-cms",
+      "openedx-config", "openedx-uwsgi-config", "openedx-theme-head-extra",
+      "redis-config", "discovery-settings", "credentials-settings",
+      "mfe-caddy-config", "notes-settings", "xqueue-settings",
+      "enterprise-access-settings"
+    ],
+    "secrets": [
+      "openedx-secrets", "database-secrets", "enterprise-secrets",
+      "enterprise-sso-secrets", "aspects-secrets", "payments-gateway-secrets",
+      "ses-smtp-credentials"
+    ],
+    "labels": {
+      "instance": "app.kubernetes.io/instance: mereka-lms",
+      "partOf": "app.kubernetes.io/part-of: mereka-lms",
+      "name": "app.kubernetes.io/name: <workload-name>"
+    },
+    "_note": "Overlays must reference these names. Kustomize content-hashes ConfigMap names — NEVER hardcode the hashed suffix."
+  }
+}

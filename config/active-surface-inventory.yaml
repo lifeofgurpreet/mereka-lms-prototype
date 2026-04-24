@@ -1,0 +1,699 @@
+# Active Surface Inventory — machine-readable source of truth
+#
+# Canonical inventory of what the platform serves, derived from the
+# tenant registry (deploy/k8s/tenancy/tenant-registry.yaml).
+#
+# This file captures the key release-critical and high-priority surfaces
+# per tenant per environment. It is NOT a full duplication of the domain
+# registry — the tenant-registry.yaml remains the exhaustive source.
+#
+# proof_state values:
+#   - proved:    runtime/browser proof artifact exists and is green
+#   - partial:   some surfaces proved, others pending
+#   - unproved:  active in source truth but no current proof artifact
+#   - broken:    runtime proof exists and is red
+#
+# Consumers:
+#   - Release gate scripts
+#   - Operational dashboards
+#   - docs/status/active/ACTIVE_SURFACE_RUNTIME_MATRIX_2026-04-04.md (human companion)
+---
+schema_version: "1.0"
+source_file: deploy/k8s/tenancy/tenant-registry.yaml
+generated_from_registry_version: "1.5.0"
+
+tenants:
+  # ============================================================================
+  # MEREKA ACADEMY (primary tenant)
+  # ============================================================================
+  - name: mereka
+    display_name: Mereka Academy
+    is_primary: true
+    org_filter: [MEREKA]
+    environments:
+      # --- Production ---
+      - env: production
+        namespace: mereka-lms
+        cluster: rke2-prod
+        surfaces:
+          - host: academyv2.mereka.io
+            role: primary
+            services: [lms, caddy]
+            proof_priority: P0
+            release_critical: true
+            proof_state: partial
+            notes: "Runtime-routing 39P/1F(nc), identity-session 9P/0F. Branding pending MFE image rollout."
+          - host: studio.academyv2.mereka.io
+            role: studio
+            services: [cms, caddy]
+            proof_priority: P0
+            release_critical: true
+            proof_state: partial
+            notes: "Studio SSO passes. Full branding pending MFE rollout."
+          - host: apps.academyv2.mereka.io
+            role: mfe
+            services: [mfe, caddy]
+            proof_priority: P0
+            release_critical: true
+            proof_state: unproved
+          - host: discovery.academyv2.mereka.io
+            role: discovery
+            services: [discovery, caddy]
+            proof_priority: P0
+            release_critical: true
+            proof_state: unproved
+          - host: preview.academyv2.mereka.io
+            role: preview
+            services: [lms, caddy]
+            proof_priority: P1
+            release_critical: false
+            proof_state: unproved
+          - host: notes.academyv2.mereka.io
+            role: notes
+            services: [notes, caddy]
+            proof_priority: P1
+            release_critical: false
+            proof_state: unproved
+          - host: credentials.academyv2.mereka.io
+            role: credentials
+            services: [credentials, caddy]
+            proof_priority: P1
+            release_critical: false
+            proof_state: unproved
+          - host: forum.academyv2.mereka.io
+            role: forum
+            services: [lms, caddy]
+            proof_priority: P1
+            release_critical: false
+            proof_state: unproved
+          - host: admin.academyv2.mereka.io
+            role: enterprise-admin
+            services: [enterprise-admin-portal, caddy]
+            proof_priority: P1
+            release_critical: false
+            proof_state: unproved
+          - host: learner.academyv2.mereka.io
+            role: enterprise-learner
+            services: [enterprise-learner-portal, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: analytics.academyv2.mereka.io
+            role: analytics
+            services: [superset, caddy]
+            proof_priority: P1
+            release_critical: false
+            proof_state: unproved
+          - host: auth0.mereka.io
+            role: auth
+            services: []
+            proof_priority: P0
+            release_critical: true
+            proof_state: unproved
+            notes: "Authentik OIDC provider — external to this deployment"
+          - host: ecommerce.academyv2.mereka.io
+            role: ecommerce
+            services: [ecommerce, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+            deprecated: true
+            notes: "Legacy Oscar ecommerce — being replaced by payments-gateway"
+
+      # --- Dev ---
+      - env: dev
+        namespace: mereka-lms-dev
+        cluster: nonprod-rke2
+        surfaces:
+          - host: academyv2.mereka.dev
+            role: primary
+            services: [lms, caddy]
+            proof_priority: P1
+            release_critical: false
+            proof_state: partial
+          - host: studio.academyv2.mereka.dev
+            role: studio
+            services: [cms, caddy]
+            proof_priority: P1
+            release_critical: false
+            proof_state: partial
+          - host: apps.academyv2.mereka.dev
+            role: mfe
+            services: [mfe, caddy]
+            proof_priority: P1
+            release_critical: false
+            proof_state: partial
+          - host: discovery.academyv2.mereka.dev
+            role: discovery
+            services: [discovery, caddy]
+            proof_priority: P1
+            release_critical: false
+            proof_state: partial
+          - host: preview.academyv2.mereka.dev
+            role: preview
+            services: [lms, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: notes.academyv2.mereka.dev
+            role: notes
+            services: [notes, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: credentials.academyv2.mereka.dev
+            role: credentials
+            services: [credentials, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: forum.academyv2.mereka.dev
+            role: forum
+            services: [lms, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: broken
+            notes: "Alias returns empty 200 while in-process endpoint returns 401"
+          - host: admin.academyv2.mereka.dev
+            role: enterprise-admin
+            services: [enterprise-admin-portal, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: learner.academyv2.mereka.dev
+            role: enterprise-learner
+            services: [enterprise-learner-portal, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: analytics.academyv2.mereka.dev
+            role: analytics
+            services: [superset, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: auth0.mereka.dev
+            role: auth
+            services: []
+            proof_priority: P1
+            release_critical: false
+            proof_state: unproved
+            notes: "Dev Authentik OIDC provider"
+
+      # --- Staging ---
+      - env: staging
+        namespace: stg-mereka-lms
+        cluster: nonprod-rke2
+        surfaces:
+          - host: staging.academyv2.mereka.io
+            role: primary
+            services: [lms, caddy]
+            proof_priority: P0
+            release_critical: true
+            proof_state: partial
+          - host: staging.studio.academyv2.mereka.io
+            role: studio
+            services: [cms, caddy]
+            proof_priority: P0
+            release_critical: true
+            proof_state: partial
+          - host: staging.apps.academyv2.mereka.io
+            role: mfe
+            services: [mfe, caddy]
+            proof_priority: P0
+            release_critical: true
+            proof_state: broken
+            notes: "Public apps root green, post-login flow broken"
+          - host: staging.preview.academyv2.mereka.io
+            role: preview
+            services: [lms, caddy]
+            proof_priority: P1
+            release_critical: false
+            proof_state: unproved
+          - host: staging.discovery.academyv2.mereka.io
+            role: discovery
+            services: [discovery, caddy]
+            proof_priority: P1
+            release_critical: false
+            proof_state: unproved
+          - host: staging.notes.academyv2.mereka.io
+            role: notes
+            services: [notes, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: staging.credentials.academyv2.mereka.io
+            role: credentials
+            services: [credentials, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: staging.admin.academyv2.mereka.io
+            role: enterprise-admin
+            services: [enterprise-admin-portal, caddy]
+            proof_priority: P1
+            release_critical: false
+            proof_state: unproved
+          - host: staging.learner.academyv2.mereka.io
+            role: enterprise-learner
+            services: [enterprise-learner-portal, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: staging.forum.academyv2.mereka.io
+            role: forum
+            services: [lms, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: broken
+            notes: "Forum alias resolution break"
+          - host: staging.auth0.mereka.io
+            role: auth
+            services: []
+            proof_priority: P0
+            release_critical: true
+            proof_state: unproved
+            notes: "Staging Authentik OIDC provider — external to this deployment"
+          - host: analytics.staging.academyv2.mereka.io
+            role: analytics
+            services: [superset, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+
+      # --- Profiles/Dev ---
+      - env: profiles-dev
+        namespace: mereka-lms-dev
+        cluster: nonprod-rke2
+        surfaces:
+          - host: lms-dev.mereka.dev
+            role: primary
+            services: [lms, caddy]
+            proof_priority: P1
+            release_critical: false
+            proof_state: unproved
+          - host: studio-dev.mereka.dev
+            role: studio
+            services: [cms, caddy]
+            proof_priority: P1
+            release_critical: false
+            proof_state: unproved
+          - host: mfe-dev.mereka.dev
+            role: mfe
+            services: [mfe, caddy]
+            proof_priority: P1
+            release_critical: false
+            proof_state: unproved
+
+  # ============================================================================
+  # BIJI-BIJI ACADEMY (tenant)
+  # ============================================================================
+  - name: biji-biji
+    display_name: Biji-Biji Academy
+    is_primary: false
+    org_filter: [BIJIBIJI]
+    environments:
+      # --- Production ---
+      - env: production
+        namespace: mereka-lms
+        cluster: rke2-prod
+        surfaces:
+          - host: academy.biji-biji.com
+            role: primary
+            services: [lms, caddy]
+            proof_priority: P0
+            release_critical: true
+            proof_state: unproved
+          - host: studio.academy.biji-biji.com
+            role: studio
+            services: [cms, caddy]
+            proof_priority: P0
+            release_critical: true
+            proof_state: unproved
+          - host: apps.academy.biji-biji.com
+            role: mfe
+            services: [mfe, caddy]
+            proof_priority: P0
+            release_critical: true
+            proof_state: unproved
+          - host: preview.academy.biji-biji.com
+            role: preview
+            services: [lms, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+            notes: "No DNS or TLS yet"
+          - host: admin.academy.biji-biji.com
+            role: enterprise-admin
+            services: [enterprise-admin-portal, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: learner.academy.biji-biji.com
+            role: enterprise-learner
+            services: [enterprise-learner-portal, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: credentials.academy.biji-biji.com
+            role: credentials
+            services: [credentials, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: analytics.academy.biji-biji.com
+            role: analytics
+            services: [superset, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+
+      # --- Dev ---
+      - env: dev
+        namespace: mereka-lms-dev
+        cluster: nonprod-rke2
+        surfaces:
+          - host: biji-biji.academyv2.mereka.dev
+            role: primary
+            services: [lms, caddy]
+            proof_priority: P1
+            release_critical: false
+            proof_state: partial
+          - host: studio.biji-biji.academyv2.mereka.dev
+            role: studio
+            services: [cms, caddy]
+            proof_priority: P1
+            release_critical: false
+            proof_state: unproved
+          - host: apps.biji-biji.academyv2.mereka.dev
+            role: mfe
+            services: [mfe, caddy]
+            proof_priority: P1
+            release_critical: false
+            proof_state: unproved
+          - host: preview.biji-biji.academyv2.mereka.dev
+            role: preview
+            services: [lms, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+            notes: "No DNS yet"
+          - host: admin.biji-biji.academyv2.mereka.dev
+            role: enterprise-admin
+            services: [enterprise-admin-portal, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: learner.biji-biji.academyv2.mereka.dev
+            role: enterprise-learner
+            services: [enterprise-learner-portal, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: credentials.biji-biji.academyv2.mereka.dev
+            role: credentials
+            services: [credentials, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: analytics.biji-biji.academyv2.mereka.dev
+            role: analytics
+            services: [superset, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+
+      # --- Staging ---
+      - env: staging
+        namespace: stg-mereka-lms
+        cluster: nonprod-rke2
+        surfaces:
+          - host: staging.academy.biji-biji.com
+            role: primary
+            services: [lms, caddy]
+            proof_priority: P0
+            release_critical: true
+            proof_state: unproved
+          - host: studio.staging.academy.biji-biji.com
+            role: studio
+            services: [cms, caddy]
+            proof_priority: P0
+            release_critical: true
+            proof_state: unproved
+          - host: apps.staging.academy.biji-biji.com
+            role: mfe
+            services: [mfe, caddy]
+            proof_priority: P0
+            release_critical: true
+            proof_state: unproved
+          - host: preview.staging.academy.biji-biji.com
+            role: preview
+            services: [lms, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+            notes: "No DNS yet"
+          - host: admin.staging.academy.biji-biji.com
+            role: enterprise-admin
+            services: [enterprise-admin-portal, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: learner.staging.academy.biji-biji.com
+            role: enterprise-learner
+            services: [enterprise-learner-portal, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: credentials.staging.academy.biji-biji.com
+            role: credentials
+            services: [credentials, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: analytics.staging.academy.biji-biji.com
+            role: analytics
+            services: [superset, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+
+  # ============================================================================
+  # SKILL OUR FUTURE (tenant)
+  # ============================================================================
+  - name: skillourfuture
+    display_name: Skill Our Future
+    is_primary: false
+    org_filter: [SKILLOURFUTURE]
+    environments:
+      # --- Production ---
+      - env: production
+        namespace: mereka-lms
+        cluster: rke2-prod
+        surfaces:
+          - host: skillourfuture.academy.mereka.io
+            role: primary
+            services: [lms, caddy]
+            proof_priority: P0
+            release_critical: true
+            proof_state: unproved
+          - host: skillourfuture.academyv2.mereka.io
+            role: primary
+            services: [lms, caddy]
+            proof_priority: P1
+            release_critical: false
+            proof_state: unproved
+            notes: "Migration target from skillourfuture.academy.mereka.io — no DNS yet"
+          - host: studio.skillourfuture.academyv2.mereka.io
+            role: studio
+            services: [cms, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+            notes: "Target root — not in prod Ingress TLS, no cert"
+          - host: apps.skillourfuture.academyv2.mereka.io
+            role: mfe
+            services: [mfe, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+            notes: "Target root — not in prod Ingress TLS, no cert"
+          - host: preview.skillourfuture.academyv2.mereka.io
+            role: preview
+            services: [lms, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+            notes: "No DNS or TLS yet"
+          - host: admin.skillourfuture.academyv2.mereka.io
+            role: enterprise-admin
+            services: [enterprise-admin-portal, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: learner.skillourfuture.academyv2.mereka.io
+            role: enterprise-learner
+            services: [enterprise-learner-portal, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: credentials.skillourfuture.academyv2.mereka.io
+            role: credentials
+            services: [credentials, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: analytics.skillourfuture.academyv2.mereka.io
+            role: analytics
+            services: [superset, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          # Deprecated surfaces
+          - host: studio.skillourfuture.academy.mereka.io
+            role: studio
+            services: [cms, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+            deprecated: true
+            notes: "Legacy root — migration target: studio.skillourfuture.academyv2.mereka.io"
+          - host: apps.skillourfuture.academy.mereka.io
+            role: mfe
+            services: [mfe, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+            deprecated: true
+            notes: "Legacy root — migration target: apps.skillourfuture.academyv2.mereka.io"
+
+      # --- Dev ---
+      - env: dev
+        namespace: mereka-lms-dev
+        cluster: nonprod-rke2
+        surfaces:
+          - host: skillourfuture.academyv2.mereka.dev
+            role: primary
+            services: [lms, caddy]
+            proof_priority: P1
+            release_critical: false
+            proof_state: partial
+          - host: studio.skillourfuture.academyv2.mereka.dev
+            role: studio
+            services: [cms, caddy]
+            proof_priority: P1
+            release_critical: false
+            proof_state: unproved
+          - host: apps.skillourfuture.academyv2.mereka.dev
+            role: mfe
+            services: [mfe, caddy]
+            proof_priority: P1
+            release_critical: false
+            proof_state: unproved
+          - host: preview.skillourfuture.academyv2.mereka.dev
+            role: preview
+            services: [lms, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+            notes: "No DNS yet"
+          - host: admin.skillourfuture.academyv2.mereka.dev
+            role: enterprise-admin
+            services: [enterprise-admin-portal, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: learner.skillourfuture.academyv2.mereka.dev
+            role: enterprise-learner
+            services: [enterprise-learner-portal, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: credentials.skillourfuture.academyv2.mereka.dev
+            role: credentials
+            services: [credentials, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: analytics.skillourfuture.academyv2.mereka.dev
+            role: analytics
+            services: [superset, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+
+      # --- Staging ---
+      - env: staging
+        namespace: stg-mereka-lms
+        cluster: nonprod-rke2
+        surfaces:
+          - host: staging.skillourfuture.academy.mereka.io
+            role: primary
+            services: [lms, caddy]
+            proof_priority: P0
+            release_critical: true
+            proof_state: unproved
+          - host: studio.staging.skillourfuture.academy.mereka.io
+            role: studio
+            services: [cms, caddy]
+            proof_priority: P0
+            release_critical: true
+            proof_state: unproved
+          - host: apps.staging.skillourfuture.academy.mereka.io
+            role: mfe
+            services: [mfe, caddy]
+            proof_priority: P0
+            release_critical: true
+            proof_state: unproved
+          - host: staging.skillourfuture.academy.mereka.io
+            role: primary
+            services: [lms, caddy]
+            proof_priority: P1
+            release_critical: false
+            proof_state: unproved
+            notes: "Migration target — DNS + TLS + Ingress live"
+          - host: studio.staging.skillourfuture.academy.mereka.io
+            role: studio
+            services: [cms, caddy]
+            proof_priority: P1
+            release_critical: false
+            proof_state: unproved
+            notes: "Migration target — DNS + TLS + Ingress live"
+          - host: apps.staging.skillourfuture.academy.mereka.io
+            role: mfe
+            services: [mfe, caddy]
+            proof_priority: P1
+            release_critical: false
+            proof_state: unproved
+            notes: "Migration target — DNS + TLS + Ingress live"
+          - host: preview.staging.skillourfuture.academy.mereka.io
+            role: preview
+            services: [lms, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+            notes: "No DNS yet"
+          - host: admin.staging.skillourfuture.academy.mereka.io
+            role: enterprise-admin
+            services: [enterprise-admin-portal, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: learner.staging.skillourfuture.academy.mereka.io
+            role: enterprise-learner
+            services: [enterprise-learner-portal, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: credentials.staging.skillourfuture.academy.mereka.io
+            role: credentials
+            services: [credentials, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved
+          - host: analytics.staging.skillourfuture.academy.mereka.io
+            role: analytics
+            services: [superset, caddy]
+            proof_priority: P2
+            release_critical: false
+            proof_state: unproved

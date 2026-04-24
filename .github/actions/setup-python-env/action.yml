@@ -1,0 +1,182 @@
+name: 'Set up Python environment'
+description: 'Install Python with pip cache and base QA dependencies'
+
+inputs:
+  python-version:
+    description: 'Python version to install'
+    required: false
+    default: '3.12'
+  requirements-file:
+    description: 'Path to requirements file for pip install + cache key hashing'
+    required: false
+    default: 'requirements-ci.txt'
+  extra-deps:
+    description: 'Additional pip packages (only for one-off deps not in a requirements file)'
+    required: false
+    default: ''
+  install-base-deps:
+    description: 'Install from requirements-file (set false to skip)'
+    required: false
+    default: 'true'
+  isolated-venv:
+    description: 'Create and activate an isolated virtualenv before installing dependencies'
+    required: false
+    default: 'false'
+  cache-isolated-venv:
+    description: 'Cache the isolated virtualenv by requirements hash and reuse it across runs'
+    required: false
+    default: 'false'
+  isolated-venv-name:
+    description: 'Stable virtualenv name under .cache/venvs when isolated venv caching is enabled'
+    required: false
+    default: 'default'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Check system Python
+      id: check-python
+      shell: bash
+      run: |
+        # ARC runner image (arc-runner-general) ships Python 3.12 + pip.
+        # Skip setup-python (7-18 min download) when system Python matches.
+        REQUIRED="${{ inputs.python-version }}"
+        SYSTEM_VER="$(python3 --version 2>/dev/null | sed 's/Python //' || echo 'missing')"
+        if [[ "$SYSTEM_VER" == "$REQUIRED"* ]]; then
+          echo "System Python $SYSTEM_VER satisfies $REQUIRED — skipping setup-python"
+          echo "skip_setup=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "::notice::System Python ($SYSTEM_VER) does not match $REQUIRED — will use setup-python"
+          echo "skip_setup=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Ensure pip cache directory exists
+      if: steps.check-python.outputs.skip_setup == 'false'
+      shell: bash
+      run: |
+        choose_pip_cache_dir() {
+          local candidate
+          for candidate in "$HOME/.cache/pip" "${RUNNER_TEMP:-}/pip-cache" "/tmp/pip-cache"; do
+            [ -n "$candidate" ] || continue
+            mkdir -p "$candidate" 2>/dev/null || continue
+            if [ -w "$candidate" ]; then
+              printf '%s\n' "$candidate"
+              return 0
+            fi
+          done
+          return 1
+        }
+        PIP_CACHE_DIR="$(choose_pip_cache_dir)"
+        echo "PIP_CACHE_DIR=$PIP_CACHE_DIR" >> "$GITHUB_ENV"
+
+    - name: Ensure lsb_release exists for setup-python pip cache
+      if: steps.check-python.outputs.skip_setup == 'false'
+      shell: bash
+      run: |
+        if ! command -v lsb_release &>/dev/null; then
+          stub="$GITHUB_WORKSPACE/.cache/bin/lsb_release"
+          mkdir -p "$(dirname "$stub")"
+          cat > "$stub" <<'STUB'
+        #!/bin/sh
+        short=0; cmd=""
+        for arg in "$@"; do
+          case "$arg" in
+            -s|--short) short=1 ;;
+            -rs) cmd=r; short=1 ;;
+            -is) cmd=i; short=1 ;;
+            -ds) cmd=d; short=1 ;;
+            -cs) cmd=c; short=1 ;;
+            -r|--release) cmd=r ;;
+            -i|--id) cmd=i ;;
+            -d|--description) cmd=d ;;
+            -c|--codename) cmd=c ;;
+            -a|--all) cmd=a ;;
+          esac
+        done
+        case "$cmd" in
+          r) [ "$short" = 1 ] && echo "0" || printf 'Release:\t0\n' ;;
+          i) [ "$short" = 1 ] && echo "Linux" || printf 'Distributor ID:\tLinux\n' ;;
+          d) [ "$short" = 1 ] && echo "ARC Runner" || printf 'Description:\tARC Runner\n' ;;
+          c) [ "$short" = 1 ] && echo "arc" || printf 'Codename:\tarc\n' ;;
+          a) printf 'Distributor ID:\tLinux\nDescription:\tARC Runner\nRelease:\t0\nCodename:\tarc\n' ;;
+          *) echo "No LSB modules are available." ;;
+        esac
+        STUB
+          chmod +x "$stub"
+          echo "$GITHUB_WORKSPACE/.cache/bin" >> "$GITHUB_PATH"
+        fi
+
+    - name: Set up Python ${{ inputs.python-version }}
+      if: steps.check-python.outputs.skip_setup == 'false'
+      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
+      with:
+        python-version: ${{ inputs.python-version }}
+        cache: 'pip'
+        cache-dependency-path: ${{ inputs.requirements-file }}
+
+    - name: Add user site-packages bin to PATH
+      if: steps.check-python.outputs.skip_setup == 'true'
+      shell: bash
+      run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+    - name: Resolve isolated virtualenv path
+      if: ${{ inputs.isolated-venv == 'true' }}
+      id: choose-venv
+      shell: bash
+      run: |
+        if [[ "${{ inputs.cache-isolated-venv }}" == 'true' ]]; then
+          VENV_DIR="$GITHUB_WORKSPACE/.cache/venvs/${{ inputs.isolated-venv-name }}"
+        else
+          VENV_DIR="${RUNNER_TEMP:-$GITHUB_WORKSPACE}/setup-python-env-venv"
+        fi
+        echo "venv_dir=$VENV_DIR" >> "$GITHUB_OUTPUT"
+        mkdir -p "$(dirname "$VENV_DIR")"
+
+    - name: Cache isolated virtualenv
+      if: ${{ inputs.isolated-venv == 'true' && inputs.cache-isolated-venv == 'true' }}
+      id: isolated-venv-cache
+      uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7  # v5.0.4
+      with:
+        path: ${{ steps.choose-venv.outputs.venv_dir }}
+        key: setup-python-env-venv-v1-${{ runner.os }}-${{ runner.arch }}-py${{ inputs.python-version }}-${{ inputs.isolated-venv-name }}-${{ inputs.install-base-deps }}-${{ hashFiles(inputs.requirements-file) }}-${{ inputs.extra-deps }}
+
+    - name: Create isolated virtualenv
+      if: ${{ inputs.isolated-venv == 'true' }}
+      shell: bash
+      run: |
+        VENV_DIR="${{ steps.choose-venv.outputs.venv_dir }}"
+        if [[ "${{ inputs.cache-isolated-venv }}" != 'true' ]]; then
+          rm -rf "$VENV_DIR"
+        fi
+        if [[ ! -x "$VENV_DIR/bin/python" ]]; then
+          if ! python3 -m venv "$VENV_DIR" 2>/dev/null; then
+            rm -rf "$VENV_DIR"
+            python3 -m venv --without-pip "$VENV_DIR"
+            GET_PIP="${RUNNER_TEMP:-/tmp}/get-pip.py"
+            curl --fail --location --retry 5 --retry-all-errors --silent --show-error \
+              --output "$GET_PIP" "https://bootstrap.pypa.io/get-pip.py"
+            "$VENV_DIR/bin/python" "$GET_PIP"
+            rm -f "$GET_PIP"
+          fi
+          "$VENV_DIR/bin/python" -m pip install -U pip setuptools wheel
+        fi
+        echo "$VENV_DIR/bin" >> "$GITHUB_PATH"
+        {
+          echo "VIRTUAL_ENV=$VENV_DIR"
+          echo "PIP_DISABLE_PIP_VERSION_CHECK=1"
+        } >> "$GITHUB_ENV"
+
+    - name: Install dependencies from requirements file
+      if: ${{ inputs.install-base-deps == 'true' && (inputs.cache-isolated-venv != 'true' || steps.isolated-venv-cache.outputs.cache-hit != 'true') }}
+      shell: bash
+      run: |
+        pip install --break-system-packages -U pip 2>/dev/null || pip install -U pip
+        pip install --break-system-packages -r ${{ inputs.requirements-file }} 2>/dev/null \
+          || pip install -r ${{ inputs.requirements-file }}
+
+    - name: Install extra dependencies
+      if: ${{ inputs.extra-deps != '' && (inputs.cache-isolated-venv != 'true' || steps.isolated-venv-cache.outputs.cache-hit != 'true') }}
+      shell: bash
+      run: |
+        pip install --break-system-packages ${{ inputs.extra-deps }} 2>/dev/null \
+          || pip install ${{ inputs.extra-deps }}

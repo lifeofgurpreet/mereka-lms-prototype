@@ -1,0 +1,1212 @@
+#!/usr/bin/env bash
+# @covers AC-014, AC-021
+# @spec: ci-cd-pipeline_spec.md
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$REPO_ROOT/.." && pwd)}"
+
+APP_BASE_REL="deploy/k8s/base/kustomization.yaml"
+APP_PROD_REL="deploy/k8s/overlays/production/kustomization.yaml"
+APP_STAGING_REL="deploy/k8s/overlays/staging/kustomization.yaml"
+INFRA_BASE_REL="apps/mereka-lms/base/kustomization.yaml"
+INFRA_PROD_REL="apps/mereka-lms/overlays/prod/kustomization.yaml"
+INFRA_STAGING_REL="apps/mereka-lms/overlays/staging/kustomization.yaml"
+
+APP_REPO="${APP_REPO:-$REPO_ROOT}"
+INFRA_REPO="${INFRA_REPO:-}"
+OPENEDX_TAG=""
+MFE_TAG=""
+OPENEDX_DIGEST=""
+MFE_DIGEST=""
+REQUIRE_DIGESTS=0
+APP_SHA_OVERRIDE=""
+RELEASE_OBJECT_JSON=""
+TARGET_ENV="production"
+TARGET_ENV_SET=0
+UPDATE_BASE_REF_MODE="auto" # auto|1|0
+
+APPLY=0
+COMMIT=0
+PUSH=0
+ALLOW_PROD_APPLY="${ALLOW_PROD_APPLY:-0}"
+CONFIRM_RELEASE_OPENEDX_GITOPS="${CONFIRM_RELEASE_OPENEDX_GITOPS:-}"
+CONFIRM_PUSH_RELEASE_OPENEDX_GITOPS="${CONFIRM_PUSH_RELEASE_OPENEDX_GITOPS:-}"
+CONFIRM_APPLY_TOKEN="RELEASE_OPENEDX_GITOPS"
+CONFIRM_PUSH_TOKEN="PUSH_RELEASE_OPENEDX_GITOPS"
+VERIFY_RUNTIME=0
+ENFORCE_ENTERPRISE_SITE_MAPPING_GUARD="${ENFORCE_ENTERPRISE_SITE_MAPPING_GUARD:-1}"
+RUN_ENTERPRISE_READINESS_INTEGRITY_GUARD="${RUN_ENTERPRISE_READINESS_INTEGRITY_GUARD:-1}"
+RUN_ENTERPRISE_SSO_RUNTIME_GUARD="${RUN_ENTERPRISE_SSO_RUNTIME_GUARD:-1}"
+RUN_ENTERPRISE_SCHEMA_GUARD="${RUN_ENTERPRISE_SCHEMA_GUARD:-1}"
+RUN_ENTERPRISE_RUNTIME_APP_GUARD="${RUN_ENTERPRISE_RUNTIME_APP_GUARD:-1}"
+RUN_BRANDING_RUNTIME_GUARD="${RUN_BRANDING_RUNTIME_GUARD:-1}"
+RUN_PARAGON_RUNTIME_GUARD="${RUN_PARAGON_RUNTIME_GUARD:-1}"
+RUN_BRANDING_SURFACE_AUDIT="${RUN_BRANDING_SURFACE_AUDIT:-1}"
+RUN_FOOTER_RUNTIME_GUARD="${RUN_FOOTER_RUNTIME_GUARD:-1}"
+RUN_MFE_ROUTE_RUNTIME_GUARD="${RUN_MFE_ROUTE_RUNTIME_GUARD:-1}"
+RUN_MFE_ROUTE_SMOKE_GUARD="${RUN_MFE_ROUTE_SMOKE_GUARD:-1}"
+RUN_FRONTEND_CACHE_PURGE="${RUN_FRONTEND_CACHE_PURGE:-0}"
+FRONTEND_CACHE_PURGE_EVERYTHING="${FRONTEND_CACHE_PURGE_EVERYTHING:-0}"
+FRONTEND_CACHE_ENV="${FRONTEND_CACHE_ENV:-auto}"
+ENTERPRISE_READINESS_TENANT="${ENTERPRISE_READINESS_TENANT:-mereka}"
+PARAGON_RUNTIME_URL="${PARAGON_RUNTIME_URL:-}"
+
+K8S_CONTEXT="${K8S_CONTEXT:-rke2-prod}"
+ARGOCD_NAMESPACE="${ARGOCD_NAMESPACE:-argocd}"
+ARGO_APP="${ARGO_APP:-auto}"
+APP_NAMESPACE="${APP_NAMESPACE:-mereka-lms}"
+WAIT_SECONDS="${WAIT_SECONDS:-600}"
+
+usage() {
+  cat <<'EOF'
+Usage:
+  scripts/infra/release-openedx-gitops.sh --openedx-tag TAG --mfe-tag TAG [options]
+
+Purpose:
+  Canonical one-command release orchestration for Open edX images:
+  1) Update app repo image tags (overlay for target env, plus base for production)
+  2) Update GitOps repo (overlay for target env, plus optional base ref bump)
+  3) Verify image override contract (production mode enforces cross-repo contract)
+  4) Optionally commit/push both repos and verify runtime convergence
+
+Options:
+  --openedx-tag TAG     Required. openedx image tag.
+  --mfe-tag TAG         Required. openedx-mfe image tag.
+  --openedx-digest DIGEST Optional image digest (sha256:...) for openedx.
+  --mfe-digest DIGEST   Optional image digest (sha256:...) for openedx-mfe.
+  --require-digests     Fail unless both openedx/mfe digests are provided.
+  --target-env ENV      Target environment: production|staging (default: production).
+  --app-repo PATH       Override app repo path (default: current repo root).
+  --infra-repo PATH     Override GitOps repo path.
+  --app-sha SHA         Override app SHA to pin in GitOps base ref.
+  --release-object-json PATH
+                       Consume canonical release-object identity for digests,
+                       app SHA, and proof/promotion binding.
+  --update-base-ref     Force update GitOps base ref to app SHA.
+  --skip-base-ref       Skip GitOps base ref update.
+                       Default: update for production, skip for staging.
+
+  --apply               Write file changes (default: dry-run).
+  --commit              Commit changed files in app + GitOps repos (requires --apply).
+  --push                Push app + GitOps repos (requires --commit).
+  --verify-runtime      Poll Argo + deployment image until target tag is live.
+  --skip-enterprise-site-mapping-guard
+                       Skip STRICT multisite enterprise UUID runtime preflight.
+  --skip-enterprise-readiness-integrity-guard
+                       Skip static enterprise readiness integrity preflight.
+  --skip-enterprise-sso-runtime-guard
+                       Skip enterprise SSO runtime readiness preflight.
+  --skip-enterprise-runtime-app-guard
+                       Skip enterprise runtime app wiring preflight.
+  --skip-enterprise-schema-guard
+                       Skip enterprise schema integrity preflight.
+  --skip-branding-runtime-guard
+                       Skip post-rollout runtime branding verification guard.
+  --skip-paragon-runtime-guard
+                       Skip strict runtime PARAGON_THEME_URLS verification guard.
+  --skip-branding-surface-audit
+                       Skip strict branding surface audit after runtime branding verification.
+  --skip-footer-runtime-guard
+                       Skip live footer parity runtime verification guard.
+  --skip-mfe-route-runtime-guard
+                       Skip strict runtime MFE route contract verification guard.
+  --skip-mfe-route-smoke-guard
+                       Skip runtime MFE route HTTP smoke guard.
+  --purge-frontend-cache
+                       Run frontend/theme cache purge helper after rollout checks.
+                       Uses dry-run unless --apply is set.
+  --purge-frontend-cache-everything
+                       Purge entire Cloudflare zone cache (high impact).
+                       Implies --purge-frontend-cache.
+  --frontend-cache-env ENV
+                       Cache purge environment: auto|prod|dev (default: auto).
+                       auto maps production->prod, staging->dev.
+  --enterprise-readiness-tenant SLUG
+                       Tenant slug used for enterprise SSO runtime readiness preflight.
+  --paragon-runtime-url URL
+                       Override runtime PARAGON theme origin for post-rollout validation
+                       (default: https://apps.academyv2.mereka.io in production).
+
+  --k8s-context NAME    Kubernetes context for runtime verification.
+  --argocd-namespace NS ArgoCD namespace (default: argocd).
+  --argocd-app NAME     ArgoCD application name (default: auto; production prefers mereka-lms-prod then mereka-lms-local).
+  --namespace NS        App namespace for deployment checks (default: mereka-lms).
+  --wait-seconds N      Max wait for runtime verification (default: 600).
+  -h, --help            Show this help.
+
+Safety controls for write operations:
+  CONFIRM_RELEASE_OPENEDX_GITOPS=RELEASE_OPENEDX_GITOPS
+                       Required when --apply is used.
+  CONFIRM_PUSH_RELEASE_OPENEDX_GITOPS=PUSH_RELEASE_OPENEDX_GITOPS
+                       Required when --push is used.
+  ALLOW_PROD_APPLY=1   Required for production --apply.
+
+Examples:
+  # Dry-run preview
+  ./scripts/infra/release-openedx-gitops.sh --openedx-tag 20260208-openedx-a --mfe-tag 20260208-mfe-b
+
+  # Apply + commit production rollout (with required runtime verification guards)
+  ./scripts/infra/release-openedx-gitops.sh --openedx-tag 20260208-openedx-a --mfe-tag 20260208-mfe-b \
+    --apply --commit --verify-runtime
+
+  # Full production automation (apply, commit, push, runtime verify)
+  ./scripts/infra/release-openedx-gitops.sh --openedx-tag 20260208-openedx-a --mfe-tag 20260208-mfe-b \
+    --apply --commit --push --verify-runtime
+
+  # Production with immutable digests
+  ./scripts/infra/release-openedx-gitops.sh --openedx-tag 20260208-openedx-a --mfe-tag 20260208-mfe-b \
+    --openedx-digest sha256:<openedx_digest> --mfe-digest sha256:<mfe_digest> \
+    --apply --commit --push --verify-runtime
+
+  # Staging-only tag update (no base-ref bump by default)
+  ./scripts/infra/release-openedx-gitops.sh --target-env staging \
+    --openedx-tag 20260208-openedx-a --mfe-tag 20260208-mfe-b \
+    --apply --commit --push
+EOF
+}
+
+require_bool_01() {
+  local var_name="$1"
+  local value="$2"
+  case "$value" in
+    0|1) ;;
+    *)
+      echo "Invalid ${var_name}='${value}' (expected 0 or 1)" >&2
+      exit 1
+      ;;
+  esac
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --openedx-tag)
+      OPENEDX_TAG="${2:-}"
+      shift 2
+      ;;
+    --mfe-tag)
+      MFE_TAG="${2:-}"
+      shift 2
+      ;;
+    --openedx-digest)
+      OPENEDX_DIGEST="${2:-}"
+      shift 2
+      ;;
+    --mfe-digest)
+      MFE_DIGEST="${2:-}"
+      shift 2
+      ;;
+    --require-digests)
+      REQUIRE_DIGESTS=1
+      shift
+      ;;
+    --target-env)
+      TARGET_ENV="${2:-}"
+      TARGET_ENV_SET=1
+      shift 2
+      ;;
+    --app-repo)
+      APP_REPO="${2:-}"
+      shift 2
+      ;;
+    --infra-repo)
+      INFRA_REPO="${2:-}"
+      shift 2
+      ;;
+    --app-sha)
+      APP_SHA_OVERRIDE="${2:-}"
+      shift 2
+      ;;
+    --release-object-json)
+      RELEASE_OBJECT_JSON="${2:-}"
+      shift 2
+      ;;
+    --update-base-ref)
+      UPDATE_BASE_REF_MODE="1"
+      shift
+      ;;
+    --skip-base-ref)
+      UPDATE_BASE_REF_MODE="0"
+      shift
+      ;;
+    --apply)
+      APPLY=1
+      shift
+      ;;
+    --commit)
+      COMMIT=1
+      shift
+      ;;
+    --push)
+      PUSH=1
+      shift
+      ;;
+    --verify-runtime)
+      VERIFY_RUNTIME=1
+      shift
+      ;;
+    --skip-enterprise-site-mapping-guard)
+      ENFORCE_ENTERPRISE_SITE_MAPPING_GUARD=0
+      shift
+      ;;
+    --skip-enterprise-readiness-integrity-guard)
+      RUN_ENTERPRISE_READINESS_INTEGRITY_GUARD=0
+      shift
+      ;;
+    --skip-enterprise-sso-runtime-guard)
+      RUN_ENTERPRISE_SSO_RUNTIME_GUARD=0
+      shift
+      ;;
+    --skip-enterprise-runtime-app-guard)
+      RUN_ENTERPRISE_RUNTIME_APP_GUARD=0
+      shift
+      ;;
+    --skip-enterprise-schema-guard)
+      RUN_ENTERPRISE_SCHEMA_GUARD=0
+      shift
+      ;;
+    --skip-branding-runtime-guard)
+      RUN_BRANDING_RUNTIME_GUARD=0
+      shift
+      ;;
+    --skip-paragon-runtime-guard)
+      RUN_PARAGON_RUNTIME_GUARD=0
+      shift
+      ;;
+    --skip-branding-surface-audit)
+      RUN_BRANDING_SURFACE_AUDIT=0
+      shift
+      ;;
+    --skip-footer-runtime-guard)
+      RUN_FOOTER_RUNTIME_GUARD=0
+      shift
+      ;;
+    --skip-mfe-route-runtime-guard)
+      RUN_MFE_ROUTE_RUNTIME_GUARD=0
+      shift
+      ;;
+    --skip-mfe-route-smoke-guard)
+      RUN_MFE_ROUTE_SMOKE_GUARD=0
+      shift
+      ;;
+    --purge-frontend-cache)
+      RUN_FRONTEND_CACHE_PURGE=1
+      shift
+      ;;
+    --purge-frontend-cache-everything)
+      RUN_FRONTEND_CACHE_PURGE=1
+      FRONTEND_CACHE_PURGE_EVERYTHING=1
+      shift
+      ;;
+    --frontend-cache-env)
+      FRONTEND_CACHE_ENV="${2:-}"
+      shift 2
+      ;;
+    --enterprise-readiness-tenant)
+      ENTERPRISE_READINESS_TENANT="${2:-}"
+      shift 2
+      ;;
+    --paragon-runtime-url)
+      PARAGON_RUNTIME_URL="${2:-}"
+      shift 2
+      ;;
+    --k8s-context)
+      K8S_CONTEXT="${2:-}"
+      shift 2
+      ;;
+    --argocd-namespace)
+      ARGOCD_NAMESPACE="${2:-}"
+      shift 2
+      ;;
+    --argocd-app)
+      ARGO_APP="${2:-}"
+      shift 2
+      ;;
+    --namespace)
+      APP_NAMESPACE="${2:-}"
+      shift 2
+      ;;
+    --wait-seconds)
+      WAIT_SECONDS="${2:-}"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Unknown arg: $1" >&2
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+if [[ -z "$OPENEDX_TAG" || -z "$MFE_TAG" ]]; then
+  echo "Both --openedx-tag and --mfe-tag are required." >&2
+  usage
+  exit 1
+fi
+
+validate_digest() {
+  local digest="$1"
+  local label="$2"
+  if [[ -z "$digest" ]]; then
+    return 0
+  fi
+  if [[ ! "$digest" =~ ^sha256:[0-9a-fA-F]{64}$ ]]; then
+    echo "Invalid $label digest format: $digest (expected sha256:<64-hex>)" >&2
+    exit 1
+  fi
+}
+
+if [[ "$COMMIT" -eq 1 && "$APPLY" -ne 1 ]]; then
+  echo "--commit requires --apply." >&2
+  exit 1
+fi
+
+if [[ "$PUSH" -eq 1 && "$COMMIT" -ne 1 ]]; then
+  echo "--push requires --commit." >&2
+  exit 1
+fi
+
+normalize_target_env() {
+  local env_lc
+  env_lc="$(echo "$1" | tr '[:upper:]' '[:lower:]')"
+  case "$env_lc" in
+    prod|production)
+      echo "production"
+      ;;
+    stage|staging|stg)
+      echo "staging"
+      ;;
+    dev|rke2-nonprod|nonprod)
+      echo "dev"
+      ;;
+    *)
+      echo "Unsupported --target-env: $1 (expected prod|staging|dev)" >&2
+      exit 1
+      ;;
+  esac
+}
+
+detect_infra_repo() {
+  if [[ -n "$INFRA_REPO" ]]; then
+    return
+  fi
+  for candidate in \
+    "${WORKSPACE_ROOT}/infrastructure" \
+    "${WORKSPACE_ROOT}/bbi-infrastructure"; do
+    if [[ -f "$candidate/$INFRA_BASE_REL" && -f "$candidate/$INFRA_PROD_REL" ]]; then
+      INFRA_REPO="$candidate"
+      return
+    fi
+  done
+  echo "Unable to detect GitOps repo. Pass --infra-repo PATH." >&2
+  exit 1
+}
+
+require_git_repo() {
+  local repo="$1"
+  if ! git -C "$repo" rev-parse --git-dir >/dev/null 2>&1; then
+    echo "Not a git repo: $repo" >&2
+    exit 1
+  fi
+}
+
+update_image_tags_file() {
+  local file="$1"
+  local openedx_tag="$2"
+  local mfe_tag="$3"
+  local openedx_digest="$4"
+  local mfe_digest="$5"
+  local apply="$6"
+  local required_names_csv="$7"
+
+  python3 - "$file" "$openedx_tag" "$mfe_tag" "$openedx_digest" "$mfe_digest" "$apply" "$required_names_csv" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+openedx_tag = sys.argv[2]
+mfe_tag = sys.argv[3]
+openedx_digest = sys.argv[4]
+mfe_digest = sys.argv[5]
+apply = sys.argv[6] == "1"
+required_names = [name for name in sys.argv[7].split(",") if name]
+
+if not path.exists():
+    raise SystemExit(f"missing file: {path}")
+
+targets = {
+    "docker.io/overhangio/openedx": openedx_tag,
+    "docker.io/overhangio/openedx-mfe": mfe_tag,
+    "ghcr.io/biji-biji-initiative/mereka-lms/openedx": openedx_tag,
+    "ghcr.io/biji-biji-initiative/mereka-lms/mfe": mfe_tag,
+}
+digest_targets = {
+    "docker.io/overhangio/openedx": openedx_digest,
+    "docker.io/overhangio/openedx-mfe": mfe_digest,
+    "ghcr.io/biji-biji-initiative/mereka-lms/openedx": openedx_digest,
+    "ghcr.io/biji-biji-initiative/mereka-lms/mfe": mfe_digest,
+}
+
+raw = path.read_text(encoding="utf-8")
+lines = raw.splitlines(keepends=True)
+current_name = None
+seen_names = set()
+updates = []
+digest_updates = []
+
+name_indices = []
+for idx, line in enumerate(lines):
+    line_no_eol = line.rstrip("\r\n")
+    name_match = re.match(r"^(\s*-\s*name:\s*)(\S+)(\s*)$", line_no_eol)
+    if name_match:
+        name_indices.append((idx, name_match.group(2), name_match.group(1)))
+
+block_ranges = []
+for pos, (start_idx, image_name, name_prefix) in enumerate(name_indices):
+    end_idx = len(lines) - 1 if pos == len(name_indices) - 1 else name_indices[pos + 1][0] - 1
+    block_ranges.append((start_idx, end_idx, image_name, name_prefix))
+
+for idx, line in enumerate(lines):
+    line_no_eol = line.rstrip("\r\n")
+    eol = line[len(line_no_eol):]
+
+    name_match = re.match(r"^(\s*-\s*name:\s*)(\S+)(\s*)$", line_no_eol)
+    if name_match:
+        current_name = name_match.group(2)
+        continue
+
+    # Track newName values so kustomize image renames count as "seen"
+    new_name_match = re.match(r"^\s*newName:\s*(\S+)\s*$", line_no_eol)
+    if new_name_match:
+        seen_names.add(new_name_match.group(1))
+        continue
+
+    tag_match = re.match(r"^(\s*newTag:\s*)(\S+)(\s*)$", line_no_eol)
+    if not tag_match or not current_name:
+        continue
+
+    if current_name not in targets:
+        continue
+
+    seen_names.add(current_name)
+    current_tag = tag_match.group(2)
+    wanted_tag = targets[current_name]
+    if current_tag == wanted_tag:
+        continue
+
+    updated_line = f"{tag_match.group(1)}{wanted_tag}{tag_match.group(3)}{eol}"
+    updates.append((idx + 1, current_name, current_tag, wanted_tag))
+    lines[idx] = updated_line
+
+for start_idx, end_idx, image_name, name_prefix in block_ranges:
+    wanted_digest = digest_targets.get(image_name, "")
+    if not wanted_digest:
+        continue
+
+    digest_idx = None
+    digest_indent = "    "
+    insert_after_idx = start_idx
+
+    for idx in range(start_idx + 1, end_idx + 1):
+        line_no_eol = lines[idx].rstrip("\r\n")
+        digest_match = re.match(r"^(\s*digest:\s*)(\S+)(\s*)$", line_no_eol)
+        if digest_match:
+            digest_idx = idx
+            digest_indent = re.match(r"^(\s*)", line_no_eol).group(1)
+            current_digest = digest_match.group(2)
+            if current_digest != wanted_digest:
+                eol = lines[idx][len(line_no_eol):]
+                lines[idx] = f"{digest_match.group(1)}{wanted_digest}{digest_match.group(3)}{eol}"
+                digest_updates.append((idx + 1, image_name, current_digest, wanted_digest))
+            break
+
+        if re.match(r"^\s*(newTag|newName):\s*\S+", line_no_eol):
+            insert_after_idx = idx
+            digest_indent = re.match(r"^(\s*)", line_no_eol).group(1)
+
+    if digest_idx is None:
+        insert_line = f"{digest_indent}digest: {wanted_digest}\n"
+        lines.insert(insert_after_idx + 1, insert_line)
+        digest_updates.append((insert_after_idx + 2, image_name, "<missing>", wanted_digest))
+        for i, (s_idx, e_idx, n, pref) in enumerate(block_ranges):
+            if s_idx > insert_after_idx:
+                block_ranges[i] = (s_idx + 1, e_idx + 1, n, pref)
+            elif i >= 0 and s_idx == start_idx:
+                block_ranges[i] = (s_idx, e_idx + 1, n, pref)
+
+missing = [name for name in required_names if name not in seen_names]
+if missing:
+    raise SystemExit(f"{path}: missing expected image entries: {', '.join(missing)}")
+
+if not updates:
+    if not digest_updates:
+        print(f"= {path}: image tags/digests already up-to-date")
+        raise SystemExit(0)
+else:
+    print(f"~ {path}: {len(updates)} tag update(s)")
+    for line_no, image_name, before, after in updates:
+        print(f"    L{line_no} {image_name}: {before} -> {after}")
+
+if digest_updates:
+    print(f"~ {path}: {len(digest_updates)} digest update(s)")
+    for line_no, image_name, before, after in digest_updates:
+        print(f"    L{line_no} {image_name}: {before} -> {after}")
+
+if apply:
+    path.write_text("".join(lines), encoding="utf-8")
+    print(f"  applied: {path}")
+else:
+    print(f"  dry-run: {path}")
+PY
+}
+
+update_gitops_base_ref() {
+  local file="$1"
+  local app_sha="$2"
+  local apply="$3"
+
+  python3 - "$file" "$app_sha" "$apply" <<'PY'
+import pathlib
+import re
+import sys
+
+path = pathlib.Path(sys.argv[1])
+new_sha = sys.argv[2].strip()
+apply = sys.argv[3] == "1"
+
+if not path.exists():
+    raise SystemExit(f"missing file: {path}")
+
+content = path.read_text(encoding="utf-8")
+pat = re.compile(
+    r"(https://github\.com/Biji-Biji-Initiative/mereka-lms\.git//deploy/k8s/base\?ref=)([0-9a-fA-F]{7,40})"
+)
+match = pat.search(content)
+if not match:
+    vendored_pat = re.compile(r"^\s*-\s*deploy/k8s/base\s*$", re.MULTILINE)
+    if vendored_pat.search(content):
+        print(f"= {path}: vendored base mode detected (resources: deploy/k8s/base); skipping base ref bump")
+        raise SystemExit(0)
+    raise SystemExit(f"{path}: could not locate mereka-lms base ref URL")
+
+old_sha = match.group(2)
+if old_sha == new_sha:
+    print(f"= {path}: base ref already {new_sha}")
+    raise SystemExit(0)
+
+updated = pat.sub(lambda m: f"{m.group(1)}{new_sha}", content, count=1)
+print(f"~ {path}: base ref {old_sha} -> {new_sha}")
+if apply:
+    path.write_text(updated, encoding="utf-8")
+    print(f"  applied: {path}")
+else:
+    print(f"  dry-run: {path}")
+PY
+}
+
+commit_if_needed() {
+  local repo="$1"
+  local message="$2"
+  shift 2
+  local paths=("$@")
+  git -C "$repo" add "${paths[@]}"
+  if git -C "$repo" diff --cached --quiet; then
+    echo "= $repo: no staged changes for commit"
+    return
+  fi
+  git -C "$repo" commit -m "$message"
+}
+
+push_with_rebase_if_needed() {
+  local repo="$1"
+  local upstream_ref remote_name remote_branch dirty_tracked=0
+  if git -C "$repo" push; then
+    return
+  fi
+
+  upstream_ref="$(git -C "$repo" rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null || true)"
+  if [[ -n "$upstream_ref" ]]; then
+    remote_name="${upstream_ref%%/*}"
+    remote_branch="${upstream_ref#*/}"
+  else
+    remote_name="origin"
+    remote_branch="$(git -C "$repo" branch --show-current)"
+  fi
+
+  if [[ -z "$remote_branch" ]]; then
+    echo "Unable to determine upstream branch for $repo after push rejection." >&2
+    return 1
+  fi
+
+  echo "Push rejected for $repo; rebasing onto ${remote_name}/${remote_branch} before retry."
+  git -C "$repo" fetch "$remote_name" "$remote_branch"
+
+  if ! git -C "$repo" diff --quiet || ! git -C "$repo" diff --cached --quiet; then
+    dirty_tracked=1
+    echo "Tracked worktree is dirty before retry; using rebase --autostash for $repo."
+    git -C "$repo" status --short --untracked-files=no
+  fi
+
+  if [[ "$dirty_tracked" -eq 1 ]]; then
+    git -C "$repo" rebase --autostash "${remote_name}/${remote_branch}"
+  else
+    git -C "$repo" rebase "${remote_name}/${remote_branch}"
+  fi
+
+  git -C "$repo" push "$remote_name" "HEAD:${remote_branch}"
+}
+
+verify_runtime_convergence() {
+  local openedx_tag="$1"
+  local mfe_tag="$2"
+  local wait_seconds="$3"
+  local interval=10
+  local attempts=$(( wait_seconds / interval ))
+  if [[ "$attempts" -lt 1 ]]; then
+    attempts=1
+  fi
+
+  if ! resolve_argocd_app; then
+    return 1
+  fi
+
+  echo "Polling runtime convergence (context=$K8S_CONTEXT app=$ARGO_APP namespace=$APP_NAMESPACE)..."
+  echo "  Waiting for: lms=$openedx_tag cms=$openedx_tag mfe=$mfe_tag"
+  for ((i=1; i<=attempts; i++)); do
+    local app_line
+    app_line="$(kubectl --context "$K8S_CONTEXT" -n "$ARGOCD_NAMESPACE" \
+      get applications.argoproj.io "$ARGO_APP" \
+      -o jsonpath='{.status.sync.status} {.status.health.status} {.status.sync.revision}' 2>/dev/null || true)"
+
+    local lms_image mfe_image cms_image
+    lms_image="$(kubectl --context "$K8S_CONTEXT" -n "$APP_NAMESPACE" \
+      get deploy lms -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null || true)"
+    cms_image="$(kubectl --context "$K8S_CONTEXT" -n "$APP_NAMESPACE" \
+      get deploy cms -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null || true)"
+    mfe_image="$(kubectl --context "$K8S_CONTEXT" -n "$APP_NAMESPACE" \
+      get deploy mfe -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null || true)"
+
+    echo "  [$i/$attempts] app=[$app_line] lms=[$lms_image] cms=[$cms_image] mfe=[$mfe_image]"
+
+    local lms_ok=0 cms_ok=0 mfe_ok=0
+    [[ "$lms_image" == *":$openedx_tag" ]] && lms_ok=1
+    [[ "$cms_image" == *":$openedx_tag" ]] && cms_ok=1
+    [[ "$mfe_image" == *":$mfe_tag" ]] && mfe_ok=1
+
+    if [[ "$lms_ok" -eq 1 && "$cms_ok" -eq 1 && "$mfe_ok" -eq 1 ]]; then
+      echo "✓ Runtime convergence verified (lms + cms + mfe)."
+      return 0
+    fi
+    sleep "$interval"
+  done
+  echo "Runtime verification timed out. Expected: lms/cms=$openedx_tag mfe=$mfe_tag" >&2
+  return 1
+}
+
+resolve_argocd_app() {
+  # Respect explicit override.
+  if [[ -n "$ARGO_APP" && "$ARGO_APP" != "auto" ]]; then
+    return 0
+  fi
+
+  local candidates=()
+  if [[ "$TARGET_ENV" == "production" ]]; then
+    candidates=(mereka-lms-prod mereka-lms-local)
+  else
+    candidates=(mereka-lms-staging mereka-lms-local mereka-lms-prod)
+  fi
+
+  local app
+  for app in "${candidates[@]}"; do
+    if kubectl --context "$K8S_CONTEXT" -n "$ARGOCD_NAMESPACE" \
+      get applications.argoproj.io "$app" >/dev/null 2>&1; then
+      ARGO_APP="$app"
+      echo "Auto-detected ArgoCD app: $ARGO_APP"
+      return 0
+    fi
+  done
+
+  echo "Unable to auto-detect ArgoCD app in namespace '$ARGOCD_NAMESPACE' for context '$K8S_CONTEXT'." >&2
+  echo "Pass --argocd-app <name> explicitly." >&2
+  return 1
+}
+
+detect_infra_repo
+require_git_repo "$APP_REPO"
+require_git_repo "$INFRA_REPO"
+
+TARGET_ENV="$(normalize_target_env "$TARGET_ENV")"
+RELEASE_OBJECT_ID=""
+if [[ -n "$RELEASE_OBJECT_JSON" ]]; then
+  if [[ ! -f "$RELEASE_OBJECT_JSON" ]]; then
+    echo "release object not found: $RELEASE_OBJECT_JSON" >&2
+    exit 1
+  fi
+  release_object_args=(
+    promotion-inputs
+    --release-object-json "$RELEASE_OBJECT_JSON"
+    --target-env "$TARGET_ENV"
+    --format env
+  )
+  [[ -n "$OPENEDX_DIGEST" ]] && release_object_args+=(--openedx-digest "$OPENEDX_DIGEST")
+  [[ -n "$MFE_DIGEST" ]] && release_object_args+=(--mfe-digest "$MFE_DIGEST")
+  [[ -n "$APP_SHA_OVERRIDE" ]] && release_object_args+=(--app-sha "$APP_SHA_OVERRIDE")
+
+  while IFS='=' read -r key value; do
+    case "$key" in
+      release_id) RELEASE_OBJECT_ID="$value" ;;
+      app_commit_sha) APP_SHA_OVERRIDE="$value" ;;
+      openedx_digest) OPENEDX_DIGEST="$value" ;;
+      mfe_digest) MFE_DIGEST="$value" ;;
+    esac
+  done < <(python3 "$REPO_ROOT/scripts/release/release_object_bindings.py" "${release_object_args[@]}")
+fi
+
+validate_digest "$OPENEDX_DIGEST" "openedx"
+validate_digest "$MFE_DIGEST" "openedx-mfe"
+
+if [[ "$REQUIRE_DIGESTS" -eq 1 && ( -z "$OPENEDX_DIGEST" || -z "$MFE_DIGEST" ) ]]; then
+  echo "--require-digests requires both --openedx-digest and --mfe-digest." >&2
+  exit 1
+fi
+
+# B-012: Production promotion requires release-object identity.
+# Without it, promotion is a manual SHA join — the root cause of
+# release-identity-split incidents.
+if [[ "$TARGET_ENV" == "production" && "$REQUIRE_DIGESTS" -eq 1 && -z "$RELEASE_OBJECT_JSON" ]]; then
+  echo "ERROR: Production promotion with --require-digests requires --release-object-json." >&2
+  echo "       The release object binds image digests, app SHA, and proof chain into one identity." >&2
+  echo "       Generate it via CI (build-tutor-images.yml) or:" >&2
+  echo "         python3 scripts/release/generate_release_object.py --release-bundle-json <bundle> --output <path>" >&2
+  exit 1
+fi
+
+require_bool_01 "ALLOW_PROD_APPLY" "$ALLOW_PROD_APPLY"
+
+if [[ "$APPLY" -eq 1 && "$CONFIRM_RELEASE_OPENEDX_GITOPS" != "$CONFIRM_APPLY_TOKEN" ]]; then
+  echo "Refusing --apply without explicit confirmation token. Set CONFIRM_RELEASE_OPENEDX_GITOPS=${CONFIRM_APPLY_TOKEN}" >&2
+  exit 1
+fi
+
+if [[ "$PUSH" -eq 1 && "$CONFIRM_PUSH_RELEASE_OPENEDX_GITOPS" != "$CONFIRM_PUSH_TOKEN" ]]; then
+  echo "Refusing --push without explicit confirmation token. Set CONFIRM_PUSH_RELEASE_OPENEDX_GITOPS=${CONFIRM_PUSH_TOKEN}" >&2
+  exit 1
+fi
+
+if [[ "$TARGET_ENV" == "production" && "$APPLY" -eq 1 && "$ALLOW_PROD_APPLY" != "1" ]]; then
+  echo "Refusing production --apply without ALLOW_PROD_APPLY=1" >&2
+  exit 1
+fi
+
+# B-015: Environment progression check.
+# For production promotion, warn if the same digest isn't already on staging.
+# For staging, warn if it isn't on dev. Advisory only — the hard gate lives
+# in bbi-infrastructure's promote-image.yml.
+if [[ -n "$INFRA_REPO" && -d "$INFRA_REPO" && "$APPLY" -eq 1 ]]; then
+  _predecessor_env=""
+  case "$TARGET_ENV" in
+    production) _predecessor_env="staging" ;;
+    staging)    _predecessor_env="dev" ;;
+  esac
+  if [[ -n "$_predecessor_env" && -n "$OPENEDX_DIGEST" ]]; then
+    _pred_overlay=""
+    case "$_predecessor_env" in
+      staging) _pred_overlay="$INFRA_REPO/apps/mereka-lms/overlays/staging/kustomization.yaml" ;;
+      dev)     _pred_overlay="$INFRA_REPO/apps/mereka-lms/overlays/dev/kustomization.yaml" ;;
+    esac
+    if [[ -n "$_pred_overlay" && -f "$_pred_overlay" ]]; then
+      if ! grep -q "${OPENEDX_DIGEST}" "$_pred_overlay" 2>/dev/null; then
+        echo "WARNING: Promoting to $TARGET_ENV but openedx digest not found in $_predecessor_env overlay." >&2
+        echo "         Consider promoting to $_predecessor_env first for environment parity." >&2
+      fi
+    fi
+  fi
+fi
+
+if [[ "${CI:-}" == "true" && "$TARGET_ENV_SET" -ne 1 ]]; then
+  echo "Error: CI mode requires explicit --target-env (production|staging)." >&2
+  usage
+  exit 1
+fi
+
+if [[ "${CI:-}" == "true" && "$TARGET_ENV" == "production" && "$APPLY" -eq 1 && ( -z "$OPENEDX_DIGEST" || -z "$MFE_DIGEST" ) ]]; then
+  echo "Error: CI production apply requires both --openedx-digest and --mfe-digest." >&2
+  exit 1
+fi
+
+if [[ "$TARGET_ENV" == "production" && "$APPLY" -eq 1 && "$RUN_BRANDING_RUNTIME_GUARD" -eq 1 && "$VERIFY_RUNTIME" -ne 1 ]]; then
+  echo "Error: production apply with runtime branding guard enabled requires --verify-runtime." >&2
+  echo "Use --skip-branding-runtime-guard only for controlled emergency releases." >&2
+  exit 1
+fi
+
+if [[ "$TARGET_ENV" == "production" && "$APPLY" -eq 1 && "$RUN_PARAGON_RUNTIME_GUARD" -eq 1 && "$VERIFY_RUNTIME" -ne 1 ]]; then
+  echo "Error: production apply with PARAGON runtime guard enabled requires --verify-runtime." >&2
+  echo "Use --skip-paragon-runtime-guard only for controlled emergency releases." >&2
+  exit 1
+fi
+
+if [[ "$TARGET_ENV" == "production" && "$APPLY" -eq 1 && "$RUN_FOOTER_RUNTIME_GUARD" -eq 1 && "$VERIFY_RUNTIME" -ne 1 ]]; then
+  echo "Error: production apply with footer runtime guard enabled requires --verify-runtime." >&2
+  echo "Use --skip-footer-runtime-guard only for controlled emergency releases." >&2
+  exit 1
+fi
+
+if [[ "$TARGET_ENV" == "production" && "$APPLY" -eq 1 ]]; then
+  # Block known mutable tags for production. Immutable tags should be SHA-based
+  # (e.g., abc1234f-20260305120000) or release tags (e.g., 21.0.0).
+  MUTABLE_TAG_PATTERN="^(latest|mereka-brand|main|master|dev|staging|nightly)$"
+  openedx_tag_lc="$(echo "$OPENEDX_TAG" | tr '[:upper:]' '[:lower:]')"
+  mfe_tag_lc="$(echo "$MFE_TAG" | tr '[:upper:]' '[:lower:]')"
+  if [[ "$openedx_tag_lc" =~ $MUTABLE_TAG_PATTERN ]]; then
+    echo "Error: production apply forbids mutable tag '$OPENEDX_TAG' for openedx." >&2
+    echo "Use immutable release tags (e.g., abc1234f-20260305120000)." >&2
+    exit 1
+  fi
+  if [[ "$mfe_tag_lc" =~ $MUTABLE_TAG_PATTERN ]]; then
+    echo "Error: production apply forbids mutable tag '$MFE_TAG' for mfe." >&2
+    echo "Use immutable release tags (e.g., abc1234f-20260305120000)." >&2
+    exit 1
+  fi
+fi
+
+case "$FRONTEND_CACHE_ENV" in
+  auto|prod|dev) ;;
+  *)
+    echo "Error: --frontend-cache-env must be auto, prod, or dev (got: $FRONTEND_CACHE_ENV)." >&2
+    exit 1
+    ;;
+esac
+
+if [[ "$TARGET_ENV" == "production" && "$APPLY" -eq 1 && "$RUN_FRONTEND_CACHE_PURGE" -eq 1 && "$VERIFY_RUNTIME" -ne 1 ]]; then
+  echo "Error: production apply with cache purge enabled requires --verify-runtime." >&2
+  echo "Run with --verify-runtime or skip --purge-frontend-cache." >&2
+  exit 1
+fi
+
+UPDATE_APP_BASE=0
+UPDATE_BASE_REF_DEFAULT=0
+APP_OVERLAY_REL="$APP_PROD_REL"
+INFRA_OVERLAY_REL="$INFRA_PROD_REL"
+APP_REQUIRED_NAMES="docker.io/overhangio/openedx,docker.io/overhangio/openedx-mfe,ghcr.io/biji-biji-initiative/mereka-lms/mfe"
+# Production infra overlay now pins the post-transform GHCR image names directly.
+# App overlay remains the reference surface with canonical docker.io names plus the
+# extra transformed MFE parity entry; GitOps prod consumes the realized GHCR names.
+INFRA_REQUIRED_NAMES="ghcr.io/biji-biji-initiative/mereka-lms/openedx,ghcr.io/biji-biji-initiative/mereka-lms/mfe"
+
+if [[ "$TARGET_ENV" == "production" ]]; then
+  # Post-Wave-9 (#1900): app-repo overlays are deleted; bbi-infra is
+  # authoritative. The app-repo base MUST carry `pin-required` sentinel
+  # per deploy/k8s/base/kustomization.yaml comment — do NOT write real
+  # SHAs into it from here. UPDATE_BASE_REF still defaults to 1 because
+  # the bbi-infra base kustomization reference (git ref to app-repo)
+  # needs the real SHA.
+  UPDATE_APP_BASE=0
+  UPDATE_BASE_REF_DEFAULT=1
+  APP_OVERLAY_REL="$APP_PROD_REL"
+  INFRA_OVERLAY_REL="$INFRA_PROD_REL"
+elif [[ "$TARGET_ENV" == "staging" ]]; then
+  UPDATE_APP_BASE=0
+  UPDATE_BASE_REF_DEFAULT=0
+  APP_OVERLAY_REL="$APP_STAGING_REL"
+  INFRA_OVERLAY_REL="$INFRA_STAGING_REL"
+  # Staging infra overlay matches on the already-transformed GHCR image names.
+  INFRA_REQUIRED_NAMES="ghcr.io/biji-biji-initiative/mereka-lms/openedx,ghcr.io/biji-biji-initiative/mereka-lms/mfe"
+fi
+
+UPDATE_BASE_REF="$UPDATE_BASE_REF_DEFAULT"
+if [[ "$UPDATE_BASE_REF_MODE" == "1" ]]; then
+  UPDATE_BASE_REF=1
+elif [[ "$UPDATE_BASE_REF_MODE" == "0" ]]; then
+  UPDATE_BASE_REF=0
+fi
+
+APP_BASE_FILE="$APP_REPO/$APP_BASE_REL"
+APP_OVERLAY_FILE="$APP_REPO/$APP_OVERLAY_REL"
+INFRA_BASE_FILE="$INFRA_REPO/$INFRA_BASE_REL"
+INFRA_OVERLAY_FILE="$INFRA_REPO/$INFRA_OVERLAY_REL"
+
+echo "App repo:   $APP_REPO"
+echo "Infra repo: $INFRA_REPO"
+echo "Target env: $TARGET_ENV"
+echo "Release object: ${RELEASE_OBJECT_ID:-<none>}"
+echo "OpenedX tag: $OPENEDX_TAG"
+echo "MFE tag:     $MFE_TAG"
+echo "OpenedX digest: ${OPENEDX_DIGEST:-<unchanged>}"
+echo "MFE digest:     ${MFE_DIGEST:-<unchanged>}"
+echo "Require digests: $([[ "$REQUIRE_DIGESTS" -eq 1 ]] && echo yes || echo no)"
+echo "Update app base image overrides: $([[ "$UPDATE_APP_BASE" -eq 1 ]] && echo yes || echo no)"
+echo "Update GitOps base ref: $([[ "$UPDATE_BASE_REF" -eq 1 ]] && echo yes || echo no)"
+echo "Mode: $([[ "$APPLY" -eq 1 ]] && echo apply || echo dry-run)"
+echo "Enterprise site mapping guard: $([[ "$ENFORCE_ENTERPRISE_SITE_MAPPING_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
+echo "Enterprise readiness integrity guard: $([[ "$RUN_ENTERPRISE_READINESS_INTEGRITY_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
+echo "Enterprise SSO runtime guard: $([[ "$RUN_ENTERPRISE_SSO_RUNTIME_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
+echo "Enterprise runtime app guard: $([[ "$RUN_ENTERPRISE_RUNTIME_APP_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
+echo "Enterprise schema guard: $([[ "$RUN_ENTERPRISE_SCHEMA_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
+echo "Branding runtime guard: $([[ "$RUN_BRANDING_RUNTIME_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
+echo "PARAGON runtime guard: $([[ "$RUN_PARAGON_RUNTIME_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
+echo "Branding surface audit: $([[ "$RUN_BRANDING_SURFACE_AUDIT" -eq 1 ]] && echo enabled || echo skipped)"
+echo "Footer runtime guard: $([[ "$RUN_FOOTER_RUNTIME_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
+echo "MFE route runtime guard: $([[ "$RUN_MFE_ROUTE_RUNTIME_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
+echo "MFE route smoke guard: $([[ "$RUN_MFE_ROUTE_SMOKE_GUARD" -eq 1 ]] && echo enabled || echo skipped)"
+echo "Frontend cache purge: $([[ "$RUN_FRONTEND_CACHE_PURGE" -eq 1 ]] && echo enabled || echo skipped)"
+echo "Frontend cache purge env: $FRONTEND_CACHE_ENV"
+echo "Frontend cache purge everything: $([[ "$FRONTEND_CACHE_PURGE_EVERYTHING" -eq 1 ]] && echo enabled || echo disabled)"
+echo "Enterprise readiness tenant: $ENTERPRISE_READINESS_TENANT"
+
+run_enterprise_release_preflights() {
+  if [[ "$TARGET_ENV" != "production" || "$APPLY" -ne 1 ]]; then
+    return 0
+  fi
+
+  echo "Running production enterprise preflight guards..."
+  if [[ "$RUN_ENTERPRISE_READINESS_INTEGRITY_GUARD" -eq 1 ]]; then
+    "$REPO_ROOT/scripts/qa/verify-enterprise-readiness-integrity.sh"
+  else
+    echo "= skipped static integrity guard (--skip-enterprise-readiness-integrity-guard)"
+  fi
+
+  if [[ "$ENFORCE_ENTERPRISE_SITE_MAPPING_GUARD" -eq 1 ]]; then
+    STRICT=1 REQUIRE_ENTERPRISE_SITE_MAPPING=1 \
+      "$REPO_ROOT/scripts/qa/verify-multisite-config.sh" prod
+  else
+    echo "= skipped enterprise site mapping runtime guard (--skip-enterprise-site-mapping-guard)"
+  fi
+
+  if [[ "$RUN_ENTERPRISE_SCHEMA_GUARD" -eq 1 ]]; then
+    "$REPO_ROOT/scripts/tenants/repair-enterprise-schema.sh" --env prod
+  else
+    echo "= skipped enterprise schema guard (--skip-enterprise-schema-guard)"
+  fi
+
+  if [[ "$RUN_ENTERPRISE_RUNTIME_APP_GUARD" -eq 1 ]]; then
+    "$REPO_ROOT/scripts/qa/verify-enterprise-runtime-app-wiring.sh" \
+      --env prod --context "$K8S_CONTEXT" --strict
+  else
+    echo "= skipped enterprise runtime app wiring guard (--skip-enterprise-runtime-app-guard)"
+  fi
+
+  if [[ "$RUN_ENTERPRISE_SSO_RUNTIME_GUARD" -eq 1 ]]; then
+    "$REPO_ROOT/scripts/qa/verify-enterprise-sso-readiness.sh" \
+      --env prod --mode cluster --tenant "$ENTERPRISE_READINESS_TENANT"
+  else
+    echo "= skipped enterprise SSO runtime guard (--skip-enterprise-sso-runtime-guard)"
+  fi
+}
+
+run_enterprise_release_preflights
+
+run_branding_release_postflights() {
+  if [[ "$TARGET_ENV" != "production" || "$APPLY" -ne 1 ]]; then
+    return 0
+  fi
+
+  local paragon_runtime_url="${PARAGON_RUNTIME_URL:-https://apps.academyv2.mereka.io}"
+
+  if [[ "$RUN_PARAGON_RUNTIME_GUARD" -eq 1 ]]; then
+    echo "Running production PARAGON runtime verification..."
+    "$REPO_ROOT/scripts/qa/verify-paragon-runtime.sh" \
+      --runtime-url "$paragon_runtime_url" \
+      --require-runtime
+  else
+    echo "= skipped PARAGON runtime guard (--skip-paragon-runtime-guard)"
+  fi
+
+  if [[ "$RUN_BRANDING_RUNTIME_GUARD" -eq 1 ]]; then
+    echo "Running production branding runtime verification..."
+    STRICT_MFE_BRANDING_REV=1 STRICT_PROXY_AUTHN_BRANDING=1 \
+      "$REPO_ROOT/scripts/qa/verify-public-branding.sh" prod
+  else
+    echo "= skipped branding runtime guard (--skip-branding-runtime-guard)"
+  fi
+
+  if [[ "$RUN_FOOTER_RUNTIME_GUARD" -eq 1 ]]; then
+    echo "Running production footer runtime verification..."
+    "$REPO_ROOT/scripts/qa/verify-footer-parity.sh" --live
+  else
+    echo "= skipped footer runtime guard (--skip-footer-runtime-guard)"
+  fi
+
+  if [[ "$RUN_BRANDING_RUNTIME_GUARD" -eq 1 && "$RUN_BRANDING_SURFACE_AUDIT" -eq 1 ]]; then
+    echo "Running production branding surface audit (strict)..."
+    STRICT_PROXY_AUTHN_BRANDING=1 \
+      "$REPO_ROOT/scripts/qa/audit-branding-surfaces.sh" prod --strict
+  elif [[ "$RUN_BRANDING_SURFACE_AUDIT" -eq 0 ]]; then
+    echo "= skipped branding surface audit (--skip-branding-surface-audit)"
+  fi
+
+  if [[ "$RUN_MFE_ROUTE_RUNTIME_GUARD" -eq 1 ]]; then
+    echo "Running production MFE route runtime contract verification..."
+    "$REPO_ROOT/scripts/qa/verify-mfe-route-contract.sh" \
+      --context "$K8S_CONTEXT" --namespace "$APP_NAMESPACE" --strict-runtime
+  else
+    echo "= skipped MFE route runtime guard (--skip-mfe-route-runtime-guard)"
+  fi
+
+  if [[ "$RUN_MFE_ROUTE_SMOKE_GUARD" -eq 1 ]]; then
+    echo "Running production MFE route smoke verification..."
+    "$REPO_ROOT/scripts/qa/verify-mfe-route-smoke.sh" --env prod
+  else
+    echo "= skipped MFE route smoke guard (--skip-mfe-route-smoke-guard)"
+  fi
+}
+
+run_frontend_cache_purge() {
+  if [[ "$RUN_FRONTEND_CACHE_PURGE" -ne 1 ]]; then
+    return 0
+  fi
+
+  local purge_env="$FRONTEND_CACHE_ENV"
+  if [[ "$purge_env" == "auto" ]]; then
+    if [[ "$TARGET_ENV" == "production" ]]; then
+      purge_env="prod"
+    else
+      purge_env="dev"
+    fi
+  fi
+
+  local -a purge_cmd=("$REPO_ROOT/scripts/infra/purge-frontend-theme-cache.sh" "--env" "$purge_env")
+  if [[ "$APPLY" -eq 1 ]]; then
+    purge_cmd+=("--apply")
+  fi
+  if [[ "$FRONTEND_CACHE_PURGE_EVERYTHING" -eq 1 ]]; then
+    purge_cmd+=("--purge-everything")
+  fi
+
+  echo "Running frontend cache purge helper..."
+  if [[ "$APPLY" -eq 1 ]]; then
+    local allow_prod_apply="0"
+    if [[ "$purge_env" == "prod" ]]; then
+      allow_prod_apply="1"
+    fi
+
+    if [[ "$FRONTEND_CACHE_PURGE_EVERYTHING" -eq 1 ]]; then
+      CONFIRM_PURGE_FRONTEND_THEME_CACHE="PURGE_FRONTEND_THEME_CACHE" \
+      CONFIRM_PURGE_EVERYTHING="PURGE_EVERYTHING" \
+      ALLOW_PROD_APPLY="$allow_prod_apply" \
+      "${purge_cmd[@]}"
+    else
+      CONFIRM_PURGE_FRONTEND_THEME_CACHE="PURGE_FRONTEND_THEME_CACHE" \
+      ALLOW_PROD_APPLY="$allow_prod_apply" \
+      "${purge_cmd[@]}"
+    fi
+  else
+    "${purge_cmd[@]}"
+  fi
+}
+
+# Wave 9 prep (bead mereka-lms-2xwo item 1): the app-repo overlays are
+# DEPRECATED per ADR-025. bbi-infrastructure overlays are authoritative.
+# Once Wave 9 deletion (bead mereka-lms-m0u5.9) retires the app-repo
+# overlay+base, the write/commit/push paths here become no-ops.
+# We keep the write paths gated on file existence so the script stays
+# green before AND after Wave 9 ships.
+if [[ -f "$APP_BASE_FILE" && "$UPDATE_APP_BASE" -eq 1 ]]; then
+  update_image_tags_file \
+    "$APP_BASE_FILE" "$OPENEDX_TAG" "$MFE_TAG" "$OPENEDX_DIGEST" "$MFE_DIGEST" "$APPLY" \
+    "docker.io/overhangio/openedx,docker.io/overhangio/openedx-mfe"
+elif [[ ! -f "$APP_BASE_FILE" ]]; then
+  echo "= skipping app base tag update: $APP_BASE_REL absent (Wave 9 deletion complete) — bbi-infra is authoritative"
+else
+  echo "= skipping app base tag update for target env '$TARGET_ENV'"
+fi
+
+if [[ -f "$APP_OVERLAY_FILE" ]]; then
+  update_image_tags_file \
+    "$APP_OVERLAY_FILE" "$OPENEDX_TAG" "$MFE_TAG" "$OPENEDX_DIGEST" "$MFE_DIGEST" "$APPLY" \
+    "$APP_REQUIRED_NAMES"
+else
+  echo "= skipping app overlay tag update: $APP_OVERLAY_REL absent (Wave 9 deletion complete) — bbi-infra is authoritative"
+fi
+
+if [[ "$COMMIT" -eq 1 ]]; then
+  APP_COMMIT_PATHS=()
+  [[ -f "$APP_OVERLAY_FILE" ]] && APP_COMMIT_PATHS+=("$APP_OVERLAY_REL")
+  if [[ -f "$APP_BASE_FILE" && "$UPDATE_APP_BASE" -eq 1 ]]; then
+    APP_COMMIT_PATHS=("$APP_BASE_REL" "${APP_COMMIT_PATHS[@]}")
+  fi
+  if [[ ${#APP_COMMIT_PATHS[@]} -gt 0 ]]; then
+    commit_if_needed "$APP_REPO" \
+      "chore: release openedx tags $OPENEDX_TAG/$MFE_TAG ($TARGET_ENV)" \
+      "${APP_COMMIT_PATHS[@]}"
+  else
+    echo "= skipping app-repo commit: no shadow overlay paths present (Wave 9 deletion complete)"
+  fi
+fi
+
+if [[ "$UPDATE_BASE_REF" -eq 1 ]]; then
+  APP_SHA="$APP_SHA_OVERRIDE"
+  if [[ -z "$APP_SHA" ]]; then
+    APP_SHA="$(git -C "$APP_REPO" rev-parse HEAD)"
+  fi
+  # Guardrail: ArgoCD/kustomize fetches by SHA and will fail with "not our ref" if the SHA
+  # isn't a real commit reachable from the app repo. Validate locally before writing it into GitOps.
+  if ! git -C "$APP_REPO" cat-file -e "${APP_SHA}^{commit}" 2>/dev/null; then
+    echo "Invalid --app-sha (or app repo HEAD is not a commit): $APP_SHA" >&2
+    echo "Tip: use the exact output of: git -C \"$APP_REPO\" rev-parse HEAD" >&2
+    exit 1
+  fi
+  echo "App SHA for GitOps base ref: $APP_SHA"
+  update_gitops_base_ref "$INFRA_BASE_FILE" "$APP_SHA" "$APPLY"
+else
+  echo "= skipping GitOps base ref update for target env '$TARGET_ENV'"
+fi
+
+update_image_tags_file \
+  "$INFRA_OVERLAY_FILE" "$OPENEDX_TAG" "$MFE_TAG" "$OPENEDX_DIGEST" "$MFE_DIGEST" "$APPLY" \
+  "$INFRA_REQUIRED_NAMES"
+
+if [[ "$APPLY" -eq 1 ]]; then
+  if [[ "$TARGET_ENV" == "production" ]]; then
+    # Wave 9 prep: once app-repo shadow overlay is deleted (bead
+    # mereka-lms-m0u5.9), the cross-repo image contract check becomes a
+    # single-repo check against bbi-infra only. Pass app-side paths when
+    # they still exist; otherwise let the verifier fall back to its own
+    # defaults + skip app-side assertions when it is updated to do so.
+    VERIFY_ENV=(INFRA_PROD_OVERLAY="$INFRA_OVERLAY_FILE")
+    if [[ -f "$APP_BASE_FILE" && -f "$APP_OVERLAY_FILE" ]]; then
+      VERIFY_ENV+=(APP_BASE="$APP_BASE_FILE" APP_PROD_OVERLAY="$APP_OVERLAY_FILE")
+    else
+      echo "= Wave 9: skipping app-side env vars for verify-gitops-image-overrides.sh (shadow overlay absent)"
+    fi
+    env "${VERIFY_ENV[@]}" "$REPO_ROOT/scripts/qa/verify-gitops-image-overrides.sh" --check-infra
+  else
+    echo "= skipping production-only cross-repo image contract check for staging target"
+  fi
+fi
+
+if [[ "$COMMIT" -eq 1 ]]; then
+  INFRA_COMMIT_PATHS=("$INFRA_OVERLAY_REL")
+  if [[ "$UPDATE_BASE_REF" -eq 1 ]]; then
+    INFRA_COMMIT_PATHS=("$INFRA_BASE_REL" "$INFRA_OVERLAY_REL")
+  fi
+  commit_if_needed "$INFRA_REPO" \
+    "chore: rollout openedx tags $OPENEDX_TAG/$MFE_TAG ($TARGET_ENV)" \
+    "${INFRA_COMMIT_PATHS[@]}"
+fi
+
+if [[ "$PUSH" -eq 1 ]]; then
+  # Wave 9 prep: only push app repo if we actually committed something to it.
+  # Post-Wave-9 (shadow overlay deleted), the app-repo push is a no-op.
+  if [[ -f "$APP_OVERLAY_FILE" ]] || [[ -f "$APP_BASE_FILE" ]]; then
+    push_with_rebase_if_needed "$APP_REPO"
+  else
+    echo "= Wave 9: skipping app-repo push (no shadow overlay present to have committed)"
+  fi
+  push_with_rebase_if_needed "$INFRA_REPO"
+fi
+
+if [[ "$VERIFY_RUNTIME" -eq 1 ]]; then
+  verify_runtime_convergence "$OPENEDX_TAG" "$MFE_TAG" "$WAIT_SECONDS"
+fi
+
+run_branding_release_postflights
+run_frontend_cache_purge
+
+echo "Done."

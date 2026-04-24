@@ -1,0 +1,8 @@
+# Intentional executable-script basename duplicates.
+check-error-budget-gate.sh
+export.sh
+generate-sla-report.sh
+post-deploy-verify.sh
+verify-branding-health.sh
+verify-token-drift.sh
+verify-tutor-patches.sh

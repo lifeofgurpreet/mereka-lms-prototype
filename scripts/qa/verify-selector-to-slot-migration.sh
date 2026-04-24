@@ -1,0 +1,237 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# @covers AC-FRONT-021, AC-FRONT-022, AC-FRONT-023, AC-FRONT-024, AC-FRONT-025
+# @spec: bead-2dcy2
+#
+# Bead 2dcy.2 — Migrate brittle MFE selector customizations to plugin slots
+#
+# AC-FRONT-021: Remaining HIGH-risk selectors are intentionally minimal and dead selectors stay removed
+# AC-FRONT-022: Plugin slot registrations exist in plugin contract sources
+# AC-FRONT-023: Exception documentation file exists at docs/policies/architecture/MFE_SELECTOR_EXCEPTIONS.md
+# AC-FRONT-024: No active `updated.replace("RenderWidget` string surgery in apply-patches.sh
+# AC-FRONT-025: Evidence file exists at docs/evidence/operations/selector-to-slot-migration-diff.md
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "$REPO_ROOT/scripts/shared/mereka_plugin_contract.sh"
+PLUGIN_MAIN="$(mereka_plugin_main_file "$REPO_ROOT")"
+
+SCSS_FILE="$REPO_ROOT/infrastructure/tutor/themes/mereka/mfe/mereka.scss"
+PATCHES_FILE="$REPO_ROOT/infrastructure/tutor/apply-patches.sh"
+EXCEPTIONS_DOC="$REPO_ROOT/docs/policies/architecture/MFE_SELECTOR_EXCEPTIONS.md"
+EVIDENCE_FILE="$REPO_ROOT/docs/evidence/operations/selector-to-slot-migration-diff.md"
+
+PASS=0
+FAIL=0
+WARN=0
+
+pass_check() { echo "✅ $1"; PASS=$((PASS + 1)); }
+fail_check() { echo "❌ $1"; FAIL=$((FAIL + 1)); }
+warn_check() { echo "⚠️  $1"; WARN=$((WARN + 1)); }
+
+count_active_literal() {
+  local file="$1"
+  local needle="$2"
+  python3 - "$file" "$needle" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+needle = sys.argv[2]
+text = path.read_text(encoding="utf-8")
+text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+text = re.sub(r"^\s*//.*$", "", text, flags=re.M)
+print(text.count(needle))
+PY
+}
+
+# ---------------------------------------------------------------------------
+# AC-FRONT-021: HIGH-risk selectors are limited + dead wildcard scopes remain removed
+# ---------------------------------------------------------------------------
+if [[ -f "$SCSS_FILE" ]]; then
+  HIGH_COUNT=$(grep -c 'RISK: HIGH' "$SCSS_FILE" || true)
+  if [[ $HIGH_COUNT -ge 1 && $HIGH_COUNT -le 3 ]]; then
+    pass_check "AC-FRONT-021: HIGH-risk selector count is intentionally minimal (found: $HIGH_COUNT, target: 1-3)"
+  else
+    fail_check "AC-FRONT-021: HIGH-risk selector count is out of expected range (found: $HIGH_COUNT, expected: 1-3)"
+  fi
+
+  LIVE_SCOPE='.page__account-settings'
+  LIVE_COUNT="$(count_active_literal "$SCSS_FILE" "$LIVE_SCOPE")"
+  if [[ "$LIVE_COUNT" -eq 0 ]]; then
+    pass_check "AC-FRONT-021: account-settings wrapper selector removed from active CSS (slot-owned styling)"
+  else
+    fail_check "AC-FRONT-021: legacy account-settings wrapper selector still active (${LIVE_COUNT} occurrence(s))"
+  fi
+
+  for dead_scope in '[class*="authn"]' '[class*="learner-dashboard"]' '[class*="learning"]' '[class*="discussions"]'; do
+    dead_count="$(count_active_literal "$SCSS_FILE" "$dead_scope")"
+    if [[ "$dead_count" -eq 0 ]]; then
+      pass_check "AC-FRONT-021: dead selector scope removed from active CSS ($dead_scope)"
+    else
+      fail_check "AC-FRONT-021: dead selector scope still active ($dead_scope, ${dead_count} occurrence(s))"
+    fi
+  done
+  
+  if grep -q 'SELECTOR-EXCEPTION: \.page__account-settings' "$SCSS_FILE"; then
+    fail_check "AC-FRONT-021: stale account-settings SELECTOR-EXCEPTION marker still present"
+  else
+    pass_check "AC-FRONT-021: no account-settings SELECTOR-EXCEPTION marker remains"
+  fi
+else
+  fail_check "AC-FRONT-021: mereka.scss not found at $SCSS_FILE"
+fi
+
+# ---------------------------------------------------------------------------
+# AC-FRONT-022: Plugin slots are wired using canonical slot IDs
+# ---------------------------------------------------------------------------
+if mereka_plugin_has_any "$REPO_ROOT"; then
+  SLOT_COUNT=$(mereka_plugin_count_regex "$REPO_ROOT" 'PLUGIN_SLOTS\.add_items|PLUGIN_SLOTS\.add_item')
+  SLOT_COUNT=${SLOT_COUNT:-0}
+  echo "  PLUGIN_SLOTS registration calls: $SLOT_COUNT"
+  if [[ "$SLOT_COUNT" -ge 1 ]]; then
+    pass_check "AC-FRONT-022: Found slot registration call(s) in plugin contract sources ($SLOT_COUNT)"
+  else
+    fail_check "AC-FRONT-022: No PLUGIN_SLOTS registration calls found in plugin contract sources"
+  fi
+
+  # Verify required canonical slots are registered
+  required_slots=(
+    "org.openedx.frontend.layout.footer.v1"
+    "org.openedx.frontend.layout.header_logo.v1"
+    "org.openedx.frontend.layout.header_desktop_main_menu.v1"
+    "org.openedx.frontend.layout.header_mobile_main_menu.v1"
+    "org.openedx.frontend.layout.header_desktop_logged_out_items.v1"
+    "org.openedx.frontend.layout.header_mobile_logged_out_items.v1"
+    "org.openedx.frontend.layout.header_desktop.v1"
+    "org.openedx.frontend.layout.header_mobile.v1"
+    "org.openedx.frontend.layout.header_learning_course_info.v1"
+    "org.openedx.frontend.layout.header_desktop_secondary_menu.v1"
+    "org.openedx.frontend.layout.header_learning_help.v1"
+    "org.openedx.frontend.layout.header_learning_logged_out_items.v1"
+    "org.openedx.frontend.layout.header_desktop_user_menu.v1"
+    "org.openedx.frontend.layout.header_mobile_user_menu.v1"
+    "org.openedx.frontend.layout.header_learning_user_menu.v1"
+    "org.openedx.frontend.layout.header_desktop_user_menu_toggle.v1"
+    "org.openedx.frontend.layout.header_mobile_user_menu_trigger.v1"
+    "org.openedx.frontend.layout.header_learning_user_menu_toggle.v1"
+    "org.openedx.frontend.layout.studio_footer.v1"
+    "org.openedx.frontend.layout.studio_header_search_button_slot.v1"
+    "org.openedx.frontend.authoring.course_unit_sidebar.v1"
+    "org.openedx.frontend.authoring.course_outline_sidebar.v1"
+    "org.openedx.frontend.authoring.course_outline_header_actions.v1"
+    "org.openedx.frontend.authoring.course_unit_header_actions.v1"
+    "org.openedx.frontend.authoring.course_outline_page_alerts.v1"
+    "org.openedx.frontend.authoring.edit_video_alerts.v1"
+    "org.openedx.frontend.authoring.edit_file_alerts.v1"
+    "org.openedx.frontend.authoring.additional_course_plugin.v1"
+    "org.openedx.frontend.authoring.additional_course_content_plugin.v1"
+    "org.openedx.frontend.authoring.course_outline_subsection_card_extra_actions.v1"
+    "org.openedx.frontend.authoring.course_outline_unit_card_extra_actions.v1"
+    "org.openedx.frontend.authoring.course_unit_sidebar.v2"
+    "org.openedx.frontend.authoring.files_upload_page_table.v1"
+    "org.openedx.frontend.authoring.videos_upload_page_table.v1"
+    "org.openedx.frontend.authoring.video_transcript_additional_translations_component.v1"
+    "org.openedx.frontend.authn.login_component.v1"
+    "org.openedx.frontend.learner_dashboard.widget_sidebar.v1"
+    "org.openedx.frontend.learner_dashboard.no_courses_view.v1"
+    "org.openedx.frontend.learner_dashboard.course_list.v1"
+    "org.openedx.frontend.learner_dashboard.course_card_banner.v1"
+    "org.openedx.frontend.learner_dashboard.course_card_action.v1"
+    "org.openedx.frontend.learner_dashboard.dashboard_modal.v1"
+    "org.openedx.frontend.layout.header_learning.v1"
+    "org.openedx.frontend.learning.course_tab_links.v1"
+    "org.openedx.frontend.account.id_verification_page.v1"
+  )
+  for slot in "${required_slots[@]}"; do
+    if mereka_plugin_has_fixed "$REPO_ROOT" "\"$slot\""; then
+      pass_check "AC-FRONT-022: slot '$slot' is registered"
+    else
+      fail_check "AC-FRONT-022: slot '$slot' is missing from plugin contract sources"
+    fi
+  done
+else
+  fail_check "AC-FRONT-022: plugin contract sources not found (expected at least $PLUGIN_MAIN)"
+fi
+
+# ---------------------------------------------------------------------------
+# AC-FRONT-023: Exception documentation file exists
+# ---------------------------------------------------------------------------
+if [[ -f "$EXCEPTIONS_DOC" ]]; then
+  pass_check "AC-FRONT-023: MFE_SELECTOR_EXCEPTIONS.md exists"
+
+  # Verify the doc has meaningful risk-state content.
+  if grep -q 'RISK: HIGH\|None active\|wrapper exceptions retired' "$EXCEPTIONS_DOC"; then
+    pass_check "AC-FRONT-023: Exceptions doc documents current high-risk/none-active state"
+  else
+    fail_check "AC-FRONT-023: Exceptions doc missing risk-state declaration"
+  fi
+
+  # Verify rationale sections exist
+  if grep -q 'rationale\|Rationale\|Cannot be migrated\|CSS-only' "$EXCEPTIONS_DOC"; then
+    pass_check "AC-FRONT-023: Exceptions doc includes rationale for keeping as CSS"
+  else
+    fail_check "AC-FRONT-023: Exceptions doc missing rationale/cannot-migrate reasoning"
+  fi
+else
+  fail_check "AC-FRONT-023: MFE_SELECTOR_EXCEPTIONS.md not found at $EXCEPTIONS_DOC"
+fi
+
+# ---------------------------------------------------------------------------
+# AC-FRONT-024: No active RenderWidget string surgery in apply-patches.sh
+# ---------------------------------------------------------------------------
+if [[ -f "$PATCHES_FILE" ]]; then
+  # Look for the specific pattern: updated.replace("RenderWidget (footer string surgery)
+  if grep -q 'updated\.replace.*RenderWidget' "$PATCHES_FILE"; then
+    fail_check "AC-FRONT-024: apply-patches.sh still has RenderWidget string surgery (should have been removed in bead 1rns)"
+  else
+    pass_check "AC-FRONT-024: apply-patches.sh has no RenderWidget string surgery"
+  fi
+else
+  fail_check "AC-FRONT-024: apply-patches.sh not found at $PATCHES_FILE"
+fi
+
+# ---------------------------------------------------------------------------
+# AC-FRONT-025: Evidence file exists with before/after diff
+# ---------------------------------------------------------------------------
+if [[ -f "$EVIDENCE_FILE" ]]; then
+  pass_check "AC-FRONT-025: selector-to-slot-migration-diff.md evidence file exists"
+
+  # Verify evidence file references the bead
+  if grep -q '2dcy.2\|2dcy2' "$EVIDENCE_FILE"; then
+    pass_check "AC-FRONT-025: Evidence file references bead 2dcy.2"
+  else
+    fail_check "AC-FRONT-025: Evidence file missing bead 2dcy.2 reference"
+  fi
+
+  # Verify evidence has AC reference
+  if grep -q 'AC-FRONT-02[1-5]' "$EVIDENCE_FILE"; then
+    pass_check "AC-FRONT-025: Evidence file references AC-FRONT-021..025"
+  else
+    fail_check "AC-FRONT-025: Evidence file missing AC-FRONT-021..025 references"
+  fi
+else
+  fail_check "AC-FRONT-025: Evidence file not found at $EVIDENCE_FILE"
+fi
+
+# ---------------------------------------------------------------------------
+# Summary
+# ---------------------------------------------------------------------------
+echo ""
+echo "=== SUMMARY ==="
+echo "PASS: $PASS"
+echo "FAIL: $FAIL"
+if [[ "$WARN" -gt 0 ]]; then
+  echo "WARN: $WARN"
+fi
+
+if [[ $FAIL -gt 0 ]]; then
+  echo ""
+  echo "RESULT: FAIL"
+  exit 1
+fi
+
+echo ""
+echo "RESULT: PASS"
+exit 0

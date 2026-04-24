@@ -1,0 +1,13 @@
+=========================================================
+Observability Validation Runtime Verification (Live)
+=========================================================
+
+==> AC-OVR-016: Prometheus recording rules producing numeric data (0-1 range)
+[0;32m[PASS][0m AC-OVR-016: SLI recording rule mereka:http_requests:availability_ratio_5m is producing data
+
+==> AC-OVR-016: LMS/CMS /metrics endpoint returns valid Prometheus exposition payload
+[0;31m[FAIL][0m AC-OVR-016: LMS /metrics returned 404 (expected 200)
+[0;31m[FAIL][0m AC-OVR-016: CMS /metrics returned 404 (expected 200)
+AC-OVR-016: LMS settings configmaps checked: openedx-settings-lms-patched
+AC-OVR-016: LMS marker probe summary: openedx-settings-lms-patched=0:none
+[0;31m[FAIL][0m AC-OVR-016: LMS settings configmaps do not include prom metrics wiring markers (checked 1 map(s))

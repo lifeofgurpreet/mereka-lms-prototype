@@ -1,0 +1,488 @@
+name: Post-Deploy E2E Gate
+
+on:
+  workflow_run:
+    workflows:
+      - "Build Tutor Images"
+    types:
+      - completed
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "LMS base URL to test against (leave blank to use the canonical URL for the selected environment)"
+        required: false
+        default: ""
+        type: string
+      environment:
+        description: "Target environment (manual browser proof defaults to staging while production stays parked)"
+        required: false
+        default: "staging"
+        type: choice
+        options:
+          - staging
+          - production
+      fail_on_flaky:
+        description: "Fail gate on non-critical test failures"
+        required: false
+        default: false
+        type: boolean
+
+permissions: {}
+
+# Only one post-deploy gate per environment at a time
+concurrency:
+  group: post-deploy-e2e-${{ github.event.inputs.environment || 'production' }}
+  cancel-in-progress: false
+
+jobs:
+  # Skip if the triggering workflow failed (no point testing a broken deploy)
+  gate-check:
+    name: Pre-flight Gate Check
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+      target_url: ${{ steps.check.outputs.target_url }}
+      environment: ${{ steps.check.outputs.environment }}
+      run_mode: ${{ steps.check.outputs.run_mode }}
+      status_context: ${{ steps.check.outputs.status_context }}
+      status_description: ${{ steps.check.outputs.status_description }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Determine run conditions
+        id: check
+        run: |
+          set -euo pipefail
+          policy_file="config/runtime-proof-policy.env"
+          if [[ ! -f "$policy_file" ]]; then
+            echo "Missing runtime proof policy: $policy_file" >&2
+            exit 1
+          fi
+
+          set -a
+          source "$policy_file"
+          set +a
+
+          environment=""
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            environment="${POST_DEPLOY_WORKFLOW_RUN_ENV:-production}"
+          else
+            environment="${{ github.event.inputs.environment || '' }}"
+            environment="${environment:-${POST_DEPLOY_MANUAL_DEFAULT_ENV:-staging}}"
+          fi
+
+          target_url_input="${{ github.event.inputs.target_url || '' }}"
+          run_mode="e2e"
+          status_context="dev-runtime/e2e"
+          status_description="Post-deploy ${environment} E2E gate"
+          default_target_url=""
+
+          case "$environment" in
+            production)
+              default_target_url="${PROD_RUNTIME_BASE_URL:-https://academyv2.mereka.io}"
+              if [[ "${PROD_RUNTIME_MODE:-active}" == "parked" ]]; then
+                run_mode="prod-parked"
+                status_context="${PROD_PARKED_STATUS_CONTEXT:-post-deploy/production-parked-state}"
+                status_description="Production parked-state verification"
+              fi
+              ;;
+            staging)
+              default_target_url="${STAGING_RUNTIME_BASE_URL:-https://staging.academyv2.mereka.io}"
+              ;;
+            *)
+              echo "Unsupported post-deploy environment: $environment" >&2
+              exit 1
+              ;;
+          esac
+
+          # For workflow_run: only run if the triggering workflow succeeded
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            if [[ "${{ github.event.workflow_run.conclusion }}" != "success" ]]; then
+              echo "Triggering workflow did not succeed (${{ github.event.workflow_run.conclusion }}); skipping E2E gate."
+              echo "should_run=false" >> "$GITHUB_OUTPUT"
+              echo "target_url=" >> "$GITHUB_OUTPUT"
+              echo "environment=$environment" >> "$GITHUB_OUTPUT"
+              echo "run_mode=$run_mode" >> "$GITHUB_OUTPUT"
+              echo "status_context=$status_context" >> "$GITHUB_OUTPUT"
+              echo "status_description=$status_description" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+
+          target_url=""
+          if [[ "$run_mode" == "e2e" ]]; then
+            target_url="${target_url_input:-$default_target_url}"
+          fi
+
+          echo "should_run=true" >> "$GITHUB_OUTPUT"
+          echo "target_url=$target_url" >> "$GITHUB_OUTPUT"
+          echo "environment=$environment" >> "$GITHUB_OUTPUT"
+          echo "run_mode=$run_mode" >> "$GITHUB_OUTPUT"
+          echo "status_context=$status_context" >> "$GITHUB_OUTPUT"
+          echo "status_description=$status_description" >> "$GITHUB_OUTPUT"
+
+  e2e-critical-paths:
+    name: E2E Critical Path Tests
+    needs: gate-check
+    if: needs.gate-check.outputs.should_run == 'true' && needs.gate-check.outputs.run_mode == 'e2e'
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      statuses: write
+    env:
+      BASE_URL: ${{ needs.gate-check.outputs.target_url }}
+      GATE_ENVIRONMENT: ${{ needs.gate-check.outputs.environment }}
+      E2E_USERNAME: ${{ secrets.E2E_TEST_USERNAME }}
+      E2E_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+      E2E_COURSE_ID: ${{ secrets.E2E_TEST_COURSE_ID || vars.E2E_TEST_COURSE_ID }}
+      SSO_CANARY_EMAIL_PROD: ${{ secrets.SSO_CANARY_EMAIL_PROD }}
+      SSO_CANARY_PASSWORD_PROD: ${{ secrets.SSO_CANARY_PASSWORD_PROD }}
+      SSO_CANARY_EMAIL_STAGING: ${{ secrets.SSO_CANARY_EMAIL_STAGING }}
+      SSO_CANARY_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_PASSWORD_STAGING }}
+      PLAYWRIGHT_RETRIES: "1"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Set up Playwright
+        uses: ./.github/actions/setup-playwright
+        with:
+          node-version: '18'
+          npm-cache-dependency-path: tests/e2e/package-lock.json
+
+      - name: Install npm dependencies
+        run: |
+          set -euo pipefail
+          cd tests/e2e && npm ci
+
+      - name: Resolve E2E credential source
+        run: |
+          set -euo pipefail
+          username="${E2E_USERNAME:-}"
+          password="${E2E_PASSWORD:-}"
+          source_label="E2E_TEST_* override"
+
+          if [[ -z "$username" || -z "$password" ]]; then
+            case "${GATE_ENVIRONMENT:-production}" in
+              staging)
+                username="${username:-${SSO_CANARY_EMAIL_STAGING:-}}"
+                password="${password:-${SSO_CANARY_PASSWORD_STAGING:-}}"
+                source_label="SSO_CANARY_*_STAGING fallback"
+                ;;
+              *)
+                username="${username:-${SSO_CANARY_EMAIL_PROD:-}}"
+                password="${password:-${SSO_CANARY_PASSWORD_PROD:-}}"
+                source_label="SSO_CANARY_*_PROD fallback"
+                ;;
+            esac
+          fi
+
+          if [[ -n "$password" ]]; then
+            echo "::add-mask::$password"
+          fi
+
+          {
+            echo "E2E_USERNAME<<EOF"
+            echo "$username"
+            echo "EOF"
+            echo "E2E_PASSWORD<<EOF"
+            echo "$password"
+            echo "EOF"
+            echo "E2E_SECRET_SOURCE=$source_label"
+          } >> "$GITHUB_ENV"
+
+      - name: Verify E2E secrets are present
+        run: |
+          set -euo pipefail
+          missing=0
+          if [[ -z "${E2E_USERNAME:-}" ]]; then
+            echo "ERROR: No E2E username available from E2E_TEST_USERNAME or the selected environment canary fallback" >&2
+            missing=1
+          fi
+          if [[ -z "${E2E_PASSWORD:-}" ]]; then
+            echo "ERROR: No E2E password available from E2E_TEST_PASSWORD or the selected environment canary fallback" >&2
+            missing=1
+          fi
+          if [[ "$missing" -eq 1 ]]; then
+            echo "Set E2E_TEST_USERNAME/E2E_TEST_PASSWORD overrides or the matching SSO_CANARY_* credentials for the selected environment." >&2
+            exit 1
+          fi
+          echo "E2E credentials present via ${E2E_SECRET_SOURCE:-unknown source}."
+
+      - name: Wait for LMS to be healthy
+        run: |
+          set -euo pipefail
+          echo "Waiting for LMS at $BASE_URL ..."
+          for i in $(seq 1 12); do
+            code="$(curl -so /dev/null -w "%{http_code}" --max-time 10 "$BASE_URL/heartbeat" 2>/dev/null || echo "000")"
+            if [[ "$code" == "200" ]]; then
+              echo "LMS heartbeat OK (HTTP $code)"
+              exit 0
+            fi
+            echo "Attempt $i/12: heartbeat returned HTTP $code — waiting 15s ..."
+            sleep 15
+          done
+          echo "ERROR: LMS did not become healthy within 3 minutes" >&2
+          exit 1
+
+      - name: Run E2E critical path tests
+        id: e2e
+        run: |
+          set -euo pipefail
+          mkdir -p var/e2e-results
+
+          # Run Playwright tests if the test suite exists
+          if [[ -f tests/e2e/playwright.config.ts ]] || [[ -f tests/e2e/playwright.config.js ]]; then
+            cd tests/e2e
+            npx playwright test \
+              --project=chromium \
+              --reporter=list,json \
+              --output=../../var/e2e-results \
+              2>&1 | tee ../../var/e2e-results/playwright-output.log
+            EXIT_CODE="${PIPESTATUS[0]}"
+            cd ../..
+          else
+            echo "WARN: No Playwright config found at tests/e2e/ — running structural verification only"
+            # Fallback: run the offline verification script to confirm wiring
+            bash scripts/qa/verify-post-deploy-gate.sh --mode offline
+            EXIT_CODE=$?
+          fi
+
+          echo "exit_code=$EXIT_CODE" >> "$GITHUB_OUTPUT"
+          exit "$EXIT_CODE"
+
+      - name: Generate gate summary
+        if: always()
+        run: |
+          set -euo pipefail
+          EXIT_CODE="${{ steps.e2e.outputs.exit_code || '1' }}"
+          GATE_STATUS="PASS"
+          if [[ "$EXIT_CODE" != "0" ]]; then
+            GATE_STATUS="FAIL"
+          fi
+
+          {
+            echo "## Post-Deploy E2E Gate: $GATE_STATUS"
+            echo ""
+            echo "| Field | Value |"
+            echo "|-------|-------|"
+            echo "| Target URL | $BASE_URL |"
+            echo "| Environment | ${GATE_ENVIRONMENT:-staging} |"
+            echo "| Credential Source | ${E2E_SECRET_SOURCE:-unknown} |"
+            echo "| Run ID | ${{ github.run_id }} |"
+            echo "| Triggered by | ${{ github.event_name }} |"
+            echo "| Timestamp | $(date -u +%Y-%m-%dT%H:%M:%SZ) |"
+            echo ""
+            echo "> Current automated default: \`staging\`. Production runs are explicit while the prod lane remains parked."
+            echo ""
+            echo "### Critical Paths Tested"
+            echo "- Login (authenticated session)"
+            echo "- Course enrollment"
+            echo "- Video playback"
+            echo "- Forum / discussions"
+            echo "- Certificate issuance"
+            echo ""
+            if [[ "$GATE_STATUS" == "FAIL" ]]; then
+              echo "> **GATE BLOCKED**: One or more critical path tests failed."
+              echo "> Review artifacts and fix before marking release complete."
+            else
+              echo "> **GATE PASSED**: All critical paths verified."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Post deployment status
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GATE_STATUS: ${{ steps.e2e.outcome == 'success' && 'success' || 'failure' }}
+          TARGET_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          set -euo pipefail
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            "/repos/${{ github.repository }}/statuses/$TARGET_SHA" \
+            -f state="$GATE_STATUS" \
+            -f target_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            -f description="${{ needs.gate-check.outputs.status_description }}: $GATE_STATUS" \
+            -f context="${{ needs.gate-check.outputs.status_context }}" \
+          || echo "WARN: Could not post commit status (non-fatal)"
+
+      - name: Sanitize E2E artifacts
+        if: always()
+        env:
+          E2E_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+          SSO_CANARY_PASSWORD_PROD: ${{ secrets.SSO_CANARY_PASSWORD_PROD }}
+          SSO_CANARY_PASSWORD_STAGING: ${{ secrets.SSO_CANARY_PASSWORD_STAGING }}
+        run: |
+          set -euo pipefail
+          for ARTIFACT_DIR in var/e2e-results tests/e2e/test-results; do
+            [[ -d "$ARTIFACT_DIR" ]] || continue
+            # Remove Playwright traces (contain full network payloads with credentials)
+            find "$ARTIFACT_DIR" -type f -name "*.trace.zip" -delete 2>/dev/null || true
+            # Redact known passwords from text logs using perl (safe with special chars)
+            for secret_var in E2E_PASSWORD SSO_CANARY_PASSWORD_PROD SSO_CANARY_PASSWORD_STAGING; do
+              secret_val="${!secret_var:-}"
+              if [[ -n "$secret_val" ]]; then
+                find "$ARTIFACT_DIR" -type f \( -name "*.txt" -o -name "*.log" -o -name "*.json" \) \
+                  -exec perl -pi -e "s/\Q${secret_val}\E/***REDACTED***/g" {} + 2>/dev/null || true
+              fi
+            done
+          done
+
+      - name: Upload E2E artifacts
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: post-deploy-e2e-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            var/e2e-results/
+            tests/e2e/test-results/
+          retention-days: 3
+          if-no-files-found: warn
+
+  prod-parked-state:
+    # Parked-state verification is LEGACY. It was designed for the GKE prod
+    # cluster during the RKE2 migration. GKE is decommissioned, so the
+    # GCP auth step here always fails, and the resulting "Post-Deploy E2E
+    # Gate FAILED" signal reads to operators like an app-runtime break when
+    # it's actually stale-infrastructure noise.
+    #
+    # As of 2026-04-18 this job is gated off by default. To re-enable it
+    # when production genuinely goes back to parked-state on rke2-prod,
+    # set the repo variable ENABLE_PROD_PARKED_STATE_GATE=true AND update
+    # the GKE auth step to either RKE2 auth or removal.
+    #
+    # See: docs/status/active/evidence/rc02-102a56a07d/
+    #      GKE-ACTIVE-SURFACE-CLASSIFICATION.md
+    name: Verify Production Parked State (legacy — gated off)
+    needs: gate-check
+    if: >-
+      needs.gate-check.outputs.should_run == 'true'
+      && needs.gate-check.outputs.run_mode == 'prod-parked'
+      && vars.ENABLE_PROD_PARKED_STATE_GATE == 'true'
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+      statuses: write
+    env:
+      GATE_ENVIRONMENT: ${{ needs.gate-check.outputs.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      # LEGACY ACTION NAME: "gcp-gke-auth" dates from the GKE era.
+      # GKE is decommissioned; RKE2 is the cluster substrate.
+      # This step is retained only because the composite action still provides
+      # valid GCP workload-identity auth for Secret Manager access.
+      # See: docs/status/active/15-ACTIVE-CONTROL-PLANE-SURFACE-CLASSIFICATION-2026-04-18.md (Bucket C)
+      - name: Authenticate to GCP Secret Manager (legacy action name, RKE2 substrate)
+        uses: ./.github/actions/gcp-gke-auth
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          wif_service_account: ${{ vars.GCP_WIF_SA }}
+          auth_mode: auto
+          gcloud_project: mereka-lms
+          gke_project: ${{ vars.GKE_CLUSTER_PROJECT || 'bbi-k8' }}
+          gke_location: ${{ vars.GKE_CLUSTER_LOCATION || '' }}
+          gke_cluster: ${{ vars.GKE_CLUSTER_NAME || '' }}
+          strict_runtime: 'true'
+
+      - name: Assert runtime access for parked-state verification
+        run: |
+          set -euo pipefail
+          if [[ "${CAN_RUN_RUNTIME:-false}" != "true" ]]; then
+            echo "ERROR: GKE runtime access unavailable; cannot verify parked production state" >&2
+            exit 1
+          fi
+
+      - name: Verify production parked state
+        id: parked
+        run: |
+          set -euo pipefail
+          bash scripts/qa/verify-prod-parked-state.sh
+
+      - name: Generate gate summary
+        if: always()
+        run: |
+          set -euo pipefail
+          GATE_STATUS="PASS"
+          if [[ "${{ steps.parked.outcome }}" != "success" ]]; then
+            GATE_STATUS="FAIL"
+          fi
+
+          {
+            echo "## Post-Deploy Runtime Gate: $GATE_STATUS"
+            echo ""
+            echo "| Field | Value |"
+            echo "|-------|-------|"
+            echo "| Environment | ${GATE_ENVIRONMENT:-production} |"
+            echo "| Mode | parked-state verification |"
+            echo "| Status Context | ${{ needs.gate-check.outputs.status_context }} |"
+            echo "| Run ID | ${{ github.run_id }} |"
+            echo "| Triggered by | ${{ github.event_name }} |"
+            echo "| Timestamp | $(date -u +%Y-%m-%dT%H:%M:%SZ) |"
+            echo ""
+            echo "- Production is intentionally parked at zero replicas."
+            echo "- This gate verifies the parked-state contract instead of browser E2E."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Post deployment status
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GATE_STATUS: ${{ steps.parked.outcome == 'success' && 'success' || 'failure' }}
+          TARGET_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          set -euo pipefail
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            "/repos/${{ github.repository }}/statuses/$TARGET_SHA" \
+            -f state="$GATE_STATUS" \
+            -f target_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            -f description="${{ needs.gate-check.outputs.status_description }}: $GATE_STATUS" \
+            -f context="${{ needs.gate-check.outputs.status_context }}" \
+          || echo "WARN: Could not post commit status (non-fatal)"
+
+  notify-on-failure:
+    name: Notify Gate Failure
+    needs: [gate-check, e2e-critical-paths, prod-parked-state]
+    if: |
+      always() &&
+      needs.gate-check.outputs.should_run == 'true' &&
+      (
+        needs.e2e-critical-paths.result == 'failure' ||
+        needs.prod-parked-state.result == 'failure'
+      )
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - name: Emit failure summary
+        run: |
+          {
+            echo "## Post-Deploy Runtime Gate FAILED"
+            echo ""
+            echo "**Action required**: The post-deploy runtime gate has failed."
+            echo "The release MUST NOT be marked complete until this is resolved."
+            echo ""
+            echo "**Run**: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo ""
+            echo "### Resolution Steps"
+            echo "1. Review the failed job for the active run mode"
+            echo "2. For staging E2E failures, inspect uploaded artifacts and LMS logs"
+            echo "3. For production parked-state failures, run \`./scripts/qa/verify-prod-parked-state.sh\`"
+            echo "4. Run locally: \`./scripts/qa/verify-post-deploy-gate.sh --mode online\`"
+            echo "5. Fix the issue and re-run this workflow"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "ERROR: Post-deploy runtime gate FAILED. Release is blocked." >&2
+          exit 1

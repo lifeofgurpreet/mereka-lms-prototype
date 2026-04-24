@@ -1,0 +1,54 @@
+version: 1
+
+change_classes:
+  normative_contract_change:
+    description: Changes normative contract truth in root specs.
+    roots: [specs]
+    lanes: [normative]
+    classifications: [canonical]
+    risk: high
+  proposal_only:
+    description: Changes proposal-lane material without changing live normative truth.
+    roots: [specs]
+    lanes: [proposal]
+    classifications: [supporting]
+    risk: medium
+  plan_only:
+    description: Changes plans or testplans without changing normative truth.
+    roots: [specs]
+    lanes: [plan, testplan]
+    classifications: [supporting]
+    risk: medium
+  compatibility_wrapper_update:
+    description: Changes compatibility-only wrappers or their retirement state.
+    roots: [specs]
+    classifications: [compatibility]
+    risk: medium
+  generated_surface_refresh:
+    description: Refreshes derived catalogs, graphs, indexes, or bundles.
+    roots: [docs, specs]
+    classifications: [generated]
+    risk: low
+  evidence_only_change:
+    description: Changes evidence or proof surfaces without changing contract truth.
+    roots: [docs, specs]
+    lanes: [evidence]
+    risk: low
+  docs_support_change:
+    description: Changes runbooks, concepts, or reviewer-facing support docs.
+    roots: [docs]
+    lanes: [concept, runbook, review, adr]
+    classifications: [canonical, supporting]
+    risk: medium
+  archival_only_change:
+    description: Changes archival surfaces only.
+    roots: [docs]
+    lanes: [archive]
+    classifications: [archival]
+    risk: low
+  reviewer_handoff_only:
+    description: Changes reviewer handoff or checklist surfaces without changing truth lanes.
+    roots: [docs]
+    lanes: [review]
+    classifications: [supporting]
+    risk: low

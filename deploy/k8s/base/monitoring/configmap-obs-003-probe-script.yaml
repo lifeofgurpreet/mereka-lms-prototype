@@ -1,0 +1,136 @@
+---
+# OBS-003: Authn MFE synthetic probe script
+# @bead: mereka-lms-e09t
+# @covers: AC-OBS-003 — external-view login-flow availability
+#
+# Mounted read-only into the CronJob container.
+# Two checks:
+#   1. GET /authn/login → 200 + MFE shell marker present
+#   2. GET /api/mfe_config/v1/?mfe=authn → 200 + JSON has LMS_BASE_URL
+#
+# Exits 0 on full pass, 1 on any failure (triggers kube_job_status_failed alert).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: obs-003-probe-script
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: authn-synthetic
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: mereka-lms
+data:
+  probe.sh: |
+    #!/usr/bin/env sh
+    # shellcheck shell=sh
+    set -eu
+
+    # Targets: comma-separated list of apps hosts to probe.
+    # Override via MEREKA_AUTHN_SYNTHETIC_TARGETS env var from the CronJob spec.
+    TARGETS="${MEREKA_AUTHN_SYNTHETIC_TARGETS:-apps.academyv2.mereka.io}"
+
+    # Guard: reject empty/whitespace-only target list so a misconfigured overlay
+    # cannot silently succeed (exit 0 with zero probes run = false-positive green).
+    _stripped="$(printf '%s' "${TARGETS}" | tr -d ', \t\n')"
+    if [ -z "${_stripped}" ]; then
+      echo "FATAL: MEREKA_AUTHN_SYNTHETIC_TARGETS resolved to 0 hosts after stripping whitespace/commas" >&2
+      exit 1
+    fi
+    unset _stripped
+
+    TIMEOUT=15   # seconds per curl request
+    MAX_LATENCY=5  # seconds; warn above but do not fail (latency alert is separate)
+    OVERALL_FAIL=0
+    TARGET_COUNT=0
+
+    probe_target() {
+      HOST="$1"
+      echo "=== Probing ${HOST} ==="
+
+      # ── Check 1: Authn login page ─────────────────────────────────────────
+      START=$(date +%s)
+      HTTP_STATUS=$(curl \
+        --silent --output /tmp/login_body.html \
+        --write-out "%{http_code}" \
+        --max-time "${TIMEOUT}" \
+        --location --max-redirs 3 \
+        "https://${HOST}/authn/login" 2>/dev/null || echo "000")
+      END=$(date +%s)
+      LATENCY=$(( END - START ))
+
+      if [ "${HTTP_STATUS}" != "200" ]; then
+        echo "FAIL [${HOST}] /authn/login → HTTP ${HTTP_STATUS} (expected 200)"
+        OVERALL_FAIL=1
+      else
+        echo "PASS [${HOST}] /authn/login → HTTP 200 (${LATENCY}s)"
+      fi
+
+      # Verify MFE shell is present: look for the webpack bundle script tag
+      # that every Open edX MFE page emits, and the document root div.
+      if [ "${HTTP_STATUS}" = "200" ]; then
+        if grep -qsF '<script' /tmp/login_body.html && grep -qsF 'id="root"' /tmp/login_body.html; then
+          echo "PASS [${HOST}] /authn/login body contains MFE shell markers"
+        else
+          echo "FAIL [${HOST}] /authn/login body missing MFE shell markers (<script / root div)"
+          OVERALL_FAIL=1
+        fi
+      fi
+
+      if [ "${LATENCY}" -gt "${MAX_LATENCY}" ]; then
+        echo "WARN [${HOST}] /authn/login latency ${LATENCY}s exceeds ${MAX_LATENCY}s threshold"
+      fi
+
+      # ── Check 2: MFE config API ───────────────────────────────────────────
+      CFG_STATUS=$(curl \
+        --silent --output /tmp/mfe_cfg.json \
+        --write-out "%{http_code}" \
+        --max-time "${TIMEOUT}" \
+        "https://${HOST}/api/mfe_config/v1/?mfe=authn" 2>/dev/null || echo "000")
+
+      if [ "${CFG_STATUS}" != "200" ]; then
+        echo "FAIL [${HOST}] /api/mfe_config/v1/?mfe=authn → HTTP ${CFG_STATUS} (expected 200)"
+        OVERALL_FAIL=1
+      else
+        echo "PASS [${HOST}] /api/mfe_config/v1/?mfe=authn → HTTP 200"
+      fi
+
+      if [ "${CFG_STATUS}" = "200" ]; then
+        # LMS_BASE_URL must be present; grep is available in curlimages/curl
+        if grep -qsF '"LMS_BASE_URL"' /tmp/mfe_cfg.json; then
+          echo "PASS [${HOST}] mfe_config response contains LMS_BASE_URL"
+        else
+          echo "FAIL [${HOST}] mfe_config response missing LMS_BASE_URL key"
+          OVERALL_FAIL=1
+        fi
+      fi
+
+      echo ""
+    }
+
+    # Iterate over comma-separated targets
+    OLD_IFS="$IFS"
+    IFS=','
+    for TARGET in $TARGETS; do
+      # trim whitespace (POSIX sh compatible)
+      TARGET="${TARGET# }"
+      TARGET="${TARGET% }"
+      # skip entries that collapsed to empty after trimming (e.g. trailing comma)
+      [ -z "${TARGET}" ] && continue
+      TARGET_COUNT=$(( TARGET_COUNT + 1 ))
+      probe_target "${TARGET}"
+    done
+    IFS="$OLD_IFS"
+
+    # Second safety net: if all entries were whitespace/empty after trimming,
+    # the loop ran 0 real probes. Treat as failure so the Job exits non-zero.
+    if [ "${TARGET_COUNT}" -eq 0 ]; then
+      echo "FATAL: all entries in MEREKA_AUTHN_SYNTHETIC_TARGETS were empty after trimming" >&2
+      exit 1
+    fi
+
+    if [ "${OVERALL_FAIL}" -eq 0 ]; then
+      echo "=== OBS-003 PASS: all targets healthy ==="
+      exit 0
+    else
+      echo "=== OBS-003 FAIL: one or more targets failed ==="
+      exit 1
+    fi

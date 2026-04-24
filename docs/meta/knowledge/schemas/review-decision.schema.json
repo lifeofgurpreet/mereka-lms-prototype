@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pack_id",
+    "schema_version",
+    "generated_by",
+    "source_range",
+    "canonical_inputs",
+    "diff_range",
+    "change_classes",
+    "touched_files",
+    "touched_repos",
+    "touched_roots",
+    "decision",
+    "required_reviewers",
+    "missing_reviewers",
+    "read_first_packs",
+    "rationale_references"
+  ],
+  "properties": {
+    "pack_id": { "const": "review-decision" },
+    "schema_version": { "type": "integer", "const": 1 },
+    "generated_by": { "type": "string", "minLength": 1 },
+    "source_range": {
+      "type": ["string", "null"]
+    },
+    "canonical_inputs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "diff_range": { "type": "string", "minLength": 1 },
+    "change_classes": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "touched_files": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "touched_repos": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "touched_roots": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "severity",
+        "blocking",
+        "selected_skills",
+        "reviewer_state",
+        "runtime_convergence_state"
+      ],
+      "properties": {
+        "severity": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "release-critical"]
+        },
+        "blocking": { "type": "boolean" },
+        "selected_skills": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1
+        },
+        "reviewer_state": { "type": "string", "minLength": 1 },
+        "runtime_convergence_state": {
+          "type": "string",
+          "enum": ["pass", "warning", "fail"]
+        }
+      }
+    },
+    "required_reviewers": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "missing_reviewers": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "read_first_packs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["pack_id", "reason"],
+        "properties": {
+          "pack_id": { "type": "string", "minLength": 1 },
+          "reason": { "type": "string", "minLength": 1 },
+          "source_skill": { "type": "string" }
+        }
+      },
+      "minItems": 1
+    },
+    "rationale_references": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1
+    },
+    "explanation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "selected_skill_categories",
+        "required_evidence_classes",
+        "evidence_summary",
+        "blocking_reasons"
+      ],
+      "properties": {
+        "selected_skill_categories": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "required_evidence_classes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "evidence_summary": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["evidence_class", "required_reviewers"],
+            "properties": {
+              "evidence_class": { "type": "string", "minLength": 1 },
+              "required_reviewers": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 }
+              }
+            }
+          }
+        },
+        "blocking_reasons": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

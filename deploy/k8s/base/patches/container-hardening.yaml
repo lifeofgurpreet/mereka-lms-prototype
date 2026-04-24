@@ -1,0 +1,464 @@
+# Container hardening patch — applied via patchesStrategicMerge in kustomization.yaml
+# Enforces non-root, read-only root filesystem, dropped capabilities, and RuntimeDefault
+# seccomp profile for all LMS Deployments.
+#
+# Design notes:
+# - Pod-level securityContext adds runAsNonRoot + seccompProfile (RuntimeDefault)
+# - Container-level securityContext adds allowPrivilegeEscalation: false,
+#   readOnlyRootFilesystem: true, and capabilities.drop: ["ALL"]
+# - emptyDir volumes are added for any writable paths not already served by PVCs
+# - mfe is exempt from readOnlyRootFilesystem because its entrypoint creates
+#   symlinks inside /openedx/dist (image filesystem) at runtime
+# - mysql mysqld-exporter and redis-exporter sidecar containers are hardened inline
+#
+# T087 — Container hardening (non-root, read-only FS, seccomp)
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lms
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: lms
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+            - mountPath: /openedx/data
+              name: openedx-data
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: openedx-data
+          emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lms-worker
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: lms-worker
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+            - mountPath: /openedx/data
+              name: openedx-data
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: openedx-data
+          emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cms
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: cms
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+            - mountPath: /openedx/data
+              name: openedx-data
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: openedx-data
+          emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cms-worker
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: cms-worker
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+            - mountPath: /openedx/data
+              name: openedx-data
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: openedx-data
+          emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: caddy
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: caddy
+          securityContext:
+            allowPrivilegeEscalation: true
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+# mfe: readOnlyRootFilesystem is NOT set because the container entrypoint
+# creates symlinks in /openedx/dist (image filesystem) at startup.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mfe
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: mfe
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: redis
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+        - name: redis-exporter
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+# mysql: mysqld requires /var/run/mysqld for socket + /tmp for temp files.
+# /var/lib/mysql is already a PVC. readOnlyRootFilesystem is set; writable
+# paths provided via emptyDir.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: mysql
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+            - mountPath: /var/run/mysqld
+              name: mysqld-run
+        - name: mysqld-exporter
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: mysqld-run
+          emptyDir: {}
+---
+# elasticsearch: /usr/share/elasticsearch/data is PVC; logs dir needs emptyDir.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: elasticsearch
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+            - mountPath: /usr/share/elasticsearch/logs
+              name: es-logs
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: es-logs
+          emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: meilisearch
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: meilisearch
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smtp
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: smtp
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+            - mountPath: /var/spool/exim4
+              name: exim-spool
+            - mountPath: /var/log/exim4
+              name: exim-logs
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: exim-spool
+          emptyDir: {}
+        - name: exim-logs
+          emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discovery
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: discovery
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+            - mountPath: /openedx/data
+              name: openedx-data
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: openedx-data
+          emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: credentials
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: credentials
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+            - mountPath: /openedx/data
+              name: openedx-data
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: openedx-data
+          emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notes
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: notes
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+            - mountPath: /openedx/data
+              name: openedx-data
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: openedx-data
+          emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: xqueue
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: xqueue
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+        - name: xqueue-consumer
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+# NOTE: Enterprise services (enterprise-access, enterprise-catalog, enterprise-subsidy,
+# license-manager, admin-portal, learner-portal), hubspot-webhook, and preview-redirect
+# are defined in sub-kustomizations (apps/enterprise/, services/, apps/preview-redirect/).
+# Their hardening patches must live in their respective sub-kustomization directories,
+# not here (patchesStrategicMerge cannot match resources from sub-kustomizations).

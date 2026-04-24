@@ -1,0 +1,32 @@
+# QUARANTINE: The MFE service serves static React micro-frontends through an
+# embedded Caddy reverse proxy. It does not expose a Prometheus /metrics endpoint.
+# MFE infrastructure metrics (HTTP errors, latency) are captured via
+# servicemonitor-caddy.yaml (job="caddy-metrics").
+#
+# Re-enable this monitor only if a custom MFE metrics sidecar is added.
+#
+# ---
+# apiVersion: monitoring.coreos.com/v1
+# kind: ServiceMonitor
+# metadata:
+#   name: mfe-metrics
+#   namespace: mereka-lms
+#   labels:
+#     app.kubernetes.io/name: mfe
+#     app.kubernetes.io/instance: mereka-lms
+#     app.kubernetes.io/part-of: mereka-lms
+#     app.kubernetes.io/component: monitoring
+# spec:
+#   selector:
+#     matchLabels:
+#       app.kubernetes.io/name: mfe
+#       app.kubernetes.io/part-of: mereka-lms
+#   namespaceSelector:
+#     matchNames:
+#       - mereka-lms
+#   endpoints:
+#     - port: http
+#       path: /metrics
+#       interval: 30s
+#       scrapeTimeout: 10s
+#       scheme: http

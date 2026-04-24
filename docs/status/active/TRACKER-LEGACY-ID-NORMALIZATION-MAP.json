@@ -1,0 +1,68 @@
+{
+  "generated_from": "TRACKER-LEGACY-ID-NORMALIZATION-MAP.md",
+  "observed_at": "2026-04-18T15:20Z",
+  "repo": "Biji-Biji-Initiative/mereka-lms",
+  "policy_version": 1,
+  "entries": [
+    {
+      "old_id": "bd-10fq",
+      "action": "archive",
+      "archive_path": ".beads/archive/legacy-bd-tombstones-20260418.jsonl",
+      "reason": "legacy bd tombstone; keep out of active execution JSONL"
+    },
+    {
+      "old_id": "bd-2u20",
+      "action": "archive",
+      "archive_path": ".beads/archive/legacy-bd-tombstones-20260418.jsonl",
+      "reason": "legacy bd tombstone; keep out of active execution JSONL"
+    },
+    {
+      "old_id": "bd-3fzs",
+      "action": "archive",
+      "archive_path": ".beads/archive/legacy-bd-tombstones-20260418.jsonl",
+      "reason": "legacy bd tombstone; keep out of active execution JSONL"
+    },
+    {
+      "old_id": "bd-j8x2",
+      "action": "archive",
+      "archive_path": ".beads/archive/legacy-bd-tombstones-20260418.jsonl",
+      "reason": "legacy bd tombstone; keep out of active execution JSONL"
+    },
+    {
+      "old_id": "bd-rii5",
+      "action": "archive",
+      "archive_path": ".beads/archive/legacy-bd-tombstones-20260418.jsonl",
+      "reason": "legacy bd tombstone; keep out of active execution JSONL"
+    },
+    {
+      "old_id": "mereka-11cl",
+      "action": "rename",
+      "new_id": "mereka-lms-11cl",
+      "reason": "closed historical issue; normalize into canonical repo prefix"
+    },
+    {
+      "old_id": "mereka-12c0",
+      "action": "rename",
+      "new_id": "mereka-lms-12c0",
+      "reason": "closed historical issue; normalize into canonical repo prefix"
+    },
+    {
+      "old_id": "mereka-2zzm",
+      "action": "rename",
+      "new_id": "mereka-lms-2zzm",
+      "reason": "closed historical issue; normalize into canonical repo prefix"
+    },
+    {
+      "old_id": "mereka-6bi4",
+      "action": "rename",
+      "new_id": "mereka-lms-6bi4",
+      "reason": "closed historical issue; normalize into canonical repo prefix"
+    },
+    {
+      "old_id": "mereka-mu5l",
+      "action": "rename",
+      "new_id": "mereka-lms-mu5l",
+      "reason": "closed historical issue; normalize into canonical repo prefix"
+    }
+  ]
+}

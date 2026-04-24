@@ -1,0 +1,54 @@
+{
+  "displayName": "MySQL saturation high (request utilization)",
+  "combiner": "OR",
+  "enabled": true,
+  "severity": "WARNING",
+  "conditions": [
+    {
+      "displayName": "MySQL CPU request utilization > 90% for 10m",
+      "conditionThreshold": {
+        "filter": "metric.type=\"kubernetes.io/container/cpu/request_utilization\" resource.type=\"k8s_container\" resource.label.\"namespace_name\"=\"mereka-lms\" resource.label.\"container_name\"=\"mysql\" resource.label.\"pod_name\"=monitoring.regex.full_match(\"mysql.*\")",
+        "aggregations": [
+          {
+            "alignmentPeriod": "300s",
+            "perSeriesAligner": "ALIGN_MAX",
+            "groupByFields": [
+              "resource.label.\"pod_name\""
+            ]
+          }
+        ],
+        "comparison": "COMPARISON_GT",
+        "thresholdValue": 0.9,
+        "duration": "600s",
+        "trigger": {
+          "count": 1
+        }
+      }
+    },
+    {
+      "displayName": "MySQL memory request utilization > 90% for 10m",
+      "conditionThreshold": {
+        "filter": "metric.type=\"kubernetes.io/container/memory/request_utilization\" resource.type=\"k8s_container\" resource.label.\"namespace_name\"=\"mereka-lms\" resource.label.\"container_name\"=\"mysql\" resource.label.\"pod_name\"=monitoring.regex.full_match(\"mysql.*\")",
+        "aggregations": [
+          {
+            "alignmentPeriod": "300s",
+            "perSeriesAligner": "ALIGN_MAX",
+            "groupByFields": [
+              "resource.label.\"pod_name\""
+            ]
+          }
+        ],
+        "comparison": "COMPARISON_GT",
+        "thresholdValue": 0.9,
+        "duration": "600s",
+        "trigger": {
+          "count": 1
+        }
+      }
+    }
+  ],
+  "notificationChannels": [
+    "projects/mereka-lms/notificationChannels/2534209833330971119",
+    "projects/mereka-lms/notificationChannels/1104353389109200281"
+  ]
+}

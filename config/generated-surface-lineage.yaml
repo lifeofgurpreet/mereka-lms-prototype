@@ -1,0 +1,109 @@
+# Generated Surface Lineage — machine-readable artifact provenance
+#
+# Maps every generated artifact to its source files, generator command,
+# output paths, and freshness verifier. Editing generated output directly
+# is forbidden — fix the source or generator instead (INV-001).
+#
+# Consumers:
+#   - Agent execution workflows (source vs output routing)
+#   - CI verification (freshness checks)
+#   - config/process-invariants.yaml INV-001 enforcement
+---
+schema_version: "1.0"
+
+surfaces:
+  - id: tutor-rendered-settings
+    description: "Django LMS/CMS production settings rendered by Tutor"
+    source_files:
+      - "infrastructure/tutor/plugins/mereka_lms.py"
+      - "scripts/infra/tutor-config-save.sh"
+      - "scripts/infra/prepare-tutor-build-context.sh"
+      - "infrastructure/tutor/apply-patches.sh"
+      - "infrastructure/tutor/patches/**"
+    generator: "scripts/infra/tutor-config-save.sh"
+    generated_output:
+      - "tutor_env/env/apps/openedx/settings/**"
+      - "tutor_env/env/apps/openedx/config/**"
+    freshness_verifier: "scripts/infra/verify-tutor-config.sh"
+    forbidden_direct_edits: true
+    invariant: INV-001
+
+  - id: ci-static-inventory
+    description: "CI script list for offline static-validation job"
+    source_files:
+      - "scripts/governance/script-registry.yaml"
+    generator: "scripts/governance/generate-ci-static-inventory.py"
+    generated_output:
+      - ".github/ci-scripts-static.txt"
+      - ".github/ci-scripts-static-shard-01.txt"
+      - ".github/ci-scripts-static-shard-02.txt"
+      - ".github/ci-scripts-static-shard-03.txt"
+    freshness_verifier: "scripts/qa/verify-ci-script-list.sh"
+    forbidden_direct_edits: true
+    invariant: INV-001
+
+  - id: ci-runtime-inventory
+    description: "CI script list for manual/runtime-dependent checks"
+    source_files:
+      - "scripts/governance/script-registry.yaml"
+    generator: "scripts/governance/generate-ci-runtime-inventory.py"
+    generated_output:
+      - ".github/ci-scripts-runtime.txt"
+    freshness_verifier: "scripts/qa/verify-ci-script-list.sh"
+    forbidden_direct_edits: true
+    invariant: INV-001
+
+  - id: kustomize-rendered-manifests
+    description: "Kubernetes manifests rendered by Kustomize from base + overlays"
+    source_files:
+      - "deploy/k8s/base/**"
+      - "deploy/k8s/overlays/**"
+    generator: "kubectl kustomize deploy/k8s/overlays/<env>"
+    generated_output:
+      - "(stdout — not persisted; applied directly by ArgoCD)"
+    freshness_verifier: "scripts/qa/verify-kustomize-render.sh"
+    forbidden_direct_edits: true
+    invariant: INV-001
+
+  - id: release-bundle
+    description: "Release object containing image digest, build metadata, and provenance"
+    source_files:
+      - "scripts/release/**"
+      - "scripts/infra/canonical-release.sh"
+    generator: "CI build workflow → canonical-release.sh"
+    generated_output:
+      - "var/release/*.json"
+    freshness_verifier: "scripts/qa/verify-release-bundle.sh"
+    forbidden_direct_edits: true
+    invariant: INV-004
+
+  - id: mfe-built-assets
+    description: "Micro-frontend JS/CSS bundles built from source"
+    source_files:
+      - "infrastructure/tutor/plugins/mereka_lms.py"
+      - "assets/brand/**"
+      - "scripts/infra/build-mfe-image.sh"
+      - "scripts/infra/prepare-tutor-build-context.sh"
+      - "infrastructure/tutor/patches/mfe-*"
+      - "infrastructure/tutor/patches/brand-*"
+    generator: "scripts/infra/build-mfe-image.sh"
+    generated_output:
+      - "(container image — served via Caddy at apps.<domain>)"
+    freshness_verifier: "scripts/qa/verify-mfe-build-contract.sh"
+    forbidden_direct_edits: true
+    invariant: INV-013
+
+  - id: caddy-configmap
+    description: "Caddy reverse proxy configuration rendered from Tutor + Kustomize"
+    source_files:
+      - "infrastructure/tutor/plugins/mereka_lms.py"
+      - "scripts/infra/tutor-config-save.sh"
+      - "deploy/k8s/base/apps/caddy/**"
+      - "deploy/k8s/tenancy/tenant-registry.yaml"
+    generator: "scripts/infra/tutor-config-save.sh + Kustomize overlay"
+    generated_output:
+      - "tutor_env/env/apps/caddy/Caddyfile"
+      - "(K8s ConfigMap — applied by ArgoCD)"
+    freshness_verifier: "scripts/qa/verify-rke2-tenant-routes.sh"
+    forbidden_direct_edits: true
+    invariant: INV-001

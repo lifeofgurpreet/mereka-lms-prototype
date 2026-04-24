@@ -1,0 +1,153 @@
+version: 1
+owner: Platform Team
+status: canonical
+last_reviewed: 2026-04-14
+
+classes:
+  architecture-standard:
+    canonical_roots:
+      - docs/architecture
+      - docs/concepts/architecture
+    schema_ref: frontmatter-schema.json#/allOf/0
+    required_common:
+      - title
+      - owner
+      - status
+      - last_reviewed
+      - canonical_root
+      - doc_class
+      - summary
+      - tags
+    required_class_fields:
+      - governs
+
+  adr:
+    canonical_roots:
+      - docs/adr
+    schema_ref: frontmatter-schema.json#/allOf/1
+    required_common:
+      - title
+      - owner
+      - status
+      - last_reviewed
+      - canonical_root
+      - doc_class
+      - summary
+      - tags
+    required_class_fields:
+      - adr_id
+      - decision_status
+      - decision_type
+      - governs
+
+  rfc:
+    canonical_roots:
+      - docs/adr/rfc
+    schema_ref: frontmatter-schema.json#/allOf/2
+    required_common:
+      - title
+      - owner
+      - status
+      - last_reviewed
+      - canonical_root
+      - doc_class
+      - summary
+      - tags
+    required_class_fields:
+      - adr_id
+      - proposal_state
+      - governs
+
+  ops-runbook:
+    canonical_roots:
+      - docs/ops
+    schema_ref: frontmatter-schema.json
+    required_common:
+      - title
+      - owner
+      - status
+      - last_reviewed
+      - canonical_root
+      - doc_class
+      - summary
+      - tags
+    required_class_fields: []
+
+  guide:
+    canonical_roots:
+      - docs/guides
+    schema_ref: frontmatter-schema.json
+    required_common:
+      - title
+      - owner
+      - status
+      - last_reviewed
+      - canonical_root
+      - doc_class
+      - summary
+      - tags
+    required_class_fields: []
+
+  reference:
+    canonical_roots:
+      - docs/reference
+    schema_ref: frontmatter-schema.json
+    required_common:
+      - title
+      - owner
+      - status
+      - last_reviewed
+      - canonical_root
+      - doc_class
+      - summary
+      - tags
+    required_class_fields: []
+
+  policy:
+    canonical_roots:
+      - docs/policies
+    schema_ref: frontmatter-schema.json
+    required_common:
+      - title
+      - owner
+      - status
+      - last_reviewed
+      - canonical_root
+      - doc_class
+      - summary
+      - tags
+    required_class_fields: []
+
+  evidence:
+    canonical_roots:
+      - docs/evidence
+    schema_ref: frontmatter-schema.json#/allOf/3
+    required_common:
+      - title
+      - owner
+      - status
+      - last_reviewed
+      - canonical_root
+      - doc_class
+      - summary
+      - tags
+    required_class_fields:
+      - claim
+      - evidence_date
+
+  status:
+    canonical_roots:
+      - docs/status
+    schema_ref: frontmatter-schema.json#/allOf/4
+    required_common:
+      - title
+      - owner
+      - status
+      - last_reviewed
+      - canonical_root
+      - doc_class
+      - summary
+      - tags
+    required_class_fields:
+      - status_scope
+      - status_date

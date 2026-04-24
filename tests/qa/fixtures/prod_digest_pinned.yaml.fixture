@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# Test fixture: production kustomization with digest-pinned tag (must pass strict mode).
+images:
+  - name: docker.io/overhangio/openedx
+    newName: ghcr.io/biji-biji-initiative/mereka-lms/openedx
+    newTag: mereka-brand-hotfix-full-v3
+    digest: sha256:907951ebabff35f1843685c97c2fb0a0e5fa0c286adba54d34156ffee594dad4

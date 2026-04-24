@@ -1,0 +1,55 @@
+{
+  "canonical_inputs": [
+    "docs/meta/knowledge/DECISION_RUNTIME_MODEL.md",
+    "generated/knowledge/review-decision.json",
+    "generated/skills/evidence-sufficiency-map.json",
+    "generated/skills/skill-registry.json"
+  ],
+  "diff_range": "e0a85143e29ee5372c533f410392b4ac23e0f0c6...HEAD",
+  "generated_by": "tools/knowledge/build_evidence_obligations.py",
+  "obligations": [
+    {
+      "advisory_note": "",
+      "blocking": true,
+      "evidence_class": "validation_run",
+      "obligation_type": "required_evidence_pack",
+      "source_rule": "all-required-reviewers-must-confirm-or-explicitly-delegate",
+      "triggered_by_skills": [
+        "control-plane-validation"
+      ]
+    },
+    {
+      "advisory_note": "",
+      "blocking": true,
+      "evidence_class": "docs_policy",
+      "obligation_type": "required_status_update",
+      "source_rule": "all-required-reviewers-must-confirm-or-explicitly-delegate",
+      "triggered_by_skills": [
+        "docs-truth-review"
+      ]
+    },
+    {
+      "advisory_note": "",
+      "blocking": true,
+      "evidence_class": "catalog_governance",
+      "obligation_type": "required_status_update",
+      "source_rule": "all-required-reviewers-must-confirm-or-explicitly-delegate",
+      "triggered_by_skills": [
+        "docs-truth-review"
+      ]
+    }
+  ],
+  "pack_id": "evidence-obligations",
+  "required_adr_updates": [],
+  "required_evidence_packs": [
+    "validation_run"
+  ],
+  "required_plan_testplan_refreshes": [],
+  "required_runbook_updates": [],
+  "required_status_updates": [
+    "catalog_governance",
+    "docs_policy"
+  ],
+  "schema_version": 1,
+  "source_range": "e0a85143e29ee5372c533f410392b4ac23e0f0c6...HEAD"
+}

@@ -1,0 +1,12 @@
+- Correlation header propagation evidence
+- generated_at: 2026-03-03T04:11:49Z
+- caddyfile: deploy/k8s/base/apps/caddy/Caddyfile
+- evidence_identity: env=nonprod;profile=nonprod;context=rke2-nonprod;project=mereka-lms
+Verify: Correlation header propagation
+  caddyfile: deploy/k8s/base/apps/caddy/Caddyfile
+
+OK: Proxy snippet and direct reverse_proxy blocks forward required headers
+[0;32mPASS[0m correlation headers are present for proxy snippet and direct reverse_proxy blocks
+required_header: x-request-id
+required_header: traceparent
+

@@ -1,0 +1,110 @@
+name: Publish TechDocs to R2
+
+# Builds the mkdocs site from this repo and uploads it to the shared
+# mereka-techdocs Cloudflare R2 bucket. Backstage (dev/staging/prod) reads
+# from that bucket, so all three envs pick up the same content.
+#
+# We only republish when docs or the mkdocs/catalog configs change — that
+# way a typical PR doesn't trigger an unnecessary docs rebuild.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - "catalog-info.yaml"
+      - ".github/workflows/techdocs-publish.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: techdocs-publish
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Generate and publish TechDocs
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ENTITY_REF: default/component/mereka-lms-app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Set up Node (for techdocs-cli)
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0
+        with:
+          node-version: "20"
+
+      - name: Install MkDocs + TechDocs toolchain
+        run: |
+          python -m pip install --upgrade pip
+          # Pinned for reproducible builds; bump as upstream releases.
+          pip install "mkdocs-techdocs-core==1.6.0"
+          npm install -g "@techdocs/cli@1.9.4"
+          techdocs-cli --version
+          mkdocs --version
+
+      - name: Generate docs (mkdocs build)
+        run: |
+          techdocs-cli generate \
+            --source-dir . \
+            --output-dir ./site \
+            --no-docker \
+            --verbose
+          # TechDocs reader looks for techdocs_metadata.json at the entity
+          # prefix root; mkdocs-techdocs-core emits it into ./site during
+          # build. Confirm it's there before we upload.
+          ls -la ./site/techdocs_metadata.json
+          head -c 200 ./site/techdocs_metadata.json; echo
+
+      - name: Publish to Cloudflare R2
+        env:
+          # R2 is S3-compatible. We use `aws s3 sync` directly instead of
+          # `techdocs-cli publish` because the latter's
+          # `--awsS3ForcePathStyle` flag in 1.9.4 silently fails to propagate
+          # into the underlying @aws-sdk/client-s3 config, causing the SDK to
+          # build a virtual-hosted bucket URL that fails auth on R2. The
+          # bucket layout required by Backstage's TechDocs reader is just
+          # `<bucket>/<namespace>/<kind>/<name>/**`, which `aws s3 sync`
+          # reproduces faithfully.
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_TECHDOCS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_TECHDOCS_SECRET_ACCESS_KEY }}
+          AWS_REGION: auto
+          R2_ACCOUNT_ID: ${{ secrets.R2_TECHDOCS_ACCOUNT_ID }}
+          R2_BUCKET: ${{ secrets.R2_TECHDOCS_BUCKET }}
+        run: |
+          aws --version
+          # Don't echo the values themselves; just confirm they reached the step.
+          echo "R2_ACCOUNT_ID length=${#R2_ACCOUNT_ID}"
+          echo "R2_BUCKET length=${#R2_BUCKET}"
+          echo "AWS_ACCESS_KEY_ID length=${#AWS_ACCESS_KEY_ID}"
+          echo "AWS_SECRET_ACCESS_KEY length=${#AWS_SECRET_ACCESS_KEY}"
+          if [ -z "${R2_ACCOUNT_ID:-}" ] || [ -z "${R2_BUCKET:-}" ]; then
+            echo "ERROR: required secret missing" >&2
+            exit 2
+          fi
+          ENDPOINT="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          DEST="s3://${R2_BUCKET}/${ENTITY_REF}/"
+          aws s3 sync ./site "$DEST" \
+            --endpoint-url "$ENDPOINT" \
+            --delete \
+            --no-progress
+
+      - name: Summary
+        run: |
+          echo "## TechDocs published" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Entity: \`$ENTITY_REF\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Bucket: \`$R2_BUCKET\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- View: https://backstage.mereka.io/docs/default/component/mereka-lms-app" >> "$GITHUB_STEP_SUMMARY"

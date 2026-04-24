@@ -1,0 +1,54 @@
+name: Lighthouse CI Budget Verification
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  lighthouse-budgets:
+    name: Verify Lighthouse Budgets
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Verify Lighthouse budget file (dry-run)
+        run: |
+          set -euo pipefail
+          mkdir -p var/ci
+          ./scripts/qa/verify-lighthouse-budgets.sh | tee var/ci/lighthouse-budget-verify.log
+
+      - name: Publish run summary
+        if: always()
+        run: |
+          {
+            echo "## Lighthouse CI Budget Verification"
+            echo ""
+            echo "### What was checked"
+            echo "- \`infrastructure/monitoring/lighthouse-budgets.json\` exists and is valid JSON"
+            echo "- All required MFE paths covered: \`/authn/login\`, \`/dashboard\`, \`/learning/course\`, \`/profile\`, \`/account\`, \`/discussions\`"
+            echo "- JS budgets within absolute ceiling (< 2048 KB)"
+            echo "- CSS budgets within absolute ceiling (< 500 KB)"
+            echo "- INP metric present (FID absent — FID retired March 2024)"
+            echo "- CLS budgets <= 100 (0.10)"
+            echo "- LCP budgets <= 2500 ms"
+            echo ""
+            echo "### Next steps"
+            echo "- To run Lighthouse against live MFEs: \`lhci collect --url=https://apps.academyv2.mereka.io/authn/login\`"
+            echo "- See \`docs/policies/architecture/LIGHTHOUSE_BUDGETS.md\` for full setup guide"
+            echo ""
+            echo "Log artifacts: \`var/ci/lighthouse-budget-verify.log\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload CI logs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: lighthouse-budget-verify-logs
+          path: var/ci/lighthouse-budget-verify.log
+          retention-days: 3
+          if-no-files-found: warn

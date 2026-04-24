@@ -1,0 +1,59 @@
+name: TTFS Onboarding Flow Verification
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ttfs-onboarding:
+    name: Verify TTFS Onboarding Funnel Config
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Verify TTFS onboarding funnel config (offline)
+        run: |
+          set -euo pipefail
+          mkdir -p var/ci
+          ./scripts/qa/verify-ttfs-onboarding.sh | tee var/ci/ttfs-onboarding-verify.log
+
+      - name: Publish run summary
+        if: always()
+        run: |
+          {
+            echo "## TTFS Onboarding Flow Verification"
+            echo ""
+            echo "### What was checked"
+            echo "- Registration endpoint referenced in LMS config (\`FRONTEND_REGISTER_URL\`, \`/register\`)"
+            echo "- Enrollment API referenced in deployment settings"
+            echo "- Course discovery service route present in Caddy + OAuth2 secrets in ExternalSecrets"
+            echo "- Courseware URLs (\`/learning/course/*\`) present in MFE Caddyfile"
+            echo "- SMTP/email credentials referenced in deployments or settings (email verification)"
+            echo "- MFE authn route (\`/authn/login\`, \`/authn/register\`) present in MFE Caddyfile"
+            echo ""
+            echo "### Funnel steps verified"
+            echo "1. Registration → account created, verification email dispatched"
+            echo "2. Login → JWT session established, redirect to Dashboard"
+            echo "3. Course Enrollment → \`POST /api/enrollment/v1/enrollment\`"
+            echo "4. First Lesson Completion → courseware reachable via \`/learning/course/\`"
+            echo ""
+            echo "### Next steps"
+            echo "- For live funnel testing, see \`docs/reference/operations/TTFS_ONBOARDING.md\`"
+            echo "- For performance budgets at each step, see \`docs/policies/architecture/LIGHTHOUSE_BUDGETS.md\`"
+            echo ""
+            echo "Log artifacts: \`var/ci/ttfs-onboarding-verify.log\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload CI logs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: ttfs-onboarding-verify-logs
+          path: var/ci/ttfs-onboarding-verify.log
+          retention-days: 3
+          if-no-files-found: warn

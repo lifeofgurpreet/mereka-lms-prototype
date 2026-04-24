@@ -1,0 +1,126 @@
+{
+  "affected_truth_surfaces": [
+    "docs/catalog.json",
+    "docs/meta/docs-program/WAVE4_WRAPPER_RETIREMENT_LEDGER.md",
+    "docs/meta/knowledge/AGENT_REVIEW_HANDOFF.md",
+    "docs/meta/knowledge/WAVE10_CLOSEOUT.md",
+    "generated/catalogs/knowledge-catalog.json",
+    "generated/contracts/cross-repo-manifest.json",
+    "generated/contracts/deployment-impact-report.json",
+    "generated/contracts/release-obligations.md",
+    "generated/graphs/knowledge-graph.json",
+    "generated/knowledge/change-manifest.json",
+    "generated/knowledge/review-bundle.md",
+    "generated/knowledge/truth-impact-report.json",
+    "generated/knowledge/wrapper-retirement-report.json",
+    "tools/knowledge/build_agent_readiness_report.py",
+    "tools/knowledge/build_agent_task_bundles.py",
+    "tools/knowledge/build_cross_repo_agent_packs.py",
+    "tools/knowledge/build_task_bundle.py",
+    "tools/knowledge/build_wave10_source_map.py",
+    "tools/knowledge/change_runtime.py",
+    "tools/knowledge/skill_runtime.py",
+    "tools/knowledge/verify_agent_consumption_runtime.py"
+  ],
+  "authority_order": [
+    "explicit Wave 4/5/6 resolver and contract docs",
+    "canonical specs / contracts / runbooks / architecture docs for the affected task type",
+    "generated runtime outputs derived from those surfaces",
+    "status/evidence surfaces",
+    "archive only when explicitly named as historical context"
+  ],
+  "bundle_json_path": "generated/knowledge/task-bundles/cross_repo_contract_change.json",
+  "bundle_markdown_path": "generated/knowledge/task-bundles/cross_repo_contract_change.md",
+  "bundle_version": 1,
+  "escalation_conditions": [
+    "Wave 6 verdict is manual_review_required",
+    "Wave 6 verdict is unknown_mapping"
+  ],
+  "generated_by": "tools/knowledge/build_task_bundle.py",
+  "intent": "Change service, environment, release, or cross-repo deployment contract truth.",
+  "likely_cross_repo_dependencies": [],
+  "out_of_scope": [
+    "docs/archive/**",
+    "specs/archive/**"
+  ],
+  "primary_roots": [
+    "docs",
+    "deploy",
+    "specs"
+  ],
+  "read_first": [
+    {
+      "path": "docs/meta/contracts/CONTRACT_RUNTIME_MODEL.md",
+      "priority": 1,
+      "reason": "Wave 6 defines the cross-repo contract runtime law."
+    },
+    {
+      "path": "docs/meta/contracts/CROSS_REPO_OWNERSHIP.yaml",
+      "priority": 2,
+      "reason": "Defines repo ownership and mandatory review groups."
+    },
+    {
+      "path": "docs/meta/contracts/RELEASE_OBLIGATIONS.yaml",
+      "priority": 3,
+      "reason": "Defines release and evidence obligations."
+    },
+    {
+      "path": "docs/meta/contracts/ENVIRONMENT_SURFACES.yaml",
+      "priority": 4,
+      "reason": "Defines environment and deployment surfaces."
+    },
+    {
+      "path": "docs/meta/contracts/INFRA_CROSSWALK.md",
+      "priority": 5,
+      "reason": "Defines the app-to-infra crosswalk boundary."
+    }
+  ],
+  "related_contracts": [],
+  "related_generated_surfaces": [
+    "generated/knowledge/change-manifest.json",
+    "generated/knowledge/review-bundle.md",
+    "generated/knowledge/truth-impact-report.json",
+    "generated/knowledge/task-context-report.json",
+    "generated/knowledge/skill-index.json",
+    "generated/contracts/cross-repo-manifest.json",
+    "generated/contracts/deployment-impact-report.json",
+    "generated/contracts/release-obligations.md"
+  ],
+  "related_runbooks": [],
+  "related_specs": [],
+  "required_commands": [
+    "bash scripts/qa/run-knowledge-runtime-gates.sh",
+    "bash scripts/qa/run-cross-repo-contract-gates.sh",
+    "python3 tools/docs/verify/verify-doc-catalog-governance.py --range origin/main...HEAD",
+    "python3 tools/knowledge/resolve_task_context.py --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+    "python3 tools/knowledge/resolve_task_context.py --check --repo-root . --range origin/main...HEAD --output generated/knowledge/task-context-report.json",
+    "python3 tools/knowledge/build_task_bundle.py --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+    "python3 tools/knowledge/build_task_bundle.py --check --repo-root . --range origin/main...HEAD --all --output-dir generated/knowledge/task-bundles",
+    "python3 tools/knowledge/build_skill_index.py --repo-root .",
+    "python3 tools/knowledge/build_skill_index.py --check --repo-root .",
+    "python3 tools/knowledge/verify_task_runtime.py --repo-root . --range origin/main...HEAD",
+    "bash scripts/qa/run-task-runtime-gates.sh"
+  ],
+  "required_evidence": [
+    "release_obligations",
+    "require_adr_update",
+    "require_runbook_update",
+    "require_status_update",
+    "reviewer_bundle",
+    "truth_impact_report"
+  ],
+  "required_reviewers": [
+    "architecture",
+    "docs"
+  ],
+  "source_runtime_artifacts": [
+    "generated/knowledge/change-manifest.json",
+    "generated/knowledge/review-bundle.md",
+    "generated/knowledge/truth-impact-report.json",
+    "generated/knowledge/wrapper-retirement-report.json",
+    "generated/contracts/cross-repo-manifest.json",
+    "generated/contracts/deployment-impact-report.json",
+    "generated/contracts/release-obligations.md"
+  ],
+  "task_type": "cross_repo_contract_change"
+}

@@ -1,0 +1,45 @@
+# ARC Controller Helm values
+# Chart: oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
+# Ref: https://github.com/actions/actions-runner-controller
+#
+# Install command (run once by a human):
+#   helm install arc \
+#     --namespace arc-systems \
+#     --create-namespace \
+#     oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller \
+#     --version 0.9.3 \
+#     -f deploy/k8s/base/arc/helm-values.yaml
+#
+# Upgrade command:
+#   helm upgrade arc \
+#     --namespace arc-systems \
+#     oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller \
+#     -f deploy/k8s/base/arc/helm-values.yaml
+
+# Flags watched namespaces. Empty string = watch all namespaces.
+# Scoping to arc-runners improves controller performance.
+flags:
+  watchSingleNamespace: arc-runners
+
+# Controller pod resources — the controller is lightweight
+# (it only watches the Kubernetes API and calls GitHub API).
+replicaCount: 1
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+# Metrics endpoint for Prometheus scraping
+metrics:
+  controllerManagerAddr: ":8080"
+  listenerAddr: ":8080"
+  listenerEndpoint: "/metrics"
+
+# Pod labels for Prometheus ServiceMonitor matching
+podLabels:
+  app.kubernetes.io/component: arc-controller
+  app.kubernetes.io/part-of: mereka-ci

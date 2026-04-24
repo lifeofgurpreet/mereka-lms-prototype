@@ -1,0 +1,818 @@
+# Domain Authority Surface Classification
+# Generated: 2026-03-31
+# Purpose: Machine-readable inventory of all files that carry domain/hostname data.
+# Each surface is classified by its authority level and ownership.
+#
+# Classifications:
+#   canonical: The single source of truth for its concern. Editable by humans.
+#   generated: Produced from canonical sources. Must not be hand-edited.
+#   derived-helper: Convenience file that re-exports canonical data. May be hand-edited but must stay aligned.
+#   historical: Stale or superseded. Should not be treated as truth.
+#
+# Staleness indicators:
+#   stale: false  -- data is current and aligned with canonical source
+#   stale: true   -- data has drifted from canonical source or is outdated
+#   stale: partial -- some entries are current, some have drifted
+
+# ==============================================================================
+# APP REPO: mereka-lms
+# ==============================================================================
+surfaces:
+
+  # --------------------------------------------------------------------------
+  # CANONICAL SOURCES (app repo)
+  # --------------------------------------------------------------------------
+
+  - path: deploy/k8s/tenancy/tenant-registry.yaml
+    repo: mereka-lms
+    classification: canonical
+    concern: tenant-host-intent
+    description: >-
+      Canonical source for ALL active domains across all environments and tenants.
+      Contains tenant definitions, environment metadata, and a comprehensive domain
+      registry with auth classification, cookie domain, proof priority, Caddy backend,
+      CORS/CSRF/ALLOWED_HOSTS flags, and ingress TLS status per domain.
+    consumers:
+      - scripts/tenants/verify-dev-runtime-proof.sh
+      - scripts/tenants/verify-staging-runtime-proof.sh
+      - scripts/tenants/verify-staging-tenant-proof.sh
+      - scripts/tenants/lib/runtime-proof-common.sh
+      - scripts/qa/verify-rke2-tenant-routes.sh
+      - scripts/qa/verify-mfe-config-api.sh
+      - scripts/qa/verify-domain-url-invariants.sh
+      - scripts/shared/config.sh (must stay aligned)
+      - docs/reference/operations/DOMAIN_MATRIX.md (projection)
+      - docs/reference/architecture/TENANT_DOMAIN_AUTHORITY_MATRIX.md (projection)
+      - docs/reference/architecture/TENANT_DOMAIN_SURFACE_AUTHORITY.md (projection)
+    stale: false
+    notes: >-
+      Version 1.2.0. Contains 60+ domain entries across production, dev, profiles-dev,
+      staging, and local environments. This is the single authority for "what domains
+      exist, who owns them, and what routing/auth/cookie policy applies."
+
+  - path: infrastructure/tenants/tenant-contracts.yml
+    repo: mereka-lms
+    classification: canonical
+    concern: tenant-metadata
+    description: >-
+      Canonical source for tenant business metadata: slug, registry_slug, name,
+      org_code, contact_email, country, active status, and per-tenant MFE env file
+      paths. Contains production domain entries under each tenant's domains map
+      (lms, studio, apps, admin).
+    consumers:
+      - scripts/shared/config.sh (mereka_lms_canonical_domain_map_json helper)
+      - scripts/tenants/ (provisioning scripts)
+    stale: false
+    notes: >-
+      Contains hostnames in its domains map, but these are tenant-scoped production
+      hostnames only. The tenant-registry.yaml is the comprehensive cross-environment
+      domain authority. This file's hostname data MUST stay aligned with the tenant
+      registry production entries. Slug inconsistency exists: biji-biji vs bijibiji.
+
+  - path: deploy/k8s/base/apps/caddy/Caddyfile
+    repo: mereka-lms
+    classification: canonical
+    concern: caddy-routing-template
+    description: >-
+      Canonical Caddy reverse proxy configuration template. Uses {$VAR} placeholders
+      for domain names (LMS_HOST, STUDIO_HOST, MFE_HOST, DISCOVERY_HOST, NOTES_HOST,
+      CREDENTIALS_HOST, ENTERPRISE_ADMIN_HOST, ENTERPRISE_LEARNER_HOST). Also contains
+      hardcoded localhost entries for local development. Actual domain values are
+      injected at runtime via overlay env var patches.
+    consumers:
+      - deploy/k8s/overlays/*/patches/caddy-env-patch.yaml (provides env var values)
+      - bbi-infrastructure overlays/*/patches/caddy-env-patch.yaml (provides env var values)
+    stale: false
+    notes: >-
+      Template is domain-agnostic by design. All environment-specific domain values
+      come from overlay patches. The localhost blocks are the only hardcoded hostnames.
+
+  - path: deploy/k8s/base/apps/openedx/settings/lms/production.py
+    repo: mereka-lms
+    classification: canonical
+    concern: django-domain-defaults
+    description: >-
+      Django LMS settings with domain defaults read from environment variables.
+      Hardcodes production defaults (academyv2.mereka.io, auth0.mereka.io) as
+      fallbacks when env vars are unset. Constructs ALLOWED_HOSTS, CORS, CSRF,
+      and service URLs from MEREKA_LMS_DOMAIN and related env vars. Also contains
+      dev domain defaults (academyv2.mereka.dev) and multisite domain variables
+      (MEREKA_BIJI_DOMAIN, MEREKA_SKILLOURFUTURE_DOMAIN).
+    consumers:
+      - LMS/CMS pods at runtime
+      - deploy/k8s/overlays/*/patches/domain-env.yaml (overrides env vars)
+      - bbi-infrastructure overlays/*/patches/lms-env-patch.yaml (overrides env vars)
+    stale: false
+    notes: >-
+      The hardcoded defaults are production values. Nonprod overlays MUST set
+      MEREKA_LMS_DOMAIN, MEREKA_AUTH_DOMAIN, etc. to override these defaults.
+      Contains both prod and dev domain variable blocks.
+
+  - path: infrastructure/tutor/plugins/_mereka_lms/config_defaults.py
+    repo: mereka-lms
+    classification: canonical
+    concern: tutor-plugin-domain-defaults
+    description: >-
+      Tutor plugin config defaults. Hardcodes production domains in
+      MEREKA_LMS_EXTRA_HOSTS (admin.academyv2.mereka.io, academy.biji-biji.com,
+      learner.academyv2.mereka.io, skillourfuture.academy.mereka.io),
+      MEREKA_LMS_EXTRA_CSRF_ORIGINS, MEREKA_SESSION_COOKIE_DOMAIN, and
+      MEREKA_CSRF_COOKIE_DOMAIN (.academyv2.mereka.io).
+    consumers:
+      - tutor config save (Tutor plugin system)
+      - tutor_env/ generated files
+    stale: false
+    notes: >-
+      These are Tutor-time defaults for local development. K8s deployments
+      do NOT use Tutor; they use the production.py settings and overlay patches.
+      The domain values here must match the production entries in tenant-registry.yaml.
+
+  - path: infrastructure/tutor/multisite-sites.yml
+    repo: mereka-lms
+    classification: canonical
+    concern: openedx-site-records-prod
+    description: >-
+      Production Open edX Site records for django.contrib.sites. Defines
+      per-tenant site_values including domain, LMS_ROOT_URL, CMS_ROOT_URL,
+      MFE_BASE_URL, THEME_NAME, and course_org_filter. Three sites:
+      academyv2.mereka.io, academy.biji-biji.com, skillourfuture.academy.mereka.io.
+    consumers:
+      - seed-sites management command
+      - docs/reference/architecture/TENANT_DOMAIN_SURFACE_AUTHORITY.md
+    stale: false
+    notes: >-
+      Domain values here must match tenant-registry.yaml production entries.
+      This file drives the Django Site database records that control
+      SiteConfiguration lookup on every HTTP request.
+
+  # --------------------------------------------------------------------------
+  # DERIVED-HELPER SOURCES (app repo)
+  # --------------------------------------------------------------------------
+
+  - path: scripts/shared/config.sh
+    repo: mereka-lms
+    classification: derived-helper
+    concern: shell-domain-defaults
+    canonical_source: deploy/k8s/tenancy/tenant-registry.yaml
+    description: >-
+      Shell script providing environment variable defaults for all domains across
+      prod, dev, and staging environments. Exports LMS_DOMAIN, STUDIO_DOMAIN,
+      MFE_DOMAIN, DEV_LMS_DOMAIN, STAGING_LMS_DOMAIN and 40+ other domain vars.
+      Contains mereka_lms_canonical_domain_map_json() helper that reads
+      tenant-registry.yaml and tenant-contracts.yml at runtime.
+    consumers:
+      - scripts/qa/* (verification scripts)
+      - scripts/gen/update-openedx-hostnames-doc.sh
+      - scripts/branding/*
+      - scripts/infra/*
+    stale: false
+    notes: >-
+      Self-documents that it is derived: "This file provides derived shell defaults
+      for scripts and must stay aligned with the tenant registry rather than becoming
+      a second authority plane." Contains explicit mapping from tenant-registry
+      entries to shell variable names.
+
+  - path: scripts/tenants/env/dev.env
+    repo: mereka-lms
+    classification: derived-helper
+    concern: dev-tenant-domain-table
+    canonical_source: deploy/k8s/tenancy/tenant-registry.yaml
+    description: >-
+      Dev environment tenant domain table for verification and seeding scripts.
+      Contains TENANTS array with SLUG:LMS_HOST:STUDIO_HOST:MFE_HOST:COOKIE_DOMAIN
+      format and TENANT_DEFS array with full provisioning data. Three tenants:
+      mereka, biji-biji, skillourfuture using academyv2.mereka.dev pattern.
+    consumers:
+      - scripts/tenants/verify-dev-runtime-proof.sh
+      - scripts/tenants/seed-dev-sites.sh
+    stale: false
+    notes: >-
+      Self-documents derivation: "Derived from deploy/k8s/tenancy/tenant-registry.yaml
+      (dev section)." Dev tenant-pattern domains use {tenant}.academyv2.mereka.dev.
+
+  - path: scripts/tenants/env/staging.env
+    repo: mereka-lms
+    classification: derived-helper
+    concern: staging-tenant-domain-table
+    canonical_source: deploy/k8s/tenancy/tenant-registry.yaml
+    description: >-
+      Staging environment tenant domain table. Contains TENANTS array and TENANT_DEFS
+      with staging domain patterns (staging.academyv2.mereka.io, staging.academy.biji-biji.com,
+      staging.skillourfuture.academy.mereka.io). Includes CMS URL resolver function.
+    consumers:
+      - scripts/tenants/verify-staging-runtime-proof.sh
+      - scripts/tenants/seed-staging-sites.sh
+    stale: false
+    notes: >-
+      Self-documents derivation from tenant-registry.yaml staging section.
+
+  - path: deploy/k8s/overlays/local/patches/domain-env.yaml
+    repo: mereka-lms
+    classification: derived-helper
+    concern: local-overlay-domain-env-vars
+    canonical_source: deploy/k8s/tenancy/tenant-registry.yaml
+    description: >-
+      Kustomize strategic merge patch injecting dev domain env vars into LMS, CMS,
+      workers, discovery, notes, credentials, caddy, and MFE deployments. Uses
+      academyv2.mereka.dev domains. 10 multi-doc YAML sections covering all workloads.
+    consumers:
+      - deploy/k8s/overlays/local/kustomization.yaml
+    stale: false
+    notes: >-
+      This is the app-repo's local overlay. In production, bbi-infrastructure
+      owns equivalent patches. Domain values must match tenant-registry.yaml
+      dev environment entries.
+
+  - path: deploy/k8s/overlays/rke2-nonprod/patches/domain-env.yaml
+    repo: mereka-lms
+    classification: derived-helper
+    concern: rke2-nonprod-domain-env-vars
+    canonical_source: deploy/k8s/tenancy/tenant-registry.yaml
+    description: >-
+      Domain env var patches for the rke2-nonprod dev environment. Identical
+      domains to local overlay (academyv2.mereka.dev). Adds MEREKA_AUTH_DOMAIN,
+      MEREKA_CREDENTIALS_DOMAIN. Includes enterprise service LMS_ROOT_URL patches
+      and CronJob domain overrides.
+    consumers:
+      - deploy/k8s/overlays/rke2-nonprod/kustomization.yaml
+    stale: partial
+    notes: >-
+      This overlay is classified for migration to bbi-infrastructure per the
+      deployment boundary (ADR-025). The bbi-infrastructure dev overlay already
+      has equivalent patches. This file is actively used but will be deprecated
+      when rke2-nonprod overlay migration completes.
+
+  - path: deploy/k8s/overlays/staging/patches/domain-env.yaml
+    repo: mereka-lms
+    classification: derived-helper
+    concern: staging-domain-env-vars
+    canonical_source: deploy/k8s/tenancy/tenant-registry.yaml
+    description: >-
+      Domain env var patches for the staging environment. Uses
+      staging.academyv2.mereka.io domain pattern. Includes all workloads,
+      enterprise services, CronJob, and MFE CSP domain vars.
+    consumers:
+      - deploy/k8s/overlays/staging/kustomization.yaml
+    stale: partial
+    notes: >-
+      Like rke2-nonprod, classified for migration to bbi-infrastructure.
+      The bbi-infrastructure staging overlay already has equivalent patches.
+
+  - path: deploy/k8s/overlays/local/ingress-openedx-lms.yaml
+    repo: mereka-lms
+    classification: derived-helper
+    concern: local-ingress-lms-hosts
+    canonical_source: deploy/k8s/tenancy/tenant-registry.yaml
+    description: >-
+      Ingress resource for LMS-related dev hosts: academyv2.mereka.dev,
+      preview, discovery, notes, credentials, forum. All route to caddy:80.
+      TLS via cert-manager letsencrypt-prod.
+    consumers:
+      - deploy/k8s/overlays/local/kustomization.yaml
+    stale: false
+    notes: >-
+      App-owned local overlay ingress. Contains 6 host rules and matching
+      TLS hosts. Must match tenant-registry.yaml dev environment active domains.
+
+  - path: deploy/k8s/overlays/local/ingress-openedx-studio.yaml
+    repo: mereka-lms
+    classification: derived-helper
+    concern: local-ingress-studio-host
+    canonical_source: deploy/k8s/tenancy/tenant-registry.yaml
+    description: >-
+      Ingress resource for Studio dev host: studio.academyv2.mereka.dev.
+      Single host rule routing to caddy:80.
+    consumers:
+      - deploy/k8s/overlays/local/kustomization.yaml
+    stale: false
+
+  - path: deploy/k8s/overlays/local/ingress-openedx-mfe.yaml
+    repo: mereka-lms
+    classification: derived-helper
+    concern: local-ingress-mfe-host
+    canonical_source: deploy/k8s/tenancy/tenant-registry.yaml
+    description: >-
+      Ingress resource for MFE dev host: apps.academyv2.mereka.dev.
+      Single host rule routing to caddy:80.
+    consumers:
+      - deploy/k8s/overlays/local/kustomization.yaml
+    stale: false
+    notes: >-
+      Missing tenant MFE hosts (apps.biji-biji.academyv2.mereka.dev,
+      apps.skillourfuture.academyv2.mereka.dev). The bbi-infrastructure
+      dev ingress includes these but the local overlay does not.
+
+  - path: infrastructure/tutor/multisite-sites.dev.yml
+    repo: mereka-lms
+    classification: derived-helper
+    concern: openedx-site-records-dev
+    canonical_source: deploy/k8s/tenancy/tenant-registry.yaml
+    description: >-
+      Dev Open edX Site records. Two sites: academyv2.mereka.dev and
+      preview.academyv2.mereka.dev. Does NOT include dev tenant-pattern
+      sites (biji-biji.academyv2.mereka.dev, skillourfuture.academyv2.mereka.dev).
+    consumers:
+      - seed-dev-sites management command
+    stale: partial
+    notes: >-
+      Missing dev tenant-pattern entries that exist in tenant-registry.yaml
+      and dev.env. Should be updated to include biji-biji and skillourfuture
+      dev sites for parity with the tenant registry.
+
+  - path: infrastructure/tutor/multisite-sites.staging.yml
+    repo: mereka-lms
+    classification: derived-helper
+    concern: openedx-site-records-staging
+    canonical_source: deploy/k8s/tenancy/tenant-registry.yaml
+    description: >-
+      Staging Open edX Site records. Two sites: staging.academyv2.mereka.io and
+      staging.preview.academyv2.mereka.io. Does NOT include staging tenant sites
+      (staging.academy.biji-biji.com, staging.skillourfuture.academy.mereka.io).
+    consumers:
+      - seed-staging-sites management command
+    stale: partial
+    notes: >-
+      Missing staging tenant entries that exist in staging.env. Should be updated
+      to include biji-biji and skillourfuture staging sites.
+
+  - path: deploy/k8s/contract.json
+    repo: mereka-lms
+    classification: derived-helper
+    concern: deploy-contract-workload-manifest
+    canonical_source: deploy/k8s/tenancy/tenant-registry.yaml
+    description: >-
+      Deployment contract JSON defining workloads, secrets, configmaps, images,
+      jobs, migrations, and allowed GitOps overrides. Contains domain data
+      indirectly through allowedGitOpsOverrides (ingress_host, env_var_injection
+      with LMS_ROOT_URL, CMS_ROOT_URL, MFE_HOST, MEREKA_LMS_DOMAIN,
+      MEREKA_CREDENTIALS_DOMAIN).
+    consumers:
+      - scripts/qa/validate-deploy-contract.sh
+      - bbi-infrastructure (ArgoCD app source reference)
+    stale: false
+    notes: >-
+      Does not contain actual domain values; contains the interface contract
+      for how domains are injected by overlays. The allowed_vars list under
+      env_var_injection defines the domain-carrying env var names.
+
+  # --------------------------------------------------------------------------
+  # GENERATED SOURCES (app repo)
+  # --------------------------------------------------------------------------
+
+  - path: docs/reference/operations/DOMAIN_MATRIX.md
+    repo: mereka-lms
+    classification: generated
+    concern: domain-matrix-docs
+    canonical_source: deploy/k8s/tenancy/tenant-registry.yaml
+    description: >-
+      Human-readable reference projection of the domain surface. Contains markdown
+      tables showing Core MEREKA Service Domains (prod/dev/staging), DEV
+      Tenant-Pattern Domains, and DEV Runtime Snapshot. Self-documents canonical
+      source at top of file.
+    consumers:
+      - tools/docs/build_domain_access_reference.py (input)
+      - operators (human reference)
+    stale: false
+    notes: >-
+      Header explicitly states: "Canonical tenant/domain source:
+      deploy/k8s/tenancy/tenant-registry.yaml". Runtime statements limited
+      to DEV checks reverified 2026-03-20. Last verified: 2026-03-20.
+
+  - path: docs/reference/architecture/TENANT_DOMAIN_SURFACE_AUTHORITY.md
+    repo: mereka-lms
+    classification: generated
+    concern: tenant-domain-surface-docs
+    canonical_source: deploy/k8s/tenancy/tenant-registry.yaml
+    description: >-
+      Human-readable entity/tenant reference. Documents tenant table (Mereka,
+      Biji-Biji, SkillOurFuture), domain matrix by environment, and surface
+      mapping (LMS, Studio, MFE, enterprise portals, etc.). Links back to
+      machine-readable sources in source-of-truth chain header.
+    consumers:
+      - operators (human reference)
+    stale: false
+    notes: >-
+      Source-of-truth chain header lists: tenant-registry.yaml, tenant-contracts.yml,
+      multisite-sites.yml, and this document as human-readable summary.
+
+  - path: docs/reference/architecture/TENANT_DOMAIN_AUTHORITY_MATRIX.md
+    repo: mereka-lms
+    classification: generated
+    concern: tenant-domain-authority-docs
+    canonical_source: deploy/k8s/tenancy/tenant-registry.yaml
+    description: >-
+      Domain authority matrix documentation. Domain tables for production, dev,
+      and staging environments. Links to tenant-registry.yaml, tenant-contracts.yml,
+      and multisite-sites.yml as machine-readable authorities.
+    consumers:
+      - operators (human reference)
+    stale: false
+    notes: >-
+      Self-documents: "Machine-readable sources remain authoritative."
+
+  - path: scripts/gen/update-openedx-hostnames-doc.sh
+    repo: mereka-lms
+    classification: generated
+    concern: hostname-doc-generator
+    canonical_source: scripts/shared/config.sh
+    description: >-
+      Generator script that produces docs/reference/operations/OPENEDX_HOSTNAMES.md
+      from scripts/shared/config.sh domain variables. Outputs prod LMS hosts, aliases,
+      Studio, MFE, shared services, dev hosts, and local kind hosts.
+    consumers:
+      - docs/reference/operations/OPENEDX_HOSTNAMES.md (output)
+    stale: false
+    notes: >-
+      Two-hop derivation: tenant-registry.yaml -> config.sh -> this script -> OPENEDX_HOSTNAMES.md.
+      The script itself is a generator tool, not a domain authority.
+
+  - path: tools/docs/build_domain_access_reference.py
+    repo: mereka-lms
+    classification: generated
+    concern: domain-access-reference-generator
+    canonical_source: bbi-infrastructure/config/domain-registry.yaml
+    description: >-
+      Python script that builds a Wave 14 domain and access reference JSON and
+      markdown output. Reads from bbi-infrastructure domain-registry.yaml,
+      DOMAIN_MATRIX.md, and USER_FACING_URLS.md. Produces
+      generated/platform/domain-access-reference.json and
+      docs/reference/platform/DOMAIN_AND_ACCESS_REFERENCE.md.
+    consumers:
+      - generated/platform/domain-access-reference.json (output)
+      - docs/reference/platform/DOMAIN_AND_ACCESS_REFERENCE.md (output)
+    stale: false
+    notes: >-
+      Cross-repo consumer: reads from bbi-infrastructure domain-registry.yaml
+      via hardcoded absolute path. Merges multiple sources and detects conflicts.
+      Tool itself does not carry domain data; it aggregates from canonical sources.
+
+# ==============================================================================
+# GITOPS REPO: bbi-infrastructure
+# ==============================================================================
+
+  # --------------------------------------------------------------------------
+  # CANONICAL SOURCES (infra repo)
+  # --------------------------------------------------------------------------
+
+  - path: config/domain-registry.yaml
+    repo: bbi-infrastructure
+    classification: canonical
+    concern: platform-domain-registry
+    description: >-
+      Platform-wide domain registry covering ALL BBI applications (openedx,
+      mereka_v2, calcom, n8n, listmonk, temporal, twentycrm, zoom_rtms,
+      climate-exchange, reka_slackbot, team_analytics, nfc_cards, agent_e),
+      standalone VPS apps, ACFS services, and observability endpoints.
+      Organized by environments (dev/staging/prod) with ingress IPs.
+      OpenEdX section has dev/staging/prod hostnames for LMS, Studio, MFE,
+      admin, preview, discovery, ecommerce, notes, credentials, learner.
+    consumers:
+      - tools/docs/build_domain_access_reference.py (in mereka-lms)
+      - bbi-infrastructure helper scripts
+      - platform-control-plane (reference)
+    stale: partial
+    notes: >-
+      OpenEdX staging section has 'staging.ecommerce.mereka.io' (bare-zone
+      pattern) which was removed from the app repo staging ingress. The
+      staging section is missing 'learner' for dev. The prod section only
+      has lms and studio (incomplete). This file is broader in scope
+      (all BBI apps) but less complete for OpenEdX specifics than
+      tenant-registry.yaml.
+
+  - path: config/service-topology-catalog.yaml
+    repo: bbi-infrastructure
+    classification: canonical
+    concern: service-placement-and-domains
+    description: >-
+      Per-service registry of environment availability, scope, packaging mode,
+      namespaces, ArgoCD manifest files, and public domains. Contains domain
+      entries for each service per environment (e.g., authentik dev/staging/prod,
+      calcom, n8n, etc.). OpenEdX/mereka-lms entries may not be present in the
+      truncated view but the catalog covers all env-scoped services.
+    consumers:
+      - scripts/verify-service-topology-sync.py (bbi-infrastructure)
+      - ArgoCD ApplicationSets
+    stale: false
+    notes: >-
+      Machine-checkable contract. Domain entries are per-service, not per-tenant.
+      This is the authority for "which service runs where" but NOT for
+      tenant-level domain mapping within a service.
+
+  - path: config/cluster-topology-catalog.yaml
+    repo: bbi-infrastructure
+    classification: canonical
+    concern: cluster-placement
+    description: >-
+      Physical cluster topology (nonprod-rke2, prod-gke) with environment
+      assignments, node counts, and scope definitions. Does not contain
+      domain/hostname data directly but defines the cluster→environment
+      mapping that determines which overlay (and therefore which domains)
+      applies where.
+    consumers:
+      - ADR-018
+      - service-topology-catalog.yaml (referenced by)
+    stale: false
+    notes: >-
+      Contains no hostname strings. Included in classification because
+      cluster placement indirectly determines domain environment selection.
+
+  # --------------------------------------------------------------------------
+  # DERIVED-HELPER SOURCES (infra repo) — Dev Overlay
+  # --------------------------------------------------------------------------
+
+  - path: apps/mereka-lms/overlays/dev/patches/caddy-env-patch.yaml
+    repo: bbi-infrastructure
+    classification: derived-helper
+    concern: dev-caddy-domain-env-vars
+    canonical_source: mereka-lms/deploy/k8s/tenancy/tenant-registry.yaml
+    description: >-
+      Caddy deployment env var patch for dev environment. Sets LMS_HOST,
+      LMS_HOST_PREVIEW, STUDIO_HOST, MFE_HOST, DISCOVERY_HOST, NOTES_HOST,
+      CREDENTIALS_HOST, ENTERPRISE_ADMIN_HOST, ENTERPRISE_LEARNER_HOST
+      to academyv2.mereka.dev pattern.
+    consumers:
+      - apps/mereka-lms/overlays/dev/kustomization.yaml
+    stale: false
+
+  - path: apps/mereka-lms/overlays/dev/patches/lms-env-patch.yaml
+    repo: bbi-infrastructure
+    classification: derived-helper
+    concern: dev-lms-configmap-domains
+    canonical_source: mereka-lms/deploy/k8s/tenancy/tenant-registry.yaml
+    description: >-
+      ConfigMap patch setting LMS_HOST, LMS_BASE, CMS_HOST, CMS_BASE,
+      PREVIEW_LMS_BASE, MFE_HOST to academyv2.mereka.dev domains.
+    consumers:
+      - apps/mereka-lms/overlays/dev/kustomization.yaml
+    stale: false
+
+  - path: apps/mereka-lms/overlays/dev/patches/mfe-env-patch.yaml
+    repo: bbi-infrastructure
+    classification: derived-helper
+    concern: dev-mfe-domain-env-vars
+    canonical_source: mereka-lms/deploy/k8s/tenancy/tenant-registry.yaml
+    description: >-
+      MFE deployment env var patch for dev CSP headers. Sets LMS_HOST,
+      CMS_HOST, AUTH_HOST (auth0.mereka.dev), MFE_HOST to
+      academyv2.mereka.dev pattern.
+    consumers:
+      - apps/mereka-lms/overlays/dev/kustomization.yaml
+    stale: false
+
+  - path: apps/mereka-lms/overlays/dev/patches/satellite-services-domain.yaml
+    repo: bbi-infrastructure
+    classification: derived-helper
+    concern: dev-satellite-domain-overrides
+    canonical_source: mereka-lms/deploy/k8s/tenancy/tenant-registry.yaml
+    description: >-
+      Domain overrides for satellite services (credentials, discovery, notes)
+      on dev. Overrides MEREKA_CREDENTIALS_DOMAIN, MEREKA_LMS_DOMAIN, and
+      NOTES_DOMAIN to academyv2.mereka.dev pattern. Necessary because image
+      default bakes in production domain.
+    consumers:
+      - apps/mereka-lms/overlays/dev/kustomization.yaml
+    stale: false
+
+  - path: apps/mereka-lms/overlays/dev/patches/ingress.yaml
+    repo: bbi-infrastructure
+    classification: derived-helper
+    concern: dev-ingress-hosts-and-tls
+    canonical_source: mereka-lms/deploy/k8s/tenancy/tenant-registry.yaml
+    description: >-
+      Ingress resources for dev environment. Three Ingress objects (openedx-lms,
+      openedx-studio, openedx-mfe) with full host lists including tenant-pattern
+      domains (biji-biji.academyv2.mereka.dev, skillourfuture.academyv2.mereka.dev
+      and their studio/apps variants). Uses letsencrypt-dev-dns01 ClusterIssuer.
+      15+ host rules across all three ingress objects.
+    consumers:
+      - apps/mereka-lms/overlays/dev/kustomization.yaml
+      - ArgoCD mereka-lms-dev ApplicationSet
+    stale: false
+    notes: >-
+      More complete than the app-repo local ingress — includes all tenant
+      MFE and Studio hosts that the local overlay is missing. Authoritative
+      for what actually runs in the dev cluster.
+
+  # --------------------------------------------------------------------------
+  # DERIVED-HELPER SOURCES (infra repo) — Staging Overlay
+  # --------------------------------------------------------------------------
+
+  - path: apps/mereka-lms/overlays/staging/patches/caddy-env-patch.yaml
+    repo: bbi-infrastructure
+    classification: derived-helper
+    concern: staging-caddy-domain-env-vars
+    canonical_source: mereka-lms/deploy/k8s/tenancy/tenant-registry.yaml
+    description: >-
+      Caddy env var patch for staging. Same structure as dev but with
+      staging.academyv2.mereka.io domain pattern. Includes staging.preview,
+      staging.discovery, staging.notes, staging.credentials, staging.admin,
+      staging.learner.
+    consumers:
+      - apps/mereka-lms/overlays/staging/kustomization.yaml
+    stale: false
+
+  - path: apps/mereka-lms/overlays/staging/patches/ingress.yaml
+    repo: bbi-infrastructure
+    classification: derived-helper
+    concern: staging-ingress-hosts-and-tls
+    canonical_source: mereka-lms/deploy/k8s/tenancy/tenant-registry.yaml
+    description: >-
+      Staging ingress with both canonical staging domains (staging.*.academyv2.mereka.io)
+      and compatibility aliases (*.staging.academyv2.mereka.io). Includes Biji-Biji
+      tenant (staging.academy.biji-biji.com) with dedicated TLS secret. SkilloFuture
+      staging tenant included. Contract revision annotated.
+    consumers:
+      - apps/mereka-lms/overlays/staging/kustomization.yaml
+      - ArgoCD mereka-lms-staging ApplicationSet
+    stale: false
+    notes: >-
+      Contains compatibility alias hosts (discovery.staging.*, notes.staging.*, etc.)
+      that will be removed when the staging domain migration window closes.
+
+  # --------------------------------------------------------------------------
+  # DERIVED-HELPER SOURCES (infra repo) — Prod Overlay
+  # --------------------------------------------------------------------------
+
+  - path: apps/mereka-lms/overlays/prod/patches/caddy-env-patch.yaml
+    repo: bbi-infrastructure
+    classification: derived-helper
+    concern: prod-caddy-domain-env-vars
+    canonical_source: mereka-lms/deploy/k8s/tenancy/tenant-registry.yaml
+    description: >-
+      Caddy env var patch for production. Sets all host env vars to
+      academyv2.mereka.io pattern. Includes admin and learner enterprise hosts.
+    consumers:
+      - apps/mereka-lms/overlays/prod/kustomization.yaml
+    stale: false
+
+  - path: apps/mereka-lms/overlays/prod/patches/lms-env-patch.yaml
+    repo: bbi-infrastructure
+    classification: derived-helper
+    concern: prod-lms-configmap-domains
+    canonical_source: mereka-lms/deploy/k8s/tenancy/tenant-registry.yaml
+    description: >-
+      ConfigMap patch for production LMS. Sets LMS_HOST, CMS_HOST, etc. to
+      academyv2.mereka.io domains. ENABLE_HTTPS=true.
+    consumers:
+      - apps/mereka-lms/overlays/prod/kustomization.yaml
+    stale: false
+
+  - path: apps/mereka-lms/overlays/prod/patches/ingress.yaml
+    repo: bbi-infrastructure
+    classification: derived-helper
+    concern: prod-ingress-hosts-and-tls
+    canonical_source: mereka-lms/deploy/k8s/tenancy/tenant-registry.yaml
+    description: >-
+      Production ingress. LMS cert covers academyv2.mereka.io, preview,
+      skillourfuture.academy.mereka.io, academy.biji-biji.com, discovery,
+      ecommerce (legacy), notes, credentials. Uses letsencrypt-prod.
+    consumers:
+      - apps/mereka-lms/overlays/prod/kustomization.yaml
+      - ArgoCD mereka-lms-prod Application
+    stale: false
+    notes: >-
+      Missing forum.academyv2.mereka.io host which exists in tenant-registry.yaml
+      as active. The forum.* domain routes to lms:8000 via Caddy; it may not
+      need a separate ingress rule if it shares the LMS cert.
+
+# ==============================================================================
+# CONTROL-PLANE REPO: platform-control-plane
+# ==============================================================================
+
+  # --------------------------------------------------------------------------
+  # CANONICAL SOURCES (control-plane repo)
+  # --------------------------------------------------------------------------
+
+  - path: contracts/staging-dns-cert-readiness.yaml
+    repo: platform-control-plane
+    classification: canonical
+    concern: staging-dns-tls-readiness
+    description: >-
+      Canonical contract for staging DNS and TLS certificate readiness.
+      Defines hostname patterns, DNS zone policies, ClusterIssuer assignments,
+      and per-host readiness state (proven_now, blocked_external_dependency,
+      blocked_on_control_plane_dns01_support). Contains 20 required_hosts
+      with dns_status and cert_status per host. Defines the
+      staging.*.mereka.io naming convention and biji-biji.com dedicated
+      issuer policy.
+    consumers:
+      - scripts/docs/generate-reference.sh (in platform-control-plane)
+      - docs/reference/generated/staging-readiness-reference.md (output)
+      - bbi-infrastructure (staging cert-manager overlays)
+    stale: false
+    notes: >-
+      This is the authority for "is a staging hostname DNS/TLS ready?"
+      It does NOT define what hostnames should exist (that is tenant-registry.yaml).
+      It tracks readiness state of hostnames defined elsewhere.
+
+  - path: contracts/canonical-authority-registry.yaml
+    repo: platform-control-plane
+    classification: canonical
+    concern: cross-repo-authority-policy
+    description: >-
+      Meta-contract defining which repo owns which truth domain.
+      Covers lane_identity, lane_semantics_adapter, service_identity,
+      alias_mapping, proof_object_schemas, secrets_metadata_pointers,
+      and proof_retention_archive_policy. Does NOT contain domain/hostname
+      data directly but defines the authority model that governs where
+      domain truth lives.
+    consumers:
+      - bbi-infrastructure (promotion workflows)
+      - mereka-lms (proof emission)
+    stale: false
+    notes: >-
+      Contains no hostname strings. Included because it defines the
+      meta-policy for authority allocation across repos. Domain/hostname
+      authority is NOT explicitly listed as a truth_domain in this contract --
+      that gap is what this classification file addresses.
+
+  # --------------------------------------------------------------------------
+  # GENERATED SOURCES (control-plane repo)
+  # --------------------------------------------------------------------------
+
+  - path: docs/reference/generated/staging-readiness-reference.md
+    repo: platform-control-plane
+    classification: generated
+    concern: staging-readiness-docs
+    canonical_source: contracts/staging-dns-cert-readiness.yaml
+    description: >-
+      Generated markdown table of all staging DNS/TLS hosts with their
+      readiness state. Auto-generated by scripts/docs/generate-reference.sh.
+      Contains 20 hostname rows with zone, TLS issuer, DNS/cert status.
+    consumers:
+      - operators (human reference)
+    stale: false
+    notes: >-
+      Header states: "GENERATED FILE -- do not edit." Source is
+      staging-dns-cert-readiness.yaml and staging-auth-surface.yaml.
+      Some hostnames in this doc use inconsistent subdomain ordering
+      vs tenant-registry.yaml (e.g., credentials.staging.academyv2 vs
+      staging.credentials.academyv2) -- this reflects the readiness
+      contract's own hostname patterns which include compatibility aliases.
+
+# ==============================================================================
+# CROSS-REPO DUPLICATION INVENTORY
+# ==============================================================================
+# The following surfaces carry the SAME domain values and must stay synchronized:
+#
+# academyv2.mereka.dev (dev primary LMS):
+#   - tenant-registry.yaml (canonical)
+#   - config.sh DEV_LMS_DOMAIN
+#   - dev.env TENANTS array
+#   - deploy/k8s/overlays/local/patches/domain-env.yaml
+#   - deploy/k8s/overlays/rke2-nonprod/patches/domain-env.yaml
+#   - deploy/k8s/overlays/local/ingress-openedx-lms.yaml
+#   - bbi-infrastructure apps/mereka-lms/overlays/dev/patches/caddy-env-patch.yaml
+#   - bbi-infrastructure apps/mereka-lms/overlays/dev/patches/lms-env-patch.yaml
+#   - bbi-infrastructure apps/mereka-lms/overlays/dev/patches/ingress.yaml
+#   - bbi-infrastructure config/domain-registry.yaml apps.openedx.dev.lms
+#   - infrastructure/tutor/multisite-sites.dev.yml
+#   - production.py MEREKA_DEV_DOMAIN default
+#
+# academyv2.mereka.io (prod primary LMS):
+#   - tenant-registry.yaml (canonical)
+#   - tenant-contracts.yml domains.lms
+#   - config.sh LMS_DOMAIN
+#   - multisite-sites.yml
+#   - config_defaults.py MEREKA_SESSION_COOKIE_DOMAIN
+#   - production.py MEREKA_LMS_DOMAIN default
+#   - bbi-infrastructure config/domain-registry.yaml apps.openedx.prod.lms
+#   - bbi-infrastructure apps/mereka-lms/overlays/prod/patches/*
+#
+# staging.academyv2.mereka.io (staging primary LMS):
+#   - tenant-registry.yaml (canonical)
+#   - config.sh STAGING_LMS_DOMAIN
+#   - staging.env TENANTS array
+#   - deploy/k8s/overlays/staging/patches/domain-env.yaml
+#   - multisite-sites.staging.yml
+#   - bbi-infrastructure config/domain-registry.yaml apps.openedx.staging.lms
+#   - bbi-infrastructure apps/mereka-lms/overlays/staging/patches/*
+#   - platform-control-plane contracts/staging-dns-cert-readiness.yaml
+
+# ==============================================================================
+# KNOWN STALENESS / DRIFT ISSUES
+# ==============================================================================
+# 1. multisite-sites.dev.yml is missing dev tenant-pattern sites (biji-biji, skillourfuture)
+#    that exist in tenant-registry.yaml and dev.env.
+#
+# 2. multisite-sites.staging.yml is missing staging tenant sites (biji-biji, skillourfuture)
+#    that exist in staging.env and tenant-registry.yaml staging section.
+#
+# 3. bbi-infrastructure config/domain-registry.yaml openedx prod section only has lms
+#    and studio; missing mfe, admin, learner, preview, discovery, notes, credentials, forum.
+#
+# 4. bbi-infrastructure config/domain-registry.yaml openedx staging ecommerce uses
+#    'staging.ecommerce.mereka.io' (bare-zone) which was removed from staging ingress.
+#
+# 5. bbi-infrastructure config/domain-registry.yaml openedx dev section is missing
+#    'learner' and 'forum' entries.
+#
+# 6. The local overlay ingress (app repo) is missing tenant MFE and Studio hosts
+#    that the bbi-infrastructure dev ingress includes.
+#
+# 7. Slug inconsistency between tenant-contracts.yml (bijibiji) and
+#    tenant-registry.yaml (biji-biji) is unresolved.
+#
+# 8. staging-readiness-reference.md uses hostname patterns (credentials.staging.*,
+#    notes.staging.*) that differ from the canonical staging convention
+#    (staging.credentials.*, staging.notes.*) -- these are compatibility aliases.

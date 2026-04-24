@@ -1,0 +1,5 @@
+{
+  "name": "redis-connection-errors",
+  "description": "Redis connection/timeout errors from Open edX services in mereka-lms namespace.",
+  "filter": "resource.type=\"k8s_container\" AND resource.labels.namespace_name=\"mereka-lms\" AND (textPayload:\"redis.exceptions\" OR textPayload:\"Error 111 connecting to redis\" OR textPayload:\"ConnectionError\" OR textPayload:\"Timeout connecting to server\" OR textPayload:\"RedisError\" OR jsonPayload.message:\"redis.exceptions\" OR jsonPayload.message:\"Error 111 connecting to redis\")"
+}

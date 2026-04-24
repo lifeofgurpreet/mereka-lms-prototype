@@ -1,0 +1,276 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mereka.io/schemas/tenant-brand-config/v1.json",
+  "title": "TenantBrandConfig",
+  "description": "Schema for a per-tenant brand profile stored in TenantConfig.branding_config. All fields are optional for fallback support; required fields are enforced at provisioning time by validate-tenant-brand-pack.sh.",
+  "type": "object",
+  "required": ["tenant_id", "display_name"],
+  "additionalProperties": false,
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]{2,63}$",
+      "description": "URL-safe tenant slug, must match TenantConfig.slug (e.g. 'skillourfuture')."
+    },
+    "display_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "description": "Human-readable tenant name shown in page titles and footers (e.g. 'Skill Our Future Academy')."
+    },
+    "logos": {
+      "type": "object",
+      "description": "Brand logo assets. All values must be absolute HTTPS URLs.",
+      "additionalProperties": false,
+      "properties": {
+        "primary": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "Full-colour primary logo (min 200px wide, PNG or SVG). Shown in LMS header."
+        },
+        "white": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "White/reversed version of primary logo. Used on dark backgrounds."
+        },
+        "favicon": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "32x32 or 64x64 ICO/PNG favicon served as /favicon.ico."
+        },
+        "footer": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "Logo variant rendered inside the MFE footer slot (often smaller or white)."
+        }
+      }
+    },
+    "palette": {
+      "type": "object",
+      "description": "Tenant palette inputs used by sync-tenant-branding.sh to generate tenant token overrides and by runtime branding to expose PRIMARY_COLOR/SECONDARY_COLOR style MFE config keys. They are not a guaranteed live plugin-injected --mereka-color-* runtime surface today. All values must be 6-digit hex.",
+      "additionalProperties": false,
+      "properties": {
+        "primary": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "description": "Primary brand colour (buttons, links, active states). Example: '#2d898b'."
+        },
+        "secondary": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "description": "Secondary brand colour (accents, hover states). Example: '#295cad'."
+        },
+        "accent": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "description": "Highlight / CTA accent colour. Example: '#f5a623'."
+        },
+        "background": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "description": "Default page background. Example: '#ffffff'."
+        },
+        "text": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "description": "Default body text colour. Must achieve WCAG AA contrast against 'background'."
+        }
+      }
+    },
+    "typography": {
+      "type": "object",
+      "description": "Font metadata reserved for future runtime font loading. Current runtime keeps the shared compiled font stack unless an explicit loader is added.",
+      "additionalProperties": false,
+      "properties": {
+        "font_family": {
+          "type": "string",
+          "minLength": 1,
+          "description": "CSS font-family stack for body text. Example: '\"Nunito\", sans-serif'."
+        },
+        "heading_font": {
+          "type": "string",
+          "minLength": 1,
+          "description": "CSS font-family stack for h1–h4. Defaults to font_family if omitted."
+        },
+        "font_source_url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "URL for a future runtime font loader (Google Fonts stylesheet URL or self-hosted HTTPS path). Not auto-injected today."
+        }
+      }
+    },
+    "footer": {
+      "type": "object",
+      "description": "Footer plugin-slot configuration for the MFE footer component.",
+      "additionalProperties": false,
+      "properties": {
+        "variant": {
+          "type": "string",
+          "enum": ["mereka-v2", "bijibiji", "skillourfuture", "custom"],
+          "description": "Named footer variant. Determines which MerekaFooter branch is rendered."
+        },
+        "copyright_holder": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Legal entity name shown in copyright line. Example: 'Mereka (M) Sdn. Bhd.'."
+        },
+        "whatsapp": {
+          "type": "string",
+          "pattern": "^\\+[0-9]{7,15}$",
+          "description": "WhatsApp support number in E.164 format. Example: '+60123456789'."
+        },
+        "legal_links": {
+          "type": "array",
+          "description": "Footer legal navigation links (Terms, Privacy, Cookies).",
+          "items": {
+            "type": "object",
+            "required": ["label", "url"],
+            "additionalProperties": false,
+            "properties": {
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Link display text."
+              },
+              "url": {
+                "type": "string",
+                "format": "uri",
+                "pattern": "^https://",
+                "description": "Absolute HTTPS URL to the legal document."
+              }
+            }
+          }
+        },
+        "social_links": {
+          "type": "array",
+          "description": "Social media icon links shown in footer.",
+          "items": {
+            "type": "object",
+            "required": ["platform", "url"],
+            "additionalProperties": false,
+            "properties": {
+              "platform": {
+                "type": "string",
+                "enum": ["facebook", "instagram", "linkedin", "twitter", "youtube", "tiktok"],
+                "description": "Social platform identifier."
+              },
+              "url": {
+                "type": "string",
+                "format": "uri",
+                "pattern": "^https://",
+                "description": "Absolute HTTPS URL to the tenant's social profile."
+              }
+            }
+          }
+        }
+      }
+    },
+    "legal_doc_urls": {
+      "type": "object",
+      "description": "Canonical URLs for legal documents served under this tenant's domain.",
+      "additionalProperties": false,
+      "properties": {
+        "terms": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "Terms of Service / Terms and Conditions URL."
+        },
+        "privacy": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "Privacy Policy URL."
+        },
+        "cookies": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://",
+          "description": "Cookie Policy URL. Omit if covered by the Privacy Policy."
+        }
+      }
+    },
+    "fallback_tenant_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]{2,63}$",
+      "description": "Slug of another tenant whose brand profile to inherit when a field is missing. Default runtime fallback is 'mereka' (the platform default)."
+    },
+    "_meta": {
+      "type": "object",
+      "description": "Audit metadata — populated by the provisioning script, not manually edited.",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+$",
+          "description": "Schema version this profile was validated against."
+        },
+        "approved_by": {
+          "type": "string",
+          "description": "GitHub username of the reviewer who approved this brand profile."
+        },
+        "approved_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of approval."
+        },
+        "source_pr": {
+          "type": "string",
+          "format": "uri",
+          "description": "GitHub pull-request URL where the brand profile was reviewed."
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "tenant_id": "skillourfuture",
+      "display_name": "Skill Our Future Academy",
+      "logos": {
+        "primary": "https://skillourfuture.academy.mereka.io/theming/asset/mereka/images/sof-logo.png",
+        "white": "https://skillourfuture.academy.mereka.io/theming/asset/mereka/images/sof-logo-white.png",
+        "favicon": "https://skillourfuture.academy.mereka.io/theming/asset/mereka/images/favicon.ico",
+        "footer": "https://skillourfuture.academy.mereka.io/theming/asset/mereka/images/sof-logo-footer.png"
+      },
+      "palette": {
+        "primary": "#1a3c6e",
+        "secondary": "#f5a623",
+        "accent": "#e8460e",
+        "background": "#ffffff",
+        "text": "#1a1a1a"
+      },
+      "typography": {
+        "font_family": "\"Nunito\", sans-serif",
+        "heading_font": "\"Nunito\", sans-serif",
+        "font_source_url": "https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap"
+      },
+      "footer": {
+        "variant": "skillourfuture",
+        "copyright_holder": "Skill Our Future Sdn. Bhd.",
+        "whatsapp": "+60123456789",
+        "legal_links": [
+          { "label": "Terms of Use", "url": "https://skillourfuture.academy.mereka.io/terms" },
+          { "label": "Privacy Policy", "url": "https://skillourfuture.academy.mereka.io/privacy" }
+        ],
+        "social_links": [
+          { "platform": "linkedin", "url": "https://linkedin.com/company/skillourfuture" }
+        ]
+      },
+      "legal_doc_urls": {
+        "terms": "https://skillourfuture.academy.mereka.io/terms",
+        "privacy": "https://skillourfuture.academy.mereka.io/privacy"
+      },
+      "_meta": {
+        "schema_version": "1.0",
+        "approved_by": "gurpreet",
+        "approved_at": "2026-02-18T00:00:00Z",
+        "source_pr": "https://github.com/Biji-Biji-Initiative/mereka-lms/pull/1"
+      }
+    }
+  ]
+}

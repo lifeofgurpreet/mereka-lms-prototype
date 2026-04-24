@@ -1,0 +1,133 @@
+name: Cross Browser Branding Smoke
+
+permissions: {}  # Deny-all at workflow level; each job grants only what it needs
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: "Target environment"
+        required: true
+        default: "prod"
+        type: choice
+        options:
+          - prod
+          - dev
+      cross_browser:
+        description: "Run cross-browser matrix (chromium/firefox/mobile; webkit when deps available)"
+        required: true
+        default: true
+        type: boolean
+      learning_path:
+        description: "Optional learning route path to include in smoke checks (e.g. /learning)"
+        required: false
+        default: "/learning"
+        type: string
+      require_runtime_theme:
+        description: "Require PARAGON_THEME_URLS runtime mode (/theme/*.min.css) instead of embedded fallback mode"
+        required: true
+        default: false
+        type: boolean
+      require_branding_markers:
+        description: "Require slot-rendered Mereka marker classes in runtime DOM"
+        required: true
+        default: true
+        type: boolean
+      require_webkit:
+        description: "Fail if WebKit cannot install/launch (instead of fallback-disable)"
+        required: true
+        default: false
+        type: boolean
+  schedule:
+    - cron: "0 3 * * *"
+
+jobs:
+  branding-smoke:
+    runs-on: ${{ vars.CI_FASTLANE_BUILD_LABEL || 'mereka-k8s-heavy-builders' }}
+    timeout-minutes: 45
+    permissions:
+      contents: read  # checkout
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Setup Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0
+        with:
+          node-version: "20"
+
+      - name: Run branding smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TARGET_ENV="${{ inputs.target_environment || 'prod' }}"
+          CROSS_BROWSER="${{ inputs.cross_browser || 'true' }}"
+          LEARNING_PATH="${{ inputs.learning_path || '/learning' }}"
+          REQUIRE_RUNTIME_THEME="${{ inputs.require_runtime_theme || 'false' }}"
+          REQUIRE_BRANDING_MARKERS="${{ inputs.require_branding_markers || 'true' }}"
+          REQUIRE_WEBKIT="${{ inputs.require_webkit || 'false' }}"
+
+          args=(--env "$TARGET_ENV")
+          if [[ "$CROSS_BROWSER" == "true" ]]; then
+            args+=(--cross-browser)
+          fi
+          if [[ -n "$LEARNING_PATH" ]]; then
+            args+=(--learning-path "$LEARNING_PATH")
+          fi
+          if [[ "$REQUIRE_RUNTIME_THEME" == "true" ]]; then
+            args+=(--require-runtime-theme)
+          fi
+          if [[ "$REQUIRE_BRANDING_MARKERS" == "true" ]]; then
+            args+=(--require-branding-markers)
+          else
+            args+=(--allow-unbranded-shell)
+          fi
+          if [[ "$REQUIRE_WEBKIT" == "true" ]]; then
+            args+=(--strict-webkit)
+          fi
+
+          ./scripts/qa/verify-cross-browser-branding-smoke.sh "${args[@]}"
+
+      - name: Summarize smoke results
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          LOG_FILE="$(ls -1t var/qa/cross-browser-branding-smoke-*.log 2>/dev/null | head -1 || true)"
+          {
+            echo "## Cross-Browser Branding Smoke"
+            echo
+            echo "- Target environment: \`${{ inputs.target_environment || 'prod' }}\`"
+            echo "- Cross-browser requested: \`${{ inputs.cross_browser || 'true' }}\`"
+            echo "- Learning route: \`${{ inputs.learning_path || '/learning' }}\`"
+            echo "- Require runtime theme mode: \`${{ inputs.require_runtime_theme || 'false' }}\`"
+            echo "- Require branding markers: \`${{ inputs.require_branding_markers || 'true' }}\`"
+            echo "- Require WebKit availability: \`${{ inputs.require_webkit || 'false' }}\`"
+            if [[ -n "$LOG_FILE" ]]; then
+              echo "- Log file: \`$LOG_FILE\`"
+              if grep -q "WebKit launch probe failed" "$LOG_FILE"; then
+                echo "- WebKit status: auto-disabled (host dependencies unavailable)"
+              else
+                echo "- WebKit status: enabled"
+              fi
+              PASS_LINE="$(grep -E '[0-9]+ passed' "$LOG_FILE" | tail -1 || true)"
+              if [[ -n "$PASS_LINE" ]]; then
+                echo "- Playwright summary: \`$PASS_LINE\`"
+              fi
+            else
+              echo "- Log file: not found"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload QA logs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: cross-browser-branding-smoke-logs
+          path: |
+            var/qa/cross-browser-branding-smoke-*.log
+            var/e2e-report/**
+            var/e2e-artifacts/**
+          if-no-files-found: warn

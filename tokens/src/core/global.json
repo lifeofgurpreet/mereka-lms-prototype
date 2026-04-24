@@ -1,0 +1,347 @@
+{
+  "global": {
+    "color": {
+      "black": {
+        "value": "#000000"
+      },
+      "white": {
+        "value": "#ffffff"
+      },
+      "teal": {
+        "value": "#237072"
+      },
+      "magenta": {
+        "value": "#ab3b78"
+      },
+      "magentaDark": {
+        "value": "#8a2f60"
+      },
+      "blue": {
+        "value": "#295cad"
+      },
+      "burgundy": {
+        "value": "#8c002f"
+      },
+      "pink": {
+        "value": "#cd89ae"
+      },
+      "sky": {
+        "value": "#94d1e4"
+      },
+      "orange": {
+        "value": "#e18437"
+      },
+      "gold": {
+        "value": "#9e7000"
+      },
+      "mint": {
+        "value": "#8fbec2"
+      },
+      "periwinkle": {
+        "value": "#7f9dce"
+      },
+      "forest": {
+        "value": "#2c6e49"
+      },
+      "success": {
+        "value": "#2c6e49"
+      },
+      "successLight": {
+        "value": "#8fbec2"
+      },
+      "warning": {
+        "value": "#9e7000"
+      },
+      "warningDark": {
+        "value": "#e18437"
+      },
+      "error": {
+        "value": "#8c002f"
+      },
+      "errorLight": {
+        "value": "#cd89ae"
+      },
+      "info": {
+        "value": "#295cad"
+      },
+      "infoLight": {
+        "value": "#94d1e4"
+      },
+      "ink900": {
+        "value": "#000000"
+      },
+      "ink700": {
+        "value": "#374151"
+      },
+      "ink500": {
+        "value": "#6b7280"
+      },
+      "ink300": {
+        "value": "#9ca3af"
+      },
+      "surfacePrimary": {
+        "value": "#ffffff"
+      },
+      "surfaceSecondary": {
+        "value": "#f3f4f6"
+      },
+      "border": {
+        "value": "#ddddde"
+      },
+      "borderStrong": {
+        "value": "#6b7280"
+      }
+    },
+    "typography": {
+      "fontFamilyBody": {
+        "value": "'Poppins', sans-serif"
+      },
+      "fontFamilyHeading": {
+        "value": "'Lato', sans-serif"
+      },
+      "fontFamilyVideo": {
+        "value": "'Open Sans', sans-serif"
+      },
+      "fontSizeDisplay": {
+        "value": "48px"
+      },
+      "fontSizeH1": {
+        "value": "36px"
+      },
+      "fontSizeH2": {
+        "value": "28px"
+      },
+      "fontSizeH3": {
+        "value": "24px"
+      },
+      "fontSizeH4": {
+        "value": "20px"
+      },
+      "fontSizeBodyLg": {
+        "value": "18px"
+      },
+      "fontSizeBody": {
+        "value": "16px"
+      },
+      "fontSizeBodySm": {
+        "value": "14px"
+      },
+      "fontSizeCaption": {
+        "value": "12px"
+      },
+      "lineHeightDisplay": {
+        "value": "1.2"
+      },
+      "lineHeightHeading": {
+        "value": "1.25"
+      },
+      "lineHeightBody": {
+        "value": "1.5"
+      },
+      "fontWeightRegular": {
+        "value": "400"
+      },
+      "fontWeightMedium": {
+        "value": "500"
+      },
+      "fontWeightSemiBold": {
+        "value": "600"
+      },
+      "fontWeightBold": {
+        "value": "700"
+      },
+      "letterSpacingBadge": {
+        "value": "0.08em"
+      }
+    },
+    "spacing": {
+      "0": {
+        "value": "0px"
+      },
+      "1": {
+        "value": "4px"
+      },
+      "2": {
+        "value": "8px"
+      },
+      "3": {
+        "value": "12px"
+      },
+      "4": {
+        "value": "16px"
+      },
+      "5": {
+        "value": "20px"
+      },
+      "6": {
+        "value": "24px"
+      },
+      "8": {
+        "value": "32px"
+      },
+      "10": {
+        "value": "40px"
+      },
+      "12": {
+        "value": "48px"
+      },
+      "16": {
+        "value": "64px"
+      },
+      "20": {
+        "value": "80px"
+      },
+      "24": {
+        "value": "96px"
+      },
+      "28": {
+        "value": "112px"
+      }
+    },
+    "sizing": {
+      "avatarXs": {
+        "value": "24px"
+      },
+      "avatarSm": {
+        "value": "36px"
+      },
+      "avatarMd": {
+        "value": "42px"
+      },
+      "avatarLg": {
+        "value": "64px"
+      },
+      "avatarXl": {
+        "value": "72px"
+      },
+      "avatar2xl": {
+        "value": "96px"
+      },
+      "iconSm": {
+        "value": "16px"
+      },
+      "iconMd": {
+        "value": "20px"
+      },
+      "iconLg": {
+        "value": "24px"
+      },
+      "iconXl": {
+        "value": "32px"
+      },
+      "buttonHeightDefault": {
+        "value": "36px"
+      },
+      "buttonHeightLarge": {
+        "value": "48px"
+      },
+      "buttonPaddingDefaultY": {
+        "value": "12px"
+      },
+      "buttonPaddingDefaultX": {
+        "value": "16px"
+      },
+      "buttonPaddingLargeY": {
+        "value": "16px"
+      },
+      "buttonPaddingLargeX": {
+        "value": "24px"
+      },
+      "navbarLogoHeight": {
+        "value": "32px"
+      },
+      "authnCtaMinHeight": {
+        "value": "44px"
+      }
+    },
+    "shadow": {
+      "sm": {
+        "value": "0 1px 2px rgba(0, 0, 0, 0.05)"
+      },
+      "md": {
+        "value": "0 4px 6px rgba(0, 0, 0, 0.1)"
+      },
+      "lg": {
+        "value": "0 10px 15px rgba(0, 0, 0, 0.1)"
+      },
+      "xl": {
+        "value": "0 20px 25px rgba(0, 0, 0, 0.15)"
+      }
+    },
+    "zIndex": {
+      "base": {
+        "value": 0
+      },
+      "dropdown": {
+        "value": "100"
+      },
+      "sticky": {
+        "value": "200"
+      },
+      "fixed": {
+        "value": "300"
+      },
+      "modalBackdrop": {
+        "value": "400"
+      },
+      "modal": {
+        "value": "500"
+      },
+      "popover": {
+        "value": "600"
+      },
+      "tooltip": {
+        "value": "700"
+      }
+    },
+    "animation": {
+      "durationFast": {
+        "value": "100ms"
+      },
+      "durationBase": {
+        "value": "200ms"
+      },
+      "durationSlow": {
+        "value": "300ms"
+      },
+      "easingStandard": {
+        "value": "cubic-bezier(0.4, 0, 0.2, 1)"
+      },
+      "easingIn": {
+        "value": "cubic-bezier(0.4, 0, 1, 1)"
+      },
+      "easingOut": {
+        "value": "cubic-bezier(0, 0, 0.2, 1)"
+      },
+      "transitionBase": {
+        "value": "all 0.2s ease-in-out 0s normal"
+      },
+      "transitionFade": {
+        "value": "opacity 0.15s linear 0s normal"
+      },
+      "transitionTransform": {
+        "value": "transform 0.2s ease-in-out 0s normal"
+      }
+    },
+    "radius": {
+      "none": {
+        "value": "0px"
+      },
+      "sm": {
+        "value": "4px"
+      },
+      "md": {
+        "value": "8px"
+      },
+      "lg": {
+        "value": "12px"
+      },
+      "xl": {
+        "value": "16px"
+      },
+      "full": {
+        "value": "9999px"
+      }
+    }
+  }
+}

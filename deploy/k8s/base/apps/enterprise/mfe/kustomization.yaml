@@ -1,0 +1,42 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: mereka-lms
+
+resources:
+  # Single deployment per MFE serves all tenants via slug routing (ADR-024).
+  # Enterprise MFEs resolve tenant from URL path /:enterpriseSlug/,
+  # NOT from separate deployments per tenant.
+  - admin-portal-deployment.yaml
+  - admin-portal-service.yaml
+  - learner-portal-deployment.yaml
+  - learner-portal-service.yaml
+
+configMapGenerator:
+  - name: enterprise-admin-portal-caddy-config
+    files:
+      - Caddyfile=admin-portal-Caddyfile
+    options:
+      labels:
+        app.kubernetes.io/name: enterprise-admin-portal
+  - name: enterprise-learner-portal-caddy-config
+    files:
+      - Caddyfile=learner-portal-Caddyfile
+    options:
+      labels:
+        app.kubernetes.io/name: enterprise-learner-portal
+  # Mereka (default tenant) env config
+  - name: enterprise-mfe-env
+    files:
+      - env.config.js=enterprise-mfe-env.js
+    options:
+      labels:
+        app.kubernetes.io/component: enterprise
+  # Per-tenant env.config.js files exist as reference (biji-biji-mfe-env.js,
+  # skillourfuture-mfe-env.js) but are NOT deployed as ConfigMaps because
+  # a single MFE deployment serves all tenants via slug routing (ADR-024).
+  # Phase D1 (#207): mfe_config_api wired — per-tenant overrides are now
+  # delivered via SiteConfiguration.site_values["MFE_CONFIG"] at runtime.
+  # Reconcile with: scripts/infra/apply-multisite-config.sh --env <prod|dev|staging>
+  # Verify with:    scripts/qa/verify-mfe-config-api.sh

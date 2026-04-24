@@ -1,0 +1,27 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Actions Runner Controller (ARC) base resources.
+#
+# ARC controller itself is deployed via Helm (see helm-values.yaml).
+# This Kustomize layer manages:
+#   - Namespaces (arc-systems, arc-runners)
+#   - RunnerScaleSet CRDs (standard + heavy)
+#   - PersistentVolumeClaims for Docker/dep caches (heavy set only)
+#
+# IMPORTANT: Apply this directory directly, NOT via the mereka-lms overlay.
+# The rke2-nonprod overlay sets namespace: mereka-lms globally which would
+# override arc-systems/arc-runners namespaces on ARC resources.
+#
+#   # Correct apply sequence (see CI_CD_RUNNERS.md for full steps):
+#   kubectl apply -f deploy/k8s/base/arc/namespace.yaml
+#   helm install arc ... -f deploy/k8s/base/arc/helm-values.yaml
+#   kubectl apply -k deploy/k8s/base/arc/
+#
+# NOTE: RunnerScaleSet resources require the ARC controller CRDs to exist first.
+# Apply namespaces → install Helm chart → then apply RunnerScaleSets.
+resources:
+  - namespace.yaml
+  - dind-daemon-config.yaml
+  - runner-scale-set-standard.yaml
+  - runner-scale-set-heavy.yaml

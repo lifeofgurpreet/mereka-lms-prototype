@@ -1,0 +1,74 @@
+<a href="/courses/<%- course %>/about" class="course course-card-premium" aria-label="<%- interpolate(
+        gettext("Explore %(course_name)s course details"),
+        { course_name: content.display_name }, true
+      ) %>">
+        <header class="course-image">
+            <div class="cover-image">
+                <img src="<%- image_url %>" onerror="this.onerror=null;this.dataset.broken='1';this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 400 225%22%3E%3Crect width=%22400%22 height=%22225%22 fill=%22%23237072%22 rx=%2212%22/%3E%3Ctext x=%22200%22 y=%22120%22 text-anchor=%22middle%22 fill=%22rgba(255,255,255,0.7)%22 font-family=%22Poppins,sans-serif%22 font-size=%2218%22%3ECourse Image%3C/text%3E%3C/svg%3E';" alt="" loading="lazy" decoding="async" fetchpriority="low" />
+                <div class="course-badge-row" aria-hidden="true">
+                    <span class="course-badge course-badge--org"><%- org %></span>
+                    <span class="course-badge course-badge--code"><%- content.number %></span>
+                </div>
+                <div class="course-visual-copy" aria-hidden="true">
+                    <span class="course-visual-copy__kicker"><%- gettext("Curated pathway") %></span>
+                    <span class="course-visual-copy__title"><%- gettext("See the syllabus, cadence, and commitment before you enroll.") %></span>
+                </div>
+            </div>
+        </header>
+        <section class="course-info">
+            <div class="course-meta">
+                <span class="course-kicker"><%- gettext("Learning Track") %></span>
+                <span class="course-organization"><%- org %></span>
+            </div>
+            <h2 class="course-name">
+                <span class="course-title"><%- content.display_name %></span>
+            </h2>
+            <p class="course-guidance">
+                <%- gettext("Review the structure, schedule, and enrollment path before you commit.") %>
+            </p>
+            <div class="course-decision-grid" aria-hidden="true">
+                <div class="course-signal">
+                    <span class="course-signal__label"><%- gettext("Track code") %></span>
+                    <span class="course-signal__value"><%- content.number %></span>
+                </div>
+                <div class="course-signal">
+                    <span class="course-signal__label"><%- gettext("Starts") %></span>
+                    <span class="course-signal__value"><%- start %></span>
+                </div>
+                <div class="course-signal">
+                    <span class="course-signal__label"><%- gettext("Best next move") %></span>
+                    <span class="course-signal__value"><%- gettext("Open syllabus") %></span>
+                </div>
+            </div>
+            <div class="course-footer">
+                <div class="course-footer-copy">
+                    <span class="course-footer-copy__label"><%- gettext("Decision support") %></span>
+                    <span class="course-footer-copy__meta"><%- gettext("Open the full course page to compare outcomes, calendar, and enrollment details in one pass.") %></span>
+                </div>
+                <div class="course-date" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="21" viewBox="0 0 20 21" fill="none" aria-hidden="true">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M15 3.83332H15.8333C16.75 3.83332 17.5 4.58332 17.5 5.49999V17.1667C17.5 18.0833 16.75 18.8333 15.8333 18.8333H4.16667C3.24167 18.8333 2.5 18.0833 2.5 17.1667L2.50833 5.49999C2.50833 4.58332 3.24167 3.83332 4.16667 3.83332H5V2.16666H6.66667V3.83332H13.3333V2.16666H15V3.83332ZM4.16667 8.83332V17.1667H15.8333V8.83332H4.16667ZM15.8333 7.16666H4.16667V5.49999H15.8333V7.16666ZM14.1667 11.3333H10V15.5H14.1667V11.3333Z" fill="#9CA3AF"/>
+              </svg>
+                    <%- interpolate(
+                          gettext("Starts: %(start_date)s"),
+                          { start_date: start }, true
+                        ) %>
+                </div>
+                <span class="learn-more" aria-hidden="true">
+                  <span><%- gettext("Explore Course") %></span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M3.33334 8H12.6667" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8.66666 4L12.6667 8L8.66666 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+            </div>
+        </section>
+        <div class="sr">
+            <ul>
+                <li><%- gettext("Learning Track") %></li>
+                <li><%- org %></li>
+                <li><%- content.number %></li>
+                <li><%- gettext("Starts") %><time itemprop="startDate" datetime="<%- start %>"><%- start %></time></li>
+            </ul>
+        </div>
+</a>

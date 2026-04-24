@@ -1,0 +1,258 @@
+# Structural Debt Register — machine-readable, severity-ranked
+#
+# Every entry represents a known deviation from the contract system's
+# declared invariants. Each must have an owner, severity, and a
+# kill/migrate/tolerate decision.
+#
+# Consumers:
+#   - scripts/qa/verify-structural-debt-register.sh (freshness + schema)
+#   - Agent execution workflows (debt-aware routing)
+#   - Operational convergence sessions
+#
+# Classification:
+#   severity: critical | high | medium | low
+#   decision: kill | migrate | tolerate
+#   status: open | in-progress | resolved
+---
+schema_version: "1.0"
+
+entries:
+  # ── CI gate failures (classified from full static inventory run) ──────────
+
+  - id: DEBT-001
+    title: "Untracked root markdown LAUNCH_ROADMAP.md fails verify-repo-structure"
+    severity: low
+    class: local-workspace-artifact
+    owner_repo: mereka-lms
+    owner_layer: source
+    failing_gate: scripts/qa/verify-repo-structure.sh
+    evidence: "LAUNCH_ROADMAP.md is untracked (git status --porcelain shows ??)"
+    current_risk: "CI fails on machines where untracked files exist in worktree"
+    decision: kill
+    action: "Deleted local LAUNCH_ROADMAP.md from the worktree; keep root markdown allowlist clean"
+    review_date: "2026-04-05"
+    status: resolved
+
+  - id: DEBT-002
+    title: "Python __pycache__/.pyc artifacts in deploy/k8s/ fail validate-deploy-contract"
+    severity: medium
+    class: local-workspace-artifact
+    owner_repo: mereka-lms
+    owner_layer: build
+    failing_gate: scripts/qa/validate-deploy-contract.sh
+    evidence: "7 .pyc files under deploy/k8s/base/apps/openedx/settings/"
+    current_risk: "Compiled artifacts in deploy tree; CI fails on machines where python imported these"
+    decision: kill
+    action: "Removed deploy/k8s/base/apps/openedx/settings/lms/__pycache__ and keep __pycache__/ ignored"
+    review_date: "2026-04-05"
+    status: resolved
+
+  - id: DEBT-003
+    title: "verify-branding-evidence-a11y-contract regex parse error"
+    severity: medium
+    class: script-bug
+    owner_repo: mereka-lms
+    owner_layer: proof
+    failing_gate: scripts/qa/verify-branding-evidence-a11y-contract.sh
+    evidence: "Was a ripgrep regex issue — passes on clean origin/main as of e3dd4067d"
+    current_risk: "None — passes on clean state"
+    decision: kill
+    action: "Reclassified: only failed in dirty worktree. Passes on clean origin/main."
+    review_date: "2026-04-08"
+    status: resolved
+
+  - id: DEBT-004
+    title: "verify-vendored-settings-drift was non-deterministic (shared checkout)"
+    severity: low
+    class: cross-repo-drift
+    owner_repo: mereka-lms + bbi-infrastructure
+    owner_layer: build
+    failing_gate: scripts/qa/verify-vendored-settings-drift.sh
+    evidence: >
+      Fixed: verifier now uses git show against INFRA_REF (default:
+      refs/remotes/origin/main) instead of reading the mutable checkout.
+      CRLF normalization also applied. Results are deterministic
+      regardless of which branch bbi-infrastructure is checked out on.
+      Remaining real drift: LMS production.py (Oscar ecommerce URLs
+      commented out in app repo, still active in infra origin/main).
+    current_risk: "1 real drift (production.py), needs bbi-infra PR #2524 merge"
+    decision: kill
+    action: "Ref-pinned verifier deployed. Merge bbi-infra PR #2524 to close last drift."
+    review_date: "2026-04-08"
+    status: in-progress
+
+  - id: DEBT-005
+    title: "verify-oscar-deprecation printf error with pipefail + || echo 0"
+    severity: low
+    class: script-bug
+    owner_repo: mereka-lms
+    owner_layer: proof
+    failing_gate: scripts/qa/verify-oscar-deprecation.sh
+    evidence: "pipefail + || echo 0 inside $() captures both wc output and fallback"
+    current_risk: "Latent: only triggers on dirty worktrees with large file count"
+    decision: kill
+    action: "Fixed: moved || fallback outside $() to prevent double capture"
+    review_date: "2026-04-08"
+    status: resolved
+
+  - id: DEBT-006
+    title: "audit-velero reports stale backups (115+ hours) and pending PVCs"
+    severity: medium
+    class: infrastructure-drift
+    owner_repo: bbi-infrastructure
+    owner_layer: realization
+    failing_gate: scripts/qa/audit-velero.sh
+    evidence: "Reclassified: passes on clean origin/main (warnings=1, failures=0)"
+    current_risk: "Advisory warning only (VolumeSnapshotLocation)"
+    decision: tolerate
+    action: "Script exits 0; VolumeSnapshotLocation optional per backup strategy"
+    review_date: "2026-04-08"
+    status: resolved
+
+  - id: DEBT-007
+    title: "verification-catalog clean-copy test used mutable worktree state"
+    severity: medium
+    class: script-bug
+    owner_repo: mereka-lms
+    owner_layer: proof
+    failing_gate: "scripts/qa/test-verify-verification-catalog.sh"
+    evidence: >
+      Resolved in PR #2037. The test now snapshots tracked files with
+      `git ls-files` + tar when running inside a git checkout and explicitly
+      proves untracked `verify-*.sh` runner noise does not enter catalog
+      authority. This was not just dirty-worktree tolerance.
+    current_risk: "None — catalog test is deterministic on clean and noisy runners"
+    decision: kill
+    action: >
+      Keep the tracked-file copy path and the untracked verification-script
+      runner-noise guard. Do not regress to mutable whole-worktree snapshots for
+      verification-catalog proof.
+    review_date: "2026-04-22"
+    status: resolved
+
+  - id: DEBT-008
+    title: "verify-release-automation fails due to branding a11y sub-check"
+    severity: medium
+    class: cascading-failure
+    owner_repo: mereka-lms
+    owner_layer: proof
+    failing_gate: scripts/qa/verify-release-automation.sh
+    evidence: "Reclassified: passes on clean origin/main. DEBT-003 was a dirty-worktree artifact."
+    current_risk: "None"
+    decision: kill
+    action: "Resolved: both DEBT-003 and this pass on clean state"
+    review_date: "2026-04-08"
+    status: resolved
+
+  # ── Gemini-class structural debt ──────────────────────────────────────────
+
+  - id: DEBT-009
+    title: "Split-brain GitOps: app-repo overlays vs bbi-infrastructure overlays"
+    severity: high
+    class: ghost-truth-surface
+    owner_repo: mereka-lms
+    owner_layer: realization
+    evidence: "deploy/k8s/overlays/production/ and overlays/rke2-nonprod/ exist in mereka-lms but bbi-infrastructure is the live GitOps truth"
+    current_risk: "Agents edit the wrong overlay; changes never reach production. Mitigated by ghost-truth-surfaces.yaml classification and route resolver flagging."
+    decision: migrate
+    action: "Complete migration to bbi-infrastructure per ADR-025; freeze app-repo overlays. Blocked by 20+ script references to these overlays."
+    review_date: "2026-05-15"
+    status: open
+
+  - id: DEBT-010
+    title: "Bashified release joins (manual SHA+digest+env join)"
+    severity: high
+    class: manual-critical-path
+    owner_repo: mereka-lms
+    owner_layer: promotion
+    evidence: "Release scripts still allow manual image tag joining without release-object validation"
+    current_risk: "Wrong image can be promoted; release-object gate can be bypassed via direct script invocation. Mitigated by release.yml schema validation step (INV-016)."
+    decision: kill
+    action: "Enforce release-object schema validation in all promotion paths. CI workflow already validates; direct script invocation path needs same gate."
+    review_date: "2026-05-01"
+    status: open
+
+  - id: DEBT-011
+    title: "Local-only ~/.factory/skills copies treated as evidence"
+    severity: medium
+    class: local-only-truth
+    owner_repo: mereka-lms
+    owner_layer: source
+    evidence: >
+      Ghost-truth verifier scans config/ and scripts/qa/ for
+      authoritative-sounding claims about home-dir skill copies.
+      Both paths are classified as mirror-only with rejection
+      rules in ghost-truth-surfaces.yaml. Verifier passes.
+    current_risk: "Low — enforced by verifier in CI static inventory"
+    decision: kill
+    action: "Covered by ghost-truth verifier. No further action needed."
+    review_date: "2026-04-08"
+    status: resolved
+
+  - id: DEBT-012
+    title: "Frozen Terraform directory still in repo"
+    severity: low
+    class: ghost-truth-surface
+    owner_repo: mereka-lms
+    owner_layer: source
+    evidence: "infrastructure/terraform/ exists but is frozen; DEPRECATION_LEDGER classifies as deprecated"
+    current_risk: "Agents may attempt to use Terraform for infrastructure changes"
+    decision: tolerate
+    action: "Already classified in DEPRECATION_LEDGER; remove when no inbound references remain"
+    review_date: "2026-04-04"
+    status: open
+
+  - id: DEBT-013
+    title: "Hand-maintained contracts without freshness checks"
+    severity: medium
+    class: contract-drift-risk
+    owner_repo: mereka-lms
+    owner_layer: proof
+    evidence: "config/change-surface-contracts.yaml, config/proof-gate-contract.yaml are hand-maintained"
+    current_risk: "Contracts can drift from reality without detection"
+    decision: migrate
+    action: "Added freshness verifiers for workflow map, ghost truth, source-of-truth, structural debt, domain proof, and eval runner contracts"
+    review_date: "2026-04-05"
+    status: resolved
+
+  - id: DEBT-014
+    title: "Cross-repo main-branch protection still drifts from governance contract"
+    severity: high
+    class: live-governance-gap
+    owner_repo: mereka-lms + bbi-infrastructure
+    owner_layer: proof
+    evidence: >
+      Reviewed 2026-04-20 with gh api. mereka-lms@main live == target.
+      bbi-infrastructure@main still drifts from target: live enforce_admins
+      is true, required approving review count is 0, strict status checks are
+      disabled, and live required contexts are ['eso-self-secrets-check',
+      'policy-guards', 'validate'] instead of target ['auth-verify',
+      'policy-guards'].
+    current_risk: >
+      Merge governance is no longer uniformly enforced across the paired repos.
+      Infra changes can bypass the stricter contract expected by this repo's
+      cross-repo branch-protection audit, and scripts/qa/verify-branch-protection-contract.sh
+      --live still fails until the target is either restored in GitHub or
+      intentionally changed in a dedicated governance tranche.
+    decision: kill
+    action: >
+      Keep mereka-lms@main aligned. The 2026-04-20 review refreshed the
+      repo-local live snapshot. Next tranche must decide whether to restore
+      bbi-infrastructure@main to the declared target or update the target as an
+      intentional architecture change, then rerun
+      scripts/qa/verify-branch-protection-contract.sh --live.
+    review_date: "2026-04-27"
+    status: open
+
+  - id: DEBT-015
+    title: "Shared team-skills roots can silently break loader integrity"
+    severity: high
+    class: shared-skill-loader
+    owner_repo: team-skills
+    owner_layer: source
+    evidence: "plugins/infra/skills/cost-management/SKILL.md has malformed frontmatter and shared roots contain alias-shadowed skill files"
+    current_risk: "Agents outside this repo can miss, shadow, or mis-load shared skills without any repo-local signal. Mitigated by ghost-truth-surfaces.yaml reject_canonical_mentions for home-dir skills."
+    decision: kill
+    action: "Fix shared-root frontmatter in team-skills repo. This repo's controls (ghost-truth, skill-graph) are in place; the fix is in the external repo."
+    review_date: "2026-05-01"
+    status: open

@@ -1,0 +1,70 @@
+[
+  {
+    "_id": {
+      "$oid": "100000000000000000000001"
+    },
+    "_type": "CommentThread",
+    "course_id": "course-v1:MerekaDemo+DEMO101+2025_T1",
+    "commentable_id": "course",
+    "title": "Welcome to the Discussion Forum! (DEV SEED)",
+    "body": "This is a sample forum thread created by the dev seed script. It is **not real content**.\n\nFeel free to reply to test forum functionality in your local environment.",
+    "author_id": "dev_seed_student",
+    "author_username": "dev_seed_student",
+    "anonymous": false,
+    "anonymous_to_peers": false,
+    "thread_type": "discussion",
+    "closed": false,
+    "pinned": true,
+    "visible": true,
+    "abuse_flaggers": [],
+    "historical_abuse_flaggers": [],
+    "tags": [],
+    "votes": {
+      "up": [],
+      "down": [],
+      "up_count": 0,
+      "down_count": 0,
+      "count": 0,
+      "point": 0
+    },
+    "comment_count": 1,
+    "at_position_list": [],
+    "read_states": [],
+    "group_id": null,
+    "last_activity_at": { "$date": "2025-01-01T00:00:00.000Z" },
+    "created_at": { "$date": "2025-01-01T00:00:00.000Z" },
+    "updated_at": { "$date": "2025-01-01T00:00:00.000Z" }
+  },
+  {
+    "_id": {
+      "$oid": "100000000000000000000002"
+    },
+    "_type": "Comment",
+    "course_id": "course-v1:MerekaDemo+DEMO101+2025_T1",
+    "comment_thread_id": {
+      "$oid": "100000000000000000000001"
+    },
+    "parent_id": null,
+    "body": "Hello! This is a sample comment from the dev seed script. Reply functionality, vote counts, and abuse flagging can all be tested using fixtures seeded via `seed-mongo-dev.sh`.",
+    "author_id": "dev_seed_student",
+    "author_username": "dev_seed_student",
+    "anonymous": false,
+    "anonymous_to_peers": false,
+    "abuse_flaggers": [],
+    "historical_abuse_flaggers": [],
+    "at_position_list": [],
+    "visible": true,
+    "endorsed": false,
+    "endorsement": {},
+    "votes": {
+      "up": [],
+      "down": [],
+      "up_count": 0,
+      "down_count": 0,
+      "count": 0,
+      "point": 0
+    },
+    "created_at": { "$date": "2025-01-01T00:00:00.000Z" },
+    "updated_at": { "$date": "2025-01-01T00:00:00.000Z" }
+  }
+]

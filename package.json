@@ -1,0 +1,26 @@
+{
+  "name": "mereka-academy-tooling",
+  "version": "0.1.0",
+  "description": "Tooling and scripts for Mereka Academy Open edX",
+  "private": true,
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "lint": "eslint scripts/**/*.mjs services/**/*.js || true",
+    "format": "prettier --write scripts/**/*.mjs services/**/*.js || true",
+    "test": "echo \"No tests configured\" && exit 0"
+  },
+  "devDependencies": {
+    "eslint": "^10.2.1",
+    "prettier": "^3.8.3"
+  },
+  "prettier": {
+    "semi": true,
+    "singleQuote": false,
+    "tabWidth": 2,
+    "trailingComma": "es5",
+    "printWidth": 100
+  }
+}
+

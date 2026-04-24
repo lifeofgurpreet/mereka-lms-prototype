@@ -1,0 +1,52 @@
+## mako
+<%namespace name="static" file="static_content.html"/>
+<%!
+"""
+Theme hook for LMS pages.
+
+edx-platform `lms/templates/main.html` loads this file via:
+  <%static:optional_include_mako file="head-extra.html" is_theming_enabled="True" />
+
+This is a runtime loader shim, not the canonical token source. Its job is
+limited to:
+  - preloading brand fonts
+  - loading the prebuilt `mereka-overrides.css` runtime stylesheet
+
+Canonical token and override ownership lives in:
+  - `assets/branding/tokens.css`
+  - `scripts/branding/generate-tokens-from-canonical.sh`
+  - `scripts/branding/sync-brand-assets.sh`
+
+Do not hand-add token values, color definitions, or unrelated hotfix logic
+here. Keep this file thin and loader-only.
+"""
+%>
+
+<link
+  rel="preload"
+  as="font"
+  type="font/woff2"
+  crossorigin
+  href="${static.url('mereka/fonts/Poppins-Regular.woff2')}"
+/>
+<link
+  rel="preload"
+  as="font"
+  type="font/woff2"
+  crossorigin
+  href="${static.url('mereka/fonts/Poppins-SemiBold.woff2')}"
+/>
+<link
+  rel="preload"
+  as="font"
+  type="font/woff2"
+  crossorigin
+  href="${static.url('mereka/fonts/Lato-Regular.woff2')}"
+/>
+
+<link
+  rel="stylesheet"
+  href="${static.url('mereka/css/mereka-overrides.css')}"
+  type="text/css"
+  media="all"
+/>

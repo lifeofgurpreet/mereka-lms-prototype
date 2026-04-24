@@ -1,0 +1,66 @@
+<%!
+from django.conf import settings
+%>
+<%
+platform_name = getattr(settings, 'PLATFORM_NAME', 'Mereka Academy')
+try:
+    from openedx.core.djangoapps.site_configuration import helpers as config_helpers
+    platform_name = config_helpers.get_value('platform_name', platform_name)
+except Exception:
+    pass
+%>
+<section class="mereka-hero">
+  <div class="mereka-hero__copy">
+    <p class="eyebrow">${platform_name}</p>
+    <h1>Train teams that can ship what Southeast Asia needs next.</h1>
+    <p class="lede">
+      Strategy-grade learning journeys for builders, operators, and emerging leaders. Every path
+      blends applied skills, mentor guidance, and work you can point to with confidence.
+    </p>
+    <ul class="mereka-hero__signals">
+      <li class="mereka-hero__signal">AI + product fluency</li>
+      <li class="mereka-hero__signal">Real project delivery</li>
+      <li class="mereka-hero__signal">Regional operator context</li>
+    </ul>
+    <div class="hero-actions">
+      <a href="/register" class="btn btn-primary">Join the community</a>
+      <a href="/courses" class="btn btn-outline-primary">Browse courses</a>
+    </div>
+  </div>
+  <aside class="mereka-hero__spotlight">
+    <p class="mereka-hero__spotlight-label">Built for applied momentum</p>
+    <h2>From curiosity to capability.</h2>
+    <p class="mereka-hero__spotlight-copy">
+      We design the shell around action, not just content. Learners get guided paths, sharper
+      signals, and a cleaner route into the work that matters.
+    </p>
+    <ul class="mereka-hero__spotlight-list">
+      <li>
+        <strong>Project-led learning</strong>
+        <span>Build practical portfolio evidence instead of collecting passive certificates.</span>
+      </li>
+      <li>
+        <strong>Mentor-calibrated tracks</strong>
+        <span>Program shape, pacing, and proof tuned for real teams and regional hiring markets.</span>
+      </li>
+      <li>
+        <strong>Faster path to clarity</strong>
+        <span>Sharper discovery surfaces so learners can find the right work without UI friction.</span>
+      </li>
+    </ul>
+    <ul class="hero-metrics">
+      <li>
+        <span class="metric">150+</span>
+        <span class="label">hands-on modules</span>
+      </li>
+      <li>
+        <span class="metric">45</span>
+        <span class="label">industry mentors</span>
+      </li>
+      <li>
+        <span class="metric">18k</span>
+        <span class="label">learners empowered</span>
+      </li>
+    </ul>
+  </aside>
+</section>

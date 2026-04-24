@@ -1,0 +1,61 @@
+name: Emit Build Metrics
+description: >
+  Parse buildx metadata JSON and build log for cache-source facts, cache-export
+  success, layer reuse counts, and build duration. Writes the repo-owned raw
+  JSON artifact consumed by downstream CI metrics receivers and appends a
+  markdown table to the GitHub Step Summary.
+
+  Bead: mereka-lms-jj97.5
+  See: docs/ops/ci-cd/CI_METRICS.md — authoritative metric name list
+  See: scripts/ci/emit-build-metrics.sh — parser implementation
+
+inputs:
+  metadata-file:
+    description: >
+      Path to the buildx metadata JSON file produced by --metadata-file on the
+      docker/build-push-action step (or docker buildx build --metadata-file).
+    required: true
+  log-file:
+    description: >
+      Path to the buildx build log (captured stdout/stderr from the build step).
+      Optional; omit or set to '' to skip log-based extraction.
+    required: false
+    default: ''
+  image-family:
+    description: >
+      Image family identifier. Must be one of: openedx, mfe.
+      Written into the producer artifact and later used as a dimension on
+      downstream metrics (see CI_METRICS.md).
+    required: true
+  release-unit-id:
+    description: >
+      The source commit SHA that triggered this build. Acts as the primary join
+      key across build → promotion → realization → runtime proof in Prometheus.
+      Pass the full github.sha for standard builds.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Parse build metrics
+      shell: bash
+      run: |
+        "${GITHUB_WORKSPACE}/scripts/ci/emit-build-metrics.sh" \
+          --metadata-file "${{ inputs.metadata-file }}" \
+          --log-file "${{ inputs.log-file }}" \
+          --image-family "${{ inputs.image-family }}" \
+          --release-unit-id "${{ inputs.release-unit-id }}" \
+          --workflow-run-id "${{ github.run_id }}"
+
+    - name: Upload metrics artifact
+      # Always run — the script exits 0 even on partial data; artifact is best-effort.
+      if: always()
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+      with:
+        name: build-metrics-${{ inputs.image-family }}
+        path: build-metrics-${{ inputs.image-family }}.json
+        # Retain for 90 days to support post-hoc analysis and Grafana backfill.
+        retention-days: 90
+        # Do not fail the workflow if the artifact file wasn't produced (edge case:
+        # runner OOM before script ran). if-no-files-found defaults to 'warn'.
+        if-no-files-found: warn

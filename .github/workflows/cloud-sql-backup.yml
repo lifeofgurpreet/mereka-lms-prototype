@@ -1,0 +1,41 @@
+name: Legacy Cloud SQL Backups (Gated)
+
+on:
+  # Keep a schedule so backups are automatic when explicitly enabled.
+  # The job itself is gated via a repo variable to avoid accidental drift/spam.
+  schedule:
+    - cron: '0 18 */3 * *'  # roughly ten runs per month
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  backup:
+    # Enable by setting GitHub repo variable: ENABLE_CLOUD_SQL_BACKUPS=true
+    if: ${{ vars.ENABLE_CLOUD_SQL_BACKUPS == 'true' }}
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      - name: Note
+        run: |
+          echo "This workflow is legacy and runs only when ENABLE_CLOUD_SQL_BACKUPS=true."
+          echo "If production uses in-cluster MySQL (PVC + Velero), keep it disabled."
+      - name: Authenticate to GCP
+        if: ${{ vars.GCP_WIF_PROVIDER != '' && vars.GCP_WIF_SA != '' }}
+        uses: ./.github/actions/gcp-gke-auth
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          wif_service_account: ${{ vars.GCP_WIF_SA }}
+          auth_mode: auto
+          gcloud_project: mereka-lms
+          skip_gke: 'true'
+      - name: Run backup script
+        env:
+          PROJECT: mereka-lms
+          INSTANCE: mereka-lms-mysql
+          BUCKET: staging-academy-mereka-io-backup
+        run: ./scripts/infra/backup-db.sh

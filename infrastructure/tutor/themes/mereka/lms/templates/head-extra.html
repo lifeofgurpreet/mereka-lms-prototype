@@ -1,0 +1,83 @@
+## mako
+<%namespace name="static" file="static_content.html"/>
+<%!
+"""
+Theme hook for LMS pages.
+
+edx-platform `lms/templates/main.html` loads this file via:
+  <%static:optional_include_mako file="head-extra.html" is_theming_enabled="True" />
+
+This is the LMS runtime shim copy of `head-extra.html`. It preloads fonts and
+loads the prebuilt runtime override CSS without requiring a full recompilation
+of the upstream LMS asset bundle.
+
+It does not own token values or CSS truth. Functional loader changes should be
+mirrored with the other `head-extra.html` copies; only documented
+surface-specific preload differences should diverge.
+"""
+%>
+
+<link
+  rel="preload"
+  as="font"
+  type="font/woff2"
+  crossorigin
+  href="${static.url('mereka/fonts/Poppins-Regular.woff2')}"
+/>
+<link
+  rel="preload"
+  as="font"
+  type="font/woff2"
+  crossorigin
+  href="${static.url('mereka/fonts/Poppins-SemiBold.woff2')}"
+/>
+<link
+  rel="preload"
+  as="font"
+  type="font/woff2"
+  crossorigin
+  href="${static.url('mereka/fonts/Lato-Regular.woff2')}"
+/>
+
+<link
+  rel="stylesheet"
+  href="${static.url('mereka/css/mereka-overrides.css')}"
+  type="text/css"
+  media="all"
+/>
+
+## Tenant palette injection — override CSS custom properties per SiteConfiguration.
+## SOF uses purple; Biji-Biji uses black; default Mereka uses magenta.
+<%
+from openedx.core.djangoapps.site_configuration import helpers as config_helpers
+
+tenant_primary   = config_helpers.get_value("PRIMARY_COLOR", "")
+tenant_secondary = config_helpers.get_value("SECONDARY_COLOR", "")
+tenant_accent    = config_helpers.get_value("ACCENT_COLOR", "")
+%>
+% if tenant_primary or tenant_secondary or tenant_accent:
+<style>
+:root {
+  % if tenant_primary:
+  --mereka-color-magenta: ${tenant_primary};
+  --pgn-color-primary-base: ${tenant_primary};
+  --pgn-color-primary-400: ${tenant_primary};
+  --pgn-color-primary-500: ${tenant_primary};
+  --pgn-color-brand-base: ${tenant_primary};
+  --color-magenta: ${tenant_primary};
+  % endif
+  % if tenant_secondary:
+  --mereka-color-teal: ${tenant_secondary};
+  --pgn-color-secondary-base: ${tenant_secondary};
+  --color-teal: ${tenant_secondary};
+  % endif
+  % if tenant_accent:
+  --mereka-color-blue: ${tenant_accent};
+  --pgn-color-info-base: ${tenant_accent};
+  --pgn-color-info-500: ${tenant_accent};
+  --pgn-color-info-700: ${tenant_accent};
+  --color-blue: ${tenant_accent};
+  % endif
+}
+</style>
+% endif

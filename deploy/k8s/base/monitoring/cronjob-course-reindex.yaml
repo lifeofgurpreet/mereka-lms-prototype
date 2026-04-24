@@ -1,0 +1,168 @@
+---
+# CronJob to reindex course catalog documents through edx-search.
+# The active backend is determined by the mounted Django settings at runtime.
+# Verification must follow the effective SEARCH_ENGINE instead of assuming a
+# permanent Elasticsearch or Meilisearch contract in source.
+# Runs every 6 hours. Idempotent — safe to rerun at any time.
+#
+# NOTE:
+# - `reindex_course` prompts for confirmation unless stdin provides `y`
+# - `reindex_course` uses SEARCH_ENGINE from the mounted Django settings
+# - verification branches on the effective SEARCH_ENGINE at runtime
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: course-reindex
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: course-reindex
+    app.kubernetes.io/component: cronjob
+    app.kubernetes.io/part-of: mereka-lms
+spec:
+  schedule: "30 */6 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    metadata:
+      labels:
+        app.kubernetes.io/name: course-reindex
+        app.kubernetes.io/component: job
+    spec:
+      backoffLimit: 1
+      ttlSecondsAfterFinished: 86400
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: course-reindex
+            app.kubernetes.io/component: pod
+        spec:
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+          containers:
+            - name: reindex
+              # Image is overridden by the kustomization images[] transformer.
+              image: docker.io/overhangio/openedx
+              securityContext:
+                allowPrivilegeEscalation: false
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -euo pipefail
+
+                  echo "=== Course Catalog Reindex - $(date -u) ==="
+
+                  echo "[1/4] Resolving effective SEARCH_ENGINE..."
+                  ENGINE=$(python manage.py cms shell -c "
+                  from django.conf import settings
+                  print(settings.SEARCH_ENGINE)
+                  " 2>/dev/null | tail -1 | tr -d '\r')
+
+                  if [ -z "${ENGINE:-}" ]; then
+                    echo "Could not determine SEARCH_ENGINE"
+                    exit 1
+                  fi
+
+                  echo "SEARCH_ENGINE=${ENGINE}"
+
+                  echo "[2/4] Reindexing all courses..."
+                  printf 'y\n' | python manage.py cms reindex_course --all 2>&1
+
+                  echo "[3/4] Verifying backend-specific index population..."
+                  case "${ENGINE}" in
+                    search.elastic.ElasticSearchEngine)
+                      STORE="Elasticsearch course_info"
+                      COUNT=$(curl -sf \
+                        "http://elasticsearch:9200/course_info/_count" \
+                        | python3 -c "import sys,json; print(json.load(sys.stdin).get('count',0))" \
+                        2>/dev/null || echo "0")
+                      ;;
+                    search.meilisearch.MeilisearchEngine)
+                      STORE="Meilisearch tutor_course_info"
+                      COUNT=$(curl -sf \
+                        -H "Authorization: Bearer ${MEILISEARCH_API_KEY:-}" \
+                        "http://meilisearch:7700/indexes/tutor_course_info/stats" \
+                        | python3 -c "import sys,json; print(json.load(sys.stdin).get('numberOfDocuments',0))" \
+                        2>/dev/null || echo "0")
+                      ;;
+                    *)
+                      echo "Unsupported SEARCH_ENGINE=${ENGINE}"
+                      exit 1
+                      ;;
+                  esac
+
+                  echo "${STORE} docs: ${COUNT}"
+
+                  echo "[4/4] Verifying CourseOverview count..."
+                  OVERVIEW_COUNT=$(python manage.py cms shell -c "
+                  from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
+                  print(CourseOverview.objects.count())
+                  " 2>&1 | tail -1 | tr -d '\r' || echo "unknown")
+
+                  echo "CourseOverview total: ${OVERVIEW_COUNT}"
+
+                  if [ "${OVERVIEW_COUNT}" != "unknown" ] && [ "${OVERVIEW_COUNT:-0}" -gt 0 ] && [ "${COUNT:-0}" -eq 0 ]; then
+                    echo "Index verification failed: ${STORE} is empty while CourseOverview has ${OVERVIEW_COUNT} rows"
+                    exit 1
+                  fi
+
+                  echo "Reindex complete."
+              env:
+                - name: DJANGO_SETTINGS_MODULE
+                  value: cms.envs.tutor.production
+                - name: SERVICE_VARIANT
+                  value: cms
+                - name: SECRET_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: openedx-secrets
+                      key: OPENEDX_SECRET_KEY
+                - name: JWT_SECRET_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: openedx-secrets
+                      key: JWT_SECRET_KEY_CMS
+                - name: MONGODB_HOST
+                  valueFrom:
+                    secretKeyRef:
+                      name: openedx-secrets
+                      key: FORUM_MONGODB_HOST
+              envFrom:
+                - secretRef:
+                    name: openedx-secrets
+                - secretRef:
+                    name: database-secrets
+                - secretRef:
+                    name: mereka-lms-runtime-secrets
+              volumeMounts:
+                - mountPath: /tmp
+                  name: tmp
+                - mountPath: /openedx/edx-platform/lms/envs/tutor/
+                  name: settings-lms
+                - mountPath: /openedx/edx-platform/cms/envs/tutor/
+                  name: settings-cms
+                - mountPath: /openedx/config
+                  name: config
+              resources:
+                requests:
+                  memory: "512Mi"
+                  cpu: "250m"
+                limits:
+                  memory: "1Gi"
+                  cpu: "500m"
+          volumes:
+            - name: tmp
+              emptyDir: {}
+            - name: settings-lms
+              configMap:
+                name: openedx-settings-lms
+            - name: settings-cms
+              configMap:
+                name: openedx-settings-cms
+            - name: config
+              configMap:
+                name: openedx-config

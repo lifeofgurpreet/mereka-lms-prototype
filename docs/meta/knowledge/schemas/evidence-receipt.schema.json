@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "receipt_id",
+    "schema_version",
+    "generated_by",
+    "source_range",
+    "canonical_inputs",
+    "required_evidence_classes",
+    "satisfied_evidence_classes",
+    "missing_evidence_classes",
+    "status_update_requirements",
+    "blocking_obligations"
+  ],
+  "properties": {
+    "receipt_id": { "const": "evidence-receipt" },
+    "schema_version": { "type": "integer", "const": 1 },
+    "generated_by": { "type": "string", "minLength": 1 },
+    "source_range": { "type": "string", "minLength": 1 },
+    "canonical_inputs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "required_evidence_classes": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "satisfied_evidence_classes": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "missing_evidence_classes": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "status_update_requirements": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "blocking_obligations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "type", "blocking"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "type": { "type": "string", "minLength": 1 },
+          "blocking": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

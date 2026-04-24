@@ -1,0 +1,79 @@
+name: RC Auto-Row Check
+
+# Runs the 9 ✅-auto rows from docs/reference/operations/RC_CHECKLIST.md.
+# Live-cluster rows (3, 4, 19, 25) run only on self-hosted ARC runners that
+# have KUBECONFIG wired. GitHub API rows (1, 2, 23) require GITHUB_TOKEN.
+# The job uploads a summary artifact so operators can review without reading logs.
+
+on:
+  workflow_dispatch:
+    inputs:
+      lane:
+        description: "Target lane"
+        required: false
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+  schedule:
+    # Daily at 06:00 UTC against dev lane
+    - cron: "0 6 * * *"
+
+permissions: {}
+
+jobs:
+  rc-check:
+    name: RC Auto-Row Check (${{ github.event.inputs.lane || 'dev' }})
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Authenticate to GCP (for kubeconfig via Secret Manager)
+        id: gcp-auth
+        # Only attempt GCP/cluster auth when WIF vars are configured.
+        # Without them the rc-check script will SKIP live-cluster rows gracefully.
+        if: ${{ vars.GCP_WIF_PROVIDER != '' && vars.GCP_WIF_SA != '' }}
+        uses: ./.github/actions/gcp-gke-auth
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          wif_service_account: ${{ vars.GCP_WIF_SA }}
+          auth_mode: auto
+          gcloud_project: bbi-k8
+          gke_project: ${{ vars.GKE_CLUSTER_PROJECT || 'bbi-k8' }}
+          gke_location: ${{ vars.GKE_CLUSTER_LOCATION || '' }}
+          gke_cluster: ${{ vars.GKE_CLUSTER_NAME || '' }}
+          strict_runtime: 'false'
+
+      - name: Run RC auto-row check
+        id: rc-check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LANE: ${{ github.event.inputs.lane || 'dev' }}
+          K8S_CONTEXT: rke2-nonprod
+        run: |
+          mkdir -p var
+          bin/lms-ops rc-check --lane "$LANE" 2>&1 | tee var/rc-check-summary.txt
+          echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload RC check summary
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: rc-check-summary-${{ github.event.inputs.lane || 'dev' }}-${{ github.run_id }}
+          path: var/rc-check-summary.txt
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Print summary to job summary
+        if: always()
+        run: |
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          cat var/rc-check-summary.txt >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || echo "(no summary produced)" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"

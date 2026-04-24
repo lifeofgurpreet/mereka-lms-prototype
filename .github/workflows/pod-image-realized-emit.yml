@@ -1,0 +1,151 @@
+name: Pod Image Realized — Emit Promotion Chain Metric
+
+# Standalone dispatch endpoint for the final stage (pod_image_realized) of the
+# S6.1 promotion-chain timing conveyor.
+#
+# Design rationale — Option C (standalone workflow_dispatch):
+#   The argo-sync-chain-watcher.yml workflow is being built by a parallel agent.
+#   Modifying it here would create a merge-conflict coordination risk with that
+#   agent's branch.  Instead this workflow is a standalone dispatch endpoint:
+#   the caller (argo-watcher or an operator) dispatches it explicitly once they
+#   have the expected digest.  This is the harder, truthful path — we only emit
+#   pod_image_realized when the caller can supply an expected_digest, meaning the
+#   signal is grounded in actual release provenance, not a polling heuristic.
+#
+# Trigger:   workflow_dispatch (caller-owned — Argo watcher, operator, or downstream CI)
+# Runner:    mereka-k8s-runners (ambient rke2-nonprod kubeconfig)
+# Stage:     pod_image_realized (stage 6 of 6 in the promotion conveyor)
+# Bead:      mereka-lms-lb4c.6
+# Companion: #1828 (app_merge), #1832 (bbi_pr_opened)
+#
+# NOTE: emit-promotion-chain-metrics.sh and verify-pods-on-digest.sh must already
+#       be present on the branch being checked out (both landed on main via
+#       mereka-lms-lb4c.1 / mereka-lms-lb4c.4).
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_unit_id:
+        description: "Release unit ID (git SHA of the app-repo merge commit, or release object ID)"
+        required: true
+        type: string
+      expected_digest:
+        description: "Expected container image digest (sha256:... form)"
+        required: true
+        type: string
+      namespace:
+        description: "Kubernetes namespace to inspect"
+        required: false
+        default: "mereka-lms-dev"
+        type: string
+      selector:
+        description: "kubectl label selector for pods (e.g. app.kubernetes.io/name=cms-worker)"
+        required: false
+        default: "app.kubernetes.io/name=cms-worker"
+        type: string
+
+permissions: {}
+
+jobs:
+  pod-image-realized:
+    name: Verify pods on digest and emit pod_image_realized metric
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      # ── 1. Confirm kubectl context is rke2-nonprod ────────────────────────────
+      # mereka-k8s-runners run inside rke2-nonprod; the ambient kubeconfig already
+      # has rke2-nonprod as the current context.  We confirm this explicitly and
+      # then use --context rke2-nonprod on every kubectl call via the verify script.
+      - name: Confirm kubectl context is rke2-nonprod
+        run: |
+          CURRENT_CTX="$(kubectl config current-context 2>/dev/null || echo '<none>')"
+          echo "kubectl current-context: ${CURRENT_CTX}"
+          if [[ "${CURRENT_CTX}" != "rke2-nonprod" ]]; then
+            echo "::warning::kubectl current-context is '${CURRENT_CTX}', expected 'rke2-nonprod'. Proceeding anyway — verify-pods-on-digest.sh passes --context rke2-nonprod explicitly."
+          fi
+
+      # ── 2. Run verify-pods-on-digest.sh ──────────────────────────────────────
+      # Exit 0  → all pods on expected digest → emit pod_image_realized below.
+      # Exit 1  → at least one pod NOT on expected digest → log warning, skip emit,
+      #           fail the step so the caller sees it.  continue-on-error: true so
+      #           the artifact upload step can still run.
+      # Exit 2  → usage / environment error (bad args, no pods, kubectl missing).
+      - name: Verify pods are on expected digest
+        id: verify_pods
+        continue-on-error: true
+        env:
+          RELEASE_UNIT_ID: ${{ inputs.release_unit_id }}
+          EXPECTED_DIGEST: ${{ inputs.expected_digest }}
+          NAMESPACE: ${{ inputs.namespace }}
+          SELECTOR: ${{ inputs.selector }}
+        run: |
+          echo "==> verify-pods-on-digest.sh"
+          echo "    namespace:  ${NAMESPACE}"
+          echo "    selector:   ${SELECTOR}"
+          echo "    digest:     ${EXPECTED_DIGEST}"
+          echo "    release_unit_id: ${RELEASE_UNIT_ID}"
+          echo ""
+          kubectl --context rke2-nonprod config current-context
+          bash scripts/qa/verify-pods-on-digest.sh \
+            --namespace "${NAMESPACE}" \
+            --selector  "${SELECTOR}" \
+            --digest    "${EXPECTED_DIGEST}"
+
+      # ── 3. Emit pod_image_realized (only on verify pass) ─────────────────────
+      # We intentionally do NOT emit when the verify step failed — emitting a
+      # pod_image_realized with unverified pods would be a false signal that
+      # corrupts the conveyor latency measurements.
+      - name: Emit pod_image_realized metric
+        if: steps.verify_pods.outcome == 'success'
+        continue-on-error: true
+        env:
+          RELEASE_UNIT_ID: ${{ inputs.release_unit_id }}
+          PROMOTION_METRICS_OUT_DIR: var/ci/promotion-metrics
+        run: |
+          mkdir -p var/ci/promotion-metrics
+          bash scripts/ci/emit-promotion-chain-metrics.sh \
+            --stage pod_image_realized \
+            --release-unit-id "${RELEASE_UNIT_ID}" \
+            --out-dir var/ci/promotion-metrics
+
+      # ── 4. Warn clearly when verify failed (emit was skipped) ─────────────────
+      # The caller needs to know the metric was NOT emitted so they can triage.
+      # This step fails the job cleanly after artifact upload.
+      - name: Warn — pod_image_realized NOT emitted (digest mismatch or error)
+        if: steps.verify_pods.outcome != 'success'
+        continue-on-error: true
+        run: |
+          echo "::warning::pod_image_realized was NOT emitted — verify-pods-on-digest.sh exited non-zero (outcome: ${{ steps.verify_pods.outcome }})."
+          echo "Triage:"
+          echo "  - Check the 'Verify pods are on expected digest' step above for MISMATCH lines."
+          echo "  - If Argo reports sync=Synced but pods are on wrong digest, see bead infrastructure-nj48:"
+          echo "    kubectl -n argocd annotate application <app-name> argocd.argoproj.io/refresh=hard --overwrite"
+          echo "  - Re-dispatch this workflow once the rollout completes."
+
+      # ── 5. Upload artifact (always — even on verify failure) ─────────────────
+      # Preserves whatever partial JSONL was written (e.g. from prior stages in
+      # the same JSONL file) plus any diagnostic output.
+      - name: Upload promotion-chain metrics artifact
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: promotion-chain-metrics-pod-realized-${{ github.run_id }}
+          path: var/ci/promotion-metrics/
+          if-no-files-found: ignore
+          retention-days: 30
+
+      # ── 6. Fail the job if verify did not pass ────────────────────────────────
+      # After the artifact is safely uploaded, surface the failure to the caller.
+      # This ensures workflow_dispatch callers and the Actions UI clearly show
+      # FAIL when the digest was not confirmed — not a silent green.
+      - name: Fail job if pods were not on expected digest
+        if: steps.verify_pods.outcome != 'success'
+        run: |
+          echo "::error::Pods in namespace '${{ inputs.namespace }}' (selector: '${{ inputs.selector }}') were not confirmed on digest '${{ inputs.expected_digest }}'. pod_image_realized was NOT emitted."
+          exit 1

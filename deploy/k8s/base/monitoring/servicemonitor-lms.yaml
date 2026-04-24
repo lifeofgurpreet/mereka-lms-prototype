@@ -1,0 +1,51 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: lms-metrics
+  namespace: mereka-lms
+  annotations:
+    app.kubernetes.io/version: 18.2.2
+  labels:
+    app.kubernetes.io/name: lms
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/managed-by: tutor
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/component: monitoring
+    release: monitoring  # bead mereka-lms-33d8: required by prod Prometheus serviceMonitorSelector
+spec:
+  # Select the LMS service
+  # Note: lms Service in services.yml does not carry the instance label —
+  # selecting only on name to guarantee this ServiceMonitor matches.
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: lms
+
+  # namespaceSelector intentionally omitted — default "same namespace as SM"
+  # works across all envs (prod mereka-lms / dev mereka-lms-dev / staging
+  # stg-mereka-lms). Previous hardcoded matchNames:[mereka-lms] yielded zero
+  # targets on dev+staging. See bead mereka-lms-33d8.
+
+  # Scrape configuration
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+      scheme: http
+      # RelabelConfigs to add additional labels to metrics
+      relabelings:
+        - action: replace
+          sourceLabels: [__meta_kubernetes_pod_name]
+          targetLabel: pod
+        - action: replace
+          sourceLabels: [__meta_kubernetes_pod_node_name]
+          targetLabel: node
+        - action: replace
+          sourceLabels: [__meta_kubernetes_namespace]
+          targetLabel: namespace
+      # MetricRelabelConfigs to drop unwanted metrics (if needed)
+      # metricRelabelings:
+      #   - sourceLabels: [__name__]
+      #     regex: 'django_http_requests_total_by_view_transport_method'
+      #     action: drop

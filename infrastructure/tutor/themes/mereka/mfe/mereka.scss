@@ -1,0 +1,42 @@
+// Mereka MFE theme — import manifest.
+// Shared design-system partials (fonts, tokens, base, utilities, footer) are
+// resolved from the co-located scss/ directory at build time (see sync-footer-assets.sh).
+// MFE surface partials (split from monolith, WW-05) live in mfe/scss/ in the
+// source tree and are merged into the same scss/ slot during the build copy.
+
+$mereka-font-path: "../fonts";
+@import "./scss/fonts";
+@import "./scss/tokens";
+@import "./scss/base";
+@import "./scss/mfe-utilities";
+@import "./scss/mfe-footer";
+
+// MFE surface partials (WW-05 split).
+@import "./scss/mfe-tokens";
+@import "./scss/shell";
+@import "./scss/auth";
+@import "./scss/dashboard";
+@import "./scss/certificate";
+@import "./scss/learning";
+
+// Responsive overrides (cross-surface breakpoints — must remain last).
+// RISK: LOW — responsive navbar padding; degrades to desktop padding only.
+@media (max-width: 768px) {
+  .navbar {
+    padding: var(--mereka-mfe-navbar-mobile-padding);
+  }
+
+  .mereka-header-logo__lockup {
+    display: none;
+  }
+
+  .mereka-no-courses-view {
+    text-align: center;
+  }
+
+  .mereka-learning-course-header__meta,
+  .mereka-dashboard-header-slot__actions,
+  .mereka-no-courses-view__actions {
+    justify-content: center;
+  }
+}

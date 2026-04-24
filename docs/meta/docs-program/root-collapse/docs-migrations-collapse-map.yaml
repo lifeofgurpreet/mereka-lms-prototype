@@ -1,0 +1,98 @@
+version: 1
+root: docs/migrations
+targets:
+  reference: docs/reference/migrations
+  status: docs/status/migrations
+  runbooks: docs/ops/runbooks/migrations
+  archive: docs/archive
+entries:
+  - source: docs/migrations/README.md
+    target: docs/migrations/README.md
+    disposition: tombstone-after-rehome
+  - source: docs/migrations/BBI-K8-MIGRATION.md
+    target: docs/archive
+    disposition: historical-plan
+  - source: docs/migrations/KAJABI_COURSES_WITHOUT_COMPLETION_DATA.md
+    target: docs/status/migrations
+    disposition: status-note
+  - source: docs/migrations/SKILLOURFUTURE_BRAND_MIGRATION.md
+    target: docs/ops/runbooks/migrations
+    disposition: execution-guide
+  - source: docs/migrations/kajabi/KAJABI_MIGRATION.md
+    target: docs/ops/runbooks/migrations/kajabi
+    disposition: runbook
+  - source: docs/migrations/kajabi/KAJABI_MIGRATION_VERIFICATION.md
+    target: docs/ops/runbooks/migrations/kajabi
+    disposition: verification-runbook
+  - source: docs/migrations/kajabi/ROLLBACK_AND_SAFETY.md
+    target: docs/ops/runbooks/migrations/kajabi
+    disposition: rollback-runbook
+  - source: docs/migrations/kajabi/KAJABI_CERTIFICATE_MIGRATION.md
+    target: docs/reference/migrations/kajabi
+    disposition: reference
+  - source: docs/migrations/kajabi/KAJABI_LESSON_CONTENT_FIX.md
+    target: docs/ops/runbooks/migrations/kajabi
+    disposition: troubleshooting-runbook
+  - source: docs/migrations/kajabi/KAJABI_LESSON_CONTENT_ISSUE.md
+    target: docs/archive
+    disposition: historical-issue-note
+  - source: docs/migrations/kajabi/KAJABI_MIGRATION_NOTES.md
+    target: docs/archive
+    disposition: mixed-historical-notes
+  - source: docs/migrations/mct/API_EXPLORATION.md
+    target: docs/reference/migrations/mct
+    disposition: reference
+  - source: docs/migrations/mct/DATA_MODEL_COMPLETE.md
+    target: docs/reference/migrations/mct
+    disposition: reference
+  - source: docs/migrations/mct/DOCUMENTATION_COMPLETE.md
+    target: docs/archive
+    disposition: historical-closeout
+  - source: docs/migrations/mct/EXPORT_COMPLETE.md
+    target: docs/archive
+    disposition: historical-closeout
+  - source: docs/migrations/mct/EXPORT_GUIDE.md
+    target: docs/ops/runbooks/migrations/mct
+    disposition: runbook
+  - source: docs/migrations/mct/EXPORT_SUCCESS.md
+    target: docs/archive
+    disposition: historical-status
+  - source: docs/migrations/mct/EXPORT_SUMMARY.md
+    target: docs/archive
+    disposition: historical-summary
+  - source: docs/migrations/mct/EXPORT_TESTING.md
+    target: docs/ops/runbooks/migrations/mct
+    disposition: runbook
+  - source: docs/migrations/mct/EXPORT_TEST_RESULTS.md
+    target: docs/archive
+    disposition: historical-test-results
+  - source: docs/migrations/mct/MCT_PLATFORM_RESEARCH.md
+    target: docs/reference/migrations/mct
+    disposition: reference
+  - source: docs/migrations/mct/MCT_PRE_MIGRATION_INVENTORY.md
+    target: docs/reference/migrations/mct
+    disposition: reference
+  - source: docs/migrations/mct/MCT_TO_OPENEDX_MAPPING.md
+    target: docs/reference/migrations/mct
+    disposition: reference
+  - source: docs/migrations/mct/MCT_USER_IMPORT_COMPLETE.md
+    target: docs/archive
+    disposition: historical-completion-note
+  - source: docs/migrations/mct/MIGRATION_PLAN.md
+    target: docs/ops/runbooks/migrations/mct
+    disposition: runbook
+  - source: docs/migrations/mct/OPENEDX_PROGRAMS_SETUP.md
+    target: docs/reference/migrations/mct
+    disposition: reference
+  - source: docs/migrations/mct/OPS_MCT_README.md
+    target: docs/ops/runbooks/migrations/mct
+    disposition: runbook
+  - source: docs/migrations/mct/PROGRAMS_SETUP_PLAN.md
+    target: docs/ops/runbooks/migrations/mct
+    disposition: runbook
+  - source: docs/migrations/mct/SMOKE_TEST.md
+    target: docs/ops/runbooks/migrations/mct
+    disposition: verification-runbook
+  - source: docs/migrations/mct/VIDEO_MIGRATION.md
+    target: docs/ops/runbooks/migrations/mct
+    disposition: runbook

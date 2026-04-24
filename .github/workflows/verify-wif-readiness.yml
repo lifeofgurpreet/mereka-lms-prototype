@@ -1,0 +1,64 @@
+name: WIF Readiness Check
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/**'
+
+permissions: {}
+
+jobs:
+  wif-readiness:
+    name: Verify WIF Migration Readiness
+    runs-on: mereka-k8s-runners
+    timeout-minutes: 5
+    continue-on-error: true
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Run WIF readiness check
+        run: |
+          set -euo pipefail
+          mkdir -p var/ci
+          ./scripts/qa/verify-wif-readiness.sh | tee var/ci/wif-readiness.log
+
+      - name: Publish run summary
+        if: always()
+        run: |
+          {
+            echo "## WIF Migration Readiness"
+            echo ""
+            echo "### What was checked"
+            echo "- Number of workflows still using \`GCP_SA_KEY\` / \`credentials_json\` (legacy)"
+            echo "- Number of workflows already using \`workload_identity_provider\` (WIF)"
+            echo "- \`id-token: write\` permission present in WIF-enabled workflows"
+            echo "- \`external-secrets.yaml\` for SA key references"
+            echo "- WIF migration guide doc exists"
+            echo ""
+            echo "### Migration status"
+            if grep -q "migration complete" var/ci/wif-readiness.log 2>/dev/null; then
+              echo "**Status**: Migration complete"
+            elif grep -q "migration in progress" var/ci/wif-readiness.log 2>/dev/null; then
+              echo "**Status**: Migration in progress"
+            else
+              echo "**Status**: Migration not started — see \`docs/ops/runbooks/WORKLOAD_IDENTITY_FEDERATION.md\`"
+            fi
+            echo ""
+            echo "### Next steps"
+            echo "- See \`docs/ops/runbooks/WORKLOAD_IDENTITY_FEDERATION.md\` for setup commands"
+            echo "- Run \`./scripts/qa/verify-wif-readiness.sh\` locally to track progress"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload CI logs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: wif-readiness-logs
+          path: var/ci/wif-readiness.log
+          retention-days: 3
+          if-no-files-found: warn

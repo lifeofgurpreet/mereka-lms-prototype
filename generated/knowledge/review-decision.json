@@ -1,0 +1,116 @@
+{
+  "canonical_inputs": [
+    "docs/meta/knowledge/DECISION_RUNTIME_MODEL.md",
+    "generated/skills/evidence-sufficiency-map.json",
+    "generated/skills/mixed-diff-arbitration.json",
+    "generated/skills/pack-registry.json",
+    "generated/skills/runtime-convergence-report.json",
+    "generated/skills/skill-registry.json"
+  ],
+  "change_classes": [
+    "documentation-truth",
+    "review"
+  ],
+  "decision": {
+    "blocking": false,
+    "reviewer_state": "required-reviewers-derived-live-approvals-unavailable",
+    "runtime_convergence_state": "warning",
+    "selected_skills": [
+      "control-plane-validation",
+      "docs-truth-review"
+    ],
+    "severity": "high"
+  },
+  "diff_range": "e0a85143e29ee5372c533f410392b4ac23e0f0c6...HEAD",
+  "explanation": {
+    "blocking_reasons": [],
+    "evidence_summary": [
+      {
+        "evidence_class": "catalog_governance",
+        "required_reviewers": [
+          "docs",
+          "governance"
+        ]
+      },
+      {
+        "evidence_class": "docs_policy",
+        "required_reviewers": [
+          "docs",
+          "governance"
+        ]
+      },
+      {
+        "evidence_class": "validation_run",
+        "required_reviewers": [
+          "docs",
+          "platform"
+        ]
+      }
+    ],
+    "required_evidence_classes": [
+      "catalog_governance",
+      "docs_policy",
+      "validation_run"
+    ],
+    "selected_skill_categories": [
+      "documentation-truth",
+      "review"
+    ]
+  },
+  "generated_by": "tools/knowledge/build_review_decision.py",
+  "missing_reviewers": [],
+  "pack_id": "review-decision",
+  "rationale_references": [
+    "docs/meta/knowledge/DECISION_RUNTIME_MODEL.md",
+    "generated/skills/pack-registry.json",
+    "generated/skills/skill-registry.json",
+    "generated/skills/runtime-convergence-report.json",
+    "generated/skills/evidence-sufficiency-map.json",
+    "generated/skills/mixed-diff-arbitration.json"
+  ],
+  "read_first_packs": [
+    {
+      "pack_id": "pack-registry",
+      "reason": "required by control-plane-validation",
+      "source_skill": "control-plane-validation"
+    },
+    {
+      "pack_id": "runtime-convergence-report",
+      "reason": "required by control-plane-validation",
+      "source_skill": "control-plane-validation"
+    },
+    {
+      "pack_id": "read-first",
+      "reason": "required by control-plane-validation",
+      "source_skill": "control-plane-validation"
+    }
+  ],
+  "required_reviewers": [
+    "docs",
+    "governance",
+    "platform"
+  ],
+  "schema_version": 1,
+  "source_range": "e0a85143e29ee5372c533f410392b4ac23e0f0c6...HEAD",
+  "touched_files": [
+    ".github/ci-scripts-static.txt",
+    "docs/archive/COURSE-CONSUMPTION-AND-STAFF-ACCEPTANCE.md",
+    "docs/catalog.json",
+    "generated/catalogs/docs-catalog.json",
+    "infrastructure/tutor/plugins/mereka_lms_mfe_slots.py",
+    "scripts/qa/test-mfe-slot-operation-compat.sh",
+    "scripts/qa/verify-mfe-header-branding.sh"
+  ],
+  "touched_repos": [
+    "bbi-infrastructure",
+    "mereka-lms",
+    "platform-control-plane"
+  ],
+  "touched_roots": [
+    ".github",
+    "docs",
+    "generated/catalogs",
+    "infrastructure",
+    "scripts/qa"
+  ]
+}

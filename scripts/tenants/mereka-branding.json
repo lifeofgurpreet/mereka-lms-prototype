@@ -1,0 +1,21 @@
+{
+  "slug": "mereka",
+  "name": "Mereka Academy",
+  "domain": "academyv2.mereka.io",
+  "colors": {
+    "primary": "#AB3B78",
+    "secondary": "#237072",
+    "accent": "#295CAD",
+    "text_on_primary": "#FFFFFF"
+  },
+  "logos": {
+    "logo_url": "/static/images/logo-horizontal.svg",
+    "logo_square_url": "/static/images/logo-square.svg",
+    "logo_white_url": "/static/images/logo-horizontal-white.svg",
+    "favicon_url": "/static/images/favicon.ico"
+  },
+  "footer": {
+    "text": "© Mereka Academy",
+    "contact_email": "support@mereka.io"
+  }
+}

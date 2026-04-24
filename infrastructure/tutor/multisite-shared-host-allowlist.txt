@@ -1,0 +1,26 @@
+# Temporary shared-host allowlist for non-enterprise preview/dev/staging lanes only.
+# Production enterprise tenant hosts MUST remain unique.
+#
+# Format (one entry per line):
+#   <host> [owner=<owner>] [expires=<YYYY-MM-DD>]
+#
+# Rules:
+#   - host MUST be preview/dev/staging scoped (*.mereka.dev, *.staging.*, preview.*)
+#   - owner MUST be a named team or individual responsible for the exception
+#   - expires MUST be set; use the next quarterly review date if no earlier deadline
+#   - Expired entries cause a governance gate FAIL (treated as unapproved shared hosts)
+#   - Enterprise (.mereka.io non-staging, .biji-biji.com) hosts are NEVER allowed here
+
+# --- dev lane (rke2-nonprod) ---
+# preview.academyv2.mereka.dev shares Studio + MFE with academyv2.mereka.dev because
+# the preview site is a read-only course preview node; it does not need its own Studio
+# or MFE deployment. Review when biji-biji.mereka.dev / skillourfuture.mereka.dev dev
+# lanes are added (each will need their own studio.*/apps.* at that point).
+studio.academyv2.mereka.dev owner=infra-team expires=2026-09-30
+apps.academyv2.mereka.dev owner=infra-team expires=2026-09-30
+
+# --- staging lane ---
+# staging.preview.academyv2.mereka.io mirrors the dev pattern above for staging.
+# Same rationale: preview is read-only, no separate Studio/MFE needed.
+staging.studio.academyv2.mereka.io owner=infra-team expires=2026-09-30
+staging.apps.academyv2.mereka.io owner=infra-team expires=2026-09-30

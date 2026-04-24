@@ -1,0 +1,126 @@
+name: CodeQL
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  merge_group:
+  schedule:
+    - cron: '0 8 * * 3'  # Weekly Wednesday 8am UTC
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # Keep only the newest run per ref, including main, so stale pushes do not
+  # consume runner capacity while the latest head waits in queue.
+  cancel-in-progress: true
+
+jobs:
+  change-scope:
+    name: Detect CodeQL language scope
+    # CodeQL is not a required PR merge gate. Keep it on merge_group, push to
+    # main, manual dispatch, and schedule so it remains a real security signal
+    # without holding PR merge state open behind non-required heavy analysis.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      should_run: ${{ steps.scope.outputs.should_run }}
+      language_matrix: ${{ steps.scope.outputs.language_matrix }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Detect language-bearing diff
+        id: scope
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python_changed=false
+          javascript_changed=false
+
+          if [[ "${GITHUB_EVENT_NAME}" != "pull_request" ]]; then
+            python_changed=true
+            javascript_changed=true
+          else
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+            mapfile -t CHANGED < <(git diff --name-only "${BASE_SHA}...${HEAD_SHA}")
+
+            for path in "${CHANGED[@]}"; do
+              case "$path" in
+                *.py|requirements*.txt|pyproject.toml|setup.py|setup.cfg)
+                  python_changed=true
+                  ;;
+              esac
+
+              case "$path" in
+                *.js|*.jsx|*.ts|*.tsx|package.json|package-lock.json|pnpm-lock.yaml|yarn.lock)
+                  javascript_changed=true
+                  ;;
+              esac
+            done
+          fi
+
+          languages=()
+          if [[ "$python_changed" == true ]]; then
+            languages+=('"python"')
+          fi
+          if [[ "$javascript_changed" == true ]]; then
+            languages+=('"javascript-typescript"')
+          fi
+
+          if [[ "${#languages[@]}" -eq 0 ]]; then
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+            echo 'language_matrix={"language":["python"]}' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "should_run=true" >> "$GITHUB_OUTPUT"
+          printf 'language_matrix={"language":[%s]}\n' "$(IFS=,; echo "${languages[*]}")" >> "$GITHUB_OUTPUT"
+
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    # ARC heavy runners now ship the pre-bundled CodeQL archive at
+    # /opt/codeql/codeql-bundle-linux64.tar.zst. Fastlane VPS runners do
+    # not currently ship this archive, so keep CodeQL pinned to ARC
+    # heavy-builders for now — moving it to fastlane requires baking the
+    # CodeQL bundle into the fastlane host bootstrap first.
+    needs: change-scope
+    if: needs.change-scope.outputs.should_run == 'true'
+    runs-on: mereka-k8s-heavy-builders
+    timeout-minutes: 45
+    permissions:
+      security-events: write
+      contents: read
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.change-scope.outputs.language_matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Setup Node.js
+        if: matrix.language == 'javascript-typescript'
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v4.0.4
+        with:
+          node-version: '20'
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@95e58e9a2cdfd71adc6e0353d5c52f41a045d225  # v4.35.2
+        with:
+          languages: ${{ matrix.language }}
+          queries: +security-and-quality
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@95e58e9a2cdfd71adc6e0353d5c52f41a045d225  # v4.35.2
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@95e58e9a2cdfd71adc6e0353d5c52f41a045d225  # v4.35.2
+        with:
+          category: "/language:${{ matrix.language }}"

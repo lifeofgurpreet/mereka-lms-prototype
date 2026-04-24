@@ -1,0 +1,221 @@
+# Runtime Proof Fixture Execution Packet
+
+> **Lane**: lane-i / lane-j (Runtime Proof Fixture Contract + Execution Bridge)
+> **Environment**: dev active; staging and production manifests available for non-dev proof planning
+> **Mutation status**: NO live mutation in lane-i or lane-j — these are repo-only tooling lanes.
+> **Canonical manifests**: `config/runtime-proof/{dev,staging,prod}.synthetic-proof-fixtures.yaml`
+> **Contract**: `docs/stabilization/SYNTHETIC_RUNTIME_PROOF_FIXTURE_CONTRACT.md`
+
+---
+
+## Warning: No Live Mutation in This Lane
+
+This execution packet documents the dry-run and validate commands that can be run
+from any workstation without cluster access. It also documents the future apply command
+(not yet wired) for reference.
+
+**No `kubectl exec`, no Django ORM calls, no database writes are performed by running
+the commands in this packet.** The bootstrap tool in its current form is a planning tool only.
+
+---
+
+## When to Run
+
+Run the dry-run command:
+
+- Before any browser-based proof flow against the selected environment
+- After any change to `config/runtime-proof/*.synthetic-proof-fixtures.yaml`
+- In CI, as part of the static validation job
+- Before opening a PR that touches enterprise fixture data
+
+Run the validate command:
+
+- In CI (included in `scripts/qa/verify-runtime-proof-fixture-pack.sh`)
+- After any manifest change (confirm no schema regressions)
+
+---
+
+## Preconditions
+
+### For dry-run and validate (this lane — no cluster needed)
+
+- [ ] Python 3.10+ available
+- [ ] PyYAML installed: `pip install pyyaml` (or `pip install -r requirements-tutor.txt`)
+- [ ] Repo checked out at the correct branch
+- [ ] the selected manifest in `config/runtime-proof/*.synthetic-proof-fixtures.yaml` exists
+
+### For future apply (not yet wired — future runtime lane)
+
+- [ ] All dry-run preconditions above
+- [ ] `kubectl` configured and pointing at `mereka-lms-dev` namespace
+- [ ] LMS pod is ready: `kubectl get pods -n mereka-lms-dev -l app.kubernetes.io/name=lms`
+- [ ] Enterprise-catalog pod is ready: `kubectl get pods -n mereka-lms-dev -l app.kubernetes.io/name=enterprise-catalog`
+- [ ] Operator has reviewed the dry-run output and confirmed it matches expectations
+- [ ] Rollback packet (`docs/reviews/RUNTIME_PROOF_FIXTURE_ROLLBACK_PACKET.md`) has been read
+
+---
+
+## Exact Commands
+
+### 1. Static Manifest Validation
+
+```bash
+# From repo root
+python scripts/tenants/validate-runtime-proof-fixtures.py --env dev
+```
+
+Expected output:
+
+```
+VERDICT: VALID — all checks passed
+```
+
+Exit code 0 = valid. Exit code 1 = invalid (see check output for details).
+
+Machine-readable variant (for CI):
+
+```bash
+python scripts/tenants/validate-runtime-proof-fixtures.py --env dev --json
+```
+
+### 2. Dry-Run Bootstrap Plan
+
+```bash
+# From repo root
+python scripts/tenants/bootstrap-runtime-proof-fixtures.py --env dev
+```
+
+Expected output: a structured plan showing all CREATE_OR_NOOP, ASSERT_ABSENT,
+ASSERT_SAFE, ENSURE_ACTIVE, ENSURE_INACTIVE, VERIFY_POST_BOOTSTRAP actions
+that would be taken. No changes are written.
+
+Machine-readable variant:
+
+```bash
+python scripts/tenants/bootstrap-runtime-proof-fixtures.py --env dev --json
+```
+
+### 3. CI Static Fixture Pack Verifier
+
+```bash
+# From repo root — runs all static checks including the above
+bash scripts/qa/verify-runtime-proof-fixture-pack.sh
+```
+
+Exit code 0 = all static checks pass. Exit code 1 = one or more checks failed.
+
+### 4. Apply Command (code exists — NOT executed in this lane)
+
+The apply command is now wired in `bootstrap-runtime-proof-fixtures.py`. The code exists
+and the guard chain is implemented. However, **no live mutation has been performed in
+lane-i or lane-j**. Execution against a live cluster is left to a future runtime lane.
+
+```bash
+# Code exists. Run from inside an LMS pod (NOT from workstation — requires Django):
+kubectl exec -n mereka-lms-dev deploy/lms -- python \
+  /openedx/scripts/tenants/bootstrap-runtime-proof-fixtures.py --env dev --apply
+```
+
+Running `--apply` outside an LMS pod (without Django) exits with a clear error and
+instructions. It does NOT silently fail or print a vague warning.
+
+Guard chain behavior: ALL of these checks must pass before any ORM write occurs:
+
+1. Environment must be `dev` (production and staging are rejected)
+2. `real_account_mutation_forbidden: true` must be in the manifest
+3. All emails must end in `@synthetic.test`
+4. Real-account collision check: if an existing LMS user or EnterpriseCustomer
+   has a non-synthetic email at the same username/slug, bootstrap REFUSES and aborts
+
+### 5. Enterprise-Catalog Companion Apply Command (code exists — NOT executed in this lane)
+
+A separate companion tool handles `enterprise_catalog_service_data` records in the
+enterprise-catalog service. Run from inside an enterprise-catalog pod:
+
+```bash
+kubectl exec -n mereka-lms-dev deploy/enterprise-catalog -- python \
+  /openedx/scripts/tenants/bootstrap-runtime-proof-fixtures-catalog.py --env dev --apply
+```
+
+**Prerequisite**: LMS-side bootstrap must run first to create the `EnterpriseCustomer`
+record whose UUID the catalog companion uses.
+
+Dry-run (no Django required):
+
+```bash
+python scripts/tenants/bootstrap-runtime-proof-fixtures-catalog.py --env dev
+python scripts/tenants/bootstrap-runtime-proof-fixtures-catalog.py --env dev --json
+```
+
+### 6. Live Read-Only Validation (after apply, from LMS pod)
+
+After running `--apply`, confirm fixture state with the live-readonly mode. This performs
+read-only ORM queries — no writes:
+
+```bash
+kubectl exec -n mereka-lms-dev deploy/lms -- python \
+  /openedx/scripts/tenants/validate-runtime-proof-fixtures.py \
+  --env dev --mode live-readonly
+```
+
+Checks performed:
+- User exists for each synthetic identity
+- EnterpriseCustomer exists for each enterprise customer
+- EnterpriseCustomerUser links exist (or are absent for the negative case user)
+- EnterpriseCustomerCatalog exists
+- Waffle flags and switches exist with the expected active state
+
+Exit code 0 = all live checks pass. Exit code 1 = one or more checks failed.
+
+---
+
+## Required Evidence
+
+After running the dry-run and validate commands, capture the following as evidence:
+
+| Evidence item | How to capture |
+|---------------|---------------|
+| Validate output | Paste `validate-runtime-proof-fixtures.py --env dev` output |
+| Validate exit code | `echo $?` immediately after |
+| Bootstrap dry-run output | Paste `bootstrap-runtime-proof-fixtures.py --env dev` output |
+| Bootstrap dry-run JSON | Paste `--json` variant output |
+| CI verifier output | Paste `verify-runtime-proof-fixture-pack.sh` output |
+| Git commit SHA | `git rev-parse HEAD` |
+
+For future apply runs, additional evidence is required — see the rollback packet.
+
+---
+
+## Fixture Pack Action Summary (Expected from Dry-Run)
+
+The dry-run should produce actions in the following categories:
+
+| Category | Kind | Count (approx) |
+|----------|------|---------------|
+| Real-Account Guards | ASSERT_SAFE | 1 |
+| LMS User Accounts | CREATE_OR_NOOP | 4 |
+| LMS Enterprise User Links | CREATE_OR_NOOP / ASSERT_ABSENT | 4 |
+| LMS Enterprise Customers | CREATE_OR_NOOP | 1 |
+| LMS Enterprise Catalogs | CREATE_OR_NOOP | 1 |
+| Enterprise-Catalog Service | CREATE_OR_NOOP + VERIFY_POST_BOOTSTRAP | 2 |
+| Waffle Flags (platform-wide) | ENSURE_ACTIVE | 1 |
+| Waffle Switches (tenant-scoped) | ENSURE_ACTIVE / ENSURE_INACTIVE | 5 |
+
+Total: approximately 19 actions. Deviation from this count is a signal to review the manifest.
+
+---
+
+## Known Limitations
+
+1. **Enterprise-catalog UUID is null in manifest** — the `enterprise_catalog_uuid` field in
+   `enterprise_catalog_service_data` is `null` until LMS-side bootstrap runs and assigns a UUID.
+   After LMS bootstrap, retrieve the catalog UUID and update the manifest.
+
+2. **Enterprise-catalog service records require separate step** — the bootstrap tool cannot
+   write to the enterprise-catalog service in its current form. The enterprise-catalog management
+   command or API must be used separately. The dry-run output flags this with a
+   `VERIFY_POST_BOOTSTRAP` action.
+
+3. **Passwords not set by this tool** — synthetic user passwords are stored in Infisical at
+   `/runtime-proof/`. The bootstrap tool will print the Infisical path but will not fetch or
+   set passwords. A future runtime lane step sets passwords via the LMS management command.

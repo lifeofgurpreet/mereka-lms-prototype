@@ -1,0 +1,128 @@
+name: NPM Start MFE Smoke
+
+permissions: {}  # Deny-all at workflow level; each job grants only what it needs
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: "Target environment (used when base_url is empty)"
+        required: true
+        default: "prod"
+        type: choice
+        options:
+          - prod
+          - dev
+      base_url:
+        description: "Override LMS base URL (empty = auto from target_environment)"
+        required: false
+        default: ""
+        type: string
+      learning_path:
+        description: "Learning route path"
+        required: false
+        default: "/learning"
+        type: string
+      project:
+        description: "Playwright project"
+        required: true
+        default: "chromium"
+        type: choice
+        options:
+          - chromium
+          - firefox
+          - mobile-chrome
+      require_runtime_theme:
+        description: "Require PARAGON runtime theme URLs (/theme/*.min.css)"
+        required: true
+        default: false
+        type: boolean
+      require_branding_markers:
+        description: "Require slot-rendered Mereka marker classes in runtime DOM"
+        required: true
+        default: true
+        type: boolean
+
+jobs:
+  smoke:
+    runs-on: ${{ vars.CI_FASTLANE_BUILD_LABEL || 'mereka-k8s-heavy-builders' }}
+    timeout-minutes: 60
+    permissions:
+      contents: read  # checkout
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Setup Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0
+        with:
+          node-version: "20"
+
+      - name: Resolve base URL
+        id: resolve
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET_ENV="${{ inputs.target_environment || 'prod' }}"
+          BASE_URL_INPUT="${{ inputs.base_url || '' }}"
+          if [[ -n "$BASE_URL_INPUT" ]]; then
+            BASE_URL="$BASE_URL_INPUT"
+          elif [[ "$TARGET_ENV" == "dev" ]]; then
+            BASE_URL="https://academyv2.mereka.dev"
+          else
+            BASE_URL="https://academyv2.mereka.io"
+          fi
+          echo "base_url=$BASE_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Run npm-start smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE_URL="${{ steps.resolve.outputs.base_url }}"
+          LEARNING_PATH="${{ inputs.learning_path || '/learning' }}"
+          PROJECT="${{ inputs.project || 'chromium' }}"
+          REQUIRE_RUNTIME="${{ inputs.require_runtime_theme || 'false' }}"
+          REQUIRE_BRANDING_MARKERS="${{ inputs.require_branding_markers || 'true' }}"
+
+          args=(--base-url "$BASE_URL" --learning-path "$LEARNING_PATH" --project "$PROJECT")
+          if [[ "$REQUIRE_RUNTIME" == "true" ]]; then
+            args+=(--require-runtime-theme)
+          fi
+          if [[ "$REQUIRE_BRANDING_MARKERS" == "true" ]]; then
+            args+=(--require-branding-markers)
+          else
+            args+=(--allow-unbranded-shell)
+          fi
+
+          ./scripts/qa/verify-npm-start-mfe-smoke.sh "${args[@]}"
+
+      - name: Summarize run
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          LATEST_LOG="$(ls -1t var/qa/npm-start-mfe-smoke-*.log 2>/dev/null | head -1 || true)"
+          {
+            echo "## NPM Start MFE Smoke"
+            echo
+            echo "- Target environment: \`${{ inputs.target_environment || 'prod' }}\`"
+            echo "- Base URL: \`${{ steps.resolve.outputs.base_url }}\`"
+            echo "- Learning path: \`${{ inputs.learning_path || '/learning' }}\`"
+            echo "- Playwright project: \`${{ inputs.project || 'chromium' }}\`"
+            echo "- Require runtime theme: \`${{ inputs.require_runtime_theme || 'false' }}\`"
+            echo "- Require branding markers: \`${{ inputs.require_branding_markers || 'true' }}\`"
+            if [[ -n "$LATEST_LOG" ]]; then
+              echo "- Log file: \`$LATEST_LOG\`"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload smoke artifacts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: npm-start-mfe-smoke-artifacts
+          path: |
+            var/qa/npm-start-mfe-smoke-*.log
+            var/e2e-artifacts/**
+            var/e2e-report/**
+          if-no-files-found: warn

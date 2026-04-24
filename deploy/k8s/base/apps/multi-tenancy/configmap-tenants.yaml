@@ -1,0 +1,49 @@
+# Tenant registry ConfigMap.
+#
+# Maps tenant slugs to their domains and EnterpriseCustomer UUIDs.
+# This is a reference/bootstrap file — the canonical source of truth is
+# the EnterpriseCustomer + TenantConfig records in the LMS database.
+#
+# BASE DEFAULTS: This file uses placeholder domains so the base package
+# is environment-neutral. Overlays MUST replace this ConfigMap with the
+# correct environment-specific tenant records via configMapGenerator
+# behavior: replace, or via a kustomize patch on the tenant-registry
+# ConfigMap data key.
+#
+# Update the overlay-specific version when provisioning or offboarding
+# tenants so that infrastructure scripts can discover tenant configuration
+# without querying the database.
+#
+# See: specs/multi-tenancy-architecture_spec.md
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tenant-registry
+  namespace: mereka-lms
+  labels:
+    app.kubernetes.io/name: tenant-registry
+    app.kubernetes.io/component: multi-tenancy
+    app.kubernetes.io/part-of: mereka-lms
+data:
+  # YAML-formatted tenant registry.  One entry per tenant.
+  # Infrastructure scripts can parse this with yq/jq.
+  tenants.yaml: |
+    - slug: mereka-academy
+      name: Mereka Academy
+      domain: academyv2.mereka.io
+      enterprise_customer_uuid: PLACEHOLDER-MEREKA-UUID
+      active: true
+      alias_domains: []
+    - slug: biji-biji
+      name: Biji-Biji Academy
+      domain: academy.biji-biji.com
+      enterprise_customer_uuid: PLACEHOLDER-BIJIBIJI-UUID
+      active: true
+      alias_domains: []
+    - slug: skillourfuture
+      name: Skill Our Future
+      domain: skillourfuture.academyv2.mereka.io
+      enterprise_customer_uuid: PLACEHOLDER-SKILLOURFUTURE-UUID
+      active: true
+      alias_domains: []

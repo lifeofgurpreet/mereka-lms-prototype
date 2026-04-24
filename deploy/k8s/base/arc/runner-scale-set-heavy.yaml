@@ -1,0 +1,193 @@
+---
+# Heavy RunnerScaleSet — label: mereka-k8s-heavy-builders
+#
+# Purpose: build-tutor-images.yml, Playwright E2E, heavy compute.
+# Uses Docker-in-Docker (DinD) defined explicitly in the template.
+#
+# CRITICAL: Do NOT set containerMode in the Helm values or here.
+# Per Helm chart docs: "If customization is required for dind mode,
+# containerMode should remain empty, and configuration should be
+# applied to the template."
+#
+# Setting containerMode.type: "dind" causes Helm to auto-generate
+# DinD init containers, which duplicates the manual ones below →
+# pod creation fails with "Duplicate value: dind-sock".
+#
+# WARNING: This file is a LOCAL REFERENCE ONLY — NOT deployed to the cluster.
+# The actual ARC config is managed by ArgoCD from bbi-infrastructure:
+#   clusters/dev/rke2/apps/arc-runners-heavy.yaml
+# To change runner behavior, update the Helm values in bbi-infrastructure.
+# Changes here have NO EFFECT on the live cluster.
+#
+# Usage in workflows:
+#   jobs:
+#     build-images:
+#       runs-on: mereka-k8s-heavy-builders
+apiVersion: actions.github.com/v1alpha1
+kind: AutoscalingRunnerSet
+metadata:
+  name: mereka-k8s-heavy-builders
+  namespace: arc-runners
+  labels:
+    app.kubernetes.io/name: mereka-k8s-heavy-builders
+    app.kubernetes.io/component: runner-scale-set
+    app.kubernetes.io/part-of: mereka-ci
+    runner-tier: heavy
+spec:
+  githubConfigUrl: https://github.com/Biji-Biji-Initiative
+  githubConfigSecret: arc-github-app-secret
+
+  minRunners: 0
+  # RWO PVCs for Docker/dep caches can only mount to one pod at a time.
+  # Keep maxRunners=1. See bbi-infrastructure arc-runners-heavy.yaml for rationale.
+  maxRunners: 1
+  runnerGroup: heavy-builders
+  # Prevent runaway builds from holding slots indefinitely (45 min ceiling).
+  maxRunnerLifetime: 2700
+
+  listenerTemplate:
+    spec:
+      containers:
+        - name: listener
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+
+  template:
+    spec:
+      # Extended grace period: DinD needs time to flush layer caches before force-kill.
+      terminationGracePeriodSeconds: 120
+      serviceAccountName: arc-runner-sa
+      restartPolicy: Never
+
+      initContainers:
+        - name: init-dind-externals
+          image: ghcr.io/actions/actions-runner:2.332.0
+          command: ["cp", "-r", "/home/runner/externals/.", "/home/runner/tmpDir/"]
+          volumeMounts:
+            - name: dind-externals
+              mountPath: /home/runner/tmpDir
+        - name: dind
+          image: docker:dind
+          args:
+            - dockerd
+            - --host=unix:///var/run/docker.sock
+            - --group=$(DOCKER_GROUP_GID)
+            - --mtu=1280
+          env:
+            - name: DOCKER_GROUP_GID
+              value: "123"
+          securityContext:
+            privileged: true
+          restartPolicy: Always
+          startupProbe:
+            exec:
+              command:
+                - docker
+                - info
+            initialDelaySeconds: 0
+            failureThreshold: 24
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "2"
+              memory: "4Gi"
+          volumeMounts:
+            - name: work
+              mountPath: /home/runner/_work
+            - name: dind-sock
+              mountPath: /var/run
+            - name: dind-externals
+              mountPath: /home/runner/externals
+            # Persistent Docker data dir — layer cache survives between builds
+            - name: docker-cache
+              mountPath: /var/lib/docker
+
+      containers:
+        - name: runner
+          image: ghcr.io/actions/actions-runner:2.332.0
+          command: ["/home/runner/run.sh"]
+          env:
+            - name: DOCKER_HOST
+              value: unix:///var/run/docker.sock
+            - name: RUNNER_WAIT_FOR_DOCKER_IN_SECONDS
+              value: "120"
+          resources:
+            requests:
+              cpu: "1"
+              memory: 4Gi
+            limits:
+              cpu: "4"
+              memory: 12Gi
+          volumeMounts:
+            - name: work
+              mountPath: /home/runner/_work
+            - name: dind-sock
+              mountPath: /var/run
+            # Persistent dep cache for npm/pip/Playwright browsers
+            - name: dep-cache
+              mountPath: /home/runner/.cache
+
+      volumes:
+        - name: work
+          emptyDir: {}
+        - name: dind-sock
+          emptyDir: {}
+        - name: dind-externals
+          emptyDir: {}
+        - name: docker-cache
+          persistentVolumeClaim:
+            claimName: arc-docker-cache
+        - name: dep-cache
+          persistentVolumeClaim:
+            claimName: arc-dep-cache
+
+---
+# PVC: Docker layer cache for DinD sidecar
+# Without this, every build starts from scratch (~50 min for OpenEdX).
+# With this, unchanged layers are reused between builds.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: arc-docker-cache
+  namespace: arc-runners
+  labels:
+    app.kubernetes.io/name: arc-docker-cache
+    app.kubernetes.io/component: cache
+    app.kubernetes.io/part-of: mereka-ci
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 50Gi
+---
+# PVC: npm / pip / Playwright browser cache
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: arc-dep-cache
+  namespace: arc-runners
+  labels:
+    app.kubernetes.io/name: arc-dep-cache
+    app.kubernetes.io/component: cache
+    app.kubernetes.io/part-of: mereka-ci
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 10Gi

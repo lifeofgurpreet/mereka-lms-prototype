@@ -1,0 +1,113 @@
+{
+  "schema_version": "runtime-routing-contract/v1",
+  "source": "deploy/k8s/tenancy/tenant-registry.yaml",
+  "source_version": "1.5.0",
+  "lane": "runtime-routing",
+  "environment": "profiles-dev",
+  "environment_contract": {
+    "lane_contract_version": "1",
+    "root_domain": "mereka.dev",
+    "auth_host": "auth0.mereka.dev",
+    "namespace": "mereka-lms-dev",
+    "argocd_app": "mereka-lms-dev",
+    "gitops_overlay_path": "apps/mereka-lms/overlays/profiles/dev",
+    "runtime_proof_script": "scripts/tenants/verify-dev-runtime-proof.sh",
+    "acceptance_profile": {
+      "dashboard_redirect": {
+        "path": "/dashboard",
+        "expect_final_role": "mfe"
+      },
+      "apps_host_stability_paths": [
+        "/",
+        "/dashboard"
+      ],
+      "studio_sso": {
+        "entry_role": "primary",
+        "entry_path": "/login",
+        "expect_apps_role": "mfe"
+      },
+      "forbidden_hosts": {
+        "source_tenant": "mereka",
+        "apply_to_non_primary_tenants_only": true,
+        "roles": [
+          "primary",
+          "studio",
+          "mfe"
+        ]
+      },
+      "footer_probe": {
+        "lms_role": "primary",
+        "mfe_role": "mfe"
+      },
+      "playwright": {
+        "base_url_role": "primary",
+        "selector_audit_routes": [
+          "/authn/login",
+          "/learner-dashboard/",
+          "/profile/"
+        ]
+      }
+    }
+  },
+  "tenants": [
+    {
+      "tenant": "mereka",
+      "display_name": "Mereka Academy",
+      "is_primary": true,
+      "theme": "mereka",
+      "playwright_base_url": "https://lms-dev.mereka.dev",
+      "playwright_selector_audit_routes": [
+        "/authn/login",
+        "/learner-dashboard/",
+        "/profile/"
+      ],
+      "studio_sso_entry_domain": "lms-dev.mereka.dev",
+      "footer_probe": {
+        "lms_url": "https://lms-dev.mereka.dev",
+        "mfe_url": "https://mfe-dev.mereka.dev"
+      },
+      "hosts": {
+        "primary": "lms-dev.mereka.dev",
+        "studio": "studio-dev.mereka.dev",
+        "mfe": "mfe-dev.mereka.dev"
+      },
+      "forbidden_hosts": [],
+      "contract_ready": true,
+      "missing_roles": [],
+      "assertions": [
+        {
+          "id": "dashboard-route",
+          "kind": "redirect-contract",
+          "url": "https://lms-dev.mereka.dev/dashboard",
+          "expect_final_host": "mfe-dev.mereka.dev",
+          "forbid_hosts": []
+        },
+        {
+          "id": "apps-root",
+          "kind": "host-stability",
+          "url": "https://mfe-dev.mereka.dev/",
+          "expect_host": "mfe-dev.mereka.dev",
+          "forbid_redirect_hosts": [],
+          "expect_content_type_prefix": "text/html",
+          "expect_min_body_bytes": 1
+        },
+        {
+          "id": "apps-dashboard",
+          "kind": "host-stability",
+          "url": "https://mfe-dev.mereka.dev/dashboard",
+          "expect_host": "mfe-dev.mereka.dev",
+          "forbid_redirect_hosts": [],
+          "expect_content_type_prefix": "text/html",
+          "expect_min_body_bytes": 1
+        },
+        {
+          "id": "studio-sso-login",
+          "kind": "sso-contract",
+          "url": "https://lms-dev.mereka.dev/login",
+          "expect_apps_host": "mfe-dev.mereka.dev",
+          "forbid_hosts": []
+        }
+      ]
+    }
+  ]
+}

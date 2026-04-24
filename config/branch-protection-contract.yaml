@@ -1,0 +1,87 @@
+# Branch Protection Contract — declared vs live GitHub settings
+#
+# Two sections per repo:
+#   live: current audited GitHub enforcement for the repo/branch
+#   target: the required enforcement contract for the repo/branch
+#
+# Consumed by: scripts/qa/verify-branch-protection-contract.sh
+# Live != target is enforcement debt unless explicitly listed under
+# tolerated_deviations.
+---
+schema_version: "2.0"
+audited_at: "2026-04-20"
+
+repos:
+  - repo: "Biji-Biji-Initiative/mereka-lms"
+    branch: main
+    live:
+      enforce_admins: true
+      required_approving_review_count: 0
+      # Flipped 2026-04-20 as Stage 1 of the merge-queue rollout, per
+      # docs/reference/operations/MERGE_POLICY.md. See rollback snapshot
+      # under /tmp/protection-rollback/mereka-lms-main-pre-*.json on the
+      # operator host. Reversible via a single PUT call.
+      strict_status_checks: false
+      required_status_checks:
+        - "Static Validation"
+        - "Tutor Configuration Tests"
+        - "Security Scans"
+        - "Python test coverage"
+        - "Review dependencies"
+        - "Trivy — K8s Manifests"
+        - "Trivy — Terraform"
+    target:
+      enforce_admins: true
+      required_approving_review_count: 0
+      # Stage 1 of merge queue rollout per docs/reference/operations/MERGE_POLICY.md.
+      # strict=false stops the rebase-storm pattern where every merge to main
+      # dumps every other open PR into BEHIND. Merge queue (Stage 2) is the
+      # world-class replacement but requires a canary first (0 historical
+      # merge_group runs on the repo as of 2026-04-20).
+      strict_status_checks: false
+      required_status_checks:
+        - "Static Validation"
+        - "Tutor Configuration Tests"
+        - "Security Scans"
+        - "Python test coverage"
+        - "Review dependencies"
+        - "Trivy — K8s Manifests"
+        - "Trivy — Terraform"
+    gaps: []
+    notes: >
+      0 required reviews: PRs are agent-authored, owner-merged. strict=false
+      is Stage 1 of MERGE_POLICY.md; Stage 2 (merge queue canary) and Stage 3
+      (queue-only path to main) are tracked as beads mereka-lms-cp16 and
+      mereka-lms-k3nm, not in this contract.
+
+  - repo: "Biji-Biji-Initiative/bbi-infrastructure"
+    branch: main
+    live:
+      enforce_admins: true
+      required_approving_review_count: 0
+      strict_status_checks: false
+      required_status_checks:
+        - "eso-self-secrets-check"
+        - "policy-guards"
+        - "validate"
+    target:
+      enforce_admins: false
+      required_approving_review_count: 1
+      strict_status_checks: true
+      required_status_checks:
+        - "auth-verify"
+        - "policy-guards"
+    gaps:
+      - "enforce_admins"
+      - "required_approving_review_count"
+      - "strict_status_checks"
+      - "required_status_checks"
+    notes: >
+      Live GitHub protection still drifts from target. As of the 2026-04-20
+      audit, admin enforcement is stronger than the stored target, approving
+      review count is lower than target, strict status checks are disabled,
+      and live required contexts are policy-guards, validate, and
+      eso-self-secrets-check instead of the target auth-verify and
+      policy-guards set. Changing the bbi-infrastructure protection policy is
+      a dedicated cross-repo governance action, not a cold-start onboarding
+      side effect.

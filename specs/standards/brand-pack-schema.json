@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mereka.io/schemas/tenant-brand-pack.json",
+  "title": "Tenant Brand Pack Configuration",
+  "description": "JSON Schema for validating tenant brand pack configuration files. Enforces the contract defined in docs/guides/branding/TENANT_BRANDING_CONTRACT.md",
+  "type": "object",
+  "required": [
+    "slug",
+    "name",
+    "domain",
+    "colors",
+    "logos",
+    "footer"
+  ],
+  "properties": {
+    "slug": {
+      "type": "string",
+      "description": "Tenant identifier (alphanumeric + hyphens, lowercase only)",
+      "pattern": "^[a-z0-9-]+$",
+      "minLength": 2,
+      "maxLength": 63,
+      "examples": ["acme-corp", "mereka-academy", "tenant-001"]
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable tenant name (displayed in UI)",
+      "minLength": 1,
+      "maxLength": 200,
+      "examples": ["Acme Corporation", "Mereka Academy", "Example Org"]
+    },
+    "domain": {
+      "type": "string",
+      "description": "Primary fully-qualified domain name for the tenant",
+      "pattern": "^([a-z0-9-]+\\.)+[a-z]{2,}$",
+      "examples": ["acme.academyv2.mereka.io", "academy.biji-biji.com"]
+    },
+    "colors": {
+      "type": "object",
+      "description": "Color palette for the tenant (all values must be valid hex colors)",
+      "required": ["primary"],
+      "properties": {
+        "primary": {
+          "type": "string",
+          "description": "Primary brand color (used for buttons, links, headers)",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "examples": ["#1a73e8", "#FF5733"]
+        },
+        "secondary": {
+          "type": "string",
+          "description": "Secondary brand color (optional, used for accents and highlights)",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "examples": ["#4285f4", "#FFC300"]
+        },
+        "accent": {
+          "type": "string",
+          "description": "Accent color (optional, used for callouts and special elements)",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "examples": ["#C70039", "#34A853"]
+        },
+        "text_on_primary": {
+          "type": "string",
+          "description": "Text color for use on primary color background (optional, defaults to white)",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "examples": ["#FFFFFF", "#000000"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "logos": {
+      "type": "object",
+      "description": "Logo asset paths (relative to tenant theme directory)",
+      "required": ["logo_url", "favicon_url"],
+      "properties": {
+        "logo_url": {
+          "type": "string",
+          "description": "Primary horizontal logo (PNG/SVG, max 400x100px, <500KB)",
+          "minLength": 1,
+          "examples": ["/static/themes/mereka/tenants/acme-corp/logos/logo.png"]
+        },
+        "logo_square_url": {
+          "type": "string",
+          "description": "Square logo (optional, PNG/SVG, 200x200px, <500KB)",
+          "minLength": 1,
+          "examples": ["/static/themes/mereka/tenants/acme-corp/logos/logo-square.png"]
+        },
+        "logo_white_url": {
+          "type": "string",
+          "description": "White logo for dark backgrounds (optional, PNG/SVG, max 400x100px, <500KB)",
+          "minLength": 1,
+          "examples": ["/static/themes/mereka/tenants/acme-corp/logos/logo-white.png"]
+        },
+        "favicon_url": {
+          "type": "string",
+          "description": "Favicon (ICO/PNG, 32x32px or 64x64px, <500KB)",
+          "minLength": 1,
+          "examples": ["/static/themes/mereka/tenants/acme-corp/favicons/favicon.ico"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "footer": {
+      "type": "object",
+      "description": "Footer configuration (text, links, contact information)",
+      "required": ["contact_email"],
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "Footer copyright/disclaimer text (optional, plaintext only, no HTML)",
+          "maxLength": 500,
+          "examples": ["© 2026 Acme Corp. All rights reserved."]
+        },
+        "links": {
+          "type": "array",
+          "description": "Footer navigation links (optional, max 10 links, HTTPS only)",
+          "maxItems": 10,
+          "items": {
+            "type": "object",
+            "required": ["title", "url"],
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "Link text displayed to users",
+                "minLength": 1,
+                "maxLength": 100,
+                "examples": ["Privacy Policy", "Terms of Service", "Contact Us"]
+              },
+              "url": {
+                "type": "string",
+                "description": "Link destination (must use HTTPS)",
+                "pattern": "^https://",
+                "examples": ["https://example.com/privacy", "https://example.com/terms"]
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "contact_email": {
+          "type": "string",
+          "description": "Support/contact email address for tenant inquiries",
+          "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+          "examples": ["support@acme.com", "info@example.org"]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

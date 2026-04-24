@@ -1,0 +1,13 @@
+{
+  "form-control": {
+    "border-radius": {
+      "value": "{global.radius.lg}"
+    },
+    "border-color": {
+      "value": "{alias.color.border}"
+    },
+    "focus-ring-color": {
+      "value": "{alias.color.secondary}"
+    }
+  }
+}

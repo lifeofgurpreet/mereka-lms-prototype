@@ -1,0 +1,4 @@
+# Test fixture: seeded bad AWS access key for scan-secrets-fast.sh strict-mode tests.
+# This file uses a .fixture extension and is excluded from secret scanner globs.
+# DO NOT use real AWS keys here. This is a structural test fixture only.
+AWS_ACCESS_KEY_ID = "AKIAIOSFODNN7EXAMPLE"

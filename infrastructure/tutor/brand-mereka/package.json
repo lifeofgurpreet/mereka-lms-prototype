@@ -1,0 +1,30 @@
+{
+  "name": "@edx/brand-mereka",
+  "version": "1.0.0",
+  "description": "Mereka Academy OEP-48 asset-only brand package for Open edX MFEs",
+  "main": "./logo.js",
+  "exports": {
+    ".": "./logo.js",
+    "./logo.js": "./logo.js",
+    "./logo.svg": "./logo.svg",
+    "./logo.png": "./logo.png",
+    "./logo-white.svg": "./logo-white.svg",
+    "./logo-white.png": "./logo-white.png",
+    "./logo_white.svg": "./logo_white.svg",
+    "./logo_white.png": "./logo_white.png",
+    "./logo-trademark.svg": "./logo-trademark.svg",
+    "./logo-trademark.png": "./logo-trademark.png",
+    "./favicon.ico": "./favicon.ico",
+    "./favicon.png": "./favicon.png"
+  },
+  "scripts": {
+    "build-tokens": "paragon build-tokens --source ./tokens/src --output ./dist",
+    "build-scss": "paragon build-scss --corePath ./paragon/core.scss --themesPath ./paragon --outDir ./dist",
+    "build": "npm run build-tokens && npm run build-scss"
+  },
+  "devDependencies": {
+    "@openedx/paragon": "^23.19.1"
+  },
+  "sideEffects": false,
+  "license": "AGPL-3.0"
+}

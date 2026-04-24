@@ -1,0 +1,53 @@
+{
+  "schema_version": "runtime-routing-contract/v1",
+  "source": "deploy/k8s/tenancy/tenant-registry.yaml",
+  "source_version": "1.5.0",
+  "lane": "runtime-routing",
+  "environment": "local",
+  "environment_contract": {
+    "lane_contract_version": "1",
+    "root_domain": "localhost",
+    "auth_host": "",
+    "namespace": "mereka-lms",
+    "argocd_app": "",
+    "gitops_overlay_path": "deploy/k8s/overlays/local",
+    "runtime_proof_script": "",
+    "acceptance_profile": {
+      "dashboard_redirect": {
+        "path": "/dashboard",
+        "expect_final_role": "mfe"
+      },
+      "apps_host_stability_paths": [
+        "/",
+        "/dashboard"
+      ],
+      "studio_sso": {
+        "entry_role": "primary",
+        "entry_path": "/login",
+        "expect_apps_role": "mfe"
+      },
+      "forbidden_hosts": {
+        "source_tenant": "mereka",
+        "apply_to_non_primary_tenants_only": true,
+        "roles": [
+          "primary",
+          "studio",
+          "mfe"
+        ]
+      },
+      "footer_probe": {
+        "lms_role": "primary",
+        "mfe_role": "mfe"
+      },
+      "playwright": {
+        "base_url_role": "primary",
+        "selector_audit_routes": [
+          "/authn/login",
+          "/learner-dashboard/",
+          "/profile/"
+        ]
+      }
+    }
+  },
+  "tenants": []
+}

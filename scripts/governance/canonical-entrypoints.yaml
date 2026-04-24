@@ -1,0 +1,295 @@
+# Canonical Entrypoint Map — Mereka LMS
+# Governance PR2: One canonical entrypoint per critical workflow.
+#
+# Every release-critical action MUST trace to exactly ONE canonical script.
+# Alternatives listed below exist in the repo but must NOT be invoked directly
+# for the named workflow. If you find yourself reaching for an alternative,
+# stop — use the canonical path or open a governance PR to change this file.
+#
+# Fields:
+#   workflow_id      - Short machine-readable ID for this workflow
+#   label            - Human-readable workflow name
+#   canonical_script - The ONE repo-relative path to invoke
+#   owner            - Team responsible for this workflow
+#   invocation       - Exact shell invocation (copy-paste safe)
+#   proof_output     - What evidence the canonical script produces on success
+#   alternatives     - Scripts that exist but are NOT the canonical path
+#   status           - canonical | legacy | deprecated (only canonical is valid)
+
+version: "2.0.0"
+
+# Canonical operator front door
+# All app-owned operational concerns MUST route through bin/lms-ops.
+# Direct invocation of underlying scripts is acceptable only for CI gates
+# and automated workflows that predate this cutover.
+front_door:
+  canonical: bin/lms-ops
+  concerns:
+    - accept      # canonical lane acceptance wrapper
+    - inventory   # harness inventory / generated CI static+runtime reports
+    - migrate     # plan/apply/verify
+    - proof       # evidence envelope emission
+    - release-gate
+    - smoke
+    - preflight
+    - topology
+  note: >
+    bin/lms-ops mirrors bin/gitops-ops in bbi-infrastructure.
+    App-owned concerns go through lms-ops; env-owned concerns go through gitops-ops.
+
+entrypoints:
+
+  # ── 1. Release ─────────────────────────────────────────────────────────────
+  - workflow_id: release
+    label: "Production release (single-tree, double-confirm)"
+    canonical_script: scripts/infra/canonical-release.sh
+    owner: platform-team
+    invocation: |
+      CONFIRM_CANONICAL_RELEASE=CANONICAL_RELEASE \
+      CONFIRM_PUSH_CANONICAL_RELEASE=PUSH_CANONICAL_RELEASE \
+      ALLOW_PROD_APPLY=1 \
+      bash scripts/infra/canonical-release.sh \
+        --openedx-tag <TAG> --mfe-tag <TAG> \
+        --apply --commit --push --verify-runtime
+    proof_output: |
+      - stdout: release summary with image tags and ArgoCD sync status
+      - var/build-cache/: image hash cache entry
+      - var/release-evidence/<sha>/: evidence bundle (when --evidence is set)
+    alternatives:
+      - path: scripts/infra/release-openedx-gitops.sh
+        reason: >
+          Core GitOps orchestrator but lacks canonical-path enforcement and
+          double-confirmation wrapper. Always invoke via canonical-release.sh,
+          not directly.
+      - path: scripts/infra/create-release.sh
+        reason: >
+          Creates semver git tags and pushes them. Part of the release flow
+          but operates upstream of the GitOps promotion step; not a substitute
+          for the full canonical-release.sh orchestration.
+      - path: scripts/infra/bump-image-tags.sh
+        reason: >
+          Updates image tags in kustomization.yaml but does not enforce
+          canonical path checks, confirmation tokens, or runtime verification.
+    status: canonical
+
+  # ── 2. Migrate ────────────────────────────────────────────────────────────
+  - workflow_id: migrate
+    label: "Pre-migration safety preflight"
+    canonical_script: scripts/release/migration-preflight.sh
+    owner: platform-team
+    invocation: |
+      bash scripts/release/migration-preflight.sh \
+        --namespace mereka-lms
+    proof_output: |
+      - stdout: PASS/WARN/SKIP/FAIL per preflight check
+      - Exit 0 = safe to proceed with migration Jobs
+      - Exit 1 = migration BLOCKED (do not proceed)
+    alternatives:
+      - path: scripts/release/verify-zero-pending-migrations.sh
+        reason: >
+          Post-migration proof, not a preflight gate. Run AFTER migration Jobs
+          complete, not before. Answers "did migrations run?" not "is it safe
+          to run migrations?".
+      - path: scripts/release/smoke-after-migrate.sh
+        reason: >
+          Post-migration smoke test. Verifies services are healthy after
+          migration completes. Not a preflight safety gate.
+      - path: scripts/migrations/run-verification-pipeline.sh
+        reason: >
+          Orchestrates migration data-integrity verification scripts. Scoped
+          to Kajabi/MCT data correctness, not cluster migration safety.
+    status: canonical
+
+  # ── 3. Promote ────────────────────────────────────────────────────────────
+  - workflow_id: promote
+    label: "GitOps image tag promotion (app-repo → infra-repo)"
+    canonical_script: scripts/infra/release-openedx-gitops.sh
+    owner: platform-team
+    invocation: |
+      CONFIRM_RELEASE_OPENEDX_GITOPS=RELEASE_OPENEDX_GITOPS \
+      CONFIRM_PUSH_RELEASE_OPENEDX_GITOPS=PUSH_RELEASE_OPENEDX_GITOPS \
+      ALLOW_PROD_APPLY=1 \
+      bash scripts/infra/release-openedx-gitops.sh \
+        --openedx-tag <TAG> --mfe-tag <TAG> \
+        --openedx-digest sha256:<DIGEST> --mfe-digest sha256:<DIGEST> \
+        --apply --commit --push
+    proof_output: |
+      - bbi-infrastructure:apps/mereka-lms/overlays/prod/kustomization.yaml: updated image tags
+        (authoritative overlay per ADR-025; the app-repo shadow path
+        deploy/k8s/overlays/production/kustomization.yaml was deleted by Wave 9 PR #1900)
+      - stdout: ArgoCD sync status
+      - Build provenance written to var/ci/build-provenance.json (when called
+        from build-tutor-images.yml via generate-build-provenance.sh)
+    alternatives:
+      - path: scripts/infra/sync-gitops-prod-image-tags.sh
+        reason: >
+          Syncs tags between app-repo overlay and infra-repo overlay but does
+          not trigger ArgoCD sync, runtime guards, or confirmation tokens.
+          Use release-openedx-gitops.sh for the full promotion workflow.
+      - path: scripts/infra/bump-image-tags.sh
+        reason: >
+          Queries registry for latest tags and optionally writes them, but
+          lacks the build provenance, ArgoCD sync, and digest pinning logic
+          that release-openedx-gitops.sh provides.
+    status: canonical
+
+  # ── 4. Publish-image ──────────────────────────────────────────────────────
+  - workflow_id: publish-image
+    label: "Build and publish Open edX / MFE container images to GHCR"
+    canonical_script: .github/workflows/build-tutor-images.yml
+    owner: platform-team
+    invocation: |
+      # Automatic: triggered on push to main when infrastructure/tutor/** changes
+      # Manual:
+      gh workflow run build-tutor-images.yml \
+        -f build_openedx=true -f build_mfe=true \
+        -f update_gitops=false
+    proof_output: |
+      - ghcr.io/biji-biji-initiative/mereka-lms/openedx:<TAG>
+      - ghcr.io/biji-biji-initiative/mereka-lms/mfe:<TAG>
+      - GitHub Actions step summary: image digest pinned to sha256
+      - SBOM artifact attached to workflow run (non-blocking)
+    alternatives:
+      - path: scripts/branding/deploy-branded-image.sh
+        reason: >
+          Legacy break-glass helper that mutates a live deployment image via
+          kubectl. Does not build, publish, digest-pin, or create a durable
+          GitOps promotion object. Not a substitute for the CI build+publish
+          workflow.
+      - path: .github/workflows/build-enterprise-mfe.yml
+        reason: >
+          Builds the enterprise micro-frontend only, not the canonical
+          OpenEdX + MFE pair. Only invoke for enterprise-MFE-specific builds.
+      - path: .github/workflows/build-purchase-gateway.yml
+        reason: >
+          Builds the purchase-gateway service image only. Not part of the
+          core OpenEdX / MFE publish workflow.
+    status: canonical
+
+  # ── 5. Deploy ─────────────────────────────────────────────────────────────
+  - workflow_id: deploy
+    label: "Apply Kustomize overlay to a Kubernetes cluster"
+    canonical_script: scripts/infra/apply-kind-overlay.sh
+    owner: platform-team
+    invocation: |
+      # Local kind cluster (dev):
+      KUBE_CONTEXT=kind-dev bash scripts/infra/apply-kind-overlay.sh
+
+      # Production/staging: use release workflow (canonical-release.sh),
+      # which calls release-openedx-gitops.sh → ArgoCD sync.
+      # Direct kubectl apply to production is FORBIDDEN (ArgoCD-managed).
+    proof_output: |
+      - stdout: kubectl apply output
+      - For production: ArgoCD sync status (via canonical-release.sh)
+    alternatives:
+      - path: scripts/infra/post-k8s-apply-hook.sh
+        reason: >
+          Post-apply verification hook, not a deploy entrypoint. Called
+          automatically by release orchestration after kubectl apply.
+      - path: scripts/infra/deploy-aspects-k8s.sh
+        reason: >
+          Deploys the Aspects analytics add-on only. Not a general deploy
+          entrypoint for the core Open edX workload.
+      - path: scripts/infra/verify-deployment.sh
+        reason: >
+          Post-deployment verification (read-only). Not a deploy script.
+    status: canonical
+
+  # ── 6. Runtime-validation ─────────────────────────────────────────────────
+  - workflow_id: runtime-validation
+    label: "Post-deploy runtime verification gate"
+    canonical_script: scripts/qa/run-release-verification-gates.sh
+    owner: platform-team
+    invocation: |
+      bash scripts/qa/run-release-verification-gates.sh
+      # or scoped to specific check categories:
+      bash scripts/release/smoke-after-migrate.sh \
+        --namespace mereka-lms --json
+    proof_output: |
+      - stdout: PASS/FAIL/SKIP per gate with counts
+      - Exit 0 = all release-blocking gates pass
+      - Exit 1 = one or more gates failed
+      - smoke-after-migrate.sh --json: structured JSON proof artifact
+    alternatives:
+      - path: scripts/release/smoke-after-migrate.sh
+        reason: >
+          Focused post-migration smoke check driven by contract.json health
+          endpoints. Used as a sub-gate within the broader verification suite.
+          Invoke directly only for targeted post-migration checks; use
+          run-release-verification-gates.sh for the full release gate suite.
+      - path: scripts/qa/verify-release-readiness.sh
+        reason: >
+          Pre-release static preflight (offline). Does not cover runtime
+          cluster health. Use as a complementary check, not the primary
+          runtime validation gate.
+      - path: scripts/qa/run-operations-gates.sh
+        reason: >
+          Scheduled runtime operations gate (not release-scoped). Covers
+          routine health monitoring, not release-blocking verification.
+      - path: scripts/release/release-gate.sh
+        reason: >
+          Validates kustomize renders, contract bundle, migration registry,
+          and boundary audit. A structural integrity gate, not a live-cluster
+          runtime verification gate. Run with --skip-cluster for CI static
+          checks; use run-release-verification-gates.sh for the full suite.
+    status: canonical
+
+  # ── 7. Runtime-routing-acceptance ───────────────────────────────────────
+  - workflow_id: runtime-routing-acceptance
+    label: "Tenant runtime-routing acceptance lane"
+    canonical_script: scripts/acceptance/runtime-routing.sh
+    owner: platform-team
+    invocation: |
+      # Preferred operator front door:
+      bin/accept runtime-routing --env dev
+
+      # Control-plane compatibility path:
+      bin/lms-ops accept runtime-routing --lane dev
+    proof_output: |
+      - var/acceptance/runtime-routing/<env>/<timestamp>/browser-matrix.json
+      - var/acceptance/runtime-routing/<env>/<timestamp>/summary.json
+      - per-tenant logs for playwright, studio-sso, and footer parity
+    alternatives:
+      - path: tests/e2e/tests/smoke-unauthenticated.spec.ts
+        reason: >
+          High-signal browser oracle, but not the acceptance front door by itself.
+          Run through runtime-routing.sh so the proof bundle stays coherent.
+      - path: scripts/qa/verify-studio-sso-flow.sh
+        reason: >
+          Useful focused redirect check, but only one slice of the lane contract.
+      - path: scripts/qa/verify-footer-parity.sh
+        reason: >
+          Useful footer/runtime probe, but not a complete tenant-routing acceptance lane.
+    status: canonical
+
+  # ── 7. Proof-envelope ──────────────────────────────────────────────────
+  - workflow_id: proof-envelope
+    label: "Emit GitOps-conformant evidence envelopes (schema v1)"
+    canonical_script: scripts/release/emit-proof-envelope.sh
+    owner: platform-team
+    invocation: |
+      # Single concern:
+      bash scripts/release/emit-proof-envelope.sh \
+        --concern release-gate --lane dev --skip-cluster
+
+      # All concerns (aggregate):
+      bash scripts/release/emit-proof-envelope.sh \
+        --concern aggregate --lane staging --namespace stg-mereka-lms \
+        --domain staging.academyv2.mereka.io
+    proof_output: |
+      - var/proof/release-gate.json: evidence envelope (schema v1)
+      - var/proof/migration-proof.json: evidence envelope (schema v1)
+      - var/proof/runtime-smoke.json: evidence envelope (schema v1)
+      - var/proof/aggregate.json: combined verdict envelope
+    alternatives:
+      - path: scripts/release/release-gate.sh
+        reason: >
+          Produces a proof artifact but in non-conformant format.
+          emit-proof-envelope.sh wraps this into the standard
+          GitOps evidence envelope schema v1.
+      - path: scripts/release/smoke-after-migrate.sh
+        reason: >
+          Produces JSON output with --json but not in evidence
+          envelope format. Use emit-proof-envelope.sh --concern
+          migration-proof for conformant output.
+    status: canonical

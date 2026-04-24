@@ -1,0 +1,147 @@
+name: 'Authenticate to GCP (and optionally GKE)'
+description: 'Sets up GCP auth + gcloud CLI. GKE credential fetching is skipped by default (GKE decommissioned). Set gke_cluster to re-enable.'
+
+inputs:
+  workload_identity_provider:
+    description: 'Workload Identity Provider resource name (projects/.../providers/...)'
+    required: false
+    default: ''
+  wif_service_account:
+    description: 'Service account email to impersonate when using WIF'
+    required: false
+    default: ''
+  auth_mode:
+    description: 'Auth mode: auto (WIF) or wif'
+    required: false
+    default: 'auto'
+  gcloud_project:
+    description: 'Project ID to set as gcloud default (used for gcloud CLI; may differ from GKE cluster project)'
+    required: false
+    default: 'mereka-lms'
+  gke_project:
+    description: 'GKE cluster project ID (used for get-credentials)'
+    required: false
+    default: 'bbi-k8'
+  gke_location:
+    description: 'GKE cluster location (zone or region)'
+    required: false
+    default: ''  # GKE decommissioned — leave empty unless explicitly needed
+  gke_cluster:
+    description: 'GKE cluster name (GKE decommissioned — leave empty for rke2-only workflows)'
+    required: false
+    default: ''
+  skip_gke:
+    description: >
+      Skip GKE credential fetching (GCP auth + gcloud only).
+      Set true for workflows that only need gcloud CLI (e.g. Docker Artifact Registry auth, Cloud SQL).
+    required: false
+    default: 'false'
+  skip_gcloud:
+    description: >
+      Skip gcloud CLI setup entirely (GCP auth only).
+      Set true for workflows that call gcloud directly via the already-authenticated SDK.
+    required: false
+    default: 'false'
+  strict_runtime:
+    description: >
+      Fail the action if GKE credentials cannot be fetched.
+      When false, sets has_cluster=false and CAN_RUN_RUNTIME=false instead of failing.
+    required: false
+    default: 'false'
+
+outputs:
+  has_cluster:
+    description: 'Whether GKE cluster credentials were successfully fetched (true/false)'
+    value: ${{ steps.resolve-cluster.outputs.has_cluster }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Resolve auth mode
+      id: auth-mode
+      shell: bash
+      env:
+        AUTH_MODE: ${{ inputs.auth_mode }}
+        WIF_PROVIDER: ${{ inputs.workload_identity_provider }}
+        WIF_SERVICE_ACCOUNT: ${{ inputs.wif_service_account }}
+      run: |
+        mode="${AUTH_MODE}"
+        if [[ "$mode" != "auto" && "$mode" != "wif" ]]; then
+          echo "ERROR: auth_mode must be one of auto|wif (got: ${mode})" >&2
+          exit 1
+        fi
+
+        has_wif=false
+        if [[ -n "$WIF_PROVIDER" && -n "$WIF_SERVICE_ACCOUNT" ]]; then
+          has_wif=true
+        fi
+
+        resolved=""
+        case "$mode" in
+          wif)
+            if [[ "$has_wif" != true ]]; then
+              echo "ERROR: auth_mode=wif requires workload_identity_provider and wif_service_account." >&2
+              exit 1
+            fi
+            resolved="wif"
+            ;;
+          auto)
+            if [[ "$has_wif" == true ]]; then
+              resolved="wif"
+            else
+              echo "ERROR: auth_mode=auto could not resolve credentials. Provide WIF inputs." >&2
+              exit 1
+            fi
+            ;;
+        esac
+
+        echo "mode=${resolved}" >> "$GITHUB_OUTPUT"
+        echo "Resolved auth mode: ${resolved}"
+
+    - name: Authenticate to GCP (WIF)
+      if: ${{ steps.auth-mode.outputs.mode == 'wif' }}
+      uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed  # v2
+      with:
+        workload_identity_provider: ${{ inputs.workload_identity_provider }}
+        service_account: ${{ inputs.wif_service_account }}
+
+    - name: Install gcloud
+      if: ${{ inputs.skip_gcloud != 'true' }}
+      uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f  # v2
+      with:
+        project_id: ${{ inputs.gcloud_project }}
+
+    - name: Get GKE credentials and resolve has_cluster output
+      id: resolve-cluster
+      shell: bash
+      env:
+        GKE_CLUSTER: ${{ inputs.gke_cluster }}
+        GKE_PROJECT: ${{ inputs.gke_project }}
+        GKE_LOCATION: ${{ inputs.gke_location }}
+        SKIP_GKE: ${{ inputs.skip_gke }}
+        SKIP_GCLOUD: ${{ inputs.skip_gcloud }}
+        STRICT_RUNTIME: ${{ inputs.strict_runtime }}
+      run: |
+        # Skip GKE credential fetching when:
+        # - Explicitly skipped via skip_gke/skip_gcloud
+        # - GKE cluster name is empty (GKE is decommissioned; most workflows are rke2-only now)
+        if [[ "$SKIP_GKE" == "true" || "$SKIP_GCLOUD" == "true" || -z "$GKE_CLUSTER" ]]; then
+          echo "has_cluster=false" >> "$GITHUB_OUTPUT"
+          [[ -z "$GKE_CLUSTER" ]] && echo "INFO: GKE cluster name empty — skipping GKE credential fetch (GKE decommissioned)" >&2
+          exit 0
+        fi
+
+        if gcloud container clusters get-credentials "$GKE_CLUSTER" \
+          --project "$GKE_PROJECT" \
+          --zone "$GKE_LOCATION"; then
+          echo "has_cluster=true" >> "$GITHUB_OUTPUT"
+          echo "CAN_RUN_RUNTIME=true" >> "$GITHUB_ENV"
+        else
+          echo "has_cluster=false" >> "$GITHUB_OUTPUT"
+          echo "CAN_RUN_RUNTIME=false" >> "$GITHUB_ENV"
+          if [[ "$STRICT_RUNTIME" == "true" ]]; then
+            echo "ERROR: unable to get GKE credentials (set strict_runtime=false to skip runtime checks)" >&2
+            exit 1
+          fi
+          echo "WARN: unable to get GKE credentials; runtime checks will be skipped (strict_runtime=false)" >&2
+        fi

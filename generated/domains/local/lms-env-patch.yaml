@@ -1,0 +1,16 @@
+# GENERATED — do not hand-edit. Source: deploy/k8s/tenancy/tenant-registry.yaml
+# Regenerate: python scripts/domains/generate_domain_env.py
+# Patch LMS environment config for academyv2.mereka.dev domain
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openedx-config
+  namespace: mereka-lms
+data:
+  LMS_HOST: "academyv2.mereka.dev"
+  LMS_BASE: "academyv2.mereka.dev"
+  CMS_HOST: "studio.academyv2.mereka.dev"
+  CMS_BASE: "studio.academyv2.mereka.dev"
+  PREVIEW_LMS_BASE: "preview.academyv2.mereka.dev"
+  MFE_HOST: "apps.academyv2.mereka.dev"
+  ENABLE_HTTPS: "true"

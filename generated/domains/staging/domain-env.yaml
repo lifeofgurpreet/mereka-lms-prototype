@@ -1,0 +1,325 @@
+# Domain overrides for staging environment.
+#
+# Staging uses staging.academyv2.mereka.io domains on the rke2-nonprod cluster.
+# AUTH DOMAIN NOTE (issue #174): same ownership rules as rke2-nonprod.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lms
+spec:
+  template:
+    spec:
+      containers:
+        - name: lms
+          env:
+            - name: MEREKA_LMS_DOMAIN
+              value: staging.academyv2.mereka.io
+            - name: MEREKA_SCHEME
+              value: https
+            - name: MEREKA_COOKIE_DOMAIN
+              value: .academyv2.mereka.io
+            - name: LMS_BASE_URL
+              value: https://staging.academyv2.mereka.io
+            - name: MFE_BASE_URL
+              value: https://staging.apps.academyv2.mereka.io
+            - name: MEREKA_AUTH_DOMAIN
+              value: staging.auth0.mereka.io
+            - name: MEREKA_CREDENTIALS_DOMAIN
+              value: staging.credentials.academyv2.mereka.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cms
+spec:
+  template:
+    spec:
+      containers:
+        - name: cms
+          env:
+            - name: MEREKA_LMS_DOMAIN
+              value: staging.academyv2.mereka.io
+            - name: MEREKA_SCHEME
+              value: https
+            - name: MEREKA_COOKIE_DOMAIN
+              value: .academyv2.mereka.io
+            - name: LMS_BASE_URL
+              value: https://staging.academyv2.mereka.io
+            - name: MFE_BASE_URL
+              value: https://staging.apps.academyv2.mereka.io
+            - name: MEREKA_AUTH_DOMAIN
+              value: staging.auth0.mereka.io
+            - name: MEREKA_CREDENTIALS_DOMAIN
+              value: staging.credentials.academyv2.mereka.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lms-worker
+spec:
+  template:
+    spec:
+      containers:
+        - name: lms-worker
+          env:
+            - name: MEREKA_LMS_DOMAIN
+              value: staging.academyv2.mereka.io
+            - name: MEREKA_SCHEME
+              value: https
+            - name: MEREKA_COOKIE_DOMAIN
+              value: .academyv2.mereka.io
+            - name: LMS_BASE_URL
+              value: https://staging.academyv2.mereka.io
+            - name: MFE_BASE_URL
+              value: https://staging.apps.academyv2.mereka.io
+            - name: MEREKA_AUTH_DOMAIN
+              value: staging.auth0.mereka.io
+            - name: MEREKA_CREDENTIALS_DOMAIN
+              value: staging.credentials.academyv2.mereka.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cms-worker
+spec:
+  template:
+    spec:
+      containers:
+        - name: cms-worker
+          env:
+            - name: MEREKA_LMS_DOMAIN
+              value: staging.academyv2.mereka.io
+            - name: MEREKA_SCHEME
+              value: https
+            - name: MEREKA_COOKIE_DOMAIN
+              value: .academyv2.mereka.io
+            - name: LMS_BASE_URL
+              value: https://staging.academyv2.mereka.io
+            - name: MFE_BASE_URL
+              value: https://staging.apps.academyv2.mereka.io
+            - name: MEREKA_AUTH_DOMAIN
+              value: staging.auth0.mereka.io
+            - name: MEREKA_CREDENTIALS_DOMAIN
+              value: staging.credentials.academyv2.mereka.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: credentials
+spec:
+  template:
+    spec:
+      containers:
+        - name: credentials
+          env:
+            - name: MEREKA_CREDENTIALS_DOMAIN
+              value: staging.credentials.academyv2.mereka.io
+            - name: MEREKA_LMS_DOMAIN
+              value: staging.academyv2.mereka.io
+            - name: MEREKA_SCHEME
+              value: https
+            - name: LMS_BASE_URL
+              value: https://staging.academyv2.mereka.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discovery
+spec:
+  template:
+    spec:
+      containers:
+        - name: discovery
+          env:
+            - name: MEREKA_SCHEME
+              value: https
+            - name: MEREKA_LMS_DOMAIN
+              value: staging.academyv2.mereka.io
+            - name: LMS_BASE_URL
+              value: https://staging.academyv2.mereka.io
+            - name: DISCOVERY_DOMAIN
+              value: staging.discovery.academyv2.mereka.io
+            - name: DISCOVERY_BASE_URL
+              value: https://staging.discovery.academyv2.mereka.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notes
+spec:
+  template:
+    spec:
+      containers:
+        - name: notes
+          env:
+            - name: MEREKA_LMS_DOMAIN
+              value: staging.academyv2.mereka.io
+            - name: NOTES_DOMAIN
+              value: staging.notes.academyv2.mereka.io
+---
+# CronJob domain overrides
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: discovery-sync
+  namespace: mereka-lms
+spec:
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: sync
+              env:
+                - name: LMS_URL
+                  value: https://staging.academyv2.mereka.io
+                - name: DISCOVERY_URL
+                  value: https://staging.discovery.academyv2.mereka.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-catalog
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: config-gen
+          env:
+            - name: LMS_ROOT_URL
+              value: https://staging.academyv2.mereka.io
+      containers:
+        - name: enterprise-catalog
+          env:
+            - name: LMS_ROOT_URL
+              value: https://staging.academyv2.mereka.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-access
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: config-gen
+          env:
+            - name: LMS_ROOT_URL
+              value: https://staging.academyv2.mereka.io
+      containers:
+        - name: enterprise-access
+          env:
+            - name: LMS_ROOT_URL
+              value: https://staging.academyv2.mereka.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-subsidy
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: config-gen
+          env:
+            - name: LMS_ROOT_URL
+              value: https://staging.academyv2.mereka.io
+      containers:
+        - name: enterprise-subsidy
+          env:
+            - name: LMS_ROOT_URL
+              value: https://staging.academyv2.mereka.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: license-manager
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: config-gen
+          env:
+            - name: LMS_ROOT_URL
+              value: https://staging.academyv2.mereka.io
+      containers:
+        - name: license-manager
+          env:
+            - name: LMS_ROOT_URL
+              value: https://staging.academyv2.mereka.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-catalog-worker
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: config-gen
+          env:
+            - name: LMS_ROOT_URL
+              value: https://staging.academyv2.mereka.io
+      containers:
+        - name: enterprise-catalog-worker
+          env:
+            - name: LMS_ROOT_URL
+              value: https://staging.academyv2.mereka.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-access-worker
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: config-gen
+          env:
+            - name: LMS_ROOT_URL
+              value: https://staging.academyv2.mereka.io
+      containers:
+        - name: enterprise-access-worker
+          env:
+            - name: LMS_ROOT_URL
+              value: https://staging.academyv2.mereka.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: caddy
+spec:
+  template:
+    spec:
+      containers:
+        - name: caddy
+          env:
+            - name: ENTERPRISE_ADMIN_HOST
+              value: staging.admin.academyv2.mereka.io
+            - name: ENTERPRISE_LEARNER_HOST
+              value: staging.learner.academyv2.mereka.io
+---
+# MFE Caddy domain env vars for CSP header template interpolation.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mfe
+  labels:
+    app.kubernetes.io/name: mfe
+spec:
+  template:
+    spec:
+      containers:
+        - name: mfe
+          env:
+            - name: LMS_HOST
+              value: staging.academyv2.mereka.io
+            - name: CMS_HOST
+              value: staging.studio.academyv2.mereka.io
+            - name: AUTH_HOST
+              value: staging.auth0.mereka.io
+            - name: TENANT_BIJIBIJI_HOST
+              value: staging.academy.biji-biji.com
+            - name: TENANT_SOF_HOST
+              value: staging.skillourfuture.academy.mereka.io

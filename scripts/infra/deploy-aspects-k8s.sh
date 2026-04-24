@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+# NOTE: GKE (mereka-lms GCP project) was decommissioned. The GKE Autopilot reference
+# in this script's description is historical; Aspects now runs on RKE2. The script is
+# also disabled by default (ALLOW_LEGACY_TUTOR_K8S guard below) — do not re-enable.
+#
+# Deploy Aspects Analytics through the deprecated Tutor-generated Kubernetes path.
+set -euo pipefail
+
+# DEPRECATED: this script applies Tutor-generated k8s manifests directly.
+# Canonical release flow:
+#   scripts/infra/release-openedx-gitops.sh
+# Temporary bypass (emergency only):
+#   ALLOW_LEGACY_TUTOR_K8S=1 ./scripts/infra/deploy-aspects-k8s.sh
+if [[ "${ALLOW_LEGACY_TUTOR_K8S:-0}" != "1" ]]; then
+  echo "DEPRECATED: scripts/infra/deploy-aspects-k8s.sh is disabled by default." >&2
+  echo "Use scripts/infra/release-openedx-gitops.sh for canonical GitOps flow." >&2
+  echo "Set ALLOW_LEGACY_TUTOR_K8S=1 only for emergency legacy recovery." >&2
+  exit 1
+fi
+
+echo "WARNING: running deprecated legacy path (ALLOW_LEGACY_TUTOR_K8S=1)." >&2
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$REPO_ROOT"
+
+source infrastructure/tutor/tutor-env.sh
+
+echo "=== Configuring Aspects for legacy Tutor Kubernetes manifests ==="
+echo ""
+
+# Configure Aspects with conservative resource limits for the legacy path.
+echo "Setting Aspects resource limits..."
+./scripts/infra/tutor-config-save.sh \
+  --set ASPECTS_CLICKHOUSE_MEMORY_LIMIT=4Gi \
+  --set ASPECTS_CLICKHOUSE_CPU_LIMIT=2 \
+  --set ASPECTS_SUPERSET_MEMORY_LIMIT=2Gi \
+  --set ASPECTS_SUPERSET_CPU_LIMIT=1 \
+  --set ASPECTS_RALPH_MEMORY_LIMIT=512Mi \
+  --set ASPECTS_RALPH_CPU_LIMIT=500m
+
+echo ""
+echo "=== Generating Kubernetes manifests ==="
+tutor k8s init
+
+echo ""
+echo "=== Checking for Aspects manifests ==="
+if find tutor_env/env/k8s -name "*clickhouse*" -o -name "*superset*" 2>/dev/null | grep -q .; then
+  echo "Found Aspects manifests"
+else
+  echo "⚠️  No Aspects manifests found. Aspects may not be enabled for Kubernetes."
+  echo "   Run: tutor plugins enable aspects && ./scripts/infra/tutor-config-save.sh"
+  exit 1
+fi
+
+echo ""
+echo "=== Deploying Aspects services ==="
+echo ""
+
+# Deploy ClickHouse
+if kubectl get deployment clickhouse -n mereka-lms &>/dev/null; then
+  echo "ClickHouse deployment exists, updating..."
+  kubectl apply -k tutor_env/env/k8s --selector app.kubernetes.io/name=clickhouse
+else
+  echo "Creating ClickHouse deployment..."
+  kubectl apply -k tutor_env/env/k8s --selector app.kubernetes.io/name=clickhouse
+fi
+
+# Deploy Superset
+if kubectl get deployment superset -n mereka-lms &>/dev/null; then
+  echo "Superset deployment exists, updating..."
+  kubectl apply -k tutor_env/env/k8s --selector app.kubernetes.io/name=superset
+else
+  echo "Creating Superset deployment..."
+  kubectl apply -k tutor_env/env/k8s --selector app.kubernetes.io/name=superset
+fi
+
+# Deploy Ralph (event routing)
+if kubectl get deployment ralph -n mereka-lms &>/dev/null; then
+  echo "Ralph deployment exists, updating..."
+  kubectl apply -k tutor_env/env/k8s --selector app.kubernetes.io/name=ralph
+else
+  echo "Creating Ralph deployment..."
+  kubectl apply -k tutor_env/env/k8s --selector app.kubernetes.io/name=ralph
+fi
+
+echo ""
+echo "=== Waiting for deployments ==="
+kubectl wait --for=condition=available --timeout=300s \
+  deployment/clickhouse -n mereka-lms || echo "⚠️  ClickHouse not ready yet"
+kubectl wait --for=condition=available --timeout=300s \
+  deployment/superset -n mereka-lms || echo "⚠️  Superset not ready yet"
+kubectl wait --for=condition=available --timeout=300s \
+  deployment/ralph -n mereka-lms || echo "⚠️  Ralph not ready yet"
+
+echo ""
+echo "=== Checking pod status ==="
+kubectl get pods -n mereka-lms | grep -E "(clickhouse|superset|ralph)"
+
+echo ""
+echo "=== Checking for scheduling issues ==="
+kubectl get events -n mereka-lms --sort-by='.lastTimestamp' | \
+  grep -i -E "(clickhouse|superset|ralph|insufficient|failed)" | tail -10
+
+echo ""
+echo "=== Access Information ==="
+echo ""
+echo "To access Superset:"
+echo "  kubectl port-forward -n mereka-lms svc/superset 8088:8088"
+echo "  Then open: http://localhost:8088"
+echo ""
+echo "Default credentials:"
+echo "  Username: admin"
+echo "  Password: Check with: tutor config printvalue SUPERSET_ADMIN_PASSWORD"
+echo ""
+echo "=== Done ==="
+
+
+

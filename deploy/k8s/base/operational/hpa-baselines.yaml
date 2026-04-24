@@ -1,0 +1,70 @@
+---
+# HPA baselines for Open edX worker workloads.
+# NOTE: LMS and CMS HPAs are defined in apps/lms/hpa.yaml and apps/cms/hpa.yaml
+# respectively. Only worker HPAs are defined here to avoid duplicate resource IDs.
+# Workers use a higher CPU target (80%) because Celery tasks are
+# CPU-bound bursts; scaling earlier would cause unnecessary churn.
+# scaleDown stabilisation window of 300s prevents flapping after
+# traffic spikes.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: lms-worker
+  labels:
+    app.kubernetes.io/name: lms-worker
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/component: autoscaling
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: lms-worker
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 60
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: cms-worker
+  labels:
+    app.kubernetes.io/name: cms-worker
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/component: autoscaling
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: cms-worker
+  minReplicas: 1
+  maxReplicas: 2
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 60

@@ -1,0 +1,42 @@
+# Allow Prometheus (monitoring namespace) to scrape /metrics from all pods.
+# Covers all services with ServiceMonitors in deploy/k8s/base/monitoring/.
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-prometheus-scrape
+  labels:
+    app.kubernetes.io/name: allow-prometheus-scrape
+    app.kubernetes.io/component: network-policy
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 8000
+        - protocol: TCP
+          port: 8002
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 8160
+        - protocol: TCP
+          port: 18170
+        - protocol: TCP
+          port: 18270
+        - protocol: TCP
+          port: 18280
+        - protocol: TCP
+          port: 9121
+        - protocol: TCP
+          port: 9104
+        - protocol: TCP
+          port: 2019

@@ -1,0 +1,29 @@
+# Allow Caddy to receive traffic from hostNetwork ingress controller (RKE2/Cilium).
+#
+# On RKE2, ingress-nginx runs with hostNetwork: true. Cross-node traffic from
+# hostNetwork pods carries the Cilium identity `reserved:remote-node` instead of
+# a namespace identity. Standard K8s NetworkPolicy namespaceSelector cannot match
+# this — CiliumNetworkPolicy with fromEntities is required.
+#
+# This policy is a defense-in-depth layer alongside the K8s NetworkPolicy
+# `allow-caddy-external-ingress`. It is safe on non-Cilium clusters (the CRD
+# simply won't exist and the manifest is ignored by ArgoCD with server-side apply).
+---
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: allow-caddy-hostnetwork-ingress
+  labels:
+    app.kubernetes.io/component: network-policy
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: caddy
+  ingress:
+    - fromEntities:
+        - remote-node
+        - host
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP

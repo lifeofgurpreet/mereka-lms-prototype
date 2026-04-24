@@ -1,0 +1,47 @@
+{
+  "affected_contracts": [],
+  "affected_repos": [
+    "bbi-infrastructure",
+    "mereka-lms",
+    "platform-control-plane"
+  ],
+  "canonical_inputs": [
+    "docs/meta/knowledge/DECISION_RUNTIME_MODEL.md",
+    "generated/knowledge/evidence-obligations.json",
+    "generated/knowledge/read-first-packs.json",
+    "generated/knowledge/review-decision.json",
+    "generated/knowledge/reviewer-obligations.json",
+    "generated/skills/runtime-convergence-report.json"
+  ],
+  "diff_range": "e0a85143e29ee5372c533f410392b4ac23e0f0c6...HEAD",
+  "generated_by": "tools/knowledge/build_release_readiness.py",
+  "missing_evidence": [
+    "catalog_governance",
+    "docs_policy",
+    "validation_run"
+  ],
+  "missing_reviewer_inputs": [
+    "live reviewer approvals are unresolved input"
+  ],
+  "pack_id": "release-readiness",
+  "promotion_contract_implications": [
+    "promotion workflow inputs must remain aligned with release contracts",
+    "promotion decision remains blocked on unresolved live reviewer approval state"
+  ],
+  "release_status": "advisory",
+  "rollback_obligations": [
+    "rollback target reference remains required for promotion review"
+  ],
+  "runtime_convergence_implications": [
+    "Assistant/runtime front doors remain subordinate to canonical contract surfaces"
+  ],
+  "schema_version": 1,
+  "source_range": "e0a85143e29ee5372c533f410392b4ac23e0f0c6...HEAD",
+  "why": [
+    "review severity is high",
+    "runtime convergence state is warning",
+    "required reviewer groups: docs, governance, platform",
+    "required evidence obligations: 3",
+    "read-first priority packs: pack-registry, runtime-convergence-report"
+  ]
+}

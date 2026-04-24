@@ -1,0 +1,67 @@
+---
+version: "1.0"
+environment: test
+lms_domain: test.localhost
+
+tenants:
+  - slug: acme
+    name: Acme Corp
+    org_code: ACME
+    active: true
+    contact_email: admin@acme.com
+    country: US
+    is_platform_operator: true
+    site:
+      domain: test.localhost
+    enterprise_customer:
+      enable_data_sharing_consent: true
+      enforce_data_sharing_consent: at_enrollment
+      enable_audit_enrollment: false
+      enable_learner_portal: true
+      enable_portal_code_management: false
+      enable_analytics_screen: true
+    catalogs:
+      - title: "Acme Full Catalog"
+        catalog_query:
+          content_filter:
+            content_type: course
+            aggregation_key: ["courserun:*"]
+          org_filter:
+            - ACME
+    user_links:
+      - email: admin@acme.com
+        role: admin
+    waffle_switches:
+      enterprise.enable_learner_portal: true
+      enterprise.enable_analytics_screen: true
+
+  - slug: partner
+    name: Partner Inc
+    org_code: PARTNER
+    active: true
+    contact_email: admin@partner.com
+    country: SG
+    is_platform_operator: false
+    site:
+      domain: partner.test.localhost
+    enterprise_customer:
+      enable_data_sharing_consent: true
+      enforce_data_sharing_consent: at_enrollment
+      enable_audit_enrollment: false
+      enable_learner_portal: true
+      enable_portal_code_management: false
+      enable_analytics_screen: true
+    catalogs:
+      - title: "Partner Catalog"
+        catalog_query:
+          content_filter:
+            content_type: course
+            aggregation_key: ["courserun:*"]
+          org_filter:
+            - PARTNER
+            - ACME
+    user_links:
+      - email: admin@partner.com
+        role: admin
+    waffle_switches:
+      enterprise.enable_learner_portal: true

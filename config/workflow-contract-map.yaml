@@ -1,0 +1,83 @@
+# Workflow Contract Map — every contract must name a consuming verifier/workflow
+---
+schema_version: "1.0"
+
+inventories:
+  ci_static:
+    generated_file: ".github/ci-scripts-static.txt"
+    shard_files:
+      - ".github/ci-scripts-static-shard-01.txt"
+      - ".github/ci-scripts-static-shard-02.txt"
+      - ".github/ci-scripts-static-shard-03.txt"
+    workflows:
+      - ".github/workflows/ci.yml"
+    required_scripts:
+      - "scripts/qa/verify-domain-proof-matrix.sh"
+      - "scripts/qa/verify-workflow-contract-map.sh"
+      - "scripts/qa/verify-ghost-truth-surfaces.sh"
+      - "scripts/qa/verify-source-of-truth-matrix.sh"
+      - "scripts/qa/verify-structural-debt-register.sh"
+      - "scripts/qa/verify-skill-eval-runner.sh"
+
+manual_profiles:
+  - id: shared_skill_roots
+    verifier: "scripts/qa/verify-skill-frontmatter-integrity.sh"
+    args: ["--profile", "shared"]
+  - id: live_branch_protection
+    verifier: "scripts/qa/verify-branch-protection-contract.sh"
+    args: ["--live"]
+
+contracts:
+  - contract: "config/domain-proof-matrix.yaml"
+    verifier: "scripts/qa/verify-domain-proof-matrix.sh"
+    inventory: ci_static
+  - contract: "config/skill-roots.yaml"
+    verifier: "scripts/qa/verify-skill-frontmatter-integrity.sh"
+    manual_profile: shared_skill_roots
+  - contract: "config/branch-protection-contract.yaml"
+    verifier: "scripts/qa/verify-branch-protection-contract.sh"
+    manual_profile: live_branch_protection
+  - contract: "config/workflow-contract-map.yaml"
+    verifier: "scripts/qa/verify-workflow-contract-map.sh"
+    inventory: ci_static
+  - contract: "config/ghost-truth-surfaces.yaml"
+    verifier: "scripts/qa/verify-ghost-truth-surfaces.sh"
+    inventory: ci_static
+  - contract: "config/source-of-truth-matrix.yaml"
+    verifier: "scripts/qa/verify-source-of-truth-matrix.sh"
+    inventory: ci_static
+  - contract: "config/structural-debt-register.yaml"
+    verifier: "scripts/qa/verify-structural-debt-register.sh"
+    inventory: ci_static
+  - contract: "evals/evals.yaml"
+    verifier: "scripts/qa/verify-skill-eval-runner.sh"
+    inventory: ci_static
+
+workflows:
+  - file: ".github/workflows/ci.yml"
+    references:
+      - ".github/ci-scripts-static-shard-01.txt"
+      - ".github/ci-scripts-static-shard-02.txt"
+      - ".github/ci-scripts-static-shard-03.txt"
+      - "scripts/qa/run-release-verification-gates.sh"
+  - file: ".github/workflows/process-invariants.yml"
+    references:
+      - "scripts/qa/verify-process-invariants.sh"
+      - "scripts/qa/verify-machine-truth-freshness.sh"
+      - "scripts/qa/verify-change-surface-contract.sh"
+  - file: ".github/workflows/build-tutor-images.yml"
+    references:
+      - "scripts/infra/generate-release-bundle.sh"
+      - "scripts/release/render_control_plane_release_bundle_projection.py"
+      - "scripts/release/generate_release_object.py"
+      - "scripts/qa/verify-control-plane-release-bundle-projection.sh"
+      - "scripts/qa/verify-release-bundle.sh"
+      - "scripts/qa/verify-release-object.sh"
+  - file: ".github/workflows/release.yml"
+    references:
+      - "scripts/qa/verify-release-object.sh"
+      - "scripts/infra/release-openedx-gitops.sh"
+  - file: ".github/workflows/smoke-authenticated.yml"
+    references:
+      - "Live-asset gate (INV-013 — must pass before canary)"
+      - "scripts/qa/smoke-authenticated.sh"

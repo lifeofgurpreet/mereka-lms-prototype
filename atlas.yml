@@ -1,0 +1,22 @@
+# openedx-atlas configuration for Mereka Academy
+# OEP-58: https://open-edx-proposals.readthedocs.io/en/latest/processes/oep-0058-proc-translations.html
+#
+# Supported locales: en (primary), id, zh, vi, fil
+# Pull with: openedx-atlas pull
+# Requires: TRANSIFEX_TOKEN env var
+
+repository: openedx/openedx-translations
+branch: main
+
+# Target locales (en is source; id=Indonesian, zh=Chinese, vi=Vietnamese, fil=Filipino)
+locales:
+  - en
+  - id
+  - zh_CN
+  - vi
+  - fil
+
+# Platform (LMS/CMS) locale output
+output: tutor_env/env/build/openedx/locale
+
+# MFE translations are pulled per-app via sync-translations.sh --mfe

@@ -1,0 +1,333 @@
+{
+  "canonical_inputs": [
+    "generated/platform/domain-access-reference.json",
+    "bbi-infrastructure/config/bootstrap-lane-topology.yaml",
+    "bbi-infrastructure/config/domain-registry.yaml",
+    "platform-control-plane/contracts/service-identity-contract.yaml",
+    "platform-control-plane/contracts/release-contracts.yaml",
+    "docs/reference/operations/USER_FACING_URLS.md",
+    "docs/guides/admin/MULTI_SITE_GUIDE.md"
+  ],
+  "generated_by": "tools/docs/build_team_topology_reference.py",
+  "humans_should_not_edit_directly": [
+    "generated/platform/domain-access-reference.json",
+    "generated/platform/team-topology-reference.json",
+    "docs/reference/platform/DOMAIN_AND_ACCESS_REFERENCE.md",
+    "docs/reference/platform/TEAM_TOPOLOGY_REFERENCE.md"
+  ],
+  "isolated_per_tenant": [
+    "LMS domain (e.g., `academyv2.mereka.io` vs `academy.biji-biji.com`)",
+    "Studio domain (main uses `studio.academyv2.mereka.io`, Biji-Biji uses `studio.academy.biji-biji.com`)",
+    "MFE domain (main uses `apps.academyv2.mereka.io`, Biji-Biji uses `apps.academy.biji-biji.com`)",
+    "Branding (logo, colors, footer, email templates)",
+    "User base (no cross-tenant login)"
+  ],
+  "lane_environment_relationships": [
+    {
+      "cluster_class": "rke2",
+      "lane": "dev",
+      "note": null,
+      "root_count": 3,
+      "roots": [
+        {
+          "active": true,
+          "name": "bbi-applicationsets-dev",
+          "owns": "ApplicationSet",
+          "path": "bootstrap/applicationsets/overlays/dev",
+          "prune": true,
+          "reason": "Sole owner of dev ApplicationSets"
+        },
+        {
+          "active": true,
+          "name": "bbi-apps-dev",
+          "owns": "Application",
+          "path": "clusters/dev/rke2/apps",
+          "prune": false,
+          "reason": "Transitional \u2014 child Application deletion causes cascading data loss"
+        },
+        {
+          "active": true,
+          "name": "bbi-platform-dev",
+          "owns": "Application",
+          "path": "clusters/dev/rke2/platform",
+          "prune": false,
+          "reason": "Transitional \u2014 platform Application deletion causes cascading data loss"
+        }
+      ]
+    },
+    {
+      "cluster_class": "rke2",
+      "lane": "nonprod_platform",
+      "note": "Shared cluster-scoped operators for the nonprod RKE2 cluster (dev + staging share one cluster). Consolidates duplicate dev/staging platform ownership per ADR-015. Uses platform-dev project as the active project since dev is the current active environment. Source paths reference dev overlays until a unified overlays/nonprod/ is created in a follow-up PR.",
+      "root_count": 1,
+      "roots": [
+        {
+          "active": true,
+          "name": "bbi-platform-nonprod",
+          "owns": "Application",
+          "path": "clusters/nonprod/rke2/platform",
+          "prune": false,
+          "reason": "Single authoritative owner of cluster-scoped operators (cert-manager, kyverno, velero, etc.) on shared nonprod RKE2. Replaces duplicate bbi-platform-dev and bbi-platform-staging ownership."
+        }
+      ]
+    },
+    {
+      "cluster_class": "rke2",
+      "lane": "preview",
+      "note": "Preview environments run on the dev RKE2 cluster, bootstrapped via the dev overlay (preview-environments-preview.yaml is included in overlays/dev/). There is no separate preview bootstrap overlay \u2014 preview is a named scope managed by the dev lane ApplicationSet controller.",
+      "root_count": 1,
+      "roots": [
+        {
+          "active": true,
+          "name": "bbi-applicationsets-dev",
+          "owns": "ApplicationSet",
+          "path": "bootstrap/applicationsets/overlays/dev",
+          "prune": true,
+          "reason": "Shared with dev lane \u2014 preview-environments-preview.yaml is included here"
+        }
+      ]
+    },
+    {
+      "cluster_class": "rke2",
+      "lane": "prod",
+      "note": null,
+      "root_count": 1,
+      "roots": [
+        {
+          "active": true,
+          "name": "bbi-applicationsets-prod",
+          "owns": "AppProject+Application+ApplicationSet",
+          "path": "bootstrap/applicationsets/overlays/prod",
+          "prune": true,
+          "reason": "Sole bootstrap owner of prod AppProjects, platform Applications, and ApplicationSets"
+        }
+      ]
+    },
+    {
+      "cluster_class": "rke2",
+      "lane": "staging",
+      "note": null,
+      "root_count": 3,
+      "roots": [
+        {
+          "active": true,
+          "name": "bbi-applicationsets-staging",
+          "owns": "ApplicationSet",
+          "path": "bootstrap/applicationsets/overlays/staging",
+          "prune": true,
+          "reason": "Sole owner of staging ApplicationSets"
+        },
+        {
+          "active": false,
+          "name": "bbi-apps-staging",
+          "owns": "Application",
+          "path": "clusters/staging/rke2/apps",
+          "prune": false,
+          "reason": "Deauthorized \u2014 superseded by ApplicationSets. Source path never created. syncPolicy disabled."
+        },
+        {
+          "active": true,
+          "name": "bbi-platform-staging",
+          "owns": "Application",
+          "path": "clusters/staging/rke2/platform",
+          "prune": false,
+          "reason": "Transitional \u2014 platform Application deletion causes cascading data loss"
+        }
+      ]
+    }
+  ],
+  "multi_site_guide_domain_rows": [
+    {
+      "Domain": "`academyv2.mereka.io`",
+      "MFE Subdomain": "`apps.academyv2.mereka.io`",
+      "Purpose": "Primary LMS",
+      "Session Scope": "`.academyv2.mereka.io` (shared with MFE)"
+    },
+    {
+      "Domain": "`academy.biji-biji.com`",
+      "MFE Subdomain": "`apps.academy.biji-biji.com`",
+      "Purpose": "Biji-Biji Initiative partner branding",
+      "Session Scope": "Independent (no subdomain sharing)"
+    },
+    {
+      "Domain": "`skillourfuture.academy.mereka.io`",
+      "MFE Subdomain": "`apps.skillourfuture.academyv2.mereka.io`",
+      "Purpose": "SkillOurFuture program",
+      "Session Scope": "Independent"
+    }
+  ],
+  "pack_id": "team-topology-reference",
+  "platform_services": {
+    "canonical_service_ids": [
+      "authentik",
+      "cal.com",
+      "listmonk",
+      "mereka-lms",
+      "reka-slackbot",
+      "temporal",
+      "weaviate",
+      "zoom-rtms"
+    ],
+    "global_platform_endpoints": [
+      "argocd",
+      "authentik",
+      "infisical"
+    ],
+    "release_contract_lanes": [
+      "authentik",
+      "cal.com",
+      "listmonk",
+      "mereka-lms",
+      "reka-slackbot",
+      "temporal",
+      "weaviate",
+      "zoom-rtms"
+    ]
+  },
+  "schema_version": 1,
+  "shared_across_tenants": [
+    "Discovery service (single catalog, filtered by organization)",
+    "Ecommerce service (single checkout, tenant-aware) \u2014 legacy Oscar, being replaced by Purchase Gateway",
+    "Credentials service (single certificate issuer, tenant-branded)",
+    "Forum service (single API, course-scoped)",
+    "Authentik SSO (single OIDC provider, tenant-aware)"
+  ],
+  "tenant_site_relationships": [
+    {
+      "lane_domains": {
+        "prod": {
+          "admin_url": "https://academy.biji-biji.com/admin",
+          "extra_urls": {
+            "mfe": "https://apps.academy.biji-biji.com"
+          },
+          "learner_url": "https://academy.biji-biji.com",
+          "studio_url": "https://studio.academy.biji-biji.com",
+          "support_ops_url": "https://argocd.mereka.io"
+        }
+      },
+      "lanes_present": [
+        "prod"
+      ],
+      "status": "resolved",
+      "tenant_display_name": "Biji-Biji",
+      "tenant_site": "bijibiji",
+      "unresolved_fields": []
+    },
+    {
+      "lane_domains": {
+        "dev": {
+          "admin_url": "https://academyv2.mereka.dev/admin",
+          "extra_urls": {
+            "admin": "https://admin.academyv2.mereka.dev",
+            "authentik": "https://auth0.mereka.dev",
+            "credentials": "https://credentials.academyv2.mereka.dev",
+            "discovery": "https://discovery.academyv2.mereka.dev",
+            "ecommerce": "https://ecommerce.academyv2.mereka.dev",
+            "mfe": "https://apps.academyv2.mereka.dev",
+            "notes": "https://notes.academyv2.mereka.dev",
+            "preview": "https://preview.academyv2.mereka.dev"
+          },
+          "learner_url": "https://academyv2.mereka.dev",
+          "studio_url": "https://studio.academyv2.mereka.dev",
+          "support_ops_url": "https://argocd.mereka.dev"
+        },
+        "prod": {
+          "admin_url": "https://academyv2.mereka.io/admin",
+          "extra_urls": {
+            "authentik": "https://auth0.mereka.io"
+          },
+          "learner_url": "https://academyv2.mereka.io",
+          "studio_url": "https://studio.academyv2.mereka.io",
+          "support_ops_url": "https://argocd.mereka.io"
+        },
+        "staging": {
+          "admin_url": "https://staging.academyv2.mereka.io/admin",
+          "extra_urls": {
+            "authentik": "https://staging.auth0.mereka.io",
+            "credentials": "https://staging.credentials.mereka.io",
+            "discovery": "https://staging.discovery.mereka.io",
+            "ecommerce": "https://staging.ecommerce.mereka.io",
+            "mfe": "https://staging.apps.academyv2.mereka.io",
+            "notes": "https://staging.notes.mereka.io",
+            "preview": "https://staging.preview.academyv2.mereka.io"
+          },
+          "learner_url": "https://staging.academyv2.mereka.io",
+          "studio_url": "https://staging.studio.academyv2.mereka.io",
+          "support_ops_url": "https://staging.argocd.mereka.io"
+        }
+      },
+      "lanes_present": [
+        "dev",
+        "staging",
+        "prod"
+      ],
+      "status": "resolved",
+      "tenant_display_name": "Mereka Academy",
+      "tenant_site": "main",
+      "unresolved_fields": []
+    },
+    {
+      "lane_domains": {
+        "prod": {
+          "admin_url": "https://skillourfuture.academy.mereka.io/admin",
+          "extra_urls": {
+            "mfe": null
+          },
+          "learner_url": "https://skillourfuture.academy.mereka.io",
+          "studio_url": null,
+          "support_ops_url": "https://argocd.mereka.io"
+        }
+      },
+      "lanes_present": [
+        "prod"
+      ],
+      "status": "conflict",
+      "tenant_display_name": "SkillOurFuture",
+      "tenant_site": "skillourfuture",
+      "unresolved_fields": [
+        "studio_url",
+        "mfe_url"
+      ]
+    }
+  ],
+  "topology_truth_lives_in": [
+    "bbi-infrastructure/config/bootstrap-lane-topology.yaml",
+    "bbi-infrastructure/config/domain-registry.yaml",
+    "platform-control-plane/contracts/service-identity-contract.yaml",
+    "platform-control-plane/contracts/release-contracts.yaml"
+  ],
+  "unresolved_conflicts": [
+    {
+      "field": "studio_url",
+      "lane": "prod",
+      "observed_values": [
+        {
+          "source": "docs/reference/operations/DOMAIN_MATRIX.md",
+          "value": "https://studio.skillourfuture.academy.mereka.io"
+        },
+        {
+          "source": "docs/reference/operations/USER_FACING_URLS.md",
+          "value": "shared-with-main-tenant"
+        }
+      ],
+      "resolution": "left-null-in-domain-access-reference-until-canonical-source-converges",
+      "tenant_site": "skillourfuture"
+    },
+    {
+      "field": "mfe_url",
+      "lane": "prod",
+      "observed_values": [
+        {
+          "source": "docs/reference/operations/DOMAIN_MATRIX.md",
+          "value": "https://apps.skillourfuture.academy.mereka.io"
+        },
+        {
+          "source": "docs/reference/operations/USER_FACING_URLS.md",
+          "value": "shared-main-mfe-hub"
+        }
+      ],
+      "resolution": "left-null-in-domain-access-reference-until-canonical-source-converges",
+      "tenant_site": "skillourfuture"
+    }
+  ]
+}

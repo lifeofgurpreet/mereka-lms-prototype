@@ -1,0 +1,23 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: caddy
+  labels:
+    app.kubernetes.io/name: caddy
+    app.kubernetes.io/component: loadbalancer
+    app.kubernetes.io/instance: mereka-lms
+    app.kubernetes.io/part-of: mereka-lms
+    app.kubernetes.io/managed-by: tutor
+spec:
+  # Ingress terminates TLS; Caddy stays internal.
+  type: ClusterIP
+  ports:
+    - port: 80
+      name: http
+    - port: 443
+      name: https
+    - port: 2019
+      name: metrics
+  selector:
+    app.kubernetes.io/name: caddy

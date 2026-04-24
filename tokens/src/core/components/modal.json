@@ -1,0 +1,10 @@
+{
+  "modal": {
+    "border-radius": {
+      "value": "{global.radius.xl}"
+    },
+    "shadow": {
+      "value": "{global.shadow.xl}"
+    }
+  }
+}

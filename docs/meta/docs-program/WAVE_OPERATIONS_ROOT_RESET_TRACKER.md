@@ -1,0 +1,220 @@
+# Wave Operations Root Reset Tracker
+
+> Historical tracker for a completed root-retirement wave.
+>
+> This file records how `docs/operations/**` was retired. It is not the current
+> front door for operator guidance. Current operator canon lives under
+> `docs/ops/**`, `docs/reference/operations/**`, and
+> `docs/policies/operations/**`.
+
+For current docs-program execution, use:
+
+- [POST_REBASE_INTAKE_2026-04-13.md](POST_REBASE_INTAKE_2026-04-13.md)
+- [REVIEW_HARDENING_BOARD_2026-04-13.md](REVIEW_HARDENING_BOARD_2026-04-13.md)
+- [DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md](DOCS_TRANCHE_MILESTONE_LEDGER_2026-04-13.md)
+
+For the current architecture front door, use:
+
+- [../../architecture/README.md](../../architecture/README.md)
+
+Status: historical tracker snapshot
+Owner: codex
+Branch: docs/operations-root-reset
+Worktree: /home/gurpreet/projects/k8s/mereka-lms-wt-operations-root-reset
+Started from: 4225380d7b4af95e9a41e8a7a5e8ab310c1d61e5
+
+## Historical Objective
+
+Determine whether `docs/operations/**` can be retired as an active root, partially collapsed, or must be split into narrower packets because it still contains live operational truth.
+
+## Initial Findings
+
+- `docs/ops/quickref/README.md` is already a superseded pointer to `docs/ops/quickref/README.md`.
+- The root still contains approximately 199 markdown files plus evidence and postmortem subdirectories.
+- There are 98 filename collisions between `docs/operations/**` and `docs/ops/**`.
+- Unlike the already-retired architecture root, this root is not a wrapper-only graveyard. It appears to mix:
+  - runbooks and troubleshooting material
+  - operational policy and readiness docs
+  - evidence/log bundles
+  - historical migration and rollout notes
+  - duplicate quickrefs and access references
+
+## Working Classification Hypothesis
+
+### Likely living operational content
+
+- deployment, release, troubleshooting, on-call, and maintenance runbooks
+- incident and recovery procedures
+- environment/access quick references if they are still active and not already superseded elsewhere
+
+### Likely movable content
+
+- operational standards and policy docs that belong under `docs/guides/standards/**`
+- docs-program governance notes that belong under `docs/meta/docs-program/**`
+- reference-style environment/domain material that belongs under `docs/reference/**`
+
+### Likely archival or deletable content
+
+- rollout notes, follow-ups, one-off fixes, and dated migration briefs
+- evidence bundles already mirrored under `docs/evidence/**` or archive/status surfaces
+- duplicate quickstarts that now exist under `docs/ops/**`
+
+## Packet A Goal
+
+- classify the root before deleting anything
+- identify whether the next safe packet is:
+  - a true root retirement
+  - an evidence/archive extraction
+  - or a move-to-`docs/ops/**` consolidation
+
+## Open Risk
+
+- Blindly deleting `docs/operations/**` would risk removing active operational truth, because this root is much denser and more live-looking than the already-retired architecture root.
+
+## Duplicate-Surface Signal
+
+Confirmed direct duplicate-name overlaps already exist with canonical `docs/ops/**` homes, including:
+
+- `docs/operations/CI_CD_RUNNERS.md` -> `docs/ops/ci-cd/CI_CD_RUNNERS.md`
+- `docs/operations/CI_OPTIMIZATION_TRACKER.md` -> `docs/ops/ci-cd/CI_OPTIMIZATION_TRACKER.md`
+- `docs/operations/BUILD_CACHE_PIPELINE_RUNBOOK.md` -> `docs/ops/runbooks/BUILD_CACHE_PIPELINE_RUNBOOK.md`
+- `docs/operations/DOMAIN_MANAGEMENT.md` -> `docs/ops/runbooks/DOMAIN_MANAGEMENT.md`
+- `docs/operations/ENTERPRISE_SSO_GUIDE.md` -> `docs/ops/runbooks/ENTERPRISE_SSO_GUIDE.md`
+- `docs/operations/TENANT_PROVISIONING.md` -> `docs/ops/runbooks/TENANT_PROVISIONING.md`
+- `docs/ops/monitoring/OBSERVABILITY` -> `docs/ops/monitoring/OBSERVABILITY_ROADMAP_MEREKA_LMS.md`
+- `docs/operations/SECRET_SCANNING.md` -> `docs/ops/security/SECRET_SCANNING.md`
+
+This strongly suggests the next safe cleanup packet is:
+
+1. convert or remove obvious duplicate `docs/operations/*.md` surfaces that already have canonical `docs/ops/**` counterparts
+2. leave evidence, postmortems, and unique operational policy docs for later packets
+
+## Packet B Scope
+
+Narrow duplicate-collapse packet limited to obvious superseded wrappers whose canonical homes are already live:
+
+- `docs/operations/CI_CD_RUNNERS.md` -> `docs/ops/ci-cd/CI_CD_RUNNERS.md`
+- `docs/operations/CI_OPTIMIZATION_TRACKER.md` -> `docs/status/active/CI_OPTIMIZATION_TRACKER.md`
+- `docs/operations/CI_PIPELINE_COST_OPTIMIZATION.md` -> `reports/2026/learnings/CI_PIPELINE_COST_OPTIMIZATION.md`
+- `docs/operations/COST_OPTIMIZATION.md` -> `docs/ops/ci-cd/COST_OPTIMIZATION.md`
+- `docs/operations/DOMAIN_MANAGEMENT.md` -> `docs/ops/runbooks/DOMAIN_MANAGEMENT.md`
+- `docs/operations/ENTERPRISE_SSO_GUIDE.md` -> `docs/ops/runbooks/ENTERPRISE_SSO_GUIDE.md`
+- `docs/operations/TENANT_PROVISIONING.md` -> `docs/ops/runbooks/TENANT_PROVISIONING.md`
+- `docs/operations/SECRET_SCANNING.md` -> `docs/reference/operations/SECRET_SCANNING.md`
+
+Packet B rule:
+
+- rewrite live active references first
+- then delete the superseded wrappers
+- do not touch evidence/postmortem trees yet
+
+## Packet B Result
+
+Completed narrow duplicate collapse for eight obvious wrapper files:
+
+- deleted `docs/operations/CI_CD_RUNNERS.md`
+- deleted `docs/operations/CI_OPTIMIZATION_TRACKER.md`
+- deleted `docs/operations/CI_PIPELINE_COST_OPTIMIZATION.md`
+- deleted `docs/operations/COST_OPTIMIZATION.md`
+- deleted `docs/operations/DOMAIN_MANAGEMENT.md`
+- deleted `docs/operations/ENTERPRISE_SSO_GUIDE.md`
+- deleted `docs/operations/TENANT_PROVISIONING.md`
+- deleted `docs/operations/SECRET_SCANNING.md`
+
+Live references were rewritten to:
+
+- `docs/ops/ci-cd/CI_CD_RUNNERS.md`
+- `docs/status/active/CI_OPTIMIZATION_TRACKER.md`
+- `reports/2026/learnings/CI_PIPELINE_COST_OPTIMIZATION.md`
+- `docs/ops/ci-cd/COST_OPTIMIZATION.md`
+- `docs/ops/runbooks/DOMAIN_MANAGEMENT.md`
+- `docs/ops/runbooks/ENTERPRISE_SSO_GUIDE.md`
+- `docs/ops/runbooks/TENANT_PROVISIONING.md`
+- `docs/reference/operations/SECRET_SCANNING.md`
+
+Residue intentionally left for later packets:
+
+- `docs/operations/**` still contains substantial non-wrapper operational material
+- evidence and postmortem trees are untouched
+- root-collapse maps may still mention deleted legacy paths as migration history
+
+## Packet C Scope
+
+Second duplicate-collapse packet limited to additional superseded wrappers with no active repo consumers outside migration metadata:
+
+- `docs/operations/A11Y_CONTRAST_FOCUS_GATE.md` -> `docs/ops/runbooks/A11Y_CONTRAST_FOCUS_GATE.md`
+- `docs/operations/A11Y_REGRESSION_LANE.md` -> `docs/ops/runbooks/A11Y_REGRESSION_LANE.md`
+- `docs/operations/A11Y_TENANT_BRANDING_GATE.md` -> `docs/ops/runbooks/A11Y_TENANT_BRANDING_GATE.md`
+- `docs/operations/ADMIN_CONSOLE_SETUP.md` -> `docs/reference/operations/ADMIN_CONSOLE_SETUP.md`
+- `docs/operations/ALERT_TUNING_SOP.md` -> `docs/ops/runbooks/ALERT_TUNING_SOP.md`
+- `docs/operations/ALTERNATIVE_DOMAIN_BRANDING_FIX.md` -> `docs/ops/runbooks/ALTERNATIVE_DOMAIN_BRANDING_FIX.md`
+- `docs/operations/ARGOCD_DRIFT.md` -> `docs/ops/runbooks/ARGOCD_DRIFT.md`
+- `docs/operations/ARGOCD_HEALTH_TROUBLESHOOTING.md` -> `docs/ops/runbooks/ARGOCD_HEALTH_TROUBLESHOOTING.md`
+
+Packet C rule:
+
+- delete the wrapper when no live active refs remain
+- keep collapse-map metadata untouched as migration history
+- continue leaving evidence/postmortem trees alone
+
+## Packet D Scope
+
+Third duplicate-collapse packet for superseded wrappers whose canonical destinations are already live and whose remaining active references can be rewritten directly:
+
+- `docs/operations/ASPECTS_ANALYTICS_SETUP.md` -> `docs/reference/operations/ASPECTS_ANALYTICS_SETUP.md`
+- `docs/operations/ASPECTS_WIRING_CHECKLIST.md` -> `docs/ops/runbooks/ASPECTS_WIRING_CHECKLIST.md`
+- `docs/operations/ATLAS_HEALTH.md` -> `docs/ops/runbooks/ATLAS_HEALTH.md`
+- `docs/operations/AUTHENTICATED_SMOKE_A11Y.md` -> `docs/ops/runbooks/AUTHENTICATED_SMOKE_A11Y.md`
+- `docs/operations/AUTHENTICATED_SMOKE_CREDENTIALS.md` -> `docs/reference/operations/AUTHENTICATED_SMOKE_CREDENTIALS.md`
+- `docs/operations/AUTH_AND_PERMISSIONS.md` -> `docs/reference/operations/AUTH_AND_PERMISSIONS.md`
+- `docs/operations/AUTH_HARDENING_SPEC.md` -> `docs/policies/operations/AUTH_HARDENING_SPEC.md`
+- `docs/operations/BACKUP_COVERAGE_MATRIX.md` -> `docs/reference/operations/BACKUP_COVERAGE_MATRIX.md`
+
+Packet D rule:
+
+- rewrite live active references first
+- then delete the wrapper
+- leave archival migration metadata in place
+
+## Packet E Scope
+
+Fourth duplicate-collapse packet for pure wrapper files with canonical replacements already in place and no remaining active repo consumers outside migration metadata:
+
+- `docs/operations/BUILD_CACHE_PIPELINE_RUNBOOK.md` -> `docs/ops/runbooks/BUILD_CACHE_PIPELINE_RUNBOOK.md`
+- `docs/operations/CANONICAL_DEPLOY_CONTRACT.md` -> `docs/reference/operations/CANONICAL_DEPLOY_CONTRACT.md`
+- `docs/operations/CAPACITY_PLANNING.md` -> `docs/reference/operations/CAPACITY_PLANNING.md`
+- `docs/operations/CI_CD_SETUP.md` -> `docs/reference/operations/CI_CD_SETUP.md`
+- `docs/operations/CI_CEREMONY_REDUCTION_MATRIX_104.md` -> `docs/ops/ci-cd/CI_CEREMONY_REDUCTION_MATRIX_104.md`
+- `docs/operations/CLOUD_SQL_RESTORE_DRILL.md` -> `docs/ops/runbooks/CLOUD_SQL_RESTORE_DRILL.md`
+- `docs/operations/COMMIT_SIGNING.md` -> `docs/reference/operations/COMMIT_SIGNING.md`
+- `docs/operations/CONTENT_LIBRARIES_V2_MIGRATION.md` -> `docs/ops/runbooks/CONTENT_LIBRARIES_V2_MIGRATION.md`
+
+## Packet F Scope
+
+Fifth duplicate-collapse packet for additional wrapper-only files whose canonical replacements already exist, with the only active dependency rewritten from script guidance to the canonical runbook:
+
+- `docs/operations/DEPLOYMENT_LANES.md` -> `docs/reference/operations/DEPLOYMENT_LANES.md`
+- `docs/operations/DEPLOYMENT_VERIFICATION.md` -> `docs/ops/runbooks/DEPLOYMENT_VERIFICATION.md`
+- `docs/operations/DEPLOY_EVIDENCE_GATES.md` -> `docs/ops/runbooks/DEPLOY_EVIDENCE_GATES.md`
+- `docs/operations/DISCOVERY_DEMO_COURSE_SETUP.md` -> `docs/ops/runbooks/DISCOVERY_DEMO_COURSE_SETUP.md`
+- `docs/operations/DR_DRILL_SCHEDULE.md` -> `docs/ops/runbooks/DR_DRILL_SCHEDULE.md`
+- `docs/operations/ECOMMERCE_DEPRECATION_INVENTORY.md` -> `docs/reference/operations/ECOMMERCE_DEPRECATION_INVENTORY.md`
+- `docs/operations/ECOMMERCE_OAUTH_TROUBLESHOOTING.md` -> `docs/ops/runbooks/ECOMMERCE_OAUTH_TROUBLESHOOTING.md`
+- `docs/operations/ECOMMERCE_THEMING.md` -> `docs/reference/operations/ECOMMERCE_THEMING.md`
+
+## Historical Wave End State
+
+- `docs/operations/**` reduced to `docs/operations/README.md` only
+- all remaining wrapper files deleted
+- active consumers rewritten to canonical homes under `docs/ops/**`, `docs/reference/operations/**`, `docs/policies/operations/**`, `docs/evidence/operations/**`, and `docs/status/**`
+- `tools/docs/verify/verify_legacy_operations_root.py` added as the no-regrowth guard
+- closeout docs:
+  - `docs/meta/docs-program/WAVE_OPERATIONS_ROOT_RESET_CLOSEOUT.md`
+  - `docs/meta/docs-program/WAVE_OPERATIONS_ROOT_RESET_REVIEW_HANDOFF.md`
+
+## Current Canonical Model
+
+- operator procedures: `docs/ops/**`
+- operations reference: `docs/reference/operations/**`
+- operations policy: `docs/policies/operations/**`
+- retired `docs/operations/**` remains tombstone-only and historical

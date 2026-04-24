@@ -1,0 +1,583 @@
+#!/usr/bin/env bash
+# verify-css-scoping.sh — CSS global-selector scoping audit gate
+# @covers AC-CSS-SCOPE-001, AC-CSS-SCOPE-002, AC-CSS-SCOPE-003, AC-CSS-SCOPE-004
+# @spec: T105
+#
+# Checks that high-risk global CSS selectors in the Mereka theme are either:
+#   (a) properly scoped under a page-context prefix, OR
+#   (b) documented as a known gap in CSS_SCOPING_AUDIT.md
+#
+# This script is READ-ONLY — it does not modify any CSS/SCSS files.
+#
+# Counters:
+#   PASS  — check explicitly passed
+#   FAIL  — check explicitly failed (blocks CI gate)
+#   SKIP  — check skipped (file not present or context not applicable)
+#   WARN  — advisory only (known gap, not CI-blocking)
+#
+# Usage: ./scripts/qa/verify-css-scoping.sh
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+PASS=0
+FAIL=0
+SKIP=0
+WARN=0
+
+do_pass() { PASS=$((PASS + 1)); echo -e "${GREEN}[PASS]${NC} $1"; }
+do_fail() { FAIL=$((FAIL + 1)); echo -e "${RED}[FAIL]${NC} $1"; }
+do_skip() { SKIP=$((SKIP + 1)); echo -e "${YELLOW}[SKIP]${NC} $1"; }
+do_warn() { WARN=$((WARN + 1)); echo -e "${YELLOW}[WARN]${NC} $1"; }
+
+# Count selector matches in active CSS/SCSS only (ignores block + line comments).
+count_active_selector_occurrences() {
+  local file="$1"
+  local selector="$2"
+  python3 - "$file" "$selector" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+selector = sys.argv[2]
+text = path.read_text(encoding="utf-8")
+text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+text = re.sub(r"^\s*//.*$", "", text, flags=re.M)
+print(text.count(selector))
+PY
+}
+
+THEME_DIR="$REPO_ROOT/infrastructure/tutor/themes/mereka"
+TOKENS_SCSS="$THEME_DIR/scss/_tokens.scss"
+THEME_SCSS="$THEME_DIR/scss/theme.scss"
+MFE_SCSS="$THEME_DIR/mfe/mereka.scss"
+COMMON_CSS="$THEME_DIR/common/static/css/mereka-overrides.css"
+LMS_CSS="$THEME_DIR/lms/static/css/mereka-overrides.css"
+CMS_CSS="$THEME_DIR/cms/static/css/mereka-overrides.css"
+LMS_DISCOVERY_SCSS="$THEME_DIR/lms/static/sass/partials/_discovery.scss"
+LMS_CUSTOM_SCSS="$THEME_DIR/lms/static/sass/partials/_custom.scss"
+AUDIT_DOC="$REPO_ROOT/docs/reference/architecture/CSS_SCOPING_AUDIT.md"
+
+echo -e "${BLUE}=== CSS Scoping Audit Gate ===${NC}"
+echo "  Theme dir: infrastructure/tutor/themes/mereka/"
+echo "  Audit doc: docs/reference/architecture/CSS_SCOPING_AUDIT.md"
+echo ""
+
+# ─────────────────────────────────────────────────────────────────────────────
+# AC-CSS-SCOPE-001: Audit documentation exists and has required sections
+# ─────────────────────────────────────────────────────────────────────────────
+echo -e "${BLUE}## AC-CSS-SCOPE-001: Audit documentation${NC}"
+
+if [[ ! -f "$AUDIT_DOC" ]]; then
+  do_fail "AC-CSS-SCOPE-001: CSS_SCOPING_AUDIT.md not found at docs/reference/architecture/"
+else
+  do_pass "AC-CSS-SCOPE-001: CSS_SCOPING_AUDIT.md exists"
+
+  # Required sections
+  for section in \
+    "## Section 1" \
+    "## Section 2" \
+    "## Section 5 — Summary" \
+    "Section 7" \
+    "XBlock impact" \
+    "Recommendation"
+  do
+    if grep -qF "$section" "$AUDIT_DOC"; then
+      do_pass "AC-CSS-SCOPE-001: Audit doc contains: $section"
+    else
+      do_fail "AC-CSS-SCOPE-001: Audit doc missing: $section"
+    fi
+  done
+
+  # Must reference all six theme files
+  for fname in "_tokens.scss" "theme.scss" "mereka.scss" "mereka-overrides.css"; do
+    if grep -qF "$fname" "$AUDIT_DOC"; then
+      do_pass "AC-CSS-SCOPE-001: Audit doc references $fname"
+    else
+      do_fail "AC-CSS-SCOPE-001: Audit doc missing reference to $fname"
+    fi
+  done
+fi
+
+echo ""
+
+# ─────────────────────────────────────────────────────────────────────────────
+# AC-CSS-SCOPE-002: High-risk global selectors — .card and .btn-primary
+#
+# These are the P1 candidates identified in the audit. The gate checks:
+#   (a) They exist as global selectors (confirming the problem is present), AND
+#   (b) A scoped counterpart also exists (mitigating the XBlock risk)
+#
+# This is a WARN-level gate, not FAIL, because the global rules are a known
+# documented gap (T106) — not an accidental regression.
+# ─────────────────────────────────────────────────────────────────────────────
+echo -e "${BLUE}## AC-CSS-SCOPE-002: P1 global selectors — .card and .btn-primary${NC}"
+
+# ── .card in _tokens.scss ───────────────────────────────────────────────────
+if [[ ! -f "$TOKENS_SCSS" ]]; then
+  do_skip "AC-CSS-SCOPE-002: _tokens.scss not found — skipping .card check"
+else
+  # Global .card rule exists (the known gap)
+  if grep -qE '^\s*\.card\s*\{' "$TOKENS_SCSS"; then
+    do_warn "AC-CSS-SCOPE-002: Global .card rule found in _tokens.scss (documented gap G5 — T106)"
+  else
+    do_pass "AC-CSS-SCOPE-002: No bare global .card rule in _tokens.scss"
+  fi
+fi
+
+# ── .card in mfe/mereka.scss — check .shadow-lg grouping ───────────────────
+if [[ ! -f "$MFE_SCSS" ]]; then
+  do_skip "AC-CSS-SCOPE-002: mereka.scss not found — skipping .shadow-lg check"
+else
+  # .shadow-lg should not share a selector block with .card/.pgn__card
+  SHADOW_GROUPED_COUNT="$(python3 - "$MFE_SCSS" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+text = Path(sys.argv[1]).read_text(encoding="utf-8")
+text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+text = re.sub(r"^\s*//.*$", "", text, flags=re.M)
+
+count = 0
+for block in re.finditer(r"([^{}]+)\{", text):
+    header = block.group(1)
+    if ".shadow-lg" in header and (".card" in header or ".pgn__card" in header):
+        count += 1
+print(count)
+PY
+)"
+  if [[ "$SHADOW_GROUPED_COUNT" -gt 0 ]]; then
+    do_warn "AC-CSS-SCOPE-002: .shadow-lg grouped with .card selectors in mereka.scss ($SHADOW_GROUPED_COUNT block(s); overapplication risk)"
+  else
+    do_pass "AC-CSS-SCOPE-002: .shadow-lg is not grouped with .card selectors in mereka.scss"
+  fi
+fi
+
+# ── .btn-primary in common overrides — global rule present ──────────────────
+if [[ ! -f "$COMMON_CSS" ]]; then
+  do_skip "AC-CSS-SCOPE-002: common mereka-overrides.css not found"
+else
+  # A bare .btn-primary { rule (not prefixed by a page class) is expected as a known gap
+  # We detect it by looking for .btn-primary at the start of a rule (no preceding page-scope)
+  if grep -qE '^\.btn-primary\s*,' "$COMMON_CSS" || grep -qE '^\.btn-primary\s*\{' "$COMMON_CSS"; then
+    do_warn "AC-CSS-SCOPE-002: Global .btn-primary rule found in common/mereka-overrides.css (documented gap G4 — T106)"
+  else
+    do_pass "AC-CSS-SCOPE-002: No bare global .btn-primary rule in common/mereka-overrides.css"
+  fi
+
+  # The scoped counterpart MUST exist to mitigate XBlock impact
+  if grep -qE '\.courseware\s+\.xblock\s+.*button|\.courseware\s+\.xblock\s+\.problem' "$COMMON_CSS" || \
+     grep -qE '\.courseware\.xblock\s+.*button' "$COMMON_CSS"; then
+    do_pass "AC-CSS-SCOPE-002: Scoped .courseware .xblock problem button rule exists (XBlock mitigation present)"
+  elif grep -qF '.courseware .xblock .problem button' "$COMMON_CSS" || \
+       grep -qF '.courseware .xblock .problem' "$COMMON_CSS"; then
+    do_pass "AC-CSS-SCOPE-002: Scoped .courseware .xblock .problem rule exists in common/mereka-overrides.css"
+  else
+    do_warn "AC-CSS-SCOPE-002: No scoped XBlock problem button rule found in common/mereka-overrides.css — global .btn-primary has no XBlock override"
+  fi
+fi
+
+echo ""
+
+# ─────────────────────────────────────────────────────────────────────────────
+# AC-CSS-SCOPE-003: Verify correctly-scoped XBlock chrome patterns are present
+#
+# The audit identified .courseware .xblock as the reference scoping pattern.
+# This check verifies the pattern is intact in both CSS files.
+# ─────────────────────────────────────────────────────────────────────────────
+echo -e "${BLUE}## AC-CSS-SCOPE-003: XBlock chrome scoping patterns present${NC}"
+
+for css_file in "$LMS_CSS" "$COMMON_CSS"; do
+  fname="$(basename "$(dirname "$css_file")")/$(basename "$css_file")"
+  if [[ ! -f "$css_file" ]]; then
+    do_skip "AC-CSS-SCOPE-003: $fname not found"
+    continue
+  fi
+
+  # .courseware .xblock { ... } wrapper rule
+  if grep -qF '.courseware .xblock' "$css_file"; then
+    do_pass "AC-CSS-SCOPE-003: .courseware .xblock scope found in $fname"
+  else
+    do_fail "AC-CSS-SCOPE-003: .courseware .xblock scope missing from $fname"
+  fi
+
+  # Heading elements scoped inside .courseware .xblock
+  if grep -qE '\.courseware\s+\.xblock\s+h[1-6]|\.courseware\s+\.xblock\s+\.hd' "$css_file"; then
+    do_pass "AC-CSS-SCOPE-003: Heading elements scoped under .courseware .xblock in $fname"
+  else
+    do_warn "AC-CSS-SCOPE-003: No heading scope under .courseware .xblock in $fname (global headings only)"
+  fi
+
+  # Link colour scoped inside .courseware .xblock
+  if grep -qF '.courseware .xblock a' "$css_file"; then
+    do_pass "AC-CSS-SCOPE-003: Link colour scoped under .courseware .xblock in $fname"
+  else
+    do_warn "AC-CSS-SCOPE-003: No .courseware .xblock a rule in $fname (global link colour only)"
+  fi
+done
+
+# Studio XBlock chrome in theme.scss
+if [[ ! -f "$THEME_SCSS" ]]; then
+  do_skip "AC-CSS-SCOPE-003: theme.scss not found"
+else
+  if grep -qF '.view-container .xblock-render' "$THEME_SCSS"; then
+    do_pass "AC-CSS-SCOPE-003: Studio .view-container .xblock-render scope found in theme.scss"
+  else
+    do_fail "AC-CSS-SCOPE-003: Studio .view-container .xblock-render scope missing from theme.scss"
+  fi
+fi
+
+echo ""
+
+# ─────────────────────────────────────────────────────────────────────────────
+# AC-CSS-SCOPE-004: Page-scope ownership is route-specific and canonical
+#
+# Verifies that:
+#   - learner dashboard card shell lives in the dedicated LMS custom partial
+#   - shared theme/runtime layers do not re-own that learner dashboard shell
+#   - discovery/course-about ownership still lives in the dedicated discovery partial
+# ─────────────────────────────────────────────────────────────────────────────
+echo -e "${BLUE}## AC-CSS-SCOPE-004: Route-specific page-scope ownership${NC}"
+
+if [[ ! -f "$COMMON_CSS" ]]; then
+  do_fail "AC-CSS-SCOPE-004: common/static/css/mereka-overrides.css missing"
+else
+  if grep -qF ".dashboard .notice" "$COMMON_CSS"; then
+    do_pass "AC-CSS-SCOPE-004: Shared runtime overrides keep dashboard utility/notices scope"
+  else
+    do_fail "AC-CSS-SCOPE-004: Shared runtime overrides lost dashboard utility/notices scope"
+  fi
+
+  for learner_shell in ".dashboard .listing-courses {" ".dashboard .course .enter-course"; do
+    if grep -qF "$learner_shell" "$COMMON_CSS"; then
+      do_fail "AC-CSS-SCOPE-004: Shared runtime overrides still own learner dashboard shell [$learner_shell]"
+    else
+      do_pass "AC-CSS-SCOPE-004: Shared runtime overrides do not own learner dashboard shell [$learner_shell]"
+    fi
+  done
+fi
+
+if [[ ! -f "$THEME_SCSS" ]]; then
+  do_fail "AC-CSS-SCOPE-004: scss/theme.scss missing"
+else
+  for learner_shell in ".dashboard .listing-courses {" ".dashboard .course .enter-course"; do
+    if grep -qF "$learner_shell" "$THEME_SCSS"; then
+      do_fail "AC-CSS-SCOPE-004: Shared theme.scss still owns learner dashboard shell [$learner_shell]"
+    else
+      do_pass "AC-CSS-SCOPE-004: Shared theme.scss does not own learner dashboard shell [$learner_shell]"
+    fi
+  done
+
+  if grep -qF ".courseware" "$THEME_SCSS"; then
+    do_pass "AC-CSS-SCOPE-004: Shared theme.scss still carries cross-surface courseware scope"
+  else
+    do_fail "AC-CSS-SCOPE-004: Shared theme.scss lost cross-surface courseware scope"
+  fi
+fi
+
+if [[ ! -f "$LMS_CUSTOM_SCSS" ]]; then
+  do_fail "AC-CSS-SCOPE-004: LMS custom partial missing at lms/static/sass/partials/_custom.scss"
+else
+  for learner_shell in ".dashboard .listing-courses {" ".dashboard .course .enter-course" ".dashboard .course .course-title"; do
+    if grep -qF "$learner_shell" "$LMS_CUSTOM_SCSS"; then
+      do_pass "AC-CSS-SCOPE-004: Learner dashboard shell selector [$learner_shell] present in _custom.scss"
+    else
+      do_fail "AC-CSS-SCOPE-004: Learner dashboard shell selector [$learner_shell] missing from _custom.scss"
+    fi
+  done
+fi
+
+if [[ ! -f "$LMS_DISCOVERY_SCSS" ]]; then
+  do_fail "AC-CSS-SCOPE-004: LMS discovery partial missing at lms/static/sass/partials/_discovery.scss"
+else
+  for page_scope in ".find-courses" ".course-info" ".course-about"; do
+    if grep -qF "$page_scope" "$LMS_DISCOVERY_SCSS"; then
+      do_pass "AC-CSS-SCOPE-004: $page_scope scope present in lms/static/sass/partials/_discovery.scss"
+    else
+      do_fail "AC-CSS-SCOPE-004: $page_scope scope missing from lms/static/sass/partials/_discovery.scss"
+    fi
+  done
+fi
+
+# MFE-specific: enforce current selector reality from dead-selector audit
+if [[ ! -f "$MFE_SCSS" ]]; then
+  do_skip "AC-CSS-SCOPE-004: mereka.scss not found — skipping MFE scope checks"
+else
+  # Account wrapper selector is retired; account styling is slot-owned now.
+  live_scope='.page__account-settings'
+  live_count="$(count_active_selector_occurrences "$MFE_SCSS" "$live_scope")"
+  if [[ "$live_count" -eq 0 ]]; then
+    do_pass "AC-CSS-SCOPE-004: Legacy MFE scope [$live_scope] absent from active selectors (slot-owned account styling)"
+  else
+    do_fail "AC-CSS-SCOPE-004: Legacy MFE scope [$live_scope] still present in active selectors (${live_count} occurrence(s))"
+  fi
+
+  # Dead selectors removed in Phase C should not return (comments ignored).
+  for dead_scope in 'class*="authn"' 'class*="learner-dashboard"' 'class*="learning"' 'class*="discussions"'; do
+    dead_count="$(count_active_selector_occurrences "$MFE_SCSS" "$dead_scope")"
+    if [[ "$dead_count" -eq 0 ]]; then
+      do_pass "AC-CSS-SCOPE-004: Dead MFE scope [$dead_scope] absent from active selectors"
+    else
+      do_fail "AC-CSS-SCOPE-004: Dead MFE scope [$dead_scope] still present in active selectors (${dead_count} occurrence(s))"
+    fi
+  done
+fi
+
+echo ""
+
+if [[ ! -f "$LMS_CUSTOM_SCSS" ]]; then
+  do_fail "AC-CSS-SCOPE-004: LMS custom partial missing at lms/static/sass/partials/_custom.scss"
+else
+  for owner_selector in \
+    ".dashboard .listing-courses" \
+    ".dashboard .my-courses .course-item .course" \
+    ".dashboard .course .enter-course"
+  do
+    if grep -qF "$owner_selector" "$LMS_CUSTOM_SCSS"; then
+      do_pass "AC-CSS-SCOPE-004: Dashboard shell owner [$owner_selector] present in lms/static/sass/partials/_custom.scss"
+    else
+      do_fail "AC-CSS-SCOPE-004: Dashboard shell owner [$owner_selector] missing from lms/static/sass/partials/_custom.scss"
+    fi
+  done
+
+  if grep -qF "content-visibility: auto" "$LMS_CUSTOM_SCSS"; then
+    do_pass "AC-CSS-SCOPE-004: Dashboard shell owner uses offscreen render skipping in lms/static/sass/partials/_custom.scss"
+  else
+    do_fail "AC-CSS-SCOPE-004: Dashboard shell owner missing offscreen render skipping in lms/static/sass/partials/_custom.scss"
+  fi
+
+  if grep -qF "contain-intrinsic-size: 24rem" "$LMS_CUSTOM_SCSS"; then
+    do_pass "AC-CSS-SCOPE-004: Dashboard shell owner reserves stable intrinsic size in lms/static/sass/partials/_custom.scss"
+  else
+    do_fail "AC-CSS-SCOPE-004: Dashboard shell owner missing intrinsic size reservation in lms/static/sass/partials/_custom.scss"
+  fi
+fi
+
+if [[ -f "$THEME_SCSS" ]]; then
+  for demoted_selector in \
+    ".dashboard .listing-courses" \
+    ".dashboard .course .enter-course"
+  do
+    if grep -qF "$demoted_selector" "$THEME_SCSS"; then
+      do_fail "AC-CSS-SCOPE-004: Shared theme still owns dashboard shell selector [$demoted_selector]"
+    else
+      do_pass "AC-CSS-SCOPE-004: Shared theme does not own dashboard shell selector [$demoted_selector]"
+    fi
+  done
+fi
+
+if [[ -f "$COMMON_CSS" ]]; then
+  for demoted_selector in \
+    ".dashboard .listing-courses .course-item .course" \
+    ".dashboard .listing-courses .course-item .wrapper-course-details"
+  do
+    if grep -qF "$demoted_selector" "$COMMON_CSS"; then
+      do_fail "AC-CSS-SCOPE-004: Runtime override still owns dashboard shell selector [$demoted_selector]"
+    else
+      do_pass "AC-CSS-SCOPE-004: Runtime override does not own dashboard shell selector [$demoted_selector]"
+    fi
+  done
+fi
+
+echo ""
+
+# ─────────────────────────────────────────────────────────────────────────────
+# AC-CSS-SCOPE-005: No regressions — global .btn-primary should not be removed
+#   (it's a known gap, not an accidental addition)
+#
+# Additional structural checks:
+#   - Verify all six theme files exist
+#   - Verify :root token block is present in _tokens.scss
+#   - Verify MFE scss imports the shared theme
+# ─────────────────────────────────────────────────────────────────────────────
+echo -e "${BLUE}## AC-CSS-SCOPE-005: Structural integrity checks${NC}"
+
+# All theme files must exist
+for f in "$TOKENS_SCSS" "$THEME_SCSS" "$MFE_SCSS" "$COMMON_CSS" "$LMS_CSS" "$CMS_CSS"; do
+  fname="${f#$REPO_ROOT/}"
+  if [[ -f "$f" ]]; then
+    do_pass "AC-CSS-SCOPE-005: Theme file exists: $fname"
+  else
+    do_fail "AC-CSS-SCOPE-005: Theme file missing: $fname"
+  fi
+done
+
+# :root block must be in _tokens.scss (CSS custom property definitions)
+if [[ -f "$TOKENS_SCSS" ]]; then
+  if grep -qE '^\s*:root\s*\{' "$TOKENS_SCSS"; then
+    do_pass "AC-CSS-SCOPE-005: :root token block present in _tokens.scss"
+  else
+    do_fail "AC-CSS-SCOPE-005: :root token block missing from _tokens.scss"
+  fi
+
+  # Required --pgn-* bridge tokens must be present
+  for token in --pgn-color-primary-base --pgn-color-secondary-base --pgn-body-bg --pgn-typography-font-family-sans-serif; do
+    if grep -qF -- "$token" "$TOKENS_SCSS"; then
+      do_pass "AC-CSS-SCOPE-005: Paragon bridge token $token present in _tokens.scss"
+    else
+      do_fail "AC-CSS-SCOPE-005: Paragon bridge token $token missing from _tokens.scss"
+    fi
+  done
+fi
+
+# MFE SCSS must import the shared theme
+if [[ -f "$MFE_SCSS" ]]; then
+  if grep -qE "@import\s+['\"].*theme['\"]|@import\s+['\"].*scss/theme" "$MFE_SCSS" \
+    || { grep -q '@import "./scss/fonts";' "$MFE_SCSS" \
+      && grep -q '@import "./scss/tokens";' "$MFE_SCSS" \
+      && grep -q '@import "./scss/base";' "$MFE_SCSS"; }; then
+    do_pass "AC-CSS-SCOPE-005: mereka.scss imports shared token stack"
+  else
+    do_fail "AC-CSS-SCOPE-005: mereka.scss does not import shared token stack"
+  fi
+fi
+
+# :root in runtime CSS (common overrides)
+if [[ -f "$COMMON_CSS" ]]; then
+  if grep -qF ':root' "$COMMON_CSS"; then
+    do_pass "AC-CSS-SCOPE-005: :root custom property block present in common/mereka-overrides.css"
+  else
+    do_fail "AC-CSS-SCOPE-005: :root custom property block missing from common/mereka-overrides.css"
+  fi
+
+  # Versioning/revision marker must be present
+  if grep -qF -- '--mereka-branding-rev' "$COMMON_CSS"; then
+    do_pass "AC-CSS-SCOPE-005: --mereka-branding-rev revision marker present in common/mereka-overrides.css"
+  else
+    do_warn "AC-CSS-SCOPE-005: --mereka-branding-rev revision marker missing from common/mereka-overrides.css"
+  fi
+fi
+
+echo ""
+
+# ─────────────────────────────────────────────────────────────────────────────
+# AC-CSS-SCOPE-006: Known-gap WARN check — bare element selectors inventory
+#
+# Documents and warns (not fails) on known bare element selectors that affect
+# XBlocks. These are tracked for T106 remediation.
+# ─────────────────────────────────────────────────────────────────────────────
+echo -e "${BLUE}## AC-CSS-SCOPE-006: Known-gap inventory (documented WARNs)${NC}"
+
+# Count bare h1-h6 rules NOT inside a page-scope prefix
+for css_file in "$TOKENS_SCSS" "$COMMON_CSS"; do
+  fname="${css_file#$REPO_ROOT/}"
+  if [[ ! -f "$css_file" ]]; then
+    continue
+  fi
+
+  # Look for bare heading selectors at line start (not inside a block)
+  bare_headings=0
+  while IFS= read -r line; do
+    if echo "$line" | grep -qE '^\s*h[1-6]\s*[,{]' && ! echo "$line" | grep -qE '^\s*\.'; then
+      bare_headings=$((bare_headings + 1))
+    fi
+  done < "$css_file"
+
+  if [[ "$bare_headings" -gt 0 ]]; then
+    do_warn "AC-CSS-SCOPE-006: $bare_headings bare heading selector(s) in $fname (known gap G2 — T106)"
+  else
+    do_pass "AC-CSS-SCOPE-006: No bare heading selectors in $fname"
+  fi
+done
+
+# Bare `a {` rule
+for css_file in "$TOKENS_SCSS" "$COMMON_CSS"; do
+  fname="${css_file#$REPO_ROOT/}"
+  if [[ ! -f "$css_file" ]]; then
+    continue
+  fi
+
+  if grep -qE '^\s*a\s*\{' "$css_file"; then
+    do_warn "AC-CSS-SCOPE-006: Bare a { rule found in $fname (known gap G3 — T106)"
+  else
+    do_pass "AC-CSS-SCOPE-006: No bare a { rule in $fname"
+  fi
+done
+
+# Bare `body {` rule
+for css_file in "$TOKENS_SCSS" "$COMMON_CSS" "$MFE_SCSS"; do
+  fname="${css_file#$REPO_ROOT/}"
+  if [[ ! -f "$css_file" ]]; then
+    continue
+  fi
+
+  if grep -qE '^\s*body\s*\{' "$css_file"; then
+    # In MFE context this is acceptable (separate app)
+    if echo "$fname" | grep -q 'mfe'; then
+      do_pass "AC-CSS-SCOPE-006: body rule in MFE SCSS ($fname) — acceptable, MFEs are separate apps"
+    else
+      do_warn "AC-CSS-SCOPE-006: Bare body { rule in $fname (known gap G1 — T106; requires template patch)"
+    fi
+  else
+    do_pass "AC-CSS-SCOPE-006: No bare body { rule in $fname"
+  fi
+done
+
+echo ""
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CI artifact
+# ─────────────────────────────────────────────────────────────────────────────
+VAR_DIR="$REPO_ROOT/var"
+mkdir -p "$VAR_DIR"
+ARTIFACT="$VAR_DIR/css-scoping-gate.txt"
+{
+  echo "css-scoping-gate"
+  echo "run_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  echo "pass=$PASS"
+  echo "warn=$WARN"
+  echo "fail=$FAIL"
+  echo "skip=$SKIP"
+  echo "status=$([ "$FAIL" -eq 0 ] && echo PASS || echo FAIL)"
+} > "$ARTIFACT"
+
+do_pass "Artifact written to var/css-scoping-gate.txt"
+
+echo ""
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Summary
+# ─────────────────────────────────────────────────────────────────────────────
+echo -e "${BLUE}## Summary${NC}"
+echo ""
+echo -e "  ${GREEN}PASS${NC}: $PASS"
+echo -e "  ${YELLOW}WARN${NC}: $WARN  (documented known gaps — see CSS_SCOPING_AUDIT.md Section 5)"
+echo -e "  ${RED}FAIL${NC}: $FAIL"
+echo -e "  ${YELLOW}SKIP${NC}: $SKIP"
+echo ""
+
+# Update artifact with final counts
+{
+  echo "css-scoping-gate"
+  echo "run_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  echo "pass=$PASS"
+  echo "warn=$WARN"
+  echo "fail=$FAIL"
+  echo "skip=$SKIP"
+  echo "status=$([ "$FAIL" -eq 0 ] && echo PASS || echo FAIL)"
+} > "$ARTIFACT"
+
+if [[ "$FAIL" -eq 0 ]]; then
+  echo -e "${GREEN}CSS scoping gate PASSED${NC}"
+  if [[ "$WARN" -gt 0 ]]; then
+    echo ""
+    echo "WARN items are documented gaps tracked in T106. They are not CI-blocking."
+    echo "See docs/reference/architecture/CSS_SCOPING_AUDIT.md Section 5 for the full list."
+  fi
+  exit 0
+else
+  echo -e "${RED}CSS scoping gate FAILED — $FAIL check(s) failed${NC}"
+  echo ""
+  echo "Fix FAIL items before merging."
+  echo "WARN items are documented known gaps (not blocking)."
+  echo "See docs/reference/architecture/CSS_SCOPING_AUDIT.md for context."
+  exit 1
+fi

@@ -1,0 +1,77 @@
+schema_version: 1
+reviewed_at: "2026-04-24"
+owner: platform-core
+description: >-
+  Versioned authority manifest for mutable first-party GitHub Actions and
+  reusable workflow references. Third-party actions must still be SHA-pinned;
+  BBI-owned refs may use protected branches only when declared here with local
+  consumer-side contract checks.
+
+first_party_refs:
+  - ref: Biji-Biji-Initiative/bbi-infrastructure/.github/actions/select-runner-lane@main
+    classification: protected-and-verified
+    owner: platform-core
+    upstream_repo: Biji-Biji-Initiative/bbi-infrastructure
+    upstream_path: .github/actions/select-runner-lane/action.yml
+    expected_branch: main
+    branch_protection_expectation: >-
+      main requires pull-request review and required CI before merge in the
+      upstream infrastructure repository.
+    local_contract_checks:
+      - scripts/qa/verify-ci-runner-policy.sh
+      - scripts/qa/verify-runner-class-taxonomy-upstream.sh
+      - scripts/qa/verify-actions-pinned.sh
+    consumers:
+      - .github/actions/select-build-lane/action.yml
+      - .github/workflows/bootstrap-local-readiness.yml
+      - .github/workflows/build-enterprise-mfe.yml
+      - .github/workflows/build-purchase-gateway.yml
+      - .github/workflows/ci.yml
+
+  - ref: Biji-Biji-Initiative/bbi-infrastructure/.github/actions/push-build-metrics@main
+    classification: protected-and-verified
+    owner: platform-core
+    upstream_repo: Biji-Biji-Initiative/bbi-infrastructure
+    upstream_path: .github/actions/push-build-metrics/action.yml
+    expected_branch: main
+    branch_protection_expectation: >-
+      main requires pull-request review and required CI before merge in the
+      upstream infrastructure repository.
+    local_contract_checks:
+      - scripts/qa/verify-build-workflow-contract.sh
+      - scripts/qa/verify-ci-cd-pipeline.sh
+      - scripts/qa/verify-actions-pinned.sh
+    consumers:
+      - .github/workflows/build-tutor-images.yml
+
+  - ref: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-build-push.yml@main
+    classification: protected-and-verified
+    owner: platform-core
+    upstream_repo: Biji-Biji-Initiative/bbi-infrastructure
+    upstream_path: .github/workflows/reusable-build-push.yml
+    expected_branch: main
+    branch_protection_expectation: >-
+      main requires pull-request review and required CI before merge in the
+      upstream infrastructure repository.
+    local_contract_checks:
+      - scripts/qa/verify-actions-pinned.sh
+      - scripts/qa/verify-ci-runner-policy.sh
+    consumers:
+      - .github/workflows/build-enterprise-mfe.yml
+      - .github/workflows/build-purchase-gateway.yml
+
+  - ref: Biji-Biji-Initiative/bbi-infrastructure/.github/workflows/reusable-update-dev-tag.yml@main
+    classification: protected-and-verified
+    owner: platform-core
+    upstream_repo: Biji-Biji-Initiative/bbi-infrastructure
+    upstream_path: .github/workflows/reusable-update-dev-tag.yml
+    expected_branch: main
+    branch_protection_expectation: >-
+      main requires pull-request review and required CI before merge in the
+      upstream infrastructure repository.
+    local_contract_checks:
+      - scripts/qa/verify-actions-pinned.sh
+      - scripts/qa/verify-ci-runner-policy.sh
+    consumers:
+      - .github/workflows/build-enterprise-mfe.yml
+      - .github/workflows/build-purchase-gateway.yml

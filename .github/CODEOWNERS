@@ -1,0 +1,75 @@
+# CODEOWNERS — Mereka LMS
+#
+# Every top-level directory has a designated owner.
+# Narrower rules (listed later) take precedence over broader rules.
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# ---------------------------------------------------------------------------
+# Default: platform team owns anything not matched below
+# ---------------------------------------------------------------------------
+* @Biji-Biji-Initiative/platform
+
+# ---------------------------------------------------------------------------
+# Infrastructure & deployment
+# ---------------------------------------------------------------------------
+/deploy/ @Biji-Biji-Initiative/platform
+# NOTE: /deploy/k8s/overlays/production/ is a DEPRECATED shadow overlay
+# pending Wave 9 deletion (bead mereka-lms-m0u5.9). Overlay is not
+# authoritative at runtime — authoritative production overlay lives in
+# bbi-infrastructure/apps/mereka-lms/overlays/prod/.
+# CODEOWNERS entry removed to avoid misleading future agents; default
+# @platform ownership applies until the overlay is deleted.
+/deploy/k8s/base/secrets/ @Biji-Biji-Initiative/infra
+/infrastructure/ @Biji-Biji-Initiative/platform
+
+# ---------------------------------------------------------------------------
+# Automation scripts
+# ---------------------------------------------------------------------------
+/scripts/ @Biji-Biji-Initiative/platform
+
+# ---------------------------------------------------------------------------
+# Microservices — service owners
+# ---------------------------------------------------------------------------
+/services/ @Biji-Biji-Initiative/engineering
+/services/purchase-gateway/ @Biji-Biji-Initiative/platform
+/services/hubspot-webhook/ @Biji-Biji-Initiative/engineering
+
+# ---------------------------------------------------------------------------
+# Specifications — architecture team
+# ---------------------------------------------------------------------------
+/specs/ @Biji-Biji-Initiative/architecture
+/specdocs/ @Biji-Biji-Initiative/architecture
+
+# ---------------------------------------------------------------------------
+# Documentation — documentation team
+# ---------------------------------------------------------------------------
+/docs/ @Biji-Biji-Initiative/docs
+/docs/adr/ @Biji-Biji-Initiative/architecture
+/docs/concepts/architecture/ @Biji-Biji-Initiative/architecture
+/docs/ops/ @Biji-Biji-Initiative/platform
+/docs/evidence/ @Biji-Biji-Initiative/platform
+/docs/status/ @Biji-Biji-Initiative/platform
+/docs/archive/ @Biji-Biji-Initiative/docs @Biji-Biji-Initiative/architecture
+/docs/guides/standards/ @Biji-Biji-Initiative/docs @Biji-Biji-Initiative/architecture
+/docs/operations/ @Biji-Biji-Initiative/docs @Biji-Biji-Initiative/platform
+/docs/runbooks/ @Biji-Biji-Initiative/docs @Biji-Biji-Initiative/platform
+/docs/architecture/ @Biji-Biji-Initiative/docs @Biji-Biji-Initiative/architecture
+
+# ---------------------------------------------------------------------------
+# Branding & design assets — design team
+# ---------------------------------------------------------------------------
+/assets/ @Biji-Biji-Initiative/design
+/assets/branding/ @Biji-Biji-Initiative/design
+
+# ---------------------------------------------------------------------------
+# Tests
+# ---------------------------------------------------------------------------
+/tests/ @Biji-Biji-Initiative/engineering
+
+# ---------------------------------------------------------------------------
+# GitHub Actions & repo configuration — infra review required
+# ---------------------------------------------------------------------------
+/.github/ @Biji-Biji-Initiative/infra
+/.github/workflows/ @Biji-Biji-Initiative/infra
+/.github/CODEOWNERS @Biji-Biji-Initiative/infra
+/.github/PULL_REQUEST_TEMPLATE.md @Biji-Biji-Initiative/infra @Biji-Biji-Initiative/docs
