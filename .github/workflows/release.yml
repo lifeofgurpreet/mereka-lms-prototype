@@ -237,7 +237,7 @@ jobs:
           fi
           echo "TAG=${TAG}" >> "$GITHUB_ENV"
           # The image tag in GHCR is the full commit SHA of the tagged commit.
-          # build-tutor-images.yml pushes with: TAG="${{ inputs.image_tag || github.sha }}"
+          # build-tutor-images.yml pushes with image_tag when present, otherwise github.sha.
           echo "IMAGE_TAG=${GITHUB_SHA}" >> "$GITHUB_ENV"
 
       - name: Verify images exist in registry

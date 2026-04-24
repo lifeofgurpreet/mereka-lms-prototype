@@ -38,45 +38,11 @@ on:
         required: true
         default: true
         type: boolean
-      run_paragon_budget_gate:
-        description: "Run Paragon runtime theme CSS budget gate"
-        required: true
-        default: true
-        type: boolean
-      run_certificate_branding_gate:
-        description: "Run certificate branding gate"
-        required: true
-        default: true
-        type: boolean
-      run_email_template_gate:
-        description: "Run transactional/marketing email branding gate"
-        required: true
-        default: true
-        type: boolean
-      run_selector_hardening_gate:
-        description: "Run MFE selector hardening regression gate"
-        required: true
-        default: true
-        type: boolean
-      run_runtime_theme_contract_gate:
-        description: "Run runtime theme contract gate (verify-paragon-runtime)"
-        required: true
-        default: true
-        type: boolean
       run_live_dom_audit_gate:
         description: "Run runtime DOM selector audit gate for authn surface"
         required: true
         default: false
         type: boolean
-      live_dom_audit_profile:
-        description: "Preset profile for live DOM selector audit defaults"
-        required: true
-        default: "standard"
-        type: choice
-        options:
-          - standard
-          - phase7_strict
-          - phase7_full
       run_npm_start_smoke_gate:
         description: "Run npm-start smoke + screenshot gate (requires reachable base URL)"
         required: true
@@ -87,93 +53,11 @@ on:
         required: true
         default: false
         type: boolean
-      screenshot_scope:
-        description: "Screenshot surface scope when screenshot gate is enabled"
-        required: true
-        default: "full"
-        type: choice
-        options:
-          - full
-          - mfe-only
-      npm_start_base_url:
-        description: "Base URL for npm-start smoke (empty = auto by env)"
+      options_json:
+        description: "Advanced options JSON for lower-frequency knobs such as runtime_theme_url, live_dom_audit_profile (standard/phase7_strict/phase7_full), screenshot_scope (full/mfe-only), selector_audit_path, and a11y settings"
         required: false
-        default: ""
+        default: "{}"
         type: string
-      npm_start_project:
-        description: "Playwright project for npm-start smoke"
-        required: false
-        default: "chromium"
-        type: string
-      live_dom_audit_project:
-        description: "Playwright project for live DOM selector audit"
-        required: false
-        default: "chromium"
-        type: string
-      live_dom_audit_min_hits:
-        description: "Minimum tracked selector hits for live DOM selector audit"
-        required: false
-        default: "3"
-        type: string
-      live_dom_audit_routes:
-        description: "Optional comma-separated route paths for live DOM selector audit"
-        required: false
-        default: ""
-        type: string
-      live_dom_audit_selectors:
-        description: "Optional comma-separated CSS selectors for live DOM selector audit"
-        required: false
-        default: ""
-        type: string
-      live_dom_audit_min_custom_hits:
-        description: "Minimum custom selectors that must match across audited routes"
-        required: false
-        default: "0"
-        type: string
-      selector_audit_path:
-        description: "Route path used for runtime selector DOM audit"
-        required: false
-        default: "/authn/login"
-        type: string
-      runtime_theme_url:
-        description: "Override runtime theme origin (empty = auto by env)"
-        required: false
-        default: ""
-        type: string
-      runtime_theme_timeout_seconds:
-        description: "Timeout seconds for runtime theme contract gate"
-        required: false
-        default: "300"
-        type: string
-      learning_path:
-        description: "Optional learning route path for smoke checks"
-        required: false
-        default: "/learning"
-        type: string
-      a11y_mode:
-        description: "Accessibility scan mode"
-        required: true
-        default: "hybrid"
-        type: choice
-        options:
-          - offline
-          - online
-          - hybrid
-      a11y_target_url:
-        description: "Accessibility scan origin (empty = auto apps domain by env)"
-        required: false
-        default: ""
-        type: string
-      a11y_routes:
-        description: "Optional CSV routes for accessibility online scan"
-        required: false
-        default: ""
-        type: string
-      a11y_allow_missing_reports:
-        description: "Allow missing axe reports for some routes"
-        required: true
-        default: false
-        type: boolean
 
 jobs:
   frontend-closure:
@@ -201,32 +85,32 @@ jobs:
           REQUIRE_BRANDING_MARKERS="${{ inputs.require_branding_markers || 'true' }}"
           REQUIRE_WEBKIT="${{ inputs.require_webkit || 'false' }}"
           RUN_PERF="${{ inputs.run_performance_gate || 'true' }}"
-          RUN_PARAGON_BUDGET="${{ inputs.run_paragon_budget_gate || 'true' }}"
-          RUN_CERTIFICATE_BRANDING="${{ inputs.run_certificate_branding_gate || 'true' }}"
-          RUN_EMAIL_TEMPLATE="${{ inputs.run_email_template_gate || 'true' }}"
-          RUN_SELECTOR_HARDENING="${{ inputs.run_selector_hardening_gate || 'true' }}"
-          RUN_RUNTIME_THEME_CONTRACT="${{ inputs.run_runtime_theme_contract_gate || 'true' }}"
+          RUN_PARAGON_BUDGET="${{ fromJSON(inputs.options_json || '{}').run_paragon_budget_gate != false && fromJSON(inputs.options_json || '{}').run_paragon_budget_gate != 'false' }}"
+          RUN_CERTIFICATE_BRANDING="${{ fromJSON(inputs.options_json || '{}').run_certificate_branding_gate != false && fromJSON(inputs.options_json || '{}').run_certificate_branding_gate != 'false' }}"
+          RUN_EMAIL_TEMPLATE="${{ fromJSON(inputs.options_json || '{}').run_email_template_gate != false && fromJSON(inputs.options_json || '{}').run_email_template_gate != 'false' }}"
+          RUN_SELECTOR_HARDENING="${{ fromJSON(inputs.options_json || '{}').run_selector_hardening_gate != false && fromJSON(inputs.options_json || '{}').run_selector_hardening_gate != 'false' }}"
+          RUN_RUNTIME_THEME_CONTRACT="${{ fromJSON(inputs.options_json || '{}').run_runtime_theme_contract_gate != false && fromJSON(inputs.options_json || '{}').run_runtime_theme_contract_gate != 'false' }}"
           RUN_LIVE_DOM_AUDIT="${{ inputs.run_live_dom_audit_gate || 'false' }}"
-          LIVE_DOM_AUDIT_PROFILE="${{ inputs.live_dom_audit_profile || 'standard' }}"
+          LIVE_DOM_AUDIT_PROFILE="${{ fromJSON(inputs.options_json || '{}').live_dom_audit_profile || 'standard' }}"
           RUN_NPM_START_SMOKE="${{ inputs.run_npm_start_smoke_gate || 'false' }}"
           RUN_SCREENSHOTS="${{ inputs.run_screenshot_gate || 'false' }}"
-          SCREENSHOT_SCOPE="${{ inputs.screenshot_scope || 'full' }}"
+          SCREENSHOT_SCOPE="${{ fromJSON(inputs.options_json || '{}').screenshot_scope || 'full' }}"
           STRICT_WEBKIT=$([[ "$REQUIRE_WEBKIT" == "true" ]] && echo 1 || echo 0)
-          NPM_START_BASE_URL="${{ inputs.npm_start_base_url || '' }}"
-          NPM_START_PROJECT="${{ inputs.npm_start_project || 'chromium' }}"
-          LIVE_DOM_AUDIT_PROJECT="${{ inputs.live_dom_audit_project || 'chromium' }}"
-          LIVE_DOM_AUDIT_MIN_HITS="${{ inputs.live_dom_audit_min_hits || '3' }}"
-          LIVE_DOM_AUDIT_ROUTES="${{ inputs.live_dom_audit_routes || '' }}"
-          LIVE_DOM_AUDIT_SELECTORS="${{ inputs.live_dom_audit_selectors || '' }}"
-          LIVE_DOM_AUDIT_MIN_CUSTOM_HITS="${{ inputs.live_dom_audit_min_custom_hits || '0' }}"
-          SELECTOR_AUDIT_PATH="${{ inputs.selector_audit_path || '/authn/login' }}"
-          RUNTIME_THEME_URL="${{ inputs.runtime_theme_url || '' }}"
-          RUNTIME_THEME_TIMEOUT_SECONDS="${{ inputs.runtime_theme_timeout_seconds || '300' }}"
-          LEARNING_PATH="${{ inputs.learning_path || '/learning' }}"
-          A11Y_MODE="${{ inputs.a11y_mode || 'hybrid' }}"
-          A11Y_TARGET_URL="${{ inputs.a11y_target_url || '' }}"
-          A11Y_ROUTES="${{ inputs.a11y_routes || '' }}"
-          A11Y_ALLOW_MISSING_REPORTS="${{ inputs.a11y_allow_missing_reports || 'false' }}"
+          NPM_START_BASE_URL="${{ fromJSON(inputs.options_json || '{}').npm_start_base_url || '' }}"
+          NPM_START_PROJECT="${{ fromJSON(inputs.options_json || '{}').npm_start_project || 'chromium' }}"
+          LIVE_DOM_AUDIT_PROJECT="${{ fromJSON(inputs.options_json || '{}').live_dom_audit_project || 'chromium' }}"
+          LIVE_DOM_AUDIT_MIN_HITS="${{ fromJSON(inputs.options_json || '{}').live_dom_audit_min_hits || '3' }}"
+          LIVE_DOM_AUDIT_ROUTES="${{ fromJSON(inputs.options_json || '{}').live_dom_audit_routes || '' }}"
+          LIVE_DOM_AUDIT_SELECTORS="${{ fromJSON(inputs.options_json || '{}').live_dom_audit_selectors || '' }}"
+          LIVE_DOM_AUDIT_MIN_CUSTOM_HITS="${{ fromJSON(inputs.options_json || '{}').live_dom_audit_min_custom_hits || '0' }}"
+          SELECTOR_AUDIT_PATH="${{ fromJSON(inputs.options_json || '{}').selector_audit_path || '/authn/login' }}"
+          RUNTIME_THEME_URL="${{ fromJSON(inputs.options_json || '{}').runtime_theme_url || '' }}"
+          RUNTIME_THEME_TIMEOUT_SECONDS="${{ fromJSON(inputs.options_json || '{}').runtime_theme_timeout_seconds || '300' }}"
+          LEARNING_PATH="${{ fromJSON(inputs.options_json || '{}').learning_path || '/learning' }}"
+          A11Y_MODE="${{ fromJSON(inputs.options_json || '{}').a11y_mode || 'hybrid' }}"
+          A11Y_TARGET_URL="${{ fromJSON(inputs.options_json || '{}').a11y_target_url || '' }}"
+          A11Y_ROUTES="${{ fromJSON(inputs.options_json || '{}').a11y_routes || '' }}"
+          A11Y_ALLOW_MISSING_REPORTS="${{ fromJSON(inputs.options_json || '{}').a11y_allow_missing_reports || 'false' }}"
 
           args=(--env "$TARGET_ENV" --frontend-only)
           if [[ "$CROSS_BROWSER_MATRIX" == "true" ]]; then
@@ -285,31 +169,31 @@ jobs:
             echo "- Require branding markers: \`${{ inputs.require_branding_markers || 'true' }}\`"
             echo "- Require WebKit availability: \`${{ inputs.require_webkit || 'false' }}\`"
             echo "- Performance gate: \`${{ inputs.run_performance_gate || 'true' }}\`"
-            echo "- Paragon budget gate: \`${{ inputs.run_paragon_budget_gate || 'true' }}\`"
-            echo "- Certificate branding gate: \`${{ inputs.run_certificate_branding_gate || 'true' }}\`"
-            echo "- Email template gate: \`${{ inputs.run_email_template_gate || 'true' }}\`"
-            echo "- Selector hardening gate: \`${{ inputs.run_selector_hardening_gate || 'true' }}\`"
-            echo "- Runtime theme contract gate: \`${{ inputs.run_runtime_theme_contract_gate || 'true' }}\`"
+            echo "- Paragon budget gate: \`${{ fromJSON(inputs.options_json || '{}').run_paragon_budget_gate != false && fromJSON(inputs.options_json || '{}').run_paragon_budget_gate != 'false' }}\`"
+            echo "- Certificate branding gate: \`${{ fromJSON(inputs.options_json || '{}').run_certificate_branding_gate != false && fromJSON(inputs.options_json || '{}').run_certificate_branding_gate != 'false' }}\`"
+            echo "- Email template gate: \`${{ fromJSON(inputs.options_json || '{}').run_email_template_gate != false && fromJSON(inputs.options_json || '{}').run_email_template_gate != 'false' }}\`"
+            echo "- Selector hardening gate: \`${{ fromJSON(inputs.options_json || '{}').run_selector_hardening_gate != false && fromJSON(inputs.options_json || '{}').run_selector_hardening_gate != 'false' }}\`"
+            echo "- Runtime theme contract gate: \`${{ fromJSON(inputs.options_json || '{}').run_runtime_theme_contract_gate != false && fromJSON(inputs.options_json || '{}').run_runtime_theme_contract_gate != 'false' }}\`"
             echo "- Live DOM selector audit gate: \`${{ inputs.run_live_dom_audit_gate || 'false' }}\`"
-            echo "- Live DOM audit profile: \`${{ inputs.live_dom_audit_profile || 'standard' }}\`"
+            echo "- Live DOM audit profile: \`${{ fromJSON(inputs.options_json || '{}').live_dom_audit_profile || 'standard' }}\`"
             echo "- npm-start smoke gate: \`${{ inputs.run_npm_start_smoke_gate || 'false' }}\`"
             echo "- Screenshot gate: \`${{ inputs.run_screenshot_gate || 'false' }}\`"
-            echo "- Screenshot scope: \`${{ inputs.screenshot_scope || 'full' }}\`"
-            echo "- npm-start base URL: \`${{ inputs.npm_start_base_url || '(auto by env)' }}\`"
-            echo "- npm-start project: \`${{ inputs.npm_start_project || 'chromium' }}\`"
-            echo "- Live DOM audit project: \`${{ inputs.live_dom_audit_project || 'chromium' }}\`"
-            echo "- Live DOM minimum selector hits: \`${{ inputs.live_dom_audit_min_hits || '3' }}\`"
-            echo "- Live DOM audit routes: \`${{ inputs.live_dom_audit_routes || '(selector_audit_path only)' }}\`"
-            echo "- Live DOM custom selectors: \`${{ inputs.live_dom_audit_selectors || '(none)' }}\`"
-            echo "- Live DOM minimum custom selector hits: \`${{ inputs.live_dom_audit_min_custom_hits || '0' }}\`"
-            echo "- Live DOM audit path: \`${{ inputs.selector_audit_path || '/authn/login' }}\`"
-            echo "- Runtime theme URL: \`${{ inputs.runtime_theme_url || '(auto by env)' }}\`"
-            echo "- Runtime theme timeout: \`${{ inputs.runtime_theme_timeout_seconds || '300' }}\`"
-            echo "- Learning path: \`${{ inputs.learning_path || '/learning' }}\`"
-            echo "- A11y mode: \`${{ inputs.a11y_mode || 'hybrid' }}\`"
-            echo "- A11y target URL: \`${{ inputs.a11y_target_url || '(auto apps by env)' }}\`"
-            echo "- A11y routes: \`${{ inputs.a11y_routes || '(verifier defaults)' }}\`"
-            echo "- A11y allow missing reports: \`${{ inputs.a11y_allow_missing_reports || 'false' }}\`"
+            echo "- Screenshot scope: \`${{ fromJSON(inputs.options_json || '{}').screenshot_scope || 'full' }}\`"
+            echo "- npm-start base URL: \`${{ fromJSON(inputs.options_json || '{}').npm_start_base_url || '(auto by env)' }}\`"
+            echo "- npm-start project: \`${{ fromJSON(inputs.options_json || '{}').npm_start_project || 'chromium' }}\`"
+            echo "- Live DOM audit project: \`${{ fromJSON(inputs.options_json || '{}').live_dom_audit_project || 'chromium' }}\`"
+            echo "- Live DOM minimum selector hits: \`${{ fromJSON(inputs.options_json || '{}').live_dom_audit_min_hits || '3' }}\`"
+            echo "- Live DOM audit routes: \`${{ fromJSON(inputs.options_json || '{}').live_dom_audit_routes || '(selector_audit_path only)' }}\`"
+            echo "- Live DOM custom selectors: \`${{ fromJSON(inputs.options_json || '{}').live_dom_audit_selectors || '(none)' }}\`"
+            echo "- Live DOM minimum custom selector hits: \`${{ fromJSON(inputs.options_json || '{}').live_dom_audit_min_custom_hits || '0' }}\`"
+            echo "- Live DOM audit path: \`${{ fromJSON(inputs.options_json || '{}').selector_audit_path || '/authn/login' }}\`"
+            echo "- Runtime theme URL: \`${{ fromJSON(inputs.options_json || '{}').runtime_theme_url || '(auto by env)' }}\`"
+            echo "- Runtime theme timeout: \`${{ fromJSON(inputs.options_json || '{}').runtime_theme_timeout_seconds || '300' }}\`"
+            echo "- Learning path: \`${{ fromJSON(inputs.options_json || '{}').learning_path || '/learning' }}\`"
+            echo "- A11y mode: \`${{ fromJSON(inputs.options_json || '{}').a11y_mode || 'hybrid' }}\`"
+            echo "- A11y target URL: \`${{ fromJSON(inputs.options_json || '{}').a11y_target_url || '(auto apps by env)' }}\`"
+            echo "- A11y routes: \`${{ fromJSON(inputs.options_json || '{}').a11y_routes || '(verifier defaults)' }}\`"
+            echo "- A11y allow missing reports: \`${{ fromJSON(inputs.options_json || '{}').a11y_allow_missing_reports || 'false' }}\`"
             if [[ -n "$LATEST" ]]; then
               echo "- Evidence directory: \`$LATEST\`"
             fi

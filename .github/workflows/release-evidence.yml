@@ -29,113 +29,26 @@ on:
         required: true
         default: true
         type: boolean
-      runtime_theme_url:
-        description: "Override runtime theme origin (empty = auto by target environment)"
-        required: false
-        default: ""
-        type: string
       run_npm_start_smoke:
         description: "Run npm-start MFE smoke lane and capture screenshots in evidence artifact"
         required: true
         default: false
-        type: boolean
-      run_certificate_branding:
-        description: "Run certificate branding verification lane"
-        required: true
-        default: true
         type: boolean
       run_live_dom_audit:
         description: "Run runtime DOM selector audit lane"
         required: true
         default: false
         type: boolean
-      learning_path:
-        description: "Learning route path for npm-start smoke"
-        required: false
-        default: "/learning"
-        type: string
-      npm_start_project:
-        description: "Playwright project for npm-start smoke"
-        required: true
-        default: "chromium"
-        type: choice
-        options:
-          - chromium
-          - firefox
-          - mobile-chrome
-      live_dom_audit_project:
-        description: "Playwright project for live DOM selector audit lane"
-        required: true
-        default: "chromium"
-        type: choice
-        options:
-          - chromium
-          - firefox
-      live_dom_audit_min_hits:
-        description: "Minimum tracked selector hits for live DOM selector audit"
-        required: false
-        default: "3"
-        type: string
-      live_dom_audit_profile:
-        description: "Preset profile for live DOM selector audit defaults"
-        required: true
-        default: "standard"
-        type: choice
-        options:
-          - standard
-          - phase7_strict
-          - phase7_full
-      live_dom_audit_routes:
-        description: "Optional comma-separated route paths for live DOM selector audit"
-        required: false
-        default: ""
-        type: string
-      live_dom_audit_selectors:
-        description: "Optional comma-separated CSS selectors for live DOM selector audit"
-        required: false
-        default: ""
-        type: string
-      live_dom_audit_min_custom_hits:
-        description: "Minimum custom selectors that must match across audited routes"
-        required: false
-        default: "0"
-        type: string
-      selector_audit_path:
-        description: "Route path used by runtime DOM selector audit lane"
-        required: false
-        default: "/authn/login"
-        type: string
       run_accessibility_scan:
         description: "Run accessibility verification lane"
         required: true
         default: true
         type: boolean
-      a11y_mode:
-        description: "Accessibility scan mode"
-        required: true
-        default: "offline"
-        type: choice
-        options:
-          - offline
-          - online
-          - hybrid
-      a11y_target_url:
-        description: "Accessibility scan origin (empty = auto apps domain by target environment)"
+      options_json:
+        description: "Advanced options JSON for runtime_theme_url, certificate branding, npm-start, live DOM audit including live_dom_audit_profile (standard/phase7_strict/phase7_full), and accessibility scan settings"
         required: false
-        default: ""
+        default: "{}"
         type: string
-      a11y_routes:
-        description: "Optional CSV routes for accessibility online scan"
-        required: false
-        default: ""
-        type: string
-      a11y_allow_missing_reports:
-        description: "Allow missing axe reports for some routes"
-        required: true
-        default: false
-        type: boolean
-
-permissions: {}
 
 jobs:
   release-evidence:
@@ -218,7 +131,7 @@ jobs:
         run: |
           set -euo pipefail
           TARGET_ENV="${{ inputs.target_environment }}"
-          RUNTIME_THEME_URL_INPUT="${{ inputs.runtime_theme_url || '' }}"
+          RUNTIME_THEME_URL_INPUT="${{ fromJSON(inputs.options_json || '{}').runtime_theme_url || '' }}"
           REQUIRE_RUNTIME_THEME="${{ inputs.require_runtime_theme || 'false' }}"
           REQUIRE_BRANDING_MARKERS="${{ inputs.require_branding_markers || 'true' }}"
 
@@ -250,11 +163,11 @@ jobs:
         run: |
           set -euo pipefail
           TARGET_ENV="${{ inputs.target_environment }}"
-          RUNTIME_THEME_URL_INPUT="${{ inputs.runtime_theme_url || '' }}"
+          RUNTIME_THEME_URL_INPUT="${{ fromJSON(inputs.options_json || '{}').runtime_theme_url || '' }}"
           REQUIRE_RUNTIME_THEME="${{ inputs.require_runtime_theme || 'false' }}"
           REQUIRE_BRANDING_MARKERS="${{ inputs.require_branding_markers || 'true' }}"
-          LEARNING_PATH="${{ inputs.learning_path || '/learning' }}"
-          PROJECT="${{ inputs.npm_start_project || 'chromium' }}"
+          LEARNING_PATH="${{ fromJSON(inputs.options_json || '{}').learning_path || '/learning' }}"
+          PROJECT="${{ fromJSON(inputs.options_json || '{}').npm_start_project || 'chromium' }}"
 
           if [[ -n "$RUNTIME_THEME_URL_INPUT" ]]; then
             BASE_URL="$RUNTIME_THEME_URL_INPUT"
@@ -283,10 +196,10 @@ jobs:
         run: |
           set -euo pipefail
           TARGET_ENV="${{ inputs.target_environment }}"
-          A11Y_MODE="${{ inputs.a11y_mode || 'offline' }}"
-          A11Y_TARGET_URL="${{ inputs.a11y_target_url || '' }}"
-          A11Y_ROUTES="${{ inputs.a11y_routes || '' }}"
-          A11Y_ALLOW_MISSING="${{ inputs.a11y_allow_missing_reports || 'false' }}"
+          A11Y_MODE="${{ fromJSON(inputs.options_json || '{}').a11y_mode || 'offline' }}"
+          A11Y_TARGET_URL="${{ fromJSON(inputs.options_json || '{}').a11y_target_url || '' }}"
+          A11Y_ROUTES="${{ fromJSON(inputs.options_json || '{}').a11y_routes || '' }}"
+          A11Y_ALLOW_MISSING="${{ fromJSON(inputs.options_json || '{}').a11y_allow_missing_reports || 'false' }}"
 
           if [[ "$TARGET_ENV" == "production" ]]; then
             ENV_FLAG="prod"
@@ -310,7 +223,7 @@ jobs:
             | tee var/release-evidence/accessibility.log
 
       - name: Run certificate branding lane
-        if: ${{ inputs.run_certificate_branding == true }}
+        if: ${{ fromJSON(inputs.options_json || '{}').run_certificate_branding != false && fromJSON(inputs.options_json || '{}').run_certificate_branding != 'false' }}
         run: |
           set -euo pipefail
           ./scripts/qa/verify-certificate-branding.sh \
@@ -321,16 +234,16 @@ jobs:
         run: |
           set -euo pipefail
           TARGET_ENV="${{ inputs.target_environment }}"
-          RUNTIME_THEME_URL_INPUT="${{ inputs.runtime_theme_url || '' }}"
+          RUNTIME_THEME_URL_INPUT="${{ fromJSON(inputs.options_json || '{}').runtime_theme_url || '' }}"
           REQUIRE_RUNTIME_THEME="${{ inputs.require_runtime_theme || 'false' }}"
           REQUIRE_BRANDING_MARKERS="${{ inputs.require_branding_markers || 'true' }}"
-          AUDIT_PROFILE="${{ inputs.live_dom_audit_profile || 'standard' }}"
-          SELECTOR_AUDIT_PATH="${{ inputs.selector_audit_path || '/authn/login' }}"
-          SELECTOR_AUDIT_ROUTES="${{ inputs.live_dom_audit_routes || '' }}"
-          SELECTOR_AUDIT_SELECTORS="${{ inputs.live_dom_audit_selectors || '' }}"
-          PROJECT="${{ inputs.live_dom_audit_project || 'chromium' }}"
-          MIN_HITS="${{ inputs.live_dom_audit_min_hits || '3' }}"
-          MIN_CUSTOM_HITS="${{ inputs.live_dom_audit_min_custom_hits || '0' }}"
+          AUDIT_PROFILE="${{ fromJSON(inputs.options_json || '{}').live_dom_audit_profile || 'standard' }}"
+          SELECTOR_AUDIT_PATH="${{ fromJSON(inputs.options_json || '{}').selector_audit_path || '/authn/login' }}"
+          SELECTOR_AUDIT_ROUTES="${{ fromJSON(inputs.options_json || '{}').live_dom_audit_routes || '' }}"
+          SELECTOR_AUDIT_SELECTORS="${{ fromJSON(inputs.options_json || '{}').live_dom_audit_selectors || '' }}"
+          PROJECT="${{ fromJSON(inputs.options_json || '{}').live_dom_audit_project || 'chromium' }}"
+          MIN_HITS="${{ fromJSON(inputs.options_json || '{}').live_dom_audit_min_hits || '3' }}"
+          MIN_CUSTOM_HITS="${{ fromJSON(inputs.options_json || '{}').live_dom_audit_min_custom_hits || '0' }}"
 
           if [[ -n "$RUNTIME_THEME_URL_INPUT" ]]; then
             BASE_URL="$RUNTIME_THEME_URL_INPUT"
@@ -369,24 +282,24 @@ jobs:
           TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
           REQUIRE_RUNTIME_THEME: ${{ inputs.require_runtime_theme || 'false' }}
           REQUIRE_BRANDING_MARKERS: ${{ inputs.require_branding_markers || 'true' }}
-          RUNTIME_THEME_URL: ${{ inputs.runtime_theme_url || '' }}
+          RUNTIME_THEME_URL: ${{ fromJSON(inputs.options_json || '{}').runtime_theme_url || '' }}
           RUN_NPM_START_SMOKE: ${{ inputs.run_npm_start_smoke || 'false' }}
           RUN_ACCESSIBILITY_SCAN: ${{ inputs.run_accessibility_scan || 'true' }}
-          A11Y_MODE: ${{ inputs.a11y_mode || 'offline' }}
-          A11Y_TARGET_URL: ${{ inputs.a11y_target_url || '' }}
-          A11Y_ROUTES: ${{ inputs.a11y_routes || '' }}
-          A11Y_ALLOW_MISSING_REPORTS: ${{ inputs.a11y_allow_missing_reports || 'false' }}
-          RUN_CERTIFICATE_BRANDING: ${{ inputs.run_certificate_branding || 'true' }}
+          A11Y_MODE: ${{ fromJSON(inputs.options_json || '{}').a11y_mode || 'offline' }}
+          A11Y_TARGET_URL: ${{ fromJSON(inputs.options_json || '{}').a11y_target_url || '' }}
+          A11Y_ROUTES: ${{ fromJSON(inputs.options_json || '{}').a11y_routes || '' }}
+          A11Y_ALLOW_MISSING_REPORTS: ${{ fromJSON(inputs.options_json || '{}').a11y_allow_missing_reports || 'false' }}
+          RUN_CERTIFICATE_BRANDING: ${{ fromJSON(inputs.options_json || '{}').run_certificate_branding != false && fromJSON(inputs.options_json || '{}').run_certificate_branding != 'false' }}
           RUN_LIVE_DOM_AUDIT: ${{ inputs.run_live_dom_audit || 'false' }}
-          LEARNING_PATH: ${{ inputs.learning_path || '/learning' }}
-          NPM_START_PROJECT: ${{ inputs.npm_start_project || 'chromium' }}
-          LIVE_DOM_AUDIT_PROJECT: ${{ inputs.live_dom_audit_project || 'chromium' }}
-          LIVE_DOM_AUDIT_MIN_HITS: ${{ inputs.live_dom_audit_min_hits || '3' }}
-          LIVE_DOM_AUDIT_PROFILE: ${{ inputs.live_dom_audit_profile || 'standard' }}
-          LIVE_DOM_AUDIT_ROUTES: ${{ inputs.live_dom_audit_routes || '' }}
-          LIVE_DOM_AUDIT_SELECTORS: ${{ inputs.live_dom_audit_selectors || '' }}
-          LIVE_DOM_AUDIT_MIN_CUSTOM_HITS: ${{ inputs.live_dom_audit_min_custom_hits || '0' }}
-          SELECTOR_AUDIT_PATH: ${{ inputs.selector_audit_path || '/authn/login' }}
+          LEARNING_PATH: ${{ fromJSON(inputs.options_json || '{}').learning_path || '/learning' }}
+          NPM_START_PROJECT: ${{ fromJSON(inputs.options_json || '{}').npm_start_project || 'chromium' }}
+          LIVE_DOM_AUDIT_PROJECT: ${{ fromJSON(inputs.options_json || '{}').live_dom_audit_project || 'chromium' }}
+          LIVE_DOM_AUDIT_MIN_HITS: ${{ fromJSON(inputs.options_json || '{}').live_dom_audit_min_hits || '3' }}
+          LIVE_DOM_AUDIT_PROFILE: ${{ fromJSON(inputs.options_json || '{}').live_dom_audit_profile || 'standard' }}
+          LIVE_DOM_AUDIT_ROUTES: ${{ fromJSON(inputs.options_json || '{}').live_dom_audit_routes || '' }}
+          LIVE_DOM_AUDIT_SELECTORS: ${{ fromJSON(inputs.options_json || '{}').live_dom_audit_selectors || '' }}
+          LIVE_DOM_AUDIT_MIN_CUSTOM_HITS: ${{ fromJSON(inputs.options_json || '{}').live_dom_audit_min_custom_hits || '0' }}
+          SELECTOR_AUDIT_PATH: ${{ fromJSON(inputs.options_json || '{}').selector_audit_path || '/authn/login' }}
         run: |
           set -euo pipefail
           jq -n '{
@@ -438,23 +351,23 @@ jobs:
             echo "- MFE tag: \`${{ inputs.mfe_tag }}\`"
             echo "- Require runtime theme: \`${{ inputs.require_runtime_theme || 'false' }}\`"
             echo "- Require branding markers: \`${{ inputs.require_branding_markers || 'true' }}\`"
-            echo "- Runtime theme URL override: \`${{ inputs.runtime_theme_url || '(auto by env)' }}\`"
+            echo "- Runtime theme URL override: \`${{ fromJSON(inputs.options_json || '{}').runtime_theme_url || '(auto by env)' }}\`"
             echo "- Run npm-start smoke lane: \`${{ inputs.run_npm_start_smoke || 'false' }}\`"
             echo "- Run accessibility lane: \`${{ inputs.run_accessibility_scan || 'true' }}\`"
-            echo "- Accessibility mode: \`${{ inputs.a11y_mode || 'offline' }}\`"
-            echo "- Accessibility target URL: \`${{ inputs.a11y_target_url || '(auto apps by env)' }}\`"
-            echo "- Accessibility routes: \`${{ inputs.a11y_routes || '(verifier defaults)' }}\`"
-            echo "- Accessibility allow missing reports: \`${{ inputs.a11y_allow_missing_reports || 'false' }}\`"
-            echo "- Run certificate branding lane: \`${{ inputs.run_certificate_branding || 'true' }}\`"
+            echo "- Accessibility mode: \`${{ fromJSON(inputs.options_json || '{}').a11y_mode || 'offline' }}\`"
+            echo "- Accessibility target URL: \`${{ fromJSON(inputs.options_json || '{}').a11y_target_url || '(auto apps by env)' }}\`"
+            echo "- Accessibility routes: \`${{ fromJSON(inputs.options_json || '{}').a11y_routes || '(verifier defaults)' }}\`"
+            echo "- Accessibility allow missing reports: \`${{ fromJSON(inputs.options_json || '{}').a11y_allow_missing_reports || 'false' }}\`"
+            echo "- Run certificate branding lane: \`${{ fromJSON(inputs.options_json || '{}').run_certificate_branding != false && fromJSON(inputs.options_json || '{}').run_certificate_branding != 'false' }}\`"
             echo "- Run live DOM audit lane: \`${{ inputs.run_live_dom_audit || 'false' }}\`"
-            echo "- Live DOM audit profile: \`${{ inputs.live_dom_audit_profile || 'standard' }}\`"
-            echo "- Live DOM audit project: \`${{ inputs.live_dom_audit_project || 'chromium' }}\`"
-            echo "- Live DOM min tracked hits: \`${{ inputs.live_dom_audit_min_hits || '3' }}\`"
-            echo "- Live DOM routes: \`${{ inputs.live_dom_audit_routes || '(profile/default)' }}\`"
-            echo "- Live DOM selectors: \`${{ inputs.live_dom_audit_selectors || '(profile/default)' }}\`"
-            echo "- Live DOM min custom hits: \`${{ inputs.live_dom_audit_min_custom_hits || '0' }}\`"
-            echo "- Selector audit path: \`${{ inputs.selector_audit_path || '/authn/login' }}\`"
-            echo "- Learning path: \`${{ inputs.learning_path || '/learning' }}\`"
+            echo "- Live DOM audit profile: \`${{ fromJSON(inputs.options_json || '{}').live_dom_audit_profile || 'standard' }}\`"
+            echo "- Live DOM audit project: \`${{ fromJSON(inputs.options_json || '{}').live_dom_audit_project || 'chromium' }}\`"
+            echo "- Live DOM min tracked hits: \`${{ fromJSON(inputs.options_json || '{}').live_dom_audit_min_hits || '3' }}\`"
+            echo "- Live DOM routes: \`${{ fromJSON(inputs.options_json || '{}').live_dom_audit_routes || '(profile/default)' }}\`"
+            echo "- Live DOM selectors: \`${{ fromJSON(inputs.options_json || '{}').live_dom_audit_selectors || '(profile/default)' }}\`"
+            echo "- Live DOM min custom hits: \`${{ fromJSON(inputs.options_json || '{}').live_dom_audit_min_custom_hits || '0' }}\`"
+            echo "- Selector audit path: \`${{ fromJSON(inputs.options_json || '{}').selector_audit_path || '/authn/login' }}\`"
+            echo "- Learning path: \`${{ fromJSON(inputs.options_json || '{}').learning_path || '/learning' }}\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload release evidence artifact

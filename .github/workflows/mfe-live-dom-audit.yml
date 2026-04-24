@@ -31,16 +31,6 @@ on:
         required: true
         default: false
         type: boolean
-      kube_context:
-        description: "kubectl context for authenticated mode (required when authenticated=true)"
-        required: false
-        default: ""
-        type: string
-      namespace:
-        description: "namespace containing deploy/lms for authenticated mode (required when authenticated=true)"
-        required: false
-        default: ""
-        type: string
       audit_profile:
         description: "Preset profile for route/selector defaults"
         required: true
@@ -50,31 +40,6 @@ on:
           - standard
           - phase7_strict
           - phase7_full
-      selector_audit_path:
-        description: "Path used for selector DOM audit"
-        required: false
-        default: "/authn/login"
-        type: string
-      selector_audit_routes:
-        description: "Comma-separated MFE route paths for selector DOM audit (empty = selector_audit_path)"
-        required: false
-        default: ""
-        type: string
-      selector_audit_selectors:
-        description: "Comma-separated CSS selectors to audit across configured routes"
-        required: false
-        default: ""
-        type: string
-      min_selector_hits:
-        description: "Minimum tracked selector hits required"
-        required: false
-        default: "3"
-        type: string
-      min_custom_selector_hits:
-        description: "Minimum custom selectors that must match across all audited routes"
-        required: false
-        default: "0"
-        type: string
       project:
         description: "Playwright project"
         required: true
@@ -83,6 +48,11 @@ on:
         options:
           - chromium
           - firefox
+      options_json:
+        description: "Advanced options JSON for kube_context, namespace, selector_audit_path, selector_audit_routes, selector_audit_selectors, and selector hit thresholds"
+        required: false
+        default: "{}"
+        type: string
 
 permissions: {}  # Deny-all at workflow level; each job grants only what it needs
 
@@ -110,14 +80,14 @@ jobs:
           REQUIRE_RUNTIME_THEME="${{ inputs.require_runtime_theme || 'false' }}"
           REQUIRE_BRANDING_MARKERS="${{ inputs.require_branding_markers || 'true' }}"
           AUTHENTICATED="${{ inputs.authenticated || 'false' }}"
-          KUBE_CONTEXT_INPUT="${{ inputs.kube_context || '' }}"
-          NAMESPACE_INPUT="${{ inputs.namespace || '' }}"
+          KUBE_CONTEXT_INPUT="${{ fromJSON(inputs.options_json || '{}').kube_context || '' }}"
+          NAMESPACE_INPUT="${{ fromJSON(inputs.options_json || '{}').namespace || '' }}"
           AUDIT_PROFILE="${{ inputs.audit_profile || 'standard' }}"
-          SELECTOR_AUDIT_PATH="${{ inputs.selector_audit_path || '/authn/login' }}"
-          SELECTOR_AUDIT_ROUTES="${{ inputs.selector_audit_routes || '' }}"
-          SELECTOR_AUDIT_SELECTORS="${{ inputs.selector_audit_selectors || '' }}"
-          MIN_SELECTOR_HITS="${{ inputs.min_selector_hits || '3' }}"
-          MIN_CUSTOM_SELECTOR_HITS="${{ inputs.min_custom_selector_hits || '0' }}"
+          SELECTOR_AUDIT_PATH="${{ fromJSON(inputs.options_json || '{}').selector_audit_path || '/authn/login' }}"
+          SELECTOR_AUDIT_ROUTES="${{ fromJSON(inputs.options_json || '{}').selector_audit_routes || '' }}"
+          SELECTOR_AUDIT_SELECTORS="${{ fromJSON(inputs.options_json || '{}').selector_audit_selectors || '' }}"
+          MIN_SELECTOR_HITS="${{ fromJSON(inputs.options_json || '{}').min_selector_hits || '3' }}"
+          MIN_CUSTOM_SELECTOR_HITS="${{ fromJSON(inputs.options_json || '{}').min_custom_selector_hits || '0' }}"
           PROJECT="${{ inputs.project || 'chromium' }}"
 
           args=(--env "$TARGET_ENV" --audit-profile "$AUDIT_PROFILE" --selector-audit-path "$SELECTOR_AUDIT_PATH" --min-selector-hits "$MIN_SELECTOR_HITS" --min-custom-selector-hits "$MIN_CUSTOM_SELECTOR_HITS" --project "$PROJECT")
@@ -176,13 +146,13 @@ jobs:
             echo "- Require runtime theme mode: \`${{ inputs.require_runtime_theme || 'false' }}\`"
             echo "- Require branding markers: \`${{ inputs.require_branding_markers || 'true' }}\`"
             echo "- Authenticated learner mode: \`${{ inputs.authenticated || 'false' }}\`"
-            echo "- kubectl context: \`${{ inputs.kube_context || '(none)' }}\`"
-            echo "- namespace: \`${{ inputs.namespace || '(none)' }}\`"
-            echo "- Selector audit path: \`${{ inputs.selector_audit_path || '/authn/login' }}\`"
-            echo "- Selector audit routes: \`${{ inputs.selector_audit_routes || '(selector_audit_path only)' }}\`"
-            echo "- Selector audit selectors: \`${{ inputs.selector_audit_selectors || '(none)' }}\`"
-            echo "- Min tracked selector hits: \`${{ inputs.min_selector_hits || '3' }}\`"
-            echo "- Min custom selector hits: \`${{ inputs.min_custom_selector_hits || '0' }}\`"
+            echo "- kubectl context: \`${{ fromJSON(inputs.options_json || '{}').kube_context || '(none)' }}\`"
+            echo "- namespace: \`${{ fromJSON(inputs.options_json || '{}').namespace || '(none)' }}\`"
+            echo "- Selector audit path: \`${{ fromJSON(inputs.options_json || '{}').selector_audit_path || '/authn/login' }}\`"
+            echo "- Selector audit routes: \`${{ fromJSON(inputs.options_json || '{}').selector_audit_routes || '(selector_audit_path only)' }}\`"
+            echo "- Selector audit selectors: \`${{ fromJSON(inputs.options_json || '{}').selector_audit_selectors || '(none)' }}\`"
+            echo "- Min tracked selector hits: \`${{ fromJSON(inputs.options_json || '{}').min_selector_hits || '3' }}\`"
+            echo "- Min custom selector hits: \`${{ fromJSON(inputs.options_json || '{}').min_custom_selector_hits || '0' }}\`"
             echo "- Playwright project: \`${{ inputs.project || 'chromium' }}\`"
             if [[ -n "$LOG_FILE" ]]; then
               echo "- Log file: \`$LOG_FILE\`"

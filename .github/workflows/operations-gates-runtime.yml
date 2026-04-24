@@ -42,6 +42,11 @@ on:
         required: false
         default: "mereka"
         type: string
+      alert_noise_runtime_source:
+        description: "Optional prebuilt alert-noise runtime sample JSON path"
+        required: false
+        default: ""
+        type: string
 
 jobs:
   operations-gates:

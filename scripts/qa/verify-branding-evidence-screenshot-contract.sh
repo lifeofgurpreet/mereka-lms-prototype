@@ -84,18 +84,35 @@ if [[ "$violations" -eq 0 ]]; then
 fi
 
 if [[ "$violations" -eq 0 ]]; then
-  if ! rg -n '^[[:space:]]+screenshot_scope:' "$WORKFLOW" >/dev/null; then
-    echo "❌ Closure workflow missing screenshot_scope input"
+  if ! {
+    rg -n '^[[:space:]]+screenshot_scope:' "$WORKFLOW" >/dev/null \
+      || {
+        rg -n 'options_json:' "$WORKFLOW" >/dev/null \
+          && rg -n 'screenshot_scope' "$WORKFLOW" >/dev/null
+      }
+  }; then
+    echo "❌ Closure workflow missing screenshot_scope dispatch contract"
     violations=1
   fi
 
-  if ! rg -n '^[[:space:]]+- full$' "$WORKFLOW" >/dev/null \
-    || ! rg -n '^[[:space:]]+- mfe-only$' "$WORKFLOW" >/dev/null; then
+  if ! {
+    {
+      rg -n '^[[:space:]]+- full$' "$WORKFLOW" >/dev/null \
+        && rg -n '^[[:space:]]+- mfe-only$' "$WORKFLOW" >/dev/null
+    } || {
+      rg -n 'screenshot_scope' "$WORKFLOW" >/dev/null \
+        && rg -n 'full' "$WORKFLOW" >/dev/null \
+        && rg -n 'mfe-only' "$WORKFLOW" >/dev/null
+    }
+  }; then
     echo "❌ Closure workflow screenshot_scope options missing full or mfe-only"
     violations=1
   fi
 
-  if ! rg -n 'SCREENSHOT_SCOPE="\$\{\{ inputs\.screenshot_scope \|\| '\''full'\'' \}\}"' "$WORKFLOW" >/dev/null; then
+  if ! {
+    rg -n 'SCREENSHOT_SCOPE="\$\{\{ inputs\.screenshot_scope \|\| '\''full'\'' \}\}"' "$WORKFLOW" >/dev/null \
+      || rg -n 'SCREENSHOT_SCOPE="\$\{\{ fromJSON\(inputs\.options_json \|\| '\''\{\}'\''\)\.screenshot_scope \|\| '\''full'\'' \}\}"' "$WORKFLOW" >/dev/null
+  }; then
     echo "❌ Closure workflow missing screenshot_scope shell variable wiring"
     violations=1
   fi

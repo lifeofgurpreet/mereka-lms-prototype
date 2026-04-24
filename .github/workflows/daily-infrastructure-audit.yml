@@ -246,7 +246,6 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   parity-check:
     name: Runtime parity (${{ matrix.env_label }})
-    if: ${{ github.event_name == 'schedule' || github.event.inputs.target_environment == 'all' || github.event.inputs.target_environment == matrix.env_label || github.event.inputs.target_environment == '' }}
     runs-on: mereka-k8s-runners
     timeout-minutes: 45
     strategy:
@@ -494,7 +493,6 @@ jobs:
   # ============================================================================
   gitops-integrity:
     name: GitOps integrity checks
-    needs: []
     runs-on: mereka-k8s-runners
     timeout-minutes: 45
     continue-on-error: false
@@ -568,7 +566,6 @@ jobs:
   # ============================================================================
   code-quality-scorecard:
     name: "Code Quality Scorecard (Tier-A)"
-    needs: []
     runs-on: mereka-k8s-runners
     timeout-minutes: 45
     permissions:

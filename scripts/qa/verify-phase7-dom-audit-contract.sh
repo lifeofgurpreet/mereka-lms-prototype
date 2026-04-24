@@ -111,7 +111,9 @@ for wf in "$LIVE_DOM_WORKFLOW" "$CLOSURE_WORKFLOW" "$RELEASE_WORKFLOW"; do
     fail "Missing workflow: $rel"
     continue
   fi
-  if rg -n 'phase7_strict' "$wf" >/dev/null && rg -n 'phase7_full' "$wf" >/dev/null; then
+  if rg -n 'phase7_strict' "$wf" >/dev/null \
+    && rg -n 'phase7_full' "$wf" >/dev/null \
+    && { rg -n 'live_dom_audit_profile' "$wf" >/dev/null || rg -n 'audit_profile:' "$wf" >/dev/null; }; then
     pass "$rel exposes phase7_strict + phase7_full profile options"
   else
     fail "$rel missing phase7_strict or phase7_full profile option"
@@ -119,8 +121,16 @@ for wf in "$LIVE_DOM_WORKFLOW" "$CLOSURE_WORKFLOW" "$RELEASE_WORKFLOW"; do
 done
 
 if rg -n 'authenticated:' "$LIVE_DOM_WORKFLOW" >/dev/null \
-  && rg -n 'kube_context:' "$LIVE_DOM_WORKFLOW" >/dev/null \
-  && rg -n 'namespace:' "$LIVE_DOM_WORKFLOW" >/dev/null; then
+  && (
+    {
+      rg -n 'kube_context:' "$LIVE_DOM_WORKFLOW" >/dev/null \
+        && rg -n 'namespace:' "$LIVE_DOM_WORKFLOW" >/dev/null
+    } || {
+      rg -n 'options_json:' "$LIVE_DOM_WORKFLOW" >/dev/null \
+        && rg -n 'fromJSON\(inputs\.options_json \|\| '\''\{\}'\''\)\.kube_context' "$LIVE_DOM_WORKFLOW" >/dev/null \
+        && rg -n 'fromJSON\(inputs\.options_json \|\| '\''\{\}'\''\)\.namespace' "$LIVE_DOM_WORKFLOW" >/dev/null
+    }
+  ); then
   pass "Live DOM workflow exposes authenticated mode inputs"
 else
   fail "Live DOM workflow missing authenticated mode inputs"
