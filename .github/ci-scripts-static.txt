@@ -22,6 +22,7 @@ scripts/qa/test-verify-workflow-script-references.sh
 scripts/qa/verify-actions-pinned.sh
 scripts/governance/verify-runbook-executable.sh
 scripts/qa/test-verify-runbook-executable.sh
+scripts/qa/test-verify-retraction-sweep.sh
 scripts/qa/verify-script-governance-census.sh
 scripts/qa/verify-script-governance-dangerous.sh
 scripts/qa/verify-script-governance-orphans.sh

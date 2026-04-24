@@ -378,7 +378,9 @@
         "none"
       ],
       "severity": "low",
-      "spec_ids": [],
+      "spec_ids": [
+        "AC-Y69T"
+      ],
       "status": "manual_only",
       "tier": "exploratory_manual"
     },

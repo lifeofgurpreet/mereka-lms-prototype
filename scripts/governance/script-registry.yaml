@@ -76,6 +76,14 @@ ci_static_inventory:
     - script: scripts/governance/verify-runbook-executable.sh
     - script: scripts/qa/test-verify-runbook-executable.sh
       estimated_seconds: 2
+    # verify-retraction-sweep.sh itself is NOT in the static inventory —
+    # it's a retraction-PR-invoked tool that exits 2 on no-arg usage (per
+    # scripts/qa/test-verify-retraction-sweep.sh fixture 1 contract).
+    # Registering it as static would fail every build at the no-arg call.
+    # The test script IS registered — it validates the verifier's contract
+    # including the usage-error exit code.
+    - script: scripts/qa/test-verify-retraction-sweep.sh
+      estimated_seconds: 2
     - script: scripts/qa/verify-script-governance-census.sh
     - script: scripts/qa/verify-script-governance-dangerous.sh
     - script: scripts/qa/verify-script-governance-orphans.sh

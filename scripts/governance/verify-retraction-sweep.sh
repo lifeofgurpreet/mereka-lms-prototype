@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @covers AC-Y69T.2
+# @spec: truth-repair-doctrine_spec.md
 # verify-retraction-sweep.sh
 # -----------------------------------------------------------------------------
 # Enforces Truth Repair Doctrine Rule 2: "Retractions patch source, not
