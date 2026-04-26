@@ -2,6 +2,10 @@
 // Frozen runtime config, sourced from Vite's import.meta.env.
 // Phase 0.5: adds authnUrl + studioUrl so the auth module can redirect
 // to the MFE login without hard-coding URLs.
+//
+// When VITE_OPENEDX_BASE_URL is empty the SPA makes same-origin requests
+// (e.g. /api/courses/v1/courses/) which Netlify proxies to academyv2.
+// This avoids all CORS issues without touching the Open edX server.
 // ---------------------------------------------------------------------------
 
 function pick(key, fallback = '') {
@@ -24,9 +28,19 @@ function bool(key, fallback = false) {
   return /^(1|true|yes|on)$/i.test(String(v));
 }
 
+// If the env var is explicitly present (even if empty), honour it.
+// Only fall back to academyv2 when the key is truly absent.
+function pickBaseUrl() {
+  const key = 'VITE_OPENEDX_BASE_URL';
+  const raw = import.meta.env[key];
+  // Vite always stringifies env vars. If the key exists, raw is a string.
+  if (raw !== undefined) return raw;          // '' is valid → same-origin proxy
+  return 'https://academyv2.mereka.dev';      // local dev without .env
+}
+
 export const config = Object.freeze({
   openedx: Object.freeze({
-    baseUrl: required('VITE_OPENEDX_BASE_URL') || 'https://academyv2.mereka.dev',
+    baseUrl: pickBaseUrl(),
     authnUrl:
       pick('VITE_OPENEDX_AUTHN_URL') || 'https://apps.academyv2.mereka.dev',
     studioUrl:

@@ -73,7 +73,7 @@ function courseCard(c) {
   const topicClass = (c.org || '').toLowerCase().replace(/[^a-z]/g, '') || 'general';
 
   return `
-    <article class="card course-card" onclick="window.goto && goto('course')">
+    <article class="card course-card" data-course-id="${escapeAttr(c.courseId)}" style="cursor:pointer;">
       <div class="course-card__img course-art" data-topic="${topicClass}">
         <span class="course-card__type"><span class="material-symbols-outlined" style="font-size:12px;">workspace_premium</span> ${c.pacing === 'self' ? 'Self-paced' : 'Instructor-led'}</span>
         <button class="wishlist-btn" aria-label="Save to wishlist" onclick="event.stopPropagation();"><span class="material-symbols-outlined">favorite</span></button>
@@ -122,6 +122,18 @@ async function loadPage(rootEl, { replace } = {}) {
     // Render cards
     grid.innerHTML = state.courses.map(courseCard).join('');
 
+    // Wire course card clicks → navigate to /course/:id
+    grid.querySelectorAll('.course-card[data-course-id]').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.wishlist-btn')) return;
+        const id = card.dataset.courseId;
+        if (id) {
+          window.history.pushState(null, '', '/course/' + encodeURIComponent(id));
+          window.dispatchEvent(new PopStateEvent('popstate'));
+        }
+      });
+    });
+
     // Update count
     const total = state.pagination.count || state.courses.length;
     if (statCount) statCount.textContent = String(total);
@@ -148,7 +160,7 @@ async function loadPage(rootEl, { replace } = {}) {
       <div style="grid-column:1/-1; text-align:center; padding:48px 24px;">
         <span class="material-symbols-outlined" style="font-size:48px; color:var(--medium-grey);">cloud_off</span>
         <h3 style="margin:16px 0 8px;">Couldn't load courses</h3>
-        <p style="color:var(--medium-grey);">The Mereka Academy API isn't reachable right now. This is likely a CORS configuration issue.</p>
+        <p style="color:var(--medium-grey);">The Mereka Academy API isn't reachable right now.</p>
         <button class="btn btn--outline btn--sm" onclick="location.reload()">Try again</button>
       </div>`;
     if (countEl) countEl.textContent = 'Unable to load courses from Mereka Academy';

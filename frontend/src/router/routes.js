@@ -4,9 +4,6 @@
 //   path: URL pattern (supports :param)
 //   page: dynamic import of the page module (code-split)
 //   auth: 'required' | 'optional' | 'forbidden'
-//
-// The prototype's `goto(pageId)` map is preserved in pageId → path below
-// so the existing HTML's onclick handlers can be kept alive during migration.
 
 export const routes = [
   { id: 'login',             path: '/login',              page: () => import('../pages/login.js'),             auth: 'forbidden' },
@@ -35,5 +32,26 @@ export const routes = [
   { id: 'studio',            path: '/studio',             page: () => import('../pages/studio-redirect.js'),   auth: 'required' },
 ];
 
-/** Legacy goto(pageId) helpers — preserved so ported prototype HTML keeps working. */
-export const pageIdToPath = Object.fromEntries(routes.map((r) => [r.id, r.path.replace(/:[^/]+/g, '')]));
+/**
+ * Legacy goto(pageId) helpers — preserved so ported prototype HTML keeps working.
+ * For parameterised routes we supply demo placeholder IDs so the link still works
+ * (e.g. goto('course') → /course/demo, goto('unit') → /learn/demo/1).
+ */
+const DEMO_PARAMS = {
+  course:             'demo',
+  unit:               'demo/1',
+  checkout:           'demo',
+  'enrollment-success': 'demo',
+  certificate:        'demo',
+};
+
+export const pageIdToPath = Object.fromEntries(
+  routes.map((r) => {
+    if (DEMO_PARAMS[r.id]) {
+      // Strip the param segments and append demo values
+      const base = r.path.replace(/\/:[^/]+/g, '');
+      return [r.id, base + '/' + DEMO_PARAMS[r.id]];
+    }
+    return [r.id, r.path];
+  })
+);
