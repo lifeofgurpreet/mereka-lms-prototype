@@ -17,10 +17,11 @@
   NETLIFY_SKIP_PYTHON_REQUIREMENTS = "true"
 
 # -- Branch-level overrides: build the SPA on phase-0/* branches --
+# NOTE: Netlify ignores `base` in branch contexts. The build command
+# must cd into frontend/ and publish is relative to repo root.
 [context."phase-0/spa-foundation"]
-  base = "frontend"
   publish = "frontend/dist"
-  command = "npm install && npm run build"
+  command = "cd frontend && npm install && npm run build"
 
 [context."phase-0/spa-foundation".environment]
   NODE_VERSION = "20"
@@ -32,9 +33,8 @@
 
 # Generic branch deploys (future phase-1/*, feature/* branches)
 [context.branch-deploy]
-  base = "frontend"
   publish = "frontend/dist"
-  command = "npm install && npm run build"
+  command = "cd frontend && npm install && npm run build"
 
 [context.branch-deploy.environment]
   NODE_VERSION = "20"
@@ -43,16 +43,15 @@
 
 # Deploy previews (PRs against main) — also build the SPA.
 [context.deploy-preview]
-  base = "frontend"
   publish = "frontend/dist"
-  command = "npm install && npm run build"
+  command = "cd frontend && npm install && npm run build"
 
 [context.deploy-preview.environment]
   NODE_VERSION = "20"
   VITE_OPENEDX_BASE_URL = "https://academyv2.mereka.dev"
   VITE_USE_MOCK_DATA = "false"
 
-# SPA catch-all for main (serves prototype index.html for any path)
+# SPA catch-all (serves index.html for any client-side route)
 [[redirects]]
   from = "/*"
   to = "/index.html"
