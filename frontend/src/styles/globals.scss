@@ -1,44 +1,22 @@
-// Mereka brand tokens — mirrors infrastructure/tutor/brand-mereka/paragon/tokens.json
-// and the prototype's inline styles. Ported from docs/design-reference/.
+// Import the full prototype stylesheet (ported from docs/design-reference/)
+@import './prototype.css';
 
-:root {
-  --mereka-primary: #AB3B78;
-  --mereka-primary-dark: #8B2E62;
-  --mereka-secondary: #2D8886;
-  --mereka-accent: #1E5A8E;
-  --mereka-gradient: linear-gradient(120deg, #AB3B78 0%, #2D8886 60%, #1E5A8E 100%);
+// SPA-specific overrides
+// The prototype uses show/hide on .screen sections.
+// In the SPA, the router injects page content directly into #app,
+// so we don't need the .screen visibility logic.
 
-  --mereka-text: #111827;
-  --mereka-text-muted: #6b7280;
-  --mereka-surface: #ffffff;
-  --mereka-surface-alt: #f9fafb;
-  --mereka-border: #e5e7eb;
+// All screens are visible by default in SPA mode
+.screen { display: block !important; }
 
-  --mereka-radius-card: 12px;
-  --mereka-radius-pill: 9999px;
-
-  --mereka-font-display: 'Poppins', system-ui, -apple-system, sans-serif;
-  --mereka-font-body: 'Inter', system-ui, -apple-system, sans-serif;
-}
-
-* { box-sizing: border-box; }
-
-html, body {
-  margin: 0;
-  padding: 0;
-  font-family: var(--mereka-font-body);
-  color: var(--mereka-text);
-  background: var(--mereka-surface-alt);
+// The router wraps content, so #app is the flex container
+#app {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-h1, h2, h3, h4 {
-  font-family: var(--mereka-font-display);
-  font-weight: 600;
-  line-height: 1.2;
+// Page content area fills available space
+.app-content {
+  flex: 1;
 }
-
-a { color: var(--mereka-primary); text-decoration: none; }
-a:hover { text-decoration: underline; }
-
-#app { min-height: 100vh; display: flex; flex-direction: column; }

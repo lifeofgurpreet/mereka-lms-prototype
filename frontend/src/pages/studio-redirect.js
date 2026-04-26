@@ -1,15 +1,12 @@
 // Page: Studio Redirect
-// Phase 0 stub. Port from docs/design-reference/mereka-ux-prototype/index.html
-// and wire to API modules as the feature ticket lands.
-
-export async function render(rootEl, { params, query } = {}) {
+import { config } from '../config.js';
+export async function render(rootEl) {
+  const studioUrl = config.openedx.studioUrl || 'https://studio.academyv2.mereka.dev';
   rootEl.innerHTML = `
-    <main style="padding:80px 20px;max-width:900px;margin:0 auto;">
-      <div style="padding:40px;border:2px dashed #e5e7eb;border-radius:12px;text-align:center;">
-        <h1 style="margin:0 0 12px;font-family:'Poppins',sans-serif;color:#AB3B78;">Studio Redirect</h1>
-        <p style="color:#6b7280;margin:0 0 16px;">Phase 0 stub — port prototype content + wire API.</p>
-        <code style="color:#6b7280;font-size:12px;">params: ${JSON.stringify(params || {})}</code>
-      </div>
-    </main>
-  `;
+  <main style="max-width:600px; margin:0 auto; padding:80px 20px; text-align:center;">
+    <span class="material-symbols-outlined" style="font-size:48px; color:var(--primary);">edit_note</span>
+    <h1 style="margin:16px 0 8px;">Mereka Studio</h1>
+    <p style="color:var(--medium-grey);">Course authoring and content management.</p>
+    <a href="${studioUrl}" target="_blank" class="btn btn--primary" style="margin-top:24px;">Open Studio <span class="material-symbols-outlined" style="font-size:16px;">open_in_new</span></a>
+  </main>`;
 }

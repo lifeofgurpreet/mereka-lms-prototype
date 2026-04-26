@@ -1,15 +1,39 @@
-// Page: Unit
-// Phase 0 stub. Port from docs/design-reference/mereka-ux-prototype/index.html
-// and wire to API modules as the feature ticket lands.
-
-export async function render(rootEl, { params, query } = {}) {
+// Page: Unit Player — ported from prototype screen-unit
+export async function render(rootEl, { params } = {}) {
   rootEl.innerHTML = `
-    <main style="padding:80px 20px;max-width:900px;margin:0 auto;">
-      <div style="padding:40px;border:2px dashed #e5e7eb;border-radius:12px;text-align:center;">
-        <h1 style="margin:0 0 12px;font-family:'Poppins',sans-serif;color:#AB3B78;">Unit</h1>
-        <p style="color:#6b7280;margin:0 0 16px;">Phase 0 stub — port prototype content + wire API.</p>
-        <code style="color:#6b7280;font-size:12px;">params: ${JSON.stringify(params || {})}</code>
+  <div class="player">
+    <div class="player__sidebar">
+      <div class="player__sidebar-head">
+        <a href="/" class="btn btn--ghost btn--sm"><span class="material-symbols-outlined" style="font-size:16px;">arrow_back</span> Back</a>
+        <h3 style="margin:16px 0 8px;">Strategic thinking for modern leaders</h3>
+        <div class="progress" style="margin-bottom:16px;"><div class="progress__fill" style="width:60%;"></div></div>
       </div>
-    </main>
-  `;
+      <div class="player__sidebar-units">
+        <div class="side-unit is-done"><span class="material-symbols-outlined" style="font-size:16px;">check_circle</span> Welcome &amp; orientation</div>
+        <div class="side-unit is-done"><span class="material-symbols-outlined" style="font-size:16px;">check_circle</span> Strategic vs tactical thinking</div>
+        <div class="side-unit is-active"><span class="material-symbols-outlined" style="font-size:16px;">play_circle</span> Frameworks for ambiguity</div>
+        <div class="side-unit"><span class="material-symbols-outlined" style="font-size:16px;">description</span> Case study: Grab's pivot</div>
+        <div class="side-unit"><span class="material-symbols-outlined" style="font-size:16px;">quiz</span> Module quiz</div>
+      </div>
+    </div>
+    <div class="player__main">
+      <div class="player__content">
+        <div class="player__video">
+          <div style="background:#1A1623; border-radius:12px; aspect-ratio:16/9; display:flex; align-items:center; justify-content:center;">
+            <span class="material-symbols-outlined" style="font-size:64px; color:var(--white); opacity:0.6;">play_circle</span>
+          </div>
+        </div>
+        <div class="player__info" style="padding:24px 0;">
+          <h2>Frameworks for ambiguity</h2>
+          <p style="color:var(--medium-grey);">Learn how to navigate uncertainty using mental models that help leaders make better decisions with incomplete information.</p>
+          <div style="display:flex; gap:12px; margin-top:16px;">
+            <button class="btn btn--outline btn--sm"><span class="material-symbols-outlined" style="font-size:16px;">bookmark</span> Bookmark</button>
+            <button class="btn btn--outline btn--sm"><span class="material-symbols-outlined" style="font-size:16px;">download</span> Resources</button>
+            <div style="flex:1;"></div>
+            <button class="btn btn--primary btn--sm">Next unit <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
 }

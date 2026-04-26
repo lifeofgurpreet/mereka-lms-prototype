@@ -1,18 +1,13 @@
-// History API router — replaces the prototype's goto(pageId) function.
-//
-// Usage:
-//   import { initRouter, navigate } from './router.js';
-//   initRouter(document.getElementById('app'));
-//   navigate('/course/course-v1:Mereka+DESIGN101+2026');
-//
-// Legacy compatibility:
-//   window.goto = (pageId) => navigate(pageIdToPath[pageId]);
-// ...is installed by initRouter() so existing inline onclick handlers still work.
-
+// History API router — uses the shared shell for header/footer/nav.
 import { routes, pageIdToPath } from './routes.js';
 import { isAuthenticated } from '../auth/session.js';
+import { mount as mountShell, setActiveNav, showShell, getContentEl } from '../components/shell.js';
 
 let rootEl = null;
+let contentEl = null;
+
+// Pages that should NOT show the app shell (header/footer)
+const NO_SHELL_PAGES = ['login', 'register', 'auth-callback'];
 
 function matchRoute(pathname) {
   for (const route of routes) {
@@ -33,28 +28,44 @@ function matchRoute(pathname) {
 async function render(pathname) {
   const match = matchRoute(pathname);
   if (!match) {
-    rootEl.innerHTML = '<main style="padding:80px 20px;text-align:center;"><h1>404</h1><p>Page not found.</p><a href="/">Back to dashboard</a></main>';
+    showShell(true);
+    setActiveNav(null);
+    contentEl.innerHTML = '<main style="padding:80px 20px;text-align:center;"><h1>404</h1><p>Page not found.</p><a href="/">Back to dashboard</a></main>';
     return;
   }
 
   const { route, params } = match;
 
-  if (route.auth === 'required' && !isAuthenticated()) {
-    navigate('/login?next=' + encodeURIComponent(pathname));
-    return;
-  }
-  if (route.auth === 'forbidden' && isAuthenticated()) {
-    navigate('/');
-    return;
+  // Auth guard — skip for now since we don't have real auth yet.
+  // In Phase 0, all pages are accessible for prototyping purposes.
+  // if (route.auth === 'required' && !isAuthenticated()) {
+  //   navigate('/login?next=' + encodeURIComponent(pathname));
+  //   return;
+  // }
+
+  // Shell visibility
+  const hideShell = NO_SHELL_PAGES.includes(route.id);
+  showShell(!hideShell);
+
+  // Set active nav
+  setActiveNav(route.id);
+
+  // Render into the right container
+  const target = hideShell ? rootEl : contentEl;
+  if (hideShell) {
+    // For full-page screens (login/register), render directly in root
+    rootEl.innerHTML = '';
   }
 
-  rootEl.innerHTML = '<main style="padding:80px 20px;text-align:center;opacity:0.5">Loading…</main>';
+  const loadingEl = hideShell ? rootEl : contentEl;
+  loadingEl.innerHTML = '<main style="padding:80px 20px;text-align:center;opacity:0.5">Loading…</main>';
+
   try {
     const mod = await route.page();
-    await mod.render(rootEl, { params, query: queryFromLocation() });
+    await mod.render(loadingEl, { params, query: queryFromLocation() });
   } catch (err) {
     console.error('[router] render failed:', err);
-    rootEl.innerHTML = `<main style="padding:80px 20px;"><h1>Something went wrong</h1><pre>${err.message}</pre></main>`;
+    loadingEl.innerHTML = `<main style="padding:80px 20px;"><h1>Something went wrong</h1><pre>${err.message}</pre></main>`;
   }
 }
 
@@ -70,10 +81,13 @@ export function navigate(path, { replace = false } = {}) {
 
 export function initRouter(mountEl) {
   rootEl = mountEl;
+  // Mount the shell and get the content container
+  contentEl = mountShell(mountEl);
+
   window.addEventListener('popstate', () => render(window.location.pathname));
   window.addEventListener('mereka:auth-expired', () => navigate('/login'));
 
-  // Intercept internal <a href="/..."> clicks for SPA navigation.
+  // Intercept internal <a href="/..."> clicks for SPA navigation
   document.addEventListener('click', (e) => {
     const a = e.target.closest('a[href]');
     if (!a) return;
@@ -83,7 +97,7 @@ export function initRouter(mountEl) {
     navigate(href);
   });
 
-  // Legacy compat for ported prototype HTML.
+  // Legacy compat
   window.goto = (pageId) => {
     const path = pageIdToPath[pageId];
     if (path) navigate(path);

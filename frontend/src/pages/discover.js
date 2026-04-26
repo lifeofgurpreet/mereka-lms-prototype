@@ -1,17 +1,4 @@
-// ---------------------------------------------------------------------------
-// Discover page — first real end-to-end feature wired to academyv2.mereka.dev.
-//
-// Public course catalog, no auth required. Supports:
-//   - Server-side search (?search_term=…)
-//   - Pagination (Load more)
-//   - Org filter pills derived from the response
-//
-// Brand tokens (--mereka-primary, --mereka-gradient, etc.) come from
-// globals.scss. The markup is intentionally prototype-flavoured so the
-// existing prototype CSS keeps working once Faiz points the class names
-// at the real cards.
-// ---------------------------------------------------------------------------
-
+// Discover page — prototype UI + live academyv2.mereka.dev API.
 import { listCourses } from '../api/courses.js';
 
 const PAGE_SIZE = 12;
@@ -27,7 +14,6 @@ const state = {
 };
 
 export async function render(rootEl, { query } = {}) {
-  // Preserve deep-link query params on first render.
   state.search = (query && query.q) || '';
   state.org = (query && query.org) || null;
   state.page = 1;
@@ -41,183 +27,173 @@ export async function render(rootEl, { query } = {}) {
 
 function shell() {
   return `
-    <section class="mereka-discover">
-      <header class="mereka-discover__hero">
-        <p class="mereka-eyebrow">Mereka Academy</p>
-        <h1 class="mereka-discover__title">Discover your next learning journey</h1>
-        <p class="mereka-discover__subtitle">
-          Mentor-calibrated tracks for product, design, craft, and entrepreneurship.
-        </p>
-        <form class="mereka-discover__search" data-role="search-form">
-          <input
-            type="search"
-            name="q"
-            placeholder="Search courses, skills, mentors…"
-            aria-label="Search courses"
-            data-role="search-input"
-          />
-          <button type="submit" class="mereka-btn mereka-btn--primary">Search</button>
+  <main class="disc">
+    <div class="disc__hero">
+      <div class="disc__hero-inner">
+        <span class="eyebrow"><span class="material-symbols-outlined" style="font-size:14px;">auto_awesome</span> Mereka Academy</span>
+        <h1>Train teams that can ship what Southeast Asia needs next.</h1>
+        <p>Strategy-grade learning journeys, hands-on pathways, and industry mentors — built for operators, creators, and curious builders across the region.</p>
+        <div class="disc__hero-cta">
+          <button class="btn btn--primary" onclick="goto('register')">Join the community</button>
+          <button class="btn btn--outline" data-role="scroll-courses">Browse courses</button>
+        </div>
+        <form class="disc__search" data-role="search-form">
+          <span class="disc__search-icon"><span class="material-symbols-outlined">search</span></span>
+          <input data-role="search-input" placeholder="Search for a course" value="${escapeAttr(state.search)}" />
+          <button type="submit" class="btn btn--primary">Search</button>
         </form>
-      </header>
-
-      <nav class="mereka-discover__filters" data-role="org-filters" aria-label="Filter by organization"></nav>
-
-      <div class="mereka-discover__status" data-role="status" role="status" aria-live="polite"></div>
-
-      <ul class="mereka-discover__grid" data-role="grid"></ul>
-
-      <div class="mereka-discover__pagination">
-        <button type="button" class="mereka-btn mereka-btn--ghost" data-role="load-more" hidden>
-          Load more courses
-        </button>
+        <div class="disc__stats">
+          <div class="disc__stat"><strong data-role="stat-count">—</strong><span>Academy courses</span></div>
+          <div class="disc__stat"><strong>45</strong><span>Industry mentors</span></div>
+          <div class="disc__stat"><strong>18k</strong><span>Learners empowered</span></div>
+          <div class="disc__stat"><strong>4</strong><span>Languages · EN · ID · VI · ZH</span></div>
+        </div>
       </div>
-    </section>
-  `;
+    </div>
+
+    <div class="disc__chips" data-role="org-chips">
+      <span class="chip is-active" data-org="">All tracks</span>
+    </div>
+
+    <div class="disc__toolbar">
+      <span class="disc__count" data-role="count-label">Loading courses…</span>
+    </div>
+
+    <div class="disc__grid" data-role="courses-grid" style="scroll-margin-top: 96px;"></div>
+
+    <div style="text-align:center; padding:24px 0 48px;" data-role="load-more-wrap"></div>
+  </main>`;
 }
 
-function wireControls(rootEl) {
-  const form = rootEl.querySelector('[data-role="search-form"]');
-  const input = rootEl.querySelector('[data-role="search-input"]');
-  const loadMore = rootEl.querySelector('[data-role="load-more"]');
+function courseCard(c) {
+  const img = c.image
+    ? `<img src="${escapeAttr(c.image)}" alt="${escapeAttr(c.name)}" style="width:100%;height:100%;object-fit:cover;" />`
+    : `<span class="material-symbols-outlined" style="font-size:48px;">school</span>`;
 
-  input.value = state.search;
+  const topicClass = (c.org || '').toLowerCase().replace(/[^a-z]/g, '') || 'general';
 
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    state.search = input.value.trim();
-    state.page = 1;
-    state.courses = [];
-    loadPage(rootEl, { replace: true });
-  });
-
-  loadMore.addEventListener('click', () => {
-    state.page += 1;
-    loadPage(rootEl, { replace: false });
-  });
+  return `
+    <article class="card course-card" onclick="window.goto && goto('course')">
+      <div class="course-card__img course-art" data-topic="${topicClass}">
+        <span class="course-card__type"><span class="material-symbols-outlined" style="font-size:12px;">workspace_premium</span> ${c.pacing === 'self' ? 'Self-paced' : 'Instructor-led'}</span>
+        <button class="wishlist-btn" aria-label="Save to wishlist" onclick="event.stopPropagation();"><span class="material-symbols-outlined">favorite</span></button>
+        ${img}
+      </div>
+      <div class="course-card__body">
+        <span class="course-card__track">${escapeHtml(c.org)} ${escapeHtml(c.number)}</span>
+        <h3>${escapeHtml(c.name)}</h3>
+        <p class="course-card__meta">${escapeHtml(c.shortDescription || 'Explore the course syllabus, content, and schedule.')}</p>
+        <div class="course-card__foot">
+          <span class="course-card__price">${c.startDisplay || 'Open enrollment'}</span>
+          <button class="btn btn--primary btn--sm">View course</button>
+        </div>
+      </div>
+    </article>`;
 }
 
-async function loadPage(rootEl, { replace }) {
+async function loadPage(rootEl, { replace } = {}) {
   if (state.loading) return;
   state.loading = true;
 
-  const statusEl = rootEl.querySelector('[data-role="status"]');
-  const gridEl = rootEl.querySelector('[data-role="grid"]');
-  const loadMore = rootEl.querySelector('[data-role="load-more"]');
-
-  statusEl.textContent = state.page === 1 ? 'Loading courses…' : 'Loading more…';
+  const grid = rootEl.querySelector('[data-role="courses-grid"]');
+  const countEl = rootEl.querySelector('[data-role="count-label"]');
+  const loadMoreWrap = rootEl.querySelector('[data-role="load-more-wrap"]');
+  const statCount = rootEl.querySelector('[data-role="stat-count"]');
 
   try {
-    const { courses, pagination } = await listCourses({
+    const result = await listCourses({
       page: state.page,
       pageSize: PAGE_SIZE,
       search: state.search || undefined,
       org: state.org || undefined,
     });
 
-    if (replace) gridEl.innerHTML = '';
-    state.pagination = pagination;
+    if (replace) {
+      state.courses = result.courses;
+    } else {
+      state.courses = state.courses.concat(result.courses);
+    }
+    state.pagination = result.pagination;
 
-    courses.forEach((course) => {
-      if (course.org) state.orgs.add(course.org);
-      gridEl.appendChild(cardEl(course));
-    });
-    state.courses.push(...courses);
+    // Update org chips
+    result.courses.forEach(c => { if (c.org) state.orgs.add(c.org); });
+    renderOrgChips(rootEl);
 
-    renderOrgFilters(rootEl);
+    // Render cards
+    grid.innerHTML = state.courses.map(courseCard).join('');
 
-    const total = pagination?.count ?? state.courses.length;
-    const shown = state.courses.length;
-    statusEl.textContent =
-      total === 0
-        ? 'No courses matched your search yet.'
-        : `Showing ${shown} of ${total} course${total === 1 ? '' : 's'}`;
+    // Update count
+    const total = state.pagination.count || state.courses.length;
+    if (statCount) statCount.textContent = String(total);
+    if (countEl) {
+      countEl.textContent = state.search
+        ? `Showing ${state.courses.length} of ${total} results for "${state.search}"`
+        : `Showing ${state.courses.length} of ${total} curated pathways`;
+    }
 
-    const hasMore =
-      pagination && pagination.num_pages && state.page < pagination.num_pages;
-    loadMore.hidden = !hasMore;
+    // Load more button
+    if (state.pagination.next && state.courses.length < total) {
+      loadMoreWrap.innerHTML = `<button class="btn btn--outline" data-role="load-more">Show more courses</button>`;
+      loadMoreWrap.querySelector('[data-role="load-more"]').addEventListener('click', () => {
+        state.page++;
+        loadPage(rootEl);
+      });
+    } else {
+      loadMoreWrap.innerHTML = '';
+    }
+
   } catch (err) {
-    console.error('[discover] load failed', err);
-    statusEl.innerHTML = `
-      <div class="mereka-error">
-        <strong>Couldn't reach academyv2.mereka.dev.</strong>
-        <span>${escapeHtml(err.message || 'Unknown error')}</span>
-      </div>
-    `;
-  } finally {
-    state.loading = false;
+    console.warn('[discover] course fetch failed:', err);
+    grid.innerHTML = `
+      <div style="grid-column:1/-1; text-align:center; padding:48px 24px;">
+        <span class="material-symbols-outlined" style="font-size:48px; color:var(--medium-grey);">cloud_off</span>
+        <h3 style="margin:16px 0 8px;">Couldn't load courses</h3>
+        <p style="color:var(--medium-grey);">The Mereka Academy API isn't reachable right now. This is likely a CORS configuration issue.</p>
+        <button class="btn btn--outline btn--sm" onclick="location.reload()">Try again</button>
+      </div>`;
+    if (countEl) countEl.textContent = 'Unable to load courses from Mereka Academy';
   }
+
+  state.loading = false;
 }
 
-function renderOrgFilters(rootEl) {
-  const container = rootEl.querySelector('[data-role="org-filters"]');
-  const orgs = [...state.orgs].sort();
-  if (!orgs.length) {
-    container.innerHTML = '';
-    return;
+function renderOrgChips(rootEl) {
+  const container = rootEl.querySelector('[data-role="org-chips"]');
+  if (!container) return;
+  const chips = [`<span class="chip ${!state.org ? 'is-active' : ''}" data-org="">All tracks</span>`];
+  for (const org of state.orgs) {
+    chips.push(`<span class="chip ${state.org === org ? 'is-active' : ''}" data-org="${escapeAttr(org)}">${escapeHtml(org)}</span>`);
   }
+  container.innerHTML = chips.join('');
 
-  container.innerHTML = `
-    <button type="button" class="mereka-chip ${!state.org ? 'is-active' : ''}" data-org="">
-      All organizations
-    </button>
-    ${orgs
-      .map(
-        (org) => `
-          <button type="button" class="mereka-chip ${state.org === org ? 'is-active' : ''}" data-org="${escapeHtml(org)}">
-            ${escapeHtml(org)}
-          </button>
-        `,
-      )
-      .join('')}
-  `;
-
-  container.querySelectorAll('.mereka-chip').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      state.org = btn.dataset.org || null;
+  container.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      state.org = chip.dataset.org || null;
       state.page = 1;
-      state.courses = [];
       loadPage(rootEl, { replace: true });
     });
   });
 }
 
-function cardEl(course) {
-  const li = document.createElement('li');
-  li.className = 'mereka-course-card';
-
-  const href = `/courses/${encodeURIComponent(course.id)}`;
-  const imageStyle = course.image
-    ? `background-image: url('${escapeAttr(course.image)}')`
-    : 'background: var(--mereka-gradient, linear-gradient(120deg,#AB3B78,#1E5A8E));';
-
-  li.innerHTML = `
-    <a class="mereka-course-card__link" href="${href}">
-      <div class="mereka-course-card__media" style="${imageStyle}" aria-hidden="true"></div>
-      <div class="mereka-course-card__body">
-        <p class="mereka-course-card__org">${escapeHtml(course.org || 'Mereka')} · ${escapeHtml(course.number || '')}</p>
-        <h3 class="mereka-course-card__title">${escapeHtml(course.name)}</h3>
-        <p class="mereka-course-card__desc">${escapeHtml(course.shortDescription || '')}</p>
-        <div class="mereka-course-card__meta">
-          <span class="mereka-tag">${escapeHtml(course.pacing === 'instructor' ? 'Instructor-paced' : 'Self-paced')}</span>
-          ${course.startDisplay ? `<span class="mereka-tag">Starts ${escapeHtml(course.startDisplay)}</span>` : ''}
-          ${course.mobileAvailable ? `<span class="mereka-tag">Mobile</span>` : ''}
-        </div>
-      </div>
-    </a>
-  `;
-  return li;
+function wireControls(rootEl) {
+  const form = rootEl.querySelector('[data-role="search-form"]');
+  const input = rootEl.querySelector('[data-role="search-input"]');
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      state.search = input.value.trim();
+      state.page = 1;
+      loadPage(rootEl, { replace: true });
+    });
+  }
+  const scrollBtn = rootEl.querySelector('[data-role="scroll-courses"]');
+  if (scrollBtn) {
+    scrollBtn.addEventListener('click', () => {
+      const grid = rootEl.querySelector('[data-role="courses-grid"]');
+      if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
 }
 
-function escapeHtml(s) {
-  return String(s ?? '').replace(/[&<>"']/g, (c) => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;',
-  }[c]));
-}
-
-function escapeAttr(s) {
-  return escapeHtml(s).replace(/\n/g, ' ');
-}
+function escapeHtml(str) { return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escapeAttr(str) { return (str || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;'); }
