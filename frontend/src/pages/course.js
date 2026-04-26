@@ -1,5 +1,5 @@
-// Page: Course Detail — shows real course data from API when available,
-// falls back to demo content for /course/demo.
+// Page: Course Detail — uses .course__* classes matching prototype CSS.
+// Fetches real course data from API when given a real courseId.
 import { getCourse } from '../api/courses.js';
 
 export async function render(rootEl, { params } = {}) {
@@ -18,76 +18,82 @@ export async function render(rootEl, { params } = {}) {
   const name = course?.name || 'Freelancing 101';
   const org = course?.org || 'Soft skills & employability';
   const desc = course?.shortDescription || 'Starting a new path in your life can be difficult, and if that path is freelancing, you might find yourself being lost. In this course, you\'ll be provided with everything you need to know.';
-  const pacing = course?.pacing === 'instructor' ? 'Instructor-led' : (course?.pacing === 'self' ? 'Self-paced' : 'Instructor-led');
+  const pacing = course?.pacing === 'self' ? 'Self-paced' : 'Instructor-led';
   const effort = course?.effort || '8 weeks';
   const imgUrl = course?.image || '';
 
+  const heroStyle = imgUrl
+    ? `background-image:linear-gradient(0deg,rgba(26,22,35,0.7) 0%,rgba(26,22,35,0.3) 60%),url('${esc(imgUrl)}'); background-size:cover; background-position:center;`
+    : '';
+
   rootEl.innerHTML = `
-  <main class="course-detail">
-    <div class="course-detail__hero"${imgUrl ? ` style="background-image:linear-gradient(to right,rgba(26,22,35,0.92),rgba(26,22,35,0.6)),url('${esc(imgUrl)}'); background-size:cover; background-position:center;"` : ''}>
-      <div class="course-detail__hero-inner">
-        <span class="course-detail__cat">${esc(org)}</span>
+  <main style="padding: 24px; max-width: 1200px; margin: 0 auto;">
+    <div class="course__hero"${heroStyle ? ` style="${heroStyle}"` : ''}>
+      <div class="course__hero-body">
+        <p style="font-size:13px; opacity:0.85; margin-bottom:4px;">${esc(org)}</p>
         <h1>${esc(name)}</h1>
-        <p class="course-detail__sub">${esc(desc)}</p>
-        <div class="course-detail__meta-row">
-          <span><span class="material-symbols-outlined" style="font-size:16px;">schedule</span> ${esc(effort)}</span>
-          <span><span class="material-symbols-outlined" style="font-size:16px;">signal_cellular_alt</span> Beginner</span>
-          <span><span class="material-symbols-outlined" style="font-size:16px;">groups</span> ${esc(pacing)}</span>
-          <span><span class="material-symbols-outlined" style="font-size:16px;">translate</span> EN</span>
-        </div>
-        <div class="course-detail__actions">
-          <button class="btn btn--primary" onclick="goto('checkout')">Enroll now</button>
-          <button class="btn btn--outline btn--sm js-course-share"><span class="material-symbols-outlined" style="font-size:16px;">share</span> Share</button>
-          <button class="btn btn--ghost btn--sm" onclick="history.back()"><span class="material-symbols-outlined" style="font-size:16px;">arrow_back</span> Back</button>
+        <p>${esc(desc)}</p>
+        <div class="course__hero-meta">
+          <span><span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle;">schedule</span> ${esc(effort)}</span>
+          <span class="dot-sep">·</span>
+          <span><span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle;">signal_cellular_alt</span> Beginner</span>
+          <span class="dot-sep">·</span>
+          <span><span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle;">groups</span> ${esc(pacing)}</span>
+          <span class="dot-sep">·</span>
+          <span><span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle;">translate</span> EN</span>
         </div>
       </div>
     </div>
 
-    <div class="course-detail__body">
-      <div class="course-detail__main">
-        <section class="course-detail__section">
+    <div style="display:flex; gap:12px; margin-bottom:24px; flex-wrap:wrap;">
+      <button class="btn btn--primary" onclick="goto('checkout')">Enroll now</button>
+      <button class="btn btn--outline btn--sm"><span class="material-symbols-outlined" style="font-size:16px;">share</span> Share</button>
+      <button class="btn btn--ghost btn--sm" onclick="history.back()"><span class="material-symbols-outlined" style="font-size:16px;">arrow_back</span> Back</button>
+    </div>
+
+    <div class="course__grid">
+      <div>
+        <section class="course__section">
           <h2>What you'll learn</h2>
-          <div class="course-detail__outcomes">
-            <div class="outcome"><span class="material-symbols-outlined">check_circle</span> Build a personal brand that attracts quality clients</div>
-            <div class="outcome"><span class="material-symbols-outlined">check_circle</span> Set up contracts, invoicing, and payment flows</div>
-            <div class="outcome"><span class="material-symbols-outlined">check_circle</span> Price your services for sustainable income</div>
-            <div class="outcome"><span class="material-symbols-outlined">check_circle</span> Navigate client relationships and scope creep</div>
-          </div>
+          <ul class="course__learn">
+            <li>Build a personal brand that attracts quality clients</li>
+            <li>Set up contracts, invoicing, and payment flows</li>
+            <li>Price your services for sustainable income</li>
+            <li>Navigate client relationships and scope creep</li>
+          </ul>
         </section>
 
-        <section class="course-detail__section">
+        <section class="course__section">
           <h2>Course outline</h2>
-          <div class="outline">
-            <div class="outline__section">
-              <div class="outline__section-head"><span class="material-symbols-outlined">expand_more</span> Module 1 — Getting started</div>
-              <div class="outline__units">
-                <div class="outline__unit"><span class="material-symbols-outlined" style="font-size:16px;">play_circle</span> Welcome &amp; orientation <span class="outline__dur">12 min</span></div>
-                <div class="outline__unit"><span class="material-symbols-outlined" style="font-size:16px;">description</span> The freelance mindset <span class="outline__dur">8 min</span></div>
-                <div class="outline__unit"><span class="material-symbols-outlined" style="font-size:16px;">quiz</span> Self-assessment <span class="outline__dur">5 min</span></div>
-              </div>
+          <div class="curriculum-module">
+            <div class="curriculum-module__head"><h4>Module 1 — Getting started</h4><span>3 units · 25 min</span></div>
+            <div class="curriculum-module__list">
+              <div class="curriculum-unit"><span class="type-icon t-video"><span class="material-symbols-outlined" style="font-size:16px;">play_circle</span></span><span class="curriculum-unit__title">Welcome &amp; orientation</span><span class="curriculum-unit__dur">12 min</span></div>
+              <div class="curriculum-unit"><span class="type-icon t-doc"><span class="material-symbols-outlined" style="font-size:16px;">description</span></span><span class="curriculum-unit__title">The freelance mindset</span><span class="curriculum-unit__dur">8 min</span></div>
+              <div class="curriculum-unit"><span class="type-icon t-quiz"><span class="material-symbols-outlined" style="font-size:16px;">quiz</span></span><span class="curriculum-unit__title">Self-assessment</span><span class="curriculum-unit__dur">5 min</span></div>
             </div>
-            <div class="outline__section">
-              <div class="outline__section-head"><span class="material-symbols-outlined">expand_more</span> Module 2 — Personal branding</div>
-              <div class="outline__units">
-                <div class="outline__unit"><span class="material-symbols-outlined" style="font-size:16px;">play_circle</span> Defining your niche <span class="outline__dur">15 min</span></div>
-                <div class="outline__unit"><span class="material-symbols-outlined" style="font-size:16px;">description</span> Portfolio essentials <span class="outline__dur">10 min</span></div>
-              </div>
+          </div>
+          <div class="curriculum-module">
+            <div class="curriculum-module__head"><h4>Module 2 — Personal branding</h4><span>2 units · 25 min</span></div>
+            <div class="curriculum-module__list">
+              <div class="curriculum-unit"><span class="type-icon t-video"><span class="material-symbols-outlined" style="font-size:16px;">play_circle</span></span><span class="curriculum-unit__title">Defining your niche</span><span class="curriculum-unit__dur">15 min</span></div>
+              <div class="curriculum-unit"><span class="type-icon t-doc"><span class="material-symbols-outlined" style="font-size:16px;">description</span></span><span class="curriculum-unit__title">Portfolio essentials</span><span class="curriculum-unit__dur">10 min</span></div>
             </div>
-            <div class="outline__section">
-              <div class="outline__section-head"><span class="material-symbols-outlined">chevron_right</span> Module 3 — Pricing &amp; proposals</div>
-            </div>
-            <div class="outline__section">
-              <div class="outline__section-head"><span class="material-symbols-outlined">chevron_right</span> Module 4 — Client management</div>
-            </div>
-            <div class="outline__section">
-              <div class="outline__section-head"><span class="material-symbols-outlined">chevron_right</span> Module 5 — Scaling your practice</div>
-            </div>
+          </div>
+          <div class="curriculum-module">
+            <div class="curriculum-module__head"><h4>Module 3 — Pricing &amp; proposals</h4><span>4 units</span></div>
+          </div>
+          <div class="curriculum-module">
+            <div class="curriculum-module__head"><h4>Module 4 — Client management</h4><span>3 units</span></div>
+          </div>
+          <div class="curriculum-module">
+            <div class="curriculum-module__head"><h4>Module 5 — Scaling your practice</h4><span>3 units</span></div>
           </div>
         </section>
       </div>
 
-      <aside class="course-detail__sidebar">
-        <div class="card" style="padding:20px;">
+      <div class="course__side">
+        <div class="card enroll-card">
           <h3 style="margin:0 0 12px;">Instructor</h3>
           <div style="display:flex; gap:12px; align-items:center;">
             <div class="avatar">AM</div>
@@ -103,7 +109,7 @@ export async function render(rootEl, { params } = {}) {
             <span><span class="material-symbols-outlined" style="font-size:16px; vertical-align:middle;">workspace_premium</span> Certificate of completion</span>
           </div>
         </div>
-      </aside>
+      </div>
     </div>
   </main>`;
 }
