@@ -1,21 +1,58 @@
 # Netlify config for mereka-lms-proto
 #
-# This repo is the Mereka LMS fork: Open edX backend + Mereka UX prototype.
-# Netlify serves ONLY the static UX prototype as a design reference.
-# The Open edX backend is deployed separately (RKE2 + GitOps, not here).
+# Deploy strategy:
+#   - `main` branch → publishes the STATIC UX prototype from docs/design-reference/
+#     (mereka-lms-proto.netlify.app stays live as the design reference).
+#   - `phase-0/*` branches → builds the Vite SPA from /frontend/
+#     (branch deploys at phase-0-spa-foundation--mereka-lms-proto.netlify.app).
 #
-# If the prototype moves, update `publish` below.
+# The Open edX backend is deployed separately via Biji-Biji-Initiative/mereka-lms.
+# This prototype consumes academyv2.mereka.dev APIs — it does NOT modify them.
 
 [build]
   publish = "docs/design-reference/mereka-ux-prototype"
-  # No build step — index.html is a single-file static prototype.
   command = ""
 
 [build.environment]
-  # Skip Netlify's default Node/Python detection — we're not building anything.
   NETLIFY_SKIP_PYTHON_REQUIREMENTS = "true"
 
-# Pretty URL — / serves the prototype index.
+# -- Branch-level overrides: build the SPA on phase-0/* branches --
+[context."phase-0/spa-foundation"]
+  base = "frontend"
+  publish = "frontend/dist"
+  command = "npm install && npm run build"
+
+[context."phase-0/spa-foundation".environment]
+  NODE_VERSION = "20"
+  VITE_OPENEDX_BASE_URL = "https://academyv2.mereka.dev"
+  VITE_OPENEDX_AUTHN_URL = "https://apps.academyv2.mereka.dev"
+  VITE_OPENEDX_STUDIO_URL = "https://studio.academyv2.mereka.dev"
+  VITE_USE_MOCK_DATA = "false"
+  VITE_SHOW_CROSS_DOMAIN_AUTH_NOTICE = "true"
+
+# Generic branch deploys (future phase-1/*, feature/* branches)
+[context.branch-deploy]
+  base = "frontend"
+  publish = "frontend/dist"
+  command = "npm install && npm run build"
+
+[context.branch-deploy.environment]
+  NODE_VERSION = "20"
+  VITE_OPENEDX_BASE_URL = "https://academyv2.mereka.dev"
+  VITE_USE_MOCK_DATA = "false"
+
+# Deploy previews (PRs against main) — also build the SPA.
+[context.deploy-preview]
+  base = "frontend"
+  publish = "frontend/dist"
+  command = "npm install && npm run build"
+
+[context.deploy-preview.environment]
+  NODE_VERSION = "20"
+  VITE_OPENEDX_BASE_URL = "https://academyv2.mereka.dev"
+  VITE_USE_MOCK_DATA = "false"
+
+# SPA catch-all for main (serves prototype index.html for any path)
 [[redirects]]
   from = "/*"
   to = "/index.html"
