@@ -28,7 +28,7 @@ function headerHtml() {
     </nav>
     <div class="lms-header__spacer"></div>
     <div class="lms-header__actions">
-      <a href="https://studio.academyv2.mereka.dev" target="_blank" rel="noopener" class="btn btn--ghost btn--sm"><span class="material-symbols-outlined" style="font-size:16px;">edit_note</span> Studio</a>
+      <a href="/studio" class="btn btn--ghost btn--sm"><span class="material-symbols-outlined" style="font-size:16px;">edit_note</span> Studio</a>
       <a href="/wishlist" class="icon-btn" aria-label="Wishlist"><span class="material-symbols-outlined">favorite</span></a>
       <button class="icon-btn js-notif-toggle" aria-label="Notifications"><span class="material-symbols-outlined">notifications</span><span class="badge">3</span></button>
       <a href="/profile" class="avatar" role="button" aria-label="Profile" style="text-decoration:none;">FF</a>
