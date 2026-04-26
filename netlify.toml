@@ -1,15 +1,13 @@
 # Netlify config for mereka-lms-proto
 #
-# This repo is the Mereka LMS fork: Open edX backend + Mereka UX prototype + SPA.
-#
 # Deploy strategy:
-#   - `main` branch → publishes the STATIC prototype at docs/design-reference/...
-#     (so mereka-lms-proto.netlify.app stays live as the UX design reference).
-#   - `phase-0/*` and `phase-1/*` branches → builds the Vite SPA from /frontend/
-#     (branch deploys preview the real SPA at <branch>--mereka-lms-proto.netlify.app).
+#   - `main` branch → publishes the STATIC UX prototype from docs/design-reference/
+#     (mereka-lms-proto.netlify.app stays live as the design reference).
+#   - `phase-0/*` branches → builds the Vite SPA from /frontend/
+#     (branch deploys at phase-0-spa-foundation--mereka-lms-proto.netlify.app).
 #
-# When Phase 0 is ready to become the primary, swap the [build] block to the
-# frontend/ configuration and remove this note.
+# The Open edX backend is deployed separately via Biji-Biji-Initiative/mereka-lms.
+# This prototype consumes academyv2.mereka.dev APIs — it does NOT modify them.
 
 [build]
   publish = "docs/design-reference/mereka-ux-prototype"
@@ -18,7 +16,7 @@
 [build.environment]
   NETLIFY_SKIP_PYTHON_REQUIREMENTS = "true"
 
-# -- Branch-level overrides: build the SPA on Phase 0/1 branches --
+# -- Branch-level overrides: build the SPA on phase-0/* branches --
 [context."phase-0/spa-foundation"]
   base = "frontend"
   publish = "frontend/dist"
@@ -26,7 +24,13 @@
 
 [context."phase-0/spa-foundation".environment]
   NODE_VERSION = "20"
+  VITE_OPENEDX_BASE_URL = "https://academyv2.mereka.dev"
+  VITE_OPENEDX_AUTHN_URL = "https://apps.academyv2.mereka.dev"
+  VITE_OPENEDX_STUDIO_URL = "https://studio.academyv2.mereka.dev"
+  VITE_USE_MOCK_DATA = "false"
+  VITE_SHOW_CROSS_DOMAIN_AUTH_NOTICE = "true"
 
+# Generic branch deploys (future phase-1/*, feature/* branches)
 [context.branch-deploy]
   base = "frontend"
   publish = "frontend/dist"
@@ -34,6 +38,8 @@
 
 [context.branch-deploy.environment]
   NODE_VERSION = "20"
+  VITE_OPENEDX_BASE_URL = "https://academyv2.mereka.dev"
+  VITE_USE_MOCK_DATA = "false"
 
 # Deploy previews (PRs against main) — also build the SPA.
 [context.deploy-preview]
@@ -43,8 +49,10 @@
 
 [context.deploy-preview.environment]
   NODE_VERSION = "20"
+  VITE_OPENEDX_BASE_URL = "https://academyv2.mereka.dev"
+  VITE_USE_MOCK_DATA = "false"
 
-# SPA-style catch-all — /any-path serves index.html so the client router can handle it.
+# SPA catch-all for main (serves prototype index.html for any path)
 [[redirects]]
   from = "/*"
   to = "/index.html"

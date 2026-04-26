@@ -7293,5 +7293,225 @@ window.handleCheckout = function() {
   });
 })();
 </script>
+
+<!--
+  ────────────────────────────────────────────────────────────────────────
+  Mereka Academy live wiring (Phase 0.5 — 2026-04-24)
+  Backend: https://academyv2.mereka.dev  (verified public course API, no OAuth
+  app required for reads). Auth redirects: https://apps.academyv2.mereka.dev.
+  This block is additive — it replaces the static Discover cards with real
+  ones on success, and falls back silently to the hardcoded cards on failure.
+  Full strategy: docs/design-reference/mereka-ux-prototype/AUTH_STRATEGY.md
+  ────────────────────────────────────────────────────────────────────────
+-->
+<script>
+(function() {
+  'use strict';
+  var LMS = 'https://academyv2.mereka.dev';
+  var AUTHN = 'https://apps.academyv2.mereka.dev';
+  var PAGE_SIZE = 12;
+
+  // ---- track icon mapping (prototype-side visual only) -------------------
+  var ICON_BY_ORG = {
+    MEREKA: 'rocket_launch',
+    BIJIBIJI: 'handshake',
+    ACADEMY: 'school'
+  };
+  function iconFor(course){
+    var n = (course.name || '').toLowerCase();
+    if (/ai\b|machine|llm|prompt/.test(n)) return 'smart_toy';
+    if (/design|figma|ux|ui/.test(n)) return 'draw';
+    if (/data|analyt/.test(n)) return 'analytics';
+    if (/market|brand|content/.test(n)) return 'campaign';
+    if (/code|developer|javascript|python|web/.test(n)) return 'code';
+    if (/entrepreneur|business|startup/.test(n)) return 'storefront';
+    if (/craft|maker|artisan/.test(n)) return 'palette';
+    return ICON_BY_ORG[course.org] || 'auto_awesome';
+  }
+
+  // ---- course-card factory: matches the prototype's existing markup ------
+  function cardHtml(course) {
+    var id    = (course.course_id || course.id || '').replace(/"/g,'&quot;');
+    var title = escapeHtml(course.name || '(Untitled course)');
+    var track = escapeHtml(((course.org||'MEREKA')+' '+(course.number||''))
+                    .replace(/\s+/g,' ').trim().toUpperCase());
+    var desc  = escapeHtml(course.short_description || defaultBlurb(course));
+    var img   = (course.media && course.media.image &&
+                 (course.media.image.large || course.media.image.small || course.media.image.raw))
+              || (course.media && course.media.banner_image &&
+                  (course.media.banner_image.uri_absolute || course.media.banner_image.uri))
+              || null;
+    var icon  = iconFor(course);
+    var paceT = course.pacing === 'instructor' ? 'Instructor-paced' : 'Self-paced';
+
+    var artStyle = img ?
+      'background-image: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.35) 100%), url(\''
+      + String(img).replace(/'/g, '%27') + '\');' +
+      'background-size: cover; background-position: center;' :
+      '';
+
+    return ''+
+    '<article class="card course-card" data-course-id="'+id+'" data-course-title="'+title+'" data-course-price="Free preview" data-course-icon="'+icon+'" data-course-tag="'+escapeAttr(paceT)+'" data-academyv2="1" onclick="goto(\'course\')">'+
+      '<div class="course-card__img course-art" data-topic="academyv2" style="'+artStyle+'">'+
+        '<span class="course-card__type"><span class="material-symbols-outlined" style="font-size:12px;">workspace_premium</span> Academy v2</span>'+
+        '<button class="wishlist-btn js-wishlist-toggle" data-course-id="'+id+'" aria-label="Save to wishlist" onclick="event.stopPropagation();"><span class="material-symbols-outlined">favorite</span></button>'+
+        '<span class="course-card__lang"><span>EN</span></span>'+
+        (img ? '' : '<span class="material-symbols-outlined" style="font-size:48px;">'+icon+'</span>')+
+      '</div>'+
+      '<div class="course-card__body">'+
+        '<span class="course-card__track">'+track+'</span>'+
+        '<h3>'+title+'</h3>'+
+        '<span class="course-card__pathway"><span class="material-symbols-outlined" style="font-size:13px;">route</span> '+paceT+'</span>'+
+        '<p class="course-card__meta">'+desc+'</p>'+
+        '<div class="course-card__foot">'+
+          '<span class="course-card__price">View details</span>'+
+          '<button class="btn btn--primary btn--sm" onclick="event.stopPropagation(); window.open(\''+LMS+'/courses/'+encodeURIComponent(id)+'/about\', \'_blank\', \'noopener\');">Open course</button>'+
+        '</div>'+
+      '</div>'+
+    '</article>';
+  }
+
+  function defaultBlurb(course){
+    if (course.pacing === 'instructor') return 'Instructor-led cohort on Mereka Academy — see the live syllabus and dates.';
+    return 'Self-paced track on Mereka Academy — open the course to see modules and start learning.';
+  }
+  function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function escapeAttr(s){ return escapeHtml(s).replace(/\n/g,' '); }
+
+  // ---- fetch + render ----------------------------------------------------
+  var state = { loading: false, lastQ: '', lastCount: 0 };
+
+  function fetchCourses(opts) {
+    opts = opts || {};
+    var params = new URLSearchParams();
+    params.set('page_size', String(opts.pageSize || PAGE_SIZE));
+    if (opts.page) params.set('page', String(opts.page));
+    if (opts.search) params.set('search_term', opts.search);
+    return fetch(LMS + '/api/courses/v1/courses/?' + params.toString(), {
+      credentials: 'omit',
+      mode: 'cors',
+      headers: { 'Accept': 'application/json' }
+    }).then(function(res){
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    });
+  }
+
+  function renderCourses(grid, countEl, search) {
+    if (state.loading) return;
+    state.loading = true;
+    state.lastQ = search || '';
+
+    // Mark grid as loading (preserves static cards until fetch resolves)
+    grid.setAttribute('data-academyv2-state', 'loading');
+
+    fetchCourses({ search: search || undefined }).then(function(data){
+      var results = (data && data.results) || [];
+      if (!results.length) {
+        grid.setAttribute('data-academyv2-state', 'empty');
+        if (countEl) countEl.textContent = search
+          ? 'No Mereka Academy courses matched "' + search + '".'
+          : 'No courses returned from Mereka Academy yet.';
+        state.loading = false;
+        return;
+      }
+
+      grid.innerHTML = results.map(cardHtml).join('');
+      grid.setAttribute('data-academyv2-state', 'ready');
+
+      var total = (data.pagination && data.pagination.count) || results.length;
+      state.lastCount = total;
+      if (countEl) countEl.textContent = 'Showing ' + results.length + ' of ' + total + ' Mereka Academy course' + (total===1?'':'s');
+
+      // Keep wishlist handlers wired for the newly-inserted cards.
+      if (typeof window.reapplyWishlistHandlers === 'function') {
+        try { window.reapplyWishlistHandlers(); } catch (e) {}
+      }
+    }).catch(function(err){
+      console.warn('[academyv2] live course fetch failed, keeping static fallback', err);
+      grid.setAttribute('data-academyv2-state', 'error');
+    }).then(function(){ state.loading = false; });
+  }
+
+  // ---- auth button wiring -------------------------------------------------
+  function wireAuthButtons() {
+    function returnTo(){ return encodeURIComponent(location.origin + location.pathname); }
+
+    // "Sign in" submit button inside the prototype login screen (line ~2467)
+    document.querySelectorAll('#screen-login .btn.btn--primary, [data-screen="login"]').forEach(function(btn){
+      btn.addEventListener('click', function(e){
+        // Only hijack if the button still says Sign in (don't break the
+        // learner jumping to Dashboard in pure demo mode).
+        var txt = (btn.textContent || '').trim().toLowerCase();
+        if (txt.indexOf('sign in') === 0 || txt === 'sign in') {
+          e.preventDefault();
+          window.location.assign(AUTHN + '/authn/login?next=' + returnTo());
+        }
+      });
+    });
+
+    // "Register" tab + "Join the community" CTA
+    document.querySelectorAll('#screen-register .btn.btn--primary, [data-screen="register"], .btn--primary[onclick*="register"]').forEach(function(btn){
+      btn.addEventListener('click', function(e){
+        var txt = (btn.textContent || '').trim().toLowerCase();
+        if (/^(create account|register|join the community)/.test(txt)) {
+          e.preventDefault();
+          window.location.assign(AUTHN + '/authn/register?next=' + returnTo());
+        }
+      });
+    });
+
+    // Log out menu item in avatar popup
+    document.querySelectorAll('.logout').forEach(function(btn){
+      btn.addEventListener('click', function(e){
+        e.preventDefault();
+        window.location.assign(LMS + '/logout?next=' + returnTo());
+      });
+    });
+  }
+
+  // ---- search input wiring -----------------------------------------------
+  function wireDiscoverSearch(grid, countEl) {
+    var search = document.querySelector('#screen-discover .disc__search');
+    if (!search) return;
+    var input = search.querySelector('input');
+    var btn = search.querySelector('button');
+
+    function doSearch(){ renderCourses(grid, countEl, (input.value || '').trim()); }
+    if (btn) btn.addEventListener('click', function(e){ e.preventDefault(); doSearch(); });
+    if (input) {
+      input.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); doSearch(); } });
+    }
+  }
+
+  // ---- boot ---------------------------------------------------------------
+  function boot() {
+    var grid = document.getElementById('courses-grid');
+    var countEl = document.querySelector('#screen-discover .disc__count');
+    if (grid) {
+      renderCourses(grid, countEl, '');
+      wireDiscoverSearch(grid, countEl);
+    }
+    wireAuthButtons();
+
+    // Tiny "live data" badge in the toolbar so we can see the wiring worked.
+    var toolbar = document.querySelector('#screen-discover .disc__toolbar .row');
+    if (toolbar && !toolbar.querySelector('[data-live-badge]')) {
+      var badge = document.createElement('span');
+      badge.setAttribute('data-live-badge', '1');
+      badge.className = 'chip';
+      badge.style.cssText = 'background: rgba(16,185,129,0.15); color: #065f46; border-color: rgba(16,185,129,0.4); font-size: 11px; letter-spacing: .04em;';
+      badge.textContent = 'LIVE · academyv2.mereka.dev';
+      toolbar.insertBefore(badge, toolbar.firstChild);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+})();
+</script>
 </body>
 </html>
