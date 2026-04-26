@@ -1,21 +1,128 @@
-// Page: Studio — full course authoring UI with all interactivity
-// Ported from static prototype + aligned with Open edX Studio features
+// Page: Studio — full course authoring UI with real Open edX data
+// Fetches courses from /api/courses/v1/courses/ (academyv2.mereka.dev)
 
-const COURSES = [
-  { id:'strategy', title:'Strategic thinking for modern leaders', code:'STRAT-101', cohort:'May 2026', modules:12, status:'published', enrolled:1208, completion:67, rating:4.8, owner:'Amira Yusof', updated:'2h ago' },
-  { id:'entrepreneurship', title:'Entrepreneurship essentials', code:'ENTRE-110', cohort:'Jun 2026', modules:8, status:'draft', enrolled:0, completion:0, rating:0, owner:'Amira Yusof', updated:'1d ago' },
-  { id:'marketing', title:'Digital marketing for SMEs', code:'MKT-120', cohort:'May 2026', modules:10, status:'published', enrolled:842, completion:58, rating:4.6, owner:'Mei Chen', updated:'4h ago' },
-  { id:'branding', title:'Personal branding on LinkedIn', code:'BRAND-100', cohort:'Apr 2026', modules:6, status:'published', enrolled:640, completion:72, rating:4.7, owner:'Amira Yusof', updated:'3d ago' },
-  { id:'pm', title:'Project management foundations', code:'PM-130', cohort:'Jun 2026', modules:9, status:'review', enrolled:0, completion:0, rating:0, owner:'Dev Kumar', updated:'6h ago' },
-  { id:'climate', title:'Climate literacy for business', code:'CLIM-140', cohort:'Q3 2025', modules:7, status:'archived', enrolled:214, completion:81, rating:4.5, owner:'Nadira S.', updated:'45d ago' },
-];
-let currentCourseId = 'strategy';
+import { listCourses, normalizeCourse } from '../api/courses.js';
+import { getCourseOutline } from '../api/courses.js';
+
+let COURSES = [];
+let currentCourseId = null;
+
+/** Map an Open edX course record into the shape Studio UI expects */
+function mapCourse(c) {
+  const startDate = c.start ? new Date(c.start) : null;
+  const now = new Date();
+  // Infer status from dates: future start → draft, past end → archived, else published
+  let status = 'published';
+  if (startDate && startDate.getFullYear() >= 2030) status = 'draft';
+  else if (c.end && new Date(c.end) < now) status = 'archived';
+  // Pacing as cohort label
+  const cohort = c.startDisplay || (startDate ? startDate.toLocaleDateString('en-MY', { month:'short', year:'numeric' }) : '—');
+  return {
+    id: c.courseId || c.id,
+    title: c.name || '(Untitled)',
+    code: c.number || c.courseId?.split('+')[1] || '—',
+    cohort,
+    modules: 0,    // not available from public API
+    status,
+    enrolled: 0,   // needs auth
+    completion: 0,  // needs auth
+    rating: 0,      // not available
+    owner: c.org || 'MEREKA',
+    updated: '—',
+    pacing: c.pacing || 'instructor',
+    image: c.image || null,
+    _raw: c._raw || c,
+  };
+}
+
+async function fetchCourses() {
+  try {
+    const { courses } = await listCourses({ pageSize: 50 });
+    COURSES = courses.map(mapCourse);
+    // Try to get enrollment counts if user is logged in
+    try {
+      const { apiGet } = await import('../api/client.js');
+      const enrollments = await apiGet('/api/enrollment/v1/enrollment');
+      if (Array.isArray(enrollments)) {
+        const countMap = {};
+        enrollments.forEach(e => {
+          const cid = e.course_details?.course_id || e.course_id;
+          if (cid) countMap[cid] = (countMap[cid] || 0) + 1;
+        });
+        COURSES.forEach(c => { if (countMap[c.id]) c.enrolled = countMap[c.id]; });
+      }
+    } catch (_) { /* auth not available, skip enrollment data */ }
+  } catch (err) {
+    console.warn('[studio] Failed to fetch courses from API, using empty list:', err);
+    COURSES = [];
+  }
+  if (COURSES.length > 0) currentCourseId = COURSES[0].id;
+}
+
+/** Try to load real course blocks for the outline. Falls back to demo outline if auth fails. */
+async function tryLoadOutline(rootEl, courseId) {
+  const container = rootEl.querySelector('#outlineColumn');
+  if (!container) return;
+  try {
+    const data = await getCourseOutline(courseId, { depth: 'all' });
+    const blocks = data.blocks || {};
+    const root = blocks[data.root];
+    if (!root || !root.children || root.children.length === 0) return; // keep demo
+    // Build outline from real blocks
+    let html = '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;"><h3 style="font-size:18px;">Course outline</h3><div class="row"><button class="btn btn--ghost btn--sm js-outline-expand-toggle"><span class="material-symbols-outlined" style="font-size:16px;">unfold_more</span> Expand all</button><button class="btn btn--primary btn--sm js-outline-new-section"><span class="material-symbols-outlined" style="font-size:16px;">add</span> New section</button></div></div>';
+    root.children.forEach((chapterId, i) => {
+      const chapter = blocks[chapterId];
+      if (!chapter) return;
+      const name = chapter.display_name || 'Section ' + (i + 1);
+      html += '<div class="outline-section"><div class="outline-section__head"><h3><span class="material-symbols-outlined drag" style="font-size:18px;">drag_indicator</span> ' + name + '</h3><div class="handle-group"><span class="visibility">Published</span><button class="btn btn--ghost btn--sm js-section-menu"><span class="material-symbols-outlined" style="font-size:16px;">more_horiz</span></button></div></div>';
+      if (chapter.children) {
+        chapter.children.forEach(seqId => {
+          const seq = blocks[seqId];
+          if (!seq) return;
+          const seqName = seq.display_name || 'Subsection';
+          const unitCount = seq.children ? seq.children.length : 0;
+          html += '<div class="outline-subsection"><div class="outline-subsection__head"><span>' + seqName + '</span><span style="font-size:11px; color:var(--medium-grey);">' + unitCount + ' units</span></div>';
+          if (seq.children) {
+            seq.children.forEach(vertId => {
+              const vert = blocks[vertId];
+              if (!vert) return;
+              const vName = vert.display_name || 'Unit';
+              const typeIcon = vert.type === 'vertical' ? 'view_agenda' : 'description';
+              html += '<div class="outline-unit"><div class="type-icon"><span class="material-symbols-outlined" style="font-size:13px;">' + typeIcon + '</span></div><span class="unit-title">' + vName + '</span><button class="btn btn--ghost btn--sm unit-edit"><span class="material-symbols-outlined" style="font-size:14px;">edit</span> Edit</button></div>';
+            });
+          }
+          html += '<button class="add-unit-btn"><span class="material-symbols-outlined" style="font-size:14px;">add</span> Add unit</button></div>';
+        });
+      }
+      html += '</div>';
+    });
+    container.innerHTML = html;
+    // Re-wire section menus and unit edit buttons
+    container.querySelectorAll('.unit-edit').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const unitTitle = btn.closest('.outline-unit')?.querySelector('.unit-title')?.textContent || 'Unit';
+        const editor = rootEl.querySelector('#unitEditor');
+        const titleInput = rootEl.querySelector('#unitEditorTitleInput');
+        const titleSpan = rootEl.querySelector('#unitEditorTitle');
+        if (editor) editor.classList.add('is-open');
+        if (titleInput) titleInput.value = unitTitle;
+        if (titleSpan) titleSpan.textContent = 'Edit: ' + unitTitle;
+      });
+    });
+    console.log('[studio] Loaded real outline for', courseId, '— ' + root.children.length + ' sections');
+  } catch (err) {
+    console.log('[studio] Could not load real outline (auth needed?), keeping demo outline:', err.message);
+  }
+}
 const statusLabel = { published:'Published', draft:'Draft', review:'In Review', archived:'Archived' };
 const statusClass = { published:'is-published', draft:'is-draft', review:'is-review', archived:'is-archived' };
 
 export async function render(rootEl) {
+  rootEl.innerHTML = '<main class="studio" style="display:flex; align-items:center; justify-content:center; min-height:60vh;"><div style="text-align:center;"><div class="spinner" style="width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--primary); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 16px;"></div><p style="color:var(--medium-grey);">Loading courses from Mereka Academy…</p></div></main><style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
+  await fetchCourses();
   rootEl.innerHTML = studioHtml();
   wireStudio(rootEl);
+  if (currentCourseId) tryLoadOutline(rootEl, currentCourseId);
 }
 
 function studioHtml() {
@@ -73,6 +180,7 @@ function sidebarHtml() {
 }
 
 function headerHtml() {
+  const firstCourse = COURSES.find(c => c.id === currentCourseId) || COURSES[0] || { title:'No courses', code:'—', cohort:'—', owner:'—' };
   return `
       <div class="studio__head" data-studio-head>
         <div style="flex:1; min-width:260px;">
@@ -81,8 +189,8 @@ function headerHtml() {
             <button class="course-switcher__btn" id="courseSwitcherBtn" aria-haspopup="true" aria-expanded="false">
               <span class="material-symbols-outlined">school</span>
               <span class="course-switcher__btn-text">
-                <span id="courseSwitcherTitle">Strategic thinking for modern leaders</span>
-                <span class="course-switcher__btn-code" id="courseSwitcherSub">STRAT-101 · Cohort May 2026 · 12 modules · Amira Yusof</span>
+                <span id="courseSwitcherTitle">${firstCourse.title}</span>
+                <span class="course-switcher__btn-code" id="courseSwitcherSub">${firstCourse.code} · ${firstCourse.cohort} · ${firstCourse.owner}</span>
               </span>
               <span class="material-symbols-outlined">unfold_more</span>
             </button>
@@ -99,7 +207,7 @@ function headerHtml() {
           </div>
         </div>
         <div class="studio__actions">
-          <span class="studio__status" id="studioStatus"><span class="dot"></span> Auto-saved 8s ago</span>
+          <span class="studio__status ${firstCourse.status === 'published' ? 'is-live' : ''}" id="studioStatus"><span class="dot"></span> ${statusLabel[firstCourse.status] || 'Draft'} · auto-saved just now</span>
           <button class="btn btn--outline btn--sm js-studio-duplicate"><span class="material-symbols-outlined" style="font-size:16px;">file_copy</span> Duplicate</button>
           <button class="btn btn--outline btn--sm js-studio-export"><span class="material-symbols-outlined" style="font-size:16px;">download</span> Export</button>
           <button class="btn btn--primary btn--sm js-studio-publish" id="studioPublishBtn"><span class="material-symbols-outlined" style="font-size:16px;">rocket_launch</span> Publish</button>
@@ -112,7 +220,7 @@ function coursesPane() {
       <div class="studio-pane" data-studio-pane="courses" style="display:none;">
         <div class="courses-pane__head">
           <div>
-            <h3 style="font-size:20px; margin-bottom:4px;">My courses</h3>
+            <h3 style="font-size:20px; margin-bottom:4px;">My courses <span style="font-weight:400; color:var(--medium-grey);">(${COURSES.length})</span></h3>
             <p style="font-size:13px; color:var(--medium-grey); margin:0;"><span id="coursesCount">5</span> courses · <span id="coursesCountPublished">3</span> published · <span id="coursesCountDraft">1</span> draft · <span id="coursesCountReview">1</span> in review</p>
           </div>
           <div class="courses-pane__head-actions">
@@ -137,13 +245,14 @@ function coursesPane() {
 }
 
 function outlinePane() {
+  const firstCourse = COURSES.find(c => c.id === currentCourseId) || COURSES[0] || { title:'No courses', code:'—', cohort:'—', owner:'—', enrolled:0, completion:0, rating:0, status:'draft' };
   return `
       <div class="studio-pane" data-studio-pane="outline">
         <div class="studio__stats">
-          <div class="studio__stat"><span>Enrolled learners</span><strong id="statEnrolled">1,208</strong><span class="trend">↑ 42 this week</span></div>
-          <div class="studio__stat"><span>Avg. completion</span><strong id="statCompletion">67%</strong><span class="trend">↑ 5% vs last cohort</span></div>
+          <div class="studio__stat"><span>Enrolled learners</span><strong id="statEnrolled">${firstCourse.enrolled ? firstCourse.enrolled.toLocaleString() : '—'}</strong><span class="trend" style="color:var(--medium-grey);">via API</span></div>
+          <div class="studio__stat"><span>Avg. completion</span><strong id="statCompletion">${firstCourse.completion ? firstCourse.completion + '%' : '—'}</strong><span class="trend" style="color:var(--medium-grey);">via API</span></div>
           <div class="studio__stat"><span>Avg. quiz score</span><strong>82%</strong><span class="trend" style="color:var(--medium-grey);">— flat</span></div>
-          <div class="studio__stat"><span>Course rating</span><strong id="statRating">★ 4.8</strong><span class="trend">↑ 0.1 vs last cohort</span></div>
+          <div class="studio__stat"><span>Course rating</span><strong id="statRating">${firstCourse.rating ? '★ ' + firstCourse.rating.toFixed(1) : '—'}</strong><span class="trend" style="color:var(--medium-grey);">via API</span></div>
         </div>
 
         <div class="studio__grid">
@@ -470,7 +579,7 @@ function wireStudio(rootEl) {
       }, 900);
     });
   });
-  rootEl.querySelectorAll('.js-studio-duplicate').forEach(btn => btn.addEventListener('click', () => showToast('Duplicated course as "Strategic thinking — copy"', 'success')));
+  rootEl.querySelectorAll('.js-studio-duplicate').forEach(btn => btn.addEventListener('click', () => showToast('Duplicated course as "' + (COURSES.find(x=>x.id===currentCourseId)||{title:'course'}).title + ' — copy"', 'success')));
   rootEl.querySelectorAll('.js-studio-export').forEach(btn => btn.addEventListener('click', () => showToast('Preparing OLX export — we\'ll email the download link', 'info')));
 
   // ---- Course switcher ----
@@ -551,6 +660,7 @@ function wireStudio(rootEl) {
     if (switcher) switcher.classList.remove('is-open');
     showToast('Now editing: ' + c.title, 'success');
     renderCoursesGrid();
+    tryLoadOutline(rootEl, id);
   }
 
   // ---- Courses grid (My courses pane) ----
