@@ -2373,3 +2373,25 @@ a:hover { text-decoration: underline; }
 @media (max-width: 440px) {
   .settings-popup__dialog { right: 8px; left: 8px; width: auto; top: 60px; }
 }
+
+/* Studio — mandatory/optional toggle pills */
+.unit-req-toggle {
+  font-size: 11px !important;
+  padding: 2px 8px !important;
+  border-radius: var(--r-pill) !important;
+  gap: 3px;
+  transition: all .15s ease;
+  flex-shrink: 0;
+}
+.unit-req-toggle.is-mandatory {
+  color: var(--primary) !important;
+  border-color: rgba(171,59,120,0.25) !important;
+  background: rgba(171,59,120,0.08) !important;
+}
+.unit-req-toggle.is-optional {
+  color: var(--medium-grey) !important;
+  border-color: var(--border) !important;
+  background: var(--surface) !important;
+}
+.unit-req-toggle:hover { opacity: 0.8; }
+.unit-editor-req-btn { transition: all .15s ease; }

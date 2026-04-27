@@ -88,7 +88,7 @@ async function tryLoadOutline(rootEl, courseId) {
               if (!vert) return;
               const vName = vert.display_name || 'Unit';
               const typeIcon = vert.type === 'vertical' ? 'view_agenda' : 'description';
-              html += '<div class="outline-unit"><div class="type-icon"><span class="material-symbols-outlined" style="font-size:13px;">' + typeIcon + '</span></div><span class="unit-title">' + vName + '</span><button class="btn btn--ghost btn--sm unit-edit"><span class="material-symbols-outlined" style="font-size:14px;">edit</span> Edit</button></div>';
+              html += '<div class="outline-unit"><div class="type-icon"><span class="material-symbols-outlined" style="font-size:13px;">' + typeIcon + '</span></div><span class="unit-title">' + vName + '</span><button class="btn btn--ghost btn--sm unit-req-toggle is-mandatory" title="Toggle mandatory/optional"><span class="material-symbols-outlined" style="font-size:12px;">verified</span> Required</button><button class="btn btn--ghost btn--sm unit-edit"><span class="material-symbols-outlined" style="font-size:14px;">edit</span> Edit</button></div>';
             });
           }
           html += '<button class="add-unit-btn"><span class="material-symbols-outlined" style="font-size:14px;">add</span> Add unit</button></div>';
@@ -272,9 +272,9 @@ function outlinePane() {
               </div>
               <div class="outline-subsection">
                 <div class="outline-subsection__head"><span>Subsection 1.1 — Welcome &amp; orientation</span><span style="font-size:11px; color:var(--medium-grey);">3 units · 45 min</span></div>
-                <div class="outline-unit"><div class="type-icon t-video"><span class="material-symbols-outlined" style="font-size:13px;">play_circle</span></div><span class="unit-title">Welcome &amp; course overview</span><span class="unit-dur">8 min</span><button class="btn btn--ghost btn--sm unit-edit"><span class="material-symbols-outlined" style="font-size:14px;">edit</span> Edit</button></div>
-                <div class="outline-unit"><div class="type-icon t-doc"><span class="material-symbols-outlined" style="font-size:13px;">description</span></div><span class="unit-title">What strategy is (and isn't)</span><span class="unit-dur">15 min</span><button class="btn btn--ghost btn--sm unit-edit"><span class="material-symbols-outlined" style="font-size:14px;">edit</span> Edit</button></div>
-                <div class="outline-unit"><div class="type-icon t-quiz"><span class="material-symbols-outlined" style="font-size:13px;">quiz</span></div><span class="unit-title">Diagnostic — where are you today</span><span class="unit-dur">10 min · 5 questions</span><button class="btn btn--ghost btn--sm unit-edit"><span class="material-symbols-outlined" style="font-size:14px;">edit</span> Edit</button></div>
+                <div class="outline-unit"><div class="type-icon t-video"><span class="material-symbols-outlined" style="font-size:13px;">play_circle</span></div><span class="unit-title">Welcome &amp; course overview</span><span class="unit-dur">8 min</span><button class="btn btn--ghost btn--sm unit-req-toggle is-mandatory" title="Toggle mandatory/optional"><span class="material-symbols-outlined" style="font-size:12px;">verified</span> Required</button><button class="btn btn--ghost btn--sm unit-edit"><span class="material-symbols-outlined" style="font-size:14px;">edit</span> Edit</button></div>
+                <div class="outline-unit"><div class="type-icon t-doc"><span class="material-symbols-outlined" style="font-size:13px;">description</span></div><span class="unit-title">What strategy is (and isn't)</span><span class="unit-dur">15 min</span><button class="btn btn--ghost btn--sm unit-req-toggle is-mandatory" title="Toggle mandatory/optional"><span class="material-symbols-outlined" style="font-size:12px;">verified</span> Required</button><button class="btn btn--ghost btn--sm unit-edit"><span class="material-symbols-outlined" style="font-size:14px;">edit</span> Edit</button></div>
+                <div class="outline-unit"><div class="type-icon t-quiz"><span class="material-symbols-outlined" style="font-size:13px;">quiz</span></div><span class="unit-title">Diagnostic — where are you today</span><span class="unit-dur">10 min · 5 questions</span><button class="btn btn--ghost btn--sm unit-req-toggle is-mandatory" title="Toggle mandatory/optional"><span class="material-symbols-outlined" style="font-size:12px;">verified</span> Required</button><button class="btn btn--ghost btn--sm unit-edit"><span class="material-symbols-outlined" style="font-size:14px;">edit</span> Edit</button></div>
                 <button class="add-unit-btn"><span class="material-symbols-outlined" style="font-size:14px;">add</span> Add unit</button>
               </div>
             </div>
@@ -286,11 +286,11 @@ function outlinePane() {
               </div>
               <div class="outline-subsection">
                 <div class="outline-subsection__head"><span>Subsection 3.1 — The 2x2 matrix</span><span style="font-size:11px; color:var(--medium-grey);">5 units · 1h 10min</span></div>
-                <div class="outline-unit"><div class="type-icon t-video"><span class="material-symbols-outlined" style="font-size:13px;">play_circle</span></div><span class="unit-title">Intro to 2x2s</span><span class="unit-dur">6 min</span><button class="btn btn--ghost btn--sm unit-edit"><span class="material-symbols-outlined" style="font-size:14px;">edit</span> Edit</button></div>
-                <div class="outline-unit" style="background:rgba(171,59,120,0.08); border-radius:10px;"><div class="type-icon t-video"><span class="material-symbols-outlined" style="font-size:13px;">play_circle</span></div><span class="unit-title" style="color:var(--off-black); font-weight:600;">Frameworks for ambiguity <span style="color:var(--primary); font-size:11px;">· editing</span></span><span class="unit-dur">10 min</span><button class="btn btn--outline btn--sm"><span class="material-symbols-outlined" style="font-size:14px;">edit</span> Editing</button></div>
-                <div class="outline-unit"><div class="type-icon t-discuss"><span class="material-symbols-outlined" style="font-size:13px;">forum</span></div><span class="unit-title">Discussion — pick a framework</span><span class="unit-dur">Participation</span><button class="btn btn--ghost btn--sm unit-edit"><span class="material-symbols-outlined" style="font-size:14px;">edit</span> Edit</button></div>
-                <div class="outline-unit"><div class="type-icon t-quiz"><span class="material-symbols-outlined" style="font-size:13px;">quiz</span></div><span class="unit-title">Knowledge check</span><span class="unit-dur">8 min · 4 questions</span><button class="btn btn--ghost btn--sm unit-edit"><span class="material-symbols-outlined" style="font-size:14px;">edit</span> Edit</button></div>
-                <div class="outline-unit"><div class="type-icon t-assign"><span class="material-symbols-outlined" style="font-size:13px;">assignment</span></div><span class="unit-title">Capstone — strategic memo</span><span class="unit-dur">Peer reviewed</span><button class="btn btn--ghost btn--sm unit-edit"><span class="material-symbols-outlined" style="font-size:14px;">edit</span> Edit</button></div>
+                <div class="outline-unit"><div class="type-icon t-video"><span class="material-symbols-outlined" style="font-size:13px;">play_circle</span></div><span class="unit-title">Intro to 2x2s</span><span class="unit-dur">6 min</span><button class="btn btn--ghost btn--sm unit-req-toggle is-mandatory" title="Toggle mandatory/optional"><span class="material-symbols-outlined" style="font-size:12px;">verified</span> Required</button><button class="btn btn--ghost btn--sm unit-edit"><span class="material-symbols-outlined" style="font-size:14px;">edit</span> Edit</button></div>
+                <div class="outline-unit" style="background:rgba(171,59,120,0.08); border-radius:10px;"><div class="type-icon t-video"><span class="material-symbols-outlined" style="font-size:13px;">play_circle</span></div><span class="unit-title" style="color:var(--off-black); font-weight:600;">Frameworks for ambiguity <span style="color:var(--primary); font-size:11px;">· editing</span></span><span class="unit-dur">10 min</span><button class="btn btn--ghost btn--sm unit-req-toggle is-mandatory" title="Toggle mandatory/optional"><span class="material-symbols-outlined" style="font-size:12px;">verified</span> Required</button><button class="btn btn--outline btn--sm"><span class="material-symbols-outlined" style="font-size:14px;">edit</span> Editing</button></div>
+                <div class="outline-unit"><div class="type-icon t-discuss"><span class="material-symbols-outlined" style="font-size:13px;">forum</span></div><span class="unit-title">Discussion — pick a framework</span><span class="unit-dur">Participation</span><button class="btn btn--ghost btn--sm unit-req-toggle is-mandatory" title="Toggle mandatory/optional"><span class="material-symbols-outlined" style="font-size:12px;">verified</span> Required</button><button class="btn btn--ghost btn--sm unit-edit"><span class="material-symbols-outlined" style="font-size:14px;">edit</span> Edit</button></div>
+                <div class="outline-unit"><div class="type-icon t-quiz"><span class="material-symbols-outlined" style="font-size:13px;">quiz</span></div><span class="unit-title">Knowledge check</span><span class="unit-dur">8 min · 4 questions</span><button class="btn btn--ghost btn--sm unit-req-toggle is-mandatory" title="Toggle mandatory/optional"><span class="material-symbols-outlined" style="font-size:12px;">verified</span> Required</button><button class="btn btn--ghost btn--sm unit-edit"><span class="material-symbols-outlined" style="font-size:14px;">edit</span> Edit</button></div>
+                <div class="outline-unit"><div class="type-icon t-assign"><span class="material-symbols-outlined" style="font-size:13px;">assignment</span></div><span class="unit-title">Capstone — strategic memo</span><span class="unit-dur">Peer reviewed</span><button class="btn btn--ghost btn--sm unit-req-toggle is-mandatory" title="Toggle mandatory/optional"><span class="material-symbols-outlined" style="font-size:12px;">verified</span> Required</button><button class="btn btn--ghost btn--sm unit-edit"><span class="material-symbols-outlined" style="font-size:14px;">edit</span> Edit</button></div>
                 <button class="add-unit-btn"><span class="material-symbols-outlined" style="font-size:14px;">add</span> Add unit</button>
               </div>
             </div>
@@ -310,6 +310,7 @@ function outlinePane() {
             <div class="field"><label class="form-label">Video source</label><input class="form-input" placeholder="Paste YouTube, Vimeo, or upload" value="mux://strat-101-m3-u2.mp4" /></div>
             <div class="row-2 field"><div><label class="form-label">Est. duration</label><input class="form-input" value="10 min" /></div><div><label class="form-label">Visibility</label><select class="form-input"><option>Published</option><option selected>Draft</option><option>Hidden</option></select></div></div>
             <div class="field"><label class="form-label">Completion rule</label><select class="form-input"><option>Watch ≥ 90%</option><option>Mark as complete (manual)</option><option>Required before next unit</option></select></div>
+            <div class="field"><label class="form-label">Requirement</label><div class="req-toggle-row" style="display:flex;gap:8px;"><button class="btn btn--sm unit-editor-req-btn is-active" data-req="mandatory" style="flex:1;justify-content:center;background:var(--primary);color:var(--white);border-color:var(--primary);"><span class="material-symbols-outlined" style="font-size:14px;">verified</span> Mandatory</button><button class="btn btn--outline btn--sm unit-editor-req-btn" data-req="optional" style="flex:1;justify-content:center;"><span class="material-symbols-outlined" style="font-size:14px;">do_not_disturb_on</span> Optional</button></div></div>
             <div class="field"><label class="form-label">Instructor notes (not shown to learner)</label><textarea class="form-input" rows="3" placeholder="Notes for co-instructors or future-you…">Tighten the 2x2 walkthrough around the 4:20 mark — too slow.</textarea></div>
             <div style="display:flex; gap:8px; margin-top:8px;"><button class="btn btn--outline btn--sm js-unit-editor-cancel" style="flex:1; justify-content:center;">Cancel</button><button class="btn btn--primary btn--sm js-unit-editor-save" style="flex:1; justify-content:center;">Save unit</button></div>
           </aside>
@@ -797,6 +798,33 @@ function wireStudio(rootEl) {
         ]);
       });
     });
+    // Mandatory/optional toggle buttons
+    section.querySelectorAll('.unit-req-toggle').forEach(btn => {
+      if (btn.dataset.wired) return;
+      btn.dataset.wired = '1';
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isMandatory = btn.classList.contains('is-mandatory');
+        if (isMandatory) {
+          btn.classList.remove('is-mandatory');
+          btn.classList.add('is-optional');
+          btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:12px;">do_not_disturb_on</span> Optional';
+          btn.style.color = 'var(--medium-grey)';
+          showToast('Component marked as optional', 'info');
+        } else {
+          btn.classList.remove('is-optional');
+          btn.classList.add('is-mandatory');
+          btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:12px;">verified</span> Required';
+          btn.style.color = '';
+          showToast('Component marked as required for certificate', 'success');
+        }
+        // Sync with unit editor if this unit is currently being edited
+        const unitEl = btn.closest('.outline-unit');
+        if (unitEl && unitEl.classList.contains('is-editing')) {
+          syncEditorReqButtons(rootEl, !isMandatory);
+        }
+      });
+    });
     // Edit unit buttons
     section.querySelectorAll('.outline-unit .unit-edit, .outline-unit .btn--outline').forEach(btn => {
       if (btn.dataset.wired) return;
@@ -815,6 +843,7 @@ function wireStudio(rootEl) {
         unit.innerHTML =
           '<div class="type-icon t-doc"><span class="material-symbols-outlined" style="font-size:13px;">description</span></div>' +
           '<span class="unit-title">New unit</span><span class="unit-dur">Untimed</span>' +
+          '<button class="btn btn--ghost btn--sm unit-req-toggle is-mandatory" title="Toggle mandatory/optional"><span class="material-symbols-outlined" style="font-size:12px;">verified</span> Required</button>' +
           '<button class="btn btn--ghost btn--sm unit-edit"><span class="material-symbols-outlined" style="font-size:14px;">edit</span> Edit</button>';
         sub.insertBefore(unit, btn);
         wireSection(sub.closest('.outline-section'));
@@ -837,6 +866,10 @@ function wireStudio(rootEl) {
     if (input) input.value = title;
     const editor = rootEl.querySelector('#unitEditor');
     if (editor) { editor.style.display = ''; editor.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+    // Sync requirement toggle state
+    const toggleBtn = unitEl.querySelector('.unit-req-toggle');
+    const isMandatory = toggleBtn ? toggleBtn.classList.contains('is-mandatory') : true;
+    syncEditorReqButtons(rootEl, isMandatory);
   }
   function closeUnitEditor() {
     const editor = rootEl.querySelector('#unitEditor');
@@ -863,6 +896,41 @@ function wireStudio(rootEl) {
     pill.addEventListener('click', () => {
       rootEl.querySelectorAll('.xblock-picker .xblock-pill').forEach(p => p.classList.remove('is-selected'));
       pill.classList.add('is-selected');
+    });
+  });
+
+  // ---- Requirement toggle in unit editor ----
+  function syncEditorReqButtons(root, isMandatory) {
+    root.querySelectorAll('.unit-editor-req-btn').forEach(b => {
+      if (b.dataset.req === 'mandatory') {
+        if (isMandatory) { b.classList.add('is-active'); b.style.background='var(--primary)'; b.style.color='var(--white)'; b.style.borderColor='var(--primary)'; }
+        else { b.classList.remove('is-active'); b.style.background=''; b.style.color=''; b.style.borderColor=''; }
+      } else {
+        if (!isMandatory) { b.classList.add('is-active'); b.style.background='var(--medium-grey)'; b.style.color='var(--white)'; b.style.borderColor='var(--medium-grey)'; }
+        else { b.classList.remove('is-active'); b.style.background=''; b.style.color=''; b.style.borderColor=''; }
+      }
+    });
+  }
+  rootEl.querySelectorAll('.unit-editor-req-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const isMandatory = btn.dataset.req === 'mandatory';
+      syncEditorReqButtons(rootEl, isMandatory);
+      // Sync the outline toggle pill for the active unit
+      if (activeUnit) {
+        const toggleBtn = activeUnit.querySelector('.unit-req-toggle');
+        if (toggleBtn) {
+          if (isMandatory) {
+            toggleBtn.classList.remove('is-optional'); toggleBtn.classList.add('is-mandatory');
+            toggleBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size:12px;">verified</span> Required';
+            toggleBtn.style.color = '';
+          } else {
+            toggleBtn.classList.remove('is-mandatory'); toggleBtn.classList.add('is-optional');
+            toggleBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size:12px;">do_not_disturb_on</span> Optional';
+            toggleBtn.style.color = 'var(--medium-grey)';
+          }
+        }
+      }
+      showToast(isMandatory ? 'Marked as required for certificate' : 'Marked as optional', isMandatory ? 'success' : 'info');
     });
   });
 

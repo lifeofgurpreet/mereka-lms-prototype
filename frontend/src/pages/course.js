@@ -419,7 +419,9 @@ function wireInteractions(rootEl,courseId,modules,isEnrolled,cert){
   // Continue learning → first incomplete mandatory unit
   const goNext=()=>{
     const next=findNextUnit(modules);
-    if(next) navigate('/learn/'+encodeURIComponent(courseId)+'/'+encodeURIComponent(next.id));
+    // For completed courses, start from the beginning for review
+    const target=next||modules[0]?.units[0];
+    if(target) navigate('/learn/'+encodeURIComponent(courseId)+'/'+encodeURIComponent(target.id));
   };
   rootEl.querySelector('#continueBtn')?.addEventListener('click',goNext);
   rootEl.querySelector('#continueLearningBtn')?.addEventListener('click',goNext);
