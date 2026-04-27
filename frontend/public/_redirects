@@ -1,0 +1,11 @@
+# Proxy Open edX API through Netlify edge (avoids CORS entirely)
+/api/courses/*  https://academyv2.mereka.dev/api/courses/:splat  200!
+/api/enrollment/*  https://academyv2.mereka.dev/api/enrollment/:splat  200!
+/api/user/*  https://academyv2.mereka.dev/api/user/:splat  200!
+/api/*  https://academyv2.mereka.dev/api/:splat  200!
+
+# Proxy course assets (images) — served from .io domain, not .dev
+/lms-assets/*  https://academyv2.mereka.io/:splat  200!
+
+# SPA catch-all
+/*  /index.html  200

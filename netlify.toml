@@ -1,31 +1,36 @@
 # Netlify config for mereka-lms-proto
 #
 # Deploy strategy:
-#   - `main` branch → publishes the STATIC UX prototype from docs/design-reference/
-#     (mereka-lms-proto.netlify.app stays live as the design reference).
-#   - `phase-0/*` branches → builds the Vite SPA from /frontend/
-#     (branch deploys at phase-0-spa-foundation--mereka-lms-proto.netlify.app).
+#   - `main` branch → builds the Vite SPA from /frontend/
+#     (mereka-lms-proto.netlify.app serves the live SPA prototype).
+#   - `phase-0/*` branches → also build the SPA (branch deploys).
 #
 # The Open edX backend is deployed separately via Biji-Biji-Initiative/mereka-lms.
 # This prototype consumes academyv2.mereka.dev APIs — it does NOT modify them.
+#
+# API PROXY: Netlify edge proxies /api/* requests to academyv2.mereka.dev
+# so the browser never makes cross-origin requests. No CORS needed.
 
 [build]
-  publish = "docs/design-reference/mereka-ux-prototype"
-  command = ""
+  publish = "frontend/dist"
+  command = "cd frontend && npm install && npm run build"
 
 [build.environment]
-  NETLIFY_SKIP_PYTHON_REQUIREMENTS = "true"
+  NODE_VERSION = "20"
+  VITE_OPENEDX_BASE_URL = ""
+  VITE_OPENEDX_AUTHN_URL = "https://apps.academyv2.mereka.dev"
+  VITE_OPENEDX_STUDIO_URL = "https://studio.academyv2.mereka.dev"
+  VITE_USE_MOCK_DATA = "false"
+  VITE_SHOW_CROSS_DOMAIN_AUTH_NOTICE = "true"
 
-# -- Branch-level overrides: build the SPA on phase-0/* branches --
-# NOTE: Netlify ignores `base` in branch contexts. The build command
-# must cd into frontend/ and publish is relative to repo root.
+# -- Branch-level overrides (keep for phase-0/* branches) --
 [context."phase-0/spa-foundation"]
   publish = "frontend/dist"
   command = "cd frontend && npm install && npm run build"
 
 [context."phase-0/spa-foundation".environment]
   NODE_VERSION = "20"
-  VITE_OPENEDX_BASE_URL = "https://academyv2.mereka.dev"
+  VITE_OPENEDX_BASE_URL = ""
   VITE_OPENEDX_AUTHN_URL = "https://apps.academyv2.mereka.dev"
   VITE_OPENEDX_STUDIO_URL = "https://studio.academyv2.mereka.dev"
   VITE_USE_MOCK_DATA = "false"
@@ -38,7 +43,7 @@
 
 [context.branch-deploy.environment]
   NODE_VERSION = "20"
-  VITE_OPENEDX_BASE_URL = "https://academyv2.mereka.dev"
+  VITE_OPENEDX_BASE_URL = ""
   VITE_USE_MOCK_DATA = "false"
 
 # Deploy previews (PRs against main) — also build the SPA.
@@ -48,10 +53,51 @@
 
 [context.deploy-preview.environment]
   NODE_VERSION = "20"
-  VITE_OPENEDX_BASE_URL = "https://academyv2.mereka.dev"
+  VITE_OPENEDX_BASE_URL = ""
   VITE_USE_MOCK_DATA = "false"
 
-# SPA catch-all (serves index.html for any client-side route)
+# -----------------------------------------------------------------------
+# PROXY REDIRECTS — must come BEFORE the SPA catch-all.
+# Netlify processes redirects in order; first match wins.
+# Status 200 with a full URL = invisible proxy (not a 3xx redirect).
+# -----------------------------------------------------------------------
+
+# Proxy Open edX course API
+[[redirects]]
+  from = "/api/courses/*"
+  to = "https://academyv2.mereka.dev/api/courses/:splat"
+  status = 200
+  force = true
+
+# Proxy Open edX enrollment API
+[[redirects]]
+  from = "/api/enrollment/*"
+  to = "https://academyv2.mereka.dev/api/enrollment/:splat"
+  status = 200
+  force = true
+
+# Proxy Open edX user API
+[[redirects]]
+  from = "/api/user/*"
+  to = "https://academyv2.mereka.dev/api/user/:splat"
+  status = 200
+  force = true
+
+# Proxy any other /api/ path as catch-all
+[[redirects]]
+  from = "/api/*"
+  to = "https://academyv2.mereka.dev/api/:splat"
+  status = 200
+  force = true
+
+# Proxy Open edX course assets (images, files)
+[[redirects]]
+  from = "/lms-assets/*"
+  to = "https://academyv2.mereka.io/:splat"
+  status = 200
+  force = true
+
+# SPA catch-all (serves index.html for any non-API, non-asset client-side route)
 [[redirects]]
   from = "/*"
   to = "/index.html"
