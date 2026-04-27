@@ -22,6 +22,7 @@ The documentation is organized across **41 normative specifications** with **1,1
 | [01-platform-changes.md](01-platform-changes.md) | All platform changes mapped from specs and ADRs, organized by domain |
 | [02-mfa-requirements.md](02-mfa-requirements.md) | MFA requirements, current state, and implementation steps |
 | [03-target-files-mapping.md](03-target-files-mapping.md) | Cross-reference of requirements to target files and implementation steps |
+| [04-gap-analysis.md](04-gap-analysis.md) | **Gap analysis**: design spec vs production repo (`mereka-lms`) -- what's built vs what's missing |
 
 ---
 
