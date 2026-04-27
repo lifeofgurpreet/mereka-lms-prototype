@@ -1,6 +1,7 @@
 // Page: Course Detail — uses .course__* classes matching prototype CSS.
 // Fetches real course data from API when given a real courseId.
 import { getCourse } from '../api/courses.js';
+import { navigate } from '../router/router.js';
 
 export async function render(rootEl, { params } = {}) {
   const courseId = params?.courseId || 'demo';
@@ -46,7 +47,7 @@ export async function render(rootEl, { params } = {}) {
     </div>
 
     <div style="display:flex; gap:12px; margin-bottom:24px; flex-wrap:wrap;">
-      <button class="btn btn--primary" onclick="goto('checkout')">Enroll now</button>
+      <button class="btn btn--primary" id="enrollBtn"><span class="material-symbols-outlined" style="font-size:18px;">lock</span> Enroll now</button>
       <button class="btn btn--outline btn--sm"><span class="material-symbols-outlined" style="font-size:16px;">share</span> Share</button>
       <button class="btn btn--ghost btn--sm" onclick="history.back()"><span class="material-symbols-outlined" style="font-size:16px;">arrow_back</span> Back</button>
     </div>
@@ -112,6 +113,18 @@ export async function render(rootEl, { params } = {}) {
       </div>
     </div>
   </main>`;
+
+  wireEnroll(rootEl, courseId);
+}
+
+// Wire the enroll button to navigate with the real courseId
+function wireEnroll(rootEl, courseId) {
+  const btn = rootEl.querySelector('#enrollBtn');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      navigate('/checkout/' + encodeURIComponent(courseId));
+    });
+  }
 }
 
 function esc(s) { return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;').replace(/"/g,'&quot;'); }
