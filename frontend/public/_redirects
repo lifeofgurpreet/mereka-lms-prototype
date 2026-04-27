@@ -4,6 +4,15 @@
 /api/user/*  https://academyv2.mereka.dev/api/user/:splat  200!
 /api/*  https://academyv2.mereka.dev/api/:splat  200!
 
+# CSRF token endpoint
+/csrf/*  https://academyv2.mereka.dev/csrf/:splat  200!
+
+# Login/registration API (session-based)
+/login_ajax  https://academyv2.mereka.dev/login_ajax  200!
+
+# SSO redirect (Authentik via Open edX)
+/auth/login/*  https://academyv2.mereka.dev/auth/login/:splat  302!
+
 # Proxy course assets (images) — served from .io domain, not .dev
 /lms-assets/*  https://academyv2.mereka.io/:splat  200!
 
