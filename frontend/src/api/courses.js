@@ -35,14 +35,18 @@ export function normalizeCourse(raw) {
     (media.banner_image && (media.banner_image.uri_absolute || media.banner_image.uri)) ||
     null;
 
-  // Rewrite absolute image URLs to relative paths so they go through our Netlify proxy.
+  // Rewrite image URLs to go through our Netlify proxy at /lms-assets/*.
   // The API returns URLs pointing to academyv2.mereka.dev which 404s for assets;
-  // the real assets live on academyv2.mereka.io — our proxy handles the rewrite.
-  if (image && /^https?:\/\//.test(image)) {
-    try {
-      const u = new URL(image);
-      image = u.pathname; // e.g. /asset-v1:MEREKA+F101-MS+course+type@asset+block@course_image.jpg
-    } catch (_) { /* keep as-is */ }
+  // the real assets live on academyv2.mereka.io — our Netlify proxy handles the rewrite.
+  if (image) {
+    if (/^https?:\/\//.test(image)) {
+      try {
+        const u = new URL(image);
+        image = '/lms-assets' + u.pathname;
+      } catch (_) { /* keep as-is */ }
+    } else if (image.startsWith('/')) {
+      image = '/lms-assets' + image;
+    }
   }
 
   return {

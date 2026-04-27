@@ -92,9 +92,10 @@
 
 # Proxy Open edX course assets (images, files)
 # Assets are served from .io domain, not .dev — the API returns .dev URLs which 404
+# We rewrite image URLs to /lms-assets/asset-v1:... and proxy that prefix.
 [[redirects]]
-  from = "/asset-v1:*"
-  to = "https://academyv2.mereka.io/asset-v1::splat"
+  from = "/lms-assets/*"
+  to = "https://academyv2.mereka.io/:splat"
   status = 200
   force = true
 
