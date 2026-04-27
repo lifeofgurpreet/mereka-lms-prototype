@@ -4,5 +4,8 @@
 /api/user/*  https://academyv2.mereka.dev/api/user/:splat  200!
 /api/*  https://academyv2.mereka.dev/api/:splat  200!
 
+# Proxy course assets (images) — served from .io domain, not .dev
+/lms-assets/*  https://academyv2.mereka.io/:splat  200!
+
 # SPA catch-all
 /*  /index.html  200
