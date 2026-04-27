@@ -360,3 +360,4 @@ function wireInteractions(rootEl, courseId, modules) {
     });}
   });
 }
+/* deploy trigger 1777276651 */
