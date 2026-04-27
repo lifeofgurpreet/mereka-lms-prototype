@@ -90,6 +90,14 @@
   status = 200
   force = true
 
+# Proxy Open edX course assets (images, files)
+# Assets are served from .io domain, not .dev — the API returns .dev URLs which 404
+[[redirects]]
+  from = "/asset-v1:*"
+  to = "https://academyv2.mereka.io/asset-v1::splat"
+  status = 200
+  force = true
+
 # SPA catch-all (serves index.html for any non-API, non-asset client-side route)
 [[redirects]]
   from = "/*"
