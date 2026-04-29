@@ -5,9 +5,7 @@
 // into the .app-content container. shell.setActiveNav(pageId) highlights
 // the current nav item.
 
-const LOGO_SVG = `<svg viewBox="0 0 120 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:26px;width:auto;display:block;">
-  <text x="0" y="22" font-family="Poppins,sans-serif" font-weight="700" font-size="22" fill="currentColor" letter-spacing="-0.5">mereka.</text>
-</svg>`;
+const LOGO_SVG = `<img src="/mereka-logo.svg" alt="Mereka" style="height:28px;width:auto;display:block;" />`;
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', path: '/' },
@@ -37,7 +35,7 @@ function headerHtml() {
 }
 
 function footerHtml() {
-  return `<footer class="lms-footer"><strong>mereka.</strong> © ${new Date().getFullYear()} · Academy v2</footer>`;
+  return `<footer class="lms-footer"><img src="/mereka-logo.svg" alt="Mereka" style="height:20px;width:auto;display:inline-block;vertical-align:middle;margin-right:8px;opacity:0.6;" /> © ${new Date().getFullYear()} · Academy v2</footer>`;
 }
 
 export function mount(appEl) {

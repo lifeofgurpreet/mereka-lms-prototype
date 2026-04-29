@@ -10,9 +10,7 @@ export async function render(rootEl) {
   <div class="login">
     <aside class="login__visual">
       <a class="login__logo" href="/" aria-label="Mereka">
-        <svg viewBox="0 0 120 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:32px;width:auto;">
-          <text x="0" y="22" font-family="Poppins,sans-serif" font-weight="700" font-size="22" fill="white" letter-spacing="-0.5">mereka.</text>
-        </svg>
+        <img src="/mereka-logo.svg" alt="Mereka" style="height:32px;width:auto;filter:brightness(0) invert(1);" />
       </a>
       <div class="login__hero">
         <h1>Start learning with Mereka Academy</h1>
@@ -28,9 +26,7 @@ export async function render(rootEl) {
 
         <div class="login__workspace">
           <div class="login__workspace-logo">
-            <svg viewBox="0 0 120 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:28px;width:auto;">
-              <text x="0" y="22" font-family="Poppins,sans-serif" font-weight="700" font-size="22" fill="#1A1623" letter-spacing="-0.5">mereka.</text>
-            </svg>
+            <img src="/mereka-logo.svg" alt="Mereka" style="height:28px;width:auto;" />
           </div>
           <p class="login__eyebrow">Learning workspace</p>
           <h1 class="login__title">Mereka Academy</h1>

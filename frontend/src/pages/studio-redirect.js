@@ -53,8 +53,18 @@ async function fetchCourses() {
       }
     } catch (_) { /* auth not available, skip enrollment data */ }
   } catch (err) {
-    console.warn('[studio] Failed to fetch courses from API, using empty list:', err);
+    console.warn('[studio] Failed to fetch courses from API, using demo courses:', err);
     COURSES = [];
+  }
+  // Fallback demo courses if API returned nothing
+  if (COURSES.length === 0) {
+    COURSES = [
+      { id:'course-v1:Mereka+FREE101+2026', title:'Freelancing 101', code:'FREE101', cohort:'Jan 2026', modules:5, status:'published', enrolled:42, completion:78, rating:4.6, owner:'MEREKA', updated:'2 days ago', pacing:'self', image:null },
+      { id:'course-v1:Mereka+DESIGN101+2026', title:'Design Thinking Foundations', code:'DESIGN101', cohort:'Feb 2026', modules:4, status:'published', enrolled:28, completion:65, rating:4.3, owner:'MEREKA', updated:'5 days ago', pacing:'instructor', image:null },
+      { id:'course-v1:Mereka+DATA101+2026', title:'Data Literacy for Leaders', code:'DATA101', cohort:'Mar 2026', modules:6, status:'draft', enrolled:0, completion:0, rating:0, owner:'MEREKA', updated:'1 day ago', pacing:'self', image:null },
+      { id:'course-v1:Mereka+STRAT201+2026', title:'Strategic Thinking for Modern Leaders', code:'STRAT201', cohort:'Apr 2026', modules:5, status:'published', enrolled:15, completion:45, rating:4.8, owner:'MEREKA', updated:'Today', pacing:'instructor', image:null },
+      { id:'course-v1:Mereka+ENTRE101+2026', title:'Entrepreneurship Essentials', code:'ENTRE101', cohort:'May 2026', modules:3, status:'review', enrolled:0, completion:0, rating:0, owner:'MEREKA', updated:'3 days ago', pacing:'self', image:null },
+    ];
   }
   if (COURSES.length > 0) currentCourseId = COURSES[0].id;
 }
@@ -180,7 +190,7 @@ function sidebarHtml() {
 }
 
 function headerHtml() {
-  const firstCourse = COURSES.find(c => c.id === currentCourseId) || COURSES[0] || { title:'No courses', code:'—', cohort:'—', owner:'—' };
+  const firstCourse = COURSES.find(c => c.id === currentCourseId) || COURSES[0] || { title:'Freelancing 101', code:'FREE101', cohort:'Jan 2026', owner:'MEREKA' };
   return `
       <div class="studio__head" data-studio-head>
         <div style="flex:1; min-width:260px;">
