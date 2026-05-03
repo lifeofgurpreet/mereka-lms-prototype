@@ -6,6 +6,7 @@ import { initRouter } from './router/router.js';
 import { handleCallback } from './auth/oauth.js';
 import { config } from './config.js';
 import './styles/globals.scss';
+import './styles/admin.css';
 
 async function boot() {
   console.info('[mereka-lms] booting', {

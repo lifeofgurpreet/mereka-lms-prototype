@@ -1,4 +1,4 @@
-// Route table — single source of truth for the 17 pages in the SPA.
+// Route table — single source of truth for all pages in the SPA.
 //
 // Each entry:
 //   path: URL pattern (supports :param)
@@ -30,12 +30,20 @@ export const routes = [
   { id: 'settings',          path: '/settings',           page: () => import('../pages/settings.js'),          auth: 'required' },
 
   { id: 'studio',            path: '/studio',             page: () => import('../pages/studio-redirect.js'),   auth: 'required' },
+
+  // Admin pages
+  { id: 'admin-proctoring',    path: '/admin/proctoring',    page: () => import('../pages/admin/proctoring.js'),    auth: 'required' },
+  { id: 'admin-credentials',   path: '/admin/credentials',   page: () => import('../pages/admin/credentials.js'),   auth: 'required' },
+  { id: 'admin-analytics',     path: '/admin/analytics',     page: () => import('../pages/admin/analytics.js'),     auth: 'required' },
+  { id: 'admin-notifications', path: '/admin/notifications', page: () => import('../pages/admin/notifications.js'), auth: 'required' },
+  { id: 'admin-multi-tenancy', path: '/admin/multi-tenancy', page: () => import('../pages/admin/multi-tenancy.js'), auth: 'required' },
+  { id: 'admin-video-pipeline',path: '/admin/video-pipeline',page: () => import('../pages/admin/video-pipeline.js'),auth: 'required' },
+  { id: 'admin-ecommerce',     path: '/admin/ecommerce',     page: () => import('../pages/admin/ecommerce.js'),     auth: 'required' },
+  { id: 'admin-lti',           path: '/admin/lti',           page: () => import('../pages/admin/lti.js'),           auth: 'required' },
 ];
 
 /**
  * Legacy goto(pageId) helpers — preserved so ported prototype HTML keeps working.
- * For parameterised routes we supply demo placeholder IDs so the link still works
- * (e.g. goto('course') → /course/demo, goto('unit') → /learn/demo/1).
  */
 const DEMO_PARAMS = {
   course:             'demo',
@@ -48,7 +56,6 @@ const DEMO_PARAMS = {
 export const pageIdToPath = Object.fromEntries(
   routes.map((r) => {
     if (DEMO_PARAMS[r.id]) {
-      // Strip the param segments and append demo values
       const base = r.path.replace(/\/:[^/]+/g, '');
       return [r.id, base + '/' + DEMO_PARAMS[r.id]];
     }
