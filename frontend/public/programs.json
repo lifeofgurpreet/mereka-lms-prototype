@@ -1,0 +1,168 @@
+[
+  {
+    "id": "prog-digital-career",
+    "title": "Digital Career Starter",
+    "subtitle": "Launch your career in the digital economy",
+    "description": "A comprehensive pathway designed for young professionals entering the workforce. Build employability skills, master digital tools, and learn how to secure and thrive in your first role.",
+    "icon": "rocket_launch",
+    "color": "#6C63FF",
+    "level": "Beginner",
+    "duration": "8-12 weeks",
+    "courses": [
+      "course-v1:MEREKA+MCT14-EN+course",
+      "course-v1:MEREKA+MCT27-EN+course",
+      "course-v1:MEREKA+MCT15-EN+course",
+      "course-v1:MEREKA+SYFJ-ID+course",
+      "course-v1:MEREKA+TYJ-EN+course",
+      "course-v1:MEREKA+MCT32-EN+course"
+    ],
+    "outcomes": [
+      "Build a professional digital presence",
+      "Master essential digital literacy skills",
+      "Prepare job applications that stand out",
+      "Thrive in your first professional role"
+    ],
+    "tags": ["career", "employability", "digital-skills"]
+  },
+  {
+    "id": "prog-ai-fluency",
+    "title": "AI Fluency & Productivity",
+    "subtitle": "Harness AI tools for work and life",
+    "description": "Learn to work effectively with AI tools like ChatGPT. From understanding fundamentals to boosting productivity and job-searching with AI — this pathway makes you fluent in the AI era.",
+    "icon": "smart_toy",
+    "color": "#FF6584",
+    "level": "Beginner to Intermediate",
+    "duration": "4-6 weeks",
+    "courses": [
+      "course-v1:MEREKA+MCT24-EN+course",
+      "course-v1:MEREKA+UPAI1-EN+course",
+      "course-v1:MEREKA+UPAI2-EN+course",
+      "course-v1:MEREKA+UPAI3-EN+course"
+    ],
+    "outcomes": [
+      "Understand AI fundamentals and ChatGPT capabilities",
+      "Use AI to boost sales and daily productivity",
+      "Leverage AI for job search and career growth",
+      "Build responsible AI usage habits"
+    ],
+    "tags": ["ai", "chatgpt", "productivity"]
+  },
+  {
+    "id": "prog-freelance-hustle",
+    "title": "Freelance Launchpad",
+    "subtitle": "From skills to paying clients",
+    "description": "Everything you need to start and grow a freelance practice. Profile your skills, learn to find and manage clients, and build a personal brand that attracts opportunities.",
+    "icon": "work",
+    "color": "#43B97F",
+    "level": "Beginner to Intermediate",
+    "duration": "6-8 weeks",
+    "courses": [
+      "course-v1:MEREKA+SP-MS+course",
+      "course-v1:MEREKA+F101-MS+course",
+      "course-v1:MEREKA+SYFC-MS+course",
+      "course-v1:MEREKA+MYFC-MS+course",
+      "course-v1:MEREKA+MCT32-EN+course",
+      "course-v1:MEREKA+PF-ID+course"
+    ],
+    "outcomes": [
+      "Identify your marketable skills and build a profile",
+      "Find, pitch, and win freelance clients",
+      "Manage client relationships professionally",
+      "Handle personal finances as a freelancer"
+    ],
+    "tags": ["freelance", "entrepreneur", "personal-branding"]
+  },
+  {
+    "id": "prog-microsoft-pro",
+    "title": "Microsoft Office Mastery",
+    "subtitle": "Productivity tools for the modern workplace",
+    "description": "Get proficient in Microsoft 365 tools that employers demand. From basic operations to advanced productivity workflows — become the team member everyone wants on their project.",
+    "icon": "grid_view",
+    "color": "#0078D4",
+    "level": "Beginner to Intermediate",
+    "duration": "4-6 weeks",
+    "courses": [
+      "course-v1:MEREKA+MCT16-EN+course",
+      "course-v1:MEREKA+MCT4-EN+course",
+      "course-v1:MEREKA+PW-EN+course"
+    ],
+    "outcomes": [
+      "Navigate Microsoft Office suite confidently",
+      "Create professional documents and presentations",
+      "Use Microsoft 365 cloud collaboration features",
+      "Write professional emails and reports"
+    ],
+    "tags": ["microsoft", "productivity", "office"]
+  },
+  {
+    "id": "prog-green-future",
+    "title": "Green Careers & Sustainability",
+    "subtitle": "Build skills for the sustainable economy",
+    "description": "Understand climate challenges and position yourself for the growing green economy. Explore sustainability careers and build the knowledge employers in this space value.",
+    "icon": "eco",
+    "color": "#2E7D32",
+    "level": "Beginner",
+    "duration": "3-4 weeks",
+    "courses": [
+      "course-v1:MEREKA+MCT30-EN+course",
+      "course-v1:MEREKA+MCT31-EN+course",
+      "course-v1:MEREKA+MCT34-EN+course"
+    ],
+    "outcomes": [
+      "Understand climate science and sustainability basics",
+      "Explore career opportunities in the green economy",
+      "Build personal well-being for sustainable productivity",
+      "Position yourself for ESG and sustainability roles"
+    ],
+    "tags": ["sustainability", "green-jobs", "climate"]
+  },
+  {
+    "id": "prog-entrepreneur",
+    "title": "Entrepreneur Blueprint",
+    "subtitle": "From idea to revenue",
+    "description": "A structured pathway for aspiring entrepreneurs. Learn to ideate, brand yourself, create content, market digitally, and manage your finances — all in one learning journey.",
+    "icon": "storefront",
+    "color": "#FF9800",
+    "level": "Intermediate",
+    "duration": "8-10 weeks",
+    "courses": [
+      "course-v1:MEREKA+MCT45-EN+course",
+      "course-v1:MEREKA+MCT32-EN+course",
+      "course-v1:MEREKA+MCT44-EN+course",
+      "course-v1:MEREKA+MCT21-ID+course",
+      "course-v1:MEREKA+MCT46-EN+course",
+      "course-v1:MEREKA+PF-ID+course"
+    ],
+    "outcomes": [
+      "Validate a business idea and plan your launch",
+      "Build a personal brand and create content",
+      "Run digital marketing campaigns for your business",
+      "Manage business finances and cash flow"
+    ],
+    "tags": ["entrepreneur", "business", "marketing"]
+  },
+  {
+    "id": "prog-comms-leadership",
+    "title": "Communication & Leadership",
+    "subtitle": "Speak, write, and lead with confidence",
+    "description": "Develop the soft skills that separate good professionals from great leaders. Master communication, build your personal brand, and learn to speak with impact in any setting.",
+    "icon": "record_voice_over",
+    "color": "#9C27B0",
+    "level": "Intermediate",
+    "duration": "5-7 weeks",
+    "courses": [
+      "course-v1:MEREKA+MCT1-EN+course",
+      "course-v1:MEREKA+MCT46-EN+course",
+      "course-v1:MEREKA+PW-EN+course",
+      "course-v1:MEREKA+MCT32-EN+course",
+      "course-v1:MEREKA+MCT34-EN+course"
+    ],
+    "outcomes": [
+      "Communicate clearly in professional settings",
+      "Deliver impactful presentations and pitches",
+      "Write professional documents and correspondence",
+      "Build a personal brand that opens doors"
+    ],
+    "tags": ["communication", "leadership", "soft-skills"]
+  }
+]

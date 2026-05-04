@@ -15,6 +15,9 @@ export const routes = [
   { id: 'course',            path: '/course/:courseId',   page: () => import('../pages/course.js'),            auth: 'optional' },
   { id: 'unit',              path: '/learn/:courseId/:unitId', page: () => import('../pages/unit.js'),         auth: 'required' },
 
+  { id: 'programs',           path: '/programs',            page: () => import('../pages/programs.js'),           auth: 'optional' },
+  { id: 'program-detail',     path: '/programs/:programId', page: () => import('../pages/program-detail.js'),    auth: 'optional' },
+
   { id: 'mylearning',        path: '/my-learning',        page: () => import('../pages/mylearning.js'),        auth: 'required' },
   { id: 'continue-learning', path: '/continue',           page: () => import('../pages/continue-learning.js'), auth: 'required' },
   { id: 'deadlines',         path: '/deadlines',          page: () => import('../pages/deadlines.js'),         auth: 'required' },

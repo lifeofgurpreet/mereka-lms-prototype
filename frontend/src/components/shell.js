@@ -6,6 +6,7 @@ const LOGO_SVG = `<img src="/mereka-logo.svg" alt="Mereka" style="height:28px;wi
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', path: '/' },
   { id: 'discover', label: 'Discover', path: '/discover' },
+  { id: 'programs', label: 'Programs', path: '/programs' },
   { id: 'mylearning', label: 'My Learning', path: '/my-learning' },
 ];
 
