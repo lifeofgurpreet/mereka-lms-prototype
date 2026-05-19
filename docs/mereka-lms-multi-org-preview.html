@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mereka LMS — Multi-Org View Reference</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,%3Csvg width='46' height='38' viewBox='0 0 46 38' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg clip-path='url(%23clip0_1187_6185)'%3E%3Cpath d='M38.2635 36.9726C41.9909 36.9726 45.0124 33.951 45.0124 30.2237C45.0124 26.4963 41.9909 23.4748 38.2635 23.4748C34.5362 23.4748 31.5146 26.4963 31.5146 30.2237C31.5146 33.951 34.5362 36.9726 38.2635 36.9726Z' fill='%23AB3B78'/%3E%3Cpath d='M29.0664 20.5058C28.9711 20.7776 28.8888 21.0552 28.8193 21.3388C28.8387 21.2858 28.8582 21.2347 28.8758 21.1817C28.9199 21.0052 28.9693 20.8499 29.0223 20.6858C29.0382 20.6258 29.0541 20.5658 29.0664 20.5058Z' fill='%23AB3B78'/%3E%3Cpath d='M22.5439 12.2567C22.6922 12.2656 22.8404 12.2726 22.9905 12.2744C22.8422 12.2638 22.694 12.2567 22.5439 12.2567Z' fill='%23AB3B78'/%3E%3Cpath d='M15.7363 19.0058C15.7374 20.5897 16.2953 22.1228 17.3126 23.3369C18.3298 24.551 19.7416 25.3688 21.3009 25.647C22.8602 25.9253 24.4677 25.6465 25.8422 24.8592C27.2166 24.072 28.2705 22.8265 28.8194 21.3407C28.8876 21.0571 28.97 20.7795 29.0665 20.5077C29.6831 18.7471 30.8316 17.2217 32.353 16.1423C33.8744 15.0629 35.6936 14.4828 37.5591 14.4824H37.725C37.8732 14.4824 38.0197 14.4912 38.1662 14.5H38.2332C39.4737 14.4999 40.6901 14.1581 41.749 13.512C42.8079 12.8659 43.6683 11.9405 44.2358 10.8374C44.8032 9.73437 45.0558 8.49629 44.9657 7.25911C44.8756 6.02194 44.4464 4.8335 43.7251 3.82428C43.0039 2.81505 42.0185 2.02407 40.8772 1.53816C39.7359 1.05226 38.4827 0.890219 37.2553 1.06984C36.028 1.24945 34.8738 1.76378 33.9196 2.55635C32.9654 3.34893 32.248 4.3891 31.8461 5.56267C31.8003 5.73916 31.7473 5.91564 31.6891 6.09213C31.0952 7.88958 29.9497 9.45404 28.4155 10.563C26.8813 11.672 25.0365 12.269 23.1435 12.2692H22.99C22.84 12.2692 22.6917 12.2692 22.5435 12.2516H22.4852C21.5986 12.2518 20.7206 12.4267 19.9016 12.7663C19.0825 13.1058 18.3384 13.6034 17.7117 14.2307C17.085 14.8579 16.5879 15.6024 16.249 16.4217C15.9101 17.241 15.7359 18.1191 15.7363 19.0058Z' fill='%23AB3B78'/%3E%3Cpath d='M38.1668 14.5017C38.0203 14.5017 37.8738 14.4858 37.7256 14.484C37.8721 14.4946 38.0185 14.5017 38.1668 14.5017Z' fill='%23AB3B78'/%3E%3Cpath d='M31.6895 6.10261C31.7477 5.92613 31.8006 5.74964 31.8465 5.57315C31.8473 5.57664 31.8473 5.58025 31.8465 5.58374C31.8024 5.7514 31.753 5.9173 31.7 6.07967C31.696 6.08706 31.6924 6.09472 31.6895 6.10261Z' fill='%23AB3B78'/%3E%3Cpath d='M15.918 20.5058C16.0133 20.7776 16.0956 21.0552 16.1651 21.3388C16.1456 21.2858 16.128 21.2347 16.1103 21.1817C16.0645 21.0052 16.0168 20.8499 15.9621 20.6858C15.9462 20.6258 15.9321 20.5658 15.918 20.5058Z' fill='%23AB3B78'/%3E%3Cpath d='M22.4408 12.2567C22.2944 12.2656 22.1443 12.2726 21.9961 12.2744C22.1426 12.2638 22.2908 12.2567 22.4408 12.2567Z' fill='%23AB3B78'/%3E%3Cpath d='M29.2501 19.0058C29.2491 20.5897 28.6912 22.1228 27.6739 23.3369C26.6566 24.551 25.2448 25.3688 23.6855 25.647C22.1262 25.9253 20.5187 25.6465 19.1443 24.8592C17.7698 24.072 16.716 22.8265 16.1671 21.3407C16.0989 21.0571 16.0165 20.7795 15.92 20.5077C15.3032 18.7468 14.1545 17.2212 12.6327 16.1418C11.111 15.0623 9.29138 14.4825 7.42565 14.4824H7.25975C7.1115 14.4824 6.96502 14.4912 6.8203 14.5H6.75147C5.51081 14.5002 4.2941 14.1584 3.23497 13.5123C2.17584 12.8662 1.31525 11.9406 0.747715 10.8374C0.180182 9.73416-0.0723425 8.49585 0.0178738 7.25847C0.10809 6.02109 0.537558 4.83251 1.25911 3.82325C1.98066 2.81399 2.96639 2.0231 4.10804 1.53743C5.2497 1.05176 6.50311 0.890097 7.73063 1.0702C8.95815 1.2503 10.1123 1.7652 11.0663 2.55834C12.0203 3.35149 12.7373 4.39221 13.1386 5.5662C13.1862 5.74269 13.2392 5.91917 13.2974 6.09566C13.8912 7.89283 15.0364 9.45708 16.5702 10.566C18.1041 11.675 19.9485 12.2722 21.8412 12.2727H21.9965C22.1447 12.2727 22.2948 12.2727 22.4412 12.2551H22.4995C23.386 12.2551 24.2638 12.4297 25.0828 12.769C25.9019 13.1082 26.6461 13.6055 27.2729 14.2323C27.8998 14.8592 28.397 15.6034 28.7363 16.4224C29.0755 17.2414 29.2501 18.1192 29.2501 19.0058Z' fill='%23AB3B78'/%3E%3Cpath d='M6.82031 14.5017C6.96503 14.5017 7.11152 14.4858 7.25977 14.484C7.11505 14.4946 6.96856 14.5017 6.82031 14.5017Z' fill='%23AB3B78'/%3E%3Cpath d='M13.2975 6.10261C13.2393 5.92613 13.1863 5.74964 13.1387 5.57315C13.1387 5.57315 13.1387 5.57315 13.1387 5.58374C13.1828 5.7514 13.2322 5.9173 13.2869 6.07967C13.2922 6.0832 13.2957 6.09203 13.2975 6.10261Z' fill='%23AB3B78'/%3E%3Cpath d='M11.5981 25.5356C12.5264 26.4856 13.1537 27.6883 13.4015 28.9931C13.6494 30.298 13.5067 31.6469 12.9913 32.871C12.476 34.0952 11.6109 35.14 10.5045 35.8747C9.39799 36.6094 8.09935 37.0013 6.77117 37.0013C5.443 37.0013 4.14435 36.6094 3.03789 35.8747C1.93143 35.14 1.06635 34.0952 0.551011 32.871C0.0356695 31.6469-0.107023 30.298 0.140806 28.9931C0.388636 27.6883 1.01597 26.4856 1.94423 25.5356C2.01953 25.465 2.09366 25.3927 2.1666 25.3185C3.82601 23.6368 4.75455 21.3681 4.75039 19.0056C4.75349 16.6403 3.82233 14.3695 2.15954 12.6873L1.94423 12.4755C1.01536 11.5255 0.38751 10.3224 0.139325 9.01715C-0.10886 7.71186 0.033662 6.36236 0.549034 5.13771C1.06441 3.91306 1.92971 2.86772 3.03654 2.13267C4.14337 1.39761 5.4425 1.00552 6.77117 1.00552C8.09985 1.00552 9.39898 1.39761 10.5058 2.13267C11.6126 2.86772 12.4779 3.91306 12.9933 5.13771C13.5087 6.36236 13.6512 7.71186 13.403 9.01715C13.1548 10.3224 12.527 11.5255 11.5981 12.4755L11.374 12.6873C9.71467 14.3713 8.78453 16.6405 8.78453 19.0047C8.78453 21.3688 9.71467 23.6381 11.374 25.3221C11.4481 25.3962 11.5205 25.4686 11.5964 25.5392L11.5981 25.5356Z' fill='%23AB3B78'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='clip0_1187_6185'%3E%3Crect width='45.0124' height='36.0026' fill='white' transform='translate(0 0.998688)'/%3E%3C/clipPath%3E%3C/defs%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+<style>
+/* ===== DESIGN TOKENS ===== */
+:root {
+  --primary: #AB3B78;
+  --primary-hover: #8F2F65;
+  --primary-pressed: #7A2856;
+  --brand-gradient: linear-gradient(120deg, #AB3B78 0%, #237072 60%, #295CAD 100%);
+  --brand-gradient-soft: linear-gradient(120deg, rgba(171,59,120,0.08) 0%, rgba(35,112,114,0.06) 60%, rgba(41,92,173,0.08) 100%);
+  --link: #295CAD;
+  --accent-teal: #237072;
+  --off-black: #1A1623;
+  --dark-grey: #4A494A;
+  --medium-grey: #7B7B7B;
+  --border: #DDDDDE;
+  --surface: #F5F6F7;
+  --surface-2: #FAFAFB;
+  --white: #FFFFFF;
+  --success: #3AA76D;
+  --warning: #FFC043;
+  --error: #D44333;
+  --video: #AB3B78;
+  --doc: #237072;
+  --quiz: #295CAD;
+  --discuss: #8F2F65;
+  --assign: #4A494A;
+  --font-display: 'Poppins','Arial',sans-serif;
+  --font-body: 'Lato','Inter','Arial',sans-serif;
+  --r-pill: 9999px;
+  --r-card: 16px;
+  --r-field: 12px;
+  --r-chip: 9999px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --shadow-card: 0 2px 10px rgba(26,22,35,0.06);
+  --shadow-lift: 0 8px 24px rgba(26,22,35,0.10);
+  --shadow-nav: 0 1px 4px rgba(26,22,35,0.06);
+
+  /* Multi-org colors */
+  --org-mereka: #AB3B78;
+  --org-bijibiji: #2E7D32;
+  --org-sof: #295CAD;
+  --org-ikea: #0058A3;
+}
+
+/* ===== RESET ===== */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--off-black);
+  background: var(--surface);
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4, h5 { font-family: var(--font-display); color: var(--off-black); margin: 0; }
+h1 { font-size: 40px; line-height: 1.1; font-weight: 700; letter-spacing: -0.5px; }
+h2 { font-size: 28px; line-height: 1.2; font-weight: 700; letter-spacing: -0.3px; }
+h3 { font-size: 20px; line-height: 1.3; font-weight: 600; }
+h4 { font-size: 16px; line-height: 1.3; font-weight: 600; }
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+ul { list-style: none; padding: 0; margin: 0; }
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal; font-style: normal;
+  font-size: 20px; line-height: 1; display: inline-block;
+  vertical-align: middle; -webkit-font-feature-settings: 'liga';
+  font-variation-settings: 'wght' 400;
+}
+
+/* ===== TAB SWITCHER ===== */
+.ref-bar {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 40px 0;
+  position: sticky; top: 0; z-index: 100;
+}
+.ref-bar__title {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--medium-grey);
+  margin-bottom: 10px;
+}
+.ref-bar__tabs {
+  display: flex; gap: 4px;
+}
+.ref-bar__tab {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 10px 20px;
+  border-radius: 12px 12px 0 0;
+  border: 1px solid var(--border);
+  border-bottom: none;
+  background: var(--surface);
+  color: var(--dark-grey);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.ref-bar__tab:hover { background: var(--white); color: var(--off-black); }
+.ref-bar__tab.is-active {
+  background: var(--white);
+  color: var(--primary);
+  border-color: var(--border);
+  position: relative;
+}
+.ref-bar__tab.is-active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 0; right: 0;
+  height: 2px;
+  background: var(--white);
+}
+
+.tab-panel { display: none; }
+.tab-panel.is-active { display: block; }
+
+/* ===== HEADER ===== */
+.lms-header {
+  position: sticky; top: 0; z-index: 50;
+  height: 72px; background: var(--white);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 40px; gap: 28px;
+}
+.lms-logo {
+  font-family: var(--font-display); font-weight: 700; font-size: 22px;
+  letter-spacing: -0.5px; color: var(--off-black);
+  text-decoration: none; display: inline-flex; align-items: center; gap: 2px;
+}
+.lms-logo .dot { color: var(--primary); }
+.lms-nav { display: flex; gap: 6px; align-items: center; }
+.lms-nav a {
+  font-family: var(--font-display); font-weight: 500; font-size: 14px;
+  color: var(--dark-grey); padding: 8px 14px;
+  border-radius: var(--r-pill); text-decoration: none;
+}
+.lms-nav a:hover { background: var(--surface); color: var(--off-black); }
+.lms-nav a.is-active { background: var(--primary); color: var(--white); }
+.lms-header__spacer { flex: 1; }
+.lms-header__actions { display: flex; gap: 12px; align-items: center; }
+.icon-btn {
+  width: 40px; height: 40px; border-radius: var(--r-pill);
+  background: var(--surface); border: none; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--dark-grey); position: relative;
+}
+.icon-btn:hover { background: var(--border); color: var(--off-black); }
+.icon-btn .badge {
+  position: absolute; top: 2px; right: 2px;
+  min-width: 18px; height: 18px; padding: 0 4px;
+  border-radius: 999px; background: var(--primary);
+  border: 2px solid var(--white); color: var(--white);
+  font-family: var(--font-body); font-size: 10px; font-weight: 700;
+  line-height: 14px; display: inline-flex; align-items: center;
+  justify-content: center;
+}
+.avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--brand-gradient);
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--white); font-family: var(--font-display);
+  font-weight: 600; font-size: 14px;
+  cursor: pointer; border: 2px solid var(--white);
+  box-shadow: 0 0 0 2px var(--primary);
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+  font-family: var(--font-display); font-weight: 600; font-size: 14px;
+  padding: 12px 24px; border-radius: var(--r-pill);
+  border: none; cursor: pointer; display: inline-flex;
+  align-items: center; gap: 8px; transition: all 0.15s ease;
+  text-decoration: none; line-height: 1;
+}
+.btn--primary { background: var(--primary); color: var(--white); }
+.btn--primary:hover { background: var(--primary-hover); }
+.btn--gradient { background: var(--brand-gradient); color: var(--white); }
+.btn--outline { background: transparent; color: var(--primary); border: 1.5px solid var(--primary); }
+.btn--outline:hover { background: var(--primary); color: var(--white); }
+.btn--ghost { background: transparent; color: var(--dark-grey); border: 1.5px solid var(--border); }
+.btn--ghost:hover { background: var(--surface); border-color: var(--dark-grey); color: var(--off-black); }
+.btn--teal { background: transparent; color: var(--accent-teal); border: 1.5px solid var(--accent-teal); }
+.btn--sm { padding: 8px 16px; font-size: 13px; }
+.btn--lg { padding: 14px 32px; font-size: 15px; }
+
+/* ===== CHIPS ===== */
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: var(--r-chip);
+  background: var(--surface); color: var(--dark-grey);
+  font-family: var(--font-display); font-weight: 500; font-size: 13px;
+  border: 1px solid var(--border); cursor: pointer;
+}
+.chip:hover { background: var(--white); border-color: var(--primary); color: var(--primary); }
+.chip.is-active { background: var(--primary); color: var(--white); border-color: var(--primary); }
+.chip--tag { background: rgba(58,167,109,0.12); color: var(--success); border: none; cursor: default; }
+.chip--tag.is-design { background: rgba(41,92,173,0.12); color: var(--link); }
+.chip--tag.is-strategy { background: rgba(35,112,114,0.12); color: var(--accent-teal); }
+.chip--tag.is-data { background: rgba(171,59,120,0.12); color: var(--primary); }
+
+/* ===== CARD ===== */
+.card {
+  background: var(--white);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+.card__body { padding: 20px; }
+
+/* ===== COURSE CARD ===== */
+.course-card { display: flex; flex-direction: column; }
+.course-card__img {
+  height: 160px;
+  background: var(--brand-gradient);
+  background-size: cover; background-position: center;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--white); position: relative;
+}
+.course-card__img.alt-1 { background: linear-gradient(135deg, #237072 0%, #295CAD 100%); }
+.course-card__img.alt-2 { background: linear-gradient(135deg, #AB3B78 0%, #237072 100%); }
+.course-card__img.alt-3 { background: linear-gradient(135deg, #295CAD 0%, #AB3B78 100%); }
+.course-card__type {
+  position: absolute; top: 12px; left: 12px;
+  background: rgba(255,255,255,0.95); color: var(--off-black);
+  padding: 4px 10px; border-radius: var(--r-pill);
+  font-size: 11px; font-weight: 600; font-family: var(--font-display);
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.course-card__body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.course-card__track {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: 11px; color: var(--primary);
+  letter-spacing: 1px; text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.course-card__track::before {
+  content: ''; width: 18px; height: 1px; background: var(--primary); display: inline-block;
+}
+.course-card h3 { font-size: 17px; line-height: 1.3; }
+.course-card__org {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--medium-grey);
+  font-family: var(--font-display); font-weight: 500;
+}
+.course-card__org .org-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.course-card__foot {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: auto; padding-top: 14px;
+}
+.course-card__price { font-family: var(--font-display); font-weight: 700; font-size: 16px; color: var(--off-black); }
+
+/* Course art */
+.course-art { background-size: cover !important; background-position: center !important; }
+.course-card__img.course-art > .material-symbols-outlined { display: none; }
+.course-art[data-topic="climate"] {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 240' preserveAspectRatio='xMidYMid slice'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%233AA76D'/><stop offset='1' stop-color='%23175942'/></linearGradient></defs><rect width='400' height='240' fill='url(%23g)'/><circle cx='310' cy='70' r='38' fill='%23FFD074' fill-opacity='0.9'/><circle cx='310' cy='70' r='56' fill='%23FFD074' fill-opacity='0.2'/><circle cx='60' cy='190' r='60' fill='white' fill-opacity='0.08'/><path d='M 170 190 Q 140 150 160 100 Q 190 70 230 90 Q 250 140 210 180 Q 190 195 170 190 Z' fill='white' fill-opacity='0.95'/><path d='M 175 185 Q 195 150 215 110' stroke='%233AA76D' stroke-width='2.5' fill='none' opacity='0.9'/><path d='M 190 165 Q 200 150 210 140' stroke='%233AA76D' stroke-width='2' fill='none' opacity='0.8'/><circle cx='100' cy='80' r='3' fill='white'/><circle cx='130' cy='140' r='2' fill='white'/><circle cx='350' cy='190' r='3' fill='white'/></svg>") !important;
+}
+.course-art[data-topic="data"] {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 240' preserveAspectRatio='xMidYMid slice'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23237072'/><stop offset='1' stop-color='%23295CAD'/></linearGradient></defs><rect width='400' height='240' fill='url(%23g)'/><circle cx='60' cy='60' r='40' fill='white' fill-opacity='0.07'/><circle cx='340' cy='200' r='60' fill='white' fill-opacity='0.06'/><path d='M 80 180 L 140 130 L 200 150 L 260 90 L 320 60' stroke='white' stroke-width='3' fill='none'/><circle cx='80' cy='180' r='6' fill='white'/><circle cx='140' cy='130' r='6' fill='white'/><circle cx='200' cy='150' r='6' fill='white'/><circle cx='260' cy='90' r='6' fill='%23FFD074'/><circle cx='320' cy='60' r='6' fill='%23FFD074'/><rect x='90' y='190' width='18' height='14' rx='2' fill='white' fill-opacity='0.5'/><rect x='150' y='190' width='18' height='30' rx='2' fill='white' fill-opacity='0.6'/><rect x='210' y='190' width='18' height='24' rx='2' fill='white' fill-opacity='0.7'/><rect x='270' y='190' width='18' height='40' rx='2' fill='white' fill-opacity='0.8'/></svg>") !important;
+}
+.course-art[data-topic="developer"] {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 240' preserveAspectRatio='xMidYMid slice'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%231E2A3D'/><stop offset='1' stop-color='%23295CAD'/></linearGradient></defs><rect width='400' height='240' fill='url(%23g)'/><circle cx='340' cy='60' r='46' fill='white' fill-opacity='0.07'/><circle cx='60' cy='190' r='56' fill='white' fill-opacity='0.06'/><path d='M 140 80 L 100 120 L 140 160' stroke='white' stroke-width='6' fill='none' stroke-linecap='round' stroke-linejoin='round'/><path d='M 260 80 L 300 120 L 260 160' stroke='white' stroke-width='6' fill='none' stroke-linecap='round' stroke-linejoin='round'/><path d='M 220 70 L 180 170' stroke='%23FFD074' stroke-width='5' fill='none' stroke-linecap='round'/></svg>") !important;
+}
+.course-art[data-topic="strategy"] {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 240' preserveAspectRatio='xMidYMid slice'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23AB3B78'/><stop offset='1' stop-color='%234B1F3D'/></linearGradient></defs><rect width='400' height='240' fill='url(%23g)'/><circle cx='340' cy='200' r='80' fill='white' fill-opacity='0.07'/><circle cx='60' cy='40' r='44' fill='white' fill-opacity='0.06'/><circle cx='200' cy='120' r='70' fill='none' stroke='white' stroke-opacity='0.35' stroke-width='2'/><circle cx='200' cy='120' r='48' fill='none' stroke='white' stroke-opacity='0.5' stroke-width='2'/><circle cx='200' cy='120' r='24' fill='none' stroke='white' stroke-opacity='0.7' stroke-width='2'/><circle cx='200' cy='120' r='6' fill='white'/><path d='M 260 60 L 200 120 L 240 120 L 240 80 Z' fill='white' fill-opacity='0.85'/></svg>") !important;
+}
+.course-art[data-topic="design"] {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 240' preserveAspectRatio='xMidYMid slice'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23AB3B78'/><stop offset='1' stop-color='%23E07A3E'/></linearGradient></defs><rect width='400' height='240' fill='url(%23g)'/><circle cx='340' cy='60' r='46' fill='white' fill-opacity='0.08'/><rect x='80' y='70' width='110' height='110' rx='16' fill='white' fill-opacity='0.9' transform='rotate(-8 135 125)'/><circle cx='230' cy='100' r='50' fill='%23FFD074' fill-opacity='0.9'/><path d='M 260 170 L 310 120 L 340 180 Z' fill='white' fill-opacity='0.7'/></svg>") !important;
+}
+.course-art[data-topic="pm"] {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 240' preserveAspectRatio='xMidYMid slice'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23295CAD'/><stop offset='1' stop-color='%23162B5C'/></linearGradient></defs><rect width='400' height='240' fill='url(%23g)'/><circle cx='340' cy='60' r='50' fill='white' fill-opacity='0.07'/><circle cx='60' cy='200' r='54' fill='white' fill-opacity='0.06'/><rect x='80' y='60' width='70' height='120' rx='6' fill='white' fill-opacity='0.15'/><rect x='165' y='60' width='70' height='120' rx='6' fill='white' fill-opacity='0.18'/><rect x='250' y='60' width='70' height='120' rx='6' fill='white' fill-opacity='0.22'/><rect x='90' y='74' width='50' height='22' rx='3' fill='white' fill-opacity='0.9'/><rect x='90' y='104' width='50' height='22' rx='3' fill='white' fill-opacity='0.85'/><rect x='175' y='74' width='50' height='22' rx='3' fill='%23FFD074'/><rect x='175' y='104' width='50' height='22' rx='3' fill='white' fill-opacity='0.8'/><rect x='175' y='134' width='50' height='22' rx='3' fill='white' fill-opacity='0.7'/><rect x='260' y='74' width='50' height='22' rx='3' fill='%23AB3B78'/></svg>") !important;
+}
+
+/* Green-tinted course arts for Biji-Biji */
+.course-art[data-topic="circular"] {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 240' preserveAspectRatio='xMidYMid slice'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%232E7D32'/><stop offset='1' stop-color='%231B5E20'/></linearGradient></defs><rect width='400' height='240' fill='url(%23g)'/><circle cx='200' cy='120' r='70' fill='none' stroke='white' stroke-opacity='0.4' stroke-width='3'/><path d='M 200 50 A 70 70 0 0 1 258 85' stroke='white' stroke-width='4' fill='none' stroke-linecap='round'/><polygon points='258,75 258,95 272,85' fill='white'/><path d='M 258 155 A 70 70 0 0 1 200 190' stroke='white' stroke-width='4' fill='none' stroke-linecap='round'/><polygon points='190,190 210,190 200,204' fill='white'/><path d='M 142 85 A 70 70 0 0 1 142 155' stroke='white' stroke-width='4' fill='none' stroke-linecap='round'/><polygon points='132,85 152,85 142,71' fill='white'/><circle cx='200' cy='120' r='20' fill='white' fill-opacity='0.2'/><circle cx='320' cy='50' r='30' fill='white' fill-opacity='0.06'/><circle cx='80' cy='200' r='40' fill='white' fill-opacity='0.05'/></svg>") !important;
+}
+.course-art[data-topic="community"] {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 240' preserveAspectRatio='xMidYMid slice'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%234CAF50'/><stop offset='1' stop-color='%232E7D32'/></linearGradient></defs><rect width='400' height='240' fill='url(%23g)'/><circle cx='160' cy='100' r='22' fill='white' fill-opacity='0.9'/><circle cx='240' cy='100' r='22' fill='white' fill-opacity='0.9'/><circle cx='200' cy='150' r='22' fill='white' fill-opacity='0.9'/><line x1='160' y1='100' x2='240' y2='100' stroke='white' stroke-width='2' stroke-opacity='0.5'/><line x1='160' y1='100' x2='200' y2='150' stroke='white' stroke-width='2' stroke-opacity='0.5'/><line x1='240' y1='100' x2='200' y2='150' stroke='white' stroke-width='2' stroke-opacity='0.5'/><circle cx='160' cy='100' r='10' fill='%232E7D32'/><circle cx='240' cy='100' r='10' fill='%232E7D32'/><circle cx='200' cy='150' r='10' fill='%232E7D32'/><circle cx='340' cy='60' r='35' fill='white' fill-opacity='0.06'/><circle cx='60' cy='190' r='45' fill='white' fill-opacity='0.05'/></svg>") !important;
+}
+
+/* Blue-tinted course arts for SOF */
+.course-art[data-topic="digital"] {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 240' preserveAspectRatio='xMidYMid slice'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23295CAD'/><stop offset='1' stop-color='%231A3A6E'/></linearGradient></defs><rect width='400' height='240' fill='url(%23g)'/><rect x='120' y='60' width='160' height='110' rx='8' fill='white' fill-opacity='0.15'/><rect x='130' y='70' width='140' height='85' rx='4' fill='white' fill-opacity='0.9'/><rect x='160' y='165' width='80' height='6' rx='3' fill='white' fill-opacity='0.6'/><rect x='145' y='84' width='60' height='6' rx='2' fill='%23295CAD' fill-opacity='0.4'/><rect x='145' y='96' width='100' height='4' rx='2' fill='%23295CAD' fill-opacity='0.2'/><rect x='145' y='106' width='80' height='4' rx='2' fill='%23295CAD' fill-opacity='0.2'/><rect x='145' y='120' width='50' height='18' rx='4' fill='%23295CAD'/><circle cx='60' cy='60' r='30' fill='white' fill-opacity='0.06'/><circle cx='340' cy='190' r='40' fill='white' fill-opacity='0.05'/></svg>") !important;
+}
+.course-art[data-topic="datasocial"] {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 240' preserveAspectRatio='xMidYMid slice'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23395FAD'/><stop offset='1' stop-color='%23295CAD'/></linearGradient></defs><rect width='400' height='240' fill='url(%23g)'/><rect x='80' y='100' width='28' height='80' rx='4' fill='white' fill-opacity='0.6'/><rect x='120' y='80' width='28' height='100' rx='4' fill='white' fill-opacity='0.7'/><rect x='160' y='60' width='28' height='120' rx='4' fill='white' fill-opacity='0.8'/><rect x='200' y='90' width='28' height='90' rx='4' fill='%23FFD074' fill-opacity='0.9'/><rect x='240' y='50' width='28' height='130' rx='4' fill='white' fill-opacity='0.9'/><rect x='280' y='70' width='28' height='110' rx='4' fill='white' fill-opacity='0.75'/><circle cx='94' cy='90' r='4' fill='white'/><circle cx='134' cy='70' r='4' fill='white'/><circle cx='174' cy='50' r='4' fill='%23FFD074'/><circle cx='214' cy='80' r='4' fill='white'/><circle cx='254' cy='40' r='4' fill='white'/><circle cx='294' cy='60' r='4' fill='white'/><path d='M 94 90 L 134 70 L 174 50 L 214 80 L 254 40 L 294 60' stroke='white' stroke-width='2' fill='none' stroke-opacity='0.5'/><circle cx='60' cy='50' r='25' fill='white' fill-opacity='0.06'/><circle cx='350' cy='200' r='35' fill='white' fill-opacity='0.05'/></svg>") !important;
+}
+
+/* Co-authored course art (split gradient) */
+.course-art[data-topic="coauth-circular"] {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 240' preserveAspectRatio='xMidYMid slice'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='0'><stop offset='0' stop-color='%232E7D32'/><stop offset='0.5' stop-color='%23236B25'/><stop offset='0.5' stop-color='%230058A3'/><stop offset='1' stop-color='%23003D75'/></linearGradient></defs><rect width='400' height='240' fill='url(%23g)'/><circle cx='200' cy='120' r='70' fill='none' stroke='white' stroke-opacity='0.35' stroke-width='3'/><path d='M 200 50 A 70 70 0 0 1 258 85' stroke='white' stroke-width='4' fill='none' stroke-linecap='round'/><polygon points='258,75 258,95 272,85' fill='white'/><path d='M 258 155 A 70 70 0 0 1 200 190' stroke='white' stroke-width='4' fill='none' stroke-linecap='round'/><polygon points='190,190 210,190 200,204' fill='white'/><path d='M 142 85 A 70 70 0 0 1 142 155' stroke='white' stroke-width='4' fill='none' stroke-linecap='round'/><polygon points='132,85 152,85 142,71' fill='white'/><circle cx='200' cy='120' r='20' fill='white' fill-opacity='0.2'/><text x='200' y='126' text-anchor='middle' font-family='sans-serif' font-weight='bold' font-size='16' fill='white' fill-opacity='0.7'>×</text><circle cx='320' cy='50' r='30' fill='white' fill-opacity='0.06'/><circle cx='80' cy='200' r='40' fill='white' fill-opacity='0.05'/></svg>") !important;
+}
+.course-art[data-topic="coauth-supply"] {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 240' preserveAspectRatio='xMidYMid slice'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%230058A3'/><stop offset='0.4' stop-color='%23003D75'/><stop offset='0.6' stop-color='%231B5E20'/><stop offset='1' stop-color='%232E7D32'/></linearGradient></defs><rect width='400' height='240' fill='url(%23g)'/><circle cx='80' cy='120' r='24' fill='white' fill-opacity='0.9'/><circle cx='200' cy='80' r='24' fill='white' fill-opacity='0.9'/><circle cx='320' cy='120' r='24' fill='white' fill-opacity='0.9'/><circle cx='200' cy='170' r='24' fill='white' fill-opacity='0.9'/><line x1='104' y1='112' x2='176' y2='88' stroke='white' stroke-width='2.5' stroke-opacity='0.5'/><line x1='224' y1='88' x2='296' y2='112' stroke='white' stroke-width='2.5' stroke-opacity='0.5'/><line x1='104' y1='128' x2='176' y2='162' stroke='white' stroke-width='2.5' stroke-opacity='0.5'/><line x1='224' y1='162' x2='296' y2='128' stroke='white' stroke-width='2.5' stroke-opacity='0.5'/><circle cx='80' cy='120' r='12' fill='%230058A3'/><circle cx='200' cy='80' r='12' fill='%232E7D32'/><circle cx='320' cy='120' r='12' fill='%230058A3'/><circle cx='200' cy='170' r='12' fill='%232E7D32'/><path d='M 180 80 L 200 65 L 220 80' stroke='%23FFDA1A' stroke-width='2.5' fill='none' stroke-linecap='round'/></svg>") !important;
+}
+
+/* ===== DISCOVER PAGE ===== */
+.disc { max-width: 1280px; margin: 0 auto; padding: 32px 40px 64px; }
+.disc__hero {
+  background: var(--brand-gradient); color: var(--white);
+  border-radius: var(--r-card); padding: 56px 48px 44px;
+  margin-bottom: 28px; position: relative; overflow: hidden;
+}
+.disc__hero::before {
+  content: ''; position: absolute; top: -140px; right: -120px;
+  width: 440px; height: 440px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.22) 0%, transparent 70%);
+}
+.disc__hero::after {
+  content: ''; position: absolute; bottom: -200px; left: -100px;
+  width: 380px; height: 380px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,0,0,0.12) 0%, transparent 70%);
+}
+.disc__hero-inner { position: relative; z-index: 1; max-width: 760px; }
+.disc__hero .eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase;
+  padding: 6px 12px; border-radius: var(--r-pill);
+  background: rgba(255,255,255,0.18); backdrop-filter: blur(6px);
+  margin-bottom: 18px;
+}
+.disc__hero h1 { color: var(--white); font-size: 42px; line-height: 1.15; margin-bottom: 14px; max-width: 720px; }
+.disc__hero p { opacity: 0.95; max-width: 620px; font-size: 16px; line-height: 1.55; margin: 0 0 22px; }
+.disc__search {
+  display: flex; gap: 8px; max-width: 640px;
+  background: var(--white); padding: 6px; border-radius: var(--r-pill);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+}
+.disc__search .disc__search-icon {
+  display: inline-flex; align-items: center; padding: 0 4px 0 14px; color: var(--medium-grey);
+}
+.disc__search input {
+  flex: 1; border: none; outline: none; padding: 12px 4px;
+  font-family: var(--font-body); font-size: 15px; background: transparent; color: var(--off-black);
+}
+.disc__stats {
+  display: flex; gap: 28px; flex-wrap: wrap;
+  margin-top: 26px; padding-top: 26px;
+  border-top: 1px solid rgba(255,255,255,0.22);
+  position: relative; z-index: 1;
+}
+.disc__stat { display: flex; flex-direction: column; gap: 2px; }
+.disc__stat strong { font-family: var(--font-display); font-weight: 700; font-size: 28px; color: var(--white); line-height: 1; }
+.disc__stat span { font-size: 13px; color: rgba(255,255,255,0.85); }
+.disc__refine-head {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  gap: 12px; margin-bottom: 14px;
+}
+.disc__refine-head h2 { margin: 0; font-size: 22px; }
+.disc__chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.disc__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* ===== COURSE DETAIL ===== */
+.course { max-width: 1280px; margin: 0 auto; padding: 32px 40px 64px; }
+.course__hero {
+  position: relative; border-radius: var(--r-card); overflow: hidden;
+  min-height: 320px; margin-bottom: 24px;
+  display: flex; align-items: flex-end; padding: 32px;
+}
+.course__hero::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(0deg, rgba(26,22,35,0.45) 0%, transparent 60%);
+}
+.course__hero-body { position: relative; color: var(--white); z-index: 1; width: 100%; }
+.course__hero h1 { color: var(--white); font-size: 42px; margin-bottom: 8px; max-width: 720px; }
+.course__hero p { opacity: 0.95; font-size: 16px; max-width: 640px; margin: 0 0 18px; }
+.course__hero-meta { display: flex; gap: 20px; align-items: center; font-size: 14px; flex-wrap: wrap; }
+.course__hero-meta .dot-sep { opacity: 0.5; }
+.course__actions { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+.course__grid { display: grid; grid-template-columns: 2fr 1fr; gap: 32px; align-items: start; }
+.course__section { margin-bottom: 36px; }
+.course__section h2 { margin-bottom: 16px; }
+.course__learn { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px; }
+.course__learn li {
+  list-style: none; padding-left: 28px; position: relative;
+  font-size: 15px; line-height: 1.5;
+}
+.course__learn li::before {
+  content: ''; position: absolute; left: 0; top: 2px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--success);
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12"><path d="M2 6l3 3 5-6" fill="none" stroke="white" stroke-width="2"/></svg>');
+  background-repeat: no-repeat; background-position: center;
+}
+.course__side { position: sticky; top: 96px; display: flex; flex-direction: column; gap: 20px; }
+
+/* Curriculum */
+.curriculum-module {
+  border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px;
+  background: var(--white); overflow: hidden;
+}
+.curriculum-module__head {
+  padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;
+  cursor: pointer;
+}
+.curriculum-module__head h4 { font-size: 15px; }
+.curriculum-module__meta { display: flex; align-items: center; gap: 10px; }
+.curriculum-module__meta span { font-size: 12px; color: var(--medium-grey); }
+.curriculum-module__list { border-top: 1px solid var(--border); padding: 8px 0; }
+.curriculum-unit {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 20px; font-size: 14px; color: var(--dark-grey);
+}
+.curriculum-unit .type-icon {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.type-icon.t-video { background: rgba(171,59,120,0.12); color: var(--video); }
+.type-icon.t-doc { background: rgba(35,112,114,0.12); color: var(--doc); }
+.type-icon.t-quiz { background: rgba(41,92,173,0.12); color: var(--quiz); }
+.curriculum-unit__title { flex: 1; }
+.curriculum-unit__dur { font-size: 12px; color: var(--medium-grey); }
+
+/* Enroll / Progress card */
+.enroll-card { padding: 24px; }
+.enroll-card .price { font-family: var(--font-display); font-weight: 700; font-size: 32px; margin-bottom: 4px; }
+.enroll-card .btn { width: 100%; justify-content: center; margin-top: 18px; }
+.enroll-card .includes { list-style: none; padding: 18px 0 0; margin: 18px 0 0; border-top: 1px solid var(--border); }
+.enroll-card .includes li { font-size: 13px; color: var(--dark-grey); padding: 6px 0; display: flex; gap: 10px; align-items: center; }
+.enroll-card .includes .material-symbols-outlined { color: var(--primary); font-size: 18px; }
+
+/* Progress ring */
+.progress-ring-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 0; }
+.progress-ring { position: relative; width: 100px; height: 100px; }
+.progress-ring svg { transform: rotate(-90deg); }
+.progress-ring__label {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-weight: 700; font-size: 22px; color: var(--off-black);
+}
+
+/* Instructor card */
+.instructor-card { padding: 24px; display: flex; gap: 16px; align-items: center; }
+.instructor-card__body { flex: 1; }
+.instructor-card h4 { margin-bottom: 4px; }
+
+/* ===== PROGRAM DETAIL ===== */
+.program-detail { padding-bottom: 64px; }
+.program-detail__hero {
+  --prog-color: #2E7D32;
+  background: linear-gradient(135deg, var(--prog-color) 0%, color-mix(in srgb, var(--prog-color) 60%, #000) 100%);
+  color: #fff;
+  padding: 24px 24px 40px;
+  border-radius: 0 0 24px 24px;
+  margin-bottom: 32px;
+}
+.program-detail__hero-inner { max-width: 960px; margin: 0 auto; }
+.program-detail__back {
+  display: inline-flex; align-items: center; gap: 4px;
+  color: rgba(255,255,255,0.8); font-size: 13px; text-decoration: none;
+  margin-bottom: 20px; transition: color 0.15s;
+}
+.program-detail__back:hover { color: #fff; }
+.program-detail__hero-content { display: flex; align-items: flex-start; gap: 20px; }
+.program-detail__icon-wrap {
+  width: 56px; height: 56px; border-radius: 14px; flex-shrink: 0;
+  background: rgba(255,255,255,0.2); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+}
+.program-detail__icon-wrap .material-symbols-outlined { font-size: 28px; color: #fff; }
+.program-detail__hero h1 { font-size: 26px; font-weight: 700; margin: 0 0 6px; color: #fff; }
+.program-detail__subtitle { font-size: 15px; opacity: 0.9; margin: 0 0 12px; }
+.program-detail__meta { display: flex; gap: 16px; font-size: 13px; opacity: 0.85; }
+.program-detail__meta span { display: inline-flex; align-items: center; gap: 4px; }
+.program-detail__content {
+  display: grid; grid-template-columns: 1fr 320px; gap: 32px;
+  max-width: 960px; margin: 0 auto; padding: 0 24px;
+}
+.program-detail__section { margin-bottom: 32px; }
+.program-detail__section h2 { font-size: 18px; font-weight: 700; margin: 0 0 12px; }
+.program-detail__section p { font-size: 14px; line-height: 1.6; color: var(--dark-grey); }
+.program-detail__outcomes {
+  list-style: none; padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.program-detail__outcomes li {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 14px; line-height: 1.4; color: var(--dark-grey);
+}
+.program-detail__course-list { display: flex; flex-direction: column; gap: 12px; }
+.program-detail__course-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; border-radius: var(--r-md);
+  border: 1px solid var(--border); background: var(--surface);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.program-detail__course-row:hover {
+  border-color: var(--primary); box-shadow: 0 2px 8px rgba(171,59,120,0.08);
+}
+.program-detail__course-num {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  background: var(--prog-color, #2E7D32); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+}
+.program-detail__course-img {
+  width: 56px; height: 40px; border-radius: 8px; overflow: hidden;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+}
+.program-detail__course-info { flex: 1; min-width: 0; }
+.program-detail__course-info h4 {
+  font-size: 14px; font-weight: 600; margin: 0 0 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.program-detail__course-info p { font-size: 12px; color: var(--medium-grey); margin: 0; }
+.program-detail__sidebar { display: flex; flex-direction: column; gap: 20px; }
+.program-detail__sidebar-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 20px;
+}
+.program-detail__sidebar-card h3 { font-size: 15px; font-weight: 700; margin: 0 0 8px; }
+.program-detail__sidebar-card p { font-size: 13px; color: var(--medium-grey); margin: 0 0 16px; }
+.program-detail__sidebar-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  margin-top: 16px; text-align: center;
+}
+.program-detail__sidebar-stats div strong { display: block; font-size: 16px; font-weight: 700; color: var(--off-black); }
+.program-detail__sidebar-stats div span { font-size: 11px; color: var(--medium-grey); }
+.program-detail__tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.prog-tag {
+  font-size: 12px; padding: 4px 12px; border-radius: var(--r-pill);
+  background: rgba(0,88,163,0.06); color: var(--dark-grey); border: 1px solid var(--border);
+}
+
+/* ===== MULTI-ORG SPECIFIC STYLES ===== */
+.org-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 14px; border-radius: var(--r-pill);
+  background: rgba(255,255,255,0.18); backdrop-filter: blur(6px);
+  font-family: var(--font-display); font-weight: 600; font-size: 13px;
+  color: var(--white); margin-bottom: 14px;
+}
+.org-badge a { color: var(--white); text-decoration: none; }
+.org-badge a:hover { text-decoration: underline; }
+
+.org-logo-circle {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-weight: 700; font-size: 11px;
+  color: #fff; flex-shrink: 0;
+}
+.org-logo-circle--sm {
+  width: 20px; height: 20px; font-size: 9px;
+}
+.org-logo-circle--xs {
+  width: 16px; height: 16px; font-size: 7px;
+}
+
+.org-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px 4px 4px; border-radius: var(--r-pill);
+  font-family: var(--font-display); font-weight: 600; font-size: 12px;
+  border: 1px solid;
+}
+.org-pill--mereka { background: rgba(171,59,120,0.06); color: #AB3B78; border-color: rgba(171,59,120,0.2); }
+.org-pill--bijibiji { background: rgba(46,125,50,0.06); color: #2E7D32; border-color: rgba(46,125,50,0.2); }
+.org-pill--sof { background: rgba(41,92,173,0.06); color: #295CAD; border-color: rgba(41,92,173,0.2); }
+.org-pill--ikea { background: rgba(0,88,163,0.06); color: #0058A3; border-color: rgba(0,88,163,0.2); }
+
+/* Co-authored badge (dual org on cards) */
+.course-card__coauthors {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 12px; color: var(--medium-grey);
+  font-family: var(--font-display); font-weight: 500;
+}
+.course-card__coauthors .org-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+.course-card__coauthors .collab-x {
+  font-size: 10px; font-weight: 700; color: var(--medium-grey); margin: 0 1px;
+}
+
+/* Hero dual-org badge row */
+.org-badge-group {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;
+}
+.org-badge-group .collab-x {
+  font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.6);
+}
+/* Instructor card dual */
+.instructor-dual { display: flex; flex-direction: column; gap: 16px; padding: 24px; }
+.instructor-dual__row { display: flex; gap: 14px; align-items: center; }
+.instructor-dual__body { flex: 1; }
+.instructor-dual__body h4 { margin-bottom: 2px; }
+.instructor-dual__divider { height: 1px; background: var(--border); margin: 0; }
+.instructor-dual__collab-label {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-display); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.8px; text-transform: uppercase; color: var(--medium-grey);
+  margin-bottom: 14px;
+}
+.instructor-dual__collab-label .material-symbols-outlined { font-size: 16px; }
+
+/* Course-org inline dual */
+.course-org-inline-dual {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 12px; color: var(--medium-grey);
+  font-family: var(--font-display); font-weight: 500;
+}
+.course-org-inline-dual .collab-x {
+  font-size: 10px; font-weight: 700; color: var(--border); margin: 0 1px;
+}
+
+.program-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: var(--r-pill);
+  background: rgba(255,255,255,0.15); backdrop-filter: blur(4px);
+  font-size: 12px; color: rgba(255,255,255,0.9);
+  margin-top: 10px;
+}
+.program-pill strong { font-weight: 600; color: var(--white); }
+
+.created-by { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.created-by__label { font-size: 12px; opacity: 0.7; }
+
+/* Course org inline */
+.course-org-inline {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px; color: var(--medium-grey);
+  font-family: var(--font-display); font-weight: 500;
+}
+
+/* Progress */
+.progress { background: var(--border); height: 6px; border-radius: 999px; overflow: hidden; margin-bottom: 14px; }
+.progress__fill { height: 100%; background: var(--brand-gradient); border-radius: 999px; }
+
+/* Footer */
+.lms-footer {
+  background: var(--white); border-top: 1px solid var(--border);
+  padding: 24px 40px; text-align: center;
+  color: var(--medium-grey); font-size: 13px;
+}
+.lms-footer strong { color: var(--dark-grey); }
+
+/* enrolled badge */
+.enrolled-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(58,167,109,0.12); color: var(--success);
+  padding: 4px 10px; border-radius: var(--r-pill);
+  font-size: 12px; font-weight: 600; font-family: var(--font-display);
+}
+
+/* Helper */
+.row { display: flex; gap: 12px; align-items: center; }
+</style>
+</head>
+<body>
+
+<!-- TAB SWITCHER -->
+<div class="ref-bar">
+  <div class="ref-bar__title">Multi-Org View Reference</div>
+  <div class="ref-bar__tabs">
+    <button class="ref-bar__tab is-active" data-tab="discover">Discover</button>
+    <button class="ref-bar__tab" data-tab="course-detail">Course Detail</button>
+    <button class="ref-bar__tab" data-tab="program-detail">Program Detail</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 1: DISCOVER -->
+<!-- ============================================================ -->
+<div class="tab-panel is-active" id="tab-discover">
+
+  <!-- Header -->
+  <header class="lms-header">
+    <a class="lms-logo" href="#">Mereka Academy<span class="dot">.</span></a>
+    <nav class="lms-nav">
+      <a href="#" class="is-active">Discover</a>
+      <a href="#">Programs</a>
+      <a href="#">My Learning</a>
+    </nav>
+    <div class="lms-header__spacer"></div>
+    <div class="lms-header__actions">
+      <button class="icon-btn">
+        <span class="material-symbols-outlined">notifications</span>
+        <span class="badge">3</span>
+      </button>
+      <div class="avatar">FF</div>
+    </div>
+  </header>
+
+  <main class="disc">
+    <!-- Hero -->
+    <section class="disc__hero">
+      <div class="disc__hero-inner">
+        <div class="eyebrow"><span class="material-symbols-outlined" style="font-size:14px;">school</span> Learning Platform</div>
+        <h1>Explore courses from our learning partners</h1>
+        <p>Discover skills-based courses from Mereka Academy, Biji-Biji Initiative, SkillOurFuture, and IKEA — including co-authored courses from partner organizations.</p>
+        <div class="disc__search">
+          <span class="disc__search-icon"><span class="material-symbols-outlined">search</span></span>
+          <input type="text" placeholder="Search courses, skills, or topics...">
+          <button class="btn btn--primary btn--sm" style="border-radius:var(--r-pill);">Search</button>
+        </div>
+        <div class="disc__stats">
+          <div class="disc__stat"><strong>48</strong><span>Courses</span></div>
+          <div class="disc__stat"><strong>4</strong><span>Organizations</span></div>
+          <div class="disc__stat"><strong>8</strong><span>Programs</span></div>
+          <div class="disc__stat"><strong>2.4k</strong><span>Learners</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Refine -->
+    <div class="disc__refine-head">
+      <div>
+        <h2>All Courses</h2>
+        <span class="sub" style="font-size:13px;color:var(--medium-grey);">Browse by organization</span>
+      </div>
+    </div>
+
+    <!-- Org Filter Chips -->
+    <div class="disc__chips">
+      <button class="chip is-active">All tracks</button>
+      <button class="chip" onclick="this.classList.toggle('is-active')">
+        <span class="org-logo-circle org-logo-circle--xs" style="background:var(--org-mereka);">M</span>
+        Mereka Academy
+      </button>
+      <button class="chip" onclick="this.classList.toggle('is-active')">
+        <span class="org-logo-circle org-logo-circle--xs" style="background:var(--org-bijibiji);">BB</span>
+        Biji-Biji Initiative
+      </button>
+      <button class="chip" onclick="this.classList.toggle('is-active')">
+        <span class="org-logo-circle org-logo-circle--xs" style="background:var(--org-sof);">S</span>
+        SkillOurFuture
+      </button>
+      <button class="chip" onclick="this.classList.toggle('is-active')">
+        <span class="org-logo-circle org-logo-circle--xs" style="background:var(--org-ikea);">IK</span>
+        IKEA
+      </button>
+    </div>
+
+    <!-- Course Grid -->
+    <div class="disc__grid">
+
+      <!-- MEREKA: AI Fundamentals -->
+      <div class="card course-card">
+        <div class="course-card__img course-art" data-topic="developer">
+          <span class="course-card__type"><span class="material-symbols-outlined" style="font-size:14px;">play_circle</span> Course</span>
+        </div>
+        <div class="course-card__body">
+          <span class="course-card__track">Technology</span>
+          <h3>AI Fundamentals with ChatGPT</h3>
+          <div class="course-card__org">
+            <span class="org-dot" style="background:var(--org-mereka);"></span>
+            Mereka Academy
+          </div>
+          <div class="course-card__foot">
+            <span class="course-card__price" style="color:var(--success);">Free</span>
+            <button class="btn btn--sm btn--outline">Enroll</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MEREKA: Climate Awareness -->
+      <div class="card course-card">
+        <div class="course-card__img course-art" data-topic="climate">
+          <span class="course-card__type"><span class="material-symbols-outlined" style="font-size:14px;">play_circle</span> Course</span>
+        </div>
+        <div class="course-card__body">
+          <span class="course-card__track">Sustainability</span>
+          <h3>Climate Awareness Fundamentals</h3>
+          <div class="course-card__org">
+            <span class="org-dot" style="background:var(--org-mereka);"></span>
+            Mereka Academy
+          </div>
+          <div class="course-card__foot">
+            <span class="course-card__price" style="color:var(--success);">Free</span>
+            <button class="btn btn--sm btn--outline">Enroll</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CO-AUTHORED: Biji-Biji × IKEA — Circular Economy -->
+      <div class="card course-card">
+        <div class="course-card__img course-art" data-topic="coauth-circular">
+          <span class="course-card__type"><span class="material-symbols-outlined" style="font-size:14px;">play_circle</span> Course</span>
+        </div>
+        <div class="course-card__body">
+          <span class="course-card__track">Sustainability</span>
+          <h3>Circular Economy in Practice</h3>
+          <div class="course-card__coauthors">
+            <span class="org-dot" style="background:var(--org-bijibiji);"></span>
+            Biji-Biji Initiative
+            <span class="collab-x">×</span>
+            <span class="org-dot" style="background:var(--org-ikea);"></span>
+            IKEA
+          </div>
+          <div class="course-card__foot">
+            <span class="course-card__price" style="color:var(--success);">Free</span>
+            <button class="btn btn--sm btn--outline">Enroll</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CO-AUTHORED: Biji-Biji × IKEA — Sustainable Supply Chain -->
+      <div class="card course-card">
+        <div class="course-card__img course-art" data-topic="coauth-supply">
+          <span class="course-card__type"><span class="material-symbols-outlined" style="font-size:14px;">play_circle</span> Course</span>
+        </div>
+        <div class="course-card__body">
+          <span class="course-card__track">Supply Chain</span>
+          <h3>Sustainable Supply Chain Design</h3>
+          <div class="course-card__coauthors">
+            <span class="org-dot" style="background:var(--org-bijibiji);"></span>
+            Biji-Biji Initiative
+            <span class="collab-x">×</span>
+            <span class="org-dot" style="background:var(--org-ikea);"></span>
+            IKEA
+          </div>
+          <div class="course-card__foot">
+            <span class="course-card__price" style="color:var(--success);">Free</span>
+            <button class="btn btn--sm btn--outline">Enroll</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SOF: Digital Literacy -->
+      <div class="card course-card">
+        <div class="course-card__img course-art" data-topic="digital">
+          <span class="course-card__type"><span class="material-symbols-outlined" style="font-size:14px;">play_circle</span> Course</span>
+        </div>
+        <div class="course-card__body">
+          <span class="course-card__track">Digital Skills</span>
+          <h3>Digital Literacy Essentials</h3>
+          <div class="course-card__org">
+            <span class="org-dot" style="background:var(--org-sof);"></span>
+            SkillOurFuture
+          </div>
+          <div class="course-card__foot">
+            <span class="course-card__price" style="color:var(--success);">Free</span>
+            <button class="btn btn--sm btn--outline">Enroll</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SOF: Data Skills -->
+      <div class="card course-card">
+        <div class="course-card__img course-art" data-topic="datasocial">
+          <span class="course-card__type"><span class="material-symbols-outlined" style="font-size:14px;">play_circle</span> Course</span>
+        </div>
+        <div class="course-card__body">
+          <span class="course-card__track">Data</span>
+          <h3>Data Skills for Social Impact</h3>
+          <div class="course-card__org">
+            <span class="org-dot" style="background:var(--org-sof);"></span>
+            SkillOurFuture
+          </div>
+          <div class="course-card__foot">
+            <span class="course-card__price" style="color:var(--success);">Free</span>
+            <button class="btn btn--sm btn--outline">Enroll</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="lms-footer">
+    <strong>Mereka Academy</strong> &middot; Powered by Open edX &middot; &copy; 2026
+  </footer>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 2: COURSE DETAIL -->
+<!-- ============================================================ -->
+<div class="tab-panel" id="tab-course-detail">
+
+  <!-- Header -->
+  <header class="lms-header">
+    <a class="lms-logo" href="#">Mereka Academy<span class="dot">.</span></a>
+    <nav class="lms-nav">
+      <a href="#">Discover</a>
+      <a href="#">Programs</a>
+      <a href="#" class="is-active">My Learning</a>
+    </nav>
+    <div class="lms-header__spacer"></div>
+    <div class="lms-header__actions">
+      <button class="icon-btn">
+        <span class="material-symbols-outlined">notifications</span>
+        <span class="badge">3</span>
+      </button>
+      <div class="avatar">FF</div>
+    </div>
+  </header>
+
+  <main class="course">
+    <!-- Course Hero — CO-AUTHORED by Biji-Biji × IKEA -->
+    <div class="course__hero" style="background: linear-gradient(135deg, #2E7D32 0%, #0058A3 60%, #003D75 100%);">
+      <div class="course__hero-body">
+        <!-- Dual org badge -->
+        <div class="org-badge-group">
+          <div class="org-badge" style="margin-bottom:0;">
+            <span class="org-logo-circle" style="background:#2E7D32; width:24px; height:24px; font-size:10px;">BB</span>
+            <a href="#">Biji-Biji Initiative</a>
+          </div>
+          <span class="org-badge-group collab-x">×</span>
+          <div class="org-badge" style="margin-bottom:0;">
+            <span class="org-logo-circle" style="background:#0058A3; width:24px; height:24px; font-size:10px;">IK</span>
+            <a href="#">IKEA</a>
+          </div>
+        </div>
+        <h1>Circular Economy in Practice</h1>
+        <p>Co-created by Biji-Biji Initiative and IKEA. Learn how circular design principles are reshaping industries — from Southeast Asian communities to global retail supply chains.</p>
+        <div class="course__hero-meta">
+          <span>4 weeks</span>
+          <span class="dot-sep">&middot;</span>
+          <span>Beginner</span>
+          <span class="dot-sep">&middot;</span>
+          <span>Self-paced</span>
+          <span class="dot-sep">&middot;</span>
+          <span>EN</span>
+          <span class="dot-sep">&middot;</span>
+          <span class="enrolled-badge"><span class="material-symbols-outlined" style="font-size:14px;color:var(--success);">check_circle</span> Enrolled</span>
+        </div>
+        <!-- Program pill -->
+        <div class="program-pill">
+          <span class="material-symbols-outlined" style="font-size:14px;">widgets</span>
+          Part of: <strong>Sustainability Leadership</strong> &mdash; by Biji-Biji Initiative × IKEA
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="course__actions">
+      <button class="btn btn--primary btn--lg"><span class="material-symbols-outlined" style="font-size:18px;">play_arrow</span> Continue learning</button>
+      <button class="btn btn--ghost"><span class="material-symbols-outlined" style="font-size:18px;">share</span> Share</button>
+      <button class="btn btn--ghost"><span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span> Back</button>
+    </div>
+
+    <!-- Two column -->
+    <div class="course__grid">
+      <!-- LEFT -->
+      <div>
+        <!-- What you'll learn -->
+        <section class="course__section">
+          <h2>What you'll learn</h2>
+          <ul class="course__learn">
+            <li>Understand the principles of circular economy and how it differs from linear models</li>
+            <li>Identify opportunities for circular design in products and services</li>
+            <li>Analyze real-world circular economy case studies from Southeast Asia</li>
+            <li>Create a personal sustainability action plan for your community</li>
+          </ul>
+        </section>
+
+        <!-- Course outline -->
+        <section class="course__section">
+          <h2>Course outline</h2>
+
+          <div class="curriculum-module">
+            <div class="curriculum-module__head">
+              <h4>Module 1: Introduction to Circular Economy</h4>
+              <div class="curriculum-module__meta">
+                <span>4 units</span>
+                <span>&middot;</span>
+                <span>45 min</span>
+              </div>
+            </div>
+            <div class="curriculum-module__list">
+              <div class="curriculum-unit">
+                <span class="type-icon t-video"><span class="material-symbols-outlined" style="font-size:16px;">play_circle</span></span>
+                <span class="curriculum-unit__title">What is Circular Economy?</span>
+                <span class="curriculum-unit__dur">12 min</span>
+              </div>
+              <div class="curriculum-unit">
+                <span class="type-icon t-doc"><span class="material-symbols-outlined" style="font-size:16px;">description</span></span>
+                <span class="curriculum-unit__title">Linear vs Circular: A Comparison</span>
+                <span class="curriculum-unit__dur">8 min</span>
+              </div>
+              <div class="curriculum-unit">
+                <span class="type-icon t-video"><span class="material-symbols-outlined" style="font-size:16px;">play_circle</span></span>
+                <span class="curriculum-unit__title">The Butterfly Diagram Explained</span>
+                <span class="curriculum-unit__dur">15 min</span>
+              </div>
+              <div class="curriculum-unit">
+                <span class="type-icon t-quiz"><span class="material-symbols-outlined" style="font-size:16px;">quiz</span></span>
+                <span class="curriculum-unit__title">Knowledge Check</span>
+                <span class="curriculum-unit__dur">10 min</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="curriculum-module">
+            <div class="curriculum-module__head">
+              <h4>Module 2: Circular Design Principles</h4>
+              <div class="curriculum-module__meta">
+                <span>3 units</span>
+                <span>&middot;</span>
+                <span>38 min</span>
+              </div>
+            </div>
+            <div class="curriculum-module__list">
+              <div class="curriculum-unit">
+                <span class="type-icon t-video"><span class="material-symbols-outlined" style="font-size:16px;">play_circle</span></span>
+                <span class="curriculum-unit__title">Design for Longevity</span>
+                <span class="curriculum-unit__dur">14 min</span>
+              </div>
+              <div class="curriculum-unit">
+                <span class="type-icon t-video"><span class="material-symbols-outlined" style="font-size:16px;">play_circle</span></span>
+                <span class="curriculum-unit__title">Material Selection &amp; Recovery</span>
+                <span class="curriculum-unit__dur">12 min</span>
+              </div>
+              <div class="curriculum-unit">
+                <span class="type-icon t-quiz"><span class="material-symbols-outlined" style="font-size:16px;">quiz</span></span>
+                <span class="curriculum-unit__title">Design Challenge</span>
+                <span class="curriculum-unit__dur">12 min</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="curriculum-module">
+            <div class="curriculum-module__head">
+              <h4>Module 3: Case Studies &amp; Action Plan</h4>
+              <div class="curriculum-module__meta">
+                <span>3 units</span>
+                <span>&middot;</span>
+                <span>42 min</span>
+              </div>
+            </div>
+            <div class="curriculum-module__list">
+              <div class="curriculum-unit">
+                <span class="type-icon t-video"><span class="material-symbols-outlined" style="font-size:16px;">play_circle</span></span>
+                <span class="curriculum-unit__title">SE Asia Case Studies</span>
+                <span class="curriculum-unit__dur">18 min</span>
+              </div>
+              <div class="curriculum-unit">
+                <span class="type-icon t-doc"><span class="material-symbols-outlined" style="font-size:16px;">description</span></span>
+                <span class="curriculum-unit__title">Building Your Action Plan</span>
+                <span class="curriculum-unit__dur">14 min</span>
+              </div>
+              <div class="curriculum-unit">
+                <span class="type-icon t-quiz"><span class="material-symbols-outlined" style="font-size:16px;">quiz</span></span>
+                <span class="curriculum-unit__title">Final Assessment</span>
+                <span class="curriculum-unit__dur">10 min</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- RIGHT SIDEBAR -->
+      <div class="course__side">
+        <!-- Progress card -->
+        <div class="card enroll-card">
+          <div class="progress-ring-wrap">
+            <div class="progress-ring">
+              <svg width="100" height="100" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="#DDDDDE" stroke-width="8"/>
+                <circle cx="50" cy="50" r="42" fill="none" stroke="url(#prog-grad)" stroke-width="8" stroke-linecap="round"
+                  stroke-dasharray="263.9" stroke-dashoffset="73.9"/>
+                <defs>
+                  <linearGradient id="prog-grad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#AB3B78"/>
+                    <stop offset="100%" stop-color="#237072"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+              <span class="progress-ring__label">72%</span>
+            </div>
+            <span style="font-size:13px;color:var(--medium-grey);">Course progress</span>
+          </div>
+          <button class="btn btn--primary" style="margin-top:12px;"><span class="material-symbols-outlined" style="font-size:18px;">play_arrow</span> Continue learning</button>
+        </div>
+
+        <!-- Co-authored instructor card -->
+        <div class="card instructor-dual">
+          <div class="instructor-dual__collab-label">
+            <span class="material-symbols-outlined">handshake</span>
+            Co-authored by
+          </div>
+          <div class="instructor-dual__row">
+            <span class="org-logo-circle" style="background:var(--org-bijibiji); width:40px; height:40px; font-size:14px;">BB</span>
+            <div class="instructor-dual__body">
+              <h4>Biji-Biji Initiative</h4>
+              <p style="font-size:12px;color:var(--medium-grey);margin:2px 0 0;">Social enterprise focused on circular economy education in SE Asia.</p>
+            </div>
+          </div>
+          <hr class="instructor-dual__divider">
+          <div class="instructor-dual__row">
+            <span class="org-logo-circle" style="background:var(--org-ikea); width:40px; height:40px; font-size:14px;">IK</span>
+            <div class="instructor-dual__body">
+              <h4>IKEA</h4>
+              <p style="font-size:12px;color:var(--medium-grey);margin:2px 0 0;">Global home furnishings leader committed to circular and sustainable business practices.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Course includes -->
+        <div class="card enroll-card">
+          <h4 style="margin-bottom:12px;">Course includes</h4>
+          <ul class="includes" style="border-top:none;padding-top:0;margin-top:0;">
+            <li><span class="material-symbols-outlined">play_circle</span> 6 video lessons</li>
+            <li><span class="material-symbols-outlined">description</span> 2 reading materials</li>
+            <li><span class="material-symbols-outlined">quiz</span> 3 assessments</li>
+            <li><span class="material-symbols-outlined">workspace_premium</span> Certificate of completion</li>
+            <li><span class="material-symbols-outlined">schedule</span> ~2 hours total</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="lms-footer">
+    <strong>Mereka Academy</strong> &middot; Powered by Open edX &middot; &copy; 2026
+  </footer>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 3: PROGRAM DETAIL -->
+<!-- ============================================================ -->
+<div class="tab-panel" id="tab-program-detail">
+
+  <!-- Header -->
+  <header class="lms-header">
+    <a class="lms-logo" href="#">Mereka Academy<span class="dot">.</span></a>
+    <nav class="lms-nav">
+      <a href="#">Discover</a>
+      <a href="#" class="is-active">Programs</a>
+      <a href="#">My Learning</a>
+    </nav>
+    <div class="lms-header__spacer"></div>
+    <div class="lms-header__actions">
+      <button class="icon-btn">
+        <span class="material-symbols-outlined">notifications</span>
+        <span class="badge">3</span>
+      </button>
+      <div class="avatar">FF</div>
+    </div>
+  </header>
+
+  <div class="program-detail">
+    <!-- Program Hero — CO-AUTHORED by Biji-Biji × IKEA -->
+    <div class="program-detail__hero" style="--prog-color: #0058A3;">
+      <div class="program-detail__hero-inner">
+        <a href="#" class="program-detail__back">
+          <span class="material-symbols-outlined" style="font-size:16px;">arrow_back</span>
+          All programs
+        </a>
+        <div class="program-detail__hero-content">
+          <div class="program-detail__icon-wrap">
+            <span class="material-symbols-outlined">eco</span>
+          </div>
+          <div>
+            <h1>Sustainability Leadership</h1>
+            <p class="program-detail__subtitle">A joint program by Biji-Biji Initiative and IKEA. Build the knowledge and skills to lead sustainability initiatives from community to global scale.</p>
+            <div class="program-detail__meta">
+              <span><span class="material-symbols-outlined" style="font-size:16px;">signal_cellular_alt</span> Beginner</span>
+              <span><span class="material-symbols-outlined" style="font-size:16px;">schedule</span> 8-12 weeks</span>
+              <span><span class="material-symbols-outlined" style="font-size:16px;">school</span> 4 courses</span>
+            </div>
+            <!-- Co-authored by section -->
+            <div class="created-by">
+              <span class="created-by__label">Co-created by</span>
+              <span class="org-pill org-pill--bijibiji">
+                <span class="org-logo-circle org-logo-circle--sm" style="background:var(--org-bijibiji);">BB</span>
+                Biji-Biji Initiative
+              </span>
+              <span style="color:rgba(255,255,255,0.5);font-weight:700;font-size:13px;">×</span>
+              <span class="org-pill org-pill--ikea">
+                <span class="org-logo-circle org-logo-circle--sm" style="background:var(--org-ikea);">IK</span>
+                IKEA
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Two column content -->
+    <div class="program-detail__content">
+      <!-- LEFT -->
+      <div>
+        <section class="program-detail__section">
+          <h2>About this pathway</h2>
+          <p>This program is jointly created by Biji-Biji Initiative and IKEA — combining Biji-Biji's grassroots circular economy expertise with IKEA's global sustainable supply chain practices. All four courses are co-authored by both organizations.</p>
+          <p style="margin-top:12px;">Whether you are a professional looking to integrate sustainability into your work, or a community leader seeking actionable frameworks, this pathway provides the tools you need — from local community projects to global retail sustainability.</p>
+        </section>
+
+        <section class="program-detail__section">
+          <h2>What you'll achieve</h2>
+          <ul class="program-detail__outcomes">
+            <li>
+              <span class="material-symbols-outlined" style="font-size:18px;color:var(--success);flex-shrink:0;">check_circle</span>
+              Understand the science and urgency of climate change
+            </li>
+            <li>
+              <span class="material-symbols-outlined" style="font-size:18px;color:var(--success);flex-shrink:0;">check_circle</span>
+              Identify green career opportunities across industries
+            </li>
+            <li>
+              <span class="material-symbols-outlined" style="font-size:18px;color:var(--success);flex-shrink:0;">check_circle</span>
+              Apply circular economy principles to real products and services
+            </li>
+            <li>
+              <span class="material-symbols-outlined" style="font-size:18px;color:var(--success);flex-shrink:0;">check_circle</span>
+              Design and lead a community sustainability project
+            </li>
+            <li>
+              <span class="material-symbols-outlined" style="font-size:18px;color:var(--success);flex-shrink:0;">check_circle</span>
+              Earn a verified Sustainability Leadership credential
+            </li>
+          </ul>
+        </section>
+
+        <section class="program-detail__section">
+          <h2>Courses in this pathway</h2>
+          <p class="program-detail__courses-note">Complete all 4 courses to earn your program certificate.</p>
+
+          <div class="program-detail__course-list">
+            <!-- Course 1 — co-authored -->
+            <div class="program-detail__course-row">
+              <span class="program-detail__course-num" style="background:#0058A3;">1</span>
+              <div class="program-detail__course-img course-art" data-topic="coauth-circular" style="width:56px;height:40px;border-radius:8px;background-size:cover;background-position:center;"></div>
+              <div class="program-detail__course-info">
+                <h4>Circular Economy in Practice</h4>
+                <div class="course-org-inline-dual">
+                  <span class="org-logo-circle org-logo-circle--xs" style="background:var(--org-bijibiji);">BB</span>
+                  Biji-Biji
+                  <span class="collab-x">×</span>
+                  <span class="org-logo-circle org-logo-circle--xs" style="background:var(--org-ikea);">IK</span>
+                  IKEA
+                </div>
+              </div>
+              <span class="material-symbols-outlined" style="color:var(--medium-grey);">chevron_right</span>
+            </div>
+
+            <!-- Course 2 — co-authored -->
+            <div class="program-detail__course-row">
+              <span class="program-detail__course-num" style="background:#0058A3;">2</span>
+              <div class="program-detail__course-img course-art" data-topic="coauth-supply" style="width:56px;height:40px;border-radius:8px;background-size:cover;background-position:center;"></div>
+              <div class="program-detail__course-info">
+                <h4>Sustainable Supply Chain Design</h4>
+                <div class="course-org-inline-dual">
+                  <span class="org-logo-circle org-logo-circle--xs" style="background:var(--org-bijibiji);">BB</span>
+                  Biji-Biji
+                  <span class="collab-x">×</span>
+                  <span class="org-logo-circle org-logo-circle--xs" style="background:var(--org-ikea);">IK</span>
+                  IKEA
+                </div>
+              </div>
+              <span class="material-symbols-outlined" style="color:var(--medium-grey);">chevron_right</span>
+            </div>
+
+            <!-- Course 3 — co-authored -->
+            <div class="program-detail__course-row">
+              <span class="program-detail__course-num" style="background:#0058A3;">3</span>
+              <div class="program-detail__course-img" style="width:56px;height:40px;border-radius:8px;background:linear-gradient(135deg,#2E7D32 0%,#0058A3 100%);display:flex;align-items:center;justify-content:center;">
+                <span class="material-symbols-outlined" style="font-size:18px;color:rgba(255,255,255,0.7);">park</span>
+              </div>
+              <div class="program-detail__course-info">
+                <h4>Zero-Waste Product Design</h4>
+                <div class="course-org-inline-dual">
+                  <span class="org-logo-circle org-logo-circle--xs" style="background:var(--org-bijibiji);">BB</span>
+                  Biji-Biji
+                  <span class="collab-x">×</span>
+                  <span class="org-logo-circle org-logo-circle--xs" style="background:var(--org-ikea);">IK</span>
+                  IKEA
+                </div>
+              </div>
+              <span class="material-symbols-outlined" style="color:var(--medium-grey);">chevron_right</span>
+            </div>
+
+            <!-- Course 4 — co-authored -->
+            <div class="program-detail__course-row">
+              <span class="program-detail__course-num" style="background:#0058A3;">4</span>
+              <div class="program-detail__course-img" style="width:56px;height:40px;border-radius:8px;background:linear-gradient(135deg,#0058A3 0%,#2E7D32 100%);display:flex;align-items:center;justify-content:center;">
+                <span class="material-symbols-outlined" style="font-size:18px;color:rgba(255,255,255,0.7);">groups</span>
+              </div>
+              <div class="program-detail__course-info">
+                <h4>Community Impact &amp; Measurement</h4>
+                <div class="course-org-inline-dual">
+                  <span class="org-logo-circle org-logo-circle--xs" style="background:var(--org-bijibiji);">BB</span>
+                  Biji-Biji
+                  <span class="collab-x">×</span>
+                  <span class="org-logo-circle org-logo-circle--xs" style="background:var(--org-ikea);">IK</span>
+                  IKEA
+                </div>
+              </div>
+              <span class="material-symbols-outlined" style="color:var(--medium-grey);">chevron_right</span>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- RIGHT SIDEBAR -->
+      <div class="program-detail__sidebar">
+        <div class="program-detail__sidebar-card" style="border-color:var(--org-ikea);">
+          <h3>Start this pathway</h3>
+          <p>Begin your sustainability leadership journey today. All courses are self-paced and free.</p>
+          <button class="btn btn--primary btn--lg" style="width:100%;justify-content:center;background:linear-gradient(135deg,#2E7D32,#0058A3);">
+            <span class="material-symbols-outlined" style="font-size:18px;">play_arrow</span> Begin pathway
+          </button>
+          <div class="program-detail__sidebar-stats">
+            <div>
+              <strong>4</strong>
+              <span>Courses</span>
+            </div>
+            <div>
+              <strong>~8h</strong>
+              <span>Total</span>
+            </div>
+            <div>
+              <strong>Free</strong>
+              <span>Price</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="program-detail__sidebar-card">
+          <h3>Skills you'll gain</h3>
+          <div class="program-detail__tags" style="margin-top:8px;">
+            <span class="prog-tag">Climate Science</span>
+            <span class="prog-tag">Circular Design</span>
+            <span class="prog-tag">Sustainability Strategy</span>
+            <span class="prog-tag">Community Engagement</span>
+            <span class="prog-tag">Systems Thinking</span>
+            <span class="prog-tag">Green Careers</span>
+            <span class="prog-tag">Waste Reduction</span>
+            <span class="prog-tag">Impact Measurement</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="lms-footer">
+    <strong>Mereka Academy</strong> &middot; Powered by Open edX &middot; &copy; 2026
+  </footer>
+</div>
+
+<!-- TAB SWITCHING SCRIPT -->
+<script>
+document.querySelectorAll('.ref-bar__tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.ref-bar__tab').forEach(t => t.classList.remove('is-active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('is-active'));
+    tab.classList.add('is-active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('is-active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
+</script>
+</body>
+</html>
