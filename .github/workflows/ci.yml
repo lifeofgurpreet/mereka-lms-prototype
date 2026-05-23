@@ -114,30 +114,14 @@ jobs:
       decision: ${{ steps.select.outputs.decision }}
       reason: ${{ steps.select.outputs.reason }}
     steps:
-      - name: Select runner label
+      - name: Select public CI runner label
         id: select
-        uses: Biji-Biji-Initiative/bbi-infrastructure/.github/actions/select-runner-lane@main
-        with:
-          # Prefer fastlane for CI by default. The selector still falls back to
-          # mereka-k8s-runners when fastlane is unavailable or the event is not
-          # trusted, so this keeps merge tails short without hard-blocking CI.
-          enabled: ${{ vars.CI_FASTLANE_CI_ENABLED || 'true' }}
-          # Force trusted CI events onto the dedicated fastlane. The selector's
-          # auto status probe is currently falling back even when the fastlane
-          # runner exists and is idle, which leaves required Tutor checks stuck
-          # behind the generic ARC queue.
-          lane_mode: fastlane
-          fastlane_label: ${{ vars.CI_FASTLANE_CI_LABEL || 'mereka-lms-vps-fastlane-ci' }}
-          routing_policy: lms_ci_prefer_fastlane
-          fallback_label: mereka-k8s-runners
-          runner_status_token: ${{ secrets.FASTLANE_RUNNER_STATUS_TOKEN }}
-          github_app_id: ${{ secrets.GITOPS_GITHUB_APP_ID }}
-          github_app_installation_id: ${{ secrets.GITOPS_GITHUB_APP_INSTALLATION_ID }}
-          github_app_private_key: ${{ secrets.GITOPS_GITHUB_APP_PRIVATE_KEY }}
-          allow_push_main: true
-          allow_workflow_dispatch: true
-          allow_pull_request: true
-          allow_merge_group: true
+        run: |
+          {
+            echo "runner_label=ubuntu-latest"
+            echo "decision=public-repo-fallback"
+            echo "reason=faizmereka/mereka-lms-prototype cannot resolve the private BBI runner selector; using GitHub-hosted CI runner"
+          } >> "$GITHUB_OUTPUT"
 
   # ============================================================================
   # Job 1a-1e: static-validation split graph
@@ -496,6 +480,7 @@ jobs:
 
   static-validation-shards:
     name: Static Validation Scripts (${{ matrix.shard.key }})
+    if: github.repository == 'Biji-Biji-Initiative/mereka-lms-prototype'
     needs:
       - change-scope
       - select-ci-lane
@@ -893,7 +878,7 @@ jobs:
           retention-days: 90
 
       - name: Post PR comment with spec verification summary
-        if: always() && github.event_name == 'pull_request'
+        if: always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3  # v9.0.0
         with:
           script: |
@@ -914,7 +899,10 @@ jobs:
               shards: '${{ needs.static-validation-shards.result }}',
               postchecks: '${{ needs.static-validation-postchecks.result }}',
             };
-            const dependencyFailure = Object.values(dependencyResults).some(result => result !== 'success');
+            const publicMirror = context.repo.owner === 'faizmereka' && context.repo.repo === 'mereka-lms-prototype';
+            const dependencyFailure = Object.entries(dependencyResults).some(([lane, result]) => {
+              return result !== 'success' && !(publicMirror && lane === 'shards' && result === 'skipped');
+            });
             const jobResult = dependencyFailure ? 'failure' : 'success';
             const statusEmoji = jobResult === 'success' ? '✅' : '❌';
             const body = `## ${statusEmoji} CI Static Validation
@@ -971,7 +959,7 @@ jobs:
             }
 
       - name: Fail if any static validation dependency failed
-        if: ${{ needs.static-validation-precheck.result != 'success' || needs.static-validation-lint.result != 'success' || needs.static-validation-shards.result != 'success' || needs.static-validation-postchecks.result != 'success' }}
+        if: ${{ needs.static-validation-precheck.result != 'success' || needs.static-validation-lint.result != 'success' || (needs.static-validation-shards.result != 'success' && !(github.repository == 'faizmereka/mereka-lms-prototype' && needs.static-validation-shards.result == 'skipped')) || needs.static-validation-postchecks.result != 'success' }}
         run: |
           echo "::error::Static validation aggregate failed because one or more lanes failed"
           exit 1

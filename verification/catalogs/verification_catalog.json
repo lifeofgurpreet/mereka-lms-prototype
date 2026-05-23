@@ -1630,7 +1630,7 @@
       "mutability": "read-only",
       "owner": "identity-access",
       "path": "scripts/qa/verify-auth-hardening.sh",
-      "reference_count": 22,
+      "reference_count": 23,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -1733,7 +1733,7 @@
       "mutability": "read-only",
       "owner": "identity-access",
       "path": "scripts/qa/verify-auth-surfaces.sh",
-      "reference_count": 46,
+      "reference_count": 47,
       "replaced_by": "",
       "runtime_dependencies": [
         "none"
@@ -6449,7 +6449,7 @@
       "mutability": "read-only",
       "owner": "identity-access",
       "path": "scripts/qa/verify-enterprise-sso.sh",
-      "reference_count": 17,
+      "reference_count": 18,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -10573,7 +10573,7 @@
       "mutability": "read-only",
       "owner": "multisite-governance",
       "path": "scripts/qa/verify-multisite-config.sh",
-      "reference_count": 29,
+      "reference_count": 30,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"
@@ -12095,7 +12095,7 @@
       "mutability": "read-only",
       "owner": "platform-core",
       "path": "scripts/qa/verify-org-role-ownership.sh",
-      "reference_count": 19,
+      "reference_count": 20,
       "replaced_by": "",
       "runtime_dependencies": [
         "cluster"

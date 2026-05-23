@@ -153,6 +153,7 @@ jobs:
   # --------------------------------------------------------------------------
   resolve-benchmark-inputs:
     name: Resolve Benchmark Inputs
+    if: github.repository == 'Biji-Biji-Initiative/mereka-lms-prototype'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -1411,7 +1412,7 @@ jobs:
     name: Emit Benchmark Results
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: always()
+    if: ${{ always() && github.repository == 'Biji-Biji-Initiative/mereka-lms-prototype' }}
     needs:
       - resolve-benchmark-inputs
       - select-runner

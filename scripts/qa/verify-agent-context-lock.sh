@@ -3,7 +3,7 @@
 # Checks:
 #   - PWD is inside the mereka-lms repo (CLAUDE.md contains "Mereka Academy Open edX")
 #   - Current branch is NOT main (unless --allow-main is passed)
-#   - git remote origin resolves to Biji-Biji-Initiative/mereka-lms
+#   - git remote origin resolves to Biji-Biji-Initiative/mereka-lms or the faizmereka public prototype mirror
 #
 # Usage:
 #   scripts/qa/verify-agent-context-lock.sh [--allow-main]
@@ -78,10 +78,10 @@ else
   else
     info "Remote origin: ${REMOTE_URL}"
     # Accept SSH (git@github.com:...) and HTTPS forms
-    if echo "${REMOTE_URL}" | grep -qiE "(Biji-Biji-Initiative/mereka-lms|biji-biji-initiative/mereka-lms)"; then
-      pass "Remote origin points to Biji-Biji-Initiative/mereka-lms"
+    if echo "${REMOTE_URL}" | grep -qiE "(Biji-Biji-Initiative/mereka-lms|biji-biji-initiative/mereka-lms|faizmereka/mereka-lms-prototype)"; then
+      pass "Remote origin points to an allowed Mereka LMS repository"
     else
-      fail "Remote origin does not point to Biji-Biji-Initiative/mereka-lms (got: ${REMOTE_URL})"
+      fail "Remote origin does not point to an allowed Mereka LMS repository (got: ${REMOTE_URL})"
     fi
   fi
 fi

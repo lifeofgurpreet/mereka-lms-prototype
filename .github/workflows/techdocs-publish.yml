@@ -26,6 +26,7 @@ permissions:
 
 jobs:
   publish:
+    if: github.repository == 'Biji-Biji-Initiative/mereka-lms-prototype'
     name: Generate and publish TechDocs
     runs-on: ubuntu-latest
     timeout-minutes: 10

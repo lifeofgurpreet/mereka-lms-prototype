@@ -55,21 +55,12 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Select runner lane
+    - name: Select GitHub-hosted fallback runner lane
       id: select
-      uses: Biji-Biji-Initiative/bbi-infrastructure/.github/actions/select-runner-lane@main
-      with:
-        enabled: ${{ inputs.enabled }}
-        lane_mode: ${{ inputs.lane_mode }}
-        fastlane_label: ${{ inputs.fastlane_label }}
-        routing_policy: lms_build_prefer_fastlane
-        fallback_label: mereka-k8s-heavy-builders
-        timezone: ${{ inputs.timezone }}
-        office_hours_start: ${{ inputs.office_hours_start }}
-        office_hours_end: ${{ inputs.office_hours_end }}
-        runner_status_token: ${{ inputs.runner_status_token }}
-        github_app_id: ${{ inputs.github_app_id }}
-        github_app_installation_id: ${{ inputs.github_app_installation_id }}
-        github_app_private_key: ${{ inputs.github_app_private_key }}
-        allow_push_main: 'true'
-        allow_workflow_dispatch: 'true'
+      shell: bash
+      run: |
+        {
+          echo "runner_label=ubuntu-latest"
+          echo "decision=public-repo-fallback"
+          echo "reason=Public repo cannot resolve the private BBI runner selector; using GitHub-hosted runner"
+        } >> "$GITHUB_OUTPUT"

@@ -37,6 +37,7 @@ permissions: {}  # Deny-all at workflow level; each job grants only what it need
 
 jobs:
   resolve-source:
+    if: github.repository == 'Biji-Biji-Initiative/mereka-lms-prototype'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:

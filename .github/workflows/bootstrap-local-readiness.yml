@@ -49,6 +49,7 @@ concurrency:
 
 jobs:
   select-bootstrap-lane:
+    if: github.repository == 'Biji-Biji-Initiative/mereka-lms-prototype'
     name: Select Bootstrap Lane
     runs-on: ubuntu-latest
     timeout-minutes: 10

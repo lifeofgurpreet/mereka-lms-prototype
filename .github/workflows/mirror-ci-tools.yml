@@ -30,6 +30,7 @@ permissions:
 
 jobs:
   mirror-busybox:
+    if: github.repository == 'Biji-Biji-Initiative/mereka-lms-prototype'
     # Intentionally uses GitHub-hosted runners (NOT self-hosted ARC) so the
     # Docker Hub pull benefits from GitHub's separate IP pool.
     runs-on: ubuntu-latest

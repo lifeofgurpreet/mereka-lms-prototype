@@ -130,6 +130,7 @@ env:
 
 jobs:
   cancel-superseded-queued-main-builds:
+    if: github.repository == 'Biji-Biji-Initiative/mereka-lms-prototype'
     name: Cancel Superseded Queued Main Builds
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -1443,7 +1444,7 @@ jobs:
     runs-on: mereka-k8s-runners
     timeout-minutes: 15
     needs: [build-openedx, build-mfe]
-    if: ${{ always() && (needs.build-openedx.result == 'success' || needs.build-mfe.result == 'success') }}
+    if: ${{ always() && github.repository == 'Biji-Biji-Initiative/mereka-lms-prototype' && (needs.build-openedx.result == 'success' || needs.build-mfe.result == 'success') }}
     permissions:
       contents: read
       id-token: write   # keyless signing via Sigstore OIDC
@@ -1627,7 +1628,7 @@ jobs:
     # Manual proof runs may intentionally leave target_environment at the
     # placeholder value. Skip release-bundle generation in that case instead of
     # failing after both images already built and pushed successfully.
-    if: ${{ always() && (needs.build-openedx.result == 'success' || needs.build-openedx.result == 'skipped') && (needs.build-mfe.result == 'success' || needs.build-mfe.result == 'skipped') && !(needs.build-openedx.result == 'skipped' && needs.build-mfe.result == 'skipped') && (github.event_name != 'workflow_dispatch' || (inputs.target_environment != 'select-environment' && inputs.build_profile == 'proof')) }}
+    if: ${{ always() && github.repository == 'Biji-Biji-Initiative/mereka-lms-prototype' && (needs.build-openedx.result == 'success' || needs.build-openedx.result == 'skipped') && (needs.build-mfe.result == 'success' || needs.build-mfe.result == 'skipped') && !(needs.build-openedx.result == 'skipped' && needs.build-mfe.result == 'skipped') && (github.event_name != 'workflow_dispatch' || (inputs.target_environment != 'select-environment' && inputs.build_profile == 'proof')) }}
     permissions:
       contents: read
       id-token: write
@@ -2113,7 +2114,7 @@ jobs:
     runs-on: mereka-k8s-runners
     timeout-minutes: 15
     needs: [release-bundle, scan-openedx-image, scan-mfe-image, slsa-provenance]
-    if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.release-bundle.result == 'success' && (needs.scan-openedx-image.result == 'success' || needs.scan-openedx-image.result == 'skipped') && (needs.scan-mfe-image.result == 'success' || needs.scan-mfe-image.result == 'skipped') && needs.slsa-provenance.result == 'success' }}
+    if: ${{ always() && github.repository == 'Biji-Biji-Initiative/mereka-lms-prototype' && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.release-bundle.result == 'success' && (needs.scan-openedx-image.result == 'success' || needs.scan-openedx-image.result == 'skipped') && (needs.scan-mfe-image.result == 'success' || needs.scan-mfe-image.result == 'skipped') && needs.slsa-provenance.result == 'success' }}
     permissions:
       contents: read
       actions: read
@@ -2368,7 +2369,7 @@ jobs:
     # Any GitOps mutation here is an explicit/manual bridge. The standard
     # dev/staging/prod promotion path is infra-owned in bbi-infrastructure.
     # Accept 'skipped' for partial builds (same logic as release-bundle).
-    if: ${{ always() && (needs.build-openedx.result == 'success' || needs.build-openedx.result == 'skipped') && (needs.build-mfe.result == 'success' || needs.build-mfe.result == 'skipped') && !(needs.build-openedx.result == 'skipped' && needs.build-mfe.result == 'skipped') && github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment' && inputs.build_profile == 'proof' }}
+    if: ${{ always() && github.repository == 'Biji-Biji-Initiative/mereka-lms-prototype' && (needs.build-openedx.result == 'success' || needs.build-openedx.result == 'skipped') && (needs.build-mfe.result == 'success' || needs.build-mfe.result == 'skipped') && !(needs.build-openedx.result == 'skipped' && needs.build-mfe.result == 'skipped') && github.event_name == 'workflow_dispatch' && inputs.update_gitops && inputs.target_environment != 'select-environment' && inputs.build_profile == 'proof' }}
     environment: ${{ inputs.target_environment }}
     permissions:
       contents: write
